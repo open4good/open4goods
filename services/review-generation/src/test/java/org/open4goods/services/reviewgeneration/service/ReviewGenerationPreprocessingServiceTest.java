@@ -514,6 +514,96 @@ class ReviewGenerationPreprocessingServiceTest {
     }
 
     @Test
+    void preparePromptVariables_FailsWhenOnlyMerchantAndSparePartPagesMatch() throws Exception {
+        properties.setMaxSearch(1);
+        properties.setLowQualityFallbackMaxSearch(0);
+        properties.setMinMarkdownChars(20);
+        properties.setSourceMinTokens(1);
+        properties.setMinGlobalTokens(1);
+        properties.setMinUrlCount(1);
+        properties.setMaxUrlsPerProduct(3);
+        Product product = product("Electrolux", "EKG604000W");
+        String merchantUrl = "https://buzzsxm.fr/fr/shop/cuisiniere";
+        String sparePartUrl = "https://genuineapplianceparts.com.au/holder-glass-lower-left.html";
+        String amazonSpareUrl = "https://www.amazon.co.uk/sparefixd-Front-Panel-Screw-Electrolux/dp/B08TCBYC1B";
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse(List.of(
+                new GoogleSearchResult("Electrolux EKG604000W cuisiniere prix", merchantUrl),
+                new GoogleSearchResult("Electrolux EKG604000W holder glass spare part", sparePartUrl),
+                new GoogleSearchResult("sparefixd Front Panel Screw Electrolux EKG604000W", amazonSpareUrl))));
+        when(promptService.estimateTokens(any(String.class))).thenReturn(300);
+        when(urlFetchingService.fetchUrlAsync(any(String.class), any(Map.class))).thenAnswer(invocation ->
+        {
+            String url = invocation.getArgument(0);
+            String markdown = "Electrolux EKG604000W prix livraison shop stock achat cuisiniere gaz utile.";
+            if (url.equals(sparePartUrl) || url.equals(amazonSpareUrl)) {
+                markdown = "Electrolux EKG604000W replacement spare part holder glass front panel screw compatible.";
+            }
+            return CompletableFuture.completedFuture(new FetchResponse(url, 200, markdown, markdown,
+                    FetchStrategy.HTTP));
+        });
+
+        assertThatThrownBy(() -> service.preparePromptVariables(product, verticalConfig(), new ReviewGenerationStatus()))
+                .isInstanceOf(NotEnoughDataException.class);
+
+        assertThat(product.getReviewFacts()).extracting("url").containsExactly(merchantUrl);
+    }
+
+    @Test
+    void preparePromptVariables_PersistsOpaqueOfficialPdfWhenSerpTitleIdentifiesProduct() throws Exception {
+        properties.setMaxSearch(1);
+        properties.setLowQualityFallbackMaxSearch(0);
+        properties.setMinMarkdownChars(20);
+        properties.setSourceMinTokens(1);
+        properties.setMinGlobalTokens(1);
+        properties.setMinUrlCount(1);
+        Product product = product("Electrolux", "EKG604000W");
+        String pdfUrl = "https://www.electrolux-ui.com/DocumentDownLoad.aspx?DocURL=2021%5C867%5C365187umFR.pdf";
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse(List.of(
+                new GoogleSearchResult("Electrolux EKG604000W notice mode d'emploi PDF", pdfUrl))));
+
+        assertThatThrownBy(() -> service.preparePromptVariables(product, verticalConfig(), new ReviewGenerationStatus()))
+                .isInstanceOf(NotEnoughDataException.class);
+
+        assertThat(product.getResources()).anySatisfy(resource ->
+        {
+            assertThat(resource.getUrl()).isEqualTo(pdfUrl);
+            assertThat(resource.getResourceType()).isEqualTo(org.open4goods.model.resource.ResourceType.PDF);
+            assertThat(resource.getDatasourceName()).isEqualTo("manufacturer");
+            assertThat(resource.getTags()).contains("official");
+        });
+    }
+
+    @Test
+    void preparePromptVariables_UsesConfiguredOfficialDomainForPrivateLabelBrand() throws Exception {
+        properties.setMaxSearch(1);
+        properties.setMinMarkdownChars(20);
+        properties.setSourceMinTokens(1);
+        properties.setMinGlobalTokens(1);
+        properties.setMinUrlCount(1);
+        properties.setMaxUrlsPerProduct(1);
+        Product product = product("Essentiel B", "ELS107-1B");
+        String officialUrl = "https://www.boulanger.com/ref/8011605";
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse(List.of(
+                new GoogleSearchResult("Lave linge sechant ESSENTIELB ELS107-1B", officialUrl))));
+        when(promptService.estimateTokens(any(String.class))).thenReturn(300);
+        when(urlFetchingService.fetchUrlAsync(any(String.class), any(Map.class))).thenAnswer(invocation ->
+        {
+            String markdown = "Essentiel B ELS107-1B fiche produit lave linge sechant avec capacite, programmes et consommation.";
+            return CompletableFuture.completedFuture(new FetchResponse(officialUrl, 200, markdown, markdown,
+                    FetchStrategy.HTTP));
+        });
+
+        Map<String, Object> variables = service.preparePromptVariables(product, verticalConfig(),
+                new ReviewGenerationStatus());
+
+        assertThat(product.getOfficialUrl()).isEqualTo(officialUrl);
+        assertThat(variables.get("RESULT_QUALITY")).isEqualTo("COMPLETE");
+        @SuppressWarnings("unchecked")
+        Map<String, String> sourceClasses = (Map<String, String>) variables.get("SOURCE_CLASSES");
+        assertThat(sourceClasses).containsEntry(officialUrl, "OFFICIAL_PRODUCT");
+    }
+
+    @Test
     void sanitizeMarkdown_RemovesConfiguredHeaderFooterNoiseLines() {
         String markdown = """
                 Header

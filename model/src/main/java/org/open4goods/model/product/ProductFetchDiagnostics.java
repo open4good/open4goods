@@ -16,6 +16,7 @@ public class ProductFetchDiagnostics {
     private String resultQuality;
     private List<String> searchedQueries = new ArrayList<>();
     private List<String> acceptedUrls = new ArrayList<>();
+    private Map<String, String> sourceClasses = new LinkedHashMap<>();
     private Map<String, String> rejectedUrls = new LinkedHashMap<>();
     private Map<String, String> enrichmentStatus = new LinkedHashMap<>();
 
@@ -65,6 +66,14 @@ public class ProductFetchDiagnostics {
 
     public void setAcceptedUrls(List<String> acceptedUrls) {
         this.acceptedUrls = acceptedUrls == null ? new ArrayList<>() : new ArrayList<>(acceptedUrls);
+    }
+
+    public Map<String, String> getSourceClasses() {
+        return sourceClasses;
+    }
+
+    public void setSourceClasses(Map<String, String> sourceClasses) {
+        this.sourceClasses = sourceClasses == null ? new LinkedHashMap<>() : new LinkedHashMap<>(sourceClasses);
     }
 
     public Map<String, String> getRejectedUrls() {

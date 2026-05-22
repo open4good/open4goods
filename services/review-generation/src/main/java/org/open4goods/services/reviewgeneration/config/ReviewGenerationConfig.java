@@ -41,6 +41,13 @@ public class ReviewGenerationConfig {
             "amazon.", "cdiscount.", "darty.", "fnac.", "galaxus.", "laredoute.", "rakuten.",
             "boulanger.", "electromenager-compare.", "lesmenagers.", "quel-lave-linge.", "nettoyant."));
 
+    /**
+     * Brand-to-official-host overrides for private-label or manufacturer brands whose
+     * official product pages live on a retailer or group domain.
+     */
+    private Map<String, List<String>> officialDomainsByBrand = Map.of(
+            "essentiel b", List.of("boulanger.com"));
+
     // Property used for building search queries.
     private String queryTemplate = "test %s \"%s\"";
 
@@ -84,6 +91,12 @@ public class ReviewGenerationConfig {
      * product evidence but did not reach source/token thresholds.
      */
     private int partialRetryMaxSearch = 2;
+
+    /**
+     * Extra GTIN/model fallback searches allowed when the first pass found results
+     * but the accepted source quality is still too low.
+     */
+    private int lowQualityFallbackMaxSearch = 2;
 
 
     // Minimum global tokens and source count required for valid generation.
@@ -258,6 +271,13 @@ public class ReviewGenerationConfig {
         this.officialUrlExcludedDomains = officialUrlExcludedDomains;
     }
 
+    public Map<String, List<String>> getOfficialDomainsByBrand() {
+        return officialDomainsByBrand;
+    }
+    public void setOfficialDomainsByBrand(Map<String, List<String>> officialDomainsByBrand) {
+        this.officialDomainsByBrand = officialDomainsByBrand == null ? Map.of() : officialDomainsByBrand;
+    }
+
     public String getQueryTemplate() {
         return queryTemplate;
     }
@@ -327,6 +347,13 @@ public class ReviewGenerationConfig {
     }
     public void setPartialRetryMaxSearch(int partialRetryMaxSearch) {
         this.partialRetryMaxSearch = partialRetryMaxSearch;
+    }
+
+    public int getLowQualityFallbackMaxSearch() {
+        return lowQualityFallbackMaxSearch;
+    }
+    public void setLowQualityFallbackMaxSearch(int lowQualityFallbackMaxSearch) {
+        this.lowQualityFallbackMaxSearch = lowQualityFallbackMaxSearch;
     }
 
     public int getMaxTotalTokens() {

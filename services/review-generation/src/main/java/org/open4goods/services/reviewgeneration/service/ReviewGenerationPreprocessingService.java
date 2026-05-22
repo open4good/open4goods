@@ -103,6 +103,19 @@ public class ReviewGenerationPreprocessingService {
 		FAILED
 	}
 
+	private enum SourceClass {
+		OFFICIAL_PRODUCT,
+		OFFICIAL_SUPPORT,
+		OFFICIAL_PDF,
+		REVIEW,
+		GUIDE,
+		MERCHANT,
+		FORUM,
+		SPARE_PART,
+		GENERIC_CATALOG,
+		UNKNOWN
+	}
+
 	public ReviewGenerationPreprocessingService(ReviewGenerationConfig properties,
 			GoogleSearchService googleSearchService, UrlFetchingService urlFetchingService, PromptService genAiService,
 			SerialisationService serialisationService, MeterRegistry meterRegistry) {
@@ -307,15 +320,21 @@ public class ReviewGenerationPreprocessingService {
 		int accumulatedTokens = 0;
 		Map<String, String> finalSourcesMap = new LinkedHashMap<>();
 		Map<String, Integer> finalTokensMap = new LinkedHashMap<>();
+		Map<String, SourceClass> finalSourceClasses = new LinkedHashMap<>();
 		Map<String, String> rejectedUrls = new LinkedHashMap<>();
 
 		accumulatedTokens = collectFetchedSources(product, sortedResults, fetchFutures, finalSourcesMap, finalTokensMap,
-				rejectedUrls, accumulatedTokens, brand, primaryModel, alternateModels, status);
-		if (isBelowCompleteThreshold(verticalConfig, accumulatedTokens, finalSourcesMap)
+				finalSourceClasses, rejectedUrls, accumulatedTokens, brand, primaryModel, alternateModels, status);
+		if (shouldRunLowQualityFallback(verticalConfig, accumulatedTokens, finalSourcesMap, finalSourceClasses)) {
+			accumulatedTokens = runLowQualityFallback(product, brand, primaryModel, preferredDomains, searchedQueries,
+					sortedResults, fetchFutures, finalSourcesMap, finalTokensMap, finalSourceClasses, rejectedUrls,
+					accumulatedTokens, customHeaders, status);
+		}
+		if (isBelowCompleteThreshold(verticalConfig, accumulatedTokens, finalSourcesMap, finalSourceClasses)
 				&& hasOfficialFetchEvidence(product, finalSourcesMap)) {
 			accumulatedTokens = runPartialRetry(product, brand, primaryModel, alternateModels, preferredDomains,
 					searchedQueries, sortedResults, fetchFutures, finalSourcesMap, finalTokensMap, rejectedUrls,
-					accumulatedTokens, customHeaders, status);
+					finalSourceClasses, accumulatedTokens, customHeaders, status);
 		}
 		logger.info("Aggregated {} tokens from {} sources.", accumulatedTokens, finalSourcesMap.size());
 
@@ -333,10 +352,15 @@ public class ReviewGenerationPreprocessingService {
 		}
 		product.setReviewFacts(newFacts.stream().limit(properties.getFactsMaxStored()).toList());
 
-		FetchResultQuality resultQuality = classifyFetchResult(verticalConfig, accumulatedTokens, finalSourcesMap);
+		FetchResultQuality resultQuality = classifyFetchResult(verticalConfig, accumulatedTokens, finalSourcesMap,
+				finalSourceClasses);
 		if (resultQuality == FetchResultQuality.FAILED) {
 			ReviewGenerationFailureDetails details = new ReviewGenerationFailureDetails(finalSourcesMap.size(),
-					accumulatedTokens, searchedQueries, new ArrayList<>(finalSourcesMap.keySet()), rejectedUrls);
+					accumulatedTokens, searchedQueries, new ArrayList<>(finalSourcesMap.keySet()),
+					finalSourceClasses.entrySet().stream()
+							.collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().name(),
+									(left, right) -> left, LinkedHashMap::new)),
+					rejectedUrls);
 			throw new NotEnoughDataException("Insufficient data for review generation: accumulatedTokens="
 					+ accumulatedTokens + ", sources=" + finalSourcesMap.size(), details);
 		}
@@ -347,6 +371,9 @@ public class ReviewGenerationPreprocessingService {
 		promptVariables.put("SEARCHED_QUERIES", searchedQueries);
 		promptVariables.put("ACCEPTED_URLS", new ArrayList<>(finalSourcesMap.keySet()));
 		promptVariables.put("REJECTED_URLS", rejectedUrls);
+		promptVariables.put("SOURCE_CLASSES", finalSourceClasses.entrySet().stream()
+				.collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().name(), (left, right) -> left,
+						LinkedHashMap::new)));
 		promptVariables.put("RESULT_QUALITY", resultQuality.name());
 		status.addMessage("AI generation");
 
@@ -515,6 +542,53 @@ public class ReviewGenerationPreprocessingService {
 				}).toList();
 	}
 
+	private SourceClass classifySource(Product product, GoogleSearchResult result, String content) {
+		if (result != null && isPdfUrl(result.link())) {
+			return isOfficialUrl(product, result) ? SourceClass.OFFICIAL_PDF : SourceClass.GENERIC_CATALOG;
+		}
+		if (result != null && isOfficialUrl(product, result)) {
+			return isOfficialSupportUrl(result) ? SourceClass.OFFICIAL_SUPPORT : SourceClass.OFFICIAL_PRODUCT;
+		}
+		String evidence = normalizeForTextMatching(String.join(" ", result == null ? "" : safeString(result.title()),
+				result == null ? "" : safeString(result.link()), firstContentZone(content)));
+		if (containsAny(evidence, "spare part", "sparefixd", "replacement part", "piece detachee", "pieces detachees",
+				"accessoire compatible", "compatible spare", "front panel screw", "holder glass")) {
+			return SourceClass.SPARE_PART;
+		}
+		if (containsAny(evidence, "catalogue 202", "catalog 202", "katalog 202", "catalogue general",
+				"general catalogue")) {
+			return SourceClass.GENERIC_CATALOG;
+		}
+		if (containsAny(evidence, "forum", "sav darty", "question", "reponse", "answered questions")) {
+			return SourceClass.FORUM;
+		}
+		if (containsAny(evidence, "test", "review", "avis", "verdict", "comparatif", "que choisir", "rtings",
+				"les numeriques", "guide d achat", "buying guide")) {
+			return SourceClass.REVIEW;
+		}
+		if (containsAny(evidence, "manual", "notice", "mode d emploi", "fiche produit", "datasheet",
+				"support")) {
+			return SourceClass.GUIDE;
+		}
+		if (containsAny(evidence, "panier", "ajouter au panier", "livraison", "stock", "prix", "acheter",
+				"marketplace", "shop", "boutique")) {
+			return SourceClass.MERCHANT;
+		}
+		return SourceClass.UNKNOWN;
+	}
+
+	private boolean containsAny(String haystack, String... needles) {
+		if (haystack == null || haystack.isBlank()) {
+			return false;
+		}
+		for (String needle : needles) {
+			if (needle != null && !needle.isBlank() && haystack.contains(normalizeForTextMatching(needle))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private Map<String, CompletableFuture<FetchOutcome>> scheduleFetches(List<GoogleSearchResult> sortedResults,
 			Map<String, String> customHeaders) {
 		Map<String, CompletableFuture<FetchOutcome>> fetchFutures = new HashMap<>();
@@ -538,8 +612,9 @@ public class ReviewGenerationPreprocessingService {
 
 	private int collectFetchedSources(Product product, List<GoogleSearchResult> sortedResults,
 			Map<String, CompletableFuture<FetchOutcome>> fetchFutures, Map<String, String> finalSourcesMap,
-			Map<String, Integer> finalTokensMap, Map<String, String> rejectedUrls, int accumulatedTokens,
-			String brand, String primaryModel, Set<String> alternateModels, ReviewGenerationStatus status)
+			Map<String, Integer> finalTokensMap, Map<String, SourceClass> finalSourceClasses,
+			Map<String, String> rejectedUrls, int accumulatedTokens, String brand, String primaryModel,
+			Set<String> alternateModels, ReviewGenerationStatus status)
 			throws InterruptedException, ExecutionException {
 		int maxTotalTokens = properties.getMaxTotalTokens();
 		int minTokens = properties.getSourceMinTokens();
@@ -550,7 +625,7 @@ public class ReviewGenerationPreprocessingService {
 				continue;
 			}
 			if (isPdfUrl(url)) {
-				if (isProductRelevantResource(product, url, result.title())) {
+				if (isProductRelevantResource(product, url, result.title(), isOfficialUrl(product, result))) {
 					persistOfficialResources(product, result, null);
 					rejectedUrls.put(url, "pdf source excluded from review prompt; persisted for attributes extraction");
 				} else {
@@ -576,6 +651,12 @@ public class ReviewGenerationPreprocessingService {
 				rejectedUrls.put(url, reason);
 				logger.warn("Content from URL {} discarded due to irrelevance for brand {} and model {}", url, brand,
 						primaryModel);
+				continue;
+			}
+			SourceClass sourceClass = classifySource(product, result, content);
+			if (sourceClass == SourceClass.SPARE_PART || sourceClass == SourceClass.GENERIC_CATALOG) {
+				rejectedUrls.put(url, "low-quality source class: " + sourceClass.name());
+				logger.warn("Content from URL {} discarded due to low-quality source class {}", url, sourceClass);
 				continue;
 			}
 			int tokenCount = genAiService.estimateTokens(content);
@@ -613,6 +694,7 @@ public class ReviewGenerationPreprocessingService {
 			persistAcceptedOfficialUrl(product, result);
 			finalSourcesMap.put(url, content);
 			finalTokensMap.put(url, tokenCount);
+			finalSourceClasses.put(url, sourceClass);
 			accumulatedTokens += tokenCount;
 			logger.info("Accepted source for UPC {}: url={}, strategy={}, tokens={}, accumulatedTokens={}",
 					product.getId(), url, resolveFetchStrategy(fetchFutures.get(url)), tokenCount, accumulatedTokens);
@@ -639,22 +721,92 @@ public class ReviewGenerationPreprocessingService {
 	}
 
 	private boolean isBelowCompleteThreshold(VerticalConfig verticalConfig, int accumulatedTokens,
-			Map<String, String> finalSourcesMap) {
-		return classifyFetchResult(verticalConfig, accumulatedTokens, finalSourcesMap) != FetchResultQuality.COMPLETE;
+			Map<String, String> finalSourcesMap, Map<String, SourceClass> finalSourceClasses) {
+		return classifyFetchResult(verticalConfig, accumulatedTokens, finalSourcesMap,
+				finalSourceClasses) != FetchResultQuality.COMPLETE;
 	}
 
 	private FetchResultQuality classifyFetchResult(VerticalConfig verticalConfig, int accumulatedTokens,
-			Map<String, String> finalSourcesMap) {
+			Map<String, String> finalSourcesMap, Map<String, SourceClass> finalSourceClasses) {
 		int sourceCount = finalSourcesMap == null ? 0 : finalSourcesMap.size();
 		FetchQualityThreshold threshold = fetchThreshold(verticalConfig);
-		if (accumulatedTokens >= threshold.getMinGlobalTokens() && sourceCount >= threshold.getMinUrlCount()) {
+		boolean hasAnchor = hasAuthoritativeOrReviewSource(finalSourceClasses);
+		if (hasAnchor && accumulatedTokens >= threshold.getMinGlobalTokens() && sourceCount >= threshold.getMinUrlCount()) {
 			return FetchResultQuality.COMPLETE;
 		}
-		if (accumulatedTokens >= threshold.getPartialMinGlobalTokens()
+		if (hasAnchor && accumulatedTokens >= threshold.getPartialMinGlobalTokens()
 				&& sourceCount >= threshold.getPartialMinUrlCount()) {
 			return FetchResultQuality.PARTIAL_USABLE;
 		}
 		return FetchResultQuality.FAILED;
+	}
+
+	private boolean hasAuthoritativeOrReviewSource(Map<String, SourceClass> sourceClasses) {
+		if (sourceClasses == null || sourceClasses.isEmpty()) {
+			return false;
+		}
+		return sourceClasses.values().stream().anyMatch(sourceClass -> sourceClass == SourceClass.OFFICIAL_PRODUCT
+				|| sourceClass == SourceClass.OFFICIAL_SUPPORT || sourceClass == SourceClass.REVIEW
+				|| sourceClass == SourceClass.GUIDE);
+	}
+
+	private boolean shouldRunLowQualityFallback(VerticalConfig verticalConfig, int accumulatedTokens,
+			Map<String, String> finalSourcesMap, Map<String, SourceClass> finalSourceClasses) {
+		return properties.getLowQualityFallbackMaxSearch() > 0
+				&& classifyFetchResult(verticalConfig, accumulatedTokens, finalSourcesMap,
+						finalSourceClasses) == FetchResultQuality.FAILED;
+	}
+
+	private int runLowQualityFallback(Product product, String brand, String primaryModel,
+			List<String> preferredDomains, List<String> searchedQueries, List<GoogleSearchResult> alreadySortedResults,
+			Map<String, CompletableFuture<FetchOutcome>> fetchFutures, Map<String, String> finalSourcesMap,
+			Map<String, Integer> finalTokensMap, Map<String, SourceClass> finalSourceClasses,
+			Map<String, String> rejectedUrls, int accumulatedTokens, Map<String, String> customHeaders,
+			ReviewGenerationStatus status)
+			throws IOException, GoogleSearchException, InterruptedException, ExecutionException {
+		int fallbackSearches = Math.max(0, properties.getLowQualityFallbackMaxSearch());
+		if (fallbackSearches == 0) {
+			return accumulatedTokens;
+		}
+		List<String> fallbackQueries = buildGtinFallbackQueries(product, brand).stream()
+				.filter(query -> !searchedQueries.contains(query))
+				.limit(fallbackSearches)
+				.toList();
+		if (fallbackQueries.isEmpty()) {
+			return accumulatedTokens;
+		}
+		status.addMessage("Accepted sources are low quality, searching GTIN/model fallback sources...");
+		List<GoogleSearchResult> fallbackResults = new ArrayList<>();
+		for (String query : fallbackQueries) {
+			logger.info("Low-quality fallback query for UPC {}: {}", product.getId(), query);
+			searchedQueries.add(query);
+			GoogleSearchRequest searchRequest = new GoogleSearchRequest(query, properties.getSearchResultsPerQuery(),
+					properties.getSearchLanguageRestrict(), properties.getSearchCountryRestrict(),
+					properties.getSearchSafe(), null, properties.getSearchGeoLocation(),
+					properties.getSearchHostLanguage());
+			GoogleSearchResponse searchResponse = googleSearchService.search(searchRequest);
+			if (searchResponse != null && searchResponse.results() != null) {
+				fallbackResults.addAll(searchResponse.results());
+			}
+		}
+		if (fallbackResults.isEmpty()) {
+			return accumulatedTokens;
+		}
+		identifyOfficialProductUrl(product, fallbackResults).ifPresent(product::setOfficialUrl);
+		identifyOfficialSupportUrls(product, fallbackResults).forEach(supportUrl ->
+				product.addOfficialSupportUrl(resolveOfficialUrlLanguage(supportUrl), supportUrl));
+		Set<String> knownUrls = new HashSet<>();
+		alreadySortedResults.stream().map(GoogleSearchResult::link).forEach(knownUrls::add);
+		finalSourcesMap.keySet().forEach(knownUrls::add);
+		List<GoogleSearchResult> sortedFallbackResults = sortSearchResults(product, fallbackResults, preferredDomains)
+				.stream()
+				.filter(result -> !knownUrls.contains(result.link()))
+				.toList();
+		Map<String, CompletableFuture<FetchOutcome>> fallbackFutures = scheduleFetches(sortedFallbackResults,
+				customHeaders);
+		fetchFutures.putAll(fallbackFutures);
+		return collectFetchedSources(product, sortedFallbackResults, fetchFutures, finalSourcesMap, finalTokensMap,
+				finalSourceClasses, rejectedUrls, accumulatedTokens, brand, primaryModel, product.getAkaModels(), status);
 	}
 
 	private FetchQualityThreshold fetchThreshold(VerticalConfig verticalConfig) {
@@ -709,8 +861,9 @@ public class ReviewGenerationPreprocessingService {
 	private int runPartialRetry(Product product, String brand, String primaryModel, Set<String> alternateModels,
 			List<String> preferredDomains, List<String> searchedQueries, List<GoogleSearchResult> alreadySortedResults,
 			Map<String, CompletableFuture<FetchOutcome>> fetchFutures, Map<String, String> finalSourcesMap,
-			Map<String, Integer> finalTokensMap, Map<String, String> rejectedUrls, int accumulatedTokens,
-			Map<String, String> customHeaders, ReviewGenerationStatus status)
+			Map<String, Integer> finalTokensMap, Map<String, String> rejectedUrls,
+			Map<String, SourceClass> finalSourceClasses, int accumulatedTokens, Map<String, String> customHeaders,
+			ReviewGenerationStatus status)
 			throws IOException, GoogleSearchException, InterruptedException, ExecutionException {
 		int retryMaxSearch = Math.max(0, properties.getPartialRetryMaxSearch());
 		if (retryMaxSearch == 0) {
@@ -751,7 +904,7 @@ public class ReviewGenerationPreprocessingService {
 		Map<String, CompletableFuture<FetchOutcome>> retryFutures = scheduleFetches(sortedRetryResults, customHeaders);
 		fetchFutures.putAll(retryFutures);
 		return collectFetchedSources(product, sortedRetryResults, fetchFutures, finalSourcesMap, finalTokensMap,
-				rejectedUrls, accumulatedTokens, brand, primaryModel, alternateModels, status);
+				finalSourceClasses, rejectedUrls, accumulatedTokens, brand, primaryModel, alternateModels, status);
 	}
 
 	private List<String> buildPartialRetryQueries(Product product, String brand, String primaryModel) {
@@ -1320,8 +1473,11 @@ public class ReviewGenerationPreprocessingService {
 			return false;
 		}
 		try {
-			String path = URI.create(url).getPath();
-			return path != null && path.toLowerCase(Locale.ROOT).endsWith(".pdf");
+			URI uri = URI.create(url);
+			String path = uri.getPath();
+			String query = uri.getQuery();
+			return (path != null && path.toLowerCase(Locale.ROOT).endsWith(".pdf"))
+					|| (query != null && query.toLowerCase(Locale.ROOT).contains(".pdf"));
 		} catch (Exception e) {
 			return url.toLowerCase(Locale.ROOT).contains(".pdf");
 		}
@@ -1366,7 +1522,7 @@ public class ReviewGenerationPreprocessingService {
 				continue;
 			}
 			if (toProductResourceType(extractedResource.type()) == ResourceType.PDF
-					&& !isProductRelevantResource(product, extractedResource.url(), extractedResource.label())) {
+					&& !isProductRelevantResource(product, extractedResource.url(), extractedResource.label(), true)) {
 				logger.debug("Skipping unrelated official PDF for UPC {}: url={}, label={}", product.getId(),
 						extractedResource.url(), extractedResource.label());
 				continue;
@@ -1541,25 +1697,52 @@ public class ReviewGenerationPreprocessingService {
 	}
 
 	private boolean isProductRelevantResource(Product product, String url, String label) {
+		return isProductRelevantResource(product, url, label, false);
+	}
+
+	private boolean isProductRelevantResource(Product product, String url, String label, boolean officialContext) {
 		if (product == null || url == null || url.isBlank()) {
 			return false;
 		}
-		String haystack = normalizeForUrlMatching(url);
-		if (haystack.isBlank()) {
+		String urlHaystack = normalizeForUrlMatching(url);
+		String labelHaystack = normalizeForUrlMatching(label);
+		String textHaystack = normalizeForTextMatching(label);
+		if (urlHaystack.isBlank() && labelHaystack.isBlank()) {
 			return false;
 		}
 		String gtin = product.gtin();
-		if (gtin != null && gtin.matches("\\d{8,14}") && haystack.contains(normalizeForUrlMatching(gtin))) {
+		if (gtin != null && gtin.matches("\\d{8,14}") && urlHaystack.contains(normalizeForUrlMatching(gtin))) {
 			return true;
 		}
 		String model = normalizeForUrlMatching(product.model());
-		if (!model.isBlank() && haystack.contains(model)) {
+		if (!model.isBlank() && urlHaystack.contains(model)) {
+			return true;
+		}
+		boolean akaMatchesUrl = product.getAkaModels() != null && product.getAkaModels().stream()
+				.filter(candidate -> candidate != null && !candidate.isBlank())
+				.map(this::normalizeForUrlMatching)
+				.anyMatch(candidate -> candidate.length() >= 4 && urlHaystack.contains(candidate));
+		if (akaMatchesUrl) {
+			return true;
+		}
+		if (!officialContext || !looksLikeProductDocument(url, label)) {
+			return false;
+		}
+		if (gtin != null && gtin.matches("\\d{8,14}") && labelHaystack.contains(normalizeForUrlMatching(gtin))) {
+			return true;
+		}
+		if (!model.isBlank() && labelHaystack.contains(model)) {
 			return true;
 		}
 		return product.getAkaModels() != null && product.getAkaModels().stream()
 				.filter(candidate -> candidate != null && !candidate.isBlank())
-				.map(this::normalizeForUrlMatching)
-				.anyMatch(candidate -> candidate.length() >= 4 && haystack.contains(candidate));
+				.anyMatch(candidate -> modelMatchesZone(candidate, textHaystack));
+	}
+
+	private boolean looksLikeProductDocument(String url, String label) {
+		String text = normalizeForTextMatching(safeString(url) + " " + safeString(label));
+		return containsAny(text, "manual", "notice", "mode d emploi", "user manual", "fiche produit", "datasheet",
+				"product fiche", "energy label", "classe energetique", "specification", "spec sheet", "leaflet");
 	}
 
 	private ResourceType toProductResourceType(org.open4goods.services.urlfetching.dto.ResourceType resourceType) {
@@ -1609,7 +1792,8 @@ public class ReviewGenerationPreprocessingService {
 			String path = normalizeForUrlMatching(url.getPath());
 			String title = normalizeForUrlMatching(result.title());
 			String pathAndTitleText = normalizeForTextMatching(url.getPath() + " " + safeString(result.title()));
-			if (isExcludedOfficialHost(host)) {
+			boolean configuredOfficialHost = isConfiguredOfficialHost(product, host);
+			if (!configuredOfficialHost && isExcludedOfficialHost(host)) {
 				return 0;
 			}
 			int score = 0;
@@ -1619,7 +1803,7 @@ public class ReviewGenerationPreprocessingService {
 					.map(this::normalizeForUrlMatching)
 					.filter(w -> w.length() >= 2)
 					.anyMatch(host::contains);
-			if (brandInHost) {
+			if (brandInHost || configuredOfficialHost) {
 				score += 8;
 			}
 			for (String modelCandidate : modelCandidates) {
@@ -1651,6 +1835,22 @@ public class ReviewGenerationPreprocessingService {
 		} catch (Exception e) {
 			return 0;
 		}
+	}
+
+	private boolean isConfiguredOfficialHost(Product product, String normalizedHost) {
+		if (product == null || product.brand() == null || normalizedHost == null || normalizedHost.isBlank()) {
+			return false;
+		}
+		Map<String, List<String>> configuredDomains = properties.getOfficialDomainsByBrand();
+		if (configuredDomains == null || configuredDomains.isEmpty()) {
+			return false;
+		}
+		String normalizedBrand = normalizeForTextMatching(product.brand());
+		return configuredDomains.entrySet().stream()
+				.filter(entry -> normalizeForTextMatching(entry.getKey()).equals(normalizedBrand))
+				.flatMap(entry -> entry.getValue() == null ? java.util.stream.Stream.empty() : entry.getValue().stream())
+				.map(this::normalizeForUrlMatching)
+				.anyMatch(domain -> !domain.isBlank() && normalizedHost.contains(domain));
 	}
 
 	private boolean isExcludedOfficialHost(String host) {

@@ -1,7 +1,13 @@
 package org.open4goods.api.services;
 
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
+import jakarta.annotation.PreDestroy;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -9,6 +15,7 @@ import org.open4goods.services.reviewgeneration.service.ReviewGenerationHook;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -29,12 +36,16 @@ public class PostFetchEnrichmentHook implements ReviewGenerationHook {
     private final CompletionFacadeService completionFacadeService;
     private final VerticalsConfigService verticalsConfigService;
     private final ProductRepository productRepository;
+    private final long timeoutSeconds;
+    private final ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
 
     public PostFetchEnrichmentHook(CompletionFacadeService completionFacadeService,
-            VerticalsConfigService verticalsConfigService, ProductRepository productRepository) {
+            VerticalsConfigService verticalsConfigService, ProductRepository productRepository,
+            @Value("${review.generation.post-fetch-enrichment-timeout-seconds:45}") long timeoutSeconds) {
         this.completionFacadeService = completionFacadeService;
         this.verticalsConfigService = verticalsConfigService;
         this.productRepository = productRepository;
+        this.timeoutSeconds = timeoutSeconds;
     }
 
     /**
@@ -76,12 +87,29 @@ public class PostFetchEnrichmentHook implements ReviewGenerationHook {
             return;
         }
         logger.info("Post-fetch enrichment triggered for UPC {} (no EPREL before fetch)", product.getId());
+        CompletableFuture<Void> completion = null;
         try {
-            completionFacadeService.processAll(Set.of(product), vertical);
-            productRepository.forceIndex(product);
+            completion = CompletableFuture.runAsync(() -> {
+                completionFacadeService.processAll(Set.of(product), vertical);
+                productRepository.forceIndex(product);
+            }, executorService);
+            completion.get(timeoutSeconds, TimeUnit.SECONDS);
             logger.info("Post-fetch enrichment completed for UPC {}", product.getId());
+        } catch (TimeoutException e) {
+            if (completion != null) {
+                completion.cancel(true);
+            }
+            logger.warn("Post-fetch enrichment timed out after {}s for UPC {}", timeoutSeconds, product.getId());
         } catch (Exception e) {
             logger.error("Post-fetch enrichment failed for UPC {}: {}", product.getId(), e.getMessage(), e);
         }
+    }
+
+    /**
+     * Stops the timeout executor on API shutdown.
+     */
+    @PreDestroy
+    public void shutdown() {
+        executorService.shutdownNow();
     }
 }

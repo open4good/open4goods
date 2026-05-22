@@ -1226,10 +1226,11 @@ public class ReviewGenerationService implements HealthIndicator {
 		List<String> searchedQueries = (List<String>) promptVariables.getOrDefault("SEARCHED_QUERIES", List.of());
 		List<String> acceptedUrls = (List<String>) promptVariables.getOrDefault("ACCEPTED_URLS",
 				new ArrayList<>(sourceTokens.keySet()));
+		Map<String, String> sourceClasses = (Map<String, String>) promptVariables.getOrDefault("SOURCE_CLASSES", Map.of());
 		Map<String, String> rejectedUrls = (Map<String, String>) promptVariables.getOrDefault("REJECTED_URLS", Map.of());
 		String resultQuality = (String) promptVariables.getOrDefault("RESULT_QUALITY", "UNKNOWN");
-		persistFetchDiagnostics(product, sourceTokens.size(), totalTokens, searchedQueries, acceptedUrls, rejectedUrls,
-				enrichmentStatus, resultQuality);
+		persistFetchDiagnostics(product, sourceTokens.size(), totalTokens, searchedQueries, acceptedUrls, sourceClasses,
+				rejectedUrls, enrichmentStatus, resultQuality);
 	}
 
 	private void persistFetchDiagnostics(Product product, ReviewGenerationFailureDetails details,
@@ -1238,12 +1239,12 @@ public class ReviewGenerationService implements HealthIndicator {
 			return;
 		}
 		persistFetchDiagnostics(product, details.sourceCount(), details.totalTokens(), details.searchedQueries(),
-				details.acceptedUrls(), details.rejectedUrls(), enrichmentStatus, "FAILED");
+				details.acceptedUrls(), details.sourceClasses(), details.rejectedUrls(), enrichmentStatus, "FAILED");
 	}
 
 	private void persistFetchDiagnostics(Product product, int sourceCount, int totalTokens, List<String> searchedQueries,
-			List<String> acceptedUrls, Map<String, String> rejectedUrls, Map<String, String> enrichmentStatus,
-			String resultQuality) {
+			List<String> acceptedUrls, Map<String, String> sourceClasses, Map<String, String> rejectedUrls,
+			Map<String, String> enrichmentStatus, String resultQuality) {
 		ProductFetchDiagnostics diagnostics = new ProductFetchDiagnostics();
 		diagnostics.setFetchedAt(Instant.now().toEpochMilli());
 		diagnostics.setSourceCount(sourceCount);
@@ -1251,6 +1252,7 @@ public class ReviewGenerationService implements HealthIndicator {
 		diagnostics.setResultQuality(resultQuality);
 		diagnostics.setSearchedQueries(searchedQueries);
 		diagnostics.setAcceptedUrls(acceptedUrls);
+		diagnostics.setSourceClasses(sourceClasses);
 		diagnostics.setRejectedUrls(rejectedUrls);
 		diagnostics.setEnrichmentStatus(enrichmentStatus);
 		product.setReviewFetchDiagnostics(diagnostics);
