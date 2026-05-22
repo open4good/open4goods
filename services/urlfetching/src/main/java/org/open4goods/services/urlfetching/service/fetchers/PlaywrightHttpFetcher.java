@@ -96,17 +96,21 @@ public class PlaywrightHttpFetcher implements Fetcher {
     /**
      * Constructs a new Playwright fetcher.
      *
-     * @param domainConfig  domain-specific fetch configuration
-     * @param meterRegistry Micrometer registry for fetch metrics
+     * @param domainConfig                   domain-specific fetch configuration
+     * @param proxy                          global proxy configuration
+     * @param replayWithProxyOnFailure       whether failed or empty responses are retried through the proxy
+     * @param proxyRequired                  whether the first request must use the proxy
+     * @param meterRegistry                  Micrometer registry for fetch metrics
      */
-    public PlaywrightHttpFetcher(DomainConfig domainConfig, MeterRegistry meterRegistry) {
+    public PlaywrightHttpFetcher(DomainConfig domainConfig, ProxyConfig proxy, boolean replayWithProxyOnFailure,
+            boolean proxyRequired, MeterRegistry meterRegistry) {
         this.userAgent = domainConfig.getUserAgent();
         this.customHeaders = domainConfig.getCustomHeaders();
         this.timeout = Duration.ofMillis(domainConfig.getTimeout());
         this.browserChannel = domainConfig.getBrowserChannel();
-        this.proxy = domainConfig.getProxy();
-        this.replayWithProxyOnFailure = domainConfig.isPlaywrightProxyFallbackEnabled();
-        this.proxyRequired = domainConfig.isPlaywrightProxyRequired();
+        this.proxy = proxy;
+        this.replayWithProxyOnFailure = replayWithProxyOnFailure;
+        this.proxyRequired = proxyRequired;
         this.meterRegistry = meterRegistry;
     }
 

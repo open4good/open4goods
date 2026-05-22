@@ -35,7 +35,8 @@ class PlaywrightHttpFetcherTest {
             domainConfig.setUserAgent("Open4GoodsTestAgent/1.0");
             domainConfig.setTimeout(10000);
 
-            PlaywrightHttpFetcher fetcher = new PlaywrightHttpFetcher(domainConfig, new SimpleMeterRegistry());
+            PlaywrightHttpFetcher fetcher = new PlaywrightHttpFetcher(domainConfig, null, false, false,
+                    new SimpleMeterRegistry());
             FetchResponse response = fetcher.fetchUrlSync("http://localhost:" + server.getAddress().getPort() + "/review");
 
             assertThat(response.fetchStrategy()).isEqualTo(FetchStrategy.PLAYWRIGHT);

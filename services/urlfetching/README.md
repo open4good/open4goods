@@ -20,19 +20,19 @@ browser-backed fetchers.
 ```yaml
 urlfetcher:
   threadPoolSize: 10
+  # Replay failed or empty Playwright fetches through this global proxy.
+  playwrightProxyFallbackEnabled: true
+  proxy:
+    scheme: http
+    host: rotating-proxy.example
+    port: 8080
+    username: "${URLFETCHER_PROXY_USERNAME:}"
+    password: "${URLFETCHER_PROXY_PASSWORD:}"
   domains:
     example.com:
       userAgent: "Mozilla/5.0"
       strategy: PLAYWRIGHT
       timeout: 15000
-      # Replay a failed or empty Playwright fetch through this proxy.
-      playwrightProxyFallbackEnabled: true
-      proxy:
-        scheme: http
-        host: rotating-proxy.example
-        port: 8080
-        username: "${URLFETCHER_PROXY_USERNAME:}"
-        password: "${URLFETCHER_PROXY_PASSWORD:}"
     another.com:
       strategy: PROXIFIED
   record:
@@ -46,6 +46,11 @@ API project owns the French authoritative product-evaluation domains in
 
 ```yaml
 urlfetcher:
+  playwrightProxyFallbackEnabled: true
+  proxy:
+    scheme: http
+    host: rotating-proxy.example
+    port: 8080
   domains:
     configured-domain.example:
       strategy: PLAYWRIGHT

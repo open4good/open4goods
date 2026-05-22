@@ -24,42 +24,42 @@
       "description": "Destination folder for storing/retrieving recorded responses (used only in tests)"
     },
     {
-      "name": "urlfetcher.domains.*.playwrightProxyFallbackEnabled",
+      "name": "urlfetcher.playwrightProxyFallbackEnabled",
       "type": "boolean",
       "defaultValue": false,
-      "description": "When true, failed or empty Playwright fetches are replayed with the domain proxy configuration."
+      "description": "When true, failed or empty Playwright fetches are replayed with the global proxy configuration."
     },
     {
-      "name": "urlfetcher.domains.*.playwrightProxyRequired",
+      "name": "urlfetcher.playwrightProxyRequired",
       "type": "boolean",
       "defaultValue": false,
-      "description": "When true, Playwright starts every fetch for the domain through the configured proxy."
+      "description": "When true, Playwright starts every fetch through the global proxy."
     },
     {
-      "name": "urlfetcher.domains.*.proxy.scheme",
+      "name": "urlfetcher.proxy.scheme",
       "type": "java.lang.String",
       "defaultValue": "http",
-      "description": "Proxy scheme used by proxified HTTP and Playwright proxy fallback."
+      "description": "Global proxy scheme used by proxified HTTP and Playwright proxy fallback."
     },
     {
-      "name": "urlfetcher.domains.*.proxy.host",
+      "name": "urlfetcher.proxy.host",
       "type": "java.lang.String",
-      "description": "Proxy host used by proxified HTTP and Playwright proxy fallback."
+      "description": "Global proxy host used by proxified HTTP and Playwright proxy fallback."
     },
     {
-      "name": "urlfetcher.domains.*.proxy.port",
+      "name": "urlfetcher.proxy.port",
       "type": "int",
-      "description": "Proxy port used by proxified HTTP and Playwright proxy fallback."
+      "description": "Global proxy port used by proxified HTTP and Playwright proxy fallback."
     },
     {
-      "name": "urlfetcher.domains.*.proxy.username",
+      "name": "urlfetcher.proxy.username",
       "type": "java.lang.String",
-      "description": "Optional proxy username used by Playwright proxy fallback."
+      "description": "Optional global proxy username used by proxified HTTP and Playwright proxy fallback."
     },
     {
-      "name": "urlfetcher.domains.*.proxy.password",
+      "name": "urlfetcher.proxy.password",
       "type": "java.lang.String",
-      "description": "Optional proxy password used by Playwright proxy fallback."
+      "description": "Optional global proxy password used by proxified HTTP and Playwright proxy fallback."
     }
   ]
 }

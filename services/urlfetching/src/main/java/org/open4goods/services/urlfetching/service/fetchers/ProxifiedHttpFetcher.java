@@ -2,6 +2,7 @@ package org.open4goods.services.urlfetching.service.fetchers;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
 import java.net.ProxySelector;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -38,16 +39,17 @@ public class ProxifiedHttpFetcher implements Fetcher {
     /**
      * Constructs a new ProxifiedHttpFetcher.
      *
-     * @param domainConfig  the domain-specific configuration including proxy details
+     * @param domainConfig  the domain-specific fetch configuration
+     * @param proxy         the global proxy configuration
      * @param executor      the executor for asynchronous operations
      * @param meterRegistry the Micrometer MeterRegistry for metrics
      */
-    public ProxifiedHttpFetcher(DomainConfig domainConfig, Executor executor, MeterRegistry meterRegistry) {
+    public ProxifiedHttpFetcher(DomainConfig domainConfig, ProxyConfig proxy, Executor executor,
+            MeterRegistry meterRegistry) {
         this.userAgent = domainConfig.getUserAgent();
         this.customHeaders = domainConfig.getCustomHeaders();
         this.timeout = Duration.ofMillis(domainConfig.getTimeout());
         this.meterRegistry = meterRegistry;
-        ProxyConfig proxy = domainConfig.getProxy();
 
         // Build HttpClient with proxy settings if provided
         HttpClient.Builder builder = HttpClient.newBuilder()
@@ -56,6 +58,15 @@ public class ProxifiedHttpFetcher implements Fetcher {
                 .followRedirects(HttpClient.Redirect.NEVER);
         if (proxy != null && proxy.getHost() != null) {
             builder.proxy(ProxySelector.of(new InetSocketAddress(proxy.getHost(), proxy.getPort())));
+            if (proxy.getUsername() != null && !proxy.getUsername().isBlank()) {
+                builder.authenticator(new java.net.Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(proxy.getUsername(),
+                                proxy.getPassword() == null ? new char[0] : proxy.getPassword().toCharArray());
+                    }
+                });
+            }
             logger.info("Using proxy {}:{} for fetching", proxy.getHost(), proxy.getPort());
         }
         this.httpClient = builder.build();

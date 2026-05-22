@@ -98,13 +98,14 @@ public class UrlFetchingService {
             domainConfig.setStrategy(FetchStrategy.HTTP);
         }
         domainConfig = withRuntimeStrategyOverride(domainConfig, headers);
+        boolean forcePlaywrightProxy = requestedPlaywrightProxy(headers);
         String expectedGtin = headers == null ? null : headers.get(EXPECTED_GTIN_HEADER); //TODO : Why expectedGtin is Empty ?
         Map<String, String> outboundHeaders = outboundHeaders(headers);
 
         logger.info("URL_FETCH domain={} phase=select strategy={} timeoutMs={} customHeaderNames={}",
                 domain, domainConfig.getStrategy(), domainConfig.getTimeout(),
                 domainConfig.getCustomHeaders() == null ? java.util.Set.of() : domainConfig.getCustomHeaders().keySet());
-        Fetcher fetcher = getFetcherForStrategy(domainConfig);
+        Fetcher fetcher = getFetcherForStrategy(domainConfig, forcePlaywrightProxy);
         // TODO : Here the strategy for reverse proxying http proxy seems to fail
         CompletableFuture<FetchResponse> future = fetcher.fetchUrlAsync(url, outboundHeaders);
         return future.thenApply(response -> {
@@ -131,7 +132,7 @@ public class UrlFetchingService {
             domainConfig.setStrategy(FetchStrategy.HTTP);
         }
 
-        Fetcher fetcher = getFetcherForStrategy(domainConfig);
+        Fetcher fetcher = getFetcherForStrategy(domainConfig, false);
         FetchResponse response = fetcher.fetchUrlSync(url);
         recordResponse(url, response);
         return response;
@@ -145,44 +146,43 @@ public class UrlFetchingService {
      * @param domainConfig the domain configuration
      * @return a Fetcher instance
      */
-    private Fetcher getFetcherForStrategy(DomainConfig domainConfig) {
+    private Fetcher getFetcherForStrategy(DomainConfig domainConfig, boolean forcePlaywrightProxy) {
         if (domainConfig.getStrategy() == null) {
             domainConfig.setStrategy(FetchStrategy.HTTP);
         }
         switch (domainConfig.getStrategy()) {
             case PROXIFIED:
                 logger.info("URL_FETCH strategy=PROXIFIED phase=selected");
-                return new ProxifiedHttpFetcher(domainConfig, executor, meterRegistry);
+                return new ProxifiedHttpFetcher(domainConfig, urlFetcherConfig.getProxy(), executor, meterRegistry);
             case PLAYWRIGHT:
                 logger.info("URL_FETCH strategy=PLAYWRIGHT phase=selected");
-                return new PlaywrightHttpFetcher(domainConfig, meterRegistry);
+                return new PlaywrightHttpFetcher(domainConfig, urlFetcherConfig.getProxy(),
+                        urlFetcherConfig.isPlaywrightProxyFallbackEnabled(),
+                        urlFetcherConfig.isPlaywrightProxyRequired() || forcePlaywrightProxy, meterRegistry);
             case HTTP:
                 logger.info("URL_FETCH strategy=HTTP phase=selected");
                 return new HttpFetcher(domainConfig, executor, meterRegistry);
             default:
                 logger.info("URL_FETCH strategy=PLAYWRIGHT phase=selected defaultFallback=true");
-                return new PlaywrightHttpFetcher(domainConfig, meterRegistry);
+                return new PlaywrightHttpFetcher(domainConfig, urlFetcherConfig.getProxy(),
+                        urlFetcherConfig.isPlaywrightProxyFallbackEnabled(),
+                        urlFetcherConfig.isPlaywrightProxyRequired() || forcePlaywrightProxy, meterRegistry);
         }
     }
 
     private DomainConfig withRuntimeStrategyOverride(DomainConfig original, Map<String, String> headers) {
         FetchStrategy override = requestedStrategy(headers);
-        boolean forcePlaywrightProxy = requestedPlaywrightProxy(headers);
-        if (override == null && !forcePlaywrightProxy) {
+        if (override == null) {
             return original;
         }
         DomainConfig overridden = new DomainConfig();
         overridden.setUserAgent(original.getUserAgent());
-        overridden.setStrategy(override == null ? original.getStrategy() : override);
+        overridden.setStrategy(override);
         overridden.setCustomHeaders(original.getCustomHeaders());
         overridden.setTimeout(original.getTimeout());
         overridden.setRetryPolicy(original.getRetryPolicy());
-        overridden.setProxy(original.getProxy());
         overridden.setBrowserChannel(original.getBrowserChannel());
-        overridden.setPlaywrightProxyFallbackEnabled(original.isPlaywrightProxyFallbackEnabled());
-        overridden.setPlaywrightProxyRequired(original.isPlaywrightProxyRequired() || forcePlaywrightProxy);
-        logger.info("URL_FETCH phase=select runtimeStrategyOverride={} forcePlaywrightProxy={}", override,
-                forcePlaywrightProxy);
+        logger.info("URL_FETCH phase=select runtimeStrategyOverride={}", override);
         return overridden;
     }
 

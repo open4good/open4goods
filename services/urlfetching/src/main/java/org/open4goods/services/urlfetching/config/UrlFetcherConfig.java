@@ -9,9 +9,10 @@ import org.springframework.context.annotation.Configuration;
 /**
  * Configuration properties for URL fetching.
  * <p>
- * This configuration holds a map of domain-specific configurations. Each key maps to a
- * {@link DomainConfig} which defines the user agent, fetching strategy, custom headers,
- * timeout, retry policy, and optional proxy settings.
+ * This configuration holds global URL fetching options and a map of
+ * domain-specific configurations. Each domain key maps to a {@link DomainConfig}
+ * which defines the user agent, fetching strategy, custom headers, timeout, and
+ * retry policy.
  * </p>
  */
 @Configuration
@@ -27,6 +28,21 @@ public class UrlFetcherConfig {
      * Thread pool size for asynchronous fetching.
      */
     private int threadPoolSize = 10;
+
+    /**
+     * Global proxy configuration used by proxified fetches and Playwright proxy replay.
+     */
+    private ProxyConfig proxy;
+
+    /**
+     * When true, a failed or empty Playwright fetch is replayed with the configured proxy.
+     */
+    private boolean playwrightProxyFallbackEnabled = false;
+
+    /**
+     * When true, Playwright starts every fetch through the configured proxy.
+     */
+    private boolean playwrightProxyRequired = false;
 
     /**
      * Configuration for recording mode.
@@ -51,6 +67,30 @@ public class UrlFetcherConfig {
 
     public void setThreadPoolSize(int threadPoolSize) {
         this.threadPoolSize = threadPoolSize;
+    }
+
+    public ProxyConfig getProxy() {
+        return proxy;
+    }
+
+    public void setProxy(ProxyConfig proxy) {
+        this.proxy = proxy;
+    }
+
+    public boolean isPlaywrightProxyFallbackEnabled() {
+        return playwrightProxyFallbackEnabled;
+    }
+
+    public void setPlaywrightProxyFallbackEnabled(boolean playwrightProxyFallbackEnabled) {
+        this.playwrightProxyFallbackEnabled = playwrightProxyFallbackEnabled;
+    }
+
+    public boolean isPlaywrightProxyRequired() {
+        return playwrightProxyRequired;
+    }
+
+    public void setPlaywrightProxyRequired(boolean playwrightProxyRequired) {
+        this.playwrightProxyRequired = playwrightProxyRequired;
     }
 
     public RecordConfig getRecord() {
@@ -90,21 +130,6 @@ public class UrlFetcherConfig {
          * Retry policy configuration.
          */
         private RetryPolicy retryPolicy;
-
-        /**
-         * Proxy configuration details for proxified fetcher.
-         */
-        private ProxyConfig proxy;
-
-        /**
-         * When true, a failed or empty Playwright fetch is replayed with the configured proxy.
-         */
-        private boolean playwrightProxyFallbackEnabled = false;
-
-        /**
-         * When true, Playwright starts the fetch through the configured proxy.
-         */
-        private boolean playwrightProxyRequired = false;
 
         /**
          * Playwright browser channel (e.g. "chrome", "chrome-beta", "msedge").
@@ -160,30 +185,6 @@ public class UrlFetcherConfig {
 
         public void setRetryPolicy(RetryPolicy retryPolicy) {
             this.retryPolicy = retryPolicy;
-        }
-
-        public ProxyConfig getProxy() {
-            return proxy;
-        }
-
-        public void setProxy(ProxyConfig proxy) {
-            this.proxy = proxy;
-        }
-
-        public boolean isPlaywrightProxyFallbackEnabled() {
-            return playwrightProxyFallbackEnabled;
-        }
-
-        public void setPlaywrightProxyFallbackEnabled(boolean playwrightProxyFallbackEnabled) {
-            this.playwrightProxyFallbackEnabled = playwrightProxyFallbackEnabled;
-        }
-
-        public boolean isPlaywrightProxyRequired() {
-            return playwrightProxyRequired;
-        }
-
-        public void setPlaywrightProxyRequired(boolean playwrightProxyRequired) {
-            this.playwrightProxyRequired = playwrightProxyRequired;
         }
 
         public String getBrowserChannel() {
