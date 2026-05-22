@@ -3,6 +3,7 @@
 This release covers **0 day(s)** of work, from **2026-05-21T22:11:21.000Z** to **2026-05-22T08:25:12.000Z**.
 
 ### 📦 Stats
+
 - Diff: [compare](https://github.com/open4good/open4goods/compare/v1.0.23...v1.0.24)
 - Changed files: **47**
 - Commits: **8**
@@ -10,17 +11,14 @@ This release covers **0 day(s)** of work, from **2026-05-21T22:11:21.000Z** to *
 
 ---
 
-
-
 <details>
 <summary>🙈 Other changes (4)</summary>
 
-| PR | Title | Author |
-|---:|---|---|
+|                                                           PR | Title                                                                 | Author         |
+| -----------------------------------------------------------: | --------------------------------------------------------------------- | -------------- |
 | [PR 3131](https://github.com/open4good/open4goods/pull/3131) | Update dependency org.xwiki.rendering:xwiki-rendering-api to v17.10.8 | @renovate[bot] |
-| [PR 3132](https://github.com/open4good/open4goods/pull/3132) | Update dependency vite-plugin-vue-devtools to v8.1.2 | @renovate[bot] |
-| [PR 3134](https://github.com/open4good/open4goods/pull/3134) | Update dependency vue-router to v5.0.7 | @renovate[bot] |
-| [PR 3133](https://github.com/open4good/open4goods/pull/3133) | Update dependency vue-i18n to v11.4.4 | @renovate[bot] |
-
+| [PR 3132](https://github.com/open4good/open4goods/pull/3132) | Update dependency vite-plugin-vue-devtools to v8.1.2                  | @renovate[bot] |
+| [PR 3134](https://github.com/open4good/open4goods/pull/3134) | Update dependency vue-router to v5.0.7                                | @renovate[bot] |
+| [PR 3133](https://github.com/open4good/open4goods/pull/3133) | Update dependency vue-i18n to v11.4.4                                 | @renovate[bot] |
 
 </details>
