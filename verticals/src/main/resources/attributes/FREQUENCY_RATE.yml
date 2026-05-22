@@ -2,8 +2,9 @@
 # FREQUENCY_RATE
 ##################################
 key: "FREQUENCY_RATE"
-eprelFeatureNames:
-  - frequencyRate
+referentials:
+  eprel:
+    - featureName: "frequencyRate"
 faIcon: "mdi-refresh-auto"
 name:
   default: "Refresh rate"

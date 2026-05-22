@@ -1,9 +1,10 @@
 key: "WEIGHT"
 userBetterIs: "LOWER"
 impactBetterIs: "LOWER"
-icecatFeaturesIds:
-  - 94
-  - 33015
+referentials:
+  icecat:
+    - featureId: 94
+    - featureId: 33015
 faIcon: "mdi-weight"
 name:
   default: "Weight"

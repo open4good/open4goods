@@ -4,9 +4,10 @@
 key: "POWER_CONSUMPTION_STANDBY"
 userBetterIs: "LOWER"
 impactBetterIs: "LOWER"
-eprelFeatureNames:
-  - powerStandby
-  - powerStandbyMode
+referentials:
+  eprel:
+    - featureName: "powerStandby"
+    - featureName: "powerStandbyMode"
 faIcon: "mdi-power-standby"
 name:
   default: "Power consumption (standby)"

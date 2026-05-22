@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,6 +15,9 @@ import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.vertical.lifecycle.LifecycleStage;
+import org.open4goods.model.vertical.referential.AttributeReferentials;
+import org.open4goods.model.vertical.referential.EprelFeatureReferential;
+import org.open4goods.model.vertical.referential.IcecatFeatureReferential;
 import org.open4goods.model.vertical.scoring.ScoreScoringConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,14 +72,11 @@ public class AttributeConfig {
 	private AttributeType filteringType = AttributeType.TEXT;
 
 	/**
-	 * The icecat features id's this attribute is mapped to
+	 * Unified cross-referential block linking this attribute to external taxonomies
+	 * (Icecat, EPREL, ETIM, Wikidata). Mirrors the vertical-level
+	 * {@link org.open4goods.model.vertical.referential.TaxonomyReferentials} block.
 	 */
-	private Set<Integer> icecatFeaturesIds = new HashSet<Integer>();
-
-	/**
-	 * The associated eprel features names.
-	 */
-	private Set<String> eprelFeatureNames = new HashSet<String>();
+	private AttributeReferentials referentials = new AttributeReferentials();
 
 
 
@@ -484,12 +485,55 @@ public class AttributeConfig {
 	}
 
 
-	public Set<Integer> getIcecatFeaturesIds() {
-		return icecatFeaturesIds;
+	/**
+	 * Unified cross-referential block (Icecat / EPREL / ETIM / Wikidata).
+	 *
+	 * @return the referentials block, never {@code null}.
+	 */
+	public AttributeReferentials getReferentials() {
+		return referentials;
 	}
 
-	public void setIcecatFeaturesIds(Set<Integer> icecatFeaturesIds) {
-		this.icecatFeaturesIds = icecatFeaturesIds;
+	public void setReferentials(AttributeReferentials referentials) {
+		this.referentials = referentials == null ? new AttributeReferentials() : referentials;
+	}
+
+	/**
+	 * Returns every Icecat feature ID linked to this attribute.
+	 *
+	 * @return Icecat feature IDs from {@link AttributeReferentials#getIcecat()},
+	 *         never {@code null}.
+	 */
+	@JsonIgnore
+	public Set<Integer> icecatFeatureIds() {
+		Set<Integer> result = new LinkedHashSet<>();
+		if (referentials != null) {
+			for (IcecatFeatureReferential ref : referentials.getIcecat()) {
+				if (ref != null && ref.getFeatureId() != null) {
+					result.add(ref.getFeatureId());
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Returns every EPREL feature name linked to this attribute.
+	 *
+	 * @return EPREL feature names from {@link AttributeReferentials#getEprel()},
+	 *         never {@code null}.
+	 */
+	@JsonIgnore
+	public Set<String> eprelFeatureNames() {
+		Set<String> result = new LinkedHashSet<>();
+		if (referentials != null) {
+			for (EprelFeatureReferential ref : referentials.getEprel()) {
+				if (ref != null && ref.getFeatureName() != null && !ref.getFeatureName().isBlank()) {
+					result.add(ref.getFeatureName());
+				}
+			}
+		}
+		return result;
 	}
 
         /**
@@ -571,14 +615,5 @@ public class AttributeConfig {
         public void setSuffix(Localisable<String, String> suffix) {
                 this.suffix = suffix;
         }
-
-		public Set<String> getEprelFeatureNames() {
-			return eprelFeatureNames;
-		}
-
-		public void setEprelFeatureNames(Set<String> eprelFeatureNames) {
-			this.eprelFeatureNames = eprelFeatureNames;
-		}
-
 
 }

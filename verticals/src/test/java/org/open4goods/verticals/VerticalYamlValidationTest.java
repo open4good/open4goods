@@ -103,9 +103,43 @@ class VerticalYamlValidationTest {
             .as("External attribute definitions must populate synonyms")
             .isNotEmpty();
 
-        assertThat(hdrClass.getEprelFeatureNames())
+        assertThat(hdrClass.eprelFeatureNames())
             .as("External attribute definitions must retain EPREL mapping")
             .contains("energyClassHDR");
+    }
+
+    @Test
+    void shouldLoadIcecatReferentialsFromAttributeYaml() {
+        VerticalConfig tvConfig = verticalsConfigService.getConfigById("tv");
+        assertThat(tvConfig).isNotNull();
+
+        AttributeConfig diagonal = tvConfig.getAttributesConfig().getConfigs().stream()
+            .filter(c -> "DIAGONALE_POUCES".equals(c.getKey()))
+            .findFirst()
+            .orElseThrow();
+
+        assertThat(diagonal.getReferentials())
+            .as("DIAGONALE_POUCES must expose a referentials block")
+            .isNotNull();
+        assertThat(diagonal.icecatFeatureIds())
+            .as("DIAGONALE_POUCES must expose Icecat feature ID via the new referentials block")
+            .contains(944);
+        assertThat(diagonal.eprelFeatureNames())
+            .as("DIAGONALE_POUCES must expose EPREL feature via the new referentials block")
+            .contains("diagonalInch");
+    }
+
+    @Test
+    void shouldExposeEprelReferentialFromAttributeYaml() {
+        VerticalConfig tvConfig = verticalsConfigService.getConfigById("tv");
+        AttributeConfig sdr = tvConfig.getAttributesConfig().getConfigs().stream()
+            .filter(c -> "POWER_CONSUMPTION_SDR".equals(c.getKey()))
+            .findFirst()
+            .orElseThrow();
+
+        assertThat(sdr.eprelFeatureNames())
+            .as("POWER_CONSUMPTION_SDR must expose EPREL mapping via the new referentials block")
+            .contains("powerOnModeSDR");
     }
 
     @Test

@@ -4,8 +4,9 @@
 key: "MINAVAILABILITYSPAREPARTSYEARS"
 userBetterIs: "GREATER"
 impactBetterIs: "GREATER"
-eprelFeatureNames:
-  - minAvailabilitySparePartsYears
+referentials:
+  eprel:
+    - featureName: "minAvailabilitySparePartsYears"
 faIcon: "mdi-tools"
 name:
   default: "Spare parts availability"

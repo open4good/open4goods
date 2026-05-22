@@ -730,8 +730,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -771,8 +772,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -804,8 +806,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -839,8 +842,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -872,8 +876,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -906,8 +911,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -947,8 +953,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -981,8 +988,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1015,8 +1023,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1052,8 +1061,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1095,8 +1105,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1128,8 +1139,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1161,8 +1173,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1195,8 +1208,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1228,8 +1242,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1262,8 +1277,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1298,8 +1314,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1341,8 +1358,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1374,8 +1392,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1417,8 +1436,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1453,8 +1473,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1490,8 +1511,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1524,8 +1546,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1558,8 +1581,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1592,8 +1616,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1627,8 +1652,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1661,8 +1687,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1695,8 +1722,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1731,8 +1759,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1767,8 +1796,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1800,8 +1830,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1833,8 +1864,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1868,8 +1900,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1902,8 +1935,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1935,8 +1969,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -1968,8 +2003,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2001,8 +2037,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2034,8 +2071,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2067,8 +2105,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2100,8 +2139,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2136,8 +2176,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2176,8 +2217,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2218,8 +2260,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2258,8 +2301,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2293,8 +2337,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2332,8 +2377,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2373,8 +2419,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2411,8 +2458,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2452,8 +2500,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2485,8 +2534,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2522,8 +2572,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2561,8 +2612,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2600,8 +2652,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2633,8 +2686,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2667,8 +2721,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2700,8 +2755,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2733,8 +2789,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2769,8 +2826,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2810,8 +2868,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2843,8 +2902,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2878,8 +2938,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2911,8 +2972,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2945,8 +3007,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -2986,8 +3049,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3020,8 +3084,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3054,8 +3119,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3091,8 +3157,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3134,8 +3201,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3167,8 +3235,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3200,8 +3269,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3234,8 +3304,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3267,8 +3338,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3301,8 +3373,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3337,8 +3410,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3380,8 +3454,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3413,8 +3488,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3456,8 +3532,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3492,8 +3569,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3529,8 +3607,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3563,8 +3642,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3597,8 +3677,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3631,8 +3712,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3666,8 +3748,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3700,8 +3783,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3734,8 +3818,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3770,8 +3855,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3806,8 +3892,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3839,8 +3926,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3872,8 +3960,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3907,8 +3996,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3941,8 +4031,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -3974,8 +4065,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -4007,8 +4099,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -4040,8 +4133,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -4073,8 +4167,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -4106,8 +4201,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -4139,8 +4235,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -4175,8 +4272,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -4215,8 +4313,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -4257,8 +4356,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -4297,8 +4397,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -4332,8 +4433,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -4371,8 +4473,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -4412,8 +4515,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -4450,8 +4554,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -4491,8 +4596,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -4524,8 +4630,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -4561,8 +4668,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -4600,8 +4708,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -4639,8 +4748,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -4672,8 +4782,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -4706,8 +4817,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -4739,8 +4851,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"
@@ -4772,8 +4885,9 @@ attributesConfig:
     #     asScore: false
     #     faIcon: ""
     #
-    #     icecatFeaturesIds:
-    #      - TODO
+    #     referentials:
+    #       icecat:
+    #         - featureId: 0  # TODO
     #
     #     name:
     #      default: "!!COMPLETE_HERE!!"

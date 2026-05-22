@@ -2,8 +2,6 @@
 key: "POWER_CONSUMPTION_OFF"
 userBetterIs: "LOWER"
 impactBetterIs: "LOWER"
-eprelFeatureNames:
-  - powerOffMode
 filteringType: "NUMERIC"
 asScore: true
 scoring:
@@ -27,9 +25,12 @@ participateInACV:
   - USE
 faIcon: "mdi-power-plug-off"
 
-icecatFeaturesIds:
-  - 2034
-  - 2036
+referentials:
+  icecat:
+    - featureId: 2034
+    - featureId: 2036
+  eprel:
+    - featureName: "powerOffMode"
 
 name:
   default: "Power consumption (off)"

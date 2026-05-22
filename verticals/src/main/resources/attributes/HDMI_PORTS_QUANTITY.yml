@@ -1,7 +1,8 @@
 key: "HDMI_PORTS_QUANTITY"
 faIcon: "mdi-sitemap"
-icecatFeaturesIds: 
-  - 3566      
+referentials:
+  icecat:
+    - featureId: 3566
 name:
   default: "HDMI ports quantity"
   fr: "Quantité de ports HDMI"

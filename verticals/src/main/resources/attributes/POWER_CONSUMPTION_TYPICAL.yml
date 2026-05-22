@@ -25,10 +25,12 @@ participateInACV:
   - USE
 faIcon: "mdi-power-plug"
 
-icecatFeaturesIds:      
-    - 445
-    - 9137 
-  
+referentials:
+  icecat:
+    - featureId: 445
+    - featureId: 9137
+
+
 name:
     default: "Power consumption"
     fr: "Consommation électrique (typique/max)"

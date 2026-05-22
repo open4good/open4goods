@@ -4,8 +4,9 @@
 key: "MINAVAILABILITYSOFTWAREUPDATESYEARS"
 userBetterIs: "GREATER"
 impactBetterIs: "GREATER"
-eprelFeatureNames:
-  - minAvailabilitySoftwareUpdatesYears
+referentials:
+  eprel:
+    - featureName: "minAvailabilitySoftwareUpdatesYears"
 faIcon: "mdi-update"
 name:
   default: "Software update availability"

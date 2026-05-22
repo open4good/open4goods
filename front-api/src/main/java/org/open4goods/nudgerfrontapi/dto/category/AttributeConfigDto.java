@@ -8,6 +8,7 @@ import org.open4goods.model.vertical.AttributeComparisonRule;
 import org.open4goods.model.vertical.AttributeParserConfig;
 import org.open4goods.model.vertical.Order;
 import org.open4goods.model.vertical.lifecycle.LifecycleStage;
+import org.open4goods.model.vertical.referential.AttributeReferentials;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -29,6 +30,8 @@ public record AttributeConfigDto(
         AttributeType filteringType,
         @Schema(description = "Identifiers of the Icecat features mapped to this attribute.")
         Set<Integer> icecatFeaturesIds,
+        @Schema(description = "Cross-referential mappings to Icecat, EPREL, ETIM and Wikidata.")
+        AttributeReferentials referentials,
         @Schema(description = "Indicates whether this attribute is exposed as a score.")
         boolean asScore,
         @Schema(description = "Localised label used when the attribute is rendered as a score.")

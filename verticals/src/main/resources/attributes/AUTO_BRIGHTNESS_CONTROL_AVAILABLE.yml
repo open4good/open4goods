@@ -2,8 +2,9 @@
 # AUTO_BRIGHTNESS_CONTROL_AVAILABLE
 ##################################
 key: "AUTO_BRIGHTNESS_CONTROL_AVAILABLE"
-eprelFeatureNames:
-  - autoBrightnessControlAvailable
+referentials:
+  eprel:
+    - featureName: "autoBrightnessControlAvailable"
 faIcon: "mdi-brightness-auto"
 name:
   default: "Automatic brightness control"

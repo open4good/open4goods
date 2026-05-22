@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.open4goods.icecat.services.IcecatIndexService;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.wikidataservice.service.WikidataSearchService;
@@ -39,11 +40,14 @@ class ReferentialHelperControllerTest
     @Mock
     private WikidataSearchService wikidataSearchService;
 
+    @Mock
+    private IcecatIndexService icecatIndexService;
+
     @BeforeEach
     void setUp()
     {
         ReferentialHelperController controller = new ReferentialHelperController(
-                verticalsService, googleTaxonomyService, wikidataSearchService);
+                verticalsService, googleTaxonomyService, wikidataSearchService, icecatIndexService);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 
@@ -100,6 +104,39 @@ class ReferentialHelperControllerTest
         mockMvc.perform(get("/api/referentials/wikidata/candidates").param("vertical", "tv"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void attributeCoverageReturns404WhenVerticalNotFound()
+            throws Exception
+    {
+        when(verticalsService.getConfigById("unknown")).thenReturn(null);
+        mockMvc.perform(get("/api/referentials/attribute/coverage").param("vertical", "unknown"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void attributeCoverageReturnsEmptyListWhenAttributesConfigMissing()
+            throws Exception
+    {
+        VerticalConfig vc = buildMinimalVertical("tv");
+        when(verticalsService.getConfigById("tv")).thenReturn(vc);
+
+        mockMvc.perform(get("/api/referentials/attribute/coverage").param("vertical", "tv"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void attributeIcecatCandidatesReturns404WhenAttributeMissing()
+            throws Exception
+    {
+        VerticalConfig vc = buildMinimalVertical("tv");
+        when(verticalsService.getConfigById("tv")).thenReturn(vc);
+        mockMvc.perform(get("/api/referentials/attribute/icecat/candidates")
+                        .param("vertical", "tv")
+                        .param("attribute", "UNKNOWN"))
+                .andExpect(status().isNotFound());
     }
 
     // -------------------------------------------------------------------------

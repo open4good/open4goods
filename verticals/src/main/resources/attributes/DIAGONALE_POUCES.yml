@@ -4,10 +4,11 @@
 key: "DIAGONALE_POUCES"
 userBetterIs: "GREATER"
 impactBetterIs: "LOWER"
-icecatFeaturesIds:
-  - 944
-eprelFeatureNames:
-  - diagonalInch
+referentials:
+  icecat:
+    - featureId: 944
+  eprel:
+    - featureName: "diagonalInch"
 faIcon: "mdi-arrow-top-right-bottom-left"
 name:
   default: "Screen size"

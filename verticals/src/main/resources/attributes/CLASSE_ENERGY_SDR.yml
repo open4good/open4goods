@@ -4,8 +4,9 @@
 key: "CLASSE_ENERGY_SDR"
 userBetterIs: "GREATER"
 impactBetterIs: "GREATER"
-eprelFeatureNames:
-  - energyClassSDR
+referentials:
+  eprel:
+    - featureName: "energyClassSDR"
 faIcon: "mdi-flash"
 name:
   default: "Energy class SDR"

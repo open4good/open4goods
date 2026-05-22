@@ -5,10 +5,11 @@ unit:
 asScore: false
 faIcon: "mdi-arrow-collapse-vertical"
 
-icecatFeaturesIds:
-  - 1650
-  - 33219
-  - 5486
+referentials:
+  icecat:
+    - featureId: 1650
+    - featureId: 33219
+    - featureId: 5486
 
 name:
   default: "Depth"

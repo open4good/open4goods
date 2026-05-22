@@ -5,9 +5,10 @@ unit:
 asScore: false
 faIcon: "mdi-arrow-expand-horizontal"
 
-icecatFeaturesIds:
-  - 1649
-  - 4157
+referentials:
+  icecat:
+    - featureId: 1649
+    - featureId: 4157
 
 name:
   default: "Width"

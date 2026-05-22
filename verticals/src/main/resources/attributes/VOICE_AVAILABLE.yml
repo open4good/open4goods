@@ -2,8 +2,9 @@
 # VOICE_AVAILABLE
 ##################################
 key: "VOICE_AVAILABLE"
-eprelFeatureNames:
-  - voiceAvailable
+referentials:
+  eprel:
+    - featureName: "voiceAvailable"
 faIcon: "mdi-microphone"
 name:
   default: "Voice control available"

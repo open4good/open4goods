@@ -4,8 +4,9 @@
 key: "WARRANTY"
 userBetterIs: "GREATER"
 impactBetterIs: "GREATER"
-eprelFeatureNames:
-  - minGuaranteedGuarantee
+referentials:
+  eprel:
+    - featureName: "minGuaranteedGuarantee"
 faIcon: "mdi-shield-check"
 name:
   default: "Warranty duration"

@@ -618,8 +618,7 @@ public class VerticalsConfigService {
 				&& attributeConfig.getUnit() == null
 				&& attributeConfig.getSuffix() == null
 				&& (attributeConfig.getSynonyms() == null || attributeConfig.getSynonyms().isEmpty())
-				&& attributeConfig.getIcecatFeaturesIds().isEmpty()
-				&& attributeConfig.getEprelFeatureNames().isEmpty()
+				&& (attributeConfig.getReferentials() == null || attributeConfig.getReferentials().isEmpty())
 				&& attributeConfig.getNumericMapping().isEmpty()
 				&& attributeConfig.getMappings().isEmpty()
 				&& (attributeConfig.getFaIcon() == null || "fa-wrench".equals(attributeConfig.getFaIcon()))

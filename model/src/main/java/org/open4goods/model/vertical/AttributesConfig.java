@@ -103,11 +103,11 @@ public class AttributesConfig {
 			if (null != configs) {
 				for (final AttributeConfig ac : configs) {
 
-					for (Integer id : ac.getIcecatFeaturesIds()) {
+					for (Integer id : ac.icecatFeatureIds()) {
 						byIcecatFeatureGroup.put(id, ac);
 					}
 
-					for (String id : ac.getEprelFeatureNames()) {
+					for (String id : ac.eprelFeatureNames()) {
 						byEprelFeatureGroup.put(id, ac);
 					}
 

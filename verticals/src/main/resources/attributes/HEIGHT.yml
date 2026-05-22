@@ -5,9 +5,10 @@ unit:
 asScore: false
 faIcon: "mdi-arrow-expand-vertical"
 
-icecatFeaturesIds:
-  - 1464
-  - 5478
+referentials:
+  icecat:
+    - featureId: 1464
+    - featureId: 5478
 
 name:
   default: "Height"

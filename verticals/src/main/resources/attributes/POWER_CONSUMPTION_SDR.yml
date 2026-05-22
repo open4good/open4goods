@@ -11,8 +11,9 @@
 key: "POWER_CONSUMPTION_SDR"
 userBetterIs: "LOWER"
 impactBetterIs: "LOWER"
-eprelFeatureNames:
-  - powerOnModeSDR
+referentials:
+  eprel:
+    - featureName: "powerOnModeSDR"
 filteringType: "NUMERIC"
 asScore: true
 scoring:

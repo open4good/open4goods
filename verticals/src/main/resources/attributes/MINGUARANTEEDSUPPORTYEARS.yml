@@ -4,8 +4,9 @@
 key: "MINGUARANTEEDSUPPORTYEARS"
 userBetterIs: "GREATER"
 impactBetterIs: "GREATER"
-eprelFeatureNames:
-  - minGuaranteedSupportYears
+referentials:
+  eprel:
+    - featureName: "minGuaranteedSupportYears"
 faIcon: "mdi-lifebuoy"
 name:
   default: "Guaranteed support duration"

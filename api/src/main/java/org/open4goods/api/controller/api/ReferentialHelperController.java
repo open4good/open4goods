@@ -1,18 +1,35 @@
 package org.open4goods.api.controller.api;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
+import org.open4goods.api.dto.AttributeEtimCandidateDto;
+import org.open4goods.api.dto.AttributeIcecatCandidateDto;
+import org.open4goods.api.dto.AttributeReferentialCoverageDto;
+import org.open4goods.api.dto.AttributeWikidataPropertyCandidateDto;
 import org.open4goods.api.dto.EtimCandidateDto;
 import org.open4goods.api.dto.GoogleCandidateDto;
 import org.open4goods.api.dto.WikidataCandidateDto;
+import org.open4goods.icecat.model.IcecatCategoryDocument;
+import org.open4goods.icecat.model.IcecatCategoryFeatureDocument;
+import org.open4goods.icecat.model.IcecatFeatureDocument;
+import org.open4goods.icecat.services.IcecatIndexService;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.helper.IdHelper;
+import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.referential.AttributeReferentials;
+import org.open4goods.model.vertical.referential.EprelFeatureReferential;
+import org.open4goods.model.vertical.referential.EtimFeatureReferential;
+import org.open4goods.model.vertical.referential.IcecatFeatureReferential;
+import org.open4goods.model.vertical.referential.IcecatReferential;
+import org.open4goods.model.vertical.referential.WikidataPropertyReferential;
 import org.open4goods.services.wikidataservice.service.WikidataSearchService;
 import org.open4goods.verticals.GoogleTaxonomyService;
 import org.open4goods.verticals.VerticalsConfigService;
@@ -51,15 +68,18 @@ public class ReferentialHelperController
     private final VerticalsConfigService verticalsService;
     private final GoogleTaxonomyService googleTaxonomyService;
     private final WikidataSearchService wikidataSearchService;
+    private final IcecatIndexService icecatIndexService;
 
     public ReferentialHelperController(
             VerticalsConfigService verticalsService,
             GoogleTaxonomyService googleTaxonomyService,
-            WikidataSearchService wikidataSearchService)
+            WikidataSearchService wikidataSearchService,
+            IcecatIndexService icecatIndexService)
     {
         this.verticalsService = verticalsService;
         this.googleTaxonomyService = googleTaxonomyService;
         this.wikidataSearchService = wikidataSearchService;
+        this.icecatIndexService = icecatIndexService;
     }
 
     /**
@@ -214,6 +234,230 @@ public class ReferentialHelperController
         }
 
         return ResponseEntity.ok(candidates.stream().limit(maxResults).toList());
+    }
+
+    // -------------------------------------------------------------------------
+    // Attribute-level reconciliation endpoints
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns Icecat feature candidates for a single Nudger attribute, scoped to the
+     * Icecat categories already declared for the vertical (either through the legacy
+     * {@code icecatTaxonomyId} or through the new {@code referentials.icecat} block).
+     * <p>
+     * Each candidate carries the Icecat feature ID, English name, feature type and
+     * the originating category to ease manual review.
+     *
+     * @param vertical    vertical identifier (e.g. "tv")
+     * @param attribute   Nudger attribute key (e.g. "HEIGHT")
+     * @param maxResults  maximum number of candidates to return (default 5)
+     */
+    @GetMapping("/attribute/icecat/candidates")
+    @Operation(
+            summary = "Candidate Icecat feature IDs for a Nudger attribute key",
+            description = "Iterates Icecat features bound to the vertical's Icecat "
+                    + "categories and scores them by name overlap with the attribute's "
+                    + "synonyms and localized names.")
+    public ResponseEntity<List<AttributeIcecatCandidateDto>> attributeIcecatCandidates(
+            @RequestParam String vertical,
+            @RequestParam String attribute,
+            @RequestParam(defaultValue = "" + DEFAULT_MAX_CANDIDATES) int maxResults)
+    {
+        VerticalConfig vc = verticalsService.getConfigById(vertical);
+        if (vc == null)
+        {
+            return ResponseEntity.notFound().build();
+        }
+
+        AttributeConfig attrConfig = vc.getAttributesConfig() == null ? null
+                : vc.getAttributesConfig().getAttributeConfigByKey(attribute);
+        if (attrConfig == null)
+        {
+            return ResponseEntity.notFound().build();
+        }
+
+        Set<String> attributeTerms = attributeSearchTerms(attrConfig);
+        Set<Integer> existingFeatureIds = attrConfig.icecatFeatureIds();
+        List<AttributeIcecatCandidateDto> candidates = new ArrayList<>();
+
+        for (Integer categoryId : icecatCategoryIds(vc))
+        {
+            Optional<IcecatCategoryDocument> category = icecatIndexService.findCategory(categoryId);
+            if (category.isEmpty())
+            {
+                continue;
+            }
+            IcecatCategoryDocument cat = category.get();
+            Map<Integer, IcecatFeatureDocument> docs = icecatIndexService.findCategoryFeatureDocuments(cat);
+            List<IcecatCategoryFeatureDocument> categoryFeatures = cat.getFeatures() == null
+                    ? List.<IcecatCategoryFeatureDocument>of()
+                    : cat.getFeatures();
+            for (IcecatCategoryFeatureDocument catFeature : categoryFeatures)
+            {
+                Integer featureId = catFeature.getId();
+                if (featureId == null)
+                {
+                    continue;
+                }
+                IcecatFeatureDocument doc = docs.get(featureId);
+                String englishName = doc == null ? null : doc.getEnglishName();
+                double score = scoreFeatureAgainstAttribute(doc, attributeTerms);
+                if (score <= 0)
+                {
+                    continue;
+                }
+                if (existingFeatureIds.contains(featureId))
+                {
+                    score = Math.min(1.0, score + 0.10);
+                }
+                String matchSource = (existingFeatureIds.contains(featureId))
+                        ? "already-bound"
+                        : (englishName != null && attributeTerms.stream()
+                                .map(t -> IdHelper.azCharAndDigits(t).toLowerCase())
+                                .anyMatch(t -> IdHelper.azCharAndDigits(englishName).toLowerCase().equals(t))
+                                ? "exact-name"
+                                : "name-overlap");
+                candidates.add(new AttributeIcecatCandidateDto(
+                        featureId,
+                        englishName,
+                        doc == null ? null : doc.getType(),
+                        cat.getId(),
+                        cat.getEnglishName(),
+                        score,
+                        matchSource));
+            }
+        }
+
+        candidates.sort((a, b) -> Double.compare(b.confidence(), a.confidence()));
+        return ResponseEntity.ok(candidates.stream().limit(maxResults).toList());
+    }
+
+    /**
+     * Returns ETIM feature candidates for a single Nudger attribute via Wikidata SPARQL.
+     * <p>
+     * For every ETIM class declared at vertical level, resolves features (ETIM
+     * {@code EFxxxxxx}) linked to the vertical's Icecat features through Wikidata
+     * properties. Falls back to a Wikidata text search against the attribute name when
+     * no ETIM class is configured.
+     */
+    @GetMapping("/attribute/etim/candidates")
+    @Operation(
+            summary = "Candidate ETIM feature IDs for a Nudger attribute key",
+            description = "Resolves ETIM features via Wikidata SPARQL bridges (Icecat "
+                    + "feature ↔ ETIM feature) and Wikidata label search.")
+    public ResponseEntity<List<AttributeEtimCandidateDto>> attributeEtimCandidates(
+            @RequestParam String vertical,
+            @RequestParam String attribute,
+            @RequestParam(defaultValue = "" + DEFAULT_MAX_CANDIDATES) int maxResults)
+    {
+        VerticalConfig vc = verticalsService.getConfigById(vertical);
+        if (vc == null)
+        {
+            return ResponseEntity.notFound().build();
+        }
+        AttributeConfig attrConfig = vc.getAttributesConfig() == null ? null
+                : vc.getAttributesConfig().getAttributeConfigByKey(attribute);
+        if (attrConfig == null)
+        {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<AttributeEtimCandidateDto> candidates = new ArrayList<>();
+
+        for (Integer icecatFeatureId : attrConfig.icecatFeatureIds())
+        {
+            candidates.addAll(resolveEtimFeatureViaIcecatFeature(icecatFeatureId, maxResults));
+            if (candidates.size() >= maxResults)
+            {
+                break;
+            }
+        }
+
+        if (candidates.size() < maxResults)
+        {
+            for (String term : attributeSearchTerms(attrConfig))
+            {
+                if (candidates.size() >= maxResults)
+                {
+                    break;
+                }
+                candidates.addAll(resolveEtimFeatureViaLabelSearch(term, maxResults - candidates.size()));
+            }
+        }
+
+        candidates.sort((a, b) -> Double.compare(b.confidence(), a.confidence()));
+        return ResponseEntity.ok(candidates.stream().limit(maxResults).toList());
+    }
+
+    /**
+     * Returns Wikidata property candidates (e.g. {@code P2048} for {@code height})
+     * for a Nudger attribute. Uses the Wikidata EntitySearch service constrained to
+     * properties.
+     */
+    @GetMapping("/attribute/wikidata/candidates")
+    @Operation(
+            summary = "Candidate Wikidata property IDs (P-xxxx) for a Nudger attribute key",
+            description = "Searches Wikidata properties by the attribute's name and synonyms.")
+    public ResponseEntity<List<AttributeWikidataPropertyCandidateDto>> attributeWikidataPropertyCandidates(
+            @RequestParam String vertical,
+            @RequestParam String attribute,
+            @RequestParam(defaultValue = "" + DEFAULT_MAX_CANDIDATES) int maxResults)
+    {
+        VerticalConfig vc = verticalsService.getConfigById(vertical);
+        if (vc == null)
+        {
+            return ResponseEntity.notFound().build();
+        }
+        AttributeConfig attrConfig = vc.getAttributesConfig() == null ? null
+                : vc.getAttributesConfig().getAttributeConfigByKey(attribute);
+        if (attrConfig == null)
+        {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<AttributeWikidataPropertyCandidateDto> candidates = new ArrayList<>();
+        for (String term : attributeSearchTerms(attrConfig))
+        {
+            if (candidates.size() >= maxResults)
+            {
+                break;
+            }
+            candidates.addAll(wikidataPropertySearch(term, maxResults - candidates.size()));
+        }
+
+        candidates.sort((a, b) -> Double.compare(b.confidence(), a.confidence()));
+        return ResponseEntity.ok(candidates.stream().limit(maxResults).toList());
+    }
+
+    /**
+     * Per-attribute referential coverage report for a vertical.
+     * <p>
+     * Lists which taxonomies each attribute is wired to (Icecat, EPREL, ETIM, Wikidata)
+     * so an AI agent can target the attributes still missing mappings.
+     */
+    @GetMapping("/attribute/coverage")
+    @Operation(
+            summary = "Per-attribute cross-referential coverage of a vertical",
+            description = "Lists for every attribute of the vertical which taxonomies "
+                    + "are wired (icecat / eprel / etim / wikidata) and which are still missing.")
+    public ResponseEntity<List<AttributeReferentialCoverageDto>> attributeCoverage(
+            @RequestParam String vertical)
+    {
+        VerticalConfig vc = verticalsService.getConfigById(vertical);
+        if (vc == null)
+        {
+            return ResponseEntity.notFound().build();
+        }
+        if (vc.getAttributesConfig() == null)
+        {
+            return ResponseEntity.ok(Collections.emptyList());
+        }
+        List<AttributeReferentialCoverageDto> coverage = new ArrayList<>();
+        for (AttributeConfig ac : vc.getAttributesConfig().getConfigs())
+        {
+            coverage.add(toCoverage(ac));
+        }
+        return ResponseEntity.ok(coverage);
     }
 
     // -------------------------------------------------------------------------
@@ -432,5 +676,296 @@ public class ReferentialHelperController
                 .replace("\"", "\\\"")
                 .replace("\n", "\\n")
                 .replace("\r", "\\r");
+    }
+
+    // -------------------------------------------------------------------------
+    // Attribute-scoped helpers
+    // -------------------------------------------------------------------------
+
+    /**
+     * Collects all Icecat category IDs declared for a vertical, both via the legacy
+     * {@code icecatTaxonomyId} scalar and the new {@code referentials.icecat} block.
+     */
+    private List<Integer> icecatCategoryIds(VerticalConfig vc)
+    {
+        List<Integer> result = new ArrayList<>();
+        if (vc.getIcecatTaxonomyId() != null && vc.getIcecatTaxonomyId() > 0)
+        {
+            result.add(vc.getIcecatTaxonomyId());
+        }
+        if (vc.getReferentials() != null)
+        {
+            for (IcecatReferential ref : vc.getReferentials().getIcecat())
+            {
+                Integer id = ref == null ? null : ref.getCategoryId();
+                if (id != null && id > 0 && !result.contains(id))
+                {
+                    result.add(id);
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns the search terms used to score taxonomy candidates against an attribute:
+     * the attribute key, every localized name and every synonym across datasources.
+     */
+    private Set<String> attributeSearchTerms(AttributeConfig attrConfig)
+    {
+        Set<String> terms = new LinkedHashSet<>();
+        addTerm(terms, attrConfig.getKey());
+        if (attrConfig.getName() != null && attrConfig.getName().values() != null)
+        {
+            for (String name : attrConfig.getName().values())
+            {
+                addTerm(terms, name);
+            }
+        }
+        if (attrConfig.getSynonyms() != null)
+        {
+            for (Set<String> synonymSet : attrConfig.getSynonyms().values())
+            {
+                if (synonymSet != null)
+                {
+                    for (String synonym : synonymSet)
+                    {
+                        addTerm(terms, synonym);
+                    }
+                }
+            }
+        }
+        return terms;
+    }
+
+    /**
+     * Token-overlap score between an Icecat feature and an attribute. Returns
+     * a value in [0, 1]. Uses English feature name and normalized variants.
+     */
+    private double scoreFeatureAgainstAttribute(IcecatFeatureDocument doc, Set<String> attributeTerms)
+    {
+        if (doc == null)
+        {
+            return 0.0;
+        }
+        double best = 0.0;
+        String englishName = doc.getEnglishName();
+        if (englishName != null && !englishName.isBlank())
+        {
+            best = keywordOverlapScore(englishName, attributeTerms);
+        }
+        if (doc.getNormalizedNames() != null)
+        {
+            for (String normalized : doc.getNormalizedNames())
+            {
+                double score = keywordOverlapScore(normalized, attributeTerms);
+                if (score > best)
+                {
+                    best = score;
+                }
+            }
+        }
+        return best;
+    }
+
+    /**
+     * Resolves ETIM feature codes linked to an Icecat feature ID via Wikidata SPARQL.
+     * Uses Wikidata property P2702 (Icecat feature ID) and P11207 (ETIM code).
+     */
+    private List<AttributeEtimCandidateDto> resolveEtimFeatureViaIcecatFeature(Integer icecatFeatureId, int limit)
+    {
+        List<AttributeEtimCandidateDto> result = new ArrayList<>();
+        String sparql = """
+                SELECT ?etimFeature ?itemLabel ?etimClass ?classLabel WHERE {
+                  ?item wdt:P2702 "%d" .
+                  ?item wdt:P11207 ?etimFeature .
+                  OPTIONAL { ?item wdt:P5009 ?etimClass . }
+                  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+                } LIMIT %d
+                """.formatted(icecatFeatureId, limit);
+
+        try
+        {
+            List<Map<String, String>> rows = wikidataSearchService.executeSparql(sparql);
+            for (Map<String, String> row : rows)
+            {
+                String code = row.get("etimFeature");
+                String label = row.getOrDefault("itemLabel", "");
+                String classId = row.get("etimClass");
+                String className = row.getOrDefault("classLabel", "");
+                if (code != null && !code.isBlank())
+                {
+                    result.add(new AttributeEtimCandidateDto(code, label, classId, className, 0.90, "icecat-feature-bridge"));
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            LOGGER.warn("ETIM/Icecat-feature SPARQL resolution failed for icecatFeatureId={}: {}", icecatFeatureId, e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * Searches for ETIM feature codes on Wikidata by label match.
+     */
+    private List<AttributeEtimCandidateDto> resolveEtimFeatureViaLabelSearch(String term, int limit)
+    {
+        List<AttributeEtimCandidateDto> result = new ArrayList<>();
+        String safeTerm = escapeSparql(term);
+        String sparql = """
+                SELECT ?etimFeature ?itemLabel WHERE {
+                  SERVICE wikibase:mwapi {
+                    bd:serviceParam wikibase:api "EntitySearch" .
+                    bd:serviceParam wikibase:endpoint "www.wikidata.org" .
+                    bd:serviceParam mwapi:search "%s" .
+                    bd:serviceParam mwapi:language "en" .
+                    ?item wikibase:apiOutputItem mwapi:item .
+                  }
+                  ?item wdt:P11207 ?etimFeature .
+                  FILTER(STRSTARTS(?etimFeature, "EF"))
+                  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+                } LIMIT %d
+                """.formatted(safeTerm, limit);
+
+        try
+        {
+            List<Map<String, String>> rows = wikidataSearchService.executeSparql(sparql);
+            for (Map<String, String> row : rows)
+            {
+                String code = row.get("etimFeature");
+                String label = row.getOrDefault("itemLabel", "");
+                if (code != null && !code.isBlank())
+                {
+                    result.add(new AttributeEtimCandidateDto(code, label, null, null, 0.65, "label-search"));
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            LOGGER.warn("ETIM feature label-search SPARQL failed for term='{}': {}", term, e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * Performs a Wikidata EntitySearch restricted to properties and returns matching
+     * P-IDs with labels and descriptions.
+     */
+    private List<AttributeWikidataPropertyCandidateDto> wikidataPropertySearch(String term, int limit)
+    {
+        List<AttributeWikidataPropertyCandidateDto> result = new ArrayList<>();
+        String safeTerm = escapeSparql(term);
+        String sparql = """
+                SELECT ?prop ?propLabel ?propDescription WHERE {
+                  SERVICE wikibase:mwapi {
+                    bd:serviceParam wikibase:api "EntitySearch" .
+                    bd:serviceParam wikibase:endpoint "www.wikidata.org" .
+                    bd:serviceParam mwapi:search "%s" .
+                    bd:serviceParam mwapi:language "en" .
+                    bd:serviceParam mwapi:srnamespace "120" .
+                    ?prop wikibase:apiOutputItem mwapi:item .
+                  }
+                  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+                } LIMIT %d
+                """.formatted(safeTerm, limit);
+
+        try
+        {
+            List<Map<String, String>> rows = wikidataSearchService.executeSparql(sparql);
+            for (Map<String, String> row : rows)
+            {
+                String uri = row.get("prop");
+                String label = row.getOrDefault("propLabel", "");
+                String description = row.getOrDefault("propDescription", "");
+                String pid = extractPid(uri);
+                if (pid != null)
+                {
+                    double confidence = labelConfidence(term, label);
+                    result.add(new AttributeWikidataPropertyCandidateDto(pid, label, description, confidence));
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            LOGGER.warn("Wikidata property search SPARQL failed for term='{}': {}", term, e.getMessage());
+        }
+        return result;
+    }
+
+    private String extractPid(String uri)
+    {
+        if (uri == null)
+        {
+            return null;
+        }
+        int lastSlash = uri.lastIndexOf('/');
+        String tail = (lastSlash >= 0 && lastSlash < uri.length() - 1)
+                ? uri.substring(lastSlash + 1)
+                : uri;
+        return tail.startsWith("P") ? tail : null;
+    }
+
+    /**
+     * Builds the per-attribute coverage report for the {@code /attribute/coverage} endpoint.
+     */
+    private AttributeReferentialCoverageDto toCoverage(AttributeConfig ac)
+    {
+        AttributeReferentials ref = ac.getReferentials();
+        List<Integer> icecatIds = new ArrayList<>();
+        List<String> eprelNames = new ArrayList<>();
+        List<String> etimIds = new ArrayList<>();
+        List<String> wikidataPids = new ArrayList<>();
+        if (ref != null)
+        {
+            for (IcecatFeatureReferential entry : ref.getIcecat())
+            {
+                if (entry != null && entry.getFeatureId() != null)
+                {
+                    icecatIds.add(entry.getFeatureId());
+                }
+            }
+            for (EprelFeatureReferential entry : ref.getEprel())
+            {
+                if (entry != null && entry.getFeatureName() != null && !entry.getFeatureName().isBlank())
+                {
+                    eprelNames.add(entry.getFeatureName());
+                }
+            }
+            for (EtimFeatureReferential entry : ref.getEtim())
+            {
+                if (entry != null && entry.getFeatureId() != null && !entry.getFeatureId().isBlank())
+                {
+                    etimIds.add(entry.getFeatureId());
+                }
+            }
+            for (WikidataPropertyReferential entry : ref.getWikidata())
+            {
+                if (entry != null && entry.getPid() != null && !entry.getPid().isBlank())
+                {
+                    wikidataPids.add(entry.getPid());
+                }
+            }
+        }
+        List<String> covered = new ArrayList<>();
+        List<String> missing = new ArrayList<>();
+        addCoverage(covered, missing, "icecat", !icecatIds.isEmpty());
+        addCoverage(covered, missing, "eprel", !eprelNames.isEmpty());
+        addCoverage(covered, missing, "etim", !etimIds.isEmpty());
+        addCoverage(covered, missing, "wikidata", !wikidataPids.isEmpty());
+        return new AttributeReferentialCoverageDto(
+                ac.getKey(), covered, missing, icecatIds, eprelNames, etimIds, wikidataPids);
+    }
+
+    private void addCoverage(List<String> covered, List<String> missing, String taxonomy, boolean present)
+    {
+        if (present)
+        {
+            covered.add(taxonomy);
+        }
+        else
+        {
+            missing.add(taxonomy);
+        }
     }
 }

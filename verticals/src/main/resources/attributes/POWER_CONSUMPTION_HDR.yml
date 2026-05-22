@@ -11,8 +11,9 @@
 key: "POWER_CONSUMPTION_HDR"
 userBetterIs: "LOWER"
 impactBetterIs: "LOWER"
-eprelFeatureNames:
-  - powerOnModeHDR
+referentials:
+  eprel:
+    - featureName: "powerOnModeHDR"
 filteringType: "NUMERIC"
 asScore: true
 scoring:

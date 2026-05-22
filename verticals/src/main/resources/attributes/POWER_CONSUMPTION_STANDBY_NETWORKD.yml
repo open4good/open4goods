@@ -11,9 +11,10 @@
 key: "POWER_CONSUMPTION_STANDBY_NETWORKD"
 userBetterIs: "LOWER"
 impactBetterIs: "LOWER"
-eprelFeatureNames:
-  - powerStandbyNetworked
-  - powerNetworkStandby
+referentials:
+  eprel:
+    - featureName: "powerStandbyNetworked"
+    - featureName: "powerNetworkStandby"
 filteringType: "NUMERIC"
 asScore: true
 scoring:

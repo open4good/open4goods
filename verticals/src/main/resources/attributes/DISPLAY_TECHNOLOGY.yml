@@ -2,10 +2,11 @@
 # TYPE TV
 ##################################
 key: "DISPLAY_TECHNOLOGY"
-eprelFeatureNames:
-  - panelTechnology
-icecatFeaturesIds:
-  - 9713
+referentials:
+  icecat:
+    - featureId: 9713
+  eprel:
+    - featureName: "panelTechnology"
 faIcon: "mdi-television"
 name:
   default: "Display technology"
