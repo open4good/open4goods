@@ -28,6 +28,7 @@ import java.net.URL;
 import java.util.stream.Stream;
 
 import org.open4goods.services.reviewgeneration.dto.AttributeExtractionResult;
+import org.open4goods.services.reviewgeneration.dto.ReviewGenerationFailureDetails;
 import org.open4goods.services.reviewgeneration.dto.ReviewGenerationStepResult;
 
 import org.open4goods.model.ai.AiReview;
@@ -38,6 +39,7 @@ import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.AiReviewHolder;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductFetchDiagnostics;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.model.review.ReviewGenerationStatus.Status;
@@ -305,24 +307,15 @@ public class ReviewGenerationService implements HealthIndicator {
 			promptVariables = preprocessingService.preparePromptVariables(product, verticalConfig,
 					status, customHeaders == null ? Map.of() : customHeaders);
 		} catch (NotEnoughDataException e) {
+			Map<String, String> enrichmentStatus = runSourceFetchedHooks(product, hadEprelBeforeFetch);
+			e.setEnrichmentStatus(enrichmentStatus);
+			persistFetchDiagnostics(product, e.getDetails(), enrichmentStatus);
 			productRepository.forceIndex(product);
 			throw e;
 		}
+		Map<String, String> enrichmentStatus = runSourceFetchedHooks(product, hadEprelBeforeFetch);
+		persistFetchDiagnostics(product, promptVariables, enrichmentStatus);
 		productRepository.forceIndex(product);
-		Map<String, String> enrichmentStatus = new LinkedHashMap<>();
-		enrichmentStatus.put("eprel.beforeFetch", Boolean.toString(hadEprelBeforeFetch));
-		try {
-			hooks.forEach(hook -> hook.onSourcesFetched(product, hadEprelBeforeFetch));
-			boolean hasEprelAfterFetchHooks = hasEprel(product);
-			enrichmentStatus.put("eprel.afterFetchHooks", Boolean.toString(hasEprelAfterFetchHooks));
-			enrichmentStatus.put("eprel.status", hadEprelBeforeFetch ? "already_present"
-					: hasEprelAfterFetchHooks ? "completed" : "not_completed");
-		} catch (Exception e) {
-			logger.error("Error executing onSourcesFetched hooks for UPC {}: {}", product.getId(), e.getMessage(), e);
-			enrichmentStatus.put("eprel.afterFetchHooks", Boolean.toString(hasEprel(product)));
-			enrichmentStatus.put("eprel.status", "hook_error");
-			enrichmentStatus.put("eprel.error", e.getMessage());
-		}
 		return stepResult(product, verticalConfig, "fetch", true, "Remote sources fetched and persisted.",
 				promptVariables, List.of(), null, enrichmentStatus);
 	}
@@ -1200,6 +1193,62 @@ public class ReviewGenerationService implements HealthIndicator {
 
 	private boolean hasEprel(Product product) {
 		return product != null && product.getExternalIds() != null && product.getExternalIds().getEprel() != null;
+	}
+
+	private Map<String, String> runSourceFetchedHooks(Product product, boolean hadEprelBeforeFetch) {
+		Map<String, String> enrichmentStatus = new LinkedHashMap<>();
+		enrichmentStatus.put("eprel.beforeFetch", Boolean.toString(hadEprelBeforeFetch));
+		try {
+			hooks.forEach(hook -> hook.onSourcesFetched(product, hadEprelBeforeFetch));
+			boolean hasEprelAfterFetchHooks = hasEprel(product);
+			enrichmentStatus.put("eprel.afterFetchHooks", Boolean.toString(hasEprelAfterFetchHooks));
+			enrichmentStatus.put("eprel.status", hadEprelBeforeFetch ? "already_present"
+					: hasEprelAfterFetchHooks ? "completed" : "not_completed");
+		} catch (Exception e) {
+			logger.error("Error executing onSourcesFetched hooks for UPC {}: {}", product.getId(), e.getMessage(), e);
+			enrichmentStatus.put("eprel.afterFetchHooks", Boolean.toString(hasEprel(product)));
+			enrichmentStatus.put("eprel.status", "hook_error");
+			enrichmentStatus.put("eprel.error", e.getMessage());
+		}
+		return enrichmentStatus;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void persistFetchDiagnostics(Product product, Map<String, Object> promptVariables,
+			Map<String, String> enrichmentStatus) {
+		if (product == null || promptVariables == null) {
+			return;
+		}
+		Map<String, Integer> sourceTokens = (Map<String, Integer>) promptVariables.getOrDefault("SOURCE_TOKENS", Map.of());
+		int totalTokens = (Integer) promptVariables.getOrDefault("TOTAL_TOKENS", 0);
+		List<String> searchedQueries = (List<String>) promptVariables.getOrDefault("SEARCHED_QUERIES", List.of());
+		List<String> acceptedUrls = (List<String>) promptVariables.getOrDefault("ACCEPTED_URLS",
+				new ArrayList<>(sourceTokens.keySet()));
+		Map<String, String> rejectedUrls = (Map<String, String>) promptVariables.getOrDefault("REJECTED_URLS", Map.of());
+		persistFetchDiagnostics(product, sourceTokens.size(), totalTokens, searchedQueries, acceptedUrls, rejectedUrls,
+				enrichmentStatus);
+	}
+
+	private void persistFetchDiagnostics(Product product, ReviewGenerationFailureDetails details,
+			Map<String, String> enrichmentStatus) {
+		if (product == null || details == null) {
+			return;
+		}
+		persistFetchDiagnostics(product, details.sourceCount(), details.totalTokens(), details.searchedQueries(),
+				details.acceptedUrls(), details.rejectedUrls(), enrichmentStatus);
+	}
+
+	private void persistFetchDiagnostics(Product product, int sourceCount, int totalTokens, List<String> searchedQueries,
+			List<String> acceptedUrls, Map<String, String> rejectedUrls, Map<String, String> enrichmentStatus) {
+		ProductFetchDiagnostics diagnostics = new ProductFetchDiagnostics();
+		diagnostics.setFetchedAt(Instant.now().toEpochMilli());
+		diagnostics.setSourceCount(sourceCount);
+		diagnostics.setTotalTokens(totalTokens);
+		diagnostics.setSearchedQueries(searchedQueries);
+		diagnostics.setAcceptedUrls(acceptedUrls);
+		diagnostics.setRejectedUrls(rejectedUrls);
+		diagnostics.setEnrichmentStatus(enrichmentStatus);
+		product.setReviewFetchDiagnostics(diagnostics);
 	}
 
 	private String determineProviderName(Map<String, Object> metadata) {

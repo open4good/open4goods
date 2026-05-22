@@ -1,5 +1,7 @@
 package org.open4goods.services.reviewgeneration.service;
 
+import java.util.Map;
+
 import org.open4goods.services.reviewgeneration.dto.ReviewGenerationFailureDetails;
 
 /**
@@ -9,6 +11,7 @@ import org.open4goods.services.reviewgeneration.dto.ReviewGenerationFailureDetai
 public class NotEnoughDataException extends Exception {
 
 	private final ReviewGenerationFailureDetails details;
+	private Map<String, String> enrichmentStatus = Map.of();
 
 	public NotEnoughDataException() {
 		super();
@@ -27,5 +30,13 @@ public class NotEnoughDataException extends Exception {
 
 	public ReviewGenerationFailureDetails getDetails() {
 		return details;
+	}
+
+	public Map<String, String> getEnrichmentStatus() {
+		return enrichmentStatus;
+	}
+
+	public void setEnrichmentStatus(Map<String, String> enrichmentStatus) {
+		this.enrichmentStatus = enrichmentStatus == null ? Map.of() : Map.copyOf(enrichmentStatus);
 	}
 }

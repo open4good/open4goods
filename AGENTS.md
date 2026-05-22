@@ -107,7 +107,7 @@ Run the canonical lint suite before handoff:
 
 The suite covers Markdown/JSON text normalization, YAML, shell scripts, GitHub
 Actions, Docker Compose, Dockerfiles when `hadolint` is installed, and the Nuxt
-frontend lint/generation checks.
+frontend lint checks. It does not build or generate the frontend.
 
 The repository uses a tracked pre-push hook in `.githooks/pre-push`. Enable it
 with:

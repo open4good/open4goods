@@ -25,7 +25,10 @@ referentials:
   etim:
     - classId: "EC001764"
       className: "TV set"
-  eprel: []
+  eprel:
+    - group: "televisions"
+    - group: "Televisions"
+    - group: "electronicdisplays"
 
 parsers:
   weight:
@@ -186,6 +189,7 @@ commonAttributes:
 # The scores that are available to build the impact score. They come from scored attributes.
 # Scores from _default.yml are merged
 availableImpactScoreCriterias:
+  - DATA_QUALITY
   - DIAGONALE_POUCES
   #  - CLASSE_ENERGY
   #  - WEIGHT
@@ -251,7 +255,15 @@ i18n:
       - "de la télévision"
       - "de cet écran"
       - "de ce TV"
-    # TODO : Generate short title (for cards restitution, with popular attributes)
+    cardTitle: "[(${p.brand()})] [(${p.model()})]"
+    shortName: "Téléviseurs"
+    longName: "Téléviseurs et écrans TV"
+    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : eco-score, impact et meilleurs prix"
+    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : comparez l'eco-score, la consommation, la réparabilité et les meilleurs prix pour choisir un téléviseur plus responsable."
+    productMetaOpenGraphTitle: "[(${p.brand()})] [(${p.model()})] : eco-score et prix du téléviseur"
+    productMetaOpenGraphDescription: "Comparez l'impact environnemental, la consommation et le prix de ce téléviseur avec Nudger."
+    productMetaTwitterTitle: "[(${p.brand()})] [(${p.model()})] : eco-score TV"
+    productMetaTwitterDescription: "Eco-score, énergie, réparabilité et meilleurs prix pour ce téléviseur."
 
     ##################################
     # Vertical page elements
@@ -314,6 +326,15 @@ i18n:
       - "of the TV"
       - "of this TV"
       - "of the screen"
+    cardTitle: "[(${p.brand()})] [(${p.model()})]"
+    shortName: "TVs"
+    longName: "Televisions and TV screens"
+    productMetaTitle: "[(${p.brand()})] [(${p.model()})]: eco-score, impact and best prices"
+    productMetaDescription: "[(${p.brand()})] [(${p.model()})]: compare the eco-score, energy use, repairability and best prices to choose a more responsible TV."
+    productMetaOpenGraphTitle: "[(${p.brand()})] [(${p.model()})]: TV eco-score and price"
+    productMetaOpenGraphDescription: "Compare this TV's environmental impact, energy use and price with Nudger."
+    productMetaTwitterTitle: "[(${p.brand()})] [(${p.model()})]: TV eco-score"
+    productMetaTwitterDescription: "Eco-score, energy, repairability and best prices for this TV."
 
     ##################################
     # Vertical page elements
@@ -555,6 +576,69 @@ nudgeToolConfig:
 
 # Fast filters; with classical attributes range values for the product category page
 subsets:
+  ################
+  # Impact Score
+  ################
+  - id: "impact_high" # Unique identifier for the subset - Worst 33% (high environmental impact)
+    group: "impactscore"
+    criterias:
+      - field: "scores.ECOSCORE.ranking"
+        fromPercent: 0
+        toPercent: 33
+    image: "example-image.png"
+    url:
+      en: "high-impact"
+      fr: "fort-impact"
+    caption:
+      en: "High "
+      fr: "Élevé "
+    title:
+      en: "High Impact"
+      fr: "Impact Élevé"
+    description:
+      en: "Products with a high environmental impact"
+      fr: "Produits ayant un fort impact environnemental"
+
+  - id: "impact_medium" # Middle 34%
+    group: "impactscore"
+    criterias:
+      - field: "scores.ECOSCORE.ranking"
+        fromPercent: 33
+        toPercent: 67
+    image: "example-image.png"
+    url:
+      en: "medium-impact"
+      fr: "impact-moyen"
+    caption:
+      en: "Medium"
+      fr: "Moyen "
+    title:
+      en: "Medium Impact"
+      fr: "Impact Moyen"
+    description:
+      en: "Products with a medium environmental impact"
+      fr: "Produits ayant un impact environnemental moyen"
+
+  - id: "impact_low" # Best 33% (low environmental impact)
+    group: "impactscore"
+    criterias:
+      - field: "scores.ECOSCORE.ranking"
+        fromPercent: 67
+        toPercent: 100
+    image: "example-image.png"
+    url:
+      en: "low-impact"
+      fr: "faible-impact"
+    caption:
+      en: "Low "
+      fr: "Faible "
+    title:
+      en: "Low Impact"
+      fr: "Impact Faible"
+    description:
+      en: "Products with a low environmental impact"
+      fr: "Produits ayant un faible impact environnemental"
+
   ################
   # Price
   ################

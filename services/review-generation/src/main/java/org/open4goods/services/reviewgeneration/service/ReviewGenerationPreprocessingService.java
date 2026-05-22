@@ -33,6 +33,7 @@ import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductFact;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.resource.ResourceType;
+import org.open4goods.model.util.ProductModelCandidateHelper;
 import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.googlesearch.dto.GoogleSearchRequest;
@@ -691,12 +692,23 @@ public class ReviewGenerationPreprocessingService {
 		List<String> queries = new ArrayList<>();
 		List<String> orderedModels = rankedModelCandidates(product, primaryModel, alternateModels);
 		List<String> searchModels = orderedModels.stream().limit(6).toList();
+		if (searchModels.isEmpty()) {
+			throw new IllegalStateException("Cannot build review SERP queries for UPC " + product.getId()
+					+ ": no usable model candidate");
+		}
 		String modelExpression = modelExpression(brand, searchModels);
 		queries.add(officialDiscoveryQuery(brand, searchModels.getFirst()));
 		queries.add(officialSupportQuery(brand, searchModels.getFirst()));
 		String preferredDomainExpression = domainExpression(preferredDomains);
 		if (!preferredDomainExpression.isBlank()) {
 			queries.add(preferredDomainExpression + " " + modelExpression);
+		}
+		List<String> userIntentModels = userIntentModels(product, primaryModel, alternateModels).stream()
+				.limit(4)
+				.toList();
+		for (String model : userIntentModels) {
+			queries.add(reviewIntentQuery(brand, model));
+			queries.add(supportIntentQuery(brand, model));
 		}
 		List<String> injectSites = verticalConfig == null ? List.of() : verticalConfig.getInjectSitesResults();
 		if (injectSites != null && !injectSites.isEmpty()) {
@@ -711,6 +723,32 @@ public class ReviewGenerationPreprocessingService {
 			queries.add(formatQuery(brand, model));
 		}
 		return queries.stream().distinct().toList();
+	}
+
+	private List<String> userIntentModels(Product product, String primaryModel, Set<String> alternateModels) {
+		List<String> candidates = new ArrayList<>();
+		if (primaryModel != null && ProductModelCandidateHelper.isHumanSearchCandidate(primaryModel)) {
+			candidates.add(primaryModel);
+		}
+		if (alternateModels != null) {
+			alternateModels.stream()
+					.filter(ProductModelCandidateHelper::isHumanSearchCandidate)
+					.forEach(candidates::add);
+		}
+		if (product != null && product.shortestOfferName() != null
+				&& ProductModelCandidateHelper.isHumanSearchCandidate(product.shortestOfferName())) {
+			candidates.add(product.shortestOfferName());
+		}
+		return candidates.stream()
+				.filter(value -> value != null && !value.isBlank())
+				.map(String::trim)
+				.filter(value -> value.length() <= 96)
+				.collect(Collectors.toMap(value -> value.toLowerCase(Locale.ROOT), Function.identity(),
+						(left, right) -> left, LinkedHashMap::new))
+				.values().stream()
+				.sorted(Comparator.comparingInt((String model) -> modelCandidateScore(product, primaryModel, model))
+						.reversed().thenComparingInt(String::length))
+				.toList();
 	}
 
 	/**
@@ -838,6 +876,9 @@ public class ReviewGenerationPreprocessingService {
 		if (normalizedCandidate.isBlank()) {
 			return false;
 		}
+		if (candidate != null && candidate.matches("\\d+") && !candidate.matches("\\d{8,14}")) {
+			return false;
+		}
 		String normalizedPrimary = normalizeForUrlMatching(primaryModel);
 		if (!normalizedPrimary.isBlank() && normalizedCandidate.equals(normalizedPrimary)) {
 			return true;
@@ -930,6 +971,14 @@ public class ReviewGenerationPreprocessingService {
 	private String officialSupportQuery(String brand, String model) {
 		return brand + " " + quoted(model)
 				+ " (support OR assistance OR manual OR notice OR datasheet OR \"fiche produit\")";
+	}
+
+	private String reviewIntentQuery(String brand, String model) {
+		return brand + " " + quoted(model) + " (avis OR review OR test OR guide)";
+	}
+
+	private String supportIntentQuery(String brand, String model) {
+		return brand + " " + quoted(model) + " (manual OR notice OR support OR datasheet OR \"fiche produit\")";
 	}
 
 	private String domainExpression(List<String> domains) {
@@ -1261,6 +1310,10 @@ public class ReviewGenerationPreprocessingService {
 		if (product == null || url == null || url.isBlank()) {
 			return false;
 		}
+		String compactHaystack = normalizeForUrlMatching(url + " " + (label == null ? "" : label));
+		if (isGenericOfficialResource(compactHaystack)) {
+			return false;
+		}
 		String haystack = normalizeForTextMatching(url + " " + (label == null ? "" : label));
 		if (haystack.isBlank()) {
 			return false;
@@ -1279,9 +1332,17 @@ public class ReviewGenerationPreprocessingService {
 				.anyMatch(candidate -> candidate.length() >= 4 && haystack.contains(candidate))) {
 			return true;
 		}
-		String compactHaystack = normalizeForUrlMatching(url + " " + (label == null ? "" : label));
 		return List.of("energylabel", "productfiche", "ficheproduit", "ficheproduct", "manual", "notice",
-				"userguide", "installation").stream().anyMatch(compactHaystack::contains);
+				"userguide").stream().anyMatch(compactHaystack::contains);
+	}
+
+	private boolean isGenericOfficialResource(String compactHaystack) {
+		if (compactHaystack == null || compactHaystack.isBlank()) {
+			return false;
+		}
+		return List.of("digitalservicesact", "termsandconditions", "conditiongenerale", "conditionsgenerales",
+				"tradein", "inbytet", "brightstar", "installationservice", "deliveryservice", "privacypolicy",
+				"cookiepolicy").stream().anyMatch(compactHaystack::contains);
 	}
 
 	private ResourceType toProductResourceType(org.open4goods.services.urlfetching.dto.ResourceType resourceType) {
