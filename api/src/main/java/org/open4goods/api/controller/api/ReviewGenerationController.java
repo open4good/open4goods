@@ -429,7 +429,11 @@ public class ReviewGenerationController {
         int totalTokens = exception.getDetails() == null ? 0 : exception.getDetails().totalTokens();
         return new ReviewGenerationStepResult(product.getId(), product.gtin(),
                 verticalConfig == null ? product.getVertical() : verticalConfig.getId(), step, false,
-                exception.getMessage(), sourceCount, totalTokens, List.of(), null, exception.getDetails());
+                exception.getMessage(), sourceCount, totalTokens, List.of(), null, exception.getDetails(),
+                exception.getDetails() == null ? List.of() : exception.getDetails().searchedQueries(),
+                exception.getDetails() == null ? List.of() : exception.getDetails().acceptedUrls(),
+                exception.getDetails() == null ? Map.of() : exception.getDetails().rejectedUrls(),
+                exception.getEnrichmentStatus());
     }
 
     private Map<String, String> requestHeaders(HttpServletRequest request) {

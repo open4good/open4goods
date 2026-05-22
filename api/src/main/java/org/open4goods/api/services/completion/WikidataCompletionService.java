@@ -1,7 +1,6 @@
 package org.open4goods.api.services.completion;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +16,7 @@ import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.resource.ResourceTag;
+import org.open4goods.model.util.ProductModelCandidateHelper;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.wikidataservice.config.WikidataServiceProperties;
@@ -233,16 +233,7 @@ public class WikidataCompletionService extends AbstractCompletionService {
      * Mirrors the logic in {@link EprelCompletionService} to produce consistent candidates.
      */
     private List<String> modelCandidates(Product product) {
-        List<String> candidates = new ArrayList<>();
-        if (product.model() != null && !product.model().isBlank()) {
-            candidates.add(product.model());
-        }
-        if (product.getAkaModels() != null) {
-            product.getAkaModels().stream()
-                    .filter(m -> m != null && !m.isBlank())
-                    .forEach(candidates::add);
-        }
-        return candidates;
+        return ProductModelCandidateHelper.expandedCandidates(product);
     }
 
     private String extractValue(String langColonValue) {

@@ -223,6 +223,10 @@
             "type": "object",
             "enabled": false
         },
+        "reviewFetchDiagnostics": {
+            "type": "object",
+            "enabled": false
+        },
         "googleTaxonomyId": {
             "type": "integer",
             "index": false,

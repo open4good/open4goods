@@ -5,7 +5,9 @@ id: air-conditioner
 # Cross-referential taxonomy mappings for AI-agent maintenance and semantic resolution.
 referentials:
   wikidata:
-    - qid: "Q174488"
+    # Source: Wikidata Q1265533, "air conditioner", device used to cool air.
+    # https://www.wikidata.org/wiki/Q1265533
+    - qid: "Q1265533"
       name: "Air conditioner"
   googleTaxonomy:
     - id: 605

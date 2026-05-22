@@ -189,6 +189,11 @@ public class Product implements Standardisable {
 	 */
 	private List<ProductFact> reviewFacts = new ArrayList<>();
 
+	/**
+	 * Latest review-source fetching diagnostics.
+	 */
+	private ProductFetchDiagnostics reviewFetchDiagnostics;
+
 	private EcoScoreRanking ranking = new EcoScoreRanking();
 
 	/**
@@ -1196,6 +1201,14 @@ public class Product implements Standardisable {
 
 	public void setReviewFacts(List<ProductFact> reviewFacts) {
 		this.reviewFacts = reviewFacts == null ? new ArrayList<>() : reviewFacts;
+	}
+
+	public ProductFetchDiagnostics getReviewFetchDiagnostics() {
+		return reviewFetchDiagnostics;
+	}
+
+	public void setReviewFetchDiagnostics(ProductFetchDiagnostics reviewFetchDiagnostics) {
+		this.reviewFetchDiagnostics = reviewFetchDiagnostics;
 	}
 
 	public void setEprelDatas(EprelProduct eprelDatas) {

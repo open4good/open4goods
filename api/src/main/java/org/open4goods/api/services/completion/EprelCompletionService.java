@@ -1,18 +1,14 @@
 package org.open4goods.api.services.completion;
 
 import java.lang.reflect.Array;
-import java.text.Normalizer;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.commons.services.AbstractCompletionService;
@@ -23,6 +19,7 @@ import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.eprel.EprelProduct;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.util.ProductModelCandidateHelper;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.eprelservice.service.EprelSearchService;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -39,8 +36,6 @@ public class EprelCompletionService extends AbstractCompletionService {
 	// TODO : From conf, not every one days.
 	private static final int REFRESH_IN_DAYS = 1;
 	private static final int MIN_COMPACT_MODEL_CONTAINMENT_LENGTH = 7;
-	private static final Pattern DIACRITICS = Pattern.compile("\\p{M}+");
-	private static final Pattern NON_ALNUM = Pattern.compile("[^\\p{Alnum}]+");
 	private EprelSearchService eprelSearchService;
 
 	Logger logger = LoggerFactory.getLogger(EprelCompletionService.class);
@@ -317,39 +312,7 @@ public class EprelCompletionService extends AbstractCompletionService {
      */
     private List<String> modelCandidates(Product product)
     {
-        Set<String> candidates = new LinkedHashSet<>();
-        if (product.model() != null)
-        {
-            candidates.add(product.model());
-        }
-        if (product.getAkaModels() != null)
-        {
-            product.getAkaModels().stream()
-                    .filter(Objects::nonNull)
-                    .forEach(candidates::add);
-        }
-
-        List<String> baseCandidates = new ArrayList<>(candidates);
-        for (String base : baseCandidates)
-        {
-            String hyphenated = base.replace(' ', '-').replaceAll("-+", "-");
-            if (!hyphenated.equalsIgnoreCase(base))
-            {
-                candidates.add(hyphenated);
-            }
-            String spaced = NON_ALNUM.matcher(base).replaceAll(" ").replaceAll(" +", " ").trim();
-            if (!spaced.equalsIgnoreCase(base) && !spaced.isEmpty())
-            {
-                candidates.add(spaced);
-            }
-            String compact = NON_ALNUM.matcher(base).replaceAll("");
-            if (!compact.equalsIgnoreCase(base) && !compact.isEmpty())
-            {
-                candidates.add(compact);
-            }
-        }
-
-        return new ArrayList<>(candidates);
+        return ProductModelCandidateHelper.expandedCandidates(product);
     }
 
     /**
@@ -378,8 +341,9 @@ public class EprelCompletionService extends AbstractCompletionService {
      * @return true when the brand is blank or matches the EPREL supplier
      */
     private boolean hasCompatibleBrand(String brand, EprelProduct candidate) {
-        String normalizedBrand = normalizePhrase(brand);
-        String normalizedSupplier = normalizePhrase(candidate == null ? null : candidate.getSupplierOrTrademark());
+        String normalizedBrand = ProductModelCandidateHelper.normalizePhrase(brand);
+        String normalizedSupplier = ProductModelCandidateHelper.normalizePhrase(
+                candidate == null ? null : candidate.getSupplierOrTrademark());
         if (normalizedBrand == null) {
             return true;
         }
@@ -405,8 +369,8 @@ public class EprelCompletionService extends AbstractCompletionService {
     private int getModelEvidenceScore(EprelProduct candidate, List<String> modelCandidates)
     {
         String eprelModel = candidate == null ? null : candidate.getModelIdentifier();
-        String normalizedEprelModel = normalizePhrase(eprelModel);
-        String compactEprelModel = compactModel(eprelModel);
+        String normalizedEprelModel = ProductModelCandidateHelper.normalizePhrase(eprelModel);
+        String compactEprelModel = ProductModelCandidateHelper.compactModel(eprelModel);
         if (normalizedEprelModel == null || compactEprelModel == null)
         {
             return 0;
@@ -415,8 +379,8 @@ public class EprelCompletionService extends AbstractCompletionService {
         int maxScore = 0;
         for (String modelCandidate : modelCandidates)
         {
-            String normalizedCandidate = normalizePhrase(modelCandidate);
-            String compactCandidate = compactModel(modelCandidate);
+            String normalizedCandidate = ProductModelCandidateHelper.normalizePhrase(modelCandidate);
+            String compactCandidate = ProductModelCandidateHelper.compactModel(modelCandidate);
             if (normalizedCandidate == null || compactCandidate == null)
             {
                 continue;
@@ -455,24 +419,6 @@ public class EprelCompletionService extends AbstractCompletionService {
         } catch (NumberFormatException e) {
             return null;
         }
-    }
-
-    private String normalizePhrase(String value) {
-        if (value == null || value.isBlank()) {
-            return null;
-        }
-        String ascii = DIACRITICS.matcher(Normalizer.normalize(value, Normalizer.Form.NFD)).replaceAll("");
-        String normalized = NON_ALNUM.matcher(ascii.toLowerCase()).replaceAll(" ").trim();
-        return normalized.isEmpty() ? null : normalized;
-    }
-
-    private String compactModel(String value) {
-        String normalized = normalizePhrase(value);
-        if (normalized == null) {
-            return null;
-        }
-        String compact = normalized.replace(" ", "");
-        return compact.isEmpty() ? null : compact;
     }
 
     /**

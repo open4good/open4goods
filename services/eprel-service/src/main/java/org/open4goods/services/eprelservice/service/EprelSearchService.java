@@ -2,14 +2,13 @@ package org.open4goods.services.eprelservice.service;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 import org.open4goods.model.eprel.EprelProduct;
+import org.open4goods.model.util.ProductModelCandidateHelper;
 import org.open4goods.services.eprelservice.config.EprelServiceProperties;
 import org.open4goods.services.eprelservice.model.GtinHelper;
 import org.slf4j.Logger;
@@ -45,14 +44,6 @@ public class EprelSearchService
 
     /** Minimum number of alphanumeric characters required for a contains/wildcard search. */
     private static final int MIN_CONTAINS_ALNUM_LENGTH = 5;
-
-    /**
-     * Pattern matching model candidates that are clearly not real model identifiers:
-     * purely numeric strings (likely order/reference IDs) or dimension codes such as
-     * {@code 568X500X430MM} or {@code L400XP700XH850}.
-     */
-    private static final Pattern DEGENERATE_MODEL_PATTERN =
-            Pattern.compile("^\\d+$|^[0-9]+[xX][0-9].*$|^[a-zA-Z][0-9]+[xX][0-9].*[a-zA-Z]{2,}$");
 
     private final ElasticsearchOperations elasticsearchOperations;
     private final EprelServiceProperties properties;
@@ -459,18 +450,8 @@ public class EprelSearchService
      */
     private List<String> sanitiseModelCandidates(List<String> models)
     {
-        if (models == null)
-        {
-            return List.of();
-        }
-
-        return models.stream()
-            .filter(Objects::nonNull)
-            .map(String::trim)
-            .filter(candidate -> !candidate.isEmpty())
-            .filter(candidate -> !shouldExcludeCandidate(candidate))
-            .sorted(Comparator.comparingInt(String::length).reversed())
-            .toList();
+        return ProductModelCandidateHelper.sanitise(models, properties.getExcludeIfSpaces(),
+                properties.getMinAlnumLength());
     }
 
     private List<String> sanitiseCategories(Collection<String> categories)
@@ -486,33 +467,6 @@ public class EprelSearchService
             .filter(value -> !value.isEmpty())
             .distinct()
             .toList();
-    }
-
-    private boolean shouldExcludeCandidate(String candidate)
-    {
-        long spaceCount = candidate.chars().filter(Character::isWhitespace).count();
-        if (spaceCount > properties.getExcludeIfSpaces())
-        {
-            LOGGER.debug("Skipping model candidate [{}]: {} spaces (limit={})", candidate, spaceCount,
-                properties.getExcludeIfSpaces());
-            return true;
-        }
-
-        long alnumCount = candidate.chars().filter(Character::isLetterOrDigit).count();
-        if (alnumCount < properties.getMinAlnumLength())
-        {
-            LOGGER.debug("Skipping model candidate [{}]: only {} alphanumeric chars (min={})", candidate, alnumCount,
-                properties.getMinAlnumLength());
-            return true;
-        }
-
-        if (DEGENERATE_MODEL_PATTERN.matcher(candidate).matches())
-        {
-            LOGGER.debug("Skipping model candidate [{}]: matches degenerate pattern", candidate);
-            return true;
-        }
-
-        return false;
     }
 
     private List<EprelProduct> execute(Query query)
