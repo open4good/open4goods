@@ -46,7 +46,12 @@ public class ReviewGenerationConfig {
      * official product pages live on a retailer or group domain.
      */
     private Map<String, List<String>> officialDomainsByBrand = Map.of(
-            "essentiel b", List.of("boulanger.com"));
+            "essentiel b", List.of("boulanger.com"),
+            "electrolux", List.of("electrolux.", "electrolux-ui.com"),
+            "klarstein", List.of("klarstein."),
+            "hotpoint", List.of("hotpoint.", "docs.hotpoint.", "docs.whirlpool.", "digitalassets-cdn.thron.com"),
+            "hotpoint ariston", List.of("hotpoint.", "docs.hotpoint.", "docs.whirlpool.", "digitalassets-cdn.thron.com"),
+            "yolco", List.of("yolco.pl", "yolco.eu"));
 
     // Property used for building search queries.
     private String queryTemplate = "test %s \"%s\"";

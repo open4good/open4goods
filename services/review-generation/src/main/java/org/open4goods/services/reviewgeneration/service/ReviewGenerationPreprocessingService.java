@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -28,6 +29,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import jakarta.annotation.PostConstruct;
+import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductFact;
@@ -35,6 +37,7 @@ import org.open4goods.model.resource.Resource;
 import org.open4goods.model.resource.ResourceType;
 import org.open4goods.model.util.ProductModelCandidateHelper;
 import org.open4goods.model.review.ReviewGenerationStatus;
+import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.googlesearch.dto.GoogleSearchRequest;
 import org.open4goods.services.googlesearch.dto.GoogleSearchResponse;
@@ -95,6 +98,9 @@ public class ReviewGenerationPreprocessingService {
 	}
 
 	private record ModelEvidence(String candidate, int score, List<String> reasons) {
+	}
+
+	private record SearchIdentity(String brand, String primaryModel, Set<String> alternateModels) {
 	}
 
 	private enum FetchResultQuality {
@@ -204,9 +210,10 @@ public class ReviewGenerationPreprocessingService {
 			ReviewGenerationStatus status, Map<String, String> customHeaders)
 			throws IOException, InterruptedException, ExecutionException, ResourceNotFoundException,
 			SerialisationException, NotEnoughDataException, GoogleSearchException {
-		String brand = product.brand();
-		String primaryModel = product.model();
-		Set<String> alternateModels = product.getAkaModels();
+		SearchIdentity identity = resolveSearchIdentity(product);
+		String brand = identity.brand();
+		String primaryModel = identity.primaryModel();
+		Set<String> alternateModels = identity.alternateModels();
 		validateSearchKeys(product, brand, primaryModel);
 		List<String> preferredDomains = effectivePreferredDomains(verticalConfig);
 
@@ -324,7 +331,8 @@ public class ReviewGenerationPreprocessingService {
 		Map<String, String> rejectedUrls = new LinkedHashMap<>();
 
 		accumulatedTokens = collectFetchedSources(product, sortedResults, fetchFutures, finalSourcesMap, finalTokensMap,
-				finalSourceClasses, rejectedUrls, accumulatedTokens, brand, primaryModel, alternateModels, status);
+				finalSourceClasses, rejectedUrls, accumulatedTokens, brand, primaryModel, alternateModels, verticalConfig,
+				status);
 		if (shouldRunLowQualityFallback(verticalConfig, accumulatedTokens, finalSourcesMap, finalSourceClasses)) {
 			accumulatedTokens = runLowQualityFallback(product, brand, primaryModel, preferredDomains, searchedQueries,
 					sortedResults, fetchFutures, finalSourcesMap, finalTokensMap, finalSourceClasses, rejectedUrls,
@@ -398,6 +406,219 @@ public class ReviewGenerationPreprocessingService {
                     + String.join(", ", missing));
         }
     }
+
+	private SearchIdentity resolveSearchIdentity(Product product) {
+		String brand = blankToNull(product.brand());
+		String primaryModel = blankToNull(product.model());
+		Set<String> alternateModels = product.getAkaModels() == null
+				? new java.util.LinkedHashSet<>()
+				: new java.util.LinkedHashSet<>(product.getAkaModels());
+		String evidence = productEvidence(product);
+		String inferredBrand = inferBrandFromEvidence(product, brand, evidence);
+		if (inferredBrand != null && (brand == null || shouldReplaceBrand(brand, inferredBrand))) {
+			brand = inferredBrand;
+			product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, brand);
+			logger.info("Resolved review search brand for UPC {} from offer evidence: {}", product.getId(), brand);
+		}
+		if (primaryModel == null || matchesProductGtin(product, primaryModel)
+				|| looksLikeMerchantTitle(primaryModel)) {
+			List<String> inferredModels = inferModelsFromEvidence(product, brand, evidence);
+			if (!inferredModels.isEmpty()) {
+				primaryModel = inferredModels.stream()
+						.filter(candidate -> !matchesProductGtin(product, candidate))
+						.findFirst()
+						.orElse(inferredModels.getFirst());
+				if (!product.promoteModel(primaryModel) && looksLikeNamedModel(primaryModel)) {
+					product.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, primaryModel);
+				}
+				alternateModels.addAll(inferredModels.stream().skip(1).toList());
+				logger.info("Resolved review search model for UPC {} from offer evidence: {}", product.getId(),
+						primaryModel);
+			}
+		}
+		if (primaryModel != null && !primaryModel.isBlank()) {
+			alternateModels.add(primaryModel);
+		}
+		return new SearchIdentity(brand, primaryModel, alternateModels);
+	}
+
+	private boolean shouldReplaceBrand(String currentBrand, String inferredBrand) {
+		String current = normalizeForUrlMatching(currentBrand);
+		String inferred = normalizeForUrlMatching(inferredBrand);
+		return current.length() <= 2 && inferred.length() > current.length() + 2 && inferred.startsWith(current);
+	}
+
+	private boolean matchesProductGtin(Product product, String value) {
+		if (product == null || value == null || value.isBlank()) {
+			return false;
+		}
+		String normalizedValue = normalizeForUrlMatching(value);
+		String normalizedGtin = normalizeForUrlMatching(product.gtin());
+		String normalizedId = product.getId() == null ? "" : normalizeForUrlMatching(String.valueOf(product.getId()));
+		return !normalizedValue.isBlank()
+				&& (normalizedValue.equals(normalizedGtin) || normalizedValue.equals(normalizedId));
+	}
+
+	private String productEvidence(Product product) {
+		if (product == null) {
+			return "";
+		}
+		List<String> values = new ArrayList<>();
+		if (product.getOfferNames() != null) {
+			values.addAll(product.getOfferNames());
+		}
+		if (product.getNames() != null) {
+			addLocalisableValues(values, product.getNames().getPrettyName());
+			addLocalisableValues(values, product.getNames().getH1Title());
+		}
+		values.add(safeString(product.gtin()));
+		return values.stream().filter(value -> value != null && !value.isBlank())
+				.collect(Collectors.joining("\n"));
+	}
+
+	private void addLocalisableValues(List<String> values, org.open4goods.model.Localisable<String, String> localisable) {
+		if (localisable == null) {
+			return;
+		}
+		values.addAll(localisable.values().stream().filter(value -> value != null && !value.isBlank()).toList());
+	}
+
+	private String inferBrandFromEvidence(Product product, String currentBrand, String evidence) {
+		if (evidence == null || evidence.isBlank()) {
+			return null;
+		}
+		List<String> candidates = new ArrayList<>();
+		if (currentBrand != null && !currentBrand.isBlank()) {
+			String normalizedCurrent = normalizeForUrlMatching(currentBrand);
+			Optional<String> expandedBrand = Arrays.stream(evidence.split("[\\s,;:/|()\\[\\]\"']+"))
+					.map(word -> word.replaceAll("^[^\\p{Alnum}]+|[^\\p{Alnum}]+$", ""))
+					.filter(word -> !word.isBlank())
+					.filter(word -> normalizeForUrlMatching(word).startsWith(normalizedCurrent))
+					.filter(word -> !normalizeForUrlMatching(word).equals(normalizedCurrent))
+					.filter(word -> word.matches("(?i)[A-Z][A-Z0-9_-]{3,}"))
+					.filter(word -> word.chars().filter(Character::isLetter).count() >= 4)
+					.filter(word -> !word.chars().anyMatch(Character::isDigit))
+					.findFirst();
+			if (expandedBrand.isPresent()) {
+				return expandedBrand.get();
+			}
+			Pattern.compile("(?i)\\b(" + Pattern.quote(currentBrand) + "[A-Za-z]{2,})\\b")
+					.matcher(evidence).results().map(match -> match.group(1))
+					.filter(candidate -> normalizeForUrlMatching(candidate).startsWith(normalizedCurrent))
+					.forEach(candidates::add);
+		}
+		for (String line : evidence.split("\\R")) {
+			List<String> words = Arrays.stream(line.split("[\\s,;:/|()\\[\\]\"']+"))
+					.filter(word -> word != null && !word.isBlank())
+					.map(word -> word.replaceAll("^[^\\p{Alnum}]+|[^\\p{Alnum}]+$", ""))
+					.filter(word -> word.length() >= 3 && word.length() <= 32)
+					.filter(word -> !isGenericProductWord(word))
+					.toList();
+			for (int i = 0; i < words.size(); i++) {
+				if (looksLikeModelToken(words.get(i)) && i > 0) {
+					candidates.add(words.get(i - 1));
+					break;
+				}
+			}
+		}
+		return candidates.stream()
+				.collect(Collectors.groupingBy(candidate -> normalizeForTextMatching(candidate), LinkedHashMap::new,
+						Collectors.collectingAndThen(Collectors.toList(), list -> list.getFirst())))
+				.values().stream()
+				.filter(candidate -> !isGenericProductWord(candidate))
+				.filter(candidate -> !isConciseModelCode(candidate))
+				.max(Comparator.comparingInt(String::length))
+				.orElse(null);
+	}
+
+	private List<String> inferModelsFromEvidence(Product product, String brand, String evidence) {
+		if (evidence == null || evidence.isBlank()) {
+			return List.of();
+		}
+		List<String> candidates = new ArrayList<>();
+		if (brand != null && !brand.isBlank()) {
+			Pattern brandPattern = Pattern.compile("(?i)\\b" + Pattern.quote(brand) + "\\b\\s+([^\\n,;|()]+)");
+			brandPattern.matcher(evidence).results()
+					.map(match -> firstModelPhrase(match.group(1)))
+					.filter(candidate -> candidate != null && !candidate.isBlank())
+					.forEach(candidates::add);
+		}
+		for (String value : evidence.split("\\R")) {
+			candidates.addAll(extractModelCodeCandidates(value));
+		}
+		return candidates.stream()
+				.map(this::cleanSearchModelCandidate)
+				.filter(candidate -> candidate != null && !candidate.isBlank())
+				.filter(candidate -> isSearchableModelCandidate(product, null, candidate) || looksLikeNamedModel(candidate))
+				.collect(Collectors.toMap(candidate -> normalizeForTextMatching(candidate), Function.identity(),
+						(left, right) -> left, LinkedHashMap::new))
+				.values().stream()
+				.sorted(Comparator.comparingInt((String candidate) -> modelCandidateScore(product, null, candidate))
+						.reversed().thenComparingInt(String::length))
+				.toList();
+	}
+
+	private String cleanSearchModelCandidate(String candidate) {
+		String cleaned = ProductModelCandidateHelper.cleanForStorage(candidate);
+		if (cleaned != null) {
+			return cleaned;
+		}
+		if (!looksLikeNamedModel(candidate)) {
+			return null;
+		}
+		return candidate.trim()
+				.replace('\u00a0', ' ')
+				.replaceAll("\\s+", " ")
+				.replaceAll("^[\\p{Punct}\\s]+|[\\p{Punct}\\s]+$", "");
+	}
+
+	private String firstModelPhrase(String rawValue) {
+		if (rawValue == null || rawValue.isBlank()) {
+			return null;
+		}
+		List<String> tokens = Arrays.stream(rawValue.trim().split("\\s+"))
+				.map(token -> token.replaceAll("^[^\\p{Alnum}]+|[^\\p{Alnum}]+$", ""))
+				.filter(token -> !token.isBlank())
+				.toList();
+		List<String> selected = new ArrayList<>();
+		for (String token : tokens) {
+			if (selected.isEmpty() && isGenericProductWord(token)) {
+				continue;
+			}
+			if (!selected.isEmpty() && (isGenericProductWord(token) || token.matches("(?i)\\d+\\s?(cm|l|kg|db|w)"))) {
+				break;
+			}
+			selected.add(token);
+			if (looksLikeModelToken(token) || selected.size() >= 2) {
+				break;
+			}
+		}
+		return selected.isEmpty() ? null : String.join(" ", selected);
+	}
+
+	private boolean looksLikeModelToken(String token) {
+		return isConciseModelCode(token) || looksLikeNamedModel(token);
+	}
+
+	private boolean looksLikeNamedModel(String value) {
+		if (value == null || value.isBlank()) {
+			return false;
+		}
+		String trimmed = value.trim();
+		return trimmed.length() >= 4 && trimmed.length() <= 32 && trimmed.matches("(?=.*[A-Za-z])[\\p{Alnum}][\\p{Alnum} ./_-]*")
+				&& !looksLikeMerchantTitle(trimmed) && !isGenericProductWord(trimmed);
+	}
+
+	private boolean isGenericProductWord(String value) {
+		String normalized = normalizeForTextMatching(value);
+		return normalized.isBlank() || Set.of("refrigerateur", "fridge", "glaciere", "dishwasher", "lave vaisselle",
+				"lave", "vaisselle", "seche", "linge", "washing", "machine", "smartphone", "telephone", "mobile",
+				"encastrable", "portable", "compact", "mini", "unknown").contains(normalized);
+	}
+
+	private String blankToNull(String value) {
+		return value == null || value.isBlank() ? null : value.trim();
+	}
 
 	/**
 	 * Checks if fetched content is relevant to a product. A model mention buried in
@@ -614,11 +835,12 @@ public class ReviewGenerationPreprocessingService {
 			Map<String, CompletableFuture<FetchOutcome>> fetchFutures, Map<String, String> finalSourcesMap,
 			Map<String, Integer> finalTokensMap, Map<String, SourceClass> finalSourceClasses,
 			Map<String, String> rejectedUrls, int accumulatedTokens, String brand, String primaryModel,
-			Set<String> alternateModels, ReviewGenerationStatus status)
+			Set<String> alternateModels, VerticalConfig verticalConfig, ReviewGenerationStatus status)
 			throws InterruptedException, ExecutionException {
 		int maxTotalTokens = properties.getMaxTotalTokens();
 		int minTokens = properties.getSourceMinTokens();
 		int maxTokens = properties.getSourceMaxTokens();
+		boolean verticalEvidenceRequired = requiresVerticalEvidence(primaryModel, alternateModels);
 		for (GoogleSearchResult result : sortedResults) {
 			String url = result.link();
 			if (finalSourcesMap.containsKey(url) || rejectedUrls.containsKey(url)) {
@@ -657,6 +879,20 @@ public class ReviewGenerationPreprocessingService {
 			if (sourceClass == SourceClass.SPARE_PART || sourceClass == SourceClass.GENERIC_CATALOG) {
 				rejectedUrls.put(url, "low-quality source class: " + sourceClass.name());
 				logger.warn("Content from URL {} discarded due to low-quality source class {}", url, sourceClass);
+				continue;
+			}
+			if (!isOfficialUrl(product, result) && !hasSpecificProductEvidence(product, result, content,
+					primaryModel, alternateModels)) {
+				rejectedUrls.put(url, "irrelevant: missing specific GTIN or model evidence");
+				logger.warn("Content from URL {} discarded because it lacks specific GTIN/model evidence for UPC {}",
+						url, product.getId());
+				continue;
+			}
+			if (verticalEvidenceRequired && !hasGtinEvidence(product, result, content)
+					&& !hasVerticalEvidence(verticalConfig, result, content)) {
+				rejectedUrls.put(url, "irrelevant: named model family without vertical evidence");
+				logger.warn("Content from URL {} discarded because named model '{}' lacks vertical evidence for UPC {}",
+						url, primaryModel, product.getId());
 				continue;
 			}
 			int tokenCount = genAiService.estimateTokens(content);
@@ -706,6 +942,53 @@ public class ReviewGenerationPreprocessingService {
 			}
 		}
 		return accumulatedTokens;
+	}
+
+	private boolean hasSpecificProductEvidence(Product product, GoogleSearchResult result, String content,
+			String primaryModel, Set<String> alternateModels) {
+		String evidence = normalizeForTextMatching(String.join(" ", safeString(result == null ? null : result.title()),
+				safeString(result == null ? null : result.link()), firstContentZone(content)));
+		String urlEvidence = normalizeForUrlMatching(result == null ? null : result.link());
+		String gtin = product == null ? null : product.gtin();
+		if (gtin != null && gtin.matches("\\d{8,14}")
+				&& (evidence.contains(normalizeForTextMatching(gtin)) || urlEvidence.contains(normalizeForUrlMatching(gtin)))) {
+			return true;
+		}
+		return orderedModels(primaryModel, alternateModels).stream()
+				.filter(model -> model != null && !model.isBlank())
+				.filter(model -> !model.equals(gtin))
+				.anyMatch(model -> modelMatchesZone(model, evidence) || urlEvidence.contains(normalizeForUrlMatching(model)));
+	}
+
+	private boolean requiresVerticalEvidence(String primaryModel, Set<String> alternateModels) {
+		return orderedModels(primaryModel, alternateModels).stream()
+				.filter(model -> model != null && !model.isBlank())
+				.findFirst()
+				.map(model -> looksLikeNamedModel(model) && !isConciseModelCode(model))
+				.orElse(false);
+	}
+
+	private boolean hasGtinEvidence(Product product, GoogleSearchResult result, String content) {
+		String gtin = product == null ? null : product.gtin();
+		if (gtin == null || !gtin.matches("\\d{8,14}")) {
+			return false;
+		}
+		String evidence = normalizeForTextMatching(String.join(" ", safeString(result == null ? null : result.title()),
+				safeString(result == null ? null : result.link()), firstContentZone(content)));
+		String urlEvidence = normalizeForUrlMatching(result == null ? null : result.link());
+		return evidence.contains(normalizeForTextMatching(gtin)) || urlEvidence.contains(normalizeForUrlMatching(gtin));
+	}
+
+	private boolean hasVerticalEvidence(VerticalConfig verticalConfig, GoogleSearchResult result, String content) {
+		List<String> terms = verticalEvidenceTerms(verticalConfig);
+		if (terms.isEmpty()) {
+			return true;
+		}
+		String evidence = normalizeForTextMatching(String.join(" ", safeString(result == null ? null : result.title()),
+				safeString(result == null ? null : result.link()), firstContentZone(content)));
+		String urlEvidence = normalizeForUrlMatching(result == null ? null : result.link());
+		return terms.stream().anyMatch(term -> evidence.contains(normalizeForTextMatching(term))
+				|| urlEvidence.contains(normalizeForUrlMatching(term)));
 	}
 
 	private void persistAcceptedOfficialUrl(Product product, GoogleSearchResult result) {
@@ -806,7 +1089,8 @@ public class ReviewGenerationPreprocessingService {
 				customHeaders);
 		fetchFutures.putAll(fallbackFutures);
 		return collectFetchedSources(product, sortedFallbackResults, fetchFutures, finalSourcesMap, finalTokensMap,
-				finalSourceClasses, rejectedUrls, accumulatedTokens, brand, primaryModel, product.getAkaModels(), status);
+				finalSourceClasses, rejectedUrls, accumulatedTokens, brand, primaryModel, product.getAkaModels(), null,
+				status);
 	}
 
 	private FetchQualityThreshold fetchThreshold(VerticalConfig verticalConfig) {
@@ -904,7 +1188,7 @@ public class ReviewGenerationPreprocessingService {
 		Map<String, CompletableFuture<FetchOutcome>> retryFutures = scheduleFetches(sortedRetryResults, customHeaders);
 		fetchFutures.putAll(retryFutures);
 		return collectFetchedSources(product, sortedRetryResults, fetchFutures, finalSourcesMap, finalTokensMap,
-				finalSourceClasses, rejectedUrls, accumulatedTokens, brand, primaryModel, alternateModels, status);
+				finalSourceClasses, rejectedUrls, accumulatedTokens, brand, primaryModel, alternateModels, null, status);
 	}
 
 	private List<String> buildPartialRetryQueries(Product product, String brand, String primaryModel) {
@@ -930,32 +1214,114 @@ public class ReviewGenerationPreprocessingService {
 					+ ": no usable model candidate");
 		}
 		String modelExpression = modelExpression(brand, searchModels);
-		queries.add(officialDiscoveryQuery(brand, searchModels.getFirst()));
-		queries.add(officialSupportQuery(brand, searchModels.getFirst()));
+		List<String> verticalTerms = requiresVerticalEvidence(searchModels.getFirst(), Set.copyOf(searchModels))
+				? verticalEvidenceTerms(verticalConfig)
+				: List.of();
+		queries.add(withVerticalSearchTerms(officialDiscoveryQuery(brand, searchModels.getFirst()), verticalTerms));
+		queries.add(withVerticalSearchTerms(officialSupportQuery(brand, searchModels.getFirst()), verticalTerms));
+		for (String officialDomain : configuredOfficialDomains(brand)) {
+			queries.add(withVerticalSearchTerms("site:" + officialDomain + " " + brand + " "
+					+ quoted(searchModels.getFirst()), verticalTerms));
+			queries.add(withVerticalSearchTerms("site:" + officialDomain + " " + brand + " "
+					+ quoted(searchModels.getFirst())
+					+ " (manual OR notice OR datasheet OR pdf OR \"fiche produit\")", verticalTerms));
+		}
 		String preferredDomainExpression = domainExpression(preferredDomains);
 		if (!preferredDomainExpression.isBlank()) {
-			queries.add(preferredDomainExpression + " " + modelExpression);
+			queries.add(withVerticalSearchTerms(preferredDomainExpression + " " + modelExpression, verticalTerms));
 		}
 		List<String> userIntentModels = userIntentModels(product, primaryModel, alternateModels).stream()
 				.limit(4)
 				.toList();
 		for (String model : userIntentModels) {
-			queries.add(reviewIntentQuery(brand, model));
-			queries.add(supportIntentQuery(brand, model));
+			queries.add(withVerticalSearchTerms(reviewIntentQuery(brand, model), verticalTerms));
+			queries.add(withVerticalSearchTerms(supportIntentQuery(brand, model), verticalTerms));
 		}
 		List<String> injectSites = verticalConfig == null ? List.of() : verticalConfig.getInjectSitesResults();
 		if (injectSites != null && !injectSites.isEmpty()) {
 			for (String site : injectSites) {
 				if (site != null && !site.isBlank()) {
-					queries.add("site:" + site.trim() + " " + formatQuery(brand, orderedModels.getFirst()));
+					queries.add(withVerticalSearchTerms("site:" + site.trim() + " "
+							+ formatQuery(brand, orderedModels.getFirst()), verticalTerms));
 				}
 			}
 		}
 
 		for (String model : searchModels) {
-			queries.add(formatQuery(brand, model));
+			queries.add(withVerticalSearchTerms(formatQuery(brand, model), verticalTerms));
 		}
 		return queries.stream().distinct().toList();
+	}
+
+	private String withVerticalSearchTerms(String query, List<String> verticalTerms) {
+		if (query == null || query.isBlank() || verticalTerms == null || verticalTerms.isEmpty()) {
+			return query;
+		}
+		String expression = verticalTerms.stream()
+				.limit(6)
+				.map(term -> term.contains(" ") ? quoted(term) : term)
+				.collect(Collectors.joining(" OR "));
+		return expression.isBlank() ? query : query + " (" + expression + ")";
+	}
+
+	private List<String> verticalEvidenceTerms(VerticalConfig verticalConfig) {
+		if (verticalConfig == null) {
+			return List.of();
+		}
+		Set<String> terms = new LinkedHashSet<>();
+		addVerticalEvidenceTerm(terms, verticalConfig.getId());
+		if (verticalConfig.getEprelGroupNames() != null) {
+			verticalConfig.getEprelGroupNames().forEach(term -> addVerticalEvidenceTerm(terms, term));
+		}
+		if (verticalConfig.getI18n() != null) {
+			for (ProductI18nElements i18n : verticalConfig.getI18n().values()) {
+				if (i18n == null) {
+					continue;
+				}
+				addVerticalEvidenceTerm(terms, i18n.getVerticalHomeTitle());
+				addVerticalEvidenceTerm(terms, i18n.getVerticalHomeUrl());
+				if (i18n.getDesignation() != null) {
+					i18n.getDesignation().forEach(term -> addVerticalEvidenceTerm(terms, term));
+				}
+				if (i18n.getSingular() != null) {
+					addVerticalEvidenceTerm(terms, i18n.getSingular().getPrefix());
+				}
+				if (i18n.getPrettyName() != null) {
+					addVerticalEvidenceTerm(terms, i18n.getPrettyName().getPrefix());
+				}
+			}
+		}
+		return terms.stream()
+				.filter(term -> term.length() >= 4)
+				.filter(term -> !Set.of("appliance", "appareil", "machine", "home appliance", "electromenager")
+						.contains(term))
+				.limit(12)
+				.toList();
+	}
+
+	private void addVerticalEvidenceTerm(Set<String> terms, String rawTerm) {
+		if (rawTerm == null || rawTerm.isBlank()) {
+			return;
+		}
+		String cleaned = rawTerm
+				.replace("||", " ")
+				.replace("|", " ")
+				.replaceAll("\\[\\([^)]*\\)\\]", " ")
+				.replaceAll("[^\\p{L}\\p{Nd}]+", " ")
+				.trim()
+				.toLowerCase(Locale.ROOT);
+		if (cleaned.isBlank()) {
+			return;
+		}
+		String[] words = cleaned.split("\\s+");
+		for (String word : words) {
+			if (word.length() >= 4) {
+				terms.add(word);
+			}
+		}
+		if (words.length > 1 && cleaned.length() <= 40) {
+			terms.add(cleaned);
+		}
 	}
 
 	private List<String> userIntentModels(Product product, String primaryModel, Set<String> alternateModels) {
@@ -1096,6 +1462,13 @@ public class ReviewGenerationPreprocessingService {
 		}
 		if (product != null && product.shortestOfferName() != null) {
 			models.addAll(extractModelCodeCandidates(product.shortestOfferName()));
+			models.addAll(inferModelsFromEvidence(product, product.brand(), product.shortestOfferName()));
+		}
+		if (product != null && product.getOfferNames() != null) {
+			for (String offerName : product.getOfferNames()) {
+				models.addAll(extractModelCodeCandidates(offerName));
+				models.addAll(inferModelsFromEvidence(product, product.brand(), offerName));
+			}
 		}
 		return models.stream().filter(model -> model != null && !model.isBlank())
 				.collect(Collectors.toMap(model -> model.trim().toLowerCase(Locale.ROOT), Function.identity(), (left, right) -> left,
@@ -1148,9 +1521,10 @@ public class ReviewGenerationPreprocessingService {
 			return false;
 		}
 		if (normalizedPrimary.isBlank()) {
-			return isConciseModelCode(candidate);
+			return isConciseModelCode(candidate) || looksLikeNamedModel(candidate);
 		}
-		return normalizedPrimary.contains(normalizedCandidate) || normalizedCandidate.contains(normalizedPrimary);
+		return normalizedPrimary.contains(normalizedCandidate) || normalizedCandidate.contains(normalizedPrimary)
+				|| looksLikeNamedModel(candidate);
 	}
 
 	private int modelCandidateScore(Product product, String primaryModel, String candidate) {
@@ -1246,6 +1620,21 @@ public class ReviewGenerationPreprocessingService {
 			return "";
 		}
 		return "(" + String.join(" OR ", sites) + ")";
+	}
+
+	private List<String> configuredOfficialDomains(String brand) {
+		if (brand == null || brand.isBlank() || properties.getOfficialDomainsByBrand() == null) {
+			return List.of();
+		}
+		String normalizedBrand = normalizeForTextMatching(brand);
+		return properties.getOfficialDomainsByBrand().entrySet().stream()
+				.filter(entry -> normalizeForTextMatching(entry.getKey()).equals(normalizedBrand))
+				.flatMap(entry -> entry.getValue() == null ? java.util.stream.Stream.empty() : entry.getValue().stream())
+				.map(domain -> domain == null ? "" : domain.trim())
+				.filter(domain -> !domain.isBlank())
+				.map(domain -> domain.endsWith(".") ? domain.substring(0, domain.length() - 1) : domain)
+				.distinct()
+				.toList();
 	}
 
 	private String formatQuery(String brand, String model) {
@@ -1522,7 +1911,7 @@ public class ReviewGenerationPreprocessingService {
 				continue;
 			}
 			if (toProductResourceType(extractedResource.type()) == ResourceType.PDF
-					&& !isProductRelevantResource(product, extractedResource.url(), extractedResource.label(), true)) {
+					&& !isOfficialPagePdfResourceRelevant(product, extractedResource)) {
 				logger.debug("Skipping unrelated official PDF for UPC {}: url={}, label={}", product.getId(),
 						extractedResource.url(), extractedResource.label());
 				continue;
@@ -1530,6 +1919,27 @@ public class ReviewGenerationPreprocessingService {
 			addOfficialResource(product, extractedResource.url(), toProductResourceType(extractedResource.type()), language,
 					extractedResource.source(), extractedResource.label());
 		}
+	}
+
+	private boolean isOfficialPagePdfResourceRelevant(Product product, ExtractedResource extractedResource) {
+		if (extractedResource == null || extractedResource.url() == null) {
+			return false;
+		}
+		if (isClearlyNonProductDocument(extractedResource.url(), extractedResource.label())) {
+			return false;
+		}
+		if (isProductRelevantResource(product, extractedResource.url(), extractedResource.label(), true)) {
+			return true;
+		}
+		String documentEvidence = normalizeForTextMatching(safeString(extractedResource.url()) + " "
+				+ safeString(extractedResource.label()));
+		return documentEvidence.contains("pdf") || containsAny(documentEvidence, "doc", "document", "download");
+	}
+
+	private boolean isClearlyNonProductDocument(String url, String label) {
+		String evidence = normalizeForTextMatching(safeString(url) + " " + safeString(label));
+		return containsAny(evidence, "privacy", "confidentialite", "cookie", "legal", "terms", "conditions",
+				"digital services act", "dsa", "warranty registration", "catalogue general", "general catalogue");
 	}
 
 	private boolean fetchOfficialEvidence(Product product, List<GoogleSearchResult> results, Map<String, String> customHeaders) {

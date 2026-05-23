@@ -123,6 +123,70 @@ class ReviewGenerationPreprocessingServiceTest {
     }
 
     @Test
+    void preparePromptVariables_InfersBrandAndModelFromOfferNamesWhenReferentialIdentityIsMissing() throws Exception {
+        properties.setMaxSearch(1);
+        properties.setLowQualityFallbackMaxSearch(0);
+        Product product = new Product();
+        product.setId(5902721194172L);
+        product.setVertical("refrigerator");
+        product.setOfferNames(Set.of("Glacière Yolco ET18 CARBON",
+                "UNKNOWN Yolco ET18, Réfrigérateur portable à compresseur, Black (ET18 CARBON)"));
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse());
+
+        assertThatThrownBy(() -> service.preparePromptVariables(product, verticalConfig(), new ReviewGenerationStatus()))
+                .isInstanceOf(NotEnoughDataException.class);
+
+        ArgumentCaptor<GoogleSearchRequest> requestCaptor = ArgumentCaptor.forClass(GoogleSearchRequest.class);
+        org.mockito.Mockito.verify(googleSearchService).search(requestCaptor.capture());
+        assertThat(requestCaptor.getValue().query())
+                .isEqualTo("Yolco \"ET18\" (official OR officiel OR product OR produit)");
+        assertThat(product.brand()).isEqualTo("Yolco");
+        assertThat(product.model()).isEqualTo("ET18");
+    }
+
+    @Test
+    void preparePromptVariables_ReplacesShortFalseBrandWithLongBrandFromOfferEvidence() throws Exception {
+        properties.setMaxSearch(1);
+        properties.setLowQualityFallbackMaxSearch(0);
+        Product product = product("GE", "7141223797872");
+        product.setId(7141223797872L);
+        product.setOfferNames(Set.of(
+                "Réfrigérateur congélateur haut GEDTECH GE217DP 217L Blanc - 2 portes - Froid statique"));
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse());
+
+        assertThatThrownBy(() -> service.preparePromptVariables(product, verticalConfig(), new ReviewGenerationStatus()))
+                .isInstanceOf(NotEnoughDataException.class);
+
+        ArgumentCaptor<GoogleSearchRequest> requestCaptor = ArgumentCaptor.forClass(GoogleSearchRequest.class);
+        org.mockito.Mockito.verify(googleSearchService).search(requestCaptor.capture());
+        assertThat(requestCaptor.getValue().query())
+                .isEqualTo("GEDTECH \"GE217DP\" (official OR officiel OR product OR produit)");
+        assertThat(product.brand()).isEqualTo("GEDTECH");
+        assertThat(product.model()).isEqualTo("GE217DP");
+    }
+
+    @Test
+    void preparePromptVariables_SearchesOfficialBrandDomainForNamedModelFromOfferTitle() throws Exception {
+        properties.setMaxSearch(4);
+        properties.setLowQualityFallbackMaxSearch(0);
+        Product product = product("Klarstein", "4060656565403");
+        product.setId(4060656565403L);
+        product.setOfferNames(Set.of("Klarstein Velaire Lave Vaisselle 45cm Pose Libre - 10 Couverts"));
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse());
+
+        assertThatThrownBy(() -> service.preparePromptVariables(product, verticalConfig(), new ReviewGenerationStatus()))
+                .isInstanceOf(NotEnoughDataException.class);
+
+        ArgumentCaptor<GoogleSearchRequest> requestCaptor = ArgumentCaptor.forClass(GoogleSearchRequest.class);
+        org.mockito.Mockito.verify(googleSearchService, org.mockito.Mockito.times(4)).search(requestCaptor.capture());
+        assertThat(requestCaptor.getAllValues()).extracting(GoogleSearchRequest::query)
+                .contains(
+                        "Klarstein \"Velaire\" (official OR officiel OR product OR produit)",
+                        "site:klarstein Klarstein \"Velaire\"");
+        assertThat(product.model()).isEqualTo("Velaire");
+    }
+
+    @Test
     void preparePromptVariables_IdentifiesAndPrioritizesManufacturerOfficialUrl() throws Exception {
         properties.setPreferredDomains(List.of("darty.com"));
         properties.setMinMarkdownChars(20);
@@ -258,6 +322,39 @@ class ReviewGenerationPreprocessingServiceTest {
             assertThat(resource.getResourceType()).isEqualTo(org.open4goods.model.resource.ResourceType.PDF);
             assertThat(resource.getDatasourceName()).isEqualTo("manufacturer");
             assertThat(resource.getTags()).contains("official", "official:fr");
+        });
+    }
+
+    @Test
+    void preparePromptVariables_PersistsOpaquePdfResourcesFromOfficialProductPages() throws Exception {
+        properties.setMinMarkdownChars(20);
+        properties.setSourceMinTokens(1);
+        properties.setMinGlobalTokens(1);
+        properties.setMinUrlCount(1);
+        properties.setMaxUrlsPerProduct(1);
+        Product product = product("Hotpoint", "HIO3O41WFE");
+        String officialUrl = "https://www.hotpoint.fr/h/lave-vaisselle/hio3o41wfe";
+        String pdfUrl = "https://digitalassets-cdn.thron.com/api/v1/content-delivery/shares/xoxl70/contents/do-1041247f-504c-4069-879c-c52b2a84ad6b/pdf/doc.pdf";
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse(List.of(
+                new GoogleSearchResult("Hotpoint HIO3O41WFE official product page", officialUrl))));
+        when(promptService.estimateTokens(any(String.class))).thenReturn(300);
+        when(urlFetchingService.fetchUrlAsync(any(String.class), any(Map.class))).thenAnswer(invocation ->
+        {
+            String markdown = "Hotpoint HIO3O41WFE official dishwasher content with programs, capacity and energy details.";
+            return CompletableFuture.completedFuture(new FetchResponse(officialUrl, 200, markdown, markdown,
+                    FetchStrategy.HTTP, List.of(), Set.of(), List.of(new org.open4goods.services.urlfetching.dto.ExtractedResource(
+                            pdfUrl, org.open4goods.services.urlfetching.dto.ResourceType.PDF, "link", "Download document")),
+                    false, null));
+        });
+
+        service.preparePromptVariables(product, verticalConfig(), new ReviewGenerationStatus());
+
+        assertThat(product.getResources()).anySatisfy(resource ->
+        {
+            assertThat(resource.getUrl()).isEqualTo(pdfUrl);
+            assertThat(resource.getResourceType()).isEqualTo(org.open4goods.model.resource.ResourceType.PDF);
+            assertThat(resource.getDatasourceName()).isEqualTo("manufacturer");
+            assertThat(resource.getTags()).contains("official");
         });
     }
 
