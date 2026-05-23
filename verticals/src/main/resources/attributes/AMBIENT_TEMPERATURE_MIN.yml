@@ -1,3 +1,14 @@
+# ============================================================================
+# AMBIENT_TEMPERATURE_MIN — Minimum ambient temperature (Température ambiante minimale)
+# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 000)
+# Used in verticals: refrigerator
+# Type: NUMERIC
+# Coverage snapshot: insufficient data from prod API
+# Taxonomy coverage: icecat ✅  eprel ❌  etim ❌  wikidata ❌
+# Purpose: Minimum ambient temperature at which the appliance is rated to
+#          operate correctly; used to filter by climate suitability.
+# ============================================================================
+
 key: "AMBIENT_TEMPERATURE_MIN"
 faIcon: "mdi-thermometer-low"
 name:
@@ -8,6 +19,12 @@ suffix:
   fr: "°C"
 filteringType: "NUMERIC"
 asScore: false
+
+referentials:
+  icecat:
+    - featureId: 19610
+      name: "Ambient temperature (min)"
+
 synonyms:
   all:
     - "MINAMBIENTTEMP"
@@ -23,4 +40,3 @@ parser:
   deleteTokens:
     - "°C"
     - "C"
-

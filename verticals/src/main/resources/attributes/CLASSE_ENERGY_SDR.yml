@@ -1,18 +1,33 @@
-################################################################################
-#                         CLASSE ELECTRIQUE SDR
-################################################################################
+# ============================================================================
+# CLASSE_ENERGY_SDR — Energy class SDR (Classe énergétique SDR)
+# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 000)
+# Used in verticals: tv
+# Type: TEXT
+# Coverage snapshot: insufficient data from prod API
+# Taxonomy coverage: icecat ✅  eprel ✅  etim ❌  wikidata ❌
+# Purpose: EU energy label class for televisions in SDR mode (EU 2019/2021);
+#          SDR is the primary viewing mode and the main energy-efficiency signal.
+# ============================================================================
+
 key: "CLASSE_ENERGY_SDR"
 userBetterIs: "GREATER"
 impactBetterIs: "GREATER"
-referentials:
-  eprel:
-    - featureName: "energyClassSDR"
 faIcon: "mdi-flash"
 name:
   default: "Energy class SDR"
   fr: "Classe énergétique (SDR)"
 filteringType: "TEXT"
 asScore: true
+
+referentials:
+  icecat:
+    - featureId: 42856
+      name: "Energy efficiency class (SDR)"
+  eprel:
+    - featureName: "energyClassSDR"
+      productGroup: "televisions"
+      name: "Energy class (SDR)"
+
 scoring:
   scale:
     min: 0.0
@@ -26,20 +41,25 @@ scoring:
   degenerateDistributionPolicy: "FALLBACK"
 scoreTitle:
   fr: "Classe énergétique (SDR)"
+  en: "Energy class (SDR)"
 scoreDescription:
   fr: "La classe énergétique du téléviseur en mode SDR"
+  en: "Television energy class in SDR mode"
 scoreUtility:
-  fr: "Résume l’efficacité énergétique en mode SDR, le plus utilisé, pour comparer les modèles et limiter la consommation sur la durée."
+  fr: "Résume l'efficacité énergétique en mode SDR, le plus utilisé, pour comparer les modèles et limiter la consommation sur la durée."
   en: "Summarises SDR energy efficiency, the most common mode, to compare models quickly and reduce lifetime electricity use."
 participateInScores:
   - ENERGY_CONSUMPTION
 participateInACV:
   - USE
+
 attributeValuesOrdering: "MAPPED"
 synonyms:
   all:
     - "ENERGYCLASSSDR"
     - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE (SDR)"
+  eprel:
+    - "ENERGYCLASSSDR"
 parser:
   normalize: true
   trim: true

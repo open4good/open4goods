@@ -7,6 +7,10 @@ import java.util.List;
 
 import org.open4goods.api.dto.AttributeSuggestionDto;
 import org.open4goods.api.dto.CategorySuggestionsDto;
+import org.open4goods.api.dto.DatasourceCoverageDto;
+import org.open4goods.api.dto.LeakageWarningDto;
+import org.open4goods.api.dto.SignificantCategoryDto;
+import org.open4goods.api.dto.UnmappedCategoryDto;
 import org.open4goods.api.model.VerticalAttributesStats;
 import org.open4goods.api.services.VerticalsGenerationService;
 import org.open4goods.model.RolesConstants;
@@ -18,6 +22,7 @@ import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +30,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -129,6 +135,53 @@ public class VerticalsGenerationController {
             throw new ResourceNotFoundException("Vertical not found: " + vertical);
         }
         return verticalsGenService.suggestCategories(vc, minOffersCount);
+    }
+
+    @GetMapping(path = "/{vertical}/datasources/stats/coverage")
+    @Operation(summary = "Per-datasource category coverage for a vertical")
+    public List<DatasourceCoverageDto> datasourceCoverage(@PathVariable String vertical,
+            @RequestParam(defaultValue = "50") int minVolume) {
+        VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
+        if (vc == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Vertical not found: " + vertical);
+        }
+        return verticalsGenService.datasourceCoverage(vc, minVolume);
+    }
+
+    @GetMapping(path = "/{vertical}/datasources/stats/unmapped")
+    @Operation(summary = "Unmapped datasourceCategories strings observed in a vertical")
+    public List<UnmappedCategoryDto> unmappedCategories(@PathVariable String vertical,
+            @RequestParam(defaultValue = "50") int minVolume,
+            @RequestParam(defaultValue = "200") int limit) {
+        VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
+        if (vc == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Vertical not found: " + vertical);
+        }
+        return verticalsGenService.unmappedCategories(vc, minVolume, limit);
+    }
+
+    @GetMapping(path = "/{vertical}/datasources/stats/leakage")
+    @Operation(summary = "Cross-vertical datasourceCategories leakage warnings")
+    public List<LeakageWarningDto> categoryLeakage(@PathVariable String vertical,
+            @RequestParam(defaultValue = "50") int minVolume,
+            @RequestParam(defaultValue = "0.2") double leakageThreshold) {
+        VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
+        if (vc == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Vertical not found: " + vertical);
+        }
+        return verticalsGenService.categoryLeakage(vertical, minVolume, leakageThreshold);
+    }
+
+    @GetMapping(path = "/{vertical}/datasources/stats/significant")
+    @Operation(summary = "Significant datasourceCategories values for a vertical")
+    public List<SignificantCategoryDto> significantCategories(@PathVariable String vertical,
+            @RequestParam(defaultValue = "50") int minVolume,
+            @RequestParam(defaultValue = "50") int limit) {
+        VerticalConfig vc = verticalsConfigService.getConfigById(vertical);
+        if (vc == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Vertical not found: " + vertical);
+        }
+        return verticalsGenService.significantCategories(vertical, minVolume, limit);
     }
 
     @GetMapping(path = "/verticals/{vertical}/suggestions/attributes")

@@ -29,6 +29,10 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.open4goods.api.config.yml.VerticalsGenerationConfig;
 import org.open4goods.api.dto.AttributeSuggestionDto;
 import org.open4goods.api.dto.CategorySuggestionsDto;
+import org.open4goods.api.dto.DatasourceCoverageDto;
+import org.open4goods.api.dto.LeakageWarningDto;
+import org.open4goods.api.dto.SignificantCategoryDto;
+import org.open4goods.api.dto.UnmappedCategoryDto;
 import org.open4goods.api.model.AttributesStats;
 import org.open4goods.api.model.VerticalAttributesStats;
 import org.open4goods.api.model.VerticalCategoryMapping;
@@ -55,6 +59,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
+import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
+
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
+import co.elastic.clients.elasticsearch._types.aggregations.SignificantStringTermsBucket;
+import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 
 public class VerticalsGenerationService {
 
@@ -372,6 +385,153 @@ public class VerticalsGenerationService {
         Map<String, List<String>> byDatasource = new LinkedHashMap<>();
         raw.forEach((ds, cats) -> byDatasource.put(ds, new ArrayList<>(cats)));
         return new CategorySuggestionsDto(vc.getId(), items.size(), byDatasource);
+    }
+
+    /**
+     * Returns observed datasourceCategories coverage for a vertical, grouped by
+     * datasource when the datasource can be inferred from the current mapping.
+     *
+     * @param vc vertical configuration
+     * @param minVolume minimum category document count to include
+     * @return coverage rows sorted by product volume
+     */
+    public List<DatasourceCoverageDto> datasourceCoverage(VerticalConfig vc, int minVolume) {
+        Set<String> mappedCategories = mappedCategories(vc);
+        Map<String, String> categoryToDatasource = categoryToDatasource(vc);
+        Map<String, CoverageAccumulator> byDatasource = new LinkedHashMap<>();
+
+        for (StringTermsBucket bucket : categoryBuckets(vc.getId(), minVolume, 200)) {
+            String category = bucket.key().stringValue();
+            String datasource = categoryToDatasource.getOrDefault(category, "unknown");
+            CoverageAccumulator accumulator = byDatasource.computeIfAbsent(datasource, k -> new CoverageAccumulator());
+            accumulator.products += bucket.docCount();
+            if (!mappedCategories.contains(category)) {
+                accumulator.unmappedCategoriesCount++;
+                if (accumulator.sampleUnmapped.size() < 5) {
+                    accumulator.sampleUnmapped.add(category);
+                }
+            }
+        }
+
+        return byDatasource.entrySet().stream()
+                .map(e -> new DatasourceCoverageDto(
+                        e.getKey(),
+                        e.getValue().products,
+                        vc.getMatchingCategories().getOrDefault(e.getKey(), Set.of()).size(),
+                        e.getValue().unmappedCategoriesCount,
+                        e.getValue().sampleUnmapped))
+                .sorted((a, b) -> Long.compare(b.products(), a.products()))
+                .toList();
+    }
+
+    /**
+     * Returns observed category strings for the vertical that are missing from
+     * {@code matchingCategories}.
+     *
+     * @param vc vertical configuration
+     * @param minVolume minimum category document count
+     * @param limit maximum number of rows
+     * @return unmapped categories sorted by volume
+     */
+    public List<UnmappedCategoryDto> unmappedCategories(VerticalConfig vc, int minVolume, int limit) {
+        Set<String> mappedCategories = mappedCategories(vc);
+        return categoryBuckets(vc.getId(), minVolume, limit).stream()
+                .filter(bucket -> !mappedCategories.contains(bucket.key().stringValue()))
+                .map(bucket -> new UnmappedCategoryDto(null, bucket.key().stringValue(), bucket.docCount()))
+                .toList();
+    }
+
+    /**
+     * Returns cross-vertical category leakage rows where the requested vertical is
+     * one of the top two verticals for a category.
+     *
+     * @param vertical vertical identifier
+     * @param minVolume minimum category document count
+     * @param leakageThreshold runner-up share threshold used to flag a row
+     * @return leakage warnings sorted by category volume
+     */
+    public List<LeakageWarningDto> categoryLeakage(String vertical, int minVolume, double leakageThreshold) {
+        NativeQueryBuilder queryBuilder = new NativeQueryBuilder()
+                .withQuery(q -> q.exists(e -> e.field("vertical")))
+                .withMaxResults(0)
+                .withSourceFilter(new FetchSourceFilter(false, null, null))
+                .withAggregation("cats", Aggregation.of(a -> a
+                        .terms(t -> t.field("datasourceCategories").size(2000).minDocCount(minVolume))
+                        .aggregations("verts", Aggregation.of(va -> va
+                                .terms(t -> t.field("vertical").size(10))))));
+
+        Aggregate aggregate = aggregation(queryBuilder.build(), "cats");
+        if (aggregate == null || !aggregate.isSterms()) {
+            return List.of();
+        }
+
+        List<LeakageWarningDto> warnings = new ArrayList<>();
+        for (StringTermsBucket categoryBucket : aggregate.sterms().buckets().array()) {
+            Aggregate verticalAggregate = categoryBucket.aggregations().get("verts");
+            if (verticalAggregate == null || !verticalAggregate.isSterms()) {
+                continue;
+            }
+            List<StringTermsBucket> verticalBuckets = verticalAggregate.sterms().buckets().array();
+            if (verticalBuckets.isEmpty()) {
+                continue;
+            }
+            long total = categoryBucket.docCount();
+            StringTermsBucket top = verticalBuckets.get(0);
+            StringTermsBucket second = verticalBuckets.size() > 1 ? verticalBuckets.get(1) : null;
+            String topVertical = top.key().stringValue();
+            String secondVertical = second == null ? null : second.key().stringValue();
+            if (!vertical.equals(topVertical) && !vertical.equals(secondVertical)) {
+                continue;
+            }
+            double topShare = share(top.docCount(), total);
+            double secondShare = second == null ? 0.0 : share(second.docCount(), total);
+            warnings.add(new LeakageWarningDto(
+                    categoryBucket.key().stringValue(),
+                    total,
+                    topVertical,
+                    topShare,
+                    secondVertical,
+                    secondShare,
+                    secondShare >= leakageThreshold));
+        }
+        return warnings;
+    }
+
+    /**
+     * Returns significant datasourceCategories values for a vertical versus
+     * unattached products.
+     *
+     * @param vertical vertical identifier
+     * @param minVolume minimum foreground document count
+     * @param limit maximum number of rows
+     * @return significant category rows
+     */
+    public List<SignificantCategoryDto> significantCategories(String vertical, int minVolume, int limit) {
+        NativeQueryBuilder queryBuilder = new NativeQueryBuilder()
+                .withQuery(q -> q.term(t -> t.field("vertical").value(vertical)))
+                .withMaxResults(0)
+                .withSourceFilter(new FetchSourceFilter(false, null, null))
+                .withAggregation("sig", Aggregation.of(a -> a.significantTerms(t -> t
+                        .field("datasourceCategories")
+                        .size(limit)
+                        .minDocCount((long) minVolume)
+                        .backgroundFilter(q -> q.bool(b -> b
+                                .mustNot(m -> m.exists(e -> e.field("vertical"))))))));
+
+        Aggregate aggregate = aggregation(queryBuilder.build(), "sig");
+        if (aggregate == null || !aggregate.isSigsterms()) {
+            return List.of();
+        }
+
+        List<SignificantCategoryDto> result = new ArrayList<>();
+        for (SignificantStringTermsBucket bucket : aggregate.sigsterms().buckets().array()) {
+            result.add(new SignificantCategoryDto(
+                    bucket.key(),
+                    bucket.score(),
+                    bucket.docCount(),
+                    bucket.bgCount()));
+        }
+        return result;
     }
 
     /**
@@ -876,6 +1036,62 @@ public class VerticalsGenerationService {
         }
         double pct = (count * 100.0) / total;
         return String.format(Locale.ROOT, "%d / %d (%.1f%%)", count, total, pct);
+    }
+
+    private List<StringTermsBucket> categoryBuckets(String vertical, int minVolume, int limit) {
+        NativeQueryBuilder queryBuilder = new NativeQueryBuilder()
+                .withQuery(q -> q.term(t -> t.field("vertical").value(vertical)))
+                .withMaxResults(0)
+                .withSourceFilter(new FetchSourceFilter(false, null, null))
+                .withAggregation("cats", Aggregation.of(a -> a.terms(t -> t
+                        .field("datasourceCategories")
+                        .size(limit)
+                        .minDocCount(minVolume))));
+
+        Aggregate aggregate = aggregation(queryBuilder.build(), "cats");
+        if (aggregate == null || !aggregate.isSterms()) {
+            return List.of();
+        }
+        return aggregate.sterms().buckets().array();
+    }
+
+    private Aggregate aggregation(org.springframework.data.elasticsearch.client.elc.NativeQuery query, String name) {
+        SearchHits<Product> results = repository.getElasticsearchOperations()
+                .search(query, Product.class, ProductRepository.CURRENT_INDEX);
+        if (results.getAggregations() == null) {
+            return null;
+        }
+        ElasticsearchAggregations aggregations = (ElasticsearchAggregations) results.getAggregations();
+        if (aggregations.get(name) == null) {
+            return null;
+        }
+        return aggregations.get(name).aggregation().getAggregate();
+    }
+
+    private Map<String, String> categoryToDatasource(VerticalConfig vc) {
+        Map<String, String> result = new HashMap<>();
+        vc.getMatchingCategories().forEach((datasource, categories) ->
+                categories.forEach(category -> result.put(category, datasource)));
+        return result;
+    }
+
+    private Set<String> mappedCategories(VerticalConfig vc) {
+        Set<String> result = new HashSet<>();
+        vc.getMatchingCategories().values().forEach(result::addAll);
+        return result;
+    }
+
+    private double share(long count, long total) {
+        if (total == 0) {
+            return 0.0;
+        }
+        return count / (double) total;
+    }
+
+    private static class CoverageAccumulator {
+        private long products;
+        private int unmappedCategoriesCount;
+        private final List<String> sampleUnmapped = new ArrayList<>();
     }
 
     // -----------------------------------------------------------------------

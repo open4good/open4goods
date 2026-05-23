@@ -1,11 +1,22 @@
+# ============================================================================
+# BRAND_SUSTAINALYTICS_SCORING — Brand ESG rating (Évaluation ESG de la marque)
+# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 000)
+# Used in verticals: _default, oven, air-conditioner, smartphones, washing-machine
+# Type: NUMERIC
+# Coverage snapshot: internal computed attribute; not matched from external feeds
+# Taxonomy coverage: icecat ❌  eprel ❌  etim ❌  wikidata ❌
+# Purpose: Synthetic ESG score (0–100, Sustainalytics) aggregated at brand level;
+#          reflects governance and sustainability practices impacting manufacturing.
+# ============================================================================
+
 key: "BRAND_SUSTAINALYTICS_SCORING"
 userBetterIs: "GREATER"
 impactBetterIs: "GREATER"
 faIcon: "mdi-web"
-#    attributePath: attributes.features
 name:
-  default: "Evaluation ESG (Sustainalytics) de la marque"
+  default: "Brand ESG rating (Sustainalytics)"
   fr: "Evaluation ESG de la marque (Sustainalytics)"
+filteringType: "NUMERIC"
 asScore: true
 scoring:
   scale:
@@ -15,8 +26,28 @@ scoring:
     method: "MINMAX_OBSERVED"
   missingValuePolicy: "NEUTRAL"
   degenerateDistributionPolicy: "FALLBACK"
+scoreTitle:
+  fr: "Notation ESG de la marque"
+  en: "Brand ESG rating"
+scoreDescription:
+  fr: "Notation ESG Sustainalytics de la marque"
+  en: "Brand Sustainalytics ESG score"
 scoreUtility:
-  fr: "Reflète les engagements globaux de la marque qui influencent l’empreinte de ses produits."
+  fr: "Reflète les engagements globaux de la marque qui influencent l'empreinte de ses produits."
   en: "Reflects brand-wide commitments that influence the footprint of its products."
 participateInScores:
   - ESG
+participateInACV:
+  - MANUFACTURING
+
+synonyms:
+  all:
+    - "SUSTAINALYTICS"
+    - "ESG_SCORE"
+    - "BRAND_ESG"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

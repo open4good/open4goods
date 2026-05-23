@@ -1,18 +1,32 @@
-##################################
-# AUTO_BRIGHTNESS_CONTROL_AVAILABLE
-##################################
+# ============================================================================
+# AUTO_BRIGHTNESS_CONTROL_AVAILABLE — Automatic brightness control (Contrôle automatique de la luminosité)
+# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 000)
+# Used in verticals: tv
+# Type: TEXT
+# Coverage snapshot: insufficient data from prod API
+# Taxonomy coverage: icecat ❌  eprel ✅  etim ❌  wikidata ❌
+# Purpose: Indicates whether the television automatically adjusts screen
+#          brightness based on ambient light (EPREL EU 2019/2021 data field).
+# ============================================================================
+
 key: "AUTO_BRIGHTNESS_CONTROL_AVAILABLE"
-referentials:
-  eprel:
-    - featureName: "autoBrightnessControlAvailable"
 faIcon: "mdi-brightness-auto"
 name:
   default: "Automatic brightness control"
   fr: "Contrôle automatique de la luminosité"
 filteringType: "TEXT"
 asScore: false
+
+referentials:
+  eprel:
+    - featureName: "autoBrightnessControlAvailable"
+      productGroup: "televisions"
+      name: "Auto brightness control available"
+
 synonyms:
   all:
+    - "AUTOBRIGHTNESSCONTROLAVAILABLE"
+  eprel:
     - "AUTOBRIGHTNESSCONTROLAVAILABLE"
 parser:
   normalize: true

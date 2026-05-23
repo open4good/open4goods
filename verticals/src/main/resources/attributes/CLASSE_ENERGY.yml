@@ -1,7 +1,25 @@
+# ============================================================================
+# CLASSE_ENERGY — Energy class (Classe énergétique)
+# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 000)
+# Used in verticals: dishwasher, oven, _default, air-conditioner, washing-machine,
+#                    smartphones, refrigerator, tv
+# Type: TEXT
+# Coverage snapshot: insufficient data from prod API
+# Taxonomy coverage: icecat ✅  eprel ✅  etim ❌  wikidata ❌
+# Purpose: EU energy label class (A–G scale) shared across all appliance verticals;
+#          primary signal for energy efficiency during daily use phase.
+# ============================================================================
+
 key: "CLASSE_ENERGY"
 userBetterIs: "GREATER"
 impactBetterIs: "GREATER"
 faIcon: "mdi-flash"
+name:
+  default: "Energy class"
+  fr: "Classe énergétique"
+filteringType: "TEXT"
+asScore: true
+
 referentials:
   icecat:
     - featureId: 2705
@@ -9,12 +27,23 @@ referentials:
   eprel:
     - featureName: "cavities[0].energyClass"
       productGroup: "ovens"
-      name: "Energy efficiency class"
-name:
-  default: "Energy class"
-  fr: "Classe énergétique"
-filteringType: "TEXT"
-asScore: true
+      name: "Energy efficiency class (oven cavity)"
+    - featureName: "energyClass"
+      productGroup: "dishwashers"
+      name: "Energy class"
+    - featureName: "energyClass"
+      productGroup: "washing-machines"
+      name: "Energy class"
+    - featureName: "energyClass"
+      productGroup: "washer-dryers"
+      name: "Energy class"
+    - featureName: "energyClass"
+      productGroup: "refrigerators"
+      name: "Energy class"
+    - featureName: "energyClass"
+      productGroup: "televisions"
+      name: "Energy class"
+
 scoring:
   scale:
     min: 0.0
@@ -28,10 +57,12 @@ scoring:
   degenerateDistributionPolicy: "FALLBACK"
 scoreTitle:
   fr: "Classe énergétique"
+  en: "Energy class"
 scoreDescription:
   fr: "La classe énergétique"
+  en: "Energy efficiency class"
 scoreUtility:
-  fr: "Offre un repère immédiat sur l’efficacité globale de l’appareil pendant son utilisation quotidienne."
+  fr: "Offre un repère immédiat sur l'efficacité globale de l'appareil pendant son utilisation quotidienne."
   en: "Provides a quick signal of overall energy efficiency during daily use."
 participateInScores:
   - ENERGY_CONSUMPTION

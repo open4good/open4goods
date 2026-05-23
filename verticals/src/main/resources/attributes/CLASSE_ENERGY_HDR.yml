@@ -1,18 +1,30 @@
-################################################################################
-#                         CLASSE ELECTRIQUE HDR
-################################################################################
+# ============================================================================
+# CLASSE_ENERGY_HDR — Energy class HDR (Classe énergétique HDR)
+# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 000)
+# Used in verticals: tv
+# Type: TEXT
+# Coverage snapshot: insufficient data from prod API
+# Taxonomy coverage: icecat ❌  eprel ✅  etim ❌  wikidata ❌
+# Purpose: EU energy label class for televisions in HDR mode (EU 2019/2021);
+#          HDR mode is more power-intensive than SDR and affects usage impact.
+# ============================================================================
+
 key: "CLASSE_ENERGY_HDR"
 userBetterIs: "GREATER"
 impactBetterIs: "GREATER"
-referentials:
-  eprel:
-    - featureName: "energyClassHDR"
 faIcon: "mdi-flash"
 name:
   default: "Energy class HDR"
   fr: "Classe énergétique (HDR)"
 filteringType: "TEXT"
 asScore: true
+
+referentials:
+  eprel:
+    - featureName: "energyClassHDR"
+      productGroup: "televisions"
+      name: "Energy class (HDR)"
+
 scoring:
   scale:
     min: 0.0
@@ -26,20 +38,25 @@ scoring:
   degenerateDistributionPolicy: "FALLBACK"
 scoreTitle:
   fr: "Classe énergétique (HDR)"
+  en: "Energy class (HDR)"
 scoreDescription:
   fr: "La classe énergétique du téléviseur en mode HDR"
+  en: "Television energy class in HDR mode"
 scoreUtility:
-  fr: "Met en avant la performance énergétique en HDR, un mode énergivore qui pèse sur l’empreinte d’usage des téléviseurs modernes."
+  fr: "Met en avant la performance énergétique en HDR, un mode énergivore qui pèse sur l'empreinte d'usage des téléviseurs modernes."
   en: "Shows energy efficiency in HDR mode, which can meaningfully raise usage impact."
 participateInScores:
   - ENERGY_CONSUMPTION
 participateInACV:
   - USE
+
 attributeValuesOrdering: "MAPPED"
 synonyms:
   all:
     - "ENERGYCLASSHDR"
     - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE (HDR)"
+  eprel:
+    - "ENERGYCLASSHDR"
 parser:
   normalize: true
   trim: true

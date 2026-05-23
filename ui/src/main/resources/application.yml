@@ -1,35 +1,49 @@
+####################################################################
+# open4goods -- UI module -- Default configuration
+#
+# All keys here are shared across every environment (dev, beta, prod).
+# Secrets and per-environment overrides live in the profile-specific
+# files (application-devsec.yml, configs/*/ui/application-active.yml).
+####################################################################
+
+###############################################
+# Server
+###############################################
 server:
+  # Enable HTTP response compression for common MIME types.
   compression:
     enabled: true
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
     min-response-size: 1024
-
+  # Enable HTTP/2 support.
   http2:
     enabled: true
-  forward-headers-strategy: NATIVE  
+  # Trust X-Forwarded-* headers sent by the upstream reverse-proxy.
+  forward-headers-strategy: NATIVE
 
+###############################################
+# Spring Boot Actuator
+###############################################
 management:
   health:
     diskspace:
+      # Alert threshold for the disk-space health indicator.
       threshold: 100GB
   endpoints:
     web:
       exposure:
-        include:
-          - "*"
+        # Expose all actuator endpoints (restrict in prod via firewall).
+        include: "*"
   endpoint:
     health:
       enabled: true
       show-details: always
 
-amazonConfig:
-  affiliate-tag: nudger-21
-  amazon-search-link: "https://www.amazon.fr/s?k={search_terms}&tag={affiliate_tag}"
-
-  
-
-  
+###############################################
+# Spring Framework
+###############################################
 spring:
+  # Spring AI — OpenAI backend used for text generation.
   ai:
     openai:
       chat:
@@ -38,289 +52,304 @@ spring:
           temperature: 1.0
           response-format:
             type: JSON_OBJECT
+
+  # Use virtual threads (Java 21 Loom) for all blocking work.
   threads:
     virtual:
       enabled: true
 
-      
-      
+  # Spring Mail defaults — host/credentials are set per environment.
   mail:
-#   host: 
     port: 587
-#    username: 
-#    password: 
     properties:
-        mail.smtp.auth: true
-        mail.smtp.starttls.enable: true        
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+  # i18n message bundles.
   messages:
     basename: i18n/messages
+
+  # Application name (shown in Spring Boot Admin).
   application:
     name: open4goods-ui
+
+  # Thymeleaf — caching is disabled by default (dev); enabled in prod.
   thymeleaf:
-      cache: true
+    cache: true
+
+  # Enable Spring Data Elasticsearch repositories.
   data:
     elasticsearch:
       repositories:
         enabled: true
 
-allowedImagesSizeSuffixes:
+###############################################
+# Amazon affiliate links
+# Bound to: UiConfig.amazonConfig (AmazonConfig)
+###############################################
+amazon-config:
+  # Affiliate tag appended to every Amazon URL.
+  affiliate-tag: nudger-21
+  # Template for Amazon product search URLs ({search_terms} and {affiliate_tag} are replaced).
+  amazon-search-link: "https://www.amazon.fr/s?k={search_terms}&tag={affiliate_tag}"
+
+###############################################
+# Image resizing (ImageResizeInterceptor)
+# Bound to: UiConfig.allowedImagesSizeSuffixes / UiConfig.imageBaseUrl
+###############################################
+# Allowed pixel-width suffixes for on-the-fly image resizing.
+allowed-images-size-suffixes:
   - 30
   - 50
-
   - 100
   - 360
   - 1000
-imageBaseUrl: https://static.nudger.fr
-googleTaxonomy:
+
+# Base URL from which source images are fetched before resizing.
+image-base-url: https://static.nudger.fr
+
+###############################################
+# Google product taxonomy
+# Bound to: UiConfig.googleTaxonomy (Map<String, String>)
+###############################################
+google-taxonomy:
   fr: https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt
   en: https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt
+
+###############################################
+# Remote file caching
+# Bound to: RemoteFileCachingProperties (prefix="remote-file-caching")
+###############################################
 remote-file-caching:
+  # HTTP connection timeout in milliseconds.
   connection-timeout: 30000
+  # HTTP read timeout in milliseconds.
   read-timeout: 30000
-              
-wikiPagesMapping:
+
+###############################################
+# XWiki wiki pages → URL mapping
+# Bound to: UiConfig.wikiPagesMapping (Map<String, Localisable<String,String>>)
+###############################################
+wiki-pages-mapping:
   "[webpages/default/legal-notice/WebHome]":
     fr: "mentions-legales"
   "[webpages/default/data-privacy/WebHome]":
-      fr: "politique-confidentialite"
+    fr: "politique-confidentialite"
 
-      
-      
-      
-
-price-config: 
+###############################################
+# Price chart event annotations
+# Bound to: UiConfig.priceConfig (PriceRestitutionConfig, prefix="price-config")
+###############################################
+price-config:
   events:
-      fr:
-        - label: "Soldes d'hiver"  
-          startDate: "2025-01-08"
-          endDate: "2025-02-04"
-          color: "rgba(176,255,76,0.25)"
-        - label: "French Days (Printemps)"
-          startDate: "2025-04-30"
-          endDate: "2025-05-07"
-          color: "rgba(176,255,76,0.25)"
-        - label: "Soldes d'été"
-          startDate: "2025-06-25"
-          endDate: "2025-07-22"
-          color: "rgba(176,255,76,0.25)"
-        - label: "Amazon Prime Day"
-          startDate: "2025-07-16"
-          endDate: "2025-07-17"
-          color: "rgba(176,255,76,0.25)"
-        - label: "Rentrée scolaire"
-          startDate: "2025-09-01"
-          endDate: "2025-09-01"
-          color: "rgba(176,255,76,0.25)"
-        - label: "French Days (Automne)"
-          startDate: "2025-09-23"
-          endDate: "2025-09-29"
-          color: "rgba(176,255,76,0.25)"
-        - label: "Singles' Day"
-          startDate: "2025-11-11"
-          endDate: "2025-11-11"
-          color: "rgba(176,255,76,0.25)"
-        - label: "Black Friday"
-          startDate: "2025-11-28"
-          endDate: "2025-11-28"
-          color: "rgba(176,255,76,0.25)"
-        - label: "Cyber Monday"
-          startDate: "2025-12-01"
-          endDate: "2025-12-01"
-          color: "rgba(176,255,76,0.25)"
-        - label: "Noël"  
-          startDate: "2025-12-25"
-          endDate: "2025-12-25"
-          color: "rgba(176,255,76,0.25)"
+    fr:
+      - label: "Soldes d'hiver"
+        startDate: "2025-01-08"
+        endDate: "2025-02-04"
+        color: "rgba(176,255,76,0.25)"
+      - label: "French Days (Printemps)"
+        startDate: "2025-04-30"
+        endDate: "2025-05-07"
+        color: "rgba(176,255,76,0.25)"
+      - label: "Soldes d'été"
+        startDate: "2025-06-25"
+        endDate: "2025-07-22"
+        color: "rgba(176,255,76,0.25)"
+      - label: "Amazon Prime Day"
+        startDate: "2025-07-16"
+        endDate: "2025-07-17"
+        color: "rgba(176,255,76,0.25)"
+      - label: "Rentrée scolaire"
+        startDate: "2025-09-01"
+        endDate: "2025-09-01"
+        color: "rgba(176,255,76,0.25)"
+      - label: "French Days (Automne)"
+        startDate: "2025-09-23"
+        endDate: "2025-09-29"
+        color: "rgba(176,255,76,0.25)"
+      - label: "Singles' Day"
+        startDate: "2025-11-11"
+        endDate: "2025-11-11"
+        color: "rgba(176,255,76,0.25)"
+      - label: "Black Friday"
+        startDate: "2025-11-28"
+        endDate: "2025-11-28"
+        color: "rgba(176,255,76,0.25)"
+      - label: "Cyber Monday"
+        startDate: "2025-12-01"
+        endDate: "2025-12-01"
+        color: "rgba(176,255,76,0.25)"
+      - label: "Noel"
+        startDate: "2025-12-25"
+        endDate: "2025-12-25"
+        color: "rgba(176,255,76,0.25)"
 
-          
+###############################################
+# Fun facts displayed in UI banners
+# Bound to: UiConfig.funFacts (Localisable<String, FunFactsConfig>, key "fun-facts")
+###############################################
 fun-facts:
   fr:
     facts:
-      - title: "La biodiversité, c'est vital"
-        description: "La biodiversité maintient l'équilibre des écosystèmes et assure la survie de milliers d'espèces."
-      - title: "Les forêts purifient l'air"
-        description: "Les arbres absorbent le CO2 et produisent de l'oxygène, jouant un rôle essentiel dans la lutte contre le changement climatique."
-      - title: "L'énergie solaire, une ressource illimitée"
-        description: "Le soleil fournit plus d'énergie en une heure que l'humanité n'en consomme en une année."
-      - title: "La réduction des déchets plastiques"
-        description: "Recycler et diminuer l'usage du plastique est crucial pour protéger les océans et la vie marine."
+      - title: "La biodiversite, c'est vital"
+        description: "La biodiversite maintient l'equilibre des ecosystemes et assure la survie de milliers d'especes."
+      - title: "Les forets purifient l'air"
+        description: "Les arbres absorbent le CO2 et produisent de l'oxygene, jouant un role essentiel dans la lutte contre le changement climatique."
+      - title: "L'energie solaire, une ressource illimitee"
+        description: "Le soleil fournit plus d'energie en une heure que l'humanite n'en consomme en une annee."
+      - title: "La reduction des dechets plastiques"
+        description: "Recycler et diminuer l'usage du plastique est crucial pour proteger les oceans et la vie marine."
       - title: "Les toits verts"
-        description: "Les toits végétalisés améliorent l'isolation thermique et réduisent l'effet d'îlot de chaleur en ville."
+        description: "Les toits vegetalises ameliorent l'isolation thermique et reduisent l'effet d'ilot de chaleur en ville."
       - title: "Les abeilles, gardiennes de la pollinisation"
-        description: "Les abeilles sont indispensables à la pollinisation, soutenant la production alimentaire mondiale."
+        description: "Les abeilles sont indispensables a la pollinisation, soutenant la production alimentaire mondiale."
       - title: "L'eau, source de vie"
-        description: "La gestion durable de l'eau est essentielle pour préserver les écosystèmes et garantir l'avenir."
-      - title: "Les énergies renouvelables"
-        description: "L'éolien, le solaire et l'hydroélectrique offrent des alternatives propres aux énergies fossiles."
+        description: "La gestion durable de l'eau est essentielle pour preserver les ecosystemes et garantir l'avenir."
+      - title: "Les energies renouvelables"
+        description: "L'eolien, le solaire et l'hydroelectrique offrent des alternatives propres aux energies fossiles."
       - title: "Les zones humides, poumons de la Terre"
-        description: "Les zones humides filtrent l'eau, préviennent les inondations et abritent une biodiversité riche."
-      - title: "Les océans, régulateurs climatiques"
-        description: "Les océans absorbent le CO2 et modèrent les températures globales, agissant comme un thermostat naturel."
-      - title: "Le compostage, un geste écologique"
-        description: "Transformer les déchets organiques en compost enrichit le sol et réduit la quantité de déchets."
-      - title: "La mobilité douce"
-        description: "Favoriser la marche, le vélo et les transports en commun aide à réduire les émissions de gaz à effet de serre."
+        description: "Les zones humides filtrent l'eau, prevalent les inondations et abritent une biodiversite riche."
+      - title: "Les oceans, regulateurs climatiques"
+        description: "Les oceans absorbent le CO2 et moderent les temperatures globales, agissant comme un thermostat naturel."
+      - title: "Le compostage, un geste ecologique"
+        description: "Transformer les dechets organiques en compost enrichit le sol et reduit la quantite de dechets."
+      - title: "La mobilite douce"
+        description: "Favoriser la marche, le velo et les transports en commun aide a reduire les emissions de gaz a effet de serre."
       - title: "Les circuits courts"
-        description: "Acheter localement diminue l'empreinte carbone liée au transport des produits et soutient l'économie locale."
+        description: "Acheter localement diminue l'empreinte carbone liee au transport des produits et soutient l'economie locale."
       - title: "La permaculture, agriculture durable"
-        description: "La permaculture imite les processus naturels pour créer des systèmes agricoles résilients et durables."
+        description: "La permaculture imite les processus naturels pour creer des systemes agricoles resilients et durables."
       - title: "Les micro-habitats urbains"
-        description: "Même en ville, de petits espaces peuvent devenir des refuges pour la biodiversité locale."
-      - title: "Les emballages écologiques"
-        description: "Utiliser des emballages biodégradables aide à réduire la pollution et facilite le recyclage."
-      - title: "La réduction des émissions de CO2"
-        description: "Des gestes quotidiens simples, comme éteindre la lumière inutilement, contribuent à diminuer l'empreinte carbone."
-      - title: "Les zones protégées"
-        description: "Les parcs nationaux et réserves naturelles préservent des habitats uniques et soutiennent la biodiversité."
-      - title: "L'éducation environnementale"
-        description: "Sensibiliser dès le plus jeune âge aux enjeux écologiques est essentiel pour un avenir durable."
+        description: "Meme en ville, de petits espaces peuvent devenir des refuges pour la biodiversite locale."
+      - title: "Les emballages ecologiques"
+        description: "Utiliser des emballages biodegradables aide a reduire la pollution et facilite le recyclage."
+      - title: "La reduction des emissions de CO2"
+        description: "Des gestes quotidiens simples, comme eteindre la lumiere inutilement, contribuent a diminuer l'empreinte carbone."
+      - title: "Les zones protegees"
+        description: "Les parcs nationaux et reserves naturelles preservent des habitats uniques et soutiennent la biodiversite."
+      - title: "L'education environnementale"
+        description: "Sensibiliser des le plus jeune age aux enjeux ecologiques est essentiel pour un avenir durable."
       - title: "L'agriculture biologique"
-        description: "L'agriculture biologique favorise la santé des sols et limite l'utilisation de produits chimiques nocifs."
+        description: "L'agriculture biologique favorise la sante des sols et limite l'utilisation de produits chimiques nocifs."
 
-    
-      
+###############################################
+# Team members (displayed on /team page)
+# Bound to: UiConfig.teamConfig (TeamConfig, key "team-config")
+###############################################
 team-config:
   cores:
-  - name: Goulven Furet
-    title: CEO / CTO
-    linkedInUrl: https://www.linkedin.com/in/goulven-furet-b448b582/
-    imageUrl: /assets/img/team/Goulven.jpeg
+    - name: Goulven Furet
+      title: CEO / CTO
+      linkedInUrl: https://www.linkedin.com/in/goulven-furet-b448b582/
+      imageUrl: /assets/img/team/Goulven.jpeg
 
-  - name: Bérangère Leven
-    title: Communication et pilotage
-    linkedInUrl: https://www.linkedin.com/in/b%C3%A9rang%C3%A8re-leven/
-    imageUrl: /assets/img/team/Berangere.jpeg
+    - name: Berangere Leven
+      title: Communication et pilotage
+      linkedInUrl: https://www.linkedin.com/in/b%C3%A9rang%C3%A8re-leven/
+      imageUrl: /assets/img/team/Berangere.jpeg
 
-  - name: Thomas Vandewalle
-    title: Stratégie SEO & contenus
-    linkedInUrl: https://www.linkedin.com/in/thomas-vandewalle-fr001/
-    imageUrl: /assets/img/team/Thomas.jpeg
+    - name: Thomas Vandewalle
+      title: Strategie SEO & contenus
+      linkedInUrl: https://www.linkedin.com/in/thomas-vandewalle-fr001/
+      imageUrl: /assets/img/team/Thomas.jpeg
 
-  - name: Candide Chérel
-    title: Gestion et conduite de projet
-    linkedInUrl: https://www.linkedin.com/in/candide-cherel/?originalSubdomain=fr
-    imageUrl: /assets/img/team/Candide.jpeg
+    - name: Candide Cherel
+      title: Gestion et conduite de projet
+      linkedInUrl: https://www.linkedin.com/in/candide-cherel/?originalSubdomain=fr
+      imageUrl: /assets/img/team/Candide.jpeg
 
-    
-  - name: Yann Mingant
-    title: Lead UX / UI
-    linkedInUrl: https://www.linkedin.com/in/yann-mingant-5118b7177/
-    imageUrl: /assets/img/team/Yann.jpeg
-        
-  - name: Louis-Marie Toudoire
-    title: Développeur Backend
-    linkedInUrl: https://www.linkedin.com/in/scezen/?originalSubdomain=fr
-    imageUrl: /assets/img/team/Louis-Marie.jpeg
+    - name: Yann Mingant
+      title: Lead UX / UI
+      linkedInUrl: https://www.linkedin.com/in/yann-mingant-5118b7177/
+      imageUrl: /assets/img/team/Yann.jpeg
 
-  - name: Laurent Blondel
-    title: Développeur & intégrateur frontend
-    linkedInUrl: https://www.linkedin.com/in/laurent-blondel-33543532/
-    imageUrl: /assets/img/team/Laurent.jpeg
+    - name: Louis-Marie Toudoire
+      title: Developpeur Backend
+      linkedInUrl: https://www.linkedin.com/in/scezen/?originalSubdomain=fr
+      imageUrl: /assets/img/team/Louis-Marie.jpeg
 
-  - name: Max Ziliani
-    title: Identité visuelle et artistique
-    linkedInUrl: https://www.linkedin.com/in/maxziliani/
-    imageUrl: /assets/img/team/Max.jpeg
+    - name: Laurent Blondel
+      title: Developpeur & integrateur frontend
+      linkedInUrl: https://www.linkedin.com/in/laurent-blondel-33543532/
+      imageUrl: /assets/img/team/Laurent.jpeg
 
-        
+    - name: Max Ziliani
+      title: Identite visuelle et artistique
+      linkedInUrl: https://www.linkedin.com/in/maxziliani/
+      imageUrl: /assets/img/team/Max.jpeg
+
   contributors:
-  - name: Loïc Gourmelon
-    title: Devops
-    linkedInUrl: https://www.linkedin.com/in/gourmelonloic/
-    imageUrl: /assets/img/team/Loic.jpeg
-          
-  - name: Thierry Ledan
-    title: Développements backend
-    linkedInUrl: https://www.linkedin.com/in/thierry-ledan-43650a183/
-    imageUrl: /assets/img/team/Thierry.jpeg
+    - name: Loic Gourmelon
+      title: Devops
+      linkedInUrl: https://www.linkedin.com/in/gourmelonloic/
+      imageUrl: /assets/img/team/Loic.jpeg
 
+    - name: Thierry Ledan
+      title: Developpements backend
+      linkedInUrl: https://www.linkedin.com/in/thierry-ledan-43650a183/
+      imageUrl: /assets/img/team/Thierry.jpeg
 
-  - name: Nicolas Bonamy
-    title: Dev backend & infra
-    linkedInUrl: https://www.linkedin.com/in/nicolas-bonamy-827b63a3/
-    imageUrl: /assets/img/team/Nicolas.jpeg
+    - name: Nicolas Bonamy
+      title: Dev backend & infra
+      linkedInUrl: https://www.linkedin.com/in/nicolas-bonamy-827b63a3/
+      imageUrl: /assets/img/team/Nicolas.jpeg
 
-  - name: Stephane Castrec
-    title: Developpements
-    linkedInUrl: https://www.linkedin.com/in/scastrec/
-    imageUrl: /assets/img/team/Stephane.jpeg
-    
+    - name: Stephane Castrec
+      title: Developpements
+      linkedInUrl: https://www.linkedin.com/in/scastrec/
+      imageUrl: /assets/img/team/Stephane.jpeg
 
+###############################################
+# Blog RSS feed metadata
+# Bound to: BlogConfiguration (prefix="blog", standalone @Component bean)
+###############################################
+blog-config:
+  feed-title:
+    default: "The Nudger blog"
+    fr: "Le blog Nudger"
+  feed-description:
+    default: "The Nudger blog, the best way to keep up with the latest news about eco-nudging"
+    fr: "Le blog Nudger, la meilleure facon de suivre les dernieres actualites sur l'eco-nudging"
 
-apiConfig:
-  apiTitle: "Open4goods API"
-  apiDescription: "This API allows you to browse eco-nudger content"
-  apiVersion: "0.1"
-  apiLicence: "May vary"
+###############################################
+# Open data export service
+# Bound to: OpenDataConfig (prefix="open-data-config")
+###############################################
+open-data-config:
+  # Max download speed per client connection in kilobytes per second.
+  download-speed-kb: 256
+  # Maximum parallel downloads allowed.
+  concurrent-downloads: 4
+  # Set to true to enable scheduled file generation (disabled by default in dev).
+  generation-enabled: true
 
-
-tagListUrl: https://open4good.github.io/open4goods/maven/taglist/taglist.xml
-
-openDataConfig:
-  downloadSpeedKb: 256
-  concurrentDownloads: 4
-  generationEnabled: true
-
-
-feedbackConfig:      
-  githubConfig:
-    accessToken: GITHUB_ACCESS_TOKEN
+###############################################
+# GitHub feedback integration
+# Bound to: FeedbackConfiguration (prefix="feedback")
+###############################################
+feedback:
+  github:
+    # GitHub personal access token — must be overridden in devsec/prod configs.
+    access-token: GITHUB_ACCESS_TOKEN
     organization: open4good
-    repo: open4goods       
-     
-reversement-config:
-  contributed-organisations:
-    greenpeace:
-      name: Green Peace
-      img: /assets/img/greenpeace_logo.png
-      url: https://www.greenpeace.fr/
-      description: Greenpeace est une organisation non gouvernementale internationale fondée en 1971, dédiée à la protection de l'environnement et à la promotion de la paix. Elle est connue pour ses actions directes non violentes et ses campagnes de sensibilisation sur des enjeux cruciaux comme le changement climatique, la déforestation, la pollution des océans, et la protection de la biodiversité. Greenpeace milite pour une transition vers des énergies renouvelables, la réduction des déchets, et la préservation des écosystèmes menacés. L'organisation s'appuie sur la recherche scientifique, l'activisme, et le plaidoyer pour inciter les gouvernements et les entreprises à adopter des pratiques durables.
-      short-description: Greenpeace est une organisation non gouvernementale internationale  dédiée à la protection de l'environnement.
-    goodplanet:
-      name: Fondation Good Planet
-      img: /assets/img/goodplanet_logo.svg
-      url: https://www.goodplanet.org/fr/
-      description: La Fondation GoodPlanet, créée par Yann Arthus-Bertrand en 2005, est une organisation dédiée à la promotion du développement durable et de la sensibilisation environnementale. Elle œuvre pour la protection de la biodiversité, la lutte contre le changement climatique, et la promotion d'une transition écologique et solidaire. La fondation mène des projets éducatifs, organise des événements, et soutient des initiatives locales et internationales. Elle propose également des solutions concrètes pour réduire l'empreinte écologique, tout en favorisant l'engagement citoyen et en cultivant une prise de conscience collective autour des enjeux environnementaux.
-      short-description:  La Fondation GoodPlanet est une organisation dédiée à la promotion du développement durable.
-  reversements:
-  - date: 2021-11-01
-    amount: 72
-    orgKey: greenpeace
-    
-  - date: 2022-02-01
-    amount: "71.5"
-    orgKey: goodplanet
+    repo: open4goods
+    user: GoulvenF
 
-blogConfig:
-   feedTitle:
-      default: "The Nudger blog"
-      fr: "Le blog Nudger"
-   feedDescription:
-      default: "The Nudger blog, the best way to keep up with the latest news about eco-nudging"
-      fr: "Le blog Nudger, la meilleure façon de suivre les dernières actualités sur l'éco-nudging"
+###############################################
+# TODO scanner (reads taglist.xml from Maven site)
+# Bound to: UiConfig.tagListUrl (key "tag-list-url")
+###############################################
+tag-list-url: https://open4good.github.io/open4goods/maven/taglist/taglist.xml
 
-# Configuration for the Image Generation service
-imageGenerationConfig:
-  prompt: |
-    Create a simple icon of a {VERTICAL} that strictly adheres to the following guidelines:
-    - The background color must be plain white(#FFFFFF).
-    - The white background does not contains any gradient or texture.
-    - The icon should be flat, in a modern, minimalist style.
-    - The lines must be clean and simple.
-    - Use a soft color palette consisting primarily of shades of green and off-white.
-    - The overall mood must be fresh and eco-friendly, evoking a sense of calm and simplicity.
-  forceOverride: false
-
-#Css and js mimification
-#wro4j:
-#  filterUrl : /resources
-#  cacheGzippedContent: true
-#  ignoreMissingResources: false
- # managerFactory:
- #   preProcessors: removeSourceMaps, cssImport, jsMin
-    
+###############################################
+# Custom URL pages mapping (page name -> template file)
+# Bound to: UiConfig.pages (Map<String, String>)
+###############################################
+pages:
+  "comparateur-prix": "pages/comparateur-prix.html"
 
 ---
+# "default" profile: disable Spring Boot Admin client registration.
 spring:
   config:
     activate:

@@ -1,3 +1,14 @@
+# ============================================================================
+# AIR_CONDITIONER_FUNCTION_TYPE — Function type (Type de fonction)
+# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 000)
+# Used in verticals: air-conditioner
+# Type: TEXT
+# Coverage snapshot: insufficient data from prod API
+# Taxonomy coverage: icecat ❌  eprel ❌  etim ❌  wikidata ❌
+# Purpose: Identifies whether an air-conditioner operates as cooling-only or
+#          reversible (heat pump), enabling filtering by function mode.
+# ============================================================================
+
 key: "AIR_CONDITIONER_FUNCTION_TYPE"
 faIcon: "mdi-swap-horizontal"
 name:

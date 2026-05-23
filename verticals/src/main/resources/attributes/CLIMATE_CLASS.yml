@@ -1,3 +1,14 @@
+# ============================================================================
+# CLIMATE_CLASS — Climate class (Classe climatique)
+# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 000)
+# Used in verticals: refrigerator
+# Type: TEXT
+# Coverage snapshot: insufficient data from prod API
+# Taxonomy coverage: icecat ✅  eprel ✅  etim ❌  wikidata ❌
+# Purpose: Ambient temperature range in which the refrigerator is rated to
+#          operate (SN/N/ST/T per EN 15502); used to filter climate suitability.
+# ============================================================================
+
 key: "CLIMATE_CLASS"
 faIcon: "mdi-thermometer-lines"
 name:
@@ -5,6 +16,16 @@ name:
   fr: "Classe climatique"
 filteringType: "TEXT"
 asScore: false
+
+referentials:
+  icecat:
+    - featureId: 2471
+      name: "Climate class"
+  eprel:
+    - featureName: "climateClass"
+      productGroup: "refrigerators"
+      name: "Climate class"
+
 synonyms:
   all:
     - "CLASSE CLIMATIQUE"
@@ -14,6 +35,8 @@ synonyms:
     - "CLIMATECLASSSN"
     - "CLIMATECLASSST"
     - "CLIMATECLASST"
+  eprel:
+    - "CLIMATECLASS"
 parser:
   normalize: true
   trim: true
@@ -25,4 +48,3 @@ parser:
     - "N"
     - "ST"
     - "T"
-

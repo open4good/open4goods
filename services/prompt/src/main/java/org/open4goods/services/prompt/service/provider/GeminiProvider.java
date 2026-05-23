@@ -18,6 +18,7 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.google.genai.GoogleGenAiChatModel;
 import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
 import org.springframework.ai.google.genai.schema.JsonSchemaConverter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.ai.util.json.schema.JsonSchemaGenerator;
 import org.springframework.util.StringUtils;
 
@@ -28,6 +29,7 @@ import tools.jackson.databind.node.ObjectNode;
  * Gemini provider implementation using Spring AI Google GenAI with grounding.
  */
 @org.springframework.stereotype.Component
+@ConditionalOnBean(GoogleGenAiChatModel.class)
 public class GeminiProvider implements GenAiProvider {
 
 	private static final Logger logger = LoggerFactory.getLogger(GeminiProvider.class);
