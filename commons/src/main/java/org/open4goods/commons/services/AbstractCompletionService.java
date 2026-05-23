@@ -55,7 +55,7 @@ public abstract class AbstractCompletionService {
     public void completeAll(Integer max, boolean withExcluded) {
         logger.info("Completion for all verticals");
         for (VerticalConfig vConf : verticalConfigService.getConfigsWithoutDefault()) {
-            complete(vConf, withExcluded);
+            complete(vConf, max, withExcluded);
         }
     }
 
@@ -78,7 +78,11 @@ public abstract class AbstractCompletionService {
      */
     public void complete(VerticalConfig vertical, Integer limit, boolean withExcluded) {
         logger.info("Completing {} products {}", limit == null ? "all" : limit, vertical.getId());
-        dataRepository.exportVerticalWithValidDate(vertical, withExcluded).forEach(data -> {
+        var products = dataRepository.exportVerticalWithValidDate(vertical, withExcluded);
+        if (limit != null) {
+            products = products.limit(limit);
+        }
+        products.forEach(data -> {
             completeAndIndexProduct(vertical, data);
         });
     }

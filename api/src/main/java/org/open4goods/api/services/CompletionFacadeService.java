@@ -4,6 +4,7 @@ package org.open4goods.api.services;
 import java.io.IOException;
 import java.util.Set;
 
+import org.open4goods.api.services.completion.AmazonCompletionService;
 import org.open4goods.api.services.completion.EprelCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
@@ -30,16 +31,19 @@ public class CompletionFacadeService {
 	private final IcecatCompletionService icecatCompletionService;
 	private final EprelCompletionService eprelCompletionService;
 	private final WikidataCompletionService wikidataCompletionService;
+	private final AmazonCompletionService amazonCompletionService;
 
 	public CompletionFacadeService(
 			ResourceCompletionService resourceCompletionService,
 			IcecatCompletionService icecatCompletionService,
 			EprelCompletionService eprelCompletionService,
-			WikidataCompletionService wikidataCompletionService) {
+			WikidataCompletionService wikidataCompletionService,
+			AmazonCompletionService amazonCompletionService) {
 		this.resourceCompletionService = resourceCompletionService;
 		this.icecatCompletionService = icecatCompletionService;
 		this.eprelCompletionService = eprelCompletionService;
 		this.wikidataCompletionService = wikidataCompletionService;
+		this.amazonCompletionService = amazonCompletionService;
 	}
 
 	/**
@@ -55,6 +59,7 @@ public class CompletionFacadeService {
 			icecatCompletionService.process(vertical, product);
 			eprelCompletionService.process(vertical, product);
 			wikidataCompletionService.process(vertical, product);
+			amazonCompletionService.process(vertical, product);
 		});
 	}
 
@@ -76,13 +81,13 @@ public class CompletionFacadeService {
 
 
 
-//	///////////////////////////////////
-//	// Amazon completion
-//	///////////////////////////////////
-//	public void amazonCompletionAll() throws InvalidParameterException, IOException {
-//		logger.warn("Completing verticals with amazon");
-//		amazonCompletionService.completeAll(false);
-//	}
+	///////////////////////////////////
+	// Amazon completion
+	///////////////////////////////////
+	public void amazonCompletionAll() throws InvalidParameterException, IOException {
+		logger.warn("Completing verticals with amazon");
+		amazonCompletionService.completeAll(amazonCompletionService.getAmazonConfig().getMaxCallsPerBatch(), false);
+	}
 
 	///////////////////////////////////
 	// Eprel completion

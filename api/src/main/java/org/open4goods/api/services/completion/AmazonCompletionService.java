@@ -1,586 +1,599 @@
-//package org.open4goods.api.services.completion;
-//
-//import java.text.ParseException;
-//import java.util.ArrayList;
-//import java.util.HashSet;
-//import java.util.List;
-//import java.util.Set;
-//
-//import org.apache.commons.lang3.StringUtils;
-//import org.open4goods.api.config.yml.AmazonCompletionConfig;
-//import org.open4goods.api.config.yml.ApiProperties;
-//import org.open4goods.api.services.AbstractCompletionService;
-//import org.open4goods.api.services.AggregationFacadeService;
-//import org.open4goods.api.services.aggregation.aggregator.StandardAggregator;
-//import org.open4goods.icecat.config.yml.datasource.DataSourceProperties;
-//import org.open4goods.icecat.exceptions.AggregationSkipException;
-//import org.open4goods.icecat.services.DataSourceConfigService;
-//import org.open4goods.icecat.services.VerticalsConfigService;
-//import org.open4goods.model.attribute.ReferentielKey;
-//import org.open4goods.model.datafragment.DataFragment;
-//import org.open4goods.model.exceptions.TechnicalException;
-//import org.open4goods.model.exceptions.ValidationException;
-//import org.open4goods.model.helper.IdHelper;
-//import org.open4goods.model.price.Price;
-//import org.open4goods.model.product.Product;
-//import org.open4goods.model.product.ProductCondition;
-//import org.open4goods.model.resource.Resource;
-//import org.open4goods.model.resource.ResourceTag;
-//import org.open4goods.model.vertical.VerticalConfig;
-//import org.open4goods.services.productrepository.services.ProductRepository;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
-//
-//import com.amazon.paapi5.v1.ApiClient;
-//import com.amazon.paapi5.v1.ApiException;
-//import com.amazon.paapi5.v1.BrowseNodeInfo;
-//import com.amazon.paapi5.v1.ByLineInfo;
-//import com.amazon.paapi5.v1.ErrorData;
-//import com.amazon.paapi5.v1.GetItemsRequest;
-//import com.amazon.paapi5.v1.GetItemsResource;
-//import com.amazon.paapi5.v1.GetItemsResponse;
-//import com.amazon.paapi5.v1.Images;
-//import com.amazon.paapi5.v1.Item;
-//import com.amazon.paapi5.v1.ItemIdType;
-//import com.amazon.paapi5.v1.ItemInfo;
-//import com.amazon.paapi5.v1.ManufactureInfo;
-//import com.amazon.paapi5.v1.MultiValuedAttribute;
-//import com.amazon.paapi5.v1.OfferListing;
-//import com.amazon.paapi5.v1.Offers;
-//import com.amazon.paapi5.v1.PartnerType;
-//import com.amazon.paapi5.v1.ProductInfo;
-//import com.amazon.paapi5.v1.SearchItemsRequest;
-//import com.amazon.paapi5.v1.SearchItemsResource;
-//import com.amazon.paapi5.v1.SearchItemsResponse;
-//import com.amazon.paapi5.v1.SingleStringValuedAttribute;
-//import com.amazon.paapi5.v1.TechnicalInfo;
-//import com.amazon.paapi5.v1.UnitBasedAttribute;
-//import com.amazon.paapi5.v1.VariationAttribute;
-//import com.amazon.paapi5.v1.api.DefaultApi;
-//
-//
-//public class AmazonCompletionService extends AbstractCompletionService {
-//
-//	protected static final Logger logger = LoggerFactory.getLogger(AmazonCompletionService.class);
-//
-//	// Constants
-//	private static final String NOT_FOUND_ASIN_MARKUP = "NOT_FOUND";
-//	private static final String AMAZON_PRODUCTSTATE_NEW = "New";
-//	private static final String AMAZON_PRODUCTSTATE_OCCASION = "Occasion";
-//
-//	// The standard datasource (yaml) for amazon
-//	private DataSourceProperties amazonDatasource;
-//
-//	// The specific amazon fetching properties
-//	private AmazonCompletionConfig amazonConfig;
-//
-//	// We re-use the realtime aggregator, from the AggregationFavcade
-//	private StandardAggregator aggregator;
-//
-//	// The amazon api componsnets
-//	private DefaultApi api;
-//	private ArrayList<GetItemsResource> getItemsResources;
-//        private ArrayList<SearchItemsResource> searchItemsResources;
-//
-//        /**
-//         * Amazon completion will be triggered again only after this delay.
-//         */
-//        private static final int REFRESH_IN_DAYS = 30;
-//
-//
-//	public AmazonCompletionService(ProductRepository dataRepository, VerticalsConfigService verticalConfigService,
-//			ApiProperties apiProperties, DataSourceConfigService dataSourceConfigService, AggregationFacadeService aggregationFacadeService) throws TechnicalException {
-//		// TODO : Should set a specific log level here (not "agg(regation)" one)
-//		super(dataRepository, verticalConfigService, apiProperties.logsFolder(), apiProperties.aggLogLevel());
-//		this.amazonConfig = apiProperties.getAmazonConfig();
-//		this.amazonDatasource = dataSourceConfigService.getDatasourceConfig(amazonConfig.getDatasourceName());
-//		this.aggregator = aggregationFacadeService.getStandardAggregator("amazon");;
-//		this.aggregator.beforeStart();
-//
-//
-//		if (null == amazonDatasource) {
-//			logger.error("Amazon datasource config file {} not found", amazonConfig.getDatasourceName() );
-//		}
-//
-//		// Set up the amazon api client
-//		ApiClient client = new ApiClient();
-//
-//		// Setting credentials
-//		client.setAccessKey(amazonConfig.getAccessKey());
-//		client.setSecretKey(amazonConfig.getSecretKey());
-//		client.setHost(amazonConfig.getHost());
-//		client.setRegion(amazonConfig.getRegion());
-//		api = new DefaultApi(client);
-//
-//		// Setting the itemresources to be used for direct product retrieving
-//		this.getItemsResources = new ArrayList<GetItemsResource>();
-//		// Adding all
-//		// https://webservices.amazon.com/paapi5/documentation/get-items.html#resources-parameter
-//		for (GetItemsResource gr : GetItemsResource.values()) {
-//			getItemsResources.add(gr);
-//
-//		}
-//
-//		// Setting the itemresources to be used for product search
-//		// https://webservices.amazon.com/paapi5/documentation/search-items.html#resources-parameter
-//		this.searchItemsResources = new ArrayList<SearchItemsResource>();
-//		// Adding all
-//		for (SearchItemsResource sr : SearchItemsResource.values()) {
-//			searchItemsResources.add(sr);
-//		}
-//	}
-//
-//
-//        @Override
-//        public boolean shouldProcess(VerticalConfig vertical, Product data) {
-//                Long lastProcessed = data.getDatasourceCodes().get(getDatasourceName());
-//                if (lastProcessed == null) {
-//                        return true;
-//                }
-//                long elapsed = System.currentTimeMillis() - lastProcessed;
-//                return elapsed > REFRESH_IN_DAYS * 24L * 3600L * 1000L;
-//        }
-//
-//	@Override
-//	public String getDatasourceName() {
-//		return "amazon.fr";
-//	}
-//
-//
-//
-//	/**
-//	 * Trigger amazon call on a product. Here the logic :
-//	 * > If first call, then make a search, then associates the asin
-//	 * > if second call, then make a get.
-//	 * > If ASIN was not previously found, then mark as stand by
-//	 */
-//	public void processProduct(VerticalConfig vertical, Product data) {
-//		logger.info("Amazon completion for {}", data.getId());
-//		Set<DataFragment> fragments = new HashSet<>();
-//
-//		String asin = data.getExternalIds().getAsin();
-//		if (StringUtils.isEmpty(asin)) {
-//			// First time API Call, we operate through the search method
-//			logger.info("Initial amazon call (get) for {}", data.gtin());
-//			fragments.addAll(completeSearch(vertical, data));
-//		} else {
-//				if (asin.equals(NOT_FOUND_ASIN_MARKUP)) {
-//					data.getExternalIds().setAsin(null);
-//				} else {
-//					// If we already have the ASIN, we operate a direct get request
-//					logger.info("Further amazon call (get) for {}", data.gtin());
-//					// TODO : Do not proceed, have a delay threshold
-//					fragments.addAll(completeGet(vertical, data));
-//				}
-//		}
-//
-//		// Apply aggregation
-//		for (DataFragment df : fragments) {
-//			try {
-//				aggregator.onDatafragment(df, data);
-//			} catch (AggregationSkipException e) {
-//				logger.error("Error occurs during amazon aggregation",e);
-//			}
-//		}
-//
-//
-//		try {
-//			Thread.sleep(amazonConfig.getSleepDuration());
-//		} catch (InterruptedException e) {
-//			logger.error("Errot while sleeping");
-//		}
-//	}
-//
-//	/**
-//	 * Proceed to the get api call on amazon
-//	 *
-//	 * @param vertical
-//	 * @param data
-//	 */
-//	private Set<DataFragment> completeGet(VerticalConfig vertical, Product data) {
-//		Set<DataFragment> ret = new HashSet<>();
-//		GetItemsRequest getItemsRequest = new GetItemsRequest().itemIdType(ItemIdType.ASIN)
-//				.itemIds(List.of(data.getExternalIds().getAsin())).partnerTag(amazonConfig.getPartnerTag())
-//				.partnerType(PartnerType.ASSOCIATES).resources(getItemsResources);
-//		try {
-//			// Sending the request
-//			GetItemsResponse response = api.getItems(getItemsRequest);
-//			logger.info("Amazon get response is {}", response);
-//
-//			if (response.getErrors() != null) {
-//				for (ErrorData error : response.getErrors()) {
-//					logger.error("Amazon API returned an error {} : {}", error.getCode(), error.getMessage());
-//				}
-//			}
-//
-//			if (response.getItemsResult().getItems().size() == 0) {
-//				logger.warn("No amazon product for {}", data.gtin());
-//			} else if (response.getItemsResult().getItems().size() == 0) {
-//				logger.warn("Multiple amazon product for {}", data.gtin());
-//			}
-//
-//			for (Item item : response.getItemsResult().getItems()) {
-//				ret.addAll(processAmazonItem(item, vertical, data));
-//			}
-//
-//		} catch (ApiException exception) {
-//			logger.error("Amazon API error {} : {} \n {} ", exception.getCode(), exception.getResponseBody(),
-//					exception.getMessage());
-//		}
-//		return ret;
-//	}
-//
-//	/**
-//	 * Proceed to the search api call on amazon
-//	 *
-//	 * @param vertical
-//	 * @param data
-//	 */
-//	private Set<DataFragment> completeSearch(VerticalConfig vertical, Product data) {
-//		Set<DataFragment> ret = new HashSet<>();
-//
-//		SearchItemsRequest searchItemsRequest = new SearchItemsRequest().keywords(data.gtin())
-//				.partnerTag(amazonConfig.getPartnerTag()).partnerType(PartnerType.ASSOCIATES)
-//				.resources(searchItemsResources);
-//
-//		try {
-//			// Sending the request
-//			SearchItemsResponse response = api.searchItems(searchItemsRequest);
-//			logger.info("Amazon search response is {}", response);
-//
-//			if (response.getErrors() != null) {
-//				for (ErrorData error : response.getErrors()) {
-//					logger.error("Amazon API returned an error {} : {}", error.getCode(), error.getMessage());
-//				}
-//			}
-//
-//			if (null == response.getSearchResult() || response.getSearchResult().getItems().size() == 0) {
-//				logger.warn("No amazon product for {}", data.gtin());
-//				data.getExternalIds().setAsin(NOT_FOUND_ASIN_MARKUP);
-//				return ret;
-//			} else if (response.getSearchResult().getItems().size() > 1) {
-//				logger.warn("Multiple amazon product for {}", data.gtin());
-//			}
-//
-//			for (Item item : response.getSearchResult().getItems()) {
-//				ret.addAll(processAmazonItem(item, vertical, data));
-//			}
-//
-//		} catch (ApiException exception) {
-//			logger.error("Amazon API error {} : {} \n {} ", exception.getCode(), exception.getResponseBody(),
-//					exception.getMessage());
-//		}
-//
-//		return ret;
-//	}
-//
-//	private Set<DataFragment> processAmazonItem(Item item, VerticalConfig vertical, Product data) {
-//
-//		logger.info("Setting amazon data for {}:{}", vertical.getId(), data.gtin());
-//		Set<DataFragment>  ret = new HashSet<>();
-//
-//		// Setting the ASIN (directly in product)
-//		String asin = item.getASIN();
-//		if (!StringUtils.isEmpty(asin)) {
-//			data.getExternalIds().setAsin(asin);
-//		} else {
-//			logger.warn("Empty ASIN returned for {}", data.gtin());
-//		}
-//
-//		// Handling images (directly in product)
-//		Images images = item.getImages();
-//		if (null != images) {
-//			if (null != images.getPrimary()) {
-//
-//				try {
-//					logger.info("Adding primary image for {} : {}", data.gtin(), images.getPrimary().getLarge());
-//					Resource r = new Resource(images.getPrimary(). getLarge().getURL());
-//					r.getHardTags().add(ResourceTag.AMAZON_PRIMARY_TAG);
-//					r.getHardTags().add(ResourceTag.PRIMARY);
-//					r.setDatasourceName(amazonDatasource.getName());
-//					data.getResources().add(r);
-//				} catch (ValidationException e) {
-//					logger.error("Error while adding primary image", e);
-//				}
-//			}
-//
-//			if (null != images.getVariants()) {
-//				images.getVariants().forEach(e -> {
-//					logger.info("Adding variant image for {} : {}", data.gtin(), e.getLarge().getURL());
-//					try {
-//						Resource r = new Resource(e.getLarge().getURL());
-//						r.getHardTags().add(ResourceTag.AMAZON_VARIANT_TAG);
-//						r.setDatasourceName(amazonDatasource.getName());
-//						data.getResources().add(r);
-//					} catch (ValidationException e1) {
-//						logger.error("Error while adding variant image", e1);
-//					}
-//				});
-//			}
-//		}
-//
-//		////////////////////
-//		// Handling offers
-//		///////////////////
-//		String detailPageUrl = item.getDetailPageURL();
-//		Offers offers = item.getOffers();
-//		if (null != offers) {
-//			logger.info("Adding prices for {}", data.gtin());
-//			OfferListing minNewPrice = null;
-//			OfferListing minOccasionPrice = null;
-//
-//			for (OfferListing o : offers.getListings()) {
-//
-//				// o.getAvailability();
-//				// TODO : As constant
-//				if (o.getCondition().getValue().equals(AMAZON_PRODUCTSTATE_OCCASION)) {
-//					// Handling occasion product
-//					if (minOccasionPrice == null) {
-//						minOccasionPrice = o;
-//					} else {
-//						if (minOccasionPrice.getPrice().getAmount().doubleValue() > o.getPrice().getAmount()
-//								.doubleValue()) {
-//							minOccasionPrice = o;
-//						}
-//					}
-//				} else if (o.getCondition().getValue().equals(AMAZON_PRODUCTSTATE_NEW)) {
-//					// Handling new product
-//					if (minNewPrice == null) {
-//						minNewPrice = o;
-//					} else {
-//						if (minNewPrice.getPrice().getAmount().doubleValue() > o.getPrice().getAmount().doubleValue()) {
-//							minNewPrice = o;
-//						}
-//					}
-//				} else {
-//					logger.error("Unknown Amazon item condition : {}", o.getCondition().getValue());
-//				}
-//
-//			}
-//
-//			// Handling the best new offer if any
-//			if (null != minNewPrice) {
-//				DataFragment df = mapOfferToDataFragment(minNewPrice, detailPageUrl, data);
-//				ret.add(df);
-//			}
-//
-//			// Handling the best occasion offer if any
-//			if (null != minOccasionPrice) {
-//				DataFragment df = mapOfferToDataFragment(minOccasionPrice, detailPageUrl, data);
-//				ret.add(df);
-//			}
-//		}
-//
-//
-//		// We take one of the df to store attributes
-//		DataFragment current = ret.stream().findAny().orElse(initDataFragment("amazon.fr",detailPageUrl, data));
-//
-//
-//
-//		// Handling product infos
-//		ItemInfo itemInfo = item.getItemInfo();
-//		if (null != itemInfo) {
-//
-//			// Brand / manufacturer
-//			ByLineInfo lineInfo = itemInfo.getByLineInfo();
-//			if (null != lineInfo) {
-//				String brand = lineInfo.getBrand().getDisplayValue();
-////				String manufacturer = lineInfo.getManufacturer().getDisplayValue();
-////
-////				if (!StringUtils.equalsIgnoreCase(brand, manufacturer)) {
-////					logger.error("Brand and manufacturer are not equals for {}", data.gtin());
-////				}
-//
-//				if (!StringUtils.isEmpty(brand)) {
-//					current.addReferentielAttribute(ReferentielKey.BRAND, brand);
-//				}
-//			}
-//
-//			// NOTE : Features seems too noisy (on TV), disabled for now
-////			MultiValuedAttribute features = itemInfo.getFeatures();
-////			for (String f : features.getDisplayValues()) {
-////
-////				int pos = f.indexOf(":");
-////				if (-1 != pos) {
-////					String key = f.substring(0,pos).trim();
-////					String val = f.substring(pos+1).trim();
-////					current.addAttribute(key,val, "fr", false, null);
-////				}
-////			}
-//
-//			ManufactureInfo manufactureInfo = itemInfo.getManufactureInfo();
-//			if (null != manufactureInfo) {
-//				if (null != manufactureInfo.getModel()) {
-//					String model = manufactureInfo.getModel().getDisplayValue();
-//					// TODO : From conf
-//					if (model.length() > 15) {
-//						model = IdHelper.extractBrandUids(model).stream().findFirst().orElse(null);
-//						logger.warn("Extracted model {} from amazon model : {}", model,manufactureInfo.getModel().getDisplayValue() );
-//
-//					}
-//					if (null != model) {
-//						current.addReferentielAttribute(ReferentielKey.MODEL, model);
-//					}
-//				}
-//				if (null != manufactureInfo.getWarranty()) current.addAttribute("WARRANTY",manufactureInfo.getWarranty().getDisplayValue(), "fr",null);
-//				//if (null != manufactureInfo.getItemPartNumber()) current.addAttribute("ITEM_PART_NUMBER",manufactureInfo.getItemPartNumber().getDisplayValue(), "fr", false, null);
-//			}
-//
-//
-//			ProductInfo productInfo = itemInfo.getProductInfo();
-//			productInfo.getColor();
-//			// TODO : Localisation
-//			if (null != productInfo.getColor()) current.addAttribute("COLOR",productInfo.getColor().getDisplayValue(), "fr",  null);
-//			if (null != productInfo.getIsAdultProduct())  current.addAttribute("ADULT",productInfo.getIsAdultProduct().getLabel(), "fr",  null);
-//			if (null != productInfo.getItemDimensions())  current.addAttribute("HEIGHT",getDisplayUnit(productInfo.getItemDimensions().getHeight()), "fr", null);
-//			if (null != productInfo.getItemDimensions()) current.addAttribute("WEIGHT",getDisplayUnit(productInfo.getItemDimensions().getWeight()), "fr",  null);
-//			if (null != productInfo.getItemDimensions()) current.addAttribute("WIDTH",getDisplayUnit(productInfo.getItemDimensions().getWidth()), "fr",  null);
-//			if (null != productInfo.getSize()) current.addAttribute("SIZE",productInfo.getSize().getDisplayValue() , "fr",  null);
-//
-//			if (null != productInfo.getReleaseDate()) {
-//				String year = productInfo.getReleaseDate().getDisplayValue().substring(0,4);
-//				if (StringUtils.isNumeric(year)) {
-//					current.addAttribute("YEAR",year, "fr", null);
-//				}
-//			}
-//
-//
-//			// TODO : Add here also
-//			TechnicalInfo technicalInfo = itemInfo.getTechnicalInfo();
-//
-//			if (null != technicalInfo) {
-//				SingleStringValuedAttribute energyClass = technicalInfo.getEnergyEfficiencyClass();
-//				if (null != energyClass) {
-//					current.addAttribute("CLASSE ENERGETIQUE",energyClass.getDisplayValue(), "fr", null);
-//				}
-//
-//				MultiValuedAttribute formats = technicalInfo.getFormats();
-//				if (null != formats) {
-//					logger.error("NOT NULL FORMATS {}",formats);
-//				}
-//
-//			}
-//
-//
-//			// Adding the amazon name
-//			SingleStringValuedAttribute title = itemInfo.getTitle();
-//			if (null != title) {
-//				current.addName(title.getDisplayValue());
-//			}
-//
-//			// TradeInInfo tradeInfo = itemInfo.getTradeInInfo();
-//		}
-//
-//		// ParentASIN
-////		String parentAsin = item.getParentASIN();
-////		if (!StringUtils.isEmpty(parentAsin)) {
-////			logger.info("Found a parent ASIN for {}", data.gtin());
-////		}
-//
-//		List<VariationAttribute> variationAttributes = item.getVariationAttributes();
-//		if (null != variationAttributes) {
-//			variationAttributes.forEach(e -> {
-//				String varName = e.getName();
-//				String varValue = e.getValue();
-//				logger.info("Found a variation attribute for {} : {}, {}", data.gtin(), varName, varValue);
-//			});
-//		}
-//
-//		////////////////////
-//		// Adding category
-//		////////////////////
-//		BrowseNodeInfo browseNodeInfo = item.getBrowseNodeInfo();
-//
-////			if (null != item.getItemInfo().getContentInfo()) {
-////				System.out.println(item.getItemInfo().getContentInfo());
-////			}
-////		browseNodeInfo.getBrowseNodes()
-////		String category = IdHelper.getCategoryName(StringUtils
-////				.join(browseNodeInfo.getBrowseNodes().stream().map(e -> e.getDisplayName()).toList(), " > "));
-////
-////		data.getDatasourceCategories().add(category);
-////		data.getMappedCategories().add(new UnindexedKeyVal("amazon", category));
-//
-////		BigDecimal score = item.getScore();
-////		if (null != score) {
-////			logger.info("Score : {}", score);
-////		}
-//
-//		// RentalOffers rentalOffers = item.getRentalOffers();
-//
-//		logger.warn("Amazon completion done for {}", data.gtin());
-//		return ret;
-//
-//	}
-//
-//
-//
-//	/**
-//	 * Map an amazon offer to a DataFragment
-//	 *
-//	 * @param o
-//	 * @param url
-//	 * @return
-//	 */
-//	private DataFragment mapOfferToDataFragment(OfferListing o, String url, Product data) {
-//
-//		DataFragment df = initDataFragment(url, url, data);
-//
-//		Price p = new Price();
-//		p.setTimeStamp(System.currentTimeMillis());
-//		if (o.getCondition().getValue().equals(AMAZON_PRODUCTSTATE_OCCASION)) {
-//			df.setProductState(ProductCondition.OCCASION);
-//		} else if (o.getCondition().getValue().equals(AMAZON_PRODUCTSTATE_NEW)) {
-//			df.setProductState(ProductCondition.NEW);
-//		} else {
-//			logger.warn("Unknow amazon product condition : {}", o.getCondition().getLabel());
-//		}
-//
-//		p.setPrice(o.getPrice().getAmount().doubleValue());
-//		try {
-//			p.setCurrency(o.getPrice().getCurrency());
-//		} catch (ParseException e) {
-//			logger.warn("Error setting amazoncurrency", e);
-//		}
-//
-//		df.setPrice(p);
-//
-//		return df;
-//	}
-//
-//
-//	/**
-//	 * Init an empty datafragment for amazon provider
-//	 * @param datasourceName
-//	 * @param url
-//	 * @param data
-//	 * @return
-//	 */
-//	private DataFragment initDataFragment(String datasourceName, String url, Product data) {
-//		DataFragment df = new DataFragment();
-//		df.setDatasourceName(amazonDatasource.getName());
-//		df.setDatasourceConfigName(amazonDatasource.getDatasourceConfigName());
-//		df.setAffiliatedUrl(url);
-//		df.setUrl(url);
-//		df.setLastIndexationDate(System.currentTimeMillis());
-//		df.setCreationDate(System.currentTimeMillis());
-//		df.addReferentielAttribute(ReferentielKey.GTIN, String.valueOf(data.getId()) );
-//		return df;
-//	}
-//
-//
-//	/**
-//	 * Display an amazon UnitBasedAttribute
-//	 * @param attr
-//	 * @return
-//	 */
-//	private String getDisplayUnit(UnitBasedAttribute attr) {
-//		if (null == attr) {
-//			return null;
-//		}
-//		return attr.getDisplayValue().toString() + " " + attr.getUnit();
-//	}
-//
-//
-//
-//}
+package org.open4goods.api.services.completion;
+
+import java.text.ParseException;
+import java.time.Duration;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
+
+import org.apache.commons.lang3.StringUtils;
+import org.open4goods.api.config.yml.AmazonCompletionConfig;
+import org.open4goods.api.config.yml.ApiProperties;
+import org.open4goods.api.services.AggregationFacadeService;
+import org.open4goods.api.services.aggregation.aggregator.StandardAggregator;
+import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
+import org.open4goods.commons.exceptions.AggregationSkipException;
+import org.open4goods.commons.services.AbstractCompletionService;
+import org.open4goods.commons.services.DataSourceConfigService;
+import org.open4goods.model.attribute.ReferentielKey;
+import org.open4goods.model.datafragment.DataFragment;
+import org.open4goods.model.datafragment.ProviderSupportType;
+import org.open4goods.model.exceptions.ValidationException;
+import org.open4goods.model.helper.IdHelper;
+import org.open4goods.model.price.Price;
+import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductCondition;
+import org.open4goods.model.resource.Resource;
+import org.open4goods.model.resource.ResourceTag;
+import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.services.productrepository.services.ProductRepository;
+import org.open4goods.verticals.VerticalsConfigService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.amazon.paapi5.v1.ApiException;
+import com.amazon.paapi5.v1.ByLineInfo;
+import com.amazon.paapi5.v1.Condition;
+import com.amazon.paapi5.v1.DimensionBasedAttribute;
+import com.amazon.paapi5.v1.ErrorData;
+import com.amazon.paapi5.v1.GetItemsRequest;
+import com.amazon.paapi5.v1.GetItemsResource;
+import com.amazon.paapi5.v1.GetItemsResponse;
+import com.amazon.paapi5.v1.ImageSize;
+import com.amazon.paapi5.v1.Images;
+import com.amazon.paapi5.v1.Item;
+import com.amazon.paapi5.v1.ItemIdType;
+import com.amazon.paapi5.v1.ItemInfo;
+import com.amazon.paapi5.v1.ManufactureInfo;
+import com.amazon.paapi5.v1.OfferListing;
+import com.amazon.paapi5.v1.Offers;
+import com.amazon.paapi5.v1.PartnerType;
+import com.amazon.paapi5.v1.ProductInfo;
+import com.amazon.paapi5.v1.SearchItemsRequest;
+import com.amazon.paapi5.v1.SearchItemsResource;
+import com.amazon.paapi5.v1.SearchItemsResponse;
+import com.amazon.paapi5.v1.SingleBooleanValuedAttribute;
+import com.amazon.paapi5.v1.SingleStringValuedAttribute;
+import com.amazon.paapi5.v1.TechnicalInfo;
+import com.amazon.paapi5.v1.UnitBasedAttribute;
+
+/**
+ * Completes products from Amazon Product Advertising API v5.
+ *
+ * <p>The service follows the existing completion pipeline contract:
+ * {@link #shouldProcess(VerticalConfig, Product)} checks the product-level cache
+ * in {@code Product.datasourceCodes}, {@link #processProduct(VerticalConfig, Product)}
+ * fetches PA-API data, maps it to {@link DataFragment} instances, applies the
+ * realtime aggregator, and stores the latest attempt timestamp.
+ */
+public class AmazonCompletionService extends AbstractCompletionService {
+
+    static final String DATASOURCE_NAME = "amazon.fr";
+    private static final Logger logger = LoggerFactory.getLogger(AmazonCompletionService.class);
+    private static final String AMAZON_PRODUCT_STATE_NEW = "New";
+    private static final String AMAZON_PRODUCT_STATE_USED = "Used";
+    private static final String AMAZON_PRODUCT_STATE_COLLECTIBLE = "Collectible";
+    private static final String AMAZON_PRODUCT_STATE_REFURBISHED = "Refurbished";
+    private static final String LANGUAGE = "fr";
+
+    private static final List<GetItemsResource> GET_ITEMS_RESOURCES = List.of(
+            GetItemsResource.IMAGES_PRIMARY_LARGE,
+            GetItemsResource.IMAGES_VARIANTS_LARGE,
+            GetItemsResource.ITEMINFO_BYLINEINFO,
+            GetItemsResource.ITEMINFO_MANUFACTUREINFO,
+            GetItemsResource.ITEMINFO_PRODUCTINFO,
+            GetItemsResource.ITEMINFO_TECHNICALINFO,
+            GetItemsResource.ITEMINFO_TITLE,
+            GetItemsResource.OFFERS_LISTINGS_CONDITION,
+            GetItemsResource.OFFERS_LISTINGS_MERCHANTINFO,
+            GetItemsResource.OFFERS_LISTINGS_PRICE);
+
+    private static final List<SearchItemsResource> SEARCH_ITEMS_RESOURCES = List.of(
+            SearchItemsResource.IMAGES_PRIMARY_LARGE,
+            SearchItemsResource.IMAGES_VARIANTS_LARGE,
+            SearchItemsResource.ITEMINFO_BYLINEINFO,
+            SearchItemsResource.ITEMINFO_MANUFACTUREINFO,
+            SearchItemsResource.ITEMINFO_PRODUCTINFO,
+            SearchItemsResource.ITEMINFO_TECHNICALINFO,
+            SearchItemsResource.ITEMINFO_TITLE,
+            SearchItemsResource.OFFERS_LISTINGS_CONDITION,
+            SearchItemsResource.OFFERS_LISTINGS_MERCHANTINFO,
+            SearchItemsResource.OFFERS_LISTINGS_PRICE);
+
+    private final AmazonCompletionConfig amazonConfig;
+    private final DataSourceProperties amazonDatasource;
+    private final StandardAggregator aggregator;
+    private final AmazonPaapiClient paapiClient;
+
+    /**
+     * Builds the Amazon completion service from API configuration.
+     *
+     * @param dataRepository product repository used by the completion base class
+     * @param verticalConfigService vertical configuration service
+     * @param apiProperties global API properties
+     * @param dataSourceConfigService datasource configuration registry
+     * @param aggregationFacadeService aggregation facade used to build a realtime aggregator
+     */
+    public AmazonCompletionService(ProductRepository dataRepository, VerticalsConfigService verticalConfigService,
+            ApiProperties apiProperties, DataSourceConfigService dataSourceConfigService,
+            AggregationFacadeService aggregationFacadeService) {
+        this(dataRepository, verticalConfigService, apiProperties, dataSourceConfigService, aggregationFacadeService,
+                apiProperties.getAmazonConfig().isConfigured()
+                        ? AmazonPaapiClient.fromConfig(apiProperties.getAmazonConfig())
+                        : null);
+    }
+
+    AmazonCompletionService(ProductRepository dataRepository, VerticalsConfigService verticalConfigService,
+            ApiProperties apiProperties, DataSourceConfigService dataSourceConfigService,
+            AggregationFacadeService aggregationFacadeService, AmazonPaapiClient paapiClient) {
+        super(dataRepository, verticalConfigService, apiProperties.logsFolder(), apiProperties.aggLogLevel());
+        this.amazonConfig = apiProperties.getAmazonConfig();
+        this.amazonDatasource = resolveAmazonDatasource(dataSourceConfigService, amazonConfig);
+        this.aggregator = aggregationFacadeService.getStandardAggregator("amazon-aggregation");
+        this.aggregator.beforeStart();
+        this.paapiClient = paapiClient;
+    }
+
+    @Override
+    public boolean shouldProcess(VerticalConfig vertical, Product data) {
+        if (!amazonConfig.isConfigured()) {
+            return false;
+        }
+
+        Long lastProcessed = data.getDatasourceCodes().get(getDatasourceName());
+        if (lastProcessed == null) {
+            return true;
+        }
+        Duration refreshDuration = amazonConfig.getRefreshDuration();
+        return System.currentTimeMillis() - lastProcessed >= refreshDuration.toMillis();
+    }
+
+    @Override
+    public String getDatasourceName() {
+        return DATASOURCE_NAME;
+    }
+
+    /**
+     * Runs Amazon completion for all verticals using one global PA-API budget.
+     *
+     * <p>The base completion service applies {@code max} per vertical. Amazon
+     * throttling is account-wide, so this override treats {@code max} as the
+     * total number of products for the whole all-vertical run.
+     *
+     * @param max maximum products for this run; uses Amazon config when null
+     * @param withExcluded whether excluded products should be included
+     */
+    @Override
+    public void completeAll(Integer max, boolean withExcluded) {
+        int remaining = max == null ? amazonConfig.getMaxCallsPerBatch() : max;
+        logger.info("Amazon completion for all verticals, max {} products", remaining);
+        for (VerticalConfig vertical : verticalConfigService.getConfigsWithoutDefault()) {
+            if (remaining <= 0) {
+                return;
+            }
+
+            List<Product> products = dataRepository.exportVerticalWithValidDate(vertical, withExcluded)
+                    .limit(remaining)
+                    .toList();
+            products.forEach(product -> completeAndIndexProduct(vertical, product));
+            remaining -= products.size();
+        }
+    }
+
+    /**
+     * Returns Amazon completion settings used by orchestration endpoints.
+     *
+     * @return Amazon completion configuration
+     */
+    public AmazonCompletionConfig getAmazonConfig() {
+        return amazonConfig;
+    }
+
+    /**
+     * Completes one product from PA-API and aggregates the resulting fragments.
+     *
+     * <p>If the product already has an ASIN, the service uses {@code GetItems};
+     * otherwise it searches by GTIN and stores the returned ASIN for the next
+     * refresh. The timestamp is stored even when no item is found, making misses
+     * cacheable for the configured refresh duration.
+     *
+     * @param vertical vertical context
+     * @param data product to complete
+     */
+    @Override
+    public void processProduct(VerticalConfig vertical, Product data) {
+        if (!amazonConfig.isConfigured() || paapiClient == null) {
+            logger.info("Amazon completion is disabled or missing PA-API credentials");
+            return;
+        }
+
+        logger.info("Amazon completion for {}", data.getId());
+        Set<DataFragment> fragments = StringUtils.isBlank(data.getExternalIds().getAsin())
+                ? completeSearch(data)
+                : completeGet(data);
+
+        for (DataFragment fragment : fragments) {
+            try {
+                aggregator.onDatafragment(fragment, data);
+            } catch (AggregationSkipException e) {
+                logger.error("Error occurred during Amazon aggregation for {}", data.gtin(), e);
+            }
+        }
+
+        data.getDatasourceCodes().put(getDatasourceName(), System.currentTimeMillis());
+        sleepAfterCall();
+    }
+
+    Set<DataFragment> completeGet(Product data) {
+        GetItemsRequest request = new GetItemsRequest()
+                .itemIdType(ItemIdType.ASIN)
+                .itemIds(List.of(data.getExternalIds().getAsin()))
+                .partnerTag(amazonConfig.getPartnerTag())
+                .partnerType(PartnerType.ASSOCIATES)
+                .resources(GET_ITEMS_RESOURCES)
+                .condition(Condition.ANY)
+                .marketplace(amazonConfig.getMarketplace());
+
+        try {
+            GetItemsResponse response = paapiClient.getItems(request);
+            logErrors(response == null ? null : response.getErrors());
+            List<Item> items = Optional.ofNullable(response)
+                    .map(GetItemsResponse::getItemsResult)
+                    .map(result -> nullToEmpty(result.getItems()))
+                    .orElseGet(List::of);
+
+            if (items.isEmpty()) {
+                logger.info("No Amazon item found for known ASIN {} and GTIN {}", data.getExternalIds().getAsin(),
+                        data.gtin());
+            } else if (items.size() > 1) {
+                logger.warn("Amazon returned {} items for ASIN {} and GTIN {}", items.size(),
+                        data.getExternalIds().getAsin(), data.gtin());
+            }
+            return mapItems(items, data);
+        } catch (ApiException e) {
+            logApiException(e, data);
+            return Set.of();
+        }
+    }
+
+    Set<DataFragment> completeSearch(Product data) {
+        SearchItemsRequest request = new SearchItemsRequest()
+                .keywords(data.gtin())
+                .itemCount(3)
+                .partnerTag(amazonConfig.getPartnerTag())
+                .partnerType(PartnerType.ASSOCIATES)
+                .resources(SEARCH_ITEMS_RESOURCES)
+                .condition(Condition.ANY)
+                .searchIndex(amazonConfig.getSearchIndex())
+                .marketplace(amazonConfig.getMarketplace());
+
+        try {
+            SearchItemsResponse response = paapiClient.searchItems(request);
+            logErrors(response == null ? null : response.getErrors());
+            List<Item> items = Optional.ofNullable(response)
+                    .map(SearchItemsResponse::getSearchResult)
+                    .map(result -> nullToEmpty(result.getItems()))
+                    .orElseGet(List::of);
+
+            if (items.isEmpty()) {
+                logger.info("No Amazon item found for GTIN {}", data.gtin());
+            } else if (items.size() > 1) {
+                logger.warn("Amazon search returned {} candidates for GTIN {}", items.size(), data.gtin());
+            }
+            return mapItems(items, data);
+        } catch (ApiException e) {
+            logApiException(e, data);
+            return Set.of();
+        }
+    }
+
+    Set<DataFragment> mapItems(List<Item> items, Product data) {
+        return nullToEmpty(items).stream()
+                .filter(Objects::nonNull)
+                .flatMap(item -> processAmazonItem(item, data).stream())
+                .collect(java.util.stream.Collectors.toSet());
+    }
+
+    Set<DataFragment> processAmazonItem(Item item, Product data) {
+        String detailPageUrl = item.getDetailPageURL();
+        if (StringUtils.isBlank(detailPageUrl)) {
+            detailPageUrl = amazonProductUrl(item.getASIN());
+        }
+
+        if (StringUtils.isNotBlank(item.getASIN())) {
+            data.getExternalIds().setAsin(item.getASIN());
+        } else {
+            logger.warn("Amazon item for {} did not include an ASIN", data.gtin());
+        }
+
+        addImages(item.getImages(), data);
+
+        String resolvedDetailPageUrl = detailPageUrl;
+        Set<DataFragment> fragments = offerFragments(item.getOffers(), resolvedDetailPageUrl, data);
+        if (fragments.isEmpty()) {
+            DataFragment attributeFragment = initDataFragment(resolvedDetailPageUrl, data);
+            addItemInfoAttributes(item.getItemInfo(), attributeFragment);
+
+            if (hasCompletionContent(attributeFragment)) {
+                fragments.add(attributeFragment);
+            }
+        } else {
+            fragments.forEach(fragment -> addItemInfoAttributes(item.getItemInfo(), fragment));
+        }
+        return fragments;
+    }
+
+    private Set<DataFragment> offerFragments(Offers offers, String detailPageUrl, Product data) {
+        List<OfferListing> listings = Optional.ofNullable(offers)
+                .map(Offers::getListings)
+                .map(AmazonCompletionService::nullToEmpty)
+                .orElseGet(List::of);
+
+        Optional<OfferListing> newOffer = listings.stream()
+                .filter(this::hasMappablePrice)
+                .filter(this::isNewCondition)
+                .min(Comparator.comparing(offer -> offer.getPrice().getAmount()));
+
+        Optional<OfferListing> usedOffer = listings.stream()
+                .filter(this::hasMappablePrice)
+                .filter(this::isUsedCondition)
+                .min(Comparator.comparing(offer -> offer.getPrice().getAmount()));
+
+        return Stream.of(newOffer, usedOffer)
+                .flatMap(Optional::stream)
+                .map(offer -> mapOfferToDataFragment(offer, detailPageUrl, data))
+                .flatMap(Optional::stream)
+                .collect(java.util.stream.Collectors.toSet());
+    }
+
+    private Optional<DataFragment> mapOfferToDataFragment(OfferListing offer, String url, Product data) {
+        if (!hasMappablePrice(offer)) {
+            return Optional.empty();
+        }
+
+        DataFragment fragment = initDataFragment(url, data);
+        ProductCondition condition = isUsedCondition(offer) ? ProductCondition.OCCASION : ProductCondition.NEW;
+        fragment.setProductState(condition);
+        fragment.setUrl(url + "#condition=" + condition.name().toLowerCase());
+
+        Price price = new Price();
+        price.setTimeStamp(System.currentTimeMillis());
+        price.setPrice(offer.getPrice().getAmount().doubleValue());
+        try {
+            price.setCurrency(offer.getPrice().getCurrency());
+        } catch (ParseException e) {
+            logger.warn("Cannot map Amazon currency {} for {}", offer.getPrice().getCurrency(), data.gtin());
+        }
+        fragment.setPrice(price);
+        return Optional.of(fragment);
+    }
+
+    private boolean hasMappablePrice(OfferListing offer) {
+        return offer != null && offer.getPrice() != null && offer.getPrice().getAmount() != null;
+    }
+
+    private boolean isNewCondition(OfferListing offer) {
+        String condition = conditionValue(offer);
+        return condition == null || AMAZON_PRODUCT_STATE_NEW.equalsIgnoreCase(condition);
+    }
+
+    private boolean isUsedCondition(OfferListing offer) {
+        String condition = conditionValue(offer);
+        return AMAZON_PRODUCT_STATE_USED.equalsIgnoreCase(condition)
+                || AMAZON_PRODUCT_STATE_COLLECTIBLE.equalsIgnoreCase(condition)
+                || AMAZON_PRODUCT_STATE_REFURBISHED.equalsIgnoreCase(condition);
+    }
+
+    private String conditionValue(OfferListing offer) {
+        return Optional.ofNullable(offer)
+                .map(OfferListing::getCondition)
+                .map(condition -> StringUtils.defaultIfBlank(condition.getValue(), condition.getDisplayValue()))
+                .orElse(null);
+    }
+
+    private void addImages(Images images, Product data) {
+        if (images == null) {
+            return;
+        }
+        addImage(images.getPrimary(), data, ResourceTag.AMAZON_PRIMARY_TAG, ResourceTag.PRIMARY);
+        nullToEmpty(images.getVariants()).forEach(image -> addImage(image, data, ResourceTag.AMAZON_VARIANT_TAG));
+    }
+
+    private void addImage(com.amazon.paapi5.v1.ImageType image, Product data, ResourceTag... hardTags) {
+        String url = Optional.ofNullable(image)
+                .map(com.amazon.paapi5.v1.ImageType::getLarge)
+                .map(ImageSize::getURL)
+                .orElse(null);
+        if (StringUtils.isBlank(url)) {
+            return;
+        }
+
+        try {
+            Resource resource = new Resource(url);
+            resource.setDatasourceName(amazonDatasource.getName());
+            for (ResourceTag hardTag : hardTags) {
+                resource.getHardTags().add(hardTag);
+            }
+            data.getResources().add(resource);
+        } catch (ValidationException e) {
+            logger.warn("Cannot add Amazon image {} for {}", url, data.gtin());
+        }
+    }
+
+    private void addItemInfoAttributes(ItemInfo itemInfo, DataFragment fragment) {
+        if (itemInfo == null) {
+            return;
+        }
+
+        addByLineInfo(itemInfo.getByLineInfo(), fragment);
+        addManufactureInfo(itemInfo.getManufactureInfo(), fragment);
+        addProductInfo(itemInfo.getProductInfo(), fragment);
+        addTechnicalInfo(itemInfo.getTechnicalInfo(), fragment);
+        addName(itemInfo.getTitle(), fragment);
+    }
+
+    private void addByLineInfo(ByLineInfo byLineInfo, DataFragment fragment) {
+        if (byLineInfo == null) {
+            return;
+        }
+        addReferentielAttribute(fragment, ReferentielKey.BRAND, byLineInfo.getBrand());
+    }
+
+    private void addManufactureInfo(ManufactureInfo manufactureInfo, DataFragment fragment) {
+        if (manufactureInfo == null) {
+            return;
+        }
+        String model = displayValue(manufactureInfo.getModel());
+        if (StringUtils.isNotBlank(model)) {
+            if (model.length() > 15) {
+                model = IdHelper.extractBrandUids(model).stream().findFirst().orElse(model);
+            }
+            fragment.addReferentielAttribute(ReferentielKey.MODEL, model);
+        }
+        addAttribute(fragment, "WARRANTY", manufactureInfo.getWarranty());
+        addAttribute(fragment, "ITEM_PART_NUMBER", manufactureInfo.getItemPartNumber());
+    }
+
+    private void addProductInfo(ProductInfo productInfo, DataFragment fragment) {
+        if (productInfo == null) {
+            return;
+        }
+        addAttribute(fragment, "COLOR", productInfo.getColor());
+        addBooleanAttribute(fragment, "ADULT", productInfo.getIsAdultProduct());
+        addAttribute(fragment, "HEIGHT", displayUnit(Optional.ofNullable(productInfo.getItemDimensions())
+                .map(DimensionBasedAttribute::getHeight).orElse(null)));
+        addAttribute(fragment, "LENGTH", displayUnit(Optional.ofNullable(productInfo.getItemDimensions())
+                .map(DimensionBasedAttribute::getLength).orElse(null)));
+        addAttribute(fragment, "WEIGHT", displayUnit(Optional.ofNullable(productInfo.getItemDimensions())
+                .map(DimensionBasedAttribute::getWeight).orElse(null)));
+        addAttribute(fragment, "WIDTH", displayUnit(Optional.ofNullable(productInfo.getItemDimensions())
+                .map(DimensionBasedAttribute::getWidth).orElse(null)));
+        addAttribute(fragment, "SIZE", productInfo.getSize());
+
+        String releaseDate = displayValue(productInfo.getReleaseDate());
+        if (StringUtils.length(releaseDate) >= 4) {
+            String year = releaseDate.substring(0, 4);
+            if (StringUtils.isNumeric(year)) {
+                addAttribute(fragment, "YEAR", year);
+            }
+        }
+    }
+
+    private void addTechnicalInfo(TechnicalInfo technicalInfo, DataFragment fragment) {
+        if (technicalInfo == null) {
+            return;
+        }
+        addAttribute(fragment, "CLASSE ENERGETIQUE", technicalInfo.getEnergyEfficiencyClass());
+    }
+
+    private void addName(SingleStringValuedAttribute title, DataFragment fragment) {
+        String value = displayValue(title);
+        if (StringUtils.isNotBlank(value)) {
+            fragment.addName(value);
+        }
+    }
+
+    private void addReferentielAttribute(DataFragment fragment, ReferentielKey key, SingleStringValuedAttribute value) {
+        String displayValue = displayValue(value);
+        if (StringUtils.isNotBlank(displayValue)) {
+            fragment.addReferentielAttribute(key, displayValue);
+        }
+    }
+
+    private void addAttribute(DataFragment fragment, String name, SingleStringValuedAttribute value) {
+        addAttribute(fragment, name, displayValue(value));
+    }
+
+    private void addBooleanAttribute(DataFragment fragment, String name, SingleBooleanValuedAttribute value) {
+        if (value != null && value.isDisplayValue() != null) {
+            addAttribute(fragment, name, String.valueOf(value.isDisplayValue()));
+        }
+    }
+
+    private void addAttribute(DataFragment fragment, String name, String value) {
+        if (StringUtils.isNotBlank(value)) {
+            fragment.addAttribute(name, value, LANGUAGE, null);
+        }
+    }
+
+    private String displayValue(SingleStringValuedAttribute value) {
+        return value == null ? null : value.getDisplayValue();
+    }
+
+    private String displayUnit(UnitBasedAttribute attribute) {
+        if (attribute == null || attribute.getDisplayValue() == null) {
+            return null;
+        }
+        return StringUtils.isBlank(attribute.getUnit())
+                ? attribute.getDisplayValue().toPlainString()
+                : attribute.getDisplayValue().toPlainString() + " " + attribute.getUnit();
+    }
+
+    private boolean hasCompletionContent(DataFragment fragment) {
+        return !fragment.getNames().isEmpty()
+                || !fragment.getAttributes().isEmpty()
+                || fragment.getReferentielAttributes().size() > 1;
+    }
+
+    private DataFragment initDataFragment(String url, Product data) {
+        DataFragment fragment = new DataFragment();
+        fragment.setDatasourceName(amazonDatasource.getName());
+        fragment.setDatasourceConfigName(amazonDatasource.getDatasourceConfigName());
+        fragment.setProviderSupportType(ProviderSupportType.API);
+        fragment.setAffiliatedUrl(url);
+        fragment.setUrl(url);
+        fragment.setLastIndexationDate(System.currentTimeMillis());
+        fragment.setCreationDate(System.currentTimeMillis());
+        fragment.addReferentielAttribute(ReferentielKey.GTIN, String.valueOf(data.getId()));
+        return fragment;
+    }
+
+    private void logErrors(List<ErrorData> errors) {
+        nullToEmpty(errors).forEach(error -> logger.warn("Amazon PA-API returned {}: {}",
+                error.getCode(), error.getMessage()));
+    }
+
+    private void logApiException(ApiException exception, Product data) {
+        logger.warn("Amazon PA-API failed for {} with status {}: {}", data.gtin(), exception.getCode(),
+                exception.getResponseBody() == null ? exception.getMessage() : exception.getResponseBody());
+    }
+
+    private void sleepAfterCall() {
+        try {
+            Thread.sleep(amazonConfig.getSleepDuration().toMillis());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.warn("Amazon politeness sleep interrupted");
+        }
+    }
+
+    private String amazonProductUrl(String asin) {
+        if (StringUtils.isBlank(asin)) {
+            return "https://" + amazonConfig.getMarketplace();
+        }
+        return "https://" + amazonConfig.getMarketplace() + "/dp/" + asin + "?tag=" + amazonConfig.getPartnerTag();
+    }
+
+    private static DataSourceProperties resolveAmazonDatasource(DataSourceConfigService dataSourceConfigService,
+            AmazonCompletionConfig config) {
+        DataSourceProperties datasource = dataSourceConfigService.getDatasourceConfig(config.getDatasourceName());
+        if (datasource == null) {
+            datasource = dataSourceConfigService.getDatasourceConfig(DATASOURCE_NAME);
+        }
+        if (datasource != null) {
+            return datasource;
+        }
+
+        DataSourceProperties fallback = new DataSourceProperties();
+        fallback.setName(DATASOURCE_NAME);
+        fallback.setDatasourceConfigName(config.getDatasourceName());
+        return fallback;
+    }
+
+    private static <T> List<T> nullToEmpty(List<T> values) {
+        return values == null ? List.of() : values;
+    }
+}

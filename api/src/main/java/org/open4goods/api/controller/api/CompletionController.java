@@ -3,6 +3,7 @@ package org.open4goods.api.controller.api;
 
 import java.io.IOException;
 
+import org.open4goods.api.services.completion.AmazonCompletionService;
 import org.open4goods.api.services.completion.EprelCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
@@ -37,7 +38,7 @@ public class CompletionController {
 	private final VerticalsConfigService verticalConfigService;
 
 	private ResourceCompletionService resourceCompletionService;
-//	private AmazonCompletionService amazonCompletionService;
+	private AmazonCompletionService amazonCompletionService;
 
 	@Autowired
 	private ProductRepository repository;
@@ -48,13 +49,13 @@ public class CompletionController {
 
 	public CompletionController(VerticalsConfigService verticalsConfigService,
 			ResourceCompletionService resourceCompletionService,
-//			AmazonCompletionService amazonCompletionService,
+			AmazonCompletionService amazonCompletionService,
 			IcecatCompletionService iceCatService,
 			EprelCompletionService eprelCompletionService
 			) {
 		this.verticalConfigService = verticalsConfigService;
 		this.resourceCompletionService = resourceCompletionService;
-//		this.amazonCompletionService = amazonCompletionService;
+		this.amazonCompletionService = amazonCompletionService;
 		this.iceCatService = iceCatService;
 		this.eprelCompletionService = eprelCompletionService;
 	}
@@ -91,37 +92,36 @@ public class CompletionController {
 
 
 
-//	///////////////////////////////////
-//	// Amazon completion
-//	///////////////////////////////////
-//
-//	@GetMapping("/completion/amazon")
-//	@Operation(summary = "Launch amazon completion on all verticals")
-//	public void amazonCompletionAll() throws InvalidParameterException, IOException {
-//// TODO : From conf
-//		amazonCompletionService.completeAll(false);
-//	}
-//
-//	@GetMapping("/completion/amazon/")
-//	@Operation(summary = "Launch amazon completion on the specified vertical")
-//	public void amazonCompletionVertical(@RequestParam @NotBlank final String verticalConfig, @RequestParam Integer max)
-//			throws InvalidParameterException, IOException {
-//		amazonCompletionService.complete(verticalConfigService.getConfigById(verticalConfig), max, false);
-//	}
-//
-//	@GetMapping("/completion/amazon/gtin/")
-//	@Operation(summary = "Launch amazon completion on the specified vertical")
-//	public void amazonCompletionProduct(@RequestParam final Long gtin) {
-//		Product data;
-//		try {
-//			data = repository.getById(gtin);
-//		} catch (ResourceNotFoundException e) {
-//			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-//		}
-//		amazonCompletionService.completeAndIndexProduct(verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
-//	}
-//
-//
+	///////////////////////////////////
+	// Amazon completion
+	///////////////////////////////////
+
+	@GetMapping("/completion/amazon")
+	@Operation(summary = "Launch amazon completion on all verticals")
+	public void amazonCompletionAll() throws InvalidParameterException, IOException {
+		amazonCompletionService.completeAll(amazonCompletionService.getAmazonConfig().getMaxCallsPerBatch(), false);
+	}
+
+	@GetMapping("/completion/amazon/")
+	@Operation(summary = "Launch amazon completion on the specified vertical")
+	public void amazonCompletionVertical(@RequestParam @NotBlank final String verticalConfig,
+			@RequestParam(required = false) Integer max)
+			throws InvalidParameterException, IOException {
+		int limit = max == null ? amazonCompletionService.getAmazonConfig().getMaxCallsPerBatch() : max;
+		amazonCompletionService.complete(verticalConfigService.getConfigById(verticalConfig), limit, false);
+	}
+
+	@GetMapping("/completion/amazon/gtin/")
+	@Operation(summary = "Launch amazon completion on the specified product")
+	public void amazonCompletionProduct(@RequestParam final Long gtin) {
+		Product data;
+		try {
+			data = repository.getById(gtin);
+		} catch (ResourceNotFoundException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		}
+		amazonCompletionService.completeAndIndexProduct(verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
+	}
 
 
 

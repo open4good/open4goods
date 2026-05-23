@@ -11,6 +11,7 @@ import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.CompletionFacadeService;
 import org.open4goods.api.services.ScrapperOrchestrationService;
 import org.open4goods.api.services.VerticalsGenerationService;
+import org.open4goods.api.services.completion.AmazonCompletionService;
 import org.open4goods.api.services.completion.EprelCompletionService;
 import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
@@ -208,7 +209,13 @@ public class ApiConfig {
 		return new EprelCompletionService(verticalConfigService, productRepository, apiProperties, eprelSearchService,aggregationFacade );
 	}
 
-
+	@Bean
+	AmazonCompletionService amazonCompletionService(ProductRepository productRepository,
+			VerticalsConfigService verticalConfigService, DataSourceConfigService dataSourceConfigService,
+			AggregationFacadeService aggregationFacade) {
+		return new AmazonCompletionService(productRepository, verticalConfigService, apiProperties,
+				dataSourceConfigService, aggregationFacade);
+	}
 
 
 
@@ -256,9 +263,9 @@ public class ApiConfig {
 	@Bean
 	CompletionFacadeService completionFacadeService(ResourceCompletionService resourceCompletionService,
 			IcecatCompletionService icecatCompletionService, EprelCompletionService eprelCompletionService,
-			WikidataCompletionService wikidataCompletionService) {
+			WikidataCompletionService wikidataCompletionService, AmazonCompletionService amazonCompletionService) {
 		return new CompletionFacadeService(resourceCompletionService, icecatCompletionService, eprelCompletionService,
-				wikidataCompletionService);
+				wikidataCompletionService, amazonCompletionService);
 	}
 
 	@Bean
