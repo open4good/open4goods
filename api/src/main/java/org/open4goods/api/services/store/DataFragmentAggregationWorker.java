@@ -51,14 +51,13 @@ public class DataFragmentAggregationWorker implements Runnable {
 					// There is data to consume and queue consummation is enabled
 					final Set<DataFragment> buffer = new HashSet<>();	
 					
-					for (int i = 0; i < dequeuePageSize; i++) {
-							buffer.add(service.getQueue().take());
+					service.getQueue().drainTo(buffer, dequeuePageSize);
+					
+					if (!buffer.isEmpty()) {
+						// Aggregating
+						service.aggregateAndstore(buffer);
+						logger.info("{} has handled {} DataFragments. {} Remaining in queue", workerName, buffer.size(), service.getQueue().size());
 					}
-					
-					// Aggregating
-					service.aggregateAndstore(buffer);
-					
-					logger.info("{} has handled {} DataFragments. {} Remaining in queue",workerName,  buffer.size(), service.getQueue().size());
 
 				} else {
 					try {

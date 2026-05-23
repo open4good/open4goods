@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import java.util.List;
 
 /**
  * Configuration properties for the EPREL integration.
@@ -48,6 +49,11 @@ public class EprelServiceProperties
      */
     @Min(1)
     private int minAlnumLength = 3;
+
+    /**
+     * List of EPREL product groups/categories to index. Empty means all.
+     */
+    private List<String> groupsToIndex = List.of();
 
     public String getApiUrl()
     {
@@ -107,5 +113,15 @@ public class EprelServiceProperties
     public void setMinAlnumLength(int minAlnumLength)
     {
         this.minAlnumLength = minAlnumLength;
+    }
+
+    public List<String> getGroupsToIndex()
+    {
+        return groupsToIndex;
+    }
+
+    public void setGroupsToIndex(List<String> groupsToIndex)
+    {
+        this.groupsToIndex = groupsToIndex;
     }
 }

@@ -59,16 +59,24 @@ public class EprelCatalogueService
             return;
         }
 
-        for (EprelProductGroup group : groups) {
-        	try {
-        		processGroup(group);
-        	} catch (IOException e) {
-        		LOGGER.error("Failed to process EPREL catalogue for group {} : {}", group.urlCode(), e.getMessage());
-        		throw e;
-        	}
-
+        List<String> groupsToIndex = properties.getGroupsToIndex();
+        for (EprelProductGroup group : groups)
+        {
+            if (groupsToIndex != null && !groupsToIndex.isEmpty() && !groupsToIndex.contains(group.urlCode()))
+            {
+                LOGGER.info("Skipping EPREL group {}", group.urlCode());
+                continue;
+            }
+            try
+            {
+                processGroup(group);
+            }
+            catch (IOException e)
+            {
+                LOGGER.error("Failed to process EPREL catalogue for group {} : {}", group.urlCode(), e.getMessage());
+                throw e;
+            }
         }
-
     }
 
 
