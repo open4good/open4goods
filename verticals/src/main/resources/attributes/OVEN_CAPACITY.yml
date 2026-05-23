@@ -1,5 +1,13 @@
 key: "OVEN_CAPACITY"
 faIcon: "mdi-cube-outline"
+referentials:
+  eprel:
+    - featureName: "cavities[0].volume"
+      productGroup: "ovens"
+      name: "Oven cavity volume"
+  wikidata:
+    - pid: "P2234"
+      name: "volume as quantity"
 name:
   default: "Oven capacity"
   fr: "Capacité du four"

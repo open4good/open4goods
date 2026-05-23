@@ -1,5 +1,13 @@
 key: "OVEN_POWER"
 faIcon: "mdi-lightning-bolt"
+referentials:
+  icecat:
+    - featureId: 8365
+      name: "Oven power"
+      unit: "W"
+  wikidata:
+    - pid: "P2109"
+      name: "nominal power output"
 name:
   default: "Power"
   fr: "Puissance"

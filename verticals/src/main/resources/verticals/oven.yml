@@ -6,11 +6,13 @@ id: oven
 # Cross-referential taxonomy mappings for AI-agent maintenance and semantic resolution.
 referentials:
   wikidata:
-    - qid: "Q192931"
+    # Source: https://www.wikidata.org/wiki/Q36539
+    - qid: "Q36539"
       name: "Oven"
   googleTaxonomy:
+    # Source: https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt
     - id: 683
-      name: "Home & Garden > Household Appliances > Ovens & Ranges > Ovens"
+      name: "Home & Garden > Kitchen & Dining > Kitchen Appliances > Ovens"
   icecat:
     - categoryId: 2286
       name: "Ovens"
@@ -29,7 +31,10 @@ parsers:
     maxYears: 10.0
 
 order: 2
-averageHoursPerDay: 0.5
+
+# Source: https://energy-efficient-products.ec.europa.eu/product-list/cooking-appliances-ovens-and-range-hoods_en
+# EC usage scenario gives 110 conventional oven cycles/year; 55 min/cycle ~= 0.28 h/day.
+averageHoursPerDay: 0.3
 
 # The associated google taxonomyID. (Ex : FR - https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)
 # SHOULD be set, it will then force this taxonomy for all products in this vertical
@@ -39,6 +44,7 @@ googleTaxonomyId: 683
 icecatTaxonomyId: 2286
 
 # EPREL group code (correspond to url_code in /swagger-ui/index.html#/eprel-controller/eprel)
+# Source: docs/eprel_codes.md (DOMESTIC_OVEN -> ovens)
 eprelGroupNames:
   - ovens
 
@@ -55,7 +61,29 @@ popular: true
 # The mainly presented attributes for this category
 popularAttributes:
   - OVEN_CAPACITY
+  - CLASSE_ENERGY
+  - OVEN_INSTALLATION_TYPE
   - OVEN_CLEANING_MODE
+
+# Attributes that are common to the category, used to guide the LLM extraction on data completion.
+commonAttributes:
+  - OVEN_CAPACITY
+  - CLASSE_ENERGY
+  - OVEN_INSTALLATION_TYPE
+  - OVEN_ENERGY_TYPE
+  - OVEN_CLEANING_MODE
+  - OVEN_COOKING_MODES
+  - OVEN_CAVITY_COUNT
+  - OVEN_POWER
+  - OVEN_ENERGY_CONSUMPTION_CYCLE
+  - OVEN_ENERGY_EFFICIENCY_INDEX
+  - WIDTH
+  - HEIGHT
+  - DEPTH
+  - WEIGHT
+  - WARRANTY
+  - COLOR
+  - COULEUR_EXTERIEURE
 
 # GenAiConfig for this vertical
 genAiConfig:
@@ -98,6 +126,11 @@ i18n:
         - BRAND
         - MODEL
         - YEAR
+    prettyName:
+      prefix: "|| Four | Fours ||"
+      attrs:
+        - BRAND
+        - MODEL
     singular:
       prefix: "|| four | four encastrable | four électrique ||"
       attrs: []
@@ -110,18 +143,21 @@ i18n:
       - "de ce four encastrable"
       - "de ce four électrique"
       - "de cet appareil"
+    cardTitle: "[(${p.brand()})] [(${p.model()})]"
+    shortName: "Fours"
+    longName: "Fours encastrables et posables"
 
     # Product metas (generic templates reused)
-    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix"
-    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation || écologique | environnementale || et meilleurs prix."
-    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore de [(${p.ecoscore()})]."
-    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation || écologique | environnementale || et meilleurs prix."
+    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, consommation et meilleurs prix"
+    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, consommation par cycle, efficacité énergétique et meilleurs prix."
+    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore de [(${p.ecoscore()})]"
+    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : comparez l'impact environnemental et les meilleurs prix de ce four."
     productMetaOpenGraphType: "product"
 
     # Vertical page elements
     verticalHomeUrl: "fours"
     verticalHomeTitle: "Fours"
-    verticalHomeDescription: "Comparez les fours encastrables ou posables (chaleur tournante, pyrolyse, vapeur…) selon l’éco-score et le prix."
+    verticalHomeDescription: "Comparez les fours encastrables ou posables selon leur volume, leur mode de nettoyage, leur consommation par cycle, leur éco-score et leur prix pour limiter le coût d'usage et l'impact environnemental."
 
     # A mapping beetween custom page names behind this vertical and wiki pages
   #    wikiPages:
@@ -143,6 +179,11 @@ i18n:
         - BRAND
         - MODEL
         - YEAR
+    prettyName:
+      prefix: "|| Oven | Ovens ||"
+      attrs:
+        - BRAND
+        - MODEL
     singular:
       prefix: "|| oven | built-in oven | electric oven ||"
       attrs: []
@@ -155,16 +196,19 @@ i18n:
       - "of the built-in oven"
       - "of this appliance"
       - "of the cooker"
+    cardTitle: "[(${p.brand()})] [(${p.model()})]"
+    shortName: "Ovens"
+    longName: "Built-in and freestanding ovens"
 
-    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, ecological offset and best prices"
-    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
-    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore [(${p.ecoscore()})]."
-    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
+    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, energy use and best prices"
+    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, cycle energy use, energy efficiency and best prices."
+    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore [(${p.ecoscore()})]"
+    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : compare this oven's environmental impact and best prices."
     productMetaOpenGraphType: "product"
 
     verticalHomeUrl: "ovens"
     verticalHomeTitle: "Ovens"
-    verticalHomeDescription: "Compare ovens (built-in or freestanding, convection, pyrolysis, steam…) by eco-score and price."
+    verticalHomeDescription: "Compare built-in and freestanding ovens by capacity, cleaning mode, cycle energy use, eco-score and price so running cost and environmental impact stay visible."
 
 #####################################################################################################################################
 # NUDGE TOOL CONFIGURATION
@@ -214,78 +258,75 @@ nudgeToolConfig:
     ################
     # Impact Score
     ################
-    - id: "impact_high" # Unique identifier for the subset
+    - id: "impact_high"
       group: "impactscore"
       criterias:
-        - field: "scores.ECOSCORE.value"
-          operator: "LOWER_THAN"
-          value: "2"
+        - field: "scores.ECOSCORE.ranking"
+          fromPercent: 0
+          toPercent: 33
       image: "example-image.png"
       url:
         en: "high-impact"
-        fr: "petit-impact"
+        fr: "fort-impact"
       caption:
-        en: "< 2"
-        fr: "< 2"
+        en: "High"
+        fr: "Élevé"
       title:
-        en: "Terrible impact "
-        fr: "Mauvais"
+        en: "High impact"
+        fr: "Impact élevé"
       description:
-        en: "Products with an ImpactScore lower than 2/5"
-        fr: "Produits avec un ImpactScore inférieur à 2/5"
+        en: "Products in the highest impact third of the category."
+        fr: "Produits dans le tiers le plus impactant de la catégorie."
 
     - id: "impact_medium"
       group: "impactscore"
       criterias:
-        - field: "scores.ECOSCORE.value"
-          operator: "GREATER_THAN"
-          value: "2"
-        - field: "scores.ECOSCORE.value"
-          operator: "LOWER_THAN"
-          value: "4"
+        - field: "scores.ECOSCORE.ranking"
+          fromPercent: 33
+          toPercent: 67
       image: "example-image.png"
       url:
         en: "medium-impact"
         fr: "impact-moyen"
       caption:
-        en: "> 2 < 4"
-        fr: "> 2 < 4"
-      title:
-        en: "Relativ impact"
+        en: "Medium"
         fr: "Moyen"
+      title:
+        en: "Medium impact"
+        fr: "Impact moyen"
       description:
-        en: "Products with an ImpactScore between 2/5 and 4/5"
-        fr: "Produits avec un ImpactScore compris entre 2/5 et 4/5"
+        en: "Products in the middle impact third of the category."
+        fr: "Produits dans le tiers intermédiaire de la catégorie."
 
     - id: "impact_low"
       group: "impactscore"
       criterias:
-        - field: "scores.ECOSCORE.value"
-          operator: "GREATER_THAN"
-          value: "4"
+        - field: "scores.ECOSCORE.ranking"
+          fromPercent: 67
+          toPercent: 100
       image: "example-image.png"
       url:
-        en: "impact-moderate"
-        fr: "impact-modere"
+        en: "low-impact"
+        fr: "faible-impact"
       caption:
-        en: "> 4"
-        fr: "> 4"
+        en: "Low"
+        fr: "Faible"
       title:
-        en: "Moderated impact"
-        fr: "Bon"
+        en: "Low impact"
+        fr: "Impact faible"
       description:
-        en: "Products with an ImpactScore greater than 4/5"
-        fr: "Produits avec un ImpactScore supérieur à 4/5"
+        en: "Products in the lowest impact third of the category."
+        fr: "Produits dans le tiers le moins impactant de la catégorie."
 
     ################
     # Price
     ################
-    - id: "price_lower_400"
+    - id: "price_lower_300"
       group: "price"
       criterias:
         - field: "price.minPrice.price"
           operator: "LOWER_THAN"
-          value: "400"
+          value: "300"
         - field: "price.minPrice.price"
           operator: "GREATER_THAN"
           value: "0"
@@ -294,57 +335,57 @@ nudgeToolConfig:
         en: "low-price"
         fr: "petits-prix"
       caption:
-        en: "< 400 €"
-        fr: "< 400 €"
+        en: "< 300 €"
+        fr: "< 300 €"
       title:
         en: "Affordable ovens"
         fr: "Fours entrée de gamme"
       description:
-        en: "Ovens priced under €400."
-        fr: "Les fours dont le prix est inférieur à 400€."
+        en: "Ovens priced under €300."
+        fr: "Les fours dont le prix est inférieur à 300€."
 
-    - id: "price_400_800"
+    - id: "price_300_1000"
       group: "price"
       criterias:
         - field: "price.minPrice.price"
           operator: "GREATER_THAN"
-          value: "400"
+          value: "300"
         - field: "price.minPrice.price"
           operator: "LOWER_THAN"
-          value: "800"
+          value: "1000"
       image: "example-image.png"
       url:
-        en: "oven-400-800-euros"
-        fr: "four-400-800-euros"
+        en: "oven-300-1000-euros"
+        fr: "four-300-1000-euros"
       caption:
-        en: "400 - 800 €"
-        fr: "400 - 800 €"
+        en: "300 - 1000 €"
+        fr: "300 - 1000 €"
       title:
         en: "Mid-range ovens"
         fr: "Fours milieu de gamme"
       description:
-        en: "Ovens priced between €400 and €800."
-        fr: "Les fours dont le prix est compris entre 400€ et 800€."
+        en: "Ovens priced between €300 and €1000."
+        fr: "Les fours dont le prix est compris entre 300€ et 1000€."
 
-    - id: "price_greater_800"
+    - id: "price_greater_1000"
       group: "price"
       criterias:
         - field: "price.minPrice.price"
           operator: "GREATER_THAN"
-          value: "800"
+          value: "1000"
       image: "example-image.png"
       url:
         en: "premium-price"
         fr: "haut-de-gamme"
       caption:
-        en: "> 800 €"
-        fr: "> 800 €"
+        en: "> 1000 €"
+        fr: "> 1000 €"
       title:
         en: "Premium ovens"
         fr: "Fours haut de gamme"
       description:
-        en: "Ovens priced over €800."
-        fr: "Les fours dont le prix est supérieur à 800€."
+        en: "Ovens priced over €1000."
+        fr: "Les fours dont le prix est supérieur à 1000€."
 
     ################
     # Capacity
@@ -355,19 +396,42 @@ nudgeToolConfig:
         - field: "attributes.indexed.OVEN_CAPACITY.numericValue"
           operator: "GREATER_THAN"
           value: "60"
+        - field: "attributes.indexed.OVEN_CAPACITY.numericValue"
+          operator: "LOWER_THAN"
+          value: "72"
       image: "example-image.png"
       url:
         en: "standard-capacity"
-        fr: "grande-capacite"
+        fr: "capacite-standard"
       caption:
-        en: "Standard (> 60L)"
-        fr: "Standard (> 60L)"
+        en: "60 - 72 L"
+        fr: "60 - 72 L"
       title:
         en: "Standard Capacity"
         fr: "Four standard"
       description:
-        en: "Standard size ovens for family cooking."
-        fr: "Fours de taille standard pour cuisiner pour toute la famille."
+        en: "Standard-size ovens for everyday family cooking."
+        fr: "Fours de taille standard pour cuisiner au quotidien."
+
+    - id: "capacity_large"
+      group: "capacity"
+      criterias:
+        - field: "attributes.indexed.OVEN_CAPACITY.numericValue"
+          operator: "GREATER_THAN"
+          value: "72"
+      image: "example-image.png"
+      url:
+        en: "large-capacity"
+        fr: "grande-capacite"
+      caption:
+        en: "> 72 L"
+        fr: "> 72 L"
+      title:
+        en: "Large capacity"
+        fr: "Grande capacité"
+      description:
+        en: "Large ovens for batch cooking or bigger dishes."
+        fr: "Fours grande capacité pour les grandes préparations."
 
     - id: "capacity_compact"
       group: "capacity"
@@ -394,14 +458,77 @@ nudgeToolConfig:
 # Fast filters; with classical attributes range values for the product category page
 subsets:
 ################
+# Impact Score
+################
+- id: "impact_high"
+  group: "impactscore"
+  criterias:
+    - field: "scores.ECOSCORE.ranking"
+      fromPercent: 0
+      toPercent: 33
+  image: "example-image.png"
+  url:
+    en: "high-impact"
+    fr: "fort-impact"
+  caption:
+    en: "High"
+    fr: "Élevé"
+  title:
+    en: "High impact"
+    fr: "Impact élevé"
+  description:
+    en: "Products in the highest impact third of the category."
+    fr: "Produits dans le tiers le plus impactant de la catégorie."
+
+- id: "impact_medium"
+  group: "impactscore"
+  criterias:
+    - field: "scores.ECOSCORE.ranking"
+      fromPercent: 33
+      toPercent: 67
+  image: "example-image.png"
+  url:
+    en: "medium-impact"
+    fr: "impact-moyen"
+  caption:
+    en: "Medium"
+    fr: "Moyen"
+  title:
+    en: "Medium impact"
+    fr: "Impact moyen"
+  description:
+    en: "Products in the middle impact third of the category."
+    fr: "Produits dans le tiers intermédiaire de la catégorie."
+
+- id: "impact_low"
+  group: "impactscore"
+  criterias:
+    - field: "scores.ECOSCORE.ranking"
+      fromPercent: 67
+      toPercent: 100
+  image: "example-image.png"
+  url:
+    en: "low-impact"
+    fr: "faible-impact"
+  caption:
+    en: "Low"
+    fr: "Faible"
+  title:
+    en: "Low impact"
+    fr: "Impact faible"
+  description:
+    en: "Products in the lowest impact third of the category."
+    fr: "Produits dans le tiers le moins impactant de la catégorie."
+
+################
 # Price
 ################
-- id: "price_lower_400"
+- id: "price_lower_300"
   group: "price"
   criterias:
     - field: "price.minPrice.price"
       operator: "LOWER_THAN"
-      value: "400"
+      value: "300"
     - field: "price.minPrice.price"
       operator: "GREATER_THAN"
       value: "0"
@@ -410,57 +537,57 @@ subsets:
     en: "low-price"
     fr: "petits-prix"
   caption:
-    en: "< 400 €"
-    fr: "< 400 €"
+    en: "< 300 €"
+    fr: "< 300 €"
   title:
     en: "Affordable ovens"
     fr: "Fours entrée de gamme"
   description:
-    en: "Ovens priced under €400."
-    fr: "Les fours dont le prix est inférieur à 400€."
+    en: "Ovens priced under €300."
+    fr: "Les fours dont le prix est inférieur à 300€."
 
-- id: "price_400_800"
+- id: "price_300_1000"
   group: "price"
   criterias:
     - field: "price.minPrice.price"
       operator: "GREATER_THAN"
-      value: "400"
+      value: "300"
     - field: "price.minPrice.price"
       operator: "LOWER_THAN"
-      value: "800"
+      value: "1000"
   image: "example-image.png"
   url:
-    en: "oven-400-800-euros"
-    fr: "four-400-800-euros"
+    en: "oven-300-1000-euros"
+    fr: "four-300-1000-euros"
   caption:
-    en: "400 - 800 €"
-    fr: "400 - 800 €"
+    en: "300 - 1000 €"
+    fr: "300 - 1000 €"
   title:
     en: "Mid-range ovens"
     fr: "Fours milieu de gamme"
   description:
-    en: "Ovens priced between €400 and €800."
-    fr: "Les fours dont le prix est compris entre 400€ et 800€."
+    en: "Ovens priced between €300 and €1000."
+    fr: "Les fours dont le prix est compris entre 300€ et 1000€."
 
-- id: "price_greater_800"
+- id: "price_greater_1000"
   group: "price"
   criterias:
     - field: "price.minPrice.price"
       operator: "GREATER_THAN"
-      value: "800"
+      value: "1000"
   image: "example-image.png"
   url:
     en: "premium-price"
     fr: "haut-de-gamme"
   caption:
-    en: "> 800 €"
-    fr: "> 800 €"
+    en: "> 1000 €"
+    fr: "> 1000 €"
   title:
     en: "Premium ovens"
     fr: "Fours haut de gamme"
   description:
-    en: "Ovens priced over €800."
-    fr: "Les fours dont le prix est supérieur à 800€."
+    en: "Ovens priced over €1000."
+    fr: "Les fours dont le prix est supérieur à 1000€."
 
 ################
 # Capacity
@@ -471,19 +598,42 @@ subsets:
     - field: "attributes.indexed.OVEN_CAPACITY.numericValue"
       operator: "GREATER_THAN"
       value: "60"
+    - field: "attributes.indexed.OVEN_CAPACITY.numericValue"
+      operator: "LOWER_THAN"
+      value: "72"
   image: "example-image.png"
   url:
     en: "standard-capacity"
-    fr: "grande-capacite"
+    fr: "capacite-standard"
   caption:
-    en: "Standard (> 60L)"
-    fr: "Standard (> 60L)"
+    en: "60 - 72 L"
+    fr: "60 - 72 L"
   title:
     en: "Standard Capacity"
     fr: "Four standard"
   description:
-    en: "Standard size ovens for family cooking."
-    fr: "Fours de taille standard pour cuisiner pour toute la famille."
+    en: "Standard-size ovens for everyday family cooking."
+    fr: "Fours de taille standard pour cuisiner au quotidien."
+
+- id: "capacity_large"
+  group: "capacity"
+  criterias:
+    - field: "attributes.indexed.OVEN_CAPACITY.numericValue"
+      operator: "GREATER_THAN"
+      value: "72"
+  image: "example-image.png"
+  url:
+    en: "large-capacity"
+    fr: "grande-capacite"
+  caption:
+    en: "> 72 L"
+    fr: "> 72 L"
+  title:
+    en: "Large capacity"
+    fr: "Grande capacité"
+  description:
+    en: "Large ovens for batch cooking or bigger dishes."
+    fr: "Fours grande capacité pour les grandes préparations."
 
 - id: "capacity_compact"
   group: "capacity"
@@ -515,9 +665,6 @@ aggregationConfiguration:
   "scores.ECOSCORE.value":
     interval: 5
     buckets: 20
-  "scores.POWER_CONSUMPTION_TYPICAL.value":
-    interval: 250
-    buckets: 12
   "scores.WEIGHT.value":
     interval: 2
     buckets: 12
@@ -530,9 +677,6 @@ aggregationConfiguration:
   "scores.DATA_QUALITY.value":
     interval: 1
     buckets: 5
-  "attributes.indexed.POWER_CONSUMPTION_TYPICAL":
-    interval: 250
-    buckets: 12
   "attributes.indexed.WEIGHT":
     interval: 2
     buckets: 12
@@ -565,7 +709,6 @@ ecoFilters:
   - "CLASSE_ENERGY"
 
 technicalFilters:
-  - "POWER_CONSUMPTION_TYPICAL"
   - "OVEN_CAPACITY"
   - "OVEN_INSTALLATION_TYPE"
   - "OVEN_ENERGY_TYPE"
@@ -611,50 +754,65 @@ attributesConfig:
 ####################################################################################
 
 matchingCategories:
-  Electrodepot - Guides et Comparateurs:
-    - "ELECTRO DEPOT | FOUR, MICRO-ONDES | FOUR ENCASTRABLE"
-  rakuten.com-csv.yml:
-    - "ELECTROMENAGER | FOUR"
-    - "ELECTROMENAGER"
-  E.Leclerc FR:
-    - "HIGH-TECH | ELECTROMENAGER>GROS ELECTROMENAGER>FOUR>FOUR ENCASTRABLE | GROS ELECTROMENAGER | FOUR"
   darty.com:
     - "GROS ELECTROMENAGER / FOUR / FOUR ENCASTRABLE | GROS ELECTROMENAGER>FOUR>FOUR ENCASTRABLE | FOUR | FOUR ENCASTRABLE"
-    - "GROS ELECTROMENAGER | FOUR"
-    - "GROS ELECTROMENAGER / CUISINIERES / GAZINIERE | GROS ELECTROMENAGER>CUISINIERES>GAZINIERE | CUISINIERES | GAZINIERE"
-  Cdiscount FR:
-    - "ELECTROMENAGER | ELECTROMENAGER > GROS APPAREIL DE CUISSON > FOUR | GROS APPAREIL DE CUISSON | FOUR"
-    - "ELECTROMENAGER | ELECTROMENAGER > PETIT APPAREIL DE CUISSON > MINI-FOUR - ROTISSOIRE | PETIT APPAREIL DE CUISSON | MINI-FOUR - ROTISSOIRE"
-    - "ELECTROMENAGER | ELECTROMENAGER > GROS APPAREIL DE CUISSON > CUISINIERE - PIANO DE CUISINE | GROS APPAREIL DE CUISSON | CUISINIERE - PIANO DE CUISINE"
-  RueDuCommerce FR:
-    - "MINI-FOUR"
-    - "FOUR"
-    - "CUISINIERE"
-    - "ELECTROMENAGER > CUISSON > FOUR"
-  ManoMano FR:
-    - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR ENCASTRABLE > FOUR CHALEUR TOURNANTE | FOUR CHALEUR TOURNANTE"
-    - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > MINI FOUR > MINI FOUR GRILL | MINI FOUR GRILL"
-    - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR ENCASTRABLE > FOUR TRADITIONNEL | FOUR TRADITIONNEL"
-    - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR ENCASTRABLE > FOUR VAPEUR | FOUR VAPEUR"
-  cdiscount.com:
-    - "ELECTROMENAGER | ELECTROMENAGER > GROS APPAREIL DE CUISSON > FOUR | GROS APPAREIL DE CUISSON | FOUR"
-    - "ELECTROMENAGER | ELECTROMENAGER > PETIT APPAREIL DE CUISSON > MINI-FOUR - ROTISSOIRE | PETIT APPAREIL DE CUISSON | MINI-FOUR - ROTISSOIRE"
-  Castorama FR:
-    - "FOUR ENCASTRABLE | MAGASIN CASTORAMA > CUISINE > GROS ELECTROMENAGER > FOUR ET MICRO-ONDES > FOUR ENCASTRABLE | CUISINE | GROS ELECTROMENAGER"
-    - "MINI FOUR | MAGASIN CASTORAMA > CUISINE > GROS ELECTROMENAGER > FOUR ET MICRO-ONDES > MINI FOUR | CUISINE | GROS ELECTROMENAGER"
-  UNDERDOG FR:
-    - "367 | COOKERS & OVENS | FOUR"
+    - "PETIT ELECTROMENAGER CUISINE / MINI-FOUR / RECHAUD / FOUR POSABLE / MINI FOUR / FOUR POSABLE | PETIT ELECTROMENAGER CUISINE>MINI-FOUR / RECHAUD / FOUR POSABLE>MINI FOUR / FOUR POSABLE | MINI-FOUR / RECHAUD / FOUR POSABLE | MINI FOUR / FOUR POSABLE"
+  Darty FR:
+    - "GROS ELECTROMENAGER / FOUR / FOUR ENCASTRABLE | GROS ELECTROMENAGER>FOUR>FOUR ENCASTRABLE | FOUR | FOUR ENCASTRABLE"
+    - "GROS ELECTROMENAGER / FOUR / FOUR ENCASTRABLE | GROS ELECTROMENAGER / FOUR / FOUR ENCASTRABLE"
+    - "PETIT ELECTROMENAGER CUISINE / MINI-FOUR / RECHAUD / FOUR POSABLE / MINI FOUR / FOUR POSABLE | PETIT ELECTROMENAGER CUISINE>MINI-FOUR / RECHAUD / FOUR POSABLE>MINI FOUR / FOUR POSABLE | MINI-FOUR / RECHAUD / FOUR POSABLE | MINI FOUR / FOUR POSABLE"
+    - "PETIT ELECTROMENAGER CUISINE / BARBECUE ET PLANCHA / FOUR A PIZZA | PETIT ELECTROMENAGER CUISINE>BARBECUE ET PLANCHA>FOUR A PIZZA | BARBECUE ET PLANCHA | FOUR A PIZZA"
   R&eacute;f&eacute;rentiel produits - Darty Pro:
     - "GROS ELECTROMENAGER | FOUR"
     - "PETIT ELECTROMENAGER CUISINE | MINI-FOUR / RECHAUD / FOUR POSABLE"
-  Darty FR:
-    - "PETIT ELECTROMENAGER CUISINE / MINI-FOUR / RECHAUD / FOUR POSABLE / MINI FOUR / FOUR POSABLE | PETIT ELECTROMENAGER CUISINE>MINI-FOUR / RECHAUD / FOUR POSABLE>MINI FOUR / FOUR POSABLE | MINI-FOUR / RECHAUD / FOUR POSABLE | MINI FOUR / FOUR POSABLE"
-    - "GROS ELECTROMENAGER / FOUR / FOUR ENCASTRABLE | GROS ELECTROMENAGER>FOUR>FOUR ENCASTRABLE | FOUR | FOUR ENCASTRABLE"
-    - "GROS ELECTROMENAGER / CUISINIERES / GAZINIERE | GROS ELECTROMENAGER>CUISINIERES>GAZINIERE | CUISINIERES | GAZINIERE"
+  Darty Pro - Cashback:
+    - "GROS ELECTROMENAGER | FOUR"
+    - "PETIT ELECTROMENAGER CUISINE | MINI-FOUR / RECHAUD / FOUR POSABLE"
+  Cdiscount FR:
+    - "ELECTROMENAGER | ELECTROMENAGER > GROS APPAREIL DE CUISSON > FOUR | GROS APPAREIL DE CUISSON | FOUR"
+    - "ELECTROMENAGER | ELECTROMENAGER > PETIT APPAREIL DE CUISSON > MINI-FOUR - ROTISSOIRE | PETIT APPAREIL DE CUISSON | MINI-FOUR - ROTISSOIRE"
+    - "ELECTROMENAGER | ELECTROMENAGER > PETIT APPAREIL DE CUISSON > FOUR A PIZZA | PETIT APPAREIL DE CUISSON | FOUR A PIZZA"
+  cdiscount.com:
+    - "ELECTROMENAGER | ELECTROMENAGER > GROS APPAREIL DE CUISSON > FOUR | GROS APPAREIL DE CUISSON | FOUR"
+    - "ELECTROMENAGER | ELECTROMENAGER > PETIT APPAREIL DE CUISSON > MINI-FOUR - ROTISSOIRE | PETIT APPAREIL DE CUISSON | MINI-FOUR - ROTISSOIRE"
+    - "ELECTROMENAGER | ELECTROMENAGER > PETIT APPAREIL DE CUISSON > FOUR A PIZZA | PETIT APPAREIL DE CUISSON | FOUR A PIZZA"
+  Boulanger - R&eacute;f&eacute;rentiel produits:
+    - "GROS ELECTROMENAGER | FOUR ENCASTRABLE"
+    - "CUISINE ET CUISSON | MINI-FOUR"
+    - "CUISINE ET CUISSON | BARBECUE | FOUR A PIZZA | FOUR A PIZZA"
+  RueDuCommerce FR:
+    - "FOUR"
+    - "MINI-FOUR"
+    - "FOUR A PIZZA"
+    - "ELECTROMENAGER > CUISSON > FOUR"
+    - "ELECTROMENAGER > CUISSON > MINI-FOUR"
+  rueducommerce.fr:
+    - "FOUR"
+  ManoMano FR:
+    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR ENCASTRABLE > FOUR CHALEUR TOURNANTE | FOUR CHALEUR TOURNANTE"
+    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > MINI FOUR > MINI FOUR GRILL | MINI FOUR GRILL"
+    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > MINI FOUR > MINI FOUR CHALEUR TOURNANTE | MINI FOUR CHALEUR TOURNANTE"
+    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR ENCASTRABLE > FOUR TRADITIONNEL | FOUR TRADITIONNEL"
+    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR ENCASTRABLE > FOUR VAPEUR | FOUR VAPEUR"
+    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > PETIT ELECTROMENAGER > APPAREIL DE CUISSON > FOUR A PIZZA ELECTRONIQUE | FOUR A PIZZA ELECTRONIQUE"
+  Castorama FR:
+    - "FOUR ENCASTRABLE | MAGASIN CASTORAMA > CUISINE > GROS ELECTROMENAGER > FOUR > FOUR ENCASTRABLE | CUISINE | GROS ELECTROMENAGER"
+    - "MINI FOUR | MAGASIN CASTORAMA > CUISINE > GROS ELECTROMENAGER > FOUR ET MICRO-ONDES > MINI FOUR | CUISINE | GROS ELECTROMENAGER"
+  Electrodepot - Guides et Comparateurs:
+    - "ELECTRO DEPOT | FOUR, MICRO-ONDES | FOUR ENCASTRABLE"
+  Référentiel produits Electro Depot:
+    - "ELECTRO DEPOT | FOUR, MICRO-ONDES | FOUR ENCASTRABLE"
+  rakuten.com-csv.yml:
+    - "ELECTROMENAGER | FOUR"
+  UNDERDOG FR:
+    - "367 | COOKERS & OVENS | FOUR"
   Back Market FR:
     - "HOME & GARDEN > KITCHEN & DINING > KITCHEN APPLIANCES > OVENS"
   Joom FR:
-    - "HOME APPLIANCES > KITCHEN ELECTRONICS > ELECTRIC STOVES"
     - "HOME APPLIANCES > KITCHEN ELECTRONICS > ELECTRIC STOVES, OVENS & FRYERS"
   e.leclerc:
     - "HIGH TECH | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR > FOUR ENCASTRABLE | GROS ELECTROMENAGER | FOUR"
+  E.Leclerc FR:
+    - "HIGH-TECH | ELECTROMENAGER>GROS ELECTROMENAGER>FOUR>FOUR ENCASTRABLE | GROS ELECTROMENAGER | FOUR"
+  icecat.biz.yml:
+    - "FOURS"

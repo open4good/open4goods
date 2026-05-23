@@ -1,5 +1,15 @@
 key: "OVEN_CAVITY_COUNT"
 faIcon: "mdi-view-grid-outline"
+referentials:
+  icecat:
+    - featureId: 37259
+      name: "Number of cavities"
+    - featureId: 7311
+      name: "Number of ovens"
+  eprel:
+    - featureName: "numberCavities"
+      productGroup: "ovens"
+      name: "Number of oven cavities"
 name:
   default: "Number of cavities"
   fr: "Nombre de cavités"

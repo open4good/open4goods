@@ -2,6 +2,14 @@ key: "CLASSE_ENERGY"
 userBetterIs: "GREATER"
 impactBetterIs: "GREATER"
 faIcon: "mdi-flash"
+referentials:
+  icecat:
+    - featureId: 2705
+      name: "Energy efficiency class"
+  eprel:
+    - featureName: "cavities[0].energyClass"
+      productGroup: "ovens"
+      name: "Energy efficiency class"
 name:
   default: "Energy class"
   fr: "Classe énergétique"
