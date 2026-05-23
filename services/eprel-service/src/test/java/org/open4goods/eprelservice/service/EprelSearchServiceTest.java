@@ -8,6 +8,7 @@ import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.query_dsl.PrefixQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.RegexpQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.WildcardQuery;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -89,6 +90,18 @@ class EprelSearchServiceTest
     }
 
     @Test
+    @DisplayName("searchBySpaceInsensitiveModel should build a regexp query with separator wildcards")
+    void searchBySpaceInsensitiveModelShouldUseRegexpQuery()
+    {
+        service.searchBySpaceInsensitiveModel("FFWDD1074269BCVFR");
+        Query query = capturedQuery();
+        assertThat(query.isRegexp()).isTrue();
+        RegexpQuery regexpQuery = query.regexp();
+        assertThat(regexpQuery.field()).isEqualTo("modelIdentifier");
+        assertThat(regexpQuery.value()).isEqualTo("f[-_/ ]*f[-_/ ]*w[-_/ ]*d[-_/ ]*d[-_/ ]*1[-_/ ]*0[-_/ ]*7[-_/ ]*4[-_/ ]*2[-_/ ]*6[-_/ ]*9[-_/ ]*b[-_/ ]*c[-_/ ]*v[-_/ ]*f[-_/ ]*r");
+    }
+
+    @Test
     @DisplayName("searchByModelPrefix should use a case insensitive prefix query")
     void searchByModelPrefixShouldUsePrefixQuery()
     {
@@ -106,17 +119,17 @@ class EprelSearchServiceTest
         service.searchByModel("MODEL12345XYZ");
 
         ArgumentCaptor<NativeQuery> captor = ArgumentCaptor.forClass(NativeQuery.class);
-        // exact(0), prefix(1), bestMatch(2), contains(3)
-        org.mockito.Mockito.verify(elasticsearchOperations, org.mockito.Mockito.times(4)).search(captor.capture(), any(Class.class));
+        // exact(0), spaceInsensitive(1), prefix(2), bestMatch(3), contains(4)
+        org.mockito.Mockito.verify(elasticsearchOperations, org.mockito.Mockito.times(5)).search(captor.capture(), any(Class.class));
 
-        Query boolQuery = captor.getAllValues().get(2).getQuery();
+        Query boolQuery = captor.getAllValues().get(3).getQuery();
         assertThat(boolQuery.isBool()).isTrue();
         assertThat(boolQuery.bool().should()).isNotEmpty();
         assertThat(boolQuery.bool().should().getFirst().term().field()).isEqualTo("modelIdentifier");
         assertThat(boolQuery.bool().should().getFirst().term().value().stringValue()).isEqualTo("model12345xyz");
         assertThat(boolQuery.bool().minimumShouldMatch()).isEqualTo("1");
 
-        Query containsQuery = captor.getAllValues().get(3).getQuery();
+        Query containsQuery = captor.getAllValues().get(4).getQuery();
         assertThat(containsQuery.isWildcard()).isTrue();
         WildcardQuery wildcardQuery = containsQuery.wildcard();
         assertThat(wildcardQuery.field()).isEqualTo("modelIdentifier");
@@ -131,11 +144,11 @@ class EprelSearchServiceTest
         service.search("INVALID", java.util.List.of("ACCEPTED", "TOO MANY SPACES"));
 
         ArgumentCaptor<NativeQuery> captor = ArgumentCaptor.forClass(NativeQuery.class);
-        // GTIN "INVALID" is non-numeric so skips ES; for "ACCEPTED": exact(0), prefix(1), bestMatch(2), contains(3)
-        org.mockito.Mockito.verify(elasticsearchOperations, org.mockito.Mockito.times(4)).search(captor.capture(), any(Class.class));
+        // GTIN "INVALID" is non-numeric so skips ES; for "ACCEPTED": exact(0), spaceInsensitive(1), prefix(2), bestMatch(3), contains(4)
+        org.mockito.Mockito.verify(elasticsearchOperations, org.mockito.Mockito.times(5)).search(captor.capture(), any(Class.class));
 
         java.util.List<Query> queries = captor.getAllValues().stream().map(NativeQuery::getQuery).toList();
-        assertThat(queries).hasSize(4);
+        assertThat(queries).hasSize(5);
         TermQuery termQuery = queries.getFirst().term();
         assertThat(termQuery.value().stringValue()).isEqualTo("accepted");
     }
@@ -149,8 +162,8 @@ class EprelSearchServiceTest
         service.search("INVALID", java.util.List.of("33703828", "1", "N3B3HTX"));
 
         ArgumentCaptor<NativeQuery> captor = ArgumentCaptor.forClass(NativeQuery.class);
-        // Only "N3B3HTX" survives filtering: exact(0), prefix(1), bestMatch(2), contains(3)
-        org.mockito.Mockito.verify(elasticsearchOperations, org.mockito.Mockito.times(4)).search(captor.capture(), any(Class.class));
+        // Only "N3B3HTX" survives filtering: exact(0), spaceInsensitive(1), prefix(2), bestMatch(3), contains(4)
+        org.mockito.Mockito.verify(elasticsearchOperations, org.mockito.Mockito.times(5)).search(captor.capture(), any(Class.class));
 
         java.util.List<Query> queries = captor.getAllValues().stream().map(NativeQuery::getQuery).toList();
         TermQuery firstQuery = queries.getFirst().term();

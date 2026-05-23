@@ -15,10 +15,10 @@ import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.google.genai.GoogleGenAiChatModel;
+import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
+import org.springframework.ai.google.genai.schema.JsonSchemaConverter;
 import org.springframework.ai.util.json.schema.JsonSchemaGenerator;
-import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
-import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
-import org.springframework.ai.vertexai.gemini.schema.JsonSchemaConverter;
 import org.springframework.util.StringUtils;
 
 import reactor.core.publisher.Flux;
@@ -31,9 +31,9 @@ import tools.jackson.databind.node.ObjectNode;
 public class GeminiProvider implements GenAiProvider {
 
 	private static final Logger logger = LoggerFactory.getLogger(GeminiProvider.class);
-	private final VertexAiGeminiChatModel chatModel;
+	private final GoogleGenAiChatModel chatModel;
 
-	public GeminiProvider(VertexAiGeminiChatModel chatModel) {
+	public GeminiProvider(GoogleGenAiChatModel chatModel) {
 		logger.info("DEBUG: Creating GeminiProvider with chatModel: {}", chatModel);
 		this.chatModel = chatModel;
 	}
@@ -45,7 +45,7 @@ public class GeminiProvider implements GenAiProvider {
 
 	@Override
 	public ProviderResult generateText(ProviderRequest request) {
-		VertexAiGeminiChatOptions options = buildOptions(request.getOptions(), request.getRetrievalMode(),
+		GoogleGenAiChatOptions options = buildOptions(request.getOptions(), request.getRetrievalMode(),
 				request.isAllowWebSearch(), request.getJsonSchema());
 
 		ChatResponse response = chatModel.call(buildPrompt(request, options));
@@ -56,7 +56,7 @@ public class GeminiProvider implements GenAiProvider {
 
 	@Override
 	public Flux<ProviderEvent> generateTextStream(ProviderRequest request) {
-		VertexAiGeminiChatOptions options = buildOptions(request.getOptions(), request.getRetrievalMode(),
+		GoogleGenAiChatOptions options = buildOptions(request.getOptions(), request.getRetrievalMode(),
 				request.isAllowWebSearch(), request.getJsonSchema());
 
 		Prompt prompt = buildPrompt(request, options);
@@ -97,9 +97,9 @@ public class GeminiProvider implements GenAiProvider {
 		}).onErrorResume(ex -> Flux.just(ProviderEvent.error(service(), options.getModel(), ex.getMessage())));
 	}
 
-	private VertexAiGeminiChatOptions buildOptions(PromptOptions options, RetrievalMode retrievalMode,
+	private GoogleGenAiChatOptions buildOptions(PromptOptions options, RetrievalMode retrievalMode,
 			boolean allowWebSearch, String jsonSchema) {
-		VertexAiGeminiChatOptions.Builder builder = VertexAiGeminiChatOptions.builder();
+		GoogleGenAiChatOptions.Builder builder = GoogleGenAiChatOptions.builder();
 		String model = options == null ? "gemini-2.5-pro" : resolveModel(options);
 
 		if (options != null) {
@@ -167,7 +167,7 @@ public class GeminiProvider implements GenAiProvider {
 		return "gemini-2.5-pro";
 	}
 
-	private Prompt buildPrompt(ProviderRequest request, VertexAiGeminiChatOptions options) {
+	private Prompt buildPrompt(ProviderRequest request, GoogleGenAiChatOptions options) {
 		List<org.springframework.ai.chat.messages.Message> messages = new ArrayList<>();
 		if (StringUtils.hasText(request.getSystemPrompt())) {
 			messages.add(new SystemMessage(request.getSystemPrompt()));

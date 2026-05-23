@@ -25,6 +25,8 @@ referentials:
   eprel:
     - group: "washingmachines"
     - group: "washingmachines2019"
+    - group: "washerdriers"
+    - group: "washerdriers2019"
 
 order: 5
 # Average daily usage time for a washing machine in hours.
@@ -51,6 +53,8 @@ eprelGroupNames:
   # Source: EPREL fiches for Regulation (EU) 2019/2014 use the washingmachines2019 product-group path.
   - "washingmachines2019"
   - "washingmachines"
+  - "washerdriers2019"
+  - "washerdriers"
 
 verticalImage: https://nudger.fr/images/verticals/washing-machine.png
 

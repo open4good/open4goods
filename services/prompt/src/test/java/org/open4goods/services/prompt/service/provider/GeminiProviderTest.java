@@ -15,15 +15,15 @@ import org.open4goods.services.prompt.config.RetrievalMode;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
-import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
+import org.springframework.ai.google.genai.GoogleGenAiChatModel;
+import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
 
 class GeminiProviderTest {
 
     @Test
     void testGenerateTextWithWebSearch() {
         // Mock ChatModel
-        VertexAiGeminiChatModel chatModel = mock(VertexAiGeminiChatModel.class);
+        GoogleGenAiChatModel chatModel = mock(GoogleGenAiChatModel.class);
         
         // Mock Response to avoid NPE
         ChatResponse mockResponse = new ChatResponse(Collections.singletonList(new Generation(new org.springframework.ai.chat.messages.AssistantMessage("test response"))));
@@ -53,14 +53,14 @@ class GeminiProviderTest {
         verify(chatModel).call(promptCaptor.capture());
 
         Prompt list = promptCaptor.getValue();
-        VertexAiGeminiChatOptions options = (VertexAiGeminiChatOptions) list.getOptions();
+        GoogleGenAiChatOptions options = (GoogleGenAiChatOptions) list.getOptions();
 
         assertTrue(options.getGoogleSearchRetrieval(), "Google Search retrieval should be enabled when requested");
     }
     @Test
     void testGenerateTextWithJsonSchema() {
         // Mock ChatModel
-        VertexAiGeminiChatModel chatModel = mock(VertexAiGeminiChatModel.class);
+        GoogleGenAiChatModel chatModel = mock(GoogleGenAiChatModel.class);
         
         // Mock Response
         ChatResponse mockResponse = new ChatResponse(Collections.singletonList(
@@ -88,10 +88,10 @@ class GeminiProviderTest {
         verify(chatModel).call(promptCaptor.capture());
 
         Prompt list = promptCaptor.getValue();
-        VertexAiGeminiChatOptions options = (VertexAiGeminiChatOptions) list.getOptions();
+        GoogleGenAiChatOptions options = (GoogleGenAiChatOptions) list.getOptions();
 
         // Verify JSON structured output settings
-        // Note: exact assertion depends on VertexAiGeminiChatOptions implementation, 
+        // Note: exact assertion depends on GoogleGenAiChatOptions implementation,
         // using toString or checking specific getters if available.
         // Assuming getters exist or we can inspect behavior.
         // For now, these are standard expected behaviors for VertexAi Gemini options in Spring AI.
@@ -104,7 +104,7 @@ class GeminiProviderTest {
 
     @Test
     void testGenerateTextWithGemini31WebSearchAndJsonSchema() {
-        VertexAiGeminiChatModel chatModel = mock(VertexAiGeminiChatModel.class);
+        GoogleGenAiChatModel chatModel = mock(GoogleGenAiChatModel.class);
         ChatResponse mockResponse = new ChatResponse(Collections.singletonList(
             new Generation(new org.springframework.ai.chat.messages.AssistantMessage("{\"name\":\"test\"}"))));
         when(chatModel.call(any(Prompt.class))).thenReturn(mockResponse);
@@ -130,7 +130,7 @@ class GeminiProviderTest {
         org.mockito.ArgumentCaptor<Prompt> promptCaptor = org.mockito.ArgumentCaptor.forClass(Prompt.class);
         verify(chatModel).call(promptCaptor.capture());
 
-        VertexAiGeminiChatOptions capturedOptions = (VertexAiGeminiChatOptions) promptCaptor.getValue().getOptions();
+        GoogleGenAiChatOptions capturedOptions = (GoogleGenAiChatOptions) promptCaptor.getValue().getOptions();
 
         assertTrue(capturedOptions.getGoogleSearchRetrieval(), "Google Search retrieval should be enabled");
         assertTrue(capturedOptions.getResponseMimeType().contains("application/json"), "MimeType should be JSON");

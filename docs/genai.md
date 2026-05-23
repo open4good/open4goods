@@ -33,8 +33,11 @@ spring:
     google:
       genai:
         api-key: ${GEMINI_API_KEY}
+        # For Vertex AI mode, omit api-key and set project-id/location instead.
+        # project-id: ${GCP_PROJECT_ID}
+        # location: ${GCP_LOCATION:europe-west4}
         chat:
-        options:
+          options:
             model: gemini-3.1-pro-preview
 ```
 

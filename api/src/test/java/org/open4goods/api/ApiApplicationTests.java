@@ -14,12 +14,11 @@ import org.open4goods.services.wikidataservice.repository.WikidataEntityReposito
 import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.prompt.service.provider.GeminiProvider;
 import org.open4goods.services.prompt.service.provider.ProviderRegistry;
+import org.springframework.ai.google.genai.GoogleGenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-
-import com.google.cloud.vertexai.VertexAI;
 
 /**
  * Verifies the Spring application context loads without errors.
@@ -35,7 +34,8 @@ import com.google.cloud.vertexai.VertexAI;
         "org.springframework.ai.model.openai.autoconfigure.OpenAiAudioTranscriptionAutoConfiguration," +
         "org.springframework.ai.model.openai.autoconfigure.OpenAiEmbeddingAutoConfiguration," +
         "org.springframework.ai.model.openai.autoconfigure.OpenAiImageAutoConfiguration," +
-        "org.springframework.ai.model.openai.autoconfigure.OpenAiModerationAutoConfiguration"
+        "org.springframework.ai.model.openai.autoconfigure.OpenAiModerationAutoConfiguration," +
+        "org.springframework.ai.model.google.genai.autoconfigure.chat.GoogleGenAiChatAutoConfiguration"
 })
 class ApiApplicationTests {
 
@@ -73,9 +73,6 @@ class ApiApplicationTests {
     private ElasticsearchOperations elasticsearchOperations;
 
     @MockitoBean
-    private VertexAI vertexAI;
-
-    @MockitoBean
     private GeminiProvider geminiProvider;
 
     @MockitoBean
@@ -86,6 +83,9 @@ class ApiApplicationTests {
 
     @MockitoBean
     private OpenAiChatModel openAiChatModel;
+
+    @MockitoBean
+    private GoogleGenAiChatModel googleGenAiChatModel;
 
     @Test
     void contextLoads() {

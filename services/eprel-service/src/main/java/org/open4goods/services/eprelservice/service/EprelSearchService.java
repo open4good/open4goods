@@ -129,6 +129,46 @@ public class EprelSearchService
     }
 
     /**
+     * Finds products whose model identifier matches the provided value case-insensitively,
+     * ignoring spaces and typical punctuation separators.
+     *
+     * @param model model identifier to search for
+     * @return matching products
+     */
+    public List<EprelProduct> searchBySpaceInsensitiveModel(String model)
+    {
+        return searchBySpaceInsensitiveModel(model, null);
+    }
+
+    private List<EprelProduct> searchBySpaceInsensitiveModel(String model, Collection<String> eprelCategories)
+    {
+        String normalized = normalize(model);
+        if (normalized == null || normalized.length() < 4)
+        {
+            return List.of();
+        }
+        StringBuilder regex = new StringBuilder();
+        for (int i = 0; i < normalized.length(); i++)
+        {
+            char c = normalized.charAt(i);
+            if (Character.isLetterOrDigit(c))
+            {
+                if (regex.length() > 0)
+                {
+                    regex.append("[-_/ ]*");
+                }
+                regex.append(c);
+            }
+        }
+        if (regex.length() == 0)
+        {
+            return List.of();
+        }
+        Query query = Query.of(q -> q.regexp(r -> r.field("modelIdentifier").value(regex.toString())));
+        return execute(query, eprelCategories);
+    }
+
+    /**
      * Filters the provided EPREL products by brand, matching {@code supplierOrTrademark}
      * against the supplied brand string (case-insensitive containment check).
      *
@@ -190,6 +230,14 @@ public class EprelSearchService
         if (!results.isEmpty())
         {
             LOGGER.info("Found {} result by exact model : {}", results.size(), model);
+            return results;
+        }
+
+        LOGGER.info("Searching by space-insensitive model : {}", model);
+        results = searchBySpaceInsensitiveModel(model, eprelCategories);
+        if (!results.isEmpty())
+        {
+            LOGGER.info("Found {} result by space-insensitive model : {}", results.size(), model);
             return results;
         }
 
@@ -260,6 +308,17 @@ public class EprelSearchService
             if (!results.isEmpty())
             {
                 LOGGER.info("Found {} result by exact model : {}", results.size(), model);
+                return results;
+            }
+        }
+
+        for (String model : candidates)
+        {
+            LOGGER.info("Searching by space-insensitive model : {}", model);
+            results = searchBySpaceInsensitiveModel(model, eprelCategories);
+            if (!results.isEmpty())
+            {
+                LOGGER.info("Found {} result by space-insensitive model : {}", results.size(), model);
                 return results;
             }
         }
@@ -372,6 +431,11 @@ public class EprelSearchService
         if (!exactMatches.isEmpty())
         {
             return exactMatches;
+        }
+        List<EprelProduct> spaceInsensitiveMatches = searchBySpaceInsensitiveModel(model);
+        if (!spaceInsensitiveMatches.isEmpty())
+        {
+            return spaceInsensitiveMatches;
         }
         List<EprelProduct> prefixMatches = searchByModelPrefix(model);
         if (!prefixMatches.isEmpty())

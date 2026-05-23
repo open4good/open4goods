@@ -21,8 +21,8 @@ import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatModel.ResponseFormat;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.ResponseFormat;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 
@@ -79,7 +79,7 @@ public class OpenAiProvider implements GenAiProvider {
     private ProviderResult generateWithChatModel(ProviderRequest request) {
         OpenAiChatOptions options = buildOptions(request.getOptions());
         if (StringUtils.hasText(request.getJsonSchema())) {
-            options.setResponseFormat(new ResponseFormat(ResponseFormat.Type.JSON_SCHEMA, request.getJsonSchema()));
+            options = withJsonSchema(options, request.getJsonSchema());
         }
         Prompt prompt = buildPrompt(request, options);
         ChatResponse response = chatModel.call(prompt);
@@ -147,31 +147,40 @@ public class OpenAiProvider implements GenAiProvider {
     }
 
     private OpenAiChatOptions buildOptions(PromptOptions options) {
-        OpenAiChatOptions chatOptions = new OpenAiChatOptions();
+        OpenAiChatOptions.Builder builder = OpenAiChatOptions.builder();
         if (options != null) {
-            chatOptions.setModel(resolveModel(options));
+            builder.model(resolveModel(options));
             if (options.getTemperature() != null) {
-                chatOptions.setTemperature(options.getTemperature());
+                builder.temperature(options.getTemperature());
             } else {
-                chatOptions.setTemperature(0.2);  // Default like Gemini
+                builder.temperature(0.2);  // Default like Gemini
             }
             if (options.getMaxTokens() != null) {
-                chatOptions.setMaxTokens(options.getMaxTokens());
+                builder.maxTokens(options.getMaxTokens());
             }
             if (options.getTopP() != null) {
-                chatOptions.setTopP(options.getTopP());
+                builder.topP(options.getTopP());
             } else {
-                chatOptions.setTopP(0.9);  // Default like Gemini
+                builder.topP(0.9);  // Default like Gemini
             }
             if (options.getSeed() != null) {
-                chatOptions.setSeed(options.getSeed());
+                builder.seed(options.getSeed());
             }
         } else {
-            chatOptions.setModel(resolveModel(null));
-            chatOptions.setTemperature(0.2);
-            chatOptions.setTopP(0.9);
+            builder.model(resolveModel(null));
+            builder.temperature(0.2);
+            builder.topP(0.9);
         }
-        return chatOptions;
+        return builder.build();
+    }
+
+    private OpenAiChatOptions withJsonSchema(OpenAiChatOptions options, String jsonSchema) {
+        return options.mutate()
+                .responseFormat(ResponseFormat.builder()
+                        .type(ResponseFormat.Type.JSON_SCHEMA)
+                        .jsonSchema(jsonSchema)
+                        .build())
+                .build();
     }
 
     private String resolveModel(PromptOptions options) {
@@ -199,14 +208,15 @@ public class OpenAiProvider implements GenAiProvider {
     private Flux<ProviderEvent> streamFromChatModel(ProviderRequest request) {
         OpenAiChatOptions options = buildOptions(request.getOptions());
         if (StringUtils.hasText(request.getJsonSchema())) {
-            options.setResponseFormat(new ResponseFormat(ResponseFormat.Type.JSON_SCHEMA, request.getJsonSchema()));
+            options = withJsonSchema(options, request.getJsonSchema());
         }
-        Prompt prompt = buildPrompt(request, options);
+        final OpenAiChatOptions streamOptions = options;
+        Prompt prompt = buildPrompt(request, streamOptions);
         return Flux.defer(() -> {
             StringBuilder content = new StringBuilder();
             Map<String, Object> metadata = new LinkedHashMap<>();
             return Flux.concat(
-                    Flux.just(ProviderEvent.started(service(), options.getModel())),
+                    Flux.just(ProviderEvent.started(service(), streamOptions.getModel())),
                     chatModel.stream(prompt)
                             .map(response -> {
                                 String delta = response.getResult().getOutput().getText();
@@ -218,16 +228,16 @@ public class OpenAiProvider implements GenAiProvider {
                                     metadata.putAll(responseMetadata);
                                 }
                                 if (StringUtils.hasText(delta)) {
-                                    return ProviderEvent.streamChunk(service(), options.getModel(), delta);
+                                    return ProviderEvent.streamChunk(service(), streamOptions.getModel(), delta);
                                 }
                                 return null;
                             })
                             .filter(Objects::nonNull),
-                    Flux.defer(() -> Flux.just(ProviderEvent.metadata(service(), options.getModel(), metadata))),
-                    Flux.defer(() -> Flux.just(ProviderEvent.completed(service(), options.getModel(),
+                    Flux.defer(() -> Flux.just(ProviderEvent.metadata(service(), streamOptions.getModel(), metadata))),
+                    Flux.defer(() -> Flux.just(ProviderEvent.completed(service(), streamOptions.getModel(),
                             content.toString(), metadata)))
             );
-        }).onErrorResume(ex -> Flux.just(ProviderEvent.error(service(), options.getModel(), ex.getMessage())));
+        }).onErrorResume(ex -> Flux.just(ProviderEvent.error(service(), streamOptions.getModel(), ex.getMessage())));
     }
 
     private Flux<ProviderEvent> streamFromWebSearch(ProviderRequest request, String model) {
