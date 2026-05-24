@@ -29,16 +29,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>com.squareup.okio</groupId>
-            <artifactId>okio-jvm</artifactId>
-            <version>3.6.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okio</groupId>
-            <artifactId>okio</artifactId>
-            <version>3.6.0</version>
-        </dependency>
         <!-- Google Cloud Storage client for Vertex batch input/output -->
         <dependency>
             <groupId>com.google.cloud</groupId>
