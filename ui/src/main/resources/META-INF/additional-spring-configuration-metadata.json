@@ -1,0 +1,147 @@
+{
+  "groups": [
+    {
+      "name": "amazon-config",
+      "type": "org.open4goods.ui.config.yml.AmazonConfig",
+      "sourceType": "org.open4goods.ui.config.yml.UiConfig",
+      "description": "Amazon affiliate link configuration."
+    },
+    {
+      "name": "banchecker-config",
+      "type": "org.open4goods.commons.config.yml.BanCheckerConfig",
+      "sourceType": "org.open4goods.ui.config.yml.UiConfig",
+      "description": "IP ban checker configuration."
+    },
+    {
+      "name": "namings",
+      "type": "org.open4goods.model.vertical.SiteNaming",
+      "sourceType": "org.open4goods.ui.config.yml.UiConfig",
+      "description": "Hostname and public base URL mapping by language."
+    },
+    {
+      "name": "remote-file-caching",
+      "type": "org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties",
+      "sourceType": "org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties",
+      "description": "Remote file download timeout configuration."
+    },
+    {
+      "name": "web-config",
+      "type": "org.open4goods.commons.config.yml.ui.WebConfig",
+      "sourceType": "org.open4goods.ui.config.yml.UiConfig",
+      "description": "Legacy UI web behavior configuration."
+    }
+  ],
+  "properties": [
+    {
+      "name": "amazon-config.affiliate-tag",
+      "type": "java.lang.String",
+      "description": "Affiliate tag appended to generated Amazon links.",
+      "sourceType": "org.open4goods.ui.config.yml.AmazonConfig"
+    },
+    {
+      "name": "amazon-config.amazon-search-link",
+      "type": "java.lang.String",
+      "description": "Amazon search URL template. Supports {search_terms} and {affiliate_tag} placeholders.",
+      "sourceType": "org.open4goods.ui.config.yml.AmazonConfig"
+    },
+    {
+      "name": "banchecker-config.ips",
+      "type": "java.util.Set<java.lang.String>",
+      "description": "IP addresses rejected with HTTP 403.",
+      "sourceType": "org.open4goods.commons.config.yml.BanCheckerConfig"
+    },
+    {
+      "name": "namings.base-urls",
+      "type": "org.open4goods.model.Localisable<java.lang.String,java.lang.String>",
+      "description": "Public base URLs mapped by language key.",
+      "sourceType": "org.open4goods.model.vertical.SiteNaming"
+    },
+    {
+      "name": "namings.server-names",
+      "type": "org.open4goods.model.Localisable<java.lang.String,java.lang.String>",
+      "description": "Hostnames mapped by language key.",
+      "sourceType": "org.open4goods.model.vertical.SiteNaming"
+    },
+    {
+      "name": "remote-file-caching.connection-timeout",
+      "type": "java.lang.Integer",
+      "description": "HTTP connection timeout in milliseconds for remote file downloads.",
+      "sourceType": "org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties",
+      "defaultValue": 30000
+    },
+    {
+      "name": "remote-file-caching.read-timeout",
+      "type": "java.lang.Integer",
+      "description": "HTTP read timeout in milliseconds for remote file downloads.",
+      "sourceType": "org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties",
+      "defaultValue": 30000
+    },
+    {
+      "name": "web-config.cors-allowed-hosts",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Origins allowed by the UI CORS filter.",
+      "sourceType": "org.open4goods.commons.config.yml.ui.WebConfig"
+    },
+    {
+      "name": "web-config.google-analytics-id",
+      "type": "java.lang.String",
+      "description": "Google Analytics tracking identifier.",
+      "sourceType": "org.open4goods.commons.config.yml.ui.WebConfig",
+      "defaultValue": "UNDEFINED"
+    },
+    {
+      "name": "web-config.google-site-verification",
+      "type": "java.lang.String",
+      "description": "Google Search Console site verification token.",
+      "sourceType": "org.open4goods.commons.config.yml.ui.WebConfig"
+    },
+    {
+      "name": "web-config.i18n-file-cache",
+      "type": "java.lang.Integer",
+      "description": "i18n file cache duration in seconds.",
+      "sourceType": "org.open4goods.commons.config.yml.ui.WebConfig",
+      "defaultValue": 10
+    },
+    {
+      "name": "web-config.products-search-max-page-size",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of products returned by a search page.",
+      "sourceType": "org.open4goods.commons.config.yml.ui.WebConfig",
+      "defaultValue": 50
+    },
+    {
+      "name": "web-config.templates-caching",
+      "type": "java.lang.Boolean",
+      "description": "Whether Thymeleaf templates are cached.",
+      "sourceType": "org.open4goods.commons.config.yml.ui.WebConfig",
+      "defaultValue": false
+    },
+    {
+      "name": "web-config.templates-path",
+      "type": "java.lang.String",
+      "description": "Filesystem templates folder. When unset, templates are served from the classpath.",
+      "sourceType": "org.open4goods.commons.config.yml.ui.WebConfig"
+    },
+    {
+      "name": "web-config.theme",
+      "type": "java.lang.String",
+      "description": "Theme folder under templates/themes.",
+      "sourceType": "org.open4goods.commons.config.yml.ui.WebConfig"
+    },
+    {
+      "name": "web-config.use-hot-scss",
+      "type": "java.lang.Boolean",
+      "description": "Whether CSS is served from hot-reloaded SCSS build output.",
+      "sourceType": "org.open4goods.commons.config.yml.ui.WebConfig",
+      "defaultValue": false
+    },
+    {
+      "name": "web-config.web-authentication",
+      "type": "java.lang.Boolean",
+      "description": "Whether authentication is required for site navigation.",
+      "sourceType": "org.open4goods.commons.config.yml.ui.WebConfig",
+      "defaultValue": true
+    }
+  ],
+  "hints": []
+}
