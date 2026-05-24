@@ -63,8 +63,14 @@ spring:
     virtual:
       enabled: true
   ai:
-    chat:
-      model: ${SPRING_AI_CHAT_MODEL:openai}
+    model:
+      chat: ${SPRING_AI_CHAT_MODEL:openai}
+      embedding: none
+      image: none
+      audio:
+        speech: none
+        transcription: none
+      moderation: none
     openai:
       api-key: ${OPENAI_API_KEY:${gen-ai-config.openai-api-key:}}
       chat:

@@ -9,8 +9,14 @@ The API service defaults to the OpenAI Spring AI chat model:
 ```yaml
 spring:
   ai:
-    chat:
-      model: ${SPRING_AI_CHAT_MODEL:openai}
+    model:
+      chat: ${SPRING_AI_CHAT_MODEL:openai}
+      embedding: none
+      image: none
+      audio:
+        speech: none
+        transcription: none
+      moderation: none
 ```
 
 Set `SPRING_AI_CHAT_MODEL=google-gen-ai` only when Gemini should be the active
