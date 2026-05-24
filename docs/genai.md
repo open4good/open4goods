@@ -4,6 +4,19 @@ This document describes the Spring AI configuration keys and batch settings for 
 
 ## Providers
 
+The API service defaults to the OpenAI Spring AI chat model:
+
+```yaml
+spring:
+  ai:
+    chat:
+      model: ${SPRING_AI_CHAT_MODEL:openai}
+```
+
+Set `SPRING_AI_CHAT_MODEL=google-gen-ai` only when Gemini should be the active
+Spring AI chat model. In that mode, provide either `GEMINI_API_KEY` for the
+Gemini Developer API or Vertex project/location credentials for Vertex AI.
+
 ### OpenAI (interactive + batch)
 
 ```yaml
