@@ -1,6 +1,244 @@
 {
   "properties": [
     {
+      "name": "blog.static-domain",
+      "type": "java.lang.String",
+      "description": "Domain prefix applied to blog resources when rendering blog content."
+    },
+    {
+      "name": "captcha.key",
+      "type": "java.lang.String",
+      "description": "Public hCaptcha site key returned to the frontend."
+    },
+    {
+      "name": "captcha.secret-key",
+      "type": "java.lang.String",
+      "description": "Secret key used by the API to verify hCaptcha responses."
+    },
+    {
+      "name": "captcha.valid-role",
+      "type": "java.lang.String",
+      "description": "Security role granted after a successful captcha verification.",
+      "defaultValue": "ROLE_HUMAN"
+    },
+    {
+      "name": "feedback.github.access-token",
+      "type": "java.lang.String",
+      "description": "GitHub token used to create and update feedback issues."
+    },
+    {
+      "name": "feedback.github.organization",
+      "type": "java.lang.String",
+      "description": "GitHub organization that owns the feedback repository."
+    },
+    {
+      "name": "feedback.github.repo",
+      "type": "java.lang.String",
+      "description": "GitHub repository used for feedback issues."
+    },
+    {
+      "name": "feedback.github.user",
+      "type": "java.lang.String",
+      "description": "GitHub user name associated with feedback operations."
+    },
+    {
+      "name": "feedback.voting.default-votable",
+      "type": "java.lang.Boolean",
+      "description": "Apply the required votable label automatically to newly created issues.",
+      "defaultValue": true
+    },
+    {
+      "name": "feedback.voting.max-votes-per-ip-per-day",
+      "type": "java.lang.Integer",
+      "description": "Maximum feedback votes allowed per IP address per day.",
+      "defaultValue": 5
+    },
+    {
+      "name": "feedback.voting.required-label",
+      "type": "java.lang.String",
+      "description": "GitHub issue label required before an issue can receive votes.",
+      "defaultValue": "votable"
+    },
+    {
+      "name": "front.affiliation-partners.api-base-url",
+      "type": "java.lang.String",
+      "description": "Base URL of the backend exposing affiliation partner data."
+    },
+    {
+      "name": "front.affiliation-partners.api-key",
+      "type": "java.lang.String",
+      "description": "API key forwarded when calling the affiliation partners backend."
+    },
+    {
+      "name": "front.affiliation-partners.partners-path",
+      "type": "java.lang.String",
+      "description": "Path appended to the affiliation partners base URL.",
+      "defaultValue": "/partners"
+    },
+    {
+      "name": "front.agent.agents[].allow-template-editing",
+      "type": "java.lang.Boolean",
+      "description": "Allow users to edit prompt templates for the agent."
+    },
+    {
+      "name": "front.agent.agents[].allowed-roles",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Roles allowed to use the agent."
+    },
+    {
+      "name": "front.agent.agents[].attributes[].id",
+      "type": "java.lang.String",
+      "description": "Stable identifier of an agent attribute."
+    },
+    {
+      "name": "front.agent.agents[].attributes[].label",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Localized labels for an agent attribute."
+    },
+    {
+      "name": "front.agent.agents[].attributes[].options",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Allowed option values for list-like agent attributes."
+    },
+    {
+      "name": "front.agent.agents[].attributes[].type",
+      "type": "java.lang.String",
+      "description": "Agent attribute input type, such as TEXT, LIST, CHECKBOX, or COMBO."
+    },
+    {
+      "name": "front.agent.agents[].description",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Localized public descriptions of the agent."
+    },
+    {
+      "name": "front.agent.agents[].icon",
+      "type": "java.lang.String",
+      "description": "Frontend icon name displayed for the agent."
+    },
+    {
+      "name": "front.agent.agents[].id",
+      "type": "java.lang.String",
+      "description": "Stable agent identifier."
+    },
+    {
+      "name": "front.agent.agents[].mail-template.body",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Localized body text for the agent mail template."
+    },
+    {
+      "name": "front.agent.agents[].mail-template.subject",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Localized subject text for the agent mail template."
+    },
+    {
+      "name": "front.agent.agents[].mail-template.to",
+      "type": "java.lang.String",
+      "description": "Recipient email address for the agent mail template."
+    },
+    {
+      "name": "front.agent.agents[].name",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Localized display names of the agent."
+    },
+    {
+      "name": "front.agent.agents[].preview-label-key",
+      "type": "java.lang.String",
+      "description": "Translation key used for the agent preview label."
+    },
+    {
+      "name": "front.agent.agents[].prompt-template",
+      "type": "java.lang.String",
+      "description": "Deprecated single prompt template retained for backward-compatible configuration."
+    },
+    {
+      "name": "front.agent.agents[].prompt-templates[].content",
+      "type": "java.lang.String",
+      "description": "Prompt template content sent to the agent."
+    },
+    {
+      "name": "front.agent.agents[].prompt-templates[].id",
+      "type": "java.lang.String",
+      "description": "Stable prompt template identifier."
+    },
+    {
+      "name": "front.agent.agents[].prompt-templates[].title",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Localized prompt template titles."
+    },
+    {
+      "name": "front.agent.agents[].public-prompt-history",
+      "type": "java.lang.Boolean",
+      "description": "Expose the agent prompt history publicly."
+    },
+    {
+      "name": "front.agent.agents[].tags",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Tags used to categorize the agent."
+    },
+    {
+      "name": "front.blog.base-urls",
+      "type": "org.open4goods.model.Localisable<java.lang.String,java.lang.String>",
+      "description": "Public blog base URLs indexed by language code."
+    },
+    {
+      "name": "front.cache.forever-max-bytes",
+      "type": "org.springframework.util.unit.DataSize",
+      "description": "Byte budget for the non-expiring local cache.",
+      "defaultValue": "128MB"
+    },
+    {
+      "name": "front.cache.one-day-max-bytes",
+      "type": "org.springframework.util.unit.DataSize",
+      "description": "Byte budget for the one-day local cache.",
+      "defaultValue": "256MB"
+    },
+    {
+      "name": "front.cache.one-day-ttl",
+      "type": "java.time.Duration",
+      "description": "Expiry applied to the one-day local cache.",
+      "defaultValue": "24h"
+    },
+    {
+      "name": "front.cache.one-hour-max-bytes",
+      "type": "org.springframework.util.unit.DataSize",
+      "description": "Byte budget for the one-hour local cache.",
+      "defaultValue": "256MB"
+    },
+    {
+      "name": "front.cache.one-hour-ttl",
+      "type": "java.time.Duration",
+      "description": "Expiry applied to the one-hour local cache.",
+      "defaultValue": "1h"
+    },
+    {
+      "name": "front.cache.one-minute-max-bytes",
+      "type": "org.springframework.util.unit.DataSize",
+      "description": "Byte budget for the one-minute local cache.",
+      "defaultValue": "32MB"
+    },
+    {
+      "name": "front.cache.one-minute-ttl",
+      "type": "java.time.Duration",
+      "description": "Expiry applied to the one-minute local cache.",
+      "defaultValue": "1m"
+    },
+    {
+      "name": "front.cache.path",
+      "type": "java.lang.String",
+      "description": "Filesystem path used for front-api cache files.",
+      "defaultValue": "./cache"
+    },
+    {
+      "name": "front.contact.email",
+      "type": "java.lang.String",
+      "description": "Recipient email address for contact form submissions."
+    },
+    {
+      "name": "front.embedding.api-base-url",
+      "type": "java.lang.String",
+      "description": "Base URL of the embedding service."
+    },
+    {
       "name": "front.exposed-docs.base-url",
       "type": "java.lang.String",
       "description": "Base URL of the exposed docs microservice.",
@@ -13,57 +251,10 @@
       "defaultValue": true
     },
     {
-      "name": "front.review-generation.api-base-url",
-      "type": "java.lang.String",
-      "description": "Base URL of the back-office API exposing review generation endpoints.",
-      "defaultValue": "https://api.open4goods.org"
-    },
-    {
-      "name": "front.review-generation.api-key",
-      "type": "java.lang.String",
-      "description": "API key forwarded to authenticate against the back-office API."
-    },
-    {
-      "name": "front.review-generation.review-path",
-      "type": "java.lang.String",
-      "description": "Path appended to the base URL when triggering or polling review generation.",
-      "defaultValue": "/review"
-    },
-    {
-      "name": "front.review-generation.quota.max-per-ip",
-      "type": "java.lang.Integer",
-      "description": "Maximum number of review generations allowed per IP during the quota window.",
-      "defaultValue": 3
-    },
-    {
-      "name": "front.review-generation.quota.window",
-      "type": "java.time.Duration",
-      "description": "Duration of the quota window used to count review generations per IP.",
-      "defaultValue": "24h"
-    },
-    {
       "name": "front.geocode.base-url",
       "type": "java.lang.String",
       "description": "Base URL of the geocode microservice.",
       "defaultValue": "http://localhost:8089"
-    },
-    {
-      "name": "front.search.suggest.semantic-fallback-enabled",
-      "type": "java.lang.Boolean",
-      "description": "Enable semantic fallback for product suggestions when prefix search yields no results.",
-      "defaultValue": true
-    },
-    {
-      "name": "front.google-indexation.enabled",
-      "type": "java.lang.Boolean",
-      "description": "Enable Google Indexation dispatch in the front API.",
-      "defaultValue": false
-    },
-    {
-      "name": "front.google-indexation.realtime-enabled",
-      "type": "java.lang.Boolean",
-      "description": "Enable real-time Indexing API dispatch when a review generation succeeds.",
-      "defaultValue": true
     },
     {
       "name": "front.google-indexation.batch-enabled",
@@ -84,10 +275,22 @@
       "defaultValue": 50
     },
     {
+      "name": "front.google-indexation.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable Google Indexation dispatch in the front API.",
+      "defaultValue": false
+    },
+    {
       "name": "front.google-indexation.max-attempts",
       "type": "java.lang.Integer",
       "description": "Maximum number of attempts before giving up on a URL.",
       "defaultValue": 5
+    },
+    {
+      "name": "front.google-indexation.realtime-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable real-time Indexing API dispatch when a review generation succeeds.",
+      "defaultValue": true
     },
     {
       "name": "front.google-indexation.site-base-url",
@@ -95,10 +298,486 @@
       "description": "Base URL of the public frontend used to build canonical product URLs."
     },
     {
+      "name": "front.google-taxonomy.english-taxonomy-url",
+      "type": "java.lang.String",
+      "description": "URL of the English Google product taxonomy.",
+      "defaultValue": "https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt"
+    },
+    {
+      "name": "front.google-taxonomy.french-taxonomy-url",
+      "type": "java.lang.String",
+      "description": "URL of the French Google product taxonomy.",
+      "defaultValue": "https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt"
+    },
+    {
+      "name": "front.google-taxonomy.taxonomy-urls",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Additional Google product taxonomy URLs indexed by language code."
+    },
+    {
+      "name": "front.mail-templates.templates[].body",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Localized body text for a reusable mail template."
+    },
+    {
+      "name": "front.mail-templates.templates[].id",
+      "type": "java.lang.String",
+      "description": "Stable reusable mail template identifier."
+    },
+    {
+      "name": "front.mail-templates.templates[].subject",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Localized subject text for a reusable mail template."
+    },
+    {
+      "name": "front.mail-templates.templates[].to",
+      "type": "java.lang.String",
+      "description": "Recipient email override for a reusable mail template."
+    },
+    {
+      "name": "front.max-page-size",
+      "type": "java.lang.Integer",
+      "description": "Maximum page size accepted by paginated endpoints.",
+      "defaultValue": 50
+    },
+    {
+      "name": "front.partners.ecosystem.partners[].bloc-id",
+      "type": "java.lang.String",
+      "description": "XWiki bloc identifier for an ecosystem partner."
+    },
+    {
+      "name": "front.partners.ecosystem.partners[].image-url",
+      "type": "java.lang.String",
+      "description": "Relative image URL for an ecosystem partner."
+    },
+    {
+      "name": "front.partners.ecosystem.partners[].name",
+      "type": "java.lang.String",
+      "description": "Display name of an ecosystem partner."
+    },
+    {
+      "name": "front.partners.ecosystem.partners[].url",
+      "type": "java.lang.String",
+      "description": "Public website URL of an ecosystem partner."
+    },
+    {
+      "name": "front.partners.mentors.partners[].bloc-id",
+      "type": "java.lang.String",
+      "description": "XWiki bloc identifier for a mentor partner."
+    },
+    {
+      "name": "front.partners.mentors.partners[].image-url",
+      "type": "java.lang.String",
+      "description": "Relative image URL for a mentor partner."
+    },
+    {
+      "name": "front.partners.mentors.partners[].name",
+      "type": "java.lang.String",
+      "description": "Display name of a mentor partner."
+    },
+    {
+      "name": "front.partners.mentors.partners[].url",
+      "type": "java.lang.String",
+      "description": "Public website URL of a mentor partner."
+    },
+    {
+      "name": "front.rate-limit.anonymous",
+      "type": "java.lang.Integer",
+      "description": "Maximum requests per minute for anonymous users.",
+      "defaultValue": 100
+    },
+    {
+      "name": "front.rate-limit.authenticated",
+      "type": "java.lang.Integer",
+      "description": "Maximum requests per minute for authenticated users.",
+      "defaultValue": 1000
+    },
+    {
+      "name": "front.rate-limit.counter-ttl",
+      "type": "java.time.Duration",
+      "description": "Duration after which idle rate-limit counters are purged.",
+      "defaultValue": "75s"
+    },
+    {
+      "name": "front.resource-root-path",
+      "type": "java.lang.String",
+      "description": "Absolute root URL used to expose downloadable static resources."
+    },
+    {
+      "name": "front.review-generation.api-base-url",
+      "type": "java.lang.String",
+      "description": "Base URL of the back-office API exposing review generation endpoints.",
+      "defaultValue": "https://api.open4goods.org"
+    },
+    {
+      "name": "front.review-generation.api-key",
+      "type": "java.lang.String",
+      "description": "API key forwarded to authenticate against the back-office API."
+    },
+    {
+      "name": "front.review-generation.connect-timeout",
+      "type": "java.time.Duration",
+      "description": "Connection timeout for review generation HTTP calls.",
+      "defaultValue": "5s"
+    },
+    {
+      "name": "front.review-generation.quota.max-per-ip",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of review generations allowed per IP during the quota window.",
+      "defaultValue": 3
+    },
+    {
+      "name": "front.review-generation.quota.window",
+      "type": "java.time.Duration",
+      "description": "Duration of the quota window used to count review generations per IP.",
+      "defaultValue": "24h"
+    },
+    {
+      "name": "front.review-generation.read-timeout",
+      "type": "java.time.Duration",
+      "description": "Read timeout for review generation HTTP calls.",
+      "defaultValue": "30s"
+    },
+    {
+      "name": "front.review-generation.review-path",
+      "type": "java.lang.String",
+      "description": "Path appended to the base URL when triggering or polling review generation.",
+      "defaultValue": "/review"
+    },
+    {
+      "name": "front.search.semantic-min-score",
+      "type": "java.lang.Float",
+      "description": "Minimum semantic score required to keep a semantic search result.",
+      "defaultValue": 0.7
+    },
+    {
+      "name": "front.search.suggest.semantic-fallback-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable semantic fallback for product suggestions when prefix search yields no results.",
+      "defaultValue": true
+    },
+    {
+      "name": "front.security.access-token-expiry",
+      "type": "java.time.Duration",
+      "description": "Validity duration of generated access tokens.",
+      "defaultValue": "15m"
+    },
+    {
+      "name": "front.security.cors-allowed-hosts",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Origins allowed for CORS requests."
+    },
+    {
+      "name": "front.security.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable Spring Security for the front API.",
+      "defaultValue": true
+    },
+    {
+      "name": "front.security.jwt-secret",
+      "type": "java.lang.String",
+      "description": "Secret key used to sign JWT tokens."
+    },
+    {
+      "name": "front.security.refresh-token-expiry",
+      "type": "java.time.Duration",
+      "description": "Validity duration of generated refresh tokens.",
+      "defaultValue": "7d"
+    },
+    {
+      "name": "front.security.shared-token",
+      "type": "java.lang.String",
+      "description": "Shared secret accepted in the X-Shared-Token header."
+    },
+    {
       "name": "front.semantic-diagnostics-enabled",
       "type": "java.lang.Boolean",
       "description": "Enable semantic score diagnostics in global search responses.",
       "defaultValue": false
+    },
+    {
+      "name": "front.share.crawler-extraction-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable crawler-based extraction during share resolution.",
+      "defaultValue": false
+    },
+    {
+      "name": "front.share.max-candidates",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of candidates retained during share resolution.",
+      "defaultValue": 5
+    },
+    {
+      "name": "front.share.max-text-length",
+      "type": "java.lang.Integer",
+      "description": "Maximum text length accepted during share resolution.",
+      "defaultValue": 2048
+    },
+    {
+      "name": "front.share.max-title-length",
+      "type": "java.lang.Integer",
+      "description": "Maximum title length accepted during share resolution.",
+      "defaultValue": 256
+    },
+    {
+      "name": "front.share.max-url-length",
+      "type": "java.lang.Integer",
+      "description": "Maximum URL length accepted during share resolution.",
+      "defaultValue": 2048
+    },
+    {
+      "name": "front.share.resolution-window",
+      "type": "java.time.Duration",
+      "description": "Maximum time window used to resolve a shared URL.",
+      "defaultValue": "4s"
+    },
+    {
+      "name": "front.share.store-ttl",
+      "type": "java.time.Duration",
+      "description": "Time to keep share resolution entries in the in-memory store.",
+      "defaultValue": "20m"
+    },
+    {
+      "name": "geocode.cache.path",
+      "type": "java.lang.String",
+      "description": "Filesystem path used for cached geocode datasets.",
+      "defaultValue": "target/geocode-cache"
+    },
+    {
+      "name": "geocode.geonames.extracted-file-name",
+      "type": "java.lang.String",
+      "description": "Expected GeoNames data file name inside the downloaded archive.",
+      "defaultValue": "cities5000.txt"
+    },
+    {
+      "name": "geocode.geonames.refresh-in-days",
+      "type": "java.lang.Integer",
+      "description": "Number of days before refreshing the cached GeoNames dataset.",
+      "defaultValue": 7
+    },
+    {
+      "name": "geocode.geonames.url",
+      "type": "java.lang.String",
+      "description": "Remote GeoNames dataset archive URL.",
+      "defaultValue": "https://download.geonames.org/export/dump/cities5000.zip"
+    },
+    {
+      "name": "geocode.maxmind.database-file-name",
+      "type": "java.lang.String",
+      "description": "Expected MaxMind database file name inside the downloaded archive.",
+      "defaultValue": "GeoLite2-City.mmdb"
+    },
+    {
+      "name": "geocode.maxmind.refresh-in-days",
+      "type": "java.lang.Integer",
+      "description": "Number of days before refreshing the cached MaxMind dataset.",
+      "defaultValue": 7
+    },
+    {
+      "name": "geocode.maxmind.url",
+      "type": "java.lang.String",
+      "description": "Remote MaxMind GeoIP dataset archive URL."
+    },
+    {
+      "name": "google-indexation.api-url",
+      "type": "java.lang.String",
+      "description": "Google Indexing API endpoint.",
+      "defaultValue": "https://indexing.googleapis.com/v3/urlNotifications:publish"
+    },
+    {
+      "name": "google-indexation.batch-size",
+      "type": "java.lang.Integer",
+      "description": "Default number of URLs sent in one indexing batch.",
+      "defaultValue": 50
+    },
+    {
+      "name": "google-indexation.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable the Google Indexing API client.",
+      "defaultValue": false
+    },
+    {
+      "name": "google-indexation.request-timeout",
+      "type": "java.time.Duration",
+      "description": "Timeout applied to outbound Google Indexing API requests.",
+      "defaultValue": "10s"
+    },
+    {
+      "name": "google-indexation.service-account-json",
+      "type": "java.lang.String",
+      "description": "Raw service account JSON used to authenticate with the Google Indexing API."
+    },
+    {
+      "name": "google-indexation.service-account-path",
+      "type": "java.lang.String",
+      "description": "Path to the service account JSON file used to authenticate with the Google Indexing API."
+    },
+    {
+      "name": "icecat-feature-config.brands-list-file-uri",
+      "type": "java.lang.String",
+      "description": "Icecat suppliers list export URI."
+    },
+    {
+      "name": "icecat-feature-config.categories-list-file-uri",
+      "type": "java.lang.String",
+      "description": "Icecat categories list export URI."
+    },
+    {
+      "name": "icecat-feature-config.category-feature-list-file-uri",
+      "type": "java.lang.String",
+      "description": "Icecat category-feature mapping export URI."
+    },
+    {
+      "name": "icecat-feature-config.feature-groups-file-uri",
+      "type": "java.lang.String",
+      "description": "Icecat feature groups export URI."
+    },
+    {
+      "name": "icecat-feature-config.features-list-file-uri",
+      "type": "java.lang.String",
+      "description": "Icecat features list export URI."
+    },
+    {
+      "name": "icecat-feature-config.language-list-file-uri",
+      "type": "java.lang.String",
+      "description": "Icecat language list export URI."
+    },
+    {
+      "name": "icecat-feature-config.load-category-feature-list",
+      "type": "java.lang.Boolean",
+      "description": "Load Icecat category-feature mappings and mutate vertical feature groups at startup.",
+      "defaultValue": true
+    },
+    {
+      "name": "icecat-feature-config.password",
+      "type": "java.lang.String",
+      "description": "Icecat account password."
+    },
+    {
+      "name": "icecat-feature-config.user",
+      "type": "java.lang.String",
+      "description": "Icecat account username."
+    },
+    {
+      "name": "open-data-config.concurrent-downloads",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of concurrent OpenData downloads.",
+      "defaultValue": 4
+    },
+    {
+      "name": "open-data-config.download-speed-kb",
+      "type": "java.lang.Integer",
+      "description": "Maximum OpenData download speed per client in kilobytes.",
+      "defaultValue": 256
+    },
+    {
+      "name": "open-data-config.generation-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable scheduled OpenData export generation.",
+      "defaultValue": false
+    },
+    {
+      "name": "price-config.events",
+      "type": "java.util.Map<java.lang.String,java.util.List<org.open4goods.model.priceevents.Event>>",
+      "description": "Commercial events indexed by language code."
+    },
+    {
+      "name": "price-config.events[].end-date",
+      "type": "java.time.LocalDate",
+      "description": "Inclusive end date of a commercial event."
+    },
+    {
+      "name": "price-config.events[].label",
+      "type": "java.lang.String",
+      "description": "Display label of a commercial event."
+    },
+    {
+      "name": "price-config.events[].start-date",
+      "type": "java.time.LocalDate",
+      "description": "Inclusive start date of a commercial event."
+    },
+    {
+      "name": "team-config.contributors[].bloc-id",
+      "type": "java.lang.String",
+      "description": "XWiki bloc identifier for a contributor biography."
+    },
+    {
+      "name": "team-config.contributors[].image-url",
+      "type": "java.lang.String",
+      "description": "Relative portrait URL for a contributor."
+    },
+    {
+      "name": "team-config.contributors[].linked-in-url",
+      "type": "java.lang.String",
+      "description": "LinkedIn profile URL for a contributor."
+    },
+    {
+      "name": "team-config.contributors[].name",
+      "type": "java.lang.String",
+      "description": "Full name of a contributor."
+    },
+    {
+      "name": "team-config.cores[].bloc-id",
+      "type": "java.lang.String",
+      "description": "XWiki bloc identifier for a core team member biography."
+    },
+    {
+      "name": "team-config.cores[].image-url",
+      "type": "java.lang.String",
+      "description": "Relative portrait URL for a core team member."
+    },
+    {
+      "name": "team-config.cores[].linked-in-url",
+      "type": "java.lang.String",
+      "description": "LinkedIn profile URL for a core team member."
+    },
+    {
+      "name": "team-config.cores[].name",
+      "type": "java.lang.String",
+      "description": "Full name of a core team member."
+    },
+    {
+      "name": "xwiki.api-entrypoint",
+      "type": "java.lang.String",
+      "description": "XWiki REST API entrypoint path.",
+      "defaultValue": "rest"
+    },
+    {
+      "name": "xwiki.api-wiki",
+      "type": "java.lang.String",
+      "description": "XWiki wiki identifier used in REST API URLs.",
+      "defaultValue": "xwiki"
+    },
+    {
+      "name": "xwiki.base-url",
+      "type": "java.lang.String",
+      "description": "Base URL of the XWiki instance."
+    },
+    {
+      "name": "xwiki.https-only",
+      "type": "java.lang.Boolean",
+      "description": "Force generated XWiki URLs to use HTTPS."
+    },
+    {
+      "name": "xwiki.media",
+      "type": "java.lang.String",
+      "description": "XWiki REST media format.",
+      "defaultValue": "json"
+    },
+    {
+      "name": "xwiki.password",
+      "type": "java.lang.String",
+      "description": "Password used to authenticate against XWiki."
+    },
+    {
+      "name": "xwiki.proxyfication-root-url",
+      "type": "java.lang.String",
+      "description": "Static root URL used when proxyfying XWiki resources."
+    },
+    {
+      "name": "xwiki.username",
+      "type": "java.lang.String",
+      "description": "Username used to authenticate against XWiki."
     }
   ]
 }

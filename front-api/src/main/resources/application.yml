@@ -20,7 +20,7 @@ springdoc:
     use-root-path: true
 
 front:
-  resourceRootPath: "${FRONT_RESOURCE_ROOT_PATH:https://static.nudger.fr}"
+  resource-root-path: "${FRONT_RESOURCE_ROOT_PATH:https://static.nudger.fr}"
   max-page-size: 50
   cache:
     path: ./cache
@@ -89,48 +89,44 @@ front:
     ecosystem:
       partners:
         - name: French Tech Ouest
-          blocId: 'pages:ecosystem:frenchtech'
+          bloc-id: 'pages:ecosystem:frenchtech'
           url: https://www.ft-brestbretagneouest.bzh
-          imageUrl: /images/ecosystem/frenchtech.png
-#        - name: ADEME
-#          blocId: 'pages:ecosystem:ademe'
-#          url: https://www.ademe.fr
-#          imageUrl: /images/ecosystem/ademe.png
+          image-url: /images/ecosystem/frenchtech.png
 
         - name: Icecat
-          blocId: 'pages:ecosystem:icecat'
+          bloc-id: 'pages:ecosystem:icecat'
           url: https://www.icecat.biz
-          imageUrl: /images/ecosystem/icecat.png          
+          image-url: /images/ecosystem/icecat.png
 
         - name: Sustainalytics
-          blocId: 'pages:ecosystem:sustainalytics'
-          url: //https://www.sustainalytics.com/
-          imageUrl: /images/ecosystem/sustainanalytics.png          
+          bloc-id: 'pages:ecosystem:sustainalytics'
+          url: https://www.sustainalytics.com/
+          image-url: /images/ecosystem/sustainanalytics.png
                     
     mentors:
       partners:
         - name: Moovance
-          blocId: 'pages:partners:moovance'
+          bloc-id: 'pages:partners:moovance'
           url: https://www.moovance.fr/
-          imageUrl: /images/mentors/moovance.png
+          image-url: /images/mentors/moovance.png
           
         - name: Wekey
-          blocId: 'pages:partners:wekey'
+          bloc-id: 'pages:partners:wekey'
           url: https://www.wekey.fr/
-          imageUrl: /images/mentors/wekey.png
+          image-url: /images/mentors/wekey.png
           
         - name: Les imparfaits
-          blocId: 'pages:partners:les-imparfaits'
+          bloc-id: 'pages:partners:les-imparfaits'
           url: https://www.les-imparfaits.com/
-          imageUrl: /images/mentors/les-imparfaits.png
+          image-url: /images/mentors/les-imparfaits.png
         - name: Polaria
-          blocId: 'pages:partners:polaria'
+          bloc-id: 'pages:partners:polaria'
           url: https://www.polaria.ai
-          imageUrl: /images/mentors/polaria.jpeg
+          image-url: /images/mentors/polaria.jpeg
         - name: Ecotree
-          blocId: 'pages:partners:ecotree'
+          bloc-id: 'pages:partners:ecotree'
           url: https://ecotree.green
-          imageUrl: /images/mentors/ecotree.png    
+          image-url: /images/mentors/ecotree.png
 
 
 feedback:
@@ -147,7 +143,7 @@ feedback:
 xwiki:
     username: ${XWIKI_USERNAME:user}
     password: ${XWIKI_PASSWORD:pwd}
-    baseUrl: ${XWIKI_BASE_URL:https://dummy.fr}
+    base-url: ${XWIKI_BASE_URL:https://dummy.fr}
     
 management:
   health:
@@ -177,104 +173,104 @@ google-indexation:
 team-config:
   cores:
     - name: Goulven Furet
-      blocId: 'pages:team:goulven-furet:'
-      linkedInUrl: https://www.linkedin.com/in/goulven-furet/
-      imageUrl: /images/team/Goulven.jpeg
+      bloc-id: 'pages:team:goulven-furet:'
+      linked-in-url: https://www.linkedin.com/in/goulven-furet/
+      image-url: /images/team/Goulven.jpeg
 
     - name: Bérangère Leven
-      blocId: 'pages:team:berangere-leven:'
-      linkedInUrl: https://www.linkedin.com/in/b%C3%A9rang%C3%A8re-leven/
-      imageUrl: /images/team/Berangere.jpeg
+      bloc-id: 'pages:team:berangere-leven:'
+      linked-in-url: https://www.linkedin.com/in/b%C3%A9rang%C3%A8re-leven/
+      image-url: /images/team/Berangere.jpeg
 
     - name: Thomas Vandewalle
-      blocId: 'pages:team:thomas-vandewalle:'
-      linkedInUrl: https://www.linkedin.com/in/thomas-vandewalle-fr001/
-      imageUrl: /images/team/Thomas.jpeg
+      bloc-id: 'pages:team:thomas-vandewalle:'
+      linked-in-url: https://www.linkedin.com/in/thomas-vandewalle-fr001/
+      image-url: /images/team/Thomas.jpeg
 
     - name: Candide Chérel
-      blocId: 'pages:team:candide-cherel:'
-      linkedInUrl: https://www.linkedin.com/in/candide-cherel/?originalSubdomain=fr
-      imageUrl: /images/team/Candide.jpeg
+      bloc-id: 'pages:team:candide-cherel:'
+      linked-in-url: https://www.linkedin.com/in/candide-cherel/?originalSubdomain=fr
+      image-url: /images/team/Candide.jpeg
 
     - name: Louis-Marie Toudoire
-      blocId: 'pages:team:louis-marie-toudoire:'
-      linkedInUrl: https://www.linkedin.com/in/scezen/?originalSubdomain=fr
-      imageUrl: /images/team/Louis-Marie.jpeg
+      bloc-id: 'pages:team:louis-marie-toudoire:'
+      linked-in-url: https://www.linkedin.com/in/scezen/?originalSubdomain=fr
+      image-url: /images/team/Louis-Marie.jpeg
 
     - name: Laurent Blondel
-      blocId: 'pages:team:laurent-blondel:'
-      linkedInUrl: https://www.linkedin.com/in/laurent-blondel-33543532/
-      imageUrl: /images/team/Laurent.jpeg
+      bloc-id: 'pages:team:laurent-blondel:'
+      linked-in-url: https://www.linkedin.com/in/laurent-blondel-33543532/
+      image-url: /images/team/Laurent.jpeg
 
     - name: Max Ziliani
-      blocId: 'pages:team:max-ziliani:'
-      linkedInUrl: https://www.linkedin.com/in/maxziliani/
-      imageUrl: /images/team/Max.jpeg
+      bloc-id: 'pages:team:max-ziliani:'
+      linked-in-url: https://www.linkedin.com/in/maxziliani/
+      image-url: /images/team/Max.jpeg
 
   contributors:
     - name: Loïc Gourmelon
-      blocId: 'pages:team:loic-gourmelon:'
-      linkedInUrl: https://www.linkedin.com/in/gourmelonloic/
-      imageUrl: /images/team/Loic.jpeg
+      bloc-id: 'pages:team:loic-gourmelon:'
+      linked-in-url: https://www.linkedin.com/in/gourmelonloic/
+      image-url: /images/team/Loic.jpeg
 
     - name: Thierry Ledan
-      blocId: 'pages:team:thierry-ledan:'
-      linkedInUrl: https://www.linkedin.com/in/thierry-ledan-43650a183/
-      imageUrl: /images/team/Thierry.jpeg
+      bloc-id: 'pages:team:thierry-ledan:'
+      linked-in-url: https://www.linkedin.com/in/thierry-ledan-43650a183/
+      image-url: /images/team/Thierry.jpeg
 
     - name: Nicolas Bonamy
-      blocId: 'pages:team:nicolas-bonamy:'
-      linkedInUrl: https://www.linkedin.com/in/nicolas-bonamy-827b63a3/
-      imageUrl: /images/team/Nicolas.jpeg
+      bloc-id: 'pages:team:nicolas-bonamy:'
+      linked-in-url: https://www.linkedin.com/in/nicolas-bonamy-827b63a3/
+      image-url: /images/team/Nicolas.jpeg
 
     - name: Stephane Castrec
-      blocId: 'pages:team:stephane-castrec:'
-      linkedInUrl: https://www.linkedin.com/in/scastrec/
-      imageUrl: /images/team/Stephane.jpeg
+      bloc-id: 'pages:team:stephane-castrec:'
+      linked-in-url: https://www.linkedin.com/in/scastrec/
+      image-url: /images/team/Stephane.jpeg
       
     - name: Yann Mingant
-      blocId: 'pages:team:yann-mingant:'
-      linkedInUrl: https://www.linkedin.com/in/yann-mingant-5118b7177/
-      imageUrl: /images/team/Yann.jpeg
+      bloc-id: 'pages:team:yann-mingant:'
+      linked-in-url: https://www.linkedin.com/in/yann-mingant-5118b7177/
+      image-url: /images/team/Yann.jpeg
       
     - name: Albert Le Jeune Vasseur
-      blocId: 'pages:team:albert-ljv:'
-      linkedInUrl: https://www.linkedin.com/in/albertljv/
-      imageUrl: /images/team/Albert.png      
+      bloc-id: 'pages:team:albert-ljv:'
+      linked-in-url: https://www.linkedin.com/in/albertljv/
+      image-url: /images/team/Albert.png
 
 price-config:
   events:
     fr:
       - label: "Soldes d'hiver"
-        startDate: "2025-01-08"
-        endDate: "2025-02-04"
+        start-date: "2025-01-08"
+        end-date: "2025-02-04"
       - label: "French Days (Printemps)"
-        startDate: "2025-04-30"
-        endDate: "2025-05-07"
+        start-date: "2025-04-30"
+        end-date: "2025-05-07"
       - label: "Soldes d'été"
-        startDate: "2025-06-25"
-        endDate: "2025-07-22"
+        start-date: "2025-06-25"
+        end-date: "2025-07-22"
       - label: "Amazon Prime Day"
-        startDate: "2025-07-16"
-        endDate: "2025-07-17"
+        start-date: "2025-07-16"
+        end-date: "2025-07-17"
       - label: "Rentrée scolaire"
-        startDate: "2025-09-01"
-        endDate: "2025-09-01"
+        start-date: "2025-09-01"
+        end-date: "2025-09-01"
       - label: "French Days (Automne)"
-        startDate: "2025-09-23"
-        endDate: "2025-09-29"
+        start-date: "2025-09-23"
+        end-date: "2025-09-29"
       - label: "Singles' Day"
-        startDate: "2025-11-11"
-        endDate: "2025-11-11"
+        start-date: "2025-11-11"
+        end-date: "2025-11-11"
       - label: "Black Friday"
-        startDate: "2025-11-28"
-        endDate: "2025-11-28"
+        start-date: "2025-11-28"
+        end-date: "2025-11-28"
       - label: "Cyber Monday"
-        startDate: "2025-12-01"
-        endDate: "2025-12-01"
+        start-date: "2025-12-01"
+        end-date: "2025-12-01"
       - label: "Noël"
-        startDate: "2025-12-25"
-        endDate: "2025-12-25"
+        start-date: "2025-12-25"
+        end-date: "2025-12-25"
 
 front.agent:
   agents:
