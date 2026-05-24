@@ -1,12 +1,13 @@
 package org.open4goods.crawler.services.fetching;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.InputStreamReader;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -44,28 +45,45 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import tools.jackson.databind.MappingIterator;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.ObjectReader;
 import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.dataformat.csv.CsvReadFeature;
 import tools.jackson.dataformat.csv.CsvSchema;
-import com.google.common.collect.Sets;
 
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 
 /**
- * Worker thread that asynchronously dequeue the DataFragments from the file
- * queue. It
- * 
- * @author goulven
+ * Worker thread that continuously dequeues {@link DataSourceProperties} entries from
+ * {@link CsvDatasourceFetchingService#getQueue()}, downloads the remote CSV file, detects its
+ * dialect, and indexes each row as a {@link org.open4goods.model.datafragment.DataFragment}.
  *
+ * <p>One worker processes one feed at a time. Multiple workers run in parallel, one per
+ * configured thread in {@link org.open4goods.crawler.config.yml.FetcherProperties#getConcurrentFetcherTask()}.
+ *
+ * <p>The lenient {@link #CSV_MAPPER} tolerates trailing columns and missing columns so that a
+ * single malformed row does not abort the whole feed. Dialect (separator, quote) is
+ * auto-detected by {@link CsvDatasourceFetchingService#detectSchema} and may be overridden
+ * per-datasource in YAML.
+ *
+ * @author goulven
  */
 public class CsvIndexationWorker implements Runnable {
 
 	private static final Logger logger = LoggerFactory.getLogger(CsvIndexationWorker.class);
 
-//	private final static ObjectMapper csvMapper = new CsvMapper().enable((CsvParser.Feature.IGNORE_TRAILING_UNMAPPABLE));
-
-	private final static ObjectMapper csvMapper = new CsvMapper();
+	/**
+	 * Lenient CSV mapper shared across all worker instances (CsvMapper is thread-safe after
+	 * construction). IGNORE_TRAILING_UNMAPPABLE silently drops extra columns instead of throwing
+	 * CsvReadException, recovering rows that the dialect detector might still mis-parse.
+	 * INSERT_NULLS_FOR_MISSING_COLUMNS fills short rows rather than failing.
+	 * SKIP_EMPTY_LINES avoids NPE on blank lines at end-of-file.
+	 */
+	private static final CsvMapper CSV_MAPPER = CsvMapper.builder()
+	        .enable(CsvReadFeature.SKIP_EMPTY_LINES)
+	        .enable(CsvReadFeature.IGNORE_TRAILING_UNMAPPABLE)
+	        .enable(CsvReadFeature.INSERT_NULLS_FOR_MISSING_COLUMNS)
+	        .enable(CsvReadFeature.TRIM_SPACES)
+	        .build();
 
 	private static final String CLASSPATH_PREFIX = "classpath:";
 
@@ -207,31 +225,33 @@ public class CsvIndexationWorker implements Runnable {
 				}
 
 				CsvSchema schema = configureCsvSchema(config, destFile, dedicatedLogger);
-				ObjectReader oReader = csvMapper.readerFor(Map.class).with(schema);
+				Charset charset = Charset.forName(config.getCsvEncoding() != null ? config.getCsvEncoding() : "UTF-8");
+				ObjectReader oReader = CSV_MAPPER.readerFor(Map.class).with(schema);
 
-				mi = oReader.readValues(destFile);
+				mi = oReader.readValues(new InputStreamReader(new FileInputStream(destFile), charset));
 
 				while (true) {
-					stats.incrementLines();
 					Map<String, String> line = null;
 					try {
-						
+
 						// NOTE : can raise exception if further line is invalid
 						boolean hasNext = mi.hasNext();
 						if (!hasNext) {
 							break;
 						}
-						
+
 						line = mi.next();
+						// Count only after a successful read so stats match actual rows attempted
+						stats.incrementLines();
 						if (line == null) {
 							throw new ValidationException("Null line encountered");
 						}
 
-						// Normalisation 
+						// Normalise cell values; guard against null values (sparse rows from INSERT_NULLS_FOR_MISSING_COLUMNS)
 						 line = line.entrySet().stream()
 							    .collect(Collectors.toMap(
-							        e -> e.getKey(), 
-							        e -> (String) IdHelper.sanitizeAndNormalize(e.getValue().toString())  
+							        e -> e.getKey(),
+							        e -> e.getValue() == null ? "" : IdHelper.sanitizeAndNormalize(e.getValue())
 							    ));
 						DataFragment df = parseCsvLine(crawler, controller, dsProperties, line, dsConfName, dedicatedLogger, url);
 
@@ -246,11 +266,11 @@ public class CsvIndexationWorker implements Runnable {
 					} catch (ValidationException e) {
 						stats.incrementValidationFail();
 						validationFailedItems++;
-						dedicatedLogger.info("Validation exception ({}) while parsing {}: {}", e.getMessage(), url, line);
+						dedicatedLogger.info("Validation exception ({}) while parsing {} (url={})", e.getMessage(), dataFragment(line), url);
 					} catch (Exception e) {
 						stats.incrementErrors();
 						errorItems++;
-						dedicatedLogger.warn("Error in {}, while parsing {}", dsConfName, url, e);
+						dedicatedLogger.warn("Error in {}, while parsing {} ({} cols)", dsConfName, url, line == null ? 0 : line.size(), e);
 					}
 				}
 
@@ -280,35 +300,46 @@ public class CsvIndexationWorker implements Runnable {
 	
 
 	/**
-	 * Configure the schema for the specified file, and overrides with DatasourceConfig props if any
-	 * @param config
-	 * @param destFile
-	 * @param dedicatedLogger
-	 * @return
-	 * @throws IOException
+	 * Builds a {@link CsvSchema} for {@code destFile} by running dialect auto-detection and then
+	 * applying any explicit overrides from the datasource YAML configuration.
+	 * <p>
+	 * Explicit YAML overrides always win over auto-detection, which is useful for feeds whose
+	 * content would confuse the heuristics (e.g. very short files or unusual encodings).
+	 * </p>
+	 *
+	 * @param config       datasource CSV configuration (may contain explicit separator/quote)
+	 * @param destFile     the local CSV file to analyse
+	 * @param dedicatedLogger feed-specific logger
+	 * @return configured {@link CsvSchema}
+	 * @throws IOException if the file cannot be read during detection
 	 */
-	private CsvSchema configureCsvSchema(CsvDataSourceProperties config, File destFile, Logger dedicatedLogger) throws IOException {
-		dedicatedLogger.info("Detecting schema for {}", destFile.getAbsolutePath());
-		CsvSchema schema = csvService.detectSchema(destFile);
+	private CsvSchema configureCsvSchema(CsvDataSourceProperties config, File destFile, Logger dedicatedLogger) throws IOException
+	{
+	    Charset charset = Charset.forName(config.getCsvEncoding() != null ? config.getCsvEncoding() : "UTF-8");
+	    dedicatedLogger.info("Detecting schema for {} (charset {})", destFile.getAbsolutePath(), charset);
 
-		// Specific logging in dedicated logger
-		dedicatedLogger.warn("Auto detected schema is quoteChar:{} separatorChar:{} escapeChar:{}",  schema.getQuoteChar() == -1 ? "none" : Character.toString(schema.getQuoteChar()), schema.getColumnSeparator() == -1 ? "none" : Character.toString(schema.getColumnSeparator()), schema.getEscapeChar() == -1 ? "none" : Character.toString(schema.getEscapeChar())  );
-		
-		// Overriding with datasource specific config if defined
-		if (config.getCsvQuoteChar() != null) {
-			schema = schema.withQuoteChar(config.getCsvQuoteChar().charValue());
-		}
-		
-		if (config.getCsvEscapeChar() != null) {
-			schema = schema.withEscapeChar(config.getCsvEscapeChar().charValue());
-		}
-		
-		if (config.getCsvSeparator() != null) {
-			schema = schema.withColumnSeparator(config.getCsvSeparator().charValue());
-		}
-				
-		
-		return schema;
+	    CsvSchema schema = csvService.detectSchema(destFile, charset);
+
+	    // YAML-level overrides always take precedence over auto-detection
+	    if (config.getCsvQuoteChar() != null)
+	    {
+	        schema = schema.withQuoteChar(config.getCsvQuoteChar());
+	    }
+	    if (config.getCsvEscapeChar() != null)
+	    {
+	        schema = schema.withEscapeChar(config.getCsvEscapeChar());
+	    }
+	    if (config.getCsvSeparator() != null)
+	    {
+	        schema = schema.withColumnSeparator(config.getCsvSeparator());
+	    }
+
+	    dedicatedLogger.warn("Final schema: quoteChar:{} separatorChar:{} escapeChar:{}",
+	        schema.getQuoteChar() == -1 ? "none" : Character.toString((char) schema.getQuoteChar()),
+	        schema.getColumnSeparator() == -1 ? "none" : Character.toString((char) schema.getColumnSeparator()),
+	        schema.getEscapeChar() == -1 ? "none" : Character.toString((char) schema.getEscapeChar()));
+
+	    return schema;
 	}
 
 	private void closeIterator(MappingIterator<Map<String, String>> mi, Logger logger) {
@@ -363,7 +394,7 @@ public class CsvIndexationWorker implements Runnable {
 	 * @throws ValidationException if validation fails
 	 */
 	private DataFragment parseCsvLine(final DataFragmentWebCrawler crawler, final CrawlController controller, final DataSourceProperties config, final Map<String, String> item, final String datasourceConfigName, final Logger dedicatedLogger, String datasetUrl) throws ValidationException {
-	    dedicatedLogger.info("Parsing line : {}", item);
+	    dedicatedLogger.debug("Parsing line : {}", item);
 	    
 	    DataFragment dataFragment = new DataFragment();
 	    dataFragment.setFragmentHashCode(item.hashCode());
@@ -408,23 +439,37 @@ public class CsvIndexationWorker implements Runnable {
 	        removeFromSource(item, csvProperties.getUrl());
 	        
 	    } catch (Exception e) {
-	        logger.info("Error while extracting url in dataset {} :  {}", datasetUrl, item);
+	        logger.info("Error while extracting url in dataset {} ({} columns)", datasetUrl, item.size());
 	    }
 	}
 
 
 	/**
-	 * Extracts URL from a specific parameter in the CSV row.
+	 * Extracts a URL from a query-string parameter embedded in the value of {@code csvProperties.url}.
+	 * <p>
+	 * Example: if the CSV cell contains {@code https://tracker.example.com?target=https%3A%2F%2Fshop.com%2Fproduct}
+	 * and {@code extractUrlFromParam = "target"}, returns the decoded {@code https://shop.com/product}.
+	 * </p>
 	 *
-	 * @param item Map representing a CSV line
-	 * @param csvProperties CsvDataSourceProperties for configuration settings
-	 * @return Extracted URL string
-	 * @throws UnsupportedEncodingException if URL decoding fails
+	 * @param item          CSV row
+	 * @param csvProperties datasource configuration carrying the column name and param key
+	 * @return decoded URL, or {@code null} if the param is absent from the cell value
 	 */
-	private String extractUrlFromParam(Map<String, String> item, CsvDataSourceProperties csvProperties) {
-	    String url = getFromCsvRow(item, csvProperties.getUrl());
-	    UriComponents parsedUrl = UriComponentsBuilder.fromUriString(url).build();
-	    return URLDecoder.decode(parsedUrl.getQueryParams().getFirst(csvProperties.getExtractUrlFromParam()), StandardCharsets.UTF_8);
+	private String extractUrlFromParam(Map<String, String> item, CsvDataSourceProperties csvProperties)
+	{
+	    String raw = getFromCsvRow(item, csvProperties.getUrl());
+	    if (StringUtils.isEmpty(raw))
+	    {
+	        return null;
+	    }
+	    UriComponents parsedUrl = UriComponentsBuilder.fromUriString(raw).build();
+	    String paramValue = parsedUrl.getQueryParams().getFirst(csvProperties.getExtractUrlFromParam());
+	    if (paramValue == null)
+	    {
+	        logger.debug("Query param '{}' not found in URL cell '{}'", csvProperties.getExtractUrlFromParam(), raw);
+	        return null;
+	    }
+	    return URLDecoder.decode(paramValue, StandardCharsets.UTF_8);
 	}
 
 	/**
@@ -495,7 +540,7 @@ public class CsvIndexationWorker implements Runnable {
 	        }
 	    }
 	    if (null == dataFragment.getPrice() || null == dataFragment.getPrice().getPrice()) {
-	    	logger.warn("No price extracted for {}",item);
+	    	logger.warn("No price extracted for row with {} columns", item.size());
 	    }
 	    
 	    
@@ -571,7 +616,7 @@ public class CsvIndexationWorker implements Runnable {
 	            rating.setValue(Double.valueOf(getFromCsvRow(item, csvProperties.getRating().getValue())));
 	            dataFragment.addRating(rating);
 	        } catch (Exception e) {
-	            logger.warn("Error while adding rating for {} : {}", item, e.getMessage());
+	            logger.warn("Error while adding rating: {}", e.getMessage());
 	        }
 	    }
 	}
@@ -637,7 +682,7 @@ public class CsvIndexationWorker implements Runnable {
 	        });
 	        
 	    } catch (ValidationException e) {
-	        logger.warn("Problem while adding resource for {}", item);
+	        logger.warn("Problem while adding resource for row with {} columns", item.size());
 	    }
 	}
 
@@ -675,18 +720,12 @@ public class CsvIndexationWorker implements Runnable {
 	            try {
 					String value = getFromCsvRow(item, inStockColumn);
 					if (!StringUtils.isEmpty(value)) {
-
 						InStock inStock = InStockParser.parse(value);
 						if (inStock != null) {
 							dataFragment.setInStock(inStock);
-							continue;
 						}
-
-	                }
-					
-		            // Delete from source
-	                removeFromSource(item, inStockColumn);
-	                
+					}
+					removeFromSource(item, inStockColumn);
 	            } catch (Exception e) {
 	                logger.info("Cannot parse InStock : {}", e.getMessage());
 	            }
@@ -898,6 +937,15 @@ public class CsvIndexationWorker implements Runnable {
 	}
 	
 	
+
+	/**
+	 * Returns a safe log token for a CSV row: column count and key names only, never values.
+	 * Avoids leaking affiliate API keys or PII that may appear in cell values.
+	 */
+	private static String dataFragment(Map<String, String> row)
+	{
+	    return row == null ? "null" : row.size() + " cols: " + row.keySet();
+	}
 
 	/**
 	 * Remove an attribute from the source jackson csv map,
