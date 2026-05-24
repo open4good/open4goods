@@ -1,11 +1,22 @@
+# ============================================================================
+# DATA_QUALITY — Data quality (Qualité de la donnée)
+# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 001)
+# Used in verticals: oven, _default, air-conditioner, smartphones
+# Type: NUMERIC
+# Coverage snapshot: internal computed attribute; not matched from external feeds
+# Taxonomy coverage: icecat ❌  eprel ❌  etim ❌  wikidata ❌
+# Purpose: Synthetic score reflecting completeness of product attribute data;
+#          improves reliability of other impact scores by tracking missing values.
+# ============================================================================
+
 key: "DATA_QUALITY"
 userBetterIs: "GREATER"
 impactBetterIs: "GREATER"
 faIcon: "mdi-database-sync"
-#    attributePath: attributes.features
 name:
   default: "Data quality"
   fr: "Qualité de la donnée"
+filteringType: "NUMERIC"
 asScore: true
 scoring:
   scale:
@@ -15,6 +26,24 @@ scoring:
     method: "MINMAX_OBSERVED"
   missingValuePolicy: "NEUTRAL"
   degenerateDistributionPolicy: "FALLBACK"
+scoreTitle:
+  fr: "Qualité de la donnée"
+  en: "Data quality"
+scoreDescription:
+  fr: "Complétude des données produit"
+  en: "Product data completeness"
 scoreUtility:
   fr: "Des données complètes améliorent la fiabilité du score et évitent de pénaliser ou favoriser un produit sur des valeurs manquantes."
   en: "Complete data improves score reliability and avoids unfair penalties or bonuses from missing values."
+participateInACV:
+  - MANUFACTURING
+
+synonyms:
+  all:
+    - "DATA_QUALITY"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

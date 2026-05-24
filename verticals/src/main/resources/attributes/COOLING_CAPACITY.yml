@@ -1,3 +1,14 @@
+# ============================================================================
+# COOLING_CAPACITY — Cooling capacity (Puissance frigorifique)
+# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 001)
+# Used in verticals: air-conditioner
+# Type: NUMERIC
+# Coverage snapshot: insufficient data from prod API
+# Taxonomy coverage: icecat ✅  eprel ✅  etim ❌  wikidata ❌
+# Purpose: Rated cooling output power of an air-conditioner (kW); primary
+#          sizing criterion used for filtering and range display.
+# ============================================================================
+
 key: "COOLING_CAPACITY"
 faIcon: "mdi-snowflake"
 name:
@@ -8,6 +19,16 @@ suffix:
   fr: "kW"
 filteringType: "NUMERIC"
 asScore: false
+
+referentials:
+  icecat:
+    - featureId: 2599
+      name: "Cooling capacity"
+  eprel:
+    - featureName: "coolingCharacteristics.ratedCapacity"
+      productGroup: "air-conditioners"
+      name: "Cooling rated capacity (kW)"
+
 synonyms:
   all:
     - "COOLINGCHARACTERISTICS-RATEDCAPACITY"
@@ -17,6 +38,9 @@ synonyms:
     - "CAPACITÉ DE REFROIDISSEMENT"
     - "PUISSANCE FRIGORIFIQUE"
 parser:
+  clazz: org.open4goods.api.services.aggregation.services.realtime.parser.UnitAwareNumericParser
+  dimension: "POWER"
+  defaultUnitHint: "kW"
   normalize: true
   trim: true
   lowerCase: false

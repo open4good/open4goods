@@ -1,15 +1,31 @@
+# ============================================================================
+# COULEUR_EXTERIEURE — Exterior color (Couleur extérieure)
+# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 001)
+# Used in verticals: oven
+# Type: TEXT
+# Coverage snapshot: insufficient data from prod API
+# Taxonomy coverage: icecat ❌  eprel ❌  etim ❌  wikidata ❌
+# Purpose: Exterior finish colour of the appliance (oven); distinct from COLOR
+#          to allow oven-specific colour normalisation including INOX finishes.
+# Note: Icecat featureId 9789 (x.v.Color) rejected — HDMI colour-space flag.
+#       featureId 21118 (Coloration) unconfirmed; flagged for manual review.
+# ============================================================================
+
 key: "COULEUR_EXTERIEURE"
 faIcon: "mdi-palette"
 name:
-  default: "Color"
-  fr: "Couleur"
+  default: "Exterior color"
+  fr: "Couleur extérieure"
 filteringType: "TEXT"
 asScore: false
+
 synonyms:
   all:
     - "COULEUR EXTERIEURE"
     - "COULEUR"
     - "COLORIS"
+    - "EXTERIOR COLOR"
+    - "EXTERNAL COLOR"
 parser:
   normalize: true
   trim: true

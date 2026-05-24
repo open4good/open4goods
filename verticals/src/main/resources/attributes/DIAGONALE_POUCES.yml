@@ -1,17 +1,18 @@
-##################################
-# DIAGONALE
-##################################
+# ============================================================================
+# DIAGONALE_POUCES — Screen size (Diagonale en pouces)
+# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 001)
+# Used in verticals: smartphones, tv
+# Type: NUMERIC
+# Coverage snapshot: insufficient data from prod API
+# Taxonomy coverage: icecat ✅  eprel ✅  etim ❌  wikidata ✅
+# Purpose: Screen diagonal in inches; drives materials, packaging, transport
+#          and energy-use impact — larger screens have higher footprint across
+#          all lifecycle stages.
+# ============================================================================
+
 key: "DIAGONALE_POUCES"
 userBetterIs: "GREATER"
 impactBetterIs: "LOWER"
-referentials:
-  icecat:
-    - featureId: 944
-  eprel:
-    - featureName: "diagonalInch"
-  wikidata:
-    - pid: "P13749"
-      name: "display size (diagonal)"
 faIcon: "mdi-arrow-top-right-bottom-left"
 name:
   default: "Screen size"
@@ -21,6 +22,18 @@ suffix:
   fr: "\""
 filteringType: "NUMERIC"
 asScore: true
+
+referentials:
+  icecat:
+    - featureId: 944
+  eprel:
+    - featureName: "diagonalInch"
+      productGroup: "televisions"
+      name: "Screen diagonal (inches)"
+  wikidata:
+    - pid: "P13749"
+      name: "display size (diagonal)"
+
 scoring:
   scale:
     min: 0.0
@@ -29,16 +42,21 @@ scoring:
     method: "MINMAX_OBSERVED"
   missingValuePolicy: "NEUTRAL"
   degenerateDistributionPolicy: "FALLBACK"
+scoreTitle:
+  fr: "Taille de l'écran"
+  en: "Screen size"
+scoreDescription:
+  fr: "Diagonale de l'écran en pouces"
+  en: "Screen diagonal in inches"
 scoreUtility:
-  fr: "La diagonale influe sur matériaux et énergie : plus elle est grande, plus l’impact de fabrication, transport et usage augmente."
+  fr: "La diagonale influe sur matériaux et énergie : plus elle est grande, plus l'impact de fabrication, transport et usage augmente."
   en: "Screen size drives materials and energy; larger sizes usually raise manufacturing, transport, and use impacts."
 participateInACV:
   - MANUFACTURING
   - TRANSPORTATION
   - USE
   - EXTRACTION
-  - END_OF_LIFE 
-
+  - END_OF_LIFE
 
 synonyms:
   all:
@@ -48,10 +66,11 @@ synonyms:
     - "CALCULATEDDIAGONALINCH"
   rakuten.com:
     - "DIAGONALE"
+  eprel:
+    - "DIAGONALINCH"
 parser:
   normalize: true
   trim: false
   lowerCase: false
   upperCase: true
   removeParenthesis: false
- #      deleteTokens:

@@ -1,3 +1,14 @@
+# ============================================================================
+# DEPTH — Depth (Profondeur)
+# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 001)
+# Used in verticals: oven, dishwasher, smartphones, washing-machine
+# Type: NUMERIC
+# Coverage snapshot: insufficient data from prod API
+# Taxonomy coverage: icecat ✅  eprel ✅  etim ❌  wikidata ❌
+# Purpose: Physical depth of the appliance (cm); used for dimension filtering
+#          and environmental impact estimation (transport, packaging).
+# ============================================================================
+
 key: "DEPTH"
 filteringType: "NUMERIC"
 unit:
@@ -10,6 +21,9 @@ referentials:
     - featureId: 1650
     - featureId: 33219
     - featureId: 5486
+  eprel:
+    - featureName: "dimensionDepth"
+      name: "Depth (mm)"
 
 name:
   default: "Depth"

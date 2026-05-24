@@ -1,3 +1,16 @@
+# ============================================================================
+# COLOR — Color (Couleur)
+# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 001)
+# Used in verticals: dishwasher, oven, _default, smartphones
+# Type: TEXT
+# Coverage snapshot: insufficient data from prod API
+# Taxonomy coverage: icecat ❌  eprel ❌  etim ❌  wikidata ❌
+# Purpose: Normalized product colour; maps merchant-specific colour labels
+#          (multilingual) to a canonical French colour value for filtering.
+# Note: Icecat featureId 9789 (x.v.Color) rejected — HDMI colour-space flag.
+#       featureId 21118 (Coloration) unconfirmed; flagged for manual review.
+# ============================================================================
+
 key: "COLOR"
 faIcon: "mdi-water"
 name:
@@ -12,7 +25,6 @@ synonyms:
     - "COULEUR DU PRODUIT"
     - "CATÉGORIE DE COULEUR"
     - "CATEGORIE DE COULEUR"
-    - "COULEUR DU PRODUIT"
     - "COULEUR GÉNÉRIQUE"
     - "COULEUR GENÉRIQUE"
     - "COLOUR"
@@ -23,7 +35,6 @@ parser:
   trim: false
   lowerCase: false
   upperCase: true
-
   removeParenthesis: false
   tokenMatch:
     - "NOIR"

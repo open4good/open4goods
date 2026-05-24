@@ -1,3 +1,16 @@
+# ============================================================================
+# COOLING_SYSTEM — Cooling system (Type de froid)
+# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 001)
+# Used in verticals: refrigerator
+# Type: TEXT
+# Coverage snapshot: insufficient data from prod API
+# Taxonomy coverage: icecat ❌  eprel ❌  etim ❌  wikidata ❌
+# Purpose: Technology used to circulate cold air inside the refrigerator
+#          (ventilated / static / stirred); key filter for food preservation.
+# Note: Icecat featureId 88 ("System type") rejected — too generic.
+#       No ETIM/wikidata candidate found; flagged for manual review.
+# ============================================================================
+
 key: "COOLING_SYSTEM"
 faIcon: "mdi-air-filter"
 name:
@@ -5,9 +18,12 @@ name:
   fr: "Type de froid"
 filteringType: "TEXT"
 asScore: false
+
 synonyms:
   all:
     - "TYPE(S) DE FROID"
+    - "COOLING SYSTEM"
+    - "SYSTEME DE REFROIDISSEMENT"
 parser:
   normalize: true
   trim: true
