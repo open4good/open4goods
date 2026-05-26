@@ -169,6 +169,7 @@ class ReviewGenerationPreprocessingServiceTest {
     void preparePromptVariables_SearchesOfficialBrandDomainForNamedModelFromOfferTitle() throws Exception {
         properties.setMaxSearch(4);
         properties.setLowQualityFallbackMaxSearch(0);
+        properties.setOfficialDomainsByBrand(Map.of("Klarstein", List.of("klarstein")));
         Product product = product("Klarstein", "4060656565403");
         product.setId(4060656565403L);
         product.setOfferNames(Set.of("Klarstein Velaire Lave Vaisselle 45cm Pose Libre - 10 Couverts"));
@@ -711,6 +712,7 @@ class ReviewGenerationPreprocessingServiceTest {
         properties.setMinGlobalTokens(1);
         properties.setMinUrlCount(1);
         properties.setMaxUrlsPerProduct(1);
+        properties.setOfficialDomainsByBrand(Map.of("Essentiel B", List.of("boulanger.com")));
         Product product = product("Essentiel B", "ELS107-1B");
         String officialUrl = "https://www.boulanger.com/ref/8011605";
         when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse(List.of(

@@ -553,13 +553,12 @@
         <id>warmup-offline</id>
         <build>
           <plugins>
-            <!-- 1) Tirer explicitement le BOM Spring Boot -->
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-dependency-plugin</artifactId>
               <executions>
                 <execution>
-                  <id>prefetch-bom</id>
+                  <id>prefetch-spring-boot-bom</id>
                   <phase>validate</phase>
                   <goals>
                     <goal>get</goal>
@@ -570,10 +569,69 @@
                     </artifact>
                   </configuration>
                 </execution>
+                <execution>
+                  <id>prefetch-spring-ai-bom</id>
+                  <phase>validate</phase>
+                  <goals>
+                    <goal>get</goal>
+                  </goals>
+                  <configuration>
+                    <artifact>org.springframework.ai:spring-ai-bom:${spring-ai.version}:pom</artifact>
+                  </configuration>
+                </execution>
+                <execution>
+                  <id>prefetch-google-genai-parent</id>
+                  <phase>validate</phase>
+                  <goals>
+                    <goal>get</goal>
+                  </goals>
+                  <configuration>
+                    <artifact>com.google.cloud:sdk-platform-java-config:3.45.1:pom</artifact>
+                  </configuration>
+                </execution>
+                <execution>
+                  <id>prefetch-google-genai-runtime</id>
+                  <phase>validate</phase>
+                  <goals>
+                    <goal>get</goal>
+                  </goals>
+                  <configuration>
+                    <artifact>com.google.genai:google-genai:1.54.0:jar</artifact>
+                    <transitive>true</transitive>
+                  </configuration>
+                </execution>
+                <execution>
+                  <id>prefetch-legacy-ui-webp</id>
+                  <phase>validate</phase>
+                  <goals>
+                    <goal>get</goal>
+                  </goals>
+                  <configuration>
+                    <artifact>org.sejda.imageio:webp-imageio:0.1.6:jar</artifact>
+                    <transitive>true</transitive>
+                  </configuration>
+                </execution>
+                <execution>
+                  <id>prefetch-legacy-ui-sitemap</id>
+                  <phase>validate</phase>
+                  <goals>
+                    <goal>get</goal>
+                  </goals>
+                  <configuration>
+                    <artifact>cz.jiripinkas:jsitemapgenerator:4.5:jar</artifact>
+                    <transitive>true</transitive>
+                  </configuration>
+                </execution>
+                <execution>
+                  <id>maven-dependency-go-offline</id>
+                  <phase>validate</phase>
+                  <goals>
+                    <goal>go-offline</goal>
+                  </goals>
+                </execution>
               </executions>
             </plugin>
 
-            <!-- (Optionnel mais robuste) le plugin QAware gère mieux certains cas -->
             <plugin>
               <groupId>de.qaware.maven</groupId>
               <artifactId>go-offline-maven-plugin</artifactId>

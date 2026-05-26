@@ -1979,14 +1979,21 @@ public class ReviewGenerationPreprocessingService {
 		if (isClearlyNonProductDocument(extractedResource.url(), extractedResource.label())) {
 			return false;
 		}
-		return isProductRelevantResource(product, extractedResource.url(), extractedResource.label(), true);
+		if (isProductRelevantResource(product, extractedResource.url(), extractedResource.label(), true)) {
+			return true;
+		}
+		// Manufacturer pages often expose manuals through opaque CDN URLs whose label
+		// is just "Download document". The official page context is the product
+		// signal; explicit legal/privacy/catalog filters above still reject unrelated
+		// documents.
+		return isPdfUrl(extractedResource.url());
 	}
 
 	private boolean isClearlyNonProductDocument(String url, String label) {
 		String evidence = normalizeForTextMatching(safeString(url) + " " + safeString(label));
 		return containsAny(evidence, "privacy", "confidentialite", "cookie", "legal", "terms", "conditions",
 				"digital services act", "dsa", "warranty registration", "garantie", "extension garantie",
-				"delivery", "livraison", "returns", "retour", "reviews policy", "avis verifies", "buyback",
+				"livraison", "returns", "retour", "reviews policy", "avis verifies", "buyback",
 				"reprise", "marketing", "brochure", "catalogue", "catalog", "catalogue general",
 				"general catalogue");
 	}
@@ -2187,9 +2194,6 @@ public class ReviewGenerationPreprocessingService {
 		if (product == null || url == null || url.isBlank()) {
 			return false;
 		}
-		if (isClearlyNonProductDocument(url, label) || !looksLikeProductDocument(url, label)) {
-			return false;
-		}
 		String urlHaystack = normalizeForUrlMatching(url);
 		String labelHaystack = normalizeForUrlMatching(label);
 		String textHaystack = normalizeForTextMatching(label);
@@ -2199,6 +2203,14 @@ public class ReviewGenerationPreprocessingService {
 		String gtin = product.gtin();
 		if (gtin != null && gtin.matches("\\d{8,14}") && urlHaystack.contains(normalizeForUrlMatching(gtin))) {
 			return true;
+		}
+		String productId = product.getId() == null ? null : String.valueOf(product.getId());
+		if (productId != null && productId.matches("\\d{8,14}")
+				&& urlHaystack.contains(normalizeForUrlMatching(productId))) {
+			return true;
+		}
+		if (isClearlyNonProductDocument(url, label) || !looksLikeProductDocument(url, label)) {
+			return false;
 		}
 		String model = normalizeForUrlMatching(product.model());
 		if (!model.isBlank() && urlHaystack.contains(model)) {
@@ -2228,8 +2240,9 @@ public class ReviewGenerationPreprocessingService {
 	private boolean looksLikeProductDocument(String url, String label) {
 		String text = normalizeForTextMatching(safeString(url) + " " + safeString(label));
 		return containsAny(text, "manual", "notice", "mode d emploi", "user manual", "fiche produit", "datasheet",
-				"product fiche", "energy label", "etiquette energie", "classe energetique", "specification",
-				"spec sheet", "leaflet", "product sheet", "fiche technique", "fiche energetique");
+				"product fiche", "productfiche", "energy label", "energylabel", "etiquette energie",
+				"classe energetique", "specification", "spec sheet", "leaflet", "product sheet",
+				"fiche technique", "fiche energetique");
 	}
 
 	private ResourceType toProductResourceType(org.open4goods.services.urlfetching.dto.ResourceType resourceType) {
