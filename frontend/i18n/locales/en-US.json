@@ -2676,12 +2676,15 @@
       "loading": "Loading document preview...",
       "navigationAria": "Product documentation list",
       "pageCount": "{count} page | {count} pages",
+      "previewPrompt": "Open the preview to view this document here.",
       "previewUnavailable": "Preview unavailable for this document. Use the download link instead.",
       "sidebarTitle": "Available documents",
       "subtitle": "Preview and download official documents.",
       "title": "Documentation",
       "untitled": "Untitled document",
       "controls": {
+        "preview": "Preview document",
+        "previewLabel": "Preview",
         "rotate": "Rotate document",
         "rotateLabel": "Rotate",
         "scrollLeft": "Scroll left",
@@ -3154,6 +3157,30 @@
           "withoutImpact": "Explore {productName} with best prices, useful highlights and alternatives to choose with confidence.",
           "withoutImpactVertical": "Explore {productName} in {verticalTitle} with best prices, useful highlights and alternatives."
         }
+      }
+    },
+    "schema": {
+      "properties": {
+        "impactScore": "Nudger Impact Score",
+        "repairabilityIndex": "Repairability index",
+        "sparePartsAvailability": "Spare parts availability",
+        "softwareUpdates": "Software updates",
+        "warranty": "Warranty",
+        "screenSize": "Screen size",
+        "displayTechnology": "Display technology",
+        "resolution": "Resolution",
+        "frequency": "Refresh rate",
+        "hdmiPorts": "HDMI ports",
+        "usbPorts": "USB ports",
+        "wifi": "Wi-Fi",
+        "wifiStandards": "Wi-Fi standards",
+        "bluetooth": "Bluetooth",
+        "bluetoothVersion": "Bluetooth version",
+        "operatingSystem": "OS / Platform",
+        "releaseYear": "Release year",
+        "color": "Color",
+        "energySdr": "Energy label (SDR)",
+        "energyHdr": "Energy label (HDR)"
       }
     }
   },

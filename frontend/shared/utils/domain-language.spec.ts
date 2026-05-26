@@ -47,4 +47,17 @@ describe('domain-language helpers', () => {
     expect(resolution.locale).toBe('fr-FR')
     expect(resolution.matched).toBe(false)
   })
+
+  it('maps the English apex and www hosts to the English locale', () => {
+    expect(getDomainLanguageFromHostname('nudger.com')).toMatchObject({
+      domainLanguage: 'en',
+      locale: 'en-US',
+      matched: true,
+    })
+    expect(getDomainLanguageFromHostname('www.nudger.com')).toMatchObject({
+      domainLanguage: 'en',
+      locale: 'en-US',
+      matched: true,
+    })
+  })
 })

@@ -164,6 +164,16 @@ export const resolveProductShortName = (
     preferPrettyName: true,
   })
 
+export const resolveProductCardName = (
+  product: ProductDto,
+  locale?: string
+): string =>
+  resolveProductTitle(product, locale, {
+    preferCardTitle: true,
+    preferShortName: true,
+    preferPrettyName: true,
+  })
+
 export const resolveProductLongName = (
   product: ProductDto,
   locale?: string

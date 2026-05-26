@@ -8,8 +8,6 @@
 import { computed, defineAsyncComponent } from 'vue'
 import { matchProductRouteFromSegments } from '~~/shared/utils/_product-route'
 import { matchLocalizedWikiRouteByPath } from '~~/shared/utils/localized-routes'
-import ProductPage from '~/components/pages/ProductPage.vue'
-import CategoryPage from '~/components/pages/CategoryPage.vue'
 
 defineRouteRules({
   isr: 3600, // Cache products, categories and wiki pages for 1 hour
@@ -17,6 +15,12 @@ defineRouteRules({
 
 const XwikiFullPageRenderer = defineAsyncComponent(
   () => import('~/components/cms/XwikiFullPageRenderer.vue')
+)
+const ProductPage = defineAsyncComponent(
+  () => import('~/components/pages/ProductPage.vue')
+)
+const CategoryPage = defineAsyncComponent(
+  () => import('~/components/pages/CategoryPage.vue')
 )
 
 const route = useRoute()

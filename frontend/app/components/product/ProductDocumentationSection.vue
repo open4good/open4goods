@@ -128,6 +128,23 @@
             </a>
             <div class="product-docs__viewer-toolbar" role="group">
               <button
+                v-if="activePdf?.url && !previewRequested"
+                type="button"
+                class="product-docs__control product-docs__control--primary"
+                data-testid="product-docs-preview-button"
+                :aria-label="
+                  tWithFallback(
+                    'product.docs.controls.preview',
+                    'Preview document'
+                  )
+                "
+                @click="openPreview"
+              >
+                {{
+                  tWithFallback('product.docs.controls.previewLabel', 'Preview')
+                }}
+              </button>
+              <button
                 type="button"
                 class="product-docs__control"
                 :aria-label="
@@ -136,6 +153,7 @@
                     'Rotate document'
                   )
                 "
+                :disabled="!previewRequested || !activePdf?.url"
                 @click="rotateClockwise"
               >
                 {{
@@ -151,7 +169,7 @@
             <div ref="viewerSurfaceRef" class="product-docs__viewer-surface">
               <div class="product-docs__viewer-scroll">
                 <VuePdfEmbed
-                  v-if="activePdf?.url && !pdfError"
+                  v-if="previewRequested && activePdf?.url && !pdfError"
                   :source="activePdf.url"
                   text-layer
                   annotation-layer
@@ -172,7 +190,12 @@
                           'product.docs.previewError',
                           'Preview unavailable'
                         )
-                      : $t('product.docs.previewUnavailable')
+                      : activePdf?.url
+                        ? tWithFallback(
+                            'product.docs.previewPrompt',
+                            'Open the preview to view this document here.'
+                          )
+                        : $t('product.docs.previewUnavailable')
                   }}
                 </p>
               </div>
@@ -259,6 +282,7 @@ const tabsOverflowing = ref(false)
 const rotation = ref(0)
 const pdfLoadedPageCount = ref<number | null>(null)
 const pdfError = ref(false)
+const previewRequested = ref(false)
 
 const MAX_TAB_TITLE_LENGTH = 35
 
@@ -572,6 +596,14 @@ const handleDownloadClick = () => {
     label: pdfTitle(pdf),
     context: 'product-docs',
   })
+}
+
+const openPreview = () => {
+  if (!activePdf.value?.url) {
+    return
+  }
+
+  previewRequested.value = true
 }
 
 watch(

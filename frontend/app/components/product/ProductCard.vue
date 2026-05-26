@@ -132,7 +132,7 @@ import {
   resolvePopularAttributes,
 } from '~/utils/_product-attributes'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
-import { resolveProductShortName } from '~/utils/_product-title-resolver'
+import { resolveProductCardName } from '~/utils/_product-title-resolver'
 import { resolveSortedFieldDisplay } from '~/utils/_sort-attribute-display'
 
 const props = withDefaults(
@@ -165,7 +165,7 @@ const { t, n, locale } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
 
 const resolveCardProductName = (product: ProductDto) =>
-  resolveProductShortName(product, locale.value)
+  resolveProductCardName(product, locale.value)
 
 const popularAttributeConfigs = computed(() => props.popularAttributes ?? [])
 

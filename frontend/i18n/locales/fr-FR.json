@@ -2570,12 +2570,15 @@
       "loading": "Chargement de l'aperçu du document...",
       "navigationAria": "Liste des documents du produit",
       "pageCount": "{count} page | {count} pages",
+      "previewPrompt": "Ouvrez l'aperçu pour consulter ce document ici.",
       "previewUnavailable": "Aucun aperçu n'est disponible pour ce document. Utilisez le lien de téléchargement.",
       "sidebarTitle": "Documents disponibles",
       "subtitle": "Consultez et téléchargez les documents techniques. Mode d'emploi, manuel utilisateur et fiches d'installation sont généralement présentes.",
       "title": "Manuels, fiches techniques et guides utilisateurs",
       "untitled": "Document sans titre",
       "controls": {
+        "preview": "Prévisualiser le document",
+        "previewLabel": "Prévisualiser",
         "rotate": "Pivoter le document",
         "rotateLabel": "Pivoter",
         "scrollLeft": "Faire défiler vers la gauche",
@@ -3047,6 +3050,30 @@
           "withoutImpact": "Découvrez {productName} : meilleurs prix, informations utiles et alternatives pour mieux choisir.",
           "withoutImpactVertical": "Découvrez {productName} dans {verticalTitle} : meilleurs prix, informations utiles et alternatives."
         }
+      }
+    },
+    "schema": {
+      "properties": {
+        "impactScore": "Nudger Impact Score",
+        "repairabilityIndex": "Indice de reparabilite",
+        "sparePartsAvailability": "Disponibilite pieces detachees",
+        "softwareUpdates": "Mises a jour logicielles",
+        "warranty": "Garantie",
+        "screenSize": "Taille ecran",
+        "displayTechnology": "Technologie d'affichage",
+        "resolution": "Resolution",
+        "frequency": "Frequence",
+        "hdmiPorts": "Ports HDMI",
+        "usbPorts": "Ports USB",
+        "wifi": "Wi-Fi",
+        "wifiStandards": "Standards Wi-Fi",
+        "bluetooth": "Bluetooth",
+        "bluetoothVersion": "Version Bluetooth",
+        "operatingSystem": "OS / Plateforme",
+        "releaseYear": "Annee de sortie",
+        "color": "Couleur",
+        "energySdr": "Etiquette energie (SDR)",
+        "energyHdr": "Etiquette energie (HDR)"
       }
     },
     "eprel": {

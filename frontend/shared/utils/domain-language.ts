@@ -9,7 +9,13 @@ export const HOST_DOMAIN_LANGUAGE_MAP: Record<string, DomainLanguage> = {
   localhost: 'fr',
   'beta.nudger.fr': 'fr',
   'nudger.com': 'en',
+  'www.nudger.com': 'en',
   '127.0.0.1': 'en',
+}
+
+export const PRIMARY_LOCALE_HOSTS: Record<NuxtLocale, string> = {
+  'fr-FR': 'nudger.fr',
+  'en-US': 'nudger.com',
 }
 
 export interface NuxtI18nLocaleDomains {

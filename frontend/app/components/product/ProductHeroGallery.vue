@@ -803,15 +803,15 @@ defineExpose({
 
 @media (max-width: 768px) {
   .product-gallery__stage {
-    aspect-ratio: auto;
+    aspect-ratio: 4 / 3;
     max-height: none;
-    min-height: auto;
+    min-height: 0;
     height: auto;
   }
 
   .product-gallery__stage-media {
     width: 100%;
-    height: auto;
+    height: 100%;
     max-height: 60vh;
     object-fit: contain;
     padding: 0.5rem;

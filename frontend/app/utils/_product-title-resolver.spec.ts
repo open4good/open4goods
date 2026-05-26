@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  resolveProductCardName,
   resolveProductLongName,
   resolveProductShortName,
 } from './_product-title-resolver'
@@ -66,5 +67,22 @@ describe('resolveProductTitle', () => {
     const result = resolveProductShortName(product)
 
     expect(result).toBe('Longer Name')
+  })
+
+  it('prefers card title over category-like short names for cards', () => {
+    const product: ProductDto = {
+      names: {
+        cardTitle: 'Samsung GU32T5379CD',
+        shortName: 'Téléviseurs',
+      },
+      identity: {
+        brand: 'Samsung',
+        model: 'GU32T5379CD',
+      },
+    }
+
+    const result = resolveProductCardName(product, 'fr-FR')
+
+    expect(result).toBe('Samsung GU32T5379CD')
   })
 })

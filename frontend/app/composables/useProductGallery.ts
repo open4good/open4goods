@@ -24,6 +24,7 @@ const DEFAULT_IMAGE_HEIGHT = 1200
 const DEFAULT_THUMBNAIL_SIZE = 200
 const DEFAULT_VIDEO_WIDTH = 1280
 const DEFAULT_VIDEO_HEIGHT = 720
+const LOCAL_FALLBACK_IMAGE_SRC = '/images/no-image.png'
 
 type ImageModifiers = Parameters<ReturnType<typeof useImage>>[1]
 
@@ -44,11 +45,37 @@ export const useProductGallery = (
     modifiers?: ImageModifiers
   ) => {
     if (!src) return ''
+    if (src.startsWith('/_ipx/')) {
+      return src
+    }
+
     try {
       return nuxtImage(src, modifiers)
     } catch {
       return src
     }
+  }
+
+  const normalizeImageSource = (src: string | null | undefined): string => {
+    if (!src) return ''
+
+    const trimmed = src.trim()
+    if (!trimmed.length) return ''
+
+    if (trimmed.includes('/_ipx/')) {
+      const nestedPublicAssetMatch = trimmed.match(/\/(images\/[^?#]+)$/)
+      if (nestedPublicAssetMatch?.[1]) {
+        return `/${nestedPublicAssetMatch[1]}`
+      }
+
+      return trimmed
+    }
+
+    if (trimmed === '/icons/no-image.png') {
+      return LOCAL_FALLBACK_IMAGE_SRC
+    }
+
+    return trimmed
   }
 
   const fallbackDimension = (
@@ -76,12 +103,12 @@ export const useProductGallery = (
     const videoItems: ProductGalleryItem[] = []
 
     const hasCoverInImages = images.some(img => {
-      const u = img.originalUrl ?? img.url
+      const u = normalizeImageSource(img.originalUrl ?? img.url)
       return u && u === coverImageRaw.value
     })
 
     if (coverImageRaw.value && !hasCoverInImages) {
-      const source = coverImageRaw.value
+      const source = normalizeImageSource(coverImageRaw.value)
       const preview =
         resolveImageUrl(source, {
           width: 1200,
@@ -116,10 +143,10 @@ export const useProductGallery = (
     }
 
     images.forEach(image => {
-      const original = image.originalUrl ?? image.url ?? ''
+      const original = normalizeImageSource(image.originalUrl ?? image.url)
       if (!original) return
 
-      const source = image.url ?? original
+      const source = normalizeImageSource(image.url) || original
       const caption = image.datasourceName ?? fallbackTitle
       const width = fallbackDimension(image.width, DEFAULT_IMAGE_WIDTH)
       const height = fallbackDimension(image.height, DEFAULT_IMAGE_HEIGHT)

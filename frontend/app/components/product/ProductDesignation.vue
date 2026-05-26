@@ -28,6 +28,7 @@
 import { computed } from 'vue'
 import type { ProductDto } from '~~/shared/api-client'
 import {
+  resolveProductCardName,
   resolveProductLongName,
   resolveProductShortName,
 } from '~/utils/_product-title-resolver'
@@ -55,6 +56,9 @@ const { locale } = useI18n()
 const shortName = computed(() =>
   resolveProductShortName(props.product, locale.value)
 )
+const cardName = computed(() =>
+  resolveProductCardName(props.product, locale.value)
+)
 const longName = computed(() =>
   resolveProductLongName(props.product, locale.value)
 )
@@ -63,7 +67,7 @@ const shortDescription = computed(() =>
 )
 
 const displayTitle = computed(() =>
-  props.variant === 'page' ? longName.value : shortName.value
+  props.variant === 'page' ? longName.value : cardName.value
 )
 
 const baseLine = computed(() =>

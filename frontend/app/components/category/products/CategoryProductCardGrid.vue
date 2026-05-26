@@ -44,7 +44,7 @@ import type {
   ProductDto,
 } from '~~/shared/api-client'
 import ProductCard from '~/components/product/ProductCard.vue'
-import { resolveProductShortName } from '~/utils/_product-title-resolver'
+import { resolveProductCardName } from '~/utils/_product-title-resolver'
 
 const props = defineProps<{
   products: ProductDto[]
@@ -62,7 +62,7 @@ const props = defineProps<{
 const { locale } = useI18n()
 
 const resolveCardProductName = (product: ProductDto) =>
-  resolveProductShortName(product, locale.value)
+  resolveProductCardName(product, locale.value)
 
 // Normalize size prop to small/medium/big
 const normalizedSize = computed(() => {

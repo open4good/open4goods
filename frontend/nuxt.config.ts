@@ -38,23 +38,29 @@ const PRECACHE_EXTENSIONS = [
   'png',
   'svg',
   'webp',
-  'jpg',
-  'jpeg',
   'json',
-  'txt',
-  'mp4',
-  'webm',
   'webmanifest',
   'woff2',
-  'ndjson',
 ]
 const PRECACHE_PATTERN = `**/*.{${PRECACHE_EXTENSIONS.join(',')}}`
 const WORKBOX_GLOB_IGNORES = [
   'videos/**/*',
+  'images/**/*',
+  'resources/**/*',
+  'lighthouse_reports/**/*',
+  'reports/**/*',
   'reports/test-coverage/**/*',
+  'coverage/**/*',
+  'test-results/**/*',
+  'playwright-report/**/*',
+  'artifacts/**/*',
   '**/_payload.json',
   '**/*.ts',
   '**/*.map',
+  '**/*.pdf',
+  '**/*.wasm',
+  '**/*.worker.*',
+  '**/*.ndjson',
   '**/node_modules/**',
   '**/.nuxt/**',
 ]
@@ -189,10 +195,6 @@ const VENDOR_CHUNK_MATCHERS = [
   {
     pattern: /[\\/]node_modules[\\/]markdown-it[\\/]/,
     chunkName: 'vendor-markdown',
-  },
-  {
-    pattern: /[\\/]node_modules[\\/]vuetify[\\/]/,
-    chunkName: 'vendor-vuetify',
   },
   { pattern: /[\\/]node_modules[\\/]@vueuse[\\/]/, chunkName: 'vendor-vueuse' },
   {
@@ -369,7 +371,6 @@ export default defineNuxtConfig({
     includeAssets: [
       'pwa-assets/icons/**/*.png',
       'pwa-assets/screenshots/*.png',
-      'resources/**/*',
     ],
     client: {
       installPrompt: true,
@@ -466,14 +467,6 @@ export default defineNuxtConfig({
         'isomorphic-dompurify',
         'date-fns',
         'date-fns/locale',
-        'vue-echarts',
-        'echarts/charts',
-        'echarts/components',
-        'echarts/renderers',
-        'echarts/core',
-        '@hcaptcha/vue3-hcaptcha',
-        'vue-pdf-embed',
-        'vue-barcode-reader',
       ],
     },
     plugins: [

@@ -55,6 +55,9 @@ describe('product-jsonld', () => {
   interface TestProductNode {
     '@type': string
     description?: string
+    width?: { '@type': string; value: number; unitCode: string }
+    height?: { '@type': string; value: number; unitCode: string }
+    depth?: { '@type': string; value: number; unitCode: string }
     offers: {
       offers: {
         url: string
@@ -170,5 +173,85 @@ describe('product-jsonld', () => {
     )
     expect(impactScoreProp).toBeDefined()
     expect(impactScoreProp?.value).toBe(18.5)
+  })
+
+  it('uses localized property labels when provided', () => {
+    const graph = buildProductJsonLdGraph({
+      ...(mockInput as unknown as ProductJsonLdInput),
+      product: {
+        ...mockProduct,
+        attributes: {
+          referentialAttributes: {
+            WARRANTY: '2',
+          },
+        },
+      } as unknown as ProductJsonLdInput['product'],
+      labels: {
+        impactScore: 'Impact score',
+        repairabilityIndex: 'Repairability index',
+        sparePartsAvailability: 'Spare parts availability',
+        softwareUpdates: 'Software updates',
+        warranty: 'Warranty',
+        screenSize: 'Screen size',
+        displayTechnology: 'Display technology',
+        resolution: 'Resolution',
+        frequency: 'Frequency',
+        hdmiPorts: 'HDMI ports',
+        usbPorts: 'USB ports',
+        wifi: 'Wi-Fi',
+        wifiStandards: 'Wi-Fi standards',
+        bluetooth: 'Bluetooth',
+        bluetoothVersion: 'Bluetooth version',
+        operatingSystem: 'OS / Platform',
+        releaseYear: 'Release year',
+        color: 'Color',
+        energySdr: 'Energy label (SDR)',
+        energyHdr: 'Energy label (HDR)',
+      },
+    })
+    const productNode = (
+      graph?.['@graph'] as unknown as TestProductNode[]
+    )?.find(n => n['@type'] === 'Product')
+
+    expect(
+      productNode?.additionalProperty?.some(
+        property => property.name === 'Warranty' && property.value === '2'
+      )
+    ).toBe(true)
+  })
+
+  it('normalizes compact metric dimensions before emitting schema units', () => {
+    const graph = buildProductJsonLdGraph({
+      ...(mockInput as unknown as ProductJsonLdInput),
+      product: {
+        ...mockProduct,
+        attributes: {
+          indexedAttributes: {
+            WIDTH: { numericValue: 0.751 },
+            HEIGHT: { numericValue: 1.62 },
+            DEPTH: { numericValue: 0.0865 },
+          },
+        },
+      } as unknown as ProductJsonLdInput['product'],
+    })
+    const productNode = (
+      graph?.['@graph'] as unknown as TestProductNode[]
+    )?.find(n => n['@type'] === 'Product')
+
+    expect(productNode?.width).toEqual({
+      '@type': 'QuantitativeValue',
+      value: 75.1,
+      unitCode: 'MMT',
+    })
+    expect(productNode?.height).toEqual({
+      '@type': 'QuantitativeValue',
+      value: 162,
+      unitCode: 'MMT',
+    })
+    expect(productNode?.depth).toEqual({
+      '@type': 'QuantitativeValue',
+      value: 8.65,
+      unitCode: 'MMT',
+    })
   })
 })

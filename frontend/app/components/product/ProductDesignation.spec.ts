@@ -28,11 +28,15 @@ const buildProduct = (overrides: Partial<ProductDto> = {}): ProductDto =>
   }) as ProductDto
 
 describe('ProductDesignation', () => {
-  it('renders the short name for card variant', () => {
+  it('renders the card title for card variant', () => {
     const wrapper = mount(ProductDesignation, {
       props: {
         product: buildProduct({
-          names: { shortName: 'Short name', longName: 'Long name' },
+          names: {
+            cardTitle: 'Card title',
+            shortName: 'Short name',
+            longName: 'Long name',
+          },
         }),
         variant: 'card',
         titleTag: 'h3',
@@ -43,7 +47,7 @@ describe('ProductDesignation', () => {
       },
     })
 
-    expect(wrapper.find('.title').text()).toBe('Short name')
+    expect(wrapper.find('.title').text()).toBe('Card title')
     expect(wrapper.find('p').exists()).toBe(false)
   })
 

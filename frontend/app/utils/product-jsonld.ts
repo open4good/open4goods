@@ -17,6 +17,29 @@ export interface ProductJsonLdSiteInfo {
   name: string
 }
 
+export interface ProductJsonLdLabels {
+  impactScore: string
+  repairabilityIndex: string
+  sparePartsAvailability: string
+  softwareUpdates: string
+  warranty: string
+  screenSize: string
+  displayTechnology: string
+  resolution: string
+  frequency: string
+  hdmiPorts: string
+  usbPorts: string
+  wifi: string
+  wifiStandards: string
+  bluetooth: string
+  bluetoothVersion: string
+  operatingSystem: string
+  releaseYear: string
+  color: string
+  energySdr: string
+  energyHdr: string
+}
+
 export interface ProductJsonLdInput {
   product: {
     gtin?: number | string | null
@@ -87,6 +110,7 @@ export interface ProductJsonLdInput {
   imageUrls?: string[]
   punchline?: string | null
   impactScore?: number | null
+  labels?: ProductJsonLdLabels
 }
 
 const isNonEmptyString = (value: unknown): value is string =>
@@ -94,6 +118,29 @@ const isNonEmptyString = (value: unknown): value is string =>
 
 const normalizeString = (value: unknown): string | undefined =>
   isNonEmptyString(value) ? value.trim() : undefined
+
+const DEFAULT_LABELS: ProductJsonLdLabels = {
+  impactScore: 'Nudger Impact Score',
+  repairabilityIndex: 'Indice de reparabilite',
+  sparePartsAvailability: 'Disponibilite pieces detachees',
+  softwareUpdates: 'Mises a jour logicielles',
+  warranty: 'Garantie',
+  screenSize: 'Taille ecran',
+  displayTechnology: "Technologie d'affichage",
+  resolution: 'Resolution',
+  frequency: 'Frequence',
+  hdmiPorts: 'Ports HDMI',
+  usbPorts: 'Ports USB',
+  wifi: 'Wi-Fi',
+  wifiStandards: 'Standards Wi-Fi',
+  bluetooth: 'Bluetooth',
+  bluetoothVersion: 'Version Bluetooth',
+  operatingSystem: 'OS / Plateforme',
+  releaseYear: 'Annee de sortie',
+  color: 'Couleur',
+  energySdr: 'Etiquette energie (SDR)',
+  energyHdr: 'Etiquette energie (HDR)',
+}
 
 const normalizeAttributeKey = (value: string): string =>
   value
@@ -186,6 +233,20 @@ const resolveAttributeValue = (
   }
 
   return undefined
+}
+
+const normalizeMetricDimension = (
+  value: string | number | undefined
+): number | string | undefined => {
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value) || value <= 0) {
+      return undefined
+    }
+
+    return value > 0 && value < 10 ? Number((value * 100).toFixed(2)) : value
+  }
+
+  return normalizeString(value)
 }
 
 const toAbsoluteUrl = (origin: string, value: string): string | undefined => {
@@ -284,6 +345,7 @@ export const buildProductJsonLdGraph = (
   input: ProductJsonLdInput
 ): Record<string, JsonLdValue> | null => {
   const { product, productTitle } = input
+  const labels = { ...DEFAULT_LABELS, ...(input.labels ?? {}) }
   const productId = `${input.canonicalUrl}#product`
   const breadcrumbId = `${input.canonicalUrl}#breadcrumb`
   const webpageId = `${input.canonicalUrl}#webpage`
@@ -312,21 +374,21 @@ export const buildProductJsonLdGraph = (
     input.impactScore != null
       ? {
           '@type': 'PropertyValue',
-          name: 'Nudger Impact Score',
+          name: labels.impactScore,
           value: input.impactScore,
         }
       : undefined,
 
     {
       '@type': 'PropertyValue',
-      name: 'Indice de réparabilité',
+      name: labels.repairabilityIndex,
       value: resolveAttributeValue(referentialAttributes, indexedAttributes, [
         'REPAIRABILITY_INDEX',
       ]),
     },
     {
       '@type': 'PropertyValue',
-      name: 'Disponibilité pièces détachées',
+      name: labels.sparePartsAvailability,
       value: resolveAttributeValue(referentialAttributes, indexedAttributes, [
         'MINAVAILABILITYSPAREPARTSYEARS',
       ]),
@@ -334,7 +396,7 @@ export const buildProductJsonLdGraph = (
     },
     {
       '@type': 'PropertyValue',
-      name: 'Mises à jour logicielles',
+      name: labels.softwareUpdates,
       value: resolveAttributeValue(referentialAttributes, indexedAttributes, [
         'MINAVAILABILITYSOFTWAREUPDATESYEARS',
       ]),
@@ -342,7 +404,7 @@ export const buildProductJsonLdGraph = (
     },
     {
       '@type': 'PropertyValue',
-      name: 'Garantie',
+      name: labels.warranty,
       value: resolveAttributeValue(referentialAttributes, indexedAttributes, [
         'WARRANTY',
       ]),
@@ -350,7 +412,7 @@ export const buildProductJsonLdGraph = (
     },
     {
       '@type': 'PropertyValue',
-      name: 'Taille écran',
+      name: labels.screenSize,
       value: resolveAttributeValue(referentialAttributes, indexedAttributes, [
         'DIAGONALE_POUCES',
       ]),
@@ -358,14 +420,14 @@ export const buildProductJsonLdGraph = (
     },
     {
       '@type': 'PropertyValue',
-      name: 'Technologie d’affichage',
+      name: labels.displayTechnology,
       value: resolveAttributeValue(referentialAttributes, indexedAttributes, [
         'DISPLAY_TECHNOLOGY',
       ]),
     },
     {
       '@type': 'PropertyValue',
-      name: 'Résolution',
+      name: labels.resolution,
       value: resolveAttributeValue(referentialAttributes, indexedAttributes, [
         "RÉSOLUTION DE L'ÉCRAN",
         'RESOLUTION',
@@ -373,7 +435,7 @@ export const buildProductJsonLdGraph = (
     },
     {
       '@type': 'PropertyValue',
-      name: 'Fréquence',
+      name: labels.frequency,
       value: resolveAttributeValue(referentialAttributes, indexedAttributes, [
         'TAUX DE RAFRAÎCHISSEMENT NATIF',
         'FREQUENCY_RATE',
@@ -382,14 +444,14 @@ export const buildProductJsonLdGraph = (
     },
     {
       '@type': 'PropertyValue',
-      name: 'Ports HDMI',
+      name: labels.hdmiPorts,
       value: resolveAttributeValue(referentialAttributes, indexedAttributes, [
         'HDMI_PORTS_QUANTITY',
       ]),
     },
     {
       '@type': 'PropertyValue',
-      name: 'Ports USB',
+      name: labels.usbPorts,
       value: resolveAttributeValue(referentialAttributes, indexedAttributes, [
         'QUANTITÉ DE PORTS USB 2.0',
         'QUANTITE DE PORTS USB 2.0',
@@ -397,49 +459,49 @@ export const buildProductJsonLdGraph = (
     },
     {
       '@type': 'PropertyValue',
-      name: 'Wi-Fi',
+      name: labels.wifi,
       value: resolveAttributeValue(referentialAttributes, indexedAttributes, [
         'WIFI',
       ]),
     },
     {
       '@type': 'PropertyValue',
-      name: 'Standards Wi-Fi',
+      name: labels.wifiStandards,
       value: resolveAttributeValue(referentialAttributes, indexedAttributes, [
         'STANDARDS WIFI',
       ]),
     },
     {
       '@type': 'PropertyValue',
-      name: 'Bluetooth',
+      name: labels.bluetooth,
       value: resolveAttributeValue(referentialAttributes, indexedAttributes, [
         'BLUETOOTH',
       ]),
     },
     {
       '@type': 'PropertyValue',
-      name: 'Version Bluetooth',
+      name: labels.bluetoothVersion,
       value: resolveAttributeValue(referentialAttributes, indexedAttributes, [
         'MODÈLE DU BLUETOOTH',
       ]),
     },
     {
       '@type': 'PropertyValue',
-      name: 'OS / Plateforme',
+      name: labels.operatingSystem,
       value: resolveAttributeValue(referentialAttributes, indexedAttributes, [
         "SYSTÈME D'EXPLOITATION INSTALLÉ",
       ]),
     },
     {
       '@type': 'PropertyValue',
-      name: 'Année de sortie',
+      name: labels.releaseYear,
       value: resolveAttributeValue(referentialAttributes, indexedAttributes, [
         'YEAR',
       ]),
     },
     {
       '@type': 'PropertyValue',
-      name: 'Couleur',
+      name: labels.color,
       value: resolveAttributeValue(referentialAttributes, indexedAttributes, [
         'COULEUR GENERIQUE',
         'NOM DE LA COULEUR',
@@ -462,11 +524,11 @@ export const buildProductJsonLdGraph = (
     [
       {
         key: 'CLASSE_ENERGY_SDR',
-        label: 'Étiquette énergie (SDR)',
+        label: labels.energySdr,
       },
       {
         key: 'CLASSE_ENERGY_HDR',
-        label: 'Étiquette énergie (HDR)',
+        label: labels.energyHdr,
       },
     ]
       .map(({ key, label }) => {
@@ -521,25 +583,28 @@ export const buildProductJsonLdGraph = (
   }
 
   const brandName = normalizeString(product.identity?.brand)
+  const widthValue = normalizeMetricDimension(
+    resolveAttributeValue(referentialAttributes, indexedAttributes, [
+      'WIDTH',
+      'LARGEUR (SANS SUPPORT)',
+    ])
+  )
+  const heightValue = normalizeMetricDimension(
+    resolveAttributeValue(referentialAttributes, indexedAttributes, [
+      'HEIGHT',
+      'HAUTEUR (SANS SUPPORT)',
+    ])
+  )
+  const depthValue = normalizeMetricDimension(
+    resolveAttributeValue(referentialAttributes, indexedAttributes, [
+      'DEPTH',
+      'PROFONDEUR (SANS SUPPORT)',
+    ])
+  )
   const weightValue = resolveAttributeValue(
     referentialAttributes,
     indexedAttributes,
     ['WEIGHT', 'POIDS (SANS SUPPORT)', 'POIDS (AVEC SUPPORT)']
-  )
-  const widthValue = resolveAttributeValue(
-    referentialAttributes,
-    indexedAttributes,
-    ['WIDTH', 'LARGEUR (SANS SUPPORT)']
-  )
-  const heightValue = resolveAttributeValue(
-    referentialAttributes,
-    indexedAttributes,
-    ['HEIGHT', 'HAUTEUR (SANS SUPPORT)']
-  )
-  const depthValue = resolveAttributeValue(
-    referentialAttributes,
-    indexedAttributes,
-    ['DEPTH', 'PROFONDEUR (SANS SUPPORT)']
   )
 
   const productEntry = {

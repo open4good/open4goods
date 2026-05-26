@@ -74,7 +74,10 @@ const createI18nPlugin = () =>
             previewUnavailable:
               'Preview unavailable for this document. Use the download link instead.',
             loading: 'Loading document preview…',
+            previewPrompt: 'Open the preview to view this document here.',
             controls: {
+              preview: 'Preview document',
+              previewLabel: 'Preview',
               rotate: 'Rotate document',
               rotateLabel: 'Rotate',
               scrollLeft: 'Scroll left',
@@ -112,7 +115,7 @@ describe('ProductDocumentationSection', () => {
       },
     })
 
-  it('renders the first PDF in the viewer by default', async () => {
+  it('renders the first PDF metadata and keeps the preview idle by default', async () => {
     const pdfs = [
       basePdf(),
       basePdf({
@@ -123,6 +126,16 @@ describe('ProductDocumentationSection', () => {
     ]
     const wrapper = mountComponent({ pdfs })
 
+    await flushPromises()
+
+    expect(wrapper.find('.vue-pdf-embed-stub').exists()).toBe(false)
+    expect(
+      wrapper.get('[data-testid="product-docs-preview-empty"]').text()
+    ).toContain('Open the preview')
+
+    await wrapper
+      .get('[data-testid="product-docs-preview-button"]')
+      .trigger('click')
     await flushPromises()
 
     const viewer = wrapper.get('.vue-pdf-embed-stub')
@@ -166,6 +179,11 @@ describe('ProductDocumentationSection', () => {
 
     const tabs = wrapper.findAll('[data-testid="product-docs-tab"]')
     expect(tabs).toHaveLength(2)
+
+    await wrapper
+      .get('[data-testid="product-docs-preview-button"]')
+      .trigger('click')
+    await flushPromises()
 
     await tabs[1].trigger('click')
     await flushPromises()

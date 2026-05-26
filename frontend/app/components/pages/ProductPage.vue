@@ -281,6 +281,10 @@ import { AggTypeEnum } from '~~/shared/api-client/models/Agg'
 import { normalizeTimestamp } from '~/utils/date-parsing'
 import type { ProductRouteMatch } from '~~/shared/utils/_product-route'
 import { isBackendNotFoundError } from '~~/shared/utils/_product-route'
+import {
+  PRIMARY_LOCALE_HOSTS,
+  type NuxtLocale,
+} from '~~/shared/utils/domain-language'
 import { buildProductJsonLdGraph } from '~/utils/product-jsonld'
 import { buildProductMeta } from '~/utils/seo/product-meta'
 
@@ -349,13 +353,17 @@ const PRODUCT_COMPONENTS = [
   'base',
   'identity',
   'names',
-  'attributes',
   'resources',
   'scores',
   'aiReview',
   'offers',
-  'timeline',
   'eprel',
+].join(',')
+
+const PRODUCT_DETAILS_COMPONENTS = [
+  PRODUCT_COMPONENTS,
+  'attributes',
+  'timeline',
 ].join(',')
 
 const impactSectionRef = ref<HTMLElement | null>(null)
@@ -436,6 +444,28 @@ const {
 )
 
 const product = computed(() => productData.value)
+
+const productDetailsLoaded = ref(false)
+
+onMounted(async () => {
+  if (productDetailsLoaded.value) {
+    return
+  }
+
+  try {
+    const detailedProduct = await $fetch<ProductDto>(`/api/products/${gtin}`, {
+      query: { include: PRODUCT_DETAILS_COMPONENTS },
+    })
+
+    productData.value = {
+      ...(productData.value ?? {}),
+      ...detailedProduct,
+    } as ProductDto
+    productDetailsLoaded.value = true
+  } catch (detailsError) {
+    console.error('Failed to load deferred product details', detailsError)
+  }
+})
 
 if (product.value?.fullSlug) {
   const currentPath = route.path.startsWith('/') ? route.path : `/${route.path}`
@@ -987,6 +1017,29 @@ const canonicalPath = computed(() => {
 const canonicalUrl = computed(() =>
   new URL(canonicalPath.value, requestURL.origin).toString()
 )
+const productHreflangLocales = ['fr-FR', 'en-US'] satisfies NuxtLocale[]
+const alternateProductLinks = computed(() => {
+  const protocol = requestURL.protocol || 'https:'
+
+  return [
+    ...productHreflangLocales.map(availableLocale => ({
+      rel: 'alternate' as const,
+      hreflang: availableLocale,
+      href: new URL(
+        canonicalPath.value,
+        `${protocol}//${PRIMARY_LOCALE_HOSTS[availableLocale]}`
+      ).toString(),
+    })),
+    {
+      rel: 'alternate' as const,
+      hreflang: 'x-default',
+      href: new URL(
+        canonicalPath.value,
+        `${protocol}//${PRIMARY_LOCALE_HOSTS['fr-FR']}`
+      ).toString(),
+    },
+  ]
+})
 const productRobotsContent = computed(() =>
   categoryDetail.value?.enabled === false ? 'noindex, nofollow' : undefined
 )
@@ -2302,6 +2355,34 @@ const productJsonLdGraph = computed(() => {
     imageUrls: jsonLdImageUrls.value,
     punchline: product.value.aiReview?.punchline,
     impactScore: impactScoreOutOf20.value,
+    labels: {
+      impactScore: String(t('product.schema.properties.impactScore')),
+      repairabilityIndex: String(
+        t('product.schema.properties.repairabilityIndex')
+      ),
+      sparePartsAvailability: String(
+        t('product.schema.properties.sparePartsAvailability')
+      ),
+      softwareUpdates: String(t('product.schema.properties.softwareUpdates')),
+      warranty: String(t('product.schema.properties.warranty')),
+      screenSize: String(t('product.schema.properties.screenSize')),
+      displayTechnology: String(
+        t('product.schema.properties.displayTechnology')
+      ),
+      resolution: String(t('product.schema.properties.resolution')),
+      frequency: String(t('product.schema.properties.frequency')),
+      hdmiPorts: String(t('product.schema.properties.hdmiPorts')),
+      usbPorts: String(t('product.schema.properties.usbPorts')),
+      wifi: String(t('product.schema.properties.wifi')),
+      wifiStandards: String(t('product.schema.properties.wifiStandards')),
+      bluetooth: String(t('product.schema.properties.bluetooth')),
+      bluetoothVersion: String(t('product.schema.properties.bluetoothVersion')),
+      operatingSystem: String(t('product.schema.properties.operatingSystem')),
+      releaseYear: String(t('product.schema.properties.releaseYear')),
+      color: String(t('product.schema.properties.color')),
+      energySdr: String(t('product.schema.properties.energySdr')),
+      energyHdr: String(t('product.schema.properties.energyHdr')),
+    },
   })
 })
 
@@ -2469,7 +2550,10 @@ useHead(() => ({
 }))
 
 useHead(() => ({
-  link: [{ rel: 'canonical', href: canonicalUrl.value }],
+  link: [
+    { rel: 'canonical', href: canonicalUrl.value },
+    ...alternateProductLinks.value,
+  ],
 }))
 
 useHead(() => {
