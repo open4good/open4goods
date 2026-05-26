@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
-  "schedule": ["after 10pm and before 5am"],
+  "schedule": ["after 10pm", "before 5am"],
   "ignorePaths": ["ui/**"],
   "automerge": true,
   "automergeType": "pr",
@@ -21,14 +21,91 @@
     },
 
     {
-      "matchPaths": ["frontend/**"],
+      "matchFileNames": ["frontend/**"],
       "matchManagers": ["npm", "pnpm", "yarn"],
       "labels": ["squad:ux"]
     },
 
     {
+      "description": "Group frontend production dependencies for non-major updates",
+      "matchFileNames": ["frontend/**"],
+      "matchManagers": ["npm", "pnpm", "yarn"],
+      "matchDepTypes": ["dependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "frontend npm dependencies",
+      "groupSlug": "frontend-npm-dependencies",
+      "labels": ["squad:ux", "dependencies:npm"]
+    },
+
+    {
+      "description": "Group frontend tooling dependencies for non-major updates",
+      "matchFileNames": ["frontend/**"],
+      "matchManagers": ["npm", "pnpm", "yarn"],
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "frontend npm tooling",
+      "groupSlug": "frontend-npm-tooling",
+      "labels": ["squad:ux", "dependencies:npm"]
+    },
+
+    {
+      "description": "Keep Nuxt ecosystem updates together",
+      "matchFileNames": ["frontend/**"],
+      "matchManagers": ["npm", "pnpm", "yarn"],
+      "matchPackageNames": ["nuxt", "@nuxt/**", "@nuxtjs/**", "nuxt-site-config", "vuetify-nuxt-module"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "frontend Nuxt ecosystem",
+      "groupSlug": "frontend-nuxt-ecosystem",
+      "labels": ["squad:ux", "dependencies:npm", "ecosystem:nuxt"]
+    },
+
+    {
+      "description": "Keep Vue ecosystem updates together",
+      "matchFileNames": ["frontend/**"],
+      "matchManagers": ["npm", "pnpm", "yarn"],
+      "matchPackageNames": ["vue", "vue-router", "@vue/**", "@vueuse/**"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "frontend Vue ecosystem",
+      "groupSlug": "frontend-vue-ecosystem",
+      "labels": ["squad:ux", "dependencies:npm", "ecosystem:vue"]
+    },
+
+    {
+      "description": "Keep frontend lint and test tooling updates together",
+      "matchFileNames": ["frontend/**"],
+      "matchManagers": ["npm", "pnpm", "yarn"],
+      "matchPackageNames": [
+        "eslint",
+        "eslint-*",
+        "@typescript-eslint/**",
+        "prettier",
+        "vitest",
+        "@vitest/**",
+        "@playwright/test",
+        "happy-dom",
+        "jsdom",
+        "@types/**",
+        "typescript",
+        "vue-tsc"
+      ],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "frontend lint and test tooling",
+      "groupSlug": "frontend-lint-test-tooling",
+      "labels": ["squad:ux", "dependencies:npm", "dependencies:tooling"]
+    },
+
+    {
       "matchManagers": ["github-actions"],
       "labels": ["squad:platform"]
+    },
+
+    {
+      "description": "Group GitHub Actions updates for non-major updates",
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "github-actions",
+      "groupSlug": "github-actions",
+      "labels": ["squad:platform", "dependencies:github-actions"]
     },
 
     {
