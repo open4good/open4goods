@@ -183,7 +183,7 @@ class ReviewGenerationPreprocessingServiceTest {
                 .contains(
                         "Klarstein \"Velaire\" (official OR officiel OR product OR produit)",
                         "site:klarstein Klarstein \"Velaire\"");
-        assertThat(product.model()).isEqualTo("Velaire");
+        assertThat(product.model()).isEqualTo("4060656565403");
     }
 
     @Test
@@ -438,6 +438,39 @@ class ReviewGenerationPreprocessingServiceTest {
         @SuppressWarnings("unchecked")
         Map<String, String> sources = (Map<String, String>) variables.get("sources");
         assertThat(sources).containsKey(officialUrl);
+    }
+
+    @Test
+    void promoteModelFromOfficialEvidenceAllowsNamedModelFromOfficialMetadata()
+    {
+        Product product = product("Klarstein", "ABC1234");
+        GoogleSearchResult result = new GoogleSearchResult("Klarstein ABC1234", "https://www.klarstein.fr/abc1234");
+        FetchResponse response = new FetchResponse("https://www.klarstein.fr/abc1234", 200,
+                "# Klarstein Velaire\nModel: Velaire", "# Klarstein Velaire\nModel: Velaire",
+                FetchStrategy.HTTP, List.of(new ExtractedMetadataAttribute("model", "Velaire", "jsonld", "fr")),
+                Set.of(), List.of(), false, null);
+
+        Boolean promoted = ReflectionTestUtils.invokeMethod(service, "promoteModelFromOfficialEvidence",
+                product, result, response);
+
+        assertThat(promoted).isTrue();
+        assertThat(product.model()).isEqualTo("Velaire");
+    }
+
+    @Test
+    void promoteModelFromOfficialEvidenceDoesNotPromoteUrlOnlySibling()
+    {
+        Product product = product("Samsung", "4D 511");
+        GoogleSearchResult result = new GoogleSearchResult("Samsung support", "https://www.samsung.com/fr/support/4d-515");
+        FetchResponse response = new FetchResponse("https://www.samsung.com/fr/support/4d-515", 200,
+                "# Samsung support\nUseful official support page.", "# Samsung support\nUseful official support page.",
+                FetchStrategy.HTTP, List.of(), Set.of(), List.of(), false, null);
+
+        Boolean promoted = ReflectionTestUtils.invokeMethod(service, "promoteModelFromOfficialEvidence",
+                product, result, response);
+
+        assertThat(promoted).isFalse();
+        assertThat(product.model()).isEqualTo("4D 511");
     }
 
     @Test

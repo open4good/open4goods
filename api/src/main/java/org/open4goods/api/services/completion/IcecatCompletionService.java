@@ -27,6 +27,7 @@ import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.resource.ResourceTag;
+import org.open4goods.model.util.ProductModelCandidateHelper.ModelCandidateSource;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
@@ -346,7 +347,7 @@ public class IcecatCompletionService extends AbstractCompletionService {
             df.addReferentielAttribute(ReferentielKey.BRAND, e.brandInfo.brandName);
         }
         
-        df.addReferentielAttribute(ReferentielKey.MODEL, e.brandPartCode);
+        df.addReferentielAttribute(ReferentielKey.MODEL, e.brandPartCode, ModelCandidateSource.STRUCTURED_DATA);
         if (e.category != null && e.category.name != null) {
             df.addProductTag(e.category.name.value);
         }

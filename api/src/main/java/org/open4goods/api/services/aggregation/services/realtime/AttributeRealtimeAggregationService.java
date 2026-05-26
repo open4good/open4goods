@@ -25,6 +25,7 @@ import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.util.ProductModelCandidateHelper.ModelCandidateSource;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributeParser;
 import org.open4goods.model.vertical.AttributesConfig;
@@ -76,7 +77,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 			String model = data.getEprelDatas().getModelIdentifier();
 			data.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, model);
-			data.addModel(model);
+			data.addModel(model, ModelCandidateSource.EPREL);
 
 		} else {
 			String actualBrand = data.brand();
@@ -706,7 +707,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		///////////////////////
 		String model = fragment.getReferentielAttributes().get(ReferentielKey.MODEL);
 		if (!StringUtils.isEmpty(model)) {
-			output.addModel(model);
+			output.addModel(model, ModelCandidateSource.DATASOURCE_REFERENTIAL);
 		}
 
 		///////////////////////

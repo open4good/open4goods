@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.util.ProductModelCandidateHelper.ModelCandidateSource;
 
 class ProductModelCandidateHelperTest
 {
@@ -79,5 +80,21 @@ class ProductModelCandidateHelperTest
         assertNull(ProductModelCandidateHelper.cleanForStorage("6941764449275"));
         assertNull(ProductModelCandidateHelper.cleanForStorage(
                 "Refrigerateur vitre professionnel grande capacite blanc"));
+    }
+
+    @Test
+    void namedModelsRequireStrongEvidence()
+    {
+        assertNull(ProductModelCandidateHelper.cleanForStorage("My Time", ModelCandidateSource.DATASOURCE_REFERENTIAL));
+        assertEquals("My Time", ProductModelCandidateHelper.cleanForStorage(" My Time ",
+                ModelCandidateSource.OFFICIAL_TEXT));
+    }
+
+    @Test
+    void detectsSiblingDriftFamilies()
+    {
+        assertTrue(ProductModelCandidateHelper.isSiblingDrift("4D 511", "4D 515"));
+        assertFalse(ProductModelCandidateHelper.isSiblingDrift("SM-S921B/DS", "SM-S921B/DS"));
+        assertFalse(ProductModelCandidateHelper.isSiblingDrift("WRIC 3C34 PE", "W7X82O-W"));
     }
 }

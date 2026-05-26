@@ -13,6 +13,7 @@ import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.eprel.EprelProduct;
+import org.open4goods.model.util.ProductModelCandidateHelper.ModelCandidateSource;
 
 class ProductTest
 {
@@ -160,5 +161,40 @@ class ProductTest
 
                 assertEquals("FS1600H", product.model());
                 assertTrue(product.getAkaModels().isEmpty());
+        }
+
+        @Test
+        void strongSourcePromotionAcceptsNamedModelWithReadableCasing()
+        {
+                Product product = new Product(1L);
+
+                boolean promoted = product.promoteModel("My Time", ModelCandidateSource.OFFICIAL_TEXT);
+
+                assertTrue(promoted);
+                assertEquals("My Time", product.model());
+        }
+
+        @Test
+        void weakSiblingDriftDoesNotReplaceCanonicalModel()
+        {
+                Product product = new Product(1L);
+                product.addModel("4D 511");
+
+                product.addModel("4D 515", ModelCandidateSource.TITLE_INFERRED);
+
+                assertEquals("4D 511", product.model());
+                assertTrue(product.getAkaModels().isEmpty());
+        }
+
+        @Test
+        void canonicalElectionDoesNotUseShortestWeakCandidate()
+        {
+                Product product = new Product(1L);
+
+                product.addModel("NV7B4550VAS/U1");
+                product.addModel("NV7B4550");
+
+                assertEquals("NV7B4550VAS/U1", product.model());
+                assertTrue(product.getAkaModels().contains("NV7B4550"));
         }
 }

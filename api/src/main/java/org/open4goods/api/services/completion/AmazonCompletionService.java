@@ -28,6 +28,7 @@ import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductCondition;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.resource.ResourceTag;
+import org.open4goods.model.util.ProductModelCandidateHelper.ModelCandidateSource;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
@@ -451,7 +452,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
             if (model.length() > 15) {
                 model = IdHelper.extractBrandUids(model).stream().findFirst().orElse(model);
             }
-            fragment.addReferentielAttribute(ReferentielKey.MODEL, model);
+            fragment.addReferentielAttribute(ReferentielKey.MODEL, model, ModelCandidateSource.STRUCTURED_DATA);
         }
         addAttribute(fragment, "WARRANTY", manufactureInfo.getWarranty());
         addAttribute(fragment, "ITEM_PART_NUMBER", manufactureInfo.getItemPartNumber());

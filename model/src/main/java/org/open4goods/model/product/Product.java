@@ -9,11 +9,13 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -34,6 +36,7 @@ import org.open4goods.model.price.Currency;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.resource.ResourceType;
 import org.open4goods.model.util.ProductModelCandidateHelper;
+import org.open4goods.model.util.ProductModelCandidateHelper.ModelCandidateSource;
 import org.open4goods.model.util.TimeAgoFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -857,7 +860,7 @@ public class Product implements Standardisable {
 	}
 
 	public void forceModel(String extractedModel) {
-		promoteModel(extractedModel);
+		promoteModel(extractedModel, ModelCandidateSource.STRUCTURED_DATA);
 	}
 
 	/**
@@ -868,13 +871,29 @@ public class Product implements Standardisable {
 	 * @return {@code true} when the canonical model changed
 	 */
 	public boolean promoteModel(String value) {
-		String promoted = ProductModelCandidateHelper.cleanForStorage(value);
+		return promoteModel(value, ModelCandidateSource.STRUCTURED_DATA);
+	}
+
+	/**
+	 * Promotes a model candidate using source-aware cleaning and drift checks.
+	 *
+	 * @param value model candidate
+	 * @param source evidence source for the candidate
+	 * @return {@code true} when the canonical model changed
+	 */
+	public boolean promoteModel(String value, ModelCandidateSource source) {
+		String promoted = ProductModelCandidateHelper.cleanForStorage(value, source);
 		if (StringUtils.isEmpty(promoted) || promoted.length() < MODEL_MIN_LENGTH) {
 			pruneAkaModels();
 			return false;
 		}
 
 		String existing = ProductModelCandidateHelper.cleanForStorage(model());
+		if (StringUtils.isNotEmpty(existing) && ProductModelCandidateHelper.isSiblingDrift(existing, promoted)
+				&& !ProductModelCandidateHelper.isStrongSource(source)) {
+			pruneAkaModels();
+			return false;
+		}
 		boolean changed = !promoted.equals(existing);
 		if (StringUtils.isNotEmpty(existing) && changed) {
 			akaModels.add(existing);
@@ -892,10 +911,27 @@ public class Product implements Standardisable {
 	 * @param value model candidate
 	 */
 	public void addModel(String value) {
+		addModel(value, ModelCandidateSource.DATASOURCE_REFERENTIAL);
+	}
 
-		String model = ProductModelCandidateHelper.cleanForStorage(value);
+	/**
+	 * Add the model referential attribute using source-aware cleaning and
+	 * confidence-ranked canonical election.
+	 *
+	 * @param value model candidate
+	 * @param source evidence source for the candidate
+	 */
+	public void addModel(String value, ModelCandidateSource source) {
+
+		String model = ProductModelCandidateHelper.cleanForStorage(value, source);
 
 		if (StringUtils.isEmpty(model) || model.length() < MODEL_MIN_LENGTH) {
+			pruneAkaModels();
+			return;
+		}
+		String existing = ProductModelCandidateHelper.cleanForStorage(model());
+		if (StringUtils.isNotEmpty(existing) && ProductModelCandidateHelper.isSiblingDrift(existing, model)
+				&& !ProductModelCandidateHelper.isStrongSource(source)) {
 			pruneAkaModels();
 			return;
 		}
@@ -916,21 +952,35 @@ public class Product implements Standardisable {
 
 		// Case ref attribute is already set, we keep as it and we remove the elected
 		// one from alternativeModels
-		String existing = ProductModelCandidateHelper.cleanForStorage(model());
 		if (StringUtils.isEmpty(existing) && StringUtils.isNotEmpty(model())) {
 			attributes.getReferentielAttributes().remove(ReferentielKey.MODEL);
 		}
 
 		if (StringUtils.isEmpty(existing) || FORCE) {
-			String shortest = shortestModel();
-			if (null != shortest) {
-				attributes.getReferentielAttributes().put(ReferentielKey.MODEL, shortest);
-				akaModels.remove(shortest);
+			String elected = electCanonicalModel(model, source);
+			if (null != elected) {
+				attributes.getReferentielAttributes().put(ReferentielKey.MODEL, elected);
+				akaModels.remove(elected);
 			}
 		} else {
 			akaModels.remove(existing);
 		}
 		pruneAkaModels();
+	}
+
+	private String electCanonicalModel(String latestModel, ModelCandidateSource latestSource) {
+		Map<String, ModelCandidateSource> candidates = new HashMap<>();
+		String existing = model();
+		if (StringUtils.isNotBlank(existing)) {
+			candidates.put(existing, ModelCandidateSource.DATASOURCE_REFERENTIAL);
+		}
+		if (akaModels != null) {
+			akaModels.forEach(candidate -> candidates.put(candidate, ModelCandidateSource.DATASOURCE_REFERENTIAL));
+		}
+		if (StringUtils.isNotBlank(latestModel)) {
+			candidates.put(latestModel, latestSource);
+		}
+		return ProductModelCandidateHelper.electCanonicalModel(candidates).orElse(null);
 	}
 
 	/**
@@ -940,8 +990,9 @@ public class Product implements Standardisable {
 		String canonicalModel = ProductModelCandidateHelper.cleanForStorage(model());
 		Set<String> cleanedModels = ProductModelCandidateHelper.cleanForStorage(akaModels).stream()
 				.filter(candidate -> !candidate.equals(canonicalModel))
+				.filter(candidate -> canonicalModel == null || !ProductModelCandidateHelper.isSiblingDrift(candidate, canonicalModel))
 				.collect(Collectors.toCollection(LinkedHashSet::new));
-		akaModels = new HashSet<>(cleanedModels);
+		akaModels = new LinkedHashSet<>(cleanedModels);
 	}
 
 	/**
@@ -985,13 +1036,18 @@ public class Product implements Standardisable {
 	 * @return the shortest model name
 	 */
 	public String shortestModel() {
-		Set<String> names = new HashSet<>();
+		Set<String> names = new LinkedHashSet<>();
 		names.add(model());
 		names.addAll(akaModels);
 		if (names.size() == 0) {
 			return null;
 		} else {
-			return names.stream().filter(e -> e != null).min(Comparator.comparingInt(String::length)).orElse(null);
+			Map<String, ModelCandidateSource> candidates = names.stream()
+					.filter(Objects::nonNull)
+					.collect(Collectors.toMap(candidate -> candidate, candidate -> ModelCandidateSource.DATASOURCE_REFERENTIAL,
+							(left, right) -> left, LinkedHashMap::new));
+			return ProductModelCandidateHelper.electCanonicalModel(candidates)
+					.orElseGet(() -> names.stream().filter(Objects::nonNull).min(Comparator.comparingInt(String::length)).orElse(null));
 		}
 	}
 

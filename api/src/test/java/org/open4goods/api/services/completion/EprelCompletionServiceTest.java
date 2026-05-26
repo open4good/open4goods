@@ -51,21 +51,21 @@ class EprelCompletionServiceTest {
         vertical = new VerticalConfig();
         vertical.setEprelGroupNames(List.of("TELEVISION"));
         product = new Product(123L);
-        product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "MODEL-A");
+        product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "MODEL-A1");
     }
 
     @Test
     void processProductUsesLatestEprelVersionWhenAvailable() {
         EprelProduct current = new EprelProduct();
         current.setEprelRegistrationNumber("old");
-        current.setModelIdentifier("MODEL-A");
+        current.setModelIdentifier("MODEL-A1");
         current.setLastVersion(false);
         current.setProductModelCoreId(10L);
         current.setVersionId(1L);
 
         EprelProduct latest = new EprelProduct();
         latest.setEprelRegistrationNumber("new");
-        latest.setModelIdentifier("MODEL-A");
+        latest.setModelIdentifier("MODEL-A1");
         latest.setLastVersion(true);
         latest.setProductModelCoreId(10L);
         latest.setVersionId(2L);
@@ -79,6 +79,26 @@ class EprelCompletionServiceTest {
 
         assertThat(product.getEprelDatas()).isEqualTo(latest);
         assertThat(product.getExternalIds().getEprel()).isEqualTo("new");
+    }
+
+    @Test
+    void processProductPromotesEprelModelOnGtinMatch() {
+        product = new Product(123L);
+        product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "WEAK123");
+
+        EprelProduct eprelMatch = new EprelProduct();
+        eprelMatch.setEprelRegistrationNumber("gtin-match");
+        eprelMatch.setModelIdentifier("EPREL-MODEL-123");
+        eprelMatch.setNumericGtin(123L);
+        eprelMatch.setLastVersion(true);
+
+        when(eprelSearchService.search(anyString(), anyList(), anyCollection()))
+                .thenReturn(List.of(eprelMatch));
+
+        service.processProduct(vertical, product);
+
+        assertThat(product.getExternalIds().getEprel()).isEqualTo("gtin-match");
+        assertThat(product.model()).isEqualTo("EPREL-MODEL-123");
     }
 
     @Test

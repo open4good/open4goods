@@ -31,6 +31,8 @@ import org.open4goods.model.product.ProductCondition;
 import org.open4goods.model.rating.Rating;
 import org.open4goods.model.rating.RatingType;
 import org.open4goods.model.resource.Resource;
+import org.open4goods.model.util.ProductModelCandidateHelper;
+import org.open4goods.model.util.ProductModelCandidateHelper.ModelCandidateSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -498,6 +500,27 @@ public class DataFragment implements Standardisable, Validable {
 	 */
 
 	public void addReferentielAttribute(ReferentielKey key, String val) {
+		addReferentielAttribute(key, val, ModelCandidateSource.DATASOURCE_REFERENTIAL);
+
+	}
+
+	/**
+	 * Adds a referential attribute with source-aware model cleaning.
+	 *
+	 * @param key referential key
+	 * @param val raw value
+	 * @param modelSource evidence source used when {@code key} is {@link ReferentielKey#MODEL}
+	 */
+	public void addReferentielAttribute(ReferentielKey key, String val, ModelCandidateSource modelSource) {
+		if (key == ReferentielKey.MODEL) {
+			String cleaned = ProductModelCandidateHelper.cleanForStorage(val, modelSource);
+			if (cleaned == null) {
+				logger.debug("Cannot add noisy model referentiel attribute {} at {}", val, this.url);
+				return;
+			}
+			referentielAttributes.put(key, cleaned);
+			return;
+		}
 		referentielAttributes.put(key, val);
 
 	}
@@ -524,15 +547,15 @@ public class DataFragment implements Standardisable, Validable {
 			getReferentielAttributes().put(ReferentielKey.BRAND,val );
 			break;
 		case "MODEL":
-			//			try {
-			final String cleaned = IdHelper.getHashedName(val);
-			getReferentielAttributes().put(ReferentielKey.MODEL,cleaned);
+			final String cleaned = ProductModelCandidateHelper.cleanForStorage(val, ModelCandidateSource.DATASOURCE_REFERENTIAL);
+			if (cleaned == null) {
+				logger.debug("Cannot add noisy model referentiel attribute {} at {}", val, this.url);
+				return;
+			}
+			getReferentielAttributes().put(ReferentielKey.MODEL, cleaned);
 			if (!cleaned.equals(val)) {
 				alternateIds.add(val.toUpperCase());
 			}
-			//			} catch (final InvalidParameterException e) {
-			//				logger.warn("{} : cannot add brand for {}",e.getMessage(), this);
-			//			}
 			break;
 		case "GTIN":
 			if (NumberUtils.isDigits(val)) {

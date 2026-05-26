@@ -20,6 +20,7 @@ import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.eprel.EprelProduct;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.util.ProductModelCandidateHelper;
+import org.open4goods.model.util.ProductModelCandidateHelper.ModelCandidateSource;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.eprelservice.service.EprelSearchService;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -105,6 +106,7 @@ public class EprelCompletionService extends AbstractCompletionService {
 
 			data.setEprelDatas(eprelData);
 			data.getExternalIds().setEprel(eprelData.getEprelRegistrationNumber());
+			data.promoteModel(eprelData.getModelIdentifier(), ModelCandidateSource.EPREL);
 
 			// Set attributes
 
@@ -197,6 +199,12 @@ public class EprelCompletionService extends AbstractCompletionService {
                         results.size(), product.brand(), product.model());
                 return Optional.of(bestMatches.getFirst());
             }
+            if (hasSiblingDrift(bestMatches) && !bestMatches.stream().anyMatch(candidate -> hasSameGtin(product.gtin(), candidate)))
+            {
+                logger.warn("Rejecting {} EPREL model-label matches for {} because sibling variants remain ambiguous",
+                        bestMatches.size(), product);
+                return Optional.empty();
+            }
             return selectDeterministicBest(bestMatches, modelCandidates, vertical, product, "model label");
         }
         return selectDeterministicBest(narrowed.isEmpty() ? results : narrowed, modelCandidates, vertical, product,
@@ -219,10 +227,38 @@ public class EprelCompletionService extends AbstractCompletionService {
         {
             return Optional.empty();
         }
+        int highestScore = getModelEvidenceScore(eligible.getFirst(), modelCandidates);
+        List<EprelProduct> highestScoreMatches = eligible.stream()
+                .filter(candidate -> getModelEvidenceScore(candidate, modelCandidates) == highestScore)
+                .toList();
+        if (highestScoreMatches.size() > 1
+                && hasSiblingDrift(highestScoreMatches)
+                && !highestScoreMatches.stream().anyMatch(candidate -> hasSameGtin(product.gtin(), candidate)))
+        {
+            logger.warn("Rejecting deterministic EPREL {} selection for {} because sibling variants remain ambiguous",
+                    reason, product);
+            return Optional.empty();
+        }
         EprelProduct selected = eligible.getFirst();
         logger.info("Deterministically selected EPREL result {} for {} from {} {} candidates",
                 selected.getEprelRegistrationNumber(), product, eligible.size(), reason);
         return Optional.of(selected);
+    }
+
+    private boolean hasSiblingDrift(List<EprelProduct> candidates)
+    {
+        for (int i = 0; i < candidates.size(); i++)
+        {
+            for (int j = i + 1; j < candidates.size(); j++)
+            {
+                if (ProductModelCandidateHelper.isSiblingDrift(candidates.get(i).getModelIdentifier(),
+                        candidates.get(j).getModelIdentifier()))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private int compareDeterministicCandidate(EprelProduct left, EprelProduct right,

@@ -36,6 +36,7 @@ import org.open4goods.model.product.ProductFact;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.resource.ResourceType;
 import org.open4goods.model.util.ProductModelCandidateHelper;
+import org.open4goods.model.util.ProductModelCandidateHelper.ModelCandidateSource;
 import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -97,7 +98,7 @@ public class ReviewGenerationPreprocessingService {
 	private record FetchOutcome(FetchResponse response, String rejectionReason) {
 	}
 
-	private record ModelEvidence(String candidate, int score, List<String> reasons) {
+	private record ModelEvidence(String candidate, int score, List<String> reasons, ModelCandidateSource source) {
 	}
 
 	private record SearchIdentity(String brand, String primaryModel, Set<String> alternateModels) {
@@ -210,6 +211,7 @@ public class ReviewGenerationPreprocessingService {
 			ReviewGenerationStatus status, Map<String, String> customHeaders)
 			throws IOException, InterruptedException, ExecutionException, ResourceNotFoundException,
 			SerialisationException, NotEnoughDataException, GoogleSearchException {
+		Set<String> exactEvidenceModels = exactEvidenceModels(product);
 		SearchIdentity identity = resolveSearchIdentity(product);
 		String brand = identity.brand();
 		String primaryModel = identity.primaryModel();
@@ -291,12 +293,12 @@ public class ReviewGenerationPreprocessingService {
 		}
 
 		status.setStatus(ReviewGenerationStatus.Status.FETCHING);
-		identifyOfficialProductUrl(product, allResults).ifPresent(officialUrl -> {
+		identifyOfficialProductUrl(product, allResults, exactEvidenceModels).ifPresent(officialUrl -> {
 			product.setOfficialUrl(officialUrl);
 			status.addMessage("Official manufacturer page identified: " + officialUrl);
 			logger.info("Official manufacturer page identified for UPC {}: {}", product.getId(), officialUrl);
 		});
-		identifyOfficialSupportUrls(product, allResults).forEach(supportUrl -> {
+		identifyOfficialSupportUrls(product, allResults, exactEvidenceModels).forEach(supportUrl -> {
 			String language = resolveOfficialUrlLanguage(supportUrl);
 			product.addOfficialSupportUrl(language, supportUrl);
 			status.addMessage("Official manufacturer support page identified: " + supportUrl);
@@ -304,6 +306,7 @@ public class ReviewGenerationPreprocessingService {
 					language, supportUrl);
 		});
 		if (fetchOfficialEvidence(product, allResults, customHeaders)) {
+			exactEvidenceModels = exactEvidenceModels(product);
 			primaryModel = product.model();
 			alternateModels = product.getAkaModels();
 			status.addMessage("Product model refined from official manufacturer evidence: " + primaryModel);
@@ -332,17 +335,17 @@ public class ReviewGenerationPreprocessingService {
 
 		accumulatedTokens = collectFetchedSources(product, sortedResults, fetchFutures, finalSourcesMap, finalTokensMap,
 				finalSourceClasses, rejectedUrls, accumulatedTokens, brand, primaryModel, alternateModels, verticalConfig,
-				status);
+				exactEvidenceModels, status);
 		if (shouldRunLowQualityFallback(verticalConfig, accumulatedTokens, finalSourcesMap, finalSourceClasses)) {
 			accumulatedTokens = runLowQualityFallback(product, brand, primaryModel, preferredDomains, searchedQueries,
 					sortedResults, fetchFutures, finalSourcesMap, finalTokensMap, finalSourceClasses, rejectedUrls,
-					accumulatedTokens, customHeaders, status);
+					accumulatedTokens, customHeaders, exactEvidenceModels, status);
 		}
 		if (isBelowCompleteThreshold(verticalConfig, accumulatedTokens, finalSourcesMap, finalSourceClasses)
 				&& hasOfficialFetchEvidence(product, finalSourcesMap)) {
 			accumulatedTokens = runPartialRetry(product, brand, primaryModel, alternateModels, preferredDomains,
 					searchedQueries, sortedResults, fetchFutures, finalSourcesMap, finalTokensMap, rejectedUrls,
-					finalSourceClasses, accumulatedTokens, customHeaders, status);
+					finalSourceClasses, accumulatedTokens, customHeaders, exactEvidenceModels, status);
 		}
 		logger.info("Aggregated {} tokens from {} sources.", accumulatedTokens, finalSourcesMap.size());
 
@@ -428,9 +431,7 @@ public class ReviewGenerationPreprocessingService {
 						.filter(candidate -> !matchesProductGtin(product, candidate))
 						.findFirst()
 						.orElse(inferredModels.getFirst());
-				if (!product.promoteModel(primaryModel) && looksLikeNamedModel(primaryModel)) {
-					product.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, primaryModel);
-				}
+				product.addModel(primaryModel, ModelCandidateSource.TITLE_INFERRED);
 				alternateModels.addAll(inferredModels.stream().skip(1).toList());
 				logger.info("Resolved review search model for UPC {} from offer evidence: {}", product.getId(),
 						primaryModel);
@@ -601,12 +602,7 @@ public class ReviewGenerationPreprocessingService {
 	}
 
 	private boolean looksLikeNamedModel(String value) {
-		if (value == null || value.isBlank()) {
-			return false;
-		}
-		String trimmed = value.trim();
-		return trimmed.length() >= 4 && trimmed.length() <= 32 && trimmed.matches("(?=.*[A-Za-z])[\\p{Alnum}][\\p{Alnum} ./_-]*")
-				&& !looksLikeMerchantTitle(trimmed) && !isGenericProductWord(trimmed);
+		return ProductModelCandidateHelper.isNamedModel(value);
 	}
 
 	private boolean isGenericProductWord(String value) {
@@ -682,19 +678,7 @@ public class ReviewGenerationPreprocessingService {
 	}
 
 	private boolean modelMatchesZone(String model, String normalizedZone) {
-		if (model == null || model.isBlank()) {
-			return false;
-		}
-		String normalizedModel = normalizeForTextMatching(model);
-		if (normalizedModel.length() >= 4 && normalizedZone.contains(normalizedModel)) {
-			return true;
-		}
-		for (String token : model.split("[\\s_\\-\\./\\\\]+")) {
-			if (isStrongModelToken(token) && normalizedZone.contains(normalizeForTextMatching(token))) {
-				return true;
-			}
-		}
-		return false;
+		return ProductModelCandidateHelper.modelMatchesTextZone(model, normalizedZone);
 	}
 
 	private List<String> effectivePreferredDomains(VerticalConfig verticalConfig) {
@@ -767,33 +751,37 @@ public class ReviewGenerationPreprocessingService {
 		if (result != null && isPdfUrl(result.link())) {
 			return isOfficialUrl(product, result) ? SourceClass.OFFICIAL_PDF : SourceClass.GENERIC_CATALOG;
 		}
-		if (result != null && isOfficialUrl(product, result)) {
-			return isOfficialSupportUrl(result) ? SourceClass.OFFICIAL_SUPPORT : SourceClass.OFFICIAL_PRODUCT;
-		}
 		String evidence = normalizeForTextMatching(String.join(" ", result == null ? "" : safeString(result.title()),
 				result == null ? "" : safeString(result.link()), firstContentZone(content)));
 		if (containsAny(evidence, "spare part", "sparefixd", "replacement part", "piece detachee", "pieces detachees",
-				"accessoire compatible", "compatible spare", "front panel screw", "holder glass")) {
+				"pièce détachée", "pièces détachées", "ersatzteil", "ersatzteile", "onderdeel", "onderdelen",
+				"spare part", "spare parts", "replacement", "replacement part", "accessoire compatible",
+				"compatible spare", "front panel screw", "holder glass")) {
 			return SourceClass.SPARE_PART;
 		}
 		if (containsAny(evidence, "catalogue 202", "catalog 202", "katalog 202", "catalogue general",
-				"general catalogue")) {
+				"general catalogue", "categorie produit", "categoria produto", "category", "categories",
+				"marque", "armoires refrigerees", "vitrines murales", "armoires a boissons",
+				"meubles pizzas refrigeres", "supplier list", "product listing")) {
 			return SourceClass.GENERIC_CATALOG;
+		}
+		if (result != null && isOfficialUrl(product, result)) {
+			return isOfficialSupportUrl(result) ? SourceClass.OFFICIAL_SUPPORT : SourceClass.OFFICIAL_PRODUCT;
 		}
 		if (containsAny(evidence, "forum", "sav darty", "question", "reponse", "answered questions")) {
 			return SourceClass.FORUM;
 		}
-		if (containsAny(evidence, "test", "review", "avis", "verdict", "comparatif", "que choisir", "rtings",
-				"les numeriques", "guide d achat", "buying guide")) {
-			return SourceClass.REVIEW;
+		if (containsAny(evidence, "panier", "ajouter au panier", "livraison", "stock", "prix", "acheter",
+				"marketplace", "shop", "boutique", "add to cart", "in stock", "out of stock")) {
+			return SourceClass.MERCHANT;
 		}
 		if (containsAny(evidence, "manual", "notice", "mode d emploi", "fiche produit", "datasheet",
 				"support")) {
 			return SourceClass.GUIDE;
 		}
-		if (containsAny(evidence, "panier", "ajouter au panier", "livraison", "stock", "prix", "acheter",
-				"marketplace", "shop", "boutique")) {
-			return SourceClass.MERCHANT;
+		if (containsAny(evidence, "test", "review", "avis", "verdict", "comparatif", "que choisir", "rtings",
+				"les numeriques", "guide d achat", "buying guide")) {
+			return SourceClass.REVIEW;
 		}
 		return SourceClass.UNKNOWN;
 	}
@@ -835,7 +823,8 @@ public class ReviewGenerationPreprocessingService {
 			Map<String, CompletableFuture<FetchOutcome>> fetchFutures, Map<String, String> finalSourcesMap,
 			Map<String, Integer> finalTokensMap, Map<String, SourceClass> finalSourceClasses,
 			Map<String, String> rejectedUrls, int accumulatedTokens, String brand, String primaryModel,
-			Set<String> alternateModels, VerticalConfig verticalConfig, ReviewGenerationStatus status)
+			Set<String> alternateModels, VerticalConfig verticalConfig, Set<String> exactEvidenceModels,
+			ReviewGenerationStatus status)
 			throws InterruptedException, ExecutionException {
 		int maxTotalTokens = properties.getMaxTotalTokens();
 		int minTokens = properties.getSourceMinTokens();
@@ -881,9 +870,8 @@ public class ReviewGenerationPreprocessingService {
 				logger.warn("Content from URL {} discarded due to low-quality source class {}", url, sourceClass);
 				continue;
 			}
-			if (!isOfficialUrl(product, result) && !hasSpecificProductEvidence(product, result, content,
-					primaryModel, alternateModels)) {
-				rejectedUrls.put(url, "irrelevant: missing specific GTIN or model evidence");
+			if (!hasExactProductEvidence(product, result, fetchResponse, content, exactEvidenceModels)) {
+				rejectedUrls.put(url, "irrelevant: missing exact GTIN/model evidence");
 				logger.warn("Content from URL {} discarded because it lacks specific GTIN/model evidence for UPC {}",
 						url, product.getId());
 				continue;
@@ -944,20 +932,59 @@ public class ReviewGenerationPreprocessingService {
 		return accumulatedTokens;
 	}
 
-	private boolean hasSpecificProductEvidence(Product product, GoogleSearchResult result, String content,
-			String primaryModel, Set<String> alternateModels) {
+	private boolean hasExactProductEvidence(Product product, GoogleSearchResult result, FetchResponse fetchResponse,
+			String content, Set<String> exactEvidenceModels) {
+		String metadataEvidence = fetchResponse == null || fetchResponse.metadataAttributes() == null
+				? ""
+				: fetchResponse.metadataAttributes().stream()
+						.map(attribute -> safeString(attribute.value()))
+						.collect(Collectors.joining(" "));
 		String evidence = normalizeForTextMatching(String.join(" ", safeString(result == null ? null : result.title()),
-				safeString(result == null ? null : result.link()), firstContentZone(content)));
+				safeString(result == null ? null : result.link()), metadataEvidence, firstContentZone(content)));
 		String urlEvidence = normalizeForUrlMatching(result == null ? null : result.link());
 		String gtin = product == null ? null : product.gtin();
 		if (gtin != null && gtin.matches("\\d{8,14}")
 				&& (evidence.contains(normalizeForTextMatching(gtin)) || urlEvidence.contains(normalizeForUrlMatching(gtin)))) {
 			return true;
 		}
-		return orderedModels(primaryModel, alternateModels).stream()
+		if (fetchResponse != null && fetchResponse.extractedGtins() != null && gtin != null
+				&& fetchResponse.extractedGtins().stream().anyMatch(gtin::equals)) {
+			return true;
+		}
+		return exactEvidenceModels.stream()
 				.filter(model -> model != null && !model.isBlank())
 				.filter(model -> !model.equals(gtin))
-				.anyMatch(model -> modelMatchesZone(model, evidence) || urlEvidence.contains(normalizeForUrlMatching(model)));
+				.anyMatch(model -> modelMatchesZone(model, evidence) || hasExactUrlModelToken(model, urlEvidence));
+	}
+
+	private boolean hasExactUrlModelToken(String model, String normalizedUrl) {
+		String normalizedModel = normalizeForUrlMatching(model);
+		return normalizedModel.length() >= 4 && normalizedUrl != null && normalizedUrl.contains(normalizedModel);
+	}
+
+	private Set<String> exactEvidenceModels(Product product) {
+		if (product == null) {
+			return Set.of();
+		}
+		return ProductModelCandidateHelper.hardenedCandidates(product).stream()
+				.filter(candidate -> candidate != null && !candidate.isBlank())
+				.filter(this::isUsableExactEvidenceModel)
+				.collect(Collectors.toCollection(LinkedHashSet::new));
+	}
+
+	private boolean isUsableExactEvidenceModel(String candidate) {
+		if (candidate == null || candidate.isBlank()) {
+			return false;
+		}
+		String normalized = normalizeForTextMatching(candidate);
+		String compact = normalizeForUrlMatching(candidate);
+		if (normalized.isBlank() || compact.isBlank()) {
+			return false;
+		}
+		if (compact.matches("(?i)r\\d{3}a?")) {
+			return false;
+		}
+		return !Set.of("r290", "r600a", "inox", "inoxydable", "stainless", "acier inoxydable").contains(normalized);
 	}
 
 	private boolean requiresVerticalEvidence(String primaryModel, Set<String> alternateModels) {
@@ -1045,7 +1072,7 @@ public class ReviewGenerationPreprocessingService {
 			Map<String, CompletableFuture<FetchOutcome>> fetchFutures, Map<String, String> finalSourcesMap,
 			Map<String, Integer> finalTokensMap, Map<String, SourceClass> finalSourceClasses,
 			Map<String, String> rejectedUrls, int accumulatedTokens, Map<String, String> customHeaders,
-			ReviewGenerationStatus status)
+			Set<String> exactEvidenceModels, ReviewGenerationStatus status)
 			throws IOException, GoogleSearchException, InterruptedException, ExecutionException {
 		int fallbackSearches = Math.max(0, properties.getLowQualityFallbackMaxSearch());
 		if (fallbackSearches == 0) {
@@ -1075,8 +1102,8 @@ public class ReviewGenerationPreprocessingService {
 		if (fallbackResults.isEmpty()) {
 			return accumulatedTokens;
 		}
-		identifyOfficialProductUrl(product, fallbackResults).ifPresent(product::setOfficialUrl);
-		identifyOfficialSupportUrls(product, fallbackResults).forEach(supportUrl ->
+		identifyOfficialProductUrl(product, fallbackResults, exactEvidenceModels).ifPresent(product::setOfficialUrl);
+		identifyOfficialSupportUrls(product, fallbackResults, exactEvidenceModels).forEach(supportUrl ->
 				product.addOfficialSupportUrl(resolveOfficialUrlLanguage(supportUrl), supportUrl));
 		Set<String> knownUrls = new HashSet<>();
 		alreadySortedResults.stream().map(GoogleSearchResult::link).forEach(knownUrls::add);
@@ -1090,7 +1117,7 @@ public class ReviewGenerationPreprocessingService {
 		fetchFutures.putAll(fallbackFutures);
 		return collectFetchedSources(product, sortedFallbackResults, fetchFutures, finalSourcesMap, finalTokensMap,
 				finalSourceClasses, rejectedUrls, accumulatedTokens, brand, primaryModel, product.getAkaModels(), null,
-				status);
+				exactEvidenceModels, status);
 	}
 
 	private FetchQualityThreshold fetchThreshold(VerticalConfig verticalConfig) {
@@ -1147,7 +1174,7 @@ public class ReviewGenerationPreprocessingService {
 			Map<String, CompletableFuture<FetchOutcome>> fetchFutures, Map<String, String> finalSourcesMap,
 			Map<String, Integer> finalTokensMap, Map<String, String> rejectedUrls,
 			Map<String, SourceClass> finalSourceClasses, int accumulatedTokens, Map<String, String> customHeaders,
-			ReviewGenerationStatus status)
+			Set<String> exactEvidenceModels, ReviewGenerationStatus status)
 			throws IOException, GoogleSearchException, InterruptedException, ExecutionException {
 		int retryMaxSearch = Math.max(0, properties.getPartialRetryMaxSearch());
 		if (retryMaxSearch == 0) {
@@ -1177,8 +1204,8 @@ public class ReviewGenerationPreprocessingService {
 		if (retryResults.isEmpty()) {
 			return accumulatedTokens;
 		}
-		identifyOfficialProductUrl(product, retryResults).ifPresent(product::setOfficialUrl);
-		identifyOfficialSupportUrls(product, retryResults).forEach(supportUrl ->
+		identifyOfficialProductUrl(product, retryResults, exactEvidenceModels).ifPresent(product::setOfficialUrl);
+		identifyOfficialSupportUrls(product, retryResults, exactEvidenceModels).forEach(supportUrl ->
 				product.addOfficialSupportUrl(resolveOfficialUrlLanguage(supportUrl), supportUrl));
 		Set<String> knownUrls = new HashSet<>();
 		alreadySortedResults.stream().map(GoogleSearchResult::link).forEach(knownUrls::add);
@@ -1188,7 +1215,8 @@ public class ReviewGenerationPreprocessingService {
 		Map<String, CompletableFuture<FetchOutcome>> retryFutures = scheduleFetches(sortedRetryResults, customHeaders);
 		fetchFutures.putAll(retryFutures);
 		return collectFetchedSources(product, sortedRetryResults, fetchFutures, finalSourcesMap, finalTokensMap,
-				finalSourceClasses, rejectedUrls, accumulatedTokens, brand, primaryModel, alternateModels, null, status);
+				finalSourceClasses, rejectedUrls, accumulatedTokens, brand, primaryModel, alternateModels, null,
+				exactEvidenceModels, status);
 	}
 
 	private List<String> buildPartialRetryQueries(Product product, String brand, String primaryModel) {
@@ -1449,6 +1477,9 @@ public class ReviewGenerationPreprocessingService {
 		if (primaryModel != null && !primaryModel.isBlank()) {
 			models.add(primaryModel);
 		}
+		if (product != null) {
+			models.addAll(ProductModelCandidateHelper.hardenedCandidates(product));
+		}
 		if (product != null && product.getExternalIds() != null) {
 			if (product.getExternalIds().getMpn() != null) {
 				models.addAll(product.getExternalIds().getMpn());
@@ -1481,19 +1512,7 @@ public class ReviewGenerationPreprocessingService {
 	}
 
 	private List<String> extractModelCodeCandidates(String value) {
-		if (value == null || value.isBlank()) {
-			return List.of();
-		}
-		List<String> candidates = URL_MODEL_TOKEN_PATTERN.matcher(value).results()
-				.map(match -> match.group())
-				.filter(candidate -> candidate != null && !candidate.isBlank())
-				.toList();
-		List<String> adjacentCandidates = Pattern.compile("(?i)\\b[A-Z]{2,8}\\s+\\d{3,5}\\b").matcher(value).results()
-				.map(match -> match.group().trim())
-				.toList();
-		List<String> allCandidates = new ArrayList<>(candidates);
-		allCandidates.addAll(adjacentCandidates);
-		return allCandidates;
+		return ProductModelCandidateHelper.extractModelCodeCandidates(value);
 	}
 
 	private boolean isSearchableModelCandidate(Product product, String primaryModel, String candidate) {
@@ -1563,11 +1582,7 @@ public class ReviewGenerationPreprocessingService {
 	}
 
 	private boolean isConciseModelCode(String value) {
-		if (value == null) {
-			return false;
-		}
-		String trimmed = value.trim();
-		return trimmed.length() >= 4 && trimmed.length() <= 24 && trimmed.matches("(?=.*[A-Za-z])(?=.*\\d)[A-Za-z0-9/_\\-.]+");
+		return ProductModelCandidateHelper.isPersistableModelCandidate(value);
 	}
 
 	private boolean looksLikeStorageVariant(String value) {
@@ -1630,11 +1645,25 @@ public class ReviewGenerationPreprocessingService {
 		return properties.getOfficialDomainsByBrand().entrySet().stream()
 				.filter(entry -> normalizeForTextMatching(entry.getKey()).equals(normalizedBrand))
 				.flatMap(entry -> entry.getValue() == null ? java.util.stream.Stream.empty() : entry.getValue().stream())
-				.map(domain -> domain == null ? "" : domain.trim())
+				.map(this::sanitizeOfficialDomainFragment)
 				.filter(domain -> !domain.isBlank())
-				.map(domain -> domain.endsWith(".") ? domain.substring(0, domain.length() - 1) : domain)
 				.distinct()
 				.toList();
+	}
+
+	private String sanitizeOfficialDomainFragment(String domain) {
+		if (domain == null || domain.isBlank()) {
+			return "";
+		}
+		String sanitized = domain.trim()
+				.replaceFirst("(?i)^https?://", "")
+				.replaceFirst("/.*$", "")
+				.replace("*.", "")
+				.replace(".*", "");
+		while (sanitized.endsWith(".")) {
+			sanitized = sanitized.substring(0, sanitized.length() - 1);
+		}
+		return sanitized;
 	}
 
 	private String formatQuery(String brand, String model) {
@@ -1814,29 +1843,51 @@ public class ReviewGenerationPreprocessingService {
 		}
 	}
 
-	private Optional<String> identifyOfficialProductUrl(Product product, List<GoogleSearchResult> results) {
+	private Optional<String> identifyOfficialProductUrl(Product product, List<GoogleSearchResult> results,
+			Set<String> exactEvidenceModels) {
 		if (results == null || results.isEmpty()) {
 			return Optional.empty();
 		}
 		return results.stream()
 				.filter(result -> isOfficialUrl(product, result))
+				.filter(result -> hasExactSerpEvidence(product, result, exactEvidenceModels))
 				.filter(result -> !isOfficialSupportUrl(result))
 				.filter(result -> !isPdfUrl(result.link()))
 				.max(Comparator.comparingInt(result -> officialUrlScore(product, result))).map(GoogleSearchResult::link);
 	}
 
-	private List<String> identifyOfficialSupportUrls(Product product, List<GoogleSearchResult> results) {
+	private List<String> identifyOfficialSupportUrls(Product product, List<GoogleSearchResult> results,
+			Set<String> exactEvidenceModels) {
 		if (results == null || results.isEmpty()) {
 			return List.of();
 		}
 		return results.stream()
 				.filter(result -> isOfficialUrl(product, result))
+				.filter(result -> hasExactSerpEvidence(product, result, exactEvidenceModels))
 				.filter(this::isOfficialSupportUrl)
 				.sorted(Comparator.comparingInt((GoogleSearchResult result) -> officialUrlScore(product, result)).reversed())
 				.map(GoogleSearchResult::link)
 				.filter(link -> link != null && !link.isBlank())
 				.distinct()
 				.toList();
+	}
+
+	private boolean hasExactSerpEvidence(Product product, GoogleSearchResult result, Set<String> exactEvidenceModels) {
+		if (result == null) {
+			return false;
+		}
+		String textEvidence = normalizeForTextMatching(safeString(result.title()) + " " + safeString(result.link()));
+		String urlEvidence = normalizeForUrlMatching(result.link());
+		String gtin = product == null ? null : product.gtin();
+		if (gtin != null && gtin.matches("\\d{8,14}")
+				&& (textEvidence.contains(normalizeForTextMatching(gtin))
+						|| urlEvidence.contains(normalizeForUrlMatching(gtin)))) {
+			return true;
+		}
+		Set<String> models = exactEvidenceModels == null ? Set.of() : exactEvidenceModels;
+		return models.stream()
+				.filter(model -> model != null && !model.isBlank())
+				.anyMatch(model -> modelMatchesZone(model, textEvidence) || hasExactUrlModelToken(model, urlEvidence));
 	}
 
 	private boolean isOfficialUrl(Product product, GoogleSearchResult result) {
@@ -1928,18 +1979,16 @@ public class ReviewGenerationPreprocessingService {
 		if (isClearlyNonProductDocument(extractedResource.url(), extractedResource.label())) {
 			return false;
 		}
-		if (isProductRelevantResource(product, extractedResource.url(), extractedResource.label(), true)) {
-			return true;
-		}
-		String documentEvidence = normalizeForTextMatching(safeString(extractedResource.url()) + " "
-				+ safeString(extractedResource.label()));
-		return documentEvidence.contains("pdf") || containsAny(documentEvidence, "doc", "document", "download");
+		return isProductRelevantResource(product, extractedResource.url(), extractedResource.label(), true);
 	}
 
 	private boolean isClearlyNonProductDocument(String url, String label) {
 		String evidence = normalizeForTextMatching(safeString(url) + " " + safeString(label));
 		return containsAny(evidence, "privacy", "confidentialite", "cookie", "legal", "terms", "conditions",
-				"digital services act", "dsa", "warranty registration", "catalogue general", "general catalogue");
+				"digital services act", "dsa", "warranty registration", "garantie", "extension garantie",
+				"delivery", "livraison", "returns", "retour", "reviews policy", "avis verifies", "buyback",
+				"reprise", "marketing", "brochure", "catalogue", "catalog", "catalogue general",
+				"general catalogue");
 	}
 
 	private boolean fetchOfficialEvidence(Product product, List<GoogleSearchResult> results, Map<String, String> customHeaders) {
@@ -2036,7 +2085,8 @@ public class ReviewGenerationPreprocessingService {
 
 		Optional<ModelEvidence> bestEvidence = scores.entrySet().stream()
 				.map(entry -> new ModelEvidence(entry.getKey(), entry.getValue(),
-						reasons.getOrDefault(entry.getKey(), List.of())))
+						reasons.getOrDefault(entry.getKey(), List.of()),
+						sourceFromOfficialReasons(reasons.getOrDefault(entry.getKey(), List.of()))))
 				.filter(evidence -> evidence.score() >= OFFICIAL_MODEL_PROMOTION_THRESHOLD)
 				.filter(evidence -> hasAuthoritativeOfficialModelEvidence(evidence.reasons()))
 				.max(Comparator.comparingInt(ModelEvidence::score)
@@ -2044,7 +2094,7 @@ public class ReviewGenerationPreprocessingService {
 		if (bestEvidence.isEmpty()) {
 			return false;
 		}
-		boolean promoted = product.promoteModel(bestEvidence.get().candidate());
+		boolean promoted = product.promoteModel(bestEvidence.get().candidate(), bestEvidence.get().source());
 		if (promoted) {
 			logger.info("Promoted official model for UPC {}: model={}, score={}, reasons={}", product.getId(),
 					bestEvidence.get().candidate(), bestEvidence.get().score(), bestEvidence.get().reasons());
@@ -2074,7 +2124,7 @@ public class ReviewGenerationPreprocessingService {
 
 	private void addModelEvidence(Map<String, Integer> scores, Map<String, List<String>> reasons, String rawCandidate,
 			int score, String reason) {
-		String candidate = ProductModelCandidateHelper.cleanForStorage(rawCandidate);
+		String candidate = ProductModelCandidateHelper.cleanForStorage(rawCandidate, sourceFromOfficialReason(reason));
 		if (candidate == null) {
 			return;
 		}
@@ -2092,6 +2142,29 @@ public class ReviewGenerationPreprocessingService {
 		}
 		return reasons.stream().anyMatch(reason -> reason != null
 				&& (reason.startsWith("metadata:") || "official-text".equals(reason)));
+	}
+
+	private ModelCandidateSource sourceFromOfficialReasons(List<String> reasons) {
+		if (reasons == null || reasons.isEmpty()) {
+			return ModelCandidateSource.OFFICIAL_URL_CONFIRMED;
+		}
+		if (reasons.stream().anyMatch(reason -> reason != null && reason.startsWith("metadata:"))) {
+			return ModelCandidateSource.OFFICIAL_METADATA;
+		}
+		if (reasons.contains("official-text")) {
+			return ModelCandidateSource.OFFICIAL_TEXT;
+		}
+		return ModelCandidateSource.OFFICIAL_URL_CONFIRMED;
+	}
+
+	private ModelCandidateSource sourceFromOfficialReason(String reason) {
+		if (reason != null && reason.startsWith("metadata:")) {
+			return ModelCandidateSource.OFFICIAL_METADATA;
+		}
+		if ("official-text".equals(reason)) {
+			return ModelCandidateSource.OFFICIAL_TEXT;
+		}
+		return ModelCandidateSource.OFFICIAL_URL_CONFIRMED;
 	}
 
 	private boolean containsModelCandidate(String haystack, String candidate) {
@@ -2112,6 +2185,9 @@ public class ReviewGenerationPreprocessingService {
 
 	private boolean isProductRelevantResource(Product product, String url, String label, boolean officialContext) {
 		if (product == null || url == null || url.isBlank()) {
+			return false;
+		}
+		if (isClearlyNonProductDocument(url, label) || !looksLikeProductDocument(url, label)) {
 			return false;
 		}
 		String urlHaystack = normalizeForUrlMatching(url);
@@ -2135,7 +2211,7 @@ public class ReviewGenerationPreprocessingService {
 		if (akaMatchesUrl) {
 			return true;
 		}
-		if (!officialContext || !looksLikeProductDocument(url, label)) {
+		if (!officialContext) {
 			return false;
 		}
 		if (gtin != null && gtin.matches("\\d{8,14}") && labelHaystack.contains(normalizeForUrlMatching(gtin))) {
@@ -2152,7 +2228,8 @@ public class ReviewGenerationPreprocessingService {
 	private boolean looksLikeProductDocument(String url, String label) {
 		String text = normalizeForTextMatching(safeString(url) + " " + safeString(label));
 		return containsAny(text, "manual", "notice", "mode d emploi", "user manual", "fiche produit", "datasheet",
-				"product fiche", "energy label", "classe energetique", "specification", "spec sheet", "leaflet");
+				"product fiche", "energy label", "etiquette energie", "classe energetique", "specification",
+				"spec sheet", "leaflet", "product sheet", "fiche technique", "fiche energetique");
 	}
 
 	private ResourceType toProductResourceType(org.open4goods.services.urlfetching.dto.ResourceType resourceType) {
@@ -2259,6 +2336,7 @@ public class ReviewGenerationPreprocessingService {
 		return configuredDomains.entrySet().stream()
 				.filter(entry -> normalizeForTextMatching(entry.getKey()).equals(normalizedBrand))
 				.flatMap(entry -> entry.getValue() == null ? java.util.stream.Stream.empty() : entry.getValue().stream())
+				.map(this::sanitizeOfficialDomainFragment)
 				.map(this::normalizeForUrlMatching)
 				.anyMatch(domain -> !domain.isBlank() && normalizedHost.contains(domain));
 	}
@@ -2274,24 +2352,12 @@ public class ReviewGenerationPreprocessingService {
 	}
 
 	private String normalizeForUrlMatching(String value) {
-		if (value == null) {
-			return "";
-		}
-		return java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFD)
-				.replaceAll("\\p{M}", "")
-				.toLowerCase(Locale.ROOT)
-				.replaceAll("[^a-z0-9]", "");
+		return ProductModelCandidateHelper.normalizeForUrlMatching(value);
 	}
 
 	private String normalizeForTextMatching(String value) {
-		if (value == null) {
-			return "";
-		}
-		return java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFD)
-				.replaceAll("\\p{M}", "")
-				.toLowerCase(Locale.ROOT)
-				.replaceAll("[^a-z0-9]+", " ")
-				.trim();
+		String normalized = ProductModelCandidateHelper.normalizePhrase(value);
+		return normalized == null ? "" : normalized;
 	}
 
 	private boolean isStrongModelToken(String token) {
