@@ -29,6 +29,22 @@ const applyBrandCasing = (
   return title.replace(regex, normalizedBrand)
 }
 
+const containsIdentityToken = (title: string, identityTokens: string[]) => {
+  const normalizedTitle = title.toLocaleLowerCase()
+
+  return identityTokens.some(token =>
+    normalizedTitle.includes(token.toLocaleLowerCase())
+  )
+}
+
+const isWeakProductName = (title: string, identityTokens: string[]) => {
+  if (!identityTokens.length || containsIdentityToken(title, identityTokens)) {
+    return false
+  }
+
+  return title.split(/\s+/).filter(Boolean).length <= 3
+}
+
 export const resolveProductTitle = (
   product: ProductDto,
   locale?: string,
@@ -48,44 +64,97 @@ export const resolveProductTitle = (
   } = options
 
   const brand = normalizeString(product.identity?.brand)
+  const model = normalizeString(product.identity?.model)
+  const identityBestName = normalizeString(product.identity?.bestName)
+  const baseBestName = normalizeString(product.base?.bestName)
   const resolvedBrand = uppercaseBrand ? brand.toLocaleUpperCase(locale) : brand
+  const identityTokens = [brand, model].filter(token => token.length > 1)
 
   const finalizeTitle = (title: string): string =>
     uppercaseBrand ? applyBrandCasing(title, brand, locale) : title
 
+  const useTitle = (title: string, allowWeakName = true): string => {
+    if (!title) {
+      return ''
+    }
+
+    if (!allowWeakName && isWeakProductName(title, identityTokens)) {
+      return ''
+    }
+
+    return finalizeTitle(title)
+  }
+
+  const firstTitle = (
+    candidates: Array<string | null | undefined>,
+    allowWeakName = true
+  ): string => {
+    for (const candidate of candidates) {
+      const title = useTitle(normalizeString(candidate), allowWeakName)
+      if (title) {
+        return title
+      }
+    }
+
+    return ''
+  }
+
   const aiShortTitle = normalizeString(product.aiReview?.review?.shortTitle)
   const aiMediumTitle = normalizeString(product.aiReview?.review?.mediumTitle)
 
-  // 1. AI Titles (highest priority)
-  if (preferLongName || preferH1Title) {
-    if (aiMediumTitle) return finalizeTitle(aiMediumTitle)
-  }
-
-  if (preferCardTitle || preferShortName || preferPrettyName) {
-    if (aiShortTitle) return finalizeTitle(aiShortTitle)
-  }
-
-  // 2. New Fields Priorities
+  // Product-owned generated names are more stable than AI review titles, which
+  // can collapse to the category label for some verticals.
   if (preferCardTitle) {
-    const cardTitle = normalizeString(product.names?.cardTitle)
-    if (cardTitle) return finalizeTitle(cardTitle)
+    const title = firstTitle(
+      [
+        product.names?.cardTitle,
+        product.names?.shortName,
+        product.names?.prettyName,
+      ],
+      false
+    )
+    if (title) return title
   }
 
   if (preferShortName) {
-    const shortName = normalizeString(product.names?.shortName)
-    if (shortName) return finalizeTitle(shortName)
+    const title = firstTitle(
+      [
+        product.names?.cardTitle,
+        product.names?.shortName,
+        product.names?.prettyName,
+      ],
+      false
+    )
+    if (title) return title
   }
 
-  if (preferLongName && !preferH1Title) {
-    const longName = normalizeString(product.names?.longName)
-    if (longName) return finalizeTitle(longName)
+  if (preferLongName || preferH1Title) {
+    const title = firstTitle(
+      preferH1Title
+        ? [product.names?.h1Title, product.names?.longName]
+        : [product.names?.longName, product.names?.h1Title],
+      false
+    )
+    if (title) return title
   }
 
-  // 2.5 Use longest offer name if no category associated
+  if (preferPrettyName) {
+    const title = firstTitle(
+      [
+        product.names?.cardTitle,
+        product.names?.shortName,
+        product.names?.prettyName,
+      ],
+      false
+    )
+    if (title) return title
+  }
+
+  // Use longest offer name if no category is associated.
   const isCategoryAssociated = Boolean(product.base?.vertical)
   if (!isCategoryAssociated && (preferCardTitle || preferShortName)) {
     const longestOfferName = normalizeString(product.names?.longestOfferName)
-    if (longestOfferName) return finalizeTitle(longestOfferName)
+    if (longestOfferName) return useTitle(longestOfferName)
 
     const offerNames = product.names?.offerNames
     if (offerNames && offerNames.size > 0) {
@@ -95,53 +164,30 @@ export const resolveProductTitle = (
           longest = name
         }
       }
-      if (longest) return finalizeTitle(longest)
+      if (longest) return useTitle(longest)
     }
   }
 
-  // 2. H1 Title / Long Name equivalent
-  if (preferH1Title) {
-    const h1Title = normalizeString(product.names?.h1Title)
-    if (h1Title) return finalizeTitle(h1Title)
+  // Identity names beat AI review titles because they are derived from product
+  // identifiers rather than prose generation.
+  if (identityBestName) return useTitle(identityBestName)
+  if (baseBestName) return useTitle(baseBestName)
 
-    const longName = normalizeString(product.names?.longName)
-    if (longName) return finalizeTitle(longName)
-  }
-
-  // 3. Pretty Name / Short Name equivalent (Default fallback for many cases)
-  if (preferPrettyName) {
-    // Prefer shortName if available
-    const shortName = normalizeString(product.names?.shortName)
-    if (shortName) return finalizeTitle(shortName)
-
-    const prettyName = normalizeString(product.names?.prettyName)
-    if (prettyName) return finalizeTitle(prettyName)
-  }
-
-  // 4. AI Title (fallback)
-  if (aiMediumTitle) return finalizeTitle(aiMediumTitle)
-
-  // 5. Best Name (Identity -> Base)
-  const identityBestName = normalizeString(product.identity?.bestName)
-  if (identityBestName) return finalizeTitle(identityBestName)
-
-  const baseBestName = normalizeString(product.base?.bestName)
-  if (baseBestName) return finalizeTitle(baseBestName)
-
-  // 6. Brand - Model (Client-side fallback, kept for products without generated titles)
-  const model = normalizeString(product.identity?.model)
   if (resolvedBrand && model) {
-    return finalizeTitle(`${resolvedBrand} - ${model}`)
+    return useTitle(`${resolvedBrand} - ${model}`)
   }
-  if (model) return finalizeTitle(model)
+  if (model) return useTitle(model)
 
-  // 7. Best Offer Name
+  const aiTitle = preferLongName || preferH1Title ? aiMediumTitle : aiShortTitle
+  if (aiTitle) return useTitle(aiTitle)
+  if (aiMediumTitle) return useTitle(aiMediumTitle)
+  if (aiShortTitle) return useTitle(aiShortTitle)
+
   const bestOfferName = normalizeString(product.offers?.bestPrice?.offerName)
-  if (bestOfferName) return finalizeTitle(bestOfferName)
+  if (bestOfferName) return useTitle(bestOfferName)
 
-  // 8. Last Resorts
   const slug = normalizeString(product.slug)
-  if (slug && locale) return finalizeTitle(humanizeSlug(slug, locale))
+  if (slug && locale) return useTitle(humanizeSlug(slug, locale))
 
   const gtin = normalizeString(product.gtin?.toString())
   if (gtin) {
@@ -149,7 +195,7 @@ export const resolveProductTitle = (
       ? gtinFallback
       : `GTIN: ${gtin}`
 
-    return finalizeTitle(fallbackValue)
+    return useTitle(fallbackValue)
   }
 
   return ''

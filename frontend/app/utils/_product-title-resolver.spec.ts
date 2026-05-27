@@ -85,4 +85,53 @@ describe('resolveProductTitle', () => {
 
     expect(result).toBe('Samsung GU32T5379CD')
   })
+
+  it('uses product-specific card titles for short names when AI and generated short names are category-like', () => {
+    const product: ProductDto = {
+      base: {
+        vertical: 'televiseurs',
+      },
+      names: {
+        cardTitle: 'Samsung GU32T5379CD',
+        shortName: 'Téléviseurs',
+        prettyName: 'Téléviseurs',
+      },
+      identity: {
+        brand: 'Samsung',
+        model: 'GU32T5379CD',
+      },
+      aiReview: {
+        review: {
+          shortTitle: 'Téléviseurs',
+        },
+      },
+    }
+
+    const result = resolveProductShortName(product, 'fr-FR')
+
+    expect(result).toBe('Samsung GU32T5379CD')
+  })
+
+  it('falls back to identity before generic AI review titles', () => {
+    const product: ProductDto = {
+      base: {
+        vertical: 'fours',
+      },
+      identity: {
+        brand: 'Brand',
+        model: 'Oven 42',
+        bestName: 'Brand Oven 42',
+      },
+      aiReview: {
+        review: {
+          shortTitle: 'Fours',
+          mediumTitle: 'Fours encastrables',
+        },
+      },
+    }
+
+    const result = resolveProductShortName(product, 'fr-FR')
+
+    expect(result).toBe('Brand Oven 42')
+  })
 })
