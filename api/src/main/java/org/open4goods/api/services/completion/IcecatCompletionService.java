@@ -32,7 +32,6 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
@@ -46,7 +45,7 @@ import com.google.common.collect.Sets;
 public class IcecatCompletionService extends AbstractCompletionService {
 
 	
-	protected static final Logger logger = LoggerFactory.getLogger(IcecatCompletionService.class);
+
 
 	/**
 	 * Icecat completion will be triggered only if older than this const

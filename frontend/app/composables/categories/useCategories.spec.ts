@@ -59,6 +59,13 @@ describe('useCategories composable', () => {
           title: 'Eco friendly',
         },
       ],
+      subCategories: [
+        {
+          id: 'sub-category-1',
+          slug: 'under-sink-dishwasher',
+          h1Title: 'Under-sink dishwashers',
+        },
+      ],
     }
 
     fetchMock.mockImplementation((request, init) => {
@@ -84,6 +91,9 @@ describe('useCategories composable', () => {
     expect(activeCategoryId.value).toBe('category-1')
     expect(detail).toEqual(detailResponse)
     expect(currentCategory.value?.subsets).toEqual(detailResponse.subsets)
+    expect(currentCategory.value?.subCategories).toEqual(
+      detailResponse.subCategories
+    )
   })
 
   it('loads disabled categories when the slug is present in the list', async () => {

@@ -48,7 +48,6 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import dev.brachtendorf.jimagehash.hash.Hash;
 import dev.brachtendorf.jimagehash.hashAlgorithms.HashingAlgorithm;
@@ -102,7 +101,7 @@ public class ResourceCompletionService extends AbstractCompletionService {
      */
     private static final int PERCEPTIVE_HASH_SIZE = 32;
 
-    private static final Logger logger = LoggerFactory.getLogger(ResourceCompletionService.class);
+
 
     private final ApiProperties apiProperties;
     private final ImageMagickService imageService;

@@ -290,6 +290,12 @@ public class VerticalConfig {
 	private List<VerticalSubset> subsets = new ArrayList<VerticalSubset>();
 
 	/**
+	 * Search-intent landing pages derived from this vertical.
+	 */
+	@JsonMerge
+	private List<VerticalSubCategory> subCategories = new ArrayList<>();
+
+	/**
 	 * The nudge tool configuration displayed to guide user selection.
 	 */
 	@JsonMerge
@@ -1054,6 +1060,24 @@ public class VerticalConfig {
 
 	public void setSubsets(List<VerticalSubset> subsets) {
 		this.subsets = subsets;
+	}
+
+	/**
+	 * Returns the search-intent landing pages derived from this vertical.
+	 *
+	 * @return configured sub-categories
+	 */
+	public List<VerticalSubCategory> getSubCategories() {
+		return subCategories;
+	}
+
+	/**
+	 * Defines the search-intent landing pages derived from this vertical.
+	 *
+	 * @param subCategories configured sub-categories
+	 */
+	public void setSubCategories(List<VerticalSubCategory> subCategories) {
+		this.subCategories = subCategories;
 	}
 
 	public NudgeToolConfig getNudgeToolConfig() {

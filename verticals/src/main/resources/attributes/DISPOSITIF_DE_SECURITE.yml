@@ -1,9 +1,9 @@
 # ============================================================================
 # DISPOSITIF_DE_SECURITE — Security features (Dispositif de sécurité)
-# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 001)
+# Maintained: 2026-05-27 by attributes-maintenance prompt (batch 001)
 # Used in verticals: oven
 # Type: TEXT
-# Coverage snapshot: insufficient data from prod API
+# Coverage snapshot: prod legacy endpoint returned no matching canonical-key stats
 # Taxonomy coverage: icecat ✅  eprel ❌  etim ❌  wikidata ❌
 # Purpose: Safety mechanisms present on the appliance (oven); e.g. child lock,
 #          door cooling, residual heat indicator — key for buyer safety filtering.

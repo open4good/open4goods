@@ -1,10 +1,10 @@
 # ============================================================================
 # DISPLAY_TECHNOLOGY — Display technology (Technologie d'affichage)
-# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 001)
+# Maintained: 2026-05-27 by attributes-maintenance prompt (batch 001)
 # Used in verticals: tv
 # Type: TEXT
-# Coverage snapshot: insufficient data from prod API
-# Taxonomy coverage: icecat ✅  eprel ✅  etim ❌  wikidata ❌
+# Coverage snapshot: prod legacy endpoint returned no matching canonical-key stats
+# Taxonomy coverage: icecat ✅  eprel ✅  etim ❌  wikidata ✅
 # Purpose: Panel/display technology (OLED, QLED, LED, etc.); primary filter
 #          for television picture quality tier and associated energy profile.
 # ============================================================================
@@ -25,6 +25,9 @@ referentials:
     - featureName: "panelTechnology"
       productGroup: "televisions"
       name: "Panel technology"
+  wikidata:
+    - pid: "P5307" # https://www.wikidata.org/wiki/Property:P5307
+      name: "display technology"
 
 synonyms:
   all:

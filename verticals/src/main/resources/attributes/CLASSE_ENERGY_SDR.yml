@@ -1,9 +1,9 @@
 # ============================================================================
 # CLASSE_ENERGY_SDR — Energy class SDR (Classe énergétique SDR)
-# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 000)
+# Maintained: 2026-05-27 by attributes-maintenance prompt (batch 000)
 # Used in verticals: tv
 # Type: TEXT
-# Coverage snapshot: insufficient data from prod API
+# Coverage snapshot: prod legacy endpoint returned no matching canonical-key stats
 # Taxonomy coverage: icecat ✅  eprel ✅  etim ❌  wikidata ❌
 # Purpose: EU energy label class for televisions in SDR mode (EU 2019/2021);
 #          SDR is the primary viewing mode and the main energy-efficiency signal.

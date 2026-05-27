@@ -1,10 +1,10 @@
 # ============================================================================
 # COLOR — Color (Couleur)
-# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 001)
-# Used in verticals: dishwasher, oven, _default, smartphones
+# Maintained: 2026-05-27 by attributes-maintenance prompt (batch 001)
+# Used in verticals: _default, dishwasher, oven, smartphones
 # Type: TEXT
-# Coverage snapshot: insufficient data from prod API
-# Taxonomy coverage: icecat ❌  eprel ❌  etim ❌  wikidata ❌
+# Coverage snapshot: prod legacy endpoint returned no matching canonical-key stats
+# Taxonomy coverage: icecat ❌  eprel ❌  etim ❌  wikidata ✅
 # Purpose: Normalized product colour; maps merchant-specific colour labels
 #          (multilingual) to a canonical French colour value for filtering.
 # Note: Icecat featureId 9789 (x.v.Color) rejected — HDMI colour-space flag.
@@ -18,6 +18,11 @@ name:
   fr: "Couleur"
 filteringType: "TEXT"
 asScore: false
+
+referentials:
+  wikidata:
+    - pid: "P462" # https://www.wikidata.org/wiki/Property:P462
+      name: "color"
 
 synonyms:
   all:

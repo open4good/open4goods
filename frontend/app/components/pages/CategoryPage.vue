@@ -2,11 +2,11 @@
   <div class="category-page">
     <CategoryHero
       v-if="category"
-      :title="category.verticalHomeTitle ?? siteName"
-      :description="category.verticalHomeDescription"
+      :title="pageTitle"
+      :description="pageDescription"
       :image="heroImage"
-      :breadcrumbs="category.breadCrumb ?? []"
-      :eyebrow="category.verticalMetaTitle"
+      :breadcrumbs="pageBreadcrumbs"
+      :eyebrow="pageEyebrow"
       :show-image="isDesktop"
     />
 
@@ -416,6 +416,7 @@ import {
 import { mergeFilterRequests } from '~/utils/_merge-filter-requests'
 import {
   buildFilterRequestFromSubsets,
+  buildFilterRequestFromCriteria,
   convertSubsetCriteriaToFilters,
   getRemainingSubsetFilters,
   mergeFiltersWithoutDuplicates,
@@ -520,11 +521,15 @@ const isDesktop = computed(() =>
 )
 const filtersDrawer = ref(false)
 
-const props = defineProps<{ slug: string }>()
+const props = defineProps<{ slug: string; subCategorySlug?: string | null }>()
 const slug = props.slug
+const subCategorySlug = props.subCategorySlug ?? null
 const slugPattern = /^[a-z-]+$/
 
-if (!slugPattern.test(slug)) {
+if (
+  !slugPattern.test(slug) ||
+  (subCategorySlug && !slugPattern.test(subCategorySlug))
+) {
   throw createError({ statusCode: 404, statusMessage: 'Page not found' })
 }
 
@@ -581,6 +586,25 @@ const category = computed<VerticalConfigFullDto | null>(() => {
   return fallback ? (toRaw(fallback) as VerticalConfigFullDto) : null
 })
 const errorMessage = computed(() => categoriesError.value)
+const activeSubCategory = computed(() => {
+  if (!subCategorySlug) {
+    return null
+  }
+
+  return (
+    category.value?.subCategories?.find(
+      subCategory => subCategory.slug === subCategorySlug
+    ) ?? null
+  )
+})
+
+if (subCategorySlug && !activeSubCategory.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Sub-category not found',
+  })
+}
+
 const hasFastFilters = computed(
   () => (category.value?.subsets?.length ?? 0) > 0
 )
@@ -591,6 +615,7 @@ const heroImage = computed(() => {
   }
 
   return (
+    activeSubCategory.value?.image ??
     category.value.imageMedium ??
     category.value.imageSmall ??
     category.value.imageLarge ??
@@ -599,13 +624,52 @@ const heroImage = computed(() => {
 })
 
 const siteName = computed(() => String(t('siteIdentity.siteName')))
+const pageTitle = computed(
+  () =>
+    activeSubCategory.value?.h1Title ??
+    category.value?.verticalHomeTitle ??
+    siteName.value
+)
+const pageDescription = computed(
+  () =>
+    activeSubCategory.value?.description ??
+    category.value?.verticalHomeDescription
+)
+const pageEyebrow = computed(
+  () => category.value?.verticalMetaTitle ?? category.value?.verticalHomeTitle
+)
+const pageBreadcrumbs = computed(() => {
+  const breadcrumbs = [...(category.value?.breadCrumb ?? [])]
+
+  if (activeSubCategory.value) {
+    breadcrumbs.push({
+      title: activeSubCategory.value.h1Title ?? activeSubCategory.value.slug,
+      link: route.path,
+    })
+  }
+
+  return breadcrumbs
+})
 const categoryDisplayName = computed(
   () =>
+    activeSubCategory.value?.h1Title ??
     category.value?.verticalHomeTitle ??
     category.value?.verticalMetaTitle ??
     category.value?.verticalHomeDescription ??
     siteName.value
 )
+const subCategoryBaseFilters = computed<FilterRequestDto | undefined>(() => {
+  const activatedFilters = activeSubCategory.value?.activatedFilters ?? []
+
+  if (!activatedFilters.length) {
+    return undefined
+  }
+
+  const filterRequest = buildFilterRequestFromCriteria(activatedFilters)
+  return filterRequest.filters?.length || filterRequest.filterGroups?.length
+    ? filterRequest
+    : undefined
+})
 const shouldRestrictCategoryProducts = computed(
   () => category.value?.enabled === false && !isLoggedIn.value
 )
@@ -614,12 +678,14 @@ const canonicalUrl = computed(() =>
 )
 const seoTitle = computed(
   () =>
+    activeSubCategory.value?.h1Title ??
     category.value?.verticalMetaTitle ??
     category.value?.verticalHomeTitle ??
     siteName.value
 )
 const seoDescription = computed(
   () =>
+    activeSubCategory.value?.description ??
     category.value?.verticalMetaDescription ??
     category.value?.verticalHomeDescription ??
     ''
@@ -628,10 +694,16 @@ const robotsContent = computed(() =>
   shouldRestrictCategoryProducts.value ? 'noindex, nofollow' : undefined
 )
 const ogTitle = computed(
-  () => category.value?.verticalMetaOpenGraphTitle ?? seoTitle.value
+  () =>
+    activeSubCategory.value?.h1Title ??
+    category.value?.verticalMetaOpenGraphTitle ??
+    seoTitle.value
 )
 const ogDescription = computed(
-  () => category.value?.verticalMetaOpenGraphDescription ?? seoDescription.value
+  () =>
+    activeSubCategory.value?.description ??
+    category.value?.verticalMetaOpenGraphDescription ??
+    seoDescription.value
 )
 const ogImage = computed(() => {
   if (!heroImage.value) {
@@ -656,7 +728,7 @@ useSeoMeta({
   ogImage: () => ogImage.value,
   ogSiteName: () => siteName.value,
   ogLocale: () => ogLocale.value,
-  ogImageAlt: () => category.value?.verticalHomeTitle ?? siteName.value,
+  ogImageAlt: () => pageTitle.value,
 })
 
 useHead(() => ({
@@ -676,11 +748,11 @@ useHead(() => ({
 }))
 
 const breadcrumbJsonLd = computed(() => {
-  if (!category.value?.breadCrumb?.length) {
+  if (!pageBreadcrumbs.value.length) {
     return null
   }
 
-  const elements = category.value.breadCrumb.map((item, index) => {
+  const elements = pageBreadcrumbs.value.map((item, index) => {
     const href = item.link
       ? new URL(item.link, requestURL.origin).toString()
       : canonicalUrl.value
@@ -740,7 +812,7 @@ useHead(() => ({
 const verticalId = computed(() => category.value?.id ?? null)
 
 const { data: initialProductsData } = await useAsyncData(
-  `category-products-${slug}`,
+  `category-products-${slug}-${subCategorySlug ?? 'base'}`,
   async () => {
     if (!verticalId.value) {
       return null
@@ -753,6 +825,7 @@ const { data: initialProductsData } = await useAsyncData(
         verticalId: verticalId.value,
         pageNumber: 0,
         pageSize: CATEGORY_PAGE_SIZES[CATEGORY_DEFAULT_VIEW_MODE],
+        filters: subCategoryBaseFilters.value,
       },
     })
   },
@@ -811,7 +884,7 @@ const sortOptions = computed(() =>
 )
 
 const FILTERS_VISIBILITY_STORAGE_KEY = 'category-page-filters-collapsed'
-const DEFAULT_FILTERS_COLLAPSED_STATE = true
+const DEFAULT_FILTERS_COLLAPSED_STATE = false
 
 const filtersVisibilityCookie = useCookie<string | null>(
   FILTERS_VISIBILITY_STORAGE_KEY,
@@ -1319,7 +1392,10 @@ const hasActiveFilters = computed(() => {
 })
 
 const combinedFilters = computed<FilterRequestDto | undefined>(() =>
-  mergeFilterRequests(subsetFilters.value, manualFilters.value)
+  mergeFilterRequests(
+    subCategoryBaseFilters.value,
+    mergeFilterRequests(subsetFilters.value, manualFilters.value)
+  )
 )
 
 const pageSize = computed(() => CATEGORY_PAGE_SIZES[viewMode.value])

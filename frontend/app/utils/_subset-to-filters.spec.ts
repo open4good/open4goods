@@ -3,6 +3,7 @@ import type { Filter, VerticalSubsetDto } from '~~/shared/api-client'
 
 import {
   convertSubsetCriteriaToFilters,
+  buildFilterRequestFromCriteria,
   buildFilterRequestFromSubsets,
   getRemainingSubsetFilters,
   mergeFiltersWithoutDuplicates,
@@ -248,6 +249,29 @@ describe('_subset-to-filters helpers', () => {
             },
           ],
         },
+      ],
+    })
+  })
+
+  it('builds immutable sub-category filters with AND semantics', () => {
+    const request = buildFilterRequestFromCriteria([
+      { field: 'price.min', operator: 'LOWER_THAN', value: '800' },
+      { field: 'price.min', operator: 'GREATER_THAN', value: '300' },
+      {
+        field: 'attributes.indexed.INSTALLATION_TYPE.value',
+        operator: 'EQUALS',
+        value: 'ENCASTRABLE',
+      },
+    ])
+
+    expect(request).toEqual({
+      filters: [
+        {
+          field: 'attributes.indexed.INSTALLATION_TYPE.value',
+          operator: 'term',
+          terms: ['ENCASTRABLE'],
+        },
+        { field: 'price.min', operator: 'range', min: 300, max: 800 },
       ],
     })
   })

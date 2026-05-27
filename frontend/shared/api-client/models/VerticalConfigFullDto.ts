@@ -41,6 +41,13 @@ import {
   VerticalSubsetDtoToJSON,
   VerticalSubsetDtoToJSONTyped,
 } from './VerticalSubsetDto'
+import type { VerticalSubCategoryDto } from './VerticalSubCategoryDto'
+import {
+  VerticalSubCategoryDtoFromJSON,
+  VerticalSubCategoryDtoFromJSONTyped,
+  VerticalSubCategoryDtoToJSON,
+  VerticalSubCategoryDtoToJSONTyped,
+} from './VerticalSubCategoryDto'
 import type { NudgeToolConfigDto } from './NudgeToolConfigDto'
 import {
   NudgeToolConfigDtoFromJSON,
@@ -360,6 +367,12 @@ export interface VerticalConfigFullDto {
    */
   impactScoreConfig?: ImpactScoreConfigDto
   /**
+   * Search-intent landing pages configured under this vertical.
+   * @type {Array<VerticalSubCategoryDto>}
+   * @memberof VerticalConfigFullDto
+   */
+  subCategories?: Array<VerticalSubCategoryDto>
+  /**
    * Custom subsets defined for this vertical with localised labels.
    * @type {Array<VerticalSubsetDto>}
    * @memberof VerticalConfigFullDto
@@ -550,6 +563,12 @@ export function VerticalConfigFullDtoFromJSONTyped(
       json['impactScoreConfig'] == null
         ? undefined
         : ImpactScoreConfigDtoFromJSON(json['impactScoreConfig']),
+    subCategories:
+      json['subCategories'] == null
+        ? undefined
+        : (json['subCategories'] as Array<any>).map(
+            VerticalSubCategoryDtoFromJSON
+          ),
     subsets:
       json['subsets'] == null
         ? undefined
@@ -679,6 +698,12 @@ export function VerticalConfigFullDtoToJSONTyped(
         ? undefined
         : Array.from(value['aggregatedScores'] as Set<any>),
     impactScoreConfig: ImpactScoreConfigDtoToJSON(value['impactScoreConfig']),
+    subCategories:
+      value['subCategories'] == null
+        ? undefined
+        : (value['subCategories'] as Array<any>).map(
+            VerticalSubCategoryDtoToJSON
+          ),
     subsets:
       value['subsets'] == null
         ? undefined

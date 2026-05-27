@@ -13,6 +13,9 @@ import { matchProductRouteFromSegments } from '~~/shared/utils/_product-route'
 const XwikiFullPageRenderer = defineAsyncComponent(
   () => import('~/components/cms/XwikiFullPageRenderer.vue')
 )
+const CategoryPage = defineAsyncComponent(
+  () => import('~/components/pages/CategoryPage.vue')
+)
 
 const normaliseSlug = (value: string | null | undefined) =>
   value
@@ -114,12 +117,17 @@ try {
   })
 }
 
+const matchedSubCategory =
+  categoryDetail.subCategories?.find(
+    subCategory => normaliseSlug(subCategory.slug) === normalisedSlug
+  ) ?? null
+
 const matchedPage =
   categoryDetail.wikiPages?.find(
     page => normaliseSlug(page.verticalUrl) === normalisedSlug
   ) ?? null
 
-if (!matchedPage) {
+if (!matchedSubCategory && !matchedPage) {
   throw createError({
     statusCode: 404,
     statusMessage: 'Guide not found',
@@ -127,9 +135,9 @@ if (!matchedPage) {
   })
 }
 
-const resolvedPageId = matchedPage.wikiUrl?.trim().replace(/^\/+/, '') ?? null
+const resolvedPageId = matchedPage?.wikiUrl?.trim().replace(/^\/+/, '') ?? null
 
-if (!resolvedPageId) {
+if (!matchedSubCategory && !resolvedPageId) {
   throw createError({
     statusCode: 404,
     statusMessage: 'Guide not found',
@@ -138,7 +146,7 @@ if (!resolvedPageId) {
 }
 
 pageId.value = resolvedPageId
-fallbackTitle.value = matchedPage.title ?? null
+fallbackTitle.value = matchedPage?.title ?? null
 fallbackDescription.value = categoryDetail.verticalHomeDescription ?? null
 
 const truncateText = (value: string | null | undefined, limit: number) => {
@@ -158,7 +166,7 @@ const truncateText = (value: string | null | undefined, limit: number) => {
 const resolvedGuideTitle = computed(() => {
   return (
     fallbackTitle.value?.trim() ||
-    matchedPage.title?.trim() ||
+    matchedPage?.title?.trim() ||
     slugSegments.at(-1)?.trim() ||
     normalisedSlug
   )
@@ -286,8 +294,13 @@ const heroBreadcrumbs = computed<CategoryBreadcrumbItemDto[]>(() => {
 </script>
 
 <template>
+  <CategoryPage
+    v-if="matchedSubCategory"
+    :slug="categorySlug"
+    :sub-category-slug="normalisedSlug"
+  />
   <XwikiFullPageRenderer
-    v-if="pageId"
+    v-else-if="pageId"
     :page-id="pageId"
     :fallback-title="fallbackTitle"
     :fallback-description="fallbackDescription"

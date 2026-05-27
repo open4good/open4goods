@@ -26,7 +26,6 @@ import org.open4goods.services.wikidataservice.service.WikidataSearchService;
 import org.open4goods.services.wikidataservice.util.WikidataConstants;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
@@ -48,7 +47,7 @@ public class WikidataCompletionService extends AbstractCompletionService {
 
     public static final String DATASOURCE_NAME = "wikidata.org";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(WikidataCompletionService.class);
+    private final Logger LOGGER = logger;
 
     private final WikidataSearchService searchService;
     private final WikidataLookupService lookupService;

@@ -1,7 +1,7 @@
 # ============================================================================
 # DATA_QUALITY — Data quality (Qualité de la donnée)
-# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 001)
-# Used in verticals: oven, _default, air-conditioner, smartphones
+# Maintained: 2026-05-27 by attributes-maintenance prompt (batch 001)
+# Used in verticals: _default, air-conditioner, oven, smartphones
 # Type: NUMERIC
 # Coverage snapshot: internal computed attribute; not matched from external feeds
 # Taxonomy coverage: icecat ❌  eprel ❌  etim ❌  wikidata ❌

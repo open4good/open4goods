@@ -16,6 +16,7 @@ import org.open4goods.model.Localisable;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.VerticalSubCategory;
 import org.open4goods.model.vertical.WikiPageConfig;
 import org.open4goods.services.blog.model.BlogPost;
 import org.open4goods.services.blog.service.BlogService;
@@ -270,6 +271,16 @@ public class SitemapGenerationService {
 
 			sitemap = sitemap.addPage(getWebPage( baseUrl+ i18n.getVerticalHomeUrl(), ChangeFreq.WEEKLY, 1.0));
 			//  >> Vertical home page
+
+			for (VerticalSubCategory subCategory : v.getSubCategories()) {
+				String subCategorySlug = subCategory.getSlug() == null ? null : subCategory.getSlug().i18n(language);
+				if (subCategorySlug == null || subCategorySlug.isBlank()) {
+					continue;
+				}
+				url = baseUrl+ i18n.getVerticalHomeUrl()+"/" + subCategorySlug;
+				LOGGER.info("Adding sub-category page to sitemap : {}",url);
+				sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.WEEKLY, 0.9 ));
+			}
 
 
 			//  >> Vertical specific pages

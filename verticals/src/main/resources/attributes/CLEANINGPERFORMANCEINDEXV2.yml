@@ -1,9 +1,9 @@
 # ============================================================================
 # CLEANINGPERFORMANCEINDEXV2 — Cleaning performance index (Indice de performance de lavage)
-# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 000)
+# Maintained: 2026-05-27 by attributes-maintenance prompt (batch 000)
 # Used in verticals: dishwasher
 # Type: NUMERIC
-# Coverage snapshot: insufficient data from prod API
+# Coverage snapshot: prod legacy endpoint returned no matching canonical-key stats
 # Taxonomy coverage: icecat ❌  eprel ✅  etim ❌  wikidata ❌
 # Purpose: EU-regulated cleaning performance index for dishwashers (EU 2019/2022);
 #          higher values indicate better cleaning efficiency per cycle.

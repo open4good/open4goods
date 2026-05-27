@@ -1,10 +1,10 @@
 # ============================================================================
 # CLASSE_ENERGY_HDR — Energy class HDR (Classe énergétique HDR)
-# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 000)
+# Maintained: 2026-05-27 by attributes-maintenance prompt (batch 000)
 # Used in verticals: tv
 # Type: TEXT
-# Coverage snapshot: insufficient data from prod API
-# Taxonomy coverage: icecat ❌  eprel ✅  etim ❌  wikidata ❌
+# Coverage snapshot: prod legacy endpoint returned no matching canonical-key stats
+# Taxonomy coverage: icecat ✅  eprel ✅  etim ❌  wikidata ❌
 # Purpose: EU energy label class for televisions in HDR mode (EU 2019/2021);
 #          HDR mode is more power-intensive than SDR and affects usage impact.
 # ============================================================================
@@ -20,6 +20,9 @@ filteringType: "TEXT"
 asScore: true
 
 referentials:
+  icecat:
+    - featureId: 42857
+      name: "Energy efficiency class (HDR)"
   eprel:
     - featureName: "energyClassHDR"
       productGroup: "televisions"

@@ -1,9 +1,9 @@
 # ============================================================================
 # COOLING_CAPACITY — Cooling capacity (Puissance frigorifique)
-# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 001)
+# Maintained: 2026-05-27 by attributes-maintenance prompt (batch 001)
 # Used in verticals: air-conditioner
 # Type: NUMERIC
-# Coverage snapshot: insufficient data from prod API
+# Coverage snapshot: prod legacy endpoint returned no matching canonical-key stats
 # Taxonomy coverage: icecat ✅  eprel ✅  etim ❌  wikidata ❌
 # Purpose: Rated cooling output power of an air-conditioner (kW); primary
 #          sizing criterion used for filtering and range display.

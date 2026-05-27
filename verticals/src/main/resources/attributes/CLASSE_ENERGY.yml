@@ -1,10 +1,10 @@
 # ============================================================================
 # CLASSE_ENERGY — Energy class (Classe énergétique)
-# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 000)
-# Used in verticals: dishwasher, oven, _default, air-conditioner, washing-machine,
-#                    smartphones, refrigerator, tv
+# Maintained: 2026-05-27 by attributes-maintenance prompt (batch 000)
+# Used in verticals: _default, air-conditioner, dishwasher, oven, refrigerator,
+#                    smartphones, tv, washing-machine
 # Type: TEXT
-# Coverage snapshot: insufficient data from prod API
+# Coverage snapshot: prod legacy endpoint returned no matching canonical-key stats
 # Taxonomy coverage: icecat ✅  eprel ✅  etim ❌  wikidata ❌
 # Purpose: EU energy label class (A–G scale) shared across all appliance verticals;
 #          primary signal for energy efficiency during daily use phase.

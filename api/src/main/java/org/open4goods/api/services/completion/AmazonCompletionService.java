@@ -33,7 +33,6 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.amazon.paapi5.v1.ApiException;
 import com.amazon.paapi5.v1.ByLineInfo;
@@ -73,7 +72,6 @@ import com.amazon.paapi5.v1.UnitBasedAttribute;
 public class AmazonCompletionService extends AbstractCompletionService {
 
     static final String DATASOURCE_NAME = "amazon.fr";
-    private static final Logger logger = LoggerFactory.getLogger(AmazonCompletionService.class);
     private static final String AMAZON_PRODUCT_STATE_NEW = "New";
     private static final String AMAZON_PRODUCT_STATE_USED = "Used";
     private static final String AMAZON_PRODUCT_STATE_COLLECTIBLE = "Collectible";

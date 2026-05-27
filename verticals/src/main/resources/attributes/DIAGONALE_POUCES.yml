@@ -1,9 +1,9 @@
 # ============================================================================
 # DIAGONALE_POUCES — Screen size (Diagonale en pouces)
-# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 001)
+# Maintained: 2026-05-27 by attributes-maintenance prompt (batch 001)
 # Used in verticals: smartphones, tv
 # Type: NUMERIC
-# Coverage snapshot: insufficient data from prod API
+# Coverage snapshot: prod legacy endpoint returned no matching canonical-key stats
 # Taxonomy coverage: icecat ✅  eprel ✅  etim ❌  wikidata ✅
 # Purpose: Screen diagonal in inches; drives materials, packaging, transport
 #          and energy-use impact — larger screens have higher footprint across

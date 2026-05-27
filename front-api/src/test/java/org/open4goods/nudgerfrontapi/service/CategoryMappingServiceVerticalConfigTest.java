@@ -15,7 +15,10 @@ import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.ProductCategory;
 import org.open4goods.model.vertical.ProductI18nElements;
+import org.open4goods.model.vertical.SubsetCriteria;
+import org.open4goods.model.vertical.SubsetCriteriaOperator;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.VerticalSubCategory;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.category.CategoryBreadcrumbItemDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
@@ -89,6 +92,33 @@ class CategoryMappingServiceVerticalConfigTest {
         assertThat(dto.aggregatedScores()).containsExactly("ECO", "GLOBAL");
     }
 
+    @Test
+    void toVerticalConfigFullDtoExposesLocalizedSubCategories() {
+        VerticalConfig config = createVerticalConfig("dishwasher", 3);
+
+        VerticalSubCategory subCategory = new VerticalSubCategory();
+        subCategory.setId("under-sink");
+        subCategory.getSlug().put("fr", "lave-vaisselle-sous-lavabo");
+        subCategory.getSlug().put("en", "under-sink-dishwasher");
+        subCategory.getH1Title().put("fr", "Lave-vaisselle sous lavabo");
+        subCategory.getDescription().put("fr", "Comparez les lave-vaisselles sous lavabo.");
+        subCategory.setImage("/images/verticals/dishwasher-under-sink.webp");
+        subCategory.setActivatedFilters(List.of(
+                new SubsetCriteria("attributes.indexed.INSTALLATION_TYPE.value",
+                        SubsetCriteriaOperator.EQUALS,
+                        "ENCASTRABLE")));
+        config.setSubCategories(List.of(subCategory));
+
+        VerticalConfigFullDto dto = service.toVerticalConfigFullDto(config, DomainLanguage.fr, List.of());
+
+        assertThat(dto.subCategories()).hasSize(1);
+        assertThat(dto.subCategories().get(0).slug()).isEqualTo("lave-vaisselle-sous-lavabo");
+        assertThat(dto.subCategories().get(0).h1Title()).isEqualTo("Lave-vaisselle sous lavabo");
+        assertThat(dto.subCategories().get(0).description()).isEqualTo("Comparez les lave-vaisselles sous lavabo.");
+        assertThat(dto.subCategories().get(0).image()).isEqualTo("/images/verticals/dishwasher-under-sink.webp");
+        assertThat(dto.subCategories().get(0).activatedFilters()).hasSize(1);
+    }
+
     private VerticalConfig createVerticalConfig(String id, int googleTaxonomyId) {
         VerticalConfig config = new VerticalConfig();
         config.setId(id);
@@ -123,4 +153,3 @@ class CategoryMappingServiceVerticalConfigTest {
         return televisions;
     }
 }
-

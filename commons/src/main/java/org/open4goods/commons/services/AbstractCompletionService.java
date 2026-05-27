@@ -24,7 +24,7 @@ public abstract class AbstractCompletionService {
 
     protected final ProductRepository dataRepository;
     protected final VerticalsConfigService verticalConfigService;
-    private final Logger logger;
+    protected final Logger logger;
 
     protected AbstractCompletionService(
             ProductRepository dataRepository,

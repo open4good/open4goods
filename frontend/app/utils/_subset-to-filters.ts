@@ -103,9 +103,13 @@ const convertCriteria = (
 export const convertSubsetCriteriaToFilters = (
   subset: VerticalSubsetDto
 ): Filter[] => {
-  const clauses = subset.criterias ?? []
+  return convertCriteriaListToFilters(subset.criterias ?? [])
+}
 
-  return clauses
+export const convertCriteriaListToFilters = (
+  criterias: SubsetCriteria[]
+): Filter[] => {
+  return criterias
     .map(criteria => convertCriteria(criteria))
     .filter((filter): filter is Filter => Boolean(filter))
 }
@@ -252,4 +256,16 @@ export const buildFilterRequestFromSubsets = (
   }
 
   return { filterGroups }
+}
+
+export const buildFilterRequestFromCriteria = (
+  criterias: SubsetCriteria[]
+): FilterRequestDto => {
+  const filters = mergeRangeClauses(convertCriteriaListToFilters(criterias))
+
+  if (!filters.length) {
+    return {}
+  }
+
+  return { filters }
 }

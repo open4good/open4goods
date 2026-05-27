@@ -26,7 +26,6 @@ import org.open4goods.services.eprelservice.service.EprelSearchService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Complete products with Eprel Datas
@@ -39,7 +38,6 @@ public class EprelCompletionService extends AbstractCompletionService {
 	private static final int MIN_COMPACT_MODEL_CONTAINMENT_LENGTH = 7;
 	private EprelSearchService eprelSearchService;
 
-	Logger logger = LoggerFactory.getLogger(EprelCompletionService.class);
 	private StandardAggregator aggregator;
 
 	public EprelCompletionService(VerticalsConfigService verticalConfigService, ProductRepository dataRepository, ApiProperties apiProperties, EprelSearchService eprelSearchService, AggregationFacadeService aggregationFacade) {

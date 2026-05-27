@@ -1,9 +1,9 @@
 # ============================================================================
 # CLIMATE_CLASS — Climate class (Classe climatique)
-# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 000)
+# Maintained: 2026-05-27 by attributes-maintenance prompt (batch 000)
 # Used in verticals: refrigerator
 # Type: TEXT
-# Coverage snapshot: insufficient data from prod API
+# Coverage snapshot: prod legacy endpoint returned no matching canonical-key stats
 # Taxonomy coverage: icecat ✅  eprel ✅  etim ❌  wikidata ❌
 # Purpose: Ambient temperature range in which the refrigerator is rated to
 #          operate (SN/N/ST/T per EN 15502); used to filter climate suitability.

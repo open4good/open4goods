@@ -99,6 +99,8 @@ public record VerticalConfigFullDto(
         Set<String> aggregatedScores,
         @Schema(description = "Impact score configuration balancing each criterion, with localised texts.")
         ImpactScoreConfigDto impactScoreConfig,
+        @Schema(description = "Search-intent landing pages configured under this vertical.")
+        List<VerticalSubCategoryDto> subCategories,
         @Schema(description = "Custom subsets defined for this vertical with localised labels.")
         List<VerticalSubsetDto> subsets,
         @Schema(description = "Configuration supporting the guided nudge tool for this vertical.")

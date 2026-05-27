@@ -1,7 +1,7 @@
 # ============================================================================
 # BRAND_SUSTAINALYTICS_SCORING — Brand ESG rating (Évaluation ESG de la marque)
-# Maintained: 2026-05-24 by attributes-maintenance prompt (batch 000)
-# Used in verticals: _default, oven, air-conditioner, smartphones, washing-machine
+# Maintained: 2026-05-27 by attributes-maintenance prompt (batch 000)
+# Used in verticals: _default, air-conditioner, oven, smartphones, washing-machine
 # Type: NUMERIC
 # Coverage snapshot: internal computed attribute; not matched from external feeds
 # Taxonomy coverage: icecat ❌  eprel ❌  etim ❌  wikidata ❌

@@ -19,11 +19,13 @@ import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.ProductCategory;
 import org.open4goods.model.vertical.NudgeToolConfig;
 import org.open4goods.model.vertical.SubsetCriteria;
+import org.open4goods.model.vertical.SubsetCriteriaOperator;
 import org.open4goods.model.vertical.NudgeToolScore;
 import org.open4goods.model.vertical.NudgeToolSubsetGroup;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.SiteNaming;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.VerticalSubCategory;
 import org.open4goods.model.vertical.VerticalSubset;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.blog.BlogPostDto;
@@ -44,6 +46,7 @@ import org.open4goods.nudgerfrontapi.dto.category.ScoreScoringConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.SiteNamingDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigFullDto;
+import org.open4goods.nudgerfrontapi.dto.category.VerticalSubCategoryDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalSubsetDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
@@ -163,6 +166,7 @@ public class CategoryMappingService {
                 defaultList(verticalConfig.getAvailableImpactScoreCriterias()),
                 defaultSet(verticalConfig.getAggregatedScores()),
                 mapImpactScoreConfig(verticalConfig.getImpactScoreConfig(), domainLanguage),
+                mapVerticalSubCategories(verticalConfig.getSubCategories(), domainLanguage),
                 mapVerticalSubsets(verticalConfig.getSubsets(), domainLanguage),
                 mapNudgeToolConfig(verticalConfig.getNudgeToolConfig(), verticalConfig, domainLanguage),
                 mapVerticalSubset(verticalConfig.getBrandsSubset(), domainLanguage),
@@ -632,21 +636,42 @@ public class CategoryMappingService {
     }
 
     /**
+     * Map configured vertical sub-categories (search-intent pages) to DTOs.
+     */
+    private List<VerticalSubCategoryDto> mapVerticalSubCategories(List<VerticalSubCategory> subCategories,
+                                                                 DomainLanguage domainLanguage) {
+        return defaultList(subCategories).stream()
+                .map(subCategory -> mapVerticalSubCategory(subCategory, domainLanguage))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Map an individual vertical sub-category entry.
+     */
+    private VerticalSubCategoryDto mapVerticalSubCategory(VerticalSubCategory subCategory,
+                                                         DomainLanguage domainLanguage) {
+        if (subCategory == null) {
+            return null;
+        }
+
+        return new VerticalSubCategoryDto(
+                subCategory.getId(),
+                localise(subCategory.getSlug(), domainLanguage),
+                localise(subCategory.getH1Title(), domainLanguage),
+                localise(subCategory.getDescription(), domainLanguage),
+                subCategory.getImage(),
+                normalizeSubsetCriteria(subCategory.getActivatedFilters()));
+    }
+
+    /**
      * Map an individual vertical subset entry.
      */
     private VerticalSubsetDto mapVerticalSubset(VerticalSubset subset, DomainLanguage domainLanguage) {
         if (subset == null) {
             return null;
         }
-        // Ensure operator is set for percentile ranking
-        List<SubsetCriteria> criterias = defaultList(subset.getCriterias()).stream()
-            .filter(Objects::nonNull)
-            .peek(c -> {
-                if ((c.getFromPercent() != null || c.getToPercent() != null) && c.getOperator() == null) {
-                    c.setOperator(org.open4goods.model.vertical.SubsetCriteriaOperator.RANKING_PERCENTILE);
-                }
-            })
-            .collect(Collectors.toList());
+        List<SubsetCriteria> criterias = normalizeSubsetCriteria(subset.getCriterias());
 
         return new VerticalSubsetDto(
                 subset.getId(),
@@ -657,6 +682,28 @@ public class CategoryMappingService {
                 localise(subset.getCaption(), domainLanguage),
                 localise(subset.getTitle(), domainLanguage),
                 localise(subset.getDescription(), domainLanguage));
+    }
+
+    /**
+     * Copy configured criteria and ensure percentile filters expose an operator.
+     */
+    private List<SubsetCriteria> normalizeSubsetCriteria(List<SubsetCriteria> criterias) {
+        return defaultList(criterias).stream()
+            .filter(Objects::nonNull)
+            .map(criteria -> {
+                SubsetCriteria copy = new SubsetCriteria();
+                copy.setField(criteria.getField());
+                copy.setOperator(criteria.getOperator());
+                copy.setValue(criteria.getValue());
+                copy.setFromPercent(criteria.getFromPercent());
+                copy.setToPercent(criteria.getToPercent());
+
+                if ((copy.getFromPercent() != null || copy.getToPercent() != null) && copy.getOperator() == null) {
+                    copy.setOperator(SubsetCriteriaOperator.RANKING_PERCENTILE);
+                }
+                return copy;
+            })
+            .collect(Collectors.toList());
     }
 
     /**
