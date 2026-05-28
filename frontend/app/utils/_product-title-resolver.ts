@@ -1,5 +1,4 @@
 import type { ProductDto } from '~~/shared/api-client'
-import { humanizeSlug } from '~/utils/_product-title'
 
 export interface ProductTitleOptions {
   preferH1Title?: boolean
@@ -29,20 +28,47 @@ const applyBrandCasing = (
   return title.replace(regex, normalizedBrand)
 }
 
-const containsIdentityToken = (title: string, identityTokens: string[]) => {
-  const normalizedTitle = title.toLocaleLowerCase()
+const normalizeString = (value: string | number | null | undefined): string =>
+  typeof value === 'string' || typeof value === 'number'
+    ? value.toString().trim()
+    : ''
 
-  return identityTokens.some(token =>
-    normalizedTitle.includes(token.toLocaleLowerCase())
-  )
+const containsRawTemplate = (value: string): boolean =>
+  /\[\(\$\{[^}]+}\)\]|\$\{[^}]+}|\{[A-Z0-9_]+}/.test(value)
+
+const safeTitle = (value: string | null | undefined): string => {
+  const normalized = normalizeString(value)
+  return normalized && !containsRawTemplate(normalized) ? normalized : ''
 }
 
-const isWeakProductName = (title: string, identityTokens: string[]) => {
-  if (!identityTokens.length || containsIdentityToken(title, identityTokens)) {
-    return false
+const brandModelTitle = (product: ProductDto): string => {
+  const brand = normalizeString(product.identity?.brand)
+  const model = normalizeString(product.identity?.model)
+  return [brand, model].filter(Boolean).join(' ')
+}
+
+const fallbackTitle = (
+  product: ProductDto,
+  locale?: string,
+  uppercaseBrand = false,
+  gtinFallback?: string
+): string => {
+  const brand = normalizeString(product.identity?.brand)
+  const candidates = [
+    product.identity?.bestName,
+    product.base?.bestName,
+    brandModelTitle(product),
+    normalizeString(product.gtin) ? (gtinFallback || `GTIN: ${product.gtin}`) : '',
+  ]
+
+  for (const candidate of candidates) {
+    const title = safeTitle(candidate)
+    if (title) {
+      return uppercaseBrand ? applyBrandCasing(title, brand, locale) : title
+    }
   }
 
-  return title.split(/\s+/).filter(Boolean).length <= 3
+  return ''
 }
 
 export const resolveProductTitle = (
@@ -50,9 +76,6 @@ export const resolveProductTitle = (
   locale?: string,
   options: ProductTitleOptions = {}
 ): string => {
-  const normalizeString = (value: string | null | undefined) =>
-    typeof value === 'string' ? value.trim() : ''
-
   const {
     preferH1Title = false,
     preferPrettyName = true,
@@ -62,170 +85,46 @@ export const resolveProductTitle = (
     uppercaseBrand = false,
     gtinFallback,
   } = options
-
   const brand = normalizeString(product.identity?.brand)
-  const model = normalizeString(product.identity?.model)
-  const identityBestName = normalizeString(product.identity?.bestName)
-  const baseBestName = normalizeString(product.base?.bestName)
-  const resolvedBrand = uppercaseBrand ? brand.toLocaleUpperCase(locale) : brand
-  const identityTokens = [brand, model].filter(token => token.length > 1)
 
-  const finalizeTitle = (title: string): string =>
-    uppercaseBrand ? applyBrandCasing(title, brand, locale) : title
+  const primary = preferCardTitle
+    ? product.names?.cardName
+    : preferLongName || preferH1Title
+      ? product.names?.pageTitle
+      : preferShortName || preferPrettyName
+        ? product.names?.displayName
+        : product.names?.displayName
 
-  const useTitle = (title: string, allowWeakName = true): string => {
-    if (!title) {
-      return ''
-    }
-
-    if (!allowWeakName && isWeakProductName(title, identityTokens)) {
-      return ''
-    }
-
-    return finalizeTitle(title)
+  const title = safeTitle(primary)
+  if (title) {
+    return uppercaseBrand ? applyBrandCasing(title, brand, locale) : title
   }
 
-  const firstTitle = (
-    candidates: Array<string | null | undefined>,
-    allowWeakName = true
-  ): string => {
-    for (const candidate of candidates) {
-      const title = useTitle(normalizeString(candidate), allowWeakName)
-      if (title) {
-        return title
-      }
-    }
-
-    return ''
-  }
-
-  const aiShortTitle = normalizeString(product.aiReview?.review?.shortTitle)
-  const aiMediumTitle = normalizeString(product.aiReview?.review?.mediumTitle)
-
-  // Product-owned generated names are more stable than AI review titles, which
-  // can collapse to the category label for some verticals.
-  if (preferCardTitle) {
-    const title = firstTitle(
-      [
-        product.names?.cardTitle,
-        product.names?.shortName,
-        product.names?.prettyName,
-      ],
-      false
-    )
-    if (title) return title
-  }
-
-  if (preferShortName) {
-    const title = firstTitle(
-      [
-        product.names?.cardTitle,
-        product.names?.shortName,
-        product.names?.prettyName,
-      ],
-      false
-    )
-    if (title) return title
-  }
-
-  if (preferLongName || preferH1Title) {
-    const title = firstTitle(
-      preferH1Title
-        ? [product.names?.h1Title, product.names?.longName]
-        : [product.names?.longName, product.names?.h1Title],
-      false
-    )
-    if (title) return title
-  }
-
-  if (preferPrettyName) {
-    const title = firstTitle(
-      [
-        product.names?.cardTitle,
-        product.names?.shortName,
-        product.names?.prettyName,
-      ],
-      false
-    )
-    if (title) return title
-  }
-
-  // Use longest offer name if no category is associated.
-  const isCategoryAssociated = Boolean(product.base?.vertical)
-  if (!isCategoryAssociated && (preferCardTitle || preferShortName)) {
-    const longestOfferName = normalizeString(product.names?.longestOfferName)
-    if (longestOfferName) return useTitle(longestOfferName)
-
-    const offerNames = product.names?.offerNames
-    if (offerNames && offerNames.size > 0) {
-      let longest = ''
-      for (const name of offerNames) {
-        if (name.length > longest.length) {
-          longest = name
-        }
-      }
-      if (longest) return useTitle(longest)
-    }
-  }
-
-  // Identity names beat AI review titles because they are derived from product
-  // identifiers rather than prose generation.
-  if (identityBestName) return useTitle(identityBestName)
-  if (baseBestName) return useTitle(baseBestName)
-
-  if (resolvedBrand && model) {
-    return useTitle(`${resolvedBrand} - ${model}`)
-  }
-  if (model) return useTitle(model)
-
-  const aiTitle = preferLongName || preferH1Title ? aiMediumTitle : aiShortTitle
-  if (aiTitle) return useTitle(aiTitle)
-  if (aiMediumTitle) return useTitle(aiMediumTitle)
-  if (aiShortTitle) return useTitle(aiShortTitle)
-
-  const bestOfferName = normalizeString(product.offers?.bestPrice?.offerName)
-  if (bestOfferName) return useTitle(bestOfferName)
-
-  const slug = normalizeString(product.slug)
-  if (slug && locale) return useTitle(humanizeSlug(slug, locale))
-
-  const gtin = normalizeString(product.gtin?.toString())
-  if (gtin) {
-    const fallbackValue = gtinFallback?.trim().length
-      ? gtinFallback
-      : `GTIN: ${gtin}`
-
-    return useTitle(fallbackValue)
-  }
-
-  return ''
+  return fallbackTitle(product, locale, uppercaseBrand, gtinFallback)
 }
 
 export const resolveProductShortName = (
   product: ProductDto,
   locale?: string
 ): string =>
-  resolveProductTitle(product, locale, {
-    preferShortName: true,
-    preferPrettyName: true,
-  })
+  safeTitle(product.names?.displayName) || fallbackTitle(product, locale)
 
 export const resolveProductCardName = (
   product: ProductDto,
   locale?: string
 ): string =>
-  resolveProductTitle(product, locale, {
-    preferCardTitle: true,
-    preferShortName: true,
-    preferPrettyName: true,
-  })
+  safeTitle(product.names?.cardName) ||
+  fallbackTitle(product, locale)
 
 export const resolveProductLongName = (
   product: ProductDto,
   locale?: string
 ): string =>
-  resolveProductTitle(product, locale, {
-    preferLongName: true,
-    preferH1Title: true,
-    uppercaseBrand: true,
-  })
+  (safeTitle(product.names?.pageTitle)
+    ? applyBrandCasing(
+        safeTitle(product.names?.pageTitle),
+        normalizeString(product.identity?.brand),
+        locale
+      )
+    : '') ||
+  fallbackTitle(product, locale, true)

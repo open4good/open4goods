@@ -12,7 +12,6 @@
  * Do not edit the class manually.
  */
 
-import { mapValues } from '../runtime'
 /**
  *
  * @export
@@ -20,29 +19,29 @@ import { mapValues } from '../runtime'
  */
 export interface ProductNamesDto {
   /**
-   * H1 title for the requested language
+   * Generic display name for the requested language
    * @type {string}
    * @memberof ProductNamesDto
    */
-  h1Title?: string
+  displayName?: string
   /**
-   * Pretty name for the requested language
+   * Short product name for cards, lists and tables
    * @type {string}
    * @memberof ProductNamesDto
    */
-  prettyName?: string
+  cardName?: string
   /**
-   * Singular product name for the requested language
+   * Product page H1 title
    * @type {string}
    * @memberof ProductNamesDto
    */
-  singular?: string
+  pageTitle?: string
   /**
-   * Generated designation variants for the requested language
-   * @type {Array<string>}
+   * Compact product name used as the base for SEO metadata
+   * @type {string}
    * @memberof ProductNamesDto
    */
-  designation?: Array<string>
+  seoName?: string
   /**
    * Meta description aligned with the requested language
    * @type {string}
@@ -61,42 +60,6 @@ export interface ProductNamesDto {
    * @memberof ProductNamesDto
    */
   ogDescription?: string
-  /**
-   * Title for product card
-   * @type {string}
-   * @memberof ProductNamesDto
-   */
-  cardTitle?: string
-  /**
-   * Short name
-   * @type {string}
-   * @memberof ProductNamesDto
-   */
-  shortName?: string
-  /**
-   * Long name
-   * @type {string}
-   * @memberof ProductNamesDto
-   */
-  longName?: string
-  /**
-   * Offer names aggregated across datasources
-   * @type {Set<string>}
-   * @memberof ProductNamesDto
-   */
-  offerNames?: Set<string>
-  /**
-   * Longest detected offer name
-   * @type {string}
-   * @memberof ProductNamesDto
-   */
-  longestOfferName?: string
-  /**
-   * Shortest detected offer name
-   * @type {string}
-   * @memberof ProductNamesDto
-   */
-  shortestOfferName?: string
 }
 
 /**
@@ -120,24 +83,15 @@ export function ProductNamesDtoFromJSONTyped(
     return json
   }
   return {
-    h1Title: json['h1Title'] == null ? undefined : json['h1Title'],
-    prettyName: json['prettyName'] == null ? undefined : json['prettyName'],
-    singular: json['singular'] == null ? undefined : json['singular'],
-    designation: json['designation'] == null ? undefined : json['designation'],
+    displayName: json['displayName'] == null ? undefined : json['displayName'],
+    cardName: json['cardName'] == null ? undefined : json['cardName'],
+    pageTitle: json['pageTitle'] == null ? undefined : json['pageTitle'],
+    seoName: json['seoName'] == null ? undefined : json['seoName'],
     metaDescription:
       json['metaDescription'] == null ? undefined : json['metaDescription'],
     ogTitle: json['ogTitle'] == null ? undefined : json['ogTitle'],
     ogDescription:
       json['ogDescription'] == null ? undefined : json['ogDescription'],
-    cardTitle: json['cardTitle'] == null ? undefined : json['cardTitle'],
-    shortName: json['shortName'] == null ? undefined : json['shortName'],
-    longName: json['longName'] == null ? undefined : json['longName'],
-    offerNames:
-      json['offerNames'] == null ? undefined : new Set(json['offerNames']),
-    longestOfferName:
-      json['longestOfferName'] == null ? undefined : json['longestOfferName'],
-    shortestOfferName:
-      json['shortestOfferName'] == null ? undefined : json['shortestOfferName'],
   }
 }
 
@@ -154,21 +108,12 @@ export function ProductNamesDtoToJSONTyped(
   }
 
   return {
-    h1Title: value['h1Title'],
-    prettyName: value['prettyName'],
-    singular: value['singular'],
-    designation: value['designation'],
+    displayName: value['displayName'],
+    cardName: value['cardName'],
+    pageTitle: value['pageTitle'],
+    seoName: value['seoName'],
     metaDescription: value['metaDescription'],
     ogTitle: value['ogTitle'],
     ogDescription: value['ogDescription'],
-    cardTitle: value['cardTitle'],
-    shortName: value['shortName'],
-    longName: value['longName'],
-    offerNames:
-      value['offerNames'] == null
-        ? undefined
-        : Array.from(value['offerNames'] as Set<any>),
-    longestOfferName: value['longestOfferName'],
-    shortestOfferName: value['shortestOfferName'],
   }
 }

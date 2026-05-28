@@ -843,7 +843,7 @@ public class ProductController {
      */
     private SearchSuggestProductDto toProductDto(SearchService.ProductSuggestHit hit) {
         return new SearchSuggestProductDto(hit.model(), hit.brand(), hit.gtin(), hit.coverImagePath(), hit.verticalId(),
-                hit.ecoscoreValue(), hit.bestPrice(), hit.bestPriceCurrency(), hit.score(), hit.prettyName());
+                hit.ecoscoreValue(), hit.bestPrice(), hit.bestPriceCurrency(), hit.score(), hit.displayName());
     }
 
     /**

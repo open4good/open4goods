@@ -103,9 +103,7 @@ class ReviewGenerationReproductionTest {
         // Mock Vertical Config hierarchy
         VerticalConfig verticalConfig = mock(VerticalConfig.class);
         org.open4goods.model.vertical.ProductI18nElements i18nElements = mock(org.open4goods.model.vertical.ProductI18nElements.class);
-        org.open4goods.model.vertical.PrefixedAttrText h1Title = mock(org.open4goods.model.vertical.PrefixedAttrText.class);
-        when(h1Title.getPrefix()).thenReturn("VerticalName");
-        when(i18nElements.getH1Title()).thenReturn(h1Title);
+        when(i18nElements.getPageTitle()).thenReturn("VerticalName");
         when(verticalConfig.i18n("fr")).thenReturn(i18nElements);
         org.open4goods.model.vertical.AttributesConfig attributesConfig = mock(org.open4goods.model.vertical.AttributesConfig.class);
         when(attributesConfig.getConfigs()).thenReturn(List.of());

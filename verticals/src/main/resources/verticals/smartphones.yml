@@ -62,37 +62,13 @@ i18n:
         - BRAND
         - MODEL
         - STORAGE_CAPACITY
-    h1Title:
-      prefix: "|| Smartphone | Téléphone mobile ||"
-      attrs:
-        - BRAND
-        - MODEL
-        - STORAGE_CAPACITY
-    prettyName:
-      prefix: "|| Smartphone | Téléphone mobile ||"
-      attrs:
-        - BRAND
-        - MODEL
-    singular:
-      prefix: "|| smartphone | téléphone mobile | téléphone portable ||"
-      attrs: []
-    singularDesignation:
-      prefix: "|| du smartphone | de ce smartphone | du téléphone | de ce téléphone | de cet appareil ||"
-      attrs: []
     designation:
       - "du smartphone"
       - "de ce smartphone"
       - "du téléphone"
       - "de ce téléphone mobile"
       - "de cet appareil"
-    cardTitle: "{BRAND} {MODEL}"
-    shortName: "{BRAND} {MODEL}"
-    longName: "{BRAND} {MODEL} - {STORAGE_CAPACITY}"
 
-    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : eco-score, réparabilité et meilleurs prix"
-    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : comparez l'eco-score, la réparabilité, l'impact environnemental et les meilleurs prix de ce smartphone."
-    productMetaOpenGraphTitle: "[(${p.brand()})] [(${p.model()})] : eco-score [(${p.ecoscore()})]"
-    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : réparabilité, durée de vie, impact environnemental et meilleurs prix."
     productMetaOpenGraphType: "product"
 
     verticalHomeUrl: "smartphones"
@@ -106,36 +82,12 @@ i18n:
         - BRAND
         - MODEL
         - STORAGE_CAPACITY
-    h1Title:
-      prefix: "|| Smartphone | Mobile phone ||"
-      attrs:
-        - BRAND
-        - MODEL
-        - STORAGE_CAPACITY
-    prettyName:
-      prefix: "|| Smartphone | Mobile phone ||"
-      attrs:
-        - BRAND
-        - MODEL
-    singular:
-      prefix: "|| smartphone | mobile phone ||"
-      attrs: []
-    singularDesignation:
-      prefix: "|| of the smartphone | of this smartphone | of the phone | of this device ||"
-      attrs: []
     designation:
       - "of the smartphone"
       - "of this smartphone"
       - "of the mobile phone"
       - "of this device"
-    cardTitle: "{BRAND} {MODEL}"
-    shortName: "{BRAND} {MODEL}"
-    longName: "{BRAND} {MODEL} - {STORAGE_CAPACITY}"
 
-    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, ecological offset and best prices"
-    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
-    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore [(${p.ecoscore()})]."
-    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
     productMetaOpenGraphType: "product"
 
     verticalHomeUrl: "smartphones"

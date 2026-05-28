@@ -96,24 +96,7 @@ i18n:
         - BRAND
         - MODEL
         - YEAR
-    h1Title:
-      prefix: "|| Lave-vaisselle | Lave-vaisselles ||"
-      attrs:
-        - BRAND
-        - MODEL
-        - YEAR
 
-    prettyName:
-      prefix: "|| Lave-vaisselle | Lave-vaisselles ||"
-      attrs:
-        - BRAND
-        - MODEL
-    singular:
-      prefix: "|| lave-vaisselle | lave-vaisselle | lave-vaisselle ||"
-      attrs: []
-    singularDesignation:
-      prefix: "|| du lave-vaisselle | de ce lave-vaisselle | du lave-vaisselle ||"
-      attrs: []
     designation:
       - "du lave-vaisselle"
       - "de ce lave-vaisselle"
@@ -122,10 +105,6 @@ i18n:
       - "du lave-vaisselle encastrable"
 
     # Product metas (generic templates reused)
-    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix"
-    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation || écologique | environnementale || et meilleurs prix."
-    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore de [(${p.ecoscore()})]."
-    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation || écologique | environnementale || et meilleurs prix."
     productMetaOpenGraphType: "product"
 
     # Vertical page elements
@@ -147,24 +126,7 @@ i18n:
         - BRAND
         - MODEL
         - YEAR
-    h1Title:
-      prefix: "|| Dishwasher | Dishwashers ||"
-      attrs:
-        - BRAND
-        - MODEL
-        - YEAR
 
-    prettyName:
-      prefix: "|| Dishwasher | Dishwashers ||"
-      attrs:
-        - BRAND
-        - MODEL
-    singular:
-      prefix: "|| dishwasher | dishwasher ||"
-      attrs: []
-    singularDesignation:
-      prefix: "|| of the dishwasher | of this dishwasher ||"
-      attrs: []
     designation:
       - "of the dishwasher"
       - "of this dishwasher"
@@ -172,10 +134,6 @@ i18n:
       - "of this machine"
       - "of the dish washer"
 
-    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, ecological offset and best prices"
-    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
-    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore [(${p.ecoscore()})]."
-    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
     productMetaOpenGraphType: "product"
 
     verticalHomeUrl: "dishwashers"

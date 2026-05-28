@@ -33,13 +33,10 @@ export const humanizeSlug = (slug: string, locale?: string): string => {
 
 export interface ProductDisplayNameOptions {
   fallbackLabel: string
-  preferPrettyName?: boolean
 }
 
 /**
  * Resolve a product display name for SSR-safe rendering.
- * The resolution order can prefer the "prettyName" when requested and
- * falls back to a "Brand - Model" string if no explicit name is available.
  */
 export const resolveProductDisplayName = (
   product: {
@@ -49,9 +46,9 @@ export const resolveProductDisplayName = (
       model?: string | null
     } | null
     base?: { bestName?: string | null } | null
-    names?: { prettyName?: string | null; h1Title?: string | null } | null
+    names?: { displayName?: string | null; pageTitle?: string | null } | null
   },
-  { fallbackLabel, preferPrettyName = false }: ProductDisplayNameOptions
+  { fallbackLabel }: ProductDisplayNameOptions
 ): string => {
   const normalize = (value?: string | null) => value?.trim() ?? ''
   const brand = normalize(product.identity?.brand)
@@ -59,10 +56,10 @@ export const resolveProductDisplayName = (
   const brandModel = [brand, model].filter(Boolean).join(' - ')
 
   const primaryCandidates = [
-    ...(preferPrettyName ? [normalize(product.names?.prettyName)] : []),
+    normalize(product.names?.displayName),
     normalize(product.identity?.bestName),
     normalize(product.base?.bestName),
-    normalize(product.names?.h1Title),
+    normalize(product.names?.pageTitle),
     normalize(product.identity?.model),
     normalize(product.identity?.brand),
     brandModel,

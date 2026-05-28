@@ -137,13 +137,13 @@ class ProductMappingServiceTest {
     }
 
     @Test
-    void getProductUsesLocalizedShortNameForPreferredName() throws Exception {
+    void getProductUsesLocalizedDisplayNameForPreferredName() throws Exception {
         long gtin = 777L;
         Product product = new Product(gtin);
         ProductTexts names = new ProductTexts();
-        Localisable<String, String> shortName = new Localisable<>();
-        shortName.put("en", "Localized short name");
-        names.setShortName(shortName);
+        Localisable<String, String> displayName = new Localisable<>();
+        displayName.put("en", "Localized display name");
+        names.setDisplayName(displayName);
         product.setNames(names);
         product.setOfferNames(Set.of("Fallback offer"));
 
@@ -152,7 +152,7 @@ class ProductMappingServiceTest {
         ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("base"), DomainLanguage.en);
 
         assertThat(dto.base()).isNotNull();
-        assertThat(dto.base().bestName()).isEqualTo("Localized short name");
+        assertThat(dto.base().bestName()).isEqualTo("Localized display name");
     }
 
     @Test

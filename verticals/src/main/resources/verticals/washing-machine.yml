@@ -128,27 +128,12 @@ i18n:
     # Product page meta and h1 title
     ##################################
     # The product h1 title. Constructed on the same basis than "url", but without the concatened hyphens
-    h1Title:
-      prefix: "|| Lave-linge | Machine à laver ||"
-      attrs:
-        - BRAND
-        - MODEL
-        - YEAR
-    singular:
-      prefix: "|| lave-linge | machine à laver ||"
-      attrs: []
-    singularDesignation:
-      prefix: "|| du lave-linge | de ce lave-linge | de la machine à laver | de cette machine | de cet appareil ||"
-      attrs: []
     designation:
       - "du lave-linge"
       - "de ce lave-linge"
       - "de la machine à laver"
       - "de cette machine"
       - "de cet appareil"
-    cardTitle: "{BRAND} {MODEL}"
-    shortName: "{BRAND} {MODEL}"
-    longName: "{BRAND} {MODEL} - {WASHING_CAPACITY} {SPIN_SPEED}"
 
     ##################################
     # Vertical page elements
@@ -162,10 +147,6 @@ i18n:
     # Text displaid as jumbotron for the vertical
     verticalHomeDescription: "Découvrez notre sélection de machines à laver. Entre consommation d’eau, d’énergie et durabilité, ces appareils ont un vrai impact sur l’environnement. Nudger vous accompagne pour trouver le modèle le plus responsable, tout en répondant parfaitement à vos besoins du quotidien."
 
-    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Éco-score, empreinte écologique et meilleures offres"
-    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Éco-score, || empreinte écologique | impact environnemental || et meilleures offres."
-    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Eco-score [(${p.ecoscore()})]."
-    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : Éco-score, || empreinte écologique | impact environnemental || et meilleures offres."
     productMetaOpenGraphType: "product"
 
     # A mapping beetween custom page names behind this vertical and wiki pages
@@ -189,18 +170,6 @@ i18n:
     # Product page meta and h1 title
     ##################################
     # The product h1 title. Constructed on the same basis than "url", but without the concatened hyphens
-    h1Title:
-      prefix: "|| Washing machine | Washer ||"
-      attrs:
-        - BRAND
-        - MODEL
-        - YEAR
-    singular:
-      prefix: "|| washing machine | washer ||"
-      attrs: []
-    singularDesignation:
-      prefix: "|| of the washing machine | of this washing machine | of the washer | of this washer | of the appliance ||"
-      attrs: []
     designation:
       - "of the washing machine"
       - "of this washing machine"
@@ -209,10 +178,6 @@ i18n:
       - "of the appliance"
 
     # Product metas (generic templates reused)
-    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, ecological offset and best prices"
-    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
-    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore [(${p.ecoscore()})]."
-    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
     productMetaOpenGraphType: "product"
 
     ##################################

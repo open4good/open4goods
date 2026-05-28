@@ -86,7 +86,6 @@ class NamesAggregationServiceTest {
 	void onProduct_shouldStoreEmbeddingWhenTextPresent() throws AggregationSkipException, InvalidParameterException {
 		VerticalConfig config = buildVerticalConfig();
 		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
-		when(blablaService.generateBlabla(anyString(), any())).thenReturn("pref");
 		when(embeddingService.embed(anyString())).thenReturn(new float[] { 0.1f, 0.2f });
 
 		Product product = new Product(7L);
@@ -101,22 +100,21 @@ class NamesAggregationServiceTest {
 	}
 
 	@Test
-	void onProduct_shouldComputePrettyNameWithSuffix() throws AggregationSkipException, InvalidParameterException {
+	void onProduct_shouldGenerateCanonicalNames() throws AggregationSkipException, InvalidParameterException {
 		VerticalConfig config = buildVerticalConfig();
 		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
-		when(blablaService.generateBlabla(anyString(), any())).thenReturn("TV");
 
 		Product product = new Product(9L);
 		product.setVertical("tv");
-		org.open4goods.model.attribute.ProductAttribute attr = new org.open4goods.model.attribute.ProductAttribute();
-		attr.setName("DIAGONALE_POUCES");
-		attr.setValue("55");
-		product.getAttributes().getAll().put("DIAGONALE_POUCES", attr);
+		product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Samsung");
+		product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "Galaxy TV");
 
 		service.onProduct(product, config);
 
-		assertThat(product.getNames().getPrettyName().get("fr"))
-				.isEqualTo("TV 55 \"");
+		assertThat(product.getNames().getDisplayName().get("fr")).isEqualTo("Samsung Galaxy TV");
+		assertThat(product.getNames().getCardName().get("fr")).isEqualTo("Samsung Galaxy TV");
+		assertThat(product.getNames().getPageTitle().get("fr")).isEqualTo("Samsung Galaxy TV");
+		assertThat(product.getNames().getSeoName().get("fr")).isEqualTo("Samsung Galaxy TV");
 	}
 
 
@@ -124,16 +122,7 @@ class NamesAggregationServiceTest {
 	private VerticalConfig buildVerticalConfig() {
 		VerticalConfig config = new VerticalConfig();
 		ProductI18nElements productI18nElements = new ProductI18nElements();
-		PrefixedAttrText h1 = new PrefixedAttrText();
-		h1.setPrefix("Cuisine");
-		productI18nElements.setH1Title(h1);
-		PrefixedAttrText pretty = new PrefixedAttrText();
-		pretty.setPrefix("Cuisine");
-		pretty.setAttrs(java.util.List.of("DIAGONALE_POUCES"));
-		productI18nElements.setPrettyName(pretty);
-		PrefixedAttrText singular = new PrefixedAttrText();
-		singular.setPrefix("Singular");
-		productI18nElements.setSingular(singular);
+		productI18nElements.setPageTitle("Cuisine");
 
 
 		HashMap<String, ProductI18nElements> i18n = new HashMap<>();
@@ -186,12 +175,11 @@ class NamesAggregationServiceTest {
 	@Test
 	void onProduct_shouldComputeTemplateTitles() throws AggregationSkipException, InvalidParameterException {
 		VerticalConfig config = buildVerticalConfig();
-		config.getI18n().get("fr").setCardTitle("{BRAND} {MODEL}");
-		config.getI18n().get("fr").setShortName("{BRAND}");
-		config.getI18n().get("fr").setLongName("{BRAND} {MODEL} - {DIAGONALE_POUCES} {ATTRIBUTE_NOT_EXIST}");
+		config.getI18n().get("fr").setCardName("{BRAND} {MODEL}");
+		config.getI18n().get("fr").setDisplayName("{BRAND}");
+		config.getI18n().get("fr").setPageTitle("{BRAND} {MODEL} - {DIAGONALE_POUCES} {ATTRIBUTE_NOT_EXIST}");
 
 		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
-		when(blablaService.generateBlabla(anyString(), any())).thenReturn("TV");
 
 		Product product = new Product(100L);
 		product.setVertical("tv");
@@ -205,16 +193,29 @@ class NamesAggregationServiceTest {
 
 		service.onProduct(product, config);
 
-		assertThat(product.getNames().getCardTitle().get("fr")).isEqualTo("Samsung Galaxy TV");
-		assertThat(product.getNames().getShortName().get("fr")).isEqualTo("Samsung");
-		// Attribute resolution + whitespace normalization (empty attribute replaced by empty string)
-		assertThat(product.getNames().getLongName().get("fr")).isEqualTo("Samsung Galaxy TV - 55");
+		assertThat(product.getNames().getCardName().get("fr")).isEqualTo("Samsung Galaxy TV");
+		assertThat(product.getNames().getDisplayName().get("fr")).isEqualTo("Samsung Galaxy TV");
+		assertThat(product.getNames().getPageTitle().get("fr")).isEqualTo("Samsung Galaxy TV");
+	}
+
+	@Test
+	void onProduct_shouldRejectLegacyRawTemplates() throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig config = buildVerticalConfig();
+		config.getI18n().get("fr").setDisplayName("[(${p.brand()})] [(${p.model()})]");
+
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
+
+		Product product = new Product(101L);
+		product.setVertical("tv");
+
+		service.onProduct(product, config);
+
+		assertThat(product.getNames().getDisplayName().get("fr")).isEqualTo("101");
 	}
 	@Test
 	void onProduct_shouldRecomputeEmbeddingWhenBrandChanges() throws AggregationSkipException, InvalidParameterException {
 		VerticalConfig config = buildVerticalConfig();
 		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
-		when(blablaService.generateBlabla(anyString(), any())).thenReturn("pref");
 		when(embeddingService.embed(anyString())).thenReturn(new float[] { 0.1f, 0.2f });
 
 		Product product = new Product(10L);
@@ -239,7 +240,6 @@ class NamesAggregationServiceTest {
 	void onProduct_shouldRecomputeEmbeddingWhenOfferCountChanges() throws AggregationSkipException, InvalidParameterException {
 		VerticalConfig config = buildVerticalConfig();
 		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
-		when(blablaService.generateBlabla(anyString(), any())).thenReturn("pref");
 		when(embeddingService.embed(anyString())).thenReturn(new float[] { 0.3f, 0.4f });
 
 		Product product = new Product(11L);
@@ -263,7 +263,6 @@ class NamesAggregationServiceTest {
 			throws AggregationSkipException, InvalidParameterException {
 		VerticalConfig config = buildVerticalConfig();
 		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
-		when(blablaService.generateBlabla(anyString(), any())).thenReturn("pref");
 		when(embeddingService.embed(anyString())).thenReturn(new float[] { 0.3f, 0.4f });
 
 		Product product = new Product(12L);
@@ -283,7 +282,6 @@ class NamesAggregationServiceTest {
 	void onProduct_shouldSkipEmbeddingWhenTextUnchanged() throws AggregationSkipException, InvalidParameterException {
 		VerticalConfig config = buildVerticalConfig();
 		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
-		when(blablaService.generateBlabla(anyString(), any())).thenReturn("pref");
 		when(embeddingService.embed(anyString())).thenReturn(new float[] { 0.1f, 0.2f });
 
 		Product product = new Product(8L);

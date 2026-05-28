@@ -36,7 +36,7 @@ public record SearchSuggestProductDto(
         @Schema(description = "Native Elasticsearch score associated with the hit.", example = "1.85")
         Double score,
         
-        @Schema(description = "Pretty name of the product.", example = "Samsung TV 55 inches")
-        String prettyName
+        @Schema(description = "Canonical display name of the product.", example = "Samsung TV 55 inches")
+        String displayName
 ) {
 }

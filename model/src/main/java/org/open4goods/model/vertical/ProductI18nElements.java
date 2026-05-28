@@ -9,20 +9,15 @@ public class ProductI18nElements {
 	@JsonMerge
 	private PrefixedAttrText url = new PrefixedAttrText();
 	@JsonMerge
-	private PrefixedAttrText h1Title = new PrefixedAttrText();
+	private String displayName;
 	@JsonMerge
-	private PrefixedAttrText prettyName = new PrefixedAttrText();
+	private String cardName;
 	@JsonMerge
-	private PrefixedAttrText singular = new PrefixedAttrText();
+	private String pageTitle;
+	@JsonMerge
+	private String seoName;
 	@JsonMerge
 	private List<String> designation = new ArrayList<>();
-
-	@JsonMerge
-	private String cardTitle;
-	@JsonMerge
-	private String shortName;
-	@JsonMerge
-	private String longName;
 
 
 
@@ -87,33 +82,37 @@ public class ProductI18nElements {
 		this.url = url;
 	}
 
-	public PrefixedAttrText getH1Title() {
-		return h1Title;
+	public String getDisplayName() {
+		return displayName;
 	}
 
-	public void setH1Title(PrefixedAttrText h1Title) {
-		this.h1Title = h1Title;
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
 	}
 
-	public PrefixedAttrText getPrettyName() {
-		return prettyName;
+	public String getCardName() {
+		return cardName;
 	}
 
-	public void setPrettyName(PrefixedAttrText prettyName) {
-		this.prettyName = prettyName;
+	public void setCardName(String cardName) {
+		this.cardName = cardName;
 	}
 
-	/**
-	 * Return the singular form configured for product naming.
-	 */
-	public PrefixedAttrText getSingular() {
-		return singular;
+	public String getPageTitle() {
+		return pageTitle;
 	}
 
-	public void setSingular(PrefixedAttrText singular) {
-		this.singular = singular;
+	public void setPageTitle(String pageTitle) {
+		this.pageTitle = pageTitle;
 	}
 
+	public String getSeoName() {
+		return seoName;
+	}
+
+	public void setSeoName(String seoName) {
+		this.seoName = seoName;
+	}
 
 	/**
 	 * Return the designation variants configured for product naming.
@@ -200,27 +199,4 @@ public class ProductI18nElements {
 		this.aiConfigs = aiConfigs;
 	}
 
-	public String getCardTitle() {
-		return cardTitle;
-	}
-
-	public void setCardTitle(String cardTitle) {
-		this.cardTitle = cardTitle;
-	}
-
-	public String getShortName() {
-		return shortName;
-	}
-
-	public void setShortName(String shortName) {
-		this.shortName = shortName;
-	}
-
-	public String getLongName() {
-		return longName;
-	}
-
-	public void setLongName(String longName) {
-		this.longName = longName;
-	}
 }

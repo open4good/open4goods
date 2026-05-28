@@ -37,9 +37,7 @@ const getProductIdentifier = (product: ProductDto): string | null => {
 }
 
 const resolveProductName = (product: ProductDto): string => {
-  return (
-    resolveProductShortName(product) || product.names?.longestOfferName || '#'
-  )
+  return resolveProductShortName(product) || '#'
 }
 
 const resolveProductImage = (product: ProductDto): string | undefined => {

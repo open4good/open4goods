@@ -702,10 +702,10 @@ public class Product implements Standardisable {
 	 * <p>
 	 * Resolution order:
 	 * <ol>
-	 *     <li>short name</li>
-	 *     <li>long name</li>
-	 *     <li>H1 title</li>
-	 *     <li>pretty name</li>
+	 *     <li>display name</li>
+	 *     <li>card name</li>
+	 *     <li>page title</li>
+	 *     <li>SEO name</li>
 	 *     <li>{@link #bestName()}</li>
 	 * </ol>
 	 * </p>
@@ -714,27 +714,27 @@ public class Product implements Standardisable {
 	 * @return the preferred name, never {@code null}
 	 */
 	public String preferredName(final String language) {
-		String resolved = resolveLocalisedName(names == null ? null : names.getShortName(), language);
+		String resolved = resolveLocalisedName(names == null ? null : names.getDisplayName(), language);
 		if (StringUtils.isNotBlank(resolved)) {
 			return resolved;
 		}
 
-		resolved = resolveLocalisedName(names == null ? null : names.getLongName(), language);
+		resolved = resolveLocalisedName(names == null ? null : names.getCardName(), language);
 		if (StringUtils.isNotBlank(resolved)) {
 			return resolved;
 		}
 
-		resolved = resolveLocalisedName(names == null ? null : names.getH1Title(), language);
+		resolved = resolveLocalisedName(names == null ? null : names.getPageTitle(), language);
 		if (StringUtils.isNotBlank(resolved)) {
 			return resolved;
 		}
 
-		resolved = resolveLocalisedName(names == null ? null : names.getPrettyName(), language);
+		resolved = resolveLocalisedName(names == null ? null : names.getSeoName(), language);
 		if (StringUtils.isNotBlank(resolved)) {
 			return resolved;
 		}
 
-		return bestName();
+		return ProductNameResolver.resolve(this, null);
 	}
 
 	/**

@@ -30,10 +30,8 @@ public class UiHelper {
 		this.product = product;
 
 		// Maybe not the best way to inject texts
-		texts.put("title", product.getNames().getH1Title().i18n(request.getLocale().getLanguage()));
+		texts.put("title", product.getNames().getPageTitle().i18n(request.getLocale().getLanguage()));
 		texts.put("meta-description", product.getNames().getMetaDescription().i18n(request.getLocale().getLanguage()));
-		texts.put("twitter-description", product.getNames().getProductMetaTwitterDescription().i18n(request.getLocale().getLanguage()));
-		texts.put("twitter-title", product.getNames().getProductMetaTwitterTitle().i18n(request.getLocale().getLanguage()));
 		texts.put("opengraph-description", product.getNames().getProductMetaOpenGraphDescription().i18n(request.getLocale().getLanguage()));
 		texts.put("opengraph-title", product.getNames().getProductMetaOpenGraphTitle().i18n(request.getLocale().getLanguage()));
 

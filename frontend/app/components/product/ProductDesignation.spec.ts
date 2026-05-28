@@ -33,9 +33,9 @@ describe('ProductDesignation', () => {
       props: {
         product: buildProduct({
           names: {
-            cardTitle: 'Card title',
-            shortName: 'Short name',
-            longName: 'Long name',
+            cardName: 'Card title',
+            displayName: 'Short name',
+            pageTitle: 'Long name',
           },
         }),
         variant: 'card',
@@ -51,11 +51,11 @@ describe('ProductDesignation', () => {
     expect(wrapper.find('p').exists()).toBe(false)
   })
 
-  it('renders the H1 title on page variant', () => {
+  it('renders the page title on page variant', () => {
     const wrapper = mount(ProductDesignation, {
       props: {
         product: buildProduct({
-          names: { longName: 'Long name', h1Title: 'H1 title' },
+          names: { pageTitle: 'Page title' },
           aiReview: { review: { shortDescription: 'AI short description' } },
         }),
         variant: 'page',
@@ -68,7 +68,7 @@ describe('ProductDesignation', () => {
       },
     })
 
-    expect(wrapper.find('.title').text()).toBe('H1 title')
+    expect(wrapper.find('.title').text()).toBe('Page title')
     expect(wrapper.find('.description').exists()).toBe(false)
   })
 
@@ -76,7 +76,7 @@ describe('ProductDesignation', () => {
     const wrapper = mount(ProductDesignation, {
       props: {
         product: buildProduct({
-          names: { longName: 'Long name' },
+          names: { pageTitle: 'Long name' },
         }),
         variant: 'page',
       },

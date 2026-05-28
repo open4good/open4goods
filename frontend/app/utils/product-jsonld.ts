@@ -46,11 +46,11 @@ export interface ProductJsonLdInput {
     slug?: string | null
     fullSlug?: string | null
     names?: {
-      prettyName?: string | null
-      singular?: string | null
+      displayName?: string | null
+      seoName?: string | null
       metaDescription?: string | null
       ogDescription?: string | null
-      h1Title?: string | null
+      pageTitle?: string | null
     } | null
     base?: {
       bestName?: string | null
@@ -622,7 +622,7 @@ export const buildProductJsonLdGraph = (
         .join(' - ') || undefined,
     image: images,
     category:
-      normalizeString(product.names?.singular) ??
+      normalizeString(product.names?.seoName) ??
       normalizeString(product.base?.vertical),
     brand: brandName
       ? {

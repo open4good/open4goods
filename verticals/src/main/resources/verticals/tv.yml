@@ -227,27 +227,6 @@ i18n:
     # Product page meta and h1 title
     ##################################
     # The product h1 title. Constructed on the same basis than "url", but without the concatened hyphens
-    h1Title:
-      prefix: "|| TV | Télévision | Téléviseur ||"
-      attrs:
-        - BRAND
-        - TV_TYPE
-        - DIAGONALE_POUCES
-        - DISPLAY_TECHNOLOGY
-        - YEAR
-        - MODEL
-    prettyName:
-      prefix: "|| TV | Télévision | Téléviseur ||"
-      attrs:
-        - BRAND
-        - DIAGONALE_POUCES
-        - DISPLAY_TECHNOLOGY
-    singular:
-      prefix: "|| tv | télévision | téléviseur ||"
-      attrs: []
-    singularDesignation:
-      prefix: "|| du téléviseur | de cette télévision | de la télévision ||"
-      attrs: []
     designation:
       - "du téléviseur"
       - "de ce téléviseur"
@@ -255,15 +234,6 @@ i18n:
       - "de la télévision"
       - "de cet écran"
       - "de ce TV"
-    cardTitle: "[(${p.brand()})] [(${p.model()})]"
-    shortName: "Téléviseurs"
-    longName: "Téléviseurs et écrans TV"
-    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : eco-score, impact et meilleurs prix"
-    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : comparez l'eco-score, la consommation, la réparabilité et les meilleurs prix pour choisir un téléviseur plus responsable."
-    productMetaOpenGraphTitle: "[(${p.brand()})] [(${p.model()})] : eco-score et prix du téléviseur"
-    productMetaOpenGraphDescription: "Comparez l'impact environnemental, la consommation et le prix de ce téléviseur avec Nudger."
-    productMetaTwitterTitle: "[(${p.brand()})] [(${p.model()})] : eco-score TV"
-    productMetaTwitterDescription: "Eco-score, énergie, réparabilité et meilleurs prix pour ce téléviseur."
 
     ##################################
     # Vertical page elements
@@ -301,40 +271,12 @@ i18n:
     # Product page meta and h1 title
     ##################################
     # The product h1 title. Constructed on the same basis than "url", but without the concatened hyphens
-    h1Title:
-      prefix: "|| TV | Television ||"
-      attrs:
-        - TV_TYPE
-        - BRAND
-        - MODEL
-        - YEAR
-    prettyName:
-      prefix: "|| TV | Television ||"
-      attrs:
-        - BRAND
-        - DIAGONALE_POUCES
-        - DISPLAY_TECHNOLOGY
-    singular:
-      prefix: "|| tv | television ||"
-      attrs: []
-    singularDesignation:
-      prefix: "|| of the television | of this television ||"
-      attrs: []
     designation:
       - "of the television"
       - "of this television"
       - "of the TV"
       - "of this TV"
       - "of the screen"
-    cardTitle: "[(${p.brand()})] [(${p.model()})]"
-    shortName: "TVs"
-    longName: "Televisions and TV screens"
-    productMetaTitle: "[(${p.brand()})] [(${p.model()})]: eco-score, impact and best prices"
-    productMetaDescription: "[(${p.brand()})] [(${p.model()})]: compare the eco-score, energy use, repairability and best prices to choose a more responsible TV."
-    productMetaOpenGraphTitle: "[(${p.brand()})] [(${p.model()})]: TV eco-score and price"
-    productMetaOpenGraphDescription: "Compare this TV's environmental impact, energy use and price with Nudger."
-    productMetaTwitterTitle: "[(${p.brand()})] [(${p.model()})]: TV eco-score"
-    productMetaTwitterDescription: "Eco-score, energy, repairability and best prices for this TV."
 
     ##################################
     # Vertical page elements

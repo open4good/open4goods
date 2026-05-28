@@ -610,12 +610,10 @@ public class ReferentialHelperController
         for (ProductI18nElements i18n : vc.getI18n().values())
         {
             addTerm(terms, i18n.getVerticalHomeTitle());
-            addTerm(terms, i18n.getCardTitle());
-            addTerm(terms, i18n.getShortName());
-            if (i18n.getSingular() != null)
-            {
-                addTerm(terms, i18n.getSingular().getPrefix());
-            }
+            addTerm(terms, i18n.getCardName());
+            addTerm(terms, i18n.getDisplayName());
+            addTerm(terms, i18n.getPageTitle());
+            addTerm(terms, i18n.getSeoName());
         }
         return terms;
     }

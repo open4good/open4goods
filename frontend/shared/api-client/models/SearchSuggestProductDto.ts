@@ -74,11 +74,11 @@ export interface SearchSuggestProductDto {
    */
   score?: number
   /**
-   * Pretty name of the product.
+   * Canonical display name of the product.
    * @type {string}
    * @memberof SearchSuggestProductDto
    */
-  prettyName?: string
+  displayName?: string
 }
 
 /**
@@ -127,7 +127,7 @@ export function SearchSuggestProductDtoFromJSONTyped(
     bestPriceCurrency:
       json['bestPriceCurrency'] == null ? undefined : json['bestPriceCurrency'],
     score: json['score'] == null ? undefined : json['score'],
-    prettyName: json['prettyName'] == null ? undefined : json['prettyName'],
+    displayName: json['displayName'] == null ? undefined : json['displayName'],
   }
 }
 
@@ -155,6 +155,6 @@ export function SearchSuggestProductDtoToJSONTyped(
     bestPrice: value['bestPrice'],
     bestPriceCurrency: value['bestPriceCurrency'],
     score: value['score'],
-    prettyName: value['prettyName'],
+    displayName: value['displayName'],
   }
 }

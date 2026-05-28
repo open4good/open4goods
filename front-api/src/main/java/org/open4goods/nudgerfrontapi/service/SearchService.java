@@ -968,12 +968,12 @@ public class SearchService {
 		AggregatedPrice bestPrice = product.bestPrice();
 		Double bestPriceValue = bestPrice != null ? bestPrice.getPrice() : null;
 		Currency bestPriceCurrency = bestPrice != null ? bestPrice.getCurrency() : null;
-		String prettyName = null;
-		if (product.getNames() != null && product.getNames().getPrettyName() != null) {
-			prettyName = localise(product.getNames().getPrettyName(), domainLanguage);
+		String displayName = null;
+		if (product.getNames() != null && product.getNames().getDisplayName() != null) {
+			displayName = localise(product.getNames().getDisplayName(), domainLanguage);
 		}
 		return new ProductSuggestHit(model, brand, gtin, product.getCoverImagePath(), product.getVertical(),
-				ecoscoreValue, bestPriceValue, bestPriceCurrency, (double) hit.getScore(), prettyName);
+				ecoscoreValue, bestPriceValue, bestPriceCurrency, (double) hit.getScore(), displayName);
 	}
 
 	private SearchHits<Product> executeSuggestProductSearch(String sanitizedQuery, List<String> tokens) {
@@ -2534,7 +2534,7 @@ public class SearchService {
 	 * Product suggestion built from a lightweight Elasticsearch hit.
 	 */
 	public record ProductSuggestHit(String model, String brand, String gtin, String coverImagePath, String verticalId,
-			Double ecoscoreValue, Double bestPrice, Currency bestPriceCurrency, Double score, String prettyName) {
+			Double ecoscoreValue, Double bestPrice, Currency bestPriceCurrency, Double score, String displayName) {
 	}
 
 	private record VerticalSuggestionEntry(String verticalId, String languageKey, String imageSmall, String title,

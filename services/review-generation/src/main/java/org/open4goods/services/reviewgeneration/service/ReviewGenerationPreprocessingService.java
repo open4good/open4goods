@@ -469,8 +469,8 @@ public class ReviewGenerationPreprocessingService {
 			values.addAll(product.getOfferNames());
 		}
 		if (product.getNames() != null) {
-			addLocalisableValues(values, product.getNames().getPrettyName());
-			addLocalisableValues(values, product.getNames().getH1Title());
+			addLocalisableValues(values, product.getNames().getDisplayName());
+			addLocalisableValues(values, product.getNames().getPageTitle());
 		}
 		values.add(safeString(product.gtin()));
 		return values.stream().filter(value -> value != null && !value.isBlank())
@@ -1311,12 +1311,9 @@ public class ReviewGenerationPreprocessingService {
 				if (i18n.getDesignation() != null) {
 					i18n.getDesignation().forEach(term -> addVerticalEvidenceTerm(terms, term));
 				}
-				if (i18n.getSingular() != null) {
-					addVerticalEvidenceTerm(terms, i18n.getSingular().getPrefix());
-				}
-				if (i18n.getPrettyName() != null) {
-					addVerticalEvidenceTerm(terms, i18n.getPrettyName().getPrefix());
-				}
+				addVerticalEvidenceTerm(terms, i18n.getDisplayName());
+				addVerticalEvidenceTerm(terms, i18n.getPageTitle());
+				addVerticalEvidenceTerm(terms, i18n.getSeoName());
 			}
 		}
 		return terms.stream()
@@ -2186,6 +2183,20 @@ public class ReviewGenerationPreprocessingService {
 		return value == null ? "" : value;
 	}
 
+	private String verticalName(VerticalConfig verticalConfig) {
+		if (verticalConfig == null || verticalConfig.i18n("fr") == null) {
+			return "";
+		}
+		ProductI18nElements i18n = verticalConfig.i18n("fr");
+		if (i18n.getPageTitle() != null && !i18n.getPageTitle().isBlank()) {
+			return i18n.getPageTitle();
+		}
+		if (i18n.getVerticalHomeTitle() != null && !i18n.getVerticalHomeTitle().isBlank()) {
+			return i18n.getVerticalHomeTitle();
+		}
+		return safeString(verticalConfig.getId());
+	}
+
 	private boolean isProductRelevantResource(Product product, String url, String label) {
 		return isProductRelevantResource(product, url, label, false);
 	}
@@ -2412,7 +2423,7 @@ public class ReviewGenerationPreprocessingService {
 		promptVariables.put("PRODUCT_MODEL", product.model());
 		promptVariables.put("PRODUCT_GTIN", product.gtin());
 		promptVariables.put("PRODUCT", product);
-		promptVariables.put("VERTICAL_NAME", verticalConfig.i18n("fr").getH1Title().getPrefix());
+		promptVariables.put("VERTICAL_NAME", verticalName(verticalConfig));
 
 		String attributesList = verticalConfig.getAttributesConfig().getConfigs().stream()
 				.filter(attrConf -> !attrConf.getSynonyms().isEmpty())
@@ -2435,7 +2446,7 @@ public class ReviewGenerationPreprocessingService {
 				&& product.getRanking().getGlobalCount() > 0) {
 			impactScorePosition = String.format("Ce produit se classe %dème sur %d produits de la catégorie %s",
 					product.getRanking().getGlobalPosition(), product.getRanking().getGlobalCount(),
-					verticalConfig.i18n("fr").getH1Title().getPrefix());
+					verticalName(verticalConfig));
 		}
 		promptVariables.put("IMPACTSCORE_POSITION", impactScorePosition);
 

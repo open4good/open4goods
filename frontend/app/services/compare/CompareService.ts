@@ -95,9 +95,7 @@ const resolveTitle = (product: ProductDto): string => {
     resolveProductTitle(product, undefined, {
       preferLongName: true,
       preferH1Title: true,
-    }) ||
-    product.names?.longestOfferName ||
-    '#'
+    }) || '#'
   )
 }
 

@@ -95,38 +95,14 @@ i18n:
         - BRAND
         - MODEL
         - YEAR
-    h1Title:
-      prefix: "|| Climatiseur | Climatiseur mobile | Climatiseur réversible ||"
-      attrs:
-        - BRAND
-        - MODEL
-        - YEAR
-    prettyName:
-      prefix: "|| Climatiseur | Climatiseur mobile ||"
-      attrs:
-        - BRAND
-        - MODEL
-    singular:
-      prefix: "|| climatiseur | appareil de climatisation ||"
-      attrs: []
-    singularDesignation:
-      prefix: "|| du climatiseur | de ce climatiseur | de cet appareil de climatisation ||"
-      attrs: []
     designation:
       - "du climatiseur"
       - "de ce climatiseur"
       - "de cet appareil de climatisation"
       - "de la climatisation"
-    cardTitle: "{BRAND} {MODEL}"
-    shortName: "{BRAND} {MODEL}"
-    longName: "{BRAND} {MODEL}"
     verticalHomeUrl: "climatiseurs"
     verticalHomeTitle: "Climatiseurs"
     verticalHomeDescription: "Comparez les climatiseurs selon leur consommation électrique, leur efficacité et leur impact environnemental. Nudger vous aide à choisir un modèle adapté à votre logement sans négliger le coût d’usage ni la sobriété énergétique."
-    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix"
-    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, consommation électrique, compensation environnementale et meilleurs prix."
-    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore de [(${p.ecoscore()})]"
-    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : comparez l’impact environnemental et les meilleurs prix de ce climatiseur."
     productMetaOpenGraphType: "product"
 
   en:
@@ -136,38 +112,14 @@ i18n:
         - BRAND
         - MODEL
         - YEAR
-    h1Title:
-      prefix: "|| Air conditioner | Portable air conditioner | Reversible air conditioner ||"
-      attrs:
-        - BRAND
-        - MODEL
-        - YEAR
-    prettyName:
-      prefix: "|| Air conditioner | AC unit ||"
-      attrs:
-        - BRAND
-        - MODEL
-    singular:
-      prefix: "|| air conditioner | cooling appliance ||"
-      attrs: []
-    singularDesignation:
-      prefix: "|| of the air conditioner | of this air conditioner | of this cooling appliance ||"
-      attrs: []
     designation:
       - "of the air conditioner"
       - "of this air conditioner"
       - "of this cooling appliance"
       - "of the AC unit"
-    cardTitle: "{BRAND} {MODEL}"
-    shortName: "{BRAND} {MODEL}"
-    longName: "{BRAND} {MODEL}"
     verticalHomeUrl: "air-conditioners"
     verticalHomeTitle: "Air conditioners"
     verticalHomeDescription: "Compare air conditioners by electricity use, efficiency, and environmental impact. Nudger helps you choose a model that fits your room while keeping running costs and energy sobriety in view."
-    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, ecological offset and best prices"
-    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, electricity use, environmental offset and best prices."
-    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore [(${p.ecoscore()})]"
-    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : compare environmental impact and best prices for this air conditioner."
     productMetaOpenGraphType: "product"
 
 matchingCategories:

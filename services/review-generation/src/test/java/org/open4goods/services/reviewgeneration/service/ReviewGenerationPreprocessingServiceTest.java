@@ -871,7 +871,7 @@ class ReviewGenerationPreprocessingServiceTest {
     private VerticalConfig verticalConfig() {
         VerticalConfig verticalConfig = new VerticalConfig();
         ProductI18nElements i18n = new ProductI18nElements();
-        i18n.getH1Title().setPrefix("lave-linge");
+        i18n.setPageTitle("lave-linge");
         Map<String, ProductI18nElements> texts = new HashMap<>();
         texts.put("fr", i18n);
         texts.put("default", i18n);

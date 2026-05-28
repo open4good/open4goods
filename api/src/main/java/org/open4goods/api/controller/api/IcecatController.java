@@ -210,13 +210,12 @@ public class IcecatController {
 			addTerm(terms, vc.getId().replace('-', ' ').replace('_', ' '));
 		}
 		vc.getI18n().values().forEach(i18n -> {
-			addTerm(terms, i18n.getCardTitle());
-			addTerm(terms, i18n.getShortName());
-			addTerm(terms, i18n.getLongName());
+			addTerm(terms, i18n.getCardName());
+			addTerm(terms, i18n.getDisplayName());
+			addTerm(terms, i18n.getPageTitle());
+			addTerm(terms, i18n.getSeoName());
 			addTerm(terms, i18n.getVerticalHomeTitle());
 			addTerm(terms, i18n.getVerticalMetaTitle());
-			addTerm(terms, i18n.getPrettyName().getPrefix());
-			addTerm(terms, i18n.getSingular().getPrefix());
 		});
 		return terms;
 	}

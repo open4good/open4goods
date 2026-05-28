@@ -68,7 +68,7 @@ class IcecatControllerTest {
         vertical.setId("washing-machines");
         vertical.setIcecatTaxonomyId(123);
         ProductI18nElements i18n = new ProductI18nElements();
-        i18n.setLongName("Washing machines");
+        i18n.setPageTitle("Washing machines");
         vertical.getI18n().put("en", i18n);
 
         IcecatCategoryDocument configured = category(123, "Washing Machines");

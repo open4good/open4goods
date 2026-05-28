@@ -120,38 +120,14 @@ i18n:
         - BRAND
         - MODEL
         - YEAR
-    h1Title:
-      prefix: "|| Four | Fours ||"
-      attrs:
-        - BRAND
-        - MODEL
-        - YEAR
-    prettyName:
-      prefix: "|| Four | Fours ||"
-      attrs:
-        - BRAND
-        - MODEL
-    singular:
-      prefix: "|| four | four encastrable | four électrique ||"
-      attrs: []
-    singularDesignation:
-      prefix: "|| du four | de ce four | de ce four encastrable | de ce four électrique | de cet appareil ||"
-      attrs: []
     designation:
       - "du four"
       - "de ce four"
       - "de ce four encastrable"
       - "de ce four électrique"
       - "de cet appareil"
-    cardTitle: "[(${p.brand()})] [(${p.model()})]"
-    shortName: "Fours"
-    longName: "Fours encastrables et posables"
 
     # Product metas (generic templates reused)
-    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, consommation et meilleurs prix"
-    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, consommation par cycle, efficacité énergétique et meilleurs prix."
-    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore de [(${p.ecoscore()})]"
-    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : comparez l'impact environnemental et les meilleurs prix de ce four."
     productMetaOpenGraphType: "product"
 
     # Vertical page elements
@@ -173,37 +149,13 @@ i18n:
         - BRAND
         - MODEL
         - YEAR
-    h1Title:
-      prefix: "|| Oven | Ovens ||"
-      attrs:
-        - BRAND
-        - MODEL
-        - YEAR
-    prettyName:
-      prefix: "|| Oven | Ovens ||"
-      attrs:
-        - BRAND
-        - MODEL
-    singular:
-      prefix: "|| oven | built-in oven | electric oven ||"
-      attrs: []
-    singularDesignation:
-      prefix: "|| of the oven | of this oven | of the built-in oven | of this appliance | of the cooker ||"
-      attrs: []
     designation:
       - "of the oven"
       - "of this oven"
       - "of the built-in oven"
       - "of this appliance"
       - "of the cooker"
-    cardTitle: "[(${p.brand()})] [(${p.model()})]"
-    shortName: "Ovens"
-    longName: "Built-in and freestanding ovens"
 
-    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, energy use and best prices"
-    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, cycle energy use, energy efficiency and best prices."
-    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore [(${p.ecoscore()})]"
-    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : compare this oven's environmental impact and best prices."
     productMetaOpenGraphType: "product"
 
     verticalHomeUrl: "ovens"

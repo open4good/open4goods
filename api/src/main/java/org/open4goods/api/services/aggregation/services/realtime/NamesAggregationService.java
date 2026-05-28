@@ -17,11 +17,13 @@ import org.open4goods.embedding.service.TextEmbeddingService;
 import org.open4goods.embedding.util.EmbeddingVectorUtils;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.services.textgen.BlablaService;
+import org.open4goods.model.Localisable;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductNameResolver;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.PrefixedAttrText;
 import org.open4goods.model.vertical.ProductI18nElements;
@@ -176,68 +178,18 @@ public class NamesAggregationService extends AbstractAggregationService {
 					// TODO : Should also concern the computed url
 
 
-					// ---- H1 Title ----
-					final boolean h1Missing =
-							data.getNames() == null
-							|| data.getNames().getH1Title() == null
-							|| data.getNames().getH1Title().get(lang) == null;
+					// ---- Canonical product names ----
+					if (data.getNames() != null) {
+						final boolean forceNames = vConf != null && vConf.isForceNameGeneration();
+						final String generatedDisplayName = computeSafeTemplate(data, tConf.getDisplayName());
+						final String generatedCardName = computeSafeTemplate(data, tConf.getCardName());
+						final String generatedPageTitle = computeSafeTemplate(data, tConf.getPageTitle());
+						final String generatedSeoName = computeSafeTemplate(data, tConf.getSeoName());
 
-					if ((vConf != null && vConf.isForceNameGeneration()) || data.getVertical() == null || h1Missing) {
-						if (data.getNames() != null && data.getNames().getH1Title() != null) {
-							data.getNames().getH1Title().put(lang, computePrefixedText(data, tConf.getH1Title(), " "));
-						}
-					}
-
-					// ---- Pretty Name ----
-					final boolean prettyMissing =
-							data.getNames() == null
-							|| data.getNames().getPrettyName() == null
-							|| data.getNames().getPrettyName().get(lang) == null;
-
-					if ((vConf != null && vConf.isForceNameGeneration()) || prettyMissing) {
-						if (data.getNames() != null && data.getNames().getPrettyName() != null) {
-							data.getNames().getPrettyName().put(lang,
-									computePrettyName(data, tConf.getPrettyName(), vConf, lang, " "));
-						}
-					}
-
-					// ---- Singular ----
-					final boolean singularMissing =
-							data.getNames() == null
-							|| data.getNames().getSingular() == null
-							|| data.getNames().getSingular().get(lang) == null;
-
-					if ((vConf != null && vConf.isForceNameGeneration()) || singularMissing) {
-						if (data.getNames() != null && data.getNames().getSingular() != null) {
-							data.getNames().getSingular().put(lang,
-									computePrettyName(data, tConf.getSingular(), vConf, lang, " "));
-						}
-					}
-
-
-
-					// ---- Card Title ----
-					if (tConf.getCardTitle() != null) {
-						String computed = computeTemplate(data, tConf.getCardTitle());
-						if (StringUtils.isNotBlank(computed)) {
-							data.getNames().getCardTitle().put(lang, computed);
-						}
-					}
-
-					// ---- Short Name ----
-					if (tConf.getShortName() != null) {
-						String computed = computeTemplate(data, tConf.getShortName());
-						if (StringUtils.isNotBlank(computed)) {
-							data.getNames().getShortName().put(lang, computed);
-						}
-					}
-
-					// ---- Long Name ----
-					if (tConf.getLongName() != null) {
-						String computed = computeTemplate(data, tConf.getLongName());
-						if (StringUtils.isNotBlank(computed)) {
-							data.getNames().getLongName().put(lang, computed);
-						}
+						putCanonicalName(data, lang, data.getNames().getDisplayName(), generatedDisplayName, forceNames);
+						putCanonicalName(data, lang, data.getNames().getCardName(), generatedCardName, forceNames);
+						putCanonicalName(data, lang, data.getNames().getPageTitle(), generatedPageTitle, forceNames);
+						putCanonicalName(data, lang, data.getNames().getSeoName(), generatedSeoName, forceNames);
 					}
 
 
@@ -442,6 +394,32 @@ public class NamesAggregationService extends AbstractAggregationService {
 	}
 
 	/**
+	 * Persist a canonical localized product name when missing or forced.
+	 *
+	 * @param data product to name
+	 * @param lang localization key
+	 * @param target target localisable field
+	 * @param generatedName optional generated name from vertical configuration
+	 * @param forceNames whether existing names must be replaced
+	 */
+	private void putCanonicalName(final Product data, final String lang, final Localisable<String, String> target,
+			final String generatedName, final boolean forceNames) {
+		if (target == null || (!forceNames && StringUtils.isNotBlank(target.get(lang)))) {
+			return;
+		}
+
+		String resolved = ProductNameResolver.resolve(data, generatedName);
+		if (StringUtils.isNotBlank(resolved) && !ProductNameResolver.containsUnresolvedTemplate(resolved)) {
+			target.put(lang, resolved);
+		}
+	}
+
+	private String computeSafeTemplate(final Product data, final String template) {
+		String computed = computeTemplate(data, template);
+		return ProductNameResolver.isSafeProductName(computed, data) ? computed : "";
+	}
+
+	/**
 	 * Normalizes a raw offer name.
 	 *
 	 * @param name raw name
@@ -508,12 +486,14 @@ public class NamesAggregationService extends AbstractAggregationService {
 			}
 		}
 
-		// Localized vertical prefix (e.g., H1 prefix)
+		// Localized vertical product naming hints.
 		if (vConf != null && vConf.getI18n() != null) {
 			vConf.getI18n().values().stream()
-					.map(ProductI18nElements::getH1Title)
-					.filter(java.util.Objects::nonNull)
-					.map(PrefixedAttrText::getPrefix)
+					.flatMap(i18n -> java.util.stream.Stream.of(
+							i18n.getDisplayName(),
+							i18n.getCardName(),
+							i18n.getPageTitle(),
+							i18n.getSeoName()))
 					.filter(StringUtils::isNotBlank)
 					.forEach(chunks::add);
 		}

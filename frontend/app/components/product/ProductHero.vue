@@ -468,7 +468,7 @@ const handleCloseInlineGallery = () => {
 }
 
 const productVerticalName = computed(() =>
-  normalizeString(props.product.names?.singular)
+  normalizeString(props.product.names?.seoName)
 )
 const productBrandName = computed(() =>
   normalizeString(props.product.identity?.brand)

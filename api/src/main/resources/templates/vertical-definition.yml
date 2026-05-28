@@ -41,24 +41,7 @@ i18n:
       # Product page meta and h1 title 
       ##################################
       # The product h1 title. Constructed on the same basis than "url", but without the concatened hyphens
-      h1Title:  
-        prefix: "[(${h1Prefix})]"
-        attrs:
-          - BRAND
-          - MODEL
-          - YEAR
-      # Singular product name (same structure as prettyName)
-      singular:
-        prefix: "[(${singularPrefix})]"
-        attrs:
-          - BRAND
-          - MODEL
-      # Singular designation (grammatical designation of the product)
-      singularDesignation:
-        prefix: "[(${singularDesignationPrefix})]"
-        attrs:
-          - BRAND
-          - MODEL
+      # Grammatical designation variants for review copy.
       designation: []
         
       ##################################
@@ -143,5 +126,4 @@ attributesConfig:
   ##################################################################################################################      
   configs: [] 
   
-
 

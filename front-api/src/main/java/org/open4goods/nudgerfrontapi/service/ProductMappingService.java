@@ -43,6 +43,7 @@ import org.open4goods.model.product.ExternalIds;
 import org.open4goods.model.product.GtinInfo;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductCondition;
+import org.open4goods.model.product.ProductNameResolver;
 import org.open4goods.model.product.ProductTexts;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.rating.Cardinality;
@@ -566,22 +567,29 @@ public class ProductMappingService {
         if (product.getNames() == null) {
             return null;
         }
-        List<String> designations = resolveDesignationVariants(product, vConfig, domainLanguage);
         return new ProductNamesDto(
-                resolveLocalisedString(product.getNames().getH1Title(), domainLanguage, locale),
-                resolveLocalisedString(product.getNames().getPrettyName(), domainLanguage, locale),
-                resolveLocalisedString(product.getNames().getSingular(), domainLanguage, locale),
-
-                designations,
+                safeCanonicalName(product, resolveLocalisedString(product.getNames().getDisplayName(), domainLanguage, locale)),
+                safeCanonicalName(product, resolveLocalisedString(product.getNames().getCardName(), domainLanguage, locale)),
+                safeCanonicalName(product, resolveLocalisedString(product.getNames().getPageTitle(), domainLanguage, locale)),
+                safeCanonicalName(product, resolveLocalisedString(product.getNames().getSeoName(), domainLanguage, locale)),
                 resolveLocalisedString(product.getNames().getMetaDescription(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getProductMetaOpenGraphTitle(), domainLanguage, locale),
-                resolveLocalisedString(product.getNames().getProductMetaOpenGraphDescription(), domainLanguage, locale),
-                resolveLocalisedString(product.getNames().getCardTitle(), domainLanguage, locale),
-                resolveLocalisedString(product.getNames().getShortName(), domainLanguage, locale),
-                resolveLocalisedString(product.getNames().getLongName(), domainLanguage, locale),
-                product.getOfferNames() == null ? Collections.emptySet() : new LinkedHashSet<>(product.getOfferNames()),
-                safeCall(product::longestOfferName),
-                safeCall(product::shortestOfferName));
+                resolveLocalisedString(product.getNames().getProductMetaOpenGraphDescription(), domainLanguage, locale));
+    }
+
+    /**
+     * Resolve a safe displayable product name, filtering unresolved templates
+     * and generic vertical labels.
+     *
+     * @param product product identity used by the resolver
+     * @param candidate candidate name
+     * @return safe candidate or resolver fallback
+     */
+    private String safeCanonicalName(Product product, String candidate) {
+        if (ProductNameResolver.isSafeProductName(candidate, product)) {
+            return candidate;
+        }
+        return ProductNameResolver.resolve(product, null);
     }
 
     /**
@@ -663,22 +671,22 @@ public class ProductMappingService {
             return null;
         }
 
-        String resolved = resolveLocalisedString(names.getShortName(), domainLanguage, locale);
+        String resolved = resolveLocalisedString(names.getDisplayName(), domainLanguage, locale);
         if (StringUtils.hasText(resolved)) {
             return resolved;
         }
 
-        resolved = resolveLocalisedString(names.getLongName(), domainLanguage, locale);
+        resolved = resolveLocalisedString(names.getCardName(), domainLanguage, locale);
         if (StringUtils.hasText(resolved)) {
             return resolved;
         }
 
-        resolved = resolveLocalisedString(names.getH1Title(), domainLanguage, locale);
+        resolved = resolveLocalisedString(names.getPageTitle(), domainLanguage, locale);
         if (StringUtils.hasText(resolved)) {
             return resolved;
         }
 
-        resolved = resolveLocalisedString(names.getPrettyName(), domainLanguage, locale);
+        resolved = resolveLocalisedString(names.getSeoName(), domainLanguage, locale);
         if (StringUtils.hasText(resolved)) {
             return resolved;
         }

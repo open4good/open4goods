@@ -268,15 +268,15 @@ import { useDebounceFn } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { useDisplay } from 'vuetify'
 import type {
-  SearchSuggestCategoryMatchDto,
-  SearchSuggestProductMatchDto,
+  SearchSuggestCategoryDto,
+  SearchSuggestProductDto,
   SearchSuggestResponseDto,
-  SuggestionItem,
 } from '~/shared/api-client'
 import { useAnalytics } from '~/composables/useAnalytics'
 import type {
   CategorySuggestionItem,
   ProductSuggestionItem,
+  SuggestionItem,
 } from '~/types/search-suggest'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 
@@ -635,7 +635,7 @@ const toAbsoluteUrl = (value?: string | null): string | null => {
 }
 
 const normalizeCategory = (
-  match: SearchSuggestCategoryMatchDto,
+  match: SearchSuggestCategoryDto,
   index: number
 ): CategorySuggestionItem | null => {
   const title =
@@ -664,15 +664,15 @@ const unknownProductLabel = computed(() =>
 )
 
 const normalizeProduct = (
-  match: SearchSuggestProductMatchDto,
+  match: SearchSuggestProductDto,
   index: number
 ): ProductSuggestionItem | null => {
   const brand = match.brand?.trim()
   const model = match.model?.trim()
-  const prettyName = match.prettyName?.trim()
+  const displayName = match.displayName?.trim()
 
   const title =
-    prettyName ||
+    displayName ||
     (brand && model
       ? `${brand} – ${model}`
       : brand || model || unknownProductLabel.value)

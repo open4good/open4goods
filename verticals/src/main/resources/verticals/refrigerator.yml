@@ -117,23 +117,6 @@ i18n:
         - BRAND
         - MODEL
         - YEAR
-    h1Title:
-      prefix: "Réfrigérateur"
-      attrs:
-        - BRAND
-        - MODEL
-        - YEAR
-    prettyName:
-      prefix: "Réfrigérateur"
-      attrs:
-        - BRAND
-        - MODEL
-    singular:
-      prefix: "|| réfrigérateur | frigo ||"
-      attrs: []
-    singularDesignation:
-      prefix: "|| du réfrigérateur | de ce réfrigérateur | du frigo | de ce frigo | de cet appareil ||"
-      attrs: []
     designation:
       - "du réfrigérateur"
       - "de ce réfrigérateur"
@@ -142,19 +125,12 @@ i18n:
       - "de cet appareil"
 
     # Product metas (generic templates reused)
-    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation écologique et meilleurs prix"
-    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation || écologique | environnementale || et meilleurs prix."
-    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore de [(${p.ecoscore()})]."
-    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, compensation || écologique | environnementale || et meilleurs prix."
     productMetaOpenGraphType: "product"
-    cardTitle: "[(${p.brand()})] [(${p.model()})]"
 
     # Vertical page elements
     verticalHomeUrl: "frigos"
     verticalHomeTitle: "Réfrigérateurs"
     verticalHomeDescription: "Comparez les réfrigérateurs selon leur impact environnemental, leur volume utile, leur classe énergétique et leur prix. Repérez les modèles les plus sobres pour conserver vos aliments avec moins d'électricité au quotidien."
-    shortName: "Frigos"
-    longName: "Réfrigérateurs"
 
     # A mapping beetween custom page names behind this vertical and wiki pages (sample)
   #    wikiPages:
@@ -170,23 +146,6 @@ i18n:
         - BRAND
         - MODEL
         - YEAR
-    h1Title:
-      prefix: "|| Refrigerator | Fridge | Built-in refrigerator | Fridge-freezer ||"
-      attrs:
-        - BRAND
-        - MODEL
-        - YEAR
-    prettyName:
-      prefix: "|| Refrigerator | Fridge ||"
-      attrs:
-        - BRAND
-        - MODEL
-    singular:
-      prefix: "|| refrigerator | fridge | fridge-freezer ||"
-      attrs: []
-    singularDesignation:
-      prefix: "|| of the refrigerator | of this refrigerator | of the fridge | of this fridge | of the appliance ||"
-      attrs: []
     designation:
       - "of the refrigerator"
       - "of this refrigerator"
@@ -194,18 +153,11 @@ i18n:
       - "of this fridge"
       - "of the appliance"
 
-    productMetaTitle: "[(${p.brand()})] [(${p.model()})] : Eco-score, ecological offset and best prices"
-    productMetaDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
-    productMetaOpenGraphTitle: "[(${p.brand()})] - [(${p.model()})] : Ecoscore [(${p.ecoscore()})]."
-    productMetaOpenGraphDescription: "[(${p.brand()})] [(${p.model()})] : Eco-score, || ecological | environmental || offset and best prices."
     productMetaOpenGraphType: "product"
-    cardTitle: "[(${p.brand()})] [(${p.model()})]"
 
     verticalHomeUrl: "refrigerators"
     verticalHomeTitle: "Refrigerators"
     verticalHomeDescription: "Compare refrigerators by environmental impact, useful capacity, energy class, and price. Find efficient models that keep food fresh while using less electricity every day."
-    shortName: "Fridges"
-    longName: "Refrigerators"
 
 #####################################################################################################################################
 # NUDGE TOOL CONFIGURATION

@@ -7,11 +7,10 @@ import {
 import type { ProductDto } from '~~/shared/api-client'
 
 describe('resolveProductTitle', () => {
-  it('prefers the H1 title over category-like long names for page titles', () => {
+  it('uses pageTitle for page titles', () => {
     const product: ProductDto = {
       names: {
-        h1Title: 'TV samsung 32 led gu32t5379cd',
-        longName: 'Téléviseurs et écrans TV',
+        pageTitle: 'TV samsung 32 led gu32t5379cd',
       },
       identity: {
         brand: 'Samsung',
@@ -19,61 +18,15 @@ describe('resolveProductTitle', () => {
       },
     }
 
-    const result = resolveProductLongName(product, 'fr-FR')
-
-    expect(result).toBe('TV SAMSUNG 32 led gu32t5379cd')
+    expect(resolveProductLongName(product, 'fr-FR')).toBe(
+      'TV SAMSUNG 32 led gu32t5379cd'
+    )
   })
 
-  it('should use longest offer name when no category is associated', () => {
-    const product: ProductDto = {
-      base: {
-        vertical: undefined, // No category
-      },
-      names: {
-        offerNames: new Set([
-          'Short Name',
-          'A very long offer name that should be picked',
-        ]),
-        longestOfferName: 'A very long offer name that should be picked',
-      },
-      identity: {
-        brand: 'Brand',
-        model: 'Model',
-      },
-    }
-
-    // Currently this might return "Brand - Model" or empty string if other names are missing
-    // We want it to return the longest offer name
-    const result = resolveProductShortName(product)
-
-    expect(result).toBe('A very long offer name that should be picked')
-  })
-
-  it('should compute longest offer name if explicit field is missing but offerNames set is present', () => {
-    const product: ProductDto = {
-      base: {
-        vertical: undefined,
-      },
-      names: {
-        offerNames: new Set(['Short', 'Longer Name']),
-        // longestOfferName missing
-      },
-      identity: {
-        brand: 'Brand',
-        model: 'Model',
-      },
-    }
-
-    const result = resolveProductShortName(product)
-
-    expect(result).toBe('Longer Name')
-  })
-
-  it('prefers card title over category-like short names for cards', () => {
+  it('uses displayName for short names', () => {
     const product: ProductDto = {
       names: {
-        cardTitle: 'Samsung GU32T5379CD',
-        shortName: 'Téléviseurs',
+        displayName: 'Samsung GU32T5379CD',
       },
       identity: {
         brand: 'Samsung',
@@ -81,57 +34,50 @@ describe('resolveProductTitle', () => {
       },
     }
 
-    const result = resolveProductCardName(product, 'fr-FR')
-
-    expect(result).toBe('Samsung GU32T5379CD')
+    expect(resolveProductShortName(product, 'fr-FR')).toBe('Samsung GU32T5379CD')
   })
 
-  it('uses product-specific card titles for short names when AI and generated short names are category-like', () => {
+  it('uses cardName for cards', () => {
     const product: ProductDto = {
-      base: {
-        vertical: 'televiseurs',
-      },
       names: {
-        cardTitle: 'Samsung GU32T5379CD',
-        shortName: 'Téléviseurs',
-        prettyName: 'Téléviseurs',
+        cardName: 'Samsung GU32T5379CD',
+        displayName: 'Samsung TV 32 pouces',
       },
       identity: {
         brand: 'Samsung',
         model: 'GU32T5379CD',
       },
-      aiReview: {
-        review: {
-          shortTitle: 'Téléviseurs',
-        },
-      },
     }
 
-    const result = resolveProductShortName(product, 'fr-FR')
-
-    expect(result).toBe('Samsung GU32T5379CD')
+    expect(resolveProductCardName(product, 'fr-FR')).toBe('Samsung GU32T5379CD')
   })
 
-  it('falls back to identity before generic AI review titles', () => {
+  it('falls back to identity before brand and model', () => {
     const product: ProductDto = {
-      base: {
-        vertical: 'fours',
-      },
       identity: {
         brand: 'Brand',
         model: 'Oven 42',
         bestName: 'Brand Oven 42',
       },
-      aiReview: {
-        review: {
-          shortTitle: 'Fours',
-          mediumTitle: 'Fours encastrables',
-        },
+      base: {
+        bestName: 'Base Name',
       },
     }
 
-    const result = resolveProductShortName(product, 'fr-FR')
+    expect(resolveProductShortName(product, 'fr-FR')).toBe('Brand Oven 42')
+  })
 
-    expect(result).toBe('Brand Oven 42')
+  it('does not expose unresolved raw templates', () => {
+    const product: ProductDto = {
+      names: {
+        cardName: '[(${p.brand()})] [(${p.model()})]',
+      },
+      identity: {
+        brand: 'Samsung',
+        model: 'GU32T5379CD',
+      },
+    }
+
+    expect(resolveProductCardName(product, 'fr-FR')).toBe('Samsung GU32T5379CD')
   })
 })

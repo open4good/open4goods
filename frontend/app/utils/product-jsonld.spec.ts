@@ -6,7 +6,7 @@ describe('product-jsonld', () => {
   const mockProduct = {
     gtin: 1234567890123,
     slug: 'test-product',
-    names: { singular: 'Test Product' },
+    names: { seoName: 'Test Product' },
     offers: {
       offersCount: 1,
       offersByCondition: {

@@ -28,7 +28,7 @@ const productMockData = {
   slug: 'rouleau-pour-couvre-livre-depliant-1-50x0-50',
   fullSlug: '8427973010706-rouleau-pour-couvre-livre-depliant-1-50x0-50',
   names: {
-    h1Title: 'Rouleau couvre livre',
+    pageTitle: 'Rouleau couvre livre',
   },
   identity: {
     brand: 'Editions',

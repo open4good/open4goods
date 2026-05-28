@@ -5,28 +5,20 @@ import org.open4goods.model.Localisable;
 public class ProductTexts {
 
 	private Localisable<String,String> url = new Localisable<>();
-	
-	private Localisable<String,String> h1Title = new Localisable<>();
 
-	private Localisable<String,String> prettyName = new Localisable<>();
+	private Localisable<String,String> displayName = new Localisable<>();
 
-	private Localisable<String,String> singular = new Localisable<>();
+	private Localisable<String,String> cardName = new Localisable<>();
 
+	private Localisable<String,String> pageTitle = new Localisable<>();
 
-
-	private Localisable<String,String> cardTitle = new Localisable<>();
-	private Localisable<String,String> shortName = new Localisable<>();
-	private Localisable<String,String> longName = new Localisable<>();
+	private Localisable<String,String> seoName = new Localisable<>();
 	
 	private Localisable<String,String> metaDescription = new Localisable<>();
 	
 	private Localisable<String,String> productMetaOpenGraphTitle = new Localisable<>();
 	
 	private Localisable<String,String> productMetaOpenGraphDescription = new Localisable<>();
-	
-	private Localisable<String,String> productMetaTwitterTitle = new Localisable<>();
-	
-	private Localisable<String,String> productMetaTwitterDescription = new Localisable<>();
 	
 
 	public Localisable<String, String> getUrl() {
@@ -37,56 +29,37 @@ public class ProductTexts {
 		this.url = url;
 	}
 
-	public Localisable<String, String> getH1Title() {
-		return h1Title;
+	public Localisable<String, String> getDisplayName() {
+		return displayName;
 	}
 
-	public void setH1Title(Localisable<String, String> h1Title) {
-		this.h1Title = h1Title;
+	public void setDisplayName(Localisable<String, String> displayName) {
+		this.displayName = displayName;
 	}
 
-	public Localisable<String, String> getPrettyName() {
-		return prettyName;
+	public Localisable<String, String> getCardName() {
+		return cardName;
 	}
 
-	public void setPrettyName(Localisable<String, String> prettyName) {
-		this.prettyName = prettyName;
+	public void setCardName(Localisable<String, String> cardName) {
+		this.cardName = cardName;
 	}
 
-	public Localisable<String, String> getSingular() {
-		return singular;
+	public Localisable<String, String> getPageTitle() {
+		return pageTitle;
 	}
 
-	public void setSingular(Localisable<String, String> singular) {
-		this.singular = singular;
+	public void setPageTitle(Localisable<String, String> pageTitle) {
+		this.pageTitle = pageTitle;
 	}
 
-
-
-	public Localisable<String, String> getCardTitle() {
-		return cardTitle;
+	public Localisable<String, String> getSeoName() {
+		return seoName;
 	}
 
-	public void setCardTitle(Localisable<String, String> cardTitle) {
-		this.cardTitle = cardTitle;
+	public void setSeoName(Localisable<String, String> seoName) {
+		this.seoName = seoName;
 	}
-
-	public Localisable<String, String> getShortName() {
-		return shortName;
-	}
-
-	public void setShortName(Localisable<String, String> shortName) {
-		this.shortName = shortName;
-	}
-
-	public Localisable<String, String> getLongName() {
-		return longName;
-	}
-
-	public void setLongName(Localisable<String, String> longName) {
-		this.longName = longName;
-	}
-
 
 	public Localisable<String, String> getMetaDescription() {
 		return metaDescription;
@@ -110,22 +83,6 @@ public class ProductTexts {
 
 	public void setProductMetaOpenGraphDescription(Localisable<String, String> productMetaOpenGraphDescription) {
 		this.productMetaOpenGraphDescription = productMetaOpenGraphDescription;
-	}
-
-	public Localisable<String, String> getProductMetaTwitterTitle() {
-		return productMetaTwitterTitle;
-	}
-
-	public void setProductMetaTwitterTitle(Localisable<String, String> productMetaTwitterTitle) {
-		this.productMetaTwitterTitle = productMetaTwitterTitle;
-	}
-
-	public Localisable<String, String> getProductMetaTwitterDescription() {
-		return productMetaTwitterDescription;
-	}
-
-	public void setProductMetaTwitterDescription(Localisable<String, String> productMetaTwitterDescription) {
-		this.productMetaTwitterDescription = productMetaTwitterDescription;
 	}
 
 	
