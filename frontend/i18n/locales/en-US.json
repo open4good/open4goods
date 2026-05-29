@@ -873,6 +873,12 @@
         "eyebrow": "Smart assistant"
       }
     },
+    "relatedSubcategories": {
+      "title": "Read more",
+      "subtitle": "Other focused selections",
+      "itemSubtitle": "Explore this subcategory",
+      "fallbackTitle": "Related selection"
+    },
     "products": {
       "compare": {
         "addMoreHint": "Select at least two products to start a comparison.",

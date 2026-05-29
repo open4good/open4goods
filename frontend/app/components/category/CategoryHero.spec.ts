@@ -101,6 +101,11 @@ describe('CategoryHero', () => {
 
     const section = wrapper.get('section')
     expect(section.attributes('aria-labelledby')).toBeTruthy()
+    expect(
+      wrapper.get('.category-hero__title').element.compareDocumentPosition(
+        wrapper.get('.category-hero__breadcrumbs').element
+      ) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
   })
 
   it('renders markdown description and right info card through MDC', async () => {
@@ -141,6 +146,29 @@ describe('CategoryHero', () => {
     })
     expect(wrapperWithoutImage.find('.category-hero__media').exists()).toBe(
       false
+    )
+  })
+
+  it('centers the hero copy only when no media or info card is rendered', async () => {
+    const soloWrapper = await mountComponent({
+      title: 'Centered category',
+      showImage: false,
+    })
+
+    expect(soloWrapper.get('.category-hero__wrapper').classes()).toContain(
+      'category-hero__wrapper--solo'
+    )
+
+    const infoWrapper = await mountComponent({
+      title: 'Left category',
+      showImage: false,
+      rightInfoCard: {
+        title: 'Did you know?',
+      },
+    })
+
+    expect(infoWrapper.get('.category-hero__wrapper').classes()).not.toContain(
+      'category-hero__wrapper--solo'
     )
   })
 })

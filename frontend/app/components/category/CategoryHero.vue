@@ -6,22 +6,27 @@
     data-testid="category-hero"
     variant="halo"
   >
-    <v-sheet class="category-hero__wrapper" elevation="0">
+    <v-sheet
+      class="category-hero__wrapper"
+      :class="{
+        'category-hero__wrapper--solo': !hasInfoCard && !shouldShowImage,
+      }"
+      elevation="0"
+    >
       <div class="category-hero__content">
-        <CategoryNavigationBreadcrumbs
-          v-if="heroBreadcrumbs.length"
-          v-bind="heroBreadcrumbProps"
-          class="category-hero__breadcrumbs animate-in-up"
-        />
-
         <div class="category-hero__copy">
           <h1
             :id="headingId"
-            class="category-hero__title animate-in-up"
-            style="--delay: 200ms"
+            class="category-hero__title"
           >
             {{ title }}
           </h1>
+          <CategoryNavigationBreadcrumbs
+            v-if="heroBreadcrumbs.length"
+            v-bind="heroBreadcrumbProps"
+            class="category-hero__breadcrumbs animate-in-up"
+            style="--delay: 250ms"
+          />
           <div
             v-if="description"
             class="category-hero__description animate-in-up"
@@ -59,7 +64,7 @@
       </aside>
 
       <div
-        v-else-if="image && showImage"
+        v-else-if="shouldShowImage"
         class="category-hero__media"
         aria-hidden="true"
       >
@@ -117,6 +122,7 @@ const hasInfoCard = computed(
     Boolean(props.rightInfoCard?.title?.trim()) ||
     Boolean(props.rightInfoCard?.body?.trim())
 )
+const shouldShowImage = computed(() => Boolean(props.image && props.showImage))
 
 const heroBreadcrumbs = computed<HeroBreadcrumbItem[]>(() => {
   const items = breadcrumbs.value
@@ -168,12 +174,20 @@ defineExpose({ headingId, t })
     border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.4)
     backdrop-filter: blur(18px)
 
+  &__wrapper--solo
+    justify-items: center
+    text-align: center
+
   &__content
     display: flex
     flex-direction: column
     gap: 1rem
     max-width: none
     width: 100%
+
+  &__wrapper--solo &__content
+    max-width: 840px
+    align-items: center
 
   &__breadcrumbs
     display: inline-flex
@@ -219,6 +233,13 @@ defineExpose({ headingId, t })
     flex-direction: column
     gap: 0.75rem
     align-items: flex-start
+
+  &__wrapper--solo &__copy
+    align-items: center
+    text-align: center
+
+  &__wrapper--solo &__description
+    text-align: center
 
   &__description
     margin: 0
@@ -305,6 +326,13 @@ defineExpose({ headingId, t })
 
   .category-hero__description
     text-align: left
+
+  .category-hero__wrapper--solo .category-hero__copy
+    align-items: center
+    text-align: center
+
+  .category-hero__wrapper--solo .category-hero__description
+    text-align: center
 
 @media (max-width: 959px)
   .category-hero__media

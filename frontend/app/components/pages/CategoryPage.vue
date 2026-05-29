@@ -7,7 +7,7 @@
       :image="heroImage"
       :breadcrumbs="pageBreadcrumbs"
       :eyebrow="pageEyebrow"
-      :show-image="isDesktop"
+      :show-image="false"
       :right-info-card="activeSubCategory?.heroBlock ?? null"
     />
 
@@ -145,6 +145,13 @@
                       clickable
                       @click="isNudgeWizardOpen = true"
                     />
+                    <CategoryRelatedSubcategoriesCard
+                      v-if="isSubCategoryPage"
+                      :subcategories="relatedSubCategories"
+                      :active-subcategory-id="activeSubCategory?.id"
+                      :active-subcategory-slug="activeSubCategory?.slug"
+                      :parent-url="category?.verticalHomeUrl"
+                    />
                   </div>
                 </template>
               </CategoryFiltersSidebar>
@@ -200,6 +207,13 @@
                     :aria-label="$t('category.filters.assistant.ariaLabel')"
                     clickable
                     @click="isNudgeWizardOpen = true"
+                  />
+                  <CategoryRelatedSubcategoriesCard
+                    v-if="isSubCategoryPage"
+                    :subcategories="relatedSubCategories"
+                    :active-subcategory-id="activeSubCategory?.id"
+                    :active-subcategory-slug="activeSubCategory?.slug"
+                    :parent-url="category?.verticalHomeUrl"
                   />
                 </div>
               </template>
@@ -394,6 +408,7 @@ import CategoryFastFilters from '~/components/category/CategoryFastFilters.vue'
 import CategoryHero from '~/components/category/CategoryHero.vue'
 import CategoryEcoscoreCard from '~/components/category/CategoryEcoscoreCard.vue'
 import CategoryFiltersSidebar from '~/components/category/CategoryFiltersSidebar.vue'
+import CategoryRelatedSubcategoriesCard from '~/components/category/CategoryRelatedSubcategoriesCard.vue'
 import CategoryResultsToolbar from '~/components/category/CategoryResultsToolbar.vue'
 import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
 import CategoryProductListView from '~/components/category/products/CategoryProductListView.vue'
@@ -667,6 +682,9 @@ const categoryDisplayName = computed(
     category.value?.verticalHomeDescription ??
     siteName.value
 )
+const relatedSubCategories = computed(() =>
+  category.value?.subCategories ?? []
+)
 const subCategoryBaseFilters = computed<FilterRequestDto | undefined>(() => {
   const activatedFilters = activeSubCategory.value?.activatedFilters ?? []
 
@@ -808,18 +826,7 @@ type StructuredDataScript = {
 }
 
 useHead(() => ({
-  link: [
-    { rel: 'canonical', href: canonicalUrl.value },
-    ...(heroImage.value && isDesktop.value
-      ? [
-          {
-            rel: 'preload',
-            as: 'image',
-            href: heroImage.value,
-          },
-        ]
-      : []),
-  ],
+  link: [{ rel: 'canonical', href: canonicalUrl.value }],
 }))
 
 const verticalId = computed(() => category.value?.id ?? null)

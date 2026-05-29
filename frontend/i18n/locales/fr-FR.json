@@ -678,10 +678,10 @@
         "title": "Filtres"
       },
       "title": "Filtres",
-      "globalTitle": "Filtres économiques",
+      "globalTitle": "Les sous",
       "hideImpact": "Masquer les filtres d'impact",
       "hideTechnical": "Masquer les filtres techniques",
-      "impactTitle": "Filtres d'impact",
+      "impactTitle": "La planète",
       "activeTitle": "Filtres actifs",
       "clearAllTooltip": "Effacer tous les filtres",
       "missingLabel": "Option sans libellé",
@@ -700,7 +700,7 @@
       },
       "showMoreImpact": "Plus de filtres",
       "showMoreTechnical": "Plus de filtres",
-      "technicalTitle": "Filtres techniques",
+      "technicalTitle": "La technique",
       "options": {
         "price.conditions": {
           "NEW": "Neuf",
@@ -751,6 +751,12 @@
         "subtitle": "Passe directement aux meilleures pistes de cette catégorie avec un accompagnement guidé.",
         "eyebrow": "Assistant intelligent"
       }
+    },
+    "relatedSubcategories": {
+      "title": "Lire plus",
+      "subtitle": "Autres sélections ciblées",
+      "itemSubtitle": "Explorer cette sous-catégorie",
+      "fallbackTitle": "Sélection associée"
     },
     "products": {
       "compare": {
