@@ -16,6 +16,7 @@ apis/IndexationApi.ts
 apis/OpenDataApi.ts
 apis/PartnerApi.ts
 apis/ProductApi.ts
+apis/ProfileApi.ts
 apis/QuotaApi.ts
 apis/ResourceAssetControllerApi.ts
 apis/ShareApi.ts
@@ -46,6 +47,7 @@ models/AiReviewSourceDto.ts
 models/AssistantConfigDto.ts
 models/AttributeConfigDto.ts
 models/AttributeParserConfig.ts
+models/AttributeReferentials.ts
 models/AttributesConfigDto.ts
 models/AuthTokensDto.ts
 models/BarcodeAggregationProperties.ts
@@ -70,6 +72,8 @@ models/DatavizHeroKpiValueDto.ts
 models/DatavizHeroStatsDto.ts
 models/DescriptionsAggregationConfig.ts
 models/DistanceResponse.ts
+models/EprelFeatureReferential.ts
+models/EtimFeatureReferential.ts
 models/ExposedDocsCategoryDto.ts
 models/ExposedDocsContentDto.ts
 models/ExposedDocsOverviewDto.ts
@@ -96,6 +100,7 @@ models/GlobalSearchResultDto.ts
 models/GlobalSearchVerticalGroupDto.ts
 models/GoogleCategoryDto.ts
 models/GoogleIndexationMetricsDto.ts
+models/IcecatFeatureReferential.ts
 models/ImpactScoreConfigDto.ts
 models/IpGeolocationResponse.ts
 models/IpQuotaCategory.ts
@@ -154,6 +159,8 @@ models/ProductTimelineEventDto.ts
 models/ProductTimelineEventSource.ts
 models/ProductTimelineEventType.ts
 models/ProductVideoDto.ts
+models/ProfileDashboardDto.ts
+models/ProfileMetricsDto.ts
 models/PromptTemplateDto.ts
 models/RecommandationChoice.ts
 models/RecommandationCriteria.ts
@@ -186,8 +193,10 @@ models/VerticalConfigDto.ts
 models/VerticalConfigFullDto.ts
 models/VerticalDatavizPlanDto.ts
 models/VerticalStatsDto.ts
+models/VerticalSubCategoryDto.ts
 models/VerticalSubsetDto.ts
 models/WikiPageConfig.ts
+models/WikidataPropertyReferential.ts
 models/XwikiContentBlocDto.ts
 models/index.ts
 runtime.ts
