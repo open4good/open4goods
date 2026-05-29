@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -68,6 +69,26 @@ class UrlFetchingServiceTest {
         } finally {
             server.stop(0);
         }
+    }
+
+    @Test
+    void fetchUrlAsync_AppliesRuntimeTimeoutOverrideWithoutMutatingConfiguredDomain() throws Exception {
+        UrlFetcherConfig config = new UrlFetcherConfig();
+        DomainConfig domainConfig = new DomainConfig();
+        domainConfig.setStrategy(FetchStrategy.HTTP);
+        domainConfig.setUserAgent("Open4GoodsTestAgent/1.0");
+        domainConfig.setTimeout(5000);
+
+        UrlFetchingService service = new UrlFetchingService(config, new SimpleMeterRegistry());
+        Method method = UrlFetchingService.class.getDeclaredMethod("withRuntimeOverrides", DomainConfig.class, Map.class);
+        method.setAccessible(true);
+
+        DomainConfig overridden = (DomainConfig) method.invoke(service, domainConfig,
+                Map.of(UrlFetchingService.FETCH_TIMEOUT_MS_HEADER, "15000"));
+
+        assertThat(overridden.getStrategy()).isEqualTo(FetchStrategy.HTTP);
+        assertThat(overridden.getTimeout()).isEqualTo(15000);
+        assertThat(domainConfig.getTimeout()).isEqualTo(5000);
     }
 
     private HttpServer startServer() throws IOException {

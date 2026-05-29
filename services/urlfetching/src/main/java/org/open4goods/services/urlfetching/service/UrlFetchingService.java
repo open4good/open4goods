@@ -43,6 +43,7 @@ public class UrlFetchingService {
     private static final String FETCH_MODE_HEADER = "X-Open4goods-Fetch-Mode";
     private static final String FETCH_PROVIDER_HEADER = "X-Open4goods-Fetch-Provider";
     private static final String PLAYWRIGHT_PROXY_HEADER = "X-Open4goods-Playwright-Proxy";
+    public static final String FETCH_TIMEOUT_MS_HEADER = "X-Open4goods-Fetch-Timeout-Ms";
     public static final String EXPECTED_GTIN_HEADER = "X-Open4goods-Expected-Gtin";
     public static final String FORCE_FETCH_HEADER = "X-Open4goods-Force-Fetch";
 
@@ -97,7 +98,7 @@ public class UrlFetchingService {
             domainConfig.setUserAgent("DefaultUserAgent/1.0");
             domainConfig.setStrategy(FetchStrategy.HTTP);
         }
-        domainConfig = withRuntimeStrategyOverride(domainConfig, headers);
+        domainConfig = withRuntimeOverrides(domainConfig, headers);
         boolean forcePlaywrightProxy = requestedPlaywrightProxy(headers);
         String expectedGtin = headers == null ? null : headers.get(EXPECTED_GTIN_HEADER); //TODO : Why expectedGtin is Empty ?
         Map<String, String> outboundHeaders = outboundHeaders(headers);
@@ -170,19 +171,21 @@ public class UrlFetchingService {
         }
     }
 
-    private DomainConfig withRuntimeStrategyOverride(DomainConfig original, Map<String, String> headers) {
+    private DomainConfig withRuntimeOverrides(DomainConfig original, Map<String, String> headers) {
         FetchStrategy override = requestedStrategy(headers);
-        if (override == null) {
+        Long timeoutOverride = requestedTimeout(headers);
+        if (override == null && timeoutOverride == null) {
             return original;
         }
         DomainConfig overridden = new DomainConfig();
         overridden.setUserAgent(original.getUserAgent());
-        overridden.setStrategy(override);
+        overridden.setStrategy(override == null ? original.getStrategy() : override);
         overridden.setCustomHeaders(original.getCustomHeaders());
-        overridden.setTimeout(original.getTimeout());
+        overridden.setTimeout(timeoutOverride == null ? original.getTimeout() : timeoutOverride);
         overridden.setRetryPolicy(original.getRetryPolicy());
         overridden.setBrowserChannel(original.getBrowserChannel());
-        logger.info("URL_FETCH phase=select runtimeStrategyOverride={}", override);
+        logger.info("URL_FETCH phase=select runtimeStrategyOverride={} runtimeTimeoutMs={}",
+                override, timeoutOverride);
         return overridden;
     }
 
@@ -210,6 +213,23 @@ public class UrlFetchingService {
         };
     }
 
+    private Long requestedTimeout(Map<String, String> headers) {
+        if (headers == null || headers.isEmpty()) {
+            return null;
+        }
+        String timeout = headers.get(FETCH_TIMEOUT_MS_HEADER);
+        if (timeout == null || timeout.isBlank()) {
+            return null;
+        }
+        try {
+            long parsed = Long.parseLong(timeout.trim());
+            return parsed > 0 ? parsed : null;
+        } catch (NumberFormatException e) {
+            logger.warn("URL_FETCH phase=select invalidRuntimeTimeout value={}", timeout);
+            return null;
+        }
+    }
+
     private Map<String, String> outboundHeaders(Map<String, String> headers) {
         if (headers == null || headers.isEmpty()) {
             return headers;
@@ -218,6 +238,7 @@ public class UrlFetchingService {
         outbound.remove(FETCH_MODE_HEADER);
         outbound.remove(FETCH_PROVIDER_HEADER);
         outbound.remove(PLAYWRIGHT_PROXY_HEADER);
+        outbound.remove(FETCH_TIMEOUT_MS_HEADER);
         outbound.remove(EXPECTED_GTIN_HEADER);
         outbound.remove(FORCE_FETCH_HEADER);
         return outbound.isEmpty() ? null : outbound;

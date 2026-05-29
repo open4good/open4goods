@@ -327,7 +327,7 @@ class ReviewGenerationPreprocessingServiceTest {
     }
 
     @Test
-    void preparePromptVariables_PersistsOpaquePdfResourcesFromOfficialProductPages() throws Exception {
+    void preparePromptVariables_PersistsOpaquePdfResourcesFromOfficialProductPagesWhenLabelIdentifiesProduct() throws Exception {
         properties.setMinMarkdownChars(20);
         properties.setSourceMinTokens(1);
         properties.setMinGlobalTokens(1);
@@ -344,7 +344,8 @@ class ReviewGenerationPreprocessingServiceTest {
             String markdown = "Hotpoint HIO3O41WFE official dishwasher content with programs, capacity and energy details.";
             return CompletableFuture.completedFuture(new FetchResponse(officialUrl, 200, markdown, markdown,
                     FetchStrategy.HTTP, List.of(), Set.of(), List.of(new org.open4goods.services.urlfetching.dto.ExtractedResource(
-                            pdfUrl, org.open4goods.services.urlfetching.dto.ResourceType.PDF, "link", "Download document")),
+                            pdfUrl, org.open4goods.services.urlfetching.dto.ResourceType.PDF, "link",
+                            "Hotpoint HIO3O41WFE user manual")),
                     false, null));
         });
 
@@ -661,7 +662,6 @@ class ReviewGenerationPreprocessingServiceTest {
                 new GoogleSearchResult("Electrolux EKG604000W cuisiniere prix", merchantUrl),
                 new GoogleSearchResult("Electrolux EKG604000W holder glass spare part", sparePartUrl),
                 new GoogleSearchResult("sparefixd Front Panel Screw Electrolux EKG604000W", amazonSpareUrl))));
-        when(promptService.estimateTokens(any(String.class))).thenReturn(300);
         when(urlFetchingService.fetchUrlAsync(any(String.class), any(Map.class))).thenAnswer(invocation ->
         {
             String url = invocation.getArgument(0);
@@ -676,11 +676,11 @@ class ReviewGenerationPreprocessingServiceTest {
         assertThatThrownBy(() -> service.preparePromptVariables(product, verticalConfig(), new ReviewGenerationStatus()))
                 .isInstanceOf(NotEnoughDataException.class);
 
-        assertThat(product.getReviewFacts()).extracting("url").containsExactly(merchantUrl);
+        assertThat(product.getReviewFacts()).isEmpty();
     }
 
     @Test
-    void preparePromptVariables_PersistsOpaqueOfficialPdfWhenSerpTitleIdentifiesProduct() throws Exception {
+    void preparePromptVariables_PersistsOpaqueOfficialSerpPdfWhenSerpTitleIdentifiesProduct() throws Exception {
         properties.setMaxSearch(1);
         properties.setLowQualityFallbackMaxSearch(0);
         properties.setMinMarkdownChars(20);
@@ -702,6 +702,69 @@ class ReviewGenerationPreprocessingServiceTest {
             assertThat(resource.getDatasourceName()).isEqualTo("manufacturer");
             assertThat(resource.getTags()).contains("official");
         });
+    }
+
+    @Test
+    void preparePromptVariables_DoesNotPersistOpaquePdfFromOfficialPageWithoutProductIdentifier() throws Exception {
+        properties.setMaxSearch(1);
+        properties.setLowQualityFallbackMaxSearch(0);
+        properties.setMinMarkdownChars(20);
+        properties.setSourceMinTokens(1);
+        properties.setMinGlobalTokens(1);
+        properties.setMinUrlCount(1);
+        properties.setMaxUrlsPerProduct(1);
+        Product product = product("Bosch", "HBG634BW1");
+        String officialUrl = "https://www.bosch-home.fr/fr/mkt-product/HBG634BW1";
+        String pdfUrl = "https://media3.bosch-home.com/Documents/20502352_CE_marking_conformity_letter_GR.pdf";
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse(List.of(
+                new GoogleSearchResult("Bosch HBG634BW1 official product page", officialUrl))));
+        when(promptService.estimateTokens(any(String.class))).thenReturn(300);
+        when(urlFetchingService.fetchUrlAsync(any(String.class), any(Map.class))).thenAnswer(invocation ->
+        {
+            String markdown = "Bosch HBG634BW1 official oven content with cooking modes, energy and dimensions.";
+            return CompletableFuture.completedFuture(new FetchResponse(officialUrl, 200, markdown, markdown,
+                    FetchStrategy.HTTP, List.of(), Set.of(), List.of(new org.open4goods.services.urlfetching.dto.ExtractedResource(
+                            pdfUrl, org.open4goods.services.urlfetching.dto.ResourceType.PDF, "link", "CE marking conformity letter")),
+                    false, null));
+        });
+
+        service.preparePromptVariables(product, verticalConfig(), new ReviewGenerationStatus());
+
+        assertThat(product.getResources()).noneSatisfy(resource ->
+                assertThat(resource.getUrl()).isEqualTo(pdfUrl));
+    }
+
+    @Test
+    void fetchWithFallbacks_UsesLongerRuntimeTimeoutForOfficialSources() throws Exception {
+        properties.setMinMarkdownChars(20);
+        String url = "https://www.electrolux.fr/kitchen/cooking/ovens/oven/eoc6p67wx/";
+        when(urlFetchingService.fetchUrlAsync(any(String.class), any(Map.class))).thenAnswer(invocation ->
+        {
+            String markdown = "Electrolux EOC6P67WX official oven content with steam, cooking and energy details.";
+            return CompletableFuture.completedFuture(new FetchResponse(url, 200, markdown, markdown,
+                    FetchStrategy.PLAYWRIGHT));
+        });
+
+        ReflectionTestUtils.invokeMethod(service, "fetchWithFallbacks", url, Map.of(), true);
+
+        ArgumentCaptor<Map> headersCaptor = ArgumentCaptor.forClass(Map.class);
+        org.mockito.Mockito.verify(urlFetchingService).fetchUrlAsync(org.mockito.ArgumentMatchers.eq(url),
+                headersCaptor.capture());
+        assertThat(headersCaptor.getValue())
+                .containsEntry(UrlFetchingService.FETCH_TIMEOUT_MS_HEADER, "15000");
+    }
+
+    @Test
+    void classifySource_TreatsOfficialProductPathAsOfficialBeforeSparePartText() {
+        Product product = product("Siemens", "HB774G1W1");
+        properties.setOfficialDomainsByBrand(Map.of("Siemens", List.of("siemens-home.bsh-group.com")));
+        GoogleSearchResult result = new GoogleSearchResult("Siemens HB774G1W1 official product",
+                "https://www.siemens-home.bsh-group.com/de/de/product/HB774G1W1");
+
+        Object sourceClass = ReflectionTestUtils.invokeMethod(service, "classifySource", product, result,
+                "Siemens HB774G1W1 replacement spare part wording appears in navigation.");
+
+        assertThat(sourceClass).hasToString("OFFICIAL_PRODUCT");
     }
 
     @Test

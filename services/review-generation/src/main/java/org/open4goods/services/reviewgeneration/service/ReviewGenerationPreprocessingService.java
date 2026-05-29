@@ -86,6 +86,7 @@ public class ReviewGenerationPreprocessingService {
 	private static final Pattern URL_MODEL_TOKEN_PATTERN = Pattern.compile(
 			"[A-Za-z]{1,10}\\d[A-Za-z0-9]{2,}(?:[-_/][A-Za-z0-9]{1,10}){0,3}|\\d[A-Za-z]{1,10}[A-Za-z0-9]{2,}(?:[-_/][A-Za-z0-9]{1,10}){0,3}");
 	private static final int OFFICIAL_MODEL_PROMOTION_THRESHOLD = 7;
+	private static final long OFFICIAL_FETCH_TIMEOUT_MS = 15000L;
 
 	private final ReviewGenerationConfig properties;
 	private final GoogleSearchService googleSearchService;
@@ -322,7 +323,7 @@ public class ReviewGenerationPreprocessingService {
 
 		// Fetch URL contents concurrently. PDFs are skipped: they will be persisted as
 		// resources for attributes extraction, not fed to the review prompt.
-		Map<String, CompletableFuture<FetchOutcome>> fetchFutures = scheduleFetches(sortedResults, customHeaders);
+		Map<String, CompletableFuture<FetchOutcome>> fetchFutures = scheduleFetches(product, sortedResults, customHeaders);
 
 		status.setStatus(ReviewGenerationStatus.Status.ANALYSING);
 		status.addMessage("Fetching URL content concurrently...");
@@ -753,6 +754,9 @@ public class ReviewGenerationPreprocessingService {
 		}
 		String evidence = normalizeForTextMatching(String.join(" ", result == null ? "" : safeString(result.title()),
 				result == null ? "" : safeString(result.link()), firstContentZone(content)));
+		if (result != null && isOfficialUrl(product, result) && isOfficialProductOrSupportPath(result)) {
+			return isOfficialSupportUrl(result) ? SourceClass.OFFICIAL_SUPPORT : SourceClass.OFFICIAL_PRODUCT;
+		}
 		if (containsAny(evidence, "spare part", "sparefixd", "replacement part", "piece detachee", "pieces detachees",
 				"pièce détachée", "pièces détachées", "ersatzteil", "ersatzteile", "onderdeel", "onderdelen",
 				"spare part", "spare parts", "replacement", "replacement part", "accessoire compatible",
@@ -786,6 +790,11 @@ public class ReviewGenerationPreprocessingService {
 		return SourceClass.UNKNOWN;
 	}
 
+	private boolean isAcceptedSourceClass(SourceClass sourceClass) {
+		return sourceClass == SourceClass.OFFICIAL_PRODUCT || sourceClass == SourceClass.OFFICIAL_SUPPORT
+				|| sourceClass == SourceClass.REVIEW || sourceClass == SourceClass.GUIDE;
+	}
+
 	private boolean containsAny(String haystack, String... needles) {
 		if (haystack == null || haystack.isBlank()) {
 			return false;
@@ -798,7 +807,7 @@ public class ReviewGenerationPreprocessingService {
 		return false;
 	}
 
-	private Map<String, CompletableFuture<FetchOutcome>> scheduleFetches(List<GoogleSearchResult> sortedResults,
+	private Map<String, CompletableFuture<FetchOutcome>> scheduleFetches(Product product, List<GoogleSearchResult> sortedResults,
 			Map<String, String> customHeaders) {
 		Map<String, CompletableFuture<FetchOutcome>> fetchFutures = new HashMap<>();
 		for (GoogleSearchResult result : sortedResults.stream().limit(properties.getMaxUrlsPerProduct()).toList()) {
@@ -808,7 +817,7 @@ public class ReviewGenerationPreprocessingService {
 			}
 			CompletableFuture<FetchOutcome> future = CompletableFuture.supplyAsync(() -> {
 				try {
-					return fetchWithFallbacks(url, customHeaders);
+					return fetchWithFallbacks(url, customHeaders, isOfficialUrl(product, result));
 				} catch (Exception e) {
 					logger.warn("Failed to fetch content from URL {}: {}", url, e.getMessage());
 					return new FetchOutcome(null, "fetch exception: " + e.getMessage());
@@ -868,6 +877,11 @@ public class ReviewGenerationPreprocessingService {
 			if (sourceClass == SourceClass.SPARE_PART || sourceClass == SourceClass.GENERIC_CATALOG) {
 				rejectedUrls.put(url, "low-quality source class: " + sourceClass.name());
 				logger.warn("Content from URL {} discarded due to low-quality source class {}", url, sourceClass);
+				continue;
+			}
+			if (!isAcceptedSourceClass(sourceClass)) {
+				rejectedUrls.put(url, "unsupported source class: " + sourceClass.name());
+				logger.warn("Content from URL {} discarded due to unsupported source class {}", url, sourceClass);
 				continue;
 			}
 			if (!hasExactProductEvidence(product, result, fetchResponse, content, exactEvidenceModels)) {
@@ -1112,7 +1126,7 @@ public class ReviewGenerationPreprocessingService {
 				.stream()
 				.filter(result -> !knownUrls.contains(result.link()))
 				.toList();
-		Map<String, CompletableFuture<FetchOutcome>> fallbackFutures = scheduleFetches(sortedFallbackResults,
+		Map<String, CompletableFuture<FetchOutcome>> fallbackFutures = scheduleFetches(product, sortedFallbackResults,
 				customHeaders);
 		fetchFutures.putAll(fallbackFutures);
 		return collectFetchedSources(product, sortedFallbackResults, fetchFutures, finalSourcesMap, finalTokensMap,
@@ -1212,7 +1226,8 @@ public class ReviewGenerationPreprocessingService {
 		List<GoogleSearchResult> sortedRetryResults = sortSearchResults(product, retryResults, preferredDomains).stream()
 				.filter(result -> !knownUrls.contains(result.link()))
 				.toList();
-		Map<String, CompletableFuture<FetchOutcome>> retryFutures = scheduleFetches(sortedRetryResults, customHeaders);
+		Map<String, CompletableFuture<FetchOutcome>> retryFutures = scheduleFetches(product, sortedRetryResults,
+				customHeaders);
 		fetchFutures.putAll(retryFutures);
 		return collectFetchedSources(product, sortedRetryResults, fetchFutures, finalSourcesMap, finalTokensMap,
 				finalSourceClasses, rejectedUrls, accumulatedTokens, brand, primaryModel, alternateModels, null,
@@ -1672,10 +1687,15 @@ public class ReviewGenerationPreprocessingService {
 	}
 
 	private FetchOutcome fetchWithFallbacks(String url, Map<String, String> customHeaders) {
+		return fetchWithFallbacks(url, customHeaders, false);
+	}
+
+	private FetchOutcome fetchWithFallbacks(String url, Map<String, String> customHeaders, boolean officialContext) {
 		Map<String, String> httpHeaders = new HashMap<>();
 		if (customHeaders != null) {
 			httpHeaders.putAll(customHeaders);
 		}
+		applyOfficialFetchHeaders(httpHeaders, officialContext);
 		httpHeaders.put("X-Open4goods-Fetch-Mode", "http");
 		FetchResponse response = fetchWithHeaders(url, httpHeaders, "HTTP_SIMPLE");
 		if (isValidFetch(response)) {
@@ -1688,6 +1708,7 @@ public class ReviewGenerationPreprocessingService {
 		if (customHeaders != null) {
 			playwrightHeaders.putAll(customHeaders);
 		}
+		applyOfficialFetchHeaders(playwrightHeaders, officialContext);
 		playwrightHeaders.put("X-Open4goods-Fetch-Mode", "playwright");
 		response = fetchWithHeaders(url, playwrightHeaders, "PLAYWRIGHT_HEADLESS");
 		if (isValidFetch(response)) {
@@ -1705,6 +1726,13 @@ public class ReviewGenerationPreprocessingService {
 			return new FetchOutcome(null, rejectionReason);
 		}
 		return new FetchOutcome(response, null);
+	}
+
+	private void applyOfficialFetchHeaders(Map<String, String> headers, boolean officialContext) {
+		if (!officialContext || headers == null) {
+			return;
+		}
+		headers.putIfAbsent(UrlFetchingService.FETCH_TIMEOUT_MS_HEADER, String.valueOf(OFFICIAL_FETCH_TIMEOUT_MS));
 	}
 
 	private FetchResponse fetchWithHeaders(String url, Map<String, String> headers, String strategy) {
@@ -1905,6 +1933,24 @@ public class ReviewGenerationPreprocessingService {
 				|| title.contains("mode d'emploi") || title.contains("manuel") || title.contains("manual");
 	}
 
+	private boolean isOfficialProductOrSupportPath(GoogleSearchResult result) {
+		if (result == null || result.link() == null || result.link().isBlank()) {
+			return false;
+		}
+		try {
+			String path = URI.create(result.link()).getPath();
+			String normalizedPath = path == null ? "" : path.toLowerCase(Locale.ROOT);
+			return normalizedPath.contains("/mkt-product/")
+					|| normalizedPath.contains("/product/")
+					|| normalizedPath.contains("/productservice/")
+					|| normalizedPath.contains("/supportdetail/")
+					|| normalizedPath.contains("/support/list/")
+					|| normalizedPath.contains("/support/model/");
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
 	private boolean isPdfUrl(String url) {
 		if (url == null || url.isBlank()) {
 			return false;
@@ -1979,11 +2025,7 @@ public class ReviewGenerationPreprocessingService {
 		if (isProductRelevantResource(product, extractedResource.url(), extractedResource.label(), true)) {
 			return true;
 		}
-		// Manufacturer pages often expose manuals through opaque CDN URLs whose label
-		// is just "Download document". The official page context is the product
-		// signal; explicit legal/privacy/catalog filters above still reject unrelated
-		// documents.
-		return isPdfUrl(extractedResource.url());
+		return false;
 	}
 
 	private boolean isClearlyNonProductDocument(String url, String label) {
@@ -2013,7 +2055,7 @@ public class ReviewGenerationPreprocessingService {
 				continue;
 			}
 			try {
-				FetchOutcome outcome = fetchWithFallbacks(url, customHeaders);
+				FetchOutcome outcome = fetchWithFallbacks(url, customHeaders, true);
 				FetchResponse response = outcome == null ? null : outcome.response();
 				if (response == null) {
 					logger.info("Official evidence fetch produced no response for UPC {}: url={}, reason={}",
