@@ -27,13 +27,7 @@
         />
 
         <div class="category-hero__copy">
-          <p
-            v-if="eyebrow"
-            class="category-hero__eyebrow animate-in-up"
-            style="--delay: 100ms"
-          >
-            {{ eyebrow }}
-          </p>
+         
           <h1
             :id="headingId"
             class="category-hero__title animate-in-up"
