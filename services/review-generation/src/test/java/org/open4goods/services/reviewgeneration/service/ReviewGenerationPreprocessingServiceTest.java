@@ -175,7 +175,7 @@ class ReviewGenerationPreprocessingServiceTest {
         product.setOfferNames(Set.of("Klarstein Velaire Lave Vaisselle 45cm Pose Libre - 10 Couverts"));
         when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse());
 
-        assertThatThrownBy(() -> service.preparePromptVariables(product, verticalConfig(), new ReviewGenerationStatus()))
+        assertThatThrownBy(() -> service.preparePromptVariables(product, new VerticalConfig(), new ReviewGenerationStatus()))
                 .isInstanceOf(NotEnoughDataException.class);
 
         ArgumentCaptor<GoogleSearchRequest> requestCaptor = ArgumentCaptor.forClass(GoogleSearchRequest.class);
