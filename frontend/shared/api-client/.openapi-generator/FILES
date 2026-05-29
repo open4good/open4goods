@@ -194,6 +194,8 @@ models/VerticalConfigFullDto.ts
 models/VerticalDatavizPlanDto.ts
 models/VerticalStatsDto.ts
 models/VerticalSubCategoryDto.ts
+models/VerticalSubCategoryHeroBlockDto.ts
+models/VerticalSubCategoryReadMoreDto.ts
 models/VerticalSubsetDto.ts
 models/WikiPageConfig.ts
 models/WikidataPropertyReferential.ts
