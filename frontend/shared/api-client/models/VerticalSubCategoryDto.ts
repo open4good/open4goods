@@ -27,6 +27,13 @@ import {
     VerticalSubCategoryHeroBlockDtoToJSON,
     VerticalSubCategoryHeroBlockDtoToJSONTyped,
 } from './VerticalSubCategoryHeroBlockDto';
+import type { VerticalSubCategoryReadMoreDto } from './VerticalSubCategoryReadMoreDto';
+import {
+    VerticalSubCategoryReadMoreDtoFromJSON,
+    VerticalSubCategoryReadMoreDtoFromJSONTyped,
+    VerticalSubCategoryReadMoreDtoToJSON,
+    VerticalSubCategoryReadMoreDtoToJSONTyped,
+} from './VerticalSubCategoryReadMoreDto';
 
 /**
  * 
@@ -65,6 +72,36 @@ export interface VerticalSubCategoryDto {
      */
     heroBlock?: VerticalSubCategoryHeroBlockDto;
     /**
+     * Optional expandable markdown copy displayed below the listing.
+     * @type {VerticalSubCategoryReadMoreDto}
+     * @memberof VerticalSubCategoryDto
+     */
+    readMore?: VerticalSubCategoryReadMoreDto;
+    /**
+     * Localized SEO meta title.
+     * @type {string}
+     * @memberof VerticalSubCategoryDto
+     */
+    metaTitle?: string;
+    /**
+     * Localized SEO meta description.
+     * @type {string}
+     * @memberof VerticalSubCategoryDto
+     */
+    metaDescription?: string;
+    /**
+     * Localized Open Graph title.
+     * @type {string}
+     * @memberof VerticalSubCategoryDto
+     */
+    metaOpenGraphTitle?: string;
+    /**
+     * Localized Open Graph description.
+     * @type {string}
+     * @memberof VerticalSubCategoryDto
+     */
+    metaOpenGraphDescription?: string;
+    /**
      * Optional image overriding the parent category image.
      * @type {string}
      * @memberof VerticalSubCategoryDto
@@ -100,6 +137,11 @@ export function VerticalSubCategoryDtoFromJSONTyped(json: any, ignoreDiscriminat
         'h1Title': json['h1Title'] == null ? undefined : json['h1Title'],
         'description': json['description'] == null ? undefined : json['description'],
         'heroBlock': json['heroBlock'] == null ? undefined : VerticalSubCategoryHeroBlockDtoFromJSON(json['heroBlock']),
+        'readMore': json['readMore'] == null ? undefined : VerticalSubCategoryReadMoreDtoFromJSON(json['readMore']),
+        'metaTitle': json['metaTitle'] == null ? undefined : json['metaTitle'],
+        'metaDescription': json['metaDescription'] == null ? undefined : json['metaDescription'],
+        'metaOpenGraphTitle': json['metaOpenGraphTitle'] == null ? undefined : json['metaOpenGraphTitle'],
+        'metaOpenGraphDescription': json['metaOpenGraphDescription'] == null ? undefined : json['metaOpenGraphDescription'],
         'image': json['image'] == null ? undefined : json['image'],
         'activatedFilters': json['activatedFilters'] == null ? undefined : ((json['activatedFilters'] as Array<any>).map(SubsetCriteriaFromJSON)),
     };
@@ -121,6 +163,11 @@ export function VerticalSubCategoryDtoToJSONTyped(value?: VerticalSubCategoryDto
         'h1Title': value['h1Title'],
         'description': value['description'],
         'heroBlock': VerticalSubCategoryHeroBlockDtoToJSON(value['heroBlock']),
+        'readMore': VerticalSubCategoryReadMoreDtoToJSON(value['readMore']),
+        'metaTitle': value['metaTitle'],
+        'metaDescription': value['metaDescription'],
+        'metaOpenGraphTitle': value['metaOpenGraphTitle'],
+        'metaOpenGraphDescription': value['metaOpenGraphDescription'],
         'image': value['image'],
         'activatedFilters': value['activatedFilters'] == null ? undefined : ((value['activatedFilters'] as Array<any>).map(SubsetCriteriaToJSON)),
     };

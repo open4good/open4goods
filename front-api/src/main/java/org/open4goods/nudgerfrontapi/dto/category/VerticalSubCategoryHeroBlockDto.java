@@ -7,11 +7,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
  *
  * @param title localized title for the hero information card
  * @param body localized markdown body for the hero information card
+ * @param mdiIcon Material Design icon displayed in the hero information card
  */
 public record VerticalSubCategoryHeroBlockDto(
         @Schema(description = "Localized title displayed in the hero information card.", example = "Le saviez-vous :")
         String title,
         @Schema(description = "Localized markdown body displayed in the hero information card.")
-        String body
+        String body,
+        @Schema(description = "Material Design icon displayed in the hero information card.", example = "mdi-lightbulb-on-outline")
+        String mdiIcon
 ) {
 }

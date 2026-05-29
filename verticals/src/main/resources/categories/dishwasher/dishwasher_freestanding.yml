@@ -1,0 +1,46 @@
+id: "dishwasher_freestanding"
+slug:
+  en: "freestanding-dishwasher"
+  fr: "lave-vaisselle-pose-libre"
+h1Title:
+  en: "Freestanding dishwashers"
+  fr: "Lave-vaisselle pose libre"
+description:
+  en: |-
+    Compare **freestanding dishwashers** that can be installed without built-in kitchen cabinetry, with energy, noise and capacity data in one place.
+  fr: |-
+    Comparez les **lave-vaisselles pose libre** a installer sans meuble de cuisine encastrant, avec les donnees d'energie, de bruit et de capacite au meme endroit.
+metaTitle:
+  en: "Freestanding dishwashers: compare models | Nudger"
+  fr: "Lave-vaisselle pose libre : comparer les modeles | Nudger"
+metaDescription:
+  en: "Compare freestanding dishwashers by capacity, noise, energy use, price and impact score before choosing a model."
+  fr: "Comparez les lave-vaisselles pose libre par capacite, bruit, energie, prix et score d'impact avant de choisir."
+metaOpenGraphTitle:
+  en: "Compare freestanding dishwashers"
+  fr: "Comparer les lave-vaisselles pose libre"
+metaOpenGraphDescription:
+  en: "A focused dishwasher selection for kitchens that do not need a built-in appliance."
+  fr: "Une selection ciblee de lave-vaisselles pour les cuisines qui n'ont pas besoin d'un appareil encastrable."
+readMore:
+  title:
+    en: "When is a freestanding dishwasher the right choice?"
+    fr: "Quand choisir un lave-vaisselle pose libre ?"
+  shortText:
+    en: |-
+      A freestanding dishwasher is often the simplest option when the kitchen is already equipped or when you want to keep installation flexible.
+    fr: |-
+      Un lave-vaisselle pose libre est souvent le choix le plus simple lorsque la cuisine est deja equipee ou quand vous voulez garder une installation flexible.
+  longText:
+    en: |-
+      Before comparing prices, check that the width, capacity and water connection match your kitchen. Then compare noise level, energy consumption and repairability indicators, because these criteria affect comfort and long-term cost.
+
+      This subcategory keeps the listing focused on freestanding models while preserving the usual Nudger comparison tools: impact score, prices, brands, offers and technical filters.
+    fr: |-
+      Avant de comparer les prix, verifiez que la largeur, la capacite et le raccordement d'eau correspondent a votre cuisine. Comparez ensuite le niveau sonore, la consommation d'energie et les indicateurs de reparabilite, car ils influencent le confort et le cout dans la duree.
+
+      Cette sous-categorie garde la liste centree sur les modeles pose libre tout en conservant les outils de comparaison Nudger : score d'impact, prix, marques, offres et filtres techniques.
+activatedFilters:
+  - field: "attributes.indexed.INSTALLATION_TYPE.value"
+    operator: "EQUALS"
+    value: "POSE LIBRE"

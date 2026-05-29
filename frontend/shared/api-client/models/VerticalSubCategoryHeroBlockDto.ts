@@ -30,6 +30,12 @@ export interface VerticalSubCategoryHeroBlockDto {
      * @memberof VerticalSubCategoryHeroBlockDto
      */
     body?: string;
+    /**
+     * Material Design icon displayed in the hero information card.
+     * @type {string}
+     * @memberof VerticalSubCategoryHeroBlockDto
+     */
+    mdiIcon?: string;
 }
 
 /**
@@ -51,6 +57,7 @@ export function VerticalSubCategoryHeroBlockDtoFromJSONTyped(json: any, ignoreDi
 
         'title': json['title'] == null ? undefined : json['title'],
         'body': json['body'] == null ? undefined : json['body'],
+        'mdiIcon': json['mdiIcon'] == null ? undefined : json['mdiIcon'],
     };
 }
 
@@ -67,5 +74,6 @@ export function VerticalSubCategoryHeroBlockDtoToJSONTyped(value?: VerticalSubCa
 
         'title': value['title'],
         'body': value['body'],
+        'mdiIcon': value['mdiIcon'],
     };
 }

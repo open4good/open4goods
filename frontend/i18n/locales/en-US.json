@@ -879,6 +879,10 @@
       "itemSubtitle": "Explore this subcategory",
       "fallbackTitle": "Related selection"
     },
+    "readMore": {
+      "showMore": "Read more",
+      "showLess": "Show less"
+    },
     "products": {
       "compare": {
         "addMoreHint": "Select at least two products to start a comparison.",

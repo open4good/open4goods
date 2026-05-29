@@ -52,6 +52,13 @@
         class="category-hero__info-card animate-in-up"
         style="--delay: 350ms"
       >
+        <v-avatar
+          class="category-hero__info-icon"
+          color="surface-primary-120"
+          size="40"
+        >
+          <v-icon :icon="infoCardIcon" size="22" />
+        </v-avatar>
         <h2 v-if="rightInfoCard?.title" class="category-hero__info-title">
           {{ rightInfoCard.title }}
         </h2>
@@ -121,6 +128,9 @@ const hasInfoCard = computed(
   () =>
     Boolean(props.rightInfoCard?.title?.trim()) ||
     Boolean(props.rightInfoCard?.body?.trim())
+)
+const infoCardIcon = computed(
+  () => props.rightInfoCard?.mdiIcon?.trim() || 'mdi-information-outline'
 )
 const shouldShowImage = computed(() => Boolean(props.image && props.showImage))
 
@@ -264,6 +274,10 @@ defineExpose({ headingId, t })
     border-radius: 8px
     background: rgba(var(--v-theme-surface-default), 0.78)
     box-shadow: 0 18px 42px -32px rgba(var(--v-theme-shadow-primary-600), 0.5)
+
+  &__info-icon
+    color: rgb(var(--v-theme-primary))
+    box-shadow: 0 10px 24px -18px rgba(var(--v-theme-shadow-primary-600), 0.55)
 
   &__info-title
     margin: 0

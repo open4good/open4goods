@@ -17,6 +17,8 @@ public class VerticalSubCategoryHeroBlock {
     @JsonMerge
     private Localisable<String, String> body = new Localisable<>();
 
+    private String mdiIcon;
+
     /**
      * Return localized card titles.
      *
@@ -53,9 +55,27 @@ public class VerticalSubCategoryHeroBlock {
         this.body = body;
     }
 
+    /**
+     * Return the Material Design icon decorating the hero information card.
+     *
+     * @return MDI icon name
+     */
+    public String getMdiIcon() {
+        return mdiIcon;
+    }
+
+    /**
+     * Set the Material Design icon decorating the hero information card.
+     *
+     * @param mdiIcon MDI icon name
+     */
+    public void setMdiIcon(String mdiIcon) {
+        this.mdiIcon = mdiIcon;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(body, title);
+        return Objects.hash(body, mdiIcon, title);
     }
 
     @Override
@@ -67,6 +87,7 @@ public class VerticalSubCategoryHeroBlock {
             return false;
         }
         VerticalSubCategoryHeroBlock other = (VerticalSubCategoryHeroBlock) obj;
-        return Objects.equals(title, other.title) && Objects.equals(body, other.body);
+        return Objects.equals(title, other.title) && Objects.equals(body, other.body)
+                && Objects.equals(mdiIcon, other.mdiIcon);
     }
 }

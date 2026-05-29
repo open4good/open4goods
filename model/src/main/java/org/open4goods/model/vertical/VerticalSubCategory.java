@@ -30,6 +30,21 @@ public class VerticalSubCategory {
     @JsonMerge
     private VerticalSubCategoryHeroBlock heroBlock;
 
+    @JsonMerge
+    private VerticalSubCategoryReadMore readMore;
+
+    @JsonMerge
+    private Localisable<String, String> metaTitle = new Localisable<>();
+
+    @JsonMerge
+    private Localisable<String, String> metaDescription = new Localisable<>();
+
+    @JsonMerge
+    private Localisable<String, String> metaOpenGraphTitle = new Localisable<>();
+
+    @JsonMerge
+    private Localisable<String, String> metaOpenGraphDescription = new Localisable<>();
+
     private String image;
 
     @JsonMerge
@@ -126,6 +141,96 @@ public class VerticalSubCategory {
     }
 
     /**
+     * Return the optional expandable editorial section.
+     *
+     * @return localized read-more content
+     */
+    public VerticalSubCategoryReadMore getReadMore() {
+        return readMore;
+    }
+
+    /**
+     * Set the optional expandable editorial section.
+     *
+     * @param readMore localized read-more content
+     */
+    public void setReadMore(VerticalSubCategoryReadMore readMore) {
+        this.readMore = readMore;
+    }
+
+    /**
+     * Return localized SEO meta titles.
+     *
+     * @return localized meta title values
+     */
+    public Localisable<String, String> getMetaTitle() {
+        return metaTitle;
+    }
+
+    /**
+     * Set localized SEO meta titles.
+     *
+     * @param metaTitle localized meta title values
+     */
+    public void setMetaTitle(Localisable<String, String> metaTitle) {
+        this.metaTitle = metaTitle;
+    }
+
+    /**
+     * Return localized SEO meta descriptions.
+     *
+     * @return localized meta description values
+     */
+    public Localisable<String, String> getMetaDescription() {
+        return metaDescription;
+    }
+
+    /**
+     * Set localized SEO meta descriptions.
+     *
+     * @param metaDescription localized meta description values
+     */
+    public void setMetaDescription(Localisable<String, String> metaDescription) {
+        this.metaDescription = metaDescription;
+    }
+
+    /**
+     * Return localized Open Graph titles.
+     *
+     * @return localized Open Graph title values
+     */
+    public Localisable<String, String> getMetaOpenGraphTitle() {
+        return metaOpenGraphTitle;
+    }
+
+    /**
+     * Set localized Open Graph titles.
+     *
+     * @param metaOpenGraphTitle localized Open Graph title values
+     */
+    public void setMetaOpenGraphTitle(Localisable<String, String> metaOpenGraphTitle) {
+        this.metaOpenGraphTitle = metaOpenGraphTitle;
+    }
+
+    /**
+     * Return localized Open Graph descriptions.
+     *
+     * @return localized Open Graph description values
+     */
+    public Localisable<String, String> getMetaOpenGraphDescription() {
+        return metaOpenGraphDescription;
+    }
+
+    /**
+     * Set localized Open Graph descriptions.
+     *
+     * @param metaOpenGraphDescription localized Open Graph description values
+     */
+    public void setMetaOpenGraphDescription(Localisable<String, String> metaOpenGraphDescription) {
+        this.metaOpenGraphDescription = metaOpenGraphDescription;
+    }
+
+    /**
      * Return the optional page image override.
      *
      * @return image URL or path
@@ -163,7 +268,8 @@ public class VerticalSubCategory {
 
     @Override
     public int hashCode() {
-        return Objects.hash(activatedFilters, description, h1Title, heroBlock, id, image, slug);
+        return Objects.hash(activatedFilters, description, h1Title, heroBlock, id, image,
+                metaDescription, metaOpenGraphDescription, metaOpenGraphTitle, metaTitle, readMore, slug);
     }
 
     @Override
@@ -180,6 +286,11 @@ public class VerticalSubCategory {
                 && Objects.equals(h1Title, other.h1Title)
                 && Objects.equals(description, other.description)
                 && Objects.equals(heroBlock, other.heroBlock)
+                && Objects.equals(readMore, other.readMore)
+                && Objects.equals(metaTitle, other.metaTitle)
+                && Objects.equals(metaDescription, other.metaDescription)
+                && Objects.equals(metaOpenGraphTitle, other.metaOpenGraphTitle)
+                && Objects.equals(metaOpenGraphDescription, other.metaOpenGraphDescription)
                 && Objects.equals(image, other.image)
                 && Objects.equals(activatedFilters, other.activatedFilters);
     }

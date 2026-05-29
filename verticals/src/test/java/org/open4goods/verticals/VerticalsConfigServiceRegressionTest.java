@@ -92,9 +92,30 @@ class VerticalsConfigServiceRegressionTest {
                 .anySatisfy(subCategory -> {
                     assertThat(subCategory.getId()).isEqualTo("dishwasher_under_sink");
                     assertThat(subCategory.getDescription().i18n("fr"))
-                            .isEqualTo("Comparez les **lave-vaisselles encastrables** adaptes aux cuisines compactes.");
+                            .isEqualTo("Comparez les **lave-vaisselles encastrables** adaptes aux cuisines compactes, avec les donnees d'energie et de bruit utiles pour choisir un modele plus responsable.");
+                    assertThat(subCategory.getMetaTitle().i18n("fr"))
+                            .isEqualTo("Lave-vaisselle sous lavabo : comparer les modeles compacts | Nudger");
+                    assertThat(subCategory.getMetaDescription().i18n("fr"))
+                            .contains("Trouvez un lave-vaisselle sous lavabo");
                     assertThat(subCategory.getHeroBlock()).isNotNull();
                     assertThat(subCategory.getHeroBlock().getTitle().i18n("fr")).isEqualTo("Le saviez-vous :");
+                    assertThat(subCategory.getHeroBlock().getMdiIcon()).isEqualTo("mdi-lightbulb-on-outline");
+                    assertThat(subCategory.getReadMore()).isNotNull();
+                    assertThat(subCategory.getReadMore().getShortText().i18n("fr"))
+                            .contains("contrainte de place");
+                    assertThat(subCategory.getReadMore().getLongText().i18n("fr"))
+                            .contains("score d'impact");
+                    assertThat(subCategory.getActivatedFilters()).hasSize(1);
+                });
+
+        assertThat(dishwasherConfig.getSubCategories())
+                .as("dishwasher category should expose a sibling sub-category without a hero block")
+                .anySatisfy(subCategory -> {
+                    assertThat(subCategory.getId()).isEqualTo("dishwasher_freestanding");
+                    assertThat(subCategory.getHeroBlock()).isNull();
+                    assertThat(subCategory.getReadMore()).isNotNull();
+                    assertThat(subCategory.getMetaOpenGraphTitle().i18n("fr"))
+                            .isEqualTo("Comparer les lave-vaisselles pose libre");
                     assertThat(subCategory.getActivatedFilters()).hasSize(1);
                 });
     }

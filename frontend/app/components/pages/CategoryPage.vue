@@ -354,6 +354,52 @@
               density="comfortable"
               @update:model-value="onPageChange"
             />
+
+            <section
+              v-if="hasReadMore"
+              class="category-page__read-more"
+              :aria-labelledby="readMoreHeadingId"
+            >
+              <h2
+                :id="readMoreHeadingId"
+                class="category-page__read-more-title"
+              >
+                {{ readMoreTitle }}
+              </h2>
+              <div
+                v-if="readMoreShortText"
+                class="category-page__read-more-copy"
+              >
+                <MDC :value="readMoreShortText" />
+              </div>
+              <v-expand-transition v-if="readMoreLongText">
+                <div
+                  v-show="isReadMoreExpanded"
+                  :id="readMoreContentId"
+                  class="category-page__read-more-copy category-page__read-more-copy--long"
+                >
+                  <MDC :value="readMoreLongText" />
+                </div>
+              </v-expand-transition>
+              <v-btn
+                v-if="readMoreLongText"
+                class="category-page__read-more-toggle"
+                variant="text"
+                color="primary"
+                :append-icon="
+                  isReadMoreExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down'
+                "
+                :aria-expanded="isReadMoreExpanded.toString()"
+                :aria-controls="readMoreContentId"
+                @click="isReadMoreExpanded = !isReadMoreExpanded"
+              >
+                {{
+                  isReadMoreExpanded
+                    ? $t('category.readMore.showLess')
+                    : $t('category.readMore.showMore')
+                }}
+              </v-btn>
+            </section>
           </template>
         </section>
       </div>
@@ -377,7 +423,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, toRaw, watch } from 'vue'
+import {
+  computed,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  toRaw,
+  useId,
+  watch,
+} from 'vue'
 import type { ActiveHeadEntry, UseHeadInput } from '@unhead/vue'
 import {
   StorageSerializers,
@@ -659,6 +713,20 @@ const pageDescription = computed(
     activeSubCategory.value?.description ??
     category.value?.verticalHomeDescription
 )
+const isReadMoreExpanded = ref(false)
+const readMoreHeadingId = useId()
+const readMoreContentId = useId()
+const readMore = computed(() => activeSubCategory.value?.readMore ?? null)
+const readMoreTitle = computed(
+  () => readMore.value?.title?.trim() || pageTitle.value
+)
+const readMoreShortText = computed(
+  () => readMore.value?.shortText?.trim() || ''
+)
+const readMoreLongText = computed(() => readMore.value?.longText?.trim() || '')
+const hasReadMore = computed(
+  () => Boolean(readMoreShortText.value) || Boolean(readMoreLongText.value)
+)
 const pageEyebrow = computed(
   () => category.value?.verticalMetaTitle ?? category.value?.verticalHomeTitle
 )
@@ -705,6 +773,7 @@ const canonicalUrl = computed(() =>
 )
 const seoTitle = computed(
   () =>
+    activeSubCategory.value?.metaTitle ??
     activeSubCategory.value?.h1Title ??
     category.value?.verticalMetaTitle ??
     category.value?.verticalHomeTitle ??
@@ -713,7 +782,8 @@ const seoTitle = computed(
 const seoDescription = computed(
   () =>
     stripMarkdownSyntax(
-      activeSubCategory.value?.description ??
+      activeSubCategory.value?.metaDescription ??
+        activeSubCategory.value?.description ??
         category.value?.verticalMetaDescription ??
         category.value?.verticalHomeDescription ??
         ''
@@ -724,6 +794,8 @@ const robotsContent = computed(() =>
 )
 const ogTitle = computed(
   () =>
+    activeSubCategory.value?.metaOpenGraphTitle ??
+    activeSubCategory.value?.metaTitle ??
     activeSubCategory.value?.h1Title ??
     category.value?.verticalMetaOpenGraphTitle ??
     seoTitle.value
@@ -731,7 +803,9 @@ const ogTitle = computed(
 const ogDescription = computed(
   () =>
     stripMarkdownSyntax(
-      activeSubCategory.value?.description ??
+      activeSubCategory.value?.metaOpenGraphDescription ??
+        activeSubCategory.value?.metaDescription ??
+        activeSubCategory.value?.description ??
         category.value?.verticalMetaOpenGraphDescription ??
         seoDescription.value
     )
@@ -2750,6 +2824,46 @@ const clearAllFilters = () => {
 
   &__pagination
     justify-content: center
+
+  &__read-more
+    margin-top: 2rem
+    padding-top: 1.5rem
+    border-top: 1px solid rgba(var(--v-theme-border-primary-strong), 0.36)
+    color: rgb(var(--v-theme-text-neutral-strong))
+
+  &__read-more-title
+    margin: 0 0 0.75rem
+    font-size: 1.25rem
+    line-height: 1.35
+    font-weight: 700
+
+  &__read-more-copy
+    max-width: 920px
+    color: rgba(var(--v-theme-text-neutral-secondary), 0.98)
+    font-size: 1rem
+    line-height: 1.7
+
+    :deep(p)
+      margin: 0
+
+    :deep(p + p)
+      margin-top: 0.85rem
+
+    :deep(ul),
+    :deep(ol)
+      margin: 0.85rem 0 0
+      padding-left: 1.25rem
+
+    :deep(strong)
+      color: rgb(var(--v-theme-text-neutral-strong))
+      font-weight: 700
+
+  &__read-more-copy--long
+    margin-top: 0.85rem
+
+  &__read-more-toggle
+    margin-top: 0.75rem
+    padding-inline: 0
 
   &__documentation-block
     width: 100%

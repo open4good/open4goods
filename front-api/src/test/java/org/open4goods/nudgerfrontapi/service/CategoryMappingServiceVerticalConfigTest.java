@@ -20,6 +20,7 @@ import org.open4goods.model.vertical.SubsetCriteriaOperator;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.vertical.VerticalSubCategory;
 import org.open4goods.model.vertical.VerticalSubCategoryHeroBlock;
+import org.open4goods.model.vertical.VerticalSubCategoryReadMore;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.category.CategoryBreadcrumbItemDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
@@ -103,10 +104,20 @@ class CategoryMappingServiceVerticalConfigTest {
         subCategory.getSlug().put("en", "under-sink-dishwasher");
         subCategory.getH1Title().put("fr", "Lave-vaisselle sous lavabo");
         subCategory.getDescription().put("fr", "Comparez les **lave-vaisselles** sous lavabo.");
+        subCategory.getMetaTitle().put("fr", "Lave-vaisselle sous lavabo : comparer les modeles | Nudger");
+        subCategory.getMetaDescription().put("fr", "Comparez les modeles compacts avant achat.");
+        subCategory.getMetaOpenGraphTitle().put("fr", "Comparer les lave-vaisselles sous lavabo");
+        subCategory.getMetaOpenGraphDescription().put("fr", "Selection compacte avec donnees energie et bruit.");
         VerticalSubCategoryHeroBlock heroBlock = new VerticalSubCategoryHeroBlock();
         heroBlock.getTitle().put("fr", "Le saviez-vous :");
         heroBlock.getBody().put("fr", "Les formats compacts gardent une **installation flexible**.");
+        heroBlock.setMdiIcon("mdi-lightbulb-on-outline");
         subCategory.setHeroBlock(heroBlock);
+        VerticalSubCategoryReadMore readMore = new VerticalSubCategoryReadMore();
+        readMore.getTitle().put("fr", "Comment choisir un lave-vaisselle sous lavabo ?");
+        readMore.getShortText().put("fr", "Verifiez d'abord la hauteur disponible.");
+        readMore.getLongText().put("fr", "Comparez ensuite bruit, energie et capacite utile.");
+        subCategory.setReadMore(readMore);
         subCategory.setImage("/images/verticals/dishwasher-under-sink.webp");
         subCategory.setActivatedFilters(List.of(
                 new SubsetCriteria("attributes.indexed.INSTALLATION_TYPE.value",
@@ -124,6 +135,19 @@ class CategoryMappingServiceVerticalConfigTest {
         assertThat(dto.subCategories().get(0).heroBlock().title()).isEqualTo("Le saviez-vous :");
         assertThat(dto.subCategories().get(0).heroBlock().body())
                 .isEqualTo("Les formats compacts gardent une **installation flexible**.");
+        assertThat(dto.subCategories().get(0).heroBlock().mdiIcon()).isEqualTo("mdi-lightbulb-on-outline");
+        assertThat(dto.subCategories().get(0).readMore()).isNotNull();
+        assertThat(dto.subCategories().get(0).readMore().title())
+                .isEqualTo("Comment choisir un lave-vaisselle sous lavabo ?");
+        assertThat(dto.subCategories().get(0).readMore().shortText()).isEqualTo("Verifiez d'abord la hauteur disponible.");
+        assertThat(dto.subCategories().get(0).readMore().longText())
+                .isEqualTo("Comparez ensuite bruit, energie et capacite utile.");
+        assertThat(dto.subCategories().get(0).metaTitle())
+                .isEqualTo("Lave-vaisselle sous lavabo : comparer les modeles | Nudger");
+        assertThat(dto.subCategories().get(0).metaDescription()).isEqualTo("Comparez les modeles compacts avant achat.");
+        assertThat(dto.subCategories().get(0).metaOpenGraphTitle()).isEqualTo("Comparer les lave-vaisselles sous lavabo");
+        assertThat(dto.subCategories().get(0).metaOpenGraphDescription())
+                .isEqualTo("Selection compacte avec donnees energie et bruit.");
         assertThat(dto.subCategories().get(0).image()).isEqualTo("/images/verticals/dishwasher-under-sink.webp");
         assertThat(dto.subCategories().get(0).activatedFilters()).hasSize(1);
     }

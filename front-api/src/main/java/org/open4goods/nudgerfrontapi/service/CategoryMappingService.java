@@ -48,6 +48,7 @@ import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigFullDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalSubCategoryDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalSubCategoryHeroBlockDto;
+import org.open4goods.nudgerfrontapi.dto.category.VerticalSubCategoryReadMoreDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalSubsetDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
@@ -661,13 +662,52 @@ public class CategoryMappingService {
                 localise(subCategory.getSlug(), domainLanguage),
                 localise(subCategory.getH1Title(), domainLanguage),
                 localise(subCategory.getDescription(), domainLanguage),
-                subCategory.getHeroBlock() == null
-                        ? null
-                        : new VerticalSubCategoryHeroBlockDto(
-                                localise(subCategory.getHeroBlock().getTitle(), domainLanguage),
-                                localise(subCategory.getHeroBlock().getBody(), domainLanguage)),
+                mapVerticalSubCategoryHeroBlock(subCategory, domainLanguage),
+                mapVerticalSubCategoryReadMore(subCategory, domainLanguage),
+                localise(subCategory.getMetaTitle(), domainLanguage),
+                localise(subCategory.getMetaDescription(), domainLanguage),
+                localise(subCategory.getMetaOpenGraphTitle(), domainLanguage),
+                localise(subCategory.getMetaOpenGraphDescription(), domainLanguage),
                 subCategory.getImage(),
                 normalizeSubsetCriteria(subCategory.getActivatedFilters()));
+    }
+
+    /**
+     * Map the optional sub-category hero block.
+     *
+     * @param subCategory source sub-category
+     * @param domainLanguage requested language
+     * @return localized hero block or {@code null}
+     */
+    private VerticalSubCategoryHeroBlockDto mapVerticalSubCategoryHeroBlock(VerticalSubCategory subCategory,
+                                                                           DomainLanguage domainLanguage) {
+        if (subCategory.getHeroBlock() == null) {
+            return null;
+        }
+
+        return new VerticalSubCategoryHeroBlockDto(
+                localise(subCategory.getHeroBlock().getTitle(), domainLanguage),
+                localise(subCategory.getHeroBlock().getBody(), domainLanguage),
+                subCategory.getHeroBlock().getMdiIcon());
+    }
+
+    /**
+     * Map the optional sub-category read-more block.
+     *
+     * @param subCategory source sub-category
+     * @param domainLanguage requested language
+     * @return localized read-more block or {@code null}
+     */
+    private VerticalSubCategoryReadMoreDto mapVerticalSubCategoryReadMore(VerticalSubCategory subCategory,
+                                                                         DomainLanguage domainLanguage) {
+        if (subCategory.getReadMore() == null) {
+            return null;
+        }
+
+        return new VerticalSubCategoryReadMoreDto(
+                localise(subCategory.getReadMore().getTitle(), domainLanguage),
+                localise(subCategory.getReadMore().getShortText(), domainLanguage),
+                localise(subCategory.getReadMore().getLongText(), domainLanguage));
     }
 
     /**

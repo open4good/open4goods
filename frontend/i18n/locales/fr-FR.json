@@ -758,6 +758,10 @@
       "itemSubtitle": "Explorer cette sous-catégorie",
       "fallbackTitle": "Sélection associée"
     },
+    "readMore": {
+      "showMore": "Lire plus",
+      "showLess": "Réduire"
+    },
     "products": {
       "compare": {
         "addMoreHint": "Sélectionnez au moins deux produits pour lancer une comparaison.",

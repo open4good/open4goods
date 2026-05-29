@@ -170,6 +170,7 @@ export * from './VerticalDatavizPlanDto';
 export * from './VerticalStatsDto';
 export * from './VerticalSubCategoryDto';
 export * from './VerticalSubCategoryHeroBlockDto';
+export * from './VerticalSubCategoryReadMoreDto';
 export * from './VerticalSubsetDto';
 export * from './WikiPageConfig';
 export * from './WikidataPropertyReferential';

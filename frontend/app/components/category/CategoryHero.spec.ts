@@ -24,7 +24,7 @@ interface MountProps {
   breadcrumbs?: CategoryBreadcrumbItemDto[]
   eyebrow?: string | null
   showImage?: boolean
-  rightInfoCard?: { title?: string; body?: string } | null
+  rightInfoCard?: { title?: string; body?: string; mdiIcon?: string } | null
 }
 
 describe('CategoryHero', () => {
@@ -115,6 +115,7 @@ describe('CategoryHero', () => {
       rightInfoCard: {
         title: 'Did you know?',
         body: 'Compact layouts keep **installation flexible**.',
+        mdiIcon: 'mdi-lightbulb-on-outline',
       },
     })
 
@@ -125,6 +126,9 @@ describe('CategoryHero', () => {
     )
     expect(wrapper.get('.category-hero__info-body strong').text()).toBe(
       'installation flexible'
+    )
+    expect(wrapper.get('.category-hero__info-icon .v-icon').classes()).toContain(
+      'mdi-lightbulb-on-outline'
     )
   })
 
