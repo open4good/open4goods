@@ -95,7 +95,7 @@ import type {
   Filter,
 } from '~~/shared/api-client'
 import CategoryFilterNumeric from './CategoryFilterNumeric.vue'
-import CategoryFilterCondition from './CategoryFilterCondition.vue'
+import CategoryFilterCompetition from './CategoryFilterCompetition.vue'
 import CategoryFilterTerms from './CategoryFilterTerms.vue'
 
 const props = withDefaults(
@@ -121,8 +121,8 @@ const emit = defineEmits<{
 }>()
 
 const resolveComponent = (field: FieldMetadataDto) => {
-  if (field.mapping === 'price.conditions') {
-    return CategoryFilterCondition
+  if (field.mapping === 'offersCount') {
+    return CategoryFilterCompetition
   }
 
   return field.valueType === 'numeric'

@@ -57,12 +57,25 @@
                 </div>
 
                 <div class="category-navigation-verticals__content">
-                  <h3 class="text-h6 font-weight-semibold mb-0">
-                    {{
-                      verticalCategory.vertical?.verticalHomeTitle ??
-                      verticalCategory.title
-                    }}
-                  </h3>
+                  <div class="category-navigation-verticals__text">
+                    <h3 class="text-h6 font-weight-semibold mb-0">
+                      {{
+                        verticalCategory.vertical?.verticalHomeTitle ??
+                        verticalCategory.title
+                      }}
+                    </h3>
+                    <CategoryNavigationSubcategoryChips
+                      :subcategories="
+                        verticalCategory.vertical?.subCategories ?? []
+                      "
+                      :parent-url="
+                        verticalCategory.vertical?.verticalHomeUrl
+                          ? `/${verticalCategory.vertical.verticalHomeUrl}`
+                          : null
+                      "
+                      :max="3"
+                    />
+                  </div>
                   <v-icon
                     icon="mdi-arrow-right"
                     size="20"
@@ -83,6 +96,7 @@
 import { computed } from 'vue'
 import type { CategoryNavigationDtoChildCategoriesInner } from '~~/shared/api-client'
 import { useI18n } from 'vue-i18n'
+import CategoryNavigationSubcategoryChips from '~/components/category/navigation/CategoryNavigationSubcategoryChips.vue'
 
 const { verticals } = defineProps<{
   verticals: CategoryNavigationDtoChildCategoriesInner[]
@@ -159,10 +173,17 @@ const verticalRoute = (
 .category-navigation-verticals__content {
   padding: 1.1rem;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
   flex: 1;
+}
+
+.category-navigation-verticals__text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
 }
 
 .category-navigation-verticals__icon {

@@ -1,7 +1,9 @@
 <template>
   <div class="category-filter-terms">
     <div class="category-filter-terms__header">
-      <p class="category-filter-terms__title">{{ displayTitle }}</p>
+      <p v-if="!hideTitle" class="category-filter-terms__title">
+        {{ displayTitle }}
+      </p>
       <v-text-field
         v-if="showSearch"
         v-model="search"
@@ -57,21 +59,25 @@ import type {
   Filter,
 } from '~~/shared/api-client'
 import { resolveFilterFieldTitle } from '~/utils/_field-localization'
+import { formatCountryLabel } from '~/utils/_country-format'
 import {
   hasRenderableFacetLabel,
   normalizeFacetLabel,
 } from '~~/shared/utils/facet-normalization'
+
+const COUNTRY_MAPPING = 'gtinInfos.country'
 
 const props = defineProps<{
   field: FieldMetadataDto
   aggregation?: AggregationResponseDto
   baselineAggregation?: AggregationResponseDto
   modelValue?: Filter | null
+  hideTitle?: boolean
 }>()
 
 const emit = defineEmits<{ 'update:modelValue': [Filter | null] }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const displayTitle = computed(() => resolveFilterFieldTitle(props.field, t))
 
@@ -273,6 +279,12 @@ const formatOptionLabel = (key?: string) => {
   }
 
   const mapping = props.field.mapping
+
+  // Country codes (ISO alpha-2) are rendered as "🇫🇷 France" using built-in Intl APIs.
+  if (mapping === COUNTRY_MAPPING) {
+    return formatCountryLabel(key, locale.value)
+  }
+
   if (mapping) {
     const translationKey = `category.filters.options.${mapping}.${key}`
     const translated = t(translationKey)

@@ -512,7 +512,16 @@ public class ResourceCompletionService extends AbstractCompletionService {
                     break;
 
                 case "video/quicktime":
+                case "video/mp4":
+                case "video/mpeg":
+                case "video/ogg":
+                case "video/webm":
+                case "video/x-msvideo":
+                case "video/x-ms-wmv":
+                case "video/3gpp":
+                case "video/3gpp2":
                     processVideo(resource, target);
+                    resource.setProcessed(true);
                     break;
 
                 default:

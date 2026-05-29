@@ -26,6 +26,12 @@ export interface ProductVideoDto {
    */
   url?: string
   /**
+   * Original source URL before resource caching
+   * @type {string}
+   * @memberof ProductVideoDto
+   */
+  originalUrl?: string
+  /**
    * Detected MIME type
    * @type {string}
    * @memberof ProductVideoDto
@@ -115,6 +121,48 @@ export interface ProductVideoDto {
    * @memberof ProductVideoDto
    */
   hardTags?: Set<ProductVideoDtoHardTagsEnum>
+  /**
+   * Human-readable video name for rich result markup
+   * @type {string}
+   * @memberof ProductVideoDto
+   */
+  name?: string
+  /**
+   * Video description when supplied by the source
+   * @type {string}
+   * @memberof ProductVideoDto
+   */
+  description?: string | null
+  /**
+   * Video thumbnail URL required for VideoObject markup
+   * @type {string}
+   * @memberof ProductVideoDto
+   */
+  thumbnailUrl?: string | null
+  /**
+   * Upload or discovery date in ISO-8601 format when known
+   * @type {string}
+   * @memberof ProductVideoDto
+   */
+  uploadDate?: string | null
+  /**
+   * ISO-8601 video duration when known
+   * @type {string}
+   * @memberof ProductVideoDto
+   */
+  duration?: string | null
+  /**
+   * Direct video file URL for VideoObject contentUrl
+   * @type {string}
+   * @memberof ProductVideoDto
+   */
+  contentUrl?: string | null
+  /**
+   * Embeddable provider URL for VideoObject embedUrl
+   * @type {string}
+   * @memberof ProductVideoDto
+   */
+  embedUrl?: string | null
 }
 
 /**
@@ -186,6 +234,7 @@ export function ProductVideoDtoFromJSONTyped(
   }
   return {
     url: json['url'] == null ? undefined : json['url'],
+    originalUrl: json['originalUrl'] == null ? undefined : json['originalUrl'],
     mimeType: json['mimeType'] == null ? undefined : json['mimeType'],
     timeStamp: json['timeStamp'] == null ? undefined : json['timeStamp'],
     cacheKey: json['cacheKey'] == null ? undefined : json['cacheKey'],
@@ -203,6 +252,14 @@ export function ProductVideoDtoFromJSONTyped(
       json['datasourceName'] == null ? undefined : json['datasourceName'],
     tags: json['tags'] == null ? undefined : new Set(json['tags']),
     hardTags: json['hardTags'] == null ? undefined : new Set(json['hardTags']),
+    name: json['name'] == null ? undefined : json['name'],
+    description: json['description'] == null ? undefined : json['description'],
+    thumbnailUrl:
+      json['thumbnailUrl'] == null ? undefined : json['thumbnailUrl'],
+    uploadDate: json['uploadDate'] == null ? undefined : json['uploadDate'],
+    duration: json['duration'] == null ? undefined : json['duration'],
+    contentUrl: json['contentUrl'] == null ? undefined : json['contentUrl'],
+    embedUrl: json['embedUrl'] == null ? undefined : json['embedUrl'],
   }
 }
 
@@ -220,6 +277,7 @@ export function ProductVideoDtoToJSONTyped(
 
   return {
     url: value['url'],
+    originalUrl: value['originalUrl'],
     mimeType: value['mimeType'],
     timeStamp: value['timeStamp'],
     cacheKey: value['cacheKey'],
@@ -239,5 +297,12 @@ export function ProductVideoDtoToJSONTyped(
       value['hardTags'] == null
         ? undefined
         : Array.from(value['hardTags'] as Set<any>),
+    name: value['name'],
+    description: value['description'],
+    thumbnailUrl: value['thumbnailUrl'],
+    uploadDate: value['uploadDate'],
+    duration: value['duration'],
+    contentUrl: value['contentUrl'],
+    embedUrl: value['embedUrl'],
   }
 }

@@ -145,9 +145,6 @@ matchingCategories:
     - "GROS ELECTROMENAGER / CLIMATISEUR / CLIMATISEUR FIXE | GROS ELECTROMENAGER>CLIMATISEUR>CLIMATISEUR FIXE | CLIMATISEUR | CLIMATISEUR FIXE"
 
 aggregationConfiguration:
-  "scores.ECOSCORE.value":
-    interval: 5
-    buckets: 20
   "scores.CLASSE_ENERGY.value":
     interval: 1
     buckets: 5

@@ -1,5 +1,48 @@
 <template>
   <div class="category-filters" data-testid="category-filters">
+    <!-- Offers state (condition) — first line, standalone toggle above the groups. -->
+    <CategoryOffersStateToggle
+      :aggregation="aggregationMap[CONDITION_FIELD]"
+      :baseline-aggregation="baselineAggregationMap[CONDITION_FIELD]"
+      :model-value="conditionFilter"
+      @update:model-value="terms => updateTermsFilter(CONDITION_FIELD, terms)"
+    />
+
+    <!-- Brand — dedicated collapsible block. -->
+    <section class="category-filters__section">
+      <h2
+        class="category-filters__title cursor-pointer"
+        @click="isBrandOpen = !isBrandOpen"
+      >
+        <div class="d-flex align-center flex-grow-1 gap-2">
+          <v-icon
+            icon="mdi-tag-outline"
+            size="20"
+            class="me-4 category-filters__title-icon"
+          />
+          <span>{{ t('category.filters.fields.brand') }}</span>
+        </div>
+        <v-icon
+          :icon="isBrandOpen ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+          color="medium-emphasis"
+        />
+      </h2>
+      <v-expand-transition>
+        <div v-show="isBrandOpen" class="category-filters__section-body">
+          <CategoryFilterTerms
+            :field="brandField"
+            :aggregation="aggregationMap[BRAND_FIELD]"
+            :baseline-aggregation="baselineAggregationMap[BRAND_FIELD]"
+            :model-value="findActiveFilter(BRAND_FIELD)"
+            hide-title
+            @update:model-value="
+              filter => updateTermsFilter(BRAND_FIELD, filter?.terms ?? [])
+            "
+          />
+        </div>
+      </v-expand-transition>
+    </section>
+
     <section class="category-filters__section">
       <h2
         class="category-filters__title cursor-pointer"
@@ -167,6 +210,17 @@ import type {
 import { ECOSCORE_RELATIVE_FIELD } from '~/constants/scores'
 
 import CategoryFilterList from './filters/CategoryFilterList.vue'
+import CategoryFilterTerms from './filters/CategoryFilterTerms.vue'
+import CategoryOffersStateToggle from './filters/CategoryOffersStateToggle.vue'
+
+const CONDITION_FIELD = 'price.conditions'
+const BRAND_FIELD = 'attributes.referentielAttributes.BRAND'
+
+const brandField: FieldMetadataDto = {
+  mapping: BRAND_FIELD,
+  title: null,
+  valueType: 'text',
+}
 const props = withDefaults(
   defineProps<{
     filterOptions: ProductFieldOptionsResponse | null
@@ -188,9 +242,15 @@ const emit = defineEmits<{
 }>()
 
 const activeFilters = computed(() => props.filters?.filters ?? [])
+const isBrandOpen = ref(false)
 const isGlobalOpen = ref(false)
 const isImpactOpen = ref(false)
 const isTechnicalOpen = ref(false)
+
+const findActiveFilter = (field: string): Filter | null =>
+  activeFilters.value.find(filter => filter.field === field) ?? null
+
+const conditionFilter = computed(() => findActiveFilter(CONDITION_FIELD))
 
 const { t } = useI18n()
 

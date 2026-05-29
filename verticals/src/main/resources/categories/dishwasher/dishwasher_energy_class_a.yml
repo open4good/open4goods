@@ -1,0 +1,98 @@
+# Search-intent subcategory for the dishwasher vertical.
+# Maintained: 2026-05-29 by subcategory.prompt.
+# Intent: energy class A dishwasher purchase/comparison.
+# Evidence:
+#   - GSC: no direct dishwasher class-A query rows found over the last 90 days;
+#     broader energy-class queries exist on other appliance guides, so demand is
+#     treated as weaker for this vertical.
+#   - Keyword MCP: unavailable in this run; kwrds.ai required a paid plan,
+#     SEO Review Tools returned an API error, and DataForSEO returned 403.
+#   - Google Autocomplete: 15 matching suggestions for "lave vaisselle classe a".
+# Feasibility:
+#   - Matching products: 154; distinct brands/datasources in sampled results: 15/13.
+#   - Filters validated through the local frontend API proxy on 2026-05-29.
+# Rationale:
+#   - Exposes a stable energy-efficiency buying intent with an exact indexed
+#     energy-class filter and clear trade-offs against price, noise and water use.
+id: "dishwasher_energy_class_a"
+slug:
+  en: "class-a-dishwasher"
+  fr: "lave-vaisselle-classe-a"
+h1Title:
+  en: "Class A dishwashers"
+  fr: "Lave-vaisselle classe A"
+description:
+  en: |-
+    Compare **energy class A dishwashers** with water use, noise, price and
+    impact indicators to choose a more efficient model.
+  fr: |-
+    Comparez les **lave-vaisselles classe A** avec la consommation d'eau, le
+    bruit, le prix et l'impact pour choisir un modele plus sobre.
+metaTitle:
+  en: "Class A dishwashers: compare efficient models | Nudger"
+  fr: "Lave-vaisselle classe A : comparer | Nudger"
+metaDescription:
+  en: "Compare class A dishwashers by energy use, water consumption, noise, capacity, price and impact score before buying."
+  fr: "Comparez les lave-vaisselles classe A par energie, eau, bruit, capacite, prix et score d'impact avant d'acheter."
+metaOpenGraphTitle:
+  en: "Compare class A dishwashers"
+  fr: "Comparer les lave-vaisselles classe A"
+metaOpenGraphDescription:
+  en: "A focused selection of efficient dishwashers with practical comparison data beyond the label."
+  fr: "Une selection ciblee de lave-vaisselles sobres avec les donnees utiles au-dela de l'etiquette."
+heroBlock:
+  mdiIcon: "mdi-leaf"
+  title:
+    en: "Beyond the label"
+    fr: "Au-dela de l'etiquette"
+  body:
+    en: |-
+      Energy class A is a strong signal, but water consumption, capacity and noise still decide daily comfort.
+    fr: |-
+      La classe A est un bon signal, mais l'eau consommee, la capacite et le bruit restent decisifs au quotidien.
+readMore:
+  title:
+    en: "Is a class A dishwasher always the best choice?"
+    fr: "Un lave-vaisselle classe A est-il toujours le meilleur choix ?"
+  shortText:
+    en: |-
+      A class A dishwasher can reduce electricity use, especially if you run
+      frequent full loads. Still, the label should be compared with water
+      consumption, noise and useful capacity.
+    fr: |-
+      Un lave-vaisselle classe A peut reduire la consommation d'electricite,
+      surtout si vous lancez souvent des cycles bien remplis. Mais l'etiquette
+      doit rester comparee a l'eau consommee, au bruit et a la capacite utile.
+  longText:
+    en: |-
+      Start by checking whether the class A model fits your household size. A
+      very efficient full-size dishwasher is not automatically better if it is
+      usually half empty, just as a cheaper model can cost more over time if it
+      uses more energy and water.
+
+      Compare the noise level when the kitchen is near living spaces, and look
+      at repairability or warranty signals when available. Efficiency is more
+      useful when the appliance also lasts and remains comfortable to use.
+
+      Nudger keeps this page focused on products with an indexed class A value,
+      then lets you compare impact score, price history, offers and technical
+      attributes before deciding.
+    fr: |-
+      Commencez par verifier que le modele classe A correspond a la taille de
+      votre foyer. Un grand lave-vaisselle tres sobre n'est pas automatiquement
+      meilleur s'il tourne souvent a moitie vide, tout comme un modele moins
+      cher peut couter davantage dans la duree s'il consomme plus d'energie et
+      d'eau.
+
+      Comparez le niveau sonore lorsque la cuisine est proche des pieces de vie,
+      et regardez les signaux de reparabilite ou de garantie lorsqu'ils sont
+      disponibles. La sobriete est plus utile quand l'appareil dure et reste
+      agreable a utiliser.
+
+      Nudger garde cette page centree sur les produits dont la classe A est
+      indexee, puis vous permet de comparer le score d'impact, l'historique de
+      prix, les offres et les caracteristiques techniques avant de choisir.
+activatedFilters:
+  - field: "attributes.indexed.CLASSE_ENERGY.value"
+    operator: "EQUALS"
+    value: "A"

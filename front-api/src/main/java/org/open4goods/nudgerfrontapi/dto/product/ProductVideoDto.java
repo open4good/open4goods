@@ -14,6 +14,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record ProductVideoDto(
         @Schema(description = "Resource URL", example = "https://cdn.example.org/videos/product_abc.mp4")
         String url,
+        @Schema(description = "Original source URL before resource caching", example = "https://example.org/product-video.mp4")
+        String originalUrl,
         @Schema(description = "Detected MIME type", example = "video/mp4")
         String mimeType,
         @Schema(description = "Last update timestamp in epoch milliseconds")
@@ -43,6 +45,20 @@ public record ProductVideoDto(
         @Schema(description = "Tags describing the resource")
         Set<String> tags,
         @Schema(description = "Hard tags describing the resource nature")
-        Set<ResourceTag> hardTags
+        Set<ResourceTag> hardTags,
+        @Schema(description = "Human-readable video name for rich result markup", example = "Product overview video")
+        String name,
+        @Schema(description = "Video description when supplied by the source", nullable = true)
+        String description,
+        @Schema(description = "Video thumbnail URL required for VideoObject markup", nullable = true, example = "https://cdn.example.org/images/video-thumb.webp")
+        String thumbnailUrl,
+        @Schema(description = "Upload or discovery date in ISO-8601 format when known", nullable = true, example = "2026-05-29T12:00:00Z")
+        String uploadDate,
+        @Schema(description = "ISO-8601 video duration when known", nullable = true, example = "PT1M30S")
+        String duration,
+        @Schema(description = "Direct video file URL for VideoObject contentUrl", nullable = true, example = "https://cdn.example.org/videos/product_abc.mp4")
+        String contentUrl,
+        @Schema(description = "Embeddable provider URL for VideoObject embedUrl", nullable = true, example = "https://www.youtube.com/embed/abc123")
+        String embedUrl
 ) {
 }

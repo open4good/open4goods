@@ -44,6 +44,8 @@ describe('CategoryFiltersPanel Expansion', () => {
         plugins: [vuetify],
         stubs: {
           CategoryFilterList: CategoryFilterListStub,
+          CategoryFilterTerms: true,
+          CategoryOffersStateToggle: true,
           VIcon: true,
           VBtn: true,
         },
@@ -62,7 +64,8 @@ describe('CategoryFiltersPanel Expansion', () => {
     // Impact has items.
 
     // Find impact section
-    const impactSection = wrapper.findAll('.category-filters__section')[1]
+    // Sections order: [0] brand, [1] global, [2] impact, [3] technical.
+    const impactSection = wrapper.findAll('.category-filters__section')[2]
     const primaryList = impactSection.find('.category-filter-list-stub')
 
     expect(primaryList.text()).toContain('ecoscore')
@@ -86,13 +89,16 @@ describe('CategoryFiltersPanel Expansion', () => {
         plugins: [vuetify],
         stubs: {
           CategoryFilterList: CategoryFilterListStub,
+          CategoryFilterTerms: true,
+          CategoryOffersStateToggle: true,
           VIcon: true,
           VBtn: true,
         },
       },
     })
 
-    const impactSection = wrapper.findAll('.category-filters__section')[1]
+    // Sections order: [0] brand, [1] global, [2] impact, [3] technical.
+    const impactSection = wrapper.findAll('.category-filters__section')[2]
     const lists = impactSection.findAll('.category-filter-list-stub')
 
     expect(lists.length).toBe(2)
@@ -112,6 +118,8 @@ describe('CategoryFiltersPanel Expansion', () => {
         plugins: [vuetify],
         stubs: {
           CategoryFilterList: CategoryFilterListStub,
+          CategoryFilterTerms: true,
+          CategoryOffersStateToggle: true,
           VIcon: true,
           VBtn: {
             template: '<button @click="$emit(\'click\')"><slot/></button>',
@@ -143,6 +151,8 @@ describe('CategoryFiltersPanel Expansion', () => {
         plugins: [vuetify],
         stubs: {
           CategoryFilterList: CategoryFilterListStub,
+          CategoryFilterTerms: true,
+          CategoryOffersStateToggle: true,
           VIcon: true,
           VBtn: {
             template: '<button @click="$emit(\'click\')"><slot/></button>',

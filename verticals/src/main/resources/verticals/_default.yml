@@ -216,8 +216,21 @@ globalTechnicalFilters:
   - "WARRANTY"
   - "YEAR"
   - "COLOR"
-  - "WEIGHT"
+
+# Filters surfaced in the "Les sous" (money) group, appended after price/offers count.
+moneyFilters:
   - "USAGE_COST_YEAR"
+
+####################################################################################
+# Aggregation configuration shared by every vertical.
+# Per-vertical aggregationConfiguration blocks merge on top of these (a vertical may
+# override a specific field key). The Impact Score scale is defined here so it stays
+# consistent across all categories.
+####################################################################################
+aggregationConfiguration:
+  "scores.ECOSCORE.value":
+    interval: 0.2
+    buckets: 25
 
 ####################################################################################
 # Brands configuration

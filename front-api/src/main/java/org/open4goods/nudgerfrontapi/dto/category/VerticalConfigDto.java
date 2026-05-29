@@ -42,6 +42,8 @@ public record VerticalConfigDto(
         @Schema(description = "Identifiers of composite scores aggregating score attributes for the vertical.")
         Set<String> aggregatedScores,
         @Schema(description = "Configuration supporting the guided nudge tool for this vertical.")
-        NudgeToolConfigDto nudgeToolConfig
+        NudgeToolConfigDto nudgeToolConfig,
+        @Schema(description = "Search-intent landing pages configured under this vertical.")
+        List<VerticalSubCategoryDto> subCategories
 ) {
 }

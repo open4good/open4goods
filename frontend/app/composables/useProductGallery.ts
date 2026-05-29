@@ -1,5 +1,4 @@
 import { computed, type Ref } from 'vue'
-import { useImage } from '#imports'
 import type { ProductDto } from '~~/shared/api-client'
 
 export interface ProductGalleryItem {
@@ -26,35 +25,14 @@ const DEFAULT_VIDEO_WIDTH = 1280
 const DEFAULT_VIDEO_HEIGHT = 720
 const LOCAL_FALLBACK_IMAGE_SRC = '/images/no-image.png'
 
-type ImageModifiers = Parameters<ReturnType<typeof useImage>>[1]
-
 export const useProductGallery = (
   product: Ref<ProductDto> | ProductDto,
   title?: string
 ) => {
-  const nuxtImage = useImage()
-
   // Handle both ref and raw object
   const productData = computed(() => {
     return 'value' in product ? product.value : product
   })
-
-  // Helper to resolve modifiers
-  const resolveImageUrl = (
-    src: string | null | undefined,
-    modifiers?: ImageModifiers
-  ) => {
-    if (!src) return ''
-    if (src.startsWith('/_ipx/')) {
-      return src
-    }
-
-    try {
-      return nuxtImage(src, modifiers)
-    } catch {
-      return src
-    }
-  }
 
   const normalizeImageSource = (src: string | null | undefined): string => {
     if (!src) return ''
@@ -109,28 +87,13 @@ export const useProductGallery = (
 
     if (coverImageRaw.value && !hasCoverInImages) {
       const source = normalizeImageSource(coverImageRaw.value)
-      const preview =
-        resolveImageUrl(source, {
-          width: 1200,
-          height: 900,
-          fit: 'cover',
-          format: 'webp',
-        }) || source
-
-      const thumbnail =
-        resolveImageUrl(source, {
-          width: DEFAULT_THUMBNAIL_SIZE,
-          height: DEFAULT_THUMBNAIL_SIZE,
-          fit: 'cover',
-          format: 'webp',
-        }) || preview
 
       imageItems.push({
         id: `image-cover-fallback-${source}`,
         type: 'image',
         originalUrl: source,
-        previewUrl: preview,
-        thumbnailUrl: thumbnail,
+        previewUrl: source,
+        thumbnailUrl: source,
         thumbnailWidth: DEFAULT_THUMBNAIL_SIZE,
         thumbnailHeight: DEFAULT_THUMBNAIL_SIZE,
         width: DEFAULT_IMAGE_WIDTH,
@@ -138,7 +101,7 @@ export const useProductGallery = (
         alt: fallbackTitle,
         caption: fallbackTitle,
         group: 'cover',
-        posterUrl: preview,
+        posterUrl: source,
       })
     }
 
@@ -151,28 +114,12 @@ export const useProductGallery = (
       const width = fallbackDimension(image.width, DEFAULT_IMAGE_WIDTH)
       const height = fallbackDimension(image.height, DEFAULT_IMAGE_HEIGHT)
 
-      const preview =
-        resolveImageUrl(source, {
-          width: 1200,
-          height: 900,
-          fit: 'cover',
-          format: 'webp',
-        }) || source
-
-      const thumbnail =
-        resolveImageUrl(source, {
-          width: DEFAULT_THUMBNAIL_SIZE,
-          height: DEFAULT_THUMBNAIL_SIZE,
-          fit: 'cover',
-          format: 'webp',
-        }) || preview
-
       imageItems.push({
         id: `image-${image.cacheKey ?? original}`,
         type: 'image',
         originalUrl: original,
-        previewUrl: preview,
-        thumbnailUrl: thumbnail,
+        previewUrl: source,
+        thumbnailUrl: source,
         thumbnailWidth: DEFAULT_THUMBNAIL_SIZE,
         thumbnailHeight: DEFAULT_THUMBNAIL_SIZE,
         width,
@@ -180,7 +127,7 @@ export const useProductGallery = (
         alt: image.fileName ?? caption,
         caption,
         group: image.group,
-        posterUrl: preview,
+        posterUrl: source,
       })
     })
 
@@ -189,32 +136,14 @@ export const useProductGallery = (
       if (!url) return
 
       const caption = video.datasourceName ?? fallbackTitle
-      const posterSource = fallbackPoster || coverImageRaw.value || ''
-
-      const poster = posterSource
-        ? resolveImageUrl(posterSource, {
-            width: DEFAULT_VIDEO_WIDTH,
-            height: DEFAULT_VIDEO_HEIGHT,
-            fit: 'cover',
-            format: 'webp',
-          }) || posterSource
-        : ''
-
-      const thumbnail = posterSource
-        ? resolveImageUrl(posterSource, {
-            width: DEFAULT_THUMBNAIL_SIZE,
-            height: DEFAULT_THUMBNAIL_SIZE,
-            fit: 'cover',
-            format: 'webp',
-          }) || posterSource
-        : ''
+      const poster = normalizeImageSource(fallbackPoster || coverImageRaw.value)
 
       videoItems.push({
         id: `video-${video.cacheKey ?? url}`,
         type: 'video',
         originalUrl: poster || url,
-        previewUrl: poster || thumbnail || url,
-        thumbnailUrl: thumbnail || poster || url,
+        previewUrl: poster || url,
+        thumbnailUrl: poster || url,
         thumbnailWidth: DEFAULT_THUMBNAIL_SIZE,
         thumbnailHeight: DEFAULT_THUMBNAIL_SIZE,
         width: DEFAULT_VIDEO_WIDTH,
@@ -223,7 +152,7 @@ export const useProductGallery = (
         caption,
         group: video.group,
         videoUrl: url,
-        posterUrl: poster || thumbnail || url,
+        posterUrl: poster || url,
       })
     })
 
@@ -253,14 +182,7 @@ export const useProductGallery = (
       coverImageRaw.value ?? galleryItems.value[0]?.previewUrl ?? null
     if (!fallback) return null
 
-    return (
-      resolveImageUrl(fallback, {
-        width: 960,
-        height: 720,
-        fit: 'cover',
-        format: 'webp',
-      }) || fallback
-    )
+    return normalizeImageSource(fallback)
   })
 
   return {

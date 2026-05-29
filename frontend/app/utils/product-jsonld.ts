@@ -73,6 +73,20 @@ export interface ProductJsonLdInput {
         url?: string | null
         originalUrl?: string | null
       }> | null
+      videos?: Array<{
+        url?: string | null
+        contentUrl?: string | null
+        embedUrl?: string | null
+        name?: string | null
+        title?: string | null
+        description?: string | null
+        thumbnailUrl?: string | null
+        uploadDate?: string | null
+        duration?: string | null
+        timeStamp?: number | null
+        fileName?: string | null
+        mimeType?: string | null
+      }> | null
     } | null
     offers?: {
       offersCount?: number | null
@@ -107,6 +121,7 @@ export interface ProductJsonLdInput {
   locale: string
   breadcrumbs: ProductJsonLdBreadcrumb[]
   site: ProductJsonLdSiteInfo
+  category?: string | null
   imageUrls?: string[]
   punchline?: string | null
   impactScore?: number | null
@@ -290,6 +305,105 @@ const resolveImageUrls = (origin: string, input?: string[]): string[] => {
   return resolved
 }
 
+const PROVIDER_EMBED_PATTERNS = [
+  'youtube.com/embed/',
+  'youtu.be/',
+  'player.vimeo.com/video/',
+  'dailymotion.com/embed/',
+]
+
+const isProviderVideoUrl = (value: string): boolean => {
+  const lower = value.toLowerCase()
+  return PROVIDER_EMBED_PATTERNS.some(pattern => lower.includes(pattern))
+}
+
+const toIsoDate = (value: string | number | null | undefined) => {
+  if (isNonEmptyString(value)) {
+    const parsed = new Date(value)
+    return Number.isNaN(parsed.getTime()) ? value.trim() : parsed.toISOString()
+  }
+
+  if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
+    return new Date(value).toISOString()
+  }
+
+  return undefined
+}
+
+const buildVideoObjects = (
+  origin: string,
+  videos: NonNullable<
+    NonNullable<ProductJsonLdInput['product']['resources']>['videos']
+  >
+): Array<Record<string, JsonLdValue>> => {
+  return videos
+    .map(video => {
+      const explicitContentUrl = normalizeString(video.contentUrl)
+      const explicitEmbedUrl = normalizeString(video.embedUrl)
+      const sourceUrl = normalizeString(video.url)
+      const resolvedSourceUrl = sourceUrl
+        ? sourceUrl.startsWith('http')
+          ? sourceUrl
+          : toAbsoluteUrl(origin, sourceUrl)
+        : undefined
+      const contentUrl = explicitContentUrl
+        ? explicitContentUrl.startsWith('http')
+          ? explicitContentUrl
+          : toAbsoluteUrl(origin, explicitContentUrl)
+        : resolvedSourceUrl && !isProviderVideoUrl(resolvedSourceUrl)
+          ? resolvedSourceUrl
+          : undefined
+      const embedUrl = explicitEmbedUrl
+        ? explicitEmbedUrl.startsWith('http')
+          ? explicitEmbedUrl
+          : toAbsoluteUrl(origin, explicitEmbedUrl)
+        : resolvedSourceUrl && isProviderVideoUrl(resolvedSourceUrl)
+          ? resolvedSourceUrl
+          : undefined
+      const thumbnailUrl = normalizeString(video.thumbnailUrl)
+      const resolvedThumbnail = thumbnailUrl
+        ? thumbnailUrl.startsWith('http')
+          ? thumbnailUrl
+          : toAbsoluteUrl(origin, thumbnailUrl)
+        : undefined
+      const name =
+        normalizeString(video.name) ??
+        normalizeString(video.title) ??
+        normalizeString(video.fileName)
+      const uploadDate = toIsoDate(video.uploadDate ?? video.timeStamp)
+
+      if (!name || !resolvedThumbnail || !uploadDate) {
+        return null
+      }
+
+      return compactJsonLd({
+        '@type': 'VideoObject',
+        name,
+        description: normalizeString(video.description),
+        thumbnailUrl: [resolvedThumbnail],
+        uploadDate,
+        duration: normalizeString(video.duration),
+        contentUrl,
+        embedUrl,
+      }) as Record<string, JsonLdValue> | undefined
+    })
+    .filter((entry): entry is Record<string, JsonLdValue> => Boolean(entry))
+}
+
+const resolveOfferItemCondition = (condition: string | null | undefined) => {
+  switch (condition) {
+    case 'NEW':
+      return 'https://schema.org/NewCondition'
+    case 'OCCASION':
+    case 'USED':
+      return 'https://schema.org/UsedCondition'
+    case 'REFURBISHED':
+      return 'https://schema.org/RefurbishedCondition'
+    default:
+      return undefined
+  }
+}
+
 export const buildOfferList = (
   origin: string,
   offersByCondition: Record<
@@ -325,12 +439,7 @@ export const buildOfferList = (
         priceCurrency: normalizeString(offer.currency),
         priceValidUntil,
         availability: 'https://schema.org/InStock',
-        itemCondition:
-          offer.condition === 'NEW'
-            ? 'https://schema.org/NewCondition'
-            : offer.condition === 'OCCASION'
-              ? 'https://schema.org/UsedCondition'
-              : undefined,
+        itemCondition: resolveOfferItemCondition(offer.condition),
         seller: {
           '@type': 'Organization',
           name: normalizeString(offer.datasourceName),
@@ -622,7 +731,7 @@ export const buildProductJsonLdGraph = (
         .join(' - ') || undefined,
     image: images,
     category:
-      normalizeString(product.names?.seoName) ??
+      normalizeString(input.category) ??
       normalizeString(product.base?.vertical),
     brand: brandName
       ? {
@@ -687,9 +796,14 @@ export const buildProductJsonLdGraph = (
         : undefined,
   }
 
+  const videoEntries = buildVideoObjects(
+    input.site.url,
+    product.resources?.videos ?? []
+  )
+
   const graph = compactJsonLd({
     '@context': 'https://schema.org',
-    '@graph': [breadcrumbEntry, productEntry, webPageEntry],
+    '@graph': [breadcrumbEntry, productEntry, webPageEntry, ...videoEntries],
   })
 
   return (graph as Record<string, JsonLdValue>) ?? null

@@ -50,6 +50,8 @@ const routeMock = {
   path: '/8427973010706-rouleau-pour-couvre-livre-depliant-1-50x0-50',
 }
 
+const useAsyncDataMock = vi.hoisted(() => vi.fn())
+
 // Mocks
 mockNuxtImport('useI18n', () => () => ({
   t: (key: string) => translate(key),
@@ -65,20 +67,10 @@ mockNuxtImport('useRuntimeConfig', () => () => ({
 mockNuxtImport('useSeoMeta', () => vi.fn())
 mockNuxtImport('useHead', () => vi.fn())
 mockNuxtImport('navigateTo', () => vi.fn())
-mockNuxtImport(
-  'useAsyncData',
-  () => () =>
-    Promise.resolve({
-      data: ref(productMockData),
-      pending: ref(false),
-      error: ref(null),
-    })
-)
+mockNuxtImport('useAsyncData', () => useAsyncDataMock)
 
 // Mock resolving category to NULL
-const selectCategoryBySlugMock = vi
-  .fn()
-  .mockRejectedValue(new Error('Category not found'))
+const selectCategoryBySlugMock = vi.hoisted(() => vi.fn())
 vi.mock('~/composables/categories/useCategories', () => ({
   useCategories: () => ({
     selectCategoryBySlug: selectCategoryBySlugMock,
@@ -138,6 +130,12 @@ describe('Uncategorized Product Page', () => {
     vi.clearAllMocks()
     selectCategoryBySlugMock.mockReset()
     selectCategoryBySlugMock.mockRejectedValue(new Error('Category not found'))
+    useAsyncDataMock.mockReset()
+    useAsyncDataMock.mockResolvedValue({
+      data: ref(productMockData),
+      pending: ref(false),
+      error: ref(null),
+    })
     routeMock.params.slug = [
       '8427973010706-rouleau-pour-couvre-livre-depliant-1-50x0-50',
     ]
@@ -186,5 +184,35 @@ describe('Uncategorized Product Page', () => {
       replace: true,
       redirectCode: 301,
     })
+  })
+
+  it('redirects categorized products without fullSlug to the root product slug', async () => {
+    routeMock.params.slug = [
+      'livres',
+      '8427973010706-rouleau-pour-couvre-livre-depliant-1-50x0-50',
+    ]
+    routeMock.path =
+      '/livres/8427973010706-rouleau-pour-couvre-livre-depliant-1-50x0-50'
+
+    const categorizedProduct = {
+      ...productMockData,
+      fullSlug: undefined,
+    }
+
+    useAsyncDataMock.mockResolvedValueOnce({
+      data: ref(categorizedProduct),
+      pending: ref(false),
+      error: ref(null),
+    })
+
+    await mountProductPage()
+
+    expect(navigateTo).toHaveBeenCalledWith(
+      '/rouleau-pour-couvre-livre-depliant-1-50x0-50',
+      {
+        replace: true,
+        redirectCode: 301,
+      }
+    )
   })
 })

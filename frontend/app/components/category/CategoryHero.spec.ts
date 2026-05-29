@@ -173,7 +173,9 @@ describe('CategoryHero', () => {
       },
     })
 
-    const infoWrapperClasses = infoWrapper.get('.category-hero__wrapper').classes()
+    const infoWrapperClasses = infoWrapper
+      .get('.category-hero__wrapper')
+      .classes()
     expect(infoWrapperClasses).not.toContain('category-hero__wrapper--solo')
     expect(infoWrapperClasses).toContain('category-hero__wrapper--info')
   })

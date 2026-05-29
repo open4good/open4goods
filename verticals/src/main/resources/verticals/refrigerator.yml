@@ -586,9 +586,6 @@ subsets:
 # will also be availlable in search for this vertical (must be an attribute or a score)
 ##############################################################################
 aggregationConfiguration:
-  "scores.ECOSCORE.value":
-    interval: 5
-    buckets: 20
   "scores.CLASSE_ENERGY.value":
     interval: 1
     buckets: 5

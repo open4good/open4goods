@@ -105,6 +105,17 @@ const CategoryFilterListStub = defineComponent({
   },
 })
 
+// The dedicated brand block and offers-state toggle are exercised in their own specs.
+const CategoryFilterTermsStub = defineComponent({
+  name: 'CategoryFilterTerms',
+  setup: () => () => h('div', { class: 'category-filter-terms-stub' }),
+})
+
+const CategoryOffersStateToggleStub = defineComponent({
+  name: 'CategoryOffersStateToggle',
+  setup: () => () => h('div', { class: 'category-offers-toggle-stub' }),
+})
+
 describe('CategoryFiltersPanel', () => {
   it('emits updated filters when CategoryFilterList triggers a terms update', async () => {
     const wrapper = mount(CategoryFiltersPanel, {
@@ -123,6 +134,8 @@ describe('CategoryFiltersPanel', () => {
           VExpansionPanel: VExpansionPanelStub,
           VBtn: VBtnStub,
           CategoryFilterList: CategoryFilterListStub,
+          CategoryFilterTerms: CategoryFilterTermsStub,
+          CategoryOffersStateToggle: CategoryOffersStateToggleStub,
         },
       },
     })

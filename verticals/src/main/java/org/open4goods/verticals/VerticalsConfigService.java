@@ -538,6 +538,10 @@ public class VerticalsConfigService {
 				mergeStringSet(defaults.getRequiredAttributes(), config.getRequiredAttributes()));
 		config.setBrandsAlias(mergeMap(defaults.getBrandsAlias(), config.getBrandsAlias()));
 		config.setSubsets(mergeByKey(defaults.getSubsets(), config.getSubsets(), VerticalSubset::getId));
+		// Aggregation configuration (e.g. the global Impact Score scale) is inherited from the
+		// defaults; a vertical may still override a specific field key.
+		config.setAggregationConfiguration(
+				mergeMap(defaults.getAggregationConfiguration(), config.getAggregationConfiguration()));
 
 		ImpactScoreConfig impactScoreConfig = config.getImpactScoreConfig();
 		ImpactScoreConfig defaultImpactScoreConfig = defaults.getImpactScoreConfig();

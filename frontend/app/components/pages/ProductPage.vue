@@ -467,11 +467,12 @@ onMounted(async () => {
   }
 })
 
-if (product.value?.fullSlug) {
+if (product.value?.fullSlug || (product.value?.slug && categorySlug)) {
   const currentPath = route.path.startsWith('/') ? route.path : `/${route.path}`
-  const targetPath = product.value.fullSlug.startsWith('/')
-    ? product.value.fullSlug
-    : `/${product.value.fullSlug}`
+  const canonicalSlug = (product.value.fullSlug ?? product.value.slug)?.trim()
+  const targetPath = canonicalSlug?.startsWith('/')
+    ? canonicalSlug
+    : `/${canonicalSlug}`
 
   // Only redirect if we are NOT on a valid uncategorized route (gtin-slug) that was intentionally requested
   // heuristic: if we have NO categorySlug matched in the route, we allow it (uncategorized view)
@@ -2352,6 +2353,7 @@ const productJsonLdGraph = computed(() => {
       url: (runtimeConfig.public.siteUrl as string) ?? requestURL.origin,
       name: siteName.value,
     },
+    category: verticalTitle.value,
     imageUrls: jsonLdImageUrls.value,
     punchline: product.value.aiReview?.punchline,
     impactScore: impactScoreOutOf20.value,

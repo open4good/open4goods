@@ -32,10 +32,6 @@ const getRuntimeConfig = (
   runtimeConfig?: SitemapLocalFilesRuntimeConfig
 ): SitemapLocalFilesRuntimeConfig => {
   const config = runtimeConfig ?? useRuntimeConfig()
-  console.log(
-    'sitemap-local-files used config:',
-    JSON.stringify(config.sitemapLocalFiles, null, 2)
-  )
   return config
 }
 

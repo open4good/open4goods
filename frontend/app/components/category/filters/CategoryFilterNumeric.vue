@@ -7,27 +7,25 @@
       </p>
     </div>
 
-    <div ref="chartContainer" class="category-filter-numeric__chart-container">
-      <ClientOnly>
-        <VueECharts
-          v-if="chartOptions && canRenderChart"
-          :option="chartOptions"
-          :autoresize="true"
-          class="category-filter-numeric__chart"
-          role="img"
-          :aria-label="chartAriaLabel"
-          :style="{ height: chartHeight }"
-          @click="onBarClick"
-        />
-        <template #fallback>
-          <div
-            v-if="hasBuckets"
-            class="category-filter-numeric__chart-placeholder"
-            :style="{ height: chartHeight }"
-            aria-hidden="true"
-          />
-        </template>
-      </ClientOnly>
+    <!-- Lightweight distribution sparkline (no axes, labels or tooltips). -->
+    <div
+      v-if="showSparkline"
+      class="category-filter-numeric__spark"
+      aria-hidden="true"
+    >
+      <button
+        v-for="bar in sparkBars"
+        :key="bar.key"
+        type="button"
+        class="category-filter-numeric__spark-bar"
+        :class="{
+          'category-filter-numeric__spark-bar--active': isBarActive(bar),
+          'category-filter-numeric__spark-bar--empty': bar.count === 0,
+        }"
+        :style="{ height: `${Math.max(bar.heightPct, 4)}%` }"
+        :tabindex="-1"
+        @click="onBarClick(bar)"
+      />
     </div>
 
     <v-range-slider
@@ -37,7 +35,9 @@
       :step="sliderStep"
       :aria-label="ariaLabel"
       class="category-filter-numeric__slider"
-      thumb-label="always"
+      track-size="2"
+      thumb-size="12"
+      thumb-label
       color="primary"
       hide-details="auto"
       @end="emitRange"
@@ -54,8 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineAsyncComponent, ref, computed } from 'vue'
-import { useElementSize } from '@vueuse/core'
+import { ref, computed } from 'vue'
 import type {
   AggregationResponseDto,
   FieldMetadataDto,
@@ -63,54 +62,22 @@ import type {
 } from '~~/shared/api-client'
 import { resolveFilterFieldTitle } from '~/utils/_field-localization'
 import { formatNumericRangeValue } from '~/utils/_number-formatting'
-import type { EChartsOption } from 'echarts'
-import type { CallbackDataParams } from 'echarts/types/dist/shared'
-import type { TooltipComponentOption } from 'echarts/components'
 import {
   clampSliderRange,
   isPriceField,
   priceToSliderValue,
   sliderValueToPrice,
 } from './price-scale'
-import { ensureECharts } from '~/utils/echarts-loader'
 import { resolveFacetUnit } from '~~/shared/utils/facet-normalization'
 
-let echartsRegistered = false
-
-const VueECharts = defineAsyncComponent(async () => {
-  if (import.meta.client) {
-    const echarts = await ensureECharts([
-      'BarChart',
-      'GridComponent',
-      'TooltipComponent',
-      'CanvasRenderer',
-    ])
-
-    if (echarts && !echartsRegistered) {
-      echartsRegistered = true
-      const { core, modules } = echarts
-      core.use(modules)
-    }
-  }
-
-  const module = await import(
-    /* webpackChunkName: "vendor-echarts" */ 'vue-echarts'
-  )
-
-  return module.default
-})
-
 type RangeBucketDatum = {
-  value: number
-  range: string
+  key: string
+  heightPct: number
   count: number
   from?: number
   to?: number
-  missing?: boolean
+  missing: boolean
 }
-
-const MAX_CHART_HEIGHT = 120
-const MAX_VISIBLE_LABELS = 6
 
 const props = defineProps<{
   field: FieldMetadataDto
@@ -120,12 +87,8 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{ 'update:modelValue': [Filter | null] }>()
-const chartContainer = ref<HTMLElement | null>(null)
-const { width } = useElementSize(chartContainer)
-const canRenderChart = computed(() => width.value > 0)
 
 const { t, n, locale } = useI18n()
-const { translatePlural } = usePluralizedTranslation()
 
 const displayTitle = computed(() => resolveFilterFieldTitle(props.field, t))
 const valueUnit = computed(() => resolveFacetUnit(props.field.mapping))
@@ -324,284 +287,50 @@ watch(
 
 const buckets = computed(() => props.aggregation?.buckets ?? [])
 
-const hasBuckets = computed(() => buckets.value.length > 0)
-
-const toColorWithAlpha = (
-  value: string | undefined,
-  fallbackRaw: string,
-  alpha = 1
-) => {
-  const normalized = value?.trim()
-  if (!normalized) {
-    return alpha === 1
-      ? `rgb(${fallbackRaw})`
-      : `rgba(${fallbackRaw}, ${alpha})`
-  }
-
-  if (normalized.startsWith('#')) {
-    return normalized
-  }
-
-  if (normalized.startsWith('rgba')) {
-    return normalized
-  }
-
-  if (normalized.startsWith('rgb')) {
-    if (alpha === 1) {
-      return normalized
-    }
-
-    return normalized.replace(/^rgb\((.+)\)$/i, `rgba($1, ${alpha})`)
-  }
-
-  return alpha === 1 ? `rgb(${normalized})` : `rgba(${normalized}, ${alpha})`
-}
-
-const chartColorVar = import.meta.client
-  ? useCssVar('--v-theme-chart-range-bar', document.documentElement, {
-      initialValue: '33, 150, 243',
-    })
-  : ref('33, 150, 243')
-
-const axisColorVar = import.meta.client
-  ? useCssVar('--v-theme-text-neutral-secondary', document.documentElement, {
-      initialValue: '71, 84, 103',
-    })
-  : ref('71, 84, 103')
-
-const labelColorVar = import.meta.client
-  ? useCssVar('--v-theme-text-neutral-strong', document.documentElement, {
-      initialValue: '16, 24, 40',
-    })
-  : ref('16, 24, 40')
-
-const chartBarColor = computed(() =>
-  toColorWithAlpha(chartColorVar.value, '33, 150, 243', 0.75)
-)
-const chartBarHoverColor = computed(() =>
-  toColorWithAlpha(chartColorVar.value, '33, 150, 243', 1)
-)
-const axisColor = computed(() =>
-  toColorWithAlpha(axisColorVar.value, '71, 84, 103')
-)
-const labelColor = computed(() =>
-  toColorWithAlpha(labelColorVar.value, '16, 24, 40')
-)
-const gridLineColor = computed(() =>
-  toColorWithAlpha(axisColorVar.value, '229, 231, 235')
-)
-const pointerShadowColor = computed(() =>
-  toColorWithAlpha(axisColorVar.value, '148, 163, 184', 0.06)
-)
-const CHART_HORIZONTAL_PADDING = 8
-
 const hasInformativeBuckets = computed(() => {
   const nonEmpty = buckets.value.filter(bucket => (bucket.count ?? 0) > 0)
   return nonEmpty.length > 1
 })
 
-const chartHeight = computed(() => {
-  if (!buckets.value.length || !hasInformativeBuckets.value) {
-    return '0px'
-  }
+const maxBucketCount = computed(() =>
+  Math.max(1, ...buckets.value.map(bucket => bucket.count ?? 0))
+)
 
-  const baseHeight = 100
-  const extraHeight = Math.max(0, buckets.value.length - 6) * 12
-
-  return `${Math.min(MAX_CHART_HEIGHT, baseHeight + extraHeight)}px`
-})
-
-const xAxisLabelRotation = computed(() => {
-  if (buckets.value.length > 6) {
-    return 45
-  }
-
-  if (buckets.value.length > 3) {
-    return 20
-  }
-
-  return 0
-})
-
-const labelStep = computed(() => {
-  const total = buckets.value.length
-  if (total <= MAX_VISIBLE_LABELS) {
-    return 1
-  }
-
-  return Math.max(1, Math.ceil(total / MAX_VISIBLE_LABELS))
-})
-
-const chartOptions = computed<EChartsOption | null>(() => {
-  if (!buckets.value.length || !hasInformativeBuckets.value) {
-    return null
-  }
-
-  const data: RangeBucketDatum[] = buckets.value.map(bucket => ({
-    value: bucket.count ?? 0,
-    range: formatBucketLabel(bucket.key, bucket.to, bucket.missing),
-    count: bucket.count ?? 0,
-    from: parseNumericBound(bucket.key),
-    to: parseNumericBound(bucket.to),
-    missing: bucket.missing ?? false,
-  }))
-
-  const totalBuckets = data.length
-
-  const shouldDisplayLabelAtIndex = (index: number) => {
-    if (totalBuckets <= MAX_VISIBLE_LABELS) {
-      return true
+const sparkBars = computed<RangeBucketDatum[]>(() =>
+  buckets.value.map((bucket, index) => {
+    const count = bucket.count ?? 0
+    return {
+      key: `${bucket.key ?? index}-${bucket.to ?? ''}`,
+      heightPct: Math.round((count / maxBucketCount.value) * 100),
+      count,
+      from: parseNumericBound(bucket.key),
+      to: parseNumericBound(bucket.to),
+      missing: bucket.missing ?? false,
     }
+  })
+)
 
-    if (index === 0 || index === totalBuckets - 1) {
-      return true
-    }
+const showSparkline = computed(
+  () => sparkBars.value.length > 0 && hasInformativeBuckets.value
+)
 
-    return index % labelStep.value === 0
+const hasActiveRange = computed(
+  () =>
+    props.modelValue?.operator === 'range' &&
+    (props.modelValue.min != null || props.modelValue.max != null)
+)
+
+const selectedNumericRange = computed(() => toNumericRange(localValue.value))
+
+const isBarActive = (bar: RangeBucketDatum): boolean => {
+  if (!hasActiveRange.value || bar.missing) {
+    return false
   }
-
-  const tooltipFormatter: TooltipComponentOption['formatter'] = rawParams => {
-    const params = Array.isArray(rawParams) ? rawParams[0] : rawParams
-    const bucket = (params as CallbackDataParams).data as
-      | RangeBucketDatum
-      | undefined
-    if (!bucket) {
-      return ''
-    }
-
-    const countLabel = translatePlural(
-      'category.products.resultsCount',
-      bucket.count
-    )
-    return `<strong>${bucket.range}</strong><br />${countLabel}`
-  }
-
-  const series = {
-    type: 'bar',
-    data,
-    barWidth: 28,
-    itemStyle: {
-      color: chartBarColor.value,
-      borderRadius: [2, 2, 0, 0],
-    },
-    label: {
-      show: true,
-      position: 'top',
-      color: labelColor.value,
-      fontSize: 11,
-      formatter: ({
-        data,
-        dataIndex,
-      }: {
-        data?: RangeBucketDatum
-        dataIndex?: number
-      }) => {
-        const index = dataIndex ?? 0
-        const bucket = data
-        if (!bucket || !shouldDisplayLabelAtIndex(index)) {
-          return ''
-        }
-
-        return String(bucket.count)
-      },
-    },
-    emphasis: {
-      focus: 'series',
-      itemStyle: {
-        color: chartBarHoverColor.value,
-      },
-    },
-    cursor: 'pointer',
-  }
-
-  const options = {
-    grid: {
-      top: 32,
-      bottom: 0,
-      left: CHART_HORIZONTAL_PADDING,
-      right: CHART_HORIZONTAL_PADDING,
-      containLabel: true,
-    },
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: {
-        type: 'shadow',
-        shadowStyle: {
-          color: pointerShadowColor.value,
-        },
-      },
-      appendToBody: true,
-      confine: true,
-      formatter: tooltipFormatter,
-    },
-    xAxis: {
-      type: 'category',
-      data: data.map(bucket => bucket.range),
-      axisLine: {
-        show: true,
-        lineStyle: {
-          color: gridLineColor.value,
-        },
-      },
-      axisTick: { show: false },
-      name: t('category.filters.axis.value', {
-        unit: valueUnit.value || t('category.filters.axis.defaultUnit'),
-      }),
-      axisLabel: {
-        show: false,
-        color: axisColor.value,
-        fontSize: 11,
-        interval: 0,
-        rotate: xAxisLabelRotation.value,
-        overflow: 'truncate',
-        hideOverlap: true,
-        formatter: (value: string, index: number) =>
-          shouldDisplayLabelAtIndex(index) ? value : '',
-      },
-      boundaryGap: true,
-      splitLine: { show: false },
-    },
-    yAxis: {
-      type: 'value',
-      name: t('category.filters.axis.products'),
-      axisLine: { show: false },
-      axisTick: { show: false },
-      splitLine: {
-        lineStyle: {
-          color: gridLineColor.value,
-          opacity: 0.3,
-        },
-      },
-      axisLabel: {
-        color: axisColor.value,
-        fontSize: 11,
-      },
-    },
-    series: [series],
-    animation: false,
-  } as EChartsOption
-
-  return options
-})
-
-const chartAriaLabel = computed(() => {
-  if (!buckets.value.length || !hasInformativeBuckets.value) {
-    return ''
-  }
-
-  const entries = buckets.value
-    .map(bucket => {
-      const range = formatBucketLabel(bucket.key, bucket.to, bucket.missing)
-      const countLabel = translatePlural(
-        'category.products.resultsCount',
-        bucket.count ?? 0
-      )
-      return `${range}: ${countLabel}`
-    })
-    .join('; ')
-
-  return `${displayTitle.value}. ${entries}`
-})
+  const [min, max] = selectedNumericRange.value
+  const from = bar.from ?? min
+  const to = bar.to ?? max
+  return to >= min && from <= max
+}
 
 const rangeLabel = computed(() => {
   if (!props.modelValue || props.modelValue.operator !== 'range') {
@@ -631,41 +360,20 @@ const emitRange = () => {
   })
 }
 
-const onBarClick = (params: CallbackDataParams) => {
-  const bucket = params.data as RangeBucketDatum | undefined
-  if (!bucket || bucket.missing || !props.field.mapping) {
+const onBarClick = (bar: RangeBucketDatum) => {
+  if (bar.missing || bar.from == null || !props.field.mapping) {
     return
   }
 
-  const [min, max] = resolveSliderRange(bucket.from, bucket.to)
+  const [min, max] = resolveSliderRange(bar.from, bar.to)
   localValue.value = [min, max]
 
   emit('update:modelValue', {
     field: props.field.mapping,
     operator: 'range',
-    min: bucket.from,
-    max: bucket.to,
+    min: bar.from,
+    max: bar.to,
   })
-}
-
-const formatBucketLabel = (
-  from?: string | number | null,
-  to?: number | null,
-  missing?: boolean
-) => {
-  if (missing) {
-    return t('category.filters.missingLabel')
-  }
-
-  if (from == null && to == null) {
-    return ''
-  }
-
-  if (to == null) {
-    return `${formatBoundary(from)}+`
-  }
-
-  return `${formatBoundary(from)} → ${formatBoundary(to)}`
 }
 </script>
 
@@ -673,13 +381,12 @@ const formatBucketLabel = (
 .category-filter-numeric
   display: flex
   flex-direction: column
-  height: 100%
 
   &__header
     display: flex
     justify-content: space-between
     align-items: baseline
-    margin-bottom: 0.75rem
+    margin-bottom: 0.5rem
 
   &__title
     font-size: 1rem
@@ -691,19 +398,36 @@ const formatBucketLabel = (
     font-size: 0.875rem
     color: rgb(var(--v-theme-text-neutral-secondary))
 
+  &__spark
+    display: flex
+    align-items: flex-end
+    gap: 2px
+    height: 36px
+    margin-bottom: 0.25rem
+    padding-inline: 2px
+
+  &__spark-bar
+    flex: 1 1 0
+    min-width: 2px
+    border: 0
+    padding: 0
+    border-radius: 2px 2px 0 0
+    background: rgba(var(--v-theme-primary), 0.18)
+    cursor: pointer
+    transition: height 0.25s ease, background-color 0.2s ease
+
+    &:hover
+      background: rgba(var(--v-theme-primary), 0.4)
+
+    &--active
+      background: rgba(var(--v-theme-primary), 0.7)
+
+    &--empty
+      cursor: default
+      background: rgba(var(--v-theme-on-surface), 0.06)
+
   &__slider
     margin-top: 0
     width: 100%
     min-width: 0
-
-  &__chart
-    width: 100%
-    min-height: 7.5rem
-    max-height: 15.625rem
-
-  &__chart-placeholder
-    width: 100%
-    border-radius: 0.5rem
-    background: rgba(var(--v-theme-surface-primary-080), 0.6)
-    max-height: 15.625rem
 </style>

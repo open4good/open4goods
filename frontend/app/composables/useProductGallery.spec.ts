@@ -1,19 +1,9 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import type { ProductDto } from '~~/shared/api-client'
 import { useProductGallery } from './useProductGallery'
 
-vi.mock('#imports', () => ({
-  useImage: () => (src: string, modifiers?: Record<string, unknown>) => {
-    if (!modifiers?.width || src.startsWith('/_ipx/')) {
-      return src
-    }
-
-    return `/_ipx/w_${modifiers.width}${src}`
-  },
-}))
-
 describe('useProductGallery', () => {
-  it('does not pass already transformed ipx URLs through the image transformer again', () => {
+  it('normalizes already transformed ipx URLs before rendering', () => {
     const product = {
       resources: {
         images: [
@@ -27,7 +17,8 @@ describe('useProductGallery', () => {
 
     const { galleryItems } = useProductGallery(product, 'Product')
 
-    expect(galleryItems.value[0].previewUrl).toContain('/images/product.png')
+    expect(galleryItems.value[0].previewUrl).toBe('/images/product.png')
+    expect(galleryItems.value[0].thumbnailUrl).toBe('/images/product.png')
     expect(galleryItems.value[0].previewUrl).not.toContain('/_ipx/w_1200/_ipx/')
     expect(galleryItems.value[0].previewUrl).not.toContain('/_ipx/_ipx/')
   })

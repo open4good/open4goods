@@ -637,7 +637,8 @@
         "subtitle": "A short selection of guides remains available after the taxonomy browse.",
         "title": "Featured guides",
         "viewPath": "Open the {category} taxonomy path",
-        "viewPathCta": "Browse taxonomy"
+        "viewPathCta": "Browse taxonomy",
+        "subcategoriesAriaLabel": "Available sub-categories"
       }
     }
   },
@@ -814,6 +815,12 @@
       "condition": {
         "new": "New",
         "used": "Used"
+      },
+      "competition": {
+        "title": "Competition",
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High"
       },
       "searchMode": {
         "semantic": "Semantic search",

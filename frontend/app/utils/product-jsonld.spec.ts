@@ -111,6 +111,46 @@ describe('product-jsonld', () => {
     expect(offer.itemCondition).toBe('https://schema.org/NewCondition')
   })
 
+  it('sets used and refurbished itemCondition values', () => {
+    const graph = buildProductJsonLdGraph({
+      ...(mockInput as unknown as ProductJsonLdInput),
+      product: {
+        ...mockProduct,
+        offers: {
+          offersCount: 2,
+          offersByCondition: {
+            USED: [
+              {
+                url: '/offer/used',
+                price: 80,
+                currency: 'EUR',
+                condition: 'USED',
+              },
+            ],
+            REFURBISHED: [
+              {
+                url: '/offer/refurbished',
+                price: 90,
+                currency: 'EUR',
+                condition: 'REFURBISHED',
+              },
+            ],
+          },
+        },
+      } as unknown as ProductJsonLdInput['product'],
+    })
+    const productNode = (
+      graph?.['@graph'] as unknown as TestProductNode[]
+    )?.find(n => n['@type'] === 'Product')
+
+    expect(
+      productNode?.offers.offers.map(offer => offer.itemCondition)
+    ).toEqual([
+      'https://schema.org/UsedCondition',
+      'https://schema.org/RefurbishedCondition',
+    ])
+  })
+
   it('correctly sets offerCount', () => {
     const graph = buildProductJsonLdGraph(
       mockInput as unknown as ProductJsonLdInput
@@ -252,6 +292,62 @@ describe('product-jsonld', () => {
       '@type': 'QuantitativeValue',
       value: 8.65,
       unitCode: 'MMT',
+    })
+  })
+
+  it('uses the resolved category label instead of the product SEO name', () => {
+    const graph = buildProductJsonLdGraph({
+      ...(mockInput as unknown as ProductJsonLdInput),
+      category: 'Televisions',
+    })
+    const productNode = (
+      graph?.['@graph'] as unknown as Array<{
+        '@type': string
+        category?: string
+      }>
+    )?.find(n => n['@type'] === 'Product')
+
+    expect(productNode?.category).toBe('Televisions')
+  })
+
+  it('emits VideoObject only when required video fields exist', () => {
+    const graph = buildProductJsonLdGraph({
+      ...(mockInput as unknown as ProductJsonLdInput),
+      product: {
+        ...mockProduct,
+        resources: {
+          videos: [
+            {
+              name: 'Product demo',
+              thumbnailUrl: '/images/video-thumb.webp',
+              uploadDate: '2026-05-29T12:00:00Z',
+              contentUrl: '/videos/demo.mp4',
+              duration: 'PT1M',
+            },
+            {
+              name: 'Missing thumbnail',
+              uploadDate: '2026-05-29T12:00:00Z',
+              contentUrl: '/videos/missing.mp4',
+            },
+          ],
+        },
+      } as unknown as ProductJsonLdInput['product'],
+    })
+
+    const videoNodes = (
+      graph?.['@graph'] as unknown as Array<{
+        '@type': string
+        name?: string
+        thumbnailUrl?: string[]
+        contentUrl?: string
+      }>
+    ).filter(n => n['@type'] === 'VideoObject')
+
+    expect(videoNodes).toHaveLength(1)
+    expect(videoNodes[0]).toMatchObject({
+      name: 'Product demo',
+      thumbnailUrl: ['https://nudger.fr/images/video-thumb.webp'],
+      contentUrl: 'https://nudger.fr/videos/demo.mp4',
     })
   })
 })

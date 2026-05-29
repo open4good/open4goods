@@ -102,11 +102,11 @@ public record ProductDto(
          * Allowed filter fields on Products. (must match elastic mapping)
          */
         public enum ProductDtoFilterFields {
+                // Core global numeric filters surfaced in the "Les sous" group.
+                // condition/brand/country remain valid FilterFields for filtering and are surfaced
+                // through dedicated UI controls / other groups, not the global group.
                 price(FilterField.price),
-                offersCount(FilterField.offersCount),
-                condition(FilterField.condition),
-                brand(FilterField.brand),
-                country(FilterField.country);
+                offersCount(FilterField.offersCount);
 
                 private final FilterField delegate;
 

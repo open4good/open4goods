@@ -1,0 +1,103 @@
+# Search-intent subcategory for the dishwasher vertical.
+# Maintained: 2026-05-29 by subcategory.prompt.
+# Intent: built-in 60 cm dishwasher purchase/comparison.
+# Evidence:
+#   - GSC: 3 clicks, 218 impressions, avg position about 6.4 over the last
+#     90 days for queries including "lave-vaisselle 60 cm".
+#   - Keyword MCP: unavailable in this run; kwrds.ai required a paid plan,
+#     SEO Review Tools returned an API error, and DataForSEO returned 403.
+#   - Google Autocomplete: 15 matching suggestions for "lave vaisselle 60 cm"
+#     and "lave vaisselle encastrable".
+# Feasibility:
+#   - Matching products: 146; distinct brands/datasources in sampled results: 16/15.
+#   - Filters validated through the local frontend API proxy on 2026-05-29.
+# Rationale:
+#   - Uses both installation type and bounded width so the page answers the
+#     named 60 cm built-in intent without overmatching every narrow appliance.
+id: "dishwasher_builtin_60"
+slug:
+  en: "built-in-60cm-dishwasher"
+  fr: "lave-vaisselle-encastrable-60-cm"
+h1Title:
+  en: "Built-in 60 cm dishwashers"
+  fr: "Lave-vaisselle encastrable 60 cm"
+description:
+  en: |-
+    Compare **built-in 60 cm dishwashers** for fitted kitchens, with capacity,
+    energy, water, noise and impact data.
+  fr: |-
+    Comparez les **lave-vaisselles encastrables 60 cm** pour cuisine equipee,
+    avec capacite, energie, eau, bruit et impact.
+metaTitle:
+  en: "Built-in 60 cm dishwashers | Nudger"
+  fr: "Lave-vaisselle encastrable 60 cm | Nudger"
+metaDescription:
+  en: "Compare built-in 60 cm dishwashers by capacity, energy use, water, noise, price and impact score before choosing."
+  fr: "Comparez les lave-vaisselles encastrables 60 cm par capacite, energie, eau, bruit, prix et impact."
+metaOpenGraphTitle:
+  en: "Compare built-in 60 cm dishwashers"
+  fr: "Comparer les lave-vaisselles encastrables 60 cm"
+metaOpenGraphDescription:
+  en: "A precise selection of full-size built-in dishwashers for fitted kitchens."
+  fr: "Une selection precise de lave-vaisselles encastrables grand format pour cuisine equipee."
+heroBlock:
+  mdiIcon: "mdi-ruler-square"
+  title:
+    en: "Check the niche"
+    fr: "Verifiez la niche"
+  body:
+    en: |-
+      A 60 cm built-in dishwasher must match both the cabinet width and the front-panel constraints.
+    fr: |-
+      Un lave-vaisselle encastrable 60 cm doit correspondre a la largeur du meuble et aux contraintes de facade.
+readMore:
+  title:
+    en: "How to choose a built-in 60 cm dishwasher?"
+    fr: "Comment choisir un lave-vaisselle encastrable 60 cm ?"
+  shortText:
+    en: |-
+      Start with the installation constraint: confirm the appliance is built-in
+      and that its width fits the 60 cm kitchen niche. Then compare capacity,
+      noise and energy use.
+    fr: |-
+      Commencez par la contrainte d'installation : verifiez que l'appareil est
+      encastrable et que sa largeur correspond a une niche de 60 cm. Comparez
+      ensuite la capacite, le bruit et la consommation.
+  longText:
+    en: |-
+      A full-size built-in model often offers 13 to 15 place settings, but two
+      products with the same width can differ strongly on water consumption,
+      noise level and drying performance. These criteria matter every week, not
+      only at purchase time.
+
+      If the kitchen opens onto a living room, prioritize quieter models before
+      small price differences. For repeated cycles, compare the energy class and
+      water use together instead of looking at one label in isolation.
+
+      Nudger keeps the filter strict: built-in installation plus a 58 to 62 cm
+      width range, so the listing stays aligned with the 60 cm buying intent
+      while preserving impact and price comparison.
+    fr: |-
+      Un modele encastrable grand format offre souvent 13 a 15 couverts, mais
+      deux produits de meme largeur peuvent beaucoup varier en consommation
+      d'eau, niveau sonore et sechage. Ces criteres comptent chaque semaine, pas
+      seulement au moment de l'achat.
+
+      Si la cuisine est ouverte sur le sejour, privilegiez les modeles plus
+      silencieux avant les petits ecarts de prix. Pour des cycles frequents,
+      comparez ensemble la classe energie et l'eau consommee au lieu de regarder
+      une seule etiquette.
+
+      Nudger garde un filtre strict : installation encastrable et largeur de
+      58 a 62 cm, afin que la liste reste alignee avec l'intention 60 cm tout en
+      conservant la comparaison d'impact et de prix.
+activatedFilters:
+  - field: "attributes.indexed.INSTALLATION_TYPE.value"
+    operator: "EQUALS"
+    value: "ENCASTRABLE"
+  - field: "attributes.indexed.WIDTH.numericValue"
+    operator: "GREATER_THAN_OR_EQUAL"
+    value: "0.58"
+  - field: "attributes.indexed.WIDTH.numericValue"
+    operator: "LOWER_THAN_OR_EQUAL"
+    value: "0.62"

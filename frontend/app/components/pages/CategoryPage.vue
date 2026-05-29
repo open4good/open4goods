@@ -354,7 +354,6 @@
               density="comfortable"
               @update:model-value="onPageChange"
             />
-
           </template>
 
           <!--
@@ -377,7 +376,10 @@
               >
                 <v-icon icon="mdi-book-open-page-variant-outline" size="22" />
               </v-avatar>
-              <h2 :id="readMoreHeadingId" class="category-page__read-more-title">
+              <h2
+                :id="readMoreHeadingId"
+                class="category-page__read-more-title"
+              >
                 {{ readMoreTitle }}
               </h2>
             </div>
@@ -605,7 +607,7 @@ const filtersDrawer = ref(false)
 const props = defineProps<{ slug: string; subCategorySlug?: string | null }>()
 const slug = props.slug
 const subCategorySlug = props.subCategorySlug ?? null
-const slugPattern = /^[a-z-]+$/
+const slugPattern = /^[a-z0-9-]+$/
 
 if (
   !slugPattern.test(slug) ||
@@ -2110,9 +2112,20 @@ const shouldFetchFreshProducts = computed(
 )
 
 const NON_AGGREGATABLE_FIELDS = new Set([
-  'attributes.referentielAttributes.BRAND',
   'attributes.referentielAttributes.MODEL',
 ])
+
+// Condition and brand are surfaced through dedicated controls (offers-state toggle and the
+// Marque block) rather than the grouped field options, so their aggregations must be requested
+// explicitly to keep the counts populated.
+const ALWAYS_AGGREGATED_FIELDS: FieldMetadataDto[] = [
+  { mapping: 'price.conditions', title: null, valueType: 'text' },
+  {
+    mapping: 'attributes.referentielAttributes.BRAND',
+    title: null,
+    valueType: 'text',
+  },
+]
 
 const buildAggregationRequest = (
   options: ProductFieldOptionsResponse | null,
@@ -2122,6 +2135,7 @@ const buildAggregationRequest = (
     ...(options?.global ?? []),
     ...(options?.impact ?? []),
     ...(options?.technical ?? []),
+    ...ALWAYS_AGGREGATED_FIELDS,
     ...extraFields,
   ]
 

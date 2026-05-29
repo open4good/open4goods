@@ -722,9 +722,6 @@ subsets:
 ##############################################################################
 
 aggregationConfiguration:
-  "scores.ECOSCORE.value":
-    interval: 5
-    buckets: 20
   "scores.REPAIRABILITY_INDEX.value":
     interval: 1
     buckets: 10

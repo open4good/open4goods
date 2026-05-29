@@ -46,6 +46,8 @@ describe('CategoryFiltersPanel Reproduction', () => {
         },
         stubs: {
           CategoryFilterList: true,
+          CategoryFilterTerms: true,
+          CategoryOffersStateToggle: true,
         },
       },
       props: {
@@ -83,6 +85,8 @@ describe('CategoryFiltersPanel Reproduction', () => {
         },
         stubs: {
           CategoryFilterList: true,
+          CategoryFilterTerms: true,
+          CategoryOffersStateToggle: true,
         },
       },
       props: {

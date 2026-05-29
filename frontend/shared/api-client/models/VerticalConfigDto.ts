@@ -27,6 +27,13 @@ import {
   NudgeToolConfigDtoToJSON,
   NudgeToolConfigDtoToJSONTyped,
 } from './NudgeToolConfigDto'
+import type { VerticalSubCategoryDto } from './VerticalSubCategoryDto'
+import {
+  VerticalSubCategoryDtoFromJSON,
+  VerticalSubCategoryDtoFromJSONTyped,
+  VerticalSubCategoryDtoToJSON,
+  VerticalSubCategoryDtoToJSONTyped,
+} from './VerticalSubCategoryDto'
 
 /**
  *
@@ -136,6 +143,12 @@ export interface VerticalConfigDto {
    * @memberof VerticalConfigDto
    */
   nudgeToolConfig?: NudgeToolConfigDto
+  /**
+   * Search-intent landing pages configured under this vertical.
+   * @type {Array<VerticalSubCategoryDto>}
+   * @memberof VerticalConfigDto
+   */
+  subCategories?: Array<VerticalSubCategoryDto>
 }
 
 /**
@@ -197,6 +210,12 @@ export function VerticalConfigDtoFromJSONTyped(
       json['nudgeToolConfig'] == null
         ? undefined
         : NudgeToolConfigDtoFromJSON(json['nudgeToolConfig']),
+    subCategories:
+      json['subCategories'] == null
+        ? undefined
+        : (json['subCategories'] as Array<any>).map(
+            VerticalSubCategoryDtoFromJSON
+          ),
   }
 }
 
@@ -238,5 +257,11 @@ export function VerticalConfigDtoToJSONTyped(
         ? undefined
         : Array.from(value['aggregatedScores'] as Set<any>),
     nudgeToolConfig: NudgeToolConfigDtoToJSON(value['nudgeToolConfig']),
+    subCategories:
+      value['subCategories'] == null
+        ? undefined
+        : (value['subCategories'] as Array<any>).map(
+            VerticalSubCategoryDtoToJSON
+          ),
   }
 }

@@ -244,6 +244,40 @@ class SearchServiceTest {
     }
 
     @Test
+    void resolveVerticalFields_shouldPlaceCountryInImpact_andMoneyFiltersLastInGlobal() {
+        // GIVEN
+        VerticalConfig config = new VerticalConfig();
+        config.setId("tv");
+        config.setMoneyFilters(List.of("USAGE_COST_YEAR"));
+
+        AttributesConfig attributesConfig = new AttributesConfig();
+        AttributeConfig usageCost = new AttributeConfig();
+        usageCost.setKey("USAGE_COST_YEAR");
+        usageCost.setFilteringType(AttributeType.NUMERIC);
+        attributesConfig.setConfigs(List.of(usageCost));
+        config.setAttributesConfig(attributesConfig);
+
+        // Simulate the controller passing the two core global numeric fields.
+        var price = new org.open4goods.nudgerfrontapi.dto.product.FieldMetadataDto(
+                "price.minPrice.price", null, null, "numeric", null);
+        var offersCount = new org.open4goods.nudgerfrontapi.dto.product.FieldMetadataDto(
+                "offersCount", null, null, "numeric", null);
+
+        // WHEN
+        org.open4goods.nudgerfrontapi.dto.product.ProductFieldOptionsResponse response = searchService
+                .resolveVerticalFields(config, DomainLanguage.fr, List.of(price, offersCount));
+
+        // THEN: country sits in the impact group, never in global.
+        assertThat(response.impact()).anyMatch(field -> "gtinInfos.country".equals(field.mapping()));
+        assertThat(response.global()).noneMatch(field -> "gtinInfos.country".equals(field.mapping()));
+
+        // THEN: the money filter is appended last in the global group.
+        List<String> globalMappings = response.global().stream().map(field -> field.mapping()).toList();
+        assertThat(globalMappings).containsExactly(
+                "price.minPrice.price", "offersCount", "attributes.indexed.USAGE_COST_YEAR.numericValue");
+    }
+
+    @Test
     void resolveVerticalFields_shouldMapEcoFiltersToImpact_andNotToTechnical() {
         // GIVEN
         VerticalConfig config = new VerticalConfig();

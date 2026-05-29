@@ -115,6 +115,11 @@ public class VerticalConfig {
 	private List<String> technicalFilters = new ArrayList<>();
 
 	/**
+	 * The list of filters to be added to the money ("Les sous") filters group
+	 */
+	private List<String> moneyFilters = new ArrayList<>();
+
+	/**
 	 * The list of attributes considered popular for frontend rendering.
 	 */
 	private List<String> popularAttributes = new ArrayList<>();
@@ -526,6 +531,9 @@ public class VerticalConfig {
 
 		if (null != technicalFilters) {
 			filters.addAll(technicalFilters);
+		}
+		if (null != moneyFilters) {
+			filters.addAll(moneyFilters);
 		}
 		filters.addAll(globalTechnicalFilters);
 		return filters;
@@ -943,6 +951,14 @@ public class VerticalConfig {
 
 	public void setTechnicalFilters(List<String> technicalFilters) {
 		this.technicalFilters = technicalFilters;
+	}
+
+	public List<String> getMoneyFilters() {
+		return moneyFilters;
+	}
+
+	public void setMoneyFilters(List<String> moneyFilters) {
+		this.moneyFilters = moneyFilters;
 	}
 
 	public List<String> getPopularAttributes() {

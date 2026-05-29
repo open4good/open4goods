@@ -1,6 +1,7 @@
 package org.open4goods.nudgerfrontapi.service;
 
 import java.net.URI;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -1504,8 +1505,14 @@ public class ProductMappingService {
         if (resource == null) {
             return null;
         }
+        String publicUrl = buildResourceUrl(resource, VIDEOS_PATH);
+        String originalUrl = resource.getUrl();
+        String uploadDate = resource.getTimeStamp() == null ? null : Instant.ofEpochMilli(resource.getTimeStamp()).toString();
+        String providerUrl = isEmbeddableVideoUrl(originalUrl) ? originalUrl : null;
+        String contentUrl = providerUrl == null ? publicUrl : null;
         return new ProductVideoDto(
-                buildResourceUrl(resource, VIDEOS_PATH),
+                publicUrl,
+                originalUrl,
                 resource.getMimeType(),
                 resource.getTimeStamp(),
                 resource.getCacheKey(),
@@ -1520,7 +1527,29 @@ public class ProductMappingService {
                 resource.getGroup(),
                 resource.getDatasourceName(),
                 resource.getTags() == null ? Collections.emptySet() : new LinkedHashSet<>(resource.getTags()),
-                resource.getHardTags() == null ? Collections.emptySet() : new LinkedHashSet<>(resource.getHardTags()));
+                resource.getHardTags() == null ? Collections.emptySet() : new LinkedHashSet<>(resource.getHardTags()),
+                resource.bestNameFromTag(),
+                null,
+                null,
+                uploadDate,
+                null,
+                contentUrl,
+                providerUrl);
+    }
+
+    /**
+     * Identifies provider URLs that should be exposed as embeddable videos
+     * instead of direct file downloads.
+     */
+    private boolean isEmbeddableVideoUrl(String url) {
+        if (!StringUtils.hasText(url)) {
+            return false;
+        }
+        String normalized = url.toLowerCase(Locale.ROOT);
+        return normalized.contains("youtube.com/embed/")
+                || normalized.contains("youtu.be/")
+                || normalized.contains("player.vimeo.com/video/")
+                || normalized.contains("dailymotion.com/embed/");
     }
 
     /**

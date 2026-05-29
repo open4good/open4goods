@@ -108,7 +108,8 @@ public class CategoryMappingService {
                 i18n == null ? null : i18n.getVerticalHomeUrl(),
                 mapPopularAttributes(verticalConfig, domainLanguage),
                 defaultSet(verticalConfig.getAggregatedScores()),
-                mapNudgeToolConfig(verticalConfig.getNudgeToolConfig(), verticalConfig, domainLanguage));
+                mapNudgeToolConfig(verticalConfig.getNudgeToolConfig(), verticalConfig, domainLanguage),
+                mapVerticalSubCategories(verticalConfig.getSubCategories(), domainLanguage));
     }
 
     /**

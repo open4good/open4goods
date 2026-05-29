@@ -517,7 +517,8 @@
         "subtitle": "Une sélection courte de guides reste disponible après le parcours taxonomique.",
         "title": "Guides mis en avant",
         "viewPath": "Ouvrir le chemin taxonomique {category}",
-        "viewPathCta": "Parcourir la taxonomie"
+        "viewPathCta": "Parcourir la taxonomie",
+        "subcategoriesAriaLabel": "Sous-catégories disponibles"
       }
     }
   },
@@ -666,7 +667,7 @@
       "fields": {
         "brand": "Marque",
         "condition": "État des offres",
-        "country": "Code pays du code barre",
+        "country": "Code pays",
         "creationDate": "Date de création",
         "datasource": "Sources de données",
         "ecoscore": "Impact Score",
@@ -674,7 +675,7 @@
         "googleTaxonomyId": "Catégorie produit Google",
         "lastChange": "Dernière mise à jour",
         "offersCount": "Nombre d'offres",
-        "price": "Fourchette de prix",
+        "price": "Prix",
         "title": "Filtres"
       },
       "title": "Filtres",
@@ -693,6 +694,12 @@
       "condition": {
         "new": "Neuf",
         "used": "Occasion"
+      },
+      "competition": {
+        "title": "Concurrence",
+        "low": "Faible",
+        "medium": "Moyenne",
+        "high": "Élevée"
       },
       "searchMode": {
         "semantic": "Recherche sémantique",
@@ -829,7 +836,7 @@
           "brand": "Marque",
           "impactScore": "Score d'impact",
           "model": "Modèle",
-          "offersCount": "Nombre d'offres",
+          "offersCount": "Concurrence",
           "price": "Prix"
         },
         "groups": {

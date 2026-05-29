@@ -83,6 +83,29 @@ class VerticalsConfigServiceRegressionTest {
     }
 
     @Test
+    void shouldInheritGlobalImpactScoreAggregationFromDefault() {
+        // The Impact Score (ECOSCORE) histogram/slider scale is defined once in _default.yml and
+        // must apply to every vertical, even those declaring their own aggregationConfiguration block.
+        for (String verticalId : new String[] {"tv", "smartphones", "dishwasher", "oven"}) {
+            VerticalConfig config = verticalsConfigService.getConfigById(verticalId);
+            assertThat(config).as("Config for " + verticalId).isNotNull();
+
+            var ecoscore = config.getAggregationConfigurationFor("scores.ECOSCORE.value");
+            assertThat(ecoscore)
+                .as(verticalId + " should inherit the global ECOSCORE aggregation config")
+                .isNotNull();
+            assertThat(ecoscore.getInterval())
+                .as(verticalId + " ECOSCORE interval should come from _default.yml")
+                .isEqualTo(0.2d);
+
+            // Vertical-specific aggregation keys must survive the merge (default + own entries).
+            assertThat(config.getAggregationConfiguration())
+                .as(verticalId + " should keep its own aggregation keys alongside the inherited one")
+                .hasSizeGreaterThan(1);
+        }
+    }
+
+    @Test
     void shouldLoadExternalSubCategoriesByVerticalId() {
         VerticalConfig dishwasherConfig = verticalsConfigService.getConfigById("dishwasher");
         assertThat(dishwasherConfig).isNotNull();

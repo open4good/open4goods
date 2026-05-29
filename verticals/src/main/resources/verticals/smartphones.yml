@@ -531,9 +531,6 @@ subsets:
       fr: "Smartphones avec plus de 256 Go de stockage."
 
 aggregationConfiguration:
-  "scores.ECOSCORE.value":
-    interval: 1
-    buckets: 12
   "scores.REPAIRABILITY_INDEX.value":
     interval: 1
     buckets: 10

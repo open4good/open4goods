@@ -213,13 +213,21 @@ public class SearchService {
             return new ProductFieldOptionsResponse(immutableGlobal, List.of(), List.of());
         }
 
-        List<FieldMetadataDto> globalWithAggregation = augmentFieldsWithAggregationMetadata(immutableGlobal, config);
+        // Global ("Les sous") = core global numeric fields (price, offersCount) followed by the
+        // vertical money filters (e.g. USAGE_COST_YEAR), which therefore appear last in the group.
+        List<FieldMetadataDto> globalCombined = new ArrayList<>(immutableGlobal);
+        globalCombined.addAll(mapVerticalAttributeFilters(config.getMoneyFilters(), config, domainLanguage));
+        List<FieldMetadataDto> globalWithAggregation = augmentFieldsWithAggregationMetadata(globalCombined, config);
         List<FieldMetadataDto> impactFields = new ArrayList<>();
 
         // Prepend the main ECOSCORE entries so they appear first in the impact section.
         FieldMetadataDto.AggregationMetadata ecoscoreAgg = resolveAggregationMetadata(config, "scores.ECOSCORE.value", "ECOSCORE");
         String ecoscoreTitle = resolveEcoscoreTitle(domainLanguage);
         impactFields.add(new FieldMetadataDto("scores.ECOSCORE.value", ecoscoreTitle, null, VALUE_TYPE_NUMERIC, ecoscoreAgg));
+
+        // Manufacturing country (resolved from the GTIN prefix) belongs to the "La planète" group.
+        // Title is left null so the frontend localises it (category.filters.fields.country).
+        impactFields.add(new FieldMetadataDto("gtinInfos.country", null, null, VALUE_TYPE_TEXT, null));
 
         // Eco filters are vertical-level ecological filters configured in YAML and
         // should be rendered with impact filters in the frontend.
