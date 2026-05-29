@@ -3,6 +3,7 @@
 This release covers **1 day(s)** of work, from **2026-05-27T14:32:18.000Z** to **2026-05-29T06:45:23.000Z**.
 
 ### 📦 Stats
+
 - Diff: [compare](https://github.com/open4good/open4goods/compare/v1.0.33...v1.0.34)
 - Changed files: **247**
 - Commits: **7**
@@ -10,15 +11,12 @@ This release covers **1 day(s)** of work, from **2026-05-27T14:32:18.000Z** to *
 
 ---
 
-
-
 <details>
 <summary>🙈 Other changes (2)</summary>
 
-| PR | Title | Author |
-|---:|---|---|
+|                                                           PR | Title                                                                      | Author         |
+| -----------------------------------------------------------: | -------------------------------------------------------------------------- | -------------- |
 | [PR 3154](https://github.com/open4good/open4goods/pull/3154) | Update dependency org.apache.maven.plugins:maven-failsafe-plugin to v3.5.6 | @renovate[bot] |
-| [PR 3153](https://github.com/open4good/open4goods/pull/3153) | Update dependency @nuxtjs/robots to v6.0.9 | @renovate[bot] |
-
+| [PR 3153](https://github.com/open4good/open4goods/pull/3153) | Update dependency @nuxtjs/robots to v6.0.9                                 | @renovate[bot] |
 
 </details>

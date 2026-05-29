@@ -18,62 +18,72 @@
  * @interface VerticalSubCategoryHeroBlockDto
  */
 export interface VerticalSubCategoryHeroBlockDto {
-    /**
-     * Localized title displayed in the hero information card.
-     * @type {string}
-     * @memberof VerticalSubCategoryHeroBlockDto
-     */
-    title?: string;
-    /**
-     * Localized markdown body displayed in the hero information card.
-     * @type {string}
-     * @memberof VerticalSubCategoryHeroBlockDto
-     */
-    body?: string;
-    /**
-     * Material Design icon displayed in the hero information card.
-     * @type {string}
-     * @memberof VerticalSubCategoryHeroBlockDto
-     */
-    mdiIcon?: string;
+  /**
+   * Localized title displayed in the hero information card.
+   * @type {string}
+   * @memberof VerticalSubCategoryHeroBlockDto
+   */
+  title?: string
+  /**
+   * Localized markdown body displayed in the hero information card.
+   * @type {string}
+   * @memberof VerticalSubCategoryHeroBlockDto
+   */
+  body?: string
+  /**
+   * Material Design icon displayed in the hero information card.
+   * @type {string}
+   * @memberof VerticalSubCategoryHeroBlockDto
+   */
+  mdiIcon?: string
 }
 
 /**
  * Check if a given object implements the VerticalSubCategoryHeroBlockDto interface.
  */
-export function instanceOfVerticalSubCategoryHeroBlockDto(value: object): value is VerticalSubCategoryHeroBlockDto {
-    return true;
+export function instanceOfVerticalSubCategoryHeroBlockDto(
+  value: object
+): value is VerticalSubCategoryHeroBlockDto {
+  return true
 }
 
-export function VerticalSubCategoryHeroBlockDtoFromJSON(json: any): VerticalSubCategoryHeroBlockDto {
-    return VerticalSubCategoryHeroBlockDtoFromJSONTyped(json, false);
+export function VerticalSubCategoryHeroBlockDtoFromJSON(
+  json: any
+): VerticalSubCategoryHeroBlockDto {
+  return VerticalSubCategoryHeroBlockDtoFromJSONTyped(json, false)
 }
 
-export function VerticalSubCategoryHeroBlockDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean): VerticalSubCategoryHeroBlockDto {
-    if (json == null) {
-        return json;
-    }
-    return {
-
-        'title': json['title'] == null ? undefined : json['title'],
-        'body': json['body'] == null ? undefined : json['body'],
-        'mdiIcon': json['mdiIcon'] == null ? undefined : json['mdiIcon'],
-    };
+export function VerticalSubCategoryHeroBlockDtoFromJSONTyped(
+  json: any,
+  ignoreDiscriminator: boolean
+): VerticalSubCategoryHeroBlockDto {
+  if (json == null) {
+    return json
+  }
+  return {
+    title: json['title'] == null ? undefined : json['title'],
+    body: json['body'] == null ? undefined : json['body'],
+    mdiIcon: json['mdiIcon'] == null ? undefined : json['mdiIcon'],
+  }
 }
 
-export function VerticalSubCategoryHeroBlockDtoToJSON(json: any): VerticalSubCategoryHeroBlockDto {
-    return VerticalSubCategoryHeroBlockDtoToJSONTyped(json, false);
+export function VerticalSubCategoryHeroBlockDtoToJSON(
+  json: any
+): VerticalSubCategoryHeroBlockDto {
+  return VerticalSubCategoryHeroBlockDtoToJSONTyped(json, false)
 }
 
-export function VerticalSubCategoryHeroBlockDtoToJSONTyped(value?: VerticalSubCategoryHeroBlockDto | null, ignoreDiscriminator: boolean = false): any {
-    if (value == null) {
-        return value;
-    }
+export function VerticalSubCategoryHeroBlockDtoToJSONTyped(
+  value?: VerticalSubCategoryHeroBlockDto | null,
+  ignoreDiscriminator: boolean = false
+): any {
+  if (value == null) {
+    return value
+  }
 
-    return {
-
-        'title': value['title'],
-        'body': value['body'],
-        'mdiIcon': value['mdiIcon'],
-    };
+  return {
+    title: value['title'],
+    body: value['body'],
+    mdiIcon: value['mdiIcon'],
+  }
 }

@@ -34,7 +34,9 @@ describe('resolveProductTitle', () => {
       },
     }
 
-    expect(resolveProductShortName(product, 'fr-FR')).toBe('Samsung GU32T5379CD')
+    expect(resolveProductShortName(product, 'fr-FR')).toBe(
+      'Samsung GU32T5379CD'
+    )
   })
 
   it('uses cardName for cards', () => {

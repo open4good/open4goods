@@ -10,27 +10,25 @@
       class="category-hero__wrapper"
       :class="{
         'category-hero__wrapper--solo': !hasInfoCard && !shouldShowImage,
+        'category-hero__wrapper--info': hasInfoCard,
       }"
       elevation="0"
     >
       <div class="category-hero__content">
         <div class="category-hero__copy">
-          <h1
-            :id="headingId"
-            class="category-hero__title"
-          >
+          <h1 :id="headingId" class="category-hero__title">
             {{ title }}
           </h1>
           <CategoryNavigationBreadcrumbs
             v-if="heroBreadcrumbs.length"
             v-bind="heroBreadcrumbProps"
             class="category-hero__breadcrumbs animate-in-up"
-            style="--delay: 250ms"
+            style="--delay: 120ms"
           />
           <div
             v-if="description"
             class="category-hero__description animate-in-up"
-            style="--delay: 300ms"
+            style="--delay: 160ms"
           >
             <MDC :value="description" />
           </div>
@@ -38,7 +36,7 @@
           <v-row
             density="comfortable"
             class="category-hero__actions-row animate-in-up"
-            style="--delay: 400ms"
+            style="--delay: 240ms"
           >
             <v-col cols="12" class="flex-grow-1">
               <slot name="actions" />
@@ -50,7 +48,7 @@
       <aside
         v-if="hasInfoCard"
         class="category-hero__info-card animate-in-up"
-        style="--delay: 350ms"
+        style="--delay: 200ms"
       >
         <v-avatar
           class="category-hero__info-icon"
@@ -62,10 +60,7 @@
         <h2 v-if="rightInfoCard?.title" class="category-hero__info-title">
           {{ rightInfoCard.title }}
         </h2>
-        <div
-          v-if="rightInfoCard?.body"
-          class="category-hero__info-body"
-        >
+        <div v-if="rightInfoCard?.body" class="category-hero__info-body">
           <MDC :value="rightInfoCard.body" />
         </div>
       </aside>
@@ -244,11 +239,13 @@ defineExpose({ headingId, t })
     gap: 0.75rem
     align-items: flex-start
 
-  &__wrapper--solo &__copy
+  &__wrapper--solo &__copy,
+  &__wrapper--info &__copy
     align-items: center
     text-align: center
 
-  &__wrapper--solo &__description
+  &__wrapper--solo &__description,
+  &__wrapper--info &__description
     text-align: center
 
   &__description
@@ -341,11 +338,13 @@ defineExpose({ headingId, t })
   .category-hero__description
     text-align: left
 
-  .category-hero__wrapper--solo .category-hero__copy
+  .category-hero__wrapper--solo .category-hero__copy,
+  .category-hero__wrapper--info .category-hero__copy
     align-items: center
     text-align: center
 
-  .category-hero__wrapper--solo .category-hero__description
+  .category-hero__wrapper--solo .category-hero__description,
+  .category-hero__wrapper--info .category-hero__description
     text-align: center
 
 @media (max-width: 959px)
@@ -356,13 +355,13 @@ defineExpose({ headingId, t })
     width: 100%
 
 .animate-in-up
-  animation: animate-in-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both
+  animation: animate-in-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both
   animation-delay: var(--delay, 0ms)
 
 @keyframes animate-in-up
   from
     opacity: 0
-    transform: translateY(20px)
+    transform: translateY(12px)
   to
     opacity: 1
     transform: translateY(0)

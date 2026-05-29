@@ -58,7 +58,9 @@ const fallbackTitle = (
     product.identity?.bestName,
     product.base?.bestName,
     brandModelTitle(product),
-    normalizeString(product.gtin) ? (gtinFallback || `GTIN: ${product.gtin}`) : '',
+    normalizeString(product.gtin)
+      ? gtinFallback || `GTIN: ${product.gtin}`
+      : '',
   ]
 
   for (const candidate of candidates) {
@@ -113,8 +115,7 @@ export const resolveProductCardName = (
   product: ProductDto,
   locale?: string
 ): string =>
-  safeTitle(product.names?.cardName) ||
-  fallbackTitle(product, locale)
+  safeTitle(product.names?.cardName) || fallbackTitle(product, locale)
 
 export const resolveProductLongName = (
   product: ProductDto,
@@ -126,5 +127,4 @@ export const resolveProductLongName = (
         normalizeString(product.identity?.brand),
         locale
       )
-    : '') ||
-  fallbackTitle(product, locale, true)
+    : '') || fallbackTitle(product, locale, true)

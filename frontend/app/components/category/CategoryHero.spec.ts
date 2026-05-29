@@ -102,9 +102,11 @@ describe('CategoryHero', () => {
     const section = wrapper.get('section')
     expect(section.attributes('aria-labelledby')).toBeTruthy()
     expect(
-      wrapper.get('.category-hero__title').element.compareDocumentPosition(
-        wrapper.get('.category-hero__breadcrumbs').element
-      ) & Node.DOCUMENT_POSITION_FOLLOWING
+      wrapper
+        .get('.category-hero__title')
+        .element.compareDocumentPosition(
+          wrapper.get('.category-hero__breadcrumbs').element
+        ) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy()
   })
 
@@ -127,9 +129,9 @@ describe('CategoryHero', () => {
     expect(wrapper.get('.category-hero__info-body strong').text()).toBe(
       'installation flexible'
     )
-    expect(wrapper.get('.category-hero__info-icon .v-icon').classes()).toContain(
-      'mdi-lightbulb-on-outline'
-    )
+    expect(
+      wrapper.get('.category-hero__info-icon .v-icon').classes()
+    ).toContain('mdi-lightbulb-on-outline')
   })
 
   it('conditionally renders the image based on showImage prop', async () => {
@@ -153,7 +155,7 @@ describe('CategoryHero', () => {
     )
   })
 
-  it('centers the hero copy only when no media or info card is rendered', async () => {
+  it('centers the hero copy for solo and info-card layouts', async () => {
     const soloWrapper = await mountComponent({
       title: 'Centered category',
       showImage: false,
@@ -164,15 +166,15 @@ describe('CategoryHero', () => {
     )
 
     const infoWrapper = await mountComponent({
-      title: 'Left category',
+      title: 'Centered with info card',
       showImage: false,
       rightInfoCard: {
         title: 'Did you know?',
       },
     })
 
-    expect(infoWrapper.get('.category-hero__wrapper').classes()).not.toContain(
-      'category-hero__wrapper--solo'
-    )
+    const infoWrapperClasses = infoWrapper.get('.category-hero__wrapper').classes()
+    expect(infoWrapperClasses).not.toContain('category-hero__wrapper--solo')
+    expect(infoWrapperClasses).toContain('category-hero__wrapper--info')
   })
 })

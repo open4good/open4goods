@@ -18,62 +18,72 @@
  * @interface VerticalSubCategoryReadMoreDto
  */
 export interface VerticalSubCategoryReadMoreDto {
-    /**
-     * Localized title for the read-more section.
-     * @type {string}
-     * @memberof VerticalSubCategoryReadMoreDto
-     */
-    title?: string;
-    /**
-     * Localized short markdown text visible before expansion.
-     * @type {string}
-     * @memberof VerticalSubCategoryReadMoreDto
-     */
-    shortText?: string;
-    /**
-     * Localized long markdown text revealed after expansion.
-     * @type {string}
-     * @memberof VerticalSubCategoryReadMoreDto
-     */
-    longText?: string;
+  /**
+   * Localized title for the read-more section.
+   * @type {string}
+   * @memberof VerticalSubCategoryReadMoreDto
+   */
+  title?: string
+  /**
+   * Localized short markdown text visible before expansion.
+   * @type {string}
+   * @memberof VerticalSubCategoryReadMoreDto
+   */
+  shortText?: string
+  /**
+   * Localized long markdown text revealed after expansion.
+   * @type {string}
+   * @memberof VerticalSubCategoryReadMoreDto
+   */
+  longText?: string
 }
 
 /**
  * Check if a given object implements the VerticalSubCategoryReadMoreDto interface.
  */
-export function instanceOfVerticalSubCategoryReadMoreDto(value: object): value is VerticalSubCategoryReadMoreDto {
-    return true;
+export function instanceOfVerticalSubCategoryReadMoreDto(
+  value: object
+): value is VerticalSubCategoryReadMoreDto {
+  return true
 }
 
-export function VerticalSubCategoryReadMoreDtoFromJSON(json: any): VerticalSubCategoryReadMoreDto {
-    return VerticalSubCategoryReadMoreDtoFromJSONTyped(json, false);
+export function VerticalSubCategoryReadMoreDtoFromJSON(
+  json: any
+): VerticalSubCategoryReadMoreDto {
+  return VerticalSubCategoryReadMoreDtoFromJSONTyped(json, false)
 }
 
-export function VerticalSubCategoryReadMoreDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean): VerticalSubCategoryReadMoreDto {
-    if (json == null) {
-        return json;
-    }
-    return {
-
-        'title': json['title'] == null ? undefined : json['title'],
-        'shortText': json['shortText'] == null ? undefined : json['shortText'],
-        'longText': json['longText'] == null ? undefined : json['longText'],
-    };
+export function VerticalSubCategoryReadMoreDtoFromJSONTyped(
+  json: any,
+  ignoreDiscriminator: boolean
+): VerticalSubCategoryReadMoreDto {
+  if (json == null) {
+    return json
+  }
+  return {
+    title: json['title'] == null ? undefined : json['title'],
+    shortText: json['shortText'] == null ? undefined : json['shortText'],
+    longText: json['longText'] == null ? undefined : json['longText'],
+  }
 }
 
-export function VerticalSubCategoryReadMoreDtoToJSON(json: any): VerticalSubCategoryReadMoreDto {
-    return VerticalSubCategoryReadMoreDtoToJSONTyped(json, false);
+export function VerticalSubCategoryReadMoreDtoToJSON(
+  json: any
+): VerticalSubCategoryReadMoreDto {
+  return VerticalSubCategoryReadMoreDtoToJSONTyped(json, false)
 }
 
-export function VerticalSubCategoryReadMoreDtoToJSONTyped(value?: VerticalSubCategoryReadMoreDto | null, ignoreDiscriminator: boolean = false): any {
-    if (value == null) {
-        return value;
-    }
+export function VerticalSubCategoryReadMoreDtoToJSONTyped(
+  value?: VerticalSubCategoryReadMoreDto | null,
+  ignoreDiscriminator: boolean = false
+): any {
+  if (value == null) {
+    return value
+  }
 
-    return {
-
-        'title': value['title'],
-        'shortText': value['shortText'],
-        'longText': value['longText'],
-    };
+  return {
+    title: value['title'],
+    shortText: value['shortText'],
+    longText: value['longText'],
+  }
 }

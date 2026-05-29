@@ -8,7 +8,8 @@ vi.mock('vue-i18n', () => ({
       const map: Record<string, string> = {
         'category.relatedSubcategories.title': 'Read more',
         'category.relatedSubcategories.subtitle': 'Other focused selections',
-        'category.relatedSubcategories.itemSubtitle': 'Explore this subcategory',
+        'category.relatedSubcategories.itemSubtitle':
+          'Explore this subcategory',
         'category.relatedSubcategories.fallbackTitle': 'Related selection',
       }
 
@@ -45,7 +46,9 @@ describe('CategoryRelatedSubcategoriesCard', () => {
         plugins: [vuetify],
         stubs: {
           VCard: { template: '<article><slot /></article>' },
-          VCardItem: { template: '<header><slot name="prepend" /><slot /></header>' },
+          VCardItem: {
+            template: '<header><slot name="prepend" /><slot /></header>',
+          },
           VCardTitle: { template: '<h2><slot /></h2>' },
           VCardSubtitle: { template: '<p><slot /></p>' },
           VAvatar: { template: '<span><slot /></span>' },

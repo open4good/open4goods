@@ -355,52 +355,63 @@
               @update:model-value="onPageChange"
             />
 
-            <section
-              v-if="hasReadMore"
-              class="category-page__read-more"
-              :aria-labelledby="readMoreHeadingId"
-            >
-              <h2
-                :id="readMoreHeadingId"
-                class="category-page__read-more-title"
+          </template>
+
+          <!--
+            Editorial read-more is rendered outside the loadingProducts v-if/v-else
+            so it is never torn down on a client-side product refetch. Re-mounting
+            it would force <MDC> to re-parse its markdown on the client and lose the
+            SSR-rendered content, making the body text disappear. It stays visually
+            at the bottom of the results column.
+          -->
+          <section
+            v-if="hasReadMore"
+            class="category-page__read-more"
+            :aria-labelledby="readMoreHeadingId"
+          >
+            <div class="category-page__read-more-header">
+              <v-avatar
+                class="category-page__read-more-icon"
+                color="surface-primary-120"
+                size="40"
               >
+                <v-icon icon="mdi-book-open-page-variant-outline" size="22" />
+              </v-avatar>
+              <h2 :id="readMoreHeadingId" class="category-page__read-more-title">
                 {{ readMoreTitle }}
               </h2>
+            </div>
+            <div v-if="readMoreShortText" class="category-page__read-more-copy">
+              <MDC :value="readMoreShortText" />
+            </div>
+            <v-expand-transition v-if="readMoreLongText">
               <div
-                v-if="readMoreShortText"
-                class="category-page__read-more-copy"
+                v-show="isReadMoreExpanded"
+                :id="readMoreContentId"
+                class="category-page__read-more-copy category-page__read-more-copy--long"
               >
-                <MDC :value="readMoreShortText" />
+                <MDC :value="readMoreLongText" />
               </div>
-              <v-expand-transition v-if="readMoreLongText">
-                <div
-                  v-show="isReadMoreExpanded"
-                  :id="readMoreContentId"
-                  class="category-page__read-more-copy category-page__read-more-copy--long"
-                >
-                  <MDC :value="readMoreLongText" />
-                </div>
-              </v-expand-transition>
-              <v-btn
-                v-if="readMoreLongText"
-                class="category-page__read-more-toggle"
-                variant="text"
-                color="primary"
-                :append-icon="
-                  isReadMoreExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down'
-                "
-                :aria-expanded="isReadMoreExpanded.toString()"
-                :aria-controls="readMoreContentId"
-                @click="isReadMoreExpanded = !isReadMoreExpanded"
-              >
-                {{
-                  isReadMoreExpanded
-                    ? $t('category.readMore.showLess')
-                    : $t('category.readMore.showMore')
-                }}
-              </v-btn>
-            </section>
-          </template>
+            </v-expand-transition>
+            <v-btn
+              v-if="readMoreLongText"
+              class="category-page__read-more-toggle"
+              variant="text"
+              color="primary"
+              :append-icon="
+                isReadMoreExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down'
+              "
+              :aria-expanded="isReadMoreExpanded.toString()"
+              :aria-controls="readMoreContentId"
+              @click="isReadMoreExpanded = !isReadMoreExpanded"
+            >
+              {{
+                isReadMoreExpanded
+                  ? $t('category.readMore.showLess')
+                  : $t('category.readMore.showMore')
+              }}
+            </v-btn>
+          </section>
         </section>
       </div>
     </v-container>
@@ -750,9 +761,7 @@ const categoryDisplayName = computed(
     category.value?.verticalHomeDescription ??
     siteName.value
 )
-const relatedSubCategories = computed(() =>
-  category.value?.subCategories ?? []
-)
+const relatedSubCategories = computed(() => category.value?.subCategories ?? [])
 const subCategoryBaseFilters = computed<FilterRequestDto | undefined>(() => {
   const activatedFilters = activeSubCategory.value?.activatedFilters ?? []
 
@@ -779,15 +788,14 @@ const seoTitle = computed(
     category.value?.verticalHomeTitle ??
     siteName.value
 )
-const seoDescription = computed(
-  () =>
-    stripMarkdownSyntax(
-      activeSubCategory.value?.metaDescription ??
-        activeSubCategory.value?.description ??
-        category.value?.verticalMetaDescription ??
-        category.value?.verticalHomeDescription ??
-        ''
-    )
+const seoDescription = computed(() =>
+  stripMarkdownSyntax(
+    activeSubCategory.value?.metaDescription ??
+      activeSubCategory.value?.description ??
+      category.value?.verticalMetaDescription ??
+      category.value?.verticalHomeDescription ??
+      ''
+  )
 )
 const robotsContent = computed(() =>
   shouldRestrictCategoryProducts.value ? 'noindex, nofollow' : undefined
@@ -800,15 +808,14 @@ const ogTitle = computed(
     category.value?.verticalMetaOpenGraphTitle ??
     seoTitle.value
 )
-const ogDescription = computed(
-  () =>
-    stripMarkdownSyntax(
-      activeSubCategory.value?.metaOpenGraphDescription ??
-        activeSubCategory.value?.metaDescription ??
-        activeSubCategory.value?.description ??
-        category.value?.verticalMetaOpenGraphDescription ??
-        seoDescription.value
-    )
+const ogDescription = computed(() =>
+  stripMarkdownSyntax(
+    activeSubCategory.value?.metaOpenGraphDescription ??
+      activeSubCategory.value?.metaDescription ??
+      activeSubCategory.value?.description ??
+      category.value?.verticalMetaOpenGraphDescription ??
+      seoDescription.value
+  )
 )
 const ogImage = computed(() => {
   if (!heroImage.value) {
@@ -2827,12 +2834,26 @@ const clearAllFilters = () => {
 
   &__read-more
     margin-top: 2rem
-    padding-top: 1.5rem
-    border-top: 1px solid rgba(var(--v-theme-border-primary-strong), 0.36)
+    padding: 1.5rem
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.38)
+    border-radius: 12px
+    background: rgba(var(--v-theme-surface-default), 0.82)
+    box-shadow: 0 14px 30px -26px rgba(var(--v-theme-shadow-primary-600), 0.42)
     color: rgb(var(--v-theme-text-neutral-strong))
 
+  &__read-more-header
+    display: flex
+    align-items: center
+    gap: 0.75rem
+    margin-bottom: 1rem
+
+  &__read-more-icon
+    color: rgb(var(--v-theme-primary))
+    flex: 0 0 auto
+    box-shadow: 0 10px 24px -18px rgba(var(--v-theme-shadow-primary-600), 0.55)
+
   &__read-more-title
-    margin: 0 0 0.75rem
+    margin: 0
     font-size: 1.25rem
     line-height: 1.35
     font-weight: 700

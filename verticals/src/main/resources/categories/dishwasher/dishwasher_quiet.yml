@@ -1,0 +1,82 @@
+id: "dishwasher_quiet"
+slug:
+  en: "quiet-dishwasher"
+  fr: "lave-vaisselle-silencieux"
+h1Title:
+  en: "Quiet dishwashers"
+  fr: "Lave-vaisselle silencieux"
+description:
+  en: |-
+    Compare **quiet dishwashers** with low decibel ratings, perfect for
+    open-plan kitchens and silent household environments.
+  fr: |-
+    Comparez les **lave-vaisselles silencieux** a faible niveau sonore,
+    parfaits pour les cuisines ouvertes et les espaces de vie calmes.
+metaTitle:
+  en: "Quiet dishwashers: compare silent models | Nudger"
+  fr: "Lave-vaisselle silencieux : comparer les modeles les plus discrets | Nudger"
+metaDescription:
+  en: >-
+    Find the quietest dishwasher model and compare decibels, capacity,
+    energy class, price, and environmental impact.
+  fr: >-
+    Trouvez le lave-vaisselle le plus silencieux pour votre logement et
+    comparez le niveau sonore, la capacite et la classe energetique.
+metaOpenGraphTitle:
+  en: "Compare quiet dishwashers"
+  fr: "Comparer les lave-vaisselles silencieux"
+metaOpenGraphDescription:
+  en: "A selection of quiet and silent dishwashers with the lowest noise levels."
+  fr: >-
+    Une selection de lave-vaisselles discrets avec un faible niveau en
+    decibels, pour un confort de vie optimal.
+heroBlock:
+  mdiIcon: "mdi-volume-mute"
+  title:
+    en: "Acoustic comfort"
+    fr: "Confort acoustique"
+  body:
+    en: |-
+      Dishwashers with a noise level of 42 dB or less are considered
+      extremely quiet, making them ideal for apartments or open-plan
+      living rooms.
+    fr: |-
+      Les lave-vaisselles affichant un niveau de bruit de 42 dB ou moins
+      sont consideres comme extremement silencieux, parfaits pour les
+      appartements ou les pieces ouvertes.
+readMore:
+  title:
+    en: "How to choose a quiet dishwasher?"
+    fr: "Comment choisir un lave-vaisselle silencieux ?"
+  shortText:
+    en: |-
+      To keep your home peaceful, a dishwasher's decibel level is a key
+      factor. Look for models with noise level <= 42 dB, or silent cycles.
+    fr: |-
+      Pour preserver le calme chez vous, le niveau sonore du lave-vaisselle
+      est crucial. Recherchez les modeles de 42 dB ou moins, ou equipes
+      de programmes nuit.
+  longText:
+    en: |-
+      Modern dishwashers average around 44 to 46 dB. Models at 42 dB or
+      below are virtually silent, dividing the perceived sound volume by
+      half compared to standard models. Don't forget to check the energy
+      efficiency class and repairability index to combine acoustic comfort
+      with sustainability.
+
+      This subcategory filters dishwashers with noise levels strictly under
+      43 dB, targeting the most silent appliances available.
+    fr: |-
+      La moyenne des lave-vaisselles se situe entre 44 et 46 dB. Les
+      modeles a 42 dB ou moins sont presque inaudibles, divisant par deux
+      le volume sonore percu par rapport a un appareil standard. Ne
+      negligez pas pour autant la classe energetique et l'indice de
+      reparabilite pour conjuguer silence et durabilite.
+
+      Cette sous-categorie regroupe les lave-vaisselles dont le niveau de
+      bruit est strictement inferieur a 43 dB, vous assurant un choix
+      parmi les modeles les plus discrets.
+activatedFilters:
+  - field: "attributes.indexed.NOISE_LEVEL.numericValue"
+    operator: "LOWER_THAN"
+    value: "43"

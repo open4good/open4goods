@@ -89,7 +89,7 @@ const items = computed(() => {
       const hasSlug = Boolean(slug)
       const isActive = Boolean(
         (activeId && subcategory.id === activeId) ||
-          (activeSlug && slug === activeSlug)
+        (activeSlug && slug === activeSlug)
       )
 
       return hasSlug && !isActive
