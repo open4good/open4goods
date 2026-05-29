@@ -1,0 +1,100 @@
+# Search-intent subcategory for the tv vertical.
+# Maintained: 2026-05-29 by subcategory.prompt.
+# Intent: buying/comparison of 55-inch (139 cm) TVs - the most popular size.
+# Evidence:
+#   - GSC (sc-domain:nudger.fr, last 90 days): dominant size cluster for the
+#     whole vertical. "55 pouces en cm" 30997 impr / 29 clicks / pos 7.7;
+#     "dimension tv 55 pouces longueur et largeur" 2154 impr / 14 clicks;
+#     "tv 55 pouces en cm" 6309 impr; "televiseur 55 pouces dimensions"
+#     230 impr / 5 clicks; "taille tv 55 pouces" 720 impr.
+#   - Google Autocomplete: very rich ("televiseur 55 pouce comparatif/promo/
+#     pas cher/oled/lg/samsung/tcl", "meilleur televiseur 55 pouces 2026").
+# Feasibility:
+#   - Matching products: 408; distinct brands sampled: 9+ (Samsung, LG, TCL,
+#     Hisense, Philips, Sony, Panasonic, Thomson, Toshiba...).
+#   - Filter validated through front-api on 2026-05-29
+#     (DIAGONALE_POUCES.value term "55" -> 408 results).
+# Rationale:
+#   - Exact-size keyword filter isolates the 139 cm format precisely (no loose
+#     numeric range), so the listing answers the named purchase intent while
+#     the informational "55 pouces = combien de cm" question is handled in copy.
+id: "tv_55_inches"
+slug:
+  en: "55-inch-tv"
+  fr: "televiseur-55-pouces"
+h1Title:
+  en: "55-inch TVs (139 cm)"
+  fr: "Téléviseurs 55 pouces (139 cm)"
+description:
+  en: |-
+    Compare **55-inch TVs (139 cm)**, the most popular living-room size, with
+    energy use, repairability and impact data to choose a more responsible set.
+  fr: |-
+    Comparez les **téléviseurs 55 pouces (139 cm)**, la taille la plus prisée
+    pour le salon, avec la consommation, la réparabilité et l'impact pour
+    choisir un modèle plus responsable.
+metaTitle:
+  en: "55-inch TVs (139 cm): compare models | Nudger"
+  fr: "Téléviseur 55 pouces (139 cm) : comparer | Nudger"
+metaDescription:
+  en: "Compare 55-inch (139 cm) TVs by panel type, energy use, refresh rate and impact before choosing the right model for your room."
+  fr: >-
+    Comparez les téléviseurs 55 pouces (139 cm) selon la dalle, la
+    consommation, la fréquence et l'impact avant de choisir le bon modèle.
+metaOpenGraphTitle:
+  en: "Compare 55-inch TVs"
+  fr: "Comparer les téléviseurs 55 pouces"
+metaOpenGraphDescription:
+  en: "A focused selection of 55-inch (139 cm) TVs with practical comparison data."
+  fr: "Une sélection ciblée de téléviseurs 55 pouces (139 cm) avec les données utiles pour comparer."
+heroBlock:
+  mdiIcon: "mdi-television"
+  title:
+    en: "The all-rounder size"
+    fr: "La taille polyvalente"
+  body:
+    en: |-
+      55 inches equals 139 cm diagonal. It suits a viewing distance of roughly
+      2 to 2.5 m, the sweet spot for most living rooms.
+    fr: |-
+      55 pouces correspond à 139 cm de diagonale. Cette taille convient à un
+      recul d'environ 2 à 2,5 m, idéale pour la plupart des salons.
+readMore:
+  title:
+    en: "55 inches: how big is it, and is it the right size for you?"
+    fr: "55 pouces : quelle taille, et est-ce le bon format pour vous ?"
+  shortText:
+    en: |-
+      A 55-inch screen measures 139 cm on the diagonal, about 122 cm wide and
+      69 cm high. As a rule of thumb, sit 2 to 2.5 m away for a 4K set. This
+      page lists only 55-inch models so you compare like for like.
+    fr: |-
+      Un écran 55 pouces mesure 139 cm de diagonale, environ 122 cm de large et
+      69 cm de haut. En pratique, prévoyez un recul de 2 à 2,5 m pour un modèle
+      4K. Cette page ne liste que des modèles 55 pouces, pour comparer à format
+      égal.
+  longText:
+    en: |-
+      Once the size is fixed, the real differences are panel technology (OLED,
+      QLED or LED), energy consumption and refresh rate. At 55 inches the energy
+      label matters: yearly running cost varies widely between an efficient set
+      and a power-hungry one for the same picture.
+
+      Nudger keeps this page focused on filterable 55-inch models so each TV
+      stays comparable on price, environmental impact score and key technical
+      attributes, instead of mixing in other sizes.
+    fr: |-
+      Une fois la taille fixée, les vraies différences se jouent sur la
+      technologie de dalle (OLED, QLED ou LED), la consommation et la fréquence
+      d'affichage. En 55 pouces, l'étiquette énergie compte : le coût annuel
+      varie fortement entre un modèle sobre et un modèle énergivore, à image
+      équivalente.
+
+      Nudger garde cette page centrée sur des modèles 55 pouces filtrables,
+      afin que chaque téléviseur reste comparable sur le prix, le score d'impact
+      environnemental et les caractéristiques techniques, sans mélanger les
+      autres tailles.
+activatedFilters:
+  - field: "attributes.indexed.DIAGONALE_POUCES.value"
+    operator: "EQUALS"
+    value: "55"

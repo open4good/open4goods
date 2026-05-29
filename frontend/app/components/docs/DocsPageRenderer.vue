@@ -8,7 +8,14 @@
       :aria-label="t('docs.labels.loading')"
     />
 
-    <v-container v-if="!pending" class="docs-page__container">
+    <!--
+      Container is always rendered so ContentRenderer is never torn down during
+      client-side navigation. Unmounting it would force a client-side re-parse
+      of the new doc's markdown and produce empty content (same footgun as the
+      product-refetch workaround in CategoryPage). Stale doc content stays
+      visible while pending; the progress bar signals the in-flight fetch.
+    -->
+    <v-container class="docs-page__container">
       <div v-if="error" class="docs-page__error" role="alert">
         <v-alert type="error" variant="tonal">
           {{ t('docs.errors.load') }}
