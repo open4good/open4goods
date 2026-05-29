@@ -204,7 +204,7 @@ class ProductMappingServiceTest {
         when(verticalsConfigService.getConfigByIdOrDefault("phones")).thenReturn(verticalConfig);
 
         VerticalConfigDto verticalDto = new VerticalConfigDto("phones", true, true, null, null, null, null, null, null,
-                null, null, "Phones", "Phones description", "phones", List.of(), null, null);
+                null, null, "Phones", "Phones description", "phones", List.of(), null, null, null);
         when(categoryMappingService.toVerticalConfigDto(verticalConfig, DomainLanguage.en)).thenReturn(verticalDto);
 
         ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("scores"), DomainLanguage.en);
@@ -301,7 +301,7 @@ class ProductMappingServiceTest {
         VerticalConfig verticalConfig = new VerticalConfig();
         verticalConfig.setId("electronics");
         VerticalConfigDto configDto = new VerticalConfigDto("electronics", true, false, null, null, 1, null, null, null,
-                null, null, null, null, "telephones-reconditionnes", List.of(), null, null);
+                null, null, null, null, "telephones-reconditionnes", List.of(), null, null, null);
         when(verticalsConfigService.getConfigById("electronics")).thenReturn(verticalConfig);
         when(categoryMappingService.toVerticalConfigDto(verticalConfig, DomainLanguage.en)).thenReturn(configDto);
 
@@ -588,11 +588,11 @@ class ProductMappingServiceTest {
         holder.setCreatedMs(1L);
         reviews.put("en", holder);
         product.setReviews(reviews);
-        
+
         when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
-        
+
         ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("aiReview"), DomainLanguage.en);
-        
+
         assertThat(dto.aiReview()).isNotNull();
         assertThat(dto.aiReview().review()).isNotNull();
         assertThat(dto.aiReview().review().baseLine()).isEqualTo("The baseline text");

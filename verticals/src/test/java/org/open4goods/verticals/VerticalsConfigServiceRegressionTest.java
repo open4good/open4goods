@@ -113,22 +113,22 @@ class VerticalsConfigServiceRegressionTest {
         assertThat(dishwasherConfig.getSubCategories())
                 .as("categories/dishwasher/*.yml files should populate dishwasher sub-categories")
                 .anySatisfy(subCategory -> {
-                    assertThat(subCategory.getId()).isEqualTo("dishwasher_under_sink");
+                    assertThat(subCategory.getId()).isEqualTo("dishwasher_builtin_60");
                     assertThat(subCategory.getDescription().i18n("fr"))
-                            .isEqualTo("Comparez les **lave-vaisselles encastrables** adaptes aux cuisines compactes, avec les donnees d'energie et de bruit utiles pour choisir un modele plus responsable.");
+                            .contains("Comparez les **lave-vaisselles encastrables 60 cm**");
                     assertThat(subCategory.getMetaTitle().i18n("fr"))
-                            .isEqualTo("Lave-vaisselle sous lavabo : comparer les modeles compacts | Nudger");
+                            .isEqualTo("Lave-vaisselle encastrable 60 cm | Nudger");
                     assertThat(subCategory.getMetaDescription().i18n("fr"))
-                            .contains("Trouvez un lave-vaisselle sous lavabo");
+                            .contains("Comparez les lave-vaisselles encastrables");
                     assertThat(subCategory.getHeroBlock()).isNotNull();
-                    assertThat(subCategory.getHeroBlock().getTitle().i18n("fr")).isEqualTo("Le saviez-vous :");
-                    assertThat(subCategory.getHeroBlock().getMdiIcon()).isEqualTo("mdi-lightbulb-on-outline");
+                    assertThat(subCategory.getHeroBlock().getTitle().i18n("fr")).isEqualTo("Verifiez la niche");
+                    assertThat(subCategory.getHeroBlock().getMdiIcon()).isEqualTo("mdi-ruler-square");
                     assertThat(subCategory.getReadMore()).isNotNull();
                     assertThat(subCategory.getReadMore().getShortText().i18n("fr"))
-                            .contains("contrainte de place");
+                            .contains("contrainte d'installation");
                     assertThat(subCategory.getReadMore().getLongText().i18n("fr"))
-                            .contains("score d'impact");
-                    assertThat(subCategory.getActivatedFilters()).hasSize(1);
+                            .contains("consommation");
+                    assertThat(subCategory.getActivatedFilters()).hasSize(3);
                 });
 
         assertThat(dishwasherConfig.getSubCategories())
