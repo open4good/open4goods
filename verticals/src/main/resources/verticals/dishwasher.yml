@@ -420,23 +420,6 @@ nudgeToolConfig:
         en: "Dishwashers that can be placed anywhere."
         fr: "Lave-vaisselles pouvant être installés n'importe où."
 
-# Fast filters; with classical attributes range values for the product category page
-subCategories:
-- id: "dishwasher_under_sink"
-  slug:
-    en: "under-sink-dishwasher"
-    fr: "lave-vaisselle-sous-lavabo"
-  h1Title:
-    en: "Under-sink dishwashers"
-    fr: "Lave-vaisselle sous lavabo"
-  description:
-    en: "Compare built-in dishwashers suited to compact kitchen layouts."
-    fr: "Comparez les lave-vaisselles encastrables adaptes aux cuisines compactes."
-  activatedFilters:
-    - field: "attributes.indexed.INSTALLATION_TYPE.value"
-      operator: "EQUALS"
-      value: "ENCASTRABLE"
-
 subsets:
 - id: "price_lower_400"
   group: "price"

@@ -19,6 +19,7 @@ import org.open4goods.model.vertical.SubsetCriteria;
 import org.open4goods.model.vertical.SubsetCriteriaOperator;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.vertical.VerticalSubCategory;
+import org.open4goods.model.vertical.VerticalSubCategoryHeroBlock;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.category.CategoryBreadcrumbItemDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
@@ -101,7 +102,11 @@ class CategoryMappingServiceVerticalConfigTest {
         subCategory.getSlug().put("fr", "lave-vaisselle-sous-lavabo");
         subCategory.getSlug().put("en", "under-sink-dishwasher");
         subCategory.getH1Title().put("fr", "Lave-vaisselle sous lavabo");
-        subCategory.getDescription().put("fr", "Comparez les lave-vaisselles sous lavabo.");
+        subCategory.getDescription().put("fr", "Comparez les **lave-vaisselles** sous lavabo.");
+        VerticalSubCategoryHeroBlock heroBlock = new VerticalSubCategoryHeroBlock();
+        heroBlock.getTitle().put("fr", "Le saviez-vous :");
+        heroBlock.getBody().put("fr", "Les formats compacts gardent une **installation flexible**.");
+        subCategory.setHeroBlock(heroBlock);
         subCategory.setImage("/images/verticals/dishwasher-under-sink.webp");
         subCategory.setActivatedFilters(List.of(
                 new SubsetCriteria("attributes.indexed.INSTALLATION_TYPE.value",
@@ -114,7 +119,11 @@ class CategoryMappingServiceVerticalConfigTest {
         assertThat(dto.subCategories()).hasSize(1);
         assertThat(dto.subCategories().get(0).slug()).isEqualTo("lave-vaisselle-sous-lavabo");
         assertThat(dto.subCategories().get(0).h1Title()).isEqualTo("Lave-vaisselle sous lavabo");
-        assertThat(dto.subCategories().get(0).description()).isEqualTo("Comparez les lave-vaisselles sous lavabo.");
+        assertThat(dto.subCategories().get(0).description()).isEqualTo("Comparez les **lave-vaisselles** sous lavabo.");
+        assertThat(dto.subCategories().get(0).heroBlock()).isNotNull();
+        assertThat(dto.subCategories().get(0).heroBlock().title()).isEqualTo("Le saviez-vous :");
+        assertThat(dto.subCategories().get(0).heroBlock().body())
+                .isEqualTo("Les formats compacts gardent une **installation flexible**.");
         assertThat(dto.subCategories().get(0).image()).isEqualTo("/images/verticals/dishwasher-under-sink.webp");
         assertThat(dto.subCategories().get(0).activatedFilters()).hasSize(1);
     }

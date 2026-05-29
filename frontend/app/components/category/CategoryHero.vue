@@ -7,18 +7,6 @@
     variant="halo"
   >
     <v-sheet class="category-hero__wrapper" elevation="0">
-      <div
-        v-if="image && showImage"
-        class="category-hero__media"
-        aria-hidden="true"
-      >
-        <v-img :src="image" alt="" class="category-hero__image" cover>
-          <template #placeholder>
-            <v-skeleton-loader type="image" class="h-100" />
-          </template>
-        </v-img>
-      </div>
-
       <div class="category-hero__content">
         <CategoryNavigationBreadcrumbs
           v-if="heroBreadcrumbs.length"
@@ -27,7 +15,6 @@
         />
 
         <div class="category-hero__copy">
-         
           <h1
             :id="headingId"
             class="category-hero__title animate-in-up"
@@ -35,13 +22,13 @@
           >
             {{ title }}
           </h1>
-          <p
+          <div
             v-if="description"
             class="category-hero__description animate-in-up"
             style="--delay: 300ms"
           >
-            {{ description }}
-          </p>
+            <MDC :value="description" />
+          </div>
 
           <v-row
             density="comfortable"
@@ -54,6 +41,34 @@
           </v-row>
         </div>
       </div>
+
+      <aside
+        v-if="hasInfoCard"
+        class="category-hero__info-card animate-in-up"
+        style="--delay: 350ms"
+      >
+        <h2 v-if="rightInfoCard?.title" class="category-hero__info-title">
+          {{ rightInfoCard.title }}
+        </h2>
+        <div
+          v-if="rightInfoCard?.body"
+          class="category-hero__info-body"
+        >
+          <MDC :value="rightInfoCard.body" />
+        </div>
+      </aside>
+
+      <div
+        v-else-if="image && showImage"
+        class="category-hero__media"
+        aria-hidden="true"
+      >
+        <v-img :src="image" alt="" class="category-hero__image" cover>
+          <template #placeholder>
+            <v-skeleton-loader type="image" class="h-100" />
+          </template>
+        </v-img>
+      </div>
     </v-sheet>
   </HeroSurface>
 </template>
@@ -61,7 +76,10 @@
 <script setup lang="ts">
 import { computed, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { CategoryBreadcrumbItemDto } from '~~/shared/api-client'
+import type {
+  CategoryBreadcrumbItemDto,
+  VerticalSubCategoryHeroBlockDto,
+} from '~~/shared/api-client'
 
 import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
 
@@ -78,6 +96,7 @@ const props = withDefaults(
     breadcrumbs?: CategoryBreadcrumbItemDto[]
     eyebrow?: string | null
     showImage?: boolean
+    rightInfoCard?: VerticalSubCategoryHeroBlockDto | null
   }>(),
   {
     description: null,
@@ -85,6 +104,7 @@ const props = withDefaults(
     breadcrumbs: () => [],
     eyebrow: null,
     showImage: true,
+    rightInfoCard: null,
   }
 )
 
@@ -92,7 +112,11 @@ const headingId = useId()
 const { t } = useI18n()
 
 const breadcrumbs = computed(() => props.breadcrumbs ?? [])
-const eyebrow = computed(() => props.eyebrow ?? null)
+const hasInfoCard = computed(
+  () =>
+    Boolean(props.rightInfoCard?.title?.trim()) ||
+    Boolean(props.rightInfoCard?.body?.trim())
+)
 
 const heroBreadcrumbs = computed<HeroBreadcrumbItem[]>(() => {
   const items = breadcrumbs.value
@@ -202,6 +226,46 @@ defineExpose({ headingId, t })
     line-height: 1.6
     color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
 
+    :deep(p)
+      margin: 0
+
+    :deep(strong)
+      color: rgb(var(--v-theme-text-neutral-strong))
+      font-weight: 700
+
+  &__info-card
+    align-self: center
+    display: flex
+    flex-direction: column
+    gap: 0.75rem
+    padding: 1.25rem
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.42)
+    border-radius: 8px
+    background: rgba(var(--v-theme-surface-default), 0.78)
+    box-shadow: 0 18px 42px -32px rgba(var(--v-theme-shadow-primary-600), 0.5)
+
+  &__info-title
+    margin: 0
+    font-size: 1rem
+    line-height: 1.35
+    font-weight: 700
+    color: rgb(var(--v-theme-text-neutral-strong))
+
+  &__info-body
+    font-size: 0.95rem
+    line-height: 1.55
+    color: rgba(var(--v-theme-text-neutral-secondary), 0.96)
+
+    :deep(p)
+      margin: 0
+
+    :deep(p + p)
+      margin-top: 0.75rem
+
+    :deep(strong)
+      color: rgb(var(--v-theme-text-neutral-strong))
+      font-weight: 700
+
   &__media
     position: relative
     flex: 0 0 auto
@@ -220,17 +284,20 @@ defineExpose({ headingId, t })
 
 @media (min-width: 960px)
   .category-hero__wrapper
-    grid-template-columns: clamp(200px, 22vw, 320px) minmax(0, 1fr)
+    grid-template-columns: minmax(0, 1fr) clamp(200px, 22vw, 320px)
     align-items: stretch
     gap: clamp(1.25rem, 3vw, 3rem)
 
   .category-hero__media
     display: flex
-    grid-column: 1
+    grid-column: 2
 
   .category-hero__content
-    grid-column: 2
+    grid-column: 1
     align-self: center
+
+  .category-hero__info-card
+    grid-column: 2
 
   .category-hero__copy
     align-items: flex-start
@@ -242,6 +309,9 @@ defineExpose({ headingId, t })
 @media (max-width: 959px)
   .category-hero__media
     display: none
+
+  .category-hero__info-card
+    width: 100%
 
 .animate-in-up
   animation: animate-in-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both

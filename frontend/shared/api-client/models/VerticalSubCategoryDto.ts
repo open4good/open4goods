@@ -20,6 +20,13 @@ import {
     SubsetCriteriaToJSON,
     SubsetCriteriaToJSONTyped,
 } from './SubsetCriteria';
+import type { VerticalSubCategoryHeroBlockDto } from './VerticalSubCategoryHeroBlockDto';
+import {
+    VerticalSubCategoryHeroBlockDtoFromJSON,
+    VerticalSubCategoryHeroBlockDtoFromJSONTyped,
+    VerticalSubCategoryHeroBlockDtoToJSON,
+    VerticalSubCategoryHeroBlockDtoToJSONTyped,
+} from './VerticalSubCategoryHeroBlockDto';
 
 /**
  * 
@@ -51,6 +58,12 @@ export interface VerticalSubCategoryDto {
      * @memberof VerticalSubCategoryDto
      */
     description?: string;
+    /**
+     * Optional localized markdown information block displayed in the hero.
+     * @type {VerticalSubCategoryHeroBlockDto}
+     * @memberof VerticalSubCategoryDto
+     */
+    heroBlock?: VerticalSubCategoryHeroBlockDto;
     /**
      * Optional image overriding the parent category image.
      * @type {string}
@@ -86,6 +99,7 @@ export function VerticalSubCategoryDtoFromJSONTyped(json: any, ignoreDiscriminat
         'slug': json['slug'] == null ? undefined : json['slug'],
         'h1Title': json['h1Title'] == null ? undefined : json['h1Title'],
         'description': json['description'] == null ? undefined : json['description'],
+        'heroBlock': json['heroBlock'] == null ? undefined : VerticalSubCategoryHeroBlockDtoFromJSON(json['heroBlock']),
         'image': json['image'] == null ? undefined : json['image'],
         'activatedFilters': json['activatedFilters'] == null ? undefined : ((json['activatedFilters'] as Array<any>).map(SubsetCriteriaFromJSON)),
     };
@@ -106,8 +120,8 @@ export function VerticalSubCategoryDtoToJSONTyped(value?: VerticalSubCategoryDto
         'slug': value['slug'],
         'h1Title': value['h1Title'],
         'description': value['description'],
+        'heroBlock': VerticalSubCategoryHeroBlockDtoToJSON(value['heroBlock']),
         'image': value['image'],
         'activatedFilters': value['activatedFilters'] == null ? undefined : ((value['activatedFilters'] as Array<any>).map(SubsetCriteriaToJSON)),
     };
 }
-

@@ -1,5 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
+import { defineComponent, h } from 'vue'
 import { createVuetify } from 'vuetify'
 import type { CategoryBreadcrumbItemDto } from '~~/shared/api-client'
 
@@ -23,6 +24,7 @@ interface MountProps {
   breadcrumbs?: CategoryBreadcrumbItemDto[]
   eyebrow?: string | null
   showImage?: boolean
+  rightInfoCard?: { title?: string; body?: string } | null
 }
 
 describe('CategoryHero', () => {
@@ -37,6 +39,26 @@ describe('CategoryHero', () => {
       global: {
         plugins: [vuetify],
         stubs: {
+          MDC: defineComponent({
+            props: {
+              value: { type: String, default: '' },
+            },
+            setup(props) {
+              return () => {
+                const parts = String(props.value).split(/(\*\*[^*]+\*\*)/g)
+
+                return h(
+                  'div',
+                  { class: 'mdc-stub' },
+                  parts.map(part =>
+                    part.startsWith('**') && part.endsWith('**')
+                      ? h('strong', part.slice(2, -2))
+                      : part
+                  )
+                )
+              }
+            },
+          }),
           VSheet: { template: '<div class="v-sheet"><slot /></div>' },
           VImg: {
             template: '<div class="v-img"><slot /></div>',
@@ -79,6 +101,26 @@ describe('CategoryHero', () => {
 
     const section = wrapper.get('section')
     expect(section.attributes('aria-labelledby')).toBeTruthy()
+  })
+
+  it('renders markdown description and right info card through MDC', async () => {
+    const wrapper = await mountComponent({
+      title: 'Under-sink dishwashers',
+      description: 'Compare **built-in dishwashers** for compact kitchens.',
+      rightInfoCard: {
+        title: 'Did you know?',
+        body: 'Compact layouts keep **installation flexible**.',
+      },
+    })
+
+    const descriptionStrong = wrapper.get('.category-hero__description strong')
+    expect(descriptionStrong.text()).toBe('built-in dishwashers')
+    expect(wrapper.get('.category-hero__info-title').text()).toBe(
+      'Did you know?'
+    )
+    expect(wrapper.get('.category-hero__info-body strong').text()).toBe(
+      'installation flexible'
+    )
   })
 
   it('conditionally renders the image based on showImage prop', async () => {

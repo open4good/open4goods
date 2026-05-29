@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * @param slug localized URL segment below the parent category
  * @param h1Title localized page title used as the category hero title
  * @param description localized page description used for hero and SEO copy
+ * @param heroBlock optional localized markdown information block displayed in the hero
  * @param image optional image overriding the parent category image
  * @param activatedFilters criteria always applied to the product listing
  */
@@ -25,6 +26,8 @@ public record VerticalSubCategoryDto(
         String h1Title,
         @Schema(description = "Localised description displayed on the sub-category page.")
         String description,
+        @Schema(description = "Optional localized markdown information block displayed in the hero.")
+        VerticalSubCategoryHeroBlockDto heroBlock,
         @Schema(description = "Optional image overriding the parent category image.")
         String image,
         @Schema(description = "Criteria always applied to the product listing on this sub-category page.")

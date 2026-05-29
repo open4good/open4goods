@@ -8,6 +8,7 @@
       :breadcrumbs="pageBreadcrumbs"
       :eyebrow="pageEyebrow"
       :show-image="isDesktop"
+      :right-info-card="activeSubCategory?.heroBlock ?? null"
     />
 
     <v-dialog
@@ -28,7 +29,7 @@
 
     <v-container v-if="category" fluid class="py-6 category-page__container">
       <div
-        v-if="hasFastFilters || isDesktop"
+        v-if="!isSubCategoryPage && (hasFastFilters || isDesktop)"
         class="category-page__fast-filters mb-6"
       >
         <div class="category-page__fast-filters-row">
@@ -586,6 +587,13 @@ const category = computed<VerticalConfigFullDto | null>(() => {
   return fallback ? (toRaw(fallback) as VerticalConfigFullDto) : null
 })
 const errorMessage = computed(() => categoriesError.value)
+const stripMarkdownSyntax = (value: string) =>
+  value
+    .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/[`*_~>#]+/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
 const activeSubCategory = computed(() => {
   if (!subCategorySlug) {
     return null
@@ -597,6 +605,7 @@ const activeSubCategory = computed(() => {
     ) ?? null
   )
 })
+const isSubCategoryPage = computed(() => Boolean(activeSubCategory.value))
 
 if (subCategorySlug && !activeSubCategory.value) {
   throw createError({
@@ -685,10 +694,12 @@ const seoTitle = computed(
 )
 const seoDescription = computed(
   () =>
-    activeSubCategory.value?.description ??
-    category.value?.verticalMetaDescription ??
-    category.value?.verticalHomeDescription ??
-    ''
+    stripMarkdownSyntax(
+      activeSubCategory.value?.description ??
+        category.value?.verticalMetaDescription ??
+        category.value?.verticalHomeDescription ??
+        ''
+    )
 )
 const robotsContent = computed(() =>
   shouldRestrictCategoryProducts.value ? 'noindex, nofollow' : undefined
@@ -701,9 +712,11 @@ const ogTitle = computed(
 )
 const ogDescription = computed(
   () =>
-    activeSubCategory.value?.description ??
-    category.value?.verticalMetaOpenGraphDescription ??
-    seoDescription.value
+    stripMarkdownSyntax(
+      activeSubCategory.value?.description ??
+        category.value?.verticalMetaOpenGraphDescription ??
+        seoDescription.value
+    )
 )
 const ogImage = computed(() => {
   if (!heroImage.value) {

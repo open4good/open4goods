@@ -81,4 +81,21 @@ class VerticalsConfigServiceRegressionTest {
             .as("TV vertical should inherit composite scores from _default.yml")
             .contains("ECOSCORE");
     }
+
+    @Test
+    void shouldLoadExternalSubCategoriesByVerticalId() {
+        VerticalConfig dishwasherConfig = verticalsConfigService.getConfigById("dishwasher");
+        assertThat(dishwasherConfig).isNotNull();
+
+        assertThat(dishwasherConfig.getSubCategories())
+                .as("categories/dishwasher/*.yml files should populate dishwasher sub-categories")
+                .anySatisfy(subCategory -> {
+                    assertThat(subCategory.getId()).isEqualTo("dishwasher_under_sink");
+                    assertThat(subCategory.getDescription().i18n("fr"))
+                            .isEqualTo("Comparez les **lave-vaisselles encastrables** adaptes aux cuisines compactes.");
+                    assertThat(subCategory.getHeroBlock()).isNotNull();
+                    assertThat(subCategory.getHeroBlock().getTitle().i18n("fr")).isEqualTo("Le saviez-vous :");
+                    assertThat(subCategory.getActivatedFilters()).hasSize(1);
+                });
+    }
 }

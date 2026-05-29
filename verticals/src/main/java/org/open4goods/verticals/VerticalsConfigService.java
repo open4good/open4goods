@@ -31,6 +31,7 @@ import org.open4goods.model.vertical.NudgeToolScore;
 import org.open4goods.model.vertical.NudgeToolSubsetGroup;
 import org.open4goods.model.vertical.Order;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.VerticalSubCategory;
 import org.open4goods.model.vertical.VerticalSubset;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
@@ -62,6 +63,7 @@ public class VerticalsConfigService {
 
 	private static final String CLASSPATH_VERTICALS_DEFAULT = "classpath:verticals/_default.yml";
 	private static final String CLASSPATH_ATTRIBUTES = "classpath*:attributes/*.yml";
+	private static final String CLASSPATH_CATEGORIES = "classpath*:categories/*/*.yml";
 	private static final String CLASSPATH_IMPACT_SCORES_DEFAULT = "classpath:/verticals/impactscores/_default.yml";
 	private static final String CLASSPATH_ASSISTANTS = "classpath:/assistant/*.yml";
 
@@ -304,7 +306,90 @@ public class VerticalsConfigService {
 				logger.error("Cannot load verticals from {} : {}", path, e.getMessage());
 			}
 		}
+		mergeExternalSubCategories(ret);
 		return ret;
+	}
+
+	/**
+	 * Merge external sub-category files into their matching vertical config.
+	 *
+	 * @param verticalConfigs vertical configurations already loaded from YAML
+	 */
+	private void mergeExternalSubCategories(List<VerticalConfig> verticalConfigs) {
+		Map<String, VerticalConfig> verticalsById = verticalConfigs.stream()
+				.filter(Objects::nonNull)
+				.filter(config -> config.getId() != null)
+				.collect(java.util.stream.Collectors.toMap(
+						VerticalConfig::getId,
+						Function.identity(),
+						(first, ignored) -> first));
+
+		Resource[] resources;
+		try {
+			resources = resourceResolver.getResources(CLASSPATH_CATEGORIES);
+		} catch (IOException e) {
+			logger.error("Cannot load categories from {} : {}", CLASSPATH_CATEGORIES, e.getMessage());
+			return;
+		}
+
+		Map<String, List<VerticalSubCategory>> subCategoriesByVerticalId = new LinkedHashMap<>();
+		for (Resource resource : resources) {
+			String filename = resource.getFilename();
+			if (filename == null || !filename.endsWith(".yml") || expectedDefaultConfig(resource)) {
+				logger.warn("Skipping categories resource without sub-category filename: {}", resource);
+				continue;
+			}
+
+			String verticalId = verticalIdFromCategoryResource(resource);
+			if (verticalId == null || verticalId.isBlank()) {
+				logger.warn("Skipping categories resource without vertical directory: {}", resource);
+				continue;
+			}
+
+			VerticalConfig target = verticalsById.get(verticalId);
+			if (target == null) {
+				logger.warn("Categories file {} targets unknown vertical id {}. Skipping.", filename, verticalId);
+				continue;
+			}
+
+			try (InputStream inputStream = resource.getInputStream()) {
+				VerticalSubCategory subCategory = serialisationService.fromYaml(inputStream, VerticalSubCategory.class);
+				if (subCategory == null) {
+					logger.warn("Empty sub-category config in {}", filename);
+					continue;
+				}
+				subCategoriesByVerticalId.computeIfAbsent(verticalId, ignored -> new ArrayList<>()).add(subCategory);
+			} catch (Exception e) {
+				logger.error("Cannot retrieve sub-category config : {}", filename, e);
+			}
+		}
+
+		subCategoriesByVerticalId.forEach((verticalId, externalSubCategories) -> {
+			VerticalConfig target = verticalsById.get(verticalId);
+			target.setSubCategories(mergeByKey(target.getSubCategories(), externalSubCategories, VerticalSubCategory::getId));
+			logger.info("Loaded {} external sub-categories for {}", externalSubCategories.size(), verticalId);
+		});
+	}
+
+	private String verticalIdFromCategoryResource(Resource resource) {
+		try {
+			String uri = resource.getURI().toString().replace('\\', '/');
+			int categoriesIndex = uri.lastIndexOf("/categories/");
+			if (categoriesIndex < 0) {
+				return null;
+			}
+
+			String relativePath = uri.substring(categoriesIndex + "/categories/".length());
+			int separatorIndex = relativePath.indexOf('/');
+			if (separatorIndex <= 0) {
+				return null;
+			}
+
+			return relativePath.substring(0, separatorIndex);
+		} catch (IOException e) {
+			logger.warn("Cannot resolve categories resource path for {}", resource, e);
+			return null;
+		}
 	}
 
 	private Map<String, ImpactScoreConfig> loadImpactScoreConfigs() {

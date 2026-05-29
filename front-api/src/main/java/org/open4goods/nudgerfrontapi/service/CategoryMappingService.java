@@ -47,6 +47,7 @@ import org.open4goods.nudgerfrontapi.dto.category.SiteNamingDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigFullDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalSubCategoryDto;
+import org.open4goods.nudgerfrontapi.dto.category.VerticalSubCategoryHeroBlockDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalSubsetDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
@@ -660,6 +661,11 @@ public class CategoryMappingService {
                 localise(subCategory.getSlug(), domainLanguage),
                 localise(subCategory.getH1Title(), domainLanguage),
                 localise(subCategory.getDescription(), domainLanguage),
+                subCategory.getHeroBlock() == null
+                        ? null
+                        : new VerticalSubCategoryHeroBlockDto(
+                                localise(subCategory.getHeroBlock().getTitle(), domainLanguage),
+                                localise(subCategory.getHeroBlock().getBody(), domainLanguage)),
                 subCategory.getImage(),
                 normalizeSubsetCriteria(subCategory.getActivatedFilters()));
     }

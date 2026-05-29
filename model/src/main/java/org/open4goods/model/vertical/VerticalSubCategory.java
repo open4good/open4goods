@@ -27,6 +27,9 @@ public class VerticalSubCategory {
     @JsonMerge
     private Localisable<String, String> description = new Localisable<>();
 
+    @JsonMerge
+    private VerticalSubCategoryHeroBlock heroBlock;
+
     private String image;
 
     @JsonMerge
@@ -105,6 +108,24 @@ public class VerticalSubCategory {
     }
 
     /**
+     * Return the optional localized hero information block.
+     *
+     * @return localized hero information block
+     */
+    public VerticalSubCategoryHeroBlock getHeroBlock() {
+        return heroBlock;
+    }
+
+    /**
+     * Set the optional localized hero information block.
+     *
+     * @param heroBlock localized hero information block
+     */
+    public void setHeroBlock(VerticalSubCategoryHeroBlock heroBlock) {
+        this.heroBlock = heroBlock;
+    }
+
+    /**
      * Return the optional page image override.
      *
      * @return image URL or path
@@ -142,7 +163,7 @@ public class VerticalSubCategory {
 
     @Override
     public int hashCode() {
-        return Objects.hash(activatedFilters, description, h1Title, id, image, slug);
+        return Objects.hash(activatedFilters, description, h1Title, heroBlock, id, image, slug);
     }
 
     @Override
@@ -158,6 +179,7 @@ public class VerticalSubCategory {
                 && Objects.equals(slug, other.slug)
                 && Objects.equals(h1Title, other.h1Title)
                 && Objects.equals(description, other.description)
+                && Objects.equals(heroBlock, other.heroBlock)
                 && Objects.equals(image, other.image)
                 && Objects.equals(activatedFilters, other.activatedFilters);
     }

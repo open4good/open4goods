@@ -1,0 +1,25 @@
+id: "dishwasher_under_sink"
+slug:
+  en: "under-sink-dishwasher"
+  fr: "lave-vaisselle-sous-lavabo"
+h1Title:
+  en: "Under-sink dishwashers"
+  fr: "Lave-vaisselle sous lavabo"
+description:
+  en: |-
+    Compare **built-in dishwashers** suited to compact kitchen layouts.
+  fr: |-
+    Comparez les **lave-vaisselles encastrables** adaptes aux cuisines compactes.
+heroBlock:
+  title:
+    en: "Did you know?"
+    fr: "Le saviez-vous :"
+  body:
+    en: |-
+      Under-sink layouts often trade capacity for installation flexibility.
+    fr: |-
+      Les lave-vaisselles sous lavabo permettent de gagner de la place dans les cuisines compactes.
+activatedFilters:
+  - field: "attributes.indexed.INSTALLATION_TYPE.value"
+    operator: "EQUALS"
+    value: "ENCASTRABLE"
