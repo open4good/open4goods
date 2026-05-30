@@ -1,12 +1,19 @@
 package org.open4goods.services.feedservice.service;
 
+import java.time.Instant;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.model.affiliation.AffiliationPartner;
+import org.open4goods.model.affiliation.AffiliationProgram;
+import org.open4goods.model.affiliation.AffiliationPromotion;
+import org.open4goods.model.affiliation.AffiliationTransaction;
 import org.open4goods.model.helper.IdHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -149,6 +156,68 @@ public class FeedService {
 		this.partners = partners;
 	}
 
+	public List<AbstractFeedService> getProviders() {
+		return feedServices;
+	}
 
+	public Collection<AffiliationProgram> getPrograms() {
+		Set<AffiliationProgram> all = new LinkedHashSet<>();
+		for (AbstractFeedService service : feedServices) {
+			try {
+				Collection<AffiliationProgram> programs = service.getPrograms();
+				if (programs != null) {
+					all.addAll(programs);
+				}
+			} catch (Exception e) {
+				logger.error("Error loading programs from provider {}: ", service.getProviderName(), e);
+			}
+		}
+		return all;
+	}
 
+	public Collection<AffiliationPromotion> getPromotions() {
+		Set<AffiliationPromotion> all = new LinkedHashSet<>();
+		for (AbstractFeedService service : feedServices) {
+			try {
+				Collection<AffiliationPromotion> promotions = service.getPromotions();
+				if (promotions != null) {
+					all.addAll(promotions);
+				}
+			} catch (Exception e) {
+				logger.error("Error loading promotions from provider {}: ", service.getProviderName(), e);
+			}
+		}
+		return all;
+	}
+
+	public Collection<AffiliationTransaction> getTransactions(Instant from, Instant to) {
+		Set<AffiliationTransaction> all = new LinkedHashSet<>();
+		for (AbstractFeedService service : feedServices) {
+			try {
+				Collection<AffiliationTransaction> transactions = service.getTransactions(from, to);
+				if (transactions != null) {
+					all.addAll(transactions);
+				}
+			} catch (Exception e) {
+				logger.error("Error loading transactions from provider {}: ", service.getProviderName(), e);
+			}
+		}
+		return all;
+	}
+
+	public String buildTrackingLink(String providerName, String programId, String targetUrl, Map<String, String> subIds) {
+		if (providerName == null) {
+			return targetUrl;
+		}
+		for (AbstractFeedService service : feedServices) {
+			if (providerName.equalsIgnoreCase(service.getProviderName())) {
+				try {
+					return service.buildTrackingLink(programId, targetUrl, subIds);
+				} catch (Exception e) {
+					logger.error("Error building tracking link for provider {}: ", providerName, e);
+				}
+			}
+		}
+		return targetUrl;
+	}
 }

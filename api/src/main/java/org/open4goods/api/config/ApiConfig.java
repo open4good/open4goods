@@ -78,6 +78,9 @@ import org.open4goods.services.feedservice.config.FeedConfiguration;
 import org.open4goods.services.feedservice.service.AbstractFeedService;
 import org.open4goods.services.feedservice.service.AwinFeedService;
 import org.open4goods.services.feedservice.service.EffiliationFeedService;
+import org.open4goods.services.feedservice.service.TradeTrackerFeedService;
+import org.open4goods.services.feedservice.service.KwankoFeedService;
+import org.open4goods.services.feedservice.service.WebgainsFeedService;
 import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.services.imageprocessing.service.ImageMagickService;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -301,6 +304,36 @@ public class ApiConfig {
         // Retrieve Effiliation-specific feed configuration from the fetcher properties
         FeedConfiguration effiliationConfig = fetcherProperties.getFeedConfigs().get("effiliation");
         return new EffiliationFeedService(effiliationConfig, remoteFileCachingService, dataSourceConfigService, serialisationService, props.getAffiliationConfig().getEffiliationApiKey());
+    }
+
+    @Bean
+    public TradeTrackerFeedService tradetrackerFeedService(FetcherProperties fetcherProperties,
+                                                           RemoteFileCachingService remoteFileCachingService,
+                                                           DataSourceConfigService dataSourceConfigService,
+                                                           SerialisationService serialisationService,
+                                                           ApiProperties props) {
+        FeedConfiguration config = fetcherProperties.getFeedConfigs().get("tradetracker");
+        return new TradeTrackerFeedService(config, remoteFileCachingService, dataSourceConfigService, serialisationService, props.getAffiliationConfig().getTradetrackerCustomerId(), props.getAffiliationConfig().getTradetrackerApiKey());
+    }
+
+    @Bean
+    public KwankoFeedService kwankoFeedService(FetcherProperties fetcherProperties,
+                                               RemoteFileCachingService remoteFileCachingService,
+                                               DataSourceConfigService dataSourceConfigService,
+                                               SerialisationService serialisationService,
+                                               ApiProperties props) {
+        FeedConfiguration config = fetcherProperties.getFeedConfigs().get("kwanko");
+        return new KwankoFeedService(config, remoteFileCachingService, dataSourceConfigService, serialisationService, props.getAffiliationConfig().getKwankoToken());
+    }
+
+    @Bean
+    public WebgainsFeedService webgainsFeedService(FetcherProperties fetcherProperties,
+                                                   RemoteFileCachingService remoteFileCachingService,
+                                                   DataSourceConfigService dataSourceConfigService,
+                                                   SerialisationService serialisationService,
+                                                   ApiProperties props) {
+        FeedConfiguration config = fetcherProperties.getFeedConfigs().get("webgains");
+        return new WebgainsFeedService(config, remoteFileCachingService, dataSourceConfigService, serialisationService, props.getAffiliationConfig().getWebgainsApiKey());
     }
 
     @Bean

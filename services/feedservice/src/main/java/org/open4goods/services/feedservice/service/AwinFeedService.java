@@ -1,8 +1,13 @@
 package org.open4goods.services.feedservice.service;
 
 import java.io.File;
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,6 +15,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.open4goods.model.affiliation.AffiliationCapability;
+import org.open4goods.model.affiliation.AffiliationProgram;
+import org.open4goods.model.affiliation.AffiliationPromotion;
+import org.open4goods.model.affiliation.AffiliationTransaction;
 
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.services.DataSourceConfigService;
@@ -214,5 +223,88 @@ public class AwinFeedService extends AbstractFeedService {
         }
         logger.info("Retrieved {} Awin merchant metadata entries", merchants.size());
         return merchants;
+    }
+
+    @Override
+    public String getProviderName()
+    {
+        return "Awin";
+    }
+
+    @Override
+    public Set<AffiliationCapability> getCapabilities()
+    {
+        return Set.of(
+            AffiliationCapability.FEEDS,
+            AffiliationCapability.PROGRAMS,
+            AffiliationCapability.TRACKING
+        );
+    }
+
+    @Override
+    protected Collection<AffiliationProgram> loadProgramsInternal() throws Exception
+    {
+        if (awinAccessToken == null || awinAccessToken.trim().isEmpty() || advertiserId == null || advertiserId.trim().isEmpty())
+        {
+            return Collections.emptyList();
+        }
+        List<AwinMerchant> raw = retrieveAwinMerchantMetadata(awinAccessToken, advertiserId);
+        if (raw == null || raw.isEmpty())
+        {
+            return Collections.emptyList();
+        }
+        List<AffiliationProgram> list = new ArrayList<>();
+        for (AwinMerchant m : raw)
+        {
+            AffiliationProgram ap = new AffiliationProgram();
+            ap.setProviderName(getProviderName());
+            ap.setProgramId(String.valueOf(m.getId()));
+            ap.setAdvertiserName(m.getName());
+            ap.setStatus("ACTIVE"); // Joined merchants are active
+            
+            if (m.getPrimaryRegion() != null && m.getPrimaryRegion().getCountryCode() != null)
+            {
+                ap.setCountryCodes(Set.of(m.getPrimaryRegion().getCountryCode().toUpperCase()));
+            }
+            ap.setLogoUrl(m.getLogoUrl());
+            ap.setPortalUrl(m.getDisplayUrl());
+            ap.setTrackingUrl(m.getClickThroughUrl());
+            ap.setDescription(m.getDescription());
+            
+            list.add(ap);
+        }
+        return list;
+    }
+
+    @Override
+    public String buildTrackingLink(String programId, String targetUrl, Map<String, String> subIds)
+    {
+        if (programId == null || programId.trim().isEmpty())
+        {
+            return targetUrl;
+        }
+        
+        StringBuilder sb = new StringBuilder("https://www.awin1.com/cread.php");
+        sb.append("?awinmid=").append(org.open4goods.commons.util.HttpUtils.urlEncode(programId));
+        if (advertiserId != null && !advertiserId.trim().isEmpty())
+        {
+            sb.append("&awinaffid=").append(org.open4goods.commons.util.HttpUtils.urlEncode(advertiserId));
+        }
+        if (targetUrl != null && !targetUrl.trim().isEmpty())
+        {
+            sb.append("&ued=").append(org.open4goods.commons.util.HttpUtils.urlEncode(targetUrl));
+        }
+        
+        if (subIds != null && !subIds.isEmpty())
+        {
+            int index = 1;
+            for (Map.Entry<String, String> entry : subIds.entrySet())
+            {
+                String key = (index == 1) ? "clickref" : "clickref" + index;
+                sb.append("&").append(key).append("=").append(org.open4goods.commons.util.HttpUtils.urlEncode(entry.getValue()));
+                index++;
+            }
+        }
+        return sb.toString();
     }
 }

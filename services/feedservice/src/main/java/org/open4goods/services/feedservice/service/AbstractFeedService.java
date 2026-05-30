@@ -2,13 +2,22 @@ package org.open4goods.services.feedservice.service;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.model.helper.IdHelper;
+import org.open4goods.model.affiliation.AffiliationCapability;
+import org.open4goods.model.affiliation.AffiliationProgram;
+import org.open4goods.model.affiliation.AffiliationPromotion;
+import org.open4goods.model.affiliation.AffiliationTransaction;
 import org.open4goods.services.feedservice.config.FeedConfiguration;
+import org.open4goods.services.feedservice.provider.AffiliationProvider;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
@@ -18,13 +27,17 @@ import org.slf4j.LoggerFactory;
  * Abstract base class for feed services. Provides lazy loading and caching of datasource properties,
  * and defines an abstract method to load datasource properties from an external feed source.
  */
-public abstract class AbstractFeedService {
+public abstract class AbstractFeedService implements AffiliationProvider {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     // Cached datasource properties loaded from the external feed.
     // TODO (P2, design) : No scheduled reloading of feeds url
     protected Set<DataSourceProperties> datasourceCache;
+
+    // Cached programs and promotions
+    protected Collection<AffiliationProgram> programsCache;
+    protected Collection<AffiliationPromotion> promotionsCache;
 
     // Feed configuration (catalog URL, CSV mapping, filters, etc.)
     protected final FeedConfiguration feedConfig;
@@ -71,6 +84,83 @@ public abstract class AbstractFeedService {
         } catch (Exception e) {
             logger.error("Error loading datasource properties", e);
         }
+
+        if (getCapabilities().contains(AffiliationCapability.PROGRAMS)) {
+            loadPrograms();
+        }
+        if (getCapabilities().contains(AffiliationCapability.PROMOTIONS)) {
+            loadPromotions();
+        }
+    }
+
+    public synchronized void loadPrograms()
+    {
+        try
+        {
+            if (getCapabilities().contains(AffiliationCapability.PROGRAMS))
+            {
+                logger.info("Loading programs for provider: {}", getProviderName());
+                programsCache = loadProgramsInternal();
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("Error loading programs for " + getProviderName(), e);
+        }
+    }
+
+    public synchronized void loadPromotions()
+    {
+        try
+        {
+            if (getCapabilities().contains(AffiliationCapability.PROMOTIONS))
+            {
+                logger.info("Loading promotions for provider: {}", getProviderName());
+                promotionsCache = loadPromotionsInternal();
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("Error loading promotions for " + getProviderName(), e);
+        }
+    }
+
+    protected Collection<AffiliationProgram> loadProgramsInternal() throws Exception
+    {
+        return Collections.emptyList();
+    }
+
+    protected Collection<AffiliationPromotion> loadPromotionsInternal() throws Exception
+    {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Collection<AffiliationProgram> getPrograms()
+    {
+        if (!getCapabilities().contains(AffiliationCapability.PROGRAMS))
+        {
+            return Collections.emptyList();
+        }
+        if (programsCache == null)
+        {
+            loadPrograms();
+        }
+        return programsCache != null ? programsCache : Collections.emptyList();
+    }
+
+    @Override
+    public Collection<AffiliationPromotion> getPromotions()
+    {
+        if (!getCapabilities().contains(AffiliationCapability.PROMOTIONS))
+        {
+            return Collections.emptyList();
+        }
+        if (promotionsCache == null)
+        {
+            loadPromotions();
+        }
+        return promotionsCache != null ? promotionsCache : Collections.emptyList();
     }
 
     /**

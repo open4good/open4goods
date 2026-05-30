@@ -297,3 +297,15 @@ feed:
     enabled: true
     cache-ttl-days: 1
     max-jitter-seconds: 30
+  tradetracker:
+    cron: 0 43 1 * * ?
+    enabled: false
+    cache-ttl-days: 1
+  kwanko:
+    cron: 0 43 1 * * ?
+    enabled: false
+    cache-ttl-days: 1
+  webgains:
+    cron: 0 43 1 * * ?
+    enabled: false
+    cache-ttl-days: 1

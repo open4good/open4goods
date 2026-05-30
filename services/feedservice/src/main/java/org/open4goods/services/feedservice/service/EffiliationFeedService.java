@@ -1,6 +1,7 @@
 package org.open4goods.services.feedservice.service;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -25,6 +26,14 @@ import org.open4goods.services.remotefilecaching.service.RemoteFileCachingServic
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.open4goods.model.affiliation.AffiliationCapability;
+import org.open4goods.model.affiliation.AffiliationProgram;
+import org.open4goods.model.affiliation.AffiliationPromotion;
+import org.open4goods.model.affiliation.AffiliationTransaction;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Collection;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import tools.jackson.core.type.TypeReference;
@@ -791,5 +800,323 @@ public class EffiliationFeedService extends AbstractFeedService {
             }
         }
         return null;
+    }
+
+    @Override
+    public String getProviderName()
+    {
+        return "Effiliation";
+    }
+
+    @Override
+    public Set<AffiliationCapability> getCapabilities()
+    {
+        return Set.of(
+            AffiliationCapability.FEEDS,
+            AffiliationCapability.PROGRAMS,
+            AffiliationCapability.PROMOTIONS,
+            AffiliationCapability.TRANSACTIONS,
+            AffiliationCapability.TRACKING
+        );
+    }
+
+    @Override
+    protected Collection<AffiliationProgram> loadProgramsInternal() throws Exception
+    {
+        Map<String, EffiliationProgram> raw = retrieveEffiliationPrograms(effiliationApiKey, "fr");
+        if (raw == null || raw.isEmpty())
+        {
+            return Collections.emptyList();
+        }
+        List<AffiliationProgram> list = new ArrayList<>();
+        for (EffiliationProgram ep : raw.values())
+        {
+            AffiliationProgram ap = new AffiliationProgram();
+            ap.setProviderName(getProviderName());
+            ap.setProgramId(String.valueOf(ep.getIdAffilieur()));
+            ap.setAdvertiserName(ep.getNom());
+            ap.setStatus(ep.getEtat());
+            
+            if (ep.getPays() != null)
+            {
+                ap.setCountryCodes(new HashSet<>(splitCountries(ep.getPays())));
+            }
+            ap.setCurrency("EUR"); // Default currency for Effiliation
+            if (ep.getCategories() != null)
+            {
+                ap.setCategories(new HashSet<>(splitCountries(ep.getCategories())));
+            }
+            ap.setCookieDurationDays(ep.getDureeCookies());
+            ap.setClickCommission(ep.getClic());
+            ap.setSaleCommissionPercent(ep.getVenteFixe());
+            ap.setLeadCommission(ep.getLead());
+            ap.setDisplayCpm(ep.getAffichage());
+            
+            if (ep.getEpc() != null)
+            {
+                try
+                {
+                    ap.setEpc(new BigDecimal(ep.getEpc().trim()));
+                }
+                catch (Exception ignored) {}
+            }
+            if (ep.getTransformation() != null)
+            {
+                try
+                {
+                    ap.setConversionRate(new BigDecimal(ep.getTransformation().trim()));
+                }
+                catch (Exception ignored) {}
+            }
+            ap.setLogoUrl(ep.getUrlLogo());
+            ap.setPortalUrl(ep.getUrlAnnonceur());
+            ap.setTrackingUrl(ep.getUrlTracke());
+            ap.setSignupUrl(ep.getUrlInscription());
+            ap.setDescription(ep.getDescription());
+            
+            list.add(ap);
+        }
+        return list;
+    }
+
+    @Override
+    protected Collection<AffiliationPromotion> loadPromotionsInternal() throws Exception
+    {
+        if (isBlank(effiliationApiKey))
+        {
+            return Collections.emptyList();
+        }
+        JsonNode root = retrieveEffiliationPromotionalOffers(effiliationApiKey, "fr", null);
+        if (root == null)
+        {
+            return Collections.emptyList();
+        }
+        JsonNode offersNode = root.path("promotionaloffers");
+        if (offersNode.isMissingNode() || !offersNode.isArray())
+        {
+            offersNode = root.path("promotions");
+            if (offersNode.isMissingNode() || !offersNode.isArray())
+            {
+                if (root.isArray())
+                {
+                    offersNode = root;
+                }
+                else
+                {
+                    return Collections.emptyList();
+                }
+            }
+        }
+        
+        List<AffiliationPromotion> list = new ArrayList<>();
+        for (JsonNode node : offersNode)
+        {
+            AffiliationPromotion ap = new AffiliationPromotion();
+            ap.setProviderName(getProviderName());
+            ap.setProgramId(firstNonBlank(textOrNull(node, "id_annonceur"), textOrNull(node, "id_affilieur"), textOrNull(node, "program_id")));
+            ap.setAdvertiserName(firstNonBlank(textOrNull(node, "nom_annonceur"), textOrNull(node, "nom"), textOrNull(node, "advertiser_name")));
+            ap.setTitle(firstNonBlank(textOrNull(node, "titre"), textOrNull(node, "title")));
+            ap.setDescription(firstNonBlank(textOrNull(node, "description"), textOrNull(node, "desc")));
+            ap.setVoucherCode(firstNonBlank(textOrNull(node, "code"), textOrNull(node, "voucher_code"), textOrNull(node, "code_promo")));
+            ap.setDiscountType(firstNonBlank(textOrNull(node, "type_remise"), textOrNull(node, "discount_type")));
+            
+            String valStr = firstNonBlank(textOrNull(node, "valeur_remise"), textOrNull(node, "discount_value"));
+            if (valStr != null)
+            {
+                try
+                {
+                    ap.setDiscountValue(new BigDecimal(valStr.trim()));
+                }
+                catch (Exception ignored) {}
+            }
+            
+            String startStr = firstNonBlank(textOrNull(node, "date_debut"), textOrNull(node, "start_date"));
+            if (startStr != null)
+            {
+                try
+                {
+                    ap.setStartDate(LocalDate.parse(startStr.trim().substring(0, 10)));
+                }
+                catch (Exception ignored) {}
+            }
+            
+            String endStr = firstNonBlank(textOrNull(node, "date_fin"), textOrNull(node, "end_date"));
+            if (endStr != null)
+            {
+                try
+                {
+                    ap.setEndDate(LocalDate.parse(endStr.trim().substring(0, 10)));
+                }
+                catch (Exception ignored) {}
+            }
+            
+            ap.setLandingUrl(firstNonBlank(textOrNull(node, "url_redirection"), textOrNull(node, "landing_url")));
+            ap.setTrackingUrl(firstNonBlank(textOrNull(node, "url_tracking"), textOrNull(node, "tracking_url")));
+            ap.setConditions(firstNonBlank(textOrNull(node, "conditions"), textOrNull(node, "terms")));
+            
+            String pays = firstNonBlank(textOrNull(node, "pays"), textOrNull(node, "countries"));
+            if (pays != null)
+            {
+                ap.setCountryCodes(new HashSet<>(splitCountries(pays)));
+            }
+            
+            list.add(ap);
+        }
+        return list;
+    }
+
+    @Override
+    public Collection<AffiliationTransaction> getTransactions(Instant from, Instant to)
+    {
+        if (isBlank(effiliationApiKey))
+        {
+            return Collections.emptyList();
+        }
+        try
+        {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(java.time.ZoneId.of("UTC"));
+            String start = formatter.format(from);
+            String end = formatter.format(to);
+            JsonNode root = retrieveEffiliationTransactions(effiliationApiKey, "fr", start, end, "action");
+            if (root == null)
+            {
+                return Collections.emptyList();
+            }
+            
+            JsonNode txNode = root.path("transactions");
+            if (txNode.isMissingNode() || !txNode.isArray())
+            {
+                txNode = root.path("reporting");
+                if (txNode.isMissingNode() || !txNode.isArray())
+                {
+                    if (root.isArray())
+                    {
+                        txNode = root;
+                    }
+                    else
+                    {
+                        return Collections.emptyList();
+                    }
+                }
+            }
+            
+            List<AffiliationTransaction> list = new ArrayList<>();
+            for (JsonNode node : txNode)
+            {
+                AffiliationTransaction tx = new AffiliationTransaction();
+                tx.setProviderName(getProviderName());
+                tx.setTransactionId(firstNonBlank(textOrNull(node, "id_transaction"), textOrNull(node, "transaction_id"), textOrNull(node, "id")));
+                tx.setProgramId(firstNonBlank(textOrNull(node, "id_annonceur"), textOrNull(node, "id_affilieur"), textOrNull(node, "program_id")));
+                
+                String clickDateStr = firstNonBlank(textOrNull(node, "date_clic"), textOrNull(node, "click_date"));
+                if (clickDateStr != null)
+                {
+                    try
+                    {
+                        tx.setClickDate(Instant.parse(clickDateStr));
+                    }
+                    catch (Exception ignored) {}
+                }
+                
+                String txDateStr = firstNonBlank(textOrNull(node, "date_action"), textOrNull(node, "date_commande"), textOrNull(node, "transaction_date"));
+                if (txDateStr != null)
+                {
+                    try
+                    {
+                        tx.setTransactionDate(Instant.parse(txDateStr));
+                    }
+                    catch (Exception ignored) {}
+                }
+                
+                tx.setStatus(firstNonBlank(textOrNull(node, "etat"), textOrNull(node, "status")));
+                
+                String saleStr = firstNonBlank(textOrNull(node, "montant_panier"), textOrNull(node, "montant_vente"), textOrNull(node, "sale_amount"));
+                if (saleStr != null)
+                {
+                    try
+                    {
+                        tx.setSaleAmount(new BigDecimal(saleStr.trim()));
+                    }
+                    catch (Exception ignored) {}
+                }
+                
+                String commStr = firstNonBlank(textOrNull(node, "commission"), textOrNull(node, "montant_commission"), textOrNull(node, "commission_amount"));
+                if (commStr != null)
+                {
+                    try
+                    {
+                        tx.setCommissionAmount(new BigDecimal(commStr.trim()));
+                    }
+                    catch (Exception ignored) {}
+                }
+                
+                tx.setCurrency(firstNonBlank(textOrNull(node, "devise"), textOrNull(node, "currency"), "EUR"));
+                tx.setSubId(firstNonBlank(textOrNull(node, "subid"), textOrNull(node, "subid1"), textOrNull(node, "site_affilie")));
+                tx.setProductId(firstNonBlank(textOrNull(node, "id_produit"), textOrNull(node, "product_id")));
+                
+                list.add(tx);
+            }
+            
+            return list;
+        }
+        catch (Exception e)
+        {
+            LOGGER.warn("Failed to retrieve/parse Effiliation transactions.", e);
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public String buildTrackingLink(String programId, String targetUrl, Map<String, String> subIds)
+    {
+        String trackingUrl = null;
+        Collection<AffiliationProgram> programs = getPrograms();
+        if (programs != null)
+        {
+            for (AffiliationProgram p : programs)
+            {
+                if (p.getProgramId().equals(programId))
+                {
+                    trackingUrl = p.getTrackingUrl();
+                    break;
+                }
+            }
+        }
+        
+        if (trackingUrl == null || trackingUrl.trim().isEmpty())
+        {
+            return targetUrl;
+        }
+        
+        StringBuilder sb = new StringBuilder(trackingUrl);
+        if (targetUrl != null && !targetUrl.trim().isEmpty())
+        {
+            if (sb.indexOf("?") < 0)
+            {
+                sb.append("?");
+            }
+            else
+            {
+                sb.append("&");
+            }
+            sb.append("url=").append(urlEncode(targetUrl));
+        }
+        
+        if (subIds != null && !subIds.isEmpty())
+        {
+            for (Map.Entry<String, String> entry : subIds.entrySet())
+            {
+                if (sb.indexOf("?") < 0)
+                {
+                    sb.append("?");
+                }
+                else
+                {
+                    sb.append("&");
+                }
+                sb.append(urlEncode(entry.getKey())).append("=").append(urlEncode(entry.getValue()));
+            }
+        }
+        return sb.toString();
     }
 }
