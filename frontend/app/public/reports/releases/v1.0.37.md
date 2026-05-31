@@ -3,6 +3,7 @@
 This release covers **0 day(s)** of work, from **2026-05-30T00:08:32.000Z** to **2026-05-30T00:40:41.000Z**.
 
 ### 📦 Stats
+
 - Diff: [compare](https://github.com/open4good/open4goods/compare/v1.0.36...v1.0.37)
 - Changed files: **3**
 - Commits: **3**
@@ -10,14 +11,11 @@ This release covers **0 day(s)** of work, from **2026-05-30T00:08:32.000Z** to *
 
 ---
 
-
-
 <details>
 <summary>🙈 Other changes (1)</summary>
 
-| PR | Title | Author |
-|---:|---|---|
+|                                                           PR | Title                                   | Author         |
+| -----------------------------------------------------------: | --------------------------------------- | -------------- |
 | [PR 3157](https://github.com/open4good/open4goods/pull/3157) | Update dependency nodemailer to v8.0.10 | @renovate[bot] |
-
 
 </details>

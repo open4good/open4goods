@@ -78,9 +78,7 @@ const { data, pending } = await useAsyncData<AggregationResponseDto | null>(
       }
     )
 
-    return (
-      response.aggregations?.find(agg => agg.name === BRAND_FIELD) ?? null
-    )
+    return response.aggregations?.find(agg => agg.name === BRAND_FIELD) ?? null
   },
   {
     server: false,

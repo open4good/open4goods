@@ -165,12 +165,12 @@ Règles de rédaction :
 Tous auto-importés (résolution MDC par nom de fichier, `pathPrefix: false`).
 **Props scalaires uniquement** (string/number passés en attributs MDC).
 
-| Composant | Props | Effet |
-| --- | --- | --- |
-| `ProductEmbed` | `gtin` \| `brand`+`model`, `size` (`s`/`m`/`l`) | Lien produit interne en ligne dans le texte. |
-| `ProductCardEmbed` | `gtin` \| `brand`+`model`, `size` (`small`/`medium`/`big`) | Carte produit complète (image, score d'impact, prix). |
-| `BrandShareChart` | `vertical` (verticalId), `type` (`pie`/`bar`), `top` (n), `title` | Graphe des parts de marché par marque. |
-| `GuideProductGrid` | `vertical` (verticalId), `top` (n), `sort` (`ecoscore` def.) | Grille des top N produits triés par impact score. |
+| Composant          | Props                                                             | Effet                                                 |
+| ------------------ | ----------------------------------------------------------------- | ----------------------------------------------------- |
+| `ProductEmbed`     | `gtin` \| `brand`+`model`, `size` (`s`/`m`/`l`)                   | Lien produit interne en ligne dans le texte.          |
+| `ProductCardEmbed` | `gtin` \| `brand`+`model`, `size` (`small`/`medium`/`big`)        | Carte produit complète (image, score d'impact, prix). |
+| `BrandShareChart`  | `vertical` (verticalId), `type` (`pie`/`bar`), `top` (n), `title` | Graphe des parts de marché par marque.                |
+| `GuideProductGrid` | `vertical` (verticalId), `top` (n), `sort` (`ecoscore` def.)      | Grille des top N produits triés par impact score.     |
 
 Exemples :
 
