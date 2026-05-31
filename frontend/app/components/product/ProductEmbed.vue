@@ -92,17 +92,27 @@ const { data, pending } = await useAsyncData<ProductResolveResponse | null>(
       }
     }
 
-    return await $fetch<ProductResolveResponse>('/api/products/resolve', {
-      query: {
-        ...(normalizedGtin.value ? { gtin: normalizedGtin.value } : {}),
-        ...(!normalizedGtin.value && normalizedBrand.value
-          ? { brand: normalizedBrand.value }
-          : {}),
-        ...(!normalizedGtin.value && normalizedModel.value
-          ? { model: normalizedModel.value }
-          : {}),
-      },
-    })
+    try {
+      return await $fetch<ProductResolveResponse>('/api/products/resolve', {
+        query: {
+          ...(normalizedGtin.value ? { gtin: normalizedGtin.value } : {}),
+          ...(!normalizedGtin.value && normalizedBrand.value
+            ? { brand: normalizedBrand.value }
+            : {}),
+          ...(!normalizedGtin.value && normalizedModel.value
+            ? { model: normalizedModel.value }
+            : {}),
+        },
+      })
+    } catch (error) {
+      console.error('Failed to load product embed', error)
+      return {
+        product: null,
+        resolvedBy: null,
+        confidence: null,
+        reason: 'fetch-error',
+      }
+    }
   },
   {
     watch: [normalizedGtin, normalizedBrand, normalizedModel],

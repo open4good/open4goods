@@ -1,7 +1,15 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent, ref } from 'vue'
 import GuideStickySidebar from '~/components/category/guides/GuideStickySidebar.vue'
+import BuyingGuideRenderer from '~/components/docs/BuyingGuideRenderer.vue'
 import { useCategories } from '~/composables/categories/useCategories'
+import {
+  resolveGuideDocPath,
+  resolveLocaleFromRequest,
+  resolvePublicGuidePath,
+  useDocsContent,
+  type DocsDoc,
+} from '~/composables/useDocsContent'
 import type {
   BlogPostDto,
   CategoryBreadcrumbItemDto,
@@ -58,7 +66,9 @@ definePageMeta({
 })
 
 const route = useRoute()
+const requestURL = useRequestURL()
 const { selectCategoryBySlug } = useCategories()
+const { getDocByPath } = useDocsContent()
 
 const categorySlug = computed(() => String(route.params.categorySlug ?? ''))
 
@@ -122,12 +132,25 @@ const matchedSubCategory =
     subCategory => normaliseSlug(subCategory.slug) === normalisedSlug
   ) ?? null
 
+const markdownDocPath = resolveGuideDocPath({
+  locale: resolveLocaleFromRequest(),
+  categorySlug: categorySlug.value,
+  guideSlug: normalisedSlug,
+})
+
+const markdownGuide = matchedSubCategory
+  ? null
+  : ((await getDocByPath({
+      path: markdownDocPath,
+      locale: resolveLocaleFromRequest(),
+    })) as DocsDoc | null)
+
 const matchedPage =
   categoryDetail.wikiPages?.find(
     page => normaliseSlug(page.verticalUrl) === normalisedSlug
   ) ?? null
 
-if (!matchedSubCategory && !matchedPage) {
+if (!matchedSubCategory && !markdownGuide && !matchedPage) {
   throw createError({
     statusCode: 404,
     statusMessage: 'Guide not found',
@@ -137,7 +160,7 @@ if (!matchedSubCategory && !matchedPage) {
 
 const resolvedPageId = matchedPage?.wikiUrl?.trim().replace(/^\/+/, '') ?? null
 
-if (!matchedSubCategory && !resolvedPageId) {
+if (!matchedSubCategory && !markdownGuide && !resolvedPageId) {
   throw createError({
     statusCode: 404,
     statusMessage: 'Guide not found',
@@ -291,6 +314,65 @@ const heroBreadcrumbs = computed<CategoryBreadcrumbItemDto[]>(() => {
 
   return base
 })
+
+const markdownBreadcrumbs = computed(() => {
+  const base = (categoryDetail.breadCrumb ?? []).map(item => ({
+    title: item.title,
+    to: item.link,
+  }))
+
+  return [
+    ...base,
+    {
+      title: categoryName.value,
+      to:
+        categoryPath.value ??
+        resolvePublicGuidePath({
+          categorySlug: categorySlug.value,
+          guideSlug: '',
+        }),
+    },
+  ]
+})
+
+const guideContext = computed(() => ({
+  verticalId: categoryDetail.id?.trim() || null,
+  categorySlug: categorySlug.value,
+  categoryPath: categoryPath.value ?? `/${categorySlug.value}`,
+  categoryTitle: categoryName.value,
+  heroImage: categoryImage.value,
+}))
+
+const markdownCanonicalPath = computed(() =>
+  resolvePublicGuidePath({
+    categorySlug: categorySlug.value,
+    guideSlug: normalisedSlug,
+  })
+)
+
+const markdownCanonicalUrl = computed(() => {
+  if (!markdownGuide || !markdownCanonicalPath.value) {
+    return undefined
+  }
+
+  return new URL(markdownCanonicalPath.value, requestURL.origin).toString()
+})
+
+if (markdownGuide) {
+  useSeoMeta({
+    title: () => markdownGuide.title ?? resolvedGuideTitle.value,
+    description: () => markdownGuide.description ?? '',
+    ogTitle: () => markdownGuide.title ?? resolvedGuideTitle.value,
+    ogDescription: () => markdownGuide.description ?? '',
+    ogUrl: () => markdownCanonicalUrl.value,
+  })
+
+  useHead(() => ({
+    link: markdownCanonicalUrl.value
+      ? [{ rel: 'canonical', href: markdownCanonicalUrl.value }]
+      : [],
+  }))
+}
 </script>
 
 <template>
@@ -298,6 +380,12 @@ const heroBreadcrumbs = computed<CategoryBreadcrumbItemDto[]>(() => {
     v-if="matchedSubCategory"
     :slug="categorySlug"
     :sub-category-slug="normalisedSlug"
+  />
+  <BuyingGuideRenderer
+    v-else-if="markdownGuide"
+    :doc="markdownGuide"
+    :guide-context="guideContext"
+    :breadcrumbs="markdownBreadcrumbs"
   />
   <XwikiFullPageRenderer
     v-else-if="pageId"

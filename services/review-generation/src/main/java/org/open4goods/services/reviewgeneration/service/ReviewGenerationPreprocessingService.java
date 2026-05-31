@@ -596,6 +596,7 @@ public class ReviewGenerationPreprocessingService {
 		return candidates.stream()
 				.map(this::cleanSearchModelCandidate)
 				.filter(candidate -> candidate != null && !candidate.isBlank())
+				.filter(candidate -> !isWeakNamedModelCandidate(candidate))
 				.filter(candidate -> isSearchableModelCandidate(product, null, candidate) || looksLikeNamedModel(candidate))
 				.collect(Collectors.toMap(candidate -> normalizeForTextMatching(candidate), Function.identity(),
 						(left, right) -> left, LinkedHashMap::new))
@@ -651,11 +652,33 @@ public class ReviewGenerationPreprocessingService {
 		return ProductModelCandidateHelper.isNamedModel(value);
 	}
 
+	private boolean isWeakNamedModelCandidate(String value) {
+		if (value == null || value.isBlank() || isConciseModelCode(value)) {
+			return false;
+		}
+		List<String> tokens = Arrays.stream(value.trim().split("[\\s_\\-\\./\\\\]+"))
+				.map(token -> token.replaceAll("^[^\\p{Alnum}]+|[^\\p{Alnum}]+$", ""))
+				.filter(token -> !token.isBlank())
+				.toList();
+		if (tokens.isEmpty()) {
+			return true;
+		}
+		boolean hasGenericToken = tokens.stream().anyMatch(this::isGenericProductWord);
+		boolean hasModelLikeToken = tokens.stream()
+				.anyMatch(token -> isConciseModelCode(token)
+						|| token.matches("(?=.*[A-Za-z])(?=.*\\d)[A-Za-z0-9._/-]{3,}"));
+		long nonGenericTextTokens = tokens.stream()
+				.filter(token -> !isGenericProductWord(token))
+				.filter(token -> token.chars().anyMatch(Character::isLetter))
+				.count();
+		return hasGenericToken && !hasModelLikeToken && nonGenericTextTokens == 0;
+	}
+
 	private boolean isGenericProductWord(String value) {
 		String normalized = normalizeForTextMatching(value);
 		return normalized.isBlank() || Set.of("refrigerateur", "fridge", "glaciere", "dishwasher", "lave vaisselle",
 				"lave", "vaisselle", "seche", "linge", "washing", "machine", "smartphone", "telephone", "mobile",
-				"encastrable", "portable", "compact", "mini", "unknown").contains(normalized);
+				"encastrable", "enchassable", "portable", "compact", "mini", "unknown").contains(normalized);
 	}
 
 	private String blankToNull(String value) {
@@ -1612,6 +1635,9 @@ public class ReviewGenerationPreprocessingService {
 			return true;
 		}
 		if (looksLikeStorageVariant(candidate) || looksLikeMerchantTitle(candidate)) {
+			return false;
+		}
+		if (isWeakNamedModelCandidate(candidate)) {
 			return false;
 		}
 		if (normalizedPrimary.isBlank()) {
@@ -2629,6 +2655,11 @@ public class ReviewGenerationPreprocessingService {
 		promptVariables.put("TOTAL_TOKENS", totalTokens);
 		promptVariables.put("SOURCE_TOKENS", tokens);
 		promptVariables.put("ACCEPTED_URLS", new ArrayList<>(sources.keySet()));
+		ProductFetchDiagnostics diagnostics = product == null ? null : product.getReviewFetchDiagnostics();
+		promptVariables.put("SEARCHED_QUERIES", diagnostics == null ? List.of() : diagnostics.getSearchedQueries());
+		promptVariables.put("SOURCE_CLASSES", diagnostics == null ? Map.of() : diagnostics.getSourceClasses());
+		promptVariables.put("REJECTED_URLS", diagnostics == null ? Map.of() : diagnostics.getRejectedUrls());
+		promptVariables.put("RESULT_QUALITY", diagnostics == null ? "UNKNOWN" : diagnostics.getResultQuality());
 		promptVariables.put("ATTRIBUTE_SOURCES_JSON", writeJson(attributeSources(product, new ArrayList<>(sources.keySet()))));
 		promptVariables.put("ATTRIBUTE_DEFINITIONS_JSON", writeJson(attributeDefinitions(verticalConfig)));
 		return promptVariables;

@@ -75,23 +75,28 @@ const { data, pending } = await useAsyncData<ProductDto | null>(
       return null
     }
 
-    if (normalizedGtin.value) {
-      return await $fetch<ProductDto>(
-        `/api/products/${encodeURIComponent(normalizedGtin.value)}`
-      )
-    }
-
-    const resolved = await $fetch<ProductResolveResponse>(
-      '/api/products/resolve',
-      {
-        query: {
-          brand: normalizedBrand.value,
-          model: normalizedModel.value,
-        },
+    try {
+      if (normalizedGtin.value) {
+        return await $fetch<ProductDto>(
+          `/api/products/${encodeURIComponent(normalizedGtin.value)}`
+        )
       }
-    )
 
-    return resolved?.product ?? null
+      const resolved = await $fetch<ProductResolveResponse>(
+        '/api/products/resolve',
+        {
+          query: {
+            brand: normalizedBrand.value,
+            model: normalizedModel.value,
+          },
+        }
+      )
+
+      return resolved?.product ?? null
+    } catch (error) {
+      console.error('Failed to load product card embed', error)
+      return null
+    }
   },
   {
     watch: [normalizedGtin, normalizedBrand, normalizedModel],

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -1156,18 +1157,19 @@ public class ReviewGenerationService implements HealthIndicator {
 				: attrResponse.getBody().attributes();
 		List<String> acceptedUrls = acceptedUrls(promptVariables);
 		List<AiReview.AiAttribute> validatedAttributes = validateExtractedAttributes(extractedAttributes,
-				verticalConfig, acceptedUrls);
+				verticalConfig, acceptedUrls, promptVariables);
 		persistValidatedAttributes(product, validatedAttributes, acceptedUrls);
 		runAttributesExtractedHooks(product);
 		return validatedAttributes;
 	}
 
 	private List<AiReview.AiAttribute> validateExtractedAttributes(List<AiReview.AiAttribute> attributes,
-			VerticalConfig verticalConfig, List<String> acceptedUrls) {
+			VerticalConfig verticalConfig, List<String> acceptedUrls, Map<String, Object> promptVariables) {
 		if (attributes == null || attributes.isEmpty()) {
 			return List.of();
 		}
 		Set<String> canonicalKeys = canonicalAttributeKeys(verticalConfig);
+		Map<String, String> sources = promptSources(promptVariables);
 		List<AiReview.AiAttribute> valid = new ArrayList<>();
 		for (AiReview.AiAttribute attribute : attributes) {
 			if (attribute == null || attribute.getName() == null || attribute.getName().isBlank()
@@ -1184,9 +1186,86 @@ public class ReviewGenerationService implements HealthIndicator {
 				logger.warn("Rejecting AI review attribute '{}' with invalid source number '{}'.", key, number);
 				continue;
 			}
-			valid.add(new AiReview.AiAttribute(key, attribute.getValue().trim(), number));
+			String value = attribute.getValue().trim();
+			Integer verifiedSourceNumber = verifiedSourceNumber(key, value, number, acceptedUrls, sources);
+			if (verifiedSourceNumber == null) {
+				logger.warn("Rejecting AI review attribute '{}'='{}' because no accepted source contains supporting evidence.",
+						key, value);
+				continue;
+			}
+			valid.add(new AiReview.AiAttribute(key, value, verifiedSourceNumber));
 		}
 		return valid;
+	}
+
+	@SuppressWarnings("unchecked")
+	private Map<String, String> promptSources(Map<String, Object> promptVariables) {
+		if (promptVariables == null) {
+			return Map.of();
+		}
+		Object sources = promptVariables.get("sources");
+		if (sources instanceof Map<?, ?> sourceMap) {
+			Map<String, String> ret = new LinkedHashMap<>();
+			sourceMap.forEach((url, markdown) -> {
+				if (url != null && markdown != null) {
+					ret.put(url.toString(), markdown.toString());
+				}
+			});
+			return ret;
+		}
+		return (Map<String, String>) promptVariables.getOrDefault("SOURCES", Map.of());
+	}
+
+	private Integer verifiedSourceNumber(String key, String value, Integer proposedNumber, List<String> acceptedUrls,
+			Map<String, String> sources) {
+		if (sources == null || sources.isEmpty() || isTriviallyVerifiable(value)) {
+			return proposedNumber;
+		}
+		String proposedUrl = acceptedUrls.get(proposedNumber - 1);
+		if (sourceContainsAttributeEvidence(sources.get(proposedUrl), key, value)) {
+			return proposedNumber;
+		}
+		for (int i = 0; i < acceptedUrls.size(); i++) {
+			String url = acceptedUrls.get(i);
+			if (sourceContainsAttributeEvidence(sources.get(url), key, value)) {
+				logger.info("Reassigned AI review attribute '{}' source from {} to {} after source-content verification.",
+						key, proposedNumber, i + 1);
+				return i + 1;
+			}
+		}
+		return null;
+	}
+
+	private boolean isTriviallyVerifiable(String value) {
+		if (value == null) {
+			return true;
+		}
+		String normalized = normalizeEvidence(value);
+		return normalized.length() <= 1 || "true".equals(normalized) || "false".equals(normalized);
+	}
+
+	private boolean sourceContainsAttributeEvidence(String markdown, String key, String value) {
+		if (markdown == null || markdown.isBlank() || value == null || value.isBlank()) {
+			return false;
+		}
+		String normalizedMarkdown = normalizeEvidence(markdown);
+		String normalizedValue = normalizeEvidence(value);
+		if (normalizedValue.isBlank()) {
+			return true;
+		}
+		if (normalizedMarkdown.contains(normalizedValue)) {
+			return true;
+		}
+		String compactValue = normalizedValue.replace(" ", "");
+		return compactValue.length() >= 3 && normalizedMarkdown.replace(" ", "").contains(compactValue);
+	}
+
+	private String normalizeEvidence(String value) {
+		return value == null ? "" : value.toLowerCase(Locale.ROOT)
+				.replace('\u00a0', ' ')
+				.replaceAll("[^\\p{Alnum}]+", " ")
+				.replaceAll("\\s+", " ")
+				.trim();
 	}
 
 	private Set<String> canonicalAttributeKeys(VerticalConfig verticalConfig) {

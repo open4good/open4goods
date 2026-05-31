@@ -5,6 +5,9 @@ import {
   isDocVisibleForLocale,
   normalizeSlugOrPath,
   resolveDocPath,
+  resolveGuideDocPath,
+  resolveLegacyGuideRedirectPath,
+  resolvePublicGuidePath,
 } from '~/composables/useDocsContent'
 
 describe('useDocsContent helpers', () => {
@@ -35,6 +38,44 @@ describe('useDocsContent helpers', () => {
         slugOrPath: '/docs/fr/impact-score/methodology',
       })
     ).toBe('/docs/fr/impact-score/methodology')
+  })
+
+  it('resolves category guide content and public paths', () => {
+    expect(
+      resolveGuideDocPath({
+        locale: 'fr',
+        categorySlug: 'televiseurs',
+        guideSlug: 'meilleur-televiseur-caravane-camping-car',
+      })
+    ).toBe('/docs/fr/televiseurs/meilleur-televiseur-caravane-camping-car')
+
+    expect(
+      resolvePublicGuidePath({
+        categorySlug: 'televiseurs',
+        guideSlug: 'meilleur-televiseur-caravane-camping-car',
+      })
+    ).toBe('/televiseurs/meilleur-televiseur-caravane-camping-car')
+  })
+
+  it('maps legacy guide docs URLs to moved category guide URLs', () => {
+    expect(
+      resolveLegacyGuideRedirectPath({
+        legacyPath: '/docs/fr/guides/meilleur-televiseur-caravane-camping-car',
+        movedDocPaths: [
+          '/docs/fr/guides/other-guide',
+          '/docs/fr/televiseurs/meilleur-televiseur-caravane-camping-car',
+        ],
+      })
+    ).toBe('/televiseurs/meilleur-televiseur-caravane-camping-car')
+
+    expect(
+      resolveLegacyGuideRedirectPath({
+        legacyPath: '/docs/fr/guides/missing',
+        movedDocPaths: [
+          '/docs/fr/televiseurs/meilleur-televiseur-caravane-camping-car',
+        ],
+      })
+    ).toBeNull()
   })
 
   it('extracts and enforces language tags', () => {

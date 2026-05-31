@@ -7,6 +7,11 @@
     "brandShare": {
       "defaultTitle": "Market share by brand",
       "description": "Distribution of referenced products by brand in this category."
+    },
+    "article": {
+      "eyebrow": "Buying guide",
+      "updated": "Updated {date}",
+      "tocAria": "Buying guide section navigation"
     }
   },
   "aiAudit": {

@@ -492,6 +492,55 @@ class ReviewGenerationServiceTest {
     }
 
     @Test
+    void extractReviewAttributes_ShouldReassignSourceNumberWhenValueIsSupportedByAnotherSource() throws Exception {
+        Product product = new Product();
+        product.setId(103L);
+        org.open4goods.model.vertical.VerticalConfig verticalConfig = verticalConfig("NOISE_LEVEL");
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("ACCEPTED_URLS", List.of("https://manufacturer.example/overview",
+                "https://manufacturer.example/specs"));
+        variables.put("sources", Map.of(
+                "https://manufacturer.example/overview", "Overview without the specific noise value.",
+                "https://manufacturer.example/specs", "Technical sheet. Noise level 44 dB."));
+        when(preprocessingService.buildPromptVariablesFromReviewFacts(product, verticalConfig, true))
+                .thenReturn(variables);
+        when(genAiService.objectPrompt(eq(properties.getAttributeExtractionPromptKey()), org.mockito.ArgumentMatchers.anyMap(),
+                eq(AttributeExtractionResult.class)))
+                .thenReturn(attributeResponse(List.of(new AiReview.AiAttribute("NOISE_LEVEL", "44", 1))));
+
+        org.open4goods.services.reviewgeneration.dto.ReviewGenerationStepResult result =
+                reviewGenerationService.extractReviewAttributes(product, verticalConfig);
+
+        assertThat(result.attributes()).singleElement()
+                .extracting(AiReview.AiAttribute::getNumber)
+                .isEqualTo(2);
+        assertThat(product.getAttributes().getAll().get("NOISE_LEVEL").getSource())
+                .extracting(SourcedAttribute::getDataSourcename)
+                .containsExactly("AI_REVIEW:s02:manufacturer.example");
+    }
+
+    @Test
+    void extractReviewAttributes_ShouldRejectAttributeWhenNoAcceptedSourceSupportsValue() throws Exception {
+        Product product = new Product();
+        product.setId(104L);
+        org.open4goods.model.vertical.VerticalConfig verticalConfig = verticalConfig("NOISE_LEVEL");
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("ACCEPTED_URLS", List.of("https://manufacturer.example/specs"));
+        variables.put("sources", Map.of("https://manufacturer.example/specs", "Technical sheet. Noise level 44 dB."));
+        when(preprocessingService.buildPromptVariablesFromReviewFacts(product, verticalConfig, true))
+                .thenReturn(variables);
+        when(genAiService.objectPrompt(eq(properties.getAttributeExtractionPromptKey()), org.mockito.ArgumentMatchers.anyMap(),
+                eq(AttributeExtractionResult.class)))
+                .thenReturn(attributeResponse(List.of(new AiReview.AiAttribute("NOISE_LEVEL", "39", 1))));
+
+        org.open4goods.services.reviewgeneration.dto.ReviewGenerationStepResult result =
+                reviewGenerationService.extractReviewAttributes(product, verticalConfig);
+
+        assertThat(result.attributes()).isEmpty();
+        assertThat(product.getAttributes().getAll()).doesNotContainKey("NOISE_LEVEL");
+    }
+
+    @Test
     void generateReviewAsync_WithTwoPhaseGeneration_ShouldPersistAttributesBeforeTextGeneration() throws Exception {
         properties.setTwoPhaseGeneration(true);
         Product product = new Product();

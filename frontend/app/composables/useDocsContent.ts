@@ -198,6 +198,79 @@ export const resolveDocPath = ({
   return `${basePrefix}/${normalizedLocale}/${resolvedSlug}`
 }
 
+export const resolveGuideDocPath = ({
+  locale,
+  categorySlug,
+  guideSlug,
+}: {
+  locale?: string | null
+  categorySlug: string
+  guideSlug: string
+}): string => {
+  const normalizedLocale = normalizeDocsLocale(locale)
+  const normalizedCategorySlug = normalizeSlugOrPath(categorySlug)
+  const normalizedGuideSlug = normalizeSlugOrPath(guideSlug)
+
+  if (!normalizedCategorySlug || !normalizedGuideSlug) {
+    return ''
+  }
+
+  return `${DEFAULT_DOCS_BASE_PATH}/${normalizedLocale}/${normalizedCategorySlug}/${normalizedGuideSlug}`
+}
+
+export const resolvePublicGuidePath = ({
+  categorySlug,
+  guideSlug,
+}: {
+  categorySlug: string
+  guideSlug: string
+}): string => {
+  const normalizedCategorySlug = normalizeSlugOrPath(categorySlug)
+  const normalizedGuideSlug = normalizeSlugOrPath(guideSlug)
+
+  if (!normalizedCategorySlug || !normalizedGuideSlug) {
+    return ''
+  }
+
+  return `/${normalizedCategorySlug}/${normalizedGuideSlug}`
+}
+
+export const resolveLegacyGuideRedirectPath = ({
+  legacyPath,
+  movedDocPaths,
+}: {
+  legacyPath: string
+  movedDocPaths: string[]
+}): string | null => {
+  const normalizedLegacyPath = sanitizePathInput(legacyPath)
+  const legacyMatch = normalizedLegacyPath.match(
+    /^\/?docs\/(en|fr)\/guides\/([^/]+)$/u
+  )
+
+  if (!legacyMatch) {
+    return null
+  }
+
+  const [, locale, guideSlug] = legacyMatch
+  const movedDocPath = movedDocPaths.find(path => {
+    const normalizedPath = sanitizePathInput(path)
+    return (
+      normalizedPath.startsWith(`/docs/${locale}/`) &&
+      !normalizedPath.startsWith(`/docs/${locale}/guides/`) &&
+      normalizedPath.endsWith(`/${guideSlug}`)
+    )
+  })
+
+  if (!movedDocPath) {
+    return null
+  }
+
+  const segments = movedDocPath.split('/').filter(Boolean)
+  const categorySlug = segments[2] ?? ''
+
+  return resolvePublicGuidePath({ categorySlug, guideSlug })
+}
+
 export const isAllowedPath = (path: string, basePath?: string | null) => {
   const normalizedBasePath = normalizeBasePath(basePath)
   return path.startsWith(`${normalizedBasePath}/`)
@@ -384,6 +457,31 @@ export const useDocsContent = () => {
     return normalizedDoc
   }
 
+  const getMovedGuideRedirect = async ({
+    legacyPath,
+  }: {
+    legacyPath: string
+  }): Promise<string | null> => {
+    const legacyMatch = sanitizePathInput(legacyPath).match(
+      /^\/?docs\/(en|fr)\/guides\/([^/]+)$/u
+    )
+
+    if (!legacyMatch) {
+      return null
+    }
+
+    const [, locale, guideSlug] = legacyMatch
+    const docs = (await queryCollection('docs')
+      .where('path', 'LIKE', `/docs/${locale}/%/${guideSlug}`)
+      .select('path')
+      .all()) as Array<Pick<DocsDoc, 'path'>>
+
+    return resolveLegacyGuideRedirectPath({
+      legacyPath,
+      movedDocPaths: docs.map(doc => doc.path),
+    })
+  }
+
   const listDocs = async ({
     locale,
     basePath,
@@ -487,6 +585,7 @@ export const useDocsContent = () => {
     buildCanonicalUrl,
     buildHreflangLinks,
     getDocByPath,
+    getMovedGuideRedirect,
     getNavigationTree,
     getSearchSections,
     listDocs,

@@ -191,6 +191,25 @@ class ReviewGenerationPreprocessingServiceTest {
     }
 
     @Test
+    void preparePromptVariables_DoesNotPromoteGenericNamedModelFromOfferTitle() throws Exception {
+        properties.setMaxSearch(1);
+        properties.setLowQualityFallbackMaxSearch(0);
+        Product product = product("ASKO", "0698142927998");
+        product.setId(698142927998L);
+        product.setOfferNames(Set.of("ASKO Lave vaisselle enchassable a usage intensif 2 niveaux"));
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse());
+
+        assertThatThrownBy(() -> service.preparePromptVariables(product, verticalConfig(), new ReviewGenerationStatus()))
+                .isInstanceOf(NotEnoughDataException.class);
+
+        ArgumentCaptor<GoogleSearchRequest> requestCaptor = ArgumentCaptor.forClass(GoogleSearchRequest.class);
+        org.mockito.Mockito.verify(googleSearchService).search(requestCaptor.capture());
+        assertThat(requestCaptor.getValue().query())
+                .isEqualTo("ASKO \"0698142927998\" (official OR officiel OR product OR produit)");
+        assertThat(product.model()).isEqualTo("0698142927998");
+    }
+
+    @Test
     void preparePromptVariables_IdentifiesAndPrioritizesManufacturerOfficialUrl() throws Exception {
         properties.setPreferredDomains(List.of("darty.com"));
         properties.setMinMarkdownChars(20);

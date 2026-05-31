@@ -33,25 +33,30 @@ import type {
   SortRequestDto,
 } from '~~/shared/api-client'
 import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
+import { useGuideContext } from '~/composables/useGuideContext'
 import { ECOSCORE_RELATIVE_FIELD } from '~/constants/scores'
 
 const LISTING_INCLUDE = 'base,identity,names,attributes,resources,scores,offers'
 
 const props = withDefaults(
   defineProps<{
-    vertical: string
+    vertical?: string
     top?: string | number
     sort?: string
   }>(),
   {
+    vertical: undefined,
     top: 3,
     sort: 'ecoscore',
   }
 )
 
 const { t } = useI18n()
+const guideContext = useGuideContext()
 
-const normalizedVertical = computed(() => `${props.vertical ?? ''}`.trim())
+const normalizedVertical = computed(() =>
+  `${props.vertical ?? guideContext?.verticalId ?? ''}`.trim()
+)
 const topCount = computed(() => {
   const parsed = Number.parseInt(`${props.top}`, 10)
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 3
@@ -85,21 +90,26 @@ const { data, pending } = await useAsyncData<ProductDto[]>(
       return []
     }
 
-    const response = await $fetch<ProductSearchResponseDto>(
-      '/api/products/search',
-      {
-        method: 'POST',
-        query: { include: LISTING_INCLUDE },
-        body: {
-          verticalId: normalizedVertical.value,
-          pageNumber: 0,
-          pageSize: topCount.value,
-          sort: sortRequest.value,
-        },
-      }
-    )
+    try {
+      const response = await $fetch<ProductSearchResponseDto>(
+        '/api/products/search',
+        {
+          method: 'POST',
+          query: { include: LISTING_INCLUDE },
+          body: {
+            verticalId: normalizedVertical.value,
+            pageNumber: 0,
+            pageSize: topCount.value,
+            sort: sortRequest.value,
+          },
+        }
+      )
 
-    return response.products?.data ?? []
+      return response.products?.data ?? []
+    } catch (error) {
+      console.error('Failed to load guide product grid', error)
+      return []
+    }
   },
   {
     watch: [normalizedVertical, topCount, () => props.sort],

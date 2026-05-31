@@ -364,11 +364,18 @@ useHead(() => ({
 .docs-page__layout {
   display: grid;
   gap: clamp(1.5rem, 3vw, 2.5rem);
+  grid-template-areas:
+    'header'
+    'body'
+    'toc';
   grid-template-columns: minmax(0, 1fr);
 }
 
 @media (min-width: 960px) {
   .docs-page__layout {
+    grid-template-areas:
+      'header toc'
+      'body toc';
     grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
     align-items: start;
   }
@@ -377,6 +384,7 @@ useHead(() => ({
 .docs-page__header {
   display: grid;
   gap: 0.75rem;
+  grid-area: header;
 }
 
 .docs-page__eyebrow {
@@ -416,6 +424,7 @@ useHead(() => ({
 .docs-page__body {
   display: grid;
   gap: 1.5rem;
+  grid-area: body;
 }
 
 .docs-page__content {
@@ -426,6 +435,7 @@ useHead(() => ({
 }
 
 .docs-page__toc {
+  grid-area: toc;
   position: sticky;
   top: 1.5rem;
 }

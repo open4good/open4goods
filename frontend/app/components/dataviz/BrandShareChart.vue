@@ -14,18 +14,20 @@ import type {
   ProductSearchResponseDto,
 } from '~~/shared/api-client'
 import DatavizChart from '~/components/dataviz/DatavizChart.vue'
+import { useGuideContext } from '~/composables/useGuideContext'
 
 const BRAND_FIELD = 'attributes.referentielAttributes.BRAND'
 
 const props = withDefaults(
   defineProps<{
-    vertical: string
+    vertical?: string
     type?: 'pie' | 'bar'
     metric?: 'count' | 'offers'
     title?: string
     top?: string | number
   }>(),
   {
+    vertical: undefined,
     type: 'pie',
     metric: 'count',
     title: undefined,
@@ -34,8 +36,11 @@ const props = withDefaults(
 )
 
 const { t } = useI18n()
+const guideContext = useGuideContext()
 
-const normalizedVertical = computed(() => `${props.vertical ?? ''}`.trim())
+const normalizedVertical = computed(() =>
+  `${props.vertical ?? guideContext?.verticalId ?? ''}`.trim()
+)
 const topCount = computed(() => {
   const parsed = Number.parseInt(`${props.top}`, 10)
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 8
@@ -56,29 +61,34 @@ const { data, pending } = await useAsyncData<AggregationResponseDto | null>(
       return null
     }
 
-    const response = await $fetch<ProductSearchResponseDto>(
-      '/api/products/search',
-      {
-        method: 'POST',
-        body: {
-          verticalId: normalizedVertical.value,
-          pageNumber: 0,
-          pageSize: 0,
-          aggs: {
-            aggs: [
-              {
-                name: BRAND_FIELD,
-                field: BRAND_FIELD,
-                type: 'terms',
-                buckets: topCount.value,
-              },
-            ],
+    try {
+      const response = await $fetch<ProductSearchResponseDto>(
+        '/api/products/search',
+        {
+          method: 'POST',
+          body: {
+            verticalId: normalizedVertical.value,
+            pageNumber: 0,
+            pageSize: 0,
+            aggs: {
+              aggs: [
+                {
+                  name: BRAND_FIELD,
+                  field: BRAND_FIELD,
+                  type: 'terms',
+                  buckets: topCount.value,
+                },
+              ],
+            },
           },
-        },
-      }
-    )
+        }
+      )
 
-    return response.aggregations?.find(agg => agg.name === BRAND_FIELD) ?? null
+      return response.aggregations?.find(agg => agg.name === BRAND_FIELD) ?? null
+    } catch (error) {
+      console.error('Failed to load guide brand share chart', error)
+      return null
+    }
   },
   {
     server: false,

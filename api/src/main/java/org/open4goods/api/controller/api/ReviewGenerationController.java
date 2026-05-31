@@ -203,7 +203,12 @@ public class ReviewGenerationController {
             throws Exception {
         Product product = productRepository.getById(upc);
         VerticalConfig verticalConfig = verticalsConfigService.getConfigByIdOrDefault(product.getVertical());
-        return ResponseEntity.ok(reviewGenerationService.extractReviewAttributes(product, verticalConfig));
+        try {
+            return ResponseEntity.ok(reviewGenerationService.extractReviewAttributes(product, verticalConfig));
+        } catch (NotEnoughDataException e) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body(failureResult(product, verticalConfig, "attributes", e));
+        }
     }
 
     /**

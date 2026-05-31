@@ -4,15 +4,29 @@
 
 The frontend reads Markdown documents from the repository root `/docs` folder through the Nuxt Content `docs` source defined in `frontend/content.config.ts`.
 
-Public routes stay under `/docs/<locale>/<slug>` and are rendered by:
+Generic documentation routes stay under `/docs/<locale>/<slug>` and are rendered by:
 
 - `app/pages/docs/[...slug].vue` (catch-all page)
 - `app/components/docs/DocsPageRenderer.vue` (full page renderer)
 - `app/components/docs/DocsInlineRenderer.vue` (embedded renderer)
 
+Buying guides are category-owned content:
+
+- source path: `docs/<locale>/<verticalHomeUrl>/<guideSlug>.md`
+- public route: `/<verticalHomeUrl>/<guideSlug>`
+- renderer: `app/components/docs/BuyingGuideRenderer.vue`
+
+Example:
+
+- source: `docs/fr/televiseurs/meilleur-televiseur-caravane-camping-car.md`
+- public URL: `/televiseurs/meilleur-televiseur-caravane-camping-car`
+
+Legacy moved guides under `/docs/fr/guides/<slug>` redirect to the matching
+category URL when a moved Markdown file exists.
+
 ## Frontmatter contract
 
-Each doc can expose:
+Generic docs can expose:
 
 ```yaml
 ---
@@ -30,6 +44,22 @@ ogImage: '/images/og/docs.png'
 noindex: false
 ---
 ```
+
+Buying guides should keep only authored SEO content in frontmatter:
+
+```yaml
+---
+title: 'Page title'
+description: 'SEO summary'
+type: 'guide'
+tags: ['language:fr', 'guide-achat', '<vertical-id-or-topic>']
+updatedAt: '2026-04-12'
+---
+```
+
+Canonical URLs, robots directives, draft/published/navigation defaults and the
+category association are application-owned. The guide category is inferred from
+the path segment after the locale.
 
 ## Language tag behaviour
 
@@ -105,7 +135,7 @@ client-side so the ECharts canvas renders once data resolves.
 
 | Prop       | Type                | Default           | Notes                                          |
 | ---------- | ------------------- | ----------------- | ---------------------------------------------- |
-| `vertical` | string              | -                 | `verticalId` to aggregate.                     |
+| `vertical` | string              | guide context     | `verticalId` to aggregate.                     |
 | `type`     | `pie` \| `bar`      | `pie`             | `pie` renders a donut, `bar` a bar chart.      |
 | `top`      | number              | `8`               | Max number of brands.                          |
 | `metric`   | `count` \| `offers` | `count`           | Bucket counts = number of referenced products. |
@@ -113,6 +143,7 @@ client-side so the ECharts canvas renders once data resolves.
 
 ```vue
 <BrandShareChart vertical="aspirateurs-robots" type="pie" top="8" />
+<BrandShareChart type="pie" top="8" />
 ```
 
 ### `GuideProductGrid`
@@ -122,14 +153,19 @@ wraps `CategoryProductCardGrid`. Rendered server-side (good for guide SEO).
 
 | Prop       | Type   | Default    | Notes                                                                                                                         |
 | ---------- | ------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `vertical` | string | -          | `verticalId` to query.                                                                                                        |
+| `vertical` | string | guide context | `verticalId` to query.                                                                                                     |
 | `top`      | number | `3`        | Number of products.                                                                                                           |
 | `sort`     | string | `ecoscore` | `ecoscore`/`impact` → `scores.ECOSCORE.value` desc. A raw field mapping with optional `:asc`/`:desc` suffix is also accepted. |
 
 ```vue
 <GuideProductGrid vertical="aspirateurs-robots" top="3" sort="ecoscore" />
+<GuideProductGrid top="3" sort="ecoscore" />
 ```
+
+Inside `BuyingGuideRenderer`, `BrandShareChart` and `GuideProductGrid` can omit
+`vertical`; they receive the category `verticalId` from guide context. Keep
+passing `vertical` for standalone docs pages where no guide context exists.
 
 > Buying guides are typically authored with the `@buying-guide-author` prompt
 > (`frontend/.claude/prompts/buying-guide-author.md`), which orchestrates SEO
-> research and produces a guide under `docs/fr/guides/`.
+> research and produces a guide under `docs/fr/<verticalHomeUrl>/`.

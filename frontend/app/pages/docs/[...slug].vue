@@ -4,9 +4,13 @@
 
 <script setup lang="ts">
 import DocsPageRenderer from '~/components/docs/DocsPageRenderer.vue'
-import { resolveLocaleFromRequest } from '~/composables/useDocsContent'
+import {
+  resolveLocaleFromRequest,
+  useDocsContent,
+} from '~/composables/useDocsContent'
 
 const route = useRoute()
+const { getMovedGuideRedirect } = useDocsContent()
 
 const resolvedSlug = computed(() => {
   const slugParam = route.params.slug
@@ -18,4 +22,12 @@ const resolvedSlug = computed(() => {
 })
 
 const resolvedLocale = computed(() => resolveLocaleFromRequest())
+
+const legacyRedirect = await getMovedGuideRedirect({
+  legacyPath: `/docs/${resolvedSlug.value}`,
+})
+
+if (legacyRedirect) {
+  await navigateTo(legacyRedirect, { redirectCode: 301 })
+}
 </script>

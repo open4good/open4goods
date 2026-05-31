@@ -22,8 +22,11 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.reviewgeneration.dto.ReviewGenerationStepResult;
 import org.open4goods.services.reviewgeneration.dto.ReviewGenerationVerticalResult;
+import org.open4goods.services.reviewgeneration.service.NotEnoughDataException;
 import org.open4goods.services.reviewgeneration.service.ReviewGenerationService;
 import org.open4goods.verticals.VerticalsConfigService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
 class ReviewGenerationControllerTest {
@@ -65,6 +68,26 @@ class ReviewGenerationControllerTest {
                     assertThat(attribute.getValue()).isEqualTo("55 in");
                     assertThat(attribute.getNumber()).isOne();
                 });
+        verify(reviewGenerationService).extractReviewAttributes(product, verticalConfig);
+    }
+
+    @Test
+    void extractReviewAttributes_ShouldReturnUnprocessableEntityWhenFactsAreMissing() throws Exception {
+        Product product = product(123L, "tv");
+        VerticalConfig verticalConfig = verticalConfig("tv");
+
+        when(productRepository.getById(123L)).thenReturn(product);
+        when(verticalsConfigService.getConfigByIdOrDefault("tv")).thenReturn(verticalConfig);
+        when(reviewGenerationService.extractReviewAttributes(product, verticalConfig))
+                .thenThrow(new NotEnoughDataException("No persisted review facts available"));
+
+        ResponseEntity<ReviewGenerationStepResult> response = controller.extractReviewAttributes(123L);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().success()).isFalse();
+        assertThat(response.getBody().step()).isEqualTo("attributes");
+        assertThat(response.getBody().message()).isEqualTo("No persisted review facts available");
         verify(reviewGenerationService).extractReviewAttributes(product, verticalConfig);
     }
 
