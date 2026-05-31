@@ -4,18 +4,14 @@ import { defineCollection, defineContentConfig, z } from '@nuxt/content'
 const DOCS_DIR = fileURLToPath(new URL('../docs', import.meta.url))
 
 export default defineContentConfig({
-  sources: {
-    docs: {
-      driver: 'fs',
-      base: DOCS_DIR,
-      prefix: '/docs',
-      extensions: ['.md'],
-    },
-  },
   collections: {
     docs: defineCollection({
       type: 'page',
-      source: 'docs',
+      source: {
+        include: '**/*.md',
+        cwd: DOCS_DIR,
+        prefix: 'docs',
+      },
       schema: z.object({
         title: z.string().optional(),
         description: z.string().optional(),

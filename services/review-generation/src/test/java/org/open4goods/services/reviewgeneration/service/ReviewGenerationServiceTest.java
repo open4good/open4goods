@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -21,15 +22,23 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.ai.AiReview;
+import org.open4goods.model.attribute.Attribute;
+import org.open4goods.model.attribute.ProductAttribute;
+import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.product.AiReviewHolder;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.review.ReviewGenerationStatus;
+import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.services.googlesearch.exception.GoogleSearchException;
 import org.open4goods.services.googlesearch.service.GoogleSearchService;
 import org.open4goods.services.productrepository.services.ProductRepository;
+import org.open4goods.services.prompt.dto.PromptResponse;
 import org.open4goods.services.prompt.exceptions.BatchJobFailedException;
 import org.open4goods.services.prompt.service.BatchPromptService;
 import org.open4goods.services.prompt.service.PromptService;
 import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
+import org.open4goods.services.reviewgeneration.dto.AttributeExtractionResult;
 import org.open4goods.services.urlfetching.service.UrlFetchingService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -428,5 +437,128 @@ class ReviewGenerationServiceTest {
         // [2] becomes [2] (pointing to AI Source)
         assertThat(processed.getDescription()).contains("<a class=\"review-ref\" href=\"#review-ref-1\">[1]</a>");
         assertThat(processed.getDescription()).contains("<a class=\"review-ref\" href=\"#review-ref-2\">[2]</a>");
+    }
+
+    @Test
+    void extractReviewAttributes_ShouldRejectUnknownKeysAndInvalidSourceNumbers() throws Exception {
+        Product product = new Product();
+        product.setId(100L);
+        org.open4goods.model.vertical.VerticalConfig verticalConfig = verticalConfig("DIAGONALE_POUCES");
+        Map<String, Object> variables = Map.of("ACCEPTED_URLS", List.of("https://www.samsung.com/tv"));
+        when(preprocessingService.buildPromptVariablesFromReviewFacts(product, verticalConfig, true))
+                .thenReturn(new HashMap<>(variables));
+        when(genAiService.objectPrompt(eq(properties.getAttributeExtractionPromptKey()), org.mockito.ArgumentMatchers.anyMap(),
+                eq(AttributeExtractionResult.class)))
+                .thenReturn(attributeResponse(List.of(
+                        new AiReview.AiAttribute("DIAGONALE_POUCES", "55", 1),
+                        new AiReview.AiAttribute("UNKNOWN", "x", 1),
+                        new AiReview.AiAttribute("DIAGONALE_POUCES", "65", 2),
+                        new AiReview.AiAttribute("DIAGONALE_POUCES", "75", null))));
+
+        org.open4goods.services.reviewgeneration.dto.ReviewGenerationStepResult result =
+                reviewGenerationService.extractReviewAttributes(product, verticalConfig);
+
+        assertThat(result.attributes()).extracting(AiReview.AiAttribute::getName)
+                .containsExactly("DIAGONALE_POUCES");
+        assertThat(product.getAttributes().getAll()).containsOnlyKeys("DIAGONALE_POUCES");
+        assertThat(product.getAttributes().getAll().get("DIAGONALE_POUCES").getSource())
+                .extracting(SourcedAttribute::getDataSourcename)
+                .containsExactly("AI_REVIEW:s01:www.samsung.com");
+    }
+
+    @Test
+    void extractReviewAttributes_ShouldRemovePreviousAiSourcesAndPreserveNonAiSourcesOnRerun() throws Exception {
+        Product product = new Product();
+        product.setId(101L);
+        ProductAttribute attribute = new ProductAttribute();
+        attribute.setName("DIAGONALE_POUCES");
+        attribute.addSourceAttribute(new SourcedAttribute(new Attribute("DIAGONALE_POUCES", "old", "fr"),
+                "AI_REVIEW:s01:old.example"));
+        attribute.addSourceAttribute(new SourcedAttribute(new Attribute("DIAGONALE_POUCES", "legacy", "fr"), "gpt-4o-mini"));
+        attribute.addSourceAttribute(new SourcedAttribute(new Attribute("DIAGONALE_POUCES", "55", "fr"), "EPREL"));
+        product.getAttributes().getAll().put("DIAGONALE_POUCES", attribute);
+        org.open4goods.model.vertical.VerticalConfig verticalConfig = verticalConfig("DIAGONALE_POUCES");
+        when(preprocessingService.buildPromptVariablesFromReviewFacts(product, verticalConfig, true))
+                .thenReturn(new HashMap<>(Map.of("ACCEPTED_URLS", List.of("https://support.samsung.com/tv"))));
+        when(genAiService.objectPrompt(eq(properties.getAttributeExtractionPromptKey()), org.mockito.ArgumentMatchers.anyMap(),
+                eq(AttributeExtractionResult.class)))
+                .thenReturn(attributeResponse(List.of(new AiReview.AiAttribute("DIAGONALE_POUCES", "65", 1))));
+
+        reviewGenerationService.extractReviewAttributes(product, verticalConfig);
+
+        assertThat(product.getAttributes().getAll().get("DIAGONALE_POUCES").getSource())
+                .extracting(SourcedAttribute::getDataSourcename)
+                .containsExactlyInAnyOrder("EPREL", "AI_REVIEW:s01:support.samsung.com");
+    }
+
+    @Test
+    void generateReviewAsync_WithTwoPhaseGeneration_ShouldPersistAttributesBeforeTextGeneration() throws Exception {
+        properties.setTwoPhaseGeneration(true);
+        Product product = new Product();
+        product.setId(102L);
+        org.open4goods.model.vertical.VerticalConfig verticalConfig = verticalConfig("DIAGONALE_POUCES");
+        org.open4goods.services.prompt.config.PromptConfig promptConfig =
+                new org.open4goods.services.prompt.config.PromptConfig();
+        promptConfig.setRetrievalMode(org.open4goods.services.prompt.config.RetrievalMode.EXTERNAL_SOURCES);
+        when(genAiService.getPromptConfig(org.mockito.ArgumentMatchers.anyString())).thenReturn(promptConfig);
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("PRODUCT_BRAND", "Samsung");
+        variables.put("PRODUCT_MODEL", "S95D");
+        variables.put("VERTICAL_NAME", "TV");
+        variables.put("OFFER_NAMES", "Samsung S95D");
+        variables.put("IMPACTSCORE_POSITION", "Non classe");
+        variables.put("COMMON_ATTRIBUTES", "DIAGONALE_POUCES");
+        variables.put("ACCEPTED_URLS", List.of("https://www.samsung.com/tv"));
+        variables.put("SOURCE_TOKENS", Map.of("https://www.samsung.com/tv", 100));
+        variables.put("TOTAL_TOKENS", 100);
+        when(preprocessingService.preparePromptVariables(eq(product), eq(verticalConfig),
+                org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyMap())).thenReturn(variables);
+        when(genAiService.objectPrompt(eq(properties.getAttributeExtractionPromptKey()), org.mockito.ArgumentMatchers.anyMap(),
+                eq(AttributeExtractionResult.class)))
+                .thenReturn(attributeResponse(List.of(new AiReview.AiAttribute("DIAGONALE_POUCES", "55", 1))));
+        when(genAiService.objectPrompt(eq(properties.getPromptKey()), org.mockito.ArgumentMatchers.anyMap(),
+                eq(AiReview.class))).thenAnswer(invocation -> {
+                    assertThat(product.getAttributes().getAll()).containsKey("DIAGONALE_POUCES");
+                    AiReview review = new AiReview();
+                    review.setDescription("A valid review description longer than twenty characters.");
+                    review.setAttributes(List.of(new AiReview.AiAttribute("DIAGONALE_POUCES", "55", 1)));
+                    PromptResponse<AiReview> response = new PromptResponse<>();
+                    response.setBody(review);
+                    return response;
+                });
+
+        reviewGenerationService.generateReviewAsync(product, verticalConfig, null, true);
+
+        long start = System.currentTimeMillis();
+        ReviewGenerationStatus status;
+        do {
+            status = reviewGenerationService.getProcessStatus(102L);
+            Thread.sleep(50);
+        } while (System.currentTimeMillis() - start < 2000
+                && status.getStatus() != ReviewGenerationStatus.Status.SUCCESS
+                && status.getStatus() != ReviewGenerationStatus.Status.FAILED);
+        assertThat(status.getStatus()).isEqualTo(ReviewGenerationStatus.Status.SUCCESS);
+        assertThat(product.getAttributes().getAll()).containsKey("DIAGONALE_POUCES");
+    }
+
+    private PromptResponse<AttributeExtractionResult> attributeResponse(List<AiReview.AiAttribute> attributes) {
+        PromptResponse<AttributeExtractionResult> response = new PromptResponse<>();
+        response.setBody(new AttributeExtractionResult(attributes));
+        return response;
+    }
+
+    private org.open4goods.model.vertical.VerticalConfig verticalConfig(String... keys) {
+        org.open4goods.model.vertical.VerticalConfig verticalConfig = new org.open4goods.model.vertical.VerticalConfig();
+        verticalConfig.setId("tv");
+        AttributesConfig attributesConfig = new AttributesConfig();
+        attributesConfig.setConfigs(java.util.Arrays.stream(keys)
+                .map(key -> {
+                    AttributeConfig config = new AttributeConfig();
+                    config.setKey(key);
+                    return config;
+                })
+                .toList());
+        verticalConfig.setAttributesConfig(attributesConfig);
+        return verticalConfig;
     }
 }

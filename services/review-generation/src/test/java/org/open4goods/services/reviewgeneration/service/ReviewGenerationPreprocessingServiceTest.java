@@ -19,7 +19,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductFetchDiagnostics;
+import org.open4goods.model.product.ProductFact;
 import org.open4goods.model.review.ReviewGenerationStatus;
+import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.googlesearch.dto.GoogleSearchRequest;
@@ -923,6 +926,31 @@ class ReviewGenerationPreprocessingServiceTest {
         assertThat(match).isFalse();
     }
 
+    @Test
+    void buildPromptVariablesFromReviewFacts_OrdersOfficialSourcesBeforeOtherAcceptedFacts() throws Exception {
+        Product product = product("Samsung", "S95D");
+        String official = "https://www.samsung.com/fr/tvs/s95d/";
+        String support = "https://www.samsung.com/fr/support/model/s95d/";
+        String review = "https://www.lesnumeriques.com/tv/samsung-s95d-test.html";
+        product.setOfficialUrl(official);
+        product.addOfficialSupportUrl("fr", support);
+        product.setReviewFacts(List.of(
+                new ProductFact(review, "review markdown", "fr", 1L, "HTTP", 10, "a"),
+                new ProductFact(support, "support markdown", "fr", 1L, "HTTP", 10, "b"),
+                new ProductFact(official, "official markdown", "fr", 1L, "HTTP", 10, "c")));
+        ProductFetchDiagnostics diagnostics = new ProductFetchDiagnostics();
+        diagnostics.setAcceptedUrls(List.of(review, support, official));
+        product.setReviewFetchDiagnostics(diagnostics);
+
+        Map<String, Object> variables = service.buildPromptVariablesFromReviewFacts(product, verticalConfig(), true);
+
+        assertThat((List<String>) variables.get("ACCEPTED_URLS"))
+                .containsExactly(official, support, review);
+        assertThat((String) variables.get("ATTRIBUTE_SOURCES_JSON"))
+                .contains("\"number\":1")
+                .contains(official);
+    }
+
     private Product product(String brand, String model) {
         Product product = new Product();
         product.setId(1L);
@@ -939,6 +967,7 @@ class ReviewGenerationPreprocessingServiceTest {
         texts.put("fr", i18n);
         texts.put("default", i18n);
         verticalConfig.setI18n(texts);
+        verticalConfig.setAttributesConfig(new AttributesConfig());
         return verticalConfig;
     }
 }

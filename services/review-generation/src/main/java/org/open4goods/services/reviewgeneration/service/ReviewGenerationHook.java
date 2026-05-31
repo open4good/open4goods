@@ -43,4 +43,17 @@ public interface ReviewGenerationHook {
     default void onSourcesFetched(Product product, boolean hadEprelBeforeFetch) {
         onSourcesFetched(product);
     }
+
+    /**
+     * Called after AI-extracted attributes have been validated and persisted on the
+     * product.
+     * <p>
+     * Implementations can run standard aggregation so canonical raw attributes are
+     * parsed into {@code attributes.indexed} before text generation.
+     * </p>
+     *
+     * @param product the product with freshly persisted AI review attributes
+     */
+    default void onAttributesExtracted(Product product) {
+    }
 }

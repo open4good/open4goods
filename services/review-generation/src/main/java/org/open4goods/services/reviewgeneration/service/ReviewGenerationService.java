@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.Collections;
@@ -33,6 +34,7 @@ import org.open4goods.services.reviewgeneration.dto.ReviewGenerationStepResult;
 
 import org.open4goods.model.ai.AiReview;
 import org.open4goods.model.attribute.Attribute;
+import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
@@ -333,11 +335,8 @@ public class ReviewGenerationService implements HealthIndicator {
 			throws Exception {
 		Map<String, Object> promptVariables = preprocessingService.buildPromptVariablesFromReviewFacts(product,
 				verticalConfig, true);
-		PromptResponse<AttributeExtractionResult> attrResponse = genAiService.objectPrompt(
-				properties.getAttributeExtractionPromptKey(), promptVariables, AttributeExtractionResult.class);
-		List<AiReview.AiAttribute> attributes = attrResponse.getBody() == null ? List.of()
-				: attrResponse.getBody().attributes();
-		persistExtractedAttributes(product, attributes, attrResponse.getMetadata());
+		List<AiReview.AiAttribute> attributes = extractAndPersistReviewAttributes(product, verticalConfig,
+				promptVariables);
 		productRepository.forceIndex(product);
 		return stepResult(product, verticalConfig, "attributes", true, "Attributes extracted and persisted.",
 				promptVariables, attributes, null);
@@ -356,7 +355,7 @@ public class ReviewGenerationService implements HealthIndicator {
 			throws Exception {
 		Map<String, Object> promptVariables = preprocessingService.buildPromptVariablesFromReviewFacts(product,
 				verticalConfig, true);
-		List<AiReview.AiAttribute> attributes = aiAttributesFromProduct(product);
+		List<AiReview.AiAttribute> attributes = aiAttributesFromProduct(product, verticalConfig);
 		if (attributes.isEmpty()) {
 			throw new IllegalStateException("No persisted product attributes available for UPC " + product.getId()
 					+ ". Run the attribute extraction stage first.");
@@ -521,7 +520,8 @@ public class ReviewGenerationService implements HealthIndicator {
 							event -> handleProviderEvent(status, event));
 					logger.debug("Streaming review generation started for promptKey: {}", promptKey);
 				} else if (properties.isTwoPhaseGeneration()) {
-					reviewResponse = executeExternalSourcesTwoPhase(promptKey, promptVariables, status, product.getId());
+					reviewResponse = executeExternalSourcesTwoPhase(promptKey, promptVariables, status, product,
+							verticalConfig);
 				} else {
 					reviewResponse = genAiService.objectPrompt(promptKey, promptVariables, AiReview.class);
 				}
@@ -832,7 +832,7 @@ public class ReviewGenerationService implements HealthIndicator {
 				} else {
 					Map<String, Object> vars = preprocessingService.preparePromptVariables(product, verticalConfig, status);
 					if (properties.isTwoPhaseGeneration()) {
-						injectExtractedAttributes(vars, product.getId());
+						injectExtractedAttributes(product, verticalConfig, vars);
 					}
 					promptVariablesList.add(vars);
 				}
@@ -888,20 +888,19 @@ public class ReviewGenerationService implements HealthIndicator {
 	 * @return the phase-2 {@link PromptResponse}
 	 */
 	private PromptResponse<AiReview> executeExternalSourcesTwoPhase(String textPromptKey,
-			Map<String, Object> promptVariables, ReviewGenerationStatus status, long upc) throws Exception {
+			Map<String, Object> promptVariables, ReviewGenerationStatus status, Product product,
+			VerticalConfig verticalConfig) throws Exception {
 		String attrPromptKey = properties.getAttributeExtractionPromptKey();
+		long upc = product.getId();
 		logger.info("Phase 1 (attribute extraction) starting for UPC {} with promptKey '{}'.", upc, attrPromptKey);
 		status.addMessage("Phase 1: extracting attributes...");
 
-		PromptResponse<AttributeExtractionResult> attrResponse =
-				genAiService.objectPrompt(attrPromptKey, promptVariables, AttributeExtractionResult.class);
-		List<AiReview.AiAttribute> extractedAttributes = attrResponse.getBody() != null
-				? attrResponse.getBody().attributes()
-				: List.of();
+		List<AiReview.AiAttribute> extractedAttributes = extractAndPersistReviewAttributes(product, verticalConfig,
+				promptVariables);
 		logger.info("Phase 1 complete for UPC {}: {} attributes extracted.", upc, extractedAttributes.size());
 
-		promptVariables.put("EXTRACTED_ATTRIBUTES",
-				objectMapper.writeValueAsString(extractedAttributes));
+		promptVariables.put("EXTRACTED_ATTRIBUTES", objectMapper.writeValueAsString(
+				aiAttributesFromProduct(product, verticalConfig)));
 
 		logger.info("Phase 2 (text generation) starting for UPC {} with promptKey '{}'.", upc, textPromptKey);
 		status.addMessage("Phase 2: generating review text...");
@@ -916,16 +915,15 @@ public class ReviewGenerationService implements HealthIndicator {
 	 * @param vars the variable map to enrich (mutated in place)
 	 * @param upc  the product UPC for log correlation
 	 */
-	private void injectExtractedAttributes(Map<String, Object> vars, long upc) {
+	private void injectExtractedAttributes(Product product, VerticalConfig verticalConfig, Map<String, Object> vars) {
 		String attrPromptKey = properties.getAttributeExtractionPromptKey();
+		long upc = product.getId();
 		try {
 			logger.info("Batch phase 1 (attribute extraction) for UPC {} with promptKey '{}'.", upc, attrPromptKey);
-			PromptResponse<AttributeExtractionResult> attrResponse =
-					genAiService.objectPrompt(attrPromptKey, vars, AttributeExtractionResult.class);
-			List<AiReview.AiAttribute> attrs = attrResponse.getBody() != null
-					? attrResponse.getBody().attributes()
-					: List.of();
-			vars.put("EXTRACTED_ATTRIBUTES", objectMapper.writeValueAsString(attrs));
+			List<AiReview.AiAttribute> attrs = extractAndPersistReviewAttributes(product, verticalConfig, vars);
+			vars.put("EXTRACTED_ATTRIBUTES", objectMapper.writeValueAsString(
+					aiAttributesFromProduct(product, verticalConfig)));
+			productRepository.forceIndex(product);
 			logger.info("Batch phase 1 complete for UPC {}: {} attributes extracted.", upc, attrs.size());
 		} catch (Exception e) {
 			logger.warn("Batch phase 1 failed for UPC {}; proceeding with empty EXTRACTED_ATTRIBUTES: {}", upc, e.getMessage());
@@ -1150,18 +1148,201 @@ public class ReviewGenerationService implements HealthIndicator {
 		populateAttributes(product, review, metadata);
 	}
 
-	private List<AiReview.AiAttribute> aiAttributesFromProduct(Product product) {
-		if (product.getAttributes() == null || product.getAttributes().getAll() == null
-				|| product.getAttributes().getAll().isEmpty()) {
+	private List<AiReview.AiAttribute> extractAndPersistReviewAttributes(Product product, VerticalConfig verticalConfig,
+			Map<String, Object> promptVariables) throws Exception {
+		PromptResponse<AttributeExtractionResult> attrResponse = genAiService.objectPrompt(
+				properties.getAttributeExtractionPromptKey(), promptVariables, AttributeExtractionResult.class);
+		List<AiReview.AiAttribute> extractedAttributes = attrResponse.getBody() == null ? List.of()
+				: attrResponse.getBody().attributes();
+		List<String> acceptedUrls = acceptedUrls(promptVariables);
+		List<AiReview.AiAttribute> validatedAttributes = validateExtractedAttributes(extractedAttributes,
+				verticalConfig, acceptedUrls);
+		persistValidatedAttributes(product, validatedAttributes, acceptedUrls);
+		runAttributesExtractedHooks(product);
+		return validatedAttributes;
+	}
+
+	private List<AiReview.AiAttribute> validateExtractedAttributes(List<AiReview.AiAttribute> attributes,
+			VerticalConfig verticalConfig, List<String> acceptedUrls) {
+		if (attributes == null || attributes.isEmpty()) {
 			return List.of();
 		}
-		AtomicInteger index = new AtomicInteger(1);
-		return product.getAttributes().getAll().values().stream()
+		Set<String> canonicalKeys = canonicalAttributeKeys(verticalConfig);
+		List<AiReview.AiAttribute> valid = new ArrayList<>();
+		for (AiReview.AiAttribute attribute : attributes) {
+			if (attribute == null || attribute.getName() == null || attribute.getName().isBlank()
+					|| attribute.getValue() == null || attribute.getValue().isBlank()) {
+				continue;
+			}
+			String key = attribute.getName().trim();
+			if (!canonicalKeys.contains(key)) {
+				logger.warn("Rejecting AI review attribute with unknown canonical key '{}'.", key);
+				continue;
+			}
+			Integer number = attribute.getNumber();
+			if (number == null || number < 1 || number > acceptedUrls.size()) {
+				logger.warn("Rejecting AI review attribute '{}' with invalid source number '{}'.", key, number);
+				continue;
+			}
+			valid.add(new AiReview.AiAttribute(key, attribute.getValue().trim(), number));
+		}
+		return valid;
+	}
+
+	private Set<String> canonicalAttributeKeys(VerticalConfig verticalConfig) {
+		if (verticalConfig == null || verticalConfig.getAttributesConfig() == null
+				|| verticalConfig.getAttributesConfig().getConfigs() == null) {
+			return Set.of();
+		}
+		return verticalConfig.getAttributesConfig().getConfigs().stream()
+				.filter(Objects::nonNull)
+				.map(config -> config.getKey())
+				.filter(key -> key != null && !key.isBlank())
+				.collect(java.util.stream.Collectors.toSet());
+	}
+
+	private void persistValidatedAttributes(Product product, List<AiReview.AiAttribute> attributes,
+			List<String> acceptedUrls) {
+		removePreviousAiReviewSources(product);
+		if (attributes == null || attributes.isEmpty()) {
+			return;
+		}
+		for (AiReview.AiAttribute attribute : attributes) {
+			String datasource = aiReviewDatasourceName(attribute.getNumber(), acceptedUrls);
+			ProductAttribute productAttribute = product.getAttributes().getAll().get(attribute.getName());
+			if (productAttribute == null) {
+				productAttribute = new ProductAttribute();
+				productAttribute.setName(attribute.getName());
+			}
+			productAttribute.addSourceAttribute(new SourcedAttribute(
+					new Attribute(attribute.getName(), attribute.getValue(), "fr"), datasource));
+			product.getAttributes().getAll().put(productAttribute.getName(), productAttribute);
+		}
+	}
+
+	private void removePreviousAiReviewSources(Product product) {
+		if (product == null || product.getAttributes() == null || product.getAttributes().getAll() == null) {
+			return;
+		}
+		product.getAttributes().getAll().entrySet().removeIf(entry -> {
+			ProductAttribute attribute = entry.getValue();
+			if (attribute == null || attribute.getSource() == null) {
+				return false;
+			}
+			attribute.getSource().removeIf(source -> isReviewAiSource(source == null ? null : source.getDataSourcename()));
+			attribute.setValue(attribute.bestValue());
+			return attribute.getSource().isEmpty();
+		});
+	}
+
+	private boolean isReviewAiSource(String datasource) {
+		if (datasource == null || datasource.isBlank()) {
+			return false;
+		}
+		String normalized = datasource.trim();
+		String upper = normalized.toUpperCase(java.util.Locale.ROOT);
+		String lower = normalized.toLowerCase(java.util.Locale.ROOT);
+		return upper.startsWith("AI_REVIEW:") || upper.equals("AI") || upper.equals("OPEN_AI")
+				|| upper.equals("GEMINI") || lower.startsWith("gpt-") || lower.startsWith("gemini-");
+	}
+
+	private String aiReviewDatasourceName(Integer number, List<String> acceptedUrls) {
+		String url = number == null || number < 1 || number > acceptedUrls.size() ? "" : acceptedUrls.get(number - 1);
+		String host = hostOf(url);
+		return "AI_REVIEW:s" + String.format("%02d", number) + ":" + host;
+	}
+
+	private String hostOf(String url) {
+		try {
+			return URI.create(url).toURL().getHost();
+		} catch (Exception e) {
+			return "unknown";
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<String> acceptedUrls(Map<String, Object> promptVariables) {
+		if (promptVariables == null) {
+			return List.of();
+		}
+		Object urls = promptVariables.get("ACCEPTED_URLS");
+		if (urls instanceof List<?> list) {
+			return list.stream()
+					.filter(Objects::nonNull)
+					.map(Object::toString)
+					.toList();
+		}
+		Map<String, Integer> sourceTokens = (Map<String, Integer>) promptVariables.getOrDefault("SOURCE_TOKENS", Map.of());
+		return new ArrayList<>(sourceTokens.keySet());
+	}
+
+	private void runAttributesExtractedHooks(Product product) {
+		try {
+			hooks.forEach(hook -> hook.onAttributesExtracted(product));
+		} catch (Exception e) {
+			logger.error("Error executing attribute extraction hooks for UPC {}: {}", product.getId(), e.getMessage(), e);
+		}
+	}
+
+	private List<AiReview.AiAttribute> aiAttributesFromProduct(Product product, VerticalConfig verticalConfig) {
+		if (product.getAttributes() == null) {
+			return List.of();
+		}
+		Set<String> canonicalKeys = canonicalAttributeKeys(verticalConfig);
+		Map<String, AiReview.AiAttribute> resolvedAttributes = new LinkedHashMap<>();
+		if (product.getAttributes().getIndexed() != null) {
+			product.getAttributes().getIndexed().values().stream()
+					.filter(attribute -> canonicalKeys.contains(attribute.getName()))
+					.filter(attribute -> attribute.getName() != null && !attribute.getName().isBlank())
+					.filter(attribute -> attribute.getValue() != null && !attribute.getValue().isBlank())
+					.forEach(attribute -> resolvedAttributes.put(attribute.getName(),
+							new AiReview.AiAttribute(attribute.getName(), attribute.getValue(),
+									sourceNumberFromIndexed(attribute))));
+		}
+		if (product.getAttributes().getAll() == null || product.getAttributes().getAll().isEmpty()) {
+			return new ArrayList<>(resolvedAttributes.values());
+		}
+		product.getAttributes().getAll().values().stream()
+				.filter(attribute -> canonicalKeys.contains(attribute.getName()))
 				.filter(attribute -> attribute.getName() != null && !attribute.getName().isBlank())
 				.filter(attribute -> attribute.getValue() != null && !attribute.getValue().isBlank())
-				.map(attribute -> new AiReview.AiAttribute(attribute.getName(), attribute.getValue(),
-						index.getAndIncrement()))
-				.toList();
+				.forEach(attribute -> resolvedAttributes.putIfAbsent(attribute.getName(),
+						new AiReview.AiAttribute(attribute.getName(), attribute.getValue(),
+								sourceNumberFromProductAttribute(attribute))));
+		return new ArrayList<>(resolvedAttributes.values());
+	}
+
+	private Integer sourceNumberFromIndexed(IndexedAttribute attribute) {
+		return sourceNumberFromSources(attribute == null ? Collections.emptySet() : attribute.getSource());
+	}
+
+	private Integer sourceNumberFromProductAttribute(ProductAttribute attribute) {
+		return sourceNumberFromSources(attribute == null ? Collections.emptySet() : attribute.getSource());
+	}
+
+	private Integer sourceNumberFromSources(Set<SourcedAttribute> sources) {
+		if (sources == null || sources.isEmpty()) {
+			return 1;
+		}
+		return sources.stream()
+				.map(source -> parseAiReviewSourceNumber(source.getDataSourcename()))
+				.filter(Objects::nonNull)
+				.findFirst()
+				.orElse(1);
+	}
+
+	private Integer parseAiReviewSourceNumber(String datasource) {
+		if (datasource == null || !datasource.startsWith("AI_REVIEW:s") || datasource.length() < 12) {
+			return null;
+		}
+		try {
+			int end = datasource.indexOf(':', "AI_REVIEW:s".length());
+			String value = end < 0 ? datasource.substring("AI_REVIEW:s".length())
+					: datasource.substring("AI_REVIEW:s".length(), end);
+			return Integer.valueOf(value);
+		} catch (NumberFormatException e) {
+			return null;
+		}
 	}
 
 	@SuppressWarnings("unchecked")

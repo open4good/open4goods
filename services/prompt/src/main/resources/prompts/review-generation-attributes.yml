@@ -6,9 +6,13 @@ systemPrompt: |
   Ta seule tache est d'extraire des attributs factuels et verifiables depuis les sources fournies.
 
   Regles:
-  - Extrais uniquement des faits presents dans les sources.
+  - Extrais uniquement des faits explicitement presents dans les sources numerotees.
   - Ne fabrique aucune valeur.
-  - Utilise la liste d'attributs attendus comme guide mais n'en invente pas.
+  - Le champ name doit etre exactement une cle canonique fournie dans ATTRIBUTE_DEFINITIONS_JSON.
+  - Le champ number doit etre le numero exact d'une entree de ATTRIBUTE_SOURCES_JSON qui prouve la valeur.
+  - Rejette toute valeur inferee, non sourcee, inconnue, ambigue, approximative ou contradictoire.
+  - Rejette tout attribut absent des definitions canoniques.
+  - Si plusieurs sources donnent des valeurs differentes, garde seulement la valeur la plus directement sourcee par une page officielle.
   - Reponds exclusivement en JSON valide, sans texte supplementaire.
 
 userPrompt: |
@@ -21,20 +25,25 @@ userPrompt: |
   Attributs communs de la catégorie produit :
   [[${COMMON_ATTRIBUTES}]]
 
-  Liste d'attributs attendus (cle / nom) :
-  [[${ATTRIBUTES}]]
+  Definitions canoniques d'attributs (JSON) :
+  [[${ATTRIBUTE_DEFINITIONS_JSON}]]
 
   Noms commerciaux du produit :
   [[${OFFER_NAMES}]]
 
-  Sources fournies (Map URL -> Contenu) :
+  Index des sources (JSON, number -> URL) :
+  [[${ATTRIBUTE_SOURCES_JSON}]]
+
+  Sources fournies (Map URL -> Contenu, dans le meme ordre que l'index) :
   [[${sources}]]
 
   Extrait les attributs techniques du produit depuis les sources ci-dessus.
   Retourne uniquement un objet JSON avec un champ "attributes" contenant une liste d'objets
-  {name, value, number} ou number est l'index sequentiel (1-based).
+  {name, value, number}.
+  name doit etre une cle canonique exacte et number doit referencer l'index de source 1-based.
 
 options:
   model: "gpt-4o-mini"
-  temperature: 0.1
-  maxTokens: 800
+  temperature: 0.0
+  maxTokens: 4000
+  timeoutMs: 60000

@@ -23,8 +23,17 @@ public class StandardReviewAggregatorHook implements ReviewGenerationHook {
 
     @Override
     public void onReviewGenerated(Product product) {
+        aggregate(product, "after review generation");
+    }
+
+    @Override
+    public void onAttributesExtracted(Product product) {
+        aggregate(product, "after review attribute extraction");
+    }
+
+    private void aggregate(Product product, String reason) {
         try {
-            logger.info("Triggering standard aggregation for product {} after review generation", product.getId());
+            logger.info("Triggering standard aggregation for product {} {}", product.getId(), reason);
             // trigger the standard aggregation (sanitization/enrichment)
             aggregationFacadeService.aggregate(product);
         } catch (Exception e) {

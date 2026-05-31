@@ -15,6 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -32,9 +33,11 @@ import jakarta.annotation.PostConstruct;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductFetchDiagnostics;
 import org.open4goods.model.product.ProductFact;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.resource.ResourceType;
+import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.util.ProductModelCandidateHelper;
 import org.open4goods.model.util.ProductModelCandidateHelper.ModelCandidateSource;
 import org.open4goods.model.review.ReviewGenerationStatus;
@@ -60,6 +63,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Builds prompt variables by discovering and fetching web sources for a
@@ -95,6 +99,7 @@ public class ReviewGenerationPreprocessingService {
 	private final SerialisationService serialisationService;
 	private final MeterRegistry meterRegistry;
 	private final ThreadPoolExecutor fetchExecutor;
+	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	private record FetchOutcome(FetchResponse response, String rejectionReason) {
 	}
@@ -440,8 +445,46 @@ public class ReviewGenerationPreprocessingService {
 		}
 		if (primaryModel != null && !primaryModel.isBlank()) {
 			alternateModels.add(primaryModel);
+			// Add base model without trailing regional-variant suffix (e.g. "55C835X1" → "55C835").
+			// Many pages omit the 1-3 uppercase letter suffix that encodes the sales region.
+			String baseModel = stripRegionalVariantSuffix(primaryModel);
+			if (!baseModel.equals(primaryModel)) {
+				alternateModels.add(baseModel);
+				logger.debug("Added base model without variant suffix for UPC {}: {} → {}",
+						product.getId(), primaryModel, baseModel);
+			}
 		}
 		return new SearchIdentity(brand, primaryModel, alternateModels);
+	}
+
+	/**
+	 * Strips a trailing regional-variant suffix from a model code.
+	 * A suffix is a sequence of 1–3 uppercase letters (no digits) at the end of the
+	 * model string, preceded by an alphanumeric character. Examples:
+	 * "55C835X1" has no trailing letters → unchanged.
+	 * "QE55S95BATXXC" → "QE55S95BAT" (strips "XXC").
+	 * "32PFS6855/12" → unchanged (ends with digits).
+	 *
+	 * @param model the model string to strip
+	 * @return the base model without trailing letter suffix, or the original if no suffix detected
+	 */
+	private String stripRegionalVariantSuffix(String model) {
+		if (model == null || model.length() < 5) {
+			return model;
+		}
+		// Match a suffix of 1-4 uppercase letters at the end, preceded by at least one digit
+		// so we don't strip e.g. "OLED" or other pure-alpha models.
+		java.util.regex.Matcher m = java.util.regex.Pattern
+				.compile("^(.*\\d)([A-Z]{1,4})$")
+				.matcher(model.trim());
+		if (m.matches()) {
+			String base = m.group(1);
+			// Only strip if the base is still a plausible model (≥ 4 chars, has a digit)
+			if (base.length() >= 4 && base.chars().anyMatch(Character::isDigit)) {
+				return base;
+			}
+		}
+		return model;
 	}
 
 	private boolean shouldReplaceBrand(String currentBrand, String inferredBrand) {
@@ -1036,12 +1079,30 @@ public class ReviewGenerationPreprocessingService {
 		if (product == null || result == null || result.link() == null || result.link().isBlank()) {
 			return;
 		}
-		if (product.getOfficialUrl() != null || isOfficialSupportUrl(result) || !isOfficialUrl(product, result)) {
+		if (product.getOfficialUrl() != null || !isOfficialUrl(product, result)) {
 			return;
 		}
-		product.setOfficialUrl(result.link());
-		logger.info("Official manufacturer page persisted from accepted source for UPC {}: {}",
-				product.getId(), result.link());
+		// Prefer a product page; fall back to a support page when no product page has been
+		// recorded yet. This handles brands (e.g. Samsung) where all accessible official
+		// pages sit under /support/ paths.
+		if (!isOfficialSupportUrl(result)) {
+			product.setOfficialUrl(result.link());
+			logger.info("Official manufacturer product page persisted from accepted source for UPC {}: {}",
+					product.getId(), result.link());
+		} else if (!hasOfficialProductUrl(product)) {
+			product.setOfficialUrl(result.link());
+			logger.info("Official manufacturer support page persisted as officialUrl fallback for UPC {}: {}",
+					product.getId(), result.link());
+		}
+	}
+
+	/** Returns true when the product already has a non-support official URL recorded. */
+	private boolean hasOfficialProductUrl(Product product) {
+		if (product == null || product.getOfficialUrl() == null) {
+			return false;
+		}
+		// Re-use the same path-based heuristic via a synthetic GoogleSearchResult
+		return !isOfficialSupportUrl(new GoogleSearchResult(product.getOfficialUrl(), ""));
 	}
 
 	private boolean isBelowCompleteThreshold(VerticalConfig verticalConfig, int accumulatedTokens,
@@ -2541,8 +2602,9 @@ public class ReviewGenerationPreprocessingService {
 		Map<String, Integer> tokens = new LinkedHashMap<>();
 		int totalTokens = 0;
 
-		if (product.getReviewFacts() != null) {
-			for (ProductFact fact : product.getReviewFacts()) {
+		List<ProductFact> orderedFacts = orderedReviewFacts(product);
+		if (!orderedFacts.isEmpty()) {
+			for (ProductFact fact : orderedFacts) {
 				if (fact == null || fact.getUrl() == null || fact.getUrl().isBlank() || fact.getMarkdown() == null
 						|| fact.getMarkdown().isBlank()) {
 					continue;
@@ -2564,7 +2626,104 @@ public class ReviewGenerationPreprocessingService {
 		promptVariables.put("tokens", tokens);
 		promptVariables.put("TOTAL_TOKENS", totalTokens);
 		promptVariables.put("SOURCE_TOKENS", tokens);
+		promptVariables.put("ACCEPTED_URLS", new ArrayList<>(sources.keySet()));
+		promptVariables.put("ATTRIBUTE_SOURCES_JSON", writeJson(attributeSources(product, new ArrayList<>(sources.keySet()))));
+		promptVariables.put("ATTRIBUTE_DEFINITIONS_JSON", writeJson(attributeDefinitions(verticalConfig)));
 		return promptVariables;
+	}
+
+	private List<ProductFact> orderedReviewFacts(Product product) {
+		if (product == null || product.getReviewFacts() == null || product.getReviewFacts().isEmpty()) {
+			return List.of();
+		}
+		List<String> acceptedUrls = product.getReviewFetchDiagnostics() == null
+				? List.of()
+				: product.getReviewFetchDiagnostics().getAcceptedUrls();
+		Map<String, Integer> acceptedOrder = new LinkedHashMap<>();
+		for (int i = 0; i < acceptedUrls.size(); i++) {
+			acceptedOrder.putIfAbsent(acceptedUrls.get(i), i);
+		}
+		Map<ProductFact, Integer> originalOrder = new LinkedHashMap<>();
+		for (int i = 0; i < product.getReviewFacts().size(); i++) {
+			originalOrder.put(product.getReviewFacts().get(i), i);
+		}
+		return product.getReviewFacts().stream()
+				.filter(fact -> fact != null && fact.getUrl() != null && !fact.getUrl().isBlank())
+				.sorted(Comparator
+						.comparingInt((ProductFact fact) -> officialSourceRank(product, fact.getUrl()))
+						.thenComparingInt(fact -> acceptedOrder.getOrDefault(fact.getUrl(), Integer.MAX_VALUE))
+						.thenComparingInt(fact -> originalOrder.getOrDefault(fact, Integer.MAX_VALUE)))
+				.toList();
+	}
+
+	private int officialSourceRank(Product product, String url) {
+		if (product == null || url == null) {
+			return 2;
+		}
+		if (url.equals(product.getOfficialUrl())) {
+			return 0;
+		}
+		boolean supportUrl = product.getOfficialSupportUrls() != null
+				&& product.getOfficialSupportUrls().values().stream()
+						.filter(Objects::nonNull)
+						.flatMap(Set::stream)
+						.anyMatch(url::equals);
+		return supportUrl ? 1 : 2;
+	}
+
+	private List<Map<String, Object>> attributeSources(Product product, List<String> urls) {
+		ProductFetchDiagnostics diagnostics = product == null ? null : product.getReviewFetchDiagnostics();
+		Map<String, String> sourceClasses = diagnostics == null ? Map.of() : diagnostics.getSourceClasses();
+		List<Map<String, Object>> sourceIndex = new ArrayList<>();
+		for (int i = 0; i < urls.size(); i++) {
+			String url = urls.get(i);
+			Map<String, Object> source = new LinkedHashMap<>();
+			source.put("number", i + 1);
+			source.put("url", url);
+			source.put("host", hostOf(url));
+			source.put("type", sourceClasses.getOrDefault(url, officialSourceRank(product, url) < 2 ? "OFFICIAL" : "ACCEPTED_FACT"));
+			sourceIndex.add(source);
+		}
+		return sourceIndex;
+	}
+
+	private List<Map<String, Object>> attributeDefinitions(VerticalConfig verticalConfig) {
+		if (verticalConfig == null || verticalConfig.getAttributesConfig() == null
+				|| verticalConfig.getAttributesConfig().getConfigs() == null) {
+			return List.of();
+		}
+		return verticalConfig.getAttributesConfig().getConfigs().stream()
+				.filter(config -> config != null && config.getKey() != null && !config.getKey().isBlank())
+				.map(this::attributeDefinition)
+				.toList();
+	}
+
+	private Map<String, Object> attributeDefinition(AttributeConfig config) {
+		Map<String, Object> definition = new LinkedHashMap<>();
+		definition.put("key", config.getKey());
+		definition.put("name", config.getName());
+		definition.put("filteringType", config.getFilteringType());
+		definition.put("unit", config.getUnit());
+		definition.put("suffix", config.getSuffix());
+		definition.put("synonyms", config.getSynonyms());
+		return definition;
+	}
+
+	private String hostOf(String url) {
+		try {
+			return URI.create(url).toURL().getHost();
+		} catch (Exception e) {
+			return "";
+		}
+	}
+
+	private String writeJson(Object value) {
+		try {
+			return objectMapper.writeValueAsString(value);
+		} catch (Exception e) {
+			logger.warn("Cannot serialize review attribute prompt context: {}", e.getMessage());
+			return "[]";
+		}
 	}
 
 	/**

@@ -53,4 +53,14 @@ class StandardReviewAggregatorHookTest {
         // verify no exception is thrown
         verify(aggregationFacadeService, times(1)).aggregate(product);
     }
+
+    @Test
+    void onAttributesExtracted_ShouldCallAggregate() throws AggregationSkipException {
+        Product product = new Product();
+        product.setId(123L);
+
+        hook.onAttributesExtracted(product);
+
+        verify(aggregationFacadeService, times(1)).aggregate(product);
+    }
 }
