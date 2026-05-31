@@ -8,6 +8,7 @@ import {
   resolveLocaleFromRequest,
   resolvePublicGuidePath,
   useDocsContent,
+  type DocsLocale,
   type DocsDoc,
 } from '~/composables/useDocsContent'
 import type {
@@ -132,18 +133,34 @@ const matchedSubCategory =
     subCategory => normaliseSlug(subCategory.slug) === normalisedSlug
   ) ?? null
 
-const markdownDocPath = resolveGuideDocPath({
-  locale: resolveLocaleFromRequest(),
-  categorySlug: categorySlug.value,
-  guideSlug: normalisedSlug,
-})
+const resolveMarkdownGuide = async (): Promise<DocsDoc | null> => {
+  const requestLocale = resolveLocaleFromRequest()
+  const candidateLocales: DocsLocale[] = [
+    requestLocale,
+    ...(['fr', 'en'] as DocsLocale[]).filter(locale => locale !== requestLocale),
+  ]
+
+  for (const locale of candidateLocales) {
+    const candidate = await getDocByPath({
+      path: resolveGuideDocPath({
+        locale,
+        categorySlug: categorySlug.value,
+        guideSlug: normalisedSlug,
+      }),
+      locale,
+    })
+
+    if (candidate) {
+      return candidate as DocsDoc
+    }
+  }
+
+  return null
+}
 
 const markdownGuide = matchedSubCategory
   ? null
-  : ((await getDocByPath({
-      path: markdownDocPath,
-      locale: resolveLocaleFromRequest(),
-    })) as DocsDoc | null)
+  : await resolveMarkdownGuide()
 
 const matchedPage =
   categoryDetail.wikiPages?.find(
