@@ -1,2 +1,4 @@
 User-Agent: *
-Disallow:
+Allow: /
+Disallow: /contrib
+Sitemap: https://nudger.fr/sitemap_index.xml

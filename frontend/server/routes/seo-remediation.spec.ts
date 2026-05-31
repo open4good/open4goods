@@ -55,4 +55,12 @@ describe('SEO remediation routes', () => {
     )
     expect(response).toContain('Sitemap: https://nudger.fr/sitemap_index.xml')
   })
+
+  it('blocks affiliation redirect URLs in robots.txt', async () => {
+    const handler = (await import('./robots.txt.get')).default
+
+    const response = await handler({} as Parameters<typeof handler>[0])
+
+    expect(response).toContain('Disallow: /contrib')
+  })
 })

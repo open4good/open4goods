@@ -3,6 +3,7 @@ import { defineEventHandler, setHeader } from 'h3'
 const ROBOTS_TXT = [
   'User-agent: *',
   'Allow: /',
+  'Disallow: /contrib',
   'Sitemap: https://nudger.fr/sitemap_index.xml',
   '',
 ].join('\n')
