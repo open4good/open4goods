@@ -137,7 +137,9 @@ const resolveMarkdownGuide = async (): Promise<DocsDoc | null> => {
   const requestLocale = resolveLocaleFromRequest()
   const candidateLocales: DocsLocale[] = [
     requestLocale,
-    ...(['fr', 'en'] as DocsLocale[]).filter(locale => locale !== requestLocale),
+    ...(['fr', 'en'] as DocsLocale[]).filter(
+      locale => locale !== requestLocale
+    ),
   ]
 
   for (const locale of candidateLocales) {
@@ -158,9 +160,7 @@ const resolveMarkdownGuide = async (): Promise<DocsDoc | null> => {
   return null
 }
 
-const markdownGuide = matchedSubCategory
-  ? null
-  : await resolveMarkdownGuide()
+const markdownGuide = matchedSubCategory ? null : await resolveMarkdownGuide()
 
 const matchedPage =
   categoryDetail.wikiPages?.find(

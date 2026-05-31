@@ -31,7 +31,9 @@
                   variant="flat"
                   color="surface"
                 >
-                  {{ t('buyingGuide.article.updated', { date: formattedDate }) }}
+                  {{
+                    t('buyingGuide.article.updated', { date: formattedDate })
+                  }}
                 </v-chip>
                 <v-chip
                   v-for="tag in visibleTags"
@@ -62,7 +64,12 @@
 
     <v-container class="buying-guide__container">
       <v-row class="buying-guide__layout">
-        <v-col v-if="tocItems.length" cols="12" md="3" class="d-none d-md-block">
+        <v-col
+          v-if="tocItems.length"
+          cols="12"
+          md="3"
+          class="d-none d-md-block"
+        >
           <StickySectionNavigation
             :sections="tocSections"
             :active-section="activeSection"

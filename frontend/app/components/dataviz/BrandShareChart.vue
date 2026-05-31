@@ -84,7 +84,9 @@ const { data, pending } = await useAsyncData<AggregationResponseDto | null>(
         }
       )
 
-      return response.aggregations?.find(agg => agg.name === BRAND_FIELD) ?? null
+      return (
+        response.aggregations?.find(agg => agg.name === BRAND_FIELD) ?? null
+      )
     } catch (error) {
       console.error('Failed to load guide brand share chart', error)
       return null

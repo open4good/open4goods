@@ -151,11 +151,11 @@ client-side so the ECharts canvas renders once data resolves.
 Grid of the top N products of a vertical, sorted by impact score by default -
 wraps `CategoryProductCardGrid`. Rendered server-side (good for guide SEO).
 
-| Prop       | Type   | Default    | Notes                                                                                                                         |
-| ---------- | ------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `vertical` | string | guide context | `verticalId` to query.                                                                                                     |
-| `top`      | number | `3`        | Number of products.                                                                                                           |
-| `sort`     | string | `ecoscore` | `ecoscore`/`impact` → `scores.ECOSCORE.value` desc. A raw field mapping with optional `:asc`/`:desc` suffix is also accepted. |
+| Prop       | Type   | Default       | Notes                                                                                                                         |
+| ---------- | ------ | ------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `vertical` | string | guide context | `verticalId` to query.                                                                                                        |
+| `top`      | number | `3`           | Number of products.                                                                                                           |
+| `sort`     | string | `ecoscore`    | `ecoscore`/`impact` → `scores.ECOSCORE.value` desc. A raw field mapping with optional `:asc`/`:desc` suffix is also accepted. |
 
 ```vue
 <GuideProductGrid vertical="aspirateurs-robots" top="3" sort="ecoscore" />
