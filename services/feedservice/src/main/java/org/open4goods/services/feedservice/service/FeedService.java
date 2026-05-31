@@ -283,7 +283,11 @@ public class FeedService {
         if (isBlank(providerName)) {
             return true;
         }
-        return providerName.equalsIgnoreCase(service.getProviderName());
+        if (providerName.equalsIgnoreCase(service.getProviderName())) {
+            return true;
+        }
+        return "Effinity".equalsIgnoreCase(providerName)
+                && "Effiliation".equalsIgnoreCase(service.getProviderName());
     }
 
     private boolean isBlank(String value) {

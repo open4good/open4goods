@@ -80,6 +80,24 @@ class FeedServiceTest
     }
 
     @Test
+    void getPromotionsAcceptsEffinityAliasForEffiliationProvider() {
+        AbstractFeedService provider = mock(AbstractFeedService.class);
+        DataSourceConfigService dataSourceConfigService = mock(DataSourceConfigService.class);
+
+        AffiliationPromotion promotion = new AffiliationPromotion();
+        promotion.setProgramId("123");
+
+        when(provider.getProviderName()).thenReturn("Effiliation");
+        when(provider.getPromotions()).thenReturn(List.of(promotion));
+        when(dataSourceConfigService.datasourceConfigs()).thenReturn(Map.of());
+
+        FeedService feedService = new FeedService(List.of(provider), dataSourceConfigService);
+        Collection<AffiliationPromotion> result = feedService.getPromotions("Effinity");
+
+        assertThat(result).containsExactly(promotion);
+    }
+
+    @Test
     void getTransactionsAggregatesFromAllProviders() {
         AbstractFeedService provider = mock(AbstractFeedService.class);
         DataSourceConfigService dataSourceConfigService = mock(DataSourceConfigService.class);

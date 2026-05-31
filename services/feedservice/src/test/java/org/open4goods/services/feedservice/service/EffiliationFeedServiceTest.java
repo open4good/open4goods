@@ -199,23 +199,24 @@ class EffiliationFeedServiceTest {
     void getPromotionsShouldReturnMappedPromotions() throws Exception {
         RemoteFileCachingService cacheService = mock(RemoteFileCachingService.class);
         File promotions = jsonFile("""
-                {"promotionaloffers":[
+                {"supports":[
                   {
-                    "id_promotion":"promo-1",
+                    "id_lien":"promo-1",
                     "id_affilieur":"101",
-                    "nom":"Promo Test",
-                    "titre":"Promo Title",
+                    "site_affilieur":"Promo Test",
+                    "nom":"Promo Title",
+                    "intitule":"PROMO20",
                     "code":"PROMO20",
-                    "date_debut":"2026-01-01",
-                    "date_fin":"2026-12-31",
-                    "type_remise":"code_promo",
-                    "url_tracking":"https://promo-track",
+                    "date_debut":"01/01/2026 00:00:00",
+                    "date_fin":"31/12/2026 23:59:59",
+                    "type":"Code de réduction",
+                    "url_tracke":"https://promo-track",
                     "description":"20% off"
                   }
                 ]}
                 """);
 
-        when(cacheService.getResource(contains("promotionaloffers.json"), anyInt())).thenReturn(promotions);
+        when(cacheService.getResource(contains("commercialtrades.json"), anyInt())).thenReturn(promotions);
 
         EffiliationFeedService service = buildService(true, cacheService);
         Collection<AffiliationPromotion> mapped = service.getPromotions();
@@ -228,7 +229,7 @@ class EffiliationFeedServiceTest {
         assertThat(ap.getVoucherCode()).isEqualTo("PROMO20");
         assertThat(ap.getStartDate().toString()).isEqualTo("2026-01-01");
         assertThat(ap.getEndDate().toString()).isEqualTo("2026-12-31");
-        assertThat(ap.getDiscountType()).isEqualTo("code_promo");
+        assertThat(ap.getDiscountType()).isEqualTo("Code de réduction");
         assertThat(ap.getTrackingUrl()).isEqualTo("https://promo-track");
         assertThat(ap.getDescription()).isEqualTo("20% off");
     }

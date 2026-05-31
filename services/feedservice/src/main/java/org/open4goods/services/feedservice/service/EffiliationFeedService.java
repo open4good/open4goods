@@ -32,7 +32,9 @@ import org.open4goods.model.affiliation.AffiliationPromotion;
 import org.open4goods.model.affiliation.AffiliationTransaction;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Collection;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -350,12 +352,18 @@ public class EffiliationFeedService extends AbstractFeedService {
     }
 
     /**
-     * Promotional offers (voucher codes / promotions). Listed in Link API methods. :contentReference[oaicite:10]{index=10}
+     * Retrieves promotional offers, called "commercial trades" by Effiliation's API.
+     *
+     * @param apiKey Effiliation API key
+     * @param lg output language
+     * @param country optional country filter
+     * @return raw API payload
+     * @throws Exception when the cached API response cannot be read
      */
     public JsonNode retrieveEffiliationPromotionalOffers(String apiKey, String lg, String country) throws Exception {
         assertEnabled();
         String endpoint = buildPromotionalOffersEndpoint(apiKey, normalizeLg(lg), FILTER_MINES, country, null, null);
-        LOGGER.info("Retrieving Effiliation promotionaloffers (endpoint='{}').", safeEndpointForLogs(endpoint));
+        LOGGER.info("Retrieving Effiliation commercial trades (endpoint='{}').", safeEndpointForLogs(endpoint));
         return readCachedJson(endpoint);
     }
 
@@ -473,8 +481,8 @@ public class EffiliationFeedService extends AbstractFeedService {
                                                  String country,
                                                  String categories,
                                                  String mode) {
-        // Mentioned as Link API method; documentation page not opened here, keep minimal/common params. :contentReference[oaicite:19]{index=19}
-        return "https://apiv2.effiliation.com/apiv2/promotionaloffers.json"
+        // Official Promotionaloffers API URL is named commercialtrades.
+        return "https://apiv2.effiliation.com/apiv2/commercialtrades.json"
                 + "?key=" + urlEncode(apiKey)
                 + "&filter=" + urlEncode(nullSafe(filter))
                 + "&lg=" + urlEncode(lg)
@@ -802,6 +810,33 @@ public class EffiliationFeedService extends AbstractFeedService {
         return null;
     }
 
+    private LocalDate parseEffiliationLocalDate(String value) {
+        if (isBlank(value)) {
+            return null;
+        }
+        String trimmed = value.trim();
+        if (trimmed.length() >= 10) {
+            try {
+                return LocalDate.parse(trimmed.substring(0, 10));
+            } catch (DateTimeParseException ignored) {
+                // Try Effiliation's documented French date format below.
+            }
+        }
+        for (DateTimeFormatter formatter : List.of(
+                DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"),
+                DateTimeFormatter.ofPattern("dd/MM/yyyy"))) {
+            try {
+                if (formatter.toString().contains("HourOfDay")) {
+                    return LocalDateTime.parse(trimmed, formatter).toLocalDate();
+                }
+                return LocalDate.parse(trimmed, formatter);
+            } catch (DateTimeParseException ignored) {
+                // Try the next documented variant.
+            }
+        }
+        return null;
+    }
+
     @Override
     public String getProviderName()
     {
@@ -891,19 +926,28 @@ public class EffiliationFeedService extends AbstractFeedService {
         {
             return Collections.emptyList();
         }
-        JsonNode offersNode = root.path("promotionaloffers");
+        JsonNode offersNode = root.path("supports");
         if (offersNode.isMissingNode() || !offersNode.isArray())
         {
-            offersNode = root.path("promotions");
+            offersNode = root.path("commercialtrades");
+        }
+        if (offersNode.isMissingNode() || !offersNode.isArray())
+        {
+            offersNode = root.path("promotionaloffers");
             if (offersNode.isMissingNode() || !offersNode.isArray())
             {
-                if (root.isArray())
+                offersNode = root.path("promotions");
+                if (offersNode.isMissingNode() || !offersNode.isArray())
                 {
-                    offersNode = root;
-                }
-                else
-                {
-                    return Collections.emptyList();
+                    if (root.isArray())
+                    {
+                        offersNode = root;
+                    }
+                    else
+                    {
+                        LOGGER.warn("Effiliation commercial trades payload has no supported offer array.");
+                        return Collections.emptyList();
+                    }
                 }
             }
         }
@@ -914,11 +958,11 @@ public class EffiliationFeedService extends AbstractFeedService {
             AffiliationPromotion ap = new AffiliationPromotion();
             ap.setProviderName(getProviderName());
             ap.setProgramId(firstNonBlank(textOrNull(node, "id_annonceur"), textOrNull(node, "id_affilieur"), textOrNull(node, "program_id")));
-            ap.setAdvertiserName(firstNonBlank(textOrNull(node, "nom_annonceur"), textOrNull(node, "nom"), textOrNull(node, "advertiser_name")));
-            ap.setTitle(firstNonBlank(textOrNull(node, "titre"), textOrNull(node, "title")));
+            ap.setAdvertiserName(firstNonBlank(textOrNull(node, "site_affilieur"), textOrNull(node, "nom_annonceur"), textOrNull(node, "advertiser_name"), textOrNull(node, "nomprogramme")));
+            ap.setTitle(firstNonBlank(textOrNull(node, "nom"), textOrNull(node, "titre"), textOrNull(node, "title"), textOrNull(node, "intitule")));
             ap.setDescription(firstNonBlank(textOrNull(node, "description"), textOrNull(node, "desc")));
-            ap.setVoucherCode(firstNonBlank(textOrNull(node, "code"), textOrNull(node, "voucher_code"), textOrNull(node, "code_promo")));
-            ap.setDiscountType(firstNonBlank(textOrNull(node, "type_remise"), textOrNull(node, "discount_type")));
+            ap.setVoucherCode(firstNonBlank(textOrNull(node, "intitule"), textOrNull(node, "voucher_code"), textOrNull(node, "code_promo")));
+            ap.setDiscountType(firstNonBlank(textOrNull(node, "type"), textOrNull(node, "type_remise"), textOrNull(node, "discount_type")));
             
             String valStr = firstNonBlank(textOrNull(node, "valeur_remise"), textOrNull(node, "discount_value"));
             if (valStr != null)
@@ -931,27 +975,13 @@ public class EffiliationFeedService extends AbstractFeedService {
             }
             
             String startStr = firstNonBlank(textOrNull(node, "date_debut"), textOrNull(node, "start_date"));
-            if (startStr != null)
-            {
-                try
-                {
-                    ap.setStartDate(LocalDate.parse(startStr.trim().substring(0, 10)));
-                }
-                catch (Exception ignored) {}
-            }
+            ap.setStartDate(parseEffiliationLocalDate(startStr));
             
             String endStr = firstNonBlank(textOrNull(node, "date_fin"), textOrNull(node, "end_date"));
-            if (endStr != null)
-            {
-                try
-                {
-                    ap.setEndDate(LocalDate.parse(endStr.trim().substring(0, 10)));
-                }
-                catch (Exception ignored) {}
-            }
+            ap.setEndDate(parseEffiliationLocalDate(endStr));
             
-            ap.setLandingUrl(firstNonBlank(textOrNull(node, "url_redirection"), textOrNull(node, "landing_url")));
-            ap.setTrackingUrl(firstNonBlank(textOrNull(node, "url_tracking"), textOrNull(node, "tracking_url")));
+            ap.setLandingUrl(firstNonBlank(textOrNull(node, "url_affilieur"), textOrNull(node, "url_redir"), textOrNull(node, "url_redirection"), textOrNull(node, "landing_url")));
+            ap.setTrackingUrl(firstNonBlank(textOrNull(node, "url_tracke"), textOrNull(node, "url_tracking"), textOrNull(node, "tracking_url"), textOrNull(node, "url_redir")));
             ap.setConditions(firstNonBlank(textOrNull(node, "conditions"), textOrNull(node, "terms")));
             
             String pays = firstNonBlank(textOrNull(node, "pays"), textOrNull(node, "countries"));
