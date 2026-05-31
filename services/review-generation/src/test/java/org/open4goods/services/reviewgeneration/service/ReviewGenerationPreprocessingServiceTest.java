@@ -271,7 +271,7 @@ class ReviewGenerationPreprocessingServiceTest {
     }
 
     @Test
-    void preparePromptVariables_StoresOfficialSupportUrlWithoutReplacingOfficialProductUrl() throws Exception {
+    void preparePromptVariables_StoresSupportUrlAsOfficialUrlFallbackWhenNoProductPageFound() throws Exception {
         properties.setMinMarkdownChars(20);
         properties.setSourceMinTokens(1);
         properties.setMinGlobalTokens(1);
@@ -291,7 +291,37 @@ class ReviewGenerationPreprocessingServiceTest {
 
         service.preparePromptVariables(product, verticalConfig(), new ReviewGenerationStatus());
 
-        assertThat(product.getOfficialUrl()).isNull();
+        // When only support pages are found, the first one is stored as officialUrl fallback
+        // so downstream services can still show a manufacturer link.
+        assertThat(product.getOfficialUrl()).isEqualTo(supportUrl);
+        assertThat(product.getOfficialSupportUrls().get("fr")).containsExactly(supportUrl);
+    }
+
+    @Test
+    void preparePromptVariables_SupportUrlDoesNotReplaceExistingOfficialProductUrl() throws Exception {
+        properties.setMinMarkdownChars(20);
+        properties.setSourceMinTokens(1);
+        properties.setMinGlobalTokens(1);
+        properties.setMinUrlCount(1);
+        properties.setMaxUrlsPerProduct(2);
+        Product product = product("Samsung", "SM-S921B/DS");
+        String productUrl = "https://www.samsung.com/fr/smartphones/galaxy-s24/galaxy-s24-sm-s921b-ds/";
+        String supportUrl = "https://www.samsung.com/fr/support/model/SM-S921BZVDEUC/";
+        product.setOfficialUrl(productUrl);
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse(List.of(
+                new GoogleSearchResult("SM-S921B/DS | Assistance Samsung FR", supportUrl))));
+        when(promptService.estimateTokens(any(String.class))).thenReturn(300);
+        when(urlFetchingService.fetchUrlAsync(any(String.class), any(Map.class))).thenAnswer(invocation ->
+        {
+            String url = invocation.getArgument(0);
+            String markdown = "Samsung SM-S921B/DS support page with useful display, camera, and battery details.";
+            return CompletableFuture.completedFuture(new FetchResponse(url, 200, markdown, markdown, FetchStrategy.HTTP));
+        });
+
+        service.preparePromptVariables(product, verticalConfig(), new ReviewGenerationStatus());
+
+        // Pre-existing product URL must not be overwritten by a support URL
+        assertThat(product.getOfficialUrl()).isEqualTo(productUrl);
         assertThat(product.getOfficialSupportUrls().get("fr")).containsExactly(supportUrl);
     }
 

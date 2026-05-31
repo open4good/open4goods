@@ -343,9 +343,9 @@ public class ReviewGenerationPreprocessingService {
 				finalSourceClasses, rejectedUrls, accumulatedTokens, brand, primaryModel, alternateModels, verticalConfig,
 				exactEvidenceModels, status);
 		if (shouldRunLowQualityFallback(verticalConfig, accumulatedTokens, finalSourcesMap, finalSourceClasses)) {
-			accumulatedTokens = runLowQualityFallback(product, brand, primaryModel, preferredDomains, searchedQueries,
-					sortedResults, fetchFutures, finalSourcesMap, finalTokensMap, finalSourceClasses, rejectedUrls,
-					accumulatedTokens, customHeaders, exactEvidenceModels, status);
+			accumulatedTokens = runLowQualityFallback(product, brand, primaryModel, alternateModels, preferredDomains,
+					searchedQueries, sortedResults, fetchFutures, finalSourcesMap, finalTokensMap, finalSourceClasses,
+					rejectedUrls, accumulatedTokens, customHeaders, exactEvidenceModels, status);
 		}
 		if (isBelowCompleteThreshold(verticalConfig, accumulatedTokens, finalSourcesMap, finalSourceClasses)
 				&& hasOfficialFetchEvidence(product, finalSourcesMap)) {
@@ -459,29 +459,31 @@ public class ReviewGenerationPreprocessingService {
 
 	/**
 	 * Strips a trailing regional-variant suffix from a model code.
-	 * A suffix is a sequence of 1–3 uppercase letters (no digits) at the end of the
-	 * model string, preceded by an alphanumeric character. Examples:
-	 * "55C835X1" has no trailing letters → unchanged.
-	 * "QE55S95BATXXC" → "QE55S95BAT" (strips "XXC").
-	 * "32PFS6855/12" → unchanged (ends with digits).
+	 * Many manufacturers append a 1-4 uppercase letter country/variant code, or a
+	 * letter+digit pair, that pages and reviews omit. Examples:
+	 * "55C835X1"      → "55C835"     (strips letter+digit suffix "X1")
+	 * "QE55S95BATXXC" → unchanged    (suffix "XXC" follows only letters, not a digit)
+	 * "32PFS6855/12"  → unchanged    (ends with digits, no match)
 	 *
 	 * @param model the model string to strip
-	 * @return the base model without trailing letter suffix, or the original if no suffix detected
+	 * @return the base model without trailing variant suffix, or the original if none detected
 	 */
 	private String stripRegionalVariantSuffix(String model) {
 		if (model == null || model.length() < 5) {
 			return model;
 		}
-		// Match a suffix of 1-4 uppercase letters at the end, preceded by at least one digit
-		// so we don't strip e.g. "OLED" or other pure-alpha models.
-		java.util.regex.Matcher m = java.util.regex.Pattern
-				.compile("^(.*\\d)([A-Z]{1,4})$")
-				.matcher(model.trim());
-		if (m.matches()) {
-			String base = m.group(1);
-			// Only strip if the base is still a plausible model (≥ 4 chars, has a digit)
-			if (base.length() >= 4 && base.chars().anyMatch(Character::isDigit)) {
-				return base;
+		// Attempt 1: trailing letter+digit pair (e.g. "X1", "A2") — handles TCL-style suffixes.
+		// Attempt 2: trailing 1-4 uppercase letters (e.g. "XXC") — handles Samsung/LG-style suffixes.
+		// Both require the base to end with a digit (rules out pure-alpha model strings).
+		for (java.util.regex.Pattern pattern : List.of(
+				java.util.regex.Pattern.compile("^(.*\\d)([A-Z]\\d)$"),
+				java.util.regex.Pattern.compile("^(.*\\d)([A-Z]{1,4})$"))) {
+			java.util.regex.Matcher m = pattern.matcher(model.trim());
+			if (m.matches()) {
+				String base = m.group(1);
+				if (base.length() >= 4 && base.chars().anyMatch(Character::isDigit)) {
+					return base;
+				}
 			}
 		}
 		return model;
@@ -1142,7 +1144,7 @@ public class ReviewGenerationPreprocessingService {
 						finalSourceClasses) == FetchResultQuality.FAILED;
 	}
 
-	private int runLowQualityFallback(Product product, String brand, String primaryModel,
+	private int runLowQualityFallback(Product product, String brand, String primaryModel, Set<String> alternateModels,
 			List<String> preferredDomains, List<String> searchedQueries, List<GoogleSearchResult> alreadySortedResults,
 			Map<String, CompletableFuture<FetchOutcome>> fetchFutures, Map<String, String> finalSourcesMap,
 			Map<String, Integer> finalTokensMap, Map<String, SourceClass> finalSourceClasses,
@@ -1191,7 +1193,7 @@ public class ReviewGenerationPreprocessingService {
 				customHeaders);
 		fetchFutures.putAll(fallbackFutures);
 		return collectFetchedSources(product, sortedFallbackResults, fetchFutures, finalSourcesMap, finalTokensMap,
-				finalSourceClasses, rejectedUrls, accumulatedTokens, brand, primaryModel, product.getAkaModels(), null,
+				finalSourceClasses, rejectedUrls, accumulatedTokens, brand, primaryModel, alternateModels, null,
 				exactEvidenceModels, status);
 	}
 
