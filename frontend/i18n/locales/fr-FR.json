@@ -1,4 +1,14 @@
 {
+  "buyingGuide": {
+    "widget": {
+      "empty": "Aucun produit à afficher pour le moment.",
+      "loadError": "Impossible de charger ce contenu. Merci de réessayer plus tard."
+    },
+    "brandShare": {
+      "defaultTitle": "Parts de marché par marque",
+      "description": "Répartition des produits référencés par marque dans cette catégorie."
+    }
+  },
   "aiAudit": {
     "positioning": {
       "title": "Positionnement",

@@ -1,4 +1,14 @@
 {
+  "buyingGuide": {
+    "widget": {
+      "empty": "No product to display right now.",
+      "loadError": "Unable to load this content. Please try again later."
+    },
+    "brandShare": {
+      "defaultTitle": "Market share by brand",
+      "description": "Distribution of referenced products by brand in this category."
+    }
+  },
   "aiAudit": {
     "positioning": {
       "title": "Positioning",
