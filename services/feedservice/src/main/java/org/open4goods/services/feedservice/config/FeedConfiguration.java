@@ -89,6 +89,7 @@ public class FeedConfiguration {
         private String cron = "0 43 1 * * ?";
         private boolean enabled = false;
         private int cacheTtlDays = 1;
+        private String offersAndVouchersEndpoint = "https://api.webgains.com/platform/publisher/offers-and-vouchers";
 
         public String getCron() { return cron; }
         public void setCron(String cron) { this.cron = cron; }
@@ -96,6 +97,8 @@ public class FeedConfiguration {
         public void setEnabled(boolean enabled) { this.enabled = enabled; }
         public int getCacheTtlDays() { return cacheTtlDays; }
         public void setCacheTtlDays(int cacheTtlDays) { this.cacheTtlDays = cacheTtlDays; }
+        public String getOffersAndVouchersEndpoint() { return offersAndVouchersEndpoint; }
+        public void setOffersAndVouchersEndpoint(String offersAndVouchersEndpoint) { this.offersAndVouchersEndpoint = offersAndVouchersEndpoint; }
     }
     
 	public String getCatalogUrl() {
