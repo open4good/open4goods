@@ -63,13 +63,7 @@ public class FeedService {
         // TODO : Not scheduled
         Set<DataSourceProperties> feeds = getFeedsUrl();
         for (DataSourceProperties ds : feeds) {
-        	AffiliationPartner p = new AffiliationPartner();
-        	p.setId(ds.getName());
-        	p.setName(ds.getName());
-        	p.setLogoUrl(ds.getLogo());
-        	p.setAffiliationLink(ds.getAffiliatedPortalUrl());
-        	p.setPortalUrl(ds.getPortalUrl());
-        	partners.add(p);
+        	partners.add(toPartner(ds));
         }
     }
 
@@ -82,29 +76,47 @@ public class FeedService {
      * @return a set of datasource properties
      */
     public Set<DataSourceProperties> getFeedsUrl() {
+        return getFeedsUrl(null);
+    }
+
+    /**
+     * Aggregates datasource properties from matching feed services and orphan datasource configurations.
+     *
+     * @param providerName optional affiliation provider name filter
+     * @return a set of datasource properties
+     */
+    public Set<DataSourceProperties> getFeedsUrl(String providerName) {
         Set<DataSourceProperties> result = new HashSet<>();
 
         // Delegate to each feed service implementation.
         for (AbstractFeedService service : feedServices) {
             try {
-                result.addAll(service.getDatasources());
+                if (!matchesProvider(service, providerName)) {
+                    continue;
+                }
+                Set<DataSourceProperties> datasources = service.getDatasources();
+                if (datasources != null) {
+                    result.addAll(datasources);
+                }
             } catch(Exception e) {
                 logger.error("Error loading datasources from {}: ", service.getClass().getName(), e);
             }
         }
 
         // Add orphan feeds that do not have a defined feed key.
-        dataSourceConfigService.datasourceConfigs().forEach((k, v) -> {
-            try {
-                if (v.getCsvDatasource() != null && (v.getFeedKey() == null || v.getFeedKey().trim().isEmpty())) {
-                    logger.info("Adding orphan feed: {}", k);
-                    v.setDatasourceConfigName(k);
-                    result.add(v);
+        if (isBlank(providerName)) {
+            dataSourceConfigService.datasourceConfigs().forEach((k, v) -> {
+                try {
+                    if (v.getCsvDatasource() != null && (v.getFeedKey() == null || v.getFeedKey().trim().isEmpty())) {
+                        logger.info("Adding orphan feed: {}", k);
+                        v.setDatasourceConfigName(k);
+                        result.add(v);
+                    }
+                } catch(Exception e) {
+                    logger.error("Error processing orphan feed {}: ", k, e);
                 }
-            } catch(Exception e) {
-                logger.error("Error processing orphan feed {}: ", k, e);
-            }
-        });
+            });
+        }
 
         return result;
     }
@@ -117,9 +129,21 @@ public class FeedService {
      */
     public Set<DataSourceProperties> getFeedsByDatasourceName(String datasourceName)
     {
+        return getFeedsByDatasourceName(datasourceName, null);
+    }
+
+    /**
+     * Returns datasources matching the provided datasource/provider name and optional affiliation provider.
+     *
+     * @param datasourceName datasource/provider name to match
+     * @param providerName optional affiliation provider name filter
+     * @return matching datasource properties
+     */
+    public Set<DataSourceProperties> getFeedsByDatasourceName(String datasourceName, String providerName)
+    {
         String cleanedName = normalizeDatasourceName(datasourceName);
         Set<DataSourceProperties> result = new HashSet<>();
-        for (DataSourceProperties ds : getFeedsUrl()) {
+        for (DataSourceProperties ds : getFeedsUrl(providerName)) {
             try {
                 String configName = normalizeDatasourceName(ds.getDatasourceConfigName());
                 String dsName = normalizeDatasourceName(ds.getName());
@@ -149,6 +173,19 @@ public class FeedService {
 		return partners;
 	}
 
+    /**
+     * Returns affiliation partners, optionally limited to one provider.
+     *
+     * @param providerName optional affiliation provider name filter
+     * @return affiliation partners
+     */
+    public Set<AffiliationPartner> getPartners(String providerName) {
+        if (isBlank(providerName)) {
+            return partners;
+        }
+        return getFeedsUrl(providerName).stream().map(this::toPartner).collect(java.util.stream.Collectors.toSet());
+    }
+
 
 
 
@@ -161,9 +198,16 @@ public class FeedService {
 	}
 
 	public Collection<AffiliationProgram> getPrograms() {
+        return getPrograms(null);
+    }
+
+	public Collection<AffiliationProgram> getPrograms(String providerName) {
 		Set<AffiliationProgram> all = new LinkedHashSet<>();
 		for (AbstractFeedService service : feedServices) {
 			try {
+                if (!matchesProvider(service, providerName)) {
+                    continue;
+                }
 				Collection<AffiliationProgram> programs = service.getPrograms();
 				if (programs != null) {
 					all.addAll(programs);
@@ -176,9 +220,16 @@ public class FeedService {
 	}
 
 	public Collection<AffiliationPromotion> getPromotions() {
+        return getPromotions(null);
+    }
+
+	public Collection<AffiliationPromotion> getPromotions(String providerName) {
 		Set<AffiliationPromotion> all = new LinkedHashSet<>();
 		for (AbstractFeedService service : feedServices) {
 			try {
+                if (!matchesProvider(service, providerName)) {
+                    continue;
+                }
 				Collection<AffiliationPromotion> promotions = service.getPromotions();
 				if (promotions != null) {
 					all.addAll(promotions);
@@ -191,9 +242,16 @@ public class FeedService {
 	}
 
 	public Collection<AffiliationTransaction> getTransactions(Instant from, Instant to) {
+        return getTransactions(from, to, null);
+    }
+
+	public Collection<AffiliationTransaction> getTransactions(Instant from, Instant to, String providerName) {
 		Set<AffiliationTransaction> all = new LinkedHashSet<>();
 		for (AbstractFeedService service : feedServices) {
 			try {
+                if (!matchesProvider(service, providerName)) {
+                    continue;
+                }
 				Collection<AffiliationTransaction> transactions = service.getTransactions(from, to);
 				if (transactions != null) {
 					all.addAll(transactions);
@@ -220,4 +278,25 @@ public class FeedService {
 		}
 		return targetUrl;
 	}
+
+    private boolean matchesProvider(AbstractFeedService service, String providerName) {
+        if (isBlank(providerName)) {
+            return true;
+        }
+        return providerName.equalsIgnoreCase(service.getProviderName());
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
+    }
+
+    private AffiliationPartner toPartner(DataSourceProperties ds) {
+        AffiliationPartner p = new AffiliationPartner();
+        p.setId(ds.getName());
+        p.setName(ds.getName());
+        p.setLogoUrl(ds.getLogo());
+        p.setAffiliationLink(ds.getAffiliatedPortalUrl());
+        p.setPortalUrl(ds.getPortalUrl());
+        return p;
+    }
 }

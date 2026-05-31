@@ -49,16 +49,16 @@ public class FeedController {
 	@GetMapping(path = "/partners")
 	@Operation(summary="Show affiliation partners from feed")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public Set<AffiliationPartner> partners() {
-		return feedService.getPartners();
+	public Set<AffiliationPartner> partners(@RequestParam(required = false) final String provider) {
+		return feedService.getPartners(provider);
 	}
 
 
 	@PatchMapping(path = "/feeds")
 	@Operation(summary="Manualy run the indexation of all feeds")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public IndexationResponse indexFeeds() {
-		batchService.fetchFeeds();
+	public IndexationResponse indexFeeds(@RequestParam(required = false) final String provider) {
+		batchService.fetchFeeds(provider);
 		return new IndexationResponse();
 	}
 
@@ -75,39 +75,42 @@ public class FeedController {
 	@PatchMapping(path = "/feedsByKey")
 	@Operation(summary="List all feeds from catalogs corresponding the given field key")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void feedByKey(@RequestParam @NotBlank final String feedKey) {
-		batchService.fetchFeedsByKey(feedKey);
+	public void feedByKey(@RequestParam @NotBlank final String feedKey,
+			@RequestParam(required = false) final String provider) {
+		batchService.fetchFeedsByKey(feedKey, provider);
 	}
 
     @PatchMapping(path = "/feedsByDatasourceName")
     @Operation(summary="Manually run the indexation of feeds matching the datasource/provider name")
     @PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-    public void feedByDatasourceName(@RequestParam @NotBlank final String datasourceName)
+    public void feedByDatasourceName(@RequestParam @NotBlank final String datasourceName,
+            @RequestParam(required = false) final String provider)
     {
-        batchService.fetchFeedsByDatasourceName(datasourceName);
+        batchService.fetchFeedsByDatasourceName(datasourceName, provider);
     }
 
 	@PatchMapping(path = "/feedsByUrl")
 	@Operation(summary="List all feeds from catalogs corresponding the given url")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void feedByUrl(@RequestParam @NotBlank final String url) {
-		batchService.fetchFeedsByUrl(url);
+	public void feedByUrl(@RequestParam @NotBlank final String url,
+			@RequestParam(required = false) final String provider) {
+		batchService.fetchFeedsByUrl(url, provider);
 	}
 
 	@GetMapping(path = "/admin/affiliation/programs")
 	@Operation(summary="Get normalized programs from all active affiliation providers")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public Collection<AffiliationProgram> programs()
+	public Collection<AffiliationProgram> programs(@RequestParam(required = false) final String provider)
 	{
-		return feedService.getPrograms();
+		return feedService.getPrograms(provider);
 	}
 
 	@GetMapping(path = "/admin/affiliation/promotions")
 	@Operation(summary="Get normalized promotions from all active affiliation providers")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public Collection<AffiliationPromotion> promotions()
+	public Collection<AffiliationPromotion> promotions(@RequestParam(required = false) final String provider)
 	{
-		return feedService.getPromotions();
+		return feedService.getPromotions(provider);
 	}
 
 	@GetMapping(path = "/admin/affiliation/transactions")
@@ -115,9 +118,10 @@ public class FeedController {
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public Collection<AffiliationTransaction> transactions(
 			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) final Instant from,
-			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) final Instant to)
+			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) final Instant to,
+			@RequestParam(required = false) final String provider)
 	{
-		return feedService.getTransactions(from, to);
+		return feedService.getTransactions(from, to, provider);
 	}
 
 	@GetMapping(path = "/admin/affiliation/tracking-link")

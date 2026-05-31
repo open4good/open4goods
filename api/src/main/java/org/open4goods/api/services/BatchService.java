@@ -196,8 +196,17 @@ public class BatchService {
      */
     @Scheduled(cron = "${feed.indexation.cron:19 13 23 * * ?}")
     public void fetchFeeds() {
+        fetchFeeds(null);
+    }
+
+    /**
+     * Fetches feeds from a single affiliation provider when requested, or all feeds otherwise.
+     *
+     * @param providerName optional affiliation provider name filter
+     */
+    public void fetchFeeds(String providerName) {
         logger.info("Initiating full feed fetching process.");
-        Set<DataSourceProperties> datasources = feedService.getFeedsUrl();
+        Set<DataSourceProperties> datasources = feedService.getFeedsUrl(providerName);
 
         List<DataSourceProperties> datasourceList = new ArrayList<>(datasources);
         long seed = System.nanoTime();
@@ -222,8 +231,18 @@ public class BatchService {
      * @param url the feed URL to match
      */
     public void fetchFeedsByUrl(String url) {
+        fetchFeedsByUrl(url, null);
+    }
+
+    /**
+     * Fetches feeds that match the specified feed URL and optional provider.
+     *
+     * @param url the feed URL to match
+     * @param providerName optional affiliation provider name filter
+     */
+    public void fetchFeedsByUrl(String url, String providerName) {
         logger.info("Fetching feeds with URL: {}", url);
-        Set<DataSourceProperties> datasources =  feedService.getFeedsUrl();
+        Set<DataSourceProperties> datasources =  feedService.getFeedsUrl(providerName);
         logger.info("Found {} feeds for processing.", datasources.size());
 
         for (DataSourceProperties ds : datasources) {
@@ -246,8 +265,18 @@ public class BatchService {
      * @param feedKey the feed key to match
      */
     public void fetchFeedsByKey(String feedKey) {
+        fetchFeedsByKey(feedKey, null);
+    }
+
+    /**
+     * Fetches feeds that match the specified feed key and optional provider.
+     *
+     * @param feedKey the feed key to match
+     * @param providerName optional affiliation provider name filter
+     */
+    public void fetchFeedsByKey(String feedKey, String providerName) {
         logger.info("Fetching feeds with key: {}", feedKey);
-        Set<DataSourceProperties> datasources = matchingKey(feedKey);
+        Set<DataSourceProperties> datasources = matchingKey(feedKey, providerName);
         for (DataSourceProperties ds : datasources) {
             try {
                 logger.info("Fetching feed {}: {}", ds.getDatasourceConfigName(), ds);
@@ -265,8 +294,19 @@ public class BatchService {
      */
     public void fetchFeedsByDatasourceName(String datasourceName)
     {
+        fetchFeedsByDatasourceName(datasourceName, null);
+    }
+
+    /**
+     * Fetches feeds that match the specified datasource/provider name and optional provider.
+     *
+     * @param datasourceName the datasource/provider name to match
+     * @param providerName optional affiliation provider name filter
+     */
+    public void fetchFeedsByDatasourceName(String datasourceName, String providerName)
+    {
         logger.info("Fetching feeds with datasource name: {}", datasourceName);
-        Set<DataSourceProperties> datasources = feedService.getFeedsByDatasourceName(datasourceName);
+        Set<DataSourceProperties> datasources = feedService.getFeedsByDatasourceName(datasourceName, providerName);
         logger.info("Found {} feeds for datasource name matching.", datasources.size());
         for (DataSourceProperties ds : datasources) {
             try {
@@ -287,9 +327,13 @@ public class BatchService {
      * @return a set of matching datasource properties
      */
     private Set<DataSourceProperties> matchingKey(String feedKey) {
+        return matchingKey(feedKey, null);
+    }
+
+    private Set<DataSourceProperties> matchingKey(String feedKey, String providerName) {
         String cleanedKey = IdHelper.azCharAndDigits(feedKey).toLowerCase();
         Set<DataSourceProperties> result = new HashSet<>();
-        for (DataSourceProperties ds : feedService.getFeedsUrl()) {
+        for (DataSourceProperties ds : feedService.getFeedsUrl(providerName)) {
             try {
                 String configName = IdHelper.azCharAndDigits(ds.getDatasourceConfigName()).toLowerCase();
                 String dsName = IdHelper.azCharAndDigits(ds.getName()).toLowerCase();

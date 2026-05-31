@@ -2,7 +2,13 @@ package org.open4goods.services.feedservice.service;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -35,6 +41,7 @@ import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.MappingIterator;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.ObjectReader;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.dataformat.csv.CsvMapper;
 import tools.jackson.dataformat.csv.CsvSchema;
 
@@ -55,6 +62,8 @@ public class AwinFeedService extends AbstractFeedService {
 
     // ObjectMapper for JSON processing.
     private final ObjectMapper objectMapper;
+
+    private final HttpClient httpClient;
 
     // Placeholder Awin API credentials; in production these would be injected via configuration.
     private final String awinAccessToken;
@@ -78,6 +87,7 @@ public class AwinFeedService extends AbstractFeedService {
         super(feedConfig, remoteFileCachingService, dataSourceConfigService, serialisationService);
         this.csvMapper = CsvMapper.builder().build();
         this.objectMapper = new ObjectMapper();
+        this.httpClient = HttpClient.newHttpClient();
         // Placeholder values; these should be provided via external configuration.
         this.awinAccessToken = awinAccessToken;
         this.advertiserId = advertiserId;
@@ -225,6 +235,44 @@ public class AwinFeedService extends AbstractFeedService {
         return merchants;
     }
 
+    /**
+     * Retrieves Awin publisher promotions using the Offers API.
+     *
+     * @param accessToken Awin API access token
+     * @param publisherId Awin publisher identifier
+     * @return raw promotions payload
+     * @throws Exception when the API call fails
+     */
+    public JsonNode retrieveAwinPromotions(String accessToken, String publisherId) throws Exception
+    {
+        String endpoint = "https://api.awin.com/publisher/" + publisherId + "/promotions";
+        String body = """
+                {"filters":{"membership":"joined","status":"active","type":"all"},"pagination":{"page":1,"pageSize":200}}
+                """;
+        logger.info("Retrieving Awin promotions from endpoint: {}", endpoint);
+        return postJson(endpoint, accessToken, body);
+    }
+
+    /**
+     * Retrieves Awin publisher transactions using the Transactions API.
+     *
+     * @param accessToken Awin API access token
+     * @param publisherId Awin publisher identifier
+     * @param from start date/time
+     * @param to end date/time
+     * @return raw transactions payload
+     * @throws Exception when the API call fails
+     */
+    public JsonNode retrieveAwinTransactions(String accessToken, String publisherId, Instant from, Instant to) throws Exception
+    {
+        String endpoint = "https://api.awin.com/publishers/" + org.open4goods.commons.util.HttpUtils.urlEncode(publisherId)
+                + "/transactions/?startDate=" + org.open4goods.commons.util.HttpUtils.urlEncode(formatAwinDateTime(from))
+                + "&endDate=" + org.open4goods.commons.util.HttpUtils.urlEncode(formatAwinDateTime(to))
+                + "&timezone=UTC&dateType=transaction";
+        logger.info("Retrieving Awin transactions from endpoint: {}", safeEndpointForLogs(endpoint));
+        return getJson(endpoint, accessToken);
+    }
+
     @Override
     public String getProviderName()
     {
@@ -237,6 +285,8 @@ public class AwinFeedService extends AbstractFeedService {
         return Set.of(
             AffiliationCapability.FEEDS,
             AffiliationCapability.PROGRAMS,
+            AffiliationCapability.PROMOTIONS,
+            AffiliationCapability.TRANSACTIONS,
             AffiliationCapability.TRACKING
         );
     }
@@ -277,6 +327,101 @@ public class AwinFeedService extends AbstractFeedService {
     }
 
     @Override
+    protected Collection<AffiliationPromotion> loadPromotionsInternal() throws Exception
+    {
+        if (isBlank(awinAccessToken) || isBlank(advertiserId))
+        {
+            return Collections.emptyList();
+        }
+        JsonNode root = retrieveAwinPromotions(awinAccessToken, advertiserId);
+        return parseAwinPromotions(root);
+    }
+
+    Collection<AffiliationPromotion> parseAwinPromotions(JsonNode root)
+    {
+        JsonNode offersNode = arrayNode(root, "promotions", "offers", "results", "data", "items");
+        if (offersNode == null)
+        {
+            return Collections.emptyList();
+        }
+
+        List<AffiliationPromotion> list = new ArrayList<>();
+        for (JsonNode node : offersNode)
+        {
+            AffiliationPromotion promotion = new AffiliationPromotion();
+            JsonNode advertiser = node.path("advertiser");
+            JsonNode voucher = node.path("voucher");
+            promotion.setProviderName(getProviderName());
+            promotion.setProgramId(firstNonBlank(textOrNull(advertiser, "id"), textOrNull(node, "advertiserId"), textOrNull(node, "programId")));
+            promotion.setAdvertiserName(firstNonBlank(textOrNull(advertiser, "name"), textOrNull(node, "advertiserName")));
+            promotion.setTitle(textOrNull(node, "title"));
+            promotion.setDescription(textOrNull(node, "description"));
+            promotion.setVoucherCode(firstNonBlank(textOrNull(voucher, "code"), textOrNull(node, "voucherCode")));
+            promotion.setDiscountType(firstNonBlank(textOrNull(node, "type"), textOrNull(node, "discountType")));
+            promotion.setStartDate(parseLocalDate(textOrNull(node, "startDate")));
+            promotion.setEndDate(parseLocalDate(textOrNull(node, "endDate")));
+            promotion.setLandingUrl(firstNonBlank(textOrNull(node, "url"), textOrNull(node, "landingUrl")));
+            promotion.setTrackingUrl(firstNonBlank(textOrNull(node, "urlTracking"), textOrNull(node, "trackingUrl")));
+            promotion.setConditions(firstNonBlank(textOrNull(node, "terms"), textOrNull(node, "conditions")));
+
+            Set<String> countryCodes = parseRegionCodes(node.path("regions"));
+            if (!countryCodes.isEmpty())
+            {
+                promotion.setCountryCodes(countryCodes);
+            }
+            list.add(promotion);
+        }
+        return list;
+    }
+
+    @Override
+    public Collection<AffiliationTransaction> getTransactions(Instant from, Instant to)
+    {
+        if (isBlank(awinAccessToken) || isBlank(advertiserId))
+        {
+            return Collections.emptyList();
+        }
+        try
+        {
+            JsonNode root = retrieveAwinTransactions(awinAccessToken, advertiserId, from, to);
+            return parseAwinTransactions(root);
+        }
+        catch (Exception e)
+        {
+            logger.warn("Failed to retrieve/parse Awin transactions.", e);
+            return Collections.emptyList();
+        }
+    }
+
+    Collection<AffiliationTransaction> parseAwinTransactions(JsonNode root)
+    {
+        JsonNode transactionsNode = arrayNode(root, "transactions", "results", "data", "items");
+        if (transactionsNode == null)
+        {
+            return Collections.emptyList();
+        }
+
+        List<AffiliationTransaction> list = new ArrayList<>();
+        for (JsonNode node : transactionsNode)
+        {
+            AffiliationTransaction transaction = new AffiliationTransaction();
+            transaction.setProviderName(getProviderName());
+            transaction.setTransactionId(firstNonBlank(textOrNull(node, "id"), textOrNull(node, "transactionId"), textOrNull(node, "transaction_id")));
+            transaction.setProgramId(firstNonBlank(textOrNull(node, "advertiserId"), textOrNull(node, "programId"), textOrNull(node, "awinAdvertiserId")));
+            transaction.setClickDate(parseInstant(firstNonBlank(textOrNull(node, "clickDate"), textOrNull(node, "clickTime"))));
+            transaction.setTransactionDate(parseInstant(firstNonBlank(textOrNull(node, "transactionDate"), textOrNull(node, "transactionTime"), textOrNull(node, "date"))));
+            transaction.setStatus(textOrNull(node, "status"));
+            transaction.setSaleAmount(firstBigDecimal(node, "saleAmount", "amount", "transactionAmount"));
+            transaction.setCommissionAmount(firstBigDecimal(node, "commissionAmount", "commission"));
+            transaction.setCurrency(firstNonBlank(textOrNull(node, "currency"), textOrNull(node.path("saleAmount"), "currency"), textOrNull(node.path("amount"), "currency")));
+            transaction.setSubId(firstNonBlank(textOrNull(node, "clickRef"), textOrNull(node, "clickref"), textOrNull(node, "clickRef1")));
+            transaction.setProductId(firstBasketProductId(node.path("basketProducts")));
+            list.add(transaction);
+        }
+        return list;
+    }
+
+    @Override
     public String buildTrackingLink(String programId, String targetUrl, Map<String, String> subIds)
     {
         if (programId == null || programId.trim().isEmpty())
@@ -306,5 +451,204 @@ public class AwinFeedService extends AbstractFeedService {
             }
         }
         return sb.toString();
+    }
+
+    private JsonNode getJson(String endpoint, String accessToken) throws Exception
+    {
+        HttpRequest request = HttpRequest.newBuilder(URI.create(endpoint))
+                .header("Authorization", "Bearer " + accessToken)
+                .GET()
+                .build();
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        return parseSuccessfulResponse(endpoint, response);
+    }
+
+    private JsonNode postJson(String endpoint, String accessToken, String body) throws Exception
+    {
+        HttpRequest request = HttpRequest.newBuilder(URI.create(endpoint))
+                .header("Authorization", "Bearer " + accessToken)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8))
+                .build();
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        return parseSuccessfulResponse(endpoint, response);
+    }
+
+    private JsonNode parseSuccessfulResponse(String endpoint, HttpResponse<String> response) throws Exception
+    {
+        if (response.statusCode() < 200 || response.statusCode() >= 300)
+        {
+            throw new IllegalStateException("Awin API call failed for " + safeEndpointForLogs(endpoint)
+                    + " with HTTP status " + response.statusCode());
+        }
+        return objectMapper.readTree(response.body());
+    }
+
+    private String formatAwinDateTime(Instant instant)
+    {
+        return DateTimeFormatter.ISO_INSTANT.format(instant);
+    }
+
+    private JsonNode arrayNode(JsonNode root, String... fields)
+    {
+        if (root == null)
+        {
+            return null;
+        }
+        if (root.isArray())
+        {
+            return root;
+        }
+        for (String field : fields)
+        {
+            JsonNode candidate = root.path(field);
+            if (!candidate.isMissingNode() && candidate.isArray())
+            {
+                return candidate;
+            }
+        }
+        return null;
+    }
+
+    private Set<String> parseRegionCodes(JsonNode regions)
+    {
+        if (regions == null || regions.isMissingNode() || regions.isNull())
+        {
+            return Collections.emptySet();
+        }
+        JsonNode listNode = regions.path("list");
+        if (!listNode.isArray())
+        {
+            return Collections.emptySet();
+        }
+        Set<String> result = new HashSet<>();
+        for (JsonNode region : listNode)
+        {
+            String code = textOrNull(region, "countryCode");
+            if (!isBlank(code))
+            {
+                result.add(code.toUpperCase());
+            }
+        }
+        return result;
+    }
+
+    private LocalDate parseLocalDate(String value)
+    {
+        if (isBlank(value))
+        {
+            return null;
+        }
+        try
+        {
+            return LocalDate.parse(value.trim().substring(0, 10));
+        }
+        catch (Exception ignored)
+        {
+            return null;
+        }
+    }
+
+    private Instant parseInstant(String value)
+    {
+        if (isBlank(value))
+        {
+            return null;
+        }
+        try
+        {
+            return Instant.parse(value.trim());
+        }
+        catch (Exception ignored)
+        {
+            return null;
+        }
+    }
+
+    private BigDecimal firstBigDecimal(JsonNode node, String... fields)
+    {
+        for (String field : fields)
+        {
+            BigDecimal parsed = parseBigDecimal(node.path(field));
+            if (parsed != null)
+            {
+                return parsed;
+            }
+        }
+        return null;
+    }
+
+    private BigDecimal parseBigDecimal(JsonNode node)
+    {
+        if (node == null || node.isMissingNode() || node.isNull())
+        {
+            return null;
+        }
+        JsonNode amountNode = node.path("amount");
+        String value = amountNode.isMissingNode() ? node.asText() : amountNode.asText();
+        if (isBlank(value))
+        {
+            return null;
+        }
+        try
+        {
+            return new BigDecimal(value.trim());
+        }
+        catch (Exception ignored)
+        {
+            return null;
+        }
+    }
+
+    private String firstBasketProductId(JsonNode basketProducts)
+    {
+        if (basketProducts == null || !basketProducts.isArray() || basketProducts.isEmpty())
+        {
+            return null;
+        }
+        JsonNode first = basketProducts.get(0);
+        return firstNonBlank(textOrNull(first, "productId"), textOrNull(first, "sku"), textOrNull(first, "id"));
+    }
+
+    private String textOrNull(JsonNode node, String field)
+    {
+        if (node == null || field == null)
+        {
+            return null;
+        }
+        JsonNode v = node.get(field);
+        if (v == null || v.isNull())
+        {
+            return null;
+        }
+        String s = v.asText();
+        return isBlank(s) ? null : s;
+    }
+
+    private String firstNonBlank(String... values)
+    {
+        if (values == null)
+        {
+            return null;
+        }
+        for (String value : values)
+        {
+            if (!isBlank(value))
+            {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    private boolean isBlank(String value)
+    {
+        return org.open4goods.commons.util.HttpUtils.isBlank(value);
+    }
+
+    private String safeEndpointForLogs(String endpoint)
+    {
+        return org.open4goods.commons.util.HttpUtils.safeEndpointForLogs(endpoint)
+                .replaceAll("(accessToken=)([^&]+)", "$1****");
     }
 }
