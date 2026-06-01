@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import jakarta.validation.constraints.NotBlank;
 import java.time.Duration;
+import java.util.List;
 
 @Component
 @ConfigurationProperties(prefix = "gen-ai-config")
@@ -143,5 +144,15 @@ public class PromptServiceConfig {
 
     public void setRepairEnabled(boolean repairEnabled) {
         this.repairEnabled = repairEnabled;
+    }
+
+    private List<String> reasoningModelPrefixes = List.of("o1", "o3", "o4", "gpt-5", "gpt5");
+
+    public List<String> getReasoningModelPrefixes() {
+        return reasoningModelPrefixes;
+    }
+
+    public void setReasoningModelPrefixes(List<String> reasoningModelPrefixes) {
+        this.reasoningModelPrefixes = reasoningModelPrefixes == null ? List.of() : reasoningModelPrefixes;
     }
 }

@@ -198,18 +198,16 @@ public class Resource implements Validable {
 		final int from = getUrl().lastIndexOf('/');
 		final int to = getUrl().indexOf('?', from);
 
-		if (from != -1 && to != -1 && from < to) {
-			String ret = getUrl().substring(from + 1, to);
-			int to2 = ret.indexOf('?');
-			if (-1 != to2) {
-				ret = ret.substring(0, to2 - 1);
+		if (from != -1) {
+			final int end = to != -1 && from < to ? to : getUrl().length();
+			final String ret = getUrl().substring(from + 1, end);
+			if (StringUtils.isNotBlank(ret)) {
+				return ret;
 			}
-			return ret;
-		} else {
-			logger.warn("Cannot extract nice name from url {}", getUrl());
-			return cacheKey;
 		}
 
+		logger.warn("Cannot extract nice name from url {}", getUrl());
+		return cacheKey;
 	}
 
 	public static String folderHashPrefix(final String hash) {

@@ -15,6 +15,7 @@ const resolveDomainLanguageMock = vi.hoisted(() =>
   vi.fn(() => ({ domainLanguage: 'en' as const }))
 )
 const extractBackendErrorDetailsMock = vi.hoisted(() => vi.fn())
+const logBackendErrorMock = vi.hoisted(() => vi.fn())
 const setDomainLanguageCacheHeadersMock = vi.hoisted(() => vi.fn())
 const getRouterParamMock = vi.hoisted(() =>
   vi.fn<(event: unknown, name: string) => string | undefined>()
@@ -23,7 +24,8 @@ const createErrorMock = vi.hoisted(() =>
   vi.fn(
     (input: {
       statusCode: number
-      statusMessage: string
+      statusMessage?: string
+      message?: string
       cause?: unknown
     }) => ({
       ...input,
@@ -155,6 +157,7 @@ vi.mock('~~/shared/utils/domain-language', () => ({
 
 vi.mock('../../utils/log-backend-error', () => ({
   extractBackendErrorDetails: extractBackendErrorDetailsMock,
+  logBackendError: logBackendErrorMock,
 }))
 
 vi.mock('../../utils/cache-headers', () => ({
@@ -181,6 +184,7 @@ describe('server/api/products/[gtin]', () => {
       isResponseError: false,
       logMessage: 'HTTP 502 - Bad Gateway',
     })
+    logBackendErrorMock.mockReset()
     getRouterParamMock.mockImplementation((event, name) => {
       const context = (
         event as {
@@ -371,10 +375,12 @@ describe('server/api/products/[gtin]', () => {
     await expect(handler(event)).rejects.toMatchObject({ statusCode: 502 })
 
     expect(extractBackendErrorDetailsMock).toHaveBeenCalledWith(backendFailure)
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      'Error fetching product:',
-      'HTTP 502 - Bad Gateway',
-      expect.any(Object)
-    )
+    expect(logBackendErrorMock).toHaveBeenCalledWith({
+      namespace: 'server/api/products/[gtin]',
+      details: expect.objectContaining({
+        statusCode: 502,
+        logMessage: 'HTTP 502 - Bad Gateway',
+      }),
+    })
   })
 })

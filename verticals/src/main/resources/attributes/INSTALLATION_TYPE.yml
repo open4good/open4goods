@@ -11,6 +11,7 @@ synonyms:
     - "TYPE"
     - "BUILTIN"
     - "BUILT_IN"
+    - "DESIGNTYPE"
 parser:
   normalize: true
   trim: true

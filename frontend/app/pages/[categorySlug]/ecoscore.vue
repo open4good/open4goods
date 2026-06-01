@@ -592,7 +592,11 @@ const display = useDisplay()
 const categorySlug = computed(() => String(route.params.categorySlug ?? ''))
 
 if (!categorySlug.value) {
-  throw createError({ statusCode: 404, statusMessage: 'Category not found' })
+  throw createError({
+    statusCode: 404,
+    message: 'Category not found',
+    fatal: false,
+  })
 }
 
 const { selectCategoryBySlug } = useCategories()
@@ -604,15 +608,16 @@ try {
   if (error instanceof Error && error.name === 'CategoryNotFoundError') {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Category not found',
+      message: 'Category not found',
       cause: error,
+      fatal: false,
     })
   }
 
   console.error('Failed to resolve category for ecoscore page', error)
   throw createError({
     statusCode: 500,
-    statusMessage: 'Failed to load category',
+    message: 'Failed to load category',
     cause: error,
   })
 }

@@ -9,7 +9,6 @@ synonyms:
   all:
     - "TYPE DE REFRIGERATEUR/CONGELATEUR"
     - "TYPE DE REFRIGERATEUR"
-    - "DESIGNTYPE"
 parser:
   normalize: true
   trim: true

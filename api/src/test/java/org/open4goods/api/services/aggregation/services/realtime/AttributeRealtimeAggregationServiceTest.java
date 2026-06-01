@@ -250,4 +250,31 @@ class AttributeRealtimeAggregationServiceTest {
 		assertThat(resultNoir).isEqualTo("NOIR"); 
 		assertThat(resultBlanc).isEqualTo("BLANC");
 	}
+
+	@Test
+	void parseValueAppliesMappingsBeforeTokenMatch() throws Exception {
+		AttributeConfig attrConfig = new AttributeConfig();
+		attrConfig.setKey("COLOR");
+		attrConfig.getParser().setUpperCase(true);
+		attrConfig.getParser().setNormalize(true);
+		attrConfig.getParser().setTrim(true);
+		attrConfig.getParser().setTokenMatch(java.util.List.of("NOIR", "BLANC", "MULTICOLORE"));
+		attrConfig.getMappings().put("BLACK", "NOIR");
+		attrConfig.getMappings().put("MULTICOULEUR", "MULTICOLORE");
+
+		assertThat(service.parseValue("Black", attrConfig, verticalConfig)).isEqualTo("NOIR");
+		assertThat(service.parseValue("Multicouleur", attrConfig, verticalConfig)).isEqualTo("MULTICOLORE");
+	}
+
+	@Test
+	void parseValueTreatsFalsePlaceholderAsEmpty() throws Exception {
+		AttributeConfig attrConfig = new AttributeConfig();
+		attrConfig.setKey("DIAGONALE_POUCES");
+		attrConfig.setFilteringType(org.open4goods.model.attribute.AttributeType.NUMERIC);
+		attrConfig.getParser().setUpperCase(true);
+		attrConfig.getParser().setNormalize(true);
+		attrConfig.getParser().setTrim(true);
+
+		assertThat(service.parseValue("false", attrConfig, verticalConfig)).isEmpty();
+	}
 }

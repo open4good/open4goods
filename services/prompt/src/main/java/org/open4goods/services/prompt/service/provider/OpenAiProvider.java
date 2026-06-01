@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import org.open4goods.services.prompt.config.GenAiServiceType;
 import org.open4goods.services.prompt.config.PromptOptions;
+import org.open4goods.services.prompt.config.PromptServiceConfig;
 import org.open4goods.services.prompt.config.RetrievalMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,12 +43,14 @@ public class OpenAiProvider implements GenAiProvider {
     private final HttpClient httpClient;
     private final OpenAiChatModel chatModel;
     private final Environment environment;
+    private final PromptServiceConfig promptServiceConfig;
 
-    public OpenAiProvider(OpenAiChatModel chatModel, Environment environment) {
+    public OpenAiProvider(OpenAiChatModel chatModel, Environment environment, PromptServiceConfig promptServiceConfig) {
         this.objectMapper = new ObjectMapper();
         this.httpClient = HttpClient.newHttpClient();
         this.chatModel = chatModel;
         this.environment = environment;
+        this.promptServiceConfig = promptServiceConfig;
         logger.info("****************************************************************");
         logger.info("Initializing OpenAiProvider with chatModel: {}", chatModel);
         logger.info("****************************************************************");
@@ -148,30 +151,44 @@ public class OpenAiProvider implements GenAiProvider {
 
     private OpenAiChatOptions buildOptions(PromptOptions options) {
         OpenAiChatOptions.Builder builder = OpenAiChatOptions.builder();
+        String model = resolveModel(options);
+        builder.model(model);
+        boolean isReasoningModel = isReasoningModel(model);
         if (options != null) {
-            builder.model(resolveModel(options));
-            if (options.getTemperature() != null) {
-                builder.temperature(options.getTemperature());
-            } else {
-                builder.temperature(0.2);  // Default like Gemini
+            if (!isReasoningModel) {
+                if (options.getTemperature() != null) {
+                    builder.temperature(options.getTemperature());
+                } else {
+                    builder.temperature(0.2);
+                }
+                if (options.getTopP() != null) {
+                    builder.topP(options.getTopP());
+                } else {
+                    builder.topP(0.9);
+                }
             }
             if (options.getMaxTokens() != null) {
-                builder.maxTokens(options.getMaxTokens());
-            }
-            if (options.getTopP() != null) {
-                builder.topP(options.getTopP());
-            } else {
-                builder.topP(0.9);  // Default like Gemini
+                builder.maxCompletionTokens(options.getMaxTokens());
             }
             if (options.getSeed() != null) {
                 builder.seed(options.getSeed());
             }
-        } else {
-            builder.model(resolveModel(null));
+        } else if (!isReasoningModel) {
             builder.temperature(0.2);
             builder.topP(0.9);
         }
         return builder.build();
+    }
+
+    private boolean isReasoningModel(String model) {
+        if (model == null) {
+            return false;
+        }
+        String lower = model.toLowerCase();
+        List<String> prefixes = promptServiceConfig != null && promptServiceConfig.getReasoningModelPrefixes() != null
+                ? promptServiceConfig.getReasoningModelPrefixes()
+                : List.of("o1", "o3", "o4", "gpt-5", "gpt5");
+        return prefixes.stream().anyMatch(prefix -> lower.startsWith(prefix.toLowerCase()));
     }
 
     private OpenAiChatOptions withJsonSchema(OpenAiChatOptions options, String jsonSchema) {

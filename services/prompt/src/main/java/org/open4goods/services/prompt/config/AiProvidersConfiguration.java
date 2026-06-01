@@ -23,8 +23,9 @@ public class AiProvidersConfiguration {
 
     @Bean
     @ConditionalOnBean(OpenAiChatModel.class)
-    public OpenAiProvider openAiProvider(OpenAiChatModel chatModel, Environment environment) {
-        return new OpenAiProvider(chatModel, environment);
+    public OpenAiProvider openAiProvider(OpenAiChatModel chatModel, Environment environment,
+            PromptServiceConfig promptServiceConfig) {
+        return new OpenAiProvider(chatModel, environment, promptServiceConfig);
     }
 
 }

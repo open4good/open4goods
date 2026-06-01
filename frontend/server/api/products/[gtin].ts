@@ -3,7 +3,10 @@ import { useProductService } from '~~/shared/api-client/services/products.servic
 import type { ProductDto } from '~~/shared/api-client'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
-import { extractBackendErrorDetails } from '../../utils/log-backend-error'
+import {
+  extractBackendErrorDetails,
+  logBackendError,
+} from '../../utils/log-backend-error'
 import { setDomainLanguageCacheHeaders } from '../../utils/cache-headers'
 import { normaliseProductDto } from '../../utils/normalise-product-sourcing'
 
@@ -36,14 +39,18 @@ export default defineEventHandler(async (event): Promise<ProductDto> => {
 
   try {
     const product = await productService.getProductByGtin(parsedGtin)
-    return normaliseProductDto(product)
+    try {
+      return normaliseProductDto(product)
+    } catch (normaliseError) {
+      console.error('Error normalising product response:', normaliseError)
+      return product
+    }
   } catch (error) {
     const backendError = await extractBackendErrorDetails(error)
-    console.error(
-      'Error fetching product:',
-      backendError.logMessage,
-      backendError
-    )
+    logBackendError({
+      namespace: 'server/api/products/[gtin]',
+      details: backendError,
+    })
 
     throw createError({
       statusCode: backendError.statusCode,

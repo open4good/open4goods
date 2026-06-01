@@ -355,6 +355,10 @@ public class ReviewGenerationPreprocessingService {
 		}
 		logger.info("Aggregated {} tokens from {} sources.", accumulatedTokens, finalSourcesMap.size());
 
+		deduplicateSimilarSources(product, finalSourcesMap, finalTokensMap, finalSourceClasses, rejectedUrls);
+		accumulatedTokens = finalTokensMap.values().stream().mapToInt(Integer::intValue).sum();
+		logger.info("After deduplication: {} tokens from {} sources.", accumulatedTokens, finalSourcesMap.size());
+
 		// Persist fetched facts before threshold check so partial results survive
 		// failed runs and are available for future EPREL/Icecat enrichment.
 		List<ProductFact> newFacts = new ArrayList<>();
@@ -930,6 +934,10 @@ public class ReviewGenerationPreprocessingService {
 			persistOfficialResources(product, result, fetchResponse);
 			if (fetchResponse == null || fetchResponse.markdownContent() == null
 					|| fetchResponse.markdownContent().isEmpty()) {
+				if (product.getOfficialUrl() == null && isOfficialUrl(product, result) && !isOfficialSupportUrl(result)) {
+					product.setOfficialUrl(url);
+					logger.info("Persisting official URL from failed fetch for UPC {}: {}", product.getId(), url);
+				}
 				rejectedUrls.put(url, outcome == null ? "fetch returned no response" : outcome.rejectionReason());
 				continue;
 			}
@@ -1570,6 +1578,107 @@ public class ReviewGenerationPreprocessingService {
 		return trimmed + "\n\n[Official source truncated to stay within the per-source token budget.]";
 	}
 
+	private void deduplicateSimilarSources(Product product, Map<String, String> sourcesMap,
+			Map<String, Integer> tokensMap, Map<String, SourceClass> sourceClasses,
+			Map<String, String> rejectedUrls) {
+		if (sourcesMap == null || sourcesMap.size() <= 1) {
+			return;
+		}
+		String preferredLocale = properties.getSearchHostLanguage();
+		if (preferredLocale != null && preferredLocale.length() >= 2) {
+			preferredLocale = preferredLocale.substring(0, 2).toLowerCase(Locale.ROOT);
+		} else {
+			preferredLocale = "fr";
+		}
+		List<String> urls = new ArrayList<>(sourcesMap.keySet());
+		Set<String> removed = new HashSet<>();
+		for (int i = 0; i < urls.size(); i++) {
+			String urlA = urls.get(i);
+			if (removed.contains(urlA)) {
+				continue;
+			}
+			String hostA = rootHost(urlA);
+			if (hostA == null) {
+				continue;
+			}
+			Set<String> wordsA = contentWordSet(sourcesMap.get(urlA));
+			for (int j = i + 1; j < urls.size(); j++) {
+				String urlB = urls.get(j);
+				if (removed.contains(urlB)) {
+					continue;
+				}
+				String hostB = rootHost(urlB);
+				if (!hostA.equals(hostB)) {
+					continue;
+				}
+				Set<String> wordsB = contentWordSet(sourcesMap.get(urlB));
+				double similarity = jaccardSimilarity(wordsA, wordsB);
+				if (similarity >= 0.8) {
+					String keep = selectBestDuplicate(urlA, urlB, tokensMap, preferredLocale);
+					String discard = keep.equals(urlA) ? urlB : urlA;
+					logger.info("Deduplicating similar sources (jaccard={}) for UPC {}: keeping {}, discarding {}",
+							String.format("%.2f", similarity),
+							product == null ? "unknown" : product.getId(), keep, discard);
+					sourcesMap.remove(discard);
+					tokensMap.remove(discard);
+					sourceClasses.remove(discard);
+					rejectedUrls.put(discard, "deduplicated: near-duplicate of " + keep);
+					removed.add(discard);
+				}
+			}
+		}
+	}
+
+	private String rootHost(String url) {
+		try {
+			String host = URI.create(url).toURL().getHost();
+			String[] parts = host.split("\\.");
+			if (parts.length >= 2) {
+				return parts[parts.length - 2] + "." + parts[parts.length - 1];
+			}
+			return host;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	private Set<String> contentWordSet(String content) {
+		if (content == null || content.isBlank()) {
+			return Set.of();
+		}
+		String normalized = content.toLowerCase(Locale.ROOT)
+				.replaceAll("[^a-z0-9\\s]", " ")
+				.replaceAll("\\s+", " ")
+				.trim();
+		return new HashSet<>(Arrays.asList(normalized.split(" ")));
+	}
+
+	private double jaccardSimilarity(Set<String> a, Set<String> b) {
+		if (a == null || b == null || a.isEmpty() || b.isEmpty()) {
+			return 0.0;
+		}
+		Set<String> intersection = new HashSet<>(a);
+		intersection.retainAll(b);
+		Set<String> union = new HashSet<>(a);
+		union.addAll(b);
+		return union.isEmpty() ? 0.0 : (double) intersection.size() / union.size();
+	}
+
+	private String selectBestDuplicate(String urlA, String urlB, Map<String, Integer> tokensMap,
+			String preferredLocale) {
+		boolean aHasLocale = urlA.contains("/" + preferredLocale + "/");
+		boolean bHasLocale = urlB.contains("/" + preferredLocale + "/");
+		if (aHasLocale && !bHasLocale) {
+			return urlA;
+		}
+		if (bHasLocale && !aHasLocale) {
+			return urlB;
+		}
+		int tokensA = tokensMap.getOrDefault(urlA, 0);
+		int tokensB = tokensMap.getOrDefault(urlB, 0);
+		return tokensA >= tokensB ? urlA : urlB;
+	}
+
 	private List<String> rankedModelCandidates(Product product, String primaryModel, Set<String> alternateModels) {
 		List<String> models = new ArrayList<>();
 		if (primaryModel != null && !primaryModel.isBlank()) {
@@ -1599,7 +1708,7 @@ public class ReviewGenerationPreprocessingService {
 				models.addAll(inferModelsFromEvidence(product, product.brand(), offerName));
 			}
 		}
-		return models.stream().filter(model -> model != null && !model.isBlank())
+		List<String> ranked = models.stream().filter(model -> model != null && !model.isBlank())
 				.collect(Collectors.toMap(model -> model.trim().toLowerCase(Locale.ROOT), Function.identity(), (left, right) -> left,
 						LinkedHashMap::new))
 				.values().stream()
@@ -1607,6 +1716,24 @@ public class ReviewGenerationPreprocessingService {
 				.sorted(Comparator.comparingInt((String model) -> modelCandidateScore(product, primaryModel, model))
 						.reversed().thenComparingInt(String::length))
 				.toList();
+		if (!ranked.isEmpty() && isGarbledModelName(ranked.getFirst())) {
+			logger.info("Primary model candidate '{}' looks garbled for UPC {}; deprioritising it",
+					ranked.getFirst(), product == null ? "unknown" : product.getId());
+			List<String> nonGarbled = ranked.stream().filter(m -> !isGarbledModelName(m)).toList();
+			if (!nonGarbled.isEmpty()) {
+				List<String> reordered = new ArrayList<>(nonGarbled);
+				ranked.stream().filter(this::isGarbledModelName).forEach(reordered::add);
+				return reordered;
+			}
+		}
+		return ranked;
+	}
+
+	private boolean isGarbledModelName(String name) {
+		if (name == null || name.isBlank()) {
+			return false;
+		}
+		return name.matches("^[A-Z0-9_]+$") && name.chars().filter(c -> c == '_').count() >= 2;
 	}
 
 	private List<String> extractModelCodeCandidates(String value) {

@@ -242,7 +242,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 				.toLowerCase(Locale.ROOT)
 				.replaceAll("[()_./-]+", " ");
 		normalized = StringUtils.normalizeSpace(normalized);
-		return Set.of("donnee non specifiee", "donnees non specifiees", "non specifie", "non specifiee", "n a",
+		return Set.of("donnee non specifiee", "donnees non specifiees", "non specifie", "non specifiee", "false", "n a",
 				"na", "nc", "null", "-").contains(normalized);
 	}
 
@@ -330,7 +330,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		String currentModel = data.model(); // can be null; we still update if best exists
 		if (currentModel == null) {
 			data.forceModel(best);
-			dedicatedLogger.warn("Model updated from '" + currentModel + "' to '" + best + "'.");
+			dedicatedLogger.info("Model updated from '{}' to '{}'.", currentModel, best);
 		} else {
 			// Store alternates (including other frequent candidates)
 			for (String cand : freq.keySet()) {
@@ -825,6 +825,22 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			string = string.trim();
 		}
 
+		if (isKnownEmptyAttributeValue(string)) {
+			return "";
+		}
+
+		/////////////////////////////////
+		// FIXED TEXT MAPPING
+		/////////////////////////////////
+		if (!attrConf.getMappings().isEmpty() && attrConf.getMappings().containsKey(string)) {
+
+			string = attrConf.getMappings().get(string);
+		}
+
+		if (isKnownEmptyAttributeValue(string)) {
+			return "";
+		}
+
 		///////////////////
 		// Exact match option
 		///////////////////
@@ -845,14 +861,6 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 				throw new ValidationException("Token " + string + " does not match  any fixed attribute ");
 			}
 
-		}
-
-		/////////////////////////////////
-		// FIXED TEXT MAPPING
-		/////////////////////////////////
-		if (!attrConf.getMappings().isEmpty() && attrConf.getMappings().containsKey(string)) {
-
-			string = attrConf.getMappings().get(string);
 		}
 
 		/////////////////////////////////

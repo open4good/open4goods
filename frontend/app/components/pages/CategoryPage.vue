@@ -628,7 +628,6 @@ const { data: categoryData, error: categoryError } = await useAsyncData(
     try {
       return await selectCategoryBySlug(slug)
     } catch (err) {
-      console.error('Error resolving category detail for slug:', slug, err)
       if (
         err instanceof Error &&
         (err.name === 'CategoryNotFoundError' ||
@@ -636,11 +635,13 @@ const { data: categoryData, error: categoryError } = await useAsyncData(
       ) {
         throw createError({
           statusCode: 404,
-          statusMessage: err.message,
+          message: err.message,
           cause: err,
+          fatal: false,
         })
       }
 
+      console.error('Error resolving category detail for slug:', slug, err)
       throw err
     }
   },
@@ -655,8 +656,9 @@ if (categoryError.value && import.meta.server) {
 
   throw createError({
     statusCode: resolvedError.statusCode ?? 500,
-    statusMessage: resolvedError.statusMessage ?? 'Failed to load category',
+    message: resolvedError.statusMessage ?? 'Failed to load category',
     cause: categoryError.value,
+    fatal: resolvedError.statusCode !== 404,
   })
 }
 
