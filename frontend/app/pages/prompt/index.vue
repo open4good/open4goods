@@ -110,9 +110,15 @@
       <v-divider class="my-12"></v-divider>
 
       <!-- Activity Stream -->
-      <div v-if="hasAdminAccess(roles, { allowedRoles: [] })" class="mb-12">
+      <div v-if="canViewActivity" class="mb-12">
         <h2 class="text-h4 mb-6">{{ $t('agents.activity.title') }}</h2>
         <v-card variant="flat" border>
+          <v-progress-linear
+            v-if="loadingActivity"
+            color="primary"
+            indeterminate
+            height="3"
+          />
           <v-list v-if="activity.length > 0" lines="two">
             <template v-for="(item, i) in activity" :key="item.id">
               <v-list-item
@@ -295,6 +301,7 @@ const accessibleTemplates = computed(() =>
 )
 const activity = ref<AgentActivityDto[]>([])
 const loadingTemplates = ref(true)
+const loadingActivity = ref(false)
 const selectedTemplate = ref<AgentTemplateWithAccess | null>(null)
 const selectedPromptTemplateId = ref<string>('')
 const mailtoLink = ref<string | null>(null)
@@ -306,6 +313,9 @@ const accessWarning = ref<string | null>(null)
 
 // Computed locale for API
 const currentLang = locale.value.split('-')[0] as DomainLanguage
+const canViewActivity = computed(() =>
+  hasAdminAccess(roles.value, { allowedRoles: [] })
+)
 
 // Helpers
 const getIssueNumber = (url?: string) => {
@@ -337,31 +347,47 @@ const mapTemplatesWithAccess = (
       hasAdminAccess(roles.value, { allowedRoles: template.allowedRoles }),
   }))
 
-// Data loading
-// Data loading
-const {
-  data: initialData,
-  error: loadError,
-  status,
-} = await useAsyncData('agents-data', async () => {
-  const [tpls, acts] = await Promise.all([
-    listTemplates(currentLang),
-    listActivity(currentLang),
-  ])
-  return { tpls, acts }
-})
+const refreshActivity = async () => {
+  if (!import.meta.client || !canViewActivity.value) {
+    activity.value = []
+    return
+  }
 
-if (initialData.value) {
-  templates.value = mapTemplatesWithAccess(initialData.value.tpls)
-  activity.value = initialData.value.acts
+  loadingActivity.value = true
+  try {
+    activity.value = await listActivity(currentLang)
+  } catch (error) {
+    console.warn('Failed to load agents activity', error)
+    activity.value = []
+  } finally {
+    loadingActivity.value = false
+  }
 }
 
 watch(
-  initialData,
-  newData => {
-    if (newData) {
-      templates.value = mapTemplatesWithAccess(newData.tpls)
-      activity.value = newData.acts
+  canViewActivity,
+  () => {
+    void refreshActivity()
+  },
+  { immediate: import.meta.client }
+)
+
+// Keep SSR focused on the fast data needed to render the public prompt page.
+const {
+  data: initialTemplates,
+  error: loadError,
+  status,
+} = await useAsyncData('agent-templates', () => listTemplates(currentLang))
+
+if (initialTemplates.value) {
+  templates.value = mapTemplatesWithAccess(initialTemplates.value)
+}
+
+watch(
+  initialTemplates,
+  newTemplates => {
+    if (newTemplates) {
+      templates.value = mapTemplatesWithAccess(newTemplates)
     }
   },
   { immediate: true }
@@ -452,10 +478,9 @@ async function onSubmit({
     submissionResult.value = await submitRequest(request, currentLang)
 
     // Refresh activity after short delay to allow GitHub indexing/propagation if needed (optional)
-    setTimeout(
-      () => listActivity(currentLang).then(acts => (activity.value = acts)),
-      1000
-    )
+    setTimeout(() => {
+      void refreshActivity()
+    }, 1000)
   } catch (e) {
     console.error('Submission failed', e)
     alert(t('agents.submission.error'))
