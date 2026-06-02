@@ -248,9 +248,8 @@ class ReviewGenerationServiceTest {
         org.open4goods.model.vertical.VerticalConfig verticalConfig = new org.open4goods.model.vertical.VerticalConfig();
         verticalConfig.setId("tv");
 
-        // Grounding has been removed: review generation is always EXTERNAL_SOURCES.
-        org.open4goods.services.prompt.config.PromptConfig promptConfig = new org.open4goods.services.prompt.config.PromptConfig();
-        org.mockito.Mockito.when(genAiService.getPromptConfig(org.mockito.ArgumentMatchers.any())).thenReturn(promptConfig);
+        // Grounding has been removed: review generation is always EXTERNAL_SOURCES and the
+        // batch path no longer inspects the prompt config retrieval mode.
 
         // Mock preprocessing.preparePromptVariables (the only retrieval path now)
         java.util.Map<String, Object> variables = new java.util.HashMap<>();
