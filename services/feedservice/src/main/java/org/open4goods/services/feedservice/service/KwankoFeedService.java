@@ -50,15 +50,15 @@ public class KwankoFeedService extends AbstractFeedService
     private static final String PRODUCT_FEED_AD_TYPE = "product_feed";
     private static final String VOUCHER_CODE_AD_TYPE = "voucher_code";
     private static final String[] KWANKO_PRODUCT_URL_COLUMNS = {"product_url", "Product page URL", "Product URL", "url", "URL", "link", "merchant_deep_link"};
-    private static final String[] KWANKO_TRACKED_URL_COLUMNS = {"tracking_url", "tracked_url", "deeplink", "tracking_link", "merchant_deep_link"};
+    private static final String[] KWANKO_TRACKED_URL_COLUMNS = {"tracking_url", "tracked_url", "deeplink", "tracking_link", "merchant_deep_link", "URL"};
     private static final String[] KWANKO_NAME_COLUMNS = {"product_name", "Product name", "Name", "name", "title", "Title", "product_title"};
-    private static final String[] KWANKO_PRICE_COLUMNS = {"price", "Current price", "product_price", "sale_price", "search_price", "price_vat_inc"};
-    private static final String[] KWANKO_DESCRIPTION_COLUMNS = {"description", "Product description", "product_description", "short_description", "long_description"};
-    private static final String[] KWANKO_IMAGE_COLUMNS = {"image_url", "URL related to the big image", "Image URL", "image", "picture", "picture_url", "product_image", "large_image"};
-    private static final String[] KWANKO_STOCK_COLUMNS = {"availability", "Stock status", "in_stock", "stock", "stock_status"};
+    private static final String[] KWANKO_PRICE_COLUMNS = {"price", "Price", "Current price", "product_price", "sale_price", "search_price", "price_vat_inc", "StrikePrice"};
+    private static final String[] KWANKO_DESCRIPTION_COLUMNS = {"description", "Description", "Product description", "product_description", "short_description", "long_description"};
+    private static final String[] KWANKO_IMAGE_COLUMNS = {"image_url", "Image", "URL related to the big image", "Image URL", "image", "picture", "picture_url", "product_image", "large_image"};
+    private static final String[] KWANKO_STOCK_COLUMNS = {"availability", "Availability", "Stock status", "in_stock", "stock", "stock_status", "StockIndicator"};
     private static final String[] KWANKO_GTIN_COLUMNS = {"gtin", "GTIN", "ean", "EAN", "ean13", "EAN13", "isbn", "ISBN", "barcode", "product_gtin"};
     private static final String[] KWANKO_BRAND_COLUMNS = {"brand", "Brand", "brand_name", "Brand name", "manufacturer", "Manufacturer"};
-    private static final String[] KWANKO_MODEL_COLUMNS = {"mpn", "MPN", "model", "Model", "sku", "SKU", "reference", "Internal reference", "Manufacturer reference", "product_reference"};
+    private static final String[] KWANKO_MODEL_COLUMNS = {"mpn", "MPN", "model", "Model", "sku", "SKU", "reference", "Internal reference", "Manufacturer reference", "product_reference", "ManafuacturerNumber"};
 
     private final String token;
     private final HttpClient httpClient;

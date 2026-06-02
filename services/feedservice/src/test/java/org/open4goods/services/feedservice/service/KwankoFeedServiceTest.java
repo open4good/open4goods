@@ -147,13 +147,13 @@ class KwankoFeedServiceTest
         assertThat(csv.getUrl()).isEqualTo("product_url");
         assertThat(csv.getAffiliatedUrl()).isEqualTo("tracking_url");
         assertThat(csv.getName()).isEqualTo("product_name");
-        assertThat(csv.getPrice()).contains("price", "sale_price", "price_vat_inc");
-        assertThat(csv.getDescription()).contains("description", "short_description");
-        assertThat(csv.getImage()).contains("image_url", "product_image");
-        assertThat(csv.getInStock()).contains("availability", "stock_status");
+        assertThat(csv.getPrice()).contains("price", "Price", "sale_price", "price_vat_inc", "StrikePrice");
+        assertThat(csv.getDescription()).contains("description", "Description", "short_description");
+        assertThat(csv.getImage()).contains("image_url", "Image", "product_image");
+        assertThat(csv.getInStock()).contains("availability", "Availability", "stock_status", "StockIndicator");
         assertThat(csv.getReferentiel().get(ReferentielKey.GTIN)).contains("gtin", "ean", "ean13");
         assertThat(csv.getReferentiel().get(ReferentielKey.BRAND)).contains("brand", "brand_name");
-        assertThat(csv.getReferentiel().get(ReferentielKey.MODEL)).contains("mpn", "model", "sku");
+        assertThat(csv.getReferentiel().get(ReferentielKey.MODEL)).contains("mpn", "model", "sku", "ManafuacturerNumber");
     }
 
     @Test
