@@ -31,6 +31,12 @@ describe('CategoryFiltersSidebar', () => {
           filters: {
             mobileApply: 'Appliquer',
             mobileClear: 'Effacer',
+            advanced: 'Filtres avancés',
+            clearAllTooltip: 'Effacer tous les filtres',
+            searchLabel: 'Rechercher des filtres',
+            toggle: {
+              hide: 'Masquer la colonne des filtres',
+            },
             ecoscore: {
               title: 'Découvrir',
               description: 'Description',
@@ -74,6 +80,46 @@ describe('CategoryFiltersSidebar', () => {
               return () => h('div', { 'data-test': 'documentation-rail-stub' })
             },
           }),
+          VTooltip: defineComponent({
+            name: 'VTooltipStub',
+            setup(_, { slots }) {
+              return () =>
+                h('div', slots.activator?.({ props: {} }) ?? slots.default?.())
+            },
+          }),
+          VBtn: defineComponent({
+            name: 'VBtnStub',
+            emits: ['click'],
+            setup(_, { attrs, emit }) {
+              return () =>
+                h('button', {
+                  ...attrs,
+                  type: 'button',
+                  onClick: () => emit('click'),
+                })
+            },
+          }),
+          VChip: defineComponent({
+            name: 'VChipStub',
+            setup(_, { attrs, slots }) {
+              return () => h('span', attrs, slots.default?.())
+            },
+          }),
+          VTextField: defineComponent({
+            name: 'VTextFieldStub',
+            props: {
+              modelValue: { type: String, default: '' },
+            },
+            emits: ['update:modelValue'],
+            setup(props, { attrs, emit }) {
+              return () =>
+                h('input', {
+                  ...attrs,
+                  value: props.modelValue,
+                  onInput: () => emit('update:modelValue', 'brand'),
+                })
+            },
+          }),
         },
       },
     })
@@ -84,5 +130,29 @@ describe('CategoryFiltersSidebar', () => {
     expect(wrapper.find('[data-test="category-ecoscore-card"]').exists()).toBe(
       false
     )
+  })
+
+  it('exposes active count, clear, collapse, and search controls', async () => {
+    const wrapper = mountComponent({
+      activeFiltersCount: 2,
+      showHeader: true,
+      showCollapseButton: true,
+      showFilterSearch: true,
+      filterSearchTerm: '',
+    })
+
+    expect(wrapper.get('[data-testid="category-filters-active-count"]').text())
+      .toBe('2')
+
+    await wrapper.get('[data-testid="category-filters-clear"]').trigger('click')
+    expect(wrapper.emitted('clear-mobile')).toHaveLength(1)
+
+    await wrapper
+      .get('[data-testid="category-filters-collapse"]')
+      .trigger('click')
+    expect(wrapper.emitted('collapse')).toHaveLength(1)
+
+    await wrapper.get('[data-testid="category-filters-search"]').trigger('input')
+    expect(wrapper.emitted('update:filterSearchTerm')?.[0]).toEqual(['brand'])
   })
 })

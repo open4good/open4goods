@@ -47,6 +47,22 @@ public class ReviewGenerationConfig {
      */
     private Map<String, List<String>> officialDomainsByBrand = Map.of();
 
+    /**
+     * Sibling-brand aliases used when judging source relevance. Many manufacturer groups
+     * sell the exact same model under several brands (e.g. the BSH group rebadges the same
+     * appliance as Bosch / Siemens / Neff / Gaggenau / Constructa), so the manufacturer
+     * page for a Bosch GTIN may legitimately carry the Siemens brand in its title/URL.
+     * Keys and values are matched case-insensitively; the relation is treated as symmetric.
+     */
+    private Map<String, List<String>> brandAliases = new java.util.HashMap<>(Map.of(
+            "bosch", List.of("siemens", "neff", "gaggenau", "constructa"),
+            "siemens", List.of("bosch", "neff", "gaggenau", "constructa"),
+            "neff", List.of("bosch", "siemens", "gaggenau", "constructa"),
+            "electrolux", List.of("aeg", "zanussi", "arthur martin", "faure"),
+            "aeg", List.of("electrolux", "zanussi"),
+            "whirlpool", List.of("indesit", "hotpoint", "ariston"),
+            "indesit", List.of("whirlpool", "hotpoint", "ariston")));
+
     // Property used for building search queries.
     private String queryTemplate = "test %s \"%s\"";
 
@@ -184,25 +200,14 @@ public class ReviewGenerationConfig {
     private String promptKey = "review-generation";
 
     /**
-     * Prompt key used for model-native web search review generation.
-     */
-    private String groundedPromptKey = "review-generation-grounded";
-
-    /**
      * Prompt key used for the first LLM phase: attribute extraction.
-     * Only used when twoPhaseGeneration is true and retrievalMode is EXTERNAL_SOURCES.
+     * Only used when twoPhaseGeneration is true.
      */
     private String attributeExtractionPromptKey = "review-generation-attributes";
 
     /**
-     * Flag to enable the grounded prompt flow.
-     */
-    private boolean useGroundedPrompt = false;
-
-    /**
-     * When true, EXTERNAL_SOURCES generation uses two sequential LLM calls:
+     * When true, review generation uses two sequential LLM calls:
      * phase 1 extracts attributes, phase 2 generates the prose review using those attributes.
-     * Grounded (MODEL_WEB_SEARCH) mode is always single-call regardless of this flag.
      */
     private boolean twoPhaseGeneration = true;
 
@@ -275,6 +280,13 @@ public class ReviewGenerationConfig {
     }
     public void setOfficialDomainsByBrand(Map<String, List<String>> officialDomainsByBrand) {
         this.officialDomainsByBrand = officialDomainsByBrand == null ? Map.of() : officialDomainsByBrand;
+    }
+
+    public Map<String, List<String>> getBrandAliases() {
+        return brandAliases;
+    }
+    public void setBrandAliases(Map<String, List<String>> brandAliases) {
+        this.brandAliases = brandAliases == null ? Map.of() : brandAliases;
     }
 
     public String getQueryTemplate() {
@@ -422,18 +434,6 @@ public class ReviewGenerationConfig {
     }
     public void setPromptKey(String promptKey) {
         this.promptKey = promptKey;
-    }
-    public String getGroundedPromptKey() {
-        return groundedPromptKey;
-    }
-    public void setGroundedPromptKey(String groundedPromptKey) {
-        this.groundedPromptKey = groundedPromptKey;
-    }
-    public boolean isUseGroundedPrompt() {
-        return useGroundedPrompt;
-    }
-    public void setUseGroundedPrompt(boolean useGroundedPrompt) {
-        this.useGroundedPrompt = useGroundedPrompt;
     }
     public Duration getBatchPollInterval() {
         return batchPollInterval;

@@ -223,6 +223,9 @@ public abstract class AbstractFeedService implements AffiliationProvider {
         }
 
         // Clear existing CSV datasource URLs and add the provided feed URL.
+        if (volatileDs.getCsvDatasource() == null) {
+            volatileDs.setCsvDatasource(new org.open4goods.commons.config.yml.datasource.CsvDataSourceProperties());
+        }
         volatileDs.getCsvDatasource().getDatasourceUrls().clear();
         volatileDs.getCsvDatasource().getDatasourceUrls().add(feedUrl);
 

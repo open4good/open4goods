@@ -259,7 +259,7 @@ public class AiReview {
 
     @JsonProperty(required = true, value = "technicalReviewAdvanced")
     @AiGeneratedField(instruction =
-            "Write in FRENCH. Technical review for ADVANCED readers: 6-8 advanced paragraphs, nuanced. Discuss trade-offs and constraints only if sources provide evidence. "
+            "Write in FRENCH. Technical review for ADVANCED readers: 3-5 paragraphs, nuanced, only as long as the sources justify (never pad, never repeat the novice/intermediate levels). Discuss trade-offs and constraints only if sources provide evidence. "
           + "Benchmarks/tests must come from sources; do not invent numbers. "
           + "No Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>, <ul>, <li>). "
           + "Never mention prices, dates, or product condition (new/used). "
@@ -295,7 +295,7 @@ public class AiReview {
 
     @JsonProperty(required = true, value = "ecologicalReviewAdvanced")
     @AiGeneratedField(instruction =
-            "Write in FRENCH. Environmental review for ADVANCED readers: 6-8 advanced paragraphs, include nuance and uncertainty. "
+            "Write in FRENCH. Environmental review for ADVANCED readers: 3-5 paragraphs, only as long as the sources justify (never pad, never repeat the novice/intermediate levels), include nuance and uncertainty. "
           + "Explicitly distinguish sourced facts vs cautious interpretation; never invent lifecycle data. "
           + "Use ecoscore/subscores only for broad interpretation; never mention ranks/precise positions. "
           + "No Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>, <ul>, <li>). "
@@ -328,7 +328,7 @@ public class AiReview {
 
     @JsonProperty(required = true, value = "communityReviewAdvanced")
     @AiGeneratedField(instruction =
-            "Write in FRENCH. Community review for ADVANCED readers: 6-8 advanced paragraphs. "
+            "Write in FRENCH. Community review for ADVANCED readers: 3-5 paragraphs, only as long as the sources justify (never pad, never repeat the novice/intermediate levels). "
           + "You may discuss evidence strength (reviewer bias, sample size) ONLY if sources provide it. Do not speculate. "
           + "No Markdown. Minimal HTML allowed (<strong>, <em>, <br>, <p>, <ul>, <li>). "
           + "Never mention prices, dates, or product condition (new/used). "
@@ -395,10 +395,16 @@ public class AiReview {
     @Schema(description = "List of sources used for the review", type = "array")
     private List<AiSource> sources = new ArrayList<>();
 
-    /** The attributes related to the product. */
+    /**
+     * Product attributes. Server-managed: populated from the validated attributes produced
+     * by the dedicated attribute-extraction stage (review-generation-attributes), NOT by the
+     * text-generation model. The text model is instructed to return an empty array here.
+     */
     @JsonProperty(required = true, value = "attributes")
     @JsonDeserialize(using = AiAttributesDeserializer.class)
-    @Schema(description = "List of product attributes", type = "array")
+    @AiGeneratedField(instruction =
+            "SERVER-MANAGED FIELD: do NOT extract or list any attribute. Always return an empty array [].")
+    @Schema(description = "List of product attributes (server-populated from validated extraction)", type = "array")
     private List<AiAttribute> attributes = new ArrayList<>();
 
     /** The quality of data used for the review. */
@@ -412,33 +418,37 @@ public class AiReview {
     private String dataQuality;
 
     /** The ratings found in the sources. */
-    @JsonProperty(required = false, value = "ratings")
+    @JsonProperty(required = true, value = "ratings")
+    @AiGeneratedField(instruction =
+            "VALUE-ONLY FIELD: list external ratings ONLY when a source explicitly states both the score and its scale (max), "
+          + "the rating clearly applies to this exact model/GTIN, and you can give the supporting source number. "
+          + "Otherwise return an empty array []. Never invent or estimate a rating. No [n] inside values.")
     @Schema(description = "List of ratings found in sources", type = "array")
     private List<AiRating> ratings = new ArrayList<>();
 
     /** The pdfs found in the sources. */
-    @JsonProperty(required = false, value = "pdfs")
+    @JsonProperty(required = true, value = "pdfs")
     @AiGeneratedField(instruction =
             "List of PDF URLs only (manuals, datasheets, repairability docs). VALUE-ONLY FIELD: no extra text, no citations.")
     @Schema(description = "List of PDF's url's for this product", type = "array")
     private List<String> pdfs = new ArrayList<>();
 
     /** The images found in the sources. */
-    @JsonProperty(required = false, value = "images")
+    @JsonProperty(required = true, value = "images")
     @AiGeneratedField(instruction =
             "List of product image URLs only (prefer high quality). VALUE-ONLY FIELD: no extra text, no citations.")
     @Schema(description = "List of quality images url's for this product", type = "array")
     private List<String> images = new ArrayList<>();
 
     /** The videos found in the sources. */
-    @JsonProperty(required = false, value = "videos")
+    @JsonProperty(required = true, value = "videos")
     @AiGeneratedField(instruction =
             "List of video URLs only (YouTube, Vimeo, Dailymotion, direct files). VALUE-ONLY FIELD: no extra text, no citations.")
     @Schema(description = "List of product related videos", type = "array")
     private List<String> videos = new ArrayList<>();
 
     /** The social network references */
-    @JsonProperty(required = false, value = "social")
+    @JsonProperty(required = true, value = "social")
     @AiGeneratedField(instruction =
             "List of social post URLs only (Facebook, X/Twitter, Instagram, etc.). VALUE-ONLY FIELD: no extra text, no citations.")
     @Schema(description = "List of social networks references", type = "array")
@@ -650,7 +660,7 @@ public class AiReview {
         @Schema(description = "The maximum possible score", type = "string")
         private String max;
         
-        @JsonProperty(required = false, value = "comment")
+        @JsonProperty(required = true, value = "comment")
         @AiGeneratedField(instruction = "Short associated comment if present in the source. Write in FRENCH if you translate; otherwise keep original wording. Plain text only. VALUE-ONLY FIELD: no citations.")
         @Schema(description = "Short comment associated with the rating", type = "string")
         private String comment;

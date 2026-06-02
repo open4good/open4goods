@@ -139,6 +139,21 @@ const VBadgeStub = defineComponent({
   },
 })
 
+const VChipStub = defineComponent({
+  name: 'VChip',
+  setup(_, { attrs, slots }) {
+    return () =>
+      h('span', { ...attrs, class: 'v-chip-stub' }, slots.default?.())
+  },
+})
+
+const VProgressLinearStub = defineComponent({
+  name: 'VProgressLinear',
+  setup(_, { attrs }) {
+    return () => h('div', { ...attrs, class: 'v-progress-linear-stub' })
+  },
+})
+
 const CategoryResultsCountStub = defineComponent({
   name: 'CategoryResultsCount',
   props: {
@@ -166,6 +181,7 @@ describe('CategoryResultsToolbar', () => {
         searchTerm: 'phone',
         showFiltersButton: true,
         filtersCount: 2,
+        activeFiltersCount: 2,
       },
       global: {
         stubs: {
@@ -176,6 +192,8 @@ describe('CategoryResultsToolbar', () => {
           VTooltip: VTooltipStub,
           VIcon: VIconStub,
           VBadge: VBadgeStub,
+          VChip: VChipStub,
+          VProgressLinear: VProgressLinearStub,
           CategoryResultsCount: CategoryResultsCountStub,
         },
       },
@@ -215,5 +233,20 @@ describe('CategoryResultsToolbar', () => {
     )
     sortToggle?.vm.$emit('update:modelValue', 'asc')
     expect(wrapper.emitted('update:sortOrder')?.[0]).toEqual(['asc'])
+  })
+
+  it('renders active filter count and loading state', async () => {
+    const wrapper = mountComponent()
+
+    expect(wrapper.find('[data-testid="results-toolbar-active-count"]').text())
+      .toBe('2')
+
+    expect(wrapper.find('[data-testid="results-toolbar-loading"]').exists())
+      .toBe(false)
+
+    await wrapper.setProps({ loading: true })
+
+    expect(wrapper.find('[data-testid="results-toolbar-loading"]').exists())
+      .toBe(true)
   })
 })

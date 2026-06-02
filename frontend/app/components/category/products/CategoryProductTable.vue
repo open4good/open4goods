@@ -6,6 +6,7 @@
     class="category-product-table"
     density="comfortable"
     :fixed-header="true"
+    :hide-default-footer="true"
     height="600"
     :sort-by="internalSortBy"
     :item-class="() => 'category-product-table__row'"

@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.commons.config.yml.datasource.CsvDataSourceProperties;
@@ -153,6 +154,163 @@ class KwankoFeedServiceTest
         assertThat(csv.getReferentiel().get(ReferentielKey.GTIN)).contains("gtin", "ean", "ean13");
         assertThat(csv.getReferentiel().get(ReferentielKey.BRAND)).contains("brand", "brand_name");
         assertThat(csv.getReferentiel().get(ReferentielKey.MODEL)).contains("mpn", "model", "sku");
+    }
+
+    @Test
+    void selectCsvProductFeedAdsShouldPreferCsvEquivalentOverXml() throws Exception
+    {
+        KwankoFeedService service = buildService();
+
+        KwankoFeedService.KwankoFeedSelection selection = service.selectCsvProductFeedAds(objectMapper.readTree("""
+                [
+                  {
+                    "id":"csv-1",
+                    "name":"Merchant Products",
+                    "format":"csv",
+                    "campaign":{"id":"123"},
+                    "tracked_material_per_websites":[{"product_feed":"https://feeds.example/merchant.csv"}]
+                  },
+                  {
+                    "id":"xml-1",
+                    "name":"Merchant products",
+                    "format":"xml",
+                    "campaign":{"id":"123"},
+                    "tracked_material_per_websites":[{"product_feed":"https://feeds.example/merchant.xml"}]
+                  }
+                ]
+                """));
+
+        assertThat(selection.csvAds()).hasSize(1);
+        assertThat(selection.csvAds().getFirst().feedUrl()).endsWith("merchant.csv");
+        assertThat(selection.xmlReplacedByCsv()).isEqualTo(1);
+        assertThat(selection.xmlOnly()).isZero();
+        assertThat(selection.ambiguous()).isZero();
+    }
+
+    @Test
+    void selectCsvProductFeedAdsShouldTreatXmfAsXmlAndSkipXmlOnly() throws Exception
+    {
+        KwankoFeedService service = buildService();
+
+        KwankoFeedService.KwankoFeedSelection selection = service.selectCsvProductFeedAds(objectMapper.readTree("""
+                [
+                  {
+                    "id":"xml-only",
+                    "name":"XML only feed",
+                    "format":"xmf",
+                    "campaign":{"id":"999"},
+                    "tracked_material_per_websites":[{"product_feed":"https://feeds.example/merchant.xml"}]
+                  }
+                ]
+                """));
+
+        assertThat(selection.csvAds()).isEmpty();
+        assertThat(selection.xmlReplacedByCsv()).isZero();
+        assertThat(selection.xmlOnly()).isEqualTo(1);
+        assertThat(selection.ambiguous()).isZero();
+    }
+
+    @Test
+    void selectCsvProductFeedAdsShouldUseSingleCampaignCsvFallbackForSingleXml() throws Exception
+    {
+        KwankoFeedService service = buildService();
+
+        KwankoFeedService.KwankoFeedSelection selection = service.selectCsvProductFeedAds(objectMapper.readTree("""
+                [
+                  {
+                    "id":"csv-1",
+                    "name":"CSV catalog",
+                    "format":"csv",
+                    "campaign":{"id":"123"},
+                    "tracked_material_per_websites":[{"product_feed":"https://feeds.example/merchant.csv"}]
+                  },
+                  {
+                    "id":"xml-1",
+                    "name":"XML catalog",
+                    "format":"xml",
+                    "campaign":{"id":"123"},
+                    "tracked_material_per_websites":[{"product_feed":"https://feeds.example/merchant.xml"}]
+                  }
+                ]
+                """));
+
+        assertThat(selection.csvAds()).hasSize(1);
+        assertThat(selection.xmlReplacedByCsv()).isEqualTo(1);
+        assertThat(selection.xmlOnly()).isZero();
+        assertThat(selection.ambiguous()).isZero();
+    }
+
+    @Test
+    void selectCsvProductFeedAdsShouldCountAmbiguousXmlEquivalents() throws Exception
+    {
+        KwankoFeedService service = buildService();
+
+        KwankoFeedService.KwankoFeedSelection selection = service.selectCsvProductFeedAds(objectMapper.readTree("""
+                [
+                  {
+                    "id":"csv-1",
+                    "name":"CSV catalog A",
+                    "format":"csv",
+                    "campaign":{"id":"123"},
+                    "tracked_material_per_websites":[{"product_feed":"https://feeds.example/merchant-a.csv"}]
+                  },
+                  {
+                    "id":"csv-2",
+                    "name":"CSV catalog B",
+                    "format":"csv",
+                    "campaign":{"id":"123"},
+                    "tracked_material_per_websites":[{"product_feed":"https://feeds.example/merchant-b.csv"}]
+                  },
+                  {
+                    "id":"xml-1",
+                    "name":"XML catalog",
+                    "format":"xml",
+                    "campaign":{"id":"123"},
+                    "tracked_material_per_websites":[{"product_feed":"https://feeds.example/merchant.xml"}]
+                  }
+                ]
+                """));
+
+        assertThat(selection.csvAds()).hasSize(2);
+        assertThat(selection.xmlReplacedByCsv()).isZero();
+        assertThat(selection.xmlOnly()).isZero();
+        assertThat(selection.ambiguous()).isEqualTo(1);
+    }
+
+    @Test
+    void volatileDatasourceShouldPreserveExistingCsvOverrides() throws Exception
+    {
+        FeedConfiguration config = new FeedConfiguration();
+        config.getKwanko().setEnabled(true);
+        config.setDefaultCsvProperties(new CsvDataSourceProperties());
+
+        DataSourceConfigService dataSourceConfigService = mock(DataSourceConfigService.class);
+        DataSourceProperties existing = new DataSourceProperties();
+        existing.setName("Existing Merchant");
+        CsvDataSourceProperties existingCsv = new CsvDataSourceProperties();
+        existingCsv.setCsvSeparator('|');
+        existingCsv.setCsvQuoteChar('\'');
+        existingCsv.setCsvEscapeChar('\\');
+        existingCsv.setDatasourceUrls(Set.of("https://old.example/feed.csv"));
+        existing.setCsvDatasource(existingCsv);
+        when(dataSourceConfigService.getDatasourcePropertiesForFeed("Merchant Products")).thenReturn(existing);
+
+        KwankoFeedService service = new KwankoFeedService(
+                config,
+                mock(RemoteFileCachingService.class),
+                dataSourceConfigService,
+                new SerialisationService(),
+                "token");
+
+        DataSourceProperties volatileDatasource = service.getVolatileDatasource(
+                "Merchant Products",
+                config,
+                "https://new.example/feed.csv");
+
+        assertThat(volatileDatasource.getCsvDatasource().getCsvSeparator()).isEqualTo('|');
+        assertThat(volatileDatasource.getCsvDatasource().getCsvQuoteChar()).isEqualTo('\'');
+        assertThat(volatileDatasource.getCsvDatasource().getCsvEscapeChar()).isEqualTo('\\');
+        assertThat(volatileDatasource.getCsvDatasource().getDatasourceUrls()).containsExactly("https://new.example/feed.csv");
     }
 
     private KwankoFeedService buildService()

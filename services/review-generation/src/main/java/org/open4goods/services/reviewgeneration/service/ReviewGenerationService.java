@@ -55,13 +55,11 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.googlesearch.service.GoogleSearchService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.prompt.config.PromptConfig;
-import org.open4goods.services.prompt.config.RetrievalMode;
 import org.open4goods.services.prompt.dto.BatchResultItem;
 import org.open4goods.services.prompt.dto.PromptResponse;
 import org.open4goods.services.prompt.exceptions.BatchJobFailedException;
 import org.open4goods.services.prompt.service.BatchPromptService;
 import org.open4goods.services.prompt.service.PromptService;
-import org.open4goods.services.prompt.service.provider.ProviderEvent;
 import org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig;
 import org.open4goods.services.urlfetching.service.UrlFetchingService;
 import org.open4goods.verticals.VerticalsConfigService;
@@ -136,7 +134,6 @@ public class ReviewGenerationService implements HealthIndicator {
     private final List<ReviewGenerationHook> hooks;
 
 	private final ObjectMapper objectMapper;
-	private static final String AI_SOURCE_NAME = "AI";
 	private static final String CITATIONS_METADATA_KEY = "citations";
     private static final int DEFAULT_SELECTION_MULTIPLIER = 5;
 
@@ -277,12 +274,8 @@ public class ReviewGenerationService implements HealthIndicator {
             throw new ResourceNotFoundException("Prompt not found: " + promptKey);
         }
 
-        Map<String, Object> promptVariables;
-        if (promptConfig.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH) {
-            promptVariables = preprocessingService.buildBasePromptVariables(product, verticalConfig);
-        } else {
-            promptVariables = preprocessingService.preparePromptVariables(product, verticalConfig, status);
-        }
+        Map<String, Object> promptVariables = preprocessingService.preparePromptVariables(product, verticalConfig,
+                status);
 
         // Add mock tokens if missing (mimic real execution)
         if (!promptVariables.containsKey("SOURCE_TOKENS")) {
@@ -377,7 +370,10 @@ public class ReviewGenerationService implements HealthIndicator {
 		if (newReview == null) {
 			throw new IllegalStateException("Text completion returned no AI review for UPC " + product.getId());
 		}
-		populateAttributes(product, newReview, reviewResponse.getMetadata());
+		// Attributes are owned by the dedicated extraction stage. Carry the validated
+		// attributes on the review (for DTO/serialisation) without letting the text model
+		// write anything back into the product.
+		newReview.setAttributes(attributes);
 		addResources(product, newReview);
 
 		AiReviewHolder holder = new AiReviewHolder();
@@ -500,16 +496,9 @@ public class ReviewGenerationService implements HealthIndicator {
 				if (promptConfig == null) {
 					throw new ResourceNotFoundException("Prompt not found: " + promptKey);
 				}
-				Map<String, Object> promptVariables;
-				if (promptConfig.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH) {
-					status.setStatus(ReviewGenerationStatus.Status.SEARCHING);
-					status.addMessage("AI grounding search...");
-					status.addEvent(ReviewGenerationStatus.ProgressEventType.SEARCHING, "AI grounding search", null);
-					promptVariables = preprocessingService.buildBasePromptVariables(product, verticalConfig);
-				} else {
-					status.setStatus(ReviewGenerationStatus.Status.SEARCHING);
-					promptVariables = preprocessingService.preparePromptVariables(product, verticalConfig, status, customHeaders);
-				}
+				status.setStatus(ReviewGenerationStatus.Status.SEARCHING);
+				Map<String, Object> promptVariables = preprocessingService.preparePromptVariables(product,
+						verticalConfig, status, customHeaders);
 
 				// Validation of critical variables
 				List<String> requiredVars = List.of("PRODUCT_BRAND", "PRODUCT_MODEL", "VERTICAL_NAME", "OFFER_NAMES", "IMPACTSCORE_POSITION", "COMMON_ATTRIBUTES");
@@ -525,11 +514,7 @@ public class ReviewGenerationService implements HealthIndicator {
 
 				status.addEvent(ReviewGenerationStatus.ProgressEventType.STARTED, "AI generation started", null);
 				PromptResponse<AiReview> reviewResponse;
-				if (promptConfig.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH) {
-					reviewResponse = genAiService.objectPromptStream(promptKey, promptVariables, AiReview.class,
-							event -> handleProviderEvent(status, event));
-					logger.debug("Streaming review generation started for promptKey: {}", promptKey);
-				} else if (properties.isTwoPhaseGeneration()) {
+				if (properties.isTwoPhaseGeneration()) {
 					reviewResponse = executeExternalSourcesTwoPhase(promptKey, promptVariables, status, product,
 							verticalConfig);
 				} else {
@@ -537,8 +522,9 @@ public class ReviewGenerationService implements HealthIndicator {
 				}
 				AiReview newReview = processAiReview(reviewResponse.getBody(), reviewResponse.getMetadata());
 
-				// Populate attributes and resources
-				populateAttributes(product, newReview, reviewResponse.getMetadata());
+				// Attributes are owned by the dedicated extraction stage: carry the validated
+				// attributes for serialisation, never merge text-model attributes into the product.
+				newReview.setAttributes(aiAttributesFromProduct(product, verticalConfig));
 				addResources(product, newReview);
 				logger.info("Completed review for UPC {}: {}", upc, objectMapper.writeValueAsString(newReview));
 				holder.setReview(newReview);
@@ -816,10 +802,6 @@ public class ReviewGenerationService implements HealthIndicator {
 		List<String> productIds = new ArrayList<>();
 		List<String> gtins = new ArrayList<>();
 		String promptKey = resolvePromptKey();
-		PromptConfig promptConfig = genAiService.getPromptConfig(promptKey);
-		if (promptConfig != null && promptConfig.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH) {
-			logger.info("Batch review generation with model-native search enabled.");
-		}
 		for (Product product : products) {
 			long upc = product.getId();
 			if (!shouldGenerateReview(product)) {
@@ -837,15 +819,11 @@ public class ReviewGenerationService implements HealthIndicator {
 			status.setStartTime(Instant.now().toEpochMilli());
 			processStatusMap.put(upc, status);
 			try {
-				if (promptConfig != null && promptConfig.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH) {
-					promptVariablesList.add(preprocessingService.buildBasePromptVariables(product, verticalConfig));
-				} else {
-					Map<String, Object> vars = preprocessingService.preparePromptVariables(product, verticalConfig, status);
-					if (properties.isTwoPhaseGeneration()) {
-						injectExtractedAttributes(product, verticalConfig, vars);
-					}
-					promptVariablesList.add(vars);
+				Map<String, Object> vars = preprocessingService.preparePromptVariables(product, verticalConfig, status);
+				if (properties.isTwoPhaseGeneration()) {
+					injectExtractedAttributes(product, verticalConfig, vars);
 				}
+				promptVariablesList.add(vars);
 				productIds.add(String.valueOf(product.getId()));
 				gtins.add(product.gtin());
 			} catch (NotEnoughDataException e) {
@@ -942,9 +920,7 @@ public class ReviewGenerationService implements HealthIndicator {
 	}
 
 	private String resolvePromptKey() {
-		if (properties.isUseGroundedPrompt()) {
-			return properties.getGroundedPromptKey();
-		}
+		// Grounding is performed at the fetch stage only; the text prompt is always EXTERNAL_SOURCES.
 		return properties.getPromptKey();
 	}
 
@@ -1050,8 +1026,11 @@ public class ReviewGenerationService implements HealthIndicator {
 				// Process the batch result to convert it into an AiReview.
 				AiReview newReview = processAiReview(output);
 				if (null != newReview) {
-					// Populate attributes
-					populateAttributes(product, newReview, response.getMetadata());
+					// Attributes are owned by the dedicated extraction stage: carry the validated
+					// attributes for serialisation, never merge text-model attributes into the product.
+					VerticalConfig verticalConfig = verticalsConfigService
+							.getConfigByIdOrDefault(product.getVertical());
+					newReview.setAttributes(aiAttributesFromProduct(product, verticalConfig));
 
 					AiReviewHolder holder = new AiReviewHolder();
 					holder.setCreatedMs(Instant.now().toEpochMilli());
@@ -1112,50 +1091,6 @@ public class ReviewGenerationService implements HealthIndicator {
 			totalProcessed.incrementAndGet();
 			lastGenerationFailed = true;
 		}
-	}
-
-	/**
-	 * Extract attributes from the gen ai response and populate the AiReview object.
-	 *
-	 * @param product the product to update
-	 * @param review the new AI review
-	 */
-	private void populateAttributes(Product product, AiReview review, Map<String, Object> metadata) {
-		// Handling attributes
-		if (review == null || review.getAttributes() == null) {
-			return;
-		}
-		String providerName = determineProviderName(metadata);
-
-		review.getAttributes().stream().forEach(a -> {
-
-			ProductAttribute agg = product.getAttributes().getAll().get(a.getName());
-			if (null == agg) {
-				// A first time match
-				agg = new ProductAttribute();
-				agg.setName(a.getName());
-			}
-
-			try {
-				agg.addSourceAttribute(new SourcedAttribute(new Attribute(a.getName(), a.getValue(), "fr"), providerName));
-
-				// Replacing new AggAttribute in product
-				product.getAttributes().getAll().put(agg.getName(), agg);
-			} catch (Exception e1) {
-				logger.error("Cannot extract domain name", e1);
-			}
-
-		});
-	}
-
-	private void persistExtractedAttributes(Product product, List<AiReview.AiAttribute> attributes,
-			Map<String, Object> metadata) {
-		if (attributes == null || attributes.isEmpty()) {
-			return;
-		}
-		AiReview review = new AiReview();
-		review.setAttributes(attributes);
-		populateAttributes(product, review, metadata);
 	}
 
 	private List<AiReview.AiAttribute> extractAndPersistReviewAttributes(Product product, VerticalConfig verticalConfig,
@@ -1243,6 +1178,20 @@ public class ReviewGenerationService implements HealthIndicator {
 		if (numericValue == null) {
 			logger.warn("Rejecting AI review numeric attribute '{}'='{}' because it does not contain a numeric value.",
 					key, value);
+			return null;
+		}
+		// Reject non-positive numerics: a spec value of 0 (or negative) is virtually always a
+		// failed parse or hallucination (e.g. FREQUENCY_RATE=0 for a 60 Hz TV), never a real
+		// product characteristic for the numeric attributes we track.
+		try {
+			double parsed = Double.parseDouble(numericValue.replace(',', '.'));
+			if (parsed <= 0d) {
+				logger.warn("Rejecting AI review numeric attribute '{}'='{}' because its value is not strictly positive.",
+						key, value);
+				return null;
+			}
+		} catch (NumberFormatException e) {
+			logger.warn("Rejecting AI review numeric attribute '{}'='{}' because it is not a parsable number.", key, value);
 			return null;
 		}
 		return numericValue;
@@ -1727,20 +1676,6 @@ public class ReviewGenerationService implements HealthIndicator {
 		product.setReviewFetchDiagnostics(diagnostics);
 	}
 
-	private String determineProviderName(Map<String, Object> metadata) {
-		if (metadata != null) {
-			Object provider = metadata.get("provider");
-			if (provider != null) {
-				return provider.toString();
-			}
-			Object model = metadata.get("model");
-			if (model != null) {
-				return model.toString();
-			}
-		}
-		return AI_SOURCE_NAME;
-	}
-
 	// -------------------- Helper Methods -------------------- //
 
 
@@ -1936,10 +1871,10 @@ public class ReviewGenerationService implements HealthIndicator {
 				logger.info("URL {} removed because it matches an excluded domain.", resolvedUrl);
 				return null;
 			}
-			if (!isValidUrl(resolvedUrl)) {
-				logger.warn("URL {} removed because it is invalid or unreachable.", resolvedUrl);
-				return null;
-			}
+			// NOTE: do NOT drop sources on a live HEAD reachability check here. In EXTERNAL_SOURCES mode
+			// these URLs are our own fetched sources (already retrieved successfully at the fetch stage),
+			// and the model cites them by number. Many sites block bot HEAD requests, so re-validating
+			// produced false negatives that emptied the sources list and left dangling [n] citations.
 
 			if (originalUrl != null && !originalUrl.equals(resolvedUrl)) {
 				return new AiReview.AiSource(source.getNumber(), source.getName(), source.getDescription(), resolvedUrl);
@@ -2218,26 +2153,6 @@ public class ReviewGenerationService implements HealthIndicator {
 			return Health.down().withDetail("error", "One or more review generations have failed").build();
 		}
 		return Health.up().build();
-	}
-
-	private void handleProviderEvent(ReviewGenerationStatus status, ProviderEvent event) {
-		if (event == null) {
-			return;
-		}
-		switch (event.getType()) {
-			case STARTED -> status.addEvent(ReviewGenerationStatus.ProgressEventType.STARTED,
-					"Streaming generation started", null);
-			case SEARCHING -> status.addEvent(ReviewGenerationStatus.ProgressEventType.SEARCHING,
-					event.getContent(), null);
-			case STREAM_CHUNK -> status.addEvent(ReviewGenerationStatus.ProgressEventType.STREAM_CHUNK,
-					null, event.getContent());
-			case COMPLETED -> status.addEvent(ReviewGenerationStatus.ProgressEventType.COMPLETED,
-					"Streaming generation completed", null);
-			case ERROR -> status.addEvent(ReviewGenerationStatus.ProgressEventType.ERROR,
-					event.getErrorMessage(), null);
-			default -> {
-			}
-		}
 	}
 
 	private AiReview applyCitationsAndNormalize(AiReview review, Map<String, Object> metadata) {

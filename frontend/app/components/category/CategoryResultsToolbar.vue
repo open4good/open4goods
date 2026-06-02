@@ -1,5 +1,14 @@
 <template>
   <div class="category-results-toolbar">
+    <v-progress-linear
+      v-if="loading"
+      class="category-results-toolbar__loading"
+      color="primary"
+      indeterminate
+      height="2"
+      data-testid="results-toolbar-loading"
+    />
+
     <div
       class="category-results-toolbar__section category-results-toolbar__section--left"
     >
@@ -9,6 +18,7 @@
         variant="flat"
         prepend-icon="mdi-filter-variant"
         data-testid="results-toolbar-filter-button"
+        :aria-label="t('category.products.openFilters')"
         @click="emit('toggle-filters')"
       >
         {{ t('category.products.openFilters') }}
@@ -22,6 +32,18 @@
       </v-btn>
 
       <CategoryResultsCount v-if="showResultsCount" :count="resultsCount" />
+
+      <v-chip
+        v-if="activeFiltersCount"
+        class="category-results-toolbar__active-count"
+        color="primary"
+        variant="tonal"
+        size="small"
+        prepend-icon="mdi-filter-check-outline"
+        data-testid="results-toolbar-active-count"
+      >
+        {{ activeFiltersCount }}
+      </v-chip>
 
       <div v-if="showSort" class="category-results-toolbar__sort">
         <div class="category-results-toolbar__sort-select">
@@ -107,10 +129,11 @@
     </div>
 
     <div
-      v-if="showViewToggle && isDesktop"
+      v-if="(showViewToggle && isDesktop) || $slots.activeFilters"
       class="category-results-toolbar__section category-results-toolbar__section--right"
     >
       <v-btn-toggle
+        v-if="showViewToggle && isDesktop"
         v-model="internalViewMode"
         mandatory
         class="category-results-toolbar__view-toggle"
@@ -141,6 +164,13 @@
           />
         </v-btn>
       </v-btn-toggle>
+
+      <div
+        v-if="$slots.activeFilters"
+        class="category-results-toolbar__active-filters"
+      >
+        <slot name="activeFilters" />
+      </div>
     </div>
   </div>
 </template>
@@ -182,6 +212,8 @@ const props = withDefaults(
     showResultsCount?: boolean
     showFiltersButton?: boolean
     filtersCount?: number
+    activeFiltersCount?: number
+    loading?: boolean
   }>(),
   {
     showSearch: true,
@@ -190,6 +222,8 @@ const props = withDefaults(
     showResultsCount: true,
     showFiltersButton: false,
     filtersCount: 0,
+    activeFiltersCount: 0,
+    loading: false,
   }
 )
 
@@ -224,23 +258,33 @@ const hasSortItems = computed(() => availableSortItems.value.length > 0)
 
 <style scoped lang="sass">
 .category-results-toolbar
+  position: sticky
+  top: 76px
+  z-index: 4
   display: flex
   flex-direction: column
-  gap: 1.25rem
-  margin-bottom: 2rem
+  gap: 0.75rem
+  margin-bottom: 0.9rem
   width: 100%
-  background: rgb(var(--v-theme-surface-glass))
-  padding: 1.25rem
-  border-radius: 1.25rem
-  border: 1px solid rgba(var(--v-theme-border-primary), 0.1)
-  box-shadow: 0 10px 25px -12px rgba(var(--v-theme-shadow-primary-600), 0.12)
-  backdrop-filter: blur(12px)
+  background: rgba(var(--v-theme-surface-default), 0.96)
+  padding: 0.75rem
+  border-radius: 8px
+  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.32)
+  box-shadow: 0 10px 24px -20px rgba(var(--v-theme-shadow-primary-600), 0.36)
+  backdrop-filter: blur(10px)
+
+  &__loading
+    position: absolute
+    inset-inline: 0
+    top: 0
+    border-radius: 8px 8px 0 0
+    overflow: hidden
 
   &__section
     display: flex
     flex-wrap: wrap
     align-items: center
-    gap: 1.25rem
+    gap: 0.75rem
 
   &__section--left
     justify-content: flex-start
@@ -256,16 +300,16 @@ const hasSortItems = computed(() => availableSortItems.value.length > 0)
     display: flex
     flex-wrap: nowrap
     align-items: center
-    gap: 0.85rem
+    gap: 0.5rem
 
   &__sort-select
-    flex: 0 1 240px
+    flex: 0 1 220px
     min-width: 0
 
   &__sort-order
     flex-shrink: 0
     overflow: visible
-    border-radius: 999px
+    border-radius: 8px
     border: 1px solid rgba(var(--v-theme-border-primary), 0.15)
     background: rgba(var(--v-theme-surface-default), 0.4)
 
@@ -278,16 +322,31 @@ const hasSortItems = computed(() => availableSortItems.value.length > 0)
     width: 100%
 
   &__view-toggle
-    border-radius: 999px
+    border-radius: 8px
     border: 1px solid rgba(var(--v-theme-border-primary), 0.15)
     background: rgba(var(--v-theme-surface-default), 0.4)
+
+  &__active-count
+    font-weight: 700
+
+  &__active-filters
+    max-width: min(42vw, 520px)
+    min-width: 0
+    overflow: hidden
+
+    :deep(.category-active-filters)
+      gap: 0.35rem
+
+    :deep(.category-active-filters__list)
+      max-height: 2.5rem
+      overflow: hidden
 
 @media (min-width: 960px)
   .category-results-toolbar
     display: grid
-    grid-template-columns: auto minmax(260px, 1fr) auto
+    grid-template-columns: minmax(280px, auto) minmax(260px, 1fr) auto
     align-items: center
-    gap: 1.5rem
+    gap: 0.85rem
 
   .category-results-toolbar__section
     flex-wrap: nowrap
@@ -299,9 +358,16 @@ const hasSortItems = computed(() => availableSortItems.value.length > 0)
     justify-content: flex-end
 
   .category-results-toolbar__search
-    flex: 0 1 420px
+    flex: 0 1 460px
 
 @media (max-width: 959px)
+  .category-results-toolbar
+    position: sticky
+    top: 64px
+    border-radius: 0
+    margin-inline: -12px
+    width: calc(100% + 24px)
+
   .category-results-toolbar__section--center
     justify-content: center
 
@@ -314,6 +380,9 @@ const hasSortItems = computed(() => availableSortItems.value.length > 0)
   .category-results-toolbar__sort-select
     flex: 1 1 auto
     min-width: 130px
+
+  .category-results-toolbar__active-filters
+    max-width: 100%
 
 :deep(.category-results-toolbar__sort-menu .v-list-subheader)
   font-size: 0.7rem

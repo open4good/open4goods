@@ -64,7 +64,7 @@
       <v-expand-transition>
         <div v-show="isGlobalOpen" class="category-filters__section-body">
           <CategoryFilterList
-            :fields="filterOptions?.global ?? []"
+            :fields="globalFields"
             :aggregations="aggregationMap"
             :baseline-aggregations="baselineAggregationMap"
             :active-filters="activeFilters"
@@ -229,9 +229,11 @@ const props = withDefaults(
     filters: FilterRequestDto | null
     impactExpanded: boolean
     technicalExpanded: boolean
+    searchTerm?: string
   }>(),
   {
     baselineAggregations: () => [],
+    searchTerm: '',
   }
 )
 
@@ -253,6 +255,23 @@ const findActiveFilter = (field: string): Filter | null =>
 const conditionFilter = computed(() => findActiveFilter(CONDITION_FIELD))
 
 const { t } = useI18n()
+const normalizedSearchTerm = computed(() =>
+  (props.searchTerm ?? '').trim().toLocaleLowerCase()
+)
+
+const matchesFilterSearch = (entry: FieldMetadataDto): boolean => {
+  if (!normalizedSearchTerm.value) {
+    return true
+  }
+
+  const label = String(entry.title ?? entry.mapping ?? '').toLocaleLowerCase()
+  const mapping = String(entry.mapping ?? '').toLocaleLowerCase()
+
+  return (
+    label.includes(normalizedSearchTerm.value) ||
+    mapping.includes(normalizedSearchTerm.value)
+  )
+}
 
 const aggregationMap = computed<Record<string, AggregationResponseDto>>(() => {
   return (props.aggregations ?? []).reduce<
@@ -285,7 +304,9 @@ const impactPrimary = computed<FieldMetadataDto[]>(() => {
   const ecoscore = entries.filter(
     item => item.mapping === ECOSCORE_RELATIVE_FIELD
   )
-  return ecoscore.length ? ecoscore : entries.slice(0, 1)
+  return (ecoscore.length ? ecoscore : entries.slice(0, 1)).filter(
+    matchesFilterSearch
+  )
 })
 
 const impactRemaining = computed<FieldMetadataDto[]>(() => {
@@ -302,9 +323,14 @@ const impactRemaining = computed<FieldMetadataDto[]>(() => {
       entry.mapping &&
       !primary.has(entry.mapping) &&
       !excluded.has(entry.mapping) &&
-      !entry.mapping.endsWith('.relativ.value')
+      !entry.mapping.endsWith('.relativ.value') &&
+      matchesFilterSearch(entry)
   )
 })
+
+const globalFields = computed<FieldMetadataDto[]>(() =>
+  (props.filterOptions?.global ?? []).filter(matchesFilterSearch)
+)
 
 const normalizedTechnical = computed<FieldMetadataDto[]>(() => {
   const entries = props.filterOptions?.technical ?? []
@@ -313,7 +339,7 @@ const normalizedTechnical = computed<FieldMetadataDto[]>(() => {
     if (!entry.mapping) return false
     if (seen.has(entry.mapping)) return false
     seen.add(entry.mapping)
-    return true
+    return matchesFilterSearch(entry)
   })
 })
 

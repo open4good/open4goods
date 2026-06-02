@@ -2,6 +2,7 @@
   <HeroSurface
     tag="section"
     class="category-hero"
+    :class="`category-hero--${variant}`"
     :aria-labelledby="headingId"
     data-testid="category-hero"
     variant="halo"
@@ -116,6 +117,7 @@ const props = withDefaults(
     rightInfoCard?: VerticalSubCategoryHeroBlockDto | null
     subcategories?: VerticalSubCategoryDto[] | null
     parentUrl?: string | null
+    variant?: 'editorial' | 'browser'
   }>(),
   {
     description: null,
@@ -126,6 +128,7 @@ const props = withDefaults(
     rightInfoCard: null,
     subcategories: null,
     parentUrl: null,
+    variant: 'editorial',
   }
 )
 
@@ -142,6 +145,7 @@ const infoCardIcon = computed(
   () => props.rightInfoCard?.mdiIcon?.trim() || 'mdi-information-outline'
 )
 const shouldShowImage = computed(() => Boolean(props.image && props.showImage))
+const variant = computed(() => props.variant)
 
 const heroBreadcrumbs = computed<HeroBreadcrumbItem[]>(() => {
   const items = breadcrumbs.value
@@ -328,6 +332,54 @@ defineExpose({ headingId, t })
     min-height: 180px
     width: 100%
 
+.category-hero--browser
+  margin-bottom: 0
+
+  .category-hero__wrapper
+    min-height: clamp(132px, 12vw, 176px)
+    padding: clamp(1rem, 2vw, 1.5rem) clamp(1rem, 3vw, 2rem)
+    border-inline: 0
+    border-radius: 0
+    background: rgba(var(--v-theme-surface-default), 0.96)
+    backdrop-filter: none
+
+  .category-hero__copy
+    gap: 0.55rem
+
+  .category-hero__title
+    font-size: clamp(1.55rem, 1.15vw + 1.2rem, 2.25rem)
+    line-height: 1.08
+
+  .category-hero__description
+    max-width: 980px
+    font-size: 0.96rem
+    line-height: 1.45
+
+    :deep(p)
+      display: -webkit-box
+      overflow: hidden
+      -webkit-line-clamp: 2
+      -webkit-box-orient: vertical
+
+  .category-hero__subcategory-chips
+    max-width: 100%
+
+  .category-hero__actions-row
+    display: none
+
+  .category-hero__info-card
+    padding: 1rem
+    gap: 0.5rem
+    box-shadow: none
+
+  .category-hero__info-body
+    display: -webkit-box
+    overflow: hidden
+    -webkit-line-clamp: 3
+    -webkit-box-orient: vertical
+    font-size: 0.9rem
+    line-height: 1.45
+
 @media (min-width: 960px)
   .category-hero__wrapper
     grid-template-columns: minmax(0, 1fr) clamp(200px, 22vw, 320px)
@@ -361,12 +413,39 @@ defineExpose({ headingId, t })
   .category-hero__wrapper--info .category-hero__description
     text-align: center
 
+  .category-hero--browser .category-hero__wrapper
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 300px)
+
+  .category-hero--browser .category-hero__wrapper--solo
+    justify-items: start
+    text-align: left
+
+  .category-hero--browser .category-hero__wrapper--solo .category-hero__content
+    max-width: none
+    align-items: flex-start
+
+  .category-hero--browser .category-hero__wrapper--solo .category-hero__copy,
+  .category-hero--browser .category-hero__wrapper--info .category-hero__copy
+    align-items: flex-start
+    text-align: left
+
+  .category-hero--browser .category-hero__wrapper--solo .category-hero__description,
+  .category-hero--browser .category-hero__wrapper--info .category-hero__description
+    text-align: left
+
 @media (max-width: 959px)
   .category-hero__media
     display: none
 
   .category-hero__info-card
     width: 100%
+
+  .category-hero--browser .category-hero__wrapper
+    min-height: 0
+    padding: 1rem
+
+  .category-hero--browser .category-hero__description :deep(p)
+    -webkit-line-clamp: 3
 
 .animate-in-up
   animation: animate-in-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both

@@ -8,6 +8,7 @@
       :breadcrumbs="pageBreadcrumbs"
       :eyebrow="pageEyebrow"
       :show-image="false"
+      variant="browser"
       :right-info-card="activeSubCategory?.heroBlock ?? null"
       :subcategories="!isSubCategoryPage ? relatedSubCategories : null"
       :parent-url="
@@ -92,7 +93,7 @@
         </div>
 
         <CategoryActiveFilters
-          v-if="hasActiveFilters"
+          v-if="hasActiveFilters && !isDesktop"
           class="category-page__active-filters"
           :filters="manualFilters"
           :subset-clauses="activeSubsetClauses"
@@ -126,7 +127,12 @@
                 :related-posts="category?.relatedPosts ?? []"
                 :show-admin-panel="showAdminFilters"
                 :admin-filter-fields="adminFilterFields"
+                :active-filters-count="activeFiltersCount"
+                :show-header="true"
+                :show-filter-search="true"
+                :filter-search-term="filterSearchTerm"
                 @update:filters="onFiltersChange"
+                @update:filter-search-term="filterSearchTerm = $event"
                 @update:impact-expanded="
                   (value: boolean) => (impactExpanded = value)
                 "
@@ -191,13 +197,21 @@
               :related-posts="category?.relatedPosts ?? []"
               :show-admin-panel="showAdminFilters"
               :admin-filter-fields="adminFilterFields"
+              :active-filters-count="activeFiltersCount"
+              :show-header="true"
+              :show-collapse-button="true"
+              :show-filter-search="true"
+              :filter-search-term="filterSearchTerm"
               @update:filters="onFiltersChange"
+              @update:filter-search-term="filterSearchTerm = $event"
               @update:impact-expanded="
                 (value: boolean) => (impactExpanded = value)
               "
               @update:technical-expanded="
                 (value: boolean) => (technicalExpanded = value)
               "
+              @clear-mobile="clearAllFilters"
+              @collapse="filtersCollapsed = true"
             >
               <template #extra>
                 <div class="category-page__filters-cta">
@@ -258,12 +272,27 @@
             :sort-order="sortOrder"
             :search-term="searchTerm"
             :show-filters-button="true"
+            :filters-count="activeFiltersCount"
+            :active-filters-count="activeFiltersCount"
+            :loading="loadingProducts"
             @toggle-filters="filtersDrawer = true"
             @update:search-term="searchTerm = $event"
             @update:sort-field="onToolbarSortFieldUpdate"
             @update:sort-order="onToolbarSortOrderUpdate"
             @update:view-mode="viewMode = $event"
-          />
+          >
+            <template v-if="hasActiveFilters" #activeFilters>
+              <CategoryActiveFilters
+                class="category-page__toolbar-active-filters"
+                :filters="manualFilters"
+                :subset-clauses="activeSubsetClauses"
+                :field-metadata="filterFieldMap"
+                @remove-filter="onRemoveManualFilter"
+                @remove-subset-clause="onRemoveSubsetClause"
+                @clear-all="clearAllFilters"
+              />
+            </template>
+          </CategoryResultsToolbar>
 
           <v-alert
             v-if="productError"
@@ -1109,7 +1138,7 @@ const layoutStyle = computed(() => {
 
   return {
     gridTemplateColumns: `${activeWidth}px minmax(0, 1fr)`,
-    columnGap: isFiltersColumnVisible.value ? '1.75rem' : '0',
+    columnGap: isFiltersColumnVisible.value ? '1rem' : '0',
     '--filters-panel-width': `${width}px`,
     '--filters-active-width': `${activeWidth}px`,
     '--filters-resizer-hitbox': `${resizerHitbox}px`,
@@ -1272,6 +1301,7 @@ const manualFilters = ref<FilterRequestDto>({})
 const isNudgeWizardOpen = ref(false)
 const impactExpanded = ref(false)
 const technicalExpanded = ref(false)
+const filterSearchTerm = ref('')
 const lastAppliedDefaultSort = ref<string | null>(null)
 
 const areFiltersEqual = (
@@ -1501,6 +1531,11 @@ const hasActiveFilters = computed(() => {
   const manualCount = manualFilters.value.filters?.length ?? 0
   return manualCount > 0 || activeSubsetClauses.value.length > 0
 })
+
+const activeFiltersCount = computed(
+  () =>
+    (manualFilters.value.filters?.length ?? 0) + activeSubsetClauses.value.length
+)
 
 const combinedFilters = computed<FilterRequestDto | undefined>(() =>
   mergeFilterRequests(
@@ -2596,6 +2631,7 @@ const clearAllFilters = () => {
   manualFilters.value = {}
   activeSubsetIds.value = []
   searchTerm.value = ''
+  filterSearchTerm.value = ''
   impactExpanded.value = false
   technicalExpanded.value = false
   pageNumber.value = 0
@@ -2616,12 +2652,14 @@ const clearAllFilters = () => {
   flex-direction: column
 
   &__container
-    max-width: 1560px
+    max-width: none
+    padding-inline: clamp(0.75rem, 1.6vw, 2rem)
 
   &__fast-filters
     display: flex
     flex-direction: column
     gap: 0.75rem
+    margin-top: 0.75rem
 
   &__fast-filters-row
     display: flex
@@ -2720,8 +2758,8 @@ const clearAllFilters = () => {
   &__layout
     display: grid
     position: relative
-    row-gap: 1.75rem
-    column-gap: 1.75rem
+    row-gap: 1rem
+    column-gap: 1rem
     grid-template-columns: minmax(0, 1fr)
     align-items: start
     transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1), column-gap 0.3s cubic-bezier(0.4, 0, 0.2, 1)
@@ -2732,14 +2770,15 @@ const clearAllFilters = () => {
 
   &__filters-surface
     position: sticky
-    top: 96px
+    top: 76px
     align-self: start
-    max-height: calc(100vh - 136px)
+    max-height: calc(100vh - 92px)
     display: flex
     flex-direction: column
-    border-radius: 1rem
-    background: rgb(var(--v-theme-surface-glass))
-    box-shadow: 0 22px 46px -28px rgba(var(--v-theme-shadow-primary-600), 0.28)
+    border-radius: 8px
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.28)
+    background: rgba(var(--v-theme-surface-default), 0.96)
+    box-shadow: 0 14px 28px -24px rgba(var(--v-theme-shadow-primary-600), 0.32)
     overflow: hidden
     overscroll-behavior: contain
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.24s ease, box-shadow 0.24s ease
@@ -2798,9 +2837,9 @@ const clearAllFilters = () => {
   &__filters-content
     display: flex
     flex-direction: column
-    gap: 1.5rem
+    gap: 1rem
     flex: 1 1 auto
-    padding: 1.5rem 1.25rem 1.75rem
+    padding: 1rem
     overflow-y: auto
 
   &__filters-actions
@@ -2822,6 +2861,9 @@ const clearAllFilters = () => {
   &__results
     min-height: 420px
     min-width: 0
+    display: flex
+    flex-direction: column
+    gap: 0.9rem
 
   &__empty-state
     display: flex
@@ -2832,7 +2874,7 @@ const clearAllFilters = () => {
     text-align: center
     background: rgba(var(--v-theme-surface-glass), 0.4)
     backdrop-filter: blur(8px)
-    border-radius: 2rem
+    border-radius: 8px
     border: 1px dashed rgba(var(--v-theme-border-primary-strong), 0.25)
     min-height: 400px
     animation: fade-in 0.6s ease-out both
@@ -2858,7 +2900,7 @@ const clearAllFilters = () => {
     margin-top: 2rem
     padding: 1.5rem
     border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.38)
-    border-radius: 12px
+    border-radius: 8px
     background: rgba(var(--v-theme-surface-default), 0.82)
     box-shadow: 0 14px 30px -26px rgba(var(--v-theme-shadow-primary-600), 0.42)
     color: rgb(var(--v-theme-text-neutral-strong))

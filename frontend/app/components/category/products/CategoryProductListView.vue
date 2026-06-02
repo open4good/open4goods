@@ -30,14 +30,14 @@
       <div class="category-product-list__layout">
         <div class="category-product-list__content">
           <div class="category-product-list__header">
-            <h3 class="category-product-list__title">
+            <h2 class="category-product-list__title">
               {{
                 resolveListProductName(product) ||
                 (product.gtin
                   ? '#' + product.gtin
                   : $t('category.products.untitledProduct'))
               }}
-            </h3>
+            </h2>
           </div>
 
           <div class="category-product-list__meta">
@@ -110,29 +110,13 @@
         </div>
 
         <div v-if="hasVertical(product)" class="category-product-list__actions">
-          <!-- Removed best price button as it is now in micro prices -->
-          <v-btn
+          <CompareToggleButton
+            :product="product"
+            variant="button-icon"
+            size="compact"
+            appearance="plain"
             class="category-product-list__compare-button"
-            :class="{
-              'category-product-list__compare-button--active':
-                isCompareSelected(product),
-            }"
-            variant="flat"
-            :aria-pressed="isCompareSelected(product)"
-            :aria-label="getCompareButtonAriaLabel(product)"
-            :title="getCompareButtonTitle(product)"
-            :disabled="isCompareDisabled(product)"
-            @click.stop.prevent="toggleCompare(product)"
-          >
-            <v-icon
-              :icon="getCompareButtonIcon(product)"
-              size="20"
-              class="category-product-list__compare-icon"
-            />
-            <span class="category-product-list__compare-label">{{
-              getCompareButtonText(product)
-            }}</span>
-          </v-btn>
+          />
         </div>
       </div>
     </v-list-item>
@@ -147,13 +131,9 @@ import type {
   FieldMetadataDto,
   ProductDto,
 } from '~~/shared/api-client'
-import {
-  MAX_COMPARE_ITEMS,
-  useProductCompareStore,
-  type CompareListBlockReason,
-} from '~/stores/useProductCompareStore'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import ProductPriceRows from '~/components/product/ProductPriceRows.vue'
+import CompareToggleButton from '~/components/shared/ui/CompareToggleButton.vue'
 import {
   formatAttributeValue,
   resolvePopularAttributes,
@@ -276,112 +256,46 @@ const sortedFieldDisplay = (
   }
 }
 
-const compareStore = useProductCompareStore()
-
-const reasonMessage = (reason: CompareListBlockReason | undefined) => {
-  switch (reason) {
-    case 'limit-reached':
-      return t('category.products.compare.limitReached', {
-        count: MAX_COMPARE_ITEMS,
-      })
-    case 'vertical-mismatch':
-      return t('category.products.compare.differentCategory')
-    case 'missing-identifier':
-      return t('category.products.compare.missingIdentifier')
-    default:
-      return t('product.hero.compare.add')
-  }
-}
-
-const isCompareSelected = (product: ProductDto) =>
-  compareStore.hasProduct(product)
-
-const compareEligibility = (product: ProductDto) =>
-  compareStore.canAddProduct(product)
-
-const isCompareDisabled = (product: ProductDto) =>
-  !isCompareSelected(product) && !compareEligibility(product).success
-
-const toggleCompare = (product: ProductDto) => {
-  if (isCompareDisabled(product)) {
-    return
-  }
-  compareStore.toggleProduct(product)
-}
-
-const getCompareButtonText = (product: ProductDto) =>
-  isCompareSelected(product)
-    ? t('product.hero.compare.remove')
-    : t('product.hero.compare.add')
-
-const getCompareButtonIcon = (product: ProductDto) =>
-  isCompareSelected(product) ? 'mdi-minus' : 'mdi-plus'
-
-const getCompareButtonTitle = (product: ProductDto) => {
-  if (isCompareSelected(product)) {
-    return t('product.hero.compare.remove')
-  }
-
-  const eligibility = compareEligibility(product)
-  if (!eligibility.success) {
-    return reasonMessage(eligibility.reason)
-  }
-
-  return t('product.hero.compare.add')
-}
-
-const getCompareButtonAriaLabel = (product: ProductDto) => {
-  const productName = resolveListProductName(product) || ''
-
-  if (isCompareSelected(product)) {
-    if (t('product.hero.compare.ariaSelected')) {
-      return t('product.hero.compare.ariaSelected', { name: productName })
-    }
-    return t('product.hero.compare.remove')
-  }
-
-  const eligibility = compareEligibility(product)
-  if (!eligibility.success) {
-    return reasonMessage(eligibility.reason)
-  }
-
-  if (t('product.hero.compare.ariaAdd')) {
-    return t('product.hero.compare.ariaAdd', { name: productName })
-  }
-
-  return t('product.hero.compare.add')
-}
 </script>
 
 <style scoped lang="sass">
 .category-product-list
   background: transparent
+  display: flex
+  flex-direction: column
+  gap: 0.55rem
+
+  :deep(.v-list-item__prepend)
+    align-self: center
 
   &__item
     background: rgb(var(--v-theme-surface-default))
-    border-radius: 1rem
-    margin-bottom: 1rem
-    padding-inline: 1rem
-    transition: box-shadow 0.2s ease, transform 0.2s ease
+    border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.22)
+    border-radius: 8px
+    margin-bottom: 0
+    padding: 0.65rem 0.75rem
+    min-height: 128px
+    transition: border-color 0.2s ease, box-shadow 0.2s ease
 
     &:hover
-      box-shadow: 0 16px 30px rgba(21, 46, 73, 0.08)
-      transform: translateY(-2px)
+      border-color: rgba(var(--v-theme-border-primary-strong), 0.45)
+      box-shadow: 0 10px 24px -20px rgba(21, 46, 73, 0.22)
 
   &__layout
-    display: flex
-    align-items: stretch
-    gap: 1.5rem
-    flex-wrap: wrap
+    display: grid
+    grid-template-columns: minmax(260px, 1fr)
+    align-items: center
+    gap: 0.85rem
+    width: 100%
 
     @media (min-width: 992px)
-      flex-wrap: nowrap
+      grid-template-columns: minmax(300px, 1fr) minmax(190px, 240px) minmax(132px, 160px) minmax(116px, auto)
 
   &__content
     display: flex
     flex-direction: column
-    gap: 0.75rem
-    flex: 1 1 auto
+    gap: 0.42rem
+    min-width: 0
 
   &__header
     display: flex
@@ -391,34 +305,40 @@ const getCompareButtonAriaLabel = (product: ProductDto) => {
   &__title
     margin: 0
     font-weight: 600
+    font-size: 1rem
+    line-height: 1.3
     color: rgb(var(--v-theme-text-neutral-strong))
     flex: 1 1 auto
     min-width: 0
+    display: -webkit-box
+    overflow: hidden
+    -webkit-line-clamp: 2
+    -webkit-box-orient: vertical
 
   &__meta
     display: flex
     gap: 1rem
     flex-wrap: wrap
-    font-size: 0.875rem
+    font-size: 0.82rem
     color: rgb(var(--v-theme-text-neutral-secondary))
 
   &__prices-column
     display: flex
     flex-direction: column
     justify-content: center
-    width: 230px
-    flex: 0 0 auto
+    width: auto
+    min-width: 0
 
   &__status
     display: inline-flex
     align-items: center
     gap: 0.5rem
-    font-size: 0.875rem
+    font-size: 0.82rem
     color: rgb(var(--v-theme-text-neutral-secondary))
 
   &__status-text
     font-weight: 500
-    color: rgb(var(--v-theme-primary))
+    color: rgb(var(--v-theme-text-neutral-strong))
 
   &__offers
     display: inline-flex
@@ -429,24 +349,24 @@ const getCompareButtonAriaLabel = (product: ProductDto) => {
     display: flex
     align-items: center
     justify-content: center
-    width: 180px
-    flex: 0 0 auto
+    width: auto
+    min-width: 0
 
   &__actions
     display: flex
     align-items: center
     justify-content: flex-end
     gap: 0.5rem
-    flex: 0 0 auto
 
   &__score-fallback
-    font-size: 0.875rem
-    color: rgb(var(--v-theme-text-neutral-secondary))
+    font-size: 0.82rem
+    font-weight: 600
+    color: rgb(var(--v-theme-text-neutral-strong))
 
   &__attributes
     display: flex
     flex-wrap: wrap
-    gap: 0.5rem 1.25rem
+    gap: 0.32rem 0.8rem
     margin: 0
     padding: 0
     list-style: none
@@ -455,7 +375,7 @@ const getCompareButtonAriaLabel = (product: ProductDto) => {
     display: flex
     gap: 0.35rem
     align-items: baseline
-    font-size: 0.875rem
+    font-size: 0.82rem
 
   &__attribute-label
     font-weight: 500
@@ -475,11 +395,11 @@ const getCompareButtonAriaLabel = (product: ProductDto) => {
       color: rgb(var(--v-theme-text-neutral-strong))
 
   &__sorted-attribute
-    margin-top: 0.5rem
+    margin-top: 0.15rem
     display: inline-flex
     gap: 0.35rem
     align-items: baseline
-    font-size: 1.1em
+    font-size: 0.88rem
 
   &__sorted-attribute-label
     font-weight: 600
@@ -490,30 +410,21 @@ const getCompareButtonAriaLabel = (product: ProductDto) => {
     color: rgb(var(--v-theme-text-neutral-strong))
 
   &__compare-button
-    background: rgba(var(--v-theme-surface-glass-strong), 0.5)
-    backdrop-filter: blur(8px)
-    border: 1px solid rgba(var(--v-theme-accent-primary-highlight), 0.2)
-    color: rgb(var(--v-theme-accent-primary-highlight))
-    padding: 0 1.25rem
-    height: 48px
-    border-radius: 14px
-    text-transform: none
-    letter-spacing: 0.01em
-    font-weight: 600
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06)
-    transition: all 0.25s ease
+    justify-self: end
 
-    &:hover
-      background: rgba(var(--v-theme-accent-primary-highlight), 0.1)
+@media (max-width: 991px)
+  .category-product-list
+    :deep(.v-list-item__prepend)
+      margin-inline-end: 0.75rem
 
-    &--active
-      background: linear-gradient(120deg, rgba(var(--v-theme-primary), 0.16), rgba(var(--v-theme-primary), 0.2))
-      color: rgb(var(--v-theme-primary))
-      box-shadow: 0 16px 32px rgba(var(--v-theme-primary), 0.2)
+    &__item
+      min-height: 0
 
-  &__compare-icon
-    margin-inline-end: 0.25rem
+    &__layout
+      align-items: start
 
-  &__compare-label
-    font-size: 0.98rem
+    &__prices-column,
+    &__score,
+    &__actions
+      justify-content: flex-start
 </style>

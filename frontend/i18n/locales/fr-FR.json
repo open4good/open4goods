@@ -706,6 +706,7 @@
       "mobileClear": "Effacer les filtres",
       "noMatch": "Aucune option correspondante",
       "rangeAriaSuffix": "sélection d'intervalle",
+      "searchLabel": "Rechercher des filtres",
       "searchOptions": "Rechercher dans les options",
       "condition": {
         "new": "Neuf",
@@ -3764,7 +3765,16 @@
   },
   "products": {
     "compare": {
-      "addToList": "Ajouter à la comparaison"
+      "addToList": "Ajouter à la comparaison",
+      "addButtonShort": "Comparer",
+      "addedButtonShort": "Ajouté",
+      "addButtonFull": "Ajouter au comparateur",
+      "removeButtonFull": "Retirer du comparateur",
+      "differentCategory": "Comparez uniquement des produits de la même catégorie.",
+      "limitReached": "Vous pouvez comparer jusqu'à {count} produits.",
+      "missingIdentifier": "Ce produit ne peut pas être comparé.",
+      "removeFromList": "Retirer de la comparaison",
+      "removeSingle": "Retirer {name}"
     }
   },
   "dataviz": {

@@ -1,16 +1,10 @@
 package org.open4goods.crawler.services.fetching;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -47,6 +41,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService impl
 
 	
 	private static final Logger logger = LoggerFactory.getLogger(CsvDatasourceFetchingService.class);
+	private final CsvDialectDetector csvDialectDetector = new CsvDialectDetector();
 
 
 	private static final Integer JOBS_QUEUE_CAPACITY = 1000;
@@ -118,28 +113,7 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService impl
 
 
 	/**
-	 * Candidate column separators in priority order (higher index = higher preference when tied).
-	 * Single-quote is intentionally absent: it is not a valid RFC-4180 quote character and is
-	 * extremely common in French/Spanish text, causing false detections.
-	 */
-	private static final char[] SEPARATOR_CANDIDATES = {'\t', '|', ';', ','};
-
-	/** Only {@code "} is a RFC-4180 quote character. Backtick never appears in real feeds. */
-	private static final char[] QUOTE_CANDIDATES = {'"'};
-
-	/** Number of data lines (after header) sampled for per-line column-count stability scoring. */
-	private static final int DETECTION_SAMPLE_LINES = 500;
-
-	/**
-	 * Detects the CSV dialect (separator and quote character) by combining two signals:
-	 * <ol>
-	 *   <li>Raw occurrence count for each candidate character.</li>
-	 *   <li>Per-line column-count <em>consistency</em> score: for a real CSV every data line has
-	 *       the same number of fields; French descriptions inflate raw apostrophe counts but
-	 *       produce wildly variable field counts per line, making this score very low.</li>
-	 * </ol>
-	 * The winning dialect is the one whose consistency score is highest. Raw count is used only
-	 * as a tie-breaker.
+	 * Detects the CSV dialect (separator and quote character).
 	 *
 	 * @param file    the CSV file to inspect
 	 * @param charset encoding used to read the file (e.g. {@code UTF-8} or {@code ISO-8859-1})
@@ -149,137 +123,11 @@ public class CsvDatasourceFetchingService extends DatasourceFetchingService impl
 	public CsvSchema detectSchema(File file, Charset charset) throws IOException
 	{
 	    logger.info("Autodetecting CSV schema for file {} (charset {})", file.getAbsolutePath(), charset);
-
-	    // Sample up to DETECTION_SAMPLE_LINES data lines (skip the header)
-	    List<String> sampleLines = new ArrayList<>(DETECTION_SAMPLE_LINES + 1);
-	    try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), charset)))
-	    {
-	        String line;
-	        int read = 0;
-	        while ((line = br.readLine()) != null && read <= DETECTION_SAMPLE_LINES)
-	        {
-	            sampleLines.add(line);
-	            read++;
-	        }
-	    }
-
-	    if (sampleLines.isEmpty())
-	    {
-	        logger.warn("CSV file is empty, using default schema for {}", file.getName());
-	        return CsvSchema.builder().setUseHeader(true).build();
-	    }
-
-	    char bestSep = ',';
-	    char bestQuote = '"';
-	    double bestScore = -1.0;
-
-	    for (char sep : SEPARATOR_CANDIDATES)
-	    {
-	        for (char quote : QUOTE_CANDIDATES)
-	        {
-	            double score = consistencyScore(sampleLines, sep, quote);
-	            if (score > bestScore)
-	            {
-	                bestScore = score;
-	                bestSep = sep;
-	                bestQuote = quote;
-	            }
-	        }
-	    }
-
-	    CsvSchema schema = CsvSchema.builder()
-	        .setColumnSeparator(bestSep)
-	        .setQuoteChar(bestQuote)
-	        .setUseHeader(true)
-	        .build();
-
-	    logger.warn("Auto detected schema is quoteChar:{} separatorChar:{} escapeChar:none (consistency score: {:.3f})",
-	        bestQuote, bestSep, bestScore);
-
+	    CsvSchema schema = csvDialectDetector.detectSchema(file, charset);
+	    logger.warn("Auto detected schema is quoteChar:{} separatorChar:{} escapeChar:none",
+		        schema.getQuoteChar() == -1 ? "none" : Character.toString((char) schema.getQuoteChar()),
+		        schema.getColumnSeparator() == -1 ? "none" : Character.toString((char) schema.getColumnSeparator()));
 	    return schema;
-	}
-
-	/**
-	 * Scores a candidate {@code (separator, quote)} dialect by measuring how consistently
-	 * each sampled line produces the same number of unquoted fields.
-	 * <p>
-	 * Algorithm: count raw separator occurrences <em>outside</em> quoted regions for every
-	 * line, collect the frequency distribution, and return the fraction of lines that agree
-	 * on the modal column count — weighted by that column count so that a 20-column agreement
-	 * scores higher than a 2-column agreement.
-	 * </p>
-	 *
-	 * @param lines sample lines (including the header at index 0)
-	 * @param sep   separator character to test
-	 * @param quote quote character to test
-	 * @return consistency score in [0, 1]; higher is better
-	 */
-	private double consistencyScore(List<String> lines, char sep, char quote)
-	{
-	    if (lines.size() < 2)
-	    {
-	        return 0.0;
-	    }
-
-	    Map<Integer, Integer> colCountFreq = new HashMap<>();
-	    // Skip line 0 (header) — count from line 1 onwards
-	    for (int i = 1; i < lines.size(); i++)
-	    {
-	        int cols = countFieldsOutsideQuotes(lines.get(i), sep, quote);
-	        colCountFreq.merge(cols, 1, Integer::sum);
-	    }
-
-	    int dataLines = lines.size() - 1;
-	    // Find modal column count
-	    int modalCount = colCountFreq.entrySet().stream()
-	        .max(Map.Entry.comparingByValue())
-	        .map(Map.Entry::getKey)
-	        .orElse(0);
-
-	    if (modalCount == 0)
-	    {
-	        return 0.0;
-	    }
-
-	    int modalFreq = colCountFreq.getOrDefault(modalCount, 0);
-	    // Weight by column count so many-column agreement beats few-column agreement
-	    return ((double) modalFreq / dataLines) * Math.log1p(modalCount);
-	}
-
-	/**
-	 * Counts the number of fields in {@code line} by splitting on {@code sep} while respecting
-	 * quoted regions opened and closed by {@code quote}.
-	 *
-	 * @param line  raw CSV line
-	 * @param sep   separator character
-	 * @param quote quote character
-	 * @return number of fields (= number of separators outside quotes + 1)
-	 */
-	private int countFieldsOutsideQuotes(String line, char sep, char quote)
-	{
-	    int fields = 1;
-	    boolean inQuotes = false;
-	    for (int i = 0; i < line.length(); i++)
-	    {
-	        char c = line.charAt(i);
-	        if (c == quote)
-	        {
-	            // Doubled-quote escape: "" inside a quoted field is not a closing quote
-	            if (inQuotes && i + 1 < line.length() && line.charAt(i + 1) == quote)
-	            {
-	                i++; // skip the second quote
-	            }
-	            else
-	            {
-	                inQuotes = !inQuotes;
-	            }
-	        }
-	        else if (c == sep && !inQuotes)
-	        {
-	            fields++;
-	        }
-	    }
-	    return fields;
 	}
 
 	

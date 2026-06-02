@@ -827,6 +827,7 @@
       "mobileClear": "Clear all filters",
       "noMatch": "No matching options",
       "rangeAriaSuffix": "range selection",
+      "searchLabel": "Search filters",
       "searchOptions": "Search options",
       "condition": {
         "new": "New",
@@ -3854,6 +3855,20 @@
         "title": "Documentation browser",
         "description": "Explore the documentation tree, search pages, and read content inline."
       }
+    }
+  },
+  "products": {
+    "compare": {
+      "addToList": "Add to compare",
+      "addButtonShort": "Compare",
+      "addedButtonShort": "Added",
+      "addButtonFull": "Add to compare",
+      "removeButtonFull": "Remove from compare",
+      "differentCategory": "Only compare products from the same category.",
+      "limitReached": "You can compare up to {count} products.",
+      "missingIdentifier": "Cannot compare this product.",
+      "removeFromList": "Remove from compare",
+      "removeSingle": "Remove {name}"
     }
   },
   "dataviz": {

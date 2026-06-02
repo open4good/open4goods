@@ -34,6 +34,10 @@ const VDataTableStub = defineComponent({
       type: Array,
       default: () => [],
     },
+    hideDefaultFooter: {
+      type: Boolean,
+      default: false,
+    },
   },
   emits: ['update:sort-by', 'click:row'],
   setup(_props, { slots }) {
@@ -119,7 +123,7 @@ const mountTable = async (props?: Record<string, unknown>) => {
               h('div', { 'data-test': 'impact-score-stub' }, slots.default?.())
           },
         }),
-        CategoryProductCompareToggle: CompareToggleStub,
+        CompareToggleButton: CompareToggleStub,
       },
     },
   })
@@ -242,5 +246,13 @@ describe('CategoryProductTable', () => {
       ECOSCORE_RELATIVE_FIELD
     )
     expect(wrapper.emitted('update:sort-order')?.[2]?.[0]).toBe('asc')
+  })
+
+  it('hides the internal Vuetify footer for external pagination', async () => {
+    const wrapper = await mountTable()
+
+    const table = wrapper.getComponent(VDataTableStub)
+
+    expect(table.props('hideDefaultFooter')).toBe(true)
   })
 })

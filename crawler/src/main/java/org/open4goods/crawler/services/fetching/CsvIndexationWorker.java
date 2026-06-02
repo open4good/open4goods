@@ -62,7 +62,7 @@ import edu.uci.ics.crawler4j.crawler.CrawlController;
  *
  * <p>The lenient {@link #CSV_MAPPER} tolerates trailing columns and missing columns so that a
  * single malformed row does not abort the whole feed. Dialect (separator, quote) is
- * auto-detected by {@link CsvDatasourceFetchingService#detectSchema} and may be overridden
+ * auto-detected by {@link CsvDialectDetector} and may be overridden
  * per-datasource in YAML.
  *
  * @author goulven
@@ -320,7 +320,18 @@ public class CsvIndexationWorker implements Runnable {
 
 	    CsvSchema schema = csvService.detectSchema(destFile, charset);
 
-	    // YAML-level overrides always take precedence over auto-detection
+	    schema = applyCsvSchemaOverrides(schema, config);
+
+	    dedicatedLogger.warn("Final schema: quoteChar:{} separatorChar:{} escapeChar:{}",
+	        schema.getQuoteChar() == -1 ? "none" : Character.toString((char) schema.getQuoteChar()),
+	        schema.getColumnSeparator() == -1 ? "none" : Character.toString((char) schema.getColumnSeparator()),
+	        schema.getEscapeChar() == -1 ? "none" : Character.toString((char) schema.getEscapeChar()));
+
+	    return schema;
+	}
+
+	static CsvSchema applyCsvSchemaOverrides(CsvSchema schema, CsvDataSourceProperties config)
+	{
 	    if (config.getCsvQuoteChar() != null)
 	    {
 	        schema = schema.withQuoteChar(config.getCsvQuoteChar());
@@ -333,12 +344,6 @@ public class CsvIndexationWorker implements Runnable {
 	    {
 	        schema = schema.withColumnSeparator(config.getCsvSeparator());
 	    }
-
-	    dedicatedLogger.warn("Final schema: quoteChar:{} separatorChar:{} escapeChar:{}",
-	        schema.getQuoteChar() == -1 ? "none" : Character.toString((char) schema.getQuoteChar()),
-	        schema.getColumnSeparator() == -1 ? "none" : Character.toString((char) schema.getColumnSeparator()),
-	        schema.getEscapeChar() == -1 ? "none" : Character.toString((char) schema.getEscapeChar()));
-
 	    return schema;
 	}
 

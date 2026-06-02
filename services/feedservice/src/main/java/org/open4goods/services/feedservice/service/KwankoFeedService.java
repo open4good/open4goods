@@ -14,10 +14,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.open4goods.commons.config.yml.datasource.CsvDataSourceProperties;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
@@ -104,33 +106,27 @@ public class KwankoFeedService extends AbstractFeedService
             return result;
         }
 
-        for (JsonNode ad : adsNode)
+        KwankoFeedSelection selection = selectCsvProductFeedAds(adsNode);
+        for (KwankoProductFeedAd adCandidate : selection.csvAds())
         {
-            String feedUrl = firstTrackedValue(ad.path("tracked_material_per_websites"), "product_feed");
-            if (isBlank(feedUrl))
-            {
-                logger.warn("Skipping Kwanko product feed '{}' because no product_feed URL was found.", textOrNull(ad, "id"));
-                continue;
-            }
-
-            String feedKey = firstNonBlank(textOrNull(ad, "name"), textOrNull(ad, "id"));
-            if (isBlank(feedKey))
-            {
-                logger.warn("Skipping Kwanko product feed because no id/name was found.");
-                continue;
-            }
-
-            DataSourceProperties ds = getVolatileDatasource(feedKey, feedConfig, feedUrl);
+            JsonNode ad = adCandidate.ad();
+            DataSourceProperties ds = getVolatileDatasource(adCandidate.feedKey(), feedConfig, adCandidate.feedUrl());
             applyKwankoCsvDefaults(ds);
             JsonNode campaign = ad.path("campaign");
-            ds.setDatasourceConfigName(firstNonBlank(textOrNull(campaign, "name"), feedKey));
-            ds.setName(extractNameAndTld(textOrNull(campaign, "url")));
-            ds.setPortalUrl(textOrNull(campaign, "url"));
+            ds.setDatasourceConfigName(firstNonBlank(textOrNull(campaign, "name"), adCandidate.feedKey()));
+            String campaignUrl = textOrNull(campaign, "url");
+            ds.setName(campaignUrl != null ? extractNameAndTld(campaignUrl) : adCandidate.feedKey());
+            ds.setPortalUrl(campaignUrl);
             ds.setLogo(textOrNull(campaign, "logo"));
             ds.setDescription(textOrNull(campaign, "description"));
             result.add(ds);
         }
 
+        logger.info("Kwanko product-feed classification: csv_emitted={}, xml_replaced_by_csv={}, xml_only={}, ambiguous={}",
+                result.size(),
+                selection.xmlReplacedByCsv(),
+                selection.xmlOnly(),
+                selection.ambiguous());
         logger.info("Kwanko datasources loaded: {} entries", result.size());
         return result;
     }
@@ -386,6 +382,184 @@ public class KwankoFeedService extends AbstractFeedService
         }
     }
 
+    KwankoFeedSelection selectCsvProductFeedAds(JsonNode adsNode)
+    {
+        if (adsNode == null || !adsNode.isArray())
+        {
+            return new KwankoFeedSelection(List.of(), 0, 0, 0);
+        }
+
+        List<KwankoProductFeedAd> candidates = new ArrayList<>();
+        int xmlOnly = 0;
+        for (JsonNode ad : adsNode)
+        {
+            String feedUrl = firstTrackedValue(ad.path("tracked_material_per_websites"), "product_feed");
+            if (isBlank(feedUrl))
+            {
+                logger.warn("Skipping Kwanko product feed '{}' because no product_feed URL was found.", textOrNull(ad, "id"));
+                continue;
+            }
+
+            String feedKey = firstNonBlank(textOrNull(ad, "name"), textOrNull(ad, "id"));
+            if (isBlank(feedKey))
+            {
+                logger.warn("Skipping Kwanko product feed because no id/name was found.");
+                continue;
+            }
+
+            KwankoFeedFormat format = KwankoFeedFormat.from(textOrNull(ad, "format"), feedUrl);
+            if (format == KwankoFeedFormat.UNKNOWN)
+            {
+                logger.warn("Skipping Kwanko product feed '{}' (id={}) because format '{}' is unsupported.",
+                        feedKey,
+                        textOrNull(ad, "id"),
+                        textOrNull(ad, "format"));
+                continue;
+            }
+            candidates.add(new KwankoProductFeedAd(ad, feedKey, feedUrl, format, campaignId(ad), normalizedFeedName(feedKey)));
+        }
+
+        Map<String, List<KwankoProductFeedAd>> byEquivalentKey = candidates.stream()
+                .collect(Collectors.groupingBy(KwankoProductFeedAd::equivalentKey, LinkedHashMap::new, Collectors.toList()));
+
+        Set<KwankoProductFeedAd> emitted = new LinkedHashSet<>();
+        Set<KwankoProductFeedAd> unresolvedXml = new LinkedHashSet<>();
+        int xmlReplacedByCsv = 0;
+        int ambiguous = 0;
+
+        for (List<KwankoProductFeedAd> group : byEquivalentKey.values())
+        {
+            List<KwankoProductFeedAd> csv = byFormat(group, KwankoFeedFormat.CSV);
+            List<KwankoProductFeedAd> xml = byFormat(group, KwankoFeedFormat.XML);
+            emitted.addAll(csv);
+            if (!xml.isEmpty())
+            {
+                if (csv.size() == 1)
+                {
+                    xmlReplacedByCsv += xml.size();
+                }
+                else if (csv.size() > 1)
+                {
+                    ambiguous += xml.size();
+                }
+                else
+                {
+                    unresolvedXml.addAll(xml);
+                }
+            }
+        }
+
+        Map<String, List<KwankoProductFeedAd>> csvByCampaign = emitted.stream()
+                .filter(ad -> !isBlank(ad.campaignId()))
+                .collect(Collectors.groupingBy(KwankoProductFeedAd::campaignId));
+        Map<String, List<KwankoProductFeedAd>> unresolvedXmlByCampaign = unresolvedXml.stream()
+                .filter(ad -> !isBlank(ad.campaignId()))
+                .collect(Collectors.groupingBy(KwankoProductFeedAd::campaignId));
+
+        Set<KwankoProductFeedAd> resolvedXml = new HashSet<>();
+        for (Map.Entry<String, List<KwankoProductFeedAd>> entry : unresolvedXmlByCampaign.entrySet())
+        {
+            List<KwankoProductFeedAd> campaignCsv = csvByCampaign.getOrDefault(entry.getKey(), List.of());
+            List<KwankoProductFeedAd> campaignXml = entry.getValue();
+            if (campaignCsv.isEmpty())
+            {
+                continue;
+            }
+            else if (campaignCsv.size() == 1 && campaignXml.size() == 1)
+            {
+                xmlReplacedByCsv++;
+                resolvedXml.add(campaignXml.getFirst());
+            }
+            else
+            {
+                ambiguous += campaignXml.size();
+                resolvedXml.addAll(campaignXml);
+            }
+        }
+
+        for (KwankoProductFeedAd xml : unresolvedXml)
+        {
+            if (resolvedXml.contains(xml))
+            {
+                continue;
+            }
+            xmlOnly++;
+        }
+
+        return new KwankoFeedSelection(List.copyOf(emitted), xmlReplacedByCsv, xmlOnly, ambiguous);
+    }
+
+    private List<KwankoProductFeedAd> byFormat(List<KwankoProductFeedAd> group, KwankoFeedFormat format)
+    {
+        return group.stream().filter(ad -> ad.format() == format).toList();
+    }
+
+    private String campaignId(JsonNode ad)
+    {
+        return firstNonBlank(textOrNull(ad.path("campaign"), "id"), textOrNull(ad, "campaign_id"));
+    }
+
+    private String normalizedFeedName(String value)
+    {
+        if (value == null)
+        {
+            return "";
+        }
+        return value.trim().toLowerCase().replaceAll("[^a-z0-9]+", "");
+    }
+
+    record KwankoFeedSelection(List<KwankoProductFeedAd> csvAds,
+                               int xmlReplacedByCsv,
+                               int xmlOnly,
+                               int ambiguous)
+    {
+    }
+
+    record KwankoProductFeedAd(JsonNode ad,
+                               String feedKey,
+                               String feedUrl,
+                               KwankoFeedFormat format,
+                               String campaignId,
+                               String normalizedName)
+    {
+        String equivalentKey()
+        {
+            return campaignId + "|" + normalizedName;
+        }
+    }
+
+    enum KwankoFeedFormat
+    {
+        CSV,
+        XML,
+        UNKNOWN;
+
+        private static final Map<String, KwankoFeedFormat> FORMATS = Map.of(
+                "csv", CSV,
+                "xml", XML,
+                "xmf", XML);
+
+        static KwankoFeedFormat from(String format, String feedUrl)
+        {
+            String normalized = format == null ? "" : format.trim().toLowerCase();
+            KwankoFeedFormat fromFormat = FORMATS.get(normalized);
+            if (fromFormat != null)
+            {
+                return fromFormat;
+            }
+            String normalizedUrl = feedUrl == null ? "" : feedUrl.toLowerCase();
+            if (normalizedUrl.contains(".xml") || normalizedUrl.contains("format=xml"))
+            {
+                return XML;
+            }
+            if (normalizedUrl.contains(".csv") || normalizedUrl.contains("format=csv"))
+            {
+                return CSV;
+            }
+            return isBlank(normalized) ? CSV : UNKNOWN;
+        }
+    }
+
     private JsonNode retrieveKwankoCampaigns() throws Exception
     {
         return readCachedJson(BASE_URL + "/publishers/campaigns?campaign_states=active");
@@ -405,9 +579,11 @@ public class KwankoFeedService extends AbstractFeedService
 
     private JsonNode retrieveKwankoConversions(Instant from, Instant to) throws Exception
     {
+        // Kwanko rejects the 'Z' suffix from ISO_INSTANT; it requires the explicit '+00:00' offset form.
+        DateTimeFormatter kwankoFmt = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
         String endpoint = BASE_URL + "/publishers/conversions"
-                + "?completion_date_from=" + HttpUtils.urlEncode(DateTimeFormatter.ISO_INSTANT.format(from))
-                + "&completion_date_to=" + HttpUtils.urlEncode(DateTimeFormatter.ISO_INSTANT.format(to));
+                + "?completion_date_from=" + HttpUtils.urlEncode(kwankoFmt.format(from.atOffset(java.time.ZoneOffset.UTC)))
+                + "&completion_date_to=" + HttpUtils.urlEncode(kwankoFmt.format(to.atOffset(java.time.ZoneOffset.UTC)));
         return readCachedJson(endpoint);
     }
 
@@ -420,7 +596,7 @@ public class KwankoFeedService extends AbstractFeedService
     private JsonNode getJson(String endpoint) throws Exception
     {
         HttpRequest request = HttpRequest.newBuilder(URI.create(endpoint))
-                .header("access-token", token)
+                .header("Authorization", "Bearer " + token)
                 .header("Accept", "application/json")
                 .GET()
                 .build();
@@ -667,7 +843,7 @@ public class KwankoFeedService extends AbstractFeedService
         return null;
     }
 
-    private boolean isBlank(String value)
+    private static boolean isBlank(String value)
     {
         return value == null || value.trim().isEmpty();
     }

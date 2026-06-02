@@ -18,8 +18,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.ai.AiReview;
-import org.open4goods.model.attribute.ProductAttribute;
-import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -80,12 +78,16 @@ class ReviewGenerationServiceReproductionTest {
     }
 
     @Test
-    void generateReviewAsync_ShouldSetCorrectDatasourceName_WhenProviderIsGemini() throws Exception {
-        // Setup
+    void generateReviewAsync_ShouldNotPersistRawTextModelAttributes() throws Exception {
+        // The text-generation model must NOT write attributes back into the product.
+        // Attributes are owned by the dedicated extraction stage, which validates them
+        // against the vertical's canonical attribute configs. A non-canonical attribute
+        // emitted by the text model (here "Display Size", absent from the empty test
+        // vertical) must therefore never end up on the product.
         Product product = new Product();
         product.setId(1001L);
         product.setReviews(new Localisable<>()); // No reviews
-        
+
         VerticalConfig verticalConfig = new VerticalConfig();
         verticalConfig.setId("test-vertical");
 
@@ -102,23 +104,19 @@ class ReviewGenerationServiceReproductionTest {
         promptVariables.put("OFFER_NAMES", "TestOffer");
         promptVariables.put("IMPACTSCORE_POSITION", "TestPosition");
         promptVariables.put("COMMON_ATTRIBUTES", "TestAttributes");
-        
+
         when(preprocessingService.preparePromptVariables(any(), any(), any(), any())).thenReturn(promptVariables);
 
-        // Mock AI Response
+        // Mock AI Response: the text model emits an attribute that the new contract ignores.
         AiReview aiReview = new AiReview();
         aiReview.setDescription("A valid review description longer than 20 characters.");
         aiReview.setAttributes(List.of(
             new AiReview.AiAttribute("Display Size", "55 inches", 1)
         ));
-        
-        Map<String, Object> metadata = new HashMap<>();
-        metadata.put("provider", "gemini");
-        metadata.put("model", "gemini-1.5-pro");
 
         PromptResponse<AiReview> promptResponse = new PromptResponse<>();
         promptResponse.setBody(aiReview);
-        promptResponse.setMetadata(metadata);
+        promptResponse.setMetadata(new HashMap<>());
 
         // Two-phase: mock attribute extraction (phase 1) and text generation (phase 2).
         PromptResponse<AttributeExtractionResult> attrResponse = new PromptResponse<>();
@@ -132,19 +130,17 @@ class ReviewGenerationServiceReproductionTest {
         // Wait for asynchronous execution
         waitForCompletion(1001L);
 
-        // Assert
+        // Assert success
         ReviewGenerationStatus status = reviewGenerationService.getProcessStatus(1001L);
         assertThat(status.getStatus()).isEqualTo(ReviewGenerationStatus.Status.SUCCESS);
 
-        // Verify Product Attributes
-        // Since we are mocking productRepository, existing attributes might be empty unless we put them or the service modified the product object directly (which it does)
-        assertThat(product.getAttributes().getAll()).containsKey("Display Size");
-        ProductAttribute attr = product.getAttributes().getAll().get("Display Size");
-        assertThat(attr).isNotNull();
-        assertThat(attr.getSource()).isNotEmpty();
-        
-        SourcedAttribute sourcedAttr = attr.getSource().iterator().next();
-        assertThat(sourcedAttr.getDataSourcename()).isEqualTo("gemini");
+        // The non-canonical text-model attribute must NOT have been merged into the product.
+        assertThat(product.getAttributes().getAll()).doesNotContainKey("Display Size");
+
+        // The persisted review carries only validated product attributes (none here).
+        AiReview persisted = status.getResult().getReview();
+        assertThat(persisted).isNotNull();
+        assertThat(persisted.getAttributes()).isEmpty();
     }
 
     private void waitForCompletion(long upc) throws InterruptedException {

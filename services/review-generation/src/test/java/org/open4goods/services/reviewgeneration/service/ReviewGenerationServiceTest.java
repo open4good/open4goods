@@ -237,7 +237,7 @@ class ReviewGenerationServiceTest {
     }
 
     @Test
-    void shouldGenerateReviewBatch_WithGrounding_DoesNotThrowException() throws Exception {
+    void shouldGenerateReviewBatch_UsesExternalSources_DoesNotThrowException() throws Exception {
         // Setup
         Product product = new Product();
         product.setId(1234567890123L);
@@ -248,15 +248,14 @@ class ReviewGenerationServiceTest {
         org.open4goods.model.vertical.VerticalConfig verticalConfig = new org.open4goods.model.vertical.VerticalConfig();
         verticalConfig.setId("tv");
 
-        // Mock Prompt Config with MODEL_WEB_SEARCH
+        // Grounding has been removed: review generation is always EXTERNAL_SOURCES.
         org.open4goods.services.prompt.config.PromptConfig promptConfig = new org.open4goods.services.prompt.config.PromptConfig();
-        promptConfig.setRetrievalMode(org.open4goods.services.prompt.config.RetrievalMode.MODEL_WEB_SEARCH);
         org.mockito.Mockito.when(genAiService.getPromptConfig(org.mockito.ArgumentMatchers.any())).thenReturn(promptConfig);
 
-        // Mock preprocessing.buildBasePromptVariables
+        // Mock preprocessing.preparePromptVariables (the only retrieval path now)
         java.util.Map<String, Object> variables = new java.util.HashMap<>();
         variables.put("VAR", "VALUE");
-        org.mockito.Mockito.when(preprocessingService.buildBasePromptVariables(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any())).thenReturn(variables);
+        org.mockito.Mockito.when(preprocessingService.preparePromptVariables(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any())).thenReturn(variables);
 
         // Mock BatchPromptService to return a dummy job ID
         org.mockito.Mockito.when(batchAiService.batchPromptRequest(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any())).thenReturn("job-123");
@@ -266,9 +265,9 @@ class ReviewGenerationServiceTest {
 
         // Verify
         assertThat(jobId).isEqualTo("job-123");
-        // Verify that buildBasePromptVariables was called (and not preparePromptVariables)
-        org.mockito.Mockito.verify(preprocessingService).buildBasePromptVariables(org.mockito.ArgumentMatchers.eq(product), org.mockito.ArgumentMatchers.eq(verticalConfig));
-        org.mockito.Mockito.verify(preprocessingService, org.mockito.Mockito.never()).preparePromptVariables(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+        // Verify that preparePromptVariables was called (and not buildBasePromptVariables)
+        org.mockito.Mockito.verify(preprocessingService).preparePromptVariables(org.mockito.ArgumentMatchers.eq(product), org.mockito.ArgumentMatchers.eq(verticalConfig), org.mockito.ArgumentMatchers.any());
+        org.mockito.Mockito.verify(preprocessingService, org.mockito.Mockito.never()).buildBasePromptVariables(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
     }
 
     @Test

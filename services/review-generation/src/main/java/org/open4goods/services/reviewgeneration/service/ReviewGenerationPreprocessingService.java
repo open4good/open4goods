@@ -710,22 +710,57 @@ public class ReviewGenerationPreprocessingService {
 		String url = result == null ? "" : result.link();
 		String earlyContent = firstContentZone(content);
 		String searchableZone = normalizeForTextMatching(String.join("\n", title, url, earlyContent));
-		if (!searchableZone.contains(normalizedBrand)) {
-			// Compound brand names (e.g. "LG Electronics", "Samsung Electronics") often appear as
-			// individual words on product pages. Fall back to checking each word of the brand.
-			boolean anyBrandWordMatches = Arrays.stream(brand.split("\\s+"))
-					.map(this::normalizeForTextMatching)
-					.filter(w -> w.length() >= 2)
-					.anyMatch(searchableZone::contains);
-			if (!anyBrandWordMatches) {
-				return false;
-			}
+		if (!brandZoneMatches(brand, searchableZone)) {
+			return false;
 		}
 		return modelsToCheck.stream().anyMatch(model -> modelMatchesZone(model, searchableZone));
 	}
 
 	private boolean isRelevantContent(String content, String brand, String primaryModel, Set<String> alternateModels) {
 		return isRelevantContent(content, new GoogleSearchResult("", ""), brand, primaryModel, alternateModels);
+	}
+
+	/**
+	 * Returns true when the searchable zone carries the product brand, one of its
+	 * sibling-brand aliases (e.g. BSH rebadges a Bosch model as Siemens), or a distinctive
+	 * (non-generic) brand word. Generic tokens such as "electronics" are excluded so they
+	 * do not produce spurious matches.
+	 */
+	private boolean brandZoneMatches(String brand, String normalizedZone) {
+		if (brand == null || brand.isBlank()) {
+			return false;
+		}
+		String normalizedBrand = normalizeForTextMatching(brand);
+		if (!normalizedBrand.isBlank() && normalizedZone.contains(normalizedBrand)) {
+			return true;
+		}
+		for (String alias : brandAliasesFor(brand)) {
+			String normalizedAlias = normalizeForTextMatching(alias);
+			if (!normalizedAlias.isBlank() && normalizedZone.contains(normalizedAlias)) {
+				return true;
+			}
+		}
+		return Arrays.stream(brand.split("\\s+"))
+				.map(this::normalizeForTextMatching)
+				.filter(word -> word.length() >= 2 && !GENERIC_BRAND_TOKENS.contains(word))
+				.anyMatch(normalizedZone::contains);
+	}
+
+	/** Resolves the configured sibling-brand aliases for a product brand (symmetric, case-insensitive). */
+	private Set<String> brandAliasesFor(String brand) {
+		Map<String, List<String>> aliases = properties.getBrandAliases();
+		if (brand == null || brand.isBlank() || aliases == null || aliases.isEmpty()) {
+			return Set.of();
+		}
+		String key = brand.trim().toLowerCase(Locale.ROOT);
+		Set<String> result = new HashSet<>();
+		aliases.forEach((aliasKey, aliasValues) -> {
+			if (aliasKey != null && !aliasKey.isBlank() && key.contains(aliasKey.toLowerCase(Locale.ROOT))
+					&& aliasValues != null) {
+				result.addAll(aliasValues);
+			}
+		});
+		return result;
 	}
 
 	private String firstContentZone(String content) {
@@ -2567,12 +2602,11 @@ public class ReviewGenerationPreprocessingService {
 				return 0;
 			}
 			int score = 0;
-			// Split compound brands (e.g. "LG Electronics") and check each word
-			// individually so "lg.com" matches even though "lgelectronics" does not.
-			boolean brandInHost = java.util.Arrays.stream(product.brand().split("\\s+"))
-					.map(this::normalizeForUrlMatching)
-					.filter(w -> w.length() >= 2)
-					.anyMatch(host::contains);
+			// Match brand tokens against whole host domain labels (split on dots/hyphens),
+			// not loose substrings. This prevents a reseller host such as
+			// "yellowelectronics.co.uk" from matching the generic "electronics" token of a
+			// "LG Electronics" brand and being mistaken for an official LG domain.
+			boolean brandInHost = brandMatchesHostLabel(product.brand(), url.getHost());
 			if (brandInHost || configuredOfficialHost) {
 				score += 8;
 			}
@@ -2632,6 +2666,53 @@ public class ReviewGenerationPreprocessingService {
 				: properties.getOfficialUrlExcludedDomains();
 		return excludedDomains.stream().filter(domain -> domain != null && !domain.isBlank())
 				.map(this::normalizeForUrlMatching).anyMatch(host::contains);
+	}
+
+	/**
+	 * Generic, non-distinctive brand tokens that must never, on their own, be treated as
+	 * evidence that a host belongs to a manufacturer (e.g. "LG Electronics" must not match
+	 * the host "yellowelectronics.co.uk" via the "electronics" token).
+	 */
+	private static final Set<String> GENERIC_BRAND_TOKENS = Set.of(
+			"electronics", "electronic", "group", "groupe", "international", "intl", "company", "co", "inc",
+			"incorporated", "ltd", "limited", "gmbh", "corp", "corporation", "global", "holding", "holdings",
+			"home", "appliances", "appliance", "technologies", "technology", "tech", "sa", "ag", "srl", "bv",
+			"llc", "kg", "the", "and");
+
+	/**
+	 * Returns true when a distinctive brand token matches a whole host domain label.
+	 * <p>
+	 * The host is split on dots, hyphens and underscores into labels, each label is reduced
+	 * to its alphanumeric form, and a match requires exact label equality with a meaningful
+	 * brand token. This is far stricter than a substring check: "lg.com" → label "lg"
+	 * matches the "lg" token, while "yellowelectronics.co.uk" → labels
+	 * [yellowelectronics, co, uk] match neither "lg" nor the dropped generic "electronics".
+	 * </p>
+	 */
+	private boolean brandMatchesHostLabel(String brand, String rawHost) {
+		if (brand == null || brand.isBlank() || rawHost == null || rawHost.isBlank()) {
+			return false;
+		}
+		Set<String> labels = Arrays.stream(rawHost.toLowerCase(Locale.ROOT).split("[.\\-_]"))
+				.map(label -> label.replaceAll("[^a-z0-9]", ""))
+				.filter(label -> !label.isBlank())
+				.collect(java.util.stream.Collectors.toSet());
+		// Distinctive tokens of the brand AND its sibling-brand aliases (e.g. a Bosch product
+		// is legitimately served from siemens-home.bsh-group.com because BSH rebadges it).
+		Set<String> brandTokens = new HashSet<>();
+		addDistinctiveBrandTokens(brandTokens, brand);
+		brandAliasesFor(brand).forEach(alias -> addDistinctiveBrandTokens(brandTokens, alias));
+		return brandTokens.stream().anyMatch(labels::contains);
+	}
+
+	private void addDistinctiveBrandTokens(Set<String> target, String brand) {
+		if (brand == null || brand.isBlank()) {
+			return;
+		}
+		Arrays.stream(brand.split("\\s+"))
+				.map(this::normalizeForUrlMatching)
+				.filter(token -> token.length() >= 2 && !GENERIC_BRAND_TOKENS.contains(token))
+				.forEach(target::add);
 	}
 
 	private String normalizeForUrlMatching(String value) {
