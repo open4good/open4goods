@@ -61,6 +61,7 @@
     <CategoryNavigationVerticalHighlights
       v-if="navigationData"
       :verticals="highlightedVerticals"
+      :guides-map="guidesMap"
     />
   </div>
 </template>
@@ -77,6 +78,7 @@ import CategoryNavigationGrid from '~/components/category/navigation/CategoryNav
 import CategoryNavigationHero from '~/components/category/navigation/CategoryNavigationHero.vue'
 import CategoryNavigationVerticalHighlights from '~/components/category/navigation/CategoryNavigationVerticalHighlights.vue'
 import { normalizeCategoryPath } from '~/utils/normalizeCategoryPath'
+import { useDocsContent, type DocsDoc } from '~/composables/useDocsContent'
 
 const { t } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
@@ -107,6 +109,25 @@ if (error.value && import.meta.server) {
       'Failed to load categories',
   })
 }
+
+const { listGuides } = useDocsContent()
+const { data: guidesData } = await useAsyncData<DocsDoc[]>(
+  'category-navigation-guides',
+  () => listGuides()
+)
+
+const guidesMap = computed(() => {
+  const map = new Map<string, DocsDoc[]>()
+  for (const guide of guidesData.value ?? []) {
+    const segments = guide.path.split('/').filter(Boolean)
+    const verticalId = segments[1]
+    if (verticalId) {
+      if (!map.has(verticalId)) map.set(verticalId, [])
+      map.get(verticalId)!.push(guide)
+    }
+  }
+  return map
+})
 
 const navigationData = computed(() => data.value ?? null)
 

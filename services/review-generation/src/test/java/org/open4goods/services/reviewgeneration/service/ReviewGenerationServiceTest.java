@@ -23,12 +23,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.ai.AiReview;
 import org.open4goods.model.attribute.Attribute;
+import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.product.AiReviewHolder;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.AttributeParserConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.services.googlesearch.exception.GoogleSearchException;
 import org.open4goods.services.googlesearch.service.GoogleSearchService;
@@ -520,6 +522,64 @@ class ReviewGenerationServiceTest {
     }
 
     @Test
+    void extractReviewAttributes_ShouldPersistConflictingValuesFromDifferentSources() throws Exception {
+        Product product = new Product();
+        product.setId(105L);
+        org.open4goods.model.vertical.VerticalConfig verticalConfig = verticalConfig("DIAGONALE_POUCES");
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("ACCEPTED_URLS", List.of("https://manufacturer.example/specs",
+                "https://support.example/specs"));
+        variables.put("sources", Map.of(
+                "https://manufacturer.example/specs", "Technical sheet. Screen size 55 inches.",
+                "https://support.example/specs", "Support sheet. Screen size 65 inches."));
+        when(preprocessingService.buildPromptVariablesFromReviewFacts(product, verticalConfig, true))
+                .thenReturn(variables);
+        when(genAiService.objectPrompt(eq(properties.getAttributeExtractionPromptKey()), org.mockito.ArgumentMatchers.anyMap(),
+                eq(AttributeExtractionResult.class)))
+                .thenReturn(attributeResponse(List.of(
+                        new AiReview.AiAttribute("DIAGONALE_POUCES", "55", 1),
+                        new AiReview.AiAttribute("DIAGONALE_POUCES", "65", 2))));
+
+        org.open4goods.services.reviewgeneration.dto.ReviewGenerationStepResult result =
+                reviewGenerationService.extractReviewAttributes(product, verticalConfig);
+
+        assertThat(result.attributes()).hasSize(2);
+        assertThat(product.getAttributes().getAll().get("DIAGONALE_POUCES").getSource())
+                .extracting(SourcedAttribute::getDataSourcename)
+                .containsExactlyInAnyOrder("AI_REVIEW:s01:manufacturer.example", "AI_REVIEW:s02:support.example");
+        assertThat(product.getAttributes().getAll().get("DIAGONALE_POUCES").getSource())
+                .extracting(SourcedAttribute::getValue)
+                .containsExactlyInAnyOrder("55", "65");
+    }
+
+    @Test
+    void extractReviewAttributes_ShouldNormalizeNumericValuesAndVerifyConvertedSourceUnits() throws Exception {
+        Product product = new Product();
+        product.setId(106L);
+        org.open4goods.model.vertical.VerticalConfig verticalConfig = numericVerticalConfig("HEIGHT", "LENGTH", "cm");
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("ACCEPTED_URLS", List.of("https://manufacturer.example/specs"));
+        variables.put("sources", Map.of("https://manufacturer.example/specs",
+                "Technical sheet. Height 420 mm. Width 800 mm."));
+        when(preprocessingService.buildPromptVariablesFromReviewFacts(product, verticalConfig, true))
+                .thenReturn(variables);
+        when(genAiService.objectPrompt(eq(properties.getAttributeExtractionPromptKey()), org.mockito.ArgumentMatchers.anyMap(),
+                eq(AttributeExtractionResult.class)))
+                .thenReturn(attributeResponse(List.of(new AiReview.AiAttribute("HEIGHT", "42 cm", 1))));
+
+        org.open4goods.services.reviewgeneration.dto.ReviewGenerationStepResult result =
+                reviewGenerationService.extractReviewAttributes(product, verticalConfig);
+
+        assertThat(result.attributes()).singleElement()
+                .extracting(AiReview.AiAttribute::getValue)
+                .isEqualTo("42");
+        assertThat(product.getAttributes().getAll().get("HEIGHT").getSource())
+                .singleElement()
+                .extracting(SourcedAttribute::getValue)
+                .isEqualTo("42");
+    }
+
+    @Test
     void extractReviewAttributes_ShouldRejectAttributeWhenNoAcceptedSourceSupportsValue() throws Exception {
         Product product = new Product();
         product.setId(104L);
@@ -607,6 +667,23 @@ class ReviewGenerationServiceTest {
                     return config;
                 })
                 .toList());
+        verticalConfig.setAttributesConfig(attributesConfig);
+        return verticalConfig;
+    }
+
+    private org.open4goods.model.vertical.VerticalConfig numericVerticalConfig(String key, String dimension,
+            String defaultUnitHint) {
+        org.open4goods.model.vertical.VerticalConfig verticalConfig = new org.open4goods.model.vertical.VerticalConfig();
+        verticalConfig.setId("tv");
+        AttributesConfig attributesConfig = new AttributesConfig();
+        AttributeConfig config = new AttributeConfig();
+        config.setKey(key);
+        config.setFilteringType(AttributeType.NUMERIC);
+        AttributeParserConfig parser = new AttributeParserConfig();
+        parser.setDimension(dimension);
+        parser.setDefaultUnitHint(defaultUnitHint);
+        config.setParser(parser);
+        attributesConfig.setConfigs(List.of(config));
         verticalConfig.setAttributesConfig(attributesConfig);
         return verticalConfig;
     }

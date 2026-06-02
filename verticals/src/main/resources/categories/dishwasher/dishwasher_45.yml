@@ -1,0 +1,115 @@
+# Search-intent subcategory for the dishwasher vertical.
+# Maintained: 2026-06-01 by subcategory.prompt.
+# Intent: 45 cm dishwasher purchase/comparison for narrow kitchens.
+# Evidence:
+#   - GSC: 0 clicks, 106 impressions, avg position about 11.8 over the last
+#     90 days for dishwasher size and dimension queries including
+#     "dimension lave-vaisselle" and "dimensions lave-vaisselle".
+#   - Keyword MCP: unavailable in this run; SEO Review Tools returned an API
+#     error, DataForSEO returned 403, and kwrds.ai had no configured API key.
+#   - Google Autocomplete: 15 matching suggestions for "lave vaisselle 45 cm",
+#     including built-in, freestanding, cheap, black, Bosch, Beko and retailer
+#     variants.
+# Feasibility:
+#   - Matching products: 121; distinct brands/datasources in sampled results:
+#     20/6.
+#   - Filters validated through the local front-api on 2026-06-01.
+# Rationale:
+#   - Exposes a stable narrow-width purchase intent that the parent category
+#     can answer with deterministic numeric filters, without overmatching every
+#     compact or small-capacity appliance.
+id: "dishwasher_45"
+slug:
+  en: "45cm-dishwasher"
+  fr: "lave-vaisselle-45-cm"
+h1Title:
+  en: "45 cm dishwashers"
+  fr: "Lave-vaisselle 45 cm"
+description:
+  en: |-
+    Compare **45 cm dishwashers** for narrow kitchens, with capacity,
+    energy, water, noise and impact data to choose a more responsible model.
+  fr: |-
+    Comparez les **lave-vaisselles 45 cm** pour cuisine etroite, avec
+    capacite, energie, eau, bruit et impact pour choisir un modele plus
+    responsable.
+metaTitle:
+  en: "45 cm dishwashers: compare narrow models | Nudger"
+  fr: "Lave-vaisselle 45 cm : comparer | Nudger"
+metaDescription:
+  en: "Compare 45 cm dishwashers by width, capacity, energy use, water, noise, price and impact score before choosing."
+  fr: "Comparez les lave-vaisselles 45 cm par largeur, capacite, energie, eau, bruit, prix et impact."
+metaOpenGraphTitle:
+  en: "Compare 45 cm dishwashers"
+  fr: "Comparer les lave-vaisselles 45 cm"
+metaOpenGraphDescription:
+  en: "A focused selection of narrow dishwashers with practical comparison data."
+  fr: "Une selection ciblee de lave-vaisselles etroits avec les donnees utiles."
+heroBlock:
+  mdiIcon: "mdi-ruler"
+  title:
+    en: "Narrow format"
+    fr: "Format etroit"
+  body:
+    en: |-
+      A 45 cm dishwasher saves cabinet width, but capacity and noise can vary sharply between models.
+    fr: |-
+      Un lave-vaisselle 45 cm economise de la largeur, mais la capacite et le bruit peuvent beaucoup varier selon les modeles.
+readMore:
+  title:
+    en: "How to choose a 45 cm dishwasher?"
+    fr: "Comment choisir un lave-vaisselle 45 cm ?"
+  shortText:
+  en: |-
+      Start with the available width: this page keeps models around the
+      45 cm format, so you can compare narrow dishwashers without mixing
+      them with full-size 60 cm appliances.
+
+      Then check capacity, noise and energy use. A narrow dishwasher is
+      useful only if it still matches the number of place settings and cycles
+      you need.
+  fr: |-
+      Commencez par la largeur disponible : cette page garde les modeles
+      autour du format 45 cm, afin de comparer les lave-vaisselles etroits
+      sans les melanger aux appareils 60 cm.
+
+      Verifiez ensuite la capacite, le bruit et la consommation. Un
+      lave-vaisselle etroit n'est pertinent que s'il correspond encore au
+      nombre de couverts et de cycles dont vous avez besoin.
+  longText:
+    en: |-
+      For one or two people, a 45 cm model can be a practical compromise
+      between a countertop appliance and a full-size dishwasher. For a family,
+      compare the usable place settings carefully: fewer settings may mean
+      more frequent cycles, which can reduce the benefit of the smaller format.
+
+      Noise matters more in small or open kitchens. If the appliance is close
+      to the living area, compare decibels before small price differences, and
+      check water and energy consumption together rather than relying on the
+      energy class alone.
+
+      Nudger keeps this page filterable with a bounded width range from
+      43 to 47 cm. Each product can still be compared on impact score, price,
+      offers, technical attributes and environmental criteria.
+    fr: |-
+      Pour une ou deux personnes, un modele 45 cm peut etre un bon compromis
+      entre un mini lave-vaisselle et un appareil 60 cm. Pour une famille,
+      comparez attentivement le nombre de couverts utiles : une capacite plus
+      faible peut imposer davantage de cycles.
+
+      Le bruit compte davantage dans une petite cuisine ou une cuisine ouverte.
+      Si l'appareil est proche du sejour, comparez les decibels avant les
+      petits ecarts de prix, et regardez ensemble l'eau et l'energie consommees
+      plutot que la seule classe energie.
+
+      Nudger garde cette page filtrable avec une plage de largeur bornee de
+      43 a 47 cm. Chaque produit reste comparable sur le score d'impact, le
+      prix, les offres, les caracteristiques techniques et les criteres
+      environnementaux.
+activatedFilters:
+  - field: "attributes.indexed.WIDTH.numericValue"
+    operator: "GREATER_THAN_OR_EQUAL"
+    value: "0.43"
+  - field: "attributes.indexed.WIDTH.numericValue"
+    operator: "LOWER_THAN_OR_EQUAL"
+    value: "0.47"

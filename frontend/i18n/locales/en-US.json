@@ -653,7 +653,8 @@
         "title": "Featured guides",
         "viewPath": "Open the {category} taxonomy path",
         "viewPathCta": "Browse taxonomy",
-        "subcategoriesAriaLabel": "Available sub-categories"
+        "subcategoriesAriaLabel": "Available sub-categories",
+        "showLess": "Show less"
       }
     }
   },

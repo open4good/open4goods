@@ -43,11 +43,10 @@ describe('useDocsContent helpers', () => {
   it('resolves category guide content and public paths', () => {
     expect(
       resolveGuideDocPath({
-        locale: 'fr',
-        categorySlug: 'televiseurs',
+        verticalId: 'tv',
         guideSlug: 'meilleur-televiseur-caravane-camping-car',
       })
-    ).toBe('/docs/fr/televiseurs/meilleur-televiseur-caravane-camping-car')
+    ).toBe('/guides/tv/meilleur-televiseur-caravane-camping-car')
 
     expect(
       resolvePublicGuidePath({

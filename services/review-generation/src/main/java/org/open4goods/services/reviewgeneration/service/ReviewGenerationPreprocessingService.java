@@ -38,6 +38,7 @@ import org.open4goods.model.product.ProductFact;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.resource.ResourceType;
 import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.AttributeParserConfig;
 import org.open4goods.model.util.ProductModelCandidateHelper;
 import org.open4goods.model.util.ProductModelCandidateHelper.ModelCandidateSource;
 import org.open4goods.model.review.ReviewGenerationStatus;
@@ -2866,6 +2867,16 @@ public class ReviewGenerationPreprocessingService {
 		definition.put("unit", config.getUnit());
 		definition.put("suffix", config.getSuffix());
 		definition.put("synonyms", config.getSynonyms());
+		AttributeParserConfig parser = config.getParser();
+		if (parser != null) {
+			Map<String, Object> parserDefinition = new LinkedHashMap<>();
+			parserDefinition.put("clazz", parser.getClazz());
+			parserDefinition.put("dimension", parser.getDimension());
+			parserDefinition.put("defaultUnitHint", parser.getDefaultUnitHint());
+			parserDefinition.put("deleteTokens", parser.getDeleteTokens());
+			parserDefinition.put("tokenMatch", parser.getTokenMatch());
+			definition.put("parser", parserDefinition);
+		}
 		return definition;
 	}
 

@@ -75,6 +75,24 @@
                       "
                       :max="3"
                     />
+                    <div
+                      v-if="guidesForVertical(verticalCategory).length"
+                      class="category-navigation-verticals__guides"
+                    >
+                      <v-chip
+                        v-for="guide in guidesForVertical(verticalCategory)"
+                        :key="guide.path"
+                        :to="guidePublicUrl(verticalCategory, guide)"
+                        size="x-small"
+                        variant="tonal"
+                        color="secondary"
+                        prepend-icon="mdi-book-open-outline"
+                        class="category-navigation-verticals__guide-chip"
+                        @click.stop
+                      >
+                        {{ guide.title }}
+                      </v-chip>
+                    </div>
                   </div>
                   <v-icon
                     icon="mdi-arrow-right"
@@ -97,10 +115,17 @@ import { computed } from 'vue'
 import type { CategoryNavigationDtoChildCategoriesInner } from '~~/shared/api-client'
 import { useI18n } from 'vue-i18n'
 import CategoryNavigationSubcategoryChips from '~/components/category/navigation/CategoryNavigationSubcategoryChips.vue'
+import type { DocsDoc } from '~/composables/useDocsContent'
 
-const { verticals } = defineProps<{
-  verticals: CategoryNavigationDtoChildCategoriesInner[]
-}>()
+const { verticals, guidesMap } = withDefaults(
+  defineProps<{
+    verticals: CategoryNavigationDtoChildCategoriesInner[]
+    guidesMap?: Map<string, DocsDoc[]>
+  }>(),
+  {
+    guidesMap: () => new Map(),
+  }
+)
 
 const { t } = useI18n()
 
@@ -121,6 +146,26 @@ const verticalRoute = (
   }
 
   return url.startsWith('/') ? url : `/${url}`
+}
+
+const guidesForVertical = (
+  verticalCategory: CategoryNavigationDtoChildCategoriesInner
+): DocsDoc[] => {
+  const verticalId = verticalCategory.vertical?.id?.trim()
+  if (!verticalId) return []
+  return guidesMap.get(verticalId) ?? []
+}
+
+const guidePublicUrl = (
+  verticalCategory: CategoryNavigationDtoChildCategoriesInner,
+  guide: DocsDoc
+): string => {
+  const homeUrl = verticalCategory.vertical?.verticalHomeUrl?.trim()
+  const segments = guide.path.split('/').filter(Boolean)
+  const guideSlug = segments[segments.length - 1] ?? ''
+  if (!homeUrl || !guideSlug) return '/'
+  const base = homeUrl.startsWith('/') ? homeUrl : `/${homeUrl}`
+  return `${base}/${guideSlug}`
 }
 </script>
 
@@ -189,6 +234,17 @@ const verticalRoute = (
 .category-navigation-verticals__icon {
   color: rgb(var(--v-theme-primary));
   flex: 0 0 auto;
+}
+
+.category-navigation-verticals__guides {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.4rem;
+}
+
+.category-navigation-verticals__guide-chip {
+  text-decoration: none;
 }
 
 @media (max-width: 599px) {

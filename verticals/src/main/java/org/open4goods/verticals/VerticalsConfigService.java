@@ -64,6 +64,7 @@ public class VerticalsConfigService {
 	private static final String CLASSPATH_VERTICALS_DEFAULT = "classpath:verticals/_default.yml";
 	private static final String CLASSPATH_ATTRIBUTES = "classpath*:attributes/*.yml";
 	private static final String CLASSPATH_CATEGORIES = "classpath*:categories/*/*.yml";
+	private static final String CLASSPATH_GUIDES = "classpath*:guides/*/*.md";
 	private static final String CLASSPATH_IMPACT_SCORES_DEFAULT = "classpath:/verticals/impactscores/_default.yml";
 	private static final String CLASSPATH_ASSISTANTS = "classpath:/assistant/*.yml";
 
@@ -307,6 +308,7 @@ public class VerticalsConfigService {
 			}
 		}
 		mergeExternalSubCategories(ret);
+		mergeGuides(ret);
 		return ret;
 	}
 
@@ -371,15 +373,66 @@ public class VerticalsConfigService {
 		});
 	}
 
+	/**
+	 * Scans {@code classpath*:guides/{vertical-id}/*.md} and appends each guide
+	 * slug to the matching {@link VerticalConfig}.
+	 */
+	private void mergeGuides(List<VerticalConfig> verticalConfigs) {
+		Map<String, VerticalConfig> verticalsById = verticalConfigs.stream()
+				.filter(Objects::nonNull)
+				.filter(config -> config.getId() != null)
+				.collect(java.util.stream.Collectors.toMap(
+						VerticalConfig::getId,
+						Function.identity(),
+						(first, ignored) -> first));
+
+		Resource[] resources;
+		try {
+			resources = resourceResolver.getResources(CLASSPATH_GUIDES);
+		} catch (IOException e) {
+			logger.error("Cannot load guides from {} : {}", CLASSPATH_GUIDES, e.getMessage());
+			return;
+		}
+
+		for (Resource resource : resources) {
+			String filename = resource.getFilename();
+			if (filename == null || !filename.endsWith(".md")) {
+				continue;
+			}
+
+			String verticalId = verticalIdFromPathSegment(resource, "/guides/");
+			if (verticalId == null || verticalId.isBlank()) {
+				logger.warn("Skipping guide resource without vertical directory: {}", resource);
+				continue;
+			}
+
+			VerticalConfig target = verticalsById.get(verticalId);
+			if (target == null) {
+				logger.warn("Guide file {} targets unknown vertical id {}. Skipping.", filename, verticalId);
+				continue;
+			}
+
+			String slug = filename.substring(0, filename.length() - ".md".length());
+			if (!target.getGuides().contains(slug)) {
+				target.getGuides().add(slug);
+				logger.info("Loaded guide '{}' for vertical '{}'", slug, verticalId);
+			}
+		}
+	}
+
 	private String verticalIdFromCategoryResource(Resource resource) {
+		return verticalIdFromPathSegment(resource, "/categories/");
+	}
+
+	private String verticalIdFromPathSegment(Resource resource, String segment) {
 		try {
 			String uri = resource.getURI().toString().replace('\\', '/');
-			int categoriesIndex = uri.lastIndexOf("/categories/");
-			if (categoriesIndex < 0) {
+			int segmentIndex = uri.lastIndexOf(segment);
+			if (segmentIndex < 0) {
 				return null;
 			}
 
-			String relativePath = uri.substring(categoriesIndex + "/categories/".length());
+			String relativePath = uri.substring(segmentIndex + segment.length());
 			int separatorIndex = relativePath.indexOf('/');
 			if (separatorIndex <= 0) {
 				return null;
@@ -387,7 +440,7 @@ public class VerticalsConfigService {
 
 			return relativePath.substring(0, separatorIndex);
 		} catch (IOException e) {
-			logger.warn("Cannot resolve categories resource path for {}", resource, e);
+			logger.warn("Cannot resolve resource path for {}", resource, e);
 			return null;
 		}
 	}

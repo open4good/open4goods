@@ -44,6 +44,7 @@ export type DocsSearchSection = {
 
 const DEFAULT_DOCS_LOCALE: DocsLocale = 'en'
 const DEFAULT_DOCS_BASE_PATH = '/docs'
+const GUIDES_BASE_PATH = '/guides'
 const INVALID_PATH_PATTERN = /(\.\.|\\|%00)/u
 const LANGUAGE_TAG_PREFIX = 'language:'
 
@@ -199,23 +200,20 @@ export const resolveDocPath = ({
 }
 
 export const resolveGuideDocPath = ({
-  locale,
-  categorySlug,
+  verticalId,
   guideSlug,
 }: {
-  locale?: string | null
-  categorySlug: string
+  verticalId: string
   guideSlug: string
 }): string => {
-  const normalizedLocale = normalizeDocsLocale(locale)
-  const normalizedCategorySlug = normalizeSlugOrPath(categorySlug)
+  const normalizedVerticalId = normalizeSlugOrPath(verticalId)
   const normalizedGuideSlug = normalizeSlugOrPath(guideSlug)
 
-  if (!normalizedCategorySlug || !normalizedGuideSlug) {
+  if (!normalizedVerticalId || !normalizedGuideSlug) {
     return ''
   }
 
-  return `${DEFAULT_DOCS_BASE_PATH}/${normalizedLocale}/${normalizedCategorySlug}/${normalizedGuideSlug}`
+  return `${GUIDES_BASE_PATH}/${normalizedVerticalId}/${normalizedGuideSlug}`
 }
 
 export const resolvePublicGuidePath = ({
@@ -273,7 +271,10 @@ export const resolveLegacyGuideRedirectPath = ({
 
 export const isAllowedPath = (path: string, basePath?: string | null) => {
   const normalizedBasePath = normalizeBasePath(basePath)
-  return path.startsWith(`${normalizedBasePath}/`)
+  return (
+    path.startsWith(`${normalizedBasePath}/`) ||
+    path.startsWith(`${GUIDES_BASE_PATH}/`)
+  )
 }
 
 const deriveTitleFromPath = (path: string): string => {
@@ -503,6 +504,23 @@ export const useDocsContent = () => {
     )
   }
 
+  const listGuides = async ({
+    locale,
+  }: {
+    locale?: DocsLocale | null
+  } = {}) => {
+    const resolvedLocale = normalizeDocsLocale(locale ?? defaultLocale.value)
+    const docs = (await queryCollection('docs')
+      .where('path', 'LIKE', `${GUIDES_BASE_PATH}/%`)
+      .all()) as DocsDoc[]
+
+    return sortDocs(
+      docs
+        .map(buildNormalizedDoc)
+        .filter(doc => isDocVisibleForLocale(doc, resolvedLocale))
+    )
+  }
+
   const getNavigationTree = async ({
     locale,
     basePath,
@@ -589,5 +607,6 @@ export const useDocsContent = () => {
     getNavigationTree,
     getSearchSections,
     listDocs,
+    listGuides,
   }
 }

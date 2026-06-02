@@ -526,14 +526,15 @@
       },
       "loading": "Chargement de la navigation des catégories",
       "verticals": {
-        "eyebrow": "Guides mis en avant",
+        "eyebrow": "",
         "openVertical": "Ouvrir le guide {category}",
         "openVerticalCta": "Découvrir le guide",
-        "subtitle": "Une sélection courte de guides reste disponible après le parcours taxonomique.",
-        "title": "Guides mis en avant",
-        "viewPath": "Ouvrir le chemin taxonomique {category}",
-        "viewPathCta": "Parcourir la taxonomie",
-        "subcategoriesAriaLabel": "Sous-catégories disponibles"
+        "subtitle": "Naviguez dans le catalogue produit de Nudger.",
+        "title": "Produits populaires",
+        "viewPath": "Ouvrir {category}",
+        "viewPathCta": "Parcourir ",
+        "subcategoriesAriaLabel": "Sous-catégories disponibles",
+        "showLess": "Voir moins"
       }
     }
   },

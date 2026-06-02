@@ -4,6 +4,7 @@ package org.open4goods.services.reviewgeneration.service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Instant;
@@ -27,6 +28,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.open4goods.services.reviewgeneration.dto.AttributeExtractionResult;
@@ -35,6 +38,7 @@ import org.open4goods.services.reviewgeneration.dto.ReviewGenerationStepResult;
 
 import org.open4goods.model.ai.AiReview;
 import org.open4goods.model.attribute.Attribute;
+import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.SourcedAttribute;
@@ -46,6 +50,7 @@ import org.open4goods.model.product.ProductFetchDiagnostics;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.model.review.ReviewGenerationStatus.Status;
+import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.googlesearch.service.GoogleSearchService;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -99,6 +104,10 @@ import io.micrometer.core.instrument.MeterRegistry;
 public class ReviewGenerationService implements HealthIndicator {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReviewGenerationService.class);
+	private static final Pattern FIRST_NUMERIC_VALUE_PATTERN = Pattern.compile("[-+]?\\d+(?:[\\s.]\\d{3})*(?:[,.]\\d+)?|[-+]?\\d+(?:[,.]\\d+)?");
+	private static final Pattern NUMBER_WITH_OPTIONAL_UNIT_PATTERN = Pattern.compile(
+			"([-+]?\\d+(?:[\\s.]\\d{3})*(?:[,.]\\d+)?|[-+]?\\d+(?:[,.]\\d+)?)(?:\\s*([\\p{L}µ°%\"/]+))?");
+	private static final Map<String, UnitDefinition> UNIT_DEFINITIONS = unitDefinitions();
 
 	private final ReviewGenerationConfig properties;
 	// Realtime prompt service for immediate generation.
@@ -1168,7 +1177,8 @@ public class ReviewGenerationService implements HealthIndicator {
 		if (attributes == null || attributes.isEmpty()) {
 			return List.of();
 		}
-		Set<String> canonicalKeys = canonicalAttributeKeys(verticalConfig);
+		Map<String, AttributeConfig> attributeConfigs = canonicalAttributeConfigs(verticalConfig);
+		Set<String> canonicalKeys = attributeConfigs.keySet();
 		Map<String, String> sources = promptSources(promptVariables);
 		List<AiReview.AiAttribute> valid = new ArrayList<>();
 		for (AiReview.AiAttribute attribute : attributes) {
@@ -1186,8 +1196,13 @@ public class ReviewGenerationService implements HealthIndicator {
 				logger.warn("Rejecting AI review attribute '{}' with invalid source number '{}'.", key, number);
 				continue;
 			}
-			String value = attribute.getValue().trim();
-			Integer verifiedSourceNumber = verifiedSourceNumber(key, value, number, acceptedUrls, sources);
+			AttributeConfig attributeConfig = attributeConfigs.get(key);
+			String value = normalizeExtractedAttributeValue(key, attribute.getValue(), attributeConfig);
+			if (value == null || value.isBlank()) {
+				continue;
+			}
+			Integer verifiedSourceNumber = verifiedSourceNumber(key, value, number, acceptedUrls, sources,
+					attributeConfig);
 			if (verifiedSourceNumber == null) {
 				logger.warn("Rejecting AI review attribute '{}'='{}' because no accepted source contains supporting evidence.",
 						key, value);
@@ -1216,18 +1231,35 @@ public class ReviewGenerationService implements HealthIndicator {
 		return (Map<String, String>) promptVariables.getOrDefault("SOURCES", Map.of());
 	}
 
+	private String normalizeExtractedAttributeValue(String key, String value, AttributeConfig attributeConfig) {
+		String trimmed = value == null ? null : value.trim();
+		if (trimmed == null || trimmed.isBlank()) {
+			return null;
+		}
+		if (!isNumericAttribute(attributeConfig)) {
+			return trimmed;
+		}
+		String numericValue = firstNumericToken(trimmed);
+		if (numericValue == null) {
+			logger.warn("Rejecting AI review numeric attribute '{}'='{}' because it does not contain a numeric value.",
+					key, value);
+			return null;
+		}
+		return numericValue;
+	}
+
 	private Integer verifiedSourceNumber(String key, String value, Integer proposedNumber, List<String> acceptedUrls,
-			Map<String, String> sources) {
+			Map<String, String> sources, AttributeConfig attributeConfig) {
 		if (sources == null || sources.isEmpty() || isTriviallyVerifiable(value)) {
 			return proposedNumber;
 		}
 		String proposedUrl = acceptedUrls.get(proposedNumber - 1);
-		if (sourceContainsAttributeEvidence(sources.get(proposedUrl), key, value)) {
+		if (sourceContainsAttributeEvidence(sources.get(proposedUrl), key, value, attributeConfig)) {
 			return proposedNumber;
 		}
 		for (int i = 0; i < acceptedUrls.size(); i++) {
 			String url = acceptedUrls.get(i);
-			if (sourceContainsAttributeEvidence(sources.get(url), key, value)) {
+			if (sourceContainsAttributeEvidence(sources.get(url), key, value, attributeConfig)) {
 				logger.info("Reassigned AI review attribute '{}' source from {} to {} after source-content verification.",
 						key, proposedNumber, i + 1);
 				return i + 1;
@@ -1244,7 +1276,8 @@ public class ReviewGenerationService implements HealthIndicator {
 		return normalized.length() <= 1 || "true".equals(normalized) || "false".equals(normalized);
 	}
 
-	private boolean sourceContainsAttributeEvidence(String markdown, String key, String value) {
+	private boolean sourceContainsAttributeEvidence(String markdown, String key, String value,
+			AttributeConfig attributeConfig) {
 		if (markdown == null || markdown.isBlank() || value == null || value.isBlank()) {
 			return false;
 		}
@@ -1257,7 +1290,10 @@ public class ReviewGenerationService implements HealthIndicator {
 			return true;
 		}
 		String compactValue = normalizedValue.replace(" ", "");
-		return compactValue.length() >= 3 && normalizedMarkdown.replace(" ", "").contains(compactValue);
+		if (compactValue.length() >= 3 && normalizedMarkdown.replace(" ", "").contains(compactValue)) {
+			return true;
+		}
+		return isNumericAttribute(attributeConfig) && sourceContainsNumericEvidence(markdown, value, attributeConfig);
 	}
 
 	private String normalizeEvidence(String value) {
@@ -1268,16 +1304,189 @@ public class ReviewGenerationService implements HealthIndicator {
 				.trim();
 	}
 
-	private Set<String> canonicalAttributeKeys(VerticalConfig verticalConfig) {
+	private boolean sourceContainsNumericEvidence(String markdown, String value, AttributeConfig attributeConfig) {
+		String expectedToken = firstNumericToken(value);
+		if (expectedToken == null) {
+			return false;
+		}
+		Double expected = parseDouble(expectedToken);
+		if (expected == null) {
+			return false;
+		}
+		String targetUnit = targetUnit(attributeConfig);
+		ConvertedNumber expectedConverted = convert(expected, targetUnit, dimension(attributeConfig));
+		Matcher matcher = NUMBER_WITH_OPTIONAL_UNIT_PATTERN.matcher(markdown.replace('\u00a0', ' '));
+		while (matcher.find()) {
+			String sourceNumberToken = firstNumericToken(matcher.group(1));
+			Double sourceValue = parseDouble(sourceNumberToken);
+			if (sourceValue == null) {
+				continue;
+			}
+			if (sameNumericValue(sourceValue, expected)) {
+				return true;
+			}
+			String sourceUnit = matcher.group(2);
+			if (sourceUnit == null || sourceUnit.isBlank() || expectedConverted == null) {
+				continue;
+			}
+			ConvertedNumber sourceConverted = convert(sourceValue, sourceUnit, dimension(attributeConfig));
+			if (sourceConverted != null && expectedConverted.dimension().equals(sourceConverted.dimension())
+					&& sameNumericValue(expectedConverted.baseValue(), sourceConverted.baseValue())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private String firstNumericToken(String value) {
+		if (value == null) {
+			return null;
+		}
+		Matcher matcher = FIRST_NUMERIC_VALUE_PATTERN.matcher(value.replace('\u00a0', ' '));
+		if (!matcher.find()) {
+			return null;
+		}
+		String token = matcher.group();
+		String normalized = token.replace(" ", "");
+		if (normalized.indexOf(',') >= 0 && normalized.indexOf('.') >= 0) {
+			normalized = normalized.replace(".", "").replace(',', '.');
+		} else {
+			normalized = normalized.replace(',', '.');
+		}
+		try {
+			return new BigDecimal(normalized).stripTrailingZeros().toPlainString();
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
+
+	private Double parseDouble(String value) {
+		try {
+			return value == null ? null : Double.parseDouble(value);
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
+
+	private boolean sameNumericValue(double left, double right) {
+		double tolerance = Math.max(0.000001d, Math.abs(right) * 0.000001d);
+		return Math.abs(left - right) <= tolerance;
+	}
+
+	private boolean isNumericAttribute(AttributeConfig attributeConfig) {
+		return attributeConfig != null && AttributeType.NUMERIC.equals(attributeConfig.getFilteringType());
+	}
+
+	private String targetUnit(AttributeConfig attributeConfig) {
+		if (attributeConfig == null) {
+			return null;
+		}
+		if (attributeConfig.getParser() != null && attributeConfig.getParser().getDefaultUnitHint() != null
+				&& !attributeConfig.getParser().getDefaultUnitHint().isBlank()) {
+			return attributeConfig.getParser().getDefaultUnitHint();
+		}
+		String suffix = firstLocalisedValue(attributeConfig.getSuffix());
+		if (suffix != null && !suffix.isBlank()) {
+			return suffix;
+		}
+		return firstLocalisedValue(attributeConfig.getUnit());
+	}
+
+	private String firstLocalisedValue(Map<String, String> values) {
+		if (values == null || values.isEmpty()) {
+			return null;
+		}
+		String preferred = values.get("default");
+		if (preferred == null) {
+			preferred = values.get("fr");
+		}
+		if (preferred != null) {
+			return preferred;
+		}
+		return values.values().stream().filter(Objects::nonNull).findFirst().orElse(null);
+	}
+
+	private String dimension(AttributeConfig attributeConfig) {
+		if (attributeConfig != null && attributeConfig.getParser() != null
+				&& attributeConfig.getParser().getDimension() != null
+				&& !attributeConfig.getParser().getDimension().isBlank()) {
+			return attributeConfig.getParser().getDimension();
+		}
+		String targetUnit = targetUnit(attributeConfig);
+		UnitDefinition definition = UNIT_DEFINITIONS.get(normalizeUnit(targetUnit));
+		return definition == null ? null : definition.dimension();
+	}
+
+	private ConvertedNumber convert(double value, String unit, String expectedDimension) {
+		UnitDefinition definition = UNIT_DEFINITIONS.get(normalizeUnit(unit));
+		if (definition == null) {
+			return null;
+		}
+		if (expectedDimension != null && !expectedDimension.isBlank()
+				&& !expectedDimension.equalsIgnoreCase(definition.dimension())) {
+			return null;
+		}
+		return new ConvertedNumber(definition.dimension(), value * definition.toBaseFactor());
+	}
+
+	private String normalizeUnit(String unit) {
+		if (unit == null) {
+			return "";
+		}
+		return unit.trim()
+				.replace('\u00a0', ' ')
+				.replace("²", "2")
+				.replace("³", "3")
+				.toLowerCase(Locale.ROOT);
+	}
+
+	private static Map<String, UnitDefinition> unitDefinitions() {
+		Map<String, UnitDefinition> definitions = new HashMap<>();
+		addUnit(definitions, "LENGTH", 0.001d, "mm", "millimetre", "millimetres", "millimeter", "millimeters");
+		addUnit(definitions, "LENGTH", 0.01d, "cm", "centimetre", "centimetres", "centimeter", "centimeters");
+		addUnit(definitions, "LENGTH", 1d, "m", "metre", "metres", "meter", "meters");
+		addUnit(definitions, "LENGTH", 0.0254d, "\"", "in", "inch", "inches", "pouce", "pouces");
+		addUnit(definitions, "MASS", 0.001d, "g", "gramme", "grammes", "gram", "grams");
+		addUnit(definitions, "MASS", 1d, "kg", "kilogramme", "kilogrammes", "kilogram", "kilograms");
+		addUnit(definitions, "MASS", 0.45359237d, "lb", "lbs", "pound", "pounds");
+		addUnit(definitions, "POWER", 1d, "w", "watt", "watts");
+		addUnit(definitions, "POWER", 1000d, "kw", "kilowatt", "kilowatts");
+		addUnit(definitions, "ENERGY", 0.001d, "wh");
+		addUnit(definitions, "ENERGY", 1d, "kwh");
+		addUnit(definitions, "VOLUME", 0.001d, "ml", "millilitre", "millilitres", "milliliter", "milliliters");
+		addUnit(definitions, "VOLUME", 0.01d, "cl", "centilitre", "centilitres", "centiliter", "centiliters");
+		addUnit(definitions, "VOLUME", 1d, "l", "litre", "litres", "liter", "liters");
+		addUnit(definitions, "SOUND_LEVEL", 1d, "db", "db(a)", "decibel", "decibels");
+		return Map.copyOf(definitions);
+	}
+
+	private static void addUnit(Map<String, UnitDefinition> definitions, String dimension, double toBaseFactor,
+			String... symbols) {
+		for (String symbol : symbols) {
+			definitions.put(symbol, new UnitDefinition(dimension, toBaseFactor));
+		}
+	}
+
+	private record UnitDefinition(String dimension, double toBaseFactor) {
+	}
+
+	private record ConvertedNumber(String dimension, double baseValue) {
+	}
+
+	private Map<String, AttributeConfig> canonicalAttributeConfigs(VerticalConfig verticalConfig) {
 		if (verticalConfig == null || verticalConfig.getAttributesConfig() == null
 				|| verticalConfig.getAttributesConfig().getConfigs() == null) {
-			return Set.of();
+			return Map.of();
 		}
 		return verticalConfig.getAttributesConfig().getConfigs().stream()
 				.filter(Objects::nonNull)
-				.map(config -> config.getKey())
-				.filter(key -> key != null && !key.isBlank())
-				.collect(java.util.stream.Collectors.toSet());
+				.filter(config -> config.getKey() != null && !config.getKey().isBlank())
+				.collect(java.util.stream.Collectors.toMap(AttributeConfig::getKey, config -> config,
+						(left, right) -> left, LinkedHashMap::new));
+	}
+
+	private Set<String> canonicalAttributeKeys(VerticalConfig verticalConfig) {
+		return canonicalAttributeConfigs(verticalConfig).keySet();
 	}
 
 	private void persistValidatedAttributes(Product product, List<AiReview.AiAttribute> attributes,

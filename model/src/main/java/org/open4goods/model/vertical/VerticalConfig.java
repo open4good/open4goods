@@ -301,6 +301,11 @@ public class VerticalConfig {
 	private List<VerticalSubCategory> subCategories = new ArrayList<>();
 
 	/**
+	 * Buying-guide slugs discovered from classpath guides/{vertical-id}/*.md files.
+	 */
+	private List<String> guides = new ArrayList<>();
+
+	/**
 	 * The nudge tool configuration displayed to guide user selection.
 	 */
 	@JsonMerge
@@ -1094,6 +1099,14 @@ public class VerticalConfig {
 	 */
 	public void setSubCategories(List<VerticalSubCategory> subCategories) {
 		this.subCategories = subCategories;
+	}
+
+	public List<String> getGuides() {
+		return guides;
+	}
+
+	public void setGuides(List<String> guides) {
+		this.guides = guides;
 	}
 
 	public NudgeToolConfig getNudgeToolConfig() {

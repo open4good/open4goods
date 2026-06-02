@@ -17,11 +17,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.open4goods.model.Localisable;
 import org.open4goods.model.attribute.ReferentielKey;
+import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductFetchDiagnostics;
 import org.open4goods.model.product.ProductFact;
 import org.open4goods.model.review.ReviewGenerationStatus;
+import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.AttributeParserConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -1000,6 +1004,25 @@ class ReviewGenerationPreprocessingServiceTest {
                 .contains(official);
     }
 
+    @Test
+    void buildPromptVariablesFromReviewFacts_IncludesAttributeUnitParserHints() throws Exception {
+        Product product = product("Samsung", "S95D");
+        String official = "https://www.samsung.com/fr/tvs/s95d/";
+        product.setOfficialUrl(official);
+        product.setReviewFacts(List.of(new ProductFact(official, "official markdown", "fr", 1L, "HTTP", 10, "a")));
+        ProductFetchDiagnostics diagnostics = new ProductFetchDiagnostics();
+        diagnostics.setAcceptedUrls(List.of(official));
+        product.setReviewFetchDiagnostics(diagnostics);
+
+        Map<String, Object> variables = service.buildPromptVariablesFromReviewFacts(product, verticalConfigWithNumericAttribute(), true);
+
+        assertThat((String) variables.get("ATTRIBUTE_DEFINITIONS_JSON"))
+                .contains("\"key\":\"HEIGHT\"")
+                .contains("\"filteringType\":\"NUMERIC\"")
+                .contains("\"dimension\":\"LENGTH\"")
+                .contains("\"defaultUnitHint\":\"cm\"");
+    }
+
     private Product product(String brand, String model) {
         Product product = new Product();
         product.setId(1L);
@@ -1017,6 +1040,24 @@ class ReviewGenerationPreprocessingServiceTest {
         texts.put("default", i18n);
         verticalConfig.setI18n(texts);
         verticalConfig.setAttributesConfig(new AttributesConfig());
+        return verticalConfig;
+    }
+
+    private VerticalConfig verticalConfigWithNumericAttribute() {
+        VerticalConfig verticalConfig = verticalConfig();
+        AttributeConfig attributeConfig = new AttributeConfig();
+        attributeConfig.setKey("HEIGHT");
+        attributeConfig.setFilteringType(AttributeType.NUMERIC);
+        Localisable<String, String> unit = new Localisable<>();
+        unit.put("default", "cm");
+        attributeConfig.setUnit(unit);
+        AttributeParserConfig parser = new AttributeParserConfig();
+        parser.setDimension("LENGTH");
+        parser.setDefaultUnitHint("cm");
+        attributeConfig.setParser(parser);
+        AttributesConfig attributesConfig = new AttributesConfig();
+        attributesConfig.setConfigs(List.of(attributeConfig));
+        verticalConfig.setAttributesConfig(attributesConfig);
         return verticalConfig;
     }
 }

@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="visibleChips.length"
+    v-if="allChips.length"
     class="subcategory-chips"
     :aria-label="t('categories.navigation.verticals.subcategoriesAriaLabel')"
   >
@@ -9,27 +9,39 @@
       :key="chip.id"
       :to="chip.to"
       size="x-small"
-      variant="tonal"
+      variant="outlined"
       color="primary"
       class="subcategory-chips__chip"
       @click.stop
     >
       {{ chip.label }}
     </v-chip>
+
     <v-chip
-      v-if="overflowCount > 0"
+      v-if="overflowCount > 0 && !isExpanded"
       size="x-small"
       variant="outlined"
       color="primary"
-      class="subcategory-chips__chip subcategory-chips__chip--overflow"
+      class="subcategory-chips__chip subcategory-chips__chip--toggle"
+      @click.stop="isExpanded = true"
     >
       +{{ overflowCount }}
+    </v-chip>
+    <v-chip
+      v-else-if="isExpanded && allChips.length > props.max"
+      size="x-small"
+      variant="outlined"
+      color="primary"
+      class="subcategory-chips__chip subcategory-chips__chip--toggle"
+      @click.stop="isExpanded = false"
+    >
+      {{ t('categories.navigation.verticals.showLess') }}
     </v-chip>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { VerticalSubCategoryDto } from '~~/shared/api-client'
 
@@ -47,6 +59,7 @@ const props = withDefaults(
 )
 
 const { t } = useI18n()
+const isExpanded = ref(false)
 
 const joinUrl = (base: string, slug: string) => {
   const normalizedBase = base.replace(/\/+$/, '')
@@ -67,7 +80,10 @@ const allChips = computed(() => {
     }))
 })
 
-const visibleChips = computed(() => allChips.value.slice(0, props.max))
+const visibleChips = computed(() =>
+  isExpanded.value ? allChips.value : allChips.value.slice(0, props.max)
+)
+
 const overflowCount = computed(() =>
   Math.max(0, allChips.value.length - props.max)
 )
@@ -90,8 +106,13 @@ const overflowCount = computed(() =>
   transform: translateY(-1px);
 }
 
-.subcategory-chips__chip--overflow {
-  opacity: 0.7;
+.subcategory-chips__chip--toggle {
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.subcategory-chips__chip--toggle:hover {
+  opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {

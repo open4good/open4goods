@@ -2,16 +2,18 @@ import { fileURLToPath } from 'node:url'
 import { defineCollection, defineContentConfig, z } from '@nuxt/content'
 
 const DOCS_DIR = fileURLToPath(new URL('../docs', import.meta.url))
+const GUIDES_DIR = fileURLToPath(
+  new URL('../verticals/src/main/resources/guides', import.meta.url)
+)
 
 export default defineContentConfig({
   collections: {
     docs: defineCollection({
       type: 'page',
-      source: {
-        include: '**/*.md',
-        cwd: DOCS_DIR,
-        prefix: 'docs',
-      },
+      source: [
+        { include: '**/*.md', cwd: DOCS_DIR, prefix: 'docs' },
+        { include: '**/*.md', cwd: GUIDES_DIR, prefix: 'guides' },
+      ],
       schema: z.object({
         title: z.string().optional(),
         description: z.string().optional(),

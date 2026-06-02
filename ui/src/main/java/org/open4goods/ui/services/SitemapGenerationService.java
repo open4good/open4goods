@@ -245,6 +245,13 @@ public class SitemapGenerationService {
 				sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.WEEKLY, 0.9));
 			}
 
+			// Buying guide pages discovered from guides/{vertical-id}/*.md
+			for (String guideSlug : v.getGuides()) {
+				String url = baseUrl + i18n.getVerticalHomeUrl() + "/" + guideSlug;
+				LOGGER.info("Adding guide page to sitemap : {}", url);
+				sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.MONTHLY, 0.8));
+			}
+
 			// Vertical-specific XWiki editorial pages
 			for (WikiPageConfig wikiPage : i18n.getWikiPages()) {
 				FullPage page = null;

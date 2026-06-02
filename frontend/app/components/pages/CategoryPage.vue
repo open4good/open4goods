@@ -9,6 +9,12 @@
       :eyebrow="pageEyebrow"
       :show-image="false"
       :right-info-card="activeSubCategory?.heroBlock ?? null"
+      :subcategories="!isSubCategoryPage ? relatedSubCategories : null"
+      :parent-url="
+        !isSubCategoryPage && category?.verticalHomeUrl
+          ? `/${category.verticalHomeUrl}`
+          : null
+      "
     />
 
     <v-dialog

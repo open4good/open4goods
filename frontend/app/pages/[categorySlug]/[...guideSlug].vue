@@ -5,10 +5,8 @@ import BuyingGuideRenderer from '~/components/docs/BuyingGuideRenderer.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import {
   resolveGuideDocPath,
-  resolveLocaleFromRequest,
   resolvePublicGuidePath,
   useDocsContent,
-  type DocsLocale,
   type DocsDoc,
 } from '~/composables/useDocsContent'
 import type {
@@ -134,30 +132,14 @@ const matchedSubCategory =
   ) ?? null
 
 const resolveMarkdownGuide = async (): Promise<DocsDoc | null> => {
-  const requestLocale = resolveLocaleFromRequest()
-  const candidateLocales: DocsLocale[] = [
-    requestLocale,
-    ...(['fr', 'en'] as DocsLocale[]).filter(
-      locale => locale !== requestLocale
-    ),
-  ]
-
-  for (const locale of candidateLocales) {
-    const candidate = await getDocByPath({
-      path: resolveGuideDocPath({
-        locale,
-        categorySlug: categorySlug.value,
-        guideSlug: normalisedSlug,
-      }),
-      locale,
-    })
-
-    if (candidate) {
-      return candidate as DocsDoc
-    }
-  }
-
-  return null
+  const verticalId = categoryDetail.id?.trim() || categorySlug.value
+  const candidate = await getDocByPath({
+    path: resolveGuideDocPath({
+      verticalId,
+      guideSlug: normalisedSlug,
+    }),
+  })
+  return candidate ? (candidate as DocsDoc) : null
 }
 
 const markdownGuide = matchedSubCategory ? null : await resolveMarkdownGuide()

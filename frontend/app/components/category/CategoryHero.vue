@@ -33,6 +33,14 @@
             <MDC :value="description" />
           </div>
 
+          <CategoryNavigationSubcategoryChips
+            v-if="subcategories?.length"
+            :subcategories="subcategories"
+            :parent-url="parentUrl"
+            class="category-hero__subcategory-chips animate-in-up"
+            style="--delay: 200ms"
+          />
+
           <v-row
             density="comfortable"
             class="category-hero__actions-row animate-in-up"
@@ -85,10 +93,12 @@ import { computed, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type {
   CategoryBreadcrumbItemDto,
+  VerticalSubCategoryDto,
   VerticalSubCategoryHeroBlockDto,
 } from '~~/shared/api-client'
 
 import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
+import CategoryNavigationSubcategoryChips from '~/components/category/navigation/CategoryNavigationSubcategoryChips.vue'
 
 type HeroBreadcrumbItem = {
   title: string
@@ -104,6 +114,8 @@ const props = withDefaults(
     eyebrow?: string | null
     showImage?: boolean
     rightInfoCard?: VerticalSubCategoryHeroBlockDto | null
+    subcategories?: VerticalSubCategoryDto[] | null
+    parentUrl?: string | null
   }>(),
   {
     description: null,
@@ -112,6 +124,8 @@ const props = withDefaults(
     eyebrow: null,
     showImage: true,
     rightInfoCard: null,
+    subcategories: null,
+    parentUrl: null,
   }
 )
 
