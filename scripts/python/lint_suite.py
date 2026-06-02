@@ -12,6 +12,7 @@ from pathlib import Path
 
 
 EXCLUDED_DIRS = {
+    ".claude",
     ".git",
     ".husky",
     ".nuxt",

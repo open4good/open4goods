@@ -3,6 +3,7 @@ extends: default
 
 ignore: |
   .git/
+  **/.claude/
   **/node_modules/
   **/target/
   **/.nuxt/
