@@ -141,8 +141,9 @@ describe('CategoryFiltersSidebar', () => {
       filterSearchTerm: '',
     })
 
-    expect(wrapper.get('[data-testid="category-filters-active-count"]').text())
-      .toBe('2')
+    expect(
+      wrapper.get('[data-testid="category-filters-active-count"]').text()
+    ).toBe('2')
 
     await wrapper.get('[data-testid="category-filters-clear"]').trigger('click')
     expect(wrapper.emitted('clear-mobile')).toHaveLength(1)
@@ -152,7 +153,9 @@ describe('CategoryFiltersSidebar', () => {
       .trigger('click')
     expect(wrapper.emitted('collapse')).toHaveLength(1)
 
-    await wrapper.get('[data-testid="category-filters-search"]').trigger('input')
+    await wrapper
+      .get('[data-testid="category-filters-search"]')
+      .trigger('input')
     expect(wrapper.emitted('update:filterSearchTerm')?.[0]).toEqual(['brand'])
   })
 })

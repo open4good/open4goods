@@ -1534,7 +1534,8 @@ const hasActiveFilters = computed(() => {
 
 const activeFiltersCount = computed(
   () =>
-    (manualFilters.value.filters?.length ?? 0) + activeSubsetClauses.value.length
+    (manualFilters.value.filters?.length ?? 0) +
+    activeSubsetClauses.value.length
 )
 
 const combinedFilters = computed<FilterRequestDto | undefined>(() =>

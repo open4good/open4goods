@@ -9,10 +9,10 @@ locale or section needs to be published.
 
 ## How the sitemap is built
 
-1. `nuxt.config.ts` enables the `@nuxtjs/sitemap` module and registers the app
-   routes sitemap under the `app-pages` key. Nuxt automatically crawls the
-   file-based routes in `app/pages` for each configured locale and generates
-   `app-pages.xml` under the `/sitemap` prefix. The Nitro plugin in
+1. `nuxt.config.ts` enables the `@nuxtjs/sitemap` module and registers the main
+   routes sitemap under the `main-pages` key. Raw app-source discovery is
+   disabled for this sitemap so canonical output does not mix source paths such
+   as `/team` with French production paths such as `/equipe`. The Nitro plugin in
    [`server/plugins/sitemap-main-pages.ts`](../server/plugins/sitemap-main-pages.ts)
    ensures the main marketing pages are always emitted for the requested
    domain language. It scans the static pages under `app/pages` (skipping

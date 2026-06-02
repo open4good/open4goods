@@ -255,7 +255,6 @@ const sortedFieldDisplay = (
     value: display.value,
   }
 }
-
 </script>
 
 <style scoped lang="sass">

@@ -164,8 +164,9 @@ describe('CategoryProductListView', () => {
     expect(wrapper.get('[data-test="product-image"]').attributes('alt')).toBe(
       'Example TV'
     )
-    expect(wrapper.get('.category-product-list__attribute--sorted').text())
-      .toContain('55 "')
+    expect(
+      wrapper.get('.category-product-list__attribute--sorted').text()
+    ).toContain('55 "')
     expect(wrapper.find('[data-test="product-compare-toggle"]').exists()).toBe(
       true
     )

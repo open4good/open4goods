@@ -238,15 +238,18 @@ describe('CategoryResultsToolbar', () => {
   it('renders active filter count and loading state', async () => {
     const wrapper = mountComponent()
 
-    expect(wrapper.find('[data-testid="results-toolbar-active-count"]').text())
-      .toBe('2')
+    expect(
+      wrapper.find('[data-testid="results-toolbar-active-count"]').text()
+    ).toBe('2')
 
-    expect(wrapper.find('[data-testid="results-toolbar-loading"]').exists())
-      .toBe(false)
+    expect(
+      wrapper.find('[data-testid="results-toolbar-loading"]').exists()
+    ).toBe(false)
 
     await wrapper.setProps({ loading: true })
 
-    expect(wrapper.find('[data-testid="results-toolbar-loading"]').exists())
-      .toBe(true)
+    expect(
+      wrapper.find('[data-testid="results-toolbar-loading"]').exists()
+    ).toBe(true)
   })
 })
