@@ -4,16 +4,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Method;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.commons.config.yml.datasource.CsvDataSourceProperties;
+import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.services.DataSourceConfigService;
+import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.affiliation.AffiliationProgram;
 import org.open4goods.model.affiliation.AffiliationPromotion;
 import org.open4goods.model.affiliation.AffiliationTransaction;
+import org.open4goods.model.price.Currency;
 import org.open4goods.services.feedservice.config.FeedConfiguration;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.services.serialisation.service.SerialisationService;
@@ -108,8 +112,7 @@ class KwankoFeedServiceTest
                     "state":"approved",
                     "completed_at":"2026-05-29T12:00:00Z",
                     "campaign":{"id":12345,"name":"Merchant","currency":"EUR"},
-                    "earnings":{"value":"1.50"},
-                    "websites_per_language":[{"argsites":{"argsite":"sub-1"}}]
+                    "websites_per_language":[{"argsites":{"argsite":"sub-1"},"earnings":{"value":"1.50"}}]
                   }
                 ]}
                 """));
@@ -124,6 +127,32 @@ class KwankoFeedServiceTest
         assertThat(transaction.getCommissionAmount()).isEqualByComparingTo("1.50");
         assertThat(transaction.getCurrency()).isEqualTo("EUR");
         assertThat(transaction.getSubId()).isEqualTo("sub-1");
+    }
+
+    @Test
+    void applyKwankoCsvDefaultsShouldMaximizeProductFeedFieldCapture() throws Exception
+    {
+        KwankoFeedService service = buildService();
+        DataSourceProperties datasource = new DataSourceProperties();
+        datasource.setCsvDatasource(new CsvDataSourceProperties());
+
+        Method method = KwankoFeedService.class.getDeclaredMethod("applyKwankoCsvDefaults", DataSourceProperties.class);
+        method.setAccessible(true);
+        method.invoke(service, datasource);
+
+        CsvDataSourceProperties csv = datasource.getCsvDatasource();
+        assertThat(csv.getImportAllAttributes()).isTrue();
+        assertThat(csv.getCurrency()).isEqualTo(Currency.EUR);
+        assertThat(csv.getUrl()).isEqualTo("product_url");
+        assertThat(csv.getAffiliatedUrl()).isEqualTo("tracking_url");
+        assertThat(csv.getName()).isEqualTo("product_name");
+        assertThat(csv.getPrice()).contains("price", "sale_price", "price_vat_inc");
+        assertThat(csv.getDescription()).contains("description", "short_description");
+        assertThat(csv.getImage()).contains("image_url", "product_image");
+        assertThat(csv.getInStock()).contains("availability", "stock_status");
+        assertThat(csv.getReferentiel().get(ReferentielKey.GTIN)).contains("gtin", "ean", "ean13");
+        assertThat(csv.getReferentiel().get(ReferentielKey.BRAND)).contains("brand", "brand_name");
+        assertThat(csv.getReferentiel().get(ReferentielKey.MODEL)).contains("mpn", "model", "sku");
     }
 
     private KwankoFeedService buildService()

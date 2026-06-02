@@ -14,17 +14,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.open4goods.commons.config.yml.datasource.CsvDataSourceProperties;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.util.HttpUtils;
+import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.affiliation.AffiliationCapability;
 import org.open4goods.model.affiliation.AffiliationProgram;
 import org.open4goods.model.affiliation.AffiliationPromotion;
 import org.open4goods.model.affiliation.AffiliationTransaction;
+import org.open4goods.model.price.Currency;
 import org.open4goods.services.feedservice.config.FeedConfiguration;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.services.serialisation.service.SerialisationService;
@@ -43,6 +47,16 @@ public class KwankoFeedService extends AbstractFeedService
     private static final String BASE_URL = "https://api.kwanko.com";
     private static final String PRODUCT_FEED_AD_TYPE = "product_feed";
     private static final String VOUCHER_CODE_AD_TYPE = "voucher_code";
+    private static final String[] KWANKO_PRODUCT_URL_COLUMNS = {"product_url", "Product page URL", "Product URL", "url", "URL", "link", "merchant_deep_link"};
+    private static final String[] KWANKO_TRACKED_URL_COLUMNS = {"tracking_url", "tracked_url", "deeplink", "tracking_link", "merchant_deep_link"};
+    private static final String[] KWANKO_NAME_COLUMNS = {"product_name", "Product name", "Name", "name", "title", "Title", "product_title"};
+    private static final String[] KWANKO_PRICE_COLUMNS = {"price", "Current price", "product_price", "sale_price", "search_price", "price_vat_inc"};
+    private static final String[] KWANKO_DESCRIPTION_COLUMNS = {"description", "Product description", "product_description", "short_description", "long_description"};
+    private static final String[] KWANKO_IMAGE_COLUMNS = {"image_url", "URL related to the big image", "Image URL", "image", "picture", "picture_url", "product_image", "large_image"};
+    private static final String[] KWANKO_STOCK_COLUMNS = {"availability", "Stock status", "in_stock", "stock", "stock_status"};
+    private static final String[] KWANKO_GTIN_COLUMNS = {"gtin", "GTIN", "ean", "EAN", "ean13", "EAN13", "isbn", "ISBN", "barcode", "product_gtin"};
+    private static final String[] KWANKO_BRAND_COLUMNS = {"brand", "Brand", "brand_name", "Brand name", "manufacturer", "Manufacturer"};
+    private static final String[] KWANKO_MODEL_COLUMNS = {"mpn", "MPN", "model", "Model", "sku", "SKU", "reference", "Internal reference", "Manufacturer reference", "product_reference"};
 
     private final String token;
     private final HttpClient httpClient;
@@ -107,6 +121,7 @@ public class KwankoFeedService extends AbstractFeedService
             }
 
             DataSourceProperties ds = getVolatileDatasource(feedKey, feedConfig, feedUrl);
+            applyKwankoCsvDefaults(ds);
             JsonNode campaign = ad.path("campaign");
             ds.setDatasourceConfigName(firstNonBlank(textOrNull(campaign, "name"), feedKey));
             ds.setName(extractNameAndTld(textOrNull(campaign, "url")));
@@ -254,14 +269,19 @@ public class KwankoFeedService extends AbstractFeedService
         for (JsonNode conversion : conversionsNode)
         {
             JsonNode campaign = conversion.path("campaign");
+            JsonNode websitePerLanguage = firstArrayElement(conversion.path("websites_per_language"));
             JsonNode earnings = firstExisting(conversion, "earnings", "spending");
+            if (earnings.isEmpty())
+            {
+                earnings = firstExisting(websitePerLanguage, "earnings", "spending");
+            }
             AffiliationTransaction transaction = new AffiliationTransaction();
             transaction.setProviderName(getProviderName());
             transaction.setTransactionId(firstNonBlank(textOrNull(conversion, "unique_conversion_id"), textOrNull(conversion, "kwanko_id")));
             transaction.setProgramId(textOrNull(campaign, "id"));
             transaction.setTransactionDate(parseInstant(textOrNull(conversion, "completed_at")));
             transaction.setStatus(textOrNull(conversion, "state"));
-            transaction.setCommissionAmount(parseBigDecimal(textOrNull(earnings, "value")));
+            transaction.setCommissionAmount(parseBigDecimal(firstNonBlank(textOrNull(earnings, "value"), textOrNull(earnings, "countervalue"))));
             transaction.setCurrency(firstNonBlank(textOrNull(campaign, "currency"), textOrNull(conversion, "countervalue_currency")));
             transaction.setSubId(firstArgsite(conversion.path("websites_per_language")));
             list.add(transaction);
@@ -303,6 +323,67 @@ public class KwankoFeedService extends AbstractFeedService
     private boolean isEnabled()
     {
         return feedConfig != null && feedConfig.getKwanko() != null && feedConfig.getKwanko().isEnabled();
+    }
+
+    /**
+     * Applies Kwanko V4 product-feed defaults documented for publisher ads while preserving
+     * any datasource-specific mapping already configured in YAML.
+     *
+     * @param datasource datasource generated from the product-feed ad
+     */
+    private void applyKwankoCsvDefaults(DataSourceProperties datasource)
+    {
+        if (datasource.getCsvDatasource() == null)
+        {
+            datasource.setCsvDatasource(new CsvDataSourceProperties());
+        }
+        CsvDataSourceProperties csv = datasource.getCsvDatasource();
+        csv.setImportAllAttributes(true);
+        if (csv.getCurrency() == null)
+        {
+            csv.setCurrency(Currency.EUR);
+        }
+        if (isBlank(csv.getUrl()))
+        {
+            csv.setUrl(firstHeader(KWANKO_PRODUCT_URL_COLUMNS));
+        }
+        if (isBlank(csv.getAffiliatedUrl()))
+        {
+            csv.setAffiliatedUrl(firstHeader(KWANKO_TRACKED_URL_COLUMNS));
+        }
+        if (isBlank(csv.getName()))
+        {
+            csv.setName(firstHeader(KWANKO_NAME_COLUMNS));
+        }
+        addAllIfEmpty(csv.getPrice(), csv::setPrice, KWANKO_PRICE_COLUMNS);
+        addAllIfEmpty(csv.getDescription(), csv::setDescription, KWANKO_DESCRIPTION_COLUMNS);
+        addAllIfEmpty(csv.getImage(), csv::setImage, KWANKO_IMAGE_COLUMNS);
+        addAllIfEmpty(csv.getInStock(), csv::setInStock, KWANKO_STOCK_COLUMNS);
+        addReferentielDefaults(csv, ReferentielKey.GTIN, KWANKO_GTIN_COLUMNS);
+        addReferentielDefaults(csv, ReferentielKey.BRAND, KWANKO_BRAND_COLUMNS);
+        addReferentielDefaults(csv, ReferentielKey.MODEL, KWANKO_MODEL_COLUMNS);
+    }
+
+    private String firstHeader(String[] headers)
+    {
+        return headers.length == 0 ? null : headers[0];
+    }
+
+    private void addAllIfEmpty(Set<String> existing, java.util.function.Consumer<Set<String>> setter, String... values)
+    {
+        if (existing == null || existing.isEmpty())
+        {
+            setter.accept(new LinkedHashSet<>(List.of(values)));
+        }
+    }
+
+    private void addReferentielDefaults(CsvDataSourceProperties csv, ReferentielKey key, String... values)
+    {
+        Set<String> existing = csv.getReferentiel().computeIfAbsent(key, ignored -> new LinkedHashSet<>());
+        if (existing.isEmpty())
+        {
+            existing.addAll(List.of(values));
+        }
     }
 
     private JsonNode retrieveKwankoCampaigns() throws Exception
@@ -398,7 +479,7 @@ public class KwankoFeedService extends AbstractFeedService
         }
         for (JsonNode trackedMaterial : trackedMaterials)
         {
-            String value = textOrNull(trackedMaterial, field);
+            String value = firstNonBlank(textOrNull(trackedMaterial, field), textOrNull(trackedMaterial.path("urls"), field));
             if (!isBlank(value))
             {
                 return value;
@@ -465,6 +546,10 @@ public class KwankoFeedService extends AbstractFeedService
 
     private JsonNode firstExisting(JsonNode node, String... fields)
     {
+        if (node == null)
+        {
+            return objectMapper.createObjectNode();
+        }
         for (String field : fields)
         {
             JsonNode value = node.path(field);
@@ -476,14 +561,31 @@ public class KwankoFeedService extends AbstractFeedService
         return objectMapper.createObjectNode();
     }
 
+    private JsonNode firstArrayElement(JsonNode node)
+    {
+        if (node == null || !node.isArray() || node.isEmpty())
+        {
+            return objectMapper.createObjectNode();
+        }
+        return node.get(0);
+    }
+
     private String firstArgsite(JsonNode websitesPerLanguage)
     {
         if (websitesPerLanguage == null || !websitesPerLanguage.isArray() || websitesPerLanguage.isEmpty())
         {
             return null;
         }
-        JsonNode argsites = websitesPerLanguage.get(0).path("argsites");
-        return firstNonBlank(textOrNull(argsites, "argsite"), textOrNull(argsites, "argsite1"), textOrNull(argsites, "argsite2"));
+        for (JsonNode websitePerLanguage : websitesPerLanguage)
+        {
+            JsonNode argsites = websitePerLanguage.path("argsites");
+            String value = firstNonBlank(textOrNull(argsites, "argsite"), textOrNull(argsites, "argsite1"), textOrNull(argsites, "argsite2"));
+            if (!isBlank(value))
+            {
+                return value;
+            }
+        }
+        return null;
     }
 
     private LocalDate parseLocalDate(String value)
