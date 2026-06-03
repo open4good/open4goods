@@ -251,7 +251,7 @@ public class CsvIndexationWorker implements Runnable {
 						 line = line.entrySet().stream()
 							    .collect(Collectors.toMap(
 							        e -> e.getKey(),
-							        e -> e.getValue() == null ? "" : IdHelper.sanitizeAndNormalize(e.getValue())
+							        e -> e.getValue() == null ? "" : normalizeCsvValue(e.getValue())
 							    ));
 						DataFragment df = parseCsvLine(crawler, controller, dsProperties, line, dsConfName, dedicatedLogger, url);
 
@@ -345,6 +345,16 @@ public class CsvIndexationWorker implements Runnable {
 	        schema = schema.withColumnSeparator(config.getCsvSeparator());
 	    }
 	    return schema;
+	}
+
+	private String normalizeCsvValue(String value)
+	{
+	    String normalized = IdHelper.sanitizeAndNormalize(value);
+	    if (normalized.length() >= 2 && normalized.charAt(0) == '"' && normalized.charAt(normalized.length() - 1) == '"')
+	    {
+	        return normalized.substring(1, normalized.length() - 1);
+	    }
+	    return normalized;
 	}
 
 	private void closeIterator(MappingIterator<Map<String, String>> mi, Logger logger) {
@@ -984,11 +994,13 @@ public class CsvIndexationWorker implements Runnable {
 
 		for (final String line : lines) {
 
-			final String[] frags = line.split(config.getCsvDatasource().getAttributesKeyValSplitChar());
+			// Limit to 2 so that values containing the separator (e.g. URLs with "://") are preserved intact.
+			final String[] frags = line.split(config.getCsvDatasource().getAttributesKeyValSplitChar(), 2);
 			if (frags.length != 2) {
 				dedicatedLogger.info("Was expecting two fragments, got {} : {} at {}", frags.length, line, config.getName());
 			} else {
 				String key = frags[0];
+				String value = frags[1];
 				if (null != config.getCsvDatasource().getAttributesKeyKeepAfter()) {
 
 					int pos = key.indexOf(config.getCsvDatasource().getAttributesKeyKeepAfter());
@@ -998,7 +1010,21 @@ public class CsvIndexationWorker implements Runnable {
 				}
 
 				// Splitters from conf
-				pd.addAttribute(key, frags[1], config.getLanguage(), null);
+				pd.addAttribute(key, value, config.getLanguage(), null);
+
+				// If the value is a comma-separated list of URLs (e.g. imageURL_large), add each as a resource.
+				if (value.startsWith("http://") || value.startsWith("https://")) {
+					for (String url : value.split(",")) {
+						String trimmed = url.trim();
+						if (!trimmed.isEmpty()) {
+							try {
+								pd.addResource(trimmed);
+							} catch (Exception ignored) {
+								dedicatedLogger.debug("Skipping invalid resource URL from attrs: {}", trimmed);
+							}
+						}
+					}
+				}
 			}
 		}
 

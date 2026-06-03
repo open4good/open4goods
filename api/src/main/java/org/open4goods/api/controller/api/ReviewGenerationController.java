@@ -208,6 +208,9 @@ public class ReviewGenerationController {
         } catch (NotEnoughDataException e) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                     .body(failureResult(product, verticalConfig, "attributes", e));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                    .body(failureResult(product, verticalConfig, "attributes", e));
         }
     }
 
@@ -225,7 +228,12 @@ public class ReviewGenerationController {
             throws Exception {
         Product product = productRepository.getById(upc);
         VerticalConfig verticalConfig = verticalsConfigService.getConfigByIdOrDefault(product.getVertical());
-        return ResponseEntity.ok(reviewGenerationService.generateReviewText(product, verticalConfig));
+        try {
+            return ResponseEntity.ok(reviewGenerationService.generateReviewText(product, verticalConfig));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                    .body(failureResult(product, verticalConfig, "text", e));
+        }
     }
 
     /**
@@ -248,6 +256,9 @@ public class ReviewGenerationController {
                     requestHeaders(request)));
         } catch (NotEnoughDataException e) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body(failureResult(product, verticalConfig, "workflow", e));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
                     .body(failureResult(product, verticalConfig, "workflow", e));
         }
     }
@@ -439,6 +450,23 @@ public class ReviewGenerationController {
                 exception.getDetails() == null ? List.of() : exception.getDetails().acceptedUrls(),
                 exception.getDetails() == null ? Map.of() : exception.getDetails().rejectedUrls(),
                 exception.getEnrichmentStatus());
+    }
+
+    private ReviewGenerationStepResult failureResult(Product product, VerticalConfig verticalConfig, String step,
+            Exception exception) {
+        int sourceCount = product.getReviewFacts() == null ? 0 : product.getReviewFacts().size();
+        int totalTokens = product.getReviewFacts() == null ? 0 : product.getReviewFacts().stream()
+                .filter(fact -> fact != null && fact.getTokenCount() != null)
+                .mapToInt(fact -> fact.getTokenCount())
+                .sum();
+        List<String> acceptedUrls = product.getReviewFacts() == null ? List.of() : product.getReviewFacts().stream()
+                .filter(fact -> fact != null && fact.getUrl() != null && !fact.getUrl().isBlank())
+                .map(fact -> fact.getUrl())
+                .toList();
+        return new ReviewGenerationStepResult(product.getId(), product.gtin(),
+                verticalConfig == null ? product.getVertical() : verticalConfig.getId(), step, false,
+                "Review generation step failed: " + exception.getMessage(), sourceCount, totalTokens, "FAILED",
+                List.of(), null, null, List.of(), acceptedUrls, Map.of(), Map.of());
     }
 
     private Map<String, String> requestHeaders(HttpServletRequest request) {

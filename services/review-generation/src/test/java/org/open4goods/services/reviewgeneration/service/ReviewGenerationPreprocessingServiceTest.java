@@ -824,6 +824,77 @@ class ReviewGenerationPreprocessingServiceTest {
     }
 
     @Test
+    void classifySource_TreatsManufacturerHostAsOfficialBeforeCommerceAndForumText() {
+        Product product = product("VEVOR", "BD-355JA");
+        GoogleSearchResult result = new GoogleSearchResult("VEVOR chest freezer 345 L",
+                "https://www.vevor.fr/machine-a-glacons-c_10725/vevor-congelateur-coffre-345-l-p_010826832541");
+
+        Object sourceClass = ReflectionTestUtils.invokeMethod(service, "classifySource", product, result,
+                "Question reponse panier acheter livraison stock. Item Model Number BD-355JA.");
+
+        assertThat(sourceClass).hasToString("OFFICIAL_PRODUCT");
+    }
+
+    @Test
+    void preparePromptVariables_AcceptsExactComparisonProductPageAsFallbackEvidence() throws Exception {
+        properties.setMaxSearch(1);
+        properties.setMinMarkdownChars(20);
+        properties.setSourceMinTokens(1);
+        properties.setMinGlobalTokens(1);
+        properties.setMinUrlCount(1);
+        properties.setMaxUrlsPerProduct(1);
+        Product product = product("TCL", "50C79K");
+        String url = "https://www.lcd-compare.com/televiseur-TCL50C79K-TCL-50C79K.htm";
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse(List.of(
+                new GoogleSearchResult("TCL 50C79K - fiche technique, prix et avis", url))));
+        when(promptService.estimateTokens(any(String.class))).thenReturn(300);
+        when(urlFetchingService.fetchUrlAsync(any(String.class), any(Map.class))).thenAnswer(invocation ->
+        {
+            String markdown = "TCL 50C79K fiche technique prix et avis televiseur QD Mini LED 50 pouces.";
+            return CompletableFuture.completedFuture(new FetchResponse(url, 200, markdown, markdown,
+                    FetchStrategy.HTTP));
+        });
+
+        Map<String, Object> variables = service.preparePromptVariables(product, verticalConfig(),
+                new ReviewGenerationStatus());
+
+        assertThat(variables.get("RESULT_QUALITY")).isEqualTo("COMPLETE");
+        @SuppressWarnings("unchecked")
+        Map<String, String> sourceClasses = (Map<String, String>) variables.get("SOURCE_CLASSES");
+        assertThat(sourceClasses).containsEntry(url, "COMPARISON_PRODUCT_PAGE");
+    }
+
+    @Test
+    void preparePromptVariables_AcceptsManufacturerPageWhenExactModelIsOnlyInFetchedContent() throws Exception {
+        properties.setMaxSearch(1);
+        properties.setMinMarkdownChars(20);
+        properties.setSourceMinTokens(1);
+        properties.setMinGlobalTokens(1);
+        properties.setMinUrlCount(1);
+        properties.setMaxUrlsPerProduct(1);
+        Product product = product("TCL", "50C79K");
+        String url = "https://www.tcl.com/fr/fr/tvs/50c7k";
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse(List.of(
+                new GoogleSearchResult("TCL C7K Premium QD-Mini LED TV", url))));
+        when(promptService.estimateTokens(any(String.class))).thenReturn(300);
+        when(urlFetchingService.fetchUrlAsync(any(String.class), any(Map.class))).thenAnswer(invocation ->
+        {
+            String markdown = "TCL C7K Premium QD-Mini LED TV. Modeles de la gamme: 50C79K, 55C79K, 65C79K.";
+            return CompletableFuture.completedFuture(new FetchResponse(url, 200, markdown, markdown,
+                    FetchStrategy.HTTP));
+        });
+
+        Map<String, Object> variables = service.preparePromptVariables(product, verticalConfig(),
+                new ReviewGenerationStatus());
+
+        assertThat(product.getOfficialUrl()).isEqualTo(url);
+        assertThat(variables.get("RESULT_QUALITY")).isEqualTo("COMPLETE");
+        @SuppressWarnings("unchecked")
+        Map<String, String> sourceClasses = (Map<String, String>) variables.get("SOURCE_CLASSES");
+        assertThat(sourceClasses).containsEntry(url, "OFFICIAL_PRODUCT");
+    }
+
+    @Test
     void preparePromptVariables_UsesConfiguredOfficialDomainForPrivateLabelBrand() throws Exception {
         properties.setMaxSearch(1);
         properties.setMinMarkdownChars(20);

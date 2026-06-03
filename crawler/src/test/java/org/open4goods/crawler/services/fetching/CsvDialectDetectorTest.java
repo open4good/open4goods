@@ -2,13 +2,19 @@ package org.open4goods.crawler.services.fetching;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.open4goods.commons.config.yml.datasource.CsvDataSourceProperties;
 
+import tools.jackson.databind.MappingIterator;
+import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.dataformat.csv.CsvReadFeature;
 import tools.jackson.dataformat.csv.CsvSchema;
 
 /**
@@ -31,6 +37,7 @@ class CsvDialectDetectorTest
                 """);
 
         assertThat((char) schema.getColumnSeparator()).isEqualTo(',');
+        assertThat(schema.getEscapeChar()).isEqualTo(-1);
     }
 
     @Test
@@ -55,6 +62,46 @@ class CsvDialectDetectorTest
                 """);
 
         assertThat((char) schema.getColumnSeparator()).isEqualTo(';');
+    }
+
+    @Test
+    void detectsBackslashEscapedQuotesInSemicolonFeed() throws Exception
+    {
+        CsvSchema schema = detect("""
+                product_name;price;description
+                Store;19,90;"Rideau avec \\\"motif\\\" et finition"
+                Blind;29,90;"Tissu occultant; largeur standard"
+                """);
+
+        assertThat((char) schema.getColumnSeparator()).isEqualTo(';');
+        assertThat((char) schema.getQuoteChar()).isEqualTo('"');
+        assertThat((char) schema.getEscapeChar()).isEqualTo('\\');
+    }
+
+    @Test
+    void fallsBackToUnquotedParsingForMalformedQuotedFeed() throws Exception
+    {
+        Path file = write("\"title\";\"price\";\"description\"\n"
+                + "\"Rideau\";\"45.90\";\"Motifs \"\"\"\"circulaires\"\"\"\",lineaires\"\n"
+                + "\"Store\";\"55.34\";\"Tissu premium,\"\"\"\"\"\"\"Fabrique en France\"\"\"\"\"\","
+                + "\"\"\"\"\"\"\"gage de qualite\"\"\"\"\"\"\"\";;;;\"\n");
+
+        CsvSchema schema = detector.detectSchema(file.toFile(), StandardCharsets.UTF_8);
+
+        assertThat((char) schema.getColumnSeparator()).isEqualTo(';');
+        assertThat(schema.getQuoteChar()).isEqualTo(-1);
+        try (MappingIterator<Map<String, String>> rows = CsvMapper.builder()
+                .enable(CsvReadFeature.IGNORE_TRAILING_UNMAPPABLE)
+                .enable(CsvReadFeature.INSERT_NULLS_FOR_MISSING_COLUMNS)
+                .build()
+                .readerFor(Map.class)
+                .with(schema)
+                .readValues(new InputStreamReader(new FileInputStream(file.toFile()), StandardCharsets.UTF_8)))
+        {
+            Map<String, String> first = rows.next();
+            assertThat(first.get("title")).isEqualTo("\"Rideau\"");
+            assertThat(first.get("price")).isEqualTo("\"45.90\"");
+        }
     }
 
     @Test

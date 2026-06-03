@@ -123,6 +123,9 @@ public class ReviewGenerationPreprocessingService {
 		OFFICIAL_PDF,
 		REVIEW,
 		GUIDE,
+		COMPARISON_PRODUCT_PAGE,
+		RETAIL_PRODUCT_PAGE,
+		MARKETPLACE,
 		MERCHANT,
 		FORUM,
 		SPARE_PART,
@@ -858,11 +861,15 @@ public class ReviewGenerationPreprocessingService {
 
 	private SourceClass classifySource(Product product, GoogleSearchResult result, String content) {
 		if (result != null && isPdfUrl(result.link())) {
-			return isOfficialUrl(product, result) ? SourceClass.OFFICIAL_PDF : SourceClass.GENERIC_CATALOG;
+			return isOfficialUrl(product, result) || isManufacturerHost(product, result)
+					? SourceClass.OFFICIAL_PDF : SourceClass.GENERIC_CATALOG;
 		}
 		String evidence = normalizeForTextMatching(String.join(" ", result == null ? "" : safeString(result.title()),
 				result == null ? "" : safeString(result.link()), firstContentZone(content)));
 		if (result != null && isOfficialUrl(product, result) && isOfficialProductOrSupportPath(result)) {
+			return isOfficialSupportUrl(result) ? SourceClass.OFFICIAL_SUPPORT : SourceClass.OFFICIAL_PRODUCT;
+		}
+		if (result != null && isManufacturerHost(product, result)) {
 			return isOfficialSupportUrl(result) ? SourceClass.OFFICIAL_SUPPORT : SourceClass.OFFICIAL_PRODUCT;
 		}
 		if (containsAny(evidence, "spare part", "sparefixd", "replacement part", "piece detachee", "pieces detachees",
@@ -883,9 +890,15 @@ public class ReviewGenerationPreprocessingService {
 		if (containsAny(evidence, "forum", "sav darty", "question", "reponse", "answered questions")) {
 			return SourceClass.FORUM;
 		}
+		if (isComparisonProductPage(result, evidence)) {
+			return SourceClass.COMPARISON_PRODUCT_PAGE;
+		}
+		if (isMarketplaceProductPage(result, evidence)) {
+			return SourceClass.MARKETPLACE;
+		}
 		if (containsAny(evidence, "panier", "ajouter au panier", "livraison", "stock", "prix", "acheter",
 				"marketplace", "shop", "boutique", "add to cart", "in stock", "out of stock")) {
-			return SourceClass.MERCHANT;
+			return SourceClass.RETAIL_PRODUCT_PAGE;
 		}
 		if (containsAny(evidence, "manual", "notice", "mode d emploi", "fiche produit", "datasheet",
 				"support")) {
@@ -900,7 +913,34 @@ public class ReviewGenerationPreprocessingService {
 
 	private boolean isAcceptedSourceClass(SourceClass sourceClass) {
 		return sourceClass == SourceClass.OFFICIAL_PRODUCT || sourceClass == SourceClass.OFFICIAL_SUPPORT
-				|| sourceClass == SourceClass.REVIEW || sourceClass == SourceClass.GUIDE;
+				|| sourceClass == SourceClass.REVIEW || sourceClass == SourceClass.GUIDE
+				|| sourceClass == SourceClass.COMPARISON_PRODUCT_PAGE
+				|| sourceClass == SourceClass.RETAIL_PRODUCT_PAGE;
+	}
+
+	private boolean isComparisonProductPage(GoogleSearchResult result, String evidence) {
+		String host = hostOf(result);
+		return host.contains("compare") || host.contains("comparateur") || host.contains("lcdcompare")
+				|| containsAny(evidence, "fiche technique", "comparer", "comparatif", "compare prices",
+						"prix et avis", "specificaties", "specifications");
+	}
+
+	private boolean isMarketplaceProductPage(GoogleSearchResult result, String evidence) {
+		String host = hostOf(result);
+		return host.contains("amazon.") || host.contains("ebay.") || host.contains("rakuten.")
+				|| host.contains("aliexpress.") || host.contains("cdiscount.")
+				|| containsAny(evidence, "marketplace", "vendeurs marketplace", "sold by", "fulfilled by");
+	}
+
+	private String hostOf(GoogleSearchResult result) {
+		if (result == null || result.link() == null || result.link().isBlank()) {
+			return "";
+		}
+		try {
+			return URI.create(result.link()).toURL().getHost().toLowerCase(Locale.ROOT);
+		} catch (Exception e) {
+			return "";
+		}
 	}
 
 	private boolean containsAny(String haystack, String... needles) {
@@ -978,7 +1018,10 @@ public class ReviewGenerationPreprocessingService {
 				continue;
 			}
 			String content = sanitizeMarkdown(fetchResponse.markdownContent(), url);
-			if (!isRelevantContent(content, result, brand, primaryModel, alternateModels)) {
+			boolean exactProductEvidence = hasExactProductEvidence(product, result, fetchResponse, content,
+					exactEvidenceModels);
+			if (!isRelevantContent(content, result, brand, primaryModel, alternateModels)
+					&& !(isManufacturerHost(product, result) && exactProductEvidence)) {
 				String reason = "irrelevant: missing brand/model match in title, h1/main content, or URL";
 				rejectedUrls.put(url, reason);
 				logger.warn("Content from URL {} discarded due to irrelevance for brand {} and model {}", url, brand,
@@ -996,7 +1039,7 @@ public class ReviewGenerationPreprocessingService {
 				logger.warn("Content from URL {} discarded due to unsupported source class {}", url, sourceClass);
 				continue;
 			}
-			if (!hasExactProductEvidence(product, result, fetchResponse, content, exactEvidenceModels)) {
+			if (!exactProductEvidence) {
 				rejectedUrls.put(url, "irrelevant: missing exact GTIN/model evidence");
 				logger.warn("Content from URL {} discarded because it lacks specific GTIN/model evidence for UPC {}",
 						url, product.getId());
@@ -1148,7 +1191,7 @@ public class ReviewGenerationPreprocessingService {
 		if (product == null || result == null || result.link() == null || result.link().isBlank()) {
 			return;
 		}
-		if (product.getOfficialUrl() != null || !isOfficialUrl(product, result)) {
+		if (product.getOfficialUrl() != null || !(isOfficialUrl(product, result) || isManufacturerHost(product, result))) {
 			return;
 		}
 		// Prefer a product page; fall back to a support page when no product page has been
@@ -1201,7 +1244,8 @@ public class ReviewGenerationPreprocessingService {
 		}
 		return sourceClasses.values().stream().anyMatch(sourceClass -> sourceClass == SourceClass.OFFICIAL_PRODUCT
 				|| sourceClass == SourceClass.OFFICIAL_SUPPORT || sourceClass == SourceClass.REVIEW
-				|| sourceClass == SourceClass.GUIDE);
+				|| sourceClass == SourceClass.GUIDE || sourceClass == SourceClass.COMPARISON_PRODUCT_PAGE
+				|| sourceClass == SourceClass.RETAIL_PRODUCT_PAGE);
 	}
 
 	private boolean shouldRunLowQualityFallback(VerticalConfig verticalConfig, int accumulatedTokens,
@@ -2169,6 +2213,21 @@ public class ReviewGenerationPreprocessingService {
 
 	private boolean isOfficialUrl(Product product, GoogleSearchResult result) {
 		return officialUrlScore(product, result) >= 10;
+	}
+
+	private boolean isManufacturerHost(Product product, GoogleSearchResult result) {
+		if (product == null || result == null || result.link() == null || result.link().isBlank()) {
+			return false;
+		}
+		try {
+			URL url = URI.create(result.link()).toURL();
+			String host = normalizeForUrlMatching(url.getHost());
+			return !isExcludedOfficialHost(host)
+					&& (brandMatchesHostLabel(product.brand(), url.getHost())
+							|| isConfiguredOfficialHost(product, host));
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	private boolean isOfficialSupportUrl(GoogleSearchResult result) {

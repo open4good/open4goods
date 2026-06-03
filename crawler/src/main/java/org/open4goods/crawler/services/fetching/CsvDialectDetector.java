@@ -29,11 +29,14 @@ public class CsvDialectDetector
      */
     private static final char[] SEPARATOR_CANDIDATES = {'\t', '|', ';', ','};
 
-    /** Only {@code "} is a RFC-4180 quote character. */
-    private static final char[] QUOTE_CANDIDATES = {'"'};
+    /** RFC-4180 quotes are preferred, but malformed partner feeds may need no quote handling. */
+    private static final Character[] QUOTE_CANDIDATES = {'"', null};
+
+    /** Some partner feeds use backslash-escaped quotes instead of doubled quotes. */
+    private static final Character[] ESCAPE_CANDIDATES = {null, '\\'};
 
     /** Number of non-blank lines sampled, including the header. */
-    private static final int DETECTION_SAMPLE_LINES = 501;
+    private static final int DETECTION_SAMPLE_LINES = 2_000;
 
     /**
      * Detects a CSV schema for the supplied file.
@@ -52,28 +55,35 @@ public class CsvDialectDetector
         }
 
         char bestSep = ',';
-        char bestQuote = '"';
+        Character bestQuote = '"';
+        Character bestEscape = null;
         double bestScore = -1.0;
 
         for (char sep : SEPARATOR_CANDIDATES)
         {
-            for (char quote : QUOTE_CANDIDATES)
+            for (Character quote : QUOTE_CANDIDATES)
             {
-                double score = consistencyScore(sampleLines, sep, quote);
-                if (score > bestScore)
+                Character[] escapeCandidates = quote == null ? new Character[] {null} : ESCAPE_CANDIDATES;
+                for (Character escape : escapeCandidates)
                 {
-                    bestScore = score;
-                    bestSep = sep;
-                    bestQuote = quote;
+                    double score = consistencyScore(sampleLines, sep, quote, escape);
+                    if (score > bestScore)
+                    {
+                        bestScore = score;
+                        bestSep = sep;
+                        bestQuote = quote;
+                        bestEscape = escape;
+                    }
                 }
             }
         }
 
-        return CsvSchema.builder()
-                .setColumnSeparator(bestSep)
-                .setQuoteChar(bestQuote)
-                .setUseHeader(true)
-                .build();
+        CsvSchema schema = buildSchema(sampleLines.getFirst(), bestSep, bestQuote);
+        if (bestEscape != null)
+        {
+            schema = schema.withEscapeChar(bestEscape);
+        }
+        return schema;
     }
 
     private List<String> readSample(File file, Charset charset) throws IOException
@@ -103,9 +113,56 @@ public class CsvDialectDetector
         return line;
     }
 
-    private double consistencyScore(List<String> lines, char sep, char quote)
+    private CsvSchema buildSchema(String header, char separator, Character quote)
     {
-        int headerColumns = countFieldsOutsideQuotes(lines.getFirst(), sep, quote);
+        CsvSchema.Builder builder = CsvSchema.builder()
+                .setColumnSeparator(separator);
+        if (quote == null)
+        {
+            for (String column : splitUnquotedHeader(header, separator))
+            {
+                builder.addColumn(stripWrappingQuotes(column));
+            }
+            return builder
+                    .disableQuoteChar()
+                    .setSkipFirstDataRow(true)
+                    .build();
+        }
+        return builder
+                .setQuoteChar(quote)
+                .setUseHeader(true)
+                .build();
+    }
+
+    private List<String> splitUnquotedHeader(String header, char separator)
+    {
+        List<String> columns = new ArrayList<>();
+        int start = 0;
+        for (int i = 0; i < header.length(); i++)
+        {
+            if (header.charAt(i) == separator)
+            {
+                columns.add(header.substring(start, i));
+                start = i + 1;
+            }
+        }
+        columns.add(header.substring(start));
+        return columns;
+    }
+
+    private String stripWrappingQuotes(String value)
+    {
+        String trimmed = value.trim();
+        if (trimmed.length() >= 2 && trimmed.charAt(0) == '"' && trimmed.charAt(trimmed.length() - 1) == '"')
+        {
+            return trimmed.substring(1, trimmed.length() - 1);
+        }
+        return trimmed;
+    }
+
+    private double consistencyScore(List<String> lines, char sep, Character quote, Character escape)
+    {
+        int headerColumns = countFieldsOutsideQuotes(lines.getFirst(), sep, quote, escape);
         if (headerColumns <= 1)
         {
             return 0.0;
@@ -119,7 +176,7 @@ public class CsvDialectDetector
         int matchingHeader = 0;
         for (int i = 1; i < lines.size(); i++)
         {
-            int cols = countFieldsOutsideQuotes(lines.get(i), sep, quote);
+            int cols = countFieldsOutsideQuotes(lines.get(i), sep, quote, escape);
             colCountFreq.merge(cols, 1, Integer::sum);
             if (cols == headerColumns)
             {
@@ -146,29 +203,62 @@ public class CsvDialectDetector
         return (modalConsistency + headerConsistency) * 0.5 * Math.log1p(modalCount) * headerPenalty;
     }
 
-    private int countFieldsOutsideQuotes(String line, char sep, char quote)
+    private int countFieldsOutsideQuotes(String line, char sep, Character quote, Character escape)
     {
         int fields = 1;
         boolean inQuotes = false;
+        boolean fieldStarted = false;
+        boolean quoteClosed = false;
         for (int i = 0; i < line.length(); i++)
         {
             char c = line.charAt(i);
-            if (c == quote)
+            if (c == sep && !inQuotes)
+            {
+                fields++;
+                fieldStarted = false;
+                quoteClosed = false;
+                continue;
+            }
+            if (quoteClosed)
+            {
+                if (!Character.isWhitespace(c))
+                {
+                    return 0;
+                }
+                continue;
+            }
+            if (escape != null && c == escape && inQuotes && i + 1 < line.length())
+            {
+                i++;
+                fieldStarted = true;
+                continue;
+            }
+            if (quote != null && c == quote)
             {
                 if (inQuotes && i + 1 < line.length() && line.charAt(i + 1) == quote)
                 {
                     i++;
                 }
+                else if (inQuotes)
+                {
+                    inQuotes = false;
+                    quoteClosed = true;
+                }
+                else if (!fieldStarted)
+                {
+                    inQuotes = true;
+                    fieldStarted = true;
+                }
                 else
                 {
-                    inQuotes = !inQuotes;
+                    return 0;
                 }
             }
-            else if (c == sep && !inQuotes)
+            else if (inQuotes || !Character.isWhitespace(c))
             {
-                fields++;
+                fieldStarted = true;
             }
         }
-        return fields;
+        return inQuotes ? 0 : fields;
     }
 }

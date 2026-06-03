@@ -14,7 +14,7 @@ public class ResourceHelper {
 	 */
 	 public static boolean isResource(String value) {
 		  String val = value.toLowerCase().trim();
-		  return val.endsWith(".jpg") || val.endsWith(".png") || val.endsWith(".jpeg")  || val.endsWith(".wlp") || val.endsWith(".gif") || val.endsWith(".bmp") || val.endsWith(".tiff") || val.endsWith(".ico")
+		  return val.endsWith(".jpg") || val.endsWith(".png") || val.endsWith(".jpeg") || val.endsWith(".webp") || val.endsWith(".wlp") || val.endsWith(".gif") || val.endsWith(".bmp") || val.endsWith(".tiff") || val.endsWith(".ico")
 				  || val.endsWith(".pdf");
 		 }
 }

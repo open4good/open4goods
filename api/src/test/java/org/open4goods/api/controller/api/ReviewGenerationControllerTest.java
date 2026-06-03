@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.model.ai.AiReview;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductFact;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.reviewgeneration.dto.ReviewGenerationStepResult;
@@ -89,6 +90,58 @@ class ReviewGenerationControllerTest {
         assertThat(response.getBody().step()).isEqualTo("attributes");
         assertThat(response.getBody().message()).isEqualTo("No persisted review facts available");
         verify(reviewGenerationService).extractReviewAttributes(product, verticalConfig);
+    }
+
+    @Test
+    void extractReviewAttributes_ShouldReturnBadGatewayWhenProviderFails() throws Exception {
+        Product product = product(123L, "tv");
+        product.getReviewFacts().add(new ProductFact("https://support.example.test/manual", "markdown", "fr", 1L,
+                "HTTP", 42, "hash"));
+        VerticalConfig verticalConfig = verticalConfig("tv");
+
+        when(productRepository.getById(123L)).thenReturn(product);
+        when(verticalsConfigService.getConfigByIdOrDefault("tv")).thenReturn(verticalConfig);
+        when(reviewGenerationService.extractReviewAttributes(product, verticalConfig))
+                .thenThrow(new RuntimeException("AI provider rejected the request"));
+
+        ResponseEntity<ReviewGenerationStepResult> response = controller.extractReviewAttributes(123L);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_GATEWAY);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().success()).isFalse();
+        assertThat(response.getBody().step()).isEqualTo("attributes");
+        assertThat(response.getBody().resultQuality()).isEqualTo("FAILED");
+        assertThat(response.getBody().sourceCount()).isOne();
+        assertThat(response.getBody().totalTokens()).isEqualTo(42);
+        assertThat(response.getBody().acceptedUrls()).containsExactly("https://support.example.test/manual");
+        assertThat(response.getBody().message()).contains("AI provider rejected the request");
+        verify(reviewGenerationService).extractReviewAttributes(product, verticalConfig);
+    }
+
+    @Test
+    void generateReviewText_ShouldReturnBadGatewayWhenProviderFails() throws Exception {
+        Product product = product(123L, "tv");
+        product.getReviewFacts().add(new ProductFact("https://support.example.test/manual", "markdown", "fr", 1L,
+                "HTTP", 42, "hash"));
+        VerticalConfig verticalConfig = verticalConfig("tv");
+
+        when(productRepository.getById(123L)).thenReturn(product);
+        when(verticalsConfigService.getConfigByIdOrDefault("tv")).thenReturn(verticalConfig);
+        when(reviewGenerationService.generateReviewText(product, verticalConfig))
+                .thenThrow(new RuntimeException("AI provider rejected the request"));
+
+        ResponseEntity<ReviewGenerationStepResult> response = controller.generateReviewText(123L);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_GATEWAY);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().success()).isFalse();
+        assertThat(response.getBody().step()).isEqualTo("text");
+        assertThat(response.getBody().resultQuality()).isEqualTo("FAILED");
+        assertThat(response.getBody().sourceCount()).isOne();
+        assertThat(response.getBody().totalTokens()).isEqualTo(42);
+        assertThat(response.getBody().acceptedUrls()).containsExactly("https://support.example.test/manual");
+        assertThat(response.getBody().message()).contains("AI provider rejected the request");
+        verify(reviewGenerationService).generateReviewText(product, verticalConfig);
     }
 
     @Test

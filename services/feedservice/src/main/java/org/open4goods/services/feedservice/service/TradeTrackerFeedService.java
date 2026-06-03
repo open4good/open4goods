@@ -107,9 +107,9 @@ public class TradeTrackerFeedService extends AbstractFeedService
                         <limit>%d</limit>
                     </options>
                     """.formatted(escapeXml(affiliateSiteId), DEFAULT_LIMIT));
-            for (Element feed : childElements(root, "Feed"))
+            for (Element feed : containerItems(root, "feeds"))
             {
-                String feedUrl = directText(feed, "URL");
+                String feedUrl = toCsvUrl(directText(feed, "URL"));
                 if (isBlank(feedUrl))
                 {
                     continue;
@@ -168,19 +168,28 @@ public class TradeTrackerFeedService extends AbstractFeedService
             return List.of();
         }
         authenticate();
-        Document root = call("getCampaigns", """
-                <options>
-                    <assignmentStatus>accepted</assignmentStatus>
-                    <limit>%d</limit>
-                </options>
-                """.formatted(DEFAULT_LIMIT));
-        return parseTradeTrackerPrograms(root);
+        Map<String, AffiliationProgram> byId = new java.util.LinkedHashMap<>();
+        for (String affiliateSiteId : retrieveAffiliateSiteIds())
+        {
+            Document root = call("getCampaigns", """
+                    <affiliateSiteID>%s</affiliateSiteID>
+                    <options>
+                        <assignmentStatus>accepted</assignmentStatus>
+                        <limit>%d</limit>
+                    </options>
+                    """.formatted(escapeXml(affiliateSiteId), DEFAULT_LIMIT));
+            for (AffiliationProgram p : parseTradeTrackerPrograms(root))
+            {
+                byId.putIfAbsent(p.getProgramId(), p);
+            }
+        }
+        return byId.values();
     }
 
     Collection<AffiliationProgram> parseTradeTrackerPrograms(Document root)
     {
         List<AffiliationProgram> list = new ArrayList<>();
-        for (Element campaign : childElements(root, "Campaign"))
+        for (Element campaign : containerItems(root, "campaigns"))
         {
             AffiliationProgram program = new AffiliationProgram();
             program.setProviderName(getProviderName());
@@ -203,9 +212,9 @@ public class TradeTrackerFeedService extends AbstractFeedService
                     program.setCategories(Set.of(categoryName));
                 }
                 Element commission = firstDirectChild(info, "commission");
-                program.setClickCommission(parseBigDecimal(directText(commission, "click")));
-                program.setLeadCommission(parseBigDecimal(directText(commission, "lead")));
-                program.setSaleCommissionPercent(parseBigDecimal(directText(commission, "sale")));
+                program.setClickCommission(parseBigDecimal(directText(commission, "clickCommission")));
+                program.setLeadCommission(parseBigDecimal(directText(commission, "leadCommission")));
+                program.setSaleCommissionPercent(parseBigDecimal(directText(commission, "saleCommissionVariable")));
             }
             list.add(program);
         }
@@ -238,7 +247,7 @@ public class TradeTrackerFeedService extends AbstractFeedService
     Collection<AffiliationPromotion> parseTradeTrackerPromotions(Document root)
     {
         List<AffiliationPromotion> list = new ArrayList<>();
-        for (Element material : childElements(root, "MaterialItem"))
+        for (Element material : containerItems(root, "materialItems"))
         {
             Element campaign = firstDirectChild(material, "campaign");
             AffiliationPromotion promotion = new AffiliationPromotion();
@@ -279,14 +288,23 @@ public class TradeTrackerFeedService extends AbstractFeedService
         try
         {
             authenticate();
-            Document root = call("getConversionTransactions", """
-                    <options>
-                        <registrationDateFrom>%s</registrationDateFrom>
-                        <registrationDateTo>%s</registrationDateTo>
-                        <limit>%d</limit>
-                    </options>
-                    """.formatted(DateTimeFormatter.ISO_INSTANT.format(from), DateTimeFormatter.ISO_INSTANT.format(to), DEFAULT_LIMIT));
-            return parseTradeTrackerTransactions(root);
+            Map<String, AffiliationTransaction> byId = new java.util.LinkedHashMap<>();
+            for (String affiliateSiteId : retrieveAffiliateSiteIds())
+            {
+                Document root = call("getConversionTransactions", """
+                        <affiliateSiteID>%s</affiliateSiteID>
+                        <options>
+                            <registrationDateFrom>%s</registrationDateFrom>
+                            <registrationDateTo>%s</registrationDateTo>
+                            <limit>%d</limit>
+                        </options>
+                        """.formatted(escapeXml(affiliateSiteId), DateTimeFormatter.ISO_INSTANT.format(from), DateTimeFormatter.ISO_INSTANT.format(to), DEFAULT_LIMIT));
+                for (AffiliationTransaction t : parseTradeTrackerTransactions(root))
+                {
+                    byId.putIfAbsent(t.getTransactionId(), t);
+                }
+            }
+            return byId.values();
         }
         catch (Exception e)
         {
@@ -298,7 +316,7 @@ public class TradeTrackerFeedService extends AbstractFeedService
     Collection<AffiliationTransaction> parseTradeTrackerTransactions(Document root)
     {
         List<AffiliationTransaction> list = new ArrayList<>();
-        for (Element conversion : childElements(root, "ConversionTransaction"))
+        for (Element conversion : containerItems(root, "conversionTransactions"))
         {
             Element campaign = firstDirectChild(conversion, "campaign");
             AffiliationTransaction transaction = new AffiliationTransaction();
@@ -369,7 +387,7 @@ public class TradeTrackerFeedService extends AbstractFeedService
                 </options>
                 """.formatted(DEFAULT_LIMIT));
         List<String> result = new ArrayList<>();
-        for (Element site : childElements(root, "AffiliateSite"))
+        for (Element site : containerItems(root, "affiliateSites"))
         {
             String id = directText(site, "ID");
             if (!isBlank(id))
@@ -418,6 +436,28 @@ public class TradeTrackerFeedService extends AbstractFeedService
         factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
         factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
         return factory.newDocumentBuilder().parse(new InputSource(new StringReader(xml)));
+    }
+
+    /** Returns direct {@code <item>} children of the first element named {@code containerLocalName} in the document. */
+    private List<Element> containerItems(Document root, String containerLocalName)
+    {
+        List<Element> containers = childElements(root, containerLocalName);
+        if (containers.isEmpty())
+        {
+            return List.of();
+        }
+        Element container = containers.get(0);
+        List<Element> result = new ArrayList<>();
+        NodeList nodes = container.getChildNodes();
+        for (int i = 0; i < nodes.getLength(); i++)
+        {
+            Node node = nodes.item(i);
+            if (node instanceof Element element && "item".equals(element.getLocalName() != null ? element.getLocalName() : element.getNodeName()))
+            {
+                result.add(element);
+            }
+        }
+        return result;
     }
 
     private List<Element> childElements(Document root, String localName)
@@ -559,6 +599,16 @@ public class TradeTrackerFeedService extends AbstractFeedService
     private boolean isBlank(String value)
     {
         return HttpUtils.isBlank(value);
+    }
+
+    /** Rewrites a TradeTracker product-feed URL to request CSV instead of XML v2. */
+    private String toCsvUrl(String url)
+    {
+        if (isBlank(url))
+        {
+            return url;
+        }
+        return url.replace("type=xml-v2", "type=csv");
     }
 
     private String escapeXml(String value)
