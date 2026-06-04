@@ -212,9 +212,9 @@ public class TradeTrackerFeedService extends AbstractFeedService
                     program.setCategories(Set.of(categoryName));
                 }
                 Element commission = firstDirectChild(info, "commission");
-                program.setClickCommission(parseBigDecimal(directText(commission, "clickCommission")));
-                program.setLeadCommission(parseBigDecimal(directText(commission, "leadCommission")));
-                program.setSaleCommissionPercent(parseBigDecimal(directText(commission, "saleCommissionVariable")));
+                program.setClickCommission(parseBigDecimal(firstNonBlank(directText(commission, "clickCommission"), directText(commission, "click"))));
+                program.setLeadCommission(parseBigDecimal(firstNonBlank(directText(commission, "leadCommission"), directText(commission, "lead"))));
+                program.setSaleCommissionPercent(parseBigDecimal(firstNonBlank(directText(commission, "saleCommissionVariable"), directText(commission, "sale"))));
             }
             list.add(program);
         }
@@ -438,21 +438,43 @@ public class TradeTrackerFeedService extends AbstractFeedService
         return factory.newDocumentBuilder().parse(new InputSource(new StringReader(xml)));
     }
 
-    /** Returns direct {@code <item>} children of the first element named {@code containerLocalName} in the document. */
+    /** Returns TradeTracker collection items from array containers or normalized SOAP response payloads. */
     private List<Element> containerItems(Document root, String containerLocalName)
     {
         List<Element> containers = childElements(root, containerLocalName);
-        if (containers.isEmpty())
+        if (!containers.isEmpty())
         {
-            return List.of();
+            Element container = containers.get(0);
+            List<Element> result = directCollectionChildren(container, containerLocalName);
+            if (!result.isEmpty())
+            {
+                return result;
+            }
         }
-        Element container = containers.get(0);
+
         List<Element> result = new ArrayList<>();
+        String itemLocalName = singularCollectionName(containerLocalName);
+        NodeList nodes = root.getElementsByTagName("*");
+        for (int i = 0; i < nodes.getLength(); i++)
+        {
+            Node node = nodes.item(i);
+            if (node instanceof Element element && sameLocalName(element, itemLocalName))
+            {
+                result.add(element);
+            }
+        }
+        return result;
+    }
+
+    private List<Element> directCollectionChildren(Element container, String containerLocalName)
+    {
+        List<Element> result = new ArrayList<>();
+        String itemLocalName = singularCollectionName(containerLocalName);
         NodeList nodes = container.getChildNodes();
         for (int i = 0; i < nodes.getLength(); i++)
         {
             Node node = nodes.item(i);
-            if (node instanceof Element element && "item".equals(element.getLocalName() != null ? element.getLocalName() : element.getNodeName()))
+            if (node instanceof Element element && ("item".equals(localName(element)) || sameLocalName(element, itemLocalName)))
             {
                 result.add(element);
             }
@@ -572,7 +594,12 @@ public class TradeTrackerFeedService extends AbstractFeedService
         }
         try
         {
-            return Math.toIntExact(java.time.Duration.parse(value.trim()).toDays());
+            String trimmed = value.trim();
+            if (trimmed.startsWith("P") && !trimmed.contains("T"))
+            {
+                return Math.toIntExact(java.time.Period.parse(trimmed).getDays());
+            }
+            return Math.toIntExact(java.time.Duration.parse(trimmed).toDays());
         }
         catch (Exception ignored)
         {
@@ -599,6 +626,30 @@ public class TradeTrackerFeedService extends AbstractFeedService
     private boolean isBlank(String value)
     {
         return HttpUtils.isBlank(value);
+    }
+
+    private String singularCollectionName(String containerLocalName)
+    {
+        if (containerLocalName.endsWith("ies"))
+        {
+            return containerLocalName.substring(0, containerLocalName.length() - 3) + "y";
+        }
+        if (containerLocalName.endsWith("s"))
+        {
+            return containerLocalName.substring(0, containerLocalName.length() - 1);
+        }
+        return containerLocalName;
+    }
+
+    private boolean sameLocalName(Element element, String expected)
+    {
+        return localName(element).equalsIgnoreCase(expected);
+    }
+
+    private String localName(Element element)
+    {
+        String localName = element.getLocalName();
+        return localName == null ? element.getNodeName() : localName;
     }
 
     /** Rewrites a TradeTracker product-feed URL to request CSV instead of XML v2. */
