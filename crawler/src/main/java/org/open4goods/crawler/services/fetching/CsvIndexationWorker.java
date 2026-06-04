@@ -427,6 +427,7 @@ public class CsvIndexationWorker implements Runnable {
 	    setShippingDetails(dataFragment, item, config, dedicatedLogger);
 	    setProductState(dataFragment, item, config, dedicatedLogger);
 	    addReferentielAttributes(dataFragment, item, config, dedicatedLogger);
+	    addExternalIds(dataFragment, item, config);
 	    enforceAffiliatedUrl(dataFragment);
 	    
 	    importAllAttributes(dataFragment, item, config);
@@ -902,6 +903,31 @@ public class CsvIndexationWorker implements Runnable {
 	}
 
 	/**
+	 * Adds structured external identifiers to the DataFragment.
+	 *
+	 * @param dataFragment DataFragment to add external ids
+	 * @param item Map representing a CSV line
+	 * @param config DataSourceProperties for configuration settings
+	 */
+	private void addExternalIds(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config) {
+	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
+	    for (String key : csvProperties.getMpn()) {
+	        String value = getFromCsvRow(item, key);
+	        if (!StringUtils.isEmpty(value)) {
+	            dataFragment.getExternalIds().getMpn().add(value);
+	            removeFromSource(item, key);
+	        }
+	    }
+	    for (String key : csvProperties.getSku()) {
+	        String value = getFromCsvRow(item, key);
+	        if (!StringUtils.isEmpty(value)) {
+	            dataFragment.getExternalIds().getSku().add(value);
+	            removeFromSource(item, key);
+	        }
+	    }
+	}
+
+	/**
 	 * Enforces the use of the affiliated URL if it is set.
 	 *
 	 * @param dataFragment DataFragment to enforce affiliated URL
@@ -968,8 +994,12 @@ public class CsvIndexationWorker implements Runnable {
 	 * @param url
 	 */
 	private void removeFromSource(Map<String, String> item, String key) {
-		if (item.containsKey(key)) {
-			item.remove(key);
+		if (item == null || key == null) {
+			return;
+		}
+		String actualKey = actualCsvKey(item, key);
+		if (actualKey != null) {
+			item.remove(actualKey);
 		}
 		
 	}
@@ -1038,9 +1068,23 @@ public class CsvIndexationWorker implements Runnable {
 	 * @return
 	 */
 	private String getFromCsvRow(final Map<String, String> item, final String colName) {
-
-		return item.get(colName);
+		String actualKey = actualCsvKey(item, colName);
+		return actualKey == null ? null : item.get(actualKey);
 		
+	}
+
+	private String actualCsvKey(final Map<String, String> item, final String colName) {
+		if (item == null || colName == null) {
+			return null;
+		}
+		if (item.containsKey(colName)) {
+			return colName;
+		}
+		String normalized = colName.trim();
+		return item.keySet().stream()
+				.filter(key -> key != null && key.trim().equalsIgnoreCase(normalized))
+				.findFirst()
+				.orElse(null);
 	}
 
 	private List<String> getCategoryFromCsvRows(Map<String, String> item) {

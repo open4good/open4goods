@@ -546,6 +546,8 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			// Checking model name from product words
 //			completeModelNames(product, dataFragment.getReferentielAttributes().get(ReferentielKey.MODEL));
 
+			mergeExternalIds(dataFragment, product);
+
 			/////////////////////////////////////////
 			// Update referentiel attributes
 			/////////////////////////////////////////
@@ -558,6 +560,14 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 		onProduct(product, vConf);
 		return null;
+	}
+
+	private void mergeExternalIds(final DataFragment dataFragment, final Product product) {
+		if (dataFragment == null || dataFragment.getExternalIds() == null || product == null || product.getExternalIds() == null) {
+			return;
+		}
+		product.getExternalIds().getMpn().addAll(dataFragment.getExternalIds().getMpn());
+		product.getExternalIds().getSku().addAll(dataFragment.getExternalIds().getSku());
 	}
 
 	private void handleDescriptions(final DataFragment dataFragment, final Product product, final VerticalConfig vConf) {

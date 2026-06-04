@@ -153,7 +153,10 @@ class KwankoFeedServiceTest
         assertThat(csv.getInStock()).contains("availability", "Availability", "stock_status", "StockIndicator");
         assertThat(csv.getReferentiel().get(ReferentielKey.GTIN)).contains("gtin", "ean", "ean13");
         assertThat(csv.getReferentiel().get(ReferentielKey.BRAND)).contains("brand", "brand_name");
-        assertThat(csv.getReferentiel().get(ReferentielKey.MODEL)).contains("mpn", "model", "sku", "ManafuacturerNumber");
+        assertThat(csv.getReferentiel().get(ReferentielKey.MODEL)).contains("model", "reference", "ManafuacturerNumber")
+                .doesNotContain("mpn", "MPN", "sku", "SKU");
+        assertThat(csv.getMpn()).contains("mpn", "MPN");
+        assertThat(csv.getSku()).contains("sku", "SKU");
     }
 
     @Test

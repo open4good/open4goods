@@ -121,6 +121,16 @@ public class CsvDataSourceProperties {
 	 */
 	protected Map<ReferentielKey, Set<String>> referentiel = new HashMap<>();
 
+	/**
+	 * Column names containing manufacturer part numbers.
+	 */
+	protected Set<String> mpn = new HashSet<>();
+
+	/**
+	 * Column names containing merchant stock keeping units.
+	 */
+	protected Set<String> sku = new HashSet<>();
+
 
 	/**
 	 * for attributes parsing, wether to ignore (or not) cariage returns in
@@ -500,6 +510,22 @@ public class CsvDataSourceProperties {
 
 	public void setReferentiel(Map<ReferentielKey, Set<String>> referentiel) {
 		this.referentiel = referentiel;
+	}
+
+	public Set<String> getMpn() {
+		return mpn;
+	}
+
+	public void setMpn(Set<String> mpn) {
+		this.mpn = mpn;
+	}
+
+	public Set<String> getSku() {
+		return sku;
+	}
+
+	public void setSku(Set<String> sku) {
+		this.sku = sku;
 	}
 
 	public Set<String> getInStock() {

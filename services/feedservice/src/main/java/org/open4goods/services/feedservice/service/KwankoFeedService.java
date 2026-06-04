@@ -58,7 +58,9 @@ public class KwankoFeedService extends AbstractFeedService
     private static final String[] KWANKO_STOCK_COLUMNS = {"availability", "Availability", "Stock status", "in_stock", "stock", "stock_status", "StockIndicator"};
     private static final String[] KWANKO_GTIN_COLUMNS = {"gtin", "GTIN", "ean", "EAN", "ean13", "EAN13", "isbn", "ISBN", "barcode", "product_gtin"};
     private static final String[] KWANKO_BRAND_COLUMNS = {"brand", "Brand", "brand_name", "Brand name", "manufacturer", "Manufacturer"};
-    private static final String[] KWANKO_MODEL_COLUMNS = {"mpn", "MPN", "model", "Model", "sku", "SKU", "reference", "Internal reference", "Manufacturer reference", "product_reference", "ManafuacturerNumber"};
+    private static final String[] KWANKO_MODEL_COLUMNS = {"model", "Model", "reference", "Internal reference", "Manufacturer reference", "product_reference", "ManafuacturerNumber"};
+    private static final String[] KWANKO_MPN_COLUMNS = {"mpn", "MPN"};
+    private static final String[] KWANKO_SKU_COLUMNS = {"sku", "SKU"};
 
     private final String token;
     private final HttpClient httpClient;
@@ -358,6 +360,8 @@ public class KwankoFeedService extends AbstractFeedService
         addReferentielDefaults(csv, ReferentielKey.GTIN, KWANKO_GTIN_COLUMNS);
         addReferentielDefaults(csv, ReferentielKey.BRAND, KWANKO_BRAND_COLUMNS);
         addReferentielDefaults(csv, ReferentielKey.MODEL, KWANKO_MODEL_COLUMNS);
+        addAllIfEmpty(csv.getMpn(), csv::setMpn, KWANKO_MPN_COLUMNS);
+        addAllIfEmpty(csv.getSku(), csv::setSku, KWANKO_SKU_COLUMNS);
     }
 
     private String firstHeader(String[] headers)

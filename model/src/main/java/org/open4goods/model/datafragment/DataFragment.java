@@ -26,6 +26,7 @@ import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.price.Currency;
 import org.open4goods.model.price.Price;
+import org.open4goods.model.product.ExternalIds;
 import org.open4goods.model.product.InStock;
 import org.open4goods.model.product.ProductCondition;
 import org.open4goods.model.rating.Rating;
@@ -157,6 +158,11 @@ public class DataFragment implements Standardisable, Validable {
 	 * considered as the "graal".
 	 */
 	private Boolean referentielData = false;
+
+	/**
+	 * Structured external identifiers found in this fragment.
+	 */
+	private ExternalIds externalIds = new ExternalIds();
 
 	/**
 	 * The resources representation
@@ -1142,6 +1148,14 @@ public class DataFragment implements Standardisable, Validable {
 
 	public void setReferentielData(final Boolean referentielData) {
 		this.referentielData = referentielData;
+	}
+
+	public ExternalIds getExternalIds() {
+		return externalIds;
+	}
+
+	public void setExternalIds(ExternalIds externalIds) {
+		this.externalIds = externalIds;
 	}
 
 	public Set<Rating> getRatings() {
