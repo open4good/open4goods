@@ -26,13 +26,12 @@ public class DataCompletion2ScoreAggregationService extends AbstractScoreAggrega
 
 
 
-        @Override
         /**
          * Ensures each product receives a data-quality score that counts existing
-         * non-virtual scores. This method intentionally runs even when identifying
-         * attributes (e.g. brand) are missing so aggregation pipelines keep the
-         * data-quality metric aligned with available signals.
+         * non-virtual scores. Intentionally runs even when identifying attributes
+         * (e.g. brand) are missing so the pipeline always has a data-quality signal.
          */
+        @Override
         public void onProduct(Product data, VerticalConfig vConf) {
 
                 try {

@@ -10,6 +10,12 @@ public final class NormalizationStrategyFactory {
     private NormalizationStrategyFactory() {
     }
 
+    /**
+     * Returns a new {@link NormalizationStrategy} instance for the given method.
+     *
+     * @param method the normalisation algorithm; {@code null} returns {@code null}
+     * @return a fresh strategy instance, or {@code null} if {@code method} is {@code null}
+     */
     public static NormalizationStrategy strategyFor(ScoreNormalizationMethod method) {
         if (method == null) {
             return null;

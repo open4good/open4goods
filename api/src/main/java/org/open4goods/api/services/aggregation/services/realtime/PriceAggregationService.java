@@ -30,13 +30,23 @@ import org.slf4j.Logger;
 import com.google.common.collect.Sets;
 
 /**
- * This service compute price infos from DataFragments computations if not in
- * stock
+ * Aggregates pricing information from all contributing {@link DataFragment}s
+ * into a consolidated {@link AggregatedPrices} structure on the product.
  *
+ * <p>Processing steps:
+ * <ol>
+ *   <li>Add the fragment's price to the product's offer set.</li>
+ *   <li>Filter out offers older than {@code ProductRepository.VALID_UNTIL_DURATION}.</li>
+ *   <li>Deduplicate by keeping only the lowest price per
+ *       (datasource, product-state) pair.</li>
+ *   <li>Compute the estimated nudger contribution for each offer.</li>
+ *   <li>Update min-price, offer count, and available product conditions.</li>
+ *   <li>Maintain and trim a per-condition price history (max 2 years,
+ *       one entry per day, computed trends).</li>
+ * </ol>
  *
- *
- * @author goulven
- *
+ * <p>TODO(p3,conf): The price-history maximum size (currently 2 years) should
+ * be driven by vertical configuration rather than hard-coded.
  */
 public class PriceAggregationService extends AbstractAggregationService {
 

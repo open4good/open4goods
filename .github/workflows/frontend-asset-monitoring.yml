@@ -1,0 +1,53 @@
+name: Frontend Asset Monitoring
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/30 * * * *"
+
+concurrency:
+  group: frontend-asset-monitoring
+  cancel-in-progress: true
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      - name: Install Playwright
+        run: |
+          python -m pip install playwright
+          python -m playwright install chromium
+
+      - name: Sample production product pages
+        run: |
+          mkdir -p out/frontend-assets
+          python scripts/sample_sitemap_urls.py \
+            --sitemap "https://nudger.fr/sitemap/fr/product-pages.xml" \
+            --n 3 \
+            --out out/frontend-assets/urls.txt
+
+      - name: Check browser console and failed responses
+        run: |
+          python scripts/playwright_console_check.py \
+            --urls out/frontend-assets/urls.txt \
+            --out out/frontend-assets/console \
+            --timeout-ms 20000
+
+      - name: Sweep Nuxt assets referenced by sampled pages
+        run: |
+          python scripts/sweep-nuxt-assets.py \
+            --urls-file out/frontend-assets/urls.txt \
+            --json
+
+      - name: Upload monitoring report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: frontend-asset-monitoring
+          path: out/frontend-assets

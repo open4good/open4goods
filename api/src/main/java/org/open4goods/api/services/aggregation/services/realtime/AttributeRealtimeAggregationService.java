@@ -33,15 +33,38 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 
+/**
+ * Merges, parses, and normalises product attributes from incoming
+ * {@link DataFragment}s and from Icecat taxonomy data.
+ *
+ * <p>Responsibilities:
+ * <ul>
+ *   <li>Applies attribute exclusions defined in the vertical configuration.</li>
+ *   <li>Resolves and deduplicates brand names using alias/exclusion rules.</li>
+ *   <li>Extracts manufacturer model numbers from offer titles when no explicit
+ *       model attribute is present.</li>
+ *   <li>Classifies raw attributes as features or indexed numeric attributes.</li>
+ *   <li>Parses numeric attribute values (with unit conversion) and stores them
+ *       in the product's {@code indexed} map for downstream scoring.</li>
+ *   <li>Merges descriptions from all datasources into the product.</li>
+ * </ul>
+ *
+ * <p>TODO(p3,perf): Attribute exclusions in {@code onProduct} are applied on
+ * every sanitisation run. Once an initial cleanup batch has run they could be
+ * skipped in realtime mode.
+ * <p>TODO(p3,design): When multiple indexed attributes match the same key, a
+ * merge strategy is needed rather than the last-write-wins behaviour.
+ * <p>TODO: Add BRAND / MODEL from attribute-match candidates (currently only
+ * title-extraction is used).
+ */
 public class AttributeRealtimeAggregationService extends AbstractAggregationService {
 
 	private final BrandService brandService;
-
-	private VerticalsConfigService verticalConfigService;
-	private IcecatFeatureResolver featureResolver;
+	private final VerticalsConfigService verticalConfigService;
+	private final IcecatFeatureResolver featureResolver;
 
 	public AttributeRealtimeAggregationService(final VerticalsConfigService verticalConfigService,
-			BrandService brandService, final Logger logger, IcecatFeatureResolver featureResolver) {
+			final BrandService brandService, final Logger logger, final IcecatFeatureResolver featureResolver) {
 		super(logger);
 		this.verticalConfigService = verticalConfigService;
 		this.brandService = brandService;
@@ -327,8 +350,9 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			}
 		}
 
-		String currentModel = data.model(); // can be null; we still update if best exists
-		if (currentModel == null) {
+		String currentModel = data.model();
+		if (StringUtils.isEmpty(currentModel)) {
+			// No model set yet (null or empty string) — promote the best candidate
 			data.forceModel(best);
 			dedicatedLogger.info("Model updated from '{}' to '{}'.", currentModel, best);
 		} else {
@@ -617,70 +641,6 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			descriptions.put(datasourceName, description);
 		}
 	}
-
-//	/**
-//	 * Complete the model names by looking in product words for sequence starting with the shortest model name.
-//	 * @param product
-//	 * @param string
-//	 */
-//	private void completeModelNames(Product product, String string) {
-//		// Get the known model names
-//		Set<String> models = new HashSet<>();
-//		if (!StringUtils.isEmpty(string)) {
-//			models.add(string);
-//		}
-//		product.getAlternativeBrands().forEach(e -> models.add(e.getValue()));
-//
-//
-//		// Compute the bag of known words
-//		Set<String> words = new HashSet<>();
-//		product.getDescriptions().forEach(e -> {
-//			words.addAll(Arrays.asList(e.getContent().getText().split(" ")));
-//		});
-//
-//		product.getNames().getOfferNames().forEach(e -> {
-//			words.addAll(Arrays.asList(e.split(" ")));
-//		});
-//
-//
-//		String shortest = product.shortestModel();
-//		// Iterating on words to find the one who have matching starts with known model names
-//		for (String w : words) {
-//			w = w.toUpperCase();
-//			if ((w.startsWith(shortest) || shortest.startsWith(w))  && !w.equals(shortest)) {
-//
-//				if (StringUtils.isAlpha(w.substring(w.length()-1))) {
-//					dedicatedLogger.info("Found a alternate model for {} in texts : {}", shortest, w);
-//					product.addModel(w);
-//
-//				}
-//
-//			}
-//		}
-//	}
-//
-
-	/**
-	 *
-	 * @param matchedFeatures
-	 * @param unmatchedFeatures
-	 * @return
-	 */
-//	private void  extractFeatures(ProductAttributes attributes) {
-//
-//		attributes.getFeatures().clear();
-//
-//
-//		Map<String, ProductAttribute> features = attributes.getAll().entrySet().stream()
-//				.filter(e -> e.getValue().isFeature())
-//			    .collect(Collectors.toMap(
-//			            Map.Entry::getKey,    // key mapper: uses the key from each entry
-//			            Map.Entry::getValue   // value mapper: uses the value from each entry
-//			        ));
-//
-//		attributes.getFeatures().addAll(features.values());
-//
-//	}
 
 	/**
 	 * Returns if an attribute is a feature, by comparing "yes" values from config

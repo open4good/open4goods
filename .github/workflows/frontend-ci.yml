@@ -42,6 +42,35 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
           TARGET: "/opt/open4goods/latest/frontend-ssr"
 
+      - name: Preserve previous Nuxt chunks in Beta staging
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: appleboy/ssh-action@v1.2.5
+        with:
+          host: ${{ secrets.REMOTE_BETA_HOST }}
+          username: ${{ secrets.REMOTE_BETA_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -eu
+            staging="/opt/open4goods/latest/frontend-ssr/.output/public/_nuxt"
+            mkdir -p "${staging}"
+            for source_bundle in /opt/open4goods/bin/frontend-ssr /opt/open4goods/previous/frontend-ssr; do
+              source_nuxt="${source_bundle}/.output/public/_nuxt"
+              if [ ! -d "${source_nuxt}" ]; then
+                echo "Skipping missing Nuxt asset source: ${source_nuxt}"
+                continue
+              fi
+              find "${source_nuxt}" -type f | while IFS= read -r source_file; do
+                relative_path="${source_file#"${source_nuxt}/"}"
+                target_file="${staging}/${relative_path}"
+                if [ -e "${target_file}" ]; then
+                  continue
+                fi
+                mkdir -p "$(dirname "${target_file}")"
+                cp -p "${source_file}" "${target_file}"
+              done
+            done
+            echo "Nuxt asset preservation complete for ${staging}"
+
       - name: Publish frontend
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: appleboy/ssh-action@v1.2.5
@@ -50,3 +79,63 @@ jobs:
           username: ${{ secrets.REMOTE_BETA_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: sh /opt/open4goods/bin/publish-frontend.sh beta
+
+      - name: Validate published Beta Nuxt assets
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: appleboy/ssh-action@v1.2.5
+        with:
+          host: ${{ secrets.REMOTE_BETA_HOST }}
+          username: ${{ secrets.REMOTE_BETA_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            python3 - <<'PY'
+            import html.parser
+            import sys
+            import urllib.parse
+            import urllib.request
+
+            base = "http://127.0.0.1:3000"
+
+            class Parser(html.parser.HTMLParser):
+                def __init__(self):
+                    super().__init__()
+                    self.assets = set()
+
+                def handle_starttag(self, tag, attrs):
+                    for name, value in attrs:
+                        if name in {"src", "href"} and value and "/_nuxt/" in value:
+                            self.assets.add(value)
+
+            def fetch(url):
+                request = urllib.request.Request(url, headers={"User-Agent": "open4goods-post-publish-asset-check/1.0"})
+                with urllib.request.urlopen(request, timeout=20) as response:
+                    return response.status, dict(response.headers), response.read()
+
+            status, _, body = fetch(base + "/")
+            if status >= 400:
+                print(f"frontend_asset_failure: {status} {base}/")
+                sys.exit(1)
+
+            parser = Parser()
+            parser.feed(body.decode("utf-8", errors="replace"))
+            failures = []
+            for asset in sorted(parser.assets):
+                asset_url = urllib.parse.urljoin(base + "/", asset)
+                try:
+                    asset_status, headers, asset_body = fetch(asset_url)
+                except Exception as exc:
+                    failures.append((0, asset_url, {}, str(exc)))
+                    continue
+                if asset_status >= 400:
+                    failures.append((asset_status, asset_url, headers, asset_body[:512].decode("utf-8", errors="replace")))
+
+            if failures:
+                print("frontend_asset_failure")
+                for status, url, headers, excerpt in failures:
+                    print(f"{status} {url}")
+                    print({name: headers.get(name, "") for name in ("cf-ray", "cf-cache-status", "cache-control", "server")})
+                    print(excerpt[:200])
+                sys.exit(1)
+
+            print(f"Validated {len(parser.assets)} Nuxt asset(s).")
+            PY

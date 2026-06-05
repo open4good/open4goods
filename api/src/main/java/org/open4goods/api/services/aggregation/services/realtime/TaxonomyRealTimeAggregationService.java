@@ -1,8 +1,6 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,27 +16,48 @@ import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 
 /**
- * Service in charge of mapping product categories to verticals
+ * Maps incoming product categories to a vertical and validates that the
+ * product's offer names contain at least one canonical vertical name token.
  *
- * @author goulven
+ * <p>Processing steps ({@link #onProduct(Product, VerticalConfig)}):
+ * <ol>
+ *   <li>Refresh the product's flat {@code datasourceCategories} set from its
+ *       {@code categoriesByDatasources} map.</li>
+ *   <li>Propagate the Google taxonomy ID from the vertical configuration.</li>
+ *   <li>Look up which vertical best matches the product's categories.</li>
+ *   <li>Confirm the vertical by checking that at least one offer name contains a
+ *       canonical vertical name token; unset the vertical if none match.</li>
+ *   <li>Clear the vertical when no categories are present at all.</li>
+ * </ol>
  *
+ * <p>The {@link #onDataFragment(DataFragment, Product, VerticalConfig)} hook stores
+ * the incoming fragment's category in {@code categoriesByDatasources} and then
+ * delegates to {@link #onProduct}.
  */
 public class TaxonomyRealTimeAggregationService extends AbstractAggregationService {
 
-	private VerticalsConfigService verticalService;
-	private GoogleTaxonomyService taxonomyService;
+	private final VerticalsConfigService verticalService;
+	private final GoogleTaxonomyService taxonomyService;
 
+	/**
+	 * @param logger          dedicated aggregation logger
+	 * @param verticalService service providing vertical-to-category mappings
+	 * @param taxonomyService Google taxonomy resolver (used for name-token confirmation)
+	 */
 	public TaxonomyRealTimeAggregationService(final Logger logger, final VerticalsConfigService verticalService,
-			GoogleTaxonomyService taxonomyService) {
+			final GoogleTaxonomyService taxonomyService) {
 		super(logger);
 		this.verticalService = verticalService;
 		this.taxonomyService = taxonomyService;
-
 	}
 
+	/**
+	 * Registers the fragment's category for its datasource, then delegates to
+	 * {@link #onProduct(Product, VerticalConfig)}.
+	 */
 	@Override
-	public Map<String, Object> onDataFragment(final DataFragment input, final Product output, VerticalConfig vConf)
-			throws AggregationSkipException {
+	public Map<String, Object> onDataFragment(final DataFragment input, final Product output,
+			final VerticalConfig vConf) throws AggregationSkipException {
 
 		String category = input.getCategory();
 		if (!StringUtils.isEmpty(category)) {
@@ -51,36 +70,32 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		}
 
 		onProduct(output, vConf);
-
-		return new HashMap<String, Object>();
+		return Map.of();
 	}
 
+	/**
+	 * Resolves or clears the product's vertical based on its accumulated categories
+	 * and offer names.
+	 *
+	 * <p>A product whose offer names do not contain any canonical vertical name token
+	 * has its vertical unset, even if category matching succeeded, to prevent
+	 * mis-classification from broad category strings.
+	 *
+	 * TODO: The language used for name-token lookup is hard-coded to French
+	 * ({@code GoogleTaxonomyService.byId(...).getGoogleNames()}). This will break
+	 * for non-French verticals once multi-language support is needed.
+	 */
 	@Override
-	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+	public void onProduct(final Product data, final VerticalConfig vConf) throws AggregationSkipException {
 
-		////////////////////////////
-		// Updating the categories
-		////////////////////////////
+		// Rebuild the flat category set from the per-datasource map
 		data.getDatasourceCategories().clear();
 		data.getDatasourceCategories().addAll(data.getCategoriesByDatasources().values());
 
-		////////////////////////////
-		// Setting google taxonomy
-		////////////////////////////
+		// Propagate the Google taxonomy ID from vertical configuration
 		data.setGoogleTaxonomyId(vConf.getGoogleTaxonomyId());
-//		if (data.getDatasourceCategories().size() != 0) {
-//			Integer taxonomy =   googleTaxonomy(data);
-//			if (null != taxonomy) {
-//				data.setGoogleTaxonomyId(taxonomy);
-//				dedicatedLogger.info("Detected taxonomy {} for categories : {}", taxonomy, data.getDatasourceCategories());
-//			} else {
-//				dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
-//			}
-//		}
 
-		////////////////////////////
-		// Setting vertical from category
-		////////////////////////////
+		// Resolve vertical from categories
 		VerticalConfig vertical = verticalService.getVerticalForCategories(data.getCategoriesByDatasources());
 		if (null != vertical) {
 			if (null != data.getVertical() && !vertical.getId().equals(data.getVertical())) {
@@ -96,43 +111,32 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 			data.setNames(new ProductTexts());
 		}
 
-		/////////////////////////////////////
-		// A hard filtering on datasource categories, that must at least contains one of
-		///////////////////////////////////// the
-		// vertical natural names
-		////////////////////////////////////
+		// Confirm vertical by checking that at least one offer name contains a canonical token
 		if (null != data.getVertical()) {
 
-			// Building offer name bags
 			StringBuilder productNameBag = new StringBuilder();
-			data.getOfferNames().forEach(name -> {
-				productNameBag.append(StringUtils.stripAccents(name).toLowerCase());
-			});
+			data.getOfferNames().forEach(name -> productNameBag.append(StringUtils.stripAccents(name).toLowerCase()));
 			String pNames = productNameBag.toString();
 
 			try {
-
 				if (null != vConf.getId()) {
-
-					Set<String> verticalNames = vConf
-							.getTokenNames(taxonomyService.byId(vConf.getGoogleTaxonomyId()).getGoogleNames().values()
+					Set<String> verticalNames = vConf.getTokenNames(
+							taxonomyService.byId(vConf.getGoogleTaxonomyId()).getGoogleNames().values()
 									.stream().map(e -> StringUtils.stripAccents(e.toLowerCase())).toList());
 
 					for (String term : verticalNames) {
-
 						if (pNames.contains(term)) {
-							dedicatedLogger.info("Vertical {} confirmed by product names match for {}", vConf, data);
+							dedicatedLogger.info("Vertical {} confirmed by product names match for {}", vConf, data);
 							data.setVertical(vConf.getId());
 							break;
 						} else {
 							data.setVertical(null);
 						}
-
 					}
 
 					if (null == data.getVertical()) {
-						dedicatedLogger.info("Vertical {} failed on product names match, unsetting vertical for {}",
-								vConf, data);
+						dedicatedLogger.info(
+								"Vertical {} failed on product names match, unsetting vertical for {}", vConf, data);
 					}
 				}
 			} catch (Exception e) {
@@ -140,61 +144,11 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 			}
 		}
 
-//		// Setting no vertical if no category
-		if (data.getDatasourceCategories().size() == 0) {
+		// Clear vertical when no categories are present
+		if (data.getDatasourceCategories().isEmpty()) {
 			dedicatedLogger.info("No category in {}, removing vertical", data);
 			data.setVertical(null);
 		}
-
-		// TODO : Disabling google taxonomy for now
-
-		// if (null != vertical && null != vertical.getTaxonomyId()) {
-//			data.setGoogleTaxonomyId(vertical.getTaxonomyId());
-//		} else {
-//			if (data.getDatasourceCategories().size() != 0) {
-//				Integer taxonomy =   googleTaxonomy(data);
-//				if (null != taxonomy) {
-//					data.setGoogleTaxonomyId(taxonomy);
-//					dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
-//
-//				} else {
-//					dedicatedLogger.info("No taxonomy found for categories : {}", data.getDatasourceCategories());
-//				}
-//			}
-//		}
-
-	}
-
-	/**
-	 * Try to detect the google taxonomy id
-	 *
-	 * @param input
-	 * @return
-	 */
-	private Integer googleTaxonomy(final Product input) {
-		Integer taxonomyId = null;
-
-		List<Integer> taxons = new ArrayList<>();
-
-		input.getAttributes().getAll().values().forEach(a -> {
-			String i = a.getName();
-
-			if (i.contains("CATEGORY")) {
-				Integer t = taxonomyService.resolve(a.getValue());
-				if (null != t) {
-					taxons.add(t);
-				}
-			}
-		});
-
-		if (taxons.size() == 1) {
-			taxonomyId = taxons.stream().findAny().orElse(null);
-		} else if (taxons.size() > 1) {
-			// TODO : The language (should not be needed), will bug when other languages
-			taxonomyId = taxonomyService.selectDeepest("fr", taxons);
-		}
-
-		return taxonomyId;
 	}
 
 }

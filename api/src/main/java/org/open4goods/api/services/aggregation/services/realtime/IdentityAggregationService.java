@@ -18,25 +18,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This service is in charge of interprting barcode countries and of generating
- * barcode images
+ * First stage in the realtime aggregation pipeline: validates and normalises
+ * the product GTIN (barcode), detects the country of origin from the GS1 prefix,
+ * and sets barcode-type metadata.
  *
- * @author Goulven.Furet
+ * <p>An invalid or missing GTIN causes an {@link AggregationSkipException} so that
+ * downstream services never receive malformed identity data.
  *
+ * <p>TODO(p2, features): Store the detected GTIN type in {@code gtinInfos} and
+ * render it with the appropriate leading zero padding on display.
  */
 public class IdentityAggregationService extends AbstractAggregationService {
 
 	private static final Logger logger = LoggerFactory.getLogger(IdentityAggregationService.class);
 
-	private Gs1PrefixService gs1Service;
+	private final Gs1PrefixService gs1Service;
+	private final BarcodeValidationService validationService;
 
-	private BarcodeValidationService validationService;
-
-	public IdentityAggregationService(final Logger logger, final Gs1PrefixService gs1Service, final BarcodeValidationService barcodeValidationService) {
+	public IdentityAggregationService(final Logger logger, final Gs1PrefixService gs1Service,
+			final BarcodeValidationService barcodeValidationService) {
 		super(logger);
 		this.gs1Service = gs1Service;
-		validationService = barcodeValidationService;
-
+		this.validationService = barcodeValidationService;
 	}
 
 	@Override

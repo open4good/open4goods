@@ -19,6 +19,7 @@ owned, and linked from this index when they become durable project knowledge.
 
 - [Documentation guidelines](conventions/documentation-guidelines.md)
 - [MCP server setup](operations/mcp-servers.md)
+- [Frontend asset hardening](operations/frontend-asset-hardening.md)
 - [ADR index](adr/README.md)
 - [Icecat reference data](architecture/icecat-reference-data.md)
 - [Amazon PA-API completion](architecture/amazon-paapi-completion.md)

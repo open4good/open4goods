@@ -16,10 +16,17 @@ import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 
 /**
- * Create a score based on brand sustainality evaluations
- * TODO : Needs evolution to handle multiple brand score providers. (have to go through an intermediate score) 
- * @author goulven
+ * Adds a brand sustainability score ({@code BRAND_SUSTAINALYTICS_SCORING}) to each
+ * product based on the Sustainalytics ESG risk rating of the product's brand.
  *
+ * <p>The brand name is resolved via {@link BrandService} to a canonical company name,
+ * which is then looked up in {@link BrandScoreService} against the
+ * {@code sustainalytics.com} score provider. The raw Sustainalytics rating is stored
+ * as metadata alongside the normalised score.
+ *
+ * <p>TODO: Needs evolution to handle multiple brand score providers
+ * (requires an intermediate score aggregation layer rather than a single
+ * provider hard-code).
  */
 public class SustainalyticsAggregationService extends AbstractScoreAggregationService {
 
@@ -31,12 +38,11 @@ public class SustainalyticsAggregationService extends AbstractScoreAggregationSe
 
 	public static final String COMPANY_URL = "url";
 
-	private BrandService brandService;
-	
-	private BrandScoreService brandScoreService;
-	
-	
-	public SustainalyticsAggregationService(final Logger logger, BrandService brandService, VerticalsConfigService verticalsConfigService, BrandScoreService brandScoreService) {
+	private final BrandService brandService;
+	private final BrandScoreService brandScoreService;
+
+	public SustainalyticsAggregationService(final Logger logger, final BrandService brandService,
+			final VerticalsConfigService verticalsConfigService, final BrandScoreService brandScoreService) {
 		super(logger);
 		this.brandService = brandService;
 		this.brandScoreService = brandScoreService;

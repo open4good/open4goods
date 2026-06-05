@@ -14,99 +14,80 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MediaAggregationService extends AbstractAggregationService{
+/**
+ * Consolidates media resources (images, PDFs, manuals, etc.) from incoming
+ * {@link DataFragment}s into the product's resource set.
+ *
+ * <p>For each resource in the fragment:
+ * <ul>
+ *   <li>Sets the datasource name and computes a stable cache key.</li>
+ *   <li>If a resource with the same URL already exists on the product, only its
+ *       tags are updated (preserving previously fetched metadata).</li>
+ *   <li>Otherwise the resource is added to the product.</li>
+ * </ul>
+ *
+ * <p>The {@link #onProduct(Product, VerticalConfig)} hook removes any Icecat
+ * resources that require authentication and therefore cannot be served anonymously.
+ */
+public class MediaAggregationService extends AbstractAggregationService {
 
 	private static final Logger logger = LoggerFactory.getLogger(MediaAggregationService.class);
 
-	//    private final  ImageMagickService imageService;
-	//
-	//    private final  ElasticsearchRestTemplate esTemplate;
-
-
-
-	//    private final ImageClassificationService imageClassificationService;
-
-	//    private final  ExecutorService executor;
-
-	//private ResourceService resourceService;
-
+	/**
+	 * @param logger dedicated aggregation logger
+	 */
 	public MediaAggregationService(final Logger logger) {
 		super(logger);
-		//		this.imageService = imageService;
-		//		this.esTemplate = esTemplate;
-//		this.config = config;
-		//		this.resourceService = resourceService;
-		// Creating executor
-		//		executor =  Executors.newFixedThreadPool(config.getResourcesConfig().getResourceDownloadConcurentThreads());
 	}
 
+	/**
+	 * Merges the fragment's resources into the product, then removes protected
+	 * Icecat URLs.
+	 */
 	@Override
-	public  Map<String, Object> onDataFragment(final DataFragment input, final Product output, VerticalConfig vConf) throws AggregationSkipException {
+	public Map<String, Object> onDataFragment(final DataFragment input, final Product output,
+			final VerticalConfig vConf) throws AggregationSkipException {
 
-		
-		
-		Map<String,Resource> olds = new HashMap<>();
-		output.getResources().forEach(r -> {
-			olds.put(r.getUrl(), r);
-		});
-		
-		
-		
+		Map<String, Resource> existing = new HashMap<>();
+		output.getResources().forEach(r -> existing.put(r.getUrl(), r));
+
 		for (final Resource r : input.getResources()) {
-
-			// Adding standard tags
 			r.setDatasourceName(input.getDatasourceName());
-			
-			r.setCacheKey(IdHelper .generateResourceId(r.getUrl()));
+			r.setCacheKey(IdHelper.generateResourceId(r.getUrl()));
 
-			
-			
-			// a special case here. to update tags. 
-			
-			Resource old = olds.get(r.getUrl());
-			
+			Resource old = existing.get(r.getUrl());
 			if (null != old) {
+				// Update tags on the already-known resource rather than duplicating it
 				old.setTags(r.getTags());
 				old.setHardTags(r.getHardTags());
 			} else {
-				output.getResources().add(r);				
+				output.getResources().add(r);
 			}
 		}
-		
+
 		onProduct(output, vConf);
-		
 		return null;
 	}
 
-
+	/** Removes protected Icecat URLs that cannot be fetched anonymously. */
 	@Override
-	public void close() throws IOException {
-		//		executor.shutdown();
+	public void onProduct(final Product data, final VerticalConfig vConf) throws AggregationSkipException {
+		data.getResources().removeIf(r -> isProtectedIcecatUrl(r.getUrl()));
 	}
 
-	@Override
-	public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
-		
-                // Clean protected Icecat resources that cannot be accessed anonymously
-                data.getResources().removeIf(r -> isProtectedIcecatUrl(r.getUrl()));
-        }
-
-        /**
-         * Detect Icecat URLs requiring authentication.
-         *
-         * @param url the resource URL
-         * @return {@code true} if the URL points to a protected Icecat resource
-         */
-        private boolean isProtectedIcecatUrl(String url) {
-                if (url == null) {
-                        return false;
-                }
-                boolean protectedLink = url.contains("icecat.biz") && url.contains("?access");
-                if (protectedLink) {
-                        logger.error("Removing icecat protected url : {}", url);
-                }
-                return protectedLink;
-        }
-
+	/**
+	 * Returns {@code true} when the URL points to an Icecat resource that requires
+	 * an authenticated session ({@code ?access} query parameter).
+	 */
+	private boolean isProtectedIcecatUrl(final String url) {
+		if (url == null) {
+			return false;
+		}
+		boolean protectedLink = url.contains("icecat.biz") && url.contains("?access");
+		if (protectedLink) {
+			logger.error("Removing icecat protected url : {}", url);
+		}
+		return protectedLink;
+	}
 
 }
