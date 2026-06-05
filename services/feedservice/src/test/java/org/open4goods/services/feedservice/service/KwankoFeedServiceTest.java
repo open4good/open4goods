@@ -314,6 +314,7 @@ class KwankoFeedServiceTest
         assertThat(volatileDatasource.getCsvDatasource().getCsvQuoteChar()).isEqualTo('\'');
         assertThat(volatileDatasource.getCsvDatasource().getCsvEscapeChar()).isEqualTo('\\');
         assertThat(volatileDatasource.getCsvDatasource().getDatasourceUrls()).containsExactly("https://new.example/feed.csv");
+        assertThat(volatileDatasource.getFeedKey()).isEqualTo("Merchant Products");
     }
 
     private KwankoFeedService buildService()

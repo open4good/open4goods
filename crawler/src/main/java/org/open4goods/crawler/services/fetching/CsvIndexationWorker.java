@@ -8,6 +8,7 @@ import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.text.Normalizer;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -166,8 +167,6 @@ public class CsvIndexationWorker implements Runnable {
 		String safeName = IdHelper.azCharAndDigitsPointsDash(dsProperties.getName()).toLowerCase();
 		Logger dedicatedLogger = csvService.createDatasourceLogger(safeName, dsProperties, logsFolder + "/feeds/");
 
-		dedicatedLogger.warn("STARTING CRAWL OF {} - {}", dsProperties.getFeedKey(), dsProperties);
-
 		final HtmlDataSourceProperties crawlConfig = dsProperties.getCsvDatasource().getWebDatasource();
 		DataFragmentWebCrawler crawler = null;
 		CrawlController controller = null;
@@ -186,6 +185,7 @@ public class CsvIndexationWorker implements Runnable {
 
 		final CsvDataSourceProperties config = dsProperties.getCsvDatasource();
 		Set<String> urls = config.getDatasourceUrls();
+		dedicatedLogger.warn("STARTING CRAWL OF {} - {} - urls={}", feedLogToken(dsProperties, urls), dsProperties, urls);
 
 		if (urls.size() == 0) {
 			// Triggering healthcheck down in the CsvService
@@ -196,6 +196,7 @@ public class CsvIndexationWorker implements Runnable {
 		}
 		
 		for (String url : urls) {
+			dedicatedLogger.warn("STARTING FEED URL {} - {}", url, dsProperties);
 			// Updating status with actual feed
 			stats = new IndexationJobStat(dsProperties.getDatasourceConfigName(), url, IndexationJobStat.TYPE_CSV);
 
@@ -414,8 +415,8 @@ public class CsvIndexationWorker implements Runnable {
 	    DataFragment dataFragment = new DataFragment();
 	    dataFragment.setFragmentHashCode(item.hashCode());
 	    
-	    setUrl(dataFragment, item, config, dedicatedLogger, datasetUrl);
 	    setAffiliatedUrl(dataFragment, item, config, dedicatedLogger);
+	    setUrl(dataFragment, item, config, dedicatedLogger, datasetUrl);
 	    trimUrlParameters(dataFragment, config);
 	    setPrice(dataFragment, item, config, dedicatedLogger);
 	    setNameAndTags(dataFragment, item, config);
@@ -428,10 +429,10 @@ public class CsvIndexationWorker implements Runnable {
 	    setProductState(dataFragment, item, config, dedicatedLogger);
 	    addReferentielAttributes(dataFragment, item, config, dedicatedLogger);
 	    addExternalIds(dataFragment, item, config);
-	    enforceAffiliatedUrl(dataFragment);
 	    
 	    importAllAttributes(dataFragment, item, config);
 	    completeWithWebData(dataFragment, crawler, controller, datasourceConfigName, config, dedicatedLogger);
+	    enforceAffiliatedUrl(dataFragment);
 	    dataFragment.validate(config.getValidationFields());
 	    
 	    return dataFragment;
@@ -556,7 +557,10 @@ public class CsvIndexationWorker implements Runnable {
 	        }
 	    }
 	    if (null == dataFragment.getPrice() || null == dataFragment.getPrice().getPrice()) {
-	    	logger.warn("No price extracted for row with {} columns", item.size());
+	    	logger.warn("No price extracted for row with {} columns; configured price columns {}; available columns {}",
+	    	        item.size(),
+	    	        csvProperties.getPrice(),
+	    	        item.keySet());
 	    }
 	    
 	    
@@ -575,7 +579,7 @@ public class CsvIndexationWorker implements Runnable {
 	    try {
 	        dataFragment.setPriceAndCurrency(getFromCsvRow(item, priceColumn), Locale.forLanguageTag(config.getLanguage().toUpperCase()));
 	    } catch (Exception e) {
-	        logger.warn("Error setting fallback price with setPriceAndCurrency(): {}", dataFragment.getUrl());
+	        logger.warn("Error setting fallback price with setPriceAndCurrency() from column '{}' at {}", priceColumn, dataFragment.getUrl());
 	    }
 	}
 
@@ -1081,10 +1085,53 @@ public class CsvIndexationWorker implements Runnable {
 			return colName;
 		}
 		String normalized = colName.trim();
-		return item.keySet().stream()
+		String comparable = comparableCsvHeader(colName);
+		String trimmedMatch = item.keySet().stream()
 				.filter(key -> key != null && key.trim().equalsIgnoreCase(normalized))
 				.findFirst()
 				.orElse(null);
+		if (trimmedMatch != null) {
+			return trimmedMatch;
+		}
+		return item.keySet().stream()
+				.filter(key -> comparableCsvHeader(key).equals(comparable))
+				.findFirst()
+				.orElse(null);
+	}
+
+	static String comparableCsvHeader(String value) {
+		if (value == null) {
+			return "";
+		}
+		String normalized = IdHelper.sanitizeAndNormalize(value);
+		if (!normalized.isEmpty() && normalized.charAt(0) == '\ufeff') {
+			normalized = normalized.substring(1);
+		}
+		normalized = stripWrappingHeaderQuotes(normalized);
+		normalized = Normalizer.normalize(normalized, Normalizer.Form.NFD)
+				.replaceAll("\\p{M}", "")
+				.toLowerCase(Locale.ROOT);
+		return normalized.replaceAll("[^a-z0-9]", "");
+	}
+
+	private static String stripWrappingHeaderQuotes(String value) {
+		String trimmed = value.trim();
+		while (trimmed.length() >= 2
+				&& ((trimmed.charAt(0) == '"' && trimmed.charAt(trimmed.length() - 1) == '"')
+						|| (trimmed.charAt(0) == '\'' && trimmed.charAt(trimmed.length() - 1) == '\''))) {
+			trimmed = trimmed.substring(1, trimmed.length() - 1).trim();
+		}
+		return trimmed;
+	}
+
+	private String feedLogToken(DataSourceProperties dsProperties, Set<String> urls) {
+		if (!StringUtils.isEmpty(dsProperties.getFeedKey())) {
+			return dsProperties.getFeedKey();
+		}
+		if (urls != null && urls.size() == 1) {
+			return urls.iterator().next();
+		}
+		return dsProperties.getDatasourceConfigName();
 	}
 
 	private List<String> getCategoryFromCsvRows(Map<String, String> item) {

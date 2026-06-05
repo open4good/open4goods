@@ -226,6 +226,7 @@ public abstract class AbstractFeedService implements AffiliationProvider {
         if (volatileDs.getCsvDatasource() == null) {
             volatileDs.setCsvDatasource(new org.open4goods.commons.config.yml.datasource.CsvDataSourceProperties());
         }
+        volatileDs.setFeedKey(feedKey);
         volatileDs.getCsvDatasource().getDatasourceUrls().clear();
         volatileDs.getCsvDatasource().getDatasourceUrls().add(feedUrl);
 

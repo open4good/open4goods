@@ -159,6 +159,17 @@ class CsvDialectDetectorTest
         assertThat((char) schema.getEscapeChar()).isEqualTo('\\');
     }
 
+    @Test
+    void comparableCsvHeaderNormalizesCommonFeedHeaderVariants()
+    {
+        assertThat(CsvIndexationWorker.comparableCsvHeader("\ufeff\"Sale Price\""))
+                .isEqualTo(CsvIndexationWorker.comparableCsvHeader("sale_price"));
+        assertThat(CsvIndexationWorker.comparableCsvHeader("Prix TTC"))
+                .isEqualTo(CsvIndexationWorker.comparableCsvHeader("prix_ttc"));
+        assertThat(CsvIndexationWorker.comparableCsvHeader("Référence produit"))
+                .isEqualTo(CsvIndexationWorker.comparableCsvHeader("reference_produit"));
+    }
+
     private CsvSchema detect(String content) throws Exception
     {
         return detector.detectSchema(write(content).toFile(), StandardCharsets.UTF_8);
