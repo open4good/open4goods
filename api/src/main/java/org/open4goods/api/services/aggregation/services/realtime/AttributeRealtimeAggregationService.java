@@ -1,9 +1,7 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -52,8 +50,6 @@ import org.slf4j.Logger;
  * <p>TODO(p3,perf): Attribute exclusions in {@code onProduct} are applied on
  * every sanitisation run. Once an initial cleanup batch has run they could be
  * skipped in realtime mode.
- * <p>TODO(p3,design): When multiple indexed attributes match the same key, a
- * merge strategy is needed rather than the last-write-wins behaviour.
  * <p>TODO: Add BRAND / MODEL from attribute-match candidates (currently only
  * title-extraction is used).
  */
@@ -65,11 +61,35 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			Pattern.compile("^(\\d{2,5})([A-Z]{1,10})$");
 	private static final Pattern NUMERIC_EXTRACT_PATTERN =
 			Pattern.compile("[-+]?\\d+(?:[.,]\\d+)?");
+	private static final Pattern EMPTY_VALUE_SEPARATOR_PATTERN =
+			Pattern.compile("[()_./-]+");
+	private static final Pattern RESOLUTION_PATTERN =
+			Pattern.compile(".*\\d{3,4}X\\d{3,4}.*");
+	private static final Pattern NON_ALPHANUMERIC_PATTERN =
+			Pattern.compile("[^A-Z0-9]");
+	private static final Pattern MODEL_SEPARATOR_PATTERN =
+			Pattern.compile("[._/\\-]");
+	private static final Pattern EDGE_PUNCTUATION_PATTERN =
+			Pattern.compile("^[\\p{Punct}]+|[\\p{Punct}]+$");
+	private static final Pattern PARENTHESIS_CONTENT_PATTERN =
+			Pattern.compile("\\(.*?\\)");
+	private static final Pattern QUOTE_MARK_PATTERN =
+			Pattern.compile("[\"”“´’]|''|´´");
+	private static final Set<String> MEASURE_SUFFIXES = Set.of("POUCE", "POUCES", "INCH", "INCHES", "CM", "MM",
+			"HZ", "W", "KW", "V", "AH", "MAH", "GB", "TB", "MB", "MP", "FPS", "NITS", "LUMENS", "K");
 
 	private final BrandService brandService;
 	private final VerticalsConfigService verticalConfigService;
 	private final IcecatFeatureResolver featureResolver;
 
+	/**
+	 * Builds the realtime attribute aggregation service.
+	 *
+	 * @param verticalConfigService vertical configuration lookup service
+	 * @param brandService          brand alias/exclusion service
+	 * @param logger                logger dedicated to aggregation diagnostics
+	 * @param featureResolver       Icecat feature-name resolver
+	 */
 	public AttributeRealtimeAggregationService(final VerticalsConfigService verticalConfigService,
 			final BrandService brandService, final Logger logger, final IcecatFeatureResolver featureResolver) {
 		super(logger);
@@ -85,12 +105,13 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		// Cleaning attributes that must be discarded
 		//////////////////////////////////////////
 
-		// Remove excluded attributes
+		// Remove excluded attributes.
 		// TODO(p3,perf) / Usefull for batch mode, could remove once initial
 		// sanitization
-		vConf.getAttributesConfig().getExclusions().forEach(e -> {
-			data.getAttributes().getAll().remove(e);
-		});
+		Set<String> exclusions = vConf.getAttributesConfig().getExclusions();
+		if (exclusions != null && !exclusions.isEmpty()) {
+			data.getAttributes().getAll().keySet().removeAll(exclusions);
+		}
 
 		/////////////////////////////////////////////////
 		// Cleaning brands
@@ -126,9 +147,12 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 		}
 
-		// Attributing taxomy to attributes
+		// Attribute names often repeat across products; avoid resolving the same name
+		// twice in this product pass when aliases point to the same raw attribute.
+		Map<String, Set<Integer>> taxonomyByAttributeName = new HashMap<>();
 		data.getAttributes().getAll().values().forEach(a -> {
-			Set<Integer> icecatTaxonomyIds = featureResolver.resolveFeatureName(a.getName());
+			Set<Integer> icecatTaxonomyIds = taxonomyByAttributeName.computeIfAbsent(a.getName(),
+					featureResolver::resolveFeatureName);
 			if (!icecatTaxonomyIds.isEmpty()) {
 				dedicatedLogger.info("Found icecat taxonomy for {} : {}", a.getName(), icecatTaxonomyIds);
 				a.setIcecatTaxonomyIds(icecatTaxonomyIds);
@@ -140,7 +164,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		//////////////////////////////////////////////////
 		AttributesConfig attributesConfig = vConf.getAttributesConfig();
 
-		Map<String, IndexedAttribute> indexed = new HashMap<String, IndexedAttribute>();
+		Map<String, IndexedAttribute> indexed = new HashMap<>();
 
 		for (ProductAttribute attr : data.getAttributes().getAll().values()) {
 
@@ -171,15 +195,12 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 						dedicatedLogger.info("Duplicate attribute candidate for indexation, for GTIN : {} and attrs {}",
 								data.getId(), attrConfig.getKey());
 						if (!cleanedValue.equals(indexedAttr.getValue())) {
-							// TODO(p3,design) : Means we have multiple attributes matching for indexed .
-							// Have a merge strategy
 							dedicatedLogger.warn("Value mismatch for attribute {} : {}<>{}", attr.getName(),
 									cleanedValue, indexedAttr.getValue());
 						}
 					} else {
 						indexedAttr = new IndexedAttribute(attrConfig.getKey(), cleanedValue);
-
-						}
+					}
 
 					mergeSourcesAndRefreshValue(indexedAttr, attr, attrConfig, vConf);
 					indexed.put(attrConfig.getKey(), indexedAttr);
@@ -204,10 +225,21 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 	}
 
+	/**
+	 * Adds all sources from one raw attribute to the indexed attribute and elects a
+	 * stable value from the cleaned source values.
+	 *
+	 * @param indexedAttr indexed attribute being built for the product
+	 * @param attr        raw product attribute whose sources should be merged
+	 * @param attrConf    vertical attribute parsing configuration
+	 * @param vConf       vertical configuration owning the attribute
+	 * @throws ValidationException when the elected value cannot be converted to the
+	 *                             configured attribute type
+	 */
 	private void mergeSourcesAndRefreshValue(IndexedAttribute indexedAttr, ProductAttribute attr,
 			AttributeConfig attrConf, VerticalConfig vConf) throws ValidationException {
 
-		for (org.open4goods.model.attribute.SourcedAttribute source : attr.getSource()) {
+		for (SourcedAttribute source : attr.getSource()) {
 			try {
 				String parsed = parseValue(source.getValue(), attrConf, vConf);
 				source.setCleanedValue(parsed);
@@ -265,9 +297,8 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		if (StringUtils.isBlank(value)) {
 			return true;
 		}
-		String normalized = StringUtils.stripAccents(value)
-				.toLowerCase(Locale.ROOT)
-				.replaceAll("[()_./-]+", " ");
+		String normalized = StringUtils.stripAccents(value).toLowerCase(Locale.ROOT);
+		normalized = EMPTY_VALUE_SEPARATOR_PATTERN.matcher(normalized).replaceAll(" ");
 		normalized = StringUtils.normalizeSpace(normalized);
 		return Set.of("donnee non specifiee", "donnees non specifiees", "non specifie", "non specifiee", "false", "n a",
 				"na", "nc", "null", "-").contains(normalized);
@@ -297,14 +328,13 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 		// Broad token finder: "model-ish" chunks including separators, min length 5
 		// Examples matched: "HG32EJ690WE", "TX-25QUE", "AB1234", "SM-G991B"
-		java.util.Map<String, Integer> freq = new java.util.HashMap<>();
-		java.util.Map<String, String> originalByNorm = new java.util.HashMap<>();
+		Map<String, Integer> freq = new HashMap<>();
 
 		for (String offerName : data.getOfferNames()) {
 			if (offerName == null || offerName.isBlank())
 				continue;
 
-			java.util.regex.Matcher m = MODEL_TOKEN_PATTERN.matcher(offerName);
+			Matcher m = MODEL_TOKEN_PATTERN.matcher(offerName);
 			while (m.find()) {
 				String raw = m.group();
 				String candidate = trimEdgePunct(raw);
@@ -316,7 +346,6 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 				String norm = candidate.toUpperCase();
 				freq.merge(norm, 1, Integer::sum);
-				originalByNorm.putIfAbsent(norm, norm);
 			}
 		}
 
@@ -329,7 +358,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		String best = null;
 		int bestCount = -1;
 
-		for (java.util.Map.Entry<String, Integer> e : freq.entrySet()) {
+		for (Map.Entry<String, Integer> e : freq.entrySet()) {
 			String cand = e.getKey();
 			int count = e.getValue();
 
@@ -353,17 +382,19 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 		String currentModel = data.model();
 		if (StringUtils.isEmpty(currentModel)) {
-			// No model set yet (null or empty string) — promote the best candidate
+			// No model set yet (null or empty string): promote the best candidate.
 			data.forceModel(best);
 			dedicatedLogger.info("Model updated from '{}' to '{}'.", currentModel, best);
 		} else {
-			// Store alternates (including other frequent candidates)
+			// Store all title candidates, including the elected one, when they differ from
+			// the referential model already present on the product.
 			for (String cand : freq.keySet()) {
-				if (cand.equalsIgnoreCase(best))
+				if (cand.equalsIgnoreCase(currentModel)) {
 					continue;
+				}
 				if (!data.getAkaModels().contains(cand)) {
 					data.getAkaModels().add(cand);
-					dedicatedLogger.info("Added alternate model: " + cand);
+					dedicatedLogger.info("Added alternate model: {}", cand);
 				}
 			}
 		}
@@ -374,11 +405,11 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		String up = token.toUpperCase();
 
 		// Quick rejects: resolutions like 1920x1080, 3840X2160, etc.
-		if (up.matches(".*\\d{3,4}[X]\\d{3,4}.*"))
+		if (RESOLUTION_PATTERN.matcher(up).matches())
 			return false;
 
 		// Extract alnum-only for analysis
-		String alnum = up.replaceAll("[^A-Z0-9]", "");
+		String alnum = NON_ALPHANUMERIC_PATTERN.matcher(up).replaceAll("");
 		if (alnum.length() < 5)
 			return false;
 
@@ -405,7 +436,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		if (looksLikeMeasureOrUnit(alnum))
 			return false;
 
-		boolean hasSeparator = up.matches(".*[._/\\-].*");
+		boolean hasSeparator = MODEL_SEPARATOR_PATTERN.matcher(up).find();
 		int transitions = countAlphaDigitTransitions(alnum);
 
 		// Strong signal: at least 2 transitions (letters->digits->letters or
@@ -429,20 +460,13 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	private static boolean looksLikeMeasureOrUnit(String alnum) {
 		// Pattern: digits + unit word (single transition), e.g. 42POUCES, 55INCH,
 		// 144HZ, 1000W, 500GB
-		java.util.regex.Matcher m = MEASURE_UNIT_PATTERN.matcher(alnum);
+		Matcher m = MEASURE_UNIT_PATTERN.matcher(alnum);
 		if (!m.matches())
 			return false;
 
 		String suffix = m.group(2);
 
-		// Common units/specs that often appear in titles and are NOT models
-		java.util.Set<String> badSuffixes = java.util.Set.of("POUCE", "POUCES", "INCH", "INCHES", "CM", "MM", "HZ", "W",
-				"KW", "V", "AH", "MAH", "GB", "TB", "MB", "MP", "FPS", "NITS", "LUMENS", "K" // catches 4K, 8K etc (we
-																								// also avoid short
-																								// length elsewhere)
-		);
-
-		if (badSuffixes.contains(suffix))
+		if (MEASURE_SUFFIXES.contains(suffix))
 			return true;
 
 		// Also reject plural-ish / common French/English variants
@@ -467,12 +491,12 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	}
 
 	private static String stripSeparators(String s) {
-		return s.replaceAll("[._/\\-]", "");
+		return MODEL_SEPARATOR_PATTERN.matcher(s).replaceAll("");
 	}
 
 	private static String trimEdgePunct(String s) {
 		// trim common edge punctuation while keeping internal separators
-		return s.replaceAll("^[\\p{Punct}]+|[\\p{Punct}]+$", "");
+		return EDGE_PUNCTUATION_PATTERN.matcher(s).replaceAll("");
 	}
 
 	/**
@@ -552,7 +576,6 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 			mergeExternalIds(dataFragment, product);
 			handleReferentielAttributes(dataFragment, product, vConf);
-			// TODO : Add BRAND / MODEL from matches from attributes
 
 		} catch (Exception e) {
 			dedicatedLogger.error("Unexpected error", e);
@@ -650,10 +673,12 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		///////////////////////
 		String gtin = fragment.gtin();
 		if (!StringUtils.isEmpty(gtin)) {
-            output.getGtinInfos().addGtinString(gtin);
+			output.getGtinInfos().addGtinString(gtin);
 			String existing = output.gtin();
 
-			if (!existing.equals(gtin)) {
+			if (StringUtils.isBlank(existing)) {
+				output.getAttributes().getReferentielAttributes().put(ReferentielKey.GTIN, gtin);
+			} else if (!existing.equals(gtin)) {
 				try {
 					long existingGtin = Long.parseLong(existing);
 					long newGtin = Long.parseLong(gtin);
@@ -671,15 +696,14 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	}
 
 	/**
-	 * Type attribute and apply parsing rules. Return null if the Attribute fail to
-	 * exact parsing rules
+	 * Parses a product attribute with its configured parser and type rules.
 	 *
-	 * @param vConf
-	 *
-	 * @param translated
-	 * @param attributeConfigByKey
-	 * @return
-	 * @throws ValidationException
+	 * @param attr     product attribute to parse
+	 * @param attrConf matching attribute configuration
+	 * @param vConf    vertical configuration owning the attribute
+	 * @return cleaned value, or an empty string for known empty placeholders
+	 * @throws ValidationException when the value cannot satisfy the parser or type
+	 *                             constraints
 	 */
 	public String parseAttributeValue(final ProductAttribute attr, final AttributeConfig attrConf, VerticalConfig vConf)
 			throws ValidationException {
@@ -706,19 +730,34 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 	}
 
+	/**
+	 * Applies the generic parser options configured on an attribute value.
+	 *
+	 * @param rawValue raw value from a datasource
+	 * @param attrConf attribute configuration containing parser options
+	 * @param vConf    vertical configuration owning the attribute
+	 * @return normalized and type-sanitized value, or an empty string for known
+	 *         empty placeholders
+	 * @throws ValidationException when the value is null or cannot satisfy parser
+	 *                             constraints
+	 */
 	public String parseValue(final String rawValue, final AttributeConfig attrConf, VerticalConfig vConf)
 			throws ValidationException {
+
+		if (rawValue == null) {
+			throw new ValidationException("Null rawValue in attribute " + attrConf.getKey());
+		}
 
 		String string = rawValue;
 		///////////////////
 		// To upperCase / lowerCase
 		///////////////////
-		if (attrConf.getParser().getLowerCase()) {
+		if (Boolean.TRUE.equals(attrConf.getParser().getLowerCase())) {
 
 			string = string.toLowerCase();
 		}
 
-		if (attrConf.getParser().getUpperCase()) {
+		if (Boolean.TRUE.equals(attrConf.getParser().getUpperCase())) {
 			string = string.toUpperCase();
 		}
 
@@ -742,20 +781,20 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		// removing parenthesis tokens
 		///////////////////
 		if (attrConf.getParser().isRemoveParenthesis()) {
-			string = string.replaceAll("\\(.*?\\)", "");
+			string = PARENTHESIS_CONTENT_PATTERN.matcher(string).replaceAll("");
 		}
 
 		///////////////////
 		// Normalisation
 		///////////////////
-		if (attrConf.getParser().getNormalize()) {
+		if (Boolean.TRUE.equals(attrConf.getParser().getNormalize())) {
 			string = StringUtils.normalizeSpace(string);
 		}
 
 		///////////////////
 		// Trimming
 		///////////////////
-		if (attrConf.getParser().getTrim()) {
+		if (Boolean.TRUE.equals(attrConf.getParser().getTrim())) {
 			string = string.trim();
 		}
 
@@ -797,14 +836,6 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 		}
 
-		/////////////////////////////////
-		// Checking preliminary result
-//		/////////////////////////////////
-//
-//		if (null == string) {
-//			throw new ValidationException("Null rawValue in attribute " + string);
-//		}
-
 		////////////////////////////////////
 		// Applying specific parser instance
 		/////////////////////////////////////
@@ -831,18 +862,20 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 	}
 
+	/**
+	 * Extracts the first decimal-compatible number from a value and normalizes the
+	 * decimal separator.
+	 *
+	 * @param value parsed numeric candidate
+	 * @return Java-compatible decimal string
+	 * @throws ValidationException when no parseable number exists
+	 */
 	private String sanitizeNumericValue(String value) throws ValidationException {
 		if (StringUtils.isBlank(value)) {
 			throw new ValidationException("Empty numeric attribute");
 		}
 
-		String stripped = value.replace("\"", "");
-		stripped = stripped.replace("”", "");
-		stripped = stripped.replace("“", "");
-		stripped = stripped.replace("''", "");
-		stripped = stripped.replace("´´", "");
-		stripped = stripped.replace("´", "");
-		stripped = stripped.replace("’", "");
+		String stripped = QUOTE_MARK_PATTERN.matcher(value).replaceAll("");
 
 		String normalized = StringUtils.normalizeSpace(stripped);
 		Matcher matcher = NUMERIC_EXTRACT_PATTERN.matcher(normalized);

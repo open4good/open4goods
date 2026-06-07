@@ -109,7 +109,7 @@ public class ReviewGenerationPreprocessingService {
 	private record ModelEvidence(String candidate, int score, List<String> reasons, ModelCandidateSource source) {
 	}
 
-	private record SearchIdentity(String brand, String primaryModel, Set<String> alternateModels) {
+	private record SearchIdentity(String brand, String primaryModel, Set<String> alternateModels, boolean weakBrandPromoted) {
 	}
 
 	private enum FetchResultQuality {
@@ -131,6 +131,7 @@ public class ReviewGenerationPreprocessingService {
 		FORUM,
 		SPARE_PART,
 		GENERIC_CATALOG,
+		MANUAL_INDEX,
 		UNKNOWN
 	}
 
@@ -232,7 +233,7 @@ public class ReviewGenerationPreprocessingService {
 
 		// Build search queries.
 		List<String> queries = buildSearchQueries(product, brand, primaryModel, alternateModels, verticalConfig,
-				preferredDomains);
+				preferredDomains, identity.weakBrandPromoted());
 		logger.info(
 				"SERP validation for UPC {}: brand='{}', model='{}', akaModels={}, preferredDomains={}, plannedQueries={}",
 				product.getId(), brand, primaryModel, alternateModels == null ? 0 : alternateModels.size(),
@@ -432,14 +433,29 @@ public class ReviewGenerationPreprocessingService {
 				? new java.util.LinkedHashSet<>()
 				: new java.util.LinkedHashSet<>(product.getAkaModels());
 		String evidence = productEvidence(product);
+		boolean weakBrandPromoted = false;
+		if (isWeakSearchBrand(brand)) {
+			Optional<BrandModelEvidence> promotedIdentity = inferStrongIdentityFromWeakBrandEvidence(product, evidence);
+			if (promotedIdentity.isPresent()) {
+				BrandModelEvidence promoted = promotedIdentity.get();
+				brand = promoted.brand();
+				primaryModel = promoted.model();
+				product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, brand);
+				product.addModel(primaryModel, ModelCandidateSource.TITLE_INFERRED);
+				alternateModels.add(primaryModel);
+				weakBrandPromoted = true;
+				logger.info("Promoted weak review search identity for UPC {} from offer evidence: brand={}, model={}",
+						product.getId(), brand, primaryModel);
+			}
+		}
 		String inferredBrand = inferBrandFromEvidence(product, brand, evidence);
-		if (inferredBrand != null && (brand == null || shouldReplaceBrand(brand, inferredBrand))) {
+		if (!weakBrandPromoted && inferredBrand != null && (brand == null || shouldReplaceBrand(brand, inferredBrand))) {
 			brand = inferredBrand;
 			product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, brand);
 			logger.info("Resolved review search brand for UPC {} from offer evidence: {}", product.getId(), brand);
 		}
-		if (primaryModel == null || matchesProductGtin(product, primaryModel)
-				|| looksLikeMerchantTitle(primaryModel)) {
+		if (!weakBrandPromoted && (primaryModel == null || matchesProductGtin(product, primaryModel)
+				|| looksLikeMerchantTitle(primaryModel))) {
 			List<String> inferredModels = inferModelsFromEvidence(product, brand, evidence);
 			if (!inferredModels.isEmpty()) {
 				primaryModel = inferredModels.stream()
@@ -470,7 +486,126 @@ public class ReviewGenerationPreprocessingService {
 						product.getId(), primaryModel, baseModel);
 			}
 		}
-		return new SearchIdentity(brand, primaryModel, alternateModels);
+		return new SearchIdentity(brand, primaryModel, alternateModels, weakBrandPromoted);
+	}
+
+	private record BrandModelEvidence(String brand, String model, int score) {
+	}
+
+	private boolean isWeakSearchBrand(String brand) {
+		if (brand == null || brand.isBlank() || properties.getWeakSearchBrands() == null) {
+			return false;
+		}
+		String normalizedBrand = normalizeForTextMatching(brand);
+		return properties.getWeakSearchBrands().stream()
+				.filter(candidate -> candidate != null && !candidate.isBlank())
+				.map(this::normalizeForTextMatching)
+				.anyMatch(normalizedBrand::equals);
+	}
+
+	private Optional<BrandModelEvidence> inferStrongIdentityFromWeakBrandEvidence(Product product, String evidence) {
+		if (evidence == null || evidence.isBlank()) {
+			return Optional.empty();
+		}
+		List<BrandModelEvidence> candidates = new ArrayList<>();
+		for (String line : evidence.split("\\R")) {
+			candidates.addAll(extractBrandModelPairsFromOfferLine(product, line));
+		}
+		return candidates.stream()
+				.collect(Collectors.toMap(candidate -> normalizeForTextMatching(candidate.brand()) + "|"
+								+ normalizeForUrlMatching(candidate.model()),
+						Function.identity(), (left, right) -> left.score() >= right.score() ? left : right,
+						LinkedHashMap::new))
+				.values().stream()
+				.max(Comparator.comparingInt(BrandModelEvidence::score)
+						.thenComparingInt(candidate -> candidate.model().length()));
+	}
+
+	private List<BrandModelEvidence> extractBrandModelPairsFromOfferLine(Product product, String line) {
+		if (line == null || line.isBlank()) {
+			return List.of();
+		}
+		List<String> tokens = Arrays.stream(line.replace('\u00a0', ' ').split("\\s+"))
+				.map(token -> token.replaceAll("^[^\\p{Alnum}]+|[^\\p{Alnum}/_-]+$", ""))
+				.filter(token -> !token.isBlank())
+				.toList();
+		List<BrandModelEvidence> candidates = new ArrayList<>();
+		for (int i = 0; i < tokens.size(); i++) {
+			String brandToken = tokens.get(i);
+			if (!looksLikeStrongOfferBrandToken(brandToken)) {
+				continue;
+			}
+			int brandEnd = i;
+			String brand = brandToken;
+			if (i + 2 < tokens.size() && looksLikeStrongOfferBrandToken(tokens.get(i + 1))
+					&& !selectModelTokensNearBrand(product, tokens, i + 2).isEmpty()) {
+				brandEnd = i + 1;
+				brand = brandToken + " " + tokens.get(i + 1);
+			}
+			for (int window = 1; window <= 5 && brandEnd + window < tokens.size(); window++) {
+				List<String> modelTokens = selectModelTokensNearBrand(product, tokens, brandEnd + window);
+				if (modelTokens.isEmpty()) {
+					continue;
+				}
+				String model = cleanSearchModelCandidate(String.join(" ", modelTokens));
+				if (model == null || model.isBlank() || matchesProductGtin(product, model)
+						|| isGenericProductWord(model)) {
+					continue;
+				}
+				int score = 50 + modelCandidateScore(product, null, model) - window;
+				candidates.add(new BrandModelEvidence(brand, model, score));
+				break;
+			}
+		}
+		return candidates;
+	}
+
+	private boolean looksLikeStrongOfferBrandToken(String token) {
+		if (token == null || token.isBlank()) {
+			return false;
+		}
+		String normalized = normalizeForTextMatching(token);
+		return token.matches("[A-Z][A-Z0-9_-]{2,24}")
+				&& token.chars().filter(Character::isLetter).count() >= 3
+				&& token.chars().noneMatch(Character::isDigit)
+				&& !isGenericProductWord(token)
+				&& !GENERIC_BRAND_TOKENS.contains(normalized);
+	}
+
+	private List<String> selectModelTokensNearBrand(Product product, List<String> tokens, int start) {
+		List<String> selected = new ArrayList<>();
+		for (int i = start; i < tokens.size() && selected.size() < 4; i++) {
+			String token = tokens.get(i);
+			if (isGenericProductWord(token) && selected.isEmpty()) {
+				continue;
+			}
+			if (!selected.isEmpty() && isGenericProductWord(token)) {
+				break;
+			}
+			boolean modelLike = looksLikeModelToken(token)
+					|| token.matches("(?=.*[A-Za-z])(?=.*\\d)[A-Za-z0-9._/-]{2,}");
+			boolean modelPhraseToken = token.matches("[A-Z0-9._/-]{1,16}")
+					&& token.chars().anyMatch(character -> Character.isLetter(character) || Character.isDigit(character));
+			if (!modelLike && !modelPhraseToken && selected.isEmpty()) {
+				continue;
+			}
+			if (!modelLike && !modelPhraseToken && selected.stream().noneMatch(this::looksLikeModelToken)) {
+				break;
+			}
+			selected.add(token);
+			String candidate = String.join(" ", selected);
+			if (isSearchableModelCandidate(product, null, candidate) || looksLikeNamedModel(candidate)) {
+				if (modelLike && (isConciseModelCode(token) || selected.size() >= 3)) {
+					break;
+				}
+			}
+			boolean phraseHasDigit = selected.stream().anyMatch(value -> value.chars().anyMatch(Character::isDigit));
+			boolean phraseHasLetter = selected.stream().anyMatch(value -> value.chars().anyMatch(Character::isLetter));
+			if (selected.size() >= 4 && phraseHasDigit && phraseHasLetter) {
+				break;
+			}
+		}
+		return selected;
 	}
 
 	/**
@@ -910,6 +1045,9 @@ public class ReviewGenerationPreprocessingService {
 		}
 		if (containsAny(evidence, "manual", "notice", "mode d emploi", "fiche produit", "datasheet",
 				"support")) {
+			if (isManualIndexPage(product, result, content)) {
+				return SourceClass.MANUAL_INDEX;
+			}
 			return SourceClass.GUIDE;
 		}
 		if (containsAny(evidence, "test", "review", "avis", "verdict", "comparatif", "que choisir", "rtings",
@@ -961,6 +1099,70 @@ public class ReviewGenerationPreprocessingService {
 			}
 		}
 		return false;
+	}
+
+	private boolean isManualIndexPage(Product product, GoogleSearchResult result, String content) {
+		if (isExactManualPageSubject(product, result, content)) {
+			return false;
+		}
+		String evidence = normalizeForTextMatching(String.join(" ", safeString(result == null ? null : result.title()),
+				safeString(result == null ? null : result.link()), firstContentZone(content)));
+		if (!containsAny(evidence, "manual", "manuals", "notice", "notices", "mode d emploi", "user manual")) {
+			return false;
+		}
+		boolean listingLanguage = containsAny(evidence, "manuals for", "notices pour", "modes d emploi pour",
+				"tous les manuels", "all manuals", "manual count", "resultats", "results", "page suivante",
+				"previous page", "next page", "pagination", "choisissez votre modele", "select your model",
+				"liste des modeles", "model list", "products found", "produits trouves");
+		boolean listingUrl = result != null && result.link() != null
+				&& normalizeForUrlMatching(result.link()).matches(".*(manuals|notices|modeemploi|userguides|documents).*")
+				&& !rankedModelCandidates(product, product == null ? null : product.model(),
+						product == null ? Set.of() : product.getAkaModels()).stream()
+						.map(this::normalizeForUrlMatching)
+						.anyMatch(model -> model.length() >= 4
+								&& normalizeForUrlMatching(result.link()).contains(model));
+		return listingLanguage || listingUrl || countDistinctModelLikeHeadings(content) >= 12;
+	}
+
+	private boolean isExactManualPageSubject(Product product, GoogleSearchResult result, String content) {
+		if (product == null) {
+			return false;
+		}
+		String title = safeString(result == null ? null : result.title());
+		String link = safeString(result == null ? null : result.link());
+		String firstZone = firstContentZone(content);
+		String firstHeading = Arrays.stream(firstZone.split("\\R"))
+				.map(String::trim)
+				.filter(line -> !line.isBlank())
+				.filter(line -> line.startsWith("#") || line.length() <= 140)
+				.findFirst()
+				.orElse("");
+		String subjectText = normalizeForTextMatching(String.join(" ", title, firstHeading));
+		String urlText = normalizeForUrlMatching(link);
+		return rankedModelCandidates(product, product.model(), product.getAkaModels()).stream()
+				.filter(model -> model != null && !model.isBlank())
+				.anyMatch(model -> modelMatchesZone(model, subjectText) || hasExactUrlModelToken(model, urlText));
+	}
+
+	private int countDistinctModelLikeHeadings(String content) {
+		if (content == null || content.isBlank()) {
+			return 0;
+		}
+		Set<String> headings = new HashSet<>();
+		for (String line : content.split("\\R")) {
+			String trimmed = line == null ? "" : line.trim();
+			if (trimmed.isBlank() || (!trimmed.startsWith("#") && trimmed.length() > 80)) {
+				continue;
+			}
+			URL_MODEL_TOKEN_PATTERN.matcher(trimmed).results()
+					.map(match -> normalizeForUrlMatching(match.group()))
+					.filter(match -> match.length() >= 4)
+					.forEach(headings::add);
+			if (headings.size() >= 12) {
+				return headings.size();
+			}
+		}
+		return headings.size();
 	}
 
 	private Map<String, CompletableFuture<FetchOutcome>> scheduleFetches(Product product, List<GoogleSearchResult> sortedResults,
@@ -1037,7 +1239,8 @@ public class ReviewGenerationPreprocessingService {
 				continue;
 			}
 			SourceClass sourceClass = classifySource(product, result, content);
-			if (sourceClass == SourceClass.SPARE_PART || sourceClass == SourceClass.GENERIC_CATALOG) {
+			if (sourceClass == SourceClass.SPARE_PART || sourceClass == SourceClass.GENERIC_CATALOG
+					|| sourceClass == SourceClass.MANUAL_INDEX) {
 				rejectedUrls.put(url, "low-quality source class: " + sourceClass.name());
 				logger.warn("Content from URL {} discarded due to low-quality source class {}", url, sourceClass);
 				continue;
@@ -1430,7 +1633,7 @@ public class ReviewGenerationPreprocessingService {
 	}
 
 	private List<String> buildSearchQueries(Product product, String brand, String primaryModel, Set<String> alternateModels,
-			VerticalConfig verticalConfig, List<String> preferredDomains) {
+			VerticalConfig verticalConfig, List<String> preferredDomains, boolean weakBrandPromoted) {
 		List<String> queries = new ArrayList<>();
 		List<String> orderedModels = rankedModelCandidates(product, primaryModel, alternateModels);
 		List<String> searchModels = orderedModels.stream().limit(6).toList();
@@ -1442,6 +1645,15 @@ public class ReviewGenerationPreprocessingService {
 		List<String> verticalTerms = requiresVerticalEvidence(searchModels.getFirst(), Set.copyOf(searchModels))
 				? verticalEvidenceTerms(verticalConfig)
 				: List.of();
+		if (weakBrandPromoted) {
+			queries.add(withVerticalSearchTerms(officialSupportQuery(brand, searchModels.getFirst()), verticalTerms));
+			queries.add(withVerticalSearchTerms(modelOnlySupportQuery(searchModels.getFirst()), verticalTerms));
+			String offerName = product == null ? null : product.shortestOfferName();
+			if (offerName != null && !offerName.isBlank()) {
+				queries.add(withVerticalSearchTerms(quoted(offerName), verticalTerms));
+			}
+			return queries.stream().distinct().toList();
+		}
 		queries.add(withVerticalSearchTerms(officialDiscoveryQuery(brand, searchModels.getFirst()), verticalTerms));
 		queries.add(withVerticalSearchTerms(officialSupportQuery(brand, searchModels.getFirst()), verticalTerms));
 		for (String officialDomain : configuredOfficialDomains(brand)) {
@@ -1962,6 +2174,10 @@ public class ReviewGenerationPreprocessingService {
 
 	private String supportIntentQuery(String brand, String model) {
 		return brand + " " + quoted(model) + " (manual OR notice OR support OR datasheet OR \"fiche produit\")";
+	}
+
+	private String modelOnlySupportQuery(String model) {
+		return quoted(model) + " (manual OR notice OR support OR datasheet OR \"fiche produit\")";
 	}
 
 	private String domainExpression(List<String> domains) {
@@ -2884,6 +3100,7 @@ public class ReviewGenerationPreprocessingService {
 		// Default empty value so templates that reference EXTRACTED_ATTRIBUTES don't
 		// fail.
 		promptVariables.put("EXTRACTED_ATTRIBUTES", "[]");
+		promptVariables.put("STRUCTURED_TRUSTED_FACTS_JSON", writeJson(trustedStructuredFacts(product)));
 
 		// Inject IMPACTSCORE_POSITION
 		String impactScorePosition = "Non classé";
@@ -3032,6 +3249,38 @@ public class ReviewGenerationPreprocessingService {
 			sourceIndex.add(source);
 		}
 		return sourceIndex;
+	}
+
+	private List<Map<String, Object>> trustedStructuredFacts(Product product) {
+		if (product == null || product.getAttributes() == null || product.getAttributes().getAll() == null) {
+			return List.of();
+		}
+		List<Map<String, Object>> facts = new ArrayList<>();
+		product.getAttributes().getAll().forEach((key, attribute) -> {
+			if (key == null || key.isBlank() || attribute == null || attribute.getSource() == null) {
+				return;
+			}
+			attribute.getSource().stream()
+					.filter(source -> source != null && isTrustedStructuredDatasource(source.getDataSourcename()))
+					.filter(source -> source.getValue() != null && !source.getValue().isBlank())
+					.forEach(source -> {
+						Map<String, Object> fact = new LinkedHashMap<>();
+						fact.put("key", key);
+						fact.put("value", source.getValue());
+						fact.put("datasource", source.getDataSourcename());
+						fact.put("traceable", true);
+						facts.add(fact);
+					});
+		});
+		return facts;
+	}
+
+	private boolean isTrustedStructuredDatasource(String datasource) {
+		if (datasource == null || datasource.isBlank()) {
+			return false;
+		}
+		String normalized = datasource.toLowerCase(Locale.ROOT);
+		return normalized.contains("eprel") || normalized.contains("icecat");
 	}
 
 	private List<Map<String, Object>> attributeDefinitions(VerticalConfig verticalConfig) {

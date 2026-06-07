@@ -643,6 +643,7 @@ public class AiReview {
      * Represents a rating found in a source.
      */
     @Schema(description = "Rating found in a source", type = "object")
+    @JsonDeserialize(using = AiRatingDeserializer.class)
     public static class AiRating {
         
         @JsonProperty(required = true, value = "source")
@@ -660,8 +661,8 @@ public class AiReview {
         @Schema(description = "The maximum possible score", type = "string")
         private String max;
         
-        @JsonProperty(value = "comment")
-        @AiGeneratedField(instruction = "Short associated comment if present in the source. Write in FRENCH if you translate; otherwise keep original wording. Plain text only. VALUE-ONLY FIELD: no citations.")
+        @JsonProperty(required = true, value = "comment")
+        @AiGeneratedField(instruction = "Short associated comment if present in the source. Return an empty string when absent. Write in FRENCH if you translate; otherwise keep original wording. Plain text only. VALUE-ONLY FIELD: no citations.")
         @Schema(description = "Short comment associated with the rating", type = "string")
         private String comment;
         
@@ -718,6 +719,23 @@ public class AiReview {
                 }
             }
             return attributes;
+        }
+    }
+
+    /**
+     * Deserializes rating payloads while preserving compatibility with older
+     * reviews where the now-required comment field was absent.
+     */
+    public static class AiRatingDeserializer extends ValueDeserializer<AiRating> {
+        @Override
+        public AiRating deserialize(JsonParser p, DeserializationContext ctxt) throws tools.jackson.core.JacksonException {
+            JsonNode node = ctxt.readTree(p);
+            String source = node.has("source") && !node.get("source").isNull() ? node.get("source").asText() : null;
+            String score = node.has("score") && !node.get("score").isNull() ? node.get("score").asText() : null;
+            String max = node.has("max") && !node.get("max").isNull() ? node.get("max").asText() : null;
+            String comment = node.has("comment") && !node.get("comment").isNull() ? node.get("comment").asText() : "";
+            Integer number = node.has("number") && !node.get("number").isNull() ? node.get("number").asInt() : null;
+            return new AiRating(source, score, max, comment, number);
         }
     }
 

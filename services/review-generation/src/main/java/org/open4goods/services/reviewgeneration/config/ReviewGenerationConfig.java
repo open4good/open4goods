@@ -63,6 +63,13 @@ public class ReviewGenerationConfig {
             "whirlpool", List.of("indesit", "hotpoint", "ariston"),
             "indesit", List.of("whirlpool", "hotpoint", "ariston")));
 
+    /**
+     * Brand names that are known to be weak catalog labels for review-source search.
+     * When one of these brands is present, offer/title evidence may promote a stronger
+     * brand and model for search only.
+     */
+    private List<String> weakSearchBrands = new ArrayList<>();
+
     // Property used for building search queries.
     private String queryTemplate = "test %s \"%s\"";
 
@@ -287,6 +294,13 @@ public class ReviewGenerationConfig {
     }
     public void setBrandAliases(Map<String, List<String>> brandAliases) {
         this.brandAliases = brandAliases == null ? Map.of() : brandAliases;
+    }
+
+    public List<String> getWeakSearchBrands() {
+        return weakSearchBrands;
+    }
+    public void setWeakSearchBrands(List<String> weakSearchBrands) {
+        this.weakSearchBrands = weakSearchBrands == null ? new ArrayList<>() : weakSearchBrands;
     }
 
     public String getQueryTemplate() {

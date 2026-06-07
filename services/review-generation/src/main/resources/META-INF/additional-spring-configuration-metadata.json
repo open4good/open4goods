@@ -32,6 +32,12 @@
       "defaultValue": {}
     },
     {
+      "name": "review.generation.weak-search-brands",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Weak catalog brand labels that allow offer/title evidence to promote a stronger brand and model for review-source search.",
+      "defaultValue": []
+    },
+    {
       "name": "review.generation.official-url-excluded-domains",
       "type": "java.util.List<java.lang.String>",
       "description": "Domain substrings excluded from manufacturer official URL detection.",

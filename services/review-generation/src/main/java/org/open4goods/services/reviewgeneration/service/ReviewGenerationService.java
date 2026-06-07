@@ -229,7 +229,8 @@ public class ReviewGenerationService implements HealthIndicator {
 	/**
 	 * Checks if an AI review is considered valid/complete enough to be kept.
 	 * A valid review must not be null, must have a description of reasonable length
-	 * (e.g. > 20 chars), and must have at least one attribute populated.
+	 * (e.g. > 20 chars). Product attributes are managed by the dedicated extraction
+	 * stage and are intentionally not part of the persisted review validity check.
 	 *
 	 * @param review the review to check
 	 * @return true if valid, false otherwise
@@ -239,9 +240,6 @@ public class ReviewGenerationService implements HealthIndicator {
 			return false;
 		}
 		if (review.getDescription() == null || review.getDescription().trim().length() < 20) {
-			return false;
-		}
-		if (review.getAttributes() == null || review.getAttributes().isEmpty()) {
 			return false;
 		}
 		return true;
@@ -371,10 +369,9 @@ public class ReviewGenerationService implements HealthIndicator {
 		if (newReview == null) {
 			throw new IllegalStateException("Text completion returned no AI review for UPC " + product.getId());
 		}
-		// Attributes are owned by the dedicated extraction stage. Carry the validated
-		// attributes on the review (for DTO/serialisation) without letting the text model
-		// write anything back into the product.
-		newReview.setAttributes(attributes);
+		// Attributes are owned by the dedicated extraction stage. Do not persist
+		// model-emitted attributes inside the review payload.
+		newReview.setAttributes(List.of());
 		addResources(product, newReview);
 
 		AiReviewHolder holder = new AiReviewHolder();
@@ -387,11 +384,13 @@ public class ReviewGenerationService implements HealthIndicator {
 		holder.setSources(sourceTokens);
 		holder.setTotalTokens((Integer) promptVariables.getOrDefault("TOTAL_TOKENS", 0));
 		applyReview(product, holder);
+		Map<String, List<SourcedAttribute>> aiAttributeSnapshot = snapshotAiReviewSources(product);
 		try {
 			hooks.forEach(hook -> hook.onReviewGenerated(product));
 		} catch (Exception e) {
 			logger.error("Error executing review generation hooks for UPC {}: {}", product.getId(), e.getMessage(), e);
 		}
+		restoreMissingAiReviewSources(product, aiAttributeSnapshot);
 		productRepository.forceIndex(product);
 		return stepResult(product, verticalConfig, "text", true, "Review text generated and persisted.",
 				promptVariables, attributes, newReview);
@@ -523,9 +522,9 @@ public class ReviewGenerationService implements HealthIndicator {
 				}
 				AiReview newReview = processAiReview(reviewResponse.getBody(), reviewResponse.getMetadata());
 
-				// Attributes are owned by the dedicated extraction stage: carry the validated
-				// attributes for serialisation, never merge text-model attributes into the product.
-				newReview.setAttributes(aiAttributesFromProduct(product, verticalConfig));
+				// Attributes are owned by the dedicated extraction stage. Do not persist
+				// model-emitted attributes inside the review payload.
+				newReview.setAttributes(List.of());
 				addResources(product, newReview);
 				logger.info("Completed review for UPC {}: {}", upc, objectMapper.writeValueAsString(newReview));
 				holder.setReview(newReview);
@@ -570,12 +569,14 @@ public class ReviewGenerationService implements HealthIndicator {
 
             // Execute hooks (enrichment/standard aggregation)
             if (status.getStatus() == ReviewGenerationStatus.Status.SUCCESS) {
+				Map<String, List<SourcedAttribute>> aiAttributeSnapshot = snapshotAiReviewSources(product);
                 try {
                     hooks.forEach(hook -> hook.onReviewGenerated(product));
                 } catch (Exception e) {
                     logger.error("Error executing review generation hooks for UPC {}: {}", upc, e.getMessage(), e);
                     // We do not fail the overall process if hooks fail, but we log it.
                 }
+				restoreMissingAiReviewSources(product, aiAttributeSnapshot);
             }
 
 			applyReview(product, holder);
@@ -1062,6 +1063,7 @@ public class ReviewGenerationService implements HealthIndicator {
 					holder.setReview(newReview);
 					holder.setEnoughData(true);
 					applyReview(product, holder);
+					Map<String, List<SourcedAttribute>> aiAttributeSnapshot = snapshotAiReviewSources(product);
 
                     // Execute hooks
                     try {
@@ -1069,6 +1071,7 @@ public class ReviewGenerationService implements HealthIndicator {
                     } catch (Exception e) {
                         logger.error("Error executing batch review generation hooks for product {}: {}", productId, e.getMessage(), e);
                     }
+					restoreMissingAiReviewSources(product, aiAttributeSnapshot);
 
 					productRepository.forceIndex(product);
 					updateBatchStatus(product.getId(), ReviewGenerationStatus.Status.SUCCESS, null);
@@ -1128,7 +1131,9 @@ public class ReviewGenerationService implements HealthIndicator {
 		List<AiReview.AiAttribute> validatedAttributes = validateExtractedAttributes(extractedAttributes,
 				verticalConfig, acceptedUrls, promptVariables);
 		persistValidatedAttributes(product, validatedAttributes, acceptedUrls);
+		Map<String, List<SourcedAttribute>> aiAttributeSnapshot = snapshotAiReviewSources(product);
 		runAttributesExtractedHooks(product);
+		restoreMissingAiReviewSources(product, aiAttributeSnapshot);
 		return validatedAttributes;
 	}
 
@@ -1495,6 +1500,63 @@ public class ReviewGenerationService implements HealthIndicator {
 			attribute.setValue(attribute.bestValue());
 			return attribute.getSource().isEmpty();
 		});
+	}
+
+	private Map<String, List<SourcedAttribute>> snapshotAiReviewSources(Product product) {
+		if (product == null || product.getAttributes() == null || product.getAttributes().getAll() == null) {
+			return Map.of();
+		}
+		Map<String, List<SourcedAttribute>> snapshot = new LinkedHashMap<>();
+		product.getAttributes().getAll().forEach((key, attribute) -> {
+			if (attribute == null || attribute.getSource() == null) {
+				return;
+			}
+			List<SourcedAttribute> aiSources = attribute.getSource().stream()
+					.filter(source -> isReviewAiSource(source == null ? null : source.getDataSourcename()))
+					.map(this::copySourcedAttribute)
+					.toList();
+			if (!aiSources.isEmpty()) {
+				snapshot.put(key, aiSources);
+			}
+		});
+		return snapshot;
+	}
+
+	private void restoreMissingAiReviewSources(Product product, Map<String, List<SourcedAttribute>> snapshot) {
+		if (product == null || product.getAttributes() == null || snapshot == null || snapshot.isEmpty()) {
+			return;
+		}
+		snapshot.forEach((key, sources) -> {
+			if (key == null || key.isBlank() || sources == null || sources.isEmpty()) {
+				return;
+			}
+			ProductAttribute attribute = product.getAttributes().getAll().get(key);
+			if (attribute == null) {
+				attribute = new ProductAttribute();
+				attribute.setName(key);
+			}
+			for (SourcedAttribute source : sources) {
+				if (source == null || source.getDataSourcename() == null) {
+					continue;
+				}
+				boolean alreadyPresent = attribute.getSource() != null && attribute.getSource().stream()
+						.anyMatch(existing -> source.getDataSourcename().equals(existing.getDataSourcename()));
+				if (!alreadyPresent) {
+					attribute.addSourceAttribute(copySourcedAttribute(source));
+				}
+			}
+			product.getAttributes().getAll().put(attribute.getName(), attribute);
+		});
+	}
+
+	private SourcedAttribute copySourcedAttribute(SourcedAttribute source) {
+		SourcedAttribute copy = new SourcedAttribute();
+		copy.setDataSourcename(source.getDataSourcename());
+		copy.setName(source.getName());
+		copy.setValue(source.getValue());
+		copy.setCleanedValue(source.getCleanedValue());
+		copy.setIcecatTaxonomyId(source.getIcecatTaxonomyId());
+		return copy;
 	}
 
 	private boolean isReviewAiSource(String datasource) {

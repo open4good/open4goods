@@ -1,6 +1,7 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.lang.reflect.Method;
 import java.util.Set;
@@ -8,13 +9,14 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.open4goods.model.attribute.Attribute;
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.icecat.services.IcecatFeatureResolver;
+import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.eprel.EprelProduct;
+import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -276,5 +278,51 @@ class AttributeRealtimeAggregationServiceTest {
 		attrConfig.getParser().setTrim(true);
 
 		assertThat(service.parseValue("false", attrConfig, verticalConfig)).isEmpty();
+	}
+
+	@Test
+	void parseValueRejectsNullRawValueWithValidationException() {
+		AttributeConfig attrConfig = new AttributeConfig();
+		attrConfig.setKey("COLOR");
+
+		assertThatThrownBy(() -> service.parseValue(null, attrConfig, verticalConfig))
+				.isInstanceOf(ValidationException.class)
+				.hasMessageContaining("Null rawValue in attribute COLOR");
+	}
+
+	@Test
+	void onProductKeepsTrustedSourceValueWhenDuplicateAttributesMapToSameIndexedKey() throws Exception {
+		AttributeConfig attrConfig = new AttributeConfig();
+		attrConfig.setKey("COLOR");
+		attrConfig.getSynonyms().put("all", Set.of("color_a", "color_b"));
+		verticalConfig.getAttributesConfig().setConfigs(java.util.List.of(attrConfig));
+
+		Product product = buildBaseProduct();
+		addSourcedAttribute(product, "color_a", "black", "eprel");
+		addSourcedAttribute(product, "color_b", "white", "merchant");
+
+		service.onProduct(product, verticalConfig);
+
+		assertThat(product.getAttributes().getIndexed()).containsKey("COLOR");
+		assertThat(product.getAttributes().getIndexed().get("COLOR").getValue()).isEqualTo("BLACK");
+		assertThat(product.getAttributes().getIndexed().get("COLOR").sourcesCount()).isEqualTo(2);
+	}
+
+	@Test
+	void extractModelFromTitlesAddsBestTitleCandidateAsAlternateWhenModelAlreadyExists() {
+		Product product = buildBaseProduct();
+		product.getOfferNames().add("Samsung HG32EJ690WE television");
+
+		service.extractModelFromTitles(product);
+
+		assertThat(product.model()).isEqualTo("ModelX");
+		assertThat(product.getAkaModels()).contains("HG32EJ690WE");
+	}
+
+	private void addSourcedAttribute(Product product, String name, String value, String datasourceName) {
+		ProductAttribute attribute = new ProductAttribute();
+		attribute.setName(name);
+		attribute.addSourceAttribute(new org.open4goods.model.attribute.SourcedAttribute(new Attribute(name, value), datasourceName));
+		product.getAttributes().getAll().put(name, attribute);
 	}
 }

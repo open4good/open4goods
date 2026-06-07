@@ -159,7 +159,7 @@ class ReviewGenerationServiceTest {
     }
 
     @Test
-    void shouldGenerateReview_ReturnsTrue_WhenReviewIsInvalid_NoAttributes() {
+    void shouldGenerateReview_ReturnsFalse_WhenFreshReviewHasNoAttributes() {
         Product product = new Product();
         Localisable<String, AiReviewHolder> reviews = new Localisable<>();
         AiReviewHolder holder = new AiReviewHolder();
@@ -176,7 +176,7 @@ class ReviewGenerationServiceTest {
 
         boolean result = invokeShouldGenerateReview(product);
 
-        assertThat(result).isTrue();
+        assertThat(result).isFalse();
     }
 
 
@@ -283,7 +283,14 @@ class ReviewGenerationServiceTest {
         withoutReview.setId(2L);
         withoutReview.setReviews(new Localisable<>());
 
-        when(productRepository.exportVerticalWithValidDateAndMissingReviewOrderByImpactScore(eq("tv"), eq("fr"), anyInt(), eq(false), anyBoolean()))
+        when(productRepository.exportVerticalWithValidDateAndMissingReviewOrderByImpactScore(
+                eq("tv"),
+                eq("fr"),
+                anyInt(),
+                eq(false),
+                anyBoolean(),
+                eq(properties.getRegenerationDelayDays()),
+                eq(properties.getRetryDelayDays())))
                 .thenReturn(Stream.of(withoutReview));
 
         org.open4goods.model.vertical.VerticalConfig verticalConfig = new org.open4goods.model.vertical.VerticalConfig();
@@ -599,6 +606,80 @@ class ReviewGenerationServiceTest {
     }
 
     @Test
+    void extractReviewAttributes_RestoresAiSourcesRemovedByHooks() throws Exception {
+        ReviewGenerationHook destructiveHook = new ReviewGenerationHook() {
+            @Override
+            public void onReviewGenerated(Product product) {
+            }
+
+            @Override
+            public void onAttributesExtracted(Product product) {
+                product.getAttributes().getAll().clear();
+            }
+        };
+        reviewGenerationService = serviceWithHooks(List.of(destructiveHook));
+        Product product = new Product();
+        product.setId(107L);
+        org.open4goods.model.vertical.VerticalConfig verticalConfig = verticalConfig("DIAGONALE_POUCES");
+        when(preprocessingService.buildPromptVariablesFromReviewFacts(product, verticalConfig, true))
+                .thenReturn(new HashMap<>(Map.of("ACCEPTED_URLS", List.of("https://manufacturer.example/specs"))));
+        when(genAiService.objectPrompt(eq(properties.getAttributeExtractionPromptKey()), org.mockito.ArgumentMatchers.anyMap(),
+                eq(AttributeExtractionResult.class)))
+                .thenReturn(attributeResponse(List.of(new AiReview.AiAttribute("DIAGONALE_POUCES", "55", 1))));
+
+        org.open4goods.services.reviewgeneration.dto.ReviewGenerationStepResult result =
+                reviewGenerationService.extractReviewAttributes(product, verticalConfig);
+
+        assertThat(result.attributes()).singleElement()
+                .extracting(AiReview.AiAttribute::getName)
+                .isEqualTo("DIAGONALE_POUCES");
+        assertThat(product.getAttributes().getAll().get("DIAGONALE_POUCES").getSource())
+                .extracting(SourcedAttribute::getDataSourcename)
+                .containsExactly("AI_REVIEW:s01:manufacturer.example");
+    }
+
+    @Test
+    void generateReviewText_RestoresAiSourcesRemovedByHooksAndKeepsReviewAttributesEmpty() throws Exception {
+        ReviewGenerationHook destructiveHook = new ReviewGenerationHook() {
+            @Override
+            public void onReviewGenerated(Product product) {
+                product.getAttributes().getAll().clear();
+            }
+        };
+        reviewGenerationService = serviceWithHooks(List.of(destructiveHook));
+        Product product = new Product();
+        product.setId(108L);
+        ProductAttribute attribute = new ProductAttribute();
+        attribute.setName("DIAGONALE_POUCES");
+        attribute.addSourceAttribute(new SourcedAttribute(new Attribute("DIAGONALE_POUCES", "55", "fr"),
+                "AI_REVIEW:s01:manufacturer.example"));
+        product.getAttributes().getAll().put("DIAGONALE_POUCES", attribute);
+        org.open4goods.model.vertical.VerticalConfig verticalConfig = verticalConfig("DIAGONALE_POUCES");
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("ACCEPTED_URLS", List.of("https://manufacturer.example/specs"));
+        variables.put("SOURCE_TOKENS", Map.of("https://manufacturer.example/specs", 100));
+        variables.put("TOTAL_TOKENS", 100);
+        when(preprocessingService.buildPromptVariablesFromReviewFacts(product, verticalConfig, true))
+                .thenReturn(variables);
+        AiReview review = new AiReview();
+        review.setDescription("A valid review description longer than twenty characters.");
+        review.setAttributes(List.of(new AiReview.AiAttribute("DIAGONALE_POUCES", "55", 1)));
+        PromptResponse<AiReview> response = new PromptResponse<>();
+        response.setBody(review);
+        when(genAiService.objectPrompt(eq(properties.getPromptKey()), org.mockito.ArgumentMatchers.anyMap(),
+                eq(AiReview.class))).thenReturn(response);
+
+        org.open4goods.services.reviewgeneration.dto.ReviewGenerationStepResult result =
+                reviewGenerationService.generateReviewText(product, verticalConfig);
+
+        assertThat(result.review().getAttributes()).isEmpty();
+        assertThat(product.getReviews().get("fr").getReview().getAttributes()).isEmpty();
+        assertThat(product.getAttributes().getAll().get("DIAGONALE_POUCES").getSource())
+                .extracting(SourcedAttribute::getDataSourcename)
+                .containsExactly("AI_REVIEW:s01:manufacturer.example");
+    }
+
+    @Test
     void generateReviewAsync_WithTwoPhaseGeneration_ShouldPersistAttributesBeforeTextGeneration() throws Exception {
         properties.setTwoPhaseGeneration(true);
         Product product = new Product();
@@ -646,12 +727,28 @@ class ReviewGenerationServiceTest {
                 && status.getStatus() != ReviewGenerationStatus.Status.FAILED);
         assertThat(status.getStatus()).isEqualTo(ReviewGenerationStatus.Status.SUCCESS);
         assertThat(product.getAttributes().getAll()).containsKey("DIAGONALE_POUCES");
+        assertThat(product.getReviews().get("fr").getReview().getAttributes()).isEmpty();
     }
 
     private PromptResponse<AttributeExtractionResult> attributeResponse(List<AiReview.AiAttribute> attributes) {
         PromptResponse<AttributeExtractionResult> response = new PromptResponse<>();
         response.setBody(new AttributeExtractionResult(attributes));
         return response;
+    }
+
+    private ReviewGenerationService serviceWithHooks(List<ReviewGenerationHook> hooks) {
+        return new ReviewGenerationService(
+                properties,
+                googleSearchService,
+                (org.open4goods.services.urlfetching.service.UrlFetchingService) urlFetchingService,
+                genAiService,
+                batchAiService,
+                meterRegistry,
+                productRepository,
+                preprocessingService,
+                verticalsConfigService,
+                hooks
+        );
     }
 
     private org.open4goods.model.vertical.VerticalConfig verticalConfig(String... keys) {

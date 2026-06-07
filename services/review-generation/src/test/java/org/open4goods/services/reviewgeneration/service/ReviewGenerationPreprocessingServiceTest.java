@@ -18,8 +18,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.model.Localisable;
+import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.attribute.AttributeType;
+import org.open4goods.model.attribute.ProductAttribute;
+import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductFetchDiagnostics;
 import org.open4goods.model.product.ProductFact;
@@ -170,6 +173,56 @@ class ReviewGenerationPreprocessingServiceTest {
                 .isEqualTo("GEDTECH \"GE217DP\" (official OR officiel OR product OR produit)");
         assertThat(product.brand()).isEqualTo("GEDTECH");
         assertThat(product.model()).isEqualTo("GE217DP");
+    }
+
+    @Test
+    void preparePromptVariables_PromotesHighOneIdentityForWeakSearchBrand() throws Exception {
+        properties.setMaxSearch(3);
+        properties.setLowQualityFallbackMaxSearch(0);
+        properties.setWeakSearchBrands(List.of("SANTE & BEAUTE"));
+        Product product = product("SANTE & BEAUTE", "3612408988217");
+        product.setId(3612408988217L);
+        product.setVertical("washing-machine");
+        product.setOfferNames(Set.of("Lave linge hublot HIGH ONE WAD929C 9kg 1200 tours"));
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse());
+
+        assertThatThrownBy(() -> service.preparePromptVariables(product, verticalConfig(), new ReviewGenerationStatus()))
+                .isInstanceOf(NotEnoughDataException.class);
+
+        ArgumentCaptor<GoogleSearchRequest> requestCaptor = ArgumentCaptor.forClass(GoogleSearchRequest.class);
+        org.mockito.Mockito.verify(googleSearchService, org.mockito.Mockito.times(3)).search(requestCaptor.capture());
+        assertThat(requestCaptor.getAllValues()).extracting(GoogleSearchRequest::query)
+                .containsExactly(
+                        "HIGH ONE \"WAD929C\" (support OR assistance OR manual OR notice OR datasheet OR \"fiche produit\")",
+                        "\"WAD929C\" (manual OR notice OR support OR datasheet OR \"fiche produit\")",
+                        "\"Lave linge hublot HIGH ONE WAD929C 9kg 1200 tours\"");
+        assertThat(product.brand()).isEqualTo("HIGH ONE");
+        assertThat(product.model()).isEqualTo("WAD929C");
+    }
+
+    @Test
+    void preparePromptVariables_PromotesValbergIdentityForWeakSearchBrand() throws Exception {
+        properties.setMaxSearch(3);
+        properties.setLowQualityFallbackMaxSearch(0);
+        properties.setWeakSearchBrands(List.of("SANTE & BEAUTE"));
+        Product product = product("SANTE & BEAUTE", "3497674181878");
+        product.setId(3497674181878L);
+        product.setVertical("washing-machine");
+        product.setOfferNames(Set.of("Lave linge VALBERG WF 712 D W180C blanc"));
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse());
+
+        assertThatThrownBy(() -> service.preparePromptVariables(product, verticalConfig(), new ReviewGenerationStatus()))
+                .isInstanceOf(NotEnoughDataException.class);
+
+        ArgumentCaptor<GoogleSearchRequest> requestCaptor = ArgumentCaptor.forClass(GoogleSearchRequest.class);
+        org.mockito.Mockito.verify(googleSearchService, org.mockito.Mockito.times(3)).search(requestCaptor.capture());
+        assertThat(requestCaptor.getAllValues()).extracting(GoogleSearchRequest::query)
+                .containsExactly(
+                        "VALBERG \"WF 712 D W180C\" (support OR assistance OR manual OR notice OR datasheet OR \"fiche produit\")",
+                        "\"WF 712 D W180C\" (manual OR notice OR support OR datasheet OR \"fiche produit\")",
+                        "\"Lave linge VALBERG WF 712 D W180C blanc\"");
+        assertThat(product.brand()).isEqualTo("VALBERG");
+        assertThat(product.model()).isEqualTo("WF 712 D W180C");
     }
 
     @Test
@@ -839,6 +892,48 @@ class ReviewGenerationPreprocessingServiceTest {
     }
 
     @Test
+    void classifySource_RejectsBroadManualIndex() {
+        Product product = product("Electrolux", "EKG604000W");
+        GoogleSearchResult result = new GoogleSearchResult("Electrolux manuals and user guides",
+                "https://www.example-manuals.test/electrolux/manuals");
+        String markdown = """
+                # Electrolux manuals
+                Choose your model from all manuals. Page suivante. 430 results.
+                ## EKG50100OW
+                ## EKG51100OW
+                ## EKG60100OW
+                ## EKG61100OX
+                ## EKK6450AOX
+                ## EOB3400BOX
+                ## EOC3430BOX
+                ## EOC5654AOX
+                ## ESL5205LO
+                ## ESL5310LO
+                ## ERN1300AOW
+                ## ENN2801BOW
+                """;
+
+        Object sourceClass = ReflectionTestUtils.invokeMethod(service, "classifySource", product, result, markdown);
+
+        assertThat(sourceClass).hasToString("MANUAL_INDEX");
+    }
+
+    @Test
+    void classifySource_AcceptsExactModelManualPage() {
+        Product product = product("Electrolux", "EKG604000W");
+        GoogleSearchResult result = new GoogleSearchResult("Electrolux EKG604000W notice mode d'emploi",
+                "https://www.example-manuals.test/electrolux/ekg604000w-manual");
+        String markdown = """
+                # Electrolux EKG604000W notice
+                Manual and mode d emploi for the Electrolux EKG604000W cooker with installation and use details.
+                """;
+
+        Object sourceClass = ReflectionTestUtils.invokeMethod(service, "classifySource", product, result, markdown);
+
+        assertThat(sourceClass).hasToString("GUIDE");
+    }
+
+    @Test
     void preparePromptVariables_AcceptsExactComparisonProductPageAsFallbackEvidence() throws Exception {
         properties.setMaxSearch(1);
         properties.setMinMarkdownChars(20);
@@ -1095,6 +1190,28 @@ class ReviewGenerationPreprocessingServiceTest {
                 .contains("\"filteringType\":\"NUMERIC\"")
                 .contains("\"dimension\":\"LENGTH\"")
                 .contains("\"defaultUnitHint\":\"cm\"");
+    }
+
+    @Test
+    void buildBasePromptVariables_IncludesOnlyTrustedStructuredFacts() {
+        Product product = product("Samsung", "S95D");
+        ProductAttribute energyClass = new ProductAttribute();
+        energyClass.setName("ENERGY_CLASS");
+        energyClass.addSourceAttribute(new SourcedAttribute(new Attribute("ENERGY_CLASS", "D", "fr"), "EPREL"));
+        ProductAttribute merchantPrice = new ProductAttribute();
+        merchantPrice.setName("PRICE");
+        merchantPrice.addSourceAttribute(new SourcedAttribute(new Attribute("PRICE", "499", "fr"), "merchant-offer"));
+        product.getAttributes().getAll().put("ENERGY_CLASS", energyClass);
+        product.getAttributes().getAll().put("PRICE", merchantPrice);
+
+        Map<String, Object> variables = service.buildBasePromptVariables(product, verticalConfig());
+
+        assertThat((String) variables.get("STRUCTURED_TRUSTED_FACTS_JSON"))
+                .contains("\"key\":\"ENERGY_CLASS\"")
+                .contains("\"datasource\":\"EPREL\"")
+                .doesNotContain("\"key\":\"PRICE\"");
+        assertThat((Map<?, ?>) variables.get("sources")).isEmpty();
+        assertThat((Map<?, ?>) variables.get("tokens")).isEmpty();
     }
 
     private Product product(String brand, String model) {

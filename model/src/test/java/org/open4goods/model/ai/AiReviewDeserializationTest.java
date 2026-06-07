@@ -27,6 +27,6 @@ public class AiReviewDeserializationTest {
 
         assertThat(rating).isNotNull();
         assertThat(rating.getSource()).isEqualTo("Test Source");
-        assertThat(rating.getComment()).isNull();
+        assertThat(rating.getComment()).isEmpty();
     }
 }
