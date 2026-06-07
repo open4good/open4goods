@@ -213,8 +213,8 @@ class SearchServiceTest {
         assertThat(nativeQuery.getSourceFilter()).isInstanceOf(FetchSourceFilter.class);
         FetchSourceFilter sourceFilter = (FetchSourceFilter) nativeQuery.getSourceFilter();
         assertThat(sourceFilter.fetchSource()).isTrue();
-        assertThat(sourceFilter.getIncludes()).contains("id", "names", "price");
-        assertThat(sourceFilter.getIncludes()).doesNotContain("embedding");
+        assertThat(sourceFilter.getIncludes()).isNull();
+        assertThat(sourceFilter.getExcludes()).contains("embedding", "resources.imageInfo.embedding");
     }
 
     @Test

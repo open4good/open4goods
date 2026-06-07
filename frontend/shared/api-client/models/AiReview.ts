@@ -164,7 +164,7 @@ export interface AiReview {
    */
   sources: string
   /**
-   * List of product attributes
+   * List of product attributes (server-populated from validated extraction)
    * @type {string}
    * @memberof AiReview
    */
@@ -180,31 +180,31 @@ export interface AiReview {
    * @type {string}
    * @memberof AiReview
    */
-  ratings?: string
+  ratings: string
   /**
    * List of PDF's url's for this product
    * @type {string}
    * @memberof AiReview
    */
-  pdfs?: string
+  pdfs: string
   /**
    * List of quality images url's for this product
    * @type {string}
    * @memberof AiReview
    */
-  images?: string
+  images: string
   /**
    * List of product related videos
    * @type {string}
    * @memberof AiReview
    */
-  videos?: string
+  videos: string
   /**
    * List of social networks references
    * @type {string}
    * @memberof AiReview
    */
-  social?: string
+  social: string
 }
 
 /**
@@ -297,6 +297,11 @@ export function instanceOfAiReview(value: object): value is AiReview {
     return false
   if (!('dataQuality' in value) || value['dataQuality'] === undefined)
     return false
+  if (!('ratings' in value) || value['ratings'] === undefined) return false
+  if (!('pdfs' in value) || value['pdfs'] === undefined) return false
+  if (!('images' in value) || value['images'] === undefined) return false
+  if (!('videos' in value) || value['videos'] === undefined) return false
+  if (!('social' in value) || value['social'] === undefined) return false
   return true
 }
 
@@ -338,11 +343,11 @@ export function AiReviewFromJSONTyped(
     sources: json['sources'],
     attributes: json['attributes'],
     dataQuality: json['dataQuality'],
-    ratings: json['ratings'] == null ? undefined : json['ratings'],
-    pdfs: json['pdfs'] == null ? undefined : json['pdfs'],
-    images: json['images'] == null ? undefined : json['images'],
-    videos: json['videos'] == null ? undefined : json['videos'],
-    social: json['social'] == null ? undefined : json['social'],
+    ratings: json['ratings'],
+    pdfs: json['pdfs'],
+    images: json['images'],
+    videos: json['videos'],
+    social: json['social'],
   }
 }
 

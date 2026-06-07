@@ -197,6 +197,8 @@ export const ProductPdfDtoStatusEnum = {
   CannotAnalyse: 'CANNOT_ANALYSE',
   PerceptivHashFail: 'PERCEPTIV_HASH_FAIL',
   PdfParsingError: 'PDF_PARSING_ERROR',
+  EmptyFile: 'EMPTY_FILE',
+  UnsupportedMimeType: 'UNSUPPORTED_MIME_TYPE',
 } as const
 export type ProductPdfDtoStatusEnum =
   (typeof ProductPdfDtoStatusEnum)[keyof typeof ProductPdfDtoStatusEnum]

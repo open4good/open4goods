@@ -179,6 +179,8 @@ export const ProductVideoDtoStatusEnum = {
   CannotAnalyse: 'CANNOT_ANALYSE',
   PerceptivHashFail: 'PERCEPTIV_HASH_FAIL',
   PdfParsingError: 'PDF_PARSING_ERROR',
+  EmptyFile: 'EMPTY_FILE',
+  UnsupportedMimeType: 'UNSUPPORTED_MIME_TYPE',
 } as const
 export type ProductVideoDtoStatusEnum =
   (typeof ProductVideoDtoStatusEnum)[keyof typeof ProductVideoDtoStatusEnum]
