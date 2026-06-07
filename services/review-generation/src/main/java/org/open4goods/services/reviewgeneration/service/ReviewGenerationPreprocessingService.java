@@ -26,6 +26,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -452,6 +453,13 @@ public class ReviewGenerationPreprocessingService {
 			}
 		}
 		if (primaryModel != null && !primaryModel.isBlank()) {
+			List<String> derivedModels = deriveConciseModelCandidates(primaryModel);
+			if (!derivedModels.isEmpty()) {
+				alternateModels.add(primaryModel);
+				primaryModel = derivedModels.getFirst();
+				logger.info("Resolved review search model for UPC {} from concise model candidate: {}",
+						product.getId(), primaryModel);
+			}
 			alternateModels.add(primaryModel);
 			// Add base model without trailing regional-variant suffix (e.g. "55C835X1" → "55C835").
 			// Many pages omit the 1-3 uppercase letter suffix that encodes the sales region.
@@ -1763,6 +1771,7 @@ public class ReviewGenerationPreprocessingService {
 		List<String> models = new ArrayList<>();
 		if (primaryModel != null && !primaryModel.isBlank()) {
 			models.add(primaryModel);
+			models.addAll(deriveConciseModelCandidates(primaryModel));
 		}
 		if (product != null) {
 			models.addAll(ProductModelCandidateHelper.hardenedCandidates(product));
@@ -1807,6 +1816,28 @@ public class ReviewGenerationPreprocessingService {
 			}
 		}
 		return ranked;
+	}
+
+	/**
+	 * Derives searchable product codes from model identifiers that append an internal
+	 * numeric service/reference code, e.g. {@code LRS1DF39X 925052177}.
+	 *
+	 * @param model raw model identifier
+	 * @return concise model candidates, possibly empty
+	 */
+	private List<String> deriveConciseModelCandidates(String model) {
+		if (model == null || model.isBlank()) {
+			return List.of();
+		}
+		Matcher matcher = Pattern.compile("^([A-Za-z0-9][A-Za-z0-9._/-]{3,})\\s+\\d{5,}$")
+				.matcher(model.trim());
+		if (matcher.matches()) {
+			String candidate = matcher.group(1);
+			if (candidate.chars().anyMatch(Character::isLetter) && candidate.chars().anyMatch(Character::isDigit)) {
+				return List.of(candidate);
+			}
+		}
+		return List.of();
 	}
 
 	private boolean isGarbledModelName(String name) {
@@ -2573,7 +2604,13 @@ public class ReviewGenerationPreprocessingService {
 				&& urlHaystack.contains(normalizeForUrlMatching(productId))) {
 			return true;
 		}
-		if (isClearlyNonProductDocument(url, label) || !looksLikeProductDocument(url, label)) {
+		if (isClearlyNonProductDocument(url, label)) {
+			return false;
+		}
+		if (officialContext && isPdfUrl(url) && hasModelCandidateInUrl(product, urlHaystack)) {
+			return true;
+		}
+		if (!looksLikeProductDocument(url, label)) {
 			return false;
 		}
 		String model = normalizeForUrlMatching(product.model());
@@ -2599,6 +2636,15 @@ public class ReviewGenerationPreprocessingService {
 		return product.getAkaModels() != null && product.getAkaModels().stream()
 				.filter(candidate -> candidate != null && !candidate.isBlank())
 				.anyMatch(candidate -> modelMatchesZone(candidate, textHaystack));
+	}
+
+	private boolean hasModelCandidateInUrl(Product product, String normalizedUrl) {
+		if (product == null || normalizedUrl == null || normalizedUrl.isBlank()) {
+			return false;
+		}
+		return rankedModelCandidates(product, product.model(), product.getAkaModels()).stream()
+				.map(this::normalizeForUrlMatching)
+				.anyMatch(candidate -> candidate.length() >= 4 && normalizedUrl.contains(candidate));
 	}
 
 	private boolean looksLikeProductDocument(String url, String label) {

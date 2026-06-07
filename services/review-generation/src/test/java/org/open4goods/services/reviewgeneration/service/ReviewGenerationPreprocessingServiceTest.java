@@ -628,12 +628,15 @@ class ReviewGenerationPreprocessingServiceTest {
                 "Samsung SM-S921B/DS notice");
         Boolean genericNameOnlyMatch = ReflectionTestUtils.invokeMethod(service, "isProductRelevantResource", product,
                 "https://images.samsung.com/common-energylabel-productfiche.pdf", "Classe energetique");
+        Boolean terseOfficialModelPdfMatch = ReflectionTestUtils.invokeMethod(service, "isProductRelevantResource",
+                product, "https://images.samsung.com/sm-s921b-ds.pdf", "SM-S921B/DS", true);
 
         assertThat(gtinMatch).isTrue();
         assertThat(modelMatch).isTrue();
         assertThat(akaModelMatch).isTrue();
         assertThat(labelOnlyMatch).isFalse();
         assertThat(genericNameOnlyMatch).isFalse();
+        assertThat(terseOfficialModelPdfMatch).isTrue();
     }
 
     @Test
