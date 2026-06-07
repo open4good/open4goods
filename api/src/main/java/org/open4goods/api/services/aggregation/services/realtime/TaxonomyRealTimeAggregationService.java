@@ -1,6 +1,7 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,7 +57,7 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 	 * {@link #onProduct(Product, VerticalConfig)}.
 	 */
 	@Override
-	public Map<String, Object> onDataFragment(final DataFragment input, final Product output,
+	public void onDataFragment(final DataFragment input, final Product output,
 			final VerticalConfig vConf) throws AggregationSkipException {
 
 		String category = input.getCategory();
@@ -70,7 +71,6 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		}
 
 		onProduct(output, vConf);
-		return Map.of();
 	}
 
 	/**
@@ -97,8 +97,8 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 
 		// Resolve vertical from categories
 		VerticalConfig vertical = verticalService.getVerticalForCategories(data.getCategoriesByDatasources());
-		if (null != vertical) {
-			if (null != data.getVertical() && !vertical.getId().equals(data.getVertical())) {
+		if (vertical != null) {
+			if (data.getVertical() != null && !vertical.getId().equals(data.getVertical())) {
 				dedicatedLogger.warn("Will erase existing vertical {} with {} for product {}, because of category {}",
 						data.getVertical(), vertical.getId(), data.bestName());
 			}
@@ -112,29 +112,27 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		}
 
 		// Confirm vertical by checking that at least one offer name contains a canonical token
-		if (null != data.getVertical()) {
+		if (data.getVertical() != null) {
 
-			StringBuilder productNameBag = new StringBuilder();
-			data.getOfferNames().forEach(name -> productNameBag.append(StringUtils.stripAccents(name).toLowerCase()));
-			String pNames = productNameBag.toString();
+			// Build normalised offer-name list once; check each name individually to
+			// avoid false positives from cross-name boundary matches in a concatenated bag.
+			List<String> normalizedOfferNames = data.getOfferNames().stream()
+					.map(n -> StringUtils.stripAccents(n).toLowerCase())
+					.toList();
 
 			try {
-				if (null != vConf.getId()) {
+				if (vConf.getId() != null) {
 					Set<String> verticalNames = vConf.getTokenNames(
 							taxonomyService.byId(vConf.getGoogleTaxonomyId()).getGoogleNames().values()
 									.stream().map(e -> StringUtils.stripAccents(e.toLowerCase())).toList());
 
-					for (String term : verticalNames) {
-						if (pNames.contains(term)) {
-							dedicatedLogger.info("Vertical {} confirmed by product names match for {}", vConf, data);
-							data.setVertical(vConf.getId());
-							break;
-						} else {
-							data.setVertical(null);
-						}
-					}
-
-					if (null == data.getVertical()) {
+					boolean confirmed = verticalNames.stream()
+							.anyMatch(token -> normalizedOfferNames.stream().anyMatch(n -> n.contains(token)));
+					if (confirmed) {
+						dedicatedLogger.info("Vertical {} confirmed by product names match for {}", vConf, data);
+						data.setVertical(vConf.getId());
+					} else {
+						data.setVertical(null);
 						dedicatedLogger.info(
 								"Vertical {} failed on product names match, unsetting vertical for {}", vConf, data);
 					}

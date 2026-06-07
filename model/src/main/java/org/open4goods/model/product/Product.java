@@ -190,6 +190,11 @@ public class Product implements Standardisable {
 	private Localisable<String, AiReviewHolder> reviews = new Localisable<String, AiReviewHolder>();
 
 	/**
+	 * Indexed review metadata used for repository counts and regeneration selection.
+	 */
+	private ProductReviewMetadata reviewMetadata = new ProductReviewMetadata();
+
+	/**
 	 * Facts scraped from web sources and stored for AI reprocessing.
 	 */
 	private List<ProductFact> reviewFacts = new ArrayList<>();
@@ -1279,6 +1284,21 @@ public class Product implements Standardisable {
 
 	public void setReviews(Localisable<String, AiReviewHolder> aiReviews) {
 		this.reviews = aiReviews;
+	}
+
+	/**
+	 * Rebuilds the indexed review metadata from the full locale-aware AI review payload.
+	 */
+	public void rebuildReviewMetadata() {
+		this.reviewMetadata = ProductReviewMetadata.from(reviews);
+	}
+
+	public ProductReviewMetadata getReviewMetadata() {
+		return reviewMetadata;
+	}
+
+	public void setReviewMetadata(ProductReviewMetadata reviewMetadata) {
+		this.reviewMetadata = reviewMetadata == null ? new ProductReviewMetadata() : reviewMetadata;
 	}
 
 	public EprelProduct getEprelDatas() {

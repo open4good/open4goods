@@ -8,6 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +29,6 @@ import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.PrefixedAttrText;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,13 +47,17 @@ public class NamesAggregationService extends AbstractAggregationService {
 
 	private static final Logger logger = LoggerFactory.getLogger(NamesAggregationService.class);
 
+	/** Pattern for template placeholders like {@code {BRAND}}, {@code {DIAGONALE_POUCES}}. */
+	private static final Pattern TEMPLATE_PLACEHOLDER = Pattern.compile("\\{([A-Z0-9_]+)\\}");
 
-
-	/**
-	 * Kept for DI compatibility even if currently unused.
-	 */
-	@SuppressWarnings("unused")
-	private final EvaluationService evaluationService;
+	/** Thread-local SHA-256 digest to avoid per-call allocation in embedding cache-key computation. */
+	private static final ThreadLocal<MessageDigest> SHA256 = ThreadLocal.withInitial(() -> {
+		try {
+			return MessageDigest.getInstance("SHA-256");
+		} catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException("SHA-256 not available", e);
+		}
+	});
 
 	private final VerticalsConfigService verticalService;
 	private final BlablaService blablaService;
@@ -62,12 +66,10 @@ public class NamesAggregationService extends AbstractAggregationService {
 
 	public NamesAggregationService(final Logger logger,
 			final VerticalsConfigService verticalService,
-			final EvaluationService evaluationService,
 			final BlablaService blablaService,
 			final TextEmbeddingService embeddingService,
 			final DjlEmbeddingProperties embeddingProperties) {
 		super(logger);
-		this.evaluationService = evaluationService;
 		this.verticalService = verticalService;
 		this.blablaService = blablaService;
 		this.embeddingService = embeddingService;
@@ -80,18 +82,14 @@ public class NamesAggregationService extends AbstractAggregationService {
 	 * @param df input fragment
 	 * @param output target product being aggregated
 	 * @param vConf vertical config provided to this aggregation pass
-	 * @return contract kept as-is (null)
 	 * @throws AggregationSkipException if aggregation must be skipped
-	 * TODO : investigate and propose robustness and performance enhancements.
 	 */
 	@Override
-	public Map<String, Object> onDataFragment(final DataFragment df, final Product output, final VerticalConfig vConf)
+	public void onDataFragment(final DataFragment df, final Product output, final VerticalConfig vConf)
 			throws AggregationSkipException {
 
 		// Adding raw offer names (not localized).
-		// Defensive checks: df / df.getNames() can be null depending on upstream parsing.
 		if (df != null && df.getNames() != null && output != null && output.getOfferNames() != null) {
-			// Small perf gain: avoid creating an intermediate Set via Collectors.toSet().
 			for (String raw : df.getNames()) {
 				String normalized = normalizeName(raw);
 				if (normalized != null) {
@@ -101,7 +99,6 @@ public class NamesAggregationService extends AbstractAggregationService {
 		}
 
 		onProduct(output, vConf);
-		return null; // contract preserved
 	}
 
 	/**
@@ -150,7 +147,6 @@ public class NamesAggregationService extends AbstractAggregationService {
 
 
 
-					// TODO : Check if existing url has changes against new one, log.warn if url updates
 					// ---- URL ----
 					// High cognitive load note:
 					// data.getNames().getUrl() is assumed existing by domain model, but we still guard nulls
@@ -160,7 +156,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 							|| data.getNames().getUrl() == null
 							|| data.getNames().getUrl().get(lang) == null;
 
-					if (vConf != null && vConf.isForceNameGeneration() || urlMissing) {
+					if (urlMissing || (vConf != null && vConf.isForceNameGeneration())) {
 						logger.debug("Generating product url for productId={} lang={}", data.getId(), lang);
 
 						final PrefixedAttrText urlPrefix = tConf.getUrl();
@@ -172,10 +168,6 @@ public class NamesAggregationService extends AbstractAggregationService {
 					} else {
 						logger.debug("Skipping URL generation for productId={} lang={}", data.getId(), lang);
 					}
-
-
-					// TODO : Investigate an optimisation opiton. Add a no indexed no dos_count fields that contains hashcode for concatenation of all those following computed txts. Than apply regen only if has changed.
-					// TODO : Should also concern the computed url
 
 
 					// ---- Canonical product names ----
@@ -228,7 +220,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 				}
 			}
 		} catch (Exception ex) {
-			logger.error("Error computing embedding for product {}", data.getId(), ex.getMessage());
+			logger.error("Error computing embedding for product {}", data.getId(), ex);
 		}
 	}
 
@@ -327,58 +319,6 @@ public class NamesAggregationService extends AbstractAggregationService {
 		}
 
 		return sb.toString();
-	}
-
-	/**
-	 * Computes a pretty name made of an optional prefix and a list of attributes,
-	 * appending attribute suffixes when configured in the vertical catalog.
-	 *
-	 * @param data product
-	 * @param config configuration (prefix + list of attributes)
-	 * @param vConf vertical configuration used to resolve attribute suffixes
-	 * @param lang current language key
-	 * @param separator separator between chunks (e.g. " ")
-	 * @return computed pretty name
-	 * @throws InvalidParameterException if template evaluation fails
-	 */
-	private String computePrettyName(final Product data, final PrefixedAttrText config, final VerticalConfig vConf,
-			final String lang, final String separator) throws InvalidParameterException {
-
-		if (data == null || config == null) {
-			return "";
-		}
-
-		final StringBuilder sb = new StringBuilder();
-
-		final String p = config.getPrefix();
-		if (StringUtils.isNotBlank(p)) {
-			final String prefix = blablaService.generateBlabla(p, data);
-			if (StringUtils.isNotBlank(prefix)) {
-				sb.append(prefix);
-			}
-		}
-
-		if (config.getAttrs() != null) {
-			for (String attr : config.getAttrs()) {
-				if (StringUtils.isBlank(attr) || data.getAttributes() == null) {
-					continue;
-				}
-				final String refVal = data.getAttributes().val(attr);
-				if (refVal != null) {
-					if (sb.length() > 0) {
-						sb.append(separator);
-					}
-					sb.append(IdHelper.azCharAndDigits(refVal).toLowerCase());
-
-					String suffix = resolveAttributeSuffix(vConf, attr, lang);
-					if (StringUtils.isNotBlank(suffix)) {
-						sb.append(" ").append(suffix);
-					}
-				}
-			}
-		}
-
-		return StringUtils.normalizeSpace(sb.toString());
 	}
 
 	private String resolveAttributeSuffix(final VerticalConfig vConf, final String attr, final String lang) {
@@ -510,7 +450,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 					.filter(StringUtils::isNotBlank)
 					.sorted()
 					.limit(5)
-					.collect(Collectors.toList());
+					.toList();
 			chunks.addAll(offers);
 		}
 
@@ -567,15 +507,11 @@ public class NamesAggregationService extends AbstractAggregationService {
 
 		String modelIdentity = embeddingProperties != null ? embeddingProperties.cacheModelIdentity() : "";
 		String cachePayload = modelIdentity + "\n" + prefixedText;
-		try {
-			byte[] digest = MessageDigest.getInstance("SHA-256")
-					.digest(cachePayload.getBytes(StandardCharsets.UTF_8));
-			long key = ByteBuffer.wrap(digest).getLong();
-			return key == 0L ? 1L : key;
-		} catch (NoSuchAlgorithmException ex) {
-			long key = cachePayload.hashCode();
-			return key == 0L ? 1L : key;
-		}
+		MessageDigest md = SHA256.get();
+		md.reset();
+		byte[] digest = md.digest(cachePayload.getBytes(StandardCharsets.UTF_8));
+		long key = ByteBuffer.wrap(digest).getLong();
+		return key == 0L ? 1L : key;
 	}
 
 	/**
@@ -594,11 +530,8 @@ public class NamesAggregationService extends AbstractAggregationService {
 
 
 
-		// Simple regex to find {KEY} pattern
-		java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\\{([A-Z0-9_]+)\\}");
-		java.util.regex.Matcher matcher = pattern.matcher(template);
-
-		StringBuffer sb = new StringBuffer();
+		java.util.regex.Matcher matcher = TEMPLATE_PLACEHOLDER.matcher(template);
+		StringBuilder sb = new StringBuilder();
 		while (matcher.find()) {
 			String key = matcher.group(1);
 			String value = null;

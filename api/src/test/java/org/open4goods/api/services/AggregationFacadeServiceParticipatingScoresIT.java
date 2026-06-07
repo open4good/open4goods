@@ -56,7 +56,9 @@ class AggregationFacadeServiceParticipatingScoresIT {
         Score aggregated = first.getScores().get("AGG");
         assertThat(aggregated).isNotNull();
         assertThat(aggregated.getAggregates()).containsEntry("SCORE_A", 0.6).containsEntry("SCORE_B", 0.4);
-        assertThat(aggregated.getAbsolute().getValue()).isCloseTo(3.4, within(1e-6));
+        // AGG = relativize(5)×0.6 + relativize(1)×0.4 = 3.75×0.6 + 1.25×0.4 = 2.75
+        // (sigma-based relativization with batch mean=3, sigma=2, DEFAULT_MAX_RATING=5)
+        assertThat(aggregated.getAbsolute().getValue()).isCloseTo(2.75, within(1e-6));
     }
 
     private AggregationFacadeService aggregationFacadeService() {
@@ -111,6 +113,8 @@ class AggregationFacadeServiceParticipatingScoresIT {
         config.setAttributesConfig(attributesConfig);
         config.setImpactScoreConfig(impactScoreConfig);
         config.setScoringAggregationConfig(new ScoringAggregationConfig());
+        // Required: ParticipatingScoreHelper skips all attrs when this list is empty
+        config.setAvailableImpactScoreCriterias(List.of("SCORE_A", "SCORE_B"));
         return config;
     }
 

@@ -1,0 +1,75 @@
+{
+  "properties": [
+    {
+      "name": "resourceCompletionConfig.force-erase-file-name",
+      "type": "java.lang.Boolean",
+      "description": "Regenerate resource file names even when a file name already exists.",
+      "defaultValue": false
+    },
+    {
+      "name": "resourceCompletionConfig.download-user-agent",
+      "type": "java.lang.String",
+      "description": "User-agent sent when downloading remote resources."
+    },
+    {
+      "name": "resourceCompletionConfig.connect-timeout-ms",
+      "type": "java.lang.Integer",
+      "description": "Connection timeout, in milliseconds, for remote resource downloads.",
+      "defaultValue": 1000
+    },
+    {
+      "name": "resourceCompletionConfig.socket-timeout-ms",
+      "type": "java.lang.Integer",
+      "description": "Socket timeout, in milliseconds, for remote resource downloads.",
+      "defaultValue": 1000
+    },
+    {
+      "name": "resourceCompletionConfig.embedding-similarity-threshold",
+      "type": "java.lang.Double",
+      "description": "Cosine similarity threshold used to group image embeddings.",
+      "defaultValue": 0.8
+    },
+    {
+      "name": "resourceCompletionConfig.perceptive-hash-size",
+      "type": "java.lang.Integer",
+      "description": "Perceptive hash size used by jImageHash.",
+      "defaultValue": 32
+    },
+    {
+      "name": "resourceCompletionConfig.perceptive-hash-alpha-threshold",
+      "type": "java.lang.Integer",
+      "description": "Alpha value above which transparent pixels are treated as opaque for perceptive hashing.",
+      "defaultValue": 243
+    },
+    {
+      "name": "resourceCompletionConfig.pdf-language-min-confidence",
+      "type": "java.lang.Double",
+      "description": "Minimum language detector raw score for a language to count as present in a PDF.",
+      "defaultValue": 0.5
+    },
+    {
+      "name": "resourceCompletionConfig.pdf-language-max-pages",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of PDF pages extracted for language detection.",
+      "defaultValue": 5
+    },
+    {
+      "name": "resourceCompletionConfig.pdf-language-max-chars",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of extracted characters used for PDF language detection.",
+      "defaultValue": 20000
+    },
+    {
+      "name": "resourceCompletionConfig.pdf-title-max-lines",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of first-page text lines inspected for PDF title extraction.",
+      "defaultValue": 10
+    },
+    {
+      "name": "resourceCompletionConfig.pdf-title-font-size-tolerance",
+      "type": "java.lang.Float",
+      "description": "Font-size tolerance used when grouping PDF title candidate lines.",
+      "defaultValue": 0.8
+    }
+  ]
+}

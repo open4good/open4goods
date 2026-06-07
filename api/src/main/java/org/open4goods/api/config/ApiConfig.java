@@ -516,8 +516,8 @@ public class ApiConfig {
 
 	@Bean
 	@org.springframework.context.annotation.Profile("!local")
-	ProductRepository aggregatedDatasRepository(@Autowired final ApiProperties config) {
-		return new ProductRepository(config.getIndexationConfig());
+	ProductRepository aggregatedDatasRepository(@Autowired final ApiProperties config, ElasticsearchOperations elasticsearchOperations) {
+		return new ProductRepository(config.getIndexationConfig(), elasticsearchOperations);
 	}
 
 	@Bean

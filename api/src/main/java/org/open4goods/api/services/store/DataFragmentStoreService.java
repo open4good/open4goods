@@ -17,6 +17,7 @@ import org.open4goods.model.StandardiserService;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductPartialUpdateField;
 import org.open4goods.model.product.ProductPartialUpdateHolder;
 import org.open4goods.services.productrepository.config.IndexationConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -208,9 +209,9 @@ public class DataFragmentStoreService {
 					data.setLastChange(System.currentTimeMillis());
 					
 					ProductPartialUpdateHolder partial = new ProductPartialUpdateHolder(data.getId());
-					partial.addChange("lastChange", data.getLastChange());
-					partial.addChange("price", data.getPrice());
-					partial.addChange("offersCount", data.getOffersCount());
+					partial.addChange(ProductPartialUpdateField.LAST_CHANGE, data.getLastChange());
+					partial.addChange(ProductPartialUpdateField.PRICE, data.getPrice());
+					partial.addChange(ProductPartialUpdateField.OFFERS_COUNT, data.getOffersCount());
 					
 					partialItemsResults.add(partial);
 					

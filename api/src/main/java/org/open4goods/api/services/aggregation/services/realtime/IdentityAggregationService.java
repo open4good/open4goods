@@ -2,7 +2,6 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
 import java.util.AbstractMap.SimpleEntry;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
@@ -15,7 +14,6 @@ import org.open4goods.model.product.BarcodeType;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * First stage in the realtime aggregation pipeline: validates and normalises
@@ -30,8 +28,6 @@ import org.slf4j.LoggerFactory;
  */
 public class IdentityAggregationService extends AbstractAggregationService {
 
-	private static final Logger logger = LoggerFactory.getLogger(IdentityAggregationService.class);
-
 	private final Gs1PrefixService gs1Service;
 	private final BarcodeValidationService validationService;
 
@@ -42,8 +38,15 @@ public class IdentityAggregationService extends AbstractAggregationService {
 		this.validationService = barcodeValidationService;
 	}
 
+	/**
+	 * Validates the incoming GTIN, registers alternate model IDs, timestamps the
+	 * product, and delegates to {@link #onProduct}.
+	 *
+	 * @throws AggregationSkipException if the GTIN is blank or mismatches the
+	 *                                  product's existing GTIN
+	 */
 	@Override
-	public  Map<String, Object> onDataFragment(final DataFragment input, final Product output, VerticalConfig vConf) throws AggregationSkipException {
+	public void onDataFragment(final DataFragment input, final Product output, final VerticalConfig vConf) throws AggregationSkipException {
 
 		/////////////////////////////
 		// Validating barcodes
@@ -54,12 +57,12 @@ public class IdentityAggregationService extends AbstractAggregationService {
             output.getGtinInfos().addGtinString(input.gtin());
         }
 
-		if (null == output.getId()) {
+		if (output.getId() == null) {
 			// TODO(p2, features) : Should store the GTIN type when encountered in gtin infos, and then render with appropriate leading 0
 			output.setId(Long.valueOf(input.gtin()));
 		} else {
 			if (!output.gtin().equals(input.gtin())) {
-				dedicatedLogger.error("GTIN Mismatch : product {], dataFragment {}", output.gtin(), input.gtin());
+				dedicatedLogger.error("GTIN Mismatch : product {}, dataFragment {}", output.gtin(), input.gtin());
 			}
 		}
 
@@ -76,9 +79,14 @@ public class IdentityAggregationService extends AbstractAggregationService {
 		output.setLastChange(System.currentTimeMillis());
 
 		onProduct(output, vConf);
-		return null;
 	}
 
+	/**
+	 * Validates the product's GTIN, resolves GS1 prefix metadata, and detects
+	 * whether the barcode may be a faked placeholder generated upstream.
+	 *
+	 * @throws AggregationSkipException when the GTIN is empty or invalid
+	 */
 	@Override
 	public void onProduct(Product output, VerticalConfig vConf) throws AggregationSkipException {
 

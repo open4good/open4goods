@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 
 import tools.jackson.dataformat.xml.XmlMapper;
 
@@ -44,8 +45,8 @@ public class AppConfig {
 
     @Bean
     @org.springframework.context.annotation.Profile("!local")
-    ProductRepository productRepository() {
-        return new ProductRepository();
+    ProductRepository productRepository(ElasticsearchOperations elasticsearchOperations) {
+        return new ProductRepository(elasticsearchOperations);
     }
 
     @Bean

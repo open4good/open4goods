@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public class StandardAggregator extends AbstractAggregator {
 
-	protected static final Logger logger = LoggerFactory.getLogger(StandardAggregator.class);
+	private static final Logger logger = LoggerFactory.getLogger(StandardAggregator.class);
 
 	private final VerticalsConfigService verticalConfigService;
 
@@ -69,7 +69,7 @@ public class StandardAggregator extends AbstractAggregator {
 			} catch (AggregationSkipException e) {
 				throw e;
 			} catch (final Exception e) {
-				logger.error("AggregationFacadeService {} threw an exception while processing data {}",
+				logger.error("Aggregation service {} threw an exception while processing data {}",
 						service.getClass().getName(), data, e);
 			}
 		}
@@ -98,7 +98,7 @@ public class StandardAggregator extends AbstractAggregator {
 			} catch (AggregationSkipException e) {
 				throw e;
 			} catch (final Exception e) {
-				logger.error("AggregationFacadeService {} threw an exception while processing data {}",
+				logger.error("Aggregation service {} threw an exception while processing data {}",
 						service.getClass().getName(), data, e);
 			}
 		}

@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -265,7 +264,7 @@ public class WeightParser extends AttributeParser {
                 final List<ParsedWeight> parsed = new ArrayList<>();
 
                 for (SourcedAttribute src : attribute.getSource()) {
-                        final String raw = safeGetString(src, "getValue").orElse(null);
+                        final String raw = src.getValue();
                         if (raw == null || raw.isBlank()) {
                                 continue;
                         }
@@ -690,29 +689,8 @@ public class WeightParser extends AttributeParser {
                 if (src == null) {
                         return "all";
                 }
-                Optional<String> ds = safeGetString(src, "getDatasource");
-                if (ds.isEmpty()) {
-                        ds = safeGetString(src, "getDatasourceName");
-                }
-                if (ds.isEmpty()) {
-                        ds = safeGetString(src, "getStore");
-                }
-                if (ds.isEmpty()) {
-                        ds = safeGetString(src, "getSource");
-                }
-                return ds.map(d -> d.trim().toLowerCase(Locale.ROOT)).filter(d -> !d.isBlank()).orElse("all");
-        }
-
-        private static Optional<String> safeGetString(Object target, String method) {
-                try {
-                        Object res = target.getClass().getMethod(method).invoke(target);
-                        if (res instanceof String s) {
-                                return Optional.ofNullable(s);
-                        }
-                        return Optional.empty();
-                } catch (ReflectiveOperationException e) {
-                        return Optional.empty();
-                }
+                String ds = src.getDataSourcename();
+                return ds != null && !ds.isBlank() ? ds.trim().toLowerCase(Locale.ROOT) : "all";
         }
 
         private record Candidate(WeightUnit unit, double kg, double score) {

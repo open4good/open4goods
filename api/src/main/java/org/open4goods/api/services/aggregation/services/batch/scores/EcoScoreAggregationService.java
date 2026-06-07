@@ -36,7 +36,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 	private static final double ECOSCORE_TARGET_SCALE = 20.0;
 
 	public EcoScoreAggregationService(final Logger logger) {
-		super(LOGGER);
+		super(logger);
 	}
 
 	/**
@@ -61,8 +61,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 	 * @return The computed EcoScore, or null if a required sub-score is missing
 	 * @throws ValidationException
 	 */
-	private Double generateEcoScore(Product product, VerticalConfig vConf, Map<String, Double> normalizedWeights,
-			Set<String> missingScoresInBatch) throws ValidationException {
+	private Double generateEcoScore(Product product, VerticalConfig vConf, Map<String, Double> normalizedWeights) throws ValidationException {
 
 		double ecoscoreVal = 0.0;
 		Map<String, Score> scores = product.getScores();
@@ -70,7 +69,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 		for (String config : vConf.getImpactScoreConfig().getCriteriasPonderation().keySet()) {
 			Score score = scores.get(config);
 
-			if (null == score) {
+			if (score == null) {
 				ScoreMissingValuePolicy policy = resolveMissingValuePolicy(config, vConf);
 				Double fallback = resolveMissingScoreFallback(config, vConf, policy);
 				if (fallback == null) {
@@ -102,40 +101,6 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 	}
 
 	/**
-	 * Resolves the numeric value of a score to be used in the EcoScore calculation.
-	 * Priorities:
-	 * 1. Relative value
-	 * 2. Absolute value (relativized if possible)
-	 * 3. Raw value
-	 * 
-	 * @param config The score name
-	 * @param score The score object
-	 * @return The resolved double value, or null if unavailable
-	 */
-	private Double resolveRelativeValue(String config, Score score) {
-		if (score.getRelativ() != null && score.getRelativ().getValue() != null) {
-			return score.getRelativ().getValue();
-		}
-
-		if (score.getAbsolute() != null && score.getAbsolute().getValue() != null) {
-			try {
-				return relativize(score.getAbsolute().getValue(), score.getAbsolute());
-			} catch (ValidationException e) {
-				LOGGER.warn("EcoScore relativization failed for {} : {}", config, e.getMessage());
-				return null;
-			}
-		}
-
-		if (score.getValue() != null) {
-			LOGGER.warn("EcoScore using raw value for {} due to missing cardinalities", config);
-			return score.getValue();
-		}
-
-		LOGGER.warn("EcoScore rating cannot proceed, missing value for {}", config);
-		return null;
-	}
-
-	/**
 	 * Finalizes the batch processing:
 	 * 1. Filters processed products.
 	 * 2. Computes rankings (global position, better/worse alternatives).
@@ -149,7 +114,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 
 		LOGGER.info("EcoScore done() start. Products: {}", datas.size());
 
-		if (null == vConf.getImpactScoreConfig() || vConf.getImpactScoreConfig().getCriteriasPonderation().isEmpty()) {
+		if (vConf.getImpactScoreConfig() == null || vConf.getImpactScoreConfig().getCriteriasPonderation().isEmpty()) {
 			LOGGER.error("No ImpactScore defined for vertical {}", vConf.getId());
 			return;
 		}
@@ -167,7 +132,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 		// Compute the ecoscore from existing scores
 		for (Product data : datas) {
 			try {
-				Double score = generateEcoScore(data, vConf, normalizedWeights, missingScoresInBatch);
+				Double score = generateEcoScore(data, vConf, normalizedWeights);
 				if (score == null) {
 					LOGGER.warn("EcoScore rating skipped for {} due to missing sub-scores", data.getId());
 					continue;
@@ -310,7 +275,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 
 	private EcoScoreRanking ensureRanking(Product product) {
 		EcoScoreRanking ranking = product.getRanking();
-		if (null == ranking) {
+		if (ranking == null) {
 			ranking = new EcoScoreRanking();
 			product.setRanking(ranking);
 		}

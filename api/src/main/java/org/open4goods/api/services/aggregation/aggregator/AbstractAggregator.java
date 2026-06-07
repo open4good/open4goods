@@ -28,7 +28,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
  */
 public abstract class AbstractAggregator implements Closeable {
 
-	protected static final Logger logger = LoggerFactory.getLogger(AbstractAggregator.class);
+	private static final Logger logger = LoggerFactory.getLogger(AbstractAggregator.class);
 
 	@Autowired
 	private AutowireCapableBeanFactory autowireBeanFactory;

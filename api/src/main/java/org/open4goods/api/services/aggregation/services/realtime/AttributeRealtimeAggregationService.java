@@ -59,6 +59,13 @@ import org.slf4j.Logger;
  */
 public class AttributeRealtimeAggregationService extends AbstractAggregationService {
 
+	private static final Pattern MODEL_TOKEN_PATTERN =
+			Pattern.compile("(?i)(?<![A-Z0-9])[A-Z0-9][A-Z0-9._/\\-]{3,}[A-Z0-9](?![A-Z0-9])");
+	private static final Pattern MEASURE_UNIT_PATTERN =
+			Pattern.compile("^(\\d{2,5})([A-Z]{1,10})$");
+	private static final Pattern NUMERIC_EXTRACT_PATTERN =
+			Pattern.compile("[-+]?\\d+(?:[.,]\\d+)?");
+
 	private final BrandService brandService;
 	private final VerticalsConfigService verticalConfigService;
 	private final IcecatFeatureResolver featureResolver;
@@ -93,7 +100,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		///////////////////////////////////////////////// brandExclusions()
 		/////////////////////////////////////////////////
 
-		if (null != data.getEprelDatas()) {
+		if (data.getEprelDatas() != null) {
 			String supplier = data.getEprelDatas().getSupplierOrTrademark();
 			data.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, supplier);
 			data.addBrand("eprel", supplier, vConf.getBrandsExclusion(), vConf.getBrandsAlias());
@@ -141,7 +148,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			AttributeConfig attrConfig = attributesConfig.resolveFromProductAttribute(attr);
 
 			// We have a "raw" attribute that matches an aggregationconfig
-			if (null != attrConfig) {
+			if (attrConfig != null) {
 
 				try {
 
@@ -160,7 +167,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 					}
 
 					IndexedAttribute indexedAttr = indexed.get(attrConfig.getKey());
-					if (null != indexedAttr) {
+					if (indexedAttr != null) {
 						dedicatedLogger.info("Duplicate attribute candidate for indexation, for GTIN : {} and attrs {}",
 								data.getId(), attrConfig.getKey());
 						if (!cleanedValue.equals(indexedAttr.getValue())) {
@@ -172,10 +179,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 					} else {
 						indexedAttr = new IndexedAttribute(attrConfig.getKey(), cleanedValue);
 
-						// Todo : force value through referenced datasources order
-						// TO
-
-					}
+						}
 
 					mergeSourcesAndRefreshValue(indexedAttr, attr, attrConfig, vConf);
 					indexed.put(attrConfig.getKey(), indexedAttr);
@@ -227,7 +231,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			bestValue = indexedAttr.bestValue();
 		}
 
-		if (null == bestValue) {
+		if (bestValue == null) {
 			return;
 		}
 
@@ -293,9 +297,6 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 		// Broad token finder: "model-ish" chunks including separators, min length 5
 		// Examples matched: "HG32EJ690WE", "TX-25QUE", "AB1234", "SM-G991B"
-		java.util.regex.Pattern tokenPattern = java.util.regex.Pattern
-				.compile("(?i)(?<![A-Z0-9])[A-Z0-9][A-Z0-9._/\\-]{3,}[A-Z0-9](?![A-Z0-9])");
-
 		java.util.Map<String, Integer> freq = new java.util.HashMap<>();
 		java.util.Map<String, String> originalByNorm = new java.util.HashMap<>();
 
@@ -303,7 +304,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			if (offerName == null || offerName.isBlank())
 				continue;
 
-			java.util.regex.Matcher m = tokenPattern.matcher(offerName);
+			java.util.regex.Matcher m = MODEL_TOKEN_PATTERN.matcher(offerName);
 			while (m.find()) {
 				String raw = m.group();
 				String candidate = trimEdgePunct(raw);
@@ -314,7 +315,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 					continue;
 
 				String norm = candidate.toUpperCase();
-				freq.put(norm, freq.getOrDefault(norm, 0) + 1);
+				freq.merge(norm, 1, Integer::sum);
 				originalByNorm.putIfAbsent(norm, norm);
 			}
 		}
@@ -428,7 +429,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	private static boolean looksLikeMeasureOrUnit(String alnum) {
 		// Pattern: digits + unit word (single transition), e.g. 42POUCES, 55INCH,
 		// 144HZ, 1000W, 500GB
-		java.util.regex.Matcher m = java.util.regex.Pattern.compile("^(\\d{2,5})([A-Z]{1,10})$").matcher(alnum);
+		java.util.regex.Matcher m = MEASURE_UNIT_PATTERN.matcher(alnum);
 		if (!m.matches())
 			return false;
 
@@ -498,7 +499,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		}
 
 		// On eprel
-		if (null == data.getEprelDatas()) {
+		if (data.getEprelDatas() == null) {
 			dedicatedLogger.info("Excluded because no EPREL association : {}", data);
 			ret = true;
 			data.getExcludedCauses().add("missing_eprel");
@@ -526,55 +527,30 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	}
 
 	/**
-	 * On data fragment agg leveln we increment the "all" field, with sourced values
-	 * for new or existing attributes. product
-	 *
-	 * @param dataFragment
-	 * @param p
-	 * @param match2
+	 * Merges attributes from the incoming fragment into the product, then delegates
+	 * to {@link #onProduct} for full attribute classification and parsing.
 	 */
 	@Override
-	public Map<String, Object> onDataFragment(final DataFragment dataFragment, final Product product,
-			VerticalConfig vConf) throws AggregationSkipException {
+	public void onDataFragment(final DataFragment dataFragment, final Product product,
+			final VerticalConfig vConf) throws AggregationSkipException {
 
 		try {
 			handleDescriptions(dataFragment, product, vConf);
 
-//			AttributesConfig attributesConfig = vConf.getAttributesConfig();
-
-//			// Remove excluded attributes
-//			if (dataFragment.getAttributes().removeIf(e -> attributesConfig.getExclusions().contains(e.getName()))) {
-//				dedicatedLogger.info("Attributes have been removed for {}", product.gtin());
-//			}
-
-			/////////////////////////////////////////
-			// Incrementing "all" attributes
-			/////////////////////////////////////////
 			for (Attribute attr : dataFragment.getAttributes()) {
 
 				ProductAttribute agg = product.getAttributes().getAll().get(attr.getName());
 
-				if (null == agg) {
-					// A first time match
+				if (agg == null) {
 					agg = new ProductAttribute();
 					agg.setName(attr.getName());
 				}
 
 				agg.addSourceAttribute(new SourcedAttribute(attr, dataFragment.getDatasourceName()));
-
-				// Replacing new AggAttribute in product
 				product.getAttributes().getAll().put(agg.getName(), agg);
-
 			}
 
-			// Checking model name from product words
-//			completeModelNames(product, dataFragment.getReferentielAttributes().get(ReferentielKey.MODEL));
-
 			mergeExternalIds(dataFragment, product);
-
-			/////////////////////////////////////////
-			// Update referentiel attributes
-			/////////////////////////////////////////
 			handleReferentielAttributes(dataFragment, product, vConf);
 			// TODO : Add BRAND / MODEL from matches from attributes
 
@@ -583,7 +559,6 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		}
 
 		onProduct(product, vConf);
-		return null;
 	}
 
 	private void mergeExternalIds(final DataFragment dataFragment, final Product product) {
@@ -640,17 +615,6 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		if (StringUtils.isBlank(existing) || description.length() > existing.length()) {
 			descriptions.put(datasourceName, description);
 		}
-	}
-
-	/**
-	 * Returns if an attribute is a feature, by comparing "yes" values from config
-	 *
-	 * @param e
-	 * @return
-	 */
-	private boolean isFeatureAttribute(Attribute e, AttributesConfig attributesConfig) {
-		return e.getRawValue() == null ? false
-				: attributesConfig.getFeaturedValues().contains(e.getRawValue().trim().toUpperCase());
 	}
 
 	/**
@@ -762,7 +726,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		// Deleting arbitrary tokens
 		//////////////////////////////
 
-		if (null != attrConf.getParser().getDeleteTokens()) {
+		if (attrConf.getParser().getDeleteTokens() != null) {
 			for (String token : attrConf.getParser().getDeleteTokens()) {
 				if (Boolean.TRUE.equals(attrConf.getParser().getLowerCase())) {
 					token = token.toLowerCase();
@@ -778,7 +742,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		// removing parenthesis tokens
 		///////////////////
 		if (attrConf.getParser().isRemoveParenthesis()) {
-			string = string.replace("\\(.*\\)", "");
+			string = string.replaceAll("\\(.*?\\)", "");
 		}
 
 		///////////////////
@@ -815,7 +779,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		// Exact match option
 		///////////////////
 
-		if (null != attrConf.getParser().getTokenMatch()) {
+		if (attrConf.getParser().getTokenMatch() != null) {
 			boolean found = false;
 
 			final String val = string;
@@ -881,7 +845,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		stripped = stripped.replace("’", "");
 
 		String normalized = StringUtils.normalizeSpace(stripped);
-		Matcher matcher = Pattern.compile("[-+]?\\d+(?:[.,]\\d+)?").matcher(normalized);
+		Matcher matcher = NUMERIC_EXTRACT_PATTERN.matcher(normalized);
 
 		if (!matcher.find()) {
 			throw new ValidationException("Attribute is expected to be numeric : " + value);

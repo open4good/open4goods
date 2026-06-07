@@ -4,17 +4,16 @@ import java.awt.Color;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.math.BigInteger;
+import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
-import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.fluent.Request;
@@ -29,13 +28,11 @@ import org.apache.tika.langdetect.optimaize.OptimaizeLangDetector;
 import org.apache.tika.language.detect.LanguageDetector;
 import org.apache.tika.language.detect.LanguageResult;
 import org.open4goods.api.config.yml.ApiProperties;
+import org.open4goods.api.config.yml.ResourceCompletionConfig;
 import org.open4goods.api.config.yml.ResourceCompletionUrlTemplate;
 import org.open4goods.commons.services.AbstractCompletionService;
-import org.open4goods.embedding.service.image.DjlImageEmbeddingService;
-import org.open4goods.services.imageprocessing.service.ImageMagickService;
 import org.open4goods.commons.services.ResourceService;
-import org.open4goods.model.exceptions.TechnicalException;
-import org.open4goods.model.exceptions.ValidationException;
+import org.open4goods.embedding.service.image.DjlImageEmbeddingService;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.resource.ImageInfo;
@@ -44,85 +41,51 @@ import org.open4goods.model.resource.Resource;
 import org.open4goods.model.resource.ResourceStatus;
 import org.open4goods.model.resource.ResourceTag;
 import org.open4goods.model.resource.ResourceType;
+import org.open4goods.model.vertical.ResourcesAggregationConfig;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.services.imageprocessing.service.ImageMagickService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
-import org.slf4j.Logger;
 
 import dev.brachtendorf.jimagehash.hash.Hash;
 import dev.brachtendorf.jimagehash.hashAlgorithms.HashingAlgorithm;
 import dev.brachtendorf.jimagehash.hashAlgorithms.PerceptiveHash;
 
 /**
- * Service responsible for "completing" resources of a product:
- * <ul>
- *     <li>Generate additional resource URLs from templates (e.g. GTIN-based image URLs)</li>
- *     <li>Download and cache resources locally</li>
- *     <li>Extract technical metadata for images, PDFs and videos</li>
- *     <li>Filter out bad or duplicate resources (MD5 blacklist, too small images, etc.)</li>
- *     <li>Group visually similar images per product using modern embeddings (category-agnostic)</li>
- *     <li>Choose a cover image for the product</li>
- * </ul>
- *
- * <p>
- * This implementation is designed to be:
- * <ul>
- *     <li>Category-agnostic (works for TVs, remotes, shoes, etc.)</li>
- *     <li>Per-product (grouping is done within a product only)</li>
- *     <li>Fully offline (no external services required)</li>
- * </ul>
+ * Completes product resources by adding configured URLs, downloading missing
+ * files, extracting metadata, filtering invalid resources, clustering images and
+ * choosing a product cover.
  */
 public class ResourceCompletionService extends AbstractCompletionService {
 
-    /** Default path used when no valid cover image can be found. */
+    /** Default cover path when no usable image remains. */
     private static final String NO_IMAGE_PATH = "/icons/no-image.png";
 
-    /**
-     * If true, will regenerate a new file name for resources even if one already
-     * exists. Use with caution in production as it may trigger 301 on existing URLs.
-     */
-    // TODO(p3, conf): expose via YAML configuration
-    private static boolean forceEraseFileName = false;
+    private static final Tika TIKA = new Tika();
+    private static final TikaConfig TIKA_CONFIG = TikaConfig.getDefaultConfig();
+    private static final Set<String> IMAGE_MIME_TYPES = Set.of(
+            "image/png", "image/jpg", "image/jpeg", "image/webp", "image/gif");
+    private static final Set<String> VIDEO_MIME_TYPES = Set.of(
+            "video/quicktime", "video/mp4", "video/mpeg", "video/ogg", "video/webm",
+            "video/x-msvideo", "video/x-ms-wmv", "video/3gpp", "video/3gpp2");
 
-    /**
-     * Embedding similarity threshold used to decide whether two images should be
-     * grouped in the same cluster.
-     *
-     * <p>Cosine similarity is in [-1, 1], but with standard embeddings of images,
-     * values typically range in [0, 1]. A threshold of 0.80 means "only images
-     * that are quite similar are clustered together".</p>
-     */
-    private static final double EMBEDDING_SIMILARITY_THRESHOLD = 0.80;
-
-    /**
-     * Perceptive hash size used by the legacy pHash-based logic. We keep this
-     * both for backward compatibility and as a cheap fallback when embedding
-     * computation fails.
-     */
-    private static final int PERCEPTIVE_HASH_SIZE = 32;
-
-
-
-    private final ApiProperties apiProperties;
+    private final ResourceCompletionConfig config;
     private final ImageMagickService imageService;
     private final ResourceService resourceService;
     private final DjlImageEmbeddingService embeddingService;
+    private final HashingAlgorithm hasher;
 
-    private static final Tika tika = new Tika();
-    private static final TikaConfig tikaConfig = TikaConfig.getDefaultConfig();
-
-    // NOTE: jImageHash hashing algorithm (probably not thread safe).
-    private static final HashingAlgorithm hasher = new PerceptiveHash(PERCEPTIVE_HASH_SIZE);
+    private volatile LanguageDetector pdfLanguageDetector;
 
     /**
-     * Constructs a new ResourceCompletionService.
+     * Creates the resource completion service.
      *
-     * @param imageService        image information extraction service (width, height, etc.)
-     * @param verticalConfigService vertical configuration (per vertical resource rules)
-     * @param resourceService     local resource cache service
-     * @param dataRepository      product repository
-     * @param apiProperties       API configuration properties
-     * @param embeddingService    image embedding service (category-agnostic features)
+     * @param imageService image information extraction service
+     * @param verticalConfigService vertical configuration service
+     * @param resourceService local resource cache service
+     * @param dataRepository product repository
+     * @param apiProperties API configuration properties
+     * @param embeddingService optional image embedding service
      */
     public ResourceCompletionService(ImageMagickService imageService,
                                      VerticalsConfigService verticalConfigService,
@@ -130,43 +93,56 @@ public class ResourceCompletionService extends AbstractCompletionService {
                                      ProductRepository dataRepository,
                                      ApiProperties apiProperties,
                                      DjlImageEmbeddingService embeddingService) {
-
-        // Log level and log folder configured via ApiProperties
         super(dataRepository, verticalConfigService, apiProperties.logsFolder(), apiProperties.aggLogLevel());
-
-        this.apiProperties = apiProperties;
+        this.config = Optional.ofNullable(apiProperties.getResourceCompletionConfig())
+                .orElseGet(ResourceCompletionConfig::new);
         this.imageService = imageService;
         this.resourceService = resourceService;
         this.embeddingService = embeddingService;
-
-        // Configure pHash handling (legacy, for transparency/alpha)
-        int alphaThreshold = 243;
-        hasher.setOpaqueHandling(Color.WHITE, alphaThreshold);
+        this.hasher = new PerceptiveHash(config.getPerceptiveHashSize());
+        this.hasher.setOpaqueHandling(Color.WHITE, config.getPerceptiveHashAlphaThreshold());
     }
 
     /**
-     * Determines whether this product still has resources that need processing.
+     * Returns whether this product still needs resource completion.
      *
      * @param vertical vertical configuration
-     * @param data     product
-     * @return {@code true} if at least one resource is not processed and not evicted,
-     *         or if vertical is configured to override resources.
+     * @param data product to inspect
+     * @return true when resources need downloading, configured templates are
+     *         missing, image grouping/cover data is stale, or override is enabled
      */
     @Override
     public boolean shouldProcess(VerticalConfig vertical, Product data) {
-        boolean hasUnprocessed = data.getResources().stream()
-                .filter(e -> !e.isProcessed())
-                .filter(e -> !e.isEvicted())
-                .findAny()
-                .isPresent();
+        if (overrideResources(vertical)) {
+            return true;
+        }
 
-        return hasUnprocessed || vertical.getResourcesConfig().getOverrideResources();
+        boolean hasUnprocessed = data.getResources().stream()
+                .anyMatch(r -> !r.isProcessed() && !r.isEvicted());
+        if (hasUnprocessed) {
+            return true;
+        }
+
+        boolean missingTemplate = config.getUrlTemplates().stream()
+                .map(tpl -> buildTemplateUrl(tpl, data.gtin()))
+                .filter(StringUtils::isNotBlank)
+                .anyMatch(url -> data.getResources().stream().noneMatch(r -> url.equals(r.getUrl())));
+        if (missingTemplate) {
+            return true;
+        }
+
+        boolean imageNeedsGrouping = data.getResources().stream()
+                .filter(r -> !r.isEvicted())
+                .filter(r -> r.getResourceType() == ResourceType.IMAGE)
+                .anyMatch(r -> r.getGroup() == null);
+
+        return imageNeedsGrouping || StringUtils.isBlank(data.getCoverImagePath());
     }
 
     /**
-     * This completion service does not correspond to any external datasource.
+     * Resource completion does not map to one external datasource key.
      *
-     * @return {@code null}
+     * @return null
      */
     @Override
     public String getDatasourceName() {
@@ -174,264 +150,49 @@ public class ResourceCompletionService extends AbstractCompletionService {
     }
 
     /**
-     * Main entry point: completes all resources for a single product.
-     *
-     * <p>High-level steps:</p>
-     * <ol>
-     *     <li>Generate additional resource URLs from templates</li>
-     *     <li>Download and analyze all non-processed / non-evicted resources</li>
-     *     <li>Normalize resource file names</li>
-     *     <li>Filter invalid/duplicate images (MD5 blacklist, minimum pixels)</li>
-     *     <li>Cluster similar images per product using embeddings</li>
-     *     <li>Pick best representative of each cluster and choose a cover image</li>
-     * </ol>
+     * Completes all product resources and updates the product cover image.
      *
      * @param vertical vertical configuration
-     * @param data     product being processed
+     * @param data product being processed
      */
     @Override
     public void processProduct(VerticalConfig vertical, Product data) {
-
-        //////////////////////////////
-        // 1. Generate URL-based resources if configured
-        //////////////////////////////
-
-        apiProperties.getResourceCompletionConfig().getUrlTemplates().forEach(tpl -> {
-            data.getResources().add(processUrlTemplate(tpl, String.valueOf(data.gtin())));
-        });
-
-        // Reset group information; we will recompute clusters
+        addTemplateResources(data);
         data.getResources().forEach(r -> r.setGroup(null));
 
-        //////////////////////////////
-        // 2. Fetch and analyze new or overridden resources
-        //////////////////////////////
-
         List<Resource> resourcesToProcess = data.getResources().stream()
-                .filter(r -> vertical.getResourcesConfig().getOverrideResources() || !r.isProcessed())
-                .filter(r -> vertical.getResourcesConfig().getOverrideResources() || !r.isEvicted())
+                .filter(r -> overrideResources(vertical) || !r.isProcessed())
+                .filter(r -> overrideResources(vertical) || !r.isEvicted())
                 .map(r -> fetchResource(r, vertical))
                 .toList();
 
-        // Merge updated resources back into product
-        data.getResources().removeAll(resourcesToProcess);
-        data.getResources().addAll(resourcesToProcess);
+        data.getResources().forEach(r -> normalizeFileNameIfNeeded(r, data));
 
-        //////////////////////////////
-        // 3. Generate / normalize file names
-        //////////////////////////////
+        List<Resource> retainedResources = filterRetainedResources(data, vertical);
+        data.setResources(retainedResources.stream().collect(Collectors.toSet()));
 
-        resourcesToProcess.forEach(r -> {
-            if (forceEraseFileName || StringUtils.isEmpty(r.getFileName())) {
-                String name = buildResourceFileName(r, data);
-                if (StringUtils.isEmpty(name)) {
-                    // Last resort, use GTIN.
-                    name = String.valueOf(data.gtin());
-                }
-
-                // Prepend hard tags for PDFs (e.g. MANUAL, SPEC, etc.)
-                if (r.getResourceType() == ResourceType.PDF && !r.getHardTags().isEmpty()) {
-                    String prefix = StringUtils.join(r.getHardTags(), "-").toLowerCase();
-                    name = prefix + "-" + name;
-                }
-
-                r.setFileName(IdHelper.normalizeFileName(name));
-            }
-        });
-
-        //////////////////////////////
-        // 4. Filter images by validity (MD5, duplicates, minimum size)
-        //////////////////////////////
-
-        Set<String> md5s = new HashSet<>();
-
-        List<Resource> filteredResources = data.getResources().stream()
-                .filter(r -> !r.isEvicted())
-                // 4.1 MD5 blacklist
-                .map(r -> {
-                    if (vertical.getResourcesConfig().getMd5Exclusions().contains(r.getMd5())) {
-                        logger.info("Excluded because of blacklisted MD5 : {}", r.getUrl());
-                        r.setStatus(ResourceStatus.MD5_EXCLUSION);
-                        r.setEvicted(true);
-                    }
-                    return r;
-                })
-                // 4.2 MD5 duplicates (exact binary duplicates)
-                .map(r -> {
-                    if (md5s.contains(r.getMd5())) {
-                        logger.info("Excluded because of duplicate MD5 : {}", r.getUrl());
-                        r.setStatus(ResourceStatus.MD5_DUPLICATE);
-                        r.setEvicted(true);
-                    }
-                    md5s.add(r.getMd5());
-                    return r;
-                })
-                // 4.3 Minimum pixel count
-                .map(r -> {
-                    if (r.getResourceType() == ResourceType.IMAGE &&
-                            r.getImageInfo() != null &&
-                            r.getImageInfo().pixels() < vertical.getResourcesConfig().getMinPixelsEvictionSize()) {
-                        logger.info("Excluded because image is too small : {}", r.getUrl());
-                        r.setStatus(ResourceStatus.TOO_SMALL);
-                        r.setEvicted(true);
-                    }
-                    return r;
-                })
-                .toList();
-
-        // Update product resources with filtered state
-        data.getResources().removeAll(filteredResources);
-        data.getResources().addAll(filteredResources);
-
-        // Physically remove evicted resources from product (but not from disk)
-        data.setResources(
-                data.getResources().stream()
-                        .filter(r -> !r.isEvicted())
-                        .collect(Collectors.toSet())
-        );
-
-        //////////////////////////////
-        // 5. Per-product image grouping (embeddings-based)
-        //////////////////////////////
-
-        List<Resource> imageResources = filteredResources.stream()
+        List<Resource> imageResources = retainedResources.stream()
                 .filter(r -> r.getResourceType() == ResourceType.IMAGE)
-                .filter(r -> !r.isEvicted())
+                .filter(r -> r.getImageInfo() != null)
                 .toList();
-
-        ArrayList<List<Resource>> clusters = classifyWithEmbeddings(imageResources);
+        List<List<Resource>> clusters = classifyWithEmbeddings(imageResources);
+        List<Resource> representativeImages = clusters.stream()
+                .filter(cluster -> !cluster.isEmpty())
+                .map(List::getFirst)
+                .toList();
 
         logger.info("{} - {} resource links, {} processed, {} retained and classified in {} clusters",
-                data.gtin(),
-                data.getResources().size(),
-                resourcesToProcess.size(),
-                filteredResources.size(),
-                clusters.size());
+                data.gtin(), data.getResources().size(), resourcesToProcess.size(), retainedResources.size(), clusters.size());
 
-        // For each cluster, pick the best representative (first one = largest resolution).
-        List<Resource> representativeImages = new ArrayList<>();
-        for (List<Resource> cluster : clusters) {
-            if (cluster.isEmpty()) {
-                continue;
-            }
-            logger.info("{} images in cluster (sorted by resolution) \n  {}",
-                    cluster.size(), StringUtils.join(cluster, "\n  "));
-            representativeImages.add(cluster.get(0));
-        }
-
-        logger.info("{}/{} images selected as representatives for product {} : \n  {}",
-                representativeImages.size(),
-                filteredResources.size(),
-                data.gtin(),
-                StringUtils.join(representativeImages, "\n  "));
-
-        //////////////////////////////
-        // 6. Cover image selection
-        //////////////////////////////
-
-        Resource cover = representativeImages.stream()
-                .filter(r -> r.getHardTags().contains(ResourceTag.PRIMARY))
-                .max((a, b) -> a.getImageInfo().pixels().compareTo(b.getImageInfo().pixels()))
-                .orElse(null);
-
-        // If no PRIMARY-tagged image, fallback to "most consistent" or any image
-        if (cover == null) {
-            cover = representativeImages.stream()
-                    .filter(r -> r.getImageInfo() != null && r.getImageInfo().getConsistencyScore() != null)
-                    .max((a, b) -> Double.compare(
-                            a.getImageInfo().getConsistencyScore(),
-                            b.getImageInfo().getConsistencyScore()))
-                    .orElse(null);
-        }
-
-        if (cover == null && !representativeImages.isEmpty()) {
-            cover = representativeImages.get(0);
-        }
-
-        if (cover == null) {
-            logger.warn("No cover image found for product : {}", data.gtin());
-            data.setCoverImagePath(NO_IMAGE_PATH);
-        } else {
-            data.setCoverImagePath(cover.path());
-        }
-
-        // Optional: delete evicted files to save disk space (disabled by default, as it may lead
-        // to re-download & re-analysis in future runs).
-        // for (Resource r : data.getResources()) {
-        //     if (r.isEvicted()) {
-        //         File evicted = resourceService.getCacheFile(r);
-        //         // if (!evicted.delete()) {
-        //         //     logger.error("Could not delete evicted resource : {}", evicted);
-        //         // }
-        //     }
-        // }
+        setCoverImage(data, representativeImages);
     }
 
     /**
-     * Builds a {@link Resource} from a URL template and a GTIN.
-     *
-     * @param ut   URL template
-     * @param gtin product GTIN
-     * @return new {@link Resource} with hard tags and URL set
-     */
-    private Resource processUrlTemplate(ResourceCompletionUrlTemplate ut, String gtin) {
-        Resource r = new Resource();
-        r.getHardTags().addAll(ut.getHardTags());
-        // TODO(p3, i18n): add resource language if needed
-        r.setUrl(ut.getUrl().replace("{GTIN}", gtin));
-        return r;
-    }
-
-    /**
-     * Creates a normalized file name for a resource based on product information.
-     *
-     * <p>Priority:</p>
-     * <ol>
-     *     <li>Random offer name (when available)</li>
-     *     <li>Brand + model</li>
-     *     <li>Derived from URL file name (without query & extension)</li>
-     * </ol>
-     *
-     * @param resource resource
-     * @param product  product
-     * @return base file name (without extension)
-     */
-    private String buildResourceFileName(Resource resource, Product product) {
-        List<String> offerNames = product.getOfferNames().stream().toList();
-        String name = null;
-
-        if (!offerNames.isEmpty()) {
-            Random rand = new Random();
-            name = offerNames.get(rand.nextInt(offerNames.size()));
-        } else if (!StringUtils.isEmpty(product.brand()) && !StringUtils.isEmpty(product.model())) {
-            name = product.brand() + "-" + product.randomModel();
-        } else {
-            // Fallback to filename part of URL
-            name = resource.getUrl();
-            if (name.contains("/")) {
-                name = name.substring(name.lastIndexOf('/') + 1);
-            }
-
-            int qPos = name.indexOf('?');
-            if (qPos != -1) {
-                name = name.substring(0, qPos);
-            }
-
-            int extPos = name.indexOf('.');
-            if (extPos != -1) {
-                name = name.substring(0, extPos);
-            }
-        }
-        return name;
-    }
-
-    /**
-     * Download the resource if not cached yet, then detect type and extract
-     * metadata depending on the mime type.
+     * Downloads and analyzes one resource.
      *
      * @param resource resource to fetch
      * @param vertical vertical configuration
-     * @return the enriched resource
+     * @return enriched resource
      */
     public Resource fetchResource(Resource resource, VerticalConfig vertical) {
         logger.info("Handling resource : {} ", resource);
@@ -441,142 +202,349 @@ public class ResourceCompletionService extends AbstractCompletionService {
         resource.setTimeStamp(System.currentTimeMillis());
 
         File target = resourceService.getCacheFile(resource);
-
-        // 1. Download if not already cached
-        if (target.exists()) {
-            logger.info("Resource found in file cache: {}", target);
+        if (!target.exists()) {
+            downloadResource(resource, target);
+            if (resource.isEvicted()) {
+                return resource;
+            }
         } else {
-            logger.info("Downloading resource to local file: {}", target);
-            try {
-                Request.Get(resource.getUrl())
-                        // TODO(p2, conf): user agent & timeouts from configuration
-                        .userAgent("Mozilla/5.0 (Windows NT 5.1; rv:5.0.1) Gecko/20100101 Firefox/5.0.1")
-                        .connectTimeout(1000)
-                        .socketTimeout(1000)
-                        .execute()
-                        .saveContent(target);
-            } catch (ClientProtocolException e) {
-                logger.error("Cannot download ({}) : {}", e.getMessage(), resource.getUrl());
-                resource.setStatus(ResourceStatus.PROTOCOL_EXCEPTION);
-                resource.setEvicted(true);
-                return resource;
-            } catch (Exception e) {
-                logger.error("Cannot download ({}) : {}", e.getMessage(), resource.getUrl());
-                resource.setStatus(ResourceStatus.IO_EXCEPTION);
-                resource.setEvicted(true);
-                return resource;
-            }
+            logger.info("Resource found in file cache: {}", target);
         }
 
-        // 2. File size
         resource.setFileSize(target.length());
-
-        // 3. Compute MD5 checksum
-        try (FileInputStream fis = new FileInputStream(target)) {
-            String md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
-            resource.setMd5(md5);
-        } catch (Exception e) {
-            logger.error("Cannot compute MD5 hash", e);
-            resource.setStatus(ResourceStatus.MD5_CHECKSUM_FAIL);
+        if (resource.getFileSize() == 0L) {
+            logger.warn("Empty resource file: {}", resource.getUrl());
+            resource.setStatus(ResourceStatus.EMPTY_FILE);
             resource.setEvicted(true);
             return resource;
         }
 
-        // 4. Detect mime type via Tika
-        try {
-            resource.setMimeType(tika.detect(target));
-            org.apache.tika.mime.MimeType mimeType = tikaConfig.getMimeRepository().forName(resource.getMimeType());
-            resource.setExtension(mimeType.getExtension().substring(1));
-        } catch (Exception e) {
-            logger.error("Cannot get mimetype ({}) : {}", e.getMessage(), resource.getUrl());
-            resource.setStatus(ResourceStatus.NO_MIME_TYPE);
-            resource.setEvicted(true);
+        if (!computeMd5(resource, target) || !detectMimeType(resource, target)) {
             return resource;
         }
 
-        // 5. Type-specific processing
         try {
-            switch (resource.getMimeType()) {
-                case "image/png":
-                case "image/jpg":
-                case "image/jpeg":
-                case "image/webp":
-                case "image/gif":
-                    processImage(resource, target);
-                    resource.setProcessed(true);
-                    break;
-
-                case "application/pdf":
-                    processPdf(resource, target);
-                    resource.setProcessed(true);
-                    break;
-
-                case "video/quicktime":
-                case "video/mp4":
-                case "video/mpeg":
-                case "video/ogg":
-                case "video/webm":
-                case "video/x-msvideo":
-                case "video/x-ms-wmv":
-                case "video/3gpp":
-                case "video/3gpp2":
-                    processVideo(resource, target);
-                    resource.setProcessed(true);
-                    break;
-
-                default:
-                    logger.warn("Unknown resource type : {} : {}", resource.getMimeType(), resource.getUrl());
-                    resource.setResourceType(ResourceType.UNKNOWN);
+            if (IMAGE_MIME_TYPES.contains(resource.getMimeType())) {
+                processImage(resource, target);
+            } else if ("application/pdf".equals(resource.getMimeType())) {
+                processPdf(resource, target);
+            } else if (VIDEO_MIME_TYPES.contains(resource.getMimeType())) {
+                processVideo(resource, target);
+            } else {
+                logger.warn("Unsupported resource type : {} : {}", resource.getMimeType(), resource.getUrl());
+                resource.setResourceType(ResourceType.UNKNOWN);
+                resource.setStatus(ResourceStatus.UNSUPPORTED_MIME_TYPE);
+                resource.setEvicted(true);
             }
-
             logger.debug("Fetching and analysis done : {}", resource);
         } catch (Exception e) {
             logger.warn("Resource integration failed : {} : {}", e.getMessage(), resource);
+            resource.setEvicted(true);
         }
 
         return resource;
     }
 
     /**
-     * Sets basic metadata for video resources. Currently minimal.
+     * Adds or refreshes resources generated from configured URL templates.
      *
-     * @param resource resource
-     * @param target   local video file
+     * @param data product to update
      */
-    private void processVideo(Resource resource, File target) {
-        resource.setResourceType(ResourceType.VIDEO);
-        // Placeholder: could extract duration, resolution, etc. in future.
+    private void addTemplateResources(Product data) {
+        for (ResourceCompletionUrlTemplate template : config.getUrlTemplates()) {
+            Resource resource = processUrlTemplate(template, data.gtin());
+            if (resource == null) {
+                continue;
+            }
+            Resource existing = data.getResources().stream()
+                    .filter(r -> resource.getUrl().equals(r.getUrl()))
+                    .findFirst()
+                    .orElse(null);
+            if (existing == null) {
+                data.getResources().add(resource);
+            } else {
+                existing.setDatasourceName(resource.getDatasourceName());
+                existing.setHardTags(resource.getHardTags());
+            }
+        }
     }
 
     /**
-     * Process a PDF file to extract metadata, detect language and identify the title.
+     * Builds a resource from a configured URL template.
      *
-     * <p>This method performs three main operations:</p>
-     * <ol>
-     *     <li>Extract standard PDF metadata (title, author, dates, etc.)</li>
-     *     <li>Detect the document's language using text content analysis</li>
-     *     <li>Extract the most prominent text from the first page as a potential title</li>
-     * </ol>
+     * @param template URL template
+     * @param gtin product GTIN
+     * @return resource, or null when the template URL is invalid
+     */
+    private Resource processUrlTemplate(ResourceCompletionUrlTemplate template, String gtin) {
+        String url = buildTemplateUrl(template, gtin);
+        if (StringUtils.isBlank(url)) {
+            logger.warn("Skipping blank resource URL template for GTIN {}", gtin);
+            return null;
+        }
+
+        Resource resource = new Resource();
+        resource.setUrl(url);
+        resource.setDatasourceName(template.getDatasourceName());
+        resource.getHardTags().addAll(template.getHardTags());
+        // TODO(p3, i18n): Resource has no language field; map template language once the model supports localized resources.
+        return resource;
+    }
+
+    /**
+     * Replaces the GTIN placeholder in a URL template.
+     *
+     * @param template template definition
+     * @param gtin product GTIN
+     * @return resolved URL, or null when no URL is configured
+     */
+    private String buildTemplateUrl(ResourceCompletionUrlTemplate template, String gtin) {
+        if (template == null || StringUtils.isBlank(template.getUrl())) {
+            return null;
+        }
+        return template.getUrl().replace("{GTIN}", gtin);
+    }
+
+    /**
+     * Generates a resource file name when missing, or always when configured to
+     * force regeneration.
      *
      * @param resource resource to update
-     * @param target   local PDF file
+     * @param product product owning the resource
+     */
+    private void normalizeFileNameIfNeeded(Resource resource, Product product) {
+        if (!config.isForceEraseFileName() && StringUtils.isNotBlank(resource.getFileName())) {
+            return;
+        }
+
+        String name = buildResourceFileName(resource, product);
+        if (StringUtils.isBlank(name)) {
+            name = product.gtin();
+        }
+        if (resource.getResourceType() == ResourceType.PDF && !resource.getHardTags().isEmpty()) {
+            String prefix = StringUtils.join(resource.getHardTags(), "-").toLowerCase();
+            name = prefix + "-" + name;
+        }
+        resource.setFileName(IdHelper.normalizeFileName(name));
+    }
+
+    /**
+     * Builds a stable, normalized base file name for a resource.
+     *
+     * @param resource resource to name
+     * @param product product owning the resource
+     * @return base file name before final normalization
+     */
+    private String buildResourceFileName(Resource resource, Product product) {
+        if (!product.getOfferNames().isEmpty()) {
+            return product.getOfferNames().stream().sorted().findFirst().orElse(null);
+        }
+        if (StringUtils.isNotBlank(product.brand()) && StringUtils.isNotBlank(product.model())) {
+            return product.brand() + "-" + product.model();
+        }
+        return basenameWithoutExtension(resource.getUrl());
+    }
+
+    /**
+     * Extracts the final path segment from a URL and removes only its final
+     * extension.
+     *
+     * @param url source URL
+     * @return filename stem, or null when none can be extracted
+     */
+    private String basenameWithoutExtension(String url) {
+        if (StringUtils.isBlank(url)) {
+            return null;
+        }
+        String path = url;
+        try {
+            path = URI.create(url).getPath();
+        } catch (IllegalArgumentException e) {
+            logger.debug("Cannot parse resource URL for filename: {}", url);
+        }
+        String name = StringUtils.substringAfterLast(path, "/");
+        if (StringUtils.isBlank(name)) {
+            return null;
+        }
+        int extensionStart = name.lastIndexOf('.');
+        return extensionStart > 0 ? name.substring(0, extensionStart) : name;
+    }
+
+    /**
+     * Applies MD5 blacklist, MD5 duplicate and minimum image-size filters.
+     *
+     * @param data product resources to filter
+     * @param vertical vertical resource rules
+     * @return non-evicted resources
+     */
+    private List<Resource> filterRetainedResources(Product data, VerticalConfig vertical) {
+        Set<String> md5s = new HashSet<>();
+        ResourcesAggregationConfig resourcesConfig = vertical.getResourcesConfig();
+
+        for (Resource resource : data.getResources()) {
+            if (resource.isEvicted()) {
+                continue;
+            }
+            String md5 = resource.getMd5();
+            if (StringUtils.isNotBlank(md5) && resourcesConfig.getMd5Exclusions().contains(md5)) {
+                logger.info("Excluded because of blacklisted MD5 : {}", resource.getUrl());
+                resource.setStatus(ResourceStatus.MD5_EXCLUSION);
+                resource.setEvicted(true);
+                continue;
+            }
+            if (StringUtils.isNotBlank(md5) && !md5s.add(md5)) {
+                logger.info("Excluded because of duplicate MD5 : {}", resource.getUrl());
+                resource.setStatus(ResourceStatus.MD5_DUPLICATE);
+                resource.setEvicted(true);
+                continue;
+            }
+            if (resource.getResourceType() == ResourceType.IMAGE
+                    && safePixels(resource) < resourcesConfig.getMinPixelsEvictionSize()) {
+                logger.info("Excluded because image is too small : {}", resource.getUrl());
+                resource.setStatus(ResourceStatus.TOO_SMALL);
+                resource.setEvicted(true);
+            }
+        }
+
+        return data.getResources().stream()
+                .filter(r -> !r.isEvicted())
+                .toList();
+    }
+
+    /**
+     * Picks the product cover from representative images.
+     *
+     * @param data product to update
+     * @param representativeImages one image per image cluster
+     */
+    private void setCoverImage(Product data, List<Resource> representativeImages) {
+        Resource cover = representativeImages.stream()
+                .filter(r -> r.getHardTags().contains(ResourceTag.PRIMARY))
+                .max(Comparator.comparingInt(this::safePixels))
+                .orElse(null);
+
+        if (cover == null) {
+            cover = representativeImages.stream()
+                    .filter(r -> r.getImageInfo() != null && r.getImageInfo().getConsistencyScore() != null)
+                    .max(Comparator.comparingDouble(r -> r.getImageInfo().getConsistencyScore()))
+                    .orElse(null);
+        }
+        if (cover == null && !representativeImages.isEmpty()) {
+            cover = representativeImages.getFirst();
+        }
+
+        if (cover == null) {
+            logger.warn("No cover image found for product : {}", data.gtin());
+            data.setCoverImagePath(NO_IMAGE_PATH);
+        } else {
+            data.setCoverImagePath(cover.path());
+        }
+    }
+
+    /**
+     * Downloads a resource into the local cache.
+     *
+     * @param resource remote resource
+     * @param target target cache file
+     */
+    private void downloadResource(Resource resource, File target) {
+        logger.info("Downloading resource to local file: {}", target);
+        try {
+            Request.Get(resource.getUrl())
+                    .userAgent(config.getDownloadUserAgent())
+                    .connectTimeout(config.getConnectTimeoutMs())
+                    .socketTimeout(config.getSocketTimeoutMs())
+                    .execute()
+                    .saveContent(target);
+        } catch (ClientProtocolException e) {
+            logger.error("Cannot download ({}) : {}", e.getMessage(), resource.getUrl());
+            resource.setStatus(ResourceStatus.PROTOCOL_EXCEPTION);
+            resource.setEvicted(true);
+            deletePartialDownload(target);
+        } catch (Exception e) {
+            logger.error("Cannot download ({}) : {}", e.getMessage(), resource.getUrl());
+            resource.setStatus(ResourceStatus.IO_EXCEPTION);
+            resource.setEvicted(true);
+            deletePartialDownload(target);
+        }
+    }
+
+    /**
+     * Removes a partial cache file after a failed download.
+     *
+     * @param target target cache file
+     */
+    private void deletePartialDownload(File target) {
+        if (target.exists() && !target.delete()) {
+            logger.warn("Could not delete partial resource download: {}", target);
+        }
+    }
+
+    /**
+     * Computes and stores a resource MD5 checksum.
+     *
+     * @param resource resource to update
+     * @param target cached file
+     * @return true when checksum computation succeeded
+     */
+    private boolean computeMd5(Resource resource, File target) {
+        try (FileInputStream inputStream = new FileInputStream(target)) {
+            resource.setMd5(DigestUtils.md5Hex(inputStream));
+            return true;
+        } catch (Exception e) {
+            logger.error("Cannot compute MD5 hash", e);
+            resource.setStatus(ResourceStatus.MD5_CHECKSUM_FAIL);
+            resource.setEvicted(true);
+            return false;
+        }
+    }
+
+    /**
+     * Detects MIME type and extension using Tika.
+     *
+     * @param resource resource to update
+     * @param target cached file
+     * @return true when MIME detection succeeded
+     */
+    private boolean detectMimeType(Resource resource, File target) {
+        try {
+            resource.setMimeType(TIKA.detect(target));
+            org.apache.tika.mime.MimeType mimeType = TIKA_CONFIG.getMimeRepository().forName(resource.getMimeType());
+            String extension = mimeType.getExtension();
+            resource.setExtension(StringUtils.removeStart(extension, "."));
+            return true;
+        } catch (Exception e) {
+            logger.error("Cannot get mimetype ({}) : {}", e.getMessage(), resource.getUrl());
+            resource.setStatus(ResourceStatus.NO_MIME_TYPE);
+            resource.setEvicted(true);
+            return false;
+        }
+    }
+
+    /**
+     * Sets basic metadata for video resources.
+     *
+     * @param resource resource to update
+     * @param target local video file
+     */
+    private void processVideo(Resource resource, File target) {
+        resource.setResourceType(ResourceType.VIDEO);
+    }
+
+    /**
+     * Extracts PDF metadata, first-page title candidate and document language.
+     *
+     * @param resource resource to update
+     * @param target local PDF file
      */
     private void processPdf(Resource resource, File target) {
         resource.setResourceType(ResourceType.PDF);
-
         try (PDDocument document = Loader.loadPDF(target)) {
-            logger.info("PDF loaded successfully: {}", target.getName());
             PdfInfo pdfInfo = new PdfInfo();
-
             extractPdfMetadata(document, pdfInfo);
             extractPdfTitle(document, pdfInfo);
             detectPdfLanguage(document, pdfInfo, resource);
-
             resource.setPdfInfo(pdfInfo);
-            resource.setProcessed(true);
-
-            logger.info("PDF processed successfully: {}", target.getName());
-
         } catch (IOException e) {
             logger.error("Failed to parse PDF: {}", e.getMessage());
             resource.setStatus(ResourceStatus.PDF_PARSING_ERROR);
@@ -585,7 +553,10 @@ public class ResourceCompletionService extends AbstractCompletionService {
     }
 
     /**
-     * Extracts standard PDF metadata.
+     * Copies standard PDF metadata into the resource model.
+     *
+     * @param document parsed PDF document
+     * @param pdfInfo target PDF metadata object
      */
     private void extractPdfMetadata(PDDocument document, PdfInfo pdfInfo) {
         PDDocumentInformation info = document.getDocumentInformation();
@@ -600,38 +571,44 @@ public class ResourceCompletionService extends AbstractCompletionService {
     }
 
     /**
-     * Extracts a candidate title by taking the largest font text from the first page.
+     * Extracts a title candidate from the largest first-page text.
+     *
+     * @param document parsed PDF document
+     * @param pdfInfo target PDF metadata object
+     * @throws IOException when PDF text extraction fails
      */
     private void extractPdfTitle(PDDocument document, PdfInfo pdfInfo) throws IOException {
-        MultiLineTitleStripper stripper = new MultiLineTitleStripper();
+        MultiLineTitleStripper stripper = new MultiLineTitleStripper(
+                config.getPdfTitleMaxLines(), config.getPdfTitleFontSizeTolerance());
         stripper.setSortByPosition(true);
         stripper.setStartPage(1);
         stripper.setEndPage(1);
         stripper.getText(document);
-        pdfInfo.setExtractedTitle(stripper.getTitle().trim());
-        logger.info("Manually extracted title: {}", pdfInfo.getExtractedTitle());
+        pdfInfo.setExtractedTitle(stripper.getTitle());
     }
 
     /**
-     * Detects the language of a PDF using its text content.
+     * Detects PDF language from a bounded text sample.
+     *
+     * @param document parsed PDF document
+     * @param pdfInfo target PDF metadata object
+     * @param resource source resource for logging context
      */
     private void detectPdfLanguage(PDDocument document, PdfInfo pdfInfo, Resource resource) {
         try {
             String text = extractPdfText(document);
+            if (StringUtils.isBlank(text)) {
+                return;
+            }
 
-            LanguageDetector detector = new OptimaizeLangDetector().loadModels();
-            List<LanguageResult> results = detector.detectAll(text);
-
+            List<LanguageResult> results = pdfLanguageDetector().detectAll(text);
             if (results.isEmpty()) {
                 logger.warn("No language detected for PDF");
                 return;
             }
 
-            // TODO : From conf
-            double MIN_CONFIDENCE = 0.5;
-
             long distinctLanguages = results.stream()
-                    .filter(r -> r.getRawScore() >= MIN_CONFIDENCE)
+                    .filter(result -> result.getRawScore() >= config.getPdfLanguageMinConfidence())
                     .map(LanguageResult::getLanguage)
                     .distinct()
                     .count();
@@ -639,377 +616,325 @@ public class ResourceCompletionService extends AbstractCompletionService {
             if (distinctLanguages > 1) {
                 pdfInfo.setLanguage("Multilingue");
                 pdfInfo.setLanguageConfidence(1.0);
-                logger.info("Multiple languages detected for PDF: MULTILINGUE");
             } else {
-                LanguageResult primary = results.get(0);
+                LanguageResult primary = results.getFirst();
                 pdfInfo.setLanguage(primary.getLanguage());
                 pdfInfo.setLanguageConfidence(primary.getRawScore());
                 logger.info("Language detected for PDF {}: {} (confidence: {})",
                         resource.getFileName(), primary.getLanguage(), primary.getRawScore());
             }
-
         } catch (Exception e) {
             logger.warn("Failed to detect document language: {}", e.getMessage());
         }
     }
 
     /**
-     * Extracts all text from a PDF document. Instantiates a new PDFTextStripper
-     * each time since it is not thread-safe.
+     * Lazily loads and reuses PDF language detector models.
+     *
+     * @return language detector
+     * @throws IOException when Tika cannot load language models
      */
-    private String extractPdfText(PDDocument document) throws IOException {
-        PDFTextStripper stripper = new PDFTextStripper();
-        return stripper.getText(document);
+    private LanguageDetector pdfLanguageDetector() throws IOException {
+        LanguageDetector detector = pdfLanguageDetector;
+        if (detector == null) {
+            synchronized (this) {
+                detector = pdfLanguageDetector;
+                if (detector == null) {
+                    detector = new OptimaizeLangDetector().loadModels();
+                    pdfLanguageDetector = detector;
+                }
+            }
+        }
+        return detector;
     }
 
     /**
-     * PDFTextStripper specialization that keeps track of the text with largest
-     * font size over a limited number of lines. Used to guess PDF titles.
+     * Extracts bounded text from a PDF for language detection.
+     *
+     * @param document parsed PDF document
+     * @return text sample
+     * @throws IOException when PDF text extraction fails
+     */
+    private String extractPdfText(PDDocument document) throws IOException {
+        PDFTextStripper stripper = new PDFTextStripper();
+        stripper.setStartPage(1);
+        stripper.setEndPage(Math.min(document.getNumberOfPages(), config.getPdfLanguageMaxPages()));
+        String text = stripper.getText(document);
+        return text.length() > config.getPdfLanguageMaxChars()
+                ? text.substring(0, config.getPdfLanguageMaxChars())
+                : text;
+    }
+
+    /**
+     * First-page stripper that keeps text rendered in the largest font.
      */
     private static class MultiLineTitleStripper extends PDFTextStripper {
 
-        private StringBuilder largestText = new StringBuilder();
+        private final StringBuilder largestText = new StringBuilder();
+        private final int maxLinesToRead;
+        private final float fontSizeTolerance;
         private float largestFontSize = 0;
-        private final float fontSizeTolerance = 0.8f;
-        private int maxLinesToRead = 10;
         private int currentLine = 0;
 
-        public MultiLineTitleStripper() throws IOException {
+        MultiLineTitleStripper(int maxLinesToRead, float fontSizeTolerance) throws IOException {
             super();
+            this.maxLinesToRead = maxLinesToRead;
+            this.fontSizeTolerance = fontSizeTolerance;
         }
 
         @Override
         protected void writeString(String text, List<TextPosition> textPositions) throws IOException {
-            if (currentLine >= maxLinesToRead) {
+            if (currentLine >= maxLinesToRead || StringUtils.isBlank(text) || textPositions.isEmpty()) {
                 return;
             }
-
             currentLine++;
 
-            if (text.trim().isEmpty()) {
-                return;
-            }
-
             float fontSize = 0;
-            for (TextPosition tp : textPositions) {
-                fontSize += tp.getFontSizeInPt();
+            for (TextPosition position : textPositions) {
+                fontSize += position.getFontSizeInPt();
             }
             fontSize /= textPositions.size();
 
             if (Math.abs(fontSize - largestFontSize) <= fontSizeTolerance) {
-                largestText.append(text).append(" ");
+                largestText.append(text).append(' ');
             } else if (fontSize > largestFontSize) {
                 largestFontSize = fontSize;
                 largestText.setLength(0);
-                largestText.append(text).append(" ");
+                largestText.append(text).append(' ');
             }
         }
 
-        public String getTitle() {
+        String getTitle() {
             return largestText.toString().trim();
         }
     }
 
     /**
-     * Processes an image file to extract:
-     * <ul>
-     *     <li>Basic image metadata (width, height, pixel count)</li>
-     *     <li>Perceptive hash (pHash) for cheap similarity checks (legacy)</li>
-     *     <li>Embeddings via {@link DjlImageEmbeddingService} for modern, category-agnostic grouping</li>
-     * </ul>
+     * Extracts image dimensions, perceptive hash and optional embedding.
      *
      * @param resource resource to update
-     * @param src      local image file
+     * @param src local image file
      */
     private void processImage(Resource resource, File src) {
         resource.setResourceType(ResourceType.IMAGE);
-
-        // 1. Basic image info (dimensions, pixels)
         ImageInfo imageInfo = imageService.buildImageInfo(src);
-        if (imageInfo == null) {
+        if (imageInfo == null || imageInfo.getHeight() == null || imageInfo.getWidth() == null) {
             logger.error("Cannot analyse image : {}", resource.getUrl());
             resource.setStatus(ResourceStatus.CANNOT_ANALYSE);
             resource.setEvicted(true);
             return;
         }
 
-        // 2. Perceptive hash (legacy, can be helpful for rare cases / debugging)
         try {
-            Hash hash = hasher.hash(src);
+            Hash hash;
+            synchronized (hasher) {
+                hash = hasher.hash(src);
+            }
             imageInfo.setpHashValue(hash.getHashValue().longValue());
             imageInfo.setpHashLength(hash.getBitResolution());
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.error("Cannot compute perceptive hash ({}) : {}", e.getMessage(), resource.getUrl());
             resource.setStatus(ResourceStatus.PERCEPTIV_HASH_FAIL);
-            // We don't necessarily evict the resource here; we can still use embeddings.
         }
 
-        // 3. Embedding (modern, category-agnostic representation)
         try {
             if (embeddingService != null) {
-                float[] embedding = embeddingService.embed(src.toPath());
-                imageInfo.setEmbedding(embedding);
+                imageInfo.setEmbedding(embeddingService.embed(src.toPath()));
             }
         } catch (Exception e) {
             logger.error("Cannot compute embedding ({}) : {}", e.getMessage(), resource.getUrl());
-
-            // Provide helpful hint for common issues
             if (e.getMessage() != null && e.getMessage().contains("attention_mask")) {
-                logger.warn("Model compatibility issue detected. The configured model may not support image-only inference. " +
-                           "Consider using a pure vision model (e.g., ResNet, EfficientNet) or a different CLIP export. " +
-                           "See the embedding.vision-model-url configuration for alternatives.");
+                logger.warn("Configured vision model may not support image-only inference; check embedding.vision-model-url.");
             } else if (e.getMessage() != null && e.getMessage().contains("NDManager")) {
-                logger.warn("NDManager lifecycle issue detected. This may indicate a concurrency problem or resource leak.");
+                logger.warn("NDManager lifecycle issue detected during image embedding.");
             }
-
-            // Decide policy: for now we keep the image even without embedding, but
-            // it will be treated as its own singleton cluster later.
         }
 
         resource.setImageInfo(imageInfo);
     }
 
     /**
-     * Groups images of a product based on embeddings.
+     * Groups image resources using embedding cosine similarity.
      *
-     * <p>Algorithm:</p>
-     * <ol>
-     *     <li>Iterate over images one by one</li>
-     *     <li>For each image, find the existing cluster whose representative is most similar (cosine)</li>
-     *     <li>If best similarity &lt; threshold, create a new cluster; otherwise, add to that cluster</li>
-     *     <li>Sort images inside each cluster by resolution (pixels) descending</li>
-     *     <li>Sort clusters by size descending</li>
-     *     <li>Assign group ids, and compute per-image "consistencyScore" as similarity to main cluster centroid</li>
-     * </ol>
-     *
-     * @param images non-evicted image resources of a product
-     * @return list of clusters (each cluster is a list of resources)
+     * @param images non-evicted image resources
+     * @return sorted clusters
      */
-    private ArrayList<List<Resource>> classifyWithEmbeddings(List<Resource> images) {
+    private List<List<Resource>> classifyWithEmbeddings(List<Resource> images) {
         logger.info("Starting image embedding-based clusterisation ({} images)", images.size());
-
-        // 1. Build initial clusters
         List<List<Resource>> clusters = new ArrayList<>();
 
-        for (Resource r : images) {
-            float[] emb = getEmbeddingSafe(r);
-            // If no embedding, treat as its own cluster (best-effort).
-            if (emb == null) {
-                List<Resource> singleton = new ArrayList<>();
-                singleton.add(r);
-                clusters.add(singleton);
+        for (Resource resource : images) {
+            float[] embedding = getEmbeddingSafe(resource);
+            if (embedding == null) {
+                clusters.add(new ArrayList<>(List.of(resource)));
                 continue;
             }
 
-            int bestClusterIdx = -1;
-            double bestSim = -1.0;
-
-            // 2. Compare to cluster representatives (first element in each cluster)
+            int bestCluster = -1;
+            double bestSimilarity = -1.0;
             for (int i = 0; i < clusters.size(); i++) {
-                Resource ref = clusters.get(i).get(0);
-                float[] refEmb = getEmbeddingSafe(ref);
-                if (refEmb == null) {
+                float[] reference = getEmbeddingSafe(clusters.get(i).getFirst());
+                if (reference == null || reference.length != embedding.length) {
                     continue;
                 }
-
-                double sim = cosine(emb, refEmb);
-                if (sim > bestSim) {
-                    bestSim = sim;
-                    bestClusterIdx = i;
+                double similarity = cosine(embedding, reference);
+                if (similarity > bestSimilarity) {
+                    bestSimilarity = similarity;
+                    bestCluster = i;
                 }
             }
 
-            // 3. Decide whether to join an existing cluster or create a new one
-            if (bestClusterIdx == -1 || bestSim < EMBEDDING_SIMILARITY_THRESHOLD) {
-                List<Resource> newCluster = new ArrayList<>();
-                newCluster.add(r);
-                clusters.add(newCluster);
+            if (bestCluster == -1 || bestSimilarity < config.getEmbeddingSimilarityThreshold()) {
+                clusters.add(new ArrayList<>(List.of(resource)));
             } else {
-                clusters.get(bestClusterIdx).add(r);
+                clusters.get(bestCluster).add(resource);
             }
         }
 
-        // 4. Sort each cluster by resolution (pixels) descending
-        for (List<Resource> cluster : clusters) {
-            cluster.sort((o1, o2) ->
-                    o2.getImageInfo().pixels().compareTo(o1.getImageInfo().pixels()));
-        }
-
-        // 5. Sort clusters by size (largest first)
-        clusters.sort((o1, o2) -> Integer.compare(o2.size(), o1.size()));
-
-        // 6. Assign group ids and compute consistencyScore vs. main cluster centroid
-        if (!clusters.isEmpty()) {
-            double[] mainCentroid = centroid(clusters.get(0));
-
-            for (int clusterId = 0; clusterId < clusters.size(); clusterId++) {
-                List<Resource> cluster = clusters.get(clusterId);
-                double[] clusterCentroid = centroid(cluster);
-
-                for (Resource r : cluster) {
-                    r.setGroup(clusterId);
-                    float[] emb = getEmbeddingSafe(r);
-                    if (emb != null) {
-                        double score = cosine( emb, mainCentroid);
-                        if (r.getImageInfo() != null) {
-                            r.getImageInfo().setConsistencyScore(score);
-                        }
-                    }
-                }
-            }
-        }
-
-        return new ArrayList<>(clusters);
+        clusters.forEach(cluster -> cluster.sort(Comparator.comparingInt(this::safePixels).reversed()));
+        clusters.sort(Comparator.<List<Resource>>comparingInt(List::size).reversed());
+        assignGroupsAndConsistency(clusters);
+        return clusters;
     }
 
     /**
-     * Safely returns the embedding of a resource's image, if available.
+     * Assigns image group ids and consistency scores against the main cluster.
      *
-     * @param r resource
-     * @return embedding or {@code null} if not available
+     * @param clusters image clusters sorted by priority
      */
-    private float[] getEmbeddingSafe(Resource r) {
-        if (r == null || r.getImageInfo() == null) {
+    private void assignGroupsAndConsistency(List<List<Resource>> clusters) {
+        if (clusters.isEmpty()) {
+            return;
+        }
+        double[] mainCentroid = centroid(clusters.getFirst());
+        for (int clusterId = 0; clusterId < clusters.size(); clusterId++) {
+            for (Resource resource : clusters.get(clusterId)) {
+                resource.setGroup(clusterId);
+                float[] embedding = getEmbeddingSafe(resource);
+                if (embedding != null && embedding.length == mainCentroid.length && resource.getImageInfo() != null) {
+                    resource.getImageInfo().setConsistencyScore(cosine(embedding, mainCentroid));
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns a usable image embedding, if one is available.
+     *
+     * @param resource resource to inspect
+     * @return embedding vector, or null
+     */
+    private float[] getEmbeddingSafe(Resource resource) {
+        if (resource == null || resource.getImageInfo() == null) {
             return null;
         }
-        return r.getImageInfo().getEmbedding();
+        float[] embedding = resource.getImageInfo().getEmbedding();
+        return embedding == null || embedding.length == 0 ? null : embedding;
     }
 
     /**
-     * Computes the centroid (mean vector) of the embeddings of all images in a cluster.
+     * Computes the mean embedding vector for a cluster.
      *
-     * @param cluster resources in the cluster
-     * @return centroid vector, or zero vector if no embeddings available
+     * @param cluster resources in a cluster
+     * @return centroid vector, or an empty vector when unavailable
      */
     private double[] centroid(List<Resource> cluster) {
-        float[] firstEmb = null;
-        for (Resource r : cluster) {
-            firstEmb = getEmbeddingSafe(r);
-            if (firstEmb != null) {
-                break;
-            }
-        }
-        if (firstEmb == null) {
-            // No embedding at all: return empty centroid (treated as zero)
+        int dimension = cluster.stream()
+                .map(this::getEmbeddingSafe)
+                .filter(embedding -> embedding != null)
+                .mapToInt(embedding -> embedding.length)
+                .findFirst()
+                .orElse(0);
+        if (dimension == 0) {
             return new double[0];
         }
 
-        int dim = firstEmb.length;
-        double[] sum = new double[dim];
+        double[] sum = new double[dimension];
         int count = 0;
-
-        for (Resource r : cluster) {
-            float[] emb = getEmbeddingSafe(r);
-            if (emb == null) {
+        for (Resource resource : cluster) {
+            float[] embedding = getEmbeddingSafe(resource);
+            if (embedding == null || embedding.length != dimension) {
                 continue;
             }
-            for (int i = 0; i < dim; i++) {
-                sum[i] += emb[i];
+            for (int i = 0; i < dimension; i++) {
+                sum[i] += embedding[i];
             }
             count++;
         }
-
         if (count == 0) {
-            return new double[dim];
+            return new double[0];
         }
-
-        for (int i = 0; i < dim; i++) {
+        for (int i = 0; i < dimension; i++) {
             sum[i] /= count;
         }
         return sum;
     }
 
-
-
     /**
-     * Computes cosine similarity where the embedding is float[] and centroid is double[].
+     * Computes cosine similarity between a float vector and a double vector.
      *
-     * @param a image embedding (float vector)
-     * @param b centroid vector (double vector)
-     * @return cosine similarity in [-1, 1], or 0 if any norm is zero
+     * @param a first vector
+     * @param b second vector
+     * @return cosine similarity, or zero for incompatible vectors
      */
     private double cosine(float[] a, double[] b) {
-
-        if (a == null || b == null || a.length == 0 || b.length == 0) {
+        if (a == null || b == null || a.length == 0 || a.length != b.length) {
             return 0.0;
         }
-
-        int dim = Math.min(a.length, b.length);
-
         double dot = 0.0;
-        double na = 0.0;   // norm of a (float)
-        double nb = 0.0;   // norm of b (double)
-
-        for (int i = 0; i < dim; i++) {
-            double av = a[i];  // promote to double
-            double bv = b[i];
-
-            dot += av * bv;
-            na  += av * av;
-            nb  += bv * bv;
+        double na = 0.0;
+        double nb = 0.0;
+        for (int i = 0; i < a.length; i++) {
+            dot += a[i] * b[i];
+            na += a[i] * a[i];
+            nb += b[i] * b[i];
         }
-
-        if (na == 0.0 || nb == 0.0) {
-            return 0.0;
-        }
-
-        return dot / (Math.sqrt(na) * Math.sqrt(nb));
+        return na == 0.0 || nb == 0.0 ? 0.0 : dot / (Math.sqrt(na) * Math.sqrt(nb));
     }
 
-
     /**
-     * Computes cosine similarity where the embedding is float[] and centroid is double[].
+     * Computes cosine similarity between two float vectors.
      *
-     * @param a image embedding (float vector)
-     * @param b centroid vector (double vector)
-     * @return cosine similarity in [-1, 1], or 0 if any norm is zero
+     * @param a first vector
+     * @param b second vector
+     * @return cosine similarity, or zero for incompatible vectors
      */
     private double cosine(float[] a, float[] b) {
-
-        if (a == null || b == null || a.length == 0 || b.length == 0) {
+        if (a == null || b == null || a.length == 0 || a.length != b.length) {
             return 0.0;
         }
-
-        int dim = Math.min(a.length, b.length);
-
         double dot = 0.0;
-        double na = 0.0;   // norm of a (float)
-        double nb = 0.0;   // norm of b (double)
-
-        for (int i = 0; i < dim; i++) {
-            double av = a[i];  // promote to double
-            double bv = b[i];
-
-            dot += av * bv;
-            na  += av * av;
-            nb  += bv * bv;
+        double na = 0.0;
+        double nb = 0.0;
+        for (int i = 0; i < a.length; i++) {
+            dot += a[i] * b[i];
+            na += a[i] * a[i];
+            nb += b[i] * b[i];
         }
-
-        if (na == 0.0 || nb == 0.0) {
-            return 0.0;
-        }
-
-        return dot / (Math.sqrt(na) * Math.sqrt(nb));
+        return na == 0.0 || nb == 0.0 ? 0.0 : dot / (Math.sqrt(na) * Math.sqrt(nb));
     }
 
+    /**
+     * Safely computes image pixel count.
+     *
+     * @param resource image resource
+     * @return pixel count, or zero when metadata is missing
+     */
+    private int safePixels(Resource resource) {
+        ImageInfo imageInfo = resource == null ? null : resource.getImageInfo();
+        if (imageInfo == null || imageInfo.getHeight() == null || imageInfo.getWidth() == null) {
+            return 0;
+        }
+        return imageInfo.getHeight() * imageInfo.getWidth();
+    }
 
     /**
-     * Reconstructs a jImageHash {@link Hash} from stored pHash data.
+     * Returns whether vertical resources should be forcibly reprocessed.
      *
-     * <p>Kept for backward compatibility and for debugging. The main logic now
-     * relies on embeddings for grouping.</p>
-     *
-     * @param r resource
-     * @return pHash representation
+     * @param vertical vertical configuration
+     * @return true when override is enabled
      */
-    @SuppressWarnings("unused")
-    private Hash getHash(Resource r) {
-        if (r.getImageInfo() == null) {
-            return null;
-        }
-        return new Hash(
-                BigInteger.valueOf(r.getImageInfo().getpHashValue()),
-                r.getImageInfo().getpHashLength(),
-                0);
+    private boolean overrideResources(VerticalConfig vertical) {
+        return Boolean.TRUE.equals(vertical.getResourcesConfig().getOverrideResources());
     }
 }

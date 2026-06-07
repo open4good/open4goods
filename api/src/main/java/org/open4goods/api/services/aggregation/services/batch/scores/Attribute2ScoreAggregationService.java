@@ -2,7 +2,6 @@ package org.open4goods.api.services.aggregation.services.batch.scores;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.open4goods.model.attribute.AttributeType;
@@ -51,7 +50,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 				}
 
 				AttributeConfig attrConfig = attributesConfig.getConfigFor(attributeKey);
-				if (null == attrConfig) {
+				if (attrConfig == null) {
 					dedicatedLogger.error("No attribute config for {}", aga);
 					continue;
 				}
@@ -93,7 +92,7 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 		AttributeConfig ac = attributesConfig.getAttributeConfigByKey(attributeKey);
 		// transformation required
 
-		if (null == ac) {
+		if (ac == null) {
 			throw new ValidationException("No attribute config for " + attributeKey);
 		}
 
@@ -104,9 +103,9 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 				throw new ValidationException("Cannot convert to numeric" + aga);
 			}
 
-		} else if (ac.getNumericMapping().size() > 0) {
+		} else if (ac.getNumericMapping() != null && !ac.getNumericMapping().isEmpty()) {
 			Double mapping = ac.getNumericMapping().get(aga.getValue());
-			if (null == mapping || mapping.isInfinite() || mapping.isNaN()) {
+			if (mapping == null || mapping.isInfinite() || mapping.isNaN()) {
 				throw new ValidationException("Attribute to rating conversion failed " + aga);
 			}
 			return mapping;

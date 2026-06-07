@@ -1,7 +1,6 @@
 
 package org.open4goods.api.services.aggregation.services.realtime;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -13,7 +12,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.commons.exceptions.AggregationSkipException;
@@ -50,20 +48,14 @@ import com.google.common.collect.Sets;
  */
 public class PriceAggregationService extends AbstractAggregationService {
 
-	/**
-	 * Allows to compute the incomes, it is the average percent reversed to Nudger by affiliation platforms
-	 */
-	private static Double averageAffiliationRatio = 0.05;
+	/** Average percent reversed to Nudger by affiliation platforms. */
+	private static final double averageAffiliationRatio = 0.05;
 
-	/**
-	 * The ratio that allows to estimate benefits from revenue
-	 */
-	private static Double incomesToBenefitsRatio = 0.75;
+	/** Ratio used to estimate benefits from revenue. */
+	private static final double incomesToBenefitsRatio = 0.75;
 
-	/**
-	 * The percent of benefits reversed
-	 */
-	private static Double percentBenefitsReversed = 0.1;
+	/** Percent of benefits reversed to the collective. */
+	private static final double percentBenefitsReversed = 0.1;
 
 
 	public PriceAggregationService(final Logger logger) {
@@ -71,22 +63,18 @@ public class PriceAggregationService extends AbstractAggregationService {
 	}
 
 	@Override
-	public  Map<String, Object> onDataFragment(final DataFragment fragment, final Product aggregatedData,VerticalConfig vConf) throws AggregationSkipException {
+	public void onDataFragment(final DataFragment fragment, final Product aggregatedData, final VerticalConfig vConf) throws AggregationSkipException {
 
 		if (!fragment.hasPrice()) {
-			dedicatedLogger.warn("No price for data fragment {}, skipping", fragment );
+			dedicatedLogger.warn("No price for data fragment {}, skipping", fragment);
 		} else if (fragment.getPrice().getPrice() == 0.0) {
-			// Checking price is not 0, can happens
 			dedicatedLogger.info("Price is 0 for datafragment {}, skipping", fragment);
 		} else {
-			// Adding the price in the price list, we fill filter and remove outdated in the onProduct() méthod
 			AggregatedPrice aggPrice = new AggregatedPrice(fragment);
 			aggregatedData.getPrice().getOffers().add(aggPrice);
 		}
 
-		// Calling the stateless handling
 		onProduct(aggregatedData, vConf);
-		return null;
 	}
 
 
@@ -111,10 +99,9 @@ public class PriceAggregationService extends AbstractAggregationService {
 			} else {
 
 				final String key = pricMerchanteKey(df);
-				// Filtering : keeping lowest prices per provider and offer names
-				if (null == reducedPrices.get(key) || reducedPrices.get(key).getPrice() > df.getPrice()) {
-					reducedPrices.put(key, df);
-				}
+				// Keep only the lowest price per (provider, condition) pair
+				reducedPrices.merge(key, df, (existing, incoming) ->
+						incoming.getPrice() < existing.getPrice() ? incoming : existing);
 			}
 		}
 
@@ -180,11 +167,8 @@ public class PriceAggregationService extends AbstractAggregationService {
             return;
         }
 
-        ////////////////////
-        // Normalization
-        // Ensure only the lowest price is kept per day
-        // TODO (P1,perf): Remove when migration ok
-        ////////////////////
+        // Ensure only the lowest price is kept per day (deduplicates history that may
+        // contain multiple entries for the same day from earlier ingestion runs).
         Map<Long, PriceHistory> dailyLowestPrices = new HashMap<>();
         for (PriceHistory ph : prices.getHistory(state)) {
 
@@ -201,23 +185,20 @@ public class PriceAggregationService extends AbstractAggregationService {
 
 
         /*
-         * We conserve one history price a day
+         * Maintain one price entry per day. If the price changed, append a new entry.
+         * If the price is unchanged but we already have an entry for today, replace it
+         * to refresh the timestamp rather than leaving a gap.
          */
-        if (minPrice != null ) {
-        	if (history.size() ==  0 || !history.getLast().getPrice().equals(minPrice.getPrice())) {
-        		history.add(new PriceHistory(minPrice));
-        	}
-        	else {
-	        	PriceHistory lastPrice = history.getLast();
-	        	if (null != lastPrice) {
-
-
-	        		if (lastPrice.getDay() ==  System.currentTimeMillis() / (1000 * 60 * 60 * 24)) {
-	        			history.removeLast();
-	        		}
-
-	        	}
-        	}
+        long today = System.currentTimeMillis() / (1000 * 60 * 60 * 24);
+        if (history.isEmpty() || !history.getLast().getPrice().equals(minPrice.getPrice())) {
+            history.add(new PriceHistory(minPrice));
+        } else {
+            PriceHistory lastEntry = history.getLast();
+            if (lastEntry.getDay() == today) {
+                // Refresh today's entry with the current timestamp
+                history.removeLast();
+                history.add(new PriceHistory(minPrice));
+            }
         }
 
         // Set the trend based on the last two price history values if the minimum price timestamp matches today's date
@@ -248,7 +229,7 @@ public class PriceAggregationService extends AbstractAggregationService {
         history = history.stream()
             .filter(e -> e.getPrice() != 0.0) // Retain only valid price entries
             .filter(e -> Instant.ofEpochMilli(e.getTimestamp()).isAfter(twoYearsAgo)) // Retain entries within the last 2 years
-            .collect(Collectors.toList());
+            .toList();
 
         // Update the price history based on the product condition
         switch (state) {
@@ -270,7 +251,7 @@ public class PriceAggregationService extends AbstractAggregationService {
 	 */
 	private String pricMerchanteKey(final AggregatedPrice df) {
 		// Not hashing offerdame bypass the sellers (nice for min price logic)
-		return df.getDatasourceName() + (null == df.getProductState() ? "" : df.getProductState());
+		return df.getDatasourceName() + (df.getProductState() == null ? "" : df.getProductState());
 	}
 
 	/**
@@ -286,7 +267,7 @@ public class PriceAggregationService extends AbstractAggregationService {
 		// Min / max
 		for (final AggregatedPrice o : filtered) {
 
-			if (null == p.getMinPrice()) {
+			if (p.getMinPrice() == null) {
 				p.setMinPrice(o);
 			}
 			if (o.lowerThan(p.getMinPrice())) {
@@ -294,11 +275,5 @@ public class PriceAggregationService extends AbstractAggregationService {
 			}
 		}
 	}
-
-	public @Override void close() throws IOException {
-	}
-
-
-
 
 }

@@ -2,8 +2,6 @@ package org.open4goods.api.services.aggregation.services.realtime;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.commons.exceptions.AggregationSkipException;
@@ -33,20 +31,13 @@ public class UsageCostAggregationService extends AbstractAggregationService
     }
 
     /**
-     * Aggregates the yearly usage cost when receiving a data fragment.
-     *
-     * @param fragment incoming data fragment
-     * @param aggregatedData product being aggregated
-     * @param vConf vertical configuration
-     * @return unused map, always {@code null}
-     * @throws AggregationSkipException if aggregation must be aborted
+     * Delegates to {@link #onProduct} — no fragment-specific data is needed for usage cost calculation.
      */
     @Override
-    public Map<String, Object> onDataFragment(final DataFragment fragment, final Product aggregatedData,
+    public void onDataFragment(final DataFragment fragment, final Product aggregatedData,
             final VerticalConfig vConf) throws AggregationSkipException
     {
         onProduct(aggregatedData, vConf);
-        return null;
     }
 
     /**

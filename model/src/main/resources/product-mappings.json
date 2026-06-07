@@ -219,6 +219,14 @@
             "type": "object",
             "enabled": false
         },
+        "reviewMetadata": {
+            "properties": {
+                "locales": {
+                    "type": "object",
+                    "dynamic": true
+                }
+            }
+        },
         "reviewFacts": {
             "type": "object",
             "enabled": false

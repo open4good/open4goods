@@ -3,16 +3,18 @@ package org.open4goods.api.services.aggregation.services.batch.scores.normalizat
 import java.math.BigDecimal;
 import java.util.Map;
 
-import org.open4goods.model.StandardiserService;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.scoring.ScoreNormalizationParams;
-import org.open4goods.model.vertical.scoring.ScoreScoringConfig;
 
 /**
- * Normalization based on a fixed mapping table.
+ * Normalization based on a fixed key→score mapping table declared in YAML.
+ *
+ * <p>The double key is normalised to a plain string (trailing zeros stripped,
+ * e.g. {@code 1.0 → "1"}) before lookup. The raw {@link Double#toString()} form
+ * is tried as a fallback to handle YAML-serialised keys that include a decimal point.
  */
-public class FixedMappingNormalizationStrategy implements NormalizationStrategy {
+public class FixedMappingNormalizationStrategy extends AbstractNormalizationStrategy {
 
     @Override
     public NormalizationResult normalize(Double value, NormalizationContext context, AttributeConfig attributeConfig)
@@ -33,40 +35,17 @@ public class FixedMappingNormalizationStrategy implements NormalizationStrategy 
             mapped = mapping.get(value.toString());
         }
         if (mapped == null) {
-            throw new ValidationException("Missing mapping entry for value " + key + ", attribute : " + attributeConfig);
+            throw new ValidationException("Missing mapping entry for value " + key + ", attribute: " + attributeConfig);
         }
 
-        double scaled = Math.max(resolveScaleMin(attributeConfig), Math.min(resolveScaleMax(attributeConfig), mapped));
+        double min = resolveScaleMin(attributeConfig);
+        double max = resolveScaleMax(attributeConfig);
+        double scaled = Math.max(min, Math.min(max, mapped));
         return new NormalizationResult(scaled, false);
     }
 
+    /** Converts a double key to a plain-string form with trailing zeros stripped (e.g. {@code 1.0 → "1"}). */
     private String normalizeKey(Double value) {
-        if (value == null) {
-            return null;
-        }
         return BigDecimal.valueOf(value).stripTrailingZeros().toPlainString();
-    }
-
-    private ScoreNormalizationParams resolveParams(AttributeConfig attributeConfig) {
-        if (attributeConfig == null || attributeConfig.getScoring() == null) {
-            return new ScoreNormalizationParams();
-        }
-        return attributeConfig.getScoring().getNormalization().getParams();
-    }
-
-    private double resolveScaleMin(AttributeConfig attributeConfig) {
-        ScoreScoringConfig scoring = attributeConfig == null ? null : attributeConfig.getScoring();
-        if (scoring == null || scoring.getScale() == null || scoring.getScale().getMin() == null) {
-            return 0.0;
-        }
-        return scoring.getScale().getMin();
-    }
-
-    private double resolveScaleMax(AttributeConfig attributeConfig) {
-        ScoreScoringConfig scoring = attributeConfig == null ? null : attributeConfig.getScoring();
-        if (scoring == null || scoring.getScale() == null || scoring.getScale().getMax() == null) {
-            return StandardiserService.DEFAULT_MAX_RATING;
-        }
-        return scoring.getScale().getMax();
     }
 }

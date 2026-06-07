@@ -225,20 +225,7 @@ public class UnitAwareNumericParser extends AttributeParser
                 .toPlainString();
     }
 
-    private static String getStringValue(SourcedAttribute src)
-    {
-        if (src == null)
-        {
-            return null;
-        }
-        try
-        {
-            Object res = src.getClass().getMethod("getValue").invoke(src);
-            return res instanceof String s ? s : null;
-        }
-        catch (ReflectiveOperationException e)
-        {
-            return null;
-        }
+    private static String getStringValue(SourcedAttribute src) {
+        return src == null ? null : src.getValue();
     }
 }

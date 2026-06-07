@@ -62,7 +62,7 @@ public class WarrantyParser extends AttributeParser {
         List<Double> candidates = new ArrayList<>();
 
         for (SourcedAttribute src : attribute.getSource()) {
-            String raw = safeGetString(src, "getValue");
+            String raw = src.getValue();
             if (raw == null || raw.isBlank()) {
                 continue;
             }
@@ -207,13 +207,6 @@ public class WarrantyParser extends AttributeParser {
         return bd.toPlainString();
     }
     
-    private String safeGetString(SourcedAttribute src, String method) {
-        try {
-            return (String) src.getClass().getMethod(method).invoke(src);
-        } catch (Exception e) {
-            return null;
-        }
-    }
 
     private record Range(double min, double max) {
         boolean contains(double val) {

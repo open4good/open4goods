@@ -28,7 +28,6 @@ import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.PrefixedAttrText;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.LoggerFactory;
 
@@ -37,9 +36,6 @@ class NamesAggregationServiceTest {
 
 	@Mock
 	private VerticalsConfigService verticalsConfigService;
-
-	@Mock
-	private EvaluationService evaluationService;
 
 	@Mock
 	private BlablaService blablaService;
@@ -57,7 +53,6 @@ class NamesAggregationServiceTest {
 		service = new NamesAggregationService(
 				LoggerFactory.getLogger(NamesAggregationService.class),
 				verticalsConfigService,
-				evaluationService,
 				blablaService,
 				embeddingService,
 				embeddingProperties);

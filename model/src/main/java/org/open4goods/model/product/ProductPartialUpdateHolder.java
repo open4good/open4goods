@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * An holder to easiest partial updates
+ * Holder for partial product document updates.
  */
 public class ProductPartialUpdateHolder {
 
@@ -18,6 +18,10 @@ public class ProductPartialUpdateHolder {
 	public ProductPartialUpdateHolder(Long productId) {
 		super();
 		this.productId = productId;
+	}
+
+	public void addChange(ProductPartialUpdateField field, Object object) {
+		addChange(field.path(), object);
 	}
 
 	public void addChange(String key, Object object) {

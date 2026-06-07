@@ -3,7 +3,6 @@ package org.open4goods.api.services.aggregation;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Map;
 
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.model.datafragment.DataFragment;
@@ -48,18 +47,16 @@ public abstract class AbstractAggregationService implements Closeable {
 	/**
 	 * Enriches {@code output} with the content of the incoming {@code input} fragment.
 	 *
-	 * <p>Default implementation is a no-op that returns an empty map; override when
-	 * the service needs to process raw merchant data.
+	 * <p>Default implementation is a no-op; override when the service needs to
+	 * process raw merchant data.
 	 *
 	 * @param input  incoming data fragment
 	 * @param output product being built; modified in-place
 	 * @param vConf  vertical configuration for the product's category
-	 * @return map of field-level update hints (may be empty); currently unused by callers
 	 * @throws AggregationSkipException if this product should be skipped entirely
 	 */
-	public Map<String, Object> onDataFragment(final DataFragment input, final Product output,
+	public void onDataFragment(final DataFragment input, final Product output,
 			final VerticalConfig vConf) throws AggregationSkipException {
-		return Map.of();
 	}
 
 	/**

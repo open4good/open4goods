@@ -28,12 +28,12 @@ class EcoScoreAggregationServiceReproductionIT {
     }
 
     @Test
-    void shouldFailToComputeEcoScoreWhenRequiredSubScoreIsMissingForAllProducts() {
+    void shouldApplyWorstFallbackWhenRequiredSubScoreIsMissingForAllProducts() {
         // Given
         VerticalConfig vConf = new VerticalConfig();
         vConf.setId("test-vertical");
         ImpactScoreConfig impactConf = new ImpactScoreConfig();
-        // Require SCORE_A with weight 1.0
+        // Require SCORE_A with weight 1.0; no explicit AttributeConfig → WORST policy defaults to 0.0
         impactConf.setCriteriasPonderation(Map.of("SCORE_A", 1.0));
         vConf.setImpactScoreConfig(impactConf);
 
@@ -41,12 +41,12 @@ class EcoScoreAggregationServiceReproductionIT {
         // Product has NO scores
 
         // When
-        service.onProduct(product, vConf); // Should log warning and return
+        service.onProduct(product, vConf);
         service.done(List.of(product), vConf);
 
-        // Then
-        // EcoScore should be missing or empty
-        assertThat(product.ecoscore()).isNull();
+        // Then: WORST policy computes ecoscore as 0.0 (not skipped)
+        assertThat(product.ecoscore()).isNotNull();
+        assertThat(product.ecoscore().getValue()).isEqualTo(0.0);
     }
     
     @Test

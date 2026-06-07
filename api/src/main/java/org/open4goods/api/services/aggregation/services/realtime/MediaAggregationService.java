@@ -1,6 +1,5 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,7 +11,6 @@ import org.open4goods.model.product.Product;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Consolidates media resources (images, PDFs, manuals, etc.) from incoming
@@ -31,8 +29,6 @@ import org.slf4j.LoggerFactory;
  */
 public class MediaAggregationService extends AbstractAggregationService {
 
-	private static final Logger logger = LoggerFactory.getLogger(MediaAggregationService.class);
-
 	/**
 	 * @param logger dedicated aggregation logger
 	 */
@@ -45,7 +41,7 @@ public class MediaAggregationService extends AbstractAggregationService {
 	 * Icecat URLs.
 	 */
 	@Override
-	public Map<String, Object> onDataFragment(final DataFragment input, final Product output,
+	public void onDataFragment(final DataFragment input, final Product output,
 			final VerticalConfig vConf) throws AggregationSkipException {
 
 		Map<String, Resource> existing = new HashMap<>();
@@ -56,8 +52,7 @@ public class MediaAggregationService extends AbstractAggregationService {
 			r.setCacheKey(IdHelper.generateResourceId(r.getUrl()));
 
 			Resource old = existing.get(r.getUrl());
-			if (null != old) {
-				// Update tags on the already-known resource rather than duplicating it
+			if (old != null) {
 				old.setTags(r.getTags());
 				old.setHardTags(r.getHardTags());
 			} else {
@@ -66,7 +61,6 @@ public class MediaAggregationService extends AbstractAggregationService {
 		}
 
 		onProduct(output, vConf);
-		return null;
 	}
 
 	/** Removes protected Icecat URLs that cannot be fetched anonymously. */
@@ -85,7 +79,7 @@ public class MediaAggregationService extends AbstractAggregationService {
 		}
 		boolean protectedLink = url.contains("icecat.biz") && url.contains("?access");
 		if (protectedLink) {
-			logger.error("Removing icecat protected url : {}", url);
+			dedicatedLogger.info("Removing icecat protected url : {}", url);
 		}
 		return protectedLink;
 	}

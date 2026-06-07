@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -27,7 +28,6 @@ import org.open4goods.services.productrepository.workers.FullProductIndexationWo
 import org.open4goods.services.productrepository.workers.PartialProductIndexationWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -104,40 +104,26 @@ public class ProductRepository {
                         "lastChange"
         };
 
+        private static final String PRODUCT_EMBEDDING_FIELD = "embedding";
+        private static final String IMAGE_EMBEDDING_FIELD = "resources.imageInfo.embedding";
+
         /**
-         * Full product projection used by frontend read paths. These paths use explicit includes
-         * to avoid materialising the dense vector payload when products are mapped to DTOs.
+         * Deprecated compatibility constant. Use {@link #productFieldsWithoutEmbeddingSourceFilter()}
+         * or {@link ProductProjection#WITHOUT_VECTORS} instead.
          */
-        public static final String[] PRODUCT_FIELDS_WITHOUT_EMBEDDING = {
-                        "akaBrands",
-                        "akaModels",
-                        "attributes",
-                        "categoriesByDatasources",
-                        "coverImagePath",
-                        "creationDate",
-                        "datasourceCategories",
-                        "datasourceCodes",
-                        "datasourceNames",
-                        "descriptionsByDatasource",
-                        "embeddingTextHash",
-                        "eprelDatas",
-                        "excluded",
-                        "excludedCauses",
-                        "externalIds",
-                        "googleTaxonomyId",
-                        "gtinInfos",
-                        "id",
-                        "lastChange",
-                        "names",
-                        "offerNames",
-                        "offersCount",
-                        "price",
-                        "ranking",
-                        "resources",
-                        "reviews",
-                        "scores",
-                        "vertical"
-        };
+        @Deprecated(forRemoval = false)
+        public static final String[] PRODUCT_FIELDS_WITHOUT_EMBEDDING = {};
+
+        /**
+         * Named product source projections used by repository queries.
+         */
+        public enum ProductProjection
+        {
+                FULL,
+                WITHOUT_VECTORS,
+                NO_SOURCE,
+                OPEN_DATA
+        }
 
         /**
          * Builds the common product source filter used by public read paths that do not need the
@@ -146,7 +132,7 @@ public class ProductRepository {
          * @return a source filter explicitly including every public product field except embedding
          */
         public static FetchSourceFilter productFieldsWithoutEmbeddingSourceFilter() {
-                return new FetchSourceFilter(true, PRODUCT_FIELDS_WITHOUT_EMBEDDING.clone(), null);
+                return sourceFilter(ProductProjection.WITHOUT_VECTORS);
         }
 
         /**
@@ -155,7 +141,54 @@ public class ProductRepository {
          * @return a source filter disabling hit source retrieval
          */
         public static FetchSourceFilter noSourceFilter() {
-                return new FetchSourceFilter(false, null, null);
+                return sourceFilter(ProductProjection.NO_SOURCE);
+        }
+
+        /**
+         * Builds a source filter for a named projection.
+         *
+         * @param projection projection to apply
+         * @return source filter for the projection
+         */
+        public static FetchSourceFilter sourceFilter(ProductProjection projection) {
+                Objects.requireNonNull(projection, "Product projection is required");
+                return switch (projection) {
+                case FULL -> new FetchSourceFilter(true, null, null);
+                case WITHOUT_VECTORS -> new FetchSourceFilter(true, null, new String[] {
+                                PRODUCT_EMBEDDING_FIELD,
+                                IMAGE_EMBEDDING_FIELD
+                });
+                case NO_SOURCE -> new FetchSourceFilter(false, null, null);
+                case OPEN_DATA -> new FetchSourceFilter(true, OPEN_DATA_EXPORT_FIELDS.clone(), null);
+                };
+        }
+
+        /**
+         * Builds a validated custom source filter.
+         *
+         * @param includes fields to include, or {@code null}
+         * @param excludes fields to exclude, or {@code null}
+         * @return custom source filter
+         */
+        public static FetchSourceFilter customSourceFilter(String[] includes, String[] excludes) {
+                validateSourceFilterPaths(includes);
+                validateSourceFilterPaths(excludes);
+                return new FetchSourceFilter(true, cloneOrNull(includes), cloneOrNull(excludes));
+        }
+
+        private static String[] cloneOrNull(String[] values) {
+                return values == null ? null : values.clone();
+        }
+
+        private static void validateSourceFilterPaths(String[] paths) {
+                if (paths == null) {
+                        return;
+                }
+                for (String path : paths) {
+                        if (path == null || path.isBlank() || path.contains("*") || path.contains("..")) {
+                                throw new IllegalArgumentException("Invalid source filter path: " + path);
+                        }
+                }
         }
 
 
@@ -178,7 +211,7 @@ public class ProductRepository {
 
 	public static IndexCoordinates CURRENT_INDEX = IndexCoordinates.of(MAIN_INDEX_NAME);
 
-	private @Autowired ElasticsearchOperations elasticsearchOperations;
+	private ElasticsearchOperations elasticsearchOperations;
 
 
 //	private @Autowired RedisProductRepository redisRepository;
@@ -190,10 +223,21 @@ public class ProductRepository {
 
 	}
 
+	public ProductRepository(ElasticsearchOperations elasticsearchOperations) {
+		this.elasticsearchOperations = elasticsearchOperations;
+	}
+
 //	private ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 
 	//TODO(p3,perf) : Virtual threads, but ko with visualVM profiling
 	public ProductRepository(IndexationConfig indexationConfig) {
+		this(indexationConfig, null);
+	}
+
+	//TODO(p3,perf) : Virtual threads, but ko with visualVM profiling
+	public ProductRepository(IndexationConfig indexationConfig, ElasticsearchOperations elasticsearchOperations) {
+
+		this.elasticsearchOperations = elasticsearchOperations;
 
 		this.fullProductQueue = new LinkedBlockingQueue<>(indexationConfig.getProductsQueueMaxSize());
 		this.partialProductQueue = new LinkedBlockingQueue<>(indexationConfig.getPartialProductsQueueMaxSize());
@@ -259,8 +303,7 @@ public class ProductRepository {
 			return elasticsearchOperations.search(query, Product.class, CURRENT_INDEX);
 		} catch (Exception e) {
 			elasticLog(e);
-			// TODO : Should throw
-			return null;
+			throw e;
 		}
     }
 
@@ -281,7 +324,7 @@ public class ProductRepository {
 	            .withSourceFilter(new FetchSourceFilter(true,new String[]{"categoriesByDatasources"}, null));
 
 	    if (null != maxResults) {
-//            initialQueryBuilder = initialQueryBuilder.withMaxResults(maxResults);
+            initialQueryBuilder = initialQueryBuilder.withMaxResults(maxResults);
 	    }
 
 	    NativeQuery initialQuery = initialQueryBuilder.build();
@@ -318,7 +361,7 @@ public class ProductRepository {
 
                 NativeQueryBuilder queryBuilder = new NativeQueryBuilder().withQuery(Query.findAll());
                 if (includeFields != null && includeFields.length > 0) {
-                        queryBuilder = queryBuilder.withSourceFilter(new FetchSourceFilter(true, includeFields, null));
+                        queryBuilder = queryBuilder.withSourceFilter(customSourceFilter(includeFields, null));
                 }
 
                 NativeQuery query = queryBuilder
@@ -329,8 +372,11 @@ public class ProductRepository {
                 return iterator.stream().onClose(iterator::close)
                                 .map(SearchHit::getContent);
         }
-
-
+	/**
+	 * @deprecated ambiguous pagination and the {@code indexName} argument is ignored. Prefer
+	 * repository methods that accept a {@link Pageable}.
+	 */
+	@Deprecated(forRemoval = false)
 	public Stream<Product> searchInValidPrices(String query, final String indexName, int from, int to) {
 
 		Criteria c = new Criteria().expression(query).and(getRecentPriceQuery());
@@ -636,6 +682,30 @@ public class ProductRepository {
      */
     public Stream<Product> exportVerticalWithValidDateAndMissingReviewOrderByImpactScore(String vertical, String locale, Integer max, boolean withExcluded, boolean sortOnImpactScore)
     {
+        return exportVerticalWithValidDateAndMissingReviewOrderByImpactScore(vertical, locale, max, withExcluded, sortOnImpactScore, 30, 7);
+    }
+
+    /**
+     * Export products eligible for review generation or regeneration.
+     *
+     * @param vertical the vertical identifier
+     * @param locale the locale to check for review metadata
+     * @param max maximum number of products to fetch
+     * @param withExcluded whether to include excluded products
+     * @param sortOnImpactScore whether impact score is required and used for ordering
+     * @param regenerationDelayDays delay before successful reviews are regenerated
+     * @param retryDelayDays delay before failed insufficient-data reviews are retried
+     * @return stream of products eligible for review generation
+     */
+    public Stream<Product> exportVerticalWithValidDateAndMissingReviewOrderByImpactScore(
+            String vertical,
+            String locale,
+            Integer max,
+            boolean withExcluded,
+            boolean sortOnImpactScore,
+            int regenerationDelayDays,
+            int retryDelayDays)
+    {
         Criteria criteria = new Criteria("vertical").is(vertical)
                 .and(getRecentPriceQuery());
 
@@ -647,8 +717,7 @@ public class ProductRepository {
         	criteria = criteria.and(new Criteria("scores.IMPACTSCORE.value").exists());
         }
 
-        // Filter products that DON'T have a review in the specified locale
-    //    criteria = criteria.and(new Criteria("reviews." + locale + ".review").exists().not());
+        criteria = criteria.and(reviewEligibilityCriteria(locale, regenerationDelayDays, retryDelayDays));
 
         SortOptions impactScoreSort = new SortOptions.Builder()
                 .field(new FieldSort.Builder()
@@ -934,8 +1003,6 @@ public class ProductRepository {
 //		});
 	}
 
-
-
 	/**
 	 * Return an aggregated data by it's ID
 	 *
@@ -1162,7 +1229,7 @@ public class ProductRepository {
         public Long countMainIndexHavingImpactScore() {
                 Criteria criteria = getRecentPriceQuery()
                         .and(new Criteria("excluded").is(false))
-                        .and(new Criteria("scores.ECOSCORE.value").exists());
+                        .and(new Criteria("scores.IMPACTSCORE.value").exists());
                 CriteriaQuery query = new CriteriaQuery(criteria);
                 return elasticsearchOperations.count(query, CURRENT_INDEX);
         }
@@ -1307,11 +1374,6 @@ public class ProductRepository {
             CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery()
                     .and(new Criteria("vertical").is(vertical))
                     .and(new Criteria("excluded").is(false))
-                    // TODO : Does not works because fiels is not indexed in product mapping (    "reviews": {
-//                    "type": "object",
-//                    "enabled": false
-//                 },
-                    // How to proceed ?
                     .and(new Criteria(resolveReviewField(locale)).exists()));
             return elasticsearchOperations.count(query, CURRENT_INDEX);
         }
@@ -1319,11 +1381,37 @@ public class ProductRepository {
         private String resolveReviewField(String locale) {
             String resolvedLocale = locale;
             if (resolvedLocale == null || resolvedLocale.isBlank()) {
-            	// TODO : Handle i18n
                 resolvedLocale = "fr";
             }
-            // TODO : Weak, relying on baseline...
-            return "reviews." + resolvedLocale + ".review.baseLine";
+            return reviewMetadataLocalePath(resolvedLocale) + ".createdMs";
+        }
+
+        private Criteria reviewEligibilityCriteria(String locale, int regenerationDelayDays, int retryDelayDays) {
+                String resolvedLocale = resolveReviewLocale(locale);
+                String createdMsField = reviewMetadataLocalePath(resolvedLocale) + ".createdMs";
+                String enoughDataField = reviewMetadataLocalePath(resolvedLocale) + ".enoughData";
+                long now = System.currentTimeMillis();
+                long regenerationCutoff = now - daysToMillis(regenerationDelayDays);
+                long retryCutoff = now - daysToMillis(retryDelayDays);
+
+                return new Criteria(createdMsField).exists().not()
+                        .or(new Criteria(enoughDataField).is(true).and(new Criteria(createdMsField).lessThan(regenerationCutoff)))
+                        .or(new Criteria(enoughDataField).is(false).and(new Criteria(createdMsField).lessThan(retryCutoff)));
+        }
+
+        private String reviewMetadataLocalePath(String locale) {
+                return "reviewMetadata.locales." + resolveReviewLocale(locale);
+        }
+
+        private String resolveReviewLocale(String locale) {
+                if (locale == null || locale.isBlank()) {
+                        return "fr";
+                }
+                return locale;
+        }
+
+        private long daysToMillis(int days) {
+                return Math.max(days, 0) * 24L * 60L * 60L * 1000L;
         }
 
         @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
@@ -1507,7 +1595,7 @@ public class ProductRepository {
 	 * @param partialItemsResults
 	 */
 	public void bulkUpdateDocument(Collection<ProductPartialUpdateHolder> partialItemsResults) {
-	    List<UpdateQuery> updateQueries = partialItemsResults.stream()
+	    List<UpdateQuery> updateQueries = mergePartialUpdates(partialItemsResults).stream()
 	        .map(product -> {
 	            Map<String, Object> fieldsToUpdate = product.getChanges();
 	            return UpdateQuery.builder(String.valueOf(product.getProductId()))
@@ -1520,6 +1608,20 @@ public class ProductRepository {
 	    // Perform the bulk update
 	    elasticsearchOperations.bulkUpdate(updateQueries, CURRENT_INDEX);
 	}
+
+        static Collection<ProductPartialUpdateHolder> mergePartialUpdates(Collection<ProductPartialUpdateHolder> partialItemsResults) {
+                Map<Long, ProductPartialUpdateHolder> mergedByProductId = new LinkedHashMap<>();
+                for (ProductPartialUpdateHolder partial : partialItemsResults) {
+                        if (partial == null || partial.getProductId() == null) {
+                                continue;
+                        }
+                        ProductPartialUpdateHolder merged = mergedByProductId.computeIfAbsent(
+                                        partial.getProductId(),
+                                        ProductPartialUpdateHolder::new);
+                        merged.getChanges().putAll(partial.getChanges());
+                }
+                return mergedByProductId.values();
+        }
 
 //	/**
 //	 * Bulk update, using script

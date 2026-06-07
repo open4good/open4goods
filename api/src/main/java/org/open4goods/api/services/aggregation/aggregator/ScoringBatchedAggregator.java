@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ScoringBatchedAggregator extends AbstractAggregator {
 
-	protected static final Logger logger = LoggerFactory.getLogger(ScoringBatchedAggregator.class);
+	private static final Logger logger = LoggerFactory.getLogger(ScoringBatchedAggregator.class);
 
 	/**
 	 * Creates a new aggregator with the given ordered list of scoring services.
@@ -42,25 +42,35 @@ public class ScoringBatchedAggregator extends AbstractAggregator {
 	 * Runs every registered scoring service through its full lifecycle against the
 	 * provided product collection.
 	 *
+	 * <p>Each product is processed independently: an {@link AggregationSkipException}
+	 * thrown for one product is caught and logged, allowing the remaining products
+	 * and services to continue. This mirrors the per-product isolation provided by
+	 * {@link StandardAggregator}.
+	 *
 	 * @param datas products to score; modified in-place
 	 * @param vConf vertical configuration driving score definitions and weights
-	 * @throws AggregationSkipException propagated when a service requests that a product be skipped
 	 */
-	public void score(final Collection<Product> datas, final VerticalConfig vConf) throws AggregationSkipException {
+	public void score(final Collection<Product> datas, final VerticalConfig vConf) {
 
+		int count = datas.size();
 		for (final AbstractAggregationService service : services) {
 
-			logger.info("Batching {} products using {} service", datas.size(), service.getClass().getSimpleName());
+			logger.info("Batching {} products using {} service", count, service.getClass().getSimpleName());
 
 			service.init(datas);
 
-			logger.info("Processing {} products using {} service", datas.size(), service.getClass().getSimpleName());
+			logger.info("Processing {} products using {} service", count, service.getClass().getSimpleName());
 
 			for (Product p : datas) {
-				service.onProduct(p, vConf);
+				try {
+					service.onProduct(p, vConf);
+				} catch (AggregationSkipException e) {
+					logger.info("Product {} skipped during batch scoring by {}: {}",
+							p.getId(), service.getClass().getSimpleName(), e.getMessage());
+				}
 			}
 
-			logger.info("Post computing {} products using {} service", datas.size(), service.getClass().getSimpleName());
+			logger.info("Post computing {} products using {} service", count, service.getClass().getSimpleName());
 
 			service.done(datas, vConf);
 		}

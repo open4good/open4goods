@@ -22,6 +22,7 @@ import org.open4goods.api.services.aggregation.services.realtime.IdentityAggrega
 import org.open4goods.api.services.aggregation.services.realtime.MediaAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.NamesAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.PriceAggregationService;
+import org.open4goods.api.services.aggregation.services.realtime.ReviewMetadataAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.TaxonomyRealTimeAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.UsageCostAggregationService;
 import org.open4goods.commons.exceptions.AggregationSkipException;
@@ -156,11 +157,7 @@ public class AggregationFacadeService {
 
 		ScoringBatchedAggregator batchAgg = getScoringAggregator();
 		List<Product> productBag = dataRepository.exportVerticalWithValidDate(vertical, false).toList();
-		try {
-			batchAgg.score(productBag, verticalConfigService.getConfigByIdOrDefault(vertical.getId()));
-		} catch (AggregationSkipException e) {
-			logger.error("Skipping product during batched scoring : ", e);
-		}
+		batchAgg.score(productBag, verticalConfigService.getConfigByIdOrDefault(vertical.getId()));
 		logger.info("Score batching : indexing {} products", productBag.size());
 		dataRepository.addToFullindexationQueue(productBag);
 	}
@@ -176,11 +173,7 @@ public class AggregationFacadeService {
 		logger.info("Score batching for {} products in {}", products.size(), vertical.getId());
 
 		ScoringBatchedAggregator batchAgg = getScoringAggregator();
-		try {
-			batchAgg.score(products, verticalConfigService.getConfigByIdOrDefault(vertical.getId()));
-		} catch (AggregationSkipException e) {
-			logger.error("Skipping product during batched scoring : ", e);
-		}
+		batchAgg.score(products, verticalConfigService.getConfigByIdOrDefault(vertical.getId()));
 	}
 
 	/**
@@ -340,10 +333,11 @@ public class AggregationFacadeService {
 		services.add(new TaxonomyRealTimeAggregationService(aggLogger, verticalConfigService, taxonomyService));
 		services.add(new AttributeRealtimeAggregationService(verticalConfigService, brandService, aggLogger, icecatFeatureResolver));
 		services.add(new UsageCostAggregationService(aggLogger));
-		services.add(new NamesAggregationService(aggLogger, verticalConfigService, evaluationService, blablaService,
+		services.add(new NamesAggregationService(aggLogger, verticalConfigService, blablaService,
 				embeddingService, embeddingProperties));
 		services.add(new PriceAggregationService(aggLogger));
 		services.add(new MediaAggregationService(aggLogger));
+		services.add(new ReviewMetadataAggregationService(aggLogger));
 
 		final StandardAggregator ret = new StandardAggregator(services, verticalConfigService);
 		autowireBeanFactory.autowireBean(ret);
@@ -383,7 +377,7 @@ public class AggregationFacadeService {
 		final List<AbstractAggregationService> services = new ArrayList<>();
 		services.add(new CleanScoreAggregationService(aggLogger));
 		services.add(new Attribute2ScoreAggregationService(aggLogger));
-		services.add(new SustainalyticsAggregationService(aggLogger, brandService, verticalConfigService, brandScoreService));
+		services.add(new SustainalyticsAggregationService(aggLogger, brandService, brandScoreService));
 		services.add(new DataCompletion2ScoreAggregationService(aggLogger));
 		services.add(new EcoScoreAggregationService(aggLogger));
 		services.add(new ParticipatingScoresAggregationService(aggLogger));

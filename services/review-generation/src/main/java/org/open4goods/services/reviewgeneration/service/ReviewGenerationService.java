@@ -47,6 +47,7 @@ import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.AiReviewHolder;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductFetchDiagnostics;
+import org.open4goods.model.product.ProductReviewMetadata;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.model.review.ReviewGenerationStatus.Status;
@@ -385,7 +386,7 @@ public class ReviewGenerationService implements HealthIndicator {
 				new HashMap<>());
 		holder.setSources(sourceTokens);
 		holder.setTotalTokens((Integer) promptVariables.getOrDefault("TOTAL_TOKENS", 0));
-		product.getReviews().put("fr", holder);
+		applyReview(product, holder);
 		try {
 			hooks.forEach(hook -> hook.onReviewGenerated(product));
 		} catch (Exception e) {
@@ -577,10 +578,27 @@ public class ReviewGenerationService implements HealthIndicator {
                 }
             }
 
-			product.getReviews().put("fr", holder);
+			applyReview(product, holder);
 			productRepository.forceIndex(product);
 		});
 		return upc;
+	}
+
+	/**
+	 * Stores the generated review holder for the French locale and refreshes the indexed review
+	 * metadata so it stays consistent with the reviews it summarises.
+	 *
+	 * <p>The indexed {@link ProductReviewMetadata} is a pure projection of {@link Product#getReviews()}.
+	 * The aggregation pipeline rebuilds it on every aggregation pass, but a review trigger mutates the
+	 * reviews outside that pipeline, so the projection is re-applied here before the product is
+	 * persisted. The persistence layer intentionally no longer performs this enrichment.</p>
+	 *
+	 * @param product the product whose reviews are being updated
+	 * @param holder  the generated review holder to store
+	 */
+	private void applyReview(Product product, AiReviewHolder holder) {
+		product.getReviews().put("fr", holder);
+		product.rebuildReviewMetadata();
 	}
 
 	// -------------------- Batch Review Generation Methods -------------------- //
@@ -684,7 +702,14 @@ public class ReviewGenerationService implements HealthIndicator {
         int selectionLimit = Math.max(limit * DEFAULT_SELECTION_MULTIPLIER, limit);
 
         try (Stream<Product> productStream =
-                productRepository.exportVerticalWithValidDateAndMissingReviewOrderByImpactScore(verticalConfig.getId(), "fr", selectionLimit, false, sortOnImpactScore)) {
+                productRepository.exportVerticalWithValidDateAndMissingReviewOrderByImpactScore(
+                        verticalConfig.getId(),
+                        "fr",
+                        selectionLimit,
+                        false,
+                        sortOnImpactScore,
+                        properties.getRegenerationDelayDays(),
+                        properties.getRetryDelayDays())) {
             return productStream
                     .filter(product -> !isActiveForBatch(product))
                     .limit(limit)
@@ -832,7 +857,7 @@ public class ReviewGenerationService implements HealthIndicator {
 				holder.setCreatedMs(Instant.now().toEpochMilli());
 				holder.setEnoughData(false);
 				holder.setFailureReason("INSUFFICIENT_SOURCES");
-				product.getReviews().put("fr", holder);
+				applyReview(product, holder);
 				productRepository.index(product);
 			} catch (Exception e) {
 				logger.error("Error while preparing prompt for UPC {}: {}", product.getId(), e.getMessage());
@@ -1036,7 +1061,7 @@ public class ReviewGenerationService implements HealthIndicator {
 					holder.setCreatedMs(Instant.now().toEpochMilli());
 					holder.setReview(newReview);
 					holder.setEnoughData(true);
-					product.getReviews().put("fr", holder);
+					applyReview(product, holder);
 
                     // Execute hooks
                     try {

@@ -2,9 +2,9 @@ package org.open4goods.api.services.aggregation.services.batch.scores;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.Product;
@@ -22,8 +22,8 @@ import org.slf4j.Logger;
 public class ParticipatingScoresAggregationService extends AbstractScoreAggregationService {
 
 	private final Map<String, Map<String, Map<String, Double>>> normalizedParticipations = new HashMap<>();
-	private final Set<String> loggedMissingParticipatingScores = new HashSet<>();
-	private final Set<String> loggedSkippedAggregates = new HashSet<>();
+	private final Set<String> loggedMissingParticipatingScores = ConcurrentHashMap.newKeySet();
+	private final Set<String> loggedSkippedAggregates = ConcurrentHashMap.newKeySet();
 
 	public ParticipatingScoresAggregationService(Logger logger) {
 		super(logger);
@@ -115,26 +115,4 @@ public class ParticipatingScoresAggregationService extends AbstractScoreAggregat
 		return aggregateValue;
 	}
 
-	private Double resolveRelativeValue(String config, Score score) {
-		if (score.getRelativ() != null && score.getRelativ().getValue() != null) {
-			return score.getRelativ().getValue();
-		}
-
-		if (score.getAbsolute() != null && score.getAbsolute().getValue() != null) {
-			try {
-				return relativize(score.getAbsolute().getValue(), score.getAbsolute());
-			} catch (ValidationException e) {
-				dedicatedLogger.warn("Participating score relativization failed for {} : {}", config, e.getMessage());
-				return null;
-			}
-		}
-
-		if (score.getValue() != null) {
-			dedicatedLogger.warn("Using raw value for {} due to missing cardinalities", config);
-			return score.getValue();
-		}
-
-		dedicatedLogger.warn("Cannot compute aggregate, missing value for {}", config);
-		return null;
-	}
 }

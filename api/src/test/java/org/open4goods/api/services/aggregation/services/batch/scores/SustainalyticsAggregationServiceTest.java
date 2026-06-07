@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 class SustainalyticsAggregationServiceTest {
 
     private final SustainalyticsAggregationService service = new SustainalyticsAggregationService(
-            LoggerFactory.getLogger(SustainalyticsAggregationServiceTest.class), null, null, null);
+            LoggerFactory.getLogger(SustainalyticsAggregationServiceTest.class), null, null);
 
     @Test
     void riskLevelIsUnknownWhenScoreMissing() {

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import co.elastic.clients.elasticsearch._types.KnnSearch;
 import co.elastic.clients.elasticsearch._types.query_dsl.IdsQuery;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +22,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductPartialUpdateHolder;
 import org.open4goods.model.vertical.SubsetCriteriaOperator;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
@@ -29,6 +32,7 @@ import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
 import org.springframework.data.elasticsearch.core.query.SourceFilter;
+import org.springframework.data.elasticsearch.core.query.UpdateQuery;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -144,9 +148,91 @@ class ProductRepositoryTest
         FetchSourceFilter sourceFilter = ProductRepository.productFieldsWithoutEmbeddingSourceFilter();
 
         assertThat(sourceFilter.fetchSource()).isTrue();
-        assertThat(sourceFilter.getIncludes()).contains("id", "names", "price", "resources");
-        assertThat(sourceFilter.getIncludes()).doesNotContain("embedding");
-        assertThat(sourceFilter.getExcludes()).isNull();
+        assertThat(sourceFilter.getIncludes()).isNull();
+        assertThat(sourceFilter.getExcludes()).containsExactly("embedding", "resources.imageInfo.embedding");
+    }
+
+    @Test
+    void customSourceFilterRejectsUnsafePaths()
+    {
+        assertThatThrownBy(() -> ProductRepository.customSourceFilter(new String[] {"names.*"}, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Invalid source filter path");
+    }
+
+    @Test
+    void getLogsAndRethrowsSearchFailure()
+    {
+        RuntimeException failure = new RuntimeException("boom");
+        when(elasticsearchOperations.search(any(org.springframework.data.elasticsearch.core.query.Query.class), eq(Product.class), eq(ProductRepository.CURRENT_INDEX)))
+                .thenThrow(failure);
+
+        assertThatThrownBy(() -> repository.get(PageRequest.of(0, 1))).isSameAs(failure);
+    }
+
+    @Test
+    void countMainIndexHavingImpactScoreUsesImpactScoreField()
+    {
+        when(elasticsearchOperations.count(any(CriteriaQuery.class), eq(ProductRepository.CURRENT_INDEX))).thenReturn(4L);
+
+        repository.countMainIndexHavingImpactScore();
+
+        ArgumentCaptor<CriteriaQuery> queryCaptor = ArgumentCaptor.forClass(CriteriaQuery.class);
+        verify(elasticsearchOperations).count(queryCaptor.capture(), eq(ProductRepository.CURRENT_INDEX));
+        assertThat(criteriaFields(queryCaptor.getValue().getCriteria())).contains("scores.IMPACTSCORE.value");
+        assertThat(criteriaFields(queryCaptor.getValue().getCriteria())).doesNotContain("scores.ECOSCORE.value");
+    }
+
+    @Test
+    void countReviewedUsesIndexedReviewMetadata()
+    {
+        when(elasticsearchOperations.count(any(CriteriaQuery.class), eq(ProductRepository.CURRENT_INDEX))).thenReturn(11L);
+
+        repository.countMainIndexValidAndReviewed("en");
+
+        ArgumentCaptor<CriteriaQuery> queryCaptor = ArgumentCaptor.forClass(CriteriaQuery.class);
+        verify(elasticsearchOperations).count(queryCaptor.capture(), eq(ProductRepository.CURRENT_INDEX));
+        assertThat(criteriaFields(queryCaptor.getValue().getCriteria()))
+                .contains("reviewMetadata.locales.en.createdMs")
+                .doesNotContain("reviews.en.review.baseLine");
+    }
+
+    @Test
+    void partialUpdatesAreMergedByProductIdBeforeBulkUpdate()
+    {
+        ProductPartialUpdateHolder first = new ProductPartialUpdateHolder(42L);
+        first.addChange("lastChange", 1L);
+        first.addChange("offersCount", 1);
+        ProductPartialUpdateHolder second = new ProductPartialUpdateHolder(42L);
+        second.addChange("offersCount", 2);
+        second.addChange("price", "updated");
+
+        repository.bulkUpdateDocument(List.of(first, second));
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<UpdateQuery>> updateCaptor = ArgumentCaptor.forClass(List.class);
+        verify(elasticsearchOperations).bulkUpdate(updateCaptor.capture(), eq(ProductRepository.CURRENT_INDEX));
+        List<UpdateQuery> updates = updateCaptor.getValue();
+        assertThat(updates).hasSize(1);
+        assertThat(updates.getFirst().getId()).isEqualTo("42");
+        assertThat(updates.getFirst().getDocument())
+                .containsEntry("lastChange", 1L)
+                .containsEntry("offersCount", 2)
+                .containsEntry("price", "updated");
+    }
+
+    @Test
+    void mergePartialUpdatesSkipsNullProductIds()
+    {
+        ProductPartialUpdateHolder valid = new ProductPartialUpdateHolder(1L);
+        valid.addChange("offersCount", 3);
+        ProductPartialUpdateHolder invalid = new ProductPartialUpdateHolder(null);
+        invalid.addChange("offersCount", 4);
+
+        Collection<ProductPartialUpdateHolder> merged = ProductRepository.mergePartialUpdates(List.of(valid, invalid));
+
+        assertThat(merged).hasSize(1);
+        assertThat(merged.iterator().next().getChanges()).containsEntry("offersCount", 3);
     }
 
     @Test
@@ -193,7 +279,27 @@ class ProductRepositoryTest
         assertThat(sourceFilter).isInstanceOf(FetchSourceFilter.class);
         FetchSourceFilter fetchSourceFilter = (FetchSourceFilter) sourceFilter;
         assertThat(fetchSourceFilter.fetchSource()).isTrue();
-        assertThat(fetchSourceFilter.getIncludes()).contains("id", "names", "price");
-        assertThat(fetchSourceFilter.getIncludes()).doesNotContain("embedding");
+        assertThat(fetchSourceFilter.getIncludes()).isNull();
+        assertThat(fetchSourceFilter.getExcludes()).contains("embedding", "resources.imageInfo.embedding");
+    }
+
+    private Set<String> criteriaFields(Criteria criteria)
+    {
+        Set<String> fields = new java.util.LinkedHashSet<>();
+        Set<Criteria> visited = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        collectCriteriaFields(criteria, fields, visited);
+        return fields;
+    }
+
+    private void collectCriteriaFields(Criteria criteria, Set<String> fields, Set<Criteria> visited)
+    {
+        if (criteria == null || !visited.add(criteria)) {
+            return;
+        }
+        if (criteria.getField() != null && criteria.getField().getName() != null) {
+            fields.add(criteria.getField().getName());
+        }
+        criteria.getCriteriaChain().forEach(child -> collectCriteriaFields(child, fields, visited));
+        criteria.getSubCriteria().forEach(child -> collectCriteriaFields(child, fields, visited));
     }
 }

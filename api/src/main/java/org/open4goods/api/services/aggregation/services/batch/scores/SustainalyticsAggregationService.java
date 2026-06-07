@@ -12,7 +12,6 @@ import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.rating.Cardinality;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 
 /**
@@ -42,13 +41,21 @@ public class SustainalyticsAggregationService extends AbstractScoreAggregationSe
 	private final BrandScoreService brandScoreService;
 
 	public SustainalyticsAggregationService(final Logger logger, final BrandService brandService,
-			final VerticalsConfigService verticalsConfigService, final BrandScoreService brandScoreService) {
+			final BrandScoreService brandScoreService) {
 		super(logger);
 		this.brandService = brandService;
 		this.brandScoreService = brandScoreService;
 	}
 	
 
+	/**
+	 * Looks up the brand's Sustainalytics ESG risk score and stores it on the
+	 * product as a {@code BRAND_SUSTAINABILITY} score with {@code rating},
+	 * {@code risk-level}, and {@code url} metadata entries.
+	 *
+	 * <p>Silently skips products with no brand or for which no Sustainalytics
+	 * record is available.
+	 */
 	@Override
 	public void onProduct(Product data, VerticalConfig vConf) {
 
@@ -62,14 +69,14 @@ public class SustainalyticsAggregationService extends AbstractScoreAggregationSe
 		try {
 			
 			Brand brand = brandService.resolve(data.brand());
-			if (null == brand || StringUtils.isEmpty(brand.getCompanyName())) {
+			if (brand == null || StringUtils.isEmpty(brand.getCompanyName())) {
 				brandService.incrementUnknown(data.brand());
 				dedicatedLogger.warn("Cannot resolve brand or company for {}",data.brand());
 				return;
 			}
 			
 			BrandScore brandResult = brandScoreService.getBrandScore(brand.getCompanyName(),"sustainalytics.com");
-			if (null == brandResult) {
+			if (brandResult == null) {
 				dedicatedLogger.warn("No score found for {} - {}",data.brand(), brand.getCompanyName());
 				return;
 			}
@@ -115,19 +122,17 @@ public class SustainalyticsAggregationService extends AbstractScoreAggregationSe
                 return "unknown";
             }
 
-            if (sustainalyticsRating >= 0 && sustainalyticsRating <= 9.9) {
+            if (sustainalyticsRating < 10) {
                 return "negligible";
-            } else if (sustainalyticsRating >= 10 && sustainalyticsRating <= 19.9) {
+            } else if (sustainalyticsRating < 20) {
                 return "low";
-            } else if (sustainalyticsRating >= 20 && sustainalyticsRating <= 29.9) {
+            } else if (sustainalyticsRating < 30) {
                 return "medium";
-            } else if (sustainalyticsRating >= 30 && sustainalyticsRating <= 39.9) {
+            } else if (sustainalyticsRating < 40) {
                 return "high";
-            } else if (sustainalyticsRating >= 40) {
+            } else {
                 return "severe";
             }
-
-            return "unknown";
         }
 
 }

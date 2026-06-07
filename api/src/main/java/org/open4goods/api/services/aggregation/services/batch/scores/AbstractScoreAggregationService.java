@@ -26,17 +26,30 @@ import org.open4goods.api.services.aggregation.services.batch.scores.normalizati
 import org.open4goods.api.services.aggregation.services.batch.scores.normalization.NormalizationStrategyFactory;
 
 /**
- * Base class for batch score aggregation services. It manages lifecycle hooks,
- * cardinality accumulation, virtual score generation and relativisation for a
- * collection of products handled in a batch.
+ * Base class for all batch score aggregation services.
+ *
+ * <p>Manages the full lifecycle:
+ * <ol>
+ *   <li>{@link #init} — clears per-batch cardinality and frequency maps.</li>
+ *   <li>{@link #onProduct} — subclass hook; called once per product.</li>
+ *   <li>{@link #done} — generates virtual scores for products missing a score,
+ *       relativises all scores to the configured scale, ranks products, and
+ *       records the best/worst product ids per score.</li>
+ * </ol>
+ *
+ * <p>Subclasses are responsible for calling {@link #incrementCardinality} for
+ * each score value they emit so that relative bounds are available in
+ * {@code done()}.
  */
 public abstract class AbstractScoreAggregationService extends AbstractAggregationService {
 
-
+        /** Relative cardinality map: key = score name, value = distribution across the batch. */
         protected Map<String, Cardinality> batchDatas = new HashMap<>();
 
+        /** Absolute cardinality map: key = score name, value = raw-value distribution. */
         protected Map<String, Cardinality> absoluteCardinalities = new HashMap<>();
 
+        /** Value-frequency map used by percentile/quantile normalization strategies. */
         protected Map<String, Map<Double, Integer>> valueFrequencies = new HashMap<>();
 
         private final Set<String> legacyScoringLogged = ConcurrentHashMap.newKeySet();
@@ -71,7 +84,7 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
                                 Score s = p.getScores().get(scoreName);
                                 Cardinality source = absoluteCardinalities.get(scoreName);
                                 Cardinality virtual = new Cardinality(source);
-                                if (null == s) {
+                                if (s == null) {
 
 
                                         // Need a virtual score
@@ -95,7 +108,7 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
                 for (Product p : datas) {
                         for (String scoreName : batchDatas.keySet()) {
                                 Score s = p.getScores().get(scoreName);
-				if (null != s) {
+				if (s != null) {
 					try {
 						relativize(s, vConf);
 					} catch (ValidationException e) {
@@ -113,20 +126,22 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 		////////////////////////
 
 		for (String scoreName : batchDatas.keySet()) {
-			// Sort in the list
+			// Only rank products that have a fully relativized score; products missing
+			// the score (e.g. EcoScore skipped due to insufficient data) are excluded.
+			final String sn = scoreName;
 			List<Product> sorted = datas.stream()
-				.sorted((e1, e2) -> {
-					Score s1 = e1.getScores().get(scoreName);
-					Score s2 = e2.getScores().get(scoreName);
-					if (s1 == null || s1.getRelativ() == null || s1.getRelativ().getValue() == null) {
-						throw new RuntimeException("Invalid score state for sorting: " + scoreName + " on product " + e1.getId());
-					}
-					if (s2 == null || s2.getRelativ() == null || s2.getRelativ().getValue() == null) {
-						throw new RuntimeException("Invalid score state for sorting: " + scoreName + " on product " + e2.getId());
-					}
-					return Double.compare(s1.getRelativ().getValue(), s2.getRelativ().getValue());
-				}).toList();
-			
+				.filter(p -> {
+					Score s = p.getScores().get(sn);
+					return s != null && s.getRelativ() != null && s.getRelativ().getValue() != null;
+				})
+				.sorted(java.util.Comparator.comparingDouble(p -> p.getScores().get(sn).getRelativ().getValue()))
+				.toList();
+
+			if (sorted.isEmpty()) {
+				dedicatedLogger.warn("{} -> No products with a relativized score for '{}', skipping ranking", this.getClass().getSimpleName(), scoreName);
+				continue;
+			}
+
 			Long worseGtin = sorted.getFirst().getId();
 			Long bestGtin = sorted.getLast().getId();
 			
@@ -158,14 +173,14 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 
 		// Substracting unused min
 
-		if (null == score.getAbsolute()) {
-			dedicatedLogger.warn("Empty value for Score {} ! Consider normalizing in a futur export/import phase",score);
+		if (score.getAbsolute() == null) {
+			dedicatedLogger.warn("Empty value for Score {} ! Consider normalizing in a future export/import phase",score);
 			return ;
 		}
 		
 		Cardinality cardinality =  batchDatas.get(score.getName());
 
-		if (null == cardinality) {
+		if (cardinality == null) {
 			dedicatedLogger.warn("No source cardinality found for score {}",score);
 			return ;
 		}
@@ -277,11 +292,6 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 	}
 
 
-        private Integer relativize(Integer count, Cardinality absolute) throws ValidationException{
-		
-                return relativize(Double.valueOf(count), absolute).intValue();
-        }
-
         /**
          * Hook used to let subclasses override the absolute value stored for a score.
          */
@@ -300,7 +310,7 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 	 * @throws ValidationException 
 	 */
 	public Double relativize(Double value, Cardinality abs) throws ValidationException {
-		if (null == value) {
+		if (value == null) {
 			throw new ValidationException("Empty value in relativization");
 		}
         
@@ -341,17 +351,17 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
         protected void incrementCardinality(String scoreName, Double value, VerticalConfig vConf) throws ValidationException {
 
 
-                if (null == value) {
-                        throw new ValidationException("Empty value for Score " + scoreName + " ! Consider normalizing in a futur export/import phase");
+                if (value == null) {
+                        throw new ValidationException("Empty value for Score " + scoreName + " ! Consider normalizing in a future export/import phase");
                 }
 
                 Cardinality absolute = absoluteCardinalities.get(scoreName);
-                if (null == absolute) {
+                if (absolute == null) {
                         absolute = new Cardinality();
                 }
 
                 Cardinality relative = batchDatas.get(scoreName);
-                if (null == relative) {
+                if (relative == null) {
                         relative = new Cardinality();
                 }
 
@@ -366,13 +376,8 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
         }
 
         private void incrementValueFrequency(String scoreName, Double value) {
-                Map<Double, Integer> frequencies = valueFrequencies.computeIfAbsent(scoreName, key -> new HashMap<>());
-                Integer current = frequencies.get(value);
-                if (current == null) {
-                        frequencies.put(value, 1);
-                        return;
-                }
-                frequencies.put(value, current + 1);
+                valueFrequencies.computeIfAbsent(scoreName, key -> new HashMap<>())
+                        .merge(value, 1, Integer::sum);
         }
 
         private boolean shouldTrackFrequencies(String scoreName, VerticalConfig vConf) {
@@ -450,4 +455,35 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 
 
 
+
+        /**
+         * Resolves the best available relative value for a score, falling back through
+         * relativized → absolute (on-the-fly relativization) → raw.
+         *
+         * <p>Returns {@code null} when no value can be resolved, logging a warning in
+         * each fallback step.
+         *
+         * @param scoreName score identifier used in warning messages
+         * @param score     the score whose value is needed
+         * @return resolved relative value, or {@code null} if unavailable
+         */
+        protected Double resolveRelativeValue(String scoreName, Score score) {
+                if (score.getRelativ() != null && score.getRelativ().getValue() != null) {
+                        return score.getRelativ().getValue();
+                }
+                if (score.getAbsolute() != null && score.getAbsolute().getValue() != null) {
+                        try {
+                                return relativize(score.getAbsolute().getValue(), score.getAbsolute());
+                        } catch (ValidationException e) {
+                                dedicatedLogger.warn("Relativization failed for {} : {}", scoreName, e.getMessage());
+                                return null;
+                        }
+                }
+                if (score.getValue() != null) {
+                        dedicatedLogger.warn("Using raw value for {} due to missing cardinalities", scoreName);
+                        return score.getValue();
+                }
+                dedicatedLogger.warn("Cannot resolve relative value for {}", scoreName);
+                return null;
+        }
 }

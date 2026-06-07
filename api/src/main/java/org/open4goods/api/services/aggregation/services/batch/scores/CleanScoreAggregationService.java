@@ -1,7 +1,6 @@
 package org.open4goods.api.services.aggregation.services.batch.scores;
 
 import java.util.Collection;
-import java.util.Map;
 
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.model.product.Product;
