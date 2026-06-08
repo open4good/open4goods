@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.Normalizer;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -26,6 +27,7 @@ import org.open4goods.commons.helper.ProductConditionParser;
 import org.open4goods.commons.helper.ResourceHelper;
 import org.open4goods.commons.helper.ShippingCostParser;
 import org.open4goods.commons.helper.ShippingTimeParser;
+import org.open4goods.commons.helper.StockQuantityParser;
 import org.open4goods.commons.model.crawlers.IndexationJobStat;
 import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.crawler.services.DataFragmentCompletionService;
@@ -87,6 +89,80 @@ public class CsvIndexationWorker implements Runnable {
 	        .build();
 
 	private static final String CLASSPATH_PREFIX = "classpath:";
+
+	private static final List<String> DEFAULT_PRICE_COLUMNS = List.of(
+	        "price",
+	        "Price",
+	        "current price",
+	        "Current price",
+	        "product_price",
+	        "sale_price",
+	        "search_price",
+	        "price_vat_inc",
+	        "base_price",
+	        "prix",
+	        "prix ttc",
+	        "prix_ttc",
+	        "StrikePrice");
+
+	private static final List<String> DEFAULT_PRODUCT_STATE_COLUMNS = List.of(
+	        "condition",
+	        "product condition",
+	        "item condition",
+	        "state",
+	        "etat",
+	        "état",
+	        "etat produit",
+	        "état produit");
+
+	private static final List<String> DEFAULT_IN_STOCK_COLUMNS = List.of(
+	        "availability",
+	        "Availability",
+	        "product availability",
+	        "stock indicator",
+	        "StockIndicator",
+	        "stock status",
+	        "Stock status",
+	        "stock_status",
+	        "in_stock",
+	        "stock");
+
+	private static final List<String> DEFAULT_QUANTITY_IN_STOCK_COLUMNS = List.of(
+	        "quantity",
+	        "quantity_in_stock",
+	        "stock quantity",
+	        "stock_quantity",
+	        "stock qty",
+	        "qty",
+	        "available quantity");
+
+	private static final List<String> DEFAULT_SHIPPING_COST_COLUMNS = List.of(
+	        "shipping costs",
+	        "shipping cost",
+	        "shipping_cost",
+	        "delivery cost",
+	        "delivery_cost",
+	        "frais de port",
+	        "frais de livraison");
+
+	private static final List<String> DEFAULT_SHIPPING_TIME_COLUMNS = List.of(
+	        "shipping time",
+	        "shipping_time",
+	        "delivery time",
+	        "delivery delay",
+	        "delais de livraison",
+	        "délais de livraison",
+	        "délai de livraison");
+
+	private static final Map<ReferentielKey, List<String>> DEFAULT_REFERENTIEL_COLUMNS = Map.of(
+	        ReferentielKey.GTIN, List.of("EAN or ISBN", "EAN", "ISBN", "gtin", "ean", "ean13", "barcode"),
+	        ReferentielKey.BRAND, List.of("brand", "Brand", "brand name", "brand_name", "manufacturer", "Manufacturer"),
+	        ReferentielKey.MODEL, List.of("manufacturer reference", "Manufacturer reference", "internal reference",
+	                "Internal reference", "model", "reference", "product_reference"));
+
+	private static final List<String> DEFAULT_MPN_COLUMNS = List.of("manufacturer reference", "Manufacturer reference", "mpn", "MPN");
+
+	private static final List<String> DEFAULT_SKU_COLUMNS = List.of("sku", "SKU", "internal reference", "Internal reference");
 
 	/** The service used to "atomically" fetch and store / update DataFragments **/
 	private final CsvDatasourceFetchingService csvService;
@@ -424,8 +500,8 @@ public class CsvIndexationWorker implements Runnable {
 	    setRating(dataFragment, item, config, dedicatedLogger);
 	    setDescription(dataFragment, item, config);
 	    addResources(dataFragment, item, config, dedicatedLogger);
-	    setInStock(dataFragment, item, config, dedicatedLogger);
-	    setShippingDetails(dataFragment, item, config, dedicatedLogger);
+	    boolean explicitStockAvailability = setInStock(dataFragment, item, config, dedicatedLogger);
+	    setShippingDetails(dataFragment, item, config, dedicatedLogger, explicitStockAvailability);
 	    setProductState(dataFragment, item, config, dedicatedLogger);
 	    addReferentielAttributes(dataFragment, item, config, dedicatedLogger);
 	    addExternalIds(dataFragment, item, config);
@@ -536,34 +612,60 @@ public class CsvIndexationWorker implements Runnable {
 	 */
 	private void setPrice(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger) {
 	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
-	    if (csvProperties.getPrice() != null) {
-	        for (String priceColumn : csvProperties.getPrice()) {
-	            try {
-	                Price price = new Price();
-	                String value = getFromCsvRow(item, priceColumn);
-	                if (!StringUtils.isEmpty(value)) {
-	                    price.setPriceValue(value, Locale.forLanguageTag(config.getLanguage().toUpperCase()));
-	                    price.setCurrency(csvProperties.getCurrency());
-	                    dataFragment.setPrice(price);
-	                    // Delete from source
-	                    removeFromSource(item, priceColumn);
-	                    break;
-	                }
-	            } catch (Exception e) {
-	                handlePriceFallback(dataFragment, item, priceColumn, config, logger);
-	            }
-	            
-	            
-	        }
+	    Set<String> configuredPriceColumns = csvProperties.getPrice();
+	    Set<String> attemptedPriceColumns = new LinkedHashSet<>();
+	    if (configuredPriceColumns != null) {
+	        attemptedPriceColumns.addAll(configuredPriceColumns);
+	        trySetPriceFromColumns(dataFragment, item, configuredPriceColumns, config, logger);
 	    }
 	    if (null == dataFragment.getPrice() || null == dataFragment.getPrice().getPrice()) {
-	    	logger.warn("No price extracted for row with {} columns; configured price columns {}; available columns {}",
-	    	        item.size(),
-	    	        csvProperties.getPrice(),
-	    	        item.keySet());
+	        List<String> fallbackPriceColumns = DEFAULT_PRICE_COLUMNS.stream()
+	                .filter(candidate -> attemptedPriceColumns.stream()
+	                        .noneMatch(attempted -> comparableCsvHeader(attempted).equals(comparableCsvHeader(candidate))))
+	                .toList();
+	        trySetPriceFromColumns(dataFragment, item, fallbackPriceColumns, config, logger);
+	    }
+	    if (null == dataFragment.getPrice() || null == dataFragment.getPrice().getPrice()) {
+	        logger.warn("No price extracted for row with {} columns; configured price columns {}; default price columns {}; available row values {}",
+	                item.size(),
+	                csvProperties.getPrice(),
+	                DEFAULT_PRICE_COLUMNS,
+	                item);
 	    }
 	    
 	    
+	}
+
+	/**
+	 * Tries to set the DataFragment price from the first non-empty matching CSV column.
+	 *
+	 * @param dataFragment DataFragment to set the price
+	 * @param item Map representing a CSV line
+	 * @param priceColumns candidate column names containing the price
+	 * @param config DataSourceProperties for configuration settings
+	 * @param logger Logger for logging information
+	 */
+	private void trySetPriceFromColumns(DataFragment dataFragment, Map<String, String> item, Iterable<String> priceColumns, DataSourceProperties config, Logger logger) {
+	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
+	    for (String priceColumn : priceColumns) {
+	        try {
+	            Price price = new Price();
+	            String value = getFromCsvRow(item, priceColumn);
+	            if (!StringUtils.isEmpty(value)) {
+	                price.setPriceValue(value, Locale.forLanguageTag(config.getLanguage().toUpperCase()));
+	                price.setCurrency(csvProperties.getCurrency());
+	                dataFragment.setPrice(price);
+	                // Delete from source
+	                removeFromSource(item, priceColumn);
+	                break;
+	            }
+	        } catch (Exception e) {
+	            handlePriceFallback(dataFragment, item, priceColumn, config, logger);
+	        }
+	        if (null != dataFragment.getPrice() && null != dataFragment.getPrice().getPrice()) {
+	            break;
+	        }
+	    }
 	}
 
 	/**
@@ -732,25 +834,26 @@ public class CsvIndexationWorker implements Runnable {
 	 * @param config DataSourceProperties for configuration settings
 	 * @param logger Logger for logging information
 	 */
-	private void setInStock(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger) {
+	private boolean setInStock(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger) {
 	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
 	    dataFragment.setInStock(InStock.INSTOCK);
-	    if (csvProperties.getInStock() != null) {
-	        for (String inStockColumn : csvProperties.getInStock()) {
-	            try {
-					String value = getFromCsvRow(item, inStockColumn);
-					if (!StringUtils.isEmpty(value)) {
-						InStock inStock = InStockParser.parse(value);
-						if (inStock != null) {
-							dataFragment.setInStock(inStock);
-						}
-					}
+	    for (String inStockColumn : candidateColumns(csvProperties.getInStock(), DEFAULT_IN_STOCK_COLUMNS)) {
+	        String value = getFromCsvRow(item, inStockColumn);
+	        if (StringUtils.isEmpty(value)) {
+	            continue;
+	        }
+	        try {
+				InStock inStock = InStockParser.parse(value);
+				if (inStock != null) {
+					dataFragment.setInStock(inStock);
 					removeFromSource(item, inStockColumn);
-	            } catch (Exception e) {
-	                logger.info("Cannot parse InStock : {}", e.getMessage());
-	            }
+					return true;
+				}
+	        } catch (Exception e) {
+	            logger.info("Cannot parse InStock : {}", e.getMessage());
 	        }
 	    }
+	    return false;
 	}
 
 	/**
@@ -761,11 +864,11 @@ public class CsvIndexationWorker implements Runnable {
 	 * @param config DataSourceProperties for configuration settings
 	 * @param logger Logger for logging information
 	 */
-	private void setShippingDetails(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger) {
+	private void setShippingDetails(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger, boolean explicitStockAvailability) {
 	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
 	    setShippingTime(dataFragment, item, csvProperties, logger);
 	    setShippingCost(dataFragment, item, csvProperties, logger);
-	    setQuantityInStock(dataFragment, item, csvProperties, logger);
+	    setQuantityInStock(dataFragment, item, csvProperties, logger, explicitStockAvailability);
 	    setWarranty(dataFragment, item, csvProperties, logger);
 	}
 
@@ -778,12 +881,16 @@ public class CsvIndexationWorker implements Runnable {
 	 * @param logger Logger for logging information
 	 */
 	private void setShippingTime(DataFragment dataFragment, Map<String, String> item, CsvDataSourceProperties csvProperties, Logger logger) {
-	    if (!StringUtils.isEmpty(csvProperties.getShippingTime())) {
-	        String shippingTimeStr = getFromCsvRow(item, csvProperties.getShippingTime());
+	    for (String shippingTimeColumn : candidateColumns(csvProperties.getShippingTime(), DEFAULT_SHIPPING_TIME_COLUMNS)) {
+	        String shippingTimeStr = getFromCsvRow(item, shippingTimeColumn);
+	        if (StringUtils.isEmpty(shippingTimeStr)) {
+	            continue;
+	        }
 	        try {
 	            dataFragment.setShippingTime(ShippingTimeParser.parse(shippingTimeStr));
 	            // Delete from source
-                removeFromSource(item, csvProperties.getShippingTime());
+                removeFromSource(item, shippingTimeColumn);
+                return;
 	        } catch (Exception e) {
 	            logger.info("Cannot parse shippingTime : {}", e.getMessage());
 	        }
@@ -798,17 +905,23 @@ public class CsvIndexationWorker implements Runnable {
 	 * @param csvProperties CsvDataSourceProperties for configuration settings
 	 * @param logger Logger for logging information
 	 */
-	private void setQuantityInStock(DataFragment dataFragment, Map<String, String> item, CsvDataSourceProperties csvProperties, Logger logger) {
-	    if (!StringUtils.isEmpty(csvProperties.getQuantityInStock())) {
-	        String quantityStr = getFromCsvRow(item, csvProperties.getQuantityInStock());
-	        if (null != quantityStr) {
-		        try {
-		            dataFragment.setQuantityInStock(Integer.valueOf(quantityStr));
-		            // Delete from source
-	                removeFromSource(item, csvProperties.getQuantityInStock());
-		        } catch (Exception e) {
-		            logger.info("Cannot parse QuantityInStock : {}", e.getMessage());
-		        }
+	private void setQuantityInStock(DataFragment dataFragment, Map<String, String> item, CsvDataSourceProperties csvProperties, Logger logger, boolean explicitStockAvailability) {
+	    for (String quantityColumn : candidateColumns(csvProperties.getQuantityInStock(), DEFAULT_QUANTITY_IN_STOCK_COLUMNS)) {
+	        String quantityStr = getFromCsvRow(item, quantityColumn);
+	        if (StringUtils.isEmpty(quantityStr)) {
+	            continue;
+	        }
+	        try {
+	            Integer quantity = StockQuantityParser.parse(quantityStr);
+	            dataFragment.setQuantityInStock(quantity);
+	            if (!explicitStockAvailability && quantity == 0) {
+	                dataFragment.setInStock(InStock.OUTOFSTOCK);
+	            }
+	            // Delete from source
+                removeFromSource(item, quantityColumn);
+                return;
+	        } catch (Exception e) {
+	            logger.info("Cannot parse QuantityInStock : {}", e.getMessage());
 	        }
 	    }
 	}
@@ -822,12 +935,16 @@ public class CsvIndexationWorker implements Runnable {
 	 * @param logger Logger for logging information
 	 */
 	private void setShippingCost(DataFragment dataFragment, Map<String, String> item, CsvDataSourceProperties csvProperties, Logger logger) {
-	    if (!StringUtils.isEmpty(csvProperties.getShippingCost())) {
-	        String costStr = getFromCsvRow(item, csvProperties.getShippingCost());
+	    for (String shippingCostColumn : candidateColumns(csvProperties.getShippingCost(), DEFAULT_SHIPPING_COST_COLUMNS)) {
+	        String costStr = getFromCsvRow(item, shippingCostColumn);
+	        if (StringUtils.isEmpty(costStr)) {
+	            continue;
+	        }
 	        try {
 	            dataFragment.setShippingCost(ShippingCostParser.parse(costStr));
 	         // Delete from source
-                removeFromSource(item, csvProperties.getShippingCost());
+                removeFromSource(item, shippingCostColumn);
+                return;
 	        } catch (Exception e) {
 	            logger.info("Cannot parse ShippingCost : {}", e.getMessage());
 	        }
@@ -866,19 +983,21 @@ public class CsvIndexationWorker implements Runnable {
 	private void setProductState(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger) {
 	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
 	    dataFragment.setProductState(config.getDefaultItemCondition());
-	    if (csvProperties.getProductState() != null) {
-	        for (String productStateColumn : csvProperties.getProductState()) {
-	            try {
-	                ProductCondition productState = ProductConditionParser.parse(getFromCsvRow(item, productStateColumn));
-	                if (productState != null) {
-	                    dataFragment.setProductState(productState);
-		                // Delete from source
-	                    removeFromSource(item, productStateColumn);
-	                    continue;
-	                }
-	            } catch (Exception e) {
-	                logger.info("Cannot parse product state : {}", e.getMessage());
+	    for (String productStateColumn : candidateColumns(csvProperties.getProductState(), DEFAULT_PRODUCT_STATE_COLUMNS)) {
+	        String value = getFromCsvRow(item, productStateColumn);
+	        if (StringUtils.isEmpty(value)) {
+	            continue;
+	        }
+	        try {
+	            ProductCondition productState = ProductConditionParser.parse(value);
+	            if (productState != null) {
+	                dataFragment.setProductState(productState);
+	                // Delete from source
+	                removeFromSource(item, productStateColumn);
+	                return;
 	            }
+	        } catch (Exception e) {
+	            logger.info("Cannot parse product state : {}", e.getMessage());
 	        }
 	    }
 	}
@@ -904,6 +1023,22 @@ public class CsvIndexationWorker implements Runnable {
 	            }
 	        }
 	    }
+	    for (Map.Entry<ReferentielKey, List<String>> entry : DEFAULT_REFERENTIEL_COLUMNS.entrySet()) {
+	        if (dataFragment.getReferentielAttributes().containsKey(entry.getKey())) {
+	            continue;
+	        }
+	        for (String key : entry.getValue()) {
+	            String value = getFromCsvRow(item, key);
+	            if (!StringUtils.isEmpty(value)) {
+	                dataFragment.addReferentielAttribute(entry.getKey().name(), value);
+	                if (ReferentielKey.MODEL.equals(entry.getKey()) && isDefaultMpnColumn(key)) {
+	                    dataFragment.getExternalIds().getMpn().add(value);
+	                }
+	                removeFromSource(item, key);
+	                break;
+	            }
+	        }
+	    }
 	}
 
 	/**
@@ -915,20 +1050,25 @@ public class CsvIndexationWorker implements Runnable {
 	 */
 	private void addExternalIds(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config) {
 	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
-	    for (String key : csvProperties.getMpn()) {
+	    for (String key : candidateColumns(csvProperties.getMpn(), DEFAULT_MPN_COLUMNS)) {
 	        String value = getFromCsvRow(item, key);
 	        if (!StringUtils.isEmpty(value)) {
 	            dataFragment.getExternalIds().getMpn().add(value);
 	            removeFromSource(item, key);
 	        }
 	    }
-	    for (String key : csvProperties.getSku()) {
+	    for (String key : candidateColumns(csvProperties.getSku(), DEFAULT_SKU_COLUMNS)) {
 	        String value = getFromCsvRow(item, key);
 	        if (!StringUtils.isEmpty(value)) {
 	            dataFragment.getExternalIds().getSku().add(value);
 	            removeFromSource(item, key);
 	        }
 	    }
+	}
+
+	private boolean isDefaultMpnColumn(String key) {
+	    return DEFAULT_MPN_COLUMNS.stream()
+	            .anyMatch(candidate -> comparableCsvHeader(candidate).equals(comparableCsvHeader(key)));
 	}
 
 	/**
@@ -1071,6 +1211,24 @@ public class CsvIndexationWorker implements Runnable {
 	 * @param colName
 	 * @return
 	 */
+	private List<String> candidateColumns(String configuredColumn, List<String> defaultColumns) {
+	    LinkedHashSet<String> candidates = new LinkedHashSet<>();
+	    if (!StringUtils.isEmpty(configuredColumn)) {
+	        candidates.add(configuredColumn);
+	    }
+	    candidates.addAll(defaultColumns);
+	    return candidates.stream().toList();
+	}
+
+	private List<String> candidateColumns(Set<String> configuredColumns, List<String> defaultColumns) {
+	    LinkedHashSet<String> candidates = new LinkedHashSet<>();
+	    if (configuredColumns != null) {
+	        candidates.addAll(configuredColumns);
+	    }
+	    candidates.addAll(defaultColumns);
+	    return candidates.stream().toList();
+	}
+
 	private String getFromCsvRow(final Map<String, String> item, final String colName) {
 		String actualKey = actualCsvKey(item, colName);
 		return actualKey == null ? null : item.get(actualKey);

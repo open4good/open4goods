@@ -1,0 +1,112 @@
+{
+  "groups": [
+    {
+      "name": "feed",
+      "type": "org.open4goods.services.feedservice.config.FeedConfiguration",
+      "sourceType": "org.open4goods.services.feedservice.config.FeedConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "feed.indexation.cron",
+      "type": "java.lang.String",
+      "description": "Cron expression for feed datasource indexation."
+    },
+    {
+      "name": "feed.awin.cron",
+      "type": "java.lang.String",
+      "description": "Cron expression for Awin feed discovery."
+    },
+    {
+      "name": "feed.awin.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable Awin feed discovery.",
+      "defaultValue": true
+    },
+    {
+      "name": "feed.awin.cache-ttl-days",
+      "type": "java.lang.Integer",
+      "description": "Awin catalog cache TTL in days.",
+      "defaultValue": 1
+    },
+    {
+      "name": "feed.effiliation.cron",
+      "type": "java.lang.String",
+      "description": "Cron expression for Effiliation feed discovery."
+    },
+    {
+      "name": "feed.effiliation.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable Effiliation feed discovery.",
+      "defaultValue": true
+    },
+    {
+      "name": "feed.effiliation.cache-ttl-days",
+      "type": "java.lang.Integer",
+      "description": "Effiliation catalog cache TTL in days.",
+      "defaultValue": 1
+    },
+    {
+      "name": "feed.effiliation.max-jitter-seconds",
+      "type": "java.lang.Integer",
+      "description": "Maximum Effiliation scheduling jitter in seconds.",
+      "defaultValue": 30
+    },
+    {
+      "name": "feed.tradetracker.cron",
+      "type": "java.lang.String",
+      "description": "Cron expression for TradeTracker feed discovery."
+    },
+    {
+      "name": "feed.tradetracker.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable TradeTracker feed discovery.",
+      "defaultValue": false
+    },
+    {
+      "name": "feed.tradetracker.cache-ttl-days",
+      "type": "java.lang.Integer",
+      "description": "TradeTracker catalog cache TTL in days.",
+      "defaultValue": 1
+    },
+    {
+      "name": "feed.kwanko.cron",
+      "type": "java.lang.String",
+      "description": "Cron expression for Kwanko feed discovery."
+    },
+    {
+      "name": "feed.kwanko.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable Kwanko feed discovery.",
+      "defaultValue": false
+    },
+    {
+      "name": "feed.kwanko.cache-ttl-days",
+      "type": "java.lang.Integer",
+      "description": "Kwanko catalog cache TTL in days.",
+      "defaultValue": 1
+    },
+    {
+      "name": "feed.webgains.cron",
+      "type": "java.lang.String",
+      "description": "Cron expression for Webgains feed discovery."
+    },
+    {
+      "name": "feed.webgains.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable Webgains feed discovery.",
+      "defaultValue": false
+    },
+    {
+      "name": "feed.webgains.cache-ttl-days",
+      "type": "java.lang.Integer",
+      "description": "Webgains catalog cache TTL in days.",
+      "defaultValue": 1
+    },
+    {
+      "name": "feed.webgains.offers-and-vouchers-endpoint",
+      "type": "java.lang.String",
+      "description": "Webgains offers and vouchers API endpoint."
+    }
+  ]
+}

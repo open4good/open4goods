@@ -17,7 +17,7 @@
       "name": "review.generation.max-queue-size",
       "type": "java.lang.Integer",
       "description": "Maximum size of the executor queue.",
-      "defaultValue": 100
+      "defaultValue": 1000
     },
     {
       "name": "review.generation.preferred-domains",
@@ -42,6 +42,17 @@
       "type": "java.util.List<java.lang.String>",
       "description": "Domain substrings excluded from manufacturer official URL detection.",
       "defaultValue": []
+    },
+    {
+      "name": "review.generation.official-domains-by-brand",
+      "type": "java.util.Map<java.lang.String,java.util.List<java.lang.String>>",
+      "description": "Brand-to-official-host overrides for private-label or manufacturer brands whose official pages live on a retailer or group domain.",
+      "defaultValue": {}
+    },
+    {
+      "name": "review.generation.brand-aliases",
+      "type": "java.util.Map<java.lang.String,java.util.List<java.lang.String>>",
+      "description": "Sibling-brand aliases used when judging whether a source belongs to the same manufacturer group."
     },
     {
       "name": "review.generation.query-template",
@@ -89,13 +100,36 @@
       "name": "review.generation.max-search",
       "type": "java.lang.Integer",
       "description": "Maximum number of search queries allowed.",
-      "defaultValue": 2
+      "defaultValue": 5
     },
     {
       "name": "review.generation.partial-retry-max-search",
       "type": "java.lang.Integer",
       "description": "Extra targeted searches allowed when the first fetch pass collected official product evidence but did not reach source or token thresholds.",
       "defaultValue": 2
+    },
+    {
+      "name": "review.generation.low-quality-fallback-max-search",
+      "type": "java.lang.Integer",
+      "description": "Extra GTIN/model fallback searches allowed when accepted source quality is too low.",
+      "defaultValue": 2
+    },
+    {
+      "name": "review.generation.min-global-tokens",
+      "type": "java.lang.Integer",
+      "description": "Minimum global token count required for a successful review evidence fetch.",
+      "defaultValue": 7500
+    },
+    {
+      "name": "review.generation.min-url-count",
+      "type": "java.lang.Integer",
+      "description": "Minimum accepted URL count required for a successful review evidence fetch.",
+      "defaultValue": 4
+    },
+    {
+      "name": "review.generation.fetch-thresholds-by-vertical",
+      "type": "java.util.Map<java.lang.String,org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig$FetchQualityThreshold>",
+      "description": "Vertical-specific thresholds used to classify fetched review evidence as complete, partial, or failed."
     },
     {
       "name": "review.generation.max-total-tokens",
@@ -122,6 +156,24 @@
       "defaultValue": 10000
     },
     {
+      "name": "review.generation.max-urls-per-product",
+      "type": "java.lang.Integer",
+      "description": "Maximum URLs to fetch per product in the retrieval pipeline.",
+      "defaultValue": 10
+    },
+    {
+      "name": "review.generation.facts-max-stored",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of stored facts per product.",
+      "defaultValue": 40
+    },
+    {
+      "name": "review.generation.fact-max-markdown-chars",
+      "type": "java.lang.Integer",
+      "description": "Maximum markdown size per stored fact.",
+      "defaultValue": 20000
+    },
+    {
       "name": "review.generation.markdown-line-removal-patterns",
       "type": "java.util.List<java.lang.String>",
       "description": "Regex patterns applied line by line to remove header, footer, cookie, newsletter, and other markdown noise before token counting."
@@ -140,9 +192,9 @@
     },
     {
       "name": "review.generation.estimated-time",
-      "type": "java.time.Duration",
+      "type": "java.lang.Long",
       "description": "Estimated time for review generation process. Used to compute remaining time.",
-      "defaultValue": "PT2M"
+      "defaultValue": 120000
     },
     {
       "name": "review.generation.regeneration-delay-days",
@@ -161,18 +213,6 @@
       "type": "java.lang.String",
       "description": "Prompt key used for external-source review generation.",
       "defaultValue": "review-generation"
-    },
-    {
-      "name": "review.generation.grounded-prompt-key",
-      "type": "java.lang.String",
-      "description": "Prompt key used for model-native web search review generation.",
-      "defaultValue": "review-generation-grounded"
-    },
-    {
-      "name": "review.generation.use-grounded-prompt",
-      "type": "java.lang.Boolean",
-      "description": "Enable model-native web search prompt flow.",
-      "defaultValue": false
     },
     {
       "name": "review.generation.batch-poll-interval",

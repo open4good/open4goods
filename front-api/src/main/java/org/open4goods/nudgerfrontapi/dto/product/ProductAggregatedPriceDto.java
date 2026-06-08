@@ -31,6 +31,12 @@ public record ProductAggregatedPriceDto(
         @Schema(description = "Timestamp of the price in epoch milliseconds")
         Long timeStamp,
         @Schema(description = "Human friendly representation of the price", nullable = true)
-        String shortPrice
+        String shortPrice,
+        @Schema(description = "Available stock quantity reported by the merchant", example = "12", nullable = true)
+        Integer quantityInStock,
+        @Schema(description = "Shipping cost reported by the merchant, in the offer currency", example = "4.99", nullable = true)
+        Double shippingCost,
+        @Schema(description = "Shipping delay reported by the merchant, in days", example = "3", nullable = true)
+        Integer shippingTimeDays
 ) {
 }

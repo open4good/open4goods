@@ -1060,8 +1060,7 @@ public class ReviewGenerationPreprocessingService {
 	private boolean isAcceptedSourceClass(SourceClass sourceClass) {
 		return sourceClass == SourceClass.OFFICIAL_PRODUCT || sourceClass == SourceClass.OFFICIAL_SUPPORT
 				|| sourceClass == SourceClass.REVIEW || sourceClass == SourceClass.GUIDE
-				|| sourceClass == SourceClass.COMPARISON_PRODUCT_PAGE
-				|| sourceClass == SourceClass.RETAIL_PRODUCT_PAGE;
+				|| sourceClass == SourceClass.COMPARISON_PRODUCT_PAGE;
 	}
 
 	private boolean isComparisonProductPage(GoogleSearchResult result, String evidence) {
@@ -1878,6 +1877,49 @@ public class ReviewGenerationPreprocessingService {
 		return trimmed + "\n\n[Official source truncated to stay within the per-source token budget.]";
 	}
 
+	// Matches an ISO 639-1 (2-letter) or BCP 47 locale tag (e.g. fr, en-us) as the first path segment.
+	private static final Pattern LOCALE_PATH_PREFIX = Pattern.compile(
+			"^/([a-z]{2}(?:-[a-z]{2})?)/(.*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+	private String canonicalPath(String url) {
+		try {
+			String path = URI.create(url).getPath();
+			if (path == null || path.isEmpty()) return "/";
+			Matcher m = LOCALE_PATH_PREFIX.matcher(path);
+			return m.matches() ? "/" + m.group(2) : path;
+		} catch (Exception e) {
+			return url;
+		}
+	}
+
+	private void deduplicateLocaleVariantSources(Product product, Map<String, String> sourcesMap,
+			Map<String, Integer> tokensMap, Map<String, SourceClass> sourceClasses,
+			Map<String, String> rejectedUrls, String preferredLocale) {
+		Map<String, List<String>> groups = new LinkedHashMap<>();
+		for (String url : new ArrayList<>(sourcesMap.keySet())) {
+			String rootH = rootHost(url);
+			if (rootH == null) continue;
+			String key = rootH + "|" + canonicalPath(url);
+			groups.computeIfAbsent(key, k -> new ArrayList<>()).add(url);
+		}
+		for (List<String> variants : groups.values()) {
+			if (variants.size() <= 1) continue;
+			String best = variants.get(0);
+			for (int i = 1; i < variants.size(); i++) {
+				best = selectBestDuplicate(best, variants.get(i), tokensMap, preferredLocale);
+			}
+			for (String url : variants) {
+				if (url.equals(best)) continue;
+				logger.info("Deduplicating locale variants for UPC {}: keeping {}, discarding {}",
+						product == null ? "unknown" : product.getId(), best, url);
+				sourcesMap.remove(url);
+				tokensMap.remove(url);
+				sourceClasses.remove(url);
+				rejectedUrls.put(url, "deduplicated: locale variant of " + best);
+			}
+		}
+	}
+
 	private void deduplicateSimilarSources(Product product, Map<String, String> sourcesMap,
 			Map<String, Integer> tokensMap, Map<String, SourceClass> sourceClasses,
 			Map<String, String> rejectedUrls) {
@@ -1890,6 +1932,7 @@ public class ReviewGenerationPreprocessingService {
 		} else {
 			preferredLocale = "fr";
 		}
+		deduplicateLocaleVariantSources(product, sourcesMap, tokensMap, sourceClasses, rejectedUrls, preferredLocale);
 		List<String> urls = new ArrayList<>(sourcesMap.keySet());
 		Set<String> removed = new HashSet<>();
 		for (int i = 0; i < urls.size(); i++) {

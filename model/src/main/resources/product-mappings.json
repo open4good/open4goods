@@ -284,6 +284,19 @@
                         "productState": {
                             "type": "keyword"
                         },
+                        "quantityInStock": {
+                            "type": "integer"
+                        },
+                        "shippingCost": {
+                            "type": "double",
+                            "index": false,
+                            "doc_values": false
+                        },
+                        "shippingTime": {
+                            "type": "integer",
+                            "index": false,
+                            "doc_values": false
+                        },
                         "timeStamp": {
                             "type": "date",
                             "format": "epoch_millis"

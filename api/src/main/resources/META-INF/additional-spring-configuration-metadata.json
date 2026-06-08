@@ -1,75 +1,152 @@
 {
   "properties": [
     {
-      "name": "resourceCompletionConfig.force-erase-file-name",
+      "name": "resource-completion-config.force-erase-file-name",
       "type": "java.lang.Boolean",
       "description": "Regenerate resource file names even when a file name already exists.",
       "defaultValue": false
     },
     {
-      "name": "resourceCompletionConfig.download-user-agent",
+      "name": "resource-completion-config.download-user-agent",
       "type": "java.lang.String",
       "description": "User-agent sent when downloading remote resources."
     },
     {
-      "name": "resourceCompletionConfig.connect-timeout-ms",
+      "name": "resource-completion-config.connect-timeout-ms",
       "type": "java.lang.Integer",
       "description": "Connection timeout, in milliseconds, for remote resource downloads.",
       "defaultValue": 1000
     },
     {
-      "name": "resourceCompletionConfig.socket-timeout-ms",
+      "name": "resource-completion-config.socket-timeout-ms",
       "type": "java.lang.Integer",
       "description": "Socket timeout, in milliseconds, for remote resource downloads.",
       "defaultValue": 1000
     },
     {
-      "name": "resourceCompletionConfig.embedding-similarity-threshold",
+      "name": "resource-completion-config.embedding-similarity-threshold",
       "type": "java.lang.Double",
       "description": "Cosine similarity threshold used to group image embeddings.",
       "defaultValue": 0.8
     },
     {
-      "name": "resourceCompletionConfig.perceptive-hash-size",
+      "name": "resource-completion-config.perceptive-hash-size",
       "type": "java.lang.Integer",
       "description": "Perceptive hash size used by jImageHash.",
       "defaultValue": 32
     },
     {
-      "name": "resourceCompletionConfig.perceptive-hash-alpha-threshold",
+      "name": "resource-completion-config.perceptive-hash-alpha-threshold",
       "type": "java.lang.Integer",
       "description": "Alpha value above which transparent pixels are treated as opaque for perceptive hashing.",
       "defaultValue": 243
     },
     {
-      "name": "resourceCompletionConfig.pdf-language-min-confidence",
+      "name": "resource-completion-config.pdf-language-min-confidence",
       "type": "java.lang.Double",
       "description": "Minimum language detector raw score for a language to count as present in a PDF.",
       "defaultValue": 0.5
     },
     {
-      "name": "resourceCompletionConfig.pdf-language-max-pages",
+      "name": "resource-completion-config.pdf-language-max-pages",
       "type": "java.lang.Integer",
       "description": "Maximum number of PDF pages extracted for language detection.",
       "defaultValue": 5
     },
     {
-      "name": "resourceCompletionConfig.pdf-language-max-chars",
+      "name": "resource-completion-config.pdf-language-max-chars",
       "type": "java.lang.Integer",
       "description": "Maximum number of extracted characters used for PDF language detection.",
       "defaultValue": 20000
     },
     {
-      "name": "resourceCompletionConfig.pdf-title-max-lines",
+      "name": "resource-completion-config.pdf-title-max-lines",
       "type": "java.lang.Integer",
       "description": "Maximum number of first-page text lines inspected for PDF title extraction.",
       "defaultValue": 10
     },
     {
-      "name": "resourceCompletionConfig.pdf-title-font-size-tolerance",
+      "name": "resource-completion-config.pdf-title-font-size-tolerance",
       "type": "java.lang.Float",
       "description": "Font-size tolerance used when grouping PDF title candidate lines.",
       "defaultValue": 0.8
+    },
+    {
+      "name": "fetcher-properties.feed-configs",
+      "type": "java.util.Map<java.lang.String,org.open4goods.services.feedservice.config.FeedConfiguration>",
+      "description": "Product feed catalog and CSV mapping configuration by provider."
+    },
+    {
+      "name": "fetcher-properties.feed-configs.*.catalog-url",
+      "type": "java.lang.String",
+      "description": "Provider catalog URL used to discover feed files."
+    },
+    {
+      "name": "fetcher-properties.feed-configs.*.datasource-key-attribute",
+      "type": "java.lang.String",
+      "description": "Catalog column containing the datasource key or advertiser name."
+    },
+    {
+      "name": "fetcher-properties.feed-configs.*.datasource-feed-name-attribute",
+      "type": "java.lang.String",
+      "description": "Catalog column containing the feed display name."
+    },
+    {
+      "name": "fetcher-properties.feed-configs.*.datasource-url-attribute",
+      "type": "java.lang.String",
+      "description": "Catalog column containing the feed download URL."
+    },
+    {
+      "name": "fetcher-properties.feed-configs.*.datasource-region-attribute",
+      "type": "java.lang.String",
+      "description": "Catalog column containing the feed region."
+    },
+    {
+      "name": "fetcher-properties.feed-configs.*.datasource-language-attribute",
+      "type": "java.lang.String",
+      "description": "Catalog column containing the feed language."
+    },
+    {
+      "name": "fetcher-properties.feed-configs.*.filter-attributes",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Catalog attribute filters that must match before a feed is indexed."
+    },
+    {
+      "name": "fetcher-properties.feed-configs.*.exclude-feed-key-contains",
+      "type": "java.util.Set<java.lang.String>",
+      "description": "Case-insensitive fragments that exclude catalog feeds by key."
+    },
+    {
+      "name": "fetcher-properties.feed-configs.*.default-csv-properties",
+      "type": "org.open4goods.commons.config.yml.datasource.CsvDataSourceProperties",
+      "description": "Default CSV mapping applied to generated datasource definitions."
+    },
+    {
+      "name": "fetcher-properties.api-key",
+      "type": "java.lang.String",
+      "description": "API key used by the local fetcher node when calling the indexation API."
+    },
+    {
+      "name": "fetcher-properties.concurrent-fetcher-task",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of concurrent data fetcher tasks.",
+      "defaultValue": 1
+    },
+    {
+      "name": "fetcher-properties.log-accepted",
+      "type": "java.lang.Boolean",
+      "description": "Log URLs accepted by crawler rules.",
+      "defaultValue": true
+    },
+    {
+      "name": "fetcher-properties.api-synch-config.node-name",
+      "type": "java.lang.String",
+      "description": "Name of the local fetcher node for API synchronization."
+    },
+    {
+      "name": "fetcher-properties.api-synch-config.node-url",
+      "type": "java.lang.String",
+      "description": "URL of the local fetcher node for API synchronization."
     }
   ]
 }

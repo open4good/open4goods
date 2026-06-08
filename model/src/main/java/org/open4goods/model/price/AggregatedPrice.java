@@ -21,6 +21,9 @@ public class AggregatedPrice extends Price {
 	private String offerName;
 	private String url;
 	private Double compensation;
+	private Integer quantityInStock;
+	private Integer shippingTime;
+	private Double shippingCost;
 	/**
 	 * The state of the product (new, occasion, ...)
 	 */
@@ -45,6 +48,9 @@ public class AggregatedPrice extends Price {
 		setPrice(df.getPrice().getPrice());
 		setTimeStamp(df.getLastIndexationDate());
 		setProductState(df.getProductState());
+		setQuantityInStock(df.getQuantityInStock());
+		setShippingTime(df.getShippingTime());
+		setShippingCost(df.getShippingCost());
 	}
 
 	/**
@@ -159,6 +165,30 @@ public class AggregatedPrice extends Price {
 
 	public void setCompensation(Double compensation) {
 		this.compensation = compensation;
+	}
+
+	public Integer getQuantityInStock() {
+		return quantityInStock;
+	}
+
+	public void setQuantityInStock(Integer quantityInStock) {
+		this.quantityInStock = quantityInStock;
+	}
+
+	public Integer getShippingTime() {
+		return shippingTime;
+	}
+
+	public void setShippingTime(Integer shippingTime) {
+		this.shippingTime = shippingTime;
+	}
+
+	public Double getShippingCost() {
+		return shippingCost;
+	}
+
+	public void setShippingCost(Double shippingCost) {
+		this.shippingCost = shippingCost;
 	}
 
 

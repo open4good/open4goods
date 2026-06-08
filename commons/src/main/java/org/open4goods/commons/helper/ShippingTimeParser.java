@@ -1,6 +1,9 @@
 package org.open4goods.commons.helper;
 
-
+import java.text.Normalizer;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -8,67 +11,89 @@ import org.open4goods.model.exceptions.InvalidParameterException;
 import org.slf4j.Logger;
 
 import ch.qos.logback.classic.Level;
-//TODO(feature) : Shipping time could be greatly improved (jours ouvrés, inneficient parsing ..., log unresolved and so on for ShippingCostParser, ...)
+
+/**
+ * Parses merchant-provided shipping delays into a conservative number of days.
+ */
 public class ShippingTimeParser {
 
 	private static final Logger logger = GenericFileLogger.initLogger("product-shipping-time-parser", Level.INFO, "/opt/open4goods/logs/");
+	private static final Pattern NUMBER_PATTERN = Pattern.compile("\\d+");
+	private static final Pattern RANGE_PATTERN = Pattern.compile("(\\d+)\\s*(?:a|to|-)\\s*(\\d+)");
+
 	/**
-	 * Parse a shipping time
-	 * @param val
-	 * @return
-	 * @throws InvalidParameterException
+	 * Parses a raw shipping time.
+	 *
+	 * @param val raw merchant value
+	 * @return parsed delay in days
+	 * @throws InvalidParameterException when the value is empty or unknown
 	 */
 	public static Integer parse(final String val) throws InvalidParameterException {
-
-		String tmp = val.toLowerCase();
-
-		tmp = tmp.trim();
-		
-		
-		if (StringUtils.isEmpty(tmp)) {
+		if (StringUtils.isEmpty(val)) {
 			throw new InvalidParameterException("Cannot evaluate empty ShippingTime value");
 		}
 
+		String tmp = normalize(val);
 		switch (tmp) {
-
-		case "livraison sous 3 à 5 jours":
+		case "livraison sous 3 a 5 jours":
 			return 5;
-		case "livraison sous 6 à 10 jours":
+		case "livraison sous 6 a 10 jours":
 			return 10;
-		case "sous 3 à 8 jours ouvrés":
+		case "sous 3 a 8 jours ouvres":
 			return 8;
 		case "demain":
-			//TODO(design) : a more general way to handle that
-		case "sous 1 jour ouvré":
+		case "tomorrow":
+		case "sous 1 jour ouvre":
 			return 1;
-
 		case "livraison sous 72h":
 			return 3;
-
+		case "aujourd hui":
+		case "today":
+		case "immediat":
+		case "immediate":
+		case "24h":
+			return 1;
 		default:
 			break;
 		}
-//
-//		// Parsing as french full date
-//		try {
-//			//TODO(gof) : test / detect if we have a ending year before appending it
-//			final LocalDate localDate = DateTimeFormat.forPattern( "EEEE dd MMM YYYY" ).withLocale( java.util.Locale.FRENCH ).parseLocalDate( tmp + " " + Year.now().getValue());
-//
-//			return Long.valueOf(localDate.toInterval().toDuration().getStandardDays()).intValue();
-//
-//		} catch (final Exception e) {
-//			LOGGER.info("Cannot convert {} to a local french date : {}", tmp, e.getMessage());
-//		}
 
-
-
-		try {
+		if (NumberUtils.isCreatable(tmp)) {
 			return NumberUtils.createInteger(tmp);
-		} catch (Exception e) {
-			throw new InvalidParameterException("Unknown ShippingTime value : " + tmp);
 		}
 
+		Matcher range = RANGE_PATTERN.matcher(tmp);
+		if (range.find()) {
+			return Integer.valueOf(range.group(2));
+		}
 
+		Matcher number = NUMBER_PATTERN.matcher(tmp);
+		if (number.find()) {
+			int value = Integer.parseInt(number.group());
+			if (tmp.contains("h") || tmp.contains("heure") || tmp.contains("hour")) {
+				return Math.max(1, (int) Math.ceil(value / 24.0));
+			}
+			if (tmp.contains("semaine") || tmp.contains("week")) {
+				return value * 7;
+			}
+			if (tmp.contains("mois") || tmp.contains("month")) {
+				return value * 30;
+			}
+			if (tmp.contains("jour") || tmp.contains("day")) {
+				return value;
+			}
+		}
 
+		logger.warn("Unknown ShippingTime value: raw='{}', normalized='{}'", val, tmp);
+		throw new InvalidParameterException("Unknown ShippingTime value : " + tmp);
+	}
+
+	private static String normalize(String val) {
+		String normalized = Normalizer.normalize(val.trim(), Normalizer.Form.NFD)
+				.replaceAll("\\p{M}", "")
+				.toLowerCase(Locale.ROOT)
+				.replaceAll("[()_,;:/]", " ")
+				.replaceAll("\\s+", " ")
+				.trim();
+		return StringUtils.normalizeSpace(normalized);
 	}
 }

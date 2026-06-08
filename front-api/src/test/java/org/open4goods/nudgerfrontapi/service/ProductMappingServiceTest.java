@@ -325,6 +325,9 @@ class ProductMappingServiceTest {
         aggregatedPrice.setPrice(199.99);
         aggregatedPrice.setCurrency(Currency.EUR);
         aggregatedPrice.setTimeStamp(123L);
+        aggregatedPrice.setQuantityInStock(8);
+        aggregatedPrice.setShippingCost(4.99);
+        aggregatedPrice.setShippingTime(3);
 
         AggregatedPrices aggregatedPrices = new AggregatedPrices();
         aggregatedPrices.setOffers(Set.of(aggregatedPrice));
@@ -346,6 +349,9 @@ class ProductMappingServiceTest {
         assertThat(dto.offers().bestPrice().url()).isEqualTo("/contrib/encrypted-token");
         assertThat(dto.offers().bestPrice().condition()).isEqualTo(ProductCondition.NEW);
         assertThat(dto.offers().bestPrice().affiliationToken()).isEqualTo("raw-token");
+        assertThat(dto.offers().bestPrice().quantityInStock()).isEqualTo(8);
+        assertThat(dto.offers().bestPrice().shippingCost()).isEqualTo(4.99);
+        assertThat(dto.offers().bestPrice().shippingTimeDays()).isEqualTo(3);
     }
 
     @Test

@@ -6,7 +6,7 @@
       "description": "Map of domain configurations for URL fetching. Supported strategies are HTTP, PROXIFIED, and PLAYWRIGHT."
     },
     {
-      "name": "urlfetcher.threadPoolSize",
+      "name": "urlfetcher.thread-pool-size",
       "type": "int",
       "defaultValue": 10,
       "description": "Thread pool size for asynchronous URL fetching"
@@ -18,19 +18,19 @@
       "description": "Flag to enable or disable recording mode (for test purposes only)"
     },
     {
-      "name": "urlfetcher.record.destinationFolder",
+      "name": "urlfetcher.record.destination-folder",
       "type": "java.lang.String",
       "defaultValue": "src/test/resources/urlfetching/mocks",
       "description": "Destination folder for storing/retrieving recorded responses (used only in tests)"
     },
     {
-      "name": "urlfetcher.playwrightProxyFallbackEnabled",
+      "name": "urlfetcher.playwright-proxy-fallback-enabled",
       "type": "boolean",
       "defaultValue": false,
       "description": "When true, failed or empty Playwright fetches are replayed with the global proxy configuration."
     },
     {
-      "name": "urlfetcher.playwrightProxyRequired",
+      "name": "urlfetcher.playwright-proxy-required",
       "type": "boolean",
       "defaultValue": false,
       "description": "When true, Playwright starts every fetch through the global proxy."
@@ -60,6 +60,40 @@
       "name": "urlfetcher.proxy.password",
       "type": "java.lang.String",
       "description": "Optional global proxy password used by proxified HTTP and Playwright proxy fallback."
+    },
+    {
+      "name": "urlfetcher.domains.*.strategy",
+      "type": "org.open4goods.services.urlfetching.config.FetchStrategy",
+      "description": "Fetch strategy for a configured domain. Supported values are HTTP, PROXIFIED, and PLAYWRIGHT."
+    },
+    {
+      "name": "urlfetcher.domains.*.user-agent",
+      "type": "java.lang.String",
+      "description": "User agent sent when fetching a configured domain."
+    },
+    {
+      "name": "urlfetcher.domains.*.timeout",
+      "type": "java.lang.Long",
+      "description": "Request timeout in milliseconds for a configured domain.",
+      "defaultValue": 5000
+    },
+    {
+      "name": "urlfetcher.domains.*.browser-channel",
+      "type": "java.lang.String",
+      "description": "Playwright browser channel used for a configured domain.",
+      "defaultValue": "chrome"
+    },
+    {
+      "name": "urlfetcher.domains.*.retry-policy.max-retries",
+      "type": "java.lang.Integer",
+      "description": "Maximum retry count for a configured domain.",
+      "defaultValue": 0
+    },
+    {
+      "name": "urlfetcher.domains.*.retry-policy.delay-between-retries",
+      "type": "java.lang.Long",
+      "description": "Delay between retries in milliseconds for a configured domain.",
+      "defaultValue": 1000
     }
   ]
 }

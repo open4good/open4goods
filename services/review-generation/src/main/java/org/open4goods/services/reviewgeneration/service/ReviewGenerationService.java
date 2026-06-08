@@ -1201,6 +1201,13 @@ public class ReviewGenerationService implements HealthIndicator {
 		if (trimmed == null || trimmed.isBlank()) {
 			return null;
 		}
+		if (AttributeType.BOOLEAN.equals(attributeConfig == null ? null : attributeConfig.getFilteringType())) {
+			String v = trimmed.toLowerCase();
+			if (v.equals("true") || v.equals("yes") || v.equals("oui") || v.equals("1") || v.equals("vrai")) return "TRUE";
+			if (v.equals("false") || v.equals("no") || v.equals("non") || v.equals("0") || v.equals("faux")) return "FALSE";
+			logger.warn("Rejecting AI review boolean attribute '{}'='{}' — not a recognized boolean synonym.", key, value);
+			return null;
+		}
 		if (!isNumericAttribute(attributeConfig)) {
 			return trimmed;
 		}
@@ -1436,6 +1443,14 @@ public class ReviewGenerationService implements HealthIndicator {
 		addUnit(definitions, "VOLUME", 0.01d, "cl", "centilitre", "centilitres", "centiliter", "centiliters");
 		addUnit(definitions, "VOLUME", 1d, "l", "litre", "litres", "liter", "liters");
 		addUnit(definitions, "SOUND_LEVEL", 1d, "db", "db(a)", "decibel", "decibels");
+		addUnit(definitions, "FREQUENCY", 1d, "hz", "hertz");
+		addUnit(definitions, "FREQUENCY", 1_000d, "khz", "kilohertz");
+		addUnit(definitions, "FREQUENCY", 1_000_000d, "mhz", "megahertz");
+		addUnit(definitions, "FREQUENCY", 1_000_000_000d, "ghz", "gigahertz");
+		addUnit(definitions, "TEMPERATURE", 1d, "°c", "celsius", "degre c", "degree c");
+		addUnit(definitions, "VOLTAGE", 1d, "v", "volt", "volts");
+		addUnit(definitions, "VOLTAGE", 1_000d, "kv", "kilovolt");
+		addUnit(definitions, "VOLTAGE", 0.001d, "mv", "millivolt");
 		return Map.copyOf(definitions);
 	}
 

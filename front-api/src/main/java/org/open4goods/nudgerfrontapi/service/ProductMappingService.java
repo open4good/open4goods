@@ -1613,7 +1613,10 @@ public class ProductMappingService {
                 price.getPrice(),
                 price.getCurrency(),
                 price.getTimeStamp(),
-                safeCall(price::shortPrice));
+                safeCall(price::shortPrice),
+                price.getQuantityInStock(),
+                price.getShippingCost(),
+                price.getShippingTime());
     }
 
     /**

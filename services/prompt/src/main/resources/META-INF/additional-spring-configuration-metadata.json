@@ -1,7 +1,7 @@
 {
   "groups": [
     {
-      "name": "genAiConfig",
+      "name": "gen-ai-config",
       "type": "org.open4goods.services.prompt.config.PromptServiceConfig",
       "sourceType": "org.open4goods.services.prompt.config.PromptServiceConfig"
     },
@@ -13,52 +13,73 @@
   ],
   "properties": [
     {
-      "name": "genAiConfig.promptsTemplatesFolder",
+      "name": "gen-ai-config.prompts-templates-folder",
       "type": "java.lang.String",
       "description": "Folder path for prompt templates."
     },
     {
-      "name": "genAiConfig.cacheTemplates",
+      "name": "gen-ai-config.cache-templates",
       "type": "java.lang.Boolean",
       "description": "Determines if prompt templates should be cached in memory."
     },
     {
-      "name": "genAiConfig.enabled",
+      "name": "gen-ai-config.enabled",
       "type": "java.lang.Boolean",
       "description": "Flag to enable or disable the GenAi service."
     },
     {
-      "name": "genAiConfig.recordEnabled",
+      "name": "gen-ai-config.record-enabled",
       "type": "java.lang.Boolean",
       "description": "Flag to enable recording of prompt responses as mocks."
     },
     {
-      "name": "genAiConfig.recordFolder",
+      "name": "gen-ai-config.record-folder",
       "type": "java.lang.String",
       "description": "Folder path where recorded prompt responses (mocks) are stored."
     },
     {
-      "name": "genAiConfig.batchFolder",
+      "name": "gen-ai-config.batch-folder",
       "type": "java.lang.String",
       "description": "Folder path where batch submission and response files are stored."
     },
     {
-      "name": "genAiConfig.batchMaxTokens",
+      "name": "gen-ai-config.batch-max-tokens",
       "type": "int",
       "description": "Maximum total tokens per batch file."
     },
     {
-      "name": "genAiConfig.batchApiEndpoint",
+      "name": "gen-ai-config.batch-api-endpoint",
       "type": "java.lang.String",
       "description": "The OpenAI Batch API endpoint URL."
     },
     {
-      "name": "genAiConfig.batchPollInterval",
+      "name": "gen-ai-config.batch-poll-interval",
       "type": "java.time.Duration",
       "description": "Poll interval for batch status checks."
     },
     {
-      "name": "vertex.batch.projectId",
+      "name": "gen-ai-config.google-api-json",
+      "type": "java.lang.String",
+      "description": "Google Cloud service account JSON content for Gemini authentication."
+    },
+    {
+      "name": "gen-ai-config.replacements",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "Character replacements applied to generated text before parsing."
+    },
+    {
+      "name": "gen-ai-config.repair-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable JSON repair attempts when initial parsing fails.",
+      "defaultValue": true
+    },
+    {
+      "name": "gen-ai-config.reasoning-model-prefixes",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Model name prefixes treated as reasoning models."
+    },
+    {
+      "name": "vertex.batch.project-id",
       "type": "java.lang.String",
       "description": "GCP project id for Vertex batch jobs."
     },
@@ -73,17 +94,17 @@
       "description": "GCS bucket for Vertex batch input/output."
     },
     {
-      "name": "vertex.batch.outputPrefix",
+      "name": "vertex.batch.output-prefix",
       "type": "java.lang.String",
       "description": "Output prefix for Vertex batch results."
     },
     {
-      "name": "vertex.batch.pollInterval",
+      "name": "vertex.batch.poll-interval",
       "type": "java.time.Duration",
       "description": "Poll interval for Vertex batch status checks."
     },
     {
-      "name": "vertex.batch.credentialsJson",
+      "name": "vertex.batch.credentials-json",
       "type": "java.lang.String",
       "description": "Service account JSON content for Vertex batch jobs."
     }

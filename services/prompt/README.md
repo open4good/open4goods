@@ -11,7 +11,7 @@ The **Prompt Service** is part of the [open4goods](https://github.com/open4good/
 
 ## Requirements
 
-- Java 11 or higher
+- Java 21 or higher
 - Maven 3.6+
 - Spring Boot
 
@@ -32,9 +32,9 @@ mvn clean install
 Set the following properties (for example, in your `application.yml`):
 
 ```yaml
-genAiConfig:
-  promptsTemplatesFolder: "src/main/resources/prompts"
-  cacheTemplates: true
+gen-ai-config:
+  prompts-templates-folder: "src/main/resources/prompts"
+  cache-templates: true
   enabled: true
 ```
 

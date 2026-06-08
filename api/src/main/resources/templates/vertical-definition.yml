@@ -17,11 +17,6 @@ googleTaxonomyId: [(${googleTaxonomyId})]
 # Indicates if the vertical must be UI / sitemap / search rendered
 enabled: false
 
-# GenAiConfig for this vertical
-genAiConfig:
-  # If false, will bypass the generativ ia texts generation  
-  enabled: true
-  
 #####################################################################################################################################
 # I18N CONFIGURATION
 # Configure in a i18n way all the texts of a product, including the Url, the title, the description, the open graph metas, ....
@@ -126,4 +121,3 @@ attributesConfig:
   ##################################################################################################################      
   configs: [] 
   
-

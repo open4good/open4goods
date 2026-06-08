@@ -87,6 +87,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
             GetItemsResource.ITEMINFO_TECHNICALINFO,
             GetItemsResource.ITEMINFO_TITLE,
             GetItemsResource.OFFERS_LISTINGS_CONDITION,
+            GetItemsResource.OFFERS_LISTINGS_DELIVERYINFO_SHIPPINGCHARGES,
             GetItemsResource.OFFERS_LISTINGS_MERCHANTINFO,
             GetItemsResource.OFFERS_LISTINGS_PRICE);
 
@@ -99,6 +100,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
             SearchItemsResource.ITEMINFO_TECHNICALINFO,
             SearchItemsResource.ITEMINFO_TITLE,
             SearchItemsResource.OFFERS_LISTINGS_CONDITION,
+            SearchItemsResource.OFFERS_LISTINGS_DELIVERYINFO_SHIPPINGCHARGES,
             SearchItemsResource.OFFERS_LISTINGS_MERCHANTINFO,
             SearchItemsResource.OFFERS_LISTINGS_PRICE);
 
@@ -367,7 +369,17 @@ public class AmazonCompletionService extends AbstractCompletionService {
             logger.warn("Cannot map Amazon currency {} for {}", offer.getPrice().getCurrency(), data.gtin());
         }
         fragment.setPrice(price);
+        mapShippingCost(offer, fragment);
         return Optional.of(fragment);
+    }
+
+    private void mapShippingCost(OfferListing offer, DataFragment fragment) {
+        Optional.ofNullable(offer.getDeliveryInfo())
+                .map(delivery -> nullToEmpty(delivery.getShippingCharges()).stream()
+                        .filter(charge -> charge != null && charge.getAmount() != null)
+                        .min(Comparator.comparing(charge -> charge.getAmount())))
+                .flatMap(optional -> optional)
+                .ifPresent(charge -> fragment.setShippingCost(charge.getAmount().doubleValue()));
     }
 
     private boolean hasMappablePrice(OfferListing offer) {
