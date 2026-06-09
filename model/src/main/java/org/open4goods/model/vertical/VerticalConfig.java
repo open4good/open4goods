@@ -185,6 +185,17 @@ public class VerticalConfig {
 	 */
 	private boolean forceEmbeddingRecomputing = false;
 
+
+
+	/**
+	 * if true, embeddings will be computed
+	 * TODO : Enable by default
+	 */
+	private boolean computeTextEmbeddings = false;
+
+
+
+
 	@JsonMerge
 	/**
 	 * Brand alias mappings (eg : LG ELECTRONICS : LG)
@@ -996,6 +1007,14 @@ public class VerticalConfig {
 
 	public void setRequiredAttributes(Set<String> requiredAttributes) {
 		this.requiredAttributes = requiredAttributes;
+	}
+
+	public boolean isComputeTextEmbeddings() {
+		return computeTextEmbeddings;
+	}
+
+	public void setComputeTextEmbeddings(boolean computeTextEmbeddings) {
+		this.computeTextEmbeddings = computeTextEmbeddings;
 	}
 
 	public Map<String, String> getBrandsAlias() {

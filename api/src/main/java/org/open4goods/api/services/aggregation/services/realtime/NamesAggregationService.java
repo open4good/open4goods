@@ -198,24 +198,28 @@ public class NamesAggregationService extends AbstractAggregationService {
 		// Compute embeddings whenever enough descriptive text is available.
 		// Uses a structured matrix-based cache key to skip redundant computations.
 		try {
-			String textToEmbed = buildEmbeddingText(data, resolvedVertical);
-			String prefixedText = applyEmbeddingPrefix(textToEmbed);
 
-			if (StringUtils.isNotBlank(prefixedText)) {
+			if (null != vConf && vConf.isComputeTextEmbeddings()) {
 
-				long cacheKey = computeEmbeddingCacheKey(prefixedText);
-				boolean forceRecomputing = resolvedVertical != null && resolvedVertical.isForceEmbeddingRecomputing();
-				boolean hasEmbedding = data.getEmbedding() != null && data.getEmbedding().length > 0;
+				String textToEmbed = buildEmbeddingText(data, resolvedVertical);
+				String prefixedText = applyEmbeddingPrefix(textToEmbed);
 
-				if (!forceRecomputing && hasEmbedding && cacheKey == data.getEmbeddingTextHash()) {
-					logger.debug("Embedding cache key unchanged for product {}, skipping", data.getId());
-				} else if (embeddingService != null) {
-					final float[] embedding = embeddingService.embed(prefixedText);
-					if (embedding != null) {
-						// Forcing to a 512 dims vector
-						float[] padded = IdHelper.to512(embedding);
-						data.setEmbedding(EmbeddingVectorUtils.normalizeL2(padded));
-						data.setEmbeddingTextHash(cacheKey);
+				if (StringUtils.isNotBlank(prefixedText)) {
+
+					long cacheKey = computeEmbeddingCacheKey(prefixedText);
+					boolean forceRecomputing = resolvedVertical != null && resolvedVertical.isForceEmbeddingRecomputing();
+					boolean hasEmbedding = data.getEmbedding() != null && data.getEmbedding().length > 0;
+
+					if (!forceRecomputing && hasEmbedding && cacheKey == data.getEmbeddingTextHash()) {
+						logger.debug("Embedding cache key unchanged for product {}, skipping", data.getId());
+					} else if (embeddingService != null) {
+						final float[] embedding = embeddingService.embed(prefixedText);
+						if (embedding != null) {
+							// Forcing to a 512 dims vector
+							float[] padded = IdHelper.to512(embedding);
+							data.setEmbedding(EmbeddingVectorUtils.normalizeL2(padded));
+							data.setEmbeddingTextHash(cacheKey);
+						}
 					}
 				}
 			}
