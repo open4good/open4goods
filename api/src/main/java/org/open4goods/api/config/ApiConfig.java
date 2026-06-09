@@ -199,7 +199,9 @@ public class ApiConfig {
 
 	@Bean
 	IcecatFeatureResolver icecatFeatureResolver(IcecatIndexService icecatIndexService) {
-		return new IcecatFeatureResolver(icecatIndexService);
+		IcecatFeatureResolver resolver = new IcecatFeatureResolver(icecatIndexService);
+		icecatIndexService.setFeatureResolver(resolver);
+		return resolver;
 	}
 
 	@Bean

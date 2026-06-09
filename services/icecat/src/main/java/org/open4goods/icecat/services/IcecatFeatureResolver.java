@@ -53,6 +53,28 @@ public class IcecatFeatureResolver {
         return featureIdsByNormalizedName.computeIfAbsent(normalizedName, this::resolveNormalizedName);
     }
 
+    /**
+     * Pre-populates both in-memory maps from an already-computed feature document list so
+     * that subsequent {@link #resolveFeatureName} calls never hit Elasticsearch.
+     * Called by {@link IcecatIndexService} right after it persists features to ES.
+     */
+    public void warmUp(List<IcecatFeatureDocument> docs) {
+        for (IcecatFeatureDocument doc : docs) {
+            if (doc.getId() == null) {
+                continue;
+            }
+            featuresById.put(doc.getId(), doc);
+            if (doc.getNormalizedNames() != null) {
+                for (String name : doc.getNormalizedNames()) {
+                    featureIdsByNormalizedName
+                            .computeIfAbsent(name, k -> new HashSet<>())
+                            .add(doc.getId());
+                }
+            }
+        }
+        LOGGER.info("Pre-warmed Icecat feature resolver with {} feature documents", docs.size());
+    }
+
     private Set<Integer> resolveNormalizedName(String normalizedName) {
         List<IcecatFeatureDocument> docs = indexService.findFeaturesByNormalizedName(normalizedName);
         for (IcecatFeatureDocument doc : docs) {

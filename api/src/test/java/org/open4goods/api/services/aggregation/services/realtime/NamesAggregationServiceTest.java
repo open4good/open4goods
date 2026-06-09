@@ -116,6 +116,7 @@ class NamesAggregationServiceTest {
 
 	private VerticalConfig buildVerticalConfig() {
 		VerticalConfig config = new VerticalConfig();
+		config.setComputeTextEmbeddings(true);
 		ProductI18nElements productI18nElements = new ProductI18nElements();
 		productI18nElements.setPageTitle("Cuisine");
 

@@ -124,7 +124,7 @@ public class BatchService {
 			allProducts = stream.collect(Collectors.toSet());
 		}
 
-		logger.info("Sanitisation of {} products", allProducts);
+		logger.info("Sanitisation of {} products for vertical {}", allProducts.size(), vertical.getId());
 
 		////////////////////
 		// We apply simple classification to unmatch products from verticals if needed

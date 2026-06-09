@@ -60,6 +60,21 @@ public class IcecatIndexService {
     private final IcecatCategoryRepository categoryRepository;
     private final IcecatFeatureGroupRepository featureGroupRepository;
     private final IcecatSupplierRepository supplierRepository;
+    private IcecatFeatureResolver featureResolver;
+
+    private final Map<String, List<IcecatFeatureDocument>> featureCache = java.util.Collections.synchronizedMap(
+        new java.util.LinkedHashMap<String, List<IcecatFeatureDocument>>(256, 0.75f, true) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<String, List<IcecatFeatureDocument>> eldest) {
+                return size() > 10000;
+            }
+        }
+    );
+
+    public void setFeatureResolver(IcecatFeatureResolver featureResolver) {
+        this.featureResolver = featureResolver;
+    }
 
     public IcecatIndexService(
             FeatureLoader featureLoader,
@@ -114,6 +129,10 @@ public class IcecatIndexService {
                 .toList();
         featureRepository.saveAll(docs);
         LOGGER.info("Indexed {} Icecat features", docs.size());
+        featureCache.clear();
+        if (featureResolver != null) {
+            featureResolver.warmUp(docs);
+        }
     }
 
     private void syncCategories() {
@@ -343,7 +362,10 @@ public class IcecatIndexService {
      * @return matching feature documents
      */
     public List<IcecatFeatureDocument> findFeaturesByNormalizedName(String normalizedName) {
-        return featureRepository.findByNormalizedName(normalizedName);
+        if (normalizedName == null) {
+            return List.of();
+        }
+        return featureCache.computeIfAbsent(normalizedName, featureRepository::findByNormalizedName);
     }
 
     /**

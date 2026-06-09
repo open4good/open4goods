@@ -39,6 +39,7 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 
 	private final VerticalsConfigService verticalService;
 	private final GoogleTaxonomyService taxonomyService;
+	private final Map<String, Set<String>> verticalTokensCache = new java.util.concurrent.ConcurrentHashMap<>();
 
 	/**
 	 * @param logger          dedicated aggregation logger
@@ -122,9 +123,16 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 
 			try {
 				if (vConf.getId() != null) {
-					Set<String> verticalNames = vConf.getTokenNames(
-							taxonomyService.byId(vConf.getGoogleTaxonomyId()).getGoogleNames().values()
-									.stream().map(e -> StringUtils.stripAccents(e.toLowerCase())).toList());
+					Set<String> verticalNames = verticalTokensCache.computeIfAbsent(vConf.getId(), id -> {
+						try {
+							return vConf.getTokenNames(
+									taxonomyService.byId(vConf.getGoogleTaxonomyId()).getGoogleNames().values()
+											.stream().map(e -> StringUtils.stripAccents(e.toLowerCase())).toList());
+						} catch (Exception ex) {
+							dedicatedLogger.error("Failed to compute vertical token names for " + id, ex);
+							return Set.of();
+						}
+					});
 
 					boolean confirmed = verticalNames.stream()
 							.anyMatch(token -> normalizedOfferNames.stream().anyMatch(n -> n.contains(token)));

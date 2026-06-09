@@ -48,6 +48,7 @@ import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 
 import dev.brachtendorf.jimagehash.hash.Hash;
+import jakarta.annotation.PostConstruct;
 import dev.brachtendorf.jimagehash.hashAlgorithms.HashingAlgorithm;
 import dev.brachtendorf.jimagehash.hashAlgorithms.PerceptiveHash;
 
@@ -101,6 +102,20 @@ public class ResourceCompletionService extends AbstractCompletionService {
         this.embeddingService = embeddingService;
         this.hasher = new PerceptiveHash(config.getPerceptiveHashSize());
         this.hasher.setOpaqueHandling(Color.WHITE, config.getPerceptiveHashAlphaThreshold());
+    }
+
+    /**
+     * Warms up the PDF language detector on startup to avoid first-hit latency spikes.
+     */
+    @PostConstruct
+    public void warmPdfLanguageDetector() {
+        logger.info("Warming up PDF language detector...");
+        try {
+            pdfLanguageDetector();
+            logger.info("PDF language detector warmed up successfully.");
+        } catch (Exception e) {
+            logger.error("Failed to warm PDF language detector at startup", e);
+        }
     }
 
     /**

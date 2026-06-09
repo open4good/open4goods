@@ -77,7 +77,11 @@ public class RestWikidataApiClient implements WikidataApiClient {
                 return (Map<String, Object>) entityMap;
             }
         } catch (Exception e) {
-            LOGGER.error("Error fetching Wikidata entity {}", qId, e);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.error("Error fetching Wikidata entity {}", qId, e);
+            } else {
+                LOGGER.warn("Error fetching Wikidata entity {}: {}", qId, e.getMessage());
+            }
         }
         return Collections.emptyMap();
     }
@@ -132,7 +136,11 @@ public class RestWikidataApiClient implements WikidataApiClient {
             }
             return rows;
         } catch (Exception e) {
-            LOGGER.error("SPARQL query failed: {}", sparql, e);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.error("SPARQL query failed: {}", sparql, e);
+            } else {
+                LOGGER.warn("SPARQL query failed: {} - {}", e.getMessage(), sparql);
+            }
             return Collections.emptyList();
         }
     }
@@ -157,7 +165,11 @@ public class RestWikidataApiClient implements WikidataApiClient {
                     })
                     .body(String.class);
         } catch (Exception e) {
-            LOGGER.error("HTTP fetch failed for {}", url, e);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.error("HTTP fetch failed for {}", url, e);
+            } else {
+                LOGGER.warn("HTTP fetch failed for {}: {}", url, e.getMessage());
+            }
             return null;
         }
     }
