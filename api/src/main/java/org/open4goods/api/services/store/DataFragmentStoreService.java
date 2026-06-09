@@ -106,38 +106,51 @@ public class DataFragmentStoreService {
 	}
 
 	/**
-	 * Add an element to the indexing queue
+	 * Add an element to the indexing queue.
 	 *
-	 * @param dataFragment
-	 * @throws ValidationException 
+	 * <p>Returns silently (without throwing) when the fragment lacks a numeric GTIN or is a brand
+	 * fragment — these are the most common rejection reasons and using exceptions for control flow
+	 * there caused significant stack-trace allocation overhead under high-throughput ingestion.
+	 *
+	 * @param data the fragment to enqueue
+	 * @throws ValidationException when the fragment fails deeper validation in {@link #preHandle}
 	 */
 //	@Timed(value = "queueDataFragment", description = "Validation, standardisation and addding to queue a DataFragment")
 	public void queueDataFragment(final DataFragment data) throws ValidationException {
 
 		if (data.isBrandFragment()) {
-			logger.debug("Skipping brand fragment classical indexation {}",data);
-		} else {
-			preHandle(data);
-			logger.debug("Queuing datafragment {}",data);
-			
-			enqueue(data);
-			
+			logger.debug("Skipping brand fragment classical indexation {}", data);
+			return;
 		}
+
+		// Fast-path rejection: fragments without a numeric GTIN are extremely common
+		// (e.g. rows without an EAN in the feed). Using a guard return instead of
+		// throwing ValidationException avoids stack-trace allocation for each such row.
+		if (!StringUtils.isNumeric(data.gtin())) {
+			logger.debug("Skipping fragment with no numeric gtin: {}", data);
+			return;
+		}
+
+		preHandle(data);
+		logger.debug("Queuing datafragment {}", data);
+		enqueue(data);
 	}
 
 	/**
-	 * @param data
+	 * Validates and standardises a data fragment before it enters the queue.
+	 *
+	 * <p>Note: the GTIN numeric check has been moved to the caller ({@link #queueDataFragment})
+	 * to avoid expensive exception construction for the common no-GTIN case.
+	 *
+	 * @param data the fragment to validate
+	 * @throws ValidationException when the fragment fails validation
 	 */
-	private void preHandle(final DataFragment data) throws ValidationException{
+	private void preHandle(final DataFragment data) throws ValidationException {
 
 		/////////////////////////////////////////
 		// Validating
 		/////////////////////////////////////////
 
-		if (!StringUtils.isNumeric(data.gtin())) {
-			//TODO : come back on standard validation model
-			throw new ValidationException("No gtin");
-		}
 		data.validate();
 
 		////////////////////////////////////////////////////////

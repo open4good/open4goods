@@ -265,9 +265,24 @@ public class CsvIndexationWorker implements Runnable {
 	 */
 	private IndexationJobStat stats;
 
-	private final Map<String, String> resolvedKeysCache = new ConcurrentHashMap<>();
+	/**
+	 * Per-worker cache that maps config column-name → actual CSV header key for the current URL.
+	 * Cleared between URLs. Accessed only by the owning worker thread — plain HashMap is
+	 * sufficient and avoids CAS overhead.
+	 */
+	private final Map<String, String> resolvedKeysCache = new java.util.HashMap<>();
 
+	/**
+	 * Global cache shared across all worker threads: raw CSV header → comparable (lower-case,
+	 * accent-stripped, alphanumeric-only) form.
+	 */
 	private static final Map<String, String> COMPARABLE_HEADER_CACHE = new ConcurrentHashMap<>();
+
+	/** Matches Unicode combining diacritics (used in NFD-based accent stripping). */
+	private static final java.util.regex.Pattern DIACRITIC_PATTERN = java.util.regex.Pattern.compile("\\p{M}");
+
+	/** Matches any character that is not a lower-case ASCII letter or digit. */
+	private static final java.util.regex.Pattern NON_ALPHANUM_PATTERN = java.util.regex.Pattern.compile("[^a-z0-9]");
 
 	/**
 	 * Constructor
@@ -1378,10 +1393,12 @@ public class CsvIndexationWorker implements Runnable {
 				normalized = normalized.substring(1);
 			}
 			normalized = stripWrappingHeaderQuotes(normalized);
-			normalized = Normalizer.normalize(normalized, Normalizer.Form.NFD)
-					.replaceAll("\\p{M}", "")
+			// Use pre-compiled patterns to avoid Pattern.compile on every cache-miss invocation.
+			normalized = DIACRITIC_PATTERN.matcher(
+					Normalizer.normalize(normalized, Normalizer.Form.NFD))
+					.replaceAll("")
 					.toLowerCase(Locale.ROOT);
-			return normalized.replaceAll("[^a-z0-9]", "");
+			return NON_ALPHANUM_PATTERN.matcher(normalized).replaceAll("");
 		});
 	}
 
