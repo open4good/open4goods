@@ -18,17 +18,21 @@ Pas le temps de tout lire ? Voici l'essentiel.
 
 **Pour un bureau professionnel pérenne** : un split réversible mural - la solution la plus silencieuse, la plus efficace énergétiquement, et une vraie pompe à chaleur qui chauffe aussi en hiver.
 
-<ProductCardEmbed gtin="4026415153229" size="medium" />
+::product-card-embed{gtin="4026415153229" size="medium"}
+::
 
-<ProductCardEmbed gtin="8806091603401" size="medium" />
+::product-card-embed{gtin="8806091603401" size="medium"}
+::
 
-<ProductCardEmbed brand="Daikin" model="FTXF25F" size="medium" />
+::product-card-embed{brand="Daikin" model="FTXF25F" size="medium"}
+::
 
 ---
 
 ## Le marché en un coup d'œil
 
-<BrandShareChart type="pie" top="8" title="Parts de marché des marques - climatiseurs" />
+::brand-share-chart{type="pie" top="8" title="Parts de marché des marques - climatiseurs"}
+::
 
 Le marché français de la climatisation est dominé par les fabricants japonais - Daikin, Mitsubishi Electric, Fujitsu, Hitachi, Toshiba - qui imposent leurs standards de fiabilité et d'efficacité énergétique. Les marques coréennes (LG, Samsung) tiennent le segment intermédiaire avec des produits bien connectés. Atlantic et Airwell représentent l'offre française, appréciée pour son réseau SAV national.
 
@@ -124,7 +128,8 @@ Un split réversible est une pompe à chaleur air/air. Pour 1 kWh d'électricit�
 
 Notre score d'impact agrège consommation réelle (SEER/SCOP), durabilité, disponibilité des pièces et réparabilité. Voici les meilleurs du vertical climatiseurs dans notre index :
 
-<GuideProductGrid top="5" sort="ecoscore" />
+::guide-product-grid{top="5" sort="ecoscore"}
+::
 
 ---
 
@@ -134,15 +139,18 @@ Notre score d'impact agrège consommation réelle (SEER/SCOP), durabilité, disp
 
 Vous êtes en location ou vous ne souhaitez pas toucher aux murs : le mobile split est votre meilleur allié. Le compresseur reste à l'extérieur, la pièce reste silencieuse. Installation en moins de 30 minutes, aucune autorisation requise.
 
-<ProductCardEmbed gtin="4026415153229" size="big" />
+::product-card-embed{gtin="4026415153229" size="big"}
+::
 
 ### Bureau professionnel pérenne - split réversible
 
 Vous êtes propriétaire ou votre bailleur autorise l'installation fixe : le split mural s'impose. C'est la seule solution vraiment silencieuse, la plus efficace en été comme en hiver, et celle dont le coût total sur 10 ans est imbattable.
 
-<ProductCardEmbed gtin="8806091603401" size="big" />
+::product-card-embed{gtin="8806091603401" size="big"}
+::
 
-<ProductCardEmbed brand="Daikin" model="FTXF25F" size="big" />
+::product-card-embed{brand="Daikin" model="FTXF25F" size="big"}
+::
 
 ---
 

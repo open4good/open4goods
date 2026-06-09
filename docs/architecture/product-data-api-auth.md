@@ -41,7 +41,7 @@ per provider) and:
    first-time users, and applies the one-time free 2500-credit grant.
 4. Computes `is_platform_admin` from the configurable admin-email allowlist.
 5. Issues an access JWT (short-lived) + refresh JWT, and writes them as **HttpOnly**
-   `Secure` `SameSite` session cookies. Bearer JWT is also accepted (API clients,
+   `Secure` `SameSite=Lax` cookies with `Domain=.product-data-api.com` configuration to allow sharing auth state across the frontend (`dashboard.product-data-api.com`) and the API backend (`api.product-data-api.com`). Bearer JWT is also accepted (API clients,
    tests).
 
 Other endpoints: `POST /api/v1/auth/refresh`, `POST /api/v1/auth/logout`,
@@ -90,11 +90,12 @@ mutation writes an `admin_audit_events` row.
 b2b:
   auth:
     jwt:
-      secret: ${B2B_JWT_SECRET:}        # HS256/RS256 signing
+      secret: ${B2B_JWT_SECRET:}        # HS256 symmetric signing secret (minimum 256-bit strong key)
+      algorithm: HS256
       access-ttl: 15m
       refresh-ttl: 30d
     cookie:
-      domain: product-data-api.com
+      domain: .product-data-api.com     # Wildcard domain for cross-origin sharing
       secure: true
       same-site: lax
     admin-emails: ${B2B_ADMIN_EMAILS:}  # comma-separated allowlist

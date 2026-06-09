@@ -55,8 +55,10 @@ For a billable-capable request (`GET /api/v1/products/{gtin}/price`):
 ```
 
 Steps 7-9 must also run on the error path (e.g. mapping throws after reserve):
-release the reservation in a `finally`/`afterCompletion` so a crash never leaks
-reserved credits beyond the next reconciliation tick.
+release the reservation in a `finally`/`afterCompletion` (refund). To guard against
+total JVM crashes, all Redis reservations must have a short TTL (e.g., 30 seconds). If
+not settled and durably committed in Postgres within this window, the reservation automatically
+expires, avoiding balance leaks.
 
 ## Expiring-first bucket debit (`settleDebit`)
 
@@ -140,7 +142,15 @@ buckets are unaffected.
 
 ## HardenerBatch (`@Scheduled`)
 
-A single scheduled component owns the background reconciliation duties:
+A single scheduled component owns the background reconciliation duties. To prevent concurrent executions of the batch tasks on clustered Spring Boot nodes, the class must use a Redis-based distributed scheduler lock (via ShedLock configured with `shedlock-provider-redis-spring` using Spring Data Redis):
+
+```java
+@Scheduled(cron = "${b2b.hardener.cron:0 */5 * * * *}")
+@SchedulerLock(name = "HardenerBatch_run", lockAtLeastFor = "1m", lockAtMostFor = "10m")
+public void runBatch() { ... }
+```
+
+The tasks performed in the batch are:
 
 1. **Drain usage stream** `b2b:usage` (consumer group `hardener`) -> insert
    `usage_events` rows; `XACK`.
@@ -152,6 +162,7 @@ A single scheduled component owns the background reconciliation duties:
    crashed reserve/settle windows).
 4. **Last-used flush**: persist debounced `b2b:lastused:{keyId}` into
    `api_keys.last_used_at`.
+
 
 Intervals are configurable (`b2b.hardener.*`). The batch is idempotent: re-runs
 never double-count (stream entries are `XACK`-ed; expiry is guarded by

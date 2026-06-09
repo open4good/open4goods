@@ -2,15 +2,13 @@
 
 > **Authority document.** This file is the single source of truth for every
 > decision that the B2B planning docs disagreed on. When any other document
-> (including `b2B.md`, `b2b-facets.md`, `b2b-ui.md`, the architecture specs, or
-> the superseded `~/.claude/plans/prompt-b2b-on-peaceful-peacock.md`) conflicts
+> (including `b2B.md`, `b2b-facets.md`, `b2b-ui.md`, the architecture specs, conflicts
 > with this page, **this page wins**. Every spec under `docs/architecture/` and
 > `docs/operations/` for the B2B brick links back here.
 
 ## 1. Source of truth
 
-- [`b2B.md`](b2B.md) is the **canonical master implementation prompt**.
-- `~/.claude/plans/prompt-b2b-on-peaceful-peacock.md` is **superseded**. It
+- [`b2B.md`](b2B.md) is the **canonical master implementation prompt**. It
   remains useful as an early exploration of the metering flow and facet pricing,
   but every decision it makes that contradicts `b2B.md` is dead.
 
@@ -73,6 +71,13 @@ before implementing the affected surface.
 - Backend package root: `org.open4goods.b2bapi`. Default local port **8087**.
 - `application-devsec.yml` is excluded from packaged jars (as `front-api` does).
 
+## 5. Finalized Infrastructure & Security Choices (v1)
+
+1. **Cookie Domain Wildcard Configuration**: Session cookies for dashboard authentication will use `SameSite=Lax`, `Secure`, and `Domain=.product-data-api.com` configuration to allow sharing auth state across the frontend (`dashboard.product-data-api.com`) and the API backend (`api.product-data-api.com`).
+2. **Distributed Scheduler Locking**: To prevent concurrent execution of `HardenerBatch` across clustered spring boot nodes, the application will use **Redis-based locks** (via ShedLock's Redis provider `shedlock-provider-redis-spring`).
+3. **Out-of-Order Stripe Webhook Resolution**: Webhook events such as `invoice.paid` and `checkout.session.completed` are processed idempotently. In cases where webhooks arrive out-of-order, the application will lazily upsert subscription and customer placeholder records in the database.
+4. **JWT Security Key Algorithm**: Dashboard tokens are signed using a symmetric shared secret with the **HS256** algorithm, matching the security convention implemented in `front-api`.
+
 ## Related
 
 - [`b2B.md`](b2B.md) - canonical master prompt
@@ -83,3 +88,4 @@ before implementing the affected surface.
 - Architecture specs under [`../architecture/`](../architecture/) (data model,
   redis contract, billing ledger, API contract, errors, auth, stripe, ops)
 - ADR [`0005-product-data-api-b2b-v1`](../adr/0005-product-data-api-b2b-v1.md)
+

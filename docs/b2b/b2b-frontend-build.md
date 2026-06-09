@@ -52,13 +52,13 @@ Reuse the Infera pattern (`infera/apps/frontend/scripts/generate-openapi.ts` +
 4. **CI**: regenerate (or verify up-to-date) on backend contract changes; fail the
    build if the committed spec/client drifts from the backend.
 
-## 3. Session-backed backend calls
+## 3. Wildcard Cookie Session Calls
 
-Browser components never hold a stored clear API secret, session cookie, or
-machine token. Session-authenticated calls go through Nuxt **server routes**
-(`server/api/...`) that attach the session and proxy to `b2b-api`.
+With session cookies configured for subdomain wildcard sharing (`Domain=.product-data-api.com`), the browser dashboard at `dashboard.product-data-api.com` can make requests directly to the API backend at `api.product-data-api.com` using standard credentials forwarding (e.g. `credentials: 'include'` in fetch).
 
-Playground live mode uses the proxy endpoint
+For calls that require high-privilege operations, server credentials, or secrets, Nuxt **server routes** (`server/api/...`) are still used as backend-for-frontend (BFF) wrappers.
+
+Playground live mode uses the endpoint
 `POST /api/v1/customer/playground/products/price` with `{ apiKeyId, gtin,
 language }`; the backend executes the real external call with the selected key and
 returns the executed request (key masked), response body+headers, and metering

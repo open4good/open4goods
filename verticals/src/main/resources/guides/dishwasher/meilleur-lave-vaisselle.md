@@ -21,19 +21,23 @@ Pas le temps de tout lire ? Voici la sélection directe de Goulven.
 
 **Meilleur lave-vaisselle 2026 - éco #1, classe A, 14 couverts, pose libre :**
 
-<ProductCardEmbed gtin="8806096304952" size="medium" />
+::product-card-embed{gtin="8806096304952" size="medium"}
+::
 
 **Meilleur silencieux - 38 dB, indice de réparabilité 9.6/10, classe A :**
 
-<ProductCardEmbed gtin="8003437065620" size="medium" />
+::product-card-embed{gtin="8003437065620" size="medium"}
+::
 
 **Meilleur encastrable fiable - Siemens, 42 dB, réparabilité 9.4/10 :**
 
-<ProductCardEmbed gtin="4242003962503" size="medium" />
+::product-card-embed{gtin="4242003962503" size="medium"}
+::
 
 ## Le marché en un coup d'oeil
 
-<BrandShareChart vertical="dishwasher" type="pie" top="8" title="Parts de marché lave-vaisselle sur nudger.fr" />
+::brand-share-chart{vertical="dishwasher" type="pie" top="8" title="Parts de marché lave-vaisselle sur nudger.fr"}
+::
 
 Le marché français est dominé par le groupe BSH (Bosch, Siemens, Neff) qui représente environ **28 % du marché européen** (source : données BSH Group, 2025). Miele tient le segment premium avec une durée de vie annoncée de **14 ans** en moyenne - soit 40 % de plus que la moyenne du marché (10 ans, source : ADEME).
 
@@ -134,7 +138,8 @@ L'**indice de réparabilité** (obligatoire en France depuis janvier 2021) est n
 
 Le classement live des lave-vaisselles les mieux notés sur nudger.fr, triés par score d'impact :
 
-<GuideProductGrid vertical="dishwasher" top="6" sort="ecoscore" />
+::guide-product-grid{vertical="dishwasher" top="6" sort="ecoscore"}
+::
 
 ## Notre sélection par usage et budget
 
@@ -142,23 +147,27 @@ Le classement live des lave-vaisselles les mieux notés sur nudger.fr, triés pa
 
 Bosch, Siemens et LG se disputent le podium. Pour un foyer de 4 personnes qui cherche un encastrable classe A, 42 dB, réparable :
 
-<ProductCardEmbed gtin="4242005483068" size="medium" />
+::product-card-embed{gtin="4242005483068" size="medium"}
+::
 
 ### Meilleur choix pour une cuisine ultra-silencieuse
 
 38 dB, c'est le niveau sonore d'une bibliothèque. Ce Whirlpool intégré atteint ce seuil avec la meilleure réparabilité de notre sélection (9.6/10) :
 
-<ProductCardEmbed gtin="8003437065620" size="medium" />
+::product-card-embed{gtin="8003437065620" size="medium"}
+::
 
 ### Meilleur lave-vaisselle 45 cm pour petit foyer ou locataire
 
 Le Bosch SPV4EMX17E est notre référence 45 cm : encastrable, 10 couverts, classe A, réparabilité 9.3/10. Idéal pour un couple ou une cuisine de 2,5 m de façade.
 
-<ProductCardEmbed gtin="4242005540037" size="medium" />
+::product-card-embed{gtin="4242005540037" size="medium"}
+::
 
 ### Le meilleur premium éco - Bosch haut de gamme
 
-<ProductCardEmbed gtin="4242005438044" size="medium" />
+::product-card-embed{gtin="4242005438044" size="medium"}
+::
 
 ## Verdict final
 

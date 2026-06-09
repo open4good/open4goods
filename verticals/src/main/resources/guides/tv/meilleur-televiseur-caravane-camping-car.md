@@ -16,21 +16,25 @@ Pas le temps de tout lire ? Voici la sélection directe d'Arthur.
 
 **Meilleur rapport qualité/prix** - 24 pouces, Google TV, triple tuner, 12V natif, moins de 150 € :
 
-<ProductCardEmbed gtin="9120072379154" size="medium" />
+::product-card-embed{gtin="9120072379154" size="medium"}
+::
 
 **Meilleur polyvalent famille** - 22 pouces, Google TV, 12V/220V, marque française spécialisée camping :
 
-<ProductCardEmbed gtin="3665476519356" size="medium" />
+::product-card-embed{gtin="3665476519356" size="medium"}
+::
 
 **Meilleur premium** - 24 pouces, Smart LED HD, marque italienne reconnue sur mer et route :
 
-<ProductCardEmbed gtin="8002829815096" size="medium" />
+::product-card-embed{gtin="8002829815096" size="medium"}
+::
 
 ## Le marché en un coup d'œil
 
 Le segment TV pour véhicules de loisir est dominé par quelques spécialistes qui maîtrisent les contraintes du 12V et des vibrations de route. Les grandes marques grand public (Samsung, LG) sont quasi absentes de ce créneau - c'est intentionnel : leurs modèles ne sont pas conçus pour ces usages.
 
-<BrandShareChart type="pie" top="8" title="Parts de marché TV référencées sur nudger.fr" />
+::brand-share-chart{type="pie" top="8" title="Parts de marché TV référencées sur nudger.fr"}
+::
 
 **Fourchettes de prix observées en mai 2026 :**
 
@@ -112,7 +116,8 @@ Un téléviseur qu'on garde 8 ans a un impact carbone bien inférieur à deux mo
 
 Notre top trié par score d'impact nudger, mis à jour en temps réel :
 
-<GuideProductGrid top="5" sort="ecoscore" />
+::guide-product-grid{top="5" sort="ecoscore"}
+::
 
 ## Notre sélection par usage
 
@@ -120,25 +125,29 @@ Notre top trié par score d'impact nudger, mis à jour en temps réel :
 
 Le STRONG SRT24HG4723C est une surprise : 24 pouces, Google TV, triple tuner DVB-T2/C/S2 (TNT + satellite + câble), 12V natif, Bluetooth, Chromecast intégré. À ce prix, c'est le rapport fonctionnalités/euro le plus efficace du marché en 2026. Idéal pour les caravaniers occasionnels qui ne veulent pas surpayer.
 
-<ProductCardEmbed gtin="9120072379154" size="medium" />
+::product-card-embed{gtin="9120072379154" size="medium"}
+::
 
 ### Famille nomade - le polyvalent 22 pouces Google TV
 
 L'Antarion ANT-TV22 en 22 pouces est le choix de la Team Nudger pour un usage régulier en famille. Google TV natif (YouTube, Netflix, Prime), DVB-T2, alimentation 12V/220V, marque française avec SAV à Toulouse. Le compromis taille/conso/qualité le plus équilibré de la gamme.
 
-<ProductCardEmbed gtin="3665476519356" size="medium" />
+::product-card-embed{gtin="3665476519356" size="medium"}
+::
 
 ### Van-lifer autonome - ultra-basse consommation avec DVD
 
 Pour les van-lifers en itinérance longue, l'Antarion LED 22" Android tourne à **20 W réels** - soit 5 heures sur 100 Ah de batterie. Le lecteur DVD intégré est un vrai plus en zone sans réseau. Score de réparabilité 6/10, Android 14, alimentation 12V/24V/220V universelle.
 
-<ProductCardEmbed gtin="3665476967706" size="medium" />
+::product-card-embed{gtin="3665476967706" size="medium"}
+::
 
 ### Premium - la Majestic SM24 pour les exigeants
 
 La Majestic SM24 est la référence des camping-caristes qui ne veulent pas de compromis sur l'image. Marque italienne historique du nautisme, construction robuste, Smart LED HD 24 pouces, 12V natif. Pour ceux qui équipent leur camping-car une fois pour dix ans.
 
-<ProductCardEmbed gtin="8002829815096" size="medium" />
+::product-card-embed{gtin="8002829815096" size="medium"}
+::
 
 ## Verdict final
 
