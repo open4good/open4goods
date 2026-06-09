@@ -112,7 +112,6 @@
 
           <SectionReveal v-else transition="slide-y">
             <div
-              v-ripple
               class="buying-guide__content docs-prose"
               role="article"
               :aria-label="t('docs.labels.article')"
@@ -132,6 +131,10 @@ import { computed, h, ref } from 'vue'
 import DocsContentLink from '~/components/docs/DocsContentLink.vue'
 import SectionReveal from '~/components/shared/ui/SectionReveal.vue'
 import StickySectionNavigation from '~/components/shared/ui/StickySectionNavigation.vue'
+import ProductCardEmbed from '~/components/product/ProductCardEmbed.vue'
+import ProductEmbed from '~/components/product/ProductEmbed.vue'
+import BrandShareChart from '~/components/dataviz/BrandShareChart.vue'
+import GuideProductGrid from '~/components/product/GuideProductGrid.vue'
 import {
   provideGuideContext,
   type GuideContext,
@@ -226,6 +229,10 @@ const navigateToSection = (sectionId: string) => {
 }
 
 const resolvedComponents = computed(() => ({
+  ProductCardEmbed,
+  ProductEmbed,
+  BrandShareChart,
+  GuideProductGrid,
   a: (contentProps: { href?: string; target?: string; rel?: string }) =>
     h(DocsContentLink, {
       ...contentProps,
