@@ -259,6 +259,12 @@ export interface VerticalConfigFullDto {
    */
   wikiPages?: Array<WikiPageConfig>
   /**
+   * Buying-guide slugs discovered under guides/{vertical-id}.
+   * @type {Array<string>}
+   * @memberof VerticalConfigFullDto
+   */
+  guides?: Array<string>
+  /**
    * Localised AI generation configuration for the vertical.
    * @type {AiPromptsConfig}
    * @memberof VerticalConfigFullDto
@@ -497,6 +503,7 @@ export function VerticalConfigFullDtoFromJSONTyped(
       json['wikiPages'] == null
         ? undefined
         : (json['wikiPages'] as Array<any>).map(WikiPageConfigFromJSON),
+    guides: json['guides'] == null ? undefined : json['guides'],
     aiConfigs:
       json['aiConfigs'] == null
         ? undefined
@@ -651,6 +658,7 @@ export function VerticalConfigFullDtoToJSONTyped(
       value['wikiPages'] == null
         ? undefined
         : (value['wikiPages'] as Array<any>).map(WikiPageConfigToJSON),
+    guides: value['guides'],
     aiConfigs: AiPromptsConfigToJSON(value['aiConfigs']),
     ecoFilters: value['ecoFilters'],
     technicalFilters: value['technicalFilters'],

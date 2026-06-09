@@ -3,6 +3,8 @@ package org.open4goods.nudgerfrontapi.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.open4goods.model.Localisable;
@@ -40,7 +42,7 @@ class ProductUrlServiceTest {
         when(productRepository.getByIdWithoutEmbedding(42L)).thenReturn(product);
         when(categoryMappingService.toVerticalConfigDto(Mockito.any(), Mockito.eq(DomainLanguage.fr)))
                 .thenReturn(new VerticalConfigDto("tv", true, true, null, null, 1, null, null, null, null,
-                        null, null, null, "televiseurs", null, null, null, null));
+                        null, null, null, "televiseurs", List.of(), null, null, null, null));
 
         ProductUrlService service = new ProductUrlService(productRepository, verticalsConfigService, categoryMappingService, properties);
 

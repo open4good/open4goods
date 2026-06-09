@@ -37,6 +37,8 @@ public record VerticalConfigDto(
         String verticalHomeDescription,
         @Schema(description = "Localised home URL slug for the vertical.", example = "televiseurs")
         String verticalHomeUrl,
+        @Schema(description = "Buying-guide slugs discovered under guides/{vertical-id}.")
+        List<String> guides,
         @Schema(description = "Popular attributes resolved to their full configuration metadata.")
         List<AttributeConfigDto> popularAttributes,
         @Schema(description = "Identifiers of composite scores aggregating score attributes for the vertical.")

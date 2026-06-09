@@ -116,6 +116,7 @@
       <CategoryDocumentationRail
         class="category-page__documentation-block"
         :wiki-pages="wikiPages"
+        :guide-slugs="guideSlugs"
         :related-posts="relatedPosts"
         :vertical-home-url="props.verticalHomeUrl"
       />
@@ -149,7 +150,9 @@ const props = withDefaults(
     showMobileActions: boolean
     hasDocumentation: boolean
     wikiPages: WikiPageConfig[]
+    guideSlugs?: string[]
     relatedPosts: BlogPostDto[]
+    verticalHomeUrl?: string | null
     showAdminPanel?: boolean
     adminFilterFields?: FieldMetadataDto[]
     activeFiltersCount?: number
@@ -162,6 +165,8 @@ const props = withDefaults(
     baselineAggregations: () => [],
     showAdminPanel: false,
     adminFilterFields: () => [],
+    guideSlugs: () => [],
+    verticalHomeUrl: null,
     activeFiltersCount: 0,
     showHeader: false,
     showCollapseButton: false,
@@ -183,6 +188,7 @@ const emit = defineEmits<{
 const { t } = useI18n()
 
 const wikiPages = computed(() => props.wikiPages ?? [])
+const guideSlugs = computed(() => props.guideSlugs ?? [])
 const relatedPosts = computed(() => props.relatedPosts ?? [])
 const hasDocumentation = computed(() => props.hasDocumentation)
 const showMobileActions = computed(() => props.showMobileActions)

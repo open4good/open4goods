@@ -63,6 +63,8 @@ public record VerticalConfigFullDto(
         List<BlogPostDto> relatedPosts,
         @Schema(description = "Localised wiki pages associated with the vertical.")
         List<WikiPageConfig> wikiPages,
+        @Schema(description = "Buying-guide slugs discovered under guides/{vertical-id}.")
+        List<String> guides,
         @Schema(description = "Localised AI generation configuration for the vertical.")
         AiPromptsConfig aiConfigs,
         @Schema(description = "Eco filters enabled for this vertical.")

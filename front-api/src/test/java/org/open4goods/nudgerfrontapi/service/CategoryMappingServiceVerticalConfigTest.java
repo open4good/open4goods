@@ -95,6 +95,18 @@ class CategoryMappingServiceVerticalConfigTest {
     }
 
     @Test
+    void toVerticalConfigDtosExposeGuideSlugs() {
+        VerticalConfig config = createVerticalConfig("tv", 3);
+        config.setGuides(List.of("meilleur-televiseur-caravane-camping-car"));
+
+        VerticalConfigDto summary = service.toVerticalConfigDto(config, DomainLanguage.fr);
+        VerticalConfigFullDto full = service.toVerticalConfigFullDto(config, DomainLanguage.fr, List.of());
+
+        assertThat(summary.guides()).containsExactly("meilleur-televiseur-caravane-camping-car");
+        assertThat(full.guides()).containsExactly("meilleur-televiseur-caravane-camping-car");
+    }
+
+    @Test
     void toVerticalConfigFullDtoExposesLocalizedSubCategories() {
         VerticalConfig config = createVerticalConfig("dishwasher", 3);
 

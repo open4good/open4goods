@@ -124,7 +124,9 @@
                 :show-mobile-actions="true"
                 :has-documentation="hasDocumentation"
                 :wiki-pages="category?.wikiPages ?? []"
+                :guide-slugs="category?.guides ?? []"
                 :related-posts="category?.relatedPosts ?? []"
+                :vertical-home-url="category?.verticalHomeUrl"
                 :show-admin-panel="showAdminFilters"
                 :admin-filter-fields="adminFilterFields"
                 :active-filters-count="activeFiltersCount"
@@ -194,7 +196,9 @@
               :show-mobile-actions="false"
               :has-documentation="hasDocumentation"
               :wiki-pages="category?.wikiPages ?? []"
+              :guide-slugs="category?.guides ?? []"
               :related-posts="category?.relatedPosts ?? []"
+              :vertical-home-url="category?.verticalHomeUrl"
               :show-admin-panel="showAdminFilters"
               :admin-filter-fields="adminFilterFields"
               :active-filters-count="activeFiltersCount"
@@ -1994,9 +1998,10 @@ watch(
 
 const hasDocumentation = computed(() => {
   const wikiCount = category.value?.wikiPages?.length ?? 0
+  const guideCount = category.value?.guides?.length ?? 0
   const postCount = category.value?.relatedPosts?.length ?? 0
 
-  return wikiCount + postCount > 0
+  return wikiCount + guideCount + postCount > 0
 })
 
 const tableFields = computed<FieldMetadataDto[]>(() => {

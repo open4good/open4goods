@@ -371,6 +371,19 @@ const getDocPathInfo = (docPath: string, basePath?: string | null) => {
   }
 }
 
+export const inferDocVisibilityLocale = (
+  docPath: string,
+  fallbackLocale?: DocsLocale | null
+): DocsLocale => {
+  const normalizedPath = sanitizePathInput(docPath)
+
+  if (normalizedPath.startsWith(`${GUIDES_BASE_PATH}/`)) {
+    return normalizeDocsLocale(fallbackLocale ?? DEFAULT_DOMAIN_LANGUAGE)
+  }
+
+  return normalizeDocsLocale(getDocPathInfo(normalizedPath).locale)
+}
+
 export const useDocsContent = () => {
   const requestURL = useSafeRequestURL()
 
@@ -449,7 +462,9 @@ export const useDocsContent = () => {
     }
 
     const normalizedDoc = buildNormalizedDoc(doc)
-    const docLocale = normalizeDocsLocale(locale ?? getDocPathInfo(path).locale)
+    const docLocale = locale
+      ? normalizeDocsLocale(locale)
+      : inferDocVisibilityLocale(path, defaultLocale.value)
 
     if (!isDocVisibleForLocale(normalizedDoc, docLocale)) {
       return null

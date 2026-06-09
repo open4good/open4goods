@@ -126,6 +126,12 @@ export interface VerticalConfigDto {
    */
   verticalHomeUrl?: string
   /**
+   * Buying-guide slugs discovered under guides/{vertical-id}.
+   * @type {Array<string>}
+   * @memberof VerticalConfigDto
+   */
+  guides?: Array<string>
+  /**
    * Popular attributes resolved to their full configuration metadata.
    * @type {Array<AttributeConfigDto>}
    * @memberof VerticalConfigDto
@@ -196,6 +202,7 @@ export function VerticalConfigDtoFromJSONTyped(
         : json['verticalHomeDescription'],
     verticalHomeUrl:
       json['verticalHomeUrl'] == null ? undefined : json['verticalHomeUrl'],
+    guides: json['guides'] == null ? undefined : json['guides'],
     popularAttributes:
       json['popularAttributes'] == null
         ? undefined
@@ -246,6 +253,7 @@ export function VerticalConfigDtoToJSONTyped(
     verticalHomeTitle: value['verticalHomeTitle'],
     verticalHomeDescription: value['verticalHomeDescription'],
     verticalHomeUrl: value['verticalHomeUrl'],
+    guides: value['guides'],
     popularAttributes:
       value['popularAttributes'] == null
         ? undefined

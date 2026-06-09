@@ -1,7 +1,7 @@
 <template>
   <aside class="category-doc-rail" data-testid="category-doc-rail">
     <v-card
-      v-if="wikiPages.length"
+      v-if="wikiPages.length || guideLinks.length"
       class="category-doc-rail__card"
       rounded="xl"
       elevation="1"
@@ -12,6 +12,15 @@
       </v-card-title>
       <v-divider />
       <v-list density="comfortable">
+        <v-list-item
+          v-for="guide in guideLinks"
+          :key="guide.to"
+          :to="guide.to"
+        >
+          <template #title>
+            <span class="category-doc-rail__link">{{ guide.title }}</span>
+          </template>
+        </v-list-item>
         <v-list-item
           v-for="page in wikiPages"
           :key="page.title ?? page.verticalUrl ?? page.wikiUrl"
@@ -57,14 +66,23 @@ import type { BlogPostDto, WikiPageConfig } from '~~/shared/api-client'
 
 const props = defineProps<{
   wikiPages: WikiPageConfig[]
+  guideSlugs?: string[]
   relatedPosts: BlogPostDto[]
   verticalHomeUrl?: string | null
 }>()
 
 const wikiPages = computed(() => props.wikiPages ?? [])
+const guideSlugs = computed(() => props.guideSlugs ?? [])
 const relatedPosts = computed(() => props.relatedPosts ?? [])
 
 const normalizePathSegment = (value: string) => value.replace(/^\/+|\/+$/g, '')
+
+const prettifySlug = (value: string) =>
+  value
+    .replace(/[-_]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, char => char.toUpperCase())
 
 const internalBasePath = computed(() => {
   const raw = props.verticalHomeUrl?.trim()
@@ -73,6 +91,37 @@ const internalBasePath = computed(() => {
   }
 
   return `/${normalizePathSegment(raw)}`
+})
+
+const guideLinks = computed(() => {
+  const basePath = internalBasePath.value
+
+  if (!basePath) {
+    return []
+  }
+
+  const wikiSlugs = new Set(
+    wikiPages.value
+      .map(page => page.verticalUrl?.trim())
+      .filter((value): value is string => Boolean(value))
+      .map(normalizePathSegment)
+  )
+  const uniqueSlugs = new Set<string>()
+
+  return guideSlugs.value
+    .map(slug => normalizePathSegment(slug.trim()))
+    .filter(slug => {
+      if (!slug || wikiSlugs.has(slug) || uniqueSlugs.has(slug)) {
+        return false
+      }
+
+      uniqueSlugs.add(slug)
+      return true
+    })
+    .map(slug => ({
+      title: prettifySlug(slug),
+      to: `${basePath}/${slug}`,
+    }))
 })
 
 const resolveExternalWikiUrl = (page: WikiPageConfig) => {

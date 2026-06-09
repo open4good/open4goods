@@ -2,7 +2,9 @@
 
 ## Usage
 
-The frontend reads Markdown documents from the repository root `/docs` folder through the Nuxt Content `docs` source defined in `frontend/content.config.ts`.
+The frontend reads generic Markdown documents from the repository root `/docs`
+folder and category buying guides from `verticals/src/main/resources/guides`
+through the Nuxt Content `docs` source defined in `frontend/content.config.ts`.
 
 Generic documentation routes stay under `/docs/<locale>/<slug>` and are rendered by:
 
@@ -12,17 +14,20 @@ Generic documentation routes stay under `/docs/<locale>/<slug>` and are rendered
 
 Buying guides are category-owned content:
 
-- source path: `docs/<locale>/<verticalHomeUrl>/<guideSlug>.md`
+- source path: `verticals/src/main/resources/guides/<vertical-id>/<guideSlug>.md`
 - public route: `/<verticalHomeUrl>/<guideSlug>`
 - renderer: `app/components/docs/BuyingGuideRenderer.vue`
+- discovery: `VerticalsConfigService` scans `guides/<vertical-id>/*.md` and
+  exposes the guide slugs through the category API.
 
 Example:
 
-- source: `docs/fr/televiseurs/meilleur-televiseur-caravane-camping-car.md`
+- source: `verticals/src/main/resources/guides/tv/meilleur-televiseur-caravane-camping-car.md`
 - public URL: `/televiseurs/meilleur-televiseur-caravane-camping-car`
 
-Legacy moved guides under `/docs/fr/guides/<slug>` redirect to the matching
-category URL when a moved Markdown file exists.
+Legacy moved guides under `/docs/fr/guides/<slug>` can redirect to the matching
+category URL when a moved Markdown file exists, but new buying guides belong
+under `verticals/src/main/resources/guides/<vertical-id>/`.
 
 ## Frontmatter contract
 
@@ -59,7 +64,8 @@ updatedAt: '2026-04-12'
 
 Canonical URLs, robots directives, draft/published/navigation defaults and the
 category association are application-owned. The guide category is inferred from
-the path segment after the locale.
+the vertical id directory and resolved to the localized `verticalHomeUrl` for
+public routes.
 
 ## Language tag behaviour
 

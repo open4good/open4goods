@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   getLanguageTags,
+  inferDocVisibilityLocale,
   isDocVisibleForLocale,
   normalizeSlugOrPath,
   resolveDocPath,
@@ -54,6 +55,22 @@ describe('useDocsContent helpers', () => {
         guideSlug: 'meilleur-televiseur-caravane-camping-car',
       })
     ).toBe('/televiseurs/meilleur-televiseur-caravane-camping-car')
+  })
+
+  it('uses the fallback locale for vertical guide paths', () => {
+    expect(
+      inferDocVisibilityLocale(
+        '/guides/tv/meilleur-televiseur-caravane-camping-car',
+        'fr'
+      )
+    ).toBe('fr')
+
+    expect(
+      inferDocVisibilityLocale(
+        '/docs/en/impact-score/overview',
+        'fr'
+      )
+    ).toBe('en')
   })
 
   it('maps legacy guide docs URLs to moved category guide URLs', () => {

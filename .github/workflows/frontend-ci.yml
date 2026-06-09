@@ -3,9 +3,12 @@ on:
   push:
     paths:
       - "frontend/**"
+      - "verticals/src/main/resources/guides/**"
     branches: [main]
   pull_request:
-    paths: ["frontend/**"]
+    paths:
+      - "frontend/**"
+      - "verticals/src/main/resources/guides/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

@@ -30,6 +30,9 @@ const normaliseSlug = (value: string | null | undefined) =>
     .replace(/^\/+|\/+$/g, '')
     .toLowerCase() ?? ''
 
+const prettifySlug = (value: string) =>
+  value.replace(/[-_]/g, ' ').replace(/\b\w/g, char => char.toUpperCase())
+
 definePageMeta({
   path: '/:categorySlug/:guideSlug([A-Za-z][A-Za-z0-9-]*)',
   lazy: true,
@@ -234,11 +237,27 @@ const buildGuidePath = (guide: WikiPageConfig | null | undefined) => {
   }
 }
 
-const otherGuideLinks = computed(() => {
-  const guides = categoryDetail.wikiPages ?? []
+const buildMarkdownGuidePath = (guideSlug: string | null | undefined) => {
+  const slug = normaliseSlug(guideSlug)
 
-  const mapped = guides
-    .map(buildGuidePath)
+  if (!slug || slug === normalisedSlug) {
+    return null
+  }
+
+  return {
+    title: prettifySlug(slug),
+    to: `/${categorySlug.value}/${slug}`,
+  }
+}
+
+const otherGuideLinks = computed(() => {
+  const wikiGuides = categoryDetail.wikiPages ?? []
+  const markdownGuides = categoryDetail.guides ?? []
+
+  const mapped = [
+    ...markdownGuides.map(buildMarkdownGuidePath),
+    ...wikiGuides.map(buildGuidePath),
+  ]
     .filter((item): item is { title: string; to: string } => !!item?.to)
 
   const unique = new Map<string, { title: string; to: string }>()
