@@ -399,7 +399,7 @@ export default defineNuxtConfig({
       globPatterns: [PRECACHE_PATTERN],
       globIgnores: WORKBOX_GLOB_IGNORES,
       maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
-      navigateFallback: '/offline',
+      navigateFallback: null,
       runtimeCaching,
     },
   },

@@ -26,7 +26,8 @@ After regenerating assets run `pnpm lint` so the manifest import stays type-chec
 
 - `registerType: 'autoUpdate'` so users see updates as soon as the build is deployed.
 - Workbox runtime caches for API calls (`NetworkFirst`) and media (`StaleWhileRevalidate`).
-- An offline fallback route served from `server/routes/offline.get.ts`.
+- A `NetworkOnly` navigation runtime rule that serves `server/routes/offline.get.ts` only when a page navigation actually fails.
+- Workbox's app-shell `navigateFallback` is disabled so the runtime navigation rule is not shadowed.
 
 When touching caching rules adjust the `runtimeCaching` array near the top of `nuxt.config.ts`.
 
