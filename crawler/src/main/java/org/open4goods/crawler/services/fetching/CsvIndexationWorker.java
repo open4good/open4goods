@@ -46,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import java.util.concurrent.ConcurrentHashMap;
 
 import tools.jackson.databind.MappingIterator;
 import tools.jackson.databind.ObjectReader;
@@ -264,6 +265,10 @@ public class CsvIndexationWorker implements Runnable {
 	 */
 	private IndexationJobStat stats;
 
+	private final Map<String, String> resolvedKeysCache = new ConcurrentHashMap<>();
+
+	private static final Map<String, String> COMPARABLE_HEADER_CACHE = new ConcurrentHashMap<>();
+
 	/**
 	 * Constructor
 	 * 
@@ -342,6 +347,7 @@ public class CsvIndexationWorker implements Runnable {
 		}
 		
 		for (String url : urls) {
+			resolvedKeysCache.clear();
 			dedicatedLogger.warn("STARTING FEED URL {} - {}", url, dsProperties);
 			// Updating status with actual feed
 			stats = new IndexationJobStat(dsProperties.getDatasourceConfigName(), url, IndexationJobStat.TYPE_CSV);
@@ -1331,41 +1337,52 @@ public class CsvIndexationWorker implements Runnable {
 		return null;
 	}
 
-	private String actualCsvKey(final Map<String, String> item, final String colName) {
-		if (item == null || colName == null) {
+	private String actualCsvKey(final Map<String, String> item, final String colName)
+	{
+		if (item == null || colName == null)
+		{
 			return null;
 		}
-		if (item.containsKey(colName)) {
+		if (item.containsKey(colName))
+		{
 			return colName;
 		}
-		String normalized = colName.trim();
-		String comparable = comparableCsvHeader(colName);
-		String trimmedMatch = item.keySet().stream()
-				.filter(key -> key != null && key.trim().equalsIgnoreCase(normalized))
-				.findFirst()
-				.orElse(null);
-		if (trimmedMatch != null) {
-			return trimmedMatch;
-		}
-		return item.keySet().stream()
-				.filter(key -> comparableCsvHeader(key).equals(comparable))
-				.findFirst()
-				.orElse(null);
+		return resolvedKeysCache.computeIfAbsent(colName, col -> {
+			String normalized = col.trim();
+			String comparable = comparableCsvHeader(col);
+			String trimmedMatch = item.keySet().stream()
+					.filter(key -> key != null && key.trim().equalsIgnoreCase(normalized))
+					.findFirst()
+					.orElse(null);
+			if (trimmedMatch != null)
+			{
+				return trimmedMatch;
+			}
+			return item.keySet().stream()
+					.filter(key -> comparableCsvHeader(key).equals(comparable))
+					.findFirst()
+					.orElse(null);
+		});
 	}
 
-	static String comparableCsvHeader(String value) {
-		if (value == null) {
+	static String comparableCsvHeader(String value)
+	{
+		if (value == null)
+		{
 			return "";
 		}
-		String normalized = IdHelper.sanitizeAndNormalize(value);
-		if (!normalized.isEmpty() && normalized.charAt(0) == '\ufeff') {
-			normalized = normalized.substring(1);
-		}
-		normalized = stripWrappingHeaderQuotes(normalized);
-		normalized = Normalizer.normalize(normalized, Normalizer.Form.NFD)
-				.replaceAll("\\p{M}", "")
-				.toLowerCase(Locale.ROOT);
-		return normalized.replaceAll("[^a-z0-9]", "");
+		return COMPARABLE_HEADER_CACHE.computeIfAbsent(value, val -> {
+			String normalized = IdHelper.sanitizeAndNormalize(val);
+			if (!normalized.isEmpty() && normalized.charAt(0) == '\ufeff')
+			{
+				normalized = normalized.substring(1);
+			}
+			normalized = stripWrappingHeaderQuotes(normalized);
+			normalized = Normalizer.normalize(normalized, Normalizer.Form.NFD)
+					.replaceAll("\\p{M}", "")
+					.toLowerCase(Locale.ROOT);
+			return normalized.replaceAll("[^a-z0-9]", "");
+		});
 	}
 
 	private static String stripWrappingHeaderQuotes(String value) {

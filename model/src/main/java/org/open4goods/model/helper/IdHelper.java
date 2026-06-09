@@ -55,21 +55,31 @@ public class IdHelper {
 	 * @param input
 	 * @return
 	 */
-	public static String sanitize(final String input) {
-		if (StringUtils.isEmpty(input)) {
+	public static String sanitize(final String input)
+	{
+		if (StringUtils.isEmpty(input))
+		{
 			return null;
 		}
-		final String ret = StringEscapeUtils.unescapeHtml4(input).trim();
+		String unescaped = input.indexOf('&') != -1 ? StringEscapeUtils.unescapeHtml4(input) : input;
+		final String ret = unescaped.trim();
 
-		if (StringUtils.isEmpty(ret)) {
+		if (StringUtils.isEmpty(ret))
+		{
 			return null;
 		}
 
 		return ret;
 	}
 
-	public static String sanitizeAndNormalize(final String input) {
-		return StringUtils.normalizeSpace(StringEscapeUtils.unescapeHtml4(input));
+	public static String sanitizeAndNormalize(final String input)
+	{
+		if (input == null)
+		{
+			return null;
+		}
+		String unescaped = input.indexOf('&') != -1 ? StringEscapeUtils.unescapeHtml4(input) : input;
+		return StringUtils.normalizeSpace(unescaped);
 	}
 
 	/**
