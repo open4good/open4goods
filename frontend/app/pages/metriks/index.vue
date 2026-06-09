@@ -81,6 +81,16 @@ const selectedTags = ref<string[]>(
 // Sync composable period
 comparePeriod.value = initialPeriod
 
+// ---------- Weekly digest ----------
+const weeklyDigest = ref<{ name: string; contentHtml: string } | null>(null)
+
+async function loadWeeklyDigest(): Promise<void> {
+  weeklyDigest.value = await $fetch<{
+    name: string
+    contentHtml: string
+  } | null>('/api/metriks/weekly/latest').catch(() => null)
+}
+
 /** Ordered list of selected metrics (for the chart). */
 const selectedMetriks = computed(() =>
   allMetriks.value.filter(m => selectedIds.value.has(m.id))
@@ -160,6 +170,7 @@ function syncUrl(): void {
 onMounted(() => {
   if (isAdmin.value) {
     loadAll()
+    loadWeeklyDigest()
   }
 })
 </script>
@@ -230,6 +241,22 @@ onMounted(() => {
         <v-row v-if="heroMetriks.length > 0" class="mb-6">
           <v-col v-for="m in heroMetriks" :key="m.id" cols="12" sm="6" md="3">
             <MetrikCard :metrik="m" variant="xl" />
+          </v-col>
+        </v-row>
+
+        <!-- Weekly digest -->
+        <v-row v-if="weeklyDigest" class="mb-6">
+          <v-col cols="12">
+            <v-card variant="tonal" color="primary">
+              <v-card-title class="d-flex align-center ga-2">
+                <v-icon icon="mdi-calendar-week" />
+                {{ t('metriks.weekly.title') }}
+              </v-card-title>
+              <v-card-text>
+                <!-- eslint-disable-next-line vue/no-v-html -- sanitized server-side via DOMPurify -->
+                <div class="metriks-digest" v-html="weeklyDigest.contentHtml" />
+              </v-card-text>
+            </v-card>
           </v-col>
         </v-row>
 

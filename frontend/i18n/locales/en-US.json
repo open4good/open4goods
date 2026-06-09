@@ -3907,6 +3907,9 @@
     },
     "accessDenied": "Access Denied",
     "loginCta": "Login",
+    "weekly": {
+      "title": "Weekly report"
+    },
     "chart": {
       "title": "Evolution over time",
       "empty": "No data to display for the selection.",

@@ -292,6 +292,16 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
+    '/sw.js': {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+      },
+    },
+    '/workbox-*.js': {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+      },
+    },
     '/_nuxt/builds/latest.json': {
       headers: {
         'Cache-Control': 'public, max-age=0, must-revalidate',
@@ -389,6 +399,7 @@ export default defineNuxtConfig({
       globPatterns: [PRECACHE_PATTERN],
       globIgnores: WORKBOX_GLOB_IGNORES,
       maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+      navigateFallback: '/offline',
       runtimeCaching,
     },
   },
@@ -538,6 +549,9 @@ export default defineNuxtConfig({
     // NUXT_MACHINE_TOKEN is the canonical path on prod, but we keep MACHINE_TOKEN as fallback
     machineToken: process.env.NUXT_MACHINE_TOKEN || process.env.MACHINE_TOKEN || 'CHANGE_ME_SHARED_TOKEN',
     apiUrl: process.env.API_URL || 'http://localhost:8082',
+    // Runtime directory holding the weekly Metriks reports (deployed by open4goods-config).
+    // Falls back to the bundled public dir during local dev when unset.
+    metriksDataDir: process.env.METRIKS_DATA_DIR || '',
     staticMainPageRoutes: STATIC_MAIN_PAGE_ROUTE_NAMES,
     sitemapLocalFiles: {
       fr: [

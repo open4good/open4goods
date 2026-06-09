@@ -3813,6 +3813,9 @@
     },
     "accessDenied": "Accès refusé",
     "loginCta": "Se connecter",
+    "weekly": {
+      "title": "Rapport hebdomadaire"
+    },
     "chart": {
       "title": "Évolution dans le temps",
       "empty": "Aucune donnée à afficher pour la sélection.",

@@ -226,6 +226,13 @@
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
+
+        <!-- Google Search Console (Metriks SEO metrics) -->
+        <dependency>
+            <groupId>com.google.auth</groupId>
+            <artifactId>google-auth-library-oauth2-http</artifactId>
+            <version>1.48.0</version>
+        </dependency>
     </dependencies>
 
 

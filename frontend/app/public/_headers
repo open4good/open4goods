@@ -5,6 +5,12 @@
   Referrer-Policy: same-origin
   Permissions-Policy: interest-cohort=()
 
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/workbox-*.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
 /_nuxt/builds/latest.json
   Cache-Control: public, max-age=0, must-revalidate
 

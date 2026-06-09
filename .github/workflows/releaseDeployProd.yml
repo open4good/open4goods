@@ -510,7 +510,10 @@ jobs:
             import urllib.request
 
             base = "http://127.0.0.1:3000"
-            pages = [base + "/"]
+            pages = [
+                base + "/",
+                base + "/televiseurs/televiseur-55-pouces",
+            ]
 
             class Parser(html.parser.HTMLParser):
                 def __init__(self):
@@ -550,6 +553,17 @@ jobs:
                             for name in ("cf-ray", "cf-cache-status", "cache-control", "server")
                         }
                         failures.append((asset_status, asset_url, interesting_headers, asset_body[:512].decode("utf-8", errors="replace")))
+
+            for path in ("/sw.js", "/_nuxt/builds/latest.json"):
+                asset_url = base + path
+                checked += 1
+                try:
+                    asset_status, headers, asset_body = fetch(asset_url)
+                except Exception as exc:
+                    failures.append((0, asset_url, {}, str(exc)))
+                    continue
+                if asset_status >= 400:
+                    failures.append((asset_status, asset_url, dict(headers), asset_body[:512].decode("utf-8", errors="replace")))
 
             if failures:
                 print("frontend_asset_failure")

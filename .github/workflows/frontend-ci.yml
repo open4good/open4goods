@@ -95,6 +95,10 @@ jobs:
             import urllib.request
 
             base = "http://127.0.0.1:3000"
+            pages = [
+                base + "/",
+                base + "/televiseurs/televiseur-55-pouces",
+            ]
 
             class Parser(html.parser.HTMLParser):
                 def __init__(self):
@@ -111,16 +115,29 @@ jobs:
                 with urllib.request.urlopen(request, timeout=20) as response:
                     return response.status, dict(response.headers), response.read()
 
-            status, _, body = fetch(base + "/")
-            if status >= 400:
-                print(f"frontend_asset_failure: {status} {base}/")
-                sys.exit(1)
-
-            parser = Parser()
-            parser.feed(body.decode("utf-8", errors="replace"))
             failures = []
-            for asset in sorted(parser.assets):
-                asset_url = urllib.parse.urljoin(base + "/", asset)
+            checked = 0
+            for page in pages:
+                status, _, body = fetch(page)
+                if status >= 400:
+                    failures.append((status, page, {}, "page failed"))
+                    continue
+                parser = Parser()
+                parser.feed(body.decode("utf-8", errors="replace"))
+                for asset in sorted(parser.assets):
+                    asset_url = urllib.parse.urljoin(page, asset)
+                    checked += 1
+                    try:
+                        asset_status, headers, asset_body = fetch(asset_url)
+                    except Exception as exc:
+                        failures.append((0, asset_url, {}, str(exc)))
+                        continue
+                    if asset_status >= 400:
+                        failures.append((asset_status, asset_url, headers, asset_body[:512].decode("utf-8", errors="replace")))
+
+            for path in ("/sw.js", "/_nuxt/builds/latest.json"):
+                asset_url = base + path
+                checked += 1
                 try:
                     asset_status, headers, asset_body = fetch(asset_url)
                 except Exception as exc:
@@ -137,5 +154,5 @@ jobs:
                     print(excerpt[:200])
                 sys.exit(1)
 
-            print(f"Validated {len(parser.assets)} Nuxt asset(s).")
+            print(f"Validated {checked} Nuxt asset(s) from {len(pages)} page(s).")
             PY

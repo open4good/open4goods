@@ -90,6 +90,40 @@ public class CsvIndexationWorker implements Runnable {
 
 	private static final String CLASSPATH_PREFIX = "classpath:";
 
+	private static final List<String> DEFAULT_URL_COLUMNS = List.of(
+	        "product_url",
+	        "product URL",
+	        "product page URL",
+	        "url",
+	        "URL",
+	        "link",
+	        "aw_deep_link",
+	        "merchant_deep_link",
+	        "productURL",
+	        "url_product",
+	        "urlficheproduit");
+
+	private static final List<String> DEFAULT_AFFILIATED_URL_COLUMNS = List.of(
+	        "tracking_url",
+	        "tracked_url",
+	        "tracking link",
+	        "affiliated_url",
+	        "affiliate_url",
+	        "aw_deep_link",
+	        "deep_link",
+	        "link",
+	        "productURL",
+	        "urlficheproduit");
+
+	private static final List<String> DEFAULT_NAME_COLUMNS = List.of(
+	        "product_name",
+	        "product name",
+	        "name of the product",
+	        "name",
+	        "title",
+	        "nomproduit",
+	        "designation");
+
 	private static final List<String> DEFAULT_PRICE_COLUMNS = List.of(
 	        "price",
 	        "Price",
@@ -104,6 +138,36 @@ public class CsvIndexationWorker implements Runnable {
 	        "prix ttc",
 	        "prix_ttc",
 	        "StrikePrice");
+
+	private static final List<String> DEFAULT_DESCRIPTION_COLUMNS = List.of(
+	        "description",
+	        "short_description",
+	        "short description",
+	        "long_description",
+	        "long description",
+	        "product_description",
+	        "product description",
+	        "product_short_description",
+	        "product short description");
+
+	private static final List<String> DEFAULT_IMAGE_COLUMNS = List.of(
+	        "image",
+	        "Image",
+	        "image_url",
+	        "image URL",
+	        "Image URL",
+	        "big image",
+	        "URL related to the big image",
+	        "large_image",
+	        "large image",
+	        "product_image",
+	        "product image",
+	        "picture",
+	        "picture_url",
+	        "aw_image_url",
+	        "merchant_image_url",
+	        "url_image",
+	        "urlimageoriginal");
 
 	private static final List<String> DEFAULT_PRODUCT_STATE_COLUMNS = List.of(
 	        "condition",
@@ -150,19 +214,25 @@ public class CsvIndexationWorker implements Runnable {
 	        "shipping_time",
 	        "delivery time",
 	        "delivery delay",
+	        "delivery_time",
 	        "delais de livraison",
 	        "délais de livraison",
 	        "délai de livraison");
 
 	private static final Map<ReferentielKey, List<String>> DEFAULT_REFERENTIEL_COLUMNS = Map.of(
-	        ReferentielKey.GTIN, List.of("EAN or ISBN", "EAN", "ISBN", "gtin", "ean", "ean13", "barcode"),
-	        ReferentielKey.BRAND, List.of("brand", "Brand", "brand name", "brand_name", "manufacturer", "Manufacturer"),
+	        ReferentielKey.GTIN, List.of("EAN or ISBN", "EAN", "ISBN", "gtin", "GTIN", "ean", "ean13", "EAN13",
+	                "barcode", "product_GTIN", "upc"),
+	        ReferentielKey.BRAND, List.of("brand", "Brand", "brand name", "Brand name", "brand_name", "manufacturer",
+	                "Manufacturer", "manufacturer name", "merchant_name"),
 	        ReferentielKey.MODEL, List.of("manufacturer reference", "Manufacturer reference", "internal reference",
-	                "Internal reference", "model", "reference", "product_reference"));
+	                "Internal reference", "model", "Model", "reference", "product_reference", "mpn", "MPN",
+	                "model_number", "product_model"));
 
-	private static final List<String> DEFAULT_MPN_COLUMNS = List.of("manufacturer reference", "Manufacturer reference", "mpn", "MPN");
+	private static final List<String> DEFAULT_MPN_COLUMNS = List.of("manufacturer reference", "Manufacturer reference",
+	        "mpn", "MPN", "model_number", "product_model", "reference");
 
-	private static final List<String> DEFAULT_SKU_COLUMNS = List.of("sku", "SKU", "internal reference", "Internal reference");
+	private static final List<String> DEFAULT_SKU_COLUMNS = List.of("sku", "SKU", "internal reference", "Internal reference",
+	        "merchant_product_id", "aw_product_id");
 
 	/** The service used to "atomically" fetch and store / update DataFragments **/
 	private final CsvDatasourceFetchingService csvService;
@@ -526,10 +596,13 @@ public class CsvIndexationWorker implements Runnable {
 	private void setUrl(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger, String datasetUrl) {
 	    try {
 	        CsvDataSourceProperties csvProperties = config.getCsvDatasource();
-	        String url = !StringUtils.isEmpty(csvProperties.getExtractUrlFromParam()) ? extractUrlFromParam(item, csvProperties) : getFromCsvRow(item, csvProperties.getUrl());
+	        String url = !StringUtils.isEmpty(csvProperties.getExtractUrlFromParam()) ? extractUrlFromParam(item, csvProperties) : null;
+	        if (StringUtils.isEmpty(url)) {
+	            url = getFromCsvRow(item, candidateColumns(csvProperties.getUrl(), DEFAULT_URL_COLUMNS));
+	        }
 	        dataFragment.setUrl(url);
 	        // revove from the source to prevent further integration
-	        removeFromSource(item, csvProperties.getUrl());
+	        removeFromSource(item, candidateColumns(csvProperties.getUrl(), DEFAULT_URL_COLUMNS));
 	        
 	    } catch (Exception e) {
 	        logger.info("Error while extracting url in dataset {} ({} columns)", datasetUrl, item.size());
@@ -576,7 +649,7 @@ public class CsvIndexationWorker implements Runnable {
 	private void setAffiliatedUrl(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger) {
 	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
 	    if (!StringUtils.isEmpty(csvProperties.getAffiliatedUrl())) {
-	        String url = getFromCsvRow(item, csvProperties.getAffiliatedUrl());
+	        String url = getFromCsvRow(item, candidateColumns(csvProperties.getAffiliatedUrl(), DEFAULT_AFFILIATED_URL_COLUMNS));
 	        if (url != null && csvProperties.getAffiliatedUrlReplacementTokens() != null) {
 	            for (Map.Entry<String, String> token : csvProperties.getAffiliatedUrlReplacementTokens().entrySet()) {
 	                url = url.replace(token.getKey(), token.getValue());
@@ -694,10 +767,11 @@ public class CsvIndexationWorker implements Runnable {
 	 */
 	private void setNameAndTags(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config) {
 	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
-	    dataFragment.addName(getFromCsvRow(item, csvProperties.getName()));
+	    List<String> nameColumns = candidateColumns(csvProperties.getName(), DEFAULT_NAME_COLUMNS);
+	    dataFragment.addName(getFromCsvRow(item, nameColumns));
 	    
         // Delete from source
-        removeFromSource(item, csvProperties.getName());
+        removeFromSource(item, nameColumns);
         
 	    dataFragment.addProductTags(getCategoryFromCsvRows(item));
 	}
@@ -752,7 +826,7 @@ public class CsvIndexationWorker implements Runnable {
 	 */
 	private void setDescription(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config) {
 	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
-	    for (String descColumn : csvProperties.getDescription()) {
+	    for (String descColumn : candidateColumns(csvProperties.getDescription(), DEFAULT_DESCRIPTION_COLUMNS)) {
 	        String description = getFromCsvRow(item, descColumn);
 	        if (!StringUtils.isEmpty(description) && config.getDescriptionRemoveToken() != null) {
 	            for (String token : config.getDescriptionRemoveToken()) {
@@ -776,10 +850,10 @@ public class CsvIndexationWorker implements Runnable {
 	private void addResources(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger) {
 	    try {
 	        CsvDataSourceProperties csvProperties = config.getCsvDatasource();
-	        for (String imgCell : csvProperties.getImage()) {
+	        for (String imgCell : candidateColumns(csvProperties.getImage(), DEFAULT_IMAGE_COLUMNS)) {
 	            String resource = getFromCsvRow(item, imgCell);
 	            if (!StringUtils.isEmpty(resource) && shouldIncludeResource(resource, csvProperties)) {
-	                dataFragment.addResource(resource);
+	                dataFragment.addResource(new Resource(resource));
 	            }
 	            
 	            // Delete from source
@@ -1147,6 +1221,15 @@ public class CsvIndexationWorker implements Runnable {
 		}
 		
 	}
+
+	private void removeFromSource(Map<String, String> item, Iterable<String> keys) {
+		if (keys == null) {
+			return;
+		}
+		for (String key : keys) {
+			removeFromSource(item, key);
+		}
+	}
 	
 	
 	
@@ -1233,6 +1316,19 @@ public class CsvIndexationWorker implements Runnable {
 		String actualKey = actualCsvKey(item, colName);
 		return actualKey == null ? null : item.get(actualKey);
 		
+	}
+
+	private String getFromCsvRow(final Map<String, String> item, final Iterable<String> colNames) {
+		if (colNames == null) {
+			return null;
+		}
+		for (String colName : colNames) {
+			String value = getFromCsvRow(item, colName);
+			if (!StringUtils.isEmpty(value)) {
+				return value;
+			}
+		}
+		return null;
 	}
 
 	private String actualCsvKey(final Map<String, String> item, final String colName) {

@@ -140,6 +140,62 @@ class CsvIndexationWorkerTest
         assertThat(fragment.getExternalIds().getMpn()).contains("ABC-1234");
     }
 
+    @Test
+    void parsesMdaEffiliationRowUsingBroadHeaderFallbacks() throws Exception
+    {
+        CsvIndexationWorker worker = new CsvIndexationWorker(
+                null,
+                new DataFragmentCompletionService(null),
+                null,
+                null,
+                null,
+                0,
+                null,
+                null);
+        DataSourceProperties datasource = new DataSourceProperties();
+        datasource.setName("MDA Electromenager");
+        datasource.setLanguage("fr");
+        datasource.setValidationFields(Set.of("price", "names", "GTIN"));
+
+        CsvDataSourceProperties csv = new CsvDataSourceProperties();
+        csv.setUrl("product_url");
+        csv.setAffiliatedUrl("tracking_url");
+        csv.setName("product_name");
+        csv.setPrice(Set.of("price_vat_inc", "price", "product_price", "sale_price"));
+        csv.setImage(Set.of("image_url"));
+        csv.setCurrency(Currency.EUR);
+        datasource.setCsvDatasource(csv);
+
+        Map<String, String> row = new LinkedHashMap<>();
+        row.put("EAN or ISBN", "0010942218654");
+        row.put("name of the product", "Cafetière KRUPS KM468910");
+        row.put("internal reference", "KM468910");
+        row.put("current price", "134.0");
+        row.put("product category", "Cafetière à filtre");
+        row.put("product page URL", "https://qby.mda-electromenager.com/?P5122F758B41F15S1UC41363f044849V4");
+        row.put("big image", "https://www.mda-electromenager.com/media/cache/product.jpg");
+        row.put("manufacturer reference", "0010942218654");
+        row.put("brand", "krups");
+        row.put("description", "Arrêt automatique : Oui - Couleur : Noir");
+        row.put("product availability", "in stock");
+        row.put("condition", "neuf");
+        row.put("shipping costs", "4.90");
+        row.put("Delais de livraison", "1 à 2 jours");
+        row.put("sku", "150527000067747");
+
+        DataFragment fragment = invokeParseCsvLine(worker, row, datasource);
+
+        assertThat(fragment.getUrl()).isEqualTo("https://qby.mda-electromenager.com/?P5122F758B41F15S1UC41363f044849V4");
+        assertThat(fragment.getAffiliatedUrl()).isEqualTo(fragment.getUrl());
+        assertThat(fragment.getNames()).contains("Cafetière KRUPS KM468910");
+        assertThat(fragment.getPrice().getPrice()).isEqualTo(134.0);
+        assertThat(fragment.getResources()).extracting("url")
+                .contains("https://www.mda-electromenager.com/media/cache/product.jpg");
+        assertThat(fragment.getReferentielAttributes()).containsEntry(ReferentielKey.GTIN, "0010942218654");
+        assertThat(fragment.getReferentielAttributes()).containsEntry(ReferentielKey.BRAND, "KRUPS");
+        assertThat(fragment.getExternalIds().getSku()).contains("150527000067747");
+    }
+
     private static void invoke(CsvIndexationWorker worker, String method, DataFragment fragment) throws Exception
     {
         Method reflected = CsvIndexationWorker.class.getDeclaredMethod(method, DataFragment.class);

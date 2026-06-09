@@ -8,10 +8,11 @@ import type {
   MetrikProviderData,
 } from '~/types/metriks'
 
-/** Known provider directory names. Add new providers here. */
-const PROVIDER_NAMES = ['plausible', 'kibana', 'hello'] as const
-
-const BASE_PATH = '/reports/metriks/data'
+/**
+ * Provider directories are discovered at runtime via `/api/metriks/providers`
+ * (served from the deployed metriks data dir), so adding a provider needs no frontend change.
+ */
+const BASE_PATH = '/api/metriks'
 
 /** Supported period presets (in days). 'latest' = compare to the previous run. */
 export type MetrikPeriodPreset = 'latest' | '7d' | '3w' | '3m'
@@ -163,7 +164,7 @@ export function useMetriks() {
     providerName: string
   ): Promise<MetrikLatest | null> {
     try {
-      const url = `${BASE_PATH}/${providerName}/latest.json`
+      const url = `${BASE_PATH}/${providerName}/latest`
       const response = await $fetch<MetrikLatest>(url)
       return response
     } catch (e: unknown) {
@@ -182,7 +183,7 @@ export function useMetriks() {
     providerName: string
   ): Promise<{ meta: MetrikMeta | null; runs: MetrikRun[] }> {
     try {
-      const url = `${BASE_PATH}/${providerName}/events.ndjson`
+      const url = `${BASE_PATH}/${providerName}/history`
       const text = await $fetch<string>(url, { responseType: 'text' })
       const records = parseNdjson(text)
 
@@ -301,8 +302,12 @@ export function useMetriks() {
     try {
       const providerMap = new Map<string, MetrikProviderData>()
 
+      const providerNames = await $fetch<string[]>(`${BASE_PATH}/providers`).catch(
+        () => [] as string[]
+      )
+
       await Promise.all(
-        PROVIDER_NAMES.map(async providerName => {
+        providerNames.map(async providerName => {
           const [latest, { meta, runs }] = await Promise.all([
             fetchLatest(providerName),
             fetchHistory(providerName),
