@@ -12,11 +12,7 @@
       </v-card-title>
       <v-divider />
       <v-list density="comfortable">
-        <v-list-item
-          v-for="guide in guideLinks"
-          :key="guide.to"
-          :to="guide.to"
-        >
+        <v-list-item v-for="guide in guideLinks" :key="guide.to" :to="guide.to">
           <template #title>
             <span class="category-doc-rail__link">{{ guide.title }}</span>
           </template>

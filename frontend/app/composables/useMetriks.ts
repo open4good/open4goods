@@ -302,9 +302,9 @@ export function useMetriks() {
     try {
       const providerMap = new Map<string, MetrikProviderData>()
 
-      const providerNames = await $fetch<string[]>(`${BASE_PATH}/providers`).catch(
-        () => [] as string[]
-      )
+      const providerNames = await $fetch<string[]>(
+        `${BASE_PATH}/providers`
+      ).catch(() => [] as string[])
 
       await Promise.all(
         providerNames.map(async providerName => {

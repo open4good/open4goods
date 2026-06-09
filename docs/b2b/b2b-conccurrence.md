@@ -1,5 +1,6 @@
 # Product Data API - Étude concurrentielle détaillée
 
+> Décisions canoniques : [`00-canonical-decisions.md`](00-canonical-decisions.md).
 > Annexe de [`b2B.md`](b2B.md). Document jumeau : [`b2b-facets.md`](b2b-facets.md).
 > Pricing vérifié en live le **2026-06-02** pour les benchmarks structurants (PriceAPI,
 > SerpApi, Winamaz, Bright Data). Les autres acteurs reprennent les données de l'annexe

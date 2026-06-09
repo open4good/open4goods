@@ -19,3 +19,5 @@ developer workflow.
 - [ADR 0001: Enhanced EPREL matching logic with score resolution](0001-eprel-matching-logic-scoring.md)
 - [ADR 0002: Product model identity confidence](0002-product-model-identity-confidence.md)
 - [ADR 0003: EPREL dry-run endpoints and logging redirection](0003-eprel-dry-run-and-logging-redirection.md)
+- [ADR 0004: Aggregation service design](0004-aggregation-service-design.md)
+- [ADR 0005: Product Data API B2B v1](0005-product-data-api-b2b-v1.md)

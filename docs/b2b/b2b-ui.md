@@ -117,7 +117,13 @@ The UI should adopt proven API-platform conventions:
 - No downstream backend calls directly from browser components when secrets,
   session cookies, or machine tokens are involved.
 
-Recommended project shape:
+Recommended project shape (illustrative grouping):
+
+> **Layout note.** The actual Infera bootstrap source uses a **flat** Nuxt layout
+> (`pages/`, `composables/`, `domains/`, `components/`, `server/`, `content/`,
+> `i18n/` at the project root), not the `app/`-nested tree below. Treat the `app/`
+> nesting here as conceptual grouping; the canonical layout and the OpenAPI codegen
+> pipeline are in [`b2b-frontend-build.md`](b2b-frontend-build.md).
 
 ```text
 b2b-frontend/

@@ -66,10 +66,7 @@ describe('useDocsContent helpers', () => {
     ).toBe('fr')
 
     expect(
-      inferDocVisibilityLocale(
-        '/docs/en/impact-score/overview',
-        'fr'
-      )
+      inferDocVisibilityLocale('/docs/en/impact-score/overview', 'fr')
     ).toBe('en')
   })
 

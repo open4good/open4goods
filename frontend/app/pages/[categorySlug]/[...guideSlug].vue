@@ -257,8 +257,7 @@ const otherGuideLinks = computed(() => {
   const mapped = [
     ...markdownGuides.map(buildMarkdownGuidePath),
     ...wikiGuides.map(buildGuidePath),
-  ]
-    .filter((item): item is { title: string; to: string } => !!item?.to)
+  ].filter((item): item is { title: string; to: string } => !!item?.to)
 
   const unique = new Map<string, { title: string; to: string }>()
   mapped.forEach(item => {

@@ -90,7 +90,10 @@ export const listMetrikProviders = async (): Promise<string[]> => {
 const safeProvider = (provider: string): string => {
   // Provider names are simple directory slugs; reject anything with path separators.
   if (!/^[a-z0-9][a-z0-9._-]*$/i.test(provider)) {
-    throw createError({ statusCode: 400, statusMessage: 'Invalid provider name' })
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Invalid provider name',
+    })
   }
   return provider
 }
@@ -100,7 +103,12 @@ export const readMetrikLatest = async (
   provider: string
 ): Promise<unknown | null> => {
   try {
-    const file = path.join(await resolveRoot(), 'data', safeProvider(provider), 'latest.json')
+    const file = path.join(
+      await resolveRoot(),
+      'data',
+      safeProvider(provider),
+      'latest.json'
+    )
     return JSON.parse(await fs.readFile(file, 'utf-8'))
   } catch (error: unknown) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null
@@ -111,7 +119,12 @@ export const readMetrikLatest = async (
 /** Raw `events.ndjson` text for a provider. */
 export const readMetrikHistory = async (provider: string): Promise<string> => {
   try {
-    const file = path.join(await resolveRoot(), 'data', safeProvider(provider), 'events.ndjson')
+    const file = path.join(
+      await resolveRoot(),
+      'data',
+      safeProvider(provider),
+      'events.ndjson'
+    )
     return await fs.readFile(file, 'utf-8')
   } catch (error: unknown) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return ''

@@ -1,5 +1,16 @@
 # Product Data API - B2B v1 master implementation prompt
 
+> **Canonical, but read [`00-canonical-decisions.md`](00-canonical-decisions.md) first.**
+> That page resolves every conflict with the superseded
+> `~/.claude/plans/prompt-b2b-on-peaceful-peacock.md` and locks v1 decisions
+> (GTIN-first strict, `meta.coverage`, full Stripe). The detailed, agent-ready
+> specs live under [`../architecture/product-data-api-*.md`](../architecture/)
+> (data model, redis contract, billing ledger, API contract, errors, auth,
+> stripe, ops), the runbook under
+> [`../operations/product-data-api-local-runbook.md`](../operations/product-data-api-local-runbook.md),
+> and the decision record at
+> [`../adr/0005-product-data-api-b2b-v1.md`](../adr/0005-product-data-api-b2b-v1.md).
+
 You are an AI coding agent working in `/home/goulven/git/open4goods`.
 Implement the first production-grade B2B vertical for **Product Data API**,
 served publicly on `product-data-api.com`.
@@ -195,6 +206,8 @@ Authorization: Bearer pdapi_...
 
 Behavior:
 
+- GTIN-first strict: v1 accepts only a syntactically valid, checksum-correct
+  GTIN as the product key (no asin/mpn/keyword resolution in v1).
 - Validate GTIN before any credit reservation. Reuse
   `org.open4goods.commons.services.BarcodeValidationService`.
 - Normalize valid GTINs according to the validation service result.
@@ -227,6 +240,12 @@ Use a response envelope for all B2B API responses:
         "credits": 5,
         "served": true,
         "billable": true
+      }
+    ],
+    "coverage": [
+      {
+        "id": "product.price",
+        "covered": true
       }
     ],
     "freshnessDays": 30,
@@ -539,7 +558,7 @@ Create or update:
 - `b2b-api/README.md`
 - `b2b-frontend/AGENTS.md`
 - `b2b-frontend/README.md`
-- `docs/adr/0004-product-data-api-b2b-v1.md`
+- `docs/adr/0005-product-data-api-b2b-v1.md` (0004 is already taken)
 - `docs/architecture/product-data-api-contract.md`
 - `docs/architecture/product-data-api-billing-ledger.md`
 - `docs/operations/product-data-api-local-runbook.md`

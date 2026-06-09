@@ -1,5 +1,6 @@
 # Product Data API - Capacités nudger & plan de facettes priorisé
 
+> Décisions canoniques : [`00-canonical-decisions.md`](00-canonical-decisions.md).
 > Annexe de [`b2B.md`](b2B.md). Document jumeau : [`b2b-conccurrence.md`](b2b-conccurrence.md).
 > Investigation menée sur le modèle `Product.java`, les DTO existants de `front-api`, et
 > **mesurée en live sur l'Elasticsearch de production** (`products-moustik`, profil devsec) le
@@ -215,6 +216,12 @@ d'extraire la logique de `ProductMappingService` dans un service B2B partagé.
 ---
 
 ## 8. Questions ouvertes
+
+> **Statut (voir [`00-canonical-decisions.md`](00-canonical-decisions.md)) :**
+> Q2 **tranchée** -> GTIN-first strict en v1. Q6 **tranchée** -> `meta.coverage`
+> par facette dans l'enveloppe. Q5 (exposition review complète vs résumé+sources)
+> reste **différée** (à trancher avant de livrer la facette review). Q1/Q3/Q4
+> restent ouvertes (radar roadmap).
 
 1. **Couverture review/EPREL non mesurable par ES** : exposer un compteur applicatif côté pipeline pour
    chiffrer le volume premium réel avant de communiquer sur ces facettes ? (recommandé)
