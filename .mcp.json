@@ -9,7 +9,22 @@
       "type": "stdio",
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp@latest"]
-    
+    },
+    "javalens": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "javalens-mcp"],
+      "env": {
+        "JAVA_PROJECT_PATH": "/home/goulven/git/open4goods"
+      }
+    },
+    "mcp-java-dev-tools": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/home/goulven/.local/share/mcp/mcp-java-dev-tools/dist/server.js"],
+      "env": {
+        "MCP_JAVA_AGENT_JAR": "/home/goulven/.local/share/mcp/mcp-java-dev-tools/java-agent/core/core-probe/target/mcp-java-dev-tools-agent-0.1.6.jar"
+      }
     }
   }
 }

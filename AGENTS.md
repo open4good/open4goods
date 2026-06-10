@@ -80,12 +80,11 @@ No class in a lower layer may depend on a higher one.
 
 ## 5  Coding standards
 
-- **Formatting**: 4-space indent, braces on a new line.  
 - **Language features**: Records (except for Spring Boot config binding), sealed classes, pattern matching where useful.  
 - **Error handling**: Custom exceptions + RFC 9457 / Problem-Detail responses.  
 - **Logging**: SLF4J parameterised messages and structured logging.  
 - **Tests**: Unit + integration tests for every feature or bug-fix.  
-- **Javadoc**: Keep class/method Javadoc up-to-date, you must generate it when writing new class, or update it when handling existing code.  
+- **Javadoc**: Keep class/method Javadoc up-to-date; generate it when writing a new class, or update it when modifying existing code.  
 - **TODOs**: Resolve or raise an issue; none should remain in committed code.
 
 ---
@@ -140,7 +139,7 @@ git config core.hooksPath .githooks
 
 ## 8  Rationale
 
-A predictable, enforced structure lowers cognitive load for humans and gives large-language models a deterministic environment in which to operate. This accelerates onboarding, reduces bugs, and keeps architecture sound as we migrate monolith parts to independent Spring Boot services (see the services/**) .
+A predictable, enforced structure lowers cognitive load for humans and gives large-language models a deterministic environment in which to operate. This accelerates onboarding, reduces bugs, and keeps architecture sound as we migrate monolith parts to independent Spring Boot services (see `services/*`).
 
 ## 9  Automated dependency updates
 
@@ -153,10 +152,34 @@ and before 5am) with major Maven upgrades disabled.
 For detailed module-specific conventions, see:
 
 - **Frontend**: [frontend/AGENTS.md](frontend/AGENTS.md) - Nuxt 4 / Vue 3 / Vuetify
+- **B2B Frontend**: [b2b-frontend/AGENTS.md](b2b-frontend/AGENTS.md) - Nuxt 4 / Vue 3 / Vuetify 4 / TypeScript
 - **Front API**: [front-api/AGENTS.md](front-api/AGENTS.md) - SpringDoc / OpenAPI
+- **B2B API**: [b2b-api/AGENTS.md](b2b-api/AGENTS.md) - Spring Boot 4 / Java 21
 - **Services**: [services/AGENTS.md](services/AGENTS.md) - Microservices (19 services)
 - **Core Modules**: [admin](admin/AGENTS.md), [api](api/AGENTS.md), [commons](commons/AGENTS.md), [crawler](crawler/AGENTS.md), [model](model/AGENTS.md), [verticals](verticals/AGENTS.md)
 - **UI (deprecated)**: [ui/AGENTS.md](ui/AGENTS.md) - Being replaced by frontend
+
+---
+
+## 11  AI Search & Navigation (Java MCP Servers)
+
+To stop AI agents from trying to `grep` a massive Java project (which results in endless false positives for overloaded methods, interface implementations, or generic names), use system prompts or explicit triggering to force the use of compiler-level tools.
+
+### 11.1  Frame prompts explicitly
+Instead of asking:
+> "Find where updateUser is called."
+
+Say:
+> "Use the JavaLens `find_references` tool to trace the call hierarchy of `UserService.updateUser` across the project. Do not use grep or plain text search."
+
+### 11.2  Inject into System Instructions (`.clauderc` / Cursor Rules / System Prompts)
+Add a rule to system instructions to correct model search bias:
+
+```text
+You are working on a large Java project. Do not use standard text-search (grep, ripgrep, find_in_files) to navigate code or find method usages. Text search creates false positives due to method overloading and interface implementations. You must prioritize the semantic Java MCP tools available to you (such as JavaLens or Java Class Analyzer) for navigating call structures, finding references, and decompiling dependencies.
+```
+
+By embedding this instruction, the AI agent relies on compiler-level accuracy rather than guessing with text searches.
 
 ---
 

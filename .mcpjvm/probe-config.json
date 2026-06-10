@@ -1,0 +1,20 @@
+{
+  "defaultProfile": "dev",
+  "profiles": {
+    "dev": {
+      "defaultProbe": "open4goods",
+      "global": {
+        "probeWaitMaxRetries": 3,
+        "probeWaitUnreachableRetryEnabled": true,
+        "probeWaitUnreachableMaxRetries": 4
+      },
+      "probes": {
+        "open4goods": {
+          "baseUrl": "http://127.0.0.1:9190",
+          "include": ["org.open4goods.**"],
+          "exclude": []
+        }
+      }
+    }
+  }
+}
