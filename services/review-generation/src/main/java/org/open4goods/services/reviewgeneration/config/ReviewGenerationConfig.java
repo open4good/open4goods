@@ -130,7 +130,7 @@ public class ReviewGenerationConfig {
      * fetched review evidence as complete, partial but usable, or failed.
      */
     private Map<String, FetchQualityThreshold> fetchThresholdsByVertical = Map.of(
-            "tv", new FetchQualityThreshold(6000, 3, 3000, 2),
+            "tv", new FetchQualityThreshold(4000, 2, 2000, 1),
             "smartphone", new FetchQualityThreshold(6000, 3, 3000, 2),
             "smartphones", new FetchQualityThreshold(6000, 3, 3000, 2),
             "dishwasher", new FetchQualityThreshold(3000, 2, 1500, 1),

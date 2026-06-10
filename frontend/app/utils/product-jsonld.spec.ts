@@ -295,6 +295,64 @@ describe('product-jsonld', () => {
     })
   })
 
+  it('emits shippingDetails when shippingCost is present on an offer', () => {
+    const graph = buildProductJsonLdGraph({
+      ...(mockInput as unknown as ProductJsonLdInput),
+      product: {
+        ...mockProduct,
+        offers: {
+          offersCount: 1,
+          offersByCondition: {
+            NEW: [
+              {
+                url: '/offer/1',
+                price: 100,
+                currency: 'EUR',
+                condition: 'NEW',
+                datasourceName: 'Shop',
+                shippingCost: 0,
+                shippingTimeDays: 3,
+              },
+            ],
+          },
+        },
+      } as unknown as ProductJsonLdInput['product'],
+    })
+    const productNode = (
+      graph?.['@graph'] as unknown as Array<{
+        '@type': string
+        offers: {
+          offers: Array<{
+            shippingDetails?: {
+              '@type': string
+              shippingRate: { value: number }
+              deliveryTime?: { transitTime: { minValue: number } }
+            }
+          }>
+        }
+      }>
+    )?.find(n => n['@type'] === 'Product')
+
+    const offer = productNode!.offers.offers[0]
+    expect(offer.shippingDetails?.['@type']).toBe('OfferShippingDetails')
+    expect(offer.shippingDetails?.shippingRate?.value).toBe(0)
+    expect(offer.shippingDetails?.deliveryTime?.transitTime?.minValue).toBe(3)
+  })
+
+  it('omits shippingDetails when shippingCost is absent', () => {
+    const graph = buildProductJsonLdGraph(
+      mockInput as unknown as ProductJsonLdInput
+    )
+    const productNode = (
+      graph?.['@graph'] as unknown as Array<{
+        '@type': string
+        offers: { offers: Array<{ shippingDetails?: unknown }> }
+      }>
+    )?.find(n => n['@type'] === 'Product')
+
+    expect(productNode!.offers.offers[0].shippingDetails).toBeUndefined()
+  })
+
   it('emits review from aiReview summary when technicalReviewIntermediate is absent', () => {
     const graph = buildProductJsonLdGraph(
       mockInput as unknown as ProductJsonLdInput
@@ -302,7 +360,12 @@ describe('product-jsonld', () => {
     const productNode = (
       graph?.['@graph'] as unknown as Array<{
         '@type': string
-        review?: { '@type': string; author: { name: string }; reviewBody: string; datePublished: string }
+        review?: {
+          '@type': string
+          author: { name: string }
+          reviewBody: string
+          datePublished: string
+        }
       }>
     )?.find(n => n['@type'] === 'Product')
 
@@ -370,7 +433,10 @@ describe('product-jsonld', () => {
       }>
     )?.find(n => n['@type'] === 'Product')
 
-    expect(productNode?.countryOfOrigin).toEqual({ '@type': 'Country', name: 'Chine' })
+    expect(productNode?.countryOfOrigin).toEqual({
+      '@type': 'Country',
+      name: 'Chine',
+    })
   })
 
   it('omits countryOfOrigin when gtinInfo.countryName is absent', () => {
@@ -404,7 +470,10 @@ describe('product-jsonld', () => {
     )?.find(n => n['@type'] === 'BreadcrumbList')
 
     expect(breadcrumbNode!.itemListElement).toHaveLength(2)
-    expect(breadcrumbNode!.itemListElement.map(e => e.name)).toEqual(['Home', 'Category'])
+    expect(breadcrumbNode!.itemListElement.map(e => e.name)).toEqual([
+      'Home',
+      'Category',
+    ])
   })
 
   it('uses the resolved category label instead of the product SEO name', () => {

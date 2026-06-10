@@ -102,6 +102,8 @@ export interface ProductJsonLdInput {
           currency?: string | null
           condition?: string | null
           datasourceName?: string | null
+          shippingCost?: number | null
+          shippingTimeDays?: number | null
         }>
       > | null
     } | null
@@ -425,6 +427,8 @@ export const buildOfferList = (
       currency?: string | null
       condition?: string | null
       datasourceName?: string | null
+      shippingCost?: number | null
+      shippingTimeDays?: number | null
     }>
   >
 ): Array<Record<string, JsonLdValue>> => {
@@ -439,6 +443,37 @@ export const buildOfferList = (
     )
     .map(offer => {
       const url = normalizeString(offer.url)
+      const currency = normalizeString(offer.currency)
+
+      const shippingDetails =
+        typeof offer.shippingCost === 'number' && currency
+          ? {
+              '@type': 'OfferShippingDetails',
+              shippingRate: {
+                '@type': 'MonetaryAmount',
+                value: offer.shippingCost,
+                currency,
+              },
+              shippingDestination: {
+                '@type': 'DefinedRegion',
+                addressCountry: 'FR',
+              },
+              ...(typeof offer.shippingTimeDays === 'number'
+                ? {
+                    deliveryTime: {
+                      '@type': 'ShippingDeliveryTime',
+                      transitTime: {
+                        '@type': 'QuantitativeValue',
+                        minValue: offer.shippingTimeDays,
+                        maxValue: offer.shippingTimeDays,
+                        unitCode: 'DAY',
+                      },
+                    },
+                  }
+                : {}),
+            }
+          : undefined
+
       return {
         '@type': 'Offer',
         url: url
@@ -447,7 +482,7 @@ export const buildOfferList = (
             : toAbsoluteUrl(origin, url)
           : undefined,
         price: offer.price,
-        priceCurrency: normalizeString(offer.currency),
+        priceCurrency: currency,
         priceValidUntil,
         availability: 'https://schema.org/InStock',
         itemCondition: resolveOfferItemCondition(offer.condition),
@@ -455,6 +490,7 @@ export const buildOfferList = (
           '@type': 'Organization',
           name: normalizeString(offer.datasourceName),
         },
+        shippingDetails,
       }
     })
 

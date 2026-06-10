@@ -361,7 +361,7 @@ public class ReviewGenerationPreprocessingService {
 		}
 		logger.info("Aggregated {} tokens from {} sources.", accumulatedTokens, finalSourcesMap.size());
 
-		deduplicateSimilarSources(product, finalSourcesMap, finalTokensMap, finalSourceClasses, rejectedUrls);
+		deduplicateSimilarSources(product, verticalConfig, finalSourcesMap, finalTokensMap, finalSourceClasses, rejectedUrls);
 		accumulatedTokens = finalTokensMap.values().stream().mapToInt(Integer::intValue).sum();
 		logger.info("After deduplication: {} tokens from {} sources.", accumulatedTokens, finalSourcesMap.size());
 
@@ -1894,7 +1894,7 @@ public class ReviewGenerationPreprocessingService {
 
 	private void deduplicateLocaleVariantSources(Product product, Map<String, String> sourcesMap,
 			Map<String, Integer> tokensMap, Map<String, SourceClass> sourceClasses,
-			Map<String, String> rejectedUrls, String preferredLocale) {
+			Map<String, String> rejectedUrls, String preferredLocale, int targetMinTokens, int targetMinUrls) {
 		Map<String, List<String>> groups = new LinkedHashMap<>();
 		for (String url : new ArrayList<>(sourcesMap.keySet())) {
 			String rootH = rootHost(url);
@@ -1910,6 +1910,26 @@ public class ReviewGenerationPreprocessingService {
 			}
 			for (String url : variants) {
 				if (url.equals(best)) continue;
+				
+				Set<String> wordsBest = contentWordSet(sourcesMap.get(best));
+				Set<String> wordsUrl = contentWordSet(sourcesMap.get(url));
+				double similarity = jaccardSimilarity(wordsBest, wordsUrl);
+				
+				int currentTokens = tokensMap.values().stream().mapToInt(Integer::intValue).sum();
+				int currentUrls = sourcesMap.size();
+				int discardTokens = tokensMap.getOrDefault(url, 0);
+				boolean belowThreshold = (currentTokens - discardTokens < targetMinTokens) || (currentUrls - 1 < targetMinUrls);
+				
+				SourceClass sc = sourceClasses.get(url);
+				boolean isOfficial = sc == SourceClass.OFFICIAL_PRODUCT || sc == SourceClass.OFFICIAL_SUPPORT;
+				double simThreshold = isOfficial ? 0.98 : 0.95;
+				
+				if (belowThreshold || similarity < simThreshold) {
+					logger.info("Bypassing locale variant deduplication for UPC {}: keeping {}, similarity={}, belowThreshold={}",
+							product == null ? "unknown" : product.getId(), url, similarity, belowThreshold);
+					continue;
+				}
+				
 				logger.info("Deduplicating locale variants for UPC {}: keeping {}, discarding {}",
 						product == null ? "unknown" : product.getId(), best, url);
 				sourcesMap.remove(url);
@@ -1920,7 +1940,7 @@ public class ReviewGenerationPreprocessingService {
 		}
 	}
 
-	private void deduplicateSimilarSources(Product product, Map<String, String> sourcesMap,
+	private void deduplicateSimilarSources(Product product, VerticalConfig verticalConfig, Map<String, String> sourcesMap,
 			Map<String, Integer> tokensMap, Map<String, SourceClass> sourceClasses,
 			Map<String, String> rejectedUrls) {
 		if (sourcesMap == null || sourcesMap.size() <= 1) {
@@ -1932,7 +1952,12 @@ public class ReviewGenerationPreprocessingService {
 		} else {
 			preferredLocale = "fr";
 		}
-		deduplicateLocaleVariantSources(product, sourcesMap, tokensMap, sourceClasses, rejectedUrls, preferredLocale);
+		
+		FetchQualityThreshold threshold = fetchThreshold(verticalConfig);
+		int targetMinTokens = threshold.getMinGlobalTokens();
+		int targetMinUrls = threshold.getMinUrlCount();
+		
+		deduplicateLocaleVariantSources(product, sourcesMap, tokensMap, sourceClasses, rejectedUrls, preferredLocale, targetMinTokens, targetMinUrls);
 		List<String> urls = new ArrayList<>(sourcesMap.keySet());
 		Set<String> removed = new HashSet<>();
 		for (int i = 0; i < urls.size(); i++) {
@@ -1959,6 +1984,22 @@ public class ReviewGenerationPreprocessingService {
 				if (similarity >= 0.8) {
 					String keep = selectBestDuplicate(urlA, urlB, tokensMap, preferredLocale);
 					String discard = keep.equals(urlA) ? urlB : urlA;
+					
+					int currentTokens = tokensMap.values().stream().mapToInt(Integer::intValue).sum();
+					int currentUrls = sourcesMap.size();
+					int discardTokens = tokensMap.getOrDefault(discard, 0);
+					boolean belowThreshold = (currentTokens - discardTokens < targetMinTokens) || (currentUrls - 1 < targetMinUrls);
+					
+					SourceClass sc = sourceClasses.get(discard);
+					boolean isOfficial = sc == SourceClass.OFFICIAL_PRODUCT || sc == SourceClass.OFFICIAL_SUPPORT;
+					boolean keepOfficial = isOfficial && similarity < 0.95;
+					
+					if (belowThreshold || keepOfficial) {
+						logger.info("Bypassing near-duplicate deduplication for UPC {}: keeping {} (similarity={}, belowThreshold={}, keepOfficial={})",
+								product == null ? "unknown" : product.getId(), discard, similarity, belowThreshold, keepOfficial);
+						continue;
+					}
+					
 					logger.info("Deduplicating similar sources (jaccard={}) for UPC {}: keeping {}, discarding {}",
 							String.format("%.2f", similarity),
 							product == null ? "unknown" : product.getId(), keep, discard);

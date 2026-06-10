@@ -116,20 +116,17 @@ const StickySectionNavigationStub = defineComponent({
       h(
         'nav',
         { class: 'sticky-section-navigation-stub' },
-        (props.sections as Array<{ id: string; label: string }>).map(
-          section =>
-            h(
-              'button',
-              {
-                class:
-                  section.id === props.activeSection
-                    ? 'is-active'
-                    : undefined,
-                type: 'button',
-                onClick: () => emit('navigate', section.id),
-              },
-              section.label
-            )
+        (props.sections as Array<{ id: string; label: string }>).map(section =>
+          h(
+            'button',
+            {
+              class:
+                section.id === props.activeSection ? 'is-active' : undefined,
+              type: 'button',
+              onClick: () => emit('navigate', section.id),
+            },
+            section.label
+          )
         )
       )
   },
@@ -190,8 +187,7 @@ const mountRenderer = async () => {
         VFadeTransition: { template: '<div><slot /></div>' },
         VImg: { template: '<img class="v-img" />', props: ['src', 'alt'] },
         VProgressLinear: {
-          template:
-            '<div class="v-progress-linear" :aria-label="ariaLabel" />',
+          template: '<div class="v-progress-linear" :aria-label="ariaLabel" />',
           props: ['ariaLabel', 'modelValue', 'height', 'color'],
         },
         VRow: { template: '<div><slot /></div>' },

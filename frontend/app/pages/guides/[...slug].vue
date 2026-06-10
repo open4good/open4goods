@@ -22,7 +22,11 @@ const slugSegments = Array.isArray(rawSlug)
 const guideSlug = slugSegments.join('/')
 
 if (!guideSlug) {
-  throw createError({ statusCode: 404, message: 'Guide not found', fatal: false })
+  throw createError({
+    statusCode: 404,
+    message: 'Guide not found',
+    fatal: false,
+  })
 }
 
 const doc = (await getDocByPath({
@@ -30,7 +34,11 @@ const doc = (await getDocByPath({
 })) as DocsDoc | null
 
 if (!doc) {
-  throw createError({ statusCode: 404, message: 'Guide not found', fatal: false })
+  throw createError({
+    statusCode: 404,
+    message: 'Guide not found',
+    fatal: false,
+  })
 }
 
 const canonicalPath = `/guides/${guideSlug}`

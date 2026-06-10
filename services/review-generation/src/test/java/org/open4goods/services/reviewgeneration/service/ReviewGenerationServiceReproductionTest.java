@@ -1,5 +1,7 @@
 package org.open4goods.services.reviewgeneration.service;
 
+import org.open4goods.model.attribute.ReferentielKey;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -141,6 +143,76 @@ class ReviewGenerationServiceReproductionTest {
         AiReview persisted = status.getResult().getReview();
         assertThat(persisted).isNotNull();
         assertThat(persisted.getAttributes()).isEmpty();
+    }
+
+    @Test
+    void testLocaleVariantContentPreservedBelowThreshold() throws Exception {
+        // Create a real PreprocessingService for this test
+        ReviewGenerationPreprocessingService realPreprocessing = new ReviewGenerationPreprocessingService(
+                properties,
+                googleSearchService,
+                urlFetchingService,
+                genAiService,
+                new org.open4goods.services.serialisation.service.SerialisationService(),
+                meterRegistry
+        );
+
+        // Setup product and config
+        Product product = new Product(5901292525859L);
+        product.setReviews(new Localisable<>());
+        product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, "TCL");
+        product.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, "98P8K");
+
+        VerticalConfig verticalConfig = new VerticalConfig();
+        verticalConfig.setId("tv");
+
+        // Two locale-variant URLs from same root host and canonical path
+        String url1 = "https://www.tcl.com/eu/en/tvs/98p8k";
+        String url2 = "https://www.tcl.com/hk/en/tvs/98p8k";
+
+        when(googleSearchService.search(any())).thenReturn(new org.open4goods.services.googlesearch.dto.GoogleSearchResponse(List.of(
+                new org.open4goods.services.googlesearch.dto.GoogleSearchResult("TCL 98P8K EU", url1),
+                new org.open4goods.services.googlesearch.dto.GoogleSearchResult("TCL 98P8K HK", url2)
+        )));
+
+        // Both URLs return contents with similarity >= 0.8 (e.g. 0.96)
+        String content1 = "TCL TV 98P8K review specs and details 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 EU";
+        String content2 = "TCL TV 98P8K review specs and details 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 HK";
+
+        when(urlFetchingService.fetchUrlAsync(eq(url1), any())).thenReturn(
+                java.util.concurrent.CompletableFuture.completedFuture(
+                        new org.open4goods.services.urlfetching.dto.FetchResponse(url1, 200, content1, content1, org.open4goods.services.urlfetching.config.FetchStrategy.HTTP)
+                )
+        );
+        when(urlFetchingService.fetchUrlAsync(eq(url2), any())).thenReturn(
+                java.util.concurrent.CompletableFuture.completedFuture(
+                        new org.open4goods.services.urlfetching.dto.FetchResponse(url2, 200, content2, content2, org.open4goods.services.urlfetching.config.FetchStrategy.HTTP)
+                )
+        );
+
+        // Map token estimations: 2100 tokens each
+        when(genAiService.estimateTokens(content1)).thenReturn(2100);
+        when(genAiService.estimateTokens(content2)).thenReturn(2100);
+
+        properties.setMinMarkdownChars(5);
+        properties.setSourceMinTokens(100);
+
+        // When we run preprocessing, we expect both URLs to be kept to meet the threshold (complete: 4000, 2 URLs).
+        // Let's execute preprocessing!
+        Map<String, Object> variables = realPreprocessing.preparePromptVariables(product, verticalConfig, new ReviewGenerationStatus());
+
+        assertThat(variables).containsKey("sources");
+        @SuppressWarnings("unchecked")
+        Map<String, String> sources = (Map<String, String>) variables.get("sources");
+        
+        // Assert both variants were preserved to satisfy the 4000 token / 2 URL complete threshold
+        assertThat(sources).containsKey(url1);
+        assertThat(sources).containsKey(url2);
+        
+        @SuppressWarnings("unchecked")
+        Map<String, String> rejected = (Map<String, String>) variables.get("REJECTED_URLS");
+        assertThat(rejected).doesNotContainKey(url1);
+        assertThat(rejected).doesNotContainKey(url2);
     }
 
     private void waitForCompletion(long upc) throws InterruptedException {

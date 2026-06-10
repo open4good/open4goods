@@ -429,9 +429,7 @@ const collectPlainText = (value: unknown): string => {
     const record = value as Record<string, unknown>
 
     return Object.entries(record)
-      .filter(
-        ([key]) => !['toc', 'props', 'id', 'tag', 'type'].includes(key)
-      )
+      .filter(([key]) => !['toc', 'props', 'id', 'tag', 'type'].includes(key))
       .map(([, item]) => collectPlainText(item))
       .join(' ')
   }
