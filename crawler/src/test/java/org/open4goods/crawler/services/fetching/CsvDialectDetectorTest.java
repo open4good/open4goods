@@ -79,6 +79,34 @@ class CsvDialectDetectorTest
     }
 
     @Test
+    void detectsQuotedSemicolonFeedWithMultilineDescription() throws Exception
+    {
+        Path file = write("""
+                id;title;description;price;gtin
+                13911734;Rouleau Gerflor;"Découvrez le sol vinyle 1734 Madras Storm de Gerflor.
+                Ce revêtement en pose collée, disponible en rouleau de 4m, résiste à l'humidité.";14.50;3475710430077
+                6086S071;Plinthe Gerflor;"Fabriquée en Europe, la plinthe S071 contribue à réduire l'empreinte carbone.";6.54;3475710421433
+                """);
+
+        CsvSchema schema = detector.detectSchema(file.toFile(), StandardCharsets.UTF_8);
+
+        assertThat((char) schema.getColumnSeparator()).isEqualTo(';');
+        assertThat((char) schema.getQuoteChar()).isEqualTo('"');
+        try (MappingIterator<Map<String, String>> rows = CsvMapper.builder()
+                .enable(CsvReadFeature.IGNORE_TRAILING_UNMAPPABLE)
+                .enable(CsvReadFeature.INSERT_NULLS_FOR_MISSING_COLUMNS)
+                .build()
+                .readerFor(Map.class)
+                .with(schema)
+                .readValues(new InputStreamReader(new FileInputStream(file.toFile()), StandardCharsets.UTF_8)))
+        {
+            Map<String, String> first = rows.next();
+            assertThat(first.get("description")).contains("Ce revêtement en pose collée");
+            assertThat(first.get("price")).isEqualTo("14.50");
+        }
+    }
+
+    @Test
     void fallsBackToUnquotedParsingForMalformedQuotedFeed() throws Exception
     {
         Path file = write("\"title\";\"price\";\"description\"\n"

@@ -38,6 +38,9 @@ public class CsvDialectDetector
     /** Number of non-blank lines sampled, including the header. */
     private static final int DETECTION_SAMPLE_LINES = 2_000;
 
+    /** Maximum physical lines to merge while scoring a quoted logical record. */
+    private static final int MAX_LOGICAL_RECORD_LINES = 50;
+
     /**
      * Detects a CSV schema for the supplied file.
      *
@@ -174,9 +177,13 @@ public class CsvDialectDetector
 
         Map<Integer, Integer> colCountFreq = new HashMap<>();
         int matchingHeader = 0;
+        int dataLines = 0;
         for (int i = 1; i < lines.size(); i++)
         {
-            int cols = countFieldsOutsideQuotes(lines.get(i), sep, quote, escape);
+            LogicalRecord logicalRecord = countLogicalRecordFields(lines, i, sep, quote, escape);
+            int cols = logicalRecord.columns();
+            i += logicalRecord.consumedLines() - 1;
+            dataLines++;
             colCountFreq.merge(cols, 1, Integer::sum);
             if (cols == headerColumns)
             {
@@ -184,7 +191,10 @@ public class CsvDialectDetector
             }
         }
 
-        int dataLines = lines.size() - 1;
+        if (dataLines == 0)
+        {
+            return 0.0;
+        }
         int modalCount = colCountFreq.entrySet().stream()
                 .max(Map.Entry.comparingByValue())
                 .map(Map.Entry::getKey)
@@ -201,6 +211,38 @@ public class CsvDialectDetector
         double headerPenalty = modalCount == headerColumns ? 1.0 : 0.45;
 
         return (modalConsistency + headerConsistency) * 0.5 * Math.log1p(modalCount) * headerPenalty;
+    }
+
+    private LogicalRecord countLogicalRecordFields(
+            List<String> lines,
+            int start,
+            char sep,
+            Character quote,
+            Character escape)
+    {
+        if (quote == null)
+        {
+            return new LogicalRecord(countFieldsOutsideQuotes(lines.get(start), sep, null, escape), 1);
+        }
+
+        StringBuilder record = new StringBuilder();
+        int consumed = 0;
+        for (int i = start; i < lines.size() && consumed < MAX_LOGICAL_RECORD_LINES; i++)
+        {
+            if (!record.isEmpty())
+            {
+                record.append('\n');
+            }
+            record.append(lines.get(i));
+            consumed++;
+
+            int columns = countFieldsOutsideQuotes(record.toString(), sep, quote, escape);
+            if (columns > 0)
+            {
+                return new LogicalRecord(columns, consumed);
+            }
+        }
+        return new LogicalRecord(0, Math.max(consumed, 1));
     }
 
     private int countFieldsOutsideQuotes(String line, char sep, Character quote, Character escape)
@@ -260,5 +302,9 @@ public class CsvDialectDetector
             }
         }
         return inQuotes ? 0 : fields;
+    }
+
+    private record LogicalRecord(int columns, int consumedLines)
+    {
     }
 }
