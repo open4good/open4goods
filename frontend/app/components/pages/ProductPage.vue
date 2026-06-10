@@ -1066,6 +1066,18 @@ const ogImageUrl = computed(() => {
 })
 
 const ogImageAlt = computed(() => productTitle.value)
+
+const ogImageDimensions = computed<{ width?: number; height?: number }>(() => {
+  const source = resolvedProductImageSource.value
+  if (!source) return {}
+  const match = product.value?.resources?.images?.find(
+    img => img?.url === source || img?.originalUrl === source
+  )
+  return {
+    width: match?.width ?? undefined,
+    height: match?.height ?? undefined,
+  }
+})
 const productScoreMap = computed<Record<string, ProductScoreDto | undefined>>(
   () => {
     return (product.value?.scores?.scores ?? {}) as Record<
@@ -2355,7 +2367,7 @@ const productJsonLdGraph = computed(() => {
     },
     category: verticalTitle.value,
     imageUrls: jsonLdImageUrls.value,
-    punchline: product.value.aiReview?.punchline,
+    punchline: product.value.aiReview?.review?.baseLine,
     impactScore: impactScoreOutOf20.value,
     labels: {
       impactScore: String(t('product.schema.properties.impactScore')),
@@ -2543,6 +2555,8 @@ useSeoMeta({
   ogType: 'product',
   ogImage: () => ogImageUrl.value,
   ogImageAlt: () => ogImageAlt.value,
+  ogImageWidth: () => ogImageDimensions.value.width,
+  ogImageHeight: () => ogImageDimensions.value.height,
 })
 
 useHead(() => ({

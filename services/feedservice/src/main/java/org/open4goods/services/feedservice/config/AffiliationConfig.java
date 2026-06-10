@@ -15,6 +15,10 @@ public class AffiliationConfig {
 
 	private String webgainsApiKey;
 
+	private String cjApiToken;
+	private String cjPublisherId;
+	private String cjWebsiteId;
+
 	public String getAwinAdvertiserId() {
 		return awinAdvertiserId;
 	}
@@ -69,5 +73,29 @@ public class AffiliationConfig {
 
 	public void setWebgainsApiKey(String webgainsApiKey) {
 		this.webgainsApiKey = webgainsApiKey;
+	}
+
+	public String getCjApiToken() {
+		return cjApiToken;
+	}
+
+	public void setCjApiToken(String cjApiToken) {
+		this.cjApiToken = cjApiToken;
+	}
+
+	public String getCjPublisherId() {
+		return cjPublisherId;
+	}
+
+	public void setCjPublisherId(String cjPublisherId) {
+		this.cjPublisherId = cjPublisherId;
+	}
+
+	public String getCjWebsiteId() {
+		return cjWebsiteId;
+	}
+
+	public void setCjWebsiteId(String cjWebsiteId) {
+		this.cjWebsiteId = cjWebsiteId;
 	}
 }

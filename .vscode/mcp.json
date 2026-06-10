@@ -30,6 +30,17 @@
         "ES_URL": "http://localhost:9200"
       },
       "type": "stdio"
+    },
+    "merchant-data-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@google/merchant-data-mcp",
+        "--credentials",
+        "/home/goulven/google-credentials.json"
+      ],
+      "env": {},
+      "type": "stdio"
     }
   },
   "inputs": []

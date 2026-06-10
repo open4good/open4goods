@@ -60,6 +60,10 @@ export interface ProductJsonLdInput {
         sku?: Set<string> | string[] | null
       } | null
       coverImagePath?: string | null
+      gtinInfo?: {
+        countryCode?: string | null
+        countryName?: string | null
+      } | null
     } | null
     identity?: {
       brand?: string | null
@@ -114,6 +118,13 @@ export interface ProductJsonLdInput {
         string,
         { numericValue?: number | null }
       > | null
+    } | null
+    aiReview?: {
+      review?: {
+        technicalReviewIntermediate?: string | null
+        summary?: string | null
+      } | null
+      createdMs?: number | null
     } | null
   }
   productTitle: string
@@ -680,7 +691,7 @@ export const buildProductJsonLdGraph = (
     '@type': 'BreadcrumbList',
     '@id': breadcrumbId,
     itemListElement: input.breadcrumbs
-      .filter(crumb => crumb.link)
+      .filter(crumb => crumb.link && isNonEmptyString(crumb.title))
       .map((crumb, index) => ({
         '@type': 'ListItem',
         position: index + 1,
@@ -716,6 +727,24 @@ export const buildProductJsonLdGraph = (
     ['WEIGHT', 'POIDS (SANS SUPPORT)', 'POIDS (AVEC SUPPORT)']
   )
 
+  const reviewBody = normalizeString(
+    product.aiReview?.review?.technicalReviewIntermediate ??
+      product.aiReview?.review?.summary
+  )
+  const reviewDate = toIsoDate(product.aiReview?.createdMs)
+
+  const productReview =
+    reviewBody && reviewDate
+      ? {
+          '@type': 'Review',
+          author: { '@type': 'Organization', name: 'Nudger' },
+          reviewBody,
+          datePublished: reviewDate.split('T')[0],
+        }
+      : undefined
+
+  const countryName = normalizeString(product.base?.gtinInfo?.countryName)
+
   const productEntry = {
     '@type': 'Product',
     '@id': productId,
@@ -748,6 +777,9 @@ export const buildProductJsonLdGraph = (
       'COULEUR GENERIQUE',
       'NOM DE LA COULEUR',
     ]),
+    countryOfOrigin: countryName
+      ? { '@type': 'Country', name: countryName }
+      : undefined,
     additionalProperty,
     weight: weightValue
       ? {
@@ -778,6 +810,7 @@ export const buildProductJsonLdGraph = (
         }
       : undefined,
     hasEnergyConsumptionDetails: energyDetails,
+    review: productReview,
     offers:
       offers.length > 0
         ? {

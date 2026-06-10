@@ -295,6 +295,118 @@ describe('product-jsonld', () => {
     })
   })
 
+  it('emits review from aiReview summary when technicalReviewIntermediate is absent', () => {
+    const graph = buildProductJsonLdGraph(
+      mockInput as unknown as ProductJsonLdInput
+    )
+    const productNode = (
+      graph?.['@graph'] as unknown as Array<{
+        '@type': string
+        review?: { '@type': string; author: { name: string }; reviewBody: string; datePublished: string }
+      }>
+    )?.find(n => n['@type'] === 'Product')
+
+    expect(productNode?.review).toBeDefined()
+    expect(productNode?.review?.['@type']).toBe('Review')
+    expect(productNode?.review?.author?.name).toBe('Nudger')
+    expect(productNode?.review?.reviewBody).toBe('Great product')
+    expect(productNode?.review?.datePublished).toBe('2021-07-01')
+  })
+
+  it('prefers technicalReviewIntermediate over summary for review body', () => {
+    const graph = buildProductJsonLdGraph({
+      ...(mockInput as unknown as ProductJsonLdInput),
+      product: {
+        ...mockProduct,
+        aiReview: {
+          review: {
+            technicalReviewIntermediate: 'Detailed technical review',
+            summary: 'Short summary',
+          },
+          createdMs: 1625097600000,
+        },
+      } as unknown as ProductJsonLdInput['product'],
+    })
+    const productNode = (
+      graph?.['@graph'] as unknown as Array<{
+        '@type': string
+        review?: { reviewBody: string }
+      }>
+    )?.find(n => n['@type'] === 'Product')
+
+    expect(productNode?.review?.reviewBody).toBe('Detailed technical review')
+  })
+
+  it('omits review when aiReview has no text content', () => {
+    const graph = buildProductJsonLdGraph({
+      ...(mockInput as unknown as ProductJsonLdInput),
+      product: {
+        ...mockProduct,
+        aiReview: { review: {}, createdMs: 1625097600000 },
+      } as unknown as ProductJsonLdInput['product'],
+    })
+    const productNode = (
+      graph?.['@graph'] as unknown as Array<{
+        '@type': string
+        review?: unknown
+      }>
+    )?.find(n => n['@type'] === 'Product')
+
+    expect(productNode?.review).toBeUndefined()
+  })
+
+  it('emits countryOfOrigin when gtinInfo.countryName is present', () => {
+    const graph = buildProductJsonLdGraph({
+      ...(mockInput as unknown as ProductJsonLdInput),
+      product: {
+        ...mockProduct,
+        base: { gtinInfo: { countryCode: 'CN', countryName: 'Chine' } },
+      } as unknown as ProductJsonLdInput['product'],
+    })
+    const productNode = (
+      graph?.['@graph'] as unknown as Array<{
+        '@type': string
+        countryOfOrigin?: { '@type': string; name: string }
+      }>
+    )?.find(n => n['@type'] === 'Product')
+
+    expect(productNode?.countryOfOrigin).toEqual({ '@type': 'Country', name: 'Chine' })
+  })
+
+  it('omits countryOfOrigin when gtinInfo.countryName is absent', () => {
+    const graph = buildProductJsonLdGraph(
+      mockInput as unknown as ProductJsonLdInput
+    )
+    const productNode = (
+      graph?.['@graph'] as unknown as Array<{
+        '@type': string
+        countryOfOrigin?: unknown
+      }>
+    )?.find(n => n['@type'] === 'Product')
+
+    expect(productNode?.countryOfOrigin).toBeUndefined()
+  })
+
+  it('filters out breadcrumbs with empty titles', () => {
+    const graph = buildProductJsonLdGraph({
+      ...(mockInput as unknown as ProductJsonLdInput),
+      breadcrumbs: [
+        { title: 'Home', link: '/' },
+        { title: '', link: '/empty-title' },
+        { title: 'Category', link: '/category' },
+      ],
+    })
+    const breadcrumbNode = (
+      graph?.['@graph'] as unknown as Array<{
+        '@type': string
+        itemListElement: Array<{ name: string }>
+      }>
+    )?.find(n => n['@type'] === 'BreadcrumbList')
+
+    expect(breadcrumbNode!.itemListElement).toHaveLength(2)
+    expect(breadcrumbNode!.itemListElement.map(e => e.name)).toEqual(['Home', 'Category'])
+  })
+
   it('uses the resolved category label instead of the product SEO name', () => {
     const graph = buildProductJsonLdGraph({
       ...(mockInput as unknown as ProductJsonLdInput),

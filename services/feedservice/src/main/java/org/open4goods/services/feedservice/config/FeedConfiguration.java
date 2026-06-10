@@ -29,6 +29,7 @@ public class FeedConfiguration {
     private TradeTrackerConfig tradetracker = new TradeTrackerConfig();
     private KwankoConfig kwanko = new KwankoConfig();
     private WebgainsConfig webgains = new WebgainsConfig();
+    private CjConfig cj = new CjConfig();
 
     public static class AwinConfig {
         private String cron = "0 43 1 * * ?";
@@ -99,6 +100,19 @@ public class FeedConfiguration {
         public void setCacheTtlDays(int cacheTtlDays) { this.cacheTtlDays = cacheTtlDays; }
         public String getOffersAndVouchersEndpoint() { return offersAndVouchersEndpoint; }
         public void setOffersAndVouchersEndpoint(String offersAndVouchersEndpoint) { this.offersAndVouchersEndpoint = offersAndVouchersEndpoint; }
+    }
+
+    public static class CjConfig {
+        private String cron = "0 43 1 * * ?";
+        private boolean enabled = false;
+        private int cacheTtlDays = 1;
+
+        public String getCron() { return cron; }
+        public void setCron(String cron) { this.cron = cron; }
+        public boolean isEnabled() { return enabled; }
+        public void setEnabled(boolean enabled) { this.enabled = enabled; }
+        public int getCacheTtlDays() { return cacheTtlDays; }
+        public void setCacheTtlDays(int cacheTtlDays) { this.cacheTtlDays = cacheTtlDays; }
     }
     
 	public String getCatalogUrl() {
@@ -195,5 +209,13 @@ public class FeedConfiguration {
 
     public void setWebgains(WebgainsConfig webgains) {
         this.webgains = webgains;
+    }
+
+    public CjConfig getCj() {
+        return cj;
+    }
+
+    public void setCj(CjConfig cj) {
+        this.cj = cj;
     }
 }

@@ -79,6 +79,7 @@ import org.open4goods.services.feedservice.service.AbstractFeedService;
 import org.open4goods.services.feedservice.service.AwinFeedService;
 import org.open4goods.services.feedservice.service.EffiliationFeedService;
 import org.open4goods.services.feedservice.service.TradeTrackerFeedService;
+import org.open4goods.services.feedservice.service.CjFeedService;
 import org.open4goods.services.feedservice.service.KwankoFeedService;
 import org.open4goods.services.feedservice.service.WebgainsFeedService;
 import org.open4goods.services.feedservice.service.FeedService;
@@ -336,6 +337,20 @@ public class ApiConfig {
                                                    ApiProperties props) {
         FeedConfiguration config = fetcherProperties.getFeedConfigs().get("webgains");
         return new WebgainsFeedService(config, remoteFileCachingService, dataSourceConfigService, serialisationService, props.getAffiliationConfig().getWebgainsApiKey());
+    }
+
+    @Bean
+    public CjFeedService cjFeedService(FetcherProperties fetcherProperties,
+                                       RemoteFileCachingService remoteFileCachingService,
+                                       DataSourceConfigService dataSourceConfigService,
+                                       SerialisationService serialisationService,
+                                       ApiProperties props)
+    {
+        FeedConfiguration config = fetcherProperties.getFeedConfigs().get("cj");
+        return new CjFeedService(config, remoteFileCachingService, dataSourceConfigService, serialisationService,
+                props.getAffiliationConfig().getCjApiToken(),
+                props.getAffiliationConfig().getCjPublisherId(),
+                props.getAffiliationConfig().getCjWebsiteId());
     }
 
     @Bean
