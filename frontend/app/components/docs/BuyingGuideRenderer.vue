@@ -2,9 +2,9 @@
   <article class="buying-guide">
     <v-fade-transition appear>
       <section class="buying-guide__hero">
-        <v-container class="buying-guide__hero-container">
+        <v-container fluid class="buying-guide__hero-container">
           <v-row align="center" class="buying-guide__hero-row">
-            <v-col cols="12" md="7">
+            <v-col cols="12" md="8">
               <v-breadcrumbs
                 :items="breadcrumbItems"
                 class="buying-guide__breadcrumbs"
@@ -46,7 +46,7 @@
               </div>
             </v-col>
 
-            <v-col cols="12" md="5">
+            <v-col cols="12" md="4">
               <v-slide-y-transition appear>
                 <v-img
                   v-if="heroImage"
@@ -62,12 +62,12 @@
       </section>
     </v-fade-transition>
 
-    <v-container class="buying-guide__container">
+    <v-container fluid class="buying-guide__container">
       <v-row class="buying-guide__layout">
         <v-col
           v-if="tocItems.length"
           cols="12"
-          md="3"
+          md="2"
           class="d-none d-md-block"
         >
           <StickySectionNavigation
@@ -78,7 +78,7 @@
           />
         </v-col>
 
-        <v-col cols="12" md="9" lg="8">
+        <v-col cols="12" md="10">
           <v-expansion-panels
             v-if="tocItems.length"
             variant="accordion"
@@ -163,17 +163,13 @@ const activeSection = ref('')
 const categoryTitle = computed(() => props.guideContext.categoryTitle)
 const heroImage = computed(() => props.guideContext.heroImage)
 
-const breadcrumbItems = computed(() => [
-  ...props.breadcrumbs.map(item => ({
+const breadcrumbItems = computed(() =>
+  props.breadcrumbs.map(item => ({
     title: item.title ?? '',
     to: item.to ?? item.link,
     disabled: !item.to && !item.link,
-  })),
-  {
-    title: props.doc.title ?? '',
-    disabled: true,
-  },
-])
+  }))
+)
 
 const visibleTags = computed(() =>
   (props.doc.tags ?? []).filter(tag => !tag.startsWith('language:')).slice(0, 4)
@@ -261,7 +257,7 @@ const resolvedComponents = computed(() => ({
 }
 
 .buying-guide__hero-row {
-  min-height: min(62vh, 620px);
+  min-height: min(40vh, 380px);
 }
 
 .buying-guide__breadcrumbs {
@@ -273,11 +269,11 @@ const resolvedComponents = computed(() => ({
 }
 
 .buying-guide__title {
-  max-width: 12ch;
+  max-width: 32ch;
   margin: 0;
-  font-size: clamp(2.1rem, 4vw, 4.5rem);
-  font-weight: 800;
-  line-height: 1.02;
+  font-size: clamp(1.3rem, 2.2vw, 2.2rem);
+  font-weight: 700;
+  line-height: 1.2;
   color: rgb(var(--v-theme-text-neutral-strong));
 }
 
@@ -297,8 +293,8 @@ const resolvedComponents = computed(() => ({
 }
 
 .buying-guide__hero-image {
-  min-height: 280px;
-  max-height: 420px;
+  min-height: 180px;
+  max-height: 260px;
   border-radius: 8px;
   box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16);
 }
@@ -317,7 +313,7 @@ const resolvedComponents = computed(() => ({
 }
 
 .buying-guide__content {
-  max-width: 76ch;
+  max-width: 88ch;
 }
 
 .buying-guide__empty {
@@ -334,7 +330,7 @@ const resolvedComponents = computed(() => ({
   }
 
   .buying-guide__hero-image {
-    min-height: 220px;
+    min-height: 160px;
   }
 }
 </style>

@@ -39,7 +39,6 @@ import {
   onMounted,
   onBeforeUnmount,
   shallowRef,
-  nextTick,
 } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type {
@@ -180,6 +179,7 @@ onMounted(() => {
   if (typeof window !== 'undefined') {
     window.addEventListener('resize', handleResize)
   }
+  if (props.chartData) renderChart()
 })
 
 onBeforeUnmount(() => {
@@ -191,10 +191,8 @@ onBeforeUnmount(() => {
 
 watch(
   () => props.chartData,
-  async () => {
-    await nextTick()
-    renderChart()
-  }
+  () => { renderChart() },
+  { flush: 'post' }
 )
 </script>
 

@@ -73,6 +73,9 @@ public class VerticalsConfigService {
 	private final Map<String, VerticalConfig> configs = new ConcurrentHashMap<>(100);
 	private final Map<String, NudgeToolConfig> assistantConfigs = new ConcurrentHashMap<>(50);
 
+	/** Guide slugs stored under {@code guides/default/} — served at {@code /guides/{slug}}. */
+	private final List<String> defaultGuides = new ArrayList<>();
+
 	// The cache of categories to verticalconfig association. datasource (or all) ->
 	// category -> VerticalConfig
 	private final Map<String, Map<String, VerticalConfig>> categoriesToVertical = new ConcurrentHashMap<>();
@@ -408,7 +411,15 @@ public class VerticalsConfigService {
 
 			VerticalConfig target = verticalsById.get(verticalId);
 			if (target == null) {
-				logger.warn("Guide file {} targets unknown vertical id {}. Skipping.", filename, verticalId);
+				if ("default".equals(verticalId)) {
+					String slug = filename.substring(0, filename.length() - ".md".length());
+					if (!defaultGuides.contains(slug)) {
+						defaultGuides.add(slug);
+						logger.info("Loaded default guide '{}'", slug);
+					}
+				} else {
+					logger.warn("Guide file {} targets unknown vertical id {}. Skipping.", filename, verticalId);
+				}
 				continue;
 			}
 
@@ -906,6 +917,10 @@ public class VerticalsConfigService {
 
 		return defaultConfig;
 
+	}
+
+	public List<String> getDefaultGuides() {
+		return defaultGuides;
 	}
 
 	/**

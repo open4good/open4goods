@@ -559,12 +559,14 @@ export default defineNuxtConfig({
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/category-pages.xml`,
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/product-pages.xml`,
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/wiki-pages.xml`,
+        `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/guides.xml`,
       ],
       en: [
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/blog-posts.xml`,
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/category-pages.xml`,
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/product-pages.xml`,
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/wiki-pages.xml`,
+        `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/guides.xml`,
       ],
     },
 

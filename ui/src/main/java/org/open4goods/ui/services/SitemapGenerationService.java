@@ -62,6 +62,7 @@ public class SitemapGenerationService {
 	private static final String SITEMAP_NAME_BLOG_PAGES = "blog-posts.xml";
 	private static final String SITEMAP_NAME_WIKI_PAGES = "wiki-pages.xml";
 	private static final String SITEMAP_NAME_VERTICAL_PAGES = "category-pages.xml";
+	private static final String SITEMAP_NAME_DEFAULT_GUIDES = "guides.xml";
 
 	private final ProductRepository aggregatedDataRepository;
 	private final UiConfig uiConfig;
@@ -106,12 +107,14 @@ public class SitemapGenerationService {
 				addWikiPages(baseUrl, lang);
 				addProductsPages(baseUrl, lang);
 				addVerticalPages(baseUrl, lang);
+				addDefaultGuidePages(baseUrl, lang);
 
 				SitemapIndexGenerator index = SitemapIndexGenerator.of(baseUrl + "sitemap/")
 						.addPage(SITEMAP_NAME_BLOG_PAGES)
 						.addPage(SITEMAP_NAME_WIKI_PAGES)
 						.addPage(SITEMAP_NAME_VERTICAL_PAGES)
-						.addPage(SITEMAP_NAME_PRODUCT_PAGES);
+						.addPage(SITEMAP_NAME_PRODUCT_PAGES)
+						.addPage(SITEMAP_NAME_DEFAULT_GUIDES);
 
 				try {
 					index.toFile(getSitemapFile("sitemap.xml", lang));
@@ -273,6 +276,29 @@ public class SitemapGenerationService {
 			sitemap.toFile(getSitemapFile(SITEMAP_NAME_VERTICAL_PAGES, language));
 		} catch (IOException e) {
 			LOGGER.error("Error while writing vertical sitemap", e);
+		}
+	}
+
+	/**
+	 * Adds non-vertical buying guides (stored under {@code guides/default/}) to the
+	 * dedicated {@code guides.xml} sitemap, served at {@code /guides/{slug}}.
+	 *
+	 * @param baseUrl  site base URL for the target language
+	 * @param language BCP-47 language tag
+	 */
+	private void addDefaultGuidePages(String baseUrl, String language) {
+		SitemapGenerator sitemap = SitemapGenerator.of(baseUrl);
+
+		for (String guideSlug : verticalsConfigService.getDefaultGuides()) {
+			String url = baseUrl + "guides/" + guideSlug;
+			LOGGER.info("Adding default guide page to sitemap : {}", url);
+			sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.MONTHLY, 0.8));
+		}
+
+		try {
+			sitemap.toFile(getSitemapFile(SITEMAP_NAME_DEFAULT_GUIDES, language));
+		} catch (IOException e) {
+			LOGGER.error("Error while writing default guides sitemap", e);
 		}
 	}
 
