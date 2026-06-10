@@ -68,6 +68,13 @@ public class BatchController {
 		batchService.clean();
 	}
 	
+	@PostMapping(path="/batch/clean-resources")
+	@Operation(summary="Launch the resource garbage collection routine to clean orphaned resources")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+	public void cleanOrphanResources() {
+		batchService.cleanOrphanResources();
+	}
+	
 	
 	
 	@PostMapping(path="/batch/")

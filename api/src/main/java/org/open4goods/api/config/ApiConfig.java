@@ -223,13 +223,9 @@ public class ApiConfig {
 				dataSourceConfigService, aggregationFacade);
 	}
 
-
-
-
-
 	@Bean
-	BatchService batchService(AggregationFacadeService aggregationFacadeService, CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository, CsvDatasourceFetchingService csvDatasourceFetchingService, FeedService feedService, SerialisationService serialisationService) {
-		return new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService, productRepository,  csvDatasourceFetchingService, feedService, serialisationService);
+	BatchService batchService(AggregationFacadeService aggregationFacadeService, CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository, CsvDatasourceFetchingService csvDatasourceFetchingService, FeedService feedService, SerialisationService serialisationService, ResourceService resourceService) {
+		return new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService, productRepository,  csvDatasourceFetchingService, feedService, serialisationService, resourceService, apiProperties);
 	}
 
 	@Bean

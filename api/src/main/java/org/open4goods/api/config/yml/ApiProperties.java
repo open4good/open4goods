@@ -270,6 +270,37 @@ public class ApiProperties {
 		return rootFolder + File.separator + ".cached" + File.separator;
 	}
 
+	public String remoteCachingDeletionFolder() {
+		return rootFolder + File.separator + ".cached-deletion" + File.separator;
+	}
+
+	/**
+	 * Image width suffixes allowed for resizing, used to build cache keys during cleanup.
+	 */
+	private List<Integer> allowedImagesSizeSuffixes = List.of(30, 50, 100, 360, 1000);
+
+	/**
+	 * Safety grace period in milliseconds. Cached files modified within this window
+	 * will not be processed during cleanup.
+	 */
+	private long resourceCleanupGracePeriodMs = 86400000L;
+
+	public List<Integer> getAllowedImagesSizeSuffixes() {
+		return allowedImagesSizeSuffixes;
+	}
+
+	public void setAllowedImagesSizeSuffixes(List<Integer> allowedImagesSizeSuffixes) {
+		this.allowedImagesSizeSuffixes = allowedImagesSizeSuffixes;
+	}
+
+	public long getResourceCleanupGracePeriodMs() {
+		return resourceCleanupGracePeriodMs;
+	}
+
+	public void setResourceCleanupGracePeriodMs(long resourceCleanupGracePeriodMs) {
+		this.resourceCleanupGracePeriodMs = resourceCleanupGracePeriodMs;
+	}
+
 	public Integer getAggregatedDataElasticBuffer() {
 		return aggregatedDataElasticBuffer;
 	}

@@ -79,6 +79,8 @@ spring:
           temperature: 1.0
     #          response-format:
     #            type: JSON_OBJECT
+    openai-sdk:
+      timeout: 180s
     google:
       genai:
         project-id: ${VERTEX_PROJECT_ID:${gen-ai-config.vertex-project-id:}}

@@ -1,5 +1,6 @@
 package org.open4goods.api.services;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.Iterator;
+import java.util.stream.Stream;
 
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
@@ -24,6 +26,12 @@ import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
+
+import org.open4goods.api.config.yml.ApiProperties;
+import org.open4goods.commons.services.ResourceService;
+import org.open4goods.model.resource.Resource;
+import org.open4goods.model.resource.ResourceType;
+import org.apache.commons.io.FileUtils;
 
 /**
  * One batch to rule them all
@@ -50,9 +58,13 @@ public class BatchService {
 
 	private SerialisationService serialisationService;
 
+	private ResourceService resourceService;
+
+	private ApiProperties apiProperties;
+
 
 	public BatchService(AggregationFacadeService aggregationFacadeService,
-			CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository dataRepository, CsvDatasourceFetchingService csvDatasourceFetchingService, FeedService feedService, SerialisationService serialisationService) {
+			CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository dataRepository, CsvDatasourceFetchingService csvDatasourceFetchingService, FeedService feedService, SerialisationService serialisationService, ResourceService resourceService, ApiProperties apiProperties) {
 		super();
 		this.aggregationFacadeService = aggregationFacadeService;
 		this.completionFacadeService = completionFacadeService;
@@ -61,7 +73,8 @@ public class BatchService {
 		this.csvDatasourceFetchingService = csvDatasourceFetchingService;
 		this.feedService = feedService;
 		this.serialisationService = serialisationService;
-
+		this.resourceService = resourceService;
+		this.apiProperties = apiProperties;
 	}
 
 	/**
@@ -94,6 +107,133 @@ public class BatchService {
 //			}
 //		});
 //	}
+
+	/**
+	 * Scans the local cached resources directory, compares the files against
+	 * all active resources registered in the product repository, and moves
+	 * orphaned cache files (older than a configured grace period) to a
+	 * deletion directory to allow safe manual inspection.
+	 */
+	public void cleanOrphanResources() {
+		logger.info("Starting orphan resource cleanup batch job...");
+
+		String cachingFolder = resourceService.getRemoteCachingFolder();
+		String deletionFolder = apiProperties.remoteCachingDeletionFolder();
+		long gracePeriodMs = apiProperties.getResourceCleanupGracePeriodMs();
+		List<Integer> allowedSuffixes = apiProperties.getAllowedImagesSizeSuffixes();
+
+		File cacheDir = new File(cachingFolder);
+		if (!cacheDir.exists() || !cacheDir.isDirectory()) {
+			logger.warn("Cache directory does not exist or is not a directory: {}", cachingFolder);
+			return;
+		}
+
+		// 1. Scan filesystem for all cached files
+		Set<File> scannedFiles = new HashSet<>();
+		collectCacheFiles(cacheDir, scannedFiles);
+		logger.info("Scanned {} files in the cache directory.", scannedFiles.size());
+
+		// 2. Stream all products to extract active resource cache keys
+		Set<String> activeKeys = new HashSet<>();
+		long activeProductCount = 0;
+		try (Stream<Product> productStream = dataRepository.exportAll()) {
+			Iterator<Product> iterator = productStream.iterator();
+			while (iterator.hasNext()) {
+				Product product = iterator.next();
+				activeProductCount++;
+				if (product.getResources() != null) {
+					for (Resource r : product.getResources()) {
+						if (r.getCacheKey() != null) {
+							// Active original cache key
+							activeKeys.add(r.getCacheKey());
+
+							// If it's an image, precompute and add original and resized WebP cache keys
+							if (r.getResourceType() == ResourceType.IMAGE) {
+								if (r.path() != null) {
+									activeKeys.add(IdHelper.generateResourceId(r.path()) + ".cache.webp");
+								}
+								if (allowedSuffixes != null) {
+									for (Integer suffix : allowedSuffixes) {
+										String pathWithSuffix = r.path(suffix);
+										if (pathWithSuffix != null) {
+											activeKeys.add(IdHelper.generateResourceId(pathWithSuffix) + ".cache.webp");
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Error streaming products from repository during resource cleanup", e);
+			return;
+		}
+		logger.info("Processed {} active products. Found {} active resource cache keys.", activeProductCount, activeKeys.size());
+
+		// 3. Compare and move orphans to deletion folder
+		long totalSpaceMovedBytes = 0;
+		long movedCount = 0;
+		long skippedGracePeriodCount = 0;
+		long activePreservedCount = 0;
+		long currentTime = System.currentTimeMillis();
+
+		for (File file : scannedFiles) {
+			String fileName = file.getName();
+			if (activeKeys.contains(fileName)) {
+				activePreservedCount++;
+				continue;
+			}
+
+			// Check grace period
+			if (currentTime - file.lastModified() <= gracePeriodMs) {
+				skippedGracePeriodCount++;
+				continue;
+			}
+
+			// Move orphan maintaining hierarchy
+			String relativePath = file.getAbsolutePath().substring(cacheDir.getAbsolutePath().length());
+			if (relativePath.startsWith(File.separator)) {
+				relativePath = relativePath.substring(1);
+			}
+
+			File destFile = new File(deletionFolder, relativePath);
+			File destParent = destFile.getParentFile();
+			if (destParent != null && !destParent.exists()) {
+				destParent.mkdirs();
+			}
+
+			long fileSize = file.length();
+			try {
+				java.nio.file.Files.move(file.toPath(), destFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+				totalSpaceMovedBytes += fileSize;
+				movedCount++;
+				if (movedCount % 100 == 0) {
+					logger.info("Progression: Moved {} orphaned resource files so far ({})...", movedCount, FileUtils.byteCountToDisplaySize(totalSpaceMovedBytes));
+				}
+			} catch (Exception e) {
+				logger.error("Failed to move orphan file {} to {}", file.getAbsolutePath(), destFile.getAbsolutePath(), e);
+			}
+		}
+
+		logger.info("Resource cleanup completed successfully.");
+		logger.info("Summary: Moved {} files to deletion folder, saving {}.", movedCount, FileUtils.byteCountToDisplaySize(totalSpaceMovedBytes));
+		logger.info("Preserved {} active cache files. Skipped {} files within grace period.", activePreservedCount, skippedGracePeriodCount);
+	}
+
+	private void collectCacheFiles(File folder, Set<File> files) {
+		File[] children = folder.listFiles();
+		if (children == null) {
+			return;
+		}
+		for (File child : children) {
+			if (child.isDirectory()) {
+				collectCacheFiles(child, files);
+			} else if (child.isFile()) {
+				files.add(child);
+			}
+		}
+	}
 
 	// TODO(p3,conf) : schedule from conf
 	@Scheduled(cron = "0 0 13 * * ?")

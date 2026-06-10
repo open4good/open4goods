@@ -85,10 +85,26 @@ public class OpenAiProvider implements GenAiProvider {
             options = withJsonSchema(options, request.getJsonSchema());
         }
         Prompt prompt = buildPrompt(request, options);
-        ChatResponse response = chatModel.call(prompt);
-        String content = response.getResult().getOutput().getText();
-        Map<String, Object> metadata = extractAnnotationsFromResponse(response);
-        return new ProviderResult(service(), options.getModel(), content, content, metadata);
+        try {
+            ChatResponse response = chatModel.call(prompt);
+            String content = response.getResult().getOutput().getText();
+            Map<String, Object> metadata = extractAnnotationsFromResponse(response);
+            return new ProviderResult(service(), options.getModel(), content, content, metadata);
+        } catch (RuntimeException e) {
+            Throwable rootCause = rootCause(e);
+            logger.error(
+                    "OpenAI chat request failed for promptKey={}, model={}, retrievalMode={}, timeoutMs={}, systemChars={}, userChars={}, rootCause={}: {}",
+                    request.getPromptKey(),
+                    options.getModel(),
+                    request.getRetrievalMode(),
+                    request.getOptions() != null ? request.getOptions().getTimeoutMs() : null,
+                    lengthOf(request.getSystemPrompt()),
+                    lengthOf(request.getUserPrompt()),
+                    rootCause.getClass().getName(),
+                    rootCause.getMessage(),
+                    e);
+            throw e;
+        }
     }
 
     private ProviderResult generateWithWebSearch(ProviderRequest request) {
@@ -329,5 +345,29 @@ public class OpenAiProvider implements GenAiProvider {
             throw new IllegalStateException("Missing spring.ai.openai.api-key for OpenAI web search");
         }
         return apiKey;
+    }
+
+    /**
+     * Returns the deepest cause available for concise provider failure diagnostics.
+     *
+     * @param throwable the exception raised by the provider call
+     * @return the deepest non-null cause, or the original exception when no cause exists
+     */
+    private Throwable rootCause(Throwable throwable) {
+        Throwable current = throwable;
+        while (current.getCause() != null) {
+            current = current.getCause();
+        }
+        return current;
+    }
+
+    /**
+     * Returns the character length for optional prompt fragments.
+     *
+     * @param value the optional text value
+     * @return the text length, or zero for {@code null}
+     */
+    private int lengthOf(String value) {
+        return value == null ? 0 : value.length();
     }
 }

@@ -57,7 +57,8 @@ import dev.brachtendorf.jimagehash.hashAlgorithms.PerceptiveHash;
  * files, extracting metadata, filtering invalid resources, clustering images and
  * choosing a product cover.
  */
-public class ResourceCompletionService extends AbstractCompletionService {
+public class ResourceCompletionService extends AbstractCompletionService
+{
 
     /** Default cover path when no usable image remains. */
     private static final String NO_IMAGE_PATH = "/icons/no-image.png";
@@ -93,7 +94,8 @@ public class ResourceCompletionService extends AbstractCompletionService {
                                      ResourceService resourceService,
                                      ProductRepository dataRepository,
                                      ApiProperties apiProperties,
-                                     DjlImageEmbeddingService embeddingService) {
+                                     DjlImageEmbeddingService embeddingService)
+    {
         super(dataRepository, verticalConfigService, apiProperties.logsFolder(), apiProperties.aggLogLevel());
         this.config = Optional.ofNullable(apiProperties.getResourceCompletionConfig())
                 .orElseGet(ResourceCompletionConfig::new);
@@ -108,12 +110,16 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * Warms up the PDF language detector on startup to avoid first-hit latency spikes.
      */
     @PostConstruct
-    public void warmPdfLanguageDetector() {
+    public void warmPdfLanguageDetector()
+    {
         logger.info("Warming up PDF language detector...");
-        try {
+        try
+        {
             pdfLanguageDetector();
             logger.info("PDF language detector warmed up successfully.");
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             logger.error("Failed to warm PDF language detector at startup", e);
         }
     }
@@ -127,14 +133,17 @@ public class ResourceCompletionService extends AbstractCompletionService {
      *         missing, image grouping/cover data is stale, or override is enabled
      */
     @Override
-    public boolean shouldProcess(VerticalConfig vertical, Product data) {
-        if (overrideResources(vertical)) {
+    public boolean shouldProcess(VerticalConfig vertical, Product data)
+    {
+        if (overrideResources(vertical))
+        {
             return true;
         }
 
         boolean hasUnprocessed = data.getResources().stream()
                 .anyMatch(r -> !r.isProcessed() && !r.isEvicted());
-        if (hasUnprocessed) {
+        if (hasUnprocessed)
+        {
             return true;
         }
 
@@ -142,7 +151,8 @@ public class ResourceCompletionService extends AbstractCompletionService {
                 .map(tpl -> buildTemplateUrl(tpl, data.gtin()))
                 .filter(StringUtils::isNotBlank)
                 .anyMatch(url -> data.getResources().stream().noneMatch(r -> url.equals(r.getUrl())));
-        if (missingTemplate) {
+        if (missingTemplate)
+        {
             return true;
         }
 
@@ -160,7 +170,8 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @return null
      */
     @Override
-    public String getDatasourceName() {
+    public String getDatasourceName()
+    {
         return null;
     }
 
@@ -171,7 +182,8 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param data product being processed
      */
     @Override
-    public void processProduct(VerticalConfig vertical, Product data) {
+    public void processProduct(VerticalConfig vertical, Product data)
+    {
         addTemplateResources(data);
         data.getResources().forEach(r -> r.setGroup(null));
 
@@ -209,7 +221,8 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param vertical vertical configuration
      * @return enriched resource
      */
-    public Resource fetchResource(Resource resource, VerticalConfig vertical) {
+    public Resource fetchResource(Resource resource, VerticalConfig vertical)
+    {
         logger.info("Handling resource : {} ", resource);
 
         resource.setProcessed(true);
@@ -217,42 +230,58 @@ public class ResourceCompletionService extends AbstractCompletionService {
         resource.setTimeStamp(System.currentTimeMillis());
 
         File target = resourceService.getCacheFile(resource);
-        if (!target.exists()) {
+        if (!target.exists())
+        {
             downloadResource(resource, target);
-            if (resource.isEvicted()) {
+            if (resource.isEvicted())
+            {
                 return resource;
             }
-        } else {
+        }
+        else
+        {
             logger.info("Resource found in file cache: {}", target);
         }
 
         resource.setFileSize(target.length());
-        if (resource.getFileSize() == 0L) {
+        if (resource.getFileSize() == 0L)
+        {
             logger.warn("Empty resource file: {}", resource.getUrl());
             resource.setStatus(ResourceStatus.EMPTY_FILE);
             resource.setEvicted(true);
             return resource;
         }
 
-        if (!computeMd5(resource, target) || !detectMimeType(resource, target)) {
+        if (!computeMd5(resource, target) || !detectMimeType(resource, target))
+        {
             return resource;
         }
 
-        try {
-            if (IMAGE_MIME_TYPES.contains(resource.getMimeType())) {
+        try
+        {
+            if (IMAGE_MIME_TYPES.contains(resource.getMimeType()))
+            {
                 processImage(resource, target);
-            } else if ("application/pdf".equals(resource.getMimeType())) {
+            }
+            else if ("application/pdf".equals(resource.getMimeType()))
+            {
                 processPdf(resource, target);
-            } else if (VIDEO_MIME_TYPES.contains(resource.getMimeType())) {
+            }
+            else if (VIDEO_MIME_TYPES.contains(resource.getMimeType()))
+            {
                 processVideo(resource, target);
-            } else {
+            }
+            else
+            {
                 logger.warn("Unsupported resource type : {} : {}", resource.getMimeType(), resource.getUrl());
                 resource.setResourceType(ResourceType.UNKNOWN);
                 resource.setStatus(ResourceStatus.UNSUPPORTED_MIME_TYPE);
                 resource.setEvicted(true);
             }
             logger.debug("Fetching and analysis done : {}", resource);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             logger.warn("Resource integration failed : {} : {}", e.getMessage(), resource);
             resource.setEvicted(true);
         }
@@ -265,19 +294,25 @@ public class ResourceCompletionService extends AbstractCompletionService {
      *
      * @param data product to update
      */
-    private void addTemplateResources(Product data) {
-        for (ResourceCompletionUrlTemplate template : config.getUrlTemplates()) {
+    private void addTemplateResources(Product data)
+    {
+        for (ResourceCompletionUrlTemplate template : config.getUrlTemplates())
+        {
             Resource resource = processUrlTemplate(template, data.gtin());
-            if (resource == null) {
+            if (resource == null)
+            {
                 continue;
             }
             Resource existing = data.getResources().stream()
                     .filter(r -> resource.getUrl().equals(r.getUrl()))
                     .findFirst()
                     .orElse(null);
-            if (existing == null) {
+            if (existing == null)
+            {
                 data.getResources().add(resource);
-            } else {
+            }
+            else
+            {
                 existing.setDatasourceName(resource.getDatasourceName());
                 existing.setHardTags(resource.getHardTags());
             }
@@ -291,9 +326,11 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param gtin product GTIN
      * @return resource, or null when the template URL is invalid
      */
-    private Resource processUrlTemplate(ResourceCompletionUrlTemplate template, String gtin) {
+    private Resource processUrlTemplate(ResourceCompletionUrlTemplate template, String gtin)
+    {
         String url = buildTemplateUrl(template, gtin);
-        if (StringUtils.isBlank(url)) {
+        if (StringUtils.isBlank(url))
+        {
             logger.warn("Skipping blank resource URL template for GTIN {}", gtin);
             return null;
         }
@@ -313,8 +350,10 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param gtin product GTIN
      * @return resolved URL, or null when no URL is configured
      */
-    private String buildTemplateUrl(ResourceCompletionUrlTemplate template, String gtin) {
-        if (template == null || StringUtils.isBlank(template.getUrl())) {
+    private String buildTemplateUrl(ResourceCompletionUrlTemplate template, String gtin)
+    {
+        if (template == null || StringUtils.isBlank(template.getUrl()))
+        {
             return null;
         }
         return template.getUrl().replace("{GTIN}", gtin);
@@ -327,16 +366,20 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param resource resource to update
      * @param product product owning the resource
      */
-    private void normalizeFileNameIfNeeded(Resource resource, Product product) {
-        if (!config.isForceEraseFileName() && StringUtils.isNotBlank(resource.getFileName())) {
+    private void normalizeFileNameIfNeeded(Resource resource, Product product)
+    {
+        if (!config.isForceEraseFileName() && StringUtils.isNotBlank(resource.getFileName()))
+        {
             return;
         }
 
         String name = buildResourceFileName(resource, product);
-        if (StringUtils.isBlank(name)) {
+        if (StringUtils.isBlank(name))
+        {
             name = product.gtin();
         }
-        if (resource.getResourceType() == ResourceType.PDF && !resource.getHardTags().isEmpty()) {
+        if (resource.getResourceType() == ResourceType.PDF && !resource.getHardTags().isEmpty())
+        {
             String prefix = StringUtils.join(resource.getHardTags(), "-").toLowerCase();
             name = prefix + "-" + name;
         }
@@ -350,11 +393,14 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param product product owning the resource
      * @return base file name before final normalization
      */
-    private String buildResourceFileName(Resource resource, Product product) {
-        if (!product.getOfferNames().isEmpty()) {
+    private String buildResourceFileName(Resource resource, Product product)
+    {
+        if (!product.getOfferNames().isEmpty())
+        {
             return product.getOfferNames().stream().sorted().findFirst().orElse(null);
         }
-        if (StringUtils.isNotBlank(product.brand()) && StringUtils.isNotBlank(product.model())) {
+        if (StringUtils.isNotBlank(product.brand()) && StringUtils.isNotBlank(product.model()))
+        {
             return product.brand() + "-" + product.model();
         }
         return basenameWithoutExtension(resource.getUrl());
@@ -367,18 +413,24 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param url source URL
      * @return filename stem, or null when none can be extracted
      */
-    private String basenameWithoutExtension(String url) {
-        if (StringUtils.isBlank(url)) {
+    private String basenameWithoutExtension(String url)
+    {
+        if (StringUtils.isBlank(url))
+        {
             return null;
         }
         String path = url;
-        try {
+        try
+        {
             path = URI.create(url).getPath();
-        } catch (IllegalArgumentException e) {
+        }
+        catch (IllegalArgumentException e)
+        {
             logger.debug("Cannot parse resource URL for filename: {}", url);
         }
         String name = StringUtils.substringAfterLast(path, "/");
-        if (StringUtils.isBlank(name)) {
+        if (StringUtils.isBlank(name))
+        {
             return null;
         }
         int extensionStart = name.lastIndexOf('.');
@@ -392,29 +444,35 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param vertical vertical resource rules
      * @return non-evicted resources
      */
-    private List<Resource> filterRetainedResources(Product data, VerticalConfig vertical) {
+    private List<Resource> filterRetainedResources(Product data, VerticalConfig vertical)
+    {
         Set<String> md5s = new HashSet<>();
         ResourcesAggregationConfig resourcesConfig = vertical.getResourcesConfig();
 
-        for (Resource resource : data.getResources()) {
-            if (resource.isEvicted()) {
+        for (Resource resource : data.getResources())
+        {
+            if (resource.isEvicted())
+            {
                 continue;
             }
             String md5 = resource.getMd5();
-            if (StringUtils.isNotBlank(md5) && resourcesConfig.getMd5Exclusions().contains(md5)) {
+            if (StringUtils.isNotBlank(md5) && resourcesConfig.getMd5Exclusions().contains(md5))
+            {
                 logger.info("Excluded because of blacklisted MD5 : {}", resource.getUrl());
                 resource.setStatus(ResourceStatus.MD5_EXCLUSION);
                 resource.setEvicted(true);
                 continue;
             }
-            if (StringUtils.isNotBlank(md5) && !md5s.add(md5)) {
+            if (StringUtils.isNotBlank(md5) && !md5s.add(md5))
+            {
                 logger.info("Excluded because of duplicate MD5 : {}", resource.getUrl());
                 resource.setStatus(ResourceStatus.MD5_DUPLICATE);
                 resource.setEvicted(true);
                 continue;
             }
             if (resource.getResourceType() == ResourceType.IMAGE
-                    && safePixels(resource) < resourcesConfig.getMinPixelsEvictionSize()) {
+                    && safePixels(resource) < resourcesConfig.getMinPixelsEvictionSize())
+            {
                 logger.info("Excluded because image is too small : {}", resource.getUrl());
                 resource.setStatus(ResourceStatus.TOO_SMALL);
                 resource.setEvicted(true);
@@ -432,26 +490,32 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param data product to update
      * @param representativeImages one image per image cluster
      */
-    private void setCoverImage(Product data, List<Resource> representativeImages) {
+    private void setCoverImage(Product data, List<Resource> representativeImages)
+    {
         Resource cover = representativeImages.stream()
                 .filter(r -> r.getHardTags().contains(ResourceTag.PRIMARY))
                 .max(Comparator.comparingInt(this::safePixels))
                 .orElse(null);
 
-        if (cover == null) {
+        if (cover == null)
+        {
             cover = representativeImages.stream()
                     .filter(r -> r.getImageInfo() != null && r.getImageInfo().getConsistencyScore() != null)
                     .max(Comparator.comparingDouble(r -> r.getImageInfo().getConsistencyScore()))
                     .orElse(null);
         }
-        if (cover == null && !representativeImages.isEmpty()) {
+        if (cover == null && !representativeImages.isEmpty())
+        {
             cover = representativeImages.getFirst();
         }
 
-        if (cover == null) {
+        if (cover == null)
+        {
             logger.warn("No cover image found for product : {}", data.gtin());
             data.setCoverImagePath(NO_IMAGE_PATH);
-        } else {
+        }
+        else
+        {
             data.setCoverImagePath(cover.path());
         }
     }
@@ -462,21 +526,27 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param resource remote resource
      * @param target target cache file
      */
-    private void downloadResource(Resource resource, File target) {
+    private void downloadResource(Resource resource, File target)
+    {
         logger.info("Downloading resource to local file: {}", target);
-        try {
+        try
+        {
             Request.Get(resource.getUrl())
                     .userAgent(config.getDownloadUserAgent())
                     .connectTimeout(config.getConnectTimeoutMs())
                     .socketTimeout(config.getSocketTimeoutMs())
                     .execute()
                     .saveContent(target);
-        } catch (ClientProtocolException e) {
+        }
+        catch (ClientProtocolException e)
+        {
             logger.error("Cannot download ({}) : {}", e.getMessage(), resource.getUrl());
             resource.setStatus(ResourceStatus.PROTOCOL_EXCEPTION);
             resource.setEvicted(true);
             deletePartialDownload(target);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             logger.error("Cannot download ({}) : {}", e.getMessage(), resource.getUrl());
             resource.setStatus(ResourceStatus.IO_EXCEPTION);
             resource.setEvicted(true);
@@ -489,8 +559,10 @@ public class ResourceCompletionService extends AbstractCompletionService {
      *
      * @param target target cache file
      */
-    private void deletePartialDownload(File target) {
-        if (target.exists() && !target.delete()) {
+    private void deletePartialDownload(File target)
+    {
+        if (target.exists() && !target.delete())
+        {
             logger.warn("Could not delete partial resource download: {}", target);
         }
     }
@@ -502,11 +574,15 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param target cached file
      * @return true when checksum computation succeeded
      */
-    private boolean computeMd5(Resource resource, File target) {
-        try (FileInputStream inputStream = new FileInputStream(target)) {
+    private boolean computeMd5(Resource resource, File target)
+    {
+        try (FileInputStream inputStream = new FileInputStream(target))
+        {
             resource.setMd5(DigestUtils.md5Hex(inputStream));
             return true;
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             logger.error("Cannot compute MD5 hash", e);
             resource.setStatus(ResourceStatus.MD5_CHECKSUM_FAIL);
             resource.setEvicted(true);
@@ -521,14 +597,18 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param target cached file
      * @return true when MIME detection succeeded
      */
-    private boolean detectMimeType(Resource resource, File target) {
-        try {
+    private boolean detectMimeType(Resource resource, File target)
+    {
+        try
+        {
             resource.setMimeType(TIKA.detect(target));
             org.apache.tika.mime.MimeType mimeType = TIKA_CONFIG.getMimeRepository().forName(resource.getMimeType());
             String extension = mimeType.getExtension();
             resource.setExtension(StringUtils.removeStart(extension, "."));
             return true;
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             logger.error("Cannot get mimetype ({}) : {}", e.getMessage(), resource.getUrl());
             resource.setStatus(ResourceStatus.NO_MIME_TYPE);
             resource.setEvicted(true);
@@ -542,7 +622,8 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param resource resource to update
      * @param target local video file
      */
-    private void processVideo(Resource resource, File target) {
+    private void processVideo(Resource resource, File target)
+    {
         resource.setResourceType(ResourceType.VIDEO);
     }
 
@@ -552,15 +633,19 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param resource resource to update
      * @param target local PDF file
      */
-    private void processPdf(Resource resource, File target) {
+    private void processPdf(Resource resource, File target)
+    {
         resource.setResourceType(ResourceType.PDF);
-        try (PDDocument document = Loader.loadPDF(target)) {
+        try (PDDocument document = Loader.loadPDF(target))
+        {
             PdfInfo pdfInfo = new PdfInfo();
             extractPdfMetadata(document, pdfInfo);
             extractPdfTitle(document, pdfInfo);
             detectPdfLanguage(document, pdfInfo, resource);
             resource.setPdfInfo(pdfInfo);
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             logger.error("Failed to parse PDF: {}", e.getMessage());
             resource.setStatus(ResourceStatus.PDF_PARSING_ERROR);
             resource.setEvicted(true);
@@ -573,7 +658,8 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param document parsed PDF document
      * @param pdfInfo target PDF metadata object
      */
-    private void extractPdfMetadata(PDDocument document, PdfInfo pdfInfo) {
+    private void extractPdfMetadata(PDDocument document, PdfInfo pdfInfo)
+    {
         PDDocumentInformation info = document.getDocumentInformation();
         pdfInfo.setMetadataTitle(info.getTitle());
         pdfInfo.setAuthor(info.getAuthor());
@@ -592,7 +678,8 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param pdfInfo target PDF metadata object
      * @throws IOException when PDF text extraction fails
      */
-    private void extractPdfTitle(PDDocument document, PdfInfo pdfInfo) throws IOException {
+    private void extractPdfTitle(PDDocument document, PdfInfo pdfInfo) throws IOException
+    {
         MultiLineTitleStripper stripper = new MultiLineTitleStripper(
                 config.getPdfTitleMaxLines(), config.getPdfTitleFontSizeTolerance());
         stripper.setSortByPosition(true);
@@ -609,15 +696,19 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param pdfInfo target PDF metadata object
      * @param resource source resource for logging context
      */
-    private void detectPdfLanguage(PDDocument document, PdfInfo pdfInfo, Resource resource) {
-        try {
+    private void detectPdfLanguage(PDDocument document, PdfInfo pdfInfo, Resource resource)
+    {
+        try
+        {
             String text = extractPdfText(document);
-            if (StringUtils.isBlank(text)) {
+            if (StringUtils.isBlank(text))
+            {
                 return;
             }
 
             List<LanguageResult> results = pdfLanguageDetector().detectAll(text);
-            if (results.isEmpty()) {
+            if (results.isEmpty())
+            {
                 logger.warn("No language detected for PDF");
                 return;
             }
@@ -628,17 +719,22 @@ public class ResourceCompletionService extends AbstractCompletionService {
                     .distinct()
                     .count();
 
-            if (distinctLanguages > 1) {
+            if (distinctLanguages > 1)
+            {
                 pdfInfo.setLanguage("Multilingue");
                 pdfInfo.setLanguageConfidence(1.0);
-            } else {
+            }
+            else
+            {
                 LanguageResult primary = results.getFirst();
                 pdfInfo.setLanguage(primary.getLanguage());
                 pdfInfo.setLanguageConfidence(primary.getRawScore());
                 logger.info("Language detected for PDF {}: {} (confidence: {})",
                         resource.getFileName(), primary.getLanguage(), primary.getRawScore());
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             logger.warn("Failed to detect document language: {}", e.getMessage());
         }
     }
@@ -649,12 +745,16 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @return language detector
      * @throws IOException when Tika cannot load language models
      */
-    private LanguageDetector pdfLanguageDetector() throws IOException {
+    private LanguageDetector pdfLanguageDetector() throws IOException
+    {
         LanguageDetector detector = pdfLanguageDetector;
-        if (detector == null) {
-            synchronized (this) {
+        if (detector == null)
+        {
+            synchronized (this)
+            {
                 detector = pdfLanguageDetector;
-                if (detector == null) {
+                if (detector == null)
+                {
                     detector = new OptimaizeLangDetector().loadModels();
                     pdfLanguageDetector = detector;
                 }
@@ -670,7 +770,8 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @return text sample
      * @throws IOException when PDF text extraction fails
      */
-    private String extractPdfText(PDDocument document) throws IOException {
+    private String extractPdfText(PDDocument document) throws IOException
+    {
         PDFTextStripper stripper = new PDFTextStripper();
         stripper.setStartPage(1);
         stripper.setEndPage(Math.min(document.getNumberOfPages(), config.getPdfLanguageMaxPages()));
@@ -683,7 +784,8 @@ public class ResourceCompletionService extends AbstractCompletionService {
     /**
      * First-page stripper that keeps text rendered in the largest font.
      */
-    private static class MultiLineTitleStripper extends PDFTextStripper {
+    private static class MultiLineTitleStripper extends PDFTextStripper
+    {
 
         private final StringBuilder largestText = new StringBuilder();
         private final int maxLinesToRead;
@@ -691,35 +793,43 @@ public class ResourceCompletionService extends AbstractCompletionService {
         private float largestFontSize = 0;
         private int currentLine = 0;
 
-        MultiLineTitleStripper(int maxLinesToRead, float fontSizeTolerance) throws IOException {
+        MultiLineTitleStripper(int maxLinesToRead, float fontSizeTolerance) throws IOException
+        {
             super();
             this.maxLinesToRead = maxLinesToRead;
             this.fontSizeTolerance = fontSizeTolerance;
         }
 
         @Override
-        protected void writeString(String text, List<TextPosition> textPositions) throws IOException {
-            if (currentLine >= maxLinesToRead || StringUtils.isBlank(text) || textPositions.isEmpty()) {
+        protected void writeString(String text, List<TextPosition> textPositions) throws IOException
+        {
+            if (currentLine >= maxLinesToRead || StringUtils.isBlank(text) || textPositions.isEmpty())
+            {
                 return;
             }
             currentLine++;
 
             float fontSize = 0;
-            for (TextPosition position : textPositions) {
+            for (TextPosition position : textPositions)
+            {
                 fontSize += position.getFontSizeInPt();
             }
             fontSize /= textPositions.size();
 
-            if (Math.abs(fontSize - largestFontSize) <= fontSizeTolerance) {
+            if (Math.abs(fontSize - largestFontSize) <= fontSizeTolerance)
+            {
                 largestText.append(text).append(' ');
-            } else if (fontSize > largestFontSize) {
+            }
+            else if (fontSize > largestFontSize)
+            {
                 largestFontSize = fontSize;
                 largestText.setLength(0);
                 largestText.append(text).append(' ');
             }
         }
 
-        String getTitle() {
+        String getTitle()
+        {
             return largestText.toString().trim();
         }
     }
@@ -730,37 +840,50 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param resource resource to update
      * @param src local image file
      */
-    private void processImage(Resource resource, File src) {
+    private void processImage(Resource resource, File src)
+    {
         resource.setResourceType(ResourceType.IMAGE);
         ImageInfo imageInfo = imageService.buildImageInfo(src);
-        if (imageInfo == null || imageInfo.getHeight() == null || imageInfo.getWidth() == null) {
+        if (imageInfo == null || imageInfo.getHeight() == null || imageInfo.getWidth() == null)
+        {
             logger.error("Cannot analyse image : {}", resource.getUrl());
             resource.setStatus(ResourceStatus.CANNOT_ANALYSE);
             resource.setEvicted(true);
             return;
         }
 
-        try {
+        try
+        {
             Hash hash;
-            synchronized (hasher) {
+            synchronized (hasher)
+            {
                 hash = hasher.hash(src);
             }
             imageInfo.setpHashValue(hash.getHashValue().longValue());
             imageInfo.setpHashLength(hash.getBitResolution());
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             logger.error("Cannot compute perceptive hash ({}) : {}", e.getMessage(), resource.getUrl());
             resource.setStatus(ResourceStatus.PERCEPTIV_HASH_FAIL);
         }
 
-        try {
-            if (embeddingService != null) {
+        try
+        {
+            if (embeddingService != null)
+            {
                 imageInfo.setEmbedding(embeddingService.embed(src.toPath()));
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             logger.error("Cannot compute embedding ({}) : {}", e.getMessage(), resource.getUrl());
-            if (e.getMessage() != null && e.getMessage().contains("attention_mask")) {
+            if (e.getMessage() != null && e.getMessage().contains("attention_mask"))
+            {
                 logger.warn("Configured vision model may not support image-only inference; check embedding.vision-model-url.");
-            } else if (e.getMessage() != null && e.getMessage().contains("NDManager")) {
+            }
+            else if (e.getMessage() != null && e.getMessage().contains("NDManager"))
+            {
                 logger.warn("NDManager lifecycle issue detected during image embedding.");
             }
         }
@@ -774,39 +897,53 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param images non-evicted image resources
      * @return sorted clusters
      */
-    private List<List<Resource>> classifyWithEmbeddings(List<Resource> images) {
+    private List<List<Resource>> classifyWithEmbeddings(List<Resource> images)
+    {
         logger.info("Starting image embedding-based clusterisation ({} images)", images.size());
         List<List<Resource>> clusters = new ArrayList<>();
 
-        for (Resource resource : images) {
+        for (Resource resource : images)
+        {
             float[] embedding = getEmbeddingSafe(resource);
-            if (embedding == null) {
+            if (embedding == null)
+            {
+                // First image or images without embedding start their own clusters
                 clusters.add(new ArrayList<>(List.of(resource)));
                 continue;
             }
 
             int bestCluster = -1;
             double bestSimilarity = -1.0;
-            for (int i = 0; i < clusters.size(); i++) {
+            for (int i = 0; i < clusters.size(); i++)
+            {
+                // Compare with the representative image (the first one) of each existing cluster
                 float[] reference = getEmbeddingSafe(clusters.get(i).getFirst());
-                if (reference == null || reference.length != embedding.length) {
+                if (reference == null || reference.length != embedding.length)
+                {
                     continue;
                 }
                 double similarity = cosine(embedding, reference);
-                if (similarity > bestSimilarity) {
+                if (similarity > bestSimilarity)
+                {
                     bestSimilarity = similarity;
                     bestCluster = i;
                 }
             }
 
-            if (bestCluster == -1 || bestSimilarity < config.getEmbeddingSimilarityThreshold()) {
+            // Assign to the cluster with the highest cosine similarity, provided it exceeds the similarity threshold
+            if (bestCluster == -1 || bestSimilarity < config.getEmbeddingSimilarityThreshold())
+            {
                 clusters.add(new ArrayList<>(List.of(resource)));
-            } else {
+            }
+            else
+            {
                 clusters.get(bestCluster).add(resource);
             }
         }
 
+        // Sort images in each cluster by size (descending) so the largest image is representative
         clusters.forEach(cluster -> cluster.sort(Comparator.comparingInt(this::safePixels).reversed()));
+        // Sort the clusters by size (descending) so the most popular image cluster comes first
         clusters.sort(Comparator.<List<Resource>>comparingInt(List::size).reversed());
         assignGroupsAndConsistency(clusters);
         return clusters;
@@ -817,16 +954,21 @@ public class ResourceCompletionService extends AbstractCompletionService {
      *
      * @param clusters image clusters sorted by priority
      */
-    private void assignGroupsAndConsistency(List<List<Resource>> clusters) {
-        if (clusters.isEmpty()) {
+    private void assignGroupsAndConsistency(List<List<Resource>> clusters)
+    {
+        if (clusters.isEmpty())
+        {
             return;
         }
         double[] mainCentroid = centroid(clusters.getFirst());
-        for (int clusterId = 0; clusterId < clusters.size(); clusterId++) {
-            for (Resource resource : clusters.get(clusterId)) {
+        for (int clusterId = 0; clusterId < clusters.size(); clusterId++)
+        {
+            for (Resource resource : clusters.get(clusterId))
+            {
                 resource.setGroup(clusterId);
                 float[] embedding = getEmbeddingSafe(resource);
-                if (embedding != null && embedding.length == mainCentroid.length && resource.getImageInfo() != null) {
+                if (embedding != null && embedding.length == mainCentroid.length && resource.getImageInfo() != null)
+                {
                     resource.getImageInfo().setConsistencyScore(cosine(embedding, mainCentroid));
                 }
             }
@@ -839,8 +981,10 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param resource resource to inspect
      * @return embedding vector, or null
      */
-    private float[] getEmbeddingSafe(Resource resource) {
-        if (resource == null || resource.getImageInfo() == null) {
+    private float[] getEmbeddingSafe(Resource resource)
+    {
+        if (resource == null || resource.getImageInfo() == null)
+        {
             return null;
         }
         float[] embedding = resource.getImageInfo().getEmbedding();
@@ -853,33 +997,40 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param cluster resources in a cluster
      * @return centroid vector, or an empty vector when unavailable
      */
-    private double[] centroid(List<Resource> cluster) {
+    private double[] centroid(List<Resource> cluster)
+    {
         int dimension = cluster.stream()
                 .map(this::getEmbeddingSafe)
                 .filter(embedding -> embedding != null)
                 .mapToInt(embedding -> embedding.length)
                 .findFirst()
                 .orElse(0);
-        if (dimension == 0) {
+        if (dimension == 0)
+        {
             return new double[0];
         }
 
         double[] sum = new double[dimension];
         int count = 0;
-        for (Resource resource : cluster) {
+        for (Resource resource : cluster)
+        {
             float[] embedding = getEmbeddingSafe(resource);
-            if (embedding == null || embedding.length != dimension) {
+            if (embedding == null || embedding.length != dimension)
+            {
                 continue;
             }
-            for (int i = 0; i < dimension; i++) {
+            for (int i = 0; i < dimension; i++)
+            {
                 sum[i] += embedding[i];
             }
             count++;
         }
-        if (count == 0) {
+        if (count == 0)
+        {
             return new double[0];
         }
-        for (int i = 0; i < dimension; i++) {
+        for (int i = 0; i < dimension; i++)
+        {
             sum[i] /= count;
         }
         return sum;
@@ -892,14 +1043,17 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param b second vector
      * @return cosine similarity, or zero for incompatible vectors
      */
-    private double cosine(float[] a, double[] b) {
-        if (a == null || b == null || a.length == 0 || a.length != b.length) {
+    private double cosine(float[] a, double[] b)
+    {
+        if (a == null || b == null || a.length == 0 || a.length != b.length)
+        {
             return 0.0;
         }
         double dot = 0.0;
         double na = 0.0;
         double nb = 0.0;
-        for (int i = 0; i < a.length; i++) {
+        for (int i = 0; i < a.length; i++)
+        {
             dot += a[i] * b[i];
             na += a[i] * a[i];
             nb += b[i] * b[i];
@@ -914,14 +1068,17 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param b second vector
      * @return cosine similarity, or zero for incompatible vectors
      */
-    private double cosine(float[] a, float[] b) {
-        if (a == null || b == null || a.length == 0 || a.length != b.length) {
+    private double cosine(float[] a, float[] b)
+    {
+        if (a == null || b == null || a.length == 0 || a.length != b.length)
+        {
             return 0.0;
         }
         double dot = 0.0;
         double na = 0.0;
         double nb = 0.0;
-        for (int i = 0; i < a.length; i++) {
+        for (int i = 0; i < a.length; i++)
+        {
             dot += a[i] * b[i];
             na += a[i] * a[i];
             nb += b[i] * b[i];
@@ -935,9 +1092,11 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param resource image resource
      * @return pixel count, or zero when metadata is missing
      */
-    private int safePixels(Resource resource) {
+    private int safePixels(Resource resource)
+    {
         ImageInfo imageInfo = resource == null ? null : resource.getImageInfo();
-        if (imageInfo == null || imageInfo.getHeight() == null || imageInfo.getWidth() == null) {
+        if (imageInfo == null || imageInfo.getHeight() == null || imageInfo.getWidth() == null)
+        {
             return 0;
         }
         return imageInfo.getHeight() * imageInfo.getWidth();
@@ -949,7 +1108,8 @@ public class ResourceCompletionService extends AbstractCompletionService {
      * @param vertical vertical configuration
      * @return true when override is enabled
      */
-    private boolean overrideResources(VerticalConfig vertical) {
+    private boolean overrideResources(VerticalConfig vertical)
+    {
         return Boolean.TRUE.equals(vertical.getResourcesConfig().getOverrideResources());
     }
 }

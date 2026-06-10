@@ -30,6 +30,8 @@ import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.verticals.VerticalsConfigService;
+import org.open4goods.commons.services.ResourceService;
+import org.open4goods.api.config.yml.ApiProperties;
 
 public class BatchServiceCleanAiTest {
 
@@ -43,8 +45,10 @@ public class BatchServiceCleanAiTest {
         CsvDatasourceFetchingService csvDatasourceFetchingService = mock(CsvDatasourceFetchingService.class);
         FeedService feedService = mock(FeedService.class);
         SerialisationService serialisationService = mock(SerialisationService.class);
+        ResourceService resourceService = mock(ResourceService.class);
+        ApiProperties apiProperties = mock(ApiProperties.class);
 
-        BatchService batchService = new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService, dataRepository, csvDatasourceFetchingService, feedService, serialisationService);
+        BatchService batchService = new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService, dataRepository, csvDatasourceFetchingService, feedService, serialisationService, resourceService, apiProperties);
 
         // Setup Data
         VerticalConfig vertical = new VerticalConfig();

@@ -408,6 +408,9 @@ public class ReviewGenerationPreprocessingService {
 		promptVariables.put("TOTAL_TOKENS", accumulatedTokens);
 		promptVariables.put("SOURCE_TOKENS", finalTokensMap);
 
+		promptVariables.put("ATTRIBUTE_SOURCES_JSON", writeJson(attributeSources(product, new ArrayList<>(finalSourcesMap.keySet()))));
+		promptVariables.put("ATTRIBUTE_DEFINITIONS_JSON", writeJson(attributeDefinitions(verticalConfig)));
+
 		return promptVariables;
 	}
 
