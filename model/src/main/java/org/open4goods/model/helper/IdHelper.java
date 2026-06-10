@@ -295,4 +295,54 @@ public class IdHelper {
 	    return padded;
 	}
 
+	/**
+	 * Checks if a string represents a pure, parsable double.
+	 * Avoids triggering expensive NumberFormatException when parsing fails.
+	 *
+	 * @param s the string to check
+	 * @return true if parsable as a double, false otherwise
+	 */
+	public static boolean isPureDouble(final String s) {
+		if (s == null) {
+			return false;
+		}
+		final int len = s.length();
+		if (len == 0) {
+			return false;
+		}
+		int start = 0;
+		final char first = s.charAt(0);
+		if (first == '-' || first == '+') {
+			start = 1;
+			if (len == 1) {
+				return false;
+			}
+		}
+		boolean hasDot = false;
+		boolean hasExponent = false;
+		for (int i = start; i < len; i++) {
+			final char c = s.charAt(i);
+			if (c >= '0' && c <= '9') {
+				continue;
+			} else if (c == '.') {
+				if (hasDot || hasExponent) {
+					return false;
+				}
+				hasDot = true;
+			} else if (c == 'e' || c == 'E') {
+				if (hasExponent || i == len - 1) {
+					return false;
+				}
+				hasExponent = true;
+				final char next = s.charAt(i + 1);
+				if (next == '-' || next == '+') {
+					i++;
+				}
+			} else {
+				return false;
+			}
+		}
+		return true;
+	}
+
 }

@@ -20,6 +20,7 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import jakarta.validation.constraints.NotNull;
+import org.open4goods.model.helper.IdHelper;
 
 public class Price implements Validable, Standardisable, Comparable<Double> {
 
@@ -151,14 +152,16 @@ public class Price implements Validable, Standardisable, Comparable<Double> {
 
 
 		double p;
-		try {
-			p = Double.parseDouble(price);
-		} catch (final NumberFormatException e) {
-
+		if (IdHelper.isPureDouble(price)) {
+			try {
+				p = Double.parseDouble(price);
+			} catch (final NumberFormatException e) {
+				final NumberFormat nf = NumberFormat.getInstance(locale);
+				p = nf.parse(price).doubleValue();
+			}
+		} else {
 			final NumberFormat nf = NumberFormat.getInstance(locale);
-
 			p = nf.parse(price).doubleValue();
-
 		}
 
 		if (null != this.price && !this.price.equals(p)) {

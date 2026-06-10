@@ -91,6 +91,7 @@ public class CsvIndexationWorker implements Runnable {
 
 	private static final String CLASSPATH_PREFIX = "classpath:";
 
+	// TODO : Should be fully from yaml config. And definitions should be case insensitive
 	private static final List<String> DEFAULT_URL_COLUMNS = List.of(
 	        "product_url",
 	        "product URL",
@@ -102,6 +103,9 @@ public class CsvIndexationWorker implements Runnable {
 	        "merchant_deep_link",
 	        "productURL",
 	        "url_product",
+	        "URL produit",
+	        "URL page produit",
+	        "URLproduit",
 	        "urlficheproduit");
 
 	private static final List<String> DEFAULT_AFFILIATED_URL_COLUMNS = List.of(
@@ -114,6 +118,9 @@ public class CsvIndexationWorker implements Runnable {
 	        "deep_link",
 	        "link",
 	        "productURL",
+	        "URL produit",
+	        "URL page produit",
+	        "URLproduit",
 	        "urlficheproduit");
 
 	private static final List<String> DEFAULT_NAME_COLUMNS = List.of(
@@ -123,6 +130,9 @@ public class CsvIndexationWorker implements Runnable {
 	        "name",
 	        "title",
 	        "nomproduit",
+	        "nom usuel du produit",
+	        "Nom",
+	        "Désignation",
 	        "designation");
 
 	private static final List<String> DEFAULT_PRICE_COLUMNS = List.of(
@@ -130,6 +140,11 @@ public class CsvIndexationWorker implements Runnable {
 	        "Price",
 	        "current price",
 	        "Current price",
+	        "Prix actuel",
+	        "Prix actuel TTC",
+	        "prix actuel",
+	        "prix actuel ttc",
+	        "prix actuel TTC du produit",
 	        "product_price",
 	        "sale_price",
 	        "search_price",
@@ -138,6 +153,12 @@ public class CsvIndexationWorker implements Runnable {
 	        "prix",
 	        "prix ttc",
 	        "prix_ttc",
+	        "prix barré",
+	        "prix barre",
+	        "prix barré TTC",
+	        "Prix barré TTC",
+	        "prix barré TTC du produit",
+	        "prix barre TTC du produit",
 	        "StrikePrice");
 
 	private static final List<String> DEFAULT_DESCRIPTION_COLUMNS = List.of(
@@ -149,7 +170,8 @@ public class CsvIndexationWorker implements Runnable {
 	        "product_description",
 	        "product description",
 	        "product_short_description",
-	        "product short description");
+	        "product short description",
+	        "descriptif");
 
 	private static final List<String> DEFAULT_IMAGE_COLUMNS = List.of(
 	        "image",
@@ -168,6 +190,11 @@ public class CsvIndexationWorker implements Runnable {
 	        "aw_image_url",
 	        "merchant_image_url",
 	        "url_image",
+	        "URL image",
+	        "URL image produit",
+	        "URL image grande",
+	        "URL image moyenne",
+	        "URL image petite",
 	        "urlimageoriginal");
 
 	private static final List<String> DEFAULT_PRODUCT_STATE_COLUMNS = List.of(
@@ -190,6 +217,10 @@ public class CsvIndexationWorker implements Runnable {
 	        "Stock status",
 	        "stock_status",
 	        "in_stock",
+	        "indicateur de stock",
+	        "Indicateur de stock",
+	        "disponibilite",
+	        "disponibilité",
 	        "stock");
 
 	private static final List<String> DEFAULT_QUANTITY_IN_STOCK_COLUMNS = List.of(
@@ -199,6 +230,8 @@ public class CsvIndexationWorker implements Runnable {
 	        "stock_quantity",
 	        "stock qty",
 	        "qty",
+	        "indicateur de stock",
+	        "Indicateur de stock",
 	        "available quantity");
 
 	private static final List<String> DEFAULT_SHIPPING_COST_COLUMNS = List.of(
@@ -208,6 +241,7 @@ public class CsvIndexationWorker implements Runnable {
 	        "delivery cost",
 	        "delivery_cost",
 	        "frais de port",
+	        "frais de port ttc",
 	        "frais de livraison");
 
 	private static final List<String> DEFAULT_SHIPPING_TIME_COLUMNS = List.of(
@@ -218,22 +252,25 @@ public class CsvIndexationWorker implements Runnable {
 	        "delivery_time",
 	        "delais de livraison",
 	        "délais de livraison",
-	        "délai de livraison");
+	        "délai de livraison",
+	        "Délai de livraison");
 
 	private static final Map<ReferentielKey, List<String>> DEFAULT_REFERENTIEL_COLUMNS = Map.of(
 	        ReferentielKey.GTIN, List.of("EAN or ISBN", "EAN", "ISBN", "gtin", "GTIN", "ean", "ean13", "EAN13",
-	                "barcode", "product_GTIN", "upc"),
+	                "barcode", "product_GTIN", "upc", "codebarre", "Code barre"),
 	        ReferentielKey.BRAND, List.of("brand", "Brand", "brand name", "Brand name", "brand_name", "manufacturer",
-	                "Manufacturer", "manufacturer name", "merchant_name"),
+	                "Manufacturer", "manufacturer name", "merchant_name", "Marque", "marque"),
 	        ReferentielKey.MODEL, List.of("manufacturer reference", "Manufacturer reference", "internal reference",
 	                "Internal reference", "model", "Model", "reference", "product_reference", "mpn", "MPN",
-	                "model_number", "product_model"));
+	                "model_number", "product_model", "Référence fabricant", "reference fabriquant",
+	                "référence fabricant", "Référence interne", "reference interne"));
 
 	private static final List<String> DEFAULT_MPN_COLUMNS = List.of("manufacturer reference", "Manufacturer reference",
-	        "mpn", "MPN", "model_number", "product_model", "reference");
+	        "mpn", "MPN", "model_number", "product_model", "reference", "Référence fabricant",
+	        "reference fabriquant", "référence fabricant");
 
 	private static final List<String> DEFAULT_SKU_COLUMNS = List.of("sku", "SKU", "internal reference", "Internal reference",
-	        "merchant_product_id", "aw_product_id");
+	        "merchant_product_id", "aw_product_id", "Référence interne", "reference interne", "ID");
 
 	/** The service used to "atomically" fetch and store / update DataFragments **/
 	private final CsvDatasourceFetchingService csvService;
@@ -1362,22 +1399,30 @@ public class CsvIndexationWorker implements Runnable {
 		{
 			return colName;
 		}
-		return resolvedKeysCache.computeIfAbsent(colName, col -> {
-			String normalized = col.trim();
-			String comparable = comparableCsvHeader(col);
-			String trimmedMatch = item.keySet().stream()
-					.filter(key -> key != null && key.trim().equalsIgnoreCase(normalized))
-					.findFirst()
-					.orElse(null);
-			if (trimmedMatch != null)
-			{
-				return trimmedMatch;
-			}
-			return item.keySet().stream()
-					.filter(key -> comparableCsvHeader(key).equals(comparable))
-					.findFirst()
-					.orElse(null);
-		});
+		if (resolvedKeysCache.containsKey(colName))
+		{
+			final String cached = resolvedKeysCache.get(colName);
+			return "".equals(cached) ? null : cached;
+		}
+
+		final String normalized = colName.trim();
+		final String comparable = comparableCsvHeader(colName);
+		final String trimmedMatch = item.keySet().stream()
+				.filter(key -> key != null && key.trim().equalsIgnoreCase(normalized))
+				.findFirst()
+				.orElse(null);
+		if (trimmedMatch != null)
+		{
+			resolvedKeysCache.put(colName, trimmedMatch);
+			return trimmedMatch;
+		}
+		final String comparableMatch = item.keySet().stream()
+				.filter(key -> comparableCsvHeader(key).equals(comparable))
+				.findFirst()
+				.orElse(null);
+
+		resolvedKeysCache.put(colName, comparableMatch != null ? comparableMatch : "");
+		return comparableMatch;
 	}
 
 	static String comparableCsvHeader(String value)

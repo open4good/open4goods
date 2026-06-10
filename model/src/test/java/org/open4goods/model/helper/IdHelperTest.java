@@ -21,4 +21,22 @@ class IdHelperTest {
          
         assertNull(IdHelper.toDatasourceId(null));
     }
+
+    @Test
+    void testIsPureDouble() {
+        org.junit.jupiter.api.Assertions.assertTrue(IdHelper.isPureDouble("61.99"));
+        org.junit.jupiter.api.Assertions.assertTrue(IdHelper.isPureDouble("-61.99"));
+        org.junit.jupiter.api.Assertions.assertTrue(IdHelper.isPureDouble("+61.99"));
+        org.junit.jupiter.api.Assertions.assertTrue(IdHelper.isPureDouble("0"));
+        org.junit.jupiter.api.Assertions.assertTrue(IdHelper.isPureDouble("1e5"));
+        org.junit.jupiter.api.Assertions.assertTrue(IdHelper.isPureDouble("-1E-5"));
+        org.junit.jupiter.api.Assertions.assertTrue(IdHelper.isPureDouble("1.2e+3"));
+
+        org.junit.jupiter.api.Assertions.assertFalse(IdHelper.isPureDouble("61.99 EUR"));
+        org.junit.jupiter.api.Assertions.assertFalse(IdHelper.isPureDouble("EUR 61.99"));
+        org.junit.jupiter.api.Assertions.assertFalse(IdHelper.isPureDouble(""));
+        org.junit.jupiter.api.Assertions.assertFalse(IdHelper.isPureDouble(null));
+        org.junit.jupiter.api.Assertions.assertFalse(IdHelper.isPureDouble("abc"));
+        org.junit.jupiter.api.Assertions.assertFalse(IdHelper.isPureDouble("61,99"));
+    }
 }

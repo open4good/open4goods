@@ -1,5 +1,7 @@
 package org.open4goods.model.attribute;
 
+import org.open4goods.model.helper.IdHelper;
+
 public class IndexedAttribute extends SourcableAttribute{
 
 	/**
@@ -30,10 +32,12 @@ public class IndexedAttribute extends SourcableAttribute{
 
 		// Trying to specialize as numeric
 		String num = cleanedValue.trim().replace(",", ".");
-		try {
-			final Double dblVal = Double.valueOf(num);
-			numericValue = dblVal;
-		} catch (final NumberFormatException e) {
+		if (IdHelper.isPureDouble(num)) {
+			try {
+				final Double dblVal = Double.valueOf(num);
+				numericValue = dblVal;
+			} catch (final NumberFormatException e) {
+			}
 		}
 
 	}

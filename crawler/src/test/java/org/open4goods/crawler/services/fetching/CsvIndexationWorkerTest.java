@@ -196,6 +196,56 @@ class CsvIndexationWorkerTest
         assertThat(fragment.getExternalIds().getSku()).contains("150527000067747");
     }
 
+    @Test
+    void parsesFrenchMerchantHeadersUsingGlobalFallbacks() throws Exception
+    {
+        CsvIndexationWorker worker = new CsvIndexationWorker(
+                null,
+                new DataFragmentCompletionService(null),
+                null,
+                null,
+                null,
+                0,
+                null,
+                null);
+        DataSourceProperties datasource = new DataSourceProperties();
+        datasource.setName("centralebrico.fr");
+        datasource.setLanguage("fr");
+        datasource.setValidationFields(Set.of("price", "names", "GTIN"));
+
+        CsvDataSourceProperties csv = new CsvDataSourceProperties();
+        csv.setPrice(Set.of("price_vat_inc", "price", "product_price", "sale_price"));
+        csv.setCurrency(Currency.EUR);
+        datasource.setCsvDatasource(csv);
+
+        Map<String, String> row = new LinkedHashMap<>();
+        row.put("URL produit", "https://mqs.centrale-brico.com/?P510CAF58B41F15S1UC41308b030214V4");
+        row.put("URL image", "https://www.centrale-brico.com/195963/gardena-regard-d-arrosage-enterre-pre-monte-1-voie.jpg");
+        row.put("Marque", "GARDENA");
+        row.put("Prix barré TTC", "56.10");
+        row.put("Description", "Regard pré-montable V1 GARDENA");
+        row.put("Référence fabricant", "GA-125420");
+        row.put("Indicateur de stock", "1");
+        row.put("Catégorie", "Accueil > Jardin > Arrosage-Pompage");
+        row.put("Désignation", "Regard d'arrosage enterré prè-monté 1 voie");
+        row.put("Prix actuel TTC", "32.55");
+        row.put("Référence interne", "6");
+        row.put("EAN13", "4078500125406");
+
+        DataFragment fragment = invokeParseCsvLine(worker, row, datasource);
+
+        assertThat(fragment.getUrl()).isEqualTo("https://mqs.centrale-brico.com/?P510CAF58B41F15S1UC41308b030214V4");
+        assertThat(fragment.getAffiliatedUrl()).isEqualTo(fragment.getUrl());
+        assertThat(fragment.getNames()).contains("Regard d'arrosage enterré prè-monté 1 voie");
+        assertThat(fragment.getPrice().getPrice()).isEqualTo(32.55);
+        assertThat(fragment.getReferentielAttributes()).containsEntry(ReferentielKey.GTIN, "4078500125406");
+        assertThat(fragment.getReferentielAttributes()).containsEntry(ReferentielKey.BRAND, "GARDENA");
+        assertThat(fragment.getReferentielAttributes()).containsEntry(ReferentielKey.MODEL, "GA-125420");
+        assertThat(fragment.getExternalIds().getSku()).contains("6");
+        assertThat(fragment.getResources()).extracting("url")
+                .contains("https://www.centrale-brico.com/195963/gardena-regard-d-arrosage-enterre-pre-monte-1-voie.jpg");
+    }
+
     private static void invoke(CsvIndexationWorker worker, String method, DataFragment fragment) throws Exception
     {
         Method reflected = CsvIndexationWorker.class.getDeclaredMethod(method, DataFragment.class);
