@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.exceptions.ParseException;
+import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributeParser;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -135,7 +136,7 @@ public class WarrantyParser extends AttributeParser {
             }
         }
         
-        LOGGER.warn("Could not parse warranty '{}' within range [{}, {}]", raw, validRange.min, validRange.max);
+        LOGGER.debug("Could not parse warranty '{}' within range [{}, {}]", raw, validRange.min, validRange.max);
         return null;
     }
 
@@ -149,7 +150,7 @@ public class WarrantyParser extends AttributeParser {
         Matcher m = pattern.matcher(normalized);
         if (m.find()) {
             String valStr = m.group(1).replace(',', '.');
-            try {
+            if (IdHelper.isPureDouble(valStr)) {
                 double val = Double.parseDouble(valStr);
                 double years = val * factorToYears;
                 if (validRange.contains(years)) {
@@ -157,10 +158,6 @@ public class WarrantyParser extends AttributeParser {
                 } else {
                     return Double.NaN; // Matched but rejected
                 }
-            } catch (NumberFormatException e) {
-                // ignore, treat as no match or fall through? 
-                // If it matched regex but failed strict parsing, maybe fallback? 
-                // Regex guarantees digits, so ParseDouble shouldn't fail unless overflow.
             }
         }
         return null;
@@ -170,10 +167,8 @@ public class WarrantyParser extends AttributeParser {
         Matcher m = NUMBER_PATTERN.matcher(normalized);
         if (m.find()) {
              String valStr = m.group(1).replace(',', '.');
-             try {
+             if (IdHelper.isPureDouble(valStr)) {
                  return Double.parseDouble(valStr);
-             } catch (NumberFormatException e) {
-                 return null;
              }
         }
         return null;

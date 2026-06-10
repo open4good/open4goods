@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.exceptions.ParseException;
+import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributeParser;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -282,7 +283,7 @@ public class WeightParser extends AttributeParser {
                                 
                                 parsed.add(w);
                         } else {
-                        	LOGGER.warn("Could not parse weight from '{}' (datasource={})", raw, datasource);
+                        	LOGGER.debug("Could not parse weight from '{}' (datasource={})", raw, datasource);
                         }
                 }
 
@@ -404,11 +405,10 @@ public class WeightParser extends AttributeParser {
                 for (String token : numbers) {
                         final boolean hasDecimal = token.contains(".");
                         final double number;
-                        try {
-                                number = Double.parseDouble(token);
-                        } catch (NumberFormatException nfe) {
+                        if (!IdHelper.isPureDouble(token)) {
                                 continue;
                         }
+                        number = Double.parseDouble(token);
                         ParsedWeight candidate = inferUnit(number, hasDecimal, range, datasourceHint, rawValue, datasource);
                         if (candidate == null) {
                                 continue;
@@ -503,11 +503,10 @@ public class WeightParser extends AttributeParser {
                         return null;
                 }
                 token = token.trim().replace(',', '.');
-                try {
-                        return Double.parseDouble(token);
-                } catch (NumberFormatException nfe) {
+                if (!IdHelper.isPureDouble(token)) {
                         return null;
                 }
+                return Double.parseDouble(token);
         }
 
         private static ParsedWeight parseExplicitUnit(String normalized, WeightRangeKg range, String datasource) {
@@ -521,11 +520,11 @@ public class WeightParser extends AttributeParser {
                         }
 
                         final double value;
-                        try {
-                                value = Double.parseDouble(numberToken.replace(',', '.'));
-                        } catch (NumberFormatException nfe) {
+                        String cleanNum = numberToken.replace(',', '.');
+                        if (!IdHelper.isPureDouble(cleanNum)) {
                                 continue;
                         }
+                        value = Double.parseDouble(cleanNum);
 
                         WeightUnit unit = unitFromToken(unitToken);
                         if (unit == null) {

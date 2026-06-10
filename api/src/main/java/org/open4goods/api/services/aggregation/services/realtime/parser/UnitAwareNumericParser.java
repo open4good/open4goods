@@ -15,6 +15,7 @@ import org.open4goods.api.util.SpringContextHolder;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.exceptions.ParseException;
+import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributeParser;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -178,14 +179,11 @@ public class UnitAwareNumericParser extends AttributeParser
         String unitToken = m.group(2);
 
         double numericVal;
-        try
-        {
-            numericVal = Double.parseDouble(numStr);
-        }
-        catch (NumberFormatException e)
+        if (!IdHelper.isPureDouble(numStr))
         {
             return null;
         }
+        numericVal = Double.parseDouble(numStr);
 
         String effectiveUnit = (unitToken != null && !unitToken.isBlank()) ? unitToken : defaultUnitHint;
         if (effectiveUnit == null || effectiveUnit.isBlank())

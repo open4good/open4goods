@@ -22,6 +22,7 @@ import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.exceptions.ValidationException;
+import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.util.ProductModelCandidateHelper.ModelCandidateSource;
 import org.open4goods.model.vertical.AttributeConfig;
@@ -273,12 +274,17 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 		indexedAttr.setValue(bestValue);
 
-		if (AttributeType.NUMERIC.equals(attrConf.getFilteringType())) {
-			indexedAttr.setNumericValue(indexedAttr.numericOrNull(bestValue));
-		} else {
+		String cleanVal = bestValue == null ? null : bestValue.trim().replace(',', '.');
+		if (IdHelper.isPureDouble(cleanVal)) {
 			try {
 				indexedAttr.setNumericValue(indexedAttr.numericOrNull(bestValue));
 			} catch (NumberFormatException e) {
+				indexedAttr.setNumericValue(null);
+			}
+		} else {
+			if (AttributeType.NUMERIC.equals(attrConf.getFilteringType())) {
+				throw new NumberFormatException("For input string: \"" + bestValue + "\"");
+			} else {
 				indexedAttr.setNumericValue(null);
 			}
 		}
