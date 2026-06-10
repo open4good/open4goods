@@ -101,7 +101,7 @@ const handleIntersect = (
     >
       <div
         v-show="isVisible"
-        class="section-reveal__content text-center align-center"
+        class="section-reveal__content"
       >
         <slot :reveal="isVisible" />
       </div>

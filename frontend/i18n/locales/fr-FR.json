@@ -10,6 +10,8 @@
     },
     "article": {
       "eyebrow": "Guide d'achat",
+      "progressAria": "Progression de lecture de l'article",
+      "readingTime": "Env. {minutes} min de lecture",
       "updated": "Mis à jour {date}",
       "tocAria": "Navigation des sections du guide d'achat"
     }

@@ -10,6 +10,8 @@
     },
     "article": {
       "eyebrow": "Buying guide",
+      "progressAria": "Article reading progress",
+      "readingTime": "Approx. {minutes} min read",
       "updated": "Updated {date}",
       "tocAria": "Buying guide section navigation"
     }
