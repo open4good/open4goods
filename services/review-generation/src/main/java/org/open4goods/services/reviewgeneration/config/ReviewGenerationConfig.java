@@ -70,9 +70,6 @@ public class ReviewGenerationConfig {
      */
     private List<String> weakSearchBrands = new ArrayList<>();
 
-    // Property used for building search queries.
-    private String queryTemplate = "test %s \"%s\"";
-
     /**
      * Number of results requested for each search query.
      */
@@ -80,13 +77,15 @@ public class ReviewGenerationConfig {
 
     /**
      * Google language restriction used for review-source discovery.
+     * Set to "none" to rely solely on gl/hl soft bias and ranking tiers.
      */
-    private String searchLanguageRestrict = "lang_fr";
+    private String searchLanguageRestrict = "none";
 
     /**
      * Google country restriction used for review-source discovery.
+     * Set to "none" to avoid hard-excluding EN authoritative sources such as rtings.com.
      */
-    private String searchCountryRestrict = "countryFR";
+    private String searchCountryRestrict = "none";
 
     /**
      * Google geo-location used for review-source discovery.
@@ -105,20 +104,12 @@ public class ReviewGenerationConfig {
 
     private List<String> excludedDomains = new ArrayList<>();
 
-    // Limit the number of search queries.
-    private int maxSearch = 5;
-
     /**
-     * Extra targeted searches allowed when the first pass collected official
-     * product evidence but did not reach source/token thresholds.
+     * Total SERP query budget shared by all phases (primary, GTIN fallback,
+     * low-quality fallback, partial retry). Default 5 — env-overridable via
+     * REVIEW_GENERATION_SERP_BUDGET.
      */
-    private int partialRetryMaxSearch = 2;
-
-    /**
-     * Extra GTIN/model fallback searches allowed when the first pass found results
-     * but the accepted source quality is still too low.
-     */
-    private int lowQualityFallbackMaxSearch = 2;
+    private int serpBudget = 5;
 
 
     // Minimum global tokens and source count required for valid generation.
@@ -174,12 +165,6 @@ public class ReviewGenerationConfig {
             "(?i)^\\s*(cookies?|gestion des cookies|politique de confidentialite|privacy policy).*$",
             "(?i)^\\s*(copyright|\\u00a9|tous droits reserves).*$"
     ));
-
-    /**
-     * The delay in months after which an existing AI review is considered outdated.
-     * Default value is 6 months.
-     */
-    private int refreshDelayMonths = 6;
 
     /**
      * Estimated time for the review generation process.
@@ -303,13 +288,6 @@ public class ReviewGenerationConfig {
         this.weakSearchBrands = weakSearchBrands == null ? new ArrayList<>() : weakSearchBrands;
     }
 
-    public String getQueryTemplate() {
-        return queryTemplate;
-    }
-    public void setQueryTemplate(String queryTemplate) {
-        this.queryTemplate = queryTemplate;
-    }
-
     public int getSearchResultsPerQuery() {
         return searchResultsPerQuery;
     }
@@ -360,25 +338,11 @@ public class ReviewGenerationConfig {
         this.excludedDomains = excludedDomains;
     }
 
-    public int getMaxSearch() {
-        return maxSearch;
+    public int getSerpBudget() {
+        return serpBudget;
     }
-    public void setMaxSearch(int maxSearch) {
-        this.maxSearch = maxSearch;
-    }
-
-    public int getPartialRetryMaxSearch() {
-        return partialRetryMaxSearch;
-    }
-    public void setPartialRetryMaxSearch(int partialRetryMaxSearch) {
-        this.partialRetryMaxSearch = partialRetryMaxSearch;
-    }
-
-    public int getLowQualityFallbackMaxSearch() {
-        return lowQualityFallbackMaxSearch;
-    }
-    public void setLowQualityFallbackMaxSearch(int lowQualityFallbackMaxSearch) {
-        this.lowQualityFallbackMaxSearch = lowQualityFallbackMaxSearch;
+    public void setSerpBudget(int serpBudget) {
+        this.serpBudget = serpBudget;
     }
 
     public int getMaxTotalTokens() {
@@ -414,13 +378,6 @@ public class ReviewGenerationConfig {
     }
     public void setMaxConcurrentFetch(int maxConcurrentFetch) {
         this.maxConcurrentFetch = maxConcurrentFetch;
-    }
-
-    public int getRefreshDelayMonths() {
-        return refreshDelayMonths;
-    }
-    public void setRefreshDelayMonths(int refreshDelayMonths) {
-        this.refreshDelayMonths = refreshDelayMonths;
     }
 
     public Long getEstimatedTime() {

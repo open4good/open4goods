@@ -285,6 +285,11 @@ public class ApiProperties {
 	 */
 	private long resourceCleanupGracePeriodMs = 86400000L;
 
+	/**
+	 * Concurrency level for product completion tasks.
+	 */
+	private int completionConcurrency = 10;
+
 	public List<Integer> getAllowedImagesSizeSuffixes() {
 		return allowedImagesSizeSuffixes;
 	}
@@ -299,6 +304,14 @@ public class ApiProperties {
 
 	public void setResourceCleanupGracePeriodMs(long resourceCleanupGracePeriodMs) {
 		this.resourceCleanupGracePeriodMs = resourceCleanupGracePeriodMs;
+	}
+
+	public int getCompletionConcurrency() {
+		return completionConcurrency;
+	}
+
+	public void setCompletionConcurrency(int completionConcurrency) {
+		this.completionConcurrency = completionConcurrency;
 	}
 
 	public Integer getAggregatedDataElasticBuffer() {

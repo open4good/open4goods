@@ -89,6 +89,18 @@ public class ResourceCompletionConfig {
     @DecimalMin("0.0")
     private float pdfTitleFontSizeTolerance = 0.8f;
 
+    /**
+     * Maximum file size in bytes for an image to be processed. Larger images will be skipped.
+     */
+    @Min(1)
+    private long maxImageSizeToProcessBytes = 10 * 1024 * 1024L;
+
+    /**
+     * Maximum file size in bytes for a PDF to be processed. Larger PDFs will be skipped.
+     */
+    @Min(1)
+    private long maxPdfSizeToProcessBytes = 50 * 1024 * 1024L;
+
     public List<ResourceCompletionUrlTemplate> getUrlTemplates() {
         return urlTemplates;
     }
@@ -191,5 +203,21 @@ public class ResourceCompletionConfig {
 
     public void setPdfTitleFontSizeTolerance(float pdfTitleFontSizeTolerance) {
         this.pdfTitleFontSizeTolerance = pdfTitleFontSizeTolerance;
+    }
+
+    public long getMaxImageSizeToProcessBytes() {
+        return maxImageSizeToProcessBytes;
+    }
+
+    public void setMaxImageSizeToProcessBytes(long maxImageSizeToProcessBytes) {
+        this.maxImageSizeToProcessBytes = maxImageSizeToProcessBytes;
+    }
+
+    public long getMaxPdfSizeToProcessBytes() {
+        return maxPdfSizeToProcessBytes;
+    }
+
+    public void setMaxPdfSizeToProcessBytes(long maxPdfSizeToProcessBytes) {
+        this.maxPdfSizeToProcessBytes = maxPdfSizeToProcessBytes;
     }
 }

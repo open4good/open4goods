@@ -267,7 +267,7 @@ public class ApiConfig {
 			IcecatCompletionService icecatCompletionService, EprelCompletionService eprelCompletionService,
 			WikidataCompletionService wikidataCompletionService, AmazonCompletionService amazonCompletionService) {
 		return new CompletionFacadeService(resourceCompletionService, icecatCompletionService, eprelCompletionService,
-				wikidataCompletionService, amazonCompletionService);
+				wikidataCompletionService, amazonCompletionService, apiProperties);
 	}
 
 	@Bean

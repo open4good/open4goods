@@ -17,6 +17,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.Collections;
@@ -242,6 +243,18 @@ public class ReviewGenerationService implements HealthIndicator {
 		if (review.getDescription() == null || review.getDescription().trim().length() < 20) {
 			return false;
 		}
+		if (review.getShortDescription() == null || review.getShortDescription().isBlank()) {
+			return false;
+		}
+		if (review.getTechnicalOneline() == null || review.getTechnicalOneline().isBlank()) {
+			return false;
+		}
+		if (review.getEcologicalOneline() == null || review.getEcologicalOneline().isBlank()) {
+			return false;
+		}
+		if (review.getCommunityOneline() == null || review.getCommunityOneline().isBlank()) {
+			return false;
+		}
 		return true;
 	}
 
@@ -267,7 +280,7 @@ public class ReviewGenerationService implements HealthIndicator {
         status.setStatus(ReviewGenerationStatus.Status.PREPROCESSING);
         status.setStartTime(Instant.now().toEpochMilli());
 
-        String promptKey = resolvePromptKey();
+        String promptKey = properties.getPromptKey();
         PromptConfig promptConfig = genAiService.getPromptConfig(promptKey);
         if (promptConfig == null) {
             throw new ResourceNotFoundException("Prompt not found: " + promptKey);
@@ -384,13 +397,7 @@ public class ReviewGenerationService implements HealthIndicator {
 		holder.setSources(sourceTokens);
 		holder.setTotalTokens((Integer) promptVariables.getOrDefault("TOTAL_TOKENS", 0));
 		applyReview(product, holder);
-		Map<String, List<SourcedAttribute>> aiAttributeSnapshot = snapshotAiReviewSources(product);
-		try {
-			hooks.forEach(hook -> hook.onReviewGenerated(product));
-		} catch (Exception e) {
-			logger.error("Error executing review generation hooks for UPC {}: {}", product.getId(), e.getMessage(), e);
-		}
-		restoreMissingAiReviewSources(product, aiAttributeSnapshot);
+		runHooksPreservingAiSources(product, ReviewGenerationHook::onReviewGenerated);
 		productRepository.forceIndex(product);
 		return stepResult(product, verticalConfig, "text", true, "Review text generated and persisted.",
 				promptVariables, attributes, newReview);
@@ -491,7 +498,7 @@ public class ReviewGenerationService implements HealthIndicator {
 					preProcessingFuture.get();
 					status.addMessage("External preprocessing complete.");
 				}
-				String promptKey = resolvePromptKey();
+				String promptKey = properties.getPromptKey();
 				PromptConfig promptConfig = genAiService.getPromptConfig(promptKey);
 				if (promptConfig == null) {
 					throw new ResourceNotFoundException("Prompt not found: " + promptKey);
@@ -567,16 +574,8 @@ public class ReviewGenerationService implements HealthIndicator {
 			}
 
 
-            // Execute hooks (enrichment/standard aggregation)
             if (status.getStatus() == ReviewGenerationStatus.Status.SUCCESS) {
-				Map<String, List<SourcedAttribute>> aiAttributeSnapshot = snapshotAiReviewSources(product);
-                try {
-                    hooks.forEach(hook -> hook.onReviewGenerated(product));
-                } catch (Exception e) {
-                    logger.error("Error executing review generation hooks for UPC {}: {}", upc, e.getMessage(), e);
-                    // We do not fail the overall process if hooks fail, but we log it.
-                }
-				restoreMissingAiReviewSources(product, aiAttributeSnapshot);
+				runHooksPreservingAiSources(product, ReviewGenerationHook::onReviewGenerated);
             }
 
 			applyReview(product, holder);
@@ -827,7 +826,7 @@ public class ReviewGenerationService implements HealthIndicator {
 		List<Map<String, Object>> promptVariablesList = new ArrayList<>();
 		List<String> productIds = new ArrayList<>();
 		List<String> gtins = new ArrayList<>();
-		String promptKey = resolvePromptKey();
+		String promptKey = properties.getPromptKey();
 		for (Product product : products) {
 			long upc = product.getId();
 			if (!shouldGenerateReview(product)) {
@@ -945,11 +944,6 @@ public class ReviewGenerationService implements HealthIndicator {
 		}
 	}
 
-	private String resolvePromptKey() {
-		// Grounding is performed at the fetch stage only; the text prompt is always EXTERNAL_SOURCES.
-		return properties.getPromptKey();
-	}
-
 	/**
 	 * Scheduled method that scans the tracking folder for batch job tracking files.
 	 * <p>
@@ -1063,16 +1057,7 @@ public class ReviewGenerationService implements HealthIndicator {
 					holder.setReview(newReview);
 					holder.setEnoughData(true);
 					applyReview(product, holder);
-					Map<String, List<SourcedAttribute>> aiAttributeSnapshot = snapshotAiReviewSources(product);
-
-                    // Execute hooks
-                    try {
-                        hooks.forEach(hook -> hook.onReviewGenerated(product));
-                    } catch (Exception e) {
-                        logger.error("Error executing batch review generation hooks for product {}: {}", productId, e.getMessage(), e);
-                    }
-					restoreMissingAiReviewSources(product, aiAttributeSnapshot);
-
+					runHooksPreservingAiSources(product, ReviewGenerationHook::onReviewGenerated);
 					productRepository.forceIndex(product);
 					updateBatchStatus(product.getId(), ReviewGenerationStatus.Status.SUCCESS, null);
 					logger.info("Updated review for product with ID {}", productId);
@@ -1131,9 +1116,7 @@ public class ReviewGenerationService implements HealthIndicator {
 		List<AiReview.AiAttribute> validatedAttributes = validateExtractedAttributes(extractedAttributes,
 				verticalConfig, acceptedUrls, promptVariables);
 		persistValidatedAttributes(product, validatedAttributes, acceptedUrls);
-		Map<String, List<SourcedAttribute>> aiAttributeSnapshot = snapshotAiReviewSources(product);
-		runAttributesExtractedHooks(product);
-		restoreMissingAiReviewSources(product, aiAttributeSnapshot);
+		runHooksPreservingAiSources(product, (hook, p) -> hook.onAttributesExtracted(p));
 		return validatedAttributes;
 	}
 
@@ -1615,12 +1598,18 @@ public class ReviewGenerationService implements HealthIndicator {
 		return new ArrayList<>(sourceTokens.keySet());
 	}
 
-	private void runAttributesExtractedHooks(Product product) {
+	/**
+	 * Snapshots AI_REVIEW-sourced attributes, runs hook actions (errors logged, never thrown),
+	 * then restores any sources that hooks may have dropped.
+	 */
+	private void runHooksPreservingAiSources(Product product, BiConsumer<ReviewGenerationHook, Product> hookAction) {
+		Map<String, List<SourcedAttribute>> snapshot = snapshotAiReviewSources(product);
 		try {
-			hooks.forEach(hook -> hook.onAttributesExtracted(product));
+			hooks.forEach(hook -> hookAction.accept(hook, product));
 		} catch (Exception e) {
-			logger.error("Error executing attribute extraction hooks for UPC {}: {}", product.getId(), e.getMessage(), e);
+			logger.error("Error executing hooks for UPC {}: {}", product.getId(), e.getMessage(), e);
 		}
+		restoreMissingAiReviewSources(product, snapshot);
 	}
 
 	private List<AiReview.AiAttribute> aiAttributesFromProduct(Product product, VerticalConfig verticalConfig) {
@@ -1726,6 +1715,10 @@ public class ReviewGenerationService implements HealthIndicator {
 			enrichmentStatus.put("eprel.afterFetchHooks", Boolean.toString(hasEprelAfterFetchHooks));
 			enrichmentStatus.put("eprel.status", hadEprelBeforeFetch ? "already_present"
 					: hasEprelAfterFetchHooks ? "completed" : "not_completed");
+			if (!hadEprelBeforeFetch && !hasEprelAfterFetchHooks) {
+				logger.warn("EPREL data still missing for UPC {} after onSourcesFetched hooks. "
+						+ "This product may lack energy-label attributes.", product.getId());
+			}
 		} catch (Exception e) {
 			logger.error("Error executing onSourcesFetched hooks for UPC {}: {}", product.getId(), e.getMessage(), e);
 			enrichmentStatus.put("eprel.afterFetchHooks", Boolean.toString(hasEprel(product)));

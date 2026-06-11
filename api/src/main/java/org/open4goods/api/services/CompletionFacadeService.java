@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
  *
  */
 
+import org.open4goods.api.config.yml.ApiProperties;
+
 public class CompletionFacadeService {
 
 	protected static final Logger logger = LoggerFactory.getLogger(CompletionFacadeService.class);
@@ -32,18 +34,21 @@ public class CompletionFacadeService {
 	private final EprelCompletionService eprelCompletionService;
 	private final WikidataCompletionService wikidataCompletionService;
 	private final AmazonCompletionService amazonCompletionService;
+	private final ApiProperties apiProperties;
 
 	public CompletionFacadeService(
 			ResourceCompletionService resourceCompletionService,
 			IcecatCompletionService icecatCompletionService,
 			EprelCompletionService eprelCompletionService,
 			WikidataCompletionService wikidataCompletionService,
-			AmazonCompletionService amazonCompletionService) {
+			AmazonCompletionService amazonCompletionService,
+			ApiProperties apiProperties) {
 		this.resourceCompletionService = resourceCompletionService;
 		this.icecatCompletionService = icecatCompletionService;
 		this.eprelCompletionService = eprelCompletionService;
 		this.wikidataCompletionService = wikidataCompletionService;
 		this.amazonCompletionService = amazonCompletionService;
+		this.apiProperties = apiProperties;
 	}
 
 	/**
@@ -54,13 +59,46 @@ public class CompletionFacadeService {
 	 */
 	public void processAll(Set<Product> products, VerticalConfig vertical) {
 		logger.info("Completing {} products", products.size());
-		products.forEach(product -> {
-			resourceCompletionService.process(vertical, product);
-			icecatCompletionService.process(vertical, product);
-			eprelCompletionService.process(vertical, product);
-			wikidataCompletionService.process(vertical, product);
-			amazonCompletionService.process(vertical, product);
-		});
+		int concurrency = apiProperties.getCompletionConcurrency();
+		if (concurrency <= 1) {
+			products.forEach(product -> {
+				try {
+					resourceCompletionService.process(vertical, product);
+					icecatCompletionService.process(vertical, product);
+					eprelCompletionService.process(vertical, product);
+					wikidataCompletionService.process(vertical, product);
+					amazonCompletionService.process(vertical, product);
+				} catch (Exception e) {
+					logger.error("Error completing product {}", product.getId(), e);
+				}
+			});
+			return;
+		}
+
+		java.util.concurrent.Semaphore semaphore = new java.util.concurrent.Semaphore(concurrency);
+		try (var executor = java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor()) {
+			for (Product product : products) {
+				executor.submit(() -> {
+					try {
+						semaphore.acquire();
+						try {
+							resourceCompletionService.process(vertical, product);
+							icecatCompletionService.process(vertical, product);
+							eprelCompletionService.process(vertical, product);
+							wikidataCompletionService.process(vertical, product);
+							amazonCompletionService.process(vertical, product);
+						} finally {
+							semaphore.release();
+						}
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+						logger.error("Product completion interrupted for product {}", product.getId(), e);
+					} catch (Exception e) {
+						logger.error("Error completing product {}", product.getId(), e);
+					}
+				});
+			}
+		}
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -123,7 +123,7 @@ embedding:
 review:
   generation:
     min-markdown-chars: ${REVIEW_GENERATION_MIN_MARKDOWN_CHARS:500}
-    max-search: ${REVIEW_GENERATION_MAX_SEARCH:7}
+    serp-budget: ${REVIEW_GENERATION_SERP_BUDGET:5}
     min-global-tokens: ${REVIEW_GENERATION_MIN_GLOBAL_TOKENS:6000}
     min-url-count: ${REVIEW_GENERATION_MIN_URL_COUNT:3}
     preferred-domains:

@@ -124,8 +124,7 @@ class ReviewGenerationServiceTest {
         holder.setCreatedMs(Instant.now().minus(1, ChronoUnit.DAYS).toEpochMilli());
 
         // Ensure the review is valid
-        AiReview review = new AiReview();
-        review.setDescription("This is a sufficiently long description that should pass the validation check of 20 characters.");
+        AiReview review = validReview();
         review.setAttributes(java.util.List.of(new AiReview.AiAttribute("attr1", "val1", 1)));
         holder.setReview(review);
 
@@ -145,7 +144,7 @@ class ReviewGenerationServiceTest {
         holder.setEnoughData(true);
         holder.setCreatedMs(Instant.now().minus(1, ChronoUnit.DAYS).toEpochMilli());
 
-        AiReview review = new AiReview();
+        AiReview review = validReview();
         review.setDescription("Too short"); // < 20 chars
         review.setAttributes(java.util.List.of(new AiReview.AiAttribute("attr1", "val1", 1)));
         holder.setReview(review);
@@ -166,8 +165,7 @@ class ReviewGenerationServiceTest {
         holder.setEnoughData(true);
         holder.setCreatedMs(Instant.now().minus(1, ChronoUnit.DAYS).toEpochMilli());
 
-        AiReview review = new AiReview();
-        review.setDescription("This is a sufficiently long description that should pass the validation check.");
+        AiReview review = validReview();
         review.setAttributes(java.util.Collections.emptyList()); // Empty attributes
         holder.setReview(review);
 
@@ -179,7 +177,15 @@ class ReviewGenerationServiceTest {
         assertThat(result).isFalse();
     }
 
-
+    private AiReview validReview() {
+        AiReview review = new AiReview();
+        review.setDescription("This is a sufficiently long description that should pass the validation check of 20 characters.");
+        review.setShortDescription("Short description");
+        review.setTechnicalOneline("Technical oneline");
+        review.setEcologicalOneline("Ecological oneline");
+        review.setCommunityOneline("Community oneline");
+        return review;
+    }
 
     // Helper to invoke private method
     private boolean invokeShouldGenerateReview(Product product) {

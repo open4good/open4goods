@@ -79,25 +79,39 @@ public class EmbeddingTranslator implements Translator<Image, float[]>
         int width = input.getWidth();
         int height = input.getHeight();
 
-        Image working = input;
-
-        if (width != imageSize || height != imageSize)
+        if (width == imageSize && height == imageSize)
         {
-            float scale = (float) imageSize / Math.min(width, height);
-            int newWidth = Math.max(1, Math.round(width * scale));
-            int newHeight = Math.max(1, Math.round(height * scale));
-            working = input.resize(newWidth, newHeight, true);
+            return input;
         }
 
-        int cropX = Math.max(0, (working.getWidth() - imageSize) / 2);
-        int cropY = Math.max(0, (working.getHeight() - imageSize) / 2);
+        BufferedImage buffered = toBufferedImage(input);
 
-        if (working.getWidth() != imageSize || working.getHeight() != imageSize || cropX != 0 || cropY != 0)
+        float scale = (float) imageSize / Math.min(width, height);
+        int newWidth = Math.max(1, Math.round(width * scale));
+        int newHeight = Math.max(1, Math.round(height * scale));
+
+        BufferedImage scaled = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2d = scaled.createGraphics();
+        try
         {
-            working = working.getSubImage(cropX, cropY, imageSize, imageSize);
+            g2d.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION, java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g2d.drawImage(buffered, 0, 0, newWidth, newHeight, null);
+        }
+        finally
+        {
+            g2d.dispose();
         }
 
-        return working;
+        int cropX = Math.max(0, (newWidth - imageSize) / 2);
+        int cropY = Math.max(0, (newHeight - imageSize) / 2);
+
+        BufferedImage cropped = scaled;
+        if (newWidth != imageSize || newHeight != imageSize || cropX != 0 || cropY != 0)
+        {
+            cropped = scaled.getSubimage(cropX, cropY, imageSize, imageSize);
+        }
+
+        return ai.djl.modality.cv.ImageFactory.getInstance().fromImage(cropped);
     }
 
     private BufferedImage toBufferedImage(Image image)
@@ -133,20 +147,19 @@ public class EmbeddingTranslator implements Translator<Image, float[]>
         int channelArea = width * height;
         float[] data = new float[3 * channelArea];
 
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                int rgb = image.getRGB(x, y);
-                float r = ((rgb >> 16) & 0xFF) / 255f;
-                float g = ((rgb >> 8) & 0xFF) / 255f;
-                float b = (rgb & 0xFF) / 255f;
+        int[] rgbArray = new int[channelArea];
+        image.getRGB(0, 0, width, height, rgbArray, 0, width);
 
-                int offset = y * width + x;
-                data[offset] = normalize(r, 0);
-                data[channelArea + offset] = normalize(g, 1);
-                data[2 * channelArea + offset] = normalize(b, 2);
-            }
+        for (int i = 0; i < channelArea; i++)
+        {
+            int rgb = rgbArray[i];
+            float r = ((rgb >> 16) & 0xFF) / 255f;
+            float g = ((rgb >> 8) & 0xFF) / 255f;
+            float b = (rgb & 0xFF) / 255f;
+
+            data[i] = normalize(r, 0);
+            data[channelArea + i] = normalize(g, 1);
+            data[2 * channelArea + i] = normalize(b, 2);
         }
 
         return data;

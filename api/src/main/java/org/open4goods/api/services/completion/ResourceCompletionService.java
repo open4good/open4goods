@@ -261,11 +261,29 @@ public class ResourceCompletionService extends AbstractCompletionService
         {
             if (IMAGE_MIME_TYPES.contains(resource.getMimeType()))
             {
-                processImage(resource, target);
+                if (target.length() <= config.getMaxImageSizeToProcessBytes())
+                {
+                    processImage(resource, target);
+                }
+                else
+                {
+                    logger.warn("Skipping image processing due to file size ({} bytes): {}", target.length(), resource.getUrl());
+                    resource.setStatus(ResourceStatus.SIZE_LIMIT_EXCEEDED);
+                    resource.setEvicted(true);
+                }
             }
             else if ("application/pdf".equals(resource.getMimeType()))
             {
-                processPdf(resource, target);
+                if (target.length() <= config.getMaxPdfSizeToProcessBytes())
+                {
+                    processPdf(resource, target);
+                }
+                else
+                {
+                    logger.warn("Skipping PDF processing due to file size ({} bytes): {}", target.length(), resource.getUrl());
+                    resource.setStatus(ResourceStatus.SIZE_LIMIT_EXCEEDED);
+                    resource.setEvicted(true);
+                }
             }
             else if (VIDEO_MIME_TYPES.contains(resource.getMimeType()))
             {

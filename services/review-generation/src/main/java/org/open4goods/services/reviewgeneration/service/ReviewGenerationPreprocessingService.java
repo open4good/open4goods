@@ -118,6 +118,30 @@ public class ReviewGenerationPreprocessingService {
 		FAILED
 	}
 
+	/** Shared SERP query budget across all search phases for one product. */
+	private static final class SerpBudget {
+		private int remaining;
+
+		SerpBudget(int budget) {
+			this.remaining = budget;
+		}
+
+		/** Tries to consume one slot. Returns true if a query may proceed. */
+		boolean tryConsume() {
+			if (remaining <= 0) return false;
+			remaining--;
+			return true;
+		}
+
+		int remaining() {
+			return remaining;
+		}
+
+		boolean hasRemaining() {
+			return remaining > 0;
+		}
+	}
+
 	private enum SourceClass {
 		OFFICIAL_PRODUCT,
 		OFFICIAL_SUPPORT,
@@ -148,8 +172,8 @@ public class ReviewGenerationPreprocessingService {
 				0L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(properties.getMaxQueueSize() * 10),
 				new ThreadPoolExecutor.AbortPolicy());
 		logger.info(
-				"Review generation retrieval configured: maxSearch={}, resultsPerQuery={}, preferredDomains={}, preferredDomainsByVertical={}, lr={}, cr={}, gl={}, hl={}, safe={}",
-				properties.getMaxSearch(), properties.getSearchResultsPerQuery(), properties.getPreferredDomains(),
+				"Review generation retrieval configured: serpBudget={}, resultsPerQuery={}, preferredDomains={}, preferredDomainsByVertical={}, lr={}, cr={}, gl={}, hl={}, safe={}",
+				properties.getSerpBudget(), properties.getSearchResultsPerQuery(), properties.getPreferredDomains(),
 				properties.getPreferredDomainsByVertical().keySet(),
 				properties.getSearchLanguageRestrict(), properties.getSearchCountryRestrict(),
 				properties.getSearchGeoLocation(), properties.getSearchHostLanguage(), properties.getSearchSafe());
@@ -239,68 +263,27 @@ public class ReviewGenerationPreprocessingService {
 				product.getId(), brand, primaryModel, alternateModels == null ? 0 : alternateModels.size(),
 				preferredDomains, queries.size());
 
+		SerpBudget budget = new SerpBudget(properties.getSerpBudget());
 		status.addMessage("Searching the web...");
-		int searchesMade = 0;
 		List<String> searchedQueries = new ArrayList<>();
-		List<GoogleSearchResult> allResults = new ArrayList<>();
-		int maxSearch = properties.getMaxSearch();
-		for (String query : queries) {
-			if (searchesMade >= maxSearch) {
-				break;
-			}
-
-			logger.info("SERP query {}/{} for UPC {}: {}", searchesMade + 1, maxSearch, product.getId(), query);
-			status.addMessage("Executing search query: " + query);
-			searchedQueries.add(query);
-			GoogleSearchRequest searchRequest = new GoogleSearchRequest(query, properties.getSearchResultsPerQuery(),
-					properties.getSearchLanguageRestrict(), properties.getSearchCountryRestrict(),
-					properties.getSearchSafe(), null, properties.getSearchGeoLocation(),
-					properties.getSearchHostLanguage());
-			GoogleSearchResponse searchResponse = googleSearchService.search(searchRequest);
-			searchesMade++;
-			if (searchResponse != null && searchResponse.results() != null) {
-				logger.info("SERP query returned {} results for UPC {}: {}", searchResponse.results().size(),
-						product.getId(), query);
-				allResults.addAll(searchResponse.results());
-			} else {
-				logger.warn("SERP query returned no response for UPC {}: {}", product.getId(), query);
-			}
-		}
-		logger.info("SERP aggregation for UPC {}: searchesMade={}, rawResults={}", product.getId(), searchesMade,
-				allResults.size());
+		List<GoogleSearchResult> allResults = executeSerpQueries("primary", queries, budget, product, searchedQueries,
+				status, r -> hasSufficientSerpCandidates(product, r, preferredDomains));
+		logger.info("SERP primary aggregation for UPC {}: queriesMade={}, rawResults={}, budgetRemaining={}",
+				product.getId(), searchedQueries.size(), allResults.size(), budget.remaining());
 
 		// GTIN fallback: when the primary brand+model queries returned no SERP results,
 		// try GTIN-based queries (pure GTIN, brand+GTIN, cleaned model) as a second pass.
-		if (allResults.isEmpty() && searchesMade < maxSearch) {
+		if (allResults.isEmpty() && budget.hasRemaining()) {
 			List<String> gtinFallbackQueries = buildGtinFallbackQueries(product, brand);
 			if (!gtinFallbackQueries.isEmpty()) {
 				status.addMessage("Primary SERP yielded no results — trying GTIN fallback queries...");
 				logger.info("GTIN fallback activated for UPC {} (0 primary results, {} fallback queries planned)",
 						product.getId(), gtinFallbackQueries.size());
-				for (String query : gtinFallbackQueries) {
-					if (searchesMade >= maxSearch) {
-						break;
-					}
-					logger.info("GTIN fallback query {}/{} for UPC {}: {}", searchesMade + 1, maxSearch,
-							product.getId(), query);
-					status.addMessage("GTIN fallback query: " + query);
-					searchedQueries.add(query);
-					GoogleSearchRequest searchRequest = new GoogleSearchRequest(query,
-							properties.getSearchResultsPerQuery(), properties.getSearchLanguageRestrict(),
-							properties.getSearchCountryRestrict(), properties.getSearchSafe(), null,
-							properties.getSearchGeoLocation(), properties.getSearchHostLanguage());
-					GoogleSearchResponse searchResponse = googleSearchService.search(searchRequest);
-					searchesMade++;
-					if (searchResponse != null && searchResponse.results() != null) {
-						logger.info("GTIN fallback query returned {} results for UPC {}: {}",
-								searchResponse.results().size(), product.getId(), query);
-						allResults.addAll(searchResponse.results());
-					} else {
-						logger.warn("GTIN fallback query returned no response for UPC {}: {}", product.getId(), query);
-					}
-				}
-				logger.info("SERP after GTIN fallback for UPC {}: searchesMade={}, rawResults={}",
-						product.getId(), searchesMade, allResults.size());
+				List<GoogleSearchResult> gtinResults = executeSerpQueries("gtin-fallback", gtinFallbackQueries,
+						budget, product, searchedQueries, status, r -> !r.isEmpty());
+				allResults.addAll(gtinResults);
+				logger.info("SERP after GTIN fallback for UPC {}: queriesMade={}, rawResults={}",
+						product.getId(), searchedQueries.size(), allResults.size());
 			}
 		}
 
@@ -348,16 +331,18 @@ public class ReviewGenerationPreprocessingService {
 		accumulatedTokens = collectFetchedSources(product, sortedResults, fetchFutures, finalSourcesMap, finalTokensMap,
 				finalSourceClasses, rejectedUrls, accumulatedTokens, brand, primaryModel, alternateModels, verticalConfig,
 				exactEvidenceModels, status);
-		if (shouldRunLowQualityFallback(verticalConfig, accumulatedTokens, finalSourcesMap, finalSourceClasses)) {
+		if (shouldRunLowQualityFallback(verticalConfig, accumulatedTokens, finalSourcesMap, finalSourceClasses, budget)) {
 			accumulatedTokens = runLowQualityFallback(product, brand, primaryModel, alternateModels, preferredDomains,
 					searchedQueries, sortedResults, fetchFutures, finalSourcesMap, finalTokensMap, finalSourceClasses,
-					rejectedUrls, accumulatedTokens, customHeaders, exactEvidenceModels, status);
+					rejectedUrls, accumulatedTokens, customHeaders, exactEvidenceModels, status, verticalConfig, budget);
 		}
 		if (isBelowCompleteThreshold(verticalConfig, accumulatedTokens, finalSourcesMap, finalSourceClasses)
-				&& hasOfficialFetchEvidence(product, finalSourcesMap)) {
+				&& hasOfficialFetchEvidence(product, finalSourcesMap)
+				&& budget.hasRemaining()) {
 			accumulatedTokens = runPartialRetry(product, brand, primaryModel, alternateModels, preferredDomains,
 					searchedQueries, sortedResults, fetchFutures, finalSourcesMap, finalTokensMap, rejectedUrls,
-					finalSourceClasses, accumulatedTokens, customHeaders, exactEvidenceModels, status);
+					finalSourceClasses, accumulatedTokens, customHeaders, exactEvidenceModels, status, verticalConfig,
+					budget);
 		}
 		logger.info("Aggregated {} tokens from {} sources.", accumulatedTokens, finalSourcesMap.size());
 
@@ -984,25 +969,67 @@ public class ReviewGenerationPreprocessingService {
 					} catch (Exception e) {
 						return r.link();
 					}
-				})).sorted((r1, r2) -> {
-					boolean r1Preferred = domains.stream().anyMatch(domain -> r1.link().contains(domain));
-					boolean r2Preferred = domains.stream().anyMatch(domain -> r2.link().contains(domain));
-					boolean r1Official = isOfficialUrl(product, r1);
-					boolean r2Official = isOfficialUrl(product, r2);
-					if (r1Official && !r2Official) {
-						return -1;
-					}
-					if (!r1Official && r2Official) {
-						return 1;
-					}
-					if (r1Preferred && !r2Preferred) {
-						return -1;
-					}
-					if (!r1Preferred && r2Preferred) {
-						return 1;
-					}
-					return 0;
-				}).toList();
+				}))
+				.sorted(Comparator.comparingInt((GoogleSearchResult r) -> -serpRankScore(product, r, domains)))
+				.toList();
+	}
+
+	/**
+	 * Tiered ranking score for SERP result ordering (stable sort preserves Google order within tier).
+	 * <ul>
+	 *   <li>300 — official manufacturer page</li>
+	 *   <li>200 — preferred-domain (FR review sites, rtings, etc.)</li>
+	 *   <li>100 — likely French result (.fr TLD, /fr/ URL segment, or French title tokens)</li>
+	 *   <li>  0 — other (EN complement, fills remaining maxUrlsPerProduct slots)</li>
+	 * </ul>
+	 */
+	private int serpRankScore(Product product, GoogleSearchResult result, List<String> preferredDomains) {
+		if (isOfficialUrl(product, result)) {
+			return 300;
+		}
+		if (preferredDomains.stream().anyMatch(domain -> result.link().contains(domain))) {
+			return 200;
+		}
+		if (isLikelyFrenchResult(result)) {
+			return 100;
+		}
+		return 0;
+	}
+
+	/**
+	 * Heuristic check for French-language results using TLD, URL path segments, and
+	 * French title tokens. Intentionally lightweight — not a language detector.
+	 */
+	private boolean isLikelyFrenchResult(GoogleSearchResult result) {
+		if (result == null) {
+			return false;
+		}
+		String link = result.link() == null ? "" : result.link().toLowerCase(Locale.ROOT);
+		String title = result.title() == null ? "" : result.title().toLowerCase(Locale.ROOT);
+		try {
+			String host = URI.create(result.link()).toURL().getHost().toLowerCase(Locale.ROOT);
+			if (host.endsWith(".fr")) {
+				return true;
+			}
+		} catch (Exception ignored) {
+			// fall through
+		}
+		if (link.contains("/fr/") || link.contains("/fr-fr/")) {
+			return true;
+		}
+		String combined = title + " " + link;
+		for (String token : new String[]{ " un ", " une ", " des ", " pour ", " avec ", "avis", "meilleur" }) {
+			if (combined.contains(token)) {
+				return true;
+			}
+		}
+		// Accented character presence is a strong French signal
+		for (char c : title.toCharArray()) {
+			if ("àâäéèêëîïôùûüç".indexOf(c) >= 0) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private SourceClass classifySource(Product product, GoogleSearchResult result, String content) {
@@ -1462,8 +1489,8 @@ public class ReviewGenerationPreprocessingService {
 	}
 
 	private boolean shouldRunLowQualityFallback(VerticalConfig verticalConfig, int accumulatedTokens,
-			Map<String, String> finalSourcesMap, Map<String, SourceClass> finalSourceClasses) {
-		return properties.getLowQualityFallbackMaxSearch() > 0
+			Map<String, String> finalSourcesMap, Map<String, SourceClass> finalSourceClasses, SerpBudget budget) {
+		return budget.hasRemaining()
 				&& classifyFetchResult(verticalConfig, accumulatedTokens, finalSourcesMap,
 						finalSourceClasses) == FetchResultQuality.FAILED;
 	}
@@ -1473,33 +1500,18 @@ public class ReviewGenerationPreprocessingService {
 			Map<String, CompletableFuture<FetchOutcome>> fetchFutures, Map<String, String> finalSourcesMap,
 			Map<String, Integer> finalTokensMap, Map<String, SourceClass> finalSourceClasses,
 			Map<String, String> rejectedUrls, int accumulatedTokens, Map<String, String> customHeaders,
-			Set<String> exactEvidenceModels, ReviewGenerationStatus status)
+			Set<String> exactEvidenceModels, ReviewGenerationStatus status,
+			VerticalConfig verticalConfig, SerpBudget budget)
 			throws IOException, GoogleSearchException, InterruptedException, ExecutionException {
-		int fallbackSearches = Math.max(0, properties.getLowQualityFallbackMaxSearch());
-		if (fallbackSearches == 0) {
-			return accumulatedTokens;
-		}
 		List<String> fallbackQueries = buildGtinFallbackQueries(product, brand).stream()
 				.filter(query -> !searchedQueries.contains(query))
-				.limit(fallbackSearches)
 				.toList();
 		if (fallbackQueries.isEmpty()) {
 			return accumulatedTokens;
 		}
 		status.addMessage("Accepted sources are low quality, searching GTIN/model fallback sources...");
-		List<GoogleSearchResult> fallbackResults = new ArrayList<>();
-		for (String query : fallbackQueries) {
-			logger.info("Low-quality fallback query for UPC {}: {}", product.getId(), query);
-			searchedQueries.add(query);
-			GoogleSearchRequest searchRequest = new GoogleSearchRequest(query, properties.getSearchResultsPerQuery(),
-					properties.getSearchLanguageRestrict(), properties.getSearchCountryRestrict(),
-					properties.getSearchSafe(), null, properties.getSearchGeoLocation(),
-					properties.getSearchHostLanguage());
-			GoogleSearchResponse searchResponse = googleSearchService.search(searchRequest);
-			if (searchResponse != null && searchResponse.results() != null) {
-				fallbackResults.addAll(searchResponse.results());
-			}
-		}
+		List<GoogleSearchResult> fallbackResults = executeSerpQueries("low-quality-fallback", fallbackQueries, budget,
+				product, searchedQueries, status, null);
 		if (fallbackResults.isEmpty()) {
 			return accumulatedTokens;
 		}
@@ -1517,8 +1529,8 @@ public class ReviewGenerationPreprocessingService {
 				customHeaders);
 		fetchFutures.putAll(fallbackFutures);
 		return collectFetchedSources(product, sortedFallbackResults, fetchFutures, finalSourcesMap, finalTokensMap,
-				finalSourceClasses, rejectedUrls, accumulatedTokens, brand, primaryModel, alternateModels, null,
-				exactEvidenceModels, status);
+				finalSourceClasses, rejectedUrls, accumulatedTokens, brand, primaryModel, alternateModels,
+				verticalConfig, exactEvidenceModels, status);
 	}
 
 	private FetchQualityThreshold fetchThreshold(VerticalConfig verticalConfig) {
@@ -1575,33 +1587,18 @@ public class ReviewGenerationPreprocessingService {
 			Map<String, CompletableFuture<FetchOutcome>> fetchFutures, Map<String, String> finalSourcesMap,
 			Map<String, Integer> finalTokensMap, Map<String, String> rejectedUrls,
 			Map<String, SourceClass> finalSourceClasses, int accumulatedTokens, Map<String, String> customHeaders,
-			Set<String> exactEvidenceModels, ReviewGenerationStatus status)
+			Set<String> exactEvidenceModels, ReviewGenerationStatus status,
+			VerticalConfig verticalConfig, SerpBudget budget)
 			throws IOException, GoogleSearchException, InterruptedException, ExecutionException {
-		int retryMaxSearch = Math.max(0, properties.getPartialRetryMaxSearch());
-		if (retryMaxSearch == 0) {
-			return accumulatedTokens;
-		}
 		List<String> retryQueries = buildPartialRetryQueries(product, brand, primaryModel).stream()
 				.filter(query -> !searchedQueries.contains(query))
-				.limit(retryMaxSearch)
 				.toList();
 		if (retryQueries.isEmpty()) {
 			return accumulatedTokens;
 		}
 		status.addMessage("Official data found, searching targeted review and guide sources...");
-		List<GoogleSearchResult> retryResults = new ArrayList<>();
-		for (String query : retryQueries) {
-			logger.info("Partial source retry query for UPC {}: {}", product.getId(), query);
-			searchedQueries.add(query);
-			GoogleSearchRequest searchRequest = new GoogleSearchRequest(query, properties.getSearchResultsPerQuery(),
-					properties.getSearchLanguageRestrict(), properties.getSearchCountryRestrict(),
-					properties.getSearchSafe(), null, properties.getSearchGeoLocation(),
-					properties.getSearchHostLanguage());
-			GoogleSearchResponse searchResponse = googleSearchService.search(searchRequest);
-			if (searchResponse != null && searchResponse.results() != null) {
-				retryResults.addAll(searchResponse.results());
-			}
-		}
+		List<GoogleSearchResult> retryResults = executeSerpQueries("partial-retry", retryQueries, budget, product,
+				searchedQueries, status, null);
 		if (retryResults.isEmpty()) {
 			return accumulatedTokens;
 		}
@@ -1617,8 +1614,70 @@ public class ReviewGenerationPreprocessingService {
 				customHeaders);
 		fetchFutures.putAll(retryFutures);
 		return collectFetchedSources(product, sortedRetryResults, fetchFutures, finalSourcesMap, finalTokensMap,
-				finalSourceClasses, rejectedUrls, accumulatedTokens, brand, primaryModel, alternateModels, null,
-				exactEvidenceModels, status);
+				finalSourceClasses, rejectedUrls, accumulatedTokens, brand, primaryModel, alternateModels,
+				verticalConfig, exactEvidenceModels, status);
+	}
+
+	/** Builds a {@link GoogleSearchRequest} using the configured language/country/geo/safe settings. */
+	private GoogleSearchRequest buildSearchRequest(String query) {
+		return new GoogleSearchRequest(query, properties.getSearchResultsPerQuery(),
+				properties.getSearchLanguageRestrict(), properties.getSearchCountryRestrict(),
+				properties.getSearchSafe(), null, properties.getSearchGeoLocation(),
+				properties.getSearchHostLanguage());
+	}
+
+	/**
+	 * Executes a list of search queries against the shared budget, returning all
+	 * accumulated results. Skips already-searched queries. If {@code earlyExit}
+	 * returns true after any query, the loop stops immediately.
+	 */
+	private List<GoogleSearchResult> executeSerpQueries(String phase, List<String> queries,
+			SerpBudget budget, Product product, List<String> searchedQueries,
+			ReviewGenerationStatus status, Predicate<List<GoogleSearchResult>> earlyExit)
+			throws GoogleSearchException, IOException, InterruptedException {
+		List<GoogleSearchResult> results = new ArrayList<>();
+		for (String query : queries) {
+			if (!budget.tryConsume()) {
+				logger.debug("SERP [{}] budget exhausted for UPC {} — stopping at {} queries",
+						phase, product.getId(), searchedQueries.size());
+				break;
+			}
+			if (searchedQueries.contains(query)) {
+				continue;
+			}
+			logger.info("SERP [{}] query for UPC {} (budget remaining: {}): {}",
+					phase, product.getId(), budget.remaining(), query);
+			status.addMessage("[" + phase + "] " + query);
+			searchedQueries.add(query);
+			GoogleSearchResponse response = googleSearchService.search(buildSearchRequest(query));
+			if (response != null && response.results() != null) {
+				logger.info("SERP [{}] returned {} results for UPC {}", phase, response.results().size(), product.getId());
+				results.addAll(response.results());
+			} else {
+				logger.warn("SERP [{}] returned no response for UPC {}: {}", phase, product.getId(), query);
+			}
+			if (earlyExit != null && earlyExit.test(results)) {
+				logger.info("SERP [{}] early exit for UPC {}: sufficient candidates after {} queries",
+						phase, product.getId(), searchedQueries.size());
+				break;
+			}
+		}
+		return results;
+	}
+
+	/**
+	 * Returns true when the accumulated results are already sufficient to cover
+	 * {@code maxUrlsPerProduct} slots with at least one official or preferred-domain
+	 * anchor — in which case the primary loop can exit early and preserve budget for
+	 * fallback phases.
+	 */
+	private boolean hasSufficientSerpCandidates(Product product, List<GoogleSearchResult> results,
+			List<String> preferredDomains) {
+		if (results == null || results.size() < properties.getMaxUrlsPerProduct()) {
+			return false;
+		}
+		return results.stream().anyMatch(r -> isOfficialUrl(product, r)
+				|| preferredDomains.stream().anyMatch(domain -> r.link().contains(domain)));
 	}
 
 	private List<String> buildPartialRetryQueries(Product product, String brand, String primaryModel) {
@@ -1656,38 +1715,58 @@ public class ReviewGenerationPreprocessingService {
 			}
 			return queries.stream().distinct().toList();
 		}
-		queries.add(withVerticalSearchTerms(officialDiscoveryQuery(brand, searchModels.getFirst()), verticalTerms));
-		queries.add(withVerticalSearchTerms(officialSupportQuery(brand, searchModels.getFirst()), verticalTerms));
-		for (String officialDomain : configuredOfficialDomains(brand)) {
-			queries.add(withVerticalSearchTerms("site:" + officialDomain + " " + brand + " "
-					+ quoted(searchModels.getFirst()), verticalTerms));
-			queries.add(withVerticalSearchTerms("site:" + officialDomain + " " + brand + " "
-					+ quoted(searchModels.getFirst())
-					+ " (manual OR notice OR datasheet OR pdf OR \"fiche produit\")", verticalTerms));
+
+		// Priority 1: official site: queries when brand domain is configured, else official-discovery
+		List<String> officialDomains = configuredOfficialDomains(brand);
+		if (!officialDomains.isEmpty()) {
+			for (String officialDomain : officialDomains) {
+				queries.add(withVerticalSearchTerms("site:" + officialDomain + " " + brand + " "
+						+ quoted(searchModels.getFirst()), verticalTerms));
+			}
+		} else {
+			queries.add(withVerticalSearchTerms(officialDiscoveryQuery(brand, searchModels.getFirst()), verticalTerms));
 		}
+
+		// Priority 2: preferred-domains fan-out expression
 		String preferredDomainExpression = domainExpression(preferredDomains);
 		if (!preferredDomainExpression.isBlank()) {
 			queries.add(withVerticalSearchTerms(preferredDomainExpression + " " + modelExpression, verticalTerms));
+		}
+
+		// Priority 3: review-intent query
+		queries.add(withVerticalSearchTerms(reviewIntentQuery(brand, searchModels.getFirst()), verticalTerms));
+
+		// Priority 4: official-support query
+		queries.add(withVerticalSearchTerms(officialSupportQuery(brand, searchModels.getFirst()), verticalTerms));
+
+		// Priority 5: broad brand + model
+		queries.add(withVerticalSearchTerms(brand + " " + quoted(searchModels.getFirst()), verticalTerms));
+
+		// Priority 6: remaining variants (budget enforces the cut)
+		if (!officialDomains.isEmpty()) {
+			for (String officialDomain : officialDomains) {
+				queries.add(withVerticalSearchTerms("site:" + officialDomain + " " + brand + " "
+						+ quoted(searchModels.getFirst())
+						+ " (manual OR notice OR datasheet OR pdf OR \"fiche produit\")", verticalTerms));
+			}
 		}
 		List<String> userIntentModels = userIntentModels(product, primaryModel, alternateModels).stream()
 				.limit(4)
 				.toList();
 		for (String model : userIntentModels) {
-			queries.add(withVerticalSearchTerms(reviewIntentQuery(brand, model), verticalTerms));
 			queries.add(withVerticalSearchTerms(supportIntentQuery(brand, model), verticalTerms));
 		}
 		List<String> injectSites = verticalConfig == null ? List.of() : verticalConfig.getInjectSitesResults();
 		if (injectSites != null && !injectSites.isEmpty()) {
 			for (String site : injectSites) {
 				if (site != null && !site.isBlank()) {
-					queries.add(withVerticalSearchTerms("site:" + site.trim() + " "
-							+ formatQuery(brand, orderedModels.getFirst()), verticalTerms));
+					queries.add(withVerticalSearchTerms("site:" + site.trim() + " " + brand + " "
+							+ quoted(orderedModels.getFirst()), verticalTerms));
 				}
 			}
 		}
-
 		for (String model : searchModels) {
-			queries.add(withVerticalSearchTerms(formatQuery(brand, model), verticalTerms));
+			queries.add(withVerticalSearchTerms(brand + " " + quoted(model), verticalTerms));
 		}
 		return queries.stream().distinct().toList();
 	}
@@ -2312,10 +2391,6 @@ public class ReviewGenerationPreprocessingService {
 		return sanitized;
 	}
 
-	private String formatQuery(String brand, String model) {
-		return String.format(properties.getQueryTemplate(), brand, model);
-	}
-
 	private String quoted(String value) {
 		return "\"" + value.replace("\"", "") + "\"";
 	}
@@ -2471,11 +2546,24 @@ public class ReviewGenerationPreprocessingService {
 		if (markdown == null || markdown.isBlank()) {
 			return "unknown";
 		}
-		String lower = markdown.toLowerCase();
-		if (lower.contains(" le ") || lower.contains(" la ") || lower.contains(" les ")) {
+		String lower = markdown.toLowerCase(Locale.ROOT);
+		int frScore = 0;
+		int enScore = 0;
+		for (String token : new String[]{ " le ", " la ", " les ", " un ", " une ", " des ",
+				" pour ", " avec ", "avis", "meilleur", " est ", " sont " }) {
+			if (lower.contains(token)) {
+				frScore++;
+			}
+		}
+		for (String token : new String[]{ " the ", " and ", " of ", " in ", " is ", " are " }) {
+			if (lower.contains(token)) {
+				enScore++;
+			}
+		}
+		if (frScore > enScore) {
 			return "fr";
 		}
-		if (lower.contains(" the ") || lower.contains(" and ")) {
+		if (enScore > frScore) {
 			return "en";
 		}
 		return "unknown";

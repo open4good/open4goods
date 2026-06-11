@@ -62,7 +62,7 @@ class ReviewGenerationPreprocessingServiceTest {
     @BeforeEach
     void setUp() {
         properties = new ReviewGenerationConfig();
-        properties.setMaxSearch(1);
+        properties.setSerpBudget(1);
         properties.setPreferredDomains(List.of("lesnumeriques.com", "fnac.com"));
         properties.setSearchResultsPerQuery(7);
         properties.setSearchGeoLocation("fr");
@@ -73,7 +73,9 @@ class ReviewGenerationPreprocessingServiceTest {
 
     @Test
     void preparePromptVariables_SearchesOfficialDiscoveryThenSupportAndPreferredDomains() throws Exception {
-        properties.setMaxSearch(4);
+        properties.setSerpBudget(4);
+        properties.setSearchLanguageRestrict("lang_fr");
+        properties.setSearchCountryRestrict("countryFR");
         Product product = product("Sony", "XR55A80L");
         product.setAkaModels(Set.of("XR-55A80L"));
         when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse());
@@ -85,12 +87,12 @@ class ReviewGenerationPreprocessingServiceTest {
         org.mockito.Mockito.verify(googleSearchService, org.mockito.Mockito.times(4)).search(requestCaptor.capture());
         List<GoogleSearchRequest> requests = requestCaptor.getAllValues();
         GoogleSearchRequest officialRequest = requests.getFirst();
-        GoogleSearchRequest supportRequest = requests.get(1);
-        GoogleSearchRequest preferredRequest = requests.get(2);
+        GoogleSearchRequest preferredRequest = requests.get(1);
+        GoogleSearchRequest supportRequest = requests.get(3);
 
         assertThat(officialRequest.query()).isEqualTo("Sony \"XR55A80L\" (official OR officiel OR product OR produit)");
-        assertThat(supportRequest.query()).contains("support OR assistance OR manual OR notice");
         assertThat(preferredRequest.query()).startsWith("(site:lesnumeriques.com OR site:fnac.com)");
+        assertThat(supportRequest.query()).contains("support OR assistance OR manual OR notice");
         assertThat(preferredRequest.query()).contains("\"Sony XR55A80L\"");
         assertThat(preferredRequest.query()).contains("\"Sony XR-55A80L\"");
         assertThat(preferredRequest.numResults()).isEqualTo(7);
@@ -103,8 +105,7 @@ class ReviewGenerationPreprocessingServiceTest {
 
     @Test
     void preparePromptVariables_KeepsLeadingScreenSizeDigitsInTvModelCodes() throws Exception {
-        properties.setMaxSearch(1);
-        properties.setLowQualityFallbackMaxSearch(0);
+        properties.setSerpBudget(1);
         Product product = product("Thomson", "Thomson TV 40FD2S13W");
         product.setId(9120106661804L);
         product.setOfferNames(Set.of("tv led thomson 40fd2s13w 101 cm full hd blanc"));
@@ -122,7 +123,7 @@ class ReviewGenerationPreprocessingServiceTest {
 
     @Test
     void preparePromptVariables_UsesVerticalPreferredDomainsWhenConfigured() throws Exception {
-        properties.setMaxSearch(4);
+        properties.setSerpBudget(4);
         properties.setPreferredDomains(List.of("global.example"));
         properties.setPreferredDomainsByVertical(Map.of("refrigerator",
                 List.of("electromenager-compare.com", "test-achats.be")));
@@ -136,7 +137,7 @@ class ReviewGenerationPreprocessingServiceTest {
 
         ArgumentCaptor<GoogleSearchRequest> requestCaptor = ArgumentCaptor.forClass(GoogleSearchRequest.class);
         org.mockito.Mockito.verify(googleSearchService, org.mockito.Mockito.times(4)).search(requestCaptor.capture());
-        String preferredQuery = requestCaptor.getAllValues().get(2).query();
+        String preferredQuery = requestCaptor.getAllValues().get(1).query();
         assertThat(preferredQuery).startsWith("(site:electromenager-compare.com OR site:test-achats.be)");
         assertThat(preferredQuery).doesNotContain("global.example");
     }
@@ -153,8 +154,7 @@ class ReviewGenerationPreprocessingServiceTest {
 
     @Test
     void preparePromptVariables_InfersBrandAndModelFromOfferNamesWhenReferentialIdentityIsMissing() throws Exception {
-        properties.setMaxSearch(1);
-        properties.setLowQualityFallbackMaxSearch(0);
+        properties.setSerpBudget(1);
         Product product = new Product();
         product.setId(5902721194172L);
         product.setVertical("refrigerator");
@@ -175,8 +175,7 @@ class ReviewGenerationPreprocessingServiceTest {
 
     @Test
     void preparePromptVariables_ReplacesShortFalseBrandWithLongBrandFromOfferEvidence() throws Exception {
-        properties.setMaxSearch(1);
-        properties.setLowQualityFallbackMaxSearch(0);
+        properties.setSerpBudget(1);
         Product product = product("GE", "7141223797872");
         product.setId(7141223797872L);
         product.setOfferNames(Set.of(
@@ -196,8 +195,7 @@ class ReviewGenerationPreprocessingServiceTest {
 
     @Test
     void preparePromptVariables_PromotesHighOneIdentityForWeakSearchBrand() throws Exception {
-        properties.setMaxSearch(3);
-        properties.setLowQualityFallbackMaxSearch(0);
+        properties.setSerpBudget(3);
         properties.setWeakSearchBrands(List.of("SANTE & BEAUTE"));
         Product product = product("SANTE & BEAUTE", "3612408988217");
         product.setId(3612408988217L);
@@ -221,8 +219,7 @@ class ReviewGenerationPreprocessingServiceTest {
 
     @Test
     void preparePromptVariables_PromotesValbergIdentityForWeakSearchBrand() throws Exception {
-        properties.setMaxSearch(3);
-        properties.setLowQualityFallbackMaxSearch(0);
+        properties.setSerpBudget(3);
         properties.setWeakSearchBrands(List.of("SANTE & BEAUTE"));
         Product product = product("SANTE & BEAUTE", "3497674181878");
         product.setId(3497674181878L);
@@ -246,8 +243,7 @@ class ReviewGenerationPreprocessingServiceTest {
 
     @Test
     void preparePromptVariables_SearchesOfficialBrandDomainForNamedModelFromOfferTitle() throws Exception {
-        properties.setMaxSearch(4);
-        properties.setLowQualityFallbackMaxSearch(0);
+        properties.setSerpBudget(4);
         properties.setOfficialDomainsByBrand(Map.of("Klarstein", List.of("klarstein")));
         Product product = product("Klarstein", "4060656565403");
         product.setId(4060656565403L);
@@ -260,16 +256,13 @@ class ReviewGenerationPreprocessingServiceTest {
         ArgumentCaptor<GoogleSearchRequest> requestCaptor = ArgumentCaptor.forClass(GoogleSearchRequest.class);
         org.mockito.Mockito.verify(googleSearchService, org.mockito.Mockito.times(4)).search(requestCaptor.capture());
         assertThat(requestCaptor.getAllValues()).extracting(GoogleSearchRequest::query)
-                .contains(
-                        "Klarstein \"Velaire\" (official OR officiel OR product OR produit)",
-                        "site:klarstein Klarstein \"Velaire\"");
+                .contains("site:klarstein Klarstein \"Velaire\"");
         assertThat(product.model()).isEqualTo("4060656565403");
     }
 
     @Test
     void preparePromptVariables_DoesNotPromoteGenericNamedModelFromOfferTitle() throws Exception {
-        properties.setMaxSearch(1);
-        properties.setLowQualityFallbackMaxSearch(0);
+        properties.setSerpBudget(1);
         Product product = product("ASKO", "0698142927998");
         product.setId(698142927998L);
         product.setOfferNames(Set.of("ASKO Lave vaisselle enchassable a usage intensif 2 niveaux"));
@@ -331,8 +324,7 @@ class ReviewGenerationPreprocessingServiceTest {
 
     @Test
     void preparePromptVariables_RetriesPartialOfficialFetchWithTargetedQueries() throws Exception {
-        properties.setMaxSearch(1);
-        properties.setPartialRetryMaxSearch(1);
+        properties.setSerpBudget(2);
         properties.setMinMarkdownChars(20);
         properties.setSourceMinTokens(1);
         properties.setMinGlobalTokens(600);
@@ -362,7 +354,7 @@ class ReviewGenerationPreprocessingServiceTest {
         @SuppressWarnings("unchecked")
         List<String> searchedQueries = (List<String>) variables.get("SEARCHED_QUERIES");
         assertThat(searchedQueries).hasSize(2);
-        assertThat(searchedQueries.get(1)).contains("manual OR notice").contains("SRS2IKW04E");
+        assertThat(searchedQueries.get(1)).contains("SRS2IKW04E");
     }
 
     @Test
@@ -713,7 +705,7 @@ class ReviewGenerationPreprocessingServiceTest {
 
     @Test
     void preparePromptVariables_SearchesBroadOfficialCandidatesBeforeGenericQueries() throws Exception {
-        properties.setMaxSearch(4);
+        properties.setSerpBudget(4);
         properties.setPreferredDomains(List.of("darty.com"));
         Product product = product("Samsung", "SM-S921B/DS");
         when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse());
@@ -727,14 +719,14 @@ class ReviewGenerationPreprocessingServiceTest {
                 .extracting(GoogleSearchRequest::query)
                 .containsExactly(
                         "Samsung \"SM-S921B/DS\" (official OR officiel OR product OR produit)",
-                        "Samsung \"SM-S921B/DS\" (support OR assistance OR manual OR notice OR datasheet OR \"fiche produit\")",
                         "(site:darty.com) (\"Samsung SM-S921B/DS\")",
-                        "Samsung \"SM-S921B/DS\" (avis OR review OR test OR guide)");
+                        "Samsung \"SM-S921B/DS\" (avis OR review OR test OR guide)",
+                        "Samsung \"SM-S921B/DS\" (support OR assistance OR manual OR notice OR datasheet OR \"fiche produit\")");
     }
 
     @Test
     void preparePromptVariables_PrefersPreciseAkaModelOverWrongPrimaryModel() throws Exception {
-        properties.setMaxSearch(1);
+        properties.setSerpBudget(1);
         Product product = product("Samsung", "SM-F956BZAEEUB");
         product.setAkaModels(Set.of("SM-F966BZKBEUB", "Galaxy Z Fold7 256Go noir"));
         product.getExternalIds().setMpn(Set.of("SM-F966BZKBEUB"));
@@ -751,7 +743,7 @@ class ReviewGenerationPreprocessingServiceTest {
 
     @Test
     void preparePromptVariables_ClassifiesApplianceEvidenceAsPartialUsable() throws Exception {
-        properties.setMaxSearch(1);
+        properties.setSerpBudget(1);
         properties.setMinMarkdownChars(20);
         properties.setSourceMinTokens(1);
         properties.setMaxUrlsPerProduct(1);
@@ -778,8 +770,7 @@ class ReviewGenerationPreprocessingServiceTest {
 
     @Test
     void preparePromptVariables_FailsWhenOnlyMerchantAndSparePartPagesMatch() throws Exception {
-        properties.setMaxSearch(1);
-        properties.setLowQualityFallbackMaxSearch(0);
+        properties.setSerpBudget(1);
         properties.setMinMarkdownChars(20);
         properties.setSourceMinTokens(1);
         properties.setMinGlobalTokens(1);
@@ -812,8 +803,7 @@ class ReviewGenerationPreprocessingServiceTest {
 
     @Test
     void preparePromptVariables_PersistsOpaqueOfficialSerpPdfWhenSerpTitleIdentifiesProduct() throws Exception {
-        properties.setMaxSearch(1);
-        properties.setLowQualityFallbackMaxSearch(0);
+        properties.setSerpBudget(1);
         properties.setMinMarkdownChars(20);
         properties.setSourceMinTokens(1);
         properties.setMinGlobalTokens(1);
@@ -837,8 +827,7 @@ class ReviewGenerationPreprocessingServiceTest {
 
     @Test
     void preparePromptVariables_DoesNotPersistOpaquePdfFromOfficialPageWithoutProductIdentifier() throws Exception {
-        properties.setMaxSearch(1);
-        properties.setLowQualityFallbackMaxSearch(0);
+        properties.setSerpBudget(1);
         properties.setMinMarkdownChars(20);
         properties.setSourceMinTokens(1);
         properties.setMinGlobalTokens(1);
@@ -954,7 +943,7 @@ class ReviewGenerationPreprocessingServiceTest {
 
     @Test
     void preparePromptVariables_AcceptsExactComparisonProductPageAsFallbackEvidence() throws Exception {
-        properties.setMaxSearch(1);
+        properties.setSerpBudget(1);
         properties.setMinMarkdownChars(20);
         properties.setSourceMinTokens(1);
         properties.setMinGlobalTokens(1);
@@ -983,7 +972,7 @@ class ReviewGenerationPreprocessingServiceTest {
 
     @Test
     void preparePromptVariables_AcceptsManufacturerPageWhenExactModelIsOnlyInFetchedContent() throws Exception {
-        properties.setMaxSearch(1);
+        properties.setSerpBudget(1);
         properties.setMinMarkdownChars(20);
         properties.setSourceMinTokens(1);
         properties.setMinGlobalTokens(1);
@@ -1013,7 +1002,7 @@ class ReviewGenerationPreprocessingServiceTest {
 
     @Test
     void preparePromptVariables_UsesConfiguredOfficialDomainForPrivateLabelBrand() throws Exception {
-        properties.setMaxSearch(1);
+        properties.setSerpBudget(1);
         properties.setMinMarkdownChars(20);
         properties.setSourceMinTokens(1);
         properties.setMinGlobalTokens(1);
