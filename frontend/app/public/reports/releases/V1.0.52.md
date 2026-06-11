@@ -3,6 +3,7 @@
 This release covers **0 day(s)** of work, from **2026-06-10T06:50:13.000Z** to **2026-06-10T17:45:57.000Z**.
 
 ### 📦 Stats
+
 - Diff: [compare](https://github.com/open4good/open4goods/compare/v1.0.51...V1.0.52)
 - Changed files: **50**
 - Commits: **12**
@@ -10,14 +11,11 @@ This release covers **0 day(s)** of work, from **2026-06-10T06:50:13.000Z** to *
 
 ---
 
-
-
 <details>
 <summary>🙈 Other changes (1)</summary>
 
-| PR | Title | Author |
-|---:|---|---|
+|                                                           PR | Title                            | Author         |
+| -----------------------------------------------------------: | -------------------------------- | -------------- |
 | [PR 3196](https://github.com/open4good/open4goods/pull/3196) | Update nuxtjs monorepo to v4.4.8 | @renovate[bot] |
-
 
 </details>
