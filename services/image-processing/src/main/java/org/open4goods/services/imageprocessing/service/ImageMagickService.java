@@ -150,6 +150,25 @@ public class ImageMagickService {
 
 			return ii;
 		} catch (final Exception e) {
+			log.debug("SimpleImageAnalyser failed ({}), falling back to ImageMagick identify: {}", e.getMessage(), target.getAbsolutePath());
+		}
+
+		// Fallback for formats unsupported by SimpleImageAnalyser (e.g. WebP)
+		try {
+			final ProcessBuilder pb = new ProcessBuilder("identify", "-format", "%wx%h", target.getAbsolutePath() + "[0]");
+			final Process p = pb.start();
+			p.waitFor();
+			final String out = IOUtils.toString(p.getInputStream(), StandardCharsets.UTF_8).trim();
+			IOUtils.closeQuietly(p.getInputStream());
+			IOUtils.closeQuietly(p.getErrorStream());
+			if (!StringUtils.isBlank(out) && out.contains("x")) {
+				final String[] parts = out.split("x");
+				final ImageInfo ii = new ImageInfo();
+				ii.setWidth(Integer.parseInt(parts[0]));
+				ii.setHeight(Integer.parseInt(parts[1]));
+				return ii;
+			}
+		} catch (final Exception e) {
 			log.warn("Cannot read image size / height : {} > {}", target.getAbsolutePath(), e.getMessage());
 		}
 
