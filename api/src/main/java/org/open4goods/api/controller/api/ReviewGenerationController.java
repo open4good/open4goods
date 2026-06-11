@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductFetchDiagnostics;
 import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -230,6 +231,9 @@ public class ReviewGenerationController {
         VerticalConfig verticalConfig = verticalsConfigService.getConfigByIdOrDefault(product.getVertical());
         try {
             return ResponseEntity.ok(reviewGenerationService.generateReviewText(product, verticalConfig));
+        } catch (NotEnoughDataException e) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body(failureResult(product, verticalConfig, "text", e));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
                     .body(failureResult(product, verticalConfig, "text", e));
@@ -454,19 +458,25 @@ public class ReviewGenerationController {
 
     private ReviewGenerationStepResult failureResult(Product product, VerticalConfig verticalConfig, String step,
             Exception exception) {
-        int sourceCount = product.getReviewFacts() == null ? 0 : product.getReviewFacts().size();
-        int totalTokens = product.getReviewFacts() == null ? 0 : product.getReviewFacts().stream()
+        ProductFetchDiagnostics diagnostics = product.getReviewFetchDiagnostics();
+        int sourceCount = diagnostics == null ? product.getReviewFacts() == null ? 0 : product.getReviewFacts().size()
+                : diagnostics.getSourceCount();
+        int totalTokens = diagnostics == null ? product.getReviewFacts() == null ? 0 : product.getReviewFacts().stream()
                 .filter(fact -> fact != null && fact.getTokenCount() != null)
                 .mapToInt(fact -> fact.getTokenCount())
-                .sum();
-        List<String> acceptedUrls = product.getReviewFacts() == null ? List.of() : product.getReviewFacts().stream()
+                .sum() : diagnostics.getTotalTokens();
+        String resultQuality = diagnostics == null ? "FAILED" : diagnostics.getResultQuality();
+        List<String> searchedQueries = diagnostics == null ? List.of() : diagnostics.getSearchedQueries();
+        List<String> acceptedUrls = diagnostics == null ? product.getReviewFacts() == null ? List.of() : product.getReviewFacts().stream()
                 .filter(fact -> fact != null && fact.getUrl() != null && !fact.getUrl().isBlank())
                 .map(fact -> fact.getUrl())
-                .toList();
+                .toList() : diagnostics.getAcceptedUrls();
+        Map<String, String> rejectedUrls = diagnostics == null ? Map.of() : diagnostics.getRejectedUrls();
+        Map<String, String> enrichmentStatus = diagnostics == null ? Map.of() : diagnostics.getEnrichmentStatus();
         return new ReviewGenerationStepResult(product.getId(), product.gtin(),
                 verticalConfig == null ? product.getVertical() : verticalConfig.getId(), step, false,
-                "Review generation step failed: " + exception.getMessage(), sourceCount, totalTokens, "FAILED",
-                List.of(), null, null, List.of(), acceptedUrls, Map.of(), Map.of());
+                "Review generation step failed: " + exception.getMessage(), sourceCount, totalTokens, resultQuality,
+                List.of(), null, null, searchedQueries, acceptedUrls, rejectedUrls, enrichmentStatus);
     }
 
     private Map<String, String> requestHeaders(HttpServletRequest request) {

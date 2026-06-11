@@ -3268,12 +3268,22 @@ public class ReviewGenerationPreprocessingService {
 					+ ". Run the remote fetching stage first.");
 		}
 
+		ProductFetchDiagnostics diagnostics = product == null ? null : product.getReviewFetchDiagnostics();
+		if (requireFacts && diagnostics != null && "FAILED".equalsIgnoreCase(diagnostics.getResultQuality())) {
+			ReviewGenerationFailureDetails details = new ReviewGenerationFailureDetails(
+					diagnostics.getSourceCount(), diagnostics.getTotalTokens(), diagnostics.getSearchedQueries(),
+					diagnostics.getAcceptedUrls(), diagnostics.getSourceClasses(), diagnostics.getRejectedUrls());
+			throw new NotEnoughDataException("Latest review fetch failed quality thresholds for UPC "
+					+ product.getId() + ": accumulatedTokens=" + diagnostics.getTotalTokens()
+					+ ", sources=" + diagnostics.getSourceCount() + ". Re-run the remote fetching stage first.",
+					details);
+		}
+
 		promptVariables.put("sources", sources);
 		promptVariables.put("tokens", tokens);
 		promptVariables.put("TOTAL_TOKENS", totalTokens);
 		promptVariables.put("SOURCE_TOKENS", tokens);
 		promptVariables.put("ACCEPTED_URLS", new ArrayList<>(sources.keySet()));
-		ProductFetchDiagnostics diagnostics = product == null ? null : product.getReviewFetchDiagnostics();
 		promptVariables.put("SEARCHED_QUERIES", diagnostics == null ? List.of() : diagnostics.getSearchedQueries());
 		promptVariables.put("SOURCE_CLASSES", diagnostics == null ? Map.of() : diagnostics.getSourceClasses());
 		promptVariables.put("REJECTED_URLS", diagnostics == null ? Map.of() : diagnostics.getRejectedUrls());
