@@ -1201,15 +1201,21 @@ class ReviewGenerationPreprocessingServiceTest {
         ProductAttribute merchantPrice = new ProductAttribute();
         merchantPrice.setName("PRICE");
         merchantPrice.addSourceAttribute(new SourcedAttribute(new Attribute("PRICE", "499", "fr"), "merchant-offer"));
+        ProductAttribute icecatDisplayName = new ProductAttribute();
+        icecatDisplayName.setName("CLASSE D'EFFICACITE ENERGETIQUE");
+        icecatDisplayName.addSourceAttribute(new SourcedAttribute(
+                new Attribute("CLASSE D'EFFICACITE ENERGETIQUE", "D", "fr"), "icecat.biz"));
         product.getAttributes().getAll().put("ENERGY_CLASS", energyClass);
         product.getAttributes().getAll().put("PRICE", merchantPrice);
+        product.getAttributes().getAll().put("CLASSE D'EFFICACITE ENERGETIQUE", icecatDisplayName);
 
-        Map<String, Object> variables = service.buildBasePromptVariables(product, verticalConfig());
+        Map<String, Object> variables = service.buildBasePromptVariables(product, verticalConfigWithEnergyClassAttribute());
 
         assertThat((String) variables.get("STRUCTURED_TRUSTED_FACTS_JSON"))
                 .contains("\"key\":\"ENERGY_CLASS\"")
                 .contains("\"datasource\":\"EPREL\"")
-                .doesNotContain("\"key\":\"PRICE\"");
+                .doesNotContain("\"key\":\"PRICE\"")
+                .doesNotContain("CLASSE D'EFFICACITE ENERGETIQUE");
         assertThat((Map<?, ?>) variables.get("sources")).isEmpty();
         assertThat((Map<?, ?>) variables.get("tokens")).isEmpty();
     }
@@ -1246,6 +1252,16 @@ class ReviewGenerationPreprocessingServiceTest {
         parser.setDimension("LENGTH");
         parser.setDefaultUnitHint("cm");
         attributeConfig.setParser(parser);
+        AttributesConfig attributesConfig = new AttributesConfig();
+        attributesConfig.setConfigs(List.of(attributeConfig));
+        verticalConfig.setAttributesConfig(attributesConfig);
+        return verticalConfig;
+    }
+
+    private VerticalConfig verticalConfigWithEnergyClassAttribute() {
+        VerticalConfig verticalConfig = verticalConfig();
+        AttributeConfig attributeConfig = new AttributeConfig();
+        attributeConfig.setKey("ENERGY_CLASS");
         AttributesConfig attributesConfig = new AttributesConfig();
         attributesConfig.setConfigs(List.of(attributeConfig));
         verticalConfig.setAttributesConfig(attributesConfig);

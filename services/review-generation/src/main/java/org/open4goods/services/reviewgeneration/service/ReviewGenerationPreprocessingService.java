@@ -3187,7 +3187,7 @@ public class ReviewGenerationPreprocessingService {
 		// Default empty value so templates that reference EXTRACTED_ATTRIBUTES don't
 		// fail.
 		promptVariables.put("EXTRACTED_ATTRIBUTES", "[]");
-		promptVariables.put("STRUCTURED_TRUSTED_FACTS_JSON", writeJson(trustedStructuredFacts(product)));
+		promptVariables.put("STRUCTURED_TRUSTED_FACTS_JSON", writeJson(trustedStructuredFacts(product, verticalConfig)));
 
 		// Inject IMPACTSCORE_POSITION
 		String impactScorePosition = "Non classé";
@@ -3348,13 +3348,27 @@ public class ReviewGenerationPreprocessingService {
 		return sourceIndex;
 	}
 
-	private List<Map<String, Object>> trustedStructuredFacts(Product product) {
+	private List<Map<String, Object>> trustedStructuredFacts(Product product, VerticalConfig verticalConfig) {
 		if (product == null || product.getAttributes() == null || product.getAttributes().getAll() == null) {
+			return List.of();
+		}
+		Set<String> canonicalKeys = verticalConfig == null || verticalConfig.getAttributesConfig() == null
+				|| verticalConfig.getAttributesConfig().getConfigs() == null
+				? Set.of()
+				: verticalConfig.getAttributesConfig().getConfigs().stream()
+						.filter(Objects::nonNull)
+						.map(AttributeConfig::getKey)
+						.filter(key -> key != null && !key.isBlank())
+						.collect(Collectors.toSet());
+		if (canonicalKeys.isEmpty()) {
 			return List.of();
 		}
 		List<Map<String, Object>> facts = new ArrayList<>();
 		product.getAttributes().getAll().forEach((key, attribute) -> {
 			if (key == null || key.isBlank() || attribute == null || attribute.getSource() == null) {
+				return;
+			}
+			if (!canonicalKeys.contains(key)) {
 				return;
 			}
 			attribute.getSource().stream()
