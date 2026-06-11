@@ -90,7 +90,7 @@ public class ReviewGenerationPreprocessingService {
 	private static final Pattern OFFICIAL_MODEL_LINE_PATTERN = Pattern.compile(
 			"(?i)\\b(?:model|modele|reference|mpn|sku|code produit|product code)\\b\\s*[:#\\-]?\\s*([A-Za-z0-9][A-Za-z0-9._/\\- ]{2,48})");
 	private static final Pattern URL_MODEL_TOKEN_PATTERN = Pattern.compile(
-			"[A-Za-z]{1,10}\\d[A-Za-z0-9]{2,}(?:[-_/][A-Za-z0-9]{1,10}){0,3}|\\d[A-Za-z]{1,10}[A-Za-z0-9]{2,}(?:[-_/][A-Za-z0-9]{1,10}){0,3}");
+			"\\b(?:[A-Za-z]{1,10}\\d[A-Za-z0-9]{2,}(?:[-_/][A-Za-z0-9]{1,10}){0,3}|\\d+[A-Za-z]{1,10}[A-Za-z0-9]{2,}(?:[-_/][A-Za-z0-9]{1,10}){0,3})\\b");
 	private static final int OFFICIAL_MODEL_PROMOTION_THRESHOLD = 7;
 	private static final long OFFICIAL_FETCH_TIMEOUT_MS = 15000L;
 
@@ -2208,6 +2208,10 @@ public class ReviewGenerationPreprocessingService {
 		if (!normalizedPrimary.isBlank() && normalizedCandidate.contains(normalizedPrimary)
 				&& normalizedCandidate.length() > normalizedPrimary.length()) {
 			score += 10;
+		}
+		if (!normalizedPrimary.isBlank() && normalizedPrimary.endsWith(normalizedCandidate)
+				&& normalizedCandidate.length() < normalizedPrimary.length()) {
+			score -= 40;
 		}
 		if (looksLikeStorageVariant(candidate)) {
 			score -= 35;

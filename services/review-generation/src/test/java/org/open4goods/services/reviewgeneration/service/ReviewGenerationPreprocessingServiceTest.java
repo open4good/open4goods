@@ -102,6 +102,25 @@ class ReviewGenerationPreprocessingServiceTest {
     }
 
     @Test
+    void preparePromptVariables_KeepsLeadingScreenSizeDigitsInTvModelCodes() throws Exception {
+        properties.setMaxSearch(1);
+        properties.setLowQualityFallbackMaxSearch(0);
+        Product product = product("Thomson", "Thomson TV 40FD2S13W");
+        product.setId(9120106661804L);
+        product.setOfferNames(Set.of("tv led thomson 40fd2s13w 101 cm full hd blanc"));
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse());
+
+        assertThatThrownBy(() -> service.preparePromptVariables(product, verticalConfig(), new ReviewGenerationStatus()))
+                .isInstanceOf(NotEnoughDataException.class);
+
+        ArgumentCaptor<GoogleSearchRequest> requestCaptor = ArgumentCaptor.forClass(GoogleSearchRequest.class);
+        org.mockito.Mockito.verify(googleSearchService).search(requestCaptor.capture());
+        assertThat(requestCaptor.getValue().query())
+                .isEqualTo("Thomson \"40fd2s13w\" (official OR officiel OR product OR produit)")
+                .doesNotContain("\"0fd2s13w\"");
+    }
+
+    @Test
     void preparePromptVariables_UsesVerticalPreferredDomainsWhenConfigured() throws Exception {
         properties.setMaxSearch(4);
         properties.setPreferredDomains(List.of("global.example"));

@@ -36,7 +36,7 @@ public final class ProductModelCandidateHelper {
     private static final Pattern NAMED_MODEL_PATTERN = Pattern.compile(
             "(?=.*\\p{L})[\\p{Alnum}][\\p{Alnum} ./_-]{3,31}");
     private static final Pattern URL_MODEL_TOKEN_PATTERN = Pattern.compile(
-            "[A-Za-z]{1,10}\\d[A-Za-z0-9]{2,}(?:[-_/][A-Za-z0-9]{1,10}){0,3}|\\d[A-Za-z]{1,10}[A-Za-z0-9]{2,}(?:[-_/][A-Za-z0-9]{1,10}){0,3}");
+            "\\b(?:[A-Za-z]{1,10}\\d[A-Za-z0-9]{2,}(?:[-_/][A-Za-z0-9]{1,10}){0,3}|\\d+[A-Za-z]{1,10}[A-Za-z0-9]{2,}(?:[-_/][A-Za-z0-9]{1,10}){0,3})\\b");
     private static final Set<String> GENERIC_MODEL_WORDS = Set.of("refrigerateur", "fridge", "glaciere",
             "dishwasher", "lave vaisselle", "lave", "vaisselle", "seche", "linge", "washing", "machine",
             "smartphone", "telephone", "mobile", "encastrable", "portable", "compact", "mini", "unknown");
