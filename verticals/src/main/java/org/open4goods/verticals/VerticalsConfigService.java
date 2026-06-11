@@ -840,7 +840,7 @@ public class VerticalsConfigService {
 			for (String token : vc.getExcludingTokensFromCategoriesMatching()) {
 				for (String category : productCategoriessByDatasource.values()) {
 					if (category.contains(token)) {
-						logger.warn("Excluded from matching category {} because categories contains word {}",
+						logger.debug("Excluded from matching category {} because categories contains word {}",
 								vc.getId(), token, category);
 						vc = null;
 						return null;

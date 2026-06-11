@@ -20,6 +20,10 @@ public class ShippingTimeParser {
 	private static final Logger logger = GenericFileLogger.initLogger("product-shipping-time-parser", Level.INFO, "/opt/open4goods/logs/");
 	private static final Pattern NUMBER_PATTERN = Pattern.compile("\\d+");
 	private static final Pattern RANGE_PATTERN = Pattern.compile("(\\d+)\\s*(?:a|to|-)\\s*(\\d+)");
+	// Pre-compiled to avoid Pattern.compile() on every normalize() call
+	private static final Pattern P_DIACRITICS = Pattern.compile("\\p{M}");
+	private static final Pattern P_PUNCTUATION = Pattern.compile("[()_,;:/]");
+	private static final Pattern P_WHITESPACE  = Pattern.compile("\\s+");
 
 	/**
 	 * Parses a raw shipping time.
@@ -83,17 +87,15 @@ public class ShippingTimeParser {
 			}
 		}
 
-		logger.warn("Unknown ShippingTime value: raw='{}', normalized='{}'", val, tmp);
-		throw new InvalidParameterException("Unknown ShippingTime value : " + tmp);
+		logger.debug("Unknown ShippingTime value: raw='{}', normalized='{}'", val, tmp);
+		return null;
 	}
 
 	private static String normalize(String val) {
-		String normalized = Normalizer.normalize(val.trim(), Normalizer.Form.NFD)
-				.replaceAll("\\p{M}", "")
-				.toLowerCase(Locale.ROOT)
-				.replaceAll("[()_,;:/]", " ")
-				.replaceAll("\\s+", " ")
-				.trim();
-		return StringUtils.normalizeSpace(normalized);
+		String normalized = P_DIACRITICS.matcher(Normalizer.normalize(val.trim(), Normalizer.Form.NFD)).replaceAll("")
+				.toLowerCase(Locale.ROOT);
+		normalized = P_PUNCTUATION.matcher(normalized).replaceAll(" ");
+		normalized = P_WHITESPACE.matcher(normalized).replaceAll(" ").trim();
+		return normalized;
 	}
 }

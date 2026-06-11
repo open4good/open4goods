@@ -1019,10 +1019,12 @@ public class CsvIndexationWorker implements Runnable {
 	            continue;
 	        }
 	        try {
-	            dataFragment.setShippingTime(ShippingTimeParser.parse(shippingTimeStr));
-	            // Delete from source
-                removeFromSource(item, shippingTimeColumn);
-                return;
+	            Integer shippingTime = ShippingTimeParser.parse(shippingTimeStr);
+	            if (shippingTime != null) {
+	                dataFragment.setShippingTime(shippingTime);
+	                removeFromSource(item, shippingTimeColumn);
+	                return;
+	            }
 	        } catch (Exception e) {
 	            logger.info("Cannot parse shippingTime : {}", e.getMessage());
 	        }

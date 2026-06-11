@@ -1,70 +1,63 @@
 package org.open4goods.model.helper;
 
-import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 
 /**
- * Big up to https://github.com/jakedouglas/fnv-java !! ;)
+ * FNV-1a hash implementation using native long arithmetic.
+ * The BigInteger-based variant was previously used and caused ~14% of all CPU
+ * samples due to allocating ~200 BigInteger objects per hash call.
  *
  * @author goulven
- *
  */
 public class FNV {
-	private static final BigInteger INIT32 = new BigInteger("811c9dc5", 16);
-	private static final BigInteger INIT64 = new BigInteger("cbf29ce484222325", 16);
-	private static final BigInteger PRIME32 = new BigInteger("01000193", 16);
-	private static final BigInteger PRIME64 = new BigInteger("100000001b3", 16);
-	private static final BigInteger MOD32 = new BigInteger("2").pow(32);
-	private static final BigInteger MOD64 = new BigInteger("2").pow(64);
+
+	private static final long FNV_OFFSET_64 = 0xcbf29ce484222325L;
+	private static final long FNV_PRIME_64  = 0x100000001b3L;
+
+	private static final int  FNV_OFFSET_32 = 0x811c9dc5;
+	private static final int  FNV_PRIME_32  = 0x01000193;
 
 	public static String hash32(final String input) {
-		return fnv1a_32(input.getBytes()).toString();
+		return Integer.toUnsignedString(fnv1a_32(input.getBytes(StandardCharsets.UTF_8)));
 	}
 
 	public static String hash64(final String input) {
-		return fnv1a_64(input.getBytes()).toString();
+		return Long.toUnsignedString(fnv1a_64(input.getBytes(StandardCharsets.UTF_8)));
 	}
 
-	public static BigInteger fnv1_32(final byte[] data) {
-		BigInteger hash = INIT32;
-
+	public static int fnv1a_32(final byte[] data) {
+		int hash = FNV_OFFSET_32;
 		for (final byte b : data) {
-			hash = hash.multiply(PRIME32).mod(MOD32);
-			hash = hash.xor(BigInteger.valueOf(b & 0xff));
+			hash ^= (b & 0xff);
+			hash *= FNV_PRIME_32;
 		}
-
 		return hash;
 	}
 
-	public static BigInteger fnv1_64(final byte[] data) {
-		BigInteger hash = INIT64;
-
+	public static long fnv1a_64(final byte[] data) {
+		long hash = FNV_OFFSET_64;
 		for (final byte b : data) {
-			hash = hash.multiply(PRIME64).mod(MOD64);
-			hash = hash.xor(BigInteger.valueOf(b & 0xff));
+			hash ^= (b & 0xffL);
+			hash *= FNV_PRIME_64;
 		}
-
 		return hash;
 	}
 
-	public static BigInteger fnv1a_32(final byte[] data) {
-		BigInteger hash = INIT32;
-
+	public static int fnv1_32(final byte[] data) {
+		int hash = FNV_OFFSET_32;
 		for (final byte b : data) {
-			hash = hash.xor(BigInteger.valueOf(b & 0xff));
-			hash = hash.multiply(PRIME32).mod(MOD32);
+			hash *= FNV_PRIME_32;
+			hash ^= (b & 0xff);
 		}
-
 		return hash;
 	}
 
-	public static BigInteger fnv1a_64(final byte[] data) {
-		BigInteger hash = INIT64;
-
+	public static long fnv1_64(final byte[] data) {
+		long hash = FNV_OFFSET_64;
 		for (final byte b : data) {
-			hash = hash.xor(BigInteger.valueOf(b & 0xff));
-			hash = hash.multiply(PRIME64).mod(MOD64);
+			hash *= FNV_PRIME_64;
+			hash ^= (b & 0xffL);
 		}
-
 		return hash;
 	}
 }

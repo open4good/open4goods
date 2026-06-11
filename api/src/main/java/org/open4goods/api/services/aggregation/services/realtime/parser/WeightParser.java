@@ -303,7 +303,7 @@ public class WeightParser extends AttributeParser {
                         }
                         double diff = Math.abs(other.kilograms() - best.kilograms());
                         if (diff > GLOBAL_CONFIG.getConflictToleranceKg()) {
-                                LOGGER.warn(
+                                LOGGER.debug(
                                                 "Weight conflict for attribute '{}': best={}kg ({}, conf={}) vs {}kg ({}, conf={})",
                                                 attribute.getName(), formatKg(best.kilograms()), best.datasource(),
                                                 best.confidence(), formatKg(other.kilograms()), other.datasource(),
