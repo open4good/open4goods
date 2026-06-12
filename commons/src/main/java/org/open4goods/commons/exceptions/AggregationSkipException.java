@@ -21,4 +21,14 @@ public class AggregationSkipException extends Exception {
 		super(message);
 	}
 
+	/**
+	 * Overridden to return {@code this} directly, bypassing expensive stack trace generation.
+	 * This is an optimization for exceptions thrown frequently in tight loops (e.g. invalid barcodes 
+	 * skipped during real-time data aggregation) where stack traces are not used.
+	 */
+	@Override
+	public synchronized Throwable fillInStackTrace() {
+		return this;
+	}
+
 }

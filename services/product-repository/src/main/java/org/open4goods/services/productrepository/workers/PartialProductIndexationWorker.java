@@ -2,6 +2,7 @@ package org.open4goods.services.productrepository.workers;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.open4goods.model.product.ProductPartialUpdateHolder;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -49,34 +50,15 @@ public class PartialProductIndexationWorker implements Runnable {
 		// TODO : exit thread condition
 		while (true) {
 			try {
-				
-				// Computing if items presents, and how many to take
-				int itemsToTake = service.getPartialProductQueue().size();
-				if (itemsToTake > dequeuePageSize) {
-					itemsToTake = dequeuePageSize;
-				}
-				
-				if (itemsToTake > 0) {
-					// There is data to consume and queue consummation is enabled
-					// A map to deduplicate --> MEANS WE CAN SOMETIMES LOOSE DATAFRAMENTS IF 2 ENTRIES ARE IN THE SAME BAG (no because we put back in queue)
+				ProductPartialUpdateHolder firstItem = service.getPartialProductQueue().poll(pauseDuration, TimeUnit.MILLISECONDS);
+				if (firstItem != null) {
 					final Set<ProductPartialUpdateHolder> buffer = new HashSet<>();	
-										
-					// Dequeuing
-					for (int i = 0; i < itemsToTake; i++) {
-						ProductPartialUpdateHolder item = service.getPartialProductQueue().take();
-						buffer.add(item);						
-					}
+					buffer.add(firstItem);
+					service.getPartialProductQueue().drainTo(buffer, dequeuePageSize - 1);
 					
 					service.bulkUpdateDocument(buffer);
 					
 					logger.info ("{} has indexed {} products. {} Remaining in queue",workerName,  buffer.size(), service.getPartialProductQueue().size());
-
-				} else {
-					try {
-						logger.debug("No DataFragments to dequeue. Will sleep {}ms",pauseDuration);
-						Thread.sleep(pauseDuration);
-					} catch (final InterruptedException e) {
-					}
 				}
 			} catch (final Exception e) {
 				logger.error("Error while dequeing DataFragments",e);

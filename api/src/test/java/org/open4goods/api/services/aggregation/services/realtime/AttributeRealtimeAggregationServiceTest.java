@@ -338,6 +338,43 @@ class AttributeRealtimeAggregationServiceTest {
 		assertThat(product.getAkaModels()).contains("HG32EJ690WE");
 	}
 
+	@Test
+	void extractModelFromTitlesPromotesBestWhenModelEmpty() {
+		Product product = new Product(123L);
+		product.getOfferNames().add("Bosch SMV4HVX31E lave-vaisselle integrable");
+
+		service.extractModelFromTitles(product);
+
+		assertThat(product.model()).isEqualTo("SMV4HVX31E");
+	}
+
+	@Test
+	void extractModelFromTitlesDoesNotPromoteFalsePositive() {
+		Product product = new Product(123L);
+		product.getOfferNames().add("Televiseur 55POUCES 144HZ");
+
+		service.extractModelFromTitles(product);
+
+		assertThat(product.model()).isNullOrEmpty();
+	}
+
+	@Test
+	void extractModelFromTitlesAlternateIsCleanedUppercased() {
+		// When a model already exists, title candidates added to akaModels must be
+		// cleaned (uppercased and validated), not raw strings.
+		Product product = buildBaseProduct();
+		product.getOfferNames().add("Samsung HG32EJ690WE television");
+
+		service.extractModelFromTitles(product);
+
+		// The alternate must be the cleaned uppercased form
+		assertThat(product.getAkaModels())
+				.as("akaModels should contain cleaned uppercase HG32EJ690WE")
+				.contains("HG32EJ690WE");
+		// Canonical must not have changed
+		assertThat(product.model()).isEqualTo("ModelX");
+	}
+
 	private void addSourcedAttribute(Product product, String name, String value, String datasourceName) {
 		ProductAttribute attribute = new ProductAttribute();
 		attribute.setName(name);

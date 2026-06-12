@@ -12,6 +12,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.util.ProductModelCandidateHelper.ModelCandidateSource;
+import org.open4goods.model.util.ProductModelCandidateHelper.TitleModelExtraction;
 
 class ProductModelCandidateHelperTest
 {
@@ -96,5 +97,91 @@ class ProductModelCandidateHelperTest
         assertTrue(ProductModelCandidateHelper.isSiblingDrift("4D 511", "4D 515"));
         assertFalse(ProductModelCandidateHelper.isSiblingDrift("SM-S921B/DS", "SM-S921B/DS"));
         assertFalse(ProductModelCandidateHelper.isSiblingDrift("WRIC 3C34 PE", "W7X82O-W"));
+    }
+
+    // --- extractModelsFromTitles ---
+
+    @Test
+    void extractModelsFromTitlesReturnsEmptyForNullOrBlankInput()
+    {
+        assertTrue(ProductModelCandidateHelper.extractModelsFromTitles(null).isEmpty());
+        assertTrue(ProductModelCandidateHelper.extractModelsFromTitles(List.of()).isEmpty());
+        assertTrue(ProductModelCandidateHelper.extractModelsFromTitles(List.of("  ", "")).isEmpty());
+    }
+
+    @Test
+    void extractModelsFromTitlesPicksBestTvModel()
+    {
+        TitleModelExtraction result = ProductModelCandidateHelper.extractModelsFromTitles(
+                List.of("Samsung HG32EJ690WE television"));
+        assertFalse(result.isEmpty());
+        assertEquals("HG32EJ690WE", result.best());
+    }
+
+    @Test
+    void extractModelsFromTitlesPrefixPreservationSmG991b()
+    {
+        // SM- prefix must survive; without it EPREL compact matching is weaker
+        TitleModelExtraction result = ProductModelCandidateHelper.extractModelsFromTitles(
+                List.of("Samsung Galaxy SM-G991B 128Go smartphone"));
+        assertFalse(result.isEmpty());
+        assertTrue(result.ranked().contains("SM-G991B"),
+                "Expected SM-G991B in ranked candidates but got: " + result.ranked());
+    }
+
+    @Test
+    void extractModelsFromTitlesElectsByFrequencyThenShortest()
+    {
+        // HG32EJ690WE appears twice, AB1234XY once — frequency wins
+        TitleModelExtraction result = ProductModelCandidateHelper.extractModelsFromTitles(List.of(
+                "Samsung HG32EJ690WE TV",
+                "HG32EJ690WE 32 pouces",
+                "AB1234XY display"));
+        assertEquals("HG32EJ690WE", result.best());
+    }
+
+    @Test
+    void extractModelsFromTitlesRejectsMeasureAndUnitTokens()
+    {
+        // All of these should be rejected as false positives
+        assertTrue(ProductModelCandidateHelper.extractModelsFromTitles(
+                List.of("TV 55POUCES", "Ecran 144HZ", "Ampli 1000W")).isEmpty());
+    }
+
+    @Test
+    void extractModelsFromTitlesRejectsResolutions()
+    {
+        assertTrue(ProductModelCandidateHelper.extractModelsFromTitles(
+                List.of("dalle 1920x1080", "panel 3840X2160")).isEmpty());
+    }
+
+    @Test
+    void extractModelsFromTitlesRejectsStorageVariants()
+    {
+        assertTrue(ProductModelCandidateHelper.extractModelsFromTitles(
+                List.of("Smartphone 256GO", "Disque 12GO/512GO")).isEmpty());
+    }
+
+    @Test
+    void extractModelsFromTitlesRejectsCategoryWords()
+    {
+        assertTrue(ProductModelCandidateHelper.extractModelsFromTitles(
+                List.of("SMARTPHONE", "TELEVISEUR", "REFRIGERATEUR")).isEmpty());
+    }
+
+    @Test
+    void extractModelsFromTitlesRejectsDegenerateAndGtinCodes()
+    {
+        assertTrue(ProductModelCandidateHelper.extractModelsFromTitles(
+                List.of("dimension 568X500X430MM", "ref 813276", "gtin 6941764449275")).isEmpty());
+    }
+
+    @Test
+    void extractModelsFromTitlesApplianceTitle()
+    {
+        TitleModelExtraction result = ProductModelCandidateHelper.extractModelsFromTitles(
+                List.of("Bosch SMV4HVX31E lave-vaisselle integrable"));
+        assertFalse(result.isEmpty());
+        assertEquals("SMV4HVX31E", result.best());
     }
 }

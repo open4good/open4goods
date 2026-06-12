@@ -27,6 +27,8 @@ public class IdHelper {
 
 	private static final Pattern brandUid = Pattern.compile("\\w*\\-?(\\d[A-Za-z])+|([A-Za-z]\\d)+\\-?\\w*");
 
+	private static final Pattern DIACRITICS_PATTERN = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+
 	private static final int TARGET_DIMS = 512;
 
 
@@ -78,8 +80,74 @@ public class IdHelper {
 		{
 			return null;
 		}
-		String unescaped = input.indexOf('&') != -1 ? StringEscapeUtils.unescapeHtml4(input) : input;
-		return StringUtils.normalizeSpace(unescaped);
+
+		int len = input.length();
+		if (len == 0)
+		{
+			return input;
+		}
+
+		boolean hasAmp = false;
+		boolean needsNormalize = false;
+
+		if (Character.isWhitespace(input.charAt(0)) || Character.isWhitespace(input.charAt(len - 1))) {
+			needsNormalize = true;
+		}
+
+		if (!needsNormalize) {
+			boolean lastWasSpace = false;
+			for (int i = 0; i < len; i++) {
+				char c = input.charAt(i);
+				if (c == '&') {
+					hasAmp = true;
+				}
+				if (Character.isWhitespace(c)) {
+					if (c != ' ' || lastWasSpace) {
+						needsNormalize = true;
+						break;
+					}
+					lastWasSpace = true;
+				} else {
+					lastWasSpace = false;
+				}
+			}
+		} else {
+			for (int i = 0; i < len; i++) {
+				if (input.charAt(i) == '&') {
+					hasAmp = true;
+					break;
+				}
+			}
+		}
+
+		if (!hasAmp && !needsNormalize) {
+			return input;
+		}
+
+		String unescaped = hasAmp ? StringEscapeUtils.unescapeHtml4(input) : input;
+		return needsNormalize ? StringUtils.normalizeSpace(unescaped) : unescaped;
+	}
+
+	/**
+	 * Clean diacritics using a precompiled pattern, skipping entirely for ASCII-only strings.
+	 */
+	public static String stripAccents(final String input) {
+		if (input == null) {
+			return null;
+		}
+		boolean hasNonAscii = false;
+		int len = input.length();
+		for (int i = 0; i < len; i++) {
+			if (input.charAt(i) > 127) {
+				hasNonAscii = true;
+				break;
+			}
+		}
+		if (!hasNonAscii) {
+			return input;
+		}
+		final String decomposed = java.text.Normalizer.normalize(input, java.text.Normalizer.Form.NFD);
+		return DIACRITICS_PATTERN.matcher(decomposed).replaceAll("");
 	}
 
 	/**
@@ -91,7 +159,7 @@ public class IdHelper {
 		if (string == null) {
 			return null;
 		} else {
-			return StringUtils.stripAccents(string).trim().toUpperCase();
+			return stripAccents(string).trim().toUpperCase();
 		}
 	}
 
@@ -156,7 +224,7 @@ public class IdHelper {
 		List<String> frs = Arrays.stream(frags).filter(e ->  ! StringUtils.isBlank(StringUtils.normalizeSpace( e))).collect(Collectors.toList());
 
 		String ret = StringUtils.join(frs," > ");
-		ret = StringUtils.stripAccents(ret);
+		ret = stripAccents(ret);
 		ret = ret.toUpperCase();
 		ret = ret.replace("\n", " > ");
 		ret = StringUtils.normalizeSpace(ret);
@@ -165,11 +233,11 @@ public class IdHelper {
 	}
 
 	public static String azCharAndDigits(final String input) {
-		return StringUtils.stripAccents(input).replaceAll("[^a-zA-Z0-9]", "");
+		return stripAccents(input).replaceAll("[^a-zA-Z0-9]", "");
 	}
 
 	public static String azCharAndDigits(final String input, String replacement) {
-		return StringUtils.stripAccents(input).replaceAll("[^a-zA-Z0-9]", replacement);
+		return stripAccents(input).replaceAll("[^a-zA-Z0-9]", replacement);
 	}
 
 	public static String azCharAndDigitsPointsDash(String input) {
@@ -178,7 +246,7 @@ public class IdHelper {
 
 
 	public static String azCharAndDigitsPointsDash(String input, String string) {
-		return StringUtils.stripAccents(input).replaceAll("[^a-zA-Z0-9_-]",string);
+		return stripAccents(input).replaceAll("[^a-zA-Z0-9_-]",string);
 	}
 
 	/**
@@ -188,7 +256,7 @@ public class IdHelper {
 	 */
 	public static String toDatasourceId(String input) {
 		if (input == null) return null;
-		return StringUtils.stripAccents(input).replaceAll("[^a-zA-Z0-9_.-]", "");
+		return stripAccents(input).replaceAll("[^a-zA-Z0-9_.-]", "");
 	}
 
 
@@ -272,7 +340,7 @@ public class IdHelper {
 	}
 
 	public static String brandName(String name) {
-		return (StringUtils.normalizeSpace(StringUtils.stripAccents(name))).toUpperCase();
+		return (StringUtils.normalizeSpace(stripAccents(name))).toUpperCase();
 	}
 
 

@@ -2,6 +2,7 @@ package org.open4goods.services.productrepository.workers;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.open4goods.model.product.Product;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -49,33 +50,15 @@ public class FullProductIndexationWorker implements Runnable {
 		// TODO : exit thread condition
 		while (true) {
 			try {
-				
-				// Computing if items presents, and how many to take
-				int itemsToTake = service.getFullProductQueue().size();
-				if (itemsToTake > dequeuePageSize) {
-					itemsToTake = dequeuePageSize;
-				}
-				
-				if (itemsToTake > 0) {
-					// There is data to consume and queue consummation is enabled
+				Product firstItem = service.getFullProductQueue().poll(pauseDuration, TimeUnit.MILLISECONDS);
+				if (firstItem != null) {
 					final Set<Product> buffer = new HashSet<>();	
-										
-					// Dequeuing
-					for (int i = 0; i < itemsToTake; i++) {
-						Product item = service.getFullProductQueue().take();
-						buffer.add(item);													
-					}
+					buffer.add(firstItem);
+					service.getFullProductQueue().drainTo(buffer, dequeuePageSize - 1);
 					
 					service.store(buffer);
 					
 					logger.info ("{} has indexed {} products. {} Remaining in queue",workerName,  buffer.size(), service.getFullProductQueue().size());
-
-				} else {
-					try {
-						logger.debug("No DataFragments to dequeue. Will sleep {}ms",pauseDuration);
-						Thread.sleep(pauseDuration);
-					} catch (final InterruptedException e) {
-					}
 				}
 			} catch (final Exception e) {
 				logger.error("Error while dequeing DataFragments",e);
