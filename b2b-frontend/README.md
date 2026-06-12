@@ -16,12 +16,12 @@ pnpm --dir b2b-frontend dev        # / (en) and /fr/
 ```
 
 Generate the API client from `b2b-api` first - see
-[frontend build & codegen](../docs/b2b/b2b-frontend-build.md).
+[frontend build & codegen](../docs/b2b/frontend/build.md).
 
 ## Documentation
 
 - [Canonical decisions](../docs/b2b/00-canonical-decisions.md)
-- [UX/UI spec](../docs/b2b/b2b-ui.md)
-- [Frontend build & OpenAPI codegen](../docs/b2b/b2b-frontend-build.md)
+- [UX/UI spec](../docs/b2b/frontend/ui-spec.md)
+- [Frontend build & OpenAPI codegen](../docs/b2b/frontend/build.md)
 - [Agent guide](AGENTS.md)
 - [Local runbook](../docs/operations/product-data-api-local-runbook.md)

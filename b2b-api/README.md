@@ -19,7 +19,9 @@ profile, seed an org/key, then exercise
 ## Documentation
 
 - [Canonical decisions](../docs/b2b/00-canonical-decisions.md)
-- [Master prompt `b2B.md`](../docs/b2b/b2B.md)
+- [Master implementation prompt](../docs/b2b/implementation/master-prompt.md)
+- [Phased plan](../docs/b2b/implementation/plan.md) & [task state](../docs/b2b/implementation/tasks.md)
+- [Price facet spec](../docs/b2b/facets/product-price.md)
 - [ADR 0005](../docs/adr/0005-product-data-api-b2b-v1.md)
 - Architecture: [data model](../docs/architecture/product-data-api-data-model.md),
   [redis contract](../docs/architecture/product-data-api-redis-contract.md),

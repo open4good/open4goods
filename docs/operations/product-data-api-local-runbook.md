@@ -116,7 +116,7 @@ pnpm --dir b2b-frontend lint && pnpm --dir b2b-frontend typecheck \
 ```
 
 OpenAPI client regeneration: see
-[`../b2b/b2b-frontend-build.md`](../b2b/b2b-frontend-build.md).
+[`../b2b/frontend/build.md`](../b2b/frontend/build.md).
 
 ## 7. Docs / OpenAPI
 
@@ -127,4 +127,4 @@ OpenAPI client regeneration: see
 ## Blockers to record (if validation cannot run)
 
 If Postgres/Redis/ES/Stripe is unavailable, record the exact command, the failure
-reason, and the smallest next step (per `b2B.md` validation policy).
+reason, and the smallest next step (per [`master-prompt.md`](../b2b/implementation/master-prompt.md) validation policy).

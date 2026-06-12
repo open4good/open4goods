@@ -13,7 +13,7 @@ open4goods/nudger.fr owns a large, differentiated Elasticsearch product index:
 (~45-50K products) carrying data no competitor has - ImpactScore(c),
 EU energy labels (EPREL), repairability index, sourced AI reviews, and
 multi-taxonomy referentials (Google/EPREL/ICECAT/ETIM/Wikidata). The competitive
-study ([`../b2b/b2b-conccurrence.md`](../b2b/b2b-conccurrence.md)) shows the
+study ([`../b2b/business/competition.md`](../b2b/business/competition.md)) shows the
 "price data API" market (PriceAPI, SerpApi, Bright Data, Winamaz...) sells
 commodity scraped data at ~30 $/1000 requests and none of them carry the
 proprietary nudger data.
@@ -22,7 +22,7 @@ We want to monetise this via a self-serve B2B API with a contractual edge
 ("No data, no pay"), starting with the commodity price facet as a loyal loss
 leader and reserving margin for proprietary facets later.
 
-The decision set was split across `b2B.md` (newer) and an older planning note;
+The decision set was split across [`master-prompt.md`](../b2b/implementation/master-prompt.md) (newer) and an older planning note;
 this ADR ratifies the canonical decisions captured in
 [`../b2b/00-canonical-decisions.md`](../b2b/00-canonical-decisions.md).
 

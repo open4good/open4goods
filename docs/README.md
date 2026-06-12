@@ -33,12 +33,17 @@ owned, and linked from this index when they become durable project knowledge.
 
 ## Product Data API (B2B)
 
+- [Corpus map & reading order](b2b/README.md) - start here
 - [Canonical decisions](b2b/00-canonical-decisions.md) - source of truth
-- [Master implementation prompt](b2b/b2B.md)
-- [Facet catalogue & data coverage](b2b/b2b-facets.md)
-- [Competitive study](b2b/b2b-conccurrence.md)
-- [Frontend UX specification](b2b/b2b-ui.md)
-- [Frontend build & OpenAPI codegen](b2b/b2b-frontend-build.md)
+- [Master implementation prompt](b2b/implementation/master-prompt.md)
+- [Phased plan](b2b/implementation/plan.md) & [living task state](b2b/implementation/tasks.md)
+- [Facet specs](b2b/facets/README.md) - lifecycle, template, authoring prompt,
+  [price facet](b2b/facets/product-price.md)
+- [Facet catalogue & credit tiers](b2b/product/facet-catalog.md)
+- [Data coverage study](b2b/business/data-coverage.md)
+- [Competitive study](b2b/business/competition.md)
+- [Frontend UX specification](b2b/frontend/ui-spec.md)
+- [Frontend build & OpenAPI codegen](b2b/frontend/build.md)
 - Architecture: [data model](architecture/product-data-api-data-model.md),
   [redis contract](architecture/product-data-api-redis-contract.md),
   [billing ledger](architecture/product-data-api-billing-ledger.md),

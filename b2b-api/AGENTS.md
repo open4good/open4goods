@@ -13,7 +13,9 @@ authenticated product-data API. v1 = the price facet only
 ## Read first
 
 - [docs/b2b/00-canonical-decisions.md](../docs/b2b/00-canonical-decisions.md) - source of truth
-- [docs/b2b/b2B.md](../docs/b2b/b2B.md) - master implementation prompt
+- [docs/b2b/implementation/master-prompt.md](../docs/b2b/implementation/master-prompt.md) - master implementation prompt
+- [docs/b2b/implementation/tasks.md](../docs/b2b/implementation/tasks.md) - **living task state; follow its resume protocol before any work** (phases: [plan.md](../docs/b2b/implementation/plan.md))
+- [docs/b2b/facets/product-price.md](../docs/b2b/facets/product-price.md) - v1 facet spec (coverage queries, no-data-no-pay matrix)
 - [docs/adr/0005-product-data-api-b2b-v1.md](../docs/adr/0005-product-data-api-b2b-v1.md)
 - Architecture specs: data model, redis contract, billing ledger, API contract,
   errors, auth, stripe, ops (`docs/architecture/product-data-api-*.md`)

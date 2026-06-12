@@ -55,10 +55,13 @@ For a billable-capable request (`GET /api/v1/products/{gtin}/price`):
 ```
 
 Steps 7-9 must also run on the error path (e.g. mapping throws after reserve):
-release the reservation in a `finally`/`afterCompletion` (refund). To guard against
-total JVM crashes, all Redis reservations must have a short TTL (e.g., 30 seconds). If
-not settled and durably committed in Postgres within this window, the reservation automatically
-expires, avoiding balance leaks.
+release the reservation in a `finally`/`afterCompletion` (refund). Recovery from a
+total JVM crash (the refund never runs) is **reconciliation-based**: the
+post-settlement `reconcile` and the periodic `HardenerBatch` balance
+reconciliation restore the hot balance from Postgres. There is **no per-request
+reservation TTL** - reservations are `DECRBY` against the shared balance key,
+which cannot expire individual reservations (canonical decision, see
+[`00-canonical-decisions.md`](../b2b/00-canonical-decisions.md) section 5).
 
 ## Expiring-first bucket debit (`settleDebit`)
 
@@ -92,15 +95,14 @@ settleDebit(orgId, requestId, facetId, gtin, cost):
 ```
 
 Notes:
-- One `DEBIT` row **per bucket touched**, all sharing `request_id`. The partial
-  unique index is on `request_id` for `type='DEBIT'`, so the *first* insert with
-  that `request_id` succeeds and a duplicate request transaction aborts -> caught
-  as already-billed. (If a single request legitimately spans multiple buckets,
-  insert them in one transaction; the uniqueness is enforced at commit and the
-  duplicate-request guard is the initial `exists` check + transaction-level
-  idempotency. If strict per-row uniqueness is required, use a composite
-  `(request_id, bucket_id)` unique index instead - decide at implementation and
-  keep the DDL and this doc in sync.)
+- One `DEBIT` row **per bucket touched**, all sharing `request_id`. Because a
+  single request may legitimately span multiple buckets, the partial unique index
+  is **composite**: `UNIQUE(request_id, bucket_id) WHERE type='DEBIT'` (canonical
+  decision, see [`00-canonical-decisions.md`](../b2b/00-canonical-decisions.md)
+  section 5). Request-level at-most-once billing is enforced by the initial
+  `exists` check on `request_id` inside the locked settlement transaction: a
+  retry/duplicate short-circuits before inserting anything, and concurrent
+  duplicates serialise on the bucket locks.
 - Authoritative balance after commit = recomputed sum; pushed to Redis via
   `reconcile`.
 
@@ -170,7 +172,7 @@ never double-count (stream entries are `XACK`-ed; expiry is guarded by
 
 ## Test matrix (Testcontainers Postgres + Redis)
 
-Mirror `b2B.md` acceptance: unauthenticated 401; bad/revoked key 401; invalid
+Mirror [`master-prompt.md`](../b2b/implementation/master-prompt.md) acceptance: unauthenticated 401; bad/revoked key 401; invalid
 GTIN 400 + 0 credits; missing product 404 + 0 credits; no-fresh-offer 200
 billable=false + 0 credits; fresh offer 200 + exactly 5 credits + one durable
 DEBIT row; insufficient balance 402; duplicate `request_id` debits once;

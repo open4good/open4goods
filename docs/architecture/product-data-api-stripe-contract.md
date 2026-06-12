@@ -9,7 +9,7 @@
 ## Catalog binding
 
 The billing catalog (packs + subscriptions) is YAML
-(`b2b-catalog.yml`, shape in `b2B.md`): each entry has `amount-eur`,
+(`b2b-catalog.yml`, shape in [`master-prompt.md`](../b2b/implementation/master-prompt.md)): each entry has `amount-eur`,
 `credits`/`monthly-credits`, and a `stripe-price-id` bound from env. The frontend
 pricing page renders this via `GET /api/v1/customer/billing/catalog` - never
 hardcoded. Stripe price/product objects are created out-of-band (Stripe

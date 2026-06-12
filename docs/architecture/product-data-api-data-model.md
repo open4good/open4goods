@@ -4,7 +4,7 @@
 > Postgres is the **authoritative** store for organizations, users, API keys,
 > credit buckets, and the append-only transaction ledger. Redis is a hot mirror
 > only (see [`product-data-api-redis-contract.md`](product-data-api-redis-contract.md)).
-> This document defines the 13 tables named in `b2B.md` and is the source for the
+> This document defines the 13 tables named in [`master-prompt.md`](../b2b/implementation/master-prompt.md) and is the source for the
 > canonical Flyway migration
 > `b2b-api/src/main/resources/db/migration/V1__product_data_api_init.sql`.
 
@@ -151,8 +151,12 @@ Append-only ledger. **Never updated or deleted.** Source of audit and invoices.
 | `created_at` | timestamptz NOT NULL DEFAULT now() | |
 
 **Idempotency**: `CREATE UNIQUE INDEX ux_credit_tx_debit_request ON
-credit_transactions(request_id) WHERE type='DEBIT'` - guarantees a billable
-request debits at most once even on retry. Index: `(organization_id, created_at desc)`.
+credit_transactions(request_id, bucket_id) WHERE type='DEBIT'` - composite,
+because one billable request writes one DEBIT row per bucket touched (all sharing
+`request_id`). Request-level at-most-once billing is enforced by the `exists`
+pre-check on `request_id` inside the locked settlement transaction (see the
+[billing ledger spec](product-data-api-billing-ledger.md)). Index:
+`(organization_id, created_at desc)`.
 
 ### stripe_customers
 One Stripe customer per org.
@@ -264,7 +268,7 @@ The canonical DDL goes in
 `b2b-api/src/main/resources/db/migration/V1__product_data_api_init.sql`,
 translating the tables above 1:1 (`CREATE EXTENSION IF NOT EXISTS pgcrypto;`
 first for `gen_random_uuid()`). Keep CHECK constraints and the partial unique
-indices (one OWNER per org; one DEBIT per `request_id`) - they are part of the
+indices (one OWNER per org; one DEBIT per `(request_id, bucket_id)`) - they are part of the
 billing-correctness contract, not optional polish. Subsequent schema changes are
 new `V2__...`, `V3__...` migrations; never edit `V1`.
 

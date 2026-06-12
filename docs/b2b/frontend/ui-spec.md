@@ -1,7 +1,7 @@
 # Product Data API - B2B frontend UX and UI specification
 
-> Companion document to [`b2B.md`](b2B.md), [`b2b-facets.md`](b2b-facets.md),
-> and [`b2b-conccurrence.md`](b2b-conccurrence.md). This document defines the
+> Companion document to [`master-prompt.md`](../implementation/master-prompt.md), [`data-coverage.md`](../business/data-coverage.md),
+> and [`competition.md`](../business/competition.md). This document defines the
 > target UX, page inventory, visual system, and frontend acceptance criteria for
 > the future `b2b-frontend` project.
 
@@ -104,7 +104,7 @@ The UI should adopt proven API-platform conventions:
 
 ## 4. Frontend architecture constraints
 
-`b2b-frontend` must follow the technical decisions in `b2B.md`:
+`b2b-frontend` must follow the technical decisions in [`master-prompt.md`](../implementation/master-prompt.md):
 
 - Nuxt 4, Vue 3, Vuetify 4, TypeScript.
 - `@nuxtjs/i18n` with `prefix_except_default`, default locale `en`, French at
@@ -123,7 +123,7 @@ Recommended project shape (illustrative grouping):
 > (`pages/`, `composables/`, `domains/`, `components/`, `server/`, `content/`,
 > `i18n/` at the project root), not the `app/`-nested tree below. Treat the `app/`
 > nesting here as conceptual grouping; the canonical layout and the OpenAPI codegen
-> pipeline are in [`b2b-frontend-build.md`](b2b-frontend-build.md).
+> pipeline are in [`build.md`](build.md).
 
 ```text
 b2b-frontend/
@@ -202,7 +202,7 @@ b2b-frontend/
 
 ## 6. Missing pages and v1 decisions
 
-The existing `b2B.md` page list covers the core launch, but the following pages
+The existing [`master-prompt.md`](../implementation/master-prompt.md) page list covers the core launch, but the following pages
 or page concepts are missing or under-specified.
 
 | Missing page or concept | v1 decision |
@@ -220,7 +220,7 @@ or page concepts are missing or under-specified.
 | Webhooks page | Future candidate. No v1 webhook product surface is defined. |
 | Changelog page | Future candidate. Can be added later through Nuxt Content. |
 | Admin catalog page | Future candidate. Billing catalog starts YAML-backed and code-reviewed. |
-| CSV enrichment workflow | Out of scope for v1, as defined in `b2B.md`. |
+| CSV enrichment workflow | Out of scope for v1, as defined in [`master-prompt.md`](../implementation/master-prompt.md). |
 | Enterprise invoicing | Out of scope for v1. Use Stripe billing only. |
 
 ## 7. Page-level UX requirements

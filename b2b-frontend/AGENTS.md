@@ -12,9 +12,10 @@ authenticated customer dashboard + admin control plane in one app.
 ## Read first
 
 - [docs/b2b/00-canonical-decisions.md](../docs/b2b/00-canonical-decisions.md)
-- [docs/b2b/b2b-ui.md](../docs/b2b/b2b-ui.md) - UX/UI spec, route map, components
-- [docs/b2b/b2b-frontend-build.md](../docs/b2b/b2b-frontend-build.md) - layout & OpenAPI codegen
-- [docs/b2b/b2B.md](../docs/b2b/b2B.md) - master prompt (frontend section)
+- [docs/b2b/frontend/ui-spec.md](../docs/b2b/frontend/ui-spec.md) - UX/UI spec, route map, components
+- [docs/b2b/frontend/build.md](../docs/b2b/frontend/build.md) - layout & OpenAPI codegen
+- [docs/b2b/implementation/master-prompt.md](../docs/b2b/implementation/master-prompt.md) - master prompt (frontend section)
+- [docs/b2b/implementation/tasks.md](../docs/b2b/implementation/tasks.md) - **living task state; follow its resume protocol before any work**
 
 ## Conventions (module-specific)
 

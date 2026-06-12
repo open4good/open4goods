@@ -1,15 +1,20 @@
 # Product Data API - B2B v1 master implementation prompt
 
-> **Canonical, but read [`00-canonical-decisions.md`](00-canonical-decisions.md) first.**
-> That page resolves every conflict with the superseded
-> `~/.claude/plans/prompt-b2b-on-peaceful-peacock.md` and locks v1 decisions
-> (GTIN-first strict, `meta.coverage`, full Stripe). The detailed, agent-ready
-> specs live under [`../architecture/product-data-api-*.md`](../architecture/)
+> **Canonical, but read [`00-canonical-decisions.md`](../00-canonical-decisions.md) first.**
+> That page resolves every conflict with the superseded peaceful-peacock planning
+> note and locks v1 decisions (GTIN-first strict, `meta.coverage`, full Stripe,
+> single frontend domain). The detailed, agent-ready specs live under
+> [`docs/architecture/product-data-api-*.md`](../../architecture/)
 > (data model, redis contract, billing ledger, API contract, errors, auth,
 > stripe, ops), the runbook under
-> [`../operations/product-data-api-local-runbook.md`](../operations/product-data-api-local-runbook.md),
+> [`product-data-api-local-runbook.md`](../../operations/product-data-api-local-runbook.md),
 > and the decision record at
-> [`../adr/0005-product-data-api-b2b-v1.md`](../adr/0005-product-data-api-b2b-v1.md).
+> [`0005-product-data-api-b2b-v1.md`](../../adr/0005-product-data-api-b2b-v1.md).
+>
+> **Execution state lives elsewhere**: this prompt defines the full scope; the
+> phased execution breakdown is [`plan.md`](plan.md) and the **living, resumable
+> task state** is [`tasks.md`](tasks.md). An implementing agent must follow the
+> resume protocol in `tasks.md` before doing any work.
 
 You are an AI coding agent working in `/home/goulven/git/open4goods`.
 Implement the first production-grade B2B vertical for **Product Data API**,
@@ -222,13 +227,16 @@ Behavior:
   Postgres settlement succeeds.
 - Return Problem Detail payloads for all errors.
 
-Use a response envelope for all B2B API responses:
+Use a response envelope for all successful (2xx) B2B API responses. Errors are
+**not** enveloped: they are bare RFC 9457 Problem Details
+(`application/problem+json`), per the
+[error catalog](../../architecture/product-data-api-errors.md).
 
 ```json
 {
   "data": {},
   "meta": {
-    "requestId": "req_...",
+    "requestId": "pdreq_01HF...",
     "timestamp": "2026-06-02T00:00:00Z",
     "language": "en",
     "creditsConsumed": 5,
@@ -261,7 +269,9 @@ Also include headers:
 - `X-Credits-Remaining`
 - `X-Response-Time-Ms`
 
-Document `401`, `402`, and `404` clearly in OpenAPI.
+Document `400`, `401`, `402`, `404`, `429`, and `500` clearly in OpenAPI, with
+Problem Detail examples (see the
+[error catalog](../../architecture/product-data-api-errors.md)).
 
 ## Sanitized price DTO
 
@@ -418,6 +428,10 @@ Required customer endpoints:
 - `GET /api/v1/customer/billing/transactions`
 - `GET /api/v1/customer/billing/invoices`
 - `GET /api/v1/customer/subscriptions`
+- `POST /api/v1/customer/playground/products/price` (session-authenticated
+  playground proxy; contract in the
+  [API contract spec](../../architecture/product-data-api-contract.md) and
+  [`ui-spec.md`](../frontend/ui-spec.md) section 7.5)
 
 Required admin endpoints:
 
@@ -488,6 +502,11 @@ Public pages:
 - `/`: landing page for Product Data API
 - `/pricing`
 - `/docs`
+- `/docs/getting-started`
+- `/docs/api-reference`
+- `/docs/authentication`
+- `/docs/billing-and-credits`
+- `/docs/errors`
 - `/docs/products/price`
 - `/docs/products/price/playground`
 - `/docs/products/price/documentation/java`
@@ -534,17 +553,17 @@ Frontend rules:
 
 Use `@nuxt/content` for public docs in `b2b-frontend/content`.
 
-Minimum docs:
+Minimum docs (content tree per [`ui-spec.md`](../frontend/ui-spec.md) section 7.4):
 
-- product price API overview
+- getting started (signup, key creation, first curl call)
+- API reference index (OpenAPI-backed endpoint list + response envelope)
 - authentication with `Authorization: Bearer pdapi_...`
-- GTIN validation behavior
-- no-data-no-pay behavior
-- credit billing and freshness rules
+- billing and credits (no-data-no-pay, freshness rules)
+- error codes and Problem Detail examples
+- product price API overview (GTIN validation behavior, freshness, provenance)
 - Java quickstart
 - Python quickstart
 - curl examples
-- error codes and Problem Detail examples
 - FAQ
 
 All public docs must exist in English and French. English can be the source of
@@ -589,6 +608,10 @@ Update Spring configuration metadata for every new `@ConfigurationProperties`
 class.
 
 ## Implementation sequence
+
+This is the canonical ordering; the executable breakdown with per-phase
+verification gates is [`plan.md`](plan.md), and progress is tracked in
+[`tasks.md`](tasks.md).
 
 1. Read repository and reference guides.
 2. Add `b2b-api` module and compile an empty app.

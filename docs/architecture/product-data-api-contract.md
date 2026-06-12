@@ -15,6 +15,13 @@ Authorization: Bearer pdapi_...
 - `{gtin}` - syntactically valid, checksum-correct GTIN (8/12/13/14). Validated
   with `org.open4goods.commons.services.BarcodeValidationService` **before** any
   credit reservation. Invalid -> `400`, zero credits.
+- **GTIN -> product id normalization**: the index id (`Product.id`) is a `Long`,
+  so leading zeros are not significant - after validation, the GTIN is parsed to
+  its numeric value for `ProductRepository.getByIdWithoutEmbedding(Long)`
+  (e.g. `0885909950805` resolves the same product as `885909950805`). The
+  response `data.gtin` echoes the normalized form from the validation service.
+  Verify this rule against `BarcodeValidationService` output at implementation
+  time (P5 of the [implementation plan](../b2b/implementation/plan.md)).
 - `language` - `en` (default) or `fr`. Affects localized display fields only
   (price data is language-neutral; the display `name` and provenance labels use
   the locale).
@@ -60,6 +67,12 @@ product, independent of whether it was billed. For v1 it always contains
 review cover only the curated ~45-50K subset), clients can see availability
 honestly without guessing from empty payloads. `covered=false` implies
 `billable=false` and `served=false` for that facet.
+
+v1 semantics for `product.price`: the price facet applies to **every** product in
+the index, so `covered` is always `true` - a product that exists but has zero or
+stale offers is *covered but not served* (`covered=true`, `served=false`,
+`billable=false`, no-pay reason `no-fresh-offer`). `covered=false` only becomes
+meaningful with curated-subset facets (impact/energy/review).
 
 ### Headers
 
@@ -130,9 +143,12 @@ source object, so new internal fields are never leaked by default.
 ## Forward-compatible facet catalogue
 
 v1 ships only `product.price` as billable. The catalogue (`b2b-catalog.yml`,
-shape in `b2B.md`) is structured so future facets reuse metering/docs/playground
-without redesign. Coverage figures and credit tiers come from
-[`../b2b/b2b-facets.md`](../b2b/b2b-facets.md).
+shape in [`master-prompt.md`](../b2b/implementation/master-prompt.md)) is structured so future facets reuse metering/docs/playground
+without redesign. Coverage figures come from
+[`../b2b/business/data-coverage.md`](../b2b/business/data-coverage.md); credit
+tiers from [`../b2b/product/facet-catalog.md`](../b2b/product/facet-catalog.md).
+Each shipped facet has a dedicated lifecycle spec under
+[`../b2b/facets/`](../b2b/facets/README.md).
 
 | Facet | Endpoint | v1? | Credits | Coverage |
 |---|---|---|---:|---|
@@ -145,6 +161,24 @@ without redesign. Coverage figures and credit tiers come from
 | `product.energy` | `.../energy` | future | 10 | ~47K (exclusive) |
 | `product.review` | `.../review` | future | 30 | ~10K (exclusive) |
 | `product.taxonomy` | `.../taxonomy` | future | 15 | curated (exclusive) |
+
+## Playground proxy (session-authenticated)
+
+The dashboard playground's live mode never holds a clear API key in the browser.
+It calls a session-authenticated proxy that executes the real external call with
+a selected key and returns the executed request (key masked), the response
+body/headers, and the metering outcome:
+
+```http
+POST /api/v1/customer/playground/products/price
+Content-Type: application/json
+Cookie: session
+
+{ "apiKeyId": "key_...", "gtin": "0885909950805", "language": "en" }
+```
+
+Response shape and UX requirements: [`../b2b/frontend/ui-spec.md`](../b2b/frontend/ui-spec.md)
+section 7.5. Role gating: `DEVELOPER` and above ([auth spec](product-data-api-auth.md)).
 
 ## OpenAPI requirements
 

@@ -1,7 +1,7 @@
 # Product Data API - Étude concurrentielle détaillée
 
-> Décisions canoniques : [`00-canonical-decisions.md`](00-canonical-decisions.md).
-> Annexe de [`b2B.md`](b2B.md). Document jumeau : [`b2b-facets.md`](b2b-facets.md).
+> Décisions canoniques : [`00-canonical-decisions.md`](../00-canonical-decisions.md).
+> Annexe de [`master-prompt.md`](../implementation/master-prompt.md). Document jumeau : [`data-coverage.md`](data-coverage.md).
 > Pricing vérifié en live le **2026-06-02** pour les benchmarks structurants (PriceAPI,
 > SerpApi, Winamaz, Bright Data). Les autres acteurs reprennent les données de l'annexe
 > de cadrage, signalées comme non re-vérifiées.
@@ -28,7 +28,7 @@ scraping) mais sur deux axes qu'eux ne peuvent pas tenir :
   provenance + fraîcheur explicites, et " no-data-no-pay " strict par facette*. C'est plus lisible
   que le scraping généraliste et plus robuste que l'affiliation.
 - **Des facettes propriétaires** (impact, review IA, énergie, réparabilité) qu'**aucun concurrent
-  ne propose**. Voir [`b2b-facets.md`](b2b-facets.md).
+  ne propose**. Voir [`facet-catalog.md`](../product/facet-catalog.md).
 
 **Signal de facturation clé** : les concurrents n'ont pas la même définition d'un appel " facturable ".
 
@@ -220,7 +220,7 @@ nudger      ██████████        (33,9 M GTIN avec offres)   �
 ```
 
 - **Sur la commodité prix**, nudger n'a pas à gagner la guerre du volume : 33,9 M GTIN avec offres et
-  3,9 M multi-marchands suffisent pour une offre crédible (voir [`b2b-facets.md`](b2b-facets.md) §2).
+  3,9 M multi-marchands suffisent pour une offre crédible (voir [`data-coverage.md`](data-coverage.md) §2).
   L'avantage se joue sur le **contrat** (no-data-no-pay strict, provenance + fraîcheur explicites) et la
   **DX** (GET synchrone GTIN-first vs jobs).
 - **Sur la différenciation**, nudger est **seul** sur ImpactScore, réparabilité, étiquette énergie EPREL,

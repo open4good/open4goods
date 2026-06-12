@@ -2,19 +2,26 @@
 
 > **Authority document.** This file is the single source of truth for every
 > decision that the B2B planning docs disagreed on. When any other document
-> (including `b2B.md`, `b2b-facets.md`, `b2b-ui.md`, the architecture specs, conflicts
-> with this page, **this page wins**. Every spec under `docs/architecture/` and
-> `docs/operations/` for the B2B brick links back here.
+> (including [`master-prompt.md`](implementation/master-prompt.md),
+> [`facet-catalog.md`](product/facet-catalog.md), [`ui-spec.md`](frontend/ui-spec.md),
+> or the architecture specs) conflicts with this page, **this page wins**. Every
+> spec under `docs/architecture/` and `docs/operations/` for the B2B brick links
+> back here. Start at [`README.md`](README.md) for the corpus map.
 
 ## 1. Source of truth
 
-- [`b2B.md`](b2B.md) is the **canonical master implementation prompt**. It
-  remains useful as an early exploration of the metering flow and facet pricing,
-  but every decision it makes that contradicts `b2B.md` is dead.
+- [`implementation/master-prompt.md`](implementation/master-prompt.md) is the
+  **canonical master implementation prompt**. The earlier exploration plan
+  (`prompt-b2b-on-peaceful-peacock`, a local planning note) remains useful as an
+  early study of the metering flow and facet pricing, but every decision it makes
+  that contradicts the master prompt is dead.
+- The phased execution plan and the living task state live in
+  [`implementation/plan.md`](implementation/plan.md) and
+  [`implementation/tasks.md`](implementation/tasks.md).
 
 ### Superseded decisions (peaceful-peacock -> canonical)
 
-| Topic | Superseded (peaceful-peacock) | Canonical (b2B.md) |
+| Topic | Superseded (peaceful-peacock) | Canonical (master prompt) |
 |---|---|---|
 | Dashboard auth | Email/password + BCrypt signup | **OIDC** (Google, Microsoft, GitHub, Apple) + JWT/session cookies |
 | Account model | Flat `account` table | **`organizations` + `users` + `organization_members`** (multi-tenant, org owns credits/keys/billing) |
@@ -24,7 +31,7 @@
 | Public domain | `b2b.nudger.fr` | **`product-data-api.com`** |
 | Brand | nudger B2B | **Product Data API** |
 | Credit store | Single Redis/Postgres `credit_balance` | **Postgres `credit_buckets` (authoritative)** + Redis hot mirror; expiring-first debit |
-| Catalog file | `b2b-facets.yml` | **`b2b-catalog.yml`** (shape per `b2B.md`) |
+| Catalog file | `b2b-facets.yml` | **`b2b-catalog.yml`** (shape per the master prompt) |
 
 The peaceful-peacock metering pattern (reserve-max -> settle-actual -> refund,
 Redis Lua, `HardenerBatch`) **survives** and is formalised in
@@ -35,7 +42,9 @@ and [`../architecture/product-data-api-redis-contract.md`](../architecture/produ
 
 1. **v1 = price facet only.** `GET /api/v1/products/{gtin}/price`. The catalog,
    metering, docs, dashboard, and playground patterns must generalise to future
-   facets (identity, attributes, impact, energy, review) without redesign.
+   facets (identity, attributes, impact, energy, review) without redesign. Each
+   shipped facet gets a dedicated spec under [`facets/`](facets/README.md);
+   [`facets/product-price.md`](facets/product-price.md) is the canonical example.
 2. **GTIN-first strict.** v1 accepts only a syntactically valid, checksum-correct
    GTIN as the product key. `asin` / `mpn` / `merchant_sku` / `keyword`
    resolution is **out of scope** for v1 (future facet/endpoint).
@@ -62,6 +71,13 @@ before implementing the affected surface.
 - **Live `/status` page**: deferred; do not block v1 on uptime infrastructure.
 - **Public price comparator** ("our EUR/call vs PriceAPI/SerpApi") on the
   pricing landing: marketing decision, deferred.
+- **Production deployment**: only the local runbook exists
+  ([`../operations/product-data-api-local-runbook.md`](../operations/product-data-api-local-runbook.md)).
+  Hosting, DNS, TLS, CI/CD deploy pipeline, and managed Postgres/Redis for
+  `product-data-api.com` are unspecified; decide before launch (not before code).
+- **GDPR / PII**: the platform stores user emails, OIDC profiles, and Stripe
+  customer data. Data-retention policy, DPA wording for `/privacy` and `/terms`,
+  and deletion workflows are unspecified; decide before public launch.
 
 ## 4. Build & platform invariants (from root `pom.xml` / `AGENTS.md`)
 
@@ -73,19 +89,44 @@ before implementing the affected surface.
 
 ## 5. Finalized Infrastructure & Security Choices (v1)
 
-1. **Cookie Domain Wildcard Configuration**: Session cookies for dashboard authentication will use `SameSite=Lax`, `Secure`, and `Domain=.product-data-api.com` configuration to allow sharing auth state across the frontend (`dashboard.product-data-api.com`) and the API backend (`api.product-data-api.com`).
+1. **Single frontend domain.** One Nuxt site serves all public, dashboard
+   (`/dashboard`), and admin (`/admin`) routes at **`product-data-api.com`**; the
+   backend is exposed at **`api.product-data-api.com`**. There is **no**
+   `dashboard.` subdomain (earlier wording mentioning one is superseded). Session
+   cookies use `SameSite=Lax`, `Secure`, and `Domain=.product-data-api.com` so the
+   browser can call the API subdomain with `credentials: 'include'`.
 2. **Distributed Scheduler Locking**: To prevent concurrent execution of `HardenerBatch` across clustered spring boot nodes, the application will use **Redis-based locks** (via ShedLock's Redis provider `shedlock-provider-redis-spring`).
 3. **Out-of-Order Stripe Webhook Resolution**: Webhook events such as `invoice.paid` and `checkout.session.completed` are processed idempotently. In cases where webhooks arrive out-of-order, the application will lazily upsert subscription and customer placeholder records in the database.
 4. **JWT Security Key Algorithm**: Dashboard tokens are signed using a symmetric shared secret with the **HS256** algorithm, matching the security convention implemented in `front-api`.
+5. **Reservation crash recovery is reconciliation-based.** Redis reservations are
+   plain `DECRBY` against the org's hot balance mirror; there is **no per-request
+   reservation TTL** (the shared balance key cannot expire individual
+   reservations). Recovery from a crash between reserve and settle is: refund in
+   `finally`/`afterCompletion`, post-settlement `reconcile` from Postgres, and the
+   periodic `HardenerBatch` reconciliation. See the
+   [redis contract](../architecture/product-data-api-redis-contract.md).
+6. **DEBIT idempotency index is composite.** A billable request may debit several
+   buckets (one ledger row per bucket touched, sharing `request_id`), so the
+   partial unique index is `UNIQUE(request_id, bucket_id) WHERE type='DEBIT'`,
+   combined with an `exists`-on-`request_id` pre-check inside the settlement
+   transaction as the request-level guard. See the
+   [data model](../architecture/product-data-api-data-model.md) and
+   [billing ledger](../architecture/product-data-api-billing-ledger.md) specs.
+7. **Request id prefix is `pdreq_`** (e.g. `pdreq_01HF...`), everywhere: response
+   envelope `meta.requestId`, `X-Request-Id` header, Problem Details, ledger
+   `request_id`, logs.
 
 ## Related
 
-- [`b2B.md`](b2B.md) - canonical master prompt
-- [`b2b-facets.md`](b2b-facets.md) - data coverage & facet catalogue
-- [`b2b-conccurrence.md`](b2b-conccurrence.md) - competitive study
-- [`b2b-ui.md`](b2b-ui.md) - frontend UX spec
-- [`b2b-frontend-build.md`](b2b-frontend-build.md) - frontend build & codegen
+- [`README.md`](README.md) - corpus map and reading order
+- [`implementation/master-prompt.md`](implementation/master-prompt.md) - canonical master prompt
+- [`implementation/plan.md`](implementation/plan.md) / [`implementation/tasks.md`](implementation/tasks.md) - phased plan & living task state
+- [`facets/README.md`](facets/README.md) - facet lifecycle, template, authoring prompt
+- [`product/facet-catalog.md`](product/facet-catalog.md) - prioritised facet catalogue & credit tiers
+- [`business/data-coverage.md`](business/data-coverage.md) - measured data coverage (+ ES queries)
+- [`business/competition.md`](business/competition.md) - competitive study
+- [`frontend/ui-spec.md`](frontend/ui-spec.md) - frontend UX spec
+- [`frontend/build.md`](frontend/build.md) - frontend build & codegen
 - Architecture specs under [`../architecture/`](../architecture/) (data model,
   redis contract, billing ledger, API contract, errors, auth, stripe, ops)
 - ADR [`0005-product-data-api-b2b-v1`](../adr/0005-product-data-api-b2b-v1.md)
-

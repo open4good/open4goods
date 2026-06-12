@@ -26,7 +26,9 @@ Implementation: `ApiKeyAuthFilter extends OncePerRequestFilter` placed before th
 authorization filter; sets an `Authentication` carrying `orgId`/`keyId`.
 `SecurityConfig` modelled on `front-api/.../config/WebSecurityConfig.java`
 (CSRF off for the stateless API, CORS from config). Public paths: `/v3/api-docs/**`,
-`/swagger-ui/**`, Redoc, `/actuator/health`, `/api/v1/auth/**`. Everything under
+`/swagger-ui/**`, Redoc, `/actuator/health`, `/api/v1/auth/**`, and
+`/api/v1/billing/stripe/webhook` (Stripe authenticates via the webhook signature,
+see the [stripe contract](product-data-api-stripe-contract.md)). Everything under
 `/api/v1/products/**` requires a valid key.
 
 ## 2. Dashboard / admin auth (OIDC)
@@ -41,7 +43,7 @@ per provider) and:
    first-time users, and applies the one-time free 2500-credit grant.
 4. Computes `is_platform_admin` from the configurable admin-email allowlist.
 5. Issues an access JWT (short-lived) + refresh JWT, and writes them as **HttpOnly**
-   `Secure` `SameSite=Lax` cookies with `Domain=.product-data-api.com` configuration to allow sharing auth state across the frontend (`dashboard.product-data-api.com`) and the API backend (`api.product-data-api.com`). Bearer JWT is also accepted (API clients,
+   `Secure` `SameSite=Lax` cookies with `Domain=.product-data-api.com` configuration to allow sharing auth state across the frontend (`product-data-api.com`, which serves the `/dashboard` and `/admin` routes - single frontend domain, no `dashboard.` subdomain) and the API backend (`api.product-data-api.com`). Bearer JWT is also accepted (API clients,
    tests).
 
 Other endpoints: `POST /api/v1/auth/refresh`, `POST /api/v1/auth/logout`,
@@ -78,7 +80,7 @@ Roles on `organization_members.role`. Permission matrix:
 
 Enforce with method security (`@PreAuthorize`) resolving the caller's role in the
 **active organization** (from session/JWT org context). Disabled actions in the
-UI must explain the missing role (see [`../b2b/b2b-ui.md`](../b2b/b2b-ui.md) 7.2).
+UI must explain the missing role (see [`../b2b/frontend/ui-spec.md`](../b2b/frontend/ui-spec.md) 7.2).
 
 **Platform admin** (`/api/v1/admin/**`) is separate from org roles: gated by
 `users.is_platform_admin`, computed from the admin-email allowlist. Every admin

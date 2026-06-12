@@ -1,19 +1,19 @@
 # Product Data API - frontend build, layout & OpenAPI codegen
 
-> Canonical authority: [`00-canonical-decisions.md`](00-canonical-decisions.md).
-> Companion to the UX spec [`b2b-ui.md`](b2b-ui.md). Resolves two
+> Canonical authority: [`00-canonical-decisions.md`](../00-canonical-decisions.md).
+> Companion to the UX spec [`ui-spec.md`](ui-spec.md). Resolves two
 > implementation ambiguities the UX spec left open: the **project layout** and the
 > **OpenAPI client codegen pipeline**. `b2b-frontend` is bootstrapped from
 > `/home/goulven/git/infera/apps/frontend`.
 
 ## 1. Project layout (reconciled)
 
-`b2b-ui.md` 4 sketched an `app/`-nested layout (`app/components/`, `app/pages/`,
+`ui-spec.md` 4 sketched an `app/`-nested layout (`app/components/`, `app/pages/`,
 ...). The actual Infera bootstrap source uses a **flat** Nuxt layout
 (`pages/`, `composables/`, `domains/`, `components/`, `server/`, `content/`,
 `i18n/` at the project root - verified in `infera/apps/frontend`). To keep the
 bootstrap mechanical, **adopt the flat Infera layout** and treat the `app/`
-drawing in `b2b-ui.md` 4 as illustrative grouping, not literal paths.
+drawing in `ui-spec.md` 4 as illustrative grouping, not literal paths.
 
 ```text
 b2b-frontend/
@@ -31,7 +31,7 @@ b2b-frontend/
   nuxt.config.ts, eslint.config.mjs, tsconfig.json, content.config.ts, AGENTS.md
 ```
 
-Stack invariants (from `b2B.md` / `b2b-ui.md`): Nuxt 4, Vue 3, Vuetify 4, TS,
+Stack invariants (from `master-prompt.md` / `ui-spec.md`): Nuxt 4, Vue 3, Vuetify 4, TS,
 `@nuxtjs/i18n` (`prefix_except_default`, default `en`, French `/fr/`),
 `@nuxtjs/seo`, `@nuxt/content`. All UI copy localized; every route has localized
 SEO metadata.
@@ -54,7 +54,12 @@ Reuse the Infera pattern (`infera/apps/frontend/scripts/generate-openapi.ts` +
 
 ## 3. Wildcard Cookie Session Calls
 
-With session cookies configured for subdomain wildcard sharing (`Domain=.product-data-api.com`), the browser dashboard at `dashboard.product-data-api.com` can make requests directly to the API backend at `api.product-data-api.com` using standard credentials forwarding (e.g. `credentials: 'include'` in fetch).
+The single Nuxt site at `product-data-api.com` serves the public pages **and**
+the `/dashboard` + `/admin` routes (canonical decision - there is no `dashboard.`
+subdomain). With session cookies configured for subdomain wildcard sharing
+(`Domain=.product-data-api.com`), the browser can call the API backend at
+`api.product-data-api.com` directly using standard credentials forwarding
+(e.g. `credentials: 'include'` in fetch).
 
 For calls that require high-privilege operations, server credentials, or secrets, Nuxt **server routes** (`server/api/...`) are still used as backend-for-frontend (BFF) wrappers.
 
@@ -63,9 +68,25 @@ Playground live mode uses the endpoint
 language }`; the backend executes the real external call with the selected key and
 returns the executed request (key masked), response body+headers, and metering
 (`billable`, `creditsConsumed`, `creditsRemaining`, `reason`). See
-[`b2b-ui.md`](b2b-ui.md) 7.5.
+[`ui-spec.md`](ui-spec.md) 7.5.
 
-## 4. Validation
+## 4. SEO foundation
+
+Per-route metadata is specified in [`ui-spec.md`](ui-spec.md); per-facet SEO plans
+live in each facet spec ([`../facets/`](../facets/README.md)). The site-wide
+foundation (`@nuxtjs/seo` + `nuxt.config.ts`) must provide:
+
+- canonical URLs on every route (`https://product-data-api.com/...`);
+- `hreflang` alternates between `/` (en) and `/fr/` pages (i18n module);
+- `sitemap.xml` covering public + docs routes in both locales (dashboard/admin
+  routes excluded);
+- `robots.txt` allowing public/docs routes and disallowing `/dashboard`,
+  `/admin`, and API paths;
+- structured data: `Organization` + `WebSite` on the landing page, `TechArticle`
+  (or `FAQPage` where relevant) on docs pages;
+- OpenGraph/Twitter metadata with localized titles/descriptions.
+
+## 5. Validation
 
 ```bash
 pnpm --dir b2b-frontend lint
@@ -74,7 +95,7 @@ pnpm --dir b2b-frontend test
 pnpm --dir b2b-frontend build
 ```
 
-Required focused tests are listed in [`b2b-ui.md`](b2b-ui.md) 12 (i18n routing,
+Required focused tests are listed in [`ui-spec.md`](ui-spec.md) 12 (i18n routing,
 localized SEO, docs rendering, pricing catalog from backend, login/session,
 dashboard states, key create/rotate/revoke, playground success/401/402/no-data-no-pay,
 admin role gating, admin manual grant).
