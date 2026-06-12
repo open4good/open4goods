@@ -460,7 +460,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
         String model = displayValue(manufactureInfo.getModel());
         if (StringUtils.isNotBlank(model)) {
             if (model.length() > 15) {
-                model = IdHelper.extractBrandUids(model).stream().findFirst().orElse(model);
+                model = IdHelper.extractModelTokens(model).stream().findFirst().orElse(model);
             }
             fragment.addReferentielAttribute(ReferentielKey.MODEL, model, ModelCandidateSource.STRUCTURED_DATA);
         }

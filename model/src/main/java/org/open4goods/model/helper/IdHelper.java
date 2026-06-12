@@ -12,7 +12,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.open4goods.model.datafragment.DataFragment;
-import org.open4goods.model.exceptions.InvalidParameterException;
+import org.open4goods.model.util.ProductModelCandidateHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +25,8 @@ public class IdHelper {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(IdHelper.class);
 
-	private static final Pattern brandUid = Pattern.compile("\\w*\\-?(\\d[A-Za-z])+|([A-Za-z]\\d)+\\-?\\w*");
+	/** Legacy token pattern used by {@link #extractModelTokens}. */
+	private static final Pattern LEGACY_BRAND_UID_PATTERN = Pattern.compile("\\w*\\-?(\\d[A-Za-z])+|([A-Za-z]\\d)+\\-?\\w*");
 
 	private static final Pattern DIACRITICS_PATTERN = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
 
@@ -164,53 +165,39 @@ public class IdHelper {
 	}
 
 	/**
-	 * Extract brandUid from product name
+	 * Extracts the most likely manufacturer model code from a data fragment's offer
+	 * names by delegating to
+	 * {@link ProductModelCandidateHelper#extractModelsFromTitles}.
 	 *
-	 * @return
-	 * @throws InvalidParameterException
+	 * <p>The best (highest-frequency, then shortest, then lexical) candidate is
+	 * returned. When no qualifying token is found, {@code null} is returned.
+	 * Ambiguous multi-candidate cases are resolved by the central helper's ranking
+	 * instead of throwing.
+	 *
+	 * @param dataFragment source fragment whose names are scanned
+	 * @return best model candidate, or {@code null} when none qualifies
 	 */
-	public static String extractModelFromNames(final DataFragment dataFragment) throws InvalidParameterException {
-		final Set<String> brandUids = new HashSet<>();
-		for (final String name : dataFragment.getNames()) {
-			// TODO(conf,P2,0.25) : Use filter parameters from conf (see cm)
-			final Set<String> extracted = extractBrandUids(name).stream().filter(e -> !e.endsWith("CM")).collect(Collectors.toSet());
-			brandUids.addAll(extracted);
-		}
-
-		if (brandUids.size() == 1) {
-			return IdHelper.sanitize(brandUids.iterator().next());
-
-		} else if (brandUids.size() > 1) {
-			throw new InvalidParameterException("Multiple brandUids extracted from names : "+StringUtils.join(dataFragment.getNames(), ", ")+" : " + StringUtils.join(brandUids, ", "));
-		}
-		return null;
-
+	public static String extractModelFromNames(final DataFragment dataFragment) {
+		return ProductModelCandidateHelper.extractModelsFromTitles(dataFragment.getNames()).best();
 	}
 
 	/**
-	 * Extract brandUid from a String
-	 * TODO : rename extract brand -> extractModel
-
-	 * @return
+	 * Extracts manufacturer-like model tokens from a single string using a
+	 * legacy token-boundary pattern. Used by Amazon model string shortening; prefer
+	 * {@link ProductModelCandidateHelper#extractModelsFromTitles} for new callers.
+	 *
+	 * @param name raw string to scan
+	 * @return set of uppercased model-like tokens (may be empty)
 	 */
-
-	public static Set<String> extractBrandUids(final String name) {
-		final Set<String> brandUids = new HashSet<>();
-		final String[] frags = name.split(" ");
-
-		for (final String f : frags) {
-			//TODO(conf,0.25,P3) : branduid minimum length here) : from conf
-			if (f.length() > 3) {
-				final boolean isVendorUid = brandUid.matcher(f).find();
-				if (isVendorUid) {
-					brandUids.add(f.toUpperCase());
-					LOGGER.debug("Extracted MODEL  ({}) from ({}) ", f, name);
-				}
+	public static Set<String> extractModelTokens(final String name) {
+		final Set<String> tokens = new HashSet<>();
+		for (final String fragment : name.split(" ")) {
+			if (fragment.length() > 3 && LEGACY_BRAND_UID_PATTERN.matcher(fragment).find()) {
+				tokens.add(fragment.toUpperCase());
+				LOGGER.debug("Extracted model token ({}) from ({})", fragment, name);
 			}
 		}
-
-		return brandUids;
-
+		return tokens;
 	}
 
 	public static String getCategoryName(final String name) {
@@ -276,11 +263,6 @@ public class IdHelper {
 			}
 		}
 		return ret.toString();
-		//		if (ret.length() > 3) {
-		//			return ret.toString();
-		//		} else {
-		//			throw new InvalidParameterException("Cannot get a clean name for"+name+", it would be "+ret+" and is too short.");
-		//		}
 	}
 
 	/**
@@ -301,11 +283,6 @@ public class IdHelper {
 			}
 		}
 		return ret.toString();
-		//		if (ret.length() > 3) {
-		//			return ret.toString();
-		//		} else {
-		//			throw new InvalidParameterException("Cannot get a clean name for"+name+", it would be "+ret+" and is too short.");
-		//		}
 	}
 
 

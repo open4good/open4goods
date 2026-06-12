@@ -15,7 +15,6 @@ import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.datafragment.ProviderSupportType;
-import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.helper.IdHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -195,22 +194,17 @@ public class DataFragmentCompletionService {
 		final Attribute a = dataFragment.getAttribute(ReferentielKey.MODEL.toString());
 
 		// ////////////////////////////////
-		// // Extracting the brand Uid
+		// // Extracting the model from offer names
 		// ////////////////////////////////
 
 		if (conf.getExtractBrandUidFromName()) {
 
 			if (null != a) {
-				dedicatedLogger.warn("Already have MODEL {}, will skip extraction of this attribute from the name",a.getRawValue());
+				dedicatedLogger.warn("Already have MODEL {}, will skip extraction of this attribute from the name", a.getRawValue());
 				return;
 			}
 
-			String bId = null;
-			try {
-				bId = IdHelper.extractModelFromNames(dataFragment);
-			} catch (final InvalidParameterException e) {
-				LOGGER.info(e.getMessage());
-			}
+			String bId = IdHelper.extractModelFromNames(dataFragment);
 			if (null != bId) {
 				dataFragment.addReferentielAttribute(ReferentielKey.MODEL, bId);
 			}
