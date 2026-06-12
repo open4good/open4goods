@@ -210,6 +210,18 @@
       <optional>true</optional>
     </dependency>
 
+    <!-- In-process MaxMind GeoIP City lookups (user-to-factory distance). -->
+    <dependency>
+      <groupId>com.maxmind.geoip2</groupId>
+      <artifactId>geoip2</artifactId>
+      <version>5.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+      <version>1.28.0</version>
+    </dependency>
+
 
   </dependencies>
 

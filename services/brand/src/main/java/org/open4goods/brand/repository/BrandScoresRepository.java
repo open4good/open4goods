@@ -49,4 +49,13 @@ public interface BrandScoresRepository extends ElasticsearchRepository<BrandScor
                   }
                """)
     List<BrandScore> findByDatasourceNameAndBrandNameLike(String datasourceName, String brandName);
+
+    @Query("""
+                  {
+                     "match_phrase":{
+                        "brandName": "#{#brandName}"
+                     }
+                  }
+               """)
+    List<BrandScore> findByBrandName(String brandName);
 }

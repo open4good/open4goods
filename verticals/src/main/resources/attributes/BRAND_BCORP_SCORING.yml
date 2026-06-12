@@ -1,0 +1,47 @@
+# ============================================================================
+# BRAND_BCORP_SCORING — Brand B Corp score (Score B Corp de la marque)
+# Maintained: 2026-06-12 by brands-maintenance prompt
+# Type: NUMERIC
+# Purpose: Curated B Corp certification score aggregated at brand/company level.
+#          Sourced in the brands-company-mapping referential (provider "bcorp").
+# Note: Displayable score; intentionally NOT part of availableImpactScoreCriterias
+#       so it does not perturb the ImpactScore until explicitly opted in.
+# ============================================================================
+
+key: "BRAND_BCORP_SCORING"
+userBetterIs: "GREATER"
+impactBetterIs: "GREATER"
+faIcon: "mdi-certificate"
+name:
+  default: "Brand B Corp score"
+  fr: "Score B Corp de la marque"
+filteringType: "NUMERIC"
+asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "MINMAX_OBSERVED"
+  missingValuePolicy: "NEUTRAL"
+  degenerateDistributionPolicy: "FALLBACK"
+scoreTitle:
+  fr: "Score B Corp de la marque"
+  en: "Brand B Corp score"
+scoreDescription:
+  fr: "Score de certification B Corp de la marque"
+  en: "Brand B Corp certification score"
+scoreUtility:
+  fr: "Reflète les standards sociaux et environnementaux de l'entreprise propriétaire de la marque."
+  en: "Reflects the social and environmental standards of the company owning the brand."
+
+synonyms:
+  all:
+    - "BCORP"
+    - "B_CORP"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

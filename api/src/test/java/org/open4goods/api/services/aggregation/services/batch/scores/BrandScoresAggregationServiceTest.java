@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.open4goods.brand.model.BrandScore;
 import org.slf4j.LoggerFactory;
 
-class SustainalyticsAggregationServiceTest {
+class BrandScoresAggregationServiceTest {
 
-    private final SustainalyticsAggregationService service = new SustainalyticsAggregationService(
-            LoggerFactory.getLogger(SustainalyticsAggregationServiceTest.class), null, null);
+    private final BrandScoresAggregationService service = new BrandScoresAggregationService(
+            LoggerFactory.getLogger(BrandScoresAggregationServiceTest.class), null, null);
 
     @Test
     void riskLevelIsUnknownWhenScoreMissing() {
@@ -33,5 +33,11 @@ class SustainalyticsAggregationServiceTest {
         brandScore.setScoreValue("15");
 
         assertThat(service.getRiskLevel(brandScore)).isEqualTo("low");
+    }
+
+    @Test
+    void scoreNameIsDerivedFromProvider() {
+        assertThat(BrandScoresAggregationService.scoreName("cdp")).isEqualTo("BRAND_CDP_SCORING");
+        assertThat(BrandScoresAggregationService.scoreName("good-on-you")).isEqualTo("BRAND_GOOD_ON_YOU_SCORING");
     }
 }

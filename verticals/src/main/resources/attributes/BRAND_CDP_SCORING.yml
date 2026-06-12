@@ -1,0 +1,47 @@
+# ============================================================================
+# BRAND_CDP_SCORING — Brand CDP climate score (Score climat CDP de la marque)
+# Maintained: 2026-06-12 by brands-maintenance prompt
+# Type: NUMERIC
+# Purpose: Curated CDP climate disclosure score aggregated at brand/company level.
+#          Sourced in the brands-company-mapping referential (provider "cdp").
+# Note: Displayable score; intentionally NOT part of availableImpactScoreCriterias
+#       so it does not perturb the ImpactScore until explicitly opted in.
+# ============================================================================
+
+key: "BRAND_CDP_SCORING"
+userBetterIs: "GREATER"
+impactBetterIs: "GREATER"
+faIcon: "mdi-leaf"
+name:
+  default: "Brand CDP climate score"
+  fr: "Score climat CDP de la marque"
+filteringType: "NUMERIC"
+asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "MINMAX_OBSERVED"
+  missingValuePolicy: "NEUTRAL"
+  degenerateDistributionPolicy: "FALLBACK"
+scoreTitle:
+  fr: "Score climat CDP de la marque"
+  en: "Brand CDP climate score"
+scoreDescription:
+  fr: "Score de transparence climatique CDP de la marque"
+  en: "Brand CDP climate disclosure score"
+scoreUtility:
+  fr: "Reflète la transparence et l'action climatique de l'entreprise propriétaire de la marque."
+  en: "Reflects the climate transparency and action of the company owning the brand."
+
+synonyms:
+  all:
+    - "CDP"
+    - "CDP_CLIMATE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

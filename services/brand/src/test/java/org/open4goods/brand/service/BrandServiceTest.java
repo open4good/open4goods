@@ -20,7 +20,7 @@ class BrandServiceTest {
 
     @Test
     void resolvesCanonicalBrandFromSynonym() throws Exception {
-        BrandService brandService = service(v2Referential());
+        BrandService brandService = serviceWithCompany();
 
         Brand resolved = brandService.resolve("LG Electronics Inc.");
 
@@ -29,23 +29,8 @@ class BrandServiceTest {
     }
 
     @Test
-    void resolvesCompanyDetailsAndOfficialDomains() throws Exception {
-        CompanyLoader companyLoader = id -> {
-            if ("lg-electronics-inc".equals(id)) {
-                return """
-                        {
-                          "id": "lg-electronics-inc",
-                          "name": "LG Electronics, Inc.",
-                          "factoryLocations": ["South Korea"],
-                          "scorings": {"sustainalytics": 75}
-                        }
-                        """;
-            }
-            throw new IllegalArgumentException("Not found");
-        };
-
-        BrandService brandService = new BrandService(remoteFileCachingService, serialisationService,
-                this::v2Referential, companyLoader);
+    void resolvesCompanyDetailsManufacturingAndScores() throws Exception {
+        BrandService brandService = serviceWithCompany();
 
         Brand resolved = brandService.resolve("LG");
         assertThat(resolved.getBrandName()).isEqualTo("LG");
@@ -53,8 +38,14 @@ class BrandServiceTest {
         assertThat(resolved.getOfficialDomains()).containsExactly("lg.com");
         assertThat(resolved.getCompany()).isNotNull();
         assertThat(resolved.getCompany().getId()).isEqualTo("lg-electronics-inc");
-        assertThat(resolved.getCompany().getFactoryLocations()).containsExactly("South Korea");
-        assertThat(resolved.getCompany().getScorings()).containsEntry("sustainalytics", 75);
+        assertThat(resolved.getCompany().getManufacturing()).hasSize(1);
+        assertThat(resolved.getCompany().getManufacturing().get(0).getCountry()).isEqualTo("KR");
+        assertThat(resolved.getCompany().getScores()).containsKey("cdp");
+
+        // Category-aware manufacturing lookup
+        assertThat(brandService.manufacturingSites("LG", "tv")).hasSize(1);
+        assertThat(brandService.manufacturingSites("LG", "smartphone")).isEmpty();
+        assertThat(brandService.getCompany("lg-electronics-inc")).isPresent();
     }
 
     @Test
@@ -64,7 +55,7 @@ class BrandServiceTest {
         };
 
         BrandService brandService = new BrandService(remoteFileCachingService, serialisationService,
-                this::v2Referential, companyLoader);
+                this::v3Referential, companyLoader);
 
         Brand resolved = brandService.resolve("LG");
         assertThat(resolved.getBrandName()).isEqualTo("LG");
@@ -77,7 +68,7 @@ class BrandServiceTest {
 
     @Test
     void appliesLegacyAliasesBeforeCentralResolution() throws Exception {
-        BrandService brandService = service(v2Referential());
+        BrandService brandService = serviceWithCompany();
         Map<String, String> aliases = new HashMap<>();
         aliases.put("LG Electronics Inc.", "LG");
 
@@ -89,7 +80,7 @@ class BrandServiceTest {
 
     @Test
     void incrementsMissCounterForUnknownBrands() throws Exception {
-        BrandService brandService = service(v2Referential());
+        BrandService brandService = serviceWithCompany();
 
         Brand resolved = brandService.resolve("unknown maker");
 
@@ -109,12 +100,26 @@ class BrandServiceTest {
 
         assertThatThrownBy(() -> service(flatJson))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("v2 schema");
+                .hasMessageContaining("v3 schema");
+    }
+
+    @Test
+    void rejectsLegacyV2Referential() {
+        String v2 = """
+                {
+                  "version": 2,
+                  "brands": []
+                }
+                """;
+
+        assertThatThrownBy(() -> service(v2))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Unsupported brand referential version");
     }
 
     @Test
     void recordsIcecatEvidenceForCanonicalBrand() throws Exception {
-        BrandService brandService = service(v2Referential());
+        BrandService brandService = serviceWithCompany();
 
         brandService.addSourceEvidence("LG", "icecat", "293");
 
@@ -128,7 +133,7 @@ class BrandServiceTest {
 
     @Test
     void suggestionGeneratorKeepsNoisyValuesOutOfReviewQueue() throws Exception {
-        BrandService brandService = service(v2Referential());
+        BrandService brandService = serviceWithCompany();
 
         brandService.resolve("FOR SAMSUNG");
         brandService.resolve("OEM");
@@ -144,12 +149,37 @@ class BrandServiceTest {
         return new BrandService(remoteFileCachingService, serialisationService, () -> json, id -> "{}");
     }
 
-    private String v2Referential() {
+    private BrandService serviceWithCompany() throws Exception {
+        CompanyLoader companyLoader = id -> {
+            if ("lg-electronics-inc".equals(id)) {
+                return """
+                        {
+                          "schemaVersion": 3,
+                          "id": "lg-electronics-inc",
+                          "name": "LG Electronics, Inc.",
+                          "manufacturing": [
+                            { "categories": ["tv"], "country": "KR", "city": "Gumi",
+                              "lat": 36.12, "lon": 128.34, "type": "factory",
+                              "sources": [{ "url": "https://example.org", "label": "test", "retrievedAt": "2026-06-01" }] }
+                          ],
+                          "scores": {
+                            "cdp": { "value": 7, "rating": "A-",
+                                     "scale": { "min": 0, "max": 8, "higherIsBetter": true },
+                                     "url": "https://cdp.example", "retrievedAt": "2026-06-01" }
+                          }
+                        }
+                        """;
+            }
+            throw new IllegalArgumentException("Not found");
+        };
+        return new BrandService(remoteFileCachingService, serialisationService, this::v3Referential, companyLoader);
+    }
+
+    private String v3Referential() {
         return """
                 {
-                  "version": 2,
+                  "version": 3,
                   "updatedAt": "2026-06-12",
-                  "companyNameSource": "test",
                   "brands": [
                     {
                       "canonicalName": "LG",

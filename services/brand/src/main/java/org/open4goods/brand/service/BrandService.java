@@ -1,8 +1,8 @@
 package org.open4goods.brand.service;
 
+import java.io.File;
 import java.io.InputStream;
-import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -13,14 +13,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.open4goods.brand.config.BrandServiceProperties;
 import org.open4goods.brand.model.Brand;
 import org.open4goods.brand.model.BrandReferential;
 import org.open4goods.brand.model.BrandReferentialEntry;
 import org.open4goods.brand.model.BrandSourceEvidence;
 import org.open4goods.brand.model.BrandSuggestion;
 import org.open4goods.brand.model.Company;
+import org.open4goods.brand.model.ManufacturingSite;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
@@ -34,8 +35,7 @@ import tools.jackson.core.type.TypeReference;
 public class BrandService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BrandService.class);
-    private static final String MAPPING_URL =
-            "https://raw.githubusercontent.com/open4good/brands-company-mapping/refs/heads/main/brands-company-mapping.json";
+    private static final int SUPPORTED_VERSION = 3;
     private static final Set<String> SUGGESTION_STOP_WORDS = Set.of(
             "FOR SAMSUNG", "OEM", "NO BRAND", "SANS MARQUE", "WITHOUT BRAND", "UNBRANDED", "GENERIC");
 
@@ -47,14 +47,21 @@ public class BrandService {
     private final Map<String, Brand> brandsByName = new ConcurrentHashMap<>();
     private final Map<String, String> canonicalByIndexedName = new ConcurrentHashMap<>();
     private final Map<String, List<BrandSourceEvidence>> evidenceByCanonicalName = new ConcurrentHashMap<>();
+    private final Map<String, Company> companiesById = new ConcurrentHashMap<>();
     private Map<String, String> brandsAlias = new HashMap<>();
     private BrandReferential referential = new BrandReferential();
 
     public BrandService(RemoteFileCachingService remoteFileCachingService, SerialisationService serialisationService)
             throws Exception {
+        this(remoteFileCachingService, serialisationService, new BrandServiceProperties());
+    }
+
+    public BrandService(RemoteFileCachingService remoteFileCachingService, SerialisationService serialisationService,
+            BrandServiceProperties properties) throws Exception {
         this(remoteFileCachingService, serialisationService,
-                () -> IOUtils.toString(new URL(MAPPING_URL), Charset.defaultCharset()),
-                companyId -> IOUtils.toString(new URL("https://raw.githubusercontent.com/open4good/brands-company-mapping/refs/heads/main/company/" + companyId + ".json"), Charset.defaultCharset()));
+                () -> loadCached(remoteFileCachingService, properties.getReferentialUrl(), properties.getRefreshInDays()),
+                companyId -> loadCached(remoteFileCachingService, properties.companyUrl(companyId),
+                        properties.getRefreshInDays()));
     }
 
     public BrandService(RemoteFileCachingService remoteFileCachingService, SerialisationService serialisationService,
@@ -72,7 +79,21 @@ public class BrandService {
     }
 
     /**
-     * Loads the v2 remote referential. The in-memory index always resolves
+     * Reads a remote resource through the on-disk cache so a transient remote
+     * outage does not break startup.
+     *
+     * @param rfc the caching service
+     * @param url the resource URL
+     * @param refreshInDays cache freshness window
+     * @return the resource content as a string
+     */
+    private static String loadCached(RemoteFileCachingService rfc, String url, int refreshInDays) throws Exception {
+        File file = rfc.getResource(url, refreshInDays);
+        return Files.readString(file.toPath());
+    }
+
+    /**
+     * Loads the v3 remote referential. The in-memory index always resolves
      * canonical names and synonyms to the same {@link Brand} instance.
      */
     protected void loadBrandMappings() throws Exception {
@@ -235,17 +256,50 @@ public class BrandService {
         return referential;
     }
 
+    /**
+     * @param companyId the company identifier
+     * @return the enriched company, if present in the referential
+     */
+    public Optional<Company> getCompany(String companyId) {
+        if (StringUtils.isBlank(companyId)) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(companiesById.get(companyId));
+    }
+
+    /**
+     * Returns the manufacturing sites relevant to a product category for the
+     * company owning the given brand.
+     *
+     * @param brandName raw brand text
+     * @param verticalId open4goods vertical id (may be {@code null} for all categories)
+     * @return matching manufacturing sites, never {@code null}
+     */
+    public List<ManufacturingSite> manufacturingSites(String brandName, String verticalId) {
+        Brand brand = resolve(brandName);
+        Company company = brand.getCompany();
+        if (company == null) {
+            return List.of();
+        }
+        return company.manufacturingFor(verticalId);
+    }
+
+    public Map<String, Company> getCompaniesById() {
+        return Map.copyOf(companiesById);
+    }
+
     private BrandReferential parseReferential(String mappingsStr) throws Exception {
         Map<String, Object> raw = serialisationService.fromJsonTypeRef(mappingsStr,
                 new TypeReference<Map<String, Object>>() {
                 });
         if (!raw.containsKey("brands")) {
-            throw new IllegalArgumentException("Brand referential must use the v2 schema with a top-level brands array");
+            throw new IllegalArgumentException("Brand referential must use the v3 schema with a top-level brands array");
         }
 
         BrandReferential parsed = serialisationService.jsonMapper().readValue(mappingsStr, BrandReferential.class);
-        if (parsed.getVersion() != 2) {
-            throw new IllegalArgumentException("Unsupported brand referential version: " + parsed.getVersion());
+        if (parsed.getVersion() != SUPPORTED_VERSION) {
+            throw new IllegalArgumentException("Unsupported brand referential version: " + parsed.getVersion()
+                    + " (expected v" + SUPPORTED_VERSION + ")");
         }
         return parsed;
     }
@@ -255,6 +309,7 @@ public class BrandService {
         brandsByName.clear();
         canonicalByIndexedName.clear();
         evidenceByCanonicalName.clear();
+        companiesById.clear();
 
         for (BrandReferentialEntry entry : loaded.getBrands()) {
             String canonical = sanitizeBrand(StringUtils.defaultIfBlank(entry.getCanonicalName(), entry.getNormalizedName()));
@@ -276,6 +331,13 @@ public class BrandService {
                     LOGGER.warn("Failed to load company details for: {}, fallback to basic company details", entry.getCompanyId(), e);
                     Company fallbackCompany = new Company(entry.getCompanyId(), entry.getCompanyName());
                     brand.setCompany(fallbackCompany);
+                }
+                Company resolvedCompany = brand.getCompany();
+                if (resolvedCompany != null) {
+                    if (resolvedCompany.getId() == null || resolvedCompany.getId().isBlank()) {
+                        resolvedCompany.setId(entry.getCompanyId());
+                    }
+                    companiesById.put(resolvedCompany.getId(), resolvedCompany);
                 }
             } else if (entry.getCompanyName() != null && !entry.getCompanyName().isBlank()) {
                 Company basicCompany = new Company(null, entry.getCompanyName());

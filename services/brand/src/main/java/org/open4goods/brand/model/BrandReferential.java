@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class BrandReferential {
 
-    private int version = 2;
+    private int version = 3;
     private String updatedAt;
     private String companyNameSource;
     private List<BrandReferentialEntry> brands = new ArrayList<>();

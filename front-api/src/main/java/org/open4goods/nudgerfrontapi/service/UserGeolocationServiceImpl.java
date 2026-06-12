@@ -2,6 +2,7 @@ package org.open4goods.nudgerfrontapi.service;
 
 import org.open4goods.nudgerfrontapi.config.properties.GeocodeProperties;
 import org.open4goods.nudgerfrontapi.dto.user.UserGeolocDto;
+import org.open4goods.nudgerfrontapi.service.geoip.GeoIpResolutionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -11,7 +12,8 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 
 /**
- * Service implementation that delegates user geolocation to the geocode microservice.
+ * Resolves user geolocation, preferring the in-process MaxMind City database
+ * when available and falling back to the geocode microservice otherwise.
  */
 @Service
 public class UserGeolocationServiceImpl implements UserGeolocationService
@@ -19,16 +21,20 @@ public class UserGeolocationServiceImpl implements UserGeolocationService
     private static final Logger LOGGER = LoggerFactory.getLogger(UserGeolocationServiceImpl.class);
 
     private final RestClient restClient;
+    private final GeoIpResolutionService geoIpResolutionService;
 
     /**
      * Creates a new geolocation service.
      *
      * @param restClientBuilder REST client builder
      * @param geocodeProperties geocode configuration properties
+     * @param geoIpResolutionService local in-process GeoIP resolver
      */
-    public UserGeolocationServiceImpl(RestClient.Builder restClientBuilder, GeocodeProperties geocodeProperties)
+    public UserGeolocationServiceImpl(RestClient.Builder restClientBuilder, GeocodeProperties geocodeProperties,
+            GeoIpResolutionService geoIpResolutionService)
     {
         this.restClient = restClientBuilder.baseUrl(geocodeProperties.getBaseUrl()).build();
+        this.geoIpResolutionService = geoIpResolutionService;
     }
 
     /**
@@ -37,6 +43,12 @@ public class UserGeolocationServiceImpl implements UserGeolocationService
     @Override
     public UserGeolocDto resolve(String ip)
     {
+        UserGeolocDto local = geoIpResolutionService.resolve(ip);
+        if (local != null)
+        {
+            return local;
+        }
+
         try
         {
             return restClient.get()

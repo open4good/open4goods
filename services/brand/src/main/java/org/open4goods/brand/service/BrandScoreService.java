@@ -40,6 +40,21 @@ public class BrandScoreService {
         brandRepository.save(brandScore);
     }
 
+    /**
+     * Returns every live brand score recorded for the given brand/company name,
+     * across all score providers (datasources).
+     *
+     * @param brand the brand or company name used as the score key
+     * @return matching brand scores, never {@code null}
+     */
+    @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+    public List<BrandScore> getBrandScores(String brand) {
+        if (StringUtils.isBlank(brand)) {
+            return new ArrayList<>();
+        }
+        return brandRepository.findByBrandName(brand.trim().toLowerCase());
+    }
+
     @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
     public BrandScore getBrandScore(String brand, String datasourceName) {
         String normalizedBrand = brand.trim().toLowerCase();
