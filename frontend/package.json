@@ -52,7 +52,7 @@
     "minisearch": "^7.1.2",
     "nuxt": "^4.0.0",
     "pinia": "^3.0.3",
-    "sharp": "^0.34.0",
+    "sharp": "^0.35.0",
     "unhead": "^2.0.14",
     "vue": "3.5.35",
     "vue-barcode-reader": "^1.0.3",
