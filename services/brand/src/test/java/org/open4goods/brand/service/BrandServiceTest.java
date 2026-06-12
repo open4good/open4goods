@@ -1,12 +1,12 @@
 package org.open4goods.brand.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.open4goods.brand.model.Brand;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
@@ -14,70 +14,118 @@ import org.open4goods.services.serialisation.service.SerialisationService;
 
 class BrandServiceTest {
 
-    private BrandService brandService;
-    private RemoteFileCachingService remoteFileCachingMock;
-    private SerialisationService serialisationServiceMock;
+    private final RemoteFileCachingService remoteFileCachingService = mock(RemoteFileCachingService.class);
+    private final SerialisationService serialisationService = new SerialisationService();
 
-    @BeforeEach
-    void setUp() throws Exception {
-        remoteFileCachingMock = mock(RemoteFileCachingService.class);
-        serialisationServiceMock = mock(SerialisationService.class);
+    @Test
+    void resolvesCanonicalBrandFromSynonym() throws Exception {
+        BrandService brandService = service(v2Referential());
 
-        // Subclass to avoid network call in constructor
-        brandService = new BrandService(remoteFileCachingMock, serialisationServiceMock) {
-            @Override
-            protected void loadBrandMappings() {
-                // Manually populate some brands for testing
-                // We access the private map if possible, or we just rely on resolve working if we could verify it.
-                // But wait, resolve uses brandsByName which is private.
-                // We need to verify how to populate brandsByName for test without reflection?
-                // Actually loadBrandMappings populates brandsByName. 
-                // We can't access brandsByName directly from here unless we use reflection or if we put this test in same package.
-                // This test IS in same package (org.open4goods.brand.service).
-                // But brandsByName is private.
-                // We can use reflection to populate it in this override.
-            }
-            
-            // Allow injecting test data
-            public void setTestBrand(String name, String company) {
-                 // But we can't access brandsByName (private).
-                 // We will rely on aliases testing. 
-                 // If resolve uses aliases, it should work even if brand not in map (it returns new Brand(alias)).
-                 // But we want to map "LG ELECTRONICS" -> "LG" -> "LG Electronics, Inc."
-                 // So we need "LG" to be in the map.
-            }
-        };
-        
-        // Reflection to inject "LG" into brandsByName
-        java.lang.reflect.Field field = BrandService.class.getDeclaredField("brandsByName");
-        field.setAccessible(true);
-        Map<String, Brand> map = (Map<String, Brand>) field.get(brandService);
-        Brand lg = new Brand("LG");
-        lg.setCompanyName("LG Electronics, Inc.");
-        map.put("LG", lg);
+        Brand resolved = brandService.resolve("LG Electronics Inc.");
+
+        assertThat(resolved.getBrandName()).isEqualTo("LG");
+        assertThat(resolved.getCompanyName()).isEqualTo("LG Electronics, Inc.");
     }
 
     @Test
-    void testResolveWithAlias() {
-        // Without alias, it should fail (return brand with input name)
-        Brand resolved = brandService.resolve("LG ELECTRONICS");
-        // Expectation: It returns "LG ELECTRONICS" as brand name (unresolved)
-        // If it was resolved to LG, it should have company name "LG Electronics, Inc."
-        
-        // This assertion confirms current behavior (FAILING requirement)
-        // assertEquals("LG Electronics, Inc.", resolved.getCompanyName()); 
-        
-        // We assert what we expect to FAIL currently
-        // Currently: "LG ELECTRONICS" -> Sanitized "LG ELECTRONICS" -> Not found -> New Brand("LG ELECTRONICS") -> No company name.
-        
-        assertEquals(null, resolved.getCompanyName(), "Currently should be null/unknown");
-
-        // Now we want to assert that AFTER fix, it works. 
+    void appliesLegacyAliasesBeforeCentralResolution() throws Exception {
+        BrandService brandService = service(v2Referential());
         Map<String, String> aliases = new HashMap<>();
-        aliases.put("LG ELECTRONICS", "LG");
-        brandService.setBrandsAlias(aliases);
-        
-        resolved = brandService.resolve("LG ELECTRONICS");
-        assertEquals("LG Electronics, Inc.", resolved.getCompanyName());
+        aliases.put("LG Electronics Inc.", "LG");
+
+        Brand resolved = brandService.resolve("LG Electronics Inc.", aliases);
+
+        assertThat(resolved.getBrandName()).isEqualTo("LG");
+        assertThat(resolved.getCompanyName()).isEqualTo("LG Electronics, Inc.");
+    }
+
+    @Test
+    void incrementsMissCounterForUnknownBrands() throws Exception {
+        BrandService brandService = service(v2Referential());
+
+        Brand resolved = brandService.resolve("unknown maker");
+
+        assertThat(resolved.getBrandName()).isEqualTo("UNKNOWN MAKER");
+        assertThat(resolved.getCompanyName()).isNull();
+        assertThat(brandService.getMissCounter()).containsEntry("UNKNOWN MAKER", 1L);
+    }
+
+    @Test
+    void rejectsLegacyFlatJsonReferential() {
+        String flatJson = """
+                {
+                  "LG": "LG Electronics, Inc.",
+                  "SAMSUNG": "Samsung Electronics Co., Ltd."
+                }
+                """;
+
+        assertThatThrownBy(() -> service(flatJson))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("v2 schema");
+    }
+
+    @Test
+    void recordsIcecatEvidenceForCanonicalBrand() throws Exception {
+        BrandService brandService = service(v2Referential());
+
+        brandService.addSourceEvidence("LG", "icecat", "293");
+
+        assertThat(brandService.getEvidenceByCanonicalName()).containsKey("LG");
+        assertThat(brandService.getEvidenceByCanonicalName().get("LG"))
+                .anySatisfy(evidence -> {
+                    assertThat(evidence.getSource()).isEqualTo("icecat");
+                    assertThat(evidence.getSourceId()).isEqualTo("293");
+                });
+    }
+
+    @Test
+    void suggestionGeneratorKeepsNoisyValuesOutOfReviewQueue() throws Exception {
+        BrandService brandService = service(v2Referential());
+
+        brandService.resolve("FOR SAMSUNG");
+        brandService.resolve("OEM");
+        brandService.resolve("Sans marque");
+        brandService.resolve("Real Candidate");
+
+        assertThat(brandService.generateSuggestions())
+                .extracting("normalizedName")
+                .containsExactly("REAL CANDIDATE");
+    }
+
+    private BrandService service(String json) throws Exception {
+        return new BrandService(remoteFileCachingService, serialisationService, () -> json);
+    }
+
+    private String v2Referential() {
+        return """
+                {
+                  "version": 2,
+                  "updatedAt": "2026-06-12",
+                  "companyNameSource": "test",
+                  "brands": [
+                    {
+                      "canonicalName": "LG",
+                      "normalizedName": "LG",
+                      "companyName": "LG Electronics, Inc.",
+                      "status": "reviewed",
+                      "synonyms": [
+                        "LG ELECTRONICS",
+                        "LG ELECTRONICS INC",
+                        "LG Electronics",
+                        "LG Electronics Inc."
+                      ],
+                      "sources": [
+                        {
+                          "source": "icecat",
+                          "sourceId": "293",
+                          "rawName": "LG",
+                          "count": 1
+                        }
+                      ]
+                    }
+                  ],
+                  "suggestions": []
+                }
+                """;
     }
 }

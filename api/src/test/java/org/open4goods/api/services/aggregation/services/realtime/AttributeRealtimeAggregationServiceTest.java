@@ -9,6 +9,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.open4goods.brand.model.Brand;
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.icecat.services.IcecatFeatureResolver;
 import org.open4goods.model.attribute.Attribute;
@@ -29,11 +30,14 @@ class AttributeRealtimeAggregationServiceTest {
         private AttributeRealtimeAggregationService service;
         private VerticalConfig verticalConfig;
         private IcecatFeatureResolver icecatFeatureResolver;
+        private BrandService brandService;
 
         @BeforeEach
         void setUp() {
                 Logger logger = LoggerFactory.getLogger(AttributeRealtimeAggregationServiceTest.class);
-                BrandService brandService = Mockito.mock(BrandService.class);
+                brandService = Mockito.mock(BrandService.class);
+                Mockito.when(brandService.resolve(Mockito.anyString(), Mockito.anyMap()))
+                                .thenAnswer(invocation -> new Brand(invocation.getArgument(0, String.class).toUpperCase()));
                 VerticalsConfigService verticalConfigService = Mockito.mock(VerticalsConfigService.class);
                 icecatFeatureResolver = Mockito.mock(IcecatFeatureResolver.class);
                 service = new AttributeRealtimeAggregationService(verticalConfigService, brandService, logger, icecatFeatureResolver);
@@ -86,6 +90,21 @@ class AttributeRealtimeAggregationServiceTest {
 
                 assertThat(product.getAttributes().getAll().get("COULEUR").getIcecatTaxonomyIds())
                                 .containsExactlyInAnyOrder(46, 46757);
+        }
+
+        @Test
+        void onProductStoresCanonicalBrandAcrossPartnerAliases() throws Exception {
+                Product product = new Product(123L);
+                product.addBrand("partner", "LG Electronics Inc.", null, null);
+                product.addBrand("icecat", "LG Electronics", null, null);
+                Brand lg = new Brand("LG");
+                lg.setCompanyName("LG Electronics, Inc.");
+                Mockito.when(brandService.resolve(Mockito.startsWith("LG"), Mockito.anyMap())).thenReturn(lg);
+
+                service.onProduct(product, verticalConfig);
+
+                assertThat(product.brand()).isEqualTo("LG");
+                assertThat(product.getAkaBrands().values()).containsOnly("LG");
         }
 
         private Product buildBaseProduct() {

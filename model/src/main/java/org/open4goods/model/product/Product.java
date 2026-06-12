@@ -1021,8 +1021,9 @@ public class Product implements Standardisable {
 		if (null != brandsMappings) {
 			String replacement = brandsMappings.get(brand);
 			if (null != replacement) {
+				String original = brand;
 				brand = replacement;
-				logger.info("replacing brand {} with {}", brand, replacement);
+				logger.info("replacing brand {} with {}", original, replacement);
 			}
 		}
 

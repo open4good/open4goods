@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
+import org.open4goods.brand.model.Brand;
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.icecat.services.IcecatFeatureResolver;
@@ -48,9 +49,18 @@ import org.slf4j.Logger;
  *   <li>Merges descriptions from all datasources into the product.</li>
  * </ul>
  *
- * <p>TODO(p3,perf): Attribute exclusions in {@code onProduct} are applied on
- * every sanitisation run. Once an initial cleanup batch has run they could be
- * skipped in realtime mode.
+ * <p>TODO(p3,perf): Attribute exclusions in {@code onProduct} currently scan
+ * and mutate the product attribute map on every realtime sanitisation pass,
+ * even when neither the product attributes nor the vertical exclusion set
+ * changed. This is useful while running cleanup batches because old indexed
+ * products may still carry attributes that were excluded after ingestion. In
+ * steady-state realtime aggregation, we can avoid the repeated map mutation
+ * once products carry a sanitisation/config marker such as the vertical
+ * exclusion version or hash. A safe optimization would be: run a one-time
+ * cleanup batch for existing products, stamp products after exclusions are
+ * applied, and skip this block only when the stamp matches the current vertical
+ * config. Without that marker, skipping here can leave stale excluded
+ * attributes in products that were indexed before a config change.
  * <p>TODO: Add BRAND / MODEL from attribute-match candidates (currently only
  * title-extraction is used).
  */
@@ -106,9 +116,9 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		// Cleaning attributes that must be discarded
 		//////////////////////////////////////////
 
-		// Remove excluded attributes.
-		// TODO(p3,perf) / Usefull for batch mode, could remove once initial
-		// sanitization
+		// Remove excluded attributes. This is intentionally repeated until product
+		// sanitisation can be tied to a vertical-config version/hash; otherwise old
+		// products can retain attributes excluded after their first ingestion.
 		Set<String> exclusions = vConf.getAttributesConfig().getExclusions();
 		if (exclusions != null && !exclusions.isEmpty()) {
 			data.getAttributes().getAll().keySet().removeAll(exclusions);
@@ -124,8 +134,9 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 		if (data.getEprelDatas() != null) {
 			String supplier = data.getEprelDatas().getSupplierOrTrademark();
-			data.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, supplier);
-			data.addBrand("eprel", supplier, vConf.getBrandsExclusion(), vConf.getBrandsAlias());
+			String canonicalSupplier = resolveBrandName(supplier, vConf);
+			data.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, canonicalSupplier);
+			data.addBrand("eprel", canonicalSupplier, vConf.getBrandsExclusion(), vConf.getBrandsAlias());
 
 			String model = data.getEprelDatas().getModelIdentifier();
 			data.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, model);
@@ -138,10 +149,10 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			data.getAttributes().getReferentielAttributes().remove(ReferentielKey.BRAND);
 			data.akaBrands().clear();
 			// NOTE : No datasource for first, cause first will be set as referentiel brand
-			data.addBrand(null, actualBrand, vConf.getBrandsExclusion(), vConf.getBrandsAlias());
+			data.addBrand(null, resolveBrandName(actualBrand, vConf), vConf.getBrandsExclusion(), vConf.getBrandsAlias());
 
 			akaBrands.entrySet().forEach(e -> {
-				data.addBrand(e.getKey(), e.getValue(), vConf.getBrandsExclusion(), vConf.getBrandsAlias());
+				data.addBrand(e.getKey(), resolveBrandName(e.getValue(), vConf), vConf.getBrandsExclusion(), vConf.getBrandsAlias());
 			});
 			// Adding model from title
 			extractModelFromTitles(data);
@@ -662,7 +673,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		///////////////////////
 		String brand = fragment.brand();
 		if (!StringUtils.isEmpty(brand)) {
-			output.addBrand(fragment.getDatasourceName(), brand, vConf.getBrandsExclusion(), vConf.getBrandsAlias());
+			output.addBrand(fragment.getDatasourceName(), resolveBrandName(brand, vConf), vConf.getBrandsExclusion(), vConf.getBrandsAlias());
 		}
 
 		///////////////////////
@@ -698,7 +709,6 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			}
 
 		}
-
 	}
 
 	/**
@@ -734,7 +744,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 		return parseValue(attr.getValue(), attrConf, vConf);
 
-	}
+}
 
 	/**
 	 * Applies the generic parser options configured on an attribute value.
@@ -899,6 +909,14 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		}
 
 		return numericCandidate;
+	}
+
+	private String resolveBrandName(String rawBrand, VerticalConfig vConf) {
+		if (StringUtils.isBlank(rawBrand)) {
+			return rawBrand;
+		}
+		Brand brand = brandService.resolve(rawBrand, vConf.getBrandsAlias());
+		return brand.getBrandName();
 	}
 
 }

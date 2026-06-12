@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.open4goods.brand.model.Brand;
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.icecat.config.yml.IcecatConfiguration;
 import org.open4goods.icecat.model.IcecatFeature;
@@ -15,7 +14,6 @@ import org.open4goods.icecat.model.IcecatModel;
 import org.open4goods.icecat.model.IcecatSupplier;
 import org.open4goods.icecat.services.IcecatFileDownloadService;
 import org.open4goods.model.exceptions.TechnicalException;
-import org.open4goods.model.helper.IdHelper;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,8 +100,9 @@ public class FeatureLoader {
     }
 
     /**
-     * Loads all brands/suppliers from SuppliersList.xml, resolves them via {@link BrandService},
-     * and stores the raw supplier objects in {@link #icecatSuppliers} for ES indexing.
+     * Loads all brands/suppliers from SuppliersList.xml, records them as brand
+     * source evidence, and stores the raw supplier objects in
+     * {@link #icecatSuppliers} for ES indexing.
      *
      * @throws TechnicalException if the file cannot be downloaded or parsed
      */
@@ -119,11 +118,7 @@ public class FeatureLoader {
                     .getResponse().getSuppliersList().getSuppliers();
             for (IcecatSupplier supplier : suppliers) {
                 icecatSuppliers.add(supplier);
-                Brand brand = brandService.resolve(supplier.getEffectiveName());
-                if (brand == null) {
-                    brand = new Brand();
-                    brand.setBrandName(IdHelper.brandName(supplier.getEffectiveName()));
-                }
+                brandService.addSourceEvidence(supplier.getEffectiveName(), "icecat", String.valueOf(supplier.getId()));
             }
         } catch (Exception e) {
             LOGGER.error("Error while loading brands", e);
