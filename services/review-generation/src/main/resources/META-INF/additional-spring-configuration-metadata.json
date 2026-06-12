@@ -97,9 +97,9 @@
       "defaultValue": "off"
     },
     {
-      "name": "review.generation.max-search",
+      "name": "review.generation.serp-budget",
       "type": "java.lang.Integer",
-      "description": "Maximum number of search queries allowed.",
+      "description": "Total SERP query budget shared by all phases.",
       "defaultValue": 5
     },
     {

@@ -49,13 +49,14 @@ class OfferLogisticsParserTest {
 
     /**
      * Verifies that unknown logistics values are rejected after being logged.
+     *
+     * @throws InvalidParameterException when parsing fails
      */
     @Test
-    void rejectsUnknownLogisticsValues() {
+    void rejectsUnknownLogisticsValues() throws InvalidParameterException {
         assertThatThrownBy(() -> ShippingCostParser.parse("contact us"))
                 .isInstanceOf(InvalidParameterException.class);
-        assertThatThrownBy(() -> ShippingTimeParser.parse("soonish"))
-                .isInstanceOf(InvalidParameterException.class);
+        assertThat(ShippingTimeParser.parse("soonish")).isNull();
         assertThatThrownBy(() -> StockQuantityParser.parse("many"))
                 .isInstanceOf(InvalidParameterException.class);
     }

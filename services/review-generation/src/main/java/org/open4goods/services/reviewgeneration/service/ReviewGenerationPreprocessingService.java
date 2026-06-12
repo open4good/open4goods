@@ -62,6 +62,7 @@ import org.open4goods.services.urlfetching.dto.FetchResponse;
 import org.open4goods.services.urlfetching.service.UrlFetchingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import io.micrometer.core.instrument.MeterRegistry;
@@ -174,6 +175,7 @@ public class ReviewGenerationPreprocessingService {
 				new OfficialPdfTextExtractionService());
 	}
 
+	@Autowired
 	public ReviewGenerationPreprocessingService(ReviewGenerationConfig properties,
 			GoogleSearchService googleSearchService, UrlFetchingService urlFetchingService, PromptService genAiService,
 			SerialisationService serialisationService, MeterRegistry meterRegistry,

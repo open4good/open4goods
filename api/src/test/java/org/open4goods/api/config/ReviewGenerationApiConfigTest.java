@@ -23,8 +23,8 @@ class ReviewGenerationApiConfigTest {
         assertThat(properties).isNotNull();
         assertThat(properties.getProperty("review.generation.min-markdown-chars"))
                 .isEqualTo("${REVIEW_GENERATION_MIN_MARKDOWN_CHARS:500}");
-        assertThat(properties.getProperty("review.generation.max-search"))
-                .isEqualTo("${REVIEW_GENERATION_MAX_SEARCH:7}");
+        assertThat(properties.getProperty("review.generation.serp-budget"))
+                .isEqualTo("${REVIEW_GENERATION_SERP_BUDGET:5}");
         assertThat(properties.getProperty("review.generation.min-global-tokens"))
                 .isEqualTo("${REVIEW_GENERATION_MIN_GLOBAL_TOKENS:6000}");
         assertThat(properties.getProperty("review.generation.min-url-count"))
