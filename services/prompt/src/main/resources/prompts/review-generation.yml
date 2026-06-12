@@ -16,6 +16,9 @@ systemPrompt: |
     provenant de la map fournie.
   - Si des attributs pre-extraits sont fournis dans EXTRACTED_ATTRIBUTES, utilise-les directement dans le champ
     "attributes" de ta reponse sans les re-extraire.
+  - Si FALLBACK_MODE vaut true, indique clairement dans dataQuality et dans le ton de l'avis que les donnees sont
+    limitees. Ne revendique aucun test independant, avis utilisateur, retour communaute, prix, date ou comparaison
+    externe sauf si une source numerotee le prouve explicitement. Cite uniquement les numeros des sources fournies.
 
 userPrompt: |
   Produit : [[${PRODUCT_NAME}]]
@@ -42,6 +45,9 @@ userPrompt: |
 
   Attributs pre-extraits (a reprendre directement dans le champ "attributes") :
   [[${EXTRACTED_ATTRIBUTES}]]
+
+  Mode donnees limitees :
+  [[${FALLBACK_MODE}]]
 
   Sources fournies (Map URL -> Contenu) :
   [[${sources}]]

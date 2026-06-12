@@ -1228,6 +1228,43 @@ class ReviewGenerationPreprocessingServiceTest {
         assertThat((Map<?, ?>) variables.get("tokens")).isEmpty();
     }
 
+    @Test
+    void preparePromptVariables_UsesStructuredFactsLimitedFallbackWhenFetchFails() throws Exception {
+        Product product = product("Smeg", "SF64M3TVX");
+        product.setId(8017709256524L);
+        addTrustedAttribute(product, "ENERGY_CLASS", "A", "EPREL");
+        addTrustedAttribute(product, "HEIGHT", "59.2 cm", "icecat.biz");
+        addTrustedAttribute(product, "WIDTH", "59.7 cm", "EPREL");
+        when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse());
+        when(promptService.estimateTokens(any(String.class))).thenReturn(220);
+
+        Map<String, Object> variables = service.preparePromptVariables(product,
+                verticalConfigWithStructuredFallbackAttributes(), new ReviewGenerationStatus());
+
+        assertThat(variables.get("RESULT_QUALITY")).isEqualTo("LIMITED_STRUCTURED");
+        assertThat(variables.get("FALLBACK_MODE")).isEqualTo(true);
+        assertThat((Map<?, ?>) variables.get("sources")).hasSize(1);
+        @SuppressWarnings("unchecked")
+        Map<String, String> sourceClasses = (Map<String, String>) variables.get("SOURCE_CLASSES");
+        assertThat(sourceClasses)
+                .containsEntry("https://www.open4goods.org/structured-facts/8017709256524", "STRUCTURED_FACTS");
+        assertThat(product.getReviewFacts()).hasSize(1);
+        assertThat(product.getReviewFacts().getFirst().getFetchStrategy()).isEqualTo("STRUCTURED_FACTS");
+        assertThat(product.getReviewFacts().getFirst().getMarkdown())
+                .contains("Donnees structurees verifiees")
+                .contains("ENERGY_CLASS: A")
+                .contains("HEIGHT: 59.2 cm")
+                .contains("WIDTH: 59.7 cm")
+                .contains("Limites");
+    }
+
+    private void addTrustedAttribute(Product product, String key, String value, String datasource) {
+        ProductAttribute attribute = new ProductAttribute();
+        attribute.setName(key);
+        attribute.addSourceAttribute(new SourcedAttribute(new Attribute(key, value, "fr"), datasource));
+        product.getAttributes().getAll().put(key, attribute);
+    }
+
     private Product product(String brand, String model) {
         Product product = new Product();
         product.setId(1L);
@@ -1272,6 +1309,20 @@ class ReviewGenerationPreprocessingServiceTest {
         attributeConfig.setKey("ENERGY_CLASS");
         AttributesConfig attributesConfig = new AttributesConfig();
         attributesConfig.setConfigs(List.of(attributeConfig));
+        verticalConfig.setAttributesConfig(attributesConfig);
+        return verticalConfig;
+    }
+
+    private VerticalConfig verticalConfigWithStructuredFallbackAttributes() {
+        VerticalConfig verticalConfig = verticalConfig();
+        AttributeConfig energyClass = new AttributeConfig();
+        energyClass.setKey("ENERGY_CLASS");
+        AttributeConfig height = new AttributeConfig();
+        height.setKey("HEIGHT");
+        AttributeConfig width = new AttributeConfig();
+        width.setKey("WIDTH");
+        AttributesConfig attributesConfig = new AttributesConfig();
+        attributesConfig.setConfigs(List.of(energyClass, height, width));
         verticalConfig.setAttributesConfig(attributesConfig);
         return verticalConfig;
     }

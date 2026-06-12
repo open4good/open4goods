@@ -85,6 +85,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>3.0.6</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.open4goods</groupId>
             <artifactId>verticals</artifactId>
             <version>${global.version}</version>

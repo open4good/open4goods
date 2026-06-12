@@ -21,7 +21,16 @@ support/manual evidence. Manufacturer HTML that passes prompt-source gates is
 persisted in `Product.reviewFacts`; official/support URLs are also stored on the
 product, and official PDFs or extracted manuals are stored in
 `Product.resources` with manufacturer tags. PDF resources are not injected into
-the prompt as markdown.
+the prompt as markdown during normal complete fetches.
+
+If normal HTML/review retrieval fails quality thresholds, preprocessing can
+build an explicit limited fallback instead of throwing immediately. It first
+adds one synthetic `STRUCTURED_FACTS` source when at least three canonical
+trusted EPREL/IceCat facts exist, then may add extracted text from official,
+product-relevant PDFs with exact GTIN/model evidence. These fallback facts are
+persisted in `Product.reviewFacts` and diagnostics expose
+`LIMITED_STRUCTURED`, `LIMITED_OFFICIAL_PDF`, or
+`LIMITED_STRUCTURED_AND_PDF`.
 
 Review generation requests the fallback sequence `HTTP`, `PLAYWRIGHT`, then
 `PROXIFIED` by passing internal strategy override headers to
@@ -74,6 +83,9 @@ captured in the result payload and do not abort the rest of the vertical run.
 - Attribute extraction and text completion never trigger remote fetching.
 - Text completion fails if `reviewFacts` or product attributes are missing.
 - The persisted markdown facts remain the contract between fetch and LLM stages.
+- Limited fallback reviews keep `enoughData=true`, but `resultQuality` and
+  `dataQuality` must disclose the limited evidence and absence of independent
+  tests, community feedback, prices, and dates.
 - Fetch results include post-fetch enrichment status, including whether EPREL
   data was already present, completed by hooks, or still missing.
 - Model-native web-search review generation remains a separate single-call mode

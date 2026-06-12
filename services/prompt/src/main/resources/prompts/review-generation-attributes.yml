@@ -12,6 +12,8 @@ systemPrompt: |
   - Le champ number doit etre le numero exact d'une entree de ATTRIBUTE_SOURCES_JSON qui prouve la valeur.
   - Rejette toute valeur inferee, non sourcee, inconnue, ambigue, approximative ou contradictoire.
   - Rejette tout attribut absent des definitions canoniques.
+  - Une source de type STRUCTURED_FACTS dans ATTRIBUTE_SOURCES_JSON est acceptable uniquement pour des faits
+    EPREL/IceCat explicitement presents dans son contenu synthetique. Les PDF officiels sont des sources normales.
   - Si plusieurs sources donnent des valeurs differentes, garde seulement la valeur la plus directement sourcee par une page officielle.
   - Reponds exclusivement en JSON valide, sans texte supplementaire.
 
@@ -33,6 +35,9 @@ userPrompt: |
 
   Index des sources (JSON, number -> URL) :
   [[${ATTRIBUTE_SOURCES_JSON}]]
+
+  Mode donnees limitees :
+  [[${FALLBACK_MODE}]]
 
   Sources fournies (Map URL -> Contenu, dans le meme ordre que l'index) :
   [[${sources}]]

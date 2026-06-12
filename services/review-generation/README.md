@@ -72,6 +72,14 @@ PDFs and extracted manuals are stored in `Product.resources` with manufacturer
 metadata. HTML pages accepted as prompt evidence are also persisted as
 `Product.reviewFacts`.
 
+When normal source retrieval still fails thresholds, a conservative limited
+fallback can persist review facts from trusted structured EPREL/IceCat
+attributes and official product PDFs. The resulting diagnostics use
+`LIMITED_STRUCTURED`, `LIMITED_OFFICIAL_PDF`, or
+`LIMITED_STRUCTURED_AND_PDF`; generated reviews must expose the limited evidence
+in `dataQuality` and avoid unsupported independent-test, user-feedback, price,
+or date claims.
+
 If the first fetch pass persists official manufacturer evidence but does not
 reach the source or token thresholds, the service can run up to
 `partial-retry-max-search` targeted manual, guide, review, and test searches.

@@ -100,6 +100,7 @@ public class ReviewGenerationPreprocessingService {
 	private final PromptService genAiService;
 	private final SerialisationService serialisationService;
 	private final MeterRegistry meterRegistry;
+	private final OfficialPdfTextExtractionService officialPdfTextExtractionService;
 	private final ThreadPoolExecutor fetchExecutor;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -112,9 +113,15 @@ public class ReviewGenerationPreprocessingService {
 	private record SearchIdentity(String brand, String primaryModel, Set<String> alternateModels, boolean weakBrandPromoted) {
 	}
 
+	private record LimitedFallbackSource(String url, String markdown, SourceClass sourceClass, String fetchStrategy) {
+	}
+
 	private enum FetchResultQuality {
 		COMPLETE,
 		PARTIAL_USABLE,
+		LIMITED_STRUCTURED,
+		LIMITED_OFFICIAL_PDF,
+		LIMITED_STRUCTURED_AND_PDF,
 		FAILED
 	}
 
@@ -146,6 +153,7 @@ public class ReviewGenerationPreprocessingService {
 		OFFICIAL_PRODUCT,
 		OFFICIAL_SUPPORT,
 		OFFICIAL_PDF,
+		STRUCTURED_FACTS,
 		REVIEW,
 		GUIDE,
 		COMPARISON_PRODUCT_PAGE,
@@ -162,12 +170,21 @@ public class ReviewGenerationPreprocessingService {
 	public ReviewGenerationPreprocessingService(ReviewGenerationConfig properties,
 			GoogleSearchService googleSearchService, UrlFetchingService urlFetchingService, PromptService genAiService,
 			SerialisationService serialisationService, MeterRegistry meterRegistry) {
+		this(properties, googleSearchService, urlFetchingService, genAiService, serialisationService, meterRegistry,
+				new OfficialPdfTextExtractionService());
+	}
+
+	public ReviewGenerationPreprocessingService(ReviewGenerationConfig properties,
+			GoogleSearchService googleSearchService, UrlFetchingService urlFetchingService, PromptService genAiService,
+			SerialisationService serialisationService, MeterRegistry meterRegistry,
+			OfficialPdfTextExtractionService officialPdfTextExtractionService) {
 		this.properties = properties;
 		this.googleSearchService = googleSearchService;
 		this.urlFetchingService = urlFetchingService;
 		this.genAiService = genAiService;
 		this.serialisationService = serialisationService;
 		this.meterRegistry = meterRegistry;
+		this.officialPdfTextExtractionService = officialPdfTextExtractionService;
 		this.fetchExecutor = new ThreadPoolExecutor(properties.getMaxConcurrentFetch(), properties.getMaxQueueSize(),
 				0L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(properties.getMaxQueueSize() * 10),
 				new ThreadPoolExecutor.AbortPolicy());
@@ -352,20 +369,18 @@ public class ReviewGenerationPreprocessingService {
 
 		// Persist fetched facts before threshold check so partial results survive
 		// failed runs and are available for future EPREL/Icecat enrichment.
-		List<ProductFact> newFacts = new ArrayList<>();
-		for (Map.Entry<String, String> entry : finalSourcesMap.entrySet()) {
-			String content = entry.getValue();
-			String normalized = content.length() > properties.getFactMaxMarkdownChars()
-					? content.substring(0, properties.getFactMaxMarkdownChars())
-					: content;
-			newFacts.add(new ProductFact(entry.getKey(), normalized, detectLanguage(normalized),
-					System.currentTimeMillis(), resolveFetchStrategy(fetchFutures.get(entry.getKey())),
-					finalTokensMap.get(entry.getKey()), sha256(normalized)));
-		}
-		product.setReviewFacts(newFacts.stream().limit(properties.getFactsMaxStored()).toList());
+		product.setReviewFacts(productFacts(finalSourcesMap, finalTokensMap, finalSourceClasses, fetchFutures).stream()
+				.limit(properties.getFactsMaxStored()).toList());
 
 		FetchResultQuality resultQuality = classifyFetchResult(verticalConfig, accumulatedTokens, finalSourcesMap,
 				finalSourceClasses);
+		if (resultQuality == FetchResultQuality.FAILED) {
+			resultQuality = applyLimitedFallback(product, verticalConfig, sortedResults, finalSourcesMap, finalTokensMap,
+					finalSourceClasses, rejectedUrls, exactEvidenceModels);
+			accumulatedTokens = finalTokensMap.values().stream().mapToInt(Integer::intValue).sum();
+			product.setReviewFacts(productFacts(finalSourcesMap, finalTokensMap, finalSourceClasses).stream()
+					.limit(properties.getFactsMaxStored()).toList());
+		}
 		if (resultQuality == FetchResultQuality.FAILED) {
 			ReviewGenerationFailureDetails details = new ReviewGenerationFailureDetails(finalSourcesMap.size(),
 					accumulatedTokens, searchedQueries, new ArrayList<>(finalSourcesMap.keySet()),
@@ -387,6 +402,7 @@ public class ReviewGenerationPreprocessingService {
 				.collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().name(), (left, right) -> left,
 						LinkedHashMap::new)));
 		promptVariables.put("RESULT_QUALITY", resultQuality.name());
+		promptVariables.put("FALLBACK_MODE", limitedFallbackMode(resultQuality));
 		status.addMessage("AI generation");
 
 		// Store aggregated tokens for convenience.
@@ -397,6 +413,217 @@ public class ReviewGenerationPreprocessingService {
 		promptVariables.put("ATTRIBUTE_DEFINITIONS_JSON", writeJson(attributeDefinitions(verticalConfig)));
 
 		return promptVariables;
+	}
+
+	private FetchResultQuality applyLimitedFallback(Product product, VerticalConfig verticalConfig,
+			List<GoogleSearchResult> sortedResults, Map<String, String> finalSourcesMap,
+			Map<String, Integer> finalTokensMap, Map<String, SourceClass> finalSourceClasses,
+			Map<String, String> rejectedUrls, Set<String> exactEvidenceModels) {
+		List<LimitedFallbackSource> fallbackSources = new ArrayList<>();
+		buildStructuredFallbackSource(product, verticalConfig).ifPresent(fallbackSources::add);
+		fallbackSources.addAll(buildOfficialPdfFallbackSources(product, sortedResults, rejectedUrls, exactEvidenceModels));
+		if (fallbackSources.isEmpty()) {
+			return FetchResultQuality.FAILED;
+		}
+		boolean hasStructured = false;
+		boolean hasPdf = false;
+		int accumulatedTokens = finalTokensMap.values().stream().mapToInt(Integer::intValue).sum();
+		for (LimitedFallbackSource source : fallbackSources) {
+			if (source == null || finalSourcesMap.containsKey(source.url())) {
+				continue;
+			}
+			int tokenCount = genAiService.estimateTokens(source.markdown());
+			if (source.sourceClass() == SourceClass.OFFICIAL_PDF) {
+				if (tokenCount < properties.getSourceMinTokens()) {
+					rejectedUrls.put(source.url(), "official PDF fallback rejected: insufficient tokens " + tokenCount);
+					continue;
+				}
+				if (tokenCount > properties.getSourceMaxTokens()) {
+					String trimmed = trimToTokenLimit(source.markdown(), tokenCount, properties.getSourceMaxTokens(),
+							properties.getSourceMinTokens());
+					int trimmedTokens = genAiService.estimateTokens(trimmed);
+					if (trimmedTokens < properties.getSourceMinTokens() || trimmedTokens > properties.getSourceMaxTokens()) {
+						rejectedUrls.put(source.url(), "official PDF fallback rejected after trimming: " + trimmedTokens);
+						continue;
+					}
+					source = new LimitedFallbackSource(source.url(), trimmed, source.sourceClass(), source.fetchStrategy());
+					tokenCount = trimmedTokens;
+				}
+			}
+			if (accumulatedTokens + tokenCount > properties.getMaxTotalTokens()) {
+				break;
+			}
+			finalSourcesMap.put(source.url(), source.markdown());
+			finalTokensMap.put(source.url(), tokenCount);
+			finalSourceClasses.put(source.url(), source.sourceClass());
+			accumulatedTokens += tokenCount;
+			hasStructured = hasStructured || source.sourceClass() == SourceClass.STRUCTURED_FACTS;
+			hasPdf = hasPdf || source.sourceClass() == SourceClass.OFFICIAL_PDF;
+			logger.info("Accepted limited fallback source for UPC {}: url={}, class={}, tokens={}",
+					product.getId(), source.url(), source.sourceClass(), tokenCount);
+		}
+		if (hasStructured && hasPdf) {
+			return FetchResultQuality.LIMITED_STRUCTURED_AND_PDF;
+		}
+		if (hasStructured) {
+			return FetchResultQuality.LIMITED_STRUCTURED;
+		}
+		return hasPdf ? FetchResultQuality.LIMITED_OFFICIAL_PDF : FetchResultQuality.FAILED;
+	}
+
+	private Optional<LimitedFallbackSource> buildStructuredFallbackSource(Product product, VerticalConfig verticalConfig) {
+		List<Map<String, Object>> facts = trustedStructuredFacts(product, verticalConfig);
+		if (facts.size() < 3) {
+			return Optional.empty();
+		}
+		String url = structuredFactsUrl(product);
+		StringBuilder markdown = new StringBuilder();
+		markdown.append("# Donnees structurees verifiees\n\n");
+		markdown.append("Source synthetique Open4Goods construite uniquement a partir d'attributs canoniques EPREL/IceCat traces.\n\n");
+		appendMarkdownLine(markdown, "Produit", product.shortestOfferName());
+		appendMarkdownLine(markdown, "Marque", product.brand());
+		appendMarkdownLine(markdown, "Modele", product.model());
+		appendMarkdownLine(markdown, "GTIN", product.gtin());
+		appendMarkdownLine(markdown, "Vertical", verticalName(verticalConfig));
+		markdown.append("\n## Faits techniques\n");
+		for (Map<String, Object> fact : facts) {
+			markdown.append("- ")
+					.append(safeString(objectString(fact.get("key"))))
+					.append(": ")
+					.append(safeString(objectString(fact.get("value"))))
+					.append(" (source: ")
+					.append(safeString(objectString(fact.get("datasource"))))
+					.append(")\n");
+		}
+		markdown.append("\nLimites: ces donnees ne contiennent pas de test independant, avis utilisateur, prix ni date de disponibilite.\n");
+		return Optional.of(new LimitedFallbackSource(url, markdown.toString(), SourceClass.STRUCTURED_FACTS,
+				"STRUCTURED_FACTS"));
+	}
+
+	private void appendMarkdownLine(StringBuilder markdown, String label, String value) {
+		if (value != null && !value.isBlank()) {
+			markdown.append("- ").append(label).append(": ").append(value).append("\n");
+		}
+	}
+
+	private String structuredFactsUrl(Product product) {
+		String productUrl = null;
+		try {
+			productUrl = product == null ? null : product.url("fr");
+		} catch (RuntimeException e) {
+			logger.debug("Cannot build product URL for structured facts fallback: {}", e.getMessage());
+		}
+		if (productUrl != null && !productUrl.isBlank()) {
+			return productUrl + "#structured-facts";
+		}
+		String gtin = product == null ? null : product.gtin();
+		if (gtin == null || gtin.isBlank()) {
+			gtin = product == null || product.getId() == null ? "unknown" : String.valueOf(product.getId());
+		}
+		return "https://www.open4goods.org/structured-facts/" + gtin;
+	}
+
+	private String objectString(Object value) {
+		return value == null ? "" : String.valueOf(value);
+	}
+
+	private List<LimitedFallbackSource> buildOfficialPdfFallbackSources(Product product, List<GoogleSearchResult> sortedResults,
+			Map<String, String> rejectedUrls, Set<String> exactEvidenceModels) {
+		List<GoogleSearchResult> candidates = officialPdfCandidates(product, sortedResults);
+		List<LimitedFallbackSource> sources = new ArrayList<>();
+		for (GoogleSearchResult candidate : candidates) {
+			String url = candidate.link();
+			if (!isProductRelevantResource(product, url, candidate.title(), true)) {
+				rejectedUrls.put(url, "official PDF fallback rejected: not product-relevant");
+				continue;
+			}
+			if (!hasExactPdfEvidence(product, candidate, "", exactEvidenceModels)) {
+				rejectedUrls.put(url, "official PDF fallback rejected: missing exact GTIN/model evidence in URL/title");
+				continue;
+			}
+			Optional<String> extracted = officialPdfTextExtractionService.extractText(url);
+			if (extracted.isEmpty()) {
+				rejectedUrls.put(url, "official PDF fallback rejected: extraction failed");
+				continue;
+			}
+			String markdown = sanitizeMarkdown(extracted.get(), url);
+			if (markdown.length() < properties.getMinMarkdownChars()) {
+				rejectedUrls.put(url, "official PDF fallback rejected: insufficient markdown chars");
+				continue;
+			}
+			if (!hasExactPdfEvidence(product, candidate, markdown, exactEvidenceModels)) {
+				rejectedUrls.put(url, "official PDF fallback rejected: missing exact GTIN/model evidence in text");
+				continue;
+			}
+			sources.add(new LimitedFallbackSource(url, "# Document PDF officiel\n\n" + markdown, SourceClass.OFFICIAL_PDF,
+					"OFFICIAL_PDF"));
+			if (sources.size() >= Math.max(1, properties.getMinUrlCount())) {
+				break;
+			}
+		}
+		return sources;
+	}
+
+	private List<GoogleSearchResult> officialPdfCandidates(Product product, List<GoogleSearchResult> sortedResults) {
+		Map<String, GoogleSearchResult> candidates = new LinkedHashMap<>();
+		if (sortedResults != null) {
+			sortedResults.stream()
+					.filter(result -> result != null && result.link() != null && isPdfUrl(result.link()))
+					.filter(result -> isOfficialUrl(product, result))
+					.forEach(result -> candidates.putIfAbsent(result.link(), result));
+		}
+		if (product != null && product.pdfs() != null) {
+			for (Resource pdf : product.pdfs()) {
+				if (pdf == null || pdf.getUrl() == null || !isOfficialResource(pdf)) {
+					continue;
+				}
+				String label = pdf.bestNameFromTag();
+				GoogleSearchResult result = new GoogleSearchResult(label, pdf.getUrl());
+				if (isOfficialUrl(product, result)) {
+					candidates.putIfAbsent(result.link(), result);
+				}
+			}
+		}
+		return candidates.values().stream().limit(properties.getMaxUrlsPerProduct()).toList();
+	}
+
+	private boolean isOfficialResource(Resource resource) {
+		return resource != null && "manufacturer".equalsIgnoreCase(resource.getDatasourceName())
+				&& resource.getTags() != null && resource.getTags().contains("official");
+	}
+
+	private boolean hasExactPdfEvidence(Product product, GoogleSearchResult candidate, String text,
+			Set<String> exactEvidenceModels) {
+		String evidence = normalizeForTextMatching(String.join(" ", safeString(candidate == null ? null : candidate.title()),
+				safeString(candidate == null ? null : candidate.link()), firstContentZone(text)));
+		String urlEvidence = normalizeForUrlMatching(candidate == null ? null : candidate.link());
+		String gtin = product == null ? null : product.gtin();
+		if (gtin != null && gtin.matches("\\d{8,14}")
+				&& (evidence.contains(normalizeForTextMatching(gtin)) || urlEvidence.contains(normalizeForUrlMatching(gtin)))) {
+			return true;
+		}
+		return rankedModelCandidates(product, product == null ? null : product.model(),
+				product == null ? Set.of() : product.getAkaModels()).stream()
+				.filter(model -> exactEvidenceModels == null || exactEvidenceModels.isEmpty()
+						|| exactEvidenceModels.contains(model))
+				.anyMatch(model -> modelMatchesZone(model, evidence) || urlEvidence.contains(normalizeForUrlMatching(model)));
+	}
+
+	private boolean limitedFallbackMode(FetchResultQuality resultQuality) {
+		return resultQuality == FetchResultQuality.LIMITED_STRUCTURED
+				|| resultQuality == FetchResultQuality.LIMITED_OFFICIAL_PDF
+				|| resultQuality == FetchResultQuality.LIMITED_STRUCTURED_AND_PDF;
+	}
+
+	private boolean limitedFallbackMode(String resultQuality) {
+		if (resultQuality == null) {
+			return false;
+		}
+		try {
+			return limitedFallbackMode(FetchResultQuality.valueOf(resultQuality));
+		} catch (IllegalArgumentException e) {
+			return false;
+		}
 	}
 
 	private void validateSearchKeys(Product product, String brand, String primaryModel) {
@@ -3380,9 +3607,39 @@ public class ReviewGenerationPreprocessingService {
 		promptVariables.put("SOURCE_CLASSES", diagnostics == null ? Map.of() : diagnostics.getSourceClasses());
 		promptVariables.put("REJECTED_URLS", diagnostics == null ? Map.of() : diagnostics.getRejectedUrls());
 		promptVariables.put("RESULT_QUALITY", diagnostics == null ? "UNKNOWN" : diagnostics.getResultQuality());
+		promptVariables.put("FALLBACK_MODE", limitedFallbackMode(diagnostics == null ? null : diagnostics.getResultQuality()));
 		promptVariables.put("ATTRIBUTE_SOURCES_JSON", writeJson(attributeSources(product, new ArrayList<>(sources.keySet()))));
 		promptVariables.put("ATTRIBUTE_DEFINITIONS_JSON", writeJson(attributeDefinitions(verticalConfig)));
 		return promptVariables;
+	}
+
+	private List<ProductFact> productFacts(Map<String, String> sources, Map<String, Integer> tokens,
+			Map<String, SourceClass> sourceClasses) {
+		return productFacts(sources, tokens, sourceClasses, Map.of());
+	}
+
+	private List<ProductFact> productFacts(Map<String, String> sources, Map<String, Integer> tokens,
+			Map<String, SourceClass> sourceClasses, Map<String, CompletableFuture<FetchOutcome>> fetchFutures) {
+		if (sources == null || sources.isEmpty()) {
+			return List.of();
+		}
+		List<ProductFact> facts = new ArrayList<>();
+		for (Map.Entry<String, String> entry : sources.entrySet()) {
+			String content = entry.getValue();
+			if (content == null || content.isBlank()) {
+				continue;
+			}
+			String normalized = content.length() > properties.getFactMaxMarkdownChars()
+					? content.substring(0, properties.getFactMaxMarkdownChars())
+					: content;
+			SourceClass sourceClass = sourceClasses == null ? null : sourceClasses.get(entry.getKey());
+			String fetchStrategy = sourceClass == SourceClass.STRUCTURED_FACTS ? "STRUCTURED_FACTS"
+					: sourceClass == SourceClass.OFFICIAL_PDF ? "OFFICIAL_PDF"
+					: resolveFetchStrategy(fetchFutures.get(entry.getKey()));
+			facts.add(new ProductFact(entry.getKey(), normalized, detectLanguage(normalized),
+					System.currentTimeMillis(), fetchStrategy, tokens.get(entry.getKey()), sha256(normalized)));
+		}
+		return facts;
 	}
 
 	private List<ProductFact> orderedReviewFacts(Product product) {

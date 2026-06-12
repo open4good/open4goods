@@ -382,6 +382,7 @@ public class ReviewGenerationService implements HealthIndicator {
 		if (newReview == null) {
 			throw new IllegalStateException("Text completion returned no AI review for UPC " + product.getId());
 		}
+		markLimitedFallbackDataQuality(product, newReview);
 		// Attributes are owned by the dedicated extraction stage. Do not persist
 		// model-emitted attributes inside the review payload.
 		newReview.setAttributes(List.of());
@@ -528,6 +529,7 @@ public class ReviewGenerationService implements HealthIndicator {
 					reviewResponse = genAiService.objectPrompt(promptKey, promptVariables, AiReview.class);
 				}
 				AiReview newReview = processAiReview(reviewResponse.getBody(), reviewResponse.getMetadata());
+				markLimitedFallbackDataQuality(product, newReview);
 
 				// Attributes are owned by the dedicated extraction stage. Do not persist
 				// model-emitted attributes inside the review payload.
@@ -1046,6 +1048,7 @@ public class ReviewGenerationService implements HealthIndicator {
 				// Process the batch result to convert it into an AiReview.
 				AiReview newReview = processAiReview(output);
 				if (null != newReview) {
+					markLimitedFallbackDataQuality(product, newReview);
 					// Attributes are owned by the dedicated extraction stage: carry the validated
 					// attributes for serialisation, never merge text-model attributes into the product.
 					VerticalConfig verticalConfig = verticalsConfigService
@@ -2372,6 +2375,26 @@ public class ReviewGenerationService implements HealthIndicator {
 			return dataQuality;
 		}
 		return dataQuality + " " + note;
+	}
+
+	private void markLimitedFallbackDataQuality(Product product, AiReview review) {
+		if (product == null || review == null || product.getReviewFetchDiagnostics() == null) {
+			return;
+		}
+		String resultQuality = product.getReviewFetchDiagnostics().getResultQuality();
+		if (resultQuality == null || !resultQuality.startsWith("LIMITED_")) {
+			return;
+		}
+		String note = switch (resultQuality) {
+		case "LIMITED_STRUCTURED" ->
+				"Données limitées: avis généré uniquement depuis des faits structurés EPREL/IceCat; aucun test indépendant, avis utilisateur, prix ou date n'est disponible dans les sources.";
+		case "LIMITED_OFFICIAL_PDF" ->
+				"Données limitées: avis généré uniquement depuis des documents PDF officiels; aucun test indépendant, avis utilisateur, prix ou date n'est disponible dans les sources.";
+		case "LIMITED_STRUCTURED_AND_PDF" ->
+				"Données limitées: avis généré depuis des faits structurés EPREL/IceCat et des documents PDF officiels; aucun test indépendant, avis utilisateur, prix ou date n'est disponible dans les sources.";
+		default -> "Données limitées: les sources disponibles ne couvrent pas les tests indépendants, avis utilisateur, prix ou dates.";
+		};
+		review.setDataQuality(appendDataQuality(review.getDataQuality(), note));
 	}
 
 	private record ReferenceNormalization(String description, String shortDescription, String mediumTitle,
