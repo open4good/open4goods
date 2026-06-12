@@ -23,8 +23,10 @@ import org.slf4j.Logger;
  * <p>An invalid or missing GTIN causes an {@link AggregationSkipException} so that
  * downstream services never receive malformed identity data.
  *
- * <p>TODO(p2, features): Store the detected GTIN type in {@code gtinInfos} and
- * render it with the appropriate leading zero padding on display.
+ * <p>TODO(p3, frontend): The GTIN type is stored in {@code gtinInfos.upcType} (see
+ * {@link #onProduct}) but short barcodes (e.g. UPC-A / EAN-8) lose leading zeros
+ * when the numeric {@code id} is rendered as a {@code Long}. Padding to the
+ * canonical digit count should be applied at display/serialisation time.
  */
 public class IdentityAggregationService extends AbstractAggregationService {
 
@@ -58,7 +60,6 @@ public class IdentityAggregationService extends AbstractAggregationService {
         }
 
 		if (output.getId() == null) {
-			// TODO(p2, features) : Should store the GTIN type when encountered in gtin infos, and then render with appropriate leading 0
 			output.setId(Long.valueOf(input.gtin()));
 		} else {
 			if (!output.gtin().equals(input.gtin())) {

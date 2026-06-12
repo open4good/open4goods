@@ -20,6 +20,7 @@ import org.open4goods.brand.model.BrandReferential;
 import org.open4goods.brand.model.BrandReferentialEntry;
 import org.open4goods.brand.model.BrandSourceEvidence;
 import org.open4goods.brand.model.BrandSuggestion;
+import org.open4goods.brand.model.Company;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ public class BrandService {
 
     private final SerialisationService serialisationService;
     private final BrandReferentialLoader referentialLoader;
+    private final CompanyLoader companyLoader;
 
     private final Map<String, Long> missCounter = new ConcurrentHashMap<>();
     private final Map<String, Brand> brandsByName = new ConcurrentHashMap<>();
@@ -51,13 +53,21 @@ public class BrandService {
     public BrandService(RemoteFileCachingService remoteFileCachingService, SerialisationService serialisationService)
             throws Exception {
         this(remoteFileCachingService, serialisationService,
-                () -> IOUtils.toString(new URL(MAPPING_URL), Charset.defaultCharset()));
+                () -> IOUtils.toString(new URL(MAPPING_URL), Charset.defaultCharset()),
+                companyId -> IOUtils.toString(new URL("https://raw.githubusercontent.com/open4good/brands-company-mapping/refs/heads/main/company/" + companyId + ".json"), Charset.defaultCharset()));
     }
 
     public BrandService(RemoteFileCachingService remoteFileCachingService, SerialisationService serialisationService,
             BrandReferentialLoader referentialLoader) throws Exception {
+        this(remoteFileCachingService, serialisationService, referentialLoader,
+                companyId -> { throw new UnsupportedOperationException("No company loader provided"); });
+    }
+
+    public BrandService(RemoteFileCachingService remoteFileCachingService, SerialisationService serialisationService,
+            BrandReferentialLoader referentialLoader, CompanyLoader companyLoader) throws Exception {
         this.serialisationService = serialisationService;
         this.referentialLoader = referentialLoader;
+        this.companyLoader = companyLoader;
         loadBrandMappings();
     }
 
@@ -255,6 +265,23 @@ public class BrandService {
 
             Brand brand = new Brand(canonical);
             brand.setCompanyName(entry.getCompanyName());
+            brand.setOfficialDomains(entry.getOfficialDomains());
+
+            if (entry.getCompanyId() != null && !entry.getCompanyId().isBlank()) {
+                try {
+                    String companyJson = companyLoader.loadCompany(entry.getCompanyId());
+                    Company company = serialisationService.jsonMapper().readValue(companyJson, Company.class);
+                    brand.setCompany(company);
+                } catch (Exception e) {
+                    LOGGER.warn("Failed to load company details for: {}, fallback to basic company details", entry.getCompanyId(), e);
+                    Company fallbackCompany = new Company(entry.getCompanyId(), entry.getCompanyName());
+                    brand.setCompany(fallbackCompany);
+                }
+            } else if (entry.getCompanyName() != null && !entry.getCompanyName().isBlank()) {
+                Company basicCompany = new Company(null, entry.getCompanyName());
+                brand.setCompany(basicCompany);
+            }
+
             brandsByName.put(canonical, brand);
             indexName(canonical, canonical);
             indexName(entry.getCanonicalName(), canonical);

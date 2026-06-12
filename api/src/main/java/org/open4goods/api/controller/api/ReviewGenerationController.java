@@ -19,6 +19,8 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.reviewgeneration.dto.ReviewGenerationStepResult;
 import org.open4goods.services.reviewgeneration.dto.ReviewGenerationVerticalResult;
+import org.open4goods.services.reviewgeneration.dto.SourceDiscoveryJob;
+import org.open4goods.services.reviewgeneration.service.DataForSeoSerpService;
 import org.open4goods.services.reviewgeneration.service.NotEnoughDataException;
 import org.open4goods.services.reviewgeneration.service.ReviewGenerationService;
 import org.open4goods.verticals.VerticalsConfigService;
@@ -55,13 +57,16 @@ public class ReviewGenerationController {
     private final ProductRepository productRepository;
     private final VerticalsConfigService verticalsConfigService;
     private final ReviewGenerationService reviewGenerationService;
+    private final DataForSeoSerpService dataForSeoSerpService;
 
     public ReviewGenerationController(ProductRepository productRepository,
             VerticalsConfigService verticalsConfigService,
-            ReviewGenerationService reviewGenerationService) {
+            ReviewGenerationService reviewGenerationService,
+            DataForSeoSerpService dataForSeoSerpService) {
         this.productRepository = productRepository;
         this.verticalsConfigService = verticalsConfigService;
         this.reviewGenerationService = reviewGenerationService;
+        this.dataForSeoSerpService = dataForSeoSerpService;
     }
 
     /**
@@ -72,6 +77,7 @@ public class ReviewGenerationController {
      * @throws ResourceNotFoundException when the product does not exist in the repository
      */
 
+    @Deprecated(since = "2026-06", forRemoval = false)
     @PostMapping("/review/{id}")
     @Operation(summary = "Schedule AI review generation", description = "Launch the asynchronous AI review pipeline for the given UPC.",
             parameters = {
@@ -120,6 +126,7 @@ public class ReviewGenerationController {
      * @param upc the product identifier used to track the process
      * @return the review generation status or {@code null} when no process is tracked for the UPC
      */
+    @Deprecated(since = "2026-06", forRemoval = false)
     @GetMapping("/review/{id}")
     @Operation(summary = "Get review generation status", description = "Return the latest status snapshot for the requested UPC.",
             parameters = {
@@ -146,6 +153,7 @@ public class ReviewGenerationController {
      * @throws ResourceNotFoundException when the product does not exist
      * @throws Exception when prompt generation fails
      */
+    @Deprecated(since = "2026-06", forRemoval = false)
     @GetMapping("/review/{id}/prompt")
     @Operation(summary = "Get review generation prompt", description = "Return the fully resolved prompt configuration (dry run) for the requested UPC.",
             parameters = {
@@ -166,6 +174,99 @@ public class ReviewGenerationController {
         return ResponseEntity.ok(promptConfig);
     }
 
+    @PostMapping("/enrichment/{id}/urls/discover")
+    @Operation(summary = "Discover enrichment source URLs for a product",
+            description = "Submit a DataForSEO Standard SERP task for source URL discovery.")
+    public ResponseEntity<SourceDiscoveryJob> discoverEnrichmentUrls(@PathVariable("id") long upc,
+            @RequestParam(value = "force", defaultValue = "false") boolean force) throws Exception {
+        Product product = productRepository.getById(upc);
+        return ResponseEntity.ok(dataForSeoSerpService.discoverUrls(product, force));
+    }
+
+    @PostMapping("/enrichment/vertical/{verticalId}/urls/discover")
+    @Operation(summary = "Discover enrichment source URLs for a vertical",
+            description = "Submit DataForSEO Standard SERP tasks in chunks of up to 100 products.")
+    public ResponseEntity<SourceDiscoveryJob> discoverEnrichmentUrlsForVertical(
+            @PathVariable String verticalId,
+            @RequestParam(value = "limit", defaultValue = "100") int limit,
+            @RequestParam(value = "force", defaultValue = "false") boolean force) throws Exception {
+        return ResponseEntity.ok(dataForSeoSerpService.discoverUrlsForVertical(verticalId, limit, force));
+    }
+
+    @PostMapping("/enrichment/discovery/jobs/{jobId}/poll")
+    @Operation(summary = "Poll an enrichment URL discovery job")
+    public ResponseEntity<SourceDiscoveryJob> pollEnrichmentDiscoveryJob(@PathVariable String jobId) throws Exception {
+        return ResponseEntity.ok(dataForSeoSerpService.pollJob(jobId));
+    }
+
+    @GetMapping("/enrichment/discovery/jobs/{jobId}")
+    @Operation(summary = "Get an enrichment URL discovery job")
+    public ResponseEntity<SourceDiscoveryJob> getEnrichmentDiscoveryJob(@PathVariable String jobId) throws Exception {
+        return ResponseEntity.ok(dataForSeoSerpService.getJob(jobId));
+    }
+
+    @PostMapping("/enrichment/{id}/fetch")
+    @Operation(summary = "Run enrichment source fetching for a product")
+    public ResponseEntity<ReviewGenerationStepResult> fetchEnrichmentSources(@PathVariable("id") long upc,
+            HttpServletRequest request) throws Exception {
+        return fetchReviewSources(upc, request);
+    }
+
+    @PostMapping("/enrichment/{id}/attributes")
+    @Operation(summary = "Run enrichment attribute extraction for a product")
+    public ResponseEntity<ReviewGenerationStepResult> extractEnrichmentAttributes(@PathVariable("id") long upc)
+            throws Exception {
+        return extractReviewAttributes(upc);
+    }
+
+    @PostMapping("/enrichment/{id}/text")
+    @Operation(summary = "Run enrichment text completion for a product")
+    public ResponseEntity<ReviewGenerationStepResult> generateEnrichmentText(@PathVariable("id") long upc)
+            throws Exception {
+        return generateReviewText(upc);
+    }
+
+    @PostMapping("/enrichment/{id}/workflow")
+    @Operation(summary = "Run full synchronous enrichment workflow for a product")
+    public ResponseEntity<ReviewGenerationStepResult> generateEnrichmentWorkflow(@PathVariable("id") long upc,
+            HttpServletRequest request) throws Exception {
+        return generateReviewWorkflow(upc, request);
+    }
+
+    @PostMapping("/enrichment/vertical/{verticalId}/fetch")
+    @Operation(summary = "Run enrichment source fetching for a vertical")
+    public ResponseEntity<ReviewGenerationVerticalResult> fetchEnrichmentSourcesForVertical(
+            @PathVariable String verticalId,
+            @RequestParam(value = "limit", defaultValue = "5") int limit,
+            HttpServletRequest request) throws IOException {
+        return fetchReviewSourcesForVertical(verticalId, limit, request);
+    }
+
+    @PostMapping("/enrichment/vertical/{verticalId}/attributes")
+    @Operation(summary = "Run enrichment attribute extraction for a vertical")
+    public ResponseEntity<ReviewGenerationVerticalResult> extractEnrichmentAttributesForVertical(
+            @PathVariable String verticalId,
+            @RequestParam(value = "limit", defaultValue = "5") int limit) throws IOException {
+        return extractReviewAttributesForVertical(verticalId, limit);
+    }
+
+    @PostMapping("/enrichment/vertical/{verticalId}/text")
+    @Operation(summary = "Run enrichment text completion for a vertical")
+    public ResponseEntity<ReviewGenerationVerticalResult> generateEnrichmentTextForVertical(
+            @PathVariable String verticalId,
+            @RequestParam(value = "limit", defaultValue = "5") int limit) throws IOException {
+        return generateReviewTextForVertical(verticalId, limit);
+    }
+
+    @PostMapping("/enrichment/vertical/{verticalId}/workflow")
+    @Operation(summary = "Run full synchronous enrichment workflow for a vertical")
+    public ResponseEntity<ReviewGenerationVerticalResult> generateEnrichmentWorkflowForVertical(
+            @PathVariable String verticalId,
+            @RequestParam(value = "limit", defaultValue = "5") int limit,
+            HttpServletRequest request) throws IOException {
+        return generateReviewWorkflowForVertical(verticalId, limit, request);
+    }
+
     /**
      * Run only the remote fetching stage for one product.
      *
@@ -174,6 +275,7 @@ public class ReviewGenerationController {
      * @return persisted fetch-stage result
      * @throws Exception when fetching fails
      */
+    @Deprecated(since = "2026-06", forRemoval = false)
     @PostMapping("/review/{id}/fetch")
     @Operation(summary = "Run review remote fetching for a product",
             description = "Fetch and persist review markdown sources without running LLM completions.")
@@ -197,6 +299,7 @@ public class ReviewGenerationController {
      * @return persisted attribute-stage result
      * @throws Exception when extraction fails
      */
+    @Deprecated(since = "2026-06", forRemoval = false)
     @PostMapping("/review/{id}/attributes")
     @Operation(summary = "Run review attribute extraction for a product",
             description = "Use persisted reviewFacts to extract and persist product attributes.")
@@ -222,6 +325,7 @@ public class ReviewGenerationController {
      * @return persisted text-stage result
      * @throws Exception when text generation fails
      */
+    @Deprecated(since = "2026-06", forRemoval = false)
     @PostMapping("/review/{id}/text")
     @Operation(summary = "Run review text completion for a product",
             description = "Use persisted reviewFacts and product attributes to generate and persist the AI review.")
@@ -248,6 +352,7 @@ public class ReviewGenerationController {
      * @return persisted text-stage result
      * @throws Exception when any stage fails
      */
+    @Deprecated(since = "2026-06", forRemoval = false)
     @PostMapping("/review/{id}/workflow")
     @Operation(summary = "Run full synchronous review workflow for a product",
             description = "Fetch sources, extract attributes, then generate and persist review text.")
@@ -276,6 +381,7 @@ public class ReviewGenerationController {
      * @return per-product synchronous results
      * @throws IOException when product loading fails
      */
+    @Deprecated(since = "2026-06", forRemoval = false)
     @PostMapping("/review/vertical/{verticalId}/fetch")
     @Operation(summary = "Run review remote fetching for a vertical")
     public ResponseEntity<ReviewGenerationVerticalResult> fetchReviewSourcesForVertical(
@@ -296,6 +402,7 @@ public class ReviewGenerationController {
      * @return per-product synchronous results
      * @throws IOException when product loading fails
      */
+    @Deprecated(since = "2026-06", forRemoval = false)
     @PostMapping("/review/vertical/{verticalId}/attributes")
     @Operation(summary = "Run review attribute extraction for a vertical")
     public ResponseEntity<ReviewGenerationVerticalResult> extractReviewAttributesForVertical(
@@ -313,6 +420,7 @@ public class ReviewGenerationController {
      * @return per-product synchronous results
      * @throws IOException when product loading fails
      */
+    @Deprecated(since = "2026-06", forRemoval = false)
     @PostMapping("/review/vertical/{verticalId}/text")
     @Operation(summary = "Run review text completion for a vertical")
     public ResponseEntity<ReviewGenerationVerticalResult> generateReviewTextForVertical(
@@ -331,6 +439,7 @@ public class ReviewGenerationController {
      * @return per-product synchronous results
      * @throws IOException when product loading fails
      */
+    @Deprecated(since = "2026-06", forRemoval = false)
     @PostMapping("/review/vertical/{verticalId}/workflow")
     @Operation(summary = "Run full synchronous review workflow for a vertical")
     public ResponseEntity<ReviewGenerationVerticalResult> generateReviewWorkflowForVertical(
@@ -352,6 +461,7 @@ public class ReviewGenerationController {
      * @return the batch job identifier
      * @throws IOException when batch submission fails
      */
+    @Deprecated(since = "2026-06", forRemoval = false)
     @PostMapping("/review/batch")
     @Operation(summary = "Schedule AI review generation batch",
             description = "Launch a batch review generation job for a vertical.")
@@ -376,6 +486,7 @@ public class ReviewGenerationController {
      * @return list of batch job identifiers
      * @throws IOException when batch submission fails
      */
+    @Deprecated(since = "2026-06", forRemoval = false)
     @PostMapping("/review/batch/impactscore")
     @Operation(summary = "Schedule AI review generation for top impact score products",
             description = "Launch a batch review generation job for the next top impact score products without existing AI reviews.")
@@ -402,6 +513,7 @@ public class ReviewGenerationController {
      * @throws ResourceNotFoundException when the job does not exist
      * @throws IOException when batch response processing fails
      */
+    @Deprecated(since = "2026-06", forRemoval = false)
     @PostMapping("/review/batch/process")
     @Operation(summary = "Process batch review generation results",
             description = "Trigger the handling of batch review generation results for a job.")

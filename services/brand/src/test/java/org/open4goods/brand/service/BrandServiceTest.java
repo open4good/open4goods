@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.brand.model.Brand;
+import org.open4goods.brand.model.Company;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.services.serialisation.service.SerialisationService;
 
@@ -25,6 +26,53 @@ class BrandServiceTest {
 
         assertThat(resolved.getBrandName()).isEqualTo("LG");
         assertThat(resolved.getCompanyName()).isEqualTo("LG Electronics, Inc.");
+    }
+
+    @Test
+    void resolvesCompanyDetailsAndOfficialDomains() throws Exception {
+        CompanyLoader companyLoader = id -> {
+            if ("lg-electronics-inc".equals(id)) {
+                return """
+                        {
+                          "id": "lg-electronics-inc",
+                          "name": "LG Electronics, Inc.",
+                          "factoryLocations": ["South Korea"],
+                          "scorings": {"sustainalytics": 75}
+                        }
+                        """;
+            }
+            throw new IllegalArgumentException("Not found");
+        };
+
+        BrandService brandService = new BrandService(remoteFileCachingService, serialisationService,
+                this::v2Referential, companyLoader);
+
+        Brand resolved = brandService.resolve("LG");
+        assertThat(resolved.getBrandName()).isEqualTo("LG");
+        assertThat(resolved.getCompanyName()).isEqualTo("LG Electronics, Inc.");
+        assertThat(resolved.getOfficialDomains()).containsExactly("lg.com");
+        assertThat(resolved.getCompany()).isNotNull();
+        assertThat(resolved.getCompany().getId()).isEqualTo("lg-electronics-inc");
+        assertThat(resolved.getCompany().getFactoryLocations()).containsExactly("South Korea");
+        assertThat(resolved.getCompany().getScorings()).containsEntry("sustainalytics", 75);
+    }
+
+    @Test
+    void fallsBackToBasicCompanyOnLoaderFailure() throws Exception {
+        CompanyLoader companyLoader = id -> {
+            throw new RuntimeException("Simulated load error");
+        };
+
+        BrandService brandService = new BrandService(remoteFileCachingService, serialisationService,
+                this::v2Referential, companyLoader);
+
+        Brand resolved = brandService.resolve("LG");
+        assertThat(resolved.getBrandName()).isEqualTo("LG");
+        assertThat(resolved.getCompanyName()).isEqualTo("LG Electronics, Inc.");
+        assertThat(resolved.getCompany()).isNotNull();
+        assertThat(resolved.getCompany().getId()).isEqualTo("lg-electronics-inc");
+        // Handled fallback should retain company name
+        assertThat(resolved.getCompany().getName()).isEqualTo("LG Electronics, Inc.");
     }
 
     @Test
@@ -93,7 +141,7 @@ class BrandServiceTest {
     }
 
     private BrandService service(String json) throws Exception {
-        return new BrandService(remoteFileCachingService, serialisationService, () -> json);
+        return new BrandService(remoteFileCachingService, serialisationService, () -> json, id -> "{}");
     }
 
     private String v2Referential() {
@@ -106,7 +154,11 @@ class BrandServiceTest {
                     {
                       "canonicalName": "LG",
                       "normalizedName": "LG",
+                      "company-id": "lg-electronics-inc",
                       "companyName": "LG Electronics, Inc.",
+                      "official-domains": [
+                        "lg.com"
+                      ],
                       "status": "reviewed",
                       "synonyms": [
                         "LG ELECTRONICS",

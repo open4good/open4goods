@@ -43,6 +43,7 @@ import org.open4goods.services.urlfetching.config.FetchStrategy;
 import org.open4goods.services.urlfetching.dto.ExtractedMetadataAttribute;
 import org.open4goods.services.urlfetching.dto.FetchResponse;
 import org.open4goods.services.urlfetching.service.UrlFetchingService;
+import org.open4goods.brand.service.BrandService;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
@@ -58,6 +59,7 @@ class ReviewGenerationPreprocessingServiceTest {
     @Mock private UrlFetchingService urlFetchingService;
     @Mock private PromptService promptService;
     @Mock private SerialisationService serialisationService;
+    @Mock private BrandService brandService;
 
     @BeforeEach
     void setUp() {
@@ -68,7 +70,8 @@ class ReviewGenerationPreprocessingServiceTest {
         properties.setSearchGeoLocation("fr");
         properties.setSearchHostLanguage("fr");
         service = new ReviewGenerationPreprocessingService(properties, googleSearchService, urlFetchingService,
-                promptService, serialisationService, new io.micrometer.core.instrument.simple.SimpleMeterRegistry());
+                promptService, serialisationService, new io.micrometer.core.instrument.simple.SimpleMeterRegistry(),
+                brandService);
     }
 
     @Test
@@ -244,7 +247,9 @@ class ReviewGenerationPreprocessingServiceTest {
     @Test
     void preparePromptVariables_SearchesOfficialBrandDomainForNamedModelFromOfferTitle() throws Exception {
         properties.setSerpBudget(4);
-        properties.setOfficialDomainsByBrand(Map.of("Klarstein", List.of("klarstein")));
+        org.open4goods.brand.model.Brand brand = new org.open4goods.brand.model.Brand();
+        brand.setOfficialDomains(List.of("klarstein"));
+        when(brandService.resolve("Klarstein")).thenReturn(brand);
         Product product = product("Klarstein", "4060656565403");
         product.setId(4060656565403L);
         product.setOfferNames(Set.of("Klarstein Velaire Lave Vaisselle 45cm Pose Libre - 10 Couverts"));
@@ -877,7 +882,9 @@ class ReviewGenerationPreprocessingServiceTest {
     @Test
     void classifySource_TreatsOfficialProductPathAsOfficialBeforeSparePartText() {
         Product product = product("Siemens", "HB774G1W1");
-        properties.setOfficialDomainsByBrand(Map.of("Siemens", List.of("siemens-home.bsh-group.com")));
+        org.open4goods.brand.model.Brand brand = new org.open4goods.brand.model.Brand();
+        brand.setOfficialDomains(List.of("siemens-home.bsh-group.com"));
+        when(brandService.resolve("Siemens")).thenReturn(brand);
         GoogleSearchResult result = new GoogleSearchResult("Siemens HB774G1W1 official product",
                 "https://www.siemens-home.bsh-group.com/de/de/product/HB774G1W1");
 
@@ -1007,8 +1014,9 @@ class ReviewGenerationPreprocessingServiceTest {
         properties.setSourceMinTokens(1);
         properties.setMinGlobalTokens(1);
         properties.setMinUrlCount(1);
-        properties.setMaxUrlsPerProduct(1);
-        properties.setOfficialDomainsByBrand(Map.of("Essentiel B", List.of("boulanger.com")));
+        org.open4goods.brand.model.Brand brand = new org.open4goods.brand.model.Brand();
+        brand.setOfficialDomains(List.of("boulanger.com"));
+        when(brandService.resolve("Essentiel B")).thenReturn(brand);
         Product product = product("Essentiel B", "ELS107-1B");
         String officialUrl = "https://www.boulanger.com/ref/8011605";
         when(googleSearchService.search(any(GoogleSearchRequest.class))).thenReturn(new GoogleSearchResponse(List.of(

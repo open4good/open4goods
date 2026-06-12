@@ -1,17 +1,22 @@
 # Review Generation Service
 
-Generates French AI-assisted product reviews from product metadata, SERP
-results, fetched markdown sources, and prompt templates. The service supports
-realtime generation and OpenAI batch generation.
+Hosts the product enrichment pipeline that generates French AI-assisted product
+content from product metadata, discovered source URLs, fetched markdown sources,
+attributes, and prompt templates. The Maven artifact remains
+`reviewgeneration`; new APIs use `/enrichment/...` and legacy `/review/...`
+routes are deprecated delegates.
 
 ## Functional Flow
 
 1. Eligibility: skip products with a fresh and structurally valid French AI
    review unless generation is forced.
-2. SERP validation: require product brand and model, build official product and
-   official support/manual queries first, then preferred-domain queries,
-   vertical-injected site queries, and broad model queries.
-3. Fetching: fetch selected URLs concurrently through `UrlFetchingService`.
+2. URL discovery: submit DataForSEO Standard SERP tasks for
+   `BRAND "MODEL" ("fiche technique" OR caractéristiques OR test OR guide OR comparatif)`.
+   Results are stored in `Product.sourceUrls`, deduped by canonical URL, and
+   capped to 20 URLs per product.
+3. Fetching: read `Product.sourceUrls` when available, otherwise fall back to
+   the existing Google Custom Search path, then fetch selected URLs concurrently
+   through `UrlFetchingService`.
    Review generation requests `HTTP`, then `PLAYWRIGHT`, then `PROXIFIED`
    through internal strategy override headers; without an override, the URL
    fetcher uses `urlfetcher.domains`.
@@ -26,7 +31,35 @@ realtime generation and OpenAI batch generation.
    product.
 8. Hooks: execute post-generation hooks, including Google indexation.
 
-## SERP Configuration
+## DataForSEO URL Discovery
+
+```yaml
+dataforseo:
+  serp:
+    username: "${DATAFORSEO_USERNAME}"
+    password: "${DATAFORSEO_PASSWORD}"
+    base-url: "https://api.dataforseo.com"
+    language-code: "fr"
+    location-name: "France"
+    se-domain: "google.fr"
+    device: "desktop"
+    priority: 1
+    depth: 10
+    max-stored-urls: 20
+    max-tasks-per-post: 100
+```
+
+Discovery uses DataForSEO Standard asynchronous tasks. Vertical discovery
+submits at most 100 tasks per `task_post` request and stores a local JSON
+tracking file in the review-generation batch folder. Polling endpoints and the
+scheduled poller read task results and persist `organic` plus
+`featured_snippet` URLs to `Product.sourceUrls`.
+
+`site:` operators are intentionally not part of the default DataForSEO query.
+Official and support domains are classified after discovery using the existing
+source classification logic.
+
+## Legacy SERP Configuration
 
 Preferred domains are configured by the consuming application, not by this
 service module. In the API application they live in
@@ -67,10 +100,11 @@ Vertical configs may still add `injectSitesResults`; those are queried after
 the global preferred-domain query and before broad fallback queries.
 
 Official manufacturer pages are identified before prompt-source selection.
-Official support pages are stored in `Product.officialSupportUrls`; official
-PDFs and extracted manuals are stored in `Product.resources` with manufacturer
-metadata. HTML pages accepted as prompt evidence are also persisted as
-`Product.reviewFacts`.
+Official support pages and accepted HTML sources are stored in
+`Product.sourceUrls`; compatibility adapters still expose
+`Product.officialUrl`, `Product.officialSupportUrls`, and `Product.reviewFacts`.
+Official PDFs and extracted manuals are stored in `Product.resources` with
+manufacturer metadata.
 
 When normal source retrieval still fails thresholds, a conservative limited
 fallback can persist review facts from trusted structured EPREL/IceCat
@@ -135,18 +169,24 @@ strategy, source token count, and accumulated token count.
 Back-office API endpoints expose the three stages independently for one GTIN or
 for a bounded set of products in a vertical:
 
-- `POST /review/{id}/fetch`
-- `POST /review/{id}/attributes`
-- `POST /review/{id}/text`
-- `POST /review/{id}/workflow`
-- `POST /review/vertical/{verticalId}/fetch?limit=5`
-- `POST /review/vertical/{verticalId}/attributes?limit=5`
-- `POST /review/vertical/{verticalId}/text?limit=5`
-- `POST /review/vertical/{verticalId}/workflow?limit=5`
+- `POST /enrichment/{id}/urls/discover?force=false`
+- `POST /enrichment/vertical/{verticalId}/urls/discover?limit=100&force=false`
+- `POST /enrichment/discovery/jobs/{jobId}/poll`
+- `GET /enrichment/discovery/jobs/{jobId}`
+- `POST /enrichment/{id}/fetch`
+- `POST /enrichment/{id}/attributes`
+- `POST /enrichment/{id}/text`
+- `POST /enrichment/{id}/workflow`
+- `POST /enrichment/vertical/{verticalId}/fetch?limit=5`
+- `POST /enrichment/vertical/{verticalId}/attributes?limit=5`
+- `POST /enrichment/vertical/{verticalId}/text?limit=5`
+- `POST /enrichment/vertical/{verticalId}/workflow?limit=5`
 
 Each stage persists its result by default. Attribute extraction requires
-existing `Product.reviewFacts`, and text completion requires both
-`Product.reviewFacts` and persisted product attributes.
+fetched `Product.sourceUrls` or legacy `Product.reviewFacts`, and text
+completion requires fetched sources plus persisted product attributes.
+
+Deprecated `/review/...` equivalents remain available for current callers.
 
 Durable technical details are maintained in
 [docs/architecture/review-generation-service.md](../../docs/architecture/review-generation-service.md).

@@ -36,6 +36,11 @@ import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductFetchDiagnostics;
 import org.open4goods.model.product.ProductFact;
+import org.open4goods.model.product.ProductSourceProvider;
+import org.open4goods.model.product.ProductSourceQuery;
+import org.open4goods.model.product.ProductSourceUrl;
+import org.open4goods.model.product.ProductSourceUrlStatus;
+import org.open4goods.model.product.ProductSourceUrlType;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.resource.ResourceType;
 import org.open4goods.model.vertical.AttributeConfig;
@@ -43,6 +48,7 @@ import org.open4goods.model.vertical.AttributeParserConfig;
 import org.open4goods.model.util.ProductModelCandidateHelper;
 import org.open4goods.model.util.ProductModelCandidateHelper.ModelCandidateSource;
 import org.open4goods.model.review.ReviewGenerationStatus;
+import org.open4goods.brand.service.BrandService;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.googlesearch.dto.GoogleSearchRequest;
@@ -102,6 +108,7 @@ public class ReviewGenerationPreprocessingService {
 	private final SerialisationService serialisationService;
 	private final MeterRegistry meterRegistry;
 	private final OfficialPdfTextExtractionService officialPdfTextExtractionService;
+	private final BrandService brandService;
 	private final ThreadPoolExecutor fetchExecutor;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -172,14 +179,21 @@ public class ReviewGenerationPreprocessingService {
 			GoogleSearchService googleSearchService, UrlFetchingService urlFetchingService, PromptService genAiService,
 			SerialisationService serialisationService, MeterRegistry meterRegistry) {
 		this(properties, googleSearchService, urlFetchingService, genAiService, serialisationService, meterRegistry,
-				new OfficialPdfTextExtractionService());
+				new OfficialPdfTextExtractionService(), null);
+	}
+
+	public ReviewGenerationPreprocessingService(ReviewGenerationConfig properties,
+			GoogleSearchService googleSearchService, UrlFetchingService urlFetchingService, PromptService genAiService,
+			SerialisationService serialisationService, MeterRegistry meterRegistry, BrandService brandService) {
+		this(properties, googleSearchService, urlFetchingService, genAiService, serialisationService, meterRegistry,
+				new OfficialPdfTextExtractionService(), brandService);
 	}
 
 	@Autowired
 	public ReviewGenerationPreprocessingService(ReviewGenerationConfig properties,
 			GoogleSearchService googleSearchService, UrlFetchingService urlFetchingService, PromptService genAiService,
 			SerialisationService serialisationService, MeterRegistry meterRegistry,
-			OfficialPdfTextExtractionService officialPdfTextExtractionService) {
+			OfficialPdfTextExtractionService officialPdfTextExtractionService, BrandService brandService) {
 		this.properties = properties;
 		this.googleSearchService = googleSearchService;
 		this.urlFetchingService = urlFetchingService;
@@ -187,6 +201,7 @@ public class ReviewGenerationPreprocessingService {
 		this.serialisationService = serialisationService;
 		this.meterRegistry = meterRegistry;
 		this.officialPdfTextExtractionService = officialPdfTextExtractionService;
+		this.brandService = brandService;
 		this.fetchExecutor = new ThreadPoolExecutor(properties.getMaxConcurrentFetch(), properties.getMaxQueueSize(),
 				0L, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(properties.getMaxQueueSize() * 10),
 				new ThreadPoolExecutor.AbortPolicy());
@@ -285,10 +300,24 @@ public class ReviewGenerationPreprocessingService {
 		SerpBudget budget = new SerpBudget(properties.getSerpBudget());
 		status.addMessage("Searching the web...");
 		List<String> searchedQueries = new ArrayList<>();
-		List<GoogleSearchResult> allResults = executeSerpQueries("primary", queries, budget, product, searchedQueries,
-				status, r -> hasSufficientSerpCandidates(product, r, preferredDomains));
-		logger.info("SERP primary aggregation for UPC {}: queriesMade={}, rawResults={}, budgetRemaining={}",
-				product.getId(), searchedQueries.size(), allResults.size(), budget.remaining());
+		List<GoogleSearchResult> allResults;
+		if (hasDiscoveredSourceUrls(product)) {
+			allResults = sourceUrlsToSearchResults(product);
+			searchedQueries.addAll(product.getSourceUrls().getUrls().stream()
+					.map(ProductSourceUrl::getQuery)
+					.filter(Objects::nonNull)
+					.map(ProductSourceQuery::getQuery)
+					.filter(query -> query != null && !query.isBlank())
+					.distinct()
+					.toList());
+			logger.info("Using {} pre-discovered source URLs for UPC {}", allResults.size(), product.getId());
+		} else {
+			allResults = executeSerpQueries("primary", queries, budget, product, searchedQueries,
+					status, r -> hasSufficientSerpCandidates(product, r, preferredDomains));
+			persistDiscoveredSourceUrls(product, allResults, searchedQueries);
+			logger.info("SERP primary aggregation for UPC {}: queriesMade={}, rawResults={}, budgetRemaining={}",
+					product.getId(), searchedQueries.size(), allResults.size(), budget.remaining());
+		}
 
 		// GTIN fallback: when the primary brand+model queries returned no SERP results,
 		// try GTIN-based queries (pure GTIN, brand+GTIN, cleaned model) as a second pass.
@@ -301,6 +330,7 @@ public class ReviewGenerationPreprocessingService {
 				List<GoogleSearchResult> gtinResults = executeSerpQueries("gtin-fallback", gtinFallbackQueries,
 						budget, product, searchedQueries, status, r -> !r.isEmpty());
 				allResults.addAll(gtinResults);
+				persistDiscoveredSourceUrls(product, gtinResults, searchedQueries);
 				logger.info("SERP after GTIN fallback for UPC {}: queriesMade={}, rawResults={}",
 						product.getId(), searchedQueries.size(), allResults.size());
 			}
@@ -1203,6 +1233,86 @@ public class ReviewGenerationPreprocessingService {
 				.toList();
 	}
 
+	private boolean hasDiscoveredSourceUrls(Product product) {
+		return product != null && product.getSourceUrls() != null && product.getSourceUrls().getUrls() != null
+				&& product.getSourceUrls().getUrls().stream()
+						.anyMatch(source -> source != null && source.getUrl() != null && !source.getUrl().isBlank()
+								&& source.getStatus() != ProductSourceUrlStatus.IDENTIFIED
+								&& source.getStatus() != ProductSourceUrlStatus.REJECTED
+								&& source.getStatus() != ProductSourceUrlStatus.FAILED);
+	}
+
+	private List<GoogleSearchResult> sourceUrlsToSearchResults(Product product) {
+		return product.getSourceUrls().getUrls().stream()
+				.filter(source -> source != null && source.getUrl() != null && !source.getUrl().isBlank())
+				.filter(source -> source.getStatus() != ProductSourceUrlStatus.IDENTIFIED
+						&& source.getStatus() != ProductSourceUrlStatus.REJECTED
+						&& source.getStatus() != ProductSourceUrlStatus.FAILED)
+				.map(source -> new GoogleSearchResult(source.getTitle(), source.getUrl()))
+				.toList();
+	}
+
+	private void persistDiscoveredSourceUrls(Product product, List<GoogleSearchResult> results, List<String> searchedQueries) {
+		if (product == null || results == null || results.isEmpty()) {
+			return;
+		}
+		String query = searchedQueries == null || searchedQueries.isEmpty() ? null : searchedQueries.getLast();
+		long now = System.currentTimeMillis();
+		int rank = 1;
+		for (GoogleSearchResult result : results) {
+			if (result == null || result.link() == null || result.link().isBlank()) {
+				continue;
+			}
+			ProductSourceUrl sourceUrl = new ProductSourceUrl(result.link());
+			sourceUrl.setTitle(result.title());
+			sourceUrl.setSerpRank(rank++);
+			sourceUrl.setProvider(ProductSourceProvider.GOOGLE_CUSTOM_SEARCH);
+			sourceUrl.setStatus(ProductSourceUrlStatus.DISCOVERED);
+			sourceUrl.setQuery(new ProductSourceQuery(query, null, ProductSourceProvider.GOOGLE_CUSTOM_SEARCH, now));
+			product.getSourceUrls().add(sourceUrl);
+		}
+	}
+
+	private void updateSourceUrl(Product product, GoogleSearchResult result, ProductSourceUrlStatus status,
+			SourceClass sourceClass, Integer tokenCount, FetchResponse fetchResponse, String rejectionReason,
+			String markdown) {
+		if (product == null || result == null || result.link() == null || result.link().isBlank()) {
+			return;
+		}
+		String content = markdown == null && fetchResponse != null ? fetchResponse.markdownContent() : markdown;
+		ProductSourceUrl sourceUrl = new ProductSourceUrl(result.link());
+		sourceUrl.setTitle(result.title());
+		sourceUrl.setStatus(status);
+		sourceUrl.setType(toSourceUrlType(sourceClass));
+		sourceUrl.setProvider(ProductSourceProvider.GOOGLE_CUSTOM_SEARCH);
+		if (fetchResponse != null) {
+			sourceUrl.setStatusCode(fetchResponse.statusCode());
+			sourceUrl.setFetchStrategy(fetchResponse.fetchStrategy() == null ? null : fetchResponse.fetchStrategy().name());
+		}
+		if (content != null && !content.isBlank()) {
+			String normalized = content.length() > properties.getFactMaxMarkdownChars()
+					? content.substring(0, properties.getFactMaxMarkdownChars())
+					: content;
+			sourceUrl.setMarkdown(normalized);
+			sourceUrl.setContentHash(sha256(normalized));
+			sourceUrl.setFetchedAt(System.currentTimeMillis());
+		}
+		sourceUrl.setTokenCount(tokenCount);
+		sourceUrl.setRejectionReason(rejectionReason);
+		product.getSourceUrls().add(sourceUrl);
+	}
+
+	private ProductSourceUrlType toSourceUrlType(SourceClass sourceClass) {
+		if (sourceClass == null) {
+			return ProductSourceUrlType.UNKNOWN;
+		}
+		try {
+			return ProductSourceUrlType.valueOf(sourceClass.name());
+		} catch (IllegalArgumentException e) {
+			return ProductSourceUrlType.UNKNOWN;
+		}
+	}
+
 	/**
 	 * Tiered ranking score for SERP result ordering (stable sort preserves Google order within tier).
 	 * <ul>
@@ -1464,8 +1574,12 @@ public class ReviewGenerationPreprocessingService {
 				if (isProductRelevantResource(product, url, result.title(), isOfficialUrl(product, result))) {
 					persistOfficialResources(product, result, null);
 					rejectedUrls.put(url, "pdf source excluded from review prompt; persisted for attributes extraction");
+					updateSourceUrl(product, result, ProductSourceUrlStatus.REJECTED, SourceClass.OFFICIAL_PDF, null,
+							null, "pdf source excluded from review prompt; persisted for attributes extraction", null);
 				} else {
 					rejectedUrls.put(url, "pdf source excluded: not specific enough to the product");
+					updateSourceUrl(product, result, ProductSourceUrlStatus.REJECTED, SourceClass.OFFICIAL_PDF, null,
+							null, "pdf source excluded: not specific enough to the product", null);
 				}
 				continue;
 			}
@@ -1473,6 +1587,7 @@ public class ReviewGenerationPreprocessingService {
 			if (future == null) {
 				continue;
 			}
+			updateSourceUrl(product, result, ProductSourceUrlStatus.FETCHING, null, null, null, null, null);
 			FetchOutcome outcome = future.get();
 			FetchResponse fetchResponse = outcome == null ? null : outcome.response();
 			persistOfficialResources(product, result, fetchResponse);
@@ -1483,6 +1598,8 @@ public class ReviewGenerationPreprocessingService {
 					logger.info("Persisting official URL from failed fetch for UPC {}: {}", product.getId(), url);
 				}
 				rejectedUrls.put(url, outcome == null ? "fetch returned no response" : outcome.rejectionReason());
+				updateSourceUrl(product, result, ProductSourceUrlStatus.FAILED, null, null, fetchResponse,
+						outcome == null ? "fetch returned no response" : outcome.rejectionReason(), null);
 				continue;
 			}
 			String content = sanitizeMarkdown(fetchResponse.markdownContent(), url);
@@ -1492,6 +1609,7 @@ public class ReviewGenerationPreprocessingService {
 					&& !(isManufacturerHost(product, result) && exactProductEvidence)) {
 				String reason = "irrelevant: missing brand/model match in title, h1/main content, or URL";
 				rejectedUrls.put(url, reason);
+				updateSourceUrl(product, result, ProductSourceUrlStatus.REJECTED, null, null, fetchResponse, reason, null);
 				logger.warn("Content from URL {} discarded due to irrelevance for brand {} and model {}", url, brand,
 						primaryModel);
 				continue;
@@ -1500,16 +1618,22 @@ public class ReviewGenerationPreprocessingService {
 			if (sourceClass == SourceClass.SPARE_PART || sourceClass == SourceClass.GENERIC_CATALOG
 					|| sourceClass == SourceClass.MANUAL_INDEX) {
 				rejectedUrls.put(url, "low-quality source class: " + sourceClass.name());
+				updateSourceUrl(product, result, ProductSourceUrlStatus.REJECTED, sourceClass, null, fetchResponse,
+						"low-quality source class: " + sourceClass.name(), null);
 				logger.warn("Content from URL {} discarded due to low-quality source class {}", url, sourceClass);
 				continue;
 			}
 			if (!isAcceptedSourceClass(sourceClass)) {
 				rejectedUrls.put(url, "unsupported source class: " + sourceClass.name());
+				updateSourceUrl(product, result, ProductSourceUrlStatus.REJECTED, sourceClass, null, fetchResponse,
+						"unsupported source class: " + sourceClass.name(), null);
 				logger.warn("Content from URL {} discarded due to unsupported source class {}", url, sourceClass);
 				continue;
 			}
 			if (!exactProductEvidence) {
 				rejectedUrls.put(url, "irrelevant: missing exact GTIN/model evidence");
+				updateSourceUrl(product, result, ProductSourceUrlStatus.REJECTED, sourceClass, null, fetchResponse,
+						"irrelevant: missing exact GTIN/model evidence", null);
 				logger.warn("Content from URL {} discarded because it lacks specific GTIN/model evidence for UPC {}",
 						url, product.getId());
 				continue;
@@ -1517,6 +1641,8 @@ public class ReviewGenerationPreprocessingService {
 			if (verticalEvidenceRequired && !hasGtinEvidence(product, result, content)
 					&& !hasVerticalEvidence(verticalConfig, result, content)) {
 				rejectedUrls.put(url, "irrelevant: named model family without vertical evidence");
+				updateSourceUrl(product, result, ProductSourceUrlStatus.REJECTED, sourceClass, null, fetchResponse,
+						"irrelevant: named model family without vertical evidence", null);
 				logger.warn("Content from URL {} discarded because named model '{}' lacks vertical evidence for UPC {}",
 						url, primaryModel, product.getId());
 				continue;
@@ -1524,6 +1650,8 @@ public class ReviewGenerationPreprocessingService {
 			int tokenCount = genAiService.estimateTokens(content);
 			if (tokenCount < minTokens) {
 				rejectedUrls.put(url, "insufficient tokens: " + tokenCount);
+				updateSourceUrl(product, result, ProductSourceUrlStatus.REJECTED, sourceClass, tokenCount,
+						fetchResponse, "insufficient tokens: " + tokenCount, null);
 				logger.warn("Content from URL {} discarded due to insufficient tokens: {}", url, tokenCount);
 				continue;
 			}
@@ -1538,12 +1666,17 @@ public class ReviewGenerationPreprocessingService {
 						tokenCount = trimmedTokenCount;
 					} else {
 						rejectedUrls.put(url, "too many tokens after official-page trimming: " + trimmedTokenCount);
+						updateSourceUrl(product, result, ProductSourceUrlStatus.REJECTED, sourceClass, trimmedTokenCount,
+								fetchResponse, "too many tokens after official-page trimming: " + trimmedTokenCount,
+								null);
 						logger.warn("Content from official URL {} discarded after trimming, token count: {}", url,
 								trimmedTokenCount);
 						continue;
 					}
 				} else {
 					rejectedUrls.put(url, "too many tokens: " + tokenCount);
+					updateSourceUrl(product, result, ProductSourceUrlStatus.REJECTED, sourceClass, tokenCount,
+							fetchResponse, "too many tokens: " + tokenCount, null);
 					logger.warn("Content from URL {} discarded, exceed tokens limit: {}", url, tokenCount);
 					continue;
 				}
@@ -1557,6 +1690,8 @@ public class ReviewGenerationPreprocessingService {
 			finalSourcesMap.put(url, content);
 			finalTokensMap.put(url, tokenCount);
 			finalSourceClasses.put(url, sourceClass);
+			updateSourceUrl(product, result, ProductSourceUrlStatus.FETCHED, sourceClass, tokenCount, fetchResponse,
+					null, content);
 			accumulatedTokens += tokenCount;
 			logger.info("Accepted source for UPC {}: url={}, strategy={}, tokens={}, accumulatedTokens={}",
 					product.getId(), url, resolveFetchStrategy(fetchFutures.get(url)), tokenCount, accumulatedTokens);
@@ -2592,17 +2727,23 @@ public class ReviewGenerationPreprocessingService {
 	}
 
 	private List<String> configuredOfficialDomains(String brand) {
-		if (brand == null || brand.isBlank() || properties.getOfficialDomainsByBrand() == null) {
+		if (brand == null || brand.isBlank() || brandService == null) {
 			return List.of();
 		}
-		String normalizedBrand = normalizeForTextMatching(brand);
-		return properties.getOfficialDomainsByBrand().entrySet().stream()
-				.filter(entry -> normalizeForTextMatching(entry.getKey()).equals(normalizedBrand))
-				.flatMap(entry -> entry.getValue() == null ? java.util.stream.Stream.empty() : entry.getValue().stream())
-				.map(this::sanitizeOfficialDomainFragment)
-				.filter(domain -> !domain.isBlank())
-				.distinct()
-				.toList();
+		try {
+			org.open4goods.brand.model.Brand resolvedBrand = brandService.resolve(brand);
+			if (resolvedBrand == null || resolvedBrand.getOfficialDomains() == null) {
+				return List.of();
+			}
+			return resolvedBrand.getOfficialDomains().stream()
+					.map(this::sanitizeOfficialDomainFragment)
+					.filter(domain -> !domain.isBlank())
+					.distinct()
+					.toList();
+		} catch (Exception e) {
+			logger.warn("Failed to resolve official domains for brand: {}", brand, e);
+			return List.of();
+		}
 	}
 
 	private String sanitizeOfficialDomainFragment(String domain) {
@@ -3374,15 +3515,11 @@ public class ReviewGenerationPreprocessingService {
 		if (product == null || product.brand() == null || normalizedHost == null || normalizedHost.isBlank()) {
 			return false;
 		}
-		Map<String, List<String>> configuredDomains = properties.getOfficialDomainsByBrand();
-		if (configuredDomains == null || configuredDomains.isEmpty()) {
+		List<String> domains = configuredOfficialDomains(product.brand());
+		if (domains.isEmpty()) {
 			return false;
 		}
-		String normalizedBrand = normalizeForTextMatching(product.brand());
-		return configuredDomains.entrySet().stream()
-				.filter(entry -> normalizeForTextMatching(entry.getKey()).equals(normalizedBrand))
-				.flatMap(entry -> entry.getValue() == null ? java.util.stream.Stream.empty() : entry.getValue().stream())
-				.map(this::sanitizeOfficialDomainFragment)
+		return domains.stream()
 				.map(this::normalizeForUrlMatching)
 				.anyMatch(domain -> !domain.isBlank() && normalizedHost.contains(domain));
 	}
@@ -3645,7 +3782,13 @@ public class ReviewGenerationPreprocessingService {
 	}
 
 	private List<ProductFact> orderedReviewFacts(Product product) {
-		if (product == null || product.getReviewFacts() == null || product.getReviewFacts().isEmpty()) {
+		if (product == null) {
+			return List.of();
+		}
+		List<ProductFact> facts = product.getSourceUrls() == null || product.getSourceUrls().fetched().isEmpty()
+				? product.getReviewFacts()
+				: product.getSourceUrls().toReviewFacts();
+		if (facts == null || facts.isEmpty()) {
 			return List.of();
 		}
 		List<String> acceptedUrls = product.getReviewFetchDiagnostics() == null
@@ -3656,10 +3799,10 @@ public class ReviewGenerationPreprocessingService {
 			acceptedOrder.putIfAbsent(acceptedUrls.get(i), i);
 		}
 		Map<ProductFact, Integer> originalOrder = new LinkedHashMap<>();
-		for (int i = 0; i < product.getReviewFacts().size(); i++) {
-			originalOrder.put(product.getReviewFacts().get(i), i);
+		for (int i = 0; i < facts.size(); i++) {
+			originalOrder.put(facts.get(i), i);
 		}
-		return product.getReviewFacts().stream()
+		return facts.stream()
 				.filter(fact -> fact != null && fact.getUrl() != null && !fact.getUrl().isBlank())
 				.sorted(Comparator
 						.comparingInt((ProductFact fact) -> officialSourceRank(product, fact.getUrl()))

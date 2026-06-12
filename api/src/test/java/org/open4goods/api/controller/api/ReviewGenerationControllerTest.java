@@ -23,6 +23,8 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.reviewgeneration.dto.ReviewGenerationStepResult;
 import org.open4goods.services.reviewgeneration.dto.ReviewGenerationVerticalResult;
+import org.open4goods.services.reviewgeneration.dto.SourceDiscoveryJob;
+import org.open4goods.services.reviewgeneration.service.DataForSeoSerpService;
 import org.open4goods.services.reviewgeneration.service.NotEnoughDataException;
 import org.open4goods.services.reviewgeneration.service.ReviewGenerationService;
 import org.open4goods.verticals.VerticalsConfigService;
@@ -41,11 +43,30 @@ class ReviewGenerationControllerTest {
     @Mock
     private ReviewGenerationService reviewGenerationService;
 
+    @Mock
+    private DataForSeoSerpService dataForSeoSerpService;
+
     private ReviewGenerationController controller;
 
     @BeforeEach
     void setUp() {
-        controller = new ReviewGenerationController(productRepository, verticalsConfigService, reviewGenerationService);
+        controller = new ReviewGenerationController(productRepository, verticalsConfigService, reviewGenerationService,
+                dataForSeoSerpService);
+    }
+
+    @Test
+    void discoverEnrichmentUrls_ShouldDelegateToDataForSeoDiscovery() throws Exception {
+        Product product = product(123L, "tv");
+        SourceDiscoveryJob job = new SourceDiscoveryJob();
+        job.setJobId("job-1");
+
+        when(productRepository.getById(123L)).thenReturn(product);
+        when(dataForSeoSerpService.discoverUrls(product, true)).thenReturn(job);
+
+        ResponseEntity<SourceDiscoveryJob> response = controller.discoverEnrichmentUrls(123L, true);
+
+        assertThat(response.getBody()).isSameAs(job);
+        verify(dataForSeoSerpService).discoverUrls(product, true);
     }
 
     @Test

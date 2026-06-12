@@ -41,11 +41,6 @@ public class ReviewGenerationConfig {
             "amazon.", "cdiscount.", "darty.", "fnac.", "galaxus.", "laredoute.", "rakuten.",
             "boulanger.", "electromenager-compare.", "lesmenagers.", "quel-lave-linge.", "nettoyant."));
 
-    /**
-     * Brand-to-official-host overrides for private-label or manufacturer brands whose
-     * official product pages live on a retailer or group domain.
-     */
-    private Map<String, List<String>> officialDomainsByBrand = Map.of();
 
     /**
      * Sibling-brand aliases used when judging source relevance. Many manufacturer groups
@@ -265,13 +260,6 @@ public class ReviewGenerationConfig {
     }
     public void setOfficialUrlExcludedDomains(List<String> officialUrlExcludedDomains) {
         this.officialUrlExcludedDomains = officialUrlExcludedDomains;
-    }
-
-    public Map<String, List<String>> getOfficialDomainsByBrand() {
-        return officialDomainsByBrand;
-    }
-    public void setOfficialDomainsByBrand(Map<String, List<String>> officialDomainsByBrand) {
-        this.officialDomainsByBrand = officialDomainsByBrand == null ? Map.of() : officialDomainsByBrand;
     }
 
     public Map<String, List<String>> getBrandAliases() {

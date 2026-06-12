@@ -215,6 +215,10 @@
             "type": "object",
             "enabled": false
         },
+        "sourceUrls": {
+            "type": "object",
+            "enabled": false
+        },
         "reviews": {
             "type": "object",
             "enabled": false

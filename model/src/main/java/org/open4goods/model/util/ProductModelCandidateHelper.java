@@ -37,6 +37,22 @@ public final class ProductModelCandidateHelper {
             "(?=.*\\p{L})[\\p{Alnum}][\\p{Alnum} ./_-]{3,31}");
     private static final Pattern URL_MODEL_TOKEN_PATTERN = Pattern.compile(
             "\\b(?:[A-Za-z]{1,10}\\d[A-Za-z0-9]{2,}(?:[-_/][A-Za-z0-9]{1,10}){0,3}|\\d+[A-Za-z]{1,10}[A-Za-z0-9]{2,}(?:[-_/][A-Za-z0-9]{1,10}){0,3})\\b");
+    /**
+     * Broad separator-aware token finder for offer titles. Captures whole tokens
+     * including alpha-only prefixes (e.g. {@code SM-G991B}, {@code TX-25QUE},
+     * {@code HG32EJ690WE}). These prefixes are required for correct EPREL compact matching.
+     */
+    private static final Pattern TITLE_MODEL_TOKEN_PATTERN =
+            Pattern.compile("(?i)(?<![A-Z0-9])[A-Z0-9][A-Z0-9._/\\-]{3,}[A-Z0-9](?![A-Z0-9])");
+    private static final Pattern TITLE_MEASURE_UNIT_PATTERN = Pattern.compile("^(\\d{2,5})([A-Z]{1,10})$");
+    private static final Pattern TITLE_RESOLUTION_PATTERN   = Pattern.compile(".*\\d{3,4}X\\d{3,4}.*");
+    private static final Pattern TITLE_SEPARATOR_PATTERN    = Pattern.compile("[._/\\-]");
+    private static final Pattern TITLE_EDGE_PUNCTUATION_PATTERN =
+            Pattern.compile("^[\\p{Punct}\\s]+|[\\p{Punct}\\s]+$");
+    private static final Pattern TITLE_NON_ALPHANUMERIC_PATTERN = Pattern.compile("[^A-Z0-9]");
+    private static final Set<String> TITLE_MEASURE_SUFFIXES = Set.of(
+            "POUCE", "POUCES", "INCH", "INCHES", "CM", "MM", "HZ", "W", "KW",
+            "V", "AH", "MAH", "GB", "TB", "MB", "MP", "FPS", "NITS", "LUMENS", "K");
     private static final Set<String> GENERIC_MODEL_WORDS = Set.of("refrigerateur", "fridge", "glaciere",
             "dishwasher", "lave vaisselle", "lave", "vaisselle", "seche", "linge", "washing", "machine",
             "smartphone", "telephone", "mobile", "encastrable", "portable", "compact", "mini", "unknown");
@@ -480,6 +496,72 @@ public final class ProductModelCandidateHelper {
     }
 
     /**
+     * Frequency-aware result of title-based model extraction.
+     *
+     * @param best   highest-confidence candidate, or {@code null} when none qualify
+     * @param ranked all qualifying candidates ordered best-first (best is element 0)
+     */
+    public record TitleModelExtraction(String best, List<String> ranked) {
+        /** Returns {@code true} when no qualifying candidate was found. */
+        public boolean isEmpty() {
+            return best == null;
+        }
+    }
+
+    /**
+     * Extracts safe, frequency-ranked manufacturer-like model candidates from offer
+     * titles.
+     *
+     * <p>Candidates are uppercased and validated against the union of two guard
+     * families:
+     * <ul>
+     *   <li>Alpha-digit transition-density heuristics (rejects measure/unit tokens
+     *       such as {@code 144HZ}, {@code 55POUCES}, resolutions like
+     *       {@code 1920x1080}, and pure-numeric codes).</li>
+     *   <li>{@link #isPersistableModelCandidate} guards (rejects storage variants
+     *       {@code 256GO}, category words, degenerate dimension codes).</li>
+     * </ul>
+     * Candidates are then ranked by frequency, then shortest (post-separator-strip),
+     * then lexical order.
+     *
+     * <p>The broad {@link #TITLE_MODEL_TOKEN_PATTERN} is used rather than
+     * {@link #URL_MODEL_TOKEN_PATTERN} in order to preserve alpha-only prefixes such
+     * as {@code SM-} in {@code SM-G991B}, which are required for correct EPREL compact
+     * matching.
+     *
+     * @param offerNames raw offer/merchant titles
+     * @return elected best candidate and ordered alternates (never {@code null})
+     */
+    public static TitleModelExtraction extractModelsFromTitles(Collection<String> offerNames) {
+        if (offerNames == null || offerNames.isEmpty()) {
+            return new TitleModelExtraction(null, List.of());
+        }
+        Map<String, Integer> freq = new java.util.HashMap<>();
+        for (String offerName : offerNames) {
+            if (offerName == null || offerName.isBlank()) {
+                continue;
+            }
+            TITLE_MODEL_TOKEN_PATTERN.matcher(offerName).results()
+                    .map(m -> trimTitleEdgePunct(m.group()))
+                    .filter(raw -> !raw.isEmpty())
+                    .map(raw -> raw.toUpperCase(Locale.ROOT))
+                    .filter(upper -> isLikelyTitleModel(upper) && isPersistableModelCandidate(upper))
+                    .forEach(upper -> freq.merge(upper, 1, Integer::sum));
+        }
+        if (freq.isEmpty()) {
+            return new TitleModelExtraction(null, List.of());
+        }
+        List<String> ranked = freq.entrySet().stream()
+                .sorted(java.util.Comparator
+                        .<Map.Entry<String, Integer>>comparingInt(Map.Entry::getValue).reversed()
+                        .thenComparingInt(e -> TITLE_SEPARATOR_PATTERN.matcher(e.getKey()).replaceAll("").length())
+                        .thenComparing(Map.Entry::getKey))
+                .map(Map.Entry::getKey)
+                .collect(java.util.stream.Collectors.toList());
+        return new TitleModelExtraction(ranked.get(0), ranked);
+    }
+
+    /**
      * Checks whether a candidate is useful for broad user-facing web searches.
      *
      * @param candidate model candidate
@@ -563,6 +645,83 @@ public final class ProductModelCandidateHelper {
 
     private static boolean containsWholePhrase(String container, String contained) {
         return contained != null && (" " + container + " ").contains(" " + contained + " ");
+    }
+
+    /**
+     * Conservative validator for manufacturer-like model tokens extracted from offer
+     * titles. Guards against measure/unit tokens, resolutions, and density-too-low
+     * codes. Mirrors the logic previously in
+     * {@code AttributeRealtimeAggregationService.isLikelyManufacturerModel}.
+     *
+     * @param upper uppercased candidate (no leading/trailing punctuation)
+     * @return {@code true} when the token looks like a manufacturer model code
+     */
+    private static boolean isLikelyTitleModel(String upper) {
+        if (TITLE_RESOLUTION_PATTERN.matcher(upper).matches()) {
+            return false;
+        }
+        String alnum = TITLE_NON_ALPHANUMERIC_PATTERN.matcher(upper).replaceAll("");
+        if (alnum.length() < 5) {
+            return false;
+        }
+        int letters = 0;
+        int digits = 0;
+        for (int i = 0; i < alnum.length(); i++) {
+            char c = alnum.charAt(i);
+            if (c >= 'A' && c <= 'Z') {
+                letters++;
+            } else if (c >= '0' && c <= '9') {
+                digits++;
+            }
+        }
+        if (letters == 0) {
+            return digits >= 5;
+        }
+        if (digits == 0) {
+            return false;
+        }
+        if (isTitleMeasureOrUnit(alnum)) {
+            return false;
+        }
+        boolean hasSeparator = TITLE_SEPARATOR_PATTERN.matcher(upper).find();
+        int transitions = countTitleAlphaDigitTransitions(alnum);
+        if (transitions >= 2) {
+            return true;
+        }
+        if (letters >= 2 && digits >= 3 && alnum.length() >= 6) {
+            return true;
+        }
+        return hasSeparator && letters >= 2 && digits >= 2 && alnum.length() >= 5;
+    }
+
+    /** Returns {@code true} when the alnum string looks like digits + a unit suffix. */
+    private static boolean isTitleMeasureOrUnit(String alnum) {
+        java.util.regex.Matcher m = TITLE_MEASURE_UNIT_PATTERN.matcher(alnum);
+        if (!m.matches()) {
+            return false;
+        }
+        String suffix = m.group(2);
+        if (TITLE_MEASURE_SUFFIXES.contains(suffix)) {
+            return true;
+        }
+        return suffix.startsWith("POUC") || suffix.startsWith("INCH");
+    }
+
+    private static int countTitleAlphaDigitTransitions(String alnum) {
+        int transitions = 0;
+        boolean prevIsDigit = Character.isDigit(alnum.charAt(0));
+        for (int i = 1; i < alnum.length(); i++) {
+            boolean isDigit = Character.isDigit(alnum.charAt(i));
+            if (isDigit != prevIsDigit) {
+                transitions++;
+            }
+            prevIsDigit = isDigit;
+        }
+        return transitions;
+    }
+
+    private static String trimTitleEdgePunct(String s) {
+        return TITLE_EDGE_PUNCTUATION_PATTERN.matcher(s).replaceAll("");
     }
 
     private static List<String> rejectAmbiguousSiblingFamilies(List<String> candidates) {

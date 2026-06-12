@@ -31,7 +31,7 @@ userPrompt: |
   Noms commerciaux du produit :
   [[${OFFER_NAMES}]]
 
-  Attributs communs du vertical :
+  Attributs communs de la catégorie :
   [[${COMMON_ATTRIBUTES}]]
 
   Scores produit (JSON) :
@@ -39,9 +39,6 @@ userPrompt: |
 
   Ecoscore produit (JSON) :
   [[${PRODUCT_ECOSCORE_JSON}]]
-
-  Liste d'attributs attendus :
-  [[${ATTRIBUTES}]]
 
   Attributs pre-extraits (a reprendre directement dans le champ "attributes") :
   [[${EXTRACTED_ATTRIBUTES}]]

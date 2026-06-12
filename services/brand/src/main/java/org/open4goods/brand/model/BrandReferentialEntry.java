@@ -2,6 +2,7 @@ package org.open4goods.brand.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Reviewed canonical brand definition and its known aliases.
@@ -11,6 +12,13 @@ public class BrandReferentialEntry {
     private String canonicalName;
     private String normalizedName;
     private String companyName;
+
+    @JsonProperty("company-id")
+    private String companyId;
+
+    @JsonProperty("official-domains")
+    private List<String> officialDomains = new ArrayList<>();
+
     private String status = "reviewed";
     private List<String> synonyms = new ArrayList<>();
     private List<BrandSourceEvidence> sources = new ArrayList<>();
@@ -37,6 +45,22 @@ public class BrandReferentialEntry {
 
     public void setCompanyName(String companyName) {
         this.companyName = companyName;
+    }
+
+    public String getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(String companyId) {
+        this.companyId = companyId;
+    }
+
+    public List<String> getOfficialDomains() {
+        return officialDomains;
+    }
+
+    public void setOfficialDomains(List<String> officialDomains) {
+        this.officialDomains = officialDomains != null ? officialDomains : new ArrayList<>();
     }
 
     public String getStatus() {

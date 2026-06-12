@@ -172,12 +172,14 @@ public class Product implements Standardisable {
 	/**
 	 * Manufacturer product page identified during review-source discovery.
 	 */
+	@Deprecated(since = "2026-06", forRemoval = false)
 	private String officialUrl;
 
 	/**
 	 * Manufacturer support pages identified during review-source discovery, grouped by
 	 * language.
 	 */
+	@Deprecated(since = "2026-06", forRemoval = false)
 	private Localisable<String, Set<String>> officialSupportUrls = new Localisable<String, Set<String>>();
 
 	private Map<String, Score> scores = new HashMap<>();
@@ -197,12 +199,19 @@ public class Product implements Standardisable {
 	/**
 	 * Facts scraped from web sources and stored for AI reprocessing.
 	 */
+	@Deprecated(since = "2026-06", forRemoval = false)
 	private List<ProductFact> reviewFacts = new ArrayList<>();
 
 	/**
 	 * Latest review-source fetching diagnostics.
 	 */
+	@Deprecated(since = "2026-06", forRemoval = false)
 	private ProductFetchDiagnostics reviewFetchDiagnostics;
+
+	/**
+	 * Generic source URL inventory used by the product enrichment pipeline.
+	 */
+	private ProductSourceUrls sourceUrls = new ProductSourceUrls();
 
 	private EcoScoreRanking ranking = new EcoScoreRanking();
 
@@ -235,6 +244,14 @@ public class Product implements Standardisable {
 	 * @return manufacturer product page URL, or {@code null} when unknown
 	 */
 	public String getOfficialUrl() {
+		if (officialUrl == null && sourceUrls != null) {
+			officialUrl = sourceUrls.getUrls().stream()
+					.filter(source -> source.getType() == ProductSourceUrlType.OFFICIAL_PRODUCT)
+					.map(ProductSourceUrl::getUrl)
+					.filter(url -> url != null && !url.isBlank())
+					.findFirst()
+					.orElse(null);
+		}
 		return officialUrl;
 	}
 
@@ -245,6 +262,13 @@ public class Product implements Standardisable {
 	 */
 	public void setOfficialUrl(String officialUrl) {
 		this.officialUrl = officialUrl;
+		if (StringUtils.isNotBlank(officialUrl)) {
+			ProductSourceUrl sourceUrl = new ProductSourceUrl(officialUrl);
+			sourceUrl.setType(ProductSourceUrlType.OFFICIAL_PRODUCT);
+			sourceUrl.setStatus(ProductSourceUrlStatus.IDENTIFIED);
+			sourceUrl.setProvider(ProductSourceProvider.OFFICIAL_DOMAIN);
+			getSourceUrls().add(sourceUrl);
+		}
 	}
 
 	/**
@@ -253,6 +277,33 @@ public class Product implements Standardisable {
 	 * @return localised manufacturer support page URLs
 	 */
 	public Localisable<String, Set<String>> getOfficialSupportUrls() {
+		if ((officialSupportUrls == null || officialSupportUrls.isEmpty()) && sourceUrls != null) {
+			Localisable<String, Set<String>> supportUrls = new Localisable<String, Set<String>>();
+			sourceUrls.getUrls().stream()
+					.filter(source -> source.getType() == ProductSourceUrlType.OFFICIAL_SUPPORT)
+					.forEach(source -> {
+						String url = source.getUrl();
+						if (url != null && !url.isBlank()) {
+							String lang = "default";
+							try {
+								java.net.URI uri = java.net.URI.create(url.trim());
+								String path = uri.getPath();
+								if (path != null) {
+									for (String segment : path.split("/")) {
+										if (segment.matches("[a-zA-Z]{2}([_-][a-zA-Z]{2})?")) {
+											lang = segment.substring(0, 2).toLowerCase(Locale.ROOT);
+											break;
+										}
+									}
+								}
+							} catch (Exception e) {
+								// ignore
+							}
+							supportUrls.computeIfAbsent(lang, ignored -> new HashSet<String>()).add(url);
+						}
+					});
+			officialSupportUrls = supportUrls;
+		}
 		return officialSupportUrls;
 	}
 
@@ -278,6 +329,11 @@ public class Product implements Standardisable {
 		}
 		String key = StringUtils.isBlank(language) ? "default" : language.trim().toLowerCase(Locale.ROOT);
 		officialSupportUrls.computeIfAbsent(key, ignored -> new HashSet<String>()).add(supportUrl);
+		ProductSourceUrl sourceUrl = new ProductSourceUrl(supportUrl);
+		sourceUrl.setType(ProductSourceUrlType.OFFICIAL_SUPPORT);
+		sourceUrl.setStatus(ProductSourceUrlStatus.IDENTIFIED);
+		sourceUrl.setProvider(ProductSourceProvider.OFFICIAL_DOMAIN);
+		getSourceUrls().add(sourceUrl);
 	}
 
 	//////////////////// :
@@ -1316,11 +1372,18 @@ public class Product implements Standardisable {
 
 
 	public List<ProductFact> getReviewFacts() {
+		if ((reviewFacts == null || reviewFacts.isEmpty()) && sourceUrls != null && !sourceUrls.fetched().isEmpty()) {
+			reviewFacts = new ArrayList<>(sourceUrls.toReviewFacts());
+		}
 		return reviewFacts;
 	}
 
 	public void setReviewFacts(List<ProductFact> reviewFacts) {
 		this.reviewFacts = reviewFacts == null ? new ArrayList<>() : reviewFacts;
+		if (reviewFacts != null && !reviewFacts.isEmpty()) {
+			ProductSourceUrls updated = getSourceUrls();
+			reviewFacts.stream().map(ProductSourceUrl::fromFact).forEach(updated::add);
+		}
 	}
 
 	public ProductFetchDiagnostics getReviewFetchDiagnostics() {
@@ -1329,6 +1392,20 @@ public class Product implements Standardisable {
 
 	public void setReviewFetchDiagnostics(ProductFetchDiagnostics reviewFetchDiagnostics) {
 		this.reviewFetchDiagnostics = reviewFetchDiagnostics;
+	}
+
+	public ProductSourceUrls getSourceUrls() {
+		if (sourceUrls == null) {
+			sourceUrls = new ProductSourceUrls();
+		}
+		return sourceUrls;
+	}
+
+	public void setSourceUrls(ProductSourceUrls sourceUrls) {
+		this.sourceUrls = sourceUrls == null ? new ProductSourceUrls() : sourceUrls;
+		if ((reviewFacts == null || reviewFacts.isEmpty()) && !this.sourceUrls.fetched().isEmpty()) {
+			reviewFacts = new ArrayList<>(this.sourceUrls.toReviewFacts());
+		}
 	}
 
 	public void setEprelDatas(EprelProduct eprelDatas) {

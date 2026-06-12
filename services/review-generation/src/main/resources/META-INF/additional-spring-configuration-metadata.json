@@ -4,6 +4,11 @@
       "name": "review.generation",
       "type": "org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig",
       "sourceType": "org.open4goods.services.reviewgeneration.config.ReviewGenerationConfig"
+    },
+    {
+      "name": "dataforseo.serp",
+      "type": "org.open4goods.services.reviewgeneration.config.DataForSeoSerpConfig",
+      "sourceType": "org.open4goods.services.reviewgeneration.config.DataForSeoSerpConfig"
     }
   ],
   "properties": [
@@ -42,12 +47,6 @@
       "type": "java.util.List<java.lang.String>",
       "description": "Domain substrings excluded from manufacturer official URL detection.",
       "defaultValue": []
-    },
-    {
-      "name": "review.generation.official-domains-by-brand",
-      "type": "java.util.Map<java.lang.String,java.util.List<java.lang.String>>",
-      "description": "Brand-to-official-host overrides for private-label or manufacturer brands whose official pages live on a retailer or group domain.",
-      "defaultValue": {}
     },
     {
       "name": "review.generation.brand-aliases",
@@ -255,6 +254,82 @@
       "type": "java.lang.Integer",
       "description": "Maximum number of entries in the URL resolution LRU cache.",
       "defaultValue": 1000
+    },
+    {
+      "name": "dataforseo.serp.username",
+      "type": "java.lang.String",
+      "description": "DataForSEO API username used for Standard SERP task submission."
+    },
+    {
+      "name": "dataforseo.serp.password",
+      "type": "java.lang.String",
+      "description": "DataForSEO API password used for Standard SERP task submission."
+    },
+    {
+      "name": "dataforseo.serp.base-url",
+      "type": "java.lang.String",
+      "description": "DataForSEO API base URL.",
+      "defaultValue": "https://api.dataforseo.com"
+    },
+    {
+      "name": "dataforseo.serp.language-code",
+      "type": "java.lang.String",
+      "description": "SERP language code.",
+      "defaultValue": "fr"
+    },
+    {
+      "name": "dataforseo.serp.location-name",
+      "type": "java.lang.String",
+      "description": "SERP location name.",
+      "defaultValue": "France"
+    },
+    {
+      "name": "dataforseo.serp.se-domain",
+      "type": "java.lang.String",
+      "description": "Search engine domain.",
+      "defaultValue": "google.fr"
+    },
+    {
+      "name": "dataforseo.serp.device",
+      "type": "java.lang.String",
+      "description": "SERP device.",
+      "defaultValue": "desktop"
+    },
+    {
+      "name": "dataforseo.serp.priority",
+      "type": "java.lang.Integer",
+      "description": "DataForSEO task priority.",
+      "defaultValue": 1
+    },
+    {
+      "name": "dataforseo.serp.depth",
+      "type": "java.lang.Integer",
+      "description": "SERP depth requested from DataForSEO. Keep at 10 for v1 cost control.",
+      "defaultValue": 10
+    },
+    {
+      "name": "dataforseo.serp.max-stored-urls",
+      "type": "java.lang.Integer",
+      "description": "Maximum source URLs retained per product after discovery and deduplication.",
+      "defaultValue": 20
+    },
+    {
+      "name": "dataforseo.serp.max-tasks-per-post",
+      "type": "java.lang.Integer",
+      "description": "Maximum DataForSEO tasks submitted per task_post request.",
+      "defaultValue": 100
+    },
+    {
+      "name": "dataforseo.serp.discovery-poll-interval",
+      "type": "java.time.Duration",
+      "description": "Delay between scheduled polls of local DataForSEO discovery jobs.",
+      "defaultValue": "PT10M"
+    },
+    {
+      "name": "dataforseo.serp.default-query-template",
+      "type": "java.lang.String",
+      "description": "Default product query template. Arguments are brand and model.",
+      "defaultValue": "%s \"%s\" (\"fiche technique\" OR caractéristiques OR test OR guide OR comparatif)"
     }
   ]
 }
