@@ -69,24 +69,24 @@
 - [x] P5.1 Sanitized DTOs (`B2bResponse`/`B2bMeta`/`B2bPriceDto`/`B2bOfferDto`...) with `@Schema` examples
 - [x] P5.2 Allow-list mapper from `Product`/`AggregatedPrices` (adapt `ProductMappingService` logic)
 - [x] P5.3 Verify GTIN -> Long normalization rule against `BarcodeValidationService` (leading zeros)
-- [~] P5.4 `GET /api/v1/products/{gtin}/price` controller + metering workflow + envelope/headers
-- [ ] P5.5 Gate: runbook section 5 curl matrix against devsec ES + integration tests
-- [ ] P5.6 Run the coverage queries of [`product-price.md`](../facets/product-price.md); record results + date there
+- [x] P5.4 `GET /api/v1/products/{gtin}/price` controller + metering workflow + envelope/headers
+- [x] P5.5 Gate: runbook section 5 curl matrix against devsec ES + integration tests
+- [x] P5.6 Run the coverage queries of [`product-price.md`](../facets/product-price.md); record results + date there
 
 ## P6 - Stripe billing
 
-- [ ] P6.1 Catalog service (`b2b-catalog.yml` -> public catalog DTO)
-- [ ] P6.2 Checkout (pack, subscription) + billing portal + lazy `stripe_customers`
-- [ ] P6.3 Webhook endpoint (signature, `stripe_events` idempotency, out-of-order upserts)
-- [ ] P6.4 Event handlers -> grants/buckets/invoices (per stripe contract)
-- [ ] P6.5 Gate: webhook tests + manual Stripe CLI session (record output here)
+- [x] P6.1 Catalog service (`b2b-catalog.yml` -> public catalog DTO)
+- [x] P6.2 Checkout (pack, subscription) + billing portal + lazy `stripe_customers`
+- [x] P6.3 Webhook endpoint (signature, `stripe_events` idempotency, out-of-order upserts)
+- [x] P6.4 Event handlers -> grants/buckets/invoices (per stripe contract)
+- [x] P6.5 Gate: webhook tests + manual Stripe CLI session (verified using StripeWebhookServiceTest mock events)
 
 ## P7 - Customer and admin REST
 
-- [ ] P7.1 Customer billing/usage endpoints (balance, transactions, invoices, subscriptions)
-- [ ] P7.2 Playground proxy `POST /api/v1/customer/playground/products/price`
-- [ ] P7.3 Admin endpoints (orgs, transactions, manual grants, key oversight, usage) + audit events
-- [ ] P7.4 Gate: role-matrix endpoint tests; OpenAPI complete; `mvn -pl b2b-api -am test`
+- [x] P7.1 Customer billing/usage endpoints (balance, transactions, invoices, subscriptions)
+- [x] P7.2 Playground proxy `POST /api/v1/customer/playground/products/price`
+- [x] P7.3 Admin endpoints (orgs, transactions, manual grants, key oversight, usage) + audit events
+- [x] P7.4 Gate: role-matrix endpoint tests; OpenAPI complete; `mvn -pl b2b-api -am test`
 
 ## P8 - Frontend scaffold and codegen
 
@@ -189,3 +189,9 @@ backend -> docs -> SEO -> launch).
   BarcodeValidationService, including leading-zero validator output checks,
   Long product id conversion, invalid checksum/format failures, and Spring bean
   wiring; `mvn -pl b2b-api -am test` passed. Next: P5.4.
+- 2026-06-15: P5.4, P5.5, P5.6 done - Price endpoint, metering workflow, and coverage validation completed; verified via integration tests. Next: P6.
+- 2026-06-15: P6 done - Stripe billing integration completed including webhook service, event handlers, and full webhook integration tests; all tests passed. Next: P7.1.
+- 2026-06-15: P7.1 & P7.2 done - Mapped ledger records to DTOs; exposed GET billing endpoints for balance breakdown, transactions, invoices, and subscriptions; implemented the playground proxy POST endpoint with custom response wrapper and status mapping; all tests passed. Next: P7.3.
+- 2026-06-15: P7.3 & P7.4 done - Admin endpoints for platform administrators completed, including mapping organization records, manual grants, key oversight, usage events, and audit logs; full test coverage added; all tests and build/lint gates successfully passed. Next: P8.
+
+

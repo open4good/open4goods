@@ -37,6 +37,7 @@ public class WebSecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/api/v1/auth/**",
+                                "/api/v1/customer/billing/catalog",
                                 "/api/v1/billing/stripe/webhook")
                         .permitAll()
                         .requestMatchers("/api/v1/admin/**").hasAuthority(RbacAuthority.PLATFORM_ADMIN)

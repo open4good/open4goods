@@ -36,5 +36,15 @@ public class AdminAuditEventRepository {
                 .setParameter("organizationId", organizationId)
                 .setMaxResults(limit)
                 .getResultList();
-    }
+     }
+
+     public List<AdminAuditEvent> findAllRecent(final int limit) {
+         return entityManager.getObject().createQuery("""
+                         select event
+                         from AdminAuditEvent event
+                         order by event.createdAt desc
+                         """, AdminAuditEvent.class)
+                 .setMaxResults(limit)
+                 .getResultList();
+     }
 }

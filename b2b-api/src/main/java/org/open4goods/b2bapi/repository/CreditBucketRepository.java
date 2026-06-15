@@ -18,6 +18,16 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CreditBucketRepository extends JpaRepository<CreditBucket, UUID> {
 
+    @Query("""
+            select bucket
+            from CreditBucket bucket
+            where bucket.organization.id = :organizationId
+              and bucket.creditsRemaining > 0
+              and (bucket.expiresAt is null or bucket.expiresAt > current_timestamp)
+            order by bucket.expiresAt asc nulls last, bucket.createdAt asc
+            """)
+    List<CreditBucket> findLiveBuckets(@Param("organizationId") UUID organizationId);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
             select bucket

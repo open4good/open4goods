@@ -23,14 +23,14 @@ GET (vs job-based PriceAPI/Bright Data) and strict per-facet no-data-no-pay
 
 | Measure | Result | Date |
 |---|---:|---|
-| Total index (`products-moustik`) | 83 168 478 | 2026-06-02 |
-| `offersCount > 0` (sellable base) | 33 894 029 (40.8 %) | 2026-06-02 |
-| `offersCount >= 2` (true price comparison) | 3 914 220 (4.7 %) | 2026-06-02 |
-| `offersCount >= 5` (market depth) | 153 818 | 2026-06-02 |
-| Fresh within 30 days, among `offersCount > 0` | 100 % | 2026-06-02 |
+| Total index (`products-moustik`) | 90,330,515 | 2026-06-15 |
+| `offersCount > 0` (sellable base) | 42,048,951 (46.5 %) | 2026-06-15 |
+| `offersCount >= 2` (true price comparison) | 4,271,391 (4.7 %) | 2026-06-15 |
+| `offersCount >= 5` (market depth) | 211,496 (0.2 %) | 2026-06-15 |
+| Fresh within 30 days, among `offersCount > 0` | 82.7 % | 2026-06-15 |
 
 Source study: [`data-coverage.md`](../business/data-coverage.md) section 2.2.
-The 100 % freshness figure means the `no-fresh-offer` no-pay case will be rare
+The 82.7 % freshness figure means the `no-fresh-offer` no-pay case will be rare
 on the offer-bearing mass - good for conversion, honest to advertise.
 
 Reproducible queries (verify field names against the live mapping first -

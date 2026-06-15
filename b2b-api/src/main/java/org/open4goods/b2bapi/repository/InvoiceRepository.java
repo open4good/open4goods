@@ -13,4 +13,6 @@ import org.springframework.stereotype.Repository;
 public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
 
     Optional<Invoice> findByStripeInvoiceId(String stripeInvoiceId);
+
+    java.util.List<Invoice> findByOrganizationIdOrderByCreatedAtDesc(UUID organizationId);
 }

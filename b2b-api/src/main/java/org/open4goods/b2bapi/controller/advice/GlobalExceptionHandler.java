@@ -37,7 +37,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     ProblemDetail handleUnhandledException(final Exception exception, final HttpServletRequest request) {
-        final String requestId = Optional.ofNullable(request.getHeader("X-Request-Id")).orElse("unavailable");
+        final String requestId = resolveRequestId(request);
         LOGGER.error("Unhandled Product Data API failure requestId={}", requestId, exception);
         return toProblem(ErrorCode.INTERNAL_ERROR, "Unexpected server error.", request);
     }
@@ -48,7 +48,22 @@ public class GlobalExceptionHandler {
         problem.setType(URI.create("https://product-data-api.com/problems/" + errorCode.slug()));
         problem.setTitle(errorCode.title());
         problem.setInstance(URI.create(request.getRequestURI()));
-        Optional.ofNullable(request.getHeader("X-Request-Id")).ifPresent(requestId -> problem.setProperty("requestId", requestId));
+        final String requestId = resolveRequestId(request);
+        if (!"unavailable".equals(requestId)) {
+            problem.setProperty("requestId", requestId);
+        }
         return problem;
+    }
+
+    private String resolveRequestId(final HttpServletRequest request) {
+        if (request == null) {
+            return "unavailable";
+        }
+        final Object attributeVal = request.getAttribute("X-Request-Id");
+        if (attributeVal instanceof String) {
+            return (String) attributeVal;
+        }
+        final String headerVal = request.getHeader("X-Request-Id");
+        return headerVal != null ? headerVal : "unavailable";
     }
 }

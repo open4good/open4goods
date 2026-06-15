@@ -159,6 +159,16 @@
       "name": "b2b.security.oidc.apple.jwks-uri",
       "type": "java.lang.String",
       "description": "Apple OIDC JWKS endpoint."
+    },
+    {
+      "name": "b2b.stripe.secret-key",
+      "type": "java.lang.String",
+      "description": "Stripe secret API key for billing integration."
+    },
+    {
+      "name": "b2b.stripe.webhook-secret",
+      "type": "java.lang.String",
+      "description": "Stripe webhook endpoint signing secret."
     }
   ]
 }

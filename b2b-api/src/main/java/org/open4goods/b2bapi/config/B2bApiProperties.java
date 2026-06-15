@@ -48,6 +48,9 @@ public class B2bApiProperties {
     @Valid
     private Hardener hardener = new Hardener();
 
+    @Valid
+    private Stripe stripe = new Stripe();
+
     public URI getPublicBaseUrl() {
         return publicBaseUrl;
     }
@@ -118,6 +121,14 @@ public class B2bApiProperties {
 
     public void setHardener(final Hardener hardener) {
         this.hardener = hardener;
+    }
+
+    public Stripe getStripe() {
+        return stripe;
+    }
+
+    public void setStripe(final Stripe stripe) {
+        this.stripe = stripe;
     }
 
     public static class Credits {
@@ -538,6 +549,29 @@ public class B2bApiProperties {
 
         public void setLockAtMostFor(final Duration lockAtMostFor) {
             this.lockAtMostFor = lockAtMostFor;
+        }
+    }
+
+    public static class Stripe {
+
+        private String secretKey = "";
+
+        private String webhookSecret = "";
+
+        public String getSecretKey() {
+            return secretKey;
+        }
+
+        public void setSecretKey(final String secretKey) {
+            this.secretKey = secretKey;
+        }
+
+        public String getWebhookSecret() {
+            return webhookSecret;
+        }
+
+        public void setWebhookSecret(final String webhookSecret) {
+            this.webhookSecret = webhookSecret;
         }
     }
 }

@@ -1,7 +1,9 @@
 package org.open4goods.b2bapi.repository;
 
+import java.util.List;
 import java.util.UUID;
 import org.open4goods.b2bapi.model.UsageEvent;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,4 +12,6 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface UsageEventRepository extends JpaRepository<UsageEvent, UUID> {
+
+    List<UsageEvent> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }

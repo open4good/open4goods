@@ -50,4 +50,9 @@ public class CreditTransactionRepository {
                 .setMaxResults(limit)
                 .getResultList();
     }
+
+    @Transactional
+    public void deleteAll() {
+        entityManager.getObject().createQuery("delete from CreditTransaction").executeUpdate();
+    }
 }

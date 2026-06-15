@@ -24,15 +24,25 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
 
     private static final String BEARER_PREFIX = "Bearer ";
 
+    private final ObjectProvider<ApiKeyAuthenticationService> apiKeyAuthenticationServiceProvider;
     private final ApiKeyAuthenticationService apiKeyAuthenticationService;
 
     @Autowired
-    public ApiKeyAuthFilter(final ObjectProvider<ApiKeyAuthenticationService> apiKeyAuthenticationService) {
-        this(apiKeyAuthenticationService.getIfAvailable());
+    public ApiKeyAuthFilter(final ObjectProvider<ApiKeyAuthenticationService> apiKeyAuthenticationServiceProvider) {
+        this.apiKeyAuthenticationServiceProvider = apiKeyAuthenticationServiceProvider;
+        this.apiKeyAuthenticationService = null;
     }
 
     ApiKeyAuthFilter(final ApiKeyAuthenticationService apiKeyAuthenticationService) {
+        this.apiKeyAuthenticationServiceProvider = null;
         this.apiKeyAuthenticationService = apiKeyAuthenticationService;
+    }
+
+    private ApiKeyAuthenticationService getApiKeyAuthenticationService() {
+        if (apiKeyAuthenticationService != null) {
+            return apiKeyAuthenticationService;
+        }
+        return apiKeyAuthenticationServiceProvider != null ? apiKeyAuthenticationServiceProvider.getIfAvailable() : null;
     }
 
     @Override
@@ -49,14 +59,15 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return;
         }
-        if (apiKeyAuthenticationService == null) {
+        final ApiKeyAuthenticationService authService = getApiKeyAuthenticationService();
+        if (authService == null) {
             SecurityContextHolder.clearContext();
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return;
         }
         try {
             final String clearKey = authorization.substring(BEARER_PREFIX.length()).trim();
-            SecurityContextHolder.getContext().setAuthentication(apiKeyAuthenticationService.authenticate(clearKey));
+            SecurityContextHolder.getContext().setAuthentication(authService.authenticate(clearKey));
         } catch (final InvalidApiKeyException | IllegalArgumentException exception) {
             SecurityContextHolder.clearContext();
             response.setStatus(HttpStatus.UNAUTHORIZED.value());

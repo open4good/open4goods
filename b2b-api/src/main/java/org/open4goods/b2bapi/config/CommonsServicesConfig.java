@@ -19,4 +19,10 @@ public class CommonsServicesConfig {
     BarcodeValidationService barcodeValidationService() {
         return new BarcodeValidationService();
     }
+
+    @Bean
+    org.open4goods.services.productrepository.services.ProductRepository productRepository(
+            org.springframework.data.elasticsearch.core.ElasticsearchOperations elasticsearchOperations) {
+        return new org.open4goods.services.productrepository.services.ProductRepository(elasticsearchOperations);
+    }
 }

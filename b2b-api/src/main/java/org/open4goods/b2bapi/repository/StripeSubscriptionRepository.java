@@ -13,4 +13,6 @@ import org.springframework.stereotype.Repository;
 public interface StripeSubscriptionRepository extends JpaRepository<StripeSubscription, UUID> {
 
     Optional<StripeSubscription> findByStripeSubscriptionId(String stripeSubscriptionId);
+
+    java.util.List<StripeSubscription> findByOrganizationIdOrderByCreatedAtDesc(UUID organizationId);
 }

@@ -92,3 +92,7 @@ b2b:
         client-secret: ${B2B_OIDC_APPLE_SECRET:}
         issuer: ${B2B_OIDC_APPLE_ISSUER:https://appleid.apple.com}
         jwks-uri: ${B2B_OIDC_APPLE_JWKS_URI:https://appleid.apple.com/auth/keys}
+  stripe:
+    secret-key: ${B2B_STRIPE_SECRET_KEY:}
+    webhook-secret: ${B2B_STRIPE_WEBHOOK_SECRET:}
+

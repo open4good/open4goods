@@ -20,6 +20,7 @@ import org.open4goods.b2bapi.repository.ApiKeyRepository;
 import org.open4goods.b2bapi.repository.OrganizationRepository;
 import org.open4goods.b2bapi.repository.UserRepository;
 import org.open4goods.b2bapi.service.ApiKeySecretGenerator;
+import org.open4goods.b2bapi.service.B2bProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -39,7 +40,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * Servlet-security integration tests for dashboard JWT and Product API-key 401 behavior.
  */
-@SpringBootTest(classes = {B2bApiApplication.class, AuthSecurityIntegrationTest.ProductEndpointTestController.class}, properties = {
+@SpringBootTest(classes = B2bApiApplication.class, properties = {
         "spring.jpa.hibernate.ddl-auto=validate",
         "management.health.redis.enabled=false"
 })
@@ -80,6 +81,9 @@ class AuthSecurityIntegrationTest {
 
     @MockitoBean
     private StringRedisTemplate redisTemplate;
+
+    @MockitoBean
+    private B2bProductService b2bProductService;
 
     private ValueOperations<String, String> valueOperations;
     private MockMvc mockMvc;
@@ -122,6 +126,8 @@ class AuthSecurityIntegrationTest {
     @Test
     void productEndpointAllowsValidApiKeyThroughSecurityLayer() throws Exception {
         saveApiKey("pdapi_active", ApiKeyStatus.ACTIVE, OrganizationStatus.ACTIVE);
+        when(b2bProductService.getProductPrice(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any()))
+                .thenReturn(new org.open4goods.b2bapi.dto.product.B2bResponse<>(null, null));
 
         mockMvc.perform(get("/api/v1/products/1234567890123/price")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer pdapi_active"))
@@ -150,14 +156,5 @@ class AuthSecurityIntegrationTest {
                 secretGenerator.sha256Hex(clearKey));
         apiKey.setStatus(apiKeyStatus);
         apiKeyRepository.save(apiKey);
-    }
-
-    @RestController
-    static class ProductEndpointTestController {
-
-        @GetMapping("/api/v1/products/{gtin}/price")
-        String price(@PathVariable final String gtin) {
-            return gtin;
-        }
     }
 }
