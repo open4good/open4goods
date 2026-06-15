@@ -15,7 +15,7 @@ import org.open4goods.model.attribute.ProductAttribute;
 
 import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
-import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
+import org.open4goods.services.feedservice.service.FeedIndexingService;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -50,7 +50,7 @@ public class BatchService {
 
 	private AggregationFacadeService aggregationFacadeService;
 
-	private CsvDatasourceFetchingService csvDatasourceFetchingService;
+	private FeedIndexingService feedIndexingService;
 
 	private FeedService feedService;
 
@@ -64,13 +64,13 @@ public class BatchService {
 
 
 	public BatchService(AggregationFacadeService aggregationFacadeService,
-			CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository dataRepository, CsvDatasourceFetchingService csvDatasourceFetchingService, FeedService feedService, SerialisationService serialisationService, ResourceService resourceService, ApiProperties apiProperties) {
+			CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository dataRepository, FeedIndexingService feedIndexingService, FeedService feedService, SerialisationService serialisationService, ResourceService resourceService, ApiProperties apiProperties) {
 		super();
 		this.aggregationFacadeService = aggregationFacadeService;
 		this.completionFacadeService = completionFacadeService;
 		this.verticalsConfigService = verticalsConfigService;
 		this.dataRepository = dataRepository;
-		this.csvDatasourceFetchingService = csvDatasourceFetchingService;
+		this.feedIndexingService = feedIndexingService;
 		this.feedService = feedService;
 		this.serialisationService = serialisationService;
 		this.resourceService = resourceService;
@@ -356,7 +356,7 @@ public class BatchService {
         for (DataSourceProperties ds : datasourceList) {
             try {
                 logger.info("Fetching feed: {}", ds);
-                csvDatasourceFetchingService.start(ds, ds.getDatasourceConfigName());
+                feedIndexingService.start(ds, ds.getDatasourceConfigName());
             } catch (Exception e) {
                 logger.error("Error fetching feed {}: ", ds, e);
             }
@@ -389,7 +389,7 @@ public class BatchService {
             try {
                 if (ds.getCsvDatasource().getDatasourceUrls().contains(url)) {
                     logger.info("Fetching feed: {}", ds);
-                    csvDatasourceFetchingService.start(ds, ds.getDatasourceConfigName());
+                    feedIndexingService.start(ds, ds.getDatasourceConfigName());
                 } else {
                     logger.debug("Skipping feed: {}", ds);
                 }
@@ -420,7 +420,7 @@ public class BatchService {
         for (DataSourceProperties ds : datasources) {
             try {
                 logger.info("Fetching feed {}: {}", ds.getDatasourceConfigName(), ds);
-                csvDatasourceFetchingService.start(ds, ds.getDatasourceConfigName());
+                feedIndexingService.start(ds, ds.getDatasourceConfigName());
             } catch (Exception e) {
                 logger.error("Error fetching feed {}: ", ds.getDatasourceConfigName(), e);
             }
@@ -451,7 +451,7 @@ public class BatchService {
         for (DataSourceProperties ds : datasources) {
             try {
                 logger.info("Fetching feed {}: {}", ds.getDatasourceConfigName(), ds);
-                csvDatasourceFetchingService.start(ds, ds.getDatasourceConfigName());
+                feedIndexingService.start(ds, ds.getDatasourceConfigName());
             } catch (Exception e) {
                 logger.error("Error fetching feed {}: ", ds.getDatasourceConfigName(), e);
             }

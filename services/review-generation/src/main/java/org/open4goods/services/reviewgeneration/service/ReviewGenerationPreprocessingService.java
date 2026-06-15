@@ -2799,6 +2799,19 @@ public class ReviewGenerationPreprocessingService {
 		Map<String, String> antiBotHeaders = new HashMap<>(playwrightHeaders);
 		antiBotHeaders.put("X-Open4goods-Playwright-Proxy", "true");
 		response = fetchWithHeaders(url, antiBotHeaders, "PLAYWRIGHT_PROXY");
+		if (isValidFetch(response)) {
+			return new FetchOutcome(response, null);
+		}
+		rejectionReason = invalidFetchReason(response);
+		logger.info("PLAYWRIGHT_PROXY produced no usable content for {}; falling back to EXTERNAL.", url);
+
+		Map<String, String> externalHeaders = new HashMap<>();
+		if (customHeaders != null) {
+			externalHeaders.putAll(customHeaders);
+		}
+		applyOfficialFetchHeaders(externalHeaders, officialContext);
+		externalHeaders.put("X-Open4goods-Fetch-Mode", "external");
+		response = fetchWithHeaders(url, externalHeaders, "EXTERNAL");
 		if (!isValidFetch(response)) {
 			rejectionReason = invalidFetchReason(response);
 			logger.warn("All fetch strategies failed for URL {}. Giving up on this source.", url);

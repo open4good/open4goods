@@ -251,7 +251,6 @@ const categoryFixture = {
       POWER: 0.3,
       REPAIRABILITY: 0.2,
       DATA_QUALITY: 0.05,
-      BRAND_SUSTAINALYTICS_SCORING: 0.1,
     },
     texts: {
       purpose: 'Purpose text for televisions.',
@@ -261,7 +260,6 @@ const categoryFixture = {
         POWER: 'Power analysis.',
         REPAIRABILITY: 'Repairability analysis.',
         DATA_QUALITY: 'Data quality analysis.',
-        BRAND_SUSTAINALYTICS_SCORING: 'Brand ESG analysis.',
       },
     },
     yamlPrompt: 'key: value',
@@ -272,12 +270,7 @@ const categoryFixture = {
       },
     }),
   },
-  availableImpactScoreCriterias: [
-    'POWER',
-    'REPAIRABILITY',
-    'DATA_QUALITY',
-    'BRAND_SUSTAINALYTICS_SCORING',
-  ],
+  availableImpactScoreCriterias: ['POWER', 'REPAIRABILITY', 'DATA_QUALITY'],
   attributesConfig: {
     configs: [
       {
@@ -299,12 +292,6 @@ const categoryFixture = {
         name: 'Data quality',
         scoreUtility: 'Shows confidence level in sourced data.',
         participateInACV: new Set(['EXTRACTION']),
-      },
-      {
-        key: 'BRAND_SUSTAINALYTICS_SCORING',
-        name: 'Brand ESG rating',
-        scoreUtility: 'Provides external ESG context for the brand.',
-        participateInACV: new Set(['USE']),
       },
     ],
   },

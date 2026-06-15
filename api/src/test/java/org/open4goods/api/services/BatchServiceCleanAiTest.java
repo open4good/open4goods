@@ -18,7 +18,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
-import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
+import org.open4goods.services.feedservice.service.FeedIndexingService;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
@@ -42,13 +42,13 @@ public class BatchServiceCleanAiTest {
         CompletionFacadeService completionFacadeService = mock(CompletionFacadeService.class);
         VerticalsConfigService verticalsConfigService = mock(VerticalsConfigService.class);
         ProductRepository dataRepository = mock(ProductRepository.class);
-        CsvDatasourceFetchingService csvDatasourceFetchingService = mock(CsvDatasourceFetchingService.class);
+        FeedIndexingService feedIndexingService = mock(FeedIndexingService.class);
         FeedService feedService = mock(FeedService.class);
         SerialisationService serialisationService = mock(SerialisationService.class);
         ResourceService resourceService = mock(ResourceService.class);
         ApiProperties apiProperties = mock(ApiProperties.class);
 
-        BatchService batchService = new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService, dataRepository, csvDatasourceFetchingService, feedService, serialisationService, resourceService, apiProperties);
+        BatchService batchService = new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService, dataRepository, feedIndexingService, feedService, serialisationService, resourceService, apiProperties);
 
         // Setup Data
         VerticalConfig vertical = new VerticalConfig();

@@ -35,7 +35,6 @@ import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.verticals.GoogleTaxonomyService;
 import org.open4goods.verticals.VerticalsConfigService;
-import org.open4goods.brand.service.BrandScoreService;
 import org.open4goods.brand.service.BrandService;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
@@ -86,7 +85,6 @@ class AggregationFacadeServiceParticipatingScoresIT {
                 mock(IcecatService.class),
                 mock(IcecatFeatureResolver.class),
                 mock(SerialisationService.class),
-                mock(BrandScoreService.class),
                 mock(DjlTextEmbeddingService.class),
                 new DjlEmbeddingProperties());
     }

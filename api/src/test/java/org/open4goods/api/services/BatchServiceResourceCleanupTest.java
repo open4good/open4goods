@@ -22,7 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.commons.services.ResourceService;
-import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
+import org.open4goods.services.feedservice.service.FeedIndexingService;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.resource.Resource;
@@ -62,7 +62,7 @@ public class BatchServiceResourceCleanupTest {
         AggregationFacadeService aggregationFacadeService = mock(AggregationFacadeService.class);
         CompletionFacadeService completionFacadeService = mock(CompletionFacadeService.class);
         VerticalsConfigService verticalsConfigService = mock(VerticalsConfigService.class);
-        CsvDatasourceFetchingService csvDatasourceFetchingService = mock(CsvDatasourceFetchingService.class);
+        FeedIndexingService feedIndexingService = mock(FeedIndexingService.class);
         FeedService feedService = mock(FeedService.class);
         SerialisationService serialisationService = mock(SerialisationService.class);
 
@@ -71,7 +71,7 @@ public class BatchServiceResourceCleanupTest {
                 completionFacadeService,
                 verticalsConfigService,
                 productRepository,
-                csvDatasourceFetchingService,
+                feedIndexingService,
                 feedService,
                 serialisationService,
                 resourceService,

@@ -10,7 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "front.share")
 public class ShareResolutionProperties {
 
-    private boolean crawlerExtractionEnabled = false;
+    private boolean urlFetchExtractionEnabled = false;
     private Duration resolutionWindow = Duration.ofSeconds(4);
     private Duration storeTtl = Duration.ofMinutes(20);
     private int maxUrlLength = 2048;
@@ -18,12 +18,12 @@ public class ShareResolutionProperties {
     private int maxTitleLength = 256;
     private int maxCandidates = 5;
 
-    public boolean isCrawlerExtractionEnabled() {
-        return crawlerExtractionEnabled;
+    public boolean isUrlFetchExtractionEnabled() {
+        return urlFetchExtractionEnabled;
     }
 
-    public void setCrawlerExtractionEnabled(boolean crawlerExtractionEnabled) {
-        this.crawlerExtractionEnabled = crawlerExtractionEnabled;
+    public void setUrlFetchExtractionEnabled(boolean urlFetchExtractionEnabled) {
+        this.urlFetchExtractionEnabled = urlFetchExtractionEnabled;
     }
 
     public Duration getResolutionWindow() {

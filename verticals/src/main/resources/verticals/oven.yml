@@ -104,7 +104,6 @@ availableImpactScoreCriterias:
   #  - POWER_CONSUMPTION_TYPICAL
   - WARRANTY
   # - REPAIRABILITY_INDEX
-  - BRAND_SUSTAINALYTICS_SCORING
   - DATA_QUALITY
   - WEIGHT
 
@@ -617,9 +616,6 @@ aggregationConfiguration:
   "scores.WEIGHT.value":
     interval: 2
     buckets: 12
-  "scores.BRAND_SUSTAINALYTICS_SCORING.value":
-    interval: 1
-    buckets: 5
   "scores.CLASSE_ENERGY.value":
     interval: 1
     buckets: 5
@@ -689,7 +685,6 @@ attributesConfig:
     - key: "YEAR"
     - key: "COLOR"
     - key: "FEATURES"
-    - key: "BRAND_SUSTAINALYTICS_SCORING"
     - key: "DATA_QUALITY"
     - key: "WIDTH"
     - key: "HEIGHT"

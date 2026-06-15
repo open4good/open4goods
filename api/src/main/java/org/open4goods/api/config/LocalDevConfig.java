@@ -18,7 +18,6 @@ import java.util.List;
 import org.open4goods.embedding.config.DjlEmbeddingProperties;
 import org.open4goods.embedding.service.image.AbstractImageModelFactory;
 import org.open4goods.embedding.service.image.DjlImageEmbeddingService;
-import org.open4goods.brand.model.BrandScore;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter;
@@ -47,7 +46,7 @@ public class LocalDevConfig {
                         (p, m, a) -> {
                             if (m.getName().equals("getMappingContext")) {
                                 SimpleElasticsearchMappingContext context = new SimpleElasticsearchMappingContext();
-                                context.setInitialEntitySet(Collections.singleton(BrandScore.class));
+                                context.setInitialEntitySet(Collections.emptySet());
                                 context.afterPropertiesSet();
                                 return context;
                             }

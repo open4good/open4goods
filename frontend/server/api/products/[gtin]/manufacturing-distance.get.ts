@@ -20,11 +20,17 @@ export default defineEventHandler(async event => {
 
   const gtinParam = getRouterParam(event, 'gtin')
   if (!gtinParam) {
-    throw createError({ statusCode: 400, statusMessage: 'Product GTIN is required' })
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Product GTIN is required',
+    })
   }
   const parsedGtin = Number.parseInt(gtinParam, 10)
   if (!Number.isFinite(parsedGtin)) {
-    throw createError({ statusCode: 400, statusMessage: 'Product GTIN must be numeric' })
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Product GTIN must be numeric',
+    })
   }
 
   const rawHost =
@@ -39,7 +45,9 @@ export default defineEventHandler(async event => {
     return await $fetch(`${apiUrl}/brands/distance/${parsedGtin}`, {
       headers: {
         'X-Shared-Token': machineToken as string,
-        ...(clientIp ? { 'X-Forwarded-For': clientIp, 'X-Real-Ip': clientIp } : {}),
+        ...(clientIp
+          ? { 'X-Forwarded-For': clientIp, 'X-Real-Ip': clientIp }
+          : {}),
       },
       query: { domainLanguage },
     })

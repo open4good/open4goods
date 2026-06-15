@@ -729,7 +729,6 @@ const availableCriteriaMap = computed(() => {
 })
 
 const defaultCriteriaIcons: Record<string, string> = {
-  BRAND_SUSTAINALYTICS_SCORING: 'mdi-earth',
   DATA_QUALITY: 'mdi-database-check-outline',
   QUALITE_DONNEE: 'mdi-database-check-outline',
   QUALITY_OF_DATA: 'mdi-database-check-outline',

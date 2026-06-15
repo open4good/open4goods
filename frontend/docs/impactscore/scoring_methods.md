@@ -234,10 +234,7 @@ Cela permet d'utiliser la même normalisation (ex: MINMAX_FIXED) tout en indiqua
 - `DIAGONALE_POUCES` : `MINMAX_OBSERVED`.
 - `WEIGHT` : `MINMAX_OBSERVED`.
 
-### ESG / Sustainalytics
-
 - `ESG` : `MINMAX_OBSERVED` avec **plus haut = mieux**.
-- `BRAND_SUSTAINALYTICS_SCORING` : `MINMAX_OBSERVED` avec **plus haut = mieux**.
 
 **Pourquoi** : on conserve une lecture relative au marché actuel avec un sens " performance " (plus haut = mieux).
 

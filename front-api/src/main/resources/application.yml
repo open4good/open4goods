@@ -97,12 +97,6 @@ front:
           bloc-id: 'pages:ecosystem:icecat'
           url: https://www.icecat.biz
           image-url: /images/ecosystem/icecat.png
-
-        - name: Sustainalytics
-          bloc-id: 'pages:ecosystem:sustainalytics'
-          url: https://www.sustainalytics.com/
-          image-url: /images/ecosystem/sustainanalytics.png
-                    
     mentors:
       partners:
         - name: Moovance

@@ -4,7 +4,7 @@ This guide defines **project-wide conventions** for all human contributors **and
 Adhering to these rules keeps every sub-project consistent, maintainable, and predictable for automated tools (LLMs included).
 
 > **Where to look next**  
-> Each sub-module (e.g. `/api`, `/crawler`, `/services/*`) ships its own `agents.md` that may add or override rules.  
+> Each sub-module (e.g. `/api`, `/services/*`) ships its own `agents.md` that may add or override rules.  
 > The standards below are **mandatory everywhere** unless a module's guide explicitly says otherwise.
 
 ---
@@ -156,7 +156,7 @@ For detailed module-specific conventions, see:
 - **Front API**: [front-api/AGENTS.md](front-api/AGENTS.md) - SpringDoc / OpenAPI
 - **B2B API**: [b2b-api/AGENTS.md](b2b-api/AGENTS.md) - Spring Boot 4 / Java 21
 - **Services**: [services/AGENTS.md](services/AGENTS.md) - Microservices (19 services)
-- **Core Modules**: [admin](admin/AGENTS.md), [api](api/AGENTS.md), [commons](commons/AGENTS.md), [crawler](crawler/AGENTS.md), [model](model/AGENTS.md), [verticals](verticals/AGENTS.md)
+- **Core Modules**: [admin](admin/AGENTS.md), [api](api/AGENTS.md), [commons](commons/AGENTS.md), [model](model/AGENTS.md), [verticals](verticals/AGENTS.md)
 - **UI (deprecated)**: [ui/AGENTS.md](ui/AGENTS.md) - Being replaced by frontend
 
 ---

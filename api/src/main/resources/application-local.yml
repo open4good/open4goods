@@ -39,19 +39,7 @@ embedding:
 
 # The key to provide to get ADMIN_ROLE
 adminKey: open4goods
-  
-crawlerKeys:
-  - open4goods
 
-######################################
-# The locally embeded crawler node
-#####################################        
-fetcherProperties:
-  apiKey: open4goods
-  concurrentFetcherTask: 2
-  apiSynchConfig:
-    nodeName: localNode
-    nodeUrl: http://localhost:8081
 
 xwiki:
   baseUrl: http://localhost:8080/xwiki

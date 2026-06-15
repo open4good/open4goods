@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.services.DataSourceConfigService;
-import org.open4goods.crawler.services.IndexationService;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.constants.UrlConstants;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,11 +28,8 @@ public class DataSourceConfigurationsController {
 
 	private final DataSourceConfigService datasourceConfigService;
 
-	public final IndexationService indexationService;
-
-	public DataSourceConfigurationsController(DataSourceConfigService datasourceConfigService, IndexationService indexationService) {
+	public DataSourceConfigurationsController(DataSourceConfigService datasourceConfigService) {
 		this.datasourceConfigService = datasourceConfigService;
-		this.indexationService = indexationService;
 	}
 
 	@GetMapping(path=UrlConstants.MASTER_API_DATASOURCES_CONFIG)

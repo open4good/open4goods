@@ -1,7 +1,7 @@
 package org.open4goods.model.constants;
 
 /**
- * All shared urls's (beetween crawler - master API AND ui - masterApi) are stored here, in the Java String Format template
+ * All shared API URL constants are stored here, in the Java String Format template
  * syntax : https://docs.oracle.com/javase/8/docs/api/java/util/Formatter.html
  * @author goulven
  *
@@ -15,33 +15,12 @@ public class UrlConstants {
 	/** Indicates a siteName parameter**/
 	public static final String SITENAME_PARAMETER = "siteName";
 	public static final String URL_PARAMETER = "url";
-	public static final String CSV_LINE_PARAMETER = "csvLine";
-	public static final String CSV_HEADERS_PARAMETER = "csvHeaders";
-
-	// Crawler endpoint, used to trigger a fetching request
-	public static final String CRAWLER_API_DIRECT_URL_REQUEST_FETCHING = "/fetch/http/test";
-	public static final String CRAWLER_API_DIRECT_CSV_REQUEST_FETCHING = "/fetch/csv/test";
-
-	public static final String CRAWLER_API_REQUEST_FETCHING = "/fetch";
-	public static final String CRAWLER_API_STOP_FETCHING = "/stop";
-	public static final String MASTER_API_CRAWLER_SYNCH_HTTP_FETCH = "/crawl/test/";
-	public static final String MASTER_API_CRAWLER_SYNCH_CSV_FETCH = "/csv/test/";
-
-	public static final String MASTER_API_CRAWLER_SYNCH_FETCH_WITH_CONFIG = "/testwithconfig/";
-
-	// API Endpoints that allow crawler status updates
-	public static final String MASTER_API_CRAWLERS= "/webscrapers";
-	public static final String MASTER_API_CRAWLER_UPDATE_PREFIX = "/webscraper/";
-	public static final String MASTER_API_CRAWLER_UPDATE = MASTER_API_CRAWLER_UPDATE_PREFIX + "%s";
 
 	// API Endpoints for datasource informations
 
 	public static final String MASTER_API_DATASOURCES_CONFIG = "/datasources";
 	public static final String MASTER_API_DATASOURCE_CONFIG_PREFIX = "/datasource/";
 	public static final String MASTER_API_DATASOURCE_CONFIG_NEXT_SCHEDULE_SUFFIX = "/nextFetchingDate";
-
-	// API endpoint that allows to send a fetching request
-	public static final String MASTER_API_CRAWLER_TRIGGER_SUFFIX = "/fetch";
 
 	public static final String MASTER_API_RELATION_DATA_PREFIX = "/api/relations";
 

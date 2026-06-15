@@ -21,6 +21,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.open4goods.nudgerfrontapi.config.properties.GeoIpProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -50,6 +51,7 @@ public class GeoIpDatabaseManager {
     private volatile Instant lastRefreshAt;
     private volatile String lastError;
 
+    @Autowired
     public GeoIpDatabaseManager(GeoIpProperties properties) {
         this(properties, dbPath -> new DatabaseReader.Builder(dbPath.toFile()).withCache(new CHMCache()).build());
     }

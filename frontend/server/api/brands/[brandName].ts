@@ -14,7 +14,10 @@ export default defineEventHandler(async event => {
 
   const brandName = getRouterParam(event, 'brandName')
   if (!brandName) {
-    throw createError({ statusCode: 400, statusMessage: 'Brand name is required' })
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Brand name is required',
+    })
   }
 
   const query = getQuery(event)

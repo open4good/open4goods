@@ -20,7 +20,7 @@ Technical metrics and maven site is deployed on Github Pages:
 
 Open4goods (o4g) is an open-source and open-data product aggregator, search engine and comparator. More over, it is a stack aiming at handling large product datasets identified by GTIN's. It is build upon Maven, Java, SpringBoot, Elasticsearch, Redis, and some other cool libraries. It is mainly designed to :
 
-- **crawl and ingest product based datas** (merchant offers, reviews, brands ratings). This is the job of the [crawler](crawler/) sub-project. Designed to ingest any kind of data, if having an UPC/GTIN code.
+- **ingest product based data** from merchant CSV feeds and URL-oriented review/enrichment sources.
 
 - **aggregate data fragments into well structured product data**. The [api](api/) module orchestrates this through the `AggregationFacadeService`, handling scoring, attribute merging, conflict detection and NLP processing.
 
@@ -32,7 +32,6 @@ Open4goods (o4g) is an open-source and open-data product aggregator, search engi
 
 Open4goods is organised as a multi‑module Maven **modulith**. Core modules are:
 
-- `crawler` - scrapes external product sources.
 - `api` - central service exposing REST endpoints and aggregation logic.
 - `front-api` - lightweight API consumed by the Nuxt 3 `frontend`.
 - `frontend` - Nuxt 3 application working with `front-api`.
@@ -193,28 +192,6 @@ Jars are not published to any central repo (nor planned to, it seems not to make
 mvn install
 ```
 
-This will build and run tests, hope in your terminal you'll get a
-
-```
-[INFO] ------------------------------------------------------------------------
-[INFO] Reactor Summary for parent 0.0.1-SNAPSHOT:
-[INFO]
-[INFO] parent ............................................. SUCCESS [ 2.509 s]
-[INFO] commons ............................................ SUCCESS [ 27.046 s]
-[INFO] crawler ............................................ SUCCESS [ 8.990 s]
-[INFO] verticals .......................................... SUCCESS [ 7.143 s]
-[INFO] icecat ............................................. SUCCESS [ 5.000 s]
-[INFO] api ................................................ SUCCESS [ 11.289 s]
-[INFO] ui ................................................. SUCCESS [ 7.895 s]
-[INFO] test ............................................... SUCCESS [ 1.496 s]
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time: 01:07 min
-[INFO] Finished at: 2021-01-31T15:20:30+01:00
-[INFO] ------------------------------------------------------------------------
-```
-
 ### Launching
 
 The open4goods project is packaged under the form of several SpringBoot web applications. You will probably want to launch :
@@ -242,23 +219,12 @@ java -Dspring.profiles.active=dev -jar api/target/api-[VERSION].jar
 
 You should be able to access the open4goods API at [http://localhost:8081](http://localhost:8081)
 
-**Crawler**
-
-You should not need to run a separate crawler, since an embedded one is instanciated in the API. However, if you want to play, or register as a open4goods web scrapper and help us in crawling the world, you could setup an individual crawler node.
-
-```
-java -Dspring.profiles.active=dev -jar target/bin/open4goods-crawler.jar
-```
-
-You should be able to access the open4goods crawler interface at [http://localhost:8080](http://localhost:8080)
-
 #### Using an IDE
 
 If using any kind of IDE (tested with Eclipse and Intellij), please import as maven or SpringBoot project, then run or debug from the following Application classes :
 
 - UI : [ui/src/main/java/com/open4goods/ui/Ui.java](ui/src/main/java/com/open4goods/ui/Ui.java)
 - API : [api/src/main/java/com/open4goods/api/Api.java](ui/src/main/java/com/open4goods/ui/Api.java)
-- Crawler : [crawler/src/main/java/com/open4goods/crawler/Crawler.java](ui/src/main/java/com/open4goods/crawler/Crawler.java)
 
 > Don't forget to specify the profile to use (probably you'll want "dev" to run in development mode)
 

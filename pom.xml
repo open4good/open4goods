@@ -82,7 +82,6 @@
         <module>model</module>
 		<module>commons</module>
 		<module>verticals</module>
-        <module>crawler</module>
         <module>api</module>
         <module>ui</module>
         <module>front-api</module>

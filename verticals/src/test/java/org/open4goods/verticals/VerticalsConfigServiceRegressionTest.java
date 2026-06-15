@@ -41,7 +41,7 @@ class VerticalsConfigServiceRegressionTest {
         checkAttributeInheritance("oven", "WARRANTY");
         checkAttributeInheritance("tv", "WARRANTY");
         checkAttributeInheritance("washing-machine", "CLASSE_ENERGY");
-        checkAttributeInheritance("washing-machine", "BRAND_SUSTAINALYTICS_SCORING");
+        checkAttributeInheritance("washing-machine", "DATA_QUALITY");
     }
 
     private void checkAttributeInheritance(String verticalId, String attributeKey) {

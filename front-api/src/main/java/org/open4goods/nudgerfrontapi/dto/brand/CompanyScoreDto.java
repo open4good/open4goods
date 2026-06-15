@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * A company-level ESG / ethics score from a single provider.
  *
- * @param provider provider key (e.g. cdp, bcorp, sustainalytics)
+ * @param provider provider key (e.g. cdp, bcorp)
  * @param value raw provider value
  * @param rating human-facing rating label
  * @param normalized value normalised to a 0-100 scale (higher is better)

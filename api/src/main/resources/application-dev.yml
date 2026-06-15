@@ -26,10 +26,6 @@ logging:
 # The key to provide to get ADMIN_ROLE
 adminKey: open4goods
 
-  
-crawlerKeys:
-  - open4goods
-
 
 spring:
   boot:
@@ -40,18 +36,6 @@ spring:
       cache: false
 
 
-######################################
-# The locally embeded crawler node
-#####################################        
-fetcherProperties:
-  apiKey: open4goods
-  concurrentFetcherTask: 2
-  apiSynchConfig:
-    nodeName: localNode
-    nodeUrl: http://localhost:8081  
-
-
-elasticsearch.username: 
 elasticsearch.password:  
 elasticsearch.host: 127.0.0.1
 

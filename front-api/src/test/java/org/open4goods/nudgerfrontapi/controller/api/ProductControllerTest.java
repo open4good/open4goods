@@ -101,7 +101,7 @@ class ProductControllerTest {
         SearchService.SearchCapabilities capabilities = new SearchService.SearchCapabilities(Set.of(), Set.of(), Set.of());
         when(searchService.buildSearchCapabilities(any(), any(), any())).thenReturn(capabilities);
 
-        Filter filter = new Filter("attributes.indexed.BRAND_SUSTAINALYTICS_SCORING.value", FilterOperator.term,
+        Filter filter = new Filter("attributes.indexed.DATA_QUALITY.value", FilterOperator.term,
                 List.of("AA"), null, null);
         ProductSearchRequestDto searchRequest = new ProductSearchRequestDto(null, null,
                 new FilterRequestDto(List.of(filter), List.of()), null, null);
@@ -122,7 +122,7 @@ class ProductControllerTest {
                 filterCaptor.capture(), anyBoolean(), any());
 
         assertThat(filterCaptor.getValue().filters()).extracting(Filter::field)
-                .contains("attributes.indexed.BRAND_SUSTAINALYTICS_SCORING.value");
+                .contains("attributes.indexed.DATA_QUALITY.value");
     }
 
 

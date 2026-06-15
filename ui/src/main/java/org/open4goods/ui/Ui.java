@@ -1,7 +1,6 @@
 
 package org.open4goods.ui;
 
-import org.open4goods.brand.repository.BrandScoresRepository;
 import org.open4goods.model.CacheKeyGenerator;
 import org.open4goods.services.productrepository.repository.ElasticProductRepository;
 import org.slf4j.Logger;
@@ -20,7 +19,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableCaching
 @Configuration
 @ConfigurationPropertiesScan
-@EnableElasticsearchRepositories(basePackageClasses = {ElasticProductRepository.class, BrandScoresRepository.class})
+@EnableElasticsearchRepositories(basePackageClasses = {ElasticProductRepository.class})
 public class Ui {
 
     private static final Logger logger = LoggerFactory.getLogger(Ui.class);

@@ -15,6 +15,7 @@ import org.open4goods.services.urlfetching.config.FetchStrategy;
 import org.open4goods.services.urlfetching.config.UrlFetcherConfig;
 import org.open4goods.services.urlfetching.config.UrlFetcherConfig.DomainConfig;
 import org.open4goods.services.urlfetching.dto.FetchResponse;
+import org.open4goods.services.urlfetching.service.fetchers.ExternalFetchProvider;
 import org.open4goods.services.urlfetching.service.fetchers.HttpFetcher;
 import org.open4goods.services.urlfetching.service.fetchers.ProxifiedHttpFetcher;
 import org.open4goods.services.urlfetching.service.fetchers.PlaywrightHttpFetcher;
@@ -160,6 +161,22 @@ public class UrlFetchingService {
                 return new PlaywrightHttpFetcher(domainConfig, urlFetcherConfig.getProxy(),
                         urlFetcherConfig.isPlaywrightProxyFallbackEnabled(),
                         urlFetcherConfig.isPlaywrightProxyRequired() || forcePlaywrightProxy, meterRegistry);
+            case EXTERNAL:
+                logger.info("URL_FETCH strategy=EXTERNAL phase=selected provider={}", domainConfig.getExternalProvider());
+                var providerConfig = urlFetcherConfig.getExternal().getProviders()
+                        .get(domainConfig.getExternalProvider());
+                if (providerConfig == null) {
+                    logger.warn("URL_FETCH strategy=EXTERNAL phase=selected outcome=missingProvider provider={}",
+                            domainConfig.getExternalProvider());
+                    UrlFetcherConfig.ExternalProviderConfig disabledProvider =
+                            new UrlFetcherConfig.ExternalProviderConfig();
+                    disabledProvider.setEnabled(false);
+                    return new ExternalFetchProvider(
+                            domainConfig.getExternalProvider() == null ? "default" : domainConfig.getExternalProvider(),
+                            disabledProvider, executor, meterRegistry);
+                }
+                return new ExternalFetchProvider(domainConfig.getExternalProvider(), providerConfig, executor,
+                        meterRegistry);
             case HTTP:
                 logger.info("URL_FETCH strategy=HTTP phase=selected");
                 return new HttpFetcher(domainConfig, executor, meterRegistry);
@@ -184,9 +201,21 @@ public class UrlFetchingService {
         overridden.setTimeout(timeoutOverride == null ? original.getTimeout() : timeoutOverride);
         overridden.setRetryPolicy(original.getRetryPolicy());
         overridden.setBrowserChannel(original.getBrowserChannel());
+        overridden.setExternalProvider(runtimeExternalProvider(headers, original.getExternalProvider()));
         logger.info("URL_FETCH phase=select runtimeStrategyOverride={} runtimeTimeoutMs={}",
                 override, timeoutOverride);
         return overridden;
+    }
+
+    private String runtimeExternalProvider(Map<String, String> headers, String configuredProvider) {
+        if (headers == null) {
+            return configuredProvider;
+        }
+        String provider = headers.get(FETCH_PROVIDER_HEADER);
+        if (provider == null || provider.isBlank() || provider.equalsIgnoreCase("zenrows")) {
+            return configuredProvider;
+        }
+        return provider.trim();
     }
 
     private boolean requestedPlaywrightProxy(Map<String, String> headers) {
@@ -209,6 +238,7 @@ public class UrlFetchingService {
             case "http", "http_simple" -> FetchStrategy.HTTP;
             case "playwright", "playwright_headless" -> FetchStrategy.PLAYWRIGHT;
             case "proxified", "zenrows" -> FetchStrategy.PROXIFIED;
+            case "external" -> FetchStrategy.EXTERNAL;
             default -> null;
         };
     }

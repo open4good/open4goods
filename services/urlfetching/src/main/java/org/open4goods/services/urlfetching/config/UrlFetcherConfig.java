@@ -23,6 +23,7 @@ public class UrlFetcherConfig {
      * Map of domain configurations.
      */
     private Map<String, DomainConfig> domains = new HashMap<>();
+    private ExternalConfig external = new ExternalConfig();
 
     /**
      * Thread pool size for asynchronous fetching.
@@ -59,6 +60,14 @@ public class UrlFetcherConfig {
 
     public void setDomains(Map<String, DomainConfig> domains) {
         this.domains = domains == null ? new HashMap<>() : domains;
+    }
+
+    public ExternalConfig getExternal() {
+        return external;
+    }
+
+    public void setExternal(ExternalConfig external) {
+        this.external = external == null ? new ExternalConfig() : external;
     }
 
     public int getThreadPoolSize() {
@@ -145,6 +154,11 @@ public class UrlFetcherConfig {
          */
         private String browserChannel = "chrome";
 
+        /**
+         * External provider key used when {@link #strategy} is EXTERNAL.
+         */
+        private String externalProvider;
+
         // Getters and setters
 
         public String getUserAgent() {
@@ -193,6 +207,128 @@ public class UrlFetcherConfig {
 
         public void setBrowserChannel(String browserChannel) {
             this.browserChannel = browserChannel;
+        }
+
+        public String getExternalProvider() {
+            return externalProvider;
+        }
+
+        public void setExternalProvider(String externalProvider) {
+            this.externalProvider = externalProvider;
+        }
+    }
+
+    public static class ExternalConfig {
+        private Map<String, ExternalProviderConfig> providers = new HashMap<>();
+
+        public Map<String, ExternalProviderConfig> getProviders() {
+            return providers;
+        }
+
+        public void setProviders(Map<String, ExternalProviderConfig> providers) {
+            this.providers = providers == null ? new HashMap<>() : providers;
+        }
+    }
+
+    public static class ExternalProviderConfig {
+        private boolean enabled = false;
+        private String endpoint;
+        private String method = "GET";
+        private String urlQueryParameter = "url";
+        private String urlBodyField = "url";
+        private Map<String, String> staticHeaders = new HashMap<>();
+        private String apiKey;
+        private String apiKeyHeader;
+        private String apiKeyQueryParameter;
+        private String htmlJsonPointer;
+        private long timeout = 30000;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public String getEndpoint() {
+            return endpoint;
+        }
+
+        public void setEndpoint(String endpoint) {
+            this.endpoint = endpoint;
+        }
+
+        public String getMethod() {
+            return method;
+        }
+
+        public void setMethod(String method) {
+            this.method = method;
+        }
+
+        public String getUrlQueryParameter() {
+            return urlQueryParameter;
+        }
+
+        public void setUrlQueryParameter(String urlQueryParameter) {
+            this.urlQueryParameter = urlQueryParameter;
+        }
+
+        public String getUrlBodyField() {
+            return urlBodyField;
+        }
+
+        public void setUrlBodyField(String urlBodyField) {
+            this.urlBodyField = urlBodyField;
+        }
+
+        public Map<String, String> getStaticHeaders() {
+            return staticHeaders;
+        }
+
+        public void setStaticHeaders(Map<String, String> staticHeaders) {
+            this.staticHeaders = staticHeaders == null ? new HashMap<>() : staticHeaders;
+        }
+
+        public String getApiKey() {
+            return apiKey;
+        }
+
+        public void setApiKey(String apiKey) {
+            this.apiKey = apiKey;
+        }
+
+        public String getApiKeyHeader() {
+            return apiKeyHeader;
+        }
+
+        public void setApiKeyHeader(String apiKeyHeader) {
+            this.apiKeyHeader = apiKeyHeader;
+        }
+
+        public String getApiKeyQueryParameter() {
+            return apiKeyQueryParameter;
+        }
+
+        public void setApiKeyQueryParameter(String apiKeyQueryParameter) {
+            this.apiKeyQueryParameter = apiKeyQueryParameter;
+        }
+
+        public String getHtmlJsonPointer() {
+            return htmlJsonPointer;
+        }
+
+        public void setHtmlJsonPointer(String htmlJsonPointer) {
+            this.htmlJsonPointer = htmlJsonPointer;
+        }
+
+        public long getTimeout() {
+            return timeout;
+        }
+
+        public void setTimeout(long timeout) {
+            this.timeout = timeout;
         }
     }
 

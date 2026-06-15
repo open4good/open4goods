@@ -77,7 +77,7 @@ public class WebSecurityConfig {
 	}
 
 	/**
-	 * This filter is used to allow external crawlers authentication, through a specific set of keys 
+	 * This filter allows token-based API authentication.
 	 */
 	public class TokenAuthenticationFilter extends GenericFilterBean {
 
@@ -102,12 +102,6 @@ public class WebSecurityConfig {
 				// Assignation of the ROLE_ADMIN
 				if (accessToken.equals(apiProperties.getAdminKey())) {
 					authorities.add(new SimpleGrantedAuthority(RolesConstants.ROLE_ADMIN));
-					authorities.add(new SimpleGrantedAuthority(RolesConstants.ROLE_CRAWLER));
-				}
-
-				// Assignation of the ROLE_CRAWLER
-				if (apiProperties.getCrawlerKeys().contains(accessToken) ) {
-					authorities.add(new SimpleGrantedAuthority(RolesConstants.ROLE_CRAWLER));
 				}
 
 				// Assignation of the ROLE_CRAWLER

@@ -42,7 +42,7 @@ public class ShareExtractionService {
      */
     public Optional<ShareExtractionDto> extract(String url, String title, String text) {
         String content = null;
-        if (properties.isCrawlerExtractionEnabled()) {
+        if (properties.isUrlFetchExtractionEnabled()) {
             content = httpFetcher.fetch(url);
         }
 
@@ -60,7 +60,7 @@ public class ShareExtractionService {
      * Identify the first GTIN-like segment across all provided content fragments.
      *
      * @param url     shared URL
-     * @param content body fetched from the crawler when enabled
+     * @param content body fetched from the URL when enabled
      * @param title   optional title
      * @param text    optional text
      * @return matched GTIN or {@code null}

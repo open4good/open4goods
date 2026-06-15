@@ -21,6 +21,7 @@ public class FeedConfiguration {
     private String datasourceLanguageAttribute;
     private Map<String, String> filterAttributes = new HashMap<>();
     private Set<String> excludeFeedKeyContains = new HashSet<>();
+    private Map<String, FeedConfiguration> providers = new HashMap<>();
     
     private CsvDataSourceProperties defaultCsvProperties;
 
@@ -30,6 +31,11 @@ public class FeedConfiguration {
     private KwankoConfig kwanko = new KwankoConfig();
     private WebgainsConfig webgains = new WebgainsConfig();
     private CjConfig cj = new CjConfig();
+
+    public FeedConfiguration provider(String providerName) {
+        FeedConfiguration provider = providers.get(providerName);
+        return provider == null ? this : provider;
+    }
 
     public static class AwinConfig {
         private String cron = "0 43 1 * * ?";
@@ -170,6 +176,14 @@ public class FeedConfiguration {
 	public void setExcludeFeedKeyContains(Set<String> excludeFeedKeyContains) {
 		this.excludeFeedKeyContains = excludeFeedKeyContains;
 	}
+
+    public Map<String, FeedConfiguration> getProviders() {
+        return providers;
+    }
+
+    public void setProviders(Map<String, FeedConfiguration> providers) {
+        this.providers = providers == null ? new HashMap<>() : providers;
+    }
 
     public AwinConfig getAwin() {
         return awin;

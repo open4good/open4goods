@@ -17,7 +17,8 @@
           </template>
 
           <v-list-item-title>
-            {{ site.city ? `${site.city}, ` : '' }}{{ site.countryName ?? site.country }}
+            {{ site.city ? `${site.city}, ` : ''
+            }}{{ site.countryName ?? site.country }}
             <v-chip
               v-if="site.operator"
               size="x-small"
@@ -37,15 +38,19 @@
           <template #append>
             <span class="manufacturing-chain__distance text-caption">
               <template v-if="distanceFor(site.country, site.city) != null">
-                à&nbsp;~{{ formatKm(distanceFor(site.country, site.city)) }}&nbsp;km
-                de chez vous
+                à&nbsp;~{{
+                  formatKm(distanceFor(site.country, site.city))
+                }}&nbsp;km de chez vous
               </template>
             </span>
           </template>
         </v-list-item>
       </v-list>
 
-      <p v-if="hasOpenSupplyHub" class="text-caption text-medium-emphasis mt-2 mb-0">
+      <p
+        v-if="hasOpenSupplyHub"
+        class="text-caption text-medium-emphasis mt-2 mb-0"
+      >
         Source des sites de production&nbsp;: Open Supply Hub (CC-BY-SA).
       </p>
     </v-card-text>
@@ -102,8 +107,12 @@ const props = defineProps({
 const { data: brand } = await useFetch<BrandPayload>(
   () => `/api/brands/${encodeURIComponent(props.brandName)}`,
   {
-    query: computed(() => (props.verticalId ? { verticalId: props.verticalId } : {})),
-    key: computed(() => `brand-chain-${props.brandName}-${props.verticalId ?? 'all'}`),
+    query: computed(() =>
+      props.verticalId ? { verticalId: props.verticalId } : {}
+    ),
+    key: computed(
+      () => `brand-chain-${props.brandName}-${props.verticalId ?? 'all'}`
+    ),
   }
 )
 

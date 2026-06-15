@@ -117,8 +117,6 @@ public class TodoService //implements HealthIndicator
 			component = "api";
 		} else if (fileName.startsWith("org.open4goods.admin")){
 			component = "admin";
-		} else if (fileName.startsWith("org.open4goods.crawler")){
-			component = "crawler";
 		} else {
 			logger.warn("Cannot get TODO component for {}",fileName);
 		}

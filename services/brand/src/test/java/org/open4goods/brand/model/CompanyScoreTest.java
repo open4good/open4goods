@@ -18,7 +18,7 @@ class CompanyScoreTest {
 
     @Test
     void invertsWhenLowerIsBetter() {
-        // Sustainalytics-like risk scale: lower raw risk is better.
+        // Retired lower-is-better risk scale: lower raw risk is better.
         CompanyScore score = new CompanyScore();
         score.setValue(10.0);
         score.setScale(new ScoreScale(0.0, 50.0, false));

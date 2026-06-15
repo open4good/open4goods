@@ -223,12 +223,6 @@ public class CsvDataSourceProperties {
 	/** Describe a rating in CSV format **/
 	private CsvRatingConfig rating;
 
-	/**
-	 * If set, the CSV extracted DataFragments will be crawled according to this web
-	 * crawling configuration
-	 */
-	private HtmlDataSourceProperties webDatasource;
-
 	protected void addColumn(final String productTag, final Set<String> ret) {
 		if (!StringUtils.isEmpty(productTag)) {
 			ret.add(productTag);
@@ -358,14 +352,6 @@ public class CsvDataSourceProperties {
 
 	public void setAttributesKeyValSplitChar(final String attributesKeyValSplitChar) {
 		this.attributesKeyValSplitChar = attributesKeyValSplitChar;
-	}
-
-	public HtmlDataSourceProperties getWebDatasource() {
-		return webDatasource;
-	}
-
-	public void setWebDatasource(final HtmlDataSourceProperties webDatasource) {
-		this.webDatasource = webDatasource;
 	}
 
 	public String getAttributesSplitChar() {

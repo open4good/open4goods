@@ -72,81 +72,54 @@
       "defaultValue": 0.8
     },
     {
-      "name": "fetcher-properties.feed-configs",
+      "name": "feed.providers",
       "type": "java.util.Map<java.lang.String,org.open4goods.services.feedservice.config.FeedConfiguration>",
       "description": "Product feed catalog and CSV mapping configuration by provider."
     },
     {
-      "name": "fetcher-properties.feed-configs.*.catalog-url",
+      "name": "feed.providers.*.catalog-url",
       "type": "java.lang.String",
       "description": "Provider catalog URL used to discover feed files."
     },
     {
-      "name": "fetcher-properties.feed-configs.*.datasource-key-attribute",
+      "name": "feed.providers.*.datasource-key-attribute",
       "type": "java.lang.String",
       "description": "Catalog column containing the datasource key or advertiser name."
     },
     {
-      "name": "fetcher-properties.feed-configs.*.datasource-feed-name-attribute",
+      "name": "feed.providers.*.datasource-feed-name-attribute",
       "type": "java.lang.String",
       "description": "Catalog column containing the feed display name."
     },
     {
-      "name": "fetcher-properties.feed-configs.*.datasource-url-attribute",
+      "name": "feed.providers.*.datasource-url-attribute",
       "type": "java.lang.String",
       "description": "Catalog column containing the feed download URL."
     },
     {
-      "name": "fetcher-properties.feed-configs.*.datasource-region-attribute",
+      "name": "feed.providers.*.datasource-region-attribute",
       "type": "java.lang.String",
       "description": "Catalog column containing the feed region."
     },
     {
-      "name": "fetcher-properties.feed-configs.*.datasource-language-attribute",
+      "name": "feed.providers.*.datasource-language-attribute",
       "type": "java.lang.String",
       "description": "Catalog column containing the feed language."
     },
     {
-      "name": "fetcher-properties.feed-configs.*.filter-attributes",
+      "name": "feed.providers.*.filter-attributes",
       "type": "java.util.Map<java.lang.String,java.lang.String>",
       "description": "Catalog attribute filters that must match before a feed is indexed."
     },
     {
-      "name": "fetcher-properties.feed-configs.*.exclude-feed-key-contains",
+      "name": "feed.providers.*.exclude-feed-key-contains",
       "type": "java.util.Set<java.lang.String>",
       "description": "Case-insensitive fragments that exclude catalog feeds by key."
     },
     {
-      "name": "fetcher-properties.feed-configs.*.default-csv-properties",
+      "name": "feed.providers.*.default-csv-properties",
       "type": "org.open4goods.commons.config.yml.datasource.CsvDataSourceProperties",
       "description": "Default CSV mapping applied to generated datasource definitions."
-    },
-    {
-      "name": "fetcher-properties.api-key",
-      "type": "java.lang.String",
-      "description": "API key used by the local fetcher node when calling the indexation API."
-    },
-    {
-      "name": "fetcher-properties.concurrent-fetcher-task",
-      "type": "java.lang.Integer",
-      "description": "Maximum number of concurrent data fetcher tasks.",
-      "defaultValue": 1
-    },
-    {
-      "name": "fetcher-properties.log-accepted",
-      "type": "java.lang.Boolean",
-      "description": "Log URLs accepted by crawler rules.",
-      "defaultValue": true
-    },
-    {
-      "name": "fetcher-properties.api-synch-config.node-name",
-      "type": "java.lang.String",
-      "description": "Name of the local fetcher node for API synchronization."
-    },
-    {
-      "name": "fetcher-properties.api-synch-config.node-url",
-      "type": "java.lang.String",
-      "description": "URL of the local fetcher node for API synchronization."
     }
   ]
 }

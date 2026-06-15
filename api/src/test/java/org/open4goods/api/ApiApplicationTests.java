@@ -1,9 +1,7 @@
 package org.open4goods.api;
 
 import org.junit.jupiter.api.Test;
-import org.open4goods.brand.repository.BrandScoresRepository;
 import org.open4goods.brand.service.BrandService;
-import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.icecat.repository.IcecatCategoryRepository;
 import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
 import org.open4goods.icecat.repository.IcecatFeatureRepository;
@@ -41,12 +39,6 @@ class ApiApplicationTests {
 
     @MockitoBean
     private BrandService brandService;
-
-    @MockitoBean
-    private BrandScoresRepository brandScoresRepository;
-
-    @MockitoBean
-    private IndexationRepository indexationRepository;
 
     @MockitoBean
     private ElasticProductRepository elasticProductRepository;

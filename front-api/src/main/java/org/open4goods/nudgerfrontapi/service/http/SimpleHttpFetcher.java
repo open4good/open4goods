@@ -9,8 +9,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 
 /**
- * Lightweight HTTP fetcher reused by share resolution to hit crawler endpoints
- * or remote URLs.
+ * Lightweight HTTP fetcher reused by share resolution to hit remote URLs.
  */
 @Service
 public class SimpleHttpFetcher {

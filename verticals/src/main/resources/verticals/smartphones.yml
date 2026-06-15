@@ -100,7 +100,6 @@ availableImpactScoreCriterias:
   - WEIGHT
   - CLASSE_ENERGY     # EU Reg. 2023/1669; 589 hits (1.3%)
   - DATA_QUALITY      # _default.yml required entry (§5 inheritance)
-  - BRAND_SUSTAINALYTICS_SCORING  # _default.yml required entry (§5 inheritance)
 
 nudgeToolConfig:
   subsetGroups:
@@ -624,7 +623,6 @@ attributesConfig:
     - key: WIDTH
     - key: HEIGHT
     - key: DEPTH
-    - key: BRAND_SUSTAINALYTICS_SCORING
     - key: DATA_QUALITY
 
 matchingCategories:

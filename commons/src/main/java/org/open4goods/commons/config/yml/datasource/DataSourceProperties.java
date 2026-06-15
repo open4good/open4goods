@@ -81,19 +81,6 @@ public class DataSourceProperties {
 
 
 	/**
-	 * If true, will be computed as a brand score
-	 */
-	private boolean brandScore = false;
-
-	/**
-	 * If set, the score will be inverted (invertedScaleBase - score).
-	 * (used to "reverse" a score. eg. a score presenting a risk, we want to get the associated performance)
-	 */
-	private Double invertScaleBase;
-
-
-
-	/**
 	 * Scheduling of this datasource Can be TimeConstants.CRON_DAY
 	 * |TimeConstants.CRON_WEEK | TimeConstants.CRON_MONTH or a spring cronexp
 	 *
@@ -223,21 +210,7 @@ public class DataSourceProperties {
 	 */
 	private CsvDataSourceProperties csvDatasource;
 
-	private HtmlDataSourceProperties webDatasource;
-
 	private ApiDataSourceProperties apiDatasource;
-
-	/**
-	 *
-	 * @return the webdatasource, from csv configuration or from webdatasource
-	 */
-	public HtmlDataSourceProperties webDataSource() {
-		if (null != csvDatasource && null != csvDatasource.getWebDatasource()) {
-			return csvDatasource.getWebDatasource();
-		}
-
-		return webDatasource;
-	}
 
 	/**
 	 * Return a well formatted cron expression from cron OR from a DAILY / WEEKLY /
@@ -254,13 +227,7 @@ public class DataSourceProperties {
 		String c = null;
 		if (org.apache.commons.lang3.StringUtils.isEmpty(cronRefresh)) {
 
-			if (null != webDataSource()) {
-				// If it is a web datasource (csv handled or natural, then schedule weekly
-				logger.info("Undefined cronReferesh for webdatasource {}. Defaulting to every week", name);
-				cronRefresh = TimeConstants.CRON_WEEK;
-
-			} else if (null != apiDatasource) {
-				// If it is a web datasource (csv handled or natural, then schedule weekly
+			if (null != apiDatasource) {
 				logger.info("Undefined cronReferesh for apidatasource {}. Defaulting to every day", name);
 				cronRefresh = TimeConstants.CRON_DAY;
 
@@ -481,14 +448,6 @@ public class DataSourceProperties {
 		this.csvDatasource = csvDatasource;
 	}
 
-	public HtmlDataSourceProperties getWebDatasource() {
-		return webDatasource;
-	}
-
-	public void setWebDatasource(final HtmlDataSourceProperties webDatasourceConfig) {
-		webDatasource = webDatasourceConfig;
-	}
-
 	public void setName(final String name) {
 		this.name = name;
 	}
@@ -595,22 +554,6 @@ public class DataSourceProperties {
 
 	public void setDatasourceConfigName(String datasourceConfigName) {
 		this.datasourceConfigName = datasourceConfigName;
-	}
-
-	public boolean isBrandScore() {
-		return brandScore;
-	}
-
-	public void setBrandScore(boolean brandScore) {
-		this.brandScore = brandScore;
-	}
-
-	public Double getInvertScaleBase() {
-		return invertScaleBase;
-	}
-
-	public void setInvertScaleBase(Double invertScaleBase) {
-		this.invertScaleBase = invertScaleBase;
 	}
 
 	public String getDescription() {

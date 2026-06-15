@@ -10,9 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
-import org.open4goods.commons.config.yml.datasource.HtmlDataSourceProperties;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
@@ -159,28 +157,6 @@ public class DataSourceConfigService {
 		return datasourcesByFileName;
 	}
 
-
-	/**
-	 * Return the DatasourceProperties matching the url given in parameter. Resolution is done on baseUrl, that must be conta
-	 * @return
-	 */
-	public DataSourceProperties getDatasourcePropertiesForUrl(final String url ) {
-
-		for (final DataSourceProperties dsp : datasourceConfigs().values()) {
-			final HtmlDataSourceProperties webdatasource = dsp.webDataSource();
-			if (null != webdatasource) {
-				if (StringUtils.isEmpty(webdatasource.getBaseUrl())  ) {
-					logger.error("Base url is undefined for datasource {}",dsp);
-				}
-				else {
-					if (url.contains(webdatasource.getBaseUrl())) {
-						return dsp;
-					}
-				}
-			}
-		}
-		return null;
-	}
 
 	/**
 	 * Return a date of next execution for a given cron exp

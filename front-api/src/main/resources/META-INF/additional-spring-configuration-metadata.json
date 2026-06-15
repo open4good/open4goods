@@ -496,9 +496,9 @@
       "defaultValue": false
     },
     {
-      "name": "front.share.crawler-extraction-enabled",
+      "name": "front.share.url-fetch-extraction-enabled",
       "type": "java.lang.Boolean",
-      "description": "Enable crawler-based extraction during share resolution.",
+      "description": "Enable URL fetch extraction during share resolution.",
       "defaultValue": false
     },
     {

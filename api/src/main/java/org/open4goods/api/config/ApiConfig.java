@@ -9,7 +9,6 @@ import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.CompletionFacadeService;
-import org.open4goods.api.services.ScrapperOrchestrationService;
 import org.open4goods.api.services.VerticalsGenerationService;
 import org.open4goods.api.services.completion.AmazonCompletionService;
 import org.open4goods.api.services.completion.EprelCompletionService;
@@ -17,25 +16,14 @@ import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.api.services.completion.WikidataCompletionService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
-import org.open4goods.brand.repository.BrandScoresRepository;
-import org.open4goods.brand.service.BrandScoreService;
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.commons.helper.DevModeService;
-import org.open4goods.commons.model.constants.TimeConstants;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.Gs1PrefixService;
 import org.open4goods.commons.services.ProductNameSelectionService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.commons.services.textgen.BlablaService;
-import org.open4goods.crawler.config.yml.FetcherProperties;
-import org.open4goods.crawler.repository.IndexationRepository;
-import org.open4goods.crawler.services.ApiSynchService;
-import org.open4goods.crawler.services.DataFragmentCompletionService;
-import org.open4goods.crawler.services.FetchersService;
-import org.open4goods.crawler.services.IndexationService;
-import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
-import org.open4goods.crawler.services.fetching.WebDatasourceFetchingService;
 import org.open4goods.embedding.config.DjlEmbeddingProperties;
 import org.open4goods.embedding.service.TextEmbeddingService;
 import org.open4goods.embedding.service.image.DjlImageEmbeddingService;
@@ -52,9 +40,7 @@ import org.open4goods.icecat.services.loader.FeatureLoader;
 import org.open4goods.model.StandardiserService;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.constants.UrlConstants;
-import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.exceptions.TechnicalException;
-import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.price.Currency;
 import org.open4goods.model.price.Price;
 import org.open4goods.model.vertical.LegacyPromptConfig;
@@ -75,6 +61,10 @@ import org.open4goods.services.eprelservice.service.JsonZipEprelCatalogueParser;
 import org.open4goods.services.evaluation.config.EvaluationConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.feedservice.config.FeedConfiguration;
+import org.open4goods.services.feedservice.config.FeedIndexingProperties;
+import org.open4goods.services.feedservice.service.DataFragmentCompletionService;
+import org.open4goods.services.feedservice.service.DataFragmentIndexer;
+import org.open4goods.services.feedservice.service.FeedIndexingService;
 import org.open4goods.services.feedservice.service.AbstractFeedService;
 import org.open4goods.services.feedservice.service.AwinFeedService;
 import org.open4goods.services.feedservice.service.EffiliationFeedService;
@@ -224,8 +214,8 @@ public class ApiConfig {
 	}
 
 	@Bean
-	BatchService batchService(AggregationFacadeService aggregationFacadeService, CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository, CsvDatasourceFetchingService csvDatasourceFetchingService, FeedService feedService, SerialisationService serialisationService, ResourceService resourceService) {
-		return new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService, productRepository,  csvDatasourceFetchingService, feedService, serialisationService, resourceService, apiProperties);
+	BatchService batchService(AggregationFacadeService aggregationFacadeService, CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository, FeedIndexingService feedIndexingService, FeedService feedService, SerialisationService serialisationService, ResourceService resourceService) {
+		return new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService, productRepository,  feedIndexingService, feedService, serialisationService, resourceService, apiProperties);
 	}
 
 	@Bean
@@ -282,7 +272,7 @@ public class ApiConfig {
 
 
     @Bean
-    public AwinFeedService awinFeedService(FetcherProperties fetcherProperties,
+    public AwinFeedService awinFeedService(FeedConfiguration feedConfiguration,
                                            RemoteFileCachingService remoteFileCachingService,
                                            DataSourceConfigService dataSourceConfigService,
                                            SerialisationService serialisationService,
@@ -290,59 +280,59 @@ public class ApiConfig {
 
     		) {
         // Retrieve Awin-specific feed configuration from the fetcher properties
-        FeedConfiguration awinConfig = fetcherProperties.getFeedConfigs().get("awin");
+        FeedConfiguration awinConfig = feedConfiguration.provider("awin");
         return new AwinFeedService(awinConfig, remoteFileCachingService, dataSourceConfigService, serialisationService, props.getAffiliationConfig().getAwinAdvertiserId(), props.getAffiliationConfig().getAwinAccessToken());
     }
 
     @Bean
-    public EffiliationFeedService effiliationFeedService(FetcherProperties fetcherProperties,
+    public EffiliationFeedService effiliationFeedService(FeedConfiguration feedConfiguration,
                                                          RemoteFileCachingService remoteFileCachingService,
                                                          DataSourceConfigService dataSourceConfigService,
                                                          SerialisationService serialisationService,
                                                          ApiProperties props) {
         // Retrieve Effiliation-specific feed configuration from the fetcher properties
-        FeedConfiguration effiliationConfig = fetcherProperties.getFeedConfigs().get("effiliation");
+        FeedConfiguration effiliationConfig = feedConfiguration.provider("effiliation");
         return new EffiliationFeedService(effiliationConfig, remoteFileCachingService, dataSourceConfigService, serialisationService, props.getAffiliationConfig().getEffiliationApiKey());
     }
 
     @Bean
-    public TradeTrackerFeedService tradetrackerFeedService(FetcherProperties fetcherProperties,
+    public TradeTrackerFeedService tradetrackerFeedService(FeedConfiguration feedConfiguration,
                                                            RemoteFileCachingService remoteFileCachingService,
                                                            DataSourceConfigService dataSourceConfigService,
                                                            SerialisationService serialisationService,
                                                            ApiProperties props) {
-        FeedConfiguration config = fetcherProperties.getFeedConfigs().get("tradetracker");
+        FeedConfiguration config = feedConfiguration.provider("tradetracker");
         return new TradeTrackerFeedService(config, remoteFileCachingService, dataSourceConfigService, serialisationService, props.getAffiliationConfig().getTradetrackerCustomerId(), props.getAffiliationConfig().getTradetrackerApiKey());
     }
 
     @Bean
-    public KwankoFeedService kwankoFeedService(FetcherProperties fetcherProperties,
+    public KwankoFeedService kwankoFeedService(FeedConfiguration feedConfiguration,
                                                RemoteFileCachingService remoteFileCachingService,
                                                DataSourceConfigService dataSourceConfigService,
                                                SerialisationService serialisationService,
                                                ApiProperties props) {
-        FeedConfiguration config = fetcherProperties.getFeedConfigs().get("kwanko");
+        FeedConfiguration config = feedConfiguration.provider("kwanko");
         return new KwankoFeedService(config, remoteFileCachingService, dataSourceConfigService, serialisationService, props.getAffiliationConfig().getKwankoToken());
     }
 
     @Bean
-    public WebgainsFeedService webgainsFeedService(FetcherProperties fetcherProperties,
+    public WebgainsFeedService webgainsFeedService(FeedConfiguration feedConfiguration,
                                                    RemoteFileCachingService remoteFileCachingService,
                                                    DataSourceConfigService dataSourceConfigService,
                                                    SerialisationService serialisationService,
                                                    ApiProperties props) {
-        FeedConfiguration config = fetcherProperties.getFeedConfigs().get("webgains");
+        FeedConfiguration config = feedConfiguration.provider("webgains");
         return new WebgainsFeedService(config, remoteFileCachingService, dataSourceConfigService, serialisationService, props.getAffiliationConfig().getWebgainsApiKey());
     }
 
     @Bean
-    public CjFeedService cjFeedService(FetcherProperties fetcherProperties,
+    public CjFeedService cjFeedService(FeedConfiguration feedConfiguration,
                                        RemoteFileCachingService remoteFileCachingService,
                                        DataSourceConfigService dataSourceConfigService,
                                        SerialisationService serialisationService,
                                        ApiProperties props)
     {
-        FeedConfiguration config = fetcherProperties.getFeedConfigs().get("cj");
+        FeedConfiguration config = feedConfiguration.provider("cj");
         return new CjFeedService(config, remoteFileCachingService, dataSourceConfigService, serialisationService,
                 props.getAffiliationConfig().getCjApiToken(),
                 props.getAffiliationConfig().getCjPublisherId(),
@@ -368,14 +358,6 @@ public class ApiConfig {
         BrandService brandService(@Autowired RemoteFileCachingService rfc, @Autowired SerialisationService serialisationService) throws Exception {
                 return new BrandService(rfc, serialisationService);
         }
-
-
-
-        @Bean
-        BrandScoreService brandScoreService(@Autowired BrandScoresRepository brandScoreRepository) {
-                return new BrandScoreService(brandScoreRepository);
-        }
-
 
 
 	@Bean
@@ -409,10 +391,10 @@ public class ApiConfig {
 	@Bean
 	AggregationFacadeService realtimeAggregationService(@Autowired EvaluationService evaluationService, StandardiserService standardiserService, AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository, ApiProperties apiProperties,
 			@Autowired Gs1PrefixService gs1prefixService, DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, BarcodeValidationService barcodeValidationService, BrandService brandservice, GoogleTaxonomyService gts, BlablaService blablaService,
-			IcecatService icecatFeatureService, IcecatFeatureResolver icecatFeatureResolver, SerialisationService serialisationService, BrandScoreService brandScoreService, ObjectProvider<TextEmbeddingService> embeddingServiceProvider,
+			IcecatService icecatFeatureService, IcecatFeatureResolver icecatFeatureResolver, SerialisationService serialisationService, ObjectProvider<TextEmbeddingService> embeddingServiceProvider,
 			ObjectProvider<DjlEmbeddingProperties> embeddingPropertiesProvider) {
 		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService, barcodeValidationService, brandservice, gts, blablaService, icecatFeatureService,
-				icecatFeatureResolver, serialisationService, brandScoreService, embeddingServiceProvider.getIfAvailable(), embeddingPropertiesProvider.getIfAvailable());
+				icecatFeatureResolver, serialisationService, embeddingServiceProvider.getIfAvailable(), embeddingPropertiesProvider.getIfAvailable());
 	}
 
 	//////////////////////////////////////////////////////////
@@ -557,80 +539,30 @@ public class ApiConfig {
 	}
 
 	//////////////////////////////////////////////
-	// Embeded crawler configuration
+	// Feed indexing configuration
 	//////////////////////////////////////////////
 
-	// For the crawlController, inported from crawler
 	@Bean
-	FetcherProperties fetcherProperties(@Autowired final ApiProperties apiProperties) {
-		return apiProperties.getFetcherProperties();
+	FeedIndexingProperties feedIndexingProperties() {
+		return new FeedIndexingProperties();
 	}
 
 	@Bean
-	CsvDatasourceFetchingService csvDatasourceFetchingService(final DataFragmentCompletionService completionService, final IndexationService indexationService, @Autowired final ApiProperties apiProperties, final WebDatasourceFetchingService webDatasourceFetchingService,
-			final IndexationRepository indexationRepository, IndexationRepository csvIndexationRepo, RemoteFileCachingService remoteFileCachingService
-
-	) {
-
-		return new CsvDatasourceFetchingService(csvIndexationRepo, completionService, indexationService, apiProperties.getFetcherProperties(), webDatasourceFetchingService, indexationRepository, webDatasourceFetchingService, remoteFileCachingService, apiProperties.logsFolder());
+	DataFragmentIndexer dataFragmentIndexer(@Autowired final DataFragmentStoreService dataFragmentStoreService) {
+		return (dataFragment, datasourceConfigName) -> dataFragmentStoreService.queueDataFragment(dataFragment);
 	}
 
 	@Bean
-	WebDatasourceFetchingService webDatasourceFetchingService(@Autowired final IndexationRepository indexationRepository, final IndexationService indexationService, @Autowired final ApiProperties apiProperties) {
-
-		return new WebDatasourceFetchingService(indexationService, apiProperties.getFetcherProperties(), indexationRepository, apiProperties.logsFolder());
-	}
-
-	/**
-	 * A custom "direct" implementation to update directly the local crawler status,
-	 * bypassing HTTP transport and serialisation
-	 *
-	 * @return
-	 */
-	@Bean
-	IndexationService indexationService(@Autowired final DataFragmentStoreService dataFragmentStoreService) {
-		return new IndexationService() {
-
-			@Override
-			protected void indexInternal(final DataFragment data) throws ValidationException {
-				// Direct indexation on the store service
-				dataFragmentStoreService.queueDataFragment(data);
-			}
-		};
+	DataFragmentCompletionService feedDataFragmentCompletionService() {
+		return new DataFragmentCompletionService();
 	}
 
 	@Bean
-	FetchersService crawlersInterface(@Autowired final ApiProperties apiProperties, final CsvDatasourceFetchingService csvDatasourceFetchingService, final WebDatasourceFetchingService webDatasourceFetchingService) {
-		return new FetchersService(apiProperties.getFetcherProperties(), webDatasourceFetchingService, csvDatasourceFetchingService);
-	}
-
-	@Bean
-
-	ScrapperOrchestrationService fetcherOrchestrationService(TaskScheduler taskScheduler, DataSourceConfigService dataSourceConfigService, ApiProperties apiProperties) {
-		return new ScrapperOrchestrationService(taskScheduler, dataSourceConfigService, apiProperties);
-	}
-
-	@Bean
-	DataFragmentCompletionService offerCompletionService(@Autowired BrandScoreService brandScoreService) {
-		return new DataFragmentCompletionService(brandScoreService);
-	}
-
-	@Bean
-	/**
-	 * A custom "direct" implementation to update directly the local crawler status,
-	 * bypassing HTTP transport and serialisation
-	 *
-	 * @return
-	 */
-
-	ApiSynchService apiSynchService(final ApiProperties apiProperties, FetchersService crawlersInterface, ScrapperOrchestrationService fetcherOrchestrationService) {
-		return new ApiSynchService(apiProperties.getFetcherProperties().getApiSynchConfig(), crawlersInterface, null, null) {
-			@Override
-			@Scheduled(initialDelay = 0L, fixedDelay = TimeConstants.CRAWLER_UPDATE_STATUS_TO_API_MS)
-			public void updateStatus() {
-				fetcherOrchestrationService.updateClientStatus(crawlersInterface.stats());
-			}
-		};
+	FeedIndexingService feedIndexingService(FeedIndexingProperties feedIndexingProperties,
+			DataFragmentCompletionService completionService, DataFragmentIndexer dataFragmentIndexer,
+			RemoteFileCachingService remoteFileCachingService) {
+		return new FeedIndexingService(feedIndexingProperties, completionService, dataFragmentIndexer,
+				remoteFileCachingService, apiProperties.logsFolder());
 	}
 
 	@Bean

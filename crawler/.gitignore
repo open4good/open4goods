@@ -1,8 +1,0 @@
-/target/
-/.attach*
-/bin/*
-/.classpath
-/.project
-/.settings
-/.factorypath
-/capsule-data/

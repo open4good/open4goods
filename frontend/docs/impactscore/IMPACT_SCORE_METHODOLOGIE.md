@@ -104,4 +104,3 @@ Décision actuelle :
 1. Sens produit : " plus haut = meilleur (moins d'impact) " ou " plus haut = plus d'impact " ?
 2. Population statistique : verticale, catégorie, autre ?
 3. Chart : distribution affichée en valeurs absolues (unités) ou valeurs normalisées ?
-4. Sustainalytics : quelle métrique exacte (Score vs Risk Rating) ?

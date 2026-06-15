@@ -3,7 +3,7 @@ package org.open4goods.brand.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
- * A company-level rating from a single provider (CDP, B Corp, Sustainalytics...).
+ * A company-level rating from a single curated provider (CDP, B Corp, etc.).
  * The raw {@link #value} is interpreted through its {@link #scale}; {@link #rating}
  * holds the human-facing label (e.g. {@code "A-"}, {@code "Certified"}).
  */

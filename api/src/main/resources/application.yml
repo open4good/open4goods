@@ -203,6 +203,16 @@ review:
       - logoeps.com
       - worldvectorlogo.com
 urlfetcher:
+  external:
+    providers:
+      example:
+        enabled: false
+        endpoint: "https://example.invalid/fetch"
+        method: "GET"
+        url-query-parameter: "url"
+        api-key-header: "X-Api-Key"
+        html-json-pointer: "/html"
+        timeout: 30000
   domains:
     leclaireur.fnac.com:
       strategy: PLAYWRIGHT
@@ -290,24 +300,25 @@ gen-ai-config:
 feed:
   indexation:
     cron: 19 13 23 * * ?
-  awin:
-    cron: 0 43 1 * * ?
-    enabled: true
-    cache-ttl-days: 1
-  effiliation:
-    cron: 30 43 1 * * ?
-    enabled: true
-    cache-ttl-days: 1
-    max-jitter-seconds: 30
-  tradetracker:
-    cron: 0 43 1 * * ?
-    enabled: false
-    cache-ttl-days: 1
-  kwanko:
-    cron: 0 43 1 * * ?
-    enabled: false
-    cache-ttl-days: 1
-  webgains:
-    cron: 0 43 1 * * ?
-    enabled: false
+  providers:
+    awin:
+      cron: 0 43 1 * * ?
+      enabled: true
+      cache-ttl-days: 1
+    effiliation:
+      cron: 30 43 1 * * ?
+      enabled: true
+      cache-ttl-days: 1
+      max-jitter-seconds: 30
+    tradetracker:
+      cron: 0 43 1 * * ?
+      enabled: false
+      cache-ttl-days: 1
+    kwanko:
+      cron: 0 43 1 * * ?
+      enabled: false
+      cache-ttl-days: 1
+    webgains:
+      cron: 0 43 1 * * ?
+      enabled: false
     cache-ttl-days: 1

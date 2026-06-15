@@ -67,7 +67,6 @@ excludingTokensFromCategoriesMatching:
 availableImpactScoreCriterias:
   #  - ESG
   - DATA_QUALITY
-  - BRAND_SUSTAINALYTICS_SCORING
 
 # Composite scores that are computed by the aggregation pipeline.
 compositeScores:
@@ -384,7 +383,6 @@ attributesConfig:
     - key: "POWER_CONSUMPTION_TYPICAL"
     - key: "POWER_CONSUMPTION_OFF"
     - key: "FEATURES"
-    - key: "BRAND_SUSTAINALYTICS_SCORING"
     - key: "BRAND_CDP_SCORING"
     - key: "BRAND_BCORP_SCORING"
     - key: "DATA_QUALITY"

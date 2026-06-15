@@ -7,7 +7,7 @@ import java.util.Set;
 
 import org.open4goods.api.services.BatchService;
 import org.open4goods.commons.model.dto.api.IndexationResponse;
-import org.open4goods.crawler.services.fetching.CsvDatasourceFetchingService;
+import org.open4goods.services.feedservice.service.FeedIndexingService;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.affiliation.AffiliationPartner;
 import org.open4goods.model.affiliation.AffiliationProgram;
@@ -34,15 +34,15 @@ import jakarta.validation.constraints.NotBlank;
 public class FeedController {
 
 
-	private final CsvDatasourceFetchingService  csvDatasourceFetchingService;
+	private final FeedIndexingService feedIndexingService;
 
 	private final BatchService batchService;
 
 	private FeedService feedService;
 
-	public FeedController( BatchService batchService, CsvDatasourceFetchingService  csvDatasourceFetchingService, FeedService feedService) {
+	public FeedController( BatchService batchService, FeedIndexingService feedIndexingService, FeedService feedService) {
 		this.batchService = batchService;
-		this.csvDatasourceFetchingService = csvDatasourceFetchingService;
+		this.feedIndexingService = feedIndexingService;
 		this.feedService = feedService;
 	}
 
@@ -69,7 +69,7 @@ public class FeedController {
 	@Operation(summary="Show feeds awaiting indexation")
 	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public Object[] getQueue() {
-		return csvDatasourceFetchingService.getQueue().toArray();
+		return feedIndexingService.getQueue().toArray();
 	}
 
 	@PatchMapping(path = "/feedsByKey")

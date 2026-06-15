@@ -734,9 +734,6 @@ aggregationConfiguration:
   "scores.WEIGHT.value":
     interval: 1
     buckets: 5
-  "scores.BRAND_SUSTAINALYTICS_SCORING.value":
-    interval: 1
-    buckets: 5
   "scores.CLASSE_ENERGY.value":
     interval: 1
     buckets: 5

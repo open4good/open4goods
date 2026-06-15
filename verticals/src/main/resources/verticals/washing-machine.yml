@@ -77,7 +77,6 @@ availableImpactScoreCriterias:
   - WARRANTY
   # Brand and data quality
   - DATA_QUALITY
-  - BRAND_SUSTAINALYTICS_SCORING
   - NOISE_LEVEL
 
 popularAttributes:
@@ -754,7 +753,6 @@ attributesConfig:
     - key: PROGRAM_COUNT
     - key: REPAIRABILITY_INDEX
     - key: WARRANTY
-    - key: "BRAND_SUSTAINALYTICS_SCORING"
     - key: HEIGHT
     - key: WIDTH
     - key: DEPTH

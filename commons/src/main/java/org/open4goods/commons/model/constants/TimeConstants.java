@@ -7,11 +7,6 @@ package org.open4goods.commons.model.constants;
  */
 public class TimeConstants {
 
-
-	public static final long CRAWLER_UPDATE_STATUS_TO_API_MS = 5000L;
-	public static final int API_EXPIRED_UNSEEN_CRAWLERS_IN_SECONDS = 10;
-	// The delay where terminated crawlers will be removed
-	public static final long CRAWLER_REMOVE_FINISHED_CRAWLERS_MS = 3000L;
 	// The Relations data (brands, conservateur, ...)  build frequency
 	public static final long RELATION_DATA_AGGREGATION_PERIOD = 1000 * 3600 * 10;
 	// Period of capsule update againt master API

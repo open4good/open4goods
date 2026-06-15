@@ -27,7 +27,6 @@ import org.open4goods.api.services.aggregation.services.realtime.TaxonomyRealTim
 import org.open4goods.api.services.aggregation.services.realtime.UsageCostAggregationService;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.helper.GenericFileLogger;
-import org.open4goods.brand.service.BrandScoreService;
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.DataSourceConfigService;
@@ -85,7 +84,6 @@ public class AggregationFacadeService {
 	private final VerticalsConfigService verticalConfigService;
 	private final BarcodeValidationService barcodeValidationService;
 	private final BrandService brandService;
-	private final BrandScoreService brandScoreService;
 	private final GoogleTaxonomyService taxonomyService;
 	private final BlablaService blablaService;
 	private final IcecatService icecatFeatureService;
@@ -112,7 +110,6 @@ public class AggregationFacadeService {
 			final IcecatService icecatFeatureService,
 			final IcecatFeatureResolver icecatFeatureResolver,
 			final SerialisationService serialisationService,
-			final BrandScoreService brandScoreService,
 			final TextEmbeddingService embeddingService,
 			final DjlEmbeddingProperties embeddingProperties) {
 		this.evaluationService = evaluationService;
@@ -132,7 +129,6 @@ public class AggregationFacadeService {
 		this.embeddingService = embeddingService;
 		this.embeddingProperties = embeddingProperties;
 		this.serialisationService = serialisationService;
-		this.brandScoreService = brandScoreService;
 		this.realtimeAggregator = getStandardAggregator("realtime");
 	}
 
@@ -377,7 +373,7 @@ public class AggregationFacadeService {
 		final List<AbstractAggregationService> services = new ArrayList<>();
 		services.add(new CleanScoreAggregationService(aggLogger));
 		services.add(new Attribute2ScoreAggregationService(aggLogger));
-		services.add(new BrandScoresAggregationService(aggLogger, brandService, brandScoreService));
+		services.add(new BrandScoresAggregationService(aggLogger, brandService));
 		services.add(new DataCompletion2ScoreAggregationService(aggLogger));
 		services.add(new EcoScoreAggregationService(aggLogger));
 		services.add(new ParticipatingScoresAggregationService(aggLogger));

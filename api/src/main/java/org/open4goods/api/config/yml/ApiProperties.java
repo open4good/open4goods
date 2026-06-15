@@ -10,7 +10,6 @@ import java.util.HashMap;
 import org.apache.commons.lang3.ArrayUtils;
 import org.open4goods.services.feedservice.config.AffiliationConfig;
 import org.open4goods.commons.config.yml.DevModeConfiguration;
-import org.open4goods.crawler.config.yml.FetcherProperties;
 import org.open4goods.icecat.config.yml.IcecatCompletionConfig;
 import org.open4goods.icecat.config.yml.IcecatConfiguration;
 import org.open4goods.services.wikidataservice.config.WikidataServiceProperties;
@@ -25,7 +24,6 @@ import org.springframework.validation.annotation.Validated;
 
 import ch.qos.logback.classic.Level;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 @Configuration
 @ConfigurationProperties
@@ -87,17 +85,12 @@ public class ApiProperties {
 	private Integer elasticSearchPort = 9200;
 
 	/**
-	 * The list of crawler api keys to authorize
-	 */
-	private List<String> crawlerKeys = new ArrayList<>();
-
-	/**
-	 * The list of crawler api keys to authorize
+	 * The list of test api keys to authorize.
 	 */
 	private List<String> testKeys = new ArrayList<>();
 
 	/**
-	 * The list of crawler api keys to authorize
+	 * The admin API key to authorize.
 	 */
 	@NotBlank
 	private String adminKey;
@@ -238,12 +231,6 @@ public class ApiProperties {
 	}
 
 	/**
-	 * The local crawler configuration
-	 */
-	@NotNull
-	private FetcherProperties fetcherProperties;
-
-	/**
 	 * Indicates if the application is in dev mode
 	 *
 	 * @return
@@ -354,14 +341,6 @@ public class ApiProperties {
 		proxypassword = proxyUserpassword;
 	}
 
-	public List<String> getCrawlerKeys() {
-		return crawlerKeys;
-	}
-
-	public void setCrawlerKeys(final List<String> crawlerKeys) {
-		this.crawlerKeys = crawlerKeys;
-	}
-
 	public Integer getDataFragmentsDequeueSize() {
 		return dataFragmentsDequeueSize;
 	}
@@ -376,14 +355,6 @@ public class ApiProperties {
 
 	public void setDataFragmentsDequeuePeriodMs(final Integer dataFragmentsDequeuePeriodMs) {
 		this.dataFragmentsDequeuePeriodMs = dataFragmentsDequeuePeriodMs;
-	}
-
-	public FetcherProperties getFetcherProperties() {
-		return fetcherProperties;
-	}
-
-	public void setFetcherProperties(final FetcherProperties fetcherProperties) {
-		this.fetcherProperties = fetcherProperties;
 	}
 
 	public DescriptionsAggregationConfig getRelationDatadescriptionsAggregationConfig() {

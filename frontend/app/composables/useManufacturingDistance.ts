@@ -26,7 +26,9 @@ export interface ManufacturingDistance {
  *
  * @param gtin the product GTIN (ref/getter so it can react to route changes)
  */
-export function useManufacturingDistance(gtin: MaybeRefOrGetter<number | undefined>) {
+export function useManufacturingDistance(
+  gtin: MaybeRefOrGetter<number | undefined>
+) {
   const data = ref<ManufacturingDistance | null>(null)
   const pending = ref(false)
   const error = ref<unknown>(null)
@@ -57,7 +59,10 @@ export function useManufacturingDistance(gtin: MaybeRefOrGetter<number | undefin
   /**
    * @returns distance in km for a site matched by country (+ city when present)
    */
-  function distanceFor(country?: string | null, city?: string | null): number | null {
+  function distanceFor(
+    country?: string | null,
+    city?: string | null
+  ): number | null {
     if (!data.value) {
       return null
     }

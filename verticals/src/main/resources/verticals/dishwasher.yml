@@ -74,7 +74,6 @@ genAiConfig:
 availableImpactScoreCriterias:
   - CLASSE_ENERGY
   - WARRANTY
-  - BRAND_SUSTAINALYTICS_SCORING
   - REPAIRABILITY_INDEX
   - MINAVAILABILITYSPAREPARTSYEARS
   - WEIGHT
@@ -601,9 +600,6 @@ aggregationConfiguration:
   "scores.WEIGHT.value":
     interval: 2
     buckets: 12
-  "scores.BRAND_SUSTAINALYTICS_SCORING.value":
-    interval: 1
-    buckets: 5
   "scores.CLASSE_ENERGY.value":
     interval: 1
     buckets: 5

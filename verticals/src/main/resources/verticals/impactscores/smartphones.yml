@@ -5,9 +5,8 @@
 #   [S3] ADEME "Empreinte carbone d'un smartphone" (2021) — manufacturing ~80% of lifecycle GHG
 #   [S4] Commission Recommendation (EU) 2021/2279 — Environmental Footprint methods (PEF)
 criteriasPonderation:
-  REPAIRABILITY_INDEX: 0.30    # [S1][S3] French law mandate; best coverage (1 983 hits); extends device lifespan
-  DATA_QUALITY: 0.20           # [S4] Virtualisation compensation; penalises incomplete product sheets
-  BRAND_SUSTAINALYTICS_SCORING: 0.20  # Manufacturer supply-chain accountability
-  WARRANTY: 0.15               # [S3] Durability proxy; 4 691 hits; contractual confidence signal
-  CLASSE_ENERGY: 0.10          # [S2] EU Reg. 2023/1669; 589 hits; use-phase energy signal
-  WEIGHT: 0.05                 # [S3] Material-intensity proxy; narrow range (100-400 g) → secondary
+  REPAIRABILITY_INDEX: 0.3750  # [S1][S3] French law mandate; best coverage (1 983 hits); extends device lifespan
+  DATA_QUALITY: 0.2500         # [S4] Virtualisation compensation; penalises incomplete product sheets
+  WARRANTY: 0.1875             # [S3] Durability proxy; 4 691 hits; contractual confidence signal
+  CLASSE_ENERGY: 0.1250        # [S2] EU Reg. 2023/1669; 589 hits; use-phase energy signal
+  WEIGHT: 0.0625               # [S3] Material-intensity proxy; narrow range (100-400 g) -> secondary

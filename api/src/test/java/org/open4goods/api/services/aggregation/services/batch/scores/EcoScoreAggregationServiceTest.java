@@ -59,10 +59,9 @@ public class EcoScoreAggregationServiceTest {
     }
 
     private void ponderations(Map<String, Double> pond) {
-        pond.put("WARRANTY", 0.3);
-        pond.put("CLASSE_ENERGY", 0.35);
-        pond.put("WEIGHT", 0.15);
-        pond.put("BRAND_SUSTAINALYTICS_SCORING", 0.15);
-        pond.put("DATA_QUALITY", 0.05);
+        pond.put("WARRANTY", 0.3529);
+        pond.put("CLASSE_ENERGY", 0.4118);
+        pond.put("WEIGHT", 0.1765);
+        pond.put("DATA_QUALITY", 0.0588);
     }
 }

@@ -1,9 +1,6 @@
 
 package org.open4goods.api;
 
-import org.open4goods.brand.repository.BrandScoresRepository;
-import org.open4goods.crawler.controller.CrawlController;
-import org.open4goods.crawler.repository.IndexationRepository;
 import org.open4goods.icecat.repository.IcecatFeatureRepository;
 import org.open4goods.model.CacheKeyGenerator;
 import org.open4goods.services.eprelservice.repository.EprelProductRepository;
@@ -18,9 +15,9 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /** Main entry point for the open4goods API application. */
-@SpringBootApplication(scanBasePackages = {"org.open4goods.services"}, scanBasePackageClasses = { Api.class, CrawlController.class, CacheKeyGenerator.class})
+@SpringBootApplication(scanBasePackages = {"org.open4goods.services"}, scanBasePackageClasses = { Api.class, CacheKeyGenerator.class})
 @EnableScheduling
-@EnableElasticsearchRepositories(basePackageClasses = {ElasticProductRepository.class, IndexationRepository.class, BrandScoresRepository.class, EprelProductRepository.class, IcecatFeatureRepository.class, WikidataEntityRepository.class})
+@EnableElasticsearchRepositories(basePackageClasses = {ElasticProductRepository.class, EprelProductRepository.class, IcecatFeatureRepository.class, WikidataEntityRepository.class})
 @EnableCaching
 public class Api {
 

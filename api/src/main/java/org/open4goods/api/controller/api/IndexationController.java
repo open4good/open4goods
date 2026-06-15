@@ -35,7 +35,7 @@ public class IndexationController {
 	}	
 
 	@PostMapping(path = UrlConstants.API_INDEXATION_ENDPOINT)
-	//TODO(perf,0.75, p2) : could optimize with "bulk" frow crawler
+	//TODO(perf,0.75, p2) : could optimize with bulk indexing
 	public IndexationResponse index(@RequestBody final DataFragment data) throws ValidationException {
 		storeService.queueDataFragment(data);
 		return new IndexationResponse();

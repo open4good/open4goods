@@ -3,7 +3,7 @@ package org.open4goods.commons.config.yml.datasource;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * Specific configuration for an Web (crawlable) DataSource. ApiDataSources reacts on already aggregated datasources.
+ * Specific configuration for API-backed datasource enrichment.
  * @author Goulven.Furet
  *
  */
@@ -11,8 +11,8 @@ import org.springframework.validation.annotation.Validated;
 public class ApiDataSourceProperties {
 
 	/**
-	 * In case of of a datasource triggered on each builded aggregated datas sets, the working class name. (must extends AbstractAggregatedDataWorker)
-	 * TODO(gof) : put in a separate HtmlDataSourceProperties
+	 * In case of a datasource triggered on each built aggregated data set, the working class name. (must extends AbstractAggregatedDataWorker)
+	 * TODO(gof) : put in a dedicated API datasource properties model.
 	 */
 	private String aggregatedDataBackingClass;
 
