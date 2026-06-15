@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="200" viewBox="40 40 720 200" role="img" aria-label="Infera horizontal lockup">
+      
+      <g transform="translate(44,30) scale(1)"><g transform="translate(0,0)">
+      
+        <defs>
+          <linearGradient id="upsilonGradient" x1="45" y1="45" x2="195" y2="190" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#2E6BFF"/>
+            <stop offset="0.56" stop-color="#18D8FF"/>
+            <stop offset="1" stop-color="#7C3AED"/>
+          </linearGradient>
+          <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.094  0 0 0 0 0.847  0 0 0 0 1  0 0 0 .32 0"/>
+            <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+      
+      <g filter="url(#softGlow)">
+        <path d="M66 50V123C66 160.5 89 185 120 185C151 185 174 160.5 174 123V50" fill="none" stroke="url(#upsilonGradient)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+        
+      <path d="M66 50H42" stroke="url(#upsilonGradient)" stroke-width="22" stroke-linecap="round"/>
+      <path d="M174 50H198" stroke="url(#upsilonGradient)" stroke-width="22" stroke-linecap="round"/>
+    
+        <circle cx="198" cy="50" r="8" fill="#FFB020"/>
+      </g>
+    </g></g>
+      <text x="318" y="142" fill="#0A1020" font-family="Inter Display, Inter, Manrope, Arial, sans-serif" font-size="104" font-weight="760" letter-spacing="-4">Infera</text>
+
+    </svg>

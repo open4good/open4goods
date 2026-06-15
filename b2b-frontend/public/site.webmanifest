@@ -1,0 +1,21 @@
+{
+  "name": "Infera",
+  "short_name": "Infera",
+  "description": "Sovereign decentralized AI cloud",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07111F",
+  "theme_color": "#2E6BFF",
+  "icons": [
+    {
+      "src": "/icons/infera_app_icon_256.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/infera_app_icon_512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

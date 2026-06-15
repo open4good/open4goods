@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="200" viewBox="40 40 720 200" role="img" aria-label="Infera horizontal lockup">
+  <rect x="40" y="40" width="720" height="200" rx="24" fill="#07111F"/>
+      <g transform="translate(44,30) scale(1)"><g transform="translate(0,0)">
+      
+      
+      <g filter="none">
+        <path d="M66 50V123C66 160.5 89 185 120 185C151 185 174 160.5 174 123V50" fill="none" stroke="#FFFFFF" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+        
+      <path d="M66 50H42" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round"/>
+      <path d="M174 50H198" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round"/>
+    
+        <circle cx="198" cy="50" r="8" fill="#18D8FF"/>
+      </g>
+    </g></g>
+      <text x="318" y="142" fill="#FFFFFF" font-family="Inter Display, Inter, Manrope, Arial, sans-serif" font-size="104" font-weight="760" letter-spacing="-4">Infera</text>
+
+    </svg>

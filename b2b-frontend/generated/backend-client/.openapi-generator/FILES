@@ -1,0 +1,12 @@
+.openapi-generator-ignore
+apis/ProductDataApi.ts
+apis/StripeWebhookControllerApi.ts
+apis/index.ts
+index.ts
+models/B2bCoverageMeta.ts
+models/B2bFacetMeta.ts
+models/B2bMeta.ts
+models/B2bResponse.ts
+models/ProblemDetail.ts
+models/index.ts
+runtime.ts

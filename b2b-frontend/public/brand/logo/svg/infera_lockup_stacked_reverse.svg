@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="680" viewBox="0 0 900 680" role="img" aria-label="Infera stacked lockup">
+        <rect width="900" height="680" rx="56" fill="#07111F"/>
+        <g transform="translate(330,62) scale(1)"><g transform="translate(0,0)">
+      
+      
+      <g filter="none">
+        <path d="M66 50V123C66 160.5 89 185 120 185C151 185 174 160.5 174 123V50" fill="none" stroke="#FFFFFF" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+        
+      <path d="M66 50H42" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round"/>
+      <path d="M174 50H198" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round"/>
+    
+        <circle cx="198" cy="50" r="8" fill="#18D8FF"/>
+      </g>
+    </g></g>
+        <text x="450" y="398" text-anchor="middle" fill="#FFFFFF" font-family="Inter Display, Inter, Manrope, Arial, sans-serif" font-size="116" font-weight="760" letter-spacing="-4">Infera</text>
+        <text x="450" y="456" text-anchor="middle" fill="#EAF2FF" font-family="Inter, Arial, sans-serif" font-size="27" font-weight="500" letter-spacing="1.2">SOVEREIGN DECENTRALIZED AI CLOUD</text>
+        <rect x="370" y="486" width="160" height="8" rx="4" fill="#18D8FF"/>
+        </svg>

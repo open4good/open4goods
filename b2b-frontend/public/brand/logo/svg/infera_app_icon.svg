@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240" role="img" aria-label="Infera Latin upsilon symbol">
+      
+      <rect width="240" height="240" rx="48" fill="#07111F"/>
+      <g filter="none">
+        <path d="M66 50V123C66 160.5 89 185 120 185C151 185 174 160.5 174 123V50" fill="none" stroke="#FFFFFF" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+        
+      <path d="M66 50H42" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round"/>
+      <path d="M174 50H198" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round"/>
+    
+        <circle cx="198" cy="50" r="8" fill="#18D8FF"/>
+      </g>
+    </svg>

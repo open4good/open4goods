@@ -90,15 +90,15 @@
 
 ## P8 - Frontend scaffold and codegen
 
-- [ ] P8.1 Bootstrap `b2b-frontend/` from `infera/apps/frontend` (flat layout)
-- [ ] P8.2 i18n (`prefix_except_default`, en `/`, fr `/fr/`) + `@nuxtjs/seo` + `@nuxt/content`
-- [ ] P8.3 OpenAPI codegen pipeline (committed static spec + `generate:openapi`)
-- [ ] P8.4 Gate: lint + typecheck + build
+- [x] P8.1 Bootstrap `b2b-frontend/` from `infera/apps/frontend` (flat layout)
+- [x] P8.2 i18n (`prefix_except_default`, en `/`, fr `/fr/`) + `@nuxtjs/seo` + `@nuxt/content`
+- [x] P8.3 OpenAPI codegen pipeline (committed static spec + `generate:openapi`)
+- [x] P8.4 Gate: lint + typecheck + build
 
 ## P9 - Frontend pages
 
-- [ ] P9.1 Shared `B2b*` components (ui-spec section 8)
-- [ ] P9.2 Public pages (landing, pricing from backend catalog, faq/contact/legal/privacy/terms)
+- [x] P9.1 Shared `B2b*` components (ui-spec section 8)
+- [x] P9.2 Public pages (landing, pricing from backend catalog, faq/contact/legal/privacy/terms)
 - [ ] P9.3 Auth login + session state
 - [ ] P9.4 Dashboard pages (overview, usage, api-keys, billing, invoices, settings)
 - [ ] P9.5 Admin pages + role gating
@@ -193,5 +193,9 @@ backend -> docs -> SEO -> launch).
 - 2026-06-15: P6 done - Stripe billing integration completed including webhook service, event handlers, and full webhook integration tests; all tests passed. Next: P7.1.
 - 2026-06-15: P7.1 & P7.2 done - Mapped ledger records to DTOs; exposed GET billing endpoints for balance breakdown, transactions, invoices, and subscriptions; implemented the playground proxy POST endpoint with custom response wrapper and status mapping; all tests passed. Next: P7.3.
 - 2026-06-15: P7.3 & P7.4 done - Admin endpoints for platform administrators completed, including mapping organization records, manual grants, key oversight, usage events, and audit logs; full test coverage added; all tests and build/lint gates successfully passed. Next: P8.
-
-
+- 2026-06-15: P8 done - b2b-frontend bootstrapped from Infera template; Infera-specific pages/components/composables removed; nuxt.config.ts and package.json aligned to product-data-api.com (port 8087, en default locale); B2B OpenAPI codegen pipeline verified against live backend (b2b-api on port 8087); useCustomerOrganizationRepository B2B composable created; OrganizationResponse local type defined; pnpm lint, typecheck, and build all pass. Next: P9.
+- 2026-06-15: P9.1 and P9.2 done - shared B2b UI foundations added; public
+  landing, pricing, FAQ, contact, legal, privacy, and terms pages created with
+  localized SEO/copy; header/footer moved to Product Data API navigation;
+  pricing fetches `/api/v1/customer/billing/catalog`; `pnpm --dir b2b-frontend
+  lint`, `typecheck`, and `build` passed. Next: P9.3.

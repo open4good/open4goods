@@ -1,0 +1,3758 @@
+{
+  "app": {
+    "name": "Product Data API"
+  },
+  "home": {
+    "seo": {
+      "title": "Product Data API - Fresh GTIN-first product price data",
+      "description": "Developer-ready product price data by GTIN with freshness metadata, provenance, and no-data-no-pay billing."
+    },
+    "hero": {
+      "eyebrow": "GTIN-first price API",
+      "title": "Fresh product price data, metered only when usable data is returned.",
+      "subtitle": "Query a product by GTIN and receive sanitized offers, best prices, freshness metadata, provenance labels, and credit metering in one REST response.",
+      "docsCta": "Start with docs"
+    },
+    "proof": {
+      "fresh": {
+        "title": "Freshness",
+        "value": "30 days",
+        "caption": "Fresh offer window for billable price data."
+      },
+      "nodata": {
+        "title": "Billing",
+        "value": "No data, no pay",
+        "caption": "Invalid GTINs, missing products, and stale offers cost zero credits."
+      },
+      "gtin": {
+        "title": "Lookup",
+        "value": "GTIN-first",
+        "caption": "Strict checksum validation before any credit reservation."
+      },
+      "provenance": {
+        "title": "Offers",
+        "value": "Provenance",
+        "caption": "Merchant labels without internal datasource leakage."
+      }
+    },
+    "api": {
+      "title": "One call to the price facet",
+      "subtitle": "The response envelope includes data and metering metadata for clients that need deterministic billing behavior."
+    },
+    "billing": {
+      "title": "Billing rules",
+      "subtitle": "Credits are consumed only when the product price facet returns usable fresh data.",
+      "rules": [
+        "Invalid GTIN: 400 response, zero credits.",
+        "Product not found: 404 response, zero credits.",
+        "Empty or stale price data: 200 response, zero credits.",
+        "Fresh offer data: 200 response, billable credit debit."
+      ]
+    }
+  },
+  "pricing": {
+    "seo": {
+      "title": "Pricing - Product Data API",
+      "description": "Credit packs and subscriptions for Product Data API, loaded from the backend billing catalog."
+    },
+    "title": "Self-serve pricing",
+    "subtitle": "Buy credits as packs or subscribe for monthly credits with rollover. Pricing is loaded from the live backend catalog.",
+    "loading": "Loading pricing",
+    "loadingDescription": "Fetching the public billing catalog.",
+    "error": "Pricing unavailable",
+    "errorDescription": "The billing catalog could not be loaded right now.",
+    "packs": "Credit packs",
+    "subscriptions": "Subscriptions",
+    "buyPack": "Buy pack",
+    "startPlan": "Start plan",
+    "packDescription": "One-time credits for production API calls.",
+    "subscriptionDescription": "Monthly credits with a {months}-month rollover cap."
+  },
+  "public": {
+    "faq": {
+      "seo": {
+        "title": "FAQ - Product Data API",
+        "description": "Answers about Product Data API coverage, freshness, billing, and support."
+      },
+      "title": "FAQ",
+      "subtitle": "Short answers for developers and buyers evaluating the price API.",
+      "items": [
+        {
+          "question": "When are credits consumed?",
+          "answer": "Credits are consumed only when the requested facet returns usable fresh data."
+        },
+        {
+          "question": "What happens when no product is found?",
+          "answer": "The API returns a non-billable error response. Missing products do not consume credits."
+        },
+        {
+          "question": "Is stock or shipping data included?",
+          "answer": "No. v1 focuses on sanitized price offers, freshness, and provenance."
+        }
+      ]
+    },
+    "contact": {
+      "seo": {
+        "title": "Contact - Product Data API",
+        "description": "Contact support or sales for Product Data API."
+      },
+      "title": "Contact",
+      "subtitle": "Reach the team for support, billing questions, or enterprise evaluation.",
+      "supportTitle": "Support",
+      "supportCopy": "For account, API, or billing issues, include your organization name and request ID when available.",
+      "salesTitle": "Sales",
+      "salesCopy": "For larger volumes or procurement questions, contact sales with your expected monthly call volume."
+    },
+    "legal": {
+      "seo": {
+        "title": "Legal - Product Data API",
+        "description": "Legal documents for Product Data API."
+      },
+      "title": "Legal",
+      "subtitle": "Privacy and terms documents for the Product Data API service."
+    },
+    "privacy": {
+      "seo": {
+        "title": "Privacy - Product Data API",
+        "description": "Privacy information for Product Data API."
+      },
+      "title": "Privacy policy",
+      "subtitle": "How Product Data API handles account, billing, and usage data.",
+      "paragraphs": [
+        "Product Data API stores account, organization, authentication, billing, and API usage metadata needed to operate the service.",
+        "API keys are stored hashed. Clear API secrets are shown only when created or rotated.",
+        "Usage records are retained for billing, support, abuse prevention, and service reliability."
+      ]
+    },
+    "terms": {
+      "seo": {
+        "title": "Terms - Product Data API",
+        "description": "Terms of service for Product Data API."
+      },
+      "title": "Terms of service",
+      "subtitle": "Core service terms for Product Data API customers.",
+      "paragraphs": [
+        "Product Data API is provided as a metered product data service. Customers are responsible for protecting their API keys.",
+        "Credits are billed according to the no-data-no-pay rules documented for each facet.",
+        "The v1 service exposes product price data only. Future facets may be added under their own contracts."
+      ]
+    }
+  },
+  "common": {
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "refresh": "Refresh",
+    "close": "Close",
+    "time": {
+      "just_now": "Just now",
+      "minutes": "{count}m",
+      "hours": "{count}h",
+      "days": "{count}d"
+    },
+    "yes": "Yes",
+    "no": "No",
+    "not_available": "-",
+    "default": "Default"
+  },
+  "org": {
+    "status": {
+      "pending": "Pending Validation",
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "sidebar": {
+      "collapse": "Collapse sidebar"
+    }
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "energy": "Energy",
+    "admin_models": "Model management",
+    "admin_energy": "Energy board",
+    "admin_nodes": "Admin nodes",
+    "admin_users": "Admin users",
+    "sign_in": "Sign in",
+    "logout": "Logout",
+    "account": "Account",
+    "authenticated_as": "Signed in as {level}",
+    "admin_keys": "Admin keys",
+    "admin_organisations": "Admin organisations",
+    "admin_overview": "Admin overview",
+    "models": "Models catalog",
+    "benchmarks": "Energy analytics",
+    "enrollment": "Enroll node",
+    "language": "Language",
+    "admin_docs": "Admin docs",
+    "admin_pentest": "Pentest licenses",
+    "playground": "Playground",
+    "manage_profile": "Manage profile",
+    "navigation": "Navigation",
+    "contexts": {
+      "personal": "Personal context",
+      "organizations": "Organizations",
+      "platform": "Platform Admin",
+      "admin_context": "Admin overview"
+    },
+    "org": {
+      "dashboard": "Dashboard",
+      "keys": "API Keys",
+      "billing": "Billing",
+      "usage": "Usage",
+      "settings": "Settings"
+    }
+  },
+  "dashboard": {
+    "title": "Product Data API",
+    "description": "Developer portal for the metered B2B product data API."
+  },
+  "benchmarks": {
+    "badge": "Methodology",
+    "title": "Inference energy analytics",
+    "subtitle": "Neutral, request-level energy attribution foundations for internal analytics and future reporting mappings.",
+    "notice": "The previous public benchmark index is retired. Operator analytics now use auditable request-level Joule events with quality and confidence metadata.",
+    "meta": {
+      "unit": "Canonical unit: Joules"
+    },
+    "metrics": {
+      "unit": "Event unit",
+      "unit_caption": "Each inference event is stored in Joules before any derived KPI.",
+      "derived": "Derived views",
+      "derived_caption": "Dashboards derive J/token and Wh/1k tokens from neutral event data.",
+      "quality": "Quality overlay",
+      "quality_value": "Confidence-aware",
+      "quality_caption": "Method tier, uncertainty, and exclusions stay attached to every event."
+    },
+    "sections": {
+      "ranking": "What changed"
+    },
+    "table": {
+      "event_level": "Request-level attribution",
+      "event_level_caption": "The agent samples power during live inference windows and emits one auditable event per request.",
+      "neutral": "Neutral metrics",
+      "neutral_caption": "The platform stores Joules, tokens, measurement method, confidence, and exclusions without embedding compliance claims.",
+      "compatibility": "Future compatibility",
+      "compatibility_caption": "Additional reporting mappings remain possible later by transforming retained evidence instead of rewriting the raw ledger."
+    }
+  },
+  "energy": {
+    "page": {
+      "badge": "Energy ledger",
+      "title": "Energy consumption",
+      "subtitle": "Request-level energy consumed by your API usage, grouped by model, API key, node, and runtime slot."
+    },
+    "admin": {
+      "badge": "Global board",
+      "title": "Energy accountability board",
+      "subtitle": "Consolidated request-level energy evidence across clients, nodes, API keys, and measurement methods.",
+      "quality_title": "Measurement quality",
+      "anomalies_title": "Flagged events"
+    },
+    "period": {
+      "24h": "24h",
+      "7d": "7d",
+      "30d": "30d"
+    },
+    "load_error": "Energy analytics could not be loaded.",
+    "kpi": {
+      "total_energy": "Total energy",
+      "requests": "requests",
+      "efficiency": "Efficiency",
+      "with_tokens": "{count} with tokens",
+      "avg_power": "Avg power",
+      "data_quality": "Clean events",
+      "anomalies": "{count} flagged",
+      "no_anomalies": "No flagged events"
+    },
+    "chart": {
+      "title": "Energy over time",
+      "no_data": "No energy events in this period.",
+      "wh_label": "Energy (Wh)"
+    },
+    "method_tiers": {
+      "device_direct_counter": "Counter (high)",
+      "device_direct_sampled": "Sampled (medium)",
+      "host_estimate": "Estimated (low)"
+    },
+    "breakdown": {
+      "by_api_key": "By API key",
+      "api_key": "API key",
+      "by_model": "By model",
+      "model": "Model",
+      "by_node": "By node",
+      "node": "Node",
+      "by_slot": "By slot",
+      "slot": "Slot",
+      "by_method": "By method",
+      "method": "Method",
+      "by_client": "By client",
+      "client": "Client",
+      "energy": "Energy",
+      "efficiency": "Wh / 1k tokens",
+      "requests": "Requests",
+      "share": "Share"
+    },
+    "ledger": {
+      "title": "Request ledger",
+      "last_n": "{count} latest events",
+      "col": {
+        "time": "Time",
+        "model": "Model",
+        "api_key": "API key",
+        "slot": "Slot",
+        "energy": "Energy",
+        "method": "Method",
+        "confidence": "Confidence",
+        "anomaly": "Quality"
+      }
+    }
+  },
+  "backend": {
+    "title": "Backend API"
+  },
+  "landing": {
+    "seo": {
+      "title": "Infera - Sovereign decentralized AI cloud",
+      "description": "Sovereign, decentralized, cost-efficient and ecological AI cloud, OpenAI-compatible."
+    },
+    "nav": {
+      "product": "Product",
+      "levels": "Levels",
+      "faq": "FAQ",
+      "joinBeta": "Join beta",
+      "home": "Home",
+      "offers": "Offers",
+      "downloadAgent": "Download agent",
+      "download": "Download",
+      "docs": "Documentation",
+      "pricing": "Pricing",
+      "contact": "Contact",
+      "createAccount": "Create account"
+    },
+    "hero": {
+      "badge": "Private beta · EU Grid",
+      "subtitle": "Connect underused GPUs or route AI workloads through an OpenAI-compatible API designed for resilience and energy efficiency.",
+      "primaryCta": "Talk to the team",
+      "enterpriseCta": "Explore enterprise offers",
+      "providerCta": "Deploy a node",
+      "secondaryCta": "Browse documentation",
+      "surfaceEyebrow": "One control plane, two growth paths",
+      "surfaceTitle": "Shared orchestration for request routing and compute monetization",
+      "surfaceBadge": "Production path",
+      "client": "CLIENT",
+      "router": "ROUTER",
+      "gpuNodes": "GPU NODES",
+      "graphLabel": "Network graph with client, router and GPU nodes",
+      "audiences": {
+        "individuals": "Individuals",
+        "enterprises": "Enterprises",
+        "clouders": "Clouders"
+      },
+      "titlePrefix": "A sovereign AI infrastructure",
+      "fallbackTitleWord": "sovereign",
+      "titleVariants": [
+        {
+          "text": "sovereign",
+          "effect": "fade"
+        },
+        {
+          "text": "resilient",
+          "effect": "slide-y"
+        },
+        {
+          "text": "distributed",
+          "effect": "slide-x"
+        },
+        {
+          "text": "sustainable",
+          "effect": "scale"
+        }
+      ],
+      "signals": {
+        "compatibility": {
+          "value": "OpenAI-compatible",
+          "label": "Preserve SDKs and existing request flows."
+        },
+        "security": {
+          "value": "3 trust tiers",
+          "label": "Match routing guarantees to workload criticality."
+        },
+        "activation": {
+          "value": "2-sided network",
+          "label": "Adopt as a client or contribute capacity as a provider."
+        }
+      },
+      "tracks": {
+        "enterprise": {
+          "label": "For enterprise teams",
+          "title": "Move workloads without rewriting your stack",
+          "text": "Keep OpenAI client compatibility while adding routing, sovereignty and tiered trust controls."
+        },
+        "provider": {
+          "label": "For compute providers",
+          "title": "Activate idle GPUs with policy-aware demand",
+          "text": "Expose local capacity through a pull-based agent model designed for security and operational control."
+        }
+      }
+    },
+    "orbitalHero": {
+      "metrics": {
+        "label": "Public network statistics driving the orbital animation",
+        "activeNodes": "Public active nodes",
+        "inferences": "Number of API keys",
+        "tokens": "Tokens handled",
+        "source": {
+          "live": "Public stats",
+          "fallback": "Preview stats"
+        }
+      },
+      "variants": {
+        "index1": {
+          "seoTitle": "Infera orbital network hero - Aurora variant",
+          "seoDescription": "Aurora orbital landing page variant for the Infera peer-to-peer inference network.",
+          "badge": "Peer mesh · Aurora routing",
+          "title": "A living network for sovereign inference",
+          "subtitle": "Requests move through a pull-based peer mesh where nearby GPU providers, router policy, and trust tiers stay visible in one premium motion system.",
+          "primaryCta": "Download",
+          "secondaryCta": "Create key"
+        },
+        "index2": {
+          "seoTitle": "Infera orbital network hero - Particle variant",
+          "seoDescription": "Full page particle landing variant for the Infera decentralized AI cloud.",
+          "badge": "Real-time capacity field",
+          "title": "Inference that feels geographically alive",
+          "subtitle": "A full-screen cluster field seeded from node activity, token flow, and routed jobs to express Infera as an active peer-to-peer compute fabric.",
+          "primaryCta": "Download",
+          "secondaryCta": "Create key"
+        },
+        "index3": {
+          "seoTitle": "Infera - The Sovereign Fabric for Trusted AI",
+          "seoDescription": "Sovereign, decentralized, and eco-friendly AI inference network. Join as a provider or access our enterprise-grade API.",
+          "badge": "Sovereign · Secure · Sustainable",
+          "title": {
+            "line1Prefix": "AI",
+            "line2Prefix": "and",
+            "words": [
+              "lean",
+              "sovereign",
+              "local",
+              "efficient",
+              "sustainable",
+              "pooled",
+              "resilient",
+              "distributed"
+            ]
+          },
+          "subtitle": "A decentralized inference network powered by underused GPUs. Built for sovereignty, verified for security, and designed for maximum energy efficiency.",
+          "primaryCta": "Download",
+          "secondaryCta": "Create key"
+        }
+      }
+    },
+    "entryPoints": {
+      "title": "Four ways to start with Infera",
+      "subtitle": "Reduce AI costs, monetize available compute, federate local capacity or govern your AI APIs: each path keeps market standards while making routing, trust and costs controllable.",
+      "badge": "Orient the use case",
+      "actions": {
+        "offers": "Explore offers",
+        "models": "View models"
+      },
+      "paths": {
+        "consume": {
+          "title": "Reduce AI workload costs",
+          "kicker": "For product, IT, data and operations teams",
+          "description": "Progressively move open-weight-friendly workloads to an OpenAI-compatible API without rewriting integrations. Start with fast-ROI flows, then extend policies for cost, residency, availability and trust.",
+          "tag": "Demand",
+          "cta": "Enterprise offer",
+          "points": {
+            "1": "Keep SDKs, prompts, API keys and quotas during the transition.",
+            "2": "Prioritize RAG, extraction, classification, internal support and document batch workloads.",
+            "3": "Route by cost, latency, availability and Public, Trusted or regulated trust level."
+          },
+          "chips": {
+            "openai": "OpenAI-compatible",
+            "rag": "RAG & extraction",
+            "policies": "Policy routing"
+          }
+        },
+        "provide": {
+          "title": "Monetize available compute",
+          "kicker": "For individuals, workstations and internal fleets",
+          "description": "Let a machine or fleet contribute when it is available, without exposing LocalAI directly and without moving private keys outside the node.",
+          "tag": "Supply",
+          "cta": "Provider path",
+          "points": {
+            "1": "The agent pulls tasks: there is no inbound router push surface.",
+            "2": "You control availability windows, commitment level and node shutdown.",
+            "3": "Useful capacity can become billable when it matches network demand."
+          },
+          "chips": {
+            "pull": "Pull agent",
+            "control": "Local control",
+            "earn": "Potential revenue"
+          }
+        },
+        "federate": {
+          "title": "Federate local capacity",
+          "kicker": "For institutions, territories and cloud operators",
+          "description": "Bring trusted actors into a governed AI capacity layer: service continuity, local pooling, measurable sovereignty and shared rules.",
+          "tag": "Federation",
+          "cta": "Institutional offer",
+          "points": {
+            "1": "Organize municipalities, campuses, hospitals, nonprofits, companies or cloud operators by scope.",
+            "2": "Set priorities, trust levels and fallback routes before production.",
+            "3": "Make cost, energy, availability and audit evidence visible enough to govern."
+          },
+          "chips": {
+            "territories": "Territories",
+            "clouders": "Clouders",
+            "continuity": "AI continuity"
+          }
+        },
+        "govern": {
+          "title": "Govern your AI APIs",
+          "kicker": "For IT, security, compliance and finance",
+          "description": "Centralize AI usage control: routing policies, audit trails, sensitive-data detection, privacy, costs, quotas and trust levels.",
+          "tag": "Governance",
+          "cta": "Enterprise path",
+          "points": {
+            "1": "Track who consumes what, through which key, model and trust level.",
+            "2": "Add privacy and audit controls before expanding usage.",
+            "3": "Keep frontier models elsewhere when needed, while steering relevant open-weight routes."
+          },
+          "chips": {
+            "audit": "Audit trails",
+            "privacy": "Privacy detection",
+            "costs": "Cost control"
+          }
+        }
+      },
+      "modelRail": {
+        "badge": "From use case to model",
+        "title": "An offer is credible only when model, hardware and trust level are aligned.",
+        "subtitle": "The catalog helps scope realistic workloads: internal assistants, document search, extraction, classification, code, vision, speech and batch processing.",
+        "families": {
+          "chat": "Chat",
+          "code": "Code",
+          "embeddings": "Embeddings",
+          "vision": "Vision",
+          "speech": "Speech",
+          "image-gen": "Image"
+        }
+      }
+    },
+    "heroSplit": {
+      "mapBadge": "Public stats · {count} active nodes",
+      "benefits": {
+        "sovereign": "Sovereign",
+        "compatible": "OpenAI-compatible",
+        "ecological": "Ecological"
+      }
+    },
+    "nodeMap": {
+      "health": "{status} · {score}% availability"
+    },
+    "mapExplainer": {
+      "badge": "Public stats",
+      "title": "The Infera network, node by node",
+      "subtitle": "Public node markers show live status, hardware, health, model readiness, and GeoIP-derived locations.",
+      "activeNodesBadge": "Public stats · {count} active nodes",
+      "ctaOffers": "See offers",
+      "ctaDeploy": "Deploy a node",
+      "noKey": "Map configuration pending",
+      "items": {
+        "decentralized": {
+          "title": "Decentralized by design",
+          "text": "GPU and CPU resources from individuals and businesses distributed across Europe - no central datacenter."
+        },
+        "proximity": {
+          "title": "Compute close to data",
+          "text": "Smart routing to the most available and geographically closest nodes."
+        },
+        "sovereign": {
+          "title": "Sovereign and compliant",
+          "text": "No dependency on US or Asian hyperscalers. Trust-policy-based routing control."
+        }
+      }
+    },
+    "why": {
+      "title": "Why Infera",
+      "items": {
+        "sovereignty": {
+          "title": "Sovereignty",
+          "description": "Native decentralization and no lock-in to hyperscalers."
+        },
+        "compatibility": {
+          "title": "Simple integration",
+          "description": "OpenAI compatibility to preserve existing application flows."
+        },
+        "security": {
+          "title": "Tiered security",
+          "description": "Public, Trusted and HDS grids based on criticality."
+        }
+      }
+    },
+    "levels": {
+      "title": "Three grid levels",
+      "public": {
+        "title": "Grid Public",
+        "label": "Dev / tests",
+        "points": {
+          "1": "Anonymous nodes",
+          "2": "Non-critical workloads",
+          "3": "OpenAI compatibility",
+          "4": "No commitment"
+        }
+      },
+      "trusted": {
+        "title": "Trusted",
+        "label": "B2B production",
+        "points": {
+          "1": "Verified nodes",
+          "2": "99.5% SLA",
+          "3": "24/7 monitoring",
+          "4": "EU geo-routing"
+        },
+        "badge": "Most popular"
+      },
+      "hds": {
+        "title": "HDS",
+        "label": "Healthcare / finance",
+        "points": {
+          "1": "Certified nodes",
+          "2": "Strong isolation",
+          "3": "End-to-end encryption",
+          "4": "Full audit trail"
+        }
+      }
+    },
+    "how": {
+      "title": "How it works",
+      "subtitle": "A production path designed to stay simple for clients and controlled for providers.",
+      "badge": "Operational flow",
+      "client": "B2B client (OpenAI SDK)",
+      "router": "Infera orchestrator / router",
+      "network": "GPU network (LocalAI + HIA Agent)",
+      "steps": {
+        "client": {
+          "description": "Applications keep a familiar API surface while choosing the right trust envelope for each workload.",
+          "points": {
+            "1": "Send requests through OpenAI-compatible endpoints.",
+            "2": "Preserve migration simplicity for product and engineering teams."
+          }
+        },
+        "router": {
+          "description": "The control plane evaluates routing, node trust, and availability before dispatching work.",
+          "points": {
+            "1": "Apply policy-aware placement across public, trusted, or regulated grids.",
+            "2": "Coordinate supply and demand without exposing provider internals."
+          }
+        },
+        "network": {
+          "description": "Agents pull tasks from the network and execute them close to the hardware boundary.",
+          "points": {
+            "1": "Keep private keys on-node and enforce mTLS between services.",
+            "2": "Serve local inference through sidecar-controlled access."
+          }
+        }
+      }
+    },
+    "metrics": {
+      "title": "Economical & ecological",
+      "subtitle": "Sobriety only matters when it is measurable: existing capacity, workload-aware routing, and exportable evidence for sustainability, procurement, and finance teams.",
+      "items": {
+        "cost": {
+          "value": "-40%",
+          "label": "Average cost vs cloud"
+        },
+        "commitment": {
+          "value": "$0",
+          "label": "Initial commitment"
+        },
+        "datacenter": {
+          "value": "0",
+          "label": "New datacenter"
+        }
+      },
+      "carbon": {
+        "badge": "Ecological differentiator",
+        "title": "AI carbon accounting compatible with CSRD Scope 3",
+        "description": "Infera connects tokens, models, execution pools, periods, and energy signals to provide usable AI footprint evidence, not just a global estimate.",
+        "points": {
+          "usage": "Usage-level measurement to separate experimentation, production, batch, and fallback.",
+          "scope3": "CSRD Scope 3-compatible reading for digital-service procurement and outsourced AI usage.",
+          "exports": "Exports designed to connect consumption, cost, logical location, and data confidence level."
+        },
+        "badges": {
+          "csrd": "CSRD-ready",
+          "scope3": "Scope 3",
+          "audit": "Sustainability audit"
+        }
+      }
+    },
+    "networkMap": {
+      "badge": "Public stats",
+      "title": "See node capacity before you route workload",
+      "subtitle": "The network map shows direct node markers with status, hardware, runtime, and model readiness from backend GeoIP-enriched node data.",
+      "mapSubtitle": "Direct node capacity and your approximate region.",
+      "empty": "No public node location is available yet.",
+      "error": "The public node map is temporarily unavailable."
+    },
+    "faq": {
+      "title": "FAQ",
+      "items": {
+        "1": {
+          "q": "How is latency optimized?",
+          "a": "The router picks the closest available node geographically."
+        },
+        "2": {
+          "q": "What SLA per tier?",
+          "a": "Public is best effort, Trusted is monitored, HDS is contractual."
+        },
+        "3": {
+          "q": "What compliance coverage?",
+          "a": "EU, GDPR, HDS and SecNumCloud drive infrastructure policies."
+        },
+        "4": {
+          "q": "How are providers selected?",
+          "a": "KYC checks, reputation scoring and operational validation."
+        },
+        "5": {
+          "q": "Which models are available?",
+          "a": "Open-weight model families served via LocalAI by selected tier."
+        },
+        "6": {
+          "q": "OpenAI SDK compatible?",
+          "a": "Yes, key endpoints are preserved to minimize migration overhead."
+        }
+      }
+    },
+    "join": {
+      "title": "Join the network.",
+      "subtitle": "Priority beta access whether you bring compute capacity or reroute AI requests.",
+      "placeholder": "business email",
+      "cta": "Join",
+      "note": "No spam. One email when your access is ready.",
+      "success": "Thanks, your priority request has been recorded."
+    },
+    "footer": {
+      "baseline": "Fresh GTIN-first product price data with no-data-no-pay billing.",
+      "product": "Product",
+      "resources": "Resources",
+      "legal": "Legal",
+      "signature": "INFERA SYSTEM © 2026",
+      "variants": "v0 · v1 dark · v2 soft · v3 editorial",
+      "docs": "Documentation"
+    }
+  },
+  "health": {
+    "form_title": "Health refresh",
+    "status": "Global status",
+    "components": "Components",
+    "status_values": {
+      "UP": "Up",
+      "DOWN": "Down",
+      "DEGRADED": "Degraded",
+      "OUT_OF_SERVICE": "Out of service",
+      "UNKNOWN": "Unknown"
+    },
+    "table": {
+      "component": "Component",
+      "status": "Status"
+    }
+  },
+  "errors": {
+    "bad_request": "Invalid request.",
+    "unauthorized": "Authentication required.",
+    "forbidden": "Access denied.",
+    "not_found": "Resource not found.",
+    "gone": "Resource is no longer available.",
+    "conflict": "Conflict detected.",
+    "validation_error": "Validation failed.",
+    "rate_limited": "Too many requests.",
+    "internal_error": "Internal server error.",
+    "network_error": "Backend is unreachable from this page.",
+    "action_must_be_approve_or_deny": "Choose approve or deny.",
+    "challenge_agent_mismatch": "Enrollment challenge does not match this node.",
+    "challenge_expired": "Enrollment challenge has expired.",
+    "challenge_invalid_data": "Enrollment challenge data is invalid.",
+    "challenge_not_approved": "Enrollment challenge has not been approved.",
+    "challenge_not_found": "Enrollment challenge not found.",
+    "invalid_bootstrap_key": "Invalid enrollment bootstrap key.",
+    "otp_invalid": "Invalid enrollment token.",
+    "otp_missing": "Enrollment token is missing.",
+    "bad_gateway": "Gateway error.",
+    "service_unavailable": "Service unavailable.",
+    "unknown_error": "Unexpected error."
+  },
+  "error_pages": {
+    "back_home": "Back to Home",
+    "404": {
+      "title": "Page not found",
+      "subtitle": "The path you are looking for does not exist or has been moved to a different coordinate in the Infera mesh."
+    },
+    "500": {
+      "title": "Mesh instability",
+      "subtitle": "An unexpected error occurred while processing your request. Our operators have been notified."
+    },
+    "generic": {
+      "title": "Unexpected error",
+      "subtitle": "Something went wrong in the control plane. Please try again later."
+    }
+  },
+  "nodes": {
+    "title": "Registered nodes",
+    "description": "Admin view of registered and online nodes.",
+    "filters": {
+      "search": "Search",
+      "status": "Status",
+      "tier": "Tier",
+      "model": "Model ID"
+    },
+    "fields": {
+      "node_id": "Node",
+      "status": "Status",
+      "tier": "Tier",
+      "last_seen": "Last seen",
+      "availability": "Availability",
+      "hardware": "Hardware",
+      "ip_masked": "Masked IP",
+      "models": "Models",
+      "geo": "Geo",
+      "agent_version": "Agent version",
+      "localai_version": "LocalAI version",
+      "gpu_model": "GPU model",
+      "gpu_vram_mb": "GPU VRAM (MB)",
+      "cert_serial": "Cert serial",
+      "cert_expires_at": "Cert expires at",
+      "trust_level": "Trust level",
+      "live_metrics": "Live GPU metrics",
+      "capable_models": "Compatible Models (Hardware)",
+      "active_models": "Active Models (Provisioned)",
+      "raw_metadata": "Raw metadata",
+      "actions": "Actions",
+      "asn_number": "ASN number",
+      "asn_organization": "ASN organization",
+      "cert_issuer": "Cert issuer",
+      "mtls_last_handshake": "mTLS last handshake"
+    },
+    "hardware": {
+      "gpu": "GPU",
+      "cpu": "CPU",
+      "vram_mb": "{count} MB VRAM",
+      "vram_free_mb": "{count} MB free",
+      "unified_memory": "unified memory",
+      "cpu_cores": "{count} logical cores",
+      "ram_gb": "{count} GB RAM",
+      "weights_mb": "Weights: {count} MB",
+      "kv_cache_mb": "KV Cache: {count} MB",
+      "vram_used_mb": "{count} MB used",
+      "backend": "Backend: {backend}",
+      "agent": "agent {version}",
+      "localai": "LocalAI {version}",
+      "runtime_unknown": "Runtime details unavailable",
+      "slot_title": "{kind} slot {slot}",
+      "loaded_models": "Loaded models",
+      "offloaded_models": "Offloaded models",
+      "installed_models": "Installed models",
+      "no_loaded_models": "No loaded model",
+      "no_offloaded_models": "No offloaded model"
+    },
+    "identity": {
+      "os_unknown": "Operating system unknown"
+    },
+    "actions": {
+      "details": "Details",
+      "close": "Close",
+      "refresh": "Refresh",
+      "open_page": "Open page",
+      "open_terminal": "Open terminal",
+      "open_node": "Open node {node}",
+      "retire": "Retire node"
+    },
+    "quick": {
+      "all": "All"
+    },
+    "last_refresh": "Last refresh: {date}",
+    "hero": {
+      "active_nodes": "Active nodes",
+      "total_nodes": "Total nodes",
+      "total_tokens": "Total tokens handled",
+      "active_caption": "Nodes currently available for routing.",
+      "total_caption": "Registered provider nodes in the control plane.",
+      "tokens_caption": "Accounted inference volume across the fleet."
+    },
+    "table": {
+      "loading": "Loading nodes...",
+      "empty": "No nodes match the current filters."
+    },
+    "map": {
+      "title": "Node locations",
+      "empty": "No geolocated nodes available for current filters.",
+      "missing_api_key": "Google Maps key is missing. Set NUXT_PUBLIC_GOOGLE_MAPS_API_KEY.",
+      "load_error": "Google Maps could not be loaded.",
+      "user_location": "Your approximate region",
+      "unknown_location": "Location unavailable",
+      "admin_subtitle": "Click a marker to inspect node health, hardware and recency without leaving the fleet view.",
+      "engine_cinematic": "Cinematic",
+      "cinematic_hint": "Global pulse view - switch to Google for operational drill-down",
+      "slots": "Slots",
+      "slots_empty": "No slots reported",
+      "slots_count": "{count} slots",
+      "slots_with_capacity": "{count} slots · {inflight}/{max} running",
+      "models": "Models",
+      "installed_count": "{count} installed",
+      "runtime": "Runtime",
+      "mode_night": "Night globe",
+      "mode_light": "Light globe",
+      "mode_terrain": "Terrain globe"
+    },
+    "large_view": {
+      "title": "Node details",
+      "loading": "Loading node details...",
+      "empty": "Select a node to load full details."
+    },
+    "status": {
+      "UP": "Online",
+      "DOWN": "Offline",
+      "DEGRADED": "Degraded",
+      "OUT_OF_SERVICE": "Out of service",
+      "RETIRED": "Retired",
+      "REVOKED": "Revoked",
+      "UNKNOWN": "Unknown"
+    },
+    "lifecycle": {
+      "INIT": "Initialising",
+      "SCANNING_HARDWARE": "Scanning hardware",
+      "MODELS_SELECTED": "Models selected",
+      "STARTING_LOCALAI": "Starting LocalAI",
+      "DOWNLOADING_MODELS": "Downloading models",
+      "MODELS_DOWNLOADED": "Models downloaded",
+      "VERIFYING_MODELS": "Verifying models",
+      "BENCHMARKING": "Benchmarking",
+      "BENCHMARKED": "Benchmarked",
+      "ENROLLING": "Enrolling",
+      "PROJECTION_READY": "Projection ready",
+      "STARTING_WORKER": "Starting worker",
+      "STARTING": "Starting",
+      "RUNNING": "Running",
+      "MODELS_SKIPPED": "Models skipped",
+      "OFFLINE": "Offline",
+      "RETIRED": "Retired",
+      "UNKNOWN": "Unknown",
+      "unknown": "Unknown"
+    },
+    "retire": {
+      "title": "Retire node",
+      "subtitle": "This revokes {nodeId} and removes it from routing. The machine must enroll again before serving traffic.",
+      "reason": "Reason",
+      "confirm": "Retire node",
+      "error": "Unable to retire this node."
+    },
+    "detail": {
+      "back_to_list": "Back to nodes",
+      "refresh_node": "Refresh node",
+      "metrics": "Node metrics",
+      "cached_models": "Cached models",
+      "uptime": "Uptime",
+      "fleet_context": "Fleet context",
+      "security_runtime": "Security & runtime",
+      "lifecycle": "Startup phase",
+      "lifecycle_timeline": "Startup timeline",
+      "lifecycle_empty": "No lifecycle events reported yet.",
+      "lifecycle_updated": "Updated",
+      "lifecycle_step": "Step {step}/{total}",
+      "metadata": "Metadata",
+      "metadata_empty": "No metadata exposed by this node.",
+      "seo_title": "Node {nodeId} - details",
+      "seo_description": "Runtime metrics and admin details for node {nodeId}.",
+      "network_identity": "Network identity",
+      "tab_overview": "Overview",
+      "tab_stats": "Statistics",
+      "tab_history": "History",
+      "tab_security": "Security",
+      "hardware_identity": "Hardware identity",
+      "geo_network": "Geo & network",
+      "cert_trust": "Certificate & trust",
+      "runtime_section": "Runtime",
+      "all_phases": "All phases",
+      "inflight_capacity": "Inflight capacity",
+      "availability_caption": "Weighted score from heartbeat history",
+      "no_hardware_data": "No hardware fingerprint available.",
+      "no_geo_data": "No geolocation data available.",
+      "trust_levels": {
+        "none": "Standard (Unverified)",
+        "verified": "Trusted (Verified)",
+        "hds": "HDS (Certified)",
+        "standard": "Standard",
+        "trusted": "Trusted"
+      }
+    },
+    "card": {
+      "availability": "Availability {score}",
+      "subtitle_default": "No operator label available",
+      "last_seen": "Last seen",
+      "live_routing": "Live routing",
+      "live_routing_caption": "Capabilities published by the node's active heartbeat.",
+      "models_live": "live models",
+      "loaded_count": "{count} loaded",
+      "offloaded_count": "{count} offloaded",
+      "slot_inflight": "{inflight}/{max} running",
+      "no_live_models": "No models are loaded in live routing.",
+      "no_offloaded_models": "No offloaded models.",
+      "provisioned_inventory": "Provisioned inventory",
+      "provisioned_inventory_caption": "Models detected by the LocalAI scanner and announced as provisioned. They may still be offline for routing.",
+      "models_provisioned": "provisioned models",
+      "compatible_models": "{count} compatible",
+      "json_fields": "{count} JSON payloads",
+      "provisioned_models_label": "Provisioned models",
+      "capable_models_label": "Compatible models",
+      "no_provisioned_models": "No provisioned models in the scanner summary.",
+      "no_capable_models": "No compatible models listed.",
+      "runtime_caption": "Identity, runtime and security posture for the node.",
+      "raw_snapshot": "JSON snapshot",
+      "raw_snapshot_caption": "Structured documents extracted from node metadata.",
+      "profile_summary": "Profile summary",
+      "system_fingerprint": "System fingerprint",
+      "geoip_full": "GeoIP Full Record",
+      "metadata_fields": "Other fields",
+      "no_metadata": "No other metadata fields.",
+      "provisioning_gap": "This node announces provisioned models in the scanner summary, but no live slot exposes them for routing yet. Key selection stays blocked by design.",
+      "provisioning_breakdown": "Provisioning breakdown"
+    },
+    "json": {
+      "object": "JSON object",
+      "array": "JSON array",
+      "empty_object": "Empty object",
+      "empty_array": "Empty array"
+    },
+    "model_modal": {
+      "title": "Model details",
+      "unknown_model": "Model not found in registry: {modelId}"
+    },
+    "charts": {
+      "status_title": "Fleet status distribution",
+      "availability_title": "Availability distribution",
+      "average_availability": "Average availability score",
+      "high_availability_nodes": "Nodes with availability ≥ 95%"
+    },
+    "tabs": {
+      "nodes": "Nodes",
+      "statistics": "Statistics",
+      "map_google": "Google Map",
+      "map_globe": "Globe"
+    },
+    "view": {
+      "list": "List",
+      "cards": "Cards"
+    },
+    "stats": {
+      "status_chart": "Status Distribution",
+      "tier_chart": "Tier Distribution",
+      "gpu_cpu_chart": "GPU / CPU Nodes",
+      "gpu_nodes": "GPU",
+      "cpu_nodes": "CPU-only",
+      "slot_occupancy": "Slot Occupancy",
+      "slots_running": "{inflight} / {max} running",
+      "slots_none": "No active slots",
+      "top_models": "Top Models by Coverage",
+      "model_node_count": "{count} node | {count} nodes",
+      "availability_histogram": "Availability Distribution",
+      "histogram_bucket": "{from}-{to}%",
+      "session_trend": "Live Session Trend",
+      "session_trend_caption": "Sampled every 30s · resets on page refresh",
+      "no_trend_data": "Accumulating data - check back in a moment.",
+      "active_nodes_series": "Active nodes",
+      "tokens_series": "Total tokens (M)",
+      "no_models": "No model data available."
+    },
+    "mine": {
+      "title": "My nodes",
+      "subtitle": "Track your enrolled nodes and their runtime."
+    },
+    "terminal": {
+      "title": "Live Terminal: {nodeId}",
+      "select_container": "Select container",
+      "connecting": "Connecting to container stream",
+      "connected": "Connected to container. You can now type commands.",
+      "disconnected": "Session disconnected",
+      "placeholder": "Type command and press Enter...",
+      "connect_first": "Connect to start interaction",
+      "ready_to_connect": "Select a container and click connect to start a live session.",
+      "actions": {
+        "connect": "Connect",
+        "disconnect": "Disconnect"
+      },
+      "errors": {
+        "connection_failed": "WebSocket connection failed.",
+        "session_failed": "Could not create terminal session grant."
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Log in",
+      "googleInfo": "PoC mode: paste a valid Google ID token to authenticate.",
+      "googleToken": "Google ID token",
+      "googleTokenHint": "Obtain this token from Google Sign-In flow (OIDC).",
+      "googleTokenRequired": "Please provide a Google ID token.",
+      "googleOneClick": "Google one-click",
+      "googleOneClickHint": "Opens the Google account chooser and auto-fills the token.",
+      "googleClientIdMissing": "Google client ID is missing. Set NUXT_PUBLIC_GOOGLE_OIDC_CLIENT_ID.",
+      "submit": "Login with Google",
+      "failed": "Authentication failed. Please try again.",
+      "provider": "OIDC provider",
+      "providers": {
+        "google": "Google",
+        "microsoft": "Microsoft",
+        "github": "GitHub",
+        "france_sso": "France SSO",
+        "france_connect": "FranceConnect",
+        "apple": "Apple"
+      },
+      "insufficientRole": "Insufficient role: required={required}, current={current}.",
+      "subtitle": "Join the Infera network and access your control plane in one click.",
+      "description": "Sign in with Google to manage nodes, observe network health, and scale trusted AI inference workloads.",
+      "signInCta": "Sign in / Sign on with Google",
+      "acceptTermsPlaceholder": "I accept the terms and conditions (placeholder).",
+      "acceptTermsRequired": "Please accept Terms and Privacy to continue.",
+      "googleFallbackHint": "Quick sign-in is unavailable. Click the button below to continue with Google.",
+      "seo": {
+        "title": "Infera - Sign in",
+        "description": "Sign in to access your Infera backoffice, admin console, and node operations."
+      },
+      "signInWith": "Sign in with {provider}",
+      "acceptPrefix": "I agree to the",
+      "terms": "Terms of Service",
+      "and": "and",
+      "privacy": "Privacy Policy",
+      "tagline": "The sovereign network for trusted AI inference.",
+      "altProvider": "or continue with",
+      "providerUnavailable": "This provider is not configured yet.",
+      "franceConnect": {
+        "title": "FranceConnect",
+        "body": "Coming soon."
+      },
+      "trust": {
+        "decentralized": "Decentralized",
+        "zeroTrust": "Zero-trust security",
+        "enterprise": "Enterprise-grade"
+      }
+    }
+  },
+  "offers": {
+    "seo": {
+      "title": "Infera - Offers by audience",
+      "description": "Navigate offers for individuals, enterprises, and institutional programs with a common menu."
+    },
+    "hero": {
+      "title": "Infera offers",
+      "subtitle": "Choose the right engagement model: contribute capacity, industrialize AI workloads, or organize a trusted territorial grid."
+    },
+    "menu": {
+      "title": "Offers menu",
+      "items": {
+        "particuliers": {
+          "title": "Individuals",
+          "subtitle": "Monetize idle compute and join the grid"
+        },
+        "entreprises": {
+          "title": "Enterprises",
+          "subtitle": "Sovereign API, governance, and resilient operations"
+        },
+        "institutionnelles": {
+          "title": "Institutions & territories",
+          "subtitle": "Territorial governance, mutualization, and resilience"
+        }
+      }
+    },
+    "overview": {
+      "badge": "Business rules",
+      "title": "Audience-first packaging",
+      "description": "The same Infera network can be positioned differently depending on expectations, governance, and procurement constraints.",
+      "points": {
+        "1": "Keep token billing transparent and auditable.",
+        "2": "Separate base grid usage from fallback guarantees.",
+        "3": "Expose roadmap items (batch mode, P2P) as contract-ready options."
+      },
+      "docs": {
+        "title": "Reference documentation",
+        "description": "Commercial offers, pricing multipliers, and packaging rationale are documented in public docs.",
+        "cta": "Open documentation"
+      }
+    },
+    "audiences": {
+      "particuliers": {
+        "seo": {
+          "title": "Infera - Earn with your PC through sovereign AI",
+          "description": "Estimate your PC revenue potential, choose your engagement level, and download the Infera agent."
+        },
+        "hero": {
+          "badge": "For gamers, creators, and PCs that sleep too much",
+          "title": "Earn with your PC while helping sovereign AI.",
+          "subtitle": "Your machine can run AI models for the Infera network when you are not using it. You choose your engagement level, stay in control, and useful capacity can generate revenue.",
+          "primaryCta": "Estimate my revenue",
+          "secondaryCta": "Download the agent",
+          "signals": {
+            "earn": {
+              "title": "Your GPU can earn",
+              "text": "Turn idle machine hours into paid inference capacity."
+            },
+            "control": {
+              "title": "You stay in control",
+              "text": "Start, pause, or adjust availability around your own usage."
+            },
+            "mission": {
+              "title": "Useful, not just profitable",
+              "text": "Help build a more distributed, local, and sovereign AI alternative."
+            }
+          }
+        },
+        "rig": {
+          "status": "Agent ready to receive compute",
+          "gpu": "GPU available",
+          "workload": "AI tasks sent when the machine is free",
+          "items": {
+            "idle": "Works mainly during your available windows.",
+            "paid": "Revenue follows capacity that is actually useful.",
+            "sovereign": "Contribution to European AI infrastructure."
+          }
+        },
+        "how": {
+          "badge": "Easy to understand",
+          "title": "Your PC becomes a small AI compute node.",
+          "subtitle": "Infera connects AI inference demand with available machines. For you, the experience should stay simple: install, choose when to contribute, and track what it earns.",
+          "steps": {
+            "install": {
+              "title": "Install the agent",
+              "text": "Download the Infera agent, then your machine prepares the required environment without exposing your AI tools directly to the internet."
+            },
+            "schedule": {
+              "title": "Choose your windows",
+              "text": "Use idle hours, nights, days when the PC stays on, or a more serious commitment if you have a dedicated machine."
+            },
+            "compute": {
+              "title": "The network sends work",
+              "text": "When your node is available, it receives AI tasks matched to its profile. Your machine works for real usage, not a pointless benchmark."
+            },
+            "earn": {
+              "title": "Track revenue",
+              "text": "Revenue depends on your hardware, demand, availability, and the engagement level accepted by the network."
+            }
+          }
+        },
+        "simulator": {
+          "badge": "Your move",
+          "title": "Estimate what your machine can earn.",
+          "subtitle": "The simulator detects browser-visible signals, estimates your hardware profile, and compares Public potential with the Trusted uplift.",
+          "note": "Aggressive but honest read: this is not guaranteed income. It is a potential projection based on your hardware, availability, and network demand."
+        },
+        "tiers": {
+          "badge": "Two ways to commit",
+          "title": "The more trust you bring, the more your capacity is worth.",
+          "subtitle": "Not everyone wants to dedicate a full machine. Infera separates a flexible personal-PC mode from Trusted mode for contributors ready to go further.",
+          "items": {
+            "public": {
+              "title": "Public",
+              "subtitle": "The flexible mode for your everyday PC",
+              "text": "Contribute when your machine is available without turning your setup into a permanent server. It is the natural way to start, test revenue potential, and keep your usual comfort.",
+              "points": {
+                "gaming": "You can keep gaming, creating, or working alongside it.",
+                "simple": "User-oriented installation without infrastructure jargon.",
+                "flexible": "You control when the machine participates."
+              }
+            },
+            "trusted": {
+              "title": "Trusted",
+              "subtitle": "The premium mode for more qualified capacity",
+              "text": "Trusted targets workloads that require more confidence. In exchange for potentially higher revenue, the machine must boot into a dedicated or controlled environment with less improvisation.",
+              "points": {
+                "premium": "Capacity is valued higher when the network needs guarantees.",
+                "dedicated": "Designed for a dedicated machine, dual boot, or controlled operating system.",
+                "secure": "A stricter path to inspire confidence for end customers."
+              }
+            }
+          }
+        },
+        "apple": {
+          "badge": "Apple user? Lucky guys :)",
+          "chip": "Trusted by default",
+          "title": "Apple Silicon starts with an advantage.",
+          "text": "Thanks to the hardware characteristics and tight integration of recent Apple machines, Infera presents Apple nodes as Trusted candidates by default. For the user, that means a more premium story: your machine can join the secure tier directly, with better-qualified capacity for the network.",
+          "cta": "Download for macOS"
+        },
+        "security": {
+          "badge": "Security without headaches",
+          "title": "Your PC contributes. It does not become an open door.",
+          "subtitle": "The product must stay understandable: the agent works for the network, while you keep your machine, your keys, and your control.",
+          "items": {
+            "local": {
+              "title": "No direct access to your models",
+              "text": "Local AI stays behind the agent. It is not exposed as a public service anyone can call."
+            },
+            "keys": {
+              "title": "Your keys stay with you",
+              "text": "Node identity is generated locally. The network does not ask you to hand over private keys."
+            },
+            "control": {
+              "title": "You choose the rhythm",
+              "text": "Your machine should not get in the way of your sessions. You decide when it can contribute."
+            },
+            "stop": {
+              "title": "You can stop",
+              "text": "When you need the full PC power, you can stop or pause contribution."
+            }
+          }
+        },
+        "final": {
+          "badge": "Ready to test?",
+          "title": "Estimate first. Download next.",
+          "text": "The best path is simple: check your machine's potential, then install the agent if the result is worth it for your usage.",
+          "primaryCta": "See the simulator again",
+          "secondaryCta": "Download the agent"
+        },
+        "subtitle": "For contributors with GPUs/CPUs who want quick onboarding and transparent revenue tracking.",
+        "valueTitle": "Value proposition",
+        "valuePoints": {
+          "1": "Run the agent locally and expose eligible LocalAI models.",
+          "2": "Get token-based accounting aligned with delivered inference.",
+          "3": "Contribute to fallback pools when enterprise nodes are unavailable.",
+          "4": "Prepare for future P2P model distribution to reduce egress costs."
+        },
+        "ctaTitle": "Start as a provider"
+      },
+      "entreprises": {
+        "seo": {
+          "title": "Infera - Offer for enterprises",
+          "description": "Sovereign OpenAI-compatible AI API, simple integration, fallback, carbon reporting, and territorial networks for enterprises."
+        },
+        "title": "Enterprise Offer",
+        "heroTitle": "Sovereign AI that integrates without rebuilding your applications.",
+        "heroSubtitle": "Infera exposes an OpenAI-compatible API and routes inference to distributed compute pools according to your cost, residency, trust, availability, and energy-efficiency policies.",
+        "consultingBadge": "Free 30-min consultation",
+        "consultingCta": "Book 30 min",
+        "playgroundCta": "Test the API",
+        "accountCtaTitle": "Try Infera with €10 free credit",
+        "accountCtaDescription": "Create your account and quickly validate performance, costs, and compatibility for your AI workflows.",
+        "accountCtaButton": "Create account (€10 free)",
+        "heroSignals": {
+          "sovereignty": {
+            "title": "Operational sovereignty",
+            "text": "Open-weight models, routing policies, and control over infrastructure tiers."
+          },
+          "integration": {
+            "title": "Configuration-led migration",
+            "text": "Same OpenAI SDK logic: base URL, API key, models, and quotas."
+          },
+          "control": {
+            "title": "Enterprise governance",
+            "text": "Cost, trust, residency, carbon, and fallback become explicit parameters."
+          }
+        },
+        "console": {
+          "title": "Drop-in OpenAI-compatible",
+          "subtitle": "A progressive switch without heavy product rewrites.",
+          "items": {
+            "dropin": "Replace the inference target in application configuration.",
+            "routing": "Filter by trust level: Public, Trusted, HDS/SecNumCloud when the scope is eligible.",
+            "reporting": "Track tokens, costs, availability, and energy events from the backoffice."
+          }
+        },
+        "proofBadge": "Why now",
+        "proofTitle": "The challenge is no longer only buying tokens. It is governing where, how, and at what cost AI runs.",
+        "proofSubtitle": "Enterprises want the simplicity of centralized APIs with stronger control over vendor dependency, operational resilience, audit data, and environmental footprint.",
+        "promises": {
+          "sovereign": {
+            "title": "Use cost-efficient sovereign AI",
+            "description": "We route each workload to relevant open-weight models without creating structural dependency on a single proprietary API.",
+            "points": {
+              "1": "Business-fit selection for RAG, extraction, classification, internal support, and document batch.",
+              "2": "Routing by cost, latency, residency, and trust level.",
+              "3": "Pragmatic positioning: frontier models can remain elsewhere while Infera covers open-weight-friendly workloads."
+            }
+          },
+          "nocode": {
+            "title": "Simple, near no-code integration",
+            "description": "Teams update the inference layer configuration instead of rebuilding application flows.",
+            "points": {
+              "1": "OpenAI-compatible standard to preserve SDKs, prompts, and existing chains.",
+              "2": "Fast pilots on a limited business scope before scaling.",
+              "3": "API keys, quotas, and reporting built for product, IT, and finance teams."
+            }
+          },
+          "hardware": {
+            "title": "Monetize unused GPUs and CPUs",
+            "description": "Install the Infera agent on your infrastructure to turn dormant capacity into governed resources.",
+            "points": {
+              "1": "Rent surplus capacity within time windows and policies defined by your organization.",
+              "2": "Reduce new capacity purchases when internal hardware is underused.",
+              "3": "Keep role separation: private keys are generated locally on the node."
+            }
+          },
+          "carbon": {
+            "title": "AI carbon accounting compatible with CSRD Scope 3",
+            "description": "Infera turns the footprint of your AI usage into steering data for sustainability, procurement, finance, and CSRD Scope 3 paths.",
+            "points": {
+              "1": "Reading by request, model, pool, period, and confidence level when telemetry is available.",
+              "2": "Scope 3-compatible attribution to connect digital services, AI usage, and supplier reporting.",
+              "3": "Exports designed to connect footprint, cost, routing, and optimization decisions."
+            }
+          },
+          "security": {
+            "title": "Secure critical operations",
+            "description": "The on-premise Infera network version keeps a controlled fallback plan for sensitive AI operations.",
+            "points": {
+              "1": "Fallback to the Infera grid when internal nodes are saturated, under maintenance, or unavailable.",
+              "2": "mTLS, pull/long-polling, and local agents reduce exposed surface.",
+              "3": "Distinct packaging for Trusted, HDS, or SecNumCloud needs according to the actually qualified scope."
+            }
+          },
+          "territory": {
+            "title": "Build territorial networks",
+            "description": "Bring together companies, public actors, schools, healthcare entities, or industrial groups to mutualize local AI capacity.",
+            "points": {
+              "1": "On-premise deployment across trusted organizations.",
+              "2": "Local governance of capacity, routing rules, and priorities.",
+              "3": "Collective resilience for sensitive workloads that should not depend on a single central point."
+            }
+          }
+        },
+        "governance": {
+          "badge": "Governance & strategic autonomy",
+          "title": "Secure AI operations while mutualizing available resources.",
+          "subtitle": "Infera is sold as a control plane: decide which workloads run where, with which trust level, fallback, audit evidence, and carbon reading.",
+          "chips": {
+            "security": "Operational security",
+            "mutualization": "Mutualization",
+            "autonomy": "Strategic autonomy",
+            "csrd": "CSRD Scope 3"
+          },
+          "levers": {
+            "policies": {
+              "title": "Execution policies",
+              "text": "Route by business criticality, residency, cost, model, availability, and trust tier without changing integrations."
+            },
+            "security": {
+              "title": "Secured operations",
+              "text": "Isolate experimentation, production, and sensitive perimeters with mTLS, pull-based agents, and clear grid separation."
+            },
+            "mutualization": {
+              "title": "Mutualized resources",
+              "text": "Reuse internal GPUs, trusted partners, or territorial capacity before systematically buying new capacity."
+            },
+            "carbon": {
+              "title": "Usable carbon evidence",
+              "text": "Connect tokens, energy, pools, and costs to steer sustainability commitments and CSRD Scope 3-compatible obligations."
+            }
+          }
+        },
+        "integration": {
+          "badge": "Adoption path",
+          "title": "Start with one workload, not a global migration.",
+          "subtitle": "The right enterprise path proves compatibility on a controlled flow, then expands routing policies, quotas, and guarantees.",
+          "steps": {
+            "scope": {
+              "title": "Scope the first flow",
+              "text": "Identify an open-weight-friendly use case: internal RAG, document extraction, classification, support, or batch."
+            },
+            "switch": {
+              "title": "Switch configuration",
+              "text": "Update base URL, API key, model, and trust parameters without rebuilding applications."
+            },
+            "policy": {
+              "title": "Enable policies",
+              "text": "Choose cost, residency, trust tier, fallback, and reporting constraints according to flow criticality."
+            },
+            "scale": {
+              "title": "Industrialize",
+              "text": "Connect metrics, quotas, keys, audits, and capacity rules to move from pilot to run."
+            }
+          }
+        },
+        "operations": {
+          "badge": "Operating offers",
+          "title": "Three ways to de-risk AI operations.",
+          "subtitle": "Infera is not a raw GPU marketplace: it is a control layer for orchestrating distributed pools with enterprise rules.",
+          "offers": {
+            "fallback": {
+              "title": "Infera Grid fallback",
+              "subtitle": "Service continuity",
+              "text": "Use the Infera grid as fallback capacity when internal resources are saturated, under maintenance, or unavailable."
+            },
+            "onpremise": {
+              "title": "On-premise network",
+              "subtitle": "Maximum control",
+              "text": "Deploy router, agents, and policies within your perimeter to use GPUs/CPUs while retaining operational governance."
+            },
+            "federation": {
+              "title": "Territorial federation",
+              "subtitle": "Local mutualization",
+              "text": "Create a shared network between local actors to distribute capacity, priorities, and trust guarantees."
+            }
+          }
+        },
+        "guardrails": {
+          "badge": "Responsible positioning",
+          "title": "What we clearly promise, and what we frame.",
+          "subtitle": "A credible enterprise page must help IT, business, procurement, and compliance teams. Strong promises must remain verifiable.",
+          "items": {
+            "frontier": {
+              "title": "Infera does not replace every frontier model",
+              "text": "Value is highest for workloads suited to open-weight models: document automation, RAG, extraction, classification, internal copilots, and batch. Frontier needs can remain routed elsewhere."
+            },
+            "compliance": {
+              "title": "CSRD, HDS, and SecNumCloud require precise scope",
+              "text": "Infera prepares steering data and target architectures. Final compliance depends on deployed scope, certified partners, contracts, and actual operations."
+            },
+            "sensitive": {
+              "title": "Sensitive data does not go to any grid",
+              "text": "Public, Trusted, and HDS/SecNumCloud tiers must remain separate. Policy routing avoids mixing low-risk tests with regulated operations."
+            }
+          }
+        },
+        "final": {
+          "badge": "Next step",
+          "title": "Let's audit your AI flows in 30 minutes.",
+          "text": "We identify compatible use cases, quick wins, security constraints, and the right scenario: managed API, fallback, on-premise, or territorial network."
+        }
+      },
+      "institutionnelles": {
+        "seo": {
+          "title": "Infera - Institutions and territories offer",
+          "description": "Federate territorial AI capacity with governance, auditability, and carbon accounting compatible with CSRD Scope 3."
+        },
+        "hero": {
+          "badge": "For territories, administrations, and public-interest organizations",
+          "title": "Federate AI compute capacity across your territory.",
+          "subtitle": "Infera helps local governments, administrations, NGOs, and coalitions organize distributed, governed, and resilient inference capacity. The goal is not to move every AI workload onto one grid, but to make execution location, trust levels, costs, fallback paths, audit evidence, and CSRD Scope 3-compatible carbon accounting explicit.",
+          "primaryCta": "Plan a territorial scoping session",
+          "secondaryCta": "Explore federation scenarios",
+          "signals": {
+            "sovereignty": {
+              "title": "Operational sovereignty",
+              "text": "Choose perimeters, trust tiers, and execution policies instead of absorbing centralized dependency by default."
+            },
+            "resilience": {
+              "title": "Multi-actor resilience",
+              "text": "Pool local resources to keep useful AI workloads running when primary capacity is saturated or unavailable."
+            },
+            "sobriety": {
+              "title": "Measured sobriety",
+              "text": "Prioritize existing capacity and structure usage, energy, and cost signals so decisions are evidence-based."
+            }
+          }
+        },
+        "map": {
+          "hub": "Governed territorial grid",
+          "items": {
+            "policies": "Policy routing: cost, trust, residency, availability.",
+            "pull": "Pull-based agents: no direct exposure of local capacity.",
+            "audit": "Traceable usage, events, tokens, and energy signals."
+          }
+        },
+        "why": {
+          "badge": "Why a territorial approach",
+          "title": "The public-sector issue is not only accessing AI. It is controlling the conditions under which AI runs.",
+          "subtitle": "Public-interest organizations must combine service continuity, budget control, strategic autonomy, regulatory constraints, and environmental responsibility. An Infera federation provides a framework to arbitrate these dimensions without claiming that one model or provider can serve every use case."
+        },
+        "promises": {
+          "federate": {
+            "title": "Federate trusted actors",
+            "text": "Bring together local governments, public institutions, associations, schools, labs, hospitals, or sovereign partners around explicit access and priority rules."
+          },
+          "derisk": {
+            "title": "Derisk sensitive AI operations",
+            "text": "Separate experimentation, production, and regulated perimeters with trust tiers, mTLS certificates, and governance that decision-makers can understand."
+          },
+          "costs": {
+            "title": "Steer costs before promising savings",
+            "text": "Compare local capacity, external fallback, latency, availability, and criticality to reduce reflexive purchases of centralized capacity."
+          },
+          "ecology": {
+            "title": "Serve more sovereign and ecological AI",
+            "text": "Value existing resources first and structure CSRD Scope 3-compatible carbon accounting instead of adding infrastructure without visibility into actual use."
+          }
+        },
+        "scenarios": {
+          "badge": "Institutional scenarios",
+          "title": "Four paths to turn a coalition into useful AI capacity.",
+          "subtitle": "The value comes from a shared operating framework: each actor keeps its role, while available capacity becomes steerable, measurable, and mobilizable through common policies.",
+          "items": {
+            "territory": {
+              "title": "Territorial federation",
+              "subtitle": "Local governments, campuses, hospitals, associations",
+              "text": "Build a local pool where actors contribute capacity according to their constraints while sharing governance over priorities and trust levels."
+            },
+            "continuity": {
+              "title": "AI continuity plan",
+              "subtitle": "Resilience for digital public services",
+              "text": "Prepare fallback routes for document, internal assistant, or batch workloads when primary resources no longer respond."
+            },
+            "budget": {
+              "title": "Budget mutualization",
+              "subtitle": "Fewer isolated purchases, better steering",
+              "text": "Make dormant capacity and per-use costs visible to arbitrate between external purchases, local reuse, and staged scaling."
+            },
+            "generalInterest": {
+              "title": "Public-interest AI",
+              "subtitle": "NGOs, mediation, citizen support",
+              "text": "Support socially useful workloads with appropriate open-weight models: document search, extraction, classification, summarization, and first-level assistance."
+            }
+          }
+        },
+        "governance": {
+          "badge": "Governance path",
+          "title": "Start small, but define from day one the rules that will let the network grow.",
+          "subtitle": "A credible federation does not start with a broad promise. It starts with mapping, a pilot perimeter, verifiable policies, and operating metrics.",
+          "steps": {
+            "map": {
+              "title": "Map resources and stakeholders",
+              "text": "Identify actors, available machines, network constraints, eligible workloads, and legal or operational responsibilities."
+            },
+            "policies": {
+              "title": "Define trust policies",
+              "text": "Separate Public, Trusted, and regulated perimeters. Specify residency, fallback, audit, quotas, model licenses, and prioritization rules."
+            },
+            "pilot": {
+              "title": "Deploy one useful flow",
+              "text": "Choose a use case compatible with open-weight models: document search, internal support, extraction, classification, or batch processing."
+            },
+            "measure": {
+              "title": "Measure before expanding",
+              "text": "Track availability, tokens, cost, incidents, perceived quality, and CSRD Scope 3-compatible energy/carbon signals to decide objectively whether to extend the network."
+            }
+          }
+        },
+        "carbon": {
+          "badge": "Ecological governance",
+          "title": "An AI federation must also produce usable carbon evidence.",
+          "subtitle": "The point is not only to say that existing capacity is more sober. You need to explain which workloads consume, on which pools, with which confidence level, and how these signals feed Scope 3 reporting.",
+          "proofs": {
+            "scope3": {
+              "title": "CSRD Scope 3-compatible",
+              "text": "Outsourced and mutualized AI usage can be connected to digital-service procurement and supplier evidence."
+            },
+            "allocation": {
+              "title": "Usage allocation",
+              "text": "Reading by model, period, pool, and perimeter avoids mixing experimentation, production, and fallback."
+            },
+            "procurement": {
+              "title": "Procurement decisions",
+              "text": "Teams can arbitrate between local capacity, fallback, new purchases, and sobriety requirements on a traceable basis."
+            }
+          }
+        },
+        "guardrails": {
+          "badge": "Responsible posture",
+          "title": "Strong promises, clearly scoped.",
+          "subtitle": "Administrations and NGOs do not need magic rhetoric. They need a framework that is understandable, contractable, and auditable.",
+          "items": {
+            "certification": {
+              "title": "HDS, SecNumCloud, and compliance are not declarations",
+              "text": "Infera prepares architecture and steering data. Final compliance depends on scope, certified partners, contracts, and real operating conditions."
+            },
+            "sensitive": {
+              "title": "Sensitive data requires dedicated perimeters",
+              "text": "A territorial federation does not mean everything can run everywhere. Policies must prevent mixing experimentation, production, and regulated data."
+            },
+            "savings": {
+              "title": "Savings must be proven use case by use case",
+              "text": "Cost reduction depends on models, availability, utilization rate, and latency requirements. Infera helps measure and arbitrate before promising."
+            },
+            "ecology": {
+              "title": "Sobriety is measured, not declared",
+              "text": "Using existing capacity is a positive signal, but impact depends on energy mix, hardware efficiency, routing quality, and the load actually avoided."
+            }
+          }
+        },
+        "final": {
+          "badge": "Next step",
+          "title": "Let's scope your federation scenario in 30 minutes.",
+          "text": "We identify the actors to federate, compatible workloads, security constraints, metrics to track, and the right first pilot to move forward without overpromising.",
+          "secondaryCta": "Review scenarios"
+        }
+      }
+    }
+  },
+  "users": {
+    "title": "Users administration",
+    "refresh": "Refresh",
+    "open_page": "Open page",
+    "loadFailed": "Failed to load users.",
+    "updateFailed": "Failed to update user.",
+    "filters": {
+      "search": "Search",
+      "level": "Level",
+      "status": "Status",
+      "organization": "Organization ID"
+    },
+    "bulk": {
+      "level": "Bulk level",
+      "status": "Bulk status",
+      "apply": "Apply to {count} users"
+    },
+    "actions": {
+      "timeline": "Timeline"
+    },
+    "timeline": {
+      "title": "User audit timeline",
+      "empty": "No audit event yet."
+    },
+    "columns": {
+      "email": "Email",
+      "provider": "Provider",
+      "organization": "Organization",
+      "level": "Level",
+      "status": "Status",
+      "updatedAt": "Updated at",
+      "actions": "Actions"
+    }
+  },
+  "keys": {
+    "title": "Admin API keys",
+    "description": "Backoffice page to manage keys across all clients.",
+    "hero": {
+      "total_keys": "Total keys",
+      "active_keys": "Active keys",
+      "captured": "Captured reqs",
+      "tokens": "Total tokens",
+      "total_caption": "Keys registered across clients.",
+      "active_caption": "Keys currently able to route traffic.",
+      "captured_caption": "Requests captured in the selected window.",
+      "tokens_caption": "Token volume in the selected window."
+    },
+    "filters": {
+      "search": "Search",
+      "client_id": "Client ID",
+      "tier": "Tier",
+      "model": "Model",
+      "days": "Window (days)"
+    },
+    "fields": {
+      "api_key_id": "API key ID",
+      "client_id": "Client ID",
+      "name": "Name",
+      "tier": "Tier",
+      "allowed_models": "Allowed models",
+      "enabled": "Enabled",
+      "requests": "Requests",
+      "captured": "Captured",
+      "total_tokens": "Total tokens",
+      "total_cost": "Total cost",
+      "monthly_spend": "Monthly spend",
+      "actions": "Actions",
+      "request_id": "Request ID",
+      "model": "Model",
+      "status": "Status"
+    },
+    "actions": {
+      "create": "Create key",
+      "refresh": "Refresh",
+      "open_page": "Open page",
+      "analytics": "Analytics",
+      "rotate": "Rotate",
+      "revoke": "Revoke",
+      "delete": "Delete",
+      "edit": "Edit key",
+      "save": "Save changes",
+      "edit_routing": "Edit routing",
+      "cancel": "Cancel",
+      "done": "Done"
+    },
+    "status": {
+      "active": "Active",
+      "revoked": "Revoked"
+    },
+    "nav": {
+      "badge": "Profile",
+      "title": "Account",
+      "subtitle": "Identity, access, billing and provider operations.",
+      "items": {
+        "informations": {
+          "title": "Personal information",
+          "subtitle": "Identity validation"
+        },
+        "nodes": {
+          "title": "Nodes",
+          "subtitle": "Provider fleet"
+        },
+        "keys": {
+          "title": "Keys",
+          "subtitle": "API access"
+        },
+        "billing": {
+          "title": "Billing & payment",
+          "subtitle": "Balance and invoices"
+        },
+        "organisations": {
+          "title": "Organisations",
+          "subtitle": "Workspace members"
+        },
+        "security": {
+          "title": "Security",
+          "subtitle": "SSO and sessions"
+        }
+      }
+    },
+    "table": {
+      "loading": "Loading keys...",
+      "empty": "No API keys match the current filters.",
+      "more_models": "+{count} more",
+      "no_limit": "no limit",
+      "spend_alert": "{threshold}% alert"
+    },
+    "edit": {
+      "title": "Edit API key",
+      "subtitle": "Update model scope, tier and options for this key.",
+      "provider_key_hint": "Leave blank to keep the current provider key."
+    },
+    "create": {
+      "title": "Create API key",
+      "subtitle": "Define model scope, commercial tier and resilience options.",
+      "steps": {
+        "essential": {
+          "nav": "Essential",
+          "title": "Tier and models",
+          "caption": "Choose the trust level, then select the models that are actually routable for this key."
+        },
+        "performance": {
+          "nav": "Performance",
+          "title": "Performance and resilience",
+          "caption": "Tune routing quality without exposing network complexity to the end user."
+        },
+        "governance": {
+          "nav": "Governance",
+          "title": "Audit and compliance",
+          "caption": "Enable guarantees useful to security, finance and compliance teams."
+        }
+      },
+      "model_picker": {
+        "label": "Required models",
+        "placeholder": "Select one or more models"
+      },
+      "validation": {
+        "models_required": "Select at least one model."
+      }
+    },
+    "delete": {
+      "title": "Delete API key",
+      "body": "Delete API key {id}? This removes it from storage and router lookup indexes."
+    },
+    "routing_policy": {
+      "title": "Routing policy",
+      "save": "Save routing",
+      "api_key_replace": "Provider API key replacement",
+      "headers": "Provider headers JSON",
+      "defaults": "Default request properties JSON",
+      "extra_body": "extra_body JSON",
+      "custom_properties": "Custom properties JSON",
+      "secret_warning": "MVP: provider BYOK credentials are stored and projected in clear value. Leave the provider API key field blank to keep the current value.",
+      "invalid_json": "JSON fields must contain objects."
+    },
+    "models": {
+      "filters": {
+        "tags": "Tags",
+        "hardware": "Hardware type",
+        "alive": "Live models",
+        "search": "Search model"
+      },
+      "headers": {
+        "model": "Model",
+        "hardware": "Hardware",
+        "tags": "Tags",
+        "nodes": "Nodes",
+        "price": "Price / token",
+        "eligibility": "Tier eligibility",
+        "availability_by_tier": "Availability by tier",
+        "status": "Status"
+      },
+      "selector_caption": "{count} of {total} models visible",
+      "loading": "Refreshing compatible models and nodes...",
+      "empty_for_tier": "No node is compatible with this tier and these filters.",
+      "more_tags": "+{count}",
+      "no_summary": "Model metadata is not documented yet.",
+      "status": {
+        "ready": "Ready",
+        "provisioned": "Provisioned",
+        "unavailable": "Unavailable",
+        "ready_tooltip": "{count} live node(s) currently serve this model.",
+        "provisioned_tooltip": "{count} node(s) have this model installed or smoke-tested, but none are routable yet.",
+        "unavailable_tooltip": "No node in this tier currently exposes this model."
+      },
+      "eligibility": {
+        "eligible": "Eligible",
+        "not_eligible": "Not eligible"
+      },
+      "availability": {
+        "none": "No tier availability"
+      },
+      "nodes": {
+        "none_tooltip": "No active node is currently serving this model in the network.",
+        "count_tooltip": "{count} active node(s) currently serving this model."
+      },
+      "provisioned_hidden": "{count} provisioned model(s) are hidden by the Live models filter."
+    },
+    "billing": {
+      "title": "Billing",
+      "caption": "Tier, SLA and options attached to this key.",
+      "active_tier": "{tier} · x{multiplier}",
+      "effective_multiplier": "Effective multiplier",
+      "tier_section": "Routing tier",
+      "tier_caption": "Pick the active tier above; paid options stay below.",
+      "recommended": "Recommended",
+      "coming_soon": "Coming soon",
+      "key_multiplier": "Key multiplier",
+      "fallback_route_multiplier": "If fallback is used",
+      "not_selected": "Not selected",
+      "selected_models": "Selected models",
+      "live_price": "Live price",
+      "input_tokens": "Input tokens",
+      "output_tokens": "Output tokens",
+      "from_prefix": "From ",
+      "per_million_suffix": " / 1M tokens",
+      "price_unavailable": "Unavailable",
+      "price_disclaimer": "Estimate before taxes and rounding, based on the model catalog and active coefficients.",
+      "pricing_unavailable": "Backend pricing coefficients are unavailable. Local fallback values are being used.",
+      "tiers": {
+        "public": {
+          "description": "Public routing for non-sensitive workloads and minimal cost."
+        },
+        "trusted": {
+          "description": "Attested nodes for enterprise workloads and more sensitive data."
+        },
+        "hds": {
+          "description": "Health-data oriented perimeter with stronger compliance posture."
+        }
+      },
+      "fallback": {
+        "title": "Safe fallback",
+        "description": "Allows Infera-operated capacity when no eligible grid node is available. Route uplift {uplift}% · x{multiplier}.",
+        "enabled_hint": "Applied only to requests routed through fallback capacity."
+      },
+      "audit_trail": {
+        "title": "Audit trail",
+        "description": "Evidentiary log of requests, routing decisions and billing events. {uplift}% uplift · x{multiplier}.",
+        "enabled_hint": "Persisted in the key policy and copied into usage events."
+      },
+      "governance": {
+        "forced_on": "Forced on by the organization.",
+        "forced_off": "Unavailable because the organization has forced this option off.",
+        "by_key": "Configurable per key."
+      },
+      "privacy": {
+        "action": "Action",
+        "actions": {
+          "audit": "Audit only",
+          "reject": "Reject request"
+        },
+        "banned_words": {
+          "title": "Banned words detector",
+          "description": "Case-insensitive detector with accent and leetspeak normalization. Matches are searched as substrings.",
+          "words": "Additional key words"
+        },
+        "pseudonymization": {
+          "title": "Pseudonymization",
+          "description": "Deterministically replaces detected emails, phone numbers and simple person names before routing."
+        }
+      },
+      "carbon": {
+        "title": "Carbon accounting",
+        "description": "Prepares usage-level carbon reporting, with no backend effect in this version.",
+        "tooltip": "Disabled until backend carbon measurement is available."
+      },
+      "performance": {
+        "title": "Best node routing",
+        "disabled": "Disabled",
+        "top50": "Top 50%",
+        "top25": "Top 25%",
+        "top10": "Top 10%"
+      },
+      "native_provider": {
+        "title": "Migration routing",
+        "description": "Switch all traffic between the Infera grid and the customer's original OpenAI-compatible provider.",
+        "infera_grid": "Infera grid",
+        "original_provider": "Original provider",
+        "kind": "Provider",
+        "base_url": "Base URL",
+        "api_key": "Provider API key",
+        "model": "Provider model override",
+        "custom": "Custom OpenAI-compatible"
+      },
+      "traffic_experiment": {
+        "title": "Canary / AB testing",
+        "description": "Routes a controlled share of matching requests to the original provider. The multiplier applies to all key usage while enabled.",
+        "share": "Provider traffic share",
+        "rules": "Rules JSON"
+      },
+      "spend_limits": {
+        "title": "Spend limits",
+        "caption": "Soft monthly and lifetime warnings. Requests are not blocked.",
+        "enabled": "Enable",
+        "currency": "Currency",
+        "monthly": "Monthly cap",
+        "lifetime": "Lifetime cap",
+        "invalid": "Enter a positive amount.",
+        "required": "Set a monthly or lifetime amount to enable spend-limit alerts."
+      }
+    },
+    "analytics": {
+      "title": "Key analytics",
+      "timeseries": "Token timeseries",
+      "by_model": "Breakdown by model",
+      "ledger": "Ledger drill-down"
+    },
+    "secret": {
+      "title": "Copy key now",
+      "warning": "This clear value is shown once only."
+    },
+    "tiers": {
+      "public": "PUBLIC",
+      "trusted": "TRUSTED",
+      "hds": "HDS"
+    }
+  },
+  "audit": {
+    "actions": {
+      "view_logs": "View logs",
+      "edit_policy": "Edit audit policy",
+      "view_details": "View details"
+    },
+    "dialog": {
+      "keys_title": "API key operation logs",
+      "keys_subtitle": "Recent retained operations for key {apiKeyId}",
+      "nodes_title": "Node operation logs",
+      "nodes_subtitle": "Recent retained operations handled by node {nodeId}",
+      "empty_title": "No audit log found",
+      "empty_detail_title": "Select an operation to inspect its timeline"
+    },
+    "fields": {
+      "request_id": "Request ID",
+      "task_id": "Task ID",
+      "model": "Model",
+      "timings": "Total / execution"
+    },
+    "policy": {
+      "title": "Audit trail policy",
+      "enabled": "Enable retained audit trail",
+      "level": "Log level",
+      "recent_limit": "Recent log window",
+      "hint": "INFO keeps the retained operation summary. DEBUG adds the internal step timeline for support and diagnostics.",
+      "save": "Save policy"
+    },
+    "levels": {
+      "info": "INFO",
+      "debug": "DEBUG"
+    }
+  },
+  "models": {
+    "title": "Model catalog",
+    "columns": {
+      "model": "Model",
+      "type": "Type",
+      "hardware": "Hardware",
+      "runtime": "Runtime",
+      "size": "Size",
+      "tags": "Tags",
+      "context": "Context",
+      "availability": "Availability"
+    },
+    "filters": {
+      "tags": "Filter by tags",
+      "search": "Search models",
+      "family": "Family",
+      "hardware": "Hardware tier",
+      "backend": "Backend",
+      "license": "License",
+      "context_range": "Context size range",
+      "context_unavailable": "Not available",
+      "compatibility_only": "Models compatible with my machine",
+      "availability_only": "Show only available models",
+      "reset": "Reset filters",
+      "subtitle": "{count} of {total} models match your filters",
+      "active": "no active filters | {n} active filter | {n} active filters",
+      "show": "Filters"
+    },
+    "families": {
+      "chat": {
+        "title": "Chat & Assistant",
+        "subtitle": "General purpose models for dialogue, instruction following, and reasoning.",
+        "icon": "mdi-chat-processing-outline"
+      },
+      "code": {
+        "title": "Code & Development",
+        "subtitle": "Specialized models for programming, debugging, and software architecture.",
+        "icon": "mdi-code-braces"
+      },
+      "embeddings": {
+        "title": "Embeddings & RAG",
+        "subtitle": "Vector representation models for search, semantic similarity, and RAG pipelines.",
+        "icon": "mdi-vector-selection"
+      },
+      "image-gen": {
+        "title": "Image Generation",
+        "subtitle": "Text-to-image and image-to-image creative generation models.",
+        "icon": "mdi-palette-outline"
+      },
+      "vision": {
+        "title": "Multimodal Vision",
+        "subtitle": "Models capable of understanding and analyzing visual content.",
+        "icon": "mdi-eye-outline"
+      },
+      "speech": {
+        "title": "Audio & Speech",
+        "subtitle": "Text-to-speech, transcription, and audio processing capabilities.",
+        "icon": "mdi-microphone-outline"
+      },
+      "rerank": {
+        "title": "Reranking",
+        "subtitle": "Optimizing search results relevance through cross-encoders.",
+        "icon": "mdi-sort-variant"
+      }
+    },
+    "modal": {
+      "title": "Model details",
+      "close": "Close",
+      "unknown_model": "Model not found in registry: {modelId}"
+    },
+    "actions": {
+      "source": "Open source card",
+      "back_to_catalog": "Back to catalog",
+      "try_playground": "Try in Playground",
+      "copy_endpoint": "Copy endpoint",
+      "copied": "Copied!"
+    },
+    "fields": {
+      "hardware": "Hardware",
+      "size": "Size",
+      "type": "Type",
+      "context": "Context size",
+      "backend": "Backend",
+      "license": "License",
+      "tags": "Tags",
+      "billing": "Billing",
+      "pay_per_token": "Pay per token",
+      "buy_per_token": "Buy per token",
+      "endpoints": "Endpoints",
+      "parameters_count": "Parameters (count)",
+      "description": "Description",
+      "summary": "Summary",
+      "metadata": "Metadata",
+      "maintainer": "Maintainer",
+      "license_url": "License URL",
+      "privacy": "Privacy",
+      "usages": "Usages",
+      "modalities": "Modalities",
+      "quantization": "Quantization",
+      "recommended_hardware": "Recommended hardware",
+      "security_notes": "Security notes",
+      "compatibility": "Compatibility"
+    },
+    "availability": {
+      "total": "Total agents: {count}",
+      "healthy": "Healthy: {count}",
+      "degraded": "Degraded: {count}",
+      "available": "{count} available",
+      "offline": "Offline"
+    },
+    "seo": {
+      "title": "Model catalog - Infera",
+      "description": "Browse available inference models by family, hardware tier, backend and live availability."
+    },
+    "hero": {
+      "label": "Model details",
+      "subtitle": "Browse {count} AI inference models - filter by family, hardware tier, and live availability.",
+      "metrics": {
+        "popularity_label": "API Keys",
+        "nodes_label": "Nodes",
+        "availability_label": "Availability"
+      }
+    },
+    "sections": {
+      "specifications": "Technical Specifications",
+      "metadata": "Metadata & Additional Info"
+    },
+    "empty": {
+      "title": "No models found",
+      "description": "Try adjusting your filters to see more results."
+    },
+    "hardware": {
+      "title": "Hardware eligibility benchmark",
+      "subtitle": "Live browser benchmark vs model minimum requirements",
+      "catalog_title": "Local hardware detection",
+      "catalog_subtitle": "Filter the catalog using capabilities detected in your browser.",
+      "running": "Running benchmark... {progress}%",
+      "webgpu": "WebGPU",
+      "webgl": "WebGL",
+      "runtime": "GPU runtime family",
+      "vram": "VRAM",
+      "vram_detected": "Estimated VRAM: {value} GB",
+      "ram_detected": "Estimated RAM: {value} GB",
+      "ram": "RAM",
+      "disk": "Disk",
+      "meta": "OS: {os} · Browser: {browser} · Measured at: {measuredAt}",
+      "compatible": "Compatible",
+      "not_compatible": "May not be compatible",
+      "compatibility_unknown": "Hardware not detected",
+      "limited": "Limited compatibility",
+      "cached": "Cached result",
+      "unavailable": "Hardware detection unavailable",
+      "rerun": "Re-run",
+      "partial_confidence": "WebGPU not available: results use WebGL/browser heuristics with partial confidence.",
+      "confidence": {
+        "high": "High confidence",
+        "medium": "Medium confidence",
+        "low": "Low confidence"
+      },
+      "gpu_required": "GPU required",
+      "cpu": "CPU",
+      "runtimes": "Runtimes"
+    },
+    "runtime": {
+      "placement": "Runtime placement",
+      "gpu_preferred": "GPU preferred",
+      "dual_slot": "CPU/GPU",
+      "slot_only": "{slot} only",
+      "cpu_fallback_opt_in": "GPU profile by default. CPU fallback is degraded and only advertised when the node explicitly enables it.",
+      "cpu_gpu_available": "Eligible on CPU and GPU slots.",
+      "single_slot": "Eligible on {slot} slots only."
+    },
+    "detail": {
+      "tabs": {
+        "overview": "Overview",
+        "hardware": "Hardware",
+        "sources": "Sources",
+        "raw": "Raw"
+      },
+      "facts": "Facts",
+      "architecture": "Architecture",
+      "motivations": "Motivations",
+      "intended_use": "Intended use",
+      "strengths": "Strengths",
+      "limitations": "Limitations",
+      "provider": "Provider",
+      "publisher": "Publisher",
+      "localai_native": "LocalAI native",
+      "infera_metadata": "x-infera metadata",
+      "hardware_gpu_summary": "Requires a GPU profile with at least {vram} GB VRAM and {ram} GB RAM.",
+      "hardware_cpu_summary": "CPU-capable profile requiring at least {cores} cores and {ram} GB RAM."
+    },
+    "view": {
+      "grid": "Grid view",
+      "table": "Table view"
+    }
+  },
+  "download": {
+    "seo": {
+      "title": "Infera - Download an agent node",
+      "description": "Download Public, native, and Trusted Tier Infera agent artifacts for node operators."
+    },
+    "hero": {
+      "eyebrow": "Node operator downloads"
+    },
+    "modes": {
+      "public": "Public",
+      "native": "Native",
+      "trusted": "Trusted"
+    },
+    "audience": {
+      "consumer": {
+        "label": "Individual",
+        "title": "Turn your own machine into an Infera node",
+        "subtitle": "Start with the simplest distribution for a personal machine, lab box, or side GPU. We prioritize a fast first install and clear explanations over infrastructure jargon.",
+        "primaryCta": "Download my easiest option",
+        "secondaryCta": "Show my recommended path",
+        "recommendedSubtitle": "Best fit for a first node on this device.",
+        "points": {
+          "1": {
+            "title": "Start fast",
+            "body": "The light bundle is the quickest path to your first online node."
+          },
+          "2": {
+            "title": "Works on your current OS",
+            "body": "We surface installers and bundles that match the system we detected."
+          },
+          "3": {
+            "title": "Learn as you go",
+            "body": "Every option explains what is included and what still downloads later."
+          }
+        }
+      },
+      "enterprise": {
+        "label": "Enterprise",
+        "title": "Choose the rollout path that matches production controls",
+        "subtitle": "For teams, the page now prioritizes trust, auditability, and deployment predictability. Trusted Tier moves to the front, while Public and native paths remain documented for pilots and labs.",
+        "primaryCta": "Open the production path",
+        "secondaryCta": "Compare deployment lanes",
+        "recommendedSubtitle": "Prioritized for controlled enterprise rollout.",
+        "points": {
+          "1": {
+            "title": "Trust first",
+            "body": "Trusted Tier is promoted ahead of convenience-oriented packaging."
+          },
+          "2": {
+            "title": "Evidence visible",
+            "body": "Checksum, signatures, and attestation artifacts stay explicit."
+          },
+          "3": {
+            "title": "Economics explained",
+            "body": "The simulator shows the Trusted multiplier instead of hiding it in policy."
+          }
+        }
+      },
+      "apple": {
+        "title": "macOS is reserved for the Trusted experience",
+        "subtitle": "Apple visitors are directed to the Trusted story only. No Public or native alternatives are shown here because the macOS proposition is intentionally positioned as a trusted-capacity lane.",
+        "primaryCta": "Open Trusted guidance",
+        "secondaryCta": "Why Trusted on Mac",
+        "recommendedSubtitle": "macOS is treated as a Trusted-only lane on this page.",
+        "points": {
+          "1": {
+            "title": "Trusted by design",
+            "body": "Apple hardware is framed as premium, controlled capacity."
+          },
+          "2": {
+            "title": "Benchmark-friendly",
+            "body": "The integrated browser benchmark helps users understand local capability before they install."
+          },
+          "3": {
+            "title": "Multiplier shown",
+            "body": "Trusted uplift is visible directly in the revenue estimate."
+          }
+        }
+      }
+    },
+    "recommended": {
+      "title": "Recommended for this device"
+    },
+    "release": {
+      "version": "Latest {version}",
+      "gitSha": "Commit {sha}",
+      "generatedAt": "Generated {date}",
+      "generatedAtUnknown": "Generation date unavailable",
+      "hybridSource": "This page mixes backend metadata with the live static release tree so published downloads stay visible even when the release index is incomplete."
+    },
+    "states": {
+      "error": "The latest release could not be loaded. Try again later or use the documented static mirror.",
+      "empty": "No release is currently published.",
+      "noRecommended": "No compatible artifact is available for this device in the latest release.",
+      "unavailable": "Unavailable"
+    },
+    "artifacts": {
+      "sizeUnknown": "Size unavailable",
+      "available": "Ready now",
+      "comingSoon": "Not published yet",
+      "readyNote": "Direct download available from the static release mirror.",
+      "pendingNote": "This artifact is part of the intended matrix but is not published on the mirror yet.",
+      "os": {
+        "any": "All platforms"
+      },
+      "channels": {
+        "light": "Light bundle",
+        "images": "Images bundle",
+        "embedded": "Embedded bundle",
+        "native": "Native installer",
+        "trusted_iso": "Trusted image"
+      }
+    },
+    "apple": {
+      "trustedBadge": "Trusted lane",
+      "title": "Lucky Apple guys, you are trusted tier provider!",
+      "body": "On macOS we deliberately hide Public and native alternatives. This page treats Apple hardware as a Trusted-capacity story, with the trust note and multiplier explained upfront."
+    },
+    "bundleFamilies": {
+      "light": {
+        "title": "Light bundle",
+        "subtitle": "Smallest starting point",
+        "body": "Downloads runtime pieces later. Best when you want the fastest first install and do not need offline payloads."
+      },
+      "images": {
+        "title": "Images bundle",
+        "subtitle": "Runtime images included",
+        "body": "Useful when you want the container images ready locally, while model downloads can still happen later."
+      },
+      "embedded": {
+        "title": "Embedded bundle",
+        "subtitle": "Heavier but more complete",
+        "body": "Carries more payload upfront for operators who want fewer downloads during first startup."
+      }
+    },
+    "publicTier": {
+      "title": "Public Tier",
+      "description": "Public Tier is the fastest way to bring community capacity online. It keeps the Docker-first runtime, local key generation, and pull-based agent behavior intact.",
+      "enterpriseDescription": "Public Tier remains useful for pilots, internal labs, and staged rollouts, but it is intentionally presented behind Trusted for enterprise visitors.",
+      "explainerTitle": "What you install",
+      "explainerBody": "These bundles are not a dedicated operating system. They package the agent runtime in different completeness levels and keep the router-to-agent trust model intact.",
+      "empty": "No Public Tier bundle is available in the latest release.",
+      "stepsTitle": "Public install flow",
+      "steps": {
+        "1": "Download the light or images bundle for your host.",
+        "2": "Start the node with the public profile and keep LocalAI behind the sidecar.",
+        "3": "Generate node keys locally during enrollment.",
+        "4": "Poll the Router for tasks once the node is accepted."
+      }
+    },
+    "native": {
+      "title": "Native installers",
+      "description": "Native wrappers improve installation ergonomics while preserving the validated Docker-first runtime underneath.",
+      "enterpriseDescription": "Native packages are useful when teams want a friendlier host install, while still accepting the same Docker-first runtime model below.",
+      "runtimeNote": "Native installers still depend on the existing agent image bundle and host Docker runtime unless the artifact explicitly says otherwise.",
+      "explainerTitle": "Native does not mean separate platform logic",
+      "explainerBody": "The installer feels more familiar, but the operational model stays aligned with the same release lane and runtime guardrails."
+    },
+    "trustedTier": {
+      "title": "Trusted Tier",
+      "description": "Trusted Tier artifacts are built for hardened operations: immutable boot image, attested OS profile, release signature, and fail-closed trust policy.",
+      "enterpriseDescription": "Trusted Tier is the production-grade lane for operators who care about verification, policy, and predictable capacity qualification.",
+      "appleDescription": "For macOS visitors, Trusted is not shown as a side option but as the only narrative. Apple hardware is framed as premium capacity for the trusted lane.",
+      "available": "Downloadable now",
+      "preparing": "Publishing in progress",
+      "explainerTitle": "Why Trusted exists",
+      "explainerBody": "Trusted packages are about a stronger chain of custody. The ISO represents a dedicated operating system image, while the evidence files let operators verify what they are about to run.",
+      "isoNote": "Trusted ISO is presented here as the dedicated OS path. It is the only lane intended to render a node eligible for the Trusted tier once verification and onboarding policy are satisfied.",
+      "stepsTitle": "Trusted install flow",
+      "steps": {
+        "1": "Download the Trusted image and its verification artifacts.",
+        "2": "Verify the checksum, signature, and attested OS profile before boot.",
+        "3": "Boot the controlled host and complete node enrollment.",
+        "4": "Run workloads only after Router trust policy accepts the attested profile."
+      },
+      "evidence": {
+        "title": "Release evidence",
+        "items": {
+          "iso": "Bootable Trusted image",
+          "checksum": "SHA-256 checksum",
+          "signature": "Detached release signature",
+          "manifest": "Attested OS profile or manifest"
+        }
+      },
+      "points": {
+        "1": "Dedicated OS image to boot on bare-metal or controlled VMs.",
+        "2": "Hardened trust chain for sensitive environments.",
+        "3": "Specific onboarding workflow for SLA-operated nodes."
+      }
+    },
+    "platforms": {
+      "macos": {
+        "name": "macOS",
+        "description": "Trusted-only presentation for Apple Silicon oriented operators."
+      },
+      "linux": {
+        "name": "Linux",
+        "description": "Recommended path for community-grade production deployments with Docker Compose."
+      },
+      "windows": {
+        "name": "Windows",
+        "description": "Guided setup with Docker Desktop and bootstrap scripts."
+      },
+      "detected": "Detected"
+    },
+    "releaseNotes": {
+      "title": "Release notes",
+      "empty": "No changelog is attached to this release yet."
+    },
+    "download": "Download",
+    "simulator": {
+      "title": "Capacity and revenue simulator",
+      "previewTitle": "Possible earnings",
+      "subtitle": "Estimate what this machine can contribute, then compare the Public baseline with the Trusted uplift.",
+      "previewSubtitle": "A quick read based on detected hardware and model catalog prices.",
+      "benchmarkRunning": "Running browser benchmark... {progress}%",
+      "hardware": "Detected hardware",
+      "vram": "Estimated VRAM",
+      "uptime": "Daily uptime",
+      "uptimeValue": "{hours} h/day",
+      "monthlyBase": "Estimated monthly baseline",
+      "monthlyTrusted": "Estimated monthly Trusted",
+      "hourlySelected": "Estimated {amount} per hour",
+      "publicMode": "Everyday companion",
+      "trustedMode": "Trusted dedicated OS",
+      "appleTrustedMode": "Apple Trusted companion",
+      "publicModeDescription": "An everyday companion that starts when your computer is on.",
+      "trustedModeDescription": "A dedicated OS you boot when you are not using your computer. The multiplier comes from the active pricing policy.",
+      "appleModeDescription": "On Apple, the experience stays a Trusted companion adapted to the macOS flow.",
+      "publicEstimate": "Public baseline",
+      "publicEstimateHint": "Same hardware without trusted uplift",
+      "baseRate": "Estimated {amount} per hour",
+      "trustedEstimate": "Trusted estimate",
+      "multiplierLabel": "Trusted multiplier x{multiplier}",
+      "multiplierDetail": "{base} baseline becomes {trusted} with the Trusted coefficient.",
+      "trustedReadyTitle": "Trusted-ready profile",
+      "trustedReadySubtitle": "The detected hardware looks compatible with a stronger capacity story.",
+      "trustedReadyBody": "This does not replace formal verification, but it indicates the machine can credibly be positioned for the Trusted lane once policy and release evidence requirements are met.",
+      "trustedGapTitle": "Public-first profile",
+      "trustedGapSubtitle": "This machine reads better as Public or native for now.",
+      "trustedGapBody": "You can still install and operate the node, but the benchmark does not make a strong trusted-capacity case yet.",
+      "appleTrustedNote": "Apple visitors are treated as a Trusted narrative by default, so the uplift is shown as the main commercial framing.",
+      "multiplierExplainTitle": "How the coefficient works",
+      "multiplierExplainBody": "The Trusted estimate is the same baseline capacity multiplied by x{multiplier}. We show the multiplication explicitly so the user sees where the uplift comes from.",
+      "benchmarkExplainTitle": "What the browser benchmark does",
+      "benchmarkExplainBody": "It combines WebGL/WebGPU signals, runtime inference, and catalog heuristics to build a practical first estimate before installation.",
+      "modelsTitle": "Compatible models and token payout",
+      "modelsSubtitle": "{count} models match the detected hardware profile ({runtime}).",
+      "modelHeaders": {
+        "model": "Model",
+        "hardware": "Min. hardware",
+        "input": "Input paid",
+        "output": "Output paid",
+        "hourly": "Est. hour"
+      },
+      "modelsEmpty": "No paid catalog model matches the detected hardware yet.",
+      "ratePerMillion": "{amount} / M tokens",
+      "rateUnavailable": "Not published",
+      "showMore": "Open full simulator",
+      "downloadCta": "Download the agent",
+      "partialConfidence": "WebGPU not available: results rely on browser heuristics and should be treated as directional.",
+      "unknownHardware": "Unknown GPU",
+      "runtimeValue": "Runtime: {runtime}",
+      "disclaimer": "This estimate is indicative and depends on model demand, routing policy, availability, and accepted tier."
+    },
+    "matrix": {
+      "title": "Tier matrix",
+      "subtitle": "Quick comparison of what each lane really means before you download.",
+      "appleSubtitle": "On macOS we keep the matrix focused on the Trusted story only.",
+      "headers": {
+        "dimension": "Dimension",
+        "public": "Public",
+        "native": "Native",
+        "trusted": "Trusted"
+      },
+      "rows": {
+        "install": "What you download",
+        "internet": "Internet dependency",
+        "eligible": "Best tier fit",
+        "os": "Dedicated OS"
+      },
+      "values": {
+        "public": {
+          "install": "Bundle archive",
+          "internet": "Usually downloads more at first run",
+          "eligible": "Best for community/Public capacity",
+          "os": "No, runs on your current host"
+        },
+        "native": {
+          "install": "Host-friendly installer",
+          "internet": "Still relies on the same runtime lane underneath",
+          "eligible": "Best for guided host onboarding",
+          "os": "No, wraps the current host OS"
+        },
+        "trusted": {
+          "install": "ISO plus trust evidence",
+          "internet": "Can support more controlled rollout logic",
+          "eligible": "Only lane meant for Trusted-tier eligibility",
+          "os": "Yes, dedicated operating system image"
+        }
+      }
+    },
+    "apiSurface": {
+      "title": "Release API surface",
+      "description": "The frontend now consumes the download release contract exposed by the backend.",
+      "gaps": {
+        "1": "The backend release contract is not yet sufficient on its own to present every published distribution artifact.",
+        "2": "Checksum and signature artifacts should remain visible whenever the Trusted lane is published.",
+        "3": "Compatibility policy between agent, router, host OS, and tier should become explicit in the API.",
+        "4": "The static release tree and the release index need to stay consistent to avoid UX drift."
+      }
+    }
+  },
+  "enrollment": {
+    "header_badge": "Secure enrollment",
+    "title": "Node enrollment",
+    "subtitle": "Review the challenge, clear the operator checks, and approve node enrollment.",
+    "categories": {
+      "gpu": "GPU Information",
+      "cpu": "CPU Information",
+      "system": "System & OS",
+      "models": "Supported Models"
+    },
+    "hello": "Hello {name}",
+    "node_name_label": "Node display name",
+    "node_name_hint": "This label stays editable and does not need to be unique.",
+    "challenge": "Enrollment challenge",
+    "error_status": "HTTP status: {status}",
+    "error_detail": "Backend detail: {detail}",
+    "tier": "Tier participating in",
+    "expires_at": "Expires {date}",
+    "hardware": "Hardware fingerprint",
+    "system": "System fingerprint",
+    "approve": "Approve node",
+    "deny": "Deny challenge",
+    "status": {
+      "done": "Done",
+      "required": "Required"
+    },
+    "checklist": {
+      "title": "Pre-flight checklist",
+      "subtitle": "Approval unlocks once the operator signs in and accepts the node agreement.",
+      "ready": "Ready to approve",
+      "pending": "Action required",
+      "signed_in": "Operator session active",
+      "sign_in_title": "Sign in to continue",
+      "sign_in_description": "Node enrollment approval requires an authenticated operator session.",
+      "sign_in_inline_help": "Use the same sign-in providers as the login page. You will return here automatically after OAuth.",
+      "identity_validated": "Identity validated",
+      "identity_title": "Trusted tier identity validation",
+      "identity_pending": "Identity validation required for Trusted tier",
+      "operator_agreement": "Operator agreement",
+      "operator_agreement_cta": "I accept the {link}",
+      "operator_agreement_link": "Node Operator Agreement"
+    },
+    "card": {
+      "title": "Node identity card",
+      "subtitle": "A concise operator-facing snapshot of this node before enrollment is confirmed.",
+      "location": "Network location",
+      "ip_address": "Node IP address",
+      "ip_address_missing": "IP address not provided by the agent",
+      "hardware_eligible_models": "{count} eligible models",
+      "selected_models_zero": "No selected models",
+      "selected_models_one": "1 selected model",
+      "selected_models": "{count} selected models",
+      "budget_gb_zero": "0 GB allocated",
+      "budget_gb": "{count} GB budget",
+      "models_preview": "Selected models preview",
+      "models_preview_empty": "No selected model has been announced by the agent yet.",
+      "system_specs": "System fingerprint",
+      "hostname": "Hostname",
+      "os": "Operating system",
+      "release": "System release",
+      "architecture": "Architecture",
+      "python": "Python version",
+      "gpu": "GPU model"
+    },
+    "tier_assignment": {
+      "eyebrow": "Tier assignment",
+      "title": "This node is applying for the {tier} grid",
+      "subtitle": "The tier drives the expected trust level and routing policies during enrollment."
+    },
+    "identity_status": {
+      "pending": "Identity validation is still completed from your account space for trusted-tier routing.",
+      "backend_enforced": "Trusted-tier approval still depends on backend-side identity verification. If the account is not validated, the backend will reject the approval even if this page is complete.",
+      "cta": "Open identity validation"
+    },
+    "approval": {
+      "eyebrow": "Operator decision",
+      "title": "Approve this node",
+      "subtitle": "Finalize node admission after reviewing the operator account, requested tier, and agent-reported fingerprint.",
+      "session": "Operator session",
+      "agreement": "Operator agreement",
+      "tier": "Requested tier"
+    },
+    "actions": {
+      "helper": "You can always deny the challenge. Approval stays locked until the checklist is complete."
+    },
+    "registration": {
+      "title": "Node registration in progress",
+      "subtitle": "We continuously verify backend signals before the node joins the Infera grid.",
+      "waiting": "Waiting for heartbeat, certificate, and runtime signals...",
+      "success_title": "Node validated on the Infera grid",
+      "success_subtitle": "All checks are green. You can now manage this node from your space.",
+      "cta": "Go to my nodes",
+      "steps": {
+        "heartbeat": "Heartbeat signal",
+        "certificate": "Node certificate",
+        "runtime": "Node runtime"
+      },
+      "state": {
+        "waiting": "Waiting...",
+        "detected": "Detected"
+      }
+    }
+  },
+  "organisations": {
+    "title": "Organisations administration",
+    "refresh": "Refresh",
+    "open_page": "Open page",
+    "loadFailed": "Failed to load organisations.",
+    "filters": {
+      "search": "Search",
+      "clientId": "Client ID",
+      "status": "Status"
+    },
+    "create": {
+      "title": "Create organization",
+      "name": "Name",
+      "clientId": "Client ID",
+      "status": "Status",
+      "currency": "Currency",
+      "monthlyCeiling": "Monthly ceiling",
+      "lifetimeCeiling": "Lifetime ceiling",
+      "submit": "Create"
+    },
+    "disable": {
+      "title": "Disable organization",
+      "body": "This organization will stop being available for active administration workflows. Existing audit history remains visible."
+    },
+    "bulk": {
+      "status": "Bulk status",
+      "apply": "Apply to {count} organisations"
+    },
+    "actions": {
+      "timeline": "Timeline",
+      "disable": "Disable"
+    },
+    "timeline": {
+      "title": "Organization audit timeline",
+      "empty": "No audit event yet."
+    },
+    "columns": {
+      "name": "Name",
+      "clientId": "Client ID",
+      "usersCount": "Users",
+      "spend": "Monthly spend",
+      "noCeiling": "no ceiling",
+      "spendAlert": "{threshold}% alert",
+      "status": "Status",
+      "updatedAt": "Updated at",
+      "actions": "Actions"
+    }
+  },
+  "content": {
+    "not_found": {
+      "title": "Content not found",
+      "description": "This page is not available in the selected locale or default locale.",
+      "cta": "Go to home"
+    },
+    "forbidden": {
+      "title": "Restricted content",
+      "description": "This page requires an admin session.",
+      "cta": "Sign in"
+    },
+    "explorer": {
+      "title": "Documentation browser",
+      "documentation": "Documentation",
+      "navigation": "Open navigation",
+      "expand": "Expand navigation",
+      "collapse": "Collapse navigation",
+      "index": "Content index",
+      "filter_tags": "Filter by tags",
+      "search_placeholder": "Search title then content",
+      "pages": "pages",
+      "headers": {
+        "title": "Title",
+        "path": "Path",
+        "tags": "Tags"
+      },
+      "seo": {
+        "title": "Infera - Documentation",
+        "description": "Browse Infera documentation with localized pages, live search, and tag filters."
+      }
+    },
+    "doc_cartouche": {
+      "badge": "Documentation page",
+      "reading_time": "Reading time",
+      "reading_time_value": "{count} min",
+      "words": "Words",
+      "words_value": "{count} words",
+      "updated_at": "Updated",
+      "show_raw": "Show raw metadata",
+      "hide_raw": "Hide raw metadata",
+      "author": "Author",
+      "contributor": "Contributor",
+      "source": "Source on GitHub",
+      "edit": "Update",
+      "editor_title": "Edit markdown source",
+      "preview": "Live preview",
+      "saved": "Documentation updated on GitHub.",
+      "history": "History",
+      "language": "Language",
+      "doc_family": "Family",
+      "feedback_like": "Helpful",
+      "feedback_unlike": "Not helpful",
+      "feedback_score": "Feedback score",
+      "metadata": "Metadata"
+    }
+  },
+  "playground": {
+    "title": "Inference playground",
+    "description": "Test Infera router OpenAI-compatible APIs with your own billed API keys.",
+    "tabs": {
+      "chat": "Chat",
+      "embeddings": "Embeddings",
+      "completions": "Completions",
+      "images": "Images",
+      "speech": "Speech",
+      "transcriptions": "Transcriptions",
+      "moderations": "Moderations",
+      "files": "Files"
+    },
+    "fields": {
+      "api_key": "API key",
+      "model": "Model",
+      "temperature": "Temperature",
+      "max_tokens": "Max tokens",
+      "prompt": "Prompt",
+      "stop_sequences": "Stop sequences",
+      "suffix": "Suffix",
+      "attachments": "Attachments (image/audio)",
+      "chat_output": "Chat response",
+      "embedding_input": "Embedding input",
+      "embedding_output": "Embeddings response",
+      "json_payload": "JSON payload",
+      "image_prompt": "Image prompt",
+      "image_size": "Image size",
+      "image_quality": "Quality",
+      "image_style": "Style",
+      "image_count": "Image count",
+      "speech_input": "Speech input",
+      "voice": "Voice",
+      "audio_format": "Audio format",
+      "speed": "Speed",
+      "audio_file": "Audio file",
+      "microphone_capture": "Microphone capture",
+      "language": "Language",
+      "transcription_prompt": "Prompt guidance",
+      "response_format": "Response format",
+      "moderation_input": "Content to moderate",
+      "file_upload": "File upload",
+      "file_purpose": "Purpose"
+    },
+    "config": {
+      "section_label": "Configuration",
+      "api_key_section": "API key",
+      "model_section": "Model",
+      "options_section": "Options"
+    },
+    "labels": {
+      "beta": "Beta",
+      "live": "Live",
+      "diagnostics": "Diagnostics",
+      "status_success": "Success",
+      "status_error": "Error",
+      "tokens": "tokens",
+      "raw_response": "Raw response",
+      "generated_asset": "Generated asset",
+      "recording": "Recording",
+      "ready": "Ready",
+      "flagged": "Flagged",
+      "allowed": "Allowed"
+    },
+    "runtime": {
+      "native": "Native runtime",
+      "image_input": "Image input",
+      "tools": "Tools",
+      "external": "External",
+      "templates": {
+        "chatml": "ChatML",
+        "llama-inst": "Llama instruct",
+        "provider-native": "Provider native",
+        "custom": "Custom template"
+      }
+    },
+    "actions": {
+      "create_key": "Create key",
+      "show_logs": "Show logs",
+      "openapi_docs": "Open API reference",
+      "copy_key": "Copy key",
+      "run_chat": "Run chat completion",
+      "run_embeddings": "Run embeddings",
+      "run_generic": "Run request",
+      "clear_output": "Clear output",
+      "clear_history": "Clear history",
+      "copy_output": "Copy output",
+      "copied": "Copied!",
+      "run_completions": "Run completion",
+      "generate_image": "Generate image",
+      "generate_speech": "Generate speech",
+      "download": "Download",
+      "download_audio": "Download audio",
+      "start_recording": "Start recording",
+      "stop_recording": "Stop recording",
+      "clear_audio": "Clear audio",
+      "run_transcription": "Run transcription",
+      "run_moderation": "Run moderation",
+      "upload_file": "Upload file",
+      "manage_keys": "Manage keys",
+      "view_model": "View model"
+    },
+    "cta": {
+      "trial_title": "First time? €10 free to test the platform",
+      "trial_caption": "Create an account, generate a test key and run live inference in a few minutes.",
+      "trial_action": "Start testing"
+    },
+    "hints": {
+      "billing": "Requests are sent to Infera router using the selected API key and are billed through the standard pipeline.",
+      "openapi": "Browse the public OpenAPI contract used for client SDK generation.",
+      "no_result": "Run a request to see the response here.",
+      "unauthenticated": "Sign in to use your billed API keys and access live inference logs.",
+      "completions_output": "Plain-text output is rendered first, with raw payload still available.",
+      "images_output": "Rendered images stay inline so users can inspect the result immediately.",
+      "speech_output": "Speech responses are converted to a previewable audio stream in the browser.",
+      "microphone_capture": "Capture a short audio clip directly in the browser, then submit it as a file.",
+      "transcription_output": "Transcript text is surfaced first, with the underlying response preserved below.",
+      "moderation_output": "Severity bars make category scores readable without opening raw JSON.",
+      "files_output": "Upload returns the created file metadata that downstream APIs will reference."
+    },
+    "errors": {
+      "configuration_required": "Select a valid API key and a model before running a request.",
+      "playground_unauthorized": "Unauthorized API key.",
+      "playground_forbidden": "Forbidden for this API key.",
+      "playground_not_found": "Target endpoint was not found.",
+      "playground_timeout": "Request timed out while waiting for the router.",
+      "playground_payload_too_large": "Payload is too large for playground relay limits.",
+      "playground_rate_limited": "Rate limit reached. Please retry later.",
+      "playground_upstream_unavailable": "Router is unavailable. Please retry shortly.",
+      "playground_router_timeout": "Playground timed out before the router returned a response.",
+      "playground_router_unreachable": "Playground cannot reach the router. Check the local router process and URL.",
+      "playground_router_transport_error": "Playground lost the router connection before a response was returned.",
+      "playground_proxy_error": "Playground relay request failed.",
+      "agent_timeout": "The agent timed out processing your request. The model may still be loading - please retry.",
+      "agent_failure": "The agent failed to process the request. Please retry.",
+      "invalid_request_error": "The selected model does not support this endpoint. Choose a compatible model or switch playground tab.",
+      "audit_trail_disabled": "Audit trail is not enabled for this API key.",
+      "empty_chat_payload": "Provide a prompt.",
+      "empty_embedding_input": "Embedding input cannot be empty.",
+      "attachments_too_large": "Attachments exceed allowed size limits.",
+      "empty_prompt": "This field cannot be empty.",
+      "audio_file_required": "Select or record an audio file before running a transcription.",
+      "file_required": "Select a file before uploading it.",
+      "microphone_unavailable": "Microphone recording is not available in this browser."
+    },
+    "results": {
+      "generated_text": "Generated text",
+      "images": "Generated images",
+      "audio_preview": "Audio preview",
+      "transcript": "Transcript",
+      "moderation_summary": "Moderation summary",
+      "uploaded_file": "Uploaded file"
+    },
+    "capabilities": {
+      "title": "Key capabilities",
+      "empty": "No models available for this API key."
+    },
+    "logs": {
+      "title": "Live operation logs",
+      "empty": "No operation has been recorded yet for this key.",
+      "detail_empty": "Select a log entry to inspect the operation timeline.",
+      "no_key": "Select a key to stream audit logs.",
+      "audit_disabled_title": "Audit trail is disabled",
+      "audit_disabled_description": "This key does not retain playground operation logs. Enable the audit trail from key administration to inspect request timelines, router decisions and agent errors.",
+      "metrics": {
+        "latency": "Total Latency",
+        "tokens": "Usage",
+        "energy": "Energy Net"
+      }
+    },
+    "facets": {
+      "supported": "Live",
+      "planned": "Planned",
+      "chat": {
+        "title": "Chat completions",
+        "description": "OpenAI-compatible endpoint already available through the router."
+      },
+      "embeddings": {
+        "title": "Embeddings",
+        "description": "Text vectors exposed through the OpenAI-compatible facade."
+      },
+      "models": {
+        "title": "Models",
+        "description": "Catalog filtered by API key and tier policy."
+      },
+      "responses": {
+        "title": "Responses",
+        "description": "Modern unified surface to add before new multimodal agents."
+      },
+      "images": {
+        "title": "Images",
+        "description": "Generation, edits and variations need a dedicated router endpoint."
+      },
+      "speech": {
+        "title": "Speech",
+        "description": "Text-to-speech needs audio streaming and output format handling."
+      },
+      "transcriptions": {
+        "title": "Transcriptions",
+        "description": "Speech-to-text and audio translation belong in the multimodal proxy."
+      },
+      "moderations": {
+        "title": "Moderations",
+        "description": "Text/image classification should be planned for client guardrails."
+      }
+    },
+    "seo": {
+      "title": "Infera - Inference playground",
+      "description": "OpenAI-compatible playground for testing models and API keys on the Infera network."
+    }
+  },
+  "admin": {
+    "sidebar": {
+      "caption": "Control plane",
+      "title": "Admin Console",
+      "expand": "Expand",
+      "collapse": "Collapse",
+      "backToInfera": "Back to Infera"
+    },
+    "overview": {
+      "badge": "Operations overview",
+      "title": "Administration dashboard",
+      "subtitle": "Real-time synthetic view of nodes, keys, organizations and users.",
+      "load_failed": "Unable to load admin metrics.",
+      "quick_actions": "Quick actions",
+      "actions": {
+        "refresh": "Refresh all",
+        "create_key": "Create and manage keys",
+        "inspect_nodes": "Inspect node fleet",
+        "benchmarks": "Energy footprint",
+        "manage_organizations": "Manage organizations",
+        "manage_users": "Manage users",
+        "manage_models": "Manage model catalog",
+        "admin_docs": "Open admin documentation"
+      },
+      "action_captions": {
+        "keys": "Issue, rotate and audit client access.",
+        "nodes": "Inspect provider health and runtime state.",
+        "benchmarks": "Compare energy footprint through node performance benchmarks.",
+        "organizations": "Maintain customer tenancy boundaries.",
+        "users": "Review access levels and account state.",
+        "models": "Sync gallery catalog, set tier policies and configure per-node overrides.",
+        "docs": "Open restricted operating procedures."
+      },
+      "health": {
+        "title": "Fleet health snapshot",
+        "active_nodes": "Active nodes: {count}",
+        "total_nodes": "Total nodes: {count}",
+        "captured_requests": "Captured requests (7d): {count}",
+        "last_nodes": "Last connected nodes",
+        "no_nodes": "No recent nodes found."
+      },
+      "metrics": {
+        "nodes": {
+          "label": "Nodes",
+          "caption": "{count} active currently"
+        },
+        "keys": {
+          "label": "Active API keys",
+          "caption": "{count} keys total"
+        },
+        "organizations": {
+          "label": "Organizations",
+          "caption": "Registered customer organizations"
+        },
+        "users": {
+          "label": "Users",
+          "caption": "Admin and client users"
+        }
+      }
+    },
+    "docs": {
+      "badge": "Restricted docs",
+      "title": "Admin documentation",
+      "section_title": "Documentation section",
+      "subtitle": "Operational and governance content restricted to admin users."
+    },
+    "pentest": {
+      "badge": "Offensive lab control",
+      "title": "PentestGPT licenses",
+      "subtitle": "Generate and revoke operator-side PentestGPT bundles that route CTF, HTB and THM work through Infera or an injected OpenAI-compatible endpoint.",
+      "metrics": {
+        "active": "Active licenses: {count}"
+      },
+      "modes": {
+        "INFERA_GRID": "Infera grid",
+        "DIRECT_OPENAI_COMPATIBLE": "Direct OpenAI-compatible"
+      },
+      "status": {
+        "ACTIVE": "Active",
+        "REVOKED": "Revoked"
+      },
+      "create": {
+        "eyebrow": "Distributed pentest license",
+        "title": "Issue a bundle",
+        "infera_note": "Creates a revocable Infera Router key for your admin client scope. LocalAI remains reachable only through Router dispatch.",
+        "direct_note": "Generates CCR config for an operator-owned OpenAI-compatible endpoint. External provider keys stay local."
+      },
+      "fields": {
+        "mode": "Provider mode",
+        "external_base_url": "OpenAI-compatible base URL",
+        "default_model": "Default model",
+        "think_model": "Reasoning model",
+        "long_context_model": "Long-context model",
+        "web_search_model": "Web-search model",
+        "allowed_models": "Authorized Infera models",
+        "instruction": "PentestGPT instructions",
+        "client_id": "Client scope",
+        "operator": "Operator",
+        "api_key_prefix": "API key prefix",
+        "revoked_by": "Revoked by"
+      },
+      "licenses": {
+        "title": "Issued licenses",
+        "total": "{count} total"
+      },
+      "columns": {
+        "id": "License",
+        "mode": "Mode",
+        "model": "Default model",
+        "key": "Key",
+        "status": "Status",
+        "created": "Created"
+      },
+      "generated": {
+        "banner": "Bundle files generated. This is the only response containing the clear Infera API key."
+      },
+      "actions": {
+        "create": "Issue license",
+        "inspect": "Inspect",
+        "revoke": "Revoke",
+        "copy": "Copy"
+      }
+    },
+    "pages": {
+      "selected": "{count} selected",
+      "nodes": {
+        "badge": "Fleet operations"
+      },
+      "node_detail": {
+        "badge": "Node dossier"
+      },
+      "keys": {
+        "badge": "Access control"
+      },
+      "users": {
+        "badge": "Identity governance",
+        "subtitle": "Review account state, roles and audit history for backoffice users.",
+        "total": "{count} users",
+        "active": "{count} active on this page"
+      },
+      "organisations": {
+        "badge": "Tenant governance",
+        "subtitle": "Manage customer organizations, client IDs and administrative state.",
+        "total": "{count} organizations",
+        "active": "{count} active on this page"
+      },
+      "benchmarks": {
+        "badge": "Energy operations"
+      }
+    },
+    "benchmarks": {
+      "title": "Energy footprint",
+      "subtitle": "Operator view of node benchmark probes: throughput, model load time and latency signals feeding the network energy-efficiency model.",
+      "meta": {
+        "requests": "{count} requests",
+        "ledger": "{count} ledger rows"
+      },
+      "actions": {
+        "refresh": "Refresh benchmarks"
+      },
+      "filters": {
+        "model": "Model",
+        "method_tier": "Method tier",
+        "scope": "Scope",
+        "scope_id": "Scope identifier",
+        "bucket": "Time bucket",
+        "min_confidence": "Min confidence"
+      },
+      "scope": {
+        "global": "Global",
+        "apikey": "API key",
+        "model": "Model",
+        "user": "User",
+        "organization": "Organization"
+      },
+      "method_tiers": {
+        "device_direct": "Device direct",
+        "host_estimate": "Host estimate"
+      },
+      "buckets": {
+        "hour": "Hour",
+        "day": "Day"
+      },
+      "metrics": {
+        "joules": {
+          "label": "Net Joules",
+          "caption": "Request-level baseline-subtracted energy"
+        },
+        "wh": {
+          "label": "Wh / 1k tokens",
+          "caption": "Neutral normalized throughput view"
+        },
+        "tokens": {
+          "label": "Known tokens",
+          "caption": "Requests with token counts retained"
+        },
+        "intensity": {
+          "label": "J / token",
+          "caption": "Derived from net Joules and total tokens"
+        }
+      },
+      "raw": {
+        "title": "Performance Benchmarks",
+        "subtitle": "Latency, tokens/sec throughput and model load time submitted by nodes during enrollment or campaigns.",
+        "badge": "Energy footprint",
+        "filters": {
+          "node": "Node ID",
+          "model": "Model ID"
+        },
+        "fields": {
+          "node_id": "Node",
+          "slot": "Slot",
+          "model_id": "Model",
+          "latency_p50": "P50 latency",
+          "latency_p95": "P95 latency",
+          "tps": "Tokens/sec",
+          "completion_tps": "Generation TPS",
+          "load_time": "Model load",
+          "duration": "Duration",
+          "generated_tokens": "Generated",
+          "status": "Status",
+          "captured_at": "Captured at",
+          "workload": "Workload",
+          "hardware": "Hardware",
+          "quality": "Quality"
+        },
+        "empty": "No benchmarks found.",
+        "actions": {
+          "view_payload": "View raw JSON payload"
+        },
+        "payload_dialog": {
+          "title": "Benchmark payload",
+          "empty": "No raw payload is available for this run.",
+          "copy": "Copy JSON"
+        }
+      },
+      "notice": "Only events at or above the selected confidence threshold are included. Partial failures and exclusions remain visible in the ledger.",
+      "sections": {
+        "breakdown": "Breakdowns",
+        "timeseries": "Time series",
+        "ledger": "Audit ledger"
+      },
+      "tabs": {
+        "model": "Model",
+        "apikey": "API key",
+        "user": "User",
+        "organization": "Organization",
+        "method": "Method tier"
+      },
+      "breakdown": {
+        "dimension": "Dimension",
+        "requests": "Requests",
+        "joules": "Net Joules",
+        "tokens": "Tokens",
+        "j_per_token": "J/token",
+        "wh_per_1k_tokens": "Wh/1k tokens"
+      },
+      "timeseries": {
+        "bucket": "Bucket start",
+        "joules": "Net Joules",
+        "tokens": "Tokens",
+        "j_per_token": "J/token"
+      },
+      "ledger": {
+        "captured_at": "Event time",
+        "model": "Model",
+        "api_key": "API key",
+        "user": "User",
+        "organization": "Organization",
+        "method": "Method tier",
+        "confidence": "Confidence",
+        "joules": "Net Joules",
+        "tokens": "Tokens",
+        "j_per_token": "J/token",
+        "partial_failure": "Completion",
+        "anomaly": "Quality flag",
+        "partial": "Partial",
+        "complete": "Complete",
+        "flagged": "Flagged",
+        "normal": "Normal"
+      }
+    },
+    "campaigns": {
+      "badge": "Distributed pentest",
+      "title": "Pentest campaigns",
+      "subtitle": "Autonomous scanning campaigns driven by a planner LLM and distributed pentest-operator agents.",
+      "metrics": {
+        "running": "Running: {count}",
+        "total": "{count} campaigns"
+      },
+      "tabs": {
+        "licenses": "PentestGPT licenses",
+        "campaigns": "Campaigns"
+      },
+      "status": {
+        "CREATED": "Created",
+        "RUNNING": "Running",
+        "PAUSED": "Paused",
+        "COMPLETED": "Completed",
+        "ABORTED": "Aborted",
+        "FAILED": "Failed"
+      },
+      "modes": {
+        "LAB": "Lab",
+        "GUARDED": "Guarded",
+        "STRICT": "Strict"
+      },
+      "columns": {
+        "id": "Campaign",
+        "name": "Name",
+        "status": "Status",
+        "mode": "Mode",
+        "iterations": "Iterations",
+        "created": "Created"
+      },
+      "fields": {
+        "name": "Campaign name",
+        "mode": "Execution mode",
+        "scope": "Scope targets",
+        "scope_type": "Type",
+        "scope_target": "Target",
+        "max_actions": "Max actions (0 = default)",
+        "max_tokens": "Max tokens (0 = default)",
+        "max_runtime": "Max runtime seconds (0 = default)"
+      },
+      "create": {
+        "title": "New campaign",
+        "eyebrow": "Pentest campaign",
+        "subtitle": "Define scope targets and budget constraints. The planner will autonomously orchestrate nmap, nuclei and http_probe workers.",
+        "mode_lab_note": "No approval gate - actions dispatched immediately. For isolated lab targets only.",
+        "mode_guarded_note": "CRITICAL-risk actions require manual approval before dispatch.",
+        "mode_strict_note": "All actions require manual approval."
+      },
+      "actions": {
+        "new": "New campaign",
+        "start": "Start",
+        "pause": "Pause",
+        "resume": "Resume",
+        "abort": "Abort",
+        "approve": "Approve",
+        "deny": "Deny",
+        "add_target": "Add target",
+        "view_timeline": "Timeline",
+        "back": "Back to campaigns"
+      },
+      "findings": {
+        "empty": "No findings yet",
+        "columns": {
+          "severity": "Severity",
+          "type": "Type",
+          "tool": "Tool",
+          "confidence": "Confidence",
+          "hash": "Dedup hash"
+        }
+      },
+      "timeline": {
+        "title": "Audit timeline",
+        "empty": "No events yet"
+      },
+      "detail": {
+        "tab_overview": "Overview",
+        "tab_findings": "Findings",
+        "tab_timeline": "Timeline",
+        "tab_actions": "Pending actions",
+        "scope_label": "Scope",
+        "budget_label": "Budget",
+        "iteration_label": "Planner iteration",
+        "started_label": "Started",
+        "ended_label": "Ended"
+      },
+      "empty": "No campaigns yet - create the first one.",
+      "abort_confirm": "Abort this campaign? All in-flight actions will be abandoned."
+    }
+  },
+  "theme": {
+    "title": "Theme",
+    "toggle": "Change theme",
+    "system": "Follow system",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "docs": {
+    "badge": "Knowledge base",
+    "title": "Documentation explorer",
+    "subtitle": "Find product, operations, and commercial references for the Infera platform.",
+    "seo": {
+      "title": "Infera - Documentation",
+      "description": "Browse public documentation pages for offers, onboarding, and operations."
+    },
+    "rag": {
+      "title": "Docs RAG",
+      "ask_label": "Ask the documentation assistant",
+      "provider_label": "Generation provider",
+      "model_label": "Model",
+      "template_label": "Prompt templates",
+      "ask_btn": "Send",
+      "ask_stream_btn": "Stream",
+      "citations": "Citations",
+      "assistant_label": "Assistant",
+      "empty_state": "Ask a question. The backend retrieves local documentation, then sends grounded context to the selected provider.",
+      "missing_key_hint": "This provider is listed but its backend API key is not configured. Add the matching server-side environment variable before asking.",
+      "no_sources": "Sources will appear after an answer.",
+      "no_stream_body": "No stream body available",
+      "prompt_title": "Prompt controls",
+      "provider_configured": "Configured",
+      "provider_missing_key": "Missing key",
+      "settings_title": "Generation",
+      "sources_count": "{count} sources",
+      "sources_title": "Sources",
+      "user_label": "You",
+      "placeholders": [
+        "Summarize node enrollment prerequisites in 5 bullets",
+        "What are the mTLS non-negotiable rules?",
+        "How does docs reindexing work in backend?"
+      ],
+      "request_failed": "Request failed",
+      "stream_failed": "Stream failed"
+    }
+  },
+  "profile": {
+    "nav": {
+      "badge": "Account Space",
+      "title": "Hello {name}",
+      "subtitle": "Manage profile, billing, identity validation status, API keys and node earnings from a single cockpit.",
+      "items": {
+        "informations": {
+          "title": "Information",
+          "subtitle": "Overview"
+        },
+        "nodes": {
+          "title": "My Nodes",
+          "subtitle": "Earnings & Health"
+        },
+        "keys": {
+          "title": "API Keys",
+          "subtitle": "Access & Consumption"
+        },
+        "billing": {
+          "title": "Billing",
+          "subtitle": "Payment Methods"
+        },
+        "organisations": {
+          "title": "Organizations",
+          "subtitle": "Teams & Roles"
+        },
+        "security": {
+          "title": "Security",
+          "subtitle": "2FA & Sessions"
+        },
+        "dashboard": {
+          "title": "Dashboard",
+          "subtitle": "Overview"
+        }
+      }
+    },
+    "badge": "Account workspace",
+    "title": "Your account workspace",
+    "subtitle": "Manage profile, billing, identity trust status, API keys, and node earnings from one control plane.",
+    "fallback_name": "your workspace",
+    "units": {
+      "tokens": "tokens",
+      "requests": "requests"
+    },
+    "status": {
+      "active": "Active",
+      "revoked": "Revoked"
+    },
+    "identity": {
+      "title": "Identity validation (trusted tier)",
+      "helper": "Your verification is under review. Trusted tier enrollment and higher-rate routing unlock once approved.",
+      "steps": {
+        "submitted": "Submitted",
+        "review": "Compliance review",
+        "verified": "Trusted approved"
+      },
+      "status_active": "Verified session",
+      "status_pending": "Pending verification",
+      "mock_notice": "Mocked status for current MVP version."
+    },
+    "profile_tab": {
+      "title": "User & organization profile"
+    },
+    "fields": {
+      "fullName": "Full name",
+      "email": "Email",
+      "organization": "Organization"
+    },
+    "hero": {
+      "greeting": "Hello {name}",
+      "nodes": "Enrolled agents",
+      "keys": "Active keys",
+      "total_paid": "Total paid",
+      "node_revenue": "Agent revenue",
+      "live": "Live",
+      "active": "Active",
+      "month": "30 days",
+      "estimated": "Estimated"
+    },
+    "panels": {
+      "nodes": {
+        "title": "My agents",
+        "subtitle": "Provider agents linked to your account",
+        "open": "Open my agents",
+        "earnings": "Estimated money earned",
+        "hardware_unknown": "Hardware not reported"
+      },
+      "keys": {
+        "title": "My API keys",
+        "subtitle": "Usage and cost by API key",
+        "spend": "Estimated total cost"
+      }
+    },
+    "empty": {
+      "nodes": {
+        "title": "No agents yet",
+        "subtitle": "Install an agent to get started",
+        "description": "Turn your hardware into revenue and track earnings once an agent is connected.",
+        "cta": "Monetize your hardware"
+      },
+      "keys": {
+        "title": "No API keys yet",
+        "subtitle": "Create a key to call the API",
+        "description": "Create per-environment keys for better security and traceability.",
+        "cta": "Create API key"
+      }
+    },
+    "nodes": {
+      "badge": "Provider operations",
+      "title": "My nodes",
+      "subtitle": "Follow enrolled hardware, runtime state and estimated provider revenue.",
+      "load_failed": "Unable to load your nodes.",
+      "actions": {
+        "install": "Install an agent",
+        "token": "Enrollment token"
+      },
+      "retire": {
+        "title": "Reset node enrollment",
+        "subtitle": "This revokes {nodeId}. The local agent must be started with a new enrollment token to join again.",
+        "reason": "Reason",
+        "confirm": "Reset enrollment",
+        "error": "Unable to reset this node enrollment."
+      },
+      "enrollment_token": {
+        "title": "Enrollment token",
+        "subtitle": "This token is short-lived and binds the next public node enrollment to your operator account.",
+        "copy": "Copy token",
+        "copied": "Copied",
+        "error": "Unable to create an enrollment token."
+      },
+      "metrics": {
+        "total": "Total nodes",
+        "active": "Active nodes",
+        "tokens": "Captured tokens",
+        "revenue": "Estimated revenue"
+      }
+    },
+    "keys": {
+      "badge": "API access",
+      "title": "My API keys",
+      "subtitle": "Create, rotate, revoke and route API keys attached to your workspace."
+    },
+    "billing": {
+      "badge": "Billing",
+      "title": "Billing & payment",
+      "subtitle": "Track balance, payment methods and invoice history.",
+      "load_failed": "Unable to load billing data.",
+      "missing_surface": "Production gap: payment method editing and invoice download actions need dedicated backend operations before this can be fully self-service.",
+      "balance": {
+        "credit": "Credit balance",
+        "due": "Due now",
+        "methods": "Payment methods"
+      },
+      "invoices": {
+        "title": "Invoices",
+        "id": "Invoice",
+        "period": "Period end",
+        "total": "Total",
+        "status": "Status"
+      },
+      "payment_methods": {
+        "title": "Payment methods",
+        "expires": "Expires {month}/{year}",
+        "empty_title": "No payment method",
+        "empty_text": "Add-card and default-payment controls are not exposed by the current API."
+      }
+    },
+    "organisations": {
+      "badge": "Workspace",
+      "title": "Organisations",
+      "subtitle": "Review the current organisation and member access.",
+      "load_failed": "Unable to load organisation data.",
+      "missing_surface": "Production gap: invitations, role changes and organisation switching are partially available in APIs but need a dedicated user-safe workflow.",
+      "current": {
+        "title": "Current organisation",
+        "name": "Name",
+        "id": "Identifier",
+        "created": "Created"
+      },
+      "members": {
+        "title": "Members",
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "created": "Created"
+      }
+    },
+    "security": {
+      "badge": "Security",
+      "title": "Security",
+      "subtitle": "Review SSO claims and production security controls.",
+      "sso": {
+        "title": "SSO session",
+        "subject": "Subject",
+        "level": "Access level"
+      },
+      "production": {
+        "title": "Production controls to expose",
+        "keys": "API key rotation and revocation are available from the Keys page.",
+        "identity": "Identity validation belongs in Personal informations.",
+        "sessions": "Session inventory and forced logout are missing backend surfaces."
+      }
+    },
+    "informations": {
+      "badge": "Account space",
+      "title": "Informations",
+      "subtitle": "Billing address, account type and preferred currency.",
+      "save_success": "Profile saved successfully.",
+      "save_error": "Error saving profile.",
+      "account": {
+        "title": "Account",
+        "personal": "Personal",
+        "pro": "Professional",
+        "currency": "Preferred currency",
+        "currency_hint": "ISO 4217 code (e.g. EUR, USD). Used in all monetary displays."
+      },
+      "address": {
+        "title": "Address",
+        "street": "Street",
+        "city": "City",
+        "zip": "Postal code",
+        "country": "Country"
+      },
+      "pro": {
+        "title": "Professional details",
+        "siret": "SIRET",
+        "vat": "EU VAT number"
+      }
+    }
+  },
+  "otp": {
+    "title": "Node enrollment token",
+    "subtitle": "Generate a short-lived token to authenticate your node's first enrollment.",
+    "badge": "Enrollment",
+    "hardware": {
+      "title": "Hardware identity",
+      "subtitle": "This token will be bound to the machine below. It cannot be reused on different hardware.",
+      "agent_id": "Agent ID",
+      "host_hash": "Host hash"
+    },
+    "generate": "Generate token",
+    "generating": "Generating...",
+    "token_label": "Enrollment token",
+    "token_hint": "This token is single-use and expires in {ttl} seconds.",
+    "inject_label": "Inject command",
+    "inject_hint": "Run this command in your node terminal to inject the token automatically:",
+    "auto_claim_waiting": "Your node is waiting for this token and will claim it automatically. The command remains available as a fallback.",
+    "copy_token": "Copy token",
+    "copied": "Copied",
+    "sign_in_required": "Sign in to generate a hardware-bound enrollment token.",
+    "error": "Unable to generate the enrollment token.",
+    "error_disabled": "Token generation is not configured on this server. Contact your administrator.",
+    "error_auth": "Session expired. Reload the page and sign in again.",
+    "no_agent": "No agent ID provided. Open this page from your node terminal.",
+    "claimed": {
+      "title": "See you in a moment.",
+      "subtitle": "The node claimed its token. You can return to the terminal to finish enrollment.",
+      "close_hint": "Closing automatically in {seconds}s",
+      "close_now": "Close now"
+    }
+  },
+  "admin_models": {
+    "seo_title": "Model management - Admin",
+    "title": "Model management",
+    "badge": "Admin",
+    "description": "Manage the model catalog synced from gallery referential, set tier policies, and configure per-node overrides.",
+    "tabs": {
+      "catalog": "Catalog",
+      "policy": "Tier policy",
+      "overrides": "Node overrides"
+    },
+    "actions": {
+      "sync": "Sync from galleries",
+      "syncing": "Syncing...",
+      "refresh": "Refresh",
+      "save_policy": "Save policy",
+      "reset_all": "Reset all",
+      "reset_tier": "Reset tier",
+      "add_model": "Add model",
+      "remove_model": "Remove model",
+      "add_override": "Add override",
+      "remove": "Remove"
+    },
+    "sync_result": "Sync complete: {inserted} inserted, {updated} updated, {disabled} disabled.",
+    "catalog": {
+      "count": "{count} models",
+      "enabled_count": "{count} enabled",
+      "empty": "No models in catalog. Run a sync to load from gallery referential.",
+      "loading": "Loading catalog...",
+      "search": "Search catalog",
+      "more_tags": "+{count}",
+      "filters": {
+        "all": "All",
+        "hardware": "Hardware"
+      },
+      "columns": {
+        "id": "Model ID",
+        "family": "Family",
+        "tier": "HW tier",
+        "backend": "Backend",
+        "priority": "Priority",
+        "size": "Size",
+        "enabled": "Enabled",
+        "tags": "Tags",
+        "updated": "Updated"
+      },
+      "disabled_chip": "Disabled",
+      "enabled_chip": "Enabled"
+    },
+    "policy": {
+      "title": "Tier model policy",
+      "summary": "{tiers} tiers, {dirty} with unsaved changes",
+      "empty": "No tier policies found.",
+      "loading": "Loading policies...",
+      "select_models": "Select desired models for this tier",
+      "add_model": "Model to add",
+      "add_placeholder": "Search an enabled catalog model",
+      "version": "Policy version: {version}",
+      "save_success": "Policy saved. Agents will reconcile on next heartbeat.",
+      "selected_count": "{count} selected models",
+      "saved": "Saved",
+      "unsaved": "Unsaved changes",
+      "table_empty": "No model selected for this tier.",
+      "unknown_model": "Unknown catalog entry",
+      "columns": {
+        "model": "Model",
+        "hardware": "Hardware",
+        "tags": "Tags",
+        "backend": "Backend",
+        "size": "Size"
+      },
+      "tiers": {
+        "PUBLIC": "Public tier",
+        "TRUSTED": "Trusted tier",
+        "HDS": "HDS tier",
+        "EXTERNAL": "External tier"
+      }
+    },
+    "overrides": {
+      "empty": "No overrides configured for this node.",
+      "loading": "Loading overrides...",
+      "select_node": "Select a node to view and manage overrides.",
+      "node_id": "Node ID",
+      "model_id": "Model ID",
+      "action": "Action",
+      "action_include": "Force include",
+      "action_exclude": "Force exclude",
+      "remove_confirm": "Remove override for {modelId}?",
+      "columns": {
+        "model_id": "Model",
+        "action": "Action",
+        "updated": "Updated"
+      }
+    },
+    "errors": {
+      "load_catalog": "Failed to load model catalog.",
+      "load_policy": "Failed to load tier policy.",
+      "load_overrides": "Failed to load node overrides.",
+      "save_policy": "Failed to save tier policy.",
+      "add_override": "Failed to add override.",
+      "remove_override": "Failed to remove override.",
+      "sync": "Failed to sync catalog."
+    }
+  }
+}

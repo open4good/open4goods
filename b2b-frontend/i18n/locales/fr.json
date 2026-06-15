@@ -1,0 +1,3763 @@
+{
+  "app": {
+    "name": "Product Data API"
+  },
+  "home": {
+    "seo": {
+      "title": "Product Data API - Données prix fraîches par GTIN",
+      "description": "Données de prix produit prêtes pour développeurs, par GTIN, avec fraîcheur, provenance et facturation no-data-no-pay."
+    },
+    "hero": {
+      "eyebrow": "API prix par GTIN",
+      "title": "Des prix produit frais, facturés uniquement quand la donnée est exploitable.",
+      "subtitle": "Interrogez un produit par GTIN et recevez offres sanitizées, meilleurs prix, fraîcheur, provenance et métriques de crédits dans une réponse REST.",
+      "docsCta": "Commencer par la doc"
+    },
+    "proof": {
+      "fresh": {
+        "title": "Fraîcheur",
+        "value": "30 jours",
+        "caption": "Fenêtre d'offres fraîches pour la facturation."
+      },
+      "nodata": {
+        "title": "Facturation",
+        "value": "No data, no pay",
+        "caption": "GTIN invalides, produits absents et offres périmées coûtent zéro crédit."
+      },
+      "gtin": {
+        "title": "Recherche",
+        "value": "GTIN-first",
+        "caption": "Validation stricte du checksum avant réservation de crédits."
+      },
+      "provenance": {
+        "title": "Offres",
+        "value": "Provenance",
+        "caption": "Libellés marchands sans fuite d'identifiants internes."
+      }
+    },
+    "api": {
+      "title": "Un appel vers le facet prix",
+      "subtitle": "L'enveloppe de réponse inclut la donnée et les métadonnées de facturation pour un comportement déterministe."
+    },
+    "billing": {
+      "title": "Règles de facturation",
+      "subtitle": "Les crédits sont consommés seulement quand le facet prix retourne une donnée fraîche exploitable.",
+      "rules": [
+        "GTIN invalide : réponse 400, zéro crédit.",
+        "Produit introuvable : réponse 404, zéro crédit.",
+        "Prix absent ou périmé : réponse 200, zéro crédit.",
+        "Offre fraîche : réponse 200, débit de crédits."
+      ]
+    }
+  },
+  "pricing": {
+    "seo": {
+      "title": "Tarifs - Product Data API",
+      "description": "Packs de crédits et abonnements Product Data API chargés depuis le catalogue backend."
+    },
+    "title": "Tarifs self-service",
+    "subtitle": "Achetez des crédits en packs ou souscrivez à des crédits mensuels avec report. Les prix viennent du catalogue backend.",
+    "loading": "Chargement des tarifs",
+    "loadingDescription": "Récupération du catalogue public de facturation.",
+    "error": "Tarifs indisponibles",
+    "errorDescription": "Le catalogue de facturation ne peut pas être chargé pour le moment.",
+    "packs": "Packs de crédits",
+    "subscriptions": "Abonnements",
+    "buyPack": "Acheter le pack",
+    "startPlan": "Démarrer l'offre",
+    "packDescription": "Crédits ponctuels pour les appels API de production.",
+    "subscriptionDescription": "Crédits mensuels avec report plafonné à {months} mois."
+  },
+  "public": {
+    "faq": {
+      "seo": {
+        "title": "FAQ - Product Data API",
+        "description": "Réponses sur la couverture, la fraîcheur, la facturation et le support de Product Data API."
+      },
+      "title": "FAQ",
+      "subtitle": "Réponses courtes pour développeurs et acheteurs qui évaluent l'API prix.",
+      "items": [
+        {
+          "question": "Quand les crédits sont-ils consommés ?",
+          "answer": "Les crédits sont consommés uniquement quand le facet demandé retourne une donnée fraîche exploitable."
+        },
+        {
+          "question": "Que se passe-t-il si le produit est introuvable ?",
+          "answer": "L'API retourne une réponse non facturable. Les produits absents ne consomment pas de crédits."
+        },
+        {
+          "question": "Le stock ou la livraison sont-ils inclus ?",
+          "answer": "Non. La v1 se limite aux offres prix sanitizées, à la fraîcheur et à la provenance."
+        }
+      ]
+    },
+    "contact": {
+      "seo": {
+        "title": "Contact - Product Data API",
+        "description": "Contacter le support ou l'équipe commerciale Product Data API."
+      },
+      "title": "Contact",
+      "subtitle": "Contactez l'équipe pour le support, la facturation ou une évaluation entreprise.",
+      "supportTitle": "Support",
+      "supportCopy": "Pour les questions compte, API ou facturation, ajoutez le nom de l'organisation et l'identifiant de requête si disponible.",
+      "salesTitle": "Commercial",
+      "salesCopy": "Pour les volumes élevés ou les questions d'achat, indiquez votre volume mensuel prévu."
+    },
+    "legal": {
+      "seo": {
+        "title": "Legal - Product Data API",
+        "description": "Documents légaux de Product Data API."
+      },
+      "title": "Legal",
+      "subtitle": "Documents de confidentialité et conditions du service Product Data API."
+    },
+    "privacy": {
+      "seo": {
+        "title": "Confidentialité - Product Data API",
+        "description": "Informations de confidentialité pour Product Data API."
+      },
+      "title": "Politique de confidentialité",
+      "subtitle": "Gestion des données de compte, de facturation et d'usage.",
+      "paragraphs": [
+        "Product Data API conserve les métadonnées de compte, organisation, authentification, facturation et usage nécessaires au service.",
+        "Les clés API sont stockées hachées. Les secrets en clair sont affichés uniquement à la création ou à la rotation.",
+        "Les usages sont conservés pour la facturation, le support, la prévention des abus et la fiabilité du service."
+      ]
+    },
+    "terms": {
+      "seo": {
+        "title": "Conditions - Product Data API",
+        "description": "Conditions d'utilisation de Product Data API."
+      },
+      "title": "Conditions d'utilisation",
+      "subtitle": "Conditions essentielles du service pour les clients Product Data API.",
+      "paragraphs": [
+        "Product Data API est fourni comme service de données produit facturé à l'usage. Les clients doivent protéger leurs clés API.",
+        "Les crédits sont facturés selon les règles no-data-no-pay documentées pour chaque facet.",
+        "La v1 expose uniquement les données de prix produit. Les facets futurs pourront être ajoutés avec leurs propres contrats."
+      ]
+    }
+  },
+  "common": {
+    "submit": "Valider",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "refresh": "Rafraîchir",
+    "close": "Fermer",
+    "time": {
+      "just_now": "À l'instant",
+      "minutes": "{count}m",
+      "hours": "{count}h",
+      "days": "{count}j"
+    },
+    "yes": "Oui",
+    "no": "Non",
+    "not_available": "-",
+    "default": "Défaut"
+  },
+  "org": {
+    "status": {
+      "pending": "En attente de validation",
+      "active": "Actif",
+      "suspended": "Suspendu"
+    },
+    "sidebar": {
+      "collapse": "Réduire le menu"
+    }
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "energy": "Energie",
+    "admin_models": "Gestion des modèles",
+    "admin_energy": "Tableau energie",
+    "admin_nodes": "Nœuds du réseau",
+    "admin_users": "Utilisateurs",
+    "sign_in": "Se connecter",
+    "logout": "Se déconnecter",
+    "account": "Compte",
+    "authenticated_as": "Connecté ({level})",
+    "admin_keys": "Clés admin",
+    "admin_organisations": "Organisations",
+    "admin_overview": "Backoffice admin",
+    "models": "Modèles",
+    "benchmarks": "Benchmarks modèles",
+    "enrollment": "Enrôler un nœud",
+    "language": "Langue",
+    "admin_docs": "Documentation backoffice",
+    "admin_pentest": "Licences pentest",
+    "playground": "Playground",
+    "manage_profile": "Gérer le profil",
+    "navigation": "Navigation",
+    "contexts": {
+      "personal": "Contexte personnel",
+      "organizations": "Organisations",
+      "platform": "Administration",
+      "admin_context": "Vue administrateur"
+    },
+    "org": {
+      "dashboard": "Tableau de bord",
+      "keys": "Clés API",
+      "nodes": "Nœuds",
+      "members": "Membres",
+      "governance": "Gouvernance",
+      "settings": "Paramètres"
+    }
+  },
+  "dashboard": {
+    "title": "Fondations du Backoffice",
+    "description": "Squelette Nuxt + Vue + Vuetify avec i18n, SEO et artefacts OpenAPI générés."
+  },
+  "benchmarks": {
+    "badge": "Méthodologie",
+    "title": "Analytique énergie d'inférence",
+    "subtitle": "Fondations neutres d'attribution énergétique par requête pour l'analytique interne et les mappings futurs.",
+    "notice": "L'ancien index benchmark public est retiré. L'analytique opérateur repose désormais sur des événements Joules par requête avec métadonnées de qualité et de confiance.",
+    "meta": {
+      "unit": "Unité canonique : Joules"
+    },
+    "metrics": {
+      "unit": "Unité d'événement",
+      "unit_caption": "Chaque événement d'inférence est stocké en Joules avant tout KPI dérivé.",
+      "derived": "Vues dérivées",
+      "derived_caption": "Les tableaux de bord calculent J/token et Wh/1k tokens à partir des données neutres.",
+      "quality": "Surcouche qualité",
+      "quality_value": "Pilotée par la confiance",
+      "quality_caption": "Niveau de méthode, incertitude et exclusions restent attachés à chaque événement."
+    },
+    "sections": {
+      "ranking": "Ce qui change"
+    },
+    "table": {
+      "event_level": "Attribution par requête",
+      "event_level_caption": "L'agent échantillonne la puissance pendant la fenêtre d'inférence et émet un événement auditable par requête.",
+      "neutral": "Métriques neutres",
+      "neutral_caption": "La plateforme conserve Joules, tokens, méthode de mesure, confiance et exclusions sans embarquer de promesse réglementaire.",
+      "compatibility": "Compatibilité future",
+      "compatibility_caption": "Des mappings de reporting additionnels restent possibles plus tard via transformation des preuves conservées."
+    }
+  },
+  "energy": {
+    "page": {
+      "badge": "Ledger énergie",
+      "title": "Consommation énergie",
+      "subtitle": "Énergie par requête consommée par vos usages API, ventilée par modèle, clé API, nœud et slot d'exécution."
+    },
+    "admin": {
+      "badge": "Vue globale",
+      "title": "Tableau d'accountability énergie",
+      "subtitle": "Preuves énergétiques consolidées par requête, client, nœud, clé API et méthode de mesure.",
+      "quality_title": "Qualité de mesure",
+      "anomalies_title": "Événements signalés"
+    },
+    "period": {
+      "24h": "24 h",
+      "7d": "7 j",
+      "30d": "30 j"
+    },
+    "load_error": "Impossible de charger l'analytique energie.",
+    "kpi": {
+      "total_energy": "Énergie totale",
+      "requests": "requêtes",
+      "efficiency": "Efficience",
+      "with_tokens": "{count} avec tokens",
+      "avg_power": "Puissance moy.",
+      "data_quality": "Événements propres",
+      "anomalies": "{count} signalés",
+      "no_anomalies": "Aucun événement signalé"
+    },
+    "chart": {
+      "title": "Energie dans le temps",
+      "no_data": "Aucun evenement energie sur cette periode.",
+      "wh_label": "Energie (Wh)"
+    },
+    "method_tiers": {
+      "device_direct_counter": "Compteur (eleve)",
+      "device_direct_sampled": "Echantillonne (moyen)",
+      "host_estimate": "Estime (faible)"
+    },
+    "breakdown": {
+      "by_api_key": "Par cle API",
+      "api_key": "Cle API",
+      "by_model": "Par modele",
+      "model": "Modele",
+      "by_node": "Par noeud",
+      "node": "Noeud",
+      "by_slot": "Par slot",
+      "slot": "Slot",
+      "by_method": "Par methode",
+      "method": "Methode",
+      "by_client": "Par client",
+      "client": "Client",
+      "energy": "Energie",
+      "efficiency": "Wh / 1k tokens",
+      "requests": "Requetes",
+      "share": "Part"
+    },
+    "ledger": {
+      "title": "Ledger des requetes",
+      "last_n": "{count} derniers evenements",
+      "col": {
+        "time": "Heure",
+        "model": "Modele",
+        "api_key": "Cle API",
+        "slot": "Slot",
+        "energy": "Energie",
+        "method": "Methode",
+        "confidence": "Confiance",
+        "anomaly": "Qualite"
+      }
+    }
+  },
+  "backend": {
+    "title": "API Backend"
+  },
+  "landing": {
+    "seo": {
+      "title": "Infera - Cloud IA souverain décentralisé",
+      "description": "Cloud IA souverain, décentralisé, économique et écologique, compatible OpenAI."
+    },
+    "nav": {
+      "product": "Produit",
+      "levels": "Niveaux",
+      "faq": "FAQ",
+      "joinBeta": "Rejoindre la beta",
+      "home": "Accueil",
+      "offers": "Offres",
+      "downloadAgent": "Télécharger l'agent",
+      "download": "Téléchargement",
+      "docs": "Documentation",
+      "pricing": "Tarifs",
+      "contact": "Contact",
+      "createAccount": "Créer un compte"
+    },
+    "hero": {
+      "badge": "Beta privée · Grid UE",
+      "subtitle": "Connectez des GPU et CPU sous-utilisés ou routez vos workloads IA via une API compatible OpenAI, conçue pour la résilience et la sobriété énergétique.",
+      "primaryCta": "Parler à l'équipe",
+      "enterpriseCta": "Découvrir les offres",
+      "providerCta": "Déployer un nœud",
+      "secondaryCta": "Consulter la documentation",
+      "surfaceEyebrow": "Un plan de contrôle, deux trajectoires",
+      "surfaceTitle": "Une orchestration commune pour le routage des requêtes et la monétisation du calcul",
+      "surfaceBadge": "Trajectoire production",
+      "client": "CLIENT",
+      "router": "ROUTER",
+      "gpuNodes": "GPU NODES",
+      "graphLabel": "Schéma réseau client, routeur, nœuds GPU",
+      "audiences": {
+        "individuals": "Particuliers",
+        "enterprises": "Entreprises",
+        "clouders": "Clouders"
+      },
+      "titlePrefix": "L'infrastructure IA",
+      "fallbackTitleWord": "souveraine",
+      "titleVariants": [
+        {
+          "text": "souveraine",
+          "effect": "fade"
+        },
+        {
+          "text": "résiliente",
+          "effect": "slide-y"
+        },
+        {
+          "text": "distribuée",
+          "effect": "slide-x"
+        },
+        {
+          "text": "sobriété",
+          "effect": "scale"
+        }
+      ],
+      "signals": {
+        "compatibility": {
+          "value": "Compatible OpenAI",
+          "label": "Conservez vos SDK et vos flux de requêtes existants."
+        },
+        "security": {
+          "value": "3 niveaux de confiance",
+          "label": "Adaptez les garanties de routage au niveau de criticité."
+        },
+        "activation": {
+          "value": "Réseau bi-face",
+          "label": "Adoptez Infera côté client ou apportez de la capacité côté fournisseur."
+        }
+      },
+      "tracks": {
+        "enterprise": {
+          "label": "Pour les entreprises",
+          "title": "Déplacer les workloads sans réécrire la stack",
+          "text": "Conservez la compatibilité client OpenAI tout en ajoutant routage, souveraineté et niveaux de confiance."
+        },
+        "provider": {
+          "label": "Pour les fournisseurs de calcul",
+          "title": "Activer des GPU sous-utilisés avec une demande pilotée par politiques",
+          "text": "Exposez la capacité locale via un modèle d'agent en pull pensé pour la sécurité et le contrôle opérationnel."
+        }
+      }
+    },
+    "orbitalHero": {
+      "metrics": {
+        "label": "Statistiques publiques du réseau pilotant l'animation orbitale",
+        "activeNodes": "Nœuds actifs publics",
+        "inferences": "Nombre de clés API",
+        "tokens": "Tokens traités",
+        "source": {
+          "live": "Stats publiques",
+          "fallback": "Stats de prévisualisation"
+        }
+      },
+      "variants": {
+        "index1": {
+          "seoTitle": "Hero réseau orbital Infera - variante aurora",
+          "seoDescription": "Variante de landing orbitale aurora pour le réseau d'inférence pair à pair Infera.",
+          "badge": "Maillage pair à pair · Routage aurora",
+          "title": "Un réseau vivant pour l'inférence souveraine",
+          "subtitle": "Les requêtes circulent dans un maillage en pull où fournisseurs GPU proches, politiques de routage et niveaux de confiance restent lisibles dans un système de mouvement premium.",
+          "primaryCta": "Télécharger",
+          "secondaryCta": "Tester gratuitement"
+        },
+        "index2": {
+          "seoTitle": "Hero réseau orbital Infera - variante particules",
+          "seoDescription": "Variante plein écran à particules pour le cloud IA décentralisé Infera.",
+          "badge": "Champ de capacité temps réel",
+          "title": "Une inférence qui respire avec le territoire",
+          "subtitle": "Un champ de cluster plein écran, seedé par l'activité des nœuds, les flux de tokens et les jobs routés, pour exprimer Infera comme un tissu de calcul pair à pair actif.",
+          "primaryCta": "Choisir un niveau de confiance",
+          "secondaryCta": "Rejoindre la grille"
+        },
+        "index3": {
+          "seoTitle": "Infera - Le Maillage Souverain pour une IA de Confiance",
+          "seoDescription": "Réseau d'inférence IA souverain, décentralisé et écologique. Rejoignez-nous en tant que fournisseur ou accédez à notre API entreprise.",
+          "badge": "Souverain · Sécurisé · Durable",
+          "title": {
+            "line1Prefix": "IA",
+            "line2Prefix": "et",
+            "words": [
+              "sobre",
+              "souveraine",
+              "moins chère",
+              "locale",
+              "frugale",
+              "écologique",
+              "mutualisée",
+              "résiliente",
+              "territoriale",
+              "économique",
+              "partagée",
+              "collective"
+            ]
+          },
+          "subtitle": "Infera, c'est le peer to peer de l'IA, le circuit court de l'inférence. Nous mettons en relation les consommateurs d'IA avec les processeurs et cartes graphiques sous-utilisées des particuliers et entreprises. Intégration 'no code' basée sur les standards du marché et options avancées de gouvernance IA pour les entreprises.",
+          "primaryCta": "Télécharger",
+          "secondaryCta": "Créer une clé"
+        }
+      }
+    },
+    "entryPoints": {
+      "title": "Quatre façons d'entrer dans Infera",
+      "subtitle": "Réduire vos coûts IA, valoriser votre puissance de calcul, fédérer une capacité locale ou gouverner vos usages IA : chaque parcours garde les standards du marché tout en visant une simplicité maximale.",
+      "badge": "Orienté cas d'usages",
+      "actions": {
+        "offers": "Explorer les offres",
+        "models": "Voir les modèles"
+      },
+      "paths": {
+        "consume": {
+          "title": "Réduction des coûts",
+          "kicker": "Pour équipes produit, DSI, data et opérations",
+          "description": "Migrez progressivement les usages compatibles open-weight vers une API compatible OpenAI, sans réécrire vos intégrations. Commencez par les flux à ROI rapide, puis étendez les règles de coût, résidence, disponibilité et confiance.",
+          "tag": "Demande",
+          "cta": "Offre entreprise",
+          "points": {
+            "1": "Conservez vos SDK, prompts, clés API et quotas pendant la transition.",
+            "2": "Priorisez RAG, extraction, classification, support interne et batch documentaire.",
+            "3": "Routez selon coût, latence, disponibilité et niveau Public, Trusted ou régulé."
+          },
+          "chips": {
+            "openai": "OpenAI-compatible",
+            "rag": "RAG & extraction",
+            "policies": "Routage par politiques"
+          }
+        },
+        "provide": {
+          "title": "Rentabilisez votre matériel",
+          "kicker": "Pour particuliers, entreprises, associations,...",
+          "description": "Faites contribuer une machine ou une flotte quand elle est disponible, sans exposer LocalAI directement et sans déplacer les clés privées hors du nœud.",
+          "tag": "Offre",
+          "cta": "Parcours fournisseur",
+          "points": {
+            "1": "L'agent récupère les tâches en pull : pas de surface de push entrant depuis le routeur.",
+            "2": "Vous gardez le contrôle des plages, du niveau d'engagement et de l'arrêt du nœud.",
+            "3": "La capacité utile peut devenir monétisable quand elle correspond aux besoins du réseau."
+          },
+          "chips": {
+            "pull": "Agent en pull",
+            "control": "Contrôle local",
+            "earn": "Revenus potentiels"
+          }
+        },
+        "federate": {
+          "title": "Fédérer une capacité locale",
+          "kicker": "Pour institutions, territoires et clouders",
+          "description": "Assemblez des acteurs de confiance autour d'une capacité IA gouvernée : continuité de service, mutualisation locale, souveraineté mesurable et règles communes.",
+          "tag": "Fédération",
+          "cta": "Offre institutionnelle",
+          "points": {
+            "1": "Organisez collectivités, campus, hôpitaux, associations, entreprises ou clouders par périmètre.",
+            "2": "Décidez des priorités, des niveaux de confiance et des routes de secours avant la production.",
+            "3": "Rendez visibles les coûts, l'énergie, la disponibilité et les preuves d'audit utiles."
+          },
+          "chips": {
+            "territories": "Territoires",
+            "clouders": "Clouders",
+            "continuity": "Continuité IA"
+          }
+        },
+        "govern": {
+          "title": "Gouverner vos API IA",
+          "kicker": "Pour DSI, sécurité, conformité et finance",
+          "description": "Centralisez le pilotage des usages IA : politiques de routage, pistes d'audit, détection de données sensibles, privacy, coûts, quotas et niveaux de confiance.",
+          "tag": "Gouvernance",
+          "cta": "Parcours entreprise",
+          "points": {
+            "1": "Suivez qui consomme quoi, via quelle clé, quel modèle et quel niveau de confiance.",
+            "2": "Ajoutez des contrôles privacy et audit avant d'élargir les usages.",
+            "3": "Gardez les modèles frontier ailleurs si nécessaire, tout en pilotant les routes open-weight pertinentes."
+          },
+          "chips": {
+            "audit": "Pistes d'audit",
+            "privacy": "Privacy detection",
+            "costs": "Pilotage coûts"
+          }
+        }
+      },
+      "modelRail": {
+        "badge": "Du cas d'usage au modèle",
+        "title": "Une offre n'est crédible que si le modèle, le matériel et le niveau de confiance sont alignés.",
+        "subtitle": "Le catalogue aide à cadrer les usages réalistes : assistants internes, recherche documentaire, extraction, classification, code, vision, audio et traitements batch.",
+        "families": {
+          "chat": "Chat",
+          "code": "Code",
+          "embeddings": "Embeddings",
+          "vision": "Vision",
+          "speech": "Audio",
+          "image-gen": "Image"
+        }
+      }
+    },
+    "heroSplit": {
+      "mapBadge": "Stats publiques · {count} nœuds actifs",
+      "benefits": {
+        "sovereign": "Souverain",
+        "compatible": "Compatible OpenAI",
+        "ecological": "Écologique"
+      }
+    },
+    "nodeMap": {
+      "health": "{status} · {score}% de disponibilité"
+    },
+    "mapExplainer": {
+      "badge": "Stats publiques",
+      "title": "Le réseau Infera",
+      "subtitle": "Les marqueurs représentent les nœuds réels du réseau.",
+      "activeNodesBadge": "Stats publiques · {count} nœuds actifs",
+      "ctaOffers": "Voir les offres",
+      "ctaDeploy": "Déployer un nœud",
+      "noKey": "Carte en cours de configuration",
+      "items": {
+        "decentralized": {
+          "title": "Décentralisé par nature",
+          "text": "Les GPU et CPU des particuliers et entreprises sont répartis géographiquement."
+        },
+        "proximity": {
+          "title": "Calcul proche des données",
+          "text": "Routage intelligent vers les nœuds les plus disponibles et géographiquement proches."
+        },
+        "sovereign": {
+          "title": "Souverain et conforme",
+          "text": "Aucune dépendance aux hyperscalers. Contrôle par politiques de confiance, des options fortes de Gouvernance IA"
+        }
+      }
+    },
+    "why": {
+      "title": "Pourquoi Infera",
+      "items": {
+        "sovereignty": {
+          "title": "Souveraineté",
+          "description": "Décentralisation native et indépendance vis-à-vis des hyperscalers."
+        },
+        "compatibility": {
+          "title": "Intégration simple",
+          "description": "Compatibilité OpenAI pour conserver vos flux existants."
+        },
+        "security": {
+          "title": "Sécurité par niveaux",
+          "description": "Grilles Public, Trusted et HDS selon le niveau de criticité."
+        }
+      }
+    },
+    "levels": {
+      "title": "Trois niveaux de grille",
+      "public": {
+        "title": "Grid Public",
+        "label": "Dev / tests",
+        "points": {
+          "1": "Nœuds anonymes",
+          "2": "Workloads non critiques",
+          "3": "Compatibilité OpenAI",
+          "4": "Sans engagement"
+        }
+      },
+      "trusted": {
+        "title": "Trusted",
+        "label": "Production B2B",
+        "points": {
+          "1": "Nœuds vérifiés",
+          "2": "SLA 99.5%",
+          "3": "Monitoring 24/7",
+          "4": "Routage géographique UE"
+        },
+        "badge": "Le plus populaire"
+      },
+      "hds": {
+        "title": "HDS",
+        "label": "Médical / finance",
+        "points": {
+          "1": "Nœuds certifiés",
+          "2": "Isolation forte",
+          "3": "Chiffrement bout en bout",
+          "4": "Audit trail complet"
+        }
+      }
+    },
+    "how": {
+      "title": "Comment ça marche",
+      "subtitle": "Un chemin de production pensé pour rester simple côté client et maîtrisé côté fournisseur.",
+      "badge": "Flux opérationnel",
+      "client": "Client B2B (SDK OpenAI)",
+      "router": "Orchestrateur / Router Infera",
+      "network": "Réseau GPU (LocalAI + HIA Agent)",
+      "steps": {
+        "client": {
+          "description": "Les applications gardent une surface API familière tout en choisissant l'enveloppe de confiance adaptée à chaque workload.",
+          "points": {
+            "1": "Envoyez les requêtes via des endpoints compatibles OpenAI.",
+            "2": "Réduisez le coût de migration pour les équipes produit et ingénierie."
+          }
+        },
+        "router": {
+          "description": "Le plan de contrôle évalue routage, niveau de confiance et disponibilité avant de distribuer le travail.",
+          "points": {
+            "1": "Appliquez un placement piloté par politiques sur les grilles public, trusted ou régulées.",
+            "2": "Coordonnez offre et demande sans exposer les détails internes des fournisseurs."
+          }
+        },
+        "network": {
+          "description": "Les agents tirent les tâches depuis le réseau et exécutent l'inférence au plus près du matériel.",
+          "points": {
+            "1": "Conservez les clés privées sur le nœud et imposez le mTLS entre services.",
+            "2": "Servez l'inférence locale via un accès contrôlé par sidecar."
+          }
+        }
+      }
+    },
+    "metrics": {
+      "title": "Économique & écologique",
+      "subtitle": "La sobriété devient utile quand elle est mesurable : capacité existante, routage par usage et preuves exportables pour les équipes RSE, achats et finance.",
+      "items": {
+        "cost": {
+          "value": "-40%",
+          "label": "Coût moyen vs cloud"
+        },
+        "commitment": {
+          "value": "0€",
+          "label": "Engagement initial"
+        },
+        "datacenter": {
+          "value": "0",
+          "label": "Nouveau datacenter"
+        }
+      },
+      "carbon": {
+        "badge": "Différenciant écologique",
+        "title": "Comptabilité carbone IA compatible CSRD Scope 3",
+        "description": "Infera relie tokens, modèles, pools d'exécution, périodes et signaux d'énergie pour donner une lecture exploitable de l'empreinte IA, pas seulement une estimation globale.",
+        "points": {
+          "usage": "Mesure par usage pour distinguer expérimentation, production, batch et fallback.",
+          "scope3": "Lecture compatible CSRD Scope 3 pour les achats de services numériques et les usages IA externalisés.",
+          "exports": "Exports conçus pour rapprocher consommation, coût, localisation logique et niveau de confiance des données."
+        },
+        "badges": {
+          "csrd": "CSRD-ready",
+          "scope3": "Scope 3",
+          "audit": "Audit RSE"
+        }
+      }
+    },
+    "networkMap": {
+      "badge": "Stats publiques",
+      "title": "Voir la capacité des nœuds avant de router une charge",
+      "subtitle": "La carte réseau affiche les nœuds directs avec statut, matériel, runtime et modèles prêts depuis les données GeoIP du backend.",
+      "mapSubtitle": "Capacité directe des nœuds et région approximative de visite.",
+      "empty": "Aucune localisation de nœud public n'est disponible pour le moment.",
+      "error": "La carte publique des nœuds est temporairement indisponible."
+    },
+    "faq": {
+      "title": "FAQ",
+      "items": {
+        "1": {
+          "q": "Comment la latence est-elle optimisée ?",
+          "a": "Le routeur choisit le nœud disponible le plus proche géographiquement."
+        },
+        "2": {
+          "q": "Quel SLA selon le niveau ?",
+          "a": "Public est en best effort, Trusted est monitoré, HDS est contractuel."
+        },
+        "3": {
+          "q": "Quelles garanties conformité ?",
+          "a": "UE, RGPD, HDS et SecNumCloud guident la sélection des environnements."
+        },
+        "4": {
+          "q": "Comment sont sélectionnés les fournisseurs ?",
+          "a": "KYC, scoring de réputation et vérifications opérationnelles."
+        },
+        "5": {
+          "q": "Quels modèles sont disponibles ?",
+          "a": "Des modèles open-weight servis via LocalAI selon la grille cible."
+        },
+        "6": {
+          "q": "Compatibilité SDK OpenAI ?",
+          "a": "Oui, les endpoints principaux sont conservés pour réduire le coût de migration."
+        }
+      }
+    },
+    "join": {
+      "title": "Rejoignez le réseau.",
+      "subtitle": "Accès prioritaire à la beta, que vous veniez apporter du calcul ou basculer vos requêtes IA.",
+      "placeholder": "email professionnel",
+      "cta": "Rejoindre",
+      "note": "Zéro spam. Un seul email quand votre accès est prêt.",
+      "success": "Merci, votre demande prioritaire est enregistrée."
+    },
+    "footer": {
+      "baseline": "Données prix produit fraîches par GTIN avec facturation no-data-no-pay.",
+      "product": "Produit",
+      "resources": "Ressources",
+      "legal": "Légal",
+      "signature": "INFERA SYSTEM © 2026",
+      "variants": "v0 · v1 dark · v2 soft · v3 editorial",
+      "docs": "Documentation"
+    }
+  },
+  "health": {
+    "form_title": "Rafraîchir la santé",
+    "status": "Statut global",
+    "components": "Composants",
+    "status_values": {
+      "UP": "Disponible",
+      "DOWN": "Indisponible",
+      "DEGRADED": "Dégradé",
+      "OUT_OF_SERVICE": "Hors service",
+      "UNKNOWN": "Inconnu"
+    },
+    "table": {
+      "component": "Composant",
+      "status": "Statut"
+    }
+  },
+  "errors": {
+    "bad_request": "Requête invalide.",
+    "unauthorized": "Authentification requise.",
+    "forbidden": "Accès interdit.",
+    "not_found": "Ressource introuvable.",
+    "gone": "La ressource n'est plus disponible.",
+    "conflict": "Conflit détecté.",
+    "validation_error": "Échec de validation.",
+    "rate_limited": "Trop de requêtes.",
+    "internal_error": "Erreur interne serveur.",
+    "network_error": "Backend inaccessible depuis cette page.",
+    "action_must_be_approve_or_deny": "Choisissez approuver ou refuser.",
+    "challenge_agent_mismatch": "Le challenge d'enrôlement ne correspond pas à ce nœud.",
+    "challenge_expired": "Le challenge d'enrôlement a expiré.",
+    "challenge_invalid_data": "Les données du challenge d'enrôlement sont invalides.",
+    "challenge_not_approved": "Le challenge d'enrôlement n'a pas été approuvé.",
+    "challenge_not_found": "Challenge d'enrôlement introuvable.",
+    "invalid_bootstrap_key": "Clé d'amorçage d'enrôlement invalide.",
+    "otp_invalid": "Jeton d'enrôlement invalide.",
+    "otp_missing": "Jeton d'enrôlement manquant.",
+    "bad_gateway": "Erreur de passerelle.",
+    "service_unavailable": "Service indisponible.",
+    "unknown_error": "Erreur inattendue."
+  },
+  "error_pages": {
+    "back_home": "Retour à l'accueil",
+    "404": {
+      "title": "Page introuvable",
+      "subtitle": "Le chemin que vous recherchez n'existe pas ou a été déplacé vers une autre coordonnée du maillage Infera."
+    },
+    "500": {
+      "title": "Instabilité du maillage",
+      "subtitle": "Une erreur inattendue est survenue lors du traitement de votre requête. Nos opérateurs ont été prévenus."
+    },
+    "generic": {
+      "title": "Erreur inattendue",
+      "subtitle": "Un problème est survenu dans le plan de contrôle. Veuillez réessayer plus tard."
+    }
+  },
+  "nodes": {
+    "title": "Nœuds enregistrés",
+    "description": "Vue admin des nœuds enregistrés et en ligne.",
+    "filters": {
+      "search": "Recherche",
+      "status": "Statut",
+      "tier": "Tier",
+      "model": "ID Modèle"
+    },
+    "fields": {
+      "node_id": "Nœud",
+      "status": "Statut",
+      "tier": "Tier",
+      "last_seen": "Dernière activité",
+      "availability": "Disponibilité",
+      "hardware": "Matériel",
+      "ip_masked": "IP masquée",
+      "models": "Modèles",
+      "geo": "Géo",
+      "agent_version": "Version agent",
+      "localai_version": "Version LocalAI",
+      "gpu_model": "Modèle GPU",
+      "gpu_vram_mb": "VRAM GPU (MB)",
+      "cert_serial": "Série certificat",
+      "cert_expires_at": "Expiration certificat",
+      "trust_level": "Niveau de confiance",
+      "live_metrics": "Métriques GPU en direct",
+      "capable_models": "Modèles compatibles (Matériel)",
+      "active_models": "Modèles actifs (Provisionnés)",
+      "raw_metadata": "Métadonnées brutes",
+      "actions": "Actions",
+      "asn_number": "Numéro ASN",
+      "asn_organization": "Organisation ASN",
+      "cert_issuer": "Émetteur du certificat",
+      "mtls_last_handshake": "Dernier handshake mTLS"
+    },
+    "hardware": {
+      "gpu": "GPU",
+      "cpu": "CPU",
+      "vram_mb": "{count} MB de VRAM",
+      "vram_free_mb": "{count} MB libres",
+      "unified_memory": "mémoire unifiée",
+      "cpu_cores": "{count} cœurs logiques",
+      "ram_gb": "{count} Go RAM",
+      "weights_mb": "Poids: {count} Mo",
+      "kv_cache_mb": "KV Cache: {count} Mo",
+      "vram_used_mb": "{count} Mo utilisés",
+      "backend": "Backend : {backend}",
+      "agent": "agent {version}",
+      "localai": "LocalAI {version}",
+      "runtime_unknown": "Informations runtime indisponibles",
+      "slot_title": "Slot {kind} {slot}",
+      "loaded_models": "Modèles chargés",
+      "offloaded_models": "Modèles déchargés",
+      "installed_models": "Modèles installés",
+      "no_loaded_models": "Aucun modèle chargé",
+      "no_offloaded_models": "Aucun modèle déchargé"
+    },
+    "identity": {
+      "os_unknown": "Système d'exploitation inconnu"
+    },
+    "actions": {
+      "details": "Détails",
+      "close": "Fermer",
+      "refresh": "Rafraîchir",
+      "open_page": "Ouvrir la page",
+      "open_terminal": "Ouvrir terminal",
+      "open_node": "Ouvrir le nœud {node}",
+      "retire": "Retirer le nœud"
+    },
+    "quick": {
+      "all": "Tous"
+    },
+    "last_refresh": "Dernière mise à jour : {date}",
+    "hero": {
+      "active_nodes": "Nœuds actifs",
+      "total_nodes": "Nœuds totaux",
+      "total_tokens": "Total des tokens traités",
+      "active_caption": "Nœuds actuellement disponibles pour le routage.",
+      "total_caption": "Nœuds fournisseurs enregistrés dans le plan de contrôle.",
+      "tokens_caption": "Volume d'inférence comptabilisé sur la flotte."
+    },
+    "table": {
+      "loading": "Chargement des nœuds...",
+      "empty": "Aucun nœud ne correspond aux filtres."
+    },
+    "map": {
+      "title": "Localisation des nœuds",
+      "empty": "Aucun nœud géolocalisé pour les filtres courants.",
+      "missing_api_key": "La clé Google Maps est manquante. Définissez NUXT_PUBLIC_GOOGLE_MAPS_API_KEY.",
+      "load_error": "Le chargement de Google Maps a échoué.",
+      "user_location": "Votre région approximative",
+      "unknown_location": "Localisation indisponible",
+      "admin_subtitle": "Cliquez sur un marqueur pour inspecter la santé, le matériel et la récence du nœud sans quitter la flotte.",
+      "engine_cinematic": "Cinématique",
+      "cinematic_hint": "Vue pulsée globale - passez sur Google pour le détail opérationnel",
+      "slots": "Slots",
+      "slots_empty": "Aucun slot signalé",
+      "slots_count": "{count} slots",
+      "slots_with_capacity": "{count} slots · {inflight}/{max} en cours",
+      "models": "Modèles",
+      "installed_count": "{count} installés",
+      "runtime": "Runtime",
+      "mode_night": "Globe nuit",
+      "mode_light": "Globe clair",
+      "mode_terrain": "Globe relief"
+    },
+    "large_view": {
+      "title": "Détails du nœud",
+      "loading": "Chargement des détails du nœud...",
+      "empty": "Sélectionnez un nœud pour charger tous les détails."
+    },
+    "status": {
+      "UP": "En ligne",
+      "DOWN": "Hors ligne",
+      "DEGRADED": "Dégradé",
+      "OUT_OF_SERVICE": "Hors service",
+      "RETIRED": "Retiré",
+      "REVOKED": "Révoqué",
+      "UNKNOWN": "Inconnu"
+    },
+    "lifecycle": {
+      "INIT": "Initialisation",
+      "SCANNING_HARDWARE": "Analyse matérielle",
+      "MODELS_SELECTED": "Modèles sélectionnés",
+      "STARTING_LOCALAI": "Démarrage LocalAI",
+      "DOWNLOADING_MODELS": "Téléchargement modèles",
+      "MODELS_DOWNLOADED": "Modèles téléchargés",
+      "VERIFYING_MODELS": "Vérification modèles",
+      "BENCHMARKING": "Benchmark",
+      "BENCHMARKED": "Benchmark terminé",
+      "ENROLLING": "Enrôlement",
+      "PROJECTION_READY": "Projection prête",
+      "STARTING_WORKER": "Démarrage worker",
+      "STARTING": "Démarrage",
+      "RUNNING": "En service",
+      "MODELS_SKIPPED": "Modèles ignorés",
+      "OFFLINE": "Hors ligne",
+      "RETIRED": "Retiré",
+      "UNKNOWN": "Inconnu",
+      "unknown": "Inconnu"
+    },
+    "retire": {
+      "title": "Retirer le nœud",
+      "subtitle": "Cette action révoque {nodeId} et le retire du routage. La machine devra être enrôlée à nouveau avant de servir du trafic.",
+      "reason": "Motif",
+      "confirm": "Retirer le nœud",
+      "error": "Impossible de retirer ce nœud."
+    },
+    "detail": {
+      "back_to_list": "Retour aux nœuds",
+      "refresh_node": "Rafraîchir le nœud",
+      "metrics": "Métriques du nœud",
+      "cached_models": "Modèles en cache",
+      "uptime": "Disponibilité continue",
+      "fleet_context": "Contexte flotte",
+      "security_runtime": "Sécurité et runtime",
+      "lifecycle": "Phase de démarrage",
+      "lifecycle_timeline": "Chronologie de démarrage",
+      "lifecycle_empty": "Aucun événement de cycle de vie signalé.",
+      "lifecycle_updated": "Mis à jour",
+      "lifecycle_step": "Étape {step}/{total}",
+      "metadata": "Métadonnées",
+      "metadata_empty": "Aucune métadonnée exposée pour ce nœud.",
+      "seo_title": "Nœud {nodeId} - détails",
+      "seo_description": "Métriques runtime et détails admin pour le nœud {nodeId}.",
+      "trust_levels": {
+        "none": "Standard (Non vérifié)",
+        "verified": "Trusted (Vérifié)",
+        "hds": "HDS (Certifié)",
+        "standard": "Standard",
+        "trusted": "Trusted"
+      },
+      "network_identity": "Identité réseau",
+      "tab_overview": "Aperçu",
+      "tab_stats": "Statistiques",
+      "tab_history": "Historique",
+      "tab_security": "Sécurité",
+      "hardware_identity": "Identité matérielle",
+      "geo_network": "Géo & réseau",
+      "cert_trust": "Certificat & confiance",
+      "runtime_section": "Runtime",
+      "all_phases": "Toutes les phases",
+      "inflight_capacity": "Capacité inflight",
+      "availability_caption": "Score pondéré depuis l'historique heartbeat",
+      "no_hardware_data": "Aucune empreinte matérielle disponible.",
+      "no_geo_data": "Aucune donnée de géolocalisation disponible."
+    },
+    "card": {
+      "availability": "Disponibilité {score}",
+      "subtitle_default": "Aucune désignation opérateur disponible",
+      "last_seen": "Dernière activité",
+      "live_routing": "Routage live",
+      "live_routing_caption": "Capacités publiées par le heartbeat actif du nœud.",
+      "models_live": "modèles live",
+      "loaded_count": "{count} chargés",
+      "offloaded_count": "{count} déchargés",
+      "slot_inflight": "{inflight}/{max} en cours",
+      "no_live_models": "Aucun modèle chargé dans le routage live.",
+      "no_offloaded_models": "Aucun modèle déchargé.",
+      "provisioned_inventory": "Inventaire provisionné",
+      "provisioned_inventory_caption": "Modèles détectés par le scanner LocalAI et annoncés comme provisionnés. Ils peuvent encore être hors ligne pour le routage.",
+      "models_provisioned": "modèles provisionnés",
+      "compatible_models": "{count} compatibles",
+      "json_fields": "{count} flux JSON",
+      "provisioned_models_label": "Modèles provisionnés",
+      "capable_models_label": "Modèles compatibles",
+      "no_provisioned_models": "Aucun modèle provisionné dans le résumé du scanner.",
+      "no_capable_models": "Aucun modèle compatible listé.",
+      "runtime_caption": "Identité, runtime et posture de sécurité du nœud.",
+      "raw_snapshot": "Instantané JSON",
+      "raw_snapshot_caption": "Documents structurés extraits des métadonnées du nœud.",
+      "profile_summary": "Résumé de profil",
+      "system_fingerprint": "Empreinte système",
+      "geoip_full": "Enregistrement GeoIP complet",
+      "metadata_fields": "Autres champs",
+      "no_metadata": "Aucun autre champ de métadonnée.",
+      "provisioning_gap": "Ce nœud annonce des modèles provisionnés dans le résumé scanner, mais aucun slot live ne les expose encore pour le routage. La sélection de clés reste donc volontairement bloquée.",
+      "provisioning_breakdown": "Répartition du provisioning"
+    },
+    "json": {
+      "object": "Objet JSON",
+      "array": "Tableau JSON",
+      "empty_object": "Objet vide",
+      "empty_array": "Tableau vide"
+    },
+    "model_modal": {
+      "title": "Détails du modèle",
+      "unknown_model": "Modèle introuvable dans le registre: {modelId}"
+    },
+    "charts": {
+      "status_title": "Répartition des statuts du parc",
+      "availability_title": "Répartition de la disponibilité",
+      "average_availability": "Score moyen de disponibilité",
+      "high_availability_nodes": "Nœuds avec disponibilité ≥ 95 %"
+    },
+    "tabs": {
+      "nodes": "Nœuds",
+      "statistics": "Statistiques",
+      "map_google": "Carte Google",
+      "map_globe": "Globe 3D"
+    },
+    "view": {
+      "list": "Liste",
+      "cards": "Cartes"
+    },
+    "stats": {
+      "status_chart": "Répartition des statuts",
+      "tier_chart": "Répartition par tier",
+      "gpu_cpu_chart": "Nœuds GPU / CPU",
+      "gpu_nodes": "GPU",
+      "cpu_nodes": "CPU uniquement",
+      "slot_occupancy": "Occupation des slots",
+      "slots_running": "{inflight} / {max} en cours",
+      "slots_none": "Aucun slot actif",
+      "top_models": "Top modèles par couverture",
+      "model_node_count": "{count} nœud | {count} nœuds",
+      "availability_histogram": "Distribution de la disponibilité",
+      "histogram_bucket": "{from}-{to}%",
+      "session_trend": "Tendance en direct",
+      "session_trend_caption": "Échantillonné toutes les 30s · remis à zéro au rechargement",
+      "no_trend_data": "Accumulation en cours - revenez dans un instant.",
+      "active_nodes_series": "Nœuds actifs",
+      "tokens_series": "Total tokens (M)",
+      "no_models": "Aucune donnée modèle disponible."
+    },
+    "mine": {
+      "title": "Mes nœuds",
+      "subtitle": "Suivez l'état de vos nœuds enrôlés et leur runtime."
+    },
+    "terminal": {
+      "title": "Terminal Live : {nodeId}",
+      "select_container": "Sélectionner conteneur",
+      "connecting": "Connexion au flux du conteneur",
+      "connected": "Connecté au conteneur. Vous pouvez saisir des commandes.",
+      "disconnected": "Session déconnectée",
+      "placeholder": "Saisissez une commande et Entrée...",
+      "connect_first": "Connectez-vous pour interagir",
+      "ready_to_connect": "Sélectionnez un conteneur et cliquez sur connecter pour démarrer une session interactive.",
+      "actions": {
+        "connect": "Connecter",
+        "disconnect": "Déconnecter"
+      },
+      "errors": {
+        "connection_failed": "Échec de la connexion WebSocket.",
+        "session_failed": "Impossible de créer le jeton de session terminal."
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Connexion",
+      "googleInfo": "Mode PoC : collez un ID token Google valide pour vous authentifier.",
+      "googleToken": "ID token Google",
+      "googleTokenHint": "Obtenez ce token via le flux Google Sign-In (OIDC).",
+      "googleTokenRequired": "Veuillez fournir un ID token Google.",
+      "googleOneClick": "Google en 1 clic",
+      "googleOneClickHint": "Ouvre le sélecteur Google et pré-remplit automatiquement le token.",
+      "googleClientIdMissing": "Client ID Google manquant. Définissez NUXT_PUBLIC_GOOGLE_OIDC_CLIENT_ID.",
+      "submit": "Se connecter avec Google",
+      "failed": "Échec de l'authentification. Veuillez réessayer.",
+      "provider": "Fournisseur OIDC",
+      "providers": {
+        "google": "Google",
+        "microsoft": "Microsoft",
+        "github": "GitHub",
+        "france_sso": "France SSO",
+        "france_connect": "FranceConnect",
+        "apple": "Apple"
+      },
+      "insufficientRole": "Rôle insuffisant : requis={required}, courant={current}.",
+      "subtitle": "Enregistrement et connexion en un clic   ",
+      "description": "Connectez-vous avec Google pour gérer vos nœuds, suivre la santé du réseau et industrialiser vos workloads IA.",
+      "signInCta": "Se connecter / s'identifier avec Google",
+      "acceptTermsPlaceholder": "J'accepte les conditions générales. C'est un POC, RGPD non garanti",
+      "acceptTermsRequired": "Veuillez accepter les conditions et la politique de confidentialité pour continuer.",
+      "googleFallbackHint": "La connexion rapide n'est pas disponible. Cliquez sur le bouton ci-dessous pour continuer avec Google.",
+      "seo": {
+        "title": "Infera - Connexion",
+        "description": "Connectez-vous pour accéder à votre backoffice Infera, console admin et opérations nœuds."
+      },
+      "signInWith": "Se connecter avec {provider}",
+      "acceptPrefix": "J'accepte les",
+      "terms": "Conditions d'utilisation",
+      "and": "et la",
+      "privacy": "Politique de confidentialité",
+      "tagline": "Le réseau mutualisé pour l'inférence IA de confiance.",
+      "altProvider": "ou continuer avec",
+      "providerUnavailable": "Ce fournisseur n'est pas encore configuré.",
+      "franceConnect": {
+        "title": "FranceConnect",
+        "body": "Bientôt disponible."
+      },
+      "trust": {
+        "decentralized": "Décentralisé",
+        "zeroTrust": "Sécurité zéro-confiance",
+        "enterprise": "Prêt pour l'entreprise"
+      }
+    }
+  },
+  "offers": {
+    "seo": {
+      "title": "Infera - Offres par audience",
+      "description": "Naviguez entre les offres particuliers, entreprises et institutionnelles avec un menu unifié."
+    },
+    "hero": {
+      "title": "Offres Infera",
+      "subtitle": "Choisissez le bon niveau d'engagement : contribuer de la capacité, industrialiser vos usages IA ou organiser une grille territoriale de confiance."
+    },
+    "menu": {
+      "title": "Menu des offres",
+      "items": {
+        "particuliers": {
+          "title": "Particuliers",
+          "subtitle": "Monétiser le calcul inutilisé et rejoindre la grille"
+        },
+        "entreprises": {
+          "title": "Entreprises",
+          "subtitle": "API souveraine, gouvernance et opérations résilientes"
+        },
+        "institutionnelles": {
+          "title": "Institutions & territoires",
+          "subtitle": "Gouvernance territoriale, mutualisation et résilience"
+        }
+      }
+    },
+    "overview": {
+      "badge": "Règles business",
+      "title": "Packaging orienté audience",
+      "description": "Le même réseau Infera se positionne différemment selon les attentes, la gouvernance et les contraintes d'achat.",
+      "points": {
+        "1": "Conserver une facturation token transparente et auditable.",
+        "2": "Séparer l'usage de la grille de base des garanties de fallback.",
+        "3": "Exposer les items roadmap (batch mode, P2P) comme options contractualisables."
+      },
+      "docs": {
+        "title": "Documentation de référence",
+        "description": "Les offres commerciales, multiplicateurs tarifaires et justifications de packaging sont documentés dans les docs publiques.",
+        "cta": "Ouvrir la documentation"
+      }
+    },
+    "audiences": {
+      "particuliers": {
+        "seo": {
+          "title": "Infera - Rentabiliser son PC avec l'IA souveraine",
+          "description": "Estimez les revenus possibles de votre PC, choisissez votre niveau d'engagement et téléchargez l'agent Infera."
+        },
+        "hero": {
+          "badge": "Pour gamers, créateurs et PC qui dorment trop",
+          "title": "Rentabilisez votre PC au service d'une IA souveraine.",
+          "subtitle": "Votre machine peut faire tourner des modèles d'IA pour le réseau Infera quand vous ne l'utilisez pas. Vous choisissez votre niveau d'engagement, vous gardez le contrôle, et votre capacité utile peut générer une rémunération.",
+          "primaryCta": "Estimer mes revenus",
+          "secondaryCta": "Télécharger l'agent",
+          "signals": {
+            "earn": {
+              "title": "Votre GPU peut rapporter",
+              "text": "Transformez les heures creuses de votre machine en capacité IA rémunérée."
+            },
+            "control": {
+              "title": "Vous restez aux commandes",
+              "text": "Démarrez, mettez en pause ou ajustez votre disponibilité selon votre usage."
+            },
+            "mission": {
+              "title": "Utile, pas juste rentable",
+              "text": "Vous aidez à construire une alternative IA plus distribuée, locale et souveraine."
+            }
+          }
+        },
+        "rig": {
+          "status": "Agent prêt à recevoir du calcul",
+          "gpu": "GPU disponible",
+          "workload": "Tâches IA envoyées quand la machine est libre",
+          "items": {
+            "idle": "Travaille surtout sur vos créneaux disponibles.",
+            "paid": "Rémunération liée à la capacité réellement utile.",
+            "sovereign": "Contribution à une infrastructure IA européenne."
+          }
+        },
+        "how": {
+          "badge": "Simple à comprendre",
+          "title": "Votre PC devient un petit nœud de calcul IA.",
+          "subtitle": "Infera met en relation des besoins d'inférence IA avec des machines disponibles. Pour vous, l'expérience doit rester simple : installer, choisir quand contribuer, suivre ce que cela rapporte.",
+          "steps": {
+            "install": {
+              "title": "Installez l'agent",
+              "text": "Vous téléchargez l'agent Infera, puis votre machine prépare l'environnement nécessaire sans exposer vos outils IA directement sur Internet."
+            },
+            "schedule": {
+              "title": "Choisissez vos moments",
+              "text": "Vous pouvez viser les heures creuses, les nuits, les journées où le PC reste allumé, ou un engagement plus sérieux si vous avez une machine dédiée."
+            },
+            "compute": {
+              "title": "Le réseau envoie du travail",
+              "text": "Quand votre nœud est disponible, il récupère des tâches IA adaptées à son profil. Votre machine travaille pour des usages réels, pas pour un benchmark inutile."
+            },
+            "earn": {
+              "title": "Vous suivez la rémunération",
+              "text": "Le revenu dépend de votre matériel, de la demande, de la disponibilité et du niveau d'engagement accepté par le réseau."
+            }
+          }
+        },
+        "simulator": {
+          "badge": "À vous de jouer",
+          "title": "Estimez ce que votre machine peut rapporter.",
+          "subtitle": "Le simulateur détecte les signaux disponibles depuis le navigateur, estime le profil de votre matériel et compare le potentiel Public avec le surcroît Trusted.",
+          "note": "Lecture volontairement agressive mais honnête : ce n'est pas un revenu garanti. C'est une projection de potentiel selon votre matériel, votre disponibilité et la demande du réseau."
+        },
+        "tiers": {
+          "badge": "Deux façons de s'engager",
+          "title": "Plus vous apportez de confiance, plus votre capacité a de valeur.",
+          "subtitle": "Tout le monde ne veut pas dédier une machine complète. Infera sépare donc le mode souple pour PC personnel et le mode Trusted pour les contributeurs prêts à aller plus loin.",
+          "items": {
+            "public": {
+              "title": "Public",
+              "subtitle": "Le mode souple pour votre PC de tous les jours",
+              "text": "Vous contribuez quand votre machine est disponible, sans transformer votre setup en serveur permanent. C'est le chemin le plus naturel pour démarrer, tester le revenu potentiel et garder votre confort d'usage.",
+              "points": {
+                "gaming": "Vous pouvez continuer à jouer, créer ou travailler à côté.",
+                "simple": "Installation orientée utilisateur, sans jargon d'infrastructure.",
+                "flexible": "Vous contrôlez les moments où la machine participe."
+              }
+            },
+            "trusted": {
+              "title": "Trusted",
+              "subtitle": "Le mode premium pour capacité plus qualifiée",
+              "text": "Trusted vise les charges qui demandent plus de confiance. En échange d'une rémunération potentiellement supérieure, la machine doit démarrer sur un environnement dédié ou contrôlé, avec moins d'improvisation.",
+              "points": {
+                "premium": "Capacité mieux valorisée quand le réseau a besoin de garanties.",
+                "dedicated": "Pensé pour machine dédiée, dual boot ou système d'exploitation contrôlé.",
+                "secure": "Parcours plus strict pour inspirer confiance aux clients finaux."
+              }
+            }
+          }
+        },
+        "apple": {
+          "badge": "Apple user ? Lucky guys :)",
+          "chip": "Trusted par défaut",
+          "title": "Apple Silicon part directement avec un avantage.",
+          "text": "Grâce aux caractéristiques matérielles et à l'intégration forte des machines Apple récentes, Infera présente les nœuds Apple comme candidats Trusted par défaut. Pour l'utilisateur, cela veut dire une histoire plus premium : votre machine peut rejoindre directement le tiers sécurisé, avec une capacité mieux qualifiée pour le réseau.",
+          "cta": "Télécharger pour macOS"
+        },
+        "security": {
+          "badge": "Sécurité sans prise de tête",
+          "title": "Votre PC contribue. Il ne devient pas une porte ouverte.",
+          "subtitle": "Le produit doit rester compréhensible : l'agent travaille pour le réseau, mais vous gardez votre machine, vos clés et votre contrôle.",
+          "items": {
+            "local": {
+              "title": "Pas d'accès direct à vos modèles",
+              "text": "L'IA locale reste derrière l'agent. Elle n'est pas exposée comme un service public ouvert à n'importe qui."
+            },
+            "keys": {
+              "title": "Vos clés restent chez vous",
+              "text": "L'identité du nœud est générée localement. Le réseau ne vous demande pas de confier vos clés privées."
+            },
+            "control": {
+              "title": "Vous choisissez le rythme",
+              "text": "Votre machine n'a pas vocation à gêner vos sessions. Vous décidez quand elle peut contribuer."
+            },
+            "stop": {
+              "title": "Arrêt possible",
+              "text": "Si vous avez besoin de toute la puissance du PC, vous pouvez arrêter ou mettre en pause la contribution."
+            }
+          }
+        },
+        "final": {
+          "badge": "Prêt à tester ?",
+          "title": "Commencez par estimer. Téléchargez ensuite.",
+          "text": "Le meilleur parcours est simple : regardez le potentiel de votre machine, puis installez l'agent si le résultat vaut le coup pour votre usage.",
+          "primaryCta": "Revoir le simulateur",
+          "secondaryCta": "Télécharger l'agent"
+        },
+        "subtitle": "Pour les contributeurs GPU/CPU qui veulent un onboarding rapide et un suivi de revenus transparent.",
+        "valueTitle": "Value proposition",
+        "valuePoints": {
+          "1": "Exécuter l'agent localement et exposer les modèles LocalAI éligibles.",
+          "2": "Bénéficier d'une comptabilité basée sur les tokens inférés.",
+          "3": "Contribuer aux pools de fallback quand des nœuds entreprise sont indisponibles.",
+          "4": "Se préparer à la distribution P2P des modèles pour réduire les coûts d'egress."
+        },
+        "ctaTitle": "Démarrer comme fournisseur"
+      },
+      "entreprises": {
+        "seo": {
+          "title": "Infera - Offres entreprises",
+          "description": "API IA souveraine compatible OpenAI, intégration simple, fallback, reporting carbone et réseaux territoriaux pour les entreprises."
+        },
+        "title": "Offre Entreprises",
+        "heroTitle": "Une IA 🇫🇷 🇪🇺 moins chère qui s'intègre sans refaire vos applications.",
+        "heroSubtitle": "Infera expose une API compatible OpenAI et route vos inférences vers des pools de calcul distribués selon vos politiques de coût, résidence, niveau de confiance, disponibilité et efficacité énergétique.",
+        "consultingBadge": "Conseil gratuit 30 min",
+        "consultingCta": "Réserver 30 min",
+        "playgroundCta": "Tester l'API",
+        "accountCtaTitle": "Testez Infera avec 10 € offerts",
+        "accountCtaDescription": "Créez votre compte et validez rapidement la performance, les coûts et la compatibilité de vos flux IA.",
+        "accountCtaButton": "Créer un compte (+10 € gratuit)",
+        "heroSignals": {
+          "sovereignty": {
+            "title": "Souveraineté opérable",
+            "text": "Modèles open-weight, politiques de routage et contrôle des tiers d'infrastructure."
+          },
+          "integration": {
+            "title": "Migration par configuration",
+            "text": "Même logique SDK OpenAI : base URL, clé API, modèles et quotas."
+          },
+          "control": {
+            "title": "Gouvernance enterprise",
+            "text": "Coût, confiance, résidence, carbone et fallback deviennent des paramètres explicites."
+          }
+        },
+        "console": {
+          "title": "Drop-in OpenAI-compatible",
+          "subtitle": "Une bascule progressive, sans réécriture produit lourde.",
+          "items": {
+            "dropin": "Remplacez la cible d'inférence dans vos configurations applicatives.",
+            "routing": "Filtrez par niveau de confiance : Public, Trusted, HDS/SecNumCloud lorsque le périmètre est éligible.",
+            "reporting": "Suivez tokens, coûts, disponibilité et événements énergie depuis le backoffice."
+          }
+        },
+        "proofBadge": "Pourquoi maintenant",
+        "proofTitle": "L'enjeu n'est plus seulement d'acheter des tokens. C'est de gouverner où, comment et à quel coût l'IA s'exécute.",
+        "proofSubtitle": "Les entreprises veulent la simplicité des API centrales, mais avec plus de contrôle sur la dépendance fournisseur, la résilience opérationnelle, les données d'audit et l'empreinte environnementale.",
+        "promises": {
+          "sovereign": {
+            "title": "Utiliser une IA économique et souveraine",
+            "description": "Nous orientons chaque usage vers les modèles open-weight pertinents, sans forcer une dépendance structurelle à une API propriétaire unique.",
+            "points": {
+              "1": "Sélection par besoin métier : RAG, extraction, classification, support interne, batch documentaire.",
+              "2": "Routage par coût, latence, résidence et niveau de confiance.",
+              "3": "Positionnement pragmatique : les modèles frontier restent possibles ailleurs, Infera couvre les usages adaptés à l'open-weight."
+            }
+          },
+          "nocode": {
+            "title": "Une intégration simple, quasi no-code",
+            "description": "Vos équipes changent la configuration de la couche d'inférence plutôt que de reconstruire les parcours applicatifs.",
+            "points": {
+              "1": "Standard OpenAI-compatible pour préserver vos SDK, prompts et chaînes existantes.",
+              "2": "Pilotes rapides sur un périmètre métier limité avant généralisation.",
+              "3": "Clés API, quotas et reporting conçus pour les équipes produit, DSI et finance."
+            }
+          },
+          "hardware": {
+            "title": "Rentabilisez vos GPU et CPU inutilisés",
+            "description": "Installez l'agent Infera sur vos infrastructures pour transformer une capacité dormante en ressource gouvernée.",
+            "points": {
+              "1": "Louez vos surplus dans des plages et politiques définies par votre organisation.",
+              "2": "Réduisez l'achat de capacité neuve quand du matériel interne est sous-utilisé.",
+              "3": "Gardez la séparation des rôles : les clés privées restent générées localement sur le nœud."
+            }
+          },
+          "carbon": {
+            "title": "Comptabilité carbone IA compatible CSRD Scope 3",
+            "description": "Infera transforme l'empreinte de vos usages IA en données de pilotage pour RSE, achats, finance et trajectoires CSRD Scope 3.",
+            "points": {
+              "1": "Lecture par requête, modèle, pool, période et niveau de confiance lorsque la télémétrie est disponible.",
+              "2": "Attribution compatible Scope 3 pour rapprocher services numériques, usage IA et reporting fournisseur.",
+              "3": "Exports pensés pour relier empreinte, coût, routage et décisions d'optimisation."
+            }
+          },
+          "security": {
+            "title": "Sécurisez vos opérations critiques",
+            "description": "La version on-premise du réseau Infera permet de conserver un plan de secours maîtrisé pour vos opérations IA sensibles.",
+            "points": {
+              "1": "Fallback vers la grille Infera lorsque vos nœuds internes sont indisponibles.",
+              "2": "mTLS, modèle pull/long-polling et agent local pour réduire la surface exposée.",
+              "3": "Packaging distinct pour les besoins Trusted, HDS ou SecNumCloud selon le périmètre réellement qualifié."
+            }
+          },
+          "territory": {
+            "title": "Créez vos réseaux territoriaux",
+            "description": "Regroupez entreprises, collectivités, écoles, établissements de santé ou acteurs industriels pour mutualiser une capacité IA locale.",
+            "points": {
+              "1": "Déploiement on-premise entre acteurs de confiance.",
+              "2": "Gouvernance locale des capacités, des règles de routage et des priorités.",
+              "3": "Résilience collective pour les usages sensibles qui ne doivent pas dépendre d'un point central unique."
+            }
+          }
+        },
+        "governance": {
+          "badge": "Gouvernance & autonomie stratégique",
+          "title": "Sécurisez vos opérations IA tout en mutualisant les ressources disponibles.",
+          "subtitle": "Infera se vend comme un plan de contrôle : vous décidez quels usages passent où, avec quel niveau de confiance, quel fallback, quelle preuve d'audit et quelle lecture carbone.",
+          "chips": {
+            "security": "Sécurité opérationnelle",
+            "mutualization": "Mutualisation",
+            "autonomy": "Autonomie stratégique",
+            "csrd": "CSRD Scope 3"
+          },
+          "levers": {
+            "policies": {
+              "title": "Politiques d'exécution",
+              "text": "Routez selon criticité métier, résidence, coût, modèle, disponibilité et tier de confiance sans changer vos intégrations."
+            },
+            "security": {
+              "title": "Opérations sécurisées",
+              "text": "Isolez expérimentation, production et périmètres sensibles avec mTLS, agents en pull et séparation claire des grilles."
+            },
+            "mutualization": {
+              "title": "Ressources mutualisées",
+              "text": "Réutilisez GPU internes, partenaires de confiance ou capacité territoriale avant d'acheter systématiquement de la capacité neuve."
+            },
+            "carbon": {
+              "title": "Preuve carbone exploitable",
+              "text": "Rapprochez tokens, énergie, pools et coûts pour piloter vos engagements RSE et vos obligations compatibles CSRD Scope 3."
+            }
+          }
+        },
+        "integration": {
+          "badge": "Parcours d'adoption",
+          "title": "Commencez par un cas d'usage, pas par une migration globale.",
+          "subtitle": "La bonne trajectoire enterprise consiste à prouver la compatibilité sur un flux maîtrisé, puis à élargir les politiques de routage, les quotas et les garanties.",
+          "steps": {
+            "scope": {
+              "title": "Cadrer le premier flux",
+              "text": "Identifier un usage compatible avec des modèles open-weight : RAG interne, extraction documentaire, classification, support ou batch."
+            },
+            "switch": {
+              "title": "Basculer la configuration",
+              "text": "Modifier base URL, clé API, modèle et paramètres de confiance sans refondre vos applications."
+            },
+            "policy": {
+              "title": "Activer les politiques",
+              "text": "Choisir coût, résidence, tier de confiance, fallback et contraintes de reporting selon la criticité du flux."
+            },
+            "scale": {
+              "title": "Industrialiser",
+              "text": "Brancher les métriques, quotas, clés, audits et règles de capacité pour passer du pilote au run."
+            }
+          }
+        },
+        "operations": {
+          "badge": "Offres opérationnelles",
+          "title": "Trois façons de dérisquer vos opérations IA.",
+          "subtitle": "Infera n'est pas une marketplace GPU brute : c'est une couche de contrôle pour orchestrer des pools distribués avec des règles enterprise.",
+          "offers": {
+            "fallback": {
+              "title": "Secours Infera Grid",
+              "subtitle": "Continuité de service",
+              "text": "Utilisez la grille Infera comme capacité de repli lorsque vos ressources internes sont saturées, maintenues ou indisponibles."
+            },
+            "onpremise": {
+              "title": "Réseau on-premise",
+              "subtitle": "Contrôle maximal",
+              "text": "Déployez Router, agents et politiques dans votre périmètre pour exploiter vos GPU/CPU tout en gardant la gouvernance opérationnelle."
+            },
+            "federation": {
+              "title": "Fédération territoriale",
+              "subtitle": "Mutualisation locale",
+              "text": "Créez un réseau partagé entre acteurs locaux afin de répartir les capacités, les priorités et les garanties de confiance."
+            }
+          }
+        },
+        "guardrails": {
+          "badge": "Discours responsable",
+          "title": "Ce que nous promettons clairement, et ce que nous cadrons.",
+          "subtitle": "Une page entreprise crédible doit être utile aux DSI, aux métiers, aux achats et aux équipes conformité. Les promesses fortes doivent rester vérifiables.",
+          "items": {
+            "frontier": {
+              "title": "Infera ne remplace pas tous les modèles frontier",
+              "text": "La valeur est maximale sur les usages adaptés aux modèles open-weight : automatisation documentaire, RAG, extraction, classification, copilotes internes et batch. Les besoins frontier peuvent rester routés ailleurs."
+            },
+            "compliance": {
+              "title": "CSRD, HDS et SecNumCloud demandent un périmètre précis",
+              "text": "Infera prépare les données de pilotage et les architectures cibles. La conformité finale dépend du périmètre déployé, des partenaires certifiés, des contrats et de l'exploitation réelle."
+            },
+            "sensitive": {
+              "title": "Les données sensibles ne vont pas sur n'importe quelle grille",
+              "text": "Les tiers Public, Trusted et HDS/SecNumCloud doivent rester séparés. Le routage par politique évite de mélanger tests bas risque et opérations réglementées."
+            }
+          }
+        },
+        "final": {
+          "badge": "Prochaine étape",
+          "title": "Faisons l'audit de vos flux IA en 30 minutes.",
+          "text": "Nous identifions les cas d'usage compatibles, les gains rapides, les contraintes de sécurité et le bon scénario : API managée, fallback, on-premise ou réseau territorial."
+        }
+      },
+      "institutionnelles": {
+        "seo": {
+          "title": "Infera - Offre institutions et territoires",
+          "description": "Fédérez une capacité IA territoriale, souveraine et résiliente avec gouvernance, audit et comptabilité carbone compatible CSRD Scope 3."
+        },
+        "hero": {
+          "badge": "Pour territoires, administrations et organisations d'intérêt général",
+          "title": "Fédérez la puissance de calcul IA à l'échelle de votre territoire.",
+          "subtitle": "Infera aide les collectivités, administrations, ONG et coalitions d'acteurs à organiser une capacité d'inférence distribuée, gouvernée et résiliente. L'objectif n'est pas de déplacer toute l'IA sur une grille unique, mais de rendre explicites les lieux d'exécution, les niveaux de confiance, les coûts, les secours, les preuves d'audit et la comptabilité carbone compatible CSRD Scope 3.",
+          "primaryCta": "Planifier un cadrage territorial",
+          "secondaryCta": "Voir les scénarios de fédération",
+          "signals": {
+            "sovereignty": {
+              "title": "Souveraineté opérable",
+              "text": "Choisissez les périmètres, les tiers de confiance et les politiques d'exécution au lieu de subir une dépendance centralisée."
+            },
+            "resilience": {
+              "title": "Résilience multi-acteurs",
+              "text": "Mutualisez des ressources locales pour maintenir des usages IA utiles lorsque la capacité principale est saturée ou indisponible."
+            },
+            "sobriety": {
+              "title": "Sobriété mesurable",
+              "text": "Priorisez la capacité existante et structurez les signaux d'usage, d'énergie et de coût pour décider sur des faits."
+            }
+          }
+        },
+        "map": {
+          "hub": "Grille territoriale gouvernée",
+          "items": {
+            "policies": "Routage par politique : coût, confiance, résidence, disponibilité.",
+            "pull": "Agents en modèle pull : pas d'exposition directe de la capacité locale.",
+            "audit": "Traçabilité des usages, événements, tokens et signaux énergie."
+          }
+        },
+        "why": {
+          "badge": "Pourquoi une approche territoriale",
+          "title": "L'enjeu public n'est pas seulement d'accéder à l'IA. C'est d'en maîtriser les conditions d'exécution.",
+          "subtitle": "Les organisations publiques et d'intérêt général doivent conjuguer continuité de service, maîtrise budgétaire, autonomie stratégique, contraintes réglementaires et responsabilité environnementale. Une fédération Infera donne un cadre pour arbitrer ces dimensions sans prétendre qu'un seul modèle ou fournisseur répondra à tous les usages."
+        },
+        "promises": {
+          "federate": {
+            "title": "Fédérer des acteurs de confiance",
+            "text": "Regroupez collectivités, établissements publics, associations, écoles, laboratoires, hôpitaux ou partenaires souverains autour de règles d'accès et de priorité explicites."
+          },
+          "derisk": {
+            "title": "Dérisquer les usages IA sensibles",
+            "text": "Séparez expérimentation, production et périmètres réglementés avec des tiers de confiance, des certificats mTLS et une gouvernance lisible pour les décideurs."
+          },
+          "costs": {
+            "title": "Piloter les coûts avant de promettre des économies",
+            "text": "Comparez capacité locale, fallback externe, latence, disponibilité et criticité afin de réduire les achats réflexes de capacité centralisée."
+          },
+          "ecology": {
+            "title": "Servir une IA plus écologique et souveraine",
+            "text": "Valorisez d'abord les ressources existantes et structurez une comptabilité carbone compatible CSRD Scope 3, plutôt que d'ajouter de l'infrastructure sans visibilité sur son usage réel."
+          }
+        },
+        "scenarios": {
+          "badge": "Scénarios institutionnels",
+          "title": "Quatre trajectoires pour transformer une coalition en capacité IA utile.",
+          "subtitle": "La valeur vient d'un cadre commun : chaque acteur garde son rôle, mais la capacité disponible devient orientable, mesurable et mobilisable selon des politiques partagées.",
+          "items": {
+            "territory": {
+              "title": "Fédération territoriale",
+              "subtitle": "Collectivités, campus, hôpitaux, associations",
+              "text": "Construisez un pool local où les acteurs contribuent de la capacité selon leurs contraintes, tout en gardant une gouvernance commune sur les priorités et les niveaux de confiance."
+            },
+            "continuity": {
+              "title": "Plan de continuité IA",
+              "subtitle": "Résilience des services numériques",
+              "text": "Préparez des routes de secours pour les cas d'usage documentaires, d'assistance interne ou de traitement batch lorsque les ressources principales ne répondent plus."
+            },
+            "budget": {
+              "title": "Mutualisation budgétaire",
+              "subtitle": "Moins d'achats isolés, plus de pilotage",
+              "text": "Rendez visibles les capacités dormantes et les coûts par usage pour arbitrer entre achat externe, réutilisation locale et montée en charge progressive."
+            },
+            "generalInterest": {
+              "title": "IA d'intérêt général",
+              "subtitle": "ONG, médiation, support citoyen",
+              "text": "Soutenez des usages à forte utilité sociale avec des modèles open-weight adaptés : recherche documentaire, extraction, classification, synthèse et assistance de premier niveau."
+            }
+          }
+        },
+        "governance": {
+          "badge": "Trajectoire de gouvernance",
+          "title": "Commencer petit, mais cadrer dès le départ les règles qui permettront de grandir.",
+          "subtitle": "Une fédération crédible ne commence pas par une promesse générale. Elle commence par une cartographie, un périmètre pilote, des politiques vérifiables et des métriques de run.",
+          "steps": {
+            "map": {
+              "title": "Cartographier ressources et parties prenantes",
+              "text": "Identifier les acteurs, les machines disponibles, les contraintes réseau, les usages éligibles et les responsabilités juridiques ou opérationnelles."
+            },
+            "policies": {
+              "title": "Définir les politiques de confiance",
+              "text": "Séparer Public, Trusted et périmètres réglementés. Spécifier résidence, fallback, audit, quotas, licences modèles et règles de priorisation."
+            },
+            "pilot": {
+              "title": "Déployer un premier flux utile",
+              "text": "Choisir un cas d'usage compatible avec des modèles open-weight : recherche documentaire, support interne, extraction, classification ou batch."
+            },
+            "measure": {
+              "title": "Mesurer avant d'étendre",
+              "text": "Suivre disponibilité, tokens, coût, incidents, qualité perçue et signaux énergie/carbone compatibles CSRD Scope 3 pour décider objectivement de l'extension du réseau."
+            }
+          }
+        },
+        "carbon": {
+          "badge": "Gouvernance écologique",
+          "title": "Une fédération IA doit aussi produire une preuve carbone exploitable.",
+          "subtitle": "Le sujet n'est pas seulement de dire que la capacité existante est plus sobre. Il faut pouvoir expliquer quels usages consomment, sur quels pools, avec quel niveau de confiance et comment ces signaux alimentent le reporting Scope 3.",
+          "proofs": {
+            "scope3": {
+              "title": "Compatible CSRD Scope 3",
+              "text": "Les usages IA externalisés et mutualisés peuvent être rapprochés des achats de services numériques et des preuves fournisseur."
+            },
+            "allocation": {
+              "title": "Allocation par usage",
+              "text": "La lecture par modèle, période, pool et périmètre évite de mélanger expérimentation, production et secours."
+            },
+            "procurement": {
+              "title": "Décision achats",
+              "text": "Les équipes peuvent arbitrer entre capacité locale, fallback, nouveaux achats et exigences de sobriété sur une base traçable."
+            }
+          }
+        },
+        "guardrails": {
+          "badge": "Posture responsable",
+          "title": "Des promesses fortes, mais cadrées.",
+          "subtitle": "Les administrations et ONG n'ont pas besoin d'une rhétorique magique. Elles ont besoin d'un cadre compréhensible, contractualisable et auditable.",
+          "items": {
+            "certification": {
+              "title": "HDS, SecNumCloud et conformité ne se décrètent pas",
+              "text": "Infera prépare une architecture et des données de pilotage. La conformité finale dépend du périmètre, des partenaires certifiés, des contrats et des conditions réelles d'exploitation."
+            },
+            "sensitive": {
+              "title": "Les données sensibles exigent des périmètres dédiés",
+              "text": "Une fédération territoriale ne signifie pas que tout circule partout. Les politiques doivent empêcher le mélange entre expérimentation, production et données réglementées."
+            },
+            "savings": {
+              "title": "Les économies doivent être démontrées usage par usage",
+              "text": "La baisse des coûts dépend des modèles, de la disponibilité, du taux d'utilisation et des exigences de latence. Infera aide à mesurer et arbitrer avant de promettre."
+            },
+            "ecology": {
+              "title": "La sobriété se mesure, elle ne se proclame pas",
+              "text": "Utiliser de la capacité existante est un signal favorable, mais l'impact dépend du mix énergétique, de l'efficacité matérielle, de la qualité de routage et de la charge réellement évitée."
+            }
+          }
+        },
+        "final": {
+          "badge": "Prochaine étape",
+          "title": "Cadrons votre scénario de fédération en 30 minutes.",
+          "text": "Nous identifions les acteurs à fédérer, les usages compatibles, les contraintes de sécurité, les métriques à suivre et le bon premier pilote pour avancer sans surpromesse.",
+          "secondaryCta": "Revoir les scénarios"
+        }
+      }
+    }
+  },
+  "users": {
+    "title": "Administration des utilisateurs",
+    "refresh": "Rafraîchir",
+    "open_page": "Ouvrir la page",
+    "loadFailed": "Échec du chargement des utilisateurs.",
+    "updateFailed": "Échec de la mise à jour utilisateur.",
+    "filters": {
+      "search": "Recherche",
+      "level": "Niveau",
+      "status": "Statut",
+      "organization": "ID organisation"
+    },
+    "bulk": {
+      "level": "Niveau en lot",
+      "status": "Statut en lot",
+      "apply": "Appliquer à {count} utilisateurs"
+    },
+    "actions": {
+      "timeline": "Historique"
+    },
+    "timeline": {
+      "title": "Historique d'audit utilisateur",
+      "empty": "Aucun événement d'audit."
+    },
+    "columns": {
+      "email": "Email",
+      "provider": "Fournisseur",
+      "organization": "Organisation",
+      "level": "Niveau",
+      "status": "Statut",
+      "updatedAt": "Mis à jour le",
+      "actions": "Actions"
+    }
+  },
+  "keys": {
+    "title": "Clés API admin",
+    "description": "Page backoffice pour gérer les clés de tous les clients.",
+    "hero": {
+      "total_keys": "Clés totales",
+      "active_keys": "Clés actives",
+      "captured": "Requêtes",
+      "tokens": "Tokens",
+      "total_caption": "Clés enregistrées pour tous les clients.",
+      "active_caption": "Clés capables de router du trafic.",
+      "captured_caption": "Requêtes capturées sur la fenêtre sélectionnée.",
+      "tokens_caption": "Volume de tokens sur la fenêtre sélectionnée."
+    },
+    "filters": {
+      "search": "Recherche",
+      "client_id": "ID client",
+      "tier": "Tier",
+      "model": "Modèle",
+      "days": "Fenêtre (jours)"
+    },
+    "fields": {
+      "api_key_id": "ID clé API",
+      "client_id": "ID client",
+      "name": "Nom",
+      "tier": "Tier",
+      "allowed_models": "Modèles",
+      "enabled": "Statuts",
+      "requests": "Requêtes",
+      "captured": "Capturées",
+      "total_tokens": "Tokens",
+      "total_cost": "Coût total",
+      "monthly_spend": "Dépense mensuelle",
+      "actions": "Actions",
+      "request_id": "ID requête",
+      "model": "Modèle",
+      "status": "Statut"
+    },
+    "actions": {
+      "create": "Créer clé",
+      "refresh": "Rafraîchir",
+      "open_page": "Ouvrir la page",
+      "analytics": "Analytique",
+      "rotate": "Rotation",
+      "revoke": "Révoquer",
+      "delete": "Supprimer",
+      "edit": "Modifier la clé",
+      "save": "Enregistrer",
+      "edit_routing": "Configurer le routage",
+      "cancel": "Annuler",
+      "done": "Terminé"
+    },
+    "status": {
+      "active": "Active",
+      "revoked": "Révoquée"
+    },
+    "nav": {
+      "badge": "Profil",
+      "title": "Compte",
+      "subtitle": "Identité, accès, facturation et opérations fournisseur.",
+      "items": {
+        "informations": {
+          "title": "Informations personnelles",
+          "subtitle": "Validation d'identité"
+        },
+        "nodes": {
+          "title": "Nœuds",
+          "subtitle": "Flotte fournisseur"
+        },
+        "keys": {
+          "title": "Clés",
+          "subtitle": "Accès API"
+        },
+        "billing": {
+          "title": "Facturation & paiement",
+          "subtitle": "Solde et factures"
+        },
+        "organisations": {
+          "title": "Organisations",
+          "subtitle": "Membres de l'espace"
+        },
+        "security": {
+          "title": "Sécurité",
+          "subtitle": "SSO et sessions"
+        }
+      }
+    },
+    "table": {
+      "loading": "Chargement des clés...",
+      "empty": "Aucune clé API ne correspond aux filtres.",
+      "more_models": "+{count} autres",
+      "no_limit": "sans limite",
+      "spend_alert": "alerte {threshold}%"
+    },
+    "edit": {
+      "title": "Modifier la clé API",
+      "subtitle": "Mettre à jour les modèles, le tier et les options de cette clé.",
+      "provider_key_hint": "Laisser vide pour conserver la clé fournisseur actuelle."
+    },
+    "create": {
+      "title": "Créer une clé API",
+      "subtitle": "Définissez le périmètre modèles, le tier commercial et les options de résilience.",
+      "steps": {
+        "essential": {
+          "nav": "Essentiel",
+          "title": "Tier et modèles",
+          "caption": "Choisissez le niveau de confiance puis les modèles réellement routables pour cette clé."
+        },
+        "performance": {
+          "nav": "Performance",
+          "title": "Performance et résilience",
+          "caption": "Ajustez la qualité de routage sans exposer la complexité réseau à l'utilisateur final."
+        },
+        "governance": {
+          "nav": "Gouvernance",
+          "title": "Audit et conformité",
+          "caption": "Activez les garanties utiles aux équipes sécurité, finance et conformité."
+        }
+      },
+      "model_picker": {
+        "label": "Modèles requis",
+        "placeholder": "Sélectionner un ou plusieurs modèles"
+      },
+      "validation": {
+        "models_required": "Sélectionnez au moins un modèle."
+      }
+    },
+    "delete": {
+      "title": "Supprimer la clé API",
+      "body": "Supprimer la clé API {id} ? Elle sera retirée du stockage et des index de routage."
+    },
+    "routing_policy": {
+      "title": "Politique de routage",
+      "save": "Enregistrer le routage",
+      "api_key_replace": "Remplacement clé API provider",
+      "headers": "Headers provider JSON",
+      "defaults": "Propriétés de requête par défaut JSON",
+      "extra_body": "extra_body JSON",
+      "custom_properties": "Propriétés custom JSON",
+      "secret_warning": "MVP : les credentials BYOK provider sont stockés et projetés en clair. Laissez la clé API provider vide pour conserver la valeur actuelle.",
+      "invalid_json": "Les champs JSON doivent contenir des objets."
+    },
+    "models": {
+      "filters": {
+        "tags": "Tags",
+        "hardware": "Type de matériel",
+        "alive": "Modèles actifs",
+        "search": "Rechercher un modèle"
+      },
+      "headers": {
+        "model": "Modèle",
+        "hardware": "Matériel",
+        "tags": "Tags",
+        "nodes": "Nœuds",
+        "price": "Prix / token",
+        "eligibility": "Éligibilité tier",
+        "availability_by_tier": "Disponibilité par tier",
+        "status": "Statut"
+      },
+      "selector_caption": "{count} sur {total} modèles visibles",
+      "loading": "Actualisation des modèles et nœuds compatibles...",
+      "empty_for_tier": "Aucun nœud compatible avec ce tier et ces filtres.",
+      "more_tags": "+{count}",
+      "no_summary": "Métadonnées du modèle non renseignées.",
+      "status": {
+        "ready": "Prêt",
+        "provisioned": "Provisionné",
+        "unavailable": "Indisponible",
+        "ready_tooltip": "{count} nœud(s) actif(s) servent actuellement ce modèle.",
+        "provisioned_tooltip": "{count} nœud(s) ont ce modèle installé ou smoke-testé, mais aucun n'est encore routable.",
+        "unavailable_tooltip": "Aucun nœud de ce tier n'expose actuellement ce modèle."
+      },
+      "eligibility": {
+        "eligible": "Éligible",
+        "not_eligible": "Non éligible"
+      },
+      "availability": {
+        "none": "Aucune disponibilité tier"
+      },
+      "nodes": {
+        "none_tooltip": "Aucun nœud actif ne sert actuellement ce modèle dans le réseau.",
+        "count_tooltip": "{count} nœud(s) actif(s) serve(nt) actuellement ce modèle."
+      },
+      "provisioned_hidden": "{count} modèle(s) provisionné(s) sont masqués par le filtre Modèles actifs."
+    },
+    "billing": {
+      "title": "Facturation",
+      "caption": "Tier, SLA et options appliqués à cette clé.",
+      "active_tier": "{tier} · x{multiplier}",
+      "effective_multiplier": "Coefficient effectif",
+      "tier_section": "Niveau de sécurité",
+      "tier_caption": "Sélectionnez le tier actif ci-dessus ; les options payantes restent en dessous.",
+      "recommended": "Recommandé",
+      "coming_soon": "Bientôt disponible",
+      "key_multiplier": "Coefficient clé",
+      "fallback_route_multiplier": "Si fallback utilisé",
+      "not_selected": "Non sélectionné",
+      "selected_models": "Modèles sélectionnés",
+      "live_price": "Prix live",
+      "input_tokens": "Input tokens",
+      "output_tokens": "Output tokens",
+      "from_prefix": "À partir de ",
+      "per_million_suffix": " / 1M tokens",
+      "price_unavailable": "Non disponible",
+      "price_disclaimer": "Estimation hors taxes et arrondis, basée sur le catalogue modèles et les coefficients actifs.",
+      "pricing_unavailable": "Les coefficients pricing backend ne sont pas disponibles. Les valeurs de repli locales sont utilisées.",
+      "tiers": {
+        "public": {
+          "description": "Routage public pour charges non sensibles et coût minimal."
+        },
+        "trusted": {
+          "description": "Nœuds attestés pour usages entreprise et données plus sensibles."
+        },
+        "hds": {
+          "description": "Périmètre orienté santé et conformité renforcée."
+        }
+      },
+      "fallback": {
+        "title": "Fallback sécurisé",
+        "description": "Autorise une capacité opérée Infera si aucun nœud grid éligible n'est disponible. Surcoût route {uplift}% · x{multiplier}.",
+        "enabled_hint": "Appliqué uniquement aux requêtes routées en fallback."
+      },
+      "audit_trail": {
+        "title": "Piste d'audit",
+        "description": "Journal probant des requêtes, décisions de routage et événements de facturation. Surcoût {uplift}% · x{multiplier}.",
+        "enabled_hint": "Option persistée dans la politique de clé et reportée dans les événements d'usage."
+      },
+      "governance": {
+        "forced_on": "Forcé par l'organisation.",
+        "forced_off": "Indisponible car l'organisation force cette option à off.",
+        "by_key": "Configurable par clé."
+      },
+      "privacy": {
+        "action": "Action",
+        "actions": {
+          "audit": "Audit uniquement",
+          "reject": "Rejeter la requête"
+        },
+        "banned_words": {
+          "title": "Détecteur de mots interdits",
+          "description": "Détection insensible à la casse avec normalisation accents et leetspeak. Les correspondances sont cherchées en sous-chaîne.",
+          "words": "Mots additionnels de la clé"
+        },
+        "pseudonymization": {
+          "title": "Pseudonymisation",
+          "description": "Remplace de façon déterministe les emails, téléphones et noms de personnes simples avant routage."
+        }
+      },
+      "carbon": {
+        "title": "Comptabilité carbone",
+        "description": "Prépare le reporting d'empreinte carbone par usage, sans effet backend dans cette version.",
+        "tooltip": "Non activable tant que la mesure carbone backend n'est pas disponible."
+      },
+      "performance": {
+        "title": "Routage meilleurs nœuds",
+        "disabled": "Désactivé",
+        "top50": "Top 50%",
+        "top25": "Top 25%",
+        "top10": "Top 10%"
+      },
+      "native_provider": {
+        "title": "Routage migration",
+        "description": "Bascule tout le trafic entre la grid Infera et le provider OpenAI-compatible d'origine du client.",
+        "infera_grid": "Grid Infera",
+        "original_provider": "Provider d'origine",
+        "kind": "Provider",
+        "base_url": "Base URL",
+        "api_key": "Clé API provider",
+        "model": "Modèle provider forcé",
+        "custom": "OpenAI-compatible custom"
+      },
+      "traffic_experiment": {
+        "title": "Canary / AB testing",
+        "description": "Route une part contrôlée des requêtes éligibles vers le provider d'origine. Le coefficient s'applique à tout l'usage de la clé tant que l'option est active.",
+        "share": "Part de trafic provider",
+        "rules": "Règles JSON"
+      },
+      "spend_limits": {
+        "title": "Limites de dépense",
+        "caption": "Alertes mensuelles et vie entière. Les requêtes ne sont pas bloquées.",
+        "enabled": "Activer",
+        "currency": "Devise",
+        "monthly": "Plafond mensuel",
+        "lifetime": "Plafond vie entière",
+        "invalid": "Saisissez un montant positif.",
+        "required": "Renseignez un montant mensuel ou vie entière pour activer les alertes."
+      }
+    },
+    "analytics": {
+      "title": "Analytique de la clé",
+      "timeseries": "Série temporelle de tokens",
+      "by_model": "Répartition par modèle",
+      "ledger": "Détail du ledger"
+    },
+    "secret": {
+      "title": "Copiez la clé maintenant",
+      "warning": "La valeur claire n'est affichée qu'une seule fois."
+    },
+    "tiers": {
+      "public": "PUBLIC",
+      "trusted": "TRUSTED",
+      "hds": "HDS"
+    }
+  },
+  "audit": {
+    "actions": {
+      "view_logs": "Voir les logs",
+      "edit_policy": "Configurer l'audit",
+      "view_details": "Voir les détails"
+    },
+    "dialog": {
+      "keys_title": "Logs d'opérations de la clé",
+      "keys_subtitle": "Dernières opérations retenues pour la clé {apiKeyId}",
+      "nodes_title": "Logs d'opérations du nœud",
+      "nodes_subtitle": "Dernières opérations traitées par le nœud {nodeId}",
+      "empty_title": "Aucun log d'audit",
+      "empty_detail_title": "Sélectionnez une opération pour inspecter sa chronologie"
+    },
+    "fields": {
+      "request_id": "ID requête",
+      "task_id": "ID tâche",
+      "model": "Modèle",
+      "timings": "Total / exécution"
+    },
+    "policy": {
+      "title": "Politique de piste d'audit",
+      "enabled": "Activer la piste d'audit retenue",
+      "level": "Niveau de log",
+      "recent_limit": "Fenêtre des logs récents",
+      "hint": "INFO conserve le résumé retenu de l'opération. DEBUG ajoute la chronologie détaillée pour le support et le diagnostic.",
+      "save": "Enregistrer la politique"
+    },
+    "levels": {
+      "info": "INFO",
+      "debug": "DEBUG"
+    }
+  },
+  "models": {
+    "title": "Catalogue des modèles",
+    "columns": {
+      "model": "Modèle",
+      "type": "Type",
+      "hardware": "Matériel",
+      "runtime": "Runtime",
+      "size": "Taille",
+      "tags": "Tags",
+      "context": "Contexte",
+      "availability": "Disponibilité"
+    },
+    "filters": {
+      "tags": "Filtrer par tags",
+      "search": "Rechercher un modèle",
+      "family": "Famille",
+      "hardware": "Tier matériel",
+      "backend": "Backend",
+      "license": "Licence",
+      "context_range": "Plage de contexte",
+      "context_unavailable": "Indisponible",
+      "compatibility_only": "Modèles compatibles avec ma machine",
+      "availability_only": "Afficher uniquement les modèles disponibles",
+      "reset": "Réinitialiser les filtres",
+      "subtitle": "{count} modèles sur {total} correspondent aux filtres",
+      "active": "aucun filtre actif | {n} filtre actif | {n} filtres actifs",
+      "show": "Filtres"
+    },
+    "families": {
+      "chat": {
+        "title": "Chat & Assistant",
+        "subtitle": "Modèles polyvalents pour le dialogue, le suivi d'instructions et le raisonnement.",
+        "icon": "mdi-chat-processing-outline"
+      },
+      "code": {
+        "title": "Code & Développement",
+        "subtitle": "Modèles spécialisés dans la programmation, le débogage et l'architecture logicielle.",
+        "icon": "mdi-code-braces"
+      },
+      "embeddings": {
+        "title": "Embeddings & RAG",
+        "subtitle": "Modèles de représentation vectorielle pour la recherche et les pipelines RAG.",
+        "icon": "mdi-vector-selection"
+      },
+      "image-gen": {
+        "title": "Génération d'images",
+        "subtitle": "Modèles créatifs de génération d'images à partir de texte.",
+        "icon": "mdi-palette-outline"
+      },
+      "vision": {
+        "title": "Vision Multimodale",
+        "subtitle": "Modèles capables de comprendre et d'analyser du contenu visuel.",
+        "icon": "mdi-eye-outline"
+      },
+      "speech": {
+        "title": "Audio & Parole",
+        "subtitle": "Capacités de synthèse vocale, de transcription et de traitement audio.",
+        "icon": "mdi-microphone-outline"
+      },
+      "rerank": {
+        "title": "Reranking",
+        "subtitle": "Optimisation de la pertinence des résultats de recherche via cross-encoders.",
+        "icon": "mdi-sort-variant"
+      }
+    },
+    "modal": {
+      "title": "Détails du modèle",
+      "close": "Fermer",
+      "unknown_model": "Modèle introuvable dans le registre: {modelId}"
+    },
+    "actions": {
+      "source": "Ouvrir la source",
+      "back_to_catalog": "Retour au catalogue",
+      "try_playground": "Tester dans le Playground",
+      "copy_endpoint": "Copier l'endpoint",
+      "copied": "Copié !"
+    },
+    "fields": {
+      "hardware": "Matériel",
+      "size": "Taille",
+      "type": "Type",
+      "context": "Taille de contexte",
+      "backend": "Backend",
+      "license": "Licence",
+      "tags": "Tags",
+      "billing": "Facturation",
+      "pay_per_token": "Paiement par token",
+      "buy_per_token": "Achat par token",
+      "endpoints": "Endpoints",
+      "parameters_count": "Paramètres (nombre)",
+      "description": "Description",
+      "summary": "Résumé",
+      "metadata": "Métadonnées",
+      "maintainer": "Mainteneur",
+      "license_url": "URL de licence",
+      "privacy": "Confidentialité",
+      "usages": "Usages",
+      "modalities": "Modalités",
+      "quantization": "Quantification",
+      "recommended_hardware": "Matériel recommandé",
+      "security_notes": "Notes de sécurité",
+      "compatibility": "Compatibilité"
+    },
+    "availability": {
+      "total": "Noeuds : {count}",
+      "healthy": "Up : {count}",
+      "degraded": "Dégradés : {count}",
+      "available": "{count} disponibles",
+      "offline": "Hors ligne"
+    },
+    "seo": {
+      "title": "Catalogue des modèles - Infera",
+      "description": "Parcourez les modèles disponibles par famille, tier matériel, backend et disponibilité en direct."
+    },
+    "hero": {
+      "label": "Détails du modèle",
+      "subtitle": "Parcourez {count} modèles d'inférence IA - filtrez par famille, tier matériel et disponibilité en direct.",
+      "metrics": {
+        "popularity_label": "Clés API",
+        "nodes_label": "Nœuds",
+        "availability_label": "Disponibilité"
+      }
+    },
+    "sections": {
+      "specifications": "Spécifications techniques",
+      "metadata": "Métadonnées & Infos additionnelles"
+    },
+    "empty": {
+      "title": "Aucun modèle trouvé",
+      "description": "Essayez d'ajuster les filtres pour voir plus de résultats."
+    },
+    "hardware": {
+      "title": "Benchmark d'éligibilité matérielle",
+      "subtitle": "Benchmark navigateur en direct vs exigences minimales du modèle",
+      "catalog_title": "Détection matérielle locale",
+      "catalog_subtitle": "Filtrez le catalogue selon les capacités détectées dans votre navigateur.",
+      "running": "Benchmark en cours... {progress}%",
+      "webgpu": "WebGPU",
+      "webgl": "WebGL",
+      "runtime": "Famille de runtime GPU",
+      "vram": "VRAM",
+      "vram_detected": "VRAM estimée : {value} Go",
+      "ram_detected": "RAM estimée : {value} Go",
+      "ram": "RAM",
+      "disk": "Disque",
+      "meta": "OS : {os} · Navigateur : {browser} · Mesuré à : {measuredAt}",
+      "compatible": "Compatible",
+      "not_compatible": "Peut ne pas être compatible",
+      "compatibility_unknown": "Matériel non détecté",
+      "limited": "Compatibilité limitée",
+      "cached": "Résultat en cache",
+      "unavailable": "Détection matérielle indisponible",
+      "rerun": "Relancer",
+      "partial_confidence": "WebGPU indisponible : résultats basés sur heuristiques WebGL/navigateur avec confiance partielle.",
+      "confidence": {
+        "high": "Confiance élevée",
+        "medium": "Confiance moyenne",
+        "low": "Confiance faible"
+      },
+      "gpu_required": "GPU requis",
+      "cpu": "CPU",
+      "runtimes": "Runtimes"
+    },
+    "runtime": {
+      "placement": "Placement runtime",
+      "gpu_preferred": "GPU préféré",
+      "dual_slot": "CPU/GPU",
+      "slot_only": "{slot} uniquement",
+      "cpu_fallback_opt_in": "Profil GPU par défaut. Le fallback CPU est dégradé et n'est annoncé que si le nœud l'active explicitement.",
+      "cpu_gpu_available": "Éligible sur les slots CPU et GPU.",
+      "single_slot": "Éligible uniquement sur les slots {slot}."
+    },
+    "detail": {
+      "tabs": {
+        "overview": "Vue d'ensemble",
+        "hardware": "Matériel",
+        "sources": "Sources",
+        "raw": "Brut"
+      },
+      "facts": "Faits",
+      "architecture": "Architecture",
+      "motivations": "Motivations",
+      "intended_use": "Usage prévu",
+      "strengths": "Forces",
+      "limitations": "Limites",
+      "provider": "Fournisseur",
+      "publisher": "Éditeur",
+      "localai_native": "LocalAI natif",
+      "infera_metadata": "Métadonnées x-infera",
+      "hardware_gpu_summary": "Requiert un profil GPU avec au moins {vram} GB de VRAM et {ram} GB de RAM.",
+      "hardware_cpu_summary": "Profil compatible CPU avec au moins {cores} cœurs et {ram} GB de RAM."
+    },
+    "view": {
+      "grid": "Vue grille",
+      "table": "Vue liste"
+    }
+  },
+  "download": {
+    "seo": {
+      "title": "Infera - Télécharger un nœud",
+      "description": "Téléchargez les artefacts Public, natifs et Trusted Tier de l'agent Infera pour opérateurs de nœuds."
+    },
+    "hero": {
+      "eyebrow": "Téléchargements opérateur de nœud"
+    },
+    "modes": {
+      "public": "Public",
+      "native": "Natif",
+      "trusted": "Trusted"
+    },
+    "audience": {
+      "consumer": {
+        "label": "Particulier",
+        "title": "Transformez votre propre machine en nœud Infera",
+        "subtitle": "Commencez avec la distribution la plus simple pour une machine personnelle, un lab ou un GPU secondaire. On privilégie ici une première installation rapide et des explications claires plutôt que du jargon infra.",
+        "primaryCta": "Télécharger mon option la plus simple",
+        "secondaryCta": "Voir mon parcours recommandé",
+        "recommendedSubtitle": "Le meilleur point d'entrée pour un premier nœud sur cet appareil.",
+        "points": {
+          "1": {
+            "title": "Démarrer vite",
+            "body": "Le bundle light est le chemin le plus court vers un premier nœud en ligne."
+          },
+          "2": {
+            "title": "Compatible avec votre OS",
+            "body": "Nous remontons les installeurs et bundles qui correspondent au système détecté."
+          },
+          "3": {
+            "title": "Comprendre sans friction",
+            "body": "Chaque option explique ce qu'elle embarque et ce qui sera encore téléchargé ensuite."
+          }
+        }
+      },
+      "enterprise": {
+        "label": "Entreprise",
+        "title": "Choisissez la voie de déploiement alignée avec vos contrôles de production",
+        "subtitle": "Pour les équipes, la page met désormais en avant la confiance, l'auditabilité et la prévisibilité du déploiement. Le Trusted Tier passe devant, tandis que les chemins Public et natifs restent documentés pour les pilotes et les labs.",
+        "primaryCta": "Ouvrir le parcours production",
+        "secondaryCta": "Comparer les voies de déploiement",
+        "recommendedSubtitle": "Priorisé pour un déploiement d'entreprise sous contrôle.",
+        "points": {
+          "1": {
+            "title": "Confiance d'abord",
+            "body": "Le Trusted Tier passe avant les packagings orientés commodité."
+          },
+          "2": {
+            "title": "Preuves visibles",
+            "body": "Checksum, signatures et artefacts d'attestation restent explicites."
+          },
+          "3": {
+            "title": "Économie expliquée",
+            "body": "Le simulateur montre le coefficient Trusted au lieu de le cacher dans la politique."
+          }
+        }
+      },
+      "apple": {
+        "title": "macOS est réservé à l'expérience Trusted",
+        "subtitle": "Les visiteurs Apple sont redirigés uniquement vers le récit Trusted. Les alternatives Public et natives sont volontairement masquées ici, car la proposition macOS est positionnée comme une voie de capacité Trusted.",
+        "primaryCta": "Ouvrir le guide Trusted",
+        "secondaryCta": "Pourquoi Trusted sur Mac",
+        "recommendedSubtitle": "macOS est traité comme une voie Trusted-only sur cette page.",
+        "points": {
+          "1": {
+            "title": "Trusted par conception",
+            "body": "Le matériel Apple est présenté comme une capacité premium et contrôlée."
+          },
+          "2": {
+            "title": "Benchmark lisible",
+            "body": "Le benchmark navigateur intégré aide à comprendre la capacité locale avant installation."
+          },
+          "3": {
+            "title": "Coefficient visible",
+            "body": "Le surcroît Trusted est affiché directement dans l'estimation de revenu."
+          }
+        }
+      }
+    },
+    "recommended": {
+      "title": "Recommandé pour cet appareil"
+    },
+    "release": {
+      "version": "Dernière {version}",
+      "gitSha": "Commit {sha}",
+      "generatedAt": "Généré le {date}",
+      "generatedAtUnknown": "Date de génération indisponible",
+      "hybridSource": "Cette page mélange les métadonnées backend avec l'arborescence réelle des releases statiques afin de garder les téléchargements publiés visibles même lorsque le release index est incomplet."
+    },
+    "states": {
+      "error": "La dernière release n'a pas pu être chargée. Réessayez plus tard ou utilisez le miroir statique documenté.",
+      "empty": "Aucune release n'est actuellement publiée.",
+      "noRecommended": "Aucun artefact compatible n'est disponible pour cet appareil dans la dernière release.",
+      "unavailable": "Indisponible"
+    },
+    "artifacts": {
+      "sizeUnknown": "Taille indisponible",
+      "available": "Disponible",
+      "comingSoon": "Pas encore publié",
+      "readyNote": "Téléchargement direct disponible depuis le miroir statique.",
+      "pendingNote": "Cet artefact fait partie de la matrice cible mais n'est pas encore publié sur le miroir.",
+      "os": {
+        "any": "Toutes plateformes"
+      },
+      "channels": {
+        "light": "Bundle léger",
+        "images": "Bundle images",
+        "embedded": "Bundle embarqué",
+        "native": "Installeur natif",
+        "trusted_iso": "Image Trusted"
+      }
+    },
+    "apple": {
+      "trustedBadge": "Voie Trusted",
+      "title": "Lucky Apple guys , you are trusted tier provider !",
+      "body": "Sur macOS, nous masquons volontairement les alternatives Public et natives. Cette page présente Apple comme une histoire de capacité Trusted, avec la note de confiance et le coefficient expliqués dès le départ."
+    },
+    "bundleFamilies": {
+      "light": {
+        "title": "Bundle light",
+        "subtitle": "Le plus simple pour démarrer",
+        "body": "Télécharge moins au départ et complète ensuite. Idéal pour un premier nœud sans besoin offline."
+      },
+      "images": {
+        "title": "Bundle images",
+        "subtitle": "Images runtime déjà incluses",
+        "body": "Pratique si vous voulez disposer des images conteneur localement, tout en gardant des téléchargements ultérieurs pour les modèles."
+      },
+      "embedded": {
+        "title": "Bundle embedded",
+        "subtitle": "Plus lourd mais plus complet",
+        "body": "Embarque davantage de payload dès le départ pour limiter les téléchargements au premier démarrage."
+      }
+    },
+    "publicTier": {
+      "title": "Public Tier",
+      "description": "Le Public Tier est le chemin le plus rapide pour mettre de la capacité communautaire en ligne. Il conserve le runtime Docker-first, la génération locale des clés et le modèle agent en pull.",
+      "enterpriseDescription": "Le Public Tier reste utile pour les pilotes, les labs internes et les déploiements progressifs, mais il est volontairement présenté derrière Trusted pour les visiteurs entreprise.",
+      "explainerTitle": "Ce que vous installez",
+      "explainerBody": "Ces bundles ne sont pas un système d'exploitation dédié. Ils empaquettent le runtime agent à différents niveaux de complétude tout en conservant le modèle de confiance Router vers Agent.",
+      "empty": "Aucun bundle Public Tier n'est disponible dans la dernière release.",
+      "stepsTitle": "Parcours d'installation Public",
+      "steps": {
+        "1": "Téléchargez le bundle light ou images pour votre hôte.",
+        "2": "Démarrez le nœud avec le profil public et gardez LocalAI derrière le sidecar.",
+        "3": "Générez les clés du nœud localement pendant l'enrôlement.",
+        "4": "Interrogez le Router pour recevoir des tâches une fois le nœud accepté."
+      }
+    },
+    "native": {
+      "title": "Installeurs natifs",
+      "description": "Les wrappers natifs améliorent l'ergonomie d'installation tout en conservant le runtime Docker-first validé.",
+      "enterpriseDescription": "Les packages natifs sont utiles quand une équipe veut un installateur plus familier, tout en assumant le même modèle runtime sous-jacent.",
+      "runtimeNote": "Les installeurs natifs dépendent encore du bundle d'images agent existant et du runtime Docker hôte, sauf indication explicite de l'artefact.",
+      "explainerTitle": "Natif ne veut pas dire logique plateforme séparée",
+      "explainerBody": "L'installation est plus familière, mais le modèle opérationnel reste aligné sur la même voie de release et les mêmes garde-fous runtime."
+    },
+    "trustedTier": {
+      "title": "Trusted Tier",
+      "description": "Les artefacts Trusted Tier ciblent les opérations durcies : image de boot immuable, profil OS attesté, signature de release et politique de confiance fail-closed.",
+      "enterpriseDescription": "Le Trusted Tier est la voie production-grade pour les opérateurs qui valorisent la vérification, la politique de confiance et une capacité qualifiée de manière prévisible.",
+      "appleDescription": "Pour les visiteurs macOS, Trusted n'est pas présenté comme une option annexe mais comme la seule narration. Le matériel Apple est cadré comme une capacité premium pour la voie Trusted.",
+      "available": "Téléchargeable maintenant",
+      "preparing": "Publication en cours",
+      "explainerTitle": "Pourquoi Trusted existe",
+      "explainerBody": "Les packages Trusted servent à renforcer la chaîne de confiance. L'ISO représente un système d'exploitation dédié, tandis que les fichiers de preuve permettent de vérifier précisément ce qui sera exécuté.",
+      "isoNote": "L'ISO Trusted est présentée ici comme la voie OS dédiée. C'est la seule lane pensée pour rendre un nœud éligible au tier Trusted une fois la vérification et la politique d'onboarding satisfaites.",
+      "stepsTitle": "Parcours d'installation Trusted",
+      "steps": {
+        "1": "Téléchargez l'image Trusted et ses artefacts de vérification.",
+        "2": "Vérifiez le checksum, la signature et le profil OS attesté avant le boot.",
+        "3": "Démarrez l'hôte contrôlé et finalisez l'enrôlement du nœud.",
+        "4": "Exécutez des workloads seulement après acceptation du profil attesté par la politique Router."
+      },
+      "evidence": {
+        "title": "Preuves de release",
+        "items": {
+          "iso": "Image Trusted bootable",
+          "checksum": "Checksum SHA-256",
+          "signature": "Signature détachée de release",
+          "manifest": "Profil OS attesté ou manifeste"
+        }
+      },
+      "points": {
+        "1": "OS dédié prêt à booter sur machine bare-metal ou VM contrôlée.",
+        "2": "Chaîne de confiance renforcée pour les environnements sensibles.",
+        "3": "Parcours d'onboarding spécifique pour nœuds opérés avec SLA."
+      }
+    },
+    "platforms": {
+      "macos": {
+        "name": "macOS",
+        "description": "Présentation Trusted-only pour les opérateurs Apple Silicon."
+      },
+      "linux": {
+        "name": "Linux",
+        "description": "Chemin recommandé en production communautaire avec Docker Compose."
+      },
+      "windows": {
+        "name": "Windows",
+        "description": "Installation assistée avec Docker Desktop et scripts de bootstrap."
+      },
+      "detected": "Détecté"
+    },
+    "releaseNotes": {
+      "title": "Notes de release",
+      "empty": "Aucun changelog n'est encore attaché à cette release."
+    },
+    "download": "Télécharger",
+    "simulator": {
+      "title": "Simulateur capacité et revenu",
+      "previewTitle": "Revenus possibles",
+      "subtitle": "Estimez ce que cette machine peut apporter, puis comparez la base Public avec le surcroît Trusted.",
+      "previewSubtitle": "Une lecture rapide basée sur le matériel détecté et les prix modèles du catalogue.",
+      "benchmarkRunning": "Benchmark navigateur en cours... {progress} %",
+      "hardware": "Matériel détecté",
+      "vram": "VRAM estimée",
+      "uptime": "Disponibilité quotidienne",
+      "uptimeValue": "{hours} h/jour",
+      "monthlyBase": "Base mensuelle estimée",
+      "monthlyTrusted": "Trusted mensuel estimé",
+      "hourlySelected": "{amount} estimés par heure",
+      "publicMode": "Compagnon quotidien",
+      "trustedMode": "OS dédié Trusted",
+      "appleTrustedMode": "Compagnon Apple Trusted",
+      "publicModeDescription": "Un compagnon de tous les jours, qui démarre quand votre ordinateur est allumé.",
+      "trustedModeDescription": "Un OS dédié que vous démarrez quand vous n'utilisez pas votre ordinateur. Le coefficient vient de la politique tarifaire active.",
+      "appleModeDescription": "Sur Apple, l'expérience reste un compagnon Trusted adapté au flux macOS.",
+      "publicEstimate": "Base Public",
+      "publicEstimateHint": "Même matériel sans surcroît Trusted",
+      "baseRate": "{amount} estimés par heure",
+      "trustedEstimate": "Estimation Trusted",
+      "multiplierLabel": "Coefficient Trusted x{multiplier}",
+      "multiplierDetail": "{base} de base deviennent {trusted} avec le coefficient Trusted.",
+      "trustedReadyTitle": "Profil prêt pour Trusted",
+      "trustedReadySubtitle": "Le matériel détecté paraît compatible avec une proposition de capacité plus premium.",
+      "trustedReadyBody": "Cela ne remplace pas une vérification formelle, mais cela indique que la machine peut être positionnée crédiblement pour la voie Trusted une fois les exigences de politique et de preuves satisfaites.",
+      "trustedGapTitle": "Profil plutôt Public",
+      "trustedGapSubtitle": "Cette machine se lit mieux comme un candidat Public ou natif pour l'instant.",
+      "trustedGapBody": "Vous pouvez toujours installer et opérer le nœud, mais le benchmark ne soutient pas encore une proposition Trusted forte.",
+      "appleTrustedNote": "Les visiteurs Apple sont traités comme une narration Trusted par défaut, donc le surcroît est montré comme le cadre commercial principal.",
+      "multiplierExplainTitle": "Comment fonctionne le coefficient",
+      "multiplierExplainBody": "L'estimation Trusted reprend la même base de capacité, multipliée par x{multiplier}. On montre explicitement le calcul pour que l'utilisateur comprenne d'où vient le surcroît.",
+      "benchmarkExplainTitle": "Ce que fait le benchmark navigateur",
+      "benchmarkExplainBody": "Il combine des signaux WebGL/WebGPU, l'inférence du runtime et des heuristiques catalogue pour produire une première estimation pratique avant installation.",
+      "modelsTitle": "Modèles compatibles et prix tokens",
+      "modelsSubtitle": "{count} modèles correspondent au profil matériel détecté ({runtime}).",
+      "modelHeaders": {
+        "model": "Modèle",
+        "hardware": "Matériel min.",
+        "input": "Input payé",
+        "output": "Output payé",
+        "hourly": "Estim. h"
+      },
+      "modelsEmpty": "Aucun modèle rémunéré du catalogue ne correspond encore au matériel détecté.",
+      "ratePerMillion": "{amount} / M tokens",
+      "rateUnavailable": "Non publié",
+      "showMore": "Voir le simulateur complet",
+      "downloadCta": "Télécharger l'agent",
+      "partialConfidence": "WebGPU indisponible : les résultats reposent sur des heuristiques navigateur et doivent être lus comme directionnels.",
+      "unknownHardware": "GPU inconnu",
+      "runtimeValue": "Runtime : {runtime}",
+      "disclaimer": "Cette estimation est indicative et dépend de la demande modèle, de la politique de routage, de la disponibilité et du tier accepté."
+    },
+    "matrix": {
+      "title": "Matrice des tiers",
+      "subtitle": "Comparatif rapide de ce que chaque voie signifie réellement avant téléchargement.",
+      "appleSubtitle": "Sur macOS, la matrice reste focalisée sur le récit Trusted.",
+      "headers": {
+        "dimension": "Dimension",
+        "public": "Public",
+        "native": "Natif",
+        "trusted": "Trusted"
+      },
+      "rows": {
+        "install": "Ce que vous téléchargez",
+        "internet": "Dépendance internet",
+        "eligible": "Tier le plus pertinent",
+        "os": "OS dédié"
+      },
+      "values": {
+        "public": {
+          "install": "Archive bundle",
+          "internet": "Télécharge souvent plus au premier run",
+          "eligible": "Meilleur choix pour la capacité communautaire/Public",
+          "os": "Non, fonctionne sur l'hôte actuel"
+        },
+        "native": {
+          "install": "Installeur plus familier",
+          "internet": "Repose toujours sur la même voie runtime dessous",
+          "eligible": "Meilleur choix pour un onboarding guidé",
+          "os": "Non, encapsule l'OS hôte"
+        },
+        "trusted": {
+          "install": "ISO plus preuves de confiance",
+          "internet": "Peut s'inscrire dans une logique de déploiement plus contrôlée",
+          "eligible": "Seule voie pensée pour l'éligibilité Trusted",
+          "os": "Oui, image de système d'exploitation dédiée"
+        }
+      }
+    },
+    "apiSurface": {
+      "title": "Surface API de release",
+      "description": "Le frontend consomme désormais le contrat de release de téléchargement exposé par le backend.",
+      "gaps": {
+        "1": "Le contrat backend de release ne suffit pas encore à lui seul pour présenter tous les artefacts publiés.",
+        "2": "Les artefacts checksum et signature doivent rester visibles dès que la voie Trusted est publiée.",
+        "3": "La compatibilité entre agent, router, OS hôte et tier devrait devenir explicite dans l'API.",
+        "4": "L'arborescence statique et le release index doivent rester cohérents pour éviter les dérives UX."
+      }
+    }
+  },
+  "enrollment": {
+    "header_badge": "Enrôlement sécurisé",
+    "title": "Enrôlement du nœud",
+    "subtitle": "Vérifiez le challenge, validez les prérequis opérateur et approuvez l'enrôlement du nœud.",
+    "categories": {
+      "gpu": "Informations GPU",
+      "cpu": "Informations CPU",
+      "system": "Système & OS",
+      "models": "Modèles supportés"
+    },
+    "hello": "Hello {name}",
+    "node_name_label": "Nom affiché du nœud",
+    "node_name_hint": "Ce libellé reste modifiable et ne doit pas être unique.",
+    "challenge": "Challenge d'enrôlement",
+    "error_status": "Statut HTTP : {status}",
+    "error_detail": "Détail backend : {detail}",
+    "tier": "Tier de participation",
+    "expires_at": "Expire le {date}",
+    "hardware": "Empreinte matérielle",
+    "system": "Empreinte système",
+    "approve": "Approuver le nœud",
+    "deny": "Refuser le challenge",
+    "status": {
+      "done": "Terminé",
+      "required": "Requis"
+    },
+    "checklist": {
+      "title": "Check-list",
+      "subtitle": "L'approbation s'ouvre une fois l'activation du noeud réussie et l'accord accepté.",
+      "ready": "Prêt pour l'approbation",
+      "pending": "Action requise",
+      "signed_in": "Session opérateur active",
+      "sign_in_title": "Connectez-vous pour continuer",
+      "sign_in_description": "L'approbation d'un enrôlement nécessite une session opérateur authentifiée.",
+      "sign_in_inline_help": "Utilisez les mêmes fournisseurs que sur la page de connexion. Le retour sur cette page est automatique après l'OAuth.",
+      "identity_validated": "Identité validée",
+      "identity_title": "Validation d'identité pour le tier Trusted",
+      "identity_pending": "Validation d'identité requise pour le tier Trusted",
+      "operator_agreement": "Accord opérateur",
+      "operator_agreement_cta": "J'accepte l'{link}",
+      "operator_agreement_link": "Accord de l'opérateur de nœud"
+    },
+    "card": {
+      "title": "Carte d'identité du nœud",
+      "subtitle": "Un résumé opérateur clair du nœud avant validation finale de l'enrôlement.",
+      "location": "Localisation réseau",
+      "ip_address": "Adresse IP du nœud",
+      "ip_address_missing": "Adresse IP non transmise par l'agent",
+      "hardware_eligible_models": "{count} modèles éligibles",
+      "selected_models_zero": "Aucun modèle sélectionné",
+      "selected_models_one": "1 modèle sélectionné",
+      "selected_models": "{count} modèles sélectionnés",
+      "budget_gb_zero": "0 Go alloué",
+      "budget_gb": "{count} Go de budget",
+      "models_preview": "Aperçu des modèles sélectionnés",
+      "models_preview_empty": "Aucun modèle sélectionné n'a encore été annoncé par l'agent.",
+      "system_specs": "Empreinte système",
+      "hostname": "Nom d'hôte",
+      "os": "Système d'exploitation",
+      "release": "Version système",
+      "architecture": "Architecture",
+      "python": "Version Python",
+      "gpu": "Modèle GPU"
+    },
+    "tier_assignment": {
+      "eyebrow": "Niveau de sécurité",
+      "title": "Ce nœud est candidat pour la grille {tier}",
+      "subtitle": "Le tier détermine le niveau de confiance et de rémunération."
+    },
+    "identity_status": {
+      "pending": "La validation d'identité se finalise encore depuis votre espace compte pour le routage trusted.",
+      "backend_enforced": "L'approbation trusted dépend toujours de la vérification d'identité côté backend. Si le compte n'est pas validé, le backend rejettera l'approbation même si cette page est complète.",
+      "cta": "Ouvrir la validation d'identité"
+    },
+    "approval": {
+      "eyebrow": "Décision opérateur",
+      "title": "Approuver ce nœud",
+      "subtitle": "Finalisez l'entrée du nœud dans le réseau après vérification du compte, du tier et de l'empreinte remontée par l'agent.",
+      "session": "Session opérateur",
+      "agreement": "Accord opérateur",
+      "tier": "Tier demandé"
+    },
+    "actions": {
+      "helper": "Le refus reste toujours possible. L'approbation reste verrouillée tant que la check-list n'est pas complète."
+    },
+    "registration": {
+      "title": "Enregistrement du nœud en cours",
+      "subtitle": "Nous vérifions en continu les signaux backend avant la mise en ligne sur la grille Infera.",
+      "waiting": "Attente des signaux heartbeat, certificat et runtime...",
+      "success_title": "Nœud validé sur la grille Infera",
+      "success_subtitle": "Tous les contrôles sont au vert. Vous pouvez maintenant piloter ce nœud depuis votre espace.",
+      "cta": "Voir mes nœuds",
+      "steps": {
+        "heartbeat": "Signal heartbeat",
+        "certificate": "Certificat node",
+        "runtime": "Runtime node"
+      },
+      "state": {
+        "waiting": "En attente...",
+        "detected": "Détecté"
+      }
+    }
+  },
+  "organisations": {
+    "title": "Administration des organisations",
+    "refresh": "Rafraîchir",
+    "open_page": "Ouvrir la page",
+    "loadFailed": "Échec du chargement des organisations.",
+    "filters": {
+      "search": "Recherche",
+      "clientId": "ID client",
+      "status": "Statut"
+    },
+    "create": {
+      "title": "Créer une organisation",
+      "name": "Nom",
+      "clientId": "ID client",
+      "status": "Statut",
+      "currency": "Devise",
+      "monthlyCeiling": "Plafond mensuel",
+      "lifetimeCeiling": "Plafond vie entière",
+      "submit": "Créer"
+    },
+    "disable": {
+      "title": "Désactiver l'organisation",
+      "body": "Cette organisation ne sera plus disponible pour les workflows d'administration actifs. L'historique d'audit reste visible."
+    },
+    "bulk": {
+      "status": "Statut en lot",
+      "apply": "Appliquer à {count} organisations"
+    },
+    "actions": {
+      "timeline": "Historique",
+      "disable": "Désactiver"
+    },
+    "timeline": {
+      "title": "Historique d'audit organisation",
+      "empty": "Aucun événement d'audit."
+    },
+    "columns": {
+      "name": "Nom",
+      "clientId": "ID client",
+      "usersCount": "Utilisateurs",
+      "spend": "Dépense mensuelle",
+      "noCeiling": "sans plafond",
+      "spendAlert": "alerte {threshold}%",
+      "status": "Statut",
+      "updatedAt": "Mis à jour le",
+      "actions": "Actions"
+    }
+  },
+  "content": {
+    "not_found": {
+      "title": "Contenu introuvable",
+      "description": "Cette page n'est disponible ni dans la locale sélectionnée ni dans la locale par défaut.",
+      "cta": "Retour à l'accueil"
+    },
+    "forbidden": {
+      "title": "Contenu restreint",
+      "description": "Cette page nécessite une session administrateur.",
+      "cta": "Se connecter"
+    },
+    "explorer": {
+      "title": "Navigateur de documentation",
+      "documentation": "Documentation",
+      "navigation": "Ouvrir la navigation",
+      "expand": "Déplier la navigation",
+      "collapse": "Réduire la navigation",
+      "index": "Index du contenu",
+      "filter_tags": "Filtrer par tags",
+      "search_placeholder": "Recherche par titre puis contenu",
+      "pages": "pages",
+      "headers": {
+        "title": "Titre",
+        "path": "Chemin",
+        "tags": "Tags"
+      },
+      "seo": {
+        "title": "Infera - Documentation",
+        "description": "Parcourez la documentation Infera avec pages localisées, recherche temps réel et filtres par tags."
+      }
+    },
+    "doc_cartouche": {
+      "badge": "Page de documentation",
+      "reading_time": "Temps de lecture",
+      "reading_time_value": "{count} min",
+      "words": "Mots",
+      "words_value": "{count} mots",
+      "updated_at": "Mis à jour",
+      "show_raw": "Afficher les métadonnées brutes",
+      "hide_raw": "Masquer les métadonnées brutes",
+      "author": "Auteur",
+      "contributor": "Contributeur",
+      "source": "Source sur GitHub",
+      "edit": "Mettre à jour",
+      "editor_title": "Modifier la source markdown",
+      "preview": "Aperçu en direct",
+      "saved": "Documentation mise à jour sur GitHub.",
+      "history": "Historique",
+      "language": "Langue",
+      "doc_family": "Famille",
+      "feedback_like": "Utile",
+      "feedback_unlike": "Peu utile",
+      "feedback_score": "Score retours",
+      "metadata": "Métadonnées"
+    }
+  },
+  "playground": {
+    "title": "Bac à sable",
+    "description": "Testez les modèles et le process.",
+    "tabs": {
+      "chat": "Chat",
+      "embeddings": "Embeddings",
+      "completions": "Completions",
+      "images": "Images",
+      "speech": "Speech",
+      "transcriptions": "Transcriptions",
+      "moderations": "Moderations",
+      "files": "Fichiers"
+    },
+    "fields": {
+      "api_key": "Clé API",
+      "model": "Modèle",
+      "temperature": "Température",
+      "max_tokens": "Tokens max",
+      "prompt": "Prompt",
+      "stop_sequences": "Séquences d'arrêt",
+      "suffix": "Suffixe",
+      "attachments": "Pièces jointes (image/audio)",
+      "chat_output": "Réponse chat",
+      "embedding_input": "Entrée embeddings",
+      "embedding_output": "Réponse embeddings",
+      "json_payload": "Payload JSON",
+      "image_prompt": "Prompt image",
+      "image_size": "Taille",
+      "image_quality": "Qualité",
+      "image_style": "Style",
+      "image_count": "Nombre d'images",
+      "speech_input": "Texte à synthétiser",
+      "voice": "Voix",
+      "audio_format": "Format audio",
+      "speed": "Vitesse",
+      "audio_file": "Fichier audio",
+      "microphone_capture": "Capture micro",
+      "language": "Langue",
+      "transcription_prompt": "Prompt de guidage",
+      "response_format": "Format de réponse",
+      "moderation_input": "Contenu à modérer",
+      "file_upload": "Fichier à envoyer",
+      "file_purpose": "Usage"
+    },
+    "config": {
+      "section_label": "Configuration",
+      "api_key_section": "Clé API",
+      "model_section": "Modèle",
+      "options_section": "Options"
+    },
+    "labels": {
+      "beta": "Bêta",
+      "live": "Live",
+      "diagnostics": "Diagnostics",
+      "status_success": "Succès",
+      "status_error": "Erreur",
+      "tokens": "tokens",
+      "raw_response": "Réponse brute",
+      "generated_asset": "Ressource générée",
+      "recording": "Enregistrement",
+      "ready": "Prêt",
+      "flagged": "Signalé",
+      "allowed": "Autorisé"
+    },
+    "runtime": {
+      "native": "Runtime natif",
+      "image_input": "Image",
+      "tools": "Outils",
+      "external": "Externe",
+      "templates": {
+        "chatml": "ChatML",
+        "llama-inst": "Llama instruct",
+        "provider-native": "Provider natif",
+        "custom": "Template custom"
+      }
+    },
+    "actions": {
+      "create_key": "Créer une clé",
+      "show_logs": "Voir les logs",
+      "openapi_docs": "Bac à sable API",
+      "copy_key": "Copier la clé",
+      "run_chat": "Exécuter chat completion",
+      "run_embeddings": "Exécuter embeddings",
+      "run_generic": "Exécuter la requête",
+      "clear_output": "Effacer la sortie",
+      "clear_history": "Effacer l'historique",
+      "copy_output": "Copier la réponse",
+      "copied": "Copié !",
+      "run_completions": "Exécuter la completion",
+      "generate_image": "Générer l'image",
+      "generate_speech": "Générer l'audio",
+      "download": "Télécharger",
+      "download_audio": "Télécharger l'audio",
+      "start_recording": "Démarrer",
+      "stop_recording": "Arrêter",
+      "clear_audio": "Effacer l'audio",
+      "run_transcription": "Lancer la transcription",
+      "run_moderation": "Lancer la modération",
+      "upload_file": "Téléverser le fichier",
+      "manage_keys": "Gérer mes clés",
+      "view_model": "Voir le modèle"
+    },
+    "cta": {
+      "trial_title": "Première fois ? 10 € offerts pour tester la plateforme",
+      "trial_caption": "Créez un compte, générez une clé de test et lancez une inférence live en quelques minutes.",
+      "trial_action": "Tester maintenant"
+    },
+    "hints": {
+      "billing": "Les requêtes sont envoyées au routeur Infera avec la clé sélectionnée et sont facturées via le pipeline standard.",
+      "openapi": "Consultez le contrat OpenAPI public utilisé pour la génération des SDK clients.",
+      "no_result": "Lancez une requête pour voir la réponse ici.",
+      "unauthenticated": "Connectez-vous pour utiliser vos clés API facturées et accéder aux logs d'inférence en direct.",
+      "completions_output": "Le texte généré est rendu directement, avec la payload brute disponible en dessous.",
+      "images_output": "Les images restent visibles inline pour une inspection immédiate.",
+      "speech_output": "Les réponses audio sont converties pour une lecture directe dans le navigateur.",
+      "microphone_capture": "Enregistrez un court extrait dans le navigateur puis soumettez-le comme fichier.",
+      "transcription_output": "Le texte transcrit est prioritaire, sans perdre la réponse complète.",
+      "moderation_output": "Les barres de sévérité rendent les scores lisibles sans ouvrir le JSON brut.",
+      "files_output": "Le téléversement renvoie les métadonnées du fichier à réutiliser dans les appels suivants."
+    },
+    "errors": {
+      "configuration_required": "Sélectionnez une clé API valide et choisissez un modèle avant d'exécuter une requête.",
+      "playground_unauthorized": "Clé API non autorisée.",
+      "playground_forbidden": "Accès interdit pour cette clé API.",
+      "playground_not_found": "Endpoint cible introuvable.",
+      "playground_timeout": "La requête a expiré en attendant le routeur.",
+      "playground_payload_too_large": "La charge utile dépasse les limites du proxy playground.",
+      "playground_rate_limited": "Limite de débit atteinte. Réessayez plus tard.",
+      "playground_upstream_unavailable": "Le routeur est indisponible. Veuillez réessayer.",
+      "playground_router_timeout": "Le playground a expiré avant que le routeur ne retourne une réponse.",
+      "playground_router_unreachable": "Le playground ne peut pas joindre le routeur. Vérifiez le processus routeur local et son URL.",
+      "playground_router_transport_error": "La connexion au routeur a été interrompue avant le retour d'une réponse.",
+      "playground_proxy_error": "Échec du relais playground.",
+      "agent_timeout": "L'agent a expiré lors du traitement. Le modèle est peut-être en cours de chargement - réessayez.",
+      "agent_failure": "L'agent n'a pas pu traiter la requête. Veuillez réessayer.",
+      "invalid_request_error": "Le modèle sélectionné ne supporte pas cet endpoint. Choisissez un modèle compatible ou changez d'onglet.",
+      "audit_trail_disabled": "La piste d'audit n'est pas activée sur cette clé API.",
+      "empty_chat_payload": "Ajoutez un prompt.",
+      "empty_embedding_input": "Le contenu d'embedding ne peut pas être vide.",
+      "attachments_too_large": "Les pièces jointes dépassent la taille autorisée.",
+      "empty_prompt": "Ce champ ne peut pas être vide.",
+      "audio_file_required": "Sélectionnez ou enregistrez un fichier audio avant la transcription.",
+      "file_required": "Sélectionnez un fichier avant le téléversement.",
+      "microphone_unavailable": "L'enregistrement micro n'est pas disponible dans ce navigateur."
+    },
+    "results": {
+      "generated_text": "Texte généré",
+      "images": "Images générées",
+      "audio_preview": "Prévisualisation audio",
+      "transcript": "Transcription",
+      "moderation_summary": "Résumé de modération",
+      "uploaded_file": "Fichier téléversé"
+    },
+    "capabilities": {
+      "title": "Capacités de la clé",
+      "empty": "Aucun modèle disponible pour cette clé API."
+    },
+    "logs": {
+      "title": "Logs live d'opération",
+      "empty": "Aucune opération n'a encore été enregistrée pour cette clé.",
+      "detail_empty": "Sélectionnez un log pour inspecter la chronologie de l'opération.",
+      "no_key": "Sélectionnez une clé pour suivre les logs d'audit.",
+      "audit_disabled_title": "Piste d'audit désactivée",
+      "audit_disabled_description": "Cette clé ne conserve pas les logs d'opération du playground. Activez la piste d'audit depuis l'administration de la clé pour inspecter les timelines, les décisions du routeur et les erreurs agent.",
+      "metrics": {
+        "latency": "Latence totale",
+        "tokens": "Usage",
+        "energy": "Énergie nette"
+      }
+    },
+    "facets": {
+      "supported": "Actif",
+      "planned": "Planifié",
+      "chat": {
+        "title": "Chat completions",
+        "description": "Endpoint compatible OpenAI disponible via le routeur."
+      },
+      "embeddings": {
+        "title": "Embeddings",
+        "description": "Vecteurs texte exposés sur la façade OpenAI-compatible."
+      },
+      "models": {
+        "title": "Models",
+        "description": "Catalogue filtré par clé API et politiques de tier."
+      },
+      "responses": {
+        "title": "Responses",
+        "description": "Surface unifiée moderne à ajouter avant de nouveaux agents multimodaux."
+      },
+      "images": {
+        "title": "Images",
+        "description": "Génération, édition et variations nécessitent un endpoint routeur dédié."
+      },
+      "speech": {
+        "title": "Speech",
+        "description": "Text-to-speech à exposer avec streaming audio et formats de sortie."
+      },
+      "transcriptions": {
+        "title": "Transcriptions",
+        "description": "Speech-to-text et traductions audio à intégrer au proxy multimodal."
+      },
+      "moderations": {
+        "title": "Moderations",
+        "description": "Classification texte/image à prévoir pour la garde-fou client."
+      }
+    },
+    "seo": {
+      "title": "Infera - Playground d'inférence",
+      "description": "Bac à sable OpenAI-compatible pour tester les modèles et les clés API sur le réseau Infera."
+    }
+  },
+  "admin": {
+    "sidebar": {
+      "caption": "Plan de contrôle",
+      "title": "Console Admin",
+      "expand": "Déplier",
+      "collapse": "Réduire",
+      "backToInfera": "Retour à Infera"
+    },
+    "overview": {
+      "badge": "Vue opérations",
+      "title": "Tableau de bord administration",
+      "subtitle": "Vue synthétique en temps réel des nœuds, clés, organisations et utilisateurs.",
+      "load_failed": "Impossible de charger les métriques admin.",
+      "quick_actions": "Actions rapides",
+      "actions": {
+        "refresh": "Tout rafraîchir",
+        "create_key": "Clés API",
+        "inspect_nodes": "Flotte de nœuds",
+        "benchmarks": "Benchmarks",
+        "manage_organizations": "Organisations",
+        "manage_users": "Utilisateurs",
+        "manage_models": "Gestion des modèles",
+        "admin_docs": "Documentation admin"
+      },
+      "action_captions": {
+        "keys": "Émettre, renouveler et auditer les accès clients.",
+        "nodes": "Inspecter la santé fournisseur et l'état runtime.",
+        "benchmarks": "Comparer l'empreinte énergétique à travers les benchmarks de performance.",
+        "organizations": "Maintenir les frontières de tenancy client.",
+        "users": "Contrôler les niveaux d'accès et les comptes.",
+        "models": "Synchroniser le catalogue de galeries, définir les politiques par tier et configurer les surcharges par nœud.",
+        "docs": "Ouvrir les procédures opérationnelles restreintes."
+      },
+      "health": {
+        "title": "État de santé de la flotte",
+        "active_nodes": "Nœuds actifs : {count}",
+        "total_nodes": "Nœuds totaux : {count}",
+        "captured_requests": "Requêtes capturées (7j) : {count}",
+        "last_nodes": "Derniers nœuds connectés",
+        "no_nodes": "Aucun nœud récent trouvé."
+      },
+      "metrics": {
+        "nodes": {
+          "label": "Nœuds",
+          "caption": "{count} actifs actuellement"
+        },
+        "keys": {
+          "label": "Clés API actives",
+          "caption": "{count} clés au total"
+        },
+        "organizations": {
+          "label": "Organisations",
+          "caption": "Organisations clientes enregistrées"
+        },
+        "users": {
+          "label": "Utilisateurs",
+          "caption": "Utilisateurs admin et clients"
+        }
+      }
+    },
+    "docs": {
+      "badge": "Docs restreintes",
+      "title": "Documentation administrateur",
+      "section_title": "Section documentation",
+      "subtitle": "Contenus opérationnels et de gouvernance réservés aux administrateurs."
+    },
+    "pentest": {
+      "badge": "Contrôle lab offensif",
+      "title": "Licences PentestGPT",
+      "subtitle": "Générer et révoquer des bundles PentestGPT côté opérateur pour piloter les travaux CTF, HTB et THM via Infera ou un endpoint OpenAI-compatible injecté.",
+      "metrics": {
+        "active": "Licences actives : {count}"
+      },
+      "modes": {
+        "INFERA_GRID": "Grille Infera",
+        "DIRECT_OPENAI_COMPATIBLE": "OpenAI-compatible direct"
+      },
+      "status": {
+        "ACTIVE": "Active",
+        "REVOKED": "Révoquée"
+      },
+      "create": {
+        "eyebrow": "Licence pentest distribuée",
+        "title": "Émettre un bundle",
+        "infera_note": "Crée une clé Router Infera révocable pour le scope client de l'admin. LocalAI reste accessible uniquement via le routage Router.",
+        "direct_note": "Génère une config CCR pour un endpoint OpenAI-compatible détenu par l'opérateur. Les clés fournisseur restent locales."
+      },
+      "fields": {
+        "mode": "Mode fournisseur",
+        "external_base_url": "Base URL OpenAI-compatible",
+        "default_model": "Modèle par défaut",
+        "think_model": "Modèle raisonnement",
+        "long_context_model": "Modèle contexte long",
+        "web_search_model": "Modèle recherche web",
+        "allowed_models": "Modèles Infera autorisés",
+        "instruction": "Instructions PentestGPT",
+        "client_id": "Scope client",
+        "operator": "Opérateur",
+        "api_key_prefix": "Préfixe de clé API",
+        "revoked_by": "Révoquée par"
+      },
+      "licenses": {
+        "title": "Licences émises",
+        "total": "{count} au total"
+      },
+      "columns": {
+        "id": "Licence",
+        "mode": "Mode",
+        "model": "Modèle par défaut",
+        "key": "Clé",
+        "status": "Statut",
+        "created": "Créée"
+      },
+      "generated": {
+        "banner": "Fichiers du bundle générés. C'est la seule réponse contenant la clé Infera en clair."
+      },
+      "actions": {
+        "create": "Émettre la licence",
+        "inspect": "Inspecter",
+        "revoke": "Révoquer",
+        "copy": "Copier"
+      }
+    },
+    "pages": {
+      "selected": "{count} sélectionné(s)",
+      "nodes": {
+        "badge": "Gestion de la flotte"
+      },
+      "node_detail": {
+        "badge": "Dossier nœud"
+      },
+      "keys": {
+        "badge": "Contrôle d'accès"
+      },
+      "users": {
+        "badge": "Gouvernance identité",
+        "subtitle": "Contrôlez l'état des comptes, les rôles et l'historique d'audit des utilisateurs backoffice.",
+        "total": "{count} utilisateurs",
+        "active": "{count} actifs sur cette page"
+      },
+      "organisations": {
+        "badge": "Gouvernance tenant",
+        "subtitle": "Gérez les organisations clientes, les IDs client et l'état administratif.",
+        "total": "{count} organisations",
+        "active": "{count} actives sur cette page"
+      },
+      "benchmarks": {
+        "badge": "Opérations énergie"
+      }
+    },
+    "benchmarks": {
+      "title": "Empreinte énergétique",
+      "subtitle": "Vue opérateur des probes de benchmark des nœuds : débit, temps de chargement modèle et latence qui alimentent la mesure d'efficacité énergétique du réseau.",
+      "meta": {
+        "requests": "{count} requêtes",
+        "ledger": "{count} lignes ledger"
+      },
+      "actions": {
+        "refresh": "Rafraîchir les benchmarks"
+      },
+      "filters": {
+        "model": "Modèle",
+        "method_tier": "Niveau de méthode",
+        "scope": "Périmètre",
+        "scope_id": "Identifiant du périmètre",
+        "bucket": "Pas de temps",
+        "min_confidence": "Confiance min."
+      },
+      "scope": {
+        "global": "Global",
+        "apikey": "Clé API",
+        "model": "Modèle",
+        "user": "Utilisateur",
+        "organization": "Organisation"
+      },
+      "method_tiers": {
+        "device_direct": "Mesure directe",
+        "host_estimate": "Estimation hôte"
+      },
+      "buckets": {
+        "hour": "Heure",
+        "day": "Jour"
+      },
+      "metrics": {
+        "joules": {
+          "label": "Joules nets",
+          "caption": "Énergie par requête après retrait de baseline"
+        },
+        "wh": {
+          "label": "Wh / 1k tokens",
+          "caption": "Vue neutre normalisée"
+        },
+        "tokens": {
+          "label": "Tokens connus",
+          "caption": "Requêtes avec comptage de tokens conservé"
+        },
+        "intensity": {
+          "label": "J / token",
+          "caption": "Dérivé des Joules nets et des tokens totaux"
+        }
+      },
+      "raw": {
+        "title": "Benchmarks de performance",
+        "subtitle": "Latence, débit tokens/sec et temps de chargement modèle envoyés par les nœuds lors de l'enrôlement ou des campagnes de mesure.",
+        "badge": "Empreinte énergétique",
+        "filters": {
+          "node": "ID Nœud",
+          "model": "ID Modèle"
+        },
+        "fields": {
+          "node_id": "Nœud",
+          "slot": "Slot",
+          "model_id": "Modèle",
+          "latency_p50": "Latence P50",
+          "latency_p95": "Latence P95",
+          "tps": "Tokens/sec",
+          "completion_tps": "TPS génération",
+          "load_time": "Chargement modèle",
+          "duration": "Durée",
+          "generated_tokens": "Générés",
+          "status": "Statut",
+          "captured_at": "Capturé le",
+          "workload": "Charge",
+          "hardware": "Hardware",
+          "quality": "Qualité"
+        },
+        "empty": "Aucun benchmark trouvé.",
+        "actions": {
+          "view_payload": "Voir le payload JSON brut"
+        },
+        "payload_dialog": {
+          "title": "Payload de benchmark",
+          "empty": "Aucun payload brut disponible pour ce run.",
+          "copy": "Copier le JSON"
+        }
+      },
+      "notice": "Seuls les événements au-dessus du seuil de confiance sélectionné sont inclus. Les échecs partiels et exclusions restent visibles dans le ledger.",
+      "sections": {
+        "breakdown": "Ventilations",
+        "timeseries": "Série temporelle",
+        "ledger": "Ledger d'audit"
+      },
+      "tabs": {
+        "model": "Modèle",
+        "apikey": "Clé API",
+        "user": "Utilisateur",
+        "organization": "Organisation",
+        "method": "Méthode"
+      },
+      "breakdown": {
+        "dimension": "Dimension",
+        "requests": "Requêtes",
+        "joules": "Joules nets",
+        "tokens": "Tokens",
+        "j_per_token": "J/token",
+        "wh_per_1k_tokens": "Wh/1k tokens"
+      },
+      "timeseries": {
+        "bucket": "Début du bucket",
+        "joules": "Joules nets",
+        "tokens": "Tokens",
+        "j_per_token": "J/token"
+      },
+      "ledger": {
+        "captured_at": "Heure de l'événement",
+        "model": "Modèle",
+        "api_key": "Clé API",
+        "user": "Utilisateur",
+        "organization": "Organisation",
+        "method": "Méthode",
+        "confidence": "Confiance",
+        "joules": "Joules nets",
+        "tokens": "Tokens",
+        "j_per_token": "J/token",
+        "partial_failure": "Exécution",
+        "anomaly": "Drapeau qualité",
+        "partial": "Partielle",
+        "complete": "Complète",
+        "flagged": "Signalée",
+        "normal": "Normale"
+      }
+    },
+    "campaigns": {
+      "badge": "Pentest distribué",
+      "title": "Campagnes pentest",
+      "subtitle": "Campagnes de scan autonomes pilotées par un LLM planificateur et des agents pentest-operator distribués.",
+      "metrics": {
+        "running": "En cours : {count}",
+        "total": "{count} campagnes"
+      },
+      "tabs": {
+        "licenses": "Licences PentestGPT",
+        "campaigns": "Campagnes"
+      },
+      "status": {
+        "CREATED": "Créée",
+        "RUNNING": "En cours",
+        "PAUSED": "En pause",
+        "COMPLETED": "Terminée",
+        "ABORTED": "Abandonnée",
+        "FAILED": "Échouée"
+      },
+      "modes": {
+        "LAB": "Lab",
+        "GUARDED": "Gardé",
+        "STRICT": "Strict"
+      },
+      "columns": {
+        "id": "Campagne",
+        "name": "Nom",
+        "status": "Statut",
+        "mode": "Mode",
+        "iterations": "Itérations",
+        "created": "Créée"
+      },
+      "fields": {
+        "name": "Nom de la campagne",
+        "mode": "Mode d'exécution",
+        "scope": "Cibles de portée",
+        "scope_type": "Type",
+        "scope_target": "Cible",
+        "max_actions": "Actions max (0 = défaut)",
+        "max_tokens": "Tokens max (0 = défaut)",
+        "max_runtime": "Durée max en secondes (0 = défaut)"
+      },
+      "create": {
+        "title": "Nouvelle campagne",
+        "eyebrow": "Campagne pentest",
+        "subtitle": "Définissez les cibles de portée et les contraintes budgétaires. Le planificateur orchestrera de façon autonome les workers nmap, nuclei et http_probe.",
+        "mode_lab_note": "Aucune approbation requise - les actions sont dispatchées immédiatement. Réservé aux cibles lab isolées.",
+        "mode_guarded_note": "Les actions à risque CRITICAL nécessitent une approbation manuelle avant dispatch.",
+        "mode_strict_note": "Toutes les actions nécessitent une approbation manuelle."
+      },
+      "actions": {
+        "new": "Nouvelle campagne",
+        "start": "Démarrer",
+        "pause": "Mettre en pause",
+        "resume": "Reprendre",
+        "abort": "Abandonner",
+        "approve": "Approuver",
+        "deny": "Refuser",
+        "add_target": "Ajouter une cible",
+        "view_timeline": "Timeline",
+        "back": "Retour aux campagnes"
+      },
+      "findings": {
+        "empty": "Aucun résultat pour l'instant",
+        "columns": {
+          "severity": "Sévérité",
+          "type": "Type",
+          "tool": "Outil",
+          "confidence": "Confiance",
+          "hash": "Hash de dédup"
+        }
+      },
+      "timeline": {
+        "title": "Timeline d'audit",
+        "empty": "Aucun événement pour l'instant"
+      },
+      "detail": {
+        "tab_overview": "Vue d'ensemble",
+        "tab_findings": "Résultats",
+        "tab_timeline": "Timeline",
+        "tab_actions": "Actions en attente",
+        "scope_label": "Portée",
+        "budget_label": "Budget",
+        "iteration_label": "Itération planificateur",
+        "started_label": "Démarrée",
+        "ended_label": "Terminée"
+      },
+      "empty": "Aucune campagne - créez la première.",
+      "abort_confirm": "Abandonner cette campagne ? Toutes les actions en cours seront interrompues."
+    }
+  },
+  "theme": {
+    "title": "Thème",
+    "toggle": "Changer de thème",
+    "system": "Suivre le système",
+    "light": "Clair",
+    "dark": "Sombre"
+  },
+  "docs": {
+    "badge": "Base de connaissances",
+    "title": "Explorateur de documentation",
+    "subtitle": "Retrouvez les références produit, opérations et offres commerciales de la plateforme Infera.",
+    "seo": {
+      "title": "Infera - Documentation",
+      "description": "Parcourez la documentation publique sur les offres, l'onboarding et les opérations."
+    },
+    "rag": {
+      "title": "RAG Documentation",
+      "ask_label": "Interroger l'assistant documentaire",
+      "provider_label": "Fournisseur de génération",
+      "model_label": "Modèle",
+      "template_label": "Templates de prompt",
+      "ask_btn": "Envoyer",
+      "ask_stream_btn": "Streamer",
+      "citations": "Citations",
+      "assistant_label": "Assistant",
+      "empty_state": "Posez une question. Le backend récupère la documentation locale, puis envoie le contexte sourcé au fournisseur sélectionné.",
+      "missing_key_hint": "Ce fournisseur est listé mais sa clé API backend n'est pas configurée. Ajoutez la variable d'environnement serveur correspondante avant de l'utiliser.",
+      "no_sources": "Les sources apparaîtront après une réponse.",
+      "no_stream_body": "Aucun corps de flux disponible",
+      "prompt_title": "Contrôles de prompt",
+      "provider_configured": "Configuré",
+      "provider_missing_key": "Clé absente",
+      "settings_title": "Génération",
+      "sources_count": "{count} sources",
+      "sources_title": "Sources",
+      "user_label": "Vous",
+      "placeholders": [
+        "Résume les prérequis d'enrôlement des nœuds en 5 points",
+        "Quelles sont les règles mTLS non négociables ?",
+        "Comment fonctionne la réindexation docs côté backend ?"
+      ],
+      "request_failed": "La requête a échoué",
+      "stream_failed": "Le flux a échoué"
+    }
+  },
+  "profile": {
+    "nav": {
+      "badge": "Espace compte",
+      "title": "Bonjour {name}",
+      "subtitle": "Gérez profil, facturation, statut de validation d'identité, clés API et revenus des nœuds depuis un seul cockpit.",
+      "items": {
+        "informations": {
+          "title": "Informations",
+          "subtitle": "Vue d'ensemble"
+        },
+        "nodes": {
+          "title": "Mes nœuds",
+          "subtitle": "Revenus & santé"
+        },
+        "keys": {
+          "title": "Clés API",
+          "subtitle": "Accès & consommation"
+        },
+        "billing": {
+          "title": "Facturation",
+          "subtitle": "Moyens de paiement"
+        },
+        "organisations": {
+          "title": "Organisations",
+          "subtitle": "Équipes & rôles"
+        },
+        "security": {
+          "title": "Sécurité",
+          "subtitle": "2FA & sessions"
+        },
+        "dashboard": {
+          "title": "Tableau de bord",
+          "subtitle": "Vue d'ensemble"
+        }
+      }
+    },
+    "badge": "Espace compte",
+    "title": "Espace utilisateur",
+    "subtitle": "Gérez profil, facturation, statut de validation d'identité, clés API et revenus des nœuds depuis un seul cockpit.",
+    "fallback_name": "votre espace",
+    "units": {
+      "tokens": "tokens",
+      "requests": "requêtes"
+    },
+    "status": {
+      "active": "Active",
+      "revoked": "Révoquée"
+    },
+    "identity": {
+      "title": "Validation d'identité (niveau trusted)",
+      "helper": "Votre vérification est en revue. Le niveau trusted et le routage prioritaire seront activés après approbation.",
+      "steps": {
+        "submitted": "Soumis",
+        "review": "Revue conformité",
+        "verified": "Trusted approuvé"
+      },
+      "status_active": "Session vérifiée",
+      "status_pending": "Vérification en attente",
+      "mock_notice": "Statut simulé pour cette version MVP."
+    },
+    "profile_tab": {
+      "title": "Profil utilisateur & organisation"
+    },
+    "fields": {
+      "fullName": "Nom complet",
+      "email": "Email",
+      "organization": "Organisation"
+    },
+    "hero": {
+      "greeting": "Bonjour {name}",
+      "nodes": "Agents enrôlés",
+      "keys": "Clés actives",
+      "total_paid": "Dépenses totales",
+      "node_revenue": "Revenus agents",
+      "live": "Live",
+      "active": "Actives",
+      "month": "30 jours",
+      "estimated": "Estimé"
+    },
+    "panels": {
+      "nodes": {
+        "title": "Mes agents",
+        "subtitle": "Agents fournisseurs liés à votre compte",
+        "open": "Ouvrir mes agents",
+        "earnings": "Argent gagné estimé",
+        "hardware_unknown": "Matériel non reporté"
+      },
+      "keys": {
+        "title": "Mes clés API",
+        "subtitle": "Usage et coût par clé API",
+        "spend": "Coût total estimé"
+      }
+    },
+    "empty": {
+      "nodes": {
+        "title": "Aucun agent",
+        "subtitle": "Installez un agent pour démarrer",
+        "description": "Rentabilisez votre matériel et suivez les revenus dès qu'un agent est connecté.",
+        "cta": "Rentabilisez votre matériel !"
+      },
+      "keys": {
+        "title": "Aucune clé API",
+        "subtitle": "Créez une clé pour utiliser l'API",
+        "description": "Créez une clé dédiée par environnement pour améliorer sécurité et traçabilité.",
+        "cta": "Créez une clé API"
+      }
+    },
+    "nodes": {
+      "badge": "Opérations fournisseur",
+      "title": "Mes nœuds",
+      "subtitle": "Suivez le matériel enrôlé, l'état runtime et les revenus fournisseur estimés.",
+      "load_failed": "Impossible de charger vos nœuds.",
+      "actions": {
+        "install": "Installer un agent",
+        "token": "Jeton d'enrôlement"
+      },
+      "retire": {
+        "title": "Réinitialiser l'enrôlement",
+        "subtitle": "Cette action révoque {nodeId}. L'agent local devra être redémarré avec un nouveau jeton pour rejoindre le réseau.",
+        "reason": "Motif",
+        "confirm": "Réinitialiser l'enrôlement",
+        "error": "Impossible de réinitialiser l'enrôlement de ce nœud."
+      },
+      "enrollment_token": {
+        "title": "Jeton d'enrôlement",
+        "subtitle": "Ce jeton est court et rattache le prochain enrôlement public à votre compte opérateur.",
+        "copy": "Copier le jeton",
+        "copied": "Copié",
+        "error": "Impossible de créer un jeton d'enrôlement."
+      },
+      "metrics": {
+        "total": "Nœuds au total",
+        "active": "Nœuds actifs",
+        "tokens": "Tokens capturés",
+        "revenue": "Revenu estimé"
+      }
+    },
+    "keys": {
+      "badge": "Accès API",
+      "title": "Mes clés API",
+      "subtitle": "Créez, renouvelez, révoquez et routez les clés API attachées à votre espace."
+    },
+    "billing": {
+      "badge": "Facturation",
+      "title": "Facturation & paiement",
+      "subtitle": "Suivez le solde, les moyens de paiement et l'historique des factures.",
+      "load_failed": "Impossible de charger la facturation.",
+      "missing_surface": "Écart production : l'édition des moyens de paiement et le téléchargement des factures nécessitent des opérations backend dédiées avant d'être réellement self-service.",
+      "balance": {
+        "credit": "Solde créditeur",
+        "due": "À payer",
+        "methods": "Moyens de paiement"
+      },
+      "invoices": {
+        "title": "Factures",
+        "id": "Facture",
+        "period": "Fin de période",
+        "total": "Total",
+        "status": "Statut"
+      },
+      "payment_methods": {
+        "title": "Moyens de paiement",
+        "expires": "Expire {month}/{year}",
+        "empty_title": "Aucun moyen de paiement",
+        "empty_text": "Les contrôles d'ajout de carte et de paiement par défaut ne sont pas exposés par l'API actuelle."
+      }
+    },
+    "organisations": {
+      "badge": "Espace",
+      "title": "Organisations",
+      "subtitle": "Consultez l'organisation courante et les accès membres.",
+      "load_failed": "Impossible de charger les données d'organisation.",
+      "missing_surface": "Écart production : invitations, changements de rôles et bascule d'organisation sont partiellement disponibles dans les API mais nécessitent un parcours utilisateur dédié et sûr.",
+      "current": {
+        "title": "Organisation courante",
+        "name": "Nom",
+        "id": "Identifiant",
+        "created": "Créée"
+      },
+      "members": {
+        "title": "Membres",
+        "email": "Email",
+        "role": "Rôle",
+        "status": "Statut",
+        "created": "Créé"
+      }
+    },
+    "security": {
+      "badge": "Sécurité",
+      "title": "Sécurité",
+      "subtitle": "Consultez les claims SSO et les contrôles de sécurité production.",
+      "sso": {
+        "title": "Session SSO",
+        "subject": "Sujet",
+        "level": "Niveau d'accès"
+      },
+      "production": {
+        "title": "Contrôles production à exposer",
+        "keys": "La rotation et la révocation des clés API sont disponibles dans la page Clés.",
+        "identity": "La validation d'identité appartient aux Informations personnelles.",
+        "sessions": "L'inventaire des sessions et la déconnexion forcée nécessitent des surfaces backend."
+      }
+    },
+    "informations": {
+      "badge": "Espace compte",
+      "title": "Informations",
+      "subtitle": "Adresse de facturation, type de compte et devise préférée.",
+      "save_success": "Profil enregistré avec succès.",
+      "save_error": "Erreur lors de l'enregistrement du profil.",
+      "account": {
+        "title": "Compte",
+        "personal": "Particulier",
+        "pro": "Professionnel",
+        "currency": "Devise préférée",
+        "currency_hint": "Code ISO 4217 (ex. EUR, USD). Utilisé dans tous les affichages monétaires."
+      },
+      "address": {
+        "title": "Adresse",
+        "street": "Rue",
+        "city": "Ville",
+        "zip": "Code postal",
+        "country": "Pays"
+      },
+      "pro": {
+        "title": "Informations professionnelles",
+        "siret": "SIRET",
+        "vat": "Numéro TVA intracommunautaire"
+      }
+    }
+  },
+  "otp": {
+    "title": "Jeton d'enrôlement de nœud",
+    "subtitle": "Générez un jeton éphémère pour authentifier le premier enrôlement de votre nœud.",
+    "badge": "Enrôlement",
+    "hardware": {
+      "title": "Identité matérielle",
+      "subtitle": "Ce jeton sera lié à la machine ci-dessous. Il ne peut pas être réutilisé sur un autre matériel.",
+      "agent_id": "Identifiant de l'agent",
+      "host_hash": "Empreinte hôte"
+    },
+    "generate": "Générer le jeton",
+    "generating": "Génération...",
+    "token_label": "Jeton d'enrôlement",
+    "token_hint": "Ce jeton est à usage unique et expire dans {ttl} secondes.",
+    "inject_label": "Commande d'injection",
+    "inject_hint": "Exécutez cette commande dans le terminal de votre nœud pour injecter le jeton automatiquement :",
+    "auto_claim_waiting": "Votre nœud attend ce jeton et le récupérera automatiquement. La commande reste disponible en secours.",
+    "copy_token": "Copier le jeton",
+    "copied": "Copié",
+    "sign_in_required": "Connectez-vous pour générer un jeton lié au matériel.",
+    "error": "Impossible de générer le jeton d'enrôlement.",
+    "error_disabled": "La génération de jetons n'est pas configurée sur ce serveur. Contactez l'administrateur.",
+    "error_auth": "Session expirée. Rechargez la page et reconnectez-vous.",
+    "no_agent": "Aucun identifiant d'agent fourni. Ouvrez cette page depuis le terminal de votre nœud.",
+    "claimed": {
+      "title": "À tout de suite !",
+      "subtitle": "Le nœud a récupéré son jeton. Vous pouvez revenir au terminal pour finaliser l'enrôlement.",
+      "close_hint": "Fermeture automatique dans {seconds} s",
+      "close_now": "Fermer maintenant"
+    }
+  },
+  "admin_models": {
+    "seo_title": "Gestion des modèles - Admin",
+    "title": "Gestion des modèles",
+    "badge": "Admin",
+    "description": "Gérez le catalogue de modèles synchronisé depuis le référentiel de galeries, définissez les politiques par tier et configurez les surcharges par nœud.",
+    "tabs": {
+      "catalog": "Catalogue",
+      "policy": "Politique par tier",
+      "overrides": "Surcharges nœud"
+    },
+    "actions": {
+      "sync": "Synchroniser depuis les galeries",
+      "syncing": "Synchronisation...",
+      "refresh": "Rafraîchir",
+      "save_policy": "Enregistrer la politique",
+      "reset_all": "Tout réinitialiser",
+      "reset_tier": "Réinitialiser le tier",
+      "add_model": "Ajouter le modèle",
+      "remove_model": "Retirer le modèle",
+      "add_override": "Ajouter une surcharge",
+      "remove": "Supprimer"
+    },
+    "sync_result": "Synchronisation terminée : {inserted} insérés, {updated} mis à jour, {disabled} désactivés.",
+    "catalog": {
+      "count": "{count} modèles",
+      "enabled_count": "{count} actifs",
+      "empty": "Aucun modèle dans le catalogue. Lancez une synchronisation pour charger le référentiel de galeries.",
+      "loading": "Chargement du catalogue...",
+      "search": "Rechercher dans le catalogue",
+      "more_tags": "+{count}",
+      "filters": {
+        "all": "Tous",
+        "hardware": "Matériel"
+      },
+      "columns": {
+        "id": "Identifiant",
+        "family": "Famille",
+        "tier": "Tier matériel",
+        "backend": "Backend",
+        "priority": "Priorité",
+        "size": "Taille",
+        "enabled": "Actif",
+        "tags": "Tags",
+        "updated": "Mis à jour"
+      },
+      "disabled_chip": "Désactivé",
+      "enabled_chip": "Actif"
+    },
+    "policy": {
+      "title": "Politique de modèles par tier",
+      "summary": "{tiers} tiers, {dirty} avec changements non enregistrés",
+      "empty": "Aucune politique de tier trouvée.",
+      "loading": "Chargement des politiques...",
+      "select_models": "Sélectionner les modèles souhaités pour ce tier",
+      "add_model": "Modèle à ajouter",
+      "add_placeholder": "Rechercher un modèle actif du catalogue",
+      "version": "Version de politique : {version}",
+      "save_success": "Politique enregistrée. Les agents se réconcilieront au prochain heartbeat.",
+      "selected_count": "{count} modèles sélectionnés",
+      "saved": "Enregistré",
+      "unsaved": "Changements non enregistrés",
+      "table_empty": "Aucun modèle sélectionné pour ce tier.",
+      "unknown_model": "Entrée catalogue inconnue",
+      "columns": {
+        "model": "Modèle",
+        "hardware": "Matériel",
+        "tags": "Tags",
+        "backend": "Backend",
+        "size": "Taille"
+      },
+      "tiers": {
+        "PUBLIC": "Tier public",
+        "TRUSTED": "Tier de confiance",
+        "HDS": "Tier HDS",
+        "EXTERNAL": "Tier externe"
+      }
+    },
+    "overrides": {
+      "empty": "Aucune surcharge configurée pour ce nœud.",
+      "loading": "Chargement des surcharges...",
+      "select_node": "Sélectionnez un nœud pour voir et gérer ses surcharges.",
+      "node_id": "ID du nœud",
+      "model_id": "ID du modèle",
+      "action": "Action",
+      "action_include": "Forcer l'inclusion",
+      "action_exclude": "Forcer l'exclusion",
+      "remove_confirm": "Supprimer la surcharge pour {modelId} ?",
+      "columns": {
+        "model_id": "Modèle",
+        "action": "Action",
+        "updated": "Mis à jour"
+      }
+    },
+    "errors": {
+      "load_catalog": "Impossible de charger le catalogue de modèles.",
+      "load_policy": "Impossible de charger la politique de tier.",
+      "load_overrides": "Impossible de charger les surcharges du nœud.",
+      "save_policy": "Impossible d'enregistrer la politique de tier.",
+      "add_override": "Impossible d'ajouter la surcharge.",
+      "remove_override": "Impossible de supprimer la surcharge.",
+      "sync": "Impossible de synchroniser le catalogue."
+    }
+  }
+}

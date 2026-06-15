@@ -1,0 +1,24 @@
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background-color: rgb(var(--v-theme-background));
+}
+
+.v-theme--dark {
+  color-scheme: dark;
+}
+
+.v-tooltip .v-overlay__content {
+  background: rgb(var(--v-theme-surface-variant)) !important;
+  color: rgb(var(--v-theme-on-surface-variant)) !important;
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  padding: 4px 10px !important;
+  font-size: 0.75rem !important;
+  font-weight: 500;
+}
