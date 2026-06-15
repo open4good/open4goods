@@ -85,6 +85,7 @@
         <module>api</module>
         <module>ui</module>
         <module>front-api</module>
+        <module>b2b-api</module>
         <module>services/urlfetching</module>
         <module>services/googlesearch</module>
         <module>services/google-indexation</module>

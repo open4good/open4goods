@@ -1,0 +1,94 @@
+server:
+  port: ${B2B_API_PORT:8087}
+
+spring:
+  application:
+    name: b2b-api
+  config:
+    import: optional:classpath:b2b-catalog.yml
+  datasource:
+    url: ${B2B_POSTGRES_URL:jdbc:postgresql://localhost:5432/product_data_api}
+    username: ${B2B_POSTGRES_USER:product_data_api}
+    password: ${B2B_POSTGRES_PASSWORD:product_data_api}
+  data:
+    redis:
+      host: ${B2B_REDIS_HOST:localhost}
+      port: ${B2B_REDIS_PORT:6379}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  jackson:
+    default-property-inclusion: non_null
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui
+
+b2b:
+  public-base-url: ${B2B_PUBLIC_BASE_URL:https://product-data-api.com}
+  api-base-path: /api/v1
+  credits:
+    unit-eur: ${B2B_CREDIT_UNIT_EUR:0.002}
+    free-grant-credits: ${B2B_FREE_GRANT_CREDITS:2500}
+  price:
+    freshness-days: ${B2B_PRICE_FRESHNESS_DAYS:30}
+  request-ids:
+    prefix: pdreq_
+  redis:
+    balance-ttl: ${B2B_REDIS_BALANCE_TTL:24h}
+    apikey-cache-ttl: ${B2B_REDIS_APIKEY_CACHE_TTL:10m}
+    usage-stream-maxlen: ${B2B_REDIS_USAGE_STREAM_MAXLEN:1000000}
+    reconcile-interval: ${B2B_REDIS_RECONCILE_INTERVAL:5m}
+    fail-closed: ${B2B_REDIS_FAIL_CLOSED:true}
+  ratelimit:
+    requests-per-minute: ${B2B_RATELIMIT_REQUESTS_PER_MINUTE:600}
+    window: ${B2B_RATELIMIT_WINDOW:1m}
+  hardener:
+    cron: ${B2B_HARDENER_CRON:0 */5 * * * *}
+    stream-batch-size: ${B2B_HARDENER_STREAM_BATCH_SIZE:100}
+    lock-at-least-for: ${B2B_HARDENER_LOCK_AT_LEAST_FOR:1m}
+    lock-at-most-for: ${B2B_HARDENER_LOCK_AT_MOST_FOR:10m}
+  security:
+    allowed-origins: ${B2B_ALLOWED_ORIGINS:https://product-data-api.com,https://api.product-data-api.com}
+    admin-emails: ${B2B_ADMIN_EMAILS:}
+    cookie-domain: ${B2B_COOKIE_DOMAIN:.product-data-api.com}
+    cookie-secure: ${B2B_COOKIE_SECURE:true}
+    cookie-same-site: ${B2B_COOKIE_SAME_SITE:Lax}
+    jwt-secret: ${B2B_JWT_SECRET:change-me-dev-only-change-me-dev-only}
+    access-token-ttl: ${B2B_ACCESS_TOKEN_TTL:15m}
+    refresh-token-ttl: ${B2B_REFRESH_TOKEN_TTL:30d}
+    oidc:
+      google:
+        client-id: ${B2B_OIDC_GOOGLE_CLIENT_ID:}
+        client-secret: ${B2B_OIDC_GOOGLE_SECRET:}
+        issuer: ${B2B_OIDC_GOOGLE_ISSUER:https://accounts.google.com}
+        jwks-uri: ${B2B_OIDC_GOOGLE_JWKS_URI:https://www.googleapis.com/oauth2/v3/certs}
+      microsoft:
+        client-id: ${B2B_OIDC_MS_CLIENT_ID:}
+        client-secret: ${B2B_OIDC_MS_SECRET:}
+        issuer: ${B2B_OIDC_MS_ISSUER:https://login.microsoftonline.com/common/v2.0}
+        jwks-uri: ${B2B_OIDC_MS_JWKS_URI:https://login.microsoftonline.com/common/discovery/v2.0/keys}
+      github:
+        client-id: ${B2B_OIDC_GH_CLIENT_ID:}
+        client-secret: ${B2B_OIDC_GH_SECRET:}
+        api-base-url: ${B2B_OIDC_GH_API_BASE_URL:https://api.github.com}
+      apple:
+        client-id: ${B2B_OIDC_APPLE_CLIENT_ID:}
+        client-secret: ${B2B_OIDC_APPLE_SECRET:}
+        issuer: ${B2B_OIDC_APPLE_ISSUER:https://appleid.apple.com}
+        jwks-uri: ${B2B_OIDC_APPLE_JWKS_URI:https://appleid.apple.com/auth/keys}

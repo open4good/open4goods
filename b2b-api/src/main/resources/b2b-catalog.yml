@@ -1,0 +1,37 @@
+b2b:
+  facets:
+    "[product.price]":
+      path: /api/v1/products/{gtin}/price
+      credits: 5
+      doc: products/price
+      billable-when: fresh-offer
+  billing:
+    packs:
+      starter:
+        amount-eur: 20
+        credits: 10000
+        stripe-price-id: ${B2B_STRIPE_PACK_STARTER_PRICE_ID:}
+      growth:
+        amount-eur: 100
+        credits: 55000
+        stripe-price-id: ${B2B_STRIPE_PACK_GROWTH_PRICE_ID:}
+      scale:
+        amount-eur: 500
+        credits: 300000
+        stripe-price-id: ${B2B_STRIPE_PACK_SCALE_PRICE_ID:}
+    subscriptions:
+      starter:
+        amount-eur: 20
+        monthly-credits: 12000
+        rollover-cap-months: 3
+        stripe-price-id: ${B2B_STRIPE_SUB_STARTER_PRICE_ID:}
+      growth:
+        amount-eur: 100
+        monthly-credits: 66000
+        rollover-cap-months: 3
+        stripe-price-id: ${B2B_STRIPE_SUB_GROWTH_PRICE_ID:}
+      scale:
+        amount-eur: 500
+        monthly-credits: 360000
+        rollover-cap-months: 3
+        stripe-price-id: ${B2B_STRIPE_SUB_SCALE_PRICE_ID:}

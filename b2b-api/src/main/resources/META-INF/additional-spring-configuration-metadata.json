@@ -1,0 +1,164 @@
+{
+  "properties": [
+    {
+      "name": "b2b.public-base-url",
+      "type": "java.net.URI",
+      "description": "Public frontend base URL for Product Data API links."
+    },
+    {
+      "name": "b2b.api-base-path",
+      "type": "java.lang.String",
+      "description": "Versioned REST API base path."
+    },
+    {
+      "name": "b2b.credits.unit-eur",
+      "type": "java.lang.Double",
+      "description": "Euro value of one credit."
+    },
+    {
+      "name": "b2b.credits.free-grant-credits",
+      "type": "java.lang.Integer",
+      "description": "One-time free credits granted to a newly provisioned organization."
+    },
+    {
+      "name": "b2b.price.freshness-days",
+      "type": "java.lang.Integer",
+      "description": "Maximum age of an offer, in days, for the price facet to be billable."
+    },
+    {
+      "name": "b2b.request-ids.prefix",
+      "type": "java.lang.String",
+      "description": "Prefix used for generated request identifiers."
+    },
+    {
+      "name": "b2b.redis.balance-ttl",
+      "type": "java.time.Duration",
+      "description": "TTL for Redis hot balance mirror keys."
+    },
+    {
+      "name": "b2b.redis.apikey-cache-ttl",
+      "type": "java.time.Duration",
+      "description": "TTL for Redis API key lookup cache entries."
+    },
+    {
+      "name": "b2b.redis.usage-stream-maxlen",
+      "type": "java.lang.Long",
+      "description": "Approximate maximum Redis usage stream length."
+    },
+    {
+      "name": "b2b.redis.reconcile-interval",
+      "type": "java.time.Duration",
+      "description": "Default interval for balance reconciliation work."
+    },
+    {
+      "name": "b2b.redis.fail-closed",
+      "type": "java.lang.Boolean",
+      "description": "Whether metered endpoints fail closed when Redis is unavailable."
+    },
+    {
+      "name": "b2b.ratelimit.requests-per-minute",
+      "type": "java.lang.Integer",
+      "description": "Default per-API-key request limit per minute."
+    },
+    {
+      "name": "b2b.ratelimit.window",
+      "type": "java.time.Duration",
+      "description": "Rate-limit counter window duration."
+    },
+    {
+      "name": "b2b.hardener.cron",
+      "type": "java.lang.String",
+      "description": "Cron expression for the Redis/Postgres hardener batch."
+    },
+    {
+      "name": "b2b.hardener.stream-batch-size",
+      "type": "java.lang.Integer",
+      "description": "Maximum Redis usage stream entries drained per hardener run."
+    },
+    {
+      "name": "b2b.hardener.lock-at-least-for",
+      "type": "java.time.Duration",
+      "description": "Minimum ShedLock duration for one hardener run."
+    },
+    {
+      "name": "b2b.hardener.lock-at-most-for",
+      "type": "java.time.Duration",
+      "description": "Maximum ShedLock duration for one hardener run."
+    },
+    {
+      "name": "b2b.security.allowed-origins",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Origins allowed to call browser-facing endpoints."
+    },
+    {
+      "name": "b2b.security.admin-emails",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Email allowlist whose users are flagged as platform administrators during provisioning."
+    },
+    {
+      "name": "b2b.security.cookie-domain",
+      "type": "java.lang.String",
+      "description": "Domain attribute used for dashboard authentication cookies."
+    },
+    {
+      "name": "b2b.security.cookie-secure",
+      "type": "java.lang.Boolean",
+      "description": "Whether dashboard authentication cookies include the Secure attribute."
+    },
+    {
+      "name": "b2b.security.cookie-same-site",
+      "type": "java.lang.String",
+      "description": "SameSite attribute used for dashboard authentication cookies."
+    },
+    {
+      "name": "b2b.security.jwt-secret",
+      "type": "java.lang.String",
+      "description": "HS256 signing secret for dashboard JWTs. Must be provided from secrets outside local development."
+    },
+    {
+      "name": "b2b.security.access-token-ttl",
+      "type": "java.time.Duration",
+      "description": "Dashboard access-token lifetime."
+    },
+    {
+      "name": "b2b.security.refresh-token-ttl",
+      "type": "java.time.Duration",
+      "description": "Dashboard refresh-token lifetime."
+    },
+    {
+      "name": "b2b.security.oidc.google.client-id",
+      "type": "java.lang.String",
+      "description": "Google OIDC client id."
+    },
+    {
+      "name": "b2b.security.oidc.google.jwks-uri",
+      "type": "java.lang.String",
+      "description": "Google OIDC JWKS endpoint."
+    },
+    {
+      "name": "b2b.security.oidc.microsoft.client-id",
+      "type": "java.lang.String",
+      "description": "Microsoft OIDC client id."
+    },
+    {
+      "name": "b2b.security.oidc.microsoft.jwks-uri",
+      "type": "java.lang.String",
+      "description": "Microsoft OIDC JWKS endpoint."
+    },
+    {
+      "name": "b2b.security.oidc.github.api-base-url",
+      "type": "java.lang.String",
+      "description": "GitHub API base URL used for OAuth userinfo verification."
+    },
+    {
+      "name": "b2b.security.oidc.apple.client-id",
+      "type": "java.lang.String",
+      "description": "Apple OIDC client id."
+    },
+    {
+      "name": "b2b.security.oidc.apple.jwks-uri",
+      "type": "java.lang.String",
+      "description": "Apple OIDC JWKS endpoint."
+    }
+  ]
+}

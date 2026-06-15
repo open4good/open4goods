@@ -1,0 +1,33 @@
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
+      - org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration
+      - org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration
+  data:
+    redis:
+      repositories:
+        enabled: false
+
+management:
+  health:
+    redis:
+      enabled: false
+
+b2b:
+  public-base-url: http://localhost:3000
+  security:
+    allowed-origins:
+      - http://localhost:3000
+      - http://localhost:8087
+    cookie-domain: localhost
+    jwt-secret: devsec-only-change-me-devsec-only-change-me
+    oidc:
+      google:
+        client-id: dev-google-client
+      microsoft:
+        client-id: dev-microsoft-client
+      github:
+        client-id: dev-github-client
+      apple:
+        client-id: dev-apple-client
