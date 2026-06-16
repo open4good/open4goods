@@ -10,8 +10,6 @@
           </v-card-text>
         </v-card>
 
-        <DocsRagChatPanel v-if="isAdmin" class="mb-4" />
-
         <InfContentExplorer section-prefix="docs/" scope="public" show-locale-selector />
       </v-col>
     </v-row>
@@ -20,8 +18,6 @@
 
 <script setup lang="ts">
 const { t } = useI18n()
-const { session } = useAuthSession()
-const isAdmin = computed(() => session.value?.user?.platformAdmin === true)
 
 definePageMeta({
   width: 'semi-fluid'

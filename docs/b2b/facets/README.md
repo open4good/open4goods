@@ -26,26 +26,32 @@ surfaces, and the launch checklist.
 
 ## Lifecycle of a new facet (the "run")
 
-1. **Spec.** Generate the facet spec with [`authoring-prompt.md`](authoring-prompt.md)
-   (AI-authored, human-reviewed). Add a `FACET-<id>` section to
-   [`tasks.md`](../implementation/tasks.md) to track the run.
-2. **Measure.** Run the spec's coverage and quality queries (ES `_count`/aggs
-   and/or API probes) against the live index. Record results and the
-   measurement date in the spec. A facet with unknown coverage does not ship.
-3. **Price.** Confirm the credit price against
-   [`facet-catalog.md`](../product/facet-catalog.md) tiers and competitive
-   anchors ([`competition.md`](../business/competition.md)).
-4. **Backend.** Add the `b2b-catalog.yml` entry, the sanitized DTOs
-   (allow-list mapping), the endpoint, OpenAPI annotations, and the test matrix
-   (including the facet's no-data-no-pay reasons).
-5. **Docs.** Add `content/en` + `content/fr` doc pages, examples
-   (curl/Java/Python), and playground support. Regenerate the OpenAPI client.
-6. **SEO.** Execute the spec's SEO plan: page slugs (en + `/fr/`), localized
-   metadata, hreflang, sitemap entries, structured data, internal links from
-   `/docs` and `/pricing`.
-7. **Launch.** Walk the spec's launch checklist; update the pricing page and
-   the `meta.coverage` declaration; announce. Post-launch, monitor the facet's
-   usage/no-pay-reason metrics ([ops spec](../../architecture/product-data-api-ops.md)).
+The lifecycle of a new facet is governed by a **business-first approach**. While technical implementation is usually straightforward following the facet template, the priority is to deep-dive into the market to ensure we outperform the competition, capture uncovered opportunities, and design a larger feature surface. 
+
+To achieve this, the specification is authored through an **interactive state machine** between the AI agent and the human reviewer:
+
+1. **State 1: Research & Competitive Analysis (Web Search & Approval)**
+   - The agent uses web search to identify competitor APIs in the facet's domain, evaluating their feature surfaces and pricing structures.
+   - The agent maps these features to identify uncovered gaps and propose a positioning that outperforms competitors.
+   - **Checkpoint**: The agent presents the competitive findings, proposed pricing tier, and target SEO positioning to the user, waiting for explicit approval before proceeding.
+
+2. **State 2: Coverage Measurement & Data Probing (Measurement & Approval)**
+   - The agent verifies the field mappings against the live database index (Elasticsearch).
+   - The agent runs coverage count/aggregation queries and performs quality probes on sample payloads.
+   - **Checkpoint**: The agent presents the measured coverage stats, quality probe results, and proposed shipping thresholds to the user, waiting for approval before drafting.
+
+3. **State 3: Spec Drafting (Template Application & Spec Approval)**
+   - The agent writes the specification file `product-<facet-id>.md` following the [`_template.md`](_template.md).
+   - **Checkpoint**: The agent presents the draft spec to the user for final feedback and approval.
+
+4. **State 4: Registry Update & Implementation Checklist**
+   - Add a `FACET-<id>` section to [`tasks.md`](../implementation/tasks.md) to track the run.
+   - Add the `b2b-catalog.yml` entry.
+   - Continue with the technical build steps:
+     - **Backend**: Add DTOs, endpoint, OpenAPI annotations, and test matrix (no-data-no-pay).
+     - **Docs & Playground**: Write en/fr documentation pages and configure playground mode.
+     - **SEO Execution**: Set page slugs, metadata, hreflang, sitemaps, and internal linking.
+     - **Launch**: Walk the launch checklist, publish the pricing update, and monitor metrics.
 
 ## Rules
 

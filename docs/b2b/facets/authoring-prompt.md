@@ -18,55 +18,54 @@ specification for **`product.<FACET_ID>`** of the Product Data API (B2B brick).
 6. [`docs/architecture/product-data-api-contract.md`](../../architecture/product-data-api-contract.md) - envelope, redaction table, coverage semantics.
 7. The relevant `Product` model blocks (`model/src/main/java/.../product/`) and the matching `front-api` DTOs (`front-api/.../dto/product/`) listed in the catalogue's mapping table.
 
-## Mandatory: measure before you write
+## Interactive State Machine Workflow
 
-Never copy coverage numbers from older docs without re-measuring. Numbers in
-your spec must come from queries **you ran**, recorded with the date.
+You must operate as a state machine, stopping to present findings and obtain explicit human approval at each transition before moving to the next state.
 
-1. **Verify field names** against the live mapping first:
-   `curl -s "$ES/products-moustik/_mapping" | jq 'paths(scalars) ...'` or
-   inspect the `Product` model + `@Field` annotations. Several blocks are
-   stored but NOT indexed (`reviews`, `eprelDatas`, `ranking`) - for those,
-   coverage cannot be counted by ES query; say so explicitly and specify a
-   pipeline-side counter instead.
-2. **Run the coverage queries** (`_count`, aggs) against the devsec
-   Elasticsearch (`products-moustik`, see the
-   [runbook](../../operations/product-data-api-local-runbook.md)). Follow the
-   query patterns of `data-coverage.md` section 4. Record query + result +
-   date in section 2 of your spec.
-3. **Probe data quality**: pick 3-5 sample GTINs covered by the facet, fetch
-   them (ES `_doc` or, if `b2b-api` runs, the future endpoint), and check the
-   payload would be non-empty, correct, and sanitized. Document the probes so
-   they are re-runnable at launch.
+### State 1: Market Research & Competitive Analysis (Web Search & Approval)
 
-## Spec requirements
+A business-first approach is mandatory. Before doing any technical work or writing the spec, you must understand the competitive landscape for this specific facet's domain.
 
-- Follow `_template.md` section by section; do not invent or drop sections.
-- **Reference, do not duplicate**: envelope, headers, error catalog, metering
-  flow, and the global redaction table live in the architecture specs - link
-  them. Your spec owns only the facet-specific parts.
-- Define the complete no-data-no-pay matrix for the facet, including the
-  facet-specific `no_pay_reason` literal(s), and the `meta.coverage` semantics
-  (critical for curated-subset facets).
-- Sanitization is allow-list: enumerate every exposed field with its source
-  model path; never expose compensation, affiliation tokens, internal
-  datasource ids, crawler/cache keys, or internal scoring/debug fields.
-- The SEO plan must name target queries (en + fr), slugs, structured-data
-  types, and copy guardrails (no overclaiming coverage; no implying data we do
-  not have, e.g. stock/shipping).
-- Credits must sit inside the tier table of `facet-catalog.md` section 3; if
-  you deviate, justify against competitive anchors in
-  [`competition.md`](../business/competition.md).
-- ASCII punctuation; English; keep it scannable.
+1. **Conduct Web Searches**: Use the web search tool to search for competitor APIs offering this type of data (e.g., search for "product reviews API", "ecological impact product API", "energy label API pricing"). Identify:
+   - Specific competitors.
+   - The features and attributes they return.
+   - Their pricing structures, pricing models, and billing terms.
+2. **Find Gaps & Uncovered Areas**: Map the findings against nudger's database structure to identify competitive gaps, missing features in competitor APIs, and opportunities where nudger can offer a larger feature surface.
+3. **Formulate Value Proposition & Pricing**:
+   - Determine how we will perform better (e.g. higher accuracy, cleaner data structure, better coverage).
+   - Propose the credit tier and pricing alignment based on the competitor anchors in [`competition.md`](../business/competition.md).
+   - Propose target SEO keywords based on competitor gaps.
+4. **Checkpoint**: STOP here and present your research findings, proposed competitive angle, credit tier, and SEO queries to the user. Do not proceed to State 2 until the user grants explicit approval.
 
-## After writing the spec
+---
 
-1. Update [`facet-catalog.md`](../product/facet-catalog.md) if your measured
-   coverage or chosen credits differ from the planned values.
-2. Add a `FACET-<id>` run section to
-   [`implementation/tasks.md`](../implementation/tasks.md) referencing the
-   spec's launch checklist.
-3. Run `./scripts/lint.sh` and fix findings.
-4. Hand off: summary, measured numbers, open questions that need a human
-   decision (do not silently decide deferred questions listed in
-   `00-canonical-decisions.md` section 3).
+### State 2: Database Measurement & Quality Probing (Measurement & Approval)
+
+Once the positioning is approved, verify the viability and quality of our data. Never copy coverage numbers from older documents without re-measuring.
+
+1. **Verify Field Mappings**: Check field names against the live mapping:
+   `curl -s "$ES/products-moustik/_mapping" | jq 'paths(scalars) ...'` or inspect the `Product` model annotations. Note that some blocks are stored but not indexed (e.g., `reviews`, `eprelDatas`, `ranking`); specify pipeline-side counters for these.
+2. **Run Coverage Queries**: Execute coverage counts and aggregations on the devsec Elasticsearch (`products-moustik`, see [`local-runbook.md`](../../operations/product-data-api-local-runbook.md)). Follow query patterns in [`data-coverage.md`](../business/data-coverage.md) section 4. Record the query, results, and execution date.
+3. **Probe Payload Quality**: Select 3-5 sample GTINs covered by the facet. Fetch their raw payloads (via ES `_doc` or the running endpoint) and inspect them to ensure they are non-empty, accurate, and respect our sanitization standards.
+4. **Checkpoint**: STOP here and present your measured coverage numbers, Elasticsearch query details, sample payload checks, and proposed threshold criteria for shipping. Do not proceed to State 3 until the user approves the data quality.
+
+---
+
+### State 3: Spec Drafting (Template Application & Spec Approval)
+
+1. **Draft the Specification**: Write the spec file at `docs/b2b/facets/product-<facet-id>.md` using the [`_template.md`](_template.md) structure. Do not invent or drop sections.
+2. **Apply Spec Requirements**:
+   - **Reference, do not duplicate**: Link the global redaction table and billing ledger documents. Only define the facet-specific `data` DTO mapping and sanitization rules.
+   - Enforce allow-list sanitization (redact compensation, affiliation tokens, internal scorer IDs, etc.).
+   - Define a strict facet-specific no-data-no-pay matrix.
+   - Detail the SEO plan, target slugs, structured data, and sitemap settings.
+3. **Checkpoint**: STOP here and present the complete draft specification to the user. Do not proceed to State 4 until the user reviews and approves the spec document.
+
+---
+
+### State 4: Registry Update & Finalization
+
+1. **Update Product Catalog**: Write the catalog entry in `b2b-catalog.yml` and synchronize [`facet-catalog.md`](../product/facet-catalog.md) if measured coverage or credits deviate from initial plans.
+2. **Initialize Task Checklist**: Add a `FACET-<id>` run section to [`implementation/tasks.md`](../implementation/tasks.md) referencing the launch checklist.
+3. **Verify Formatting & Linting**: Run `./scripts/lint.sh` to ensure all generated Markdown conforms to repository styles and punctuation formatting.
+4. **Handoff**: Provide a concise summary of the final spec, including key statistics, and highlight any unresolved questions from [`00-canonical-decisions.md`](../00-canonical-decisions.md) that require human resolution.

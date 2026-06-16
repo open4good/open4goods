@@ -8,10 +8,14 @@
 
 ## 1. Overview and value proposition
 
-What the facet returns, who buys it, and why nudger's data is credible here
-(commodity volume vs proprietary exclusivity). One short paragraph plus the
-competitive angle (link [`competition.md`](../business/competition.md) if
-relevant).
+### 1.1 Value proposition
+What the facet returns, who buys it, and why nudger's data is credible here (commodity volume vs proprietary exclusivity).
+
+### 1.2 Competitive analysis
+Detail the competitive landscape for this specific facet's domain (e.g., specific competitor APIs, their features/data fields, and their pricing structures/models). Compare their feature surface with nudger's:
+- **Competitors**: List specific competitor APIs/companies.
+- **Pricing**: Detail their pricing plans, credit costs, or monthly fees for this data.
+- **Uncovered Areas & Gaps**: Identify what the competition lacks or how we perform better (aiming for a larger feature surface and higher quality). Link [`competition.md`](../business/competition.md).
 
 ## 2. Coverage and data quality (measured)
 
@@ -95,14 +99,11 @@ Content outline per page (what must be covered, which examples).
 
 ## 7. SEO plan
 
-- Target queries/keywords (en + fr), search intent, and the page that captures
-  each.
+- Target queries/keywords (en + fr), search intent, and the page that captures each. Specifically map keywords targeting the competitive gaps and uncovered areas identified in Section 1.2.
 - Slugs, localized titles/descriptions, hreflang pairs.
 - Structured data type per page (`TechArticle`, `FAQPage`...).
-- Sitemap entries; internal links (from `/docs`, `/pricing`, landing facet
-  roadmap section).
-- What NOT to claim (copy guardrails - e.g. no stock/shipping implications,
-  honest coverage wording).
+- Sitemap entries; internal links (from `/docs`, `/pricing`, landing facet roadmap section).
+- What NOT to claim (copy guardrails - e.g. no stock/shipping implications, honest coverage wording).
 
 ## 8. Examples
 
