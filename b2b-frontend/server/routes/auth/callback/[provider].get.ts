@@ -61,7 +61,7 @@ export default defineEventHandler(async (event) => {
   }
 
   if (backendResponse._data?.newAccount) {
-    return sendRedirect(event, '/profile', 302)
+    return sendRedirect(event, '/dashboard', 302)
   }
 
   return sendRedirect(event, normalizeLocalRedirectPath(parsed.next, '/'), 302)

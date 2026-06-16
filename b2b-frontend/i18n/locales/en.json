@@ -153,7 +153,10 @@
     "yes": "Yes",
     "no": "No",
     "not_available": "-",
-    "default": "Default"
+    "default": "Default",
+    "loading": "Loading...",
+    "retry": "Retry",
+    "errorGeneric": "Something went wrong"
   },
   "org": {
     "status": {
@@ -199,12 +202,135 @@
       "keys": "API Keys",
       "billing": "Billing",
       "usage": "Usage",
-      "settings": "Settings"
+      "settings": "Settings",
+      "roles": {
+        "OWNER": "Owner",
+        "ADMIN": "Admin",
+        "DEVELOPER": "Developer",
+        "BILLING": "Billing"
+      }
     }
   },
   "dashboard": {
     "title": "Product Data API",
-    "description": "Developer portal for the metered B2B product data API."
+    "description": "Developer portal for the metered B2B product data API.",
+    "overview": {
+      "seo": {
+        "title": "Dashboard - Product Data API"
+      },
+      "title": "Dashboard",
+      "subtitle": "Account overview, credits, recent activity, and quick actions.",
+      "creditsRemaining": "Credits remaining",
+      "activeKeys": "Active keys",
+      "recentRequests": "Requests (last 20)",
+      "billableRequests": "Billable requests",
+      "recentActivity": "Recent activity",
+      "checklist": {
+        "title": "Getting started",
+        "account": "Account created",
+        "createKey": "Create an API key",
+        "firstCall": "Make your first API call"
+      }
+    },
+    "keys": {
+      "seo": {
+        "title": "API Keys - Product Data API"
+      },
+      "title": "API Keys",
+      "subtitle": "Create, rotate, and revoke Product Data API keys. The clear secret is shown only once.",
+      "name": "Name",
+      "prefix": "Prefix",
+      "status": "Status",
+      "lastUsed": "Last used",
+      "created": "Created",
+      "empty": "No API keys yet. Create your first key to start querying the price facet.",
+      "create": "Create key",
+      "createTitle": "Create API key",
+      "nameLabel": "Key name",
+      "nameRequired": "Key name is required.",
+      "rotate": "Rotate",
+      "revoke": "Revoke",
+      "rotateConfirm": "Rotate key",
+      "rotateWarning": "Rotating the key \"{name}\" will invalidate the existing secret immediately. A new secret will be shown once.",
+      "revokeConfirm": "Revoke key",
+      "revokeWarning": "Revoking \"{name}\" is permanent. Any requests using this key will return 401.",
+      "revealTitle": "Save your API key",
+      "revealWarning": "This secret will not be shown again. Copy and store it securely before closing.",
+      "savedKey": "I have saved this key"
+    },
+    "billing": {
+      "seo": {
+        "title": "Billing - Product Data API"
+      },
+      "title": "Billing",
+      "subtitle": "Credit balance, packs, subscriptions, and billing portal.",
+      "balance": "Credit balance",
+      "creditsUnit": "credits",
+      "buckets": "Credit buckets",
+      "expiresAt": "Expires {date}",
+      "subscription": "Active subscription",
+      "renewsAt": "Renews {date}",
+      "topUp": "Add credits",
+      "buy": "Buy",
+      "manageSubscription": "Manage subscription"
+    },
+    "invoices": {
+      "seo": {
+        "title": "Invoices - Product Data API"
+      },
+      "title": "Invoices",
+      "subtitle": "Stripe invoices linked to your credit purchases and subscriptions.",
+      "id": "Invoice ID",
+      "amount": "Amount",
+      "credits": "Credits",
+      "status": "Status",
+      "date": "Date",
+      "empty": "No invoices yet."
+    },
+    "usage": {
+      "seo": {
+        "title": "Usage - Product Data API"
+      },
+      "title": "Usage",
+      "subtitle": "Credit ledger activity: debits, refunds, and grants.",
+      "totalRequests": "Total requests",
+      "billable": "Billable",
+      "noPay": "No-pay",
+      "creditsConsumed": "Credits consumed",
+      "log": "Transaction log"
+    },
+    "settings": {
+      "seo": {
+        "title": "Settings - Product Data API"
+      },
+      "title": "Settings",
+      "subtitle": "Profile, organization, and security settings.",
+      "tabs": {
+        "profile": "Profile",
+        "org": "Organization",
+        "security": "Security"
+      },
+      "platformAdmin": "Platform admin",
+      "profileReadOnly": "Profile information is sourced from your OIDC provider and is read-only.",
+      "orgName": "Organization name",
+      "orgSlug": "Organization slug",
+      "role": "Your role",
+      "balance": "Credit balance",
+      "oidcProvider": "Authentication",
+      "oidcHint": "Your account is authenticated via your OIDC provider (Google, Microsoft, GitHub, or Apple). To change your sign-in method, contact support.",
+      "apiKeyGuidance": "API keys",
+      "apiKeyGuidanceHint": "Product Data API keys are separate from your account credentials. Manage your keys from the API Keys page."
+    },
+    "transactions": {
+      "type": "Type",
+      "credits": "Credits",
+      "facet": "Facet",
+      "gtin": "GTIN",
+      "requestId": "Request ID",
+      "note": "Note",
+      "date": "Date",
+      "empty": "No transactions yet."
+    }
   },
   "benchmarks": {
     "badge": "Methodology",
@@ -1111,22 +1237,22 @@
         "apple": "Apple"
       },
       "insufficientRole": "Insufficient role: required={required}, current={current}.",
-      "subtitle": "Join the Infera network and access your control plane in one click.",
+      "subtitle": "Access your developer dashboard and API keys in one click.",
       "description": "Sign in with Google to manage nodes, observe network health, and scale trusted AI inference workloads.",
       "signInCta": "Sign in / Sign on with Google",
       "acceptTermsPlaceholder": "I accept the terms and conditions (placeholder).",
       "acceptTermsRequired": "Please accept Terms and Privacy to continue.",
       "googleFallbackHint": "Quick sign-in is unavailable. Click the button below to continue with Google.",
       "seo": {
-        "title": "Infera - Sign in",
-        "description": "Sign in to access your Infera backoffice, admin console, and node operations."
+        "title": "Sign in - Product Data API",
+        "description": "Sign in to access your Product Data API dashboard and API keys."
       },
       "signInWith": "Sign in with {provider}",
       "acceptPrefix": "I agree to the",
       "terms": "Terms of Service",
       "and": "and",
       "privacy": "Privacy Policy",
-      "tagline": "The sovereign network for trusted AI inference.",
+      "tagline": "Product price data. GTIN-first, metered, fresh.",
       "altProvider": "or continue with",
       "providerUnavailable": "This provider is not configured yet.",
       "franceConnect": {
@@ -2762,214 +2888,42 @@
     }
   },
   "playground": {
-    "title": "Inference playground",
-    "description": "Test Infera router OpenAI-compatible APIs with your own billed API keys.",
-    "tabs": {
-      "chat": "Chat",
-      "embeddings": "Embeddings",
-      "completions": "Completions",
-      "images": "Images",
-      "speech": "Speech",
-      "transcriptions": "Transcriptions",
-      "moderations": "Moderations",
-      "files": "Files"
-    },
-    "fields": {
-      "api_key": "API key",
-      "model": "Model",
-      "temperature": "Temperature",
-      "max_tokens": "Max tokens",
-      "prompt": "Prompt",
-      "stop_sequences": "Stop sequences",
-      "suffix": "Suffix",
-      "attachments": "Attachments (image/audio)",
-      "chat_output": "Chat response",
-      "embedding_input": "Embedding input",
-      "embedding_output": "Embeddings response",
-      "json_payload": "JSON payload",
-      "image_prompt": "Image prompt",
-      "image_size": "Image size",
-      "image_quality": "Quality",
-      "image_style": "Style",
-      "image_count": "Image count",
-      "speech_input": "Speech input",
-      "voice": "Voice",
-      "audio_format": "Audio format",
-      "speed": "Speed",
-      "audio_file": "Audio file",
-      "microphone_capture": "Microphone capture",
-      "language": "Language",
-      "transcription_prompt": "Prompt guidance",
-      "response_format": "Response format",
-      "moderation_input": "Content to moderate",
-      "file_upload": "File upload",
-      "file_purpose": "Purpose"
-    },
-    "config": {
-      "section_label": "Configuration",
-      "api_key_section": "API key",
-      "model_section": "Model",
-      "options_section": "Options"
-    },
-    "labels": {
-      "beta": "Beta",
-      "live": "Live",
-      "diagnostics": "Diagnostics",
-      "status_success": "Success",
-      "status_error": "Error",
-      "tokens": "tokens",
-      "raw_response": "Raw response",
-      "generated_asset": "Generated asset",
-      "recording": "Recording",
-      "ready": "Ready",
-      "flagged": "Flagged",
-      "allowed": "Allowed"
-    },
-    "runtime": {
-      "native": "Native runtime",
-      "image_input": "Image input",
-      "tools": "Tools",
-      "external": "External",
-      "templates": {
-        "chatml": "ChatML",
-        "llama-inst": "Llama instruct",
-        "provider-native": "Provider native",
-        "custom": "Custom template"
-      }
-    },
-    "actions": {
-      "create_key": "Create key",
-      "show_logs": "Show logs",
-      "openapi_docs": "Open API reference",
-      "copy_key": "Copy key",
-      "run_chat": "Run chat completion",
-      "run_embeddings": "Run embeddings",
-      "run_generic": "Run request",
-      "clear_output": "Clear output",
-      "clear_history": "Clear history",
-      "copy_output": "Copy output",
-      "copied": "Copied!",
-      "run_completions": "Run completion",
-      "generate_image": "Generate image",
-      "generate_speech": "Generate speech",
-      "download": "Download",
-      "download_audio": "Download audio",
-      "start_recording": "Start recording",
-      "stop_recording": "Stop recording",
-      "clear_audio": "Clear audio",
-      "run_transcription": "Run transcription",
-      "run_moderation": "Run moderation",
-      "upload_file": "Upload file",
-      "manage_keys": "Manage keys",
-      "view_model": "View model"
-    },
-    "cta": {
-      "trial_title": "First time? €10 free to test the platform",
-      "trial_caption": "Create an account, generate a test key and run live inference in a few minutes.",
-      "trial_action": "Start testing"
-    },
-    "hints": {
-      "billing": "Requests are sent to Infera router using the selected API key and are billed through the standard pipeline.",
-      "openapi": "Browse the public OpenAPI contract used for client SDK generation.",
-      "no_result": "Run a request to see the response here.",
-      "unauthenticated": "Sign in to use your billed API keys and access live inference logs.",
-      "completions_output": "Plain-text output is rendered first, with raw payload still available.",
-      "images_output": "Rendered images stay inline so users can inspect the result immediately.",
-      "speech_output": "Speech responses are converted to a previewable audio stream in the browser.",
-      "microphone_capture": "Capture a short audio clip directly in the browser, then submit it as a file.",
-      "transcription_output": "Transcript text is surfaced first, with the underlying response preserved below.",
-      "moderation_output": "Severity bars make category scores readable without opening raw JSON.",
-      "files_output": "Upload returns the created file metadata that downstream APIs will reference."
-    },
-    "errors": {
-      "configuration_required": "Select a valid API key and a model before running a request.",
-      "playground_unauthorized": "Unauthorized API key.",
-      "playground_forbidden": "Forbidden for this API key.",
-      "playground_not_found": "Target endpoint was not found.",
-      "playground_timeout": "Request timed out while waiting for the router.",
-      "playground_payload_too_large": "Payload is too large for playground relay limits.",
-      "playground_rate_limited": "Rate limit reached. Please retry later.",
-      "playground_upstream_unavailable": "Router is unavailable. Please retry shortly.",
-      "playground_router_timeout": "Playground timed out before the router returned a response.",
-      "playground_router_unreachable": "Playground cannot reach the router. Check the local router process and URL.",
-      "playground_router_transport_error": "Playground lost the router connection before a response was returned.",
-      "playground_proxy_error": "Playground relay request failed.",
-      "agent_timeout": "The agent timed out processing your request. The model may still be loading - please retry.",
-      "agent_failure": "The agent failed to process the request. Please retry.",
-      "invalid_request_error": "The selected model does not support this endpoint. Choose a compatible model or switch playground tab.",
-      "audit_trail_disabled": "Audit trail is not enabled for this API key.",
-      "empty_chat_payload": "Provide a prompt.",
-      "empty_embedding_input": "Embedding input cannot be empty.",
-      "attachments_too_large": "Attachments exceed allowed size limits.",
-      "empty_prompt": "This field cannot be empty.",
-      "audio_file_required": "Select or record an audio file before running a transcription.",
-      "file_required": "Select a file before uploading it.",
-      "microphone_unavailable": "Microphone recording is not available in this browser."
-    },
-    "results": {
-      "generated_text": "Generated text",
-      "images": "Generated images",
-      "audio_preview": "Audio preview",
-      "transcript": "Transcript",
-      "moderation_summary": "Moderation summary",
-      "uploaded_file": "Uploaded file"
-    },
-    "capabilities": {
-      "title": "Key capabilities",
-      "empty": "No models available for this API key."
-    },
-    "logs": {
-      "title": "Live operation logs",
-      "empty": "No operation has been recorded yet for this key.",
-      "detail_empty": "Select a log entry to inspect the operation timeline.",
-      "no_key": "Select a key to stream audit logs.",
-      "audit_disabled_title": "Audit trail is disabled",
-      "audit_disabled_description": "This key does not retain playground operation logs. Enable the audit trail from key administration to inspect request timelines, router decisions and agent errors.",
-      "metrics": {
-        "latency": "Total Latency",
-        "tokens": "Usage",
-        "energy": "Energy Net"
-      }
-    },
-    "facets": {
-      "supported": "Live",
-      "planned": "Planned",
-      "chat": {
-        "title": "Chat completions",
-        "description": "OpenAI-compatible endpoint already available through the router."
-      },
-      "embeddings": {
-        "title": "Embeddings",
-        "description": "Text vectors exposed through the OpenAI-compatible facade."
-      },
-      "models": {
-        "title": "Models",
-        "description": "Catalog filtered by API key and tier policy."
-      },
-      "responses": {
-        "title": "Responses",
-        "description": "Modern unified surface to add before new multimodal agents."
-      },
-      "images": {
-        "title": "Images",
-        "description": "Generation, edits and variations need a dedicated router endpoint."
-      },
-      "speech": {
-        "title": "Speech",
-        "description": "Text-to-speech needs audio streaming and output format handling."
-      },
-      "transcriptions": {
-        "title": "Transcriptions",
-        "description": "Speech-to-text and audio translation belong in the multimodal proxy."
-      },
-      "moderations": {
-        "title": "Moderations",
-        "description": "Text/image classification should be planned for client guardrails."
-      }
-    },
     "seo": {
-      "title": "Infera - Inference playground",
-      "description": "OpenAI-compatible playground for testing models and API keys on the Infera network."
+      "title": "Playground - Product Data API",
+      "description": "Test the price facet live in your browser. Sample mode for visitors; live mode for authenticated users with API key selection."
+    },
+    "title": "Price facet playground",
+    "subtitle": "Try the API in sample mode or execute real live calls using one of your API keys.",
+    "sampleMode": "Sample mode",
+    "liveMode": "Live mode",
+    "loginRequired": "Login required",
+    "liveSignInHint": "Sign in to run live calls against the real API using one of your API keys.",
+    "signIn": "Sign in",
+    "request": "Request",
+    "gtinLabel": "GTIN",
+    "gtinPlaceholder": "e.g. 0885909950805",
+    "languageLabel": "Response language",
+    "apiKeyLabel": "API key",
+    "run": "Run",
+    "requestPreview": "Request preview",
+    "response": "Response",
+    "billable": "Billable",
+    "notBillable": "Not billable",
+    "credits": "credits",
+    "emptyHint": "Enter a GTIN and click Run to see a response.",
+    "error": "Request error",
+    "examples": "Examples",
+    "meta": {
+      "reason": "Reason",
+      "creditsConsumed": "Credits consumed",
+      "creditsRemaining": "Credits remaining",
+      "responseTime": "Response time"
+    },
+    "example": {
+      "fresh": "Fresh offer",
+      "stale": "Stale data",
+      "notFound": "Not found",
+      "invalid": "Invalid GTIN"
     }
   },
   "admin": {
@@ -2978,12 +2932,21 @@
       "title": "Admin Console",
       "expand": "Expand",
       "collapse": "Collapse",
-      "backToInfera": "Back to Infera"
+      "backToInfera": "Back to Product Data API"
     },
     "overview": {
-      "badge": "Operations overview",
-      "title": "Administration dashboard",
-      "subtitle": "Real-time synthetic view of nodes, keys, organizations and users.",
+      "seo": {
+        "title": "Admin - Product Data API"
+      },
+      "badge": "Platform administration",
+      "title": "Platform overview",
+      "subtitle": "Organizations, API keys, usage, and audit events.",
+      "totalOrgs": "Total organizations",
+      "activeOrgs": "Active organizations",
+      "totalKeys": "Total API keys",
+      "recentRequests": "Recent requests",
+      "viewAll": "View all",
+      "back": "Back",
       "load_failed": "Unable to load admin metrics.",
       "quick_actions": "Quick actions",
       "actions": {
@@ -3344,6 +3307,71 @@
       },
       "empty": "No campaigns yet - create the first one.",
       "abort_confirm": "Abort this campaign? All in-flight actions will be abandoned."
+    },
+    "organizations": {
+      "seo": {
+        "title": "Organizations - Admin"
+      },
+      "title": "Organizations",
+      "subtitle": "All customer organizations, their credit balances, and lifecycle status.",
+      "name": "Name",
+      "slug": "Slug",
+      "status": "Status",
+      "balance": "Balance",
+      "freeGrant": "Free grant",
+      "created": "Created",
+      "search": "Search organizations",
+      "empty": "No organizations yet.",
+      "detail": {
+        "title": "Organization",
+        "info": "Organization info",
+        "billingEmail": "Billing email",
+        "quickActions": "Quick actions",
+        "transactions": "Transaction history",
+        "manualGrant": "Manual credit grant",
+        "grantTitle": "Grant credits",
+        "grantCredits": "Credits to grant",
+        "grantNote": "Reason / note",
+        "confirmGrant": "Grant credits",
+        "grantSuccess": "{credits} credits granted successfully."
+      }
+    },
+    "usage": {
+      "seo": {
+        "title": "Platform Usage - Admin"
+      },
+      "title": "Platform Usage",
+      "subtitle": "Recent API requests across all organizations.",
+      "recent": "Recent usage",
+      "org": "Organization",
+      "apiKey": "API key",
+      "facet": "Facet",
+      "gtin": "GTIN",
+      "status": "Status",
+      "billable": "Billable",
+      "credits": "Credits",
+      "date": "Date",
+      "empty": "No usage events yet."
+    },
+    "apiKeys": {
+      "seo": {
+        "title": "API Key Oversight - Admin"
+      },
+      "title": "API Key Oversight",
+      "subtitle": "All customer API keys. Admin can revoke any active key."
+    },
+    "audit": {
+      "seo": {
+        "title": "Audit Events - Admin"
+      },
+      "title": "Audit Events",
+      "subtitle": "Platform admin actions: manual grants, key revocations, and billing events.",
+      "action": "Action",
+      "actor": "Actor",
+      "targetOrg": "Target organization",
+      "ref": "Reference",
+      "date": "Date",
+      "empty": "No audit events yet."
     }
   },
   "theme": {
@@ -3354,13 +3382,16 @@
     "dark": "Dark"
   },
   "docs": {
-    "badge": "Knowledge base",
-    "title": "Documentation explorer",
-    "subtitle": "Find product, operations, and commercial references for the Infera platform.",
+    "badge": "Developer documentation",
+    "title": "Documentation",
+    "subtitle": "Everything you need to integrate, authenticate, and monitor the Product Data API.",
     "seo": {
-      "title": "Infera - Documentation",
-      "description": "Browse public documentation pages for offers, onboarding, and operations."
+      "title": "Documentation - Product Data API",
+      "description": "Developer documentation for Product Data API: getting started, authentication, billing, error handling, and the price facet reference."
     },
+    "notFound": "Page not found",
+    "notFoundDetail": "This documentation page does not exist.",
+    "backToIndex": "Back to documentation",
     "rag": {
       "title": "Docs RAG",
       "ask_label": "Ask the documentation assistant",

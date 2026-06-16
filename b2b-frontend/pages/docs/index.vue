@@ -21,7 +21,7 @@
 <script setup lang="ts">
 const { t } = useI18n()
 const { session } = useAuthSession()
-const isAdmin = computed(() => session.value?.level === 'admin')
+const isAdmin = computed(() => session.value?.user?.platformAdmin === true)
 
 definePageMeta({
   width: 'semi-fluid'

@@ -5,21 +5,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
     await fetchMe()
   }
 
-  const isAdmin = session.value?.level === 'admin' || session.value?.roles?.includes('ROLE_ADMIN')
-  
+  const isAdmin = session.value?.user?.platformAdmin === true
+
   if (!session.value || !isAdmin) {
-    const currentLevel = session.value?.level || 'public'
     const next = encodeURIComponent(to.fullPath)
-    const required = encodeURIComponent('admin')
-    const current = encodeURIComponent(currentLevel)
-
-    console.warn('[auth/rbac] Admin route denied', {
-      target: to.fullPath,
-      required: 'admin',
-      current: currentLevel,
-      roles: session.value?.roles || []
-    })
-
-    return navigateTo(`/auth/login?next=${next}&error=insufficient_role&required=${required}&current=${current}`)
+    return navigateTo(`/auth/login?next=${next}&error=insufficient_role&required=admin&current=user`)
   }
 })

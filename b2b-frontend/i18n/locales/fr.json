@@ -153,7 +153,10 @@
     "yes": "Oui",
     "no": "Non",
     "not_available": "-",
-    "default": "Défaut"
+    "default": "Défaut",
+    "loading": "Chargement...",
+    "retry": "Réessayer",
+    "errorGeneric": "Une erreur est survenue"
   },
   "org": {
     "status": {
@@ -200,12 +203,137 @@
       "nodes": "Nœuds",
       "members": "Membres",
       "governance": "Gouvernance",
-      "settings": "Paramètres"
+      "settings": "Paramètres",
+      "usage": "Utilisation",
+      "billing": "Facturation",
+      "roles": {
+        "OWNER": "Propriétaire",
+        "ADMIN": "Administrateur",
+        "DEVELOPER": "Développeur",
+        "BILLING": "Facturation"
+      }
     }
   },
   "dashboard": {
-    "title": "Fondations du Backoffice",
-    "description": "Squelette Nuxt + Vue + Vuetify avec i18n, SEO et artefacts OpenAPI générés."
+    "title": "Product Data API",
+    "description": "Portail développeur pour l'API de données produit B2B.",
+    "overview": {
+      "seo": {
+        "title": "Tableau de bord - Product Data API"
+      },
+      "title": "Tableau de bord",
+      "subtitle": "Aperçu du compte, crédits, activité récente et actions rapides.",
+      "creditsRemaining": "Crédits restants",
+      "activeKeys": "Clés actives",
+      "recentRequests": "Requêtes (20 dernières)",
+      "billableRequests": "Requêtes facturables",
+      "recentActivity": "Activité récente",
+      "checklist": {
+        "title": "Démarrage",
+        "account": "Compte créé",
+        "createKey": "Créer une clé API",
+        "firstCall": "Effectuer votre premier appel API"
+      }
+    },
+    "keys": {
+      "seo": {
+        "title": "Clés API - Product Data API"
+      },
+      "title": "Clés API",
+      "subtitle": "Créez, faites pivoter et révoquez vos clés. Le secret en clair n'est affiché qu'une seule fois.",
+      "name": "Nom",
+      "prefix": "Préfixe",
+      "status": "Statut",
+      "lastUsed": "Dernière utilisation",
+      "created": "Créée le",
+      "empty": "Aucune clé API. Créez votre première clé pour interroger le facet prix.",
+      "create": "Créer une clé",
+      "createTitle": "Créer une clé API",
+      "nameLabel": "Nom de la clé",
+      "nameRequired": "Le nom de la clé est requis.",
+      "rotate": "Renouveler",
+      "revoke": "Révoquer",
+      "rotateConfirm": "Renouveler la clé",
+      "rotateWarning": "Le renouvellement de \"{name}\" invalidera immédiatement le secret existant.",
+      "revokeConfirm": "Révoquer la clé",
+      "revokeWarning": "La révocation de \"{name}\" est permanente. Les requêtes utilisant cette clé renverront 401.",
+      "revealTitle": "Sauvegardez votre clé API",
+      "revealWarning": "Ce secret ne sera plus affiché. Copiez-le et stockez-le en sécurité.",
+      "savedKey": "J'ai sauvegardé cette clé"
+    },
+    "billing": {
+      "seo": {
+        "title": "Facturation - Product Data API"
+      },
+      "title": "Facturation",
+      "subtitle": "Solde, packs, abonnements et portail de facturation.",
+      "balance": "Solde de crédits",
+      "creditsUnit": "crédits",
+      "buckets": "Compartiments de crédits",
+      "expiresAt": "Expire le {date}",
+      "subscription": "Abonnement actif",
+      "renewsAt": "Renouvellement le {date}",
+      "topUp": "Ajouter des crédits",
+      "buy": "Acheter",
+      "manageSubscription": "Gérer l'abonnement"
+    },
+    "invoices": {
+      "seo": {
+        "title": "Factures - Product Data API"
+      },
+      "title": "Factures",
+      "subtitle": "Factures Stripe liées à vos achats de crédits et abonnements.",
+      "id": "N° facture",
+      "amount": "Montant",
+      "credits": "Crédits",
+      "status": "Statut",
+      "date": "Date",
+      "empty": "Aucune facture pour l'instant."
+    },
+    "usage": {
+      "seo": {
+        "title": "Utilisation - Product Data API"
+      },
+      "title": "Utilisation",
+      "subtitle": "Activité du registre : débits, remboursements et attributions.",
+      "totalRequests": "Requêtes totales",
+      "billable": "Facturables",
+      "noPay": "Sans facturation",
+      "creditsConsumed": "Crédits consommés",
+      "log": "Journal des transactions"
+    },
+    "settings": {
+      "seo": {
+        "title": "Paramètres - Product Data API"
+      },
+      "title": "Paramètres",
+      "subtitle": "Profil, organisation et sécurité.",
+      "tabs": {
+        "profile": "Profil",
+        "org": "Organisation",
+        "security": "Sécurité"
+      },
+      "platformAdmin": "Administrateur plateforme",
+      "profileReadOnly": "Les informations de profil proviennent de votre fournisseur OIDC et sont en lecture seule.",
+      "orgName": "Nom de l'organisation",
+      "orgSlug": "Identifiant unique",
+      "role": "Votre rôle",
+      "balance": "Solde de crédits",
+      "oidcProvider": "Authentification",
+      "oidcHint": "Votre compte est authentifié via votre fournisseur OIDC.",
+      "apiKeyGuidance": "Clés API",
+      "apiKeyGuidanceHint": "Les clés API sont distinctes de vos identifiants de compte."
+    },
+    "transactions": {
+      "type": "Type",
+      "credits": "Crédits",
+      "facet": "Facet",
+      "gtin": "GTIN",
+      "requestId": "ID requête",
+      "note": "Note",
+      "date": "Date",
+      "empty": "Aucune transaction pour l'instant."
+    }
   },
   "benchmarks": {
     "badge": "Méthodologie",
@@ -2767,214 +2895,42 @@
     }
   },
   "playground": {
-    "title": "Bac à sable",
-    "description": "Testez les modèles et le process.",
-    "tabs": {
-      "chat": "Chat",
-      "embeddings": "Embeddings",
-      "completions": "Completions",
-      "images": "Images",
-      "speech": "Speech",
-      "transcriptions": "Transcriptions",
-      "moderations": "Moderations",
-      "files": "Fichiers"
-    },
-    "fields": {
-      "api_key": "Clé API",
-      "model": "Modèle",
-      "temperature": "Température",
-      "max_tokens": "Tokens max",
-      "prompt": "Prompt",
-      "stop_sequences": "Séquences d'arrêt",
-      "suffix": "Suffixe",
-      "attachments": "Pièces jointes (image/audio)",
-      "chat_output": "Réponse chat",
-      "embedding_input": "Entrée embeddings",
-      "embedding_output": "Réponse embeddings",
-      "json_payload": "Payload JSON",
-      "image_prompt": "Prompt image",
-      "image_size": "Taille",
-      "image_quality": "Qualité",
-      "image_style": "Style",
-      "image_count": "Nombre d'images",
-      "speech_input": "Texte à synthétiser",
-      "voice": "Voix",
-      "audio_format": "Format audio",
-      "speed": "Vitesse",
-      "audio_file": "Fichier audio",
-      "microphone_capture": "Capture micro",
-      "language": "Langue",
-      "transcription_prompt": "Prompt de guidage",
-      "response_format": "Format de réponse",
-      "moderation_input": "Contenu à modérer",
-      "file_upload": "Fichier à envoyer",
-      "file_purpose": "Usage"
-    },
-    "config": {
-      "section_label": "Configuration",
-      "api_key_section": "Clé API",
-      "model_section": "Modèle",
-      "options_section": "Options"
-    },
-    "labels": {
-      "beta": "Bêta",
-      "live": "Live",
-      "diagnostics": "Diagnostics",
-      "status_success": "Succès",
-      "status_error": "Erreur",
-      "tokens": "tokens",
-      "raw_response": "Réponse brute",
-      "generated_asset": "Ressource générée",
-      "recording": "Enregistrement",
-      "ready": "Prêt",
-      "flagged": "Signalé",
-      "allowed": "Autorisé"
-    },
-    "runtime": {
-      "native": "Runtime natif",
-      "image_input": "Image",
-      "tools": "Outils",
-      "external": "Externe",
-      "templates": {
-        "chatml": "ChatML",
-        "llama-inst": "Llama instruct",
-        "provider-native": "Provider natif",
-        "custom": "Template custom"
-      }
-    },
-    "actions": {
-      "create_key": "Créer une clé",
-      "show_logs": "Voir les logs",
-      "openapi_docs": "Bac à sable API",
-      "copy_key": "Copier la clé",
-      "run_chat": "Exécuter chat completion",
-      "run_embeddings": "Exécuter embeddings",
-      "run_generic": "Exécuter la requête",
-      "clear_output": "Effacer la sortie",
-      "clear_history": "Effacer l'historique",
-      "copy_output": "Copier la réponse",
-      "copied": "Copié !",
-      "run_completions": "Exécuter la completion",
-      "generate_image": "Générer l'image",
-      "generate_speech": "Générer l'audio",
-      "download": "Télécharger",
-      "download_audio": "Télécharger l'audio",
-      "start_recording": "Démarrer",
-      "stop_recording": "Arrêter",
-      "clear_audio": "Effacer l'audio",
-      "run_transcription": "Lancer la transcription",
-      "run_moderation": "Lancer la modération",
-      "upload_file": "Téléverser le fichier",
-      "manage_keys": "Gérer mes clés",
-      "view_model": "Voir le modèle"
-    },
-    "cta": {
-      "trial_title": "Première fois ? 10 € offerts pour tester la plateforme",
-      "trial_caption": "Créez un compte, générez une clé de test et lancez une inférence live en quelques minutes.",
-      "trial_action": "Tester maintenant"
-    },
-    "hints": {
-      "billing": "Les requêtes sont envoyées au routeur Infera avec la clé sélectionnée et sont facturées via le pipeline standard.",
-      "openapi": "Consultez le contrat OpenAPI public utilisé pour la génération des SDK clients.",
-      "no_result": "Lancez une requête pour voir la réponse ici.",
-      "unauthenticated": "Connectez-vous pour utiliser vos clés API facturées et accéder aux logs d'inférence en direct.",
-      "completions_output": "Le texte généré est rendu directement, avec la payload brute disponible en dessous.",
-      "images_output": "Les images restent visibles inline pour une inspection immédiate.",
-      "speech_output": "Les réponses audio sont converties pour une lecture directe dans le navigateur.",
-      "microphone_capture": "Enregistrez un court extrait dans le navigateur puis soumettez-le comme fichier.",
-      "transcription_output": "Le texte transcrit est prioritaire, sans perdre la réponse complète.",
-      "moderation_output": "Les barres de sévérité rendent les scores lisibles sans ouvrir le JSON brut.",
-      "files_output": "Le téléversement renvoie les métadonnées du fichier à réutiliser dans les appels suivants."
-    },
-    "errors": {
-      "configuration_required": "Sélectionnez une clé API valide et choisissez un modèle avant d'exécuter une requête.",
-      "playground_unauthorized": "Clé API non autorisée.",
-      "playground_forbidden": "Accès interdit pour cette clé API.",
-      "playground_not_found": "Endpoint cible introuvable.",
-      "playground_timeout": "La requête a expiré en attendant le routeur.",
-      "playground_payload_too_large": "La charge utile dépasse les limites du proxy playground.",
-      "playground_rate_limited": "Limite de débit atteinte. Réessayez plus tard.",
-      "playground_upstream_unavailable": "Le routeur est indisponible. Veuillez réessayer.",
-      "playground_router_timeout": "Le playground a expiré avant que le routeur ne retourne une réponse.",
-      "playground_router_unreachable": "Le playground ne peut pas joindre le routeur. Vérifiez le processus routeur local et son URL.",
-      "playground_router_transport_error": "La connexion au routeur a été interrompue avant le retour d'une réponse.",
-      "playground_proxy_error": "Échec du relais playground.",
-      "agent_timeout": "L'agent a expiré lors du traitement. Le modèle est peut-être en cours de chargement - réessayez.",
-      "agent_failure": "L'agent n'a pas pu traiter la requête. Veuillez réessayer.",
-      "invalid_request_error": "Le modèle sélectionné ne supporte pas cet endpoint. Choisissez un modèle compatible ou changez d'onglet.",
-      "audit_trail_disabled": "La piste d'audit n'est pas activée sur cette clé API.",
-      "empty_chat_payload": "Ajoutez un prompt.",
-      "empty_embedding_input": "Le contenu d'embedding ne peut pas être vide.",
-      "attachments_too_large": "Les pièces jointes dépassent la taille autorisée.",
-      "empty_prompt": "Ce champ ne peut pas être vide.",
-      "audio_file_required": "Sélectionnez ou enregistrez un fichier audio avant la transcription.",
-      "file_required": "Sélectionnez un fichier avant le téléversement.",
-      "microphone_unavailable": "L'enregistrement micro n'est pas disponible dans ce navigateur."
-    },
-    "results": {
-      "generated_text": "Texte généré",
-      "images": "Images générées",
-      "audio_preview": "Prévisualisation audio",
-      "transcript": "Transcription",
-      "moderation_summary": "Résumé de modération",
-      "uploaded_file": "Fichier téléversé"
-    },
-    "capabilities": {
-      "title": "Capacités de la clé",
-      "empty": "Aucun modèle disponible pour cette clé API."
-    },
-    "logs": {
-      "title": "Logs live d'opération",
-      "empty": "Aucune opération n'a encore été enregistrée pour cette clé.",
-      "detail_empty": "Sélectionnez un log pour inspecter la chronologie de l'opération.",
-      "no_key": "Sélectionnez une clé pour suivre les logs d'audit.",
-      "audit_disabled_title": "Piste d'audit désactivée",
-      "audit_disabled_description": "Cette clé ne conserve pas les logs d'opération du playground. Activez la piste d'audit depuis l'administration de la clé pour inspecter les timelines, les décisions du routeur et les erreurs agent.",
-      "metrics": {
-        "latency": "Latence totale",
-        "tokens": "Usage",
-        "energy": "Énergie nette"
-      }
-    },
-    "facets": {
-      "supported": "Actif",
-      "planned": "Planifié",
-      "chat": {
-        "title": "Chat completions",
-        "description": "Endpoint compatible OpenAI disponible via le routeur."
-      },
-      "embeddings": {
-        "title": "Embeddings",
-        "description": "Vecteurs texte exposés sur la façade OpenAI-compatible."
-      },
-      "models": {
-        "title": "Models",
-        "description": "Catalogue filtré par clé API et politiques de tier."
-      },
-      "responses": {
-        "title": "Responses",
-        "description": "Surface unifiée moderne à ajouter avant de nouveaux agents multimodaux."
-      },
-      "images": {
-        "title": "Images",
-        "description": "Génération, édition et variations nécessitent un endpoint routeur dédié."
-      },
-      "speech": {
-        "title": "Speech",
-        "description": "Text-to-speech à exposer avec streaming audio et formats de sortie."
-      },
-      "transcriptions": {
-        "title": "Transcriptions",
-        "description": "Speech-to-text et traductions audio à intégrer au proxy multimodal."
-      },
-      "moderations": {
-        "title": "Moderations",
-        "description": "Classification texte/image à prévoir pour la garde-fou client."
-      }
-    },
     "seo": {
-      "title": "Infera - Playground d'inférence",
-      "description": "Bac à sable OpenAI-compatible pour tester les modèles et les clés API sur le réseau Infera."
+      "title": "Playground - Product Data API",
+      "description": "Testez la facette prix en direct dans votre navigateur. Mode exemple pour les visiteurs ; mode live pour les utilisateurs authentifiés."
+    },
+    "title": "Playground facette prix",
+    "subtitle": "Essayez l'API en mode exemple ou exécutez des appels réels avec l'une de vos clés API.",
+    "sampleMode": "Mode exemple",
+    "liveMode": "Mode live",
+    "loginRequired": "Connexion requise",
+    "liveSignInHint": "Connectez-vous pour exécuter des appels en direct avec l'une de vos clés API.",
+    "signIn": "Se connecter",
+    "request": "Requête",
+    "gtinLabel": "GTIN",
+    "gtinPlaceholder": "ex. 0885909950805",
+    "languageLabel": "Langue de réponse",
+    "apiKeyLabel": "Clé API",
+    "run": "Exécuter",
+    "requestPreview": "Aperçu de la requête",
+    "response": "Réponse",
+    "billable": "Facturable",
+    "notBillable": "Non facturable",
+    "credits": "crédits",
+    "emptyHint": "Saisissez un GTIN et cliquez sur Exécuter pour voir une réponse.",
+    "error": "Erreur de requête",
+    "examples": "Exemples",
+    "meta": {
+      "reason": "Raison",
+      "creditsConsumed": "Crédits consommés",
+      "creditsRemaining": "Crédits restants",
+      "responseTime": "Temps de réponse"
+    },
+    "example": {
+      "fresh": "Offre fraîche",
+      "stale": "Données périmées",
+      "notFound": "Introuvable",
+      "invalid": "GTIN invalide"
     }
   },
   "admin": {
@@ -2986,56 +2942,17 @@
       "backToInfera": "Retour à Infera"
     },
     "overview": {
-      "badge": "Vue opérations",
-      "title": "Tableau de bord administration",
-      "subtitle": "Vue synthétique en temps réel des nœuds, clés, organisations et utilisateurs.",
-      "load_failed": "Impossible de charger les métriques admin.",
-      "quick_actions": "Actions rapides",
-      "actions": {
-        "refresh": "Tout rafraîchir",
-        "create_key": "Clés API",
-        "inspect_nodes": "Flotte de nœuds",
-        "benchmarks": "Benchmarks",
-        "manage_organizations": "Organisations",
-        "manage_users": "Utilisateurs",
-        "manage_models": "Gestion des modèles",
-        "admin_docs": "Documentation admin"
+      "seo": {
+        "title": "Admin - Product Data API"
       },
-      "action_captions": {
-        "keys": "Émettre, renouveler et auditer les accès clients.",
-        "nodes": "Inspecter la santé fournisseur et l'état runtime.",
-        "benchmarks": "Comparer l'empreinte énergétique à travers les benchmarks de performance.",
-        "organizations": "Maintenir les frontières de tenancy client.",
-        "users": "Contrôler les niveaux d'accès et les comptes.",
-        "models": "Synchroniser le catalogue de galeries, définir les politiques par tier et configurer les surcharges par nœud.",
-        "docs": "Ouvrir les procédures opérationnelles restreintes."
-      },
-      "health": {
-        "title": "État de santé de la flotte",
-        "active_nodes": "Nœuds actifs : {count}",
-        "total_nodes": "Nœuds totaux : {count}",
-        "captured_requests": "Requêtes capturées (7j) : {count}",
-        "last_nodes": "Derniers nœuds connectés",
-        "no_nodes": "Aucun nœud récent trouvé."
-      },
-      "metrics": {
-        "nodes": {
-          "label": "Nœuds",
-          "caption": "{count} actifs actuellement"
-        },
-        "keys": {
-          "label": "Clés API actives",
-          "caption": "{count} clés au total"
-        },
-        "organizations": {
-          "label": "Organisations",
-          "caption": "Organisations clientes enregistrées"
-        },
-        "users": {
-          "label": "Utilisateurs",
-          "caption": "Utilisateurs admin et clients"
-        }
-      }
+      "title": "Vue d'ensemble plateforme",
+      "subtitle": "Organisations, clés API, utilisation et audit.",
+      "totalOrgs": "Total organisations",
+      "activeOrgs": "Organisations actives",
+      "totalKeys": "Total clés API",
+      "recentRequests": "Requêtes récentes",
+      "viewAll": "Voir tout",
+      "back": "Retour"
     },
     "docs": {
       "badge": "Docs restreintes",
@@ -3349,6 +3266,71 @@
       },
       "empty": "Aucune campagne - créez la première.",
       "abort_confirm": "Abandonner cette campagne ? Toutes les actions en cours seront interrompues."
+    },
+    "organizations": {
+      "seo": {
+        "title": "Organisations - Admin"
+      },
+      "title": "Organisations",
+      "subtitle": "Toutes les organisations clients, leurs soldes de crédits et leur statut.",
+      "name": "Nom",
+      "slug": "Identifiant",
+      "status": "Statut",
+      "balance": "Solde",
+      "freeGrant": "Don initial",
+      "created": "Créée le",
+      "search": "Rechercher des organisations",
+      "empty": "Aucune organisation pour l'instant.",
+      "detail": {
+        "title": "Organisation",
+        "info": "Informations",
+        "billingEmail": "Email de facturation",
+        "quickActions": "Actions rapides",
+        "transactions": "Historique des transactions",
+        "manualGrant": "Attribution manuelle de crédits",
+        "grantTitle": "Attribuer des crédits",
+        "grantCredits": "Crédits à attribuer",
+        "grantNote": "Motif / note",
+        "confirmGrant": "Attribuer",
+        "grantSuccess": "{credits} crédits attribués avec succès."
+      }
+    },
+    "usage": {
+      "seo": {
+        "title": "Utilisation plateforme - Admin"
+      },
+      "title": "Utilisation plateforme",
+      "subtitle": "Requêtes API récentes sur toutes les organisations.",
+      "recent": "Utilisation récente",
+      "org": "Organisation",
+      "apiKey": "Clé API",
+      "facet": "Facet",
+      "gtin": "GTIN",
+      "status": "Statut",
+      "billable": "Facturable",
+      "credits": "Crédits",
+      "date": "Date",
+      "empty": "Aucun événement pour l'instant."
+    },
+    "apiKeys": {
+      "seo": {
+        "title": "Supervision des clés - Admin"
+      },
+      "title": "Supervision des clés API",
+      "subtitle": "Toutes les clés clients. Un administrateur peut révoquer toute clé active."
+    },
+    "audit": {
+      "seo": {
+        "title": "Journal d'audit - Admin"
+      },
+      "title": "Journal d'audit",
+      "subtitle": "Actions admin : attributions manuelles, révocations et événements de facturation.",
+      "action": "Action",
+      "actor": "Acteur",
+      "targetOrg": "Organisation cible",
+      "ref": "Référence",
+      "date": "Date",
+      "empty": "Aucun événement d'audit pour l'instant."
     }
   },
   "theme": {
@@ -3359,13 +3341,16 @@
     "dark": "Sombre"
   },
   "docs": {
-    "badge": "Base de connaissances",
-    "title": "Explorateur de documentation",
-    "subtitle": "Retrouvez les références produit, opérations et offres commerciales de la plateforme Infera.",
+    "badge": "Documentation développeur",
+    "title": "Documentation",
+    "subtitle": "Tout ce qu'il faut pour intégrer, s'authentifier et surveiller Product Data API.",
     "seo": {
-      "title": "Infera - Documentation",
-      "description": "Parcourez la documentation publique sur les offres, l'onboarding et les opérations."
+      "title": "Documentation - Product Data API",
+      "description": "Documentation développeur pour Product Data API : démarrage, authentification, facturation, gestion des erreurs et référence facette prix."
     },
+    "notFound": "Page introuvable",
+    "notFoundDetail": "Cette page de documentation n'existe pas.",
+    "backToIndex": "Retour à la documentation",
     "rag": {
       "title": "RAG Documentation",
       "ask_label": "Interroger l'assistant documentaire",

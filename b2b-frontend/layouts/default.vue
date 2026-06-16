@@ -1,16 +1,63 @@
 <template>
   <v-app>
-    <!-- Main Header (Handled by LandingHeader component) -->
     <LandingHeader />
 
-    <!-- Admin Sidebar (Only for /admin routes) -->
+    <!-- Dashboard sidebar -->
+    <v-navigation-drawer
+      v-if="isDashboardRoute"
+      v-model="dashboardDrawer"
+      :rail="dashboardRail"
+      permanent
+      elevation="1"
+      class="app-sidebar"
+    >
+      <div class="px-3 py-4 d-flex align-center ga-2">
+        <v-avatar color="primary" size="30">
+          <v-icon icon="mdi-view-dashboard-outline" />
+        </v-avatar>
+        <span v-if="!dashboardRail" class="text-subtitle-2 font-weight-medium text-uppercase text-truncate">
+          {{ t('nav.dashboard') }}
+        </span>
+      </div>
+
+      <v-divider />
+
+      <v-list density="comfortable" nav class="pa-2">
+        <v-list-item
+          v-for="item in dashboardLinks"
+          :key="item.to"
+          :to="item.to"
+          :prepend-icon="item.icon"
+          :title="item.title"
+          class="mb-1 rounded-lg"
+        />
+      </v-list>
+
+      <template #append>
+        <div class="pa-3">
+          <v-btn
+            block
+            variant="text"
+            :icon="dashboardRail ? 'mdi-arrow-expand-horizontal' : undefined"
+            :prepend-icon="dashboardRail ? undefined : 'mdi-arrow-collapse-horizontal'"
+            @click="dashboardRail = !dashboardRail"
+          >
+            <template v-if="!dashboardRail">
+              {{ t('admin.sidebar.collapse') }}
+            </template>
+          </v-btn>
+        </div>
+      </template>
+    </v-navigation-drawer>
+
+    <!-- Admin sidebar -->
     <v-navigation-drawer
       v-if="isAdminRoute"
       v-model="adminDrawer"
       :rail="adminRail"
       permanent
       elevation="1"
-      class="admin-sidebar"
+      class="app-sidebar"
     >
       <div class="px-3 py-4 d-flex align-center ga-2">
         <v-avatar color="primary" size="30">
@@ -39,7 +86,8 @@
           <v-btn
             block
             variant="text"
-            :prepend-icon="adminRail ? 'mdi-arrow-expand-horizontal' : 'mdi-arrow-collapse-horizontal'"
+            :icon="adminRail ? 'mdi-arrow-expand-horizontal' : undefined"
+            :prepend-icon="adminRail ? undefined : 'mdi-arrow-collapse-horizontal'"
             @click="adminRail = !adminRail"
           >
             <template v-if="!adminRail">
@@ -52,10 +100,7 @@
 
     <!-- Content Area -->
     <v-main>
-      <!-- Full Bleed Pages (Landing, Download, etc.) -->
       <slot v-if="isFullBleedPage" />
-
-      <!-- Standard Pages -->
       <v-container
         v-else
         :class="containerClass"
@@ -65,7 +110,6 @@
       </v-container>
     </v-main>
 
-    <!-- Global Footer -->
     <LandingFooter />
   </v-app>
 </template>
@@ -77,17 +121,16 @@ import LandingFooter from '~/components/landing/LandingFooter.vue'
 const { t } = useI18n()
 const route = useRoute()
 
+const dashboardDrawer = ref(true)
+const dashboardRail = ref(false)
 const adminDrawer = ref(true)
 const adminRail = ref(false)
 
 const isAdminRoute = computed(() => route.path.startsWith('/admin'))
+const isDashboardRoute = computed(() => route.path.startsWith('/dashboard'))
 
-// Full bleed pages (Landing, etc.) already include their own container logic if needed
 const isFullBleedPage = computed(() =>
   route.path === '/' ||
-  route.path.startsWith('/index-') ||
-  route.path.startsWith('/offres') ||
-  route.path.startsWith('/download') ||
   route.path.startsWith('/docs')
 )
 
@@ -98,17 +141,21 @@ const containerClass = computed(() => [
   route.meta.width === 'semi-fluid' ? 'app-shell__container--semi-fluid' : ''
 ])
 
+const dashboardLinks = computed(() => [
+  { to: '/dashboard', icon: 'mdi-view-dashboard-outline', title: t('nav.org.dashboard') },
+  { to: '/dashboard/api-keys', icon: 'mdi-key-variant', title: t('nav.org.keys') },
+  { to: '/dashboard/usage', icon: 'mdi-chart-line', title: t('nav.org.usage') },
+  { to: '/dashboard/billing', icon: 'mdi-credit-card-outline', title: t('nav.org.billing') },
+  { to: '/dashboard/invoices', icon: 'mdi-receipt', title: t('dashboard.invoices.title') },
+  { to: '/dashboard/settings', icon: 'mdi-cog-outline', title: t('nav.org.settings') },
+])
+
 const adminLinks = computed(() => [
-  { to: '/admin', icon: 'mdi-view-dashboard-outline', title: t('nav.admin_overview') },
-  { to: '/admin/nodes', icon: 'mdi-lan-connect', title: t('admin.overview.actions.inspect_nodes') },
-  { to: '/admin/keys', icon: 'mdi-key-outline', title: t('admin.overview.actions.create_key') },
-  { to: '/admin/organisations', icon: 'mdi-domain', title: t('admin.overview.actions.manage_organizations') },
-  { to: '/admin/users', icon: 'mdi-account-group-outline', title: t('admin.overview.actions.manage_users') },
-  { to: '/admin/models', icon: 'mdi-cube-outline', title: t('nav.admin_models') },
-  { to: '/admin/energy', icon: 'mdi-lightning-bolt-outline', title: t('nav.admin_energy') },
-  { to: '/admin/benchmarks', icon: 'mdi-leaf-circle-outline', title: t('admin.overview.actions.benchmarks') },
-  { to: '/admin/pentest', icon: 'mdi-shield-bug-outline', title: t('nav.admin_pentest') },
-  { to: '/admin/docs', icon: 'mdi-book-open-variant', title: t('admin.overview.actions.admin_docs') }
+  { to: '/admin', icon: 'mdi-view-dashboard-outline', title: t('admin.overview.title') },
+  { to: '/admin/organizations', icon: 'mdi-domain', title: t('admin.organizations.title') },
+  { to: '/admin/usage', icon: 'mdi-chart-line', title: t('admin.usage.title') },
+  { to: '/admin/api-keys', icon: 'mdi-key-outline', title: t('admin.apiKeys.title') },
+  { to: '/admin/audit', icon: 'mdi-history', title: t('admin.audit.title') },
 ])
 </script>
 
@@ -118,7 +165,7 @@ const adminLinks = computed(() => [
   width: 100%;
 }
 
-.admin-sidebar {
+.app-sidebar {
   border-right: 1px solid var(--inf-token-color-line-subtle) !important;
 }
 

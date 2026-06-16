@@ -17,6 +17,7 @@ export default withNuxt([
         'ignorePatterns': [
           'V[A-Z].*', // Vuetify
           'Nuxt[A-Z].*', // Nuxt
+          'B2b[A-Z].*',
           'Landing[A-Z].*',
           'Docs[A-Z].*',
           'Inf[A-Z].*',

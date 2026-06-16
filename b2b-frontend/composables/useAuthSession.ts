@@ -1,18 +1,30 @@
-export type AccessLevel = 'public' | 'user' | 'client' | 'admin'
+export type OrgRole = 'OWNER' | 'ADMIN' | 'DEVELOPER' | 'BILLING'
 
-export interface AuthSession {
-  subject: string
-  clientId: string
-  level: AccessLevel
-  roles: string[]
-  email?: string
-  name?: string
-  picture?: string
+export interface AuthUser {
+  id: string
+  email: string
+  displayName: string
+  avatarUrl: string | null
+  platformAdmin: boolean
 }
 
-interface OidcLoginPayload {
-  provider: 'google' | string
-  idToken: string
+export interface AuthOrganization {
+  id: string
+  name: string
+  slug: string
+  balanceCredits: number
+}
+
+export interface AuthSession {
+  user: AuthUser
+  organization: AuthOrganization | null
+  role: OrgRole | null
+}
+
+interface RawAuthResponse {
+  user?: AuthUser
+  organization?: AuthOrganization
+  role?: OrgRole
 }
 
 export function useAuthSession() {
@@ -22,38 +34,32 @@ export function useAuthSession() {
 
   const fetchMe = async () => {
     try {
-      const data = await $fetch<AuthSession>('/api/v1/auth/me', {
+      const data = await $fetch<RawAuthResponse>('/api/v1/auth/me', {
         baseURL: backendBaseUrl,
         credentials: 'include',
         headers: ssrHeaders
       })
-      session.value = data
-      return data
+      if (data?.user) {
+        session.value = {
+          user: data.user,
+          organization: data.organization ?? null,
+          role: data.role ?? null
+        }
+        return session.value
+      }
+      session.value = null
+      return null
     } catch (err: unknown) {
       const error = err as { status?: number; message?: string }
       const message = error.message || String(error)
       if (error.status !== 401) {
         console.warn('[auth/session] Unable to resolve /auth/me session claims', message)
       }
-
-      // Only clear session if it's a 401 (Unauthorized) or if we are on server
-      // Transient network errors on client shouldn't wipe out the hydrated session
       if (import.meta.server || error.status === 401) {
         session.value = null
       }
       return null
     }
-  }
-
-  const loginWithOidc = async (payload: OidcLoginPayload) => {
-    await $fetch('/api/v1/auth/oidc', {
-      method: 'POST',
-      baseURL: backendBaseUrl,
-      credentials: 'include',
-      body: payload,
-      headers: ssrHeaders
-    })
-    return fetchMe()
   }
 
   const logout = async () => {
@@ -69,7 +75,6 @@ export function useAuthSession() {
   return {
     session,
     fetchMe,
-    loginWithOidc,
     logout
   }
 }
@@ -79,6 +84,5 @@ function resolveBackendBaseUrl() {
   if (import.meta.server) {
     return resolveServerRuntimeBaseUrl(baseUrl, useRequestURL().origin)
   }
-
   return resolveRuntimeUrl(baseUrl)
 }

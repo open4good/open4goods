@@ -97,12 +97,12 @@ export default defineNuxtConfig({
   },
   robots: {
     sitemap: ['/sitemap.xml'],
-    disallow: ['/admin/**', '/auth/**', '/enroll']
+    disallow: ['/admin/**', '/dashboard/**', '/auth/**', '/enroll']
   },
   sitemap: {
     sitemaps: true,
     autoI18n: true,
-    exclude: ['/admin/**', '/auth/**', '/enroll']
+    exclude: ['/admin/**', '/dashboard/**', '/auth/**', '/enroll']
   },
   site: {
     url: 'https://product-data-api.com',

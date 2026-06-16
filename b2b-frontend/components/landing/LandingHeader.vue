@@ -178,7 +178,7 @@
           :prepend-icon="item.icon"
           @click="drawer = false"
         />
-        <v-list-item :to="'/profile'" :title="t('nav.manage_profile')" prepend-icon="mdi-account-cog-outline" @click="drawer = false" />
+        <v-list-item :to="'/dashboard/settings'" :title="t('nav.manage_profile')" prepend-icon="mdi-account-cog-outline" @click="drawer = false" />
         <v-list-item
           :title="t('nav.logout')"
           prepend-icon="mdi-logout"
@@ -205,7 +205,7 @@ const router = useRouter()
 const { session, fetchMe, logout } = useAuthSession()
 
 const isAuthenticated = computed(() => Boolean(session.value))
-const canAccessAdmin = computed(() => session.value?.level === 'admin' || Boolean(session.value?.roles?.includes('ROLE_ADMIN')))
+const canAccessAdmin = computed(() => session.value?.user?.platformAdmin === true)
 
 interface LandingNavItem {
   key: string

@@ -11,14 +11,15 @@
           :title="`${point.label}: ${point.value}`"
         />
       </div>
-      <B2bAsyncState v-else state="empty" title="No usage data" description="Usage will appear after API calls are processed." />
+      <div v-else class="d-flex flex-column align-center justify-center py-10 text-center text-medium-emphasis">
+        <v-icon icon="mdi-chart-bar-stacked" size="40" class="mb-2" />
+        <p class="text-body-2 mb-0">No usage data yet.</p>
+      </div>
     </v-card-text>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import B2bAsyncState from '~/components/B2bAsyncState.vue'
-
 const props = defineProps<{
   title: string
   points: Array<{ label: string; value: number }>

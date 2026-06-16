@@ -2,35 +2,23 @@
   <div>
     <B2bPageHeader :title="t('pricing.title')" :subtitle="t('pricing.subtitle')" eyebrow="Pricing" />
 
-    <B2bAsyncState
-      v-if="pending"
-      state="loading"
-      :title="t('pricing.loading')"
-      :description="t('pricing.loadingDescription')"
-    />
-    <B2bAsyncState
-      v-else-if="error"
-      state="error"
-      :title="t('pricing.error')"
-      :description="t('pricing.errorDescription')"
-    />
-    <div v-else class="d-flex flex-column ga-10">
-      <section>
-        <h2 class="text-h5 font-weight-bold mb-4">{{ t('pricing.packs') }}</h2>
-        <B2bBillingCatalog :items="packItems" :cta-label="t('pricing.buyPack')" />
-      </section>
-      <section>
-        <h2 class="text-h5 font-weight-bold mb-4">{{ t('pricing.subscriptions') }}</h2>
-        <B2bBillingCatalog :items="subscriptionItems" :cta-label="t('pricing.startPlan')" />
-      </section>
-    </div>
+    <B2bAsyncState :loading="pending" :error="errorState">
+      <div class="d-flex flex-column ga-10">
+        <section>
+          <h2 class="text-h5 font-weight-bold mb-4">{{ t('pricing.packs') }}</h2>
+          <B2bBillingCatalog :items="packItems" :cta-label="t('pricing.buyPack')" />
+        </section>
+        <section>
+          <h2 class="text-h5 font-weight-bold mb-4">{{ t('pricing.subscriptions') }}</h2>
+          <B2bBillingCatalog :items="subscriptionItems" :cta-label="t('pricing.startPlan')" />
+        </section>
+      </div>
+    </B2bAsyncState>
   </div>
 </template>
 
 <script setup lang="ts">
-import B2bAsyncState from '~/components/B2bAsyncState.vue'
-import B2bBillingCatalog from '~/components/B2bBillingCatalog.vue'
-import B2bPageHeader from '~/components/B2bPageHeader.vue'
+import type { AppApiError } from '~/composables/useApiClient'
 
 interface BillingCatalog {
   packs: Array<{ id: string; amountEur: number | string; credits: number }>
@@ -46,6 +34,8 @@ useLocalizedPageSeo({
 })
 
 const { data, pending, error } = await useAsyncData('billing-catalog', () => get<BillingCatalog>('/api/v1/customer/billing/catalog'))
+
+const errorState = computed<AppApiError | null>(() => error.value ? (error.value as unknown as AppApiError) : null)
 
 const packItems = computed(() => (data.value?.packs ?? []).map((pack) => ({
   id: pack.id,

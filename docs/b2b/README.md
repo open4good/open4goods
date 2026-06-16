@@ -72,19 +72,16 @@ architecture specs define the contracts; `implementation/plan.md` +
 
 | Area | State |
 |---|---|
-| Documentation foundation | Complete (this corpus) |
-| `b2b-api` code | P1-P4 complete; P5 price facet endpoint in progress. Resume from [`implementation/tasks.md`](implementation/tasks.md) P5.4 |
-| `b2b-frontend` code | Not started |
+| Documentation foundation | Complete |
+| `b2b-api` code | P1-P11 complete (price facet, auth, metering, billing, admin/customer REST) |
+| `b2b-frontend` code | P8-P11 complete (scaffold, all pages, docs, playground, tests, CI) |
 | Facet specs | `product.price` done; future facets are generated per [`facets/authoring-prompt.md`](facets/authoring-prompt.md) |
 
 ## Current resume pointer
 
-The living state is [`implementation/tasks.md`](implementation/tasks.md). As of
-2026-06-15, the last completed gate is P4.5 (metering and ledger matrix with
-Testcontainers Postgres + Redis). The active implementation phase is P5:
-`GET /api/v1/products/{gtin}/price`.
+**v1 implementation is complete.** All P0-P11 phases done; see
+[`implementation/tasks.md`](implementation/tasks.md) P11.3 for the full acceptance
+checklist and P11.4 for the handoff summary.
 
-Before starting new work, follow the resume protocol in
-[`implementation/tasks.md`](implementation/tasks.md): re-run the verification
-gate for the last completed phase, fix any drift, then continue at the first
-non-done task.
+For future facets, follow the lifecycle in [`facets/README.md`](facets/README.md)
+and add a `FACET-<id>` section to `tasks.md`.

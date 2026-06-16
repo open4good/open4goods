@@ -1,49 +1,39 @@
 <template>
-  <v-sheet class="b2b-async-state pa-6 text-center" rounded="lg">
-    <v-progress-circular v-if="state === 'loading'" indeterminate color="primary" class="mb-4" />
-    <v-avatar v-else :color="tone" variant="tonal" size="52" class="mb-4">
-      <v-icon :icon="iconName" size="28" />
-    </v-avatar>
+  <div>
+    <v-sheet v-if="loading" class="b2b-async-state pa-6 text-center" rounded="lg">
+      <v-progress-circular indeterminate color="primary" class="mb-4" />
+      <p class="text-body-2 text-medium-emphasis mb-0">{{ t('common.loading') }}</p>
+    </v-sheet>
 
-    <h2 class="text-h6 font-weight-bold mb-2">{{ title }}</h2>
-    <p v-if="description" class="text-body-2 text-medium-emphasis mb-4 b2b-async-state__description">
-      {{ description }}
-    </p>
-    <slot name="actions" />
-  </v-sheet>
+    <v-sheet v-else-if="error" class="b2b-async-state pa-6 text-center" rounded="lg">
+      <v-avatar color="error" variant="tonal" size="52" class="mb-4">
+        <v-icon icon="mdi-alert-circle-outline" size="28" />
+      </v-avatar>
+      <h2 class="text-h6 font-weight-bold mb-2">{{ t('common.errorGeneric') }}</h2>
+      <p v-if="error.i18nKey" class="text-body-2 text-medium-emphasis mb-4 b2b-async-state__description">
+        {{ t(error.i18nKey) }}
+      </p>
+      <v-btn variant="tonal" prepend-icon="mdi-refresh" @click="emit('retry')">
+        {{ t('common.retry') }}
+      </v-btn>
+    </v-sheet>
+
+    <template v-else>
+      <slot />
+    </template>
+  </div>
 </template>
 
 <script setup lang="ts">
-type AsyncState = 'loading' | 'empty' | 'error' | 'permission-denied' | 'partial'
+import type { AppApiError } from '~/composables/useApiClient'
 
-const props = defineProps<{
-  state: AsyncState
-  title: string
-  description?: string
+defineProps<{
+  loading: boolean
+  error: AppApiError | null
 }>()
 
-const tone = computed(() => {
-  if (props.state === 'error') {
-    return 'error'
-  }
-  if (props.state === 'permission-denied') {
-    return 'warning'
-  }
-  return 'primary'
-})
-
-const iconName = computed(() => {
-  if (props.state === 'error') {
-    return 'mdi-alert-circle-outline'
-  }
-  if (props.state === 'permission-denied') {
-    return 'mdi-lock-outline'
-  }
-  if (props.state === 'partial') {
-    return 'mdi-cloud-alert-outline'
-  }
-  return 'mdi-database-search-outline'
-})
+const emit = defineEmits<{ retry: [] }>()
+const { t } = useI18n()
 </script>
 
 <style scoped>
