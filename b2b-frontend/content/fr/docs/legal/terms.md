@@ -1,6 +1,6 @@
 ---
 title: "Conditions d'utilisation"
-description: "En vous authentifiant via un fournisseur d'identité externe, vous acceptez les conditions d'utilisation d'Infera."
+description: "En vous authentifiant, vous acceptez les conditions d'utilisation de Product Data API."
 tags:
   - documentation
   - vue-content
@@ -19,4 +19,4 @@ metadata_last_synced: 2026-05-08
 ---
 # Conditions d'utilisation
 
-En vous authentifiant via un fournisseur d'identité externe, vous acceptez les conditions d'utilisation d'Infera.
+En vous authentifiant, vous acceptez les conditions d'utilisation de Product Data API.

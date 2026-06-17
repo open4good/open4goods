@@ -1,9 +1,9 @@
-export type InferaThemeName = 'light' | 'dark'
-export type ThemePreference = 'system' | InferaThemeName
+export type PdapiThemeName = 'light' | 'dark'
+export type ThemePreference = 'system' | PdapiThemeName
 
-export const THEME_PREFERENCE_STORAGE_KEY = 'infera.theme.preference'
+export const THEME_PREFERENCE_STORAGE_KEY = 'pdapi.theme.preference'
 
-export function getSystemThemePreference(): InferaThemeName {
+export function getSystemThemePreference(): PdapiThemeName {
   if (import.meta.server) {
     return 'light'
   }
@@ -11,7 +11,7 @@ export function getSystemThemePreference(): InferaThemeName {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
-export function resolveThemeFromPreference(preference: ThemePreference): InferaThemeName {
+export function resolveThemeFromPreference(preference: ThemePreference): PdapiThemeName {
   if (preference !== 'system') {
     return preference
   }
@@ -26,23 +26,23 @@ export function useThemePreference() {
   })
 
   const preference = useState<ThemePreference>('theme.preference', () => cookiePreference.value ?? 'light')
-  const systemTheme = useState<InferaThemeName>('theme.system-theme', () => getSystemThemePreference())
+  const systemTheme = useState<PdapiThemeName>('theme.system-theme', () => getSystemThemePreference())
 
   if (import.meta.client) {
-    const windowWithFlag = window as Window & { __inferaThemeListenerBound?: boolean }
+    const windowWithFlag = window as Window & { __pdapiThemeListenerBound?: boolean }
 
-    if (!windowWithFlag.__inferaThemeListenerBound) {
+    if (!windowWithFlag.__pdapiThemeListenerBound) {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
       const onChange = () => {
         systemTheme.value = mediaQuery.matches ? 'dark' : 'light'
       }
 
       mediaQuery.addEventListener('change', onChange)
-      windowWithFlag.__inferaThemeListenerBound = true
+      windowWithFlag.__pdapiThemeListenerBound = true
     }
   }
 
-  const activeTheme = computed<InferaThemeName>(() => preference.value === 'system' ? systemTheme.value : preference.value)
+  const activeTheme = computed<PdapiThemeName>(() => preference.value === 'system' ? systemTheme.value : preference.value)
 
   function setPreference(nextPreference: ThemePreference) {
     preference.value = nextPreference

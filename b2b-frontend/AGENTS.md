@@ -5,8 +5,7 @@
 
 ## What this module is
 
-Nuxt 4 / Vue 3 / Vuetify 4 / TypeScript frontend, bootstrapped from
-`/home/goulven/git/infera/apps/frontend`. Public docs/pricing/playground +
+Nuxt 4 / Vue 3 / Vuetify 4 / TypeScript frontend. Public docs/pricing/playground +
 authenticated customer dashboard + admin control plane in one app.
 
 ## Read first
@@ -19,7 +18,7 @@ authenticated customer dashboard + admin control plane in one app.
 
 ## Conventions (module-specific)
 
-- **Flat Infera layout** (`pages/`, `composables/`, `domains/`, `components/`,
+- **Flat layout** (`pages/`, `composables/`, `domains/`, `components/`,
   `server/`, `content/`, `i18n/` at root) - not an `app/`-nested layout.
 - i18n `prefix_except_default`, default `en` at `/`, French at `/fr/`. All UI copy
   in JSON locale files; every route has localized SEO metadata (`@nuxtjs/seo`).

@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
   const redirectUri = providerConfig.redirectUri || new URL(callbackPath, origin).toString()
   const nonce = crypto.randomUUID()
 
-  setCookie(event, 'INFERA_OIDC_STATE', Buffer.from(JSON.stringify({ next, nonce, provider, redirectUri })).toString('base64url'), {
+  setCookie(event, 'PDAPI_OIDC_STATE', Buffer.from(JSON.stringify({ next, nonce, provider, redirectUri })).toString('base64url'), {
     httpOnly: true,
     secure: requestUrl.protocol === 'https:',
     sameSite: 'lax',

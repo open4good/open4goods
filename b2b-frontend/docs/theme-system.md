@@ -38,7 +38,7 @@ Both `dark` and `light` themes define:
 ## Runtime behavior
 
 - Preference state is managed by `composables/useThemePreference.ts`.
-- Stored key: `infera.theme.preference` persisted via Nuxt cookie (`useCookie`) so SSR and client stay aligned.
+- Stored key: `pdapi.theme.preference` persisted via Nuxt cookie (`useCookie`) so SSR and client stay aligned.
 - Allowed values:
   - `system` (default)
   - `light`

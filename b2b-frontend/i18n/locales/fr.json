@@ -444,7 +444,7 @@
   },
   "landing": {
     "seo": {
-      "title": "Infera - Cloud IA souverain décentralisé",
+      "title": "Product Data API",
       "description": "Cloud IA souverain, décentralisé, économique et écologique, compatible OpenAI."
     },
     "nav": {
@@ -712,7 +712,7 @@
       }
     },
     "why": {
-      "title": "Pourquoi Infera",
+      "title": "Pourquoi Product Data API",
       "items": {
         "sovereignty": {
           "title": "Souveraineté",
@@ -876,7 +876,7 @@
       "product": "Produit",
       "resources": "Ressources",
       "legal": "Légal",
-      "signature": "INFERA SYSTEM © 2026",
+      "signature": "PRODUCT DATA API © 2026",
       "variants": "v0 · v1 dark · v2 soft · v3 editorial",
       "docs": "Documentation"
     }
@@ -925,7 +925,7 @@
     "back_home": "Retour à l'accueil",
     "404": {
       "title": "Page introuvable",
-      "subtitle": "Le chemin que vous recherchez n'existe pas ou a été déplacé vers une autre coordonnée du maillage Infera."
+      "subtitle": "Le chemin que vous recherchez n'existe pas ou a été déplacé vers une autre coordonnée du réseau API."
     },
     "500": {
       "title": "Instabilité du maillage",
@@ -1254,8 +1254,8 @@
       "acceptTermsRequired": "Veuillez accepter les conditions et la politique de confidentialité pour continuer.",
       "googleFallbackHint": "La connexion rapide n'est pas disponible. Cliquez sur le bouton ci-dessous pour continuer avec Google.",
       "seo": {
-        "title": "Infera - Connexion",
-        "description": "Connectez-vous pour accéder à votre backoffice Infera, console admin et opérations nœuds."
+        "title": "Product Data API - Connexion",
+        "description": "Connectez-vous pour accéder à votre backoffice Product Data API, console admin et opérations nœuds."
       },
       "signInWith": "Se connecter avec {provider}",
       "acceptPrefix": "J'accepte les",
@@ -2106,7 +2106,7 @@
       "native_provider": {
         "title": "Routage migration",
         "description": "Bascule tout le trafic entre la grid Infera et le provider OpenAI-compatible d'origine du client.",
-        "infera_grid": "Grid Infera",
+        "pdapi_grid": "Grille Product Data API",
         "original_provider": "Provider d'origine",
         "kind": "Provider",
         "base_url": "Base URL",
@@ -2291,7 +2291,7 @@
       "offline": "Hors ligne"
     },
     "seo": {
-      "title": "Catalogue des modèles - Infera",
+      "title": "Product Data API - Catalogue des modèles",
       "description": "Parcourez les modèles disponibles par famille, tier matériel, backend et disponibilité en direct."
     },
     "hero": {
@@ -2368,7 +2368,7 @@
       "provider": "Fournisseur",
       "publisher": "Éditeur",
       "localai_native": "LocalAI natif",
-      "infera_metadata": "Métadonnées x-infera",
+      "pdapi_metadata": "Métadonnées x-pdapi",
       "hardware_gpu_summary": "Requiert un profil GPU avec au moins {vram} GB de VRAM et {ram} GB de RAM.",
       "hardware_cpu_summary": "Profil compatible CPU avec au moins {cores} cœurs et {ram} GB de RAM."
     },
@@ -2379,7 +2379,7 @@
   },
   "download": {
     "seo": {
-      "title": "Infera - Télécharger un nœud",
+      "title": "Product Data API - Télécharger",
       "description": "Téléchargez les artefacts Public, natifs et Trusted Tier de l'agent Infera pour opérateurs de nœuds."
     },
     "hero": {
@@ -2777,9 +2777,9 @@
     },
     "registration": {
       "title": "Enregistrement du nœud en cours",
-      "subtitle": "Nous vérifions en continu les signaux backend avant la mise en ligne sur la grille Infera.",
+      "subtitle": "Nous vérifions en continu les signaux backend avant la mise en ligne.",
       "waiting": "Attente des signaux heartbeat, certificat et runtime...",
-      "success_title": "Nœud validé sur la grille Infera",
+      "success_title": "Nœud validé et en ligne",
       "success_subtitle": "Tous les contrôles sont au vert. Vous pouvez maintenant piloter ce nœud depuis votre espace.",
       "cta": "Voir mes nœuds",
       "steps": {
@@ -2868,8 +2868,8 @@
         "tags": "Tags"
       },
       "seo": {
-        "title": "Infera - Documentation",
-        "description": "Parcourez la documentation Infera avec pages localisées, recherche temps réel et filtres par tags."
+        "title": "Product Data API - Documentation",
+        "description": "Parcourez la documentation Product Data API avec pages localisées, recherche temps réel et filtres par tags."
       }
     },
     "doc_cartouche": {
@@ -3005,7 +3005,7 @@
       "title": "Console Admin",
       "expand": "Déplier",
       "collapse": "Réduire",
-      "backToInfera": "Retour à Infera"
+      "backToProductDataAPI": "Retour à Product Data API"
     },
     "overview": {
       "seo": {
@@ -3034,7 +3034,7 @@
         "active": "Licences actives : {count}"
       },
       "modes": {
-        "INFERA_GRID": "Grille Infera",
+        "PDAPI_GRID": "Grille Product Data API",
         "DIRECT_OPENAI_COMPATIBLE": "OpenAI-compatible direct"
       },
       "status": {
@@ -3044,7 +3044,7 @@
       "create": {
         "eyebrow": "Licence pentest distribuée",
         "title": "Émettre un bundle",
-        "infera_note": "Crée une clé Router Infera révocable pour le scope client de l'admin. LocalAI reste accessible uniquement via le routage Router.",
+        "pdapi_note": "Crée une clé Router Product Data API révocable pour le scope client de l'admin. LocalAI reste accessible uniquement via le routage Router.",
         "direct_note": "Génère une config CCR pour un endpoint OpenAI-compatible détenu par l'opérateur. Les clés fournisseur restent locales."
       },
       "fields": {
@@ -3054,7 +3054,7 @@
         "think_model": "Modèle raisonnement",
         "long_context_model": "Modèle contexte long",
         "web_search_model": "Modèle recherche web",
-        "allowed_models": "Modèles Infera autorisés",
+        "allowed_models": "Modèles autorisés",
         "instruction": "Instructions PentestGPT",
         "client_id": "Scope client",
         "operator": "Opérateur",
@@ -3074,7 +3074,7 @@
         "created": "Créée"
       },
       "generated": {
-        "banner": "Fichiers du bundle générés. C'est la seule réponse contenant la clé Infera en clair."
+        "banner": "Fichiers du bundle générés. Seule réponse contenant la clé API en clair."
       },
       "actions": {
         "create": "Émettre la licence",

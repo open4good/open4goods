@@ -1,12 +1,12 @@
 <template>
   <div>
-    <section class="b2b-home-hero">
+    <section class="py-18 pt-16">
       <v-container>
         <v-row align="center" class="ga-8 ga-md-0">
           <v-col cols="12" md="6">
             <p class="text-overline text-primary mb-3">{{ t('home.hero.eyebrow') }}</p>
             <h1 class="text-h3 text-md-h2 font-weight-bold mb-4">{{ t('home.hero.title') }}</h1>
-            <p class="text-body-1 text-medium-emphasis mb-6 b2b-home-hero__copy">
+            <p class="text-body-1 text-medium-emphasis mb-6" style="max-width: 620px;">
               {{ t('home.hero.subtitle') }}
             </p>
             <div class="d-flex flex-wrap ga-3">
@@ -78,12 +78,3 @@ const curlExample = `curl -H "Authorization: Bearer pdapi_..." \\
   "https://api.product-data-api.com/api/v1/products/0885909950805/price?language=en"`
 </script>
 
-<style scoped>
-.b2b-home-hero {
-  padding-block: 72px 40px;
-}
-
-.b2b-home-hero__copy {
-  max-width: 620px;
-}
-</style>

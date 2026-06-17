@@ -1,6 +1,6 @@
 ---
 title: "Privacy Policy"
-description: "Infera uses identity attributes from selected SSO providers only to authenticate and authorize access."
+description: "Product Data API uses identity attributes from selected SSO providers only to authenticate and authorize access."
 tags:
   - documentation
   - vue-content
@@ -19,4 +19,4 @@ metadata_last_synced: 2026-05-08
 ---
 # Privacy Policy
 
-Infera uses identity attributes from selected SSO providers only to authenticate and authorize access.
+Product Data API uses identity attributes from selected SSO providers only to authenticate and authorize access.

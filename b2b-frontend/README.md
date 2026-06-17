@@ -2,7 +2,7 @@
 
 Web frontend for the **Product Data API** (B2B), served on
 `product-data-api.com`. Nuxt 4 / Vue 3 / Vuetify 4 / TypeScript, bootstrapped
-from the Infera frontend stack.
+cleaned up from the Infera frontend stack (legacy bootstrap - no longer used).
 
 It is a B2B developer platform (not a marketing microsite): public docs, pricing,
 self-serve onboarding, API-key management, billing, a live playground, and an

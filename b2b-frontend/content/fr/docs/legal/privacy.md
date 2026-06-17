@@ -1,6 +1,6 @@
 ---
 title: "Politique de confidentialité"
-description: "Infera utilise les attributs d'identité des fournisseurs SSO uniquement pour l'authentification et l'autorisation."
+description: "Product Data API utilise les attributs d'identité des fournisseurs SSO uniquement pour l'authentification et l'autorisation."
 tags:
   - documentation
   - vue-content
@@ -19,4 +19,4 @@ metadata_last_synced: 2026-05-08
 ---
 # Politique de confidentialité
 
-Infera utilise les attributs d'identité des fournisseurs SSO uniquement pour l'authentification et l'autorisation.
+Product Data API utilise les attributs d'identité des fournisseurs SSO uniquement pour l'authentification et l'autorisation.

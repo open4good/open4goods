@@ -1,6 +1,6 @@
 ---
 title: "Terms of Service"
-description: "By authenticating through an external identity provider, you agree to the Infera platform usage terms."
+description: "By authenticating through an external identity provider, you agree to the Product Data API usage terms."
 tags:
   - documentation
   - vue-content
@@ -19,9 +19,9 @@ metadata_last_synced: 2026-05-08
 ---
 # Terms of Service
 
-By authenticating through an external identity provider, you agree to the Infera platform usage terms.
+By authenticating through an external identity provider, you agree to the Product Data API usage terms.
 
 ## Authentication
 
-- Infera relies on external SSO providers only.
+- Product Data API relies on external SSO providers only.
 - No local password or local user database is managed in frontend flows.

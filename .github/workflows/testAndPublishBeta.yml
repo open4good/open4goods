@@ -85,6 +85,7 @@ jobs:
           cp api/target/api-0.0.1-SNAPSHOT.jar deploy-jars/api-latest.jar
           cp ui/target/ui-0.0.1-SNAPSHOT.jar deploy-jars/ui-latest.jar
           cp front-api/target/front-api-0.0.1-SNAPSHOT.jar deploy-jars/front-api-latest.jar
+          cp b2b-api/target/b2b-api-0.0.1-SNAPSHOT.jar deploy-jars/b2b-api-latest.jar
 
       - name: 🚚 Deploy JARs to Qualification Server (Consolidated)
         uses: easingthemes/ssh-deploy@main
@@ -97,7 +98,54 @@ jobs:
           TARGET: "/opt/open4goods/latest/"
 
       ############################################
-      # 7. Restarting Application
+      # 7a. Build b2b-frontend
+      ############################################
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.1.3
+
+      - name: Set up Node.js for b2b-frontend
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+          cache-dependency-path: b2b-frontend/pnpm-lock.yaml
+
+      - name: Install b2b-frontend dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: b2b-frontend
+
+      - name: Build b2b-frontend
+        run: pnpm build
+        working-directory: b2b-frontend
+        env:
+          NUXT_PUBLIC_BACKEND_BASE_URL: https://beta.api.product-data-api.com
+          NUXT_BACKEND_PROXY_TARGET: http://localhost:8087
+
+      - name: Deploy b2b-frontend output to beta server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ARGS: "-rltgoDzvO --delete"
+          SOURCE: "b2b-frontend/.output"
+          REMOTE_HOST: ${{ secrets.REMOTE_BETA_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
+          TARGET: "/opt/open4goods/latest/b2b-frontend"
+
+      ############################################
+      # 7b. Publish b2b-frontend container
+      ############################################
+      - name: Publish b2b-frontend
+        uses: appleboy/ssh-action@v1.2.5
+        with:
+          host: ${{ secrets.REMOTE_BETA_HOST }}
+          username: ${{ secrets.REMOTE_BETA_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: sh /opt/open4goods/bin/publish-b2b-frontend.sh beta
+
+      ############################################
+      # 7c. Restarting Spring Applications
       ############################################
       - name: Publish Applications
         uses: appleboy/ssh-action@v1.2.5

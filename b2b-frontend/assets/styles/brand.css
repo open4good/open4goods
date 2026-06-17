@@ -1,30 +1,30 @@
-/* Infera brand design tokens — sourced from docs/brand/tokens.css (v1.0.0) */
+/* Product Data API brand design tokens */
 :root {
-  --infera-night: #07111F;
-  --infera-ink: #0A1020;
-  --infera-blue: #2E6BFF;
-  --infera-cyan: #18D8FF;
-  --infera-violet: #7C3AED;
-  --infera-cloud: #EAF2FF;
-  --infera-amber: #FFB020;
-  --infera-success: #2CD889;
-  --infera-font-display: Inter Display, Inter, Manrope, system-ui, sans-serif;
-  --infera-font-body: Inter, system-ui, -apple-system, Segoe UI, sans-serif;
-  --infera-radius-lg: 24px;
-  --infera-shadow-soft: 0 14px 48px rgba(7, 17, 31, 0.18);
-  --infera-shadow-glow: 0 0 36px rgba(24, 216, 255, 0.28);
+  --pdapi-night: #07111F;
+  --pdapi-ink: #0A1020;
+  --pdapi-blue: #2E6BFF;
+  --pdapi-cyan: #18D8FF;
+  --pdapi-violet: #7C3AED;
+  --pdapi-cloud: #EAF2FF;
+  --pdapi-amber: #FFB020;
+  --pdapi-success: #2CD889;
+  --pdapi-font-display: Inter Display, Inter, Manrope, system-ui, sans-serif;
+  --pdapi-font-body: Inter, system-ui, -apple-system, Segoe UI, sans-serif;
+  --pdapi-radius-lg: 24px;
+  --pdapi-shadow-soft: 0 14px 48px rgba(7, 17, 31, 0.18);
+  --pdapi-shadow-glow: 0 0 36px rgba(24, 216, 255, 0.28);
 }
 
-.infera-gradient-text {
-  background: linear-gradient(105deg, var(--infera-blue), var(--infera-cyan) 58%, var(--infera-violet));
+.pdapi-gradient-text {
+  background: linear-gradient(105deg, var(--pdapi-blue), var(--pdapi-cyan) 58%, var(--pdapi-violet));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
-.infera-panel {
+.pdapi-panel {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
   border: 1px solid rgba(234, 242, 255, 0.12);
-  border-radius: var(--infera-radius-lg);
-  box-shadow: var(--infera-shadow-soft);
+  border-radius: var(--pdapi-radius-lg);
+  box-shadow: var(--pdapi-shadow-soft);
 }

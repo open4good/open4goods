@@ -1,5 +1,5 @@
 const localDevelopmentHosts = new Set(['localhost', '127.0.0.1', '::1'])
-const reloadMarker = 'infera-dev-cache-reset-reloaded'
+const reloadMarker = 'pdapi-dev-cache-reset-reloaded'
 
 export default defineNuxtPlugin(() => {
   if (!import.meta.dev || !localDevelopmentHosts.has(window.location.hostname)) {

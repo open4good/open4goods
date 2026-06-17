@@ -441,7 +441,7 @@
   },
   "landing": {
     "seo": {
-      "title": "Infera - Sovereign decentralized AI cloud",
+      "title": "Product Data API",
       "description": "Sovereign, decentralized, cost-efficient and ecological AI cloud, OpenAI-compatible."
     },
     "nav": {
@@ -705,7 +705,7 @@
       }
     },
     "why": {
-      "title": "Why Infera",
+      "title": "Why Product Data API",
       "items": {
         "sovereignty": {
           "title": "Sovereignty",
@@ -869,7 +869,7 @@
       "product": "Product",
       "resources": "Resources",
       "legal": "Legal",
-      "signature": "INFERA SYSTEM © 2026",
+      "signature": "PRODUCT DATA API © 2026",
       "variants": "v0 · v1 dark · v2 soft · v3 editorial",
       "docs": "Documentation"
     }
@@ -918,7 +918,7 @@
     "back_home": "Back to Home",
     "404": {
       "title": "Page not found",
-      "subtitle": "The path you are looking for does not exist or has been moved to a different coordinate in the Infera mesh."
+      "subtitle": "The path you are looking for does not exist or has been moved to a different coordinate in the API network."
     },
     "500": {
       "title": "Mesh instability",
@@ -2099,7 +2099,7 @@
       "native_provider": {
         "title": "Migration routing",
         "description": "Switch all traffic between the Infera grid and the customer's original OpenAI-compatible provider.",
-        "infera_grid": "Infera grid",
+        "pdapi_grid": "Product Data API grid",
         "original_provider": "Original provider",
         "kind": "Provider",
         "base_url": "Base URL",
@@ -2284,7 +2284,7 @@
       "offline": "Offline"
     },
     "seo": {
-      "title": "Model catalog - Infera",
+      "title": "Product Data API - Model catalog",
       "description": "Browse available inference models by family, hardware tier, backend and live availability."
     },
     "hero": {
@@ -2361,7 +2361,7 @@
       "provider": "Provider",
       "publisher": "Publisher",
       "localai_native": "LocalAI native",
-      "infera_metadata": "x-infera metadata",
+      "pdapi_metadata": "x-pdapi metadata",
       "hardware_gpu_summary": "Requires a GPU profile with at least {vram} GB VRAM and {ram} GB RAM.",
       "hardware_cpu_summary": "CPU-capable profile requiring at least {cores} cores and {ram} GB RAM."
     },
@@ -2372,7 +2372,7 @@
   },
   "download": {
     "seo": {
-      "title": "Infera - Download an agent node",
+      "title": "Product Data API - Download an agent",
       "description": "Download Public, native, and Trusted Tier Infera agent artifacts for node operators."
     },
     "hero": {
@@ -2770,9 +2770,9 @@
     },
     "registration": {
       "title": "Node registration in progress",
-      "subtitle": "We continuously verify backend signals before the node joins the Infera grid.",
+      "subtitle": "We continuously verify backend signals before the node goes live.",
       "waiting": "Waiting for heartbeat, certificate, and runtime signals...",
-      "success_title": "Node validated on the Infera grid",
+      "success_title": "Node validated and live",
       "success_subtitle": "All checks are green. You can now manage this node from your space.",
       "cta": "Go to my nodes",
       "steps": {
@@ -2861,8 +2861,8 @@
         "tags": "Tags"
       },
       "seo": {
-        "title": "Infera - Documentation",
-        "description": "Browse Infera documentation with localized pages, live search, and tag filters."
+        "title": "Product Data API - Documentation",
+        "description": "Browse Product Data API documentation with localized pages, live search, and tag filters."
       }
     },
     "doc_cartouche": {
@@ -2998,7 +2998,7 @@
       "title": "Admin Console",
       "expand": "Expand",
       "collapse": "Collapse",
-      "backToInfera": "Back to Product Data API"
+      "backToProductDataAPI": "Back to Product Data API"
     },
     "overview": {
       "seo": {
@@ -3075,7 +3075,7 @@
         "active": "Active licenses: {count}"
       },
       "modes": {
-        "INFERA_GRID": "Infera grid",
+        "PDAPI_GRID": "Product Data API grid",
         "DIRECT_OPENAI_COMPATIBLE": "Direct OpenAI-compatible"
       },
       "status": {
@@ -3085,7 +3085,7 @@
       "create": {
         "eyebrow": "Distributed pentest license",
         "title": "Issue a bundle",
-        "infera_note": "Creates a revocable Infera Router key for your admin client scope. LocalAI remains reachable only through Router dispatch.",
+        "pdapi_note": "Creates a revocable Product Data API Router key for your admin client scope. LocalAI remains reachable only through Router dispatch.",
         "direct_note": "Generates CCR config for an operator-owned OpenAI-compatible endpoint. External provider keys stay local."
       },
       "fields": {
@@ -3095,7 +3095,7 @@
         "think_model": "Reasoning model",
         "long_context_model": "Long-context model",
         "web_search_model": "Web-search model",
-        "allowed_models": "Authorized Infera models",
+        "allowed_models": "Authorized models",
         "instruction": "PentestGPT instructions",
         "client_id": "Client scope",
         "operator": "Operator",
@@ -3115,7 +3115,7 @@
         "created": "Created"
       },
       "generated": {
-        "banner": "Bundle files generated. This is the only response containing the clear Infera API key."
+        "banner": "Bundle files generated. This is the only response containing the clear API key."
       },
       "actions": {
         "create": "Issue license",

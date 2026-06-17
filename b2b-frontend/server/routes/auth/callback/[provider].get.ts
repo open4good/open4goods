@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
 
   const code = String(query.code || '')
   const state = String(query.state || '')
-  const stateCookie = getCookie(event, 'INFERA_OIDC_STATE')
+  const stateCookie = getCookie(event, 'PDAPI_OIDC_STATE')
   if (!code || !state || !stateCookie) {
     throw createError({
       statusCode: 400,
@@ -31,7 +31,7 @@ export default defineEventHandler(async (event) => {
   } catch {
     throw createError({ statusCode: 400, statusMessage: 'oidc_state_cookie_invalid' })
   }
-  deleteCookie(event, 'INFERA_OIDC_STATE', { path: '/' })
+  deleteCookie(event, 'PDAPI_OIDC_STATE', { path: '/' })
   if (parsed.provider !== provider || parsed.nonce !== state) throw createError({ statusCode: 400, statusMessage: 'oidc_state_mismatch' })
 
   const config = useRuntimeConfig(event)

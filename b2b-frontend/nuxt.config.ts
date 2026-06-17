@@ -12,7 +12,7 @@ export default defineNuxtConfig({
       pathPrefix: false,
     },
   ],
-  css: ['vuetify/styles', '@mdi/font/css/materialdesignicons.css', 'md-editor-v3/lib/style.css', '~/assets/styles/main.scss', '~/assets/styles/landing.scss'],
+  css: ['vuetify/styles', '@mdi/font/css/materialdesignicons.css', 'md-editor-v3/lib/style.css', '~/assets/styles/main.scss'],
   app: {
     head: {
       link: [

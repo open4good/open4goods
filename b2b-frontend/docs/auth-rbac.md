@@ -44,7 +44,7 @@ Global reference: `docs/architecture/auth-rbac-model.md`.
 1. User reaches `/auth/login` and accepts terms placeholder checkbox in UI.
 2. User authenticates through a single Google one-click CTA.
 3. Frontend exchanges returned Google ID token via OIDC endpoint (`POST /api/v1/auth/oidc`, provider=`google`).
-4. Backend sets `INFERA_ACCESS_TOKEN` and `INFERA_REFRESH_TOKEN` cookies.
+4. Backend sets `PDAPI_ACCESS_TOKEN` and `PDAPI_REFRESH_TOKEN` cookies.
 5. Frontend reads session via `/api/v1/auth/me` and redirects to `/admin` by default (or `next` query override).
 
 ## Route policy

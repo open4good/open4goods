@@ -1,11 +1,11 @@
 import tokens from './tokens.json'
 
-export type InferaTokens = typeof tokens
-export type InferaThemeName = keyof InferaTokens['themes']
+export type PdapiTokens = typeof tokens
+export type PdapiThemeName = keyof PdapiTokens['themes']
 
-const FALLBACK_THEME: InferaThemeName = 'dark'
+const FALLBACK_THEME: PdapiThemeName = 'dark'
 
-function resolveThemeTokens(themeName: InferaThemeName) {
+function resolveThemeTokens(themeName: PdapiThemeName) {
   return tokens.themes[themeName] ?? tokens.themes[FALLBACK_THEME]
 }
 
@@ -32,39 +32,39 @@ export function buildVuetifyThemes() {
   }
 }
 
-export function buildCssVariables(themeName: InferaThemeName) {
+export function buildCssVariables(themeName: PdapiThemeName) {
   const themeTokens = resolveThemeTokens(themeName)
 
   return {
-    '--inf-token-color-primary': themeTokens.color.primary,
-    '--inf-token-color-secondary': themeTokens.color.secondary,
-    '--inf-token-color-surface': themeTokens.color.surface,
-    '--inf-token-color-background': themeTokens.color.background,
-    '--inf-token-color-success': themeTokens.color.success,
-    '--inf-token-color-error': themeTokens.color.error,
-    '--inf-token-color-warning': themeTokens.color.warning,
-    '--inf-token-color-info': themeTokens.color.info,
+    '--pdapi-token-color-primary': themeTokens.color.primary,
+    '--pdapi-token-color-secondary': themeTokens.color.secondary,
+    '--pdapi-token-color-surface': themeTokens.color.surface,
+    '--pdapi-token-color-background': themeTokens.color.background,
+    '--pdapi-token-color-success': themeTokens.color.success,
+    '--pdapi-token-color-error': themeTokens.color.error,
+    '--pdapi-token-color-warning': themeTokens.color.warning,
+    '--pdapi-token-color-info': themeTokens.color.info,
 
-    '--inf-token-color-bg-base': themeTokens.landing.bgBase,
-    '--inf-token-color-bg-elevated': themeTokens.landing.bgElevated,
-    '--inf-token-color-text-primary': themeTokens.landing.textPrimary,
-    '--inf-token-color-text-secondary': themeTokens.landing.textSecondary,
-    '--inf-token-color-line-subtle': themeTokens.landing.lineSubtle,
-    '--inf-token-color-accent-primary': themeTokens.landing.accentPrimary,
-    '--inf-token-color-accent-primary-soft': themeTokens.landing.accentPrimarySoft,
-    '--inf-token-color-accent-glow': themeTokens.landing.accentGlow,
-    '--inf-token-color-surface-input': themeTokens.landing.surfaceInput,
-    '--inf-token-color-surface-footer': themeTokens.landing.surfaceFooter,
+    '--pdapi-token-color-bg-base': themeTokens.landing.bgBase,
+    '--pdapi-token-color-bg-elevated': themeTokens.landing.bgElevated,
+    '--pdapi-token-color-text-primary': themeTokens.landing.textPrimary,
+    '--pdapi-token-color-text-secondary': themeTokens.landing.textSecondary,
+    '--pdapi-token-color-line-subtle': themeTokens.landing.lineSubtle,
+    '--pdapi-token-color-accent-primary': themeTokens.landing.accentPrimary,
+    '--pdapi-token-color-accent-primary-soft': themeTokens.landing.accentPrimarySoft,
+    '--pdapi-token-color-accent-glow': themeTokens.landing.accentGlow,
+    '--pdapi-token-color-surface-input': themeTokens.landing.surfaceInput,
+    '--pdapi-token-color-surface-footer': themeTokens.landing.surfaceFooter,
 
-    '--inf-token-spacing-xs': tokens.spacing.xs,
-    '--inf-token-spacing-sm': tokens.spacing.sm,
-    '--inf-token-spacing-md': tokens.spacing.md,
-    '--inf-token-spacing-lg': tokens.spacing.lg,
-    '--inf-token-spacing-xl': tokens.spacing.xl
+    '--pdapi-token-spacing-xs': tokens.spacing.xs,
+    '--pdapi-token-spacing-sm': tokens.spacing.sm,
+    '--pdapi-token-spacing-md': tokens.spacing.md,
+    '--pdapi-token-spacing-lg': tokens.spacing.lg,
+    '--pdapi-token-spacing-xl': tokens.spacing.xl
   }
 }
 
-export function applyThemeCssVariables(themeName: InferaThemeName) {
+export function applyThemeCssVariables(themeName: PdapiThemeName) {
   const cssVars = buildCssVariables(themeName)
 
   Object.entries(cssVars).forEach(([key, value]) => {

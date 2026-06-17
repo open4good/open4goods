@@ -21,13 +21,13 @@ metadata_last_synced: 2026-05-08
 
 *Dernière mise à jour : 04/05/2026*
 
-Bienvenue sur le réseau Infera. En enrôlant votre nœud, vous acceptez les conditions suivantes :
+Bienvenue sur Product Data API. En enrôlant votre nœud, vous acceptez les conditions suivantes :
 
 ## 1. Responsabilité du nœud
 En tant qu'opérateur, vous êtes responsable de la disponibilité et de la sécurité de votre matériel.
 
 ## 2. Allocation des ressources
-Vous accordez à Infera le droit d'acheminer des tâches d'inférence vers votre matériel en fonction des niveaux auxquels vous participez.
+Vous acceptez que Product Data API ait le droit d'acheminer des tâches d'inférence vers votre matériel en fonction des niveaux auxquels vous participez.
 
 ## 3. Confidentialité et sécurité
 Les clés privées générées sur votre nœud doivent rester locales. Vous acceptez de ne pas contourner les contrôles de sécurité mTLS.

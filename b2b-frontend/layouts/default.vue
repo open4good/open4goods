@@ -9,7 +9,6 @@
       :rail="dashboardRail"
       permanent
       elevation="1"
-      class="app-sidebar"
     >
       <div class="px-3 py-4 d-flex align-center ga-2">
         <v-avatar color="primary" size="30">
@@ -57,7 +56,6 @@
       :rail="adminRail"
       permanent
       elevation="1"
-      class="app-sidebar"
     >
       <div class="px-3 py-4 d-flex align-center ga-2">
         <v-avatar color="primary" size="30">
@@ -104,6 +102,7 @@
       <v-container
         v-else
         :class="containerClass"
+        :style="route.meta.width === 'semi-fluid' ? 'max-width: min(90vw, 1600px); width: 100%;' : ''"
         :fluid="isFluidWidth"
       >
         <slot />
@@ -136,10 +135,7 @@ const isFullBleedPage = computed(() =>
 
 const isFluidWidth = computed(() => route.meta.width === 'fluid')
 
-const containerClass = computed(() => [
-  'py-6 px-lg-8',
-  route.meta.width === 'semi-fluid' ? 'app-shell__container--semi-fluid' : ''
-])
+const containerClass = computed(() => 'py-6 px-lg-8')
 
 const dashboardLinks = computed(() => [
   { to: '/dashboard', icon: 'mdi-view-dashboard-outline', title: t('nav.org.dashboard') },
@@ -159,19 +155,3 @@ const adminLinks = computed(() => [
 ])
 </script>
 
-<style scoped lang="scss">
-.app-shell__container--semi-fluid {
-  max-width: min(90vw, 1600px);
-  width: 100%;
-}
-
-.app-sidebar {
-  border-right: 1px solid var(--inf-token-color-line-subtle) !important;
-}
-
-@media (max-width: 960px) {
-  .app-shell__container--semi-fluid {
-    max-width: 100%;
-  }
-}
-</style>

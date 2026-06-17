@@ -65,15 +65,7 @@ async function onLogout() {
 }
 </script>
 
-<style scoped lang="scss">
-.identity-account {
-  text-transform: none;
-  font-weight: 600;
-  border-radius: 999px;
-  border: 1px solid color-mix(in oklab, var(--inf-token-color-line-subtle) 70%, transparent);
-  background: color-mix(in oklab, var(--inf-token-color-bg-elevated) 35%, transparent);
-}
-
+<style scoped>
 .context-switcher-list {
   min-width: 240px;
 }

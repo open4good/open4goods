@@ -79,7 +79,7 @@ export async function fetchRouterMultipartWithMappedErrors(
         data: {
           code: payload.code || mapPlaygroundProxyError(response.status),
           message: payload.message,
-          requestId: response.headers.get('x-infera-request-id') || undefined,
+          requestId: response.headers.get('x-pdapi-request-id') || undefined,
           statusCode: response.status
         }
       })
@@ -137,7 +137,7 @@ export async function fetchRouterBinaryAsDataUrl(
         data: {
           code: payload.code || mapPlaygroundProxyError(response.status),
           message: payload.message,
-          requestId: response.headers.get('x-infera-request-id') || undefined,
+          requestId: response.headers.get('x-pdapi-request-id') || undefined,
           statusCode: response.status
         }
       })
@@ -183,7 +183,7 @@ function toPlaygroundProxyError(error: unknown) {
     ? routerError.code
     : transportCause?.code || mapPlaygroundProxyError(statusCode)
   const message = typeof routerError?.message === 'string' ? routerError.message : transportCause?.message
-  const requestId = err?.response?.headers?.get?.('x-infera-request-id')
+  const requestId = err?.response?.headers?.get?.('x-pdapi-request-id')
 
   return createError({
     statusCode,
