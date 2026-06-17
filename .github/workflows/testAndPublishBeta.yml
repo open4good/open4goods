@@ -103,7 +103,7 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v6
         with:
-          version: 11.1.3
+          version: 11.7.0
 
       - name: Set up Node.js for b2b-frontend
         uses: actions/setup-node@v4
