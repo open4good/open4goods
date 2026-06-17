@@ -47,7 +47,12 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(final HttpServletRequest request) {
-        return !request.getRequestURI().startsWith("/api/v1/products/");
+        final String uri = request.getRequestURI();
+        // Public barcode assets and the anonymous check endpoint bypass API key authentication
+        if (uri.startsWith("/api/v1/barcodes/assets/") || "/api/v1/barcodes/check".equals(uri)) {
+            return true;
+        }
+        return !uri.startsWith("/api/v1/products/") && !uri.startsWith("/api/v1/barcodes/");
     }
 
     @Override

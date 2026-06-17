@@ -5,10 +5,12 @@
 > Envelope/DTO/metering rules common to all facets:
 > [API contract](../../architecture/product-data-api-contract.md).
 
-A **facet** is one billable data product (`product.price`, `product.impact`,
-...): one endpoint, one catalog entry, one credit price, one doc page, one SEO
-surface. v1 ships `product.price` only; shipping each later facet is a
-**recurring "run" task** in the project's life, executed against this playbook.
+A **facet** represents a billable unit in the B2B API catalogue, which can fall into one of two categories:
+
+1. **Product Facets**: Keyed by GTIN, returning product-specific data (`product.price`, `product.impact`, etc.) via `GET /api/v1/products/{gtin}/<facet-path>`.
+2. **Utility Facets**: Function-oriented endpoints performing actions or transformations (e.g., `barcode.render`) that do not require a GTIN, typically queried via separate endpoints (e.g., `POST /api/v1/barcodes/render`).
+
+Each facet is defined by one endpoint category, one catalog entry, one credit price structure, one documentation page, and one SEO surface. v1 ships `product.price` only; shipping each later facet is a **recurring "run" task** in the project's life, executed against this playbook.
 
 ## Files here
 
@@ -16,13 +18,14 @@ surface. v1 ships `product.price` only; shipping each later facet is a
 |---|---|
 | [`_template.md`](_template.md) | Section-by-section template every facet spec follows |
 | [`authoring-prompt.md`](authoring-prompt.md) | Prompt for an AI agent to generate a new facet spec |
-| [`product-price.md`](product-price.md) | The v1 facet and the **canonical example** of a finished spec |
+| [`product-price.md`](product-price.md) | The v1 product facet and the **canonical example** of a finished spec |
+| [`barcode-render.md`](barcode-render.md) | The first utility facet specification |
 
-One file per facet, named `product-<facet>.md` (e.g. `product-impact.md`).
-Facet specs **reference** the architecture contracts instead of duplicating
-them; they own what is facet-specific: value proposition, coverage and quality
-measurement, credits rationale, sanitization deltas, docs/SEO/playground
-surfaces, and the launch checklist.
+File naming conventions:
+- Product facets: `product-<facet>.md` (e.g., `product-impact.md`).
+- Utility facets: named after their service domain/action (e.g., `barcode-render.md`).
+
+Facet specs **reference** the architecture contracts instead of duplicating them; they own what is facet-specific: value proposition, coverage and quality measurement, credits rationale, sanitization deltas, docs/SEO/playground surfaces, and the launch checklist.
 
 ## Lifecycle of a new facet (the "run")
 

@@ -21,10 +21,12 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(final HttpSecurity http,
             final ObjectProvider<DashboardJwtAuthenticationFilter> dashboardJwtAuthenticationFilter,
             final ObjectProvider<ApiKeyAuthFilter> apiKeyAuthFilter) throws Exception {
-        apiKeyAuthFilter.ifAvailable(filter ->
-                http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class));
-        dashboardJwtAuthenticationFilter.ifAvailable(filter ->
-                http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class));
+        apiKeyAuthFilter.ifAvailable(filter -> {
+            http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
+        });
+        dashboardJwtAuthenticationFilter.ifAvailable(filter -> {
+            http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
+        });
 
         return http
                 .csrf(csrf -> csrf.disable())
@@ -38,7 +40,9 @@ public class WebSecurityConfig {
                                 "/swagger-ui.html",
                                 "/api/v1/auth/**",
                                 "/api/v1/customer/billing/catalog",
-                                "/api/v1/billing/stripe/webhook")
+                                "/api/v1/billing/stripe/webhook",
+                                "/api/v1/barcodes/assets/**",
+                                "/api/v1/barcodes/check")
                         .permitAll()
                         .requestMatchers("/api/v1/admin/**").hasAuthority(RbacAuthority.PLATFORM_ADMIN)
                         .anyRequest().authenticated())

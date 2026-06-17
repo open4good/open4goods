@@ -5,6 +5,16 @@ b2b:
       credits: 5
       doc: products/price
       billable-when: fresh-offer
+    "[barcode.render]":
+      path: /api/v1/barcodes/render
+      credits: 1
+      doc: barcodes/render
+      billable-when: valid-render
+    "[barcode.check]":
+      path: /api/v1/barcodes/{gtin}/check
+      credits: 0
+      doc: barcodes/check
+      billable-when: never
   billing:
     packs:
       starter:

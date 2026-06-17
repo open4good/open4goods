@@ -225,6 +225,34 @@ Each new facet is a run of the lifecycle in [`facets/README.md`](../facets/READM
 add a `FACET-<id>` section here when one starts (spec -> coverage -> catalog ->
 backend -> docs -> SEO -> launch).
 
+### FACET-barcode-render (done)
+
+Barcode image generation facet (`barcode.render`). POST /api/v1/barcodes/render,
+1 credit per render, signed temporary asset URL. Backend + b2b-catalog + frontend
+playground + EN/FR docs + integration tests all complete.
+
+### FACET-barcode-check (done 2026-06-17)
+
+Free barcode validity + GS1 forensics facet (`barcode.check`), 0 credits.
+
+- [x] Backend: `BarcodeForensics` record + `Gs1Class` enum in `model`
+- [x] Backend: `BarcodeForensicsService` in `commons` (check-digit + GS1 class + country)
+- [x] Backend: `GtinInfo` enriched with 5 forensic fields; `IdentityAggregationService` populates them
+- [x] Backend: `BarcodeForensicsDto`, `ProductTeaserDto`, `BarcodeCheckResponse` DTOs in `b2b-api`
+- [x] Backend: `B2bBarcodeCheckService` (public IP-rate-limited + authenticated key-rate-limited paths)
+- [x] Backend: `BarcodeController` - `GET /api/v1/barcodes/check` (public) + `GET /api/v1/barcodes/{gtin}/check` (keyed)
+- [x] Backend: `CustomerPlaygroundController.proxyBarcodeCheck` + `PlaygroundCheckRequest` DTO
+- [x] Backend: `RedisMeteringService.checkRateLimitByIp` added
+- [x] Backend: `WebSecurityConfig` permitAll + `ApiKeyAuthFilter` shouldNotFilter for public path
+- [x] Backend: `BillingCatalogProperties.Facet.credits` → `@PositiveOrZero`; `b2b-catalog.yml` entry added
+- [x] Frontend: `B2bBarcodeCheckPlayground.vue` component (forensics chips/table + product teaser card)
+- [x] Frontend: `pages/docs/barcodes/check/playground.vue` page
+- [x] Frontend: EN + FR docs content (`barcodes/check.md`, `check/documentation/java.md`, `check/documentation/python.md`)
+- [x] Frontend: i18n keys added to `en.json` + `fr.json`
+- [x] Tests: `BarcodeForensicsServiceTest` (commons unit, all GS1 classes)
+- [x] Tests: `B2bBarcodeCheckServiceTest` (b2b-api unit, mocked deps, 8 cases)
+- [x] Tests: 5 integration test cases added to `BarcodeControllerIntegrationTest`
+
 ## Session log
 
 - 2026-06-12: P0 done - corpus reorganized, inconsistencies fixed, facet system
@@ -320,3 +348,21 @@ backend -> docs -> SEO -> launch).
   on b2b-frontend/** paths); `pnpm-workspace.yaml` created with allowBuilds and
   minimumReleaseAge=0; acceptance checklist ticked in P11.3 with known gaps
   recorded; handoff summary written in P11.4. All P11 gates satisfied.
+- 2026-06-17: FACET-barcode-check done - Free barcode validity + GS1 forensics
+  facet implemented end-to-end: `BarcodeForensics` record + `Gs1Class` enum in
+  model; `BarcodeForensicsService` in commons; `GtinInfo` enriched with 5 forensic
+  fields populated during ingestion; `B2bBarcodeCheckService` with dual public/keyed
+  paths + IP rate limiting; dual endpoints in `BarcodeController`; playground proxy
+  in `CustomerPlaygroundController`; `@PositiveOrZero` fix for 0-credit catalog
+  entry; `B2bBarcodeCheckPlayground.vue` component + playground page; EN+FR docs
+  content (check.md, java.md, python.md × 2 locales); i18n keys; unit tests for
+  `BarcodeForensicsService` (10 cases) and `B2bBarcodeCheckService` (8 cases);
+  5 integration tests in `BarcodeControllerIntegrationTest`.
+- 2026-06-17: Fixed security integration tests for b2b-api. Resolved bean
+  initialization failures by removing overly restrictive bean conditions.
+  Updated GlobalExceptionHandler to rethrow security exceptions and handle
+  ServletRequestBindingException as 400. Aligned ApiKeyControllerIntegrationTest
+  with ApiKeySecretResponse record schema. Corrected DashboardJwtAuthenticationFilter
+  to bypass public billing and webhook endpoints. Removed debugging prints and
+  confirmed all 157 integration tests pass.
+

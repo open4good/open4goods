@@ -6,10 +6,12 @@ import java.util.AbstractMap.SimpleEntry;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.commons.exceptions.AggregationSkipException;
+import org.open4goods.commons.services.BarcodeForensicsService;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.Gs1PrefixService;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.datafragment.DataFragment;
+import org.open4goods.model.product.BarcodeForensics;
 import org.open4goods.model.product.BarcodeType;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -32,12 +34,15 @@ public class IdentityAggregationService extends AbstractAggregationService {
 
 	private final Gs1PrefixService gs1Service;
 	private final BarcodeValidationService validationService;
+	private final BarcodeForensicsService barcodeForensicsService;
 
 	public IdentityAggregationService(final Logger logger, final Gs1PrefixService gs1Service,
-			final BarcodeValidationService barcodeValidationService) {
+			final BarcodeValidationService barcodeValidationService,
+			final BarcodeForensicsService barcodeForensicsService) {
 		super(logger);
 		this.gs1Service = gs1Service;
 		this.validationService = barcodeValidationService;
+		this.barcodeForensicsService = barcodeForensicsService;
 	}
 
 	/**
@@ -127,6 +132,16 @@ public class IdentityAggregationService extends AbstractAggregationService {
 
 		// Setting barcode type
 		output.getGtinInfos().setUpcType(valResult.getKey());
+
+		// Enrich GtinInfo with richer forensic metadata derived from the normalized GTIN
+		final BarcodeForensics forensics = barcodeForensicsService.analyze(output.gtin());
+		if (forensics.valid()) {
+			output.getGtinInfos().setGs1Prefix(forensics.gs1Prefix());
+			output.getGtinInfos().setGs1Class(forensics.gs1Class());
+			output.getGtinInfos().setPackagingIndicator(forensics.packagingIndicator());
+			output.getGtinInfos().setIsbnRegistrationGroup(forensics.isbnRegistrationGroup());
+			output.getGtinInfos().setNormalizedGtin14(forensics.normalizedGtin14());
+		}
 
 	}
 

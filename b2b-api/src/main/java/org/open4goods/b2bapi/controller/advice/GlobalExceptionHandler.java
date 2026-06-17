@@ -35,6 +35,16 @@ public class GlobalExceptionHandler {
         return toProblem(ErrorCode.VALIDATION_ERROR, exception.getMessage(), request);
     }
 
+    @ExceptionHandler({ org.springframework.security.access.AccessDeniedException.class, org.springframework.security.authorization.AuthorizationDeniedException.class })
+    void handleSecurityException(final Exception exception) throws Exception {
+        throw exception;
+    }
+
+    @ExceptionHandler(org.springframework.web.bind.ServletRequestBindingException.class)
+    ProblemDetail handleServletRequestBindingException(final org.springframework.web.bind.ServletRequestBindingException exception, final HttpServletRequest request) {
+        return toProblem(ErrorCode.INVALID_PARAMETER, exception.getMessage(), request);
+    }
+
     @ExceptionHandler(Exception.class)
     ProblemDetail handleUnhandledException(final Exception exception, final HttpServletRequest request) {
         final String requestId = resolveRequestId(request);

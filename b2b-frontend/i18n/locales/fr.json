@@ -66,7 +66,10 @@
     "buyPack": "Acheter le pack",
     "startPlan": "Démarrer l'offre",
     "packDescription": "Crédits ponctuels pour les appels API de production.",
-    "subscriptionDescription": "Crédits mensuels avec report plafonné à {months} mois."
+    "subscriptionDescription": "Crédits mensuels avec report plafonné à {months} mois.",
+    "empty": "Aucune offre disponible pour le moment",
+    "emptyDescription": "Le catalogue de facturation est vide actuellement. Contactez notre équipe commerciale et nous définirons le bon volume avec vous.",
+    "contactSales": "Contacter le service commercial"
   },
   "public": {
     "faq": {
@@ -2892,6 +2895,69 @@
       "feedback_unlike": "Peu utile",
       "feedback_score": "Score retours",
       "metadata": "Métadonnées"
+    }
+  },
+  "barcodes": {
+    "check": {
+      "playground": {
+        "title": "Playground verificateur de code-barres",
+        "subtitle": "Saisissez un code-barres pour le valider, classifier son type, identifier le pays GS1 emetteur et rechercher les produits correspondants.",
+        "seo": {
+          "title": "Playground Verificateur de Code-Barres - Product Data API",
+          "description": "Validation et analyse forensique de code-barres gratuite. Verifiez le chiffre de controle, classifiez le type, identifiez le pays GS1 emetteur et verifiez si le produit est dans l'index nudger.fr."
+        },
+        "barcodeLabel": "Code-barres",
+        "barcodePlaceholder": "Saisir un GTIN, EAN-13, UPC-A ou ISBN (ex: 3017620422003)",
+        "run": "Verifier",
+        "clearLabel": "Effacer"
+      }
+    },
+    "playground": {
+      "title": "Playground générateur de code-barres",
+      "subtitle": "Configurez la mise en page, la symbologie et les métadonnées de copyright personnalisées pour générer des images de code-barres prêtes à l'impression.",
+      "seo": {
+        "title": "Playground Générateur de Code-Barres - Product Data API",
+        "description": "Testez l'utilitaire de génération de code-barres en direct dans votre navigateur. Choisissez des symbologies, configurez des paramètres et injectez des métadonnées."
+      },
+      "controls": {
+        "symbology": "Symbologie",
+        "payload": "Données / Valeur",
+        "payloadPlaceholder": "Saisissez la valeur du code-barres (ex. 4006381333931)",
+        "format": "Format de sortie",
+        "dimensions": "Dimensions & Résolution",
+        "width": "Largeur (px)",
+        "height": "Hauteur (px)",
+        "dpi": "Résolution (DPI)",
+        "colors": "Couleurs",
+        "foreground": "Couleur de premier plan",
+        "background": "Couleur d'arrière-plan",
+        "options": "Paramètres de symbologie",
+        "showText": "Afficher le texte lisible",
+        "quietZone": "Inclure la zone de silence",
+        "moduleWidth": "Largeur de module (mm)",
+        "barHeight": "Hauteur de barre (mm)",
+        "fontSize": "Taille de police",
+        "preset": "Préréglage DPI",
+        "rotation": "Rotation",
+        "metadata": "Métadonnées intégrées",
+        "copyright": "Titulaire du copyright",
+        "copyrightPlaceholder": "ex. Copyright 2026 Open4Goods",
+        "author": "Créateur/Auteur",
+        "authorPlaceholder": "ex. Générateur Open4Goods",
+        "description": "Description de l'image",
+        "descriptionPlaceholder": "ex. Code-barres Produit EAN-13"
+      },
+      "preview": {
+        "title": "Code-barres généré",
+        "empty": "Configurez les paramètres et cliquez sur Exécuter pour générer un aperçu du code-barres.",
+        "expired": "L'image expire le {date}",
+        "expiresIn": "Expire dans 30 jours",
+        "copyUrl": "Copier l'URL de l'image",
+        "urlCopied": "URL signée copiée !",
+        "download": "Télécharger le fichier image",
+        "warnings": "Avertissements :",
+        "inputHash": "Hash déterministe :"
+      }
     }
   },
   "playground": {

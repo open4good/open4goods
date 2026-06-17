@@ -15,7 +15,7 @@ const handleClearError = () => {
 }
 
 useHead({
-  title: props.error?.statusCode === 404 ? 'Page Not Found — Infera' : 'System Error — Infera',
+  title: props.error?.statusCode === 404 ? 'Page Not Found — Product Data API' : 'System Error — Product Data API',
   meta: [
     { name: 'robots', content: 'noindex, nofollow' }
   ]

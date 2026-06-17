@@ -59,8 +59,8 @@ public class BarcodeTest {
 		assertEquals(BarcodeType.GTIN_13, service.sanitize("88381694858").getKey());
 		assertEquals(BarcodeType.GTIN_13, service.sanitize("088381694858").getKey());
 		assertEquals(BarcodeType.GTIN_13, service.sanitize("0088381694858").getKey());
-		// Reduced GTIN 13
-		assertEquals(BarcodeType.GTIN_13, service.sanitize("00088381694858").getKey());
+		// 14-digit barcodes are always GTIN_14 (packaging indicator in first digit)
+		assertEquals(BarcodeType.GTIN_14, service.sanitize("00088381694858").getKey());
 
 		
 		// Alimentary : 

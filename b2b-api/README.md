@@ -2,7 +2,8 @@
 
 Backend for the **Product Data API** (B2B), served on `product-data-api.com`.
 A metered, authenticated product-data API over the open4goods Elasticsearch
-index. v1 exposes the **price facet** only, with "No data, no pay" billing.
+index. v1 exposes two facets - the **price facet** and the **barcode render**
+facet - both with "No data, no pay" billing.
 
 - Stack: Spring Boot 4 / Java 21, package `org.open4goods.b2bapi`, port `8087`.
 - Auth: OIDC (dashboard) + opaque `pdapi_` API keys (data endpoints).
@@ -22,6 +23,7 @@ profile, seed an org/key, then exercise
 - [Master implementation prompt](../docs/b2b/implementation/master-prompt.md)
 - [Phased plan](../docs/b2b/implementation/plan.md) & [task state](../docs/b2b/implementation/tasks.md)
 - [Price facet spec](../docs/b2b/facets/product-price.md)
+- [Barcode render facet spec](../docs/b2b/facets/barcode-render.md)
 - [ADR 0005](../docs/adr/0005-product-data-api-b2b-v1.md)
 - Architecture: [data model](../docs/architecture/product-data-api-data-model.md),
   [redis contract](../docs/architecture/product-data-api-redis-contract.md),

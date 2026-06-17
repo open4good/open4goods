@@ -19,6 +19,21 @@ public class GtinInfo
      */
     private List<String> gtinStrings = new ArrayList<>();
 
+    /** 3-digit GS1 prefix (first 3 digits of the normalized GTIN). */
+    private String gs1Prefix;
+
+    /** GS1 product/numbering class derived from the prefix range. */
+    private Gs1Class gs1Class;
+
+    /** First digit of a GTIN-14 packaging indicator; null for shorter GTINs. */
+    private Integer packagingIndicator;
+
+    /** Registration group element of an ISBN-13; null for non-book GTINs. */
+    private String isbnRegistrationGroup;
+
+    /** Zero-padded 14-digit canonical form of the GTIN. */
+    private String normalizedGtin14;
+
     public String getCountry()
     {
         return country;
@@ -66,6 +81,46 @@ public class GtinInfo
         if (!gtinStrings.contains(trimmed)) {
             gtinStrings.add(trimmed);
         }
+    }
+
+    public String getGs1Prefix() {
+        return gs1Prefix;
+    }
+
+    public void setGs1Prefix(final String gs1Prefix) {
+        this.gs1Prefix = gs1Prefix;
+    }
+
+    public Gs1Class getGs1Class() {
+        return gs1Class;
+    }
+
+    public void setGs1Class(final Gs1Class gs1Class) {
+        this.gs1Class = gs1Class;
+    }
+
+    public Integer getPackagingIndicator() {
+        return packagingIndicator;
+    }
+
+    public void setPackagingIndicator(final Integer packagingIndicator) {
+        this.packagingIndicator = packagingIndicator;
+    }
+
+    public String getIsbnRegistrationGroup() {
+        return isbnRegistrationGroup;
+    }
+
+    public void setIsbnRegistrationGroup(final String isbnRegistrationGroup) {
+        this.isbnRegistrationGroup = isbnRegistrationGroup;
+    }
+
+    public String getNormalizedGtin14() {
+        return normalizedGtin14;
+    }
+
+    public void setNormalizedGtin14(final String normalizedGtin14) {
+        this.normalizedGtin14 = normalizedGtin14;
     }
 
     /**

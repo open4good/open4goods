@@ -73,9 +73,9 @@ architecture specs define the contracts; `implementation/plan.md` +
 | Area | State |
 |---|---|
 | Documentation foundation | Complete |
-| `b2b-api` code | P1-P11 complete (price facet, auth, metering, billing, admin/customer REST) |
+| `b2b-api` code | P1-P11 complete (price + barcode-render facets, auth, metering, billing, admin/customer REST) |
 | `b2b-frontend` code | P8-P11 complete (scaffold, all pages, docs, playground, tests, CI) |
-| Facet specs | `product.price` done; future facets are generated per [`facets/authoring-prompt.md`](facets/authoring-prompt.md) |
+| Facet specs | `product.price` and `barcode.render` released; future facets are generated per [`facets/authoring-prompt.md`](facets/authoring-prompt.md) |
 
 ## Current resume pointer
 

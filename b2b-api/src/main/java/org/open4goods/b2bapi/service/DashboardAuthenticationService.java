@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
  * Converts access JWTs into Spring Security dashboard authentications.
  */
 @Service
-@ConditionalOnBean(name = "entityManagerFactory")
 public class DashboardAuthenticationService {
 
     private final DashboardSessionService dashboardSessionService;

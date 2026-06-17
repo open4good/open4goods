@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/customer/api-keys")
-@ConditionalOnBean(name = "entityManagerFactory")
 public class ApiKeyController {
 
     private final ApiKeyService apiKeyService;

@@ -18,6 +18,7 @@ import org.open4goods.api.services.completion.WikidataCompletionService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.commons.helper.DevModeService;
+import org.open4goods.commons.services.BarcodeForensicsService;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.Gs1PrefixService;
@@ -392,9 +393,9 @@ public class ApiConfig {
 	AggregationFacadeService realtimeAggregationService(@Autowired EvaluationService evaluationService, StandardiserService standardiserService, AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository, ApiProperties apiProperties,
 			@Autowired Gs1PrefixService gs1prefixService, DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, BarcodeValidationService barcodeValidationService, BrandService brandservice, GoogleTaxonomyService gts, BlablaService blablaService,
 			IcecatService icecatFeatureService, IcecatFeatureResolver icecatFeatureResolver, SerialisationService serialisationService, ObjectProvider<TextEmbeddingService> embeddingServiceProvider,
-			ObjectProvider<DjlEmbeddingProperties> embeddingPropertiesProvider) {
+			ObjectProvider<DjlEmbeddingProperties> embeddingPropertiesProvider, BarcodeForensicsService barcodeForensicsService) {
 		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService, barcodeValidationService, brandservice, gts, blablaService, icecatFeatureService,
-				icecatFeatureResolver, serialisationService, embeddingServiceProvider.getIfAvailable(), embeddingPropertiesProvider.getIfAvailable());
+				icecatFeatureResolver, serialisationService, embeddingServiceProvider.getIfAvailable(), embeddingPropertiesProvider.getIfAvailable(), barcodeForensicsService);
 	}
 
 	//////////////////////////////////////////////////////////
@@ -536,6 +537,11 @@ public class ApiConfig {
 	Gs1PrefixService gs1prefixService(@Autowired ResourcePatternResolver resourceResolver) throws IOException {
 		return new Gs1PrefixService("classpath:/gs1-prefix.csv", resourceResolver);
 
+	}
+
+	@Bean
+	BarcodeForensicsService barcodeForensicsService(BarcodeValidationService barcodeValidationService, Gs1PrefixService gs1PrefixService) {
+		return new BarcodeForensicsService(barcodeValidationService, gs1PrefixService);
 	}
 
 	//////////////////////////////////////////////

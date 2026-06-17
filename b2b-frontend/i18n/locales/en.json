@@ -66,7 +66,10 @@
     "buyPack": "Buy pack",
     "startPlan": "Start plan",
     "packDescription": "One-time credits for production API calls.",
-    "subscriptionDescription": "Monthly credits with a {months}-month rollover cap."
+    "subscriptionDescription": "Monthly credits with a {months}-month rollover cap.",
+    "empty": "No plans available right now",
+    "emptyDescription": "The billing catalog is empty at the moment. Contact our sales team and we'll set you up with the right volume.",
+    "contactSales": "Contact sales"
   },
   "public": {
     "faq": {
@@ -2885,6 +2888,69 @@
       "feedback_unlike": "Not helpful",
       "feedback_score": "Feedback score",
       "metadata": "Metadata"
+    }
+  },
+  "barcodes": {
+    "check": {
+      "playground": {
+        "title": "Barcode checker playground",
+        "subtitle": "Enter any barcode to validate it, classify its type, discover the issuing GS1 country, and look up matching products.",
+        "seo": {
+          "title": "Barcode Checker Playground - Product Data API",
+          "description": "Free barcode validation and forensic lookup. Verify the check digit, classify the barcode type, resolve the issuing GS1 country, and see if the product is in the nudger.fr index."
+        },
+        "barcodeLabel": "Barcode",
+        "barcodePlaceholder": "Enter a GTIN, EAN-13, UPC-A, or ISBN (e.g. 3017620422003)",
+        "run": "Check",
+        "clearLabel": "Clear"
+      }
+    },
+    "playground": {
+      "title": "Barcode generator playground",
+      "subtitle": "Configure layout, symbology, and custom copyright metadata to generate print-ready barcode assets.",
+      "seo": {
+        "title": "Barcode Generator Playground - Product Data API",
+        "description": "Test the barcode rendering utility live in your browser. Choose symbologies, configure parameters, and inject custom metadata."
+      },
+      "controls": {
+        "symbology": "Symbology",
+        "payload": "Data / Payload",
+        "payloadPlaceholder": "Enter barcode data (e.g. 4006381333931)",
+        "format": "Output format",
+        "dimensions": "Dimensions & Resolution",
+        "width": "Width (px)",
+        "height": "Height (px)",
+        "dpi": "Resolution (DPI)",
+        "colors": "Colors",
+        "foreground": "Foreground Color",
+        "background": "Background Color",
+        "options": "Symbology settings",
+        "showText": "Show human-readable text",
+        "quietZone": "Include quiet zone",
+        "moduleWidth": "Module width (mm)",
+        "barHeight": "Bar height (mm)",
+        "fontSize": "Font size",
+        "preset": "DPI preset",
+        "rotation": "Rotation",
+        "metadata": "Embedded metadata",
+        "copyright": "Copyright owner",
+        "copyrightPlaceholder": "e.g. Copyright 2026 Open4Goods",
+        "author": "Creator/Author",
+        "authorPlaceholder": "e.g. Open4Goods Generator",
+        "description": "Asset description",
+        "descriptionPlaceholder": "e.g. EAN-13 Product Barcode"
+      },
+      "preview": {
+        "title": "Generated Barcode",
+        "empty": "Configure parameters and click Run to generate a barcode preview.",
+        "expired": "Asset expires on {date}",
+        "expiresIn": "Expires in 30 days",
+        "copyUrl": "Copy asset URL",
+        "urlCopied": "Signed URL copied!",
+        "download": "Download image file",
+        "warnings": "Warnings:",
+        "inputHash": "Deterministic hash:"
+      }
     }
   },
   "playground": {

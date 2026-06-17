@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
@@ -48,7 +49,7 @@ public class BillingCatalogProperties {
         @NotBlank
         private String path;
 
-        @Positive
+        @PositiveOrZero
         private int credits;
 
         @NotBlank

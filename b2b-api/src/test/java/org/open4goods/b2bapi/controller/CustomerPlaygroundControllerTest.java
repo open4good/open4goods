@@ -16,13 +16,19 @@ import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.open4goods.b2bapi.dto.playground.PlaygroundBarcodeRequest;
 import org.open4goods.b2bapi.dto.playground.PlaygroundRequest;
+import org.open4goods.b2bapi.dto.barcode.B2bBarcodeRenderRequest;
+import org.open4goods.b2bapi.dto.barcode.B2bBarcodeRenderResponse;
+import org.open4goods.b2bapi.dto.barcode.B2bBarcodeRenderMeta;
+import org.open4goods.b2bapi.dto.barcode.B2bBarcodeDimensions;
 import org.open4goods.b2bapi.dto.product.B2bCoverageMeta;
 import org.open4goods.b2bapi.dto.product.B2bFacetMeta;
 import org.open4goods.b2bapi.dto.product.B2bMeta;
 import org.open4goods.b2bapi.dto.product.B2bPriceDto;
 import org.open4goods.b2bapi.dto.product.B2bResponse;
 import org.open4goods.b2bapi.exception.InsufficientCreditsException;
+import org.open4goods.b2bapi.exception.InvalidBarcodeException;
 import org.open4goods.b2bapi.exception.InvalidGtinException;
 import org.open4goods.b2bapi.exception.ResourceNotFoundException;
 import org.open4goods.b2bapi.model.ApiKey;
@@ -32,6 +38,8 @@ import org.open4goods.b2bapi.model.OrganizationRole;
 import org.open4goods.b2bapi.model.User;
 import org.open4goods.b2bapi.repository.ApiKeyRepository;
 import org.open4goods.b2bapi.service.ApiKeyPrincipal;
+import org.open4goods.b2bapi.service.B2bBarcodeCheckService;
+import org.open4goods.b2bapi.service.B2bBarcodeService;
 import org.open4goods.b2bapi.service.B2bProductService;
 import org.open4goods.b2bapi.service.DashboardPrincipal;
 import org.springframework.http.MediaType;
@@ -44,6 +52,8 @@ class CustomerPlaygroundControllerTest {
 
     private final ApiKeyRepository apiKeyRepository = mock(ApiKeyRepository.class);
     private final B2bProductService b2bProductService = mock(B2bProductService.class);
+    private final B2bBarcodeService b2bBarcodeService = mock(B2bBarcodeService.class);
+    private final B2bBarcodeCheckService b2bBarcodeCheckService = mock(B2bBarcodeCheckService.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private MockMvc mockMvc;
@@ -53,7 +63,7 @@ class CustomerPlaygroundControllerTest {
 
     @BeforeEach
     void setUp() {
-        final CustomerPlaygroundController controller = new CustomerPlaygroundController(apiKeyRepository, b2bProductService);
+        final CustomerPlaygroundController controller = new CustomerPlaygroundController(apiKeyRepository, b2bProductService, b2bBarcodeService, b2bBarcodeCheckService);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
 
         final DashboardPrincipal principal = new DashboardPrincipal(
@@ -199,5 +209,69 @@ class CustomerPlaygroundControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.response.status").value(404))
                 .andExpect(jsonPath("$.metering.reason").value("not-found"));
+    }
+
+    @Test
+    void proxyBarcodeRenderSuccess() throws Exception {
+        when(apiKeyRepository.findByIdAndOrganizationId(apiKeyId, orgId)).thenReturn(Optional.of(apiKey));
+
+        final B2bBarcodeRenderRequest renderRequest = new B2bBarcodeRenderRequest(
+                "ean13", "4006381333931", "png", 200, 100, "#000000", "#ffffff", 0, true, true, null, null
+        );
+        final B2bBarcodeRenderMeta renderMeta = new B2bBarcodeRenderMeta("pdreq_999", true, 1L);
+        final B2bBarcodeDimensions dimensions = new B2bBarcodeDimensions(200, 100, 300);
+        final B2bBarcodeRenderResponse renderResponse = new B2bBarcodeRenderResponse(
+                renderMeta,
+                "https://product-data-api.com/api/v1/barcodes/assets/tok_abc",
+                Instant.now().plusSeconds(3600),
+                dimensions,
+                "image/png",
+                List.of(),
+                "sha256_abc"
+        );
+
+        when(b2bBarcodeService.renderBarcode(
+                any(),
+                eq(new ApiKeyPrincipal(orgId, apiKeyId)),
+                any(),
+                any()
+        )).thenReturn(renderResponse);
+
+        final PlaygroundBarcodeRequest requestBody = new PlaygroundBarcodeRequest(apiKeyId, renderRequest);
+
+        mockMvc.perform(post("/api/v1/customer/playground/barcodes/render")
+                        .principal(SecurityContextHolder.getContext().getAuthentication())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.request.method").value("POST"))
+                .andExpect(jsonPath("$.request.path").value("/api/v1/barcodes/render"))
+                .andExpect(jsonPath("$.request.headers.Authorization").value("Bearer pdapi_abcd...masked"))
+                .andExpect(jsonPath("$.response.status").value(200))
+                .andExpect(jsonPath("$.response.body.assetUrl").value("https://product-data-api.com/api/v1/barcodes/assets/tok_abc"))
+                .andExpect(jsonPath("$.metering.billable").value(true))
+                .andExpect(jsonPath("$.metering.creditsConsumed").value(1))
+                .andExpect(jsonPath("$.metering.reason").value("success"));
+    }
+
+    @Test
+    void proxyBarcodeRenderInvalidBarcodeReturns400() throws Exception {
+        when(apiKeyRepository.findByIdAndOrganizationId(apiKeyId, orgId)).thenReturn(Optional.of(apiKey));
+        when(b2bBarcodeService.renderBarcode(any(), any(), any(), any()))
+                .thenThrow(new InvalidBarcodeException("Barcode type is required"));
+
+        // Use a valid structure to pass Jackson/validation, but trigger mock exception
+        final B2bBarcodeRenderRequest renderRequest = new B2bBarcodeRenderRequest(
+                "ean13", "4006381333931", "png", 200, 100, "#000000", "#ffffff", 0, true, true, null, null
+        );
+        final PlaygroundBarcodeRequest requestBody = new PlaygroundBarcodeRequest(apiKeyId, renderRequest);
+
+        mockMvc.perform(post("/api/v1/customer/playground/barcodes/render")
+                        .principal(SecurityContextHolder.getContext().getAuthentication())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.response.status").value(400))
+                .andExpect(jsonPath("$.metering.reason").value("invalid-input"));
     }
 }

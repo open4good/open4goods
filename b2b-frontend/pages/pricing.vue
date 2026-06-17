@@ -3,12 +3,21 @@
     <B2bPageHeader :title="t('pricing.title')" :subtitle="t('pricing.subtitle')" eyebrow="Pricing" />
 
     <B2bAsyncState :loading="pending" :error="errorState">
-      <div class="d-flex flex-column ga-10">
-        <section>
+      <v-card v-if="isEmpty" variant="outlined" class="text-center pa-8">
+        <v-card-text>
+          <h2 class="text-h6 font-weight-bold mb-2">{{ t('pricing.empty') }}</h2>
+          <p class="text-body-2 text-medium-emphasis mb-4">{{ t('pricing.emptyDescription') }}</p>
+          <v-btn color="primary" href="mailto:sales@product-data-api.com" prepend-icon="mdi-handshake-outline">
+            {{ t('pricing.contactSales') }}
+          </v-btn>
+        </v-card-text>
+      </v-card>
+      <div v-else class="d-flex flex-column ga-10">
+        <section v-if="packItems.length">
           <h2 class="text-h5 font-weight-bold mb-4">{{ t('pricing.packs') }}</h2>
           <B2bBillingCatalog :items="packItems" :cta-label="t('pricing.buyPack')" />
         </section>
-        <section>
+        <section v-if="subscriptionItems.length">
           <h2 class="text-h5 font-weight-bold mb-4">{{ t('pricing.subscriptions') }}</h2>
           <B2bBillingCatalog :items="subscriptionItems" :cta-label="t('pricing.startPlan')" />
         </section>
@@ -37,9 +46,12 @@ const { data, pending, error } = await useAsyncData('billing-catalog', () => get
 
 const errorState = computed<AppApiError | null>(() => error.value ? (error.value as unknown as AppApiError) : null)
 
+// Catalog IDs (e.g. "starter") are raw enum-like values; present them title-cased.
+const friendlyName = (id: string) => id ? id.charAt(0).toUpperCase() + id.slice(1) : id
+
 const packItems = computed(() => (data.value?.packs ?? []).map((pack) => ({
   id: pack.id,
-  name: pack.id,
+  name: friendlyName(pack.id),
   description: t('pricing.packDescription'),
   price: n(Number(pack.amountEur), { style: 'currency', currency: 'EUR' }),
   credits: n(pack.credits)
@@ -47,9 +59,11 @@ const packItems = computed(() => (data.value?.packs ?? []).map((pack) => ({
 
 const subscriptionItems = computed(() => (data.value?.subscriptions ?? []).map((subscription) => ({
   id: subscription.id,
-  name: subscription.id,
+  name: friendlyName(subscription.id),
   description: t('pricing.subscriptionDescription', { months: subscription.rolloverCapMonths }),
   price: `${n(Number(subscription.amountEur), { style: 'currency', currency: 'EUR' })} / mo`,
   credits: n(subscription.monthlyCredits)
 })))
+
+const isEmpty = computed(() => !pending.value && packItems.value.length === 0 && subscriptionItems.value.length === 0)
 </script>

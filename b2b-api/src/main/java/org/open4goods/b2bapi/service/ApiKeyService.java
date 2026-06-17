@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
  * Creates, lists, rotates, and revokes hashed Product Data API keys.
  */
 @Service
-@ConditionalOnBean(name = "entityManagerFactory")
 public class ApiKeyService {
 
     private final ApiKeyRepository apiKeyRepository;

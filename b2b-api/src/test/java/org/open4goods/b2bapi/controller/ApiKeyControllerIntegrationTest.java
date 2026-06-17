@@ -163,12 +163,12 @@ class ApiKeyControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("name", "My Test Key"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.secret").isString())
-                .andExpect(jsonPath("$.keyPrefix").isString())
+                .andExpect(jsonPath("$.clearKey").isString())
+                .andExpect(jsonPath("$.key.keyPrefix").isString())
                 .andReturn();
 
         final String secret = objectMapper.readTree(result.getResponse().getContentAsString())
-                .get("secret").asText();
+                .get("clearKey").asText();
         assertThat(secret).startsWith("pdapi_");
 
         // Secret is returned once; the stored hash is not re-exposed in subsequent list
@@ -190,19 +190,19 @@ class ApiKeyControllerIntegrationTest {
                 .andReturn();
 
         final String keyId = objectMapper.readTree(createResult.getResponse().getContentAsString())
-                .get("id").asText();
+                .get("key").get("id").asText();
         final String firstSecret = objectMapper.readTree(createResult.getResponse().getContentAsString())
-                .get("secret").asText();
+                .get("clearKey").asText();
 
         // Rotate
         final MvcResult rotateResult = mockMvc.perform(post("/api/v1/customer/api-keys/" + keyId + "/rotate")
                         .header(HttpHeaders.AUTHORIZATION, ownerToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.secret").isString())
+                .andExpect(jsonPath("$.clearKey").isString())
                 .andReturn();
 
         final String newSecret = objectMapper.readTree(rotateResult.getResponse().getContentAsString())
-                .get("secret").asText();
+                .get("clearKey").asText();
 
         assertThat(newSecret).startsWith("pdapi_").isNotEqualTo(firstSecret);
     }
@@ -218,7 +218,7 @@ class ApiKeyControllerIntegrationTest {
                 .andReturn();
 
         final String keyId = objectMapper.readTree(createResult.getResponse().getContentAsString())
-                .get("id").asText();
+                .get("key").get("id").asText();
 
         // Revoke
         mockMvc.perform(post("/api/v1/customer/api-keys/" + keyId + "/revoke")

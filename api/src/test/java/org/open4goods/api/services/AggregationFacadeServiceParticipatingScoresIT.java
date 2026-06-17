@@ -13,6 +13,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.aggregation.aggregator.ScoringBatchedAggregator;
+import org.open4goods.commons.services.BarcodeForensicsService;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.Gs1PrefixService;
@@ -86,7 +87,8 @@ class AggregationFacadeServiceParticipatingScoresIT {
                 mock(IcecatFeatureResolver.class),
                 mock(SerialisationService.class),
                 mock(DjlTextEmbeddingService.class),
-                new DjlEmbeddingProperties());
+                new DjlEmbeddingProperties(),
+                mock(BarcodeForensicsService.class));
     }
 
     private VerticalConfig verticalConfig() {

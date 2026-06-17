@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
  * Loads and refreshes dashboard sessions from verified JWT claims.
  */
 @Service
-@ConditionalOnBean(name = "entityManagerFactory")
 public class DashboardSessionService {
 
     private final UserRepository userRepository;

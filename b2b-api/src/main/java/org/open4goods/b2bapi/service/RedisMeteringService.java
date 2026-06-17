@@ -142,12 +142,39 @@ public class RedisMeteringService {
         return result;
     }
 
+    /**
+     * Applies a per-IP request rate limit for the current configured window.
+     * Intended for public (unauthenticated) endpoints to prevent abuse.
+     *
+     * @param ip the client IP address
+     * @return current request count inside the window
+     */
+    public long checkRateLimitByIp(final String ip) {
+        final Duration window = properties.getRatelimit().getWindow();
+        final long windowSeconds = window.toSeconds();
+        final long windowIndex = Instant.now(clock).getEpochSecond() / windowSeconds;
+        final String sanitizedIp = ip == null ? "unknown" : ip.replaceAll("[^a-zA-Z0-9:._-]", "");
+        final long result = evalInteger(
+                sha().rateLimitSha(),
+                rateLimitIpKey(sanitizedIp, windowIndex),
+                Integer.toString(properties.getRatelimit().getRequestsPerMinute()),
+                Long.toString(windowSeconds));
+        if (result == -1L) {
+            throw new RateLimitExceededException("Rate limit exceeded.");
+        }
+        return result;
+    }
+
     public String balanceKey(final UUID organizationId) {
         return BALANCE_PREFIX + organizationId + ":balance";
     }
 
     private String rateLimitKey(final UUID apiKeyId, final long windowIndex) {
         return RATE_LIMIT_PREFIX + apiKeyId + ":" + windowIndex;
+    }
+
+    private String rateLimitIpKey(final String ip, final long windowIndex) {
+        return RATE_LIMIT_PREFIX + "ip:" + ip + ":" + windowIndex;
     }
 
     private LoadedScripts sha() {
