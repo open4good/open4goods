@@ -11,9 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.google.genai.GoogleGenAiChatModel;
 import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
 import org.springframework.ai.model.openai.autoconfigure.OpenAiChatAutoConfiguration;
-import org.springframework.ai.model.tool.DefaultToolExecutionEligibilityPredicate;
 import org.springframework.ai.model.tool.ToolCallingManager;
-import org.springframework.ai.model.tool.ToolExecutionEligibilityPredicate;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.retry.RetryUtils;
 import org.springframework.beans.factory.ObjectProvider;
@@ -76,7 +74,6 @@ public class AiProvidersConfiguration {
     @ConditionalOnProperty(prefix = "gen-ai-config", name = "google-api-json")
     public GoogleGenAiChatModel googleGenAiChatModel(PromptServiceConfig promptServiceConfig, Environment environment,
             ObjectProvider<ToolCallingManager> toolCallingManager,
-            ObjectProvider<ToolExecutionEligibilityPredicate> toolExecutionEligibilityPredicate,
             ObjectProvider<RetryTemplate> retryTemplate,
             ObjectProvider<ObservationRegistry> observationRegistry) throws IOException {
 
@@ -110,10 +107,8 @@ public class AiProvidersConfiguration {
 
         return GoogleGenAiChatModel.builder()
                 .genAiClient(client)
-                .defaultOptions(GoogleGenAiChatOptions.builder().model(model).build())
+                .options(GoogleGenAiChatOptions.builder().model(model).build())
                 .toolCallingManager(toolCallingManager.getIfUnique(() -> ToolCallingManager.builder().build()))
-                .toolExecutionEligibilityPredicate(toolExecutionEligibilityPredicate
-                        .getIfUnique(DefaultToolExecutionEligibilityPredicate::new))
                 .retryTemplate(retryTemplate.getIfUnique(() -> RetryUtils.DEFAULT_RETRY_TEMPLATE))
                 .observationRegistry(observationRegistry.getIfUnique(() -> ObservationRegistry.NOOP))
                 .build();

@@ -137,7 +137,7 @@ public class GeminiProvider implements GenAiProvider {
 
 		if (useGrounding) {
 			builder.googleSearchRetrieval(true);
-			builder.internalToolExecutionEnabled(true);
+			builder.includeServerSideToolInvocations(true);
 			logger.info("Enabled Google Search grounding for Gemini model {}", model);
 		}
 		if (jsonSchema != null && !jsonSchema.isBlank()

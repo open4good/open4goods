@@ -57,7 +57,7 @@ export function transformRadarValue(
     return 100
   }
 
-  let normalized = 0
+  let normalized: number
   if (isLowerBetter) {
     // Lower is Better: Min is Best (100), Max is Worst (0)
     // Formula: (Max - Value) / (Max - Min)

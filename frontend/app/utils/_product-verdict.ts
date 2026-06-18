@@ -154,7 +154,7 @@ export const getReliabilityVerdict = (
   }
 
   const level = getReliabilityLevel(dqScore)
-  let color = 'grey'
+  let color: string
   if (level === 'excellent' || level === 'good') {
     color = 'success'
   } else if (level === 'fair' || level === 'poor') {

@@ -32,7 +32,7 @@ const resolveDisplayNames = (locale: string): Intl.DisplayNames | null => {
     return displayNamesCache.get(locale) ?? null
   }
 
-  let instance: Intl.DisplayNames | null = null
+  let instance: Intl.DisplayNames | null
   try {
     instance = new Intl.DisplayNames([locale], { type: 'region' })
   } catch {
