@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.open4goods.b2bapi.dto.playground.PlaygroundBarcodeRequest;
@@ -80,6 +81,11 @@ class CustomerPlaygroundControllerTest {
         final User user = new User("user@example.com", org.open4goods.b2bapi.model.OidcProvider.GOOGLE, "subject");
         apiKey = new ApiKey(organization, user, "Test Key", "abcd", "hash123");
         apiKey.setId(apiKeyId);
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     @Test
