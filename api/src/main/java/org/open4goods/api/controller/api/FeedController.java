@@ -1,23 +1,13 @@
 package org.open4goods.api.controller.api;
 
-import java.time.Instant;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
-
 import org.open4goods.api.services.BatchService;
 import org.open4goods.commons.model.dto.api.IndexationResponse;
 import org.open4goods.services.feedservice.service.FeedIndexingService;
 import org.open4goods.model.RolesConstants;
-import org.open4goods.model.affiliation.AffiliationPartner;
-import org.open4goods.model.affiliation.AffiliationProgram;
-import org.open4goods.model.affiliation.AffiliationPromotion;
-import org.open4goods.model.affiliation.AffiliationTransaction;
 import org.open4goods.services.feedservice.service.FeedService;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,114 +15,54 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotBlank;
 
 /**
- * This controller allows informations and communications from fetchers
- * @author goulven
- *
+ * Admin endpoints for triggering feed fetching and monitoring the indexation queue.
+ * Affiliation program/promotion/transaction data is in {@link AffiliationController}.
  */
 @RestController
-
+@PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
 public class FeedController {
 
+    private final FeedIndexingService feedIndexingService;
+    private final BatchService batchService;
+    private final FeedService feedService;
 
-	private final FeedIndexingService feedIndexingService;
+    public FeedController(BatchService batchService, FeedIndexingService feedIndexingService, FeedService feedService) {
+        this.batchService = batchService;
+        this.feedIndexingService = feedIndexingService;
+        this.feedService = feedService;
+    }
 
-	private final BatchService batchService;
+    @PostMapping("/feeds")
+    @Operation(summary = "Manually run the indexation of all feeds")
+    public IndexationResponse indexFeeds(@RequestParam(required = false) final String provider) {
+        batchService.fetchFeeds(provider);
+        return new IndexationResponse();
+    }
 
-	private FeedService feedService;
+    @GetMapping("/feed/queue")
+    @Operation(summary = "Show feeds awaiting indexation")
+    public Object[] getQueue() {
+        return feedIndexingService.getQueue().toArray();
+    }
 
-	public FeedController( BatchService batchService, FeedIndexingService feedIndexingService, FeedService feedService) {
-		this.batchService = batchService;
-		this.feedIndexingService = feedIndexingService;
-		this.feedService = feedService;
-	}
+    @PostMapping("/feeds/by-key")
+    @Operation(summary = "Run feeds matching the given feed key")
+    public void feedByKey(@RequestParam @NotBlank final String feedKey,
+            @RequestParam(required = false) final String provider) {
+        batchService.fetchFeedsByKey(feedKey, provider);
+    }
 
-	@GetMapping(path = "/partners")
-	@Operation(summary="Show affiliation partners from feed")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public Set<AffiliationPartner> partners(@RequestParam(required = false) final String provider) {
-		return feedService.getPartners(provider);
-	}
-
-
-	@PatchMapping(path = "/feeds")
-	@Operation(summary="Manualy run the indexation of all feeds")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public IndexationResponse indexFeeds(@RequestParam(required = false) final String provider) {
-		batchService.fetchFeeds(provider);
-		return new IndexationResponse();
-	}
-
-
-
-
-	@GetMapping(path = "/feed/queue")
-	@Operation(summary="Show feeds awaiting indexation")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public Object[] getQueue() {
-		return feedIndexingService.getQueue().toArray();
-	}
-
-	@PatchMapping(path = "/feedsByKey")
-	@Operation(summary="List all feeds from catalogs corresponding the given field key")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void feedByKey(@RequestParam @NotBlank final String feedKey,
-			@RequestParam(required = false) final String provider) {
-		batchService.fetchFeedsByKey(feedKey, provider);
-	}
-
-    @PatchMapping(path = "/feedsByDatasourceName")
-    @Operation(summary="Manually run the indexation of feeds matching the datasource/provider name")
-    @PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+    @PostMapping("/feeds/by-datasource")
+    @Operation(summary = "Manually run the indexation of feeds matching the datasource/provider name")
     public void feedByDatasourceName(@RequestParam @NotBlank final String datasourceName,
-            @RequestParam(required = false) final String provider)
-    {
+            @RequestParam(required = false) final String provider) {
         batchService.fetchFeedsByDatasourceName(datasourceName, provider);
     }
 
-	@PatchMapping(path = "/feedsByUrl")
-	@Operation(summary="List all feeds from catalogs corresponding the given url")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void feedByUrl(@RequestParam @NotBlank final String url,
-			@RequestParam(required = false) final String provider) {
-		batchService.fetchFeedsByUrl(url, provider);
-	}
-
-	@GetMapping(path = "/admin/affiliation/programs")
-	@Operation(summary="Get normalized programs from all active affiliation providers")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public Collection<AffiliationProgram> programs(@RequestParam(required = false) final String provider)
-	{
-		return feedService.getPrograms(provider);
-	}
-
-	@GetMapping(path = "/admin/affiliation/promotions")
-	@Operation(summary="Get normalized promotions from all active affiliation providers")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public Collection<AffiliationPromotion> promotions(@RequestParam(required = false) final String provider)
-	{
-		return feedService.getPromotions(provider);
-	}
-
-	@GetMapping(path = "/admin/affiliation/transactions")
-	@Operation(summary="Get normalized transactions from all active affiliation providers")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public Collection<AffiliationTransaction> transactions(
-			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) final Instant from,
-			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) final Instant to,
-			@RequestParam(required = false) final String provider)
-	{
-		return feedService.getTransactions(from, to, provider);
-	}
-
-	@GetMapping(path = "/admin/affiliation/tracking-link")
-	@Operation(summary="Build a tracking link for a specific provider and program")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public String trackingLink(
-			@RequestParam final String provider,
-			@RequestParam final String programId,
-			@RequestParam final String targetUrl,
-			@RequestParam(required = false) final Map<String, String> subIds)
-	{
-		return feedService.buildTrackingLink(provider, programId, targetUrl, subIds);
-	}
+    @PostMapping("/feeds/by-url")
+    @Operation(summary = "Run feeds matching the given URL")
+    public void feedByUrl(@RequestParam @NotBlank final String url,
+            @RequestParam(required = false) final String provider) {
+        batchService.fetchFeedsByUrl(url, provider);
+    }
 }

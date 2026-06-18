@@ -4,6 +4,7 @@ apis/AgentsApi.ts
 apis/AssistantConfigsApi.ts
 apis/AuthenticationApi.ts
 apis/BlogApi.ts
+apis/BrandApi.ts
 apis/CategoriesApi.ts
 apis/CommercialEventsApi.ts
 apis/ContactApi.ts
@@ -53,6 +54,8 @@ models/AuthTokensDto.ts
 models/BarcodeAggregationProperties.ts
 models/BlogPostDto.ts
 models/BlogTagDto.ts
+models/Brand.ts
+models/BrandXMeta.ts
 models/CategoriesScoreStatsDto.ts
 models/CategoriesScoresStatsDto.ts
 models/CategoriesStatsDto.ts
@@ -60,6 +63,9 @@ models/CategoryBreadcrumbItemDto.ts
 models/CategoryNavigationDto.ts
 models/CategoryScoreCardinalitiesDto.ts
 models/CommercialEvent.ts
+models/Company.ts
+models/CompanyLocation.ts
+models/CompanyScore.ts
 models/ContactDetails.ts
 models/ContactRequestDto.ts
 models/ContactResponseDto.ts
@@ -110,6 +116,9 @@ models/LegacyPromptConfig.ts
 models/LoginRequest.ts
 models/LogoutResponse.ts
 models/MailTemplateDto.ts
+models/ManufacturingDistance.ts
+models/ManufacturingSite.ts
+models/ManufacturingSiteDistance.ts
 models/Member.ts
 models/NudgeToolConfigDto.ts
 models/NudgeToolScoreDto.ts
@@ -184,6 +193,7 @@ models/ShareResolutionRequestDto.ts
 models/ShareResolutionResponseDto.ts
 models/SortOption.ts
 models/SortRequestDto.ts
+models/SourcedReference.ts
 models/StaticPartnerDto.ts
 models/SubsetCriteria.ts
 models/TeamProperties.ts

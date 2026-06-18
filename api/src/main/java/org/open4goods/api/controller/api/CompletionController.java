@@ -1,4 +1,3 @@
-
 package org.open4goods.api.controller.api;
 
 import java.io.IOException;
@@ -13,10 +12,10 @@ import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -25,161 +24,141 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotBlank;
 
 /**
- * This controller allows informations and communications about
- * DatasourceConfigurations TODO : Scheduling done here, not good
- *
- * @author goulven
- *
+ * Admin endpoints for triggering on-demand data completion runs (resource, Amazon, Icecat, EPREL).
  */
 @RestController
 @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
 public class CompletionController {
 
-	private final VerticalsConfigService verticalConfigService;
+    private final VerticalsConfigService verticalConfigService;
+    private final ResourceCompletionService resourceCompletionService;
+    private final AmazonCompletionService amazonCompletionService;
+    private final IcecatCompletionService iceCatService;
+    private final EprelCompletionService eprelCompletionService;
+    private final ProductRepository repository;
 
-	private ResourceCompletionService resourceCompletionService;
-	private AmazonCompletionService amazonCompletionService;
+    public CompletionController(VerticalsConfigService verticalsConfigService,
+            ResourceCompletionService resourceCompletionService,
+            AmazonCompletionService amazonCompletionService,
+            IcecatCompletionService iceCatService,
+            EprelCompletionService eprelCompletionService,
+            ProductRepository repository) {
+        this.verticalConfigService = verticalsConfigService;
+        this.resourceCompletionService = resourceCompletionService;
+        this.amazonCompletionService = amazonCompletionService;
+        this.iceCatService = iceCatService;
+        this.eprelCompletionService = eprelCompletionService;
+        this.repository = repository;
+    }
 
-	@Autowired
-	private ProductRepository repository;
+    ///////////////////////////////////
+    // Resource completion
+    ///////////////////////////////////
 
-	private IcecatCompletionService iceCatService;
+    @PostMapping("/completion/resources")
+    @Operation(summary = "Launch resource completion on all verticals")
+    public void resourceCompletionAll() throws InvalidParameterException, IOException {
+        resourceCompletionService.completeAll(false);
+    }
 
-	private EprelCompletionService eprelCompletionService;
+    @PostMapping("/completion/resources/{vertical}")
+    @Operation(summary = "Launch resource completion on the specified vertical")
+    public void resourceCompletionVertical(@PathVariable @NotBlank final String vertical)
+            throws InvalidParameterException, IOException {
+        resourceCompletionService.complete(verticalConfigService.getConfigById(vertical), false);
+    }
 
-	public CompletionController(VerticalsConfigService verticalsConfigService,
-			ResourceCompletionService resourceCompletionService,
-			AmazonCompletionService amazonCompletionService,
-			IcecatCompletionService iceCatService,
-			EprelCompletionService eprelCompletionService
-			) {
-		this.verticalConfigService = verticalsConfigService;
-		this.resourceCompletionService = resourceCompletionService;
-		this.amazonCompletionService = amazonCompletionService;
-		this.iceCatService = iceCatService;
-		this.eprelCompletionService = eprelCompletionService;
-	}
+    @PostMapping("/completion/resources/gtin/{gtin}")
+    @Operation(summary = "Launch resource completion on a specific product")
+    public void resourceCompletionProduct(@PathVariable final Long gtin) {
+        Product data = loadProduct(gtin);
+        resourceCompletionService.completeAndIndexProduct(
+                verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
+    }
 
-	///////////////////////////////////
-	// Resource completion
-	///////////////////////////////////
+    ///////////////////////////////////
+    // Amazon completion
+    ///////////////////////////////////
 
-	@GetMapping("/completion/resources")
-	@Operation(summary = "Launch resource completion on all verticals")
-	public void resourceCompletionAll() throws InvalidParameterException, IOException {
-		resourceCompletionService.completeAll(false);
-	}
+    @PostMapping("/completion/amazon")
+    @Operation(summary = "Launch Amazon completion on all verticals")
+    public void amazonCompletionAll() throws InvalidParameterException, IOException {
+        amazonCompletionService.completeAll(amazonCompletionService.getAmazonConfig().getMaxCallsPerBatch(), false);
+    }
 
-	@GetMapping("/completion/resources/")
-	@Operation(summary = "Launch resource completion on the specified vertical")
-	public void resourceCompletionVertical(@RequestParam @NotBlank final String verticalConfig)
-			throws InvalidParameterException, IOException {
-		resourceCompletionService.complete(verticalConfigService.getConfigById(verticalConfig),false);
-	}
+    @PostMapping("/completion/amazon/{vertical}")
+    @Operation(summary = "Launch Amazon completion on the specified vertical")
+    public void amazonCompletionVertical(@PathVariable @NotBlank final String vertical,
+            @RequestParam(required = false) Integer max)
+            throws InvalidParameterException, IOException {
+        int limit = max == null ? amazonCompletionService.getAmazonConfig().getMaxCallsPerBatch() : max;
+        amazonCompletionService.complete(verticalConfigService.getConfigById(vertical), limit, false);
+    }
 
-	@GetMapping("/completion/resources/gtin/")
-	@Operation(summary = "Launch resource completion on the specified vertical")
-	public void resourceCompletionProduct(@RequestParam final Long gtin) {
-		Product data;
-		try {
-			data = repository.getById(gtin);
-		} catch (ResourceNotFoundException e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-		}
-		resourceCompletionService.completeAndIndexProduct(verticalConfigService.getConfigByIdOrDefault(data.getVertical()),
-				data);
-	}
+    @PostMapping("/completion/amazon/gtin/{gtin}")
+    @Operation(summary = "Launch Amazon completion on a specific product")
+    public void amazonCompletionProduct(@PathVariable final Long gtin) {
+        Product data = loadProduct(gtin);
+        amazonCompletionService.completeAndIndexProduct(
+                verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
+    }
 
+    ///////////////////////////////////
+    // Icecat completion
+    ///////////////////////////////////
 
+    @PostMapping("/completion/icecat")
+    @Operation(summary = "Launch Icecat completion on all verticals")
+    public void icecatCompletionAll() throws InvalidParameterException, IOException {
+        iceCatService.completeAll(true);
+    }
 
-	///////////////////////////////////
-	// Amazon completion
-	///////////////////////////////////
+    @PostMapping("/completion/icecat/{vertical}")
+    @Operation(summary = "Launch Icecat completion on the specified vertical")
+    public void icecatCompletionVertical(@PathVariable @NotBlank final String vertical,
+            @RequestParam Integer max)
+            throws InvalidParameterException, IOException {
+        iceCatService.complete(verticalConfigService.getConfigById(vertical), max, true);
+    }
 
-	@GetMapping("/completion/amazon")
-	@Operation(summary = "Launch amazon completion on all verticals")
-	public void amazonCompletionAll() throws InvalidParameterException, IOException {
-		amazonCompletionService.completeAll(amazonCompletionService.getAmazonConfig().getMaxCallsPerBatch(), false);
-	}
+    @PostMapping("/completion/icecat/gtin/{gtin}")
+    @Operation(summary = "Launch Icecat completion on a specific product")
+    public void icecatCompletionProduct(@PathVariable final Long gtin) {
+        Product data = loadProduct(gtin);
+        iceCatService.completeAndIndexProduct(
+                verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
+    }
 
-	@GetMapping("/completion/amazon/")
-	@Operation(summary = "Launch amazon completion on the specified vertical")
-	public void amazonCompletionVertical(@RequestParam @NotBlank final String verticalConfig,
-			@RequestParam(required = false) Integer max)
-			throws InvalidParameterException, IOException {
-		int limit = max == null ? amazonCompletionService.getAmazonConfig().getMaxCallsPerBatch() : max;
-		amazonCompletionService.complete(verticalConfigService.getConfigById(verticalConfig), limit, false);
-	}
+    ///////////////////////////////////
+    // EPREL completion
+    ///////////////////////////////////
 
-	@GetMapping("/completion/amazon/gtin/")
-	@Operation(summary = "Launch amazon completion on the specified product")
-	public void amazonCompletionProduct(@RequestParam final Long gtin) {
-		Product data;
-		try {
-			data = repository.getById(gtin);
-		} catch (ResourceNotFoundException e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-		}
-		amazonCompletionService.completeAndIndexProduct(verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
-	}
+    @PostMapping("/completion/eprel")
+    @Operation(summary = "Launch EPREL completion on all verticals")
+    public void eprelCompletionAll() throws InvalidParameterException, IOException {
+        eprelCompletionService.completeAll(true);
+    }
 
+    @PostMapping("/completion/eprel/{vertical}")
+    @Operation(summary = "Launch EPREL completion on the specified vertical")
+    public void eprelCompletionVertical(@PathVariable @NotBlank final String vertical,
+            @RequestParam Integer max) throws InvalidParameterException, IOException {
+        eprelCompletionService.complete(verticalConfigService.getConfigById(vertical), max, true);
+    }
 
+    @PostMapping("/completion/eprel/gtin/{gtin}")
+    @Operation(summary = "Launch EPREL completion on a specific product")
+    public void eprelCompletionProduct(@PathVariable final Long gtin) {
+        Product data = loadProduct(gtin);
+        eprelCompletionService.completeAndIndexProduct(
+                verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
+    }
 
-	///////////////////////////////////
-	// Icecat completion
-	///////////////////////////////////
-
-	@GetMapping("/completion/icecat")
-	@Operation(summary = "Launch icecat completion on all verticals")
-	public void icecatCompletionAll() throws InvalidParameterException, IOException {
-// TODO : From conf
-		iceCatService.completeAll(true);
-	}
-
-	@GetMapping("/completion/icecat/")
-	@Operation(summary = "Launch icecat completion on the specified vertical")
-	public void icecatCompletionVertical(@RequestParam @NotBlank final String verticalConfig, @RequestParam Integer max)
-			throws InvalidParameterException, IOException {
-		iceCatService.complete(verticalConfigService.getConfigById(verticalConfig), max,true);
-	}
-
-	@GetMapping("/completion/icecat/gtin/")
-	@Operation(summary = "Launch icecat completion on the specified vertical")
-	public void icecatCompletionProduct(@RequestParam final Long gtin) {
-		Product data;
-		try {
-			data = repository.getById(gtin);
-		} catch (ResourceNotFoundException e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-		}
-		iceCatService.completeAndIndexProduct(verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
-	}
-
-	///////////////////////////////////
-	// EPREL  completion
-	///////////////////////////////////
-
-	@GetMapping("/completion/eprel")
-	@Operation(summary = "Launch eprel completion on all verticals")
-	public void eprelCompletionAll() throws InvalidParameterException, IOException {
-		eprelCompletionService.completeAll(true);
-	}
-
-	@GetMapping("/completion/eprel/")
-	@Operation(summary = "Launch eprel completion on the specified vertical")
-	public void eprelCompletionVertical(@RequestParam @NotBlank final String verticalConfig, @RequestParam Integer max) throws InvalidParameterException, IOException {
-		eprelCompletionService.complete(verticalConfigService.getConfigById(verticalConfig), max, true);
-	}
-
-	@GetMapping("/completion/eprel/gtin/")
-	@Operation(summary = "Launch eprel completion on the specified vertical")
-	public void eprelCompletionProduct(@RequestParam final Long gtin) {
-		Product data;
-		try {
-			data = repository.getById(gtin);
-		} catch (ResourceNotFoundException e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-		}
-		eprelCompletionService.completeAndIndexProduct(verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
-	}
+    private Product loadProduct(Long gtin) {
+        try {
+            return repository.getById(gtin);
+        } catch (ResourceNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+    }
 }

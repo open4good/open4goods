@@ -1,5 +1,3 @@
-
-
 package org.open4goods.api.controller.api;
 
 import java.util.List;
@@ -14,54 +12,42 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 /**
- * This controller allows informations and communications about DatasourceConfigurations
- * @author goulven
- *
+ * Admin endpoints for brand resolution, statistics and AI-generated suggestions.
  */
 @RestController
-@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 public class BrandController {
 
-	private BrandService brandService;
-	
-	public BrandController(BrandService brandService) {
-		super();
-		this.brandService=brandService;
-	}
+    private final BrandService brandService;
 
+    public BrandController(BrandService brandService) {
+        this.brandService = brandService;
+    }
 
-	@GetMapping("/brands/resolve")
-	@PreAuthorize("hasAuthority('" + RolesConstants.ROLE_XWIKI_ALL + "')")
-	public Brand resolve(@RequestParam String name) {
-		return brandService.resolve(name);
-	}
+    @GetMapping("/brands/resolve")
+    @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_XWIKI_ALL + "')")
+    public Brand resolve(@RequestParam String name) {
+        return brandService.resolve(name);
+    }
 
-	@GetMapping("/brands/stats/companies/missing")
-	@PreAuthorize("hasAuthority('" + RolesConstants.ROLE_XWIKI_ALL + "')")
-	public List<String> statsMissingCompanies(HttpServletRequest request) {
-	    // Fetch the stats map
-	    Map<String, Long> stats = brandService.getMissCounter();
+    @GetMapping("/brands/stats/companies/missing")
+    @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_XWIKI_ALL + "')")
+    public List<String> statsMissingCompanies() {
+        return brandService.getMissCounter().entrySet().stream()
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                .map(Map.Entry::getKey)
+                .toList();
+    }
 
-	    // Sort the map by value in descending order
-	   return  stats.entrySet().stream()
-	            .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-	            .map(e->e.getKey())
-	            .toList();
+    @GetMapping("/brands/stats/companies/missing/counts")
+    @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_XWIKI_ALL + "')")
+    public Map<String, Long> statsMissingCompanyCounts() {
+        return brandService.getMissCounter();
+    }
 
-	}
-
-	@GetMapping("/brands/stats/companies/missing/counts")
-	@PreAuthorize("hasAuthority('" + RolesConstants.ROLE_XWIKI_ALL + "')")
-	public Map<String, Long> statsMissingCompanyCounts() {
-		return brandService.getMissCounter();
-	}
-
-	@GetMapping("/brands/suggestions")
-	@PreAuthorize("hasAuthority('" + RolesConstants.ROLE_XWIKI_ALL + "')")
-	public List<BrandSuggestion> suggestions() {
-		return brandService.generateSuggestions();
-	}
+    @GetMapping("/brands/suggestions")
+    @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_XWIKI_ALL + "')")
+    public List<BrandSuggestion> suggestions() {
+        return brandService.generateSuggestions();
+    }
 }

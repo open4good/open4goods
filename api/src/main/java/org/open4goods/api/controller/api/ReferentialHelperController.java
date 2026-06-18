@@ -24,7 +24,6 @@ import org.open4goods.icecat.services.IcecatIndexService;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.vertical.AttributeConfig;
-import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.vertical.referential.AttributeReferentials;
 import org.open4goods.model.vertical.referential.EprelFeatureReferential;
@@ -111,7 +110,7 @@ public class ReferentialHelperController
             return ResponseEntity.notFound().build();
         }
 
-        Set<String> searchTerms = verticalSearchTerms(vc);
+        Set<String> searchTerms = VerticalSearchTerms.of(vc);
         Map<String, Integer> lastCategories = googleTaxonomyService.getLastCategoriesId();
         Map<String, Integer> fullCategories = googleTaxonomyService.getFullCategoriesId();
 
@@ -187,7 +186,7 @@ public class ReferentialHelperController
 
         if (candidates.size() < maxResults)
         {
-            for (String term : verticalSearchTerms(vc))
+            for (String term : VerticalSearchTerms.of(vc))
             {
                 if (candidates.size() >= maxResults)
                 {
@@ -226,7 +225,7 @@ public class ReferentialHelperController
         }
 
         List<WikidataCandidateDto> candidates = new ArrayList<>();
-        Set<String> searchTerms = verticalSearchTerms(vc);
+        Set<String> searchTerms = VerticalSearchTerms.of(vc);
 
         for (String term : searchTerms)
         {
@@ -598,34 +597,6 @@ public class ReferentialHelperController
         return result;
     }
 
-    /** Collects localized names and the vertical ID as search terms. */
-    private Set<String> verticalSearchTerms(VerticalConfig vc)
-    {
-        Set<String> terms = new LinkedHashSet<>();
-        addTerm(terms, vc.getId());
-        if (vc.getId() != null)
-        {
-            addTerm(terms, vc.getId().replace('-', ' ').replace('_', ' '));
-        }
-        for (ProductI18nElements i18n : vc.getI18n().values())
-        {
-            addTerm(terms, i18n.getVerticalHomeTitle());
-            addTerm(terms, i18n.getCardName());
-            addTerm(terms, i18n.getDisplayName());
-            addTerm(terms, i18n.getPageTitle());
-            addTerm(terms, i18n.getSeoName());
-        }
-        return terms;
-    }
-
-    private void addTerm(Set<String> terms, String term)
-    {
-        if (term != null && !term.isBlank())
-        {
-            terms.add(term.trim());
-        }
-    }
-
     /**
      * Scores a taxonomy key against the vertical search terms using token overlap.
      * Returns a value in (0, 1]; 0 means no overlap.
@@ -724,12 +695,12 @@ public class ReferentialHelperController
     private Set<String> attributeSearchTerms(AttributeConfig attrConfig)
     {
         Set<String> terms = new LinkedHashSet<>();
-        addTerm(terms, attrConfig.getKey());
+        VerticalSearchTerms.addTerm(terms, attrConfig.getKey());
         if (attrConfig.getName() != null && attrConfig.getName().values() != null)
         {
             for (String name : attrConfig.getName().values())
             {
-                addTerm(terms, name);
+                VerticalSearchTerms.addTerm(terms, name);
             }
         }
         if (attrConfig.getSynonyms() != null)
@@ -740,7 +711,7 @@ public class ReferentialHelperController
                 {
                     for (String synonym : synonymSet)
                     {
-                        addTerm(terms, synonym);
+                        VerticalSearchTerms.addTerm(terms, synonym);
                     }
                 }
             }

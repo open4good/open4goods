@@ -30,7 +30,7 @@ public class EmbeddingProxyService {
         try {
             return restClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/product/embedding")
+                            .path("/embedding")
                             .queryParam("text", text)
                             .build())
                     .retrieve()

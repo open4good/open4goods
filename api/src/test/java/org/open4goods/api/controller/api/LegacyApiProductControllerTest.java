@@ -16,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.commons.services.ProductNameSelectionService;
 import org.open4goods.services.productrepository.services.ProductRepository;
-import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -30,14 +29,11 @@ public class LegacyApiProductControllerTest {
     private ProductRepository productRepository;
 
     @Mock
-    private VerticalsConfigService verticalsConfigService;
-
-    @Mock
     private ProductNameSelectionService productNameSelectionService;
 
     @BeforeEach
     public void setup() {
-        LegacyApiProductController controller = new LegacyApiProductController(productRepository, verticalsConfigService, productNameSelectionService);
+        ProductAdminController controller = new ProductAdminController(productRepository, productNameSelectionService);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 
@@ -50,7 +46,7 @@ public class LegacyApiProductControllerTest {
                 .param("vertical", "tv")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
-        
+
         verify(productRepository).getRandomProducts("tv", 5);
     }
 }

@@ -208,11 +208,11 @@ jobs:
       ############################################
       # Java / Maven (build + site + jacoco aggregate)
       ############################################
-      - name: Set up JDK 25 (Temurin) + Maven cache
+      - name: Set up JDK 21 (Temurin) + Maven cache
         uses: actions/setup-java@v5
         with:
           distribution: "temurin"
-          java-version: "25"
+          java-version: "21"
           cache: "maven"
 
       - name: Set up Maven Repositories
@@ -586,6 +586,7 @@ jobs:
         uses: pnpm/action-setup@v6
         with:
           version: 11.7.0
+          standalone: true
 
       - name: Set up Node.js for b2b-frontend
         if: env.MODE != 'test'

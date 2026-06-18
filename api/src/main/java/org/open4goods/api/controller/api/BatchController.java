@@ -1,142 +1,75 @@
-
-
 package org.open4goods.api.controller.api;
 
 import java.io.IOException;
 
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.BatchService;
-import org.open4goods.api.services.completion.ResourceCompletionService;
-import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.exceptions.InvalidParameterException;
-import org.open4goods.model.exceptions.ResourceNotFoundException;
-import org.open4goods.services.productrepository.services.ProductRepository;
-import org.open4goods.services.serialisation.service.SerialisationService;
+import org.open4goods.services.prompt.dto.openai.BatchJobResponse;
+import org.open4goods.services.prompt.service.BatchPromptService;
 import org.open4goods.verticals.VerticalsConfigService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotBlank;
 
 /**
- * This controller allows informations and communications about DatasourceConfigurations
- * TODO : Should split, into scoringController / resourceController, ....
- * @author goulven
- *
+ * Admin endpoints for batch operations (full-scan reprocessing, cleanup, AI batch job status).
+ * Scoring and aggregation are in {@link ScoreController} and {@link AggregationController}.
  */
 @RestController
-@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
+@PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
 public class BatchController {
 
-	private final VerticalsConfigService verticalConfigService;
-	
-	private final SerialisationService serialisationService;
-	
-	private final AggregationFacadeService aggregationFacadeService;
+    private final VerticalsConfigService verticalConfigService;
+    private final AggregationFacadeService aggregationFacadeService;
+    private final BatchService batchService;
+    private final BatchPromptService batchPromptService;
 
+    public BatchController(BatchService batchService,
+                           AggregationFacadeService aggregationFacadeService,
+                           VerticalsConfigService verticalsConfigService,
+                           BatchPromptService batchPromptService) {
+        this.verticalConfigService = verticalsConfigService;
+        this.aggregationFacadeService = aggregationFacadeService;
+        this.batchService = batchService;
+        this.batchPromptService = batchPromptService;
+    }
 
-	@Autowired
-	private  ProductRepository repository;
+    @PostMapping("/batch/tweak")
+    @Operation(summary = "Launch the data cleanup routine, if implemented")
+    public void batchCleanup() throws InvalidParameterException, IOException, InterruptedException {
+        batchService.clean();
+    }
 
-	private ResourceCompletionService resourceCompletionService;
+    @PostMapping("/batch/clean-resources")
+    @Operation(summary = "Launch the resource garbage collection routine to clean orphaned resources")
+    public void cleanOrphanResources() {
+        batchService.cleanOrphanResources();
+    }
 
-	private BatchService batchService;
-	
-	
-	public BatchController(BatchService batchService, AggregationFacadeService aggregationFacadeService, SerialisationService serialisationService, VerticalsConfigService verticalsConfigService) {
-		this.serialisationService = serialisationService;
-		this.verticalConfigService = verticalsConfigService;
-		this.aggregationFacadeService = aggregationFacadeService;
-		this.resourceCompletionService = resourceCompletionService;
-		this.batchService = batchService;
-		
-	}
-	
-	
-	
-	@PostMapping(path="/batch/tweak")
-	@Operation(summary="Launch the data cleanup routine, if implemented")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void batchCleanup( ) throws InvalidParameterException, IOException, InterruptedException{
-		batchService.clean();
-	}
-	
-	@PostMapping(path="/batch/clean-resources")
-	@Operation(summary="Launch the resource garbage collection routine to clean orphaned resources")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void cleanOrphanResources() {
-		batchService.cleanOrphanResources();
-	}
-	
-	
-	
-	@PostMapping(path="/batch/")
-	@Operation(summary="Launch the full batch (scoring, aggregation, completion batch), iso has @Scheduled")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void batch( ) throws InvalidParameterException, IOException, InterruptedException{
-		batchService.batch();
-	}
-	
-	@PostMapping(path="/batch/{vertical}")
-	@Operation(summary="Batch a specific vertical")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void batchVertical( @PathVariable @NotBlank final String vertical ) throws InvalidParameterException, IOException, InterruptedException{
-		batchService.batch(verticalConfigService.getConfigById(vertical));
-	}
-	
+    @PostMapping("/batch")
+    @Operation(summary = "Launch the full batch (scoring, aggregation, completion batch), iso has @Scheduled")
+    public void batch() throws InvalidParameterException, IOException, InterruptedException {
+        batchService.batch();
+    }
 
-	
-	@PostMapping(path="/score/{vertical}")
-	@Operation(summary="Score a specific vertical")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void scoreFromName(  @PathVariable @NotBlank final String vertical ) throws InvalidParameterException, IOException, InterruptedException{
-		
-		aggregationFacadeService. score(verticalConfigService.getConfigById(vertical));
-	}
-	
-	
-	@GetMapping("/score/")
-	@Operation(summary="Score all verticals (sanitisation + launch the scheduled batch that score all verticals)")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void scoreVerticals() throws InvalidParameterException, IOException, InterruptedException {
-		aggregationFacadeService.scoreAll();
-	}
-	
-	
-	@GetMapping("/aggregate/verticals")
-	@Operation(summary="Launch aggregation of all verticals")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")	
-	public void sanitizeAllVertical() throws InvalidParameterException, IOException {
-		aggregationFacadeService.sanitizeAllVerticals();
-	}
+    @PostMapping("/batch/{vertical}")
+    @Operation(summary = "Batch a specific vertical")
+    public void batchVertical(@PathVariable @NotBlank final String vertical)
+            throws InvalidParameterException, IOException, InterruptedException {
+        batchService.batch(verticalConfigService.getConfigById(vertical));
+    }
 
-	@GetMapping("/aggregate/verticals/{vertical}")
-	@Operation(summary="Launch aggregation of a specific vertical")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")	
-	public void sanitizeSpecificVertical(@PathVariable String vertical) throws InvalidParameterException, IOException {
-		aggregationFacadeService.sanitizeVertical(verticalConfigService.getConfigById(vertical));
-	}
-	
-	
-	@GetMapping("/aggregate/products")
-	@Operation(summary="Launch aggregation of all products")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")	
-	public void sanitize() throws InvalidParameterException, IOException {
-		aggregationFacadeService.sanitizeAll();
-	}
-
-	@GetMapping("/aggregate/gtin/{gtin}")
-	@Operation(summary="Launch sanitisation of a given products")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")	
-	public void sanitizeOne(@PathVariable Long gtin ) throws InvalidParameterException, IOException, ResourceNotFoundException, AggregationSkipException {
-		aggregationFacadeService.sanitizeAndSave(repository.getById(gtin));
-	}
-	
+    @GetMapping("/batch/ai-job/{jobId}/status")
+    @Operation(summary = "Check AI batch job status by jobId")
+    public BatchJobResponse checkAiBatchJobStatus(@PathVariable String jobId) {
+        return batchPromptService.checkStatus(jobId);
+    }
 }

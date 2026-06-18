@@ -10,12 +10,14 @@ import org.open4goods.api.dto.metriks.MetriksEvent;
 import org.open4goods.api.dto.metriks.MetriksPeriod;
 import org.open4goods.api.dto.metriks.MetriksResponse;
 import org.open4goods.api.services.metriks.GoogleSearchConsoleService;
+import org.open4goods.model.RolesConstants;
 import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.query.Query;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,6 +33,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  */
 @RestController
 @RequestMapping("/api/metriks")
+@PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
 @Tag(name = "Metriks", description = "Endpoints for Metriks monitoring system")
 public class MetriksController {
 

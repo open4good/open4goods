@@ -98,7 +98,7 @@ public class ReviewGenerationController {
                                     schema = @Schema(implementation = Long.class))),
                     @ApiResponse(responseCode = "404", description = "Product not found")
             })
-    public ResponseEntity<Long> generateReview(@PathVariable("id") long upc, @PathVariable( required = false, name = "force") boolean force, HttpServletRequest request) throws ResourceNotFoundException {
+    public ResponseEntity<Long> generateReview(@PathVariable("id") long upc, @RequestParam(defaultValue = "false") boolean force, HttpServletRequest request) throws ResourceNotFoundException {
         Product product = productRepository.getById(upc);
         VerticalConfig verticalConfig = verticalsConfigService.getConfigByIdOrDefault(product.getVertical());
 
@@ -203,68 +203,6 @@ public class ReviewGenerationController {
     @Operation(summary = "Get an enrichment URL discovery job")
     public ResponseEntity<SourceDiscoveryJob> getEnrichmentDiscoveryJob(@PathVariable String jobId) throws Exception {
         return ResponseEntity.ok(dataForSeoSerpService.getJob(jobId));
-    }
-
-    @PostMapping("/enrichment/{id}/fetch")
-    @Operation(summary = "Run enrichment source fetching for a product")
-    public ResponseEntity<ReviewGenerationStepResult> fetchEnrichmentSources(@PathVariable("id") long upc,
-            HttpServletRequest request) throws Exception {
-        return fetchReviewSources(upc, request);
-    }
-
-    @PostMapping("/enrichment/{id}/attributes")
-    @Operation(summary = "Run enrichment attribute extraction for a product")
-    public ResponseEntity<ReviewGenerationStepResult> extractEnrichmentAttributes(@PathVariable("id") long upc)
-            throws Exception {
-        return extractReviewAttributes(upc);
-    }
-
-    @PostMapping("/enrichment/{id}/text")
-    @Operation(summary = "Run enrichment text completion for a product")
-    public ResponseEntity<ReviewGenerationStepResult> generateEnrichmentText(@PathVariable("id") long upc)
-            throws Exception {
-        return generateReviewText(upc);
-    }
-
-    @PostMapping("/enrichment/{id}/workflow")
-    @Operation(summary = "Run full synchronous enrichment workflow for a product")
-    public ResponseEntity<ReviewGenerationStepResult> generateEnrichmentWorkflow(@PathVariable("id") long upc,
-            HttpServletRequest request) throws Exception {
-        return generateReviewWorkflow(upc, request);
-    }
-
-    @PostMapping("/enrichment/vertical/{verticalId}/fetch")
-    @Operation(summary = "Run enrichment source fetching for a vertical")
-    public ResponseEntity<ReviewGenerationVerticalResult> fetchEnrichmentSourcesForVertical(
-            @PathVariable String verticalId,
-            @RequestParam(value = "limit", defaultValue = "5") int limit,
-            HttpServletRequest request) throws IOException {
-        return fetchReviewSourcesForVertical(verticalId, limit, request);
-    }
-
-    @PostMapping("/enrichment/vertical/{verticalId}/attributes")
-    @Operation(summary = "Run enrichment attribute extraction for a vertical")
-    public ResponseEntity<ReviewGenerationVerticalResult> extractEnrichmentAttributesForVertical(
-            @PathVariable String verticalId,
-            @RequestParam(value = "limit", defaultValue = "5") int limit) throws IOException {
-        return extractReviewAttributesForVertical(verticalId, limit);
-    }
-
-    @PostMapping("/enrichment/vertical/{verticalId}/text")
-    @Operation(summary = "Run enrichment text completion for a vertical")
-    public ResponseEntity<ReviewGenerationVerticalResult> generateEnrichmentTextForVertical(
-            @PathVariable String verticalId,
-            @RequestParam(value = "limit", defaultValue = "5") int limit) throws IOException {
-        return generateReviewTextForVertical(verticalId, limit);
-    }
-
-    @PostMapping("/enrichment/vertical/{verticalId}/workflow")
-    @Operation(summary = "Run full synchronous enrichment workflow for a vertical")
-    public ResponseEntity<ReviewGenerationVerticalResult> generateEnrichmentWorkflowForVertical(
-            @PathVariable String verticalId,
-            @RequestParam(value = "limit", defaultValue = "5") int limit,
-            HttpServletRequest request) throws IOException {
-        return generateReviewWorkflowForVertical(verticalId, limit, request);
     }
 
     /**

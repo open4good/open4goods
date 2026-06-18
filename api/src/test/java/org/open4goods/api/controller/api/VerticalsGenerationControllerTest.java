@@ -54,7 +54,7 @@ class VerticalsGenerationControllerTest {
         when(verticalsGenerationService.datasourceCoverage(vertical, 50)).thenReturn(List.of(
                 new DatasourceCoverageDto("Darty FR", 110L, 5, 1, List.of("UNMAPPED"))));
 
-        mockMvc.perform(get("/oven/datasources/stats/coverage").param("minVolume", "50"))
+        mockMvc.perform(get("/verticals/oven/datasources/stats/coverage").param("minVolume", "50"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].datasource").value("Darty FR"))
                 .andExpect(jsonPath("$[0].products").value(110));
@@ -67,7 +67,7 @@ class VerticalsGenerationControllerTest {
         when(verticalsGenerationService.unmappedCategories(vertical, 50, 200)).thenReturn(List.of(
                 new UnmappedCategoryDto(null, "FOUR", 110L)));
 
-        mockMvc.perform(get("/oven/datasources/stats/unmapped"))
+        mockMvc.perform(get("/verticals/oven/datasources/stats/unmapped"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].category").value("FOUR"))
                 .andExpect(jsonPath("$[0].volume").value(110));
@@ -79,7 +79,7 @@ class VerticalsGenerationControllerTest {
         when(verticalsGenerationService.categoryLeakage("oven", 50, 0.2)).thenReturn(List.of(
                 new LeakageWarningDto("FOUR", 100L, "oven", 0.8, "cooktop", 0.2, true)));
 
-        mockMvc.perform(get("/oven/datasources/stats/leakage"))
+        mockMvc.perform(get("/verticals/oven/datasources/stats/leakage"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].category").value("FOUR"))
                 .andExpect(jsonPath("$[0].flagged").value(true));
@@ -91,7 +91,7 @@ class VerticalsGenerationControllerTest {
         when(verticalsGenerationService.significantCategories("oven", 50, 50)).thenReturn(List.of(
                 new SignificantCategoryDto("FOUR", 42.5, 110L, 12L)));
 
-        mockMvc.perform(get("/oven/datasources/stats/significant"))
+        mockMvc.perform(get("/verticals/oven/datasources/stats/significant"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].category").value("FOUR"))
                 .andExpect(jsonPath("$[0].score").value(42.5));
@@ -101,7 +101,7 @@ class VerticalsGenerationControllerTest {
     void statsEndpointReturns404WhenVerticalDoesNotExist() throws Exception {
         when(verticalsConfigService.getConfigById("missing")).thenReturn(null);
 
-        mockMvc.perform(get("/missing/datasources/stats/coverage"))
+        mockMvc.perform(get("/verticals/missing/datasources/stats/coverage"))
                 .andExpect(status().isNotFound());
     }
 

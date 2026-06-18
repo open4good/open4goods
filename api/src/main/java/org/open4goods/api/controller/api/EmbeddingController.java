@@ -11,11 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotBlank;
 
-
-
 /**
- * Controller exposing text embedding generation for internal services
- * (e.g., front-api proxying).
+ * Endpoint for generating semantic text embeddings, used by {@code front-api} for search.
  */
 @RestController
 @ConditionalOnBean(TextEmbeddingService.class)
@@ -28,12 +25,8 @@ public class EmbeddingController {
         this.textEmbeddingService = textEmbeddingService;
     }
 
-    /**
-     * Generate embedding for a single text.
-     */
-    @GetMapping(path = "/product/embedding")
+    @GetMapping(path = "/embedding")
     @Operation(summary = "Generate a semantic embedding for a given text")
-    @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
     public float[] getEmbedding(@RequestParam @NotBlank final String text) {
         return textEmbeddingService.embed(text);
     }

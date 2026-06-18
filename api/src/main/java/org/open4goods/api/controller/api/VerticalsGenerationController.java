@@ -56,7 +56,7 @@ public class VerticalsGenerationController {
     // Legacy read-only fragments (YAML strings)
     // -----------------------------------------------------------------------
 
-    @GetMapping(path = "/{vertical}/attributes/")
+    @GetMapping(path = "/verticals/{vertical}/attributes")
     @Operation(summary = "Attribute coverage stats for a vertical (JSON)")
     @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
     public VerticalAttributesStats generateAttributesCoverage(@PathVariable String vertical)
@@ -64,7 +64,7 @@ public class VerticalsGenerationController {
         return verticalsGenService.attributesStats(vertical);
     }
 
-    @GetMapping(path = "/{vertical}/categories/")
+    @GetMapping(path = "/verticals/{vertical}/categories")
     @Operation(summary = "Suggested matchingCategories YAML fragment for a vertical")
     @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
     public String generateCategoryMappingsFragment(@PathVariable String vertical,
@@ -74,7 +74,7 @@ public class VerticalsGenerationController {
         return verticalsGenService.generateMapping(vc, minOffersCount);
     }
 
-    @GetMapping(path = "/{vertical}/ecoscore/")
+    @GetMapping(path = "/verticals/{vertical}/ecoscore")
     @Operation(
         summary = "Run the ecoscore LLM prompt and return YAML content for impactscores/{vertical}.yml",
         description = "Cached for 1h per vertical. Pass force=true to evict the entry and re-run the LLM "
@@ -83,12 +83,12 @@ public class VerticalsGenerationController {
     @Caching(
         cacheable = @Cacheable(
             cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME,
-            key = "'ecoscore:' + #vertical",
+            key = "'ecoscore-' + #vertical",
             condition = "!#force"
         ),
         evict = @CacheEvict(
             cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME,
-            key = "'ecoscore:' + #vertical",
+            key = "'ecoscore-' + #vertical",
             condition = "#force",
             beforeInvocation = true
         )
@@ -100,7 +100,7 @@ public class VerticalsGenerationController {
         return verticalsGenService.generateEcoscoreYamlConfig(vc);
     }
 
-    @GetMapping(path = "/{vertical}/impactscore-criterias/")
+    @GetMapping(path = "/verticals/{vertical}/impactscore-criterias")
     @Operation(summary = "Available impact-score criterias YAML fragment for a vertical")
     @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
     public String generateImpactScoreCriterias(@PathVariable String vertical,
@@ -110,7 +110,7 @@ public class VerticalsGenerationController {
         return verticalsGenService.generateAvailableImpactScoreCriteriasFragment(vc, minCoveragePercent);
     }
 
-    @GetMapping(path = "/{vertical}/nudgetool/compute")
+    @GetMapping(path = "/verticals/{vertical}/nudgetool/compute")
     @Operation(summary = "Compute nudge tool score thresholds and impact subsets without writing to disk")
     public VerticalConfig computeNudgeTool(@PathVariable String vertical)
             throws ResourceNotFoundException, IOException {
@@ -137,7 +137,7 @@ public class VerticalsGenerationController {
         return verticalsGenService.suggestCategories(vc, minOffersCount);
     }
 
-    @GetMapping(path = "/{vertical}/datasources/stats/coverage")
+    @GetMapping(path = "/verticals/{vertical}/datasources/stats/coverage")
     @Operation(summary = "Per-datasource category coverage for a vertical")
     public List<DatasourceCoverageDto> datasourceCoverage(@PathVariable String vertical,
             @RequestParam(defaultValue = "50") int minVolume) {
@@ -148,7 +148,7 @@ public class VerticalsGenerationController {
         return verticalsGenService.datasourceCoverage(vc, minVolume);
     }
 
-    @GetMapping(path = "/{vertical}/datasources/stats/unmapped")
+    @GetMapping(path = "/verticals/{vertical}/datasources/stats/unmapped")
     @Operation(summary = "Unmapped datasourceCategories strings observed in a vertical")
     public List<UnmappedCategoryDto> unmappedCategories(@PathVariable String vertical,
             @RequestParam(defaultValue = "50") int minVolume,
@@ -160,7 +160,7 @@ public class VerticalsGenerationController {
         return verticalsGenService.unmappedCategories(vc, minVolume, limit);
     }
 
-    @GetMapping(path = "/{vertical}/datasources/stats/leakage")
+    @GetMapping(path = "/verticals/{vertical}/datasources/stats/leakage")
     @Operation(summary = "Cross-vertical datasourceCategories leakage warnings")
     public List<LeakageWarningDto> categoryLeakage(@PathVariable String vertical,
             @RequestParam(defaultValue = "50") int minVolume,
@@ -172,7 +172,7 @@ public class VerticalsGenerationController {
         return verticalsGenService.categoryLeakage(vertical, minVolume, leakageThreshold);
     }
 
-    @GetMapping(path = "/{vertical}/datasources/stats/significant")
+    @GetMapping(path = "/verticals/{vertical}/datasources/stats/significant")
     @Operation(summary = "Significant datasourceCategories values for a vertical")
     public List<SignificantCategoryDto> significantCategories(@PathVariable String vertical,
             @RequestParam(defaultValue = "50") int minVolume,

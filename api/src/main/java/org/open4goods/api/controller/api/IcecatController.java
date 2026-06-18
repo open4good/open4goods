@@ -3,7 +3,6 @@ package org.open4goods.api.controller.api;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -127,7 +126,7 @@ public class IcecatController {
 					.ifPresent(candidate -> candidates.put(candidate.id(), candidate));
 		}
 
-		for (String term : verticalSearchTerms(vc)) {
+		for (String term : VerticalSearchTerms.of(vc)) {
 			icecatIndexService.searchCategories(term, PageRequest.of(0, Math.max(1, size))).forEach(category -> {
 				candidates.putIfAbsent(category.getId(), toCandidate(category, "search:" + term));
 			});
@@ -203,28 +202,6 @@ public class IcecatController {
 				source);
 	}
 
-	private Set<String> verticalSearchTerms(VerticalConfig vc) {
-		Set<String> terms = new LinkedHashSet<>();
-		addTerm(terms, vc.getId());
-		if (vc.getId() != null) {
-			addTerm(terms, vc.getId().replace('-', ' ').replace('_', ' '));
-		}
-		vc.getI18n().values().forEach(i18n -> {
-			addTerm(terms, i18n.getCardName());
-			addTerm(terms, i18n.getDisplayName());
-			addTerm(terms, i18n.getPageTitle());
-			addTerm(terms, i18n.getSeoName());
-			addTerm(terms, i18n.getVerticalHomeTitle());
-			addTerm(terms, i18n.getVerticalMetaTitle());
-		});
-		return terms;
-	}
-
-	private void addTerm(Set<String> terms, String term) {
-		if (term != null && !term.isBlank()) {
-			terms.add(term.trim());
-		}
-	}
 
 	private IcecatCategoryAttributesDto toCategoryAttributes(IcecatCategoryDocument category) {
 		Map<Integer, IcecatFeatureDocument> featureDocuments = icecatIndexService.findCategoryFeatureDocuments(category);
