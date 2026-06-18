@@ -27,10 +27,19 @@
 
     <v-container class="py-10">
       <v-row>
-        <v-col v-for="proof in proofItems" :key="proof.title" cols="12" md="3">
+        <v-col v-for="proof in proofItems" :key="proof.icon" cols="12" md="3">
           <B2bKpiCard :label="proof.title" :value="proof.value" :caption="proof.caption" :icon="proof.icon" />
         </v-col>
       </v-row>
+    </v-container>
+
+    <v-container class="py-8">
+      <B2bServiceCarousel :services="carouselServices" :title="t('home.services.title')" />
+      <div class="d-flex justify-end mt-4">
+        <v-btn variant="text" to="/solutions" append-icon="mdi-arrow-right">
+          {{ t('landing.nav.allSolutions') }}
+        </v-btn>
+      </div>
     </v-container>
 
     <v-container class="py-8">
@@ -57,6 +66,8 @@ import B2bCodeBlock from '~/components/B2bCodeBlock.vue'
 import B2bKpiCard from '~/components/B2bKpiCard.vue'
 import B2bOrbitalDataVisual from '~/components/B2bOrbitalDataVisual.vue'
 import B2bPageHeader from '~/components/B2bPageHeader.vue'
+import B2bServiceCarousel from '~/components/B2bServiceCarousel.vue'
+import { featuredServices } from '~/domains/b2b/services'
 
 const { t, tm } = useI18n()
 
@@ -65,16 +76,39 @@ useLocalizedPageSeo({
   descriptionKey: 'home.seo.description'
 })
 
+const { indexedProductsFormatted } = useCatalogStats()
+const serviceCount = featuredServices().length
+
 const proofItems = computed(() => [
-  { title: t('home.proof.fresh.title'), value: t('home.proof.fresh.value'), caption: t('home.proof.fresh.caption'), icon: 'mdi-clock-check-outline' },
-  { title: t('home.proof.nodata.title'), value: t('home.proof.nodata.value'), caption: t('home.proof.nodata.caption'), icon: 'mdi-credit-card-off-outline' },
-  { title: t('home.proof.gtin.title'), value: t('home.proof.gtin.value'), caption: t('home.proof.gtin.caption'), icon: 'mdi-barcode-scan' },
-  { title: t('home.proof.provenance.title'), value: t('home.proof.provenance.value'), caption: t('home.proof.provenance.caption'), icon: 'mdi-storefront-outline' }
+  {
+    title: t('home.proof.data.title'),
+    value: indexedProductsFormatted.value,
+    caption: t('home.proof.data.caption'),
+    icon: 'mdi-database-outline'
+  },
+  {
+    title: t('home.proof.price.title'),
+    value: t('home.proof.price.value'),
+    caption: t('home.proof.price.caption'),
+    icon: 'mdi-currency-eur'
+  },
+  {
+    title: t('home.proof.services.title'),
+    value: String(serviceCount),
+    caption: t('home.proof.services.caption'),
+    icon: 'mdi-puzzle-outline'
+  },
+  {
+    title: t('home.proof.nodata.title'),
+    value: t('home.proof.nodata.value'),
+    caption: t('home.proof.nodata.caption'),
+    icon: 'mdi-credit-card-off-outline'
+  }
 ])
 
+const carouselServices = featuredServices()
 const billingRules = computed(() => tm('home.billing.rules') as string[])
 
 const curlExample = `curl -H "Authorization: Bearer pdapi_..." \\
   "https://api.product-data-api.com/api/v1/products/0885909950805/price?language=en"`
 </script>
-

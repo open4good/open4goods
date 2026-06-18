@@ -1,3 +1,5 @@
+import { featuredServices } from '~/domains/b2b/services'
+
 /**
  * Provides top navigation links and outbound destinations used by landing pages.
  */
@@ -19,7 +21,22 @@ export interface LandingNavAction {
 }
 
 export function useLandingNav() {
+  const solutionsChildren: LandingNavLink[] = [
+    ...featuredServices().map(s => ({
+      key: `services.${s.slug}.name`,
+      to: `/solutions/${s.slug}`
+    })),
+    { key: 'landing.nav.allSolutions', to: '/solutions' }
+  ]
+
   const items: LandingNavLink[] = [
+    {
+      key: 'landing.nav.solutions',
+      to: '/solutions',
+      activePrefix: '/solutions',
+      parentClickable: true,
+      children: solutionsChildren
+    },
     { key: 'landing.nav.pricing', to: '/pricing' },
     { key: 'landing.nav.docs', to: '/docs', activePrefix: '/docs' },
     { key: 'landing.nav.faq', to: '/faq' },

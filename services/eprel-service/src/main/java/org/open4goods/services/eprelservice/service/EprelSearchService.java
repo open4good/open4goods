@@ -40,7 +40,9 @@ public class EprelSearchService
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(EprelSearchService.class);
 
-    private static final int MIN_PREFIX_LENGTH = 5;
+    // Aligned with EprelCompletionService.MIN_COMPACT_MODEL_CONTAINMENT_LENGTH to avoid
+    // sending broad prefix queries whose results would always score 0 and be rejected.
+    private static final int MIN_PREFIX_LENGTH = 7;
 
     /** Minimum number of alphanumeric characters required for a contains/wildcard search. */
     private static final int MIN_CONTAINS_ALNUM_LENGTH = 5;
@@ -555,7 +557,7 @@ public class EprelSearchService
                 return b;
             }));
         }
-        NativeQuery nativeQuery = NativeQuery.builder().withQuery(finalQuery).build();
+        NativeQuery nativeQuery = NativeQuery.builder().withQuery(finalQuery).withMaxResults(properties.getMaxSearchResults()).build();
         SearchHits<EprelProduct> hits = elasticsearchOperations.search(nativeQuery, EprelProduct.class);
         return hits.stream().map(SearchHit::getContent).toList();
     }

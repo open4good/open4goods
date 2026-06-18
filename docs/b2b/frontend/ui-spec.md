@@ -158,7 +158,9 @@ b2b-frontend/
 
 | Route | Purpose | Required content |
 |---|---|---|
-| `/` | Product Data API landing page | Value proposition, no-data-no-pay, sample response, pricing CTA, docs CTA |
+| `/` | Product Data API landing page | Live indexed-product count, data services carousel, no-data-no-pay, sample response, pricing CTA, docs CTA |
+| `/solutions` | Data services catalog | Sectioned grid of all 13 services (product + utility), Live / Coming-soon badges |
+| `/solutions/[slug]` | Per-service presentation page | Hero with name, credits, status; feature description; docs + playground CTAs for live; notify/contact for coming-soon |
 | `/pricing` | Self-serve pricing | YAML-backed credit packs and subscriptions from backend catalog |
 | `/docs` | Documentation home | Product overview, navigation, search, quickstarts |
 | `/docs/getting-started` | First integration path | Signup, key creation, first curl call, expected response |
@@ -227,20 +229,22 @@ or page concepts are missing or under-specified.
 
 ### 7.1 Home page
 
-The homepage must sell the API contract and lead developers into docs or signup.
+The homepage leads with data scale + breadth, then funnels to trial and docs.
+
+**Terminology note**: The product layer calls these offerings "Data services" (consumer term used in the UI and navigation). The API contract uses "facet" (`meta.facet`) — do not rename it in backend code or API responses.
 
 Required sections:
 
-1. Hero: Product Data API headline, short value proposition, primary CTA to
-   create account, secondary CTA to docs, light orbital GTIN-to-price visual.
-2. Proof strip: fresh price data, no-data-no-pay, GTIN-first, provenance.
-3. API preview: copyable curl request and abbreviated JSON response envelope.
-4. How billing works: invalid GTIN, missing product, empty/stale price data are
-   not billed; fresh price data consumes credits.
-5. Facet roadmap preview: price in v1, identity/attributes/impact/energy/review
-   as future capabilities without implying v1 availability.
-6. Pricing teaser: backend catalog values, not hardcoded.
-7. Documentation CTA: quickstart and playground links.
+1. Hero: Product Data API headline anchored on scale (huge data + low price + rich features), primary CTA to create account, secondary CTA to docs, light orbital visual.
+2. Proof strip (4 KPI cards):
+   - **Indexed products**: live count from `GET /api/v1/catalog/stats` (cached, served SSR; fallback to 83M+).
+   - **Entry price**: "from €0.002" / call (from catalog).
+   - **Data services**: count of available services (computed from `featuredServices()`).
+   - **No-data-no-pay**: the key billing trust signal.
+3. Data services carousel: `B2bServiceCarousel` of featured services, linked to `/solutions`.
+4. API preview: copyable curl request and abbreviated JSON response envelope.
+5. How billing works: invalid GTIN, missing product, empty/stale data are not billed.
+6. Documentation CTA: quickstart and playground links.
 
 The first viewport must show the product name and at least a hint of the next
 section on desktop and mobile.
@@ -405,6 +409,8 @@ Build reusable components before page-specific copies.
 | `B2bBillingCatalog` | Packs and subscriptions from backend catalog |
 | `B2bPlaygroundShell` | Request/response playground layout |
 | `B2bOrbitalDataVisual` | Light orbital public-page visual |
+| `B2bServiceCard` | Data service card: icon, name, short description, credits, Live/Coming-soon badge, CTA |
+| `B2bServiceCarousel` | Horizontal swipeable row of `B2bServiceCard` items; props: `services`, optional `title` |
 
 ## 9. Data and state requirements
 

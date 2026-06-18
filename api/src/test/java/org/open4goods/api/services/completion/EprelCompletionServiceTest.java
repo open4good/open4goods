@@ -44,6 +44,7 @@ class EprelCompletionServiceTest {
 
         when(apiProperties.logsFolder()).thenReturn("/tmp/logs");
         when(apiProperties.aggLogLevel()).thenReturn(Level.INFO);
+        when(apiProperties.getEprelRefreshDays()).thenReturn(1);
         when(aggregationFacadeService.getStandardAggregator("eprel-aggregation")).thenReturn(aggregator);
 
         service = new EprelCompletionService(verticalConfigService, productRepository, apiProperties,
@@ -193,6 +194,27 @@ class EprelCompletionServiceTest {
 
         assertThat(product.getEprelDatas()).isEqualTo(newerDisplay);
         assertThat(product.getExternalIds().getEprel()).isEqualTo("new");
+    }
+
+    @Test
+    void shouldProcessReturnsTrueWhenNeverProcessed()
+    {
+        assertThat(service.shouldProcess(vertical, product)).isTrue();
+    }
+
+    @Test
+    void shouldProcessReturnsFalseWhenCompletedWithinRefreshWindow()
+    {
+        product.getDatasourceCodes().put(EprelCompletionService.EPREL_DS_NAME, System.currentTimeMillis());
+        assertThat(service.shouldProcess(vertical, product)).isFalse();
+    }
+
+    @Test
+    void shouldProcessReturnsTrueWhenCompletionIsStale()
+    {
+        long twoDaysAgo = System.currentTimeMillis() - 2L * 24 * 3600 * 1000;
+        product.getDatasourceCodes().put(EprelCompletionService.EPREL_DS_NAME, twoDaysAgo);
+        assertThat(service.shouldProcess(vertical, product)).isTrue();
     }
 
     @Test

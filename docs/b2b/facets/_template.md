@@ -118,12 +118,27 @@ Java and Python snippets (or links to the quickstart pages once written).
 Sample-mode fixture (GTIN + canned response) and live-mode expectations
 (metering display, facet-specific empty states).
 
-## 10. Launch checklist
+## 10. Frontend service presentation
+
+This facet is registered in `b2b-frontend/domains/b2b/services.ts` as a
+`ServiceDescriptor`. The `/solutions/<slug>` page is **auto-generated** from
+that descriptor — no per-facet Vue file is needed.
+
+Required additions per the authoring-prompt State 4:
+
+- `ServiceDescriptor` entry in `SERVICES` array with `status: 'coming-soon'` until shipped.
+- `featured: true` for premium/differentiated facets (impact, energy, review, price-history, attributes).
+- `services.<slug>.name`, `services.<slug>.short`, `services.<slug>.description` keys in both `i18n/locales/en.json` and `fr.json`.
+- When shipped: set `status: 'live'`, `docSlug: 'products/<facet-path>'`, `playgroundPath`.
+
+## 11. Launch checklist
 
 - [ ] Coverage measured and recorded above (section 2), thresholds met
 - [ ] Catalog entry + credits reviewed against tiers
 - [ ] Backend endpoint + tests (incl. no-data-no-pay matrix) green
 - [ ] OpenAPI annotations complete; frontend client regenerated
+- [ ] `ServiceDescriptor` registered in `domains/b2b/services.ts` (coming-soon → live on ship)
+- [ ] i18n keys `services.<slug>.*` added in en + fr
 - [ ] Docs pages en + fr published (no placeholder French)
 - [ ] Playground supports the facet (sample + live)
 - [ ] SEO plan executed (metadata, hreflang, sitemap, structured data, internal links)

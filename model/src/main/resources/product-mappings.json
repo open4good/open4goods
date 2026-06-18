@@ -417,6 +417,21 @@
                 "upcType": {
                     "type": "keyword",
                     "index": true
+                },
+                "gs1Prefix": {
+                    "type": "keyword"
+                },
+                "gs1Class": {
+                    "type": "keyword"
+                },
+                "packagingIndicator": {
+                    "type": "integer"
+                },
+                "isbnRegistrationGroup": {
+                    "type": "keyword"
+                },
+                "normalizedGtin14": {
+                    "type": "keyword"
                 }
             }
         }

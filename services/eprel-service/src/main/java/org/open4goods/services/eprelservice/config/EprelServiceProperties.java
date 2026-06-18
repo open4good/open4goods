@@ -51,6 +51,13 @@ public class EprelServiceProperties
     private int minAlnumLength = 3;
 
     /**
+     * Maximum number of results returned per Elasticsearch query. Guards against silent
+     * truncation at the ES default of 10; increase cautiously on large indices.
+     */
+    @Min(1)
+    private int maxSearchResults = 100;
+
+    /**
      * List of EPREL product groups/categories to index. Empty means all.
      */
     private List<String> groupsToIndex = List.of();
@@ -113,6 +120,16 @@ public class EprelServiceProperties
     public void setMinAlnumLength(int minAlnumLength)
     {
         this.minAlnumLength = minAlnumLength;
+    }
+
+    public int getMaxSearchResults()
+    {
+        return maxSearchResults;
+    }
+
+    public void setMaxSearchResults(int maxSearchResults)
+    {
+        this.maxSearchResults = maxSearchResults;
     }
 
     public List<String> getGroupsToIndex()

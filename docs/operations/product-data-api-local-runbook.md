@@ -16,8 +16,8 @@
 ## 1. Backing services (Docker)
 
 ```bash
-docker run -d --name pdapi-postgres -e POSTGRES_DB=b2b -e POSTGRES_USER=b2b \
-  -e POSTGRES_PASSWORD=b2b -p 5432:5432 postgres:16
+docker run -d --name pdapi-postgres -e POSTGRES_DB=product_data_api -e POSTGRES_USER=product_data_api \
+  -e POSTGRES_PASSWORD=product_data_api -p 5432:5432 postgres:16
 docker run -d --name pdapi-redis -p 6379:6379 redis:7
 ```
 

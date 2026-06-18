@@ -23,6 +23,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.validation.annotation.Validated;
 
 import ch.qos.logback.classic.Level;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
 @Configuration
@@ -277,6 +278,13 @@ public class ApiProperties {
 	 */
 	private int completionConcurrency = 10;
 
+	/**
+	 * Number of days before an EPREL-completed product is re-processed.
+	 * A product completed within this window is skipped to avoid redundant searches.
+	 */
+	@Min(1)
+	private int eprelRefreshDays = 1;
+
 	public List<Integer> getAllowedImagesSizeSuffixes() {
 		return allowedImagesSizeSuffixes;
 	}
@@ -299,6 +307,14 @@ public class ApiProperties {
 
 	public void setCompletionConcurrency(int completionConcurrency) {
 		this.completionConcurrency = completionConcurrency;
+	}
+
+	public int getEprelRefreshDays() {
+		return eprelRefreshDays;
+	}
+
+	public void setEprelRefreshDays(int eprelRefreshDays) {
+		this.eprelRefreshDays = eprelRefreshDays;
 	}
 
 	public Integer getAggregatedDataElasticBuffer() {

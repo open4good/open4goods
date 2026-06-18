@@ -70,6 +70,19 @@
             "request": "attach",
             "hostName": "localhost",
             "port": 5007
+        },
+        {
+            "type": "java",
+            "name": "B2B API (devsec)",
+            "request": "launch",
+            "mainClass": "org.open4goods.b2bapi.B2bApiApplication",
+            "projectName": "b2b-api",
+            "args": "--spring.profiles.active=devsec",
+            "env": {
+                "B2B_POSTGRES_URL": "jdbc:postgresql://localhost:5433/product_data_api",
+                "B2B_POSTGRES_USER": "product_data_api",
+                "B2B_POSTGRES_PASSWORD": "product_data_api"
+            }
         }
     ]
 }

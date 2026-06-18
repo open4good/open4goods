@@ -66,6 +66,12 @@ Once the positioning is approved, verify the viability and quality of our data. 
 ### State 4: Registry Update & Finalization
 
 1. **Update Product Catalog**: Write the catalog entry in `b2b-catalog.yml` and synchronize [`facet-catalog.md`](../product/facet-catalog.md) if measured coverage or credits deviate from initial plans.
-2. **Initialize Task Checklist**: Add a `FACET-<id>` run section to [`implementation/tasks.md`](../implementation/tasks.md) referencing the launch checklist.
-3. **Verify Formatting & Linting**: Run `./scripts/lint.sh` to ensure all generated Markdown conforms to repository styles and punctuation formatting.
-4. **Handoff**: Provide a concise summary of the final spec, including key statistics, and highlight any unresolved questions from [`00-canonical-decisions.md`](../00-canonical-decisions.md) that require human resolution.
+2. **Register the Service Descriptor** in `b2b-frontend/domains/b2b/services.ts`:
+   - Add a `ServiceDescriptor` entry to the `SERVICES` array with `status: 'coming-soon'` until the facet ships.
+   - Set `featured: true` for premium/differentiated facets (impact, energy, review, price-history, attributes).
+   - Add `services.<slug>.{name,short,description}` i18n keys to both `b2b-frontend/i18n/locales/en.json` and `fr.json` under the `services` namespace.
+   - When the facet **ships**: change `status` to `'live'`, set `docSlug` (e.g. `'products/<facet-id>'`) and `playgroundPath` (e.g. `'/docs/products/<facet-id>/playground'`).
+   - The `/solutions/<slug>` page is **auto-generated** from the descriptor - no per-facet page file is needed.
+3. **Initialize Task Checklist**: Add a `FACET-<id>` run section to [`implementation/tasks.md`](../implementation/tasks.md) referencing the launch checklist.
+4. **Verify Formatting & Linting**: Run `./scripts/lint.sh` to ensure all generated Markdown conforms to repository styles and punctuation formatting. Also run `pnpm --dir b2b-frontend lint` and `pnpm --dir b2b-frontend test` to confirm the new ServiceDescriptor is valid.
+5. **Handoff**: Provide a concise summary of the final spec, including key statistics, and highlight any unresolved questions from [`00-canonical-decisions.md`](../00-canonical-decisions.md) that require human resolution.

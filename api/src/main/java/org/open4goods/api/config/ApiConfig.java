@@ -391,10 +391,10 @@ public class ApiConfig {
 
 	@Bean
 	AggregationFacadeService realtimeAggregationService(@Autowired EvaluationService evaluationService, StandardiserService standardiserService, AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository, ApiProperties apiProperties,
-			@Autowired Gs1PrefixService gs1prefixService, DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, BarcodeValidationService barcodeValidationService, BrandService brandservice, GoogleTaxonomyService gts, BlablaService blablaService,
+			@Autowired Gs1PrefixService gs1prefixService, DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, BarcodeValidationService barcodeValidationService, BrandService brandservice, BlablaService blablaService,
 			IcecatService icecatFeatureService, IcecatFeatureResolver icecatFeatureResolver, SerialisationService serialisationService, ObjectProvider<TextEmbeddingService> embeddingServiceProvider,
 			ObjectProvider<DjlEmbeddingProperties> embeddingPropertiesProvider, BarcodeForensicsService barcodeForensicsService) {
-		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService, barcodeValidationService, brandservice, gts, blablaService, icecatFeatureService,
+		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService, barcodeValidationService, brandservice, blablaService, icecatFeatureService,
 				icecatFeatureResolver, serialisationService, embeddingServiceProvider.getIfAvailable(), embeddingPropertiesProvider.getIfAvailable(), barcodeForensicsService);
 	}
 

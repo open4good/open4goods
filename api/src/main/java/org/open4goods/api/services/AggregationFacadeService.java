@@ -42,7 +42,6 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.serialisation.service.SerialisationService;
-import org.open4goods.verticals.GoogleTaxonomyService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +85,6 @@ public class AggregationFacadeService {
 	private final BarcodeValidationService barcodeValidationService;
 	private final BarcodeForensicsService barcodeForensicsService;
 	private final BrandService brandService;
-	private final GoogleTaxonomyService taxonomyService;
 	private final BlablaService blablaService;
 	private final IcecatService icecatFeatureService;
 	private final IcecatFeatureResolver icecatFeatureResolver;
@@ -107,7 +105,6 @@ public class AggregationFacadeService {
 			final VerticalsConfigService configService,
 			final BarcodeValidationService barcodeValidationService,
 			final BrandService brandService,
-			final GoogleTaxonomyService taxonomyService,
 			final BlablaService blablaService,
 			final IcecatService icecatFeatureService,
 			final IcecatFeatureResolver icecatFeatureResolver,
@@ -125,7 +122,6 @@ public class AggregationFacadeService {
 		this.verticalConfigService = configService;
 		this.brandService = brandService;
 		this.barcodeValidationService = barcodeValidationService;
-		this.taxonomyService = taxonomyService;
 		this.blablaService = blablaService;
 		this.icecatFeatureService = icecatFeatureService;
 		this.icecatFeatureResolver = icecatFeatureResolver;
@@ -330,7 +326,7 @@ public class AggregationFacadeService {
 
 		final List<AbstractAggregationService> services = new ArrayList<>();
 		services.add(new IdentityAggregationService(aggLogger, gs1prefixService, barcodeValidationService, barcodeForensicsService));
-		services.add(new TaxonomyRealTimeAggregationService(aggLogger, verticalConfigService, taxonomyService));
+		services.add(new TaxonomyRealTimeAggregationService(aggLogger, verticalConfigService));
 		services.add(new AttributeRealtimeAggregationService(verticalConfigService, brandService, aggLogger, icecatFeatureResolver));
 		services.add(new UsageCostAggregationService(aggLogger));
 		services.add(new NamesAggregationService(aggLogger, verticalConfigService, blablaService,
@@ -356,7 +352,7 @@ public class AggregationFacadeService {
 
 		final List<AbstractAggregationService> services = new ArrayList<>();
 		services.add(new IdentityAggregationService(aggLogger, gs1prefixService, barcodeValidationService, barcodeForensicsService));
-		services.add(new TaxonomyRealTimeAggregationService(aggLogger, verticalConfigService, taxonomyService));
+		services.add(new TaxonomyRealTimeAggregationService(aggLogger, verticalConfigService));
 
 		final StandardAggregator ret = new StandardAggregator(services, verticalConfigService);
 		autowireBeanFactory.autowireBean(ret);

@@ -4,49 +4,50 @@
   },
   "home": {
     "seo": {
-      "title": "Product Data API - Fresh GTIN-first product price data",
-      "description": "Developer-ready product price data by GTIN with freshness metadata, provenance, and no-data-no-pay billing."
+      "title": "Product Data API - 83M+ products, from €0.002/call",
+      "description": "Rich product data by GTIN: price, attributes, energy labels, AI reviews, and more. No-data-no-pay billing. 11 data services."
     },
     "hero": {
-      "eyebrow": "GTIN-first price API",
-      "title": "Fresh product price data, metered only when usable data is returned.",
-      "subtitle": "Query a product by GTIN and receive sanitized offers, best prices, freshness metadata, provenance labels, and credit metering in one REST response.",
+      "eyebrow": "Product data at scale",
+      "title": "83M+ products. 11 data services. Pay only for usable data.",
+      "subtitle": "Query any product by GTIN and get price, attributes, energy labels, AI-sourced reviews, and impact scores in one metered REST call.",
       "docsCta": "Start with docs"
     },
     "proof": {
-      "fresh": {
-        "title": "Freshness",
-        "value": "30 days",
-        "caption": "Fresh offer window for billable price data."
+      "data": {
+        "title": "Indexed products",
+        "caption": "Live ES index. Updated continuously."
+      },
+      "price": {
+        "title": "Entry price",
+        "value": "from €0.002",
+        "caption": "Per successful API call. No minimum spend."
+      },
+      "services": {
+        "title": "Data services",
+        "caption": "Product + utility services available."
       },
       "nodata": {
         "title": "Billing",
         "value": "No data, no pay",
-        "caption": "Invalid GTINs, missing products, and stale offers cost zero credits."
-      },
-      "gtin": {
-        "title": "Lookup",
-        "value": "GTIN-first",
-        "caption": "Strict checksum validation before any credit reservation."
-      },
-      "provenance": {
-        "title": "Offers",
-        "value": "Provenance",
-        "caption": "Merchant labels without internal datasource leakage."
+        "caption": "Empty results, missing products, and invalid GTINs cost zero credits."
       }
     },
+    "services": {
+      "title": "Explore data services"
+    },
     "api": {
-      "title": "One call to the price facet",
+      "title": "One call to the price service",
       "subtitle": "The response envelope includes data and metering metadata for clients that need deterministic billing behavior."
     },
     "billing": {
       "title": "Billing rules",
-      "subtitle": "Credits are consumed only when the product price facet returns usable fresh data.",
+      "subtitle": "Credits are consumed only when the requested data service returns usable fresh data.",
       "rules": [
         "Invalid GTIN: 400 response, zero credits.",
         "Product not found: 404 response, zero credits.",
-        "Empty or stale price data: 200 response, zero credits.",
-        "Fresh offer data: 200 response, billable credit debit."
+        "Empty or stale data: 200 response, zero credits.",
+        "Fresh usable data: 200 response, billable credit debit."
       ]
     }
   },
@@ -456,7 +457,9 @@
       "docs": "Documentation",
       "pricing": "Pricing",
       "contact": "Contact",
-      "createAccount": "Create account"
+      "createAccount": "Create account",
+      "solutions": "Solutions",
+      "allSolutions": "See all solutions"
     },
     "hero": {
       "badge": "Private beta · EU Grid",
@@ -872,6 +875,116 @@
       "signature": "PRODUCT DATA API © 2026",
       "variants": "v0 · v1 dark · v2 soft · v3 editorial",
       "docs": "Documentation"
+    }
+  },
+  "services": {
+    "badge": {
+      "live": "Live",
+      "comingSoon": "Coming soon",
+      "credits": "credits",
+      "free": "Free"
+    },
+    "cta": {
+      "learn": "Learn more",
+      "playground": "Try it",
+      "preview": "Preview"
+    },
+    "price": {
+      "name": "Price",
+      "short": "Live best price, offers, and freshness metadata per GTIN.",
+      "description": "Returns sanitized offers, best price, merchant provenance labels, freshness window, and offer count for any GTIN. Billed only when fresh offers exist - no-data-no-pay."
+    },
+    "identity": {
+      "name": "Identity",
+      "short": "Core product identity: names, brand, model, GTINs.",
+      "description": "Returns canonical product identity fields - brand, model, EAN/UPC/GTIN variants, product names, and basic classification. Ideal for matching and deduplication pipelines."
+    },
+    "attributes": {
+      "name": "Attributes",
+      "short": "Full technical specification sheet mapped from Icecat.",
+      "description": "Returns the complete mapped attribute set from Icecat and other sources - CPU, RAM, dimensions, connectivity, material, and hundreds of category-specific fields. 34M products covered."
+    },
+    "images": {
+      "name": "Images",
+      "short": "Product images with resolution and type metadata.",
+      "description": "Returns a ranked list of product images with URL, dimensions, format, and source type. Covers packshot, lifestyle, and detail images when available."
+    },
+    "documents": {
+      "name": "Documents",
+      "short": "Product datasheets and manuals (PDFs).",
+      "description": "Returns links to product PDFs - datasheets, user manuals, quick-start guides - with language and document-type metadata."
+    },
+    "price-history": {
+      "name": "Price history",
+      "short": "Time series of price observations for trend analysis.",
+      "description": "Returns a chronological series of price observations, enabling trend analysis, price drop detection, and historical benchmarking. Persisted internally from the live price feed."
+    },
+    "impact": {
+      "name": "Impact",
+      "short": "Exclusive eco-impact scores: ECOSCORE, repairability, durability.",
+      "description": "Returns proprietary scores computed by nudger: ECOSCORE (A-E), repairability index (French law), durability score, brand sustainability rating, warranty, and intra-vertical ranking. No competitor has this data."
+    },
+    "energy": {
+      "name": "Energy",
+      "short": "EU energy label data from EPREL, including HDR/SDR for TVs.",
+      "description": "Returns the EU EPREL energy classification (A-G), raw EPREL dataset, and extended scores for TVs (HDR, SDR). Covers appliances, TVs, lighting, and more. ~47K products indexed."
+    },
+    "review": {
+      "name": "AI Review",
+      "short": "AI-sourced multi-level product review with pros, cons, and sources.",
+      "description": "Returns a multi-level AI-generated review (novice / intermediate / expert), pros and cons, ecological review, community synthesis, verifiable source references, obsolescence warning, and data quality metadata. Exclusive and sourced."
+    },
+    "taxonomy": {
+      "name": "Taxonomy",
+      "short": "Multi-taxonomy mapping: Google, Icecat, ETIM, Wikidata.",
+      "description": "Returns the product's category identifiers across Google Product Taxonomy, Icecat, ETIM, and Wikidata referentials - enabling cross-catalog alignment and enrichment pipelines."
+    },
+    "alternatives": {
+      "name": "Alternatives",
+      "short": "KNN-similar products ranked by eco-score and relevance.",
+      "description": "Returns a ranked list of semantically similar products using vector embedding and KNN search, filtered by eco-score and availability. Useful for recommendation engines and product comparison pages."
+    },
+    "barcode-render": {
+      "name": "Barcode render",
+      "short": "Generate barcode images from any GTIN.",
+      "description": "Renders a barcode image (EAN-13, UPC-A, QR, etc.) from a GTIN in multiple formats (PNG, SVG). Useful for label printing, packaging, and catalog tools."
+    },
+    "barcode-check": {
+      "name": "Barcode check",
+      "short": "Validate GTIN checksum and format instantly.",
+      "description": "Validates a GTIN string - checksum, length, and format (GTIN-8, -12, -13, -14). Returns validation result with error details. Free, no credits consumed."
+    }
+  },
+  "solutions": {
+    "index": {
+      "seo": {
+        "title": "Data services - Product Data API",
+        "description": "Browse all 13 product data services: price, attributes, energy labels, AI reviews, eco-impact scores, barcodes, and more."
+      },
+      "eyebrow": "Data services catalog",
+      "title": "All data services",
+      "subtitle": "13 metered services covering product price, identity, attributes, images, energy labels, AI reviews, eco-impact scores, taxonomy, and barcode utilities.",
+      "sectionProduct": "Product services",
+      "sectionUtility": "Utility services"
+    },
+    "slug": {
+      "backToAll": "All services",
+      "ctaDocs": "Documentation",
+      "ctaPlayground": "Try in playground",
+      "ctaNotify": "Get notified",
+      "ctaContact": "Contact us",
+      "details": "Service details",
+      "category": "Category",
+      "categoryValue": {
+        "product": "Product data",
+        "utility": "Utility"
+      },
+      "facetId": "Facet ID (API)",
+      "cost": "Credit cost",
+      "call": "call",
+      "otherServices": "More data services",
+      "notFound": "Service not found",
+      "notFoundSeo": "Service not found - Product Data API"
     }
   },
   "health": {

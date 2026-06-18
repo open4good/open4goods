@@ -42,7 +42,8 @@ public class WebSecurityConfig {
                                 "/api/v1/customer/billing/catalog",
                                 "/api/v1/billing/stripe/webhook",
                                 "/api/v1/barcodes/assets/**",
-                                "/api/v1/barcodes/check")
+                                "/api/v1/barcodes/check",
+                                "/api/v1/catalog/stats")
                         .permitAll()
                         .requestMatchers("/api/v1/admin/**").hasAuthority(RbacAuthority.PLATFORM_ADMIN)
                         .anyRequest().authenticated())

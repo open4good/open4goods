@@ -196,6 +196,37 @@ class EprelSearchServiceTest
         assertThat(filtered).isEqualTo(all);
     }
 
+    @Test
+    @DisplayName("execute should cap result size at maxSearchResults")
+    void executeShouldCapResultSize()
+    {
+        properties.setMaxSearchResults(42);
+        service.searchByGtin("123456");
+
+        ArgumentCaptor<NativeQuery> captor = ArgumentCaptor.forClass(NativeQuery.class);
+        org.mockito.Mockito.verify(elasticsearchOperations).search(captor.capture(), any(Class.class));
+        assertThat(captor.getValue().getMaxResults()).isEqualTo(42);
+    }
+
+    @Test
+    @DisplayName("best-match should not include prefix terms shorter than MIN_PREFIX_LENGTH (7)")
+    void bestMatchShouldNotProduceTermsShorterThanFloor()
+    {
+        // 10-char model; with MIN_PREFIX_LENGTH=7 the shortest term should be 7 chars
+        service.searchByModel("model12345");
+
+        ArgumentCaptor<NativeQuery> captor = ArgumentCaptor.forClass(NativeQuery.class);
+        // exact(0), spaceInsensitive(1), prefix(2), bestMatch(3), contains(4)
+        org.mockito.Mockito.verify(elasticsearchOperations, org.mockito.Mockito.times(5)).search(captor.capture(), any(Class.class));
+
+        Query boolQuery = captor.getAllValues().get(3).getQuery();
+        assertThat(boolQuery.isBool()).isTrue();
+        boolQuery.bool().should().forEach(term ->
+            assertThat(term.term().value().stringValue().length())
+                .as("best-match term length must be >= 7")
+                .isGreaterThanOrEqualTo(7));
+    }
+
     private Query capturedQuery()
     {
         ArgumentCaptor<NativeQuery> captor = ArgumentCaptor.forClass(NativeQuery.class);

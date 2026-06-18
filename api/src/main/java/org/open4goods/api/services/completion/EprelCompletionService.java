@@ -28,40 +28,52 @@ import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 
 /**
- * Complete products with Eprel Datas
+ * Enriches catalogue products with EPREL (EU energy label) data.
+ *
+ * <p>Search flow per product: {@link EprelSearchService#search} runs the tiered
+ * GTIN → model strategy; {@link #selectUniqueResult} then narrows candidates
+ * conservatively (GTIN → brand → model-label containment) to guard against false
+ * positives. A wrong EPREL match would corrupt energy-class and category attributes,
+ * so the selection deliberately rejects ambiguous results rather than guessing.
+ *
+ * <p>Re-processing is throttled via {@code getDatasourceCodes()} timestamps; the
+ * window is controlled by {@code api.eprelRefreshDays} (default 1 day).
+ *
+ * <p>Known debt: EPREL category attributes are applied without per-vertical
+ * filtering — see the inline TODO for details.
  */
 public class EprelCompletionService extends AbstractCompletionService {
 
 	public static final String EPREL_DS_NAME = "eprel";
-	// TODO : From conf, not every one days.
-	private static final int REFRESH_IN_DAYS = 1;
 	private static final int MIN_COMPACT_MODEL_CONTAINMENT_LENGTH = 7;
-	private EprelSearchService eprelSearchService;
 
-	private StandardAggregator aggregator;
+	private final EprelSearchService eprelSearchService;
+	private final ApiProperties apiProperties;
+	private final StandardAggregator aggregator;
 
 	public EprelCompletionService(VerticalsConfigService verticalConfigService, ProductRepository dataRepository, ApiProperties apiProperties, EprelSearchService eprelSearchService, AggregationFacadeService aggregationFacade) {
 
-		// TODO(p3,conf) : Should set a specific log level here (not "agg(regation)"
-		// one)
+		// TODO(p3,conf) : Should set a specific log level here (not "agg(regation)" one)
 		super(dataRepository, verticalConfigService, apiProperties.logsFolder(), apiProperties.aggLogLevel());
 
+		this.apiProperties = apiProperties;
 		this.eprelSearchService = eprelSearchService;
-
 		this.aggregator = aggregationFacade.getStandardAggregator("eprel-aggregation");
-		;
 		this.aggregator.beforeStart();
 	}
 
+	/**
+	 * Returns {@code false} when the product was completed within the configured refresh
+	 * window ({@code api.eprelRefreshDays}), {@code true} otherwise (or when never processed).
+	 */
 	@Override
 	public boolean shouldProcess(VerticalConfig vertical, Product data) {
 		Long lastProcessed = data.getDatasourceCodes().get(getDatasourceName());
-		if (null != lastProcessed && REFRESH_IN_DAYS * 1000 * 3600 * 24 < System.currentTimeMillis() - lastProcessed) {
-			// TODO : do not process each time
-			return true;
-		} else {
+		if (lastProcessed == null) {
 			return true;
 		}
+		long windowMs = (long) apiProperties.getEprelRefreshDays() * 1000L * 3600 * 24;
+		return windowMs < System.currentTimeMillis() - lastProcessed;
 	}
 
 	@Override
@@ -71,12 +83,13 @@ public class EprelCompletionService extends AbstractCompletionService {
 	}
 
 	/**
-	 * Process resources for one product
+	 * Searches EPREL for the product's GTIN and model candidates, selects a unique
+	 * match, resolves the latest label version, and applies the resulting energy-class
+	 * and category attributes via the standard aggregation pipeline.
 	 *
-	 * @param data
-	 * @param vertical
+	 * @param vertical vertical context (used for EPREL category restriction)
+	 * @param data     product to enrich (mutated in place)
 	 */
-
 	@Override
 	public void processProduct(VerticalConfig vertical, Product data) {
 
@@ -114,7 +127,7 @@ public class EprelCompletionService extends AbstractCompletionService {
 				try {
 					aggregator.onDatafragment(df, data);
 				} catch (AggregationSkipException e) {
-					logger.error("Error occurs during icecat aggregation", e);
+					logger.error("Error occurs during EPREL aggregation", e);
 				}
 			}
 

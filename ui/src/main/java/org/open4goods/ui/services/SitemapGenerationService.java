@@ -107,14 +107,16 @@ public class SitemapGenerationService {
 				addWikiPages(baseUrl, lang);
 				addProductsPages(baseUrl, lang);
 				addVerticalPages(baseUrl, lang);
-				addDefaultGuidePages(baseUrl, lang);
+				boolean hasDefaultGuides = addDefaultGuidePages(baseUrl, lang);
 
 				SitemapIndexGenerator index = SitemapIndexGenerator.of(baseUrl + "sitemap/")
 						.addPage(SITEMAP_NAME_BLOG_PAGES)
 						.addPage(SITEMAP_NAME_WIKI_PAGES)
 						.addPage(SITEMAP_NAME_VERTICAL_PAGES)
-						.addPage(SITEMAP_NAME_PRODUCT_PAGES)
-						.addPage(SITEMAP_NAME_DEFAULT_GUIDES);
+						.addPage(SITEMAP_NAME_PRODUCT_PAGES);
+				if (hasDefaultGuides) {
+					index = index.addPage(SITEMAP_NAME_DEFAULT_GUIDES);
+				}
 
 				try {
 					index.toFile(getSitemapFile("sitemap.xml", lang));
@@ -285,11 +287,16 @@ public class SitemapGenerationService {
 	 *
 	 * @param baseUrl  site base URL for the target language
 	 * @param language BCP-47 language tag
+	 * @return {@code true} if at least one guide was written, {@code false} if skipped
 	 */
-	private void addDefaultGuidePages(String baseUrl, String language) {
-		SitemapGenerator sitemap = SitemapGenerator.of(baseUrl);
+	private boolean addDefaultGuidePages(String baseUrl, String language) {
+		List<String> guides = verticalsConfigService.getDefaultGuides();
+		if (guides.isEmpty()) {
+			return false;
+		}
 
-		for (String guideSlug : verticalsConfigService.getDefaultGuides()) {
+		SitemapGenerator sitemap = SitemapGenerator.of(baseUrl);
+		for (String guideSlug : guides) {
 			String url = baseUrl + "guides/" + guideSlug;
 			LOGGER.info("Adding default guide page to sitemap : {}", url);
 			sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.MONTHLY, 0.8));
@@ -300,6 +307,7 @@ public class SitemapGenerationService {
 		} catch (IOException e) {
 			LOGGER.error("Error while writing default guides sitemap", e);
 		}
+		return true;
 	}
 
 	/**
