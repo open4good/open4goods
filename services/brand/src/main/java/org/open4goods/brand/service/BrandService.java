@@ -328,7 +328,7 @@ public class BrandService {
                     Company company = serialisationService.jsonMapper().readValue(companyJson, Company.class);
                     brand.setCompany(company);
                 } catch (Exception e) {
-                    LOGGER.warn("Failed to load company details for: {}, fallback to basic company details", entry.getCompanyId(), e);
+                    LOGGER.warn("Failed to load company details for: {}, fallback to basic company details", entry.getCompanyId());
                     Company fallbackCompany = new Company(entry.getCompanyId(), entry.getCompanyName());
                     brand.setCompany(fallbackCompany);
                 }
