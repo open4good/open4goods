@@ -17,6 +17,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage.enabled true --coverage.reporter=lcov --coverage.reportsDirectory=artifacts/coverage",
+    "typecheck": "nuxt typecheck",
     "test:visual": "playwright test",
     "prepare:nuxt": "nuxt prepare",
     "generate:api": "openapi-generator-cli generate -i https://beta.front-api.nudger.fr/v3/api-docs/front -g typescript-fetch -t ./config/openapi-templates -o shared/api-client --skip-validate-spec",

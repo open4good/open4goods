@@ -256,7 +256,8 @@ interface BarcodeCheckResponse {
 const { t } = useI18n()
 const localePath = useLocalePath()
 const { get, post } = useApiClient()
-const { isAuthenticated } = useAuth()
+const { session } = useAuthSession()
+const isAuthenticated = computed(() => !!session.value?.user)
 
 const mode = ref<'sample' | 'live'>('sample')
 const barcode = ref('')

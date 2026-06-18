@@ -27,7 +27,7 @@ describe('allServices()', () => {
     const services = allServices()
     expect(services).toHaveLength(13)
     for (let i = 1; i < services.length; i++) {
-      expect(services[i].order).toBeGreaterThanOrEqual(services[i - 1].order)
+      expect(services[i]!.order).toBeGreaterThanOrEqual(services[i - 1]!.order)
     }
   })
 })
