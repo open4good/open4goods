@@ -66,11 +66,6 @@ public class DataForSeoSerpService {
         this.verticalsConfigService = verticalsConfigService;
         this.httpClient = HttpClient.newBuilder().connectTimeout(config.getRequestTimeout()).build();
         this.trackingFolder = Path.of(reviewConfig.getBatchFolder(), "source-discovery");
-        try {
-            Files.createDirectories(trackingFolder);
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot create DataForSEO discovery tracking folder " + trackingFolder, e);
-        }
     }
 
     /**
@@ -357,6 +352,7 @@ public class DataForSeoSerpService {
     }
 
     private void persist(SourceDiscoveryJob job) throws IOException {
+        Files.createDirectories(trackingFolder);
         Files.writeString(jobPath(job.getJobId()), objectMapper.writeValueAsString(job), StandardCharsets.UTF_8);
     }
 
