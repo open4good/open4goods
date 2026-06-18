@@ -33,6 +33,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 "/actuator/health",
+                                "/actuator/info",
                                 "/v3/api-docs/**",
                                 "/redoc",
                                 "/scalar",

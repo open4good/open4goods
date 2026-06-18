@@ -105,13 +105,11 @@ public class AiProvidersConfiguration {
         logger.info("Registering Vertex AI Gemini chat model (project={}, location={}, defaultModel={}).",
                 projectId, location, model);
 
-        return GoogleGenAiChatModel.builder()
-                .genAiClient(client)
-                .defaultOptions(GoogleGenAiChatOptions.builder().model(model).build())
-                .toolCallingManager(toolCallingManager.getIfUnique(() -> ToolCallingManager.builder().build()))
-                .retryTemplate(retryTemplate.getIfUnique(() -> RetryUtils.DEFAULT_RETRY_TEMPLATE))
-                .observationRegistry(observationRegistry.getIfUnique(() -> ObservationRegistry.NOOP))
-                .build();
+        return new GoogleGenAiChatModel(client,
+                GoogleGenAiChatOptions.builder().model(model).build(),
+                toolCallingManager.getIfUnique(() -> ToolCallingManager.builder().build()),
+                retryTemplate.getIfUnique(() -> RetryUtils.DEFAULT_RETRY_TEMPLATE),
+                observationRegistry.getIfUnique(() -> ObservationRegistry.NOOP));
     }
 
     /**

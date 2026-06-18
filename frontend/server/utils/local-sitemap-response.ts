@@ -3,7 +3,7 @@ import { access } from 'node:fs/promises'
 import { basename } from 'node:path'
 
 import { createError, sendStream, setHeader } from 'h3'
-
+import type { H3Event } from 'h3'
 import type { DomainLanguage } from '~~/shared/utils/domain-language'
 import { getLocalSitemapFilePath } from '~~/server/utils/sitemap-local-files'
 
@@ -11,7 +11,7 @@ const isDomainLanguage = (value: string | undefined): value is DomainLanguage =>
   value === 'en' || value === 'fr'
 
 export const handleLocalSitemapResponse = async (
-  event: Parameters<typeof sendStream>[0],
+  event: H3Event,
   options: { sendBody: boolean }
 ) => {
   const domainLanguage = event.context.params?.domainLanguage

@@ -1,5 +1,6 @@
 package org.open4goods.b2bapi.config;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -138,6 +139,21 @@ class AuthSecurityIntegrationTest {
     void dashboardEndpointRejectsMissingJwtBeforeController() throws Exception {
         mockMvc.perform(get("/api/v1/customer/api-keys"))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void actuatorHealthAndInfoArePublicForSpringBootAdmin() throws Exception {
+        final int healthStatus = mockMvc.perform(get("/actuator/health"))
+                .andReturn()
+                .getResponse()
+                .getStatus();
+        final int infoStatus = mockMvc.perform(get("/actuator/info"))
+                .andReturn()
+                .getResponse()
+                .getStatus();
+
+        assertThat(healthStatus).isNotIn(401, 403);
+        assertThat(infoStatus).isNotIn(401, 403);
     }
 
     private void saveApiKey(

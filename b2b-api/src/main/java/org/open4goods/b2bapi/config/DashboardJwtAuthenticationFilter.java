@@ -40,6 +40,7 @@ public class DashboardJwtAuthenticationFilter extends OncePerRequestFilter {
         return path.startsWith("/api/v1/auth/")
                 || path.startsWith("/api/v1/products/")
                 || path.equals("/actuator/health")
+                || path.equals("/actuator/info")
                 || path.startsWith("/v3/api-docs/")
                 || path.startsWith("/swagger-ui/")
                 || path.equals("/swagger-ui.html")

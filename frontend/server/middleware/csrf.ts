@@ -1,5 +1,3 @@
-import { defineEventHandler, getRequestURL } from 'h3'
-
 import {
   assertCsrfToken,
   assertSameOrigin,
@@ -10,7 +8,7 @@ import {
 const API_PREFIX = '/api'
 
 export default defineEventHandler(event => {
-  const { pathname } = getRequestURL(event)
+  const pathname = event.path ?? event.node.req.url ?? '/'
 
   if (!pathname.startsWith(API_PREFIX)) {
     return

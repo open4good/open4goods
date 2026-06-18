@@ -58,6 +58,19 @@ export B2B_STRIPE_WEBHOOK_SECRET=whsec_...   # from `stripe listen` (step 4)
 # OIDC client ids/secrets per provider you want to test
 ```
 
+Spring Boot Admin registration is available through the standard client and is
+disabled locally by default. To register against the local `admin` module, start
+`admin` on port 8085 and set:
+
+```bash
+export B2B_SBA_CLIENT_ENABLED=true
+export B2B_SBA_URL=http://localhost:8085
+export B2B_SBA_USERNAME=o4g
+export B2B_SBA_PASSWORD=...
+```
+
+The B2B API exposes `/actuator/health` and `/actuator/info` for the admin client.
+
 ## 3. Seed an org + key
 
 For local testing without OIDC, seed via SQL or an admin/dev endpoint:

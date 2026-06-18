@@ -428,7 +428,7 @@ describe('Category ecosystem Impact Score page', () => {
     ])
 
     const criteriaCards = wrapper.findAll('[data-test="impact-criteria-card"]')
-    expect(criteriaCards).toHaveLength(4)
+    expect(criteriaCards).toHaveLength(3)
     expect(criteriaCards[0].text()).toContain('Energy efficiency')
     expect(criteriaCards[0].text()).toContain('30%')
 
@@ -438,12 +438,11 @@ describe('Category ecosystem Impact Score page', () => {
     expect(criteriaIcons).toContain('mdi-flash')
     expect(criteriaIcons).toContain('mdi-tools')
     expect(criteriaIcons).toContain('mdi-database-check-outline')
-    expect(criteriaIcons).toContain('mdi-earth')
 
     const utilityButtons = wrapper.findAll(
       '.category-ecoscore__criteria-utility-trigger'
     )
-    expect(utilityButtons).toHaveLength(4)
+    expect(utilityButtons).toHaveLength(3)
     expect(utilityButtons[0]?.attributes('aria-label')).toBe(
       'Display criterion utility'
     )

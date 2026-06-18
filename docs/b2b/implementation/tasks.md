@@ -255,6 +255,9 @@ Free barcode validity + GS1 forensics facet (`barcode.check`), 0 credits.
 
 ## Session log
 
+- 2026-06-18: Added Spring Boot Admin client registration support to `b2b-api`
+  (dependency, configurable SBA client properties, public health/info actuator
+  endpoints) and documented local SBA env toggles.
 - 2026-06-12: P0 done - corpus reorganized, inconsistencies fixed, facet system
   and plan/tasks created. Next: P1.1.
 - 2026-06-15: P1 done - backend module scaffold added, install gate passed,
@@ -365,4 +368,3 @@ Free barcode validity + GS1 forensics facet (`barcode.check`), 0 credits.
   with ApiKeySecretResponse record schema. Corrected DashboardJwtAuthenticationFilter
   to bypass public billing and webhook endpoints. Removed debugging prints and
   confirmed all 157 integration tests pass.
-

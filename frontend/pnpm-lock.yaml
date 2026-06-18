@@ -9,6 +9,7 @@ overrides:
   tar: ^7.5.4
   lodash: ^4.17.23
   lodash-es: ^4.17.23
+  h3: 1.15.11
   undici: ^7.25.0
 
 importers:
@@ -129,7 +130,7 @@ importers:
         version: 3.2.4(vite@7.3.5(@types/node@25.9.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))(vue@3.5.38(typescript@6.0.3))
       '@nuxt/eslint':
         specifier: 1.16.0
-        version: 1.16.0(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(@typescript-eslint/utils@8.61.1(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3))(@vue/compiler-sfc@3.5.38)(crossws@0.4.6(srvx@0.11.16))(eslint@10.4.1(jiti@2.7.0))(magicast@0.5.3)(oxc-parser@0.133.0)(typescript@6.0.3)(vite@7.3.5(@types/node@25.9.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))
+        version: 1.16.0(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(@typescript-eslint/utils@8.61.1(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3))(@vue/compiler-sfc@3.5.38)(eslint@10.4.1(jiti@2.7.0))(magicast@0.5.3)(oxc-parser@0.133.0)(typescript@6.0.3)(vite@7.3.5(@types/node@25.9.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))
       '@nuxt/eslint-config':
         specifier: ^1.9.0
         version: 1.16.0(@typescript-eslint/utils@8.61.1(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3))(@vue/compiler-sfc@3.5.38)(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3)
@@ -153,7 +154,7 @@ importers:
         version: 6.1.1(dfd58382a282cfb5680a000d943702f8)
       '@nuxtjs/seo':
         specifier: ^5.0.0
-        version: 5.3.0(52049db3d2ac90179ce22bd619ff4a2b)
+        version: 5.3.0(b61dc9bcb5330915532c003c06a8850e)
       '@nuxtjs/sitemap':
         specifier: ^8.0.0
         version: 8.2.1(dfd58382a282cfb5680a000d943702f8)
@@ -7442,9 +7443,6 @@ packages:
   h3@1.15.11:
     resolution: {integrity: sha512-L3THSe2MPeBwgIZVSH5zLdBBU90TOxarvhK9d04IDY2AmVS8j2Jz2LIWtwsGOU3lu2I5jCN7FNvVfY2+XyF+mg==}
 
-  h3@1.15.5:
-    resolution: {integrity: sha512-xEyq3rSl+dhGX2Lm0+eFQIAzlDN6Fs0EcC4f7BNUmzaRX/PTzeuM+Tr2lHB8FoXggsQIeXLj8EDVgs5ywxyxmg==}
-
   h3@2.0.1-rc.22:
     resolution: {integrity: sha512-Esv0DMIuPkCTSWCA0vO73vcTqwzH1wjSrAO1TXNu/K3up1sZHa9EKMapbmxCDYBeymC3fVTk4qxp7ogQWQ+KgA==}
     engines: {node: '>=20.11.1'}
@@ -12907,10 +12905,10 @@ snapshots:
 
   '@csstools/css-tokenizer@4.0.0': {}
 
-  '@devframes/hub@0.5.4(devframe@0.5.4(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(crossws@0.4.6(srvx@0.11.16))(typescript@6.0.3))':
+  '@devframes/hub@0.5.4(devframe@0.5.4(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(typescript@6.0.3))':
     dependencies:
       birpc: 4.0.0
-      devframe: 0.5.4(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(crossws@0.4.6(srvx@0.11.16))(typescript@6.0.3)
+      devframe: 0.5.4(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(typescript@6.0.3)
       nostics: 0.2.0
       pathe: 2.0.3
       perfect-debounce: 2.1.0
@@ -13224,19 +13222,18 @@ snapshots:
     dependencies:
       '@eslint/core': 1.2.1
 
-  '@eslint/config-inspector@3.0.4(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(crossws@0.4.6(srvx@0.11.16))(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3)':
+  '@eslint/config-inspector@3.0.4(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3)':
     dependencies:
       ansis: 4.3.0
       cac: 7.0.0
       chokidar: 5.0.0
-      devframe: 0.5.2(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(crossws@0.4.6(srvx@0.11.16))(typescript@6.0.3)
+      devframe: 0.5.2(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(typescript@6.0.3)
       eslint: 10.4.1(jiti@2.7.0)
       jiti: 2.7.0
       tinyglobby: 0.2.17
     transitivePeerDependencies:
       - '@modelcontextprotocol/sdk'
       - bufferutil
-      - crossws
       - typescript
       - utf-8-validate
 
@@ -14142,9 +14139,9 @@ snapshots:
       - supports-color
       - typescript
 
-  '@nuxt/eslint@1.16.0(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(@typescript-eslint/utils@8.61.1(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3))(@vue/compiler-sfc@3.5.38)(crossws@0.4.6(srvx@0.11.16))(eslint@10.4.1(jiti@2.7.0))(magicast@0.5.3)(oxc-parser@0.133.0)(typescript@6.0.3)(vite@7.3.5(@types/node@25.9.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))':
+  '@nuxt/eslint@1.16.0(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(@typescript-eslint/utils@8.61.1(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3))(@vue/compiler-sfc@3.5.38)(eslint@10.4.1(jiti@2.7.0))(magicast@0.5.3)(oxc-parser@0.133.0)(typescript@6.0.3)(vite@7.3.5(@types/node@25.9.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))':
     dependencies:
-      '@eslint/config-inspector': 3.0.4(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(crossws@0.4.6(srvx@0.11.16))(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3)
+      '@eslint/config-inspector': 3.0.4(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3)
       '@nuxt/devtools-kit': 3.2.4(magicast@0.5.3)(vite@7.3.5(@types/node@25.9.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))
       '@nuxt/eslint-config': 1.16.0(@typescript-eslint/utils@8.61.1(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3))(@vue/compiler-sfc@3.5.38)(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3)
       '@nuxt/eslint-plugin': 1.16.0(eslint@10.4.1(jiti@2.7.0))(typescript@6.0.3)
@@ -14163,7 +14160,6 @@ snapshots:
       - '@typescript-eslint/utils'
       - '@vue/compiler-sfc'
       - bufferutil
-      - crossws
       - eslint-import-resolver-node
       - eslint-plugin-format
       - magicast
@@ -14240,7 +14236,7 @@ snapshots:
       '@nuxt/kit': 4.2.2(magicast@0.5.3)
       consola: 3.4.2
       defu: 6.1.4
-      h3: 1.15.5
+      h3: 1.15.11
       image-meta: 0.2.2
       knitwork: 1.3.0
       ohash: 2.0.11
@@ -14651,7 +14647,7 @@ snapshots:
       exsolve: 1.0.8
       fake-indexeddb: 6.2.5
       get-port-please: 3.2.0
-      h3: 1.15.5
+      h3: 1.15.11
       h3-next: h3@2.0.1-rc.22(crossws@0.4.6(srvx@0.11.16))
       local-pkg: 1.1.2
       magic-string: 0.30.21
@@ -15075,7 +15071,7 @@ snapshots:
       - vue-router
       - yup
 
-  '@nuxtjs/seo@5.3.0(52049db3d2ac90179ce22bd619ff4a2b)':
+  '@nuxtjs/seo@5.3.0(b61dc9bcb5330915532c003c06a8850e)':
     dependencies:
       '@nuxt/kit': 4.4.8(magicast@0.5.3)
       '@nuxtjs/robots': 6.1.1(dfd58382a282cfb5680a000d943702f8)
@@ -15084,7 +15080,7 @@ snapshots:
       nuxt-link-checker: 5.1.0(8e08103deead811578175f9f97a66da4)
       nuxt-og-image: 6.6.0(33da6f7012f3337a4c1e7191c7d070a8)
       nuxt-schema-org: 6.2.1(736b72f95dc40d624bf0b9e16b5f5642)
-      nuxt-seo-utils: 8.3.1(9d231ff7b12e963265da2c9ae6a810d8)
+      nuxt-seo-utils: 8.3.1(ee727d4171827c8009382f457f4baef9)
       nuxt-site-config: 4.1.0(dfd58382a282cfb5680a000d943702f8)
       nuxtseo-shared: 5.3.0(a294458b473a28ba42366b9937f8a86c)
     transitivePeerDependencies:
@@ -15139,7 +15135,6 @@ snapshots:
       - axios
       - bufferutil
       - change-case
-      - crossws
       - db0
       - drauu
       - embla-carousel
@@ -17164,9 +17159,9 @@ snapshots:
 
   '@ungap/structured-clone@1.3.1': {}
 
-  '@unhead/bundler@3.1.4(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(crossws@0.4.6(srvx@0.11.16))(esbuild@0.25.12)(lightningcss@1.32.0)(typescript@6.0.3)(unhead@2.1.15)(vite@7.3.5(@types/node@25.9.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))':
+  '@unhead/bundler@3.1.4(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(esbuild@0.25.12)(lightningcss@1.32.0)(typescript@6.0.3)(unhead@2.1.15)(vite@7.3.5(@types/node@25.9.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))':
     dependencies:
-      '@vitejs/devtools-kit': 0.3.3(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(crossws@0.4.6(srvx@0.11.16))(typescript@6.0.3)(vite@7.3.5(@types/node@25.9.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))
+      '@vitejs/devtools-kit': 0.3.3(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(typescript@6.0.3)(vite@7.3.5(@types/node@25.9.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))
       magic-string: 0.30.21
       oxc-parser: 0.135.0
       oxc-walker: 1.0.0(oxc-parser@0.135.0)
@@ -17180,7 +17175,6 @@ snapshots:
     transitivePeerDependencies:
       - '@modelcontextprotocol/sdk'
       - bufferutil
-      - crossws
       - typescript
       - utf-8-validate
 
@@ -17305,11 +17299,11 @@ snapshots:
       - workbox-build
       - workbox-window
 
-  '@vitejs/devtools-kit@0.3.3(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(crossws@0.4.6(srvx@0.11.16))(typescript@6.0.3)(vite@7.3.5(@types/node@25.9.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))':
+  '@vitejs/devtools-kit@0.3.3(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(typescript@6.0.3)(vite@7.3.5(@types/node@25.9.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))':
     dependencies:
-      '@devframes/hub': 0.5.4(devframe@0.5.4(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(crossws@0.4.6(srvx@0.11.16))(typescript@6.0.3))
+      '@devframes/hub': 0.5.4(devframe@0.5.4(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(typescript@6.0.3))
       birpc: 4.0.0
-      devframe: 0.5.4(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(crossws@0.4.6(srvx@0.11.16))(typescript@6.0.3)
+      devframe: 0.5.4(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(typescript@6.0.3)
       mlly: 1.8.2
       nostics: 0.3.0
       pathe: 2.0.3
@@ -17319,7 +17313,6 @@ snapshots:
     transitivePeerDependencies:
       - '@modelcontextprotocol/sdk'
       - bufferutil
-      - crossws
       - typescript
       - utf-8-validate
 
@@ -18743,12 +18736,12 @@ snapshots:
 
   devalue@5.8.1: {}
 
-  devframe@0.5.2(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(crossws@0.4.6(srvx@0.11.16))(typescript@6.0.3):
+  devframe@0.5.2(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(typescript@6.0.3):
     dependencies:
       '@valibot/to-json-schema': 1.7.1(valibot@1.4.1(typescript@6.0.3))
       birpc: 4.0.0
       cac: 7.0.0
-      h3: 2.0.1-rc.22(crossws@0.4.6(srvx@0.11.16))
+      h3: 1.15.11
       mrmime: 2.0.1
       nostics: 0.2.0
       pathe: 2.0.3
@@ -18758,16 +18751,15 @@ snapshots:
       '@modelcontextprotocol/sdk': 1.25.2(hono@4.11.4)(zod@3.25.76)
     transitivePeerDependencies:
       - bufferutil
-      - crossws
       - typescript
       - utf-8-validate
 
-  devframe@0.5.4(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(crossws@0.4.6(srvx@0.11.16))(typescript@6.0.3):
+  devframe@0.5.4(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(typescript@6.0.3):
     dependencies:
       '@valibot/to-json-schema': 1.7.1(valibot@1.4.1(typescript@6.0.3))
       birpc: 4.0.0
       cac: 7.0.0
-      h3: 2.0.1-rc.22(crossws@0.4.6(srvx@0.11.16))
+      h3: 1.15.11
       mrmime: 2.0.1
       nostics: 0.2.0
       pathe: 2.0.3
@@ -18777,7 +18769,6 @@ snapshots:
       '@modelcontextprotocol/sdk': 1.25.2(hono@4.11.4)(zod@3.25.76)
     transitivePeerDependencies:
       - bufferutil
-      - crossws
       - typescript
       - utf-8-validate
 
@@ -19891,18 +19882,6 @@ snapshots:
       ufo: 1.6.4
       uncrypto: 0.1.3
 
-  h3@1.15.5:
-    dependencies:
-      cookie-es: 1.2.3
-      crossws: 0.3.5
-      defu: 6.1.4
-      destr: 2.0.5
-      iron-webcrypto: 1.2.1
-      node-mock-http: 1.0.4
-      radix3: 1.1.2
-      ufo: 1.6.3
-      uncrypto: 0.1.3
-
   h3@2.0.1-rc.22(crossws@0.4.6(srvx@0.11.16)):
     dependencies:
       rou3: 0.8.1
@@ -20281,7 +20260,7 @@ snapshots:
       defu: 6.1.4
       destr: 2.0.5
       etag: 1.8.1
-      h3: 1.15.5
+      h3: 1.15.11
       image-meta: 0.2.2
       listhen: 1.9.0
       ofetch: 1.5.1
@@ -20822,7 +20801,7 @@ snapshots:
       crossws: 0.3.5
       defu: 6.1.4
       get-port-please: 3.2.0
-      h3: 1.15.5
+      h3: 1.15.11
       http-shutdown: 1.2.2
       jiti: 2.7.0
       mlly: 1.8.2
@@ -21962,10 +21941,10 @@ snapshots:
       - vue-router
       - yup
 
-  nuxt-seo-utils@8.3.1(9d231ff7b12e963265da2c9ae6a810d8):
+  nuxt-seo-utils@8.3.1(ee727d4171827c8009382f457f4baef9):
     dependencies:
       '@nuxt/kit': 4.4.8(magicast@0.5.3)
-      '@unhead/bundler': 3.1.4(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(crossws@0.4.6(srvx@0.11.16))(esbuild@0.25.12)(lightningcss@1.32.0)(typescript@6.0.3)(unhead@2.1.15)(vite@7.3.5(@types/node@25.9.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))
+      '@unhead/bundler': 3.1.4(@modelcontextprotocol/sdk@1.25.2(hono@4.11.4)(zod@3.25.76))(esbuild@0.25.12)(lightningcss@1.32.0)(typescript@6.0.3)(unhead@2.1.15)(vite@7.3.5(@types/node@25.9.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))
       citty: 0.2.2
       consola: 3.4.2
       defu: 6.1.7
@@ -22033,7 +22012,6 @@ snapshots:
       - axios
       - bufferutil
       - change-case
-      - crossws
       - db0
       - drauu
       - embla-carousel

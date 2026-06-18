@@ -1,13 +1,41 @@
 import { access } from 'node:fs/promises'
 
-import { getRequestURL } from 'h3'
-
 import { getDomainLanguageFromHostname } from '~~/shared/utils/domain-language'
 import { getLocalSitemapFileDescriptorsForDomainLanguage } from '~~/server/utils/sitemap-local-files'
 
+const DEFAULT_SITEMAP_ORIGIN = 'https://nudger.fr'
+
+type RequestOriginEvent = {
+  node?: {
+    req?: {
+      headers?: Record<string, string | string[] | undefined>
+    }
+  }
+}
+
+const getFallbackRequestUrl = () =>
+  new URL(
+    process.env.NUXT_PUBLIC_SITE_URL ||
+      process.env.NUXT_SITE_URL ||
+      DEFAULT_SITEMAP_ORIGIN
+  )
+
+const getHeaderValue = (value: string | string[] | undefined) =>
+  Array.isArray(value) ? value[0] : value
+
+const getSafeRequestUrl = (event: RequestOriginEvent | undefined) => {
+  const headers = event?.node?.req?.headers
+  const forwardedHost = getHeaderValue(headers?.['x-forwarded-host'])
+  const host = forwardedHost ?? getHeaderValue(headers?.host)
+  const forwardedProtocol = getHeaderValue(headers?.['x-forwarded-proto'])
+  const protocol = forwardedProtocol?.split(',')[0]?.trim() || 'https'
+
+  return host ? new URL(`${protocol}://${host}`) : getFallbackRequestUrl()
+}
+
 export default (nitroApp: import('nitro/app').NitroApp) => {
   nitroApp.hooks.hook('sitemap:index-resolved', async ctx => {
-    let requestURL = getRequestURL(ctx.event)
+    let requestURL = getSafeRequestUrl(ctx.event)
 
     // Fallback for static generation where requestURL might be localhost (NODE_ENV is 'prerender' during generation)
     if (

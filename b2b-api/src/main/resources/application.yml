@@ -4,6 +4,13 @@ server:
 spring:
   application:
     name: b2b-api
+  boot:
+    admin:
+      client:
+        enabled: ${B2B_SBA_CLIENT_ENABLED:false}
+        url: ${B2B_SBA_URL:}
+        username: ${B2B_SBA_USERNAME:}
+        password: ${B2B_SBA_PASSWORD:}
   config:
     import: optional:classpath:b2b-catalog.yml
   datasource:
@@ -96,4 +103,3 @@ b2b:
   stripe:
     secret-key: ${B2B_STRIPE_SECRET_KEY:}
     webhook-secret: ${B2B_STRIPE_WEBHOOK_SECRET:}
-
