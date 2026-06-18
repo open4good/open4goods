@@ -26,7 +26,7 @@ jobs:
 
       - uses: pnpm/action-setup@v5
         with:
-          version: 10.34.2
+          version: 10.34.3
 
       - name: Install lint tools
         run: |
