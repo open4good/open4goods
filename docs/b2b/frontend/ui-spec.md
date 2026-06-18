@@ -231,7 +231,7 @@ or page concepts are missing or under-specified.
 
 The homepage leads with data scale + breadth, then funnels to trial and docs.
 
-**Terminology note**: The product layer calls these offerings "Data services" (consumer term used in the UI and navigation). The API contract uses "facet" (`meta.facet`) — do not rename it in backend code or API responses.
+**Terminology note**: The product layer calls these offerings "Data services" (consumer term used in the UI and navigation). The API contract uses "facet" (`meta.facet`) - do not rename it in backend code or API responses.
 
 Required sections:
 

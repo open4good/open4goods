@@ -122,7 +122,7 @@ Sample-mode fixture (GTIN + canned response) and live-mode expectations
 
 This facet is registered in `b2b-frontend/domains/b2b/services.ts` as a
 `ServiceDescriptor`. The `/solutions/<slug>` page is **auto-generated** from
-that descriptor — no per-facet Vue file is needed.
+that descriptor - no per-facet Vue file is needed.
 
 Required additions per the authoring-prompt State 4:
 
