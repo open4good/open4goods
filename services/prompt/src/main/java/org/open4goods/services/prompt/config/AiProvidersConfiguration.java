@@ -107,7 +107,7 @@ public class AiProvidersConfiguration {
 
         return GoogleGenAiChatModel.builder()
                 .genAiClient(client)
-                .options(GoogleGenAiChatOptions.builder().model(model).build())
+                .defaultOptions(GoogleGenAiChatOptions.builder().model(model).build())
                 .toolCallingManager(toolCallingManager.getIfUnique(() -> ToolCallingManager.builder().build()))
                 .retryTemplate(retryTemplate.getIfUnique(() -> RetryUtils.DEFAULT_RETRY_TEMPLATE))
                 .observationRegistry(observationRegistry.getIfUnique(() -> ObservationRegistry.NOOP))
