@@ -35,6 +35,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * Admin endpoints for Icecat reference data browsing and vertical category matching.
@@ -42,6 +46,9 @@ import io.swagger.v3.oas.annotations.Operation;
 @RestController
 @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
 @Profile("!beta")
+@Tag(name = "Icecat", description = "Browse the local Icecat product catalogue index (features, categories, feature groups, suppliers), "
+        + "search and assign Icecat categories to verticals, and manage the Elasticsearch Icecat index. "
+        + "Not active in the beta profile.")
 public class IcecatController {
 
 	private final IcecatService icecatService;
@@ -58,22 +65,46 @@ public class IcecatController {
 	}
 
 	@GetMapping("/feature/resolve")
-	@Operation(summary = "Resolve the icecat feature id and return the English name if an unambiguous match is found")
-	public String getOriginalEnglishName(@RequestParam String name, @RequestParam String vertical) {
+	@Operation(
+			summary = "Resolve an Icecat feature name to its canonical English name",
+			description = "Looks up the Icecat feature whose name best matches the supplied name string within the "
+					+ "context of the given vertical. Returns the canonical English feature name when an "
+					+ "unambiguous match is found, or null otherwise.")
+	@ApiResponse(responseCode = "200", description = "Canonical English Icecat feature name, or null on no match")
+	public String getOriginalEnglishName(
+			@Parameter(description = "Feature name string to resolve (may be a localized or abbreviated form)", required = true)
+			@RequestParam String name,
+			@Parameter(description = "Vertical identifier used to scope the feature lookup", required = true)
+			@RequestParam String vertical) {
 		VerticalConfig vc = verticalsService.getConfigByIdOrDefault(vertical);
 		return icecatFeatureResolver.getOriginalEnglishName(name, vc);
 	}
 
 	@GetMapping("/{vertical}/featuregroups/")
-	@Operation(summary = "Load the list of features aggregated by UiFeatureGroup")
-	public Map<String, String> getFeaturesGroup(@PathVariable String vertical) {
+	@Operation(
+			summary = "List Icecat features grouped by UI feature group for a vertical",
+			description = "Returns a map of feature key to display label for every Icecat feature "
+					+ "that is part of a UiFeatureGroup defined in the vertical's configuration.")
+	@ApiResponse(responseCode = "200", description = "Map of Icecat feature key to display label")
+	public Map<String, String> getFeaturesGroup(
+			@Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop')", required = true)
+			@PathVariable String vertical) {
 		VerticalConfig vc = verticalsService.getConfigByIdOrDefault(vertical);
 		return icecatService.types(vc);
 	}
 
 	@GetMapping("/features/{featuresId}/")
-	@Operation(summary = "Load the Feature for a given id")
-	public IcecatFeature getFeature(@PathVariable Integer featuresId) {
+	@Operation(
+			summary = "Get an Icecat feature by numeric ID",
+			description = "Returns the full IcecatFeature record for the given Icecat feature ID, "
+					+ "including its name in all available languages, measurement unit and data type.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "IcecatFeature record found and returned"),
+			@ApiResponse(responseCode = "404", description = "No feature with the given ID found in the Icecat index")
+	})
+	public IcecatFeature getFeature(
+			@Parameter(description = "Numeric Icecat feature identifier", required = true)
+			@PathVariable Integer featuresId) {
 		return icecatService.getFeaturesById().get(featuresId);
 	}
 
@@ -82,23 +113,43 @@ public class IcecatController {
 	// -------------------------------------------------------------------------
 
 	@GetMapping("/icecat/categories")
-	@Operation(summary = "List all Icecat categories from the Elasticsearch index")
+	@Operation(
+			summary = "List all Icecat categories from the local index",
+			description = "Returns every IcecatCategoryDocument stored in the local Elasticsearch Icecat index. "
+					+ "Use /icecat/categories/search for a filtered listing; this endpoint returns the full catalogue.")
+	@ApiResponse(responseCode = "200", description = "All Icecat category documents")
 	public Iterable<IcecatCategoryDocument> getAllCategories() {
 		return icecatIndexService.findAllCategories();
 	}
 
 	@GetMapping("/icecat/categories/search")
-	@Operation(summary = "Search Icecat categories by English name")
+	@Operation(
+			summary = "Search Icecat categories by English name",
+			description = "Performs a full-text search on the Icecat category English name field in Elasticsearch. "
+					+ "Results are paginated; use page and size to navigate.")
+	@ApiResponse(responseCode = "200", description = "Paginated list of matching Icecat category documents")
 	public Page<IcecatCategoryDocument> searchCategories(
+			@Parameter(description = "English name search term (partial matches supported)", required = true)
 			@RequestParam String q,
+			@Parameter(description = "Zero-based page number")
 			@RequestParam(defaultValue = "0") int page,
+			@Parameter(description = "Number of results per page")
 			@RequestParam(defaultValue = "20") int size) {
 		return icecatIndexService.searchCategories(q, PageRequest.of(page, size));
 	}
 
 	@GetMapping("/icecat/categories/{id}")
-	@Operation(summary = "Get a single Icecat category by ID")
-	public ResponseEntity<IcecatCategoryDocument> getCategory(@PathVariable Integer id) {
+	@Operation(
+			summary = "Get a single Icecat category by numeric ID",
+			description = "Returns the IcecatCategoryDocument for the given category ID, "
+					+ "including its English name, parent ID, localized names and associated features.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Icecat category document found"),
+			@ApiResponse(responseCode = "404", description = "No category with the given ID found")
+	})
+	public ResponseEntity<IcecatCategoryDocument> getCategory(
+			@Parameter(description = "Numeric Icecat category ID", required = true)
+			@PathVariable Integer id) {
 		return icecatIndexService.findCategory(id)
 				.map(ResponseEntity::ok)
 				.orElse(ResponseEntity.notFound().build());
@@ -111,8 +162,14 @@ public class IcecatController {
 					+ "The configured vertical Icecat category is returned first when present, "
 					+ "then candidates found from vertical names."
 	)
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Ranked list of Icecat category candidates for the vertical"),
+			@ApiResponse(responseCode = "404", description = "Vertical not found")
+	})
 	public ResponseEntity<List<IcecatCategoryCandidateDto>> candidateCategoriesForVertical(
+			@Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop')", required = true)
 			@PathVariable String verticalId,
+			@Parameter(description = "Maximum number of candidates to return")
 			@RequestParam(defaultValue = "20") int size) {
 		VerticalConfig vc = verticalsService.getConfigById(verticalId);
 		if (vc == null) {
@@ -144,7 +201,13 @@ public class IcecatController {
 			description = "Returns category-scoped attribute metadata and global Icecat feature metadata "
 					+ "already stored in Elasticsearch. No live Icecat API call is made."
 	)
-	public ResponseEntity<IcecatCategoryAttributesDto> getCategoryAttributes(@PathVariable Integer id) {
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Attribute metadata for the category"),
+			@ApiResponse(responseCode = "404", description = "No category with the given ID found")
+	})
+	public ResponseEntity<IcecatCategoryAttributesDto> getCategoryAttributes(
+			@Parameter(description = "Numeric Icecat category ID", required = true)
+			@PathVariable Integer id) {
 		Optional<IcecatCategoryDocument> category = icecatIndexService.findCategory(id);
 		if (category.isEmpty()) {
 			return ResponseEntity.notFound().build();
@@ -153,9 +216,19 @@ public class IcecatController {
 	}
 
 	@PostMapping("/icecat/vertical/{verticalId}/category/{catId}")
-	@Operation(summary = "Assign an Icecat category to a vertical (returns the resolved vertical config)")
+	@Operation(
+			summary = "Assign an Icecat category to a vertical",
+			description = "Sets the icecatTaxonomyId field on the in-memory VerticalConfig for the given vertical "
+					+ "and returns the updated config. This does NOT persist to disk — write the returned config "
+					+ "back to the vertical YAML file to make the change durable.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Updated VerticalConfig with the new Icecat category ID"),
+			@ApiResponse(responseCode = "404", description = "Vertical not found")
+	})
 	public ResponseEntity<VerticalConfig> assignCategoryToVertical(
+			@Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop')", required = true)
 			@PathVariable String verticalId,
+			@Parameter(description = "Numeric Icecat category ID to assign to the vertical", required = true)
 			@PathVariable Integer catId) {
 		VerticalConfig vc = verticalsService.getConfigById(verticalId);
 		if (vc == null) {
@@ -170,7 +243,12 @@ public class IcecatController {
 	// -------------------------------------------------------------------------
 
 	@GetMapping("/icecat/index/sync")
-	@Operation(summary = "Trigger a re-sync of Icecat reference data from in-memory loaders to Elasticsearch")
+	@Operation(
+			summary = "Re-sync the Icecat Elasticsearch indexes from in-memory loaders",
+			description = "Reloads all Icecat reference data (features, categories, feature groups, suppliers) "
+					+ "from the in-memory loaders into Elasticsearch. "
+					+ "Returns the new document counts for each index after the sync.")
+	@ApiResponse(responseCode = "200", description = "Map of index name to post-sync document count (as strings)")
 	public Map<String, String> syncIndex() {
 		icecatIndexService.syncFromLoaders();
 		long[] counts = icecatIndexService.indexCounts();
@@ -182,7 +260,11 @@ public class IcecatController {
 	}
 
 	@GetMapping("/icecat/index/counts")
-	@Operation(summary = "Return the document counts for all Icecat Elasticsearch indexes")
+	@Operation(
+			summary = "Return document counts for all Icecat Elasticsearch indexes",
+			description = "Returns the current document counts for the features, categories, featureGroups and "
+					+ "suppliers Elasticsearch indexes without performing any sync operation.")
+	@ApiResponse(responseCode = "200", description = "Map of index name to document count (Long)")
 	public Map<String, Long> indexCounts() {
 		long[] counts = icecatIndexService.indexCounts();
 		return Map.of(

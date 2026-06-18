@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
@@ -34,7 +36,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/api/metriks")
 @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
-@Tag(name = "Metriks", description = "Endpoints for Metriks monitoring system")
+@Tag(name = "Metriks", description = "Structured metric endpoints consumed by the weekly Metriks report pipeline. "
+        + "Each endpoint emits schema-2.0 events covering system health, business KPIs and SEO signals.")
 public class MetriksController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetriksController.class);
@@ -57,7 +60,11 @@ public class MetriksController {
     }
 
     @GetMapping("/system")
-    @Operation(summary = "Get system metrics (Disk, Elasticsearch)")
+    @Operation(
+            summary = "Get system metrics",
+            description = "Returns disk usage (total, free, used) and the Elasticsearch product document count "
+                    + "as Metriks schema-2.0 events. These events flow unchanged into the weekly report pipeline.")
+    @ApiResponse(responseCode = "200", description = "MetriksResponse containing system metric events")
     public MetriksResponse getSystemMetrics() {
         MetriksResponse response = newResponse();
         List<MetriksEvent> events = new ArrayList<>();
@@ -79,8 +86,14 @@ public class MetriksController {
     }
 
     @GetMapping("/functional")
-    @Operation(summary = "Get functional metrics (Business KPIs)")
+    @Operation(
+            summary = "Get functional business KPI metrics",
+            description = "Returns business KPIs as Metriks schema-2.0 events: total product count, "
+                    + "products with an AI review, products with an ImpactScore, "
+                    + "number of active feeds and affiliation partner count.")
+    @ApiResponse(responseCode = "200", description = "MetriksResponse containing business KPI events")
     public MetriksResponse getFunctionalMetrics(
+            @Parameter(description = "Locale used to count products that carry an AI review (e.g. 'fr', 'en'). Defaults to 'fr'.")
             @RequestParam(name = "locale", required = false, defaultValue = DEFAULT_REVIEW_LOCALE) String locale) {
         MetriksResponse response = newResponse();
         List<MetriksEvent> events = new ArrayList<>();
@@ -110,7 +123,11 @@ public class MetriksController {
     }
 
     @GetMapping("/seo")
-    @Operation(summary = "Get SEO metrics (Google Search Console indexed pages)")
+    @Operation(
+            summary = "Get SEO metrics from Google Search Console",
+            description = "Returns the number of pages indexed by Google Search Console as a Metriks schema-2.0 event. "
+                    + "Requires a valid Google Search Console credential to be configured.")
+    @ApiResponse(responseCode = "200", description = "MetriksResponse containing SEO metric events")
     public MetriksResponse getSeoMetrics() {
         MetriksResponse response = newResponse();
         List<MetriksEvent> events = new ArrayList<>();

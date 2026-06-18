@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.model.RolesConstants;
@@ -62,12 +63,12 @@ public class WebSecurityConfig {
                 .cors(withDefaults())
                 .authorizeHttpRequests(requests -> requests
                         // Actuator endpoints are protected
-                        .requestMatchers("/actuator").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
-                        .requestMatchers("/actuator/**").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE))
+                        .requestMatchers("/actuator").hasAuthority(RolesConstants.ACTUATOR_ADMIN_ROLE)
+                        .requestMatchers("/actuator/**").hasAuthority(RolesConstants.ACTUATOR_ADMIN_ROLE))
 				.formLogin(login -> login.permitAll().loginProcessingUrl("/login").defaultSuccessUrl("/",true))
 				.logout(logout -> logout.permitAll())
                 .csrf(c -> c.ignoringRequestMatchers("/actuator/**").disable())
-                .addFilterBefore(new TokenAuthenticationFilter(), BasicAuthenticationFilter.class)
+                .addFilterBefore(new TokenAuthenticationFilter(apiProperties), BasicAuthenticationFilter.class)
                 // Allowing directauth via http creds
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(requests -> requests
@@ -79,46 +80,68 @@ public class WebSecurityConfig {
 	/**
 	 * This filter allows token-based API authentication.
 	 */
-	public class TokenAuthenticationFilter extends GenericFilterBean {
+	static final class TokenAuthenticationFilter extends GenericFilterBean {
+
+		private final ApiProperties apiProperties;
+
+		TokenAuthenticationFilter(ApiProperties apiProperties) {
+			this.apiProperties = apiProperties;
+		}
 
 		@Override
 		public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)	throws IOException, ServletException {
 
 			final HttpServletRequest httpRequest = (HttpServletRequest) request;
 
-			// Extracting token prom parameter
-			String accessToken = httpRequest.getParameter(UrlConstants.APIKEY_PARAMETER);
-			if (null == accessToken) {
-				accessToken = httpRequest.getHeader (UrlConstants.APIKEY_PARAMETER);
-			}
+			final String accessToken = resolveAccessToken(httpRequest);
 
 
 			if (null != accessToken) {
 
-				// By default, we provide a USER role
-				final List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-				authorities.add(new SimpleGrantedAuthority(RolesConstants.ROLE_USER));
+				final List<SimpleGrantedAuthority> authorities = resolveAuthorities(accessToken);
 
-				// Assignation of the ROLE_ADMIN
-				if (accessToken.equals(apiProperties.getAdminKey())) {
-					authorities.add(new SimpleGrantedAuthority(RolesConstants.ROLE_ADMIN));
+				if (!authorities.isEmpty()) {
+					// Populate SecurityContextHolder
+					final User user = new User("api-key", "", true, true, true, true, authorities);
+					final UsernamePasswordAuthenticationToken authentication =
+							new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+					SecurityContextHolder.getContext().setAuthentication(authentication);
 				}
-
-				// Assignation of the ROLE_CRAWLER
-				if (apiProperties.getTestKeys().contains(accessToken) ) {
-					authorities.add(new SimpleGrantedAuthority(RolesConstants.ROLE_TESTER));
-				}
-
-				// Populate SecurityContextHolder
-				final User user = new User("username", "password", true, true, true, true, authorities);
-				
-				final UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user,null, user.getAuthorities());
-				SecurityContextHolder.getContext().setAuthentication(authentication);
 			}
 
 
 			// Continue request handling
 			chain.doFilter(request, response);
+		}
+
+		private String resolveAccessToken(HttpServletRequest httpRequest) {
+			// Extract token from request parameter first for backward compatibility, then from header.
+			String accessToken = httpRequest.getParameter(UrlConstants.APIKEY_PARAMETER);
+			if (null == accessToken) {
+				accessToken = httpRequest.getHeader(UrlConstants.APIKEY_PARAMETER);
+			}
+			if (null == accessToken || accessToken.isBlank()) {
+				return null;
+			}
+			return accessToken.trim();
+		}
+
+		private List<SimpleGrantedAuthority> resolveAuthorities(String accessToken) {
+			final List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+			final boolean adminKey = Objects.equals(accessToken, apiProperties.getAdminKey());
+			final boolean testKey = apiProperties.getTestKeys() != null && apiProperties.getTestKeys().contains(accessToken);
+
+			if (adminKey || testKey) {
+				authorities.add(new SimpleGrantedAuthority(RolesConstants.ROLE_USER));
+			}
+			if (adminKey) {
+				authorities.add(new SimpleGrantedAuthority(RolesConstants.ROLE_ADMIN));
+			}
+			if (testKey) {
+				authorities.add(new SimpleGrantedAuthority(RolesConstants.ROLE_TESTER));
+			}
+
+			return authorities;
 		}
 	}
 	

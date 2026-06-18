@@ -176,8 +176,15 @@ public class ReviewGenerationController {
 
     @PostMapping("/enrichment/{id}/urls/discover")
     @Operation(summary = "Discover enrichment source URLs for a product",
-            description = "Submit a DataForSEO Standard SERP task for source URL discovery.")
-    public ResponseEntity<SourceDiscoveryJob> discoverEnrichmentUrls(@PathVariable("id") long upc,
+            description = "Submit a DataForSEO Standard SERP task for source URL discovery.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Discovery job submitted"),
+                    @ApiResponse(responseCode = "404", description = "Product not found")
+            })
+    public ResponseEntity<SourceDiscoveryJob> discoverEnrichmentUrls(
+            @Parameter(description = "Product UPC / GTIN", required = true)
+            @PathVariable("id") long upc,
+            @Parameter(description = "Force re-submission even if URLs were already discovered")
             @RequestParam(value = "force", defaultValue = "false") boolean force) throws Exception {
         Product product = productRepository.getById(upc);
         return ResponseEntity.ok(dataForSeoSerpService.discoverUrls(product, force));
@@ -185,23 +192,44 @@ public class ReviewGenerationController {
 
     @PostMapping("/enrichment/vertical/{verticalId}/urls/discover")
     @Operation(summary = "Discover enrichment source URLs for a vertical",
-            description = "Submit DataForSEO Standard SERP tasks in chunks of up to 100 products.")
+            description = "Submit DataForSEO Standard SERP tasks in chunks of up to 100 products.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Discovery job submitted for the vertical"),
+                    @ApiResponse(responseCode = "404", description = "Vertical not found")
+            })
     public ResponseEntity<SourceDiscoveryJob> discoverEnrichmentUrlsForVertical(
+            @Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop')", required = true)
             @PathVariable String verticalId,
+            @Parameter(description = "Maximum number of products to submit discovery tasks for")
             @RequestParam(value = "limit", defaultValue = "100") int limit,
+            @Parameter(description = "Force re-submission even if URLs were already discovered")
             @RequestParam(value = "force", defaultValue = "false") boolean force) throws Exception {
         return ResponseEntity.ok(dataForSeoSerpService.discoverUrlsForVertical(verticalId, limit, force));
     }
 
     @PostMapping("/enrichment/discovery/jobs/{jobId}/poll")
-    @Operation(summary = "Poll an enrichment URL discovery job")
-    public ResponseEntity<SourceDiscoveryJob> pollEnrichmentDiscoveryJob(@PathVariable String jobId) throws Exception {
+    @Operation(summary = "Poll an enrichment URL discovery job",
+            description = "Fetches the latest status of the DataForSEO SERP job and updates its state in the local store.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Updated job state returned"),
+                    @ApiResponse(responseCode = "404", description = "Job not found")
+            })
+    public ResponseEntity<SourceDiscoveryJob> pollEnrichmentDiscoveryJob(
+            @Parameter(description = "DataForSEO SERP job identifier", required = true)
+            @PathVariable String jobId) throws Exception {
         return ResponseEntity.ok(dataForSeoSerpService.pollJob(jobId));
     }
 
     @GetMapping("/enrichment/discovery/jobs/{jobId}")
-    @Operation(summary = "Get an enrichment URL discovery job")
-    public ResponseEntity<SourceDiscoveryJob> getEnrichmentDiscoveryJob(@PathVariable String jobId) throws Exception {
+    @Operation(summary = "Get an enrichment URL discovery job",
+            description = "Returns the stored state of the DataForSEO SERP discovery job without polling the remote API.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Stored job state returned"),
+                    @ApiResponse(responseCode = "404", description = "Job not found")
+            })
+    public ResponseEntity<SourceDiscoveryJob> getEnrichmentDiscoveryJob(
+            @Parameter(description = "DataForSEO SERP job identifier", required = true)
+            @PathVariable String jobId) throws Exception {
         return ResponseEntity.ok(dataForSeoSerpService.getJob(jobId));
     }
 
@@ -321,9 +349,13 @@ public class ReviewGenerationController {
      */
     @Deprecated(since = "2026-06", forRemoval = false)
     @PostMapping("/review/vertical/{verticalId}/fetch")
-    @Operation(summary = "Run review remote fetching for a vertical")
+    @Operation(summary = "Run review remote fetching for a vertical",
+            description = "Fetches and persists review markdown sources for up to limit products in the vertical, "
+                    + "ordered by impact score descending. Does not run LLM completions.")
     public ResponseEntity<ReviewGenerationVerticalResult> fetchReviewSourcesForVertical(
+            @Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop')", required = true)
             @PathVariable String verticalId,
+            @Parameter(description = "Maximum number of products to process")
             @RequestParam(value = "limit", defaultValue = "5") int limit,
             HttpServletRequest request) throws IOException {
         Map<String, String> headers = requestHeaders(request);
@@ -342,9 +374,13 @@ public class ReviewGenerationController {
      */
     @Deprecated(since = "2026-06", forRemoval = false)
     @PostMapping("/review/vertical/{verticalId}/attributes")
-    @Operation(summary = "Run review attribute extraction for a vertical")
+    @Operation(summary = "Run review attribute extraction for a vertical",
+            description = "Uses persisted reviewFacts to extract and persist product attributes for up to limit products "
+                    + "in the vertical, ordered by impact score descending.")
     public ResponseEntity<ReviewGenerationVerticalResult> extractReviewAttributesForVertical(
+            @Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop')", required = true)
             @PathVariable String verticalId,
+            @Parameter(description = "Maximum number of products to process")
             @RequestParam(value = "limit", defaultValue = "5") int limit) throws IOException {
         return ResponseEntity.ok(runVerticalStage(verticalId, limit, "attributes",
                 reviewGenerationService::extractReviewAttributes));
@@ -360,9 +396,13 @@ public class ReviewGenerationController {
      */
     @Deprecated(since = "2026-06", forRemoval = false)
     @PostMapping("/review/vertical/{verticalId}/text")
-    @Operation(summary = "Run review text completion for a vertical")
+    @Operation(summary = "Run review text completion for a vertical",
+            description = "Generates and persists AI review text for up to limit products in the vertical, "
+                    + "ordered by impact score descending. Requires persisted reviewFacts and extracted attributes.")
     public ResponseEntity<ReviewGenerationVerticalResult> generateReviewTextForVertical(
+            @Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop')", required = true)
             @PathVariable String verticalId,
+            @Parameter(description = "Maximum number of products to process")
             @RequestParam(value = "limit", defaultValue = "5") int limit) throws IOException {
         return ResponseEntity.ok(runVerticalStage(verticalId, limit, "text",
                 reviewGenerationService::generateReviewText));
@@ -379,9 +419,13 @@ public class ReviewGenerationController {
      */
     @Deprecated(since = "2026-06", forRemoval = false)
     @PostMapping("/review/vertical/{verticalId}/workflow")
-    @Operation(summary = "Run full synchronous review workflow for a vertical")
+    @Operation(summary = "Run full synchronous review workflow for a vertical",
+            description = "Fetches sources, extracts attributes, then generates and persists review text "
+                    + "for up to limit products in the vertical, ordered by impact score descending.")
     public ResponseEntity<ReviewGenerationVerticalResult> generateReviewWorkflowForVertical(
+            @Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop')", required = true)
             @PathVariable String verticalId,
+            @Parameter(description = "Maximum number of products to process")
             @RequestParam(value = "limit", defaultValue = "5") int limit,
             HttpServletRequest request) throws IOException {
         Map<String, String> headers = requestHeaders(request);
@@ -403,7 +447,10 @@ public class ReviewGenerationController {
     @PostMapping("/review/batch")
     @Operation(summary = "Schedule AI review generation batch",
             description = "Launch a batch review generation job for a vertical.")
-    public ResponseEntity<String> generateReviewBatch(@RequestParam("verticalId") String verticalId,
+    public ResponseEntity<String> generateReviewBatch(
+            @Parameter(description = "Vertical identifier to generate reviews for", required = true)
+            @RequestParam("verticalId") String verticalId,
+            @Parameter(description = "Maximum number of products to include in the batch; when omitted, all eligible products are batched")
             @RequestParam(value = "top", required = false) Integer top) throws IOException {
         VerticalConfig verticalConfig = verticalsConfigService.getConfigByIdOrDefault(verticalId);
         List<Product> products;
@@ -429,8 +476,11 @@ public class ReviewGenerationController {
     @Operation(summary = "Schedule AI review generation for top impact score products",
             description = "Launch a batch review generation job for the next top impact score products without existing AI reviews.")
     public ResponseEntity<List<String>> generateImpactScoreBatch(
+            @Parameter(description = "Vertical identifier; when omitted, all enabled verticals are processed")
             @RequestParam(value = "verticalId", required = false) String verticalId,
+            @Parameter(description = "Number of products to include per vertical batch")
             @RequestParam(value = "limit", defaultValue = "2") int limit,
+            @Parameter(description = "Sort products by ImpactScore descending when true; by date otherwise")
             @RequestParam(value = "sortOnImpactScore", defaultValue = "true") boolean sortOnImpactScore
 
 
@@ -455,7 +505,9 @@ public class ReviewGenerationController {
     @PostMapping("/review/batch/process")
     @Operation(summary = "Process batch review generation results",
             description = "Trigger the handling of batch review generation results for a job.")
-    public void processBatchResults(@RequestParam("jobId") String jobId)
+    public void processBatchResults(
+            @Parameter(description = "AI provider batch job identifier as returned by the batch submission endpoint", required = true)
+            @RequestParam("jobId") String jobId)
             throws ResourceNotFoundException, IOException {
         reviewGenerationService.triggerResponseHandling(jobId);
     }

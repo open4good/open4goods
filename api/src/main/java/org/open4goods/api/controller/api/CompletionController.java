@@ -21,6 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 
 /**
@@ -28,6 +32,9 @@ import jakarta.validation.constraints.NotBlank;
  */
 @RestController
 @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
+@Tag(name = "Completion", description = "Trigger on-demand data completion runs from external sources: "
+        + "resource/image fetching, Amazon product data, Icecat specs and EPREL energy labels. "
+        + "Each source has endpoints scoped to all verticals, a single vertical, or a single product by GTIN.")
 public class CompletionController {
 
     private final VerticalsConfigService verticalConfigService;
@@ -56,21 +63,45 @@ public class CompletionController {
     ///////////////////////////////////
 
     @PostMapping("/completion/resources")
-    @Operation(summary = "Launch resource completion on all verticals")
+    @Operation(
+            summary = "Run resource completion on all verticals",
+            description = "Fetches missing resources (product images, PDF datasheets, cached web pages) "
+                    + "for every product in every active vertical. "
+                    + "Use /completion/resources/{vertical} for a scoped run.")
+    @ApiResponse(responseCode = "200", description = "Resource completion run started for all verticals")
     public void resourceCompletionAll() throws InvalidParameterException, IOException {
         resourceCompletionService.completeAll(false);
     }
 
     @PostMapping("/completion/resources/{vertical}")
-    @Operation(summary = "Launch resource completion on the specified vertical")
-    public void resourceCompletionVertical(@PathVariable @NotBlank final String vertical)
+    @Operation(
+            summary = "Run resource completion on a specific vertical",
+            description = "Fetches missing resources (product images, PDF datasheets, cached web pages) "
+                    + "for every product in the named vertical. "
+                    + "Use /completion/resources to run across all verticals.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Resource completion run started for the vertical"),
+            @ApiResponse(responseCode = "404", description = "Vertical not found")
+    })
+    public void resourceCompletionVertical(
+            @Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop')", required = true)
+            @PathVariable @NotBlank final String vertical)
             throws InvalidParameterException, IOException {
         resourceCompletionService.complete(verticalConfigService.getConfigById(vertical), false);
     }
 
     @PostMapping("/completion/resources/gtin/{gtin}")
-    @Operation(summary = "Launch resource completion on a specific product")
-    public void resourceCompletionProduct(@PathVariable final Long gtin) {
+    @Operation(
+            summary = "Run resource completion on a single product",
+            description = "Fetches missing resources for the product with the given GTIN and re-indexes it. "
+                    + "The product's vertical is resolved automatically from its existing document.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Resource completion run for the product"),
+            @ApiResponse(responseCode = "404", description = "No product with the given GTIN found in the index")
+    })
+    public void resourceCompletionProduct(
+            @Parameter(description = "GTIN (EAN-13) of the product to process", required = true)
+            @PathVariable final Long gtin) {
         Product data = loadProduct(gtin);
         resourceCompletionService.completeAndIndexProduct(
                 verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
@@ -81,14 +112,29 @@ public class CompletionController {
     ///////////////////////////////////
 
     @PostMapping("/completion/amazon")
-    @Operation(summary = "Launch Amazon completion on all verticals")
+    @Operation(
+            summary = "Run Amazon completion on all verticals",
+            description = "Enriches products across all active verticals with data fetched from the Amazon Product "
+                    + "Advertising API (title, description, specs, images). The batch size is capped by the "
+                    + "configured maxCallsPerBatch limit to stay within API quotas.")
+    @ApiResponse(responseCode = "200", description = "Amazon completion run started for all verticals")
     public void amazonCompletionAll() throws InvalidParameterException, IOException {
         amazonCompletionService.completeAll(amazonCompletionService.getAmazonConfig().getMaxCallsPerBatch(), false);
     }
 
     @PostMapping("/completion/amazon/{vertical}")
-    @Operation(summary = "Launch Amazon completion on the specified vertical")
-    public void amazonCompletionVertical(@PathVariable @NotBlank final String vertical,
+    @Operation(
+            summary = "Run Amazon completion on a specific vertical",
+            description = "Enriches products in the named vertical with Amazon Product Advertising API data. "
+                    + "An optional max parameter overrides the default per-batch API call limit.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Amazon completion run started for the vertical"),
+            @ApiResponse(responseCode = "404", description = "Vertical not found")
+    })
+    public void amazonCompletionVertical(
+            @Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop')", required = true)
+            @PathVariable @NotBlank final String vertical,
+            @Parameter(description = "Maximum number of Amazon API calls to make; defaults to the configured maxCallsPerBatch")
             @RequestParam(required = false) Integer max)
             throws InvalidParameterException, IOException {
         int limit = max == null ? amazonCompletionService.getAmazonConfig().getMaxCallsPerBatch() : max;
@@ -96,8 +142,17 @@ public class CompletionController {
     }
 
     @PostMapping("/completion/amazon/gtin/{gtin}")
-    @Operation(summary = "Launch Amazon completion on a specific product")
-    public void amazonCompletionProduct(@PathVariable final Long gtin) {
+    @Operation(
+            summary = "Run Amazon completion on a single product",
+            description = "Queries the Amazon Product Advertising API for the product with the given GTIN "
+                    + "and re-indexes it with the enriched data.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Amazon completion run for the product"),
+            @ApiResponse(responseCode = "404", description = "No product with the given GTIN found in the index")
+    })
+    public void amazonCompletionProduct(
+            @Parameter(description = "GTIN (EAN-13) of the product to enrich via Amazon", required = true)
+            @PathVariable final Long gtin) {
         Product data = loadProduct(gtin);
         amazonCompletionService.completeAndIndexProduct(
                 verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
@@ -108,22 +163,45 @@ public class CompletionController {
     ///////////////////////////////////
 
     @PostMapping("/completion/icecat")
-    @Operation(summary = "Launch Icecat completion on all verticals")
+    @Operation(
+            summary = "Run Icecat completion on all verticals",
+            description = "Enriches products across all active verticals with structured specification data "
+                    + "from the Icecat product catalogue (dimensions, weight, technical attributes). "
+                    + "Runs with force=true to re-fetch even already-enriched products.")
+    @ApiResponse(responseCode = "200", description = "Icecat completion run started for all verticals")
     public void icecatCompletionAll() throws InvalidParameterException, IOException {
         iceCatService.completeAll(true);
     }
 
     @PostMapping("/completion/icecat/{vertical}")
-    @Operation(summary = "Launch Icecat completion on the specified vertical")
-    public void icecatCompletionVertical(@PathVariable @NotBlank final String vertical,
+    @Operation(
+            summary = "Run Icecat completion on a specific vertical",
+            description = "Enriches products in the named vertical with Icecat specification data. "
+                    + "The max parameter caps the number of products processed in this run.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Icecat completion run started for the vertical"),
+            @ApiResponse(responseCode = "404", description = "Vertical not found")
+    })
+    public void icecatCompletionVertical(
+            @Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop')", required = true)
+            @PathVariable @NotBlank final String vertical,
+            @Parameter(description = "Maximum number of products to process in this run", required = true)
             @RequestParam Integer max)
             throws InvalidParameterException, IOException {
         iceCatService.complete(verticalConfigService.getConfigById(vertical), max, true);
     }
 
     @PostMapping("/completion/icecat/gtin/{gtin}")
-    @Operation(summary = "Launch Icecat completion on a specific product")
-    public void icecatCompletionProduct(@PathVariable final Long gtin) {
+    @Operation(
+            summary = "Run Icecat completion on a single product",
+            description = "Fetches Icecat specification data for the product with the given GTIN and re-indexes it.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Icecat completion run for the product"),
+            @ApiResponse(responseCode = "404", description = "No product with the given GTIN found in the index")
+    })
+    public void icecatCompletionProduct(
+            @Parameter(description = "GTIN (EAN-13) of the product to enrich via Icecat", required = true)
+            @PathVariable final Long gtin) {
         Product data = loadProduct(gtin);
         iceCatService.completeAndIndexProduct(
                 verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);
@@ -134,21 +212,45 @@ public class CompletionController {
     ///////////////////////////////////
 
     @PostMapping("/completion/eprel")
-    @Operation(summary = "Launch EPREL completion on all verticals")
+    @Operation(
+            summary = "Run EPREL completion on all verticals",
+            description = "Matches products across all active verticals against the EPREL catalogue and enriches "
+                    + "them with EU energy label data (energy class, efficiency ratings). "
+                    + "Runs with force=true to re-process already-enriched products.")
+    @ApiResponse(responseCode = "200", description = "EPREL completion run started for all verticals")
     public void eprelCompletionAll() throws InvalidParameterException, IOException {
         eprelCompletionService.completeAll(true);
     }
 
     @PostMapping("/completion/eprel/{vertical}")
-    @Operation(summary = "Launch EPREL completion on the specified vertical")
-    public void eprelCompletionVertical(@PathVariable @NotBlank final String vertical,
+    @Operation(
+            summary = "Run EPREL completion on a specific vertical",
+            description = "Matches products in the named vertical against the EPREL catalogue and enriches them "
+                    + "with EU energy label data. The max parameter caps the number of products processed.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "EPREL completion run started for the vertical"),
+            @ApiResponse(responseCode = "404", description = "Vertical not found")
+    })
+    public void eprelCompletionVertical(
+            @Parameter(description = "Vertical identifier (e.g. 'tv', 'washing-machine')", required = true)
+            @PathVariable @NotBlank final String vertical,
+            @Parameter(description = "Maximum number of products to process in this run", required = true)
             @RequestParam Integer max) throws InvalidParameterException, IOException {
         eprelCompletionService.complete(verticalConfigService.getConfigById(vertical), max, true);
     }
 
     @PostMapping("/completion/eprel/gtin/{gtin}")
-    @Operation(summary = "Launch EPREL completion on a specific product")
-    public void eprelCompletionProduct(@PathVariable final Long gtin) {
+    @Operation(
+            summary = "Run EPREL completion on a single product",
+            description = "Matches the product with the given GTIN against the EPREL catalogue and enriches it "
+                    + "with EU energy label data, then re-indexes it.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "EPREL completion run for the product"),
+            @ApiResponse(responseCode = "404", description = "No product with the given GTIN found in the index")
+    })
+    public void eprelCompletionProduct(
+            @Parameter(description = "GTIN (EAN-13) of the product to enrich via EPREL", required = true)
+            @PathVariable final Long gtin) {
         Product data = loadProduct(gtin);
         eprelCompletionService.completeAndIndexProduct(
                 verticalConfigService.getConfigByIdOrDefault(data.getVertical()), data);

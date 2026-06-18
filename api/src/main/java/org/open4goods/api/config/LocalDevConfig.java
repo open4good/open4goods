@@ -1,23 +1,23 @@
 package org.open4goods.api.config;
 
 import java.lang.reflect.Proxy;
-
-import org.open4goods.api.repository.mock.MockProductRepository;
-import org.open4goods.api.services.backup.BackupService;
-import org.open4goods.api.config.yml.BackupConfig;
-import org.open4goods.services.productrepository.services.ProductRepository;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Profile;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.open4goods.api.config.yml.BackupConfig;
+import org.open4goods.api.repository.mock.MockProductRepository;
+import org.open4goods.api.services.backup.BackupService;
 import org.open4goods.embedding.config.DjlEmbeddingProperties;
 import org.open4goods.embedding.service.image.AbstractImageModelFactory;
 import org.open4goods.embedding.service.image.DjlImageEmbeddingService;
+import org.open4goods.services.productrepository.services.ProductRepository;
+import org.springframework.boot.health.contributor.Health;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter;
@@ -66,7 +66,7 @@ public class LocalDevConfig {
                 
                 if (method.getName().equals("toString")) return "MockElasticsearchOperations";
                 if (method.getName().equals("hashCode")) return 42;
-                if (method.getName().equals("equals")) return false;
+                if (method.getName().equals("equals")) return proxy == args[0];
 
                 if (method.getReturnType().equals(long.class)) {
                     return 0L;
@@ -100,7 +100,37 @@ public class LocalDevConfig {
 	@Bean
 	@Primary
 	BackupService backupService(BackupConfig backupConfig) {
-		return new BackupService(null, null, backupConfig, null, null);
+		return new BackupService(null, null, backupConfig, null, null) {
+			@Override
+			public void backupProducts() {
+				// no-op for local profile
+			}
+
+			@Override
+			public void exportVertical(String vertical) {
+				// no-op for local profile
+			}
+
+			@Override
+			public void importProducts() {
+				// no-op for local profile
+			}
+
+			@Override
+			public void copyTo(String suffix) {
+				// no-op for local profile
+			}
+
+			@Override
+			public void backupXwiki() {
+				// no-op for local profile
+			}
+
+			@Override
+			public Health health() {
+				return Health.up().withDetail("backup", "disabled for local profile").build();
+			}
+		};
 	}
 	
 	@Bean

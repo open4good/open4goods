@@ -47,6 +47,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * Resolution assistance endpoints that help an AI agent discover candidate taxonomy
@@ -61,6 +65,9 @@ import io.swagger.v3.oas.annotations.Operation;
 @RequestMapping("/api/referentials")
 @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
 @Profile("!beta")
+@Tag(name = "Referentials", description = "Taxonomy candidate discovery endpoints consumed by AI agents during vertical configuration. "
+        + "Returns scored candidates from Google Product Taxonomy, ETIM and Wikidata at both vertical and attribute level. "
+        + "Not active in the beta profile.")
 public class ReferentialHelperController
 {
 
@@ -100,8 +107,14 @@ public class ReferentialHelperController
             summary = "Candidate Google Product Taxonomy entries for a vertical",
             description = "Scores taxonomy entries by keyword overlap with vertical names. "
                     + "Use to choose the best googleTaxonomy referential mapping.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Ranked list of Google Product Taxonomy candidates"),
+            @ApiResponse(responseCode = "404", description = "Vertical not found")
+    })
     public ResponseEntity<List<GoogleCandidateDto>> googleCandidates(
+            @Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop', 'air-conditioner')", required = true)
             @RequestParam String vertical,
+            @Parameter(description = "Maximum number of candidates to return")
             @RequestParam(defaultValue = "" + DEFAULT_MAX_CANDIDATES) int maxResults)
     {
         VerticalConfig vc = verticalsService.getConfigById(vertical);
@@ -166,8 +179,14 @@ public class ReferentialHelperController
             summary = "Candidate ETIM class entries for a vertical",
             description = "Resolves ETIM class IDs via Wikidata SPARQL. "
                     + "Queries by Icecat category ID first, then falls back to label search.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Ranked list of ETIM class candidates"),
+            @ApiResponse(responseCode = "404", description = "Vertical not found")
+    })
     public ResponseEntity<List<EtimCandidateDto>> etimCandidates(
+            @Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop', 'air-conditioner')", required = true)
             @RequestParam String vertical,
+            @Parameter(description = "Maximum number of candidates to return")
             @RequestParam(defaultValue = "" + DEFAULT_MAX_CANDIDATES) int maxResults)
     {
         VerticalConfig vc = verticalsService.getConfigById(vertical);
@@ -214,8 +233,14 @@ public class ReferentialHelperController
     @Operation(
             summary = "Candidate Wikidata entities for a vertical",
             description = "Searches Wikidata by vertical names using the EntitySearch SPARQL service.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Ranked list of Wikidata entity candidates"),
+            @ApiResponse(responseCode = "404", description = "Vertical not found")
+    })
     public ResponseEntity<List<WikidataCandidateDto>> wikidataCandidates(
+            @Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop', 'air-conditioner')", required = true)
             @RequestParam String vertical,
+            @Parameter(description = "Maximum number of candidates to return")
             @RequestParam(defaultValue = "" + DEFAULT_MAX_CANDIDATES) int maxResults)
     {
         VerticalConfig vc = verticalsService.getConfigById(vertical);
@@ -265,9 +290,16 @@ public class ReferentialHelperController
                     + "instance because the category-feature mapping has not been "
                     + "synchronised - falls back to a global Icecat-features index search "
                     + "with matchSource=global-fallback.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Ranked list of Icecat feature candidates for the attribute"),
+            @ApiResponse(responseCode = "404", description = "Vertical or attribute not found")
+    })
     public ResponseEntity<List<AttributeIcecatCandidateDto>> attributeIcecatCandidates(
+            @Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop')", required = true)
             @RequestParam String vertical,
+            @Parameter(description = "Nudger attribute key to find Icecat feature mappings for (e.g. 'HEIGHT', 'WEIGHT')", required = true)
             @RequestParam String attribute,
+            @Parameter(description = "Maximum number of candidates to return")
             @RequestParam(defaultValue = "" + DEFAULT_MAX_CANDIDATES) int maxResults)
     {
         VerticalConfig vc = verticalsService.getConfigById(vertical);
@@ -356,9 +388,16 @@ public class ReferentialHelperController
             summary = "Candidate ETIM feature IDs for a Nudger attribute key",
             description = "Resolves ETIM features via Wikidata SPARQL bridges (Icecat "
                     + "feature ↔ ETIM feature) and Wikidata label search.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Ranked list of ETIM feature candidates for the attribute"),
+            @ApiResponse(responseCode = "404", description = "Vertical or attribute not found")
+    })
     public ResponseEntity<List<AttributeEtimCandidateDto>> attributeEtimCandidates(
+            @Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop')", required = true)
             @RequestParam String vertical,
+            @Parameter(description = "Nudger attribute key to find ETIM feature mappings for (e.g. 'HEIGHT', 'WEIGHT')", required = true)
             @RequestParam String attribute,
+            @Parameter(description = "Maximum number of candidates to return")
             @RequestParam(defaultValue = "" + DEFAULT_MAX_CANDIDATES) int maxResults)
     {
         VerticalConfig vc = verticalsService.getConfigById(vertical);
@@ -407,11 +446,18 @@ public class ReferentialHelperController
      */
     @GetMapping("/attribute/wikidata/candidates")
     @Operation(
-            summary = "Candidate Wikidata property IDs (P-xxxx) for a Nudger attribute key",
+            summary = "Candidate Wikidata property IDs for a Nudger attribute key",
             description = "Searches Wikidata properties by the attribute's name and synonyms.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Ranked list of Wikidata property (P-id) candidates for the attribute"),
+            @ApiResponse(responseCode = "404", description = "Vertical or attribute not found")
+    })
     public ResponseEntity<List<AttributeWikidataPropertyCandidateDto>> attributeWikidataPropertyCandidates(
+            @Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop')", required = true)
             @RequestParam String vertical,
+            @Parameter(description = "Nudger attribute key to find Wikidata property mappings for (e.g. 'HEIGHT', 'WEIGHT')", required = true)
             @RequestParam String attribute,
+            @Parameter(description = "Maximum number of candidates to return")
             @RequestParam(defaultValue = "" + DEFAULT_MAX_CANDIDATES) int maxResults)
     {
         VerticalConfig vc = verticalsService.getConfigById(vertical);
@@ -451,7 +497,12 @@ public class ReferentialHelperController
             summary = "Per-attribute cross-referential coverage of a vertical",
             description = "Lists for every attribute of the vertical which taxonomies "
                     + "are wired (icecat / eprel / etim / wikidata) and which are still missing.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Coverage report listing wired and missing taxonomies per attribute"),
+            @ApiResponse(responseCode = "404", description = "Vertical not found")
+    })
     public ResponseEntity<List<AttributeReferentialCoverageDto>> attributeCoverage(
+            @Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop')", required = true)
             @RequestParam String vertical)
     {
         VerticalConfig vc = verticalsService.getConfigById(vertical);

@@ -48,8 +48,6 @@ import org.open4goods.model.vertical.LegacyPromptConfig;
 import org.open4goods.services.eprelservice.client.EprelApiClient;
 import org.open4goods.services.wikidataservice.client.RestWikidataApiClient;
 import org.open4goods.services.wikidataservice.client.WikidataApiClient;
-import org.open4goods.services.wikidataservice.config.WikidataServiceProperties;
-import org.open4goods.services.wikidataservice.model.WikidataEntity;
 import org.open4goods.services.wikidataservice.repository.WikidataEntityRepository;
 import org.open4goods.services.wikidataservice.service.WikidataLookupService;
 import org.open4goods.services.wikidataservice.service.WikidataParser;
@@ -93,11 +91,9 @@ import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.client.RestTemplate;
 import org.xml.sax.SAXException;
@@ -120,10 +116,7 @@ public class ApiConfig {
 	private final ApiProperties apiProperties;
 	private static final Logger logger = LoggerFactory.getLogger(ApiConfig.class);
 
-	protected final Environment env;
-
-	public ApiConfig(ApiProperties apiProperties, Environment env) {
-		this.env = env;
+	public ApiConfig(ApiProperties apiProperties) {
 		this.apiProperties = apiProperties;
 	}
 

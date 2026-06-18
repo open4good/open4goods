@@ -10,13 +10,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+/**
+ * Creates the real backup service for profiles that have the required storage,
+ * repository, and XWiki dependencies.
+ */
 @Configuration
-@Profile({ "beta" })
-public class ApiConfigBeta {
+@Profile({ "beta", "dev", "devsec", "prod" })
+public class BackupServiceConfig {
 
 	@Bean
-	BackupService backupService(XWikiReadService xwikiService, ProductRepository productRepository, BackupConfig backupConfig, SerialisationService serialisationService, AggregationFacadeService aggregationService) {
+	BackupService backupService(XWikiReadService xwikiService, ProductRepository productRepository,
+			BackupConfig backupConfig, SerialisationService serialisationService,
+			AggregationFacadeService aggregationService) {
 		return new BackupService(xwikiService, productRepository, backupConfig, serialisationService, aggregationService);
 	}
-
 }
