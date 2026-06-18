@@ -200,7 +200,7 @@
   **Local run commands:**
   ```bash
   docker run -d --name pdapi-postgres -e POSTGRES_DB=product_data_api -e POSTGRES_USER=product_data_api \
-    -e POSTGRES_PASSWORD=product_data_api -p 5432:5432 postgres:16
+    -e POSTGRES_PASSWORD=product_data_api -p 5433:5432 postgres:16
   docker run -d --name pdapi-redis -p 6379:6379 redis:7
   export B2B_JWT_SECRET=dev-only-change-me
   export B2B_ADMIN_EMAILS=goulven.furet@gmail.com

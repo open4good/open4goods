@@ -103,3 +103,11 @@ b2b:
   stripe:
     secret-key: ${B2B_STRIPE_SECRET_KEY:}
     webhook-secret: ${B2B_STRIPE_WEBHOOK_SECRET:}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: devsec
+  datasource:
+    url: ${B2B_POSTGRES_URL:jdbc:postgresql://localhost:5433/product_data_api}

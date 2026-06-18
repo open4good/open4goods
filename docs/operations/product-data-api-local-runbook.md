@@ -17,7 +17,7 @@
 
 ```bash
 docker run -d --name pdapi-postgres -e POSTGRES_DB=product_data_api -e POSTGRES_USER=product_data_api \
-  -e POSTGRES_PASSWORD=product_data_api -p 5432:5432 postgres:16
+  -e POSTGRES_PASSWORD=product_data_api -p 5433:5432 postgres:16
 docker run -d --name pdapi-redis -p 6379:6379 redis:7
 ```
 
@@ -43,8 +43,8 @@ java -jar b2b-api/target/b2b-api-*.jar \
 ```
 
 `devsec` points Elasticsearch at the prod cluster (`136.243.46.60:9200`, index
-`products-moustik`). Postgres/Redis come from `application.yml` (localhost above).
-Default port **8087**.
+`products-moustik`). Postgres defaults to `localhost:5433` and Redis defaults to
+`localhost:6379`. Default port **8087**.
 
 Required env (test values, never commit real secrets) - see
 [auth](../architecture/product-data-api-auth.md) and
