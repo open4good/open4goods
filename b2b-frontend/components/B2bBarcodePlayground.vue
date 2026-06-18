@@ -321,18 +321,20 @@
 
                 <div class="pa-8 d-flex justify-center align-center min-height-200 bg-white">
                   <!-- Rendered barcode wrapper -->
+                  <!-- eslint-disable vue/no-v-html -->
                   <div
                     v-if="format === 'svg'"
-                    v-html="barcodeImageSource"
                     class="barcode-svg-render-wrapper"
+                    v-html="barcodeImageSource"
                   />
+                  <!-- eslint-enable vue/no-v-html -->
                   <img
                     v-else
                     :src="barcodeImageSource"
                     alt="Generated Barcode"
                     class="barcode-img-render"
                     :style="{ maxWidth: '100%', maxHeight: '250px' }"
-                  />
+                  >
                 </div>
 
                 <v-divider />
@@ -798,7 +800,6 @@ function generateSampleSvg () {
     // Render 1D barcode lines
     let barsHtml = ''
     let x = quietZone.value ? 20 : 5
-    const step = 2.5
     const barWidths = [1, 2, 1, 3, 1, 1, 2, 4, 1, 2, 3, 1, 1, 2, 1, 3, 1, 1, 2, 2, 1, 1, 3, 2, 1, 4, 1, 2, 1, 3, 1, 2, 1, 1, 2, 4, 1]
 
     for (let i = 0; i < barWidths.length; i++) {
@@ -877,7 +878,6 @@ function generateSamplePngDataUrl () {
       // Draw 1D barcode lines
       const left = quietZone.value ? canvas.width * 0.1 : 5
       const right = quietZone.value ? canvas.width * 0.9 : canvas.width - 5
-      const barcodeWidth = right - left
       const barHeight = showText.value ? canvas.height * 0.65 : canvas.height * 0.8
 
       let currX = left

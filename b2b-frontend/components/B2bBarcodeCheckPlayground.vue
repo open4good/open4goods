@@ -134,7 +134,7 @@
                         :alt="result.forensics.issuingCountryCode"
                         height="14"
                         class="mr-1 d-inline-block align-middle"
-                      />
+                      >
                       {{ result.forensics.issuingCountryName || result.forensics.issuingCountryCode }}
                       <span class="text-medium-emphasis text-caption ml-1">({{ result.forensics.gs1Prefix }})</span>
                     </td>

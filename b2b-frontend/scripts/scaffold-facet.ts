@@ -35,7 +35,6 @@ if (!slug) {
 
 const facetId = `product.${slug}`
 const endpointPath = `/api/v1/products/{gtin}/${slug}`
-const playgroundEndpoint = `/api/v1/customer/playground/products/${slug}`
 const root = join(import.meta.dirname, '..')
 
 function write (path: string, content: string) {
@@ -253,7 +252,7 @@ useLocalizedPageSeo({
   titleKey: 'playground.seo.title',
   descriptionKey: 'playground.seo.description'
 })
-<\/script>
+</script>
 `
 
 write(`pages/docs/products/${slug}/playground.vue`, playgroundPage)
