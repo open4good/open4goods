@@ -1,9 +1,14 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest'
+import { access } from 'node:fs/promises'
 import { getRequestURL } from 'h3'
 import sitemapPlugin from './sitemap-index'
-import { getPublicSitemapUrlsForDomainLanguage } from '~~/server/utils/sitemap-local-files'
+import { getLocalSitemapFileDescriptorsForDomainLanguage } from '~~/server/utils/sitemap-local-files'
 
 // Mock dependencies
+vi.mock('node:fs/promises', () => ({
+  access: vi.fn(),
+}))
+
 vi.mock('h3', () => ({
   getRequestURL: vi.fn(),
   createError: vi.fn(),
@@ -11,7 +16,7 @@ vi.mock('h3', () => ({
 }))
 
 vi.mock('~~/server/utils/sitemap-local-files', () => ({
-  getPublicSitemapUrlsForDomainLanguage: vi.fn(),
+  getLocalSitemapFileDescriptorsForDomainLanguage: vi.fn(),
 }))
 
 describe('sitemap-index plugin', () => {
@@ -28,7 +33,8 @@ describe('sitemap-index plugin', () => {
       sitemaps: [],
     }
     vi.clearAllMocks()
-    vi.mocked(getPublicSitemapUrlsForDomainLanguage).mockReturnValue([])
+    vi.mocked(getLocalSitemapFileDescriptorsForDomainLanguage).mockReturnValue([])
+    vi.mocked(access).mockResolvedValue(undefined)
   })
 
   const runPlugin = () => {
@@ -38,58 +44,97 @@ describe('sitemap-index plugin', () => {
       },
     } as unknown as { hooks: { hook: Mock } }
     sitemapPlugin(nitroApp)
-    // Return the registered callback
+    // Return the registered async callback
     return mockHook.mock.calls[0]?.[1]
   }
 
-  it('handles standard nudger.fr request', () => {
+  it('handles standard nudger.fr request with existing file', async () => {
     const callback = runPlugin()
 
     vi.mocked(getRequestURL).mockReturnValue(new URL('https://nudger.fr'))
-    vi.mocked(getPublicSitemapUrlsForDomainLanguage).mockReturnValue([
-      'https://nudger.fr/sitemap/fr/sitemap.xml',
+    vi.mocked(getLocalSitemapFileDescriptorsForDomainLanguage).mockReturnValue([
+      {
+        filePath: '/opt/open4goods/sitemap/fr/product-pages.xml',
+        fileName: 'product-pages.xml',
+        publicPath: '/sitemap/fr/product-pages.xml',
+      },
     ])
+    vi.mocked(access).mockResolvedValue(undefined)
 
-    callback(mockCtx)
+    await callback(mockCtx)
 
     expect(mockCtx.sitemaps).toHaveLength(1)
     expect(mockCtx.sitemaps[0]?.sitemap).toBe(
-      'https://nudger.fr/sitemap/fr/sitemap.xml'
+      'https://nudger.fr/sitemap/fr/product-pages.xml'
     )
   })
 
-  it('handles empty sitemap list', () => {
+  it('skips sitemaps whose file does not exist on disk', async () => {
     const callback = runPlugin()
 
     vi.mocked(getRequestURL).mockReturnValue(new URL('https://nudger.fr'))
-    vi.mocked(getPublicSitemapUrlsForDomainLanguage).mockReturnValue([])
+    vi.mocked(getLocalSitemapFileDescriptorsForDomainLanguage).mockReturnValue([
+      {
+        filePath: '/opt/open4goods/sitemap/fr/guides.xml',
+        fileName: 'guides.xml',
+        publicPath: '/sitemap/fr/guides.xml',
+      },
+    ])
+    vi.mocked(access).mockRejectedValue(new Error('ENOENT'))
 
-    callback(mockCtx)
+    await callback(mockCtx)
 
     expect(mockCtx.sitemaps).toHaveLength(0)
   })
 
-  it('handles unknown domain by falling back to default', () => {
+  it('handles empty sitemap list', async () => {
+    const callback = runPlugin()
+
+    vi.mocked(getRequestURL).mockReturnValue(new URL('https://nudger.fr'))
+    vi.mocked(getLocalSitemapFileDescriptorsForDomainLanguage).mockReturnValue([])
+
+    await callback(mockCtx)
+
+    expect(mockCtx.sitemaps).toHaveLength(0)
+  })
+
+  it('handles unknown domain by falling back to default', async () => {
     const callback = runPlugin()
 
     vi.mocked(getRequestURL).mockReturnValue(new URL('https://unknown.com'))
-    vi.mocked(getPublicSitemapUrlsForDomainLanguage).mockReturnValue([
-      'https://unknown.com/sitemap/fr/sitemap-fr.xml',
+    vi.mocked(getLocalSitemapFileDescriptorsForDomainLanguage).mockReturnValue([
+      {
+        filePath: '/opt/open4goods/sitemap/default/product-pages.xml',
+        fileName: 'product-pages.xml',
+        publicPath: '/sitemap/default/product-pages.xml',
+      },
     ])
+    vi.mocked(access).mockResolvedValue(undefined)
 
-    callback(mockCtx)
+    await callback(mockCtx)
 
     expect(mockCtx.sitemaps).toHaveLength(1)
     expect(mockCtx.sitemaps[0]?.sitemap).toBe(
-      'https://unknown.com/sitemap/fr/sitemap-fr.xml'
+      'https://unknown.com/sitemap/default/product-pages.xml'
     )
   })
 
-  it('handles sitemapLocalFiles returning null/undefined logic (simulated by empty array)', () => {
+  it('does not add duplicates', async () => {
     const callback = runPlugin()
+
     vi.mocked(getRequestURL).mockReturnValue(new URL('https://nudger.fr'))
-    vi.mocked(getPublicSitemapUrlsForDomainLanguage).mockReturnValue([])
-    callback(mockCtx)
-    expect(mockCtx.sitemaps).toHaveLength(0)
+    vi.mocked(getLocalSitemapFileDescriptorsForDomainLanguage).mockReturnValue([
+      {
+        filePath: '/opt/open4goods/sitemap/fr/product-pages.xml',
+        fileName: 'product-pages.xml',
+        publicPath: '/sitemap/fr/product-pages.xml',
+      },
+    ])
+    vi.mocked(access).mockResolvedValue(undefined)
+    mockCtx.sitemaps = [{ sitemap: 'https://nudger.fr/sitemap/fr/product-pages.xml' }]
+
+    await callback(mockCtx)
+
+    expect(mockCtx.sitemaps).toHaveLength(1)
   })
 })
