@@ -1,10 +1,12 @@
+import { access } from 'node:fs/promises'
+
 import { getRequestURL } from 'h3'
 
 import { getDomainLanguageFromHostname } from '~~/shared/utils/domain-language'
-import { getPublicSitemapUrlsForDomainLanguage } from '~~/server/utils/sitemap-local-files'
+import { getLocalSitemapFileDescriptorsForDomainLanguage } from '~~/server/utils/sitemap-local-files'
 
 export default (nitroApp: import('nitro/app').NitroApp) => {
-  nitroApp.hooks.hook('sitemap:index-resolved', ctx => {
+  nitroApp.hooks.hook('sitemap:index-resolved', async ctx => {
     let requestURL = getRequestURL(ctx.event)
 
     // Fallback for static generation where requestURL might be localhost (NODE_ENV is 'prerender' during generation)
@@ -23,24 +25,35 @@ export default (nitroApp: import('nitro/app').NitroApp) => {
       requestURL.hostname
     )
 
-    const additionalSitemaps = getPublicSitemapUrlsForDomainLanguage(
-      domainLanguage,
-      requestURL.origin
-    )
+    const descriptors = getLocalSitemapFileDescriptorsForDomainLanguage(domainLanguage)
 
-    if (!additionalSitemaps.length) {
+    if (!descriptors.length) {
       return
     }
 
     const seen = new Set(ctx.sitemaps.map(entry => entry.sitemap))
 
-    additionalSitemaps.forEach(sitemapUrl => {
+    for (const descriptor of descriptors) {
+      // Skip sitemaps whose backing file doesn't exist yet (e.g. guides.xml before first generation run)
+      try {
+        await access(descriptor.filePath)
+      } catch {
+        continue
+      }
+
+      let sitemapUrl: string
+      try {
+        sitemapUrl = new URL(descriptor.publicPath, requestURL.origin).toString()
+      } catch {
+        continue
+      }
+
       if (seen.has(sitemapUrl)) {
-        return
+        continue
       }
 
       ctx.sitemaps.push({ sitemap: sitemapUrl })
       seen.add(sitemapUrl)
-    })
+    }
   })
 }
