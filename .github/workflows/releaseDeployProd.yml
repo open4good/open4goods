@@ -93,7 +93,7 @@ jobs:
       - name: 📝 Build Release Notes (tag)
         id: build_changelog
         if: steps.meta.outputs.is_tag == 'true'
-        uses: mikepenz/release-changelog-builder-action@v6.2.2
+        uses: mikepenz/release-changelog-builder-action@v6.2.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -177,7 +177,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
         with:
-          version: 10.34.3
+          version: 10.34.4
 
       - name: Setup pnpm cache
         uses: actions/setup-node@v6
@@ -585,7 +585,7 @@ jobs:
         if: env.MODE != 'test'
         uses: pnpm/action-setup@v6
         with:
-          version: 11.7.0
+          version: 11.8.0
           standalone: true
 
       - name: Set up Node.js for b2b-frontend
