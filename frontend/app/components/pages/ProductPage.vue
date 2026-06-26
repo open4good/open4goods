@@ -474,14 +474,13 @@ if (product.value?.fullSlug || (product.value?.slug && categorySlug)) {
     ? canonicalSlug
     : `/${canonicalSlug}`
 
-  // Only redirect if we are NOT on a valid uncategorized route (gtin-slug) that was intentionally requested
-  // heuristic: if we have NO categorySlug matched in the route, we allow it (uncategorized view)
-  const isUncategorizedRoute = !productRoute.categorySlug
-
-  if (
-    targetPath !== currentPath &&
-    (!isUncategorizedRoute || !productRoute.slug)
-  ) {
+  // 301 to the product's canonical path whenever the requested URL differs.
+  // Genuinely uncategorized products have a gtin-slug fullSlug equal to the
+  // requested path, so this is a no-op for them. Categorized products reached
+  // via the legacy non-vertical /{gtin}-{slug} URL (or via a stale slug) are
+  // redirected to their canonical category URL, which prevents the duplicate
+  // indexing Google was producing by ignoring the soft rel=canonical.
+  if (targetPath !== currentPath) {
     await navigateTo(targetPath, { replace: true, redirectCode: 301 })
   }
 }
@@ -2049,6 +2048,11 @@ const DEFERRED_SECTION_ROOT_MARGIN = '700px 0px 900px 0px'
 
 const renderedSections = ref<Record<string, boolean>>({
   [sectionIds.hero]: true,
+  // Server-render the price section: its data ships in the initial payload and
+  // it sits inside the initial CLS window, so deferring it behind the scroll
+  // observer only produced a large post-hydration layout shift (CWV: CLS) with
+  // no perf benefit. Heavy children (price-history charts) stay client-only.
+  [sectionIds.price]: true,
 })
 
 const markSectionForRender = (sectionId: string) => {
@@ -2685,9 +2689,13 @@ useHead(() => {
 }
 
 .product-page__deferred-placeholder {
-  min-height: 220px;
+  /* Reserve a realistic section height so revealing a deferred section (notably
+     the tall impact section above the fold) causes a much smaller layout shift.
+     Sections still render before entering the viewport, so any residual
+     shrink happens off-screen and does not count toward CLS. */
+  min-height: 600px;
   content-visibility: auto;
-  contain-intrinsic-size: 220px;
+  contain-intrinsic-size: 600px;
 }
 
 @media (prefers-reduced-motion: no-preference) {

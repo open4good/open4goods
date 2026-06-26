@@ -186,6 +186,48 @@ describe('Uncategorized Product Page', () => {
     })
   })
 
+  it('redirects a categorized product reached via the legacy /{gtin}-{slug} URL to its canonical category URL', async () => {
+    // Legacy non-vertical URL for a product that belongs to a vertical.
+    routeMock.params.slug = ['8431312260509-midea-mmcs12hrn8qrd0']
+    routeMock.path = '/8431312260509-midea-mmcs12hrn8qrd0'
+
+    const categorizedProduct = {
+      ...productMockData,
+      gtin: '8431312260509',
+      slug: 'climatisation-midea-mmcs12hrn8qrd0',
+      fullSlug: 'climatiseurs/8431312260509-climatisation-midea-mmcs12hrn8qrd0',
+    }
+
+    useAsyncDataMock.mockResolvedValueOnce({
+      data: ref(categorizedProduct),
+      pending: ref(false),
+      error: ref(null),
+    })
+
+    await mountProductPage()
+
+    expect(navigateTo).toHaveBeenCalledWith(
+      '/climatiseurs/8431312260509-climatisation-midea-mmcs12hrn8qrd0',
+      {
+        replace: true,
+        redirectCode: 301,
+      }
+    )
+  })
+
+  it('does not redirect a genuinely uncategorized product served at its canonical slug', async () => {
+    // fullSlug equals the requested path → no redirect (no duplicate created).
+    routeMock.params.slug = [
+      '8427973010706-rouleau-pour-couvre-livre-depliant-1-50x0-50',
+    ]
+    routeMock.path =
+      '/8427973010706-rouleau-pour-couvre-livre-depliant-1-50x0-50'
+
+    await mountProductPage()
+
+    expect(navigateTo).not.toHaveBeenCalled()
+  })
+
   it('redirects categorized products without fullSlug to the root product slug', async () => {
     routeMock.params.slug = [
       'livres',
