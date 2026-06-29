@@ -471,17 +471,6 @@
                     >
                       <h3 class="category-ecoscore__code-title">
                         {{
-                          t('category.ecoscorePage.sections.aiAudit.auditTitle')
-                        }}
-                      </h3>
-                      <AiAuditDisplay
-                        v-if="parsedAiResult"
-                        :ai-result="parsedAiResult"
-                        class="mb-6"
-                      />
-
-                      <h3 class="category-ecoscore__code-title">
-                        {{
                           t(
                             'category.ecoscorePage.sections.aiAudit.promptTitle'
                           )
@@ -570,7 +559,6 @@ import { createError, useRequestURL, useRoute, useSeoMeta } from '#imports'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useDisplay } from 'vuetify'
-import AiAuditDisplay from '~/components/category/AiAuditDisplay.vue'
 import CategoryHero from '~/components/category/CategoryHero.vue'
 import StickySectionNavigation from '~/components/shared/ui/StickySectionNavigation.vue'
 import { useCategories } from '~/composables/categories/useCategories'
@@ -676,21 +664,6 @@ const availableDataText = computed(
 const criticalReviewText = computed(
   () => impactScoreTexts.value?.criticalReview?.trim() || null
 )
-
-const parsedAiResult = computed(() => {
-  const config = impactScoreConfig.value
-  if (!config) return null
-  // @ts-expect-error: aiResult is a new field not yet in the generated client
-  if (config.aiResult) return config.aiResult
-  if (config.aiJsonResponse) {
-    try {
-      return JSON.parse(config.aiJsonResponse)
-    } catch (e) {
-      console.error('Failed to parse AI JSON response', e)
-    }
-  }
-  return null
-})
 
 const availableImpactScoreCriterias = computed<string[]>(
   () => category.value?.availableImpactScoreCriterias ?? []
