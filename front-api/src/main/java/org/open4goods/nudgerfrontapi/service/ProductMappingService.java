@@ -19,13 +19,10 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.open4goods.commons.model.IpQuotaCategory;
-import org.open4goods.commons.services.IpQuotaService;
 import org.open4goods.commons.services.textgen.BlaBlaSecGenerator;
 import org.open4goods.icecat.model.AttributesFeatureGroups;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.Localisable;
-import org.open4goods.model.ai.AiReview;
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.ProductAttributes;
@@ -37,7 +34,6 @@ import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.AggregatedPrices;
 import org.open4goods.model.price.PriceHistory;
 import org.open4goods.model.price.PriceTrend;
-import org.open4goods.model.product.AiReviewHolder;
 import org.open4goods.model.product.BarcodeType;
 import org.open4goods.model.product.EcoScoreRanking;
 import org.open4goods.model.product.ExternalIds;
@@ -51,21 +47,15 @@ import org.open4goods.model.rating.Cardinality;
 import org.open4goods.model.resource.ImageInfo;
 import org.open4goods.model.resource.PdfInfo;
 import org.open4goods.model.resource.Resource;
-import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
-import org.open4goods.nudgerfrontapi.config.properties.ReviewGenerationProperties;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.dto.PageMetaDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
-import org.open4goods.nudgerfrontapi.dto.product.AiReviewAttributeDto;
-import org.open4goods.nudgerfrontapi.dto.product.AiReviewDto;
-import org.open4goods.nudgerfrontapi.dto.product.AiReviewSourceDto;
 import org.open4goods.nudgerfrontapi.dto.product.PriceTrendState;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAggregatedPriceDto;
-import org.open4goods.nudgerfrontapi.dto.product.ProductAiReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAttributeDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAttributeSourceDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAttributesDto;
@@ -90,7 +80,6 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductPriceTrendDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductRankingDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductReferenceDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductResourcesDto;
-import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductScoreDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductScoresDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductSourcedAttributeDto;
@@ -100,9 +89,6 @@ import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
-import org.open4goods.nudgerfrontapi.service.exception.ReviewGenerationLimitExceededException;
-import org.open4goods.nudgerfrontapi.utils.IpUtils;
-import org.open4goods.services.captcha.service.HcaptchaService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
@@ -118,8 +104,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.ibm.icu.util.ULocale;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Maps {@link Product} domain entities to DTOs consumed by the frontend API.
@@ -143,7 +127,6 @@ public class ProductMappingService {
     private static final String FAVICON_ENDPOINT = "/api/favicon?url=";
     private static final String IMAGE_WEBP_MEDIATYPE = "image/webp";
     private static final String PRODUCT_REFERENCE_CACHE_PREFIX = "product-ref";
-    private static final IpQuotaCategory REVIEW_GENERATION_QUOTA_CATEGORY = IpQuotaCategory.REVIEW_GENERATION;
 
     private final ProductRepository repository;
     private final ApiProperties apiProperties;
@@ -153,11 +136,7 @@ public class ProductMappingService {
     private final AffiliationService affiliationService;
     private final IcecatService icecatService;
     private final Cache referenceCache;
-    private final ReviewGenerationClient reviewGenerationClient;
-    private final HcaptchaService hcaptchaService;
     private final ProductTimelineService productTimelineService;
-    private final ReviewGenerationProperties reviewGenerationProperties;
-    private final IpQuotaService ipQuotaService;
 
     public ProductMappingService(ProductRepository repository,
             ApiProperties apiProperties,
@@ -167,11 +146,7 @@ public class ProductMappingService {
             AffiliationService affiliationService,
             IcecatService icecatService,
             CacheManager cacheManager,
-            ReviewGenerationClient reviewGenerationClient,
-            HcaptchaService hcaptchaService,
-            ProductTimelineService productTimelineService,
-            ReviewGenerationProperties reviewGenerationProperties,
-            IpQuotaService ipQuotaService) {
+            ProductTimelineService productTimelineService) {
         this.repository = repository;
         this.apiProperties = apiProperties;
         this.categoryMappingService = categoryMappingService;
@@ -180,11 +155,7 @@ public class ProductMappingService {
         this.affiliationService = affiliationService;
         this.icecatService = icecatService;
         this.referenceCache = cacheManager.getCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
-        this.reviewGenerationClient = reviewGenerationClient;
-        this.hcaptchaService = hcaptchaService;
         this.productTimelineService = productTimelineService;
-        this.reviewGenerationProperties = reviewGenerationProperties;
-        this.ipQuotaService = ipQuotaService;
         if (this.referenceCache == null) {
             logger.warn("Cache {} is not configured; product reference caching disabled.",
                     CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
@@ -254,9 +225,6 @@ public class ProductMappingService {
         ProductScoresDto scores = components.contains(ProductDtoComponent.scores)
                 ? mapScores(product, domainLanguage, vConfig, referencedProducts)
                 : null;
-        ProductAiReviewDto aiReview = components.contains(ProductDtoComponent.aiReview)
-                ? mapAiReview(product, domainLanguage, locale)
-                : null;
         ProductEprelDto eprel = components.contains(ProductDtoComponent.eprel)
                 ? mapEprel(product)
                 : null;
@@ -290,7 +258,6 @@ public class ProductMappingService {
                 resources,
                 datasources,
                 scores,
-                aiReview,
                 eprel,
                 offers,
                 timeline);
@@ -862,139 +829,6 @@ public class ProductMappingService {
     }
 
     /**
-     * Map the AI generated review associated with the product using localisation
-     * fallback rules.
-     *
-     * @param product        product retrieved from the repository
-     * @param domainLanguage requested domain language guiding localisation
-     * @param locale         HTTP locale fallback used when the domain language is
-     *                       not provided
-     * @return DTO describing the AI review or {@code null} when none is available
-     */
-    private ProductAiReviewDto mapAiReview(Product product, DomainLanguage domainLanguage, Locale locale) {
-        if (product == null || product.getReviews() == null || product.getReviews().isEmpty()) {
-            return null;
-        }
-
-        ResolvedLocalisedValue<AiReviewHolder> resolved = resolveLocalised(product.getReviews(), domainLanguage,
-                locale);
-        AiReviewHolder holder = resolved.value();
-        if (holder == null) {
-            return null;
-        }
-
-        AiReviewDto reviewDto = mapAiReview(holder.getReview());
-        Map<String, Integer> sources = sanitizeSourceWeights(holder.getSources());
-        return new ProductAiReviewDto(
-                resolved.key(),
-                reviewDto,
-                sources,
-                holder.isEnoughData(),
-                holder.getTotalTokens(),
-                holder.getCreatedMs(),
-                holder.getFailureReason());
-    }
-
-    /**
-     * Convert the domain {@link AiReview} to its transport representation.
-     */
-    private AiReviewDto mapAiReview(AiReview review) {
-        if (review == null) {
-            return null;
-        }
-
-        List<String> pros = review.getPros() == null
-                ? List.of()
-                : review.getPros().stream().filter(Objects::nonNull).toList();
-        List<String> cons = review.getCons() == null
-                ? List.of()
-                : review.getCons().stream().filter(Objects::nonNull).toList();
-        List<AiReviewSourceDto> sources = review.getSources() == null
-                ? List.of()
-                : review.getSources().stream()
-                        .map(this::mapAiReviewSource)
-                        .filter(Objects::nonNull)
-                        .toList();
-        List<AiReviewAttributeDto> attributes = review.getAttributes() == null
-                ? List.of()
-                : review.getAttributes().stream()
-                        .map(this::mapAiReviewAttribute)
-                        .filter(Objects::nonNull)
-                        .toList();
-
-        return new AiReviewDto(
-                review.getDescription(),
-                review.getShortDescription(),
-                review.getMediumTitle(),
-                review.getShortTitle(),
-                review.getTechnicalReviewIntermediate(), // Legacy field now maps to Intermediate
-                review.getTechnicalReviewNovice(),
-                review.getTechnicalReviewIntermediate(),
-                review.getTechnicalReviewAdvanced(),
-                review.getTechnicalShortReview(),
-                review.getEcologicalReviewIntermediate(), // Legacy field now maps to Intermediate
-                review.getEcologicalReviewNovice(),
-                review.getEcologicalReviewIntermediate(),
-                review.getEcologicalReviewAdvanced(),
-                review.getCommunityReviewNovice(),
-                review.getCommunityReviewIntermediate(),
-                review.getCommunityReviewAdvanced(),
-                review.getSummary(),
-                pros,
-                cons,
-                sources,
-                attributes,
-                review.getDataQuality(),
-                review.getTechnicalOneline(),
-                review.getEcologicalOneline(),
-                review.getCommunityOneline(),
-                review.getObsolescenceWarning(),
-                review.getBaseLine());
-    }
-
-    /**
-     * Map an {@link AiReview.AiSource} to the DTO representation.
-     */
-    private AiReviewSourceDto mapAiReviewSource(AiReview.AiSource source) {
-        if (source == null) {
-            return null;
-        }
-        return new AiReviewSourceDto(
-                source.getNumber(),
-                source.getName(),
-                source.getDescription(),
-                source.getUrl(),
-                buildSourceFavicon(source.getUrl()));
-    }
-
-    /**
-     * Map an {@link AiReview.AiAttribute} to the DTO representation.
-     */
-    private AiReviewAttributeDto mapAiReviewAttribute(AiReview.AiAttribute attribute) {
-        if (attribute == null) {
-            return null;
-        }
-        return new AiReviewAttributeDto(attribute.getName(), attribute.getValue(), attribute.getNumber());
-    }
-
-    /**
-     * Remove null entries from the AI review sources map and expose an immutable
-     * view.
-     */
-    private Map<String, Integer> sanitizeSourceWeights(Map<String, Integer> sources) {
-        if (sources == null || sources.isEmpty()) {
-            return Map.of();
-        }
-        Map<String, Integer> sanitized = new LinkedHashMap<>();
-        sources.forEach((key, value) -> {
-            if (key != null && value != null) {
-                sanitized.put(key, value);
-            }
-        });
-        return sanitized.isEmpty() ? Map.of() : Map.copyOf(sanitized);
-    }
-
-    /**
      * Map ranking information provided by the product repository.
      */
     private ProductRankingDto mapRanking(Product product, Map<Long, ProductReferenceDto> referencedProducts) {
@@ -1109,92 +943,6 @@ public class ProductMappingService {
         PageDto<ProductDto> pageDto = new PageDto<>(meta, items);
 
         return new ProductSearchResponseDto(pageDto, result.aggregations());
-    }
-
-    /**
-     * Retrieve reviews for a given product (placeholder implementation).
-     */
-    public Page<ProductReviewDto> getReviews(long gtin, Pageable pageable) throws ResourceNotFoundException {
-        List<ProductReviewDto> reviews = new ArrayList<>();
-        return new PageImpl<>(reviews, pageable, 0);
-    }
-
-    /**
-     * Request AI review generation for the product after verifying captcha and
-     * product existence.
-     *
-     * @param gtin               product identifier used to trigger generation
-     * @param captchaResponse    hCaptcha token provided by the caller
-     * @param request            HTTP request used to resolve the client IP address
-     * @param authenticatedUser  whether the requester is an authenticated user
-     * @param force              whether generation should be forced for authenticated users
-     * @return UPC echoed back by the back-office API once the job is scheduled
-     * @throws ResourceNotFoundException when the product cannot be found locally
-     * @throws SecurityException         when captcha verification fails
-     * @throws ReviewGenerationLimitExceededException when the IP exceeds the configured quota
-     */
-    public long createReview(long gtin,
-                             String captchaResponse,
-                             HttpServletRequest request,
-                             boolean authenticatedUser,
-                             boolean force)
-            throws ResourceNotFoundException, SecurityException {
-        String clientIp = IpUtils.getIp(request);
-        if (!authenticatedUser) {
-            hcaptchaService.verifyRecaptcha(clientIp, captchaResponse);
-            ReviewGenerationProperties.Quota quota = reviewGenerationProperties.getQuota();
-            int maxPerIp = quota.getMaxPerIp();
-            if (!ipQuotaService.isAllowed(REVIEW_GENERATION_QUOTA_CATEGORY.actionKey(), clientIp, maxPerIp, quota.getWindow())) {
-                logger.warn("IP {} reached review generation limit ({})", clientIp, maxPerIp);
-                throw new ReviewGenerationLimitExceededException(
-                        "Maximum " + maxPerIp + " review generations reached for this period");
-            }
-            ipQuotaService.increment(REVIEW_GENERATION_QUOTA_CATEGORY.actionKey(), clientIp, quota.getWindow());
-        } else if (force) {
-            logger.info("Force review generation requested by authenticated user for product {}", gtin);
-        }
-        Product product = repository.getByIdWithoutEmbedding(gtin);
-
-        boolean shouldForce = force;
-        if (!authenticatedUser) {
-        	// For anonymous users, we only allow forcing if the current review is broken/insufficient
-        	shouldForce = false;
-        	if (force) {
-        		AiReviewHolder holder = product.getReviews() != null ? product.getReviews().i18n("fr") : null;
-        		if (holder != null) {
-        			boolean isBroken = !holder.isEnoughData()
-        					|| (holder.getFailureReason() != null && !holder.getFailureReason().isEmpty())
-        					|| holder.getReview() == null;
-
-        			if (isBroken) {
-        				logger.info("Allowing forced regeneration for anonymous user on broken review for product {}", gtin);
-        				shouldForce = true;
-        			}
-        		}
-        	}
-        }
-
-        long scheduledUpc = reviewGenerationClient.triggerGeneration(product.getId(), shouldForce);
-        if (!authenticatedUser) {
-            ReviewGenerationProperties.Quota quota = reviewGenerationProperties.getQuota();
-            int remaining = Math.max(0, quota.getMaxPerIp()
-                    - ipQuotaService.getUsage(REVIEW_GENERATION_QUOTA_CATEGORY.actionKey(), clientIp, quota.getWindow()));
-            logger.info("AI review generation requested for product {} (remaining quota: {})", gtin, remaining);
-        } else {
-            logger.info("AI review generation requested for product {} by authenticated user", gtin);
-        }
-        return scheduledUpc;
-    }
-
-    /**
-     * Retrieve the status of an AI review generation process.
-     *
-     * @param gtin product identifier used when the generation was triggered
-     * @return status returned by the back-office API or {@code null} when the UPC
-     *         is unknown upstream
-     */
-    public ReviewGenerationStatus getReviewStatus(long gtin) {
-        return reviewGenerationClient.getStatus(gtin);
     }
 
     /**

@@ -40,16 +40,6 @@
             </h2>
           </div>
 
-          <div class="category-product-list__meta">
-            <div class="category-product-list__status">
-              <template v-if="resolveBaseLine(product)">
-                <span class="category-product-list__status-text">
-                  {{ resolveBaseLine(product) }}
-                </span>
-              </template>
-            </div>
-          </div>
-
           <ul
             v-if="popularAttributesByProduct(product).length"
             class="category-product-list__attributes"
@@ -171,9 +161,6 @@ const productLink = (product: ProductDto) =>
 
 const impactScoreValue = (product: ProductDto) =>
   resolvePrimaryImpactScore(product)
-
-const resolveBaseLine = (product: ProductDto) =>
-  product.aiReview?.baseLine ?? null
 
 type DisplayedAttribute = {
   key: string

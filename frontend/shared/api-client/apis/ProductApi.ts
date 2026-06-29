@@ -22,7 +22,6 @@ import type {
   ProductFieldOptionsResponse,
   ProductSearchRequestDto,
   ProductSearchResponseDto,
-  ReviewGenerationStatus,
   SearchSuggestResponseDto,
 } from '../models/index';
 import {
@@ -40,8 +39,6 @@ import {
     ProductSearchRequestDtoToJSON,
     ProductSearchResponseDtoFromJSON,
     ProductSearchResponseDtoToJSON,
-    ReviewGenerationStatusFromJSON,
-    ReviewGenerationStatusToJSON,
     SearchSuggestResponseDtoFromJSON,
     SearchSuggestResponseDtoToJSON,
 } from '../models/index';
@@ -80,11 +77,6 @@ export interface ProductsRequest {
     productSearchRequestDto?: ProductSearchRequestDto;
 }
 
-export interface ReviewStatusRequest {
-    gtin: number;
-    domainLanguage: ReviewStatusDomainLanguageEnum;
-}
-
 export interface SortableFieldsRequest {
     domainLanguage: SortableFieldsDomainLanguageEnum;
 }
@@ -97,13 +89,6 @@ export interface SortableFieldsForVerticalRequest {
 export interface SuggestRequest {
     query: string;
     domainLanguage: SuggestDomainLanguageEnum;
-}
-
-export interface TriggerReviewRequest {
-    gtin: number;
-    domainLanguage: TriggerReviewDomainLanguageEnum;
-    hcaptchaResponse?: string;
-    force?: boolean;
 }
 
 /**
@@ -358,7 +343,7 @@ export class ProductApi extends runtime.BaseAPI {
     }
 
     /**
-     * Return high‑level product information, aggregated scores and optional AI review content, including datasource favicons for offers and AI source references.
+     * Return high-level product information, aggregated scores, datasource favicons and offers.
      * Get product view
      */
     async productRaw(requestParameters: ProductRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
@@ -418,7 +403,7 @@ export class ProductApi extends runtime.BaseAPI {
     }
 
     /**
-     * Return high‑level product information, aggregated scores and optional AI review content, including datasource favicons for offers and AI source references.
+     * Return high-level product information, aggregated scores, datasource favicons and offers.
      * Get product view
      */
     async product(requestParameters: ProductRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
@@ -503,71 +488,6 @@ export class ProductApi extends runtime.BaseAPI {
      */
     async products(requestParameters: ProductsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
         const response = await this.productsRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
-    /**
-     * Return the latest status snapshot for the requested product.
-     * Get AI review generation status
-     */
-    async reviewStatusRaw(requestParameters: ReviewStatusRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
-        if (requestParameters['gtin'] == null) {
-            throw new runtime.RequiredError(
-                'gtin',
-                'Required parameter "gtin" was null or undefined when calling reviewStatus().'
-            );
-        }
-
-        if (requestParameters['domainLanguage'] == null) {
-            throw new runtime.RequiredError(
-                'domainLanguage',
-                'Required parameter "domainLanguage" was null or undefined when calling reviewStatus().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        if (requestParameters['domainLanguage'] != null) {
-            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
-            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
-        }
-        if (this.configuration && this.configuration.accessToken) {
-            const token = this.configuration.accessToken;
-            const tokenString = await token("bearerAuth", []);
-
-            if (tokenString) {
-                headerParameters["Authorization"] = `Bearer ${tokenString}`;
-            }
-        }
-
-        let urlPath = `/products/{gtin}/review`;
-        urlPath = urlPath.replace(`{${"gtin"}}`, encodeURIComponent(String(requestParameters['gtin'])));
-
-        const response = await this.request({
-            path: urlPath,
-            method: 'GET',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        if (this.isJsonMime(response.headers.get('content-type'))) {
-            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
-        } else {
-            return new runtime.TextApiResponse(response) as any;
-        }
-    }
-
-    /**
-     * Return the latest status snapshot for the requested product.
-     * Get AI review generation status
-     */
-    async reviewStatus(requestParameters: ReviewStatusRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
-        const response = await this.reviewStatusRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -761,79 +681,6 @@ export class ProductApi extends runtime.BaseAPI {
         return await response.value();
     }
 
-    /**
-     * Validate the provided hCaptcha token and forward the request to the back-office API. Authenticated users may bypass captcha and force generation.
-     * Trigger AI review generation
-     */
-    async triggerReviewRaw(requestParameters: TriggerReviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<{ [key: string]: any; }>> {
-        if (requestParameters['gtin'] == null) {
-            throw new runtime.RequiredError(
-                'gtin',
-                'Required parameter "gtin" was null or undefined when calling triggerReview().'
-            );
-        }
-
-        if (requestParameters['domainLanguage'] == null) {
-            throw new runtime.RequiredError(
-                'domainLanguage',
-                'Required parameter "domainLanguage" was null or undefined when calling triggerReview().'
-            );
-        }
-
-        const queryParameters: any = {};
-
-        if (requestParameters['hcaptchaResponse'] != null) {
-            queryParameters['hcaptchaResponse'] = requestParameters['hcaptchaResponse'];
-        }
-
-        if (requestParameters['force'] != null) {
-            queryParameters['force'] = requestParameters['force'];
-        }
-
-        if (requestParameters['domainLanguage'] != null) {
-            queryParameters['domainLanguage'] = requestParameters['domainLanguage'];
-        }
-
-        const headerParameters: runtime.HTTPHeaders = {};
-
-        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
-            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
-        }
-        if (this.configuration && this.configuration.accessToken) {
-            const token = this.configuration.accessToken;
-            const tokenString = await token("bearerAuth", []);
-
-            if (tokenString) {
-                headerParameters["Authorization"] = `Bearer ${tokenString}`;
-            }
-        }
-
-        let urlPath = `/products/{gtin}/review`;
-        urlPath = urlPath.replace(`{${"gtin"}}`, encodeURIComponent(String(requestParameters['gtin'])));
-
-        const response = await this.request({
-            path: urlPath,
-            method: 'POST',
-            headers: headerParameters,
-            query: queryParameters,
-        }, initOverrides);
-
-        if (this.isJsonMime(response.headers.get('content-type'))) {
-            return new runtime.JSONApiResponse<{ [key: string]: any; }>(response);
-        } else {
-            return new runtime.TextApiResponse(response) as any;
-        }
-    }
-
-    /**
-     * Validate the provided hCaptcha token and forward the request to the back-office API. Authenticated users may bypass captcha and force generation.
-     * Trigger AI review generation
-     */
-    async triggerReview(requestParameters: TriggerReviewRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<{ [key: string]: any; }> {
-        const response = await this.triggerReviewRaw(requestParameters, initOverrides);
-        return await response.value();
-    }
-
 }
 
 /**
@@ -887,7 +734,6 @@ export const ProductIncludeEnum = {
     Resources: 'resources',
     Datasources: 'datasources',
     Scores: 'scores',
-    AiReview: 'aiReview',
     Eprel: 'eprel',
     Offers: 'offers',
     Timeline: 'timeline'
@@ -912,20 +758,11 @@ export const ProductsIncludeEnum = {
     Resources: 'resources',
     Datasources: 'datasources',
     Scores: 'scores',
-    AiReview: 'aiReview',
     Eprel: 'eprel',
     Offers: 'offers',
     Timeline: 'timeline'
 } as const;
 export type ProductsIncludeEnum = typeof ProductsIncludeEnum[keyof typeof ProductsIncludeEnum];
-/**
- * @export
- */
-export const ReviewStatusDomainLanguageEnum = {
-    Fr: 'fr',
-    En: 'en'
-} as const;
-export type ReviewStatusDomainLanguageEnum = typeof ReviewStatusDomainLanguageEnum[keyof typeof ReviewStatusDomainLanguageEnum];
 /**
  * @export
  */
@@ -950,11 +787,3 @@ export const SuggestDomainLanguageEnum = {
     En: 'en'
 } as const;
 export type SuggestDomainLanguageEnum = typeof SuggestDomainLanguageEnum[keyof typeof SuggestDomainLanguageEnum];
-/**
- * @export
- */
-export const TriggerReviewDomainLanguageEnum = {
-    Fr: 'fr',
-    En: 'en'
-} as const;
-export type TriggerReviewDomainLanguageEnum = typeof TriggerReviewDomainLanguageEnum[keyof typeof TriggerReviewDomainLanguageEnum];

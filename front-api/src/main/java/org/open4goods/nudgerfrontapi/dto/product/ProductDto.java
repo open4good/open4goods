@@ -32,8 +32,6 @@ public record ProductDto(
         ProductDatasourcesDto datasources,
         @Schema(description = "Score and ranking related information")
         ProductScoresDto scores,
-        @Schema(description = "AI generated review resolved for the requested domain language")
-        ProductAiReviewDto aiReview,
         @Schema(description = "EPREL product information when available", implementation = ProductEprelDto.class)
         ProductEprelDto eprel,
         @Schema(description = "Product offers and pricing information")
@@ -53,7 +51,6 @@ public record ProductDto(
                 resources,
                 datasources,
                 scores,
-                aiReview,
                 eprel,
                 offers,
                 timeline

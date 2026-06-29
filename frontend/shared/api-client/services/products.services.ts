@@ -9,7 +9,6 @@ import type {
   ProductFieldOptionsResponse,
   ProductSearchRequestDto,
   ProductSearchResponseDto,
-  ReviewGenerationStatus,
   SearchSuggestResponseDto,
   SortRequestDto,
 } from '..'
@@ -226,78 +225,6 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
     }
   }
 
-  const getReviewStatus = async (
-    gtin: string | number
-  ): Promise<ReviewGenerationStatus> => {
-    const parsedGtin =
-      typeof gtin === 'number' ? gtin : Number.parseInt(gtin, 10)
-
-    if (!Number.isFinite(parsedGtin)) {
-      throw new TypeError('GTIN must be a number.')
-    }
-
-    try {
-      return await resolveApi().reviewStatus({
-        gtin: parsedGtin,
-        domainLanguage,
-      })
-    } catch (error) {
-      console.error(
-        'Error fetching review status for product',
-        parsedGtin,
-        error
-      )
-      throw error
-    }
-  }
-
-  const triggerReviewGeneration = async (
-    gtin: string | number,
-    hcaptchaResponse?: string | null,
-    options: { force?: boolean; authToken?: string | null } = {}
-  ): Promise<number> => {
-    const parsedGtin =
-      typeof gtin === 'number' ? gtin : Number.parseInt(gtin, 10)
-
-    if (!Number.isFinite(parsedGtin)) {
-      throw new TypeError('GTIN must be a number.')
-    }
-
-    if (!hcaptchaResponse && !options.force) {
-      throw new TypeError(
-        'hCaptcha response is required to trigger review generation.'
-      )
-    }
-
-    const config = createBackendApiConfig()
-    const basePath = config.basePath?.replace(/\/$/, '') ?? ''
-    const endpoint = `${basePath}/products/${encodeURIComponent(String(parsedGtin))}/review`
-
-    try {
-      return await ofetch<number>(endpoint, {
-        method: 'POST',
-        headers: {
-          ...(config.headers ?? {}),
-          ...(options.authToken
-            ? { Authorization: `Bearer ${options.authToken}` }
-            : {}),
-        },
-        query: {
-          ...(hcaptchaResponse ? { hcaptchaResponse } : {}),
-          ...(options.force ? { force: true } : {}),
-          domainLanguage,
-        },
-      })
-    } catch (error) {
-      console.error(
-        'Error triggering review generation for product',
-        parsedGtin,
-        error
-      )
-      throw error
-    }
-  }
-
   return {
     getProductByGtin,
     getFilterableFieldsForVertical,
@@ -305,7 +232,5 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
     searchProducts,
     searchGlobalProducts,
     fetchSearchSuggestions,
-    getReviewStatus,
-    triggerReviewGeneration,
   }
 }

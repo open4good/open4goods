@@ -8,7 +8,6 @@ import type {
   AffiliationPartnerDto,
   BlogPostDto,
   CategoriesStatsDto,
-  IpQuotaStatusDto,
 } from '~~/shared/api-client'
 
 import HomeSolutionSection from '~/components/home/sections/HomeSolutionSection.vue'
@@ -133,18 +132,6 @@ const { data: affiliationPartners } = await useAsyncData<
   }
 )
 
-const { data: reviewQuotaStatus } = await useAsyncData<IpQuotaStatusDto | null>(
-  'home-review-quota',
-  () =>
-    $fetch<IpQuotaStatusDto>('/api/quotas/REVIEW_GENERATION', {
-      headers: requestHeaders,
-    }).catch(() => null),
-  {
-    default: () => null,
-    server: true,
-  }
-)
-
 const heroPartnersCount = computed(() => {
   const statsCount = categoriesStats.value?.affiliationPartnersCount
 
@@ -239,15 +226,7 @@ const categoriesCount = computed(() => {
   return fallbackCount > 0 ? fallbackCount : null
 })
 
-const aiSummaryRemainingCredits = computed(() => {
-  const remaining = reviewQuotaStatus.value?.remaining
-
-  if (typeof remaining !== 'number' || !Number.isFinite(remaining)) {
-    return null
-  }
-
-  return remaining
-})
+const aiSummaryRemainingCredits = computed(() => null)
 
 const parallaxConfig = useParallaxConfig()
 const resolveParallaxAssets = () =>

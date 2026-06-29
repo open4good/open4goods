@@ -21,9 +21,8 @@
 | 6 | `product.price-history` | `/products/{gtin}/price/history` | `price` history/trends | ⊂ 34 M | 8 | interne (persisté) | série temporelle |
 | 7 | `product.impact` ⭐⭐ | `/products/{gtin}/impact` | `scores` (ECOSCORE, réparabilité, durabilité, ranking) | ~45-50 K | **15** | **interne EXCLUSIF** | **éco / réparabilité / CO₂** |
 | 8 | `product.energy` ⭐⭐ | `/products/{gtin}/energy` | `eprelDatas` + `CLASSE_ENERGY` | ~47 K | 10 | **interne EXCLUSIF** | **étiquette énergie UE** |
-| 9 | `product.review` ⭐⭐⭐ | `/products/{gtin}/review` | `reviews` (`AiReview` multi-niveaux) | ~10 K | **30** | **interne EXCLUSIF** | **revue IA sourcée** |
-| 10 | `product.taxonomy` | `/products/{gtin}/taxonomy` | référentiels Google/ICECAT/ETIM/Wikidata | curé | 15 | **interne EXCLUSIF** | mapping multi-taxonomies |
-| 11 | _exp._ `product.alternatives` | `/products/{gtin}/alternatives` | embedding KNN / ranking | curé | 20 | interne (KNN) | reco mieux notés |
+| 9 | `product.taxonomy` | `/products/{gtin}/taxonomy` | référentiels Google/ICECAT/ETIM/Wikidata | curé | 15 | **interne EXCLUSIF** | mapping multi-taxonomies |
+| 10 | _exp._ `product.alternatives` | `/products/{gtin}/alternatives` | embedding KNN / ranking | curé | 20 | interne (KNN) | reco mieux notés |
 
 ⭐ socle v1 · ⭐⭐ différenciation premium · ⭐⭐⭐ premium fort
 
@@ -35,11 +34,6 @@
   → **Aucun concurrent du panel n'a cette donnée.**
 - **`product.energy`** - `eprelDatas` (EPREL UE) + score `CLASSE_ENERGY` (et HDR/SDR pour TV). DTO :
   `ProductEprelDto`. Vendable sur électroménager + TV.
-- **`product.review`** - `AiReview` : `technicalReview`/`ecologicalReview`/`communityReview` en 3 niveaux
-  (novice/intermédiaire/avancé), `pros`/`cons`, `sources` (sourcing vérifiable), `ratings`,
-  `manufacturingCountry`, `obsolescenceWarning`, `dataQuality`. DTO : `ProductAiReviewDto`. **Facette la
-  plus chère** (30 cr.) : coût de génération réel + responsabilité éditoriale + exclusivité totale.
-
 ---
 
 ## 2. Facettes " marché " non couvertes par nudger
@@ -70,13 +64,12 @@ L'étude concurrentielle liste des facettes **scraping/marketplace** que nudger 
 | **Baseline** | **`price`** | **5** | **0,010 €** | aligné PriceAPI Starter, volume |
 | L | `price-history` | 8 | 0,016 € | persistance série temporelle |
 | **Premium** | **`energy`**, **`impact`**, **`taxonomy`** | 10-15 | 0,020-0,030 € | **exclusif**, faible volume, forte valeur |
-| Premium++ | **`review`** | 30 | 0,060 € | coût génération + exclusivité + responsabilité |
 
 Don de bienvenue freemium : **2 500 crédits** (≈ 5 €) - cohérent avec
 [`master-prompt.md`](../implementation/master-prompt.md).
 
 **Lecture stratégique** : la facette `price` reste un **produit d'appel loyal** (no-data-no-pay,
-fraîcheur réelle excellente). La marge vient des facettes propriétaires `impact`/`energy`/`review`,
+fraîcheur réelle excellente). La marge vient des facettes propriétaires `impact`/`energy`,
 **impossibles à répliquer** par la concurrence (cf. [`competition.md`](../business/competition.md) §6).
 
 ---
@@ -103,7 +96,6 @@ Chaque nouvelle facette suit le **cycle de vie** décrit dans [`facets/README.md
 ### Vague 2 - différenciation propriétaire (le vrai pitch, marge)
 - **`product.impact`** (15 cr.) - DTO `ProductScoresDto` déjà existant, données indexées ES ✅.
 - **`product.energy`** (10 cr.) - `ProductEprelDto`, vendable électroménager + TV.
-- **`product.review`** (30 cr.) - `ProductAiReviewDto`, facette signature.
 - `product.taxonomy` (15 cr.) - mapping multi-référentiels.
 
 ### Vague 3 - expérimental / roadmap
@@ -119,18 +111,14 @@ d'extraire la logique de `ProductMappingService` dans un service B2B partagé.
 
 > **Statut (voir [`00-canonical-decisions.md`](../00-canonical-decisions.md)) :**
 > Q2 **tranchée** -> GTIN-first strict en v1. Q6 **tranchée** -> `meta.coverage`
-> par facette dans l'enveloppe. Q5 (exposition review complète vs résumé+sources)
-> reste **différée** (à trancher avant de livrer la facette review). Q1/Q3/Q4
-> restent ouvertes (radar roadmap).
+> par facette dans l'enveloppe. Q1/Q3/Q4 restent ouvertes (radar roadmap).
 
-1. **Couverture review/EPREL non mesurable par ES** : exposer un compteur applicatif côté pipeline pour
-   chiffrer le volume premium réel avant de communiquer sur ces facettes ? (recommandé)
+1. **Couverture EPREL non mesurable par ES** : exposer un compteur applicatif côté pipeline pour
+   chiffrer le volume premium réel avant de communiquer sur cette facette ? (recommandé)
 2. **GTIN-first strict** ou accepter rapidement `asin`/`mpn`/`merchant_sku`/`keyword` en entrée ?
 3. **Facettes marché (scraping)** : assumer durablement le " non ", ou prévoir une supply hybride (crawl /
    affiliation) pour `availability`/`shipping`/`ranking` ?
 4. **Séparation live vs derived/stored** : isoler dès maintenant les facettes persistées (history, ranking)
    pour éviter l'explosion des coûts de collecte ?
-5. **`product.review` UGC/IA** : exposer la revue complète multi-niveaux, ou un résumé + `sources` seulement,
-   pour limiter la responsabilité éditoriale en B2B ?
-6. **Verticales** : commercialiser les facettes premium uniquement sur les 7 verticales existantes, avec un
+5. **Verticales** : commercialiser les facettes premium uniquement sur les 7 verticales existantes, avec un
    `meta.coverage` explicite par facette dans l'enveloppe de réponse ?

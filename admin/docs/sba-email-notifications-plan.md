@@ -165,7 +165,6 @@ Cette option couvre les exigences de lisibilité, anti-bruit, regroupement, et a
 - Status change: `UP -> DOWN`
 - Duration: `4m 12s`
 - Failed indicators:
-  - `reviewGenerationService: DOWN (timeout)`
   - `catalogSync: OUT_OF_SERVICE (dependency unavailable)`
 - Links:
   - `Instance: https://sb-admin.nudger.fr/#/instances/<id>/details`

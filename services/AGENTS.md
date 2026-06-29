@@ -336,30 +336,6 @@ Each service has unique responsibilities and may have specific conventions beyon
 
 ---
 
-### review-generation
-
-**Purpose**: Generates product reviews using AI.
-
-**Key Responsibilities**:
-- Generate synthetic product reviews
-- Ensure review quality and diversity
-- Apply content moderation
-- Track generated content metadata
-
-**AI/Content Guidelines**:
-- All generated reviews must be marked as AI-generated
-- Implement quality scoring for generated content
-- Use diverse prompt templates to avoid repetition
-- Apply content filters for inappropriate language
-- Store generation metadata (model, prompt version, timestamp)
-
-**Ethical Considerations**:
-- Clearly distinguish AI-generated from human reviews
-- Implement disclosure mechanisms
-- Follow platform policies on synthetic content
-
----
-
 ### serialisation
 
 **Purpose**: Data serialization and format conversion service.

@@ -86,7 +86,9 @@
       "eyebrow": "Comparateur responsable",
       "title": "Acheter mieux. Sans dépenser plus.",
       "animatedSubtitle": "",
-      "titleSubtitle": ["Nudger : le comparateur écologique tech & électro"],
+      "titleSubtitle": [
+        "Nudger : le comparateur écologique tech & électro"
+      ],
       "subtitles": [
         "Gagnez du temps. Choisissez librement.",
         "Consommez mieux sans payer plus. Nudger équilibre planète et budget.",
@@ -2351,110 +2353,6 @@
     "start_impact_text": "Envie de soutenir un projet à impact ?",
     "start_impact_subtext": "Faites vos achats via Nudger ! Ça marche aussi en allant directement chez",
     "partners_link": "nos partenaires",
-    "aiReview": {
-      "empty": "Synthèse non encore demandée.",
-      "illustrations": {
-        "technicalAlt": "Illustration de l'analyse technique",
-        "ecologicalAlt": "Illustration de l'analyse écologique",
-        "communityAlt": "Illustration de l'analyse communautaire"
-      },
-      "errors": {
-        "captcha": "Merci de valider le captcha avant de continuer.",
-        "generic": "Une erreur est survenue lors de la génération.",
-        "notEnoughData": "Pas assez de données fiables pour générer une synthèse."
-      },
-      "generatedAt": "Synthèse générée le {date}",
-      "sourceReferenceAria": "Voir la source {reference}",
-      "tooltip": {
-        "generatedAt": "Synthèse avancée générée le {date}",
-        "available": "Synthèse IA disponible",
-        "remaining": "Ce produit ne dispose pas encore de synthèse. Vous pouvez la demander et la partager à la communauté. Il vous reste {count} génération | Ce produit ne dispose pas encore de synthèse. Vous pouvez la demander et la partager à la communauté. Il vous reste {count} générations",
-        "quotaExceeded": "Quota épuisé"
-      },
-      "dataQuality": {
-        "title": "Qualité des données",
-        "description": "Évaluation de la fiabilité et de la complétude des sources utilisées pour cette synthèse IA."
-      },
-      "requestButton": "Demander la synthèse",
-      "retryButton": "Réessayer",
-      "request": {
-        "agreement": "Je mandate Nudger pour rechercher et synthétiser les informations du {productName}. Dans une logique de sobriété et de partage, j'accepte également que ces données soient partagées à tous les utilisateurs de Nudger.",
-        "bannerDescription": "Démarrer une synthèse du {productName}.",
-        "bannerTitle": "Synthèse",
-        "callToAction": {
-          "title": "Aucune synthèse disponible",
-          "subtitle": "Demandez à notre IA de générer une synthèse pour ce produit.",
-          "subtitleVariant": "Nous mettons à votre disposition un outil puissant pour tout savoir du {bestName}"
-        },
-        "cancel": "Annuler",
-        "close": "Fermer",
-        "description": "Nous utilisons des outils puissants d'IA, d'analyse et d'agrégation de données pour vous fournir une information complète sur ce produit. Cette démarche est coûteuse (financièrement et énergétiquement). À utiliser si vous avez un réel intérêt pour ce produit.",
-        "methodologyLink": "Comment c'est généré ?",
-        "eyebrow": "Synthèse",
-        "eyebrowNeutral": "Synthèse",
-        "productFallback": "ce produit",
-        "remainingUnknown": "Indisponible",
-        "submit": "Valider",
-        "title": "Demander une synthèse IA"
-      },
-      "retry": {
-        "title": "La génération a échoué",
-        "subtitle": "Une erreur est survenue lors de la création de la synthèse pour {bestName}. Vous pouvez tenter une nouvelle demande."
-      },
-      "sections": {
-        "cons": "Points faibles",
-        "details": "En détail",
-        "community": "Analyse communautaire",
-        "ecological": "Analyse écologique",
-        "identity": "Fiche d'identité",
-        "overall": "Résumé général",
-        "pros": "Points forts",
-        "sources": "Sources consultées",
-        "sourcesCount": "{count} sources consultées",
-        "technical": "Analyse technique"
-      },
-      "levels": {
-        "label": "Niveau de lecture",
-        "simple": "Simple",
-        "intermediate": "Intermédiaire",
-        "advanced": "Avancé"
-      },
-      "sources": {
-        "description": "Description",
-        "index": "Réf.",
-        "source": "Source",
-        "showLess": "Voir moins de sources",
-        "showMore": "Voir plus de sources"
-      },
-      "status": {
-        "failed": "La génération a échoué",
-        "running": "Génération en cours ({step})",
-        "success": "Synthèse disponible"
-      },
-      "generationPanel": {
-        "title": "Synthèses IA",
-        "quotaTitle": "Vos générations restantes : {count}",
-        "expandPanel": "Afficher",
-        "collapsePanel": "Réduire",
-        "status": {
-          "generating": "Génération en cours...",
-          "success": "Terminé",
-          "error": "Échec"
-        },
-        "alert": {
-          "successTitle": "Résumé prêt !",
-          "successMessage": "Le résumé pour {product} a été généré avec succès.",
-          "errorTitle": "Échec de génération",
-          "errorMessage": "Impossible de générer le résumé pour {product}.",
-          "viewResult": "Voir le résumé"
-        }
-      },
-      "subtitle": {
-        "one": "Une synthèse rédigée par notre IA à partir de {count} source vérifiée.",
-        "other": "Une synthèse rédigée par notre IA à partir de {count} sources vérifiées."
-      },
-      "title": "Synthèse des tests et avis"
-    },
     "attributes": {
       "title": "Caractéristiques techniques",
       "subtitle": "Explorez toutes les caractéristiques et filtrez par mots-clés.",
@@ -2622,9 +2520,6 @@
       }
     },
     "hero": {
-      "aiReview": {
-        "label": "Synthèse"
-      },
       "aiSummary": {
         "community": "Les experts",
         "ecological": "Écologiquement",

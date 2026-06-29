@@ -22,13 +22,6 @@ describe('CompareService', () => {
       resources: {
         coverImagePath: 'https://example.com/cover.jpg',
       },
-      aiReview: {
-        review: {
-          description: '<p>Great <strong>product</strong></p>',
-          pros: ['<b>Efficient</b>'],
-          cons: ['<i>Pricey</i>'],
-        },
-      },
       scores: overrides.scores,
       ...overrides,
     }) as ProductDto
@@ -42,7 +35,6 @@ describe('CompareService', () => {
     model: null,
     coverImage: null,
     impactScore: null,
-    review: { description: null, pros: [], cons: [] },
     country: null,
   })
 
@@ -55,8 +47,6 @@ describe('CompareService', () => {
     expect(fetchProduct).toHaveBeenCalledWith('1234567890123')
     expect(entry.gtin).toBe('1234567890123')
     expect(entry.title).toBe('Brand Model X')
-    expect(entry.review.description).toBe('Great product')
-    expect(entry.review.pros[0]).toContain('<b>Efficient</b>')
     expect(entry.country?.name).toBe('France')
     expect(entry.impactScore).toBeNull()
   })

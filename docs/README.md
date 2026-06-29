@@ -23,7 +23,6 @@ owned, and linked from this index when they become durable project knowledge.
 - [ADR index](adr/README.md)
 - [Icecat reference data](architecture/icecat-reference-data.md)
 - [Amazon PA-API completion](architecture/amazon-paapi-completion.md)
-- [Review generation service](architecture/review-generation-service.md)
 - [ETIM integration and cross-referential design](architecture/etim_integration_design.md)
 - [ADR 0001: EPREL matching logic scoring](adr/0001-eprel-matching-logic-scoring.md)
 - [ADR 0002: Product model identity confidence](adr/0002-product-model-identity-confidence.md)

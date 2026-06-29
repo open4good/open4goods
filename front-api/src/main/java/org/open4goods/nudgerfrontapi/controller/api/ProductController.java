@@ -12,7 +12,6 @@ import org.open4goods.model.Localisable;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
-import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.model.vertical.AggregationConfiguration;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -43,11 +42,8 @@ import org.open4goods.nudgerfrontapi.dto.search.SearchSuggestResponseDto;
 import org.open4goods.nudgerfrontapi.dto.search.SortRequestDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
-import org.open4goods.nudgerfrontapi.service.GoogleIndexationDispatchService;
 import org.open4goods.nudgerfrontapi.service.SearchService;
 import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchHit;
-import org.open4goods.nudgerfrontapi.service.exception.ReviewGenerationClientException;
-import org.open4goods.nudgerfrontapi.service.exception.ReviewGenerationLimitExceededException;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,9 +56,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -87,8 +80,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * REST controller exposing read‑only information about a product as well as the ability to
- * trigger an AI‑generated review.  All endpoints are grouped under the <i>Product</i> tag in the
+ * REST controller exposing read-only information about a product. All endpoints are grouped under the <i>Product</i> tag in the
  * generated OpenAPI contract and share the common base path <code>/product</code>.
  * The locale used by the service is resolved via {@link
  * org.open4goods.nudgerfrontapi.config.UserPreferenceLocaleResolver}, which
@@ -99,13 +91,12 @@ import jakarta.servlet.http.HttpServletRequest;
 @RequestMapping("/products")
 @Validated
 @PreAuthorize("hasAnyAuthority('" + RolesConstants.ROLE_FRONTEND + "', '" + RolesConstants.ROLE_EDITOR + "')")
-@Tag(name = "Product", description = "Read product data, offers, impact score and reviews; trigger AI review generation.")
+@Tag(name = "Product", description = "Read product data, offers and impact score.")
 public class ProductController {
 
     private final ProductMappingService service;
     private final VerticalsConfigService verticalsConfigService;
     private final SearchService searchService;
-    private final GoogleIndexationDispatchService googleIndexationDispatchService;
 
     private static final String VALUE_TYPE_NUMERIC = "numeric";
     private static final String VALUE_TYPE_TEXT = "text";
@@ -122,16 +113,13 @@ public class ProductController {
      * @param service product mapping service
      * @param verticalsConfigService vertical configuration service
      * @param searchService search service
-     * @param googleIndexationDispatchService indexation dispatch service
      */
     public ProductController(ProductMappingService service,
                              VerticalsConfigService verticalsConfigService,
-                             SearchService searchService,
-                             GoogleIndexationDispatchService googleIndexationDispatchService) {
+                             SearchService searchService) {
         this.service = service;
         this.verticalsConfigService = verticalsConfigService;
         this.searchService = searchService;
-        this.googleIndexationDispatchService = googleIndexationDispatchService;
     }
 
     /**
@@ -863,154 +851,7 @@ public class ProductController {
     }
 
     /**
-     * Trigger asynchronous AI review generation after verifying hCaptcha.
-     */
-    @PostMapping("/{gtin}/review")
-    @Operation(
-            summary = "Trigger AI review generation",
-            description = "Validate the provided hCaptcha token and forward the request to the back-office API. " +
-                    "Authenticated users may bypass captcha and force generation.",
-            parameters = {
-                    @Parameter(name = "gtin",
-                            in = ParameterIn.PATH,
-                            required = true,
-                            description = "Product GTIN/UPC (numeric identifier)",
-                            schema = @Schema(type = "integer", format = "int64", minimum = "0", example = "8806095491998")),
-                    @Parameter(name = "hcaptchaResponse",
-                            in = ParameterIn.QUERY,
-                            required = false,
-                            description = "hCaptcha token returned by the widget (required for anonymous users).",
-                            schema = @Schema(type = "string")),
-                    @Parameter(name = "force",
-                            in = ParameterIn.QUERY,
-                            required = false,
-                            description = "Force review generation when the requester is authenticated.",
-                            schema = @Schema(type = "boolean")),
-                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
-                            description = "Language driving localisation of textual fields (future use).",
-                            schema = @Schema(implementation = DomainLanguage.class))
-            },
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Generation scheduled",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(type = "integer", format = "int64"))),
-                    @ApiResponse(responseCode = "400", description = "Captcha verification failed"),
-                    @ApiResponse(responseCode = "401", description = "Authentication required"),
-                    @ApiResponse(responseCode = "403", description = "Access forbidden"),
-                    @ApiResponse(responseCode = "404", description = "Product not found"),
-                    @ApiResponse(responseCode = "429", description = "Review generation quota exceeded",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ProblemDetail.class))),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
-    )
-    public ResponseEntity<?> triggerReview(@PathVariable Long gtin,
-                                           @RequestParam(name = "hcaptchaResponse", required = false) String hcaptchaResponse,
-                                           @RequestParam(name = "force", defaultValue = "false") boolean force,
-                                           @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
-                                           HttpServletRequest request)
-            throws ResourceNotFoundException {
-        boolean authenticatedUser = isAuthenticatedUser();
-        if (!authenticatedUser && !StringUtils.hasText(hcaptchaResponse)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "hCaptcha response is required for anonymous users");
-        }
-        if (force && !authenticatedUser) {
-            LOGGER.warn("Force review generation requested without authentication for product {}", gtin);
-        }
-        LOGGER.info(
-                "Entering triggerReview(gtin={}, domainLanguage={}, hasHcaptchaResponse={}, force={}, authenticatedUser={}, remoteAddr={})",
-                gtin,
-                domainLanguage,
-                StringUtils.hasText(hcaptchaResponse),
-                force,
-                authenticatedUser,
-                request != null ? request.getRemoteAddr() : null);
-        try {
-            long scheduledUpc = service.createReview(gtin, hcaptchaResponse, request, authenticatedUser, force);
-            return ResponseEntity.ok()
-                    .cacheControl(CacheControl.noCache())
-                    .header("X-Locale", domainLanguage.languageTag())
-                    .body(scheduledUpc);
-        } catch (ReviewGenerationLimitExceededException ex) {
-            LOGGER.warn("Review generation limit reached for remote IP {}", request.getRemoteAddr());
-            ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage());
-            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
-                    .cacheControl(CacheControl.noCache())
-                    .header("X-Locale", domainLanguage.languageTag())
-                    .body(detail);
-        }
-    }
-
-    /**
-     * Determine whether the current request comes from an authenticated user.
-     *
-     * @return {@code true} when a non-shared-token authentication is present
-     */
-    private boolean isAuthenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return false;
-        }
-
-        if (authentication instanceof JwtAuthenticationToken) {
-            return true;
-        }
-
-        return !"shared-token-user".equals(authentication.getName());
-    }
-
-    /**
-     * Poll the AI review generation status for a product.
-     */
-    @GetMapping("/{gtin}/review")
-    @Operation(
-            summary = "Get AI review generation status",
-            description = "Return the latest status snapshot for the requested product.",
-            security = @SecurityRequirement(name = "bearer-jwt"),
-            parameters = {
-                    @Parameter(name = "gtin",
-                            in = ParameterIn.PATH,
-                            required = true,
-                            description = "Product GTIN/UPC (numeric identifier)",
-                            schema = @Schema(type = "integer", format = "int64", minimum = "0", example = "8806095491998")),
-                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
-                            description = "Language driving localisation of textual fields (future use).",
-                            schema = @Schema(implementation = DomainLanguage.class))
-            },
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Status returned",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = ReviewGenerationStatus.class))),
-                    @ApiResponse(responseCode = "401", description = "Authentication required"),
-                    @ApiResponse(responseCode = "403", description = "Access forbidden"),
-                    @ApiResponse(responseCode = "404", description = "Product not found"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
-    )
-    public ResponseEntity<ReviewGenerationStatus> reviewStatus(@PathVariable Long gtin,
-                                                               @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
-        LOGGER.info("Entering reviewStatus(gtin={}, domainLanguage={})", gtin, domainLanguage);
-        try {
-            ReviewGenerationStatus status = service.getReviewStatus(gtin);
-            if (status != null && status.getStatus() == ReviewGenerationStatus.Status.SUCCESS) {
-                googleIndexationDispatchService.handleReviewSuccess(gtin, domainLanguage);
-            }
-            return ResponseEntity.ok()
-                    .cacheControl(CacheControl.noCache())
-                    .header("X-Locale", domainLanguage.languageTag())
-                    .body(status);
-        } catch (ReviewGenerationClientException e) {
-            HttpStatus resolvedStatus = e.getStatusCode() != null
-                    ? HttpStatus.valueOf(e.getStatusCode().value())
-                    : HttpStatus.BAD_GATEWAY;
-            ProblemDetail detail = ProblemDetail.forStatusAndDetail(resolvedStatus, e.getMessage());
-            throw new ResponseStatusException(resolvedStatus, detail.getDetail(), e);
-        }
-    }
-
-    /**
-     * Return high level information for a product, including optional AI generated review
-     * metadata when the corresponding component is requested.
+     * Return high level information for a product.
      *
      * <p>Error codes:</p>
      * <ul>
@@ -1024,8 +865,7 @@ public class ProductController {
     @GetMapping("/{gtin}")
     @Operation(
             summary = "Get product view",
-            description = "Return high‑level product information, aggregated scores and optional AI review content, "
-                    + "including datasource favicons for offers and AI source references.",
+            description = "Return high-level product information, aggregated scores, datasource favicons and offers.",
             security = @SecurityRequirement(name = "bearer-jwt"),
             parameters = {
                     @Parameter(name = "gtin",

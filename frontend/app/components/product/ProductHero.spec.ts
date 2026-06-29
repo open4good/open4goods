@@ -168,7 +168,6 @@ const baseProduct: ProductDto = {
       countryFlagUrl: 'https://flag.example/fr.png',
     },
   },
-  aiReview: { review: { mediumTitle: 'Next-gen Orbit X1' } },
 }
 
 const mountComponent = async () =>

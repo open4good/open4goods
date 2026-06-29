@@ -86,7 +86,9 @@
       "eyebrow": "Responsible shopping",
       "title": "Nudger: The eco-friendly comparator",
       "animatedSubtitle": "",
-      "titleSubtitle": ["Buy better. Spend smarter."],
+      "titleSubtitle": [
+        "Buy better. Spend smarter."
+      ],
       "subtitles": [
         "Save time, stay true to your values. Compare effortlessly, choose freely.",
         "Shop smarter without compromise. Nudger balances planet and price.",
@@ -151,7 +153,9 @@
         ],
         "partnerLinkLabel": "{formattedCount} partner | {formattedCount} partners",
         "partnerLinkFallback": "our partners",
-        "placeholders": ["Search a product (e.g. television, smartphone...)"]
+        "placeholders": [
+          "Search a product (e.g. television, smartphone...)"
+        ]
       },
       "highlights": [
         {
@@ -2466,110 +2470,6 @@
     "start_impact_text": "Enjoying this?",
     "start_impact_subtext": "Support an independent, open, and impactful web by shopping through Nudger! It also works via our partner merchants",
     "partners_link": "our partners",
-    "aiReview": {
-      "empty": "Summary not requested yet.",
-      "illustrations": {
-        "technicalAlt": "Illustration of the technical analysis",
-        "ecologicalAlt": "Illustration of the environmental analysis",
-        "communityAlt": "Illustration of the community analysis"
-      },
-      "errors": {
-        "captcha": "Please validate the captcha before continuing.",
-        "generic": "An error occurred while generating the summary.",
-        "notEnoughData": "Not enough reliable data was found to generate a summary."
-      },
-      "generatedAt": "Summary generated on {date}",
-      "sourceReferenceAria": "View source {reference}",
-      "tooltip": {
-        "generatedAt": "Generated on {date}",
-        "available": "AI summary available",
-        "remaining": "This product does not have a summary yet. You can request it and share it with the community. You have {count} generation remaining | This product does not have a summary yet. You can request it and share it with the community. You have {count} generations remaining",
-        "quotaExceeded": "Quota exceeded"
-      },
-      "dataQuality": {
-        "title": "Data quality",
-        "description": "Assessment of the reliability and completeness of the sources used for this AI summary."
-      },
-      "requestButton": "Request the summary",
-      "retryButton": "Retry",
-      "request": {
-        "agreement": "I authorize Nudger to research and summarize information about {productName}. In a spirit of sobriety and sharing, I also agree that this data can be shared with all Nudger users.",
-        "bannerDescription": "Start a summary for {productName}.",
-        "bannerTitle": "AI summary",
-        "callToAction": {
-          "title": "No summary available",
-          "subtitle": "Ask our AI to generate a summary for this product.",
-          "subtitleVariant": "We provide a powerful tool to know everything about {bestName}"
-        },
-        "cancel": "Cancel",
-        "close": "Close",
-        "description": "blabla",
-        "methodologyLink": "How is this generated?",
-        "eyebrow": "AI summary",
-        "eyebrowNeutral": "Summary",
-        "productFallback": "this product",
-        "remainingUnknown": "Unavailable",
-        "submit": "Confirm",
-        "title": "Request an AI summary"
-      },
-      "retry": {
-        "title": "Generation failed",
-        "subtitle": "An error occurred while generating the summary for {bestName}. You can try again."
-      },
-      "sections": {
-        "cons": "Cons",
-        "details": "In detail",
-        "community": "Community analysis",
-        "ecological": "Environmental analysis",
-        "identity": "Identity card",
-        "overall": "Overall summary",
-        "pros": "Pros",
-        "sources": "Consulted sources",
-        "sourcesCount": "{count} sources consulted",
-        "technical": "Technical analysis"
-      },
-      "levels": {
-        "label": "Reading level",
-        "simple": "Simple",
-        "intermediate": "Intermediate",
-        "advanced": "Advanced"
-      },
-      "sources": {
-        "description": "Description",
-        "index": "Ref.",
-        "source": "Source",
-        "showLess": "See fewer sources",
-        "showMore": "See more sources"
-      },
-      "status": {
-        "failed": "Generation failed",
-        "running": "Generation in progress ({step})",
-        "success": "Summary available"
-      },
-      "generationPanel": {
-        "title": "AI Generations",
-        "quotaTitle": "{count} → Remaining quota",
-        "expandPanel": "Expand",
-        "collapsePanel": "Collapse",
-        "status": {
-          "generating": "Generating...",
-          "success": "Completed",
-          "error": "Failed"
-        },
-        "alert": {
-          "successTitle": "Summary ready!",
-          "successMessage": "The summary for {product} has been generated successfully.",
-          "errorTitle": "Generation failed",
-          "errorMessage": "Unable to generate the summary for {product}.",
-          "viewResult": "View summary"
-        }
-      },
-      "subtitle": {
-        "one": "An AI-written synthesis built from {count} verified source.",
-        "other": "An AI-written synthesis built from {count} verified sources."
-      },
-      "title": "Test & review summary"
-    },
     "attributes": {
       "title": "Technical specifications",
       "subtitle": "Browse every specification and filter with keywords.",
@@ -2728,9 +2628,6 @@
       }
     },
     "hero": {
-      "aiReview": {
-        "label": "AI Summary"
-      },
       "aiSummary": {
         "community": "Experts say",
         "ecological": "Environmentally",

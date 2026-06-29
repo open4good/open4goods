@@ -47,7 +47,6 @@ class StatsServiceTest {
         given(productRepository.countMainIndexHavingImpactScore()).willReturn(5_925L);
         given(productRepository.countMainIndexWithoutVertical()).willReturn(3_210L);
         given(productRepository.countMainIndexValidAndRated()).willReturn(9_876L);
-        given(productRepository.countMainIndexValidAndReviewed("fr")).willReturn(4_321L);
         given(partnerService.getPartners()).willReturn(List.of(mock(AffiliationPartner.class), mock(AffiliationPartner.class)));
 
         StatsService service = new StatsService(serialisationService, resolver, partnerService, openDataService, productRepository, productMappingService);
@@ -63,7 +62,6 @@ class StatsServiceTest {
         assertThat(dto.productsCountByCategory()).isEqualTo(Map.of("enabled", 42L));
         assertThat(dto.productsCountSum()).isEqualTo(42L);
         assertThat(dto.ratedProductsCount()).isEqualTo(9_876L);
-        assertThat(dto.reviewedProductsCount()).isEqualTo(4_321L);
     }
 
     private Resource resource(String filename, String yaml) {

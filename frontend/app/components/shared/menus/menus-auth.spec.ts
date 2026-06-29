@@ -182,7 +182,6 @@ vi.mock('~/stores/useProductCompareStore', () => ({
 
 vi.mock('~~/shared/api-client', () => ({
   IpQuotaCategory: {
-    ReviewGeneration: 'REVIEW_GENERATION',
     FeedbackVote: 'FEEDBACK_VOTE',
   },
 }))

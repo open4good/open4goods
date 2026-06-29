@@ -46,7 +46,6 @@ class OpenApiDocsIT {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.openapi").exists())
                 .andExpect(jsonPath("$.paths['/products'].post.responses['400']").exists())
-                .andExpect(jsonPath("$.components.schemas.ReviewGenerationStatus").exists())
                 .andExpect(jsonPath("$.components.securitySchemes.basicAuth").exists());
     }
 }

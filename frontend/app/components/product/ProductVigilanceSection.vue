@@ -167,36 +167,6 @@
         </v-card>
       </v-col>
 
-      <!-- Obsolescence Warning Card -->
-      <v-col v-if="hasObsolescenceWarning" cols="12" :md="cardColumnSize">
-        <v-card
-          class="product-vigilance__card product-vigilance__card--obsolescence h-100"
-          color="warning"
-          variant="tonal"
-        >
-          <v-card-text class="product-vigilance__card-body">
-            <div class="product-vigilance__card-layout">
-              <v-icon
-                class="product-vigilance__card-icon"
-                size="40"
-                icon="mdi-timer-alert-outline"
-              />
-              <div class="product-vigilance__card-content">
-                <p class="product-vigilance__card-title">
-                  {{ t('product.vigilance.obsolescence.title') }}
-                </p>
-                <!-- eslint-disable vue/no-v-html -->
-                <p
-                  class="product-vigilance__card-description"
-                  v-html="sanitize(obsolescenceWarning)"
-                />
-                <!-- eslint-enable vue/no-v-html -->
-              </div>
-            </div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-
       <!-- Competition Vigilance Card -->
       <v-col v-if="isLowCompetition" cols="12" :md="cardColumnSize">
         <v-card
@@ -447,15 +417,6 @@ const isLowDataQuality = computed(() => {
   return dataQualityScoreValueNum.value < dataQualityAvgNum.value
 })
 
-// --- Obsolescence Vigilance Logic ---
-const obsolescenceWarning = computed(
-  () => product.value.aiReview?.review?.obsolescenceWarning
-)
-
-const hasObsolescenceWarning = computed(
-  () => !!obsolescenceWarning.value && obsolescenceWarning.value.length > 0
-)
-
 // --- Competition Vigilance Logic ---
 const allOffers = computed(() => {
   const byCondition = product.value.offers?.offersByCondition ?? {}
@@ -486,7 +447,6 @@ const activeCardCount = computed(() => {
   if (isEndOfLife.value) count++
   if (hasConflictingAttributes.value) count++
   if (isLowDataQuality.value) count++
-  if (hasObsolescenceWarning.value) count++
   if (isLowCompetition.value) count++
   return count
 })
@@ -559,10 +519,6 @@ function sanitize(content: string | null | undefined): string {
 }
 
 .product-vigilance__card--quality .product-vigilance__card-icon {
-  color: rgba(var(--v-theme-warning));
-}
-
-.product-vigilance__card--obsolescence .product-vigilance__card-icon {
   color: rgba(var(--v-theme-warning));
 }
 

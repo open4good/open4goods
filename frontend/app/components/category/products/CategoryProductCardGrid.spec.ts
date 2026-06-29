@@ -205,7 +205,6 @@ const buildProduct = (overrides: Partial<ProductDto> = {}): ProductDto => ({
   scores: overrides.scores,
   attributes: overrides.attributes,
   datasources: overrides.datasources,
-  aiReview: overrides.aiReview,
   slug: overrides.slug,
   fullSlug: overrides.fullSlug,
 })

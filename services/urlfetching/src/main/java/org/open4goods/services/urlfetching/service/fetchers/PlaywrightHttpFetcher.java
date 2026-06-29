@@ -38,7 +38,7 @@ import io.micrometer.core.instrument.MeterRegistry;
  * URL fetcher backed by Playwright Chromium in headless mode.
  * <p>
  * A fresh browser context is created per fetch so user-agent and header
- * overrides remain isolated across domains and review-generation attempts.
+ * overrides remain isolated across domains and fetch attempts.
  * </p>
  */
 public class PlaywrightHttpFetcher implements Fetcher {

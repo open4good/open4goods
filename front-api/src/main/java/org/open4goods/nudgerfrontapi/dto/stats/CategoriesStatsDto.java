@@ -41,9 +41,6 @@ public record CategoriesStatsDto(
         @Schema(description = "Total products with a valid ECOSCORE and offers.", example = "25000")
         long ratedProductsCount,
 
-        @Schema(description = "Total products with AI reviews.", example = "10000")
-        long reviewedProductsCount,
-
         @Schema(description = "Detailed statistics per vertical.", example = "{\"electronics\": {\"totalProducts\": 1000, ...}}")
         Map<String, VerticalStatsDto> detailedStats
 ) { }

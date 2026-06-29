@@ -20,7 +20,6 @@ import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,8 +41,6 @@ public class MetriksController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetriksController.class);
     /** Default locale used when counting products that carry an AI review. */
-    private static final String DEFAULT_REVIEW_LOCALE = "fr";
-
     private final FeedService feedService;
     private final ElasticsearchOperations elasticsearchOperations;
     private final ProductRepository productRepository;
@@ -89,22 +86,15 @@ public class MetriksController {
     @Operation(
             summary = "Get functional business KPI metrics",
             description = "Returns business KPIs as Metriks schema-2.0 events: total product count, "
-                    + "products with an AI review, products with an ImpactScore, "
-                    + "number of active feeds and affiliation partner count.")
+                    + "products with an ImpactScore, number of active feeds and affiliation partner count.")
     @ApiResponse(responseCode = "200", description = "MetriksResponse containing business KPI events")
-    public MetriksResponse getFunctionalMetrics(
-            @Parameter(description = "Locale used to count products that carry an AI review (e.g. 'fr', 'en'). Defaults to 'fr'.")
-            @RequestParam(name = "locale", required = false, defaultValue = DEFAULT_REVIEW_LOCALE) String locale) {
+    public MetriksResponse getFunctionalMetrics() {
         MetriksResponse response = newResponse();
         List<MetriksEvent> events = new ArrayList<>();
 
         events.add(measure("business.products.total", "Produits en base", "count",
                 List.of("products"), List.of("elasticsearch", "products"),
                 productRepository::countMainIndex));
-
-        events.add(measure("business.products.reviewed", "Produits avec AiReview", "count",
-                List.of("products", "reviews"), List.of("elasticsearch", "products", "reviews"),
-                () -> productRepository.countMainIndexValidAndReviewed(locale)));
 
         events.add(measure("business.products.rated", "Produits notés (ImpactScore)", "count",
                 List.of("products"), List.of("elasticsearch", "products"),

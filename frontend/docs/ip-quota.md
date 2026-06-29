@@ -28,7 +28,6 @@ No cookies are written. Cached entries are considered fresh for 1 hour.
 The API currently exposes:
 
 - `FEEDBACK_VOTE`
-- `REVIEW_GENERATION`
 - `CONTACT_MESSAGE` (reserved for future use)
 
 ## Usage
@@ -45,6 +44,5 @@ The composable intentionally keeps read APIs (`getUsed`, `getRemaining`,
 `getLimit`) separate from the fetch logic (`refreshQuota`) so components can
 control when to sync with the backend.
 
-Use `invalidateQuota` after successful actions (feedback votes, AI review
-generation) to force a refresh and keep the cached count aligned with the
-backend.
+Use `invalidateQuota` after successful actions to force a refresh and keep the
+cached count aligned with the backend.

@@ -111,7 +111,6 @@ const createProduct = (overrides: Partial<ProductDto> = {}): ProductDto => ({
   scores: overrides.scores,
   attributes: overrides.attributes,
   datasources: overrides.datasources,
-  aiReview: overrides.aiReview,
 })
 
 describe('CategoryComparePanel', () => {

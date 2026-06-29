@@ -21,7 +21,7 @@ class IpQuotaServiceTest {
         IpQuotaService service = new IpQuotaService(fixedClock);
 
         Duration window = Duration.ofMinutes(30);
-        String action = "REVIEW_GENERATION";
+        String action = "TEST_ACTION";
         String ip = "127.0.0.1";
 
         assertThat(service.getUsage(action, ip, window)).isZero();

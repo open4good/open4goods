@@ -22,7 +22,6 @@ import org.open4goods.api.services.aggregation.services.realtime.IdentityAggrega
 import org.open4goods.api.services.aggregation.services.realtime.MediaAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.NamesAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.PriceAggregationService;
-import org.open4goods.api.services.aggregation.services.realtime.ReviewMetadataAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.TaxonomyRealTimeAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.UsageCostAggregationService;
 import org.open4goods.commons.exceptions.AggregationSkipException;
@@ -333,7 +332,6 @@ public class AggregationFacadeService {
 				embeddingService, embeddingProperties));
 		services.add(new PriceAggregationService(aggLogger));
 		services.add(new MediaAggregationService(aggLogger));
-		services.add(new ReviewMetadataAggregationService(aggLogger));
 
 		final StandardAggregator ret = new StandardAggregator(services, verticalConfigService);
 		autowireBeanFactory.autowireBean(ret);

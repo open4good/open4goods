@@ -53,20 +53,6 @@ describe('useProductVigilance', () => {
     expect(alerts.value.some(a => a.key === 'quality')).toBe(true)
   })
 
-  it('identifies obsolescence warning', () => {
-    const product = ref<ProductDto>({
-      aiReview: {
-        review: {
-          obsolescenceWarning: 'Warning detail',
-        },
-      },
-    } as ProductDto)
-
-    const { hasObsolescenceWarning, alerts } = useProductVigilance(product)
-    expect(hasObsolescenceWarning.value).toBe(true)
-    expect(alerts.value.some(a => a.key === 'obsolescence')).toBe(true)
-  })
-
   it('identifies low competition warning', () => {
     const product = ref<ProductDto>({
       offers: {

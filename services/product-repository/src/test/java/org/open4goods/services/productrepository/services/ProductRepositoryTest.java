@@ -184,20 +184,6 @@ class ProductRepositoryTest
     }
 
     @Test
-    void countReviewedUsesIndexedReviewMetadata()
-    {
-        when(elasticsearchOperations.count(any(CriteriaQuery.class), eq(ProductRepository.CURRENT_INDEX))).thenReturn(11L);
-
-        repository.countMainIndexValidAndReviewed("en");
-
-        ArgumentCaptor<CriteriaQuery> queryCaptor = ArgumentCaptor.forClass(CriteriaQuery.class);
-        verify(elasticsearchOperations).count(queryCaptor.capture(), eq(ProductRepository.CURRENT_INDEX));
-        assertThat(criteriaFields(queryCaptor.getValue().getCriteria()))
-                .contains("reviewMetadata.locales.en.createdMs")
-                .doesNotContain("reviews.en.review.baseLine");
-    }
-
-    @Test
     void partialUpdatesAreMergedByProductIdBeforeBulkUpdate()
     {
         ProductPartialUpdateHolder first = new ProductPartialUpdateHolder(42L);

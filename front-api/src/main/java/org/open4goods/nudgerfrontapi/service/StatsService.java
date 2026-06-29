@@ -72,7 +72,7 @@ public class StatsService {
      *
      * @param domainLanguage currently unused but retained for future localisation of statistics labels
      * @return DTO describing the category statistics used by the frontend including affiliation partners,
-     * OpenData counts, rated/reviewed product counts, and per-category product counts for recent products with offers.
+     * OpenData counts, rated product counts, and per-category product counts for recent products with offers.
      */
     @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public CategoriesStatsDto categories(DomainLanguage domainLanguage) {
@@ -85,8 +85,6 @@ public class StatsService {
         long totalProductsCount = safeCount(productRepository.countMainIndex());
         long excludedProductsCount = safeCount(productRepository.countMainIndexExcluded());
         long ratedProductsCount = safeCount(productRepository.countMainIndexValidAndRated());
-        long reviewedProductsCount = safeCount(productRepository.countMainIndexValidAndReviewed(domainLanguage.languageTag()));
-        String reviewLocale = domainLanguage != null ? domainLanguage.languageTag() : null;
 
         Map<String, Long> productsCountByCategory = new LinkedHashMap<>();
         Map<String, VerticalStatsDto> detailedStats = new LinkedHashMap<>();
@@ -104,9 +102,8 @@ public class StatsService {
             long vTotal = safeCount(productRepository.countMainIndexTotal(verticalId));
             long vExcluded = safeCount(productRepository.countMainIndexExcluded(verticalId));
             long vRated = safeCount(productRepository.countMainIndexValidAndRated(verticalId));
-            long vReviewed = safeCount(productRepository.countMainIndexValidAndReviewed(verticalId, domainLanguage.languageTag()));
 
-            detailedStats.put(verticalId, new VerticalStatsDto(vTotal, vExcluded, safeCount, vRated, vReviewed));
+            detailedStats.put(verticalId, new VerticalStatsDto(vTotal, vExcluded, safeCount, vRated));
         }
 
         return new CategoriesStatsDto(
@@ -121,7 +118,6 @@ public class StatsService {
                 totalProductsCount,
                 excludedProductsCount,
                 ratedProductsCount,
-                reviewedProductsCount,
                 detailedStats
         );
     }

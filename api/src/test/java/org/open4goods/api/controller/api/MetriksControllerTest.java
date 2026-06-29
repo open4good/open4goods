@@ -65,7 +65,6 @@ public class MetriksControllerTest {
         partners.add(p2);
 
         when(productRepository.countMainIndex()).thenReturn(1234L);
-        when(productRepository.countMainIndexValidAndReviewed("fr")).thenReturn(42L);
         when(productRepository.countMainIndexValidAndRated()).thenReturn(99L);
         when(feedService.getFeedsUrl()).thenReturn(new HashSet<>());
         when(feedService.getPartners()).thenReturn(partners);
@@ -76,8 +75,8 @@ public class MetriksControllerTest {
                 .andExpect(jsonPath("$.events").isArray())
                 .andExpect(jsonPath("$.events[0].id").value("business.products.total"))
                 .andExpect(jsonPath("$.events[0].value").value(1234))
-                .andExpect(jsonPath("$.events[1].id").value("business.products.reviewed"))
-                .andExpect(jsonPath("$.events[1].value").value(42));
+                .andExpect(jsonPath("$.events[1].id").value("business.products.rated"))
+                .andExpect(jsonPath("$.events[1].value").value(99));
     }
 
     @Test

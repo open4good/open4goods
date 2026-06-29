@@ -112,7 +112,7 @@ public class IpQuotaService {
     /**
      * Returns the number of times the action was performed by this IP in the current time window.
      *
-     * @param action Identifier of the action (e.g. "REVIEW_GENERATION")
+     * @param action Identifier of the action (e.g. "FEEDBACK_VOTE")
      * @param ip Client IP
      * @param window duration of the quota window
      * @return Usage count within the window

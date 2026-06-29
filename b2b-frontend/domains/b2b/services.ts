@@ -95,16 +95,6 @@ export const SERVICES: ServiceDescriptor[] = [
     order: 8
   },
   {
-    id: 'product.review',
-    slug: 'review',
-    icon: 'mdi-star-circle-outline',
-    category: 'product',
-    status: 'coming-soon',
-    credits: 30,
-    featured: true,
-    order: 9
-  },
-  {
     id: 'product.taxonomy',
     slug: 'taxonomy',
     icon: 'mdi-sitemap-outline',
@@ -112,7 +102,7 @@ export const SERVICES: ServiceDescriptor[] = [
     status: 'coming-soon',
     credits: 15,
     featured: false,
-    order: 10
+    order: 9
   },
   {
     id: 'product.alternatives',
@@ -122,7 +112,7 @@ export const SERVICES: ServiceDescriptor[] = [
     status: 'coming-soon',
     credits: 20,
     featured: false,
-    order: 11
+    order: 10
   },
   {
     id: 'barcode.render',

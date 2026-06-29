@@ -56,10 +56,9 @@ Pre-fetch search candidates are hardened before use: conflicting sibling
 alternates are removed when a canonical candidate exists, and ambiguous sibling
 families are omitted when no authoritative winner exists.
 
-EPREL and review-generation use the same candidate hardening and model-zone
-matching helpers. EPREL GTIN matches remain authoritative, while multiple EPREL
-sibling variants are rejected unless scoring or GTIN evidence produces one safe
-winner.
+EPREL uses the same candidate hardening and model-zone matching helpers. EPREL
+GTIN matches remain authoritative, while multiple EPREL sibling variants are
+rejected unless scoring or GTIN evidence produces one safe winner.
 
 ## Consequences
 

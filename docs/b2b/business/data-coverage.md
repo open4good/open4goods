@@ -11,15 +11,15 @@
 
 ## 1. Méthodologie
 
-1. **Modèle** : analyse de `model/.../product/Product.java` (1 325 lignes) et de ses blocs
-   (`AggregatedPrices`, `Score`, `AiReview`, `EprelProduct`, `ProductAttributes`, `Resource`...).
+1. **Modèle** : analyse de `model/.../product/Product.java` et de ses blocs
+   (`AggregatedPrices`, `Score`, `EprelProduct`, `ProductAttributes`, `Resource`...).
 2. **DTO existants** : inventaire des 40 DTO de `front-api/.../dto/product/` - la couche de mapping
    `Product (ES) → DTO sanitisé` **existe déjà** et doit être réutilisée (cf. `ProductMappingService`).
 3. **Volumétrie réelle** : requêtes `_count` / `_search` (aggs) sur l'index de prod pour mesurer la
    **couverture effective** de chaque champ - la priorisation est *data-driven*, pas théorique.
    Les requêtes utilisées sont consignées en §4 pour que la mesure soit **reproductible**.
 
-> ⚠️ Limite ES : plusieurs blocs sont stockés mais **non indexés** (`reviews`, `ranking` → `enabled:false` ;
+> ⚠️ Limite ES : plusieurs blocs sont stockés mais **non indexés** (`ranking` → `enabled:false` ;
 > `eprelDatas` → `dynamic:false` ; `coverImagePath`, `googleTaxonomyId` → non indexés). Leur couverture
 > **ne peut pas être comptée par requête** ; elle est estimée à partir du sous-ensemble curé (voir §2.3).
 
@@ -36,7 +36,7 @@ nudger n'a pas *une* base mais **deux**, qu'il faut traiter distinctement dans l
 | Population | Volume | Nature | Stratégie B2B |
 |---|---|---|---|
 | **Masse commodité** | ~34 M GTIN avec offres | Prix/offres scrapés multi-marchands, attributs Icecat | Facette `price` d'appel, **volume**, no-data-no-pay |
-| **Curé premium** | ~10-50 K produits | ImpactScore, énergie, réparabilité, review IA, 7 verticales | Facettes **exclusives**, **marge**, faible volume |
+| **Curé premium** | ~10-50 K produits | ImpactScore, énergie, réparabilité, 7 verticales | Facettes **exclusives**, **marge**, faible volume |
 
 ### 2.2 Couverture - facette PRIX & enrichissement de masse
 
@@ -67,7 +67,7 @@ nudger n'a pas *une* base mais **deux**, qu'il faut traiter distinctement dans l
 | `vertical` présent (curé) | **87 609** | toutes premium | Catalogue curé |
 | `vertical` + `offersCount > 0` | 26 643 | `impact` + `price` croisés | **Cœur monétisable premium** |
 | `vertical` + `ECOSCORE` | 13 274 | `product.impact` vendable | Curé scoré ET affichable |
-| `vertical` + `excluded=false` (affichés) | 10 286 | review IA, premium UX | Le " vrai " catalogue éditorial |
+| `vertical` + `excluded=false` (affichés) | 10 286 | premium UX | Le " vrai " catalogue éditorial |
 
 **Répartition des 7 verticales curées :**
 
@@ -82,12 +82,11 @@ nudger n'a pas *une* base mais **deux**, qu'il faut traiter distinctement dans l
 | air-conditioner | 1 031 |
 
 **Non mesurable par ES** (stocké, non indexé) - couverture **estimée** :
-- `reviews` (revue IA, `enabled:false`) : générée sur le sous-ensemble **affiché** (~10 K), partiellement.
 - `eprelDatas` (`dynamic:false`) : présent surtout sur électroménager + TV (énergie ≈ 47,5 K via le score).
 - `googleTaxonomyId` / référentiels multi-taxonomies : portés par la config verticale, pas par doc indexé.
 
 > **À faire avant chiffrage premium** : exposer un compteur applicatif (côté pipeline) du nombre réel de
-> produits avec `reviews[lang]` non vide et `eprelDatas` non null - non récupérable par requête ES seule.
+> produits avec `eprelDatas` non null - non récupérable par requête ES seule.
 
 ---
 
@@ -102,7 +101,6 @@ La couche de mapping existe déjà dans `front-api`. **Ne pas réécrire** : cop
 | `price.newPricehistory` / `trends` | `ProductPriceHistoryDto`, `ProductPriceHistoryEntryDto`, `ProductPriceTrendDto`, `PriceTrendState` | `product.price-history` | non |
 | `attributes` (`ProductAttributes`, Icecat) | `ProductAttributesDto`, `ProductAttributeDto`, `ProductIndexedAttributeDto` | `product.attributes` | `attributes.indexed` |
 | `scores` (`Map<String,Score>`) | `ProductScoresDto`, `ProductScoreDto`, `ProductCardinalityDto` | `product.impact` | `scores.*.value` ✅ |
-| `reviews` (`AiReviewHolder`) | `ProductAiReviewDto`, `AiReviewDto`, `AiReviewAttributeDto`, `AiReviewSourceDto` | `product.review` | non (`enabled:false`) |
 | `eprelDatas` (`EprelProduct`) | `ProductEprelDto` | `product.energy` | non (`dynamic:false`) |
 | `resources` (`Resource`) | `ProductResourcesDto`, `ProductImageDto`, `ProductPdfDto`, `ProductVideoDto` | `product.images` / `product.documents` | partiel |
 | `ranking` (`EcoScoreRanking`) | `ProductRankingDto` | `product.impact` (rang) | non |

@@ -69,13 +69,6 @@ import {
     ProductResourcesDtoToJSON,
     ProductResourcesDtoToJSONTyped,
 } from './ProductResourcesDto';
-import type { ProductAiReviewDto } from './ProductAiReviewDto';
-import {
-    ProductAiReviewDtoFromJSON,
-    ProductAiReviewDtoFromJSONTyped,
-    ProductAiReviewDtoToJSON,
-    ProductAiReviewDtoToJSONTyped,
-} from './ProductAiReviewDto';
 import type { ProductEprelDto } from './ProductEprelDto';
 import {
     ProductEprelDtoFromJSON,
@@ -158,12 +151,6 @@ export interface ProductDto {
      */
     scores?: ProductScoresDto;
     /**
-     * AI generated review resolved for the requested domain language
-     * @type {ProductAiReviewDto}
-     * @memberof ProductDto
-     */
-    aiReview?: ProductAiReviewDto;
-    /**
      * EPREL product information when available
      * @type {ProductEprelDto}
      * @memberof ProductDto
@@ -210,7 +197,6 @@ export function ProductDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean)
         'resources': json['resources'] == null ? undefined : ProductResourcesDtoFromJSON(json['resources']),
         'datasources': json['datasources'] == null ? undefined : ProductDatasourcesDtoFromJSON(json['datasources']),
         'scores': json['scores'] == null ? undefined : ProductScoresDtoFromJSON(json['scores']),
-        'aiReview': json['aiReview'] == null ? undefined : ProductAiReviewDtoFromJSON(json['aiReview']),
         'eprel': json['eprel'] == null ? undefined : ProductEprelDtoFromJSON(json['eprel']),
         'offers': json['offers'] == null ? undefined : ProductOffersDtoFromJSON(json['offers']),
         'timeline': json['timeline'] == null ? undefined : ProductTimelineDtoFromJSON(json['timeline']),
@@ -238,7 +224,6 @@ export function ProductDtoToJSONTyped(value?: ProductDto | null, ignoreDiscrimin
         'resources': ProductResourcesDtoToJSON(value['resources']),
         'datasources': ProductDatasourcesDtoToJSON(value['datasources']),
         'scores': ProductScoresDtoToJSON(value['scores']),
-        'aiReview': ProductAiReviewDtoToJSON(value['aiReview']),
         'eprel': ProductEprelDtoToJSON(value['eprel']),
         'offers': ProductOffersDtoToJSON(value['offers']),
         'timeline': ProductTimelineDtoToJSON(value['timeline']),

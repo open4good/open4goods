@@ -21,13 +21,6 @@ describe('product-jsonld', () => {
         ],
       },
     },
-    aiReview: {
-      review: {
-        summary: 'Great product',
-        shortTitle: 'Review',
-      },
-      createdMs: 1625097600000,
-    },
     scores: {
       ecoscore: {
         absolute: { value: 15 },
@@ -351,71 +344,6 @@ describe('product-jsonld', () => {
     )?.find(n => n['@type'] === 'Product')
 
     expect(productNode!.offers.offers[0].shippingDetails).toBeUndefined()
-  })
-
-  it('emits review from aiReview summary when technicalReviewIntermediate is absent', () => {
-    const graph = buildProductJsonLdGraph(
-      mockInput as unknown as ProductJsonLdInput
-    )
-    const productNode = (
-      graph?.['@graph'] as unknown as Array<{
-        '@type': string
-        review?: {
-          '@type': string
-          author: { name: string }
-          reviewBody: string
-          datePublished: string
-        }
-      }>
-    )?.find(n => n['@type'] === 'Product')
-
-    expect(productNode?.review).toBeDefined()
-    expect(productNode?.review?.['@type']).toBe('Review')
-    expect(productNode?.review?.author?.name).toBe('Nudger')
-    expect(productNode?.review?.reviewBody).toBe('Great product')
-    expect(productNode?.review?.datePublished).toBe('2021-07-01')
-  })
-
-  it('prefers technicalReviewIntermediate over summary for review body', () => {
-    const graph = buildProductJsonLdGraph({
-      ...(mockInput as unknown as ProductJsonLdInput),
-      product: {
-        ...mockProduct,
-        aiReview: {
-          review: {
-            technicalReviewIntermediate: 'Detailed technical review',
-            summary: 'Short summary',
-          },
-          createdMs: 1625097600000,
-        },
-      } as unknown as ProductJsonLdInput['product'],
-    })
-    const productNode = (
-      graph?.['@graph'] as unknown as Array<{
-        '@type': string
-        review?: { reviewBody: string }
-      }>
-    )?.find(n => n['@type'] === 'Product')
-
-    expect(productNode?.review?.reviewBody).toBe('Detailed technical review')
-  })
-
-  it('omits review when aiReview has no text content', () => {
-    const graph = buildProductJsonLdGraph({
-      ...(mockInput as unknown as ProductJsonLdInput),
-      product: {
-        ...mockProduct,
-        aiReview: { review: {}, createdMs: 1625097600000 },
-      } as unknown as ProductJsonLdInput['product'],
-    })
-    const productNode = (
-      graph?.['@graph'] as unknown as Array<{
-        '@type': string
-        review?: unknown
-      }>
-    )?.find(n => n['@type'] === 'Product')
-
-    expect(productNode?.review).toBeUndefined()
   })
 
   it('emits countryOfOrigin when gtinInfo.countryName is present', () => {

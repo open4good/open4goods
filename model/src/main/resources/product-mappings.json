@@ -219,26 +219,6 @@
             "type": "object",
             "enabled": false
         },
-        "reviews": {
-            "type": "object",
-            "enabled": false
-        },
-        "reviewMetadata": {
-            "properties": {
-                "locales": {
-                    "type": "object",
-                    "dynamic": true
-                }
-            }
-        },
-        "reviewFacts": {
-            "type": "object",
-            "enabled": false
-        },
-        "reviewFetchDiagnostics": {
-            "type": "object",
-            "enabled": false
-        },
         "googleTaxonomyId": {
             "type": "integer",
             "index": false,

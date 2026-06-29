@@ -36,22 +36,6 @@ public class ProductSourceUrl {
         this.discoveredAt = System.currentTimeMillis();
     }
 
-    public static ProductSourceUrl fromFact(ProductFact fact) {
-        ProductSourceUrl sourceUrl = new ProductSourceUrl(fact.getUrl());
-        sourceUrl.setMarkdown(fact.getMarkdown());
-        sourceUrl.setFetchedAt(fact.getFetchedAt());
-        sourceUrl.setFetchStrategy(fact.getFetchStrategy());
-        sourceUrl.setTokenCount(fact.getTokenCount());
-        sourceUrl.setContentHash(fact.getContentHash());
-        sourceUrl.setProvider(ProductSourceProvider.LEGACY_REVIEW_FACT);
-        sourceUrl.setStatus(ProductSourceUrlStatus.FETCHED);
-        return sourceUrl;
-    }
-
-    public ProductFact toFact() {
-        return new ProductFact(url, markdown, null, fetchedAt, fetchStrategy, tokenCount, contentHash);
-    }
-
     public String getUrl() {
         return url;
     }

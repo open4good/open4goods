@@ -16,8 +16,5 @@ public record VerticalStatsDto(
         long validProducts,
 
         @Schema(description = "Number of rated products (having an ECOSCORE) in this vertical.", example = "700")
-        long ratedProducts,
-
-        @Schema(description = "Number of reviewed products (having AI reviews) in this vertical.", example = "600")
-        long reviewedProducts
+        long ratedProducts
 ) { }

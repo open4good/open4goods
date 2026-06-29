@@ -92,7 +92,6 @@
         <module>services/evaluation</module>
         <module>services/serialisation</module>
         <module>services/prompt</module>
-        <module>services/review-generation</module>
         <module>services/product-repository</module>
         <module>services/opendata</module>
         <module>services/captcha</module>

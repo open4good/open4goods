@@ -31,36 +31,6 @@
           {{ t('siteIdentity.menu.account.privacy.quotas.title') }}
         </p>
         <v-list density="compact" nav bg-color="transparent" class="pa-0">
-          <v-list-item v-if="aiQuota !== null" class="px-0">
-            <template #prepend>
-              <v-icon icon="mdi-robot-outline" size="small" class="mr-2" />
-            </template>
-            <div class="d-flex align-center ga-2 w-100">
-              <div class="d-flex align-center ga-2">
-                <span class="text-body-2">{{
-                  t('siteIdentity.menu.account.privacy.quotas.aiRemaining')
-                }}</span>
-                <v-tooltip location="top">
-                  <template #activator="{ props }">
-                    <v-icon
-                      v-bind="props"
-                      icon="mdi-information-outline"
-                      size="small"
-                      color="neutral-secondary"
-                    />
-                  </template>
-                  <span>{{
-                    t(
-                      'siteIdentity.menu.account.privacy.quotas.aiRemainingTooltip'
-                    )
-                  }}</span>
-                </v-tooltip>
-              </div>
-              <v-chip size="x-small" color="primary" variant="flat">{{
-                aiQuota
-              }}</v-chip>
-            </div>
-          </v-list-item>
           <v-list-item
             v-if="voteQuota !== null"
             to="/feedback"
@@ -338,10 +308,8 @@ const ipLabel = computed(() => {
 // --- Quota Logic ---
 const { getRemaining, refreshQuota } = useIpQuota()
 
-const aiQuotaCategory = IpQuotaCategory.ReviewGeneration
 const voteQuotaCategory = IpQuotaCategory.FeedbackVote
 
-const aiQuota = computed(() => getRemaining(aiQuotaCategory))
 const voteQuota = computed(() => getRemaining(voteQuotaCategory))
 const userAgentFull = ref<string | null>(null)
 
@@ -358,10 +326,7 @@ const userAgentDisplay = computed(() => {
 
 const loadQuotas = async () => {
   if (import.meta.client) {
-    await Promise.allSettled([
-      refreshQuota(aiQuotaCategory),
-      refreshQuota(voteQuotaCategory),
-    ])
+    await Promise.allSettled([refreshQuota(voteQuotaCategory)])
   }
 }
 

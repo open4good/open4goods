@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public enum IpQuotaCategory
 {
     FEEDBACK_VOTE("feedback.vote"),
-    REVIEW_GENERATION("review-generation"),
     CONTACT_MESSAGE("contact.message");
 
     private final String actionKey;

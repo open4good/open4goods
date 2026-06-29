@@ -35,9 +35,6 @@ const i18nMessages = {
           title: 'Qualité des données',
           description: 'Score: {score}, Moyenne: {avg}',
         },
-        obsolescence: {
-          title: 'Obsolescence',
-        },
       },
       price: {
         competition: {
@@ -170,26 +167,6 @@ describe('ProductVigilanceSection', () => {
     expect(wrapper.find('.product-vigilance__card--competition').exists()).toBe(
       false
     )
-  })
-
-  it('renders HTML in obsolescence warning', async () => {
-    const htmlWarning =
-      '<strong>Warning!</strong> This is <a href="#">AI generated</a>.'
-    const wrapper = await mountComponent({
-      product: {
-        aiReview: {
-          review: {
-            obsolescenceWarning: htmlWarning,
-          },
-        },
-      },
-    })
-
-    const description = wrapper.find(
-      '.product-vigilance__card--obsolescence .product-vigilance__card-description'
-    )
-    expect(description.html()).toContain('<strong>Warning!</strong>')
-    expect(description.html()).toContain('<a href="#">AI generated</a>')
   })
 
   it('renders HTML in data quality description', async () => {

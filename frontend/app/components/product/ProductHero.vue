@@ -92,7 +92,6 @@
                       :banner="true"
                       :brand="productBrandName"
                       :model="productModelName"
-                      :date="aiGenerationDate"
                       :category="productVerticalName"
                       :ranking="ecoscoreRanking"
                       :count="ecoscoreCount"
@@ -100,15 +99,6 @@
                   </div>
 
                   <div v-if="hasCategory" class="product-hero__actions">
-                    <AiReviewActionButton
-                      v-if="!hasAiReview"
-                      :is-reviewed="hasAiReview"
-                      variant="button"
-                      :label="t('product.hero.aiReview.label')"
-                      button-class="product-hero__ai-button"
-                      @click="handleAiReviewClick"
-                    />
-
                     <v-btn
                       class="product-hero__compare-button"
                       :class="{
@@ -304,7 +294,6 @@ import CategoryNavigationBreadcrumbs from '~/components/category/navigation/Cate
 import ProductHeroPricing from '~/components/product/ProductHeroPricing.vue'
 import ProductDesignation from '~/components/product/ProductDesignation.vue'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
-import AiReviewActionButton from '~/components/shared/ai/AiReviewActionButton.vue'
 import {
   MAX_COMPARE_ITEMS,
   useProductCompareStore,
@@ -386,10 +375,6 @@ const props = defineProps({
 const { t, te, n, locale } = useI18n()
 const heroBackground = useThemedAsset('product/product-hero-background.svg')
 
-// AI Review Logic
-
-const aiReview = computed(() => props.product.aiReview?.review ?? null)
-const hasAiReview = computed(() => Boolean(aiReview.value))
 const handleVerdictNavigate = (section: 'impact' | 'price' | 'reliability') => {
   let targetId = 'impact'
   if (section === 'price') {
@@ -406,21 +391,6 @@ const handleVerdictNavigate = (section: 'impact' | 'price' | 'reliability') => {
     window.scrollTo({ top, behavior: 'smooth' })
   }
 }
-
-const handleAiReviewClick = () => {
-  const element =
-    document.getElementById('synthese') ||
-    document.querySelector('.product-ai-review')
-  if (element) {
-    const offset = 120 // Adjust based on header height
-    const top = element.getBoundingClientRect().top + window.scrollY - offset
-    window.scrollTo({ top, behavior: 'smooth' })
-  }
-}
-
-const aiGenerationDate = computed(() => {
-  return props.product.aiReview?.createdMs ?? null
-})
 
 const handleImpactScoreClick = () => {
   const element = document.getElementById('impact')

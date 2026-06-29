@@ -117,31 +117,9 @@
               :vertical-title="normalizedVerticalTitle"
               :subtitle-params="impactSubtitleParams"
               :expanded-score-id="expandedScoreId"
-              :ai-impact-text="product.aiReview?.ecologicalOneline"
               :on-market-end-date="product.eprel?.onMarketEndDate"
               :score-min="impactScoreMin"
               :score-max="impactScoreMax"
-            />
-            <div v-else class="product-page__deferred-placeholder" />
-          </section>
-
-          <section
-            v-if="showAiReviewSection"
-            :id="sectionIds.ai"
-            class="product-page__section"
-          >
-            <ProductAiReviewSection
-              v-if="shouldRenderSection(sectionIds.ai)"
-              :gtin="product.gtin ?? gtin"
-              :initial-review="product.aiReview?.review ?? null"
-              :review-created-at="product.aiReview?.createdMs ?? undefined"
-              :site-key="hcaptchaSiteKey"
-              :title-params="aiTitleParams"
-              :product-name="productTitle"
-              :product-image="resolvedProductImageSource"
-              :product-slug="product.fullSlug ?? product.slug ?? undefined"
-              :failure-reason="product.aiReview?.failureReason ?? null"
-              :enough-data="product.aiReview?.enoughData ?? true"
             />
             <div v-else class="product-page__deferred-placeholder" />
           </section>
@@ -314,9 +292,6 @@ const ProductAttributesSection = defineAsyncComponent(
 const ProductImpactSection = defineAsyncComponent(
   () => import('~/components/product/ProductImpactSection.vue')
 )
-const ProductAiReviewSection = defineAsyncComponent(
-  () => import('~/components/product/ProductAiReviewSection.vue')
-)
 const ProductPriceSection = defineAsyncComponent(
   () => import('~/components/product/ProductPriceSection.vue')
 )
@@ -345,7 +320,6 @@ const { y: scrollY } = useWindowScroll()
 const display = useDisplay()
 
 const isStickyBannerOpen = ref(false)
-const aiNavigationLabel = computed(() => t('product.navigation.ai'))
 
 const heroSectionRef = ref<HTMLElement | null>(null)
 
@@ -355,7 +329,6 @@ const PRODUCT_COMPONENTS = [
   'names',
   'resources',
   'scores',
-  'aiReview',
   'offers',
   'eprel',
 ].join(',')
@@ -844,9 +817,6 @@ const buildModelVariationParams = (options: {
 
 const impactSubtitleParams = computed(() =>
   buildModelVariationParams({ key: 'impactSubtitle' })
-)
-const aiTitleParams = computed(() =>
-  buildModelVariationParams({ key: 'aiTitle' })
 )
 const priceTitleParams = computed(() =>
   buildModelVariationParams({ key: 'priceTitle' })
@@ -1679,10 +1649,6 @@ const { data: commercialEventsData } = await useAsyncData<
 
 const commercialEvents = computed(() => commercialEventsData.value ?? [])
 
-const hcaptchaSiteKey = computed(
-  () => runtimeConfig.public.hcaptchaSiteKey ?? ''
-)
-
 const showAdminSection = computed(() => isLoggedIn.value)
 const showAttributesSection = computed(() => {
   const currentProduct = product.value
@@ -1742,19 +1708,6 @@ const hideHeroPricingPanel = computed(() => {
 })
 const alternativesHydrated = ref(false)
 const hasAlternatives = ref(true)
-const showAiReviewSection = computed(() => {
-  if (!categoryDetail.value) {
-    return false
-  }
-  const aiReview = product.value?.aiReview
-  const hasReview = Boolean(aiReview?.review)
-  // Hide the section when backend says there isn't enough data and there's
-  // no existing review to display — avoids dead-end "Request" CTAs.
-  if (aiReview?.enoughData === false && !hasReview) {
-    return false
-  }
-  return true
-})
 
 const showVigilanceSection = computed(() => {
   if (!product.value) return false
@@ -1792,7 +1745,6 @@ const showVigilanceSection = computed(() => {
 const sectionIds = {
   hero: 'hero',
   impact: 'impact',
-  ai: 'synthese',
   price: 'prix',
   timeline: 'cycle-de-vie',
   alternatives: 'alternatives',
@@ -1811,9 +1763,6 @@ const subSectionIds = {
   attributesMain: 'attributes-main',
   attributesTimeline: 'attributes-timeline',
   attributesDetails: 'attributes-details',
-  aiTechnical: 'ai-review-technical',
-  aiEcological: 'ai-review-ecological',
-  aiCommunity: 'ai-review-community',
 } as const
 
 type NavigableSection = {
@@ -1865,29 +1814,6 @@ const attributesSubsections = computed(() => {
   return entries
 })
 
-const aiSubsections = computed(() => {
-  const review = product.value?.aiReview?.review
-  if (!review) {
-    return []
-  }
-
-  // We add all sections as they are generally available when a review exists
-  return [
-    {
-      id: subSectionIds.aiTechnical,
-      label: t('product.aiReview.sections.technical'),
-    },
-    {
-      id: subSectionIds.aiEcological,
-      label: t('product.aiReview.sections.ecological'),
-    },
-    {
-      id: subSectionIds.aiCommunity,
-      label: t('product.aiReview.sections.community'),
-    },
-  ]
-})
-
 const shouldShowAlternativesNavigation = computed(
   () =>
     showAlternativesSection.value &&
@@ -1907,13 +1833,6 @@ const primarySectionDefinitions = computed<ConditionalSection[]>(() => [
     icon: 'mdi-leaf',
     condition: impactScores.value.length > 0,
     subsections: impactSubsections.value,
-  },
-  {
-    id: sectionIds.ai,
-    label: aiNavigationLabel.value,
-    icon: 'mdi-robot-outline',
-    condition: showAiReviewSection.value,
-    subsections: aiSubsections.value,
   },
   {
     id: sectionIds.price,
@@ -2079,9 +1998,6 @@ const subsectionParentMap: Record<string, string> = {
   [subSectionIds.attributesMain]: sectionIds.attributes,
   [subSectionIds.attributesTimeline]: sectionIds.attributes,
   [subSectionIds.attributesDetails]: sectionIds.attributes,
-  [subSectionIds.aiTechnical]: sectionIds.ai,
-  [subSectionIds.aiEcological]: sectionIds.ai,
-  [subSectionIds.aiCommunity]: sectionIds.ai,
 }
 
 const resolveRenderableSectionId = (sectionId: string) =>
@@ -2371,7 +2287,6 @@ const productJsonLdGraph = computed(() => {
     },
     category: verticalTitle.value,
     imageUrls: jsonLdImageUrls.value,
-    punchline: product.value.aiReview?.review?.baseLine,
     impactScore: impactScoreOutOf20.value,
     labels: {
       impactScore: String(t('product.schema.properties.impactScore')),

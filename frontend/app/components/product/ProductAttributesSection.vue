@@ -4,14 +4,7 @@
       <h2 class="product-attributes__title">
         {{ $t('product.attributes.title', titleParams) }}
       </h2>
-      <!-- eslint-disable vue/no-v-html -->
-      <p
-        v-if="technicalShortReviewHtml"
-        class="product-attributes__subtitle container-fluid"
-        v-html="technicalShortReviewHtml"
-      />
-      <!-- eslint-enable vue/no-v-html -->
-      <p v-else class="product-attributes__subtitle">
+      <p class="product-attributes__subtitle">
         {{ $t('product.attributes.subtitle') }}
       </p>
     </header>
@@ -802,7 +795,6 @@ import { useAuth } from '~/composables/useAuth'
 import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import ProductAttributesDetailCard from '~/components/product/attributes/ProductAttributesDetailCard.vue'
 
-import { _sanitizeHtml } from '~~/shared/utils/sanitizer'
 import type {
   AttributeConfigDto,
   ProductAttributeDto,
@@ -882,18 +874,6 @@ const gtinCountry = computed(() => {
     flag: info.countryFlagUrl ?? null,
   }
 })
-const technicalShortReview = computed(
-  () => props.product?.aiReview?.review?.technicalShortReview?.trim() ?? ''
-)
-const technicalShortReviewHtml = computed(() => {
-  if (!technicalShortReview.value) {
-    return ''
-  }
-
-  const { sanitizedHtml } = _sanitizeHtml(technicalShortReview.value)
-  return sanitizedHtml.value || technicalShortReview.value
-})
-
 const gtinBarcodeUrl = computed(() => {
   if (!gtin.value) {
     return null

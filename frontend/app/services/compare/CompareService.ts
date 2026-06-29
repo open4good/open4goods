@@ -1,17 +1,6 @@
-import DOMPurify from 'isomorphic-dompurify'
-import type {
-  ProductDto,
-  VerticalConfigFullDto,
-  AiReviewDto,
-} from '~~/shared/api-client'
+import type { ProductDto, VerticalConfigFullDto } from '~~/shared/api-client'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
 import { resolveProductTitle } from '~/utils/_product-title-resolver'
-
-export interface CompareProductReview {
-  description: string | null
-  pros: string[]
-  cons: string[]
-}
 
 export interface CompareProductEntry {
   gtin: string
@@ -22,7 +11,6 @@ export interface CompareProductEntry {
   model: string | null
   coverImage: string | null
   impactScore: number | null
-  review: CompareProductReview
   country: { name: string; flag?: string } | null
 }
 
@@ -34,60 +22,6 @@ export type FetchVerticalFn = (
 export interface CompareServiceOptions {
   fetchProduct?: FetchProductFn
   fetchVertical?: FetchVerticalFn
-}
-
-const stripHtml = (content: string | null): string | null => {
-  if (!content) {
-    return null
-  }
-
-  const sanitized = DOMPurify.sanitize(content, {
-    ALLOWED_TAGS: [],
-    ALLOWED_ATTR: [],
-  }).trim()
-  const stripped = sanitized.replace(/<[^>]+>/g, '').trim()
-
-  return stripped.length ? stripped : null
-}
-
-const sanitizeHtml = (content: string | null): string | null => {
-  if (!content) {
-    return null
-  }
-
-  return DOMPurify.sanitize(content, { ADD_ATTR: ['target', 'rel', 'class'] })
-}
-
-const normaliseReview = (
-  review: AiReviewDto | null | undefined
-): CompareProductReview => {
-  if (!review) {
-    return {
-      description: null,
-      pros: [],
-      cons: [],
-    }
-  }
-
-  const description = stripHtml(review.description ?? null)
-  const pros = Array.isArray(review.pros)
-    ? review.pros
-        .map(entry => sanitizeHtml(String(entry)))
-        .filter(
-          (entry): entry is string =>
-            typeof entry === 'string' && entry.length > 0
-        )
-    : []
-  const cons = Array.isArray(review.cons)
-    ? review.cons
-        .map(entry => sanitizeHtml(String(entry)))
-        .filter(
-          (entry): entry is string =>
-            typeof entry === 'string' && entry.length > 0
-        )
-    : []
-
-  return { description, pros, cons }
 }
 
 const resolveTitle = (product: ProductDto): string => {
@@ -152,7 +86,6 @@ export const createCompareService = (options: CompareServiceOptions = {}) => {
         try {
           const product = await fetchProduct(gtin)
           const verticalId = product.base?.vertical ?? null
-          const review = normaliseReview(product.aiReview?.review)
 
           return {
             gtin,
@@ -163,7 +96,6 @@ export const createCompareService = (options: CompareServiceOptions = {}) => {
             model: product.identity?.model ?? null,
             coverImage: resolveCoverImage(product),
             impactScore: resolvePrimaryImpactScore(product),
-            review,
             country: resolveCountry(product),
           }
         } catch (error) {

@@ -150,7 +150,6 @@ const buildProduct = (overrides: Partial<ProductDto> = {}): ProductDto => ({
       },
     },
   },
-  aiReview: overrides.aiReview,
   scores: overrides.scores,
 })
 

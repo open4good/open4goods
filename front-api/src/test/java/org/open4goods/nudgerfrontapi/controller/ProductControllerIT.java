@@ -2,10 +2,10 @@ package org.open4goods.nudgerfrontapi.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -16,21 +16,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-import java.util.List;
 import java.util.Locale;
-
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.RolesConstants;
-import org.open4goods.model.ai.AiReview;
 import org.open4goods.nudgerfrontapi.controller.api.ProductController;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.dto.PageMetaDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
-import org.open4goods.nudgerfrontapi.dto.product.ProductReviewDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.Filter;
@@ -51,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.health.actuate.endpoint.HealthEndpoint;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.mockito.ArgumentCaptor;
@@ -78,32 +73,11 @@ class ProductControllerIT {
     @Autowired
     private HealthEndpoint healthEndpoint;
     private static final String SHARED_TOKEN = "test-token";
-    /* Endpoint missing or changed to singular /review for status
-    @Test
-    void reviewsEndpointReturnsList() throws Exception {
-        long gtin = 123L;
-        var page = new PageImpl<>(List.of(new ProductReviewDto("fr", new AiReview(), 1L)), PageRequest.of(0, 20), 1);
-        given(service.getReviews(anyLong(), any(Pageable.class))).willReturn(page);
-
-        mockMvc.perform(get("/products/{gtin}/review", gtin)
-                .header("Accept-Language", "de")
-                .header("X-Shared-Token", SHARED_TOKEN)
-                .param("domainLanguage", "fr")
-                .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
-            .andExpect(status().isOk())
-            .andExpect(header().string("Cache-Control", "public, max-age=3600"))
-            .andExpect(header().string("X-Locale", "de"))
-            .andExpect(header().exists("Link"))
-            .andExpect(jsonPath("$.page.number").value(0))
-            .andExpect(jsonPath("$.data").isArray());
-    }
-    */
-
     @Test
     void includeParameterFiltersFields() throws Exception {
         long gtin = 321L;
         given(service.getProduct(anyLong(), any(Locale.class), anySet(), any(DomainLanguage.class)))
-                .willReturn(new ProductDto(gtin, null, null, null, null, null, null, null, null, null, null, null, null, null));
+                .willReturn(new ProductDto(gtin, null, null, null, null, null, null, null, null, null, null, null, null));
 
         mockMvc.perform(get("/products/{gtin}", gtin)
                         .param("include", "gtin")
@@ -130,7 +104,7 @@ class ProductControllerIT {
 
     @Test
     void productsEndpointReturnsPage() throws Exception {
-        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null);
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
         given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean(), nullable(String.class)))
@@ -155,7 +129,7 @@ class ProductControllerIT {
 
     @Test
     void productsEndpointParsesAggregationObjectSyntax() throws Exception {
-        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null);
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
         given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean(), nullable(String.class)))
@@ -209,7 +183,7 @@ class ProductControllerIT {
 
     @Test
     void productsEndpointAllowsGlobalAggregation() throws Exception {
-        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null);
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
         given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean(), nullable(String.class)))
@@ -226,7 +200,7 @@ class ProductControllerIT {
 
     @Test
     void productsEndpointAllowsEcoscoreGlobalAggregation() throws Exception {
-        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null);
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
         given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean(), nullable(String.class)))
@@ -256,7 +230,7 @@ class ProductControllerIT {
         VerticalConfig config = verticalConfigWithNumericAttribute("battery_life");
         given(verticalsConfigService.getConfigById("electronics")).willReturn(config);
 
-        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null);
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
         given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean(), nullable(String.class)))
@@ -277,7 +251,7 @@ class ProductControllerIT {
         config.setId("electronics");
         given(verticalsConfigService.getConfigById("electronics")).willReturn(config);
 
-        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null);
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
         given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean(), nullable(String.class)))
@@ -297,7 +271,7 @@ class ProductControllerIT {
         VerticalConfig config = verticalConfigWithNumericAttribute("battery_life");
         given(verticalsConfigService.getConfigById("electronics")).willReturn(config);
 
-        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null);
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
         given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean(), nullable(String.class)))
@@ -333,7 +307,7 @@ class ProductControllerIT {
         VerticalConfig config = verticalConfigWithNumericAttribute("battery_life");
         given(verticalsConfigService.getConfigById("electronics")).willReturn(config);
 
-        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null);
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
         given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), nullable(FilterRequestDto.class), anyBoolean(), nullable(String.class)))
@@ -369,7 +343,7 @@ class ProductControllerIT {
         VerticalConfig config = verticalConfigWithNumericAttribute("battery_life");
         given(verticalsConfigService.getConfigById("electronics")).willReturn(config);
 
-        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null);
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
         given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), any(FilterRequestDto.class), anyBoolean(), nullable(String.class)))
@@ -435,7 +409,7 @@ class ProductControllerIT {
 
     @Test
     void productsEndpointParsesFilterObjectSyntax() throws Exception {
-        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null);
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
         given(service.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), any(FilterRequestDto.class), anyBoolean(), nullable(String.class)))

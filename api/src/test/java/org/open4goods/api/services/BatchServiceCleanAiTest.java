@@ -19,13 +19,11 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.services.feedservice.service.FeedIndexingService;
-import org.open4goods.model.Localisable;
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.model.product.AiReviewHolder;
 import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.serialisation.service.SerialisationService;
@@ -58,12 +56,7 @@ public class BatchServiceCleanAiTest {
         Product product = new Product();
         product.setId(123L);
         
-        // 1. Setup AI Review
-        Localisable<String, AiReviewHolder> reviews = new Localisable<>();
-        reviews.put("en", new AiReviewHolder());
-        product.setReviews(reviews);
-
-        // 2. Setup Attributes
+        // Setup Attributes
         // Attribute with mixed sources (AI + others)
         IndexedAttribute mixedAttr = new IndexedAttribute();
         mixedAttr.setName("mixed");
@@ -106,9 +99,6 @@ public class BatchServiceCleanAiTest {
 
         // Verify
         verify(dataRepository, times(1)).index(product);
-
-        // Check Review cleared
-        assertTrue(product.getReviews().isEmpty());
 
         // Check Mixed Attribute
         IndexedAttribute updatedMixed = product.getAttributes().getIndexed().get("mixed");

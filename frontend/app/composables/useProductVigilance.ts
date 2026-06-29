@@ -4,7 +4,7 @@ import type { ProductDto } from '~~/shared/api-client'
 import { normalizeTimestamp } from '~/utils/date-parsing'
 
 export interface VigilanceAlert {
-  key: 'eol' | 'conflicts' | 'quality' | 'obsolescence' | 'competition'
+  key: 'eol' | 'conflicts' | 'quality' | 'competition'
   titleKey: string
   icon: string
   color: string
@@ -42,13 +42,6 @@ export function useProductVigilance(
     const val = (dqScore.value ?? 0) * 4
     const avg = (dqScore.relativ?.avg ?? dqScore.absolute?.avg ?? 0) * 4
     return val < avg
-  })
-
-  const hasObsolescenceWarning = computed(() => {
-    const product = productRef.value
-    if (!product) return false
-    const warning = product.aiReview?.review?.obsolescenceWarning
-    return !!warning && warning.length > 0
   })
 
   const isLowCompetition = computed(() => {
@@ -90,14 +83,6 @@ export function useProductVigilance(
         color: 'warning',
       })
     }
-    if (hasObsolescenceWarning.value) {
-      list.push({
-        key: 'obsolescence',
-        titleKey: 'product.vigilance.obsolescence.title',
-        icon: 'mdi-timer-alert-outline',
-        color: 'warning',
-      })
-    }
     if (isLowCompetition.value) {
       list.push({
         key: 'competition',
@@ -115,7 +100,6 @@ export function useProductVigilance(
     isEndOfLife,
     hasConflictingAttributes,
     isLowDataQuality,
-    hasObsolescenceWarning,
     isLowCompetition,
     alerts,
     hasAlerts,

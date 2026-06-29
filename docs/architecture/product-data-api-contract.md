@@ -159,7 +159,6 @@ Each shipped facet has a dedicated lifecycle spec under
 | `product.price-history` | `.../price/history` | future | 8 | subset |
 | `product.impact` | `.../impact` | future | 15 | ~45-50K (exclusive) |
 | `product.energy` | `.../energy` | future | 10 | ~47K (exclusive) |
-| `product.review` | `.../review` | future | 30 | ~10K (exclusive) |
 | `product.taxonomy` | `.../taxonomy` | future | 15 | curated (exclusive) |
 
 ## Playground proxy (session-authenticated)

@@ -32,7 +32,7 @@ class ProductSourceUrlsTest {
     }
 
     @Test
-    void productReviewFacts_ShouldMirrorFetchedSourceUrlsForLegacyConsumers() {
+    void productSourceUrls_ShouldExposeFetchedSources() {
         Product product = new Product();
         ProductSourceUrl sourceUrl = new ProductSourceUrl("https://example.com/review");
         sourceUrl.setStatus(ProductSourceUrlStatus.FETCHED);
@@ -43,11 +43,11 @@ class ProductSourceUrlsTest {
 
         product.getSourceUrls().add(sourceUrl);
 
-        assertThat(product.getReviewFacts()).singleElement()
-                .satisfies(fact -> {
-                    assertThat(fact.getUrl()).isEqualTo("https://example.com/review");
-                    assertThat(fact.getMarkdown()).isEqualTo("markdown");
-                    assertThat(fact.getTokenCount()).isEqualTo(42);
+        assertThat(product.getSourceUrls().fetched()).singleElement()
+                .satisfies(source -> {
+                    assertThat(source.getUrl()).isEqualTo("https://example.com/review");
+                    assertThat(source.getMarkdown()).isEqualTo("markdown");
+                    assertThat(source.getTokenCount()).isEqualTo(42);
                 });
     }
 }

@@ -43,12 +43,6 @@ export interface VerticalStatsDto {
      * @memberof VerticalStatsDto
      */
     ratedProducts?: number;
-    /**
-     * Number of reviewed products (having AI reviews) in this vertical.
-     * @type {number}
-     * @memberof VerticalStatsDto
-     */
-    reviewedProducts?: number;
 }
 
 /**
@@ -72,7 +66,6 @@ export function VerticalStatsDtoFromJSONTyped(json: any, ignoreDiscriminator: bo
         'excludedProducts': json['excludedProducts'] == null ? undefined : json['excludedProducts'],
         'validProducts': json['validProducts'] == null ? undefined : json['validProducts'],
         'ratedProducts': json['ratedProducts'] == null ? undefined : json['ratedProducts'],
-        'reviewedProducts': json['reviewedProducts'] == null ? undefined : json['reviewedProducts'],
     };
 }
 
@@ -91,7 +84,6 @@ export function VerticalStatsDtoToJSONTyped(value?: VerticalStatsDto | null, ign
         'excludedProducts': value['excludedProducts'],
         'validProducts': value['validProducts'],
         'ratedProducts': value['ratedProducts'],
-        'reviewedProducts': value['reviewedProducts'],
     };
 }
 

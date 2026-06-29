@@ -121,13 +121,6 @@ export interface ProductJsonLdInput {
         { numericValue?: number | null }
       > | null
     } | null
-    aiReview?: {
-      review?: {
-        technicalReviewIntermediate?: string | null
-        summary?: string | null
-      } | null
-      createdMs?: number | null
-    } | null
   }
   productTitle: string
   canonicalUrl: string
@@ -763,22 +756,6 @@ export const buildProductJsonLdGraph = (
     ['WEIGHT', 'POIDS (SANS SUPPORT)', 'POIDS (AVEC SUPPORT)']
   )
 
-  const reviewBody = normalizeString(
-    product.aiReview?.review?.technicalReviewIntermediate ??
-      product.aiReview?.review?.summary
-  )
-  const reviewDate = toIsoDate(product.aiReview?.createdMs)
-
-  const productReview =
-    reviewBody && reviewDate
-      ? {
-          '@type': 'Review',
-          author: { '@type': 'Organization', name: 'Nudger' },
-          reviewBody,
-          datePublished: reviewDate.split('T')[0],
-        }
-      : undefined
-
   const countryName = normalizeString(product.base?.gtinInfo?.countryName)
 
   const productEntry = {
@@ -846,7 +823,6 @@ export const buildProductJsonLdGraph = (
         }
       : undefined,
     hasEnergyConsumptionDetails: energyDetails,
-    review: productReview,
     offers:
       offers.length > 0
         ? {

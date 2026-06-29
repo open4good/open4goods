@@ -543,13 +543,7 @@ public class BatchService {
 			stream.forEach(p -> {
 				boolean changed = false;
 
-			// 1. Reset/Delete aireview field
-			if (p.getReviews() != null && !p.getReviews().isEmpty()) {
-				p.getReviews().clear();
-				changed = true;
-			}
-
-			// 2. Delete attribute sources having "ai" as datasourcename
+			// Delete attribute sources having "ai" as datasourcename
 			// Check Indexed Attributes
 			Iterator<IndexedAttribute> itIndexed = p.getAttributes().getIndexed().values().iterator();
 			while (itIndexed.hasNext()) {

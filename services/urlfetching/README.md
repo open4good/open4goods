@@ -76,23 +76,7 @@ none of the values match the requested GTIN, the service returns a rejected
 response with status `409` and empty markdown. If the page exposes no GTIN, the
 fetch is not rejected.
 
-## Product Cache Contract
-
-Fetched review facts are stored on products by the review-generation/product
-layer, not by this module. This keeps `urlfetching` independent from product
-persistence and avoids forcing every low-level URL fetch to write to
-Elasticsearch.
-
-The intended cache policy is:
-
-- Use existing `Product.reviewFacts` as the product-scoped cache.
-- Treat facts as fresh for 6 months by default.
-- Pass `X-Open4goods-Force-Fetch: true` from callers that intentionally bypass
-  cached facts.
-- Do not refetch stale URLs until a product workflow actually needs that source.
-
-The force header is removed before outbound HTTP requests, so it is only a
-local orchestration signal.
+## Fetch Orchestration Headers
 
 Callers can request an explicit Playwright proxy replay with
 `X-Open4goods-Playwright-Proxy: true`. The header is also stripped before the

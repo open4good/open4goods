@@ -671,86 +671,6 @@ public class ProductRepository {
         return exportVerticalWithValidDateOrderByImpactScore(vertical, null, withExcluded);
     }
 
-    /**
-     * Export all aggregated data for a vertical that are missing an AI review, ordered by impact score descending.
-     *
-     * @param vertical the vertical identifier
-     * @param locale the locale to check for missing review (e.g. "fr")
-     * @param max maximum number of products to fetch
-     * @param withExcluded whether to include excluded products
-     * @return stream of products ordered by impact score
-     */
-    public Stream<Product> exportVerticalWithValidDateAndMissingReviewOrderByImpactScore(String vertical, String locale, Integer max, boolean withExcluded, boolean sortOnImpactScore)
-    {
-        return exportVerticalWithValidDateAndMissingReviewOrderByImpactScore(vertical, locale, max, withExcluded, sortOnImpactScore, 30, 7);
-    }
-
-    /**
-     * Export products eligible for review generation or regeneration.
-     *
-     * @param vertical the vertical identifier
-     * @param locale the locale to check for review metadata
-     * @param max maximum number of products to fetch
-     * @param withExcluded whether to include excluded products
-     * @param sortOnImpactScore whether impact score is required and used for ordering
-     * @param regenerationDelayDays delay before successful reviews are regenerated
-     * @param retryDelayDays delay before failed insufficient-data reviews are retried
-     * @return stream of products eligible for review generation
-     */
-    public Stream<Product> exportVerticalWithValidDateAndMissingReviewOrderByImpactScore(
-            String vertical,
-            String locale,
-            Integer max,
-            boolean withExcluded,
-            boolean sortOnImpactScore,
-            int regenerationDelayDays,
-            int retryDelayDays)
-    {
-        Criteria criteria = new Criteria("vertical").is(vertical)
-                .and(getRecentPriceQuery());
-
-        if (!withExcluded) {
-            criteria = criteria.and(new Criteria("excluded").is(false));
-        }
-
-        if (sortOnImpactScore) {
-        	criteria = criteria.and(new Criteria("scores.IMPACTSCORE.value").exists());
-        }
-
-        criteria = criteria.and(reviewEligibilityCriteria(locale, regenerationDelayDays, retryDelayDays));
-
-        SortOptions impactScoreSort = new SortOptions.Builder()
-                .field(new FieldSort.Builder()
-                        .field("scores.IMPACTSCORE.value")
-                        .order(SortOrder.Desc)
-                        .unmappedType(FieldType.Float)
-                        .missing("_last")
-                        .build())
-                .build();
-
-        NativeQueryBuilder queryBuilder = new NativeQueryBuilder()
-                .withQuery(new CriteriaQuery(criteria))
-                .withSort(impactScoreSort);
-
-        if (max != null) {
-            queryBuilder = queryBuilder.withMaxResults(max);
-        }
-
-        NativeQuery query = queryBuilder.build();
-
-        try {
-            var iterator = elasticsearchOperations
-                    .searchForStream(query, Product.class, CURRENT_INDEX);
-            return iterator.stream().onClose(iterator::close)
-                    .map(SearchHit::getContent);
-        } catch (Exception e) {
-            elasticLog(e);
-            throw e;
-        }
-    }
-
-
-
 	public SearchHits<Product> search(Query query, final String indexName) {
 		return elasticsearchOperations.search(query, Product.class, IndexCoordinates.of(indexName));
 
@@ -1324,20 +1244,6 @@ public class ProductRepository {
         }
 
         /**
-         * Count recent products with offers, AI reviews for the requested locale, and not excluded from the catalogue.
-         *
-         * @param locale locale to check (e.g. {@code fr}); defaults to {@code default} when blank
-         * @return count of recent products with AI reviews
-         */
-        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-        public Long countMainIndexValidAndReviewed(String locale) {
-            CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery()
-                    .and(new Criteria("excluded").is(false))
-                    .and(new Criteria(resolveReviewField(locale)).exists()));
-            return elasticsearchOperations.count(query, CURRENT_INDEX);
-        }
-
-        /**
          * Count recent products with offers, a valid ECOSCORE, and not excluded from the catalogue.
          *
          * @return count of recent products with an ECOSCORE
@@ -1360,58 +1266,6 @@ public class ProductRepository {
         public Long countMainIndexExcluded(String vertical) {
             CriteriaQuery query = new CriteriaQuery(new Criteria("vertical").is(vertical).and(new Criteria("excluded").is(true)));
             return elasticsearchOperations.count(query, CURRENT_INDEX);
-        }
-
-        /**
-         * Count recent products with offers, AI reviews for the requested locale, and not excluded for a specific vertical.
-         *
-         * @param vertical vertical identifier
-         * @param locale locale to check (e.g. {@code fr}); defaults to {@code default} when blank
-         * @return count of recent products with AI reviews for the vertical
-         */
-        @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
-        public Long countMainIndexValidAndReviewed(String vertical, String locale) {
-            CriteriaQuery query = new CriteriaQuery(getRecentPriceQuery()
-                    .and(new Criteria("vertical").is(vertical))
-                    .and(new Criteria("excluded").is(false))
-                    .and(new Criteria(resolveReviewField(locale)).exists()));
-            return elasticsearchOperations.count(query, CURRENT_INDEX);
-        }
-
-        private String resolveReviewField(String locale) {
-            String resolvedLocale = locale;
-            if (resolvedLocale == null || resolvedLocale.isBlank()) {
-                resolvedLocale = "fr";
-            }
-            return reviewMetadataLocalePath(resolvedLocale) + ".createdMs";
-        }
-
-        private Criteria reviewEligibilityCriteria(String locale, int regenerationDelayDays, int retryDelayDays) {
-                String resolvedLocale = resolveReviewLocale(locale);
-                String createdMsField = reviewMetadataLocalePath(resolvedLocale) + ".createdMs";
-                String enoughDataField = reviewMetadataLocalePath(resolvedLocale) + ".enoughData";
-                long now = System.currentTimeMillis();
-                long regenerationCutoff = now - daysToMillis(regenerationDelayDays);
-                long retryCutoff = now - daysToMillis(retryDelayDays);
-
-                return new Criteria(createdMsField).exists().not()
-                        .or(new Criteria(enoughDataField).is(true).and(new Criteria(createdMsField).lessThan(regenerationCutoff)))
-                        .or(new Criteria(enoughDataField).is(false).and(new Criteria(createdMsField).lessThan(retryCutoff)));
-        }
-
-        private String reviewMetadataLocalePath(String locale) {
-                return "reviewMetadata.locales." + resolveReviewLocale(locale);
-        }
-
-        private String resolveReviewLocale(String locale) {
-                if (locale == null || locale.isBlank()) {
-                        return "fr";
-                }
-                return locale;
-        }
-
-        private long daysToMillis(int days) {
-                return Math.max(days, 0) * 24L * 60L * 60L * 1000L;
         }
 
         @Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)

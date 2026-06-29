@@ -3,23 +3,12 @@
     <slot
       :short-name="shortName"
       :long-name="longName"
-      :short-description="shortDescription"
+      :short-description="undefined"
       :display-title="displayTitle"
     >
       <component :is="titleTag" :class="titleClass">
         {{ displayTitle }}
       </component>
-      <div
-        v-if="baseLine"
-        class="product-designation__baseline"
-        :class="{
-          'text-center': variant === 'card',
-          'product-designation__baseline--clamped': variant === 'card',
-        }"
-        :title="variant === 'card' ? baseLine : undefined"
-      >
-        {{ baseLine }}
-      </div>
     </slot>
   </div>
 </template>
@@ -62,16 +51,8 @@ const cardName = computed(() =>
 const longName = computed(() =>
   resolveProductLongName(props.product, locale.value)
 )
-const shortDescription = computed(() =>
-  props.product.aiReview?.review?.shortDescription?.trim()
-)
-
 const displayTitle = computed(() =>
   props.variant === 'page' ? longName.value : cardName.value
-)
-
-const baseLine = computed(() =>
-  props.product.aiReview?.review?.baseLine?.trim()
 )
 
 const rootClass = computed(() =>
@@ -89,36 +70,6 @@ const rootClass = computed(() =>
 
   &__title {
     margin: 0;
-  }
-
-  &__baseline {
-    margin-top: 0.2rem;
-    font-size: 0.9rem;
-    font-weight: 500;
-    opacity: 0;
-    animation: fadeIn 0.8s ease-out forwards;
-    animation-delay: 1s;
-    color: rgb(var(--v-theme-text-neutral-secondary));
-    line-height: 1.2;
-
-    &--clamped {
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      white-space: normal;
-    }
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-5px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
   }
 
   &--card {

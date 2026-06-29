@@ -106,7 +106,6 @@ const mountProductPage = async () => {
         ProductSummaryNavigation: simpleStub('ProductSummaryNavigation-stub'),
         ProductHero: simpleStub('ProductHero-stub'),
         ProductImpactSection: simpleStub('ProductImpactSection-stub'),
-        ProductAiReviewSection: simpleStub('ProductAiReviewSection-stub'),
         ProductPriceSection: simpleStub('ProductPriceSection-stub'),
         ProductAlternatives: simpleStub('ProductAlternatives-stub'),
         ProductAttributesSection: simpleStub('ProductAttributesSection-stub'),

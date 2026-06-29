@@ -184,30 +184,6 @@ public class Product implements Standardisable {
 
 	private Map<String, Score> scores = new HashMap<>();
 
-
-
-	/**
-	 * The ai generated review for this product
-	 */
-	private Localisable<String, AiReviewHolder> reviews = new Localisable<String, AiReviewHolder>();
-
-	/**
-	 * Indexed review metadata used for repository counts and regeneration selection.
-	 */
-	private ProductReviewMetadata reviewMetadata = new ProductReviewMetadata();
-
-	/**
-	 * Facts scraped from web sources and stored for AI reprocessing.
-	 */
-	@Deprecated(since = "2026-06", forRemoval = false)
-	private List<ProductFact> reviewFacts = new ArrayList<>();
-
-	/**
-	 * Latest review-source fetching diagnostics.
-	 */
-	@Deprecated(since = "2026-06", forRemoval = false)
-	private ProductFetchDiagnostics reviewFetchDiagnostics;
-
 	/**
 	 * Generic source URL inventory used by the product enrichment pipeline.
 	 */
@@ -1333,31 +1309,6 @@ public class Product implements Standardisable {
 		this.excludedCauses = excludedCauses;
 	}
 
-
-
-	public Localisable<String, AiReviewHolder> getReviews() {
-		return reviews;
-	}
-
-	public void setReviews(Localisable<String, AiReviewHolder> aiReviews) {
-		this.reviews = aiReviews;
-	}
-
-	/**
-	 * Rebuilds the indexed review metadata from the full locale-aware AI review payload.
-	 */
-	public void rebuildReviewMetadata() {
-		this.reviewMetadata = ProductReviewMetadata.from(reviews);
-	}
-
-	public ProductReviewMetadata getReviewMetadata() {
-		return reviewMetadata;
-	}
-
-	public void setReviewMetadata(ProductReviewMetadata reviewMetadata) {
-		this.reviewMetadata = reviewMetadata == null ? new ProductReviewMetadata() : reviewMetadata;
-	}
-
 	public EprelProduct getEprelDatas() {
 		return eprelDatas;
 	}
@@ -1370,30 +1321,6 @@ public class Product implements Standardisable {
 		this.embedding = embedding;
 	}
 
-
-	public List<ProductFact> getReviewFacts() {
-		if ((reviewFacts == null || reviewFacts.isEmpty()) && sourceUrls != null && !sourceUrls.fetched().isEmpty()) {
-			reviewFacts = new ArrayList<>(sourceUrls.toReviewFacts());
-		}
-		return reviewFacts;
-	}
-
-	public void setReviewFacts(List<ProductFact> reviewFacts) {
-		this.reviewFacts = reviewFacts == null ? new ArrayList<>() : reviewFacts;
-		if (reviewFacts != null && !reviewFacts.isEmpty()) {
-			ProductSourceUrls updated = getSourceUrls();
-			reviewFacts.stream().map(ProductSourceUrl::fromFact).forEach(updated::add);
-		}
-	}
-
-	public ProductFetchDiagnostics getReviewFetchDiagnostics() {
-		return reviewFetchDiagnostics;
-	}
-
-	public void setReviewFetchDiagnostics(ProductFetchDiagnostics reviewFetchDiagnostics) {
-		this.reviewFetchDiagnostics = reviewFetchDiagnostics;
-	}
-
 	public ProductSourceUrls getSourceUrls() {
 		if (sourceUrls == null) {
 			sourceUrls = new ProductSourceUrls();
@@ -1403,9 +1330,6 @@ public class Product implements Standardisable {
 
 	public void setSourceUrls(ProductSourceUrls sourceUrls) {
 		this.sourceUrls = sourceUrls == null ? new ProductSourceUrls() : sourceUrls;
-		if ((reviewFacts == null || reviewFacts.isEmpty()) && !this.sourceUrls.fetched().isEmpty()) {
-			reviewFacts = new ArrayList<>(this.sourceUrls.toReviewFacts());
-		}
 	}
 
 	public void setEprelDatas(EprelProduct eprelDatas) {

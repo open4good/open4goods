@@ -40,11 +40,6 @@ models/AggregationMetadata.ts
 models/AggregationRequestDto.ts
 models/AggregationResponseDto.ts
 models/AiPromptsConfig.ts
-models/AiReview.ts
-models/AiReviewAttributeDto.ts
-models/AiReviewDto.ts
-models/AiReviewHolder.ts
-models/AiReviewSourceDto.ts
 models/AssistantConfigDto.ts
 models/AttributeConfigDto.ts
 models/AttributeParserConfig.ts
@@ -133,7 +128,6 @@ models/PageMetaDto.ts
 models/PlacementCountry.ts
 models/ProblemDetail.ts
 models/ProductAggregatedPriceDto.ts
-models/ProductAiReviewDto.ts
 models/ProductAttributeDto.ts
 models/ProductAttributeSourceDto.ts
 models/ProductAttributesDto.ts
@@ -175,8 +169,6 @@ models/RecommandationChoice.ts
 models/RecommandationCriteria.ts
 models/RecommandationsConfig.ts
 models/ResourcesAggregationConfig.ts
-models/ReviewGenerationEvent.ts
-models/ReviewGenerationStatus.ts
 models/ScoreCardinalityDto.ts
 models/ScoreNormalizationConfigDto.ts
 models/ScoreNormalizationParamsDto.ts

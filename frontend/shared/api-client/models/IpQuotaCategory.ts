@@ -19,7 +19,6 @@
  */
 export const IpQuotaCategory = {
     FeedbackVote: 'FEEDBACK_VOTE',
-    ReviewGeneration: 'REVIEW_GENERATION',
     ContactMessage: 'CONTACT_MESSAGE'
 } as const;
 export type IpQuotaCategory = typeof IpQuotaCategory[keyof typeof IpQuotaCategory];

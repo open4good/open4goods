@@ -1,13 +1,10 @@
 package org.open4goods.nudgerfrontapi.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.EnumSet;
@@ -21,13 +18,11 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.open4goods.icecat.services.IcecatService;
-import org.open4goods.model.Localisable;
-import org.open4goods.model.ai.AiReview;
-import org.open4goods.model.product.AiReviewHolder;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.AggregatedPrices;
 import org.open4goods.model.price.Currency;
+import org.open4goods.model.product.Localisable;
 import org.open4goods.model.product.EcoScoreRanking;
 import org.open4goods.model.product.GtinInfo;
 import org.open4goods.model.product.Product;
@@ -38,25 +33,17 @@ import org.open4goods.model.resource.ImageInfo;
 import org.open4goods.model.resource.PdfInfo;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.resource.ResourceType;
-import org.open4goods.model.review.ReviewGenerationStatus;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
-import org.open4goods.nudgerfrontapi.config.properties.ReviewGenerationProperties;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductScoreDto;
 import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
-import org.open4goods.nudgerfrontapi.service.exception.ReviewGenerationLimitExceededException;
-import org.open4goods.commons.services.IpQuotaService;
-import org.open4goods.commons.model.IpQuotaCategory;
-import org.open4goods.services.captcha.service.HcaptchaService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 class ProductMappingServiceTest {
 
@@ -69,12 +56,7 @@ class ProductMappingServiceTest {
     private IcecatService icecatService;
     private SearchService searchService;
     private CacheManager cacheManager;
-    private ReviewGenerationClient reviewGenerationClient;
-    private HcaptchaService hcaptchaService;
     private ProductTimelineService productTimelineService;
-    private ReviewGenerationProperties reviewGenerationProperties;
-    private IpQuotaService ipQuotaService;
-    private HttpServletRequest httpServletRequest;
 
     @BeforeEach
     void setUp() {
@@ -87,21 +69,13 @@ class ProductMappingServiceTest {
         icecatService = mock(IcecatService.class);
         searchService = mock(SearchService.class);
         cacheManager = mock(CacheManager.class);
-        reviewGenerationClient = mock(ReviewGenerationClient.class);
-        hcaptchaService = mock(HcaptchaService.class);
         productTimelineService = new ProductTimelineService();
-        reviewGenerationProperties = new ReviewGenerationProperties();
-        reviewGenerationProperties.setApiBaseUrl("https://review.example");
-        reviewGenerationProperties.setApiKey("review-key");
-        ipQuotaService = mock(IpQuotaService.class);
-        httpServletRequest = mock(HttpServletRequest.class);
         CaffeineCache referenceCache = new CaffeineCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME,
                 Caffeine.newBuilder().maximumSize(100).build());
         when(cacheManager.getCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)).thenReturn(referenceCache);
         service = new ProductMappingService(repository, apiProperties, categoryMappingService,
                 verticalsConfigService, searchService, affiliationService, icecatService, cacheManager,
-                reviewGenerationClient, hcaptchaService, productTimelineService, reviewGenerationProperties,
-                ipQuotaService);
+                productTimelineService);
     }
 
     @Test
@@ -354,82 +328,6 @@ class ProductMappingServiceTest {
         assertThat(dto.offers().bestPrice().shippingTimeDays()).isEqualTo(3);
     }
 
-    @Test
-    void createReviewVerifiesCaptchaAndDelegatesToClient() throws Exception {
-        long gtin = 42L;
-        when(httpServletRequest.getHeader("X-Real-Ip")).thenReturn(null);
-        when(httpServletRequest.getHeader("X-Forwarded-For")).thenReturn(null);
-        when(httpServletRequest.getRemoteAddr()).thenReturn("127.0.0.1");
-        when(ipQuotaService.isAllowed(eq(IpQuotaCategory.REVIEW_GENERATION.actionKey()), eq("127.0.0.1"), eq(3),
-                eq(reviewGenerationProperties.getQuota().getWindow()))).thenReturn(true);
-        when(ipQuotaService.increment(eq(IpQuotaCategory.REVIEW_GENERATION.actionKey()), eq("127.0.0.1"),
-                eq(reviewGenerationProperties.getQuota().getWindow()))).thenReturn(1);
-        Product product = new Product(gtin);
-        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
-        when(reviewGenerationClient.triggerGeneration(gtin, false)).thenReturn(gtin);
-
-        long scheduled = service.createReview(gtin, "token", httpServletRequest, false, false);
-
-        verify(hcaptchaService).verifyRecaptcha("127.0.0.1", "token");
-        verify(ipQuotaService).isAllowed(eq(IpQuotaCategory.REVIEW_GENERATION.actionKey()), eq("127.0.0.1"), eq(3),
-                eq(reviewGenerationProperties.getQuota().getWindow()));
-        verify(ipQuotaService).increment(eq(IpQuotaCategory.REVIEW_GENERATION.actionKey()), eq("127.0.0.1"),
-                eq(reviewGenerationProperties.getQuota().getWindow()));
-        verify(repository).getByIdWithoutEmbedding(gtin);
-        verify(reviewGenerationClient).triggerGeneration(gtin, false);
-        assertThat(scheduled).isEqualTo(gtin);
-    }
-
-    @Test
-    void createReviewThrowsWhenQuotaExceeded() throws Exception {
-        long gtin = 42L;
-        when(httpServletRequest.getHeader("X-Real-Ip")).thenReturn(null);
-        when(httpServletRequest.getHeader("X-Forwarded-For")).thenReturn(null);
-        when(httpServletRequest.getRemoteAddr()).thenReturn("127.0.0.1");
-        when(ipQuotaService.isAllowed(eq(IpQuotaCategory.REVIEW_GENERATION.actionKey()), eq("127.0.0.1"), eq(3),
-                eq(reviewGenerationProperties.getQuota().getWindow()))).thenReturn(false);
-
-        assertThatThrownBy(() -> service.createReview(gtin, "token", httpServletRequest, false, false))
-                .isInstanceOf(ReviewGenerationLimitExceededException.class)
-                .hasMessageContaining("Maximum 3 review generations");
-
-        verify(hcaptchaService).verifyRecaptcha("127.0.0.1", "token");
-        verify(ipQuotaService, never()).increment(eq(IpQuotaCategory.REVIEW_GENERATION.actionKey()), eq("127.0.0.1"),
-                eq(reviewGenerationProperties.getQuota().getWindow()));
-        verify(reviewGenerationClient, never()).triggerGeneration(gtin, false);
-    }
-
-    @Test
-    void createReviewBypassesCaptchaForAuthenticatedUser() throws Exception {
-        long gtin = 42L;
-        when(httpServletRequest.getHeader("X-Real-Ip")).thenReturn(null);
-        when(httpServletRequest.getHeader("X-Forwarded-For")).thenReturn(null);
-        when(httpServletRequest.getRemoteAddr()).thenReturn("127.0.0.1");
-        Product product = new Product(gtin);
-        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
-        when(reviewGenerationClient.triggerGeneration(gtin, true)).thenReturn(gtin);
-
-        long scheduled = service.createReview(gtin, null, httpServletRequest, true, true);
-
-        verifyNoInteractions(hcaptchaService);
-        verify(ipQuotaService, never()).isAllowed(eq(IpQuotaCategory.REVIEW_GENERATION.actionKey()), eq("127.0.0.1"), eq(3),
-                eq(reviewGenerationProperties.getQuota().getWindow()));
-        verify(reviewGenerationClient).triggerGeneration(gtin, true);
-        assertThat(scheduled).isEqualTo(gtin);
-    }
-
-    @Test
-    void getReviewStatusDelegatesToClient() {
-        long gtin = 77L;
-        ReviewGenerationStatus status = new ReviewGenerationStatus();
-        status.setUpc(gtin);
-        when(reviewGenerationClient.getStatus(gtin)).thenReturn(status);
-
-        ReviewGenerationStatus returned = service.getReviewStatus(gtin);
-
-        assertThat(returned).isEqualTo(status);
-    }
-
     /**
      * Test defensive null handling when AttributeConfig.getName() returns null.
      * Verifies that mapIndexedAttribute gracefully falls back to the attribute key
@@ -578,29 +476,5 @@ class ProductMappingServiceTest {
         assertThat(dto.attributes().indexedAttributes()).containsKey("BRAND");
         assertThat(dto.attributes().indexedAttributes().get("BRAND").name())
                 .isEqualTo("BRAND"); // Fallback to attribute key itself
-    }
-    @Test
-    void mapAiReviewMapsBaseLine() throws Exception {
-        long gtin = 42L;
-        Product product = new Product(gtin);
-        Localisable<String, AiReviewHolder> reviews = new Localisable<>();
-        AiReview review = new AiReview();
-        review.setBaseLine("The baseline text");
-        AiReviewHolder holder = new AiReviewHolder();
-        holder.setReview(review);
-        holder.setSources(Map.of());
-        holder.setEnoughData(true);
-        holder.setTotalTokens(100);
-        holder.setCreatedMs(1L);
-        reviews.put("en", holder);
-        product.setReviews(reviews);
-
-        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
-
-        ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("aiReview"), DomainLanguage.en);
-
-        assertThat(dto.aiReview()).isNotNull();
-        assertThat(dto.aiReview().review()).isNotNull();
-        assertThat(dto.aiReview().review().baseLine()).isEqualTo("The baseline text");
     }
 }

@@ -4,7 +4,6 @@ import java.time.Duration;
 
 import org.open4goods.commons.model.IpQuotaCategory;
 import org.open4goods.commons.services.IpQuotaService;
-import org.open4goods.nudgerfrontapi.config.properties.ReviewGenerationProperties;
 import org.open4goods.nudgerfrontapi.dto.quota.IpQuotaStatusDto;
 import org.open4goods.services.feedback.config.FeedbackConfiguration;
 import org.springframework.stereotype.Service;
@@ -12,8 +11,7 @@ import org.springframework.stereotype.Service;
 /**
  * Service exposing IP quota usage and limits for supported categories.
  * <p>
- * The service aggregates multiple quota sources (feedback votes, review
- * generation, etc.) and normalises them into a single DTO for the frontend.
+ * The service aggregates quota sources and normalises them into a single DTO for the frontend.
  * </p>
  */
 @Service
@@ -23,22 +21,18 @@ public class QuotaService
 
     private final IpQuotaService ipQuotaService;
     private final FeedbackConfiguration feedbackConfiguration;
-    private final ReviewGenerationProperties reviewGenerationProperties;
 
     /**
      * Create a quota service using the configured quota sources.
      *
      * @param ipQuotaService quota storage service
      * @param feedbackConfiguration feedback configuration for vote limits
-     * @param reviewGenerationProperties review generation quota configuration
      */
     public QuotaService(IpQuotaService ipQuotaService,
-                        FeedbackConfiguration feedbackConfiguration,
-                        ReviewGenerationProperties reviewGenerationProperties)
+                        FeedbackConfiguration feedbackConfiguration)
     {
         this.ipQuotaService = ipQuotaService;
         this.feedbackConfiguration = feedbackConfiguration;
-        this.reviewGenerationProperties = reviewGenerationProperties;
     }
 
     /**
@@ -76,14 +70,6 @@ public class QuotaService
                     feedbackConfiguration.getVoting().getMaxVotesPerIpPerDay(),
                     null,
                     DAILY_WINDOW.getSeconds());
-            case REVIEW_GENERATION -> {
-                ReviewGenerationProperties.Quota quota = reviewGenerationProperties.getQuota();
-                yield new QuotaDefinition(
-                        category.actionKey(),
-                        quota.getMaxPerIp(),
-                        quota.getWindow(),
-                        quota.getWindow().getSeconds());
-            }
             case CONTACT_MESSAGE -> new QuotaDefinition(
                     category.actionKey(),
                     0,

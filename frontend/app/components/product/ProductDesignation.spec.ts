@@ -15,7 +15,6 @@ const buildProduct = (overrides: Partial<ProductDto> = {}): ProductDto =>
   ({
     gtin: 1,
     names: overrides.names,
-    aiReview: overrides.aiReview,
     identity: overrides.identity,
     base: overrides.base,
     attributes: overrides.attributes,
@@ -56,7 +55,6 @@ describe('ProductDesignation', () => {
       props: {
         product: buildProduct({
           names: { pageTitle: 'Page title' },
-          aiReview: { review: { shortDescription: 'AI short description' } },
         }),
         variant: 'page',
         titleTag: 'h1',

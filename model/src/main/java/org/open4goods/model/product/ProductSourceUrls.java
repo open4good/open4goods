@@ -52,18 +52,6 @@ public class ProductSourceUrls {
                 .toList();
     }
 
-    public List<ProductFact> toReviewFacts() {
-        return fetched().stream().map(ProductSourceUrl::toFact).toList();
-    }
-
-    public static ProductSourceUrls fromFacts(List<ProductFact> facts) {
-        ProductSourceUrls sourceUrls = new ProductSourceUrls();
-        if (facts != null) {
-            facts.stream().map(ProductSourceUrl::fromFact).forEach(sourceUrls::add);
-        }
-        return sourceUrls;
-    }
-
     private static List<ProductSourceUrl> deduplicate(List<ProductSourceUrl> input, int limit) {
         Map<String, ProductSourceUrl> byKey = new LinkedHashMap<>();
         for (ProductSourceUrl sourceUrl : input) {
