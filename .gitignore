@@ -6,6 +6,14 @@ ui/src/main/resources/application-devsec.yml
 /generated-images/
 /code
 
+# Local secrets and per-user agent configuration.
+.env.local
+.env.*.local
+.envrc
+.mcp.local.json
+.codex/local.config.toml
+.gemini/settings.local.json
+
 apache-maven-*-bin.tar.gz
 /frontend/components/dev/generations
 /logs/

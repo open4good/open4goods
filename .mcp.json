@@ -10,6 +10,16 @@
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp@latest"]
     },
+    "plausible": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@icjia/plausible-mcp@0.1.5"],
+      "env": {
+        "PLAUSIBLE_BASE_URL": "https://plausible.nudger.fr",
+        "PLAUSIBLE_DEFAULT_SITE": "nudger.fr",
+        "PLAUSIBLE_API_KEY": "$PLAUSIBLE_API_KEY"
+      }
+    },
     "javalens": {
       "type": "stdio",
       "command": "npx",

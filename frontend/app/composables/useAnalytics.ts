@@ -30,9 +30,20 @@ type OpenDataDownloadContext = {
 type AffiliateClickContext = {
   token?: string | null
   url?: string | null
+  affiliatePlatform?: string | null
+  merchantId?: string | number | null
+  merchantName?: string | null
+  merchantSlug?: string | null
   partner?: string | null
   placement?: string | null
   productId?: string | number | null
+  gtin?: string | number | null
+  vertical?: string | null
+  categorySlug?: string | null
+  offerRank?: number | null
+  price?: number | null
+  currency?: string | null
+  condition?: string | null
 }
 
 type TabClickContext = {
@@ -97,6 +108,95 @@ const extractTokenFromLink = (link?: string | null) =>
     ? (link.split('/').filter(Boolean).pop() ?? null)
     : null
 
+const compactProps = (props: Record<string, unknown>) =>
+  Object.fromEntries(
+    Object.entries(props).filter(([, value]) => {
+      if (value === null || value === undefined) {
+        return false
+      }
+
+      return typeof value !== 'string' || value.trim().length > 0
+    })
+  )
+
+export const normalizeAnalyticsSlug = (value?: string | number | null) => {
+  const normalized = String(value ?? '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+
+  return normalized || null
+}
+
+export const resolveAnalyticsHost = (url?: string | null) => {
+  if (!url || url.startsWith('/')) {
+    return null
+  }
+
+  try {
+    return new URL(url).hostname.replace(/^www\./, '') || null
+  } catch {
+    return null
+  }
+}
+
+export const resolvePriceBucket = (price?: number | null) => {
+  if (typeof price !== 'number' || Number.isNaN(price) || price < 0) {
+    return null
+  }
+
+  if (price < 25) return '0-25'
+  if (price < 50) return '25-50'
+  if (price < 100) return '50-100'
+  if (price < 250) return '100-250'
+  if (price < 500) return '250-500'
+  if (price < 1000) return '500-1000'
+  return '1000-plus'
+}
+
+export const buildAffiliateClickProps = ({
+  token,
+  url,
+  affiliatePlatform,
+  merchantId,
+  merchantName,
+  merchantSlug,
+  partner,
+  placement,
+  productId,
+  gtin,
+  vertical,
+  categorySlug,
+  offerRank,
+  price,
+  currency,
+  condition,
+}: AffiliateClickContext) => {
+  const resolvedMerchantName = merchantName ?? partner ?? null
+
+  return compactProps({
+    token,
+    affiliatePlatform: affiliatePlatform ?? 'unknown',
+    merchantId,
+    merchantName: resolvedMerchantName,
+    merchantSlug:
+      merchantSlug ?? normalizeAnalyticsSlug(resolvedMerchantName ?? merchantId),
+    placement,
+    productId,
+    gtin,
+    vertical,
+    categorySlug,
+    offerRank,
+    priceBucket: resolvePriceBucket(price),
+    currency,
+    condition,
+    destinationHost: resolveAnalyticsHost(url),
+  })
+}
+
 export const useAnalytics = () => {
   const nuxtApp = useNuxtApp()
   const runtimeConfig = useRuntimeConfig()
@@ -130,9 +230,20 @@ export const useAnalytics = () => {
   const trackAffiliateClick = ({
     token,
     url,
+    affiliatePlatform,
+    merchantId,
+    merchantName,
+    merchantSlug,
     partner,
     placement,
     productId,
+    gtin,
+    vertical,
+    categorySlug,
+    offerRank,
+    price,
+    currency,
+    condition,
   }: AffiliateClickContext) => {
     const resolvedToken = token ?? extractTokenFromLink(url)
 
@@ -141,13 +252,24 @@ export const useAnalytics = () => {
     }
 
     trackEvent('affiliate-click', {
-      props: {
+      props: buildAffiliateClickProps({
         token: resolvedToken,
         url,
+        affiliatePlatform,
+        merchantId,
+        merchantName,
+        merchantSlug,
         partner,
         placement,
         productId,
-      },
+        gtin,
+        vertical,
+        categorySlug,
+        offerRank,
+        price,
+        currency,
+        condition,
+      }),
     })
   }
 

@@ -1,0 +1,8 @@
+[mcp_servers.plausible]
+command = "npx"
+args = ["-y", "@icjia/plausible-mcp@0.1.5"]
+env_vars = ["PLAUSIBLE_API_KEY"]
+
+[mcp_servers.plausible.env]
+PLAUSIBLE_BASE_URL = "https://plausible.nudger.fr"
+PLAUSIBLE_DEFAULT_SITE = "nudger.fr"

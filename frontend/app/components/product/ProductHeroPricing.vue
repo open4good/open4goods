@@ -283,6 +283,17 @@ const offersCount = computed(() => props.product.offers?.offersCount ?? 0)
 
 const isSingleOffer = computed(() => offersCount.value === 1)
 
+const productGtin = computed(() => props.product.gtin ?? props.product.base?.gtin)
+const productVertical = computed(() => props.product.base?.vertical ?? null)
+const productCategorySlug = computed(() => {
+  const fullSlug = props.product.fullSlug?.trim()
+  if (!fullSlug) {
+    return null
+  }
+
+  return fullSlug.split('/').filter(Boolean)[0] ?? null
+})
+
 const getAffiliationLink = (offer: AggregatedOffer | null) => {
   if (!isSingleOffer.value) {
     return null
@@ -332,9 +343,16 @@ const handleMerchantClick = (payload: {
   trackAffiliateClick({
     token: extractTokenFromLink(link),
     url: link,
-    partner: payload.name ?? null,
+    merchantName: payload.name ?? null,
     placement: 'product-hero',
-    productId: props.product.id ?? null,
+    productId: productGtin.value ?? null,
+    gtin: productGtin.value ?? null,
+    vertical: productVertical.value,
+    categorySlug: productCategorySlug.value,
+    offerRank: 1,
+    price: aggregatedBestOffer.value?.price ?? null,
+    currency: aggregatedBestOffer.value?.currency ?? null,
+    condition: aggregatedBestOffer.value?.condition ?? null,
   })
 }
 

@@ -971,6 +971,17 @@ const bestOccasionOfferLink = computed(() =>
   resolveOfferLink(bestOccasionOffer.value)
 )
 
+const productGtin = computed(() => props.product?.gtin ?? props.product?.base?.gtin)
+const productVertical = computed(() => props.product?.base?.vertical ?? null)
+const productCategorySlug = computed(() => {
+  const fullSlug = props.product?.fullSlug?.trim()
+  if (!fullSlug) {
+    return null
+  }
+
+  return fullSlug.split('/').filter(Boolean)[0] ?? null
+})
+
 const allOffers = computed(() => {
   const byCondition = props.offers?.offersByCondition ?? {}
   const list: Array<ProductAggregatedPriceDto & { condition: string }> = []
@@ -1085,6 +1096,22 @@ const onRowClick = (
   }
 }
 
+const resolveOfferRank = (offer: ProductAggregatedPriceDto | null) => {
+  if (!offer) {
+    return null
+  }
+
+  const index = allOffers.value.findIndex(
+    item =>
+      item.affiliationToken === offer.affiliationToken &&
+      item.datasourceName === offer.datasourceName &&
+      item.price === offer.price &&
+      item.condition === offer.condition
+  )
+
+  return index >= 0 ? index + 1 : null
+}
+
 const handleOfferRedirectClick = (
   offer: ProductAggregatedPriceDto | null,
   placement: string,
@@ -1104,8 +1131,16 @@ const handleOfferRedirectClick = (
   trackAffiliateClick({
     token: extractTokenFromLink(link),
     url: link,
-    partner: offer?.datasourceName ?? null,
+    merchantName: offer?.datasourceName ?? null,
     placement,
+    productId: productGtin.value ?? null,
+    gtin: productGtin.value ?? null,
+    vertical: productVertical.value,
+    categorySlug: productCategorySlug.value,
+    offerRank: resolveOfferRank(offer),
+    price: offer?.price ?? null,
+    currency: offer?.currency ?? null,
+    condition: offer?.condition ?? null,
   })
 }
 
