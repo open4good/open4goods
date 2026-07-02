@@ -37,7 +37,7 @@
 
     <v-icon
       v-if="showArrow"
-      icon="mdi-arrow-right"
+      :icon="mdiArrowRight"
       class="cta-card__arrow"
       :size="size === 'large' ? 24 : 20"
     />
@@ -45,6 +45,7 @@
 </template>
 
 <script setup lang="ts">
+import { mdiArrowRight } from '@mdi/js'
 import { computed, useAttrs } from 'vue'
 
 defineOptions({ inheritAttrs: false })

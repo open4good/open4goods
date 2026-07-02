@@ -1,4 +1,13 @@
 import { computed, type ComputedRef } from 'vue'
+import {
+  mdiAccountGroupOutline,
+  mdiDatabaseOutline,
+  mdiEmailOutline,
+  mdiHandshakeOutline,
+  mdiLinkedin,
+  mdiMessageDraw,
+  mdiSourceBranch,
+} from '@mdi/js'
 import type { ComposerTranslation } from 'vue-i18n'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 
@@ -41,7 +50,7 @@ export const useCommunityMenu = (
           'siteIdentity.menu.community.sections.connect.items.feedback.description'
         )
       ),
-      icon: 'mdi-message-draw',
+      icon: mdiMessageDraw,
       to: resolveLocalizedRoutePath('feedback', currentLocale.value),
     }
 
@@ -55,7 +64,7 @@ export const useCommunityMenu = (
           'siteIdentity.menu.community.sections.connect.items.contact.description'
         )
       ),
-      icon: 'mdi-email-outline',
+      icon: mdiEmailOutline,
       to: resolveLocalizedRoutePath('contact', currentLocale.value),
     }
 
@@ -69,7 +78,7 @@ export const useCommunityMenu = (
           'siteIdentity.menu.community.sections.connect.items.follow.description'
         )
       ),
-      icon: 'mdi-linkedin',
+      icon: mdiLinkedin,
       href: linkedinUrl.value,
       external: true,
     }
@@ -84,7 +93,7 @@ export const useCommunityMenu = (
           'siteIdentity.menu.community.sections.collaborate.items.team.description'
         )
       ),
-      icon: 'mdi-account-group-outline',
+      icon: mdiAccountGroupOutline,
       to: resolveLocalizedRoutePath('team', currentLocale.value),
     }
 
@@ -100,7 +109,7 @@ export const useCommunityMenu = (
           'siteIdentity.menu.community.sections.collaborate.items.partners.description'
         )
       ),
-      icon: 'mdi-handshake-outline',
+      icon: mdiHandshakeOutline,
       to: resolveLocalizedRoutePath('partners', currentLocale.value),
     }
 
@@ -114,7 +123,7 @@ export const useCommunityMenu = (
           'siteIdentity.menu.community.sections.resources.items.opendata.description'
         )
       ),
-      icon: 'mdi-database-outline',
+      icon: mdiDatabaseOutline,
       to: resolveLocalizedRoutePath('opendata', currentLocale.value),
     }
 
@@ -130,7 +139,7 @@ export const useCommunityMenu = (
           'siteIdentity.menu.community.sections.resources.items.opensource.description'
         )
       ),
-      icon: 'mdi-source-branch',
+      icon: mdiSourceBranch,
       to: resolveLocalizedRoutePath('opensource', currentLocale.value),
     }
 

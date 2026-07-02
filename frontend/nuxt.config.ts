@@ -23,7 +23,6 @@ import {
 } from './shared/utils/localized-routes'
 import { collectStaticPageRouteNames } from './scripts/static-main-page-routes'
 import { vuetifyPalettes } from './config/theme/palettes'
-import { icons } from './app/config/icons'
 
 const APP_PAGES_DIR = fileURLToPath(new URL('./app/pages', import.meta.url))
 const manifestFile = new URL('./app/public/site.webmanifest', import.meta.url)
@@ -348,18 +347,6 @@ export default defineNuxtConfig({
   },
   modules: [
     'vuetify-nuxt-module',
-    // Strip the redundant MDI icon webfont that vuetify-nuxt-module injects from
-    // jsDelivr (~362 KB, render-blocking, third-party) even though we use the
-    // tree-shaken @mdi/js SVG iconset. It pushes the keyed <link> during its own
-    // setup, so this inline module — registered right after it — removes it. All
-    // icons render as SVG; the only former webfont users (NudgeCondition*Icon)
-    // now use <v-icon>. Improves LCP/CWV. See fix/cwv-product-cls-lcp.
-    (_inlineOptions, nuxt) => {
-      const links = nuxt.options.app.head.link
-      if (Array.isArray(links)) {
-        nuxt.options.app.head.link = links.filter(link => link?.key !== 'mdi')
-      }
-    },
     '@nuxt/content',
     '@nuxtjs/i18n',
     '@nuxt/image',
@@ -422,16 +409,12 @@ export default defineNuxtConfig({
       // Enable Vuetify CSS tree-shaking (only include CSS for used components)
       styles: 'sass',
     },
-    icons: {
-      // Use inline SVG icons instead of the remote MDI icon font.
-      defaultSet: 'mdi-svg',
-      svg: {
-        mdi: {
-          aliases: icons,
-        },
-      },
-    },
     vuetifyOptions: {
+      icons: {
+        // Use Vuetify's native inline SVG Material Design Icons instead of the
+        // remote MDI icon font.
+        defaultSet: 'mdi-svg',
+      },
       theme: {
         defaultTheme: 'light',
         themes: {

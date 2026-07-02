@@ -34,7 +34,7 @@
             >
               <v-icon
                 v-if="isFilterActive(filter.key)"
-                icon="mdi-check"
+                :icon="mdiCheck"
                 size="small"
                 class="mr-2"
               />
@@ -71,7 +71,7 @@
         </div>
         <div v-else class="product-alternatives__empty-card">
           <v-icon
-            icon="mdi-emoticon-happy-outline"
+            :icon="mdiEmoticonHappyOutline"
             size="56"
             class="product-alternatives__empty-icon"
             aria-hidden="true"
@@ -90,6 +90,7 @@ import { computed, ref, watch } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { FetchError } from 'ofetch'
+import { mdiCheck, mdiEmoticonHappyOutline } from '@mdi/js'
 import type {
   AttributeConfigDto,
   Filter,

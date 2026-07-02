@@ -13,7 +13,7 @@
         </p>
       </div>
       <v-icon
-        icon="mdi-timeline-text-outline"
+        :icon="mdiTimelineTextOutline"
         class="product-life-timeline__header-icon"
         size="28"
       />
@@ -126,6 +126,24 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import {
+  mdiCloudUploadOutline,
+  mdiCogOffOutline,
+  mdiDatabaseImportOutline,
+  mdiDomainOff,
+  mdiHistory,
+  mdiNewspaperCheck,
+  mdiNewspaperVariantOutline,
+  mdiRecycleVariant,
+  mdiRocketLaunchOutline,
+  mdiShieldOffOutline,
+  mdiStarFourPointsOutline,
+  mdiStoreMinusOutline,
+  mdiStorePlusOutline,
+  mdiTimelineClockOutline,
+  mdiTimelineTextOutline,
+  mdiUpdate,
+} from '@mdi/js'
 
 import type {
   ProductTimelineDto,
@@ -220,21 +238,21 @@ const sourceLabelKeys: Record<string, string> = {
 }
 
 const eventIcons: Record<string, string> = {
-  PRICE_FIRST_SEEN_NEW: 'mdi-star-four-points-outline',
-  PRICE_FIRST_SEEN_OCCASION: 'mdi-recycle-variant',
-  PRICE_LAST_SEEN_NEW: 'mdi-history',
-  PRICE_LAST_SEEN_OCCASION: 'mdi-history',
-  EPREL_ON_MARKET_START: 'mdi-store-plus-outline',
-  EPREL_ON_MARKET_END: 'mdi-store-minus-outline',
-  EPREL_ON_MARKET_FIRST_START: 'mdi-rocket-launch-outline',
-  EPREL_FIRST_PUBLICATION: 'mdi-newspaper-variant-outline',
-  EPREL_LAST_PUBLICATION: 'mdi-newspaper-check',
-  EPREL_EXPORT: 'mdi-cloud-upload-outline',
-  EPREL_SPARE_PARTS_END: 'mdi-cog-off-outline',
-  EPREL_SOFTWARE_SUPPORT_END: 'mdi-update',
-  EPREL_SUPPORT_END: 'mdi-shield-off-outline',
-  EPREL_IMPORTED: 'mdi-database-import-outline',
-  EPREL_ORGANISATION_CLOSED: 'mdi-domain-off',
+  PRICE_FIRST_SEEN_NEW: mdiStarFourPointsOutline,
+  PRICE_FIRST_SEEN_OCCASION: mdiRecycleVariant,
+  PRICE_LAST_SEEN_NEW: mdiHistory,
+  PRICE_LAST_SEEN_OCCASION: mdiHistory,
+  EPREL_ON_MARKET_START: mdiStorePlusOutline,
+  EPREL_ON_MARKET_END: mdiStoreMinusOutline,
+  EPREL_ON_MARKET_FIRST_START: mdiRocketLaunchOutline,
+  EPREL_FIRST_PUBLICATION: mdiNewspaperVariantOutline,
+  EPREL_LAST_PUBLICATION: mdiNewspaperCheck,
+  EPREL_EXPORT: mdiCloudUploadOutline,
+  EPREL_SPARE_PARTS_END: mdiCogOffOutline,
+  EPREL_SOFTWARE_SUPPORT_END: mdiUpdate,
+  EPREL_SUPPORT_END: mdiShieldOffOutline,
+  EPREL_IMPORTED: mdiDatabaseImportOutline,
+  EPREL_ORGANISATION_CLOSED: mdiDomainOff,
 }
 
 const sourceColors: Record<string, string> = {
@@ -330,7 +348,7 @@ const groupedEvents = computed<TimelineYearGroup[]>(() => {
       const date = new Date(event.timestamp)
       const monthLabel = monthFormatter.value.format(date)
       const fullDateLabel = fullDateFormatter.value.format(date)
-      const icon = (type && eventIcons[type]) ?? 'mdi-timeline-clock-outline'
+      const icon = (type && eventIcons[type]) ?? mdiTimelineClockOutline
       const resolvedSource = (type && sourceOverrideByType[type]) ?? source
       const color =
         (resolvedSource && sourceColors[resolvedSource]) ?? 'primary'

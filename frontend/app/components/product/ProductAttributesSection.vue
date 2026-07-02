@@ -14,7 +14,7 @@
         <div class="product-attributes__column-header">
           <div class="product-attributes__column-header-content">
             <v-icon
-              icon="mdi-card-account-details-outline"
+              :icon="mdiCardAccountDetailsOutline"
               size="20"
               class="product-attributes__column-header-icon"
             />
@@ -24,7 +24,7 @@
         <div class="product-attributes__column-header">
           <div class="product-attributes__column-header-content">
             <v-icon
-              icon="mdi-format-list-bulleted"
+              :icon="mdiFormatListBulleted"
               size="20"
               class="product-attributes__column-header-icon"
             />
@@ -143,7 +143,7 @@
                     :aria-label="$t('product.attributes.main.identity.copy')"
                     @click="copy(String(gtin))"
                   >
-                    <v-icon :icon="copied ? 'mdi-check' : 'mdi-content-copy'" />
+                    <v-icon :icon="copied ? mdiCheck : mdiContentCopy" />
                     <v-tooltip
                       activator="parent"
                       location="bottom"
@@ -240,7 +240,7 @@
           <v-text-field
             v-model="auditSearchTerm"
             :label="$t('product.attributes.audit.searchPlaceholder')"
-            prepend-inner-icon="mdi-magnify"
+            :prepend-inner-icon="mdiMagnify"
             hide-details
             clearable
             class="product-attributes__search product-attributes__search--audit"
@@ -345,7 +345,7 @@
           <v-text-field
             v-model="searchTerm"
             :label="$t('product.attributes.searchPlaceholder')"
-            prepend-inner-icon="mdi-magnify"
+            :prepend-inner-icon="mdiMagnify"
             hide-details
             clearable
             class="product-attributes__search"
@@ -364,7 +364,7 @@
               value="table"
               :aria-label="$t('product.attributes.detailed.viewTable')"
             >
-              <v-icon icon="mdi-view-list" />
+              <v-icon :icon="mdiViewList" />
               <v-tooltip
                 activator="parent"
                 location="bottom"
@@ -375,7 +375,7 @@
               value="cards"
               :aria-label="$t('product.attributes.detailed.viewCards')"
             >
-              <v-icon icon="mdi-view-grid" />
+              <v-icon :icon="mdiViewGrid" />
               <v-tooltip
                 activator="parent"
                 location="bottom"
@@ -423,8 +423,8 @@
                           <v-icon
                             :icon="
                               isDetailGroupExpanded(item.id)
-                                ? 'mdi-chevron-up'
-                                : 'mdi-chevron-down'
+                                ? mdiChevronUp
+                                : mdiChevronDown
                             "
                             size="18"
                           />
@@ -453,7 +453,7 @@
                                   :key="feature.key"
                                 >
                                   <v-icon
-                                    icon="mdi-check-circle"
+                                    :icon="mdiCheckCircle"
                                     size="18"
                                     class="product-attributes__chip-icon product-attributes__chip-icon--positive"
                                   />
@@ -475,7 +475,7 @@
                                   :key="feature.key"
                                 >
                                   <v-icon
-                                    icon="mdi-close-octagon-outline"
+                                    :icon="mdiCloseOctagonOutline"
                                     size="18"
                                     class="product-attributes__chip-icon product-attributes__chip-icon--negative"
                                   />
@@ -544,8 +544,8 @@
                           <v-icon
                             :icon="
                               isDetailGroupExpanded(item.id)
-                                ? 'mdi-chevron-up'
-                                : 'mdi-chevron-down'
+                                ? mdiChevronUp
+                                : mdiChevronDown
                             "
                             size="18"
                           />
@@ -574,7 +574,7 @@
                                   :key="feature.key"
                                 >
                                   <v-icon
-                                    icon="mdi-check-circle"
+                                    :icon="mdiCheckCircle"
                                     size="18"
                                     class="product-attributes__chip-icon product-attributes__chip-icon--positive"
                                   />
@@ -596,7 +596,7 @@
                                   :key="feature.key"
                                 >
                                   <v-icon
-                                    icon="mdi-close-octagon-outline"
+                                    :icon="mdiCloseOctagonOutline"
                                     size="18"
                                     class="product-attributes__chip-icon product-attributes__chip-icon--negative"
                                   />
@@ -666,8 +666,8 @@
                       <v-icon
                         :icon="
                           isDetailGroupExpanded(item.id)
-                            ? 'mdi-chevron-up'
-                            : 'mdi-chevron-down'
+                            ? mdiChevronUp
+                            : mdiChevronDown
                         "
                         size="18"
                       />
@@ -694,7 +694,7 @@
                               :key="feature.key"
                             >
                               <v-icon
-                                icon="mdi-check-circle"
+                                :icon="mdiCheckCircle"
                                 size="18"
                                 class="product-attributes__chip-icon product-attributes__chip-icon--positive"
                               />
@@ -715,7 +715,7 @@
                               :key="feature.key"
                             >
                               <v-icon
-                                icon="mdi-close-octagon-outline"
+                                :icon="mdiCloseOctagonOutline"
                                 size="18"
                                 class="product-attributes__chip-icon product-attributes__chip-icon--negative"
                               />
@@ -791,6 +791,19 @@ import { computed, ref } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useClipboard } from '@vueuse/core'
+import {
+  mdiCardAccountDetailsOutline,
+  mdiCheck,
+  mdiCheckCircle,
+  mdiChevronDown,
+  mdiChevronUp,
+  mdiCloseOctagonOutline,
+  mdiContentCopy,
+  mdiFormatListBulleted,
+  mdiMagnify,
+  mdiViewGrid,
+  mdiViewList,
+} from '@mdi/js'
 import { useAuth } from '~/composables/useAuth'
 import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import ProductAttributesDetailCard from '~/components/product/attributes/ProductAttributesDetailCard.vue'

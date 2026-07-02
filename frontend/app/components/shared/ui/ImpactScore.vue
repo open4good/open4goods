@@ -31,7 +31,7 @@
               category: '',
             })
           "
-          icon="mdi-leaf"
+          :icon="mdiLeaf"
           size="small"
           :to="'/impact-score'"
           flat
@@ -134,7 +134,7 @@
       <!-- Left: Icon + Link -->
       <div class="impact-score-panel__footer-left">
         <v-icon
-          icon="mdi-leaf"
+          :icon="mdiLeaf"
           size="16"
           class="impact-score-panel__footer-icon"
         />
@@ -169,6 +169,7 @@
 </template>
 
 <script setup lang="ts">
+import { mdiLeaf } from '@mdi/js'
 import { computed } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'

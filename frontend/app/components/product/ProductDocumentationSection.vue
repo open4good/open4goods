@@ -120,7 +120,7 @@
               @click="handleDownloadClick"
             >
               <v-icon
-                icon="mdi-file-pdf-box"
+                :icon="mdiFilePdfBox"
                 size="20"
                 class="product-docs__download-icon"
               />
@@ -230,6 +230,7 @@ import {
   watch,
 } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { mdiFilePdfBox } from '@mdi/js'
 import type { ProductPdfDto } from '~~/shared/api-client'
 import { useAnalytics } from '~/composables/useAnalytics'
 

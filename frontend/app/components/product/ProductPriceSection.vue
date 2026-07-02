@@ -87,7 +87,7 @@
                     )
                   "
                 >
-                  <v-icon icon="mdi-open-in-new" />
+                  <v-icon :icon="mdiOpenInNew" />
                 </v-btn>
               </template>
             </v-data-table>
@@ -203,7 +203,7 @@
                     />
                     <v-icon
                       v-else
-                      icon="mdi-store"
+                      :icon="mdiStore"
                       size="24"
                       class="product-price__history-cta-icon"
                     />
@@ -220,11 +220,11 @@
                         {{ bestNewOffer.datasourceName }}
                       </span>
                     </div>
-                    <v-icon icon="mdi-open-in-new" size="18" />
+                    <v-icon :icon="mdiOpenInNew" size="18" />
                   </a>
                   <ProductPriceEmptyCard
                     v-else
-                    icon="mdi-tag-off-outline"
+                    :icon="mdiTagOffOutline"
                     :label="$t('product.price.noOffers.new')"
                   />
 
@@ -232,7 +232,7 @@
                     <div class="product-price__metrics-list">
                       <div class="product-price__metrics-row">
                         <v-icon
-                          icon="mdi-trending-down"
+                          :icon="mdiTrendingDown"
                           size="20"
                           class="product-price__metrics-stat-icon"
                           aria-hidden="true"
@@ -254,7 +254,7 @@
                       </div>
                       <div class="product-price__metrics-row">
                         <v-icon
-                          icon="mdi-chart-line"
+                          :icon="mdiChartLine"
                           size="20"
                           class="product-price__metrics-stat-icon"
                           aria-hidden="true"
@@ -276,7 +276,7 @@
                       </div>
                       <div class="product-price__metrics-row">
                         <v-icon
-                          icon="mdi-trending-up"
+                          :icon="mdiTrendingUp"
                           size="20"
                           class="product-price__metrics-stat-icon"
                           aria-hidden="true"
@@ -322,7 +322,7 @@
                 >
                   <div>
                     <v-icon
-                      icon="mdi-chart-timeline-variant"
+                      :icon="mdiChartTimelineVariant"
                       size="48"
                       class="mb-2 opacity-50"
                     />
@@ -406,7 +406,7 @@
                     />
                     <v-icon
                       v-else
-                      icon="mdi-recycle"
+                      :icon="mdiRecycle"
                       size="24"
                       class="product-price__history-cta-icon"
                     />
@@ -423,11 +423,11 @@
                         {{ bestOccasionOffer.datasourceName }}
                       </span>
                     </div>
-                    <v-icon icon="mdi-open-in-new" size="18" />
+                    <v-icon :icon="mdiOpenInNew" size="18" />
                   </a>
                   <ProductPriceEmptyCard
                     v-else
-                    icon="mdi-recycle"
+                    :icon="mdiRecycle"
                     :label="$t('product.price.noOffers.occasion')"
                   />
                   <div
@@ -437,7 +437,7 @@
                     <div class="product-price__metrics-list">
                       <div class="product-price__metrics-row">
                         <v-icon
-                          icon="mdi-trending-down"
+                          :icon="mdiTrendingDown"
                           size="20"
                           class="product-price__metrics-stat-icon"
                           aria-hidden="true"
@@ -459,7 +459,7 @@
                       </div>
                       <div class="product-price__metrics-row">
                         <v-icon
-                          icon="mdi-chart-line"
+                          :icon="mdiChartLine"
                           size="20"
                           class="product-price__metrics-stat-icon"
                           aria-hidden="true"
@@ -481,7 +481,7 @@
                       </div>
                       <div class="product-price__metrics-row">
                         <v-icon
-                          icon="mdi-trending-up"
+                          :icon="mdiTrendingUp"
                           size="20"
                           class="product-price__metrics-stat-icon"
                           aria-hidden="true"
@@ -526,7 +526,7 @@
                 >
                   <div>
                     <v-icon
-                      icon="mdi-chart-timeline-variant"
+                      :icon="mdiChartTimelineVariant"
                       size="48"
                       class="mb-2 opacity-50"
                     />
@@ -570,6 +570,19 @@ import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { format } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
+import {
+  mdiAccountMultipleCheckOutline,
+  mdiAlertOutline,
+  mdiChartLine,
+  mdiChartTimelineVariant,
+  mdiOpenInNew,
+  mdiRecycle,
+  mdiStore,
+  mdiTagOffOutline,
+  mdiTrendingDown,
+  mdiTrendingUp,
+  mdiTrophyOutline,
+} from '@mdi/js'
 import { useAnalytics } from '~/composables/useAnalytics'
 import type {
   ProductDto,
@@ -1008,7 +1021,7 @@ const competitionLevel = computed(() => {
   if (count < 2) {
     return {
       tone: 'low',
-      icon: 'mdi-alert-outline',
+      icon: mdiAlertOutline,
       labelKey: 'product.price.competition.low',
       labelFallback: 'Concurrence faible !',
       descriptionKey: 'product.price.competition.lowDescription',
@@ -1021,7 +1034,7 @@ const competitionLevel = computed(() => {
   if (count > 4) {
     return {
       tone: 'super',
-      icon: 'mdi-trophy-outline',
+      icon: mdiTrophyOutline,
       labelKey: 'product.price.competition.super',
       labelFallback: 'Super concurrence !',
       descriptionKey: 'product.price.competition.superDescription',
@@ -1033,7 +1046,7 @@ const competitionLevel = computed(() => {
   // 2-4 offers
   return {
     tone: 'correct',
-    icon: 'mdi-account-multiple-check-outline',
+    icon: mdiAccountMultipleCheckOutline,
     labelKey: 'product.price.competition.correct',
     labelFallback: 'Concurrence correcte !',
     descriptionKey: 'product.price.competition.correctDescription',

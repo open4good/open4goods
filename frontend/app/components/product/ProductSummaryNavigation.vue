@@ -20,7 +20,7 @@
         @click="toggleCollapse"
       >
         <v-icon
-          :icon="isCollapsed ? 'mdi-chevron-right' : 'mdi-chevron-left'"
+          :icon="isCollapsed ? mdiChevronRight : mdiChevronLeft"
           size="20"
         />
       </button>
@@ -71,7 +71,7 @@
             >
               <v-icon
                 :icon="
-                  isSubmenuOpen(section) ? 'mdi-chevron-up' : 'mdi-chevron-down'
+                  isSubmenuOpen(section) ? mdiChevronUp : mdiChevronDown
                 "
                 size="18"
               />
@@ -184,6 +184,12 @@
 <script setup lang="ts">
 import type { PropType } from 'vue'
 import { ref, watch } from 'vue'
+import {
+  mdiChevronDown,
+  mdiChevronLeft,
+  mdiChevronRight,
+  mdiChevronUp,
+} from '@mdi/js'
 
 const { t: $t } = useI18n()
 

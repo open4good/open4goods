@@ -3,7 +3,7 @@
     <div class="product-vigilance-teaser__container">
       <div class="product-vigilance-teaser__left">
         <v-icon
-          icon="mdi-alert-circle-outline"
+          :icon="mdiAlertCircleOutline"
           class="product-vigilance-teaser__icon mr-3"
           size="22"
         />
@@ -36,7 +36,7 @@
         color="warning"
         size="small"
         class="font-weight-bold product-vigilance-teaser__cta"
-        append-icon="mdi-chevron-right"
+        :append-icon="mdiChevronRight"
         @click="emit('click:alerts')"
       >
         {{ t('product.vigilance.teaser.cta') }}
@@ -48,6 +48,7 @@
 <script setup lang="ts">
 import { toRef } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { mdiAlertCircleOutline, mdiChevronRight } from '@mdi/js'
 import type { ProductDto } from '~~/shared/api-client'
 import { useProductVigilance } from '~/composables/useProductVigilance'
 

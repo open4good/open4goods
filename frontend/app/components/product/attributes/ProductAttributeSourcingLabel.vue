@@ -19,7 +19,7 @@
             icon
             :aria-label="tooltipAriaLabel"
           >
-            <v-icon :icon="'mdi-information'" size="18" :color="iconColor" />
+            <v-icon :icon="mdiInformation" size="18" :color="iconColor" />
           </v-btn>
         </template>
 
@@ -108,6 +108,7 @@
 import { computed, toRaw, unref } from 'vue'
 import type { PropType, Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { mdiInformation } from '@mdi/js'
 import { usePluralizedTranslation } from '~/composables/usePluralizedTranslation'
 import type {
   ProductAttributeSourceDto,

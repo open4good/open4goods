@@ -11,7 +11,7 @@
         class="impact-details__virtual-toggle"
         color="primary"
         :prepend-icon="
-          showVirtualScores ? 'mdi-check-circle-outline' : 'mdi-circle-outline'
+          showVirtualScores ? mdiCheckCircleOutline : mdiCircleOutline
         "
         @click="showVirtualScores = !showVirtualScores"
       >
@@ -59,7 +59,7 @@
           >
             <v-icon
               :icon="
-                isGroupExpanded(item.id) ? 'mdi-chevron-up' : 'mdi-chevron-down'
+                isGroupExpanded(item.id) ? mdiChevronUp : mdiChevronDown
               "
               size="18"
             />
@@ -81,8 +81,8 @@
             <v-icon
               :icon="
                 expandedSubscores.includes(item.id)
-                  ? 'mdi-chevron-up'
-                  : 'mdi-chevron-down'
+                  ? mdiChevronUp
+                  : mdiChevronDown
               "
               size="18"
             />
@@ -91,7 +91,7 @@
             {{ item.label }}
             <v-icon
               v-if="item.virtual"
-              icon="mdi-flask-outline"
+              :icon="mdiFlaskOutline"
               size="16"
               class="ml-2 text-disabled"
               :title="$t('product.impact.showVirtualScores')"
@@ -169,6 +169,13 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import {
+  mdiCheckCircleOutline,
+  mdiChevronDown,
+  mdiChevronUp,
+  mdiCircleOutline,
+  mdiFlaskOutline,
+} from '@mdi/js'
 import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import ProductImpactSubscoreCard from './ProductImpactSubscoreCard.vue'
 import type { ScoreView } from './impact-types'

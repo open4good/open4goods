@@ -223,6 +223,18 @@ import {
 } from 'vue'
 import { useDisplay } from 'vuetify'
 import { createError } from 'h3'
+import {
+  mdiAlertCircleOutline,
+  mdiCodeJson,
+  mdiCompareHorizontal,
+  mdiCurrencyEur,
+  mdiDatabaseOutline,
+  mdiFileDocumentOutline,
+  mdiFormatListBulleted,
+  mdiInformationOutline,
+  mdiLeaf,
+  mdiOpenInNew,
+} from '@mdi/js'
 import type {
   Agg,
   AggregationBucketDto,
@@ -1785,20 +1797,20 @@ const primarySectionDefinitions = computed<ConditionalSection[]>(() => [
   {
     id: sectionIds.hero,
     label: t('product.navigation.overview'),
-    icon: 'mdi-information-outline',
+    icon: mdiInformationOutline,
     condition: true,
   },
   {
     id: sectionIds.impact,
     label: t('product.navigation.impact'),
-    icon: 'mdi-leaf',
+    icon: mdiLeaf,
     condition: impactScores.value.length > 0,
     subsections: impactSubsections.value,
   },
   {
     id: sectionIds.price,
     label: t('product.navigation.price'),
-    icon: 'mdi-currency-eur',
+    icon: mdiCurrencyEur,
     condition: !!product.value?.offers,
     subsections: [
       {
@@ -1823,26 +1835,26 @@ const primarySectionDefinitions = computed<ConditionalSection[]>(() => [
   {
     id: sectionIds.alternatives,
     label: t('product.navigation.alternatives'),
-    icon: 'mdi-compare-horizontal',
+    icon: mdiCompareHorizontal,
     condition: shouldShowAlternativesNavigation.value,
   },
   {
     id: sectionIds.vigilance,
     label: t('product.vigilance.title'),
-    icon: 'mdi-alert-circle-outline',
+    icon: mdiAlertCircleOutline,
     condition: showVigilanceSection.value,
   },
   {
     id: sectionIds.attributes,
     label: t('product.navigation.attributes'),
-    icon: 'mdi-format-list-bulleted',
+    icon: mdiFormatListBulleted,
     condition: showAttributesSection.value,
     subsections: attributesSubsections.value,
   },
   {
     id: sectionIds.docs,
     label: t('product.navigation.docs'),
-    icon: 'mdi-file-document-outline',
+    icon: mdiFileDocumentOutline,
     condition: (product.value?.resources?.pdfs?.length ?? 0) > 0,
   },
 ])
@@ -1869,22 +1881,22 @@ const adminSections = computed<AdminNavigableSection[]>(() => {
     {
       id: sectionIds.attributes,
       label: t('product.navigation.attributes'),
-      icon: 'mdi-format-list-bulleted',
+      icon: mdiFormatListBulleted,
     },
     {
       id: sectionIds.adminDatasources,
       label: t('product.navigation.adminPanel.items.datasources'),
-      icon: 'mdi-database-outline',
+      icon: mdiDatabaseOutline,
     },
     {
       id: sectionIds.adminJson,
       label: t('product.navigation.adminPanel.items.productJson'),
-      icon: 'mdi-code-json',
+      icon: mdiCodeJson,
     },
     {
       id: sectionIds.adminRawApi,
       label: t('product.navigation.adminPanel.items.rawApi'),
-      icon: 'mdi-open-in-new',
+      icon: mdiOpenInNew,
       href: adminApiPayloadUrl.value,
       target: '_blank',
     },

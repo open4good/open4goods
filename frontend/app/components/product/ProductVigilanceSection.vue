@@ -27,7 +27,7 @@
               <v-icon
                 class="product-vigilance__card-icon"
                 size="40"
-                icon="mdi-alert-decagram-outline"
+                :icon="mdiAlertDecagramOutline"
               />
               <div class="product-vigilance__card-content">
                 <p class="product-vigilance__card-title">
@@ -77,7 +77,7 @@
               <v-icon
                 class="product-vigilance__card-icon"
                 size="40"
-                icon="mdi-alert-circle-outline"
+                :icon="mdiAlertCircleOutline"
               />
               <div class="product-vigilance__card-content">
                 <p class="product-vigilance__card-title">
@@ -114,7 +114,7 @@
                   density="compact"
                   class="mt-2 px-0 text-lowercase ml-n2"
                   :prepend-icon="
-                    showAllConflicts ? 'mdi-chevron-up' : 'mdi-chevron-down'
+                    showAllConflicts ? mdiChevronUp : mdiChevronDown
                   "
                   @click="showAllConflicts = !showAllConflicts"
                 >
@@ -142,7 +142,7 @@
               <v-icon
                 class="product-vigilance__card-icon"
                 size="40"
-                icon="mdi-database-alert-outline"
+                :icon="mdiDatabaseAlertOutline"
               />
               <div class="product-vigilance__card-content">
                 <p class="product-vigilance__card-title">
@@ -179,7 +179,7 @@
               <v-icon
                 class="product-vigilance__card-icon"
                 size="40"
-                icon="mdi-alert-outline"
+                :icon="mdiAlertOutline"
               />
               <div class="product-vigilance__card-content">
                 <p class="product-vigilance__card-title">
@@ -198,7 +198,7 @@
                   size="small"
                   color="warning"
                   variant="outlined"
-                  prepend-icon="mdi-eye-outline"
+                  :prepend-icon="mdiEyeOutline"
                   @click="emit('click:offers')"
                 >
                   {{
@@ -217,6 +217,15 @@
 </template>
 
 <script setup lang="ts">
+import {
+  mdiAlertCircleOutline,
+  mdiAlertDecagramOutline,
+  mdiAlertOutline,
+  mdiChevronDown,
+  mdiChevronUp,
+  mdiDatabaseAlertOutline,
+  mdiEyeOutline,
+} from '@mdi/js'
 import { computed, toRef, ref } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'

@@ -1,5 +1,11 @@
 import { computed } from 'vue'
 import type { Ref } from 'vue'
+import {
+  mdiAlertCircleOutline,
+  mdiAlertDecagramOutline,
+  mdiAlertOutline,
+  mdiDatabaseAlertOutline,
+} from '@mdi/js'
 import type { ProductDto } from '~~/shared/api-client'
 import { normalizeTimestamp } from '~/utils/date-parsing'
 
@@ -63,7 +69,7 @@ export function useProductVigilance(
       list.push({
         key: 'eol',
         titleKey: 'product.impact.endOfLifeTitle',
-        icon: 'mdi-alert-decagram-outline',
+        icon: mdiAlertDecagramOutline,
         color: 'warning',
       })
     }
@@ -71,7 +77,7 @@ export function useProductVigilance(
       list.push({
         key: 'conflicts',
         titleKey: 'product.vigilance.conflicts.title',
-        icon: 'mdi-alert-circle-outline',
+        icon: mdiAlertCircleOutline,
         color: 'error',
       })
     }
@@ -79,7 +85,7 @@ export function useProductVigilance(
       list.push({
         key: 'quality',
         titleKey: 'product.vigilance.quality.title',
-        icon: 'mdi-database-alert-outline',
+        icon: mdiDatabaseAlertOutline,
         color: 'warning',
       })
     }
@@ -87,7 +93,7 @@ export function useProductVigilance(
       list.push({
         key: 'competition',
         titleKey: 'product.price.competition.title',
-        icon: 'mdi-alert-outline',
+        icon: mdiAlertOutline,
         color: 'warning',
       })
     }

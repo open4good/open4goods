@@ -44,7 +44,7 @@
                           <span>{{ item.label }}</span>
                           <v-icon
                             class="main-menu-items__toggle-icon"
-                            :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
+                            :icon="isActive ? mdiMenuUp : mdiMenuDown"
                             aria-hidden="true"
                           />
                         </span>
@@ -63,7 +63,7 @@
                         size="44"
                         color="surface-primary-080"
                       >
-                        <v-icon icon="mdi-storefront-outline" color="primary" />
+                        <v-icon :icon="mdiStorefrontOutline" color="primary" />
                       </v-avatar>
                       <div>
                         <p class="products-menu__title">
@@ -121,7 +121,7 @@
                               />
                               <v-icon
                                 v-else
-                                icon="mdi-image-outline"
+                                :icon="mdiImageOutline"
                                 size="28"
                               />
                             </v-avatar>
@@ -129,7 +129,7 @@
                               {{ category.title }}
                             </p>
                             <v-icon
-                              icon="mdi-arrow-top-right"
+                              :icon="mdiArrowTopRight"
                               size="18"
                               class="products-menu__popular-icon"
                             />
@@ -152,7 +152,7 @@
                           <v-btn
                             color="primary"
                             variant="flat"
-                            prepend-icon="mdi-robot-love"
+                            :prepend-icon="mdiRobotLove"
                             size="small"
                             class="products-menu__nudge-button"
                             @click.stop="isNudgeWizardOpen = true"
@@ -199,7 +199,7 @@
                                   entry.title
                                 }}</v-list-item-title>
                                 <template #append>
-                                  <v-icon icon="mdi-arrow-right" size="16" />
+                                  <v-icon :icon="mdiArrowRight" size="16" />
                                 </template>
                               </v-list-item>
                             </v-list>
@@ -229,7 +229,7 @@
                         class="products-menu__cta-action"
                       >
                         {{ item.copy.ctaLabel }}
-                        <v-icon icon="mdi-arrow-right" size="18" />
+                        <v-icon :icon="mdiArrowRight" size="18" />
                       </NuxtLink>
                     </div>
                   </v-card>
@@ -255,7 +255,7 @@
                           <span>{{ item.label }}</span>
                           <v-icon
                             class="main-menu-items__toggle-icon"
-                            :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
+                            :icon="isActive ? mdiMenuUp : mdiMenuDown"
                             aria-hidden="true"
                           />
                         </span>
@@ -274,7 +274,7 @@
                         size="44"
                         color="surface-primary-080"
                       >
-                        <v-icon icon="mdi-account-group" color="primary" />
+                        <v-icon :icon="mdiAccountGroup" color="primary" />
                       </v-avatar>
                       <div>
                         <p class="community-menu__title">{{ item.label }}</p>
@@ -354,7 +354,7 @@
 
                             <template v-if="link.external" #append>
                               <v-icon
-                                icon="mdi-open-in-new"
+                                :icon="mdiOpenInNew"
                                 size="18"
                                 class="community-menu__external-icon"
                               />
@@ -379,7 +379,7 @@
               <v-btn
                 v-if="!isSearchOpen"
                 class="main-menu-search__activator"
-                icon="mdi-magnify"
+                :icon="mdiMagnify"
                 variant="text"
                 :aria-label="t('siteIdentity.menu.search.openLabel')"
                 @click="openSearch"
@@ -408,7 +408,7 @@
                   <template #append-inner>
                     <div class="main-menu-search__actions">
                       <v-btn
-                        icon="mdi-arrow-right"
+                        :icon="mdiArrowRight"
                         variant="plain"
                         rounded="0"
                         size="small"
@@ -416,7 +416,7 @@
                         @click.prevent="handleSearchSubmit"
                       />
                       <v-btn
-                        icon="mdi-close"
+                        :icon="mdiClose"
                         variant="text"
                         color="text-neutral-secondary"
                         size="small"
@@ -445,12 +445,12 @@
                   class="accessibility-menu__activator"
                   :aria-label="accessibilityLabel"
                 >
-                  <v-icon icon="mdi-sunglasses" start />
+                  <v-icon :icon="mdiSunglasses" start />
                   <span class="accessibility-menu__label">{{
                     accessibilityLabel
                   }}</span>
                   <v-icon
-                    :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
+                    :icon="isActive ? mdiMenuUp : mdiMenuDown"
                     size="18"
                     end
                   />
@@ -475,7 +475,7 @@
                     @click="setTheme('light')"
                   >
                     <template #prepend>
-                      <v-icon icon="mdi-white-balance-sunny" size="20" />
+                      <v-icon :icon="mdiWhiteBalanceSunny" size="20" />
                     </template>
                     <v-list-item-title>Thème clair</v-list-item-title>
                   </v-list-item>
@@ -488,7 +488,7 @@
                     @click="setTheme('dark')"
                   >
                     <template #prepend>
-                      <v-icon icon="mdi-weather-night" size="20" />
+                      <v-icon :icon="mdiWeatherNight" size="20" />
                     </template>
                     <v-list-item-title>Thème sombre</v-list-item-title>
                   </v-list-item>
@@ -540,7 +540,7 @@
                     accountLabel
                   }}</span>
                   <v-icon
-                    :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
+                    :icon="isActive ? mdiMenuUp : mdiMenuDown"
                     end
                   />
                 </v-btn>
@@ -553,9 +553,9 @@
                   data-testid="hero-account-menu-activator-guest"
                 >
                   <span class="account-menu-activator__guest-icons">
-                    <v-icon icon="mdi-incognito" />
+                    <v-icon :icon="mdiIncognito" />
                     <v-icon
-                      :icon="isActive ? 'mdi-menu-up' : 'mdi-menu-down'"
+                      :icon="isActive ? mdiMenuUp : mdiMenuDown"
                     />
                   </span>
                 </v-btn>
@@ -604,7 +604,7 @@
                     @click="handleClearCache"
                   >
                     <template #prepend>
-                      <v-icon icon="mdi-refresh" />
+                      <v-icon :icon="mdiRefresh" />
                     </template>
                     <v-list-item-title>
                       {{
@@ -621,7 +621,7 @@
                     @click="handleLogout"
                   >
                     <template #prepend>
-                      <v-icon icon="mdi-logout" />
+                      <v-icon :icon="mdiLogout" />
                     </template>
                     <v-list-item-title>
                       {{ t('siteIdentity.menu.account.logout') }}
@@ -651,13 +651,31 @@
         :aria-label="t('siteIdentity.menu.openLabel')"
         @click="$emit('toggle-drawer')"
       >
-        <v-icon icon="mdi-menu" />
+        <v-icon :icon="mdiMenu" />
       </v-btn>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import {
+  mdiAccountCircle,
+  mdiAccountGroup,
+  mdiArrowRight,
+  mdiArrowTopRight,
+  mdiClose,
+  mdiImageOutline,
+  mdiIncognito,
+  mdiLogout,
+  mdiMagnify,
+  mdiMenu,
+  mdiMenuDown,
+  mdiMenuUp,
+  mdiOpenInNew,
+  mdiRefresh,
+  mdiRobotLove,
+  mdiStorefrontOutline,
+} from '@mdi/js'
 import { defineAsyncComponent } from 'vue'
 // TODO: enable later
 /*
@@ -865,7 +883,7 @@ const accountLabel = computed(() =>
     : t('siteIdentity.menu.account.guestLabel')
 )
 const accountIcon = computed(() =>
-  isLoggedIn.value ? 'mdi-account-circle' : 'mdi-incognito'
+  isLoggedIn.value ? mdiAccountCircle : mdiIncognito
 )
 
 const accountRoles = computed(() =>

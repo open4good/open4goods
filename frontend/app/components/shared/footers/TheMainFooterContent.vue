@@ -1,4 +1,20 @@
 <script lang="ts" setup>
+import {
+  mdiAccountGroupOutline,
+  mdiArrowRight,
+  mdiDatabaseOutline,
+  mdiEmailOutline,
+  mdiGithub,
+  mdiHandshakeOutline,
+  mdiLinkedin,
+  mdiMessageTextOutline,
+  mdiPackageVariantClosed,
+  mdiPostOutline,
+  mdiRecordCircleOutline,
+  mdiScaleBalance,
+  mdiShieldLockOutline,
+  mdiStar,
+} from '@mdi/js'
 import type { RouteLocationRaw } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useCookie } from '#app'
@@ -45,12 +61,12 @@ const highlightLinks = computed<FooterLink[]>(() => [
   {
     label: t('siteIdentity.footer.highlightLinks.ecoscore'),
     to: resolveLocalizedRoutePath('/impact-score', currentLocale.value),
-    icon: 'mdi-star',
+    icon: mdiStar,
   },
   {
     label: t('siteIdentity.footer.highlightLinks.allProducts'),
     to: categoriesPath.value,
-    icon: 'mdi-package-variant-closed',
+    icon: mdiPackageVariantClosed,
   },
 ])
 
@@ -58,22 +74,22 @@ const resourceLinks = computed<FooterLink[]>(() => [
   {
     label: t('siteIdentity.footer.comparator.links.openData'),
     to: '/opendata',
-    icon: 'mdi-database-outline',
+    icon: mdiDatabaseOutline,
   },
   {
     label: t('siteIdentity.footer.comparator.links.openSource'),
     to: '/opensource',
-    icon: 'mdi-github',
+    icon: mdiGithub,
   },
   {
     label: t('siteIdentity.footer.comparator.links.privacy'),
     to: resolveLocalizedRoutePath('data-privacy', currentLocale.value),
-    icon: 'mdi-shield-lock-outline',
+    icon: mdiShieldLockOutline,
   },
   {
     label: t('siteIdentity.footer.comparator.links.legal'),
     to: resolveLocalizedRoutePath('legal-notice', currentLocale.value),
-    icon: 'mdi-scale-balance',
+    icon: mdiScaleBalance,
   },
 ])
 
@@ -81,12 +97,12 @@ const communityLinks = computed<FooterLink[]>(() => [
   {
     label: t('siteIdentity.footer.community.links.team'),
     to: resolveLocalizedRoutePath('team', currentLocale.value),
-    icon: 'mdi-account-group-outline',
+    icon: mdiAccountGroupOutline,
   },
   {
     label: t('siteIdentity.footer.community.links.partners'),
     to: resolveLocalizedRoutePath('partners', currentLocale.value),
-    icon: 'mdi-handshake-outline',
+    icon: mdiHandshakeOutline,
   },
 ])
 
@@ -94,19 +110,19 @@ const feedbackLinks = computed<FooterLink[]>(() => [
   {
     label: t('siteIdentity.footer.feedback.links.feedback'),
     to: feedbackPath.value,
-    icon: 'mdi-message-text-outline',
+    icon: mdiMessageTextOutline,
   },
   {
     label: t('siteIdentity.footer.feedback.links.contact'),
     to: resolveLocalizedRoutePath('contact', currentLocale.value),
-    icon: 'mdi-email-outline',
+    icon: mdiEmailOutline,
   },
   {
     label: t('siteIdentity.footer.feedback.links.linkedin'),
     href: linkedinUrl.value,
     target: '_blank',
     rel: 'noopener nofollow',
-    icon: 'mdi-linkedin',
+    icon: mdiLinkedin,
   },
 ])
 
@@ -244,12 +260,12 @@ const isRecording = computed(() =>
           <v-btn
             :to="blogPath"
             variant="text"
-            append-icon="mdi-arrow-right"
+            :append-icon="mdiArrowRight"
             color="hero-overlay-strong"
             class="footer-link-btn px-0"
           >
             <template #prepend>
-              <v-icon icon="mdi-post-outline" size="18" class="me-2" />
+              <v-icon :icon="mdiPostOutline" size="18" class="me-2" />
             </template>
             {{ t('siteIdentity.footer.blogLink') }}
           </v-btn>
@@ -318,7 +334,7 @@ const isRecording = computed(() =>
           size="small"
           class="font-weight-bold"
         >
-          <v-icon start icon="mdi-record-circle-outline" class="mr-1" />
+          <v-icon start :icon="mdiRecordCircleOutline" class="mr-1" />
           {{ t('siteIdentity.footer.recordingEnabled') }}
         </v-chip>
       </v-col>

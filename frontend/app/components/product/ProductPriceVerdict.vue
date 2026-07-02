@@ -58,6 +58,12 @@
 </template>
 
 <script setup lang="ts">
+import {
+  mdiTagOutline,
+  mdiTrendingDown,
+  mdiTrendingNeutral,
+  mdiTrendingUp,
+} from '@mdi/js'
 import { computed } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -76,17 +82,17 @@ const { t, n } = useI18n()
 const verdict = computed(() => getPriceVerdict(props.product))
 
 const verdictIcon = computed(() => {
-  if (!verdict.value) return 'mdi-tag-outline'
+  if (!verdict.value) return mdiTagOutline
   switch (verdict.value.level) {
     case 'good':
-      return 'mdi-trending-down'
+      return mdiTrendingDown
     case 'poor':
-      return 'mdi-trending-up'
+      return mdiTrendingUp
     case 'fair':
-      return 'mdi-trending-neutral'
+      return mdiTrendingNeutral
     case 'insufficient':
     default:
-      return 'mdi-tag-outline'
+      return mdiTagOutline
   }
 })
 

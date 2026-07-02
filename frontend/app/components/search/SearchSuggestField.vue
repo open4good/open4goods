@@ -18,7 +18,7 @@
           :aria-label="ariaLabel"
           :loading="loading"
           :elevation="getFieldElevation(isHovering)"
-          prepend-inner-icon="mdi-magnify"
+          :prepend-inner-icon="mdiMagnify"
           variant="solo-filled"
           density="comfortable"
           clearable
@@ -64,7 +64,7 @@
             >
               <v-icon
                 :icon="
-                  isVoiceListening ? 'mdi-microphone' : 'mdi-microphone-outline'
+                  isVoiceListening ? mdiMicrophone : mdiMicrophoneOutline
                 "
                 size="20"
                 aria-hidden="true"
@@ -81,7 +81,7 @@
               data-test="search-scanner-button"
               @click="openScannerDialog"
             >
-              <v-icon icon="mdi-barcode-scan" size="28" aria-hidden="true" />
+              <v-icon :icon="mdiBarcodeScan" size="28" aria-hidden="true" />
             </v-btn>
             <slot v-if="$slots['append-inner']" name="append-inner" />
           </template>
@@ -123,7 +123,7 @@
               </v-list-item-title>
               <template #append>
                 <v-icon
-                  icon="mdi-arrow-top-right-thin"
+                  :icon="mdiArrowTopRightThin"
                   size="small"
                   aria-hidden="true"
                 />
@@ -223,7 +223,7 @@
               :aria-label="t('search.suggestions.scanner.closeLabel')"
               @click="closeScannerDialog"
             >
-              <v-icon icon="mdi-close" aria-hidden="true" />
+              <v-icon :icon="mdiClose" aria-hidden="true" />
             </v-btn>
           </div>
           <div class="search-suggest-field__scanner-body">
@@ -254,6 +254,14 @@
 </template>
 
 <script setup lang="ts">
+import {
+  mdiArrowTopRightThin,
+  mdiBarcodeScan,
+  mdiClose,
+  mdiMagnify,
+  mdiMicrophone,
+  mdiMicrophoneOutline,
+} from '@mdi/js'
 import type { Component } from 'vue'
 import {
   computed,
