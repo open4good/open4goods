@@ -106,7 +106,6 @@
             class="product-page__section"
           >
             <ProductImpactSection
-              v-if="shouldRenderSection(sectionIds.impact)"
               :scores="impactScores"
               :radar-data="radarData"
               :product-name="productTitle"
@@ -121,18 +120,16 @@
               :score-min="impactScoreMin"
               :score-max="impactScoreMax"
             />
-            <div v-else class="product-page__deferred-placeholder" />
           </section>
 
           <section :id="sectionIds.price" class="product-page__section">
             <ProductPriceSection
-              v-if="product.offers && shouldRenderSection(sectionIds.price)"
+              v-if="product.offers"
               :offers="product.offers"
               :product="product"
               :commercial-events="commercialEvents"
               :title-params="priceTitleParams"
             />
-            <div v-else class="product-page__deferred-placeholder" />
           </section>
 
           <section
@@ -140,11 +137,7 @@
             :id="sectionIds.timeline"
             class="product-page__section"
           >
-            <ProductLifeTimeline
-              v-if="shouldRenderSection(sectionIds.timeline)"
-              :timeline="product.timeline"
-            />
-            <div v-else class="product-page__deferred-placeholder" />
+            <ProductLifeTimeline :timeline="product.timeline" />
           </section>
 
           <section
@@ -153,14 +146,12 @@
             class="product-page__section"
           >
             <ProductAlternatives
-              v-if="shouldRenderSection(sectionIds.alternatives)"
               :product="product"
               :vertical-id="categoryDetail?.id ?? ''"
               :popular-attributes="categoryDetail?.popularAttributes ?? []"
               :subtitle-params="alternativesSubtitleParams"
               @alternatives-updated="handleAlternativesUpdated"
             />
-            <div v-else class="product-page__deferred-placeholder" />
           </section>
 
           <section
@@ -169,7 +160,6 @@
             class="product-page__section"
           >
             <ProductVigilanceSection
-              v-if="shouldRenderSection(sectionIds.vigilance)"
               :product="product"
               :attribute-configs="
                 categoryDetail?.attributesConfig?.configs ?? []
@@ -177,7 +167,6 @@
               :on-market-end-date="product.eprel?.onMarketEndDate"
               @click:offers="scrollToSection(subSectionIds.priceOffers)"
             />
-            <div v-else class="product-page__deferred-placeholder" />
           </section>
 
           <section
@@ -186,14 +175,12 @@
             class="product-page__section"
           >
             <ProductAttributesSection
-              v-if="shouldRenderSection(sectionIds.attributes)"
               :product="product"
               :attribute-configs="
                 categoryDetail?.attributesConfig?.configs ?? []
               "
               :title-params="attributesTitleParams"
             />
-            <div v-else class="product-page__deferred-placeholder" />
           </section>
 
           <section
@@ -201,11 +188,7 @@
             :id="sectionIds.docs"
             class="product-page__section"
           >
-            <ProductDocumentationSection
-              v-if="shouldRenderSection(sectionIds.docs)"
-              :pdfs="product.resources.pdfs"
-            />
-            <div v-else class="product-page__deferred-placeholder" />
+            <ProductDocumentationSection :pdfs="product.resources.pdfs" />
           </section>
 
           <section
@@ -214,14 +197,12 @@
             class="product-page__section"
           >
             <ProductAdminSection
-              v-if="shouldRenderSection(sectionIds.adminPanel)"
               :product="product"
               :panel-id="sectionIds.adminPanel"
               :json-section-id="sectionIds.adminJson"
               :datasources-section-id="sectionIds.adminDatasources"
               :vertical-config="categoryDetail"
             />
-            <div v-else class="product-page__deferred-placeholder" />
           </section>
         </main>
       </div>
@@ -323,6 +304,12 @@ const isStickyBannerOpen = ref(false)
 
 const heroSectionRef = ref<HTMLElement | null>(null)
 
+// Every component the page needs is server-rendered so the whole product page —
+// hero attributes, the lifecycle timeline and all sections — has its final height
+// at first paint. Fetching any of these client-side and merging them into the
+// reactive product re-rendered taller content after hydration, which caused large
+// post-load layout shifts (CWV: CLS) and moved the LCP element. See
+// fix/cwv-product-cls-lcp.
 const PRODUCT_COMPONENTS = [
   'base',
   'identity',
@@ -331,10 +318,6 @@ const PRODUCT_COMPONENTS = [
   'scores',
   'offers',
   'eprel',
-].join(',')
-
-const PRODUCT_DETAILS_COMPONENTS = [
-  PRODUCT_COMPONENTS,
   'attributes',
   'timeline',
 ].join(',')
@@ -417,28 +400,6 @@ const {
 )
 
 const product = computed(() => productData.value)
-
-const productDetailsLoaded = ref(false)
-
-onMounted(async () => {
-  if (productDetailsLoaded.value) {
-    return
-  }
-
-  try {
-    const detailedProduct = await $fetch<ProductDto>(`/api/products/${gtin}`, {
-      query: { include: PRODUCT_DETAILS_COMPONENTS },
-    })
-
-    productData.value = {
-      ...(productData.value ?? {}),
-      ...detailedProduct,
-    } as ProductDto
-    productDetailsLoaded.value = true
-  } catch (detailsError) {
-    console.error('Failed to load deferred product details', detailsError)
-  }
-})
 
 if (product.value?.fullSlug || (product.value?.slug && categorySlug)) {
   const currentPath = route.path.startsWith('/') ? route.path : `/${route.path}`
@@ -560,11 +521,9 @@ if (categorySlug) {
   }
 }
 
-const {
-  data: aggregationsData,
-  execute: executeAggregationsFetch,
-  status: aggregationsStatus,
-} = await useAsyncData<Record<string, AggregationResponseDto>>(
+const { data: aggregationsData } = await useAsyncData<
+  Record<string, AggregationResponseDto>
+>(
   `product-aggregations-${categorySlug ?? gtin}`,
   async () => {
     if (!product.value || !categoryDetail.value?.id) return {}
@@ -603,7 +562,9 @@ const {
       return {}
     }
   },
-  { server: false, immediate: false }
+  // Server-rendered so the impact section's radar/score distribution has its final
+  // height at first paint instead of filling in after hydration (CWV: CLS).
+  { server: true, immediate: true }
 )
 
 const aggregations = computed(() => aggregationsData.value ?? {})
@@ -1959,60 +1920,17 @@ const activeSection = ref<string>(sectionIds.hero)
 
 const observer = ref<IntersectionObserver | null>(null)
 const revealObserver = ref<IntersectionObserver | null>(null)
-const renderObserver = ref<IntersectionObserver | null>(null)
 const visibleSectionRatios = new Map<string, number>()
 const revealedSections = new Set<string>()
 const MIN_SECTION_RATIO = 0.6
-const DEFERRED_SECTION_ROOT_MARGIN = '700px 0px 900px 0px'
 
-const renderedSections = ref<Record<string, boolean>>({
-  [sectionIds.hero]: true,
-  // Server-render the price section: its data ships in the initial payload and
-  // it sits inside the initial CLS window, so deferring it behind the scroll
-  // observer only produced a large post-hydration layout shift (CWV: CLS) with
-  // no perf benefit. Heavy children (price-history charts) stay client-only.
-  [sectionIds.price]: true,
-})
-
-const markSectionForRender = (sectionId: string) => {
-  if (sectionId === sectionIds.impact) {
-    loadImpactAggregations()
-  }
-
-  if (renderedSections.value[sectionId]) {
-    return
-  }
-
-  renderedSections.value = {
-    ...renderedSections.value,
-    [sectionId]: true,
-  }
-}
-
-const shouldRenderSection = (sectionId: string) =>
-  renderedSections.value[sectionId] === true
-
-const subsectionParentMap: Record<string, string> = {
-  [subSectionIds.priceOffers]: sectionIds.price,
-  [subSectionIds.priceHistory]: sectionIds.price,
-  [subSectionIds.attributesMain]: sectionIds.attributes,
-  [subSectionIds.attributesTimeline]: sectionIds.attributes,
-  [subSectionIds.attributesDetails]: sectionIds.attributes,
-}
-
-const resolveRenderableSectionId = (sectionId: string) =>
-  subsectionParentMap[sectionId] ?? sectionId
-
-const loadImpactAggregations = () => {
-  if (
-    aggregationsStatus.value === 'pending' ||
-    aggregationsStatus.value === 'success'
-  ) {
-    return
-  }
-
-  void executeAggregationsFetch()
-}
+// All product sections render eagerly (server-side) so the page has its final
+// height at first paint. Deferring whole sections behind a scroll observer made
+// each grow from a fixed placeholder to its real height on reveal, cascading large
+// layout shifts down to the footer (CWV: CLS). Section data — including the impact
+// aggregations — is server-rendered, so nothing needs on-demand rendering. The
+// observers set up below only drive active-section highlighting and the reveal
+// animation.
 
 const refreshActiveSection = () => {
   if (!visibleSectionRatios.size) {
@@ -2036,7 +1954,6 @@ const observeSections = () => {
 
   observer.value?.disconnect()
   revealObserver.value?.disconnect()
-  renderObserver.value?.disconnect()
   visibleSectionRatios.clear()
   refreshActiveSection()
 
@@ -2072,21 +1989,6 @@ const observeSections = () => {
     { threshold: 0.05 }
   )
 
-  renderObserver.value = new IntersectionObserver(
-    entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && entry.target.id) {
-          markSectionForRender(entry.target.id)
-          renderObserver.value?.unobserve(entry.target)
-        }
-      })
-    },
-    {
-      rootMargin: DEFERRED_SECTION_ROOT_MARGIN,
-      threshold: 0,
-    }
-  )
-
   nextTick(() => {
     sections.value.forEach(section => {
       const element = document.getElementById(section.id)
@@ -2095,19 +1997,8 @@ const observeSections = () => {
         if (!revealedSections.has(section.id)) {
           revealObserver.value?.observe(element)
         }
-        if (!shouldRenderSection(section.id)) {
-          renderObserver.value?.observe(element)
-        }
       }
     })
-
-    document
-      .querySelectorAll<HTMLElement>('.product-page__section[id]')
-      .forEach(element => {
-        if (!shouldRenderSection(element.id)) {
-          renderObserver.value?.observe(element)
-        }
-      })
   })
 }
 
@@ -2126,7 +2017,6 @@ watch(
 onBeforeUnmount(() => {
   observer.value?.disconnect()
   revealObserver.value?.disconnect()
-  renderObserver.value?.disconnect()
   visibleSectionRatios.clear()
   revealedSections.clear()
 })
@@ -2152,9 +2042,6 @@ const scrollToSection = async (sectionId: string) => {
   if (!import.meta.client) {
     return
   }
-
-  markSectionForRender(resolveRenderableSectionId(sectionId))
-  await nextTick()
 
   let targetId = sectionId
   const scoreId = impactAnchorToScoreIdMap.value.get(sectionId)
@@ -2601,16 +2488,6 @@ useHead(() => {
 
 .product-page__section {
   scroll-margin-top: 108px; /* Match sticky nav + banner */
-}
-
-.product-page__deferred-placeholder {
-  /* Reserve a realistic section height so revealing a deferred section (notably
-     the tall impact section above the fold) causes a much smaller layout shift.
-     Sections still render before entering the viewport, so any residual
-     shrink happens off-screen and does not count toward CLS. */
-  min-height: 600px;
-  content-visibility: auto;
-  contain-intrinsic-size: 600px;
 }
 
 @media (prefers-reduced-motion: no-preference) {

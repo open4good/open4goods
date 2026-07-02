@@ -105,7 +105,8 @@
         />
         <dd th:if="${detail.value instanceof T(java.util.Map)}">
           <dl
-            th:replace="~{META-INF/spring-boot-admin-server/mail/status-changed :: statusDetails (details = ${detail.value})}"
+            th:with="templateName = ${#execInfo.templateName}"
+            th:replace="~{${templateName} :: statusDetails (details = ${detail.value})}"
           />
         </dd>
       </th:block>

@@ -20,6 +20,14 @@ describe('SERVICES catalog', () => {
     expect(check?.status).toBe('live')
     expect(check?.credits).toBe(0)
   })
+
+  it('has product.review as a coming-soon premium service', () => {
+    const review = SERVICES.find(s => s.id === 'product.review')
+    expect(review).toBeDefined()
+    expect(review?.slug).toBe('review')
+    expect(review?.status).toBe('coming-soon')
+    expect(review?.featured).toBe(true)
+  })
 })
 
 describe('allServices()', () => {

@@ -1003,7 +1003,11 @@ const { data: filterOptionsData, execute: loadFilterOptions } =
         `/api/products/fields/filters/${encodeURIComponent(verticalId.value)}`
       )
     },
-    { server: false, immediate: true, watch: [verticalId] }
+    // Server-rendered so the filters sidebar/toolbar are populated at first paint
+    // instead of expanding after hydration (CWV: CLS). verticalId resolves from
+    // the awaited, SSR'd category data above. Stays lazy: non-blocking on
+    // client-side navigation.
+    { server: true, immediate: true, watch: [verticalId] }
   )
 
 const { data: sortOptionsData, execute: loadSortOptions } = useLazyAsyncData(
@@ -1017,7 +1021,9 @@ const { data: sortOptionsData, execute: loadSortOptions } = useLazyAsyncData(
       `/api/products/fields/sortable/${encodeURIComponent(verticalId.value)}`
     )
   },
-  { server: false, immediate: true, watch: [verticalId] }
+  // Server-rendered so the sort control is populated at first paint instead of
+  // reflowing the toolbar after hydration (CWV: CLS). Stays lazy on navigation.
+  { server: true, immediate: true, watch: [verticalId] }
 )
 
 const filterOptions = computed(() =>
