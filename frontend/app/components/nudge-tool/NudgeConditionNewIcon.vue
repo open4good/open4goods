@@ -1,5 +1,5 @@
 <template>
-  <span class="nudge-condition-icon mdi mdi-tag" aria-hidden="true" />
+  <v-icon icon="mdi-tag" class="nudge-condition-icon" aria-hidden="true" />
 </template>
 
 <style scoped>

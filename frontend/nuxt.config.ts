@@ -348,6 +348,18 @@ export default defineNuxtConfig({
   },
   modules: [
     'vuetify-nuxt-module',
+    // Strip the redundant MDI icon webfont that vuetify-nuxt-module injects from
+    // jsDelivr (~362 KB, render-blocking, third-party) even though we use the
+    // tree-shaken @mdi/js SVG iconset. It pushes the keyed <link> during its own
+    // setup, so this inline module — registered right after it — removes it. All
+    // icons render as SVG; the only former webfont users (NudgeCondition*Icon)
+    // now use <v-icon>. Improves LCP/CWV. See fix/cwv-product-cls-lcp.
+    (_inlineOptions, nuxt) => {
+      const links = nuxt.options.app.head.link
+      if (Array.isArray(links)) {
+        nuxt.options.app.head.link = links.filter(link => link?.key !== 'mdi')
+      }
+    },
     '@nuxt/content',
     '@nuxtjs/i18n',
     '@nuxt/image',
