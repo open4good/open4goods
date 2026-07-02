@@ -49,12 +49,8 @@
           >
             <template #activator="{ props: tooltipProps }">
               <ClientOnly v-if="isStaticCategory(category)">
-                <component
-                  :is="category.externalLink ? 'a' : 'div'"
+                <div
                   class="nudge-step-category__card-link"
-                  :href="category.externalLink"
-                  target="_blank"
-                  rel="noopener noreferrer nofollow"
                   v-bind="tooltipProps"
                 >
                   <v-card
@@ -69,6 +65,13 @@
                     }"
                     variant="flat"
                     rounded="xl"
+                    :href="category.externalLink || undefined"
+                    :target="category.externalLink ? '_blank' : undefined"
+                    :rel="
+                      category.externalLink
+                        ? 'noopener noreferrer nofollow'
+                        : undefined
+                    "
                     :role="category.externalLink ? 'link' : 'button'"
                     :aria-pressed="
                       (!isExternalCategory(category) && isSelected).toString()
@@ -108,15 +111,11 @@
                       {{ category.verticalHomeTitle ?? category.id }}
                     </p>
                   </v-card>
-                </component>
+                </div>
               </ClientOnly>
-              <component
-                :is="category.externalLink ? 'a' : 'div'"
+              <div
                 v-else
                 class="nudge-step-category__card-link"
-                :href="category.externalLink"
-                target="_blank"
-                rel="noopener noreferrer nofollow"
                 v-bind="tooltipProps"
               >
                 <v-card
@@ -130,6 +129,13 @@
                   }"
                   variant="flat"
                   rounded="xl"
+                  :href="category.externalLink || undefined"
+                  :target="category.externalLink ? '_blank' : undefined"
+                  :rel="
+                    category.externalLink
+                      ? 'noopener noreferrer nofollow'
+                      : undefined
+                  "
                   :role="category.externalLink ? 'link' : 'button'"
                   :aria-pressed="
                     (!isExternalCategory(category) && isSelected).toString()
@@ -169,17 +175,11 @@
                     {{ category.verticalHomeTitle ?? category.id }}
                   </p>
                 </v-card>
-              </component>
+              </div>
             </template>
           </v-tooltip>
           <ClientOnly v-else-if="isStaticCategory(category)">
-            <component
-              :is="category.externalLink ? 'a' : 'div'"
-              class="nudge-step-category__card-link"
-              :href="category.externalLink"
-              target="_blank"
-              rel="noopener noreferrer nofollow"
-            >
+            <div class="nudge-step-category__card-link">
               <v-card
                 class="nudge-step-category__card nudge-option-card"
                 :class="{
@@ -191,6 +191,13 @@
                 }"
                 variant="flat"
                 rounded="xl"
+                :href="category.externalLink || undefined"
+                :target="category.externalLink ? '_blank' : undefined"
+                :rel="
+                  category.externalLink
+                    ? 'noopener noreferrer nofollow'
+                    : undefined
+                "
                 :role="category.externalLink ? 'link' : 'button'"
                 :aria-pressed="
                   (!isExternalCategory(category) && isSelected).toString()
@@ -230,16 +237,9 @@
                   {{ category.verticalHomeTitle ?? category.id }}
                 </p>
               </v-card>
-            </component>
+            </div>
           </ClientOnly>
-          <component
-            :is="category.externalLink ? 'a' : 'div'"
-            v-else
-            class="nudge-step-category__card-link"
-            :href="category.externalLink"
-            target="_blank"
-            rel="noopener noreferrer nofollow"
-          >
+          <div v-else class="nudge-step-category__card-link">
             <v-card
               class="nudge-step-category__card nudge-option-card"
               :class="{
@@ -250,6 +250,13 @@
               }"
               variant="flat"
               rounded="xl"
+              :href="category.externalLink || undefined"
+              :target="category.externalLink ? '_blank' : undefined"
+              :rel="
+                category.externalLink
+                  ? 'noopener noreferrer nofollow'
+                  : undefined
+              "
               :role="category.externalLink ? 'link' : 'button'"
               :aria-pressed="
                 (!isExternalCategory(category) && isSelected).toString()
@@ -283,7 +290,7 @@
                 {{ category.verticalHomeTitle ?? category.id }}
               </p>
             </v-card>
-          </component>
+          </div>
         </template>
       </v-slide-group-item>
     </v-slide-group>
@@ -294,13 +301,7 @@
     >
       <template v-for="category in categories" :key="category.id">
         <ClientOnly v-if="isStaticCategory(category)">
-          <component
-            :is="category.externalLink ? 'a' : 'div'"
-            class="nudge-step-category__card-link-mobile"
-            :href="category.externalLink"
-            target="_blank"
-            rel="noopener noreferrer nofollow"
-          >
+          <div class="nudge-step-category__card-link-mobile">
             <v-card
               class="nudge-step-category__card-mobile nudge-option-card"
               :class="{
@@ -312,6 +313,13 @@
               }"
               variant="flat"
               rounded="xl"
+              :href="category.externalLink || undefined"
+              :target="category.externalLink ? '_blank' : undefined"
+              :rel="
+                category.externalLink
+                  ? 'noopener noreferrer nofollow'
+                  : undefined
+              "
               :role="category.externalLink ? 'link' : 'button'"
               :aria-pressed="
                 (
@@ -347,17 +355,10 @@
                 {{ category.verticalHomeTitle ?? category.id }}
               </p>
             </v-card>
-          </component>
+          </div>
         </ClientOnly>
 
-        <component
-          :is="category.externalLink ? 'a' : 'div'"
-          v-else
-          class="nudge-step-category__card-link-mobile"
-          :href="category.externalLink"
-          target="_blank"
-          rel="noopener noreferrer nofollow"
-        >
+        <div v-else class="nudge-step-category__card-link-mobile">
           <v-card
             class="nudge-step-category__card-mobile nudge-option-card"
             :class="{
@@ -369,6 +370,11 @@
             }"
             variant="flat"
             rounded="xl"
+            :href="category.externalLink || undefined"
+            :target="category.externalLink ? '_blank' : undefined"
+            :rel="
+              category.externalLink ? 'noopener noreferrer nofollow' : undefined
+            "
             :role="category.externalLink ? 'link' : 'button'"
             :aria-pressed="
               (
@@ -404,7 +410,7 @@
               {{ category.verticalHomeTitle ?? category.id }}
             </p>
           </v-card>
-        </component>
+        </div>
       </template>
     </div>
   </div>

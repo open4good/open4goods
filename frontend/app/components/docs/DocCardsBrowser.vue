@@ -171,14 +171,16 @@ const resolvedLocale = computed(() =>
   normalizeDocsLocale(props.locale ?? resolveLocaleFromRequest())
 )
 const resolvedBasePath = computed(() => normalizeBasePath(props.basePath))
+const docsCardsKeySuffix = `${resolvedLocale.value}:${resolvedBasePath.value}`
 
 const { data: docsList } = await useAsyncData(
-  () => `docs-cards-list:${resolvedLocale.value}`,
+  `docs-cards-list:${docsCardsKeySuffix}`,
   () =>
     listDocs({
       locale: resolvedLocale.value,
       basePath: resolvedBasePath.value,
-    })
+    }),
+  { server: true }
 )
 
 const allDocs = computed(() => docsList.value ?? [])

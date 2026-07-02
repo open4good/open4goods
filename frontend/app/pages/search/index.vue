@@ -433,7 +433,7 @@ const VERTICAL_RESULTS_LIMIT = 4
 const isDev = process.env.NODE_ENV === 'development'
 
 definePageMeta({
-  ssr: true,
+  ssr: false,
 })
 
 const { t, locale, availableLocales } = useI18n()
@@ -445,6 +445,7 @@ const route = useRoute()
 const localePath = useLocalePath()
 const requestURL = useRequestURL()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
+const { $fetch: csrfFetch } = useNuxtApp()
 
 const routeQuery = computed(() => {
   const q = route.query.q
@@ -681,7 +682,7 @@ const { data, pending, error, refresh } =
     'search-global',
     async () => {
       if (!hasMinimumLength.value) return null
-      return await $fetch<GlobalSearchResponseDto>('/api/products/search', {
+      return await csrfFetch<GlobalSearchResponseDto>('/api/products/search', {
         method: 'POST',
         headers: requestHeaders,
         body: {
@@ -701,6 +702,8 @@ const { data, pending, error, refresh } =
         () => resolvedSearchType.value,
       ],
       immediate: true,
+      lazy: true,
+      server: false,
     }
   )
 
@@ -746,7 +749,7 @@ const {
       return null
     }
 
-    return await $fetch<ProductSearchResponseDto>('/api/products/search', {
+    return await csrfFetch<ProductSearchResponseDto>('/api/products/search', {
       method: 'POST',
       headers: requestHeaders,
       body: baselinePayload.value,
@@ -761,6 +764,8 @@ const {
       () => sortRequest.value,
     ],
     immediate: true,
+    lazy: true,
+    server: false,
   }
 )
 
@@ -776,7 +781,7 @@ const {
       return null
     }
 
-    return await $fetch<ProductSearchResponseDto>('/api/products/search', {
+    return await csrfFetch<ProductSearchResponseDto>('/api/products/search', {
       method: 'POST',
       headers: requestHeaders,
       body: {
@@ -793,6 +798,8 @@ const {
       () => resolvedSearchType.value,
     ],
     immediate: true,
+    lazy: true,
+    server: false,
   }
 )
 
@@ -812,7 +819,7 @@ const {
 
     if (!isFiltered.value) return null
 
-    return await $fetch<ProductSearchResponseDto>('/api/products/search', {
+    return await csrfFetch<ProductSearchResponseDto>('/api/products/search', {
       method: 'POST',
       headers: requestHeaders,
       body: {
@@ -832,6 +839,8 @@ const {
       () => sortRequest.value,
     ],
     immediate: false, // Wait for interaction
+    lazy: true,
+    server: false,
   }
 )
 

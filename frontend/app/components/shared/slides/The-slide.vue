@@ -25,13 +25,19 @@ const loadedImages = ref<Set<number>>(new Set())
 const onImageLoad = (index: number) => {
   loadedImages.value.add(index)
 }
+
+const isExternalUrl = (href: string) => /^https?:\/\//i.test(href)
 </script>
 
 <template>
   <v-slide-group show-arrows :model-value="selectedImage">
     <v-slide-group-item v-for="(item, index) in items" :key="index">
-      <NuxtLink
-        :to="item.href"
+      <component
+        :is="isExternalUrl(item.href) ? 'a' : 'NuxtLink'"
+        :to="isExternalUrl(item.href) ? undefined : item.href"
+        :href="isExternalUrl(item.href) ? item.href : undefined"
+        :target="isExternalUrl(item.href) ? '_blank' : undefined"
+        :rel="isExternalUrl(item.href) ? 'noopener noreferrer' : undefined"
         class="d-inline-flex flex-column align-center text-decoration-none"
       >
         <v-img
@@ -48,7 +54,7 @@ const onImageLoad = (index: number) => {
         >
           {{ item.verticalHomeTitle }}
         </div>
-      </NuxtLink>
+      </component>
     </v-slide-group-item>
   </v-slide-group>
 </template>

@@ -165,23 +165,26 @@ const resolvedLocale = computed(() =>
   normalizeDocsLocale(props.locale ?? resolveLocaleFromRequest())
 )
 const resolvedBasePath = computed(() => normalizeBasePath(props.basePath))
+const docsBrowserKeySuffix = `${resolvedLocale.value}:${resolvedBasePath.value}`
 
 const { data: navigationTree } = await useAsyncData(
-  () => `docs-browser-tree:${resolvedLocale.value}`,
+  `docs-browser-tree:${docsBrowserKeySuffix}`,
   () =>
     getNavigationTree({
       locale: resolvedLocale.value,
       basePath: resolvedBasePath.value,
-    })
+    }),
+  { server: true }
 )
 
 const { data: docsList } = await useAsyncData(
-  () => `docs-browser-list:${resolvedLocale.value}`,
+  `docs-browser-list:${docsBrowserKeySuffix}`,
   () =>
     listDocs({
       locale: resolvedLocale.value,
       basePath: resolvedBasePath.value,
-    })
+    }),
+  { server: true }
 )
 
 const allDocs = computed(() => docsList.value ?? [])

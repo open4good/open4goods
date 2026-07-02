@@ -316,6 +316,17 @@ const buildNormalizedDoc = (doc: DocsDoc): DocsDoc => {
 
 const isDraftAllowed = () => import.meta.dev
 
+const withDocsQueryFallback = async <T>(
+  query: () => Promise<T>,
+  fallback: T
+): Promise<T> => {
+  try {
+    return await query()
+  } catch {
+    return fallback
+  }
+}
+
 export const getLanguageTags = (tags?: string[] | null): DocsLocale[] =>
   (tags ?? [])
     .map(tag => tag.trim().toLowerCase())
@@ -447,6 +458,10 @@ export const useDocsContent = () => {
     locale?: DocsLocale
     fields?: string[]
   }) => {
+    if (import.meta.client) {
+      return null
+    }
+
     if (!isAllowedPath(path)) {
       return null
     }
@@ -455,7 +470,10 @@ export const useDocsContent = () => {
     const resolvedQuery =
       fields && fields.length > 0 ? query.select(fields) : query
 
-    const doc = (await resolvedQuery.first()) as DocsDoc | null
+    const doc = await withDocsQueryFallback(
+      () => resolvedQuery.first() as Promise<DocsDoc | null>,
+      null
+    )
 
     if (!doc) {
       return null
@@ -478,6 +496,10 @@ export const useDocsContent = () => {
   }: {
     legacyPath: string
   }): Promise<string | null> => {
+    if (import.meta.client) {
+      return null
+    }
+
     const legacyMatch = sanitizePathInput(legacyPath).match(
       /^\/?docs\/(en|fr)\/guides\/([^/]+)$/u
     )
@@ -487,10 +509,14 @@ export const useDocsContent = () => {
     }
 
     const [, locale, guideSlug] = legacyMatch
-    const docs = (await queryCollection('docs')
-      .where('path', 'LIKE', `/docs/${locale}/%/${guideSlug}`)
-      .select('path')
-      .all()) as Array<Pick<DocsDoc, 'path'>>
+    const docs = await withDocsQueryFallback(
+      () =>
+        queryCollection('docs')
+          .where('path', 'LIKE', `/docs/${locale}/%/${guideSlug}`)
+          .select('path')
+          .all() as Promise<Array<Pick<DocsDoc, 'path'>>>,
+      []
+    )
 
     return resolveLegacyGuideRedirectPath({
       legacyPath,
@@ -505,12 +531,20 @@ export const useDocsContent = () => {
     locale?: DocsLocale | null
     basePath?: string | null
   }) => {
+    if (import.meta.client) {
+      return []
+    }
+
     const resolvedLocale = normalizeDocsLocale(locale ?? defaultLocale.value)
     const resolvedBasePath = normalizeBasePath(basePath)
     const prefix = `${resolvedBasePath}/${resolvedLocale}/`
-    const docs = (await queryCollection('docs')
-      .where('path', 'LIKE', `${prefix}%`)
-      .all()) as DocsDoc[]
+    const docs = await withDocsQueryFallback(
+      () =>
+        queryCollection('docs')
+          .where('path', 'LIKE', `${prefix}%`)
+          .all() as Promise<DocsDoc[]>,
+      []
+    )
 
     return sortDocs(
       docs
@@ -524,10 +558,18 @@ export const useDocsContent = () => {
   }: {
     locale?: DocsLocale | null
   } = {}) => {
+    if (import.meta.client) {
+      return []
+    }
+
     const resolvedLocale = normalizeDocsLocale(locale ?? defaultLocale.value)
-    const docs = (await queryCollection('docs')
-      .where('path', 'LIKE', `${GUIDES_BASE_PATH}/%`)
-      .all()) as DocsDoc[]
+    const docs = await withDocsQueryFallback(
+      () =>
+        queryCollection('docs')
+          .where('path', 'LIKE', `${GUIDES_BASE_PATH}/%`)
+          .all() as Promise<DocsDoc[]>,
+      []
+    )
 
     return sortDocs(
       docs

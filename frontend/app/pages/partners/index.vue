@@ -130,7 +130,6 @@ interface PartnersPageData {
 
 definePageMeta({
   name: 'partners',
-  ssr: false,
 })
 
 const { t } = useI18n()
@@ -160,7 +159,7 @@ const { data, pending, error, refresh } = await useAsyncData<PartnersPageData>(
     }
   },
   {
-    server: false,
+    server: true,
     lazy: false,
   }
 )

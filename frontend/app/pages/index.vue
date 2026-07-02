@@ -823,26 +823,31 @@ useHead(() => ({
       @select-product="handleProductSuggestion"
     />
     <div class="home-page">
-      <HomeHeroSection
-        v-if="!isMobileLayout"
-        v-model:search-query="searchQuery"
-        :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
-        :verticals="rawCategories"
-        :partners-count="heroPartnersCount"
-        :open-data-millions="openDataMillions"
-        :products-count="productsCount"
-        :categories-count="categoriesCount"
-        :impact-score-products-count="impactScoreProductsCount"
-        :impact-score-categories-count="impactScoreCategoriesCount"
-        :products-without-vertical-count="productsWithoutVerticalCount"
-        :reviewed-products-count="reviewedProductsCount"
-        :ai-summary-remaining-credits="aiSummaryRemainingCredits"
-        :should-reduce-motion="shouldReduceMotion"
-        hero-background-i18n-key="hero.background"
-        @submit="handleSearchSubmit"
-        @select-category="handleCategorySuggestion"
-        @select-product="handleProductSuggestion"
-      />
+      <ClientOnly>
+        <HomeHeroSection
+          v-if="!isMobileLayout"
+          v-model:search-query="searchQuery"
+          :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
+          :verticals="rawCategories"
+          :partners-count="heroPartnersCount"
+          :open-data-millions="openDataMillions"
+          :products-count="productsCount"
+          :categories-count="categoriesCount"
+          :impact-score-products-count="impactScoreProductsCount"
+          :impact-score-categories-count="impactScoreCategoriesCount"
+          :products-without-vertical-count="productsWithoutVerticalCount"
+          :reviewed-products-count="reviewedProductsCount"
+          :ai-summary-remaining-credits="aiSummaryRemainingCredits"
+          :should-reduce-motion="shouldReduceMotion"
+          hero-background-i18n-key="hero.background"
+          @submit="handleSearchSubmit"
+          @select-category="handleCategorySuggestion"
+          @select-product="handleProductSuggestion"
+        />
+        <template #fallback>
+          <section class="home-page__hero-fallback" aria-hidden="true" />
+        </template>
+      </ClientOnly>
       <div class="home-page__sections">
         <ParallaxWidget
           class="home-page__parallax"
@@ -1050,6 +1055,10 @@ useHead(() => ({
 .home-page__promises-content--visible
   opacity: 1
   transform: translateY(0)
+
+.home-page__hero-fallback
+  min-height: min(760px, 90vh)
+  background: rgb(var(--v-theme-surface-default))
 
 .home-contact-redirect__card
   border: 1px solid rgb(var(--v-theme-surface-primary-080))

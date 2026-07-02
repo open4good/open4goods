@@ -78,10 +78,7 @@
                 {{ t('releases.latest') }}
               </v-chip>
 
-              <v-btn
-                icon
-                variant="text"
-                color="on-surface"
+              <span
                 class="release-accordion__toggle"
                 :aria-label="
                   isExpanded
@@ -94,7 +91,7 @@
                   class="release-accordion__icon"
                   :class="{ 'release-accordion__icon--expanded': isExpanded }"
                 />
-              </v-btn>
+              </span>
             </div>
           </template>
         </v-expansion-panel-title>
@@ -179,6 +176,17 @@ const formatPublishedDate = (isoDate: string): string => {
 
   &__latest-chip
     font-weight: 700
+
+  &__toggle
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    width: 40px
+    height: 40px
+    border-radius: 50%
+
+  &__toggle:hover
+    background: rgba(var(--v-theme-on-surface), 0.04)
 
   &__meta
     display: flex

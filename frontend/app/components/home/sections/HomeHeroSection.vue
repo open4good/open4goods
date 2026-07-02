@@ -371,7 +371,16 @@ const scrollToNext = () => {
                   </div>
 
                   <div class="d-flex flex-column ga-4">
-                    <NudgeToolWizard :verticals="wizardVerticals" />
+                    <ClientOnly>
+                      <NudgeToolWizard :verticals="wizardVerticals" />
+                      <template #fallback>
+                        <v-skeleton-loader
+                          class="home-hero__wizard-fallback"
+                          type="card"
+                          height="320"
+                        />
+                      </template>
+                    </ClientOnly>
                   </div>
                 </div>
 
