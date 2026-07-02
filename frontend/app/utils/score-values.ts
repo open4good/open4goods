@@ -1,11 +1,7 @@
 import type { ProductScoreDto } from 'shared/api-client'
 
 export type ScoreValueSource =
-  | 'value'
-  | 'relative'
-  | 'legacyRelative'
-  | 'percent'
-  | 'on20'
+  'value' | 'relative' | 'legacyRelative' | 'percent' | 'on20'
 
 export interface ResolvedScoreValue {
   value: number

@@ -7,13 +7,7 @@
 
 /** Allowed unit types for a metric value. */
 export type MetrikUnit =
-  | 'count'
-  | 'bytes'
-  | 'percent'
-  | 'currency'
-  | 'ms'
-  | 'ratio'
-  | 'unknown'
+  'count' | 'bytes' | 'percent' | 'currency' | 'ms' | 'ratio' | 'unknown'
 
 /** Status of a metric event collection. */
 export type MetrikStatus = 'ok' | 'error'

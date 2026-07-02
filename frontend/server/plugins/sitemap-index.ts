@@ -53,7 +53,8 @@ export default (nitroApp: import('nitro/app').NitroApp) => {
       requestURL.hostname
     )
 
-    const descriptors = getLocalSitemapFileDescriptorsForDomainLanguage(domainLanguage)
+    const descriptors =
+      getLocalSitemapFileDescriptorsForDomainLanguage(domainLanguage)
 
     if (!descriptors.length) {
       return
@@ -71,7 +72,10 @@ export default (nitroApp: import('nitro/app').NitroApp) => {
 
       let sitemapUrl: string
       try {
-        sitemapUrl = new URL(descriptor.publicPath, requestURL.origin).toString()
+        sitemapUrl = new URL(
+          descriptor.publicPath,
+          requestURL.origin
+        ).toString()
       } catch {
         continue
       }

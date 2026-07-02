@@ -102,12 +102,7 @@ interface CategoryProductTableRowBase {
 
 interface CategoryProductTableRow extends CategoryProductTableRowBase {
   [key: string]:
-    | AttributeCellValue
-    | ProductDto
-    | string
-    | number
-    | null
-    | undefined
+    AttributeCellValue | ProductDto | string | number | null | undefined
 }
 
 interface AttributeColumn {

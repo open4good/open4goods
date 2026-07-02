@@ -7,8 +7,7 @@ import {
 export default defineNuxtRouteMiddleware(to => {
   const runtimeConfig = useRuntimeConfig()
   const hotjarConfig = runtimeConfig.public.hotjar as
-    | { mode?: 'always' | 'never' | 'query' }
-    | undefined
+    { mode?: 'always' | 'never' | 'query' } | undefined
 
   if (hotjarConfig?.mode === 'always' || hotjarConfig?.mode === 'never') {
     return

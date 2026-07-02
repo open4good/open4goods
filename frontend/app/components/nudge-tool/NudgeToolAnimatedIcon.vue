@@ -21,12 +21,7 @@ import { storeToRefs } from 'pinia'
 import { useAccessibilityStore } from '~/stores/useAccessibilityStore'
 
 type AnimatedIconVariant =
-  | 'pulse'
-  | 'fadeIn'
-  | 'bounce'
-  | 'float'
-  | 'wiggle'
-  | 'glow'
+  'pulse' | 'fadeIn' | 'bounce' | 'float' | 'wiggle' | 'glow'
 
 const props = withDefaults(
   defineProps<{

@@ -183,8 +183,7 @@ describe('ProductHeroPricing', () => {
                     class: ['v-btn-stub', attrs.class],
                     type: 'button',
                     onClick: attrs.onClick as
-                      | ((event: MouseEvent) => void)
-                      | undefined,
+                      ((event: MouseEvent) => void) | undefined,
                   },
                   slots.default?.()
                 )

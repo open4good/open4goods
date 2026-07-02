@@ -23,7 +23,9 @@ const getRequestOriginUrl = (event: RequestOriginEvent | undefined) => {
   const forwardedProtocol = getHeaderValue(headers?.['x-forwarded-proto'])
   const protocol = forwardedProtocol?.split(',')[0]?.trim() || 'https'
 
-  return host ? new URL(`${protocol}://${host}`) : new URL(DEFAULT_SITEMAP_ORIGIN)
+  return host
+    ? new URL(`${protocol}://${host}`)
+    : new URL(DEFAULT_SITEMAP_ORIGIN)
 }
 
 export default defineNitroPlugin(nitroApp => {

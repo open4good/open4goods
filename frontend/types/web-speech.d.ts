@@ -31,8 +31,7 @@ declare interface SpeechRecognition extends EventTarget {
   abort(): void
   onstart: ((this: SpeechRecognition, ev: Event) => void) | null
   onresult:
-    | ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => void)
-    | null
+    ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => void) | null
   onerror: ((this: SpeechRecognition, ev: ErrorEvent) => void) | null
   onend: ((this: SpeechRecognition, ev: Event) => void) | null
 }

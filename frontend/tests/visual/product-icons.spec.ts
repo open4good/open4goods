@@ -16,11 +16,13 @@ test('product attributes view toggle uses inline SVG icons', async ({
   await expect(toggle.locator('.v-icon svg path')).toHaveCount(2)
   await expect(page.locator('.v-icon svg path[d^="mdi-"]')).toHaveCount(0)
 
-  const mdiStylesheetLinks = await page.locator('link').evaluateAll(links =>
-    links
-      .map(link => link.getAttribute('href') ?? '')
-      .filter(href => /@mdi\/font|materialdesignicons/i.test(href))
-  )
+  const mdiStylesheetLinks = await page
+    .locator('link')
+    .evaluateAll(links =>
+      links
+        .map(link => link.getAttribute('href') ?? '')
+        .filter(href => /@mdi\/font|materialdesignicons/i.test(href))
+    )
 
   expect(mdiStylesheetLinks).toEqual([])
 })

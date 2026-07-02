@@ -63,9 +63,7 @@
               @click="toggleVoiceListening"
             >
               <v-icon
-                :icon="
-                  isVoiceListening ? mdiMicrophone : mdiMicrophoneOutline
-                "
+                :icon="isVoiceListening ? mdiMicrophone : mdiMicrophoneOutline"
                 size="20"
                 aria-hidden="true"
               />

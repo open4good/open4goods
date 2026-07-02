@@ -6,9 +6,7 @@ import type { ProductDto } from '~~/shared/api-client'
 import ProductHero from './ProductHero.vue'
 
 type CompareListBlockReason =
-  | 'limit-reached'
-  | 'vertical-mismatch'
-  | 'missing-identifier'
+  'limit-reached' | 'vertical-mismatch' | 'missing-identifier'
 
 vi.mock('~/stores/useProductCompareStore', () => {
   let isSelected = false

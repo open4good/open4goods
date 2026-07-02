@@ -2,10 +2,7 @@
 import { computed } from 'vue'
 
 export type NudgerCorner =
-  | 'top-left'
-  | 'top-right'
-  | 'bottom-right'
-  | 'bottom-left'
+  'top-left' | 'top-right' | 'bottom-right' | 'bottom-left'
 
 const props = withDefaults(
   defineProps<{

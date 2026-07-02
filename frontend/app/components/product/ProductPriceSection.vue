@@ -984,7 +984,9 @@ const bestOccasionOfferLink = computed(() =>
   resolveOfferLink(bestOccasionOffer.value)
 )
 
-const productGtin = computed(() => props.product?.gtin ?? props.product?.base?.gtin)
+const productGtin = computed(
+  () => props.product?.gtin ?? props.product?.base?.gtin
+)
 const productVertical = computed(() => props.product?.base?.vertical ?? null)
 const productCategorySlug = computed(() => {
   const fullSlug = props.product?.fullSlug?.trim()

@@ -8,10 +8,7 @@ import {
 } from '~~/shared/utils/facet-normalization'
 
 type FacetIssueKind =
-  | 'empty_label'
-  | 'taxonomy_duplicate'
-  | 'source_collision'
-  | 'duplicate_bucket'
+  'empty_label' | 'taxonomy_duplicate' | 'source_collision' | 'duplicate_bucket'
 
 const TAXONOMY_FIELDS = new Set(['googleTaxonomyId'])
 const SOURCE_FIELDS = new Set(['datasource', 'offers.datasource'])

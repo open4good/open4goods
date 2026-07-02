@@ -9,9 +9,7 @@ const STORAGE_KEY = 'open4goods:compare-list'
 const COLLAPSE_STORAGE_KEY = `${STORAGE_KEY}:collapsed`
 
 export type CompareListBlockReason =
-  | 'limit-reached'
-  | 'vertical-mismatch'
-  | 'missing-identifier'
+  'limit-reached' | 'vertical-mismatch' | 'missing-identifier'
 
 export interface CompareListItem {
   id: string

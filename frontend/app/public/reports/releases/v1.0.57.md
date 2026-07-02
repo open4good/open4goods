@@ -3,6 +3,7 @@
 This release covers **0 day(s)** of work, from **2026-06-30T11:22:47.000Z** to **2026-06-30T13:21:29.000Z**.
 
 ### 📦 Stats
+
 - Diff: [compare](https://github.com/open4good/open4goods/compare/v1.0.56...v1.0.57)
 - Changed files: **4**
 - Commits: **5**
@@ -10,15 +11,12 @@ This release covers **0 day(s)** of work, from **2026-06-30T11:22:47.000Z** to *
 
 ---
 
-
-
 <details>
 <summary>🙈 Other changes (2)</summary>
 
-| PR | Title | Author |
-|---:|---|---|
-| [PR 3243](https://github.com/open4good/open4goods/pull/3243) | Update dependency prettier to v3.9.4 | @renovate[bot] |
+|                                                           PR | Title                                                                  | Author         |
+| -----------------------------------------------------------: | ---------------------------------------------------------------------- | -------------- |
+| [PR 3243](https://github.com/open4good/open4goods/pull/3243) | Update dependency prettier to v3.9.4                                   | @renovate[bot] |
 | [PR 3242](https://github.com/open4good/open4goods/pull/3242) | Update dependency org.junit.platform:junit-platform-launcher to v6.1.1 | @renovate[bot] |
-
 
 </details>

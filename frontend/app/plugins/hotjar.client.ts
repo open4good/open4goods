@@ -27,8 +27,7 @@ export default defineNuxtPlugin({
 
     const runtimeConfig = useRuntimeConfig()
     const hotjarConfig = runtimeConfig.public.hotjar as
-      | HotjarPublicConfig
-      | undefined
+      HotjarPublicConfig | undefined
 
     if (!hotjarConfig) {
       return

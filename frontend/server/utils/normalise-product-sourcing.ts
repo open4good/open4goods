@@ -19,8 +19,7 @@ const normaliseSourcesSet = (
     ;(
       sourcing as ProductAttributeSourceDto & {
         sources?:
-          | ProductAttributeSourceDto['sources']
-          | ProductSourcedAttributeDto[]
+          ProductAttributeSourceDto['sources'] | ProductSourcedAttributeDto[]
       }
     ).sources = Array.from(sources)
   }

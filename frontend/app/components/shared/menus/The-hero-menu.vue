@@ -539,10 +539,7 @@
                   <span class="account-username text-truncate">{{
                     accountLabel
                   }}</span>
-                  <v-icon
-                    :icon="isActive ? mdiMenuUp : mdiMenuDown"
-                    end
-                  />
+                  <v-icon :icon="isActive ? mdiMenuUp : mdiMenuDown" end />
                 </v-btn>
                 <!-- TODO: enable later
                 <v-btn

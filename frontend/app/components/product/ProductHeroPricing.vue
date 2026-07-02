@@ -283,7 +283,9 @@ const offersCount = computed(() => props.product.offers?.offersCount ?? 0)
 
 const isSingleOffer = computed(() => offersCount.value === 1)
 
-const productGtin = computed(() => props.product.gtin ?? props.product.base?.gtin)
+const productGtin = computed(
+  () => props.product.gtin ?? props.product.base?.gtin
+)
 const productVertical = computed(() => props.product.base?.vertical ?? null)
 const productCategorySlug = computed(() => {
   const fullSlug = props.product.fullSlug?.trim()

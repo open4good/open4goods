@@ -29,7 +29,9 @@ describe('sitemap-index plugin', () => {
       sitemaps: [],
     }
     vi.clearAllMocks()
-    vi.mocked(getLocalSitemapFileDescriptorsForDomainLanguage).mockReturnValue([])
+    vi.mocked(getLocalSitemapFileDescriptorsForDomainLanguage).mockReturnValue(
+      []
+    )
     accessMock.mockResolvedValue(undefined)
   })
 
@@ -100,7 +102,9 @@ describe('sitemap-index plugin', () => {
     const callback = runPlugin()
 
     setRequestHost('nudger.fr')
-    vi.mocked(getLocalSitemapFileDescriptorsForDomainLanguage).mockReturnValue([])
+    vi.mocked(getLocalSitemapFileDescriptorsForDomainLanguage).mockReturnValue(
+      []
+    )
 
     await callback(mockCtx)
 
@@ -161,7 +165,9 @@ describe('sitemap-index plugin', () => {
       },
     ])
     accessMock.mockResolvedValue(undefined)
-    mockCtx.sitemaps = [{ sitemap: 'https://nudger.fr/sitemap/fr/product-pages.xml' }]
+    mockCtx.sitemaps = [
+      { sitemap: 'https://nudger.fr/sitemap/fr/product-pages.xml' },
+    ]
 
     await callback(mockCtx)
 

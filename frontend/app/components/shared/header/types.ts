@@ -9,9 +9,7 @@
  * Page header variant types
  */
 export type PageHeaderVariant =
-  | 'hero-fullscreen'
-  | 'hero-standard'
-  | 'section-header'
+  'hero-fullscreen' | 'hero-standard' | 'section-header'
 
 /**
  * Layout configuration for header content
@@ -32,22 +30,13 @@ export type PageHeaderContainer = 'fluid' | 'lg' | 'xl' | 'xxl' | 'semi-fluid'
  * Background type options
  */
 export type PageHeaderBackground =
-  | 'gradient'
-  | 'image'
-  | 'parallax'
-  | 'solid'
-  | 'surface-variant'
+  'gradient' | 'image' | 'parallax' | 'solid' | 'surface-variant'
 
 /**
  * HeroSurface variant types (from existing HeroSurface.vue)
  */
 export type HeroSurfaceVariant =
-  | 'aurora'
-  | 'halo'
-  | 'prism'
-  | 'pulse'
-  | 'mesh'
-  | 'orbit'
+  'aurora' | 'halo' | 'prism' | 'pulse' | 'mesh' | 'orbit'
 
 /**
  * Heading level options for SEO
@@ -58,11 +47,7 @@ export type PageHeaderHeadingLevel = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
  * Schema.org types for structured data
  */
 export type PageHeaderSchemaType =
-  | 'WebPage'
-  | 'Article'
-  | 'AboutPage'
-  | 'ContactPage'
-  | 'FAQPage'
+  'WebPage' | 'Article' | 'AboutPage' | 'ContactPage' | 'FAQPage'
 
 /**
  * Media type for visual content

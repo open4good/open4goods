@@ -33,8 +33,7 @@ describe('error-handler plugin', () => {
 
   it('logs error to console when vue:error hook is triggered', async () => {
     let vueErrorCallback:
-      | ((error: unknown, instance: unknown, info: unknown) => void)
-      | undefined
+      ((error: unknown, instance: unknown, info: unknown) => void) | undefined
     const nuxtApp = {
       hook: vi.fn((name, callback) => {
         if (name === 'vue:error') {

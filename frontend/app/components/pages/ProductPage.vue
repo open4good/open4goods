@@ -1360,9 +1360,8 @@ const extractReferenceScoreValue = (
 
   const rawScores =
     (reference.scores as
-      | { scores?: Record<string, unknown> }
-      | Record<string, unknown>
-      | null) ?? null
+      { scores?: Record<string, unknown> } | Record<string, unknown> | null) ??
+    null
   if (!rawScores) {
     return null
   }
@@ -1453,9 +1452,9 @@ const radarData = computed<RadarDataset>(() => {
       const name = score.name?.trim() ?? id
       const productValue = extractAbsoluteScoreValue(score)
 
-      if (
-        !(typeof productValue === 'number' && Number.isFinite(productValue))
-      ) {
+      if (!(
+        typeof productValue === 'number' && Number.isFinite(productValue)
+      )) {
         return null
       }
 

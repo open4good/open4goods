@@ -16,9 +16,9 @@ describe('useAnalytics affiliate properties', () => {
   })
 
   it('extracts destination hosts without keeping full urls', () => {
-    expect(resolveAnalyticsHost('https://www.example.com/path?token=secret')).toBe(
-      'example.com'
-    )
+    expect(
+      resolveAnalyticsHost('https://www.example.com/path?token=secret')
+    ).toBe('example.com')
     expect(resolveAnalyticsHost('/contrib/abc123')).toBeNull()
     expect(resolveAnalyticsHost('not a url')).toBeNull()
   })

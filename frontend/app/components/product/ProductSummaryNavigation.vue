@@ -70,9 +70,7 @@
               @click="toggleSubmenu(section.id)"
             >
               <v-icon
-                :icon="
-                  isSubmenuOpen(section) ? mdiChevronUp : mdiChevronDown
-                "
+                :icon="isSubmenuOpen(section) ? mdiChevronUp : mdiChevronDown"
                 size="18"
               />
             </button>

@@ -239,8 +239,7 @@ describe('CategoryComparePanel', () => {
     await launchButton.trigger('click')
     await nextTick()
     const emitted = wrapper.emitted('launch-comparison') as
-      | unknown[][]
-      | undefined
+      unknown[][] | undefined
     expect(emitted).toBeTruthy()
     expect(emitted?.[0]?.[0]).toHaveLength(2)
     expect(routerPush).toHaveBeenLastCalledWith('/compare#201Vs202')

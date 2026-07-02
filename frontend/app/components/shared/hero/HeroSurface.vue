@@ -3,12 +3,7 @@ import { computed, mergeProps, useAttrs } from 'vue'
 import type { Component } from 'vue'
 
 type HeroSurfaceVariant =
-  | 'aurora'
-  | 'halo'
-  | 'prism'
-  | 'pulse'
-  | 'mesh'
-  | 'orbit'
+  'aurora' | 'halo' | 'prism' | 'pulse' | 'mesh' | 'orbit'
 
 defineOptions({ name: 'HeroSurface' })
 

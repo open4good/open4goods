@@ -303,8 +303,7 @@ const scrollActiveThumbnailIntoView = () => {
   if (!viewport || !list) return
 
   const activeItem = list.children[activeMediaIndex.value] as
-    | HTMLElement
-    | undefined
+    HTMLElement | undefined
   if (!activeItem) return
 
   const itemStart = activeItem.offsetLeft

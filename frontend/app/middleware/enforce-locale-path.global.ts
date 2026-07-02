@@ -8,8 +8,7 @@ import {
 export default defineNuxtRouteMiddleware(to => {
   const nuxtApp = useNuxtApp()
   const i18n = nuxtApp.$i18n as
-    | { locale?: { value?: string | null } }
-    | undefined
+    { locale?: { value?: string | null } } | undefined
   const activeLocale = normalizeLocale(i18n?.locale?.value ?? undefined)
   const matchedRoute = matchLocalizedRouteByPath(to.path)
 

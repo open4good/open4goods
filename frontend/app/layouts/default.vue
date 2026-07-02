@@ -74,7 +74,6 @@ watch(
   },
   { immediate: true }
 )
-
 </script>
 
 <style scoped lang="sass">

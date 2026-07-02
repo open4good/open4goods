@@ -4,11 +4,7 @@ import type {
 } from '~~/shared/api-client'
 
 export type VerdictLevel =
-  | 'excellent'
-  | 'good'
-  | 'fair'
-  | 'poor'
-  | 'insufficient'
+  'excellent' | 'good' | 'fair' | 'poor' | 'insufficient'
 
 export interface VerdictDimension {
   level: VerdictLevel

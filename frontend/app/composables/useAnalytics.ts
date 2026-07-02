@@ -183,7 +183,8 @@ export const buildAffiliateClickProps = ({
     merchantId,
     merchantName: resolvedMerchantName,
     merchantSlug:
-      merchantSlug ?? normalizeAnalyticsSlug(resolvedMerchantName ?? merchantId),
+      merchantSlug ??
+      normalizeAnalyticsSlug(resolvedMerchantName ?? merchantId),
     placement,
     productId,
     gtin,

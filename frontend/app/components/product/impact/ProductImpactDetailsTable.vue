@@ -58,9 +58,7 @@
             @click.stop="toggleGroup(item.id)"
           >
             <v-icon
-              :icon="
-                isGroupExpanded(item.id) ? mdiChevronUp : mdiChevronDown
-              "
+              :icon="isGroupExpanded(item.id) ? mdiChevronUp : mdiChevronDown"
               size="18"
             />
           </v-btn>

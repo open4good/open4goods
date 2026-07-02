@@ -90,8 +90,7 @@ const dataSize = computed(() => {
       <div v-if="!isExpanded" class="preview">
         <pre class="preview-text"
           >{{ formatData(data).substring(0, 200)
-          }}{{ formatData(data).length > 200 ? '...' : '' }}</pre
-        >
+          }}{{ formatData(data).length > 200 ? '...' : '' }}</pre>
       </div>
 
       <div v-else class="expanded-content">

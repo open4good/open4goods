@@ -7,10 +7,7 @@ import { useHeroBackgroundAsset } from '~~/app/composables/useThemedAsset'
 export type CornerSize = 'sm' | 'md' | 'lg' | 'xl'
 export type CornerVariant = 'icon' | 'text' | 'custom' | 'none'
 export type AccentCorner =
-  | 'top-left'
-  | 'top-right'
-  | 'bottom-left'
-  | 'bottom-right'
+  'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
 export type SurfaceTone = 'glass' | 'strong' | 'hero'
 export type RoundedSize = 'sm' | 'md' | 'lg' | 'xl'
 
