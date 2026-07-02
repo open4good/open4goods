@@ -1,7 +1,7 @@
 <template>
   <v-card v-if="hasSites" class="manufacturing-chain" variant="tonal">
     <v-card-title class="text-subtitle-1 d-flex align-center">
-      <v-icon icon="mdi-factory" class="mr-2" />
+      <v-icon :icon="mdiFactory" class="mr-2" />
       Lieux de fabrication
     </v-card-title>
 
@@ -59,6 +59,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { mdiFactory, mdiOfficeBuilding, mdiWrench } from '@mdi/js'
 
 import { useManufacturingDistance } from '~/composables/useManufacturingDistance'
 
@@ -132,11 +133,11 @@ const { distanceFor } = useManufacturingDistance(() => props.gtin)
 function siteIcon(type?: string | null): string {
   switch (type) {
     case 'assembly':
-      return 'mdi-wrench'
+      return mdiWrench
     case 'hq':
-      return 'mdi-office-building'
+      return mdiOfficeBuilding
     default:
-      return 'mdi-factory'
+      return mdiFactory
   }
 }
 

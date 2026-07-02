@@ -7,7 +7,7 @@
       :display-title="displayTitle"
     >
       <component :is="titleTag" :class="titleClass">
-        {{ displayTitle }}
+        {{ prefixedDisplayTitle }}
       </component>
     </slot>
   </div>
@@ -30,6 +30,7 @@ const props = withDefaults(
     titleClass?: string
     descriptionClass?: string
     showShortDescription?: boolean
+    titlePrefix?: string
   }>(),
   {
     variant: 'card',
@@ -37,6 +38,7 @@ const props = withDefaults(
     titleClass: 'product-designation__title',
     descriptionClass: 'product-designation__description',
     showShortDescription: undefined,
+    titlePrefix: undefined,
   }
 )
 
@@ -54,6 +56,14 @@ const longName = computed(() =>
 const displayTitle = computed(() =>
   props.variant === 'page' ? longName.value : cardName.value
 )
+
+const prefixedDisplayTitle = computed(() => {
+  const prefix = props.titlePrefix?.trim()
+  if (!prefix || displayTitle.value.toLowerCase().startsWith(prefix.toLowerCase())) {
+    return displayTitle.value
+  }
+  return `${prefix} ${displayTitle.value}`
+})
 
 const rootClass = computed(() =>
   props.variant === 'card'

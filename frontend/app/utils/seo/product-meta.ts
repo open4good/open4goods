@@ -9,9 +9,13 @@ export interface ProductMetaTemplates {
 
 export interface ProductMetaDescriptionTemplates {
   withImpact: string
+  withImpactNoBrand: string
   withImpactVertical: string
+  withImpactVerticalNoBrand: string
   withoutImpact: string
+  withoutImpactNoBrand: string
   withoutImpactVertical: string
+  withoutImpactVerticalNoBrand: string
 }
 
 export interface ProductMetaBuildOptions {
@@ -117,13 +121,24 @@ export const buildProductMeta = (options: ProductMetaBuildOptions) => {
 
   const title = truncateAtWordBoundary(matchingTitle, maxTitleLength)
 
+  const sameProductAndBrandModel =
+    brandModel.length > 0 && productName.toLowerCase() === brandModel.toLowerCase()
+
   const descriptionTemplate = score
     ? verticalTitle
-      ? options.descriptionTemplates.withImpactVertical
-      : options.descriptionTemplates.withImpact
+      ? sameProductAndBrandModel
+        ? options.descriptionTemplates.withImpactVerticalNoBrand
+        : options.descriptionTemplates.withImpactVertical
+      : sameProductAndBrandModel
+        ? options.descriptionTemplates.withImpactNoBrand
+        : options.descriptionTemplates.withImpact
     : verticalTitle
-      ? options.descriptionTemplates.withoutImpactVertical
-      : options.descriptionTemplates.withoutImpact
+      ? sameProductAndBrandModel
+        ? options.descriptionTemplates.withoutImpactVerticalNoBrand
+        : options.descriptionTemplates.withoutImpactVertical
+      : sameProductAndBrandModel
+        ? options.descriptionTemplates.withoutImpactNoBrand
+        : options.descriptionTemplates.withoutImpact
 
   const description = truncateAtWordBoundary(
     descriptionTemplate

@@ -2582,7 +2582,7 @@
       "viewOffersCount": "Voir les {count} offres",
       "viewOffersNew": "Une offre neuve | {count} offres neuves",
       "viewOffersOccasion": "Voir l'offre d'occasion | Voir les {count} offres d'occasion",
-      "viewSingleOffer": "Voir l'offre"
+      "viewSingleOffer": "Voir l'offre - {price}"
     },
     "impact": {
       "subtitle": "Comprendre l'impact {designation} pour mieux choisir.",
@@ -2594,7 +2594,7 @@
       "endOfLifeSupportRemaining": "Support légal restant",
       "endOfLifeSupportExpired": "Support légal terminé",
       "alternatives": {
-        "title": "😘 Moins cher, et meilleur pour la planète ?",
+        "title": "Moins cher, et meilleur pour la planète ?",
         "subtitle": "Découvrez des produits similaires avec un meilleur score d'impact, un prix égal ou plus accessible et des caractéristiques techniques similaires.",
         "bestProduct": "Élu meilleur produit par rapport à vos critères !",
         "error": "Impossible de charger les alternatives pour le moment. Réessayez.",
@@ -2933,13 +2933,15 @@
       "serp": {
         "title": {
           "withImpact": {
-            "full": "{productName} : ImpactScore : {score}/20 | Meilleurs prix, manuels, et caractéristiques pour le {brandModel}",
-            "compact": "{productName} : ImpactScore : {score}/20 | Meilleurs prix pour {brandModel}",
-            "minimal": "{productName} : ImpactScore : {score}/20"
+            "full": "{productName} : meilleur prix, caractéristiques et avis | ImpactScore {score}/20",
+            "fullVertical": "{verticalTitle} {productName} : meilleur prix | ImpactScore {score}/20",
+            "compact": "{productName} : meilleur prix | ImpactScore {score}/20",
+            "minimal": "{productName} : ImpactScore {score}/20"
           },
           "withoutImpact": {
-            "full": "{productName} | Meilleurs prix, manuels, et caractéristiques pour le {brandModel}",
-            "compact": "{productName} | Meilleurs prix pour {brandModel}",
+            "full": "{productName} : meilleur prix, caractéristiques et avis",
+            "fullVertical": "{verticalTitle} {productName} : meilleur prix",
+            "compact": "{productName} : meilleur prix",
             "minimal": "{productName}"
           },
           "noCategory": {
@@ -2950,9 +2952,13 @@
         },
         "description": {
           "withImpact": "Comparez {productName} ({brandModel}) : score d'impact {score}/20, meilleurs prix, manuels et caractéristiques sur Nudger.",
+          "withImpactNoBrand": "Comparez {productName} : score d'impact {score}/20, meilleurs prix, manuels et caractéristiques sur Nudger.",
           "withImpactVertical": "Comparez {productName} ({brandModel}) dans la catégorie {verticalTitle} : score d'impact {score}/20, meilleurs prix, manuels et caractéristiques sur Nudger.",
+          "withImpactVerticalNoBrand": "Comparez {productName} dans la catégorie {verticalTitle} : score d'impact {score}/20, meilleurs prix, manuels et caractéristiques sur Nudger.",
           "withoutImpact": "Comparez {productName} ({brandModel}) : meilleurs prix, manuels et caractéristiques sur Nudger.",
-          "withoutImpactVertical": "Comparez {productName} ({brandModel}) dans la catégorie {verticalTitle} : meilleurs prix, manuels et caractéristiques sur Nudger."
+          "withoutImpactNoBrand": "Comparez {productName} : meilleurs prix, manuels et caractéristiques sur Nudger.",
+          "withoutImpactVertical": "Comparez {productName} ({brandModel}) dans la catégorie {verticalTitle} : meilleurs prix, manuels et caractéristiques sur Nudger.",
+          "withoutImpactVerticalNoBrand": "Comparez {productName} dans la catégorie {verticalTitle} : meilleurs prix, manuels et caractéristiques sur Nudger."
         }
       },
       "social": {

@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { defineComponent, h, nextTick, ref } from 'vue'
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const messages: Record<string, string> = {
   'pwa.install.title': 'Install Nudger',
@@ -126,12 +126,34 @@ const VBtnStub = defineComponent({
   },
 })
 
+const VSnackbarStub = defineComponent({
+  name: 'VSnackbarStub',
+  props: {
+    modelValue: { type: Boolean, default: false },
+  },
+  emits: ['update:modelValue'],
+  setup(props, { slots, attrs }) {
+    return () =>
+      props.modelValue
+        ? h(
+            'div',
+            {
+              class: 'v-snackbar-stub',
+              ...attrs,
+            },
+            slots.default ? slots.default() : []
+          )
+        : null
+  },
+})
+
 const mountPrompt = () =>
   mount(PwaInstallPrompt, {
     global: {
       stubs: {
         VAlert: VAlertStub,
         VBtn: VBtnStub,
+        VSnackbar: VSnackbarStub,
       },
       components: {
         ClientOnly: ClientOnlyStub,
@@ -142,6 +164,12 @@ const mountPrompt = () =>
 describe('PwaInstallPrompt', () => {
   beforeEach(() => {
     resetState()
+    sessionStorage.clear()
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
   it('hides the install banner on desktop displays', async () => {
@@ -155,14 +183,54 @@ describe('PwaInstallPrompt', () => {
     )
   })
 
-  it('shows update and offline ready banners', async () => {
+  it('shows the update banner immediately', async () => {
     const wrapper = mountPrompt()
     updateAvailable.value = true
-    offlineReady.value = true
     await nextTick()
 
     expect(wrapper.find('[data-test="pwa-update-banner"]').exists()).toBe(true)
-    expect(wrapper.find('[data-test="pwa-offline-ready"]').exists()).toBe(true)
+  })
+
+  it('delays the offline-ready toast until the page has settled', async () => {
+    const wrapper = mountPrompt()
+    offlineReady.value = true
+    await nextTick()
+
+    expect(wrapper.find('[data-test="pwa-offline-ready"]').exists()).toBe(
+      false
+    )
+
+    vi.advanceTimersByTime(2000)
+    await nextTick()
+
+    expect(wrapper.find('[data-test="pwa-offline-ready"]').exists()).toBe(
+      true
+    )
+  })
+
+  it('shows the offline-ready toast at most once per session', async () => {
+    sessionStorage.setItem('pwa-offline-ready-shown', 'true')
+    const wrapper = mountPrompt()
+    offlineReady.value = true
+    await nextTick()
+    vi.advanceTimersByTime(2000)
+    await nextTick()
+
+    expect(wrapper.find('[data-test="pwa-offline-ready"]').exists()).toBe(
+      false
+    )
+  })
+
+  it('renders the offline-ready toast as a non-blocking snackbar, not an overlay', async () => {
+    const wrapper = mountPrompt()
+    offlineReady.value = true
+    await nextTick()
+    vi.advanceTimersByTime(2000)
+    await nextTick()
+
+    const toast = wrapper.find('[data-test="pwa-offline-ready"]')
+    expect(toast.exists()).toBe(true)
+    expect(wrapper.find('.v-overlay').exists()).toBe(false)
   })
 
   it('applies updates when requested', async () => {

@@ -46,6 +46,11 @@ public class BackupConfig {
 	private int productsExportThreads = 4;
 
 	/**
+	 * Page size used while streaming products for backup exports.
+	 */
+	private int productExportPageSize = 1000;
+
+	/**
 	 * Page size used while streaming products for copy operations.
 	 */
 	private int copyPageSize = 5000;
@@ -130,6 +135,14 @@ public class BackupConfig {
 
 	public void setProductsExportThreads(int productsExportThreads) {
 		this.productsExportThreads = productsExportThreads;
+	}
+
+	public int getProductExportPageSize() {
+		return productExportPageSize;
+	}
+
+	public void setProductExportPageSize(int productExportPageSize) {
+		this.productExportPageSize = productExportPageSize;
 	}
 
 	public int getMinXwikiBackupFileSizeInMb() {

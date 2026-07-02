@@ -1,10 +1,6 @@
 <template>
-  <section :id="sectionId" class="product-price">
-    <header class="product-price__header">
-      <h2 class="product-price__title">
-        {{ $t('product.price.title') }}
-      </h2>
-    </header>
+  <section class="product-price">
+    <ProductSectionHeader :title="$t('product.price.title')" />
 
     <div class="product-price__content">
       <ProductPriceVerdict :product="computedProduct" />
@@ -33,6 +29,7 @@
               class="rounded-xl border product-price__offers-table"
               density="comfortable"
               :items-per-page="5"
+              :hide-default-footer="allOffers.length <= 5"
               hover
               @click:row="onRowClick"
             >
@@ -59,7 +56,11 @@
               <template #[`item.condition`]="{ item }">
                 <v-chip
                   size="small"
-                  :color="item.condition === 'NEW' ? 'success' : 'warning'"
+                  :color="
+                    item.condition === 'NEW'
+                      ? NEW_CONDITION_COLOR
+                      : OCCASION_CONDITION_COLOR
+                  "
                   variant="tonal"
                   class="font-weight-medium"
                 >
@@ -75,6 +76,7 @@
                 <v-btn
                   :href="resolveOfferLink(item)"
                   target="_blank"
+                  :rel="AFFILIATE_LINK_REL"
                   icon
                   variant="text"
                   size="small"
@@ -185,7 +187,8 @@
                   <a
                     v-if="bestNewOffer && bestNewOfferLink"
                     :href="bestNewOfferLink"
-                    rel="nofollow"
+                    target="_blank"
+                    :rel="AFFILIATE_LINK_REL"
                     class="product-price__history-cta"
                     @click="
                       handleOfferRedirectClick(
@@ -388,7 +391,8 @@
                   <a
                     v-if="bestOccasionOffer && bestOccasionOfferLink"
                     :href="bestOccasionOfferLink"
-                    rel="nofollow"
+                    target="_blank"
+                    :rel="AFFILIATE_LINK_REL"
                     class="product-price__history-cta"
                     @click="
                       handleOfferRedirectClick(
@@ -584,6 +588,13 @@ import {
   mdiTrophyOutline,
 } from '@mdi/js'
 import { useAnalytics } from '~/composables/useAnalytics'
+import {
+  resolveOfferHref,
+  AFFILIATE_LINK_REL,
+  formatPrice,
+  NEW_CONDITION_COLOR,
+  OCCASION_CONDITION_COLOR,
+} from '~/utils/_product-pricing'
 import type {
   ProductDto,
   CommercialEvent,
@@ -971,12 +982,7 @@ const resolveOfferLink = (
     return null
   }
 
-  const token = 'affiliationToken' in offer ? offer.affiliationToken : undefined
-  if (token) {
-    return `/contrib/${token}`
-  }
-
-  return 'url' in offer ? (offer.url ?? null) : null
+  return resolveOfferHref(offer) ?? null
 }
 
 const bestNewOfferLink = computed(() => resolveOfferLink(bestNewOffer.value))
@@ -1514,10 +1520,10 @@ const handleNewChartClick = (params: {
 
 const formatCurrency = (value?: number | null, currency: string = 'EUR') => {
   if (value == null || Number.isNaN(value)) {
-    return '—'
+    return '-'
   }
 
-  return n(value, { style: 'currency', currency, maximumFractionDigits: 2 })
+  return formatPrice(value, n, currency)
 }
 
 onBeforeUnmount(() => {
@@ -1530,11 +1536,6 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   gap: 2rem;
-}
-
-.product-price__title {
-  font-size: clamp(1.6rem, 2.4vw, 2.2rem);
-  font-weight: 700;
 }
 
 .product-price__subtitle-h3 {

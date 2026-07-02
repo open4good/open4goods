@@ -62,6 +62,7 @@
                   title-tag="h1"
                   title-class="product-hero__title"
                   description-class="product-hero__short-description"
+                  :title-prefix="verticalTitle"
                 />
               </header>
 
@@ -88,6 +89,7 @@
                       :min="impactScoreMin"
                       :max="impactScoreMax"
                       :show-methodology="false"
+                      :show-min-max="false"
                       size="lg"
                       :banner="true"
                       :brand="productBrandName"
@@ -290,6 +292,7 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent, ref, type PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { mdiMinus, mdiPlus } from '@mdi/js'
 import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
 import ProductHeroPricing from '~/components/product/ProductHeroPricing.vue'
 import ProductDesignation from '~/components/product/ProductDesignation.vue'
@@ -361,6 +364,10 @@ const props = defineProps({
   hasCategory: {
     type: Boolean,
     default: false,
+  },
+  verticalTitle: {
+    type: String,
+    default: '',
   },
   hidePricingPanel: {
     type: Boolean,
@@ -663,7 +670,7 @@ const compareButtonAriaLabel = computed(() => {
 })
 
 const compareButtonIcon = computed(() =>
-  isCompareSelected.value ? 'mdi-minus' : 'mdi-plus'
+  isCompareSelected.value ? mdiMinus : mdiPlus
 )
 
 const isCompareDisabled = computed(
@@ -1270,6 +1277,42 @@ const heroBreadcrumbProps = computed(() => ({
 
   .product-hero__decision-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Bold mobile fold reorder (owner-approved): breadcrumb/h1 -> price CTA ->
+   * compact gallery -> verdict, ahead of the details/attributes section.
+   * `display: contents` unwraps the intermediate v-col/grid wrappers so
+   * their children become orderable flex items of `.product-hero__layout`
+   * directly, without touching desktop markup or duplicating components. */
+  .product-hero__layout {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .product-hero__decision-column,
+  .product-hero__decision-shell,
+  .product-hero__decision-grid {
+    display: contents;
+  }
+
+  .product-hero__heading {
+    order: 1;
+  }
+
+  .product-hero__panel--pricing {
+    order: 2;
+  }
+
+  .product-hero__media-column {
+    order: 3;
+  }
+
+  .product-hero__verdict {
+    order: 4;
+  }
+
+  .product-hero__details-section {
+    order: 5;
   }
 }
 

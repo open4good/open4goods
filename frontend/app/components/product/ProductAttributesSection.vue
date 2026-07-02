@@ -1,13 +1,9 @@
 <template>
-  <section :id="sectionId" class="product-attributes">
-    <header class="product-attributes__header">
-      <h2 class="product-attributes__title">
-        {{ $t('product.attributes.title', titleParams) }}
-      </h2>
-      <p class="product-attributes__subtitle">
-        {{ $t('product.attributes.subtitle') }}
-      </p>
-    </header>
+  <section class="product-attributes">
+    <ProductSectionHeader
+      :title="$t('product.attributes.title', titleParams)"
+      :subtitle="$t('product.attributes.subtitle')"
+    />
 
     <div class="product-attributes__block">
       <div class="product-attributes__column-headers">
@@ -327,7 +323,10 @@
       </p>
     </div>
 
-    <div class="product-attributes__block product-attributes__block--detailed">
+    <div
+      v-if="hasDetailedAttributes"
+      class="product-attributes__block product-attributes__block--detailed"
+    >
       <div
         class="product-attributes__block-header product-attributes__block-header--detailed"
       >
@@ -913,15 +912,21 @@ const identityModel = computed(() =>
   normalizeIdentityValue(identity.value?.model ?? null)
 )
 
+// GTIN-prefixed internal codes (e.g. "8431312260509_CAFR") are datasource
+// bookkeeping, not a real alternate name a shopper would recognize.
+const GTIN_PREFIXED_INTERNAL_CODE = /^\d{8,}_[A-Z]/
+const isDisplayableAkaValue = (value: string) =>
+  !GTIN_PREFIXED_INTERNAL_CODE.test(value)
+
 const akaBrands = computed(() =>
-  toStringList(identity.value?.akaBrands).sort((a, b) =>
-    a.localeCompare(b, locale.value)
-  )
+  toStringList(identity.value?.akaBrands)
+    .filter(isDisplayableAkaValue)
+    .sort((a, b) => a.localeCompare(b, locale.value))
 )
 const akaModels = computed(() =>
-  toStringList(identity.value?.akaModels).sort((a, b) =>
-    a.localeCompare(b, locale.value)
-  )
+  toStringList(identity.value?.akaModels)
+    .filter(isDisplayableAkaValue)
+    .sort((a, b) => a.localeCompare(b, locale.value))
 )
 
 const formatIdentityDate = (timestamp?: number | null) => {
@@ -1492,6 +1497,8 @@ const baseGroups = computed<DetailGroupView[]>(() =>
     .filter((group): group is DetailGroupView => Boolean(group))
 )
 
+const hasDetailedAttributes = computed(() => baseGroups.value.length > 0)
+
 const filteredGroups = computed<DetailGroupView[]>(() => {
   const term = searchTerm.value.trim().toLowerCase()
   if (!term) {
@@ -1593,25 +1600,6 @@ const toggleDetailGroup = (id: string) => {
   gap: 2rem;
   overflow: hidden;
   max-width: 100%;
-}
-
-.product-attributes__header {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  align-items: center;
-  text-align: center;
-}
-
-.product-attributes__title {
-  font-size: clamp(1.6rem, 2.4vw, 2.2rem);
-  font-weight: 700;
-  color: rgb(var(--v-theme-text-neutral-strong));
-}
-
-.product-attributes__subtitle {
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
-  max-width: 140ch;
 }
 
 .product-attributes__block {

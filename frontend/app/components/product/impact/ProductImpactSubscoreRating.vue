@@ -10,7 +10,7 @@
         <v-icon
           v-for="index in length"
           :key="`track-${index}`"
-          icon="mdi-star"
+          :icon="mdiStar"
         />
       </div>
       <div
@@ -21,7 +21,7 @@
         <v-icon
           v-for="index in length"
           :key="`fill-${index}`"
-          icon="mdi-star"
+          :icon="mdiStar"
         />
       </div>
     </div>
@@ -35,6 +35,7 @@
 import { computed } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { mdiStar } from '@mdi/js'
 
 const props = defineProps({
   score: {

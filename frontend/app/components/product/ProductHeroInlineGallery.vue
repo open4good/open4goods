@@ -9,7 +9,7 @@
       <div class="product-inline-gallery__toolbar">
         <div class="product-inline-gallery__controls">
           <v-btn
-            icon="mdi-minus"
+            :icon="mdiMinus"
             variant="text"
             density="comfortable"
             :disabled="scale <= 1"
@@ -19,7 +19,7 @@
             {{ Math.round(scale * 100) }}%
           </span>
           <v-btn
-            icon="mdi-plus"
+            :icon="mdiPlus"
             variant="text"
             density="comfortable"
             :disabled="scale >= maxScale"
@@ -27,13 +27,13 @@
           />
           <v-divider vertical class="mx-2" />
           <v-btn
-            icon="mdi-rotate-right"
+            :icon="mdiRotateRight"
             variant="text"
             density="comfortable"
             @click="rotate"
           />
           <v-btn
-            icon="mdi-restore"
+            :icon="mdiRestore"
             variant="text"
             density="comfortable"
             :disabled="isReset"
@@ -43,13 +43,13 @@
 
         <div class="product-inline-gallery__actions">
           <v-btn
-            :icon="isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'"
+            :icon="isFullscreen ? mdiFullscreenExit : mdiFullscreen"
             variant="text"
             density="comfortable"
             @click="toggleFullscreen"
           />
           <v-btn
-            icon="mdi-close"
+            :icon="mdiClose"
             variant="text"
             density="comfortable"
             @click="$emit('close')"
@@ -97,14 +97,14 @@
         class="product-inline-gallery__nav product-inline-gallery__nav--prev"
         @click="prev"
       >
-        <v-icon icon="mdi-chevron-left" size="32" />
+        <v-icon :icon="mdiChevronLeft" size="32" />
       </button>
       <button
         v-if="hasMultipleItems"
         class="product-inline-gallery__nav product-inline-gallery__nav--next"
         @click="next"
       >
-        <v-icon icon="mdi-chevron-right" size="32" />
+        <v-icon :icon="mdiChevronRight" size="32" />
       </button>
 
       <!-- Thumbs Strip (Optional/Simplified) -->
@@ -126,6 +126,17 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useEventListener } from '@vueuse/core'
+import {
+  mdiMinus,
+  mdiPlus,
+  mdiRotateRight,
+  mdiRestore,
+  mdiClose,
+  mdiChevronLeft,
+  mdiChevronRight,
+  mdiFullscreen,
+  mdiFullscreenExit,
+} from '@mdi/js'
 
 interface GalleryItem {
   id: string

@@ -19,12 +19,20 @@ const serpTemplates = {
   description: {
     withImpact:
       "Comparez {productName} ({brandModel}) : score d'impact {score}/20, meilleurs prix, manuels et caractéristiques sur Nudger.",
+    withImpactNoBrand:
+      "Comparez {productName} : score d'impact {score}/20, meilleurs prix, manuels et caractéristiques sur Nudger.",
     withImpactVertical:
       "Comparez {productName} ({brandModel}) dans la catégorie {verticalTitle} : score d'impact {score}/20, meilleurs prix, manuels et caractéristiques sur Nudger.",
+    withImpactVerticalNoBrand:
+      "Comparez {productName} dans la catégorie {verticalTitle} : score d'impact {score}/20, meilleurs prix, manuels et caractéristiques sur Nudger.",
     withoutImpact:
       'Comparez {productName} ({brandModel}) : meilleurs prix, manuels et caractéristiques sur Nudger.',
+    withoutImpactNoBrand:
+      'Comparez {productName} : meilleurs prix, manuels et caractéristiques sur Nudger.',
     withoutImpactVertical:
       'Comparez {productName} ({brandModel}) dans la catégorie {verticalTitle} : meilleurs prix, manuels et caractéristiques sur Nudger.',
+    withoutImpactVerticalNoBrand:
+      'Comparez {productName} dans la catégorie {verticalTitle} : meilleurs prix, manuels et caractéristiques sur Nudger.',
   },
 }
 
@@ -113,5 +121,29 @@ describe('buildProductMeta', () => {
     expect(meta.title).toBe(
       'Uncategorized Product : Meilleurs prix et historique'
     )
+  })
+
+  it('drops the parenthesized brand/model when it duplicates the product name', () => {
+    const meta = buildProductMeta({
+      productName: 'MIDEA MMCS-12HRN8-QRD0',
+      brandModel: 'MIDEA MMCS-12HRN8-QRD0',
+      score: 3.4,
+      titleTemplates: serpTemplates.title,
+      descriptionTemplates: serpTemplates.description,
+    })
+
+    expect(meta.description).not.toContain('(MIDEA MMCS-12HRN8-QRD0)')
+  })
+
+  it('keeps the parenthesized brand/model when it differs from the product name', () => {
+    const meta = buildProductMeta({
+      productName: 'iPhone 16 Pro',
+      brandModel: 'Apple iPhone 16 Pro',
+      score: 16.4,
+      titleTemplates: serpTemplates.title,
+      descriptionTemplates: serpTemplates.description,
+    })
+
+    expect(meta.description).toContain('(Apple iPhone 16 Pro)')
   })
 })

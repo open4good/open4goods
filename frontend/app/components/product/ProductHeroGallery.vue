@@ -44,7 +44,7 @@
             class="product-gallery__stage-overlay"
           >
             <v-icon
-              icon="mdi-play-circle-outline"
+              :icon="mdiPlayCircleOutline"
               size="56"
               class="product-gallery__stage-icon"
             />
@@ -72,7 +72,7 @@
             @keydown.enter.prevent="playHeroVideo"
             @keydown.space.prevent="playHeroVideo"
           >
-            <v-icon icon="mdi-play-circle-outline" size="24" />
+            <v-icon :icon="mdiPlayCircleOutline" size="24" />
             <span>{{ $t('product.hero.videoBadge') }}</span>
           </button>
           <div
@@ -91,7 +91,7 @@
             @keydown.enter.prevent="openGalleryFromVideo(activeMediaIndex)"
             @keydown.space.prevent="openGalleryFromVideo(activeMediaIndex)"
           >
-            <v-icon icon="mdi-arrow-expand" size="18" />
+            <v-icon :icon="mdiArrowExpand" size="18" />
             <span>{{ galleryButtonLabel }}</span>
           </button>
         </div>
@@ -113,7 +113,7 @@
           :disabled="!canScrollThumbnailsLeft"
           @click="scrollThumbnails('left')"
         >
-          <v-icon icon="mdi-chevron-left" size="22" />
+          <v-icon :icon="mdiChevronLeft" size="22" />
         </button>
 
         <div
@@ -160,7 +160,7 @@
                   class="product-gallery__thumbnail-badge"
                   aria-hidden="true"
                 >
-                  <v-icon icon="mdi-video-outline" size="18" />
+                  <v-icon :icon="mdiVideoOutline" size="18" />
                 </span>
               </button>
             </li>
@@ -175,7 +175,7 @@
           :disabled="!canScrollThumbnailsRight"
           @click="scrollThumbnails('right')"
         >
-          <v-icon icon="mdi-chevron-right" size="22" />
+          <v-icon :icon="mdiChevronRight" size="22" />
         </button>
       </div>
     </div>
@@ -204,6 +204,13 @@ import {
   type PropType,
 } from 'vue'
 import { useI18n } from 'vue-i18n'
+import {
+  mdiPlayCircleOutline,
+  mdiArrowExpand,
+  mdiChevronLeft,
+  mdiVideoOutline,
+  mdiChevronRight,
+} from '@mdi/js'
 import type { ProductDto } from '~~/shared/api-client'
 import {
   useProductGallery,
@@ -864,6 +871,19 @@ defineExpose({
   .product-gallery__thumbnail-image {
     width: 48px;
     height: 48px;
+  }
+
+  /* Compact mobile fold gallery (owner-approved bold reorder): the
+   * carousel is now mid-page, not the first thing users see, so it drops
+   * the thumbnail row and caps at ~240px instead of competing for the
+   * fold with price/CTA content above it. */
+  .product-gallery__stage {
+    max-height: 240px;
+    margin-bottom: 0;
+  }
+
+  .product-gallery__thumbnails {
+    display: none;
   }
 }
 </style>

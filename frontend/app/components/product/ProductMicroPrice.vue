@@ -5,13 +5,12 @@
       v-if="bestOffer"
       :href="bestOffer.url || undefined"
       target="_blank"
-      rel="noopener noreferrer"
+      :rel="AFFILIATE_LINK_REL"
       class="product-micro-price__main-btn"
-      :color="condition === 'new' ? 'primary' : 'secondary'"
-      variant="elevated"
+      color="primary"
+      variant="flat"
       size="small"
       height="32"
-      elevation="0"
       @click="$emit('offer-click', condition)"
     >
       <template #prepend>
@@ -26,7 +25,7 @@
           />
           <v-icon
             v-else
-            :icon="condition === 'new' ? 'mdi-tag' : 'mdi-recycle'"
+            :icon="condition === 'new' ? mdiTag : mdiRecycle"
             size="14"
           />
         </div>
@@ -46,12 +45,12 @@
         <v-btn
           v-bind="activatorProps"
           class="product-micro-price__more-btn"
-          :color="condition === 'new' ? 'primary' : 'secondary'"
+          :color="condition === 'new' ? NEW_CONDITION_COLOR : OCCASION_CONDITION_COLOR"
           variant="tonal"
           size="small"
           height="32"
           width="24"
-          icon="mdi-chevron-down"
+          :icon="mdiChevronDown"
           density="comfortable"
         />
       </template>
@@ -61,7 +60,7 @@
           :key="offer.id"
           :href="offer.url || undefined"
           target="_blank"
-          rel="noopener noreferrer"
+          :rel="AFFILIATE_LINK_REL"
           class="product-micro-price__list-item"
           rounded="lg"
         >
@@ -75,7 +74,7 @@
                 height="16"
                 class="rounded-sm"
               />
-              <v-icon v-else icon="mdi-store" size="16" />
+              <v-icon v-else :icon="mdiStore" size="16" />
             </div>
           </template>
 
@@ -98,7 +97,14 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { mdiTag, mdiRecycle, mdiChevronDown, mdiStore } from '@mdi/js'
 import type { ProductDto } from '~~/shared/api-client'
+import {
+  resolveOfferHref,
+  AFFILIATE_LINK_REL,
+  NEW_CONDITION_COLOR,
+  OCCASION_CONDITION_COLOR,
+} from '~/utils/_product-pricing'
 // Generate deterministic ID from offer URL to avoid SSR hydration mismatches
 const deterministicId = (url?: string, fallback: string = 'offer') =>
   url ? `offer-${url.slice(-12).replace(/[^a-z0-9]/gi, '-')}` : fallback
@@ -144,7 +150,7 @@ const bestOffer = computed<MicroPriceOffer | null>(() => {
     label: raw.merchantName || 'Unknown',
     priceLabel: raw.priceLabel || 'N/A',
     favicon: raw.merchantFavicon,
-    url: raw.url,
+    url: resolveOfferHref(raw),
   }
 })
 
@@ -168,7 +174,7 @@ const alternatives = computed<MicroPriceOffer[]>(() => {
       label: o.merchantName || 'Unknown',
       priceLabel: o.priceLabel || 'N/A',
       favicon: o.merchantFavicon,
-      url: o.url,
+      url: resolveOfferHref(o),
     }))
 })
 

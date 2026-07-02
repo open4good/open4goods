@@ -4,6 +4,7 @@ import { defineComponent, h } from 'vue'
 import { createI18n } from 'vue-i18n'
 import type { CommercialEvent, ProductDto } from '~~/shared/api-client'
 import ProductPriceSection from './ProductPriceSection.vue'
+import { AFFILIATE_LINK_REL } from '~/utils/_product-pricing'
 
 vi.mock('vue-echarts', () => ({
   default: defineComponent({
@@ -345,6 +346,10 @@ describe('ProductPriceSection', () => {
     expect(links.length).toBeGreaterThanOrEqual(1)
     const hrefs = links.map(link => link.attributes('href'))
     expect(hrefs).toContain('/contrib/abc123')
+    links.forEach(link => {
+      expect(link.attributes('rel')).toBe(AFFILIATE_LINK_REL)
+      expect(link.attributes('target')).toBe('_blank')
+    })
 
     await wrapper.unmount()
   })

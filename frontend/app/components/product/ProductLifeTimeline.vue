@@ -4,14 +4,10 @@
     variant="flat"
   >
     <div class="product-life-timeline__header">
-      <div>
-        <p class="product-life-timeline__eyebrow">
-          {{ $t('product.attributes.timeline.title') }}
-        </p>
-        <p class="product-life-timeline__subtitle">
-          {{ $t('product.attributes.timeline.subtitle') }}
-        </p>
-      </div>
+      <ProductSectionHeader
+        :title="$t('product.attributes.timeline.title')"
+        :subtitle="$t('product.attributes.timeline.subtitle')"
+      />
       <v-icon
         :icon="mdiTimelineTextOutline"
         class="product-life-timeline__header-icon"
@@ -461,18 +457,6 @@ const hasFilteredFarFutureEndDate = computed(() => {
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-}
-
-.product-life-timeline__eyebrow {
-  font-weight: 700;
-  margin: 0;
-  color: rgb(var(--v-theme-text-neutral-strong));
-}
-
-.product-life-timeline__subtitle {
-  margin: 0.2rem 0 0;
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
-  max-width: 32ch;
 }
 
 .product-life-timeline__header-icon {

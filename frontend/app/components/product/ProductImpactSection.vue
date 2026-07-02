@@ -1,15 +1,9 @@
 <template>
-  <section :id="sectionId" class="product-impact">
-    <header class="product-impact__header">
-      <div class="product-impact__header-content">
-        <h2 class="product-impact__title">
-          {{ $t('product.impact.title') }}
-        </h2>
-        <p class="product-impact__subtitle">
-          {{ $t('product.impact.subtitle', subtitleParams) }}
-        </p>
-      </div>
-    </header>
+  <section class="product-impact">
+    <ProductSectionHeader
+      :title="$t('product.impact.title')"
+      :subtitle="$t('product.impact.subtitle', subtitleParams)"
+    />
 
     <div class="product-impact__primary">
       <ProductImpactEcoScoreCard
@@ -251,35 +245,8 @@ const hasEprelData = computed(() => !!productEprelData.value?.eprelDatas)
   gap: 2rem;
 }
 
-.product-impact__header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1.5rem;
-}
-
-.product-impact__header-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  max-width: 60ch;
-}
-
 .product-impact__header-actions {
   flex-shrink: 0;
-}
-
-.product-impact__title {
-  font-size: clamp(1.6rem, 3vw, 2.4rem);
-  font-weight: 700;
-  line-height: 1.1;
-}
-
-.product-impact__subtitle {
-  font-size: 1rem;
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
-  line-height: 1.5;
 }
 
 .product-impact__primary {
@@ -343,18 +310,6 @@ const hasEprelData = computed(() => !!productEprelData.value?.eprelDatas)
 }
 
 @media (max-width: 600px) {
-  .product-impact__header {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 1rem;
-  }
-
-  .product-impact__header-content {
-    align-items: center;
-    margin: 0 auto;
-  }
-
   .product-impact__toggle {
     width: 100%;
   }

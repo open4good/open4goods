@@ -13,7 +13,7 @@
     <meta itemprop="priceCurrency" :content="defaultCurrencyCode" />
 
     <div v-if="visiblePanels.length === 0" class="product-hero__pricing-empty">
-      <v-icon icon="mdi-basket-off-outline" size="32" />
+      <v-icon :icon="mdiBasketOffOutline" size="32" />
       <p class="product-hero__pricing-empty-title">
         {{ t('product.hero.noOffersUnified') }}
       </p>
@@ -35,11 +35,7 @@
         :value="panel.condition"
       >
         <v-icon
-          :icon="
-            panel.condition === 'new'
-              ? 'mdi-tag-outline'
-              : 'mdi-recycle-variant'
-          "
+          :icon="panel.condition === 'new' ? mdiTagOutline : mdiRecycleVariant"
           size="18"
           class="me-1"
         />
@@ -85,6 +81,7 @@
           :trend-tone-class="panel.trendToneClass"
           :trend-icon="panel.trendIcon"
           :view-offers-label="panel.viewOffersLabel"
+        :view-offers-href="panel.viewOffersHref"
           :hide-header="true"
           @merchant-click="handleMerchantClick"
           @trend-click="scrollToSelector('#price-history')"
@@ -116,6 +113,7 @@
         :trend-tone-class="panel.trendToneClass"
         :trend-icon="panel.trendIcon"
         :view-offers-label="panel.viewOffersLabel"
+        :view-offers-href="panel.viewOffersHref"
         @merchant-click="handleMerchantClick"
         @trend-click="scrollToSelector('#price-history')"
         @view-offers="handleViewOffers(panel)"
@@ -126,11 +124,12 @@
 
 <script setup lang="ts">
 import { computed, ref, watch, type PropType } from 'vue'
-import { useRouter } from '#imports'
 import { useI18n } from 'vue-i18n'
 import { useDisplay } from 'vuetify'
+import { mdiBasketOffOutline, mdiTagOutline, mdiRecycleVariant } from '@mdi/js'
 import { useAnalytics } from '~/composables/useAnalytics'
 import { useProductPriceTrend } from '~/composables/useProductPriceTrend'
+import { resolveOfferHref } from '~/utils/_product-pricing'
 import type { ProductDto } from '~~/shared/api-client'
 import ProductHeroPricingPanel from '~/components/product/ProductHeroPricingPanel.vue'
 
@@ -146,7 +145,6 @@ const props = defineProps({
 })
 
 const { n, t, locale } = useI18n()
-const router = useRouter()
 const display = useDisplay()
 const {
   trackProductRedirect,
@@ -267,7 +265,7 @@ const buildOffersList = (condition: OfferCondition): OfferOption[] => {
       offerName: offer.offerName ?? null,
       priceLabel,
       favicon: offer.favicon ?? null,
-      url: offer.url ?? null,
+      url: resolveOfferHref(offer) ?? null,
     }
   })
 }
@@ -296,32 +294,21 @@ const productCategorySlug = computed(() => {
   return fullSlug.split('/').filter(Boolean)[0] ?? null
 })
 
-const getAffiliationLink = (offer: AggregatedOffer | null) => {
-  if (!isSingleOffer.value) {
-    return null
-  }
-
-  const token =
-    offer?.affiliationToken ?? aggregatedBestOffer.value?.affiliationToken
-  return token ? `/contrib/${token}` : null
-}
-
 const createMerchant = (offer: AggregatedOffer | null) => {
   if (!offer?.datasourceName) {
     return null
   }
 
-  const affiliationLink = getAffiliationLink(offer)
-  const url = isSingleOffer.value
-    ? (affiliationLink ?? offer.url ?? null)
-    : (offer.url ?? null)
+  const affiliationLink = offer.affiliationToken
+    ? `/contrib/${offer.affiliationToken}`
+    : null
+  const url = affiliationLink ?? offer.url ?? null
 
   return {
     name: offer.datasourceName,
     url,
     favicon: offer.favicon ?? null,
-    isInternal: typeof url === 'string' && url.startsWith('/'),
-    clientOnly: isSingleOffer.value && Boolean(affiliationLink),
+    clientOnly: Boolean(affiliationLink),
   }
 }
 
@@ -419,7 +406,6 @@ type ConditionPanel = {
     name: string
     url: string | null
     favicon: string | null
-    isInternal: boolean
     clientOnly: boolean
   } | null
   offerName: string | null
@@ -431,20 +417,15 @@ type ConditionPanel = {
   trendToneClass: string
   trendIcon: string | null
   viewOffersLabel: string
+  viewOffersHref: string | null
 }
 
 const handleViewOffers = (panel: ConditionPanel) => {
-  if (isSingleOffer.value && panel.merchant?.url) {
+  if (panel.viewOffersHref && panel.merchant) {
     handleMerchantClick({
       name: panel.merchant.name,
-      url: panel.merchant.url,
+      url: panel.viewOffersHref,
     })
-
-    if (panel.merchant.isInternal) {
-      router.push(panel.merchant.url)
-    } else {
-      window.open(panel.merchant.url, '_blank', 'noopener,noreferrer')
-    }
   } else {
     scrollToSelector('#prix', 136)
   }
@@ -467,10 +448,13 @@ const conditionPanels = computed<ConditionPanel[]>(() => {
 
     const count = offersCountByCondition.value[condition]
     const offersList = offersListByCondition.value[condition]
+    const merchant = createMerchant(offer)
 
     let viewOffersLabel = ''
     if (count <= 1) {
-      viewOffersLabel = t('product.hero.viewSingleOffer')
+      viewOffersLabel = t('product.hero.viewSingleOffer', {
+        price: priceCurrency ? `${priceLabel} ${priceCurrency}` : priceLabel,
+      })
     } else if (condition === 'new') {
       viewOffersLabel = t('product.hero.viewOffersNew', count)
     } else {
@@ -488,7 +472,7 @@ const conditionPanels = computed<ConditionPanel[]>(() => {
       priceCurrency,
       hasOffer: typeof offer?.price === 'number',
       emptyStateLabel: t(`product.hero.noOffers.${condition}`),
-      merchant: createMerchant(offer),
+      merchant,
       offerName: offer?.offerName ?? null,
       offersList,
       offersListLabel: t('product.hero.alternativeOffers.label'),
@@ -501,6 +485,7 @@ const conditionPanels = computed<ConditionPanel[]>(() => {
       trendToneClass: `product-hero__price-trend--${trendTone}`,
       trendIcon,
       viewOffersLabel,
+      viewOffersHref: isSingleOffer.value ? (merchant?.url ?? null) : null,
     }
   })
 })

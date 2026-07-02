@@ -1,7 +1,7 @@
 <template>
   <article v-if="score" class="impact-ecoscore">
     <div v-if="aiImpactText" class="impact-ecoscore__ai-text mb-6">
-      <v-icon icon="mdi-robot" size="small" class="mr-2 text-primary" />
+      <v-icon :icon="mdiRobot" size="small" class="mr-2 text-primary" />
       <span class="text-body-2">{{ aiImpactText }}</span>
     </div>
 
@@ -27,6 +27,7 @@
             :min="scoreMin"
             :max="scoreMax"
             :show-methodology="false"
+            :show-min-max="false"
             size="lg"
             class="align-self-center w-100"
           />
@@ -54,7 +55,7 @@
         :aria-label="$t('product.impact.methodologyLinkAria')"
       >
         <span>{{ $t('product.impact.methodologyLink') }}</span>
-        <v-icon icon="mdi-arrow-top-right" size="18" />
+        <v-icon :icon="mdiArrowTopRight" size="18" />
       </NuxtLink>
     </div>
   </article>
@@ -63,6 +64,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { mdiRobot, mdiArrowTopRight } from '@mdi/js'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import ProductImpactDetailsTable from './ProductImpactDetailsTable.vue'
 import ProductImpactRadarChart from './ProductImpactRadarChart.vue'

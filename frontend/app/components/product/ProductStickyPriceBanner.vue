@@ -37,7 +37,7 @@
             class="product-sticky-banner__score-chip"
             :color="impactScoreColor"
             variant="tonal"
-            prepend-icon="mdi-leaf"
+            :prepend-icon="mdiLeaf"
           >
             {{ impactScore }}/20
           </v-chip>
@@ -68,6 +68,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { mdiLeaf } from '@mdi/js'
 import type { ProductDto } from '~~/shared/api-client'
 
 const { t } = useI18n()

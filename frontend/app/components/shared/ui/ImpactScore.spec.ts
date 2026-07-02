@@ -177,4 +177,22 @@ describe('ImpactScore', () => {
 
     expect(wrapper.text()).toContain('Better than 90%')
   })
+
+  it('hides the Min/Max scale while keeping the percentile when showMinMax is false', () => {
+    const wrapper = mount(ImpactScore, {
+      props: {
+        score: 15,
+        min: 0,
+        max: 20,
+        ranking: 10,
+        count: 100,
+        showMinMax: false,
+      },
+      global: globalOptions,
+    })
+
+    expect(wrapper.text()).not.toContain('Min :')
+    expect(wrapper.text()).not.toContain('Max :')
+    expect(wrapper.text()).toContain('Better than 90%')
+  })
 })

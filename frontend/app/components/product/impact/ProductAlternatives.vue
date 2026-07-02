@@ -1,13 +1,9 @@
 <template>
   <article class="product-alternatives">
-    <header class="product-alternatives__header">
-      <h3 class="product-alternatives__title">
-        {{ t('product.impact.alternatives.title') }}
-      </h3>
-      <p class="product-alternatives__subtitle">
-        {{ t('product.impact.alternatives.subtitle', subtitleParams) }}
-      </p>
-    </header>
+    <ProductSectionHeader
+      :title="t('product.impact.alternatives.title')"
+      :subtitle="t('product.impact.alternatives.subtitle', subtitleParams)"
+    />
 
     <div v-if="filterDefinitions.length" class="product-alternatives__filters">
       <div class="product-alternatives__chips">
@@ -101,6 +97,7 @@ import { ProductsIncludeEnum } from '~~/shared/api-client'
 import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
 import { resolveAttributeRawValueByKey } from '~/utils/_product-attributes'
 import { ECOSCORE_RELATIVE_FIELD } from '~/constants/scores'
+import { formatPrice } from '~/utils/_product-pricing'
 
 const props = defineProps({
   product: {
@@ -148,22 +145,6 @@ const emitAlternativesState = (hydrated: boolean) => {
 const normalizedPopularAttributes = computed(
   () => props.popularAttributes ?? []
 )
-
-const formatCurrency = (value: number, currency?: string | null) => {
-  if (!Number.isFinite(value)) {
-    return null
-  }
-
-  if (!currency) {
-    return n(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-  }
-
-  try {
-    return n(value, { style: 'currency', currency })
-  } catch {
-    return `${n(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`.trim()
-  }
-}
 
 const resolveScoreNumericValue = (
   score:
@@ -385,9 +366,7 @@ const priceFilterDefinition = computed<AlternativeFilterDefinition | null>(
       label: t('product.impact.alternatives.filters.price'),
       tooltip:
         t('product.impact.alternatives.tooltips.price', {
-          value:
-            formatCurrency(value, priceCurrency.value) ??
-            n(value, { maximumFractionDigits: 2 }),
+          value: formatPrice(value, n, priceCurrency.value ?? undefined),
         }) ?? '',
       defaultSelected: true,
       disabled: false,
@@ -726,25 +705,6 @@ const retryFetch = () => {
     rgba(var(--v-theme-surface-primary-080), 0.9)
   );
   box-shadow: inset 0 0 0 1px rgba(var(--v-theme-border-primary-strong), 0.08);
-}
-
-.product-alternatives__header {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.product-alternatives__title {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: rgb(var(--v-theme-text-neutral-strong));
-}
-
-.product-alternatives__subtitle {
-  margin: 0;
-  font-size: 0.95rem;
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
 }
 
 .product-alternatives__filters {

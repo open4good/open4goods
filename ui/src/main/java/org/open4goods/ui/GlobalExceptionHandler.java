@@ -14,10 +14,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Component;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -28,7 +27,8 @@ import jakarta.servlet.http.HttpServletRequest;
  * - Differentiates between client (4xx) and server (5xx) errors.<br>
  * - Provides structured JSON error responses for all requests.<br>
  * - Tracks error occurrences per endpoint for monitoring.<br>
- * - Implements a custom health check indicating server error health status.<br>
+ * - Exposes request error counters as health details without changing
+ * application availability status.<br>
  * </p>
  */
 @Component
@@ -76,12 +76,10 @@ public class GlobalExceptionHandler implements HealthIndicator {
      * @return The corresponding {@link HttpStatus}.
      */
     private HttpStatus determineHttpStatus(Exception ex) {
-        if (ex instanceof ResponseStatusException responseStatusException) {
-            return HttpStatus.valueOf(responseStatusException.getStatusCode().value());
-        } else if (ex instanceof NoResourceFoundException) {
-            return HttpStatus.NOT_FOUND; // 404
-        } else if (ex instanceof AuthorizationDeniedException) {
+        if (ex instanceof AuthorizationDeniedException) {
             return HttpStatus.FORBIDDEN; // 403
+        } else if (ex instanceof ErrorResponse errorResponse) {
+            return HttpStatus.valueOf(errorResponse.getStatusCode().value());
         }
         return HttpStatus.INTERNAL_SERVER_ERROR; // Default 500
     }
@@ -130,19 +128,18 @@ public class GlobalExceptionHandler implements HealthIndicator {
     }
 
     /**
-     * Custom health check for monitoring HTTP errors.
-     * Marks the application as "DOWN" if any server errors (500) have been recorded.
+     * Custom health check details for monitoring handled HTTP errors.
+     * Historical request errors are diagnostic data and do not determine whether
+     * the UI process is available.
      *
-     * @return The health status including error details.
+     * @return The up health status including error details.
      */
     @Override
     public Health health() {
         int total500Errors = serverErrorCount.get();
         int total400Errors = clientErrorCount.get();
 
-        Health.Builder healthBuilder = (total500Errors > 0) ? Health.down() : Health.up();
-
-        return healthBuilder
+        return Health.up()
                 .withDetail("total_500_errors", total500Errors)
                 .withDetail("total_400_errors", total400Errors)
                 .withDetail("server_errors_by_endpoint", Map.copyOf(serverErrorEndpoints))
@@ -150,4 +147,3 @@ public class GlobalExceptionHandler implements HealthIndicator {
                 .build();
     }
 }
-

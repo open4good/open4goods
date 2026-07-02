@@ -1,9 +1,9 @@
 <template>
-  <section :id="sectionId" class="product-docs">
-    <header class="product-docs__header">
-      <h2 class="product-docs__title">{{ $t('product.docs.title') }}</h2>
-      <p class="product-docs__subtitle">{{ $t('product.docs.subtitle') }}</p>
-    </header>
+  <section class="product-docs">
+    <ProductSectionHeader
+      :title="$t('product.docs.title')"
+      :subtitle="$t('product.docs.subtitle')"
+    />
 
     <div v-if="hasPdfs" class="product-docs__layout">
       <nav
@@ -638,21 +638,6 @@ const onPdfError = () => {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-}
-
-.product-docs__header {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.product-docs__title {
-  font-size: clamp(1.6rem, 2.4vw, 2.2rem);
-  font-weight: 700;
-}
-
-.product-docs__subtitle {
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
 }
 
 .product-docs__layout {

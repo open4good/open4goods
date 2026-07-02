@@ -2688,7 +2688,7 @@
       "viewOffersCount": "View the {count} offers",
       "viewOffersNew": "One new offer | View the {count} new offers",
       "viewOffersOccasion": "View the second-hand offer | View the {count} second-hand offers",
-      "viewSingleOffer": "View the offer"
+      "viewSingleOffer": "View the offer - {price}"
     },
     "eprel": {
       "detailsTitle": "European Registry for Energy Labelling",
@@ -3040,13 +3040,15 @@
       "serp": {
         "title": {
           "withImpact": {
-            "full": "{productName}: ImpactScore {score}/20 | Best prices, manuals and specs for {brandModel}",
-            "compact": "{productName}: ImpactScore {score}/20 | Best prices for {brandModel}",
+            "full": "{productName}: best price, specs and reviews | ImpactScore {score}/20",
+            "fullVertical": "{verticalTitle} {productName}: best price | ImpactScore {score}/20",
+            "compact": "{productName}: best price | ImpactScore {score}/20",
             "minimal": "{productName}: ImpactScore {score}/20"
           },
           "withoutImpact": {
-            "full": "{productName} | Best prices, manuals, and features for {brandModel}",
-            "compact": "{productName} | Best prices for {brandModel}",
+            "full": "{productName}: best price, specs and reviews",
+            "fullVertical": "{verticalTitle} {productName}: best price",
+            "compact": "{productName}: best price",
             "minimal": "{productName}"
           },
           "noCategory": {
@@ -3057,9 +3059,13 @@
         },
         "description": {
           "withImpact": "Compare {productName} ({brandModel}) with impact score {score}/20, best prices, manuals and key specs on Nudger.",
+          "withImpactNoBrand": "Compare {productName} with impact score {score}/20, best prices, manuals and key specs on Nudger.",
           "withImpactVertical": "Compare {productName} ({brandModel}) in {verticalTitle} with impact score {score}/20, best prices, manuals and key specs on Nudger.",
+          "withImpactVerticalNoBrand": "Compare {productName} in {verticalTitle} with impact score {score}/20, best prices, manuals and key specs on Nudger.",
           "withoutImpact": "Compare {productName} ({brandModel}) for best prices, manuals and key specs on Nudger.",
-          "withoutImpactVertical": "Compare {productName} ({brandModel}) in {verticalTitle} for best prices, manuals and key specs on Nudger."
+          "withoutImpactNoBrand": "Compare {productName} for best prices, manuals and key specs on Nudger.",
+          "withoutImpactVertical": "Compare {productName} ({brandModel}) in {verticalTitle} for best prices, manuals and key specs on Nudger.",
+          "withoutImpactVerticalNoBrand": "Compare {productName} in {verticalTitle} for best prices, manuals and key specs on Nudger."
         }
       },
       "social": {

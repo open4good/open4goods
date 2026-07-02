@@ -88,6 +88,7 @@
                 :impact-score-max="impactScoreMax"
                 :popular-attributes="heroPopularAttributes"
                 :has-category="!!categoryDetail"
+                :vertical-title="verticalTitle"
                 :hide-pricing-panel="hideHeroPricingPanel"
               />
             </div>
@@ -252,10 +253,7 @@ import { AggTypeEnum } from '~~/shared/api-client/models/Agg'
 import { normalizeTimestamp } from '~/utils/date-parsing'
 import type { ProductRouteMatch } from '~~/shared/utils/_product-route'
 import { isBackendNotFoundError } from '~~/shared/utils/_product-route'
-import {
-  PRIMARY_LOCALE_HOSTS,
-  type NuxtLocale,
-} from '~~/shared/utils/domain-language'
+import { buildProductHreflangLinks } from '~~/shared/utils/domain-language'
 import { buildProductJsonLdGraph } from '~/utils/product-jsonld'
 import { buildProductMeta } from '~/utils/seo/product-meta'
 
@@ -960,29 +958,9 @@ const canonicalPath = computed(() => {
 const canonicalUrl = computed(() =>
   new URL(canonicalPath.value, requestURL.origin).toString()
 )
-const productHreflangLocales = ['fr-FR', 'en-US'] satisfies NuxtLocale[]
-const alternateProductLinks = computed(() => {
-  const protocol = requestURL.protocol || 'https:'
-
-  return [
-    ...productHreflangLocales.map(availableLocale => ({
-      rel: 'alternate' as const,
-      hreflang: availableLocale,
-      href: new URL(
-        canonicalPath.value,
-        `${protocol}//${PRIMARY_LOCALE_HOSTS[availableLocale]}`
-      ).toString(),
-    })),
-    {
-      rel: 'alternate' as const,
-      hreflang: 'x-default',
-      href: new URL(
-        canonicalPath.value,
-        `${protocol}//${PRIMARY_LOCALE_HOSTS['fr-FR']}`
-      ).toString(),
-    },
-  ]
-})
+const alternateProductLinks = computed(() =>
+  buildProductHreflangLinks(canonicalPath.value, requestURL.protocol)
+)
 const productRobotsContent = computed(() =>
   categoryDetail.value?.enabled === false ? 'noindex, nofollow' : undefined
 )
@@ -2147,10 +2125,26 @@ const jsonLdBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
   }
 
   // Sanitize links (remove hashes/queries)
-  return crumbs.map(crumb => ({
+  const sanitized = crumbs.map(crumb => ({
     ...crumb,
     link: crumb.link?.split('#')[0]?.split('?')[0],
   }))
+
+  // Once hash-based filters (e.g. the brand crumb's brand-filtered category
+  // URL) are stripped, some entries can end up pointing at the same URL as an
+  // earlier crumb (e.g. category). Schema.org BreadcrumbList items must not
+  // share an `item` URL, so drop later duplicates.
+  const seenLinks = new Set<string>()
+  return sanitized.filter(crumb => {
+    if (!crumb.link) {
+      return true
+    }
+    if (seenLinks.has(crumb.link)) {
+      return false
+    }
+    seenLinks.add(crumb.link)
+    return true
+  })
 })
 
 const jsonLdImageUrls = computed(() => {
@@ -2224,6 +2218,14 @@ const metaVariables = computed(() => ({
   verticalTitle: normalizedVerticalTitle.value,
 }))
 
+// Titles use the properly-cased vertical name (e.g. "Climatiseurs MIDEA…"),
+// while descriptions read better with the lowercase mid-sentence form
+// ("… dans la catégorie climatiseurs").
+const titleMetaVariables = computed(() => ({
+  ...metaVariables.value,
+  verticalTitle: verticalTitle.value,
+}))
+
 const seoMetaBase = computed(() =>
   buildProductMeta({
     productName: productMetaTitle.value,
@@ -2234,20 +2236,31 @@ const seoMetaBase = computed(() =>
     maxDescriptionLength: 160,
     titleTemplates: {
       withImpactFull: String(
-        t('product.meta.serp.title.withImpact.full', metaVariables.value)
+        t(
+          categoryDetail.value
+            ? 'product.meta.serp.title.withImpact.fullVertical'
+            : 'product.meta.serp.title.withImpact.full',
+          titleMetaVariables.value
+        )
       ),
       withImpactCompact: String(
-        t('product.meta.serp.title.withImpact.compact', metaVariables.value)
+        t(
+          'product.meta.serp.title.withImpact.compact',
+          titleMetaVariables.value
+        )
       ),
       withImpactMinimal: String(
-        t('product.meta.serp.title.withImpact.minimal', metaVariables.value)
+        t(
+          'product.meta.serp.title.withImpact.minimal',
+          titleMetaVariables.value
+        )
       ),
       withoutImpactFull: String(
         t(
           !categoryDetail.value
             ? 'product.meta.serp.title.noCategory.full'
-            : 'product.meta.serp.title.withoutImpact.full',
-          metaVariables.value
+            : 'product.meta.serp.title.withoutImpact.fullVertical',
+          titleMetaVariables.value
         )
       ),
       withoutImpactCompact: String(
@@ -2255,7 +2268,7 @@ const seoMetaBase = computed(() =>
           !categoryDetail.value
             ? 'product.meta.serp.title.noCategory.compact'
             : 'product.meta.serp.title.withoutImpact.compact',
-          metaVariables.value
+          titleMetaVariables.value
         )
       ),
       withoutImpactMinimal: String(
@@ -2263,7 +2276,7 @@ const seoMetaBase = computed(() =>
           !categoryDetail.value
             ? 'product.meta.serp.title.noCategory.minimal'
             : 'product.meta.serp.title.withoutImpact.minimal',
-          metaVariables.value
+          titleMetaVariables.value
         )
       ),
     },
@@ -2271,18 +2284,42 @@ const seoMetaBase = computed(() =>
       withImpact: String(
         t('product.meta.serp.description.withImpact', metaVariables.value)
       ),
+      withImpactNoBrand: String(
+        t(
+          'product.meta.serp.description.withImpactNoBrand',
+          metaVariables.value
+        )
+      ),
       withImpactVertical: String(
         t(
           'product.meta.serp.description.withImpactVertical',
           metaVariables.value
         )
       ),
+      withImpactVerticalNoBrand: String(
+        t(
+          'product.meta.serp.description.withImpactVerticalNoBrand',
+          metaVariables.value
+        )
+      ),
       withoutImpact: String(
         t('product.meta.serp.description.withoutImpact', metaVariables.value)
+      ),
+      withoutImpactNoBrand: String(
+        t(
+          'product.meta.serp.description.withoutImpactNoBrand',
+          metaVariables.value
+        )
       ),
       withoutImpactVertical: String(
         t(
           'product.meta.serp.description.withoutImpactVertical',
+          metaVariables.value
+        )
+      ),
+      withoutImpactVerticalNoBrand: String(
+        t(
+          'product.meta.serp.description.withoutImpactVerticalNoBrand',
           metaVariables.value
         )
       ),
@@ -2337,7 +2374,18 @@ const socialMetaBase = computed(() =>
       withImpact: String(
         t('product.meta.social.description.withImpact', metaVariables.value)
       ),
+      // Social copy never mentions {brandModel}, so the "NoBrand" variants
+      // are identical to their base counterparts.
+      withImpactNoBrand: String(
+        t('product.meta.social.description.withImpact', metaVariables.value)
+      ),
       withImpactVertical: String(
+        t(
+          'product.meta.social.description.withImpactVertical',
+          metaVariables.value
+        )
+      ),
+      withImpactVerticalNoBrand: String(
         t(
           'product.meta.social.description.withImpactVertical',
           metaVariables.value
@@ -2346,7 +2394,16 @@ const socialMetaBase = computed(() =>
       withoutImpact: String(
         t('product.meta.social.description.withoutImpact', metaVariables.value)
       ),
+      withoutImpactNoBrand: String(
+        t('product.meta.social.description.withoutImpact', metaVariables.value)
+      ),
       withoutImpactVertical: String(
+        t(
+          'product.meta.social.description.withoutImpactVertical',
+          metaVariables.value
+        )
+      ),
+      withoutImpactVerticalNoBrand: String(
         t(
           'product.meta.social.description.withoutImpactVertical',
           metaVariables.value

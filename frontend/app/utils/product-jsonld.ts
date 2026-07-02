@@ -104,6 +104,8 @@ export interface ProductJsonLdInput {
           datasourceName?: string | null
           shippingCost?: number | null
           shippingTimeDays?: number | null
+          quantityInStock?: number | null
+          timeStamp?: number | null
         }>
       > | null
     } | null
@@ -422,12 +424,12 @@ export const buildOfferList = (
       datasourceName?: string | null
       shippingCost?: number | null
       shippingTimeDays?: number | null
+      quantityInStock?: number | null
+      timeStamp?: number | null
     }>
   >
 ): Array<Record<string, JsonLdValue>> => {
-  const validUntilDate = new Date()
-  validUntilDate.setDate(validUntilDate.getDate() + 10)
-  const priceValidUntil = validUntilDate.toISOString().split('T')[0]
+  const DEFAULT_VALID_DAYS = 10
 
   const offers = Object.values(offersByCondition)
     .flat()
@@ -437,6 +439,25 @@ export const buildOfferList = (
     .map(offer => {
       const url = normalizeString(offer.url)
       const currency = normalizeString(offer.currency)
+
+      // The DTO only exposes stock as a quantity, not a boolean/enum: derive
+      // availability from it when present, otherwise assume InStock (offers
+      // without stock data are still live/purchasable on the merchant site).
+      const availability =
+        typeof offer.quantityInStock === 'number'
+          ? offer.quantityInStock > 0
+            ? 'https://schema.org/InStock'
+            : 'https://schema.org/OutOfStock'
+          : 'https://schema.org/InStock'
+
+      const priceValidUntil = (() => {
+        const validFrom =
+          typeof offer.timeStamp === 'number' && offer.timeStamp > 0
+            ? new Date(offer.timeStamp)
+            : new Date()
+        validFrom.setDate(validFrom.getDate() + DEFAULT_VALID_DAYS)
+        return validFrom.toISOString().split('T')[0]
+      })()
 
       const shippingDetails =
         typeof offer.shippingCost === 'number' && currency
@@ -477,7 +498,7 @@ export const buildOfferList = (
         price: offer.price,
         priceCurrency: currency,
         priceValidUntil,
-        availability: 'https://schema.org/InStock',
+        availability,
         itemCondition: resolveOfferItemCondition(offer.condition),
         seller: {
           '@type': 'Organization',
@@ -716,19 +737,37 @@ export const buildProductJsonLdGraph = (
     },
   }
 
+  // Schema.org BreadcrumbList items must not share an `item` URL (e.g. a
+  // brand crumb whose hash-filtered link collapses to the same page as the
+  // category crumb once resolved) — dedupe before assigning positions.
+  const breadcrumbSeenUrls = new Set<string>()
+  const breadcrumbItems = input.breadcrumbs
+    .filter(crumb => crumb.link && isNonEmptyString(crumb.title))
+    .map(crumb => ({
+      name: crumb.title,
+      item: crumb.link ? toAbsoluteUrl(input.site.url, crumb.link) : undefined,
+    }))
+    .filter(entry => {
+      if (!entry.item) {
+        return true
+      }
+      if (breadcrumbSeenUrls.has(entry.item)) {
+        return false
+      }
+      breadcrumbSeenUrls.add(entry.item)
+      return true
+    })
+    .map((entry, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: entry.name,
+      item: entry.item,
+    }))
+
   const breadcrumbEntry = {
     '@type': 'BreadcrumbList',
     '@id': breadcrumbId,
-    itemListElement: input.breadcrumbs
-      .filter(crumb => crumb.link && isNonEmptyString(crumb.title))
-      .map((crumb, index) => ({
-        '@type': 'ListItem',
-        position: index + 1,
-        name: crumb.title,
-        item: crumb.link
-          ? toAbsoluteUrl(input.site.url, crumb.link)
-          : undefined,
-      })),
+    itemListElement: breadcrumbItems,
   }
 
   const brandName = normalizeString(product.identity?.brand)
@@ -757,6 +796,26 @@ export const buildProductJsonLdGraph = (
   )
 
   const countryName = normalizeString(product.base?.gtinInfo?.countryName)
+
+  const reviewEntry =
+    typeof input.impactScore === 'number'
+      ? {
+          '@type': 'Review',
+          author: {
+            '@type': 'Organization',
+            name: input.site.name,
+            url: input.site.url,
+          },
+          reviewRating: {
+            '@type': 'Rating',
+            ratingValue: Number((input.impactScore / 4).toFixed(1)),
+            bestRating: 5,
+            worstRating: 0,
+          },
+          name: labels.impactScore,
+          reviewBody: normalizeString(input.punchline),
+        }
+      : undefined
 
   const productEntry = {
     '@type': 'Product',
@@ -823,6 +882,7 @@ export const buildProductJsonLdGraph = (
         }
       : undefined,
     hasEnergyConsumptionDetails: energyDetails,
+    review: reviewEntry,
     offers:
       offers.length > 0
         ? {

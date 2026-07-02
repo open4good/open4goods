@@ -3,15 +3,14 @@ package org.open4goods.api.services.backup;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.util.concurrent.Callable;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.IOUtils;
@@ -23,28 +22,29 @@ import org.slf4j.LoggerFactory;
 /**
  * This thread is in charge of serialisation and compression of products in a given file, polling from a BlockingQueue
  */
-public class ProductBackupThread implements Runnable {
-
-	// The minimum size a TMP file should have before being moved
-    private static final int MINIMUM_TMP_FILE_SIZE = 1024 * 1024 * 100;
+public class ProductBackupThread implements Callable<ProductBackupThread.ProductBackupFile> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ProductBackupThread.class);
 
-    private final File outputFolder;
     private final LinkedBlockingQueue<Product> queue;
     private final SerialisationService serialisationService;
     private final int fileNumber;
+    private final AtomicBoolean producerDone;
+    private final AtomicReference<Throwable> failure;
     
     private BufferedWriter writer;
     private File tmpFile;
+    private long writtenProducts;
 
-    public ProductBackupThread(File outputFolder, LinkedBlockingQueue<Product> queue, SerialisationService serialisationService, int fileNumber) throws Exception {
-        this.outputFolder = outputFolder;
+    public ProductBackupThread(LinkedBlockingQueue<Product> queue, SerialisationService serialisationService, int fileNumber,
+            AtomicBoolean producerDone, AtomicReference<Throwable> failure) throws Exception {
         this.queue = queue;
         this.serialisationService = serialisationService;
         this.fileNumber = fileNumber;
+        this.producerDone = producerDone;
+        this.failure = failure;
 
-        logger.info("Starting product backuping thread {}", fileNumber);
+        logger.info("Starting product backup thread {}", fileNumber);
         try {
 
             // Create temporary file for backup
@@ -62,65 +62,73 @@ public class ProductBackupThread implements Runnable {
     }
 
     @Override
-    public void run() {
-				// Data writing
-				processQueue();
-				// File closing, and on 
-				finalizeBackup();
+    public ProductBackupFile call() {
+        try {
+            processQueue();
+            return finalizeBackup();
+        } catch (RuntimeException e) {
+            failure.compareAndSet(null, e);
+            if (tmpFile != null) {
+                tmpFile.delete();
+            }
+            throw e;
+        }
     }
 
     /**
-     * Readinf from the queue, serialize and compress into 
-     * the target file, until no elements availlable
+     * Reads from the queue, serializes and compresses into a temporary file until the producer is done.
      */
     private void processQueue() {
         logger.info("Starting product consuming for thread {}", fileNumber);
-        while (true) {
+        while (failure.get() == null) {
             try {
-            	// We have big batches
-                Product product = queue.poll(5, TimeUnit.MINUTES);
+                Product product = queue.poll(1, TimeUnit.SECONDS);
                 
                 if (product == null) {
-                	logger.info("Handling done for this thread");
-                	break;
-                } else {
-                    try {
-                    	String json = serialisationService.toJson(product);
-						writer.write(json);
-						writer.newLine(); // Ensure each JSON object is on a new line
-					} catch (Exception e) {
-						   logger.error("Serialiation exception", e);
-					}
+                    if (producerDone.get() && queue.isEmpty()) {
+                        logger.info("Handling done for product backup thread {}", fileNumber);
+                        break;
+                    }
+                    continue;
                 }
+
+                String json = serialisationService.toJson(product);
+                writer.write(json);
+                writer.newLine();
+                writtenProducts++;
             } catch (InterruptedException e) {
                 logger.warn("Backup thread interrupted", e);
-                Thread.currentThread().interrupt(); // Restore interrupt status
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("Product backup thread interrupted", e);
+            } catch (Exception e) {
+                logger.error("Serialization exception", e);
+                throw new IllegalStateException("Product backup serialization failed", e);
             } 
         }
     }
 
     /**
-     * Resources releasing, and moving file to final destination
+     * Releases resources and returns the completed temporary file.
      */
-    private void finalizeBackup()  {
+    private ProductBackupFile finalizeBackup()  {
         IOUtils.closeQuietly(writer);
 
         if (!tmpFile.exists()) {
-            logger.error("Backup file does not exist: " + tmpFile.getAbsolutePath());
-        } else if (tmpFile.length() < MINIMUM_TMP_FILE_SIZE) {
-            logger.error("Backup file size is too low");
-            tmpFile.delete();
-        }  else {
-            try {
-            	Path dest = Path.of(outputFolder.toPath() +"/products-backup-"+fileNumber+".gz");
-                Files.move(tmpFile.toPath(), dest, StandardCopyOption.REPLACE_EXISTING);
-                logger.info("Backup file successfully created: " + outputFolder.getAbsolutePath());
-            } catch (IOException e) {
-                logger.error("Failed to move backup file to final destination", e);
-                throw new UncheckedIOException(e);
-            }
+            throw new IllegalStateException("Backup temporary file does not exist: " + tmpFile.getAbsolutePath());
         }
+
+        logger.info("Backup temporary file successfully created: {}", tmpFile.getAbsolutePath());
+        return new ProductBackupFile(fileNumber, tmpFile.toPath(), writtenProducts);
     }
 
+    /**
+     * Temporary backup file produced by a worker.
+     *
+     * @param fileNumber the final backup file number
+     * @param path the temporary file path
+     * @param productCount number of products written by this worker
+     */
+    public record ProductBackupFile(int fileNumber, Path path, long productCount) {
+    }
 
 }

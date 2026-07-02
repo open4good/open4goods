@@ -13,17 +13,23 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -31,6 +37,7 @@ import java.util.zip.GZIPOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.open4goods.api.config.yml.BackupConfig;
 import org.open4goods.api.services.AggregationFacadeService;
+import org.open4goods.api.services.backup.ProductBackupThread.ProductBackupFile;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.serialisation.service.SerialisationService;
@@ -41,6 +48,8 @@ import org.springframework.boot.health.contributor.Health;
 import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.boot.health.contributor.Status;
 import org.springframework.scheduling.annotation.Scheduled;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.micrometer.core.annotation.Timed;
 
@@ -56,6 +65,11 @@ public class BackupService implements HealthIndicator {
 
 
 	protected static final Logger logger = LoggerFactory.getLogger(BackupService.class);
+
+	private static final String PRODUCT_BACKUP_FILE_PREFIX = "products-backup-";
+	private static final String PRODUCT_BACKUP_FILE_SUFFIX = ".gz";
+	private static final String PRODUCT_BACKUP_MANIFEST = "products-backup-manifest.json";
+	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
 
 
@@ -100,75 +114,145 @@ public class BackupService implements HealthIndicator {
 	// TODO : Schedule from conf
 	@Scheduled(initialDelay = 1000 * 3600 * 6, fixedDelay = 1000 * 3600 * 24 * 7)
 	@Timed(value = "backup.products", description = "Backup of all products", extraTags = { "service" })
-	   public void backupProducts() {
-        logger.info("Products data backup - start");
+	public void backupProducts() {
+		logger.info("Products data backup - start");
 
-        // Checking not already running
-        if (productExportRunning.get()) {
-            logger.warn("Product export is already running. Skipped");
-            return;
-        } else {
-            productExportRunning.set(true);
-        }
+		if (!productExportRunning.compareAndSet(false, true)) {
+			logger.warn("Product export is already running. Skipped");
+			return;
+		}
 
-        // The bloking queue, used to share the items to be backuped with threads
-        LinkedBlockingQueue<Product> blockingQueue = new LinkedBlockingQueue<Product>(1000);
-        // Reset the counter item flags
-        expordedProductsCounter.set(0L);
+		List<ProductBackupFile> tempFiles = new ArrayList<>();
+		ExecutorService executorService = null;
+		AtomicBoolean producerDone = new AtomicBoolean(false);
+		AtomicReference<Throwable> workerFailure = new AtomicReference<>();
 
-        try {
-	        ExecutorService executorService = Executors.newFixedThreadPool(backupConfig.getProductsExportThreads());
+		try {
+			int exportThreads = Math.max(1, backupConfig.getProductsExportThreads());
+			int pageSize = Math.max(1, backupConfig.getProductExportPageSize());
+			LinkedBlockingQueue<Product> blockingQueue = new LinkedBlockingQueue<>(Math.max(1000, pageSize));
+			expordedProductsCounter.set(0L);
 
-	        // Starting files writing threads
-	        File backupFolder = new File(backupConfig.getDataBackupFolder());
+			File backupFolder = ensureProductBackupFolder();
+			executorService = Executors.newFixedThreadPool(exportThreads);
+			List<Future<ProductBackupFile>> futures = new ArrayList<>();
+			for (int i = 0; i < exportThreads; i++) {
+				futures.add(executorService.submit(
+						new ProductBackupThread(blockingQueue, serialisationService, i, producerDone, workerFailure)));
+			}
 
-	        if (backupFolder != null && backupFolder.exists() && !backupFolder.isDirectory()) {
-	        	throw new Exception("is a file");
-	        } else  if (backupFolder != null && !backupFolder.exists()) {
-	            if (!backupFolder.mkdirs()) {
-	                throw new IOException("Failed to create parent directories: " + backupFolder.getAbsolutePath());
-	            }
-	        }
+			expectedBackupedProducts.set(productRepo.countMainIndex());
 
-	        // Creating the folders if needed
-	        backupFolder.mkdirs();
+			try (Stream<Product> stream = productRepo.exportAll(pageSize)) {
+				stream.forEach(product -> queueProductForBackup(blockingQueue, workerFailure, product));
+			} finally {
+				producerDone.set(true);
+			}
 
-	        // Starting the files writing threads
-	        for (int i = 0; i < backupConfig.getProductsExportThreads(); i++) {
-	        	executorService.submit(new ProductBackupThread(backupFolder, blockingQueue, serialisationService, i));
-	        }
+			executorService.shutdown();
+			if (!executorService.awaitTermination(1, TimeUnit.HOURS)) {
+				executorService.shutdownNow();
+				throw new IllegalStateException("Timed out waiting for product backup workers");
+			}
 
+			for (Future<ProductBackupFile> future : futures) {
+				tempFiles.add(future.get());
+			}
 
-	        // Setting the expected number of items (min, new items can be indexed during backup)
-	        expectedBackupedProducts.set(productRepo.countMainIndex());
+			if (workerFailure.get() != null) {
+				throw new IllegalStateException("Product backup worker failed", workerFailure.get());
+			}
 
-	        // TODO(p2,feature) : Export verticalis in separate files
-
-	        // Exporting all datas to the blocking queue
-	        productRepo.exportAll()
-	        .forEach(e -> {
-	        	try {
-	        		// Incrementing the counter
-	        		expordedProductsCounter.incrementAndGet();
-
-					blockingQueue.put(e);
-				} catch (InterruptedException e1) {
-		            logger.error("Interruption error while backing up data", e1);
-		            this.dataBackupException = e1.getMessage();
+			long exportedProducts = tempFiles.stream().mapToLong(ProductBackupFile::productCount).sum();
+			publishProductBackupFiles(backupFolder.toPath(), tempFiles, expectedBackupedProducts.get(), exportedProducts,
+					pageSize);
+			expordedProductsCounter.set(exportedProducts);
+			this.dataBackupException = null;
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			logger.error("Product backup interrupted", e);
+			this.dataBackupException = e.getMessage();
+			cleanupTempFiles(tempFiles);
+		} catch (ExecutionException e) {
+			logger.error("Error while backing up data", e.getCause());
+			this.dataBackupException = Objects.toString(e.getCause().getMessage(), e.getCause().toString());
+			cleanupTempFiles(tempFiles);
+		} catch (Exception e) {
+			logger.error("Error while backing up data", e);
+			this.dataBackupException = e.getMessage();
+			cleanupTempFiles(tempFiles);
+		} finally {
+			producerDone.set(true);
+			if (executorService != null && !executorService.isShutdown()) {
+				executorService.shutdown();
+				try {
+					if (!executorService.awaitTermination(1, TimeUnit.MINUTES)) {
+						executorService.shutdownNow();
+					}
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					executorService.shutdownNow();
 				}
-	        });
+			}
+			productExportRunning.set(false);
+		}
 
-	        executorService.shutdown();
+		logger.info("Products data backup - complete");
+	}
 
-        } catch (Exception e) {
-            logger.error("Error while backing up data", e);
-            this.dataBackupException = e.getMessage();
-        } finally {
-            productExportRunning.set(false);
-        }
+	private File ensureProductBackupFolder() throws IOException {
+		File backupFolder = new File(backupConfig.getDataBackupFolder());
 
-        logger.info("Products data backup - complete");
-    }
+		if (backupFolder.exists() && !backupFolder.isDirectory()) {
+			throw new IOException("Product backup path is a file: " + backupFolder.getAbsolutePath());
+		}
+		if (!backupFolder.exists() && !backupFolder.mkdirs()) {
+			throw new IOException("Failed to create parent directories: " + backupFolder.getAbsolutePath());
+		}
+		return backupFolder;
+	}
+
+	private void queueProductForBackup(LinkedBlockingQueue<Product> blockingQueue, AtomicReference<Throwable> workerFailure,
+			Product product) {
+		while (workerFailure.get() == null) {
+			try {
+				if (blockingQueue.offer(product, 1, TimeUnit.SECONDS)) {
+					return;
+				}
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new IllegalStateException("Interrupted while queueing product backup item", e);
+			}
+		}
+
+		throw new IllegalStateException("Product backup worker failed", workerFailure.get());
+	}
+
+	private void publishProductBackupFiles(Path backupFolder, List<ProductBackupFile> tempFiles, long expectedProducts,
+			long exportedProducts, int pageSize) throws IOException {
+		List<String> fileNames = new ArrayList<>();
+		for (ProductBackupFile tempFile : tempFiles) {
+			Path destination = backupFolder
+					.resolve(PRODUCT_BACKUP_FILE_PREFIX + tempFile.fileNumber() + PRODUCT_BACKUP_FILE_SUFFIX);
+			Files.move(tempFile.path(), destination, StandardCopyOption.REPLACE_EXISTING);
+			fileNames.add(destination.getFileName().toString());
+		}
+
+		ProductBackupManifest manifest = new ProductBackupManifest(Instant.now().toString(),
+				System.currentTimeMillis(), expectedProducts, exportedProducts, pageSize, fileNames);
+		OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(backupFolder.resolve(PRODUCT_BACKUP_MANIFEST).toFile(),
+				manifest);
+	}
+
+	private void cleanupTempFiles(List<ProductBackupFile> tempFiles) {
+		for (ProductBackupFile tempFile : tempFiles) {
+			try {
+				Files.deleteIfExists(tempFile.path());
+			} catch (IOException e) {
+				logger.warn("Could not delete product backup temporary file {}", tempFile.path(), e);
+			}
+		}
+	}
 
 
 	public void exportVertical(String vertical) {
@@ -514,8 +598,9 @@ public class BackupService implements HealthIndicator {
 		/////////////////////////////
 
 		File productFolder = new File(backupConfig.getDataBackupFolder());
-		long productLastModified = productFolder.lastModified();
-		long productFolderSize = FileUtils.sizeOfDirectoryAsBigInteger(productFolder).longValue();
+		File[] productBackupFiles = listProductBackupFiles(productFolder);
+		long productLastModified = Arrays.stream(productBackupFiles).mapToLong(File::lastModified).max().orElse(0L);
+		long productFolderSize = Arrays.stream(productBackupFiles).mapToLong(File::length).sum();
 
 
 		// Check we have the expected number of items backuped (only if not running)
@@ -534,7 +619,6 @@ public class BackupService implements HealthIndicator {
 		}
 
 		// Check exists
-		// TODO
 		if (!Files.exists(Path.of(backupConfig.getDataBackupFolder()))) {
 			errorMessages.put("product_backup_missing", backupConfig.getDataBackupFolder());
 		}
@@ -548,8 +632,6 @@ public class BackupService implements HealthIndicator {
 		// NOTE : In the best world, MAX_WIKI_PRODUCT_AGE would be derivated from the schedule rate
 
 		long oldestFileTs = Long.MAX_VALUE;
-		// TODO : Check count
-		File[] productBackupFiles = productFolder.listFiles();
 
 		/*
 		 * Checking number of files is correct
@@ -564,10 +646,16 @@ public class BackupService implements HealthIndicator {
 			}
 		}
 
+		ProductBackupManifest manifest = readProductBackupManifest(productFolder, errorMessages);
+		if (manifest != null) {
+			validateProductBackupManifest(manifest, productFolder, productBackupFiles, errorMessages);
+		}
+
 		/**
 		 * Checking product backup oldness
 		 */
-		if (System.currentTimeMillis() - oldestFileTs > backupConfig.getMaxProductsBackupAgeInHours() * 3600L * 1000L) {
+		if (oldestFileTs == Long.MAX_VALUE
+				|| System.currentTimeMillis() - oldestFileTs > backupConfig.getMaxProductsBackupAgeInHours() * 3600L * 1000L) {
 			errorMessages.put("product_backup_too_old", new Date (productLastModified).toString());
 		}
 
@@ -592,6 +680,73 @@ public class BackupService implements HealthIndicator {
 		}
 
 		return health;
+	}
+
+	private File[] listProductBackupFiles(File productFolder) {
+		File[] files = productFolder.listFiles((dir, name) -> name.startsWith(PRODUCT_BACKUP_FILE_PREFIX)
+				&& name.endsWith(PRODUCT_BACKUP_FILE_SUFFIX));
+		if (files == null) {
+			return new File[0];
+		}
+		Arrays.sort(files);
+		return files;
+	}
+
+	private ProductBackupManifest readProductBackupManifest(File productFolder, Map<String, String> errorMessages) {
+		Path manifestPath = productFolder.toPath().resolve(PRODUCT_BACKUP_MANIFEST);
+		if (!Files.exists(manifestPath)) {
+			errorMessages.put("product_backup_manifest_missing", manifestPath.toString());
+			return null;
+		}
+
+		try {
+			return OBJECT_MAPPER.readValue(manifestPath.toFile(), ProductBackupManifest.class);
+		} catch (IOException e) {
+			errorMessages.put("product_backup_manifest_invalid", e.getMessage());
+			return null;
+		}
+	}
+
+	private void validateProductBackupManifest(ProductBackupManifest manifest, File productFolder, File[] productBackupFiles,
+			Map<String, String> errorMessages) {
+		if (manifest.exportedCount() < manifest.expectedCount()) {
+			errorMessages.put("product_backup_manifest_exported_items_too_low",
+					manifest.exportedCount() + " < " + manifest.expectedCount());
+		}
+
+		if (System.currentTimeMillis() - manifest.completedEpochMillis() > backupConfig.getMaxProductsBackupAgeInHours()
+				* 3600L * 1000L) {
+			errorMessages.put("product_backup_manifest_too_old", new Date(manifest.completedEpochMillis()).toString());
+		}
+
+		List<String> actualFiles = Arrays.stream(productBackupFiles).map(File::getName).toList();
+		if (!actualFiles.equals(manifest.files())) {
+			errorMessages.put("product_backup_manifest_file_list",
+					actualFiles + " <> " + Objects.toString(manifest.files(), List.of().toString()));
+		}
+
+		if (manifest.files() != null) {
+			for (String file : manifest.files()) {
+				Path filePath = productFolder.toPath().resolve(file);
+				if (!Files.exists(filePath)) {
+					errorMessages.put("product_backup_manifest_file_missing", filePath.toString());
+				}
+			}
+		}
+	}
+
+	/**
+	 * Metadata written after a successful complete product backup publication.
+	 *
+	 * @param completedAt completion timestamp in ISO-8601 format
+	 * @param completedEpochMillis completion timestamp in epoch milliseconds
+	 * @param expectedCount expected product count before streaming
+	 * @param exportedCount successfully serialized product count
+	 * @param pageSize Elasticsearch export page size
+	 * @param files final backup files published by the export
+	 */
+	public record ProductBackupManifest(String completedAt, long completedEpochMillis, long expectedCount,
+			long exportedCount, int pageSize, List<String> files) {
 	}
 
 }

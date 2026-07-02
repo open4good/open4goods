@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   HOST_DOMAIN_LANGUAGE_MAP,
   buildI18nLocaleDomains,
+  buildProductHreflangLinks,
   getDomainLanguageFromHostname,
   getNuxtLocaleForDomainLanguage,
 } from './domain-language'
@@ -59,5 +60,26 @@ describe('domain-language helpers', () => {
       locale: 'en-US',
       matched: true,
     })
+  })
+
+  it('emits exactly fr-FR and x-default for product pages, both on nudger.fr', () => {
+    const links = buildProductHreflangLinks(
+      '/climatiseurs/8431312260509-climatisation-midea-mmcs12hrn8qrd0'
+    )
+
+    expect(links).toHaveLength(2)
+    expect(links.map(link => link.hreflang)).toEqual(['fr-FR', 'x-default'])
+    links.forEach(link => {
+      expect(link.rel).toBe('alternate')
+      expect(link.href).toBe(
+        'https://nudger.fr/climatiseurs/8431312260509-climatisation-midea-mmcs12hrn8qrd0'
+      )
+    })
+  })
+
+  it('never emits an en-US alternate for product pages', () => {
+    const links = buildProductHreflangLinks('/some-product')
+
+    expect(links.some(link => link.hreflang === 'en-US')).toBe(false)
   })
 })

@@ -64,32 +64,37 @@
       </div>
 
       <div v-if="shouldShowMeta" class="impact-score-panel__col-right">
-        <div v-if="showRange" class="impact-score-panel__meta-grid">
-          <span class="impact-score-panel__label">Min :</span>
-          <span
-            class="impact-score-panel__value"
-            :class="`impact-score-panel--${getScaleStep(rangeMin)}`"
-          >
-            {{
-              n(rangeMin, {
-                maximumFractionDigits: 1,
-                minimumFractionDigits: 0,
-              })
-            }}
-          </span>
+        <div
+          v-if="(showRange && showMinMax) || percentile !== null"
+          class="impact-score-panel__meta-grid"
+        >
+          <template v-if="showRange && showMinMax">
+            <span class="impact-score-panel__label">Min :</span>
+            <span
+              class="impact-score-panel__value"
+              :class="`impact-score-panel--${getScaleStep(rangeMin)}`"
+            >
+              {{
+                n(rangeMin, {
+                  maximumFractionDigits: 1,
+                  minimumFractionDigits: 0,
+                })
+              }}
+            </span>
 
-          <span class="impact-score-panel__label">Max :</span>
-          <span
-            class="impact-score-panel__value"
-            :class="`impact-score-panel--${getScaleStep(rangeMax)}`"
-          >
-            {{
-              n(rangeMax, {
-                maximumFractionDigits: 1,
-                minimumFractionDigits: 0,
-              })
-            }}
-          </span>
+            <span class="impact-score-panel__label">Max :</span>
+            <span
+              class="impact-score-panel__value"
+              :class="`impact-score-panel--${getScaleStep(rangeMax)}`"
+            >
+              {{
+                n(rangeMax, {
+                  maximumFractionDigits: 1,
+                  minimumFractionDigits: 0,
+                })
+              }}
+            </span>
+          </template>
 
           <template v-if="percentile !== null">
             <span class="impact-score-panel__label"
@@ -204,6 +209,13 @@ const props = defineProps({
     default: true,
   },
   showRange: {
+    type: Boolean,
+    default: true,
+  },
+  /** Show the raw Min/Max scale bounds alongside the /20 score. Product
+   * hero/impact usages disable this — showing a second numeric scale next
+   * to the score reads as two conflicting scores. */
+  showMinMax: {
     type: Boolean,
     default: true,
   },
@@ -498,9 +510,10 @@ const formattedDate = computed(() => {
   position: relative;
   z-index: 1;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 14px;
+  gap: 6px 14px;
 }
 
 /* Score (left column) */

@@ -52,3 +52,17 @@ export const formatOffersCount = (
   const count = product.offers?.offersCount ?? 0
   return translatePlural('category.products.offerCount', count, { count })
 }
+
+/** rel for outbound affiliate/offer links — Google requires `sponsored` for paid links. */
+export const AFFILIATE_LINK_REL = 'sponsored nofollow noopener noreferrer'
+
+export const resolveOfferHref = (offer: {
+  affiliationToken?: string | null
+  url?: string | null
+}): string | undefined =>
+  offer.affiliationToken ? `/contrib/${offer.affiliationToken}` : (offer.url ?? undefined)
+
+/** Single-sourced condition color grammar, used everywhere a "new" vs
+ * "occasion" offer badge/chip renders. */
+export const NEW_CONDITION_COLOR = 'success'
+export const OCCASION_CONDITION_COLOR = 'secondary'

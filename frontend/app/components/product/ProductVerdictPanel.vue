@@ -9,7 +9,7 @@
       <div
         class="product-verdict-panel__header d-flex align-center mb-3 mb-sm-0"
       >
-        <v-icon icon="mdi-scale-balance" class="mr-2 text-primary" size="22" />
+        <v-icon :icon="mdiScaleBalance" class="mr-2 text-primary" size="22" />
         <h2 class="text-subtitle-1 font-weight-bold text-neutral-strong ma-0">
           {{ t('product.verdict.title') }}
         </h2>
@@ -58,6 +58,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from '#imports'
+import { mdiScaleBalance } from '@mdi/js'
 import type { ProductDto } from '~~/shared/api-client'
 import { useProductVerdict } from '../../composables/useProductVerdict'
 import ProductVerdictDimensionChip from './ProductVerdictDimensionChip.vue'

@@ -156,6 +156,32 @@ export const getDomainLanguageFromHostname = (
 ): DomainLanguageResolution =>
   resolveDomainLanguage(hostname, { logUnknownHost: false })
 
+export interface ProductHreflangLink {
+  rel: 'alternate'
+  hreflang: NuxtLocale | 'x-default'
+  href: string
+}
+
+/**
+ * Product pages have no per-locale slug — there is no English content to
+ * alternate to on nudger.com. Only emit fr-FR + x-default, both pointing at
+ * the canonical nudger.fr path, so hreflang never advertises a 404.
+ */
+export const buildProductHreflangLinks = (
+  canonicalPath: string,
+  protocol: string = 'https:'
+): ProductHreflangLink[] => {
+  const frenchHref = new URL(
+    canonicalPath,
+    `${protocol}//${PRIMARY_LOCALE_HOSTS['fr-FR']}`
+  ).toString()
+
+  return [
+    { rel: 'alternate', hreflang: 'fr-FR', href: frenchHref },
+    { rel: 'alternate', hreflang: 'x-default', href: frenchHref },
+  ]
+}
+
 export const DEFAULT_DOMAIN_LANGUAGE_RESOLUTION: DomainLanguageResolution = {
   domainLanguage: DEFAULT_DOMAIN_LANGUAGE,
   locale: DEFAULT_NUXT_LOCALE,

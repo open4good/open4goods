@@ -212,4 +212,30 @@ describe('ProductVigilanceSection', () => {
     )
     expect(description.html()).toContain('<strong>8.0</strong>')
   })
+
+  it('humanizes a raw attribute key instead of showing it verbatim when no name or config is available', async () => {
+    const wrapper = await mountComponent({
+      product: {
+        attributes: {
+          allAttributes: {
+            COLOUR: {
+              key: 'COLOUR',
+              name: null,
+              sourcing: { conflicts: true },
+            },
+            NOISE_LEVEL: {
+              key: 'NOISE_LEVEL',
+              name: null,
+              sourcing: { conflicts: true },
+            },
+          },
+        },
+      },
+    })
+
+    expect(wrapper.text()).toContain('Colour')
+    expect(wrapper.text()).not.toContain('COLOUR')
+    expect(wrapper.text()).toContain('Noise level')
+    expect(wrapper.text()).not.toContain('NOISE_LEVEL')
+  })
 })

@@ -67,20 +67,6 @@
 
       <Transition name="fade">
         <v-alert
-          v-if="offlineReady"
-          class="pwa-prompts__alert"
-          border="start"
-          color="success"
-          variant="tonal"
-          :title="offlineReadyTitle"
-          data-test="pwa-offline-ready"
-        >
-          {{ offlineReadyDescription }}
-        </v-alert>
-      </Transition>
-
-      <Transition name="fade">
-        <v-alert
           v-if="installSuccessMessage"
           class="pwa-prompts__alert"
           border="start"
@@ -105,6 +91,18 @@
         </v-alert>
       </Transition>
     </div>
+
+    <v-snackbar
+      v-model="showOfflineReadySnackbar"
+      location="bottom left"
+      :timeout="4000"
+      color="success"
+      variant="elevated"
+      data-test="pwa-offline-ready"
+    >
+      <p class="pwa-prompts__snackbar-title">{{ offlineReadyTitle }}</p>
+      <p class="pwa-prompts__description">{{ offlineReadyDescription }}</p>
+    </v-snackbar>
   </ClientOnly>
 </template>
 
@@ -145,6 +143,43 @@ const installErrorMessage = computed(() =>
   installError.value ? String(t('pwa.install.error')) : ''
 )
 
+// The offline-ready toast is informational, not actionable: show it at most
+// once per session, and only after the page has settled (idle or 2s after
+// mount) so it never collides with above-the-fold content on first paint.
+const OFFLINE_READY_SESSION_KEY = 'pwa-offline-ready-shown'
+const hasShownOfflineReady = ref(false)
+const offlineReadyDelayElapsed = ref(false)
+const showOfflineReadySnackbar = ref(false)
+
+onMounted(() => {
+  if (!import.meta.client) {
+    return
+  }
+
+  hasShownOfflineReady.value =
+    sessionStorage.getItem(OFFLINE_READY_SESSION_KEY) === 'true'
+
+  const markDelayElapsed = () => {
+    offlineReadyDelayElapsed.value = true
+  }
+
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(markDelayElapsed, { timeout: 2000 })
+  } else {
+    setTimeout(markDelayElapsed, 2000)
+  }
+})
+
+watch([offlineReady, offlineReadyDelayElapsed], ([ready, delayElapsed]) => {
+  if (ready && delayElapsed && !hasShownOfflineReady.value) {
+    showOfflineReadySnackbar.value = true
+    hasShownOfflineReady.value = true
+    if (import.meta.client) {
+      sessionStorage.setItem(OFFLINE_READY_SESSION_KEY, 'true')
+    }
+  }
+})
+
 const handleInstall = async () => {
   await requestInstall()
 }
@@ -176,6 +211,10 @@ const handleUpdate = async () => {
 .pwa-prompts__description
   margin-bottom: 0
   font-size: 0.95rem
+
+.pwa-prompts__snackbar-title
+  font-weight: 600
+  margin-bottom: 4px
 
 .slide-up-enter-active,
 .slide-up-leave-active

@@ -571,6 +571,22 @@ describe('ProductAttributesSection', () => {
     expect(richValue.text()).toContain('2 kg')
   })
 
+  it('filters out GTIN-prefixed internal codes from the alternate names list', async () => {
+    const product = buildProduct()
+    product.identity = {
+      ...product.identity,
+      akaBrands: new Set(['Brand X Alternative', '8431312260509_CAFR']),
+      akaModels: new Set(['Model Y Prime', '3401598765432_XYZ']),
+    }
+
+    const wrapper = await mountComponent(product)
+
+    expect(wrapper.text()).toContain('Brand X Alternative')
+    expect(wrapper.text()).toContain('Model Y Prime')
+    expect(wrapper.text()).not.toContain('8431312260509_CAFR')
+    expect(wrapper.text()).not.toContain('3401598765432_XYZ')
+  })
+
   it('filters detailed groups with the search input', async () => {
     const wrapper = await mountComponent(buildProduct())
 

@@ -15,7 +15,7 @@
         <ul>
           <li v-for="feature in group.features" :key="feature.key">
             <v-icon
-              icon="mdi-check-circle"
+              :icon="mdiCheckCircle"
               size="18"
               class="product-attributes__chip-icon product-attributes__chip-icon--positive"
             />
@@ -33,7 +33,7 @@
         <ul>
           <li v-for="feature in group.unFeatures" :key="feature.key">
             <v-icon
-              icon="mdi-close-octagon-outline"
+              :icon="mdiCloseOctagonOutline"
               size="18"
               class="product-attributes__chip-icon product-attributes__chip-icon--negative"
             />
@@ -70,6 +70,7 @@
 <script setup lang="ts">
 import { toRefs } from 'vue'
 import type { PropType } from 'vue'
+import { mdiCheckCircle, mdiCloseOctagonOutline } from '@mdi/js'
 import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import type { DetailGroupView } from '~/components/product/ProductAttributesSection.vue'
 

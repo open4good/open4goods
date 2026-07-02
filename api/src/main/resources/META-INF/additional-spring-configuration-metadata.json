@@ -1,6 +1,12 @@
 {
   "properties": [
     {
+      "name": "api.backup.product-export-page-size",
+      "type": "java.lang.Integer",
+      "description": "Page size used while streaming products for full backup exports.",
+      "defaultValue": 1000
+    },
+    {
       "name": "resource-completion-config.force-erase-file-name",
       "type": "java.lang.Boolean",
       "description": "Regenerate resource file names even when a file name already exists.",

@@ -17,7 +17,7 @@
         <a
           :href="badge.url"
           target="_blank"
-          rel="nofollow noopener noreferrer"
+          :rel="AFFILIATE_LINK_REL"
           class="product-price-rows__content"
           @click.stop
         >
@@ -32,9 +32,7 @@
           />
           <v-icon
             v-else
-            :icon="
-              badge.appearance === 'new' ? 'mdi-tag-outline' : 'mdi-recycle'
-            "
+            :icon="badge.appearance === 'new' ? mdiTagOutline : mdiRecycle"
             size="16"
             class="product-price-rows__fallback-icon"
           />
@@ -78,7 +76,7 @@
           <template #activator="{ props: menuProps }">
             <v-btn
               v-bind="menuProps"
-              icon="mdi-chevron-down"
+              :icon="mdiChevronDown"
               variant="text"
               density="compact"
               size="20"
@@ -92,7 +90,7 @@
               :key="alt.id"
               :href="alt.url"
               target="_blank"
-              rel="nofollow noopener noreferrer"
+              :rel="AFFILIATE_LINK_REL"
               class="product-price-rows__menu-item"
             >
               <template #prepend>
@@ -104,7 +102,7 @@
                   height="16"
                   class="mr-2"
                 />
-                <v-icon v-else icon="mdi-store" size="16" class="mr-2" />
+                <v-icon v-else :icon="mdiStore" size="16" class="mr-2" />
               </template>
 
               <div
@@ -130,12 +128,17 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { mdiTagOutline, mdiRecycle, mdiChevronDown, mdiStore } from '@mdi/js'
 import { useProductPriceTrend } from '~/composables/useProductPriceTrend'
 import type {
   ProductDto,
   ProductAggregatedPriceDto,
 } from '~~/shared/api-client'
-import { formatBestPrice } from '~/utils/_product-pricing'
+import {
+  formatBestPrice,
+  resolveOfferHref,
+  AFFILIATE_LINK_REL,
+} from '~/utils/_product-pricing'
 
 const props = defineProps<{
   product: ProductDto
@@ -144,24 +147,9 @@ const props = defineProps<{
 
 const { t, n, locale } = useI18n()
 
-// Reusing logic from ProductHeroPricing for contrib links
-// Since we don't have direct access to 'useAnalytics' inside helpers in the same way, we'll inline some logic or use the composable if available.
-// Actually, let's adapt the logic straightforwardly.
-
-const getAffiliationLink = (offer: ProductAggregatedPriceDto | undefined) => {
-  if (!offer) return null
-  // Simplified check: if we have a token, use it.
-  // The original generic component had a check 'isSingleOffer', but here we are listing best offers per condition.
-  // If there is an affiliation token on the offer, we should probably use it.
-
-  const token = offer.affiliationToken
-  return token ? `/contrib/${token}` : null
-}
-
 const resolveUrl = (offer: ProductAggregatedPriceDto | undefined) => {
   if (!offer) return undefined
-  const affLink = getAffiliationLink(offer)
-  return affLink ?? offer.url ?? undefined
+  return resolveOfferHref(offer)
 }
 
 const NBSP = '\u00A0'

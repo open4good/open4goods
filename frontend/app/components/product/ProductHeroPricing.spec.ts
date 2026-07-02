@@ -4,6 +4,7 @@ import { createI18n } from 'vue-i18n'
 import { defineComponent, h } from 'vue'
 import type { ProductDto } from '~~/shared/api-client'
 import ProductHeroPricing from './ProductHeroPricing.vue'
+import { AFFILIATE_LINK_REL } from '~/utils/_product-pricing'
 
 interface MockPriceTrend {
   trend: string
@@ -438,6 +439,41 @@ describe('ProductHeroPricing', () => {
     )
 
     expect(wrapper.text()).toContain('1\u202f234,5')
+
+    await wrapper.unmount()
+  })
+
+  it('links the merchant panel to the affiliation redirect with sponsored rel when a token exists', async () => {
+    const wrapper = await createWrapper({
+      offersCount: 1,
+      bestPrice: {
+        price: 799,
+        currency: 'EUR',
+        datasourceName: 'Shop',
+        url: 'https://shop.example',
+        favicon: 'https://shop.example/favicon.ico',
+        condition: 'NEW',
+        offerName: 'Shop offer',
+        affiliationToken: 'tok-abc',
+      },
+      bestNewOffer: {
+        price: 799,
+        currency: 'EUR',
+        datasourceName: 'Shop',
+        url: 'https://shop.example',
+        favicon: 'https://shop.example/favicon.ico',
+        condition: 'NEW',
+        offerName: 'Shop offer',
+        affiliationToken: 'tok-abc',
+      },
+    })
+
+    const link = wrapper.find(
+      '.product-hero__pricing-panel-main--link'
+    )
+    expect(link.attributes('href')).toBe('/contrib/tok-abc')
+    expect(link.attributes('rel')).toBe(AFFILIATE_LINK_REL)
+    expect(link.attributes('target')).toBe('_blank')
 
     await wrapper.unmount()
   })

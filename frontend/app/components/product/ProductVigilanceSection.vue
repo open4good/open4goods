@@ -1,18 +1,9 @@
 <template>
-  <section :id="sectionId" class="product-vigilance">
-    <header class="product-vigilance__header">
-      <div class="product-vigilance__header-content">
-        <h2 class="product-vigilance__title">
-          {{ t('product.vigilance.title') }}
-        </h2>
-        <!-- eslint-disable vue/no-v-html -->
-        <p
-          class="product-vigilance__subtitle"
-          v-html="sanitize(t('product.vigilance.subtitle'))"
-        />
-        <!-- eslint-enable vue/no-v-html -->
-      </div>
-    </header>
+  <section class="product-vigilance">
+    <ProductSectionHeader
+      :title="t('product.vigilance.title')"
+      :subtitle-html="sanitize(t('product.vigilance.subtitle'))"
+    />
 
     <v-row justify="center">
       <!-- End of Life Card -->
@@ -233,6 +224,7 @@ import { format } from 'date-fns'
 import { fr, enUS } from 'date-fns/locale'
 import DOMPurify from 'isomorphic-dompurify'
 import { normalizeTimestamp } from '~/utils/date-parsing'
+import { capitalizeFirstLetter } from '~/utils/_product-title'
 import type {
   AttributeConfigDto,
   ProductAttributeDto,
@@ -358,6 +350,14 @@ const conflictingAttributes = computed(() => {
   )
 })
 
+// Matches raw enum-style attribute keys such as "COLOUR" or "NOISE_LEVEL"
+// that sometimes leak through as-is, whether from a missing config entry or
+// a config/attribute name field that was itself never given a proper label.
+const RAW_ATTRIBUTE_KEY_PATTERN = /^[A-Z0-9]+(_[A-Z0-9]+)*$/
+
+const humanizeRawKey = (key: string) =>
+  capitalizeFirstLetter(key.toLowerCase().replaceAll('_', ' '))
+
 const resolveAttributeLabel = (
   attribute: ProductAttributeDto | null | undefined
 ) => {
@@ -366,14 +366,17 @@ const resolveAttributeLabel = (
   }
 
   const rawKey = attribute.key?.trim().toLowerCase()
-  if (rawKey) {
-    const configuredName = attributeConfigNameByKey.value.get(rawKey)
-    if (configuredName) {
-      return configuredName
-    }
+  const configuredName = rawKey
+    ? attributeConfigNameByKey.value.get(rawKey)
+    : undefined
+  const name = attribute.name?.trim()
+  const label = configuredName || name || attribute.key?.trim() || ''
+
+  if (label && RAW_ATTRIBUTE_KEY_PATTERN.test(label)) {
+    return humanizeRawKey(label)
   }
 
-  return attribute.name?.trim() || attribute.key?.trim() || ''
+  return label
 }
 
 const hasConflictingAttributes = computed(
@@ -479,25 +482,6 @@ function sanitize(content: string | null | undefined): string {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-}
-
-.product-vigilance__header-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  max-width: 60ch;
-}
-
-.product-vigilance__title {
-  font-size: clamp(1.4rem, 2.5vw, 2rem);
-  font-weight: 700;
-  line-height: 1.1;
-}
-
-.product-vigilance__subtitle {
-  font-size: 1rem;
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.85);
-  line-height: 1.5;
 }
 
 .product-vigilance__card {

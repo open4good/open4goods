@@ -69,6 +69,7 @@ import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { ProductDto } from '~~/shared/api-client'
 import { getPriceVerdict } from '~/utils/_product-verdict'
+import { formatPrice } from '~/utils/_product-pricing'
 
 const props = defineProps({
   product: {
@@ -120,12 +121,8 @@ const verdictDescription = computed(() => {
   }
 })
 
-const formatCurrency = (value: number) => {
-  return n(value, 'currency', {
-    currency: props.product.offers?.bestPrice?.currency || 'EUR',
-    maximumFractionDigits: 2,
-  })
-}
+const formatCurrency = (value: number) =>
+  formatPrice(value, n, props.product.offers?.bestPrice?.currency || 'EUR')
 </script>
 
 <style scoped>

@@ -28,7 +28,7 @@
             variant="flat"
             size="small"
             class="font-weight-bold"
-            prepend-icon="mdi-leaf"
+            :prepend-icon="mdiLeaf"
           >
             {{ $t('product.hero.responsibleChoice') }}
           </v-chip>
@@ -45,8 +45,8 @@
                   <NuxtLink
                     :to="merchant.url"
                     class="product-hero__pricing-panel-main product-hero__pricing-panel-main--link"
-                    :target="merchant.isInternal ? undefined : '_blank'"
-                    :rel="merchant.isInternal ? undefined : 'nofollow noopener'"
+                    target="_blank"
+                    :rel="AFFILIATE_LINK_REL"
                     :prefetch="false"
                     @click="emitMerchantClick"
                   >
@@ -128,8 +128,8 @@
                 v-else-if="merchant?.url"
                 :to="merchant.url"
                 class="product-hero__pricing-panel-main product-hero__pricing-panel-main--link"
-                :target="merchant.isInternal ? undefined : '_blank'"
-                :rel="merchant.isInternal ? undefined : 'nofollow noopener'"
+                target="_blank"
+                :rel="AFFILIATE_LINK_REL"
                 :prefetch="false"
                 @click="emitMerchantClick"
               >
@@ -216,7 +216,7 @@
           class="product-hero__pricing-panel-alternatives"
         >
           <p class="product-hero__pricing-panel-alternatives-title">
-            <v-icon icon="mdi-shopping-search-outline" size="16" class="me-1" />
+            <v-icon :icon="mdiShoppingSearchOutline" size="16" class="me-1" />
             {{ offersListLabel }}
           </p>
           <TransitionGroup
@@ -229,8 +229,10 @@
               :key="offer.id"
               class="product-hero__pricing-panel-alternative"
             >
-              <button
-                type="button"
+              <a
+                :href="offer.url ?? undefined"
+                target="_blank"
+                :rel="AFFILIATE_LINK_REL"
                 class="product-hero__pricing-panel-alternative-row"
                 @click="onOfferSelected(offer)"
               >
@@ -244,7 +246,7 @@
                 />
                 <v-icon
                   v-else
-                  icon="mdi-storefront-outline"
+                  :icon="mdiStorefrontOutline"
                   size="20"
                   class="product-hero__pricing-panel-alternative-favicon-fallback"
                 />
@@ -255,23 +257,23 @@
                   {{ offer.priceLabel }}
                 </span>
                 <v-icon
-                  icon="mdi-chevron-right"
+                  :icon="mdiChevronRight"
                   size="18"
                   class="product-hero__pricing-panel-alternative-chevron"
                 />
-              </button>
+              </a>
             </li>
           </TransitionGroup>
         </div>
 
         <p v-if="moreOffersLabel" class="product-hero__pricing-panel-more">
-          <v-icon icon="mdi-information-outline" size="14" class="me-1" />
+          <v-icon :icon="mdiInformationOutline" size="14" class="me-1" />
           {{ moreOffersLabel }}
         </p>
       </template>
 
       <div v-else class="product-hero__pricing-panel-empty">
-        <v-icon icon="mdi-basket-off-outline" size="20" />
+        <v-icon :icon="mdiBasketOffOutline" size="20" />
         <span>{{ emptyStateLabel }}</span>
       </div>
     </div>
@@ -319,6 +321,11 @@
           v-if="hasOffer"
           color="primary"
           variant="flat"
+          size="large"
+          block
+          :href="viewOffersHref ?? undefined"
+          :target="viewOffersHref ? '_blank' : undefined"
+          :rel="viewOffersHref ? AFFILIATE_LINK_REL : undefined"
           @click="emitViewOffers"
         >
           {{ viewOffersLabel }}
@@ -330,7 +337,17 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRouter } from '#imports'
+import {
+  mdiLeaf,
+  mdiShoppingSearchOutline,
+  mdiStorefrontOutline,
+  mdiChevronRight,
+  mdiInformationOutline,
+  mdiBasketOffOutline,
+  mdiTagOutline,
+  mdiRecycleVariant,
+} from '@mdi/js'
+import { AFFILIATE_LINK_REL } from '~/utils/_product-pricing'
 
 type OfferCondition = 'occasion' | 'new'
 
@@ -338,7 +355,6 @@ type MerchantInfo = {
   name: string
   url: string | null
   favicon: string | null
-  isInternal: boolean
   clientOnly: boolean
 }
 
@@ -416,6 +432,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  viewOffersHref: {
+    type: String as () => string | null,
+    default: null,
+  },
   offersList: {
     type: Array as () => OfferOption[] | null,
     default: null,
@@ -442,12 +462,10 @@ const emit = defineEmits<{
   (event: 'trend-click' | 'view-offers'): void
 }>()
 
-const router = useRouter()
-
 const offersListToDisplay = computed(() => props.offersList ?? [])
 
 const conditionIcon = computed(() =>
-  props.condition === 'new' ? 'mdi-tag-outline' : 'mdi-recycle-variant'
+  props.condition === 'new' ? mdiTagOutline : mdiRecycleVariant
 )
 
 const emitMerchantClick = () => {
@@ -471,13 +489,6 @@ const onOfferSelected = (item: OfferOption) => {
       name: item.label,
       url: item.url,
     })
-
-    const isInternal = item.url.startsWith('/')
-    if (isInternal) {
-      router.push(item.url)
-    } else {
-      window.open(item.url, '_blank', 'noopener,noreferrer')
-    }
   }
 }
 </script>
@@ -592,9 +603,9 @@ const onOfferSelected = (item: OfferOption) => {
 }
 
 .product-hero__pricing-panel-merchant-name {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.2;
 }
 
 .product-hero__pricing-panel-merchant-favicon {
@@ -702,6 +713,7 @@ const onOfferSelected = (item: OfferOption) => {
   color: rgb(var(--v-theme-text-neutral-strong));
   font: inherit;
   text-align: left;
+  text-decoration: none;
   cursor: pointer;
   transition:
     background-color 0.2s ease,

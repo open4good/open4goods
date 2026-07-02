@@ -36,7 +36,7 @@
               class="impact-subscore-explanation__bullet-item"
             >
               <v-icon
-                icon="mdi-check-circle-outline"
+                :icon="mdiCheckCircleOutline"
                 size="18"
                 class="impact-subscore-explanation__bullet-icon"
               />
@@ -69,7 +69,7 @@
               class="impact-subscore-explanation__bullet-item"
             >
               <v-icon
-                icon="mdi-chart-bell-curve"
+                :icon="mdiChartBellCurve"
                 size="18"
                 class="impact-subscore-explanation__bullet-icon"
               />
@@ -156,6 +156,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { mdiCheckCircleOutline, mdiChartBellCurve } from '@mdi/js'
 import type { ScoreView } from './impact-types'
 
 const props = defineProps<{

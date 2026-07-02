@@ -25,6 +25,7 @@ api:
     xwiki-backup-file: /opt/open4goods/backup/xwiki-backup.zip
     data-backup-folder: /opt/open4goods/backup/products
     import-product-path: /opt/open4goods/backup/import
+    product-export-page-size: 1000
     copy-page-size: 5000
     copy-bulk-size: 500
     copy-threads: 4
