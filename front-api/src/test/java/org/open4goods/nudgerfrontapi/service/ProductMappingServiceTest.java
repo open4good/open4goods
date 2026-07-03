@@ -33,6 +33,7 @@ import org.open4goods.model.resource.ImageInfo;
 import org.open4goods.model.resource.PdfInfo;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.resource.ResourceType;
+import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
@@ -283,6 +284,46 @@ class ProductMappingServiceTest {
 
         assertThat(dto.slug()).isEqualTo("fairphone-4");
         assertThat(dto.fullSlug()).isEqualTo("/telephones-reconditionnes/fairphone-4");
+    }
+
+    @Test
+    void getProductComputesFullSlugFromVerticalConfigWhenCategoryDtoHasNoUrl() throws Exception {
+        long gtin = 8431312260509L;
+        Product product = new Product(gtin);
+        product.setVertical("air-conditioners");
+        Localisable<String, String> urlLocalisable = new Localisable<>();
+        urlLocalisable.put("fr", "8431312260509-climatisation-midea-mmcs12hrn8qrd0");
+        product.getNames().setUrl(urlLocalisable);
+
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
+        VerticalConfig verticalConfig = new VerticalConfig();
+        verticalConfig.setId("air-conditioners");
+        ProductI18nElements frI18n = new ProductI18nElements();
+        frI18n.setVerticalHomeUrl("/climatiseurs/");
+        verticalConfig.getI18n().put("fr", frI18n);
+        when(verticalsConfigService.getConfigById("air-conditioners")).thenReturn(verticalConfig);
+        when(categoryMappingService.toVerticalConfigDto(verticalConfig, DomainLanguage.fr)).thenReturn(null);
+
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("base"), DomainLanguage.fr);
+
+        assertThat(dto.slug()).isEqualTo("8431312260509-climatisation-midea-mmcs12hrn8qrd0");
+        assertThat(dto.fullSlug()).isEqualTo("/climatiseurs/8431312260509-climatisation-midea-mmcs12hrn8qrd0");
+    }
+
+    @Test
+    void getProductComputesFullSlugFromSlugWhenProductHasNoCategory() throws Exception {
+        long gtin = 8427973010706L;
+        Product product = new Product(gtin);
+        Localisable<String, String> urlLocalisable = new Localisable<>();
+        urlLocalisable.put("fr", "/8427973010706-rouleau-pour-couvre-livre-depliant-1-50x0-50/");
+        product.getNames().setUrl(urlLocalisable);
+
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
+
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("base"), DomainLanguage.fr);
+
+        assertThat(dto.slug()).isEqualTo("/8427973010706-rouleau-pour-couvre-livre-depliant-1-50x0-50/");
+        assertThat(dto.fullSlug()).isEqualTo("/8427973010706-rouleau-pour-couvre-livre-depliant-1-50x0-50");
     }
 
     @Test

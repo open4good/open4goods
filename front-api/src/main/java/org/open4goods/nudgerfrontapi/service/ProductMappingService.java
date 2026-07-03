@@ -241,10 +241,7 @@ public class ProductMappingService {
         }
         String fullSlug = null;
         if (StringUtils.hasText(slug)) {
-            String verticalHomeUrl = resolveVerticalHomeUrl(product.getVertical(), domainLanguage, vConfig);
-            if (StringUtils.hasText(verticalHomeUrl)) {
-                fullSlug = "/" + verticalHomeUrl + "/" + slug;
-            }
+            fullSlug = buildFullSlug(slug, product.getVertical(), domainLanguage, vConfig);
         }
 
         ProductDto dto = new ProductDto(
@@ -383,10 +380,7 @@ public class ProductMappingService {
         String fullSlug = null;
         if (StringUtils.hasText(slug)) {
             VerticalConfig config = resolveVerticalConfig(referencedProduct.getVertical());
-            String verticalHomeUrl = resolveVerticalHomeUrl(referencedProduct.getVertical(), domainLanguage, config);
-            if (StringUtils.hasText(verticalHomeUrl)) {
-                fullSlug = "/" + verticalHomeUrl + "/" + slug;
-            }
+            fullSlug = buildFullSlug(slug, referencedProduct.getVertical(), domainLanguage, config);
         }
 
         ProductScoresDto scores = null;
@@ -1020,10 +1014,55 @@ public class ProductMappingService {
             return null;
         }
         VerticalConfigDto dto = categoryMappingService.toVerticalConfigDto(config, domainLanguage);
-        if (dto == null || !StringUtils.hasText(dto.verticalHomeUrl())) {
+        if (dto != null && StringUtils.hasText(dto.verticalHomeUrl())) {
+            return dto.verticalHomeUrl();
+        }
+        for (String languageKey : candidateLanguageKeys(domainLanguage, null)) {
+            ProductI18nElements i18n = config.i18n(languageKey);
+            if (i18n != null && StringUtils.hasText(i18n.getVerticalHomeUrl())) {
+                return i18n.getVerticalHomeUrl();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Build the canonical product path from a product slug and vertical
+     * configuration.
+     *
+     * @param slug product slug resolved from product names
+     * @param verticalId vertical identifier attached to the product
+     * @param domainLanguage requested domain language
+     * @param config vertical configuration used to resolve the category URL
+     * @return canonical path or {@code null} when the product is not categorized
+     */
+    private String buildFullSlug(String slug, String verticalId, DomainLanguage domainLanguage, VerticalConfig config) {
+        if (!StringUtils.hasText(slug)) {
             return null;
         }
-        return dto.verticalHomeUrl();
+        String trimmedSlug = trimSlashes(slug);
+        String verticalHomeUrl = resolveVerticalHomeUrl(verticalId, domainLanguage, config);
+        if (!StringUtils.hasText(verticalHomeUrl)) {
+            return "/" + trimmedSlug;
+        }
+        return "/" + trimSlashes(verticalHomeUrl) + "/" + trimmedSlug;
+    }
+
+    /**
+     * Trim leading and trailing slashes from a path fragment.
+     *
+     * @param value path fragment
+     * @return trimmed fragment
+     */
+    private String trimSlashes(String value) {
+        String trimmed = value.trim();
+        while (trimmed.startsWith("/")) {
+            trimmed = trimmed.substring(1);
+        }
+        while (trimmed.endsWith("/")) {
+            trimmed = trimmed.substring(0, trimmed.length() - 1);
+        }
+        return trimmed;
     }
 
     /**

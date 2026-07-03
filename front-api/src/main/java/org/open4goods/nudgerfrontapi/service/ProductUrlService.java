@@ -1,7 +1,12 @@
 package org.open4goods.nudgerfrontapi.service;
 
+import java.util.LinkedHashSet;
+import java.util.Locale;
+import java.util.Set;
+
 import org.open4goods.model.Localisable;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.GoogleIndexationProperties;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
@@ -20,6 +25,7 @@ import org.springframework.util.StringUtils;
 public class ProductUrlService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductUrlService.class);
+    private static final String DEFAULT_LANGUAGE_KEY = "default";
 
     private final ProductRepository productRepository;
     private final VerticalsConfigService verticalsConfigService;
@@ -84,7 +90,45 @@ public class ProductUrlService {
             config = verticalsConfigService.getConfigByIdOrDefault(verticalId);
         }
         VerticalConfigDto dto = categoryMappingService.toVerticalConfigDto(config, domainLanguage);
-        return dto != null ? dto.verticalHomeUrl() : null;
+        if (dto != null && StringUtils.hasText(dto.verticalHomeUrl())) {
+            return dto.verticalHomeUrl();
+        }
+        for (String languageKey : candidateLanguageKeys(domainLanguage)) {
+            ProductI18nElements i18n = config.i18n(languageKey);
+            if (i18n != null && StringUtils.hasText(i18n.getVerticalHomeUrl())) {
+                return i18n.getVerticalHomeUrl();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Build candidate language keys for vertical URL fallback lookup.
+     *
+     * @param domainLanguage requested domain language
+     * @return ordered language keys
+     */
+    private Set<String> candidateLanguageKeys(DomainLanguage domainLanguage) {
+        LinkedHashSet<String> keys = new LinkedHashSet<>();
+        if (domainLanguage != null) {
+            String iso = domainLanguage.name();
+            String tag = domainLanguage.languageTag();
+            String normalizedTag = tag.replace('_', '-');
+            keys.add(iso);
+            keys.add(iso.toLowerCase(Locale.ROOT));
+            keys.add(iso.toUpperCase(Locale.ROOT));
+            keys.add(tag);
+            keys.add(tag.toLowerCase(Locale.ROOT));
+            keys.add(normalizedTag);
+            keys.add(normalizedTag.toLowerCase(Locale.ROOT));
+            if (normalizedTag.contains("-")) {
+                String base = normalizedTag.substring(0, normalizedTag.indexOf('-'));
+                keys.add(base);
+                keys.add(base.toLowerCase(Locale.ROOT));
+            }
+        }
+        keys.add(DEFAULT_LANGUAGE_KEY);
+        return keys;
     }
 
     /**

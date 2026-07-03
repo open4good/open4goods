@@ -427,7 +427,7 @@ const onRowClick = (
   item: { item: CategoryProductTableRow }
 ) => {
   const product = item.item.product
-  const target = product.fullSlug ?? product.slug
+  const target = product.fullSlug
 
   if (target) {
     router.push(target)

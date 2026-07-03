@@ -1836,7 +1836,7 @@ const handleRemove = (gtin: string) => {
 }
 
 const productLink = (entry: CompareProductEntry) => {
-  return entry.product.fullSlug ?? entry.product.slug ?? null
+  return entry.product.fullSlug ?? null
 }
 
 const productModelLabel = (entry: CompareProductEntry) => {

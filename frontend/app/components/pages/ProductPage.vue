@@ -260,6 +260,7 @@ import { buildProductMeta } from '~/utils/seo/product-meta'
 import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigation.vue'
 import ProductHero from '~/components/product/ProductHero.vue'
 import ProductVigilanceTeaser from '~/components/product/ProductVigilanceTeaser.vue'
+import ProductPriceSection from '~/components/product/ProductPriceSection.vue'
 import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import { useAuth } from '~/composables/useAuth'
@@ -282,9 +283,6 @@ const ProductAttributesSection = defineAsyncComponent(
 )
 const ProductImpactSection = defineAsyncComponent(
   () => import('~/components/product/ProductImpactSection.vue')
-)
-const ProductPriceSection = defineAsyncComponent(
-  () => import('~/components/product/ProductPriceSection.vue')
 )
 const ProductAlternatives = defineAsyncComponent(
   () => import('~/components/product/impact/ProductAlternatives.vue')
@@ -411,9 +409,9 @@ const {
 
 const product = computed(() => productData.value)
 
-if (product.value?.fullSlug || (product.value?.slug && categorySlug)) {
+if (product.value?.fullSlug) {
   const currentPath = route.path.startsWith('/') ? route.path : `/${route.path}`
-  const canonicalSlug = (product.value.fullSlug ?? product.value.slug)?.trim()
+  const canonicalSlug = product.value.fullSlug.trim()
   const targetPath = canonicalSlug?.startsWith('/')
     ? canonicalSlug
     : `/${canonicalSlug}`
@@ -943,7 +941,7 @@ const canonicalPath = computed(() => {
   const fallbackPath = route.path.startsWith('/')
     ? route.path
     : `/${route.path}`
-  const preferredSlug = product.value?.fullSlug ?? product.value?.slug ?? null
+  const preferredSlug = product.value?.fullSlug ?? null
   const normalizedSlug = preferredSlug
     ? preferredSlug.startsWith('/')
       ? preferredSlug

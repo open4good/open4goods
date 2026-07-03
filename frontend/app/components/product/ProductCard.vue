@@ -185,7 +185,7 @@ const resolveImage = (product: ProductDto) => {
 }
 
 const resolvedProductLink = computed(
-  () => props.product.fullSlug ?? props.product.slug ?? undefined
+  () => props.product.fullSlug ?? undefined
 )
 
 const impactScoreValue = computed(() =>

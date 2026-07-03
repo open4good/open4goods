@@ -156,8 +156,7 @@ const resolveImage = (product: ProductDto) => {
   )
 }
 
-const productLink = (product: ProductDto) =>
-  product.fullSlug ?? product.slug ?? undefined
+const productLink = (product: ProductDto) => product.fullSlug ?? undefined
 
 const impactScoreValue = (product: ProductDto) =>
   resolvePrimaryImpactScore(product)

@@ -165,7 +165,7 @@ const remove = (id: string) => {
 }
 
 const itemLink = (item: CompareListItem) => {
-  return item.fullSlug ?? item.slug ?? undefined
+  return item.fullSlug ?? undefined
 }
 
 const launchComparison = () => {

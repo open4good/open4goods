@@ -1829,7 +1829,7 @@ const productListJsonLd = computed(() => {
       return null
     }
 
-    const productUrl = toAbsoluteUrl(product.fullSlug ?? product.slug)
+    const productUrl = toAbsoluteUrl(product.fullSlug)
     const imageUrl =
       toAbsoluteUrl(product.resources?.coverImagePath) ??
       toAbsoluteUrl(

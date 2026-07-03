@@ -91,7 +91,7 @@ const route = useRoute()
 const requestURL = useRequestURL()
 const localePath = useLocalePath()
 const { t } = useI18n()
-const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
+const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host', 'user-agent'])
 
 const token = computed(() => {
   const param = route.params.token

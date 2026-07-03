@@ -227,7 +227,7 @@ describe('Uncategorized Product Page', () => {
     expect(navigateTo).not.toHaveBeenCalled()
   })
 
-  it('redirects categorized products without fullSlug to the root product slug', async () => {
+  it('does not redirect categorized products without fullSlug to a root product slug', async () => {
     routeMock.params.slug = [
       'livres',
       '8427973010706-rouleau-pour-couvre-livre-depliant-1-50x0-50',
@@ -248,12 +248,6 @@ describe('Uncategorized Product Page', () => {
 
     await mountProductPage()
 
-    expect(navigateTo).toHaveBeenCalledWith(
-      '/rouleau-pour-couvre-livre-depliant-1-50x0-50',
-      {
-        replace: true,
-        redirectCode: 301,
-      }
-    )
+    expect(navigateTo).not.toHaveBeenCalled()
   })
 })

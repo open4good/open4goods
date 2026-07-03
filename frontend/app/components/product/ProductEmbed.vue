@@ -160,7 +160,7 @@ const productLink = computed(() => {
     return undefined
   }
 
-  const slug = product.fullSlug?.trim() || product.slug?.trim()
+  const slug = product.fullSlug?.trim()
 
   if (!slug) {
     return undefined
