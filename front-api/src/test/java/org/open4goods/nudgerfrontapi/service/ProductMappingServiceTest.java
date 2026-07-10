@@ -131,6 +131,33 @@ class ProductMappingServiceTest {
     }
 
     @Test
+    void getProductNamesIncludesBackendComputedMetaTitle() throws Exception {
+        long gtin = 1234567890123L;
+        Product product = new Product(gtin);
+        product.setVertical("phones");
+        ProductTexts names = new ProductTexts();
+        Localisable<String, String> seoName = new Localisable<>();
+        seoName.put("fr", "Fairphone 6");
+        names.setSeoName(seoName);
+        product.setNames(names);
+        product.setScores(Map.of("ECOSCORE", new Score("ECOSCORE", 14.25)));
+
+        VerticalConfig verticalConfig = new VerticalConfig();
+        ProductI18nElements frI18n = new ProductI18nElements();
+        frI18n.setVerticalMetaTitle("Smartphones durables");
+        verticalConfig.getI18n().put("fr", frI18n);
+
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
+        when(verticalsConfigService.getConfigByIdOrDefault("phones")).thenReturn(verticalConfig);
+        when(verticalsConfigService.getConfigById("phones")).thenReturn(verticalConfig);
+
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("names"), DomainLanguage.fr);
+
+        assertThat(dto.names()).isNotNull();
+        assertThat(dto.names().metaTitle()).isEqualTo("Fairphone 6 - score impact 14.3/20 | Smartphones durables");
+    }
+
+    @Test
     void scoresIncludeReferencedProducts() throws Exception {
         long gtin = 555L;
         Product product = new Product(gtin);

@@ -39,8 +39,11 @@ export function useHeaderSeo(options: UseHeaderSeoOptions) {
   const { locale } = useI18n()
   const requestURL = useRequestURL()
 
-  // Canonical URL
-  const canonicalUrl = computed(() => requestURL.href)
+  // Canonical URL: keep origin + pathname and drop query/hash noise by default.
+  const canonicalUrl = computed(() => {
+    const url = new URL(requestURL.pathname, requestURL.origin)
+    return url.toString()
+  })
 
   // Meta description (subtitle > description fallback)
   const metaDescription = computed(

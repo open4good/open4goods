@@ -21,6 +21,8 @@ Use this document as the bible for:
 
 > 📄 **Need to update the sitemap?** See [docs/sitemap-generation.md](docs/sitemap-generation.md) for the end-to-end workflow and configuration reference.
 
+> 🔎 **Need to update page metadata?** See [docs/seo-metadata.md](docs/seo-metadata.md) for the backend-first SEO metadata contract and fallback rules.
+
 ## Getting Started: Installation & Setup
 
 To get the project up and running locally, follow these steps:
