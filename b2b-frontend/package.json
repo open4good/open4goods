@@ -61,7 +61,8 @@
     "vitest": "^3.2.4",
     "vue": "^3.5.33",
     "vue-i18n": "^11.3.2",
-    "vue-router": "^5.0.0"
+    "vue-router": "^5.0.0",
+    "vue-tsc": "^3.3.7"
   },
   "packageManager": "pnpm@11.1.3"
 }
