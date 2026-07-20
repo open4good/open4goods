@@ -62,8 +62,8 @@ When instructions conflict:
 
 - The open4goods root `AGENTS.md` and root `pom.xml` win for Java version,
   Spring Boot version, build conventions, and repo documentation policy.
-- `front-api/AGENTS.md` is useful for OpenAPI/Javadoc/controller style, but its
-  Spring Boot 3 wording is stale. Use Spring Boot 4 from the root parent.
+- `front-api/AGENTS.md` is useful for OpenAPI/Javadoc/controller style and uses
+  Spring Boot 4 from the root parent.
 - The Infera apps are the reference for OIDC, organization UX, API key rotation,
   billing/admin/dashboard patterns, OpenAPI codegen, `domains/` mapping, and
   Nuxt 4 / Vuetify 4 structure.
@@ -757,4 +757,3 @@ When done, provide:
 - any known gaps or blocked validations
 - any credentials/env vars needed for local development, without revealing
   secrets
-

@@ -81,9 +81,8 @@ before implementing the affected surface.
 
 ## 4. Build & platform invariants (from root `pom.xml` / `AGENTS.md`)
 
-- Java **21**, Spring Boot **4.0.6** (parent `pom.xml`). The
-  `front-api/AGENTS.md` "Spring Boot 3" wording is **stale** - ignore it for
-  versioning; it is still a good reference for controller/OpenAPI/Javadoc style.
+- Java **21**, Spring Boot **4.0.6** (parent `pom.xml`). `front-api/AGENTS.md`
+  is still a good reference for controller/OpenAPI/Javadoc style.
 - Backend package root: `org.open4goods.b2bapi`. Default local port **8087**.
 - `application-devsec.yml` is excluded from packaged jars (as `front-api` does).
 

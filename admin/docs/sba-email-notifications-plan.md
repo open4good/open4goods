@@ -2,7 +2,7 @@
 
 ## Contexte
 
-Le module `admin` utilise Spring Boot Admin 3.x et un template Thymeleaf pour les notifications email (`status-changed.html`).
+Le module `admin` utilise Spring Boot Admin 4.x et un template Thymeleaf pour les notifications email (`status-changed.html`).
 L'objectif est d'améliorer la lisibilité des alertes en cas d'incident, de réduire le bruit, et d'ajouter des liens directs vers l'interface SBA (`https://sb-admin.nudger.fr`).
 
 ## Décisions déjà validées
@@ -55,7 +55,7 @@ L'objectif est d'améliorer la lisibilité des alertes en cas d'incident, de ré
 **Avantages**
 
 - Bon compromis entre maîtrise et effort.
-- Compatible avec l'écosystème SBA 3.x.
+- Compatible avec l'écosystème SBA 4.x.
 
 **Limites**
 
@@ -94,7 +94,7 @@ Cette option couvre les exigences de lisibilité, anti-bruit, regroupement, et a
 
 ### Étape 2 - Notifier custom
 
-- Implémenter un notifier custom basé sur SBA 3.x.
+- Implémenter un notifier custom basé sur SBA 4.x.
 - Règles de diffusion:
   - envoyer `DOWN` et `OUT_OF_SERVICE`,
   - envoyer le retour `UP` pour résolution,

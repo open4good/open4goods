@@ -114,7 +114,7 @@ mvn clean install
 Or build from the repository root:
 
 ```bash
-mvn -pl nudger-front-api -am clean install
+mvn -pl front-api -am clean install
 ```
 
 ## Testing

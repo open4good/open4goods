@@ -16,7 +16,7 @@ All microservices in this directory follow the root [AGENTS.md](../AGENTS.md) co
 | Component | Standard |
 |-----------|----------|
 | **JDK** | Java 21 |
-| **Framework** | Spring Boot 3.x |
+| **Framework** | Spring Boot 4.x |
 | **Build tool** | Maven (part of multi-module reactor) |
 | **Testing** | JUnit 5, AssertJ |
 

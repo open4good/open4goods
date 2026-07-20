@@ -23,9 +23,8 @@ authenticated product-data API. v1 = the price facet only
 
 ## Conventions (module-specific)
 
-- Spring Boot **4.0.6** from the open4goods parent (ignore the stale "Spring Boot 3"
-  note in `front-api/AGENTS.md`; its controller/OpenAPI/Javadoc style is still a
-  good reference).
+- Spring Boot **4.0.6** from the open4goods parent; `front-api` remains the
+  reference for controller, OpenAPI, and Javadoc style.
 - Layered packages: thin controllers, services own workflows, repositories own
   persistence, DTOs are records, `@ConfigurationProperties` have metadata.
 - **Postgres is authoritative** for credits/ledger; **Redis is hot-path only**.

@@ -1,10 +1,10 @@
 # Nudger Front API - AGENTS Guide
 
 > **Parent Guide**: [Root AGENTS.md](../AGENTS.md)  
-> This guide **extends** the root conventions with front-API-specific rules for Spring Boot 3 and SpringDoc.
+> This guide **extends** the root conventions with front-API-specific rules for Spring Boot 4 and SpringDoc.
 
 ## 1. Mission
-Provide a **clear and fully documented REST API** for the Nuxt 3 frontend, using Spring Boot 3 and SpringDoc.  
+Provide a **clear and fully documented REST API** for the Nuxt 3 frontend, using Spring Boot 4 and SpringDoc.
 The OpenAPI contract is generated directly from the annotated controllers and DTOs.
 
 ---
@@ -26,7 +26,7 @@ Controller  →  Service  →  Repository/Client
 | Layer     | Choice              | Notes                                   |
 |-----------|---------------------|-----------------------------------------|
 | JDK       | 21 +                | No preview features                     |
-| Framework | Spring Boot 3       | Exclude spring-boot-starter-webflux     |
+| Framework | Spring Boot 4       | Exclude spring-boot-starter-webflux     |
 | Docs      | springdoc-openapi   | Swagger UI auto-enabled                 |
 | Build     | Maven multi-module  | **open4goods** parent                   |
 
@@ -50,7 +50,7 @@ mvn --offline clean install
 mvn --offline test
 
 # From the repo root
-mvn --offline -pl nudger-front-api -am clean install
+mvn --offline -pl front-api -am clean install
 ~~~
 
 ### Configuration properties

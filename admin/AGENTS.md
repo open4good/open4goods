@@ -8,7 +8,7 @@ This module is part of the open4goods multi-module Maven project.
 ## Technology
 
 - Java 21
-- Spring Boot 3 (Spring Boot Admin)
+- Spring Boot 4 (Spring Boot Admin)
 
 ## Directory structure
 
