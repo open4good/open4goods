@@ -555,6 +555,7 @@ import {
 } from '~/utils/_field-options-normalizer'
 import { deduplicateSortItemsByTitle } from '~/utils/_sort-options-normalizer'
 import { hasAdminAccess } from '~~/shared/utils/_roles'
+import { resolveCategorySeoMeta } from '~/utils/seo/category-meta'
 
 const route = useRoute()
 const router = useRouter()
@@ -710,13 +711,6 @@ const category = computed<VerticalConfigFullDto | null>(() => {
   return fallback ? (toRaw(fallback) as VerticalConfigFullDto) : null
 })
 const errorMessage = computed(() => categoriesError.value)
-const stripMarkdownSyntax = (value: string) =>
-  value
-    .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/[`*_~>#]+/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
 const activeSubCategory = computed(() => {
   if (!subCategorySlug) {
     return null
@@ -823,43 +817,20 @@ const shouldRestrictCategoryProducts = computed(
 const canonicalUrl = computed(() =>
   new URL(route.path, requestURL.origin).toString()
 )
-const seoTitle = computed(
-  () =>
-    activeSubCategory.value?.metaTitle ??
-    activeSubCategory.value?.h1Title ??
-    category.value?.verticalMetaTitle ??
-    category.value?.verticalHomeTitle ??
-    siteName.value
+const categorySeoMeta = computed(() =>
+  resolveCategorySeoMeta({
+    category: category.value,
+    subCategory: activeSubCategory.value,
+    siteName: siteName.value,
+  })
 )
-const seoDescription = computed(() =>
-  stripMarkdownSyntax(
-    activeSubCategory.value?.metaDescription ??
-      activeSubCategory.value?.description ??
-      category.value?.verticalMetaDescription ??
-      category.value?.verticalHomeDescription ??
-      ''
-  )
-)
+const seoTitle = computed(() => categorySeoMeta.value.title)
+const seoDescription = computed(() => categorySeoMeta.value.description)
 const robotsContent = computed(() =>
   shouldRestrictCategoryProducts.value ? 'noindex, nofollow' : undefined
 )
-const ogTitle = computed(
-  () =>
-    activeSubCategory.value?.metaOpenGraphTitle ??
-    activeSubCategory.value?.metaTitle ??
-    activeSubCategory.value?.h1Title ??
-    category.value?.verticalMetaOpenGraphTitle ??
-    seoTitle.value
-)
-const ogDescription = computed(() =>
-  stripMarkdownSyntax(
-    activeSubCategory.value?.metaOpenGraphDescription ??
-      activeSubCategory.value?.metaDescription ??
-      activeSubCategory.value?.description ??
-      category.value?.verticalMetaOpenGraphDescription ??
-      seoDescription.value
-  )
-)
+const ogTitle = computed(() => categorySeoMeta.value.ogTitle)
+const ogDescription = computed(() => categorySeoMeta.value.ogDescription)
 const ogImage = computed(() => {
   if (!heroImage.value) {
     return undefined

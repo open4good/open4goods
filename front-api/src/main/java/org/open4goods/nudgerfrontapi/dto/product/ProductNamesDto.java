@@ -14,6 +14,9 @@ public record ProductNamesDto(
         String pageTitle,
         @Schema(description = "Compact product name used as the base for SEO metadata", example = "Samsung Galaxy S24")
         String seoName,
+        @Schema(description = "Backend-computed SEO meta title aligned with the requested language",
+                example = "Samsung Galaxy S24 - score impact 14/20 | Nudger")
+        String metaTitle,
         @Schema(description = "Meta description aligned with the requested language")
         String metaDescription,
         @Schema(description = "OpenGraph title for social sharing")

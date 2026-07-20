@@ -918,7 +918,7 @@ const productMetaDescription = computed(() => {
     return explicit
   }
 
-  return seoMetaDescription.value
+  return fallbackSeoMetaDescription.value
 })
 
 const toAbsoluteUrl = (value?: string | null) => {
@@ -2411,18 +2411,26 @@ const socialMetaBase = computed(() =>
   })
 )
 
-const seoMetaTitle = computed(() => seoMetaBase.value.title)
-const seoMetaDescription = computed(() => seoMetaBase.value.description)
+const fallbackSeoMetaTitle = computed(() => seoMetaBase.value.title)
+const fallbackSeoMetaDescription = computed(() => seoMetaBase.value.description)
 
-const socialMetaTitle = computed(() => socialMetaBase.value.title)
-const socialMetaDescription = computed(() => socialMetaBase.value.description)
+const fallbackSocialMetaTitle = computed(() => socialMetaBase.value.title)
+const fallbackSocialMetaDescription = computed(() => socialMetaBase.value.description)
+
+const productSeoMeta = computed(() => ({
+  title: product.value?.names?.metaTitle?.trim() || fallbackSeoMetaTitle.value,
+  description: productMetaDescription.value,
+  ogTitle: product.value?.names?.ogTitle?.trim() || fallbackSocialMetaTitle.value,
+  ogDescription:
+    product.value?.names?.ogDescription?.trim() ||
+    fallbackSocialMetaDescription.value,
+}))
 
 useSeoMeta({
-  title: () => seoMetaTitle.value,
-  description: () => productMetaDescription.value,
-  ogTitle: () => product.value?.names?.ogTitle ?? socialMetaTitle.value,
-  ogDescription: () =>
-    product.value?.names?.ogDescription ?? socialMetaDescription.value,
+  title: () => productSeoMeta.value.title,
+  description: () => productSeoMeta.value.description,
+  ogTitle: () => productSeoMeta.value.ogTitle,
+  ogDescription: () => productSeoMeta.value.ogDescription,
   ogUrl: () => canonicalUrl.value,
   ogType: 'product',
   ogImage: () => ogImageUrl.value,

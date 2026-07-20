@@ -44,6 +44,12 @@ export interface ProductNamesDto {
    */
   seoName?: string
   /**
+   * Backend-computed SEO meta title aligned with the requested language
+   * @type {string}
+   * @memberof ProductNamesDto
+   */
+  metaTitle?: string
+  /**
    * Meta description aligned with the requested language
    * @type {string}
    * @memberof ProductNamesDto
@@ -88,6 +94,7 @@ export function ProductNamesDtoFromJSONTyped(
     cardName: json['cardName'] == null ? undefined : json['cardName'],
     pageTitle: json['pageTitle'] == null ? undefined : json['pageTitle'],
     seoName: json['seoName'] == null ? undefined : json['seoName'],
+    metaTitle: json['metaTitle'] == null ? undefined : json['metaTitle'],
     metaDescription:
       json['metaDescription'] == null ? undefined : json['metaDescription'],
     ogTitle: json['ogTitle'] == null ? undefined : json['ogTitle'],
@@ -113,6 +120,7 @@ export function ProductNamesDtoToJSONTyped(
     cardName: value['cardName'],
     pageTitle: value['pageTitle'],
     seoName: value['seoName'],
+    metaTitle: value['metaTitle'],
     metaDescription: value['metaDescription'],
     ogTitle: value['ogTitle'],
     ogDescription: value['ogDescription'],
