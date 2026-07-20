@@ -18,6 +18,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.open4goods.icecat.services.IcecatService;
+import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.AggregatedPrices;
@@ -135,6 +136,8 @@ class ProductMappingServiceTest {
         long gtin = 1234567890123L;
         Product product = new Product(gtin);
         product.setVertical("phones");
+        product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Fairphone");
+        product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "6");
         ProductTexts names = new ProductTexts();
         Localisable<String, String> seoName = new Localisable<>();
         seoName.put("fr", "Fairphone 6");
