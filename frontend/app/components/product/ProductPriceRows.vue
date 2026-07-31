@@ -19,7 +19,7 @@
           target="_blank"
           :rel="AFFILIATE_LINK_REL"
           class="product-price-rows__content"
-          @click.stop
+          @click.stop="trackOfferClick(badge.offer, badge.url, 'price-row')"
         >
           <!-- Merchant Favicon -->
           <img
@@ -92,6 +92,9 @@
               target="_blank"
               :rel="AFFILIATE_LINK_REL"
               class="product-price-rows__menu-item"
+              @click="
+                trackOfferClick(alt.offer, alt.url, 'price-row-alternative')
+              "
             >
               <template #prepend>
                 <img
@@ -130,6 +133,7 @@
 import { computed } from 'vue'
 import { mdiTagOutline, mdiRecycle, mdiChevronDown, mdiStore } from '@mdi/js'
 import { useProductPriceTrend } from '~/composables/useProductPriceTrend'
+import { useAnalytics } from '~/composables/useAnalytics'
 import type {
   ProductDto,
   ProductAggregatedPriceDto,
@@ -146,6 +150,12 @@ const props = defineProps<{
 }>()
 
 const { t, n, locale } = useI18n()
+const {
+  extractTokenFromLink,
+  isClientContribLink,
+  trackAffiliateClick,
+  trackProductRedirect,
+} = useAnalytics()
 
 const resolveUrl = (offer: ProductAggregatedPriceDto | undefined) => {
   if (!offer) return undefined
@@ -238,6 +248,7 @@ type AlternativeOffer = {
   priceLabel: string
   favicon?: string
   url?: string
+  offer: ProductAggregatedPriceDto
 }
 
 const getAlternatives = (
@@ -255,6 +266,7 @@ const getAlternatives = (
       priceLabel: formatOfferPrice(o) || 'N/A',
       favicon: o.favicon ?? o.merchantFavicon,
       url: resolveUrl(o), // Apply same URL resolution logic
+      offer: o,
     }))
 }
 
@@ -269,6 +281,7 @@ type Badge = {
   favicon?: string
   merchantName?: string
   url?: string
+  offer?: ProductAggregatedPriceDto
   hasAlternatives: boolean
   alternatives: AlternativeOffer[]
 }
@@ -299,6 +312,7 @@ const offerBadges = computed<Badge[]>(() => {
         favicon: newOffer.favicon ?? newOffer.merchantFavicon,
         merchantName: newOffer.merchantName,
         url,
+        offer: newOffer,
         hasAlternatives:
           (props.product.offers?.offersByCondition?.['NEW']?.length ?? 0) > 1,
         alternatives: getAlternatives('NEW', newOffer.url),
@@ -325,6 +339,7 @@ const offerBadges = computed<Badge[]>(() => {
         favicon: occasionOffer.favicon ?? occasionOffer.merchantFavicon,
         merchantName: occasionOffer.merchantName,
         url,
+        offer: occasionOffer,
         hasAlternatives:
           (props.product.offers?.offersByCondition?.['USED']?.length ?? 0) +
             (props.product.offers?.offersByCondition?.['REFURBISHED']?.length ??
@@ -356,6 +371,7 @@ const offerBadges = computed<Badge[]>(() => {
         favicon: fallbackOffer?.favicon ?? fallbackOffer?.merchantFavicon,
         merchantName: fallbackOffer?.merchantName,
         url,
+        offer: fallbackOffer,
         hasAlternatives: false,
         alternatives: [],
       })
@@ -364,6 +380,48 @@ const offerBadges = computed<Badge[]>(() => {
 
   return entries
 })
+
+const productGtin = computed(
+  () => props.product.gtin ?? props.product.base?.gtin ?? null
+)
+const productCategorySlug = computed(() => {
+  const fullSlug = props.product.fullSlug?.trim()
+
+  return fullSlug?.split('/').filter(Boolean)[0] ?? null
+})
+
+const trackOfferClick = (
+  offer: ProductAggregatedPriceDto | undefined,
+  link: string | undefined,
+  placement: 'price-row' | 'price-row-alternative'
+) => {
+  if (!isClientContribLink(link)) {
+    return
+  }
+
+  const token = extractTokenFromLink(link)
+  const merchantName = offer?.datasourceName ?? offer?.merchantName ?? null
+
+  trackProductRedirect({
+    token,
+    placement,
+    source: merchantName,
+    url: link,
+  })
+  trackAffiliateClick({
+    token,
+    url: link,
+    merchantName,
+    placement,
+    productId: productGtin.value,
+    gtin: productGtin.value,
+    vertical: props.product.base?.vertical ?? null,
+    categorySlug: productCategorySlug.value,
+    price: offer?.price ?? null,
+    currency: offer?.currency ?? null,
+    condition: offer?.condition ?? null,
+  })
+}
 </script>
 
 <style scoped lang="sass">

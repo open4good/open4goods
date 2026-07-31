@@ -1032,27 +1032,6 @@
       }
     }
   },
-  "contrib": {
-    "error": {
-      "cta": "Retour à l'accueil",
-      "description": "Le lien de contribution a peut-être expiré ou est invalide. Retourner à l'accueil et réessayer.",
-      "detailsPrefix": "Détails :",
-      "title": "Impossible de valider ce lien"
-    },
-    "loading": {
-      "message": "Merci de patienter pendant la validation de votre lien de contribution.",
-      "title": "Préparation de la redirection..."
-    },
-    "seo": {
-      "description": "Nous vérifions votre lien de contribution sécurisé avant de vous rediriger vers le partenaire de Nudger.",
-      "title": "Redirection vers notre partenaire"
-    },
-    "success": {
-      "cta": "Continuer vers le site partenaire",
-      "message": "Vous serez redirigé dans quelques instants. Si rien ne se passe, utilisez le bouton ci-dessous.",
-      "title": "Prêt pour la redirection"
-    }
-  },
   "error": {
     "page": {
       "actions": {

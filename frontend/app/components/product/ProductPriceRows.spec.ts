@@ -1,9 +1,23 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createI18n } from 'vue-i18n'
 import ProductPriceRows from './ProductPriceRows.vue'
 import type { ProductDto } from '~~/shared/api-client'
 import { AFFILIATE_LINK_REL } from '~/utils/_product-pricing'
+
+const trackAffiliateClickMock = vi.hoisted(() => vi.fn())
+const trackProductRedirectMock = vi.hoisted(() => vi.fn())
+
+vi.mock('~/composables/useAnalytics', () => ({
+  useAnalytics: () => ({
+    extractTokenFromLink: (link?: string | null) =>
+      link?.split('/').filter(Boolean).pop() ?? null,
+    isClientContribLink: (link?: string | null) =>
+      Boolean(link?.startsWith('/contrib/')),
+    trackAffiliateClick: trackAffiliateClickMock,
+    trackProductRedirect: trackProductRedirectMock,
+  }),
+}))
 
 const i18nMessages = {
   'fr-FR': {
@@ -62,6 +76,10 @@ describe('ProductPriceRows', () => {
     })
   }
 
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   it('renders a decrease trend correctly', async () => {
     const product: ProductDto = {
       ...baseProduct,
@@ -118,5 +136,42 @@ describe('ProductPriceRows', () => {
     expect(link.attributes('href')).toBe('/contrib/tok-123')
     expect(link.attributes('rel')).toBe(AFFILIATE_LINK_REL)
     expect(link.attributes('target')).toBe('_blank')
+  })
+
+  it('tracks affiliate clicks before opening a contrib link', async () => {
+    const product: ProductDto = {
+      ...baseProduct,
+      gtin: 1234567890123,
+      fullSlug: 'televisions/test-product',
+      base: { vertical: 'televisions' },
+      offers: {
+        ...baseProduct.offers,
+        bestNewOffer: {
+          price: 90,
+          currency: 'EUR',
+          datasourceName: 'Test Merchant',
+          affiliationToken: 'tok-123',
+        },
+        offersByCondition: {},
+      },
+    }
+    const wrapper = await mountComponent(product)
+
+    await wrapper.find('a.product-price-rows__content').trigger('click')
+
+    expect(trackProductRedirectMock).toHaveBeenCalledWith({
+      token: 'tok-123',
+      placement: 'price-row',
+      source: 'Test Merchant',
+      url: '/contrib/tok-123',
+    })
+    expect(trackAffiliateClickMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        token: 'tok-123',
+        placement: 'price-row',
+        productId: 1234567890123,
+        categorySlug: 'televisions',
+      })
+    )
   })
 })

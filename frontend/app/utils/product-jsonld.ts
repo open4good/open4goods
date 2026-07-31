@@ -283,6 +283,20 @@ const toAbsoluteUrl = (origin: string, value: string): string | undefined => {
   }
 }
 
+const isAffiliationRedirectUrl = (origin: string, value: string): boolean => {
+  try {
+    const siteUrl = new URL(origin)
+    const candidateUrl = new URL(value, siteUrl)
+
+    return (
+      candidateUrl.origin === siteUrl.origin &&
+      candidateUrl.pathname.startsWith('/contrib/')
+    )
+  } catch {
+    return false
+  }
+}
+
 const resolveImageUrls = (origin: string, input?: string[]): string[] => {
   if (!input?.length) {
     return []
@@ -491,9 +505,11 @@ export const buildOfferList = (
       return {
         '@type': 'Offer',
         url: url
-          ? url.startsWith('http')
-            ? url
-            : toAbsoluteUrl(origin, url)
+          ? isAffiliationRedirectUrl(origin, url)
+            ? undefined
+            : url.startsWith('http')
+              ? url
+              : toAbsoluteUrl(origin, url)
           : undefined,
         price: offer.price,
         priceCurrency: currency,

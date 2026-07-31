@@ -23,6 +23,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.validation.annotation.Validated;
 
 import ch.qos.logback.classic.Level;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
@@ -274,6 +276,26 @@ public class ApiProperties {
 	private long resourceCleanupGracePeriodMs = 86400000L;
 
 	/**
+	 * Safety floor for the orphan resource cleanup. The batch aborts without touching
+	 * a single file if the number of products actually streamed from Elasticsearch falls
+	 * below this fraction of the index count taken before the stream started.
+	 * <p>
+	 * This guards against a silently truncated or empty stream (index rebuild, alias
+	 * pointing at a half-built index, PIT expiry) being interpreted as "no product owns
+	 * any resource", which would otherwise evict the whole cache.
+	 */
+	@DecimalMin("0.5")
+	@DecimalMax("1.0")
+	private double resourceCleanupMinProductRatio = 0.9d;
+
+	/**
+	 * Retention, in milliseconds, of files parked in the deletion folder by the
+	 * {@link org.open4goods.api.services.ResourceCleanupMode#MOVE} mode. Files older than
+	 * this are purged for real, which is what actually reclaims disk space.
+	 */
+	private long resourceDeletionFolderRetentionMs = 604800000L;
+
+	/**
 	 * Concurrency level for product completion tasks.
 	 */
 	private int completionConcurrency = 10;
@@ -299,6 +321,22 @@ public class ApiProperties {
 
 	public void setResourceCleanupGracePeriodMs(long resourceCleanupGracePeriodMs) {
 		this.resourceCleanupGracePeriodMs = resourceCleanupGracePeriodMs;
+	}
+
+	public double getResourceCleanupMinProductRatio() {
+		return resourceCleanupMinProductRatio;
+	}
+
+	public void setResourceCleanupMinProductRatio(double resourceCleanupMinProductRatio) {
+		this.resourceCleanupMinProductRatio = resourceCleanupMinProductRatio;
+	}
+
+	public long getResourceDeletionFolderRetentionMs() {
+		return resourceDeletionFolderRetentionMs;
+	}
+
+	public void setResourceDeletionFolderRetentionMs(long resourceDeletionFolderRetentionMs) {
+		this.resourceDeletionFolderRetentionMs = resourceDeletionFolderRetentionMs;
 	}
 
 	public int getCompletionConcurrency() {

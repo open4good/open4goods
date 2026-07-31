@@ -61,6 +61,6 @@ describe('SEO remediation routes', () => {
 
     const response = await handler({} as Parameters<typeof handler>[0])
 
-    expect(response).toContain('Disallow: /contrib')
+    expect(response).toContain('Disallow: /contrib/')
   })
 })

@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.BatchService;
+import org.open4goods.api.services.ResourceCleanupMode;
+import org.open4goods.api.services.ResourceCleanupReport;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.services.prompt.dto.openai.BatchJobResponse;
@@ -64,12 +66,27 @@ public class BatchController {
     @PostMapping("/batch/clean-resources")
     @Operation(
             summary = "Run resource garbage collection",
-            description = "Scans stored resources (images, PDFs, cached responses) and removes any orphaned entries "
-                    + "that no longer have a corresponding product document in Elasticsearch. "
-                    + "Safe to run at any time; it does not affect live product data.")
+            description = "Scans the product resource shards of the cache folder and classifies files no longer "
+                    + "referenced by any product document in Elasticsearch. Foreign caches sharing the same root "
+                    + "(favicons, remote files, geocode, batch-ia, Icecat) are never considered. "
+                    + "The run aborts without touching a single file if the product stream comes back short of the "
+                    + "configured safety floor. Defaults to DRY_RUN, which only reports: run it in that mode first and "
+                    + "check the returned counters before switching to MOVE or DELETE.")
     @ApiResponse(responseCode = "200", description = "Orphaned resource cleanup completed")
-    public void cleanOrphanResources() {
-        batchService.cleanOrphanResources();
+    public ResourceCleanupReport cleanOrphanResources(
+            @RequestParam(defaultValue = "DRY_RUN") ResourceCleanupMode mode) {
+        return batchService.cleanOrphanResources(mode);
+    }
+
+    @PostMapping("/batch/purge-resources-deletion-folder")
+    @Operation(
+            summary = "Purge the resource deletion folder",
+            description = "Deletes for real the files parked in the deletion folder by a MOVE run, once they are older "
+                    + "than the configured retention. Moving between two folders of the same filesystem frees no space, "
+                    + "so this is the step that actually reclaims disk.")
+    @ApiResponse(responseCode = "200", description = "Deletion folder purged, returns the number of bytes reclaimed")
+    public long purgeResourcesDeletionFolder() {
+        return batchService.purgeDeletionFolder();
     }
 
     @PostMapping("/batch")

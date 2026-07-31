@@ -56,8 +56,11 @@ public class BatchServiceResourceCleanupTest {
         when(apiProperties.remoteCachingDeletionFolder()).thenReturn(tempDeletionDir.toAbsolutePath().toString() + File.separator);
         when(apiProperties.getResourceCleanupGracePeriodMs()).thenReturn(5000L); // 5 seconds grace period
         when(apiProperties.getAllowedImagesSizeSuffixes()).thenReturn(List.of(30, 50));
+        when(apiProperties.getResourceCleanupMinProductRatio()).thenReturn(0.9d);
+        when(apiProperties.getResourceDeletionFolderRetentionMs()).thenReturn(5000L);
 
         productRepository = mock(ProductRepository.class);
+        when(productRepository.countMainIndex()).thenReturn(1L);
 
         AggregationFacadeService aggregationFacadeService = mock(AggregationFacadeService.class);
         CompletionFacadeService completionFacadeService = mock(CompletionFacadeService.class);
@@ -124,7 +127,7 @@ public class BatchServiceResourceCleanupTest {
         Path youngOrphanFile = createFileInCache(orphanYoungPrefix + "/" + orphanYoungKey, "orphan young content", System.currentTimeMillis() - 1000);
 
         // Execute cleanup
-        batchService.cleanOrphanResources();
+        batchService.cleanOrphanResources(ResourceCleanupMode.MOVE);
 
         // Verify file states
         // 1. Active original file must still be in cache and NOT in deletion dir
@@ -143,6 +146,143 @@ public class BatchServiceResourceCleanupTest {
         // 4. Young orphan file must still exist in cache (skipped due to grace period) and NOT in deletion dir
         assertTrue(Files.exists(youngOrphanFile), "Young orphan file should be skipped and still exist in cache");
         assertFalse(Files.exists(tempDeletionDir.resolve(orphanYoungPrefix + "/" + orphanYoungKey)), "Young orphan file should not be in deletion folder");
+    }
+
+    /**
+     * A stream coming back short of the index count means the enumeration is incomplete, not that
+     * the cache is orphaned. Nothing may be touched in that case.
+     */
+    @Test
+    public void testTruncatedProductStreamAbortsWithoutTouchingAnyFile() throws Exception {
+        // The index claims 100 products, but the stream only yields one
+        when(productRepository.countMainIndex()).thenReturn(100L);
+        when(productRepository.exportAll()).thenReturn(Stream.of(productWithResource()));
+
+        String orphanKey = "orphan_stale_key";
+        Path orphan = createFileInCache(Resource.folderHashPrefix(orphanKey) + "/" + orphanKey, "content",
+                System.currentTimeMillis() - 10000);
+
+        ResourceCleanupReport report = batchService.cleanOrphanResources(ResourceCleanupMode.DELETE);
+
+        assertTrue(report.aborted(), "Run must abort when the product stream is truncated");
+        assertEquals(0, report.processedCount(), "No file may be processed on an aborted run");
+        assertTrue(Files.exists(orphan), "Orphan must survive an aborted run");
+    }
+
+    /**
+     * An empty product index is never a licence to evict the cache.
+     */
+    @Test
+    public void testEmptyProductIndexAborts() throws Exception {
+        when(productRepository.countMainIndex()).thenReturn(0L);
+
+        String orphanKey = "orphan_stale_key";
+        Path orphan = createFileInCache(Resource.folderHashPrefix(orphanKey) + "/" + orphanKey, "content",
+                System.currentTimeMillis() - 10000);
+
+        ResourceCleanupReport report = batchService.cleanOrphanResources(ResourceCleanupMode.DELETE);
+
+        assertTrue(report.aborted(), "Run must abort on an empty product index");
+        assertTrue(Files.exists(orphan), "Orphan must survive an aborted run");
+    }
+
+    /**
+     * The cache root is shared with unrelated caches. Only the three level hash shard hierarchy
+     * holds product resources; everything else must be left strictly alone.
+     */
+    @Test
+    public void testForeignCachesOutsideShardsAreNeverSwept() throws Exception {
+        when(productRepository.exportAll()).thenReturn(Stream.of(productWithResource()));
+
+        long stale = System.currentTimeMillis() - 10000;
+        // Flat files written at the cache root by RemoteFileCachingService and IcecatFileDownloadService
+        Path remoteFile = createFileInCache("1234567890123456789", "remote file cache", stale);
+        // Named sub folders owned by other services
+        Path geocode = createFileInCache("geocode/GeoLite2-City.mmdb", "geoip database", stale);
+        Path aiBatch = createFileInCache("batch-ia/batch-42.jsonl", "in flight ai batch", stale);
+        // A shard shaped folder, but a file sitting at the wrong depth
+        Path shallow = createFileInCache("A/B/stray-file", "not at shard depth", stale);
+
+        ResourceCleanupReport report = batchService.cleanOrphanResources(ResourceCleanupMode.DELETE);
+
+        assertFalse(report.aborted(), "Run should proceed");
+        assertTrue(Files.exists(remoteFile), "Remote file cache entry must not be swept");
+        assertTrue(Files.exists(geocode), "Geocode database must not be swept");
+        assertTrue(Files.exists(aiBatch), "In flight AI batch must not be swept");
+        assertTrue(Files.exists(shallow), "File outside the shard depth must not be swept");
+        assertEquals(0, report.orphanCount(), "No foreign cache file may be classified as orphan");
+    }
+
+    /**
+     * DRY_RUN must account for the reclaimable volume without touching anything.
+     */
+    @Test
+    public void testDryRunReportsOrphansWithoutTouchingThem() throws Exception {
+        when(productRepository.exportAll()).thenReturn(Stream.of(productWithResource()));
+
+        String orphanKey = "orphan_stale_key";
+        Path orphan = createFileInCache(Resource.folderHashPrefix(orphanKey) + "/" + orphanKey, "0123456789",
+                System.currentTimeMillis() - 10000);
+
+        ResourceCleanupReport report = batchService.cleanOrphanResources(ResourceCleanupMode.DRY_RUN);
+
+        assertFalse(report.aborted());
+        assertEquals(1, report.orphanCount(), "Orphan should be counted");
+        assertEquals(10, report.orphanBytes(), "Reclaimable volume should be measured");
+        assertEquals(0, report.processedCount(), "DRY_RUN must not process anything");
+        assertTrue(Files.exists(orphan), "DRY_RUN must leave the orphan in place");
+    }
+
+    /**
+     * DELETE reclaims the space in place, where MOVE only parks the file on the same filesystem.
+     */
+    @Test
+    public void testDeleteModeRemovesOrphanInPlace() throws Exception {
+        when(productRepository.exportAll()).thenReturn(Stream.of(productWithResource()));
+
+        String orphanKey = "orphan_stale_key";
+        String relative = Resource.folderHashPrefix(orphanKey) + "/" + orphanKey;
+        Path orphan = createFileInCache(relative, "content", System.currentTimeMillis() - 10000);
+
+        ResourceCleanupReport report = batchService.cleanOrphanResources(ResourceCleanupMode.DELETE);
+
+        assertEquals(1, report.processedCount());
+        assertFalse(Files.exists(orphan), "Orphan should be deleted in place");
+        assertFalse(Files.exists(tempDeletionDir.resolve(relative)), "DELETE must not park the file anywhere");
+    }
+
+    /**
+     * Parking files is what the previous implementation called a cleanup; the purge is what
+     * actually gives the disk back.
+     */
+    @Test
+    public void testPurgeDeletionFolderReclaimsSpaceBeyondRetention() throws Exception {
+        Path parkedStale = tempDeletionDir.resolve("K/E/Y/orphan_stale_key");
+        Files.createDirectories(parkedStale.getParent());
+        Files.writeString(parkedStale, "0123456789", StandardCharsets.UTF_8);
+        assertTrue(parkedStale.toFile().setLastModified(System.currentTimeMillis() - 10000));
+
+        Path parkedRecent = tempDeletionDir.resolve("K/E/Y/orphan_recent_key");
+        Files.writeString(parkedRecent, "still inspectable", StandardCharsets.UTF_8);
+        assertTrue(parkedRecent.toFile().setLastModified(System.currentTimeMillis() - 1000));
+
+        long reclaimed = batchService.purgeDeletionFolder();
+
+        assertEquals(10, reclaimed, "Only the file beyond retention should be reclaimed");
+        assertFalse(Files.exists(parkedStale), "File beyond retention should be purged");
+        assertTrue(Files.exists(parkedRecent), "File within retention should stay inspectable");
+    }
+
+    private Product productWithResource() throws Exception {
+        Product product = new Product();
+        product.setId(999L);
+
+        Resource activeResource = new Resource("http://example.com/image.jpg");
+        activeResource.setResourceType(ResourceType.IMAGE);
+        activeResource.setFileName("image");
+        activeResource.setCacheKey("hash123");
+        product.setResources(new HashSet<>(Collections.singletonList(activeResource)));
+        return product;
     }
 
     private Path createFileInCache(String relativePath, String content, long lastModifiedTime) throws IOException {

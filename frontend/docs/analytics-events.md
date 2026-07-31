@@ -14,7 +14,9 @@ wraps the Plausible plugin and respects Do Not Track settings.
 
 ### `affiliate-click`
 
-Tracks clicks on affiliate redirect links (typically `/contrib/<token>`).
+Tracks clicks on affiliate redirect links (typically `/contrib/<token>`). Emit
+the event from the source offer link before the browser opens the redirect;
+`/contrib/<token>` is an HTTP-only redirect and does not load analytics.
 
 Props:
 

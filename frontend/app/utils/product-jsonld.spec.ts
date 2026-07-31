@@ -75,6 +75,37 @@ describe('product-jsonld', () => {
     expect(productNode!.offers.offers[0].url).toBe('https://nudger.fr/offer/1')
   })
 
+  it('omits affiliation redirects from offer URLs', () => {
+    const affiliationToken = 'secret-affiliation-token'
+    const graph = buildProductJsonLdGraph({
+      ...(mockInput as unknown as ProductJsonLdInput),
+      product: {
+        ...mockProduct,
+        offers: {
+          offersCount: 1,
+          offersByCondition: {
+            NEW: [
+              {
+                url: `/contrib/${affiliationToken}`,
+                price: 100,
+                currency: 'EUR',
+                condition: 'NEW',
+                datasourceName: 'Shop',
+              },
+            ],
+          },
+        },
+      } as unknown as ProductJsonLdInput['product'],
+    })
+    const productNode = (
+      graph?.['@graph'] as unknown as TestProductNode[]
+    )?.find(node => node['@type'] === 'Product')
+
+    expect(productNode?.offers.offers).toHaveLength(1)
+    expect(productNode?.offers.offers[0]).not.toHaveProperty('url')
+    expect(JSON.stringify(graph)).not.toContain(affiliationToken)
+  })
+
   it('sets priceValidUntil to 10 days in the future', () => {
     const graph = buildProductJsonLdGraph(
       mockInput as unknown as ProductJsonLdInput
@@ -529,7 +560,11 @@ describe('product-jsonld', () => {
         bestRating: 5,
         worstRating: 0,
       },
-      author: { '@type': 'Organization', name: 'Nudger', url: 'https://nudger.fr' },
+      author: {
+        '@type': 'Organization',
+        name: 'Nudger',
+        url: 'https://nudger.fr',
+      },
       reviewBody: 'Best product ever',
     })
   })
@@ -572,9 +607,7 @@ describe('product-jsonld', () => {
       'Home',
       'Category',
     ])
-    expect(breadcrumbNode!.itemListElement.map(e => e.position)).toEqual([
-      1, 2,
-    ])
+    expect(breadcrumbNode!.itemListElement.map(e => e.position)).toEqual([1, 2])
   })
 
   it('emits VideoObject only when required video fields exist', () => {
