@@ -195,7 +195,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 						dedicatedLogger.info("Duplicate attribute candidate for indexation, for GTIN : {} and attrs {}",
 								data.getId(), attrConfig.getKey());
 						if (!cleanedValue.equals(indexedAttr.getValue())) {
-							dedicatedLogger.warn("Value mismatch for attribute {} : {}<>{}", attr.getName(),
+							dedicatedLogger.debug("Value mismatch for attribute {} : {}<>{}", attr.getName(),
 									cleanedValue, indexedAttr.getValue());
 						}
 					} else {

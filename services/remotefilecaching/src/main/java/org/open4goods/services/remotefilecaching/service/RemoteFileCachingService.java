@@ -81,7 +81,7 @@ public class RemoteFileCachingService {
 
 		CacheResourceConfig conf = configs.get(url);
 		if (null == conf) {
-			logger.info("No cache config, caching with default config",url );
+			logger.info("No cache config for resource {}, caching with default config", loggableUrl(url));
 			conf = new CacheResourceConfig();
 			conf.setRefreshInDays(refreshInDays);
 			conf.setUrl(url);
@@ -90,14 +90,14 @@ public class RemoteFileCachingService {
 
 		try {
 			if (!resource.exists()) {
-				logger.info("Resource {} does not exists, will download it",url);
+				logger.info("Resource {} does not exist, will download it", loggableUrl(url));
 				resource = retrieve(conf);
 			} else if ((System.currentTimeMillis() - resource.lastModified()) > (conf.getRefreshInDays() * 24 *3600 * 1000)) {
-				logger.warn("Resource {} is outdated, will replace it",url);
+				logger.warn("Resource {} is outdated, will replace it", loggableUrl(url));
 				resource = retrieve(conf);
 			}
 		} catch (final Exception e) {
-			logger.error("Resource {} cannot be retrieved : {}",url,e.getMessage() );
+			logger.error("Resource {} cannot be retrieved ({})", loggableUrl(url), e.getClass().getSimpleName());
 		}
 
 		return resource;
@@ -175,7 +175,7 @@ public class RemoteFileCachingService {
         // Create a temporary file with a normalized safe name
         File destFile = File.createTempFile("csv", IdHelper.normalizeFileName(safeName) + ".csv");
 
-        logger.info("Downloading CSV for '{}' from '{}' to '{}'", safeName, url, destFile.getAbsolutePath());
+        logger.info("Downloading CSV for '{}' from '{}' to '{}'", safeName, loggableUrl(url), destFile.getAbsolutePath());
 
         try {
             // Handle HTTP/HTTPS URLs
@@ -291,12 +291,27 @@ public class RemoteFileCachingService {
 
 
                 try {
-                        logger.info("Downloading resource  from {} to {}", url, tmpFile);
+                        logger.info("Downloading resource from {} to {}", loggableUrl(url), tmpFile);
             FileUtils.copyURLToFile(new URL(url), tmpFile, connectionTimeout, readTimeout);
 			return tmpFile;
 		} catch (Exception e) {
-			throw new TechnicalException("Cannot download resource " + url  + " : " + e.getMessage());
+			throw new TechnicalException("Cannot download resource", e);
 		}
+	}
+
+	/**
+	 * Removes URL query values before diagnostic logging because remote resource
+	 * URLs can carry credentials or signed access parameters.
+	 *
+	 * @param url remote resource URL
+	 * @return URL without query values, or {@code null} when no URL was supplied
+	 */
+	static String loggableUrl(String url) {
+		if (url == null) {
+			return null;
+		}
+		int queryStart = url.indexOf('?');
+		return queryStart < 0 ? url : url.substring(0, queryStart) + "?<redacted>";
 	}
 	
 	

@@ -113,7 +113,7 @@ export const assertCsrfToken = (event: H3Event) => {
   if (!csrfToken || !headerToken || csrfToken !== headerToken) {
     throw createError({
       statusCode: 403,
-      statusMessage: `Invalid CSRF token. Cookie: '${csrfToken}', Header: '${headerToken}'`,
+      statusMessage: 'Invalid CSRF token.',
     })
   }
 }

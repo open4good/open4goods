@@ -11,7 +11,6 @@ import org.open4goods.b2bapi.service.DashboardSessionService;
 import org.open4goods.b2bapi.service.JwtCookieService;
 import org.open4goods.b2bapi.service.JwtTokenPair;
 import org.open4goods.b2bapi.service.ProvisionedAccount;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/auth")
-@ConditionalOnBean(name = "entityManagerFactory")
 public class AuthController {
 
     private final AuthService authService;

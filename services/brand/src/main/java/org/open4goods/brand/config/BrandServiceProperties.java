@@ -13,7 +13,7 @@ public class BrandServiceProperties {
             "https://raw.githubusercontent.com/open4good/brands-company-mapping/refs/heads/main/brands-company-mapping.json";
 
     private String companyUrlTemplate =
-            "https://raw.githubusercontent.com/open4good/brands-company-mapping/refs/heads/main/company/{id}.json";
+            "https://raw.githubusercontent.com/open4good/brands-company-mapping/refs/heads/main/brands/{id}.json";
 
     private int refreshInDays = 1;
 

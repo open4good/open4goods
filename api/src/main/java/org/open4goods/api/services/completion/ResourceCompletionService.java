@@ -223,7 +223,7 @@ public class ResourceCompletionService extends AbstractCompletionService
      */
     public Resource fetchResource(Resource resource, VerticalConfig vertical)
     {
-        logger.info("Handling resource : {} ", resource);
+        logger.info("Handling resource: {}", safeLogUrl(resource.getUrl()));
 
         resource.setProcessed(true);
         resource.setCacheKey(IdHelper.generateResourceId(resource.getUrl()));
@@ -246,7 +246,7 @@ public class ResourceCompletionService extends AbstractCompletionService
         resource.setFileSize(target.length());
         if (resource.getFileSize() == 0L)
         {
-            logger.warn("Empty resource file: {}", resource.getUrl());
+            logger.warn("Empty resource file: {}", safeLogUrl(resource.getUrl()));
             resource.setStatus(ResourceStatus.EMPTY_FILE);
             resource.setEvicted(true);
             return resource;
@@ -267,7 +267,7 @@ public class ResourceCompletionService extends AbstractCompletionService
                 }
                 else
                 {
-                    logger.warn("Skipping image processing due to file size ({} bytes): {}", target.length(), resource.getUrl());
+                    logger.warn("Skipping image processing due to file size ({} bytes): {}", target.length(), safeLogUrl(resource.getUrl()));
                     resource.setStatus(ResourceStatus.SIZE_LIMIT_EXCEEDED);
                     resource.setEvicted(true);
                 }
@@ -280,7 +280,7 @@ public class ResourceCompletionService extends AbstractCompletionService
                 }
                 else
                 {
-                    logger.warn("Skipping PDF processing due to file size ({} bytes): {}", target.length(), resource.getUrl());
+                    logger.warn("Skipping PDF processing due to file size ({} bytes): {}", target.length(), safeLogUrl(resource.getUrl()));
                     resource.setStatus(ResourceStatus.SIZE_LIMIT_EXCEEDED);
                     resource.setEvicted(true);
                 }
@@ -291,16 +291,16 @@ public class ResourceCompletionService extends AbstractCompletionService
             }
             else
             {
-                logger.warn("Unsupported resource type : {} : {}", resource.getMimeType(), resource.getUrl());
+                logger.warn("Unsupported resource type: {}: {}", resource.getMimeType(), safeLogUrl(resource.getUrl()));
                 resource.setResourceType(ResourceType.UNKNOWN);
                 resource.setStatus(ResourceStatus.UNSUPPORTED_MIME_TYPE);
                 resource.setEvicted(true);
             }
-            logger.debug("Fetching and analysis done : {}", resource);
+            logger.debug("Fetching and analysis done: {}", safeLogUrl(resource.getUrl()));
         }
         catch (Exception e)
         {
-            logger.warn("Resource integration failed : {} : {}", e.getMessage(), resource);
+            logger.warn("Resource integration failed ({}): {}", e.getClass().getSimpleName(), safeLogUrl(resource.getUrl()));
             resource.setEvicted(true);
         }
 
@@ -444,7 +444,7 @@ public class ResourceCompletionService extends AbstractCompletionService
         }
         catch (IllegalArgumentException e)
         {
-            logger.debug("Cannot parse resource URL for filename: {}", url);
+            logger.debug("Cannot parse resource URL for filename: {}", safeLogUrl(url));
         }
         String name = StringUtils.substringAfterLast(path, "/");
         if (StringUtils.isBlank(name))
@@ -476,14 +476,14 @@ public class ResourceCompletionService extends AbstractCompletionService
             String md5 = resource.getMd5();
             if (StringUtils.isNotBlank(md5) && resourcesConfig.getMd5Exclusions().contains(md5))
             {
-                logger.info("Excluded because of blacklisted MD5 : {}", resource.getUrl());
+                logger.info("Excluded because of blacklisted MD5: {}", safeLogUrl(resource.getUrl()));
                 resource.setStatus(ResourceStatus.MD5_EXCLUSION);
                 resource.setEvicted(true);
                 continue;
             }
             if (StringUtils.isNotBlank(md5) && !md5s.add(md5))
             {
-                logger.info("Excluded because of duplicate MD5 : {}", resource.getUrl());
+                logger.info("Excluded because of duplicate MD5: {}", safeLogUrl(resource.getUrl()));
                 resource.setStatus(ResourceStatus.MD5_DUPLICATE);
                 resource.setEvicted(true);
                 continue;
@@ -491,7 +491,7 @@ public class ResourceCompletionService extends AbstractCompletionService
             if (resource.getResourceType() == ResourceType.IMAGE
                     && safePixels(resource) < resourcesConfig.getMinPixelsEvictionSize())
             {
-                logger.info("Excluded because image is too small : {}", resource.getUrl());
+                logger.info("Excluded because image is too small: {}", safeLogUrl(resource.getUrl()));
                 resource.setStatus(ResourceStatus.TOO_SMALL);
                 resource.setEvicted(true);
             }
@@ -558,14 +558,14 @@ public class ResourceCompletionService extends AbstractCompletionService
         }
         catch (ClientProtocolException e)
         {
-            logger.error("Cannot download ({}) : {}", e.getMessage(), resource.getUrl());
+            logger.error("Cannot download ({}) : {}", e.getClass().getSimpleName(), safeLogUrl(resource.getUrl()));
             resource.setStatus(ResourceStatus.PROTOCOL_EXCEPTION);
             resource.setEvicted(true);
             deletePartialDownload(target);
         }
         catch (Exception e)
         {
-            logger.error("Cannot download ({}) : {}", e.getMessage(), resource.getUrl());
+            logger.error("Cannot download ({}) : {}", e.getClass().getSimpleName(), safeLogUrl(resource.getUrl()));
             resource.setStatus(ResourceStatus.IO_EXCEPTION);
             resource.setEvicted(true);
             deletePartialDownload(target);
@@ -627,7 +627,7 @@ public class ResourceCompletionService extends AbstractCompletionService
         }
         catch (Exception e)
         {
-            logger.error("Cannot get mimetype ({}) : {}", e.getMessage(), resource.getUrl());
+            logger.error("Cannot get mimetype ({}) : {}", e.getClass().getSimpleName(), safeLogUrl(resource.getUrl()));
             resource.setStatus(ResourceStatus.NO_MIME_TYPE);
             resource.setEvicted(true);
             return false;
@@ -864,12 +864,13 @@ public class ResourceCompletionService extends AbstractCompletionService
         ImageInfo imageInfo = imageService.buildImageInfo(src);
         if (imageInfo == null || imageInfo.getHeight() == null || imageInfo.getWidth() == null)
         {
-            logger.error("Cannot analyse image : {}", resource.getUrl());
+            logger.error("Cannot analyse image: {}", safeLogUrl(resource.getUrl()));
             resource.setStatus(ResourceStatus.CANNOT_ANALYSE);
             resource.setEvicted(true);
             return;
         }
 
+        File normalizedImage = null;
         try
         {
             Hash hash;
@@ -882,20 +883,52 @@ public class ResourceCompletionService extends AbstractCompletionService
         }
         catch (Exception e)
         {
-            logger.error("Cannot compute perceptive hash ({}) : {}", e.getMessage(), resource.getUrl());
-            resource.setStatus(ResourceStatus.PERCEPTIV_HASH_FAIL);
+            try
+            {
+                normalizedImage = imageService.createJavaCompatiblePng(src);
+                Hash normalizedHash;
+                synchronized (hasher)
+                {
+                    normalizedHash = hasher.hash(normalizedImage);
+                }
+                imageInfo.setpHashValue(normalizedHash.getHashValue().longValue());
+                imageInfo.setpHashLength(normalizedHash.getBitResolution());
+                logger.debug("Computed perceptive hash from normalized image: {}", safeLogUrl(resource.getUrl()));
+            }
+            catch (Exception fallbackException)
+            {
+                logger.error("Cannot compute perceptive hash after normalization ({}) : {}",
+                        fallbackException.getMessage(), safeLogUrl(resource.getUrl()));
+                resource.setStatus(ResourceStatus.PERCEPTIV_HASH_FAIL);
+            }
         }
 
         try
         {
             if (embeddingService != null)
             {
-                imageInfo.setEmbedding(embeddingService.embed(src.toPath()));
+                try
+                {
+                    imageInfo.setEmbedding(embeddingService.embed(
+                            (normalizedImage == null ? src : normalizedImage).toPath()));
+                }
+                catch (Exception e)
+                {
+                    if (normalizedImage == null)
+                    {
+                        normalizedImage = imageService.createJavaCompatiblePng(src);
+                        imageInfo.setEmbedding(embeddingService.embed(normalizedImage.toPath()));
+                    }
+                    else
+                    {
+                        throw e;
+                    }
+                }
             }
         }
         catch (Exception e)
         {
-            logger.error("Cannot compute embedding ({}) : {}", e.getMessage(), resource.getUrl());
+            logger.error("Cannot compute embedding after normalization ({}) : {}", e.getMessage(), safeLogUrl(resource.getUrl()));
             if (e.getMessage() != null && e.getMessage().contains("attention_mask"))
             {
                 logger.warn("Configured vision model may not support image-only inference; check embedding.vision-model-url.");
@@ -905,8 +938,31 @@ public class ResourceCompletionService extends AbstractCompletionService
                 logger.warn("NDManager lifecycle issue detected during image embedding.");
             }
         }
+        finally
+        {
+            if (normalizedImage != null && normalizedImage.exists() && !normalizedImage.delete())
+            {
+                logger.debug("Could not delete normalized temporary image: {}", normalizedImage.getAbsolutePath());
+            }
+        }
 
         resource.setImageInfo(imageInfo);
+    }
+
+    /**
+     * Removes potentially signed query parameters from resource URLs before logging.
+     *
+     * @param url resource URL
+     * @return query-redacted URL, or {@code null} when absent
+     */
+    private static String safeLogUrl(String url)
+    {
+        if (url == null)
+        {
+            return null;
+        }
+        int queryStart = url.indexOf('?');
+        return queryStart < 0 ? url : url.substring(0, queryStart) + "?<redacted>";
     }
 
     /**

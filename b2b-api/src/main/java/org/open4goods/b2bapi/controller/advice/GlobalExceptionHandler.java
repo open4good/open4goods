@@ -45,6 +45,21 @@ public class GlobalExceptionHandler {
         return toProblem(ErrorCode.INVALID_PARAMETER, exception.getMessage(), request);
     }
 
+    /**
+     * Maps requests that do not resolve to an application endpoint to a normal
+     * not-found response instead of reporting them as server failures.
+     *
+     * @param exception unresolved static-resource request
+     * @param request incoming HTTP request
+     * @return RFC 9457 not-found response
+     */
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    ProblemDetail handleNoResourceFoundException(
+            final org.springframework.web.servlet.resource.NoResourceFoundException exception,
+            final HttpServletRequest request) {
+        return toProblem(ErrorCode.NOT_FOUND, "The requested resource does not exist.", request);
+    }
+
     @ExceptionHandler(Exception.class)
     ProblemDetail handleUnhandledException(final Exception exception, final HttpServletRequest request) {
         final String requestId = resolveRequestId(request);

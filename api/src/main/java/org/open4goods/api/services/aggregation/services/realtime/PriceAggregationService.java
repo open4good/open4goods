@@ -66,7 +66,7 @@ public class PriceAggregationService extends AbstractAggregationService {
 	public void onDataFragment(final DataFragment fragment, final Product aggregatedData, final VerticalConfig vConf) throws AggregationSkipException {
 
 		if (!fragment.hasPrice()) {
-			dedicatedLogger.warn("No price for data fragment {}, skipping", fragment);
+			dedicatedLogger.debug("No price for data fragment {}, skipping", fragment);
 		} else if (fragment.getPrice().getPrice() == 0.0) {
 			dedicatedLogger.info("Price is 0 for datafragment {}, skipping", fragment);
 		} else {

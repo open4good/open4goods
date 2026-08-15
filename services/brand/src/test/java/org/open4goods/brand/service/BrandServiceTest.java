@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.open4goods.brand.config.BrandServiceProperties;
 import org.open4goods.brand.model.Brand;
 import org.open4goods.brand.model.Company;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
@@ -17,6 +18,14 @@ class BrandServiceTest {
 
     private final RemoteFileCachingService remoteFileCachingService = mock(RemoteFileCachingService.class);
     private final SerialisationService serialisationService = new SerialisationService();
+
+    @Test
+    void defaultsCompanyResourcesToTheCanonicalBrandsDirectory() {
+        BrandServiceProperties properties = new BrandServiceProperties();
+
+        assertThat(properties.companyUrl("samsung-electronics-co-ltd"))
+                .isEqualTo("https://raw.githubusercontent.com/open4good/brands-company-mapping/refs/heads/main/brands/samsung-electronics-co-ltd.json");
+    }
 
     @Test
     void resolvesCanonicalBrandFromSynonym() throws Exception {
