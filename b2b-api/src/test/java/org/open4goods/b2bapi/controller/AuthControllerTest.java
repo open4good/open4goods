@@ -15,6 +15,7 @@ import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.open4goods.b2bapi.config.B2bApiProperties;
+import org.open4goods.b2bapi.controller.advice.GlobalExceptionHandler;
 import org.open4goods.b2bapi.dto.AuthResponse;
 import org.open4goods.b2bapi.model.OidcProvider;
 import org.open4goods.b2bapi.model.Organization;
@@ -52,7 +53,9 @@ class AuthControllerTest {
                 dashboardSessionService,
                 new AuthTokenResolver(),
                 cookieService);
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
     }
 
     @Test
@@ -114,6 +117,13 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.accessToken").doesNotExist())
                 .andExpect(jsonPath("$.user.displayName").value("Test User"))
                 .andExpect(jsonPath("$.role").value("OWNER"));
+    }
+
+    @Test
+    void meWithoutCredentialsReturnsUnauthorizedProblemDetail() throws Exception {
+        mockMvc.perform(get("/api/v1/auth/me"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401));
     }
 
     private AuthResponse authResponse() {

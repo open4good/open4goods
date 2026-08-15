@@ -12,6 +12,7 @@ public enum ErrorCode {
     MISSING_CREDENTIALS(HttpStatus.UNAUTHORIZED, "missing-credentials", "Missing API key"),
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "invalid-credentials", "Invalid API key"),
     INSUFFICIENT_CREDITS(HttpStatus.PAYMENT_REQUIRED, "insufficient-credits", "Insufficient credits"),
+    NOT_FOUND(HttpStatus.NOT_FOUND, "not-found", "Resource not found"),
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "product-not-found", "Product not found"),
     VALIDATION_ERROR(HttpStatus.UNPROCESSABLE_ENTITY, "validation-error", "Validation error"),
     RATE_LIMITED(HttpStatus.TOO_MANY_REQUESTS, "rate-limited", "Too many requests"),

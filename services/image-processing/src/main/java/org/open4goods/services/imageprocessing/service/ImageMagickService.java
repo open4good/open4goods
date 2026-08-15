@@ -1,7 +1,9 @@
 package org.open4goods.services.imageprocessing.service;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -56,6 +58,43 @@ public class ImageMagickService {
 			log.error("Error while generating default translated image for favico {} : {}", source, e.getMessage());
 
 
+		}
+	}
+
+	/**
+	 * Converts an image to a temporary PNG that Java image libraries can decode.
+	 *
+	 * <p>ImageMagick supports several supplier formats, notably WebP, that are
+	 * not always available through ImageIO or DJL. The caller owns the returned
+	 * temporary file and must delete it after processing.</p>
+	 *
+	 * @param source source image to normalize
+	 * @return readable PNG file containing the first image frame
+	 * @throws IOException when ImageMagick cannot create a usable PNG
+	 */
+	public File createJavaCompatiblePng(final File source) throws IOException {
+		final File target = File.createTempFile("open4goods-image-", ".png");
+		try {
+			final Process process = new ProcessBuilder(
+					"convert", source.getAbsolutePath() + "[0]", "-strip", target.getAbsolutePath()).start();
+			final int exitCode = process.waitFor();
+			final String error = IOUtils.toString(process.getErrorStream(), StandardCharsets.UTF_8).trim();
+			IOUtils.closeQuietly(process.getInputStream());
+			IOUtils.closeQuietly(process.getErrorStream());
+			if (exitCode != 0 || !target.isFile() || target.length() == 0L) {
+				throw new IOException("ImageMagick could not normalize image" +
+						(StringUtils.isBlank(error) ? "" : ": " + error));
+			}
+			return target;
+		} catch (InterruptedException exception) {
+			Thread.currentThread().interrupt();
+			throw new IOException("Image normalization was interrupted", exception);
+		} catch (IOException exception) {
+			Files.deleteIfExists(target.toPath());
+			throw exception;
+		} catch (RuntimeException exception) {
+			Files.deleteIfExists(target.toPath());
+			throw exception;
 		}
 	}
 

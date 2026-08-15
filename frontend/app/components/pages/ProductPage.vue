@@ -303,6 +303,7 @@ const ProductVigilanceSection = defineAsyncComponent(
 const route = useRoute()
 const requestURL = useRequestURL()
 const runtimeConfig = useRuntimeConfig()
+const { $fetch: csrfFetch } = useNuxtApp()
 const { t, locale } = useI18n()
 const { isLoggedIn } = useAuth()
 const { y: scrollY } = useWindowScroll()
@@ -546,7 +547,7 @@ const { data: aggregationsData } = await useAsyncData<
     }))
 
     try {
-      const response = await $fetch<ProductSearchResponseDto>(
+      const response = await csrfFetch<ProductSearchResponseDto>(
         '/api/products/search',
         {
           method: 'POST',

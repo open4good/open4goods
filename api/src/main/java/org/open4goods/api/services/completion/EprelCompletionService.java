@@ -102,12 +102,14 @@ public class EprelCompletionService extends AbstractCompletionService {
 			data.setEprelDatas(null);
 			data.getExternalIds().setEprel(null);
 			data.removeDatasourceData(getDatasourceName());
+			markCompletionAttempt(data);
 			return;
 		}
 		Optional<EprelProduct> selected = selectUniqueResult(results, data, models, vertical);
 		if (selected.isEmpty()) {
 			logger.warn("No safe unique EPREL result ({} candidates) when completing {}", results.size(), data);
 			data.removeDatasourceData(getDatasourceName());
+			markCompletionAttempt(data);
 			return;
 		}
 		{
@@ -134,11 +136,22 @@ public class EprelCompletionService extends AbstractCompletionService {
 			// TODO : Filter per vertical
 
 			// Setting the computed flag
-			data.getDatasourceCodes().put(getDatasourceName(), System.currentTimeMillis());
+			markCompletionAttempt(data);
 
 			logger.info("product {} completed with EPREL datas ", data);
 
 		}
+	}
+
+	/**
+	 * Records a completion attempt, including safe negative outcomes, so the
+	 * configured refresh window prevents the same product from being queried on
+	 * every batch run.
+	 *
+	 * @param data product whose EPREL lookup completed
+	 */
+	private void markCompletionAttempt(Product data) {
+		data.getDatasourceCodes().put(getDatasourceName(), System.currentTimeMillis());
 	}
 
     /**

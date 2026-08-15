@@ -203,6 +203,17 @@ class EprelCompletionServiceTest {
     }
 
     @Test
+    void processProductRecordsNegativeLookupAttemptWithinRefreshWindow()
+    {
+        when(eprelSearchService.search(anyString(), anyList(), anyCollection())).thenReturn(List.of());
+
+        service.processProduct(vertical, product);
+
+        assertThat(product.getDatasourceCodes()).containsKey(EprelCompletionService.EPREL_DS_NAME);
+        assertThat(service.shouldProcess(vertical, product)).isFalse();
+    }
+
+    @Test
     void shouldProcessReturnsFalseWhenCompletedWithinRefreshWindow()
     {
         product.getDatasourceCodes().put(EprelCompletionService.EPREL_DS_NAME, System.currentTimeMillis());

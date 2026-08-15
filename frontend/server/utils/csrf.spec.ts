@@ -124,5 +124,9 @@ describe('csrf utilities', () => {
     getRequestHeaderMock.mockReturnValue(undefined)
 
     expect(() => assertCsrfToken(event)).toThrow(error)
+    expect(createErrorMock).toHaveBeenCalledWith({
+      statusCode: 403,
+      statusMessage: 'Invalid CSRF token.',
+    })
   })
 })
