@@ -11,7 +11,9 @@ owned, and linked from this index when they become durable project knowledge.
 - `business/`: mission, governance, product, and project-management material.
 - `conventions/`: documentation and repository conventions.
 - `datasources/`: datasource onboarding guides.
-- `operations/`: local tooling, MCP servers, deployment, and runbooks.
+- `operations/`: local tooling, MCP servers, deployment, and runbooks. See the
+  [dependency maintenance and deployment runbook](operations/dependency-maintenance.md)
+  for Renovate review and release policy.
 - `en/` and `fr/`: localized product-facing documentation.
 - `templates/`: reusable documentation templates.
 

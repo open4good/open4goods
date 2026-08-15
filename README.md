@@ -71,9 +71,12 @@ Contribute to the websites, on the UI, on the content, or on the data aspects. Q
 
 ### Automated dependency updates
 
-Dependencies across Maven modules, Node projects (`frontend` and `ui`) and GitHub Actions
-are maintained by [Renovate](https://github.com/renovatebot/renovate). Updates run
-nightly (`after 10pm and before 5am`), and major Maven upgrades are disabled by default.
+Dependencies across Maven modules, Node projects, Docker/Compose images, and GitHub
+Actions are maintained by [Renovate](https://github.com/renovatebot/renovate). Ordinary
+updates are grouped for manual review before 06:00 Europe/Paris time each Monday; major
+updates require Dependency Dashboard approval, and security fixes remain urgent. See the
+[dependency maintenance and deployment runbook](docs/operations/dependency-maintenance.md)
+for the complete review and release policy.
 
 ### Project management automation
 

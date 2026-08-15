@@ -1,117 +1,87 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
-  "schedule": ["after 10pm", "before 5am"],
+  "extends": ["config:best-practices"],
+  "timezone": "Europe/Paris",
+  "schedule": ["* 0-5 * * 1"],
+  "updateNotScheduled": false,
+  "prConcurrentLimit": 4,
+  "branchConcurrentLimit": 4,
+  "prCreation": "immediate",
   "ignorePaths": ["ui/**"],
-  "automerge": true,
-  "automergeType": "pr",
+  "automerge": false,
   "dependencyDashboard": true,
+  "separateMultipleMajor": true,
 
-  "github-actions": { "enabled": true },
+  "major": {
+    "automerge": false,
+    "dependencyDashboardApproval": true
+  },
+
+  "vulnerabilityAlerts": {
+    "automerge": false,
+    "groupName": null
+  },
+
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["* 0-5 * * 1"]
+  },
 
   "packageRules": [
     {
+      "description": "Keep major upgrades ungrouped and approved from the Dependency Dashboard",
       "matchUpdateTypes": ["major"],
-      "automerge": false
-    },
-
-    {
-      "matchManagers": ["maven"],
-      "labels": ["squad:backend"]
-    },
-
-    {
-      "matchFileNames": ["frontend/**"],
-      "matchManagers": ["npm", "pnpm", "yarn"],
-      "labels": ["squad:ux"]
-    },
-
-    {
-      "description": "Group frontend production dependencies for non-major updates",
-      "matchFileNames": ["frontend/**"],
-      "matchManagers": ["npm", "pnpm", "yarn"],
-      "matchDepTypes": ["dependencies"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "frontend npm dependencies",
-      "groupSlug": "frontend-npm-dependencies",
-      "labels": ["squad:ux", "dependencies:npm"]
-    },
-
-    {
-      "description": "Group frontend tooling dependencies for non-major updates",
-      "matchFileNames": ["frontend/**"],
-      "matchManagers": ["npm", "pnpm", "yarn"],
-      "matchDepTypes": ["devDependencies"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "frontend npm tooling",
-      "groupSlug": "frontend-npm-tooling",
-      "labels": ["squad:ux", "dependencies:npm"]
-    },
-
-    {
-      "description": "Keep Nuxt ecosystem updates together",
-      "matchFileNames": ["frontend/**"],
-      "matchManagers": ["npm", "pnpm", "yarn"],
-      "matchPackageNames": ["nuxt", "@nuxt/**", "@nuxtjs/**", "nuxt-site-config", "vuetify-nuxt-module"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "frontend Nuxt ecosystem",
-      "groupSlug": "frontend-nuxt-ecosystem",
-      "labels": ["squad:ux", "dependencies:npm", "ecosystem:nuxt"]
-    },
-
-    {
-      "description": "Keep Vue ecosystem updates together",
-      "matchFileNames": ["frontend/**"],
-      "matchManagers": ["npm", "pnpm", "yarn"],
-      "matchPackageNames": ["vue", "vue-router", "@vue/**", "@vueuse/**"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "frontend Vue ecosystem",
-      "groupSlug": "frontend-vue-ecosystem",
-      "labels": ["squad:ux", "dependencies:npm", "ecosystem:vue"]
-    },
-
-    {
-      "description": "Keep frontend lint and test tooling updates together",
-      "matchFileNames": ["frontend/**"],
-      "matchManagers": ["npm", "pnpm", "yarn"],
-      "matchPackageNames": [
-        "eslint",
-        "eslint-*",
-        "@typescript-eslint/**",
-        "prettier",
-        "vitest",
-        "@vitest/**",
-        "@playwright/test",
-        "happy-dom",
-        "jsdom",
-        "@types/**",
-        "typescript",
-        "vue-tsc"
-      ],
-      "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "frontend lint and test tooling",
-      "groupSlug": "frontend-lint-test-tooling",
-      "labels": ["squad:ux", "dependencies:npm", "dependencies:tooling"]
-    },
-
-    {
-      "matchManagers": ["github-actions"],
-      "labels": ["squad:platform"]
-    },
-
-    {
-      "description": "Group GitHub Actions updates for non-major updates",
-      "matchManagers": ["github-actions"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "github-actions",
-      "groupSlug": "github-actions",
-      "labels": ["squad:platform", "dependencies:github-actions"]
-    },
-
-    {
-      "matchManagers": ["dockerfile", "docker-compose"],
       "automerge": false,
-      "labels": ["squad:platform"]
+      "dependencyDashboardApproval": true,
+      "groupName": null
+    },
+    {
+      "description": "Use npmInstallTwice only when updating frontend npm lock files",
+      "matchFileNames": ["frontend/**", "b2b-frontend/**"],
+      "matchManagers": ["npm"],
+      "postUpdateOptions": ["npmInstallTwice"]
+    },
+    {
+      "description": "Group non-major frontend npm updates",
+      "matchFileNames": ["frontend/**", "b2b-frontend/**"],
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["minor", "patch", "digest", "pin", "pinDigest", "replacement", "rollback", "bump"],
+      "groupName": "frontend npm updates",
+      "groupSlug": "frontend-npm-updates",
+      "labels": ["squad:ux", "dependencies:npm"]
+    },
+    {
+      "description": "Keep frontend lock-file maintenance in its own reviewable pull request",
+      "matchFileNames": ["frontend/**", "b2b-frontend/**"],
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["lockFileMaintenance"],
+      "groupName": "frontend lock file maintenance",
+      "groupSlug": "frontend-lock-file-maintenance",
+      "labels": ["squad:ux", "dependencies:npm", "maintenance:lockfile"]
+    },
+    {
+      "description": "Group non-major backend Maven updates",
+      "matchManagers": ["maven"],
+      "matchUpdateTypes": ["minor", "patch", "digest", "pin", "pinDigest", "replacement", "rollback", "bump"],
+      "groupName": "backend Maven updates",
+      "groupSlug": "backend-maven-updates",
+      "labels": ["squad:backend", "dependencies:maven"]
+    },
+    {
+      "description": "Group non-major Python worker updates",
+      "matchManagers": ["pep621", "pep723", "pip-compile", "pip_requirements", "pip_setup", "pipenv", "poetry", "setup-cfg"],
+      "matchUpdateTypes": ["minor", "patch", "digest", "pin", "pinDigest", "replacement", "rollback", "bump"],
+      "groupName": "Python worker updates",
+      "groupSlug": "python-worker-updates",
+      "labels": ["squad:backend", "dependencies:python"]
+    },
+    {
+      "description": "Group non-major Docker, Compose, and GitHub Actions updates",
+      "matchManagers": ["dockerfile", "docker-compose", "github-actions"],
+      "matchUpdateTypes": ["minor", "patch", "digest", "pin", "pinDigest", "replacement", "rollback", "bump"],
+      "groupName": "build and infrastructure updates",
+      "groupSlug": "build-infrastructure-updates",
+      "labels": ["squad:platform", "dependencies:infrastructure"]
     }
   ]
 }
