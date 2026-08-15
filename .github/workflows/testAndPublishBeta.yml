@@ -11,7 +11,7 @@ run-name: 🔘 Beta Build by @${{ github.actor }}
 jobs:
   deploy:
     name: Beta Test, Build, and Publish
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     concurrency:
       group: deploy-beta
       cancel-in-progress: true
