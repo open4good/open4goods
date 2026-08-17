@@ -70,7 +70,7 @@ jobs:
       # Checkout
       ############################################
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           fetch-depth: 0
           ref: ${{ steps.meta.outputs.checkout_ref }}
@@ -93,7 +93,7 @@ jobs:
       - name: 📝 Build Release Notes (tag)
         id: build_changelog
         if: steps.meta.outputs.is_tag == 'true'
-        uses: mikepenz/release-changelog-builder-action@v6.2.3
+        uses: mikepenz/release-changelog-builder-action@c9bcd8238b6f41e05561348339429d360b1c0247 # v6.2.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -170,14 +170,14 @@ jobs:
       # Frontend (tests coverage -> copy -> build)
       ############################################
       - name: Setup Node 24
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "24"
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
         with:
-          version: 10.34.4
+          version: 10.34.5
 
       - name: Configure frontend pnpm store
         shell: bash
@@ -187,7 +187,7 @@ jobs:
           mkdir -p "${RUNNER_TEMP}/pnpm-store/frontend"
 
       - name: Setup pnpm cache
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "24"
           cache: "pnpm"
@@ -216,14 +216,14 @@ jobs:
       # Java / Maven (build + site + jacoco aggregate)
       ############################################
       - name: Set up JDK 21 (Temurin) + Maven cache
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: "temurin"
           java-version: "21"
           cache: "maven"
 
       - name: Set up Maven Repositories
-        uses: s4u/maven-settings-action@v4.0.0
+        uses: s4u/maven-settings-action@894661b3ddae382f1ae8edbeab60987e08cf0788 # v4.0.0
         with:
           repositories: |
             [
@@ -329,7 +329,7 @@ jobs:
       # 📦 Always upload reports artifact (even in MODE=test)
       ############################################
       - name: 📦 Upload reports artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: reports-${{ steps.meta.outputs.safe_version }}
           path: frontend/app/public/reports
@@ -419,7 +419,7 @@ jobs:
 
       - name: 🚚 Deploy JARs to Server (Consolidated)
         if: env.MODE != 'test'
-        uses: easingthemes/ssh-deploy@main
+        uses: easingthemes/ssh-deploy@2cc5b27bf3029d0455dd5e09fe02633904031447 # main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ARGS: "-rltgoDzvO"
@@ -433,7 +433,7 @@ jobs:
       ############################################
       - name: 🔁 Start Applications
         if: env.MODE != 'test'
-        uses: appleboy/ssh-action@v1.2.5
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
@@ -445,7 +445,7 @@ jobs:
       ############################################
       - name: Deploy SSR output to  server
         if: env.MODE != 'test'
-        uses: easingthemes/ssh-deploy@main
+        uses: easingthemes/ssh-deploy@2cc5b27bf3029d0455dd5e09fe02633904031447 # main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ARGS: "-rltgoDzvO --delete"
@@ -455,7 +455,7 @@ jobs:
           TARGET: "/opt/open4goods/latest/frontend-ssr"
 
       - name: Deploy reports (forced) to server
-        uses: easingthemes/ssh-deploy@main
+        uses: easingthemes/ssh-deploy@2cc5b27bf3029d0455dd5e09fe02633904031447 # main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ARGS: "-rltgoDzvO --delete"
@@ -466,7 +466,7 @@ jobs:
 
       - name: Preserve previous Nuxt chunks in frontend staging
         if: env.MODE != 'test'
-        uses: appleboy/ssh-action@v1.2.5
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
@@ -497,7 +497,7 @@ jobs:
 
       - name: Publish frontend
         if: env.MODE != 'test'
-        uses: appleboy/ssh-action@v1.2.5
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
@@ -506,7 +506,7 @@ jobs:
 
       - name: Validate published Nuxt assets
         if: env.MODE != 'test'
-        uses: appleboy/ssh-action@v1.2.5
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
@@ -614,9 +614,9 @@ jobs:
       ############################################
       - name: Set up pnpm for b2b-frontend
         if: env.MODE != 'test'
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
         with:
-          version: 11.8.0
+          version: 11.21.0
           standalone: true
 
       - name: Configure b2b-frontend pnpm store
@@ -629,7 +629,7 @@ jobs:
 
       - name: Set up Node.js for b2b-frontend
         if: env.MODE != 'test'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "24"
           cache: "pnpm"
@@ -650,7 +650,7 @@ jobs:
 
       - name: Deploy b2b-frontend output to prod server
         if: env.MODE != 'test'
-        uses: easingthemes/ssh-deploy@main
+        uses: easingthemes/ssh-deploy@2cc5b27bf3029d0455dd5e09fe02633904031447 # main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ARGS: "-rltgoDzvO --delete"
@@ -661,7 +661,7 @@ jobs:
 
       - name: Publish b2b-frontend container
         if: env.MODE != 'test'
-        uses: appleboy/ssh-action@v1.2.5
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
@@ -682,7 +682,7 @@ jobs:
 
       - name: Create Release
         if: env.MODE != 'test' && steps.meta.outputs.is_tag == 'true'
-        uses: mikepenz/action-gh-release@v2
+        uses: mikepenz/action-gh-release@5c3d16ffbdc3e0fbfe2c8a69a448798f5d9b30c2 # v2
         with:
           body_path: ${{ github.workspace }}/RELEASE-NOTES.md
           files: |

@@ -3,7 +3,7 @@ services:
 # Elastic Search
 ###################################################################
   elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch:9.4.3
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.5.1@sha256:b70b3017fbd35310bc57e7e3f8c0ca42ca0b94df3331f747b7cdcfddae430a5a
     container_name: elastic
     environment:
       - http.max_content_length=200mb
@@ -34,7 +34,7 @@ services:
 # Kibana
 ###################################################################
   kibana:
-    image: docker.elastic.co/kibana/kibana:9.4.3
+    image: docker.elastic.co/kibana/kibana:9.5.1@sha256:f1e3cb03928b2c88590579445cd3ea3fad750a1b1ced653193ce4211051d2206
     container_name: kibana
     depends_on:
       - elastic
@@ -51,7 +51,7 @@ services:
 # API (Backend)
 ###################################################################
   api:
-    image: eclipse-temurin:25.0.3_9-jre
+    image: eclipse-temurin:25.0.3_9-jre@sha256:a214efa3200af4b657e41935799aa12d7aee3336fdb42eb505a0948f6ecdd983
     container_name: api
     volumes:
       - ./api/target/api-0.0.1-SNAPSHOT.jar:/app/app.jar
@@ -73,7 +73,7 @@ services:
 # Front API (Backend for Frontend)
 ###################################################################
   front-api:
-    image: eclipse-temurin:25.0.3_9-jre
+    image: eclipse-temurin:25.0.3_9-jre@sha256:a214efa3200af4b657e41935799aa12d7aee3336fdb42eb505a0948f6ecdd983
     container_name: front-api
     volumes:
       - ./front-api/target/front-api-0.0.1-SNAPSHOT.jar:/app/app.jar
@@ -95,7 +95,7 @@ services:
 # Frontend (SSR)
 ###################################################################
   frontend-ssr:
-    image: node:24
+    image: node:24@sha256:934240a162082fd8b8a2f90cd5114446443f1eba1c5378f6687167ca405e6584
     container_name: frontend-ssr
     working_dir: /usr/src/app
     volumes:
