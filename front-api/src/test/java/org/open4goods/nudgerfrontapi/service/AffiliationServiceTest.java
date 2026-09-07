@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,5 +70,15 @@ class AffiliationServiceTest {
     void decryptShouldThrowWhenTokenIsInvalid() {
         assertThrows(InvalidAffiliationTokenException.class,
                 () -> affiliationService.decryptAffiliationLink("not-a-valid-token"));
+    }
+
+    @Test
+    void trackRedirectShouldFailOpenWhenPersistenceThrows() {
+        String token = affiliationService.encryptAffiliationLink("datasource", "https://example.com");
+        doThrow(new RuntimeException("Elasticsearch unavailable")).when(contributionVoteRepository).save(any());
+
+        String url = affiliationService.trackRedirect(token, "203.0.113.5", "Mozilla/5.0");
+
+        assertEquals("https://example.com", url);
     }
 }

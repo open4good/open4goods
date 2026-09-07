@@ -104,11 +104,14 @@ public class AffiliationService {
             contributionVoteRepository.save(vote);
             LOGGER.info("Tracked affiliation redirect for datasource '{}' towards '{}'", vote.getDatasourceName(),
                     vote.getUrl());
-            return vote.getUrl();
         }
         catch (Exception exception) {
-            throw new AffiliationTrackingException("Failed to persist affiliation redirect", exception);
+            // Fail-open: a tracking/persistence failure must never prevent the user from
+            // reaching the merchant. The redirect always proceeds; only the click log is lost.
+            LOGGER.error("Failed to persist affiliation redirect for datasource '{}' towards '{}'",
+                    vote.getDatasourceName(), vote.getUrl(), exception);
         }
+        return vote.getUrl();
     }
 
     /**
