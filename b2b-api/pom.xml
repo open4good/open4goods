@@ -84,7 +84,7 @@
     <dependency>
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-      <version>3.0.3</version>
+      <version>3.1.1</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -107,12 +107,12 @@
     <dependency>
       <groupId>net.javacrumbs.shedlock</groupId>
       <artifactId>shedlock-spring</artifactId>
-      <version>7.7.0</version>
+      <version>7.10.0</version>
     </dependency>
     <dependency>
       <groupId>net.javacrumbs.shedlock</groupId>
       <artifactId>shedlock-provider-redis-spring</artifactId>
-      <version>7.7.0</version>
+      <version>7.10.0</version>
     </dependency>
 
     <dependency>
