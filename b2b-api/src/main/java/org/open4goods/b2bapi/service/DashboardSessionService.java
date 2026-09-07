@@ -6,7 +6,6 @@ import org.open4goods.b2bapi.repository.CreditBucketRepository;
 import org.open4goods.b2bapi.repository.OrganizationMemberRepository;
 import org.open4goods.b2bapi.repository.OrganizationRepository;
 import org.open4goods.b2bapi.repository.UserRepository;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

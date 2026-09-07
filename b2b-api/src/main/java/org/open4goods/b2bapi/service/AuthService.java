@@ -2,14 +2,12 @@ package org.open4goods.b2bapi.service;
 
 import org.open4goods.b2bapi.dto.AuthResponse;
 import org.open4goods.b2bapi.model.OidcProvider;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 
 /**
  * Coordinates provider verification, provisioning, and JWT issuance.
  */
 @Service
-@ConditionalOnBean(name = "entityManagerFactory")
 public class AuthService {
 
     private final OidcVerifierService oidcVerifierService;

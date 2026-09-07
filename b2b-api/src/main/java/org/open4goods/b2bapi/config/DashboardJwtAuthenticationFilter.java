@@ -10,7 +10,6 @@ import org.open4goods.b2bapi.service.AuthTokenResolver;
 import org.open4goods.b2bapi.service.DashboardAuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;

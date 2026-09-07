@@ -8,7 +8,6 @@ import org.open4goods.b2bapi.dto.ApiKeySecretResponse;
 import org.open4goods.b2bapi.dto.CreateApiKeyRequest;
 import org.open4goods.b2bapi.service.ApiKeyService;
 import org.open4goods.b2bapi.service.DashboardPrincipal;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
