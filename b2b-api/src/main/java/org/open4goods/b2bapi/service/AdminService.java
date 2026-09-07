@@ -29,7 +29,6 @@ import org.open4goods.b2bapi.repository.OrganizationRepository;
 import org.open4goods.b2bapi.repository.UsageEventRepository;
 import org.open4goods.b2bapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -39,7 +38,6 @@ import org.springframework.transaction.annotation.Transactional;
  * Service providing administrative functions for platform oversight.
  */
 @Service
-@ConditionalOnBean(name = "entityManagerFactory")
 public class AdminService {
 
     private final OrganizationRepository organizationRepository;

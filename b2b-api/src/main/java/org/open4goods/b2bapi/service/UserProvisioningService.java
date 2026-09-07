@@ -14,7 +14,6 @@ import org.open4goods.b2bapi.repository.OrganizationMemberRepository;
 import org.open4goods.b2bapi.repository.OrganizationRepository;
 import org.open4goods.b2bapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -23,7 +22,6 @@ import org.springframework.util.StringUtils;
  * Provisions and updates dashboard users from verified OIDC identities.
  */
 @Service
-@ConditionalOnBean(name = "entityManagerFactory")
 public class UserProvisioningService {
 
     private final B2bApiProperties properties;

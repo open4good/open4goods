@@ -4,7 +4,6 @@ import java.util.List;
 import org.open4goods.b2bapi.dto.billing.B2bSubscriptionDto;
 import org.open4goods.b2bapi.service.CustomerBillingService;
 import org.open4goods.b2bapi.service.DashboardPrincipal;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/customer/subscriptions")
-@ConditionalOnBean(name = "entityManagerFactory")
 public class CustomerSubscriptionController {
 
     private final CustomerBillingService customerBillingService;

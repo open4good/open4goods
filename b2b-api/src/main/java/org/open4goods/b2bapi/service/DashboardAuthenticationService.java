@@ -3,7 +3,6 @@ package org.open4goods.b2bapi.service;
 import java.util.ArrayList;
 import java.util.List;
 import org.open4goods.b2bapi.model.OrganizationRole;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

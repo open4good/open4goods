@@ -29,7 +29,6 @@ import org.open4goods.b2bapi.service.B2bBarcodeCheckService;
 import org.open4goods.b2bapi.service.B2bBarcodeService;
 import org.open4goods.b2bapi.service.B2bProductService;
 import org.open4goods.b2bapi.service.DashboardPrincipal;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.AccessDeniedException;
@@ -45,7 +44,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/customer/playground")
-@ConditionalOnBean(name = "entityManagerFactory")
 public class CustomerPlaygroundController {
 
     private final ApiKeyRepository apiKeyRepository;

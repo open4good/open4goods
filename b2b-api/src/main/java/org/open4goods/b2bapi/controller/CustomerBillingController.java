@@ -12,7 +12,6 @@ import org.open4goods.b2bapi.service.BillingCatalogService;
 import org.open4goods.b2bapi.service.CustomerBillingService;
 import org.open4goods.b2bapi.service.DashboardPrincipal;
 import org.open4goods.b2bapi.service.StripeBillingService;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -28,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/customer/billing")
-@ConditionalOnBean(name = "entityManagerFactory")
 public class CustomerBillingController {
 
     private final BillingCatalogService billingCatalogService;

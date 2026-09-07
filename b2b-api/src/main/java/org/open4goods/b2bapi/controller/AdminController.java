@@ -13,7 +13,6 @@ import org.open4goods.b2bapi.dto.billing.B2bTransactionDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.open4goods.b2bapi.service.AdminService;
 import org.open4goods.b2bapi.service.DashboardPrincipal;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -32,7 +31,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Platform Administration", description = "Endpoints for B2B platform administrators")
 @RestController
 @RequestMapping("/api/v1/admin")
-@ConditionalOnBean(name = "entityManagerFactory")
 @PreAuthorize("@organizationRbacService.isPlatformAdmin(authentication)")
 public class AdminController {
 
