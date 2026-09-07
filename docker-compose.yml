@@ -3,7 +3,7 @@ services:
 # Elastic Search
 ###################################################################
   elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch:9.5.1@sha256:b70b3017fbd35310bc57e7e3f8c0ca42ca0b94df3331f747b7cdcfddae430a5a
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.5.3@sha256:f456578fc2a620a8a4f4c21d070fff1f6070345adb2be5e5626b65be72aea350
     container_name: elastic
     environment:
       - http.max_content_length=200mb
@@ -34,7 +34,7 @@ services:
 # Kibana
 ###################################################################
   kibana:
-    image: docker.elastic.co/kibana/kibana:9.5.1@sha256:f1e3cb03928b2c88590579445cd3ea3fad750a1b1ced653193ce4211051d2206
+    image: docker.elastic.co/kibana/kibana:9.5.3@sha256:4530cd98c529bc913ae364067f0233ab6cfb9a560644480b365b45f74a18dbf3
     container_name: kibana
     depends_on:
       - elastic
@@ -51,7 +51,7 @@ services:
 # API (Backend)
 ###################################################################
   api:
-    image: eclipse-temurin:25.0.3_9-jre@sha256:a214efa3200af4b657e41935799aa12d7aee3336fdb42eb505a0948f6ecdd983
+    image: eclipse-temurin:25.0.4_7-jre@sha256:f9e65324a37f28209ce7dd0e5149a7aa954520ed936fb87813cf6ded2400a112
     container_name: api
     volumes:
       - ./api/target/api-0.0.1-SNAPSHOT.jar:/app/app.jar
@@ -73,7 +73,7 @@ services:
 # Front API (Backend for Frontend)
 ###################################################################
   front-api:
-    image: eclipse-temurin:25.0.3_9-jre@sha256:a214efa3200af4b657e41935799aa12d7aee3336fdb42eb505a0948f6ecdd983
+    image: eclipse-temurin:25.0.4_7-jre@sha256:f9e65324a37f28209ce7dd0e5149a7aa954520ed936fb87813cf6ded2400a112
     container_name: front-api
     volumes:
       - ./front-api/target/front-api-0.0.1-SNAPSHOT.jar:/app/app.jar
@@ -95,7 +95,7 @@ services:
 # Frontend (SSR)
 ###################################################################
   frontend-ssr:
-    image: node:24@sha256:934240a162082fd8b8a2f90cd5114446443f1eba1c5378f6687167ca405e6584
+    image: node:24@sha256:be23f54a88d34e8824c741b19b91064094f92c1c97b194144bfc8b50d67258e2
     container_name: frontend-ssr
     working_dir: /usr/src/app
     volumes:

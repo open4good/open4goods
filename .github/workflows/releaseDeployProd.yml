@@ -93,7 +93,7 @@ jobs:
       - name: 📝 Build Release Notes (tag)
         id: build_changelog
         if: steps.meta.outputs.is_tag == 'true'
-        uses: mikepenz/release-changelog-builder-action@c9bcd8238b6f41e05561348339429d360b1c0247 # v6.2.3
+        uses: mikepenz/release-changelog-builder-action@cb021f9b36a51a7c6f18e4679b6fa2cb77a1260c # v6.3.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -616,7 +616,7 @@ jobs:
         if: env.MODE != 'test'
         uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
         with:
-          version: 11.21.0
+          version: 11.25.0
           standalone: true
 
       - name: Configure b2b-frontend pnpm store

@@ -4,7 +4,7 @@ services:
 ###################################################################
   xwiki:
     # Use an already built XWiki image from DockerHub.
-    image: "xwiki:stable-mysql-tomcat@sha256:13a2c5f626a8a47264b9a4889b3a01d1279f0cac73dcae027d0918db5d3cd265"
+    image: "xwiki:stable-mysql-tomcat@sha256:7d28a07c4ddb08f5d1254758e263f038cbb94ece38feb3d68a36c3d6bd9f5ad4"
     container_name: xwiki-mysql-tomcat-web
     depends_on:
       - mysql
