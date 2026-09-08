@@ -9,6 +9,10 @@
 
 All microservices in this directory follow the root [AGENTS.md](../AGENTS.md) conventions. This guide consolidates common patterns and documents service-specific details.
 
+A service directory has no `AGENTS.md` of its own unless it states something this
+guide and section 5 below don't already cover. If `services/<name>/AGENTS.md`
+does not exist, section 5's entry for `<name>` is that service's guide.
+
 ---
 
 ## 2. Common Technology Stack
@@ -226,6 +230,18 @@ Each service has unique responsibilities and may have specific conventions beyon
 **Configuration**:
 - Requires Icecat API credentials
 - Configure data synchronization schedules
+
+---
+
+### eprel-service
+
+**Purpose**: Fetches, parses and searches the EU EPREL energy-label catalogue, matching
+products by GTIN, brand and model.
+
+**Key Responsibilities**:
+- Download and parse EPREL's zipped JSON catalogue exports
+- Serve EPREL product lookups (by GTIN, and by brand/model fallback)
+- Schedule periodic catalogue refreshes
 
 ---
 

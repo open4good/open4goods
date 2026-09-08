@@ -6,7 +6,7 @@ audience: PROJECT_SCOPED
 
 # AI Impact Score Generation Process
 
-This document details how the Impact Score configuration for verticals is generated using Generative AI.
+This document details how the Impact Score configuration for verticals is generated using Generative AI. For the scoring formulas themselves (sigma scoring, percentile fallback, weighted-sum aggregation), see [Impact Score computation methodology](ImpactScore_Computation.md).
 
 ## Overview
 

@@ -8,8 +8,8 @@ audience: PROJECT_SCOPED
 
 > Canonical authority: [`../b2b/00-canonical-decisions.md`](../b2b/00-canonical-decisions.md).
 > Two distinct auth surfaces: **dashboard/admin** (human, OIDC + JWT/session) and
-> **external data API** (machine, opaque `pdapi_` key). Reuse Infera's verifier
-> services as references (see paths below); they are the closest in-house pattern.
+> **external data API** (machine, opaque `pdapi_` key). Implemented in
+> `b2b-api/src/main/java/org/open4goods/b2bapi/service/` (see paths below).
 
 ## 1. External data API auth (`pdapi_` keys)
 
@@ -57,9 +57,13 @@ Other endpoints: `POST /api/v1/auth/refresh`, `POST /api/v1/auth/logout`,
 
 ### Per-provider verification
 
-Reference services in Infera:
-`apps/backend/src/main/java/com/infera/backend/service/{OidcTokenVerifierService,
-GoogleTokenVerifierService,GithubTokenVerifierService,JwtTokenService}.java`.
+Implemented in `b2b-api/src/main/java/org/open4goods/b2bapi/service/`:
+`OidcVerifierService` dispatches by provider to `GoogleOidcTokenVerifier`,
+`MicrosoftOidcTokenVerifier`, `GithubOidcTokenVerifier` and
+`AppleOidcTokenVerifier` (the first, second and fourth share JWKS-based
+verification via `JwksOidcTokenVerifier`; GitHub's OAuth-token exchange does
+not). Issued sessions are minted by `JwtTokenService` and
+`JwtCookieService`.
 
 | Provider | Mechanism | Notes |
 |---|---|---|

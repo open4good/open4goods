@@ -111,8 +111,8 @@ gating and `admin_audit_events`.
 
 ## P8 - Frontend scaffold and codegen
 
-`b2b-frontend/` bootstrapped from `infera/apps/frontend` (flat layout per
-[`build.md`](../frontend/build.md)); Nuxt 4 + Vuetify 4 + i18n
+`b2b-frontend/` uses a flat layout (per [`build.md`](../frontend/build.md));
+Nuxt 4 + Vuetify 4 + i18n
 (`prefix_except_default`, `/fr/`) + `@nuxtjs/seo` + `@nuxt/content`; OpenAPI
 client generation from the `b2b-api` spec (committed static spec).
 

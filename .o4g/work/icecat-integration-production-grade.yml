@@ -1,0 +1,59 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: icecat-integration-production-grade, name: Icecat integration, production grade}
+spec:
+  purpose: >-
+    The icecat integration is prototype-quality: getCachedFile() is duplicated three times,
+    100k+ features live in rebuilt-on-boot in-memory HashMaps instead of an index, hand-coded
+    POJOs break on schema drift where JAXB-from-XSD would not, the live completion API
+    (IcecatCompletionService, IcecatData, IcecatController, IcecatCompletionConfig) still lives
+    in api/ instead of services/icecat/, there is no refresh policy, i18n is broken (hardcoded
+    "fr"), and a fifth of icecat's data (BulletPoints, SummaryDescription, ProductFamily/Series,
+    Variants, ReleaseDate/EndOfLifeDate, ReasonsToBuy, FeatureLogos, FeaturesGroups structure) is
+    not mapped. This was agreed as a 5-phase plan on 2026-05-07; the "wrong module" state and the
+    other listed bugs were re-verified against the live tree on 2026-09-08 and are still present.
+    This WorkOrder replaces the ad-hoc memory/ notes that previously carried this plan outside
+    any governed structure.
+  roadmapRef: m5-icecat-integration
+  state: ACCEPTED
+  dependsOn: [governance-kit-bootstrap]
+  pathScope:
+    - 'services/icecat/**'
+    - 'api/src/main/java/org/open4goods/api/services/completion/IcecatCompletionService.java'
+    - 'api/src/main/java/org/open4goods/api/model/IcecatData.java'
+    - 'api/src/main/java/org/open4goods/api/controller/api/IcecatController.java'
+    - 'api/src/main/java/org/open4goods/api/config/yml/IcecatCompletionConfig.java'
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        Phase 1 - JAXB classes are generated from the existing
+        services/icecat/src/main/resources/xsd/icecat.xsd (binding: icecat.xjb), replacing the
+        hand-coded POJOs that break silently on Icecat schema drift.
+    - id: AC2
+      statement: >-
+        Phase 2 - icecat-feature, icecat-category, icecat-feature-group and icecat-supplier
+        become Spring Data Elasticsearch indexes (pattern: services/product-repository's
+        ElasticProductRepository), replacing the in-memory HashMaps rebuilt on every boot in
+        IcecatService, FeatureLoader and CategoryLoader, and eliminating the three duplicate
+        getCachedFile() implementations and CategoryLoader's text-grep category minification.
+    - id: AC3
+      statement: >-
+        Phase 3 - IcecatCompletionService, IcecatData, IcecatController and
+        IcecatCompletionConfig move from api/ into services/icecat/, the module the rest of the
+        icecat integration already lives in.
+    - id: AC4
+      statement: >-
+        Phase 4 - an admin REST endpoint supports manual vertical-to-icecat-category mapping.
+        No auto-fuzzy matching, per the 2026-05-07 constraint.
+    - id: AC5
+      statement: >-
+        Phase 5 - the live completion API stops hardcoding "fr" (language is a parameter
+        end-to-end, architected for more languages later even though only French is populated
+        today) and maps BulletPoints, SummaryDescription, ProductFamily/ProductSeries, Variants
+        and ReleaseDate/EndOfLifeDate, which the current mapping silently drops.
+  evidenceRefs:
+    - 'note: 2026-09-08 -- re-verified against the live tree before promoting the old memory/
+        notes into this WorkOrder: api/src/main/java/org/open4goods/api/services/completion/IcecatCompletionService.java
+        and api/src/main/java/org/open4goods/api/controller/api/IcecatController.java still exist
+        under api/, confirming Phase 3 (module placement) was never done despite icecat-touching
+        commits since 2026-05-07 (c46a64a78, 6ad7b831d, 3e7ea925d, e1d6b462c, 4fb3e2b45).'

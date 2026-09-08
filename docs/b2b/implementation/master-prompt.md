@@ -59,8 +59,7 @@ Before editing files, inspect and obey the repository instructions:
 
 Use the following reference implementations, but adapt them to open4goods:
 
-- `/home/goulven/git/infera/apps/frontend`
-- `/home/goulven/git/infera/apps/backend`
+- `b2b-frontend/`, `b2b-api/` (this repo's own implementation of this plan)
 - `front-api/`
 - `frontend/`
 
@@ -475,9 +474,8 @@ Do not manually edit generated OpenAPI clients.
 
 ## Frontend module: `b2b-frontend`
 
-Create a new top-level `b2b-frontend/`.
-
-Bootstrap from `/home/goulven/git/infera/apps/frontend`, not from the deprecated
+Create a new top-level `b2b-frontend/` (already implemented; see
+[`build.md`](../frontend/build.md) for its layout), not from the deprecated
 `ui/` project.
 
 Use:

@@ -33,3 +33,17 @@ spec:
       exitCondition: >-
         No workflow references a secret that does not exist; no workflow has zero runs;
         the ranked dead-code lots are applied or explicitly declined with a reason.
+    - id: m4-product-page-quality
+      order: 4
+      exitCondition: >-
+        The production build ships the same SSR content the working tree renders; every
+        outbound offer link carries the required affiliate rel attributes; the product page's
+        JSON-LD, hreflang and heading/price/CTA presentation are each single-sourced instead of
+        duplicated per component.
+    - id: m5-icecat-integration
+      order: 5
+      exitCondition: >-
+        The icecat integration lives entirely under services/icecat (nothing left in api/); its
+        feature/category/supplier data is served from Elasticsearch indexes instead of in-memory
+        maps rebuilt from hand-coded POJOs; the live completion API's i18n and mapping gaps
+        (BulletPoints, Variants, ReleaseDate, ProductFamily) are closed.

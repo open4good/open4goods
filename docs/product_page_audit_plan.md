@@ -6,6 +6,10 @@ audience: PROJECT_SCOPED
 
 # Product Page Audit & Fix Plan - UI consistency + SEO/affiliate maximization
 
+> **Governance**: this plan is tracked as WorkOrder
+> [`product-page-seo-ui-quality`](../.o4g/work/product-page-seo-ui-quality.yml)
+> (ACCEPTED). Its 9 work packages map to that WorkOrder's AC1-AC9.
+>
 > **Status tracking**: check the boxes as steps complete. Each work package (WP)
 > is an independent, coherent PR. Execute WPs in order unless stated otherwise.
 > Every WP ends with explicit verification; do not mark a WP done if any

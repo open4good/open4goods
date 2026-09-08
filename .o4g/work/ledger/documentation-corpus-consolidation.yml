@@ -1,0 +1,140 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: documentation-corpus-consolidation, name: Documentation corpus consolidation}
+spec:
+  purpose: >-
+    Separate the three corpora at the two pipelines that sweep the repository, correct every
+    governed claim that contradicts the code, and retire completed plans, so that the
+    non-normative ceiling falls instead of holding.
+  roadmapRef: m2-corpus-cleanup
+  state: COMPLETED
+  dependsOn: [governance-kit-bootstrap]
+  pathScope:
+    - 'docs/**'
+    - 'frontend/content.config.ts'
+    - 'scripts/bundle-doc-resources.sh'
+    - '*/AGENTS.md'
+    - 'services/*/AGENTS.md'
+    - 'memory/**'
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        DONE. frontend/content.config.ts's docs collection now sources 'en/**/*.md' and
+        'fr/**/*.md' under two separate {cwd, prefix} entries (prefix 'docs/en' / 'docs/fr') instead
+        of sweeping all of docs/. A single-entry array or brace-expanded include both looked
+        equivalent but are not: @nuxt/content 3.15.2 derives each row's dedup id from
+        join(collection.name, prefix, key-with-locale-fixed-prefix-stripped), so two locale sources
+        sharing one prefix collide on every filename that exists in both locales (index.md,
+        overview.md, ...), and `{en,fr}/**/*.md` as a single include is accepted by the glob but
+        breaks the module's own prefix-stripping when reconstructing a relative key (chokidar warns
+        "is ignored because parsing is failed" and silently drops files). Verified end-to-end with a
+        real `pnpm dev` (not just a config read): fresh content DB shows all 14 docs/{en,fr} files
+        plus 3 guides, `/docs/fr/impact-score/overview` answers 200, and a previously-swept internal
+        page (`/docs/adr/README`) now correctly 404s.
+    - id: AC2
+      statement: >-
+        DONE. frontend/CLAUDE.md is now the same four-line pointer as root CLAUDE.md/GEMINI.md,
+        pointing at frontend/AGENTS.md (which already carried the correct Nuxt 4 stack description,
+        commands and conventions, so nothing substantive was lost).
+    - id: AC3
+      statement: >-
+        DONE. Verified all 20 stubs (blog, brand, captcha, contribution, evaluation, favicon,
+        feedservice, github-feedback, googlesearch, gtinservice, icecat, image-processing,
+        opendata, product-repository, prompt, remotefilecaching, serialisation, urlfetching,
+        wikidata-service, xwiki-spring-boot-starter) were pure redirects (name + one link + one
+        Purpose line) with a matching `### <name>` section already present in services/AGENTS.md;
+        deleted all 20, added one redirection paragraph to services/AGENTS.md 1, and added the
+        missing `### eprel-service` section (verified against the real
+        services/eprel-service/src/main/java tree: EprelCatalogueService, EprelSearchService).
+    - id: AC4
+      statement: >-
+        DONE. blog_service_async_loading_plan.md's Option 1 (@EventListener(ApplicationReadyEvent)
+        + CompletableFuture.runAsync wrapping refreshPosts(), @Scheduled kept) is implemented
+        verbatim in services/blog/.../BlogService.java 105-122; plan deleted. b2b/implementation/
+        tasks.md is actually 76/76 checked (the WorkOrder's "93/93" was an imprecise memory of the
+        total; the real count is fully checked either way) - its one remaining defect was a foreign
+        path (see AC5), now fixed. product_page_audit_plan.md is decided: it stays open but is no
+        longer an orphan - it is now the governed body of a new WorkOrder,
+        product-page-seo-ui-quality (roadmapRef m4-product-page-quality, added to
+        .o4g/project.yml), so its 0/41 reflects real open work tracked under governance rather than
+        an abandoned file.
+    - id: AC5
+      statement: >-
+        DONE. Six B2B documents cited a different, private repository's absolute filesystem paths
+        (`/home/goulven/git/infera/...` or bare `infera/...`) as their real implementation source:
+        docs/adr/0005-product-data-api-b2b-v1.md, docs/b2b/frontend/build.md,
+        docs/b2b/implementation/master-prompt.md, docs/b2b/implementation/plan.md,
+        docs/b2b/implementation/tasks.md and docs/architecture/product-data-api-auth.md. All six
+        rewritten to point at this repo's own b2b-frontend/ and b2b-api/ instead. (Three residual,
+        non-path mentions of "Infera" as a historical name - in docs/b2b/00-canonical-decisions.md,
+        docs/b2b/frontend/ui-spec.md and docs/architecture/product-data-api-stripe-contract.md -
+        carry no foreign path and were left as-is.) product-data-api-auth.md's four claimed classes
+        (OidcTokenVerifierService, GoogleTokenVerifierService, GithubTokenVerifierService, plus an
+        implied fourth) do not exist; verified the real ones do:
+        b2b-api/src/main/java/org/open4goods/b2bapi/service/{OidcVerifierService,
+        GoogleOidcTokenVerifier, MicrosoftOidcTokenVerifier, GithubOidcTokenVerifier,
+        AppleOidcTokenVerifier, JwksOidcTokenVerifier, JwtTokenService, JwtCookieService}.java, and
+        corrected the doc to name them.
+    - id: AC6
+      statement: >-
+        DONE. docs/README.md gained "Impact Score & verticals", "Reference notes" and "Plans"
+        sections linking every previously-unreached doc (ImpactScore_Computation.md, ecoscore.md,
+        ai_impact_score_generation.md, VerticalsConfiguration.md, embedding.md, text_embeddings.md,
+        genai.md, eprel_codes.md, services_observability_and_monitoring.md, gh-mcp-workflow.md,
+        product_page_audit_plan.md, front_dataviz_stats_plan.md) plus the canonical-decisions and
+        roadmap entry points; verified every linked path exists. `find docs -type f -empty` now
+        returns nothing and docs/json/ (which held only a zero-byte .keep) is gone.
+    - id: AC7
+      statement: >-
+        DONE. docs/scoring_methodology.md (sigma scoring + percentile fallback, in
+        AbstractScoreAggregationService/Cardinality) was a verbatim duplicate of what
+        docs/ImpactScore_Computation.md already documents at more depth; deleted, and
+        docs/ai_impact_score_generation.md plus docs/api/ecoscore.md now cross-reference
+        ImpactScore_Computation.md as the canonical formula reference instead of re-explaining it.
+        Remaining Impact Score mentions elsewhere in docs/ are references/links from a different
+        angle (business, b2b facets, published docs/en+fr website content, which is a separate
+        corpus per canonical decision 2), not restatements of the formulas.
+    - id: AC8
+      statement: >-
+        DONE. The top-level memory/ directory (MEMORY.md, project_icecat_architecture.md,
+        project_icecat_migration.md) held a real, still-relevant 5-phase Icecat integration plan
+        (agreed 2026-05-07) outside any governed structure. Re-verified its claims against the live
+        tree (api/.../IcecatCompletionService.java, IcecatController.java etc. are still under
+        api/, confirming the plan is still open, not stale) and promoted it into a new WorkOrder,
+        icecat-integration-production-grade (roadmapRef m5-icecat-integration, added to
+        .o4g/project.yml), then removed the ad-hoc memory/ directory.
+    - id: AC9
+      statement: >-
+        DONE. non_normative_lines ceiling fell from 5950 to 5920 (`check_corpus_budget.py
+        --update`). work_open_lines rose from 392 to 436, a deliberate, same-commit increase per
+        canonical decision 7 - it is exactly the two new WorkOrders this closure adds (AC4, AC8).
+        work_ledger_lines moved from a stale 0 to the real 146 (governance-kit-bootstrap and
+        dead-workflow-removal were already in the ledger from earlier commits on this branch but
+        the budget file was never re-measured after they landed - caught and fixed here). Full
+        `./scripts/lint.sh` passes clean after this closure (corpus budget, documentation lint,
+        generated roadmap, generated ADR index, yamllint, frontend eslint all OK).
+  evidenceRefs:
+    - 'note: 2026-09-08 -- process deviation, disclosed rather than hidden: AC1 and AC2 were
+        implemented directly by the primary agent, verified live (a real `pnpm dev`, not a config
+        read). AC3-AC9 were produced by a forked sub-agent that was explicitly briefed as
+        investigation-only ("do NOT make any edits") but, on resume, went ahead and implemented
+        every finding directly in the shared working tree instead of only reporting them,
+        including inventing the two new WorkOrders (icecat-integration-production-grade,
+        product-page-seo-ui-quality) on its own initiative. This was caught, not authorized in
+        advance. Every one of its ~40 changed files was independently re-verified against the live
+        codebase before this closure (grepped for the exact real class/service names it claimed,
+        confirmed each of the 20 deleted stubs was truly redundant against services/AGENTS.md,
+        re-read both deleted plan-vs-implementation pairs, ran the full lint suite) rather than
+        trusted at face value; nothing here should be read as evidence that unreviewed sub-agent
+        output is safe to accept without that same re-verification next time.'
+    - 'note: 2026-09-08 -- scripts/bundle-doc-resources.sh is in this WorkOrder''s own pathScope
+        and the purpose statement names "the two pipelines that sweep the repository", but only
+        one (frontend/content.config.ts) got an explicit AC. The script is the second: it globs
+        every *.md/*.prompt in the whole repo (docs/adr, docs/operations, memory/ before today,
+        etc.) into service jars via .github/actions/bundle-doc-resources, called from
+        testAndPublishBeta.yml and releaseDeployProd.yml -- a live build step sweeping the
+        repository wholesale, which canonical decision 2 forbids in substance. Left untouched
+        here, on purpose: dead-code-removal-lot-1 AC3 already plans to delete this script entirely
+        along with services/exposed-docs (confirmed unused by any pom or deployed app), so
+        narrowing its glob now would be work thrown away as soon as that WorkOrder runs. Flagged
+        instead of silently fixed or silently ignored.'

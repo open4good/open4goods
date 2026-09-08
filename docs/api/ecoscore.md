@@ -7,6 +7,8 @@ lang: fr
 
 # Documentation fonctionnelle : règles de construction de l'écoscore Nudger
 
+> Pour les formules de scoring (sigma scoring, repli percentile, somme pondérée), voir la référence canonique : [Impact Score computation methodology](../ImpactScore_Computation.md). Ce document couvre le code (modèle produit, verticale) plutôt que les formules.
+
 ## 1. Objectif et périmètre
 Chaque produit agrégé par Nudger expose un score synthétique nommé `ECOSCORE` au sein de sa carte des scores (`Product.scores`). Ce score est accessible par `Product.ecoscore()`, restituable en chaîne via `ecoscoreAsString()` et transporté avec les autres évaluations lors des échanges API.【F:model/src/main/java/org/open4goods/model/product/Product.java†L273-L306】【F:model/src/main/java/org/open4goods/model/product/Product.java†L556-L563】  
 La position du produit par rapport au reste de la verticale est stockée dans `EcoScoreRanking`, qui mémorise rang, taille d'échantillon et identifiants des meilleurs produits afin d'alimenter les recommandations et les écrans " meilleure alternative ".【F:model/src/main/java/org/open4goods/model/product/Product.java†L838-L844】【F:model/src/main/java/org/open4goods/model/product/EcoScoreRanking.java†L1-L77】

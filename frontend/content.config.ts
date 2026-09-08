@@ -11,7 +11,8 @@ export default defineContentConfig({
     docs: defineCollection({
       type: 'page',
       source: [
-        { include: '**/*.md', cwd: DOCS_DIR, prefix: 'docs' },
+        { include: 'en/**/*.md', cwd: DOCS_DIR, prefix: 'docs/en' },
+        { include: 'fr/**/*.md', cwd: DOCS_DIR, prefix: 'docs/fr' },
         { include: '**/*.md', cwd: GUIDES_DIR, prefix: 'guides' },
       ],
       schema: z.object({

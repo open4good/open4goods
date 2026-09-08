@@ -9,17 +9,15 @@ audience: PROJECT_SCOPED
 > Canonical authority: [`00-canonical-decisions.md`](../00-canonical-decisions.md).
 > Companion to the UX spec [`ui-spec.md`](ui-spec.md). Resolves two
 > implementation ambiguities the UX spec left open: the **project layout** and the
-> **OpenAPI client codegen pipeline**. `b2b-frontend` is bootstrapped from
-> `/home/goulven/git/infera/apps/frontend`.
+> **OpenAPI client codegen pipeline**. Both are implemented in `b2b-frontend/`.
 
 ## 1. Project layout (reconciled)
 
 `ui-spec.md` 4 sketched an `app/`-nested layout (`app/components/`, `app/pages/`,
-...). The actual Infera bootstrap source uses a **flat** Nuxt layout
-(`pages/`, `composables/`, `domains/`, `components/`, `server/`, `content/`,
-`i18n/` at the project root - verified in `infera/apps/frontend`). To keep the
-bootstrap mechanical, **adopt the flat Infera layout** and treat the `app/`
-drawing in `ui-spec.md` 4 as illustrative grouping, not literal paths.
+...). `b2b-frontend/` instead uses a **flat** Nuxt layout (`pages/`,
+`composables/`, `domains/`, `components/`, `server/`, `content/`, `i18n/` at the
+project root). Treat the `app/` drawing in `ui-spec.md` 4 as illustrative
+grouping, not literal paths.
 
 ```text
 b2b-frontend/
@@ -44,8 +42,7 @@ SEO metadata.
 
 ## 2. OpenAPI client codegen
 
-Reuse the Infera pattern (`infera/apps/frontend/scripts/generate-openapi.ts` +
-`openapitools.json`):
+Implemented as `b2b-frontend/scripts/generate-openapi.ts` + `openapitools.json`:
 
 1. **Source of truth**: the `b2b-api` SpringDoc spec. Produce it either by hitting
    a running backend (`http://localhost:8087/v3/api-docs`) or by exporting a static

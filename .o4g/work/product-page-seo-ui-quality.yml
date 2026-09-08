@@ -1,0 +1,74 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: product-page-seo-ui-quality, name: Product page SEO and UI quality}
+spec:
+  purpose: >-
+    Fix the nudger.fr product page against a June-2026 audit with two goals: eliminate UI
+    inconsistencies and maximize clicks on affiliation links. The critical finding is a live
+    production bug, not a cosmetic one: production serves a stale build whose SSR sections
+    (impact, vigilance, caracteristiques, alternatives, cycle-de-vie) render empty, making
+    attributes, impact details and internal links invisible to Google, while the current
+    working tree already SSRs them correctly. The full audit, evidence and an ordered,
+    step-by-step work-package breakdown live in docs/product_page_audit_plan.md; this
+    WorkOrder is that plan's governance home so it is tracked rather than an orphaned file.
+  roadmapRef: m4-product-page-quality
+  state: ACCEPTED
+  dependsOn: [governance-kit-bootstrap]
+  pathScope:
+    - 'frontend/app/components/pages/ProductPage.vue'
+    - 'frontend/app/components/product/**'
+    - 'frontend/app/utils/product-jsonld.ts'
+    - 'frontend/app/utils/_product-pricing.ts'
+    - 'frontend/app/pages/[...slug].vue'
+    - 'frontend/i18n/locales/**'
+    - 'frontend/tests/visual/**'
+    - 'docs/product_page_audit_plan.md'
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        WP0 (docs/product_page_audit_plan.md S1, S8) - the production-mode census
+        (`pnpm build && pnpm preview`) proves every section SSRs content on both reference
+        product URLs, not just the dev-mode census; the duplicate `id="prix"` is fixed; the
+        owner deploys and a post-deploy census against nudger.fr confirms it.
+    - id: AC2
+      statement: >-
+        WP1 (S5) - every outbound offer link is `/contrib/{token}` when a token exists and
+        carries `rel="sponsored nofollow noopener noreferrer"` and `target="_blank"`, replacing
+        the four inconsistent rel variants and the one `window.open` path found across
+        ProductPriceRows.vue, ProductPriceSection.vue, ProductHeroPricingPanel.vue,
+        ProductHeroPricing.vue, ProductStickyPriceBanner.vue and ProductMicroPrice.vue.
+    - id: AC3
+      statement: >-
+        WP2 (S2, S3, S11) - SERP titles keep the ImpactScore and gain a category keyword; the
+        meta description no longer duplicates brand-model when they are identical; the h1
+        carries the category keyword.
+    - id: AC4
+      statement: >-
+        WP3 (S4, S7, S9) - an editorial Review node (derived from the existing verdict/score)
+        is added to the Product JSON-LD for SERP star eligibility; the breadcrumb JSON-LD no
+        longer duplicates the category item URL as the brand item; offer availability/validity
+        fields are honest about what the offer DTO actually exposes.
+    - id: AC5
+      statement: >-
+        WP4 (S6) - the broken `en-US` hreflang alternate (which 301s to a 404 on nudger.com) is
+        either backed by a real per-locale slug or removed; every emitted hreflang alternate
+        resolves 200.
+    - id: AC6
+      statement: >-
+        WP5 (U1, U2, U5, U6-partial, U16) - the above-the-fold score card, verdict chips,
+        merchant name and mobile fold order are fixed per the plan, with before/after Playwright
+        screenshots as the new visual baseline.
+    - id: AC7
+      statement: >-
+        WP6 (U4, U7-U11) - one section-header component, one price-format helper, one CTA/
+        condition color grammar, and no raw internal attribute keys or empty-state noise, applied
+        across the product-detail component set.
+    - id: AC8
+      statement: >-
+        WP7 (U13) - zero string `"mdi-..."` icon literals remain under
+        frontend/app/components/product; the icon migration started on 11 components is
+        finished on the remaining 13.
+    - id: AC9
+      statement: >-
+        WP8 (U3) - the PWA offline-ready toast no longer overlaps page content on load and
+        shows at most once per session.

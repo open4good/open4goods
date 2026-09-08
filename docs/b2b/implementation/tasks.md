@@ -96,7 +96,7 @@ audience: PROJECT_SCOPED
 
 ## P8 - Frontend scaffold and codegen
 
-- [x] P8.1 Bootstrap `b2b-frontend/` from `infera/apps/frontend` (flat layout)
+- [x] P8.1 Bootstrap `b2b-frontend/` (flat layout, see [`build.md`](../frontend/build.md))
 - [x] P8.2 i18n (`prefix_except_default`, en `/`, fr `/fr/`) + `@nuxtjs/seo` + `@nuxt/content`
 - [x] P8.3 OpenAPI codegen pipeline (committed static spec + `generate:openapi`)
 - [x] P8.4 Gate: lint + typecheck + build

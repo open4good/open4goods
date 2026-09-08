@@ -14,8 +14,10 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 |---|---|---|---|---|---|
 | m0-governance | 0 | 0 | 0 | 0 | 1 |
 | m1-config-autonomy | 2 | 1 | 0 | 1 | 0 |
-| m2-corpus-cleanup | 1 | 1 | 0 | 0 | 0 |
+| m2-corpus-cleanup | 0 | 0 | 0 | 0 | 1 |
 | m3-dead-surface-removal | 1 | 0 | 1 | 0 | 1 |
+| m4-product-page-quality | 1 | 1 | 0 | 0 | 0 |
+| m5-icecat-integration | 1 | 1 | 0 | 0 | 0 |
 
 ## m0-governance
 
@@ -31,9 +33,8 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 
 ## m2-corpus-cleanup
 
-| WorkOrder | Contract state | Availability | Dependencies | Blockers | Purpose |
-|---|---|---|---|---|---|
-| [documentation-corpus-consolidation](../../.o4g/work/documentation-corpus-consolidation.yml) | ACCEPTED | READY | governance-kit-bootstrap | -- | Separate the three corpora at the two pipelines that sweep the repository, correct every governed claim that contradicts the code, and retire completed plans, so that the non-normative ceiling falls instead of holding. |
+
+*1 closed, see [ledger](../../.o4g/work/ledger).*
 
 ## m3-dead-surface-removal
 
@@ -42,3 +43,15 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 | [dead-code-removal-lot-1](../../.o4g/work/dead-code-removal-lot-1.yml) | ACCEPTED | BLOCKED | governance-kit-bootstrap, config-repository-elimination | config-repository-elimination | Apply the ranked dead-surface inventory in four lots ordered by runtime risk: tracked weight and orphan fixtures first, then unreferenced frontend components, then Java, then Maven declarations one module at a time. |
 
 *1 closed, see [ledger](../../.o4g/work/ledger).*
+
+## m4-product-page-quality
+
+| WorkOrder | Contract state | Availability | Dependencies | Blockers | Purpose |
+|---|---|---|---|---|---|
+| [product-page-seo-ui-quality](../../.o4g/work/product-page-seo-ui-quality.yml) | ACCEPTED | READY | governance-kit-bootstrap | -- | Fix the nudger.fr product page against a June-2026 audit with two goals: eliminate UI inconsistencies and maximize clicks on affiliation links. The critical finding is a live production bug, not a cosmetic one: production serves a stale build whose SSR sections (impact, vigilance, caracteristiques, alternatives, cycle-de-vie) render empty, making attributes, impact details and internal links invisible to Google, while the current working tree already SSRs them correctly. The full audit, evidence and an ordered, step-by-step work-package breakdown live in docs/product_page_audit_plan.md; this WorkOrder is that plan's governance home so it is tracked rather than an orphaned file. |
+
+## m5-icecat-integration
+
+| WorkOrder | Contract state | Availability | Dependencies | Blockers | Purpose |
+|---|---|---|---|---|---|
+| [icecat-integration-production-grade](../../.o4g/work/icecat-integration-production-grade.yml) | ACCEPTED | READY | governance-kit-bootstrap | -- | The icecat integration is prototype-quality: getCachedFile() is duplicated three times, 100k+ features live in rebuilt-on-boot in-memory HashMaps instead of an index, hand-coded POJOs break on schema drift where JAXB-from-XSD would not, the live completion API (IcecatCompletionService, IcecatData, IcecatController, IcecatCompletionConfig) still lives in api/ instead of services/icecat/, there is no refresh policy, i18n is broken (hardcoded "fr"), and a fifth of icecat's data (BulletPoints, SummaryDescription, ProductFamily/Series, Variants, ReleaseDate/EndOfLifeDate, ReasonsToBuy, FeatureLogos, FeaturesGroups structure) is not mapped. This was agreed as a 5-phase plan on 2026-05-07; the "wrong module" state and the other listed bugs were re-verified against the live tree on 2026-09-08 and are still present. This WorkOrder replaces the ad-hoc memory/ notes that previously carried this plan outside any governed structure. |

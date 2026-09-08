@@ -38,8 +38,8 @@ this ADR ratifies the canonical decisions captured in
 ## Decision
 
 1. **Two new modules in the monorepo.** `b2b-api` (Spring Boot 4 / Java 21,
-   `org.open4goods.b2bapi`) and `b2b-frontend` (Nuxt 4 / Vuetify 4, bootstrapped
-   from `infera/apps/frontend`). They are separate from `front-api`/`frontend`
+   `org.open4goods.b2bapi`) and `b2b-frontend` (Nuxt 4 / Vuetify 4). They are
+   separate from `front-api`/`frontend`
    because the audience (paying developers/businesses), auth model (OIDC +
    organizations + metered API keys), billing, and public brand
    (`product-data-api.com`) are distinct, and we do not want B2B billing/metering
