@@ -25,6 +25,14 @@
                 <sleepycat-je.version>18.3.12</sleepycat-je.version>
                 <commons-io.version>2.22.0</commons-io.version>
                 <commons-text.version>1.15.0</commons-text.version>
+                <!-- co.elastic.clients:elasticsearch-java (via spring-data-elasticsearch) itself
+                     depends on opentelemetry-semconv:1.41.1, but Spring Boot's dependency-management
+                     BOM pins an older 1.29.0-alpha that Maven's nearest-wins mediation prefers,
+                     shading a version without io.opentelemetry.semconv.DbAttributes into the fat
+                     jar. That crashes SimpleElasticsearchRepository construction with a
+                     NoClassDefFoundError at boot. Pin the version elasticsearch-java itself asks
+                     for; see elasticsearch-java-9.4.5.pom. -->
+                <opentelemetry-semconv.version>1.41.1</opentelemetry-semconv.version>
                 <maven-compiler-plugin.version>3.16.0</maven-compiler-plugin.version>
                 <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
                 <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
@@ -175,6 +183,11 @@
 				<groupId>com.sleepycat</groupId>
 				<artifactId>je</artifactId>
 				<version>${sleepycat-je.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.opentelemetry.semconv</groupId>
+				<artifactId>opentelemetry-semconv</artifactId>
+				<version>${opentelemetry-semconv.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
