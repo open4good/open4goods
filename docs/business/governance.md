@@ -1,3 +1,10 @@
+---
+title: "Nudger : Our world"
+normative: false
+audience: PROJECT_SCOPED
+lang: fr
+---
+
 # Nudger : Our world
 
 ## La Tribe Nudger

@@ -1,3 +1,10 @@
+---
+title: "ADR 0004 - Aggregation Service Design: Manual Instantiation vs. Spring Beans"
+normative: true
+audience: PROJECT_SCOPED
+status: accepted
+---
+
 # ADR 0004 - Aggregation Service Design: Manual Instantiation vs. Spring Beans
 
 **Status**: Accepted  

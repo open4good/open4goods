@@ -1,3 +1,9 @@
+---
+title: "MCP Servers"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # MCP Servers
 
 open4goods ships Model Context Protocol configuration for assistants that can

@@ -1,3 +1,9 @@
+---
+title: "Product Data API - Rate limiting & observability"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Product Data API - Rate limiting & observability
 
 > Canonical authority: [`../b2b/00-canonical-decisions.md`](../b2b/00-canonical-decisions.md).

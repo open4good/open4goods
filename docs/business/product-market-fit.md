@@ -1,3 +1,10 @@
+---
+title: "product market fit"
+normative: false
+audience: PROJECT_SCOPED
+lang: fr
+---
+
 @Candide Chérel @Upsylon Developpement @Maxime Ziliani 
 
 ## Positionnement sur le marché

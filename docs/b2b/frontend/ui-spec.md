@@ -1,3 +1,9 @@
+---
+title: "Product Data API - B2B frontend UX and UI specification"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Product Data API - B2B frontend UX and UI specification
 
 > Companion document to [`master-prompt.md`](../implementation/master-prompt.md), [`data-coverage.md`](../business/data-coverage.md),

@@ -1,3 +1,9 @@
+---
+title: "Documentation Guidelines"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Documentation Guidelines
 
 Documentation should be short, discoverable, and tied to decisions.

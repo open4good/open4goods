@@ -1,3 +1,9 @@
+---
+title: "Icecat Reference Data"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Icecat Reference Data
 
 The Icecat integration stores reference metadata in Elasticsearch indexes managed by

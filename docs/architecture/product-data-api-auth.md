@@ -1,3 +1,9 @@
+---
+title: "Product Data API - Authentication, OIDC & authorization"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Product Data API - Authentication, OIDC & authorization
 
 > Canonical authority: [`../b2b/00-canonical-decisions.md`](../b2b/00-canonical-decisions.md).

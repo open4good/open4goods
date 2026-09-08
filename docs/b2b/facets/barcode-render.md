@@ -1,3 +1,9 @@
+---
+title: "Facet spec - `barcode.render`"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Facet spec - `barcode.render`
 
 > Status: RELEASED

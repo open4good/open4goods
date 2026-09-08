@@ -86,6 +86,26 @@ def lint_text(suite: LintSuite) -> None:
     suite.run("Markdown/JSON text replacements", command)
 
 
+def lint_corpus(suite: LintSuite) -> None:
+    """The governance gate: front matter and references, the corpus ratchet, and the two
+    generated projections. --fix regenerates the projections rather than reporting them
+    stale, because a stale projection is never something a person should hand-edit."""
+    suite.run(
+        "Documentation lint",
+        [sys.executable, "scripts/verify/documentation_lint.py"],
+    )
+    suite.run(
+        "Corpus budget",
+        [sys.executable, "scripts/verify/check_corpus_budget.py"],
+    )
+    for label, script in (
+        ("Generated roadmap", "scripts/generate/generate_roadmap.py"),
+        ("Generated ADR index", "scripts/generate/generate_decision_index.py"),
+    ):
+        command = [sys.executable, script] if suite.fix else [sys.executable, script, "--check"]
+        suite.run(label, command)
+
+
 def lint_yaml(suite: LintSuite) -> None:
     if suite.require_tool("yamllint", "install with: pip install yamllint"):
         suite.run("yamllint", ["yamllint", "-c", ".yamllint", "."])
@@ -160,6 +180,7 @@ def main() -> int:
     suite = LintSuite(root=root, fix=args.fix)
 
     lint_text(suite)
+    lint_corpus(suite)
     lint_yaml(suite)
     lint_shell(suite)
     lint_actions(suite)

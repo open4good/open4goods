@@ -1,3 +1,9 @@
+---
+title: "ETIM Integration and Cross-Referential Design"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # ETIM Integration and Cross-Referential Design
 
 This document details the architectural design to transform Nudger into a first-class **cross-referential platform** by integrating the ETIM classification standard, mapping taxonomies (Icecat, ETIM, EPREL, Google Product Taxonomy, Wikidata, and future standards like GS1 GPC and eCl@ss), and establishing a robust unit normalization engine.

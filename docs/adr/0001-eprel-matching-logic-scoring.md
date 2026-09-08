@@ -1,3 +1,10 @@
+---
+title: "ADR 0001: Enhanced EPREL Matching Logic with Score Resolution"
+normative: true
+audience: PROJECT_SCOPED
+status: accepted
+---
+
 # ADR 0001: Enhanced EPREL Matching Logic with Score Resolution
 
 ## Status

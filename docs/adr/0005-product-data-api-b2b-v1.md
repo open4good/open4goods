@@ -1,3 +1,10 @@
+---
+title: "ADR 0005 - Product Data API (B2B) v1"
+normative: true
+audience: PROJECT_SCOPED
+status: accepted
+---
+
 # ADR 0005 - Product Data API (B2B) v1
 
 **Status**: Accepted

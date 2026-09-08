@@ -1,0 +1,44 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: dead-workflow-removal, name: Dead workflow removal}
+spec:
+  purpose: >-
+    Remove the workflows that cannot run and the ones that never have, after the pipelines are
+    green again. A red CI cannot tell a workflow that is broken from one that is dead.
+  roadmapRef: m3-dead-surface-removal
+  state: ACCEPTED
+  dependsOn: [governance-kit-bootstrap]
+  pathScope:
+    - '.github/workflows/**'
+    - 'lighthouse/**'
+    - '.lighthouserc.json'
+    - 'scripts/generate_markdown.py'
+  acceptanceCriteria:
+    - id: AC0
+      statement: >-
+        testAndPublishBeta.yml, releaseDeployProd.yml and b2b-frontend-ci.yml are green before any
+        workflow is deleted.
+    - id: AC1
+      statement: >-
+        frontend-release.yml is removed. It has zero runs and three independent defects that would
+        fail it if dispatched: no root package.json for its pnpm install, setup-node caching pnpm
+        before corepack activates it, and a pnpm version two minors behind.
+    - id: AC2
+      statement: >-
+        ai-agent.yml is either made to work by creating the three provider secrets it reads, none
+        of which exist, or removed with its .old companions and its .md.
+    - id: AC3
+      statement: The three non-yml files parked in .github/workflows/ are gone.
+    - id: AC4
+      statement: >-
+        pr-to-project.yml no longer skips every human pull request, or is removed. issue-to-project.yml,
+        silent since 2026-06-25, is decided.
+    - id: AC5
+      statement: >-
+        The five JRELEASER_* org secrets are revoked. Nothing else is revoked at this stage: the
+        MACHINE_TOKEN and HCAPTCHA keys look orphaned from the workflows but are the frontend's
+        runtime values and are needed by config-repository-elimination.
+    - id: AC6
+      statement: >-
+        The Lighthouse pipeline and scripts/generate_markdown.py are either wired to a caller or
+        removed; neither has one today.

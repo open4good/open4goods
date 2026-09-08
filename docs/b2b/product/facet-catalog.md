@@ -1,3 +1,10 @@
+---
+title: "Product Data API - Catalogue de facettes priorise"
+normative: false
+audience: PROJECT_SCOPED
+lang: fr
+---
+
 # Product Data API - Catalogue de facettes priorise
 
 > Décisions canoniques : [`00-canonical-decisions.md`](../00-canonical-decisions.md).

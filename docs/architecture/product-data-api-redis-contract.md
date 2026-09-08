@@ -1,3 +1,9 @@
+---
+title: "Product Data API - Redis key contract"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Product Data API - Redis key contract
 
 > Canonical authority: [`../b2b/00-canonical-decisions.md`](../b2b/00-canonical-decisions.md).

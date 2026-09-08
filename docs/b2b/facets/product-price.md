@@ -1,3 +1,9 @@
+---
+title: "Facet spec - `product.price`"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Facet spec - `product.price`
 
 > Status: IN BUILD (v1 facet)

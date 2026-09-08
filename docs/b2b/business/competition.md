@@ -1,3 +1,10 @@
+---
+title: "Product Data API - Étude concurrentielle détaillée"
+normative: false
+audience: PROJECT_SCOPED
+lang: fr
+---
+
 # Product Data API - Étude concurrentielle détaillée
 
 > Décisions canoniques : [`00-canonical-decisions.md`](../00-canonical-decisions.md).

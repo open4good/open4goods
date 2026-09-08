@@ -1,3 +1,9 @@
+---
+title: "Product Data API (B2B) - Canonical decisions"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Product Data API (B2B) - Canonical decisions
 
 > **Authority document.** This file is the single source of truth for every

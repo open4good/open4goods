@@ -1,3 +1,9 @@
+---
+title: "Impact Score (Eco-Score) Computation Methodology"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Impact Score (Eco-Score) Computation Methodology
 
 This document details the computation of the **Impact Score** (often referred to as `ECOSCORE` in the codebase), explaining the steps from raw attribute data to the final aggregated score.

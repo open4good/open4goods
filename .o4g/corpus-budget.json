@@ -1,0 +1,33 @@
+{
+  "_comment": "Ceilings for the open4goods corpus. Exceeding one fails CI. Lowering one is the intended direction and needs no ceremony; raising one is a deliberate, reviewable act. Regenerate with scripts/verify/check_corpus_budget.py --update.",
+  "measures": {
+    "non_normative_lines": {
+      "resolution": "non-normative"
+    },
+    "rule_shaped_statements_in_non_normative": {
+      "resolution": "non-normative"
+    },
+    "normative_documents": {
+      "resolution": "normative",
+      "informational": "bounded by NORMATIVE_PATHS, not by a line count"
+    },
+    "work_open_lines": {
+      "resolution": "machine"
+    },
+    "work_ledger_lines": {
+      "resolution": "machine",
+      "informational": "append-only closure records"
+    },
+    "adr_lines_max": {
+      "resolution": "normative"
+    }
+  },
+  "ceilings": {
+    "non_normative_lines": 5950,
+    "rule_shaped_statements_in_non_normative": 134,
+    "normative_documents": 7,
+    "work_open_lines": 249,
+    "work_ledger_lines": 0,
+    "adr_lines_max": 120
+  }
+}

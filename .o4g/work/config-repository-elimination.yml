@@ -1,0 +1,54 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: config-repository-elimination, name: Config repository elimination}
+spec:
+  purpose: >-
+    Make open4goods self-sufficient and archive open4goods-config. Non-secret structure becomes
+    versioned files; everything secret or topological becomes a GitHub Environment secret or
+    variable injected as an environment variable. The dominant constraint is that the config
+    repository is private and holds cleartext production credentials across 1052 commits while
+    this repository is public: no history is migrated, and every credential is rotated.
+  roadmapRef: m1-config-autonomy
+  state: ACCEPTED
+  dependsOn: [governance-kit-bootstrap]
+  pathScope:
+    - 'ops/**'
+    - '.github/workflows/**'
+    - '*/src/main/resources/application*.yml'
+    - 'scripts/**'
+    - 'docs/operations/**'
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        GitHub Environments beta and prod exist on open4good/open4goods and hold the classified
+        inventory. The 9 config-repo-only secrets are recreated; the 5 that already exist at org
+        level are not duplicated; the 4 referenced-but-nonexistent ones are created or removed
+        from the workflow that reads them.
+    - id: AC2
+      statement: >-
+        admin/src/main/resources/application.yml exists. admin runs today with no packaged
+        defaults at all, which is why publish-jars.sh omits classpath:/application.yml on that
+        line alone; it is the worst case of this migration and is fixed, not reproduced.
+    - id: AC3
+      statement: >-
+        Iso-functionality is proven on beta before anything is deleted: /actuator/configprops
+        captured before and after the switch differs on no non-secret key, and all five services
+        report /actuator/health UP.
+    - id: AC4
+      statement: >-
+        The host-local /etc/open4goods/${service}.env, which is in no git repository, is
+        inventoried on both hosts and either absorbed or documented. Without this "iso-functional"
+        is unverifiable.
+    - id: AC5
+      statement: >-
+        Every credential the config repository held is rotated, and the four Elastic .p12
+        keystores are regenerated on the hosts. Rotation happens after the Environments are in
+        place and before the config repository is archived.
+    - id: AC6
+      statement: >-
+        The 153 MB of personal documents under doc/nudger/** leave git before the repository is
+        touched. No secret and no internal topology lands in this public repository.
+    - id: AC7
+      statement: >-
+        Values that are tuned hot (affiliation toggles, Icecat URLs, log levels) are Environment
+        variables, not committed YAML, so that changing one does not require a full release.

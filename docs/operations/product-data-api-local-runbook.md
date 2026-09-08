@@ -1,3 +1,9 @@
+---
+title: "Product Data API - local runbook"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Product Data API - local runbook
 
 > Canonical authority: [`../b2b/00-canonical-decisions.md`](../b2b/00-canonical-decisions.md).

@@ -1,3 +1,9 @@
+---
+title: "GitHub / MCP Hybrid Workflow"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # GitHub / MCP Hybrid Workflow
 
 This document sets the rules for using both the GitHub CLI (`gh`) and MCP GitHub so we do not double‑edit PRs or leak credentials.

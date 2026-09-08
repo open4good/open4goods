@@ -1,3 +1,9 @@
+---
+title: "Amazon PA-API Completion"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Amazon PA-API Completion
 
 Amazon completion enriches open4goods products through the official Amazon

@@ -1,3 +1,9 @@
+---
+title: "Asynchronous Blog Loading Plan"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Asynchronous Blog Loading Plan
 
 The current `BlogService` refreshes all posts at startup using `@PostConstruct`. This blocks the application until XWiki calls complete. We want to make the initial refresh non‑blocking.

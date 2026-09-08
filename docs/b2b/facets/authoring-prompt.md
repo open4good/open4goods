@@ -1,3 +1,9 @@
+---
+title: "Facet spec authoring prompt (for AI agents)"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Facet spec authoring prompt (for AI agents)
 
 Use this prompt to generate the spec for a new Product Data API facet. The

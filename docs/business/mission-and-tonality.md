@@ -1,3 +1,10 @@
+---
+title: "Valeurs fondamentales"
+normative: false
+audience: PROJECT_SCOPED
+lang: fr
+---
+
 # Valeurs fondamentales
 
 **Nudger** se définit avant tout comme un **comparateur engagé pour le bien commun**. Il vise à aider les consommateurs à " consommer moins, consommer mieux ". Ses valeurs clés incluent notamment :

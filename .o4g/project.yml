@@ -1,0 +1,35 @@
+apiVersion: open4goods.org/v1
+kind: Project
+metadata:
+  id: open4goods
+  name: open4goods / nudger.fr
+spec:
+  contractDirectory: .o4g
+  repository: open4good/open4goods
+  visibility: PUBLIC
+  purpose: Product comparison and environmental impact scoring platform
+  documentation:
+    canonicalDecisions: docs/00-canonical-decisions.md
+    entryPoint: AGENTS.md
+  milestones:
+    - id: m0-governance
+      order: 0
+      exitCondition: >-
+        The corpus budget, the documentation lint and the generated projections run in CI;
+        every governed document declares its resolution; the canonical decisions exist.
+    - id: m1-config-autonomy
+      order: 1
+      exitCondition: >-
+        open4goods-config is archived. Every runtime value reaches the five services from a
+        versioned file or a GitHub Environment secret or variable, proven by an empty
+        /actuator/configprops diff on beta, and every credential it held has been rotated.
+    - id: m2-corpus-cleanup
+      order: 2
+      exitCondition: >-
+        The three corpora are separated at their pipelines; no governed document contradicts
+        the code; the non_normative_lines ceiling has fallen.
+    - id: m3-dead-surface-removal
+      order: 3
+      exitCondition: >-
+        No workflow references a secret that does not exist; no workflow has zero runs;
+        the ranked dead-code lots are applied or explicitly declined with a reason.

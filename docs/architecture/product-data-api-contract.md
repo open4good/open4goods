@@ -1,3 +1,9 @@
+---
+title: "Product Data API - Public API contract & sanitized DTO"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Product Data API - Public API contract & sanitized DTO
 
 > Canonical authority: [`../b2b/00-canonical-decisions.md`](../b2b/00-canonical-decisions.md).

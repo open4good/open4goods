@@ -1,3 +1,10 @@
+---
+title: "Plan complet - Dataviz statistiques verticales (front-api + frontend)"
+normative: false
+audience: PROJECT_SCOPED
+lang: fr
+---
+
 # Plan complet - Dataviz statistiques verticales (front-api + frontend)
 
 ## 1. Objectif

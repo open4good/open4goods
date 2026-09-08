@@ -1,3 +1,9 @@
+---
+title: "open4goods Documentation"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # open4goods Documentation
 
 Use this directory as the canonical documentation entry point. Keep docs small,

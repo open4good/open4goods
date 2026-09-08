@@ -1,3 +1,9 @@
+---
+title: "Frontend Asset Hardening"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Frontend Asset Hardening
 
 Nuxt chunks under `/_nuxt/` are content-hashed and can be cached as immutable.

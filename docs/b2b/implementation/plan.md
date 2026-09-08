@@ -1,3 +1,9 @@
+---
+title: "Product Data API - phased implementation plan"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Product Data API - phased implementation plan
 
 > Stable companion to [`master-prompt.md`](master-prompt.md) (full scope) and

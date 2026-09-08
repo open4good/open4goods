@@ -1,3 +1,9 @@
+---
+title: "AI Impact Score Generation Process"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # AI Impact Score Generation Process
 
 This document details how the Impact Score configuration for verticals is generated using Generative AI.

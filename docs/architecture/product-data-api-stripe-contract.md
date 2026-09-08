@@ -1,3 +1,9 @@
+---
+title: "Product Data API - Stripe billing contract"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Product Data API - Stripe billing contract
 
 > Canonical authority: [`../b2b/00-canonical-decisions.md`](../b2b/00-canonical-decisions.md).

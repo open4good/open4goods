@@ -1,3 +1,10 @@
+---
+title: "Déploiement opérationnel avec GitHub Projects"
+normative: false
+audience: PROJECT_SCOPED
+lang: fr
+---
+
 # Déploiement opérationnel avec GitHub Projects
 
 ## Choix méthodologique : Kanban Agile

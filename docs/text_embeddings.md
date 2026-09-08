@@ -1,3 +1,9 @@
+---
+title: "Text Embedding Service"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Text Embedding Service
 
 ## Overview

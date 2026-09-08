@@ -1,3 +1,9 @@
+---
+title: "Product Data API - Error catalog (RFC 9457)"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Product Data API - Error catalog (RFC 9457)
 
 > Canonical authority: [`../b2b/00-canonical-decisions.md`](../b2b/00-canonical-decisions.md).

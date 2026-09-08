@@ -1,3 +1,9 @@
+---
+title: "Product Data API - B2B v1 master implementation prompt"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Product Data API - B2B v1 master implementation prompt
 
 > **Canonical, but read [`00-canonical-decisions.md`](../00-canonical-decisions.md) first.**

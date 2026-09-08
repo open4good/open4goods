@@ -1,3 +1,9 @@
+---
+title: "open4goods - Agents Guide (Root)"
+normative: true
+audience: PROJECT_SCOPED
+---
+
 # open4goods - Agents Guide (Root)
 
 This guide defines **project-wide conventions** for all human contributors **and AI coding agents** working on the open4goods repository.  
@@ -6,6 +12,29 @@ Adhering to these rules keeps every sub-project consistent, maintainable, and pr
 > **Where to look next**  
 > Each sub-module (e.g. `/api`, `/services/*`) ships its own `agents.md` that may add or override rules.  
 > The standards below are **mandatory everywhere** unless a module's guide explicitly says otherwise.
+
+---
+
+## 0  Reading order
+
+Load what the task needs, knowing the price. Everything below is the project corpus;
+`README.md` files are outside it (canonical decision 5).
+
+| Read | Cost | For |
+|---|---|---|
+| [canonical decisions](docs/00-canonical-decisions.md) | ~0.8k tokens | the numbered rules everything else cites |
+| [ADR index](docs/adr/README.md) | ~0.4k tokens | which ADR owns a boundary, before opening one |
+| [roadmap](docs/reference/roadmap.md) | ~1.2k tokens | the open WorkOrders, their state and their blockers |
+| this guide, sections 1-11 | ~2.5k tokens | conventions for writing code here |
+| [docs/README.md](docs/README.md) | ~0.9k tokens | the rest of the corpus, by subject |
+
+Pick a WorkOrder from the roadmap, then read its own YAML under `.o4g/work/` and stay
+within its `pathScope`. `docs/reference/roadmap.md` and `docs/adr/README.md` are
+generated projections: change the contracts, not the projection.
+
+Before changing anything under `docs/` or `.o4g/`, run `./scripts/lint.sh`. It gates
+the corpus budget, so growing the prose fails the build unless you raise the ceiling
+in the same commit.
 
 ---
 
@@ -144,8 +173,10 @@ A predictable, enforced structure lowers cognitive load for humans and gives lar
 ## 9  Automated dependency updates
 
 Dependencies for Maven modules, Node projects (`frontend` and `ui`), and GitHub
-Actions workflows are maintained by Renovate. Updates run nightly (after 10pm
-and before 5am) with major Maven upgrades disabled.
+Actions workflows are maintained by Renovate. Updates run **Mondays between
+00:00 and 05:59** (`renovate.json` `schedule`), at most 4 pull requests at a time.
+Major upgrades are **not** disabled: they are gated behind
+`dependencyDashboardApproval`. `ui/**` is excluded from Renovate.
 
 ## 10  Module-Specific Guides
 
@@ -155,31 +186,30 @@ For detailed module-specific conventions, see:
 - **B2B Frontend**: [b2b-frontend/AGENTS.md](b2b-frontend/AGENTS.md) - Nuxt 4 / Vue 3 / Vuetify 4 / TypeScript
 - **Front API**: [front-api/AGENTS.md](front-api/AGENTS.md) - SpringDoc / OpenAPI
 - **B2B API**: [b2b-api/AGENTS.md](b2b-api/AGENTS.md) - Spring Boot 4 / Java 21
-- **Services**: [services/AGENTS.md](services/AGENTS.md) - Microservices (19 services)
+- **Services**: [services/AGENTS.md](services/AGENTS.md) - 25 service modules
 - **Core Modules**: [admin](admin/AGENTS.md), [api](api/AGENTS.md), [commons](commons/AGENTS.md), [model](model/AGENTS.md), [verticals](verticals/AGENTS.md)
-- **UI (deprecated)**: [ui/AGENTS.md](ui/AGENTS.md) - Being replaced by frontend
+- **UI**: [ui/AGENTS.md](ui/AGENTS.md) - Thymeleaf app behind `static.nudger.fr`.
+  **Not deprecated, despite what this guide said until 2026-09-08.** It serves every
+  product and brand image, is the only producer of the sitemaps `frontend` reads
+  (`SitemapGenerationService`), and is the only handler for the open-data download.
+  It has no Maven dependents and was dropped from the local `docker-compose.yml`,
+  which is what made it look dead; it is still deployed by `releaseDeployProd.yml`.
 
 ---
 
 ## 11  AI Search & Navigation (Java MCP Servers)
 
-To stop AI agents from trying to `grep` a massive Java project (which results in endless false positives for overloaded methods, interface implementations, or generic names), use system prompts or explicit triggering to force the use of compiler-level tools.
+Text search over 1 374 Java files produces endless false positives on overloaded
+methods, interface implementations and generic names, so prefer a compiler-level
+tool when one is available: ask for a call hierarchy or a reference trace by name
+(`UserService.updateUser`) rather than grepping for the identifier.
 
-### 11.1  Frame prompts explicitly
-Instead of asking:
-> "Find where updateUser is called."
-
-Say:
-> "Use the JavaLens `find_references` tool to trace the call hierarchy of `UserService.updateUser` across the project. Do not use grep or plain text search."
-
-### 11.2  Inject into System Instructions (`.clauderc` / Cursor Rules / System Prompts)
-Add a rule to system instructions to correct model search bias:
-
-```text
-You are working on a large Java project. Do not use standard text-search (grep, ripgrep, find_in_files) to navigate code or find method usages. Text search creates false positives due to method overloading and interface implementations. You must prioritize the semantic Java MCP tools available to you (such as JavaLens or Java Class Analyzer) for navigating call structures, finding references, and decompiling dependencies.
-```
-
-By embedding this instruction, the AI agent relies on compiler-level accuracy rather than guessing with text searches.
+**Availability is not guaranteed.** `.mcp.json` declares `javalens` and
+`mcp-java-dev-tools`, but `.claude/settings.local.json` currently lists both under
+`disabledMcpjsonServers`, and two of its entries carry machine-absolute paths that
+do not resolve on another contributor's checkout. Check what is actually connected
+before relying on it; falling back to `grep` with a narrow path scope is correct
+when it is not.
 
 ---
 

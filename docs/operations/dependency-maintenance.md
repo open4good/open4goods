@@ -1,3 +1,9 @@
+---
+title: "Dependency maintenance and deployment runbook"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Dependency maintenance and deployment runbook
 
 ## Purpose

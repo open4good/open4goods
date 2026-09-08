@@ -1,3 +1,10 @@
+---
+title: "Product Data API - Couverture de donnees nudger (etude mesuree)"
+normative: false
+audience: PROJECT_SCOPED
+lang: fr
+---
+
 # Product Data API - Couverture de donnees nudger (etude mesuree)
 
 > Décisions canoniques : [`00-canonical-decisions.md`](../00-canonical-decisions.md).

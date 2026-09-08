@@ -1,3 +1,9 @@
+---
+title: "GenAI configuration (OpenAI + Gemini)"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # GenAI configuration (OpenAI + Gemini)
 
 This document describes the Spring AI configuration keys and batch settings for the prompt service.

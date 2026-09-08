@@ -1,3 +1,9 @@
+---
+title: "Product Page Audit & Fix Plan - UI consistency + SEO/affiliate maximization"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Product Page Audit & Fix Plan - UI consistency + SEO/affiliate maximization
 
 > **Status tracking**: check the boxes as steps complete. Each work package (WP)

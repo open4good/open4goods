@@ -1,3 +1,9 @@
+---
+title: "Product Data API - Credit ledger & bucket algorithm"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Product Data API - Credit ledger & bucket algorithm
 
 > Canonical authority: [`../b2b/00-canonical-decisions.md`](../b2b/00-canonical-decisions.md).

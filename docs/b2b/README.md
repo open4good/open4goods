@@ -1,3 +1,9 @@
+---
+title: "Product Data API (B2B) - documentation corpus"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Product Data API (B2B) - documentation corpus
 
 This folder is the foundation for the **Product Data API** brick: a metered,

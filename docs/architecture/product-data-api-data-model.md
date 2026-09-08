@@ -1,3 +1,9 @@
+---
+title: "Product Data API - Postgres data model & DDL"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Product Data API - Postgres data model & DDL
 
 > Canonical authority: [`../b2b/00-canonical-decisions.md`](../b2b/00-canonical-decisions.md).

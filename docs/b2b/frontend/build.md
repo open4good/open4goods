@@ -1,3 +1,9 @@
+---
+title: "Product Data API - frontend build, layout & OpenAPI codegen"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Product Data API - frontend build, layout & OpenAPI codegen
 
 > Canonical authority: [`00-canonical-decisions.md`](../00-canonical-decisions.md).

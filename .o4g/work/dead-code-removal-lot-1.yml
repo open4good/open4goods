@@ -1,0 +1,53 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: dead-code-removal-lot-1, name: Dead code removal, lot 1}
+spec:
+  purpose: >-
+    Apply the ranked dead-surface inventory in four lots ordered by runtime risk: tracked weight
+    and orphan fixtures first, then unreferenced frontend components, then Java, then Maven
+    declarations one module at a time.
+  roadmapRef: m3-dead-surface-removal
+  state: ACCEPTED
+  dependsOn: [governance-kit-bootstrap, config-repository-elimination]
+  pathScope:
+    - 'src/main/site/**'
+    - 'src/test/resources/**'
+    - 'libs/**'
+    - 'frontend/app/components/**'
+    - 'frontend/app/composables/**'
+    - 'b2b-frontend/components/**'
+    - 'commons/**'
+    - 'ui/**'
+    - 'services/exposed-docs/**'
+    - 'pom.xml'
+    - '*/pom.xml'
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        Lot A - src/main/site/ (2312 files, 40 MB of a third-party Bootstrap template with zero
+        references), the root src/test/resources/googlesearch/mocks/ (moved, not deleted - they are
+        loaded by classpath from a module that cannot see them), the unused vendored url-detector,
+        the tracked __pycache__, the stray root META-INF/, the tracked .DS_Store files, and the
+        never-interpolated exclude.tests property.
+    - id: AC2
+      statement: >-
+        Lot B - the 33 Vue components and 3 composables whose names appear nowhere in either
+        frontend tree, after checking resolveComponent and dynamic :is. The B2bApiKey* set is
+        arbitrated rather than deleted by default; it looks unfinished, not obsolete.
+    - id: AC3
+      statement: >-
+        Lot C - the 42 unreferenced plain Java classes, the ui Todo cluster with its last Thymeleaf
+        template and the i18n bundles it strands, and services/exposed-docs, which no pom declares
+        as a dependency and which no deployed application loads. Removing it also removes
+        bundle-doc-resources.sh and its composite action.
+    - id: AC4
+      statement: >-
+        Lot D - unused Maven declarations, one module at a time with a full build between each,
+        restricted to the subset dependency:analyze can judge. logback-classic, actuator and the
+        configuration processor are runtime or annotation-processor uses it cannot see and are
+        not touched.
+    - id: AC5
+      statement: >-
+        The ui module is NOT removed. It serves static.nudger.fr images, is the only producer of
+        the sitemaps the frontend reads, and is the only handler for the open-data download.
+        AGENTS.md is corrected instead.

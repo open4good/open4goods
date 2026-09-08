@@ -1,3 +1,9 @@
+---
+title: "Facet spec - `product.<facet-id>` <!-- e.g. product.impact -->"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Facet spec - `product.<facet-id>` <!-- e.g. product.impact -->
 
 > Status: DRAFT | MEASURED | IN BUILD | LIVE

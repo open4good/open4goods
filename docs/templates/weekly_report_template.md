@@ -1,3 +1,9 @@
+---
+title: "KPI Report ({{ start_date }} → {{ end_date }})"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # KPI Report ({{ start_date }} → {{ end_date }})
 
 | KPI | Value |
@@ -10,4 +16,4 @@
 | LOC Added | {{ data.github.loc_added }} |
 | Conversion Rate | {{ data.custom_api.conversion_rate }}% |
 
-[👉 Issue de suivi hebdomadaire](<URL issue>)
+[👉 Issue de suivi hebdomadaire]({{ issue_url }})

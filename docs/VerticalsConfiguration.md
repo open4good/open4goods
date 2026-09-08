@@ -1,3 +1,9 @@
+---
+title: "Verticals Configuration and Generation"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Verticals Configuration and Generation
 
 This document explains how verticals are configured, how the configuration is structured, and how the **Generation API** is used to assist in creating and updating these configurations.

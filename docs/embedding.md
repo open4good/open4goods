@@ -1,3 +1,9 @@
+---
+title: "Embedding services"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Embedding services
 
 The project provides a shared **DJL-based text embedding starter** (`embedding-djl`). It loads text and multimodal text models and exposes a `DjlTextEmbeddingService` bean to consuming modules (API and front-api).

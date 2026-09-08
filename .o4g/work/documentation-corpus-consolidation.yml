@@ -1,0 +1,53 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: documentation-corpus-consolidation, name: Documentation corpus consolidation}
+spec:
+  purpose: >-
+    Separate the three corpora at the two pipelines that sweep the repository, correct every
+    governed claim that contradicts the code, and retire completed plans, so that the
+    non-normative ceiling falls instead of holding.
+  roadmapRef: m2-corpus-cleanup
+  state: ACCEPTED
+  dependsOn: [governance-kit-bootstrap]
+  pathScope:
+    - 'docs/**'
+    - 'frontend/content.config.ts'
+    - 'scripts/bundle-doc-resources.sh'
+    - '*/AGENTS.md'
+    - 'services/*/AGENTS.md'
+    - 'memory/**'
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        frontend/content.config.ts restricts its docs include to the published locales instead of
+        sweeping all of docs/, so the SSR content index stops embedding the internal corpus.
+        Regression proof: /docs/fr/impact-score/overview still answers 200.
+    - id: AC2
+      statement: >-
+        frontend/CLAUDE.md no longer claims Nuxt 3 for a Nuxt 4 application; it is reduced to the
+        four-line pointer already used by the root CLAUDE.md and GEMINI.md.
+    - id: AC3
+      statement: >-
+        The 20 services/*/AGENTS.md stubs that only redirect to services/AGENTS.md are gone and
+        the redirection is stated once. eprel-service, which has neither stub nor section, gains
+        a section.
+    - id: AC4
+      statement: >-
+        Completed plans leave the corpus: blog_service_async_loading_plan.md is implemented
+        verbatim in BlogService, and b2b/implementation/tasks.md is 93/93. product_page_audit_plan.md
+        is decided either way, not left at 0/41.
+    - id: AC5
+      statement: >-
+        Foreign provenance is purged. Six B2B documents cite another repository's absolute paths,
+        and product-data-api-auth.md names four classes that do not exist under names that do.
+    - id: AC6
+      statement: >-
+        docs/README.md reaches the whole governance corpus; the zero-byte files and the empty
+        docs/json/ are gone.
+    - id: AC7
+      statement: >-
+        Impact Score is documented once with cross-references, not in six unlinked places.
+    - id: AC8
+      statement: The parallel memory store at /memory/ is merged or removed.
+    - id: AC9
+      statement: The non_normative_lines ceiling has fallen.

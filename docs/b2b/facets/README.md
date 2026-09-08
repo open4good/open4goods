@@ -1,3 +1,9 @@
+---
+title: "Facet specs - lifecycle and authoring"
+normative: false
+audience: PROJECT_SCOPED
+---
+
 # Facet specs - lifecycle and authoring
 
 > Authority: [`00-canonical-decisions.md`](../00-canonical-decisions.md).

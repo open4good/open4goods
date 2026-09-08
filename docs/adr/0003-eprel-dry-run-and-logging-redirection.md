@@ -1,3 +1,10 @@
+---
+title: "ADR 0003: EPREL Dry-Run Endpoints and Logging Redirection"
+normative: true
+audience: PROJECT_SCOPED
+status: accepted
+---
+
 # ADR 0003: EPREL Dry-Run Endpoints and Logging Redirection
 
 ## Status

@@ -1,3 +1,10 @@
+---
+title: "ADR 0002: Product Model Identity Confidence"
+normative: true
+audience: PROJECT_SCOPED
+status: accepted
+---
+
 # ADR 0002: Product Model Identity Confidence
 
 ## Status
