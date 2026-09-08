@@ -1,5 +1,6 @@
 import { computed } from 'vue'
 import type { Ref } from 'vue'
+import { mdiLeaf } from '@mdi/js'
 import type { ProductDto } from '~~/shared/api-client'
 import {
   getImpactLevel,
@@ -26,7 +27,7 @@ export function useProductVerdict(
         scoreOutOf: 20,
         labelKey: 'product.verdict.levels.insufficient',
         color: 'grey',
-        icon: 'mdi-leaf-polyline',
+        icon: mdiLeaf,
       }
     }
 
@@ -39,7 +40,7 @@ export function useProductVerdict(
       scoreOutOf: 20,
       labelKey: `product.verdict.levels.${level}`,
       color,
-      icon: 'mdi-leaf',
+      icon: mdiLeaf,
     }
   })
 

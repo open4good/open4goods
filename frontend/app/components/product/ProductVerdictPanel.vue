@@ -10,7 +10,7 @@
         class="product-verdict-panel__header d-flex align-center mb-3 mb-sm-0"
       >
         <v-icon :icon="mdiScaleBalance" class="mr-2 text-primary" size="22" />
-        <h2 class="text-subtitle-1 font-weight-bold text-neutral-strong ma-0">
+        <h2 class="product-verdict-panel__title">
           {{ t('product.verdict.title') }}
         </h2>
       </div>
@@ -144,5 +144,13 @@ const reliabilityTooltip = computed(() => {
 
 .product-verdict-panel__chips {
   gap: 1rem;
+}
+
+.product-verdict-panel__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.75rem;
+  color: rgb(var(--v-theme-text-neutral-strong));
 }
 </style>

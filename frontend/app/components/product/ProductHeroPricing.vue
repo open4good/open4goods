@@ -345,27 +345,30 @@ const handleMerchantClick = (payload: {
   })
 }
 
-const formatPriceLabel = (price: number | null, currency: string) => {
+// Same locale/decimal rules as formatPrice() (used everywhere else on the
+// page) rather than this component's own 0-1 fraction-digit decimal style -
+// that mismatch is what produced "999 €" here vs "999,00 €" elsewhere.
+// formatToParts (not formatPrice's plain string) so the number and the
+// currency symbol can still render as separate, independently styled spans.
+const formatPriceParts = (price: number | null, currency: string) => {
   if (typeof price !== 'number') {
-    return '—'
+    return { numberPart: '—', currencyPart: null as string | null }
   }
 
-  const isEuro = currency === 'EUR'
+  const parts = new Intl.NumberFormat(locale.value, {
+    style: 'currency',
+    currency,
+  }).formatToParts(price)
 
-  return new Intl.NumberFormat(locale.value, {
-    style: isEuro ? 'decimal' : 'currency',
-    currency: isEuro ? undefined : currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 1,
-  }).format(price)
-}
+  const numberPart = parts
+    .filter(part => part.type !== 'currency')
+    .map(part => part.value)
+    .join('')
+    .trim()
+  const currencyPart =
+    parts.find(part => part.type === 'currency')?.value ?? null
 
-const formatCurrencyDisplay = (priceLabel: string, currency: string) => {
-  if (priceLabel === '—') {
-    return null
-  }
-
-  return currency === 'EUR' ? '€' : currency
+  return { numberPart, currencyPart }
 }
 
 const {
@@ -437,8 +440,8 @@ const conditionPanels = computed<ConditionPanel[]>(() => {
     const offer = bestOffersByCondition.value[condition]
     const currency = offer?.currency ?? defaultCurrencyCode.value
     const price = typeof offer?.price === 'number' ? offer.price : null
-    const priceLabel = formatPriceLabel(price, currency)
-    const priceCurrency = formatCurrencyDisplay(priceLabel, currency)
+    const { numberPart: priceLabel, currencyPart: priceCurrency } =
+      formatPriceParts(price, currency)
     const trend =
       condition === 'occasion' ? offers?.occasionTrend : offers?.newTrend
     const trendLabel = resolvePriceTrendLabel(trend, currency)

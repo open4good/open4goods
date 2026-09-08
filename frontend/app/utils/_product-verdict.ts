@@ -1,3 +1,4 @@
+import { mdiTagOutline, mdiShieldCheckOutline } from '@mdi/js'
 import type {
   ProductDto,
   ProductPriceHistoryEntryDto,
@@ -95,7 +96,7 @@ export const getPriceVerdict = (product: ProductDto): PriceVerdict => {
       medianPrice,
       labelKey: 'product.verdict.priceLevels.insufficient',
       color: 'grey',
-      icon: 'mdi-tag-outline',
+      icon: mdiTagOutline,
     }
   }
 
@@ -121,7 +122,7 @@ export const getPriceVerdict = (product: ProductDto): PriceVerdict => {
     medianPrice,
     labelKey: `product.verdict.priceLevels.${level}`,
     color,
-    icon: 'mdi-tag-outline',
+    icon: mdiTagOutline,
   }
 }
 
@@ -145,7 +146,7 @@ export const getReliabilityVerdict = (
       scoreOutOf: 20,
       labelKey: 'product.verdict.reliabilityLevels.insufficient',
       color: 'grey',
-      icon: 'mdi-shield-check-outline',
+      icon: mdiShieldCheckOutline,
     }
   }
 
@@ -165,6 +166,6 @@ export const getReliabilityVerdict = (
     scoreOutOf: 20,
     labelKey: `product.verdict.reliabilityLevels.${level}`,
     color,
-    icon: 'mdi-shield-check-outline',
+    icon: mdiShieldCheckOutline,
   }
 }
