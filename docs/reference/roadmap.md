@@ -13,7 +13,7 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 | Milestone | Open | READY | BLOCKED | IN_PROGRESS | Closed |
 |---|---|---|---|---|---|
 | m0-governance | 1 | 0 | 0 | 1 | 0 |
-| m1-config-autonomy | 1 | 0 | 1 | 0 | 0 |
+| m1-config-autonomy | 2 | 1 | 1 | 0 | 0 |
 | m2-corpus-cleanup | 1 | 0 | 1 | 0 | 0 |
 | m3-dead-surface-removal | 2 | 0 | 2 | 0 | 0 |
 
@@ -28,6 +28,7 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 | WorkOrder | Contract state | Availability | Dependencies | Blockers | Purpose |
 |---|---|---|---|---|---|
 | [config-repository-elimination](../../.o4g/work/config-repository-elimination.yml) | ACCEPTED | BLOCKED | governance-kit-bootstrap | governance-kit-bootstrap | Make open4goods self-sufficient and archive open4goods-config. Non-secret structure becomes versioned files; everything secret or topological becomes a GitHub Environment secret or variable injected as an environment variable. The dominant constraint is that the config repository is private and holds cleartext production credentials across 1052 commits while this repository is public: no history is migrated, and every credential is rotated. |
+| [leaked-credential-rotation](../../.o4g/work/leaked-credential-rotation.yml) | ACCEPTED | READY | -- | -- | A production password is in this public repository's main-branch history since 2024-01-15 and is still live in production today. Rotate it and the two other values found in public history. This is independent of every other order: it changes no mechanism, it uses the deployment path that exists today, and it must not wait for the config-repository migration. |
 
 ## m2-corpus-cleanup
 
