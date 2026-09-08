@@ -1,0 +1,69 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: governance-kit-bootstrap, name: Governance kit bootstrap}
+spec:
+  purpose: >-
+    Install the corpus budget, the governed front matter, the documentation lint and the
+    generated projections, without cleaning anything yet, so that every later lot has a gate
+    to prove itself against and a ceiling it must lower rather than raise.
+  roadmapRef: m0-governance
+  state: COMPLETED
+  pathScope:
+    - '.o4g/**'
+    - 'scripts/verify/**'
+    - 'scripts/generate/**'
+    - 'scripts/python/lint_suite.py'
+    - 'docs/**'
+    - 'AGENTS.md'
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        DONE. .o4g/corpus-budget.json, check_corpus_budget.py, documentation_lint.py,
+        generate_roadmap.py and generate_decision_index.py exist and are wired into
+        scripts/python/lint_suite.py; ./scripts/lint.sh runs all five with no new workflow.
+    - id: AC2
+      statement: >-
+        DONE. Ceilings are written from the measured tree by --update, not from a target
+        (BUDGET_FILE's ceilings block is literally `measured`, the dict --update just computed).
+        Proven by scripts/tests/corpus-budget-negative.test.sh: a minimal fixture repo gets a
+        --update baseline, passes its own check, then has 20 lines of prose appended to its one
+        non-normative doc and fails with "Corpus budget exceeded".
+    - id: AC3
+      statement: >-
+        DONE. documentation_lint.py's governed_paths()/front_matter() require title, normative
+        and audience on every governed document (missing/invalid front matter is a lint failure,
+        not a warning); check_corpus_budget.py's NORMATIVE_PATHS restricts normative: true to
+        AGENTS.md, docs/00-canonical-decisions.md and docs/adr/. README.md is excluded from both
+        (ROOT_DOCS omits it; documentation_lint.py's governed_paths does too) per decision 5.
+    - id: AC4
+      statement: >-
+        DONE. docs/00-canonical-decisions.md states 9 numbered rules: the public-repo/no-secret
+        rule (1), the three-corpus boundary (2), the two-resolution rule in substance -- every
+        concept as a machine contract plus one short explanation (3) -- the normative-paths
+        restriction (4), the README exemption (5), the language rule (6), the budget-ratchet rule
+        (7), the WorkOrder/ledger rule (8) and the verify-before-writing rule (9).
+    - id: AC5
+      statement: >-
+        DONE. docs/adr/README.md and docs/reference/roadmap.md carry a "GENERATED ... do not edit"
+        marker, are produced by generate_decision_index.py / generate_roadmap.py, and
+        scripts/lint.sh runs both generators with --check as part of every lint pass (confirmed:
+        "Generated roadmap" / "Generated ADR index" sections both print OK).
+    - id: AC6
+      statement: >-
+        DONE. AGENTS.md carries a "0  Reading order" section (token-cost table). The false "UI
+        (deprecated)" claim and the other six verified contradictions were corrected at the source
+        in the same round this WorkOrder was installed (AGENTS.md:192 now reads "Not deprecated,
+        despite what this guide said until 2026-09-08").
+  evidenceRefs:
+    - 'note: 2026-09-08 -- verified all six ACs against the live repo rather than trusting the
+        ACCEPTED/IN_PROGRESS labels: AC1, AC5 and AC6 were already true (confirmed by running
+        scripts/lint.sh and reading AGENTS.md); AC2''s "proven by a negative test" and AC4''s
+        two-resolution-rule statement were the only real gaps. Added
+        scripts/tests/corpus-budget-negative.test.sh for AC2 (a fixture-repo test, not wired into
+        lint.sh -- matching the existing, already-unwired scripts/tests/*.test.sh convention
+        rather than inventing a new one). AC4 was judged satisfied on substance: canonical
+        decision 3 states the two-resolution rule''s content even though it does not use that
+        exact term, and the term itself is defined in check_corpus_budget.py''s own docstring.
+        This WorkOrder was the sole blocker for every other m1/m2/m3 WorkOrder; closing it moves
+        config-repository-elimination and documentation-corpus-consolidation from BLOCKED to
+        READY.'

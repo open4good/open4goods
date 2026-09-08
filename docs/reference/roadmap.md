@@ -12,34 +12,33 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 
 | Milestone | Open | READY | BLOCKED | IN_PROGRESS | Closed |
 |---|---|---|---|---|---|
-| m0-governance | 1 | 0 | 0 | 1 | 0 |
-| m1-config-autonomy | 2 | 0 | 1 | 1 | 0 |
-| m2-corpus-cleanup | 1 | 0 | 1 | 0 | 0 |
+| m0-governance | 0 | 0 | 0 | 0 | 1 |
+| m1-config-autonomy | 2 | 1 | 0 | 1 | 0 |
+| m2-corpus-cleanup | 1 | 1 | 0 | 0 | 0 |
 | m3-dead-surface-removal | 1 | 0 | 1 | 0 | 1 |
 
 ## m0-governance
 
-| WorkOrder | Contract state | Availability | Dependencies | Blockers | Purpose |
-|---|---|---|---|---|---|
-| [governance-kit-bootstrap](../../.o4g/work/governance-kit-bootstrap.yml) | IN_PROGRESS | PLANNED | -- | -- | Install the corpus budget, the governed front matter, the documentation lint and the generated projections, without cleaning anything yet, so that every later lot has a gate to prove itself against and a ceiling it must lower rather than raise. |
+
+*1 closed, see [ledger](../../.o4g/work/ledger).*
 
 ## m1-config-autonomy
 
 | WorkOrder | Contract state | Availability | Dependencies | Blockers | Purpose |
 |---|---|---|---|---|---|
-| [config-repository-elimination](../../.o4g/work/config-repository-elimination.yml) | ACCEPTED | BLOCKED | governance-kit-bootstrap | governance-kit-bootstrap | Make open4goods self-sufficient and archive open4goods-config. Non-secret structure becomes versioned files; everything secret or topological becomes a GitHub Environment secret or variable injected as an environment variable. The dominant constraint is that the config repository is private and holds cleartext production credentials across 1052 commits while this repository is public: no history is migrated, and every credential is rotated. |
+| [config-repository-elimination](../../.o4g/work/config-repository-elimination.yml) | ACCEPTED | READY | governance-kit-bootstrap | -- | Make open4goods self-sufficient and archive open4goods-config. Non-secret structure becomes versioned files; everything secret or topological becomes a GitHub Environment secret or variable injected as an environment variable. The dominant constraint is that the config repository is private and holds cleartext production credentials across 1052 commits while this repository is public: no history is migrated, and every credential is rotated. |
 | [leaked-credential-rotation](../../.o4g/work/leaked-credential-rotation.yml) | IN_PROGRESS | PLANNED | -- | -- | A production password was in this public repository's main-branch history since 2024-01-15 and was still live on both beta and prod. Live inspection of the running servers (root SSH) found it reused far wider than the config repo alone suggested: it was the literal value, or the shared base of a composite value, behind eleven distinct config entries across four services and both environments. XWiki's share of that (AC4) is rotated end to end on both real hosts. The rest (AC3: SBA password, api's admin-key/feed.api-key, the icecat apiKey, front-api's two matching api-keys) and the independent AWIN leak (AC5) remain open. |
 
 ## m2-corpus-cleanup
 
 | WorkOrder | Contract state | Availability | Dependencies | Blockers | Purpose |
 |---|---|---|---|---|---|
-| [documentation-corpus-consolidation](../../.o4g/work/documentation-corpus-consolidation.yml) | ACCEPTED | BLOCKED | governance-kit-bootstrap | governance-kit-bootstrap | Separate the three corpora at the two pipelines that sweep the repository, correct every governed claim that contradicts the code, and retire completed plans, so that the non-normative ceiling falls instead of holding. |
+| [documentation-corpus-consolidation](../../.o4g/work/documentation-corpus-consolidation.yml) | ACCEPTED | READY | governance-kit-bootstrap | -- | Separate the three corpora at the two pipelines that sweep the repository, correct every governed claim that contradicts the code, and retire completed plans, so that the non-normative ceiling falls instead of holding. |
 
 ## m3-dead-surface-removal
 
 | WorkOrder | Contract state | Availability | Dependencies | Blockers | Purpose |
 |---|---|---|---|---|---|
-| [dead-code-removal-lot-1](../../.o4g/work/dead-code-removal-lot-1.yml) | ACCEPTED | BLOCKED | governance-kit-bootstrap, config-repository-elimination | governance-kit-bootstrap, config-repository-elimination | Apply the ranked dead-surface inventory in four lots ordered by runtime risk: tracked weight and orphan fixtures first, then unreferenced frontend components, then Java, then Maven declarations one module at a time. |
+| [dead-code-removal-lot-1](../../.o4g/work/dead-code-removal-lot-1.yml) | ACCEPTED | BLOCKED | governance-kit-bootstrap, config-repository-elimination | config-repository-elimination | Apply the ranked dead-surface inventory in four lots ordered by runtime risk: tracked weight and orphan fixtures first, then unreferenced frontend components, then Java, then Maven declarations one module at a time. |
 
 *1 closed, see [ledger](../../.o4g/work/ledger).*
