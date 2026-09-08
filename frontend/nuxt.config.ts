@@ -482,7 +482,9 @@ export default defineNuxtConfig({
       ],
     },
     plugins: [
-      ...(process.env.NODE_ENV !== 'production'
+      ...(process.env.NODE_ENV !== 'production' &&
+      process.env.NODE_ENV !== 'test' &&
+      !process.env.VITEST
         ? [
             VueMcp(),
             VueDevTools({
