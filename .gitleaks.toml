@@ -1,0 +1,44 @@
+title = "open4goods gitleaks config"
+
+# This repository is public and had no secret scanning until 2026-09-08, which is how a
+# production password reached main and stayed valid for twenty months. Default rules are
+# extended, never replaced.
+[extend]
+useDefault = true
+
+# The shape that actually leaked here: a Spring credential key carrying a literal value
+# instead of a ${PLACEHOLDER}. Gitleaks' default rules are provider-specific (AWS, Stripe,
+# GitHub...) and match none of xwiki.password, admin-key or spring.boot.admin.client.password.
+#
+# Written without lookahead: gitleaks compiles with Go RE2, which has none. Exclusions are
+# expressed as allowlists below rather than as (?!...) in the pattern.
+[[rules]]
+id = "o4g-spring-inline-credential"
+description = "Spring credential key with a literal value instead of a ${PLACEHOLDER}"
+regex = '''(?i)^[ \t]*(?:password|passwd|secret|jwt-secret|shared-token|admin-key|api-key|apikey|access-key|secret-key|client-secret|access-token|credentials-json|default-password)[ \t]*:[ \t]*["']?([^\s#"']{8,})'''
+secretGroup = 1
+tags = ["spring", "credential"]
+
+  [rules.allowlist]
+  description = "Placeholders, documented examples, and the gitignored local-dev profiles"
+  regexTarget = "match"
+  regexes = [
+    '''\$\{''',                                   # ${ENV_VAR} or ${ENV_VAR:default}
+    '''(?i)(change[-_]?me|dummy|example|placeholder|redacted|your[-_])''',
+    '''(?i):[ \t]*["']?(?:none|null|false|true|test)["']?[ \t]*$''',
+    '''(?i)(sk_test_|whsec_|ghp_|pdapi_)(\.\.\.|x{3,}|<)''',
+  ]
+  paths = [
+    '''.*/src/test/.*''',
+    '''.*application-devsec\.yml$''',             # gitignored; local dev only
+    '''.*application-local\.yml$''',
+  ]
+
+[allowlist]
+description = "High-entropy strings that are hashes or generated code, never credentials"
+paths = [
+  '''(^|/)pnpm-lock\.yaml$''',
+  '''(^|/)package-lock\.json$''',
+  '''.*/shared/api-client/.*''',
+  '''(^|/)licenses\.csv$''',
+]

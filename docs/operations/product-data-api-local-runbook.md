@@ -48,9 +48,9 @@ java -jar b2b-api/target/b2b-api-*.jar \
   --spring.config.additional-location=optional:file:./b2b-api/src/main/resources/
 ```
 
-`devsec` points Elasticsearch at the prod cluster (`136.243.46.60:9200`, index
-`products-moustik`). Postgres defaults to `localhost:5433` and Redis defaults to
-`localhost:6379`. Default port **8087**.
+`devsec` points Elasticsearch at the prod cluster (host and port come from the
+`devsec` profile, which is gitignored; index `products-moustik`). Postgres defaults
+to `localhost:5433` and Redis defaults to `localhost:6379`. Default port **8087**.
 
 Required env (test values, never commit real secrets) - see
 [auth](../architecture/product-data-api-auth.md) and
