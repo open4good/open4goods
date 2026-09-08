@@ -15,7 +15,7 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 | m0-governance | 1 | 0 | 0 | 1 | 0 |
 | m1-config-autonomy | 2 | 0 | 1 | 1 | 0 |
 | m2-corpus-cleanup | 1 | 0 | 1 | 0 | 0 |
-| m3-dead-surface-removal | 2 | 0 | 2 | 0 | 0 |
+| m3-dead-surface-removal | 1 | 0 | 1 | 0 | 1 |
 
 ## m0-governance
 
@@ -41,4 +41,5 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 | WorkOrder | Contract state | Availability | Dependencies | Blockers | Purpose |
 |---|---|---|---|---|---|
 | [dead-code-removal-lot-1](../../.o4g/work/dead-code-removal-lot-1.yml) | ACCEPTED | BLOCKED | governance-kit-bootstrap, config-repository-elimination | governance-kit-bootstrap, config-repository-elimination | Apply the ranked dead-surface inventory in four lots ordered by runtime risk: tracked weight and orphan fixtures first, then unreferenced frontend components, then Java, then Maven declarations one module at a time. |
-| [dead-workflow-removal](../../.o4g/work/dead-workflow-removal.yml) | ACCEPTED | BLOCKED | governance-kit-bootstrap | governance-kit-bootstrap | Remove the workflows that cannot run and the ones that never have, after the pipelines are green again. A red CI cannot tell a workflow that is broken from one that is dead. |
+
+*1 closed, see [ledger](../../.o4g/work/ledger).*

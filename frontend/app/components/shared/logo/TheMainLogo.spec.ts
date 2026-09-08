@@ -29,13 +29,17 @@ describe('TheMainLogo', () => {
   it('renders the logo image with a valid src', async () => {
     const wrapper = await mountSuspended(TheMainLogo)
     await flushPromises()
-    await new Promise(resolve => setTimeout(resolve, 50))
 
     const img = wrapper.find('img.main-logo')
     expect(img.exists()).toBe(true)
 
-    const src = img.attributes('src')
-    // It should point to the light theme logo we confirmed exists
+    // The asset URL resolves asynchronously (useThemedAsset's watchEffect); wait for
+    // it instead of a fixed delay, which is flaky under a loaded full-suite run.
+    const src = await vi.waitFor(() => {
+      const value = img.attributes('src')
+      if (!value) throw new Error('logo src not resolved yet')
+      return value
+    })
     console.log('Resolved Logo SRC:', src)
 
     // The asset is inlined as a data URI by the build system
