@@ -69,7 +69,6 @@
     "@capacitor/android": "8.4.2",
     "@capacitor/cli": "8.4.2",
     "@capacitor/ios": "8.4.2",
-    "@iconify-json/mdi": "1.2.3",
     "@nuxt/devtools": "3.2.4",
     "@nuxt/eslint": "1.17.0",
     "@nuxt/eslint-config": "1.16.0",

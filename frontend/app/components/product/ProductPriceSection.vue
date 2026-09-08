@@ -319,19 +319,12 @@
                     <div class="product-price__chart-placeholder" />
                   </template>
                 </ClientOnly>
-                <div
+                <p
                   v-else-if="!hasNewHistory"
-                  class="d-flex align-center justify-center text-center h-100 pa-6 text-grey-darken-1"
+                  class="product-price__charts-empty-message product-price__charts-empty-message--inline"
                 >
-                  <div>
-                    <v-icon
-                      :icon="mdiChartTimelineVariant"
-                      size="48"
-                      class="mb-2 opacity-50"
-                    />
-                    <p>{{ $t('product.price.noHistory') }}</p>
-                  </div>
-                </div>
+                  {{ $t('product.price.noHistory') }}
+                </p>
                 <template v-else>
                   <div
                     v-if="newChartOption"
@@ -524,19 +517,12 @@
                     <div class="product-price__chart-placeholder" />
                   </template>
                 </ClientOnly>
-                <div
+                <p
                   v-else-if="!hasOccasionHistory"
-                  class="d-flex align-center justify-center text-center h-100 pa-6 text-grey-darken-1"
+                  class="product-price__charts-empty-message product-price__charts-empty-message--inline"
                 >
-                  <div>
-                    <v-icon
-                      :icon="mdiChartTimelineVariant"
-                      size="48"
-                      class="mb-2 opacity-50"
-                    />
-                    <p>{{ $t('product.price.noHistory') }}</p>
-                  </div>
-                </div>
+                  {{ $t('product.price.noHistory') }}
+                </p>
                 <template v-else>
                   <div
                     v-if="occasionChartOption"
@@ -578,7 +564,6 @@ import {
   mdiAccountMultipleCheckOutline,
   mdiAlertOutline,
   mdiChartLine,
-  mdiChartTimelineVariant,
   mdiOpenInNew,
   mdiRecycle,
   mdiStore,
@@ -1113,7 +1098,10 @@ const onRowClick = (
   const link = resolveOfferLink(item)
   if (link) {
     handleOfferRedirectClick(item, 'offers-table', link)
-    window.open(link, '_blank')
+    // noopener/noreferrer: this is a whole-row click convenience opening the
+    // same href as the row's real `AFFILIATE_LINK_REL` anchor (item.actions
+    // slot above) - that anchor is the crawlable, rel="sponsored ..." link.
+    window.open(link, '_blank', 'noopener,noreferrer')
   }
 }
 
@@ -1827,6 +1815,11 @@ onBeforeUnmount(() => {
   background: rgba(var(--v-theme-surface-primary-050), 0.9);
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
   border: 1px dashed rgba(var(--v-theme-border-primary-strong), 0.4);
+}
+
+.product-price__charts-empty-message--inline {
+  margin: 1rem;
+  font-size: 0.9rem;
 }
 
 @media (max-width: 768px) {

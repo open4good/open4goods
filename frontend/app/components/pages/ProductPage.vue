@@ -2179,6 +2179,10 @@ const productJsonLdGraph = computed(() => {
     category: verticalTitle.value,
     imageUrls: jsonLdImageUrls.value,
     impactScore: impactScoreOutOf20.value,
+    // Nudger's own generated summary, not `product.names.metaDescription` -
+    // productEntry.description below already includes that CMS field, and
+    // reusing it here would duplicate it (`"X - X"`).
+    punchline: fallbackSeoMetaDescription.value,
     labels: {
       impactScore: String(t('product.schema.properties.impactScore')),
       repairabilityIndex: String(

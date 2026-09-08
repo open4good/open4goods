@@ -8,7 +8,7 @@ audience: PROJECT_SCOPED
 
 > **Governance**: this plan is tracked as WorkOrder
 > [`product-page-seo-ui-quality`](../.o4g/work/product-page-seo-ui-quality.yml)
-> (ACCEPTED). Its 9 work packages map to that WorkOrder's AC1-AC9.
+> (IN_PROGRESS). Its 9 work packages map to that WorkOrder's AC1-AC9.
 >
 > **Status tracking**: check the boxes as steps complete. Each work package (WP)
 > is an independent, coherent PR. Execute WPs in order unless stated otherwise.
@@ -17,7 +17,15 @@ audience: PROJECT_SCOPED
 >
 > **Audience**: coding agents. Read `AGENTS.md` (repo root) and
 > `frontend/AGENTS.md` before touching code. Baseline is the **current working
-> tree** (an icon migration is in progress, uncommitted - do not revert it).
+> tree** (the icon migration mentioned below is finished, not in progress).
+>
+> **CORRECTED 2026-09-08**: nearly every checkbox below was stale, not open -
+> commit `13cc9c750` (2026-07-03, the day after this audit) already implemented
+> most of WP0-WP8, and this file's checkboxes were simply never updated to
+> match. Every item was re-verified against the live code and production site
+> before being checked (not trusted from the prose). Only WP6.3 (CTA
+> button-grammar unification) is a real, still-open gap; see the WorkOrder for
+> full per-item evidence.
 
 ---
 
@@ -152,7 +160,7 @@ Legend per step: **[edit]** code change · **[verify]** must pass · **[owner]**
 **Goal**: prove the production build SSRs all sections, fix the duplicate id,
 hand off to the owner for deploy.
 
-- [ ] **0.1 [edit]** Fix duplicate `id="prix"`:
+- [x] **0.1 [edit]** Fix duplicate `id="prix"`:
   - `frontend/app/components/pages/ProductPage.vue` keeps its
     `<section :id="sectionIds.price">` wrapper (id `prix`, used by
     `ProductSummaryNavigation` scroll-spy).
@@ -160,7 +168,7 @@ hand off to the owner for deploy.
     `<section id="prix">` - remove the `id` from the inner element (keep the
     element). Grep first: `grep -n 'id="prix"' frontend/app/components -r`.
     Check nothing targets the inner one (`grep -rn "'#prix'\|\"#prix\"" frontend/app`).
-- [ ] **0.2 [edit]** Create `frontend/scripts/ssr-census.mjs`: a Node script,
+- [x] **0.2 [edit]** Create `frontend/scripts/ssr-census.mjs`: a Node script,
   no new dependencies (use global `fetch` + regex/`JSON.parse`), usage:
   `node scripts/ssr-census.mjs <url>`. It must print:
   1. `<title>` text and meta description content;
@@ -173,14 +181,14 @@ hand off to the owner for deploy.
   7. exit code 1 if: no h1, or any JSON-LD parse fails, or any `/contrib/` anchor
      lacks `sponsored` in rel (this last check may fail until WP1 lands - pass
      `--no-rel-check` flag to skip it in WP0).
-- [ ] **0.3 [verify]** Dev-mode census passes:
+- [x] **0.3 [verify]** Dev-mode census passes:
   `cd frontend && pnpm dev` (note the actual port in the log), then
   `node scripts/ssr-census.mjs http://localhost:<port>/climatiseurs/8431312260509-climatisation-midea-mmcs12hrn8qrd0 --no-rel-check`.
   Expect: h1 + h2s for Impact Score / Prix et évolution / Points de vigilance /
   Caractéristiques techniques; sections `impact`, `vigilance`, `caracteristiques`,
   `alternatives` all "has content = true"; exactly ONE `id="prix"` occurrence in
   the raw HTML (`curl -s <url> | grep -c 'id="prix"'` → 1).
-- [ ] **0.4 [verify]** **Production-mode** census passes (this is the point of WP0 -
+- [x] **0.4 [verify]** **Production-mode** census passes (this is the point of WP0 -
   dev mode proving it is NOT sufficient):
   `cd frontend && pnpm build && pnpm preview` then run the census against the
   preview port on BOTH reference URLs. All sections must have content in the
@@ -189,9 +197,9 @@ hand off to the owner for deploy.
   `ProductPage.vue` (sections are `defineAsyncComponent(() => import(...))`);
   fix so SSR renders them (e.g. static imports for SSR-critical sections or
   Nuxt lazy hydration), then re-verify. Document what was found in the PR.
-- [ ] **0.5 [verify]** `pnpm test` green, Playwright visual specs green
+- [x] **0.5 [verify]** `pnpm test` green, Playwright visual specs green
   (`pnpm exec playwright test`).
-- [ ] **0.6 [owner]** Deploy frontend to production. Afterward re-run the census
+- [x] **0.6 [owner]** Deploy frontend to production. Afterward re-run the census
   against `https://nudger.fr/...` - sections must have content in prod HTML.
 
 **Acceptance**: census green in preview mode on both URLs; single `id="prix"`;
@@ -204,7 +212,7 @@ tests green.
 **Goal**: every outbound offer link is `/contrib/{token}` when a token exists and
 carries `rel="sponsored nofollow noopener noreferrer"` + `target="_blank"`.
 
-- [ ] **1.1 [edit]** In `frontend/app/utils/_product-pricing.ts` add:
+- [x] **1.1 [edit]** In `frontend/app/utils/_product-pricing.ts` add:
   ```ts
   /** rel for outbound affiliate/offer links - Google requires `sponsored` for paid links. */
   export const AFFILIATE_LINK_REL = 'sponsored nofollow noopener noreferrer'
@@ -216,7 +224,7 @@ carries `rel="sponsored nofollow noopener noreferrer"` + `target="_blank"`.
   export const resolveOfferHref = (offer: { affiliationToken?: string | null; url?: string | null }) =>
     offer.affiliationToken ? `/contrib/${offer.affiliationToken}` : offer.url ?? undefined
   ```
-- [ ] **1.2 [edit]** Apply both in every offer-link render:
+- [x] **1.2 [edit]** Apply both in every offer-link render:
   - `frontend/app/components/product/ProductPriceRows.vue` (currently
     `nofollow noopener noreferrer`, lines ~19-20, 94-95; local href logic ~157-164)
   - `frontend/app/components/product/ProductPriceSection.vue` (row buttons,
@@ -232,11 +240,11 @@ carries `rel="sponsored nofollow noopener noreferrer"` + `target="_blank"`.
     (emits `scroll-to-offers`) leave it; only outbound hrefs need the rel.
   - `frontend/app/components/product/ProductMicroPrice.vue`: uses raw
     `bestOffer.url` - switch to `resolveOfferHref` so the token/tracking is not lost.
-- [ ] **1.3 [edit]** Unit tests: in the colocated specs
+- [x] **1.3 [edit]** Unit tests: in the colocated specs
   (`ProductPriceRows.spec.ts`, `ProductPriceSection.spec.ts`, hero pricing spec...)
   assert rendered offer links have `rel === AFFILIATE_LINK_REL` and href starts
   with `/contrib/` when a token is present.
-- [ ] **1.4 [verify]** `pnpm test` green. Census (`--no-rel-check` removed) green:
+- [x] **1.4 [verify]** `pnpm test` green. Census (`--no-rel-check` removed) green:
   every `/contrib/` anchor now reports `sponsored nofollow noopener noreferrer`.
 
 **Acceptance**: census rel-check passes on both reference URLs; no remaining
@@ -249,7 +257,7 @@ carries `rel="sponsored nofollow noopener noreferrer"` + `target="_blank"`.
 **Goal**: commercial, keyword-bearing titles that keep the score, deduped
 descriptions, category keyword in h1.
 
-- [ ] **2.1 [edit]** `frontend/i18n/locales/fr-FR.json` - rework
+- [x] **2.1 [edit]** `frontend/i18n/locales/fr-FR.json` - rework
   `product.meta.serp.title.*` (keep the `full`/`compact`/`minimal` +
   `withImpact`/`withoutImpact`/`noCategory` structure so `seoMetaBase`'s
   length-fallback logic keeps working). Score stays in ALL `withImpact` variants
@@ -266,13 +274,13 @@ descriptions, category keyword in h1.
     `"{verticalTitle} {productName} : meilleur prix | ImpactScore {score}/20"`
     for the full variant.
   - Mirror changes in `en-US.json` (English copy).
-- [ ] **2.2 [edit]** Fix the brand-model duplicate (S3): in `seoMetaBase` /
+- [x] **2.2 [edit]** Fix the brand-model duplicate (S3): in `seoMetaBase` /
   description building (`ProductPage.vue` ~2230-2290), when
   `brandModel === productName` (case/whitespace-insensitive compare), pass a
   variant WITHOUT the parenthesized `{brandModel}`. Cleanest: add i18n
   description keys without the `({brandModel})` segment and select them when the
   values are equal - do not string-replace at runtime.
-- [ ] **2.3 [edit]** h1 category keyword (S11): in `ProductHero.vue` (h1 via
+- [x] **2.3 [edit]** h1 category keyword (S11): in `ProductHero.vue` (h1 via
   `<ProductDesignation title-tag="h1">`, line ~62), prefix the vertical singular
   label when available from `categoryDetail` (e.g. "Climatiseur MIDEA
   MMCS-12HRN8-QRD0"). Check what the category DTO exposes
@@ -280,7 +288,7 @@ descriptions, category keyword in h1.
   - front-api VerticalConfig has i18n names; use the existing prop passed to the
   hero/breadcrumbs rather than adding an API field. Visible title and `og:title`
   may diverge (og keeps the social template) - that is fine.
-- [ ] **2.4 [verify]** Census on both URLs: title matches the new template,
+- [x] **2.4 [verify]** Census on both URLs: title matches the new template,
   description has no duplicated brand-model, h1 contains the category word.
   `pnpm test` green (several specs assert meta/title - update them).
 
@@ -296,7 +304,7 @@ the closest fitting variant), description without `(MIDEA MMCS-12HRN8-QRD0)`.
 item; honest offer fields. All in `frontend/app/utils/product-jsonld.ts`
 (+ its colocated spec).
 
-- [ ] **3.1 [edit]** Add on the Product node (only when an impact score exists):
+- [x] **3.1 [edit]** Add on the Product node (only when an impact score exists):
   ```json
   "review": {
     "@type": "Review",
@@ -308,7 +316,7 @@ item; honest offer fields. All in `frontend/app/utils/product-jsonld.ts`
   ```
   `ratingValue` = impact score (on 20) ÷ 4, rounded to 1 decimal. Use the score
   source that already feeds `additionalProperty` "Nudger Impact Score".
-- [ ] **3.2 [edit]** Breadcrumb brand item (S7): in the breadcrumb assembly
+- [x] **3.2 [edit]** Breadcrumb brand item (S7): in the breadcrumb assembly
   (`jsonLdBreadcrumbs` in `ProductPage.vue` ~2128 feeding the builder), the brand
   crumb currently carries the category URL. If a brand-filtered category URL
   exists (check how the visible breadcrumb builds its brand link in
@@ -316,16 +324,16 @@ item; honest offer fields. All in `frontend/app/utils/product-jsonld.ts`
   is no distinct brand URL), then **drop the brand ListItem from the JSON-LD
   breadcrumb only** (visible breadcrumb unchanged). No two ListItems may share
   an `item` URL.
-- [ ] **3.3 [edit]** Offers honesty (S9): inspect the offer DTO
+- [x] **3.3 [edit]** Offers honesty (S9): inspect the offer DTO
   (`frontend/shared/api-client` or wherever `product.offers` types live -
   `grep -rn "availability\|inStock" frontend/shared frontend/app/utils/product-jsonld.ts`).
   If a real availability/stock field exists, map it; if not, keep `InStock` and
   add a code comment stating the DTO has no availability data. For
   `priceValidUntil`, derive from the offer's last-update timestamp (+N days) if
   present; otherwise keep the synthetic value.
-- [ ] **3.4 [edit]** Extend the builder's colocated spec: review node present
+- [x] **3.4 [edit]** Extend the builder's colocated spec: review node present
   with correctly normalized rating; no duplicate breadcrumb item URLs.
-- [ ] **3.5 [verify]** `pnpm test` green. Census: JSON-LD parses, `@type`s
+- [x] **3.5 [verify]** `pnpm test` green. Census: JSON-LD parses, `@type`s
   include `Product` + `Review` (nested). Manually validate one page's JSON-LD at
   https://validator.schema.org (paste the block) and with Google's Rich Results
   test if accessible.
@@ -339,16 +347,16 @@ spec coverage for both.
 
 **Goal**: stop emitting alternates that 404.
 
-- [ ] **4.1 [edit]** `alternateProductLinks` (`ProductPage.vue` ~963-985)
+- [x] **4.1 [edit]** `alternateProductLinks` (`ProductPage.vue` ~963-985)
   currently builds `en-US` from `PRIMARY_LOCALE_HOSTS` + the **French** path.
   `nudger.com/<french-path>` → 404. Determine whether the product API exposes a
   per-locale slug (`grep -rn "fullSlug" frontend/shared frontend/app | grep -i "en\|locale"`).
   - If an English slug exists → emit it.
   - If not (expected) → emit only `fr-FR` + `x-default` for product pages and
     delete the en-US branch (owner prefers deletion over compat).
-- [ ] **4.2 [edit]** Update/add a unit test asserting product pages emit exactly
+- [x] **4.2 [edit]** Update/add a unit test asserting product pages emit exactly
   fr-FR + x-default (or the en slug case if it exists).
-- [ ] **4.3 [verify]** Census: hreflang list correct; `curl -sI` each emitted
+- [x] **4.3 [verify]** Census: hreflang list correct; `curl -sI` each emitted
   alternate URL → 200.
 
 ---
@@ -358,7 +366,7 @@ spec coverage for both.
 **Goal**: the first viewport sells: clear score, honest verdict, visible price
 CTA - desktop and mobile. This WP changes layout: screenshot before/after.
 
-- [ ] **5.1 [edit]** Verdict panel (`ProductVerdictPanel.vue`,
+- [x] **5.1 [edit]** Verdict panel (`ProductVerdictPanel.vue`,
   `ProductVerdictDimensionChip.vue`):
   - Fix the empty pale circles: the chip's leading visual (icon or mini-gauge)
     renders blank - reproduce locally (Midea URL), inspect why (likely a
@@ -368,12 +376,12 @@ CTA - desktop and mobile. This WP changes layout: screenshot before/after.
     neutral gray (not bordered red/orange) OR omit them when ≥2 dimensions lack
     data, keeping a single muted line "Données partielles pour ce produit".
     Choose the option that reads calmer in the screenshot; document choice in PR.
-- [ ] **5.2 [edit]** Score card overlap (U1): component is the score card in the
+- [x] **5.2 [edit]** Score card overlap (U1): component is the score card in the
   hero (and reused in the impact section - find it:
   `grep -rln "Classement\|Mieux que" frontend/app/components`). Fix the
   "FAIB"/"Classement : Mieux que 95 %" collision (flex wrap / min-width), and
   remove the `Min : 0 / Max : 5` block - the /20 scale is the only one shown.
-- [ ] **5.3 [edit]** Hero pricing panel (`ProductHeroPricingPanel.vue`):
+- [x] **5.3 [edit]** Hero pricing panel (`ProductHeroPricingPanel.vue`):
   - Merchant name: remove the aggressive truncation (allow wrap or larger
     max-width; "castorama.fr" must display fully at 1440px).
   - Make the primary action an explicit CTA button: full-width
@@ -383,18 +391,18 @@ CTA - desktop and mobile. This WP changes layout: screenshot before/after.
     the visual anchor.
   - Price display through `formatPrice` (WP6 does the global sweep; do this
     panel now since we touch it).
-- [ ] **5.4 [edit]** Mobile fold reorder (U16, owner-approved bold change) in
+- [x] **5.4 [edit]** Mobile fold reorder (U16, owner-approved bold change) in
   `ProductHero.vue`: on `xs/sm`, order = breadcrumb → h1 → price CTA block →
   compact gallery (height-capped carousel ~240px with the thumbnails row
   removed or collapsed) → verdict panel. Desktop (md+) layout unchanged. Prefer
   CSS order/`v-row` reordering over duplicating markup; if the pricing panel
   must appear in two spots, extract, don't copy.
-- [ ] **5.5 [edit]** Playwright: add `frontend/tests/visual/product-fold.spec.ts`
+- [x] **5.5 [edit]** Playwright: add `frontend/tests/visual/product-fold.spec.ts`
   taking desktop (1440×900) and mobile (390×844) viewport screenshots of the
   reference TV product URL (stable product), asserting `toHaveScreenshot` - this
   creates the baseline for future changes. Also assert: mobile first-viewport
   contains the price CTA (locator visible without scrolling).
-- [ ] **5.6 [verify]** `pnpm test`, `pnpm exec playwright test` green; manual
+- [x] **5.6 [verify]** `pnpm test`, `pnpm exec playwright test` green; manual
   screenshot review (attach to PR): no overlap in score card, verdict reads
   neutral, merchant name full, CTA prominent, mobile fold shows price.
 
@@ -405,7 +413,7 @@ CTA - desktop and mobile. This WP changes layout: screenshot before/after.
 **Goal**: one heading system, one price format, one CTA grammar, no raw
 internals, no empty-state noise. Mostly mechanical; keep each step reviewable.
 
-- [ ] **6.1 [edit]** Create
+- [x] **6.1 [edit]** Create
   `frontend/app/components/product/ProductSectionHeader.vue`: props
   `{ title: string; subtitle?: string; headingId?: string }`, renders
   `<header><h2 class="product-section__title">...</h2><p class="product-section__subtitle">...</p></header>`,
@@ -417,33 +425,37 @@ internals, no empty-state noise. Mostly mechanical; keep each step reviewable.
   (currently no h2 - new i18n title key, e.g. fr "Cycle de vie"). Kill the
   center-alignment of "Caractéristiques techniques". `ProductVerdictPanel.vue`
   keeps an h2 but switch its classes to the same BEM title class.
-- [ ] **6.2 [edit]** Price format sweep (U4): every displayed price goes through
+- [x] **6.2 [edit]** Price format sweep (U4): every displayed price goes through
   `formatPrice`/`formatBestPrice` from `frontend/app/utils/_product-pricing.ts`.
   Known offenders: `ProductAlternatives.vue` local `formatCurrency` (~line 389,
   produces `433.2 €`) - delete it; `ProductMicroPrice.vue`;
   `ProductHeroPricing(.Panel).vue`; check `ProductStickyPriceBanner.vue` and
   `ProductCard.vue`. Add a vitest asserting fr-FR output (`1 890,00 €` style -
   match whatever `formatPrice` produces; the point is ONE format everywhere).
-- [ ] **6.3 [edit]** CTA + condition color grammar (U6 rest): in
-  `_product-pricing.ts` export `NEW_CONDITION_COLOR = 'success'`,
-  `OCCASION_CONDITION_COLOR = 'secondary'` (pick the pair already dominant in
-  `ProductPriceSection.vue`; just make it single-sourced) and use them in
-  `ProductPriceSection.vue`, `ProductMicroPrice.vue`, `ProductPriceRows.vue`,
-  sticky banner. Align buy-button style: `color="primary" variant="flat"`
-  everywhere a buy/offer CTA renders (rows may use `size="small"`).
-- [ ] **6.4 [edit]** `ProductAlternatives.vue`: replace the "😘 ..." heading with
+- [x] Condition colors: `NEW_CONDITION_COLOR`/`OCCASION_CONDITION_COLOR` exported
+  from `_product-pricing.ts`, single-sourced across `ProductPriceSection.vue`
+  and `ProductMicroPrice.vue`.
+- [ ] **6.3 [edit] STILL OPEN (2026-09-08)** - Buy-button grammar is not unified:
+  `ProductHeroPricingPanel.vue`/`ProductMicroPrice.vue` use
+  `v-btn variant="flat"`, `ProductPriceSection.vue`'s offers-table row action
+  uses `v-btn variant="text"`, and `ProductPriceRows.vue`'s buy interaction is
+  a plain CSS-styled `<a>`, not a `v-btn` at all. Converting it changes
+  hover/focus/keyboard semantics and visual weight in a dense list - do this as
+  its own reviewable step with before/after screenshots, per this doc's own
+  "keep each step reviewable" rule, not folded into another WP's diff.
+- [x] **6.4 [edit]** `ProductAlternatives.vue`: replace the "😘 ..." heading with
   sober copy via i18n (fr e.g. "Alternatives : moins cher, meilleur impact"),
   through `ProductSectionHeader`.
-- [ ] **6.5 [edit]** Offers table (U10): in `ProductPriceSection.vue`, hide the
+- [x] **6.5 [edit]** Offers table (U10): in `ProductPriceSection.vue`, hide the
   v-data-table footer when `items.length <= itemsPerPage`
   (`hide-default-footer` or slot override).
-- [ ] **6.6 [edit]** Empty states (U11): `ProductAttributesSection.vue` - when
+- [x] **6.6 [edit]** Empty states (U11): `ProductAttributesSection.vue` - when
   there are no detailed attributes, render nothing for the "Caractéristiques
   détaillées" sub-block (no search field, no toggle, no empty message if the
   synthesis block above already shows content). Price history
   (`ProductPriceSection.vue`): when history has < 2 points, collapse the card to
   a single muted line instead of the large empty sparkline block.
-- [ ] **6.7 [edit]** Raw internals (U9):
+- [x] **6.7 [edit]** Raw internals (U9):
   - Vigilance contradictory-attributes card: find where the attribute names come
     from (`grep -rn "COLOUR\|conflicts\|contradict" frontend/app/components/product frontend/app/composables`)
     and resolve them through the same label translation the attributes section
@@ -451,7 +463,7 @@ internals, no empty-state noise. Mostly mechanical; keep each step reviewable.
   - Identity card "autres appellations": filter values matching
     `/^\d{8,}_[A-Z]/` (GTIN-prefixed internal codes like `8431312260509_CAFR`)
     out of the displayed list.
-- [ ] **6.8 [verify]** `pnpm test`, Playwright (visual baselines from WP5 will
+- [x] **6.8 [verify]** `pnpm test`, Playwright (visual baselines from WP5 will
   need regeneration - regenerate deliberately, review the diff images, commit).
   Census still green.
 
@@ -461,7 +473,7 @@ internals, no empty-state noise. Mostly mechanical; keep each step reviewable.
 
 **Goal**: zero string `"mdi-..."` literals under `frontend/app/components/product`.
 
-- [ ] **7.1 [edit]** Migrate to `import { mdiX } from '@mdi/js'` +
+- [x] **7.1 [edit]** Migrate to `import { mdiX } from '@mdi/js'` +
   `:icon="mdiX"` (pattern identical to the 11 already-migrated components):
   `ProductHeroPricingPanel.vue`, `ProductHeroPricing.vue`,
   `ProductHeroGallery.vue`, `ProductHeroInlineGallery.vue`,
@@ -472,12 +484,12 @@ internals, no empty-state noise. Mostly mechanical; keep each step reviewable.
   `impact/ProductImpactSubscoreExplanation.vue`,
   `impact/ProductImpactSubscoreRating.vue`.
   Sweep check: `grep -rn '"mdi-\|'"'"'mdi-' frontend/app/components/product` → 0 hits.
-- [ ] **7.2 [edit]** Check `@iconify-json/mdi` usage
+- [x] **7.2 [edit]** Check `@iconify-json/mdi` usage
   (`grep -rn "i-mdi\|mdi:" frontend/app frontend/nuxt.config.ts | grep -v node_modules`);
   if only the Nuxt Icon local-collection discovery uses it and no component
   references `mdi:` names, remove it from `package.json` (`pnpm remove @iconify-json/mdi`).
   If anything uses it, leave it and note in the PR.
-- [ ] **7.3 [verify]** `pnpm test`;
+- [x] **7.3 [verify]** `pnpm test`;
   `pnpm exec playwright test tests/visual/product-icons.spec.ts` green (asserts
   inline SVG, no webfont, no `@mdi/font` stylesheet).
 
@@ -487,14 +499,21 @@ internals, no empty-state noise. Mostly mechanical; keep each step reviewable.
 
 **Goal**: the offline-ready toast never overlaps content at load.
 
-- [ ] **8.1 [edit]** `frontend/app/components/pwa/PwaOfflineNotice.vue`
-  (mounted in `frontend/app/layouts/default.vue`): show at most once per session
-  (sessionStorage flag), delay until `requestIdleCallback`/2s after mount,
-  render as a standard `v-snackbar` bottom-left with a short timeout, and make
-  sure it never captures clicks outside itself. Update
-  `PwaOfflineNotice.spec.ts`.
-- [ ] **8.2 [verify]** `pnpm test`; manual check on the Midea URL: toast no
-  longer overlaps the offers card (screenshot).
+- [x] **8.1/8.2 CORRECTED (2026-09-08)** - this section named the wrong file.
+  The "Mode hors ligne prêt" toast lives in
+  `frontend/app/components/pwa/PwaInstallPrompt.vue`, not
+  `PwaOfflineNotice.vue` (a different, unrelated "you're offline now"
+  indicator). `PwaInstallPrompt.vue` already did everything this item asks:
+  sessionStorage-gated to once per session, `requestIdleCallback`/2s-timeout
+  delay, a standard bottom-left `v-snackbar` with a 4s timeout, no click
+  capture outside itself, with test coverage. Nothing to fix here.
+- [ ] **New, out of this WorkOrder's scope** - `PwaOfflineNotice.vue` itself
+  still has raw `mdi-wifi-off`/`mdi-refresh`/`mdi-close` string icons (same
+  invisible-icon bug as WP5.1/U2, fixed elsewhere this session) - a real but
+  separate defect on a component this WP never named. Same bug also found in
+  `frontend/app/error.vue`, `useMetriks.ts`, `pages/releases/index.vue` and
+  `pages/opensource/index.vue`. File a follow-up icon-migration lot rather
+  than folding these into a product-page WorkOrder.
 
 ---
 
