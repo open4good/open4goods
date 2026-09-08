@@ -6,7 +6,7 @@ spec:
     Remove the workflows that cannot run and the ones that never have, after the pipelines are
     green again. A red CI cannot tell a workflow that is broken from one that is dead.
   roadmapRef: m3-dead-surface-removal
-  state: ACCEPTED
+  state: COMPLETED
   dependsOn: [governance-kit-bootstrap]
   pathScope:
     - '.github/workflows/**'
@@ -16,29 +16,62 @@ spec:
   acceptanceCriteria:
     - id: AC0
       statement: >-
-        testAndPublishBeta.yml, releaseDeployProd.yml and b2b-frontend-ci.yml are green before any
-        workflow is deleted.
+        DONE. testAndPublishBeta.yml, releaseDeployProd.yml and b2b-frontend-ci.yml were all red
+        for three independent reasons, none of them workflow-file defects: elasticsearch-java's
+        opentelemetry-semconv mismatch (fixed by merging the already-open PR #3317), b2b-frontend's
+        nuxt 4.5/vite 8 jump outrunning vitest's vite 7 support (nuxt pinned back to 4.4.8, plus an
+        explicit vite@7.3.6 and @vitejs/devtools-kit devDependency to stop pnpm's peer resolution
+        from splitting the tree), and the main frontend's identical nuxt/vite skew (same 4.4.8 pin)
+        compounded by a flaky test (TheMainLogo.spec.ts asserted on a fixed 50ms timeout for an
+        async asset load that loses the race under full-suite parallel load; switched to
+        vi.waitFor). Verified locally with CI's exact Node/pnpm versions: lint, typecheck, test,
+        test:coverage and build all green on both frontend and b2b-frontend; PR #3317's own Maven
+        build/test checks were already green pre-merge.
     - id: AC1
       statement: >-
-        frontend-release.yml is removed. It has zero runs and three independent defects that would
-        fail it if dispatched: no root package.json for its pnpm install, setup-node caching pnpm
-        before corepack activates it, and a pnpm version two minors behind.
+        DONE. frontend-release.yml removed. It had zero runs and three independent defects that
+        would fail it if dispatched: no root package.json for its pnpm install, setup-node caching
+        pnpm before corepack activates it, and a pnpm version two minors behind.
     - id: AC2
       statement: >-
-        ai-agent.yml is either made to work by creating the three provider secrets it reads, none
-        of which exist, or removed with its .old companions and its .md.
+        DONE. ai-agent.yml removed. None of its three provider secrets (ANTHROPIC_API_KEY,
+        GEMINI_API_KEY, OPENAI_API_KEY) exist at org or repo level -- the org has GEMINI_KEY, not
+        GEMINI_API_KEY -- and creating real third-party provider credentials isn't something this
+        session can do. Removed with its .old companions and its .md.
     - id: AC3
-      statement: The three non-yml files parked in .github/workflows/ are gone.
+      statement: >-
+        DONE. The three non-yml files (ai-agent-dev.yml.old, ai-agent.yml.old, ai-agent.md) are
+        gone with AC2.
     - id: AC4
       statement: >-
-        pr-to-project.yml no longer skips every human pull request, or is removed. issue-to-project.yml,
-        silent since 2026-06-25, is decided.
+        DONE, by owner decision: both removed rather than fixed. pr-to-project.yml's job condition
+        (github.event.pull_request.user.login == 'renovate[bot]') confirmed skipping every human
+        PR by design; issue-to-project.yml confirmed silent since 2026-06-25 (last run that day,
+        none since). Project-board assignment is fully manual until someone re-implements it.
     - id: AC5
       statement: >-
-        The five JRELEASER_* org secrets are revoked. Nothing else is revoked at this stage: the
-        MACHINE_TOKEN and HCAPTCHA keys look orphaned from the workflows but are the frontend's
-        runtime values and are needed by config-repository-elimination.
+        DONE. Confirmed exactly five JRELEASER_* org secrets (JRELEASER_GPG_PASSPHRASE,
+        JRELEASER_GPG_PUBLIC_KEY, JRELEASER_GPG_SECRET_KEY, JRELEASER_NEXUS2_PASSWORD,
+        JRELEASER_NEXUS2_USERNAME), referenced nowhere in the repo but this WorkOrder file itself
+        (their only caller, frontend-release.yml, is gone per AC1). Revoked via
+        `gh api -X DELETE orgs/open4good/actions/secrets/<name>`, verified absent afterward.
+        Nothing else touched: MACHINE_TOKEN, BETA_MACHINE_TOKEN, HCAPTCHA_SITE_KEY,
+        BETA_HCAPTCHA_SITE_KEY and PROJECT_PAT are out of scope for this WorkOrder.
     - id: AC6
       statement: >-
-        The Lighthouse pipeline and scripts/generate_markdown.py are either wired to a caller or
-        removed; neither has one today.
+        DONE, by owner decision: removed rather than wired up. lighthouse/ (badges/, history/,
+        HISTORY.md, latest/) and .lighthouserc.json had a real assertion config and history but no
+        workflow called either; scripts/generate_markdown.py had no caller anywhere. All removed.
+  evidenceRefs:
+    - 'note: 2026-09-08 -- AC0 required deciding how far to chase CI-red before touching any
+        workflow file; owner chose "fix all three, however deep." The b2b-frontend and frontend
+        fixes are dependency-version pins working around a real upstream gap (vitest 3.x/5.x both
+        still declare `vite: ^5.0.0 || ^6.0.0 || ^7.0.0-0` in vite-node, while @nuxt/vite-builder
+        jumped to `vite: ^8.x` at nuxt 4.5.0) -- pinning nuxt back to 4.4.8 is a deliberate
+        rollback, not a random version bump, and should stay pinned until vitest ships vite 8
+        support.'
+    - 'note: 2026-09-08 -- AC2/AC4/AC5/AC6 each had a real either/or the WorkOrder text left open;
+        owner decided all four in one round: remove ai-agent.yml (no path to make it work without
+        credentials this session cannot create), remove both project-sync workflows rather than
+        repair pr-to-project.yml, revoke the JRELEASER secrets immediately rather than deferring,
+        remove the Lighthouse pipeline and generate_markdown.py rather than wiring a caller.'
