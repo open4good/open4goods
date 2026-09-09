@@ -1,0 +1,34 @@
+# GitHub Actions deployment inputs referenced by .github/workflows/*.yml.
+#
+# Enforced by scripts/verify/check_deployment_inputs.py -- AC4 of config-contract-and-environments
+# (docs/adr/0006-github-environments-and-systemd-runtime.md). A workflow may not reference a new
+# secrets.NAME or vars.NAME without adding it here first: that is the "unclassified" gate, a
+# deliberate, reviewed decision instead of a silent new deployment input.
+#
+# store: which GitHub Actions store this name must resolve from today. No GitHub Environment
+# (job-level `environment:`) is used anywhere yet -- AC2 (moving these into beta/prod GitHub
+# Environments) is unattempted, see docs/operations/legacy-config-inventory.md. Every input below
+# is a repository-level secret; none use the separate, non-masked `vars` store.
+inputs:
+  SSH_PRIVATE_KEY:
+    store: secrets
+    note: deploy SSH private key; multi-line, so GitHub's log-masking is unreliable for it -- never echo it
+  REMOTE_HOST:
+    store: secrets
+    note: production deploy host -- topology, kept out of docs per leaked-credential-rotation AC8
+  REMOTE_USER:
+    store: secrets
+  REMOTE_BETA_HOST:
+    store: secrets
+    note: beta deploy host -- topology
+  REMOTE_BETA_USER:
+    store: secrets
+  API_URL:
+    store: secrets
+    note: baked into the Nuxt production build
+  HCAPTCHA_SITE_KEY:
+    store: secrets
+    note: hCaptcha's own design makes site keys public-facing, but it is stored as a secret today
+  GITHUB_TOKEN:
+    store: secrets
+    note: GitHub Actions' own automatic per-run token, not an owner-managed repository secret

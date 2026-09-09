@@ -16,19 +16,19 @@ spec:
     - .github/workflows/**
     - '*/src/main/resources/application*.yml'
     - docs/operations/**
+    - scripts/verify/**
+    - scripts/python/lint_suite.py
   acceptanceCriteria:
     - id: AC1
       statement: >-
-        DONE. docs/operations/legacy-config-inventory.md classifies all 157 tracked assets of
-        open4good/open4goods-config (git ls-files ground truth at origin/main HEAD e9ebc878f) by file glob, with a
-        key-level appendix for the files that mix classes (the ten application-active.yml, the .env files,
-        kibana.yml, server.xml/xwiki.cfg*). Surfaced three findings outside this AC's scope, recorded in the
-        document rather than acted on -- a live kibana_system Elasticsearch password in
-        docker-compose/beta/kibana.yml (new exposure, candidate for a new leaked-credential-rotation AC), a
-        likely-stale literal GitHub runner token in two doc/example files, and configs/prod/infra/.env being 0
-        bytes versus beta's four keys (an AC2 candidate for one of the "four missing references"). Untracked local
-        content in the audited checkout (personal documents, provisioning artifacts) is out of AC1's "tracked
-        legacy asset" scope and noted separately.
+        DONE. docs/operations/legacy-config-inventory.md classifies all 157 tracked assets of open4good/open4goods-config (git ls-files
+        ground truth at origin/main HEAD e9ebc878f) by file glob, with a key-level appendix for the files that mix classes (the ten
+        application-active.yml, the .env files, kibana.yml, server.xml/xwiki.cfg*). Surfaced three findings outside this AC's scope,
+        recorded in the document rather than acted on -- a live kibana_system Elasticsearch password in docker-compose/beta/kibana.yml (new
+        exposure, candidate for a new leaked-credential-rotation AC), a likely-stale literal GitHub runner token in two doc/example files,
+        and configs/prod/infra/.env being 0 bytes versus beta's four keys (an AC2 candidate for one of the "four missing references").
+        Untracked local content in the audited checkout (personal documents, provisioning artifacts) is out of AC1's "tracked legacy asset"
+        scope, noted separately.
     - id: AC2
       statement: Environments beta and prod hold nine legacy-only secrets, reuse five organization secrets and resolve four
         missing references.
@@ -37,8 +37,12 @@ spec:
         DONE. All 7 services (@SpringBootApplication) ship a packaged application.yml with only non-secret defaults:
         admin had none (added one, moved secrets to devsec); front-api's shared-token gained jwt-secret's indirection.
     - id: AC4
-      statement: CI fails when a deployment input is unclassified, duplicated at the wrong scope or rendered into logs.
+      statement: >-
+        PARTIAL. scripts/verify/check_deployment_inputs.py (in lint.sh) checks workflow secrets./vars. refs against
+        ops/config/deployment-inputs.yml: fails unclassified names, cross-store/literal-fallback duplicates and
+        log-printing steps. All 8 refs pass; cross-environment duplication isn't checkable without a GitHub Environment.
   evidenceRefs:
-    - 'note: 2026-09-09 -- AC1 read-only audit of the owner''s open4goods-config checkout, no writes made. AC2 needs
-        undelegated GitHub secret-admin access; AC4 unattempted. AC3: admin/front-api compile clean, admin boots
-        (devsec profile) with no errors, lint.sh passed; no production/secret access used. See legacy-config-inventory.md.'
+    - 'note: 2026-09-09 -- AC1 read-only audit, no writes. AC2 needs undelegated secret-admin access. AC3/AC4:
+        admin/front-api compile+boot clean, lint.sh (incl. deployment-inputs check) passed; no prod/secret access.
+        AC4 widened pathScope to scripts/verify/** and scripts/python/lint_suite.py (the check and its lint.sh
+        wiring) and raised work_open_lines via check_corpus_budget.py --update, both in this commit.'
