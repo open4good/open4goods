@@ -1,12 +1,14 @@
 package org.open4goods.icecat.model;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Response model for the Icecat live API (JSON format).
  * Renamed from IcecatData; import from org.open4goods.icecat.model.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class IcecatLiveApiResponse {
 
     @JsonProperty("msg")
@@ -17,6 +19,7 @@ public class IcecatLiveApiResponse {
 
     // Getters and Setters
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class IceDataItem {
         @JsonProperty("Dictionary")
         public Dictionary dictionary;
@@ -63,6 +66,7 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Dictionary {
         @JsonProperty("link_integrate_desk")
         public String linkIntegrateDesk;
@@ -133,6 +137,7 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class GeneralInfo {
         @JsonProperty("IcecatId")
         public int icecatId;        
@@ -178,6 +183,7 @@ public class IcecatLiveApiResponse {
         public List<GTIN> gtins;
 
     }
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class GTIN {
 
         @JsonProperty("GTIN")
@@ -186,6 +192,7 @@ public class IcecatLiveApiResponse {
         public boolean isApproved;
 
     }
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class TitleInfo {
         @JsonProperty("GeneratedIntTitle")
         public String generatedIntTitle;
@@ -197,6 +204,7 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class GeneratedLocalTitle {
         @JsonProperty("Value")
         public String value;
@@ -206,6 +214,7 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class BrandLocalTitle {
         @JsonProperty("Value")
         public String value;
@@ -215,6 +224,7 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class BrandInfo {
         @JsonProperty("BrandName")
         public String brandName;
@@ -226,6 +236,7 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ProductNameInfo {
         @JsonProperty("ProductIntName")
         public String productIntName;
@@ -235,6 +246,7 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ProductLocalName {
         @JsonProperty("Value")
         public String value;
@@ -244,6 +256,7 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Category {
         @JsonProperty("CategoryID")
         public String categoryID;
@@ -253,6 +266,7 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Name {
         @JsonProperty("Value")
         public String value;
@@ -262,6 +276,7 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ProductFamily {
         @JsonProperty("ProductFamilyID")
         public String productFamilyID;
@@ -273,6 +288,7 @@ public class IcecatLiveApiResponse {
         public String language;
    }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ProductSeries {
         @JsonProperty("SeriesID")
         public String seriesID;
@@ -289,6 +305,7 @@ public class IcecatLiveApiResponse {
         
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Description {
         @JsonProperty("ID")
         public String id;
@@ -321,6 +338,7 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class SummaryDescription {
         @JsonProperty("ShortSummaryDescription")
         public String shortSummaryDescription;
@@ -330,6 +348,7 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class BulletPoints {
         @JsonProperty("BulletPointsId")
         public String bulletPointsId;
@@ -344,6 +363,7 @@ public class IcecatLiveApiResponse {
         public String updated;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class GeneratedBulletPoints {
         @JsonProperty("Language")
         public String language;
@@ -353,6 +373,7 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Image {
         @JsonProperty("HighPic")
         public String highPic;
@@ -386,6 +407,8 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    
+    @JsonIgnoreProperties(ignoreUnknown = true)
     
     public static class Multimedia {
     	  @JsonProperty("ID")
@@ -450,6 +473,7 @@ public class IcecatLiveApiResponse {
     	    public String eprelLink;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Gallery {
         @JsonProperty("ID")
         public String id;
@@ -497,6 +521,7 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Attributes {
         @JsonProperty("OriginalFileName")
         public String originalFileName;
@@ -504,6 +529,7 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class FeaturesGroups {
         @JsonProperty("ID")
         public String id;
@@ -517,6 +543,7 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class FeatureGroup {
         @JsonProperty("ID")
         public String id;
@@ -526,6 +553,7 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Feature {
         @JsonProperty("Localized")
         public String localized;
@@ -563,6 +591,7 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class FeatureDetail {
         @JsonProperty("ID")
         public String id;
@@ -576,6 +605,7 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Measure {
         @JsonProperty("ID")
         public String id;
@@ -587,6 +617,7 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Signs {
         @JsonProperty("ID")
         public String id;
@@ -598,6 +629,7 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class FeatureLogos {
     	  @JsonProperty("LogoPic")
     	    public String logoPic;
@@ -629,6 +661,7 @@ public class IcecatLiveApiResponse {
     	    // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ReasonsToBuy {
     	 @JsonProperty("ReasonToBuyID")
     	    public String reasonToBuyID;
@@ -663,18 +696,21 @@ public class IcecatLiveApiResponse {
     	    // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Reviews {
         // Empty class based on provided JSON structure
 
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class TaxonomyDescriptions {
         // Empty class based on provided JSON structure
 
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ProductRelated {
         @JsonProperty("ID")
         public String id;
@@ -700,6 +736,7 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ProductRelatedLocales {
         @JsonProperty("ID")
         public String id;
@@ -715,12 +752,14 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Variants {
         // Empty class based on provided JSON structure
 
         // Getters and Setters
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ProductStory {
         // Empty class based on provided JSON structure
 
