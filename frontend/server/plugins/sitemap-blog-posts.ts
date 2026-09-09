@@ -10,8 +10,9 @@ const BLOG_POSTS_SITEMAP_FILENAME = `${BLOG_POSTS_SITEMAP_KEY}.xml`
  * Blog articles are dynamic routes (app/pages/blog/[slug].vue), so they are excluded from
  * shared/utils/sitemap-main-pages.ts's static-page scan and had no sitemap source at all: the
  * `blog-posts.xml` name reserved in nuxt.config.ts's sitemapLocalFiles was never written by ui's
- * SitemapGenerationService (it only ever produced product-pages.xml, wiki-pages.xml,
- * category-pages.xml and guides.xml), so that proxy entry always 404'd. This plugin makes Nuxt the
+ * SitemapGenerationService (it only ever produced product-pages.xml, category-pages.xml and
+ * guides.xml -- wiki-pages.xml was dropped too, see AC3 below: it was always an empty urlset),
+ * so that proxy entry always 404'd. This plugin makes Nuxt the
  * actual source of truth for blog URLs, consistent with rss.get.ts's own reasoning: "Nuxt -- not
  * the Java UI module -- owns the blog." See xwiki-editorial-content-to-nuxt-content AC3.
  *

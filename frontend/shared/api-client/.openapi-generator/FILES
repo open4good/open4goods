@@ -8,7 +8,6 @@ apis/BrandApi.ts
 apis/CategoriesApi.ts
 apis/CommercialEventsApi.ts
 apis/ContactApi.ts
-apis/ContentApi.ts
 apis/ExposedDocsApi.ts
 apis/FaviconControllerApi.ts
 apis/FeedbackApi.ts
@@ -92,7 +91,6 @@ models/FieldMetadataDto.ts
 models/Filter.ts
 models/FilterGroup.ts
 models/FilterRequestDto.ts
-models/FullPageDto.ts
 models/GeocodeResponse.ts
 models/GlobalSearchPageMetaDto.ts
 models/GlobalSearchRequestDto.ts

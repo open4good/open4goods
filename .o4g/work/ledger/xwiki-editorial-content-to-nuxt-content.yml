@@ -1,0 +1,81 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: xwiki-editorial-content-to-nuxt-content
+  name: Move editorial XWiki content to Nuxt Content
+spec:
+  purpose: Replace XWiki pages, reusable blocs and attachments with localized typed content rendered by Nuxt SSR.
+  roadmapRef: m6-xwiki-retirement
+  state: COMPLETED
+  dependsOn:
+    - governance-kit-bootstrap
+  decisionRefs:
+    - ADR-0009
+  pathScope:
+    - frontend/**
+    - front-api/**
+    - ui/**
+    - scripts/migrate/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: 'DONE 2026-09-09 (see evidenceRefs). All in-scope editorial content now serves statically: team/opensource/partner/ecosystem
+        blocs, legal-notice and data-privacy full pages. opensource-contribution has no live consumer (stale dev doc, not
+        migrated). Genuinely blocked, not deferred: the 3 /blog/* full pages (impact-score-ia, prioriser-durabilite, equilibrer-prix-impact),
+        absent from the export archive with no working XWiki access.'
+    - id: AC2
+      statement: 'DONE 2026-09-09 (see evidenceRefs). Bloc slice: ContentsController''s /blocs/{blocId}, its XWikiHtmlService
+        wiring, XwikiContentBlocDto (java), content.services.ts and ContentApi.contentBloc removed; frontend/api/blocs/[blocId].ts
+        now 404s on a static-map miss, guarded by static-content-blocs.coverage.spec.ts (fails CI if a team/partner bloc-id
+        in application.yml has no static content). Page slice: the 3 unrecoverable /blog/* pages (impact-score-ia, prioriser-durabilite,
+        equilibrer-prix-impact -- absent from the export archive, live XWiki still 401s, and confirmed already broken in production)
+        are 301-redirected to /blog; ContentsController, XwikiFullPageService, FullPageDto (java+ts), pages.services.ts and
+        XwikiProxyController (its only remaining trigger, /wiki-files/** rewriting, no longer fires) are removed. No live
+        XWiki call remains in this WorkOrder''s scope.'
+    - id: AC3
+      statement: DONE 2026-09-09. Blog has a real Nuxt-native sitemap (server/plugins/sitemap-blog-posts.ts); editorial routes
+        were already Nuxt-owned via main-pages.xml's static-route scan. ui's wiki-pages.xml was verified dead (see evidence)
+        and removed; the remaining editorial sitemap surface (per-vertical WikiPageConfig entries in category-pages.xml) now
+        emits its URL without any XWiki call.
+  evidenceRefs:
+    - 'note: 2026-09-09 -- owner decision mid-session: "except for blog, ALL content will be replaced with i18n (thinking
+      on teams, and so on...)". AC1 and AC2 restated accordingly (rewrite, not export/parity); original wording is preserved
+      in this WorkOrder''s git history for anyone auditing the change. No XWiki access is needed for this WorkOrder; only
+      the sibling xwiki-blog-to-nuxt-content depends on live XWiki content.'
+    - 'note: 2026-09-09 -- resumed. AC1''s bloc slice (team/opensource/opendata bios, per-member title/bio blocs) is real
+      per-person copy, not fabricable; HOME:FAQ is already static i18n, no work needed there. Anonymous XWiki REST still 401s
+      on a real page fetch, matching incident_xwiki_blog_locked_down_sept2026: needs owner-supplied copy or working credentials
+      first. Also: /blog/{impact-score-ia,prioriser-durabilite,equilibrer-prix-impact} are real full pages outside the closed
+      blog WorkOrder''s export, still live via cache, not broken but unmigrated (AC1/AC2 full-page slice). Did AC3 instead.
+      test: pnpm vitest run, pnpm lint, nuxt typecheck, ./scripts/lint.sh all green.'
+    - 'note: 2026-09-09 -- owner instruction: work from the export archive (root@136.243.46.60:/opt/open4goods/backup/xwiki-export.xar)
+      as the real content source, reversing the prior session''s deferral. Extracted the relevant pages (team, opensource,
+      opendata heroes, partners, ecosystem), cross-checked every string against the live blocId used by each component/config
+      entry, and added frontend/server/utils/static-content-blocs.ts: a per-blocId, per-language map consulted by server/api/blocs/[blocId].ts
+      before it would otherwise call the live (401''ing) XWiki backend. English is missing for most personal bios and two
+      partner blurbs in the source itself -- served as a French fallback rather than a fabricated translation, documented
+      inline. One source data bug found and corrected: pages/ecosystem/frenchtech.xml''s French content was a copy-paste of
+      the Wekey blurb; used a direct translation of the correct English text instead, flagged in a code comment. test: pnpm
+      vitest run (8 new tests + full suite 596 passed/1 skipped), pnpm lint, nuxt typecheck, ./scripts/lint.sh all green.'
+    - 'note: 2026-09-09 -- AC3 done: wiki-pages.xml verified dead repo-wide, removed with its XwikiFacadeService dep; kept
+      WikiPageConfig sitemap entries but dropped their XWiki call. AC1/AC2 untouched. test: mvn/ui/frontend suites green.'
+    - 'note: 2026-09-09 -- AC1 done: extracted legal-notice/data-privacy from the owner-provided export archive into frontend/server/utils/static-full-pages.ts
+      (mirrors static-content-blocs.ts), wired ahead of the live XWiki call in server/api/pages/[pageId].ts, SSR-verified
+      with a real dev server. opensource-contribution confirmed unused (no code reference anywhere). The 3 /blog/* full pages
+      are absent from the export and the app''s own XWiki service account still redirects to a login page on the live endpoint
+      -- genuinely blocked, kept live-fallback for them. test: frontend vitest 608/1 skip, lint, typecheck, ./scripts/lint.sh
+      all green.'
+    - 'note: 2026-09-09 -- resumed to trace bloc-id consumers left incomplete last session (TeamProperties/EcosystemPartnersProperties/MentorPartnersProperties
+      -> ContentsController). Zero coverage gaps found, but the live fallback was already dead (XWiki 401s the service account),
+      so removed /blocs/{blocId} and its java+ts wiring, added static-content-blocs.coverage.spec.ts as the build-time guard,
+      dropped orphaned webpages:opensource:pillars-community. User then confirmed: once all blog posts are markdown, drop
+      the rest. Live-fetched the 3 blocked /blog/* pages to check for a recoverable source: all 3 already show the app''s
+      own "failed to load" error in production (the prior session''s warm cache has since expired) -- no content anywhere
+      (export archive, live XWiki, or the live site). Owner decision: drop them. Added 301 redirects /blog/{impact-score-ia,prioriser-durabilite,equilibrer-prix-impact}
+      -> /blog, then removed the now-fully-dead /pages live fallback (ContentsController, XwikiFullPageService, FullPageDto
+      java+ts, pages.services.ts) and XwikiProxyController (confirmed its only remaining trigger, /bin/download rewriting
+      for full-page HTML, no longer fires). AC2 done. test: mvn -pl front-api,ui -am compile + test-compile, frontend vitest
+      642/1 skip (158 files), pnpm lint, nuxt typecheck, ./scripts/lint.sh all green.'
+    - 'note: 2026-09-09 -- closing. AC1/AC2/AC3 all DONE (see acceptanceCriteria and prior evidenceRefs). No live XWiki call
+      remains anywhere in this WorkOrder''s pathScope (frontend/**, front-api/**, ui/**); the sibling xwiki-decommission WorkOrder
+      can now consider this dependency satisfied. Full suites green: mvn -pl front-api,ui -am compile + test-compile, frontend
+      vitest 642/1 skip (158 files), pnpm lint, nuxt typecheck, ./scripts/lint.sh.'

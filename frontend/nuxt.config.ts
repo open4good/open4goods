@@ -338,6 +338,12 @@ export default defineNuxtConfig({
     '/offline': { prerender: true },
     '/ecoscore': { redirect: { to: '/impact-score', statusCode: 301 } },
     '/eco-score': { redirect: { to: '/impact-score', statusCode: 301 } },
+    // The 3 remaining XWiki-backed /blog/* full pages: absent from the XWiki export archive and
+    // live XWiki access has been down since 2026-09-09 (incident_xwiki_blog_locked_down_sept2026)
+    // -- no recoverable source, dropped rather than left broken (xwiki-editorial-content-to-nuxt-content AC2).
+    '/blog/impact-score-ia': { redirect: { to: '/blog', statusCode: 301 } },
+    '/blog/prioriser-durabilite': { redirect: { to: '/blog', statusCode: 301 } },
+    '/blog/equilibrer-prix-impact': { redirect: { to: '/blog', statusCode: 301 } },
     // Fix SWR handler error by disabling cache for assistant configs (conflicts with cookie setting)
     '/assistant-configs/**': { cache: false },
     '/api/assistant-configs/**': { cache: false },
@@ -557,18 +563,18 @@ export default defineNuxtConfig({
     staticMainPageRoutes: STATIC_MAIN_PAGE_ROUTE_NAMES,
     sitemapLocalFiles: {
       fr: [
-        // blog-posts.xml removed: ui's SitemapGenerationService never wrote it (only
-        // product-pages/wiki-pages/category-pages/guides), so this proxy entry always 404'd.
+        // blog-posts.xml and wiki-pages.xml removed: ui's SitemapGenerationService never wrote
+        // real content into them (blog-posts.xml was never written at all; wiki-pages.xml was
+        // always an empty urlset since no vertical or top-level wiki page mapping was ever
+        // configured), so these proxy entries always 404'd or pointed at an empty file.
         // server/plugins/sitemap-blog-posts.ts now generates blog URLs directly from Nuxt Content.
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/category-pages.xml`,
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/product-pages.xml`,
-        `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/wiki-pages.xml`,
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/guides.xml`,
       ],
       en: [
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/category-pages.xml`,
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/product-pages.xml`,
-        `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/wiki-pages.xml`,
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/guides.xml`,
       ],
     },
