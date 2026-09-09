@@ -18,16 +18,15 @@ spec:
     - scripts/migrate/**
   acceptanceCriteria:
     - id: AC1
-      statement: 'REVISED again 2026-09-09 (see evidenceRefs): owner directed using the export archive as the real content
-        source for team/opensource/partner/ecosystem blocs, superseding the earlier "freshly authored, not exported" framing
-        for that slice specifically. Those bloc ids (13 members'' bios+titles, 3 team-page heroes, 13 opensource blocs, 2
-        opendata heroes, 7 partner/ecosystem blurbs) now serve real extracted copy statically, bypassing the down XWiki
-        endpoint entirely -- DONE. FAQ was already static i18n. Remaining and still not exported: legal-notice, data-privacy
-        and the opensource-contribution full pages (larger markup, deferred).'
+      statement: 'DONE 2026-09-09 (see evidenceRefs). All in-scope editorial content now serves statically: team/opensource/partner/ecosystem
+        blocs, legal-notice and data-privacy full pages. opensource-contribution has no live consumer (stale dev doc, not
+        migrated). Genuinely blocked, not deferred: the 3 /blog/* full pages (impact-score-ia, prioriser-durabilite,
+        equilibrer-prix-impact), absent from the export archive with no working XWiki access.'
     - id: AC2
-      statement: 'REVISED 2026-09-09. XWiki renderers and content endpoints are removed after route, metadata, accessibility
-        and SSR coverage tests pass against the new authored content. Dropped the original "parity" framing: with no XWiki
-        export as source of truth for this content, there is nothing to hold parity against.'
+      statement: 'OPEN. Still live and XWiki-backed: front-api ContentsController''s /blocs and /pages endpoints,
+        XwikiFullPageService, XwikiProxyController, and the frontend blocs/pages live-fallback (needed for the 3 blocked
+        /blog/* pages and any future uncovered bloc id -- team/partner bloc ids come from front-api config, not a closed
+        set). Removing these forces a shared/api-client regen; not attempted this lot.'
     - id: AC3
       statement: 'DONE 2026-09-09. Blog has a real Nuxt-native sitemap (server/plugins/sitemap-blog-posts.ts); editorial
         routes were already Nuxt-owned via main-pages.xml''s static-route scan. ui''s wiki-pages.xml was verified dead
@@ -55,3 +54,9 @@ spec:
       flagged in a code comment. test: pnpm vitest run (8 new tests + full suite 596 passed/1 skipped), pnpm lint, nuxt
       typecheck, ./scripts/lint.sh all green.'
     - 'note: 2026-09-09 -- AC3 done: wiki-pages.xml verified dead repo-wide, removed with its XwikiFacadeService dep; kept WikiPageConfig sitemap entries but dropped their XWiki call. AC1/AC2 untouched. test: mvn/ui/frontend suites green.'
+    - 'note: 2026-09-09 -- AC1 done: extracted legal-notice/data-privacy from the owner-provided export archive into
+        frontend/server/utils/static-full-pages.ts (mirrors static-content-blocs.ts), wired ahead of the live XWiki call
+        in server/api/pages/[pageId].ts, SSR-verified with a real dev server. opensource-contribution confirmed unused
+        (no code reference anywhere). The 3 /blog/* full pages are absent from the export and the app''s own XWiki service
+        account still redirects to a login page on the live endpoint -- genuinely blocked, kept live-fallback for them.
+        test: frontend vitest 608/1 skip, lint, typecheck, ./scripts/lint.sh all green.'
