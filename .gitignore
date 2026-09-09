@@ -17,6 +17,7 @@ ui/src/main/resources/application-devsec.yml
 apache-maven-*-bin.tar.gz
 /frontend/components/dev/generations
 /logs/
+/artifacts/recette/
 /jstack.log
 /.claude/
 /products_with_offers.json

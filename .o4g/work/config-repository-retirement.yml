@@ -1,0 +1,17 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: config-repository-retirement, name: Retire open4goods-config}
+spec:
+  purpose: Remove the final operational dependency and archive the private repository without rewriting its history.
+  roadmapRef: m1-config-autonomy
+  state: ACCEPTED
+  dependsOn: [config-prod-cutover]
+  decisionRefs: [ADR-0006]
+  pathScope: ['.github/workflows/**', 'ops/config/**', 'scripts/**', 'docs/operations/**']
+  acceptanceCriteria:
+    - id: AC1
+      statement: Builds, deployments, monitoring and recovery use no file, runner or credential from the legacy repository.
+    - id: AC2
+      statement: The repository remains private, is archived unchanged and has workflows, deploy keys, runners and tokens disabled.
+    - id: AC3
+      statement: Scanning proves no cleartext, keystore, personal document or internal topology was copied into this public repository.

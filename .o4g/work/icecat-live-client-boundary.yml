@@ -1,0 +1,17 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: icecat-live-client-boundary, name: Icecat live client module boundary}
+spec:
+  purpose: Put transport, parsing and neutral mapping in services/icecat while keeping product orchestration in api.
+  roadmapRef: m5-icecat-integration
+  state: ACCEPTED
+  dependsOn: [icecat-xml-contract-generation]
+  decisionRefs: [ADR-0007]
+  pathScope: ['services/icecat/**', 'api/src/main/java/org/open4goods/api/services/completion/**', 'api/src/test/**']
+  acceptanceCriteria:
+    - id: AC1
+      statement: services/icecat exposes a live client taking GTIN and DomainLanguage and returning a neutral mapped result.
+    - id: AC2
+      statement: HTTP configuration, tolerant JSON parsing and mapping live in icecat; repository and aggregation stay in api.
+    - id: AC3
+      statement: The API service becomes a coordinator and Maven analysis proves no icecat-to-api dependency.

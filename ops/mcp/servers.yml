@@ -1,0 +1,51 @@
+version: 1
+servers:
+  javalens:
+    core: true
+    transport: stdio
+    command: bash
+    args: [scripts/mcp/javalens.sh]
+  maven-deps:
+    core: true
+    transport: stdio
+    command: npx
+    args: [-y, mcp-maven-deps@0.2.0]
+  maven-tools:
+    core: true
+    transport: stdio
+    command: bash
+    args: [scripts/mcp/maven-tools.sh]
+  vuetify:
+    core: true
+    transport: stdio
+    command: npx
+    args: [-y, '@vuetify/mcp@0.11.0']
+  docker:
+    core: true
+    transport: stdio
+    command: bash
+    args: [scripts/mcp/docker-readonly.sh]
+  playwright:
+    core: false
+    transport: stdio
+    command: npx
+    args: [-y, '@playwright/mcp@0.0.80']
+  context7:
+    core: false
+    transport: stdio
+    command: npx
+    args: [-y, '@upstash/context7-mcp@4.0.6']
+  plausible:
+    core: false
+    transport: stdio
+    command: npx
+    args: [-y, '@icjia/plausible-mcp@0.1.5']
+    env:
+      PLAUSIBLE_BASE_URL: https://plausible.nudger.fr
+      PLAUSIBLE_DEFAULT_SITE: nudger.fr
+    passEnv: [PLAUSIBLE_API_KEY]
+  nuxt:
+    core: false
+    transport: sse
+    url: http://127.0.0.1:3000/__mcp/sse
+    clients: [claude, vscode]

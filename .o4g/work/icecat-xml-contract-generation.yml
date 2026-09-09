@@ -1,0 +1,17 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: icecat-xml-contract-generation, name: Generate Icecat bulk XML contract}
+spec:
+  purpose: Replace hand-written bulk XML POJOs with reproducible JAXB sources generated from the owned XSD and binding.
+  roadmapRef: m5-icecat-integration
+  state: ACCEPTED
+  dependsOn: [governance-kit-bootstrap]
+  decisionRefs: [ADR-0007]
+  pathScope: ['services/icecat/**', 'pom.xml']
+  acceptanceCriteria:
+    - id: AC1
+      statement: Maven generates JAXB sources from icecat.xsd and icecat.xjb under target/generated-sources without committed output.
+    - id: AC2
+      statement: Bulk loaders use generated types and fixtures cover namespaces, optional elements and streamed input.
+    - id: AC3
+      statement: The independent Jackson live JSON model accepts unknown fields and is not generated from the XML schema.

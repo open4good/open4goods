@@ -1,0 +1,48 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: nudger-social-content-prompt, name: Nudger social data content prompt}
+spec:
+  purpose: >-
+    Provide a portable, tool-assisted prompt that turns verified Nudger catalogue data and
+    relevant current events into review-ready social media copy and deterministic branded
+    charts. The workflow uses the existing API and read-only Elasticsearch access, keeps
+    credentials outside versioned content, and never publishes automatically.
+  roadmapRef: m6-content-outreach
+  state: COMPLETED
+  dependsOn: [governance-kit-bootstrap]
+  pathScope:
+    - 'prompts/nudger-social-content.prompt'
+    - '.o4g/work/nudger-social-content-prompt.yml'
+    - '.o4g/work/ledger/nudger-social-content-prompt.yml'
+    - '.o4g/corpus-budget.json'
+    - 'docs/reference/roadmap.md'
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        DONE. The prompt asks for the target channel and either a supplied theme or permission
+        to discover one, then presents exactly three evidence-backed concepts and waits for the
+        user's choice before producing publication assets.
+    - id: AC2
+      statement: >-
+        DONE. The prompt uses existing Nudger API metadata plus read-only Elasticsearch HTTP
+        queries, restricts Elasticsearch access to an injected index allowlist, measures coverage
+        and sample size, and records every published number in an auditable data file.
+    - id: AC3
+      statement: >-
+        DONE. The prompt creates channel-adapted long and short copy, deterministic Nudger-branded
+        SVG charts, PNG variants when rendering is available, and an explicit SVG fallback when
+        it is not.
+    - id: AC4
+      statement: >-
+        DONE. Runtime credentials remain outside the prompt and generated files, all remote data
+        is treated as untrusted input, Elasticsearch writes are forbidden, and publication
+        remains a manual human decision.
+    - id: AC5
+      statement: >-
+        DONE. Static checks found all required interaction, evidence, security, branding,
+        fallback and no-publication invariants, parsed the embedded data contract with jq, and
+        found no credential-shaped literal.
+  evidenceRefs:
+    - 'note: 2026-09-08 -- prompts/nudger-social-content.prompt was checked for the required
+        conversation, evidence, security, branding, file-output and manual-publication clauses;
+        its embedded JSON example parses and exposes the required metrics and chart arrays.'

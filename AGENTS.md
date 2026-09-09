@@ -197,19 +197,24 @@ For detailed module-specific conventions, see:
 
 ---
 
-## 11  AI Search & Navigation (Java MCP Servers)
+## 11  MCP Tooling
 
-Text search over 1 374 Java files produces endless false positives on overloaded
-methods, interface implementations and generic names, so prefer a compiler-level
-tool when one is available: ask for a call hierarchy or a reference trace by name
-(`UserService.updateUser`) rather than grepping for the identifier.
+Run `scripts/mcp/doctor.sh --core` before stack work. The generated project
+configuration is shared by Claude, Codex, Gemini and VS Code; edit
+`ops/mcp/servers.yml`, never a generated client file.
 
-**Availability is not guaranteed.** `.mcp.json` declares `javalens` and
-`mcp-java-dev-tools`, but `.claude/settings.local.json` currently lists both under
-`disabledMcpjsonServers`, and two of its entries carry machine-absolute paths that
-do not resolve on another contributor's checkout. Check what is actually connected
-before relying on it; falling back to `grep` with a narrow path scope is correct
-when it is not.
+- Use JavaLens for symbols, references, implementations and call hierarchies before
+  a narrow `rg` fallback.
+- Use `maven-deps` or `maven-tools` for dependency and effective-model questions;
+  use the commands in section 6 for compilation and tests.
+- Consult Vuetify MCP before changing a Vue component or relying on a component
+  prop, slot or version-specific behavior.
+- Use Docker MCP only for read-only container state and logs. Repository launchers
+  own stack start, stop and mutation.
+- Use Playwright for browser recette and Nuxt MCP while the local frontend exposes it.
+
+If a required server fails the doctor, record its sanitized failure as evidence.
+Only then may Java navigation fall back to `rg` within the WorkOrder `pathScope`.
 
 ---
 

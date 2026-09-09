@@ -1,0 +1,17 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: config-beta-cutover, name: Beta configuration and systemd cutover}
+spec:
+  purpose: Prove the new configuration and service runtime on the real beta host before production changes.
+  roadmapRef: m1-config-autonomy
+  state: ACCEPTED
+  dependsOn: [systemd-service-runtime]
+  decisionRefs: [ADR-0006]
+  pathScope: ['ops/config/**', 'ops/systemd/**', 'scripts/deploy/**', '.github/workflows/**', 'docs/operations/**']
+  acceptanceCriteria:
+    - id: AC1
+      statement: Existing /etc/open4goods files are inventoried and replaced atomically from beta without secret output.
+    - id: AC2
+      statement: Before and after configprops captures differ on no non-secret key and five actuator health endpoints report UP.
+    - id: AC3
+      statement: Frontend SSR, application logs and a complete release rollback are verified on the distinct beta host.

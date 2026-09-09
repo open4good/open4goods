@@ -1,0 +1,17 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: config-prod-cutover, name: Production configuration and systemd cutover}
+spec:
+  purpose: Roll the beta-proven runtime into production and invalidate every credential retained by the legacy repository.
+  roadmapRef: m1-config-autonomy
+  state: ACCEPTED
+  dependsOn: [config-beta-cutover, leaked-credential-rotation]
+  decisionRefs: [ADR-0006]
+  pathScope: ['ops/config/**', 'ops/systemd/**', 'scripts/deploy/**', '.github/workflows/**', 'docs/operations/**']
+  acceptanceCriteria:
+    - id: AC1
+      statement: The protected prod Environment deploys one service at a time and gates each successor on health and log checks.
+    - id: AC2
+      statement: Remaining credentials are rotated and four Elastic keystores are generated on-host rather than copied from Git.
+    - id: AC3
+      statement: Redacted configprops parity, five healthy services and tested rollback are recorded without secret values.

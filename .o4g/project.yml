@@ -20,9 +20,9 @@ spec:
     - id: m1-config-autonomy
       order: 1
       exitCondition: >-
-        open4goods-config is archived. Every runtime value reaches the five services from a
-        versioned file or a GitHub Environment secret or variable, proven by an empty
-        /actuator/configprops diff on beta, and every credential it held has been rotated.
+        open4goods-config is archived. The five Java services run as isolated systemd units;
+        every runtime value comes from a versioned default or a GitHub Environment secret or
+        variable, proven by an empty non-secret /actuator/configprops diff on beta and prod.
     - id: m2-corpus-cleanup
       order: 2
       exitCondition: >-
@@ -43,7 +43,11 @@ spec:
     - id: m5-icecat-integration
       order: 5
       exitCondition: >-
-        The icecat integration lives entirely under services/icecat (nothing left in api/); its
-        feature/category/supplier data is served from Elasticsearch indexes instead of in-memory
-        maps rebuilt from hand-coded POJOs; the live completion API's i18n and mapping gaps
-        (BulletPoints, Variants, ReleaseDate, ProductFamily) are closed.
+        services/icecat owns Icecat transport, parsing and reference data while api owns product
+        orchestration and HTTP. Reference data is served from Elasticsearch, generated XML models
+        replace hand-written ones, and live completion is localized and complete.
+    - id: m6-xwiki-retirement
+      order: 6
+      exitCondition: >-
+        Blog and editorial content are served from Nuxt Content, Google OIDC replaces XWiki
+        authentication, and all XWiki runtime, dependency, backup and ingress surfaces are gone.

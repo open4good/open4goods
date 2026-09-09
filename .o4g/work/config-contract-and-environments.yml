@@ -1,0 +1,19 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: config-contract-and-environments, name: Configuration contract and GitHub Environments}
+spec:
+  purpose: Classify every legacy configuration asset and establish public defaults and private environment inputs.
+  roadmapRef: m1-config-autonomy
+  state: ACCEPTED
+  dependsOn: [governance-kit-bootstrap]
+  decisionRefs: [ADR-0006]
+  pathScope: ['ops/config/**', '.github/workflows/**', '*/src/main/resources/application*.yml', 'docs/operations/**']
+  acceptanceCriteria:
+    - id: AC1
+      statement: An inventory classifies every tracked legacy asset as public, variable, secret, host-generated or archive-only.
+    - id: AC2
+      statement: Environments beta and prod hold nine legacy-only secrets, reuse five organization secrets and resolve four missing references.
+    - id: AC3
+      statement: Every Java service has packaged non-secret defaults, including admin application.yml, with no host topology or credential.
+    - id: AC4
+      statement: CI fails when a deployment input is unclassified, duplicated at the wrong scope or rendered into logs.

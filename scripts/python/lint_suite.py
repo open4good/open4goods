@@ -101,9 +101,16 @@ def lint_corpus(suite: LintSuite) -> None:
     for label, script in (
         ("Generated roadmap", "scripts/generate/generate_roadmap.py"),
         ("Generated ADR index", "scripts/generate/generate_decision_index.py"),
+        ("Generated MCP client configs", "scripts/generate/generate_mcp_configs.py"),
     ):
         command = [sys.executable, script] if suite.fix else [sys.executable, script, "--check"]
         suite.run(label, command)
+
+
+def lint_governance_tools(suite: LintSuite) -> None:
+    """Exercise the WorkOrder lifecycle and recette evidence tools on disposable fixtures."""
+    suite.run("WorkOrder tooling tests", ["bash", "scripts/tests/workorder-tools.test.sh"])
+    suite.run("Recette tooling tests", ["bash", "scripts/tests/recette-tools.test.sh"])
 
 
 def lint_yaml(suite: LintSuite) -> None:
@@ -181,6 +188,7 @@ def main() -> int:
 
     lint_text(suite)
     lint_corpus(suite)
+    lint_governance_tools(suite)
     lint_yaml(suite)
     lint_shell(suite)
     lint_actions(suite)

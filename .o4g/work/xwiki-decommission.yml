@@ -1,0 +1,22 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: xwiki-decommission, name: Decommission XWiki completely}
+spec:
+  purpose: Remove XWiki after content and identity replacements have production evidence and a verified recovery archive.
+  roadmapRef: m6-xwiki-retirement
+  state: ACCEPTED
+  dependsOn:
+    - xwiki-blog-to-nuxt-content
+    - xwiki-editorial-content-to-nuxt-content
+    - google-sso-allowlisted-roles
+  decisionRefs: [ADR-0009]
+  pathScope: ['services/xwiki-spring-boot-starter/**', 'services/blog/**', 'admin/**', 'api/**', 'front-api/**', 'frontend/**', 'ui/**', 'pom.xml', 'ops/**', 'docs/operations/**']
+  acceptanceCriteria:
+    - id: AC1
+      statement: A restorable database and attachment archive is checksum-verified outside Git before shutdown.
+    - id: AC2
+      statement: Starter, authentication, backup, Maven repository, properties, secrets, containers, database, ingress and certificates are absent.
+    - id: AC3
+      statement: Beta then prod smoke tests prove content, SSO, sitemaps, images and open-data before DNS removal.
+    - id: AC4
+      statement: Repository and deployment searches contain no executable XWiki dependency or endpoint.

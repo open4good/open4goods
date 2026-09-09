@@ -1,0 +1,19 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: icecat-completion-i18n-and-coverage, name: Complete localized Icecat enrichment}
+spec:
+  purpose: Finish refresh semantics, language propagation and live fields currently dropped during product enrichment.
+  roadmapRef: m5-icecat-integration
+  state: ACCEPTED
+  dependsOn: [icecat-live-client-boundary]
+  decisionRefs: [ADR-0007]
+  pathScope: ['services/icecat/**', 'api/src/main/java/org/open4goods/api/services/completion/**', 'model/**', 'api/src/test/**']
+  acceptanceCriteria:
+    - id: AC1
+      statement: DomainLanguage reaches every live call and no language literal remains in request or feature mapping.
+    - id: AC2
+      statement: Search runs without an Icecat id, refresh-by-id afterward, and timestamps follow successful aggregation only.
+    - id: AC3
+      statement: Refresh, negative-cache, rate, retry and timeout policies are configuration properties with metadata.
+    - id: AC4
+      statement: Bullets, summary, family, series, variants, lifecycle dates, reasons, logos and group structure survive mapping tests.

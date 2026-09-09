@@ -16,6 +16,8 @@
 - **Node**: >= 20.x, **Package manager**: `pnpm@10.12.1`.
 - Generated OpenAPI client lives under `shared/api-client/` and must stay in sync with `front-api`.
   - Doc: [docs/backend-services.md](Doc-services-usage)
+- Run the root MCP doctor before UI work. Consult Vuetify MCP for the installed
+  component API and use Nuxt MCP plus Playwright for live SSR/browser behavior.
 
 ## Everyday Commands (use `--offline` flag by default)
 

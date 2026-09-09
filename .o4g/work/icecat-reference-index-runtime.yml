@@ -1,0 +1,19 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: icecat-reference-index-runtime, name: Icecat reference indexes as runtime source}
+spec:
+  purpose: Make Elasticsearch the durable reference source instead of a boot-time mirror of in-memory maps.
+  roadmapRef: m5-icecat-integration
+  state: ACCEPTED
+  dependsOn: [icecat-xml-contract-generation]
+  decisionRefs: [ADR-0007]
+  pathScope: ['services/icecat/**', 'docs/architecture/icecat-reference-data.md']
+  acceptanceCriteria:
+    - id: AC1
+      statement: Feature, category, feature-group and supplier reads use repositories and startup builds no full reference map.
+    - id: AC2
+      statement: Idempotent imports build versioned indexes, validate counts and atomically switch aliases with rollback retained.
+    - id: AC3
+      statement: Category text-grep minification and duplicate file caching are absent; bounded caches expose metrics.
+    - id: AC4
+      statement: Elasticsearch Testcontainers covers clean import, retry, interruption, alias switch and rollback.

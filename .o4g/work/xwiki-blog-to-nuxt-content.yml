@@ -1,0 +1,17 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: xwiki-blog-to-nuxt-content, name: Move the blog to Nuxt Content}
+spec:
+  purpose: Export the XWiki blog into typed Markdown while preserving public URLs, metadata and feeds.
+  roadmapRef: m6-xwiki-retirement
+  state: ACCEPTED
+  dependsOn: [governance-kit-bootstrap]
+  decisionRefs: [ADR-0009]
+  pathScope: ['frontend/**', 'front-api/**', 'services/blog/**', 'ui/**', 'scripts/migrate/**']
+  acceptanceCriteria:
+    - id: AC1
+      statement: A repeatable export creates validated Markdown and local media with stable slugs, languages, authors, dates, tags and state.
+    - id: AC2
+      statement: List, article, carousel, RSS, canonical metadata and historical redirects use Nuxt Content with count and checksum parity.
+    - id: AC3
+      statement: Blog authoring is Git based and no runtime blog request reaches XWiki.

@@ -1,0 +1,60 @@
+version: 1
+defaults:
+  modes: [desktop, mobile]
+  locales: [fr, en]
+cases:
+  - id: home
+    wave: 1
+    surface: page
+    path: /
+    intent: Understand the service and reach a primary category without console, i18n or SSR errors.
+  - id: category-discovery
+    wave: 1
+    surface: journey
+    path: /
+    intent: Discover a category through the rendered navigation and open its landing page.
+  - id: product-from-sitemap
+    wave: 2
+    surface: journey
+    path: dynamic
+    intent: Sample a product URL from the public sitemap and inspect identity, scores, offers and metadata.
+  - id: category-product-list
+    wave: 2
+    surface: page
+    path: dynamic
+    intent: Inspect a category product list, filters, empty states, pagination and responsive behavior.
+  - id: search
+    wave: 2
+    surface: journey
+    path: dynamic
+    intent: Exercise a valid search, an empty result and invalid input without a remote mutation.
+  - id: compare
+    wave: 3
+    surface: journey
+    path: dynamic
+    intent: Compare products selected through read-only navigation and verify stable SSR and accessibility.
+  - id: blog-index
+    wave: 3
+    surface: page
+    path: /blog
+    intent: Inspect article discovery, tags, images, locale handling and empty-state behavior.
+  - id: blog-article
+    wave: 3
+    surface: page
+    path: dynamic
+    intent: Open one discovered article and verify content, canonical metadata, navigation and image loading.
+  - id: editorial-pages
+    wave: 3
+    surface: inventory
+    path: dynamic
+    intent: Inventory and visit editorial routes exposed by navigation and sitemaps.
+  - id: invalid-route
+    wave: 4
+    surface: page
+    path: /recette-route-that-does-not-exist
+    intent: Verify a localized recoverable not-found response with no server or hydration failure.
+  - id: systemic-log-review
+    wave: 5
+    surface: technical
+    path: all
+    intent: Correlate recurring browser, i18n, Java and SSR signals across the campaign.

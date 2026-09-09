@@ -1,0 +1,19 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: systemd-service-runtime, name: Isolated systemd service runtime}
+spec:
+  purpose: Replace name-based PID scripts with deterministic service units and atomic releases.
+  roadmapRef: m1-config-autonomy
+  state: ACCEPTED
+  dependsOn: [config-contract-and-environments]
+  decisionRefs: [ADR-0006]
+  pathScope: ['ops/systemd/**', 'scripts/deploy/**', '.github/workflows/**', 'docs/operations/**']
+  acceptanceCriteria:
+    - id: AC1
+      statement: open4goods@.service and open4goods.target run five services as a dedicated account with 0600 EnvironmentFiles.
+    - id: AC2
+      statement: Releases use /opt/open4goods/releases/<sha> and an atomic current symlink.
+    - id: AC3
+      statement: Deployment restarts only the named unit, waits for health and restores the prior release on failure.
+    - id: AC4
+      statement: systemd-analyze, shell tests and a forced failed health check prove installation, isolation and rollback.

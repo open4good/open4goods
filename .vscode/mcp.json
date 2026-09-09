@@ -1,56 +1,74 @@
 {
   "servers": {
-    "nuxt": {
-      "type": "sse",
-      "url": "http://localhost:3000/__mcp/sse"
+    "javalens": {
+      "command": "bash",
+      "args": [
+        "scripts/mcp/javalens.sh"
+      ],
+      "type": "stdio"
+    },
+    "maven-deps": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-maven-deps@0.2.0"
+      ],
+      "type": "stdio"
+    },
+    "maven-tools": {
+      "command": "bash",
+      "args": [
+        "scripts/mcp/maven-tools.sh"
+      ],
+      "type": "stdio"
     },
     "vuetify": {
       "command": "npx",
-      "args": ["-y", "@vuetify/mcp@latest"],
+      "args": [
+        "-y",
+        "@vuetify/mcp@0.11.0"
+      ],
+      "type": "stdio"
+    },
+    "docker": {
+      "command": "bash",
+      "args": [
+        "scripts/mcp/docker-readonly.sh"
+      ],
+      "type": "stdio"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@0.0.80"
+      ],
       "type": "stdio"
     },
     "context7": {
       "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@4.0.6"
+      ],
       "type": "stdio"
     },
     "plausible": {
       "command": "npx",
-      "args": ["-y", "@icjia/plausible-mcp@0.1.5"],
+      "args": [
+        "-y",
+        "@icjia/plausible-mcp@0.1.5"
+      ],
+      "type": "stdio",
       "env": {
         "PLAUSIBLE_BASE_URL": "https://plausible.nudger.fr",
         "PLAUSIBLE_DEFAULT_SITE": "nudger.fr",
-        "PLAUSIBLE_API_KEY": "$PLAUSIBLE_API_KEY"
-      },
-      "type": "stdio"
+        "PLAUSIBLE_API_KEY": "${PLAUSIBLE_API_KEY}"
+      }
     },
-    "elasticsearch": {
-      "command": "docker",
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "--network=host",
-        "-e",
-        "ES_URL",
-        "docker.elastic.co/mcp/elasticsearch",
-        "stdio"
-      ],
-      "env": {
-        "ES_URL": "http://localhost:9200"
-      },
-      "type": "stdio"
-    },
-    "merchant-data-mcp": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@google/merchant-data-mcp",
-        "--credentials",
-        "/home/goulven/google-credentials.json"
-      ],
-      "env": {},
-      "type": "stdio"
+    "nuxt": {
+      "url": "http://127.0.0.1:3000/__mcp/sse",
+      "type": "sse"
     }
   },
   "inputs": []

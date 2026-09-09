@@ -1,0 +1,17 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: xwiki-editorial-content-to-nuxt-content, name: Move editorial XWiki content to Nuxt Content}
+spec:
+  purpose: Replace XWiki pages, reusable blocs and attachments with localized typed content rendered by Nuxt SSR.
+  roadmapRef: m6-xwiki-retirement
+  state: ACCEPTED
+  dependsOn: [governance-kit-bootstrap]
+  decisionRefs: [ADR-0009]
+  pathScope: ['frontend/**', 'front-api/**', 'ui/**', 'scripts/migrate/**']
+  acceptanceCriteria:
+    - id: AC1
+      statement: FAQ, team, partner, home and full-page content plus attachments migrate with stable routes and locale fallback.
+    - id: AC2
+      statement: XWiki renderers and content endpoints are removed after route, metadata, accessibility and SSR parity tests.
+    - id: AC3
+      statement: Nuxt owns editorial and blog sitemaps while ui retains product, brand, image and open-data responsibilities.

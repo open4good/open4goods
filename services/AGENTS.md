@@ -42,6 +42,10 @@ services/<service-name>/
 
 ## 4. Build and Test Commands
 
+Before Java changes, run the root MCP doctor and use JavaLens for semantic
+navigation. Use the Maven MCP servers to verify dependency and effective-model
+claims; the shell commands below remain the build authority.
+
 ### From a service directory
 
 ```bash

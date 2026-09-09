@@ -1,40 +1,74 @@
 {
   "mcpServers": {
-    "vuetify": {
-      "type": "stdio",
+    "javalens": {
+      "command": "bash",
+      "args": [
+        "scripts/mcp/javalens.sh"
+      ],
+      "type": "stdio"
+    },
+    "maven-deps": {
       "command": "npx",
-      "args": ["-y", "@vuetify/mcp@latest"]
+      "args": [
+        "-y",
+        "mcp-maven-deps@0.2.0"
+      ],
+      "type": "stdio"
+    },
+    "maven-tools": {
+      "command": "bash",
+      "args": [
+        "scripts/mcp/maven-tools.sh"
+      ],
+      "type": "stdio"
+    },
+    "vuetify": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@vuetify/mcp@0.11.0"
+      ],
+      "type": "stdio"
+    },
+    "docker": {
+      "command": "bash",
+      "args": [
+        "scripts/mcp/docker-readonly.sh"
+      ],
+      "type": "stdio"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@0.0.80"
+      ],
+      "type": "stdio"
     },
     "context7": {
-      "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@latest"]
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@4.0.6"
+      ],
+      "type": "stdio"
     },
     "plausible": {
-      "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@icjia/plausible-mcp@0.1.5"],
+      "args": [
+        "-y",
+        "@icjia/plausible-mcp@0.1.5"
+      ],
+      "type": "stdio",
       "env": {
         "PLAUSIBLE_BASE_URL": "https://plausible.nudger.fr",
         "PLAUSIBLE_DEFAULT_SITE": "nudger.fr",
-        "PLAUSIBLE_API_KEY": "$PLAUSIBLE_API_KEY"
+        "PLAUSIBLE_API_KEY": "${PLAUSIBLE_API_KEY}"
       }
     },
-    "javalens": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "javalens-mcp"],
-      "env": {
-        "JAVA_PROJECT_PATH": "/home/goulven/git/open4goods"
-      }
-    },
-    "mcp-java-dev-tools": {
-      "type": "stdio",
-      "command": "node",
-      "args": ["/home/goulven/.local/share/mcp/mcp-java-dev-tools/dist/server.js"],
-      "env": {
-        "MCP_JAVA_AGENT_JAR": "/home/goulven/.local/share/mcp/mcp-java-dev-tools/java-agent/core/core-probe/target/mcp-java-dev-tools-agent-0.1.6.jar"
-      }
+    "nuxt": {
+      "url": "http://127.0.0.1:3000/__mcp/sse",
+      "type": "sse"
     }
   }
 }

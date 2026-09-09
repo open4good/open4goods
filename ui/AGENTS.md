@@ -1,37 +1,23 @@
-# UI Module - DEPRECATED ⚠️
+# UI Module - Deployed static and open-data service
 
-> **Status**: This module is being replaced by [frontend](../frontend) (Nuxt 3 / Vue 3).  
-> **Action**: Do not add new features. For current UI development, see [frontend/AGENTS.md](../frontend/AGENTS.md).
+> **Status**: This legacy Thymeleaf module remains deployed behind `static.nudger.fr`.
+> Do not remove or bypass it without a WorkOrder that replaces each responsibility.
 
-## Migration Status
+The module is the current producer of product and brand images, dynamic sitemaps and
+the open-data download. New customer-facing UI belongs in `frontend`, while fixes and
+migrations for these deployed responsibilities remain valid work here.
 
-This legacy UI module (Thymeleaf + Bootstrap) is being phased out in favor of the modern Nuxt 3 frontend. All new UI development should occur in the `frontend` module.
+## Technology and structure
 
-**Migration Progress**:
-- ✅ Blog integration → `frontend/composables/useBlog.ts`
-- ✅ Product pages → `frontend/pages/products/`
-- 🔄 User authentication flows → In progress
-- ⏳ Admin panels → Planned
+- Java 21 and Spring Boot 4
+- Thymeleaf plus the existing Node/gulp asset build
+- Java sources under `src/main/java`, resources under `src/main/resources` and tests
+  under `src/test/java`
 
-This module is part of the open4goods multi-module Maven project. 
-## Technology
+Use JavaLens and the Maven MCP servers as required by the root guide. Preserve the
+controller-to-service-to-repository layering and add tests for every behavior change.
 
-- Java 21
-- Spring Boot 4
-- Node.js build tools (gulp)
-
-## Directory structure
-
-- `src/main/java` - web controllers
-- `src/main/resources` - templates and configuration
-- `src/test/java` - unit tests
-- `package.json` and `gulpfile.mjs` - frontend build tasks
-
-## Purpose
-
-The `ui` module provides the web user interface built with Thymeleaf and Bootstrap.
-
-## Build and test this module only
+## Verification
 
 From this directory:
 
@@ -39,13 +25,7 @@ From this directory:
 mvn --offline clean install
 ```
 
-Run only the tests with:
-
-```bash
-mvn --offline test
-```
-
-From the repository root you can also execute:
+From the repository root:
 
 ```bash
 mvn --offline -pl ui -am clean install

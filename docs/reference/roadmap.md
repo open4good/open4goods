@@ -13,11 +13,13 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 | Milestone | Open | READY | BLOCKED | IN_PROGRESS | Closed |
 |---|---|---|---|---|---|
 | m0-governance | 0 | 0 | 0 | 0 | 1 |
-| m1-config-autonomy | 2 | 1 | 0 | 1 | 0 |
+| m1-config-autonomy | 7 | 1 | 5 | 1 | 0 |
 | m2-corpus-cleanup | 0 | 0 | 0 | 0 | 1 |
 | m3-dead-surface-removal | 1 | 0 | 1 | 0 | 1 |
 | m4-product-page-quality | 1 | 0 | 0 | 1 | 0 |
-| m5-icecat-integration | 1 | 1 | 0 | 0 | 0 |
+| m5-icecat-integration | 6 | 1 | 5 | 0 | 0 |
+| m6-xwiki-retirement | 4 | 2 | 2 | 0 | 0 |
+| m6-content-outreach | 0 | 0 | 0 | 0 | 1 |
 
 ## m0-governance
 
@@ -28,8 +30,13 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 
 | WorkOrder | Contract state | Availability | Dependencies | Blockers | Purpose |
 |---|---|---|---|---|---|
-| [config-repository-elimination](../../.o4g/work/config-repository-elimination.yml) | ACCEPTED | READY | governance-kit-bootstrap | -- | Make open4goods self-sufficient and archive open4goods-config. Non-secret structure becomes versioned files; everything secret or topological becomes a GitHub Environment secret or variable injected as an environment variable. The dominant constraint is that the config repository is private and holds cleartext production credentials across 1052 commits while this repository is public: no history is migrated, and every credential is rotated. |
+| [config-contract-and-environments](../../.o4g/work/config-contract-and-environments.yml) | ACCEPTED | READY | governance-kit-bootstrap | -- | Classify every legacy configuration asset and establish public defaults and private environment inputs. |
 | [leaked-credential-rotation](../../.o4g/work/leaked-credential-rotation.yml) | IN_PROGRESS | PLANNED | -- | -- | A production password was in this public repository's main-branch history since 2024-01-15 and was still live on both beta and prod. Live inspection of the running servers (root SSH) found it reused far wider than the config repo alone suggested: it was the literal value, or the shared base of a composite value, behind eleven distinct config entries across four services and both environments. XWiki's share of that (AC4) is rotated end to end on both real hosts. The rest (AC3: SBA password, api's admin-key/feed.api-key, the icecat apiKey, front-api's two matching api-keys) and the independent AWIN leak (AC5) remain open. |
+| [systemd-service-runtime](../../.o4g/work/systemd-service-runtime.yml) | ACCEPTED | BLOCKED | config-contract-and-environments | config-contract-and-environments | Replace name-based PID scripts with deterministic service units and atomic releases. |
+| [config-beta-cutover](../../.o4g/work/config-beta-cutover.yml) | ACCEPTED | BLOCKED | systemd-service-runtime | systemd-service-runtime | Prove the new configuration and service runtime on the real beta host before production changes. |
+| [config-prod-cutover](../../.o4g/work/config-prod-cutover.yml) | ACCEPTED | BLOCKED | config-beta-cutover, leaked-credential-rotation | config-beta-cutover, leaked-credential-rotation | Roll the beta-proven runtime into production and invalidate every credential retained by the legacy repository. |
+| [config-repository-retirement](../../.o4g/work/config-repository-retirement.yml) | ACCEPTED | BLOCKED | config-prod-cutover | config-prod-cutover | Remove the final operational dependency and archive the private repository without rewriting its history. |
+| [config-repository-elimination](../../.o4g/work/config-repository-elimination.yml) | ACCEPTED | BLOCKED | config-repository-retirement | config-repository-retirement | Prove the completed configuration migration as one system before open4goods-config is archived. Inventory, runtime, cutovers and retirement are separate dependencies. |
 
 ## m2-corpus-cleanup
 
@@ -54,4 +61,23 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 
 | WorkOrder | Contract state | Availability | Dependencies | Blockers | Purpose |
 |---|---|---|---|---|---|
-| [icecat-integration-production-grade](../../.o4g/work/icecat-integration-production-grade.yml) | ACCEPTED | READY | governance-kit-bootstrap | -- | The icecat integration is prototype-quality: getCachedFile() is duplicated three times, 100k+ features live in rebuilt-on-boot in-memory HashMaps instead of an index, hand-coded POJOs break on schema drift where JAXB-from-XSD would not, the live completion API (IcecatCompletionService, IcecatData, IcecatController, IcecatCompletionConfig) still lives in api/ instead of services/icecat/, there is no refresh policy, i18n is broken (hardcoded "fr"), and a fifth of icecat's data (BulletPoints, SummaryDescription, ProductFamily/Series, Variants, ReleaseDate/EndOfLifeDate, ReasonsToBuy, FeatureLogos, FeaturesGroups structure) is not mapped. This was agreed as a 5-phase plan on 2026-05-07; the "wrong module" state and the other listed bugs were re-verified against the live tree on 2026-09-08 and are still present. This WorkOrder replaces the ad-hoc memory/ notes that previously carried this plan outside any governed structure. |
+| [icecat-xml-contract-generation](../../.o4g/work/icecat-xml-contract-generation.yml) | ACCEPTED | READY | governance-kit-bootstrap | -- | Replace hand-written bulk XML POJOs with reproducible JAXB sources generated from the owned XSD and binding. |
+| [icecat-live-client-boundary](../../.o4g/work/icecat-live-client-boundary.yml) | ACCEPTED | BLOCKED | icecat-xml-contract-generation | icecat-xml-contract-generation | Put transport, parsing and neutral mapping in services/icecat while keeping product orchestration in api. |
+| [icecat-reference-index-runtime](../../.o4g/work/icecat-reference-index-runtime.yml) | ACCEPTED | BLOCKED | icecat-xml-contract-generation | icecat-xml-contract-generation | Make Elasticsearch the durable reference source instead of a boot-time mirror of in-memory maps. |
+| [icecat-completion-i18n-and-coverage](../../.o4g/work/icecat-completion-i18n-and-coverage.yml) | ACCEPTED | BLOCKED | icecat-live-client-boundary | icecat-live-client-boundary | Finish refresh semantics, language propagation and live fields currently dropped during product enrichment. |
+| [icecat-vertical-mapping-admin](../../.o4g/work/icecat-vertical-mapping-admin.yml) | ACCEPTED | BLOCKED | icecat-reference-index-runtime | icecat-reference-index-runtime | Replace transient vertical assignment with an explicit, authorized and durable admin contract. |
+| [icecat-integration-production-grade](../../.o4g/work/icecat-integration-production-grade.yml) | ACCEPTED | BLOCKED | icecat-reference-index-runtime, icecat-vertical-mapping-admin, icecat-completion-i18n-and-coverage | icecat-reference-index-runtime, icecat-vertical-mapping-admin, icecat-completion-i18n-and-coverage | Verify Icecat end to end after the XML, reference index, module boundary, admin mapping and live completion lots close. Shared download and Elasticsearch scaffolding already exist. |
+
+## m6-xwiki-retirement
+
+| WorkOrder | Contract state | Availability | Dependencies | Blockers | Purpose |
+|---|---|---|---|---|---|
+| [google-sso-allowlisted-roles](../../.o4g/work/google-sso-allowlisted-roles.yml) | ACCEPTED | BLOCKED | config-repository-elimination | config-repository-elimination | Replace XWiki password authentication with Google OIDC and deny-by-default email-to-role authorization. |
+| [xwiki-blog-to-nuxt-content](../../.o4g/work/xwiki-blog-to-nuxt-content.yml) | ACCEPTED | READY | governance-kit-bootstrap | -- | Export the XWiki blog into typed Markdown while preserving public URLs, metadata and feeds. |
+| [xwiki-editorial-content-to-nuxt-content](../../.o4g/work/xwiki-editorial-content-to-nuxt-content.yml) | ACCEPTED | READY | governance-kit-bootstrap | -- | Replace XWiki pages, reusable blocs and attachments with localized typed content rendered by Nuxt SSR. |
+| [xwiki-decommission](../../.o4g/work/xwiki-decommission.yml) | ACCEPTED | BLOCKED | xwiki-blog-to-nuxt-content, xwiki-editorial-content-to-nuxt-content, google-sso-allowlisted-roles | xwiki-blog-to-nuxt-content, xwiki-editorial-content-to-nuxt-content, google-sso-allowlisted-roles | Remove XWiki after content and identity replacements have production evidence and a verified recovery archive. |
+
+## m6-content-outreach
+
+
+*1 closed, see [ledger](../../.o4g/work/ledger).*

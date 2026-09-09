@@ -25,3 +25,7 @@ contract, infrastructure, data layout, security posture or developer workflow.
 | [0003](0003-eprel-dry-run-and-logging-redirection.md) | ADR 0003: EPREL Dry-Run Endpoints and Logging Redirection | ACCEPTED | -- |
 | [0004](0004-aggregation-service-design.md) | ADR 0004 - Aggregation Service Design: Manual Instantiation vs. Spring Beans | ACCEPTED | -- |
 | [0005](0005-product-data-api-b2b-v1.md) | ADR 0005 - Product Data API (B2B) v1 | ACCEPTED | -- |
+| [0006](0006-github-environments-and-systemd-runtime.md) | ADR 0006: GitHub Environments and systemd runtime | ACCEPTED | 1, 8, 9 |
+| [0007](0007-icecat-module-and-data-boundaries.md) | ADR 0007: Icecat module and data boundaries | ACCEPTED | 8, 9 |
+| [0008](0008-portable-project-mcp-tooling.md) | ADR 0008: Portable project MCP tooling | ACCEPTED | 8, 9 |
+| [0009](0009-xwiki-content-and-identity-retirement.md) | ADR 0009: XWiki content and identity retirement | ACCEPTED | 1, 8, 9 |

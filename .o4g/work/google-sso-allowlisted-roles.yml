@@ -1,0 +1,19 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: google-sso-allowlisted-roles, name: Google SSO with environment role allowlist}
+spec:
+  purpose: Replace XWiki password authentication with Google OIDC and deny-by-default email-to-role authorization.
+  roadmapRef: m6-xwiki-retirement
+  state: ACCEPTED
+  dependsOn: [config-repository-elimination]
+  decisionRefs: [ADR-0009]
+  pathScope: ['frontend/**', 'front-api/**', 'model/**', '.github/workflows/**', 'docs/operations/**']
+  acceptanceCriteria:
+    - id: AC1
+      statement: The Nuxt BFF performs Authorization Code with PKCE, state and nonce without exposing provider tokens to browser code.
+    - id: AC2
+      statement: front-api verifies issuer, audience, signature, expiry and verified email before applying the environment role map.
+    - id: AC3
+      statement: JWT refresh preserves ROLE_EDITOR and ROLE_ADMIN; password login and XWiki-named authorities are removed.
+    - id: AC4
+      statement: Tests cover tampered tokens, replay, unverified and absent emails, role changes, logout and environment isolation.
