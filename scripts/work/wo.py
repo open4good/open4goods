@@ -15,6 +15,13 @@ from pathlib import Path
 import yaml
 
 
+class IndentedDumper(yaml.SafeDumper):
+    """Indents block sequences under their parent key, matching this repo's yamllint config."""
+
+    def increase_indent(self, flow: bool = False, indentless: bool = False) -> None:
+        return super().increase_indent(flow, False)
+
+
 def load_module(path: Path, name: str):
     """Load a repository script as a module."""
     spec = importlib.util.spec_from_file_location(name, path)
@@ -105,7 +112,10 @@ class Workspace:
         if evidence:
             refs = spec.setdefault("evidenceRefs", [])
             refs.extend(evidence)
-        path.write_text(yaml.safe_dump(data, sort_keys=False, width=120), encoding="utf-8")
+        path.write_text(
+            yaml.dump(data, Dumper=IndentedDumper, sort_keys=False, width=120),
+            encoding="utf-8",
+        )
         if target == "COMPLETED":
             destination = self.work_root / "ledger" / path.name
             if destination.exists():
