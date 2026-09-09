@@ -187,6 +187,13 @@ cookies using these names. In production they are marked `Secure` and
 
 > Before running the docker compose check that the value of 'vm.max_map_count' is higher or equal to 262144. If not, you will have to raise your max map args to be able to rune the Elastic image, see the [Hint's section](https://github.com/open4good/open4goods?tab=readme-ov-file#elastic-max-map-count)
 
+### Configuration and deployment
+
+For the full picture beyond local dev -- every configuration variable and secret, where beta/prod
+configuration actually lives, and how it reaches those hosts (including Elasticsearch's own
+certificates and credentials) -- see
+[docs/operations/configuration-and-deployment.md](docs/operations/configuration-and-deployment.md).
+
 ### Building the open4goods project from code base
 
 Jars are not published to any central repo (nor planned to, it seems not to make any particular sense). To build, please go into the project folder. Then :
