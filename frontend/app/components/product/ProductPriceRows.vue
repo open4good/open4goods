@@ -14,10 +14,14 @@
         </span>
 
         <!-- Price Area (Clickable) -->
-        <a
+        <v-btn
           :href="badge.url"
           target="_blank"
           :rel="AFFILIATE_LINK_REL"
+          variant="text"
+          color="primary"
+          density="compact"
+          slim
           class="product-price-rows__content"
           @click.stop="trackOfferClick(badge.offer, badge.url, 'price-row')"
         >
@@ -41,7 +45,7 @@
           <span class="product-price-rows__amount">
             {{ badge.price }}
           </span>
-        </a>
+        </v-btn>
 
         <!-- Trend -->
         <v-tooltip
@@ -468,18 +472,23 @@ const trackOfferClick = (
     flex-shrink: 0
 
   &__content
-    display: flex
-    align-items: center
     flex: 1
-    gap: 0.35rem
-    text-decoration: none
-    color: inherit
-    padding: 2px 4px
+    min-width: 0
+    height: auto !important
+    text-transform: none
+    letter-spacing: normal
     border-radius: 4px
-    transition: background-color 0.2s
 
-    &:hover
-      background-color: rgba(var(--v-theme-surface-primary-080), 0.3)
+    :deep(.v-btn__content)
+      display: flex
+      align-items: center
+      justify-content: flex-start
+      gap: 0.35rem
+      width: 100%
+      text-align: left
+
+    :deep(.v-btn__overlay)
+      border-radius: inherit
 
   &__favicon
     border-radius: 2px
