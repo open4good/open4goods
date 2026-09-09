@@ -33,12 +33,12 @@ spec:
       statement: Environments beta and prod hold nine legacy-only secrets, reuse five organization secrets and resolve four
         missing references.
     - id: AC3
-      statement: Every Java service has packaged non-secret defaults, including admin application.yml, with no host topology
-        or credential.
+      statement: >-
+        DONE. All 7 services (@SpringBootApplication) ship a packaged application.yml with only non-secret defaults:
+        admin had none (added one, moved secrets to devsec); front-api's shared-token gained jwt-secret's indirection.
     - id: AC4
       statement: CI fails when a deployment input is unclassified, duplicated at the wrong scope or rendered into logs.
   evidenceRefs:
-    - 'note: 2026-09-09 -- AC1 built from a read-only audit of the owner''s existing open4goods-config checkout
-        (git ls-files, no writes made, left as found). AC2 needs GitHub Environment/secret administration access
-        the owner has not delegated to this lot; AC3 and AC4 are separate, unattempted lots. See
-        docs/operations/legacy-config-inventory.md for the full classification and its findings.'
+    - 'note: 2026-09-09 -- AC1 read-only audit of the owner''s open4goods-config checkout, no writes made. AC2 needs
+        undelegated GitHub secret-admin access; AC4 unattempted. AC3: admin/front-api compile clean, admin boots
+        (devsec profile) with no errors, lint.sh passed; no production/secret access used. See legacy-config-inventory.md.'

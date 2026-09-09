@@ -1,0 +1,25 @@
+####################################################################
+# open4goods -- admin module (Spring Boot Admin server) -- Default configuration
+#
+# All keys here are shared across every environment (dev, beta, prod).
+# Secrets and host topology (xwiki.*, spring.boot.admin.instance-auth.default-*)
+# live in the profile-specific files (application-devsec.yml,
+# configs/*/admin/application-active.yml).
+####################################################################
+
+server:
+  port: 8085
+  forward-headers-strategy: FRAMEWORK
+
+spring:
+  application:
+    name: open4goods-admin
+  boot:
+    admin:
+      monitor:
+        status-interval: 30000
+        status-lifetime: 30000
+        default-timeout: 30000
+        default-retries: 1
+      instance-auth:
+        enabled: true
