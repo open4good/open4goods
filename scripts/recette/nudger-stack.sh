@@ -42,8 +42,8 @@ alive() {
 }
 
 wait_url() {
-  local name="$1" url="$2" log="$3" pid="$4" attempt
-  for attempt in $(seq 1 120); do
+  local name="$1" url="$2" log="$3" pid="$4"
+  for _ in $(seq 1 120); do
     if curl --silent --show-error --fail --max-time 3 "$url" >/dev/null 2>&1; then
       return 0
     fi

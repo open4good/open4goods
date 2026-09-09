@@ -23,10 +23,10 @@
     }
   },
   "ceilings": {
-    "non_normative_lines": 5939,
+    "non_normative_lines": 5905,
     "rule_shaped_statements_in_non_normative": 135,
-    "normative_documents": 7,
-    "work_open_lines": 507,
+    "normative_documents": 11,
+    "work_open_lines": 692,
     "work_ledger_lines": 334,
     "adr_lines_max": 120
   }
