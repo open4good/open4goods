@@ -5,9 +5,33 @@ const DOCS_DIR = fileURLToPath(new URL('../docs', import.meta.url))
 const GUIDES_DIR = fileURLToPath(
   new URL('../verticals/src/main/resources/guides', import.meta.url)
 )
+const BLOG_DIR = fileURLToPath(new URL('./content/blog', import.meta.url))
 
 export default defineContentConfig({
   collections: {
+    blog: defineCollection({
+      type: 'page',
+      source: { include: '**/*.md', cwd: BLOG_DIR, prefix: 'blog' },
+      schema: z.object({
+        title: z.string(),
+        description: z.string().default(''),
+        author: z.string(),
+        language: z.string().default('fr'),
+        tags: z.array(z.string()).default([]),
+        date: z.string().nullable(),
+        updatedAt: z.string().nullable(),
+        draft: z.boolean().default(false),
+        published: z.boolean().default(true),
+        image: z.string().optional(),
+      }),
+      indexes: [
+        { columns: ['path'], unique: true },
+        { columns: ['language'] },
+        { columns: ['published'] },
+        { columns: ['draft'] },
+        { columns: ['date'] },
+      ],
+    }),
     docs: defineCollection({
       type: 'page',
       source: [
