@@ -1,20 +1,23 @@
-import { useBlogService } from '~~/shared/api-client/services/blog.services'
+import { getRequestHeader } from 'h3'
+
 import type { BlogPostDto } from '~~/shared/api-client'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
-import { extractBackendErrorDetails } from '../../../utils/log-backend-error'
 import { setDomainLanguageCacheHeaders } from '../../../utils/cache-headers'
+import { findBlogDocBySlug, toBlogPostDto } from '../../../utils/blog-content'
 
 /**
- * Blog article by slug API endpoint
- * Handles GET requests for a single blog article
+ * Blog article by slug, served from the `blog` Nuxt Content collection. See articles.ts for why
+ * the response shape (BlogPostDto) is preserved unchanged.
+ *
+ * No extractBackendErrorDetails here (unlike the old front-api-proxying version): that helper is
+ * shaped around the generated client's ResponseError and would turn this route's own 404 into a
+ * 500. There is no backend call left to translate errors from.
  */
 export default defineEventHandler(async (event): Promise<BlogPostDto> => {
-  // Cache the article for one hour
   setDomainLanguageCacheHeaders(event, 'public, max-age=3600, s-maxage=3600')
 
   const slug = getRouterParam(event, 'slug')
-
   if (!slug) {
     throw createError({
       statusCode: 400,
@@ -23,28 +26,12 @@ export default defineEventHandler(async (event): Promise<BlogPostDto> => {
   }
 
   const rawHost =
-    event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
-  const { domainLanguage } = resolveDomainLanguage(rawHost)
+    getRequestHeader(event, 'x-forwarded-host') ?? getRequestHeader(event, 'host')
+  resolveDomainLanguage(rawHost)
 
-  const blogService = useBlogService(domainLanguage)
-
-  try {
-    // Use the service to fetch the article
-    const response = await blogService.getArticleBySlug(slug)
-    return response
-  } catch (error) {
-    const backendError = await extractBackendErrorDetails(error)
-    console.error(
-      'Error fetching blog article:',
-      backendError.logMessage,
-      backendError
-    )
-
-    // Forward backend status code and message when available
-    throw createError({
-      statusCode: backendError.statusCode,
-      statusMessage: backendError.statusMessage,
-      cause: error,
-    })
+  const doc = await findBlogDocBySlug(event, slug)
+  if (!doc) {
+    throw createError({ statusCode: 404, statusMessage: 'Article not found' })
   }
+  return await toBlogPostDto(doc)
 })

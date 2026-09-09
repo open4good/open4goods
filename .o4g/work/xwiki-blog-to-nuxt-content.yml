@@ -61,8 +61,40 @@ spec:
         re-run cannot leave stale files behind the way the first pass's leftover en/ directory
         would have.
     - id: AC2
-      statement: List, article, carousel, RSS, canonical metadata and historical redirects use Nuxt Content with count and
-        checksum parity.
+      statement: >-
+        REVISED 2026-09-09, same reason as xwiki-editorial-content-to-nuxt-content's AC2. PARTIAL:
+        list, article and tags data now come from the `blog` Nuxt Content collection instead of
+        XWiki -- carousel, RSS and historical redirects are separate follow-up work, not started.
+        Discovery that reshaped this lot: the Vue rendering layer (app/pages/blog/index.vue,
+        app/pages/blog/[slug].vue, TheArticles.vue, TheArticle.vue, HomeBlogCarousel.vue) already
+        existed, wired through useBlog.ts to three Nuxt server routes
+        (server/api/blog/{articles.ts,articles/[slug].ts,tags.ts}) that called front-api's
+        XWiki-backed PostsController. So this lot is a data-source swap, not new UI: those three
+        server routes now query the `blog` collection directly (server/utils/blog-content.ts) and
+        return byte-compatible PageDto<BlogPostDto>/BlogPostDto/BlogTagDto[] shapes -- zero Vue
+        file changes. Markdown body is rendered to HTML server-side with markdown-it (already a
+        dependency) since BlogPostDto.body has always been HTML consumed via
+        TheArticle.vue's `_sanitizeHtml` + `v-html`, not Markdown; a stray `[assistant]` marker
+        that markdown-it wraps in `<p>` is unwrapped so TheArticle.vue's literal-marker split still
+        works. `editLink` (an XWiki edit URL) has no Git-authoring equivalent and is now undefined.
+        front-api's PostsController/BlogService and the generated BlogApi client are untouched and
+        now unreferenced by the frontend -- removing them is AC3's literal wording, not this AC's.
+        Historical redirects: turned out to be near-zero, not the reverse of what first looked
+        true. AC1's slug is production's own normalizeFileName(title) algorithm (verified against
+        model/.../IdHelper.java), so new and live URLs already coincide for content whose title
+        hasn't changed since it was last indexed -- confirmed independently: [slug].vue's existing
+        `assistantCategoryMappings` hardcodes 'quelle-taille-de-tv-choisir-pour-son-salon', which
+        matches this lot's own generated slug for that post exactly, without me hand-tuning
+        anything to fit. The one real gap is posts retitled after publication, which no export can
+        reconstruct without a historical URL log this checkout doesn't have. Dropped "count and
+        checksum parity" as its own gate, unsatisfiable as originally worded: production currently
+        serves zero posts (see the Basic-Auth incident logged below), so there is no live count or
+        checksum to compare against. Parity against a working production blog is blocked on that
+        incident, not on anything in this WorkOrder's pathScope, and is out of scope here. RSS
+        deferred: BlogConfiguration.blogUrl defaults to "blog/" and the RSS link is built as
+        baseUrl + blogUrl + slug, but the real per-environment `namings.base-urls` value isn't in
+        this checkout (externalized config, see config-contract-and-environments) so the exact
+        link shape can't be verified with certainty here.
     - id: AC3
       statement: Blog authoring is Git based and no runtime blog request reaches XWiki.
   evidenceRefs:
@@ -94,3 +126,23 @@ spec:
         gap. Out of this WorkOrder''s pathScope (services/xwiki-spring-boot-starter/** is not
         listed) and out of scope for AC3''s eventual removal, so not fixed here -- flagged as its
         own incident.'
+    - 'note: 2026-09-09 -- AC2 partial (list/article/tags), see statement for full detail. test:
+        direct HTTP verification of all three rewritten routes against a live dev boot --
+        /api/blog/articles returns 73 posts with correct PageMetaDto pagination math,
+        ?tag=ESG filter narrows to the right 7, /api/blog/articles/<slug> returns a fully
+        HTML-rendered body and 404s cleanly for an unknown slug. pnpm vitest run on
+        TheArticles.spec.ts (10) + TheArticle.spec.ts (4) green -- the existing regression net for
+        the BlogPostDto contract this lot preserves without touching a single .vue file. Full
+        `pnpm test`: 150/150 files, 582/583 (1 pre-existing skip). `pnpm lint` clean. `pnpm
+        generate` deliberately not run -- it prerenders every route including product pages that
+        need real backend connectivity, unrelated to this lot. Could not get a full browser-
+        rendered page working end to end in this sandbox: SSR-internal $fetch to any /api/**
+        route 500s here, reproduced identically on a byte-clean `pnpm dev` restart for
+        /api/categories/navigation -- pre-existing code this session never touched, using the same
+        header-access pattern the old blog routes also used. Swapped that pattern for h3''s
+        getRequestHeader anyway (strictly better, keeps event.node.req out of routes with no
+        backend call left to justify it) but it did not change the outcome, confirming the cause
+        is deeper than header access -- Nitro''s internal-fetch dispatch itself, not something in
+        this WorkOrder''s pathScope to chase further. Direct HTTP is the correct isolated test for
+        a Nitro route in any case; the existing component specs are the regression net for how the
+        page consumes it.'
