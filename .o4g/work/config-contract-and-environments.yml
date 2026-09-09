@@ -44,5 +44,24 @@ spec:
       scripts/verify/** and scripts/python/lint_suite.py (the check and its lint.sh wiring) and raised work_open_lines via
       check_corpus_budget.py --update, both in this commit.'
     - 'note: 2026-09-09 -- `gh api repos/open4good/open4goods/environments` shows only github-pages/test-github-pages: no
-      beta or prod Environment exists. AC2 and AC4''s remainder need creating and populating those, which is repository
-      administration withheld by prompts/nudger-dev.md. Formalized as BLOCKED so next-workorder.py stops resurfacing it.'
+      beta or prod Environment exists. AC2 and AC4''s remainder need creating and populating those, which is repository administration
+      withheld by prompts/nudger-dev.md. Formalized as BLOCKED so next-workorder.py stops resurfacing it.'
+    - 'note: 2026-09-09 -- owner acting to unblock: created both GitHub Environments (`gh api repos/open4good/open4goods/environments`
+      now lists `beta` and `prod`). Re-verified read-only, names only, no values touched: both are currently empty (`gh secret
+      list --env beta`/`--env prod`: zero entries). The org already holds 13 relevant Actions secrets (`gh api orgs/open4good/actions/secrets`):
+      API_URL, BETA_API_URL, BETA_HCAPTCHA_SITE_KEY, BETA_MACHINE_TOKEN, GEMINI_KEY, HCAPTCHA_SITE_KEY, MACHINE_TOKEN, PROJECT_PAT,
+      REMOTE_BETA_HOST, REMOTE_BETA_USER, REMOTE_HOST, REMOTE_USER, SSH_PRIVATE_KEY -- this is why repo-level `gh secret list`
+      showed only 5 unrelated OIDC/SSO entries even though ops/config/deployment-inputs.yml''s 8 inputs pass: they are org-inherited,
+      not repo-level. Creating the Environments was necessary but is not sufficient for AC2: the statement''s "nine legacy-only
+      secrets / five reused org secrets / four missing references" is a specific name-to-name mapping that was never actually
+      written down anywhere in this WorkOrder or legacy-config-inventory.md (that document explicitly defers it, "these deltas
+      are AC2 material... not resolved further here"). Real application-config secret keys needing an Environment home (from
+      the inventory''s key-level appendix) number well over nine once xwiki, Spring Boot Admin, Elasticsearch, Redis, datasource,
+      mail, OpenAI, admin-key, EPREL, Icecat, affiliation providers, Amazon, proxy, Vertex, front.security, captcha, GitHub
+      feedback-token and feed-provider keys are each counted -- deciding which of those collapse into one shared Environment
+      secret, which stay per-service, and which of the 13 org secrets above are the "five reused" is a naming/architecture
+      decision (ADR-0006 territory), not a classification exercise AC1 already finished. Did not invent that mapping unilaterally.
+      Left IN_PROGRESS -> BLOCKED again rather than COMPLETED: AC2 needs that mapping decided (owner or a dedicated session)
+      before any real value is entered, and AC4''s "cross-environment duplication" check is only meaningful once AC2 populates
+      something to check. No secret value was requested, displayed, or handled in this note.'
+    - 'see evidenceRefs: Environments created, AC2 mapping decision still needed, no secret values touched'
