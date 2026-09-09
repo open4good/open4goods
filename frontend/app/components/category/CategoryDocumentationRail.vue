@@ -28,48 +28,21 @@
         </v-list-item>
       </v-list>
     </v-card>
-
-    <v-card
-      v-if="relatedPosts.length"
-      class="category-doc-rail__card"
-      rounded="xl"
-      elevation="1"
-    >
-      <v-card-title class="category-doc-rail__title">
-        <v-icon icon="mdi-newspaper-variant-outline" size="20" class="me-2" />
-        {{ $t('category.documentation.postsTitle') }}
-      </v-card-title>
-      <v-divider />
-      <v-list density="comfortable">
-        <v-list-item
-          v-for="post in relatedPosts"
-          :key="post.url ?? post.title"
-          :href="resolvePostUrl(post)"
-        >
-          <v-list-item-title>{{ post.title }}</v-list-item-title>
-          <v-list-item-subtitle v-if="post.summary">
-            {{ post.summary }}
-          </v-list-item-subtitle>
-        </v-list-item>
-      </v-list>
-    </v-card>
   </aside>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { BlogPostDto, WikiPageConfig } from '~~/shared/api-client'
+import type { WikiPageConfig } from '~~/shared/api-client'
 
 const props = defineProps<{
   wikiPages: WikiPageConfig[]
   guideSlugs?: string[]
-  relatedPosts: BlogPostDto[]
   verticalHomeUrl?: string | null
 }>()
 
 const wikiPages = computed(() => props.wikiPages ?? [])
 const guideSlugs = computed(() => props.guideSlugs ?? [])
-const relatedPosts = computed(() => props.relatedPosts ?? [])
 
 const normalizePathSegment = (value: string) => value.replace(/^\/+|\/+$/g, '')
 
@@ -156,27 +129,6 @@ const resolveWikiLinkProps = (page: WikiPageConfig): WikiLinkProps => {
   }
 }
 
-const BLOG_POST_PATH_PREFIX = '/blog/'
-
-const resolvePostUrl = (post: BlogPostDto) => {
-  const rawUrl = post.url?.trim()
-
-  if (!rawUrl) {
-    return '#'
-  }
-
-  if (/^https?:\/\//i.test(rawUrl)) {
-    return rawUrl
-  }
-
-  const normalised = rawUrl.replace(/^\/+/, '')
-
-  if (normalised.startsWith('blog/')) {
-    return `/${normalised}`
-  }
-
-  return `${BLOG_POST_PATH_PREFIX}${normalised}`
-}
 </script>
 
 <style scoped lang="sass">

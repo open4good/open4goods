@@ -10,7 +10,6 @@ import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.model.constants.CacheConstants;
-import org.open4goods.services.blog.service.BlogService;
 import org.open4goods.services.imageprocessing.service.ImageMagickService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
@@ -67,8 +66,8 @@ public class AppConfig {
 	}
 
 	@Bean
-	SitemapGenerationService sitemapGenerationService(ProductRepository repository, VerticalsConfigService verticalConfigService, BlogService blogService, XwikiFacadeService wikiService) {
-		return new SitemapGenerationService(repository, config, verticalConfigService, blogService, wikiService);
+	SitemapGenerationService sitemapGenerationService(ProductRepository repository, VerticalsConfigService verticalConfigService, XwikiFacadeService wikiService) {
+		return new SitemapGenerationService(repository, config, verticalConfigService, wikiService);
 	}
 
 	@Bean

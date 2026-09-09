@@ -10,7 +10,6 @@ import {
   type DocsDoc,
 } from '~/composables/useDocsContent'
 import type {
-  BlogPostDto,
   CategoryBreadcrumbItemDto,
   VerticalConfigFullDto,
   WikiPageConfig,
@@ -269,41 +268,8 @@ const otherGuideLinks = computed(() => {
   return Array.from(unique.values())
 })
 
-const relatedPostLinks = computed(() => {
-  const posts = categoryDetail.relatedPosts ?? []
-
-  const mapped = posts
-    .filter((post): post is BlogPostDto => !!post && typeof post === 'object')
-    .map(post => {
-      const slug = post.url?.trim().replace(/^\/+/, '') ?? ''
-
-      if (!slug.length) {
-        return null
-      }
-
-      return {
-        title: post.title?.trim() || slug.replace(/[-_]/g, ' '),
-        to: `/blog/${slug}`,
-      }
-    })
-    .filter((item): item is { title: string; to: string } => !!item?.to)
-
-  const unique = new Map<string, { title: string; to: string }>()
-  mapped.forEach(item => {
-    if (!unique.has(item.to)) {
-      unique.set(item.to, item)
-    }
-  })
-
-  return Array.from(unique.values())
-})
-
 const shouldDisplaySidebar = computed(() =>
-  Boolean(
-    categoryPath.value ||
-    otherGuideLinks.value.length ||
-    relatedPostLinks.value.length
-  )
+  Boolean(categoryPath.value || otherGuideLinks.value.length)
 )
 
 const categoryImage = computed(() => {
@@ -418,7 +384,6 @@ if (markdownGuide) {
         :category-name="categoryName"
         :category-path="categoryPath"
         :guides="otherGuideLinks"
-        :posts="relatedPostLinks"
       />
     </template>
   </XwikiFullPageRenderer>

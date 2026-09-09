@@ -6,18 +6,14 @@ import org.open4goods.icecat.services.IcecatFileDownloadService;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.icecat.services.loader.CategoryLoader;
 import org.open4goods.icecat.services.loader.FeatureLoader;
-import org.open4goods.nudgerfrontapi.config.properties.BlogProperties;
 import org.open4goods.nudgerfrontapi.config.properties.CacheProperties;
 import org.open4goods.nudgerfrontapi.config.properties.GoogleTaxonomyProperties;
-import org.open4goods.services.blog.config.BlogConfiguration;
-import org.open4goods.services.blog.service.BlogService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.verticals.GoogleTaxonomyService;
 import org.open4goods.verticals.VerticalsConfigService;
-import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,12 +78,6 @@ public class AppConfig {
         // NOTE: xmlMapper not injected because sharing the Spring-managed one corrupts springdoc.
         return new IcecatService(new XmlMapper(), icecatFeatureConfig, icecatFileDownloadService,
                 featureLoader, categoryLoader);
-    }
-
-    @Bean
-    BlogService blogService(@Autowired XwikiFacadeService xwikiFacadeService, @Autowired BlogConfiguration blogConfig,
-            @Autowired BlogProperties blogProperties) {
-        return new BlogService(xwikiFacadeService, blogConfig, blogProperties.getBaseUrls());
     }
 
     @Bean

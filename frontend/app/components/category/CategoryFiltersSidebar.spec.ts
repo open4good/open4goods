@@ -59,7 +59,6 @@ describe('CategoryFiltersSidebar', () => {
     showMobileActions: false,
     hasDocumentation: true,
     wikiPages: [],
-    relatedPosts: [],
   }
 
   const mountComponent = (overrides: Partial<typeof baseProps> = {}) =>

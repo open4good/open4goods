@@ -18,7 +18,7 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 | m3-dead-surface-removal | 1 | 0 | 1 | 0 | 1 |
 | m4-product-page-quality | 0 | 0 | 0 | 0 | 1 |
 | m5-icecat-integration | 6 | 0 | 5 | 0 | 0 |
-| m6-xwiki-retirement | 4 | 0 | 2 | 2 | 0 |
+| m6-xwiki-retirement | 3 | 0 | 2 | 1 | 1 |
 | m6-content-outreach | 0 | 0 | 0 | 0 | 1 |
 
 ## m0-governance
@@ -72,9 +72,10 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 | WorkOrder | Contract state | Availability | Dependencies | Blockers | Purpose |
 |---|---|---|---|---|---|
 | [google-sso-allowlisted-roles](../../.o4g/work/google-sso-allowlisted-roles.yml) | ACCEPTED | BLOCKED | config-repository-elimination | config-repository-elimination | Replace XWiki password authentication with Google OIDC and deny-by-default email-to-role authorization. |
-| [xwiki-blog-to-nuxt-content](../../.o4g/work/xwiki-blog-to-nuxt-content.yml) | IN_PROGRESS | PLANNED | governance-kit-bootstrap | -- | Export the XWiki blog into typed Markdown while preserving public URLs, metadata and feeds. |
 | [xwiki-editorial-content-to-nuxt-content](../../.o4g/work/xwiki-editorial-content-to-nuxt-content.yml) | IN_PROGRESS | PLANNED | governance-kit-bootstrap | -- | Replace XWiki pages, reusable blocs and attachments with localized typed content rendered by Nuxt SSR. |
-| [xwiki-decommission](../../.o4g/work/xwiki-decommission.yml) | ACCEPTED | BLOCKED | xwiki-blog-to-nuxt-content, xwiki-editorial-content-to-nuxt-content, google-sso-allowlisted-roles | xwiki-blog-to-nuxt-content, xwiki-editorial-content-to-nuxt-content, google-sso-allowlisted-roles | Remove XWiki after content and identity replacements have production evidence and a verified recovery archive. |
+| [xwiki-decommission](../../.o4g/work/xwiki-decommission.yml) | ACCEPTED | BLOCKED | xwiki-blog-to-nuxt-content, xwiki-editorial-content-to-nuxt-content, google-sso-allowlisted-roles | xwiki-editorial-content-to-nuxt-content, google-sso-allowlisted-roles | Remove XWiki after content and identity replacements have production evidence and a verified recovery archive. |
+
+*1 closed, see [ledger](../../.o4g/work/ledger).*
 
 ## m6-content-outreach
 

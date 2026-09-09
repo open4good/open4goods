@@ -14,7 +14,6 @@ import org.open4goods.commons.config.yml.ui.WebConfig;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.priceevents.PriceRestitutionConfig;
 import org.open4goods.model.vertical.SiteNaming;
-import org.open4goods.services.blog.config.BlogConfiguration;
 import org.open4goods.ui.interceptors.ImageResizeInterceptor;
 import org.open4goods.xwiki.config.XWikiServiceProperties;
 import org.slf4j.Logger;
@@ -161,9 +160,6 @@ public class UiConfig {
 	 * Containing the project members, for restitution in /team
 	 */
 	private TeamConfig teamConfig = new TeamConfig();
-
-
-	private BlogConfiguration blogConfig = new BlogConfiguration();
 
 
 	/**
@@ -337,16 +333,6 @@ public class UiConfig {
 		this.pages = pages;
 	}
 
-
-
-	public BlogConfiguration getBlogConfig() {
-		return blogConfig;
-	}
-
-
-	public void setBlogConfig(BlogConfiguration blogConfig) {
-		this.blogConfig = blogConfig;
-	}
 
 
 

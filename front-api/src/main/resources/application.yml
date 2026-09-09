@@ -56,12 +56,6 @@ front:
     french-taxonomy-url: "https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt"
     english-taxonomy-url: "https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt"
 
-  blog:
-    base-urls:
-      default: "${FRONT_BLOG_BASE_URL_DEFAULT:https://nudger.fr}"
-      fr: "${FRONT_BLOG_BASE_URL_FR:https://nudger.fr}"
-      en: "${FRONT_BLOG_BASE_URL_EN:https://nudger.fr/en}"
-
   rate-limit:
     anonymous: 100
     authenticated: 1000

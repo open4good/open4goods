@@ -28,7 +28,6 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.vertical.VerticalSubCategory;
 import org.open4goods.model.vertical.VerticalSubset;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
-import org.open4goods.nudgerfrontapi.dto.blog.BlogPostDto;
 import org.open4goods.nudgerfrontapi.dto.category.CategoryBreadcrumbItemDto;
 import org.open4goods.nudgerfrontapi.dto.category.AttributeConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.AttributesConfigDto;
@@ -118,12 +117,10 @@ public class CategoryMappingService {
      *
      * @param verticalConfig domain object loaded from the configuration service
      * @param domainLanguage language requested by the caller
-     * @param relatedPosts most recent blog posts referencing the vertical identifier
      * @return DTO exposing the full vertical configuration or {@code null} when the source is {@code null}
      */
     public VerticalConfigFullDto toVerticalConfigFullDto(VerticalConfig verticalConfig,
-                                                        DomainLanguage domainLanguage,
-                                                        List<BlogPostDto> relatedPosts) {
+                                                        DomainLanguage domainLanguage) {
         if (verticalConfig == null) {
             return null;
         }
@@ -150,7 +147,6 @@ public class CategoryMappingService {
                 i18n == null ? null : i18n.getVerticalMetaOpenGraphTitle(),
                 i18n == null ? null : i18n.getVerticalMetaOpenGraphDescription(),
                 mapCategoryBreadcrumb(verticalConfig.getGoogleTaxonomyId(), domainLanguage),
-                defaultList(relatedPosts),
                 defaultList(i18n == null ? null : i18n.getWikiPages()),
                 defaultList(verticalConfig.getGuides()),
                 i18n == null ? null : i18n.getAiConfigs(),

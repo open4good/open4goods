@@ -167,7 +167,7 @@ public class XWikiHtmlService {
 			}
 		}
 
-		//TODO : Markup should be mutualized with BlogController / downloadAttachment mapping
+		//TODO : Markup should be mutualized with XwikiProxyController / downloadAttachment mapping
 		htmlResult = htmlResult.replace("\"/bin/download","\""+PROXYFIED_FOLDER);
 
 		return htmlResult;
