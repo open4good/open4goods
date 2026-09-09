@@ -1,17 +1,34 @@
 apiVersion: open4goods.org/v1
 kind: WorkOrder
-metadata: {id: xwiki-editorial-content-to-nuxt-content, name: Move editorial XWiki content to Nuxt Content}
+metadata:
+  id: xwiki-editorial-content-to-nuxt-content
+  name: Move editorial XWiki content to Nuxt Content
 spec:
   purpose: Replace XWiki pages, reusable blocs and attachments with localized typed content rendered by Nuxt SSR.
   roadmapRef: m6-xwiki-retirement
-  state: ACCEPTED
-  dependsOn: [governance-kit-bootstrap]
-  decisionRefs: [ADR-0009]
-  pathScope: ['frontend/**', 'front-api/**', 'ui/**', 'scripts/migrate/**']
+  state: IN_PROGRESS
+  dependsOn:
+    - governance-kit-bootstrap
+  decisionRefs:
+    - ADR-0009
+  pathScope:
+    - frontend/**
+    - front-api/**
+    - ui/**
+    - scripts/migrate/**
   acceptanceCriteria:
     - id: AC1
-      statement: FAQ, team, partner, home and full-page content plus attachments migrate with stable routes and locale fallback.
+      statement: 'REVISED 2026-09-09 (see evidenceRefs). FAQ, team, partner, home and full-page sections are freshly authored
+        as localized (i18n) Nuxt Content with stable routes and locale fallback -- not exported from XWiki: owner decision
+        is that only the blog is migrated, editorial content is rewritten.'
     - id: AC2
-      statement: XWiki renderers and content endpoints are removed after route, metadata, accessibility and SSR parity tests.
+      statement: 'REVISED 2026-09-09. XWiki renderers and content endpoints are removed after route, metadata, accessibility
+        and SSR coverage tests pass against the new authored content. Dropped the original "parity" framing: with no XWiki
+        export as source of truth for this content, there is nothing to hold parity against.'
     - id: AC3
       statement: Nuxt owns editorial and blog sitemaps while ui retains product, brand, image and open-data responsibilities.
+  evidenceRefs:
+    - 'note: 2026-09-09 -- owner decision mid-session: "except for blog, ALL content will be replaced with i18n (thinking
+      on teams, and so on...)". AC1 and AC2 restated accordingly (rewrite, not export/parity); original wording is preserved
+      in this WorkOrder''s git history for anyone auditing the change. No XWiki access is needed for this WorkOrder; only
+      the sibling xwiki-blog-to-nuxt-content depends on live XWiki content.'
