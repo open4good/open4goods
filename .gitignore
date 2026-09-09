@@ -28,3 +28,4 @@ apache-maven-*-bin.tar.gz
 /random_washing_machine.json
 /workspace-api.log
 /api.log
+*.log
