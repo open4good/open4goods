@@ -24,8 +24,10 @@ from __future__ import annotations
 import argparse
 import base64
 import re
+import shutil
 import sys
 import tempfile
+import unicodedata
 import zipfile
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -88,6 +90,40 @@ def strip_xwiki_prefix(author: str) -> str:
     return author[6:] if author.startswith("XWiki.") else author
 
 
+def normalize_file_name(name: str) -> str:
+    """Python port of org.open4goods.model.helper.IdHelper.normalizeFileName, the exact
+    algorithm BlogService uses today to derive a post's live URL from its title. Used here
+    as the slug so exported routes match production instead of relying on the XWiki
+    document name, which is not always itself URL-safe (see AC1 evidence)."""
+    lowered = name.lower()
+    decomposed = unicodedata.normalize("NFD", lowered)
+    stripped = "".join(c for c in decomposed if not unicodedata.combining(c))
+    replaced = re.sub(r"[^a-z0-9_-]", "-", stripped)
+    collapsed = re.sub(r"-+", "-", replaced)
+    return collapsed.strip("-")
+
+
+# Small, deliberately narrow language sniff: XWiki's own defaultLanguage metadata is
+# demonstrably unreliable for this space (23/74 pages are tagged "en" while their body is
+# plainly French -- verified by inspection, not a export-tool artifact). This only ever
+# overrides a declared language when the content-based signal strongly disagrees with it;
+# it never invents a language absent from the corpus.
+_FRENCH_MARKERS = re.compile(r"\b(le|la|les|des|une|un|est|dans|pour|avec|vous|nous|c'est|qui)\b", re.I)
+_ENGLISH_MARKERS = re.compile(r"\b(the|and|with|you|this|that|are|for|from|have)\b", re.I)
+
+
+def detect_language(declared: str, body: str, warnings: list[str]) -> str:
+    french_hits = len(_FRENCH_MARKERS.findall(body))
+    english_hits = len(_ENGLISH_MARKERS.findall(body))
+    if french_hits > english_hits * 3 and declared != "fr":
+        warnings.append(
+            f"language corrected from declared '{declared}' to 'fr': XWiki's own defaultLanguage metadata "
+            f"disagreed with the content (french-marker hits={french_hits} vs english-marker hits={english_hits})"
+        )
+        return "fr"
+    return declared
+
+
 def epoch_ms_to_iso(value: str) -> str:
     import datetime
 
@@ -116,6 +152,15 @@ def parse_page(xml_path: Path) -> BlogPost | None:
     if obj is None:
         return None
 
+    # Document-level hidden (top-level <hidden>, distinct from BlogPostClass's own "Is hidden"
+    # editorial checkbox property mapped to `draft` below): this is how XWiki itself marks
+    # internal/template pages, and how BlogService.updateBlogPosts() skips them at runtime
+    # (fullPage.getWikiPage().isHidden()). Blog.BlogPostTemplate carries the BlogPostClass
+    # object (XWiki templates are typically instances of the class they template) but is not
+    # real content -- title literally "Enter your title here", empty body, published=false.
+    if root.findtext("hidden") == "true":
+        return None
+
     props: dict[str, ET.Element] = {}
     for prop in obj.findall("property"):
         for child in prop:
@@ -131,9 +176,16 @@ def parse_page(xml_path: Path) -> BlogPost | None:
         if v.text
     ]
 
+    warnings: list[str] = []
+
     raw_author = root.findtext("author") or ""
-    slug = root.findtext("name") or xml_path.stem
-    language = root.findtext("defaultLanguage") or "fr"
+    doc_name = root.findtext("name") or xml_path.stem
+    title = prop_text("title") or doc_name
+    slug = normalize_file_name(title) or normalize_file_name(doc_name) or doc_name
+
+    body_wiki = prop_text("content")
+    declared_language = root.findtext("defaultLanguage") or "fr"
+    language = detect_language(declared_language, body_wiki, warnings)
 
     publish_date_raw = prop_text("publishDate")
     publish_date = xwiki_date_to_iso(publish_date_raw) if publish_date_raw else None
@@ -148,7 +200,7 @@ def parse_page(xml_path: Path) -> BlogPost | None:
     post = BlogPost(
         slug=slug,
         language=language,
-        title=prop_text("title") or slug,
+        title=title,
         extract=prop_text("extract"),
         author=strip_xwiki_prefix(raw_author),
         category=category,
@@ -157,13 +209,16 @@ def parse_page(xml_path: Path) -> BlogPost | None:
         hidden=prop_text("hidden", "0") == "1",
         published=prop_text("published", "0") == "1",
         image_filename=prop_text("image") or None,
-        body_wiki=prop_text("content"),
+        body_wiki=body_wiki,
         attachments=attachments,
+        warnings=warnings,
     )
     if not publish_date:
         post.warnings.append("missing publishDate")
     if post.image_filename and not any(a.filename == post.image_filename for a in attachments):
         post.warnings.append(f"image property '{post.image_filename}' has no matching attachment")
+    if slug != doc_name:
+        post.warnings.append(f"slug '{slug}' derived from title differs from XWiki document name '{doc_name}'")
     return post
 
 
@@ -176,7 +231,14 @@ def parse_page(xml_path: Path) -> BlogPost | None:
 _HEADING_RE = re.compile(r"^(=+)\s*(.*?)\s*=+\s*$")
 _LIST_ITEM_RE = re.compile(r"^(\*+|1+\.)\s+(.*)$")
 _LINK_RE = re.compile(r"\[\[(.*?)>>(.*?)\]\]")
+_BARE_IMAGE_RE = re.compile(r"\[\[image:(.*?)\]\]")
+_PARAM_BLOCK_RE = re.compile(r"\(%.*?%\)")
 _TABLE_ROW_RE = re.compile(r"^\s*\|(.+)\|?\s*$")
+
+
+def _convert_bare_image(match: re.Match) -> str:
+    target = match.group(1).split("||", 1)[0].strip()
+    return f"![]({target})"
 
 
 def _convert_link(match: re.Match, warnings: list[str]) -> str:
@@ -196,6 +258,7 @@ def _convert_link(match: re.Match, warnings: list[str]) -> str:
 
 
 def _convert_inline(text: str, warnings: list[str]) -> str:
+    text = _BARE_IMAGE_RE.sub(_convert_bare_image, text)
     text = _LINK_RE.sub(lambda m: _convert_link(m, warnings), text)
     text = re.sub(r"(?<!/)//(?!/)([^/]+?)(?<!/)//(?!/)", r"_\1_", text)
     text = re.sub(r"(?<!-)--(?!-)([^-]+?)(?<!-)--(?!-)", r"~~\1~~", text)
@@ -204,6 +267,10 @@ def _convert_inline(text: str, warnings: list[str]) -> str:
 
 
 def convert_body(wiki_text: str, warnings: list[str]) -> str:
+    if _PARAM_BLOCK_RE.search(wiki_text):
+        warnings.append("stripped one or more '(%...%)' XWiki style-parameter blocks (presentational "
+                         "only, safe to drop, but source had heavy inline styling -- worth a manual look)")
+    wiki_text = _PARAM_BLOCK_RE.sub("", wiki_text)
     lines = wiki_text.replace("\r\n", "\n").split("\n")
     out: list[str] = []
     table_buffer: list[list[str]] = []
@@ -259,6 +326,10 @@ def _residual_syntax_warnings(markdown: str) -> list[str]:
         warnings.append("residual '=' heading syntax left unconverted")
     if "{{" in markdown and "}}" in markdown:
         warnings.append("residual '{{macro}}' syntax found (not handled by this converter)")
+    if re.search(r"\[\[image:", markdown):
+        warnings.append("residual '[[image:...]]' syntax left unconverted")
+    if _PARAM_BLOCK_RE.search(markdown):
+        warnings.append("residual '(%...%)' parameter block left unconverted")
     if markdown.count("~~") % 2 == 1:
         warnings.append("odd number of '~~' sequences -- likely literal source text (e.g. an author-typed "
                          "'approximately' tilde), not a strikethrough pair; will render as literal in Markdown")
@@ -337,12 +408,32 @@ def main(argv: list[str] | None = None) -> int:
             with zipfile.ZipFile(args.xar) as zf:
                 zf.extractall(source_dir)
 
-        exported, skipped, all_warnings = 0, 0, []
+        posts, skipped = [], 0
         for xml_path in iter_blog_pages(source_dir):
             post = parse_page(xml_path)
             if post is None:
                 skipped += 1
                 continue
+            posts.append(post)
+
+        seen: dict[tuple[str, str], BlogPost] = {}
+        for post in posts:
+            key = (post.language, post.slug)
+            if key in seen:
+                raise SystemExit(
+                    f"slug collision: '{post.slug}' ({post.language}) is shared by both "
+                    f"{seen[key].title!r} and {post.title!r} -- resolve manually before exporting"
+                )
+            seen[key] = post
+
+        if not args.dry_run:
+            # Clear prior output first so a corrected re-run cannot leave stale files behind
+            # (e.g. a post that moves slug or language, or a page later excluded).
+            shutil.rmtree(args.out_content, ignore_errors=True)
+            shutil.rmtree(args.out_media, ignore_errors=True)
+
+        exported, all_warnings = 0, []
+        for post in posts:
             warnings = write_post(post, args.out_content, args.out_media, args.dry_run)
             exported += 1
             for w in warnings:
