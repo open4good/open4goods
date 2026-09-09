@@ -29,7 +29,7 @@ export interface BlogContentDoc {
   image?: string
 }
 
-const slugFromPath = (path: string): string => path.split('/').filter(Boolean).pop() ?? path
+export const slugFromPath = (path: string): string => path.split('/').filter(Boolean).pop() ?? path
 
 const toEpochMs = (value: string | null): number | null => {
   if (!value) {
@@ -88,6 +88,23 @@ export async function toBlogPostDto(doc: BlogContentDoc): Promise<BlogPostDto> {
     editLink: undefined,
     createdMs: toEpochMs(doc.date) ?? undefined,
     modifiedMs: toEpochMs(doc.updatedAt) ?? undefined,
+  }
+}
+
+export interface BlogSitemapUrl {
+  loc: string
+  lastmod?: string
+}
+
+/**
+ * Maps a blog doc to the shape @nuxtjs/sitemap expects for a source entry -- see
+ * server/plugins/sitemap-blog-posts.ts. `updatedAt` wins over `date` for `lastmod` since it
+ * reflects the last real edit, matching rss.get.ts's own preference order for freshness signals.
+ */
+export function blogDocToSitemapUrl(doc: BlogContentDoc): BlogSitemapUrl {
+  return {
+    loc: `/blog/${slugFromPath(doc.path)}`,
+    lastmod: doc.updatedAt ?? doc.date ?? undefined,
   }
 }
 

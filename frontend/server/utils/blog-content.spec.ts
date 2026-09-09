@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
+  blogDocToSitemapUrl,
   findBlogDocBySlug,
   listBlogDocs,
   toBlogPostDto,
@@ -93,6 +94,23 @@ describe('blog-content', () => {
 
       expect(dto.body).toContain('[assistant]')
       expect(dto.body).not.toContain('<p>[assistant]</p>')
+    })
+  })
+
+  describe('blogDocToSitemapUrl', () => {
+    it('builds a /blog/<slug> loc regardless of the path prefix depth', () => {
+      const url = blogDocToSitemapUrl(
+        doc({ path: '/blog/fr/a-quoi-sert-l-esg', updatedAt: '2026-03-01T00:00:00Z' })
+      )
+      expect(url).toEqual({
+        loc: '/blog/a-quoi-sert-l-esg',
+        lastmod: '2026-03-01T00:00:00Z',
+      })
+    })
+
+    it('falls back to date when updatedAt is absent', () => {
+      const url = blogDocToSitemapUrl(doc({ updatedAt: null, date: '2026-01-05T00:00:00Z' }))
+      expect(url.lastmod).toBe('2026-01-05T00:00:00Z')
     })
   })
 
