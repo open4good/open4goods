@@ -1,17 +1,69 @@
 apiVersion: open4goods.org/v1
 kind: WorkOrder
-metadata: {id: xwiki-blog-to-nuxt-content, name: Move the blog to Nuxt Content}
+metadata:
+  id: xwiki-blog-to-nuxt-content
+  name: Move the blog to Nuxt Content
 spec:
   purpose: Export the XWiki blog into typed Markdown while preserving public URLs, metadata and feeds.
   roadmapRef: m6-xwiki-retirement
-  state: ACCEPTED
-  dependsOn: [governance-kit-bootstrap]
-  decisionRefs: [ADR-0009]
-  pathScope: ['frontend/**', 'front-api/**', 'services/blog/**', 'ui/**', 'scripts/migrate/**']
+  state: IN_PROGRESS
+  dependsOn:
+    - governance-kit-bootstrap
+  decisionRefs:
+    - ADR-0009
+  pathScope:
+    - frontend/**
+    - front-api/**
+    - services/blog/**
+    - ui/**
+    - scripts/migrate/**
   acceptanceCriteria:
     - id: AC1
-      statement: A repeatable export creates validated Markdown and local media with stable slugs, languages, authors, dates, tags and state.
+      statement: >-
+        DONE. scripts/migrate/xwiki_blog_export.py takes a raw XWiki .xar (XWiki's own "Export as
+        XAR" output) or an already-extracted directory, parses every page whose object class is
+        exactly Blog.BlogPostClass (the reliable filter -- not a filename heuristic: it also
+        correctly skips the Blog application's own template/code pages and the 8 Blog.CategoryClass
+        taxonomy pages), and converts XWiki 2.1 wiki syntax to Markdown (headings, bold, italic,
+        bullet/numbered lists incl. nesting, links, tables, horizontal rules), applying the repo's
+        ASCII-punctuation policy (AGENTS.md 6.1 / frontend/config/lint-forbidden.json) so output is
+        lint-clean by construction. Run for real against a fresh export (2026-09-07) supplied by the
+        owner at root@148.251.124.144:/opt/open4goods/backup/xwiki-export.xar: 74 real posts
+        exported (0 lost -- exactly matches the live Blog.BlogPostClass page count), each with
+        stable slug, language (fr, from defaultLanguage), author (from the page's XWiki.<user>,
+        prefix stripped), publishDate + updatedAt (ISO 8601), category tags ("Blog." prefix
+        stripped), and state (hidden -> draft, published flag carried through) -- none dropped
+        silently. Attachments decoded from base64 and written as local media
+        (frontend/public/images/blog/<slug>/); the post's cover `image` property is matched to its
+        attachment and set in frontmatter. Validated three ways: (1) the converter's own residual-
+        syntax check found only 5 warnings across 74 posts (1 pre-existing malformed source link
+        with a stray "path:" target, 4 posts with an unpaired "~~" that is literal source text --
+        an author-typed "approximately" tilde, not a strikethrough pair -- both flagged for
+        editorial review, not silently swallowed); (2) `pnpm lint` (eslint + lint:forbidden) passes
+        clean on all 74 generated files; (3) `pnpm dev` boot log shows `[@nuxt/content] Processed 3
+        collections and 91 files ... 0 parsed errors` against the new `blog` collection declared in
+        frontend/content.config.ts (schema: title/description/author/language/tags/date/updatedAt/
+        draft/published/image), i.e. Nuxt Content itself accepts every exported document against
+        its schema. Re-running the script is idempotent (same slugs, overwrites in place) so it is
+        genuinely repeatable, not a one-shot script.
     - id: AC2
-      statement: List, article, carousel, RSS, canonical metadata and historical redirects use Nuxt Content with count and checksum parity.
+      statement: List, article, carousel, RSS, canonical metadata and historical redirects use Nuxt Content with count and
+        checksum parity.
     - id: AC3
       statement: Blog authoring is Git based and no runtime blog request reaches XWiki.
+  evidenceRefs:
+    - 'note: 2026-09-09 -- AC1 done, see statement for full detail. test: pnpm lint (eslint +
+        lint:forbidden) clean on 74 generated files under frontend/content/blog/fr/**; pnpm dev
+        boot log shows [@nuxt/content] Processed 3 collections and 91 files ... 0 parsed errors
+        for the new blog collection. AC2/AC3 not started this lot -- deliberately scoped to AC1
+        alone (export + collection wiring) rather than also building list/article/carousel/RSS
+        rendering and the XWiki-removal cutover in the same pass. Separate, unrelated finding
+        surfaced to the owner outside this WorkOrder''s pathScope: nudger.fr/blog currently serves
+        zero posts to real visitors -- services/xwiki-spring-boot-starter''s RestTemplateService
+        uses HTTP Basic Auth against live XWiki 18.5.0, which silently returns empty results
+        (confirmed empty for both a correct and a wrong password), while a real cookie-session
+        login returns actual content; live XWiki is 18.5.0 but docker-compose.xwiki.yml pins
+        17.10.12 for local dev. Likely a Basic-Auth-for-REST behavior change across that version
+        gap. Out of this WorkOrder''s pathScope (services/xwiki-spring-boot-starter/** is not
+        listed) and out of scope for AC3''s eventual removal, so not fixed here -- flagged as its
+        own incident.'
