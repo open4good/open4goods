@@ -2,14 +2,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 type PageHandler = (typeof import('./[pageId]'))['default']
 
-const getPageMock = vi.hoisted(() => vi.fn())
-const usePagesServiceMock = vi.hoisted(() =>
-  vi.fn(() => ({ getPage: getPageMock }))
-)
 const resolveDomainLanguageMock = vi.hoisted(() =>
   vi.fn(() => ({ domainLanguage: 'fr' as const }))
 )
-const extractBackendErrorDetailsMock = vi.hoisted(() => vi.fn())
 const setDomainLanguageCacheHeadersMock = vi.hoisted(() => vi.fn())
 const getRouterParamMock = vi.hoisted(() =>
   vi.fn<(event: unknown, name: string) => string | undefined>()
@@ -24,16 +19,8 @@ vi.mock('h3', () => ({
   }),
 }))
 
-vi.mock('~~/shared/api-client/services/pages.services', () => ({
-  usePagesService: usePagesServiceMock,
-}))
-
 vi.mock('~~/shared/utils/domain-language', () => ({
   resolveDomainLanguage: resolveDomainLanguageMock,
-}))
-
-vi.mock('../../utils/log-backend-error', () => ({
-  extractBackendErrorDetails: extractBackendErrorDetailsMock,
 }))
 
 vi.mock('../../utils/cache-headers', () => ({
@@ -45,7 +32,6 @@ describe('server/api/pages/[pageId]', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    getPageMock.mockReset()
     getRouterParamMock.mockReset()
     handler = (await import('./[pageId]')).default
   })
@@ -54,7 +40,7 @@ describe('server/api/pages/[pageId]', () => {
     node: { req: { headers: { host: 'nudger.fr' } } },
   } as unknown as Parameters<PageHandler>[0]
 
-  it('serves the real static legal-notice page without calling the live XWiki backend', async () => {
+  it('serves the real static legal-notice page', async () => {
     getRouterParamMock.mockReturnValue(
       encodeURIComponent('webpages:default:legal-notice:WebHome')
     )
@@ -62,23 +48,14 @@ describe('server/api/pages/[pageId]', () => {
     const response = await handler(event)
 
     expect(response.pageTitle).toBe('Les mentions légales et les CGU de Nudger')
-    expect(usePagesServiceMock).not.toHaveBeenCalled()
-    expect(getPageMock).not.toHaveBeenCalled()
   })
 
-  it('falls through to the live backend for a page id with no static entry', async () => {
+  it('404s a page id with no static entry -- there is no live XWiki backend to fall back to', async () => {
     getRouterParamMock.mockReturnValue(
       encodeURIComponent('webpages:default:impact-score-ia:WebHome')
     )
-    getPageMock.mockResolvedValue({ htmlContent: '<p>from xwiki</p>' })
 
-    const response = await handler(event)
-
-    expect(usePagesServiceMock).toHaveBeenCalledWith('fr')
-    expect(getPageMock).toHaveBeenCalledWith(
-      'webpages:default:impact-score-ia:WebHome'
-    )
-    expect(response.htmlContent).toBe('<p>from xwiki</p>')
+    await expect(handler(event)).rejects.toMatchObject({ statusCode: 404 })
   })
 
   it('rejects a request with no page id', async () => {

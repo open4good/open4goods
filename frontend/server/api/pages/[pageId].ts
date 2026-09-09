@@ -1,12 +1,8 @@
 import { createError, defineEventHandler, getRouterParam } from 'h3'
 
-import {
-  usePagesService,
-  type CmsFullPage,
-} from '~~/shared/api-client/services/pages.services'
+import type { CmsFullPage } from '~~/shared/utils/cms-full-page'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
-import { extractBackendErrorDetails } from '../../utils/log-backend-error'
 import { setDomainLanguageCacheHeaders } from '../../utils/cache-headers'
 import { getStaticFullPage } from '../../utils/static-full-pages'
 
@@ -24,25 +20,16 @@ export default defineEventHandler(async (event): Promise<CmsFullPage> => {
   const { domainLanguage } = resolveDomainLanguage(rawHost)
 
   // Real editorial copy extracted from the XWiki export archive (see static-full-pages.ts)
-  // takes over for page ids it covers, entirely bypassing the live XWiki call -- anonymous
-  // XWiki REST access has been down since 2026-09-09 (incident_xwiki_blog_locked_down_sept2026).
+  // is the only source for this endpoint -- front-api's /pages/{xwikiPageId} backend was removed
+  // once the last live-only pages (the 3 unrecoverable /blog/* posts) were dropped and redirected
+  // to /blog instead (xwiki-editorial-content-to-nuxt-content AC2, pages slice).
   const staticPage = getStaticFullPage(pageId, domainLanguage)
-  if (staticPage !== null) {
-    return staticPage
-  }
-
-  const pagesService = usePagesService(domainLanguage)
-
-  try {
-    return await pagesService.getPage(pageId)
-  } catch (error) {
-    const backendError = await extractBackendErrorDetails(error)
-    console.error('Error fetching page', backendError.logMessage, backendError)
-
+  if (staticPage === null) {
     throw createError({
-      statusCode: backendError.statusCode,
-      statusMessage: backendError.statusMessage,
-      cause: error,
+      statusCode: 404,
+      statusMessage: `No static content for page id "${pageId}"`,
     })
   }
+
+  return staticPage
 })

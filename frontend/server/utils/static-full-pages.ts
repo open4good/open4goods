@@ -1,5 +1,5 @@
 import type { DomainLanguage } from '~~/shared/utils/domain-language'
-import type { CmsFullPage } from '~~/shared/api-client/services/pages.services'
+import type { CmsFullPage } from '~~/shared/utils/cms-full-page'
 
 interface StaticFullPageEntry {
   pageTitle: string

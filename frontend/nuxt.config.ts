@@ -338,6 +338,12 @@ export default defineNuxtConfig({
     '/offline': { prerender: true },
     '/ecoscore': { redirect: { to: '/impact-score', statusCode: 301 } },
     '/eco-score': { redirect: { to: '/impact-score', statusCode: 301 } },
+    // The 3 remaining XWiki-backed /blog/* full pages: absent from the XWiki export archive and
+    // live XWiki access has been down since 2026-09-09 (incident_xwiki_blog_locked_down_sept2026)
+    // -- no recoverable source, dropped rather than left broken (xwiki-editorial-content-to-nuxt-content AC2).
+    '/blog/impact-score-ia': { redirect: { to: '/blog', statusCode: 301 } },
+    '/blog/prioriser-durabilite': { redirect: { to: '/blog', statusCode: 301 } },
+    '/blog/equilibrer-prix-impact': { redirect: { to: '/blog', statusCode: 301 } },
     // Fix SWR handler error by disabling cache for assistant configs (conflicts with cookie setting)
     '/assistant-configs/**': { cache: false },
     '/api/assistant-configs/**': { cache: false },
