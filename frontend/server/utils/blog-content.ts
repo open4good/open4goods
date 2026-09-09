@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises'
-import { fileURLToPath } from 'node:url'
+import { resolve } from 'node:path'
 
 import type { H3Event } from 'h3'
 import MarkdownIt from 'markdown-it'
@@ -8,8 +8,10 @@ import { queryCollection } from '@nuxt/content/server'
 import type { BlogPostDto, BlogTagDto } from '~~/shared/api-client'
 
 // scripts/migrate/xwiki_blog_export.py writes here; kept in sync with frontend/content.config.ts's
-// BLOG_DIR so the raw Markdown body can be read directly (see renderBody for why).
-const BLOG_CONTENT_DIR = fileURLToPath(new URL('../../content/blog', import.meta.url))
+// BLOG_DIR so the raw Markdown body can be read directly (see renderBody for why). Resolved from
+// process.cwd() rather than import.meta.url: both Nitro and Vitest run with the frontend/ package
+// root as cwd, and import.meta.url isn't a file:// URL under Vitest's transform pipeline.
+const BLOG_CONTENT_DIR = resolve(process.cwd(), 'content', 'blog')
 
 const markdown = new MarkdownIt({ html: false, linkify: true })
 
