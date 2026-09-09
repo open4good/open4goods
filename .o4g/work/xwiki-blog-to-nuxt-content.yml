@@ -20,44 +20,71 @@ spec:
   acceptanceCriteria:
     - id: AC1
       statement: >-
-        DONE. scripts/migrate/xwiki_blog_export.py takes a raw XWiki .xar (XWiki's own "Export as
-        XAR" output) or an already-extracted directory, parses every page whose object class is
-        exactly Blog.BlogPostClass (the reliable filter -- not a filename heuristic: it also
-        correctly skips the Blog application's own template/code pages and the 8 Blog.CategoryClass
-        taxonomy pages), and converts XWiki 2.1 wiki syntax to Markdown (headings, bold, italic,
-        bullet/numbered lists incl. nesting, links, tables, horizontal rules), applying the repo's
-        ASCII-punctuation policy (AGENTS.md 6.1 / frontend/config/lint-forbidden.json) so output is
-        lint-clean by construction. Run for real against a fresh export (2026-09-07) supplied by the
-        owner at root@148.251.124.144:/opt/open4goods/backup/xwiki-export.xar: 74 real posts
-        exported (0 lost -- exactly matches the live Blog.BlogPostClass page count), each with
-        stable slug, language (fr, from defaultLanguage), author (from the page's XWiki.<user>,
-        prefix stripped), publishDate + updatedAt (ISO 8601), category tags ("Blog." prefix
-        stripped), and state (hidden -> draft, published flag carried through) -- none dropped
-        silently. Attachments decoded from base64 and written as local media
-        (frontend/public/images/blog/<slug>/); the post's cover `image` property is matched to its
-        attachment and set in frontmatter. Validated three ways: (1) the converter's own residual-
-        syntax check found only 5 warnings across 74 posts (1 pre-existing malformed source link
-        with a stray "path:" target, 4 posts with an unpaired "~~" that is literal source text --
-        an author-typed "approximately" tilde, not a strikethrough pair -- both flagged for
-        editorial review, not silently swallowed); (2) `pnpm lint` (eslint + lint:forbidden) passes
-        clean on all 74 generated files; (3) `pnpm dev` boot log shows `[@nuxt/content] Processed 3
-        collections and 91 files ... 0 parsed errors` against the new `blog` collection declared in
-        frontend/content.config.ts (schema: title/description/author/language/tags/date/updatedAt/
-        draft/published/image), i.e. Nuxt Content itself accepts every exported document against
-        its schema. Re-running the script is idempotent (same slugs, overwrites in place) so it is
-        genuinely repeatable, not a one-shot script.
+        DONE, corrected 2026-09-09 after a second AC2-research pass found three real defects in
+        the first "DONE" pass (see evidenceRefs for how each was found and verified, not just
+        asserted). scripts/migrate/xwiki_blog_export.py takes a raw XWiki .xar or an already-
+        extracted directory, keeps only pages whose object class is exactly Blog.BlogPostClass
+        AND whose document-level `<hidden>` is not "true" (the second check excludes
+        Blog.BlogPostTemplate, which carries the BlogPostClass object -- XWiki templates
+        typically do -- but is not real content: title "Enter your title here", empty body,
+        published=false; missing this the first time let one template page through as post #74).
+        73 real posts exported. Slug is `normalizeFileName(title)` -- a Python port of
+        org.open4goods.model.helper.IdHelper.normalizeFileName, the exact algorithm
+        BlogService.updateBlogPosts() uses today to derive each post's live URL -- not the XWiki
+        document name: the first pass used the document name and was wrong for 70 of 74 posts,
+        whose XWiki page name was never the real URL (e.g. document name
+        "impact-environnemental-des-televiseurs" vs. the live-matching slug
+        "impact-ecologique-des-televiseurs" from the real title). Getting this right, not the
+        (mostly cosmetic) syntax coverage, is what "stable slugs" in this AC actually depends on.
+        `language` is content-detected against XWiki's own defaultLanguage rather than trusting
+        it blindly: 23 of the 74 pages had defaultLanguage="en" while their body was plainly
+        French (verified: the "en"-tagged content read the same as every "fr"-tagged post, just
+        mislabeled at the source) -- all 73 real posts are in fact French, none genuinely English,
+        confirmed by a french/english marker-count heuristic on every post, not asserted from a
+        handful of samples. Wiki-syntax coverage: headings, bold, italic, bullet/numbered lists
+        incl. nesting, `[[label>>target]]` links, bare `[[image:url]]` images (6 posts, missed in
+        the first pass), `(%...%)` XWiki style-parameter blocks (1 legacy post, stripped -- purely
+        presentational), tables, horizontal rules; ASCII-punctuation policy (AGENTS.md 6.1 /
+        frontend/config/lint-forbidden.json) applied so output is lint-clean by construction.
+        Attachments decoded from base64 to local media (frontend/public/images/blog/<slug>/); the
+        cover `image` property is matched to its attachment. A slug collision check runs across
+        the whole batch before any file is written (fails loudly rather than silently overwriting
+        one post with another) -- none found. Validated: (1) the converter's own residual-syntax
+        check -- now also covering `[[image:` and `(%...%)` leftovers -- found only 3 warnings
+        across 73 posts (1 pre-existing malformed source link with a stray "path:" target, 2 posts
+        with an unpaired "~~" that is literal source text, an author-typed "approximately" tilde,
+        not a strikethrough pair); (2) `pnpm lint` clean on all 73 files; (3) `pnpm dev` boot log:
+        `[@nuxt/content] Processed 3 collections and 90 files ... 73 parsed`, i.e. Nuxt Content
+        accepts every exported document against the `blog` collection schema in
+        frontend/content.config.ts. Re-running the script is idempotent and now fully replaces
+        prior output (content/blog and public/images/blog are cleared first), so a corrected
+        re-run cannot leave stale files behind the way the first pass's leftover en/ directory
+        would have.
     - id: AC2
       statement: List, article, carousel, RSS, canonical metadata and historical redirects use Nuxt Content with count and
         checksum parity.
     - id: AC3
       statement: Blog authoring is Git based and no runtime blog request reaches XWiki.
   evidenceRefs:
-    - 'note: 2026-09-09 -- AC1 done, see statement for full detail. test: pnpm lint (eslint +
-        lint:forbidden) clean on 74 generated files under frontend/content/blog/fr/**; pnpm dev
-        boot log shows [@nuxt/content] Processed 3 collections and 91 files ... 0 parsed errors
-        for the new blog collection. AC2/AC3 not started this lot -- deliberately scoped to AC1
-        alone (export + collection wiring) rather than also building list/article/carousel/RSS
-        rendering and the XWiki-removal cutover in the same pass. Separate, unrelated finding
+    - 'note: 2026-09-09 -- AC1 first pass. test: pnpm lint clean on 74 generated files under
+        frontend/content/blog/fr/**; pnpm dev boot log shows [@nuxt/content] Processed 3
+        collections and 91 files ... 0 parsed errors. AC2/AC3 not started this lot --
+        deliberately scoped to AC1 alone. Superseded by the next note: two of this pass''s claims
+        (slug parity, language correctness) turned out wrong on inspection, not just incomplete.'
+    - 'note: 2026-09-09 (same day, second pass) -- before starting AC2, researched the live URL
+        scheme and found the first AC1 pass wrong on two axes it had asserted as done: (1) slugs
+        used the XWiki document name, which matches the live URL (normalizeFileName(title)) for
+        only 4 of 74 posts, not "most" as an earlier research summary claimed -- verified by
+        porting normalizeFileName from model/.../IdHelper.java and running it for real, not by
+        spot-checking a sample; (2) 23/74 posts carried defaultLanguage="en" in XWiki despite
+        entirely French content, so language was wrong for those, not just for "a handful". Also
+        found one BlogPostClass page (BlogPostTemplate, XWiki''s own template) had slipped through
+        the class filter as a fake 74th post, and 6 posts used bare [[image:url]] syntax the
+        converter silently left unconverted. All four fixed in the same script (see AC1 statement)
+        and re-verified the same three ways as the first pass. Corrected rather than left stale
+        per canonical decision 9 (verify a claim before writing it down) and this repo''s own
+        convention of amending a WorkOrder''s prior statement in place instead of layering a patch
+        note that leaves the wrong claim standing. Unrelated finding kept from the first pass, still
         surfaced to the owner outside this WorkOrder''s pathScope: nudger.fr/blog currently serves
         zero posts to real visitors -- services/xwiki-spring-boot-starter''s RestTemplateService
         uses HTTP Basic Auth against live XWiki 18.5.0, which silently returns empty results
