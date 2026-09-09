@@ -133,10 +133,6 @@ const STATIC_CONTENT_BLOCS: Record<string, Partial<Record<DomainLanguage, string
     fr: 'Plongez dans notre documentation sur l’Impact Score pour voir comment les indicateurs sont sourcés, pondérés et régulièrement mis à jour.',
     en: 'Dive into our Impact Score documentation to see how indicators are sourced, weighted, and regularly updated.',
   },
-  'webpages:opensource:pillars-community': {
-    fr: 'Rencontrez le collectif de citoyens, chercheurs et partenaires qui nourrissent la feuille de route et la gouvernance.',
-    en: 'Meet the collective of citizens, researchers, and partners who nurture the roadmap and governance.',
-  },
   'webpages:opensource:contribute-intro': {
     fr: "Contribuer est un parcours collaboratif - suivez ces étapes pour configurer votre environnement et commencer à jouer avec la bête !",
     en: 'Contributing is a collaborative journey. Follow these steps to set up your environment and ship value quickly.',

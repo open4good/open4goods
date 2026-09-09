@@ -7,11 +7,9 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.open4goods.commons.helper.GenericFileLogger;
-import org.open4goods.model.Localisable;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -20,8 +18,6 @@ import org.open4goods.model.vertical.WikiPageConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.verticals.VerticalsConfigService;
-import org.open4goods.xwiki.model.FullPage;
-import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -39,10 +35,9 @@ import cz.jiripinkas.jsitemapgenerator.generator.SitemapIndexGenerator;
  * <ul>
  *   <li><b>category-pages.xml</b> – vertical landing pages, sub-category pages
  *       (including auto-generated sub-categories from
- *       {@code classpath*:categories/<vertical>/*.yml}), and XWiki editorial
- *       pages attached to verticals.</li>
+ *       {@code classpath*:categories/<vertical>/*.yml}), and vertical-specific
+ *       editorial pages.</li>
  *   <li><b>product-pages.xml</b> – individual product pages.</li>
- *   <li><b>wiki-pages.xml</b> – XWiki-backed editorial pages.</li>
  * </ul>
  * A sitemap index file ({@code sitemap.xml}) is produced alongside each set.</p>
  *
@@ -56,7 +51,6 @@ public class SitemapGenerationService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SitemapGenerationService.class);
 
 	private static final String SITEMAP_NAME_PRODUCT_PAGES = "product-pages.xml";
-	private static final String SITEMAP_NAME_WIKI_PAGES = "wiki-pages.xml";
 	private static final String SITEMAP_NAME_VERTICAL_PAGES = "category-pages.xml";
 	private static final String SITEMAP_NAME_DEFAULT_GUIDES = "guides.xml";
 
@@ -65,14 +59,12 @@ public class SitemapGenerationService {
 	private final AtomicBoolean exportRunning = new AtomicBoolean(false);
 	private final Logger statsLogger;
 	private final VerticalsConfigService verticalsConfigService;
-	private final XwikiFacadeService xwikiService;
 
 	public SitemapGenerationService(ProductRepository aggregatedDataRepository, UiConfig uiConfig,
-			VerticalsConfigService verticalConfigService, XwikiFacadeService xwikiService) {
+			VerticalsConfigService verticalConfigService) {
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.verticalsConfigService = verticalConfigService;
 		this.statsLogger = GenericFileLogger.initLogger("stats-sitemap", Level.INFO, uiConfig.logsFolder());
-		this.xwikiService = xwikiService;
 		this.uiConfig = uiConfig;
 	}
 
@@ -97,13 +89,11 @@ public class SitemapGenerationService {
 				String lang = e.getKey();
 				String baseUrl = e.getValue();
 
-				addWikiPages(baseUrl, lang);
 				addProductsPages(baseUrl, lang);
 				addVerticalPages(baseUrl, lang);
 				boolean hasDefaultGuides = addDefaultGuidePages(baseUrl, lang);
 
 				SitemapIndexGenerator index = SitemapIndexGenerator.of(baseUrl + "sitemap/")
-						.addPage(SITEMAP_NAME_WIKI_PAGES)
 						.addPage(SITEMAP_NAME_VERTICAL_PAGES)
 						.addPage(SITEMAP_NAME_PRODUCT_PAGES);
 				if (hasDefaultGuides) {
@@ -156,40 +146,8 @@ public class SitemapGenerationService {
 	}
 
 	/**
-	 * Adds XWiki editorial pages referenced in the UI configuration to the wiki sitemap.
-	 *
-	 * @param baseUrl  site base URL for the target language
-	 * @param language BCP-47 language tag
-	 */
-	private void addWikiPages(String baseUrl, String language) {
-		SitemapGenerator sitemap = SitemapGenerator.of(baseUrl);
-
-		for (Entry<String, Localisable<String, String>> entry : uiConfig.getWikiPagesMapping().entrySet()) {
-			FullPage page = null;
-			try {
-				page = xwikiService.getFullPage(entry.getKey(), language);
-			} catch (Exception e) {
-				LOGGER.error("Error while retrieving wiki page {} : {}", entry.getValue(), e.getMessage(), e);
-			}
-			if (page == null) {
-				continue;
-			}
-
-			String url = baseUrl + entry.getValue().i18n(language);
-			LOGGER.info("Adding wiki page to sitemap : {}", url);
-			sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.MONTHLY, 0.8, page.getWikiPage().getModified().getTime()));
-		}
-
-		try {
-			sitemap.toFile(getSitemapFile(SITEMAP_NAME_WIKI_PAGES, language));
-		} catch (IOException e) {
-			LOGGER.error("Error while writing wiki sitemap", e);
-		}
-	}
-
-	/**
 	 * Adds vertical landing pages, sub-category pages, and vertical-specific
-	 * XWiki editorial pages to the category sitemap.
+	 * editorial pages to the category sitemap.
 	 *
 	 * <p>Sub-categories include both those defined inline in the vertical YAML
 	 * and those auto-generated from
@@ -226,17 +184,9 @@ public class SitemapGenerationService {
 				sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.MONTHLY, 0.8));
 			}
 
-			// Vertical-specific XWiki editorial pages
+			// Vertical-specific editorial pages (rendered by CategoryPage.vue /
+			// CategoryFiltersSidebar.vue from VerticalConfig i18n, no longer XWiki-backed)
 			for (WikiPageConfig wikiPage : i18n.getWikiPages()) {
-				FullPage page = null;
-				try {
-					page = xwikiService.getFullPage(wikiPage.getWikiUrl(), language);
-				} catch (Exception ex) {
-					LOGGER.error("Error while retrieving wiki page {} : {}", wikiPage.getWikiUrl(), ex.getMessage());
-				}
-				if (page == null) {
-					continue;
-				}
 				String url = baseUrl + i18n.getVerticalHomeUrl() + "/" + wikiPage.getVerticalUrl();
 				LOGGER.info("Adding to sitemap : {}", url);
 				sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.MONTHLY, 0.9));

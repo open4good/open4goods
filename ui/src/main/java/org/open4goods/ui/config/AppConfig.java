@@ -21,7 +21,6 @@ import org.open4goods.ui.services.SitemapGenerationService;
 import org.open4goods.ui.services.todo.TodoService;
 import org.open4goods.verticals.GoogleTaxonomyService;
 import org.open4goods.verticals.VerticalsConfigService;
-import org.open4goods.xwiki.services.XwikiFacadeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
@@ -66,8 +65,8 @@ public class AppConfig {
 	}
 
 	@Bean
-	SitemapGenerationService sitemapGenerationService(ProductRepository repository, VerticalsConfigService verticalConfigService, XwikiFacadeService wikiService) {
-		return new SitemapGenerationService(repository, config, verticalConfigService, wikiService);
+	SitemapGenerationService sitemapGenerationService(ProductRepository repository, VerticalsConfigService verticalConfigService) {
+		return new SitemapGenerationService(repository, config, verticalConfigService);
 	}
 
 	@Bean

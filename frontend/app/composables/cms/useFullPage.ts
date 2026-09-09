@@ -1,5 +1,5 @@
 import { computed, toValue, type MaybeRefOrGetter } from 'vue'
-import type { CmsFullPage } from '~~/shared/api-client/services/pages.services'
+import type { CmsFullPage } from '~~/shared/utils/cms-full-page'
 
 const SUPPORTED_WIDTHS = new Set([
   'container',
@@ -46,9 +46,7 @@ export const useFullPage = async (
     ) as SupportedWidth
   })
 
-  const pageTitle = computed(
-    () => page.value?.pageTitle ?? page.value?.title ?? ''
-  )
+  const pageTitle = computed(() => page.value?.pageTitle ?? '')
   const metaTitle = computed(() => page.value?.metaTitle ?? pageTitle.value)
   const metaDescription = computed(() => page.value?.metaDescription ?? '')
   const htmlContent = computed(() => page.value?.htmlContent ?? '')

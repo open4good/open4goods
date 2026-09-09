@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-type BlocHandler = (typeof import('./[blocId]'))['default']
+type PageHandler = (typeof import('./[pageId]'))['default']
 
 const resolveDomainLanguageMock = vi.hoisted(() =>
   vi.fn(() => ({ domainLanguage: 'fr' as const }))
@@ -11,7 +11,7 @@ const getRouterParamMock = vi.hoisted(() =>
 )
 
 vi.mock('h3', () => ({
-  defineEventHandler: (fn: BlocHandler) => fn,
+  defineEventHandler: (fn: PageHandler) => fn,
   getRouterParam: getRouterParamMock,
   createError: (input: { statusCode: number; statusMessage: string }) => ({
     ...input,
@@ -27,38 +27,38 @@ vi.mock('../../utils/cache-headers', () => ({
   setDomainLanguageCacheHeaders: setDomainLanguageCacheHeadersMock,
 }))
 
-describe('server/api/blocs/[blocId]', () => {
-  let handler: BlocHandler
+describe('server/api/pages/[pageId]', () => {
+  let handler: PageHandler
 
   beforeEach(async () => {
     vi.resetModules()
     getRouterParamMock.mockReset()
-    handler = (await import('./[blocId]')).default
+    handler = (await import('./[pageId]')).default
   })
 
   const event = {
     node: { req: { headers: { host: 'nudger.fr' } } },
-  } as unknown as Parameters<BlocHandler>[0]
+  } as unknown as Parameters<PageHandler>[0]
 
-  it('serves real static content for a bloc id in the static map', async () => {
-    getRouterParamMock.mockReturnValue('pages:team:goulven-furet-title:')
+  it('serves the real static legal-notice page', async () => {
+    getRouterParamMock.mockReturnValue(
+      encodeURIComponent('webpages:default:legal-notice:WebHome')
+    )
 
     const response = await handler(event)
 
-    expect(response).toEqual({
-      blocId: 'pages:team:goulven-furet-title:',
-      htmlContent: '<p>CEO / CTO</p>',
-      editLink: null,
-    })
+    expect(response.pageTitle).toBe('Les mentions légales et les CGU de Nudger')
   })
 
-  it('404s a bloc id with no static entry -- there is no live XWiki backend to fall back to', async () => {
-    getRouterParamMock.mockReturnValue('pages:unknown:bloc')
+  it('404s a page id with no static entry -- there is no live XWiki backend to fall back to', async () => {
+    getRouterParamMock.mockReturnValue(
+      encodeURIComponent('webpages:default:impact-score-ia:WebHome')
+    )
 
     await expect(handler(event)).rejects.toMatchObject({ statusCode: 404 })
   })
 
-  it('rejects a request with no bloc id', async () => {
+  it('rejects a request with no page id', async () => {
     getRouterParamMock.mockReturnValue(undefined)
 
     await expect(handler(event)).rejects.toMatchObject({ statusCode: 400 })

@@ -63,18 +63,14 @@ runtimeConfig: {
   // ...
   sitemapLocalFiles: {
     fr: [
-      '/opt/open4goods/sitemap/fr/blog-posts.xml',
       '/opt/open4goods/sitemap/fr/category-pages.xml',
       '/opt/open4goods/sitemap/fr/product-pages.xml',
-      '/opt/open4goods/sitemap/fr/verticals-pages.xml',
-      '/opt/open4goods/sitemap/fr/wiki-pages.xml',
+      '/opt/open4goods/sitemap/fr/guides.xml',
     ],
     en: [
-      '/opt/open4goods/sitemap/en/blog-posts.xml',
       '/opt/open4goods/sitemap/en/category-pages.xml',
       '/opt/open4goods/sitemap/en/product-pages.xml',
-      '/opt/open4goods/sitemap/en/verticals-pages.xml',
-      '/opt/open4goods/sitemap/en/wiki-pages.xml',
+      '/opt/open4goods/sitemap/en/guides.xml',
     ],
   },
   // ...

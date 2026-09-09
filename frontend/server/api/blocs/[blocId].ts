@@ -1,10 +1,8 @@
 import { createError, defineEventHandler, getRouterParam } from 'h3'
 
-import { useContentService } from '~~/shared/api-client/services/content.services'
 import type { XwikiContentBlocDto } from '~~/shared/api-client'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
-import { extractBackendErrorDetails } from '../../utils/log-backend-error'
 import { setDomainLanguageCacheHeaders } from '../../utils/cache-headers'
 import { getStaticContentBloc } from '../../utils/static-content-blocs'
 
@@ -25,29 +23,18 @@ export default defineEventHandler(
     const { domainLanguage } = resolveDomainLanguage(rawHost)
 
     // Real editorial copy extracted from the XWiki export archive (see static-content-blocs.ts)
-    // takes over for bloc ids it covers, entirely bypassing the live XWiki call -- anonymous
-    // XWiki REST access has been down since 2026-09-09 (incident_xwiki_blog_locked_down_sept2026).
+    // is the only source for this endpoint -- front-api's /blocs/{blocId} backend was removed
+    // once the coverage check confirmed every bloc id requested by the frontend has a static
+    // entry (xwiki-editorial-content-to-nuxt-content AC2). Anonymous XWiki REST access has been
+    // down since 2026-09-09 anyway (incident_xwiki_blog_locked_down_sept2026).
     const staticContent = getStaticContentBloc(blocId, domainLanguage)
-    if (staticContent !== null) {
-      return { blocId, htmlContent: staticContent, editLink: null }
-    }
-
-    const contentService = useContentService(domainLanguage)
-    try {
-      return await contentService.getBloc(blocId)
-    } catch (error) {
-      const backendError = await extractBackendErrorDetails(error)
-      console.error(
-        'Error fetching bloc',
-        backendError.logMessage,
-        backendError
-      )
-
+    if (staticContent === null) {
       throw createError({
-        statusCode: backendError.statusCode,
-        statusMessage: backendError.statusMessage,
-        cause: error,
+        statusCode: 404,
+        statusMessage: `No static content for bloc id "${blocId}"`,
       })
     }
+
+    return { blocId, htmlContent: staticContent, editLink: null }
   }
 )

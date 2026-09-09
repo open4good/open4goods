@@ -151,12 +151,6 @@ public class UiConfig {
 	private XWikiServiceProperties wikiConfig = new XWikiServiceProperties();
 
 	/**
-	 * The localised mapping of exposed spaces in the wiki. Eg : "/mentions-legales" -> "/", "legalspace" -> "/legals""
-	 */
-	private Map<String,Localisable<String,String>> wikiPagesMapping = new HashMap<>();
-
-
-	/**
 	 * Containing the project members, for restitution in /team
 	 */
 	private TeamConfig teamConfig = new TeamConfig();
@@ -371,14 +365,6 @@ public class UiConfig {
 
 
 
-	public Map<String, Localisable<String, String>> getWikiPagesMapping() {
-		return wikiPagesMapping;
-	}
-
-
-	public void setWikiPagesMapping(Map<String, Localisable<String, String>> wikiPagesMapping) {
-		this.wikiPagesMapping = wikiPagesMapping;
-	}
 
 
 	public String getTagListUrl() {
