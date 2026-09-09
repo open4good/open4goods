@@ -17,8 +17,6 @@ import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.vertical.VerticalSubCategory;
 import org.open4goods.model.vertical.WikiPageConfig;
-import org.open4goods.services.blog.model.BlogPost;
-import org.open4goods.services.blog.service.BlogService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.verticals.VerticalsConfigService;
@@ -44,7 +42,6 @@ import cz.jiripinkas.jsitemapgenerator.generator.SitemapIndexGenerator;
  *       {@code classpath*:categories/<vertical>/*.yml}), and XWiki editorial
  *       pages attached to verticals.</li>
  *   <li><b>product-pages.xml</b> – individual product pages.</li>
- *   <li><b>blog-posts.xml</b> – blog articles.</li>
  *   <li><b>wiki-pages.xml</b> – XWiki-backed editorial pages.</li>
  * </ul>
  * A sitemap index file ({@code sitemap.xml}) is produced alongside each set.</p>
@@ -59,7 +56,6 @@ public class SitemapGenerationService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SitemapGenerationService.class);
 
 	private static final String SITEMAP_NAME_PRODUCT_PAGES = "product-pages.xml";
-	private static final String SITEMAP_NAME_BLOG_PAGES = "blog-posts.xml";
 	private static final String SITEMAP_NAME_WIKI_PAGES = "wiki-pages.xml";
 	private static final String SITEMAP_NAME_VERTICAL_PAGES = "category-pages.xml";
 	private static final String SITEMAP_NAME_DEFAULT_GUIDES = "guides.xml";
@@ -69,14 +65,12 @@ public class SitemapGenerationService {
 	private final AtomicBoolean exportRunning = new AtomicBoolean(false);
 	private final Logger statsLogger;
 	private final VerticalsConfigService verticalsConfigService;
-	private final BlogService blogService;
 	private final XwikiFacadeService xwikiService;
 
 	public SitemapGenerationService(ProductRepository aggregatedDataRepository, UiConfig uiConfig,
-			VerticalsConfigService verticalConfigService, BlogService blogService, XwikiFacadeService xwikiService) {
+			VerticalsConfigService verticalConfigService, XwikiFacadeService xwikiService) {
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.verticalsConfigService = verticalConfigService;
-		this.blogService = blogService;
 		this.statsLogger = GenericFileLogger.initLogger("stats-sitemap", Level.INFO, uiConfig.logsFolder());
 		this.xwikiService = xwikiService;
 		this.uiConfig = uiConfig;
@@ -103,14 +97,12 @@ public class SitemapGenerationService {
 				String lang = e.getKey();
 				String baseUrl = e.getValue();
 
-				addBlogPost(blogService.getPosts(), baseUrl, lang);
 				addWikiPages(baseUrl, lang);
 				addProductsPages(baseUrl, lang);
 				addVerticalPages(baseUrl, lang);
 				boolean hasDefaultGuides = addDefaultGuidePages(baseUrl, lang);
 
 				SitemapIndexGenerator index = SitemapIndexGenerator.of(baseUrl + "sitemap/")
-						.addPage(SITEMAP_NAME_BLOG_PAGES)
 						.addPage(SITEMAP_NAME_WIKI_PAGES)
 						.addPage(SITEMAP_NAME_VERTICAL_PAGES)
 						.addPage(SITEMAP_NAME_PRODUCT_PAGES);
@@ -192,29 +184,6 @@ public class SitemapGenerationService {
 			sitemap.toFile(getSitemapFile(SITEMAP_NAME_WIKI_PAGES, language));
 		} catch (IOException e) {
 			LOGGER.error("Error while writing wiki sitemap", e);
-		}
-	}
-
-	/**
-	 * Adds blog posts to the blog sitemap.
-	 *
-	 * <p>Blog content is not translated; the same posts are written for every language.</p>
-	 *
-	 * @param posts    list of blog posts to include
-	 * @param baseUrl  site base URL for the target language
-	 * @param language BCP-47 language tag
-	 */
-	private void addBlogPost(List<BlogPost> posts, String baseUrl, String language) {
-		SitemapGenerator sitemap = SitemapGenerator.of(baseUrl);
-		for (BlogPost post : posts) {
-			String url = baseUrl + "blog/" + post.getUrl();
-			LOGGER.info("Adding blog entry to sitemap : {}", url);
-			sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.MONTHLY, 0.8, post.getCreated()));
-		}
-		try {
-			sitemap.toFile(getSitemapFile(SITEMAP_NAME_BLOG_PAGES, language));
-		} catch (IOException e) {
-			LOGGER.error("Error while writing blog sitemap", e);
 		}
 	}
 

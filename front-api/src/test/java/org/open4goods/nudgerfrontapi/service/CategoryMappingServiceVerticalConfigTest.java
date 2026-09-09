@@ -46,7 +46,7 @@ class CategoryMappingServiceVerticalConfigTest {
         ProductCategory category = buildCategoryHierarchy(verticalConfig);
         when(googleTaxonomyService.byId(2)).thenReturn(category);
 
-        VerticalConfigFullDto dto = service.toVerticalConfigFullDto(verticalConfig, DomainLanguage.fr, List.of());
+        VerticalConfigFullDto dto = service.toVerticalConfigFullDto(verticalConfig, DomainLanguage.fr);
 
         assertThat(dto).isNotNull();
         assertThat(dto.breadCrumb()).isNotEmpty();
@@ -100,7 +100,7 @@ class CategoryMappingServiceVerticalConfigTest {
         config.setGuides(List.of("meilleur-televiseur-caravane-camping-car"));
 
         VerticalConfigDto summary = service.toVerticalConfigDto(config, DomainLanguage.fr);
-        VerticalConfigFullDto full = service.toVerticalConfigFullDto(config, DomainLanguage.fr, List.of());
+        VerticalConfigFullDto full = service.toVerticalConfigFullDto(config, DomainLanguage.fr);
 
         assertThat(summary.guides()).containsExactly("meilleur-televiseur-caravane-camping-car");
         assertThat(full.guides()).containsExactly("meilleur-televiseur-caravane-camping-car");
@@ -137,7 +137,7 @@ class CategoryMappingServiceVerticalConfigTest {
                         "ENCASTRABLE")));
         config.setSubCategories(List.of(subCategory));
 
-        VerticalConfigFullDto dto = service.toVerticalConfigFullDto(config, DomainLanguage.fr, List.of());
+        VerticalConfigFullDto dto = service.toVerticalConfigFullDto(config, DomainLanguage.fr);
 
         assertThat(dto.subCategories()).hasSize(1);
         assertThat(dto.subCategories().get(0).slug()).isEqualTo("lave-vaisselle-sous-lavabo");

@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,7 +46,7 @@ class CategoryMappingServiceFullDtoTest {
         config.setEnabled(true);
         config.setGoogleTaxonomyId(3);
 
-        VerticalConfigFullDto dto = service.toVerticalConfigFullDto(config, DomainLanguage.fr, List.of());
+        VerticalConfigFullDto dto = service.toVerticalConfigFullDto(config, DomainLanguage.fr);
 
         assertThat(dto.breadCrumb())
                 .extracting(CategoryBreadcrumbItemDto::title)

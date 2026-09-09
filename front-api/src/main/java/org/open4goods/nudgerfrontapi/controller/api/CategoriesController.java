@@ -16,7 +16,6 @@ import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.ProductCategory;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
-import org.open4goods.nudgerfrontapi.dto.blog.BlogPostDto;
 import org.open4goods.nudgerfrontapi.dto.category.CategoryNavigationDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigFullDto;
@@ -30,8 +29,6 @@ import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.CategoryMappingService;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.open4goods.nudgerfrontapi.service.SearchService;
-import org.open4goods.services.blog.model.BlogPost;
-import org.open4goods.services.blog.service.BlogService;
 import org.open4goods.verticals.GoogleTaxonomyService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.cache.annotation.Cacheable;
@@ -75,20 +72,17 @@ public class CategoriesController {
 
     private final VerticalsConfigService verticalsConfigService;
     private final CategoryMappingService categoryMappingService;
-    private final BlogService blogService;
     private final GoogleTaxonomyService googleTaxonomyService;
     private final SearchService searchService;
     private final ProductMappingService productMappingService;
 
     public CategoriesController(VerticalsConfigService verticalsConfigService,
                                 CategoryMappingService categoryMappingService,
-                                BlogService blogService,
                                 GoogleTaxonomyService googleTaxonomyService,
                                 SearchService searchService,
                                 ProductMappingService productMappingService) {
         this.verticalsConfigService = verticalsConfigService;
         this.categoryMappingService = categoryMappingService;
-        this.blogService = blogService;
         this.googleTaxonomyService = googleTaxonomyService;
         this.searchService = searchService;
         this.productMappingService = productMappingService;
@@ -157,12 +151,7 @@ public class CategoriesController {
             return ResponseEntity.notFound().build();
         }
 
-        List<BlogPostDto> relatedPosts = blogService.getPosts(categoryId).stream()
-                .limit(3)
-                .map(this::mapBlogPost)
-                .toList();
-
-        VerticalConfigFullDto body = categoryMappingService.toVerticalConfigFullDto(config, domainLanguage, relatedPosts);
+        VerticalConfigFullDto body = categoryMappingService.toVerticalConfigFullDto(config, domainLanguage);
         return ResponseEntity.ok()
                 .cacheControl(CacheControlConstants.FIFTEEN_MINUTES_PUBLIC_CACHE)
                 .body(body);
@@ -277,21 +266,6 @@ public class CategoriesController {
             return Locale.forLanguageTag(domainLanguage.languageTag());
         }
         return Locale.getDefault();
-    }
-
-    private BlogPostDto mapBlogPost(BlogPost post) {
-        return new BlogPostDto(
-                post.getUrl(),
-                post.getTitle(),
-                post.getAuthor(),
-                post.getSummary(),
-                null,
-                post.getCategory(),
-                post.getImage(),
-                post.getEditLink(),
-                post.getCreated() == null ? null : post.getCreated().getTime(),
-                post.getModified() == null ? null : post.getModified().getTime()
-        );
     }
 
     private ProductCategory resolveCategory(DomainLanguage domainLanguage,

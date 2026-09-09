@@ -50,12 +50,6 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.rometools</groupId>
-            <artifactId>rome</artifactId>
-            <version>2.1.0</version>
-        </dependency>
-
         <!-- verticals definitions -->
         <dependency>
             <groupId>org.open4goods</groupId>
@@ -99,17 +93,17 @@
             <version>${global.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>xwiki-spring-boot-starter</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+
 
         <!-- web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.open4goods</groupId>
-            <artifactId>blog</artifactId>
-            <version>${global.version}</version>
         </dependency>
 
         <dependency>

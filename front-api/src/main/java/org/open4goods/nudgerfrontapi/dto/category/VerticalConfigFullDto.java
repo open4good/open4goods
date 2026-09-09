@@ -12,7 +12,6 @@ import org.open4goods.model.vertical.RecommandationsConfig;
 import org.open4goods.model.vertical.ResourcesAggregationConfig;
 import org.open4goods.model.vertical.ScoringAggregationConfig;
 import org.open4goods.model.vertical.WikiPageConfig;
-import org.open4goods.nudgerfrontapi.dto.blog.BlogPostDto;
 import org.open4goods.nudgerfrontapi.dto.category.NudgeToolConfigDto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -59,8 +58,6 @@ public record VerticalConfigFullDto(
         String verticalMetaOpenGraphDescription,
         @Schema(description = "Breadcrumb derived from the Google taxonomy hierarchy for this vertical.")
         List<CategoryBreadcrumbItemDto> breadCrumb,
-        @Schema(description = "Most recent blog posts tagged with the vertical identifier.")
-        List<BlogPostDto> relatedPosts,
         @Schema(description = "Localised wiki pages associated with the vertical.")
         List<WikiPageConfig> wikiPages,
         @Schema(description = "Buying-guide slugs discovered under guides/{vertical-id}.")

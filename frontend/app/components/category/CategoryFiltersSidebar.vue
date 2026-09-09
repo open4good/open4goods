@@ -117,7 +117,6 @@
         class="category-page__documentation-block"
         :wiki-pages="wikiPages"
         :guide-slugs="guideSlugs"
-        :related-posts="relatedPosts"
         :vertical-home-url="props.verticalHomeUrl"
       />
     </template>
@@ -129,7 +128,6 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type {
   AggregationResponseDto,
-  BlogPostDto,
   FieldMetadataDto,
   FilterRequestDto,
   ProductFieldOptionsResponse,
@@ -151,7 +149,6 @@ const props = withDefaults(
     hasDocumentation: boolean
     wikiPages: WikiPageConfig[]
     guideSlugs?: string[]
-    relatedPosts: BlogPostDto[]
     verticalHomeUrl?: string | null
     showAdminPanel?: boolean
     adminFilterFields?: FieldMetadataDto[]
@@ -189,7 +186,6 @@ const { t } = useI18n()
 
 const wikiPages = computed(() => props.wikiPages ?? [])
 const guideSlugs = computed(() => props.guideSlugs ?? [])
-const relatedPosts = computed(() => props.relatedPosts ?? [])
 const hasDocumentation = computed(() => props.hasDocumentation)
 const showMobileActions = computed(() => props.showMobileActions)
 const filterSearchTerm = computed(() => props.filterSearchTerm ?? '')
