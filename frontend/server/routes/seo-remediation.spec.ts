@@ -32,15 +32,8 @@ describe('SEO remediation routes', () => {
     )
   })
 
-  it('retires the stale blog RSS feed with 410', async () => {
-    const handler = (await import('./blog/rss.get')).default
-
-    expect(() => handler({} as Parameters<typeof handler>[0])).toThrow()
-    expect(createErrorMock).toHaveBeenCalledWith({
-      statusCode: 410,
-      statusMessage: 'RSS feed retired',
-    })
-  })
+  // The blog RSS feed's own coverage moved to ./blog/rss.spec.ts once it stopped being a
+  // 410 stub and started querying the `blog` Nuxt Content collection for real.
 
   it('exposes the canonical sitemap in robots.txt', async () => {
     const handler = (await import('./robots.txt.get')).default
