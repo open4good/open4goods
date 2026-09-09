@@ -26,9 +26,18 @@ spec:
         and SSR coverage tests pass against the new authored content. Dropped the original "parity" framing: with no XWiki
         export as source of truth for this content, there is nothing to hold parity against.'
     - id: AC3
-      statement: Nuxt owns editorial and blog sitemaps while ui retains product, brand, image and open-data responsibilities.
+      statement: 'PARTIAL. Blog now has a real Nuxt-native sitemap (server/plugins/sitemap-blog-posts.ts): the reserved
+        blog-posts.xml was never written by ui, so blog had zero coverage before. Editorial routes were already Nuxt-owned
+        via main-pages.xml''s static-route scan. Remaining: ui''s wiki-pages.xml still duplicates those routes via a live-XWiki
+        call unverifiable from here -- see evidence.'
   evidenceRefs:
     - 'note: 2026-09-09 -- owner decision mid-session: "except for blog, ALL content will be replaced with i18n (thinking
       on teams, and so on...)". AC1 and AC2 restated accordingly (rewrite, not export/parity); original wording is preserved
       in this WorkOrder''s git history for anyone auditing the change. No XWiki access is needed for this WorkOrder; only
       the sibling xwiki-blog-to-nuxt-content depends on live XWiki content.'
+    - 'note: 2026-09-09 -- resumed. AC1''s bloc slice (team/opensource/opendata bios, per-member title/bio blocs) is real
+      per-person copy, not fabricable; HOME:FAQ is already static i18n, no work needed there. Anonymous XWiki REST still
+      401s on a real page fetch, matching incident_xwiki_blog_locked_down_sept2026: needs owner-supplied copy or working
+      credentials first. Also: /blog/{impact-score-ia,prioriser-durabilite,equilibrer-prix-impact} are real full pages outside
+      the closed blog WorkOrder''s export, still live via cache, not broken but unmigrated (AC1/AC2 full-page slice). Did
+      AC3 instead. test: pnpm vitest run, pnpm lint, nuxt typecheck, ./scripts/lint.sh all green.'
