@@ -1,17 +1,71 @@
 apiVersion: open4goods.org/v1
 kind: WorkOrder
-metadata: {id: icecat-xml-contract-generation, name: Generate Icecat bulk XML contract}
+metadata:
+  id: icecat-xml-contract-generation
+  name: Generate Icecat bulk XML contract
 spec:
   purpose: Replace hand-written bulk XML POJOs with reproducible JAXB sources generated from the owned XSD and binding.
   roadmapRef: m5-icecat-integration
-  state: ACCEPTED
-  dependsOn: [governance-kit-bootstrap]
-  decisionRefs: [ADR-0007]
-  pathScope: ['services/icecat/**', 'pom.xml']
+  state: BLOCKED
+  dependsOn:
+    - governance-kit-bootstrap
+  decisionRefs:
+    - ADR-0007
+  pathScope:
+    - services/icecat/**
+    - pom.xml
   acceptanceCriteria:
     - id: AC1
-      statement: Maven generates JAXB sources from icecat.xsd and icecat.xjb under target/generated-sources without committed output.
+      statement: 'DONE. org.jvnet.jaxb:jaxb-maven-plugin 4.0.16 (bound to generate-sources) runs xjc against src/main/resources/xsd/icecat.xsd
+        + xjb/icecat.xjb, writing 128 classes to target/generated-sources/jaxb (gitignored, not committed); mvn --offline
+        -pl services/icecat -am clean install reproduces it and all 10 pre-existing tests still pass. Getting there needed
+        real schema fixes, not just plugin wiring: icecat.xsd declares several attribute/element pairs that collide under
+        JAXB''s default property naming (ProductFamily Name element vs. Name attribute; Measure Sign; Category UNCATID; CategoryFeatureGroup
+        FeatureGroup; Supplier''s Name/name and Updated/updated case variants; ProductFeature''s Local_Value attribute vs.
+        its LocalValue element), plus one real class-name collision (Product_related''s underscore-stripped default name colliding
+        with the separate ProductRelated type). Each is fixed with an explicit, narrowly-scoped <jxb:bindings node="...">
+        in icecat.xjb. Also found: of the ~20 complexTypes carrying a "Value" attribute, only Name, Sign and SupplierName
+        actually collide (the ones combining xs:simpleContent, whose text implicitly becomes a `value` property, with their
+        own Value attribute); the rest are plain attribute bags with no colliding text property, so only those three got an
+        explicit rename. The icecat.xjb file already carried a commented-out "rename every Value attribute" template using
+        `{../@name}-{@name}` interpolation; that is not valid JAXB customization syntax -- tried it, and it silently produced
+        the literal identifier `_007B002F0040Name007DValue` (XJC''s illegal-character escaping of the literal `{../@name}Value`
+        string) instead of evaluating anything, which still happened not to collide across different classes but was meaningless.
+        Removed rather than left as a trap for the next lot. Required jakarta.xml.bind-api and org.glassfish.jaxb:jaxb-runtime
+        as new compile/runtime dependencies (both already cached at compatible versions via other modules'' transitive deps).
+        The plugin itself and the raw xjc jars were not cached under any offline-resolvable coordinate; one online `mvn generate-sources`
+        pass was needed to fetch org.jvnet.jaxb:jaxb-maven-plugin and its xjc dependencies before --offline reproduction worked
+        -- record this as a one-time bootstrap cost of adopting this tooling, not an ongoing --offline violation.'
     - id: AC2
-      statement: Bulk loaders use generated types and fixtures cover namespaces, optional elements and streamed input.
+      statement: 'BLOCKED, not reachable inside this WorkOrder''s declared pathScope (services/icecat/** + pom.xml). Replacing
+        the bulk-XML POJOs the loaders return is not confined to CategoryLoader/FeatureLoader: IcecatIndexService''s toFeatureDocument(IcecatFeature)/toCategoryFeatureDocument(IcecatFeature)
+        consume the loader output directly and would need the same type swap, and api/src/main/java/org/open4goods/api/controller/api/IcecatController.java:105
+        returns org.open4goods.icecat.model.IcecatFeature directly as a REST response body -- outside pathScope entirely.
+        Per canonical decision on simplification over backwards-compat, the old hand-written POJOs cannot be left standing
+        alongside the generated types "for now", so this criterion cannot close without either widening pathScope into api/
+        or waiting for that coupling to be cut first. That api-to-icecat-internals coupling is exactly what the dependent
+        icecat-live-client-boundary WorkOrder ("keep product orchestration in api, put transport/parsing/mapping in services/icecat")
+        exists to sever -- but the roadmap lists it as BLOCKED on this WorkOrder, when in fact this criterion is blocked on
+        it. The milestone''s dependency order is inverted for AC2; flagging for the owner to re-sequence rather than widening
+        pathScope unilaterally into a module this WorkOrder was never scoped to touch.'
     - id: AC3
-      statement: The independent Jackson live JSON model accepts unknown fields and is not generated from the XML schema.
+      statement: 'DONE. IcecatLiveApiResponse.java (services/icecat/src/main/java/org/open4goods/icecat/model/) is confirmed
+        structurally independent of icecat.xsd: it is a hand-written Jackson model using com.fasterxml.jackson.annotation.JsonProperty,
+        deserializing the live completion API''s JSON shape, in a separate package hierarchy from the generated org.open4goods.icecat.jaxb
+        classes -- several of its 37 nested classes happen to share names with generated bulk-XML types (Feature, Name, Category,
+        ProductFamily, Measure, Signs, ProductRelated) but are distinct Java types with no shared ancestry, so there is no
+        risk of the two ever colliding or one accidentally replacing the other. It did not, however, already "accept unknown
+        fields": none of its 37 classes carried @JsonIgnoreProperties(ignoreUnknown = true), so a plain `new ObjectMapper()`
+        (FAIL_ON_UNKNOWN_PROPERTIES defaults to enabled) would reject any JSON payload carrying a field this hand-written
+        model doesn''t already know about -- exactly the "breaks on schema drift" failure mode this whole WorkOrder exists
+        to fix, just on the JSON side instead of the XML side. Added the annotation to the top-level class and all 36 nested
+        classes, and added IcecatLiveApiResponseTest (services/icecat/src/test/java/org/open4goods/icecat/model/) asserting
+        deserialization survives unknown fields at both the top level and nested inside GeneralInfo, and that known fields
+        still parse correctly alongside them. mvn --offline -pl services/icecat -am test: 12/12 green.'
+  evidenceRefs:
+    - 'note: AC1 and AC3 DONE (JAXB codegen wired + verified offline-reproducible; live-JSON model hardened with ignoreUnknown).
+      AC2 blocked: api/controller/api/IcecatController.java:105 returns org.open4goods.icecat.model.IcecatFeature as a REST
+      body and IcecatIndexService consumes loader output directly, so replacing the bulk-XML POJOs cannot stay inside pathScope
+      (services/icecat/** + pom.xml) without also touching api/, which the dependent icecat-live-client-boundary WorkOrder
+      exists to fix -- but that WorkOrder is listed BLOCKED on this one. The milestone dependency order is inverted for this
+      criterion; see full per-AC evidence in the WorkOrder file.'

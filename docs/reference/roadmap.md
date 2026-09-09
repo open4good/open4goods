@@ -17,7 +17,7 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 | m2-corpus-cleanup | 0 | 0 | 0 | 0 | 1 |
 | m3-dead-surface-removal | 1 | 0 | 1 | 0 | 1 |
 | m4-product-page-quality | 0 | 0 | 0 | 0 | 1 |
-| m5-icecat-integration | 6 | 1 | 5 | 0 | 0 |
+| m5-icecat-integration | 6 | 0 | 5 | 0 | 0 |
 | m6-xwiki-retirement | 4 | 2 | 2 | 0 | 0 |
 | m6-content-outreach | 0 | 0 | 0 | 0 | 1 |
 
@@ -60,7 +60,7 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 
 | WorkOrder | Contract state | Availability | Dependencies | Blockers | Purpose |
 |---|---|---|---|---|---|
-| [icecat-xml-contract-generation](../../.o4g/work/icecat-xml-contract-generation.yml) | ACCEPTED | READY | governance-kit-bootstrap | -- | Replace hand-written bulk XML POJOs with reproducible JAXB sources generated from the owned XSD and binding. |
+| [icecat-xml-contract-generation](../../.o4g/work/icecat-xml-contract-generation.yml) | BLOCKED | PLANNED | governance-kit-bootstrap | -- | Replace hand-written bulk XML POJOs with reproducible JAXB sources generated from the owned XSD and binding. |
 | [icecat-live-client-boundary](../../.o4g/work/icecat-live-client-boundary.yml) | ACCEPTED | BLOCKED | icecat-xml-contract-generation | icecat-xml-contract-generation | Put transport, parsing and neutral mapping in services/icecat while keeping product orchestration in api. |
 | [icecat-reference-index-runtime](../../.o4g/work/icecat-reference-index-runtime.yml) | ACCEPTED | BLOCKED | icecat-xml-contract-generation | icecat-xml-contract-generation | Make Elasticsearch the durable reference source instead of a boot-time mirror of in-memory maps. |
 | [icecat-completion-i18n-and-coverage](../../.o4g/work/icecat-completion-i18n-and-coverage.yml) | ACCEPTED | BLOCKED | icecat-live-client-boundary | icecat-live-client-boundary | Finish refresh semantics, language propagation and live fields currently dropped during product enrichment. |

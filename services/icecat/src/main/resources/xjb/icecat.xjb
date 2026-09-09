@@ -13,21 +13,67 @@
          
          
          
-        <!-- Renommer tous les éléments 
-        <jxb:bindings multiple="true" node="//xs:element">
-            <jxb:property name="{../@name}-{@name}"/>
+        <!-- Name, Sign and SupplierName each combine xs:simpleContent (whose text
+             maps to a default "value" property) with their own "Value" attribute,
+             which normalizes to the same JAXB property. Only these three actually
+             collide: the schema's many other "Value" attributes sit on plain
+             attribute-only complex types with no simpleContent text to clash with. -->
+        <jxb:bindings node="//xs:complexType[@name='Name']/xs:simpleContent/xs:extension/xs:attribute[@name='Value']">
+            <jxb:property name="ValueAttribute"/>
         </jxb:bindings>
-        -->
-
-        <!-- Renommer tous les attributs 
-        <jxb:bindings multiple="true" node="//xs:attribute[@name='Value']">
-             <jxb:property name="{../@name}-{@name}"/>
+        <jxb:bindings node="//xs:complexType[@name='Sign']/xs:simpleContent/xs:extension/xs:attribute[@name='Value']">
+            <jxb:property name="ValueAttribute"/>
         </jxb:bindings>
-        -->
+        <jxb:bindings node="//xs:complexType[@name='SupplierName']/xs:simpleContent/xs:extension/xs:attribute[@name='Value']">
+            <jxb:property name="ValueAttribute"/>
+        </jxb:bindings>
 
+        <!-- The remaining collisions below are each a single named complexType where
+             Icecat declares both a data-carrying element and a same-named (or
+             case-/underscore-variant) attribute; both would map to the same JAXB
+             property by default. In every case the element carries the real,
+             structured data, so the attribute is the one renamed. -->
 
-        
-        
-        
+        <!-- ProductFamily: <Name> element (list of Name) vs. a Name attribute. -->
+        <jxb:bindings node="//xs:complexType[@name='ProductFamily']/xs:attribute[@name='Name']">
+            <jxb:property name="NameAttribute"/>
+        </jxb:bindings>
+
+        <!-- Measure: <Sign> element vs. a Sign attribute. -->
+        <jxb:bindings node="//xs:complexType[@name='Measure']/xs:attribute[@name='Sign']">
+            <jxb:property name="SignAttribute"/>
+        </jxb:bindings>
+
+        <!-- Category: <UNCATID> element vs. a UNCATID attribute. -->
+        <jxb:bindings node="//xs:complexType[@name='Category']/xs:attribute[@name='UNCATID']">
+            <jxb:property name="UNCATIDAttribute"/>
+        </jxb:bindings>
+
+        <!-- CategoryFeatureGroup: <FeatureGroup> element (list) vs. a FeatureGroup attribute. -->
+        <jxb:bindings node="//xs:complexType[@name='CategoryFeatureGroup']/xs:attribute[@name='FeatureGroup']">
+            <jxb:property name="FeatureGroupAttribute"/>
+        </jxb:bindings>
+
+        <!-- Supplier: both Name/name and Updated/updated are declared as separate
+             attributes that normalize to the same capitalized JAXB property. -->
+        <jxb:bindings node="//xs:complexType[@name='Supplier']/xs:attribute[@name='name']">
+            <jxb:property name="NameLowercase"/>
+        </jxb:bindings>
+        <jxb:bindings node="//xs:complexType[@name='Supplier']/xs:attribute[@name='updated']">
+            <jxb:property name="UpdatedLowercase"/>
+        </jxb:bindings>
+
+        <!-- ProductFeature: <LocalValue> element vs. a Local_Value attribute, which
+             JAXB's default underscore-stripping normalization also names "LocalValue". -->
+        <jxb:bindings node="//xs:complexType[@name='ProductFeature']/xs:attribute[@name='Local_Value']">
+            <jxb:property name="LocalValueAttribute"/>
+        </jxb:bindings>
+
+        <!-- Product_related's own underscore-stripped default class name collides with
+             the unrelated, separately-declared ProductRelated complexType. -->
+        <jxb:bindings node="//xs:complexType[@name='Product_related']">
+            <jxb:class name="ProductRelatedProduct"/>
+        </jxb:bindings>
+
     </jxb:bindings>
 </jxb:bindings>
