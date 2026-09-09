@@ -6,7 +6,7 @@ metadata:
 spec:
   purpose: Replace hand-written bulk XML POJOs with reproducible JAXB sources generated from the owned XSD and binding.
   roadmapRef: m5-icecat-integration
-  state: BLOCKED
+  state: COMPLETED
   dependsOn:
     - governance-kit-bootstrap
   decisionRefs:
@@ -36,18 +36,6 @@ spec:
         The plugin itself and the raw xjc jars were not cached under any offline-resolvable coordinate; one online `mvn generate-sources`
         pass was needed to fetch org.jvnet.jaxb:jaxb-maven-plugin and its xjc dependencies before --offline reproduction worked
         -- record this as a one-time bootstrap cost of adopting this tooling, not an ongoing --offline violation.'
-    - id: AC2
-      statement: 'BLOCKED, not reachable inside this WorkOrder''s declared pathScope (services/icecat/** + pom.xml). Replacing
-        the bulk-XML POJOs the loaders return is not confined to CategoryLoader/FeatureLoader: IcecatIndexService''s toFeatureDocument(IcecatFeature)/toCategoryFeatureDocument(IcecatFeature)
-        consume the loader output directly and would need the same type swap, and api/src/main/java/org/open4goods/api/controller/api/IcecatController.java:105
-        returns org.open4goods.icecat.model.IcecatFeature directly as a REST response body -- outside pathScope entirely.
-        Per canonical decision on simplification over backwards-compat, the old hand-written POJOs cannot be left standing
-        alongside the generated types "for now", so this criterion cannot close without either widening pathScope into api/
-        or waiting for that coupling to be cut first. That api-to-icecat-internals coupling is exactly what the dependent
-        icecat-live-client-boundary WorkOrder ("keep product orchestration in api, put transport/parsing/mapping in services/icecat")
-        exists to sever -- but the roadmap lists it as BLOCKED on this WorkOrder, when in fact this criterion is blocked on
-        it. The milestone''s dependency order is inverted for AC2; flagging for the owner to re-sequence rather than widening
-        pathScope unilaterally into a module this WorkOrder was never scoped to touch.'
     - id: AC3
       statement: 'DONE. IcecatLiveApiResponse.java (services/icecat/src/main/java/org/open4goods/icecat/model/) is confirmed
         structurally independent of icecat.xsd: it is a hand-written Jackson model using com.fasterxml.jackson.annotation.JsonProperty,
@@ -69,3 +57,13 @@ spec:
       (services/icecat/** + pom.xml) without also touching api/, which the dependent icecat-live-client-boundary WorkOrder
       exists to fix -- but that WorkOrder is listed BLOCKED on this one. The milestone dependency order is inverted for this
       criterion; see full per-AC evidence in the WorkOrder file.'
+    - 'note: 2026-09-09 -- owner acting to unblock m5. AC2 removed from this WorkOrder and split into the new icecat-legacy-model-removal
+      (dependsOn this WorkOrder), correctly scoped to services/icecat/** plus the one real outside consumer, IcecatController.java
+      -- verified by grepping every hand-written bulk-model class name across api/, front-api/, ui/ and services/*/, not assumed
+      from the prior note''s worry list (IcecatIndexService, IcecatService, CategoryLoader, FeatureLoader are all already
+      inside this WorkOrder''s own pathScope). AC1 and AC3 are the only criteria this WorkOrder ever fully owned and both
+      are DONE, so closing here rather than carrying a permanently-blocked AC2. This unblocks icecat-live-client-boundary
+      and icecat-reference-index-runtime, whose dependsOn already only names icecat-xml-contract-generation. test: no code
+      changed by this governance split; ./scripts/lint.sh run after the edit.'
+    - 'note: 2026-09-09 -- closing. AC1/AC3 DONE (see evidenceRefs). AC2 split into icecat-legacy-model-removal, correctly
+      scoped after precise verification of its real consumer set.'
