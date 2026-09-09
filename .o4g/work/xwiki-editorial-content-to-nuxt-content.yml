@@ -29,10 +29,10 @@ spec:
         and SSR coverage tests pass against the new authored content. Dropped the original "parity" framing: with no XWiki
         export as source of truth for this content, there is nothing to hold parity against.'
     - id: AC3
-      statement: 'PARTIAL. Blog now has a real Nuxt-native sitemap (server/plugins/sitemap-blog-posts.ts): the reserved
-        blog-posts.xml was never written by ui, so blog had zero coverage before. Editorial routes were already Nuxt-owned
-        via main-pages.xml''s static-route scan. Remaining: ui''s wiki-pages.xml still duplicates those routes via a live-XWiki
-        call unverifiable from here -- see evidence.'
+      statement: 'DONE 2026-09-09. Blog has a real Nuxt-native sitemap (server/plugins/sitemap-blog-posts.ts); editorial
+        routes were already Nuxt-owned via main-pages.xml''s static-route scan. ui''s wiki-pages.xml was verified dead
+        (see evidence) and removed; the remaining editorial sitemap surface (per-vertical WikiPageConfig entries in
+        category-pages.xml) now emits its URL without any XWiki call.'
   evidenceRefs:
     - 'note: 2026-09-09 -- owner decision mid-session: "except for blog, ALL content will be replaced with i18n (thinking
       on teams, and so on...)". AC1 and AC2 restated accordingly (rewrite, not export/parity); original wording is preserved
@@ -54,3 +54,4 @@ spec:
       French content was a copy-paste of the Wekey blurb; used a direct translation of the correct English text instead,
       flagged in a code comment. test: pnpm vitest run (8 new tests + full suite 596 passed/1 skipped), pnpm lint, nuxt
       typecheck, ./scripts/lint.sh all green.'
+    - 'note: 2026-09-09 -- AC3 done: wiki-pages.xml verified dead repo-wide, removed with its XwikiFacadeService dep; kept WikiPageConfig sitemap entries but dropped their XWiki call. AC1/AC2 untouched. test: mvn/ui/frontend suites green.'
