@@ -13,18 +13,8 @@
  */
 
 import * as runtime from '../runtime'
-import type { FullPageDto, XwikiContentBlocDto } from '../models/index'
-import {
-  FullPageDtoFromJSON,
-  FullPageDtoToJSON,
-  XwikiContentBlocDtoFromJSON,
-  XwikiContentBlocDtoToJSON,
-} from '../models/index'
-
-export interface ContentBlocRequest {
-  blocId: string
-  domainLanguage: ContentBlocDomainLanguageEnum
-}
+import type { FullPageDto } from '../models/index'
+import { FullPageDtoFromJSON, FullPageDtoToJSON } from '../models/index'
 
 export interface PageRequest {
   xwikiPageId: string
@@ -35,89 +25,6 @@ export interface PageRequest {
  *
  */
 export class ContentApi extends runtime.BaseAPI {
-  /**
-   * Return the HTML content of the given XWiki bloc.
-   * Get content bloc
-   */
-  async contentBlocRaw(
-    requestParameters: ContentBlocRequest,
-    initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
-    if (requestParameters['blocId'] == null) {
-      throw new runtime.RequiredError(
-        'blocId',
-        'Required parameter "blocId" was null or undefined when calling contentBloc().'
-      )
-    }
-
-    if (requestParameters['domainLanguage'] == null) {
-      throw new runtime.RequiredError(
-        'domainLanguage',
-        'Required parameter "domainLanguage" was null or undefined when calling contentBloc().'
-      )
-    }
-
-    const queryParameters: any = {}
-
-    if (requestParameters['domainLanguage'] != null) {
-      queryParameters['domainLanguage'] = requestParameters['domainLanguage']
-    }
-
-    const headerParameters: runtime.HTTPHeaders = {}
-
-    if (
-      this.configuration &&
-      (this.configuration.username !== undefined ||
-        this.configuration.password !== undefined)
-    ) {
-      headerParameters['Authorization'] =
-        'Basic ' +
-        btoa(this.configuration.username + ':' + this.configuration.password)
-    }
-    if (this.configuration && this.configuration.accessToken) {
-      const token = this.configuration.accessToken
-      const tokenString = await token('bearerAuth', [])
-
-      if (tokenString) {
-        headerParameters['Authorization'] = `Bearer ${tokenString}`
-      }
-    }
-
-    let urlPath = `/blocs/{blocId}`
-    urlPath = urlPath.replace(
-      `{${'blocId'}}`,
-      encodeURIComponent(String(requestParameters['blocId']))
-    )
-
-    const response = await this.request(
-      {
-        path: urlPath,
-        method: 'GET',
-        headers: headerParameters,
-        query: queryParameters,
-      },
-      initOverrides
-    )
-
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
-  }
-
-  /**
-   * Return the HTML content of the given XWiki bloc.
-   * Get content bloc
-   */
-  async contentBloc(
-    requestParameters: ContentBlocRequest,
-    initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
-    const response = await this.contentBlocRaw(requestParameters, initOverrides)
-    return await response.value()
-  }
-
   /**
    * Return the rendered XWiki page along with metadata.
    * Get XWiki page
@@ -202,15 +109,6 @@ export class ContentApi extends runtime.BaseAPI {
   }
 }
 
-/**
- * @export
- */
-export const ContentBlocDomainLanguageEnum = {
-  Fr: 'fr',
-  En: 'en',
-} as const
-export type ContentBlocDomainLanguageEnum =
-  (typeof ContentBlocDomainLanguageEnum)[keyof typeof ContentBlocDomainLanguageEnum]
 /**
  * @export
  */
