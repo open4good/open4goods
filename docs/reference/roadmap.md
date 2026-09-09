@@ -16,7 +16,7 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 | m1-config-autonomy | 7 | 1 | 5 | 1 | 0 |
 | m2-corpus-cleanup | 0 | 0 | 0 | 0 | 1 |
 | m3-dead-surface-removal | 1 | 0 | 1 | 0 | 1 |
-| m4-product-page-quality | 1 | 0 | 0 | 1 | 0 |
+| m4-product-page-quality | 0 | 0 | 0 | 0 | 1 |
 | m5-icecat-integration | 6 | 1 | 5 | 0 | 0 |
 | m6-xwiki-retirement | 4 | 2 | 2 | 0 | 0 |
 | m6-content-outreach | 0 | 0 | 0 | 0 | 1 |
@@ -53,9 +53,8 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 
 ## m4-product-page-quality
 
-| WorkOrder | Contract state | Availability | Dependencies | Blockers | Purpose |
-|---|---|---|---|---|---|
-| [product-page-seo-ui-quality](../../.o4g/work/product-page-seo-ui-quality.yml) | IN_PROGRESS | PLANNED | governance-kit-bootstrap | -- | Fix the nudger.fr product page against a June-2026 audit with two goals: eliminate UI inconsistencies and maximize clicks on affiliation links. CORRECTED 2026-09-08: this WorkOrder's original premise -- "production serves a stale build whose SSR sections render empty" -- is false today. A live check of https://nudger.fr and a from-scratch `pnpm build && pnpm preview` census (see AC1) both show every section (impact, vigilance, caracteristiques, alternatives, cycle-de-vie) rendering with real content, a single `id="prix"`, and a category-prefixed h1. Most of docs/product_page_audit_plan.md's 41 checkboxes describe work that was already implemented in commit 13cc9c750 (2026-07-03) and later, silently, without the checkboxes or this governance record being updated -- the plan file was simply never reconciled with the code it describes. This session re-verified every item against the live code and production site (not the stale checkboxes) and closed the small number of real remaining gaps; see per-AC evidence below for what was actually true vs. fixed vs. still open. |
+
+*1 closed, see [ledger](../../.o4g/work/ledger).*
 
 ## m5-icecat-integration
 

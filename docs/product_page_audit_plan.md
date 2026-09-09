@@ -7,8 +7,8 @@ audience: PROJECT_SCOPED
 # Product Page Audit & Fix Plan - UI consistency + SEO/affiliate maximization
 
 > **Governance**: this plan is tracked as WorkOrder
-> [`product-page-seo-ui-quality`](../.o4g/work/product-page-seo-ui-quality.yml)
-> (IN_PROGRESS). Its 9 work packages map to that WorkOrder's AC1-AC9.
+> [`product-page-seo-ui-quality`](../.o4g/work/ledger/product-page-seo-ui-quality.yml)
+> (COMPLETED). Its 9 work packages map to that WorkOrder's AC1-AC9.
 >
 > **Status tracking**: check the boxes as steps complete. Each work package (WP)
 > is an independent, coherent PR. Execute WPs in order unless stated otherwise.
@@ -23,9 +23,9 @@ audience: PROJECT_SCOPED
 > commit `13cc9c750` (2026-07-03, the day after this audit) already implemented
 > most of WP0-WP8, and this file's checkboxes were simply never updated to
 > match. Every item was re-verified against the live code and production site
-> before being checked (not trusted from the prose). Only WP6.3 (CTA
-> button-grammar unification) is a real, still-open gap; see the WorkOrder for
-> full per-item evidence.
+> before being checked (not trusted from the prose). WP6.3 (CTA button-grammar
+> unification) was the one real, still-open gap; it closed 2026-09-09. See the
+> WorkOrder for full per-item evidence.
 
 ---
 
@@ -435,14 +435,14 @@ internals, no empty-state noise. Mostly mechanical; keep each step reviewable.
 - [x] Condition colors: `NEW_CONDITION_COLOR`/`OCCASION_CONDITION_COLOR` exported
   from `_product-pricing.ts`, single-sourced across `ProductPriceSection.vue`
   and `ProductMicroPrice.vue`.
-- [ ] **6.3 [edit] STILL OPEN (2026-09-08)** - Buy-button grammar is not unified:
-  `ProductHeroPricingPanel.vue`/`ProductMicroPrice.vue` use
-  `v-btn variant="flat"`, `ProductPriceSection.vue`'s offers-table row action
-  uses `v-btn variant="text"`, and `ProductPriceRows.vue`'s buy interaction is
-  a plain CSS-styled `<a>`, not a `v-btn` at all. Converting it changes
-  hover/focus/keyboard semantics and visual weight in a dense list - do this as
-  its own reviewable step with before/after screenshots, per this doc's own
-  "keep each step reviewable" rule, not folded into another WP's diff.
+- [x] **6.3 [edit] DONE (2026-09-09)** - Buy-button grammar unified: `ProductPriceRows.vue`'s
+  buy interaction is now a real `v-btn variant="text" color="primary" density="compact" slim`
+  (previously a plain CSS-styled `<a>`), matching the `ProductHeroPricingPanel.vue`/
+  `ProductMicroPrice.vue` (`v-btn variant="flat"`) and `ProductPriceSection.vue` (`v-btn
+  variant="text"`) CTAs in kind, if not in visual weight. Dense-list layout preserved via a
+  scoped `:deep(.v-btn__content)` override; href/rel/target/click semantics verified unchanged
+  by the existing component spec and live browser checks across all three consumers (product
+  sticky banner, ProductCard, CategoryProductListView). See the WorkOrder for full evidence.
 - [x] **6.4 [edit]** `ProductAlternatives.vue`: replace the "😘 ..." heading with
   sober copy via i18n (fr e.g. "Alternatives : moins cher, meilleur impact"),
   through `ProductSectionHeader`.

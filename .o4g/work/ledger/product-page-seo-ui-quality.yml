@@ -1,0 +1,165 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: product-page-seo-ui-quality
+  name: Product page SEO and UI quality
+spec:
+  purpose: 'Fix the nudger.fr product page against a June-2026 audit with two goals: eliminate UI inconsistencies and maximize
+    clicks on affiliation links. CORRECTED 2026-09-08: this WorkOrder''s original premise -- "production serves a stale build
+    whose SSR sections render empty" -- is false today. A live check of https://nudger.fr and a from-scratch `pnpm build &&
+    pnpm preview` census (see AC1) both show every section (impact, vigilance, caracteristiques, alternatives, cycle-de-vie)
+    rendering with real content, a single `id="prix"`, and a category-prefixed h1. Most of docs/product_page_audit_plan.md''s
+    41 checkboxes describe work that was already implemented in commit 13cc9c750 (2026-07-03) and later, silently, without
+    the checkboxes or this governance record being updated -- the plan file was simply never reconciled with the code it describes.
+    This session re-verified every item against the live code and production site (not the stale checkboxes) and closed the
+    small number of real remaining gaps; see per-AC evidence below for what was actually true vs. fixed vs. still open.'
+  roadmapRef: m4-product-page-quality
+  state: COMPLETED
+  dependsOn:
+    - governance-kit-bootstrap
+  pathScope:
+    - frontend/app/components/pages/ProductPage.vue
+    - frontend/app/components/product/**
+    - frontend/app/utils/product-jsonld.ts
+    - frontend/app/utils/_product-pricing.ts
+    - frontend/app/utils/_product-verdict.ts
+    - frontend/app/composables/useProductVerdict.ts
+    - frontend/app/pages/[...slug].vue
+    - frontend/i18n/locales/**
+    - frontend/tests/visual/**
+    - frontend/package.json
+    - docs/product_page_audit_plan.md
+  acceptanceCriteria:
+    - id: AC1
+      statement: 'DONE, premise corrected. WP0''s "production serves a stale build" claim is false today: a live fetch of
+        https://nudger.fr/climatiseurs/8431312260509-climatisation-midea-mmcs12hrn8qrd0 shows sections impact/prix/cycle-de-vie/alternatives/vigilance/caracteristiques
+        all present with real content, exactly one `id="prix"`, and h1 "Climatiseurs MIDEA MMCS-12HRN8-QRD0" (category-prefixed).
+        frontend/scripts/ssr-census.mjs already existed, matching WP0.2''s spec exactly. Ran the actual acceptance test end
+        to end from a clean `pnpm build && pnpm preview`: census PASS on both reference URLs (Midea AC and the LG TV), every
+        section has content, single `id="prix"`. `pnpm test` (150 files / 582 tests) and the Playwright visual suite (52 specs)
+        both green. One real environment finding along the way, disclosed for the record: this sandbox''s `pnpm preview` background
+        process intermittently destabilizes after several rebuild cycles in one session (asset chunks start 503ing, breaking
+        client hydration) - reproduced identically with every change in this WorkOrder fully `git stash`-reverted, so it is
+        a local test-infra artifact, not a code defect; a clean preview restart always resolved it and the live production
+        site was unaffected throughout.'
+    - id: AC2
+      statement: 'DONE. `AFFILIATE_LINK_REL`/`resolveOfferHref` already existed in _product-pricing.ts and were already wired
+        through ProductPriceRows.vue, ProductHeroPricingPanel.vue, ProductHeroPricing.vue, ProductStickyPriceBanner.vue and
+        ProductMicroPrice.vue (verified by reading each). The one real residual: ProductPriceSection.vue''s offers-table row-click
+        handler (`onRowClick`) still called `window.open(link, ''_blank'')` with no `noopener` - fixed to `window.open(link,
+        ''_blank'', ''noopener,noreferrer'')`. Not converted to a real anchor: the same row already renders a proper `rel="sponsored
+        nofollow noopener noreferrer"` anchor in its `item.actions` column (the crawlable, SEO-facing link); this handler
+        is a secondary whole-row-click convenience gated to skip when the click already hit that anchor or a button, so `sponsored`
+        semantics were never missing from the crawlable surface, only a security nicety (`noopener`) was.'
+    - id: AC3
+      statement: 'DONE, already implemented pre-session. fr-FR.json / en-US.json already have the full withImpact/withoutImpact/noCategory
+        `serp.title` and `serp.description` template sets (score always kept per owner decision). `frontend/app/utils/seo/product-meta.ts`
+        already dedupes brand-model via a `sameProductAndBrandModel` check selecting `*NoBrand` template variants, not runtime
+        string-replacement. `ProductDesignation.vue`''s `titlePrefix` prop (fed `verticalTitle` from ProductHero.vue) already
+        prefixes the h1 with the category label, with a duplicate-prefix guard. Verified live: Midea page h1 is "Climatiseurs
+        MIDEA MMCS-12HRN8-QRD0", title "Climatiseurs MIDEA MMCS-12HRN8-QRD0 : meilleur prix", description free of duplicated
+        brand-model.'
+    - id: AC4
+      statement: 'DONE. Breadcrumb dedup (Set-based, drops any repeated `item` URL) and offer honesty (availability derived
+        from `quantityInStock` when present, `priceValidUntil` derived from `offer.timeStamp` when present) were already correctly
+        implemented in product-jsonld.ts with test coverage. The Review/reviewRating node itself was also already correct
+        (rating = impactScore/4, bestRating 5, worstRating 0) - but ProductPage.vue''s call into `buildProductJsonLdGraph`
+        never passed a `punchline`, so the shipped JSON-LD''s `Review.reviewBody` was always empty despite the builder and
+        its tests suggesting otherwise. Fixed by passing `punchline: fallbackSeoMetaDescription.value` (Nudger''s own generated
+        SEO description, not `product.names.metaDescription`, which `productEntry.description` already includes - reusing
+        that would have produced a duplicated "X - X" description).'
+    - id: AC5
+      statement: 'DONE, already implemented pre-session. `buildProductHreflangLinks` in shared/utils/domain-language.ts only
+        ever emits fr-FR + x-default, both resolving to the canonical nudger.fr path; the en-US/nudger.com branch was already
+        deleted, with test coverage asserting it''s never emitted. Verified live: no en-US alternate on either reference product
+        page.'
+    - id: AC6
+      statement: 'DONE. Real, confirmed, user-visible bug found and fixed: the verdict-panel chips'' "empty pale circle" icons
+        (U2) were real, live, and reproduced in a screenshot - `frontend/app/utils/_product-verdict.ts` and `frontend/app/composables/useProductVerdict.ts`
+        (outside this WorkOrder''s original pathScope; both added to it, see below) assigned raw `''mdi-tag-outline''`/`''mdi-shield-check-outline''`/`''mdi-leaf''`/`''mdi-leaf-polyline''`
+        string literals, which Vuetify''s configured `mdi-svg` iconset renders as literal (invalid) SVG path data - an invisible
+        path, not a missing icon. Fixed by importing the real `@mdi/js` constants (`mdiTagOutline`, `mdiShieldCheckOutline`,
+        `mdiLeaf` for both the scored and insufficient-data leaf states - `mdi-leaf-polyline` doesn''t exist in the installed
+        @mdi/js version and price/reliability already use one icon for both states, so this matches the codebase''s own established
+        pattern). Verified visually via a regenerated Playwright baseline screenshot: all three verdict chips now show real
+        leaf/tag/shield icons. Also fixed: ProductHeroPricing.vue had its own `formatPriceLabel` using 0-1-fraction-digit
+        decimal formatting instead of `formatPrice`''s currency-style 2-decimal rule, producing "999 -EUR-" instead of "999,00
+        -EUR-" - replaced with a `formatToParts`-based helper using the same currency-style rule as `formatPrice`, keeping
+        the number/symbol split the template needs for separate styling. Score-card Min/Max removal, merchant-name truncation
+        removal, the explicit CTA button, and the mobile fold reorder (breadcrumb to h1 to price CTA to gallery to verdict)
+        were all already correctly implemented pre-session, confirmed by reading `ImpactScore.vue`, `ProductHeroPricingPanel.vue`
+        and `ProductHero.vue`''s mobile media query.'
+    - id: AC7
+      statement: 'DONE. `ProductSectionHeader.vue` already existed and was already adopted by ProductPriceSection/ProductVigilanceSection/ProductAttributesSection/
+        ProductImpactSection/ProductDocumentationSection/ProductAlternatives/ProductLifeTimeline; `NEW_CONDITION_COLOR`/`OCCASION_CONDITION_COLOR`
+        were already single-sourced; the emoji heading, offers-table pagination-for-few-items, and the attributes empty state
+        were already fixed; vigilance''s raw attribute keys and the GTIN-prefixed "autres appellations" codes were already
+        filtered/humanized (independently re-verified against a live production page, including checking that the GTIN code
+        some initial grepping flagged was only present in the hydration payload''s raw JSON, never in the rendered, user-visible
+        list). Fixed this session: ProductVerdictPanel.vue''s h2 still used hand-rolled Vuetify utility classes (`text-subtitle-1
+        font-weight-bold ...`) instead of a BEM class - switched to `product-verdict-panel__title` per the plan''s own instruction
+        ("keeps an h2 but switch its classes to the same BEM title class", not full ProductSectionHeader adoption, since that
+        component''s font scale is sized for full top-level sections, not this hero-embedded sub-header). Fixed the price-history
+        empty state (`ProductPriceSection.vue`): both the "new" and "occasion" chart columns rendered a large icon + centered
+        paragraph (`h-100 pa-6`) when history had under 3 points; collapsed to the file''s own existing muted single-line
+        convention (`product-price__charts-empty-message`, already used elsewhere in the same file for the zero-charts-visible
+        case) instead of inventing a new style. Finished 2026-09-09: full CTA button-grammar unification (WP6.3). Buy/offer
+        CTAs previously rendered as three different things - `v-btn variant="flat"` (ProductHeroPricingPanel, ProductMicroPrice),
+        `v-btn variant="text"` (ProductPriceSection''s offers-table row action), and a plain CSS-styled `<a>` (ProductPriceRows.vue).
+        ProductPriceRows.vue''s clickable price area is now a real `v-btn` (`variant="text" color="primary" density="compact"
+        slim`), keeping its href/target/rel/click handler unchanged and its dense inline layout via a scoped `:deep(.v-btn__content)`
+        override (`justify-content: flex-start`, preserving the favicon+price+gap layout instead of Vuetify''s centered default).
+        Verified: `ProductPriceRows.spec.ts`''s `wrapper.find(''a.product-price-rows__content'')` assertions still pass unchanged
+        (Vuetify renders `v-btn` as a real `<a>` when given `href`), confirming href/rel/target/click semantics are byte-identical;
+        the accessibility tree shows each row as a real focusable `link`, not a styled div. Visually verified live (local
+        front-api on real Elasticsearch + `pnpm dev`, MACHINE_TOKEN aligned to devsec''s shared-token) in all three consumers
+        of ProductPriceRows.vue - the product-page sticky price banner (compact variant), ProductCard (used in the alternatives
+        grid), and CategoryProductListView (search/category list rows) - no layout breakage, hover now shows Vuetify''s native
+        primary-tinted overlay in place of the removed hand-rolled `:hover` rule. Full `pnpm test` (150 files / 582 tests),
+        `pnpm lint`, and `pnpm build` (61.2 MB, no errors) all green. The Playwright `product-fold` baseline could not be
+        used to verify this specific change: ProductPriceRows.vue is not rendered in the hero fold at all (only in ProductCard/ProductStickyPriceBanner),
+        and re-running that suite against a real local stack surfaced only pre-existing, unrelated sandbox drift (an English-locale
+        fallback instead of fr-FR because 127.0.0.1 doesn''t resolve to a known domainLanguage, plus live price drift on real
+        production data) - confirmed by inspecting the diff image, which shows every string on the page changed, not a ProductPriceRows-only
+        region.'
+    - id: AC8
+      statement: 'DONE. `grep -rn ''"mdi-\|''\''''mdi-''` under frontend/app/components/product already returned zero hits
+        in real source (only spec/mock files) before this session - all 13 named components already migrated to `@mdi/js`
+        imports. The literal grep passing masked the real remaining bug (see AC6): `_product-verdict.ts` and `useProductVerdict.ts`
+        live outside that directory (`app/utils`, `app/composables`) and still had raw string icons, now fixed there instead,
+        and both files added to this WorkOrder''s pathScope since that is where the actual fix belongs. `@iconify-json/mdi`
+        was still an unused devDependency (confirmed zero `i-mdi`/`mdi:` references anywhere) - removed via `pnpm remove`,
+        verified with a full `pnpm build` (61.2 MB output, no errors) that nothing depended on it.'
+    - id: AC9
+      statement: "DONE, already implemented pre-session, file name in the plan was wrong. The \"Mode hors ligne pr\xEAt\"\
+        \ toast is in `frontend/app/components/pwa/PwaInstallPrompt.vue`, not `PwaOfflineNotice.vue` as WP8 assumed (that\
+        \ is a different, unrelated \"you are currently offline\" indicator). `PwaInstallPrompt.vue` already shows the toast\
+        \ at most once per session (sessionStorage flag), delays via `requestIdleCallback`/2s fallback, and renders as a standard\
+        \ bottom-left `v-snackbar` with a 4s timeout and no click-blocking overlay, with test coverage. Not fixed, flagged\
+        \ instead (out of this WorkOrder's pathScope, a different component and a different, non-overlapping defect class):\
+        \ PwaOfflineNotice.vue itself still has its own raw `mdi-wifi-off`/`mdi-refresh`/`mdi-close` string icons - the same\
+        \ AC6/AC8 bug, on a component this WorkOrder never named. Also flagged, same reason: `grep -rn '\"mdi-\\|'\\''mdi-'`\
+        \ across all of frontend/app (not just components/product) turns up further hits in frontend/app/error.vue, useMetriks.ts,\
+        \ pages/releases/index.vue and pages/opensource/index.vue - all rendering invisible icons under the same `mdi-svg`\
+        \ iconset for the same reason, on pages outside this WorkOrder's product-page scope."
+  evidenceRefs:
+    - 'note: 2026-09-08 -- this WorkOrder was created earlier the same day by a sub-agent that wrapped docs/product_page_audit_plan.md
+      (already 61 days old, dated 2026-07-02) in governance tracking without checking whether the plan still matched the code.
+      It did not: commit 13cc9c750 (2026-07-03, the day after the audit) already implemented most of WP0- WP8, and the plan''s
+      41 checkboxes were simply never updated to reflect that. Every AC above was re-verified against the live production
+      site and the current code before being marked done, exactly as canonical decision 9 requires ("a claim ... is verified
+      against the code before it is written").'
+    - 'note: 2026-09-08 -- two out-of-scope findings surfaced while investigating AC6/AC8''s icon bug, deliberately not fixed
+      here (different components/files than any AC names): (1) frontend/app/components/pwa/PwaOfflineNotice.vue still has
+      raw mdi-wifi-off/mdi-refresh/ mdi-close string icons, the same defect class as AC6 on a component this WorkOrder never
+      scoped; (2) the same raw-mdi-string defect exists in frontend/app/error.vue, useMetriks.ts, pages/releases/index.vue
+      and pages/opensource/index.vue. Both are quick, low-risk fixes (same @mdi/js import pattern used throughout this closure)
+      but belong to a follow-up WorkOrder or an icon-migration lot, not silently bundled into a product-page WorkOrder''s
+      diff.'
+    - 'note: 2026-09-08 -- remaining open work: WP6.3''s CTA button-grammar unification (ProductPriceRows.vue''s plain `<a>`
+      vs. the v-btn variants used elsewhere). Left open by choice, not oversight: it is a structural, visually-weighted change
+      to a dense list component that the plan itself asks to be screenshot-reviewed step by step, not blind- edited in the
+      same pass as everything else. State kept IN_PROGRESS rather than COMPLETED for this one item.'
+    - 'test: pnpm test 150 files/582 tests, pnpm lint, and pnpm build (61.2 MB, no errors) all green after converting ProductPriceRows.vue
+      buy-CTA <a> to v-btn (WP6.3, AC7); visually verified live in all three consumers (sticky banner, ProductCard, CategoryProductListView)
+      via a real local front-api on real Elasticsearch + pnpm dev'
