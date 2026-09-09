@@ -13,7 +13,7 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 | Milestone | Open | READY | BLOCKED | IN_PROGRESS | Closed |
 |---|---|---|---|---|---|
 | m0-governance | 0 | 0 | 0 | 0 | 1 |
-| m1-config-autonomy | 7 | 0 | 5 | 2 | 0 |
+| m1-config-autonomy | 7 | 0 | 5 | 0 | 0 |
 | m2-corpus-cleanup | 0 | 0 | 0 | 0 | 1 |
 | m3-dead-surface-removal | 1 | 0 | 1 | 0 | 1 |
 | m4-product-page-quality | 0 | 0 | 0 | 0 | 1 |
@@ -30,8 +30,8 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 
 | WorkOrder | Contract state | Availability | Dependencies | Blockers | Purpose |
 |---|---|---|---|---|---|
-| [config-contract-and-environments](../../.o4g/work/config-contract-and-environments.yml) | IN_PROGRESS | PLANNED | governance-kit-bootstrap | -- | Classify every legacy configuration asset and establish public defaults and private environment inputs. |
-| [leaked-credential-rotation](../../.o4g/work/leaked-credential-rotation.yml) | IN_PROGRESS | PLANNED | -- | -- | A production password was in this public repository's main-branch history since 2024-01-15 and was still live on both beta and prod. Live inspection of the running servers (root SSH) found it reused far wider than the config repo alone suggested: it was the literal value, or the shared base of a composite value, behind eleven distinct config entries across four services and both environments. XWiki's share of that (AC4) is rotated end to end on both real hosts. The rest (AC3: SBA password, api's admin-key/feed.api-key, the icecat apiKey, front-api's two matching api-keys) and the independent AWIN leak (AC5) remain open. |
+| [config-contract-and-environments](../../.o4g/work/config-contract-and-environments.yml) | BLOCKED | PLANNED | governance-kit-bootstrap | -- | Classify every legacy configuration asset and establish public defaults and private environment inputs. |
+| [leaked-credential-rotation](../../.o4g/work/leaked-credential-rotation.yml) | BLOCKED | PLANNED | -- | -- | A production password was in this public repository's main-branch history since 2024-01-15 and was still live on both beta and prod. Live inspection of the running servers (root SSH) found it reused far wider than the config repo alone suggested: it was the literal value, or the shared base of a composite value, behind eleven distinct config entries across four services and both environments. XWiki's share of that (AC4) is rotated end to end on both real hosts. The rest (AC3: SBA password, api's admin-key/feed.api-key, the icecat apiKey, front-api's two matching api-keys) and the independent AWIN leak (AC5) remain open. |
 | [systemd-service-runtime](../../.o4g/work/systemd-service-runtime.yml) | ACCEPTED | BLOCKED | config-contract-and-environments | config-contract-and-environments | Replace name-based PID scripts with deterministic service units and atomic releases. |
 | [config-beta-cutover](../../.o4g/work/config-beta-cutover.yml) | ACCEPTED | BLOCKED | systemd-service-runtime | systemd-service-runtime | Prove the new configuration and service runtime on the real beta host before production changes. |
 | [config-prod-cutover](../../.o4g/work/config-prod-cutover.yml) | ACCEPTED | BLOCKED | config-beta-cutover, leaked-credential-rotation | config-beta-cutover, leaked-credential-rotation | Roll the beta-proven runtime into production and invalidate every credential retained by the legacy repository. |

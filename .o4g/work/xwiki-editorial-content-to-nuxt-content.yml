@@ -18,17 +18,39 @@ spec:
     - scripts/migrate/**
   acceptanceCriteria:
     - id: AC1
-      statement: 'REVISED 2026-09-09 (see evidenceRefs). FAQ, team, partner, home and full-page sections are freshly authored
-        as localized (i18n) Nuxt Content with stable routes and locale fallback -- not exported from XWiki: owner decision
-        is that only the blog is migrated, editorial content is rewritten.'
+      statement: 'REVISED again 2026-09-09 (see evidenceRefs): owner directed using the export archive as the real content
+        source for team/opensource/partner/ecosystem blocs, superseding the earlier "freshly authored, not exported" framing
+        for that slice specifically. Those bloc ids (13 members'' bios+titles, 3 team-page heroes, 13 opensource blocs, 2
+        opendata heroes, 7 partner/ecosystem blurbs) now serve real extracted copy statically, bypassing the down XWiki
+        endpoint entirely -- DONE. FAQ was already static i18n. Remaining and still not exported: legal-notice, data-privacy
+        and the opensource-contribution full pages (larger markup, deferred).'
     - id: AC2
       statement: 'REVISED 2026-09-09. XWiki renderers and content endpoints are removed after route, metadata, accessibility
         and SSR coverage tests pass against the new authored content. Dropped the original "parity" framing: with no XWiki
         export as source of truth for this content, there is nothing to hold parity against.'
     - id: AC3
-      statement: Nuxt owns editorial and blog sitemaps while ui retains product, brand, image and open-data responsibilities.
+      statement: 'PARTIAL. Blog now has a real Nuxt-native sitemap (server/plugins/sitemap-blog-posts.ts): the reserved
+        blog-posts.xml was never written by ui, so blog had zero coverage before. Editorial routes were already Nuxt-owned
+        via main-pages.xml''s static-route scan. Remaining: ui''s wiki-pages.xml still duplicates those routes via a live-XWiki
+        call unverifiable from here -- see evidence.'
   evidenceRefs:
     - 'note: 2026-09-09 -- owner decision mid-session: "except for blog, ALL content will be replaced with i18n (thinking
       on teams, and so on...)". AC1 and AC2 restated accordingly (rewrite, not export/parity); original wording is preserved
       in this WorkOrder''s git history for anyone auditing the change. No XWiki access is needed for this WorkOrder; only
       the sibling xwiki-blog-to-nuxt-content depends on live XWiki content.'
+    - 'note: 2026-09-09 -- resumed. AC1''s bloc slice (team/opensource/opendata bios, per-member title/bio blocs) is real
+      per-person copy, not fabricable; HOME:FAQ is already static i18n, no work needed there. Anonymous XWiki REST still
+      401s on a real page fetch, matching incident_xwiki_blog_locked_down_sept2026: needs owner-supplied copy or working
+      credentials first. Also: /blog/{impact-score-ia,prioriser-durabilite,equilibrer-prix-impact} are real full pages outside
+      the closed blog WorkOrder''s export, still live via cache, not broken but unmigrated (AC1/AC2 full-page slice). Did
+      AC3 instead. test: pnpm vitest run, pnpm lint, nuxt typecheck, ./scripts/lint.sh all green.'
+    - 'note: 2026-09-09 -- owner instruction: work from the export archive (root@136.243.46.60:/opt/open4goods/backup/xwiki-export.xar)
+      as the real content source, reversing the prior session''s deferral. Extracted the relevant pages (team, opensource,
+      opendata heroes, partners, ecosystem), cross-checked every string against the live blocId used by each component/config
+      entry, and added frontend/server/utils/static-content-blocs.ts: a per-blocId, per-language map consulted by
+      server/api/blocs/[blocId].ts before it would otherwise call the live (401''ing) XWiki backend. English is missing
+      for most personal bios and two partner blurbs in the source itself -- served as a French fallback rather than a
+      fabricated translation, documented inline. One source data bug found and corrected: pages/ecosystem/frenchtech.xml''s
+      French content was a copy-paste of the Wekey blurb; used a direct translation of the correct English text instead,
+      flagged in a code comment. test: pnpm vitest run (8 new tests + full suite 596 passed/1 skipped), pnpm lint, nuxt
+      typecheck, ./scripts/lint.sh all green.'

@@ -14,6 +14,7 @@ import {
 } from './shared/utils/domain-language'
 import {
   APP_ROUTES_SITEMAP_KEY,
+  BLOG_POSTS_SITEMAP_KEY,
   SITEMAP_PATH_PREFIX,
 } from './shared/utils/sitemap-config'
 import {
@@ -467,6 +468,10 @@ export default defineNuxtConfig({
         includeAppSources: false,
         exclude: ['/offline', '/share/callback'],
       },
+      [BLOG_POSTS_SITEMAP_KEY]: {
+        sitemapName: `${BLOG_POSTS_SITEMAP_KEY}.xml`,
+        includeAppSources: false,
+      },
     },
   },
 
@@ -552,14 +557,15 @@ export default defineNuxtConfig({
     staticMainPageRoutes: STATIC_MAIN_PAGE_ROUTE_NAMES,
     sitemapLocalFiles: {
       fr: [
-        `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/blog-posts.xml`,
+        // blog-posts.xml removed: ui's SitemapGenerationService never wrote it (only
+        // product-pages/wiki-pages/category-pages/guides), so this proxy entry always 404'd.
+        // server/plugins/sitemap-blog-posts.ts now generates blog URLs directly from Nuxt Content.
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/category-pages.xml`,
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/product-pages.xml`,
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/wiki-pages.xml`,
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/guides.xml`,
       ],
       en: [
-        `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/blog-posts.xml`,
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/category-pages.xml`,
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/product-pages.xml`,
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/wiki-pages.xml`,
