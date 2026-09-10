@@ -10,10 +10,12 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
+import org.open4goods.api.services.completion.EprelCompletionService;
 import org.open4goods.brand.model.Brand;
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.icecat.services.IcecatFeatureResolver;
+import org.open4goods.icecat.util.IcecatConstants;
 import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.attribute.IndexedAttribute;
@@ -120,37 +122,49 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		///////////////////////////////////////////////// brandExclusions()
 		/////////////////////////////////////////////////
 
+		String actualBrand = data.brand();
+		Map<String, String> akaBrands = new HashMap<>(data.getAkaBrands());
+
+		data.getAttributes().getReferentielAttributes().remove(ReferentielKey.BRAND);
+		data.akaBrands().clear();
+
+		// EPREL is the most trusted brand evidence, so it is offered first and takes the
+		// referentiel slot when present. It is contributed through addBrand like every
+		// other source: exclusions and aliases still apply and no write bypasses election.
 		if (data.getEprelDatas() != null) {
-			String supplier = data.getEprelDatas().getSupplierOrTrademark();
-			String canonicalSupplier = resolveBrandName(supplier, vConf);
-			data.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, canonicalSupplier);
-			data.addBrand("eprel", canonicalSupplier, vConf.getBrandsExclusion(), vConf.getBrandsAlias());
-
-			String model = data.getEprelDatas().getModelIdentifier();
-			data.getAttributes().getReferentielAttributes().put(ReferentielKey.MODEL, model);
-			data.addModel(model, ModelCandidateSource.EPREL);
-
-		} else {
-			String actualBrand = data.brand();
-			Map<String, String> akaBrands = new HashMap<>(data.getAkaBrands());
-
-			data.getAttributes().getReferentielAttributes().remove(ReferentielKey.BRAND);
-			data.akaBrands().clear();
-			// NOTE : No datasource for first, cause first will be set as referentiel brand
-			data.addBrand(null, resolveBrandName(actualBrand, vConf), vConf.getBrandsExclusion(), vConf.getBrandsAlias());
-
-			akaBrands.entrySet().forEach(e -> {
-				data.addBrand(e.getKey(), resolveBrandName(e.getValue(), vConf), vConf.getBrandsExclusion(), vConf.getBrandsAlias());
-			});
-			// Adding model from title
-			extractModelFromTitles(data);
-
+			data.addBrand(EprelCompletionService.EPREL_DS_NAME,
+					resolveBrandName(data.getEprelDatas().getSupplierOrTrademark(), vConf), vConf.getBrandsExclusion(),
+					vConf.getBrandsAlias());
 		}
 
+		// NOTE : No datasource for first, cause first will be set as referentiel brand
+		data.addBrand(null, resolveBrandName(actualBrand, vConf), vConf.getBrandsExclusion(), vConf.getBrandsAlias());
+
+		akaBrands.entrySet().forEach(e -> {
+			data.addBrand(e.getKey(), resolveBrandName(e.getValue(), vConf), vConf.getBrandsExclusion(), vConf.getBrandsAlias());
+		});
+
+		// The EPREL model identifier is a strong candidate, but it is elected by
+		// addModel rather than written straight into the referentiel attributes.
+		if (data.getEprelDatas() != null) {
+			data.addModel(data.getEprelDatas().getModelIdentifier(), ModelCandidateSource.EPREL);
+		}
+
+		// Adding model from title
+		extractModelFromTitles(data);
+
+		// The Icecat resolver matches on the attribute label alone, so it is only asked
+		// about attributes Icecat actually asserted. An EPREL or merchant field whose
+		// label happens to look like an Icecat feature keeps its own identifiers, and a
+		// non-Icecat attribute that acquired taxonomy ids in an earlier pass loses them.
 		// Attribute names often repeat across products; avoid resolving the same name
 		// twice in this product pass when aliases point to the same raw attribute.
 		Map<String, Set<Integer>> taxonomyByAttributeName = new HashMap<>();
 		data.getAttributes().getAll().values().forEach(a -> {
+			if (!hasIcecatSource(a)) {
+				a.setIcecatTaxonomyIds(new HashSet<>());
+				return;
+			}
 			Set<Integer> icecatTaxonomyIds = taxonomyByAttributeName.computeIfAbsent(a.getName(),
 					featureResolver::resolveFeatureName);
 			if (!icecatTaxonomyIds.isEmpty()) {
@@ -745,6 +759,25 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		}
 
 		return numericCandidate;
+	}
+
+	/**
+	 * Tells whether Icecat contributed at least one value to this attribute.
+	 *
+	 * <p>Icecat taxonomy identifiers are resolved from the attribute label, which is
+	 * not source-specific: without this guard an EPREL or merchant field would
+	 * silently acquire an Icecat identifier from a coincidentally similar label.
+	 *
+	 * @param attr product attribute carrying its per-datasource contributions
+	 * @return {@code true} when one of the sources is the Icecat datasource
+	 */
+	private static boolean hasIcecatSource(ProductAttribute attr) {
+		Set<SourcedAttribute> sources = attr.getSource();
+		if (sources == null) {
+			return false;
+		}
+		return sources.stream()
+				.anyMatch(source -> IcecatConstants.DATASOURCE_NAME.equalsIgnoreCase(source.getDataSourcename()));
 	}
 
 	private String resolveBrandName(String rawBrand, VerticalConfig vConf) {

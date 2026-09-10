@@ -12,6 +12,7 @@ import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.services.AbstractCompletionService;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.model.attribute.ReferentielKey;
+import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.Product;
@@ -204,7 +205,9 @@ public class WikidataCompletionService extends AbstractCompletionService {
     private void completeAttributes(WikidataEntity entity, DataFragment df) {
         for (java.util.Map.Entry<String, String> claim : entity.getNumericClaims().entrySet()) {
             if (!StringUtils.isBlank(claim.getValue())) {
-                df.addAttribute(claim.getKey(), claim.getValue(), WikidataConstants.LANG_DEFAULT, claim.getKey());
+                // Numeric claims are language-neutral, and a Wikidata property id is not an
+                // Icecat feature id: neither slot is filled with a fabricated value.
+                df.addAttribute(claim.getKey(), claim.getValue(), SourcedAttribute.UNDETERMINED_LANGUAGE, null);
             }
         }
     }

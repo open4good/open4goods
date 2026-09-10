@@ -18,6 +18,7 @@ import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.aggregation.aggregator.StandardAggregator;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.eprel.EprelProduct;
+import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.eprelservice.service.EprelSearchService;
@@ -288,5 +289,34 @@ class EprelCompletionServiceTest {
 
         assertThat(product.getEprelDatas()).isEqualTo(matching);
         assertThat(product.getExternalIds().getEprel()).isEqualTo("matching-compact");
+    }
+
+    @Test
+    void eprelAttributesAreLanguageNeutralAndCarryNoIcecatIdentifier() throws Exception {
+        EprelProduct eprelProduct = new EprelProduct();
+        eprelProduct.setCategorySpecificAttributes(new java.util.LinkedHashMap<>(
+                java.util.Map.of("screenDiagonalCm", "139", "energyClassImage", "A")));
+        eprelProduct.setEnergyClass("A");
+        Product data = new Product(1234567890123L);
+        data.setEprelDatas(eprelProduct);
+
+        java.lang.reflect.Method method = EprelCompletionService.class
+                .getDeclaredMethod("getEprelAttributesFragments", Product.class, VerticalConfig.class);
+        method.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        java.util.Set<org.open4goods.model.datafragment.DataFragment> fragments =
+                (java.util.Set<org.open4goods.model.datafragment.DataFragment>) method.invoke(service, data, vertical);
+
+        assertThat(fragments).hasSize(1);
+        org.open4goods.model.datafragment.DataFragment fragment = fragments.iterator().next();
+        assertThat(fragment.getAttributes()).isNotEmpty();
+        assertThat(fragment.getAttributes())
+                .allSatisfy(attribute -> {
+                    // EPREL parameter values are language-neutral; stamping them "fr" made
+                    // them unusable for any other locale.
+                    assertThat(attribute.getLanguage()).isEqualTo(SourcedAttribute.UNDETERMINED_LANGUAGE);
+                    // An EPREL parameter identifier is not an Icecat feature identifier.
+                    assertThat(attribute.getIcecatFeatureId()).isNull();
+                });
     }
 }
