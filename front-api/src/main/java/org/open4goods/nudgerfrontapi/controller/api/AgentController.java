@@ -9,7 +9,7 @@ import org.open4goods.nudgerfrontapi.dto.agent.AgentIssueDto;
 import org.open4goods.nudgerfrontapi.dto.agent.AgentRequestDto;
 import org.open4goods.nudgerfrontapi.dto.agent.AgentRequestResponseDto;
 import org.open4goods.nudgerfrontapi.dto.agent.AgentTemplateDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.AgentService;
 import org.open4goods.nudgerfrontapi.utils.IpUtils;
 import org.slf4j.Logger;

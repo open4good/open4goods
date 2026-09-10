@@ -8,7 +8,7 @@ import org.open4goods.nudgerfrontapi.config.properties.MentorPartnersProperties;
 import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
 import org.open4goods.nudgerfrontapi.dto.partner.AffiliationPartnerDto;
 import org.open4goods.nudgerfrontapi.dto.partner.StaticPartnerDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.AffiliationPartnerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

@@ -4,7 +4,7 @@ import org.open4goods.model.RolesConstants;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.nudgerfrontapi.config.properties.TeamProperties;
 import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

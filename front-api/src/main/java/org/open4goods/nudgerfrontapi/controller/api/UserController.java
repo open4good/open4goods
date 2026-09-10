@@ -2,7 +2,7 @@ package org.open4goods.nudgerfrontapi.controller.api;
 
 import org.open4goods.model.RolesConstants;
 import org.open4goods.nudgerfrontapi.dto.user.UserGeolocDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.UserGeolocationService;
 import org.open4goods.nudgerfrontapi.utils.IpUtils;
 import org.slf4j.Logger;

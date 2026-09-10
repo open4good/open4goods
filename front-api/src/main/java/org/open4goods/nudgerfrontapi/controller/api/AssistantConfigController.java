@@ -19,7 +19,7 @@ import org.open4goods.nudgerfrontapi.dto.category.NudgeToolConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.NudgeToolScoreDto;
 import org.open4goods.nudgerfrontapi.dto.category.NudgeToolSubsetGroupDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalSubsetDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

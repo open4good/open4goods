@@ -14,7 +14,7 @@ import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.opendata.OpenDataDatasetDto;
 import org.open4goods.nudgerfrontapi.dto.opendata.OpenDataDownloadLimitsDto;
 import org.open4goods.nudgerfrontapi.dto.opendata.OpenDataOverviewDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.services.opendata.config.OpenDataConfig;
 import org.open4goods.services.opendata.service.OpenDataService;
 import org.springframework.stereotype.Service;

@@ -12,7 +12,7 @@ import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackSubmissionRequestDto;
 import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackSubmissionResponseDto;
 import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackVoteEligibilityDto;
 import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackVoteResponseDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.FeedbackService;
 import org.open4goods.nudgerfrontapi.service.FeedbackService.FeedbackSubmissionResult;
 import org.open4goods.nudgerfrontapi.utils.IpUtils;

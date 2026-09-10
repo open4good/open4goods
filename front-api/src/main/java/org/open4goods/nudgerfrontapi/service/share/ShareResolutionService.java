@@ -25,7 +25,7 @@ import org.open4goods.nudgerfrontapi.dto.share.ShareExtractionDto;
 import org.open4goods.nudgerfrontapi.dto.share.ShareResolutionRequestDto;
 import org.open4goods.nudgerfrontapi.dto.share.ShareResolutionResponseDto;
 import org.open4goods.nudgerfrontapi.dto.share.ShareResolutionStatus;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.open4goods.nudgerfrontapi.service.SearchService;
 import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchHit;

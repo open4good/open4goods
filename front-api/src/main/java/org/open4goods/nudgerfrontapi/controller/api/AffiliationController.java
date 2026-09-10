@@ -3,7 +3,7 @@ package org.open4goods.nudgerfrontapi.controller.api;
 import java.net.URI;
 
 import org.open4goods.model.RolesConstants;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.AffiliationService;
 import org.open4goods.nudgerfrontapi.service.exception.InvalidAffiliationTokenException;
 import org.open4goods.nudgerfrontapi.utils.IpUtils;

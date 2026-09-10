@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.List;
 
 import org.open4goods.nudgerfrontapi.config.properties.GoogleIndexationProperties;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.repository.GoogleIndexationQueueEntry;
 import org.open4goods.services.googleindexation.dto.GoogleIndexationResult;
 import org.open4goods.services.googleindexation.dto.GoogleIndexationResultItem;

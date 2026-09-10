@@ -8,7 +8,7 @@ import org.open4goods.model.Localisable;
 import org.open4goods.model.priceevents.Event;
 import org.open4goods.nudgerfrontapi.config.properties.PriceRestitutionProperties;
 import org.open4goods.nudgerfrontapi.dto.event.CommercialEventDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.springframework.stereotype.Service;
 
 /**

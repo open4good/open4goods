@@ -11,7 +11,7 @@ import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.nudgerfrontapi.dto.opendata.OpenDataDatasetDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.services.opendata.config.OpenDataConfig;
 import org.open4goods.services.opendata.service.OpenDataService;

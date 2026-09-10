@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.open4goods.nudgerfrontapi.dto.exposed.ExposedDocsCategoryDto;
 import org.open4goods.nudgerfrontapi.dto.exposed.ExposedDocsOverviewDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.exposed.ExposedDocsService;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;

@@ -6,7 +6,7 @@ import org.open4goods.model.RolesConstants;
 import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
 import org.open4goods.nudgerfrontapi.dto.share.ShareResolutionRequestDto;
 import org.open4goods.nudgerfrontapi.dto.share.ShareResolutionResponseDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.share.ShareResolutionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

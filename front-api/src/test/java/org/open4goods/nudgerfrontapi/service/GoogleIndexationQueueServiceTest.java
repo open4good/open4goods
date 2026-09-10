@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.nudgerfrontapi.config.properties.GoogleIndexationProperties;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.repository.GoogleIndexationQueueEntry;
 import org.open4goods.nudgerfrontapi.repository.GoogleIndexationQueueEntry.Status;
 import org.open4goods.nudgerfrontapi.repository.GoogleIndexationQueueRepository;
