@@ -1,0 +1,61 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: reference-coordinated-cutover
+  name: Coordinated product reference cutover
+spec:
+  purpose: Apply the final ingestion delta and atomically move all readers to validated source-neutral projections.
+  roadmapRef: m7-product-data-reference
+  state: ACCEPTED
+  dependsOn:
+    - full-reference-shadow-reingestion
+    - reference-api-frontend-breaking-cutover
+    - b2b-price-history-facet
+  decisionRefs:
+    - ADR-0010
+    - ADR-0011
+  pathScope:
+    - api/**
+    - front-api/**
+    - frontend/**
+    - b2b-api/**
+    - b2b-frontend/**
+    - services/data-reference/**
+    - services/price-history/**
+    - services/opendata/**
+    - services/product-repository/**
+    - docs/operations/**
+    - .github/workflows/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        A rehearsed runbook names owners, maintenance window, source freeze semantics, exact aliases/data streams, health gates,
+        final-delta checkpoints, deployment order, abort conditions, rollback commands and communication points.
+    - id: AC2
+      statement: >-
+        Ingestion is paused only for the bounded final delta; every event after the shadow high-water mark is applied once to
+        source heads, offer heads, price events and projections before readers move.
+    - id: AC3
+      statement: >-
+        Write aliases move first only after validation, application versions that understand the new contract deploy together,
+        and read aliases switch atomically after smoke tests; mixed old/new DTO versions are rejected rather than silently read.
+    - id: AC4
+      statement: >-
+        Smoke tests cover consumer product/search/image/sitemap, B2B current price/history and billing, open-data export, admin
+        mapping status, ingestion, GTIN replay and all three policy surfaces in English and French.
+    - id: AC5
+      statement: >-
+        Live gates require expected counts/hashes, green cluster health for the chosen topology, zero write rejection, bounded
+        replay lag, query/error latency within benchmark limits and no restricted-source field in sampled public payloads.
+    - id: AC6
+      statement: >-
+        Any failed gate stops or reverses the alias/application switch, resumes legacy ingestion from recorded checkpoints and
+        preserves new indexes for diagnosis; rollback never deletes either validated data set.
+    - id: AC7
+      statement: >-
+        After success, legacy indexes remain read-only and restorable for seven full days, new ingestion runs source-neutral only,
+        and dashboards distinguish legacy/new reads, projection lag, policy denials, conflicts and price-rollup lag.
+    - id: AC8
+      statement: >-
+        Production evidence records timestamps, versions, aliases before/after, delta counts, smoke results and owner decision;
+        it contains no secrets, raw provider payload or restricted assertion values.

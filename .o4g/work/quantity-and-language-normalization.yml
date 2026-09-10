@@ -1,0 +1,52 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: quantity-and-language-normalization
+  name: Shared quantity and language normalization
+spec:
+  purpose: Replace dispersed parsers and unit strings with one lossless, typed and locale-aware normalization pipeline.
+  roadmapRef: m7-product-data-reference
+  state: ACCEPTED
+  dependsOn:
+    - canonical-concept-registry
+    - source-assertion-store
+  decisionRefs:
+    - ADR-0010
+  pathScope:
+    - services/data-reference/**
+    - api/src/main/java/org/open4goods/api/services/aggregation/**
+    - model/**
+    - verticals/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        A single normalizer maps provider field plus registry version to a canonical concept and emits a typed value,
+        normalized language, validation outcome and complete source-assertion reference without changing the stored raw evidence.
+    - id: AC2
+      statement: >-
+        Numeric parsing uses ICU4J/CLDR for the declared source locale, BigDecimal throughout and an explicit rounding policy
+        only at display boundaries; Double conversion and binary floating-point equality are absent from canonical quantities.
+    - id: AC3
+      statement: >-
+        Source-specific unit aliases map to standard UCUM codes and registry dimensions; unknown units, incompatible dimensions,
+        out-of-range values and ambiguous localized numbers remain auditable failures and cannot enter a projection silently.
+    - id: AC4
+      statement: >-
+        WIDTH, HEIGHT and DEPTH fixtures cover metre, centimetre and millimetre inputs and prove the current metre/centimetre
+        scale error is gone without changing raw provider values.
+    - id: AC5
+      statement: >-
+        Language normalization accepts valid BCP 47 tags, maps missing or invalid provider language to und with a diagnostic,
+        and never assigns fr or en because of the serving domain.
+    - id: AC6
+      statement: >-
+        Localized lookup order is exact tag, parent language, English, then canonical id; unit labels and formatted quantities
+        are locale output only and the stored UCUM unit never changes with language.
+    - id: AC7
+      statement: >-
+        Existing UUDC and parser implementations are either removed or reduced to adapters over this service; no second unit,
+        decimal, boolean, date or language normalizer remains in api, model or verticals.
+    - id: AC8
+      statement: >-
+        Property tests cover round-trip conversions, scale/precision, incompatible dimensions, localized separators, unknown
+        inputs and deterministic output; provider contract fixtures exercise repeated values and mixed-language assertions.

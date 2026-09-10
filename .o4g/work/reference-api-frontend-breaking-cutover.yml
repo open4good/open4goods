@@ -1,0 +1,58 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: reference-api-frontend-breaking-cutover
+  name: Reference API and frontend breaking contract
+spec:
+  purpose: Move consumer, B2B and open-data readers to typed licensed projections in one coordinated API version change.
+  roadmapRef: m7-product-data-reference
+  state: ACCEPTED
+  dependsOn:
+    - reference-resolution-and-surface-projections
+    - product-family-model-grouping
+  decisionRefs:
+    - ADR-0010
+  pathScope:
+    - front-api/**
+    - frontend/**
+    - b2b-api/**
+    - services/opendata/**
+    - services/data-reference/**
+    - ui/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        The product read DTO exposes GTIN, canonical class, localized identity, brand/model, group ids, typed attributes,
+        allowed media, conflicts and publishable provenance from the requested surface; it never serializes source heads.
+    - id: AC2
+      statement: >-
+        Each attribute DTO contains canonical id, value discriminator and structured value, cardinality, localized label,
+        formatted value, canonical unit when relevant, publishable provenance and conflict; Double and free unit suffix are absent.
+    - id: AC3
+      statement: >-
+        Legacy icecatTaxonomyIds, eprelDatas, datasourceCodes, categories/descriptions by raw source and direct Icecat feature
+        lookups are absent from public contracts; any retained source list contains only policy-approved public provenance ids.
+    - id: AC4
+      statement: >-
+        Front API always requests NUDGER_WEB, B2B API requests B2B_API and open-data export requests ODBL_EXPORT; callers cannot
+        override the surface, and an empty allowed result omits the field instead of falling back to a forbidden source.
+    - id: AC5
+      statement: >-
+        Localization uses exact tag, parent, English and canonical-id fallback supplied by the projection; frontend and ui do
+        not regroup, rename or unit-format attributes from Icecat or other provider metadata.
+    - id: AC6
+      statement: >-
+        Search, product detail, dataviz, sitemap/image and open-data paths consume the new GTIN projection or explicit domain
+        ports and preserve current pagination, SEO, score, offer and image behavior with documented intentional contract changes.
+    - id: AC7
+      statement: >-
+        SpringDoc models all sealed value variants and Problem Details, generated Nuxt clients are refreshed atomically with
+        frontend call sites, and no durable dual-read or DTO fallback to legacy Product remains after deployment.
+    - id: AC8
+      statement: >-
+        Contract and end-to-end tests cover both languages, every value type, missing translation, conflicts, family/model query,
+        source-policy denial, no allowed alternative, media attribution, SSR product pages and sanitized open-data/B2B output.
+    - id: AC9
+      statement: >-
+        Existing B2B product.price identity and current-offer mapping reads the B2B projection plus OfferHead summary without
+        changing its five-credit/no-data contract; the new history facet remains governed by its separate WorkOrder.

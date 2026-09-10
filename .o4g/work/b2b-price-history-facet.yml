@@ -1,0 +1,53 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: b2b-price-history-facet
+  name: B2B provider price history facet
+spec:
+  purpose: Serve licensed provider price history through the existing metered B2B contract.
+  roadmapRef: m7-product-data-reference
+  state: ACCEPTED
+  dependsOn:
+    - price-observation-timeseries
+  decisionRefs:
+    - ADR-0005
+    - ADR-0011
+  pathScope:
+    - b2b-api/**
+    - b2b-frontend/**
+    - docs/b2b/**
+    - docs/architecture/product-data-api-*.md
+    - docs/operations/product-data-api-local-runbook.md
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        GET /api/v1/products/{gtin}/price/history accepts language, from, to, granularity, provider, condition, currency, limit
+        and cursor; dates are UTC, ranges are half-open, default range is 30 days and default granularity is DAY.
+    - id: AC2
+      statement: >-
+        DAY may query at most five years and reads provider rollups; CHANGE may query at most 31 days and reads raw events;
+        invalid ranges, future-only ranges, limit outside 1..1000 and a cursor/query mismatch return RFC 9457 validation errors.
+    - id: AC3
+      statement: >-
+        The sanitized response contains GTIN, effective range/granularity, stable next cursor and series keyed by public provider
+        label, condition and currency; DAY points expose min/max/close/offerCount and CHANGE points expose time, amount and state.
+    - id: AC4
+      statement: >-
+        Internal provider ids, offer ids, affiliation tokens, compensation, crawler/cache keys, usage-policy internals and
+        legacy debug fields never appear; a denied provider/content policy removes that series before billability is decided.
+    - id: AC5
+      statement: >-
+        Facet product.price-history costs 8 credits only when at least one allowed point is served; invalid GTIN, absent product,
+        denied/preserved-empty range and all-policy-denied results consume zero under the existing reserve/settle workflow.
+    - id: AC6
+      statement: >-
+        Absence returns the existing covered-but-not-served 200 envelope with no-data reason no-price-history; unknown GTIN
+        remains 404, and headers/meta report zero or eight credits consistently with the durable ledger and usage event.
+    - id: AC7
+      statement: >-
+        OpenAPI freezes every parameter, enum, record, nullable field, error and example; generated clients, catalog, English and
+        French docs, playground and pricing display derive the path and eight-credit cost from the backend catalog.
+    - id: AC8
+      statement: >-
+        Unit and Testcontainers tests cover both granularities, cursor stability, late rollups, multi-provider/currency data,
+        policy filtering, redaction, all no-pay cases, debit idempotence and a query plan that does not scan Product documents.

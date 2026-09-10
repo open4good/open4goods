@@ -1,0 +1,47 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: aggregation-integrity-hotfixes
+  name: Legacy aggregation integrity hotfixes
+spec:
+  purpose: Remove known data corruption paths while the source-neutral engine is being built.
+  roadmapRef: m7-product-data-reference
+  state: ACCEPTED
+  dependsOn: []
+  decisionRefs:
+    - ADR-0010
+  pathScope:
+    - api/src/main/java/org/open4goods/api/services/aggregation/**
+    - api/src/main/java/org/open4goods/api/services/completion/**
+    - api/src/test/**
+    - model/**
+    - verticals/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        Attribute language is copied from Attribute into every SourcedAttribute and remains available through merge and DTO
+        mapping; missing language becomes und and no aggregation path assigns a serving-domain language.
+    - id: AC2
+      statement: >-
+        AttributeRealtimeAggregationService invokes IcecatFeatureResolver only for Icecat assertions; EPREL and merchant fields
+        retain their own stable field ids and cannot acquire Icecat taxonomy ids from a coincidentally similar label.
+    - id: AC3
+      statement: >-
+        EPREL resolution consumes the stable parameter identifier and real language from the EPREL input rather than a flattened
+        name or duplicated Icecat mapping; brand/model writes are source-scoped and do not bypass normal election.
+    - id: AC4
+      statement: >-
+        When classification changes Product.vertical, the matching VerticalConfig is resolved again before attribute parsing,
+        indexing and scoring; a stale pre-classification config cannot process the remainder of that aggregation.
+    - id: AC5
+      statement: >-
+        UnitAwareNumericParser no longer averages converted candidates from different sources; until the new resolver ships it
+        selects one valid candidate by explicit legacy source rank, then stable source/value tie-break and records a conflict log.
+    - id: AC6
+      statement: >-
+        Regression tests permute source order and cover language, EPREL/Icecat name collision, vertical reclassification,
+        centimetre/metre values and conflicting quantities; identical input sets always produce the same result.
+    - id: AC7
+      statement: >-
+        The hotfix adds no new persistence model or compatibility abstraction and is deleted with the legacy aggregator by the
+        retirement WorkOrder after equivalent new-engine tests pass.

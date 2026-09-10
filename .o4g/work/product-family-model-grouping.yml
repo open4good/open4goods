@@ -1,0 +1,53 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: product-family-model-grouping
+  name: Queryable model and family grouping
+spec:
+  purpose: Add stable model/family relations and prefix-assisted discovery while preserving GTIN as leaf identity.
+  roadmapRef: m7-product-data-reference
+  state: ACCEPTED
+  dependsOn:
+    - canonical-concept-registry
+    - reference-resolution-and-surface-projections
+  decisionRefs:
+    - ADR-0010
+  pathScope:
+    - services/data-reference/**
+    - services/product-repository/**
+    - api/src/main/**
+    - front-api/src/main/**
+    - b2b-api/src/main/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        ProductProjection exposes keyword modelGroupId, familyGroupIds and normalized modelSearchTokens on each GTIN leaf;
+        filtering/grouping uses these fields and never changes the document id or returns a family as a product.
+    - id: AC2
+      statement: >-
+        Automatic model membership is limited to an explicit resolved source relation or an exact normalized tuple of canonical
+        brand id, O4G class id and full model; missing brand/class/model prevents automatic exact grouping.
+    - id: AC3
+      statement: >-
+        Family membership comes from explicit resolved family/series relations or a reviewed ModelPatternRule keyed by canonical
+        brand and class; generic common-prefix similarity only emits candidates and can never publish membership.
+    - id: AC4
+      statement: >-
+        ModelPatternRule is Git-versioned with regex/tokenizer, named family/model capture, examples, counterexamples, reviewer
+        and effective version; validation rejects catastrophic regexes, empty captures and overlapping ambiguous active rules.
+    - id: AC5
+      statement: >-
+        A compact group index stores stable group id, type, labels, canonical brand/class, evidence/rule version, member count,
+        representative GTINs and predecessor aliases, but never an unbounded array of all members.
+    - id: AC6
+      statement: >-
+        Merge retains one canonical group id and aliases predecessors; split creates new ids and leaves audit links; regrouping
+        reindexes affected GTIN leaves and is idempotent for the same registry/rule/input versions.
+    - id: AC7
+      statement: >-
+        Query ports support exact group lookup, GTIN-to-groups, filter by group id and prefix candidate search with stable
+        pagination; responses distinguish CONFIRMED membership from CANDIDATE matches.
+    - id: AC8
+      statement: >-
+        Fixtures cover punctuation/case, regional suffixes, sizes embedded in model codes, identical prefixes across brands or
+        classes, explicit provider relations, rule overlap, merge/split and arrival-order independence.

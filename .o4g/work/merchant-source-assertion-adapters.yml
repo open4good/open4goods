@@ -1,0 +1,57 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: merchant-source-assertion-adapters
+  name: Merchant reference and offer adapters
+spec:
+  purpose: Split merchant reference evidence from offer observations while preserving stable feed coordinates.
+  roadmapRef: m7-product-data-reference
+  state: ACCEPTED
+  dependsOn:
+    - source-assertion-store
+    - quantity-and-language-normalization
+    - price-observation-timeseries
+  decisionRefs:
+    - ADR-0010
+    - ADR-0011
+  pathScope:
+    - api/src/main/java/org/open4goods/api/services/feed/**
+    - api/src/main/java/org/open4goods/api/services/store/**
+    - api/src/test/**
+    - services/data-reference/**
+    - services/price-history/**
+    - services/urlfetching/**
+    - model/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        Every feed definition declares stable source id, source-record key columns, provider schema version, configured language,
+        field identifiers, unit columns and full/partial/deletion semantics; display labels are not persistent identities.
+    - id: AC2
+      statement: >-
+        Identity, classification, text, media, relation and characteristic columns become source assertions with raw lexical
+        value, raw unit, language, ordinal and GTIN-link confidence; unknown columns are reported and never guessed by label.
+    - id: AC3
+      statement: >-
+        Price, availability and offer condition are sent only to price-history OfferHead ingestion with a stable provider offer
+        id; they are not reference assertions and reference fields are not embedded in price events.
+    - id: AC4
+      statement: >-
+        A successful complete feed version emits FULL heads and explicit missing-record deletions; delta feeds emit PARTIAL heads
+        with tombstones, and an interrupted feed never marks unseen records deleted.
+    - id: AC5
+      statement: >-
+        Source usage policy distinguishes reference, media, offer and price content and its effective period; merchant offers
+        remain authoritative for their own current state but cannot globally override regulatory or technical attributes.
+    - id: AC6
+      statement: >-
+        DataFragmentStore content-hash behavior moves to SourceRecordHead and completion schedules use a separate
+        IngestionCheckpoint store; Product.datasourceCodes is neither hash store nor scheduling state on the new path.
+    - id: AC7
+      statement: >-
+        Batch ingestion is streaming, bounded, resumable and idempotent; poison rows are quarantined with sanitized coordinates,
+        while accepted/rejected/deleted/unchanged and price-change counts are observable by source and feed version.
+    - id: AC8
+      statement: >-
+        Shared fixtures cover CSV quoting, localized decimals, missing language/unit, duplicate rows, multi-values, unchanged
+        offers, price changes, record deletion, interrupted full feed and source-policy changes without direct Product mutation.

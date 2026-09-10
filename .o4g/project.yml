@@ -51,3 +51,9 @@ spec:
       exitCondition: >-
         Blog and editorial content are served from Nuxt Content, Google OIDC replaces XWiki
         authentication, and all XWiki runtime, dependency, backup and ingress surfaces are gone.
+    - id: m7-product-data-reference
+      order: 7
+      exitCondition: >-
+        Every GTIN is served from the source-neutral product projection; current source records,
+        licensed surface decisions and price observations are replayable; the consumer, B2B and
+        open-data readers no longer depend on the legacy Product aggregation model.

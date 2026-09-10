@@ -29,3 +29,5 @@ contract, infrastructure, data layout, security posture or developer workflow.
 | [0007](0007-icecat-module-and-data-boundaries.md) | ADR 0007: Icecat module and data boundaries | ACCEPTED | 8, 9 |
 | [0008](0008-portable-project-mcp-tooling.md) | ADR 0008: Portable project MCP tooling | ACCEPTED | 8, 9 |
 | [0009](0009-xwiki-content-and-identity-retirement.md) | ADR 0009: XWiki content and identity retirement | ACCEPTED | 1, 8, 9 |
+| [0010](0010-source-neutral-product-reference.md) | ADR 0010: Source-neutral product reference | ACCEPTED | 10, 12 |
+| [0011](0011-price-observation-time-series.md) | ADR 0011: Price observation time series | ACCEPTED | 11 |

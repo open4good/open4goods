@@ -1,0 +1,53 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: amazon-paapi-content-quarantine
+  name: Amazon PA-API content quarantine
+spec:
+  purpose: Stop PA-API enrichment and remove persisted licensed content without affecting independent Amazon merchant feeds.
+  roadmapRef: m7-product-data-reference
+  state: ACCEPTED
+  dependsOn: []
+  decisionRefs:
+    - ADR-0010
+  pathScope:
+    - api/src/main/java/org/open4goods/api/services/completion/**
+    - api/src/main/resources/**
+    - api/src/test/**
+    - model/**
+    - services/remotefilecaching/**
+    - docs/architecture/amazon-paapi-completion.md
+    - docs/operations/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        Amazon PA-API completion is disabled by default and cannot be scheduled or called by an active ingestion path; startup
+        and metrics prove zero PA-API request attempts while unrelated Amazon merchant feed adapters remain enabled.
+    - id: AC2
+      statement: >-
+        A read-only inventory classifies every Product field, offer, resource, description, category, cache entry and source code
+        attributable to PA-API separately from merchant-feed data and reports counts before any deletion.
+    - id: AC3
+      statement: >-
+        An idempotent migration supports INVENTORY and APPLY modes, explicit index/alias targeting, bounded PIT/search_after
+        batches, optimistic retries, checkpoints, cancellation and a final reconciliation report.
+    - id: AC4
+      statement: >-
+        APPLY removes PA-API attributes, texts, offers, media references and cached non-image/image content, but retains ASIN
+        identifiers and never matches records by a broad amazon substring or shared merchant display name.
+    - id: AC5
+      statement: >-
+        Cache deletion resolves exact indexed object keys, prevents path traversal and records count/hash outcomes without
+        provider content; dry-run output is sufficient for an operator to review every target class before APPLY.
+    - id: AC6
+      statement: >-
+        A deny-all source policy prevents historical PA-API evidence from entering NUDGER_WEB, B2B_API or ODBL_EXPORT while
+        retaining only the explicitly approved ASIN identity treatment.
+    - id: AC7
+      statement: >-
+        Fixtures containing both PA-API and Amazon merchant data prove selective purge, ASIN preservation, zero active calls,
+        idempotent rerun and absence of PA-API content from projections, serialization, logs and cached files.
+    - id: AC8
+      statement: >-
+        The runbook separates delivery of the migration from production APPLY; production execution requires recorded inventory,
+        backup/rollback reference and post-run evidence and is never triggered by application startup.

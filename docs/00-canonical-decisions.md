@@ -1,7 +1,7 @@
 ---
 title: "Canonical decisions"
 status: accepted
-last_updated: 2026-09-08
+last_updated: 2026-09-10
 normative: true
 audience: PROJECT_SCOPED
 ---
@@ -46,3 +46,14 @@ ADR that changes a rule updates the entry here in the same commit.
    before it is written, and corrected at the source when found false. A stale
    agent guide is a defect with the same standing as a stale test: it is what
    turned the load-bearing `ui` module into a deletion candidate.
+10. Product reference data is represented by provider-neutral, replayable source
+    records and resolved through a Git-versioned O4G concept registry. A source
+    usage policy filters evidence by content type, effective period and publication
+    surface before resolution; generic contracts contain no provider-specific field.
+11. Offers and price observations are not product-reference assertions. Current
+    offer state, append-only price change events and daily provider rollups have
+    separate stores and retention policies; unchanged polling never creates a
+    synthetic price event.
+12. A normalized GTIN remains the unique product identity. Model and family groups
+    are versioned, queryable relations on GTIN leaves; a model prefix is evidence
+    only when a reviewed brand-and-class pattern rule gives it semantics.

@@ -1,0 +1,61 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: price-observation-timeseries
+  name: Provider price observation time series
+spec:
+  purpose: Preserve provider-level price changes and presence without duplicating unchanged polls in Product documents.
+  roadmapRef: m7-product-data-reference
+  state: ACCEPTED
+  dependsOn:
+    - product-reference-contract
+    - reference-storage-capacity-benchmark
+  decisionRefs:
+    - ADR-0011
+  pathScope:
+    - pom.xml
+    - services/price-history/**
+    - api/src/main/**
+    - api/src/test/**
+    - model/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        services/price-history is a provider-neutral Java 21 module owning OfferHead, PriceChangeEvent, daily rollup, ingestion
+        and query ports; it depends on data-reference contracts but not on api or a provider adapter.
+    - id: AC2
+      statement: >-
+        OfferHead identity is normalized GTIN plus public provider id plus provider offer id and stores condition, ISO 4217
+        currency, BigDecimal amount, availability, provider/observation instants, firstSeenAt, lastSeenAt, hash and policy ref.
+    - id: AC3
+      statement: >-
+        First sight, amount/currency/condition/availability change, disappearance and reappearance append exactly one
+        idempotent event; an unchanged observation updates only head presence and retrying the same observation creates no event.
+    - id: AC4
+      statement: >-
+        Raw events use an Elasticsearch time-series data stream with GTIN, provider, offer, condition and currency dimensions,
+        observation timestamp and gauge amount; a deterministic event id prevents duplicates despite ingestion retries.
+    - id: AC5
+      statement: >-
+        Daily provider rollups group GTIN/provider/condition/currency and expose min, max, close, observed-offer count,
+        first/last observation and change count; late events update only still-open or explicitly rebuilt buckets.
+    - id: AC6
+      statement: >-
+        Lifecycle retains raw changes for 24 months and daily rollups for five years with one production replica, rollover,
+        downsampling/transform monitoring, snapshot policy and the capacity settings approved by the benchmark WorkOrder.
+    - id: AC7
+      statement: >-
+        Query ports enforce half-open UTC ranges, stable ascending order, opaque cursor pagination and filters for GTIN,
+        provider, condition and currency; ranges over 31 days default to daily rollups rather than scanning raw events.
+    - id: AC8
+      statement: >-
+        Legacy Product minimum-price points import once as provider LEGACY_PRODUCT_MIN with unknown offer identity and explicit
+        legacy provenance; they never fabricate provider, presence or observation fields and cannot outrank fresh native data.
+    - id: AC9
+      statement: >-
+        Tests cover simultaneous offers, unchanged polls, oscillating prices, disappearance/reappearance, currencies,
+        out-of-order and late events, retries, daily boundaries, retention, pagination and deterministic legacy backfill.
+    - id: AC10
+      statement: >-
+        Existing Product price histories and DataFragment.priceHistory cease being write targets after dual validation; current
+        offer summaries consumed by projections are produced from OfferHead, not reconstructed from time-series scans.
