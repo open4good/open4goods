@@ -86,3 +86,12 @@ spec:
     - 'note: Product.addBrand no longer files a candidate under a null datasource key. The null datasource means elect this
       as the referentiel brand; once a more trusted source holds that slot the candidate has no key to be filed under, and
       a null map key would not survive serialization. Source-keyed alternate brands are unaffected.'
+    - 'test: follow-up to the null-datasource brand candidate. The single-merchant case was verified rather than assumed:
+      handleReferentielAttributes files the first brand claim straight into the referentiel slot without keying it by datasource,
+      so after EPREL claims that slot the value is a derived election result, not evidence, and is not re-asserted. This is
+      not a regression: the previous EPREL branch overwrote the same referentiel brand and never re-filed it either, and the
+      merchant re-asserts it on its next fragment. Pinned by AttributeRealtimeAggregationServiceTest.onProductDoesNotReAssertADerivedBrand_whenEprelClaimsTheReferentielSlot.'
+    - 'note: AC1 scope boundary. Two aggregation paths stamped a serving-domain language and both are fixed (EPREL fr, Wikidata
+      numeric claims en). AmazonCompletionService.LANGUAGE stays fr deliberately: that text comes from the French marketplace,
+      so fr states the language the value is actually written in rather than the language a page will be served in. amazon-paapi-content-quarantine
+      owns that path next.'

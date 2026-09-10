@@ -154,6 +154,24 @@ class AttributeRealtimeAggregationServiceTest {
         }
 
         @Test
+        void onProductDoesNotReAssertADerivedBrand_whenEprelClaimsTheReferentielSlot() throws Exception {
+                Product product = new Product(123L);
+                EprelProduct eprelProduct = new EprelProduct();
+                eprelProduct.setSupplierOrTrademark("Brand");
+                product.setEprelDatas(eprelProduct);
+                // A single merchant claim lands straight in the referentiel slot without being
+                // keyed by datasource, so after election it is a derived value, not evidence.
+                product.addBrand("only-merchant.com", "Other brand", null, null);
+
+                service.onProduct(product, verticalConfig);
+
+                assertThat(product.brand()).isEqualTo("BRAND");
+                // It is not re-filed as an alternate brand: it has no datasource key to be
+                // filed under, and the merchant re-asserts it on its next fragment.
+                assertThat(product.getAkaBrands()).isEmpty();
+        }
+
+        @Test
         void onProductDoesNotWriteAnEprelBrandThatTheVerticalExcludes() throws Exception {
                 Product product = new Product(123L);
                 EprelProduct eprelProduct = new EprelProduct();
