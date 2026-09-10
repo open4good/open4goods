@@ -8,16 +8,13 @@ import java.util.Map;
 
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.icecat.config.yml.IcecatConfiguration;
-import org.open4goods.icecat.model.IcecatFeature;
-import org.open4goods.icecat.model.IcecatFeatureGroup;
-import org.open4goods.icecat.model.IcecatModel;
-import org.open4goods.icecat.model.IcecatSupplier;
+import org.open4goods.icecat.jaxb.Feature;
+import org.open4goods.icecat.jaxb.FeatureGroup;
+import org.open4goods.icecat.jaxb.Supplier;
 import org.open4goods.icecat.services.IcecatFileDownloadService;
 import org.open4goods.model.exceptions.TechnicalException;
-import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tools.jackson.dataformat.xml.XmlMapper;
 
 /**
  * Loads Icecat reference data (features, feature groups, brands/suppliers) from
@@ -30,21 +27,18 @@ public class FeatureLoader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeatureLoader.class);
 
-    private final XmlMapper xmlMapper;
     private final IcecatConfiguration iceCatConfig;
     private final IcecatFileDownloadService fileDownloadService;
     private final BrandService brandService;
 
-    private final Map<Integer, IcecatFeature> featuresById = new HashMap<>();
-    private final Map<Integer, IcecatFeatureGroup> featureGroupsById = new HashMap<>();
-    private final List<IcecatSupplier> icecatSuppliers = new ArrayList<>();
+    private final Map<Integer, Feature> featuresById = new HashMap<>();
+    private final Map<Integer, FeatureGroup> featureGroupsById = new HashMap<>();
+    private final List<Supplier> icecatSuppliers = new ArrayList<>();
 
     public FeatureLoader(
-            XmlMapper xmlMapper,
             IcecatConfiguration iceCatConfig,
             IcecatFileDownloadService fileDownloadService,
             BrandService brandService) {
-        this.xmlMapper = xmlMapper;
         this.iceCatConfig = iceCatConfig;
         this.fileDownloadService = fileDownloadService;
         this.brandService = brandService;
@@ -63,12 +57,9 @@ public class FeatureLoader {
         LOGGER.info("Getting file from {}", iceCatConfig.getFeaturesListFileUri());
         File icecatFile = fileDownloadService.getOrDownload(iceCatConfig.getFeaturesListFileUri());
         try {
-            List<IcecatFeature> features = xmlMapper.readValue(icecatFile, IcecatModel.class)
-                    .getResponse().getFeaturesList().getFeatures();
-            features.forEach(feature -> {
-                Integer id = feature.getId();
-                featuresById.put(id, feature);
-            });
+            List<Feature> features = IcecatBulkXmlReader.readResponse(icecatFile)
+                    .getFeaturesList().getFeature();
+            features.forEach(feature -> featuresById.put(IcecatBulkModelSupport.intValue(feature.getID()), feature));
         } catch (Exception e) {
             LOGGER.error("Error while loading features", e);
         }
@@ -88,10 +79,10 @@ public class FeatureLoader {
         LOGGER.info("Getting file from {}", iceCatConfig.getFeatureGroupsFileUri());
         File icecatFile = fileDownloadService.getOrDownload(iceCatConfig.getFeatureGroupsFileUri());
         try {
-            List<IcecatFeatureGroup> groups = xmlMapper.readValue(icecatFile, IcecatModel.class)
-                    .getResponse().getFeatureGroupsList().getFeatureGroups();
-            for (IcecatFeatureGroup fg : groups) {
-                featureGroupsById.put(fg.getId(), fg);
+            List<FeatureGroup> groups = IcecatBulkXmlReader.readResponse(icecatFile)
+                    .getFeatureGroupsList().getFeatureGroup();
+            for (FeatureGroup fg : groups) {
+                featureGroupsById.put(IcecatBulkModelSupport.intValue(fg.getID()), fg);
             }
         } catch (Exception e) {
             LOGGER.error("Error while loading feature groups", e);
@@ -114,11 +105,12 @@ public class FeatureLoader {
         LOGGER.info("Getting brands file from {}", iceCatConfig.getBrandsListFileUri());
         File icecatFile = fileDownloadService.getOrDownload(iceCatConfig.getBrandsListFileUri());
         try {
-            List<IcecatSupplier> suppliers = xmlMapper.readValue(icecatFile, IcecatModel.class)
-                    .getResponse().getSuppliersList().getSuppliers();
-            for (IcecatSupplier supplier : suppliers) {
+            List<Supplier> suppliers = IcecatBulkXmlReader.readResponse(icecatFile)
+                    .getSuppliersList().getSupplier();
+            for (Supplier supplier : suppliers) {
                 icecatSuppliers.add(supplier);
-                brandService.addSourceEvidence(supplier.getEffectiveName(), "icecat", String.valueOf(supplier.getId()));
+                brandService.addSourceEvidence(
+                        IcecatBulkModelSupport.effectiveName(supplier), "icecat", String.valueOf(supplier.getID()));
             }
         } catch (Exception e) {
             LOGGER.error("Error while loading brands", e);
@@ -126,16 +118,16 @@ public class FeatureLoader {
         LOGGER.info("End loading of brands from {}", iceCatConfig.getBrandsListFileUri());
     }
 
-    public Map<Integer, IcecatFeature> getFeaturesById() {
+    public Map<Integer, Feature> getFeaturesById() {
         return featuresById;
     }
 
-    public Map<Integer, IcecatFeatureGroup> getFeatureGroupsById() {
+    public Map<Integer, FeatureGroup> getFeatureGroupsById() {
         return featureGroupsById;
     }
 
     /** Returns all suppliers loaded from SuppliersList.xml, available for ES indexing. */
-    public List<IcecatSupplier> getIcecatSuppliers() {
+    public List<Supplier> getIcecatSuppliers() {
         return icecatSuppliers;
     }
 }

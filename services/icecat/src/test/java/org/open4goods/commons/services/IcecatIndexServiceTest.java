@@ -10,10 +10,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
+import java.math.BigInteger;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -21,15 +20,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.open4goods.icecat.model.IcecatCategory;
+import org.open4goods.icecat.jaxb.Category;
+import org.open4goods.icecat.jaxb.CategoryFeatureGroup;
+import org.open4goods.icecat.jaxb.Feature;
+import org.open4goods.icecat.jaxb.FeatureGroup;
+import org.open4goods.icecat.jaxb.Name;
+import org.open4goods.icecat.jaxb.Names;
 import org.open4goods.icecat.model.IcecatCategoryDocument;
 import org.open4goods.icecat.model.IcecatCategoryFeatureDocument;
-import org.open4goods.icecat.model.IcecatCategoryFeatureGroup;
-import org.open4goods.icecat.model.IcecatFeature;
 import org.open4goods.icecat.model.IcecatFeatureDocument;
-import org.open4goods.icecat.model.IcecatFeatureGroup;
-import org.open4goods.icecat.model.IcecatName;
-import org.open4goods.icecat.model.IcecatNames;
 import org.open4goods.icecat.repository.IcecatCategoryRepository;
 import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
 import org.open4goods.icecat.repository.IcecatFeatureRepository;
@@ -76,19 +75,19 @@ public class IcecatIndexServiceTest {
 
     @Test
     public void testSyncIndexesFeatureWhenMapPopulated() {
-        IcecatName nameEn = new IcecatName();
-        nameEn.setLangId(1);
-        nameEn.setValue("Screen size");
+        Name nameEn = new Name();
+        nameEn.setLangid(BigInteger.valueOf(1));
+        nameEn.setValueAttribute("Screen size");
 
-        IcecatNames names = new IcecatNames();
-        names.setNames(Arrays.asList(nameEn));
+        Names names = new Names();
+        names.getName().add(nameEn);
 
-        IcecatFeature feature = new IcecatFeature();
-        feature.setId(42);
+        Feature feature = new Feature();
+        feature.setID(BigInteger.valueOf(42));
         feature.setType("numerical");
         feature.setNames(names);
 
-        Map<Integer, IcecatFeature> map = new HashMap<>();
+        Map<Integer, Feature> map = new HashMap<>();
         map.put(42, feature);
         when(featureLoader.getFeaturesById()).thenReturn(map);
 
@@ -101,30 +100,30 @@ public class IcecatIndexServiceTest {
 
     @Test
     public void testSyncIndexesCategoryFeatureMetadataWhenMapPopulated() {
-        IcecatName nameEn = new IcecatName();
-        nameEn.setLangId(1);
-        nameEn.setValue("Washing Machines");
+        Name nameEn = new Name();
+        nameEn.setLangid(BigInteger.valueOf(1));
+        nameEn.setValueAttribute("Washing Machines");
 
-        IcecatFeatureGroup featureGroup = new IcecatFeatureGroup();
-        featureGroup.setId(88);
+        FeatureGroup featureGroup = new FeatureGroup();
+        featureGroup.setID(BigInteger.valueOf(88));
 
-        IcecatCategoryFeatureGroup categoryFeatureGroup = new IcecatCategoryFeatureGroup();
-        categoryFeatureGroup.setId(77);
-        categoryFeatureGroup.setFeatureGroups(List.of(featureGroup));
+        CategoryFeatureGroup categoryFeatureGroup = new CategoryFeatureGroup();
+        categoryFeatureGroup.setID(BigInteger.valueOf(77));
+        categoryFeatureGroup.getFeatureGroup().add(featureGroup);
 
-        IcecatFeature feature = new IcecatFeature();
-        feature.setId(42);
-        feature.setCategoryFeatureGroupId(77);
-        feature.setCategoryFeatureId(9001);
-        feature.setMandatory(1);
-        feature.setSearchable(1);
-        feature.setDefaultDisplayUnit("kg");
+        Feature feature = new Feature();
+        feature.setID(BigInteger.valueOf(42));
+        feature.setCategoryFeatureGroupID(BigInteger.valueOf(77));
+        feature.setCategoryFeatureID(BigInteger.valueOf(9001));
+        feature.setMandatory(BigInteger.ONE);
+        feature.setSearchable(true);
+        feature.setDefaultDisplayUnit(true);
 
-        IcecatCategory category = new IcecatCategory();
-        category.setId(123);
-        category.setNames(List.of(nameEn));
-        category.setCategoryFeatureGroups(List.of(categoryFeatureGroup));
-        category.setFeatures(List.of(feature));
+        Category category = new Category();
+        category.setID(BigInteger.valueOf(123));
+        category.getName().add(nameEn);
+        category.getCategoryFeatureGroup().add(categoryFeatureGroup);
+        category.getFeature().add(feature);
 
         when(categoryLoader.getCategoriesById()).thenReturn(Map.of(123, category));
         when(categoryRepository.saveAll(any())).thenReturn(Collections.emptyList());
@@ -143,7 +142,7 @@ public class IcecatIndexServiceTest {
         assertEquals(77, featureDocument.getCategoryFeatureGroupId());
         assertEquals(9001, featureDocument.getCategoryFeatureId());
         assertEquals(1, featureDocument.getMandatory());
-        assertEquals("kg", featureDocument.getDefaultDisplayUnit());
+        assertEquals("true", featureDocument.getDefaultDisplayUnit());
     }
 
     @Test

@@ -12,7 +12,7 @@ import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 /**
  * Elasticsearch document representing an Icecat feature (specification attribute).
  *
- * <p>Populated from {@link IcecatFeature} objects loaded via {@link org.open4goods.icecat.services.loader.FeatureLoader}.
+ * <p>Populated from {@link org.open4goods.icecat.jaxb.Feature} objects loaded via {@link org.open4goods.icecat.services.loader.FeatureLoader}.
  * Used as a persistent backing store and to power admin search and attribute-resolution endpoints.
  */
 @Document(indexName = "icecat-features", createIndex = true, writeTypeHint = WriteTypeHint.FALSE)

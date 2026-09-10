@@ -10,14 +10,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.StreamSupport;
 
+import org.open4goods.icecat.jaxb.Feature;
+import org.open4goods.icecat.jaxb.FeatureGroup;
+import org.open4goods.icecat.jaxb.Name;
 import org.open4goods.icecat.model.IcecatCategoryFeatureDocument;
 import org.open4goods.icecat.model.IcecatCategoryFeatureGroupDocument;
 import org.open4goods.icecat.model.IcecatCategoryDocument;
-import org.open4goods.icecat.model.IcecatFeature;
 import org.open4goods.icecat.model.IcecatFeatureDocument;
-import org.open4goods.icecat.model.IcecatFeatureGroup;
 import org.open4goods.icecat.model.IcecatFeatureGroupDocument;
-import org.open4goods.icecat.model.IcecatName;
 import org.open4goods.icecat.model.IcecatSupplierDocument;
 import org.open4goods.icecat.repository.IcecatCategoryRepository;
 import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
@@ -25,6 +25,7 @@ import org.open4goods.icecat.repository.IcecatFeatureRepository;
 import org.open4goods.icecat.repository.IcecatSupplierRepository;
 import org.open4goods.icecat.services.loader.CategoryLoader;
 import org.open4goods.icecat.services.loader.FeatureLoader;
+import org.open4goods.icecat.services.loader.IcecatBulkModelSupport;
 import org.open4goods.icecat.util.IcecatConstants;
 import org.open4goods.model.helper.IdHelper;
 import org.slf4j.Logger;
@@ -143,29 +144,29 @@ public class IcecatIndexService {
         List<IcecatCategoryDocument> docs = categoryLoader.getCategoriesById().values().stream()
                 .map(cat -> {
                     IcecatCategoryDocument doc = new IcecatCategoryDocument();
-                    doc.setId(cat.getId());
-                    doc.setScore(cat.getScore());
+                    doc.setId(IcecatBulkModelSupport.intValue(cat.getID()));
+                    doc.setScore(IcecatBulkModelSupport.intValue(cat.getScore()));
                     if (cat.getParentCategory() != null) {
-                        doc.setParentId(cat.getParentCategory().getId());
+                        doc.setParentId(IcecatBulkModelSupport.intValue(cat.getParentCategory().getID()));
                     }
-                    List<IcecatName> names = cat.getNames();
+                    List<Name> names = cat.getName();
                     doc.setEnglishName(names.stream()
-                            .filter(n -> n.getLangId() == LANG_ID_ENGLISH)
-                            .map(IcecatName::getEffectiveName)
+                            .filter(n -> IcecatBulkModelSupport.intValue(n.getLangid(), -1) == LANG_ID_ENGLISH)
+                            .map(IcecatBulkModelSupport::effectiveName)
                             .findFirst()
                             .orElse(null));
                     doc.setLangNames(toLangNameList(names));
-                    doc.setFeatureGroups(cat.getCategoryFeatureGroups().stream()
+                    doc.setFeatureGroups(cat.getCategoryFeatureGroup().stream()
                             .map(cfg -> {
                                 IcecatCategoryFeatureGroupDocument group = new IcecatCategoryFeatureGroupDocument();
-                                group.setId(cfg.getId());
-                                group.setFeatureGroupIds(cfg.getFeatureGroups().stream()
-                                        .map(IcecatFeatureGroup::getId)
+                                group.setId(IcecatBulkModelSupport.intValue(cfg.getID()));
+                                group.setFeatureGroupIds(cfg.getFeatureGroup().stream()
+                                        .map(fg -> IcecatBulkModelSupport.intValue(fg.getID()))
                                         .toList());
                                 return group;
                             })
                             .toList());
-                    doc.setFeatures(cat.getFeatures().stream()
+                    doc.setFeatures(cat.getFeature().stream()
                             .map(this::toCategoryFeatureDocument)
                             .toList());
                     return doc;
@@ -193,12 +194,12 @@ public class IcecatIndexService {
             return;
         }
         List<IcecatSupplierDocument> docs = featureLoader.getIcecatSuppliers().stream()
-                .filter(s -> s.getId() != null)
+                .filter(s -> s.getID() != null)
                 .map(supplier -> {
                     IcecatSupplierDocument doc = new IcecatSupplierDocument();
-                    doc.setId(supplier.getId());
-                    doc.setName(supplier.getEffectiveName());
-                    doc.setLogoUrl(supplier.getBestLogoUrl());
+                    doc.setId(IcecatBulkModelSupport.intValue(supplier.getID()));
+                    doc.setName(IcecatBulkModelSupport.effectiveName(supplier));
+                    doc.setLogoUrl(IcecatBulkModelSupport.bestLogoUrl(supplier));
                     doc.setLogoHighPic(supplier.getLogoHighPic());
                     doc.setLogoMediumPic(supplier.getLogoMediumPic());
                     doc.setLogoLowPic(supplier.getLogoLowPic());
@@ -210,39 +211,39 @@ public class IcecatIndexService {
         LOGGER.info("Indexed {} Icecat suppliers", docs.size());
     }
 
-    private IcecatCategoryFeatureDocument toCategoryFeatureDocument(IcecatFeature feature) {
+    private IcecatCategoryFeatureDocument toCategoryFeatureDocument(Feature feature) {
         IcecatCategoryFeatureDocument doc = new IcecatCategoryFeatureDocument();
-        doc.setId(feature.getId());
+        doc.setId(IcecatBulkModelSupport.intValue(feature.getID()));
         doc.setType(feature.getType());
-        doc.setCategoryFeatureGroupId(feature.getCategoryFeatureGroupId());
-        doc.setCategoryFeatureId(feature.getCategoryFeatureId());
-        doc.setLimitDirection(feature.getLimitDirection());
-        doc.setMandatory(feature.getMandatory());
-        doc.setSearchable(feature.getSearchable());
-        doc.setNo(feature.getNo());
-        doc.setClazz(feature.getClazz());
-        doc.setDefaultDisplayUnit(feature.getDefaultDisplayUnit());
+        doc.setCategoryFeatureGroupId(IcecatBulkModelSupport.intValue(feature.getCategoryFeatureGroupID(), 0));
+        doc.setCategoryFeatureId(IcecatBulkModelSupport.intValue(feature.getCategoryFeatureID(), 0));
+        doc.setLimitDirection(IcecatBulkModelSupport.intValue(feature.getLimitDirection(), 0));
+        doc.setMandatory(IcecatBulkModelSupport.intValue(feature.getMandatory(), 0));
+        doc.setSearchable((feature.isSetSearchable() && feature.isSearchable()) ? 1 : 0);
+        doc.setNo(feature.getNo() != null ? feature.getNo().toString() : null);
+        doc.setClazz(feature.isSetClazz() ? String.valueOf(feature.isClazz()) : null);
+        doc.setDefaultDisplayUnit(feature.isSetDefaultDisplayUnit() ? String.valueOf(feature.isDefaultDisplayUnit()) : null);
         doc.setUseDropdownInput(feature.getUseDropdownInput());
-        doc.setValueSorting(feature.getValueSorting());
+        doc.setValueSorting(IcecatBulkModelSupport.intValue(feature.getValueSorting(), 0));
         return doc;
     }
 
-    private IcecatFeatureDocument toFeatureDocument(org.open4goods.icecat.model.IcecatFeature feature) {
+    private IcecatFeatureDocument toFeatureDocument(Feature feature) {
         IcecatFeatureDocument doc = new IcecatFeatureDocument();
-        doc.setId(feature.getId());
+        doc.setId(IcecatBulkModelSupport.intValue(feature.getID()));
         doc.setType(feature.getType());
 
-        List<IcecatName> names = feature.getNames().getNames();
+        List<Name> names = feature.getNames().getName();
 
         doc.setEnglishName(names.stream()
-                .filter(n -> n.getLangId() == LANG_ID_ENGLISH)
-                .map(IcecatName::getEffectiveName)
+                .filter(n -> IcecatBulkModelSupport.intValue(n.getLangid(), -1) == LANG_ID_ENGLISH)
+                .map(IcecatBulkModelSupport::effectiveName)
                 .findFirst()
                 .orElse(null));
 
         Set<String> normalizedNames = new HashSet<>();
         names.forEach(n -> {
-            String effective = n.getEffectiveName();
+            String effective = IcecatBulkModelSupport.effectiveName(n);
             if (effective != null) {
                 normalizedNames.add(IdHelper.normalizeAttributeName(effective));
             }
@@ -252,13 +253,13 @@ public class IcecatIndexService {
         return doc;
     }
 
-    private IcecatFeatureGroupDocument toFeatureGroupDocument(IcecatFeatureGroup fg) {
+    private IcecatFeatureGroupDocument toFeatureGroupDocument(FeatureGroup fg) {
         IcecatFeatureGroupDocument doc = new IcecatFeatureGroupDocument();
-        doc.setId(fg.getId());
-        List<IcecatName> names = fg.getNames() != null ? fg.getNames() : List.of();
+        doc.setId(IcecatBulkModelSupport.intValue(fg.getID()));
+        List<Name> names = fg.getName();
         doc.setEnglishName(names.stream()
-                .filter(n -> n.getLangId() == LANG_ID_ENGLISH)
-                .map(IcecatName::getEffectiveName)
+                .filter(n -> IcecatBulkModelSupport.intValue(n.getLangid(), -1) == LANG_ID_ENGLISH)
+                .map(IcecatBulkModelSupport::effectiveName)
                 .findFirst()
                 .orElse(null));
         doc.setLangNames(toLangNameList(names));
@@ -266,12 +267,12 @@ public class IcecatIndexService {
     }
 
     /** Encodes a list of Icecat names as {@code "langId:name"} strings for compact ES storage. */
-    private List<String> toLangNameList(List<IcecatName> names) {
+    private List<String> toLangNameList(List<Name> names) {
         List<String> result = new ArrayList<>();
-        for (IcecatName n : names) {
-            String effective = n.getEffectiveName();
+        for (Name n : names) {
+            String effective = IcecatBulkModelSupport.effectiveName(n);
             if (effective != null) {
-                result.add(n.getLangId() + ":" + effective);
+                result.add(IcecatBulkModelSupport.intValue(n.getLangid(), 0) + ":" + effective);
             }
         }
         return result;

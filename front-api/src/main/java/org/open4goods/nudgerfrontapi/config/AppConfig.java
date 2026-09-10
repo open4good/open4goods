@@ -22,8 +22,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 
-import tools.jackson.dataformat.xml.XmlMapper;
-
 @Configuration
 /**
  * Beans providing core infrastructure services for the frontend API.
@@ -60,14 +58,14 @@ public class AppConfig {
     @Bean
     FeatureLoader featureLoader(IcecatFileDownloadService icecatFileDownloadService, BrandService brandService,
             @Autowired IcecatConfiguration icecatFeatureConfig) {
-        return new FeatureLoader(new XmlMapper(), icecatFeatureConfig, icecatFileDownloadService, brandService);
+        return new FeatureLoader(icecatFeatureConfig, icecatFileDownloadService, brandService);
     }
 
     @Bean
     CategoryLoader categoryLoader(IcecatFileDownloadService icecatFileDownloadService,
             VerticalsConfigService verticalConfigService, FeatureLoader featureLoader,
             @Autowired IcecatConfiguration icecatFeatureConfig) {
-        return new CategoryLoader(new XmlMapper(), icecatFeatureConfig, icecatFileDownloadService,
+        return new CategoryLoader(icecatFeatureConfig, icecatFileDownloadService,
                 verticalConfigService, featureLoader);
     }
 
@@ -75,8 +73,7 @@ public class AppConfig {
     IcecatService icecatFeatureService(IcecatFileDownloadService icecatFileDownloadService,
             @Autowired IcecatConfiguration icecatFeatureConfig, @Autowired FeatureLoader featureLoader,
             @Autowired CategoryLoader categoryLoader) {
-        // NOTE: xmlMapper not injected because sharing the Spring-managed one corrupts springdoc.
-        return new IcecatService(new XmlMapper(), icecatFeatureConfig, icecatFileDownloadService,
+        return new IcecatService(icecatFeatureConfig, icecatFileDownloadService,
                 featureLoader, categoryLoader);
     }
 
