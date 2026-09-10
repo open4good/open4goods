@@ -21,6 +21,20 @@ public record SourceFieldId(String namespace, String key, String version) {
     }
 
     /**
+     * Returns the stable serialized form of this field identity.
+     *
+     * @return identifier such as {@code icecat:1234:v2}
+     */
+    public String externalForm() {
+        return namespace + ":" + key + ":" + version;
+    }
+
+    @Override
+    public String toString() {
+        return externalForm();
+    }
+
+    /**
      * Validates a required textual component.
      *
      * @param value component value

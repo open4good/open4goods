@@ -1,0 +1,123 @@
+{
+  "gtin" : "4006381333931",
+  "surface" : "NUDGER_WEB",
+  "registryVersion" : 7,
+  "builtAt" : "2026-02-01T00:00:00Z",
+  "resolvedValues" : [ {
+    "attribute" : "o4g:attribute:name",
+    "value" : {
+      "type" : "LOCALIZED_TEXT",
+      "value" : "Téléviseur 4K",
+      "language" : "fr"
+    },
+    "winningAssertionId" : "icecat/REC-42#icecat:1234:v2#0",
+    "candidateAssertionIds" : [ "icecat/REC-42#icecat:1234:v2#0" ],
+    "ruleVersion" : "reference-resolution@2",
+    "reason" : "SOURCE_AUTHORITY",
+    "conflicting" : false
+  }, {
+    "attribute" : "o4g:attribute:energy-star",
+    "value" : {
+      "type" : "BOOLEAN",
+      "value" : true
+    },
+    "winningAssertionId" : "icecat/REC-42#icecat:1234:v2#0",
+    "candidateAssertionIds" : [ "icecat/REC-42#icecat:1234:v2#0" ],
+    "ruleVersion" : "reference-resolution@2",
+    "reason" : "SOURCE_AUTHORITY",
+    "conflicting" : false
+  }, {
+    "attribute" : "o4g:attribute:port-count",
+    "value" : {
+      "type" : "INTEGER",
+      "value" : 4
+    },
+    "winningAssertionId" : "icecat/REC-42#icecat:1234:v2#0",
+    "candidateAssertionIds" : [ "icecat/REC-42#icecat:1234:v2#0" ],
+    "ruleVersion" : "reference-resolution@2",
+    "reason" : "SOURCE_AUTHORITY",
+    "conflicting" : false
+  }, {
+    "attribute" : "o4g:attribute:rating",
+    "value" : {
+      "type" : "DECIMAL",
+      "value" : 4.50
+    },
+    "winningAssertionId" : "icecat/REC-42#icecat:1234:v2#0",
+    "candidateAssertionIds" : [ "icecat/REC-42#icecat:1234:v2#0" ],
+    "ruleVersion" : "reference-resolution@2",
+    "reason" : "SOURCE_AUTHORITY",
+    "conflicting" : false
+  }, {
+    "attribute" : "o4g:attribute:width",
+    "value" : {
+      "type" : "QUANTITY",
+      "amount" : 0.55,
+      "dimension" : "LENGTH",
+      "unit" : "m"
+    },
+    "winningAssertionId" : "icecat/REC-42#icecat:1234:v2#0",
+    "candidateAssertionIds" : [ "icecat/REC-42#icecat:1234:v2#0" ],
+    "ruleVersion" : "reference-resolution@2",
+    "reason" : "SOURCE_AUTHORITY",
+    "conflicting" : false
+  }, {
+    "attribute" : "o4g:attribute:energy-class",
+    "value" : {
+      "type" : "CODE",
+      "namespace" : "eu-energy-label",
+      "value" : "A"
+    },
+    "winningAssertionId" : "icecat/REC-42#icecat:1234:v2#0",
+    "candidateAssertionIds" : [ "icecat/REC-42#icecat:1234:v2#0" ],
+    "ruleVersion" : "reference-resolution@2",
+    "reason" : "SOURCE_AUTHORITY",
+    "conflicting" : false
+  }, {
+    "attribute" : "o4g:attribute:release-date",
+    "value" : {
+      "type" : "DATE",
+      "value" : "2026-03-15"
+    },
+    "winningAssertionId" : "icecat/REC-42#icecat:1234:v2#0",
+    "candidateAssertionIds" : [ "icecat/REC-42#icecat:1234:v2#0" ],
+    "ruleVersion" : "reference-resolution@2",
+    "reason" : "SOURCE_AUTHORITY",
+    "conflicting" : false
+  }, {
+    "attribute" : "o4g:attribute:official-page",
+    "value" : {
+      "type" : "URI",
+      "value" : "https://example.invalid/p"
+    },
+    "winningAssertionId" : "icecat/REC-42#icecat:1234:v2#0",
+    "candidateAssertionIds" : [ "icecat/REC-42#icecat:1234:v2#0" ],
+    "ruleVersion" : "reference-resolution@2",
+    "reason" : "SOURCE_AUTHORITY",
+    "conflicting" : false
+  } ],
+  "slices" : {
+    "offers" : {
+      "name" : "offers",
+      "fields" : {
+        "minimumPrice" : {
+          "type" : "DECIMAL",
+          "value" : 499.00
+        }
+      }
+    },
+    "scores" : {
+      "name" : "scores",
+      "fields" : {
+        "impact" : {
+          "type" : "DECIMAL",
+          "value" : 3.20
+        },
+        "repairability" : {
+          "type" : "DECIMAL",
+          "value" : 7.10
+        }
+      }
+    }
+  }
+}

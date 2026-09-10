@@ -1,0 +1,126 @@
+{
+  "key" : {
+    "sourceId" : "icecat",
+    "sourceRecordId" : "REC-42"
+  },
+  "schemaVersion" : "1",
+  "providerVersion" : "icecat-2026-01",
+  "observedAt" : "2026-01-01T00:00:00Z",
+  "retrievedAt" : "2026-01-02T00:00:00Z",
+  "expiresAt" : "2026-07-01T00:00:00Z",
+  "completeness" : "FULL",
+  "state" : "ACTIVE",
+  "payloadHash" : {
+    "algorithm" : "SHA-256",
+    "hexadecimalValue" : "9f86d081884c7d659a2feaa0c55ad015"
+  },
+  "evidenceReference" : "urn:o4g:evidence:icecat/REC-42",
+  "usagePolicyRef" : {
+    "policyId" : "icecat-standard",
+    "version" : "3"
+  },
+  "gtinLinks" : [ {
+    "gtin" : "4006381333931",
+    "confidence" : "EXACT",
+    "method" : "DECLARED_IDENTIFIER",
+    "evidenceReference" : "urn:o4g:evidence:gtin"
+  }, {
+    "gtin" : "5901234123457",
+    "confidence" : "WEAK",
+    "method" : "TEXT_EVIDENCE",
+    "evidenceReference" : null
+  } ],
+  "assertions" : [ {
+    "assertionId" : "icecat/REC-42#icecat:1234:v2#0",
+    "field" : {
+      "namespace" : "icecat",
+      "key" : "1234",
+      "version" : "v2"
+    },
+    "ordinal" : 0,
+    "contentType" : "IDENTITY",
+    "evidence" : {
+      "kind" : "SCALAR",
+      "lexicalValue" : "Samsung",
+      "lexicalUnit" : null,
+      "language" : "und"
+    }
+  }, {
+    "assertionId" : "icecat/REC-42#icecat:1234:v2#1",
+    "field" : {
+      "namespace" : "icecat",
+      "key" : "1234",
+      "version" : "v2"
+    },
+    "ordinal" : 1,
+    "contentType" : "ATTRIBUTE",
+    "evidence" : {
+      "kind" : "SCALAR",
+      "lexicalValue" : "55",
+      "lexicalUnit" : "cm",
+      "language" : "und"
+    }
+  }, {
+    "assertionId" : "icecat/REC-42#icecat:1234:v2#2",
+    "field" : {
+      "namespace" : "icecat",
+      "key" : "1234",
+      "version" : "v2"
+    },
+    "ordinal" : 2,
+    "contentType" : "TEXT",
+    "evidence" : {
+      "kind" : "LOCALIZED_TEXT",
+      "text" : "Téléviseur 4K",
+      "language" : "fr"
+    }
+  }, {
+    "assertionId" : "icecat/REC-42#icecat:1234:v2#3",
+    "field" : {
+      "namespace" : "icecat",
+      "key" : "1234",
+      "version" : "v2"
+    },
+    "ordinal" : 3,
+    "contentType" : "MEDIA",
+    "evidence" : {
+      "kind" : "MEDIA",
+      "uri" : "https://example.invalid/a.jpg",
+      "mediaType" : "image/jpeg",
+      "role" : "gallery-1",
+      "language" : "und"
+    }
+  }, {
+    "assertionId" : "icecat/REC-42#icecat:1234:v2#4",
+    "field" : {
+      "namespace" : "icecat",
+      "key" : "1234",
+      "version" : "v2"
+    },
+    "ordinal" : 4,
+    "contentType" : "CLASSIFICATION",
+    "evidence" : {
+      "kind" : "CLASSIFICATION",
+      "scheme" : "icecat-category",
+      "code" : "1234",
+      "label" : "Televisions",
+      "language" : "en"
+    }
+  }, {
+    "assertionId" : "icecat/REC-42#icecat:1234:v2#5",
+    "field" : {
+      "namespace" : "icecat",
+      "key" : "1234",
+      "version" : "v2"
+    },
+    "ordinal" : 5,
+    "contentType" : "RELATION",
+    "evidence" : {
+      "kind" : "RELATION",
+      "relationType" : "variant-of",
+      "targetScheme" : "icecat-record",
+      "targetIdentifier" : "REC-41",
+      "language" : "und"
+    }
+  } ]
+}

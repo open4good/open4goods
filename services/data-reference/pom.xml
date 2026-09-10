@@ -13,4 +13,47 @@
   <artifactId>data-reference</artifactId>
   <name>open4goods data reference</name>
   <description>Source-neutral product assertions and canonical reference contracts</description>
+  <build>
+    <plugins>
+      <!--
+        The dependency direction of this module is a contract, not a convention.
+        Consumers depend on these ports; the module depends on none of them. A
+        single import of a provider type here would let a provider's model leak
+        into the neutral contract, and nothing else in the build would notice.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>enforce-source-neutrality</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <bannedDependencies>
+                  <searchTransitive>true</searchTransitive>
+                  <excludes>
+                    <exclude>org.open4goods:api</exclude>
+                    <exclude>org.open4goods:front-api</exclude>
+                    <exclude>org.open4goods:commons</exclude>
+                    <exclude>org.open4goods:model</exclude>
+                    <exclude>org.open4goods:icecat</exclude>
+                    <exclude>org.open4goods:eprel-service</exclude>
+                    <exclude>org.open4goods:wikidata-service</exclude>
+                    <exclude>org.open4goods:feedservice</exclude>
+                    <exclude>org.open4goods:product-repository</exclude>
+                  </excludes>
+                  <message>services/data-reference is source-neutral: it must not depend on api, on the legacy model, or on any provider module.</message>
+                </bannedDependencies>
+              </rules>
+              <fail>true</fail>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>

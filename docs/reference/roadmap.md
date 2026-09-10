@@ -19,7 +19,7 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 | m4-product-page-quality | 0 | 0 | 0 | 0 | 1 |
 | m5-icecat-integration | 0 | 0 | 0 | 0 | 5 |
 | m6-xwiki-retirement | 2 | 0 | 2 | 0 | 2 |
-| m7-product-data-reference | 20 | 2 | 18 | 0 | 2 |
+| m7-product-data-reference | 19 | 3 | 16 | 0 | 3 |
 | m6-content-outreach | 0 | 0 | 0 | 0 | 1 |
 
 ## m0-governance
@@ -76,12 +76,11 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 | WorkOrder | Contract state | Availability | Dependencies | Blockers | Purpose |
 |---|---|---|---|---|---|
 | [amazon-paapi-content-quarantine](../../.o4g/work/amazon-paapi-content-quarantine.yml) | ACCEPTED | READY | -- | -- | Stop PA-API enrichment and remove persisted licensed content without affecting independent Amazon merchant feeds. |
-| [product-reference-contract](../../.o4g/work/product-reference-contract.yml) | ACCEPTED | READY | -- | -- | Establish the Java and serialization contracts that every reference source and consumer shares. |
-| [canonical-concept-registry](../../.o4g/work/canonical-concept-registry.yml) | ACCEPTED | BLOCKED | product-reference-contract | product-reference-contract | Replace supplier taxonomies as internal authority with a complete independently authored O4G registry. |
-| [reference-storage-capacity-benchmark](../../.o4g/work/reference-storage-capacity-benchmark.yml) | ACCEPTED | BLOCKED | product-reference-contract | product-reference-contract | Prove mappings, topology, throughput and cost from production-shaped data before full-catalog ingestion. |
+| [canonical-concept-registry](../../.o4g/work/canonical-concept-registry.yml) | ACCEPTED | READY | product-reference-contract | -- | Replace supplier taxonomies as internal authority with a complete independently authored O4G registry. |
+| [reference-storage-capacity-benchmark](../../.o4g/work/reference-storage-capacity-benchmark.yml) | ACCEPTED | READY | product-reference-contract | -- | Prove mappings, topology, throughput and cost from production-shaped data before full-catalog ingestion. |
 | [icecat-vertical-mapping-admin](../../.o4g/work/icecat-vertical-mapping-admin.yml) | ACCEPTED | BLOCKED | icecat-reference-index-runtime, canonical-concept-registry | canonical-concept-registry | Replace transient vertical assignment with reviewed Icecat-to-O4G mappings whose authority remains in Git. |
-| [price-observation-timeseries](../../.o4g/work/price-observation-timeseries.yml) | ACCEPTED | BLOCKED | product-reference-contract, reference-storage-capacity-benchmark | product-reference-contract, reference-storage-capacity-benchmark | Preserve provider-level price changes and presence without duplicating unchanged polls in Product documents. |
-| [source-assertion-store](../../.o4g/work/source-assertion-store.yml) | ACCEPTED | BLOCKED | product-reference-contract, reference-storage-capacity-benchmark | product-reference-contract, reference-storage-capacity-benchmark | Persist replaceable source heads and a compact transition journal for deterministic current-state replay. |
+| [price-observation-timeseries](../../.o4g/work/price-observation-timeseries.yml) | ACCEPTED | BLOCKED | product-reference-contract, reference-storage-capacity-benchmark | reference-storage-capacity-benchmark | Preserve provider-level price changes and presence without duplicating unchanged polls in Product documents. |
+| [source-assertion-store](../../.o4g/work/source-assertion-store.yml) | ACCEPTED | BLOCKED | product-reference-contract, reference-storage-capacity-benchmark | reference-storage-capacity-benchmark | Persist replaceable source heads and a compact transition journal for deterministic current-state replay. |
 | [b2b-price-history-facet](../../.o4g/work/b2b-price-history-facet.yml) | ACCEPTED | BLOCKED | price-observation-timeseries | price-observation-timeseries | Serve licensed provider price history through the existing metered B2B contract. |
 | [quantity-and-language-normalization](../../.o4g/work/quantity-and-language-normalization.yml) | ACCEPTED | BLOCKED | canonical-concept-registry, source-assertion-store | canonical-concept-registry, source-assertion-store | Replace dispersed parsers and unit strings with one lossless, typed and locale-aware normalization pipeline. |
 | [eprel-source-assertion-adapter](../../.o4g/work/eprel-source-assertion-adapter.yml) | ACCEPTED | BLOCKED | source-assertion-store, quantity-and-language-normalization | source-assertion-store, quantity-and-language-normalization | Convert EPREL catalogues and corrections into licensed source records without mutating Product. |
@@ -96,7 +95,7 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 | [reference-coordinated-cutover](../../.o4g/work/reference-coordinated-cutover.yml) | ACCEPTED | BLOCKED | full-reference-shadow-reingestion, reference-api-frontend-breaking-cutover, b2b-price-history-facet | full-reference-shadow-reingestion, reference-api-frontend-breaking-cutover, b2b-price-history-facet | Apply the final ingestion delta and atomically move all readers to validated source-neutral projections. |
 | [product-reference-legacy-retirement](../../.o4g/work/product-reference-legacy-retirement.yml) | ACCEPTED | BLOCKED | reference-coordinated-cutover | reference-coordinated-cutover | Remove dual semantics and dead source-specific fields after the new projection survives its rollback window. |
 
-*2 closed, see [ledger](../../.o4g/work/ledger).*
+*3 closed, see [ledger](../../.o4g/work/ledger).*
 
 ## m6-content-outreach
 

@@ -7,7 +7,10 @@ import java.util.Set;
  *
  * @param value GTIN-8, GTIN-12, GTIN-13, or GTIN-14 digits
  */
-public record Gtin(String value) {
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
+public record Gtin(@JsonValue String value) {
 
     private static final Set<Integer> VALID_LENGTHS = Set.of(8, 12, 13, 14);
 
@@ -20,6 +23,17 @@ public record Gtin(String value) {
                 || !VALID_LENGTHS.contains(value.length())) {
             throw new IllegalArgumentException("GTIN must contain 8, 12, 13, or 14 digits");
         }
+    }
+
+    /**
+     * Rebuilds the identifier from its serialized form.
+     *
+     * @param value serialized value
+     * @return validated identifier
+     */
+    @JsonCreator
+    public static Gtin fromJson(String value) {
+        return new Gtin(value);
     }
 
     @Override
