@@ -1,6 +1,7 @@
 package org.open4goods.api.services.completion;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -14,12 +15,16 @@ import org.open4goods.api.services.aggregation.aggregator.StandardAggregator;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.icecat.config.yml.IcecatCompletionConfig;
+import org.open4goods.icecat.model.IcecatLiveApiResponse.FeatureLogos;
 import org.open4goods.icecat.model.IcecatLiveApiResponse.FeaturesGroups;
 import org.open4goods.icecat.model.IcecatLiveApiResponse.Gallery;
 import org.open4goods.icecat.model.IcecatLiveApiResponse.GeneralInfo;
 import org.open4goods.icecat.model.IcecatLiveApiResponse.IceDataItem;
 import org.open4goods.icecat.model.IcecatLiveApiResponse.Image;
 import org.open4goods.icecat.model.IcecatLiveApiResponse.Multimedia;
+import org.open4goods.icecat.model.IcecatLiveApiResponse.ReasonsToBuy;
+import org.open4goods.icecat.model.IcecatLiveApiResponse.VariantIdentifier;
+import org.open4goods.icecat.model.IcecatLiveApiResponse.Variants;
 import org.open4goods.icecat.services.IcecatLiveClient;
 import org.open4goods.icecat.services.IcecatLiveLookupResult;
 import org.open4goods.model.attribute.ReferentielKey;
@@ -42,13 +47,12 @@ import com.google.common.collect.Sets;
 
 public class IcecatCompletionService extends AbstractCompletionService {
 
-	
-
-
 	/**
-	 * Icecat completion will be triggered only if older than this const
+	 * Suffix appended to {@link #getDatasourceName()} to record the negative-cache timestamp
+	 * (NOT_FOUND / RESTRICTED / ERROR outcomes), kept distinct from the success timestamp so
+	 * that {@link #shouldProcess(VerticalConfig, Product)} can gate each independently.
 	 */
-	private static final int REFRESH_IN_DAYS = 30;
+	private static final String MISS_SUFFIX = ".miss";
 
     private final IcecatCompletionConfig icecatConfig;
     private final StandardAggregator aggregator;
@@ -82,13 +86,25 @@ public class IcecatCompletionService extends AbstractCompletionService {
         @Override
         public boolean shouldProcess(VerticalConfig vertical, Product data) {
                 // TODO(p2,perf) : should adda check on unprocessed resources
-                Long lastProcessed = data.getDatasourceCodes().get(getDatasourceName());
-                if (null == lastProcessed) {
-                        return true;
+                long now = System.currentTimeMillis();
+
+                Long lastSuccess = data.getDatasourceCodes().get(getDatasourceName());
+                if (null != lastSuccess) {
+                        long refreshIntervalMs = Duration.ofDays(icecatConfig.getRefreshIntervalDays()).toMillis();
+                        if (now - lastSuccess < refreshIntervalMs) {
+                                return false;
+                        }
                 }
 
-                long refreshIntervalMs = Duration.ofDays(REFRESH_IN_DAYS).toMillis();
-                return System.currentTimeMillis() - lastProcessed >= refreshIntervalMs;
+                Long lastMiss = data.getDatasourceCodes().get(missDatasourceName());
+                if (null != lastMiss) {
+                        long negativeCacheMs = Duration.ofDays(icecatConfig.getNegativeCacheIntervalDays()).toMillis();
+                        if (now - lastMiss < negativeCacheMs) {
+                                return false;
+                        }
+                }
+
+                return true;
         }
 
 	@Override
@@ -96,37 +112,62 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		return "icecat.biz";
 	}
 
-	
+	private String missDatasourceName() {
+		return getDatasourceName() + MISS_SUFFIX;
+	}
+
 	/**
-	 * Trigger icecat call on a product. Here the logic : 
-	 * > If first call, then make a search, then associates the asin
-	 * > if second call, then make a get.
-	 * > If ASIN was not previously found, then mark as stand by
+	 * Trigger icecat call on a product. Here the logic :
+	 * > If no Icecat id is known yet, search by GTIN and associate the id on a match.
+	 * > If an Icecat id is already known, refresh that exact product by id.
+	 * The success timestamp ({@link #getDatasourceName()}) is set only when aggregation of the
+	 * resulting DataFragment actually succeeds; a NOT_FOUND/RESTRICTED/ERROR outcome instead sets
+	 * a distinct negative-cache timestamp ({@link #missDatasourceName()}), so {@link #shouldProcess}
+	 * can gate retries on misses independently of the refresh interval for known matches.
 	 */
 	public void processProduct(VerticalConfig vertical, Product data) {
 		logger.info("Icecat completion for {}", data.getId());
-		Set<DataFragment> fragments = new HashSet<>();
-		
-		String icecatId = data.getExternalIds().getIcecat();
-		if (StringUtils.isEmpty(icecatId)) {			
-			fragments.addAll(completeSearch(vertical, data));
-		} else {
-				// TODO : Refresh policy
-					//logger.info("Skipping, already fetched{}", data.gtin());
-			fragments.addAll(completeSearch(vertical, data));
+
+		if (null == data.getId()) {
+			logger.warn("Skipping icecat completion, product has no id");
+			return;
 		}
-		
-		// Apply aggregation
+
+		Set<DataFragment> fragments = new HashSet<>();
+
+		String icecatId = data.getExternalIds().getIcecat();
+		IcecatLiveLookupResult result = StringUtils.isEmpty(icecatId)
+				? liveClient.fetchProduct(data.getId(), icecatConfig.getDomainLanguage())
+				: liveClient.fetchProductByIcecatId(icecatId, icecatConfig.getDomainLanguage());
+
+		switch (result.status()) {
+			case FOUND -> {
+				IceDataItem iceItem = result.product().orElseThrow();
+				data.getExternalIds().setIcecat(String.valueOf(iceItem.generalInfo.icecatId));
+				fragments.add(convert(iceItem, data, icecatConfig.getDomainLanguage()));
+			}
+			case NOT_FOUND, RESTRICTED -> data.getDatasourceCodes().put(missDatasourceName(), System.currentTimeMillis());
+			case ERROR -> {
+				logger.error("Icecat live lookup failed for gtin {} : {}", data.gtin(),
+						result.errorMessage().orElse("unknown error"));
+				data.getDatasourceCodes().put(missDatasourceName(), System.currentTimeMillis());
+			}
+		}
+
+		// Apply aggregation; the success timestamp is set only if at least one fragment aggregates cleanly.
+		boolean aggregationSucceeded = false;
 		for (DataFragment df : fragments) {
 			try {
 				aggregator.onDatafragment(df, data);
+				aggregationSucceeded = true;
 			} catch (AggregationSkipException e) {
 				logger.error("Error occurs during icecat aggregation",e);
 			}
 		}
-		
-		// Setting the timestamp flag
-		data.getDatasourceCodes().put(getDatasourceName(), System.currentTimeMillis());
+
+		if (aggregationSucceeded) {
+			data.getDatasourceCodes().put(getDatasourceName(), System.currentTimeMillis());
+		}
 
         try {
             Thread.sleep(icecatConfig.getPolitenessDelayMs());
@@ -136,58 +177,35 @@ public class IcecatCompletionService extends AbstractCompletionService {
         }
     }
 
-	/**
-	 * Proceed to the search api call on icecat
-	 * 
-	 * @param vertical
-	 * @param data
-	 */
-	private Set<DataFragment> completeSearch(VerticalConfig vertical, Product data) {
-		Set<DataFragment> ret = new HashSet<>();
 
-		// TODO : Should manage a thread pool if operating on all catalog
-		// TODO(icecat-completion-i18n-and-coverage) : resolve the real domain language instead of this default
-		IcecatLiveLookupResult result = liveClient.fetchProduct(data.getId(), DomainLanguage.fr);
-
-		switch (result.status()) {
-			case FOUND -> {
-				IceDataItem iceItem = result.product().orElseThrow();
-				data.getExternalIds().setIcecat(String.valueOf(iceItem.generalInfo.icecatId));
-				ret.add(convert(iceItem, data));
-			}
-			case NOT_FOUND, RESTRICTED -> {
-				// Nothing to complete; IcecatLiveClient already logged the reason.
-			}
-			case ERROR -> logger.error("Icecat live lookup failed for gtin {} : {}", data.gtin(),
-					result.errorMessage().orElse("unknown error"));
-		}
-		return ret;
-	}
-
-	
 	/**
 	 * Proceed to icecat to datafragment conversion
 	 * @param iceItem
 	 * @param data
+	 * @param language the domain language requested from the live API, used for language-tagged
+	 *                 fields when the item itself carries no more specific language
 	 * @return
 	 */
-	private DataFragment convert(IceDataItem iceItem, Product data) {
+	private DataFragment convert(IceDataItem iceItem, Product data, DomainLanguage language) {
 		DataFragment df = initDataFragment(data);
-		
-		completeGeneralInfos(iceItem.generalInfo, df,data);
+
+		completeGeneralInfos(iceItem.generalInfo, df,data, language);
 		completeImage(iceItem.image, df, data);
-		completeMultimedia(nullToEmpty(iceItem.multimedia),df,data);
+		completeMultimedia(nullToEmpty(iceItem.multimedia),df,data, language);
 		completeGallery(nullToEmpty(iceItem.gallery),df,data);
 		completeFeaturesGroup(nullToEmpty(iceItem.featuresGroups),df);
+		completeFeatureLogos(nullToEmpty(iceItem.featureLogos), df, data);
+		completeReasonsToBuy(nullToEmpty(iceItem.reasonsToBuy), df, language);
+		completeVariants(nullToEmpty(iceItem.variants), df, language);
 
 
         nullToEmpty(iceItem.taxonomyDescriptions).forEach(e->{
-            
+
             // TODO : Handle taxonomy
         });
-        
-        
-        
+
+
+
         nullToEmpty(iceItem.productRelated).forEach(e-> {
             // TODO : HAndle related products
             //System.out.println("RELATED : " + e.icecatID);
@@ -196,7 +214,7 @@ public class IcecatCompletionService extends AbstractCompletionService {
 //TaxonomyDescriptions
 //ProductRelated
 
-		
+
 		return df;
 	}
 
@@ -274,21 +292,78 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		df.addResource(url ,  Sets.newHashSet(tag,"gallery"));
 	}
 
-	private void completeMultimedia(List<Multimedia> multimedia, DataFragment df, Product p) {
+	private void completeMultimedia(List<Multimedia> multimedia, DataFragment df, Product p, DomainLanguage language) {
 
         for (Multimedia m : multimedia) {
             if (m == null || StringUtils.isBlank(m.url)) {
                 continue;
             }
             try {
-                // TODO : handle i18
-                addResourceIfAbsent(df, p, m.url, "fr");
+                // Resource tag is the multimedia type (matches completeGallery's use of Gallery.type);
+                // falls back to the requested language only when Icecat provides no type.
+                String tag = StringUtils.isNotBlank(m.type) ? m.type : language.languageTag();
+                addResourceIfAbsent(df, p, m.url, tag);
 			} catch (ValidationException e) {
 				logger.info("Cannot validate multimedia resource : {}",m.url);
 			}
 		}
-				
-		
+
+
+	}
+
+	private void completeFeatureLogos(List<FeatureLogos> featureLogos, DataFragment df, Product p) {
+		for (FeatureLogos logo : featureLogos) {
+			if (logo == null || StringUtils.isBlank(logo.logoPic)) {
+				continue;
+			}
+			try {
+				addResourceIfAbsent(df, p, logo.logoPic, "logo");
+			} catch (ValidationException e) {
+				logger.info("Cannot validate feature logo resource : {}", logo.logoPic);
+			}
+		}
+	}
+
+	private void completeReasonsToBuy(List<ReasonsToBuy> reasonsToBuy, DataFragment df, DomainLanguage language) {
+		List<String> values = new ArrayList<>();
+		String lang = language.languageTag();
+		for (ReasonsToBuy reason : reasonsToBuy) {
+			if (reason == null || StringUtils.isBlank(reason.value)) {
+				continue;
+			}
+			values.add(reason.value);
+			if (StringUtils.isNotBlank(reason.language)) {
+				lang = reason.language;
+			}
+		}
+		if (!values.isEmpty()) {
+			df.addAttribute("REASONS_TO_BUY", String.join(" | ", values), lang, null);
+		}
+	}
+
+	/**
+	 * Variants (sibling products, e.g. by color) are captured as a single joined attribute of
+	 * their identifiers rather than as alternate ids : {@code DataFragment.alternateIds} is for
+	 * alternate names of the SAME product, and a variant is a DIFFERENT product.
+	 */
+	private void completeVariants(List<Variants> variants, DataFragment df, DomainLanguage language) {
+		List<String> identifiers = new ArrayList<>();
+		for (Variants variant : variants) {
+			if (variant == null) {
+				continue;
+			}
+			for (VariantIdentifier identifier : nullToEmpty(variant.variantIdentifiers)) {
+				if (identifier == null || StringUtils.isBlank(identifier.value)) {
+					continue;
+				}
+				identifiers.add(StringUtils.isNotBlank(identifier.identifierType)
+						? identifier.identifierType + ":" + identifier.value
+						: identifier.value);
+			}
+		}
+		if (!identifiers.isEmpty()) {
+			df.addAttribute("ICECAT_VARIANTS", String.join(" | ", identifiers), language.languageTag(), null);
+		}
 	}
 
     private void completeImage(Image image, DataFragment df, Product p) {
@@ -308,51 +383,65 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		
 	}
 
-    private void completeGeneralInfos(GeneralInfo e, DataFragment df, Product p) {
+    private void completeGeneralInfos(GeneralInfo e, DataFragment df, Product p, DomainLanguage language) {
         if (e == null) {
             return;
         }
-		
+		String lang = language.languageTag();
+
 		// TODO(p3, feature) : HAndle end of year / end of year
-		if (null != e.releaseDate) {			
-			// TODO : i18n
+		if (null != e.releaseDate) {
 			try {
-				df.addAttribute("YEAR",  e.releaseDate.substring(e.releaseDate.lastIndexOf("-")+1) , "fr", null);
+				// ReleaseDate is "YYYY-MM-DD" or "YYYY-MM-DDTHH:MM:SS" ; the year is the leading segment.
+				int dash = e.releaseDate.indexOf("-");
+				df.addAttribute("YEAR", dash > 0 ? e.releaseDate.substring(0, dash) : e.releaseDate, lang, null);
 			} catch (Exception e1) {
 				logger.error("Parsing year failed ! ",e);
 			}
 		}
-		
+		if (null != e.endOfLifeDate) {
+			df.addAttribute("END_OF_LIFE_DATE", e.endOfLifeDate, lang, null);
+		}
+
 		df.addName(e.title);
         if (e.titleInfo != null) {
             df.addName(e.titleInfo.generatedIntTitle);
         }
         df.addName(e.productName);
-        
+
         df.addReferentielAttribute(ReferentielKey.BRAND, e.brand);
         if (e.brandInfo != null) {
             df.addReferentielAttribute(ReferentielKey.BRAND, e.brandInfo.brandName);
         }
-        
+
         df.addReferentielAttribute(ReferentielKey.MODEL, e.brandPartCode, ModelCandidateSource.STRUCTURED_DATA);
         if (e.category != null && e.category.name != null) {
             df.addProductTag(e.category.name.value);
         }
-		
-		
-		
+
+        if (e.productFamily != null && StringUtils.isNotBlank(e.productFamily.value)) {
+            df.addAttribute("PRODUCT_FAMILY", e.productFamily.value,
+                    StringUtils.isNotBlank(e.productFamily.language) ? e.productFamily.language : lang, null);
+        }
+        if (e.productSeries != null && StringUtils.isNotBlank(e.productSeries.value)) {
+            df.addAttribute("PRODUCT_SERIES", e.productSeries.value,
+                    StringUtils.isNotBlank(e.productSeries.language) ? e.productSeries.language : lang, null);
+        }
+
+        completeSummaryAndBullets(e, df);
+
 		// Adding PDFs
 		try {
-						
+
 			if (e.description != null && e.description.leafletPDFURL != null) {
 				addResourceIfAbsent(df, p, e.description.leafletPDFURL, ResourceTag.LEAFLET.toString());
 			}
-			
+
 		} catch (ValidationException e1) {
 			logger.error("Error while adding leaflet pdf {}", e.description.leafletPDFURL, e);
 		}
-		
-		
+
+
 		try {
 			if (e.description != null && e.description.manualPDFURL != null) {
 				addResourceIfAbsent(df, p, e.description.manualPDFURL, ResourceTag.MANUAL.toString());
@@ -362,10 +451,47 @@ public class IcecatCompletionService extends AbstractCompletionService {
 			logger.error("Error while adding manual pdf {}", e.description.leafletPDFURL, e);
 
 		}
-		
-		// TODO : Check ProductFamily
-		
-		
+	}
+
+	/**
+	 * DataFragment only holds one description slot per datasource ({@link DataFragment#addDescription}),
+	 * so summary and bullet points are folded into a single text rather than competing for that
+	 * slot: prefers SummaryDescription (long, then short), falls back to Description (long, then
+	 * middle), then appends BulletPoints (or GeneratedBulletPoints if absent) as a bullet list.
+	 */
+	private void completeSummaryAndBullets(GeneralInfo e, DataFragment df) {
+		String description = null;
+		if (e.summaryDescription != null && StringUtils.isNotBlank(e.summaryDescription.longSummaryDescription)) {
+			description = e.summaryDescription.longSummaryDescription;
+		} else if (e.summaryDescription != null && StringUtils.isNotBlank(e.summaryDescription.shortSummaryDescription)) {
+			description = e.summaryDescription.shortSummaryDescription;
+		} else if (e.description != null && StringUtils.isNotBlank(e.description.longDesc)) {
+			description = e.description.longDesc;
+		} else if (e.description != null && StringUtils.isNotBlank(e.description.middleDesc)) {
+			description = e.description.middleDesc;
+		}
+
+		List<String> bullets = null;
+		if (e.bulletPoints != null && !nullToEmpty(e.bulletPoints.values).isEmpty()) {
+			bullets = e.bulletPoints.values;
+		} else if (e.generatedBulletPoints != null && !nullToEmpty(e.generatedBulletPoints.values).isEmpty()) {
+			bullets = e.generatedBulletPoints.values;
+		}
+
+		if (bullets != null && !bullets.isEmpty()) {
+			StringBuilder sb = new StringBuilder(StringUtils.defaultString(description));
+			for (String bullet : bullets) {
+				if (StringUtils.isNotBlank(bullet)) {
+					if (sb.length() > 0) {
+						sb.append('\n');
+					}
+					sb.append("- ").append(bullet);
+				}
+			}
+			description = sb.toString();
+		}
+
+		df.addDescription(getDatasourceName(), description);
 	}
 
 	/**

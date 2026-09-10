@@ -6,7 +6,10 @@ import org.open4goods.icecat.model.IcecatLiveApiResponse.IceDataItem;
 import org.open4goods.model.localization.DomainLanguage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
 import tools.jackson.databind.ObjectMapper;
@@ -29,7 +32,7 @@ public class IcecatLiveClient {
     private final ObjectMapper objectMapper;
 
     public IcecatLiveClient(IcecatCompletionConfig config) {
-        this(config, RestClient.create(), new ObjectMapper());
+        this(config, buildRestClient(config), new ObjectMapper());
     }
 
     IcecatLiveClient(IcecatCompletionConfig config, RestClient restClient, ObjectMapper objectMapper) {
@@ -38,46 +41,103 @@ public class IcecatLiveClient {
         this.objectMapper = objectMapper;
     }
 
+    private static RestClient buildRestClient(IcecatCompletionConfig config) {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(config.getConnectTimeoutMs());
+        factory.setReadTimeout(config.getReadTimeoutMs());
+        return RestClient.builder().requestFactory(factory).build();
+    }
+
     /**
-     * Fetches and parses a single product from the Icecat live API.
+     * Fetches and parses a single product from the Icecat live API, by GTIN (search).
      *
      * @param gtin     the product's GTIN
      * @param language the domain language to request localized content in
      * @return the neutral lookup outcome; never throws for expected HTTP/parsing failures
      */
     public IcecatLiveLookupResult fetchProduct(long gtin, DomainLanguage language) {
-        String url = buildUrl(gtin, language);
+        return fetch(buildUrl(gtin, language), "gtin " + gtin);
+    }
+
+    /**
+     * Fetches and parses a single product from the Icecat live API, by its Icecat product id
+     * (refresh of a product already matched to Icecat).
+     *
+     * @param icecatId the Icecat product id previously matched via {@link #fetchProduct(long, DomainLanguage)}
+     * @param language the domain language to request localized content in
+     * @return the neutral lookup outcome; never throws for expected HTTP/parsing failures
+     */
+    public IcecatLiveLookupResult fetchProductByIcecatId(String icecatId, DomainLanguage language) {
+        return fetch(buildIdUrl(icecatId, language), "icecatId " + icecatId);
+    }
+
+    private IcecatLiveLookupResult fetch(String url, String label) {
+        int maxAttempts = Math.max(1, config.getMaxRetryAttempts());
         LOGGER.info("Loading icecat data {}", url);
-        try {
-            String content = restClient.get().uri(url).retrieve().body(String.class);
-            IceDataItem item = objectMapper.readValue(content, IcecatLiveApiResponse.class).data;
-            if (item == null || item.generalInfo == null) {
-                LOGGER.warn("Icecat response for gtin {} does not contain product data", gtin);
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                String content = restClient.get().uri(url).retrieve().body(String.class);
+                IceDataItem item = objectMapper.readValue(content, IcecatLiveApiResponse.class).data;
+                if (item == null || item.generalInfo == null) {
+                    LOGGER.warn("Icecat response for {} does not contain product data", label);
+                    return IcecatLiveLookupResult.notFound();
+                }
+                return IcecatLiveLookupResult.found(item);
+            } catch (UnrecognizedPropertyException e) {
+                LOGGER.error("Unknown property at {} : {}", url, e.getOriginalMessage());
+                return IcecatLiveLookupResult.error(e.getOriginalMessage());
+            } catch (HttpClientErrorException.NotFound | HttpClientErrorException.BadRequest e) {
+                LOGGER.info("{} is not found in Icecat", label);
                 return IcecatLiveLookupResult.notFound();
+            } catch (HttpClientErrorException.Forbidden e) {
+                LOGGER.info("{} is restricted to an upgraded Icecat plan", label);
+                return IcecatLiveLookupResult.restricted();
+            } catch (HttpServerErrorException | ResourceAccessException e) {
+                // Transient (5xx, connect/read timeout) : retry up to maxAttempts, others are terminal.
+                if (attempt >= maxAttempts) {
+                    LOGGER.error("Icecat live call failed after {} attempt(s) for {}", attempt, label, e);
+                    return IcecatLiveLookupResult.error(e.getMessage());
+                }
+                LOGGER.warn("Icecat live call attempt {}/{} failed for {}, retrying : {}", attempt, maxAttempts, label,
+                        e.getMessage());
+                sleep(config.getRetryBackoffMs());
+            } catch (Exception e) {
+                LOGGER.error("Unexpected error in icecat parsing for {}", label, e);
+                return IcecatLiveLookupResult.error(e.getMessage());
             }
-            return IcecatLiveLookupResult.found(item);
-        } catch (UnrecognizedPropertyException e) {
-            LOGGER.error("Unknown property at {} : {}", url, e.getOriginalMessage());
-            return IcecatLiveLookupResult.error(e.getOriginalMessage());
-        } catch (HttpClientErrorException.NotFound | HttpClientErrorException.BadRequest e) {
-            LOGGER.info("Gtin {} is not found in Icecat", gtin);
-            return IcecatLiveLookupResult.notFound();
-        } catch (HttpClientErrorException.Forbidden e) {
-            LOGGER.info("Gtin {} is restricted to an upgraded Icecat plan", gtin);
-            return IcecatLiveLookupResult.restricted();
-        } catch (Exception e) {
-            LOGGER.error("Unexpected error in icecat parsing for gtin {}", gtin, e);
-            return IcecatLiveLookupResult.error(e.getMessage());
+        }
+        return IcecatLiveLookupResult.error("Icecat live call failed after " + maxAttempts + " attempt(s) for " + label);
+    }
+
+    private static void sleep(Integer millis) {
+        try {
+            Thread.sleep(millis == null ? 0 : millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 
     /**
-     * Builds the request URL, substituting the configured {@code Language=} query value with
-     * the requested {@link DomainLanguage} instead of the static config default.
+     * Builds the GTIN-search request URL, substituting the configured {@code Language=} query
+     * value with the requested {@link DomainLanguage} instead of the static config default.
      */
     String buildUrl(long gtin, DomainLanguage language) {
         String prefix = config.getIceCatUrlPrefix()
                 .replaceFirst("(?i)Language=[^&]*", "Language=" + language.languageTag());
         return prefix + gtin;
+    }
+
+    /**
+     * Builds the Icecat-id request URL, substituting both the configured {@code Language=} value
+     * and the trailing {@code GTIN=} query name with {@code icecat_id=}.
+     *
+     * <p>Verified against Icecat's published JSON API manual (icecat_id query parameter); not
+     * verified against the live API itself, since no by-id fixture is available offline.
+     */
+    String buildIdUrl(String icecatId, DomainLanguage language) {
+        String prefix = config.getIceCatUrlPrefix()
+                .replaceFirst("(?i)Language=[^&]*", "Language=" + language.languageTag())
+                .replaceFirst("(?i)GTIN=$", "icecat_id=");
+        return prefix + icecatId;
     }
 }

@@ -56,4 +56,42 @@ class IcecatLiveApiResponseTest {
         assertThat(response.data.generalInfo.icecatId).isEqualTo(42);
         assertThat(response.data.generalInfo.title).isEqualTo("Example Product");
     }
+
+    /**
+     * Shape sourced from Icecat's published JSON API manual, not a captured live response
+     * (no by-id/Variants fixture is available offline) : proves the mapper parses this
+     * documented shape, not that it matches production exactly.
+     */
+    @Test
+    void parsesVariantsWithIdentifiersAndIgnoresUnmappedInnerArrays() throws Exception {
+        String json = """
+                {
+                  "msg": "OK",
+                  "data": {
+                    "GeneralInfo": { "IcecatId": 1 },
+                    "Variants": [
+                      {
+                        "VariantID": "v1",
+                        "VariantIdentifiers": [
+                          { "Identifier Type": "GTIN13", "Value": "1234567890123" }
+                        ],
+                        "VariantDescriptions": "Red edition",
+                        "VariantFeatures": [{ "Unmapped": "ignored" }],
+                        "VariantImages": [{ "Unmapped": "ignored" }],
+                        "VariantMultimedia": [{ "Unmapped": "ignored" }]
+                      }
+                    ]
+                  }
+                }
+                """;
+
+        IcecatLiveApiResponse response = mapper.readValue(json, IcecatLiveApiResponse.class);
+
+        assertThat(response.data.variants).hasSize(1);
+        assertThat(response.data.variants.get(0).variantID).isEqualTo("v1");
+        assertThat(response.data.variants.get(0).variantDescriptions).isEqualTo("Red edition");
+        assertThat(response.data.variants.get(0).variantIdentifiers).hasSize(1);
+        assertThat(response.data.variants.get(0).variantIdentifiers.get(0).identifierType).isEqualTo("GTIN13");
+        assertThat(response.data.variants.get(0).variantIdentifiers.get(0).value).isEqualTo("1234567890123");
+    }
 }
