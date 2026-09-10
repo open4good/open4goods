@@ -8,13 +8,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.open4goods.icecat.config.yml.IcecatConfiguration;
+import org.open4goods.icecat.jaxb.Category;
+import org.open4goods.icecat.jaxb.Feature;
+import org.open4goods.icecat.jaxb.Name;
 import org.open4goods.icecat.model.AttributesFeatureGroups;
-import org.open4goods.icecat.model.IcecatCategory;
-import org.open4goods.icecat.model.IcecatFeature;
 import org.open4goods.icecat.model.IcecatLanguageHandler;
-import org.open4goods.icecat.model.IcecatName;
 import org.open4goods.icecat.services.loader.CategoryLoader;
 import org.open4goods.icecat.services.loader.FeatureLoader;
+import org.open4goods.icecat.services.loader.IcecatBulkModelSupport;
 import org.open4goods.icecat.util.IcecatConstants;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.exceptions.TechnicalException;
@@ -26,8 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
-
-import tools.jackson.dataformat.xml.XmlMapper;
 
 
 /**
@@ -42,7 +41,6 @@ public class IcecatService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IcecatService.class);
 
-    private final XmlMapper xmlMapper;
     private final IcecatConfiguration iceCatConfig;
     private final IcecatFileDownloadService fileDownloadService;
     private final FeatureLoader featureLoader;
@@ -54,19 +52,16 @@ public class IcecatService {
     /**
      * Creates the IcecatService and immediately loads all reference data.
      *
-     * @param xmlMapper           Jackson XML mapper (a dedicated instance, not the shared Spring one)
      * @param iceCatConfig        Icecat bulk-export configuration
      * @param fileDownloadService handles file download and decompression
      * @param featureLoader       loads features, feature groups, and suppliers
      * @param categoryLoader      loads categories and category-feature mappings
      */
     public IcecatService(
-            XmlMapper xmlMapper,
             IcecatConfiguration iceCatConfig,
             IcecatFileDownloadService fileDownloadService,
             FeatureLoader featureLoader,
             CategoryLoader categoryLoader) {
-        this.xmlMapper = xmlMapper;
         this.iceCatConfig = iceCatConfig;
         this.fileDownloadService = fileDownloadService;
         this.featureLoader = featureLoader;
@@ -163,14 +158,14 @@ public class IcecatService {
                     ProductAttribute a = product.getAttributes().attributeByFeatureId(fId);
                     if (null != a) {
                         ufg.getAttributes().add(a);
-                        IcecatFeature f = featureLoader.getFeaturesById().get(fId);
+                        Feature f = featureLoader.getFeaturesById().get(fId);
                         if (f != null) {
-                            IcecatName i18nName = f.getNames().getNames().stream()
-                                    .filter(e -> e.getLangId() == icecatLanguage)
+                            Name i18nName = f.getNames().getName().stream()
+                                    .filter(e -> IcecatBulkModelSupport.intValue(e.getLangid(), -1) == icecatLanguage)
                                     .findFirst()
                                     .orElse(null);
                             if (null != i18nName) {
-                                a.setName(i18nName.getEffectiveName());
+                                a.setName(IcecatBulkModelSupport.effectiveName(i18nName));
                             }
                         }
 
@@ -210,13 +205,13 @@ public class IcecatService {
         if (null != vertical) {
             for (FeatureGroup fg : vertical.getFeatureGroups()) {
                 for (Integer fId : fg.getFeaturesId()) {
-                    IcecatFeature f = featureLoader.getFeaturesById().get(fId);
-                    IcecatName i18nName = f.getNames().getNames().stream()
-                            .filter(e -> e.getLangId() == IcecatConstants.LANG_ID_ENGLISH)
+                    Feature f = featureLoader.getFeaturesById().get(fId);
+                    Name i18nName = f.getNames().getName().stream()
+                            .filter(e -> IcecatBulkModelSupport.intValue(e.getLangid(), -1) == IcecatConstants.LANG_ID_ENGLISH)
                             .findFirst()
                             .orElse(null);
                     if (null != i18nName) {
-                        ret.put(i18nName.getTextValue(), f.getType());
+                        ret.put(i18nName.getValue(), f.getType());
                     } else {
                         LOGGER.error("Name not found for feature {} - {}", fId, f);
                     }
@@ -226,20 +221,20 @@ public class IcecatService {
         return ret;
     }
 
-    public Map<Integer, IcecatFeature> getFeaturesById() {
+    public Map<Integer, Feature> getFeaturesById() {
         return featureLoader.getFeaturesById();
     }
 
-    public void setFeaturesById(Map<Integer, IcecatFeature> featuresById) {
+    public void setFeaturesById(Map<Integer, Feature> featuresById) {
         featureLoader.getFeaturesById().clear();
         featureLoader.getFeaturesById().putAll(featuresById);
     }
 
-    public Map<Integer, IcecatCategory> getCategoriesById() {
+    public Map<Integer, Category> getCategoriesById() {
         return categoryLoader.getCategoriesById();
     }
 
-    public void setCategoriesById(Map<Integer, IcecatCategory> categoriesById) {
+    public void setCategoriesById(Map<Integer, Category> categoriesById) {
         categoryLoader.getCategoriesById().clear();
         categoryLoader.getCategoriesById().putAll(categoriesById);
     }

@@ -12,7 +12,7 @@ import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 /**
  * Elasticsearch document representing an Icecat product category.
  *
- * <p>Populated from {@link IcecatCategory} objects loaded via
+ * <p>Populated from {@link org.open4goods.icecat.jaxb.Category} objects loaded via
  * {@link org.open4goods.icecat.services.loader.CategoryLoader}.
  * Used for admin category-browsing and fuzzy vertical-to-category matching.
  */

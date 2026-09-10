@@ -17,7 +17,7 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 | m2-corpus-cleanup | 0 | 0 | 0 | 0 | 1 |
 | m3-dead-surface-removal | 1 | 0 | 1 | 0 | 1 |
 | m4-product-page-quality | 0 | 0 | 0 | 0 | 1 |
-| m5-icecat-integration | 6 | 3 | 3 | 0 | 1 |
+| m5-icecat-integration | 5 | 2 | 3 | 0 | 2 |
 | m6-xwiki-retirement | 2 | 0 | 2 | 0 | 2 |
 | m6-content-outreach | 0 | 0 | 0 | 0 | 1 |
 
@@ -60,14 +60,13 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 
 | WorkOrder | Contract state | Availability | Dependencies | Blockers | Purpose |
 |---|---|---|---|---|---|
-| [icecat-legacy-model-removal](../../.o4g/work/icecat-legacy-model-removal.yml) | ACCEPTED | READY | icecat-xml-contract-generation | -- | Make CategoryLoader and FeatureLoader parse bulk XML into the JAXB-generated types from icecat-xml-contract-generation instead of the hand-written org.open4goods.icecat.model bulk POJOs, then delete the POJOs once nothing references them. |
 | [icecat-live-client-boundary](../../.o4g/work/icecat-live-client-boundary.yml) | ACCEPTED | READY | icecat-xml-contract-generation | -- | Put transport, parsing and neutral mapping in services/icecat while keeping product orchestration in api. |
 | [icecat-reference-index-runtime](../../.o4g/work/icecat-reference-index-runtime.yml) | ACCEPTED | READY | icecat-xml-contract-generation | -- | Make Elasticsearch the durable reference source instead of a boot-time mirror of in-memory maps. |
 | [icecat-completion-i18n-and-coverage](../../.o4g/work/icecat-completion-i18n-and-coverage.yml) | ACCEPTED | BLOCKED | icecat-live-client-boundary | icecat-live-client-boundary | Finish refresh semantics, language propagation and live fields currently dropped during product enrichment. |
 | [icecat-vertical-mapping-admin](../../.o4g/work/icecat-vertical-mapping-admin.yml) | ACCEPTED | BLOCKED | icecat-reference-index-runtime | icecat-reference-index-runtime | Replace transient vertical assignment with an explicit, authorized and durable admin contract. |
 | [icecat-integration-production-grade](../../.o4g/work/icecat-integration-production-grade.yml) | ACCEPTED | BLOCKED | icecat-reference-index-runtime, icecat-vertical-mapping-admin, icecat-completion-i18n-and-coverage | icecat-reference-index-runtime, icecat-vertical-mapping-admin, icecat-completion-i18n-and-coverage | Verify Icecat end to end after the XML, reference index, module boundary, admin mapping and live completion lots close. Shared download and Elasticsearch scaffolding already exist. |
 
-*1 closed, see [ledger](../../.o4g/work/ledger).*
+*2 closed, see [ledger](../../.o4g/work/ledger).*
 
 ## m6-xwiki-retirement
 

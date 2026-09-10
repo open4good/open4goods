@@ -98,7 +98,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.client.RestTemplate;
 import org.xml.sax.SAXException;
 
-import tools.jackson.dataformat.xml.XmlMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Ticker;
 
@@ -160,18 +159,17 @@ public class ApiConfig {
 
     @Bean
     FeatureLoader featureLoader(IcecatFileDownloadService icecatFileDownloadService, BrandService brandService) {
-        return new FeatureLoader(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), icecatFileDownloadService, brandService);
+        return new FeatureLoader(apiProperties.getIcecatFeatureConfig(), icecatFileDownloadService, brandService);
     }
 
     @Bean
     CategoryLoader categoryLoader(IcecatFileDownloadService icecatFileDownloadService, VerticalsConfigService verticalConfigService, FeatureLoader featureLoader) {
-        return new CategoryLoader(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), icecatFileDownloadService, verticalConfigService, featureLoader);
+        return new CategoryLoader(apiProperties.getIcecatFeatureConfig(), icecatFileDownloadService, verticalConfigService, featureLoader);
     }
 
     @Bean
     IcecatService icecatFeatureService(IcecatFileDownloadService icecatFileDownloadService, FeatureLoader featureLoader, CategoryLoader categoryLoader) {
-        // NOTE: xmlMapper not injected here because sharing the Spring-managed one corrupts springdoc. Uses a fresh XmlMapper instance.
-        return new IcecatService(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), icecatFileDownloadService, featureLoader, categoryLoader);
+        return new IcecatService(apiProperties.getIcecatFeatureConfig(), icecatFileDownloadService, featureLoader, categoryLoader);
     }
 
 	@Bean

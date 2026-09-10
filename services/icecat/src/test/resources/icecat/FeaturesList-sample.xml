@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ICECAT-interface>
+  <Response Status="OK" Request_ID="1" ID="1" Date="2026-01-01">
+    <FeaturesList>
+      <Feature ID="42" Type="numerical" CategoryFeatureGroup_ID="7" CategoryFeature_ID="1001"
+                LimitDirection="0" Mandatory="1" Searchable="true" No="3" Class="false"
+                DefaultDisplayUnit="true" Use_Dropdown_Input="N" ValueSorting="1" Updated="2026-01-01">
+        <Names>
+          <Name ID="1" langid="1" Value="Screen size"/>
+          <Name ID="2" langid="3" Value="Taille d'ecran"/>
+        </Names>
+      </Feature>
+    </FeaturesList>
+  </Response>
+</ICECAT-interface>
