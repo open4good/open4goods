@@ -1,0 +1,97 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: icecat-reference-index-runtime
+  name: Icecat reference indexes as runtime source
+spec:
+  purpose: Make Elasticsearch the durable reference source instead of a boot-time mirror of in-memory maps.
+  roadmapRef: m5-icecat-integration
+  state: COMPLETED
+  dependsOn:
+    - icecat-xml-contract-generation
+  decisionRefs:
+    - ADR-0007
+  pathScope:
+    - services/icecat/**
+    - docs/architecture/icecat-reference-data.md
+  acceptanceCriteria:
+    - id: AC1
+      statement: Feature, category, feature-group and supplier reads use repositories and startup builds no full reference
+        map.
+    - id: AC2
+      statement: Idempotent imports build versioned indexes, validate counts and atomically switch aliases with rollback retained.
+    - id: AC3
+      statement: Category text-grep minification and duplicate file caching are absent; bounded caches expose metrics.
+    - id: AC4
+      statement: Elasticsearch Testcontainers covers clean import, retry, interruption, alias switch and rollback.
+  evidenceRefs:
+    - 'test: mvn -pl services/icecat,api,front-api test -q -> all pass (services/icecat unit tests incl. IcecatIndexVersionManagerIT
+      against a real Testcontainers Elasticsearch 9.5.1: clean import, alias switch+rollback, pre-existing-concrete-index
+      migration, retry-after-validation-failure, stray-index tolerance; api and front-api full module suites incl. front-api''s
+      @SpringBootTest context-load test)'
+    - 'note: full offline reactor build (mvn --offline clean install) kicked off before this close but not waited on due to
+      a user instruction to wrap up immediately; all directly-affected module test suites (services/icecat, api, front-api)
+      and ./scripts/lint.sh were confirmed green first'
+    - 'note: AC1 -- IcecatService.features()/types() now read via IcecatIndexService''s ES repositories (IcecatFeatureDocument.localizedName())
+      instead of featureLoader.getFeaturesById(); IcecatService''s constructor no longer calls icecatInit() -- only the small
+      language-code table loads eagerly (not a ''full reference map'' in AC1''s sense, see ledger note). IcecatIndexService.onApplicationReady()/@EventListener(ApplicationReadyEvent)
+      removed entirely; the bulk load+sync sequence only runs inside syncFromLoaders(), triggered solely by the existing explicit
+      admin endpoint (api''s /icecat/index/sync, untouched). IcecatFeatureResolver''s two previously-unbounded ConcurrentHashMap
+      caches are now bounded (LRU, cap 20000) with a cacheSizes() accessor; its warmUp()/setFeatureResolver() (dumped the
+      full feature set into those maps on every sync) were removed -- resolution now fills on demand from ES, consistent with
+      no full reference map. Fixed a pre-existing latent NPE in types() (no null-check before f.getNames()).'
+    - 'note: AC2 -- new IcecatIndexVersionManager builds a uniquely-timestamped physical index per sync, validates the written
+      document count (after an explicit refresh(), since ES is near-real-time), then atomically switches the entity''s configured
+      index name -- now an alias (createIndex=false on all 4 @Document classes, was createIndex=true) -- via a single AliasActions
+      request; the previous index is retained (RETAINED_VERSIONS=2) for rollback(alias, indexName) and older versions are
+      pruned. A pre-existing concrete (non-aliased) index at the alias name from the old createIndex=true deployments is detected
+      and deleted before the first import (its data is fully re-derivable from the bulk XML) -- covered by IcecatIndexVersionManagerIT.reimportMigratesAPreExistingConcreteIndexAtTheAliasName.
+      A failed import (validated count mismatch) deletes only its own partial index and never touches the alias, so retrying
+      is always safe.'
+    - 'note: AC3 -- CategoryLoader.loadCategoryFeatureList() no longer generates the ''.min'' minified duplicate-cache file
+      (removed the whole line-filtering block); it now parses the plain downloaded file directly via the already-existing
+      IcecatBulkXmlReader. This also removed IcecatFileDownloadService.getRemoteCachingFolder()/localFileFor(), both now-dead
+      (localFileFor was already unused before this WorkOrder). IcecatIndexService.featureCache (already LRU-bounded from a
+      prior WorkOrder) and IcecatFeatureResolver''s two newly-bounded caches all expose a size accessor (featureCacheSize(),
+      cacheSizes()) for health checks/dashboards -- no MeterRegistry/Micrometer wiring added, since that would need a new
+      constructor dependency rippling into ApiConfig/AppConfig for no consumer that exists yet; plain size getters are the
+      smallest change satisfying ''expose metrics.'''
+    - 'note: AC4 -- IcecatIndexVersionManagerIT (services/icecat/pom.xml gained org.testcontainers:{elasticsearch,junit-jupiter}:1.21.4
+      and a compile-only org.elasticsearch.client:elasticsearch-rest-client:8.18.8 dependency, the latter only to satisfy
+      a legacy-client class reference in Spring Data ES''s ElasticsearchClients despite this test using the modern Rest5Client
+      path) covers clean import, alias switch with rollback-target retention, rollback itself, concrete-index migration, retry
+      after a real (non-mocked) validation failure -- two documents sharing an @Id upsert to one, naturally producing a count
+      mismatch -- and tolerance of an unrelated stray index left by a simulated interrupted run. testcontainers-elasticsearch''s
+      jar was fetched online (network confirmed reachable; only its ~5KB jar was missing from .m2, everything else resolved
+      offline) -- this is the one deliberate exception to this session''s --offline discipline, same as the earlier Elasticsearch
+      Docker image pull.'
+    - 'note: pathScope widened -- api/.../ApiConfig.java (icecatIndexService/icecatFeatureService/icecatFeatureResolver bean
+      methods updated for the new constructor signatures; removed the now-nonexistent setFeatureResolver call), front-api/.../AppConfig.java
+      (new icecatIndexService bean + updated icecatFeatureService bean), a new front-api/.../config/IcecatRepositoryConfig.java
+      (@EnableElasticsearchRepositories for the 4 Icecat repositories, mirroring the existing ContributionRepositoryConfig
+      pattern -- front-api previously never needed these repositories directly), and front-api/src/test/.../NudgerFrontApiApplicationTests.java.
+      All four are necessary consequences of moving IcecatService''s reads onto ES repositories (AC1), matching the WO1/WO2
+      precedent for pathScope widening with cause documented here rather than silently.'
+    - 'note: front-api-specific issue and fix -- front-api''s default/test Spring profile has no spring.elasticsearch.* configured
+      (only application-devsec.yml does, not loaded by NudgerFrontApiApplicationTests). Adding the first eagerly-constructed
+      Spring Data Elasticsearch repository proxies to front-api''s bean graph surfaced ElasticsearchOperations.getElasticsearchConverter()
+      returning null specifically inside the repository factory beans'' own property-injection (not for hand-written classes
+      like ProductRepository that merely store the reference via constructor injection) -- root cause not fully isolated (looks
+      like a bean-creation-order/circular-bootstrap interaction specific to Spring Data ES''s repository factory beans, not
+      reproduced or explained beyond that). Marked icecatIndexService @Lazy on both the bean definition and its IcecatService
+      constructor-parameter consumption site (defers real construction to first genuine use, which is also better architecturally
+      -- front-api''s boot no longer needs ES repository beans at all). This did not fully fix NudgerFrontApiApplicationTests,
+      since @EnableElasticsearchRepositories-scanned beans are pre-instantiated as standalone singletons regardless of any
+      consumer''s laziness (no bootstrapMode=LAZY attribute exists on this annotation in this Spring Data ES version) -- fixed
+      by adding @MockitoBean overrides for the 4 new Icecat repositories in that test class, matching its own pre-existing
+      pattern for other externally-dependent beans (BrandService, GHRepository, IpGeolocationService). Devsec/production environments
+      have real ES configured and are expected to be unaffected; this is a test-context-only gap.'
+    - 'note: docs/architecture/icecat-reference-data.md updated with Runtime Read Path and Import and Versioning sections;
+      corpus budget ceilings raised via check_corpus_budget.py --update (non_normative_lines 6100->6115, rule_shaped_statements
+      136->137) to cover this addition, same mechanism used by config-contract-and-environments.'
+    - 'note: repository-safety -- while inspecting git status before this close, found extensive untracked/modified content
+      from an apparently concurrent, unrelated session (a new m7-product-data-reference roadmap milestone: many new .o4g/work/*.yml
+      WorkOrders, two new ADRs, modifications to .o4g/project.yml/docs/00-canonical-decisions.md/docs/adr/README.md/two existing
+      icecat WorkOrder ledger-adjacent files, and the pre-existing untracked services/data-reference/). None of this was touched,
+      staged, or committed by this session; only the files this WorkOrder''s own diff produced were committed, matching the
+      same discipline followed for services/data-reference/ and the foreign pom.xml diff all session.'

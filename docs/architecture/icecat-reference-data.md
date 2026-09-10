@@ -37,3 +37,22 @@ The `api` module exposes these admin endpoints for category tooling:
 
 These endpoints are stable JSON contracts and are included in the generated
 OpenAPI contract from controller annotations.
+
+## Runtime Read Path
+
+Application startup builds no in-memory reference map and makes no Icecat bulk-export
+download. Every feature/category/feature-group/supplier read (admin search, feature-name
+resolution, attribute rendering) goes through `IcecatIndexService`'s Elasticsearch
+repositories, bounded by small local caches (`IcecatIndexService.featureCache`,
+`IcecatFeatureResolver`'s normalized-name and by-id caches) with size-inspection methods for
+health checks.
+
+## Import and Versioning
+
+`IcecatIndexService.syncFromLoaders()` is the only entry point that downloads and parses the
+bulk exports; it is triggered explicitly (`GET /icecat/index/sync`), never automatically at
+startup. Each reference type is written into a new, uniquely-versioned physical index and
+`IcecatIndexVersionManager` atomically switches that type's alias to it only after the
+written document count is validated. The previous index is retained (not deleted) so a bad
+switch can be rolled back; older versions beyond the retained count are pruned. A failed
+import leaves the alias untouched and can simply be retried.

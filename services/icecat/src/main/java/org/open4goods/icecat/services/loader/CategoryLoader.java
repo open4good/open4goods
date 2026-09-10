@@ -1,16 +1,10 @@
 package org.open4goods.icecat.services.loader;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.io.IOUtils;
 import org.open4goods.icecat.config.yml.IcecatConfiguration;
 import org.open4goods.icecat.jaxb.Category;
 import org.open4goods.icecat.jaxb.CategoryFeatureGroup;
@@ -18,7 +12,6 @@ import org.open4goods.icecat.jaxb.Feature;
 import org.open4goods.icecat.jaxb.Name;
 import org.open4goods.icecat.services.IcecatFileDownloadService;
 import org.open4goods.model.exceptions.TechnicalException;
-import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.vertical.FeatureGroup;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.verticals.VerticalsConfigService;
@@ -83,9 +76,6 @@ public class CategoryLoader {
      * For each category that matches a configured vertical, updates the vertical's
      * feature group definitions.
      *
-     * <p>The file is minified before DOM-parsing to remove large {@code <Name>} and
-     * {@code <RestrictedValue>} elements that are not needed and would bloat the DOM.
-     *
      * @throws TechnicalException if the file cannot be downloaded or parsed
      */
     public void loadCategoryFeatureList() throws TechnicalException {
@@ -94,45 +84,10 @@ public class CategoryLoader {
             return;
         }
         LOGGER.info("Getting file from {}", iceCatConfig.getCategoryFeatureListFileUri());
-        File icecatMimified = new File(
-                fileDownloadService.getRemoteCachingFolder() + File.separator
-                + IdHelper.getHashedName(iceCatConfig.getCategoryFeatureListFileUri() + ".min"));
-
-        if (!icecatMimified.exists()) {
-            LOGGER.info("Minified file not found, generating minified version");
-            File icecatFile = fileDownloadService.getOrDownload(iceCatConfig.getCategoryFeatureListFileUri());
-            LOGGER.info("Start generating minified version");
-            icecatMimified.delete();
-            AtomicBoolean inMeasure = new AtomicBoolean(false);
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(icecatMimified, true))) {
-                Files.lines(icecatFile.toPath()).forEach(l -> {
-                    try {
-                        if (l.contains("<Measure ")) {
-                            inMeasure.set(true);
-                        }
-                        if (!inMeasure.get()) {
-                            if (!l.contains("<Name") && !l.contains("<RestrictedValue")) {
-                                writer.write(l);
-                                writer.newLine();
-                            }
-                        }
-                        if (l.contains("</Measure")) {
-                            inMeasure.set(false);
-                        }
-                    } catch (IOException e) {
-                        LOGGER.error("Error writing line", e);
-                    }
-                });
-                LOGGER.info("End generating minified version : {}", icecatMimified.getAbsolutePath());
-                LOGGER.info("Cleaning up the uncompressed file");
-                IOUtils.closeQuietly(writer);
-            } catch (IOException e) {
-                LOGGER.error("Error writing file", e);
-            }
-        }
+        File icecatFile = fileDownloadService.getOrDownload(iceCatConfig.getCategoryFeatureListFileUri());
         try {
-            LOGGER.info("DOM Parsing of {}", icecatMimified);
-            List<Category> categories = IcecatBulkXmlReader.readResponse(icecatMimified)
+            LOGGER.info("Parsing {}", icecatFile);
+            List<Category> categories = IcecatBulkXmlReader.readResponse(icecatFile)
                     .getCategoryFeaturesList().getCategory();
             for (Category category : categories) {
                 int catId = IcecatBulkModelSupport.intValue(category.getID(), 0);

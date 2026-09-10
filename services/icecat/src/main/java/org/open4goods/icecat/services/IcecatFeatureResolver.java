@@ -1,10 +1,11 @@
 package org.open4goods.icecat.services;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.open4goods.icecat.model.IcecatFeatureDocument;
@@ -18,12 +19,15 @@ import org.slf4j.LoggerFactory;
  * Resolves local attribute names against the Icecat feature index.
  *
  * <p>This service deliberately uses Elasticsearch as the source of truth instead of
- * the startup feature-loader maps. Lookups are cached by normalized attribute name
- * to avoid repeated Elasticsearch queries during product aggregation.
+ * a startup-loaded reference map. Lookups are cached by normalized attribute name and
+ * by feature ID, bounded to avoid an unbounded in-memory mirror of the full feature set.
  */
 public class IcecatFeatureResolver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IcecatFeatureResolver.class);
+
+    /** Cap for each bounded cache below; generous enough that normal lookup traffic never evicts a hot entry. */
+    private static final int MAX_CACHE_SIZE = 20000;
 
     private static final Map<String, Integer> LANGUAGE_IDS = Map.of(
             "default", IcecatConstants.LANG_ID_ENGLISH,
@@ -31,11 +35,21 @@ public class IcecatFeatureResolver {
             "fr", 3);
 
     private final IcecatIndexService indexService;
-    private final Map<String, Set<Integer>> featureIdsByNormalizedName = new ConcurrentHashMap<>();
-    private final Map<Integer, IcecatFeatureDocument> featuresById = new ConcurrentHashMap<>();
+    private final Map<String, Set<Integer>> featureIdsByNormalizedName = boundedCache();
+    private final Map<Integer, IcecatFeatureDocument> featuresById = boundedCache();
 
     public IcecatFeatureResolver(IcecatIndexService indexService) {
         this.indexService = indexService;
+    }
+
+    private static <K, V> Map<K, V> boundedCache() {
+        return Collections.synchronizedMap(new LinkedHashMap<K, V>(256, 0.75f, true) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+                return size() > MAX_CACHE_SIZE;
+            }
+        });
     }
 
     /**
@@ -54,25 +68,12 @@ public class IcecatFeatureResolver {
     }
 
     /**
-     * Pre-populates both in-memory maps from an already-computed feature document list so
-     * that subsequent {@link #resolveFeatureName} calls never hit Elasticsearch.
-     * Called by {@link IcecatIndexService} right after it persists features to ES.
+     * Current size of each bounded cache, for health checks and admin dashboards.
+     *
+     * @return {@code [normalizedNameCacheSize, featureByIdCacheSize]}
      */
-    public void warmUp(List<IcecatFeatureDocument> docs) {
-        for (IcecatFeatureDocument doc : docs) {
-            if (doc.getId() == null) {
-                continue;
-            }
-            featuresById.put(doc.getId(), doc);
-            if (doc.getNormalizedNames() != null) {
-                for (String name : doc.getNormalizedNames()) {
-                    featureIdsByNormalizedName
-                            .computeIfAbsent(name, k -> new HashSet<>())
-                            .add(doc.getId());
-                }
-            }
-        }
-        LOGGER.info("Pre-warmed Icecat feature resolver with {} feature documents", docs.size());
+    public int[] cacheSizes() {
+        return new int[] {featureIdsByNormalizedName.size(), featuresById.size()};
     }
 
     private Set<Integer> resolveNormalizedName(String normalizedName) {
@@ -175,15 +176,7 @@ public class IcecatFeatureResolver {
     }
 
     private String localizedName(IcecatFeatureDocument doc, int languageId) {
-        if (doc.getLangNames() == null) {
-            return null;
-        }
-        String prefix = languageId + ":";
-        return doc.getLangNames().stream()
-                .filter(name -> name.startsWith(prefix))
-                .map(name -> name.substring(prefix.length()))
-                .findFirst()
-                .orElse(null);
+        return doc.localizedName(languageId);
     }
 
     private int languageId(String language) {

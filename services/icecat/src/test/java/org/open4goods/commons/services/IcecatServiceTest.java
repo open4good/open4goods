@@ -3,14 +3,13 @@ package org.open4goods.commons.services;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.Collections;
-import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.open4goods.icecat.config.yml.IcecatConfiguration;
-import org.open4goods.icecat.jaxb.Feature;
-import org.open4goods.icecat.jaxb.Names;
 import org.open4goods.icecat.services.IcecatFileDownloadService;
+import org.open4goods.icecat.services.IcecatIndexService;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.icecat.services.loader.CategoryLoader;
 import org.open4goods.icecat.services.loader.FeatureLoader;
@@ -41,8 +40,9 @@ public class IcecatServiceTest {
 
         FeatureLoader fl = new FeatureLoader(cfg, downloader, brand);
         CategoryLoader cl = new CategoryLoader(cfg, downloader, vertical, fl);
+        IcecatIndexService indexService = Mockito.mock(IcecatIndexService.class);
 
-        assertDoesNotThrow(() -> new IcecatService(cfg, downloader, fl, cl));
+        assertDoesNotThrow(() -> new IcecatService(cfg, downloader, fl, cl, indexService));
     }
 
     @Test
@@ -51,8 +51,9 @@ public class IcecatServiceTest {
         IcecatFileDownloadService downloader = mockDownloader();
         FeatureLoader fl = Mockito.mock(FeatureLoader.class);
         CategoryLoader cl = Mockito.mock(CategoryLoader.class);
+        IcecatIndexService indexService = Mockito.mock(IcecatIndexService.class);
 
-        IcecatService service = new IcecatService(cfg, downloader, fl, cl);
+        IcecatService service = new IcecatService(cfg, downloader, fl, cl, indexService);
 
         int featureId = 123;
         String language = "fr";
@@ -75,13 +76,7 @@ public class IcecatServiceTest {
         Mockito.when(product.getAttributes()).thenReturn(attributes);
         Mockito.when(attributes.attributeByFeatureId(featureId)).thenReturn(attribute);
 
-        Feature icecatFeature = new Feature();
-        Names icecatNames = new Names();
-        icecatFeature.setNames(icecatNames);
-
-        Map<Integer, Feature> featuresMap = Mockito.mock(Map.class);
-        Mockito.when(fl.getFeaturesById()).thenReturn(featuresMap);
-        Mockito.when(featuresMap.get(featureId)).thenReturn(icecatFeature);
+        Mockito.when(indexService.findFeature(featureId)).thenReturn(Optional.empty());
 
         assertDoesNotThrow(() -> service.features(verticalConfig, language, product));
     }

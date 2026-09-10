@@ -16,7 +16,7 @@ import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
  * {@link org.open4goods.icecat.services.loader.CategoryLoader}.
  * Used for admin category-browsing and fuzzy vertical-to-category matching.
  */
-@Document(indexName = "icecat-categories", createIndex = true, writeTypeHint = WriteTypeHint.FALSE)
+@Document(indexName = "icecat-categories", createIndex = false, writeTypeHint = WriteTypeHint.FALSE)
 public class IcecatCategoryDocument {
 
     /** Icecat stable category ID. */

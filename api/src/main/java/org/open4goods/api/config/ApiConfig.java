@@ -168,23 +168,23 @@ public class ApiConfig {
     }
 
     @Bean
-    IcecatService icecatFeatureService(IcecatFileDownloadService icecatFileDownloadService, FeatureLoader featureLoader, CategoryLoader categoryLoader) {
-        return new IcecatService(apiProperties.getIcecatFeatureConfig(), icecatFileDownloadService, featureLoader, categoryLoader);
+    IcecatService icecatFeatureService(IcecatFileDownloadService icecatFileDownloadService, FeatureLoader featureLoader, CategoryLoader categoryLoader, IcecatIndexService icecatIndexService) {
+        return new IcecatService(apiProperties.getIcecatFeatureConfig(), icecatFileDownloadService, featureLoader, categoryLoader, icecatIndexService);
     }
 
 	@Bean
 	IcecatIndexService icecatIndexService(FeatureLoader featureLoader, CategoryLoader categoryLoader,
 			IcecatFeatureRepository featureRepository, IcecatCategoryRepository categoryRepository,
-			IcecatFeatureGroupRepository featureGroupRepository, IcecatSupplierRepository supplierRepository) {
-		return new IcecatIndexService(featureLoader, categoryLoader, featureRepository, categoryRepository,
-				featureGroupRepository, supplierRepository);
+			IcecatFeatureGroupRepository featureGroupRepository, IcecatSupplierRepository supplierRepository,
+			ElasticsearchOperations elasticsearchOperations) {
+		return new IcecatIndexService(apiProperties.getIcecatFeatureConfig(), featureLoader, categoryLoader,
+				featureRepository, categoryRepository, featureGroupRepository, supplierRepository,
+				elasticsearchOperations);
 	}
 
 	@Bean
 	IcecatFeatureResolver icecatFeatureResolver(IcecatIndexService icecatIndexService) {
-		IcecatFeatureResolver resolver = new IcecatFeatureResolver(icecatIndexService);
-		icecatIndexService.setFeatureResolver(resolver);
-		return resolver;
+		return new IcecatFeatureResolver(icecatIndexService);
 	}
 
 	@Bean

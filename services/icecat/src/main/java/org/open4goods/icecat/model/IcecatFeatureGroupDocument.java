@@ -15,7 +15,7 @@ import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
  * <p>Populated from {@link org.open4goods.icecat.jaxb.FeatureGroup} objects loaded via
  * {@link org.open4goods.icecat.services.loader.FeatureLoader}.
  */
-@Document(indexName = "icecat-feature-groups", createIndex = true, writeTypeHint = WriteTypeHint.FALSE)
+@Document(indexName = "icecat-feature-groups", createIndex = false, writeTypeHint = WriteTypeHint.FALSE)
 public class IcecatFeatureGroupDocument {
 
     /** Icecat stable feature group ID. */

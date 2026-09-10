@@ -13,6 +13,10 @@
 
   <artifactId>icecat</artifactId>
 
+  <properties>
+    <testcontainers.version>1.21.4</testcontainers.version>
+  </properties>
+
   <dependencies>
     <!-- Spring Boot Actuator for health checks and metrics -->
     <dependency>
@@ -88,6 +92,28 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Testcontainers, for a real Elasticsearch in IcecatIndexVersionManagerIT -->
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${testcontainers.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>elasticsearch</artifactId>
+      <version>${testcontainers.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- Compile-time only: Spring Data Elasticsearch's ElasticsearchClients references the legacy
+         RestClient in its class signature even though we build the client via Rest5Client. -->
+    <dependency>
+      <groupId>org.elasticsearch.client</groupId>
+      <artifactId>elasticsearch-rest-client</artifactId>
+      <version>8.18.8</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
