@@ -7,12 +7,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.kohsuke.github.GHRepository;
+import org.open4goods.brand.service.BrandService;
+import org.open4goods.icecat.repository.IcecatCategoryRepository;
+import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
+import org.open4goods.icecat.repository.IcecatFeatureRepository;
+import org.open4goods.icecat.repository.IcecatSupplierRepository;
+import org.open4goods.services.geocode.service.IpGeolocationService;
 import org.open4goods.model.RolesConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
  * Integration tests verifying the {@link SharedTokenFilter} behaviour.
@@ -26,6 +34,27 @@ class SharedTokenFilterIT {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockitoBean
+    private GHRepository ghRepository;
+
+    @MockitoBean
+    private BrandService brandService;
+
+    @MockitoBean
+    private IpGeolocationService ipGeolocationService;
+
+    @MockitoBean
+    private IcecatFeatureRepository icecatFeatureRepository;
+
+    @MockitoBean
+    private IcecatCategoryRepository icecatCategoryRepository;
+
+    @MockitoBean
+    private IcecatFeatureGroupRepository icecatFeatureGroupRepository;
+
+    @MockitoBean
+    private IcecatSupplierRepository icecatSupplierRepository;
 
     /**
      * Shared token used for authenticated requests in tests.

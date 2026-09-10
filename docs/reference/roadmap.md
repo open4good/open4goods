@@ -19,7 +19,7 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 | m4-product-page-quality | 0 | 0 | 0 | 0 | 1 |
 | m5-icecat-integration | 0 | 0 | 0 | 0 | 5 |
 | m6-xwiki-retirement | 2 | 0 | 2 | 0 | 2 |
-| m7-product-data-reference | 22 | 4 | 18 | 0 | 0 |
+| m7-product-data-reference | 21 | 3 | 18 | 0 | 1 |
 | m6-content-outreach | 0 | 0 | 0 | 0 | 1 |
 
 ## m0-governance
@@ -77,7 +77,6 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 |---|---|---|---|---|---|
 | [aggregation-integrity-hotfixes](../../.o4g/work/aggregation-integrity-hotfixes.yml) | ACCEPTED | READY | -- | -- | Remove known data corruption paths while the source-neutral engine is being built. |
 | [amazon-paapi-content-quarantine](../../.o4g/work/amazon-paapi-content-quarantine.yml) | ACCEPTED | READY | -- | -- | Stop PA-API enrichment and remove persisted licensed content without affecting independent Amazon merchant feeds. |
-| [consumer-search-cost-hotfix](../../.o4g/work/consumer-search-cost-hotfix.yml) | ACCEPTED | READY | -- | -- | Stop query-time text embeddings and semantic kNN on public consumer search without waiting for the source-neutral projection cutover. |
 | [product-reference-contract](../../.o4g/work/product-reference-contract.yml) | ACCEPTED | READY | -- | -- | Establish the Java and serialization contracts that every reference source and consumer shares. |
 | [canonical-concept-registry](../../.o4g/work/canonical-concept-registry.yml) | ACCEPTED | BLOCKED | product-reference-contract | product-reference-contract | Replace supplier taxonomies as internal authority with a complete independently authored O4G registry. |
 | [reference-storage-capacity-benchmark](../../.o4g/work/reference-storage-capacity-benchmark.yml) | ACCEPTED | BLOCKED | product-reference-contract | product-reference-contract | Prove mappings, topology, throughput and cost from production-shaped data before full-catalog ingestion. |
@@ -92,11 +91,13 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 | [reference-resolution-and-surface-projections](../../.o4g/work/reference-resolution-and-surface-projections.yml) | ACCEPTED | BLOCKED | canonical-concept-registry, quantity-and-language-normalization, source-assertion-store | canonical-concept-registry, quantity-and-language-normalization, source-assertion-store | Resolve policy-filtered evidence into auditable per-surface values and a single GTIN read model. |
 | [icecat-integration-production-grade](../../.o4g/work/icecat-integration-production-grade.yml) | ACCEPTED | BLOCKED | icecat-reference-index-runtime, icecat-vertical-mapping-admin, icecat-completion-i18n-and-coverage, icecat-source-assertion-adapter, reference-resolution-and-surface-projections | icecat-vertical-mapping-admin, icecat-source-assertion-adapter, reference-resolution-and-surface-projections | Verify Icecat end to end through source records, O4G mappings, normalization and licensed projections rather than direct Product aggregation. |
 | [product-family-model-grouping](../../.o4g/work/product-family-model-grouping.yml) | ACCEPTED | BLOCKED | canonical-concept-registry, reference-resolution-and-surface-projections | canonical-concept-registry, reference-resolution-and-surface-projections | Add stable model/family relations and prefix-assisted discovery while preserving GTIN as leaf identity. |
-| [consumer-search-lexical-refactor](../../.o4g/work/consumer-search-lexical-refactor.yml) | ACCEPTED | BLOCKED | consumer-search-cost-hotfix, reference-resolution-and-surface-projections, product-family-model-grouping | consumer-search-cost-hotfix, reference-resolution-and-surface-projections, product-family-model-grouping | Replace duplicate consumer search paths with one relevance-tested lexical Elasticsearch search over the source-neutral GTIN projection. |
+| [consumer-search-lexical-refactor](../../.o4g/work/consumer-search-lexical-refactor.yml) | ACCEPTED | BLOCKED | consumer-search-cost-hotfix, reference-resolution-and-surface-projections, product-family-model-grouping | reference-resolution-and-surface-projections, product-family-model-grouping | Replace duplicate consumer search paths with one relevance-tested lexical Elasticsearch search over the source-neutral GTIN projection. |
 | [full-reference-shadow-reingestion](../../.o4g/work/full-reference-shadow-reingestion.yml) | ACCEPTED | BLOCKED | amazon-paapi-content-quarantine, aggregation-integrity-hotfixes, eprel-source-assertion-adapter, merchant-source-assertion-adapters, icecat-integration-production-grade, product-family-model-grouping | amazon-paapi-content-quarantine, aggregation-integrity-hotfixes, eprel-source-assertion-adapter, merchant-source-assertion-adapters, icecat-integration-production-grade, product-family-model-grouping | Build and validate complete source-neutral indexes without changing production readers. |
 | [reference-api-frontend-breaking-cutover](../../.o4g/work/reference-api-frontend-breaking-cutover.yml) | ACCEPTED | BLOCKED | reference-resolution-and-surface-projections, product-family-model-grouping, consumer-search-lexical-refactor | reference-resolution-and-surface-projections, product-family-model-grouping, consumer-search-lexical-refactor | Move consumer, B2B and open-data readers to typed licensed projections in one coordinated API version change. |
 | [reference-coordinated-cutover](../../.o4g/work/reference-coordinated-cutover.yml) | ACCEPTED | BLOCKED | full-reference-shadow-reingestion, reference-api-frontend-breaking-cutover, b2b-price-history-facet | full-reference-shadow-reingestion, reference-api-frontend-breaking-cutover, b2b-price-history-facet | Apply the final ingestion delta and atomically move all readers to validated source-neutral projections. |
 | [product-reference-legacy-retirement](../../.o4g/work/product-reference-legacy-retirement.yml) | ACCEPTED | BLOCKED | reference-coordinated-cutover | reference-coordinated-cutover | Remove dual semantics and dead source-specific fields after the new projection survives its rollback window. |
+
+*1 closed, see [ledger](../../.o4g/work/ledger).*
 
 ## m6-content-outreach
 

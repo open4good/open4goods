@@ -34,13 +34,6 @@ import {
   GlobalSearchResultDtoToJSON,
   GlobalSearchResultDtoToJSONTyped,
 } from './GlobalSearchResultDto'
-import type { SemanticScoreDiagnosticsDto } from './SemanticScoreDiagnosticsDto'
-import {
-  SemanticScoreDiagnosticsDtoFromJSON,
-  SemanticScoreDiagnosticsDtoFromJSONTyped,
-  SemanticScoreDiagnosticsDtoToJSON,
-  SemanticScoreDiagnosticsDtoToJSONTyped,
-} from './SemanticScoreDiagnosticsDto'
 import type { GlobalSearchPageMetaDto } from './GlobalSearchPageMetaDto'
 import {
   GlobalSearchPageMetaDtoFromJSON,
@@ -62,7 +55,7 @@ export interface GlobalSearchResponseDto {
    */
   verticalGroups?: Array<GlobalSearchVerticalGroupDto>
   /**
-   * Semantic results that have no vertical assigned
+   * Lexical results that have no vertical assigned
    * @type {Array<GlobalSearchResultDto>}
    * @memberof GlobalSearchResponseDto
    */
@@ -79,12 +72,6 @@ export interface GlobalSearchResponseDto {
    * @memberof GlobalSearchResponseDto
    */
   verticalCta?: SearchSuggestCategoryDto
-  /**
-   * Semantic score diagnostics when enabled
-   * @type {SemanticScoreDiagnosticsDto}
-   * @memberof GlobalSearchResponseDto
-   */
-  semanticDiagnostics?: SemanticScoreDiagnosticsDto
 }
 
 /**
@@ -130,10 +117,6 @@ export function GlobalSearchResponseDtoFromJSONTyped(
       json['verticalCta'] == null
         ? undefined
         : SearchSuggestCategoryDtoFromJSON(json['verticalCta']),
-    semanticDiagnostics:
-      json['semanticDiagnostics'] == null
-        ? undefined
-        : SemanticScoreDiagnosticsDtoFromJSON(json['semanticDiagnostics']),
   }
 }
 
@@ -168,8 +151,5 @@ export function GlobalSearchResponseDtoToJSONTyped(
       value['missingVerticalPage']
     ),
     verticalCta: SearchSuggestCategoryDtoToJSON(value['verticalCta']),
-    semanticDiagnostics: SemanticScoreDiagnosticsDtoToJSON(
-      value['semanticDiagnostics']
-    ),
   }
 }

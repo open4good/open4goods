@@ -234,11 +234,6 @@
       "description": "Recipient email address for contact form submissions."
     },
     {
-      "name": "front.embedding.api-base-url",
-      "type": "java.lang.String",
-      "description": "Base URL of the embedding service."
-    },
-    {
       "name": "front.exposed-docs.base-url",
       "type": "java.lang.String",
       "description": "Base URL of the exposed docs microservice.",
@@ -404,18 +399,6 @@
       "description": "Absolute root URL used to expose downloadable static resources."
     },
     {
-      "name": "front.search.semantic-min-score",
-      "type": "java.lang.Float",
-      "description": "Minimum semantic score required to keep a semantic search result.",
-      "defaultValue": 0.7
-    },
-    {
-      "name": "front.search.suggest.semantic-fallback-enabled",
-      "type": "java.lang.Boolean",
-      "description": "Enable semantic fallback for product suggestions when prefix search yields no results.",
-      "defaultValue": true
-    },
-    {
       "name": "front.security.access-token-expiry",
       "type": "java.time.Duration",
       "description": "Validity duration of generated access tokens.",
@@ -447,12 +430,6 @@
       "name": "front.security.shared-token",
       "type": "java.lang.String",
       "description": "Shared secret accepted in the X-Shared-Token header."
-    },
-    {
-      "name": "front.semantic-diagnostics-enabled",
-      "type": "java.lang.Boolean",
-      "description": "Enable semantic score diagnostics in global search responses.",
-      "defaultValue": false
     },
     {
       "name": "front.share.url-fetch-extraction-enabled",

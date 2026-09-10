@@ -96,10 +96,8 @@
           :aggregations="productAggregations"
           :baseline-aggregations="baselineAggregations"
           :active-filters="activeFilters"
-          :search-type="searchType"
           @update-range="updateRangeFilter"
           @update-terms="updateTermsFilter"
-          @update:search-type="searchType = $event"
         />
       </div>
     </v-navigation-drawer>
@@ -326,11 +324,9 @@
                   :aggregations="productAggregations"
                   :baseline-aggregations="baselineAggregations"
                   :active-filters="activeFilters"
-                  :search-type="searchType"
                   mode="bar"
                   @update-range="updateRangeFilter"
                   @update-terms="updateTermsFilter"
-                  @update:search-type="searchType = $event"
                 />
               </div>
 
@@ -473,7 +469,6 @@ const countOthers = computed(
 )
 const filtersOpen = ref(false)
 const filterRequest = ref<FilterRequestDto>({ filters: [], filterGroups: [] })
-const searchType = ref<string | null>('SEMANTIC')
 const openPanels = ref<number[]>([])
 
 watch(
@@ -481,8 +476,6 @@ watch(
   value => {
     searchInput.value = value
     searchTerm.value = value
-    // Reset search type on new query?
-    // User requirement: explicit toggle. If I type new query, toggle likely stays until user resets.
   },
   { immediate: true }
 )
@@ -670,13 +663,6 @@ const aggregationDefinition = computed<AggregationRequestDto>(() => {
   return aggs.length > 0 ? { aggs } : {}
 })
 
-const resolvedSearchType = computed(() =>
-  hasMinimumLength.value ? (searchType.value ?? 'SEMANTIC') : undefined
-)
-const semanticSearchEnabled = computed(() =>
-  resolvedSearchType.value === 'SEMANTIC' ? true : undefined
-)
-
 const { data, pending, error, refresh } =
   await useAsyncData<GlobalSearchResponseDto | null>(
     'search-global',
@@ -689,7 +675,6 @@ const { data, pending, error, refresh } =
           query: normalizedQuery.value,
           filters: filterRequest.value,
           sort: sortRequest.value,
-          searchType: resolvedSearchType.value,
         },
       })
     },
@@ -699,7 +684,6 @@ const { data, pending, error, refresh } =
         () => pageNumber.value,
         () => sortRequest.value,
         () => filterRequest.value,
-        () => resolvedSearchType.value,
       ],
       immediate: true,
       lazy: true,
@@ -711,8 +695,6 @@ const requestBody = computed<ProductSearchRequestDto>(() => ({
   filters: filterRequest.value,
   aggs: aggregationDefinition.value,
   sort: sortRequest.value,
-  semanticSearch: semanticSearchEnabled.value,
-  searchType: resolvedSearchType.value,
 }))
 
 const latestProductsSort = computed<SortRequestDto>(() => ({
@@ -731,8 +713,6 @@ const baselinePayload = computed(() => ({
   query: hasMinimumLength.value ? normalizedQuery.value : undefined,
   aggs: aggregationDefinition.value,
   sort: effectiveSortRequest.value,
-  semanticSearch: semanticSearchEnabled.value,
-  searchType: resolvedSearchType.value,
   pageNumber: pageNumber.value,
   pageSize: pageSize.value,
 }))
@@ -787,16 +767,11 @@ const {
       body: {
         query: hasMinimumLength.value ? normalizedQuery.value : undefined,
         aggs: aggregationDefinition.value,
-        searchType: resolvedSearchType.value,
       },
     })
   },
   {
-    watch: [
-      () => normalizedQuery.value,
-      () => showLatestProducts.value,
-      () => resolvedSearchType.value,
-    ],
+    watch: [() => normalizedQuery.value, () => showLatestProducts.value],
     immediate: true,
     lazy: true,
     server: false,

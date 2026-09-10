@@ -14,8 +14,11 @@ public record ProductSearchRequestDto(
         AggregationRequestDto aggs,
         @Schema(description = "Filter clauses restricting the result set.")
         FilterRequestDto filters,
-        @Schema(description = "Enable semantic search for text queries.")
+        @Deprecated(forRemoval = true)
+        @Schema(description = "Deprecated compatibility field. Accepted but ignored; search is always lexical.", deprecated = true)
         Boolean semanticSearch,
-        @Schema(description = "Strategy to use for the search (e.g. 'SEMANTIC' or 'TEXT').", example = "TEXT")
+        @Deprecated(forRemoval = true)
+        @Schema(description = "Deprecated compatibility field. Accepted but ignored; search is always lexical.",
+                example = "TEXT", deprecated = true)
         String searchType) {
 }

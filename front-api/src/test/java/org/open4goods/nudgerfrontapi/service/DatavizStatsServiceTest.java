@@ -75,7 +75,7 @@ class DatavizStatsServiceTest {
         given(verticalsConfigService.getConfigById("televisions")).willReturn(verticalConfig);
 
         // Stub search to return a minimal non-null result
-        given(searchService.search(any(), eq("televisions"), any(), any(), any(), eq(false), eq("TEXT")))
+        given(searchService.search(any(), eq("televisions"), any(), any(), any()))
                 .willReturn(new SearchService.SearchResult(null, List.of()));
 
         DatavizStatsService service = new DatavizStatsService(verticalsConfigService, searchService);
@@ -95,4 +95,3 @@ class DatavizStatsServiceTest {
         }
     }
 }
-

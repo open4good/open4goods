@@ -1272,7 +1272,6 @@ const normalizedSearchTerm = computed(() => (searchTerm.value ?? '').trim())
 const hasMinimumSearchLength = computed(
   () => normalizedSearchTerm.value.length >= MIN_QUERY_LENGTH
 )
-const shouldUseSemanticSearch = computed(() => hasMinimumSearchLength.value)
 const sortField = ref<string | null>(null)
 const sortOrder = ref<'asc' | 'desc'>('desc')
 const activeSubsetIds = ref<string[]>([])
@@ -2218,7 +2217,6 @@ const fetchProducts = async () => {
           query: hasMinimumSearchLength.value
             ? normalizedSearchTerm.value
             : undefined,
-          semanticSearch: shouldUseSemanticSearch.value ? true : undefined,
           sort: sortRequest.value,
           filters: combinedFilters.value,
           aggs: buildAggregationRequest(

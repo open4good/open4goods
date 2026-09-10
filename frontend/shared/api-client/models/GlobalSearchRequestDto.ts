@@ -53,9 +53,10 @@ export interface GlobalSearchRequestDto {
    */
   sort?: SortRequestDto
   /**
-   * Strategy to use for the search (e.g. 'SEMANTIC' or 'TEXT').
+   * Deprecated compatibility field. Accepted but ignored; search is always lexical.
    * @type {string}
    * @memberof GlobalSearchRequestDto
+   * @deprecated
    */
   searchType?: string
   /**

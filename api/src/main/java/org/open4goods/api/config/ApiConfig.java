@@ -25,8 +25,6 @@ import org.open4goods.commons.services.Gs1PrefixService;
 import org.open4goods.commons.services.ProductNameSelectionService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.commons.services.textgen.BlablaService;
-import org.open4goods.embedding.config.DjlEmbeddingProperties;
-import org.open4goods.embedding.service.TextEmbeddingService;
 import org.open4goods.embedding.service.image.DjlImageEmbeddingService;
 import org.open4goods.icecat.repository.IcecatCategoryRepository;
 import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
@@ -383,10 +381,10 @@ public class ApiConfig {
 	@Bean
 	AggregationFacadeService realtimeAggregationService(@Autowired EvaluationService evaluationService, StandardiserService standardiserService, AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository, ApiProperties apiProperties,
 			@Autowired Gs1PrefixService gs1prefixService, DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, BarcodeValidationService barcodeValidationService, BrandService brandservice, BlablaService blablaService,
-			IcecatService icecatFeatureService, IcecatFeatureResolver icecatFeatureResolver, SerialisationService serialisationService, ObjectProvider<TextEmbeddingService> embeddingServiceProvider,
-			ObjectProvider<DjlEmbeddingProperties> embeddingPropertiesProvider, BarcodeForensicsService barcodeForensicsService) {
+			IcecatService icecatFeatureService, IcecatFeatureResolver icecatFeatureResolver, SerialisationService serialisationService,
+			BarcodeForensicsService barcodeForensicsService) {
 		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService, barcodeValidationService, brandservice, blablaService, icecatFeatureService,
-				icecatFeatureResolver, serialisationService, embeddingServiceProvider.getIfAvailable(), embeddingPropertiesProvider.getIfAvailable(), barcodeForensicsService);
+				icecatFeatureResolver, serialisationService, barcodeForensicsService);
 	}
 
 	//////////////////////////////////////////////////////////
