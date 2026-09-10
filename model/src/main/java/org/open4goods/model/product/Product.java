@@ -1059,7 +1059,10 @@ public class Product implements Standardisable {
 
 		if (StringUtils.isEmpty(brand())) {
 			attributes.addReferentielAttribute(ReferentielKey.BRAND, brand);
-		} else {
+		} else if (null != datasource) {
+			// A null datasource means "elect this as the referentiel brand"; once a more
+			// trusted source has taken that slot the candidate has no key to be filed
+			// under, and a null key would not survive serialization.
 			if (!akaBrands.values().contains(brand)) {
 				akaBrands.put(datasource, brand);
 			}

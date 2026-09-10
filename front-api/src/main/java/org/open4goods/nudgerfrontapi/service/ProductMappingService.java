@@ -1383,7 +1383,7 @@ public class ProductMappingService {
         return new ProductSourcedAttributeDto(
                 attribute.getDataSourcename(),
                 attribute.getValue(),
-                null,
+                attribute.getLanguage(),
                 attribute.getIcecatTaxonomyId(),
                 attribute.getName());
     }
