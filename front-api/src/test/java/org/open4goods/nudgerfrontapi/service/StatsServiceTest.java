@@ -11,7 +11,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.affiliation.AffiliationPartner;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesStatsDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.services.opendata.service.OpenDataService;

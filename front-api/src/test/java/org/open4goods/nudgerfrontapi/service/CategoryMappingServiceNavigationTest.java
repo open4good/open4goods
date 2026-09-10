@@ -15,7 +15,7 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.category.CategoryNavigationDto;
 import org.open4goods.nudgerfrontapi.dto.category.GoogleCategoryDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.verticals.GoogleTaxonomyService;
 
 class CategoryMappingServiceNavigationTest {

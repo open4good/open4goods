@@ -3,7 +3,7 @@ package org.open4goods.nudgerfrontapi.controller.api;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.nudgerfrontapi.dto.contact.ContactRequestDto;
 import org.open4goods.nudgerfrontapi.dto.contact.ContactResponseDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ContactService;
 import org.open4goods.nudgerfrontapi.utils.IpUtils;
 import org.slf4j.Logger;

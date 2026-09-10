@@ -8,7 +8,7 @@ import org.open4goods.nudgerfrontapi.dto.exposed.ExposedDocsContentDto;
 import org.open4goods.nudgerfrontapi.dto.exposed.ExposedDocsOverviewDto;
 import org.open4goods.nudgerfrontapi.dto.exposed.ExposedDocsSearchResultDto;
 import org.open4goods.nudgerfrontapi.dto.exposed.ExposedDocsTreeNodeDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;

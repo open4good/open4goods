@@ -3,7 +3,7 @@ package org.open4goods.nudgerfrontapi.controller.api;
 import org.open4goods.commons.model.IpQuotaCategory;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.nudgerfrontapi.dto.quota.IpQuotaStatusDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.QuotaService;
 import org.open4goods.nudgerfrontapi.utils.IpUtils;
 import org.slf4j.Logger;

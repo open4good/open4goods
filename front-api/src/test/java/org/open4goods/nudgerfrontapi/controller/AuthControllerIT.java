@@ -9,7 +9,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.nudgerfrontapi.dto.auth.LoginRequest;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.auth.JwtService;
 import org.open4goods.xwiki.services.XWikiAuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;

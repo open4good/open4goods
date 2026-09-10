@@ -6,7 +6,7 @@ import org.open4goods.model.RolesConstants;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
 import org.open4goods.nudgerfrontapi.dto.event.CommercialEventDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.CommercialEventService;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;

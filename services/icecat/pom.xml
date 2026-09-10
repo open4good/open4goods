@@ -45,6 +45,16 @@
       <groupId>tools.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-xml</artifactId>
     </dependency>
+    <dependency>
+      <groupId>tools.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+
+    <!-- RestClient for the Icecat live API client -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+    </dependency>
 
     <!-- JAXB runtime for the bulk-XML sources generated from src/main/resources/xsd/icecat.xsd -->
     <dependency>

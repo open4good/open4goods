@@ -14,7 +14,7 @@ import org.open4goods.nudgerfrontapi.dto.brand.BrandDto;
 import org.open4goods.nudgerfrontapi.dto.brand.ManufacturingDistanceDto;
 import org.open4goods.nudgerfrontapi.dto.brand.ManufacturingSiteDistanceDto;
 import org.open4goods.nudgerfrontapi.dto.user.UserGeolocDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.BrandMappingService;
 import org.open4goods.nudgerfrontapi.service.UserGeolocationService;
 import org.open4goods.nudgerfrontapi.utils.HaversineUtil;

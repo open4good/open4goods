@@ -40,7 +40,7 @@ import org.open4goods.nudgerfrontapi.dto.search.SearchSuggestCategoryDto;
 import org.open4goods.nudgerfrontapi.dto.search.SearchSuggestProductDto;
 import org.open4goods.nudgerfrontapi.dto.search.SearchSuggestResponseDto;
 import org.open4goods.nudgerfrontapi.dto.search.SortRequestDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.open4goods.nudgerfrontapi.service.SearchService;
 import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchHit;

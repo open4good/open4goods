@@ -11,7 +11,7 @@ import org.open4goods.nudgerfrontapi.config.properties.ContactProperties;
 import org.open4goods.nudgerfrontapi.dto.contact.ContactRequestDto;
 import org.open4goods.nudgerfrontapi.config.properties.MailTemplateProperties;
 import org.open4goods.nudgerfrontapi.config.properties.MailTemplateProperties.MailTemplate;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.services.captcha.service.HcaptchaService;
 
 /**

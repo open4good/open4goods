@@ -14,16 +14,18 @@ import org.open4goods.api.services.aggregation.aggregator.StandardAggregator;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.icecat.config.yml.IcecatCompletionConfig;
-import org.open4goods.icecat.model.IcecatLiveApiResponse;
 import org.open4goods.icecat.model.IcecatLiveApiResponse.FeaturesGroups;
 import org.open4goods.icecat.model.IcecatLiveApiResponse.Gallery;
 import org.open4goods.icecat.model.IcecatLiveApiResponse.GeneralInfo;
 import org.open4goods.icecat.model.IcecatLiveApiResponse.IceDataItem;
 import org.open4goods.icecat.model.IcecatLiveApiResponse.Image;
 import org.open4goods.icecat.model.IcecatLiveApiResponse.Multimedia;
+import org.open4goods.icecat.services.IcecatLiveClient;
+import org.open4goods.icecat.services.IcecatLiveLookupResult;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.exceptions.ValidationException;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.resource.ResourceTag;
@@ -32,11 +34,7 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestClient;
 
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.exc.UnrecognizedPropertyException;
 import com.google.common.collect.Sets;
 
 
@@ -52,10 +50,9 @@ public class IcecatCompletionService extends AbstractCompletionService {
 	 */
 	private static final int REFRESH_IN_DAYS = 30;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private final IcecatCompletionConfig icecatConfig;
     private final StandardAggregator aggregator;
-    private final RestClient restClient = RestClient.create();
+    private final IcecatLiveClient liveClient;
 
     /**
      * Returns an empty list when an Icecat response omits an optional array.
@@ -79,8 +76,7 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		this.aggregator = aggregationFacadeService.getStandardAggregator("icecat-aggregation");;
 		this.aggregator.beforeStart();
 		this.icecatConfig = apiProperties.getIcecatCompletionConfig();
-		
-		
+		this.liveClient = new IcecatLiveClient(icecatConfig);
 	}
 
         @Override
@@ -148,31 +144,23 @@ public class IcecatCompletionService extends AbstractCompletionService {
 	 */
 	private Set<DataFragment> completeSearch(VerticalConfig vertical, Product data) {
 		Set<DataFragment> ret = new HashSet<>();
-		
+
 		// TODO : Should manage a thread pool if operating on all catalog
-		String url = icecatConfig.getIceCatUrlPrefix()+data.getId();
-		logger.info("Loading icecat data {}",url);
-		
-        try {
-            String content = restClient.get().uri(url).retrieve().body(String.class);
-            IceDataItem iceItem = objectMapper.readValue(content, IcecatLiveApiResponse.class).data;
-            if (iceItem == null || iceItem.generalInfo == null) {
-                logger.warn("Icecat response for gtin {} does not contain product data", data.gtin());
-                return ret;
-            }
-            data.getExternalIds().setIcecat(String.valueOf(iceItem.generalInfo.icecatId));
-            ret.add(convert(iceItem, data));
-        } catch (UnrecognizedPropertyException e) {
-            logger.error("Unknown property at {} : {}", url, e.getOriginalMessage());
-        } catch (HttpClientErrorException.NotFound e) {
-            logger.info("Gtin {} is not found in Icecat", data.gtin());
-        } catch (HttpClientErrorException.BadRequest e) {
-            logger.info("Gtin {} does not exist in Icecat", data.gtin());
-        } catch (HttpClientErrorException.Forbidden e) {
-            logger.info("Gtin {} is restricted to an upgraded Icecat plan", data.gtin());
-        } catch (Exception e) {
-            logger.error("Unexpected error in icecat parsing for gtin {}", data.gtin(), e);
-        }
+		// TODO(icecat-completion-i18n-and-coverage) : resolve the real domain language instead of this default
+		IcecatLiveLookupResult result = liveClient.fetchProduct(data.getId(), DomainLanguage.fr);
+
+		switch (result.status()) {
+			case FOUND -> {
+				IceDataItem iceItem = result.product().orElseThrow();
+				data.getExternalIds().setIcecat(String.valueOf(iceItem.generalInfo.icecatId));
+				ret.add(convert(iceItem, data));
+			}
+			case NOT_FOUND, RESTRICTED -> {
+				// Nothing to complete; IcecatLiveClient already logged the reason.
+			}
+			case ERROR -> logger.error("Icecat live lookup failed for gtin {} : {}", data.gtin(),
+					result.errorMessage().orElse("unknown error"));
+		}
 		return ret;
 	}
 

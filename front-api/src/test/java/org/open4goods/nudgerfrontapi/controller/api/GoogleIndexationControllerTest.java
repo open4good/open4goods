@@ -8,7 +8,7 @@ import java.time.Instant;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.nudgerfrontapi.dto.indexation.GoogleIndexationMetricsDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.GoogleIndexationQueueService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

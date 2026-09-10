@@ -19,7 +19,7 @@ import org.open4goods.nudgerfrontapi.dto.stats.CategoriesScoresStatsDto;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoryScoreCardinalitiesDto;
 import org.open4goods.nudgerfrontapi.dto.stats.ScoreCardinalityDto;
 import org.open4goods.nudgerfrontapi.dto.stats.VerticalStatsDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.model.stats.AffiliationPartnersStats;
 import org.open4goods.services.opendata.service.OpenDataService;
 import org.open4goods.services.productrepository.services.ProductRepository;

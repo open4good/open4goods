@@ -1,9 +1,9 @@
-package org.open4goods.nudgerfrontapi.localization;
+package org.open4goods.model.localization;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Enumeration listing the supported domain languages exposed by the front API.
+ * Enumeration listing the supported domain languages.
  * <p>
  * Values follow ISO 639-1 / IETF BCP 47 conventions so clients can safely map
  * them to standard locale tags when localisation is eventually implemented.

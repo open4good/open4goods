@@ -22,7 +22,7 @@ import org.open4goods.nudgerfrontapi.config.AgentProperties.AgentConfig;
 import org.open4goods.nudgerfrontapi.dto.agent.AgentRequestDto;
 import org.open4goods.nudgerfrontapi.dto.agent.AgentRequestResponseDto;
 import org.open4goods.nudgerfrontapi.dto.agent.AgentTemplateDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.services.feedback.dto.IssueDto;
 import org.open4goods.services.feedback.service.IssueService;
 import org.open4goods.services.captcha.service.HcaptchaService;

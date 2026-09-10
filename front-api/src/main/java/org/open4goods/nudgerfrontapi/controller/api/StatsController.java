@@ -16,7 +16,7 @@ import org.open4goods.nudgerfrontapi.dto.stats.DatavizChartQueryRequestDto;
 import org.open4goods.nudgerfrontapi.dto.stats.DatavizChartQueryResponseDto;
 import org.open4goods.nudgerfrontapi.dto.stats.DatavizHeroStatsDto;
 import org.open4goods.nudgerfrontapi.dto.stats.VerticalDatavizPlanDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.DatavizStatsService;
 import org.open4goods.nudgerfrontapi.service.StatsService;
 import org.springframework.http.ResponseEntity;
