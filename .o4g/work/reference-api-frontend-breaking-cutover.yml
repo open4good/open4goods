@@ -10,6 +10,7 @@ spec:
   dependsOn:
     - reference-resolution-and-surface-projections
     - product-family-model-grouping
+    - consumer-search-lexical-refactor
   decisionRefs:
     - ADR-0010
   pathScope:

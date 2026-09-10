@@ -1,0 +1,48 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: consumer-search-cost-hotfix
+  name: Consumer search cost hotfix
+spec:
+  purpose: Stop query-time text embeddings and semantic kNN on public consumer search without waiting for the source-neutral projection cutover.
+  roadmapRef: m7-product-data-reference
+  state: ACCEPTED
+  dependsOn: []
+  decisionRefs:
+    - ADR-0012
+  pathScope:
+    - api/**
+    - front-api/**
+    - frontend/**
+    - model/**
+    - verticals/**
+    - services/embedding-djl/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        Product list, global search and suggestions execute lexical Elasticsearch queries only; no /embedding request,
+        query-vector calculation or kNN clause is reachable from public consumer search.
+    - id: AC2
+      statement: >-
+        Legacy semanticSearch and searchType request fields remain accepted, are marked deprecated and have no effect, so an
+        older client cannot reactivate semantic retrieval during the compatibility window.
+    - id: AC3
+      statement: >-
+        EmbeddingProxyService, EmbeddingController, active semantic diagnostics and all semantic branches in SearchService are
+        removed while lexical filters, aggregations, paging and result mapping keep their current contract.
+    - id: AC4
+      statement: >-
+        API startup and aggregation do not load or generate text embeddings, including in NamesAggregationService; image model
+        loading, image vector generation and image clustering behavior remain available and covered by tests.
+    - id: AC5
+      statement: >-
+        The frontend has no SEMANTIC state, search-mode toggle, semantic label or suggestion fallback and sends one lexical
+        request shape for each existing search surface.
+    - id: AC6
+      statement: >-
+        Existing legacy product vectors are neither migrated nor deleted by this hotfix and remain excluded from search source
+        reads; their physical removal belongs to replacement of the legacy index.
+    - id: AC7
+      statement: >-
+        Automated tests prove that requests carrying legacy semantic indicators still build lexical queries, and beta recette
+        records zero text-model load, embedding request and kNN query before release.

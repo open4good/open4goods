@@ -57,3 +57,7 @@ ADR that changes a rule updates the entry here in the same commit.
 12. A normalized GTIN remains the unique product identity. Model and family groups
     are versioned, queryable relations on GTIN leaves; a model prefix is evidence
     only when a reviewed brand-and-class pattern rule gives it semantics.
+13. Public consumer product search is lexical Elasticsearch search over the
+    source-neutral GTIN projection. Reintroducing semantic or hybrid retrieval
+    requires a dedicated WorkOrder, a relevance benchmark and a capacity benchmark;
+    no dormant query-time text embedding or vector-search path is retained.

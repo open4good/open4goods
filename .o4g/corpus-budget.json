@@ -25,8 +25,8 @@
   "ceilings": {
     "non_normative_lines": 6115,
     "rule_shaped_statements_in_non_normative": 137,
-    "normative_documents": 13,
-    "work_open_lines": 1474,
+    "normative_documents": 14,
+    "work_open_lines": 1595,
     "work_ledger_lines": 1215,
     "adr_lines_max": 120
   }
