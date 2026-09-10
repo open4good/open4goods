@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.StreamSupport;
 
+import org.open4goods.icecat.config.yml.IcecatConfiguration;
 import org.open4goods.icecat.jaxb.Feature;
 import org.open4goods.icecat.jaxb.FeatureGroup;
 import org.open4goods.icecat.jaxb.Name;
@@ -23,31 +24,29 @@ import org.open4goods.icecat.repository.IcecatCategoryRepository;
 import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
 import org.open4goods.icecat.repository.IcecatFeatureRepository;
 import org.open4goods.icecat.repository.IcecatSupplierRepository;
+import org.open4goods.icecat.services.IcecatIndexVersionManager.IndexSwitchResult;
 import org.open4goods.icecat.services.loader.CategoryLoader;
 import org.open4goods.icecat.services.loader.FeatureLoader;
 import org.open4goods.icecat.services.loader.IcecatBulkModelSupport;
 import org.open4goods.icecat.util.IcecatConstants;
+import org.open4goods.model.exceptions.TechnicalException;
 import org.open4goods.model.helper.IdHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 
 /**
  * Manages Elasticsearch persistence for Icecat reference data.
  *
- * <p>After application startup the in-memory maps populated by {@link FeatureLoader} and
- * {@link CategoryLoader} are mirrored to dedicated ES indexes. This provides:
- * <ul>
- *   <li>Persistent reference data that survives application restarts without re-downloading XML.</li>
- *   <li>Searchable indexes for admin endpoints (category browse, feature lookup).</li>
- *   <li>Foundation for fuzzy vertical-to-category matching.</li>
- * </ul>
- *
- * <p>Attribute-name resolution is served from Elasticsearch through {@link IcecatFeatureResolver},
- * with a small runtime cache to avoid repeated identical queries.
+ * <p>{@link #syncFromLoaders()} is the single explicit entry point: it triggers
+ * {@link FeatureLoader} and {@link CategoryLoader} to (re)download and parse the Icecat bulk
+ * XML exports, then persists each reference type into a new versioned Elasticsearch index and
+ * atomically switches that type's alias to it (see {@link IcecatIndexVersionManager}). It is
+ * never run automatically at application startup — startup builds no in-memory reference map,
+ * and every read (admin search, feature lookup, attribute resolution) is served from whatever
+ * index version each alias currently points to.
  */
 public class IcecatIndexService {
 
@@ -55,13 +54,14 @@ public class IcecatIndexService {
 
     private static final int LANG_ID_ENGLISH = IcecatConstants.LANG_ID_ENGLISH;
 
+    private final IcecatConfiguration iceCatConfig;
     private final FeatureLoader featureLoader;
     private final CategoryLoader categoryLoader;
     private final IcecatFeatureRepository featureRepository;
     private final IcecatCategoryRepository categoryRepository;
     private final IcecatFeatureGroupRepository featureGroupRepository;
     private final IcecatSupplierRepository supplierRepository;
-    private IcecatFeatureResolver featureResolver;
+    private final IcecatIndexVersionManager versionManager;
 
     private final Map<String, List<IcecatFeatureDocument>> featureCache = java.util.Collections.synchronizedMap(
         new java.util.LinkedHashMap<String, List<IcecatFeatureDocument>>(256, 0.75f, true) {
@@ -73,43 +73,45 @@ public class IcecatIndexService {
         }
     );
 
-    public void setFeatureResolver(IcecatFeatureResolver featureResolver) {
-        this.featureResolver = featureResolver;
-    }
-
     public IcecatIndexService(
+            IcecatConfiguration iceCatConfig,
             FeatureLoader featureLoader,
             CategoryLoader categoryLoader,
             IcecatFeatureRepository featureRepository,
             IcecatCategoryRepository categoryRepository,
             IcecatFeatureGroupRepository featureGroupRepository,
-            IcecatSupplierRepository supplierRepository) {
+            IcecatSupplierRepository supplierRepository,
+            ElasticsearchOperations elasticsearchOperations) {
+        this.iceCatConfig = iceCatConfig;
         this.featureLoader = featureLoader;
         this.categoryLoader = categoryLoader;
         this.featureRepository = featureRepository;
         this.categoryRepository = categoryRepository;
         this.featureGroupRepository = featureGroupRepository;
         this.supplierRepository = supplierRepository;
+        this.versionManager = new IcecatIndexVersionManager(elasticsearchOperations);
     }
 
     /**
-     * Triggered after all Spring beans are ready (after {@link FeatureLoader} and
-     * {@link CategoryLoader} have loaded their in-memory maps).
-     * Persists reference data to Elasticsearch indexes.
-     */
-    @EventListener(ApplicationReadyEvent.class)
-    public void onApplicationReady() {
-        syncFromLoaders();
-    }
-
-    /**
-     * Synchronises all Icecat reference data from the in-memory loaders to Elasticsearch.
-     * Safe to call multiple times (upserts by ID). Skips each index if the corresponding
-     * loader map is empty (e.g. Icecat not configured).
+     * Downloads and parses the Icecat bulk XML exports (feature groups, brands, categories,
+     * features, and — if enabled — the category-feature list), then synchronises every reference
+     * type to Elasticsearch, each into a new versioned index with an atomic alias switch. This is
+     * the explicit, asynchronous import command (triggered by an admin action, e.g.
+     * {@code /icecat/index/sync}); it is never called automatically at startup.
      */
     public void syncFromLoaders() {
         LOGGER.info("Syncing Icecat reference data to Elasticsearch");
         try {
+            featureLoader.loadFeatureGroups();
+            featureLoader.loadBrands();
+            categoryLoader.loadCategories();
+            featureLoader.loadFeatures();
+            if (iceCatConfig.isLoadCategoryFeatureList()) {
+                categoryLoader.loadCategoryFeatureList();
+            } else {
+                LOGGER.info("Icecat category-feature list loading is disabled");
+            }
+
             syncFeatures();
             syncCategories();
             syncFeatureGroups();
@@ -128,12 +130,9 @@ public class IcecatIndexService {
         List<IcecatFeatureDocument> docs = featureLoader.getFeaturesById().values().stream()
                 .map(this::toFeatureDocument)
                 .toList();
-        featureRepository.saveAll(docs);
-        LOGGER.info("Indexed {} Icecat features", docs.size());
+        IndexSwitchResult result = versionManager.reimport(IcecatFeatureDocument.class, docs);
+        LOGGER.info("Indexed {} Icecat features into {}", result.documentCount(), result.indexName());
         featureCache.clear();
-        if (featureResolver != null) {
-            featureResolver.warmUp(docs);
-        }
     }
 
     private void syncCategories() {
@@ -142,38 +141,40 @@ public class IcecatIndexService {
             return;
         }
         List<IcecatCategoryDocument> docs = categoryLoader.getCategoriesById().values().stream()
-                .map(cat -> {
-                    IcecatCategoryDocument doc = new IcecatCategoryDocument();
-                    doc.setId(IcecatBulkModelSupport.intValue(cat.getID()));
-                    doc.setScore(IcecatBulkModelSupport.intValue(cat.getScore()));
-                    if (cat.getParentCategory() != null) {
-                        doc.setParentId(IcecatBulkModelSupport.intValue(cat.getParentCategory().getID()));
-                    }
-                    List<Name> names = cat.getName();
-                    doc.setEnglishName(names.stream()
-                            .filter(n -> IcecatBulkModelSupport.intValue(n.getLangid(), -1) == LANG_ID_ENGLISH)
-                            .map(IcecatBulkModelSupport::effectiveName)
-                            .findFirst()
-                            .orElse(null));
-                    doc.setLangNames(toLangNameList(names));
-                    doc.setFeatureGroups(cat.getCategoryFeatureGroup().stream()
-                            .map(cfg -> {
-                                IcecatCategoryFeatureGroupDocument group = new IcecatCategoryFeatureGroupDocument();
-                                group.setId(IcecatBulkModelSupport.intValue(cfg.getID()));
-                                group.setFeatureGroupIds(cfg.getFeatureGroup().stream()
-                                        .map(fg -> IcecatBulkModelSupport.intValue(fg.getID()))
-                                        .toList());
-                                return group;
-                            })
-                            .toList());
-                    doc.setFeatures(cat.getFeature().stream()
-                            .map(this::toCategoryFeatureDocument)
-                            .toList());
-                    return doc;
-                })
+                .map(this::toCategoryDocument)
                 .toList();
-        categoryRepository.saveAll(docs);
-        LOGGER.info("Indexed {} Icecat categories", docs.size());
+        IndexSwitchResult result = versionManager.reimport(IcecatCategoryDocument.class, docs);
+        LOGGER.info("Indexed {} Icecat categories into {}", result.documentCount(), result.indexName());
+    }
+
+    private IcecatCategoryDocument toCategoryDocument(org.open4goods.icecat.jaxb.Category cat) {
+        IcecatCategoryDocument doc = new IcecatCategoryDocument();
+        doc.setId(IcecatBulkModelSupport.intValue(cat.getID()));
+        doc.setScore(IcecatBulkModelSupport.intValue(cat.getScore()));
+        if (cat.getParentCategory() != null) {
+            doc.setParentId(IcecatBulkModelSupport.intValue(cat.getParentCategory().getID()));
+        }
+        List<Name> names = cat.getName();
+        doc.setEnglishName(names.stream()
+                .filter(n -> IcecatBulkModelSupport.intValue(n.getLangid(), -1) == LANG_ID_ENGLISH)
+                .map(IcecatBulkModelSupport::effectiveName)
+                .findFirst()
+                .orElse(null));
+        doc.setLangNames(toLangNameList(names));
+        doc.setFeatureGroups(cat.getCategoryFeatureGroup().stream()
+                .map(cfg -> {
+                    IcecatCategoryFeatureGroupDocument group = new IcecatCategoryFeatureGroupDocument();
+                    group.setId(IcecatBulkModelSupport.intValue(cfg.getID()));
+                    group.setFeatureGroupIds(cfg.getFeatureGroup().stream()
+                            .map(fg -> IcecatBulkModelSupport.intValue(fg.getID()))
+                            .toList());
+                    return group;
+                })
+                .toList());
+        doc.setFeatures(cat.getFeature().stream()
+                .map(this::toCategoryFeatureDocument)
+                .toList());
+        return doc;
     }
 
     private void syncFeatureGroups() {
@@ -184,8 +185,8 @@ public class IcecatIndexService {
         List<IcecatFeatureGroupDocument> docs = featureLoader.getFeatureGroupsById().values().stream()
                 .map(this::toFeatureGroupDocument)
                 .toList();
-        featureGroupRepository.saveAll(docs);
-        LOGGER.info("Indexed {} Icecat feature groups", docs.size());
+        IndexSwitchResult result = versionManager.reimport(IcecatFeatureGroupDocument.class, docs);
+        LOGGER.info("Indexed {} Icecat feature groups into {}", result.documentCount(), result.indexName());
     }
 
     private void syncSuppliers() {
@@ -207,8 +208,8 @@ public class IcecatIndexService {
                     return doc;
                 })
                 .toList();
-        supplierRepository.saveAll(docs);
-        LOGGER.info("Indexed {} Icecat suppliers", docs.size());
+        IndexSwitchResult result = versionManager.reimport(IcecatSupplierDocument.class, docs);
+        LOGGER.info("Indexed {} Icecat suppliers into {}", result.documentCount(), result.indexName());
     }
 
     private IcecatCategoryFeatureDocument toCategoryFeatureDocument(Feature feature) {
@@ -381,5 +382,21 @@ public class IcecatIndexService {
                 featureGroupRepository.count(),
                 supplierRepository.count()
         };
+    }
+
+    /**
+     * Current size of the {@code findFeaturesByNormalizedName} cache, for health checks and
+     * admin dashboards.
+     */
+    public int featureCacheSize() {
+        return featureCache.size();
+    }
+
+    /**
+     * The version manager backing every {@code sync*} call, exposed for admin rollback tooling
+     * and index-version inspection.
+     */
+    public IcecatIndexVersionManager indexVersionManager() {
+        return versionManager;
     }
 }

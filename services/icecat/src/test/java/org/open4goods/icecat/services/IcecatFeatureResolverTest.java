@@ -11,8 +11,6 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Set;
 
-import org.open4goods.model.helper.IdHelper;
-
 import org.junit.jupiter.api.Test;
 import org.open4goods.icecat.model.IcecatFeatureDocument;
 
@@ -51,19 +49,20 @@ class IcecatFeatureResolverTest {
     }
 
     @Test
-    void warmUpPreventsEsLookupForKnownFeatureNames() {
+    void cacheSizesReflectPriorLookups() {
         IcecatIndexService indexService = mock(IcecatIndexService.class);
-
-        IcecatFeatureDocument doc = new IcecatFeatureDocument();
-        doc.setId(99);
-        doc.setEnglishName("Screen Size");
-        String normalized = IdHelper.normalizeAttributeName("Screen Size");
-        doc.setNormalizedNames(Set.of(normalized));
+        IcecatFeatureDocument document = new IcecatFeatureDocument();
+        document.setId(46);
+        when(indexService.findFeaturesByNormalizedName("COULEUR")).thenReturn(List.of(document));
 
         IcecatFeatureResolver resolver = new IcecatFeatureResolver(indexService);
-        resolver.warmUp(List.of(doc));
 
-        assertThat(resolver.resolveFeatureName("Screen Size")).containsExactly(99);
-        verify(indexService, never()).findFeaturesByNormalizedName(any());
+        assertThat(resolver.cacheSizes()).containsExactly(0, 0);
+
+        resolver.resolveFeatureName("Couleur");
+
+        int[] sizes = resolver.cacheSizes();
+        assertThat(sizes[0]).isEqualTo(1);
+        assertThat(sizes[1]).isEqualTo(1);
     }
 }

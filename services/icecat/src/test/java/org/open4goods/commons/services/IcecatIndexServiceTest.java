@@ -3,22 +3,15 @@ package org.open4goods.commons.services;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.open4goods.icecat.jaxb.Category;
 import org.open4goods.icecat.jaxb.CategoryFeatureGroup;
@@ -29,6 +22,7 @@ import org.open4goods.icecat.jaxb.Names;
 import org.open4goods.icecat.model.IcecatCategoryDocument;
 import org.open4goods.icecat.model.IcecatCategoryFeatureDocument;
 import org.open4goods.icecat.model.IcecatFeatureDocument;
+import org.open4goods.icecat.config.yml.IcecatConfiguration;
 import org.open4goods.icecat.repository.IcecatCategoryRepository;
 import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
 import org.open4goods.icecat.repository.IcecatFeatureRepository;
@@ -36,7 +30,16 @@ import org.open4goods.icecat.repository.IcecatSupplierRepository;
 import org.open4goods.icecat.services.IcecatIndexService;
 import org.open4goods.icecat.services.loader.CategoryLoader;
 import org.open4goods.icecat.services.loader.FeatureLoader;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 
+/**
+ * Unit-level coverage for {@link IcecatIndexService}: JAXB-to-document mapping (via reflection,
+ * since mapping is private) and the plain read/delegate methods. The versioned-index import
+ * pipeline itself ({@code syncFromLoaders()} end to end, alias switching, rollback) is covered
+ * against a real Elasticsearch by {@code IcecatIndexVersionManagerIT}, not here — mocking
+ * {@link ElasticsearchOperations}'s full index/alias API would only verify the mock, not the
+ * pipeline.
+ */
 public class IcecatIndexServiceTest {
 
     private FeatureLoader featureLoader;
@@ -62,19 +65,20 @@ public class IcecatIndexServiceTest {
         when(categoryLoader.getCategoriesById()).thenReturn(Collections.emptyMap());
 
         indexService = new IcecatIndexService(
+                Mockito.mock(IcecatConfiguration.class),
                 featureLoader, categoryLoader,
                 featureRepository, categoryRepository,
-                featureGroupRepository, supplierRepository);
+                featureGroupRepository, supplierRepository,
+                Mockito.mock(ElasticsearchOperations.class));
     }
 
     @Test
     public void testSyncFromLoadersDoesNotThrowWhenEmpty() {
         assertDoesNotThrow(() -> indexService.syncFromLoaders());
-        verify(featureRepository, never()).saveAll(anyList());
     }
 
     @Test
-    public void testSyncIndexesFeatureWhenMapPopulated() {
+    public void testToFeatureDocumentMapsNameAndType() throws Exception {
         Name nameEn = new Name();
         nameEn.setLangid(BigInteger.valueOf(1));
         nameEn.setValueAttribute("Screen size");
@@ -87,19 +91,18 @@ public class IcecatIndexServiceTest {
         feature.setType("numerical");
         feature.setNames(names);
 
-        Map<Integer, Feature> map = new HashMap<>();
-        map.put(42, feature);
-        when(featureLoader.getFeaturesById()).thenReturn(map);
+        Method toFeatureDocument = IcecatIndexService.class.getDeclaredMethod("toFeatureDocument", Feature.class);
+        toFeatureDocument.setAccessible(true);
+        IcecatFeatureDocument doc = (IcecatFeatureDocument) toFeatureDocument.invoke(indexService, feature);
 
-        when(featureRepository.saveAll(any())).thenReturn(Collections.emptyList());
-
-        indexService.syncFromLoaders();
-
-        verify(featureRepository, atLeastOnce()).saveAll(any());
+        assertEquals(42, doc.getId());
+        assertEquals("numerical", doc.getType());
+        assertEquals("Screen size", doc.getEnglishName());
+        assertEquals("1:Screen size", doc.getLangNames().get(0));
     }
 
     @Test
-    public void testSyncIndexesCategoryFeatureMetadataWhenMapPopulated() {
+    public void testToCategoryDocumentMapsFeatureGroupsAndFeatures() throws Exception {
         Name nameEn = new Name();
         nameEn.setLangid(BigInteger.valueOf(1));
         nameEn.setValueAttribute("Washing Machines");
@@ -125,14 +128,10 @@ public class IcecatIndexServiceTest {
         category.getCategoryFeatureGroup().add(categoryFeatureGroup);
         category.getFeature().add(feature);
 
-        when(categoryLoader.getCategoriesById()).thenReturn(Map.of(123, category));
-        when(categoryRepository.saveAll(any())).thenReturn(Collections.emptyList());
+        Method toCategoryDocument = IcecatIndexService.class.getDeclaredMethod("toCategoryDocument", Category.class);
+        toCategoryDocument.setAccessible(true);
+        IcecatCategoryDocument document = (IcecatCategoryDocument) toCategoryDocument.invoke(indexService, category);
 
-        indexService.syncFromLoaders();
-
-        ArgumentCaptor<Iterable<IcecatCategoryDocument>> captor = ArgumentCaptor.forClass(Iterable.class);
-        verify(categoryRepository).saveAll(captor.capture());
-        IcecatCategoryDocument document = captor.getValue().iterator().next();
         assertEquals(123, document.getId());
         assertEquals("Washing Machines", document.getEnglishName());
         assertEquals(77, document.getFeatureGroups().get(0).getId());
@@ -172,5 +171,10 @@ public class IcecatIndexServiceTest {
         assertEquals(500L, counts[1]);
         assertEquals(200L, counts[2]);
         assertEquals(50L, counts[3]);
+    }
+
+    @Test
+    public void testFeatureCacheSizeStartsEmpty() {
+        assertEquals(0, indexService.featureCacheSize());
     }
 }

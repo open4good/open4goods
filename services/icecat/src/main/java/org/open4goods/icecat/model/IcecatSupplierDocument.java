@@ -13,7 +13,7 @@ import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
  * {@link org.open4goods.icecat.services.loader.FeatureLoader}.
  * Provides persistent storage of brand logo URLs for use in brand enrichment.
  */
-@Document(indexName = "icecat-suppliers", createIndex = true, writeTypeHint = WriteTypeHint.FALSE)
+@Document(indexName = "icecat-suppliers", createIndex = false, writeTypeHint = WriteTypeHint.FALSE)
 public class IcecatSupplierDocument {
 
     /** Icecat stable supplier ID. */

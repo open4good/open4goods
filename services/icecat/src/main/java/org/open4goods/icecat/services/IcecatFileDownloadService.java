@@ -65,18 +65,4 @@ public class IcecatFileDownloadService {
         }
     }
 
-    /**
-     * Returns the local path that would be used for the given URL (whether or not it exists).
-     * Useful for constructing derived file names (e.g. minified variants).
-     *
-     * @param url the remote URL
-     * @return the local file (may not exist yet)
-     */
-    public File localFileFor(String url) {
-        return new File(remoteCachingFolder + File.separator + IdHelper.getHashedName(url));
-    }
-
-    public String getRemoteCachingFolder() {
-        return remoteCachingFolder;
-    }
 }
