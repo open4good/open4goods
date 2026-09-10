@@ -1,0 +1,87 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: icecat-legacy-model-removal
+  name: Swap Icecat loaders to the generated JAXB contract
+spec:
+  purpose: Make CategoryLoader and FeatureLoader parse bulk XML into the JAXB-generated types from icecat-xml-contract-generation
+    instead of the hand-written org.open4goods.icecat.model bulk POJOs, then delete the POJOs once nothing references them.
+  roadmapRef: m5-icecat-integration
+  state: COMPLETED
+  dependsOn:
+    - icecat-xml-contract-generation
+  decisionRefs:
+    - ADR-0007
+  pathScope:
+    - services/icecat/**
+    - api/src/main/java/org/open4goods/api/controller/api/IcecatController.java
+    - api/src/main/java/org/open4goods/api/config/ApiConfig.java
+    - front-api/src/main/java/org/open4goods/nudgerfrontapi/config/AppConfig.java
+  acceptanceCriteria:
+    - id: AC1
+      statement: FeatureLoader and CategoryLoader (services/icecat/src/main/java/org/open4goods/icecat/services/loader/) unmarshal
+        bulk XML into the org.open4goods.icecat.jaxb generated types instead of tools.jackson.dataformat.xml.XmlMapper against
+        the hand-written org.open4goods.icecat.model bulk classes (IcecatFeature, IcecatCategory, IcecatSupplier, IcecatFeatureGroup,
+        IcecatModel, IcecatResponse, IcecatName(s), IcecatSign(s), IcecatDescription(s), IcecatMeasure, IcecatParentCategory,
+        IcecatSupplierName(s), and the *List wrapper classes). Field-for-field parity with the current loader output is required
+        for every downstream aggregation that reads these maps; a schema/field mismatch here is a silent data-quality regression,
+        not a compile error, so add or extend loader tests that assert real parsed values (not just non-null) for a representative
+        feature and category fixture.
+    - id: AC2
+      statement: IcecatIndexService's toFeatureDocument/toCategoryFeatureDocument and every other mapper that currently takes
+        an org.open4goods.icecat.model bulk-POJO parameter accept the AC1 generated type instead. IcecatService's internal
+        maps (getFeaturesById and equivalents) hold the generated type.
+    - id: AC3
+      statement: IcecatController.getFeature (api/src/main/java/org/open4goods/api/controller/api/IcecatController.java:105,
+        the only consumer of these bulk POJOs outside services/icecat/**) no longer references org.open4goods.icecat.model.IcecatFeature.
+        The controller already injects IcecatIndexService, whose existing public findFeature(Integer) returns Optional<IcecatFeatureDocument>
+        (the already-scoped Elasticsearch-mapped type) from the live index -- prefer routing this endpoint through that method
+        over exposing the new generated type on a REST response body, but the implementer decides after checking API-consumer
+        impact (OpenAPI contract, front-api/ui clients of this admin endpoint).
+    - id: AC4
+      statement: Once AC1-AC3 leave no reference to the old hand-written bulk classes anywhere in the reactor, they are deleted
+        (per simplification-over-backwards-compat -- no parallel POJO left "for now"). mvn --offline -pl services/icecat,api
+        -am clean install passes with the deletion in the same commit as the last reference removal.
+  evidenceRefs:
+    - 'note: 2026-09-09 -- split out of icecat-xml-contract-generation''s AC2 (see that WorkOrder''s ledger entry) after that
+      WorkOrder''s own pathScope (services/icecat/** + pom.xml) proved too narrow to close it: closing required either widening
+      into api/ or waiting on this coupling to be cut, and the roadmap had icecat-live-client-boundary listed as depending
+      on icecat-xml-contract-generation, backwards from the AC2 blocker. Verified precisely before splitting, not assumed:
+      `grep -rlnE` for every hand-written bulk-model class name (IcecatFeature, IcecatCategory, IcecatSupplier, IcecatCategoryFeatureGroup,
+      IcecatFeatureGroup, IcecatModel, IcecatResponse, IcecatName(s), IcecatSign(s), IcecatDescription(s), IcecatMeasure,
+      IcecatParentCategory, IcecatSupplierName(s), IcecatCategoriesList, IcecatFeaturesList, IcecatFeatureGroupsList, IcecatSuppliersList,
+      CategoryFeaturesList) across api/, front-api/, ui/ and services/*/ found exactly one consumer outside services/icecat/**:
+      IcecatController.java. Everything else the prior evidence worried about (IcecatIndexService.toFeatureDocument, IcecatService,
+      CategoryLoader/FeatureLoader) is already inside services/icecat/**, in scope. FeatureLoader/CategoryLoader currently
+      parse with tools.jackson.dataformat.xml.XmlMapper against the hand-written @JacksonXmlProperty-annotated POJOs, a wholly
+      separate mechanism from the JAXB/xjc pipeline icecat-xml-contract-generation''s AC1 wired -- the 128 generated classes
+      are not yet consumed anywhere, so this is a real swap, not a rename. Given the field-collision fixes AC1 needed to get
+      JAXB to reproduce the schema faithfully, this is genuine implementation work (parser swap + per-field parity verification
+      across two loaders), sized as its own WorkOrder rather than folded into icecat-xml-contract-generation or icecat-live-client-boundary,
+      neither of which owns this concern. Not started; no code changed by this note.'
+    - 'note: 2026-09-10 -- widened pathScope to add api/src/main/java/org/open4goods/api/config/ApiConfig.java and front-api/src/main/java/org/open4goods/nudgerfrontapi/config/AppConfig.java.
+      Verified via `grep -rn "new FeatureLoader(\|new CategoryLoader(\|new IcecatService("` across the reactor: these two
+      config classes (plus the loaders'' own test) are the only callers of the three constructors, and both pass a per-call
+      `new XmlMapper()` that AC1''s JAXB swap makes an unused constructor parameter to drop. FeatureLoader/CategoryLoader/IcecatService
+      are otherwise entirely inside services/icecat/**, already in scope; only these two Spring @Configuration classes needed
+      touching outside the original pathScope, and only to delete the now-dead XmlMapper argument from three constructor calls
+      each -- no other change to either file.'
+    - 'test: mvn --offline -pl services/icecat,api -am clean install -> BUILD SUCCESS, 0 failures/errors across both modules'
+    - 'test: FeatureLoaderTest/CategoryLoaderTest (new) unmarshal real FeaturesList/CategoriesList XML fixtures via the JAXB
+      path and assert real parsed field values (type, mandatory, searchable, defaultDisplayUnit, no, categoryFeatureGroupId,
+      langid-keyed names) -> 2/2 pass'
+    - 'test: services/icecat full suite (14 tests, incl. rewritten IcecatServiceTest/IcecatIndexServiceTest) -> 0 failures/errors'
+    - 'test: api IcecatControllerTest + ReferentialHelperControllerTest -> pass unchanged (getFeature now routes through IcecatIndexService.findFeature,
+      no existing test asserted the old bulk-POJO response shape)'
+    - 'note: AC1 premise verified before implementing -- JAXB codegen (icecat-xml-contract-generation) already produces org.open4goods.icecat.jaxb.*
+      under target/generated-sources; Feature.DefaultDisplayUnit/Class are genuinely xs:boolean per the owned XSD (not the
+      fictitious String "kg" the old unit test used), confirmed by grep against src/main/resources/xsd/icecat.xsd'
+    - 'note: AC4 deletion -- grep-verified zero remaining references to the 23 hand-written bulk classes (IcecatModel, IcecatResponse,
+      IcecatFeature, IcecatFeatureGroup, IcecatCategory, IcecatCategoryFeatureGroup, IcecatSupplier, IcecatCustomerService,
+      IcecatSupplierName(s), IcecatName(s), IcecatSign(s), IcecatDescription(s), IcecatMeasure, IcecatParentCategory, and
+      the 5 *List wrappers) anywhere in the reactor before deleting them in the same commit as the last reference removal
+      (IcecatController AC3 change); Supplier.getCustomerServices()/getNames() were confirmed unused by any consumer so no
+      JAXB interleaved-list-filtering helper was needed'
+    - 'note: AC2 mapping preserves the ES document schema unchanged (IcecatCategoryFeatureDocument no/clazz/defaultDisplayUnit/searchable
+      stay String/String/String/Integer) by converting JAXB BigInteger/Boolean at the mapping boundary in IcecatIndexService,
+      avoiding an index-mapping migration and keeping IcecatCategoryAttributesDto (outside pathScope) untouched'

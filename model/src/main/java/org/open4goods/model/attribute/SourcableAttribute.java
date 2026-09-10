@@ -120,12 +120,27 @@ public abstract class SourcableAttribute {
 
 
 
-	private int trustedSourcePriorityIndex(String datasource) {
+	/**
+	 * Rank of a datasource in the legacy trusted-source order, lowest first.
+	 *
+	 * <p>This is the single legacy ranking used to elect between conflicting
+	 * contributions. Parsers electing a value across sources use it so that one
+	 * product does not end up with two different notions of which source wins.
+	 *
+	 * @param datasource contributing datasource name, possibly {@code null}
+	 * @return its index in the trusted order, or {@link Integer#MAX_VALUE} when the
+	 *         datasource is unknown or absent
+	 */
+	public static int trustedSourcePriority(String datasource) {
 		if (datasource == null) {
 			return Integer.MAX_VALUE;
 		}
 		Optional<Integer> index = java.util.stream.IntStream.range(0, DEFAULT_TRUSTED_SOURCE_PRIORITY.size()).filter(i -> datasource.equalsIgnoreCase(DEFAULT_TRUSTED_SOURCE_PRIORITY.get(i))).boxed().findFirst();
 		return index.orElse(Integer.MAX_VALUE);
+	}
+
+	private int trustedSourcePriorityIndex(String datasource) {
+		return trustedSourcePriority(datasource);
 	}
 
 	private String normalizeValue(String value) {

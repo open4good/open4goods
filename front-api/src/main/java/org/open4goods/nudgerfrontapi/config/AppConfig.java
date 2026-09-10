@@ -2,7 +2,12 @@ package org.open4goods.nudgerfrontapi.config;
 
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.icecat.config.yml.IcecatConfiguration;
+import org.open4goods.icecat.repository.IcecatCategoryRepository;
+import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
+import org.open4goods.icecat.repository.IcecatFeatureRepository;
+import org.open4goods.icecat.repository.IcecatSupplierRepository;
 import org.open4goods.icecat.services.IcecatFileDownloadService;
+import org.open4goods.icecat.services.IcecatIndexService;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.icecat.services.loader.CategoryLoader;
 import org.open4goods.icecat.services.loader.FeatureLoader;
@@ -19,10 +24,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-
-import tools.jackson.dataformat.xml.XmlMapper;
 
 @Configuration
 /**
@@ -60,24 +64,35 @@ public class AppConfig {
     @Bean
     FeatureLoader featureLoader(IcecatFileDownloadService icecatFileDownloadService, BrandService brandService,
             @Autowired IcecatConfiguration icecatFeatureConfig) {
-        return new FeatureLoader(new XmlMapper(), icecatFeatureConfig, icecatFileDownloadService, brandService);
+        return new FeatureLoader(icecatFeatureConfig, icecatFileDownloadService, brandService);
     }
 
     @Bean
     CategoryLoader categoryLoader(IcecatFileDownloadService icecatFileDownloadService,
             VerticalsConfigService verticalConfigService, FeatureLoader featureLoader,
             @Autowired IcecatConfiguration icecatFeatureConfig) {
-        return new CategoryLoader(new XmlMapper(), icecatFeatureConfig, icecatFileDownloadService,
+        return new CategoryLoader(icecatFeatureConfig, icecatFileDownloadService,
                 verticalConfigService, featureLoader);
+    }
+
+    @Bean
+    @Lazy
+    IcecatIndexService icecatIndexService(@Autowired IcecatConfiguration icecatFeatureConfig,
+            @Autowired FeatureLoader featureLoader, @Autowired CategoryLoader categoryLoader,
+            @Autowired IcecatFeatureRepository featureRepository, @Autowired IcecatCategoryRepository categoryRepository,
+            @Autowired IcecatFeatureGroupRepository featureGroupRepository,
+            @Autowired IcecatSupplierRepository supplierRepository,
+            @Autowired ElasticsearchOperations elasticsearchOperations) {
+        return new IcecatIndexService(icecatFeatureConfig, featureLoader, categoryLoader, featureRepository,
+                categoryRepository, featureGroupRepository, supplierRepository, elasticsearchOperations);
     }
 
     @Bean
     IcecatService icecatFeatureService(IcecatFileDownloadService icecatFileDownloadService,
             @Autowired IcecatConfiguration icecatFeatureConfig, @Autowired FeatureLoader featureLoader,
-            @Autowired CategoryLoader categoryLoader) {
-        // NOTE: xmlMapper not injected because sharing the Spring-managed one corrupts springdoc.
-        return new IcecatService(new XmlMapper(), icecatFeatureConfig, icecatFileDownloadService,
-                featureLoader, categoryLoader);
+            @Autowired CategoryLoader categoryLoader, @Autowired @Lazy IcecatIndexService icecatIndexService) {
+        return new IcecatService(icecatFeatureConfig, icecatFileDownloadService,
+                featureLoader, categoryLoader, icecatIndexService);
     }
 
     @Bean

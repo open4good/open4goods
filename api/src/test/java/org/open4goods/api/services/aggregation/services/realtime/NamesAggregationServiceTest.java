@@ -1,11 +1,8 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -15,8 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.open4goods.embedding.service.DjlTextEmbeddingService;
-import org.open4goods.embedding.config.DjlEmbeddingProperties;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.services.textgen.BlablaService;
 import org.open4goods.model.exceptions.InvalidParameterException;
@@ -40,58 +35,14 @@ class NamesAggregationServiceTest {
 	@Mock
 	private BlablaService blablaService;
 
-	@Mock
-	private DjlTextEmbeddingService embeddingService;
-
-	private DjlEmbeddingProperties embeddingProperties;
-
 	private NamesAggregationService service;
 
 	@BeforeEach
 	void setUp() {
-		embeddingProperties = new DjlEmbeddingProperties();
 		service = new NamesAggregationService(
 				LoggerFactory.getLogger(NamesAggregationService.class),
 				verticalsConfigService,
-				blablaService,
-				embeddingService,
-				embeddingProperties);
-	}
-
-	@Test
-	void buildEmbeddingText_shouldBlendBrandModelOffersAndVertical() {
-		VerticalConfig config = buildVerticalConfig();
-		Product product = new Product(42L);
-		product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Marque");
-		product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "Modele");
-		product.getOfferNames().add("premiere offre");
-		product.getOfferNames().add("seconde offre");
-
-		String combined = service.buildEmbeddingText(product, config);
-
-		assertThat(combined)
-				.contains("Marque")
-				.contains("Modele")
-				.contains("premiere offre")
-				.contains("Cuisine");
-		assertThat(combined.length()).isLessThanOrEqualTo(1000);
-	}
-
-	@Test
-	void onProduct_shouldStoreEmbeddingWhenTextPresent() throws AggregationSkipException, InvalidParameterException {
-		VerticalConfig config = buildVerticalConfig();
-		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
-		when(embeddingService.embed(anyString())).thenReturn(new float[] { 0.1f, 0.2f });
-
-		Product product = new Product(7L);
-		product.setVertical("vertical-id");
-		product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Marque");
-		product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "Modele");
-		product.getOfferNames().add("offre");
-
-		service.onProduct(product, config);
-
-		assertNotNull(product.getEmbedding());
+				blablaService);
 	}
 
 	@Test
@@ -116,7 +67,6 @@ class NamesAggregationServiceTest {
 
 	private VerticalConfig buildVerticalConfig() {
 		VerticalConfig config = new VerticalConfig();
-		config.setComputeTextEmbeddings(true);
 		ProductI18nElements productI18nElements = new ProductI18nElements();
 		productI18nElements.setPageTitle("Cuisine");
 
@@ -209,95 +159,23 @@ class NamesAggregationServiceTest {
 		assertThat(product.getNames().getDisplayName().get("fr")).isEqualTo("101");
 	}
 	@Test
-	void onProduct_shouldRecomputeEmbeddingWhenBrandChanges() throws AggregationSkipException, InvalidParameterException {
-		VerticalConfig config = buildVerticalConfig();
-		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
-		when(embeddingService.embed(anyString())).thenReturn(new float[] { 0.1f, 0.2f });
-
-		Product product = new Product(10L);
-		product.setVertical("vertical-id");
-		product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Marque");
-		product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "Modele");
-		product.getOfferNames().add("offre");
-
-		// First call: computes embedding
-		service.onProduct(product, config);
-		assertNotNull(product.getEmbedding());
-
-		// Change brand → matrix slot 0 stays 1 but preferredName hash changes → triggers re-embed
-		product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "AutreMarque");
-		service.onProduct(product, config);
-
-		// Embed should have been called twice (once per distinct cache key)
-		verify(embeddingService, times(2)).embed(anyString());
-	}
-
-	@Test
-	void onProduct_shouldRecomputeEmbeddingWhenOfferCountChanges() throws AggregationSkipException, InvalidParameterException {
-		VerticalConfig config = buildVerticalConfig();
-		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
-		when(embeddingService.embed(anyString())).thenReturn(new float[] { 0.3f, 0.4f });
-
-		Product product = new Product(11L);
-		product.setVertical("vertical-id");
-		product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Marque");
-		product.getOfferNames().add("offre1");
-
-		// First call
-		service.onProduct(product, config);
-		assertNotNull(product.getEmbedding());
-
-		// Add a new offer → matrix slot 4 increments → triggers re-embed
-		product.getOfferNames().add("offre2");
-		service.onProduct(product, config);
-
-		verify(embeddingService, times(2)).embed(anyString());
-	}
-
-	@Test
-	void onProduct_shouldRecomputeEmbeddingWhenOfferTextChangesWithSameCount()
+	void onProduct_shouldLeaveLegacyTextEmbeddingUntouched()
 			throws AggregationSkipException, InvalidParameterException {
 		VerticalConfig config = buildVerticalConfig();
 		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
-		when(embeddingService.embed(anyString())).thenReturn(new float[] { 0.3f, 0.4f });
-
-		Product product = new Product(12L);
-		product.setVertical("vertical-id");
-		product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Marque");
-		product.getOfferNames().add("offre1");
-
-		service.onProduct(product, config);
-		product.getOfferNames().clear();
-		product.getOfferNames().add("offre2");
-		service.onProduct(product, config);
-
-		verify(embeddingService, times(2)).embed(anyString());
-	}
-
-	@Test
-	void onProduct_shouldSkipEmbeddingWhenTextUnchanged() throws AggregationSkipException, InvalidParameterException {
-		VerticalConfig config = buildVerticalConfig();
-		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
-		when(embeddingService.embed(anyString())).thenReturn(new float[] { 0.1f, 0.2f });
 
 		Product product = new Product(8L);
 		product.setVertical("vertical-id");
 		product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Marque");
 		product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "Modele");
-		product.getOfferNames().add("offre");
+		float[] legacyEmbedding = new float[] { 0.1f, 0.2f };
+		product.setEmbedding(legacyEmbedding);
+		product.setEmbeddingTextHash(123L);
 
-		// First call: Should compute embedding
 		service.onProduct(product, config);
 
-		assertNotNull(product.getEmbedding());
-		long hashAfterFirstCall = product.getEmbeddingTextHash();
-		
-		// Second call: Input hasn't changed, should skip embeddingService.embed()
-		service.onProduct(product, config);
-
-		// Verify embed() was only called once, not twice
-		verify(embeddingService, times(1)).embed(anyString());
-		assertThat(product.getEmbeddingTextHash()).isEqualTo(hashAfterFirstCall);
+		assertThat(product.getEmbedding()).isSameAs(legacyEmbedding);
+		assertThat(product.getEmbeddingTextHash()).isEqualTo(123L);
 	}
 
 }

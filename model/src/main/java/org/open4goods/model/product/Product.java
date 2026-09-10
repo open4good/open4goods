@@ -192,17 +192,15 @@ public class Product implements Standardisable {
 	private EcoScoreRanking ranking = new EcoScoreRanking();
 
 	/**
-	 * Text embedding vector for semantic search (CLIP = 512 dims)
+	 * Legacy text embedding retained until the legacy index is replaced. Public
+	 * product search excludes this field and no longer computes it.
 	 */
 	@Field(type = FieldType.Dense_Vector, dims = 512)
 	private float[] embedding;
 
 	/**
-	 * Structured cache key derived from a feature matrix of the product data that feeds into
-	 * the embedding text. Used to skip redundant embedding computations when the meaningful
-	 * input dimensions (brand, model, offer count, etc.) have not changed.
-	 *
-	 * @see org.open4goods.api.services.aggregation.services.realtime.NamesAggregationService#computeEmbeddingCacheKey
+	 * Legacy cache key associated with {@link #embedding}. It remains serialized only
+	 * until the legacy index is replaced.
 	 */
 	private long embeddingTextHash;
 
@@ -1061,7 +1059,10 @@ public class Product implements Standardisable {
 
 		if (StringUtils.isEmpty(brand())) {
 			attributes.addReferentielAttribute(ReferentielKey.BRAND, brand);
-		} else {
+		} else if (null != datasource) {
+			// A null datasource means "elect this as the referentiel brand"; once a more
+			// trusted source has taken that slot the candidate has no key to be filed
+			// under, and a null key would not survive serialization.
 			if (!akaBrands.values().contains(brand)) {
 				akaBrands.put(datasource, brand);
 			}

@@ -9,11 +9,11 @@ import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 /**
  * Elasticsearch document representing an Icecat supplier (brand/manufacturer).
  *
- * <p>Populated from {@link IcecatSupplier} objects loaded via
+ * <p>Populated from {@link org.open4goods.icecat.jaxb.Supplier} objects loaded via
  * {@link org.open4goods.icecat.services.loader.FeatureLoader}.
  * Provides persistent storage of brand logo URLs for use in brand enrichment.
  */
-@Document(indexName = "icecat-suppliers", createIndex = true, writeTypeHint = WriteTypeHint.FALSE)
+@Document(indexName = "icecat-suppliers", createIndex = false, writeTypeHint = WriteTypeHint.FALSE)
 public class IcecatSupplierDocument {
 
     /** Icecat stable supplier ID. */

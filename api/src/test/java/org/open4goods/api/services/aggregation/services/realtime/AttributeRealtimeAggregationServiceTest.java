@@ -4,17 +4,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.lang.reflect.Method;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.open4goods.api.services.completion.EprelCompletionService;
 import org.open4goods.brand.model.Brand;
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.icecat.services.IcecatFeatureResolver;
+import org.open4goods.icecat.util.IcecatConstants;
 import org.open4goods.model.attribute.Attribute;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.ReferentielKey;
+import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.eprel.EprelProduct;
 import org.open4goods.model.exceptions.ValidationException;
@@ -83,13 +87,37 @@ class AttributeRealtimeAggregationServiceTest {
         @Test
         void onProductAssignsIcecatTaxonomyIdsFromResolver() throws Exception {
                 Product product = buildBaseProduct();
-                addAttribute(product, "COULEUR");
+                addAttribute(product, "COULEUR", IcecatConstants.DATASOURCE_NAME);
                 Mockito.when(icecatFeatureResolver.resolveFeatureName("COULEUR")).thenReturn(Set.of(46, 46757));
 
                 service.onProduct(product, verticalConfig);
 
                 assertThat(product.getAttributes().getAll().get("COULEUR").getIcecatTaxonomyIds())
                                 .containsExactlyInAnyOrder(46, 46757);
+        }
+
+        @Test
+        void onProductDoesNotAskIcecatAboutAttributesIcecatNeverAsserted() throws Exception {
+                Product product = buildBaseProduct();
+                addAttribute(product, "COULEUR", EprelCompletionService.EPREL_DS_NAME);
+                addAttribute(product, "LARGEUR", "some-merchant.com");
+
+                service.onProduct(product, verticalConfig);
+
+                assertThat(product.getAttributes().getAll().get("COULEUR").getIcecatTaxonomyIds()).isEmpty();
+                assertThat(product.getAttributes().getAll().get("LARGEUR").getIcecatTaxonomyIds()).isEmpty();
+                Mockito.verify(icecatFeatureResolver, Mockito.never()).resolveFeatureName(Mockito.anyString());
+        }
+
+        @Test
+        void onProductClearsIcecatTaxonomyIdsLeftOnANonIcecatAttribute() throws Exception {
+                Product product = buildBaseProduct();
+                ProductAttribute corrupted = addAttribute(product, "COULEUR", EprelCompletionService.EPREL_DS_NAME);
+                corrupted.setIcecatTaxonomyIds(new HashSet<>(Set.of(46)));
+
+                service.onProduct(product, verticalConfig);
+
+                assertThat(product.getAttributes().getAll().get("COULEUR").getIcecatTaxonomyIds()).isEmpty();
         }
 
         @Test
@@ -107,6 +135,70 @@ class AttributeRealtimeAggregationServiceTest {
                 assertThat(product.getAkaBrands().values()).containsOnly("LG");
         }
 
+        @Test
+        void onProductElectsTheEprelBrand_throughTheNormalBrandPath() throws Exception {
+                Product product = new Product(123L);
+                EprelProduct eprelProduct = new EprelProduct();
+                eprelProduct.setSupplierOrTrademark("Brand");
+                eprelProduct.setModelIdentifier("ModelX");
+                product.setEprelDatas(eprelProduct);
+                product.addBrand("first-merchant.com", "First brand", null, null);
+                product.addBrand("some-merchant.com", "Other brand", null, null);
+
+                service.onProduct(product, verticalConfig);
+
+                // EPREL is the trusted brand evidence, and the merchant claims stay
+                // recorded against the datasource that made them.
+                assertThat(product.brand()).isEqualTo("BRAND");
+                assertThat(product.getAkaBrands()).containsEntry("some-merchant.com", "OTHER BRAND");
+        }
+
+        @Test
+        void onProductDoesNotReAssertADerivedBrand_whenEprelClaimsTheReferentielSlot() throws Exception {
+                Product product = new Product(123L);
+                EprelProduct eprelProduct = new EprelProduct();
+                eprelProduct.setSupplierOrTrademark("Brand");
+                product.setEprelDatas(eprelProduct);
+                // A single merchant claim lands straight in the referentiel slot without being
+                // keyed by datasource, so after election it is a derived value, not evidence.
+                product.addBrand("only-merchant.com", "Other brand", null, null);
+
+                service.onProduct(product, verticalConfig);
+
+                assertThat(product.brand()).isEqualTo("BRAND");
+                // It is not re-filed as an alternate brand: it has no datasource key to be
+                // filed under, and the merchant re-asserts it on its next fragment.
+                assertThat(product.getAkaBrands()).isEmpty();
+        }
+
+        @Test
+        void onProductDoesNotWriteAnEprelBrandThatTheVerticalExcludes() throws Exception {
+                Product product = new Product(123L);
+                EprelProduct eprelProduct = new EprelProduct();
+                eprelProduct.setSupplierOrTrademark("Excluded");
+                product.setEprelDatas(eprelProduct);
+                verticalConfig.setBrandsExclusion(Set.of("EXCLUDED"));
+
+                service.onProduct(product, verticalConfig);
+
+                assertThat(product.brand()).isNullOrEmpty();
+        }
+
+        @Test
+        void onProductElectsTheEprelModel_ratherThanWritingItDirectly() throws Exception {
+                Product product = new Product(123L);
+                EprelProduct eprelProduct = new EprelProduct();
+                eprelProduct.setModelIdentifier("model-x/2024");
+                product.setEprelDatas(eprelProduct);
+
+                service.onProduct(product, verticalConfig);
+
+                // The raw EPREL identifier is never stored as-is: it goes through the same
+                // cleaning and canonical election as any other model candidate.
+                assertThat(product.model()).isNotEqualTo("model-x/2024");
+                assertThat(product.model()).isEqualTo(product.model() == null ? null : product.model().toUpperCase());
+        }
+
         private Product buildBaseProduct() {
                 Product product = new Product(123L);
                 product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, "Brand");
@@ -119,10 +211,26 @@ class AttributeRealtimeAggregationServiceTest {
         }
 
         private void addAttribute(Product product, String name) {
+                addAttribute(product, name, null);
+        }
+
+        /**
+         * Adds a raw attribute contributed by {@code datasource}, or with no source at
+         * all when {@code datasource} is {@code null}.
+         */
+        private ProductAttribute addAttribute(Product product, String name, String datasource) {
                 ProductAttribute attribute = new ProductAttribute();
                 attribute.setName(name);
                 attribute.setValue("value");
+                if (datasource != null) {
+                        SourcedAttribute source = new SourcedAttribute();
+                        source.setDataSourcename(datasource);
+                        source.setName(name);
+                        source.setValue("value");
+                        attribute.addSourceAttribute(source);
+                }
                 product.getAttributes().getAll().put(name, attribute);
+                return attribute;
         }
 
         private void invokeUpdateExcludeStatus(Product product) throws Exception {

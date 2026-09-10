@@ -1,0 +1,72 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: consumer-search-lexical-refactor
+  name: Source-neutral lexical consumer search
+spec:
+  purpose: Replace duplicate consumer search paths with one relevance-tested lexical Elasticsearch search over the source-neutral GTIN projection.
+  roadmapRef: m7-product-data-reference
+  state: ACCEPTED
+  dependsOn:
+    - consumer-search-cost-hotfix
+    - reference-resolution-and-surface-projections
+    - product-family-model-grouping
+  decisionRefs:
+    - ADR-0012
+  pathScope:
+    - services/data-reference/**
+    - services/product-repository/**
+    - verticals/**
+    - front-api/**
+    - frontend/**
+    - scripts/benchmark/search-relevance/**
+    - docs/operations/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        SearchSlice contains normalized GTIN, canonical French and English names, brand, model, canonical class, category views,
+        localized class labels and aliases, modelSearchTokens, family/model ids and merchant titles on each GTIN projection.
+    - id: AC2
+      statement: >-
+        The O4G registry is the sole Git-reviewed synonym source and versions localized search aliases; exact normalized fields,
+        separate French and English analyzers and search_as_you_type fields are installed and verified from strict mappings.
+    - id: AC3
+      statement: >-
+        Versioned relevance ranks exact GTIN, exact brand plus model, exact or phrase canonical name, exact class or alias,
+        model/family tokens, all canonical-name terms and low-weight merchant titles in that order, with a strong category-intent
+        boost and lower-weight fuzziness only for sufficiently long text tokens.
+    - id: AC4
+      statement: >-
+        Offer count is an availability filter and price, Impact Score and offer count never boost relevance; default ordering is
+        score descending then GTIN ascending, explicit sort is primary then score and GTIN, and blank unsorted search uses
+        lastChange descending then GTIN ascending.
+    - id: AC5
+      statement: >-
+        POST /products/search is the only list/search contract and returns one ProductDto page plus ordinary and localized
+        category facets; public filters use stable core or O4G attribute ids and public sorts are RELEVANCE, PRICE_ASC,
+        PRICE_DESC, IMPACT_ASC, IMPACT_DESC, OFFERS_DESC and NEWEST.
+    - id: AC6
+      statement: >-
+        POST /products, grouped vertical responses, missingVerticalResults, semanticSearch, searchType and semantic diagnostics
+        are removed; unclassified matching products remain in the single result page and GET /products/suggest uses in-memory
+        registry categories plus one bool_prefix Elasticsearch request returning at most five products.
+    - id: AC7
+      statement: >-
+        A neutral search port lives in data-reference, its Elasticsearch adapter in product-repository and a thin orchestrator
+        in front-api; filter compilation, query construction, facet extraction and suggestions are separated, and former
+        SearchService consumers use dedicated ports before that monolith is deleted.
+    - id: AC8
+      statement: >-
+        A reviewed corpus of at least 100 French and English queries covers all seven verticals, GTIN, brand/model, accents,
+        misspellings, accessories and no-result cases; exact GTIN is always first, known-product MRR@10 is at least 0.90,
+        global NDCG@10 is at least 0.85 and each language reaches at least 0.80 with no critical precedence violation.
+    - id: AC9
+      statement: >-
+        Elasticsearch integration tests cover mappings, analyzers, boosts, filters, facets, stable paging, explicit sort,
+        language fallback and suggestions; production-shaped tests show one request per normal search, front-api p95 at most
+        500 ms and p99 at most one second, suggestion p95 at most 200 ms and zero vector operation.
+    - id: AC10
+      statement: >-
+        The strict target mapping has no dense_vector, HNSW or script_score and no Java-side reranking; a shadow index passes
+        quality and capacity gates before atomic alias cutover, with tested alias rollback and no durable dual-read or semantic
+        feature flag.

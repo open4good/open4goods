@@ -18,7 +18,7 @@ import org.open4goods.nudgerfrontapi.dto.stats.DatavizDefaultFilterDto;
 import org.open4goods.nudgerfrontapi.dto.stats.DatavizHeroStatsDto;
 import org.open4goods.nudgerfrontapi.dto.stats.DatavizHeroKpiValueDto;
 import org.open4goods.nudgerfrontapi.dto.stats.VerticalDatavizPlanDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.model.vertical.DatavizConfig;
 import org.open4goods.model.vertical.DatavizChartOverride;
 import org.open4goods.model.vertical.DatavizHeroKpi;
@@ -137,9 +137,7 @@ public class DatavizStatsService {
                 verticalId.trim(),
                 null,
                 aggregationQuery,
-                filters,
-                false,
-                "TEXT"
+                filters
         );
 
         return formatResponse(preset, result);
@@ -201,9 +199,7 @@ public class DatavizStatsService {
                 verticalId.trim(),
                 null,
                 aggregationQuery,
-                filters,
-                false,
-                "TEXT"
+                filters
         );
 
         DatavizHeroStatsDto standardStats = buildHeroStatsFromResult(result);

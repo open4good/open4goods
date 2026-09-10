@@ -1,0 +1,61 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: product-reference-legacy-retirement
+  name: Legacy Product model and aggregator retirement
+spec:
+  purpose: Remove dual semantics and dead source-specific fields after the new projection survives its rollback window.
+  roadmapRef: m7-product-data-reference
+  state: ACCEPTED
+  dependsOn:
+    - reference-coordinated-cutover
+  decisionRefs:
+    - ADR-0010
+    - ADR-0011
+  pathScope:
+    - model/**
+    - api/**
+    - front-api/**
+    - b2b-api/**
+    - services/product-repository/**
+    - services/data-reference/**
+    - services/price-history/**
+    - verticals/**
+    - docs/architecture/**
+    - docs/b2b/**
+    - docs/operations/**
+    - scripts/migration/**
+    - scripts/verify/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        Retirement starts only after seven complete days of healthy production evidence, no rollback invocation, bounded replay
+        and rollup lag, accepted coverage comparison and zero legacy read/write metric.
+    - id: AC2
+      statement: >-
+        Product.datasourceCodes is removed: source hash/observation metadata lives in SourceRecordHead, scheduling and misses in
+        IngestionCheckpoint, and public source visibility in policy-approved projection provenance.
+    - id: AC3
+      statement: >-
+        Product.eprelDatas, provider-keyed categories/descriptions, akaBrands/akaModels, legacy Resource provenance, old attribute
+        and numeric/unit types, Icecat taxonomy fields and Product price-history storage are removed from code and mappings.
+    - id: AC4
+      statement: >-
+        AttributeRealtimeAggregationService, legacy parsers/UUDC, DataFragment direct Product mutation and completion timestamp
+        conventions are deleted after semantic-equivalence tests point to their new owners; no compatibility facade remains unused.
+    - id: AC5
+      statement: >-
+        Repository methods, filters, dataviz queries, serializers, DTOs, configuration metadata and tests referencing removed
+        fields migrate or are deleted; a repository-wide forbidden-symbol check prevents their reintroduction.
+    - id: AC6
+      statement: >-
+        Obsolete Icecat/ETIM/Amazon and B2B documents are replaced or marked historical and linked to accepted ADRs without
+        appending a duplicate architecture narrative; generated roadmap/ADR projections are regenerated.
+    - id: AC7
+      statement: >-
+        Legacy product indexes are deleted only after a final snapshot is verified and its retention/restore owner is recorded;
+        deletion uses exact resolved index names and reports recoverability and expiry.
+    - id: AC8
+      statement: >-
+        Complete offline reactor, canonical lint, frontend lint/test/generate, Elasticsearch integration and end-to-end smoke
+        suites pass with legacy aliases unavailable, proving no hidden dual-read or startup dependency remains.

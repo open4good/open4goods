@@ -21,6 +21,8 @@ public enum AllowedGlobalAggregations {
     country("gtinInfos.country", AggregationRequestDto.AggType.terms),
     @Schema(description = "Aggregate the product brand", example = "attributes.referentielAttributes.BRAND")
     brand("attributes.referentielAttributes.BRAND", AggregationRequestDto.AggType.terms),
+    @Schema(description = "Aggregate the product ecoscore", example = "scores.ECOSCORE.value")
+    ecoscore("scores.ECOSCORE.value", AggregationRequestDto.AggType.range),
     @Schema(description = "Aggregate the relative ecoscore", example = "scores.ECOSCORE.relativ.value")
     ecoscoreRelativ("scores.ECOSCORE.relativ.value", AggregationRequestDto.AggType.range),
     @Schema(description = "Aggregate the ecoscore ranking", example = "scores.ECOSCORE.ranking")

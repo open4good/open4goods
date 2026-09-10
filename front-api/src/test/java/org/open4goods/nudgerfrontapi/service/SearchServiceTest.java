@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -26,9 +27,8 @@ import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
-import org.open4goods.nudgerfrontapi.config.properties.SearchProperties;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationBucketDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchResult;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
@@ -52,18 +52,11 @@ class SearchServiceTest {
     private ProductMappingService productMappingService;
     @Mock
     private ApiProperties apiProperties;
-    private SearchProperties searchProperties;
-    @Mock
-    private EmbeddingProxyService textEmbeddingService;
-
-    // Use a partial mock or spy if needed, but here we can stick to standard mocks
     private SearchService searchService;
 
     @BeforeEach
     void setUp() {
-        searchProperties = new SearchProperties();
-        searchService = new SearchService(repository, verticalsConfigService, productMappingService, apiProperties,
-                searchProperties, textEmbeddingService);
+        searchService = new SearchService(repository, verticalsConfigService, productMappingService, apiProperties);
     }
 
     @Test
@@ -91,7 +84,7 @@ class SearchServiceTest {
 
 
         GlobalSearchResult result = searchService.globalSearch("téléviseurs", DomainLanguage.fr, null,
-                org.springframework.data.domain.Sort.unsorted(), null, null);
+                org.springframework.data.domain.Sort.unsorted(), null);
 
         // THEN
         assertThat(result).isNotNull();
@@ -118,14 +111,14 @@ class SearchServiceTest {
 
 
         GlobalSearchResult result = searchService.globalSearch("something else", DomainLanguage.fr, null,
-                org.springframework.data.domain.Sort.unsorted(), null, null);
+                org.springframework.data.domain.Sort.unsorted(), null);
 
         // THEN
         assertThat(result.verticalCta()).isNull();
     }
 
     @Test
-    void globalSearch_shouldNeverPerformSemantic_evenWhenNoVerticalCandidates() {
+    void globalSearch_shouldBuildOnlyLexicalQueries_whenNoVerticalCandidates() {
         // GIVEN initial setup
         when(verticalsConfigService.getConfigsWithoutDefault()).thenReturn(Collections.emptyList());
         searchService.initializeSuggestIndex();
@@ -136,19 +129,24 @@ class SearchServiceTest {
         when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(emptyHits);
 
         // WHEN
-        GlobalSearchResult result = searchService.globalSearch("iphone", DomainLanguage.fr, null,
-                org.springframework.data.domain.Sort.unsorted(), null, null);
+        searchService.globalSearch("iphone", DomainLanguage.fr, null,
+                org.springframework.data.domain.Sort.unsorted(), null);
 
         // THEN
-        // We verify that semantic embeddings were NEVER requested
-        verify(textEmbeddingService, times(0)).embed(any());
+        ArgumentCaptor<org.springframework.data.elasticsearch.core.query.Query> queryCaptor = ArgumentCaptor
+                .forClass(org.springframework.data.elasticsearch.core.query.Query.class);
+        verify(repository, atLeastOnce()).search(queryCaptor.capture(), eq(ProductRepository.MAIN_INDEX_NAME));
+        assertThat(queryCaptor.getAllValues()).allSatisfy(query -> {
+            NativeQuery nativeQuery = (NativeQuery) query;
+            assertThat(nativeQuery.getKnnSearches()).isEmpty();
+            assertThat(nativeQuery.getQuery().isBool()).isTrue();
+        });
     }
 
 
 
     @Test
-    void suggest_shouldSkipSemanticFallback_whenDisabled() {
-        searchProperties.getSuggest().setSemanticFallbackEnabled(false);
+    void suggest_shouldExecuteOneLexicalProductQuery_whenNoProductsMatch() {
         SearchHits<Product> emptyHits = new SearchHitsImpl<Product>(0L, TotalHitsRelation.EQUAL_TO, 0.0f,
                 java.time.Duration.ZERO, null, null, java.util.Collections.emptyList(), null, null, null);
 
@@ -156,7 +154,11 @@ class SearchServiceTest {
 
         searchService.suggest("iphone", DomainLanguage.fr);
 
-        verify(textEmbeddingService, times(0)).embed(any());
+        ArgumentCaptor<org.springframework.data.elasticsearch.core.query.Query> queryCaptor = ArgumentCaptor
+                .forClass(org.springframework.data.elasticsearch.core.query.Query.class);
+        verify(repository, times(1)).search(queryCaptor.capture(), eq(ProductRepository.MAIN_INDEX_NAME));
+        NativeQuery nativeQuery = (NativeQuery) queryCaptor.getValue();
+        assertThat(nativeQuery.getKnnSearches()).isEmpty();
     }
     @Test
     void search_shouldUseFilterQuery_whenQueryIsEmpty() {
@@ -166,7 +168,7 @@ class SearchServiceTest {
         when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(emptyHits);
 
         // WHEN
-        searchService.search(org.springframework.data.domain.Pageable.unpaged(), null, null, null, null, false, null);
+        searchService.search(org.springframework.data.domain.Pageable.unpaged(), null, null, null, null);
 
         // THEN
         ArgumentCaptor<org.springframework.data.elasticsearch.core.query.Query> queryCaptor = ArgumentCaptor.forClass(org.springframework.data.elasticsearch.core.query.Query.class);
@@ -180,6 +182,7 @@ class SearchServiceTest {
         // After fix, it should NOT use FunctionScore query for empty input, but a BoolQuery directly
         assertThat(esQuery.isFunctionScore()).isFalse();
         assertThat(esQuery.isBool()).isTrue();
+        assertThat(nativeQuery.getKnnSearches()).isEmpty();
         assertSearchUsesProductProjection(nativeQuery);
     }
 
@@ -191,7 +194,7 @@ class SearchServiceTest {
         when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(emptyHits);
 
         // WHEN
-        searchService.search(org.springframework.data.domain.Pageable.unpaged(), null, "some query", null, null, false, null);
+        searchService.search(org.springframework.data.domain.Pageable.unpaged(), null, "some query", null, null);
 
         // THEN
         ArgumentCaptor<org.springframework.data.elasticsearch.core.query.Query> queryCaptor = ArgumentCaptor.forClass(org.springframework.data.elasticsearch.core.query.Query.class);
@@ -206,6 +209,7 @@ class SearchServiceTest {
         assertThat(esQuery.bool().must()).isNotEmpty();
         boolean hasMultiMatch = esQuery.bool().must().stream().anyMatch(Query::isMultiMatch);
         assertThat(hasMultiMatch).isTrue();
+        assertThat(nativeQuery.getKnnSearches()).isEmpty();
         assertSearchUsesProductProjection(nativeQuery);
     }
 

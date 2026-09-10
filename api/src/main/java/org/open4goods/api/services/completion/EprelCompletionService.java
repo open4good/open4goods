@@ -16,6 +16,7 @@ import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.aggregation.aggregator.StandardAggregator;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.model.attribute.ReferentielKey;
+import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.eprel.EprelProduct;
 import org.open4goods.model.product.Product;
@@ -583,7 +584,11 @@ public class EprelCompletionService extends AbstractCompletionService {
 				addAttributeValue(df, attributeKey + "[" + index + "]", Array.get(value, index));
 			}
 		} else {
-			df.addAttribute(attributeKey, value.toString(), "fr", null);
+			// EPREL publishes language-neutral parameter values under a stable parameter
+			// identifier. Stamping them with a serving-domain language would be a
+			// fabrication, and the Icecat feature id slot is left null because EPREL
+			// identifiers are not Icecat identifiers.
+			df.addAttribute(attributeKey, value.toString(), SourcedAttribute.UNDETERMINED_LANGUAGE, null);
 		}
 	}
 

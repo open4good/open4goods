@@ -3,33 +3,26 @@ package org.open4goods.commons.services;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
+import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.open4goods.icecat.model.IcecatCategory;
+import org.open4goods.icecat.jaxb.Category;
+import org.open4goods.icecat.jaxb.CategoryFeatureGroup;
+import org.open4goods.icecat.jaxb.Feature;
+import org.open4goods.icecat.jaxb.FeatureGroup;
+import org.open4goods.icecat.jaxb.Name;
+import org.open4goods.icecat.jaxb.Names;
 import org.open4goods.icecat.model.IcecatCategoryDocument;
 import org.open4goods.icecat.model.IcecatCategoryFeatureDocument;
-import org.open4goods.icecat.model.IcecatCategoryFeatureGroup;
-import org.open4goods.icecat.model.IcecatFeature;
 import org.open4goods.icecat.model.IcecatFeatureDocument;
-import org.open4goods.icecat.model.IcecatFeatureGroup;
-import org.open4goods.icecat.model.IcecatName;
-import org.open4goods.icecat.model.IcecatNames;
+import org.open4goods.icecat.config.yml.IcecatConfiguration;
 import org.open4goods.icecat.repository.IcecatCategoryRepository;
 import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
 import org.open4goods.icecat.repository.IcecatFeatureRepository;
@@ -37,7 +30,16 @@ import org.open4goods.icecat.repository.IcecatSupplierRepository;
 import org.open4goods.icecat.services.IcecatIndexService;
 import org.open4goods.icecat.services.loader.CategoryLoader;
 import org.open4goods.icecat.services.loader.FeatureLoader;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 
+/**
+ * Unit-level coverage for {@link IcecatIndexService}: JAXB-to-document mapping (via reflection,
+ * since mapping is private) and the plain read/delegate methods. The versioned-index import
+ * pipeline itself ({@code syncFromLoaders()} end to end, alias switching, rollback) is covered
+ * against a real Elasticsearch by {@code IcecatIndexVersionManagerIT}, not here — mocking
+ * {@link ElasticsearchOperations}'s full index/alias API would only verify the mock, not the
+ * pipeline.
+ */
 public class IcecatIndexServiceTest {
 
     private FeatureLoader featureLoader;
@@ -63,77 +65,73 @@ public class IcecatIndexServiceTest {
         when(categoryLoader.getCategoriesById()).thenReturn(Collections.emptyMap());
 
         indexService = new IcecatIndexService(
+                Mockito.mock(IcecatConfiguration.class),
                 featureLoader, categoryLoader,
                 featureRepository, categoryRepository,
-                featureGroupRepository, supplierRepository);
+                featureGroupRepository, supplierRepository,
+                Mockito.mock(ElasticsearchOperations.class));
     }
 
     @Test
     public void testSyncFromLoadersDoesNotThrowWhenEmpty() {
         assertDoesNotThrow(() -> indexService.syncFromLoaders());
-        verify(featureRepository, never()).saveAll(anyList());
     }
 
     @Test
-    public void testSyncIndexesFeatureWhenMapPopulated() {
-        IcecatName nameEn = new IcecatName();
-        nameEn.setLangId(1);
-        nameEn.setValue("Screen size");
+    public void testToFeatureDocumentMapsNameAndType() throws Exception {
+        Name nameEn = new Name();
+        nameEn.setLangid(BigInteger.valueOf(1));
+        nameEn.setValueAttribute("Screen size");
 
-        IcecatNames names = new IcecatNames();
-        names.setNames(Arrays.asList(nameEn));
+        Names names = new Names();
+        names.getName().add(nameEn);
 
-        IcecatFeature feature = new IcecatFeature();
-        feature.setId(42);
+        Feature feature = new Feature();
+        feature.setID(BigInteger.valueOf(42));
         feature.setType("numerical");
         feature.setNames(names);
 
-        Map<Integer, IcecatFeature> map = new HashMap<>();
-        map.put(42, feature);
-        when(featureLoader.getFeaturesById()).thenReturn(map);
+        Method toFeatureDocument = IcecatIndexService.class.getDeclaredMethod("toFeatureDocument", Feature.class);
+        toFeatureDocument.setAccessible(true);
+        IcecatFeatureDocument doc = (IcecatFeatureDocument) toFeatureDocument.invoke(indexService, feature);
 
-        when(featureRepository.saveAll(any())).thenReturn(Collections.emptyList());
-
-        indexService.syncFromLoaders();
-
-        verify(featureRepository, atLeastOnce()).saveAll(any());
+        assertEquals(42, doc.getId());
+        assertEquals("numerical", doc.getType());
+        assertEquals("Screen size", doc.getEnglishName());
+        assertEquals("1:Screen size", doc.getLangNames().get(0));
     }
 
     @Test
-    public void testSyncIndexesCategoryFeatureMetadataWhenMapPopulated() {
-        IcecatName nameEn = new IcecatName();
-        nameEn.setLangId(1);
-        nameEn.setValue("Washing Machines");
+    public void testToCategoryDocumentMapsFeatureGroupsAndFeatures() throws Exception {
+        Name nameEn = new Name();
+        nameEn.setLangid(BigInteger.valueOf(1));
+        nameEn.setValueAttribute("Washing Machines");
 
-        IcecatFeatureGroup featureGroup = new IcecatFeatureGroup();
-        featureGroup.setId(88);
+        FeatureGroup featureGroup = new FeatureGroup();
+        featureGroup.setID(BigInteger.valueOf(88));
 
-        IcecatCategoryFeatureGroup categoryFeatureGroup = new IcecatCategoryFeatureGroup();
-        categoryFeatureGroup.setId(77);
-        categoryFeatureGroup.setFeatureGroups(List.of(featureGroup));
+        CategoryFeatureGroup categoryFeatureGroup = new CategoryFeatureGroup();
+        categoryFeatureGroup.setID(BigInteger.valueOf(77));
+        categoryFeatureGroup.getFeatureGroup().add(featureGroup);
 
-        IcecatFeature feature = new IcecatFeature();
-        feature.setId(42);
-        feature.setCategoryFeatureGroupId(77);
-        feature.setCategoryFeatureId(9001);
-        feature.setMandatory(1);
-        feature.setSearchable(1);
-        feature.setDefaultDisplayUnit("kg");
+        Feature feature = new Feature();
+        feature.setID(BigInteger.valueOf(42));
+        feature.setCategoryFeatureGroupID(BigInteger.valueOf(77));
+        feature.setCategoryFeatureID(BigInteger.valueOf(9001));
+        feature.setMandatory(BigInteger.ONE);
+        feature.setSearchable(true);
+        feature.setDefaultDisplayUnit(true);
 
-        IcecatCategory category = new IcecatCategory();
-        category.setId(123);
-        category.setNames(List.of(nameEn));
-        category.setCategoryFeatureGroups(List.of(categoryFeatureGroup));
-        category.setFeatures(List.of(feature));
+        Category category = new Category();
+        category.setID(BigInteger.valueOf(123));
+        category.getName().add(nameEn);
+        category.getCategoryFeatureGroup().add(categoryFeatureGroup);
+        category.getFeature().add(feature);
 
-        when(categoryLoader.getCategoriesById()).thenReturn(Map.of(123, category));
-        when(categoryRepository.saveAll(any())).thenReturn(Collections.emptyList());
+        Method toCategoryDocument = IcecatIndexService.class.getDeclaredMethod("toCategoryDocument", Category.class);
+        toCategoryDocument.setAccessible(true);
+        IcecatCategoryDocument document = (IcecatCategoryDocument) toCategoryDocument.invoke(indexService, category);
 
-        indexService.syncFromLoaders();
-
-        ArgumentCaptor<Iterable<IcecatCategoryDocument>> captor = ArgumentCaptor.forClass(Iterable.class);
-        verify(categoryRepository).saveAll(captor.capture());
-        IcecatCategoryDocument document = captor.getValue().iterator().next();
         assertEquals(123, document.getId());
         assertEquals("Washing Machines", document.getEnglishName());
         assertEquals(77, document.getFeatureGroups().get(0).getId());
@@ -143,7 +141,7 @@ public class IcecatIndexServiceTest {
         assertEquals(77, featureDocument.getCategoryFeatureGroupId());
         assertEquals(9001, featureDocument.getCategoryFeatureId());
         assertEquals(1, featureDocument.getMandatory());
-        assertEquals("kg", featureDocument.getDefaultDisplayUnit());
+        assertEquals("true", featureDocument.getDefaultDisplayUnit());
     }
 
     @Test
@@ -173,5 +171,10 @@ public class IcecatIndexServiceTest {
         assertEquals(500L, counts[1]);
         assertEquals(200L, counts[2]);
         assertEquals(50L, counts[3]);
+    }
+
+    @Test
+    public void testFeatureCacheSizeStartsEmpty() {
+        assertEquals(0, indexService.featureCacheSize());
     }
 }

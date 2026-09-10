@@ -1,0 +1,74 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: consumer-search-cost-hotfix
+  name: Consumer search cost hotfix
+spec:
+  purpose: Stop query-time text embeddings and semantic kNN on public consumer search without waiting for the source-neutral
+    projection cutover.
+  roadmapRef: m7-product-data-reference
+  state: COMPLETED
+  dependsOn: []
+  decisionRefs:
+    - ADR-0012
+  pathScope:
+    - api/**
+    - front-api/**
+    - frontend/**
+    - model/**
+    - verticals/**
+    - services/embedding-djl/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: Product list, global search and suggestions execute lexical Elasticsearch queries only; no /embedding request,
+        query-vector calculation or kNN clause is reachable from public consumer search.
+    - id: AC2
+      statement: Legacy semanticSearch and searchType request fields remain accepted, are marked deprecated and have no effect,
+        so an older client cannot reactivate semantic retrieval during the compatibility window.
+    - id: AC3
+      statement: EmbeddingProxyService, EmbeddingController, active semantic diagnostics and all semantic branches in SearchService
+        are removed while lexical filters, aggregations, paging and result mapping keep their current contract.
+    - id: AC4
+      statement: API startup and aggregation do not load or generate text embeddings, including in NamesAggregationService;
+        image model loading, image vector generation and image clustering behavior remain available and covered by tests.
+    - id: AC5
+      statement: The frontend has no SEMANTIC state, search-mode toggle, semantic label or suggestion fallback and sends one
+        lexical request shape for each existing search surface.
+    - id: AC6
+      statement: Existing legacy product vectors are neither migrated nor deleted by this hotfix and remain excluded from
+        search source reads; their physical removal belongs to replacement of the legacy index.
+    - id: AC7
+      statement: Automated tests prove that requests carrying legacy semantic indicators still build lexical queries, and
+        beta recette records zero text-model load, embedding request and kNN query before release.
+  evidenceRefs:
+    - 'note: the implementation was found already on disk in this checkout, authored by an earlier session on branch workorder/go-ahead-2026-09-10.
+      It was reviewed criterion by criterion and fully re-verified here before closure.'
+    - 'test: mvn --offline clean install -> BUILD SUCCESS, 0 failures and 0 errors across the whole reactor, including api,
+      front-api, model, verticals and services/embedding-djl.'
+    - 'test: scripts/lint.sh -> OK, all lint checks passed (docs and .o4g corpus budget, yaml, shell, workflows, frontend
+      eslint and the forbidden-pattern scan).'
+    - 'test: frontend pnpm test -> 158 files, 644 passed and 1 skipped; frontend pnpm build -> Build complete.'
+    - 'note: AC1 and AC3. EmbeddingController, EmbeddingProxyService, SemanticScoreDiagnosticsDto and the generated SearchApi
+      client are deleted; front-api SearchService keeps only lexical builders, and every product read uses productFieldsWithoutEmbeddingSourceFilter.
+      A repository-wide search for embedding, knn and semantic identifiers over main sources leaves no live reference beyond
+      the retained legacy model fields.'
+    - 'note: AC2. ProductSearchRequestDto still accepts semanticSearch and searchType, both annotated Deprecated(forRemoval)
+      and documented as accepted but ignored; ProductController no longer reads either value, so no request shape can reactivate
+      semantic retrieval.'
+    - 'test: AC4. The api module suite passes with NamesAggregationService reduced to the lexical name pipeline and AggregationFacadeService
+      no longer receiving a text embedding service or its properties, and ApiApplicationTests boots with no text model. The
+      image path is untouched: DjlImageEmbeddingService, its factories and EmbeddingTranslator remain, and DjlEmbeddingAutoConfigurationTest
+      plus EmbeddingTranslatorTest pass.'
+    - 'note: AC5. No SEMANTIC state, search-mode toggle, semantic label or suggestion fallback remains in the frontend; search/index.vue,
+      CategoryPage.vue, SearchResultGroup.vue, CategoryFilterList.vue and both locale bundles are cleaned, and server/api/products/search.post.ts
+      emits one lexical request shape per surface.'
+    - 'note: AC6. Product.embedding and Product.embeddingTextHash are retained and documented as legacy fields kept until
+      the legacy index is replaced. Nothing in this lot migrates or deletes stored vectors, and search source filters exclude
+      embedding and resources.imageInfo.embedding.'
+    - 'test: AC7 automated half. ProductControllerTest.legacySemanticFlagsAreAcceptedAndIgnored proves a payload carrying
+      semanticSearch true and searchType SEMANTIC still reaches the lexical searchProducts contract; SearchServiceTest globalSearch_shouldBuildOnlyLexicalQueries_whenNoVerticalCandidates,
+      suggest_shouldExecuteOneLexicalProductQuery_whenNoProductsMatch and both search query tests assert that getKnnSearches
+      is empty; two frontend specs assert the legacy flags are dropped before the API call.'
+    - 'note: AC7 beta recette half is NOT executed here. Observing zero text-model load, zero embedding request and zero knn
+      query on beta requires a deployment, which prompts/nudger-dev.md withholds from this session. It stands as a release
+      gate for the owner before this hotfix ships.'

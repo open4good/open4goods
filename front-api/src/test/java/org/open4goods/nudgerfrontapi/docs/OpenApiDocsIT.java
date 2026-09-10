@@ -13,6 +13,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
+import org.kohsuke.github.GHRepository;
+import org.open4goods.brand.service.BrandService;
+import org.open4goods.icecat.repository.IcecatCategoryRepository;
+import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
+import org.open4goods.icecat.repository.IcecatFeatureRepository;
+import org.open4goods.icecat.repository.IcecatSupplierRepository;
+import org.open4goods.services.geocode.service.IpGeolocationService;
 
 import org.open4goods.xwiki.services.XWikiAuthenticationService;
 
@@ -28,6 +35,27 @@ class OpenApiDocsIT {
 
     @MockitoBean
     private XWikiAuthenticationService authService;
+
+    @MockitoBean
+    private GHRepository ghRepository;
+
+    @MockitoBean
+    private BrandService brandService;
+
+    @MockitoBean
+    private IpGeolocationService ipGeolocationService;
+
+    @MockitoBean
+    private IcecatFeatureRepository icecatFeatureRepository;
+
+    @MockitoBean
+    private IcecatCategoryRepository icecatCategoryRepository;
+
+    @MockitoBean
+    private IcecatFeatureGroupRepository icecatFeatureGroupRepository;
+
+    @MockitoBean
+    private IcecatSupplierRepository icecatSupplierRepository;
 
     private static final String SHARED_TOKEN = "test-token";
 

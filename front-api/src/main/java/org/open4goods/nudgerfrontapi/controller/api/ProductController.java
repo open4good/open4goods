@@ -40,7 +40,7 @@ import org.open4goods.nudgerfrontapi.dto.search.SearchSuggestCategoryDto;
 import org.open4goods.nudgerfrontapi.dto.search.SearchSuggestProductDto;
 import org.open4goods.nudgerfrontapi.dto.search.SearchSuggestResponseDto;
 import org.open4goods.nudgerfrontapi.dto.search.SortRequestDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.open4goods.nudgerfrontapi.service.SearchService;
 import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchHit;
@@ -355,7 +355,7 @@ public class ProductController {
         SearchService.SearchCapabilities capabilities = searchService.buildSearchCapabilities(normalizedVerticalId, domainLanguage, List.of());
         Set<String> allowedSortMappings = capabilities.allowedSorts();
 
-        // TODO : HEre we add a big micmac. We used the logic of duplicated search (verticals and global)
+        // Preserve the legacy query-parameter and JSON sort inputs during the hotfix.
         Pageable effectivePageable = page;
         SortRequestDto sortDto = searchPayload == null ? null : searchPayload.sort();
         Validation<Pageable> sortValidation = sanitizeSort(page, sortDto, allowedSortMappings);
@@ -394,18 +394,16 @@ public class ProductController {
         filterDto = filterValidation.value();
 
         String normalizedQuery = StringUtils.hasText(query) ? query.trim() : null;
-        boolean semanticSearch = StringUtils.hasText(normalizedQuery);
         Set<String> requestedComponents = include == null ? Set.of() : include;
-        String searchType = searchPayload == null ? null : searchPayload.searchType();
 
         ProductSearchResponseDto body = searchService.searchProducts(effectivePageable, locale, requestedComponents, aggDto,
-                domainLanguage, normalizedVerticalId, normalizedQuery, filterDto, semanticSearch, searchType);
+                domainLanguage, normalizedVerticalId, normalizedQuery, filterDto);
 
         return ResponseEntity.ok().cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE).body(body);
     }
 
     /**
-     * Execute a semantic-only global search with optional filters and sort rules.
+     * Execute a lexical global search with optional filters and sort rules.
      *
      * <p>Error codes:</p>
      * <ul>
@@ -417,7 +415,7 @@ public class ProductController {
     @PostMapping("/search")
     @Operation(
             summary = "Execute a global search",
-            description = "Runs an embeddings-only search strategy with optional filters and sorting.",
+            description = "Runs a lexical Elasticsearch search with optional filters and sorting.",
             security = @SecurityRequirement(name = "bearer-jwt"),
             parameters = {
                     @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
@@ -453,7 +451,6 @@ public class ProductController {
         String query = request != null ? request.query() : null;
         FilterRequestDto filterDto = request != null ? request.filters() : null;
         SortRequestDto sortDto = request != null ? request.sort() : null;
-        String searchType = request != null ? request.searchType() : null;
 
         Validation<FilterRequestDto> filterValidation = sanitizeFilters(filterDto);
         if (filterValidation.hasError()) {
@@ -479,7 +476,7 @@ public class ProductController {
         Pageable missingVerticalPageable = PageRequest.of(pageNumber, pageSize);
 
         SearchService.GlobalSearchResult result = searchService.globalSearch(query, domainLanguage, filterDto,
-                sortValidation.value().getSort(), searchType, missingVerticalPageable);
+                sortValidation.value().getSort(), missingVerticalPageable);
 
         List<GlobalSearchVerticalGroupDto> groups = result.verticalGroups().stream()
                 .map(group -> new GlobalSearchVerticalGroupDto(
@@ -503,8 +500,7 @@ public class ProductController {
         GlobalSearchResponseDto body = new GlobalSearchResponseDto(groups,
                 missingVerticalResults,
                 pageMetaDto,
-                toCategoryDto(result.verticalCta()),
-                result.diagnostics());
+                toCategoryDto(result.verticalCta()));
         return ResponseEntity.ok()
                 .cacheControl(CacheControlConstants.FIVE_MINUTES_PUBLIC_CACHE)
                 .header("X-Locale", domainLanguage.languageTag())

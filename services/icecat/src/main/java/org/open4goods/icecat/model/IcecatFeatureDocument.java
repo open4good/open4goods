@@ -12,10 +12,10 @@ import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 /**
  * Elasticsearch document representing an Icecat feature (specification attribute).
  *
- * <p>Populated from {@link IcecatFeature} objects loaded via {@link org.open4goods.icecat.services.loader.FeatureLoader}.
+ * <p>Populated from {@link org.open4goods.icecat.jaxb.Feature} objects loaded via {@link org.open4goods.icecat.services.loader.FeatureLoader}.
  * Used as a persistent backing store and to power admin search and attribute-resolution endpoints.
  */
-@Document(indexName = "icecat-features", createIndex = true, writeTypeHint = WriteTypeHint.FALSE)
+@Document(indexName = "icecat-features", createIndex = false, writeTypeHint = WriteTypeHint.FALSE)
 public class IcecatFeatureDocument {
 
     /** Icecat stable feature ID. */
@@ -60,4 +60,24 @@ public class IcecatFeatureDocument {
 
     public List<String> getLangNames() { return langNames; }
     public void setLangNames(List<String> langNames) { this.langNames = langNames; }
+
+    /**
+     * Returns the name for the given Icecat language ID, decoding the {@code "langId:name"}
+     * encoding used by {@link #langNames}.
+     *
+     * @param languageId Icecat language ID (see {@link org.open4goods.icecat.util.IcecatConstants})
+     * @return the localized name, or {@code null} if this feature has no name in that language
+     */
+    public String localizedName(int languageId) {
+        if (langNames == null) {
+            return null;
+        }
+        String prefix = languageId + ":";
+        for (String entry : langNames) {
+            if (entry.startsWith(prefix)) {
+                return entry.substring(prefix.length());
+            }
+        }
+        return null;
+    }
 }

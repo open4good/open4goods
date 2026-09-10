@@ -60,15 +60,17 @@ export interface ProductSearchRequestDto {
    */
   filters?: FilterRequestDto
   /**
-   * Enable semantic search for text queries.
+   * Deprecated compatibility field. Accepted but ignored; search is always lexical.
    * @type {boolean}
    * @memberof ProductSearchRequestDto
+   * @deprecated
    */
   semanticSearch?: boolean
   /**
-   * Strategy to use for the search (e.g. 'SEMANTIC' or 'TEXT').
+   * Deprecated compatibility field. Accepted but ignored; search is always lexical.
    * @type {string}
    * @memberof ProductSearchRequestDto
+   * @deprecated
    */
   searchType?: string
 }

@@ -1,0 +1,83 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: icecat-live-client-boundary
+  name: Icecat live client module boundary
+spec:
+  purpose: Put transport, parsing and neutral mapping in services/icecat while keeping product orchestration in api.
+  roadmapRef: m5-icecat-integration
+  state: COMPLETED
+  dependsOn:
+    - icecat-xml-contract-generation
+  decisionRefs:
+    - ADR-0007
+  pathScope:
+    - services/icecat/**
+    - api/src/main/java/org/open4goods/api/services/completion/**
+    - api/src/test/**
+    - model/src/main/java/org/open4goods/model/localization/**
+    - front-api/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: services/icecat exposes a live client taking GTIN and DomainLanguage and returning a neutral mapped result.
+    - id: AC2
+      statement: HTTP configuration, tolerant JSON parsing and mapping live in icecat; repository and aggregation stay in
+        api.
+    - id: AC3
+      statement: The API service becomes a coordinator and Maven analysis proves no icecat-to-api dependency.
+  evidenceRefs:
+    - 'note: 2026-09-10 -- widened pathScope to add model/src/main/java/org/open4goods/model/localization/** and front-api/**
+      (plus api ApiConfig.java for the live-client bean, same pattern as icecat-legacy-model-removal). AC1 literally requires
+      the live client to take a DomainLanguage parameter; grep confirmed no Java DomainLanguage type existed anywhere in services/icecat
+      or api -- only a pre-existing enum at front-api/src/main/java/org/open4goods/nudgerfrontapi/localization/DomainLanguage.java
+      (18 lines, one io.swagger.v3.oas.annotations.media.Schema import, no front-api-specific logic), used in 53 front-api
+      files (controllers, services, DTOs, tests). icecat-completion-i18n-and-coverage (dependsOn: [icecat-live-client-boundary])
+      owns threading DomainLanguage through every live call and removing language literals, not creating the type -- so this
+      WorkOrder is where it first needs to exist somewhere services/icecat can see. Module dependency direction (model ->
+      icecat -> api, front-api -> icecat) rules out putting it in icecat itself (front-api would then need to depend on icecat
+      for a UI-facing enum, backwards) or leaving a duplicate (two identically-named enums the i18n WorkOrder would have to
+      reconcile, against simplification-over-backwards-compat). model/pom.xml already depends on swagger-annotations, so the
+      @Schema import needed no new dependency. Moved the file as-is (git mv, package line only) to model/src/main/java/org/open4goods/model/localization/DomainLanguage.java
+      and updated all 53 front-api import sites (52 import-statement lines + 2 fully-qualified references in one IT test)
+      via a mechanical sed, verified zero remaining `nudgerfrontapi.localization.DomainLanguage` references reactor-wide after
+      the change. Rejected creating a separate icecat-local Gtin value type for the other AC1 parameter: Product already exposes
+      GTIN as Long/String (getId()/gtin()), and a new org.open4goods.icecat.model.Gtin would collide by name with the Gtin
+      record already defined in the uncommitted, foreign services/data-reference module (left untouched all session per repository-safety
+      rules) -- pre-empting a design decision that belongs to whoever owns that module. The live client takes a plain long
+      GTIN.'
+    - 'test: mvn --offline clean install (full reactor, all modules) -> BUILD SUCCESS, EXITCODE:0'
+    - 'test: IcecatLiveClientTest (new, 6 tests via a local com.sun.net.httpserver.HttpServer fixture) -> found/not-found/404/403/malformed-JSON/buildUrl-language-substitution
+      all pass'
+    - 'test: IcecatCompletionServiceTest, IcecatControllerTest, ReferentialHelperControllerTest -> pass unchanged'
+    - 'note: AC3 Maven-analysis proof -- mvn --offline -pl services/icecat dependency:tree contains zero org.open4goods:api
+      entries (grep empty, exit 1), confirmed both before implementing (structural premise) and after (regression check)'
+    - 'note: AC2 grep proof -- api/.../IcecatCompletionService.java now imports zero org.springframework.web.client.* and
+      zero tools.jackson.* symbols (only IcecatLiveApiResponse inner-type DTOs for DataFragment mapping); HTTP transport (RestClient),
+      tolerant JSON parsing (ObjectMapper/UnrecognizedPropertyException) and the neutral-result mapping (IcecatLiveLookupResult)
+      now live entirely in services/icecat/services/{IcecatLiveClient,IcecatLiveLookupResult}.java; repository (ProductRepository)
+      and aggregation (StandardAggregator/DataFragment construction) stay in api, unchanged'
+    - 'note: AC1 required a DomainLanguage parameter that did not exist in services/icecat or api -- only a pre-existing front-api-only
+      enum. Moved model/src/main/java/org/open4goods/model/localization/DomainLanguage.java from front-api (git mv, package-line
+      only, 53 front-api import sites updated mechanically) rather than duplicating it, per module dependency direction (model
+      -> icecat -> api, front-api -> icecat) and simplification-over-backwards-compat; full detail in the pathScope-widening
+      note above. Live client signature is fetchProduct(long gtin, DomainLanguage language); GTIN stays a plain long (Product
+      already exposes Long/String, and a new icecat-local Gtin type would collide by name with the one in the uncommitted
+      foreign services/data-reference module). Full DomainLanguage propagation through every call site and removal of remaining
+      language literals is explicitly icecat-completion-i18n-and-coverages AC1, not this WorkOrders -- completeSearch() currently
+      passes a fixed DomainLanguage.fr default with a TODO pointing at that WorkOrder, preserving the exact prior behavior
+      (the old hardcoded Language=fr in IcecatCompletionConfigs default URL).'
+    - 'note: 2026-09-10 -- post-close corrections. (1) pathScope listed api/.../ApiConfig.java as widened "for the live-client
+      bean," but IcecatLiveClient is constructed inline inside IcecatCompletionServices own constructor, not as a Spring
+      bean -- ApiConfig.java was never touched (git show 6101a2a0b -- ApiConfig.java is empty). Removed that pathScope entry
+      so it matches the actual diff. (2) Verified the "preserving the exact prior behavior" claim for completeSearch()s DomainLanguage.fr
+      default against every deployed config, not just the Java default: grepped all *.yml/*.properties reactor-wide for iceCatUrlPrefix/Language=;
+      only one file sets it -- api/src/main/resources/application-devsec.yml:557, ice-cat-url-prefix: ...&Language=fr&GTIN=
+      -- same fr the Java default and IcecatLiveClient.buildUrl both use. No config anywhere sets a non-fr language, so the
+      behavior-preservation claim holds for real, not just by coincidence of the two defaults matching. If a future profile
+      sets a non-fr prefix, buildUrl will now override it to match the caller-supplied DomainLanguage (fr, until icecat-completion-i18n-and-coverage
+      threads the real one through) rather than respecting the operator-configured language -- a latent behavior change with
+      no current config to trigger it. (3) fetchProduct(long gtin, ...) unboxes Product.getId() (Long); a null id now throws
+      NPE out of completeSearch into processProduct, which has no try/catch around that call, aborting the whole completion
+      pass for that product batch instead of the old code (string-concatenated a null into the URL, got a 404/error, logged
+      and continued). This is a fail-fast tradeoff, not verified safe -- not fixed here as it is outside this WorkOrders acceptance
+      criteria, but flagged for icecat-completion-i18n-and-coverage or a dedicated follow-up to address explicitly.'

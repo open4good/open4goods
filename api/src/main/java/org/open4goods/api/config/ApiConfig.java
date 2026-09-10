@@ -25,8 +25,6 @@ import org.open4goods.commons.services.Gs1PrefixService;
 import org.open4goods.commons.services.ProductNameSelectionService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.commons.services.textgen.BlablaService;
-import org.open4goods.embedding.config.DjlEmbeddingProperties;
-import org.open4goods.embedding.service.TextEmbeddingService;
 import org.open4goods.embedding.service.image.DjlImageEmbeddingService;
 import org.open4goods.icecat.repository.IcecatCategoryRepository;
 import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
@@ -98,7 +96,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.client.RestTemplate;
 import org.xml.sax.SAXException;
 
-import tools.jackson.dataformat.xml.XmlMapper;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Ticker;
 
@@ -160,33 +157,32 @@ public class ApiConfig {
 
     @Bean
     FeatureLoader featureLoader(IcecatFileDownloadService icecatFileDownloadService, BrandService brandService) {
-        return new FeatureLoader(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), icecatFileDownloadService, brandService);
+        return new FeatureLoader(apiProperties.getIcecatFeatureConfig(), icecatFileDownloadService, brandService);
     }
 
     @Bean
     CategoryLoader categoryLoader(IcecatFileDownloadService icecatFileDownloadService, VerticalsConfigService verticalConfigService, FeatureLoader featureLoader) {
-        return new CategoryLoader(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), icecatFileDownloadService, verticalConfigService, featureLoader);
+        return new CategoryLoader(apiProperties.getIcecatFeatureConfig(), icecatFileDownloadService, verticalConfigService, featureLoader);
     }
 
     @Bean
-    IcecatService icecatFeatureService(IcecatFileDownloadService icecatFileDownloadService, FeatureLoader featureLoader, CategoryLoader categoryLoader) {
-        // NOTE: xmlMapper not injected here because sharing the Spring-managed one corrupts springdoc. Uses a fresh XmlMapper instance.
-        return new IcecatService(new XmlMapper(), apiProperties.getIcecatFeatureConfig(), icecatFileDownloadService, featureLoader, categoryLoader);
+    IcecatService icecatFeatureService(IcecatFileDownloadService icecatFileDownloadService, FeatureLoader featureLoader, CategoryLoader categoryLoader, IcecatIndexService icecatIndexService) {
+        return new IcecatService(apiProperties.getIcecatFeatureConfig(), icecatFileDownloadService, featureLoader, categoryLoader, icecatIndexService);
     }
 
 	@Bean
 	IcecatIndexService icecatIndexService(FeatureLoader featureLoader, CategoryLoader categoryLoader,
 			IcecatFeatureRepository featureRepository, IcecatCategoryRepository categoryRepository,
-			IcecatFeatureGroupRepository featureGroupRepository, IcecatSupplierRepository supplierRepository) {
-		return new IcecatIndexService(featureLoader, categoryLoader, featureRepository, categoryRepository,
-				featureGroupRepository, supplierRepository);
+			IcecatFeatureGroupRepository featureGroupRepository, IcecatSupplierRepository supplierRepository,
+			ElasticsearchOperations elasticsearchOperations) {
+		return new IcecatIndexService(apiProperties.getIcecatFeatureConfig(), featureLoader, categoryLoader,
+				featureRepository, categoryRepository, featureGroupRepository, supplierRepository,
+				elasticsearchOperations);
 	}
 
 	@Bean
 	IcecatFeatureResolver icecatFeatureResolver(IcecatIndexService icecatIndexService) {
-		IcecatFeatureResolver resolver = new IcecatFeatureResolver(icecatIndexService);
-		icecatIndexService.setFeatureResolver(resolver);
-		return resolver;
+		return new IcecatFeatureResolver(icecatIndexService);
 	}
 
 	@Bean
@@ -385,10 +381,10 @@ public class ApiConfig {
 	@Bean
 	AggregationFacadeService realtimeAggregationService(@Autowired EvaluationService evaluationService, StandardiserService standardiserService, AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository, ApiProperties apiProperties,
 			@Autowired Gs1PrefixService gs1prefixService, DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, BarcodeValidationService barcodeValidationService, BrandService brandservice, BlablaService blablaService,
-			IcecatService icecatFeatureService, IcecatFeatureResolver icecatFeatureResolver, SerialisationService serialisationService, ObjectProvider<TextEmbeddingService> embeddingServiceProvider,
-			ObjectProvider<DjlEmbeddingProperties> embeddingPropertiesProvider, BarcodeForensicsService barcodeForensicsService) {
+			IcecatService icecatFeatureService, IcecatFeatureResolver icecatFeatureResolver, SerialisationService serialisationService,
+			BarcodeForensicsService barcodeForensicsService) {
 		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService, barcodeValidationService, brandservice, blablaService, icecatFeatureService,
-				icecatFeatureResolver, serialisationService, embeddingServiceProvider.getIfAvailable(), embeddingPropertiesProvider.getIfAvailable(), barcodeForensicsService);
+				icecatFeatureResolver, serialisationService, barcodeForensicsService);
 	}
 
 	//////////////////////////////////////////////////////////

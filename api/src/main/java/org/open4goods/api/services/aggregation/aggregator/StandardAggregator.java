@@ -1,6 +1,7 @@
 package org.open4goods.api.services.aggregation.aggregator;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.commons.exceptions.AggregationSkipException;
@@ -26,8 +27,11 @@ import org.slf4j.LoggerFactory;
  *       fields from the product's aggregated data without a fragment input.</li>
  * </ul>
  *
- * <p>Both methods look up the vertical configuration once per product and pass it
- * to every service to avoid redundant lookups inside the loop.
+ * <p>Both methods resolve the vertical configuration from {@link Product#getVertical()}
+ * and pass it to every service. Classification runs inside that same chain, so the
+ * configuration is re-resolved as soon as a service changes the product's vertical:
+ * every later service then parses, indexes and scores against the vertical the
+ * product actually belongs to rather than the one it had on entry.
  */
 public class StandardAggregator extends AbstractAggregator {
 
@@ -62,9 +66,15 @@ public class StandardAggregator extends AbstractAggregator {
 
 		logger.debug("Incrementing Product with {} DataFragment and using {} services", fragment, services.size());
 
-		VerticalConfig vConf = verticalConfigService.getConfigByIdOrDefault(data.getVertical());
+		String verticalId = data.getVertical();
+		VerticalConfig vConf = verticalConfigService.getConfigByIdOrDefault(verticalId);
 		for (final AbstractAggregationService service : services) {
 			try {
+				if (!Objects.equals(verticalId, data.getVertical())) {
+					verticalId = data.getVertical();
+					vConf = verticalConfigService.getConfigByIdOrDefault(verticalId);
+					logger.debug("Vertical changed to {} during aggregation, re-resolved its configuration", verticalId);
+				}
 				service.onDataFragment(fragment, data, vConf);
 			} catch (AggregationSkipException e) {
 				throw e;
@@ -91,9 +101,15 @@ public class StandardAggregator extends AbstractAggregator {
 
 		logger.debug("Updating product using {} services", services.size());
 
-		VerticalConfig vConf = verticalConfigService.getConfigByIdOrDefault(data.getVertical());
+		String verticalId = data.getVertical();
+		VerticalConfig vConf = verticalConfigService.getConfigByIdOrDefault(verticalId);
 		for (final AbstractAggregationService service : services) {
 			try {
+				if (!Objects.equals(verticalId, data.getVertical())) {
+					verticalId = data.getVertical();
+					vConf = verticalConfigService.getConfigByIdOrDefault(verticalId);
+					logger.debug("Vertical changed to {} during aggregation, re-resolved its configuration", verticalId);
+				}
 				service.onProduct(data, vConf);
 			} catch (AggregationSkipException e) {
 				throw e;

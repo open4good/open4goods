@@ -1,0 +1,57 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: icecat-source-assertion-adapter
+  name: Icecat source record adapter
+spec:
+  purpose: Reuse the completed Icecat transport/reference work while replacing direct Product mutation with source records.
+  roadmapRef: m7-product-data-reference
+  state: ACCEPTED
+  dependsOn:
+    - icecat-completion-i18n-and-coverage
+    - icecat-reference-index-runtime
+    - icecat-vertical-mapping-admin
+    - source-assertion-store
+    - quantity-and-language-normalization
+  decisionRefs:
+    - ADR-0007
+    - ADR-0010
+  pathScope:
+    - services/icecat/**
+    - services/data-reference/**
+    - api/src/main/java/org/open4goods/api/services/completion/IcecatCompletionService.java
+    - api/src/test/**
+    - model/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        Bulk XML/JAXB imports, live client DTOs, retries, localization and versioned Icecat reference indexes remain owned by
+        services/icecat; the adapter consumes their neutral result without reintroducing legacy Icecat models or api dependencies.
+    - id: AC2
+      statement: >-
+        SourceRecordKey uses the Icecat product id, with GTIN attachments separated from record identity; live search followed
+        by id refresh replaces the same head and records match confidence and the provider schema/reference version.
+    - id: AC3
+      statement: >-
+        Names, summaries, bullets, brand/model/family/series, lifecycle dates and technical features become scalar/localized or
+        relation assertions; gallery, logos, documents and multimedia become media assertions with provider URLs and cache policy.
+    - id: AC4
+      statement: >-
+        SourceFieldId uses stable Icecat category-feature/feature identifiers and version, never only a translated name;
+        approved Icecat-to-O4G mappings normalize evidence and unmapped fields remain auditable without entering projections.
+    - id: AC5
+      statement: >-
+        A complete response writes a FULL ACTIVE head, provider not-found/removal writes the configured terminal state, and
+        restricted/transient failures use UNAVAILABLE/REJECTED semantics without deleting the last valid head prematurely.
+    - id: AC6
+      statement: >-
+        The Icecat usage policy independently controls technical text, taxonomy and media by surface/effective period; cache and
+        attribution output obey the selected content type and B2B/ODBL remain denied until reviewed approval.
+    - id: AC7
+      statement: >-
+        IcecatCompletionService stops invoking the legacy DataFragment aggregator and persists source heads plus ingestion
+        checkpoints; no source-specific field is added to SourceAssertion, SourceRecordHead or ProductProjection.
+    - id: AC8
+      statement: >-
+        Contract tests cover bulk/live equivalence, language, repeated values, missing unit, media, refresh, removal, restricted
+        response, unmapped feature, policy denial and two identical ingestions yielding the same head hash.

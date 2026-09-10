@@ -25,7 +25,7 @@ import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.Filter;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterOperator;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.CategoryMappingService;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.open4goods.nudgerfrontapi.service.SearchService;
@@ -227,7 +227,7 @@ public class CategoriesController {
         Pageable pageable = PageRequest.of(0, TOP_PRODUCTS_LIMIT,
                 Sort.by(Sort.Order.desc(SORT_FIELD_IMPACT_SCORE)));
 
-        SearchService.SearchResult result = searchService.search(pageable, null, null, null, filters, false, null);
+        SearchService.SearchResult result = searchService.search(pageable, null, null, null, filters);
         Locale locale = resolveLocale(domainLanguage);
 
         Map<Long, ProductDto> uniqueProducts = new LinkedHashMap<>();

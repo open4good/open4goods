@@ -9,10 +9,8 @@ import java.util.Map;
 
 import org.open4goods.icecat.config.yml.IcecatConfiguration;
 import org.open4goods.icecat.model.AttributesFeatureGroups;
-import org.open4goods.icecat.model.IcecatCategory;
-import org.open4goods.icecat.model.IcecatFeature;
+import org.open4goods.icecat.model.IcecatFeatureDocument;
 import org.open4goods.icecat.model.IcecatLanguageHandler;
-import org.open4goods.icecat.model.IcecatName;
 import org.open4goods.icecat.services.loader.CategoryLoader;
 import org.open4goods.icecat.services.loader.FeatureLoader;
 import org.open4goods.icecat.util.IcecatConstants;
@@ -27,76 +25,56 @@ import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
-import tools.jackson.dataformat.xml.XmlMapper;
-
 
 /**
  * Core Icecat service: provides category-to-vertical mapping and product feature rendering.
  *
- * <p>Reference data (features, categories, feature groups) is loaded at startup via
- * {@link FeatureLoader} and {@link CategoryLoader}. Product feature rendering still uses
- * loaded reference data by ID. Attribute-name resolution is handled by {@link IcecatFeatureResolver}
- * through Elasticsearch.
+ * <p>Feature and category reference data is served from Elasticsearch through
+ * {@link IcecatIndexService}, never from an in-memory map built at startup — the constructor
+ * does no bulk loading. {@link FeatureLoader} and {@link CategoryLoader} are only driven by
+ * {@link IcecatIndexService#syncFromLoaders()}, an explicit admin-triggered import.
  */
 public class IcecatService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IcecatService.class);
 
-    private final XmlMapper xmlMapper;
     private final IcecatConfiguration iceCatConfig;
     private final IcecatFileDownloadService fileDownloadService;
     private final FeatureLoader featureLoader;
     private final CategoryLoader categoryLoader;
+    private final IcecatIndexService icecatIndexService;
 
     private Map<String, String> codeByLanguage;
     private Map<String, String> languageByCode;
 
     /**
-     * Creates the IcecatService and immediately loads all reference data.
+     * Creates the IcecatService and loads the small Icecat language-code table (not the
+     * feature/category reference data — see {@link IcecatIndexService#syncFromLoaders()}
+     * for that explicit import path).
      *
-     * @param xmlMapper           Jackson XML mapper (a dedicated instance, not the shared Spring one)
      * @param iceCatConfig        Icecat bulk-export configuration
      * @param fileDownloadService handles file download and decompression
-     * @param featureLoader       loads features, feature groups, and suppliers
-     * @param categoryLoader      loads categories and category-feature mappings
+     * @param featureLoader       loads features, feature groups, and suppliers (import path only)
+     * @param categoryLoader      loads categories and category-feature mappings (import path only)
+     * @param icecatIndexService  serves feature/category reads from Elasticsearch
      */
     public IcecatService(
-            XmlMapper xmlMapper,
             IcecatConfiguration iceCatConfig,
             IcecatFileDownloadService fileDownloadService,
             FeatureLoader featureLoader,
-            CategoryLoader categoryLoader) {
-        this.xmlMapper = xmlMapper;
+            CategoryLoader categoryLoader,
+            IcecatIndexService icecatIndexService) {
         this.iceCatConfig = iceCatConfig;
         this.fileDownloadService = fileDownloadService;
         this.featureLoader = featureLoader;
         this.categoryLoader = categoryLoader;
+        this.icecatIndexService = icecatIndexService;
 
         try {
-            icecatInit();
+            loadLanguages();
         } catch (TechnicalException e) {
-            LOGGER.error("Error while initializing Icecat", e);
+            LOGGER.error("Error while loading Icecat languages", e);
         }
-    }
-
-    /**
-     * Initialises all reference data. Order matters: feature groups must load before
-     * category features (which reference them).
-     *
-     * @throws TechnicalException if any mandatory resource cannot be loaded
-     */
-    public void icecatInit() throws TechnicalException {
-        featureLoader.loadFeatureGroups();
-        loadLanguages();
-        featureLoader.loadBrands();
-        categoryLoader.loadCategories();
-        featureLoader.loadFeatures();
-        if (iceCatConfig.isLoadCategoryFeatureList()) {
-            categoryLoader.loadCategoryFeatureList();
-        } else {
-            LOGGER.info("Icecat category-feature list loading is disabled");
-        }
-        LOGGER.info("Icecat up and running");
     }
 
     /**
@@ -163,14 +141,11 @@ public class IcecatService {
                     ProductAttribute a = product.getAttributes().attributeByFeatureId(fId);
                     if (null != a) {
                         ufg.getAttributes().add(a);
-                        IcecatFeature f = featureLoader.getFeaturesById().get(fId);
+                        IcecatFeatureDocument f = icecatIndexService.findFeature(fId).orElse(null);
                         if (f != null) {
-                            IcecatName i18nName = f.getNames().getNames().stream()
-                                    .filter(e -> e.getLangId() == icecatLanguage)
-                                    .findFirst()
-                                    .orElse(null);
+                            String i18nName = f.localizedName(icecatLanguage);
                             if (null != i18nName) {
-                                a.setName(i18nName.getEffectiveName());
+                                a.setName(i18nName);
                             }
                         }
 
@@ -210,13 +185,14 @@ public class IcecatService {
         if (null != vertical) {
             for (FeatureGroup fg : vertical.getFeatureGroups()) {
                 for (Integer fId : fg.getFeaturesId()) {
-                    IcecatFeature f = featureLoader.getFeaturesById().get(fId);
-                    IcecatName i18nName = f.getNames().getNames().stream()
-                            .filter(e -> e.getLangId() == IcecatConstants.LANG_ID_ENGLISH)
-                            .findFirst()
-                            .orElse(null);
+                    IcecatFeatureDocument f = icecatIndexService.findFeature(fId).orElse(null);
+                    if (f == null) {
+                        LOGGER.error("Feature {} not found in the Icecat feature index", fId);
+                        continue;
+                    }
+                    String i18nName = f.localizedName(IcecatConstants.LANG_ID_ENGLISH);
                     if (null != i18nName) {
-                        ret.put(i18nName.getTextValue(), f.getType());
+                        ret.put(i18nName, f.getType());
                     } else {
                         LOGGER.error("Name not found for feature {} - {}", fId, f);
                     }
@@ -224,23 +200,5 @@ public class IcecatService {
             }
         }
         return ret;
-    }
-
-    public Map<Integer, IcecatFeature> getFeaturesById() {
-        return featureLoader.getFeaturesById();
-    }
-
-    public void setFeaturesById(Map<Integer, IcecatFeature> featuresById) {
-        featureLoader.getFeaturesById().clear();
-        featureLoader.getFeaturesById().putAll(featuresById);
-    }
-
-    public Map<Integer, IcecatCategory> getCategoriesById() {
-        return categoryLoader.getCategoriesById();
-    }
-
-    public void setCategoriesById(Map<Integer, IcecatCategory> categoriesById) {
-        categoryLoader.getCategoriesById().clear();
-        categoryLoader.getCategoriesById().putAll(categoriesById);
     }
 }

@@ -12,10 +12,10 @@ import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
  * Elasticsearch document representing an Icecat feature group
  * (a logical grouping such as "Display", "Connectivity", etc.).
  *
- * <p>Populated from {@link IcecatFeatureGroup} objects loaded via
+ * <p>Populated from {@link org.open4goods.icecat.jaxb.FeatureGroup} objects loaded via
  * {@link org.open4goods.icecat.services.loader.FeatureLoader}.
  */
-@Document(indexName = "icecat-feature-groups", createIndex = true, writeTypeHint = WriteTypeHint.FALSE)
+@Document(indexName = "icecat-feature-groups", createIndex = false, writeTypeHint = WriteTypeHint.FALSE)
 public class IcecatFeatureGroupDocument {
 
     /** Icecat stable feature group ID. */

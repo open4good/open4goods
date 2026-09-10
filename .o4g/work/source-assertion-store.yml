@@ -1,0 +1,51 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: source-assertion-store
+  name: Atomic source record and assertion store
+spec:
+  purpose: Persist replaceable source heads and a compact transition journal for deterministic current-state replay.
+  roadmapRef: m7-product-data-reference
+  state: ACCEPTED
+  dependsOn:
+    - product-reference-contract
+    - reference-storage-capacity-benchmark
+  decisionRefs:
+    - ADR-0010
+  pathScope:
+    - services/data-reference/**
+    - api/src/main/**
+    - api/src/test/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        Versioned strict mappings and read/write aliases exist for source-record heads and the append-only metadata journal;
+        head ids are deterministic from SourceRecordKey and journal ids are deterministic from key plus transition revision.
+    - id: AC2
+      statement: >-
+        Replacing a head is compare-and-set atomic: an identical content hash is a no-op; otherwise observedAt then retrievedAt
+        define order, older input is ignored, and equal timestamps with different hashes are rejected as a collision.
+    - id: AC3
+      statement: >-
+        FULL replacement removes every omitted prior assertion and GTIN link; PARTIAL replacement changes only supplied
+        coordinates and explicit tombstones, and rejects an ambiguous empty partial update.
+    - id: AC4
+      statement: >-
+        DELETED clears assertions and links; UNAVAILABLE or REJECTED attempts are journalled without replacing a prior valid head,
+        and create an ineligible empty head only when none exists; expiration excludes a head without erasing transition metadata.
+    - id: AC5
+      statement: >-
+        The journal stores key, old/new hashes, versions, timestamps, state, outcome and sanitized error code only; it never
+        duplicates assertion values, provider payloads, restricted URLs or media bytes.
+    - id: AC6
+      statement: >-
+        Replay APIs scan a GTIN, a source or the complete head alias with point-in-time plus search_after, stable ordering,
+        bounded pages, resumable checkpoints and cancellation; no scroll context or in-memory full-catalog list is used.
+    - id: AC7
+      statement: >-
+        Metrics expose accepted, duplicate, out-of-order, tombstoned, expired and rejected heads, optimistic conflicts, latency
+        and replay lag by source without assertion values or prohibited evidence in tags or logs.
+    - id: AC8
+      statement: >-
+        Elasticsearch Testcontainers proves create/import/retry/concurrent replace, FULL/PARTIAL deletion, status semantics,
+        expiry, alias migration, replay resume and deterministic results across two identical ingestion runs.

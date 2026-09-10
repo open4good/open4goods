@@ -17,8 +17,9 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 | m2-corpus-cleanup | 0 | 0 | 0 | 0 | 1 |
 | m3-dead-surface-removal | 1 | 0 | 1 | 0 | 1 |
 | m4-product-page-quality | 0 | 0 | 0 | 0 | 1 |
-| m5-icecat-integration | 6 | 3 | 3 | 0 | 1 |
+| m5-icecat-integration | 0 | 0 | 0 | 0 | 5 |
 | m6-xwiki-retirement | 2 | 0 | 2 | 0 | 2 |
+| m7-product-data-reference | 20 | 2 | 18 | 0 | 2 |
 | m6-content-outreach | 0 | 0 | 0 | 0 | 1 |
 
 ## m0-governance
@@ -58,16 +59,8 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 
 ## m5-icecat-integration
 
-| WorkOrder | Contract state | Availability | Dependencies | Blockers | Purpose |
-|---|---|---|---|---|---|
-| [icecat-legacy-model-removal](../../.o4g/work/icecat-legacy-model-removal.yml) | ACCEPTED | READY | icecat-xml-contract-generation | -- | Make CategoryLoader and FeatureLoader parse bulk XML into the JAXB-generated types from icecat-xml-contract-generation instead of the hand-written org.open4goods.icecat.model bulk POJOs, then delete the POJOs once nothing references them. |
-| [icecat-live-client-boundary](../../.o4g/work/icecat-live-client-boundary.yml) | ACCEPTED | READY | icecat-xml-contract-generation | -- | Put transport, parsing and neutral mapping in services/icecat while keeping product orchestration in api. |
-| [icecat-reference-index-runtime](../../.o4g/work/icecat-reference-index-runtime.yml) | ACCEPTED | READY | icecat-xml-contract-generation | -- | Make Elasticsearch the durable reference source instead of a boot-time mirror of in-memory maps. |
-| [icecat-completion-i18n-and-coverage](../../.o4g/work/icecat-completion-i18n-and-coverage.yml) | ACCEPTED | BLOCKED | icecat-live-client-boundary | icecat-live-client-boundary | Finish refresh semantics, language propagation and live fields currently dropped during product enrichment. |
-| [icecat-vertical-mapping-admin](../../.o4g/work/icecat-vertical-mapping-admin.yml) | ACCEPTED | BLOCKED | icecat-reference-index-runtime | icecat-reference-index-runtime | Replace transient vertical assignment with an explicit, authorized and durable admin contract. |
-| [icecat-integration-production-grade](../../.o4g/work/icecat-integration-production-grade.yml) | ACCEPTED | BLOCKED | icecat-reference-index-runtime, icecat-vertical-mapping-admin, icecat-completion-i18n-and-coverage | icecat-reference-index-runtime, icecat-vertical-mapping-admin, icecat-completion-i18n-and-coverage | Verify Icecat end to end after the XML, reference index, module boundary, admin mapping and live completion lots close. Shared download and Elasticsearch scaffolding already exist. |
 
-*1 closed, see [ledger](../../.o4g/work/ledger).*
+*5 closed, see [ledger](../../.o4g/work/ledger).*
 
 ## m6-xwiki-retirement
 
@@ -75,6 +68,33 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 |---|---|---|---|---|---|
 | [google-sso-allowlisted-roles](../../.o4g/work/google-sso-allowlisted-roles.yml) | ACCEPTED | BLOCKED | config-repository-elimination | config-repository-elimination | Replace XWiki password authentication with Google OIDC and deny-by-default email-to-role authorization. |
 | [xwiki-decommission](../../.o4g/work/xwiki-decommission.yml) | ACCEPTED | BLOCKED | xwiki-blog-to-nuxt-content, xwiki-editorial-content-to-nuxt-content, google-sso-allowlisted-roles | google-sso-allowlisted-roles | Remove XWiki after content and identity replacements have production evidence and a verified recovery archive. |
+
+*2 closed, see [ledger](../../.o4g/work/ledger).*
+
+## m7-product-data-reference
+
+| WorkOrder | Contract state | Availability | Dependencies | Blockers | Purpose |
+|---|---|---|---|---|---|
+| [amazon-paapi-content-quarantine](../../.o4g/work/amazon-paapi-content-quarantine.yml) | ACCEPTED | READY | -- | -- | Stop PA-API enrichment and remove persisted licensed content without affecting independent Amazon merchant feeds. |
+| [product-reference-contract](../../.o4g/work/product-reference-contract.yml) | ACCEPTED | READY | -- | -- | Establish the Java and serialization contracts that every reference source and consumer shares. |
+| [canonical-concept-registry](../../.o4g/work/canonical-concept-registry.yml) | ACCEPTED | BLOCKED | product-reference-contract | product-reference-contract | Replace supplier taxonomies as internal authority with a complete independently authored O4G registry. |
+| [reference-storage-capacity-benchmark](../../.o4g/work/reference-storage-capacity-benchmark.yml) | ACCEPTED | BLOCKED | product-reference-contract | product-reference-contract | Prove mappings, topology, throughput and cost from production-shaped data before full-catalog ingestion. |
+| [icecat-vertical-mapping-admin](../../.o4g/work/icecat-vertical-mapping-admin.yml) | ACCEPTED | BLOCKED | icecat-reference-index-runtime, canonical-concept-registry | canonical-concept-registry | Replace transient vertical assignment with reviewed Icecat-to-O4G mappings whose authority remains in Git. |
+| [price-observation-timeseries](../../.o4g/work/price-observation-timeseries.yml) | ACCEPTED | BLOCKED | product-reference-contract, reference-storage-capacity-benchmark | product-reference-contract, reference-storage-capacity-benchmark | Preserve provider-level price changes and presence without duplicating unchanged polls in Product documents. |
+| [source-assertion-store](../../.o4g/work/source-assertion-store.yml) | ACCEPTED | BLOCKED | product-reference-contract, reference-storage-capacity-benchmark | product-reference-contract, reference-storage-capacity-benchmark | Persist replaceable source heads and a compact transition journal for deterministic current-state replay. |
+| [b2b-price-history-facet](../../.o4g/work/b2b-price-history-facet.yml) | ACCEPTED | BLOCKED | price-observation-timeseries | price-observation-timeseries | Serve licensed provider price history through the existing metered B2B contract. |
+| [quantity-and-language-normalization](../../.o4g/work/quantity-and-language-normalization.yml) | ACCEPTED | BLOCKED | canonical-concept-registry, source-assertion-store | canonical-concept-registry, source-assertion-store | Replace dispersed parsers and unit strings with one lossless, typed and locale-aware normalization pipeline. |
+| [eprel-source-assertion-adapter](../../.o4g/work/eprel-source-assertion-adapter.yml) | ACCEPTED | BLOCKED | source-assertion-store, quantity-and-language-normalization | source-assertion-store, quantity-and-language-normalization | Convert EPREL catalogues and corrections into licensed source records without mutating Product. |
+| [icecat-source-assertion-adapter](../../.o4g/work/icecat-source-assertion-adapter.yml) | ACCEPTED | BLOCKED | icecat-completion-i18n-and-coverage, icecat-reference-index-runtime, icecat-vertical-mapping-admin, source-assertion-store, quantity-and-language-normalization | icecat-vertical-mapping-admin, source-assertion-store, quantity-and-language-normalization | Reuse the completed Icecat transport/reference work while replacing direct Product mutation with source records. |
+| [merchant-source-assertion-adapters](../../.o4g/work/merchant-source-assertion-adapters.yml) | ACCEPTED | BLOCKED | source-assertion-store, quantity-and-language-normalization, price-observation-timeseries | source-assertion-store, quantity-and-language-normalization, price-observation-timeseries | Split merchant reference evidence from offer observations while preserving stable feed coordinates. |
+| [reference-resolution-and-surface-projections](../../.o4g/work/reference-resolution-and-surface-projections.yml) | ACCEPTED | BLOCKED | canonical-concept-registry, quantity-and-language-normalization, source-assertion-store | canonical-concept-registry, quantity-and-language-normalization, source-assertion-store | Resolve policy-filtered evidence into auditable per-surface values and a single GTIN read model. |
+| [icecat-integration-production-grade](../../.o4g/work/icecat-integration-production-grade.yml) | ACCEPTED | BLOCKED | icecat-reference-index-runtime, icecat-vertical-mapping-admin, icecat-completion-i18n-and-coverage, icecat-source-assertion-adapter, reference-resolution-and-surface-projections | icecat-vertical-mapping-admin, icecat-source-assertion-adapter, reference-resolution-and-surface-projections | Verify Icecat end to end through source records, O4G mappings, normalization and licensed projections rather than direct Product aggregation. |
+| [product-family-model-grouping](../../.o4g/work/product-family-model-grouping.yml) | ACCEPTED | BLOCKED | canonical-concept-registry, reference-resolution-and-surface-projections | canonical-concept-registry, reference-resolution-and-surface-projections | Add stable model/family relations and prefix-assisted discovery while preserving GTIN as leaf identity. |
+| [consumer-search-lexical-refactor](../../.o4g/work/consumer-search-lexical-refactor.yml) | ACCEPTED | BLOCKED | consumer-search-cost-hotfix, reference-resolution-and-surface-projections, product-family-model-grouping | reference-resolution-and-surface-projections, product-family-model-grouping | Replace duplicate consumer search paths with one relevance-tested lexical Elasticsearch search over the source-neutral GTIN projection. |
+| [full-reference-shadow-reingestion](../../.o4g/work/full-reference-shadow-reingestion.yml) | ACCEPTED | BLOCKED | amazon-paapi-content-quarantine, aggregation-integrity-hotfixes, eprel-source-assertion-adapter, merchant-source-assertion-adapters, icecat-integration-production-grade, product-family-model-grouping | amazon-paapi-content-quarantine, eprel-source-assertion-adapter, merchant-source-assertion-adapters, icecat-integration-production-grade, product-family-model-grouping | Build and validate complete source-neutral indexes without changing production readers. |
+| [reference-api-frontend-breaking-cutover](../../.o4g/work/reference-api-frontend-breaking-cutover.yml) | ACCEPTED | BLOCKED | reference-resolution-and-surface-projections, product-family-model-grouping, consumer-search-lexical-refactor | reference-resolution-and-surface-projections, product-family-model-grouping, consumer-search-lexical-refactor | Move consumer, B2B and open-data readers to typed licensed projections in one coordinated API version change. |
+| [reference-coordinated-cutover](../../.o4g/work/reference-coordinated-cutover.yml) | ACCEPTED | BLOCKED | full-reference-shadow-reingestion, reference-api-frontend-breaking-cutover, b2b-price-history-facet | full-reference-shadow-reingestion, reference-api-frontend-breaking-cutover, b2b-price-history-facet | Apply the final ingestion delta and atomically move all readers to validated source-neutral projections. |
+| [product-reference-legacy-retirement](../../.o4g/work/product-reference-legacy-retirement.yml) | ACCEPTED | BLOCKED | reference-coordinated-cutover | reference-coordinated-cutover | Remove dual semantics and dead source-specific fields after the new projection survives its rollback window. |
 
 *2 closed, see [ledger](../../.o4g/work/ledger).*
 

@@ -8,8 +8,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.kohsuke.github.GHRepository;
+import org.open4goods.brand.service.BrandService;
+import org.open4goods.icecat.repository.IcecatCategoryRepository;
+import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
+import org.open4goods.icecat.repository.IcecatFeatureRepository;
+import org.open4goods.icecat.repository.IcecatSupplierRepository;
+import org.open4goods.services.geocode.service.IpGeolocationService;
 import org.open4goods.nudgerfrontapi.dto.auth.LoginRequest;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.auth.JwtService;
 import org.open4goods.xwiki.services.XWikiAuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +42,27 @@ class AuthControllerIT {
 
     @MockitoBean
     private XWikiAuthenticationService authService;
+
+    @MockitoBean
+    private GHRepository ghRepository;
+
+    @MockitoBean
+    private BrandService brandService;
+
+    @MockitoBean
+    private IpGeolocationService ipGeolocationService;
+
+    @MockitoBean
+    private IcecatFeatureRepository icecatFeatureRepository;
+
+    @MockitoBean
+    private IcecatCategoryRepository icecatCategoryRepository;
+
+    @MockitoBean
+    private IcecatFeatureGroupRepository icecatFeatureGroupRepository;
+
+    @MockitoBean
+    private IcecatSupplierRepository icecatSupplierRepository;
 
     @Autowired
     private JwtService jwtService;

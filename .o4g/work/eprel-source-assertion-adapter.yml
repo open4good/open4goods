@@ -1,0 +1,53 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: eprel-source-assertion-adapter
+  name: EPREL source record adapter
+spec:
+  purpose: Convert EPREL catalogues and corrections into licensed source records without mutating Product.
+  roadmapRef: m7-product-data-reference
+  state: ACCEPTED
+  dependsOn:
+    - source-assertion-store
+    - quantity-and-language-normalization
+  decisionRefs:
+    - ADR-0010
+  pathScope:
+    - services/eprel-service/**
+    - services/data-reference/**
+    - api/src/main/java/org/open4goods/api/services/completion/EprelCompletionService.java
+    - api/src/test/**
+    - model/src/main/java/org/open4goods/model/eprel/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        SourceRecordKey uses the EPREL registration/model record identifier rather than GTIN, and every GTIN attachment records
+        exact matching evidence and confidence consistent with the existing model-identity contract.
+    - id: AC2
+      statement: >-
+        Assertions use EPREL parameter identifiers and schema version as SourceFieldId; localized values preserve actual BCP 47
+        tags and non-linguistic values use und, with no flattened-label identifier or forced French value.
+    - id: AC3
+      statement: >-
+        Catalogue rows produce FULL heads; published corrections, removals and withdrawn models produce replacement or DELETED
+        heads so an assertion absent from the current EPREL record cannot survive indefinitely.
+    - id: AC4
+      statement: >-
+        Regulatory authority is assigned only by configured O4G concept mapping and exact model attachment; unmapped parameters
+        remain stored raw and reported but cannot be resolved through an Icecat name or a global EPREL priority.
+    - id: AC5
+      statement: >-
+        The effective EPREL usage policy carries attribution, correction/withdrawal refresh, retention and per-surface
+        redistribution decisions; B2B_API and ODBL_EXPORT remain denied until a reviewed policy version explicitly allows them.
+    - id: AC6
+      statement: >-
+        Import is idempotent and resumable by catalogue/version and source-record cursor; a failed page never publishes a partial
+        FULL snapshot and metrics expose mapped, unmapped, rejected, withdrawn and changed record counts.
+    - id: AC7
+      statement: >-
+        Product.eprelDatas and direct Product brand/model/attribute writes are absent from the new path and removed after cutover;
+        provider payloads stay in the EPREL source boundary and not in product projections.
+    - id: AC8
+      statement: >-
+        Shared adapter contract tests cover repeated values, deletion, unknown language/unit, provider version change,
+        corrected GTIN attachment, withdrawal, policy denial and byte-equivalent output across repeated catalogue ingestion.

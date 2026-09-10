@@ -48,10 +48,6 @@ front:
     api-base-url: ${FRONT_AFFILIATION_PARTNERS_API_BASE_URL:http://localhost:8080}
     api-key: ${FRONT_AFFILIATION_PARTNERS_API_KEY:CHANGE_ME_AFFILIATION_PARTNER_API_KEY}
 
-  embedding:
-    api-base-url: ${FRONT_EMBEDDING_API_BASE_URL:http://localhost:8080}
-
-
   google-taxonomy:
     french-taxonomy-url: "https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt"
     english-taxonomy-url: "https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt"
@@ -68,10 +64,6 @@ front:
     batch-size: ${FRONT_GOOGLE_INDEXATION_BATCH_SIZE:50}
     max-attempts: ${FRONT_GOOGLE_INDEXATION_MAX_ATTEMPTS:5}
     site-base-url: ${FRONT_GOOGLE_INDEXATION_SITE_BASE_URL:https://nudger.fr}
-  search:
-    suggest:
-      semantic-fallback-enabled: true
-
   partners:
     ecosystem:
       partners:

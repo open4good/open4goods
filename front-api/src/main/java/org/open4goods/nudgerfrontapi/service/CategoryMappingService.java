@@ -50,7 +50,7 @@ import org.open4goods.nudgerfrontapi.dto.category.VerticalSubCategoryHeroBlockDt
 import org.open4goods.nudgerfrontapi.dto.category.VerticalSubCategoryReadMoreDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalSubsetDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.verticals.GoogleTaxonomyService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;

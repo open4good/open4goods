@@ -2,7 +2,7 @@ package org.open4goods.nudgerfrontapi.controller.api;
 
 import org.open4goods.model.RolesConstants;
 import org.open4goods.nudgerfrontapi.dto.indexation.GoogleIndexationMetricsDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.GoogleIndexationQueueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

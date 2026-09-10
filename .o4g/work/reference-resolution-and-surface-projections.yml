@@ -1,0 +1,62 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: reference-resolution-and-surface-projections
+  name: Deterministic reference resolution and surface projections
+spec:
+  purpose: Resolve policy-filtered evidence into auditable per-surface values and a single GTIN read model.
+  roadmapRef: m7-product-data-reference
+  state: ACCEPTED
+  dependsOn:
+    - canonical-concept-registry
+    - quantity-and-language-normalization
+    - source-assertion-store
+  decisionRefs:
+    - ADR-0010
+  pathScope:
+    - services/data-reference/**
+    - services/evaluation/**
+    - services/product-repository/**
+    - api/src/main/**
+    - api/src/test/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        Git-versioned rules select per canonical concept and surface; there is no global EPREL/Icecat ordering and no
+        cross-source arithmetic mean unless a named rule for that concept explicitly defines it.
+    - id: AC2
+      statement: >-
+        Eligibility applies effective usage policy, source-head state/expiry, GTIN-link confidence and normalization validity
+        before ranking, conflict calculation or derivation, so forbidden evidence cannot influence an allowed result indirectly.
+    - id: AC3
+      statement: >-
+        Ranking is deterministic: in-scope validated O4G correction, configured regulatory authority, configured source rank,
+        match confidence, observation time, then stable source/assertion id; input arrival and Elasticsearch hit order have no effect.
+    - id: AC4
+      statement: >-
+        Every resolved field records deduplicated candidate assertion ids, winner id, rule id/version, reason, conflict status
+        and publishable provenance; materially distinct normalized candidates are retained as conflicts rather than overwritten.
+    - id: AC5
+      statement: >-
+        O4G corrections are immutable audited source records with author, reason, scope and revocation; projection documents are
+        never edited as a correction mechanism and a revoked correction restores the deterministic prior winner on replay.
+    - id: AC6
+      statement: >-
+        Derived values have their own ids, rule version and input assertion/derived ids; a surface-disallowed input excludes the
+        derivation and prohibited values are absent from public DTOs, exports, logs and operational metric labels.
+    - id: AC7
+      statement: >-
+        A strict aliased index stores one document per normalized GTIN with NUDGER_WEB, B2B_API and ODBL_EXPORT decisions plus
+        typed reference, offer-summary, evaluation and search slices assembled by one writer through typed input ports.
+    - id: AC8
+      statement: >-
+        A changed source head, registry, policy, correction, rule or domain slice enqueues idempotent GTIN recomputation; full
+        replay uses PIT/search_after checkpoints and two identical replays produce byte-equivalent canonical projections.
+    - id: AC9
+      statement: >-
+        Search and batch aggregation use indexed projection fields or dedicated rollups, never nested raw assertions; mappings
+        bound nested/object counts and keep audit-only evidence non-indexed to prevent mapping and aggregation blow-ups.
+    - id: AC10
+      statement: >-
+        Unit and Elasticsearch integration tests cover source-order permutations, expiry, policy periods, corrections,
+        regulatory authority, conflicts, anti-leak behavior, optimistic retries, alias migration and composition of all slices.

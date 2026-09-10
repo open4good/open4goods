@@ -60,7 +60,7 @@ class StatsControllerIT {
                 "televisions",
                 List.of(new DatavizDefaultFilterDto("lastChange", "range", null, null, "now-2d")),
                 List.of(new DatavizChartPresetDto("products-by-brand", "bar", "Produits par marque", "Top marques", "productsByBrand", RolesConstants.ROLE_FRONTEND, true)));
-        given(datavizStatsService.getVerticalPlan("televisions", org.open4goods.nudgerfrontapi.localization.DomainLanguage.fr))
+        given(datavizStatsService.getVerticalPlan("televisions", org.open4goods.model.localization.DomainLanguage.fr))
                 .willReturn(dto);
 
         mockMvc.perform(get("/stats/verticals/televisions/dataviz/plan")
@@ -79,7 +79,7 @@ class StatsControllerIT {
      */
     @Test
     void datavizPlanReturns404WhenVerticalIsUnknown() throws Exception {
-        given(datavizStatsService.getVerticalPlan("unknown", org.open4goods.nudgerfrontapi.localization.DomainLanguage.en))
+        given(datavizStatsService.getVerticalPlan("unknown", org.open4goods.model.localization.DomainLanguage.en))
                 .willReturn(null);
 
         mockMvc.perform(get("/stats/verticals/unknown/dataviz/plan")

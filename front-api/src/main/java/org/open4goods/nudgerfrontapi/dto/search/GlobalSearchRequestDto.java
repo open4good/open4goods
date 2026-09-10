@@ -17,7 +17,9 @@ public record GlobalSearchRequestDto(
         FilterRequestDto filters,
         @Schema(description = "Optional sort definition applied to global search results.")
         SortRequestDto sort,
-        @Schema(description = "Strategy to use for the search (e.g. 'SEMANTIC' or 'TEXT').", example = "TEXT")
+        @Deprecated(forRemoval = true)
+        @Schema(description = "Deprecated compatibility field. Accepted but ignored; search is always lexical.",
+                example = "TEXT", deprecated = true)
         String searchType,
         @Schema(description = "Zero-based page index for missing-vertical results.", example = "0")
         Integer pageNumber,

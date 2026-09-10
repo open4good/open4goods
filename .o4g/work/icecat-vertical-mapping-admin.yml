@@ -1,19 +1,45 @@
 apiVersion: open4goods.org/v1
 kind: WorkOrder
-metadata: {id: icecat-vertical-mapping-admin, name: Persistent Icecat vertical mapping administration}
+metadata:
+  id: icecat-vertical-mapping-admin
+  name: Reviewed Icecat to O4G mapping administration
 spec:
-  purpose: Replace transient vertical assignment with an explicit, authorized and durable admin contract.
-  roadmapRef: m5-icecat-integration
+  purpose: Replace transient vertical assignment with reviewed Icecat-to-O4G mappings whose authority remains in Git.
+  roadmapRef: m7-product-data-reference
   state: ACCEPTED
-  dependsOn: [icecat-reference-index-runtime]
-  decisionRefs: [ADR-0007]
-  pathScope: ['services/icecat/**', 'api/src/main/java/org/open4goods/api/controller/api/IcecatController.java', 'api/src/test/**']
+  dependsOn:
+    - icecat-reference-index-runtime
+    - canonical-concept-registry
+  decisionRefs:
+    - ADR-0007
+    - ADR-0010
+  pathScope:
+    - services/icecat/**
+    - services/data-reference/**
+    - api/src/main/java/org/open4goods/api/controller/api/IcecatController.java
+    - api/src/test/**
   acceptanceCriteria:
     - id: AC1
-      statement: GET, PUT and DELETE /icecat/vertical-mappings/{verticalId} persist typed mappings and reject unknown ids.
+      statement: >-
+        Every Icecat category, feature and feature-group mapping targets a versioned O4G class/attribute id and has APPROVED,
+        IGNORED or UNMAPPED status, rationale, reviewer and effective registry version.
     - id: AC2
-      statement: ROLE_ADMIN is required, errors use Problem Details and no automatic fuzzy assignment occurs.
+      statement: >-
+        Only APPROVED mappings participate in normalization; label similarity and fuzzy matching may create a review report but
+        cannot assign a class, vertical or canonical attribute automatically.
     - id: AC3
-      statement: POST /icecat/index/rebuild returns a job id and GET job status replaces mutating GET endpoints.
+      statement: >-
+        Git registry resources are authoritative and the runtime index is a generated projection; admin HTTP cannot PUT or
+        DELETE mappings and returns a conflict if its requested rebuild does not match a committed registry version/hash.
     - id: AC4
-      statement: Tests prove persistence across restart, authorization, conflicts and generated OpenAPI accuracy.
+      statement: >-
+        ROLE_ADMIN GET endpoints expose mapping coverage and unmapped candidates, POST rebuild returns an asynchronous job id,
+        and job/status errors use Problem Details; mutating GET endpoints are absent.
+    - id: AC5
+      statement: >-
+        Mapping validation rejects unknown O4G ids, duplicate active mappings, type/dimension mismatch and a category mapped to
+        incompatible classes; coverage is reported by Icecat category and each of the seven editorial verticals.
+    - id: AC6
+      statement: >-
+        Tests prove authorization, Git-to-index persistence across restart, stale-hash conflict, unmapped isolation, rebuild
+        rollback and generated OpenAPI accuracy without relying on a direct Product vertical mutation.

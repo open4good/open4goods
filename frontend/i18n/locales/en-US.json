@@ -841,10 +841,6 @@
         "medium": "Medium",
         "high": "High"
       },
-      "searchMode": {
-        "semantic": "Semantic search",
-        "text": "Text search"
-      },
       "showMoreImpact": "Show more impact filters",
       "showMoreTechnical": "Show more technical filters",
       "technicalTitle": "Technical filters",
@@ -2209,14 +2205,14 @@
     },
     "columns": {
       "verticals": {
-        "title": "Semantic categories ({count})",
+        "title": "Categories ({count})",
         "emptyTitle": "No category matches for “{query}”",
         "emptyDescription": "Try a different keyword or broaden your query.",
         "unknownTitle": "Other categories"
       },
       "products": {
         "title": "Uncategorised products ({count})",
-        "subtitle": "Products matched semantically without an assigned category.",
+        "subtitle": "Products matched without an assigned category.",
         "emptyTitle": "No uncategorised products for “{query}”",
         "emptyDescription": "Try another keyword or adjust your filters."
       }
@@ -2260,10 +2256,6 @@
       "title": "Product search",
       "description": "Search Nudger's responsible shopping catalogue to discover products, brands and categories.",
       "imageAlt": "Illustration of the Nudger product search experience"
-    },
-    "modes": {
-      "exact_vertical": "Exact (category)",
-      "semantic": "Semantic"
     }
   },
   "compare": {

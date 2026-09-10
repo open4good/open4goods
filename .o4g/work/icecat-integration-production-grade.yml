@@ -3,20 +3,38 @@ kind: WorkOrder
 metadata: {id: icecat-integration-production-grade, name: Icecat production integration acceptance}
 spec:
   purpose: >-
-    Verify Icecat end to end after the XML, reference index, module boundary, admin mapping and
-    live completion lots close. Shared download and Elasticsearch scaffolding already exist.
-  roadmapRef: m5-icecat-integration
+    Verify Icecat end to end through source records, O4G mappings, normalization and licensed projections rather than direct
+    Product aggregation.
+  roadmapRef: m7-product-data-reference
   state: ACCEPTED
   dependsOn:
     - icecat-reference-index-runtime
     - icecat-vertical-mapping-admin
     - icecat-completion-i18n-and-coverage
-  decisionRefs: [ADR-0007]
-  pathScope: ['services/icecat/**', 'api/**', 'docs/architecture/icecat-reference-data.md']
+    - icecat-source-assertion-adapter
+    - reference-resolution-and-surface-projections
+  decisionRefs:
+    - ADR-0007
+    - ADR-0010
+  pathScope:
+    - services/icecat/**
+    - services/data-reference/**
+    - api/**
+    - docs/architecture/icecat-reference-data.md
   acceptanceCriteria:
     - id: AC1
-      statement: A fixture traverses generated XML, versioned indexes, lookup, live mapping and product aggregation.
+      statement: >-
+        One production-shaped fixture traverses generated XML, versioned Icecat indexes, live lookup, source-head replacement,
+        approved O4G mapping, normalization, surface resolution and ProductProjection without a direct Product mutation.
     - id: AC2
-      statement: services/icecat has no api dependency; api retains only product orchestration and its HTTP adapter.
+      statement: >-
+        services/icecat has no api dependency, services/data-reference has no Icecat-specific contract member, and api retains
+        only ingestion orchestration plus authenticated HTTP/job adapters.
     - id: AC3
-      statement: Module, API and complete offline reactor tests pass with production-equivalent configuration validation.
+      statement: >-
+        A policy fixture proves the same Icecat evidence can be allowed on NUDGER_WEB and absent from B2B_API/ODBL_EXPORT,
+        including media, attribution and derived values with no leak through logs or conflicts.
+    - id: AC4
+      statement: >-
+        Module, API, Elasticsearch Testcontainers and complete offline reactor tests pass with production-equivalent mapping,
+        policy and configuration validation; failure before alias validation leaves the prior projection readable.

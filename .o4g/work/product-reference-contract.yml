@@ -1,0 +1,58 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: product-reference-contract
+  name: Source-neutral product reference contract
+spec:
+  purpose: Establish the Java and serialization contracts that every reference source and consumer shares.
+  roadmapRef: m7-product-data-reference
+  state: ACCEPTED
+  dependsOn: []
+  decisionRefs:
+    - ADR-0010
+  pathScope:
+    - pom.xml
+    - services/data-reference/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        services/data-reference is a Java 21 reactor module with no dependency on api or a provider module; api and provider
+        adapters depend on its public ports, never the reverse.
+    - id: AC2
+      statement: >-
+        Stable value objects validate normalized GTINs, source ids, source-record ids, provider field ids, canonical concept
+        ids, BCP 47 language tags, content hashes, policy references and rule versions without provider-specific members.
+    - id: AC3
+      statement: >-
+        SourceRecordKey is exactly sourceId plus sourceRecordId; GTIN attachment is a separate ordered GtinLink carrying
+        confidence, match method and evidence, so a corrected attachment does not change provider-record identity.
+    - id: AC4
+      statement: >-
+        SourceRecordHead models schema/provider versions, observed/retrieved/expires instants, FULL or PARTIAL completeness,
+        ACTIVE/DELETED/UNAVAILABLE/REJECTED state, payload hash, evidence reference, usage policy, GTIN links and assertions.
+    - id: AC5
+      statement: >-
+        SourceAssertion contains a stable assertion id, versioned SourceFieldId, ordinal and one sealed evidence payload:
+        scalar, localized text, media, classification or relation; payloads preserve provider lexical value, unit and language,
+        brand/model use scalar evidence and images use media.
+    - id: AC6
+      statement: >-
+        SourceContentType covers IDENTITY, CLASSIFICATION, ATTRIBUTE, TEXT, MEDIA, RELATION, OFFER and PRICE; usage policies
+        select source plus content type plus effective interval and deny every unspecified publication surface.
+    - id: AC7
+      statement: >-
+        Canonical values are a sealed union of localized text, boolean, integer, decimal, quantity, code, date and URI;
+        quantity amount is BigDecimal and its unit is a validated UCUM code rather than localizable free text.
+    - id: AC8
+      statement: >-
+        Typed ports exist for head persistence, replay scanning, registry lookup, normalization, resolution, corrections,
+        projection reads/writes and domain-slice composition; every batch port defines cursor, ordering and failure behavior.
+    - id: AC9
+      statement: >-
+        Jackson round-trip and golden JSON tests freeze all public discriminators, ids, nullability and collection ordering;
+        invalid chronology, duplicate coordinates, malformed ids and an unrecognized payload discriminator fail explicitly.
+    - id: AC10
+      statement: >-
+        The existing draft module is reconciled rather than layered over: SourceSnapshot no longer embeds GTIN identity in its
+        key, String-only SourceAssertion is replaced, and tests plus Javadoc describe the final contract with no compatibility
+        shim to the uncommitted draft.

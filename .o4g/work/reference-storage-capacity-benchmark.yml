@@ -1,0 +1,54 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: reference-storage-capacity-benchmark
+  name: Reference and price storage capacity gate
+spec:
+  purpose: Prove mappings, topology, throughput and cost from production-shaped data before full-catalog ingestion.
+  roadmapRef: m7-product-data-reference
+  state: ACCEPTED
+  dependsOn:
+    - product-reference-contract
+  decisionRefs:
+    - ADR-0010
+    - ADR-0011
+  pathScope:
+    - scripts/benchmark/**
+    - services/data-reference/**
+    - services/price-history/**
+    - docs/operations/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        A read-only inventory records aliases, document counts, primary/store sizes, shard counts, replicas, field counts,
+        source mix, assertions per GTIN, offers per GTIN and observed daily price-change rate; every query and timestamp is kept
+        as sanitized WorkOrder evidence and no historical marketing count is used as sizing input.
+    - id: AC2
+      statement: >-
+        The benchmark corpus is a deterministic stratified sample covering all seven verticals, source-rich products,
+        offer-heavy products, multilingual values, media and the 95th/99th percentile document sizes; its generation seed and
+        distribution are reproducible without committing provider payloads.
+    - id: AC3
+      statement: >-
+        Candidate strict mappings are measured for source heads, metadata journal, registry, one-GTIN projection, offer heads,
+        raw price changes and daily rollups with synthetic source enabled where compatible and dynamic mapping disabled.
+    - id: AC4
+      statement: >-
+        Reported capacity includes primary and one-replica totals, merge/translog allowance, snapshots, 30 percent free-disk
+        headroom, retention tiers and projected monthly growth for measured low, median and high change rates.
+    - id: AC5
+      statement: >-
+        Load tests sustain twice the measured peak ingestion rate without write rejections, heap above 75 percent or an
+        unbounded merge backlog; a complete current-head replay is projected to finish within 72 hours.
+    - id: AC6
+      statement: >-
+        Product point reads and common filtered searches meet p95 500 ms, daily price-history reads meet p95 750 ms, and
+        representative batch aggregations use projection/rollup indexes and complete within their current production window.
+    - id: AC7
+      statement: >-
+        Failure tests cover node loss with one replica, index rollover, snapshot restore, alias rollback and a stopped
+        downsampling or transform job; restore point and restore time are recorded.
+    - id: AC8
+      statement: >-
+        Final shard, replica, lifecycle, routing and bulk settings are checked into the owning modules only after all gates
+        pass; any failed gate blocks source-assertion-store and price-observation-timeseries rather than accepting an estimate.

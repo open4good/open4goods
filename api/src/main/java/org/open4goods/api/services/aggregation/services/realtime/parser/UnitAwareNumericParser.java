@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -13,6 +14,7 @@ import org.open4goods.api.services.uudc.UUDCRegistry;
 import org.open4goods.api.services.uudc.UnitDefinition;
 import org.open4goods.api.util.SpringContextHolder;
 import org.open4goods.model.attribute.ProductAttribute;
+import org.open4goods.model.attribute.SourcableAttribute;
 import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.exceptions.ParseException;
 import org.open4goods.model.helper.IdHelper;
@@ -44,7 +46,10 @@ import org.springframework.stereotype.Component;
  *   <li>Resolve the unit token via {@link UUDCRegistry}; fall back to
  *       {@code defaultUnitHint} when absent.</li>
  *   <li>Convert to the base unit.</li>
- *   <li>Collect all valid conversions and return their average as a {@link String}.</li>
+ *   <li>Elect one valid conversion by legacy trusted-source rank, then datasource
+ *       name, then value, and return it as a {@link String}. Conflicting sources are
+ *       logged rather than blended: averaging two sources produced a value neither
+ *       of them ever asserted.</li>
  * </ol>
  */
 @Component
@@ -99,7 +104,7 @@ public class UnitAwareNumericParser extends AttributeParser
         dimension = dimension.toUpperCase(Locale.ROOT);
         String defaultHint = attributeConfig.getParser().getDefaultUnitHint();
 
-        List<Double> baseValues = new ArrayList<>();
+        List<Candidate> candidates = new ArrayList<>();
         for (SourcedAttribute src : attr.getSource())
         {
             String raw = getStringValue(src);
@@ -112,7 +117,7 @@ public class UnitAwareNumericParser extends AttributeParser
                 Double baseValue = parseToBase(raw, dimension, defaultHint);
                 if (baseValue != null && Double.isFinite(baseValue) && baseValue >= 0)
                 {
-                    baseValues.add(baseValue);
+                    candidates.add(new Candidate(src.getDataSourcename(), baseValue));
                 }
             }
             catch (Exception e)
@@ -122,14 +127,48 @@ public class UnitAwareNumericParser extends AttributeParser
             }
         }
 
-        if (baseValues.isEmpty())
+        if (candidates.isEmpty())
         {
             return null;
         }
 
-        double average = baseValues.stream().mapToDouble(Double::doubleValue).average().orElse(0);
-        return formatValue(average);
+        Candidate elected = candidates.stream().min(CANDIDATE_ORDER).orElseThrow();
+
+        long distinctValues = candidates.stream().map(candidate -> candidate.baseValue).distinct().count();
+        if (distinctValues > 1)
+        {
+            LOGGER.warn("Conflicting values for attribute '{}' in dimension {}: {}; electing {} from source '{}'",
+                    attributeConfig.getKey(), dimension, candidates, elected.baseValue, elected.datasource);
+        }
+
+        return formatValue(elected.baseValue);
     }
+
+    /**
+     * One source's value already converted to the dimension's base unit.
+     *
+     * @param datasource contributing datasource name, possibly {@code null}
+     * @param baseValue  value expressed in the dimension's base unit
+     */
+    private record Candidate(String datasource, double baseValue)
+    {
+        @Override
+        public String toString()
+        {
+            return datasource + "=" + baseValue;
+        }
+    }
+
+    /**
+     * Election order between conflicting sources: the legacy trusted-source rank
+     * decides first, then the datasource name and finally the value itself, so that
+     * the same set of contributions always elects the same value whatever order the
+     * sources arrived in.
+     */
+    private static final Comparator<Candidate> CANDIDATE_ORDER = Comparator
+            .comparingInt((Candidate candidate) -> SourcableAttribute.trustedSourcePriority(candidate.datasource))
+            .thenComparing(candidate -> candidate.datasource, Comparator.nullsLast(Comparator.naturalOrder()))
+            .thenComparingDouble(candidate -> candidate.baseValue);
 
     /**
      * Single-value entry point used by tests and direct callers.

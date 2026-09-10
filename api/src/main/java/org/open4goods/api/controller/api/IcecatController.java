@@ -15,7 +15,6 @@ import org.open4goods.api.dto.IcecatCategoryAttributesDto.IcecatCategoryFeatureG
 import org.open4goods.icecat.model.IcecatCategoryFeatureDocument;
 import org.open4goods.icecat.model.IcecatCategoryFeatureGroupDocument;
 import org.open4goods.icecat.model.IcecatCategoryDocument;
-import org.open4goods.icecat.model.IcecatFeature;
 import org.open4goods.icecat.model.IcecatFeatureDocument;
 import org.open4goods.icecat.services.IcecatFeatureResolver;
 import org.open4goods.icecat.services.IcecatIndexService;
@@ -96,16 +95,18 @@ public class IcecatController {
 	@GetMapping("/features/{featuresId}/")
 	@Operation(
 			summary = "Get an Icecat feature by numeric ID",
-			description = "Returns the full IcecatFeature record for the given Icecat feature ID, "
-					+ "including its name in all available languages, measurement unit and data type.")
+			description = "Returns the indexed IcecatFeatureDocument record for the given Icecat feature ID, "
+					+ "including its name in all available languages and data type.")
 	@ApiResponses({
-			@ApiResponse(responseCode = "200", description = "IcecatFeature record found and returned"),
+			@ApiResponse(responseCode = "200", description = "Icecat feature document found and returned"),
 			@ApiResponse(responseCode = "404", description = "No feature with the given ID found in the Icecat index")
 	})
-	public IcecatFeature getFeature(
+	public ResponseEntity<IcecatFeatureDocument> getFeature(
 			@Parameter(description = "Numeric Icecat feature identifier", required = true)
 			@PathVariable Integer featuresId) {
-		return icecatService.getFeaturesById().get(featuresId);
+		return icecatIndexService.findFeature(featuresId)
+				.map(ResponseEntity::ok)
+				.orElse(ResponseEntity.notFound().build());
 	}
 
 	// -------------------------------------------------------------------------

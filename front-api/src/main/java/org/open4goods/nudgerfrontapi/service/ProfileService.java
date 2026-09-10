@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import org.open4goods.nudgerfrontapi.dto.profile.ProfileDashboardDto;
 import org.open4goods.nudgerfrontapi.dto.profile.ProfileMetricsDto;
-import org.open4goods.nudgerfrontapi.localization.DomainLanguage;
+import org.open4goods.model.localization.DomainLanguage;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;

@@ -33,10 +33,6 @@ api:
     copy-threads: 2
     copy-queue-size: 25
 
-embedding:
-  provider: djl
-  text-model-url: djl://ai.djl.huggingface.pytorch/intfloat/multilingual-e5-small
-
 # The key to provide to get ADMIN_ROLE
 adminKey: open4goods
 

@@ -1,0 +1,69 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: full-reference-shadow-reingestion
+  name: Full reference shadow reingestion and comparison
+spec:
+  purpose: Build and validate complete source-neutral indexes without changing production readers.
+  roadmapRef: m7-product-data-reference
+  state: ACCEPTED
+  dependsOn:
+    - amazon-paapi-content-quarantine
+    - aggregation-integrity-hotfixes
+    - eprel-source-assertion-adapter
+    - merchant-source-assertion-adapters
+    - icecat-integration-production-grade
+    - product-family-model-grouping
+  decisionRefs:
+    - ADR-0010
+    - ADR-0011
+  pathScope:
+    - api/**
+    - services/data-reference/**
+    - services/price-history/**
+    - services/eprel-service/**
+    - services/icecat/**
+    - services/product-repository/**
+    - scripts/migration/**
+    - docs/operations/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        Execution remeasures the current production read alias and treats every normalized GTIN document in that point-in-time
+        inventory as migration scope; the approximately 90.3 million June 2026 count is context, never a fixed target.
+    - id: AC2
+      statement: >-
+        EPREL, Icecat and merchant sources are fully reingested into empty versioned source/offer/price indexes, then resolved
+        into an empty versioned projection; no projection is built by reading legacy Product as its normal source of truth.
+    - id: AC3
+      statement: >-
+        GTINs not reproducible from current provider inputs receive at most an O4G_LEGACY_UNATTRIBUTED baseline for necessary
+        identity fields, clearly marked unknown provenance, NUDGER_WEB-only and lower priority than every valid native assertion.
+    - id: AC4
+      statement: >-
+        Legacy price points backfill only through the price WorkOrder's LEGACY_PRODUCT_MIN contract and no legacy conversion
+        invents a provider, source record, language, confidence, observed time or redistribution right.
+    - id: AC5
+      statement: >-
+        Streaming jobs use PIT/search_after, deterministic partitions, bounded bulk requests, persisted checkpoints, retry/dead
+        letter handling and resumable phases; rerunning any completed partition is idempotent.
+    - id: AC6
+      statement: >-
+        Validation reports by seven verticals and source cover GTIN count, identity/classification, all 94 attribute dispositions,
+        languages, quantities, media, groups, offers, prices, scores, document size, conflicts, policy omissions and unmapped data.
+    - id: AC7
+      statement: >-
+        Every unexplained coverage regression, dynamic mapping field, quantity without canonical unit, artificial language,
+        forbidden-surface assertion and missing GTIN blocks alias publication; accepted differences carry reviewed reason codes.
+    - id: AC8
+      statement: >-
+        Sample and aggregate comparisons include source-rich, offer-heavy, legacy-only and each vertical's boundary cases; two
+        complete resolution replays produce the same hashes and perform no provider reads.
+    - id: AC9
+      statement: >-
+        Capacity, indexing throughput, shard balance, merge pressure, heap, query p95 and projected retention remain within the
+        benchmark gates for the full data set; otherwise the shadow build is discarded without modifying reader aliases.
+    - id: AC10
+      statement: >-
+        A signed readiness artifact records exact index/data-stream versions, counts, hashes, policy/registry/rule versions,
+        checkpoints, failures and rollback targets required by the coordinated cutover WorkOrder.

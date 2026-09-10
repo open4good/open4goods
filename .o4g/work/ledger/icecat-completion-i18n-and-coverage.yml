@@ -1,0 +1,109 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: icecat-completion-i18n-and-coverage
+  name: Complete localized Icecat enrichment
+spec:
+  purpose: Finish refresh semantics, language propagation and live fields currently dropped during product enrichment.
+  roadmapRef: m5-icecat-integration
+  state: COMPLETED
+  dependsOn:
+    - icecat-live-client-boundary
+  decisionRefs:
+    - ADR-0007
+  pathScope:
+    - services/icecat/**
+    - api/src/main/java/org/open4goods/api/services/completion/**
+    - model/**
+    - api/src/test/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: DomainLanguage reaches every live call and no language literal remains in request or feature mapping.
+    - id: AC2
+      statement: Search runs without an Icecat id, refresh-by-id afterward, and timestamps follow successful aggregation only.
+    - id: AC3
+      statement: Refresh, negative-cache, rate, retry and timeout policies are configuration properties with metadata.
+    - id: AC4
+      statement: Bullets, summary, family, series, variants, lifecycle dates, reasons, logos and group structure survive mapping
+        tests.
+  evidenceRefs:
+    - 'test: mvn --offline clean install (full reactor, all modules) -> BUILD SUCCESS, EXITCODE:0'
+    - 'test: mvn -pl services/icecat,api test (icecat+api modules) -> all pass, including 12 IcecatCompletionServiceTest,
+      11 IcecatLiveClientTest, 3 IcecatLiveApiResponseTest'
+    - 'note: AC1 -- DomainLanguage now reaches every live call: IcecatCompletionConfig gained a domainLanguage field (default
+      fr, replacing the DomainLanguage.fr literal in completeSearch/processProduct) consumed by both liveClient.fetchProduct/fetchProductByIcecatId
+      and threaded down through convert()/completeGeneralInfos()/completeMultimedia(). The completeMultimedia ''fr'' resource-tag
+      literal was replaced with Multimedia.type (matching completeGallery''s use of Gallery.type as the resource tag), falling
+      back to the configured language only when Icecat supplies no type -- this also fixes a latent bug where a language code
+      was being used as a resource-type tag. grep confirmed zero remaining "fr"/"en" string literals in IcecatCompletionService.java
+      or IcecatLiveClient.java. completeFeaturesGroup already used the per-feature Name.language from the API response, not
+      a literal -- left unchanged.'
+    - 'note: AC2 -- processProduct now branches on externalIds.getIcecat(): empty -> liveClient.fetchProduct(gtin) (search),
+      present -> liveClient.fetchProductByIcecatId(id) (refresh), replacing the prior code that called the same search method
+      in both branches (a pre-existing bug). Verified via processProductSearchesByGtinWhenNoIcecatIdKnown/processProductRefreshesByIcecatIdWhenAlreadyMatched
+      (mocked IcecatLiveClient, Mockito.verify on which method was called). The success timestamp (datasourceCodes[getDatasourceName()])
+      is now set only after aggregator.onDatafragment() returns without AggregationSkipException, verified by processProductDoesNotSetSuccessTimestampWhenAggregationSkipped
+      (aggregation throws -> no success timestamp) and processProductSetsSuccessTimestampWhenAggregationSucceeds. Also fixed
+      the WO2-deferred null-GTIN NPE: processProduct now returns early with a log warning when data.getId() is null, before
+      any liveClient call (previously fetchProduct(long,...) would NPE unboxing a null Long, aborting the whole completion
+      pass for that product).'
+    - 'note: AC2/AC3 negative cache -- resolves the tension advisor flagged between ''timestamps follow successful aggregation
+      only'' and shouldProcess''s 30-day dedup: a NOT_FOUND/RESTRICTED/ERROR outcome now writes a distinct negative-cache
+      timestamp under getDatasourceName()+''.miss'' (not the success key), and shouldProcess consults both keys independently
+      against refreshIntervalDays (success) and negativeCacheIntervalDays (miss) from config. Without this, every product
+      Icecat doesn''t have would be re-queried on every single completion run once success-timestamp-only gating shipped.
+      One shared miss key and interval covers NOT_FOUND/RESTRICTED/ERROR alike (not three separate policies) -- simplest design
+      that still prevents a request storm; documented as a deliberate simplification, not a distinct per-outcome policy AC3
+      asked for.'
+    - 'note: AC3 -- IcecatCompletionConfig gained refreshIntervalDays (replaces the private REFRESH_IN_DAYS=30 constant),
+      negativeCacheIntervalDays, maxRetryAttempts, retryBackoffMs, connectTimeoutMs, readTimeoutMs, domainLanguage, alongside
+      the pre-existing politenessDelayMs (rate) and iceCatUrlPrefix -- each with a one-line javadoc stating purpose/unit/default,
+      matching this file''s own pre-existing convention (no repo-wide @ConfigurationProperties-metadata contract or JSON schema
+      was found; grepped docs/operations/configuration-and-deployment.md and scripts/verify/ for one). Did not add jakarta.validation
+      constraint annotations: services/icecat has no jakarta.validation-api dependency today (confirmed via dependency:tree),
+      and IcecatCompletionConfig''s @Valid cascade from the @Validated ApiProperties parent is not currently wired either,
+      so adding annotations without that wiring would be inert, misleading ''metadata''. IcecatLiveClient''s single-arg constructor
+      now builds RestClient with a SimpleClientHttpRequestFactory using connectTimeoutMs/readTimeoutMs (was RestClient.create(),
+      no timeout). Retry is a plain bounded loop (no spring-retry dependency added) around HttpServerErrorException/ResourceAccessException
+      (5xx, connect/read timeout) only, up to maxRetryAttempts with retryBackoffMs between attempts; 404/400/403 remain immediately
+      terminal (not retried), verified by fetchProductDoesNotRetryOn404 (single server hit) alongside fetchProductRetriesOnServerErrorThenSucceeds
+      and fetchProductReturnsErrorAfterExhaustingRetriesOnServerError (request-counting local HTTP server).'
+    - 'note: AC2 refresh-by-id endpoint -- IcecatLiveClient.fetchProductByIcecatId/buildIdUrl substitute the configured URL''s
+      trailing ''GTIN='' with ''icecat_id='' (regex, same technique buildUrl already uses for Language=), rather than restructuring
+      iceCatUrlPrefix into base+params (which would have broken application-devsec.yml:557''s existing single-string format).
+      The icecat_id parameter name is sourced from Icecat''s published JSON API manual (iceclog.com/manual-for-icecat-json-product-requests),
+      not verified against the live API itself -- no by-id fixture is available offline. buildIdUrlSubstitutesLanguageAndIcecatIdParam
+      tests URL construction only; this is a known, documented gap, not a verified-working integration.'
+    - 'note: AC4 -- convert() gained completeFeatureLogos (FeatureLogos.logoPic as an addResourceIfAbsent ''logo''-tagged
+      resource), completeReasonsToBuy (ReasonsToBuy.value joined into a single REASONS_TO_BUY attribute), completeVariants
+      (Variants.variantIdentifiers joined into a single ICECAT_VARIANTS attribute -- deliberately NOT DataFragment.alternateIds,
+      which is for alternate names of the SAME product, while a variant is a DIFFERENT sibling product), and completeGeneralInfos
+      gained END_OF_LIFE_DATE (GeneralInfo.endOfLifeDate), PRODUCT_FAMILY/PRODUCT_SERIES (GeneralInfo.productFamily/productSeries),
+      and completeSummaryAndBullets (SummaryDescription long/short, falling back to Description long/middle, with BulletPoints/GeneratedBulletPoints
+      appended as a bullet list) -- folded into DataFragment''s single addDescription slot per datasource since it holds only
+      one description per datasource (verified via DataFragment.addDescription/getDescriptionsByDatasource and FeedIndexingWorker''s
+      one-call-per-datasource usage), not four competing writes. Also fixed a real pre-existing bug the new mapping test surfaced:
+      the YEAR attribute used releaseDate.lastIndexOf(''-'')+1, which for a full ''YYYY-MM-DD'' ReleaseDate returned the day
+      (''15''), not the year -- now uses the substring before the first dash.'
+    - 'note: AC4 Variants model -- IcecatLiveApiResponse.Variants was an empty stub; fleshed out with VariantID/VariantIdentifiers/VariantDescriptions
+      per Icecat''s published JSON API manual (iceclog.com), not a captured live response (no live fixture available offline)
+      -- the mapping test (convertMapsFamilySeriesLifecycleSummaryBulletsReasonsLogosAndVariants, IcecatCompletionServiceTest)
+      and parse test (parsesVariantsWithIdentifiersAndIgnoresUnmappedInnerArrays, IcecatLiveApiResponseTest) prove the mapper
+      handles this documented shape correctly, not that it matches production Icecat data exactly -- same discipline as WO1''s
+      XSD-boolean finding. VariantFeatures/VariantImages/VariantMultimedia are left unmapped (covered by the class-level ignoreUnknown)
+      pending a real captured sample of their inner shape.'
+    - 'note: AC4 group structure -- FeaturesGroups/FeatureGroup were reviewed, not changed: Attribute (model/) has no group-id/name
+      field to populate, and Icecat''s per-feature global id (featureDetail.id, already passed as addAttribute''s categoryFeatureId/icecatFeatureId)
+      is the existing cross-reference into the bulk-loaded IcecatCategoryFeatureDocument/IcecatFeatureGroupDocument reference
+      index (icecat-legacy-model-removal, icecat-xml-contract-generation), which already carries the group structure server-side.
+      Adding a duplicate group field to DataFragment/Attribute would ripple into model/aggregation/ES-mapping/front-api beyond
+      this WorkOrder''s stated AC (mapping, not indexation) for data already resolvable via the existing id. ''Survive mapping
+      tests'' is satisfied at the raw-attribute level (data.getAttributes().getAll(), always populated regardless of a verticals/attributes/*.yml
+      declaration -- confirmed by reading AttributeRealtimeAggregationService, which stores raw attributes unconditionally
+      and only additionally produces an IndexedAttribute when a matching AttributeConfig exists); END_OF_LIFE_DATE/PRODUCT_FAMILY/PRODUCT_SERIES/REASONS_TO_BUY/ICECAT_VARIANTS
+      are new raw attribute names with no verticals/attributes/*.yml declaration of their own, so they survive mapping (asserted
+      directly in convertMapsFamilySeriesLifecycleSummaryBulletsReasonsLogosAndVariants) but are not yet indexed/searchable/displayed
+      -- that declaration is outside pathScope (verticals/**) and this WorkOrder''s mapping-layer AC4, left as a followup.'
+    - 'note: pathScope -- no widening needed this time (unlike icecat-legacy-model-removal and icecat-live-client-boundary):
+      all changes fall within services/icecat/**, api/.../services/completion/**, and api/src/test/** as declared; model/**
+      was listed in scope but not touched (DomainLanguage already exists there from icecat-live-client-boundary).'
