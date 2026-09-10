@@ -14,7 +14,6 @@ spec:
   pathScope:
     - services/icecat/**
     - api/src/main/java/org/open4goods/api/services/completion/**
-    - api/src/main/java/org/open4goods/api/config/ApiConfig.java
     - api/src/test/**
     - model/src/main/java/org/open4goods/model/localization/**
     - front-api/**
@@ -67,3 +66,18 @@ spec:
       language literals is explicitly icecat-completion-i18n-and-coverages AC1, not this WorkOrders -- completeSearch() currently
       passes a fixed DomainLanguage.fr default with a TODO pointing at that WorkOrder, preserving the exact prior behavior
       (the old hardcoded Language=fr in IcecatCompletionConfigs default URL).'
+    - 'note: 2026-09-10 -- post-close corrections. (1) pathScope listed api/.../ApiConfig.java as widened "for the live-client
+      bean," but IcecatLiveClient is constructed inline inside IcecatCompletionServices own constructor, not as a Spring
+      bean -- ApiConfig.java was never touched (git show 6101a2a0b -- ApiConfig.java is empty). Removed that pathScope entry
+      so it matches the actual diff. (2) Verified the "preserving the exact prior behavior" claim for completeSearch()s DomainLanguage.fr
+      default against every deployed config, not just the Java default: grepped all *.yml/*.properties reactor-wide for iceCatUrlPrefix/Language=;
+      only one file sets it -- api/src/main/resources/application-devsec.yml:557, ice-cat-url-prefix: ...&Language=fr&GTIN=
+      -- same fr the Java default and IcecatLiveClient.buildUrl both use. No config anywhere sets a non-fr language, so the
+      behavior-preservation claim holds for real, not just by coincidence of the two defaults matching. If a future profile
+      sets a non-fr prefix, buildUrl will now override it to match the caller-supplied DomainLanguage (fr, until icecat-completion-i18n-and-coverage
+      threads the real one through) rather than respecting the operator-configured language -- a latent behavior change with
+      no current config to trigger it. (3) fetchProduct(long gtin, ...) unboxes Product.getId() (Long); a null id now throws
+      NPE out of completeSearch into processProduct, which has no try/catch around that call, aborting the whole completion
+      pass for that product batch instead of the old code (string-concatenated a null into the URL, got a 404/error, logged
+      and continued). This is a fail-fast tradeoff, not verified safe -- not fixed here as it is outside this WorkOrders acceptance
+      criteria, but flagged for icecat-completion-i18n-and-coverage or a dedicated follow-up to address explicitly.'
