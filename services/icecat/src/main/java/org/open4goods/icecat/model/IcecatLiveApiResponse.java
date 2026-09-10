@@ -752,9 +752,30 @@ public class IcecatLiveApiResponse {
         // Getters and Setters
     }
 
+    /**
+     * Shape sourced from Icecat's published JSON API manual (VariantID/VariantIdentifiers/
+     * VariantDescriptions); not verified against a captured live response.
+     * VariantFeatures/VariantImages/VariantMultimedia are deliberately left unmapped
+     * (ignored via the class-level {@code ignoreUnknown}) pending a real sample of their shape.
+     */
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Variants {
-        // Empty class based on provided JSON structure
+        @JsonProperty("VariantID")
+        public String variantID;
+        @JsonProperty("VariantIdentifiers")
+        public List<VariantIdentifier> variantIdentifiers;
+        @JsonProperty("VariantDescriptions")
+        public String variantDescriptions;
+
+        // Getters and Setters
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class VariantIdentifier {
+        @JsonProperty("Identifier Type")
+        public String identifierType;
+        @JsonProperty("Value")
+        public String value;
 
         // Getters and Setters
     }
