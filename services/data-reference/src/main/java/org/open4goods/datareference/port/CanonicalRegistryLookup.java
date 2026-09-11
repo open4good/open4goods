@@ -1,11 +1,14 @@
 package org.open4goods.datareference.port;
 
 import java.util.Optional;
+import java.time.LocalDate;
 
 import org.open4goods.datareference.model.CanonicalAttributeId;
 import org.open4goods.datareference.model.CanonicalClassId;
 import org.open4goods.datareference.model.registry.CanonicalAttributeDefinition;
 import org.open4goods.datareference.model.registry.CanonicalClassDefinition;
+import org.open4goods.datareference.model.registry.RegistryExternalMapping;
+import org.open4goods.datareference.model.registry.RegistryVerticalView;
 import org.open4goods.datareference.model.registry.RegistryVersion;
 
 /**
@@ -39,4 +42,26 @@ public interface CanonicalRegistryLookup {
      * @return its definition, or empty when the registry does not declare it
      */
     Optional<CanonicalClassDefinition> findClass(CanonicalClassId id);
+
+    /**
+     * Resolves one reviewed provider coordinate at a specified effective date.
+     *
+     * <p>Proposed and rejected mappings are deliberately not visible through
+     * this read port. Provider taxonomies can therefore be recorded for review
+     * without becoming an authority that creates O4G concepts at runtime.
+     *
+     * @param system provider-neutral mapping system
+     * @param externalId opaque provider coordinate
+     * @param effectiveOn date for which the mapping must be effective
+     * @return reviewed canonical mapping, or empty when none is effective
+     */
+    Optional<RegistryExternalMapping> findReviewedMapping(String system, String externalId, LocalDate effectiveOn);
+
+    /**
+     * Returns an editorial vertical view without treating its id as a class id.
+     *
+     * @param verticalId stable editorial vertical identifier
+     * @return explicitly included O4G classes, or empty when the view is unknown
+     */
+    Optional<RegistryVerticalView> findVerticalView(String verticalId);
 }

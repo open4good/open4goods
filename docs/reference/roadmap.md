@@ -19,7 +19,7 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 | m4-product-page-quality | 0 | 0 | 0 | 0 | 1 |
 | m5-icecat-integration | 0 | 0 | 0 | 0 | 5 |
 | m6-xwiki-retirement | 2 | 0 | 2 | 0 | 2 |
-| m7-product-data-reference | 19 | 3 | 16 | 0 | 3 |
+| m7-product-data-reference | 19 | 2 | 16 | 1 | 3 |
 | m6-content-outreach | 0 | 0 | 0 | 0 | 1 |
 
 ## m0-governance
@@ -76,7 +76,7 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 | WorkOrder | Contract state | Availability | Dependencies | Blockers | Purpose |
 |---|---|---|---|---|---|
 | [amazon-paapi-content-quarantine](../../.o4g/work/amazon-paapi-content-quarantine.yml) | ACCEPTED | READY | -- | -- | Stop PA-API enrichment and remove persisted licensed content without affecting independent Amazon merchant feeds. |
-| [canonical-concept-registry](../../.o4g/work/canonical-concept-registry.yml) | ACCEPTED | READY | product-reference-contract | -- | Replace supplier taxonomies as internal authority with a complete independently authored O4G registry. |
+| [canonical-concept-registry](../../.o4g/work/canonical-concept-registry.yml) | IN_PROGRESS | PLANNED | product-reference-contract | -- | Replace supplier taxonomies as internal authority with a complete independently authored O4G registry. |
 | [reference-storage-capacity-benchmark](../../.o4g/work/reference-storage-capacity-benchmark.yml) | ACCEPTED | READY | product-reference-contract | -- | Prove mappings, topology, throughput and cost from production-shaped data before full-catalog ingestion. |
 | [icecat-vertical-mapping-admin](../../.o4g/work/icecat-vertical-mapping-admin.yml) | ACCEPTED | BLOCKED | icecat-reference-index-runtime, canonical-concept-registry | canonical-concept-registry | Replace transient vertical assignment with reviewed Icecat-to-O4G mappings whose authority remains in Git. |
 | [price-observation-timeseries](../../.o4g/work/price-observation-timeseries.yml) | ACCEPTED | BLOCKED | product-reference-contract, reference-storage-capacity-benchmark | reference-storage-capacity-benchmark | Preserve provider-level price changes and presence without duplicating unchanged polls in Product documents. |

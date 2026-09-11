@@ -1,0 +1,97 @@
+{
+  "schemaVersion": "https://open4goods.org/schema/o4g-registry-1.json",
+  "registryVersion": 1,
+  "classes": [
+    {
+      "id": "o4g:class:television",
+      "lifecycle": "ACTIVE",
+      "labels": {"en": "Television", "fr": "Téléviseur"},
+      "parent": null,
+      "attributes": ["o4g:attribute:width", "o4g:attribute:color"],
+      "mappings": [{"system": "icecat", "externalId": "category:1584", "status": "REVIEWED", "effectiveFrom": "2026-09-11", "effectiveTo": null}]
+    },
+    {
+      "id": "o4g:class:dishwasher",
+      "lifecycle": "ACTIVE",
+      "labels": {"en": "Dishwasher", "fr": "Lave-vaisselle"},
+      "parent": null,
+      "attributes": ["o4g:attribute:width", "o4g:attribute:color"],
+      "mappings": []
+    },
+    {
+      "id": "o4g:class:air-conditioner",
+      "lifecycle": "ACTIVE",
+      "labels": {"en": "Air conditioner", "fr": "Climatiseur"},
+      "parent": null,
+      "attributes": ["o4g:attribute:width", "o4g:attribute:color"],
+      "mappings": []
+    },
+    {
+      "id": "o4g:class:oven",
+      "lifecycle": "ACTIVE",
+      "labels": {"en": "Oven", "fr": "Four"},
+      "parent": null,
+      "attributes": ["o4g:attribute:width", "o4g:attribute:color"],
+      "mappings": []
+    },
+    {
+      "id": "o4g:class:refrigerator",
+      "lifecycle": "ACTIVE",
+      "labels": {"en": "Refrigerator", "fr": "Réfrigérateur"},
+      "parent": null,
+      "attributes": ["o4g:attribute:width", "o4g:attribute:color"],
+      "mappings": []
+    },
+    {
+      "id": "o4g:class:smartphone",
+      "lifecycle": "ACTIVE",
+      "labels": {"en": "Smartphone", "fr": "Smartphone"},
+      "parent": null,
+      "attributes": ["o4g:attribute:width", "o4g:attribute:color"],
+      "mappings": []
+    },
+    {
+      "id": "o4g:class:washing-machine",
+      "lifecycle": "ACTIVE",
+      "labels": {"en": "Washing machine", "fr": "Lave-linge"},
+      "parent": null,
+      "attributes": ["o4g:attribute:width", "o4g:attribute:color"],
+      "mappings": []
+    }
+  ],
+  "attributes": [
+    {
+      "id": "o4g:attribute:width",
+      "lifecycle": "ACTIVE",
+      "labels": {"en": "Width", "fr": "Largeur"},
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "LENGTH",
+      "canonicalUnit": "cm",
+      "constraints": {"minimum": 0, "maximum": 1000, "allowedCodes": []},
+      "mappings": [{"system": "icecat", "externalId": "feature:1464", "status": "REVIEWED", "effectiveFrom": "2026-09-11", "effectiveTo": null}],
+      "resolutionPolicy": "o4g:resolution-policy:product-dimensions@1"
+    },
+    {
+      "id": "o4g:attribute:color",
+      "lifecycle": "ACTIVE",
+      "labels": {"en": "Color", "fr": "Couleur"},
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "MULTIPLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {"minimum": null, "maximum": null, "allowedCodes": []},
+      "mappings": [{"system": "wikidata", "externalId": "P462", "status": "REVIEWED", "effectiveFrom": "2026-09-11", "effectiveTo": null}],
+      "resolutionPolicy": "o4g:resolution-policy:product-appearance@1"
+    }
+  ],
+  "verticalViews": [
+    {"verticalId": "air-conditioner", "includedClasses": ["o4g:class:air-conditioner"]},
+    {"verticalId": "dishwasher", "includedClasses": ["o4g:class:dishwasher"]},
+    {"verticalId": "oven", "includedClasses": ["o4g:class:oven"]},
+    {"verticalId": "refrigerator", "includedClasses": ["o4g:class:refrigerator"]},
+    {"verticalId": "smartphones", "includedClasses": ["o4g:class:smartphone"]},
+    {"verticalId": "tv", "includedClasses": ["o4g:class:television"]},
+    {"verticalId": "washing-machine", "includedClasses": ["o4g:class:washing-machine"]}
+  ]
+}

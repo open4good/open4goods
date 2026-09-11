@@ -6,7 +6,7 @@ metadata:
 spec:
   purpose: Replace supplier taxonomies as internal authority with a complete independently authored O4G registry.
   roadmapRef: m7-product-data-reference
-  state: ACCEPTED
+  state: IN_PROGRESS
   dependsOn:
     - product-reference-contract
   decisionRefs:
@@ -18,34 +18,28 @@ spec:
     - api/src/test/**
   acceptanceCriteria:
     - id: AC1
-      statement: >-
-        Git resources are the sole authority for o4g:class and o4g:attribute definitions; a JSON Schema validates ids,
-        versions, lifecycle, translations, hierarchy, type, cardinality, constraints, mappings and resolution-policy reference.
+      statement: Git resources are the sole authority for o4g:class and o4g:attribute definitions; a JSON Schema validates
+        ids, versions, lifecycle, translations, hierarchy, type, cardinality, constraints, mappings and resolution-policy
+        reference.
     - id: AC2
-      statement: >-
-        The seven active verticals are editorial views over O4G classes; vertical ids never serve as class ids and every view
-        lists its included classes explicitly.
+      statement: The seven active verticals are editorial views over O4G classes; vertical ids never serve as class ids and
+        every view lists its included classes explicitly.
     - id: AC3
-      statement: >-
-        A generated migration manifest accounts for all 94 current attribute configuration files as MIGRATED, MERGED or
-        RETIRED with rationale and replacement; no configured attribute disappears silently.
+      statement: A generated migration manifest accounts for all 94 current attribute configuration files as MIGRATED, MERGED
+        or RETIRED with rationale and replacement; no configured attribute disappears silently.
     - id: AC4
-      statement: >-
-        Each quantity attribute declares exactly one dimension and canonical UCUM unit; non-quantity attributes cannot declare
-        a unit and every attribute declares value type, cardinality, English/French label and validation bounds where applicable.
+      statement: Each quantity attribute declares exactly one dimension and canonical UCUM unit; non-quantity attributes cannot
+        declare a unit and every attribute declares value type, cardinality, English/French label and validation bounds where
+        applicable.
     - id: AC5
-      statement: >-
-        Icecat, EPREL, ETIM, Wikidata, GS1 and merchant fields are versioned external mappings with reviewed status and effective
-        interval; provider labels or hierarchies cannot create O4G ids or definitions automatically.
+      statement: Icecat, EPREL, ETIM, Wikidata, GS1 and merchant fields are versioned external mappings with reviewed status
+        and effective interval; provider labels or hierarchies cannot create O4G ids or definitions automatically.
     - id: AC6
-      statement: >-
-        Validation rejects duplicate ids, cycles, dangling mappings, dimension/unit mismatches, overlapping active mappings,
-        missing translations and a breaking semantic change without a registry version increment.
+      statement: Validation rejects duplicate ids, cycles, dangling mappings, dimension/unit mismatches, overlapping active
+        mappings, missing translations and a breaking semantic change without a registry version increment.
     - id: AC7
-      statement: >-
-        An idempotent importer builds a strict versioned runtime index, verifies count/hash/version and switches read aliases
-        atomically; runtime administration is read-only and cannot mutate definitions outside Git review.
+      statement: An idempotent importer builds a strict versioned runtime index, verifies count/hash/version and switches
+        read aliases atomically; runtime administration is read-only and cannot mutate definitions outside Git review.
     - id: AC8
-      statement: >-
-        Contract tests load the complete registry offline and prove every migrated vertical/attribute and external mapping is
-        addressable by stable id; a machine-readable coverage report is produced on every registry change.
+      statement: Contract tests load the complete registry offline and prove every migrated vertical/attribute and external
+        mapping is addressable by stable id; a machine-readable coverage report is produced on every registry change.
