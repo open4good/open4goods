@@ -12,7 +12,7 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 
 | Milestone | Open | READY | BLOCKED | IN_PROGRESS | Closed |
 |---|---|---|---|---|---|
-| m0-governance | 0 | 0 | 0 | 0 | 1 |
+| m0-governance | 0 | 0 | 0 | 0 | 2 |
 | m1-config-autonomy | 7 | 0 | 5 | 0 | 0 |
 | m2-corpus-cleanup | 0 | 0 | 0 | 0 | 1 |
 | m3-dead-surface-removal | 1 | 0 | 1 | 0 | 1 |
@@ -25,7 +25,7 @@ Availability is derived: only an ACCEPTED order whose dependencies are all COMPL
 ## m0-governance
 
 
-*1 closed, see [ledger](../../.o4g/work/ledger).*
+*2 closed, see [ledger](../../.o4g/work/ledger).*
 
 ## m1-config-autonomy
 
