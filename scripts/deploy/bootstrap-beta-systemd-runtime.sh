@@ -47,7 +47,7 @@ gc_options() {
 
 write_java_environment sbadmin \
   "-Xms512m -Xmx512m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:MetaspaceSize=256m -XX:+ExitOnOutOfMemoryError $(gc_options sbadmin)" \
-  '-Dspring.config.location=file:/opt/open4goods/config/beta/admin/application-active.yml -Dspring.profiles.active=nudger,beta'
+  '-Dspring.config.location=classpath:/application.yml,file:/opt/open4goods/config/beta/admin/application-active.yml -Dspring.profiles.active=nudger,beta'
 write_java_environment api \
   "-Xms8g -Xmx8g -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:G1HeapRegionSize=32m -XX:MetaspaceSize=256m -XX:+AlwaysPreTouch -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/open4goods -XX:+ExitOnOutOfMemoryError $(gc_options api)" \
   '-Dspring.config.location=classpath:/application.yml,file:/opt/open4goods/config/beta/api/application-active.yml -Dspring.profiles.active=nudger,beta'
