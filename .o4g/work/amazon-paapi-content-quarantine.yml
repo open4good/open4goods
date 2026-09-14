@@ -6,7 +6,7 @@ metadata:
 spec:
   purpose: Stop PA-API enrichment and remove persisted licensed content without affecting independent Amazon merchant feeds.
   roadmapRef: m7-product-data-reference
-  state: ACCEPTED
+  state: BLOCKED
   executionPhase: DEVELOPMENT
   priority: 80
   dependsOn:
@@ -61,5 +61,18 @@ spec:
       2026-09-11, and has no Amazon or PA-API scheduled systemd unit. The local PA-API service now quarantines all configured
       calls and the named amazon-paapi source policy denies all projection surfaces.'
     - '2026-09-14 owner ruling: exclude the complete ambiguous amazon.fr legacy slice during the controlled rebuilt-dataset
-      import. Do not infer PA-API provenance or selectively erase ambiguous historical records; production APPLY remains
-      owner-gated under ADR-0013.'
+      import. Do not infer PA-API provenance or selectively erase ambiguous historical records; production APPLY remains owner-gated
+      under ADR-0013.'
+    - '2026-09-14 beta: disposable exact-index fixture verified INVENTORY and APPLY. It classified one each proven amazon-paapi,
+      ambiguous amazon.fr and independent merchant record; APPLY copied only the merchant record and retained only the approved
+      ASIN identity. All three temporary beta indexes were deleted.'
+    - blocker:the 54-million-document beta legacy products-moustik index stores datasourceNames without indexing or doc values,
+      so exact PA-API/ambiguous counts require the bounded PIT scan during the capacity-gated rebuilt-dataset replay. No real
+      legacy document, cache object, alias or source index was changed.
+  externalBlockers:
+    - '2026-09-14 beta: disposable exact-index fixture verified INVENTORY and APPLY. It classified one each proven amazon-paapi,
+      ambiguous amazon.fr and independent merchant record; APPLY copied only the merchant record and retained only the approved
+      ASIN identity. All three temporary beta indexes were deleted.'
+    - blocker:the 54-million-document beta legacy products-moustik index stores datasourceNames without indexing or doc values,
+      so exact PA-API/ambiguous counts require the bounded PIT scan during the capacity-gated rebuilt-dataset replay. No real
+      legacy document, cache object, alias or source index was changed.
