@@ -13,13 +13,13 @@ Default selection is DEVELOPMENT, ordered by priority after resuming active work
 | Milestone | Open | READY | BLOCKED | IN_PROGRESS | AWAITING_OWNER_ORDER | Closed |
 |---|---|---|---|---|---|---|
 | m0-governance | 1 | 1 | 0 | 0 | 0 | 3 |
-| m1-config-autonomy | 4 | 1 | 3 | 0 | 0 | 3 |
+| m1-config-autonomy | 4 | 0 | 4 | 0 | 0 | 3 |
 | m2-corpus-cleanup | 0 | 0 | 0 | 0 | 0 | 1 |
 | m3-dead-surface-removal | 1 | 0 | 1 | 0 | 0 | 1 |
 | m4-product-page-quality | 0 | 0 | 0 | 0 | 0 | 1 |
 | m5-icecat-integration | 0 | 0 | 0 | 0 | 0 | 5 |
 | m6-xwiki-retirement | 2 | 0 | 2 | 0 | 0 | 2 |
-| m7-product-data-reference | 19 | 2 | 17 | 0 | 0 | 8 |
+| m7-product-data-reference | 19 | 1 | 17 | 1 | 0 | 8 |
 | m8-production-promotion | 3 | 0 | 3 | 0 | 0 | 0 |
 | m9-post-production-retirement | 4 | 0 | 4 | 0 | 0 | 0 |
 | m6-content-outreach | 0 | 0 | 0 | 0 | 0 | 1 |
@@ -36,7 +36,7 @@ Default selection is DEVELOPMENT, ordered by priority after resuming active work
 
 | WorkOrder | Phase / priority | Contract state | Availability | Dependencies | Blockers | Purpose |
 |---|---|---|---|---|---|---|
-| [beta-credential-isolation](../../.o4g/work/beta-credential-isolation.yml) | DEVELOPMENT / 30 | ACCEPTED | READY | config-contract-and-environments, beta-environment-preflight, systemd-service-runtime | -- | Remove beta dependence on shared leaked internal credentials without modifying production. |
+| [beta-credential-isolation](../../.o4g/work/beta-credential-isolation.yml) | DEVELOPMENT / 30 | BLOCKED | BLOCKED | config-contract-and-environments, beta-environment-preflight, systemd-service-runtime | blocker:AC3 service-monitor health remains DOWN because beta workspace free space is below the configured 100GB disk-health threshold (91GB observed); front-api is otherwise active after the stale legacy 8086 listener was stopped. A restorable cleanup or capacity owner action is required before this health gate can pass. | Remove beta dependence on shared leaked internal credentials without modifying production. |
 | [config-beta-cutover](../../.o4g/work/config-beta-cutover.yml) | DEVELOPMENT / 50 | ACCEPTED | BLOCKED | systemd-service-runtime, beta-credential-isolation | beta-credential-isolation | Prove the new configuration and service runtime on the real beta host before production changes. |
 | [config-beta-independence](../../.o4g/work/config-beta-independence.yml) | DEVELOPMENT / 60 | ACCEPTED | BLOCKED | config-beta-cutover | config-beta-cutover | Prove beta build, deployment and recovery no longer need open4goods-config while production retains its current runtime. |
 | [beta-campaign-readiness](../../.o4g/work/beta-campaign-readiness.yml) | DEVELOPMENT / 400 | ACCEPTED | BLOCKED | reference-beta-cutover, product-reference-legacy-retirement, xwiki-decommission, dead-code-removal-lot-1, config-beta-independence, beta-first-workorder-sequencing | reference-beta-cutover, product-reference-legacy-retirement, xwiki-decommission, dead-code-removal-lot-1, config-beta-independence | Close development only when the cleaned beta release and dated dataset are a concrete, reproducible production candidate. |
@@ -81,7 +81,7 @@ Default selection is DEVELOPMENT, ordered by priority after resuming active work
 |---|---|---|---|---|---|---|
 | [amazon-paapi-content-quarantine](../../.o4g/work/amazon-paapi-content-quarantine.yml) | DEVELOPMENT / 80 | ACCEPTED | READY | reference-backup-input-contract | -- | Stop PA-API enrichment and remove persisted licensed content without affecting independent Amazon merchant feeds. |
 | [icecat-vertical-mapping-admin](../../.o4g/work/icecat-vertical-mapping-admin.yml) | DEVELOPMENT / 100 | BLOCKED | BLOCKED | icecat-reference-index-runtime, canonical-concept-registry, beta-environment-preflight | owner-action: approve the automated O4G class discovery and creation design after its bounded beta study. Until then, the current registry and normalizer retain reviewed mappings only. | Replace transient vertical assignment with reviewed Icecat-to-O4G mappings whose authority remains in Git. |
-| [reference-capacity-feasibility](../../.o4g/work/reference-capacity-feasibility.yml) | DEVELOPMENT / 75 | ACCEPTED | READY | beta-environment-preflight, reference-backup-input-contract, reference-domain-slice-contracts | -- | Establish bounded development mappings and capacity inputs without making a full-volume benchmark prerequisite to implementation. |
+| [reference-capacity-feasibility](../../.o4g/work/reference-capacity-feasibility.yml) | DEVELOPMENT / 75 | IN_PROGRESS | IN_PROGRESS | beta-environment-preflight, reference-backup-input-contract, reference-domain-slice-contracts | -- | Establish bounded development mappings and capacity inputs without making a full-volume benchmark prerequisite to implementation. |
 | [price-observation-timeseries](../../.o4g/work/price-observation-timeseries.yml) | DEVELOPMENT / 120 | ACCEPTED | BLOCKED | product-reference-contract, reference-capacity-feasibility | reference-capacity-feasibility | Preserve provider-level price changes and presence without duplicating unchanged polls in Product documents. |
 | [source-assertion-store](../../.o4g/work/source-assertion-store.yml) | DEVELOPMENT / 110 | ACCEPTED | BLOCKED | product-reference-contract, reference-capacity-feasibility | reference-capacity-feasibility | Persist replaceable source heads and a compact transition journal for deterministic current-state replay. |
 | [b2b-price-history-facet](../../.o4g/work/b2b-price-history-facet.yml) | DEVELOPMENT / 195 | ACCEPTED | BLOCKED | price-observation-timeseries, reference-source-policy-review | price-observation-timeseries | Serve licensed provider price history through the existing metered B2B contract. |

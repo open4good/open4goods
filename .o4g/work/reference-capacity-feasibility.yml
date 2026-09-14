@@ -7,7 +7,7 @@ spec:
   purpose: Establish bounded development mappings and capacity inputs without making a full-volume benchmark prerequisite
     to implementation.
   roadmapRef: m7-product-data-reference
-  state: ACCEPTED
+  state: IN_PROGRESS
   executionPhase: DEVELOPMENT
   priority: 75
   dependsOn:
@@ -47,8 +47,7 @@ spec:
       documents, 91,884,840,935 store bytes, 90 started primary shards and 9 unassigned replica shards. The 2,000-record metadata-only
       archive sample has 1,442 classified and 558 unclassified records; offer distributions, document-size tails, seven-vertical
       values, and ingestion/change rates remain explicitly unknown pending replay.'
-    - '2026-09-14 beta: a dedicated o4g_capacity_feasibility_beta identity was granted metadata monitoring plus create,
-      write and delete only on o4g-capacity-feasibility-*. The strict probe completed on Elasticsearch 9.4.3 and removed
-      its temporary index. Elasticsearch derives time-series ids from dimensions and timestamp, so a same-series timestamp
-      transition is rejected; the price persistence contract must allocate distinct timestamps before writing. Late events
-      were accepted.'
+    - '2026-09-14 beta: a dedicated o4g_capacity_feasibility_beta identity was granted metadata monitoring plus create, write
+      and delete only on o4g-capacity-feasibility-*. The strict probe completed on Elasticsearch 9.4.3 and removed its temporary
+      index. Elasticsearch derives time-series ids from dimensions and timestamp, so a same-series timestamp transition is
+      rejected; the price persistence contract must allocate distinct timestamps before writing. Late events were accepted.'
