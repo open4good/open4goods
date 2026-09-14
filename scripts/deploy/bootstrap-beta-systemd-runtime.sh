@@ -35,9 +35,16 @@ install -d -o root -g open4goods -m 0750 /etc/open4goods
 
 write_java_environment() {
   local service="$1" jvm_options="$2" spring_options="$3"
-  printf 'O4G_JAVA_OPTS="%s %s"\n' "$jvm_options" "$spring_options" > "/etc/open4goods/${service}.env"
-  chown root:open4goods "/etc/open4goods/${service}.env"
-  chmod 0600 "/etc/open4goods/${service}.env"
+  local environment_file="/etc/open4goods/${service}.env"
+  local temporary_file
+  temporary_file="$(mktemp "${environment_file}.XXXXXX")"
+  if [[ -f "$environment_file" ]]; then
+    grep -v '^O4G_JAVA_OPTS=' "$environment_file" > "$temporary_file" || true
+  fi
+  printf 'O4G_JAVA_OPTS="%s %s"\n' "$jvm_options" "$spring_options" >> "$temporary_file"
+  chown root:open4goods "$temporary_file"
+  chmod 0600 "$temporary_file"
+  mv -f "$temporary_file" "$environment_file"
 }
 
 gc_options() {
