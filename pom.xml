@@ -32,7 +32,7 @@
                      jar. That crashes SimpleElasticsearchRepository construction with a
                      NoClassDefFoundError at boot. Pin the version elasticsearch-java itself asks
                      for; see elasticsearch-java-9.4.5.pom. -->
-                <opentelemetry-semconv.version>1.41.1</opentelemetry-semconv.version>
+                <opentelemetry-semconv.version>1.44.0</opentelemetry-semconv.version>
                 <maven-compiler-plugin.version>3.16.0</maven-compiler-plugin.version>
                 <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
                 <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
@@ -47,8 +47,8 @@
                 <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
                 <maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>
                 <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
-                <versions-maven-plugin.version>2.21.0</versions-maven-plugin.version>
-                <taglist-maven-plugin.version>3.2.2</taglist-maven-plugin.version>
+                <versions-maven-plugin.version>2.22.0</versions-maven-plugin.version>
+                <taglist-maven-plugin.version>3.2.3</taglist-maven-plugin.version>
 
                 <processDependencyManagement>true</processDependencyManagement>
                 <processPluginDependenciesInPluginManagement>true</processPluginDependenciesInPluginManagement>
