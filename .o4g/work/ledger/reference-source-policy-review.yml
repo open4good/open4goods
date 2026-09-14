@@ -1,0 +1,43 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: reference-source-policy-review
+  name: Source policy inventory and reviewed publication matrix
+spec:
+  purpose: Make source usage decisions explicit and versioned before provider evidence is published.
+  roadmapRef: m7-product-data-reference
+  state: COMPLETED
+  executionPhase: DEVELOPMENT
+  priority: 85
+  dependsOn:
+    - reference-backup-input-contract
+  decisionRefs:
+    - ADR-0013
+  pathScope:
+    - services/data-reference/**
+    - docs/architecture/**
+    - docs/operations/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: Inventory actual EPREL, Icecat, merchant, legacy and PA-API content types with evidence references, effective
+        periods, retention, attribution, media caching and allowed NUDGER_WEB/B2B_API/ODBL_EXPORT surfaces.
+    - id: AC2
+      statement: Store versioned policy records and validation fixtures in data-reference; absent or unreviewed permissions
+        deny publication. A provider's accessible API or a legacy public page is not proof of redistribution rights.
+    - id: AC3
+      statement: Create one owner review packet for missing rights and ambiguous historical evidence, with source/content/surface,
+        supporting references and requested decision; record remaining decisions without fabricating approval.
+    - id: AC4
+      statement: Close this implementation order with deny-by-default behavior and the decision inventory; beta release readiness
+        separately requires approval for the data essential to its accepted coverage. Optional denied content is a measured
+        omission, not an implicit fallback.
+    - id: AC5
+      statement: Policy tests cover boundaries of effective periods, expiration, revocation, media attribution and derived-field
+        exclusion on all three surfaces.
+  implementationPlan:
+    - This order implements the policy registry and review packet; it does not grant a license. Preserve existing reviewed
+      decisions with their evidence.
+  evidenceRefs:
+    - '2026-09-12: SourceUsagePolicyRegistry loads the Git-versioned deny inventory and rejects absent, source-mismatched,
+      unreviewed, expired, revoked, media-cache and derived-field publication. SourceUsagePolicyRegistryTest and SourceUsagePolicyTest
+      pass under mvn --offline -pl services/data-reference test (107 tests); ./scripts/lint.sh passes.'

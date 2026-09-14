@@ -12,9 +12,10 @@ jobs:
   deploy:
     name: Beta Test, Build, and Publish
     runs-on: ubuntu-latest
+    environment: beta
     concurrency:
       group: deploy-beta
-      cancel-in-progress: true
+      cancel-in-progress: false
 
     steps:
       ############################################
@@ -22,6 +23,18 @@ jobs:
       ############################################
       - name: Checkout Repository
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Verify beta target identity
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
+        env:
+          O4G_EXPECTED_TARGET: beta
+          O4G_EXPECTED_CLUSTER_FINGERPRINT: ${{ vars.O4G_TARGET_CLUSTER_FINGERPRINT }}
+        with:
+          host: ${{ secrets.BETA_DEPLOY_HOST }}
+          username: ${{ secrets.BETA_DEPLOY_USER }}
+          key: ${{ secrets.BETA_DEPLOY_SSH_PRIVATE_KEY }}
+          envs: O4G_EXPECTED_TARGET,O4G_EXPECTED_CLUSTER_FINGERPRINT
+          script_path: scripts/verify/deployment-target-guard.sh
 
       ############################################
       # 2. Set up JDK 21 (avec cache Maven intégré)
@@ -90,11 +103,11 @@ jobs:
       - name: 🚚 Deploy JARs to Qualification Server (Consolidated)
         uses: easingthemes/ssh-deploy@2cc5b27bf3029d0455dd5e09fe02633904031447 # main
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets.BETA_DEPLOY_SSH_PRIVATE_KEY }}
           ARGS: "-rltgoDzvO"
           SOURCE: "deploy-jars/"
-          REMOTE_HOST: ${{ secrets.REMOTE_BETA_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
+          REMOTE_HOST: ${{ secrets.BETA_DEPLOY_HOST }}
+          REMOTE_USER: ${{ secrets.BETA_DEPLOY_USER }}
           TARGET: "/opt/open4goods/latest/"
 
       ############################################
@@ -118,17 +131,17 @@ jobs:
         run: pnpm build
         working-directory: b2b-frontend
         env:
-          NUXT_PUBLIC_BACKEND_BASE_URL: https://beta.api.product-data-api.com
-          NUXT_BACKEND_PROXY_TARGET: http://localhost:8087
+          NUXT_PUBLIC_BACKEND_BASE_URL: ${{ vars.B2B_FRONTEND_PUBLIC_BACKEND_BASE_URL }}
+          NUXT_BACKEND_PROXY_TARGET: ${{ vars.B2B_FRONTEND_BACKEND_PROXY_TARGET }}
 
       - name: Deploy b2b-frontend output to beta server
         uses: easingthemes/ssh-deploy@2cc5b27bf3029d0455dd5e09fe02633904031447 # main
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets.BETA_DEPLOY_SSH_PRIVATE_KEY }}
           ARGS: "-rltgoDzvO --delete"
           SOURCE: "b2b-frontend/.output"
-          REMOTE_HOST: ${{ secrets.REMOTE_BETA_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
+          REMOTE_HOST: ${{ secrets.BETA_DEPLOY_HOST }}
+          REMOTE_USER: ${{ secrets.BETA_DEPLOY_USER }}
           TARGET: "/opt/open4goods/latest/b2b-frontend"
 
       ############################################
@@ -137,9 +150,9 @@ jobs:
       - name: Publish b2b-frontend
         uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
-          host: ${{ secrets.REMOTE_BETA_HOST }}
-          username: ${{ secrets.REMOTE_BETA_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.BETA_DEPLOY_HOST }}
+          username: ${{ secrets.BETA_DEPLOY_USER }}
+          key: ${{ secrets.BETA_DEPLOY_SSH_PRIVATE_KEY }}
           script: sh /opt/open4goods/bin/publish-b2b-frontend.sh beta
 
       ############################################
@@ -148,7 +161,7 @@ jobs:
       - name: Publish Applications
         uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
-          host: ${{ secrets.REMOTE_BETA_HOST }}
-          username: ${{ secrets.REMOTE_BETA_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.BETA_DEPLOY_HOST }}
+          username: ${{ secrets.BETA_DEPLOY_USER }}
+          key: ${{ secrets.BETA_DEPLOY_SSH_PRIVATE_KEY }}
           script: sh /opt/open4goods/bin/publish-jars.sh beta

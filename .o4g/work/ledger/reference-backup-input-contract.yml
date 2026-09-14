@@ -1,0 +1,61 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: reference-backup-input-contract
+  name: Pinned product backup and conversion contract
+spec:
+  purpose: Freeze the real gzip JSONL input contract and field conversion decisions before building the migration importer.
+  roadmapRef: m7-product-data-reference
+  state: COMPLETED
+  executionPhase: DEVELOPMENT
+  priority: 70
+  dependsOn:
+    - beta-environment-preflight
+  decisionRefs:
+    - ADR-0013
+  pathScope:
+    - scripts/migration/**
+    - api/src/main/java/org/open4goods/api/services/backup/**
+    - api/src/test/java/org/open4goods/api/services/backup/**
+    - services/data-reference/**
+    - docs/operations/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: Read PRODUCT_BACKUP_SOURCE_URI through private configuration; obtain a coherent immutable set of only the
+        manifest-listed files, with manifest digest, per-file SHA-256, byte sizes, line counts and completion time. Reject
+        missing, truncated, changed or mixed-generation files.
+    - id: AC2
+      statement: 'Protect against the current backup publisher replacing numbered files before replacing the manifest: pause
+        only the beta publisher during pinning or use a validated immutable server-side copy, then resume it. Do not assume
+        matching directory timestamps establish consistency.'
+    - id: AC3
+      statement: Inventory sampled JSON field shapes, GTIN validity, duplicate GTINs, source attribution, seven-vertical and
+        unclassified coverage, media references and legacy price shape. Publish counts and field names only; raw records stay
+        outside Git.
+    - id: AC4
+      statement: A versioned machine mapping classifies each legacy field as native-evidenced conversion, unattributed identity,
+        legacy minimum price, recomputed, quarantine or drop; all 94 legacy attribute dispositions reference the registry
+        manifest instead of duplicating it.
+    - id: AC5
+      statement: Specify no invented provider ids, observations, languages, offer identity or rights. Unknown source identity
+        is limited to necessary NUDGER_WEB identity; uncertain Amazon content is quarantined. Derived scores and availability
+        are recomputed from eligible inputs.
+    - id: AC6
+      statement: Define snapshot scope from valid distinct GTINs in the pinned archive, account for rejects and duplicates,
+        and record that production accounts, billing, keys, corrections outside Product and media bytes need separate preservation/transfer
+        checks.
+  implementationPlan:
+    - The current manifest has completion time, total counts and filenames but no schema version or checksums. Add an import-side
+      manifest; keep legacy export compatibility.
+    - Use a bounded sanitized sample first. Full checksums and counts run on beta with measured I/O limits; never download
+      the full archive into Git.
+  evidenceRefs:
+    - 'note: 2026-09-12 beta: validated the private immutable server-side archive copy with the v1 pin validator; its manifest-listed
+      four gzip files total 27,425,675,427 bytes and 51,310,975 decoded JSONL lines, exactly matching the legacy exported
+      count. The import-side manifest records its legacy-manifest and per-file SHA-256 digests, completion time and safe sampled
+      field/count inventory only.'
+    - 'note: 2026-09-12 beta: synchronized the hardened standalone validator and reprocessed the existing private import-side
+      manifest; its SHA-256 remained 743cdf698d06c4caee7941289158d4308e3e732f29f7ef412c8b0f480ab31619. The source is the validated
+      immutable beta copy, so no active publisher was paused or resumed.'
+    - 'note: 2026-09-12 local: six pinning tests and the data-reference reactor test suite (98 tests) pass; registry migration
+      validation accounts for all 94 legacy attribute configurations.'

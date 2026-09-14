@@ -3,9 +3,11 @@ kind: WorkOrder
 metadata: {id: config-prod-cutover, name: Production configuration and systemd cutover}
 spec:
   purpose: Roll the beta-proven runtime into production and invalidate every credential retained by the legacy repository.
-  roadmapRef: m1-config-autonomy
+  roadmapRef: m8-production-promotion
   state: ACCEPTED
-  dependsOn: [config-beta-cutover, leaked-credential-rotation]
+  executionPhase: PRODUCTION
+  priority: 810
+  dependsOn: [beta-campaign-readiness, config-beta-cutover, leaked-credential-rotation]
   decisionRefs: [ADR-0006]
   pathScope: ['ops/config/**', 'ops/systemd/**', 'scripts/deploy/**', '.github/workflows/**', 'docs/operations/**']
   acceptanceCriteria:
@@ -15,3 +17,8 @@ spec:
       statement: Remaining credentials are rotated and four Elastic keystores are generated on-host rather than copied from Git.
     - id: AC3
       statement: Redacted configprops parity, five healthy services and tested rollback are recorded without secret values.
+    - id: AC4
+      statement: >-
+        On the separate owner order, populate production inputs from the reviewed key-level contract and deploy the runtime
+        transition using the retained currently compatible application binaries first. Do not start new reference readers
+        against legacy data; coordinated application/data promotion belongs to reference-coordinated-cutover.

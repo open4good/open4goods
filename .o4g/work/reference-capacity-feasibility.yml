@@ -1,0 +1,54 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: reference-capacity-feasibility
+  name: Reference capacity inventory and bounded mapping feasibility
+spec:
+  purpose: Establish bounded development mappings and capacity inputs without making a full-volume benchmark prerequisite
+    to implementation.
+  roadmapRef: m7-product-data-reference
+  state: ACCEPTED
+  executionPhase: DEVELOPMENT
+  priority: 75
+  dependsOn:
+    - beta-environment-preflight
+    - reference-backup-input-contract
+    - reference-domain-slice-contracts
+  decisionRefs:
+    - ADR-0013
+  pathScope:
+    - scripts/benchmark/**
+    - services/data-reference/**
+    - services/price-history/**
+    - docs/operations/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: Record measured alias counts/store/shards, source and offer distributions, source-head/projection candidate
+        sizes and observed ingestion/price-change rates with time windows; unknown rates stay explicit and are measured during
+        beta replay.
+    - id: AC2
+      statement: A deterministic bounded sample includes seven verticals, unclassified GTINs and source/offer/document-size
+        tails; seed, sample limit, byte budget and private sample location are explicit.
+    - id: AC3
+      statement: Exercise candidate strict mappings against the actual Elasticsearch version, especially time-series ids,
+        same-timestamp transitions, late events and missing legacy offer identity; freeze the supported event persistence
+        contract before price-history implementation.
+    - id: AC4
+      statement: Provide development bulk/shard limits and full-volume disk estimates including old/new coexistence, one replica,
+        snapshot space and 30 percent headroom. These are feasibility results, not final throughput or fault-tolerance acceptance.
+    - id: AC5
+      statement: If hardware is insufficient, prepare exact restorable beta cleanup or a priced owner action; limited fixture
+        development remains possible, but the full benchmark and full import stay blocked until their resource gates pass.
+  implementationPlan:
+    - Do not install final lifecycle settings or claim node-loss validation on a single-node cluster. Resolve time-series
+      incompatibilities in ADR-0011 and the price WorkOrder before dependent code.
+  evidenceRefs:
+    - '2026-09-12 beta: aggregate read-only feasibility report measured Elasticsearch 9.4.3, 36 aliases, 12 indexes, 53,811,635
+      documents, 91,884,840,935 store bytes, 90 started primary shards and 9 unassigned replica shards. The 2,000-record metadata-only
+      archive sample has 1,442 classified and 558 unclassified records; offer distributions, document-size tails, seven-vertical
+      values, and ingestion/change rates remain explicitly unknown pending replay.'
+    - '2026-09-14 beta: a dedicated o4g_capacity_feasibility_beta identity was granted metadata monitoring plus create,
+      write and delete only on o4g-capacity-feasibility-*. The strict probe completed on Elasticsearch 9.4.3 and removed
+      its temporary index. Elasticsearch derives time-series ids from dimensions and timestamp, so a same-series timestamp
+      transition is rejected; the price persistence contract must allocate distinct timestamps before writing. Late events
+      were accepted.'

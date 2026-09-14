@@ -6,10 +6,13 @@ metadata:
 spec:
   purpose: Replace transient vertical assignment with reviewed Icecat-to-O4G mappings whose authority remains in Git.
   roadmapRef: m7-product-data-reference
-  state: ACCEPTED
+  state: BLOCKED
+  executionPhase: DEVELOPMENT
+  priority: 100
   dependsOn:
     - icecat-reference-index-runtime
     - canonical-concept-registry
+    - beta-environment-preflight
   decisionRefs:
     - ADR-0007
     - ADR-0010
@@ -20,26 +23,39 @@ spec:
     - api/src/test/**
   acceptanceCriteria:
     - id: AC1
-      statement: >-
-        Every Icecat category, feature and feature-group mapping targets a versioned O4G class/attribute id and has APPROVED,
-        IGNORED or UNMAPPED status, rationale, reviewer and effective registry version.
+      statement: Inventory the actual beta Icecat category/feature/group catalogue. Every reviewed mapping has status, rationale,
+        reviewer and registry version; APPROVED targets a valid compatible O4G id, UNMAPPED has no invented target. Feature-group
+        presentation metadata does not become a canonical attribute without an explicit semantic mapping.
     - id: AC2
-      statement: >-
-        Only APPROVED mappings participate in normalization; label similarity and fuzzy matching may create a review report but
-        cannot assign a class, vertical or canonical attribute automatically.
+      statement: Only APPROVED mappings participate in normalization; label similarity and fuzzy matching may create a review
+        report but cannot assign a class, vertical or canonical attribute automatically.
     - id: AC3
-      statement: >-
-        Git registry resources are authoritative and the runtime index is a generated projection; admin HTTP cannot PUT or
-        DELETE mappings and returns a conflict if its requested rebuild does not match a committed registry version/hash.
+      statement: Git registry resources are authoritative and the runtime index is a generated projection; admin HTTP cannot
+        PUT or DELETE mappings and returns a conflict if its requested rebuild does not match a committed registry version/hash.
     - id: AC4
-      statement: >-
-        ROLE_ADMIN GET endpoints expose mapping coverage and unmapped candidates, POST rebuild returns an asynchronous job id,
-        and job/status errors use Problem Details; mutating GET endpoints are absent.
+      statement: ROLE_ADMIN GET endpoints expose mapping coverage and unmapped candidates, POST rebuild returns an asynchronous
+        job id, and job/status errors use Problem Details; mutating GET endpoints are absent.
     - id: AC5
-      statement: >-
-        Mapping validation rejects unknown O4G ids, duplicate active mappings, type/dimension mismatch and a category mapped to
-        incompatible classes; coverage is reported by Icecat category and each of the seven editorial verticals.
+      statement: Mapping validation rejects unknown O4G ids, duplicate active mappings, type/dimension mismatch and a category
+        mapped to incompatible classes; coverage is reported by Icecat category and each of the seven editorial verticals.
     - id: AC6
-      statement: >-
-        Tests prove authorization, Git-to-index persistence across restart, stale-hash conflict, unmapped isolation, rebuild
-        rollback and generated OpenAPI accuracy without relying on a direct Product vertical mutation.
+      statement: Tests prove authorization, Git-to-index persistence across restart, stale-hash conflict, unmapped isolation,
+        rebuild rollback and generated OpenAPI accuracy without relying on a direct Product vertical mutation.
+  implementationPlan:
+    - Build the read-only coverage API, asynchronous committed-version rebuild and validation using existing registry contracts.
+      Page the beta catalogue to derive denominators; no full provider snapshot is committed to Git.
+    - Reuse established mappings. Batch ambiguous candidates for owner review with examples, alternatives and downstream coverage
+      effect. Report UNMAPPED honestly; missing business decisions block only coverage-dependent release criteria, not the
+      administration feature itself. Add explicit blockers if beta catalogue access actually fails.
+  evidenceRefs:
+    - blocker:the complete Icecat category, feature and feature-group inventory and its reviewed mapping decisions exist only
+      in the runtime Elasticsearch catalogue; no checked-in snapshot or accessible runtime evidence is available to establish
+      AC1/AC5 coverage safely
+    - 'note: 2026-09-11 beta runtime access is authorized; remeasure availability before treating the historical blocker as
+      current.'
+    - '2026-09-14 owner ruling: replace the manual category-to-existing-class mapping release gate with a separate study of
+      automated O4G class discovery and creation. The study must define class authority, deterministic/AI evidence, versioning,
+      precision evaluation, lifecycle and rollback before changing normalization or publication.'
+  externalBlockers:
+    - 'owner-action: approve the automated O4G class discovery and creation design after its bounded beta study. Until then,
+      the current registry and normalizer retain reviewed mappings only.'

@@ -80,18 +80,14 @@ class AmazonCompletionServiceTest {
     }
 
     @Test
-    void shouldUseProductDatasourceCodeAsRefreshCache() {
+    void shouldQuarantineConfiguredPaapiCompletion() {
         Product product = new Product(123L);
         VerticalConfig vertical = new VerticalConfig();
 
-        assertThat(service.shouldProcess(vertical, product)).isTrue();
-
-        product.getDatasourceCodes().put(service.getDatasourceName(), System.currentTimeMillis());
         assertThat(service.shouldProcess(vertical, product)).isFalse();
-
-        product.getDatasourceCodes().put(service.getDatasourceName(),
-                System.currentTimeMillis() - config.getRefreshDuration().toMillis() - 1_000L);
-        assertThat(service.shouldProcess(vertical, product)).isTrue();
+        service.processProduct(vertical, product);
+        assertThat(paapiClient.lastSearchRequest).isNull();
+        assertThat(paapiClient.lastGetRequest).isNull();
     }
 
     @Test

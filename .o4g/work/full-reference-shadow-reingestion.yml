@@ -4,9 +4,11 @@ metadata:
   id: full-reference-shadow-reingestion
   name: Full reference shadow reingestion and comparison
 spec:
-  purpose: Build and validate complete source-neutral indexes without changing production readers.
+  purpose: Rebuild the full pinned backup catalogue on beta, enrich from providers and validate the production candidate dataset.
   roadmapRef: m7-product-data-reference
   state: ACCEPTED
+  executionPhase: DEVELOPMENT
+  priority: 210
   dependsOn:
     - amazon-paapi-content-quarantine
     - aggregation-integrity-hotfixes
@@ -14,6 +16,9 @@ spec:
     - merchant-source-assertion-adapters
     - icecat-integration-production-grade
     - product-family-model-grouping
+    - reference-backup-importer
+    - reference-storage-capacity-benchmark
+    - reference-source-policy-review
   decisionRefs:
     - ADR-0010
     - ADR-0011
@@ -29,32 +34,36 @@ spec:
   acceptanceCriteria:
     - id: AC1
       statement: >-
-        Execution remeasures the current production read alias and treats every normalized GTIN document in that point-in-time
-        inventory as migration scope; the approximately 90.3 million June 2026 count is context, never a fixed target.
+        Migration scope is every valid distinct normalized GTIN in the pinned PRODUCT_BACKUP_SOURCE_URI archive manifest.
+        Reconcile file line totals, rejects, duplicates and final identity count; neither historical marketing counts nor the
+        2026-09-11 observed 51310975 export count is a hardcoded future target. Production comparison is read-only and contextual.
     - id: AC2
       statement: >-
-        EPREL, Icecat and merchant sources are fully reingested into empty versioned source/offer/price indexes, then resolved
-        into an empty versioned projection; no projection is built by reading legacy Product as its normal source of truth.
+        Run the dedicated backup converter into empty versioned source/legacy-price stores, then refresh EPREL, Icecat and
+        merchant inputs through native adapters into source/offer/price stores and resolve the versioned projection.
+        The backup is the initial catalogue baseline; the running resolver never reads legacy Product as a fallback.
     - id: AC3
       statement: >-
-        GTINs not reproducible from current provider inputs receive at most an O4G_LEGACY_UNATTRIBUTED baseline for necessary
-        identity fields, clearly marked unknown provenance, NUDGER_WEB-only and lower priority than every valid native assertion.
+        Backup fields with verified attribution follow the reviewed conversion map and policy. Unrecoverable or unattributed
+        GTINs receive at most O4G_LEGACY_UNATTRIBUTED necessary identity, NUDGER_WEB-only and lower priority than native
+        assertions. Ambiguous potentially PA-API content cannot enter that identity fallback; missing identity is reported.
     - id: AC4
       statement: >-
         Legacy price points backfill only through the price WorkOrder's LEGACY_PRODUCT_MIN contract and no legacy conversion
         invents a provider, source record, language, confidence, observed time or redistribution right.
     - id: AC5
       statement: >-
-        Streaming jobs use PIT/search_after, deterministic partitions, bounded bulk requests, persisted checkpoints, retry/dead
-        letter handling and resumable phases; rerunning any completed partition is idempotent.
+        Archive jobs use digest-bound file/line checkpoints; Elasticsearch scans use PIT/search_after. Both use bounded
+        partitions and bulk queues, retries, sanitized dead letters and cancellation; replaying completed work is idempotent.
     - id: AC6
       statement: >-
         Validation reports by seven verticals and source cover GTIN count, identity/classification, all 94 attribute dispositions,
         languages, quantities, media, groups, offers, prices, scores, document size, conflicts, policy omissions and unmapped data.
     - id: AC7
       statement: >-
-        Every unexplained coverage regression, dynamic mapping field, quantity without canonical unit, artificial language,
-        forbidden-surface assertion and missing GTIN blocks alias publication; accepted differences carry reviewed reason codes.
+        Every unexplained coverage regression, dynamic field, unitless quantity, invented language, forbidden assertion and
+        unexplained missing valid GTIN blocks publication. Reviewed quarantine, invalid GTINs and policy omissions carry
+        reason codes and counts; preserving catalogue identity is distinguished from claiming every historical field is recoverable.
     - id: AC8
       statement: >-
         Sample and aggregate comparisons include source-rich, offer-heavy, legacy-only and each vertical's boundary cases; two
@@ -62,8 +71,15 @@ spec:
     - id: AC9
       statement: >-
         Capacity, indexing throughput, shard balance, merge pressure, heap, query p95 and projected retention remain within the
-        benchmark gates for the full data set; otherwise the shadow build is discarded without modifying reader aliases.
+        benchmark gates for the full data set; otherwise stop the shadow job and retain diagnostic checkpoints without
+        publishing aliases. Delete failed beta indexes only under the exact-target and verified-recovery procedure.
     - id: AC10
       statement: >-
-        A signed readiness artifact records exact index/data-stream versions, counts, hashes, policy/registry/rule versions,
-        checkpoints, failures and rollback targets required by the coordinated cutover WorkOrder.
+        A checksummed readiness artifact binds index/data-stream versions, counts, canonical hashes, policy/registry/rule
+        versions, archive completion time, enrichment watermark, failures and rollback targets. Record accepted snapshot
+        staleness; it is not a final-delta guarantee. Store data and private coordinates outside Git.
+    - id: AC11
+      statement: >-
+        Rehearse the chosen full-dataset transport to a production-shaped isolated restore target using snapshots of the
+        neutral stores plus the immutable input/reimport recipe. Include media and registry/job dependencies; exclude beta
+        accounts, API keys, billing ledgers and test data. Record restore counts, hashes, elapsed time and required storage.

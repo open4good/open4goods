@@ -1,0 +1,26 @@
+[Unit]
+Description=open4goods %i Nuxt service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=open4goods
+Group=open4goods
+EnvironmentFile=/etc/open4goods/%i.env
+EnvironmentFile=-/etc/open4goods/infra.env
+WorkingDirectory=/srv/open4goods/services/%i/current
+ExecStart=/usr/local/bin/node server/index.mjs
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=120
+TimeoutStopSec=45
+LimitNOFILE=65536
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/srv/open4goods /var/log/open4goods /opt/open4goods/.cached
+
+[Install]
+WantedBy=multi-user.target

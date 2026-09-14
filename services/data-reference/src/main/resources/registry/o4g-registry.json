@@ -1,97 +1,2658 @@
 {
   "schemaVersion": "https://open4goods.org/schema/o4g-registry-1.json",
-  "registryVersion": 1,
+  "registryVersion": 4,
   "classes": [
     {
       "id": "o4g:class:television",
       "lifecycle": "ACTIVE",
-      "labels": {"en": "Television", "fr": "Téléviseur"},
+      "labels": {
+        "en": "Television",
+        "fr": "Téléviseur"
+      },
       "parent": null,
-      "attributes": ["o4g:attribute:width", "o4g:attribute:color"],
-      "mappings": [{"system": "icecat", "externalId": "category:1584", "status": "REVIEWED", "effectiveFrom": "2026-09-11", "effectiveTo": null}]
+      "attributes": [
+        "o4g:attribute:width",
+        "o4g:attribute:color"
+      ],
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "category:1584",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "group:televisions",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "group:electronicdisplays",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "etim",
+          "externalId": "class:EC001764",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "wikidata",
+          "externalId": "Q26899",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ]
     },
     {
       "id": "o4g:class:dishwasher",
       "lifecycle": "ACTIVE",
-      "labels": {"en": "Dishwasher", "fr": "Lave-vaisselle"},
+      "labels": {
+        "en": "Dishwasher",
+        "fr": "Lave-vaisselle"
+      },
       "parent": null,
-      "attributes": ["o4g:attribute:width", "o4g:attribute:color"],
-      "mappings": []
+      "attributes": [
+        "o4g:attribute:width",
+        "o4g:attribute:color"
+      ],
+      "mappings": [
+        {
+          "system": "eprel",
+          "externalId": "group:dishwashers",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "group:dishwashers2019",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "etim",
+          "externalId": "class:EC000780",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "wikidata",
+          "externalId": "Q58009",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ]
     },
     {
       "id": "o4g:class:air-conditioner",
       "lifecycle": "ACTIVE",
-      "labels": {"en": "Air conditioner", "fr": "Climatiseur"},
+      "labels": {
+        "en": "Air conditioner",
+        "fr": "Climatiseur"
+      },
       "parent": null,
-      "attributes": ["o4g:attribute:width", "o4g:attribute:color"],
-      "mappings": []
+      "attributes": [
+        "o4g:attribute:width",
+        "o4g:attribute:color"
+      ],
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "category:224",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "group:airconditioners",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "etim",
+          "externalId": "class:EC011604",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "etim",
+          "externalId": "class:EC011573",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "etim",
+          "externalId": "class:EC011579",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "wikidata",
+          "externalId": "Q1265533",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ]
     },
     {
       "id": "o4g:class:oven",
       "lifecycle": "ACTIVE",
-      "labels": {"en": "Oven", "fr": "Four"},
+      "labels": {
+        "en": "Oven",
+        "fr": "Four"
+      },
       "parent": null,
-      "attributes": ["o4g:attribute:width", "o4g:attribute:color"],
-      "mappings": []
+      "attributes": [
+        "o4g:attribute:width",
+        "o4g:attribute:color"
+      ],
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "category:2286",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "group:ovens",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "etim",
+          "externalId": "class:EC001843",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "wikidata",
+          "externalId": "Q36539",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ]
     },
     {
       "id": "o4g:class:refrigerator",
       "lifecycle": "ACTIVE",
-      "labels": {"en": "Refrigerator", "fr": "Réfrigérateur"},
+      "labels": {
+        "en": "Refrigerator",
+        "fr": "Réfrigérateur"
+      },
       "parent": null,
-      "attributes": ["o4g:attribute:width", "o4g:attribute:color"],
-      "mappings": []
+      "attributes": [
+        "o4g:attribute:width",
+        "o4g:attribute:color"
+      ],
+      "mappings": [
+        {
+          "system": "eprel",
+          "externalId": "group:refrigeratingappliances",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "group:refrigeratingappliances2019",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "group:professionalrefrigeratedstoragecabinets",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "etim",
+          "externalId": "class:EC000438",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "etim",
+          "externalId": "class:EC000440",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "wikidata",
+          "externalId": "Q3751369",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ]
     },
     {
       "id": "o4g:class:smartphone",
       "lifecycle": "ACTIVE",
-      "labels": {"en": "Smartphone", "fr": "Smartphone"},
+      "labels": {
+        "en": "Smartphone",
+        "fr": "Smartphone"
+      },
       "parent": null,
-      "attributes": ["o4g:attribute:width", "o4g:attribute:color"],
-      "mappings": []
+      "attributes": [
+        "o4g:attribute:width",
+        "o4g:attribute:color"
+      ],
+      "mappings": [
+        {
+          "system": "etim",
+          "externalId": "class:EC002268",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "wikidata",
+          "externalId": "Q22645",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ]
     },
     {
       "id": "o4g:class:washing-machine",
       "lifecycle": "ACTIVE",
-      "labels": {"en": "Washing machine", "fr": "Lave-linge"},
+      "labels": {
+        "en": "Washing machine",
+        "fr": "Lave-linge"
+      },
       "parent": null,
-      "attributes": ["o4g:attribute:width", "o4g:attribute:color"],
-      "mappings": []
+      "attributes": [
+        "o4g:attribute:width",
+        "o4g:attribute:color"
+      ],
+      "mappings": [
+        {
+          "system": "eprel",
+          "externalId": "group:washingmachines",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "group:washingmachines2019",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "group:washerdriers",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "group:washerdriers2019",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "etim",
+          "externalId": "class:EC000021",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "wikidata",
+          "externalId": "Q127917",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ]
     }
   ],
   "attributes": [
     {
       "id": "o4g:attribute:width",
       "lifecycle": "ACTIVE",
-      "labels": {"en": "Width", "fr": "Largeur"},
+      "labels": {
+        "en": "Width",
+        "fr": "Largeur"
+      },
       "valueType": "QUANTITY",
       "cardinality": "SINGLE",
       "dimension": "LENGTH",
       "canonicalUnit": "cm",
-      "constraints": {"minimum": 0, "maximum": 1000, "allowedCodes": []},
-      "mappings": [{"system": "icecat", "externalId": "feature:1464", "status": "REVIEWED", "effectiveFrom": "2026-09-11", "effectiveTo": null}],
+      "constraints": {
+        "minimum": 0,
+        "maximum": 1000,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "feature:1649",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "icecat",
+          "externalId": "feature:4157",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
       "resolutionPolicy": "o4g:resolution-policy:product-dimensions@1"
     },
     {
       "id": "o4g:attribute:color",
       "lifecycle": "ACTIVE",
-      "labels": {"en": "Color", "fr": "Couleur"},
+      "labels": {
+        "en": "Color",
+        "fr": "Couleur"
+      },
       "valueType": "LOCALIZED_TEXT",
       "cardinality": "MULTIPLE",
       "dimension": null,
       "canonicalUnit": null,
-      "constraints": {"minimum": null, "maximum": null, "allowedCodes": []},
-      "mappings": [{"system": "wikidata", "externalId": "P462", "status": "REVIEWED", "effectiveFrom": "2026-09-11", "effectiveTo": null}],
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "wikidata",
+          "externalId": "P462",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
       "resolutionPolicy": "o4g:resolution-policy:product-appearance@1"
+    },
+    {
+      "id": "o4g:attribute:air-conditioner-function-type",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Function type",
+        "fr": "Type de fonction"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "feature:9149",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:ambient-temperature-max",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Maximum ambient temperature",
+        "fr": "Température ambiante maximale"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "TEMPERATURE",
+      "canonicalUnit": "Cel",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "feature:18074",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:ambient-temperature-min",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Minimum ambient temperature",
+        "fr": "Température ambiante minimale"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "TEMPERATURE",
+      "canonicalUnit": "Cel",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "feature:19610",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:auto-brightness-control-available",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Automatic brightness control",
+        "fr": "Contrôle automatique de la luminosité"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "feature:8075",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "televisions:autoBrightnessControlAvailable",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:brand-bcorp-scoring",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Brand B Corp score",
+        "fr": "Score B Corp de la marque"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:brand-cdp-scoring",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Brand CDP climate score",
+        "fr": "Score climat CDP de la marque"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:classe-energy",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Energy class",
+        "fr": "Classe énergétique"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "feature:2705",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "ovens:cavities[0].energyClass",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "dishwashers:energyClass",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "washing-machines:energyClass",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "washer-dryers:energyClass",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "refrigerators:energyClass",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "televisions:energyClass",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:classe-energy-hdr",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Energy class HDR",
+        "fr": "Classe énergétique (HDR)"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "feature:42857",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "televisions:energyClassHDR",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:classe-energy-sdr",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Energy class SDR",
+        "fr": "Classe énergétique (SDR)"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "feature:42856",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "televisions:energyClassSDR",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:cleaningperformanceindexv2",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Cleaning performance index",
+        "fr": "Indice de performance de lavage"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "eprel",
+          "externalId": "dishwashers:cleaningPerformanceIndexV2",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:climate-class",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Climate class",
+        "fr": "Classe climatique"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "feature:2471",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "refrigerators:climateClass",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:compartment-count",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Compartment count",
+        "fr": "Nombre de compartiments"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:cooling-capacity",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Cooling capacity",
+        "fr": "Puissance frigorifique"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "POWER",
+      "canonicalUnit": "kW",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "feature:2599",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "air-conditioners:coolingCharacteristics.ratedCapacity",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:cooling-system",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Cooling system",
+        "fr": "Type de froid"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:data-quality",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Data quality",
+        "fr": "Qualité de la donnée"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:depth",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Depth",
+        "fr": "Profondeur"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "LENGTH",
+      "canonicalUnit": "cm",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "feature:1650",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "icecat",
+          "externalId": "feature:33219",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "icecat",
+          "externalId": "feature:5486",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "*:dimensionDepth",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "etim",
+          "externalId": "feature:EF000049",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "wikidata",
+          "externalId": "P5524",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:diagonale-pouces",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Screen size",
+        "fr": "Diagonale (en pouces)"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "LENGTH",
+      "canonicalUnit": "[in_i]",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "feature:944",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "televisions:diagonalInch",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "wikidata",
+          "externalId": "P13749",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:display-technology",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Display technology",
+        "fr": "Technologie d'affichage"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "feature:9713",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "televisions:panelTechnology",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "wikidata",
+          "externalId": "P5307",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:dispositif-de-securite",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Security features",
+        "fr": "Dispositif de sécurité"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "feature:248",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:door-count",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Door count",
+        "fr": "Nombre de portes"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:dryingperformanceindexv2",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Drying performance index",
+        "fr": "Indice de performance de séchage"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:durability",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Durability",
+        "fr": "Durabilité"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:energy-consumption",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Energy consumption",
+        "fr": "Consommation énergétique"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "ENERGY",
+      "canonicalUnit": "kW.h",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:energy-consumption-100-cycles",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Energy consumption per 100 cycles",
+        "fr": "Consommation d'énergie pour 100 cycles"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "ENERGY",
+      "canonicalUnit": "kW.h",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:energy-consumption-annual",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Annual energy consumption",
+        "fr": "Consommation d'énergie annuelle"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "ENERGY",
+      "canonicalUnit": "kW.h",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:energy-consumption-per-cycle",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Energy consumption per cycle",
+        "fr": "Consommation d'énergie par cycle"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "ENERGY",
+      "canonicalUnit": "kW.h",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:energy-efficiency-index",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Energy efficiency index",
+        "fr": "Indice d'efficacité énergétique"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:esg",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "ESG score",
+        "fr": "Score ESG"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:fast-freeze",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Fast freeze",
+        "fr": "Congélation rapide"
+      },
+      "valueType": "BOOLEAN",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:features",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Features",
+        "fr": "Fonctionnalités"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "MULTIPLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:freezer-net-capacity",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Freezer net capacity",
+        "fr": "Capacité nette du congélateur"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "VOLUME",
+      "canonicalUnit": "l",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:freezer-stars",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Freezer stars",
+        "fr": "Etoiles congélateur"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:frequency-rate",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Refresh rate",
+        "fr": "Taux de rafraîchissement"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "FREQUENCY",
+      "canonicalUnit": "Hz",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "eprel",
+          "externalId": "*:frequencyRate",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:fridge-net-capacity",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Refrigerator net capacity",
+        "fr": "Capacité nette du réfrigérateur"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "VOLUME",
+      "canonicalUnit": "l",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:hdmi-ports-quantity",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "HDMI ports quantity",
+        "fr": "Quantité de ports HDMI"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "feature:3566",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:height",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Height",
+        "fr": "Hauteur"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "LENGTH",
+      "canonicalUnit": "cm",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "feature:1464",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "icecat",
+          "externalId": "feature:5478",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:installation-type",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Installation type",
+        "fr": "Type de pose"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:loading-type",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Loading type",
+        "fr": "Type de chargement"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:low-noise",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Low noise",
+        "fr": "Silencieux"
+      },
+      "valueType": "BOOLEAN",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:minavailabilitysoftwareupdatesyears",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Software update availability",
+        "fr": "Disponibilité des mises à jour logicielles"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "eprel",
+          "externalId": "*:minAvailabilitySoftwareUpdatesYears",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:minavailabilitysparepartsyears",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Spare parts availability",
+        "fr": "Disponibilité des pièces détachées"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "eprel",
+          "externalId": "*:minAvailabilitySparePartsYears",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:minguaranteedsupportyears",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Guaranteed support duration",
+        "fr": "Durée garantie du support"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "eprel",
+          "externalId": "*:minGuaranteedSupportYears",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:mobile-network-generation",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Mobile network generation",
+        "fr": "Génération mobile"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:noise-class",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Noise class",
+        "fr": "Classe sonore"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:noise-level",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Noise level",
+        "fr": "Niveau sonore"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:noise-level-spin",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Noise level (spin)",
+        "fr": "Niveau sonore (essorage)"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:opening-type",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Opening type",
+        "fr": "Type d'ouverture"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:operating-system",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Operating system",
+        "fr": "Système d'exploitation"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:oven-capacity",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Oven capacity",
+        "fr": "Capacité du four"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "VOLUME",
+      "canonicalUnit": "l",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "eprel",
+          "externalId": "ovens:cavities[0].volume",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "wikidata",
+          "externalId": "P2234",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:oven-cavity-count",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Number of cavities",
+        "fr": "Nombre de cavités"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "feature:37259",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "icecat",
+          "externalId": "feature:7311",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "ovens:numberCavities",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:oven-cleaning-mode",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Cleaning mode",
+        "fr": "Mode de nettoyage"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:oven-cooking-modes",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Cooking modes",
+        "fr": "Modes de cuisson"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:oven-energy-consumption-cycle",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Energy consumption per cycle",
+        "fr": "Consommation d'énergie par cycle"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "ENERGY",
+      "canonicalUnit": "kW.h",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:oven-energy-efficiency-index",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Energy Efficiency Index",
+        "fr": "Indice d'efficacité énergétique"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:oven-energy-type",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Energy type",
+        "fr": "Énergie"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:oven-installation-type",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Installation type",
+        "fr": "Type d'installation"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:oven-power",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Power",
+        "fr": "Puissance"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "POWER",
+      "canonicalUnit": "W",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "feature:8365",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "wikidata",
+          "externalId": "P2109",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:place-settings",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Place settings",
+        "fr": "Nombre de couverts"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:powerdelaystart",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Start delay",
+        "fr": "Départ différé"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "TIME",
+      "canonicalUnit": "h",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:power-consumption-hdr",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Power consumption (HDR)",
+        "fr": "Consommation électrique (haute définition)"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "POWER",
+      "canonicalUnit": "W",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "eprel",
+          "externalId": "*:powerOnModeHDR",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:power-consumption-off",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Power consumption (off)",
+        "fr": "Consommation électrique (arrêt/veille)"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "POWER",
+      "canonicalUnit": "W",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "feature:2034",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "icecat",
+          "externalId": "feature:2036",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "*:powerOffMode",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:power-consumption-sdr",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Power consumption (SDR)",
+        "fr": "Consommation électrique (basse définition)"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "POWER",
+      "canonicalUnit": "W",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "eprel",
+          "externalId": "*:powerOnModeSDR",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:power-consumption-standby",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Power consumption (standby)",
+        "fr": "Consommation en veille"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "POWER",
+      "canonicalUnit": "W",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "eprel",
+          "externalId": "*:powerStandby",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "*:powerStandbyMode",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:power-consumption-standby-networkd",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Power consumption (standby networked)",
+        "fr": "Consommation électrique (arrêt/veille/réseau)"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "POWER",
+      "canonicalUnit": "W",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "eprel",
+          "externalId": "*:powerStandbyNetworked",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "eprel",
+          "externalId": "*:powerNetworkStandby",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:power-consumption-typical",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Power consumption",
+        "fr": "Consommation électrique (typique/max)"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "POWER",
+      "canonicalUnit": "W",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "feature:445",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "icecat",
+          "externalId": "feature:9137",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:product-type",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Product type",
+        "fr": "Type de produit"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:program-count",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Program count",
+        "fr": "Nombre de programmes"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:ram-capacity",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "RAM capacity",
+        "fr": "Mémoire vive"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:refrigerant-gwp",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Refrigerant GWP",
+        "fr": "PRG du refrigerant"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:refrigerant-name",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Refrigerant",
+        "fr": "Fluide refrigerant"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:refrigerator-type",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Refrigerator type",
+        "fr": "Type de réfrigérateur"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:repairability-index",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Repairability index",
+        "fr": "Indice de réparabilité"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:reparability",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Reparability",
+        "fr": "Réparabilité"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:sim-slots",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "SIM slots",
+        "fr": "Nombre de SIM"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:smart-tv",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Smart TV",
+        "fr": "Smart TV"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:spin-class",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Spin class",
+        "fr": "Classe d'essorage"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:spin-speed",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Spin speed",
+        "fr": "Vitesse d'essorage"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:storage-capacity",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Storage capacity",
+        "fr": "Capacité de stockage"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:total-volume",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Total volume",
+        "fr": "Volume total"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "VOLUME",
+      "canonicalUnit": "l",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:type-de-produit",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Product Type",
+        "fr": "Type de produit"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:type-hd",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "HD Type",
+        "fr": "Type HD"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:usage-cost-year",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Annual usage cost",
+        "fr": "Coût d'usage annuel"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:voice-available",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Voice control available",
+        "fr": "Commande vocale disponible"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "eprel",
+          "externalId": "*:voiceAvailable",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:warranty",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Warranty duration",
+        "fr": "Durée de garantie"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "TIME",
+      "canonicalUnit": "a",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "eprel",
+          "externalId": "*:minGuaranteedGuarantee",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "wikidata",
+          "externalId": "P13635",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:washing-capacity",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Washing capacity",
+        "fr": "Capacité de lavage"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "MASS",
+      "canonicalUnit": "kg",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:water-consumption",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Water consumption per cycle",
+        "fr": "Consommation d'eau par cycle"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "VOLUME",
+      "canonicalUnit": "l",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:water-consumption-annual",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Annual water consumption",
+        "fr": "Consommation d'eau annuelle"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "VOLUME",
+      "canonicalUnit": "l",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:weight",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Weight",
+        "fr": "Poids"
+      },
+      "valueType": "QUANTITY",
+      "cardinality": "SINGLE",
+      "dimension": "MASS",
+      "canonicalUnit": "kg",
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [
+        {
+          "system": "icecat",
+          "externalId": "feature:94",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        },
+        {
+          "system": "icecat",
+          "externalId": "feature:33015",
+          "status": "REVIEWED",
+          "effectiveFrom": "2026-09-11",
+          "effectiveTo": null
+        }
+      ],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:wifi",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "WiFi",
+        "fr": "WiFi"
+      },
+      "valueType": "LOCALIZED_TEXT",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:wine-storage",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Wine storage",
+        "fr": "Cave à vin"
+      },
+      "valueType": "BOOLEAN",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
+    },
+    {
+      "id": "o4g:attribute:year",
+      "lifecycle": "ACTIVE",
+      "labels": {
+        "en": "Year",
+        "fr": "Année de mise en service"
+      },
+      "valueType": "DECIMAL",
+      "cardinality": "SINGLE",
+      "dimension": null,
+      "canonicalUnit": null,
+      "constraints": {
+        "minimum": null,
+        "maximum": null,
+        "allowedCodes": []
+      },
+      "mappings": [],
+      "resolutionPolicy": "o4g:resolution-policy:legacy-baseline@1"
     }
   ],
   "verticalViews": [
-    {"verticalId": "air-conditioner", "includedClasses": ["o4g:class:air-conditioner"]},
-    {"verticalId": "dishwasher", "includedClasses": ["o4g:class:dishwasher"]},
-    {"verticalId": "oven", "includedClasses": ["o4g:class:oven"]},
-    {"verticalId": "refrigerator", "includedClasses": ["o4g:class:refrigerator"]},
-    {"verticalId": "smartphones", "includedClasses": ["o4g:class:smartphone"]},
-    {"verticalId": "tv", "includedClasses": ["o4g:class:television"]},
-    {"verticalId": "washing-machine", "includedClasses": ["o4g:class:washing-machine"]}
+    {
+      "verticalId": "air-conditioner",
+      "includedClasses": [
+        "o4g:class:air-conditioner"
+      ]
+    },
+    {
+      "verticalId": "dishwasher",
+      "includedClasses": [
+        "o4g:class:dishwasher"
+      ]
+    },
+    {
+      "verticalId": "oven",
+      "includedClasses": [
+        "o4g:class:oven"
+      ]
+    },
+    {
+      "verticalId": "refrigerator",
+      "includedClasses": [
+        "o4g:class:refrigerator"
+      ]
+    },
+    {
+      "verticalId": "smartphones",
+      "includedClasses": [
+        "o4g:class:smartphone"
+      ]
+    },
+    {
+      "verticalId": "tv",
+      "includedClasses": [
+        "o4g:class:television"
+      ]
+    },
+    {
+      "verticalId": "washing-machine",
+      "includedClasses": [
+        "o4g:class:washing-machine"
+      ]
+    }
   ]
 }

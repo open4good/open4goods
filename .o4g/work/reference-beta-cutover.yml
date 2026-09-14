@@ -1,0 +1,58 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: reference-beta-cutover, name: Beta reference switch and production rehearsal}
+spec:
+  purpose: Switch all beta readers to the validated projection and rehearse the exact production promotion and rollback operations.
+  roadmapRef: m7-product-data-reference
+  state: ACCEPTED
+  executionPhase: DEVELOPMENT
+  priority: 230
+  dependsOn:
+    - full-reference-shadow-reingestion
+    - reference-api-frontend-breaking-cutover
+    - b2b-price-history-facet
+    - config-beta-independence
+    - google-sso-allowlisted-roles
+  decisionRefs: [ADR-0013]
+  pathScope:
+    - 'api/**'
+    - 'front-api/**'
+    - 'frontend/**'
+    - 'b2b-api/**'
+    - 'b2b-frontend/**'
+    - 'ui/**'
+    - 'services/**'
+    - 'scripts/deploy/**'
+    - 'scripts/migration/**'
+    - '.github/workflows/**'
+    - 'docs/operations/**'
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        A parameterized runbook uses explicit environment identity, application SHA/artifact digests, index/data-stream
+        names, schema versions and private configuration references; validate beta targets before every mutation.
+    - id: AC2
+      statement: >-
+        Stop beta writers for the bounded reader/writer switch; stage the matching application versions behind
+        maintenance gating, switch validated aliases and routes, then resume collections. Do not claim a multi-service
+        deploy is atomic.
+    - id: AC3
+      statement: >-
+        Promote the pinned dated snapshot plus recorded enrichment watermark; list the accepted freshness gap. No final
+        production delta or zero-loss event guarantee is required by this campaign.
+    - id: AC4
+      statement: >-
+        Smoke tests cover French/English product/search/score/dataviz, ui image and sitemap routes, B2B
+        price/history/billing sandbox, open-data, SSO and admin mapping/status; old/new wire versions cannot mix.
+    - id: AC5
+      statement: >-
+        Force a failed gate and restore prior beta release/config/aliases with tested commands; preserve both datasets.
+        A rollback after resumed ingestion records its known data gap rather than claiming lossless reverse conversion.
+    - id: AC6
+      statement: >-
+        Produce a sanitized rehearsal report and repeatable snapshot/restore or reimport recipe for the full target
+        dataset, all supporting indexes and media dependencies; production transactional stores remain separate.
+  implementationPlan:
+    - >-
+      Retain immutable legacy production-compatible binaries before deleting source code. Rehearse again on the final
+      release after beta legacy-code cleanup.

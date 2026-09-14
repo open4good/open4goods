@@ -1,7 +1,16 @@
 {
   "gtin" : "4006381333931",
   "surface" : "NUDGER_WEB",
-  "registryVersion" : 7,
+  "replayInputs" : {
+    "registryVersion" : 7,
+    "normalizationVersion" : "quantity-normalization@3",
+    "resolutionVersion" : "reference-resolution@2",
+    "policyRefs" : [ {
+      "policyId" : "icecat-standard",
+      "version" : "3"
+    } ],
+    "evaluationInstant" : "2026-02-01T00:00:00Z"
+  },
   "builtAt" : "2026-02-01T00:00:00Z",
   "resolvedValues" : [ {
     "attribute" : "o4g:attribute:name",
@@ -96,28 +105,32 @@
     "reason" : "SOURCE_AUTHORITY",
     "conflicting" : false
   } ],
-  "slices" : {
-    "offers" : {
-      "name" : "offers",
-      "fields" : {
-        "minimumPrice" : {
-          "type" : "DECIMAL",
-          "value" : 499.00
-        }
+  "offers" : {
+    "activeOfferCount" : 2,
+    "available" : true,
+    "lowestPrice" : 499.00,
+    "currency" : "EUR",
+    "observedAt" : "2026-02-01T00:00:00Z"
+  },
+  "evaluation" : {
+    "ruleVersion" : "impact-evaluation@1",
+    "evaluatedAt" : "2026-02-01T00:00:00Z",
+    "scores" : {
+      "o4g:attribute:impact" : {
+        "type" : "DECIMAL",
+        "value" : 3.20
       }
     },
-    "scores" : {
-      "name" : "scores",
-      "fields" : {
-        "impact" : {
-          "type" : "DECIMAL",
-          "value" : 3.20
-        },
-        "repairability" : {
-          "type" : "DECIMAL",
-          "value" : 7.10
-        }
+    "cohortStatistics" : {
+      "class-median" : {
+        "type" : "DECIMAL",
+        "value" : 7.10
       }
-    }
+    },
+    "missingInputs" : [ "o4g:attribute:repair-index" ]
+  },
+  "search" : {
+    "ruleVersion" : "lexical-search@1",
+    "lexicalTerms" : [ "television", "4k" ]
   }
 }

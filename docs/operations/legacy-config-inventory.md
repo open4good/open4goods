@@ -72,9 +72,9 @@ Prod-only keys not in beta: `api`'s `googlesearch.*`, `amazon-config.*`,
 `urlfetcher.proxy.*`, `vertex.batch.credentials-json`, `spring.ai.openai.{embedding,image,audio,moderation}`;
 `front-api`/`ui`'s `spring.boot.admin.client.{connect-timeout,read-timeout,period,register-once}`,
 `spring.elasticsearch.{socket-timeout,connection-timeout}`; `ui`'s `google-api-json`.
-Beta-only: `api`'s `review.generation.search-*` fields. These deltas are AC2
-material (which of beta/prod's nine legacy secrets and four missing references
-map to which key), not resolved further here.
+Beta-only: `api`'s `review.generation.search-*` fields. AC2 maps these actual keys to
+environment inputs. The earlier nine/five/four counts had no established mapping
+and were replaced on 2026-09-11; beta is populated first under ADR-0013.
 
 ## Key-level appendix: other mixed files
 
@@ -123,6 +123,7 @@ map to which key), not resolved further here.
 
 ## Out of scope for this pass
 
-AC2 (environment secret/variable placement), AC3 (packaged non-secret
-defaults) and AC4 (CI classification gate) are separate acceptance criteria in
-the same WorkOrder and are not attempted here.
+This is the historical AC1 audit, not current execution status. AC2 (input placement),
+AC3 (packaged defaults) and AC4 (CI gate) have their current evidence in the WorkOrder.
+Beta administration is authorized for the campaign; production writes await its
+separate owner order. Findings above remain historical observations to revalidate.

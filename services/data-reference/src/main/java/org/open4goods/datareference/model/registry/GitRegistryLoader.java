@@ -25,6 +25,8 @@ public final class GitRegistryLoader {
     public static final String SCHEMA_RESOURCE = "/registry/o4g-registry.schema.json";
     /** Classpath resource containing the authored registry. */
     public static final String REGISTRY_RESOURCE = "/registry/o4g-registry.json";
+    /** Classpath resource containing the reviewed legacy migration manifest. */
+    public static final String MIGRATION_MANIFEST_RESOURCE = "/registry/legacy-attribute-migrations.json";
 
     private final ObjectMapper mapper;
 
@@ -57,7 +59,27 @@ public final class GitRegistryLoader {
                 throw new IOException("missing checked-in registry resource");
             }
             verifySchema(schema);
-            return load(registry);
+            RegistryRuntimeIndex index = load(registry);
+            RegistryMigrationManifest manifest = loadDefaultMigrationManifest();
+            manifest.verify(index.registry(), manifest.legacyResources());
+            return index;
+        }
+    }
+
+    /**
+     * Loads the complete migration manifest packaged with the reviewed registry.
+     *
+     * @return immutable legacy-attribute migration manifest
+     * @throws IOException when the checked-in resource cannot be read or parsed
+     */
+    public RegistryMigrationManifest loadDefaultMigrationManifest() throws IOException {
+        try (InputStream manifest = GitRegistryLoader.class.getResourceAsStream(MIGRATION_MANIFEST_RESOURCE)) {
+            if (manifest == null) {
+                throw new IOException("Missing registry migration manifest resource: " + MIGRATION_MANIFEST_RESOURCE);
+            }
+            return mapper.readValue(manifest.readAllBytes(), RegistryMigrationManifest.class);
+        } catch (IllegalArgumentException exception) {
+            throw new RegistryValidationException("Invalid registry migration manifest: " + exception.getMessage(), exception);
         }
     }
 

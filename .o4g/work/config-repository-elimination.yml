@@ -3,10 +3,12 @@ kind: WorkOrder
 metadata: {id: config-repository-elimination, name: Config repository elimination integration}
 spec:
   purpose: >-
-    Prove the completed configuration migration as one system before open4goods-config is archived.
+    Prove the completed configuration migration as one system after open4goods-config is archived.
     Inventory, runtime, cutovers and retirement are separate dependencies.
-  roadmapRef: m1-config-autonomy
+  roadmapRef: m9-post-production-retirement
   state: ACCEPTED
+  executionPhase: POST_PRODUCTION
+  priority: 960
   dependsOn: [config-repository-retirement]
   decisionRefs: [ADR-0006]
   pathScope: ['.o4g/work/**', 'docs/operations/**']

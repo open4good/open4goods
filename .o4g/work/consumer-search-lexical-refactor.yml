@@ -7,6 +7,8 @@ spec:
   purpose: Replace duplicate consumer search paths with one relevance-tested lexical Elasticsearch search over the source-neutral GTIN projection.
   roadmapRef: m7-product-data-reference
   state: ACCEPTED
+  executionPhase: DEVELOPMENT
+  priority: 190
   dependsOn:
     - consumer-search-cost-hotfix
     - reference-resolution-and-surface-projections
@@ -70,3 +72,11 @@ spec:
         The strict target mapping has no dense_vector, HNSW or script_score and no Java-side reranking; a shadow index passes
         quality and capacity gates before atomic alias cutover, with tested alias rollback and no durable dual-read or semantic
         feature flag.
+  implementationPlan:
+    - >-
+      Build the 100-query corpus early from actual beta candidates with expected/relevant GTIN judgments and an owner review
+      packet for ambiguous rankings. Relevance success is computed from that fixed corpus, not queries chosen after tuning.
+    - >-
+      Search only NUDGER_WEB-eligible title/class/group/merchant evidence. The local/bounded beta index validates behavior;
+      full capacity is evaluated by reference-storage-capacity-benchmark and the final switch by reference-beta-cutover.
+      Update search callers and generated clients in this lot; remaining product/detail contracts belong to the reader cutover.

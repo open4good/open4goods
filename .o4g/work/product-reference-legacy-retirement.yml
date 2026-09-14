@@ -4,11 +4,13 @@ metadata:
   id: product-reference-legacy-retirement
   name: Legacy Product model and aggregator retirement
 spec:
-  purpose: Remove dual semantics and dead source-specific fields after the new projection survives its rollback window.
+  purpose: Remove legacy Product code after beta proves neutral-reader independence while retaining production rollback artifacts.
   roadmapRef: m7-product-data-reference
   state: ACCEPTED
+  executionPhase: DEVELOPMENT
+  priority: 280
   dependsOn:
-    - reference-coordinated-cutover
+    - reference-beta-cutover
   decisionRefs:
     - ADR-0010
     - ADR-0011
@@ -17,6 +19,9 @@ spec:
     - api/**
     - front-api/**
     - b2b-api/**
+    - frontend/**
+    - b2b-frontend/**
+    - ui/**
     - services/product-repository/**
     - services/data-reference/**
     - services/price-history/**
@@ -29,8 +34,9 @@ spec:
   acceptanceCriteria:
     - id: AC1
       statement: >-
-        Retirement starts only after seven complete days of healthy production evidence, no rollback invocation, bounded replay
-        and rollup lag, accepted coverage comparison and zero legacy read/write metric.
+        Code retirement starts after the full beta switch, accepted coverage, bounded replay/rollup lag and zero new-runtime
+        legacy reads/writes. Retain immutable old production-compatible artifacts/config/data; the seven-day production data
+        deletion gate belongs to product-reference-production-retirement and does not block beta code cleanup.
     - id: AC2
       statement: >-
         Product.datasourceCodes is removed: source hash/observation metadata lives in SourceRecordHead, scheduling and misses in
@@ -53,8 +59,9 @@ spec:
         appending a duplicate architecture narrative; generated roadmap/ADR projections are regenerated.
     - id: AC7
       statement: >-
-        Legacy product indexes are deleted only after a final snapshot is verified and its retention/restore owner is recorded;
-        deletion uses exact resolved index names and reports recoverability and expiry.
+        Prove the cleaned runtime and its dedicated legacy-backup input DTO still import the pinned archive with the legacy
+        Product class absent. No production index is deleted here; exact beta cleanup follows a verified restore and excludes
+        the input archive. Product-reference-production-retirement owns later production deletion.
     - id: AC8
       statement: >-
         Complete offline reactor, canonical lint, frontend lint/test/generate, Elasticsearch integration and end-to-end smoke

@@ -1,0 +1,60 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: reference-backup-importer, name: Resumable legacy backup to neutral data importer}
+spec:
+  purpose: Convert the pinned product backup into new source, legacy baseline and price stores without writing the active legacy alias.
+  roadmapRef: m7-product-data-reference
+  state: ACCEPTED
+  executionPhase: DEVELOPMENT
+  priority: 165
+  dependsOn:
+    - reference-backup-input-contract
+    - amazon-paapi-content-quarantine
+    - source-assertion-store
+    - quantity-and-language-normalization
+    - price-observation-timeseries
+    - reference-source-policy-review
+  decisionRefs: [ADR-0013]
+  pathScope:
+    - 'scripts/migration/**'
+    - 'api/**'
+    - 'services/data-reference/**'
+    - 'services/price-history/**'
+    - 'services/product-repository/**'
+    - 'docs/operations/**'
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        Provide explicit INVENTORY, SAMPLE, APPLY, STATUS and CANCEL operations with dataset id, immutable input
+        manifest, exact versioned output names and registry/policy/mapping versions; no import starts on application
+        boot.
+    - id: AC2
+      statement: >-
+        Read only listed gzip UTF-8 JSONL files, validate digests and completion counts, reject path traversal and
+        maintain bounded bulk queues with backpressure. Do not call BackupService.importProducts or its active Product
+        repository writer.
+    - id: AC3
+      statement: >-
+        Persist progress by dataset/file digest and committed line position. Reopening gzip may decompress/skip to the
+        checkpoint; never seek an arbitrary compressed offset. Advance only after every bulk result is reconciled.
+    - id: AC4
+      statement: >-
+        Apply the reviewed conversion map, deterministic record ids and legacy minima contract; preserve valid GTIN
+        identity without inventing provenance, historical offers or rights. Native provider enrichment replaces
+        lower-priority legacy baselines.
+    - id: AC5
+      statement: >-
+        Handle duplicate GTINs deterministically: identical records deduplicate; conflicting duplicates are quarantined
+        with coordinates and reason codes until reviewed. Never choose a winner from thread arrival order.
+    - id: AC6
+      statement: >-
+        Return non-success for unreconciled parse/bulk/digest errors, keep sanitized dead letters outside Git, and prove
+        cancellation, restart, retry and repeated partitions do not lose or duplicate accepted records.
+    - id: AC7
+      statement: >-
+        Integration tests include the real manifest shape, extra manifest files, final short batch, corrupt gzip,
+        changed input, invalid GTIN, forbidden Amazon data, unknown fields and bounded-memory processing.
+  implementationPlan:
+    - >-
+      Keep a versioned migration input DTO/reader independent of the retiring runtime Product class so the final
+      cleaned release can still import the legacy snapshot.

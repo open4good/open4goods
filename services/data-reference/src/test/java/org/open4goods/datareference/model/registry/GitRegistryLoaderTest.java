@@ -20,9 +20,9 @@ class GitRegistryLoaderTest {
     void loadsTheCheckedInRegistryAsAnImmutableVersionedIndex() throws IOException {
         RegistryRuntimeIndex index = loader.loadDefault();
 
-        assertThat(index.registry().version()).isEqualTo(new RegistryVersion(1));
+        assertThat(index.registry().version()).isEqualTo(new RegistryVersion(4));
         assertThat(index.classCount()).isEqualTo(7);
-        assertThat(index.attributeCount()).isEqualTo(2);
+        assertThat(index.attributeCount()).isEqualTo(93);
         assertThat(index.contentHash()).matches("[0-9a-f]{64}");
         assertThat(index.registry().findClass(new CanonicalClassId("television"))).isPresent();
         assertThat(index.registry().findAttribute(new CanonicalAttributeId("width")))
@@ -31,10 +31,28 @@ class GitRegistryLoaderTest {
                     assertThat(attribute.canonicalUnit().value()).isEqualTo("cm");
                     assertThat(attribute.labels()).containsEntry("en", "Width").containsEntry("fr", "Largeur");
                 });
-        assertThat(index.registry().findReviewedMapping("icecat", "feature:1464", LocalDate.of(2026, 9, 11)))
+        assertThat(index.registry().findReviewedMapping("icecat", "feature:1649", LocalDate.of(2026, 9, 11)))
                 .hasValueSatisfying(mapping -> assertThat(mapping.conceptId().externalForm())
                         .isEqualTo("o4g:attribute:width"));
-        assertThat(index.registry().findReviewedMapping("icecat", "feature:1464", LocalDate.of(2026, 9, 10)))
+        assertThat(index.registry().findReviewedMapping("eprel", "televisions:energyClass", LocalDate.of(2026, 9, 11)))
+                .hasValueSatisfying(mapping -> assertThat(mapping.conceptId().externalForm())
+                        .isEqualTo("o4g:attribute:classe-energy"));
+        assertThat(index.registry().findReviewedMapping("etim", "feature:EF000049", LocalDate.of(2026, 9, 11)))
+                .hasValueSatisfying(mapping -> assertThat(mapping.conceptId().externalForm())
+                        .isEqualTo("o4g:attribute:depth"));
+        assertThat(index.registry().findReviewedMapping("wikidata", "P5307", LocalDate.of(2026, 9, 11)))
+                .hasValueSatisfying(mapping -> assertThat(mapping.conceptId().externalForm())
+                        .isEqualTo("o4g:attribute:display-technology"));
+        assertThat(index.registry().findReviewedMapping("eprel", "group:washingmachines", LocalDate.of(2026, 9, 11)))
+                .hasValueSatisfying(mapping -> assertThat(mapping.conceptId().externalForm())
+                        .isEqualTo("o4g:class:washing-machine"));
+        assertThat(index.registry().findReviewedMapping("etim", "class:EC001764", LocalDate.of(2026, 9, 11)))
+                .hasValueSatisfying(mapping -> assertThat(mapping.conceptId().externalForm())
+                        .isEqualTo("o4g:class:television"));
+        assertThat(index.registry().findReviewedMapping("wikidata", "Q58009", LocalDate.of(2026, 9, 11)))
+                .hasValueSatisfying(mapping -> assertThat(mapping.conceptId().externalForm())
+                        .isEqualTo("o4g:class:dishwasher"));
+        assertThat(index.registry().findReviewedMapping("icecat", "feature:1649", LocalDate.of(2026, 9, 10)))
                 .isEmpty();
         assertThat(index.registry().findVerticalView("tv"))
                 .hasValueSatisfying(view -> assertThat(view.includedClasses())
@@ -43,8 +61,8 @@ class GitRegistryLoaderTest {
 
     @Test
     void rejectsAnUnknownJsonPropertyBeforeBuildingTheRuntimeIndex() {
-        String invalid = registryJson().replace("\"registryVersion\": 1,",
-                "\"registryVersion\": 1, \"providerShortcut\": true,");
+        String invalid = registryJson().replace("\"registryVersion\": 4,",
+                "\"registryVersion\": 4, \"providerShortcut\": true,");
 
         assertThatThrownBy(() -> load(invalid))
                 .isInstanceOf(RegistryValidationException.class)
@@ -53,8 +71,8 @@ class GitRegistryLoaderTest {
 
     @Test
     void rejectsDanglingClassAttributesAndOverlappingReviewedMappings() {
-        String dangling = registryJson().replace("\"o4g:attribute:width\", \"o4g:attribute:color\"",
-                "\"o4g:attribute:unknown\", \"o4g:attribute:color\"");
+        String dangling = registryJson().replace("\"o4g:attribute:width\",\n        \"o4g:attribute:color\"",
+                "\"o4g:attribute:unknown\",\n        \"o4g:attribute:color\"");
         String overlapping = registryJson()
                 .replace("\"system\": \"wikidata\"", "\"system\": \"icecat\"")
                 .replace("\"externalId\": \"P462\"", "\"externalId\": \"feature:1464\"");
@@ -80,7 +98,7 @@ class GitRegistryLoaderTest {
     void rejectsAClassHierarchyCycleAndMissingTranslations() {
         String cyclic = registryJson().replaceFirst("\"parent\": null,", "\"parent\": \"o4g:class:dishwasher\",")
                 .replaceFirst("\"parent\": null,", "\"parent\": \"o4g:class:television\",");
-        String untranslated = registryJson().replace("\"labels\": {\"en\": \"Television\", \"fr\": \"Téléviseur\"}",
+        String untranslated = registryJson().replace("\"labels\": {\n        \"en\": \"Television\",\n        \"fr\": \"Téléviseur\"\n      }",
                 "\"labels\": {\"en\": \"Television\"}");
 
         assertThatThrownBy(() -> load(cyclic))
@@ -93,7 +111,8 @@ class GitRegistryLoaderTest {
 
     @Test
     void rejectsAnUnknownClassFromAnEditorialVerticalView() {
-        String invalid = registryJson().replace("\"o4g:class:television\"]}", "\"o4g:class:unknown\"]}");
+        String invalid = registryJson().replace("\"verticalId\": \"tv\",\n      \"includedClasses\": [\n        \"o4g:class:television\"",
+                "\"verticalId\": \"tv\",\n      \"includedClasses\": [\n        \"o4g:class:unknown\"");
 
         assertThatThrownBy(() -> load(invalid))
                 .isInstanceOf(RegistryValidationException.class)

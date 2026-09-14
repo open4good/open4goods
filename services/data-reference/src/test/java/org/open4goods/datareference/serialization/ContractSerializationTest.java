@@ -110,13 +110,13 @@ class ContractSerializationTest {
     }
 
     @Test
-    void sliceOrderIsPreserved() {
+    void typedContributionOrderIsPreserved() {
         ProductReferenceProjection read =
                 mapper.readValue(golden("product-reference-projection.json"), ProductReferenceProjection.class);
 
-        assertThat(read.slices().keySet()).containsExactly("offers", "scores");
-        assertThat(read.slices().get("scores").fields().keySet())
-                .containsExactly("impact", "repairability");
+        assertThat(read.search().lexicalTerms()).containsExactly("television", "4k");
+        assertThat(read.evaluation().missingInputs()).extracting(attribute -> attribute.slug())
+                .containsExactly("repair-index");
     }
 
     @Test

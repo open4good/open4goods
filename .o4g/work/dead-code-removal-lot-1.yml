@@ -8,7 +8,9 @@ spec:
     declarations one module at a time.
   roadmapRef: m3-dead-surface-removal
   state: ACCEPTED
-  dependsOn: [governance-kit-bootstrap, config-repository-elimination]
+  executionPhase: DEVELOPMENT
+  priority: 300
+  dependsOn: [governance-kit-bootstrap, config-beta-independence, product-reference-legacy-retirement, xwiki-decommission]
   pathScope:
     - 'src/main/site/**'
     - 'src/test/resources/**'
@@ -21,6 +23,16 @@ spec:
     - 'services/exposed-docs/**'
     - 'pom.xml'
     - '*/pom.xml'
+    - 'services/*/pom.xml'
+    - 'services/googlesearch/src/test/resources/**'
+    - 'scripts/verify/**'
+    - 'scripts/bundle-doc-resources.sh'
+    - '.github/actions/bundle-doc-resources/**'
+    - '.github/workflows/**'
+    - '.o4g/inventory/dead-surfaces.yml'
+    - 'META-INF/**'
+    - '**/.DS_Store'
+    - '**/__pycache__/**'
   acceptanceCriteria:
     - id: AC1
       statement: >-
@@ -51,3 +63,16 @@ spec:
         The ui module is NOT removed. It serves static.nudger.fr images, is the only producer of
         the sitemaps the frontend reads, and is the only handler for the open-data download.
         AGENTS.md is corrected instead.
+    - id: AC6
+      statement: >-
+        Before deletion, produce .o4g/inventory/dead-surfaces.yml with exact tracked targets, reference evidence, classification
+        (remove, move, keep, owner-review), destination for moved fixtures and verification command. Historical AC1-AC4 counts
+        are leads, not an executable deletion list. Missing candidates are not fabricated.
+  implementationPlan:
+    - >-
+      Recompute candidates after reference and XWiki cleanup using JavaLens, dynamic Vue usage checks and Maven evidence.
+      Keep unfinished B2bApiKey features unless explicitly retired by the owner; approved keep decisions satisfy that item.
+    - >-
+      Execute A/B/C/D as four bounded sub-lots with explicit-path commits and per-candidate evidence. Move Google fixtures
+      before removing originals; build affected modules and the full reactor between Maven declaration batches. Remove
+      bundling scripts/actions only after updating every workflow caller. Preserve ui images, sitemaps and open-data.

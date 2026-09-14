@@ -7,6 +7,7 @@ import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ class SourceUsagePolicyTest {
         return new SourceUsagePolicy("icecat-standard", SOURCE, "3", types, surfaces, FROM, UNTIL,
                 Duration.ofDays(365), MediaCachePolicy.NONE,
                 new AttributionRequirement(true, "Data by Icecat", URI.create("https://icecat.biz")),
-                RedistributionPolicy.PROHIBITED, LocalDate.of(2026, 1, 1));
+                RedistributionPolicy.ALLOWED, LocalDate.of(2026, 1, 1), List.of(URI.create("https://icecat.biz/terms")));
     }
 
     @Test
@@ -36,6 +37,15 @@ class SourceUsagePolicyTest {
         for (SourceContentType contentType : SourceContentType.values()) {
             for (ProjectionSurface surface : ProjectionSurface.values()) {
                 assertThat(denied.allows(contentType, surface, DURING)).isFalse();
+            }
+        }
+    }
+
+    @Test
+    void paapiQuarantinePermitsNoPublicSurface() {
+        for (SourceContentType contentType : SourceContentType.values()) {
+            for (ProjectionSurface surface : ProjectionSurface.values()) {
+                assertThat(PaapiQuarantinePolicy.POLICY.allows(contentType, surface, DURING)).isFalse();
             }
         }
     }
@@ -72,7 +82,7 @@ class SourceUsagePolicyTest {
         SourceUsagePolicy openEnded = new SourceUsagePolicy("p", SOURCE, "1",
                 Set.of(SourceContentType.IDENTITY), Set.of(ProjectionSurface.NUDGER_WEB), FROM, null,
                 Duration.ZERO, MediaCachePolicy.NONE, AttributionRequirement.NONE,
-                RedistributionPolicy.PROHIBITED, LocalDate.of(2026, 1, 1));
+                RedistributionPolicy.ALLOWED, LocalDate.of(2026, 1, 1), List.of(URI.create("https://example.test/terms")));
 
         assertThat(openEnded.isEffectiveAt(Instant.parse("2099-01-01T00:00:00Z"))).isTrue();
     }
@@ -91,8 +101,19 @@ class SourceUsagePolicyTest {
     void rejectsAnIntervalThatEndsBeforeItBegins() {
         assertThatThrownBy(() -> new SourceUsagePolicy("p", SOURCE, "1", Set.of(), Set.of(), UNTIL, FROM,
                 Duration.ZERO, MediaCachePolicy.NONE, AttributionRequirement.NONE,
-                RedistributionPolicy.PROHIBITED, LocalDate.of(2026, 1, 1)))
+                RedistributionPolicy.PROHIBITED, LocalDate.of(2026, 1, 1), List.of(URI.create("https://example.test/terms"))))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("effectiveUntil must not precede effectiveFrom");
+    }
+
+    @Test
+    void prohibitsPublicationWhenRedistributionIsNotPermitted() {
+        SourceUsagePolicy prohibited = new SourceUsagePolicy("p", SOURCE, "1",
+                Set.of(SourceContentType.ATTRIBUTE), Set.of(ProjectionSurface.NUDGER_WEB), FROM, null,
+                Duration.ZERO, MediaCachePolicy.NONE, AttributionRequirement.NONE,
+                RedistributionPolicy.PROHIBITED, LocalDate.of(2026, 1, 1),
+                List.of(URI.create("https://example.test/terms")));
+
+        assertThat(prohibited.allows(SourceContentType.ATTRIBUTE, ProjectionSurface.NUDGER_WEB, DURING)).isFalse();
     }
 }

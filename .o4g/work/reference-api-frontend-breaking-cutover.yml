@@ -7,19 +7,26 @@ spec:
   purpose: Move consumer, B2B and open-data readers to typed licensed projections in one coordinated API version change.
   roadmapRef: m7-product-data-reference
   state: ACCEPTED
+  executionPhase: DEVELOPMENT
+  priority: 220
   dependsOn:
     - reference-resolution-and-surface-projections
     - product-family-model-grouping
     - consumer-search-lexical-refactor
+    - reference-domain-slice-contracts
   decisionRefs:
     - ADR-0010
   pathScope:
     - front-api/**
     - frontend/**
     - b2b-api/**
+    - b2b-frontend/**
     - services/opendata/**
     - services/data-reference/**
     - ui/**
+    - docs/architecture/**
+    - docs/b2b/**
+    - docs/operations/**
   acceptanceCriteria:
     - id: AC1
       statement: >-
@@ -57,3 +64,11 @@ spec:
       statement: >-
         Existing B2B product.price identity and current-offer mapping reads the B2B projection plus OfferHead summary without
         changing its five-credit/no-data contract; the new history facet remains governed by its separate WorkOrder.
+  implementationPlan:
+    - >-
+      Freeze the new product DTO/OpenAPI and every server-controlled surface, then update generated clients and all readers
+      in the same bounded lot. Include ui image/sitemap/open-data and B2B frontend consumers explicitly. Validate locally
+      and on bounded beta data; the full-reader switch is reference-beta-cutover, not an implicit production deploy.
+    - >-
+      Retain old immutable runtime artifacts for rollback. Do not leave a permanent legacy read fallback in the new release;
+      missing policy-allowed data is absent with the existing contract's no-data treatment.

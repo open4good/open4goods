@@ -1,0 +1,52 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: workorder-specifications-corpus
+  name: WorkOrder specification files outside the corpus budget
+spec:
+  purpose: >-
+    Give detailed WorkOrder design a checked home in .o4g/specifications/ so that prompts/nudger-spec.md can demand
+    decision-complete specifications without growing the budgeted open-order corpus, which today is resolved by raising
+    work_open_lines (383 on 2026-09-08, 1442 at HEAD on 2026-09-13).
+  roadmapRef: m0-governance
+  state: ACCEPTED
+  executionPhase: DEVELOPMENT
+  priority: 90
+  pathScope:
+    - .o4g/specifications/**
+    - archive/specs/**
+    - scripts/verify/documentation_lint.py
+    - scripts/work/wo.py
+    - scripts/tests/workorder-tools.test.sh
+    - scripts/tests/corpus-budget-negative.test.sh
+    - AGENTS.md
+    - prompts/nudger-spec.md
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        A WorkOrder may declare spec.specificationRefs, a list of paths matching
+        ^(\.o4g/specifications|archive/specs)/[a-z0-9][a-z0-9-]*\.md$. documentation_lint.py refuses a malformed entry, an
+        open order entry outside .o4g/specifications/, an entry that does not resolve to a file, and a file under
+        .o4g/specifications/ that no open WorkOrder references. Specification files need no front matter and have no
+        language rule; acceptanceCriteria remain the only checked contract.
+    - id: AC2
+      statement: >-
+        wo.py close moves each specification file whose last open referrer is the closing order to archive/specs/ and
+        rewrites every ledger record citing it to the archive/specs/ path; a file still cited by another open order stays in
+        place. workorder-tools.test.sh covers the unshared and the shared case and fails when the move is removed.
+    - id: AC3
+      statement: >-
+        Neither directory counts toward any corpus budget measure and no size limit applies to a specification file. This is
+        proven by corpus-budget-negative.test.sh adding a 600-line file under each directory and asserting every measure is
+        unchanged; check_corpus_budget.py itself is not modified.
+    - id: AC4
+      statement: >-
+        prompts/nudger-spec.md section Required specification depth directs design detail that exceeds purpose and criteria
+        into .o4g/specifications/<id>.md referenced by specificationRefs, and SPECIFY step 6 no longer instructs raising the
+        work_open_lines ceiling to fit a specification. AGENTS.md states the same in at most three lines.
+    - id: AC5
+      statement: >-
+        ./scripts/lint.sh passes on the closing commit, and the commit is made from a tree that holds no other session's
+        uncommitted .o4g/ changes, since the generated roadmap and the budget are measured from the whole working tree.
+  evidenceRefs:
+    - 'note: 2026-09-13 owner ruling -- specification files live in .o4g/specifications/, a closed order moves its file to archive/specs/, and no per-file size limit applies. Mirrors jumo WorkOrders workorder-specification-refs-contract and workorder-specifications-corpus.'

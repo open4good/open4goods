@@ -117,6 +117,40 @@ def check_logging(workflow: dict, manifest: dict[str, dict], relative: str) -> l
     return problems
 
 
+def job_environment(job: dict) -> str | None:
+    """Return the explicit GitHub Environment name for a workflow job."""
+    environment = job.get("environment")
+    if isinstance(environment, str):
+        return environment
+    if isinstance(environment, dict) and isinstance(environment.get("name"), str):
+        return environment["name"]
+    return None
+
+
+def check_environment_scope(workflow: dict, manifest: dict[str, dict], relative: str) -> list[str]:
+    """Ensure a target-scoped input is used only by a job targeting that Environment."""
+    problems: list[str] = []
+    for job_name, job in (workflow.get("jobs") or {}).items():
+        if not isinstance(job, dict):
+            continue
+        environment = job_environment(job)
+        references = find_references(yaml.safe_dump(job, sort_keys=False))
+        for _, _, name in references:
+            declaration = manifest.get(name)
+            if not declaration:
+                continue
+            allowed = declaration.get("environments")
+            if not allowed:
+                continue
+            if environment not in allowed:
+                allowed_text = ", ".join(allowed)
+                problems.append(
+                    f"{relative}: job {job_name!r} uses {name} outside its Environment scope "
+                    f"({allowed_text}); job environment is {environment or 'unset'}"
+                )
+    return problems
+
+
 def check_file(path: Path, manifest: dict[str, dict]) -> list[str]:
     relative = path.relative_to(ROOT).as_posix()
     text = path.read_text(encoding="utf-8")
@@ -148,6 +182,7 @@ def check_file(path: Path, manifest: dict[str, dict]) -> list[str]:
         return problems
     if isinstance(workflow, dict):
         problems.extend(check_logging(workflow, manifest, relative))
+        problems.extend(check_environment_scope(workflow, manifest, relative))
     return problems
 
 

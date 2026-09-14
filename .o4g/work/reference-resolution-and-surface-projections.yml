@@ -7,10 +7,15 @@ spec:
   purpose: Resolve policy-filtered evidence into auditable per-surface values and a single GTIN read model.
   roadmapRef: m7-product-data-reference
   state: ACCEPTED
+  executionPhase: DEVELOPMENT
+  priority: 130
   dependsOn:
     - canonical-concept-registry
     - quantity-and-language-normalization
     - source-assertion-store
+    - reference-source-policy-review
+    - reference-domain-slice-contracts
+    - price-observation-timeseries
   decisionRefs:
     - ADR-0010
   pathScope:
@@ -60,3 +65,18 @@ spec:
       statement: >-
         Unit and Elasticsearch integration tests cover source-order permutations, expiry, policy periods, corrections,
         regulatory authority, conflicts, anti-leak behavior, optimistic retries, alias migration and composition of all slices.
+    - id: AC11
+      statement: >-
+        Implement all offer/evaluation/search producers named by reference-domain-slice-contracts, including cohort statistics
+        and score refresh, through typed ports. Test against eligible source values and OfferHead without a legacy Product
+        fallback; denied evidence cannot affect scores, ranking, grouping or search text indirectly.
+    - id: AC12
+      statement: >-
+        Source-transition delivery is acknowledged only after durable recompute enqueue; workers coalesce by GTIN and retry
+        version conflicts. Registry/policy/clock expiry changes have bounded scan checkpoints. A restarted worker repairs
+        missed refreshes, including both sides of a GTIN relink, and metrics expose lag without raw evidence.
+  implementationPlan:
+    - >-
+      Fix registry, policy, rule/normalizer versions and evaluation instant for replay comparisons. Canonical hash comparison
+      excludes operational delivery timestamps but includes every published value and provenance decision; document that
+      canonical representation. A current-time expiry reevaluation is a new input, not a nondeterministic replay.

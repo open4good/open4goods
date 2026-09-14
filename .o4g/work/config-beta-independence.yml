@@ -1,0 +1,33 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: config-beta-independence, name: Beta independence from the legacy configuration repository}
+spec:
+  purpose: Prove beta build, deployment and recovery no longer need open4goods-config while production retains its current runtime.
+  roadmapRef: m1-config-autonomy
+  state: ACCEPTED
+  executionPhase: DEVELOPMENT
+  priority: 60
+  dependsOn: [config-beta-cutover]
+  decisionRefs: [ADR-0013]
+  pathScope:
+    - 'ops/**'
+    - 'scripts/**'
+    - '.github/workflows/**'
+    - 'docs/operations/**'
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        A clean beta release and rollback consume only public structure, beta Environment inputs and host-generated
+        material, with no runtime fetch from open4goods-config.
+    - id: AC2
+      statement: >-
+        Five Java applications, both Nuxt frontends and beta routes for images, product/brand sitemaps and open-data
+        pass checks with the legacy config checkout unavailable on beta.
+    - id: AC3
+      statement: >-
+        Retain a production-only legacy deployment/recovery description and sanitized input-name checklist for
+        config-prod-cutover; do not archive the private repository or disable its production credentials.
+  implementationPlan:
+    - >-
+      Remove beta config-repository reads by environment-specific routing; production retirement belongs to its later
+      phase.

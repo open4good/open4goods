@@ -6,7 +6,7 @@ metadata:
 spec:
   purpose: Replace supplier taxonomies as internal authority with a complete independently authored O4G registry.
   roadmapRef: m7-product-data-reference
-  state: IN_PROGRESS
+  state: COMPLETED
   dependsOn:
     - product-reference-contract
   decisionRefs:
@@ -43,3 +43,6 @@ spec:
     - id: AC8
       statement: Contract tests load the complete registry offline and prove every migrated vertical/attribute and external
         mapping is addressable by stable id; a machine-readable coverage report is produced on every registry change.
+  evidenceRefs:
+    - test:mvn --offline -pl services/data-reference test
+    - verification:complete registry validates 94 legacy resources (93 migrated, 1 merged)

@@ -2,11 +2,13 @@
 package org.open4goods.api.controller.api;
 
 import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import org.open4goods.api.dto.IcecatCategoryAttributesDto;
 import org.open4goods.api.dto.IcecatCategoryCandidateDto;
@@ -16,22 +18,35 @@ import org.open4goods.icecat.model.IcecatCategoryFeatureDocument;
 import org.open4goods.icecat.model.IcecatCategoryFeatureGroupDocument;
 import org.open4goods.icecat.model.IcecatCategoryDocument;
 import org.open4goods.icecat.model.IcecatFeatureDocument;
+import org.open4goods.icecat.model.IcecatMappingCoverage;
+import org.open4goods.icecat.model.IcecatMappingRebuildJob;
+import org.open4goods.icecat.model.IcecatUnmappedCategory;
 import org.open4goods.icecat.services.IcecatFeatureResolver;
 import org.open4goods.icecat.services.IcecatIndexService;
+import org.open4goods.icecat.services.IcecatMappingCoverageService;
+import org.open4goods.icecat.services.IcecatMappingRebuildService;
+import org.open4goods.icecat.services.IcecatRegistryProjectionService;
 import org.open4goods.icecat.services.IcecatService;
+import org.open4goods.icecat.services.StaleRegistryProjectionException;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -40,13 +55,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
- * Admin endpoints for Icecat reference data browsing and vertical category matching.
+ * Read-only admin endpoints for browsing Icecat reference data and mapping candidates.
  */
 @RestController
 @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
 @Profile("!beta")
 @Tag(name = "Icecat", description = "Browse the local Icecat product catalogue index (features, categories, feature groups, suppliers), "
-        + "search and assign Icecat categories to verticals, and manage the Elasticsearch Icecat index. "
+        + "inspect mapping candidates, and manage the Elasticsearch Icecat index. "
         + "Not active in the beta profile.")
 public class IcecatController {
 
@@ -216,29 +231,6 @@ public class IcecatController {
 		return ResponseEntity.ok(toCategoryAttributes(category.get()));
 	}
 
-	@PostMapping("/icecat/vertical/{verticalId}/category/{catId}")
-	@Operation(
-			summary = "Assign an Icecat category to a vertical",
-			description = "Sets the icecatTaxonomyId field on the in-memory VerticalConfig for the given vertical "
-					+ "and returns the updated config. This does NOT persist to disk — write the returned config "
-					+ "back to the vertical YAML file to make the change durable.")
-	@ApiResponses({
-			@ApiResponse(responseCode = "200", description = "Updated VerticalConfig with the new Icecat category ID"),
-			@ApiResponse(responseCode = "404", description = "Vertical not found")
-	})
-	public ResponseEntity<VerticalConfig> assignCategoryToVertical(
-			@Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop')", required = true)
-			@PathVariable String verticalId,
-			@Parameter(description = "Numeric Icecat category ID to assign to the vertical", required = true)
-			@PathVariable Integer catId) {
-		VerticalConfig vc = verticalsService.getConfigById(verticalId);
-		if (vc == null) {
-			return ResponseEntity.notFound().build();
-		}
-		vc.setIcecatTaxonomyId(catId);
-		return ResponseEntity.ok(vc);
-	}
-
 	// -------------------------------------------------------------------------
 	// Index management endpoints
 	// -------------------------------------------------------------------------
@@ -340,4 +332,62 @@ public class IcecatController {
 		}
 		return result;
 	}
+}
+
+/**
+ * Beta-safe, read-only mapping administration backed solely by the Git registry.
+ *
+ * <p>It intentionally has no PUT or DELETE mapping operation. This package-private
+ * component lives beside the legacy controller, whose beta profile excludes it.
+ */
+@RestController
+@RequestMapping("/admin/icecat/mappings")
+@PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
+@Tag(name = "Icecat mapping administration", description = "Read-only coverage from the Git-authored O4G registry")
+@Import({IcecatRegistryProjectionService.class, IcecatMappingCoverageService.class, IcecatMappingRebuildService.class})
+class IcecatMappingAdminController {
+
+    private final IcecatMappingCoverageService coverageService;
+    private final IcecatMappingRebuildService rebuildService;
+
+    IcecatMappingAdminController(
+            IcecatMappingCoverageService coverageService, IcecatMappingRebuildService rebuildService) {
+        this.coverageService = coverageService;
+        this.rebuildService = rebuildService;
+    }
+
+    @GetMapping("/coverage")
+    @Operation(summary = "Report reviewed Icecat category coverage by editorial vertical")
+    IcecatMappingCoverage coverage(@RequestParam(defaultValue = "2026-09-12") LocalDate effectiveOn) {
+        return coverageService.coverage(effectiveOn);
+    }
+
+    @GetMapping("/unmapped-categories")
+    @Operation(summary = "List bounded, unmapped Icecat categories for owner review")
+    List<IcecatUnmappedCategory> unmappedCategories(
+            @RequestParam(defaultValue = "2026-09-12") LocalDate effectiveOn,
+            @RequestParam(defaultValue = "100") int limit) {
+        if (limit < 1 || limit > 500) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "limit must be between 1 and 500");
+        }
+        return coverageService.unmappedCategories(effectiveOn, limit);
+    }
+
+    @PostMapping("/rebuild")
+    @Operation(summary = "Asynchronously rebuild the Git-authored registry projection")
+    ResponseEntity<IcecatMappingRebuildJob> rebuild(
+            @RequestHeader(name = HttpHeaders.IF_MATCH, required = false) String expectedHash) {
+        try {
+            return ResponseEntity.accepted().body(rebuildService.submit(expectedHash));
+        } catch (StaleRegistryProjectionException exception) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, exception.getMessage(), exception);
+        }
+    }
+
+    @GetMapping("/rebuild/{jobId}")
+    @Operation(summary = "Return asynchronous rebuild status")
+    IcecatMappingRebuildJob rebuildStatus(@PathVariable UUID jobId) {
+        return rebuildService.find(jobId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "unknown rebuild job " + jobId));
+    }
 }

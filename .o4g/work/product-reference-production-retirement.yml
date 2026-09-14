@@ -1,0 +1,28 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: product-reference-production-retirement, name: Retire legacy product data after production observation}
+spec:
+  purpose: Delete exact legacy production indexes only after the observation window and a verified recovery snapshot.
+  roadmapRef: m9-post-production-retirement
+  state: ACCEPTED
+  executionPhase: POST_PRODUCTION
+  priority: 900
+  dependsOn: [reference-coordinated-cutover]
+  decisionRefs: [ADR-0013]
+  pathScope:
+    - 'scripts/migration/**'
+    - 'scripts/verify/**'
+    - 'docs/operations/**'
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        Observe seven complete healthy production days since the last successful cutover, with no rollback, zero legacy
+        reads/writes and bounded projection/price-rollup lag; a rollback resets the window.
+    - id: AC2
+      statement: >-
+        Verify a restorable final snapshot, exact resolved index names, retention expiry and restore owner; aliases
+        still serving any reader are not deletion targets.
+    - id: AC3
+      statement: >-
+        Execute the owner-authorized exact deletion and report removed indexes, recovery reference and expiry without
+        deleting the new dataset or shared stores.

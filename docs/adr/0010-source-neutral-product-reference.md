@@ -83,8 +83,9 @@ versioned by brand and class; an unmatched prefix produces candidates, not membe
 
 Rule and policy changes can rebuild current projections without provider access. Storage
 grows through source heads and surface decisions, so mappings and shard topology are
-benchmarked against the complete read alias before ingestion. Cutover is a shadow build,
-comparison, final delta and atomic alias switch. A legacy unattributed baseline may keep
-otherwise unrecoverable GTIN identity fields, but cannot invent provider provenance or
-enter B2B/open-data surfaces. The old product model is removed only after observation and
-rollback windows close.
+benchmarked before full-volume ingestion. ADR-0013 defines this campaign's input as a pinned
+legacy product backup followed by provider enrichment. The converter preserves evidenced
+source fields under reviewed policies and necessary unattributed identity on NUDGER_WEB
+only; it invents no provenance. Promotion accepts a dated snapshot and resumed collections,
+not a complete final delta. Beta code retirement precedes production rollout while immutable
+old binaries/config/data preserve rollback; physical production retirement waits seven days.

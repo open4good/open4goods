@@ -7,7 +7,10 @@ spec:
   purpose: Stop PA-API enrichment and remove persisted licensed content without affecting independent Amazon merchant feeds.
   roadmapRef: m7-product-data-reference
   state: ACCEPTED
-  dependsOn: []
+  executionPhase: DEVELOPMENT
+  priority: 80
+  dependsOn:
+    - reference-backup-input-contract
   decisionRefs:
     - ADR-0010
   pathScope:
@@ -16,38 +19,47 @@ spec:
     - api/src/test/**
     - model/**
     - services/remotefilecaching/**
+    - scripts/migration/**
+    - services/data-reference/**
     - docs/architecture/amazon-paapi-completion.md
     - docs/operations/**
   acceptanceCriteria:
     - id: AC1
-      statement: >-
-        Amazon PA-API completion is disabled by default and cannot be scheduled or called by an active ingestion path; startup
-        and metrics prove zero PA-API request attempts while unrelated Amazon merchant feed adapters remain enabled.
+      statement: Amazon PA-API completion is disabled by default and cannot be scheduled or called by an active ingestion
+        path; startup and metrics prove zero PA-API request attempts while unrelated Amazon merchant feed adapters remain
+        enabled.
     - id: AC2
-      statement: >-
-        A read-only inventory classifies every Product field, offer, resource, description, category, cache entry and source code
-        attributable to PA-API separately from merchant-feed data and reports counts before any deletion.
+      statement: Inventory classifies legacy fields, offers, media and cache entries as proven PA-API, proven independent
+        merchant or ambiguous, with counts and evidence type. The shared amazon.fr label alone never proves origin; ambiguity
+        is a supported outcome and does not block implementation of exclusion or future independently identified ingestion.
     - id: AC3
-      statement: >-
-        An idempotent migration supports INVENTORY and APPLY modes, explicit index/alias targeting, bounded PIT/search_after
+      statement: An idempotent migration supports INVENTORY and APPLY modes, explicit index/alias targeting, bounded PIT/search_after
         batches, optimistic retries, checkpoints, cancellation and a final reconciliation report.
     - id: AC4
-      statement: >-
-        APPLY removes PA-API attributes, texts, offers, media references and cached non-image/image content, but retains ASIN
-        identifiers and never matches records by a broad amazon substring or shared merchant display name.
+      statement: On exact beta migration targets, APPLY excludes proven PA-API and ambiguous potentially PA-API content from
+        the new dataset while preserving approved ASIN identity and proven independent merchant records. It does not selectively
+        erase ambiguous legacy evidence or caches whose ownership is unproven; fresh merchant input has explicit origin.
     - id: AC5
-      statement: >-
-        Cache deletion resolves exact indexed object keys, prevents path traversal and records count/hash outcomes without
-        provider content; dry-run output is sufficient for an operator to review every target class before APPLY.
+      statement: Delete only exact proven PA-API beta cache objects after target/ownership checks and a recovery record; quarantine
+        ambiguous references from publication. Shared/prod cache purge is deferred to the production runbook and never follows
+        a broad Amazon substring. Dry-run reports classes, counts and sanitized coordinates.
     - id: AC6
-      statement: >-
-        A deny-all source policy prevents historical PA-API evidence from entering NUDGER_WEB, B2B_API or ODBL_EXPORT while
-        retaining only the explicitly approved ASIN identity treatment.
+      statement: A deny-all source policy prevents historical PA-API evidence from entering NUDGER_WEB, B2B_API or ODBL_EXPORT
+        while retaining only the explicitly approved ASIN identity treatment.
     - id: AC7
-      statement: >-
-        Fixtures containing both PA-API and Amazon merchant data prove selective purge, ASIN preservation, zero active calls,
-        idempotent rerun and absence of PA-API content from projections, serialization, logs and cached files.
+      statement: Fixtures containing both PA-API and Amazon merchant data prove selective purge, ASIN preservation, zero active
+        calls, idempotent rerun and absence of PA-API content from projections, serialization, logs and cached files.
     - id: AC8
-      statement: >-
-        The runbook separates delivery of the migration from production APPLY; production execution requires recorded inventory,
-        backup/rollback reference and post-run evidence and is never triggered by application startup.
+      statement: The runbook separates delivery of the migration from production APPLY; production execution requires recorded
+        inventory, backup/rollback reference and post-run evidence and is never triggered by application startup.
+  evidenceRefs:
+    - blocker:legacy Product provenance stores the shared amazon.fr datasource label but no PA-API-versus-merchant origin,
+      so AC2/AC4 cannot distinguish historical licensed content without unsafe matching
+    - 'note: 2026-09-11 resolution: model uncertainty explicitly and exclude ambiguous content from the rebuilt dataset; do
+      not infer a selective historical purge. Production mutation remains owner-gated under ADR-0013.'
+    - '2026-09-12 beta: the API service is active, reports zero PA-API/Product Advertising API endpoint log matches since
+      2026-09-11, and has no Amazon or PA-API scheduled systemd unit. The local PA-API service now quarantines all configured
+      calls and the named amazon-paapi source policy denies all projection surfaces.'
+    - '2026-09-14 owner ruling: exclude the complete ambiguous amazon.fr legacy slice during the controlled rebuilt-dataset
+      import. Do not infer PA-API provenance or selectively erase ambiguous historical records; production APPLY remains
+      owner-gated under ADR-0013.'

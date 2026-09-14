@@ -26,7 +26,7 @@ class GitRegistryRuntimeImporterTest {
         assertThat(installed.idempotent()).isFalse();
         assertThat(installed.installedAt()).isEqualTo(Instant.parse("2026-09-11T07:30:00Z"));
         assertThat(installed.classCount()).isEqualTo(7);
-        assertThat(installed.attributeCount()).isEqualTo(2);
+        assertThat(installed.attributeCount()).isEqualTo(93);
         assertThat(retried.idempotent()).isTrue();
         assertThat(retried.contentHash()).isEqualTo(installed.contentHash());
         assertThat(importer.current()).hasValueSatisfying(index -> assertThat(index.contentHash())
@@ -35,16 +35,18 @@ class GitRegistryRuntimeImporterTest {
 
     @Test
     void rejectsChangedContentUntilItsRegistryVersionAdvances() throws IOException {
-        importer.importDefault();
+        RegistryImportReport installed = importer.importDefault();
 
         assertThatThrownBy(() -> importer.importGitResource(bytes(registryJson().replace("\"Width\"", "\"Product width\""))))
                 .isInstanceOf(RegistryValidationException.class)
                 .hasMessageContaining("without a version increment");
+        assertThat(importer.current()).hasValueSatisfying(index -> assertThat(index.contentHash())
+                .isEqualTo(installed.contentHash()));
 
         RegistryImportReport upgraded = importer.importGitResource(bytes(registryJson()
-                .replace("\"registryVersion\": 1", "\"registryVersion\": 2")
+                .replace("\"registryVersion\": 4", "\"registryVersion\": 5")
                 .replace("\"Width\"", "\"Product width\"")));
-        assertThat(upgraded.registryVersion()).isEqualTo(new RegistryVersion(2));
+        assertThat(upgraded.registryVersion()).isEqualTo(new RegistryVersion(5));
         assertThat(upgraded.idempotent()).isFalse();
     }
 

@@ -7,12 +7,15 @@ spec:
   purpose: Reuse the completed Icecat transport/reference work while replacing direct Product mutation with source records.
   roadmapRef: m7-product-data-reference
   state: ACCEPTED
+  executionPhase: DEVELOPMENT
+  priority: 150
   dependsOn:
     - icecat-completion-i18n-and-coverage
     - icecat-reference-index-runtime
     - icecat-vertical-mapping-admin
     - source-assertion-store
     - quantity-and-language-normalization
+    - reference-source-policy-review
   decisionRefs:
     - ADR-0007
     - ADR-0010
@@ -22,6 +25,8 @@ spec:
     - api/src/main/java/org/open4goods/api/services/completion/IcecatCompletionService.java
     - api/src/test/**
     - model/**
+    - api/pom.xml
+    - docs/operations/**
   acceptanceCriteria:
     - id: AC1
       statement: >-
@@ -41,7 +46,8 @@ spec:
         approved Icecat-to-O4G mappings normalize evidence and unmapped fields remain auditable without entering projections.
     - id: AC5
       statement: >-
-        A complete response writes a FULL ACTIVE head, provider not-found/removal writes the configured terminal state, and
+        A response complete across the configured locale set writes a FULL ACTIVE head; one-locale refresh is PARTIAL.
+        Provider not-found/removal writes the configured terminal state, and
         restricted/transient failures use UNAVAILABLE/REJECTED semantics without deleting the last valid head prematurely.
     - id: AC6
       statement: >-
@@ -55,3 +61,8 @@ spec:
       statement: >-
         Contract tests cover bulk/live equivalence, language, repeated values, missing unit, media, refresh, removal, restricted
         response, unmapped feature, policy denial and two identical ingestions yielding the same head hash.
+  implementationPlan:
+    - >-
+      Keep one Icecat product-id head. Single-locale refreshes are PARTIAL updates of that locale's coordinates; FULL
+      requires the full configured locale set. Prove an English refresh cannot delete French assertions. Use shared store
+      unavailable/rejected semantics and beta coverage endpoints to report unmapped evidence.

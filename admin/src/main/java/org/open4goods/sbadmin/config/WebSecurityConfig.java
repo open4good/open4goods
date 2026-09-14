@@ -10,6 +10,7 @@ import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -29,6 +30,7 @@ import de.codecentric.boot.admin.server.config.AdminServerProperties;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
+@EnableConfigurationProperties(SbaRegistrationCredentials.class)
 /**
  * HTTP Security configuration
  * 
@@ -44,9 +46,13 @@ public class WebSecurityConfig {
 
 	private final AuthenticationProvider authProvider;
 
-	public WebSecurityConfig(AuthenticationProvider authProvider, AdminServerProperties adminServer) {
+	private final SbaRegistrationCredentials registrationCredentials;
+
+	public WebSecurityConfig(AuthenticationProvider authProvider, AdminServerProperties adminServer,
+			SbaRegistrationCredentials registrationCredentials) {
 		this.authProvider = authProvider;
 		this.adminServer = adminServer;
+		this.registrationCredentials = registrationCredentials;
 	}
 
 	//////////////////////////////////////////////
@@ -78,6 +84,8 @@ public class WebSecurityConfig {
 	AuthenticationManager authManager(HttpSecurity http) throws Exception {
 		AuthenticationManagerBuilder authenticationManagerBuilder = http
 				.getSharedObject(AuthenticationManagerBuilder.class);
+		authenticationManagerBuilder.authenticationProvider(
+				new SbaRegistrationAuthenticationProvider(registrationCredentials));
 		authenticationManagerBuilder.authenticationProvider(authProvider);
 		return authenticationManagerBuilder.build();
 	}

@@ -3,9 +3,11 @@ kind: WorkOrder
 metadata: {id: config-repository-retirement, name: Retire open4goods-config}
 spec:
   purpose: Remove the final operational dependency and archive the private repository without rewriting its history.
-  roadmapRef: m1-config-autonomy
+  roadmapRef: m9-post-production-retirement
   state: ACCEPTED
-  dependsOn: [config-prod-cutover]
+  executionPhase: POST_PRODUCTION
+  priority: 950
+  dependsOn: [config-prod-cutover, product-reference-production-retirement, xwiki-production-retirement]
   decisionRefs: [ADR-0006]
   pathScope: ['.github/workflows/**', 'ops/config/**', 'scripts/**', 'docs/operations/**']
   acceptanceCriteria:

@@ -121,6 +121,19 @@ def lint(root: Path) -> list[str]:
                 problems.append(f"{path.name}: invalid YAML: {exc}")
                 continue
             spec = data.get("spec") or {}
+            if spec.get("executionPhase") not in {"DEVELOPMENT", "PRODUCTION", "POST_PRODUCTION"}:
+                problems.append(f"{path.name}: explicit executionPhase is required")
+            if type(spec.get("priority")) is not int or spec["priority"] < 0:
+                problems.append(f"{path.name}: nonnegative integer priority is required")
+            criteria = spec.get("acceptanceCriteria") or []
+            if not criteria or any(not isinstance(item, dict) or not item.get("id") or not item.get("statement") for item in criteria):
+                problems.append(f"{path.name}: acceptanceCriteria need id and statement")
+            elif len({item["id"] for item in criteria}) != len(criteria):
+                problems.append(f"{path.name}: duplicate acceptance criterion id")
+            for field in ("implementationPlan", "externalBlockers"):
+                entries = spec.get(field, [])
+                if not isinstance(entries, list) or any(not isinstance(item, str) or not item.strip() for item in entries):
+                    problems.append(f"{path.name}: {field} must be a list of nonempty strings")
             for identifier in spec.get("decisionRefs") or []:
                 token = str(identifier).removeprefix("ADR-")
                 if token not in decisions:

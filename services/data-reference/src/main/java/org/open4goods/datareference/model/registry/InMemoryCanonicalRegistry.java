@@ -76,6 +76,15 @@ public final class InMemoryCanonicalRegistry implements CanonicalRegistryLookup 
     }
 
     /**
+     * Returns every Git-authored editorial vertical in deterministic registry order.
+     *
+     * @return immutable vertical views
+     */
+    public List<RegistryVerticalView> verticalViews() {
+        return List.copyOf(verticalViews.values());
+    }
+
+    /**
      * Returns the registry's declared attribute count for import reconciliation.
      *
      * @return number of addressable attributes

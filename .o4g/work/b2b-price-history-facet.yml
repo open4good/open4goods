@@ -7,8 +7,11 @@ spec:
   purpose: Serve licensed provider price history through the existing metered B2B contract.
   roadmapRef: m7-product-data-reference
   state: ACCEPTED
+  executionPhase: DEVELOPMENT
+  priority: 195
   dependsOn:
     - price-observation-timeseries
+    - reference-source-policy-review
   decisionRefs:
     - ADR-0005
     - ADR-0011
@@ -51,3 +54,8 @@ spec:
       statement: >-
         Unit and Testcontainers tests cover both granularities, cursor stability, late rollups, multi-provider/currency data,
         policy filtering, redaction, all no-pay cases, debit idempotence and a query plan that does not scan Product documents.
+  implementationPlan:
+    - >-
+      Preserve the current eight-credit requirement: each nonempty served page uses the existing reserve/settle and request
+      idempotency contract. DAY/CHANGE cursors bind all query filters and snapshot/policy version; public provider selectors
+      are approved public keys, never internal feed ids. Beta tests use isolated billing fixtures, not production balances.

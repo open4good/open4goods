@@ -7,6 +7,8 @@ spec:
   purpose: Add stable model/family relations and prefix-assisted discovery while preserving GTIN as leaf identity.
   roadmapRef: m7-product-data-reference
   state: ACCEPTED
+  executionPhase: DEVELOPMENT
+  priority: 180
   dependsOn:
     - canonical-concept-registry
     - reference-resolution-and-surface-projections
@@ -51,3 +53,13 @@ spec:
       statement: >-
         Fixtures cover punctuation/case, regional suffixes, sizes embedded in model codes, identical prefixes across brands or
         classes, explicit provider relations, rule overlap, merge/split and arrival-order independence.
+    - id: AC9
+      statement: >-
+        Group membership, counts, representatives and search tokens are surface-eligible: forbidden relation evidence cannot
+        leak through global membership or B2B/open-data group lookups. If the projection's shared group fields are insufficient,
+        extend the contract with per-surface group decisions before implementing query consumers.
+  implementationPlan:
+    - >-
+      Seed only exact tuple/explicit approved relations. Batch ambiguous family pattern proposals for owner review; leave
+      them as candidates. Derive deterministic ids for initial groups; persist reviewed merge/split decisions so repeated
+      rebuilds do not allocate different group ids. Include affected old/new memberships in refresh work.

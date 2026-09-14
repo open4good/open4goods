@@ -1,0 +1,29 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: xwiki-production-retirement, name: Retire production XWiki infrastructure}
+spec:
+  purpose: Remove production XWiki infrastructure after the replacement survives its recovery window.
+  roadmapRef: m9-post-production-retirement
+  state: ACCEPTED
+  executionPhase: POST_PRODUCTION
+  priority: 920
+  dependsOn: [reference-coordinated-cutover, xwiki-decommission]
+  decisionRefs: [ADR-0013]
+  pathScope:
+    - 'ops/**'
+    - 'scripts/**'
+    - '.github/workflows/**'
+    - 'docs/operations/**'
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        After seven healthy production days, verify content, Google SSO, image, sitemap and open-data behavior and a
+        checksum-verified database/attachment restore.
+    - id: AC2
+      statement: >-
+        Inventory exact XWiki-only containers, database, ingress, certificates, DNS, backup jobs and secrets; preserve
+        shared objects and unrelated ui responsibilities.
+    - id: AC3
+      statement: >-
+        Execute only the owner-authorized targets and record removed resources, archive retention and recovery
+        procedure; production rollback artifacts remain recoverable for their declared retention.

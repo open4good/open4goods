@@ -29,3 +29,4 @@ apache-maven-*-bin.tar.gz
 /workspace-api.log
 /api.log
 *.log
+/artifacts/

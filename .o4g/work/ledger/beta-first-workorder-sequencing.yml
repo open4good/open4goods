@@ -1,0 +1,55 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: beta-first-workorder-sequencing, name: Beta-first campaign contracts and selection}
+spec:
+  purpose: Make the remaining work executable locally and on beta while reserving production for a separate owner order.
+  roadmapRef: m0-governance
+  state: COMPLETED
+  executionPhase: DEVELOPMENT
+  priority: 0
+  dependsOn: [governance-kit-bootstrap]
+  decisionRefs: [ADR-0006, ADR-0010, ADR-0013]
+  pathScope:
+    - .o4g/**
+    - AGENTS.md
+    - prompts/nudger-dev.md
+    - docs/**
+    - scripts/work/**
+    - scripts/generate/generate_roadmap.py
+    - scripts/tests/workorder-tools.test.sh
+    - scripts/verify/documentation_lint.py
+  acceptanceCriteria:
+    - id: AC1
+      statement: Owner decisions define beta write authority, production deferral, restorable beta cleanup and snapshot freshness.
+    - id: AC2
+      statement: All open orders have an execution phase and priority; production dependencies no longer block beta implementation.
+    - id: AC3
+      statement: Backup conversion, capacity feasibility, policy review and domain composition have bounded implementation orders.
+    - id: AC4
+      statement: Selection and begin enforce dependencies and phases, roadmap exposes external blockers, and regression tests pass.
+    - id: AC5
+      statement: >-
+        Canonical lint passes, projections are generated, corpus growth is accounted for and pre-existing source edits are preserved.
+  evidenceRefs:
+    - >-
+      note: AC1 owner decisions 2026-09-11 authorize local/beta development, beta Environment administration and beta-only
+      secrets, exact beta cleanup after verified restore, backup-baseline enrichment and dated-snapshot promotion with
+      resumed collections. Production writes await a separate order; ambiguous mappings and new spend remain owner-held.
+    - >-
+      note: AC2/AC3 all 28 prior open orders were reviewed and rephased; 12 bounded prerequisite/rehearsal/retirement orders
+      were added. No development dependency reaches a production phase. Historical permission blockers were distinguished
+      from unresolved capacity, policy and external-account requirements; original evidence remains in Git history.
+    - >-
+      note: Read-only beta inspection found a manifest reporting 51310975 exported products across four gzip files, about
+      27.4 GB compressed, completed 2026-09-11 at 04:20:50 UTC. The archive mount reported 90 percent usage. No archive
+      integrity, target-index capacity, provider rights or production readiness claim is made from those observations.
+    - >-
+      test: AC4 scripts/tests/workorder-tools.test.sh passes lifecycle, default phase isolation, active-first priority,
+      explicit production-order reference, external blockers, forbidden later-phase dependency, missing dependency and cycle cases.
+    - >-
+      test: AC5 ./scripts/lint.sh passed and mvn --offline clean install completed BUILD SUCCESS across all 34 reactor modules.
+      git diff --check passes. Existing unrelated Java/registry/IDE changes were preserved; Maven result describes this working tree.
+    - >-
+      note: AC5 corpus ceiling growth is deliberate: twelve explicit bounded orders replace implicit work and one short
+      campaign guide explains execution. Long obsolete config/rotation blocker narratives were compacted; the non-normative
+      rule-shaped ceiling remains 137. Generated roadmap/ADR projections come from their generators, not hand edits.

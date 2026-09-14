@@ -1,0 +1,131 @@
+# Runtime configuration contract. Values remain in GitHub Environments; this file contains names only.
+# A service uses its packaged application.yml for any property not listed below.
+version: 1
+services:
+  admin:
+    defaultSource: packaged
+    requiredWhen: service-enabled
+    inputs:
+      - {property: server.port, input: ADMIN_SERVER_PORT, store: vars, environments: [beta, prod]}
+      - {property: xwiki.baseUrl, input: ADMIN_XWIKI_BASE_URL, store: vars, environments: [beta, prod]}
+      - {property: xwiki.username, input: ADMIN_XWIKI_USERNAME, store: secrets, environments: [beta, prod]}
+      - {property: xwiki.password, input: ADMIN_XWIKI_PASSWORD, store: secrets, environments: [beta, prod]}
+      - {property: spring.boot.admin.instance-auth.default-user-name, input: ADMIN_SBA_USERNAME, store: secrets, environments: [beta, prod]}
+      - {property: spring.boot.admin.instance-auth.default-password, input: ADMIN_SBA_PASSWORD, store: secrets, environments: [beta, prod]}
+      - {property: o4g.sba.registration.username, input: ADMIN_SBA_REGISTRATION_USERNAME, store: secrets, environments: [beta]}
+      - {property: o4g.sba.registration.password, input: ADMIN_SBA_REGISTRATION_PASSWORD, store: secrets, environments: [beta]}
+  api:
+    defaultSource: packaged
+    requiredWhen: service-enabled
+    inputs:
+      - {property: root-folder, input: API_ROOT_FOLDER, store: vars, environments: [beta, prod]}
+      - {property: api.backup.data-backup-folder, input: API_BACKUP_DATA_FOLDER, store: vars, environments: [beta, prod]}
+      - {property: api.backup.import-product-path, input: API_BACKUP_IMPORT_PATH, store: vars, environments: [beta, prod]}
+      - {property: admin-key, input: API_ADMIN_KEY, store: secrets, environments: [beta, prod]}
+      - {property: eprel.api-key, input: API_EPREL_API_KEY, store: secrets, environments: [beta, prod]}
+      - {property: feed.api-key, input: API_FEED_API_KEY, store: secrets, environments: [beta, prod]}
+      - {property: feed.api-synch-config.node-name, input: API_FEED_NODE_NAME, store: vars, environments: [beta, prod]}
+      - {property: feed.api-synch-config.node-url, input: API_FEED_NODE_URL, store: vars, environments: [beta, prod]}
+      - {property: gen-ai-config.google-api-json, input: API_GOOGLE_API_JSON, store: secrets, environments: [beta, prod]}
+      - {property: icecat-feature-config.user, input: API_ICECAT_USERNAME, store: secrets, environments: [beta, prod]}
+      - {property: icecat-feature-config.password, input: API_ICECAT_PASSWORD, store: secrets, environments: [beta, prod]}
+      - {property: spring.ai.openai.api-key, input: API_OPENAI_API_KEY, store: secrets, environments: [beta, prod]}
+      - {property: spring.boot.admin.client.url, input: API_SBA_URL, store: vars, environments: [beta, prod]}
+      - {property: spring.boot.admin.client.username, input: API_SBA_USERNAME, store: secrets, environments: [beta, prod]}
+      - {property: spring.boot.admin.client.password, input: API_SBA_PASSWORD, store: secrets, environments: [beta, prod]}
+      - {property: spring.data.redis.host, input: API_REDIS_HOST, store: vars, environments: [beta, prod]}
+      - {property: spring.data.redis.port, input: API_REDIS_PORT, store: vars, environments: [beta, prod]}
+      - {property: spring.data.redis.password, input: API_REDIS_PASSWORD, store: secrets, environments: [beta, prod]}
+      - {property: spring.elasticsearch.uris, input: API_ELASTICSEARCH_URIS, store: vars, environments: [beta, prod]}
+      - {property: spring.elasticsearch.username, input: API_ELASTICSEARCH_USERNAME, store: secrets, environments: [beta, prod]}
+      - {property: spring.elasticsearch.password, input: API_ELASTICSEARCH_PASSWORD, store: secrets, environments: [beta, prod]}
+      - {property: xwiki.base-url, input: API_XWIKI_BASE_URL, store: vars, environments: [beta, prod]}
+      - {property: xwiki.username, input: API_XWIKI_USERNAME, store: secrets, environments: [beta, prod]}
+      - {property: xwiki.password, input: API_XWIKI_PASSWORD, store: secrets, environments: [beta, prod]}
+  b2b-api:
+    defaultSource: packaged
+    requiredWhen: service-enabled
+    inputs:
+      - {property: server.port, input: B2B_API_PORT, store: vars, environments: [beta, prod]}
+      - {property: b2b.public-base-url, input: B2B_PUBLIC_BASE_URL, store: vars, environments: [beta, prod]}
+      - {property: spring.datasource.url, input: B2B_POSTGRES_URL, store: vars, environments: [beta, prod]}
+      - {property: spring.datasource.username, input: B2B_POSTGRES_USER, store: secrets, environments: [beta, prod]}
+      - {property: spring.datasource.password, input: B2B_POSTGRES_PASSWORD, store: secrets, environments: [beta, prod]}
+      - {property: spring.data.redis.host, input: B2B_REDIS_HOST, store: vars, environments: [beta, prod]}
+      - {property: spring.data.redis.port, input: B2B_REDIS_PORT, store: vars, environments: [beta, prod]}
+      - {property: spring.elasticsearch.uris, input: B2B_ELASTICSEARCH_URIS, store: vars, environments: [beta, prod]}
+      - {property: spring.elasticsearch.username, input: B2B_ELASTICSEARCH_USERNAME, store: secrets, environments: [beta, prod]}
+      - {property: spring.elasticsearch.password, input: B2B_ELASTICSEARCH_PASSWORD, store: secrets, environments: [beta, prod]}
+      - {property: b2b.security.jwt-secret, input: B2B_JWT_SECRET, store: secrets, environments: [beta, prod]}
+  front-api:
+    defaultSource: packaged
+    requiredWhen: service-enabled
+    inputs:
+      - {property: server.port, input: FRONT_API_PORT, store: vars, environments: [beta, prod]}
+      - {property: blog.static-domain, input: FRONT_API_BLOG_STATIC_DOMAIN, store: vars, environments: [beta, prod]}
+      - {property: captcha.key, input: FRONT_API_CAPTCHA_KEY, store: secrets, environments: [beta, prod]}
+      - {property: captcha.secret-key, input: FRONT_API_CAPTCHA_SECRET, store: secrets, environments: [beta, prod]}
+      - {property: feedback.github.access-token, input: FRONT_API_GITHUB_TOKEN, store: secrets, environments: [beta, prod]}
+      - {property: front.affiliation-partners.api-base-url, input: FRONT_API_AFFILIATION_URL, store: vars, environments: [beta, prod]}
+      - {property: front.affiliation-partners.api-key, input: FRONT_API_AFFILIATION_KEY, store: secrets, environments: [beta, prod]}
+      - {property: front.review-generation.api-base-url, input: FRONT_API_REVIEW_URL, store: vars, environments: [beta, prod]}
+      - {property: front.review-generation.api-key, input: FRONT_API_REVIEW_KEY, store: secrets, environments: [beta, prod]}
+      - {property: front.security.jwt-secret, input: FRONT_API_JWT_SECRET, store: secrets, environments: [beta, prod]}
+      - {property: front.security.shared-token, input: FRONT_API_SHARED_TOKEN, store: secrets, environments: [beta, prod]}
+      - {property: spring.elasticsearch.uris, input: FRONT_API_ELASTICSEARCH_URIS, store: vars, environments: [beta, prod]}
+      - {property: spring.elasticsearch.username, input: FRONT_API_ELASTICSEARCH_USERNAME, store: secrets, environments: [beta, prod]}
+      - {property: spring.elasticsearch.password, input: FRONT_API_ELASTICSEARCH_PASSWORD, store: secrets, environments: [beta, prod]}
+      - {property: spring.mail.host, input: FRONT_API_MAIL_HOST, store: vars, environments: [beta, prod]}
+      - {property: spring.mail.username, input: FRONT_API_MAIL_USERNAME, store: secrets, environments: [beta, prod]}
+      - {property: spring.mail.password, input: FRONT_API_MAIL_PASSWORD, store: secrets, environments: [beta, prod]}
+      - {property: xwiki.base-url, input: FRONT_API_XWIKI_BASE_URL, store: vars, environments: [beta, prod]}
+      - {property: xwiki.username, input: FRONT_API_XWIKI_USERNAME, store: secrets, environments: [beta, prod]}
+      - {property: xwiki.password, input: FRONT_API_XWIKI_PASSWORD, store: secrets, environments: [beta, prod]}
+      - {property: spring.boot.admin.client.username, input: FRONT_API_SBA_USERNAME, store: secrets, environments: [beta]}
+      - {property: spring.boot.admin.client.password, input: FRONT_API_SBA_PASSWORD, store: secrets, environments: [beta]}
+  ui:
+    defaultSource: packaged
+    requiredWhen: service-enabled
+    inputs:
+      - {property: server.port, input: UI_PORT, store: vars, environments: [beta, prod]}
+      - {property: blog.static-domain, input: UI_BLOG_STATIC_DOMAIN, store: vars, environments: [beta, prod]}
+      - {property: captcha-key, input: UI_CAPTCHA_KEY, store: secrets, environments: [beta, prod]}
+      - {property: captcha-secret, input: UI_CAPTCHA_SECRET, store: secrets, environments: [beta, prod]}
+      - {property: email, input: UI_EMAIL, store: vars, environments: [beta, prod]}
+      - {property: spring.elasticsearch.uris, input: UI_ELASTICSEARCH_URIS, store: vars, environments: [beta, prod]}
+      - {property: spring.elasticsearch.username, input: UI_ELASTICSEARCH_USERNAME, store: secrets, environments: [beta, prod]}
+      - {property: spring.elasticsearch.password, input: UI_ELASTICSEARCH_PASSWORD, store: secrets, environments: [beta, prod]}
+      - {property: spring.mail.host, input: UI_MAIL_HOST, store: vars, environments: [beta, prod]}
+      - {property: spring.mail.username, input: UI_MAIL_USERNAME, store: secrets, environments: [beta, prod]}
+      - {property: spring.mail.password, input: UI_MAIL_PASSWORD, store: secrets, environments: [beta, prod]}
+      - {property: xwiki.base-url, input: UI_XWIKI_BASE_URL, store: vars, environments: [beta, prod]}
+      - {property: xwiki.username, input: UI_XWIKI_USERNAME, store: secrets, environments: [beta, prod]}
+      - {property: xwiki.password, input: UI_XWIKI_PASSWORD, store: secrets, environments: [beta, prod]}
+      - {property: spring.boot.admin.client.username, input: UI_SBA_USERNAME, store: secrets, environments: [beta]}
+      - {property: spring.boot.admin.client.password, input: UI_SBA_PASSWORD, store: secrets, environments: [beta]}
+  b2b-frontend:
+    defaultSource: packaged
+    requiredWhen: service-enabled
+    inputs:
+      - {property: NUXT_PUBLIC_BACKEND_BASE_URL, input: B2B_FRONTEND_PUBLIC_BACKEND_BASE_URL, store: vars, environments: [beta, prod]}
+      - {property: NUXT_BACKEND_PROXY_TARGET, input: B2B_FRONTEND_BACKEND_PROXY_TARGET, store: vars, environments: [beta, prod]}
+      - {property: NUXT_PORT, input: B2B_FRONTEND_PORT, store: vars, environments: [beta, prod]}
+  frontend:
+    defaultSource: packaged
+    requiredWhen: service-enabled
+    inputs:
+      - {property: API_URL, input: FRONTEND_API_URL, store: vars, environments: [beta, prod]}
+      - {property: NUXT_API_URL, input: FRONTEND_NUXT_API_URL, store: vars, environments: [beta, prod]}
+      - {property: NUXT_PUBLIC_API_BASE, input: FRONTEND_PUBLIC_API_BASE, store: vars, environments: [beta, prod]}
+      - {property: MACHINE_TOKEN, input: FRONTEND_MACHINE_TOKEN, store: secrets, environments: [beta, prod]}
+      - {property: NUXT_MACHINE_TOKEN, input: FRONTEND_NUXT_MACHINE_TOKEN, store: secrets, environments: [beta, prod]}
+      - {property: HCAPTCHA_SITE_KEY, input: FRONTEND_HCAPTCHA_SITE_KEY, store: vars, environments: [beta, prod]}
+      - {property: NUXT_HCAPTCHA_SITE_KEY, input: FRONTEND_NUXT_HCAPTCHA_SITE_KEY, store: vars, environments: [beta, prod]}
+  infra:
+    defaultSource: packaged
+    requiredWhen: service-enabled
+    inputs:
+      - {property: ES_HEAP, input: INFRA_ES_HEAP, store: vars, environments: [beta, prod]}
+      - {property: PLAUSIBLE_SECRET_KEY_BASE, input: INFRA_PLAUSIBLE_SECRET_KEY_BASE, store: secrets, environments: [beta, prod]}
+      - {property: GOOGLE_CLIENT_ID, input: INFRA_GOOGLE_CLIENT_ID, store: secrets, environments: [beta, prod]}
+      - {property: GOOGLE_CLIENT_SECRET, input: INFRA_GOOGLE_CLIENT_SECRET, store: secrets, environments: [beta, prod]}

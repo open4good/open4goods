@@ -1,0 +1,55 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata: {id: beta-campaign-readiness, name: Final beta campaign and production readiness}
+spec:
+  purpose: Close development only when the cleaned beta release and dated dataset are a concrete, reproducible production candidate.
+  roadmapRef: m1-config-autonomy
+  state: ACCEPTED
+  executionPhase: DEVELOPMENT
+  priority: 400
+  dependsOn:
+    - reference-beta-cutover
+    - product-reference-legacy-retirement
+    - xwiki-decommission
+    - dead-code-removal-lot-1
+    - config-beta-independence
+    - beta-first-workorder-sequencing
+  decisionRefs: [ADR-0013]
+  pathScope:
+    - '.o4g/**'
+    - 'scripts/verify/**'
+    - 'scripts/deploy/**'
+    - 'scripts/migration/**'
+    - 'docs/operations/**'
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        Every current DEVELOPMENT order except this readiness order is COMPLETED; newly added development orders
+        automatically invalidate readiness until completed. Maintain explicit dependencies for the current graph as well
+        as this campaign-wide check.
+    - id: AC2
+      statement: >-
+        Repeat the beta promotion and forced rollback on the final cleaned SHA, with all local/module/frontend checks,
+        complete reactor and real beta smoke evidence; fixture success alone is insufficient.
+    - id: AC3
+      statement: >-
+        Record a pinned release manifest, checksums, dataset/backup and registry/policy/rule versions, coverage
+        exceptions, capacity/topology settings, private input-name checklist, snapshot time and enrichment freshness
+        gap.
+    - id: AC4
+      statement: >-
+        List every remaining owner decision, third-party credential and required source-rights approval; required
+        coverage or production restore/capacity uncertainty blocks readiness, while explicitly accepted snapshot
+        staleness does not.
+    - id: AC5
+      statement: >-
+        Preserve immutable old production release/config and restorable data references. Deliver production commands,
+        maintenance order, abort/rollback gates and seven-day retirement checklist, without production writes.
+  implementationPlan:
+    - >-
+      At the future owner order revalidate the candidate and readiness dependencies; never interpret COMPLETED as
+      permission to deploy.
+    - >-
+      Implement a campaign-readiness check rejecting open DEVELOPMENT orders other than itself and verifying pinned
+      evidence digests; rerun it in the production launcher. New orders invalidate readiness even if this order is in the
+      ledger. Do not encode readiness as a permanent boolean or infer it only from this dependency list.

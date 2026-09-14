@@ -4,8 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.open4goods.datareference.model.Gtin;
-import org.open4goods.datareference.model.ProjectionSurface;
-import org.open4goods.datareference.model.projection.ProductReferenceProjection;
+import org.open4goods.datareference.model.projection.ProductReferenceProjectionEnvelope;
 
 /**
  * Read access to built product documents.
@@ -20,26 +19,23 @@ public interface ProjectionReadPort {
      * Reads one product document.
      *
      * @param gtin product identity
-     * @param surface surface being served
-     * @return the document, or empty when none was built for that surface
+     * @return the one-GTIN envelope, or empty when none was built
      */
-    Optional<ProductReferenceProjection> find(Gtin gtin, ProjectionSurface surface);
+    Optional<ProductReferenceProjectionEnvelope> find(Gtin gtin);
 
     /**
      * Reads several product documents.
      *
      * @param gtins product identities
-     * @param surface surface being served
      * @return the documents that exist, in the order the identities were given
      */
-    List<ProductReferenceProjection> findAll(List<Gtin> gtins, ProjectionSurface surface);
+    List<ProductReferenceProjectionEnvelope> findAll(List<Gtin> gtins);
 
     /**
-     * Scans every document built for one surface.
+     * Scans every one-GTIN projection envelope.
      *
-     * @param surface surface being scanned
      * @param request page position, size, ordering and failure behavior
      * @return one page of documents
      */
-    ScanPage<ProductReferenceProjection> scan(ProjectionSurface surface, ScanRequest request);
+    ScanPage<ProductReferenceProjectionEnvelope> scan(ScanRequest request);
 }

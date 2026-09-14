@@ -26,8 +26,10 @@ Each host runs the five Java applications through `open4goods@.service` and
 release directory and an atomic `current` symlink. A deploy restarts only its named unit and rolls
 back the symlink when readiness fails.
 
-Beta proves configuration parity, health and rollback before production. Production deploys one
-service at a time. Certificates and keystores are generated on their host.
+Beta proves configuration parity, health and rollback before production. ADR-0013 reserves
+production inputs and execution for a separate owner order; beta independence does not wait for
+private repository archival. Production deploys one service at a time with compatible retained
+artifacts before the coordinated reader/data switch. Certificates and keystores are generated on-host.
 
 The owner chose to archive `open4goods-config` privately without rewriting it. Therefore every
 credential it ever held is invalidated before archive, and none of its history is copied here.

@@ -102,6 +102,10 @@ def lint_corpus(suite: LintSuite) -> None:
         "Deployment inputs",
         [sys.executable, "scripts/verify/check_deployment_inputs.py"],
     )
+    suite.run(
+        "Runtime input contract",
+        [sys.executable, "scripts/verify/check_runtime_input_contract.py"],
+    )
     for label, script in (
         ("Generated roadmap", "scripts/generate/generate_roadmap.py"),
         ("Generated ADR index", "scripts/generate/generate_decision_index.py"),

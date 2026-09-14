@@ -7,9 +7,12 @@ spec:
   purpose: Convert EPREL catalogues and corrections into licensed source records without mutating Product.
   roadmapRef: m7-product-data-reference
   state: ACCEPTED
+  executionPhase: DEVELOPMENT
+  priority: 140
   dependsOn:
     - source-assertion-store
     - quantity-and-language-normalization
+    - reference-source-policy-review
   decisionRefs:
     - ADR-0010
   pathScope:
@@ -18,6 +21,8 @@ spec:
     - api/src/main/java/org/open4goods/api/services/completion/EprelCompletionService.java
     - api/src/test/**
     - model/src/main/java/org/open4goods/model/eprel/**
+    - api/pom.xml
+    - docs/operations/**
   acceptanceCriteria:
     - id: AC1
       statement: >-
@@ -51,3 +56,8 @@ spec:
       statement: >-
         Shared adapter contract tests cover repeated values, deletion, unknown language/unit, provider version change,
         corrected GTIN attachment, withdrawal, policy denial and byte-equivalent output across repeated catalogue ingestion.
+  implementationPlan:
+    - >-
+      Fix source-record and locale completeness in fixtures before FULL replacement can remove translations. Persist the
+      catalogue cursor only after acknowledged heads; never infer withdrawal from an interrupted page. Use shared store
+      status semantics, preserve exact matching evidence and run a bounded real beta import after fixtures pass.

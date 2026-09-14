@@ -7,9 +7,11 @@ spec:
   purpose: Persist replaceable source heads and a compact transition journal for deterministic current-state replay.
   roadmapRef: m7-product-data-reference
   state: ACCEPTED
+  executionPhase: DEVELOPMENT
+  priority: 110
   dependsOn:
     - product-reference-contract
-    - reference-storage-capacity-benchmark
+    - reference-capacity-feasibility
   decisionRefs:
     - ADR-0010
   pathScope:
@@ -49,3 +51,14 @@ spec:
       statement: >-
         Elasticsearch Testcontainers proves create/import/retry/concurrent replace, FULL/PARTIAL deletion, status semantics,
         expiry, alias migration, replay resume and deterministic results across two identical ingestion runs.
+    - id: AC9
+      statement: >-
+        Cross-document journal delivery and projection invalidation survive a crash between head CAS and journal append.
+        Persist a pending transition in the head CAS, deliver its deterministic journal id idempotently and clear it with
+        CAS before admitting another transition on that head; scan pending transitions after restart. Do not assume an
+        Elasticsearch bulk is a transaction. Test crashes after each write and retries under concurrent replacement.
+    - id: AC10
+      statement: >-
+        Recompute notifications include both old and new GTIN attachments, so a corrected link invalidates the formerly
+        attached product too. Expiry and terminal states enqueue removal work; IngestionCheckpoint has a separate owner
+        and store with source/cursor/retry state, never Product.datasourceCodes or price events.

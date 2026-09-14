@@ -7,9 +7,11 @@ spec:
   purpose: Preserve provider-level price changes and presence without duplicating unchanged polls in Product documents.
   roadmapRef: m7-product-data-reference
   state: ACCEPTED
+  executionPhase: DEVELOPMENT
+  priority: 120
   dependsOn:
     - product-reference-contract
-    - reference-storage-capacity-benchmark
+    - reference-capacity-feasibility
   decisionRefs:
     - ADR-0011
   pathScope:
@@ -34,7 +36,8 @@ spec:
     - id: AC4
       statement: >-
         Raw events use an Elasticsearch time-series data stream with GTIN, provider, offer, condition and currency dimensions,
-        observation timestamp and gauge amount; a deterministic event id prevents duplicates despite ingestion retries.
+        observation timestamp and gauge amount. The feasibility-tested Elasticsearch identity strategy prevents duplicates
+        across retries and preserves distinct same-timestamp changes; do not assume arbitrary custom ids are supported by TSDS.
     - id: AC5
       statement: >-
         Daily provider rollups group GTIN/provider/condition/currency and expose min, max, close, observed-offer count,
@@ -59,3 +62,21 @@ spec:
       statement: >-
         Existing Product price histories and DataFragment.priceHistory cease being write targets after dual validation; current
         offer summaries consumed by projections are produced from OfferHead, not reconstructed from time-series scans.
+    - id: AC11
+      statement: >-
+        Offer head updates and append-only event delivery use a recoverable pending-event protocol with deterministic ids,
+        retry reconciliation and crash tests; a failed second write cannot silently lose a price event. Full-feed disappearance
+        events occur only after a successful complete feed, and an older observation cannot roll back the current offer.
+    - id: AC12
+      statement: >-
+        Daily observed-offer count and first/last presence include unchanged offers via head presence input, without synthetic
+        price events. Define close ordering and the open bucket window explicitly; legacy minima use their separate neutral
+        backfill shape when offer identity is unknown and stay excluded from B2B/open-data by default.
+  implementationPlan:
+    - >-
+      Use provisional bounded settings from reference-capacity-feasibility; full retention/load/resilience acceptance belongs
+      to the later benchmark. Prove event identity and legacy backfill on the installed Elasticsearch version before wiring feeds.
+    - >-
+      Finalize late-event and daily aggregation rules with deterministic fixtures: UTC close orders by observation time then
+      stable event id, current/previous UTC day stay open, older buckets require an explicit repair job. Materialize presence
+      from OfferHead independently of the sparse event stream; never count changes as the number of observed offers.

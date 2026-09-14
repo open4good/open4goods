@@ -2,7 +2,7 @@ package org.open4goods.datareference.port;
 
 import java.util.List;
 
-import org.open4goods.datareference.model.projection.ProductReferenceProjection;
+import org.open4goods.datareference.model.projection.ProductReferenceProjectionEnvelope;
 
 /**
  * Write access to built product documents.
@@ -14,12 +14,11 @@ import org.open4goods.datareference.model.projection.ProductReferenceProjection;
 public interface ProjectionWritePort {
 
     /**
-     * Writes one product document, replacing any document for the same product
-     * and surface.
+     * Writes one product envelope, replacing the document for its GTIN.
      *
      * @param projection document to write
      */
-    void write(ProductReferenceProjection projection);
+    void write(ProductReferenceProjectionEnvelope projection);
 
     /**
      * Writes several documents, in the order given.
@@ -35,5 +34,5 @@ public interface ProjectionWritePort {
      * @param projections documents to write
      * @return elements that could not be written, empty when all succeeded
      */
-    List<ScanFailure> writeAll(List<ProductReferenceProjection> projections);
+    List<ScanFailure> writeAll(List<ProductReferenceProjectionEnvelope> projections);
 }

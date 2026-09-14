@@ -51,11 +51,10 @@ Three tiers, by how sensitive and how environment-specific a value is:
    development section above.
 
 Tier 2 is being migrated to GitHub Environments (public non-secret variables + environment
-secrets) per [ADR-0006](../adr/0006-github-environments-and-systemd-runtime.md). That migration is
-`config-contract-and-environments`, currently **BLOCKED**: no `beta` or `prod` GitHub Environment
-exists yet in this repository (verified via `gh api repos/open4good/open4goods/environments`,
-2026-09-09) -- creating them is repository administration, an owner action. Until then, tier 2's
-private repository remains the actual source of truth for beta and prod.
+secrets) per [ADR-0006](../adr/0006-github-environments-and-systemd-runtime.md). The `beta` and
+`prod` Environments exist; beta holds its target fingerprint, while both lack secrets and protection
+rules. Until their inputs are populated, the private repository remains the actual source of truth
+for beta and prod.
 
 ## How configuration reaches beta and prod today
 
@@ -69,11 +68,11 @@ manually (or, for the first, on every push to its `main`):
 | `publishInfra.yml` | SSHes in and runs `/opt/open4goods/bin/publish-infra.sh {env}`, which copies `docker-compose.infra.yml`, `kibana.yml`, `elasticsearch.yml`, `elastic-stack-ca.p12`, `elastic-certificates.p12`, `server.xml` and `xwiki.cfg` from `/opt/open4goods/latest/{env}/` into `/opt/open4goods/bin/` (the directory Docker Compose actually mounts from), then brings up `docker-compose.infra.yml` with `--env-file /opt/open4goods/config/{env}/infra/.env`. |
 | `publishJars.yml` | SSHes in and runs `/opt/open4goods/bin/publish-jars.sh {env} [start\|stop\|restart] [service]`, which starts each Spring Boot jar with `-Dspring.config.location=classpath:/application.yml,file:/opt/open4goods/config/{env}/{service}/application-active.yml -Dspring.profiles.active=nudger,{env}`. |
 
-The public repository's own `releaseDeployProd.yml` builds and tags releases and deploys the Nuxt
+The public repository's `releaseDeployProd.yml` is manually dispatched and deploys the Nuxt
 `frontend`/`b2b-frontend` bundles (`frontend-ssr-{blue,green}`, `b2b-frontend` containers in
-`docker-compose.frontend.yml`, deployed by `deployConfiguration.yml`'s bin-sync step) -- those
-containers read `env_file: /opt/open4goods/config/{env}/{frontend,b2b-frontend}/.env`, the same
-files `deployConfiguration.yml` places.
+`docker-compose.frontend.yml`, deployed by `deployConfiguration.yml`'s bin-sync step). Every
+remote release checks a host marker and a cluster fingerprint from its GitHub Environment before
+writing; missing or unequal markers fail the release.
 
 Host path summary: `/opt/open4goods/config/{env}/**` (rendered secrets and topology),
 `/opt/open4goods/latest/{env}/**` (compose files and infra assets, pre-copy), `/opt/open4goods/bin/`

@@ -4,13 +4,17 @@ metadata:
   id: reference-coordinated-cutover
   name: Coordinated product reference cutover
 spec:
-  purpose: Apply the final ingestion delta and atomically move all readers to validated source-neutral projections.
-  roadmapRef: m7-product-data-reference
+  purpose: On the separate owner order, promote the beta-validated release and dated dataset, then resume native collections.
+  roadmapRef: m8-production-promotion
   state: ACCEPTED
+  executionPhase: PRODUCTION
+  priority: 820
   dependsOn:
     - full-reference-shadow-reingestion
     - reference-api-frontend-breaking-cutover
     - b2b-price-history-facet
+    - beta-campaign-readiness
+    - config-prod-cutover
   decisionRefs:
     - ADR-0010
     - ADR-0011
@@ -18,6 +22,7 @@ spec:
     - api/**
     - front-api/**
     - frontend/**
+    - ui/**
     - b2b-api/**
     - b2b-frontend/**
     - services/data-reference/**
@@ -26,19 +31,24 @@ spec:
     - services/product-repository/**
     - docs/operations/**
     - .github/workflows/**
+    - scripts/deploy/**
+    - scripts/migration/**
   acceptanceCriteria:
     - id: AC1
       statement: >-
-        A rehearsed runbook names owners, maintenance window, source freeze semantics, exact aliases/data streams, health gates,
-        final-delta checkpoints, deployment order, abort conditions, rollback commands and communication points.
+        Revalidate the beta-rehearsed runbook, explicit owner order, candidate SHA/digests, dated dataset, private target
+        identities, capacity, source policies, maintenance window, deployment order, abort/rollback gates and communication.
+        A changed release, dataset or policy requires renewed beta validation before promotion.
     - id: AC2
       statement: >-
-        Ingestion is paused only for the bounded final delta; every event after the shadow high-water mark is applied once to
-        source heads, offer heads, price events and projections before readers move.
+        Restore the validated source/offer/price/projection dataset into exact new production targets while existing readers
+        remain on legacy data. Record archive completion time, enrichment watermark and accepted freshness gap; no claim of
+        capturing every intervening update, deletion or price event is made. Pause writers only for the coordinated switch.
     - id: AC3
       statement: >-
-        Write aliases move first only after validation, application versions that understand the new contract deploy together,
-        and read aliases switch atomically after smoke tests; mixed old/new DTO versions are rejected rather than silently read.
+        After restore validation, gate traffic/ingestion, stage compatible application versions, switch the validated
+        Elasticsearch alias set and application routes, smoke test, then reopen traffic and native collectors. Alias atomicity
+        applies inside Elasticsearch only; maintenance and schema checks prevent mixed old/new readers and writers.
     - id: AC4
       statement: >-
         Smoke tests cover consumer product/search/image/sitemap, B2B current price/history and billing, open-data export, admin
@@ -49,8 +59,9 @@ spec:
         replay lag, query/error latency within benchmark limits and no restricted-source field in sampled public payloads.
     - id: AC6
       statement: >-
-        Any failed gate stops or reverses the alias/application switch, resumes legacy ingestion from recorded checkpoints and
-        preserves new indexes for diagnosis; rollback never deletes either validated data set.
+        Any failed gate restores prior application/config/routes/aliases and resumes legacy collection from retained state,
+        preserving both datasets. Record possible loss of new-only changes since promotion; a reversible alias switch is not
+        proof of a lossless reverse data migration. Do not restore beta transactional stores over production billing/accounts.
     - id: AC7
       statement: >-
         After success, legacy indexes remain read-only and restorable for seven full days, new ingestion runs source-neutral only,
@@ -59,3 +70,8 @@ spec:
       statement: >-
         Production evidence records timestamps, versions, aliases before/after, delta counts, smoke results and owner decision;
         it contains no secrets, raw provider payload or restricted assertion values.
+  implementationPlan:
+    - >-
+      All scripts, compatibility checks and rollback commands are developed in reference-beta-cutover and finalized by
+      beta-campaign-readiness. This order is execution only after owner authorization; no development order depends on it.
+      Enrichment resumes with real source observations, never synthetic reconstruction of the accepted freshness gap.

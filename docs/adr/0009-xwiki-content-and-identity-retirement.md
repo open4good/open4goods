@@ -27,7 +27,8 @@ tokens never enter browser application code. Existing sessions use application r
 XWiki group names.
 
 XWiki infrastructure is removed only after both content migrations, SSO production evidence and
-a tested offline recovery archive.
+a tested offline recovery archive. Under ADR-0013, code and beta dependencies can retire after
+beta validation; production infrastructure waits for its separate retirement order.
 
 ## Consequences
 

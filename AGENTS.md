@@ -28,8 +28,11 @@ Load what the task needs, knowing the price. Everything below is the project cor
 | this guide, sections 1-11 | ~2.5k tokens | conventions for writing code here |
 | [docs/README.md](docs/README.md) | ~0.9k tokens | the rest of the corpus, by subject |
 
-Pick a WorkOrder from the roadmap, then read its own YAML under `.o4g/work/` and stay
-within its `pathScope`. `docs/reference/roadmap.md` and `docs/adr/README.md` are
+Select a WorkOrder with `scripts/work/next-workorder.py`, then read its YAML under
+`.o4g/work/` and stay within its `pathScope`. The default phase is DEVELOPMENT:
+implement locally and validate directly on beta with the authority in ADR-0013.
+Production and post-production operations await a separate explicit owner order.
+`docs/reference/roadmap.md` and `docs/adr/README.md` are
 generated projections: change the contracts, not the projection.
 
 Before changing anything under `docs/` or `.o4g/`, run `./scripts/lint.sh`. It gates

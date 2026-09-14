@@ -68,13 +68,15 @@ class Workspace:
             raise ValueError(f"{identifier} is already closed in the ledger")
         raise ValueError(f"unknown open WorkOrder: {identifier}")
 
-    def candidates(self, include_blocked: bool = False) -> list[tuple[object, str, tuple[str, ...]]]:
+    def candidates(self, include_blocked: bool = False, phase: str = "DEVELOPMENT") -> list[tuple[object, str, tuple[str, ...]]]:
         orders, by_id = self.all_orders()
         milestones = self.roadmap.load_milestones(self.root)
         milestone_rank = {identifier: index for index, identifier in enumerate(milestones)}
         candidates = []
         for order in orders:
             if order.is_ledger or order.state not in {"ACCEPTED", "IN_PROGRESS", "BLOCKED"}:
+                continue
+            if phase != "ALL" and order.execution_phase != phase:
                 continue
             blocked = self.roadmap.blockers(order, by_id)
             availability = self.roadmap.availability(order, by_id)
@@ -85,8 +87,9 @@ class Workspace:
         return sorted(
             candidates,
             key=lambda item: (
-                milestone_rank.get(item[0].roadmap_ref, len(milestones)),
                 state_rank.get(item[0].state, 9),
+                item[0].priority,
+                milestone_rank.get(item[0].roadmap_ref, len(milestones)),
                 item[0].identifier,
             ),
         )
@@ -94,7 +97,7 @@ class Workspace:
     def regenerate(self) -> None:
         run(self.root, sys.executable, "scripts/generate/generate_roadmap.py")
 
-    def transition(self, identifier: str, target: str, evidence: list[str]) -> Path:
+    def transition(self, identifier: str, target: str, evidence: list[str], authorization_ref: str | None = None) -> Path:
         path = self.open_path(identifier)
         data = read_order(path)
         spec = data.setdefault("spec", {})
@@ -106,9 +109,19 @@ class Workspace:
         }
         if current not in allowed[target]:
             raise ValueError(f"refusing {current} -> {target} for {identifier}")
+        info = self.describe(identifier)
+        if target in {"IN_PROGRESS", "COMPLETED"}:
+            if info["blockers"]:
+                raise ValueError(f"{identifier} has unresolved blockers: {', '.join(info['blockers'])}")
+            if info["executionPhase"] != "DEVELOPMENT":
+                if not authorization_ref or not authorization_ref.strip():
+                    raise ValueError("production phase requires --authorization-ref to an explicit owner order; readiness is not permission")
+                evidence = [*evidence, f"owner-order:{authorization_ref.strip()}"]
         if target in {"BLOCKED", "COMPLETED"} and not evidence:
             raise ValueError(f"{target.lower()} requires at least one --evidence entry")
         spec["state"] = target
+        if target == "BLOCKED":
+            spec["externalBlockers"] = list(dict.fromkeys([*(spec.get("externalBlockers") or []), *evidence]))
         if evidence:
             refs = spec.setdefault("evidenceRefs", [])
             refs.extend(evidence)
@@ -136,10 +149,13 @@ class Workspace:
                     "state": order.state,
                     "availability": self.roadmap.availability(order, by_id),
                     "milestone": order.roadmap_ref,
+                    "executionPhase": order.execution_phase,
+                    "priority": order.priority,
                     "blockers": list(self.roadmap.blockers(order, by_id)),
                     "pathScope": spec.get("pathScope") or [],
                     "acceptanceCriteria": spec.get("acceptanceCriteria") or [],
                     "evidenceRefs": spec.get("evidenceRefs") or [],
+                    "implementationPlan": spec.get("implementationPlan") or [],
                     "path": str(order.path.relative_to(self.root)),
                 }
         raise ValueError(f"unknown WorkOrder: {identifier}")
@@ -163,11 +179,13 @@ class Workspace:
 
 
 def command_next(workspace: Workspace, args: argparse.Namespace) -> int:
-    entries = workspace.candidates(args.all)
+    entries = workspace.candidates(args.all, args.phase)
     payload = [
         {
             "id": order.identifier,
             "milestone": order.roadmap_ref,
+            "executionPhase": order.execution_phase,
+            "priority": order.priority,
             "state": order.state,
             "availability": availability,
             "blockers": list(blockers),
@@ -179,7 +197,7 @@ def command_next(workspace: Workspace, args: argparse.Namespace) -> int:
     else:
         for item in payload:
             blockers = f" blockers={','.join(item['blockers'])}" if item["blockers"] else ""
-            print(f"{item['id']} [{item['milestone']}] {item['state']}/{item['availability']}{blockers}")
+            print(f"{item['id']} [{item['executionPhase']} priority={item['priority']}] {item['state']}/{item['availability']}{blockers}")
     return 0
 
 
@@ -207,16 +225,19 @@ def parser() -> argparse.ArgumentParser:
     next_parser.add_argument("--all", action="store_true")
     next_parser.add_argument("--json", action="store_true")
     next_parser.add_argument("--limit", type=int, default=8)
+    next_parser.add_argument("--phase", choices=["DEVELOPMENT", "PRODUCTION", "POST_PRODUCTION", "ALL"], default="DEVELOPMENT")
     status = commands.add_parser("status")
     status.add_argument("identifier")
     begin = commands.add_parser("begin")
     begin.add_argument("identifier")
+    begin.add_argument("--authorization-ref", help="Reference to an actual explicit owner order; this flag does not grant authority")
     block = commands.add_parser("block")
     block.add_argument("identifier")
     block.add_argument("--evidence", action="append", required=True)
     close = commands.add_parser("close")
     close.add_argument("identifier")
     close.add_argument("--evidence", action="append", required=True)
+    close.add_argument("--authorization-ref", help="Owner order covering this production completion")
     commit = commands.add_parser("commit")
     commit.add_argument("identifier")
     commit.add_argument("--message", required=True)
@@ -235,13 +256,13 @@ def main(argv: list[str] | None = None) -> int:
             print(yaml.safe_dump(workspace.describe(args.identifier), sort_keys=False).rstrip())
             return 0
         if args.command == "begin":
-            print(workspace.transition(args.identifier, "IN_PROGRESS", []))
+            print(workspace.transition(args.identifier, "IN_PROGRESS", [], args.authorization_ref))
             return 0
         if args.command == "block":
             print(workspace.transition(args.identifier, "BLOCKED", args.evidence))
             return 0
         if args.command == "close":
-            print(workspace.transition(args.identifier, "COMPLETED", args.evidence))
+            print(workspace.transition(args.identifier, "COMPLETED", args.evidence, args.authorization_ref))
             return 0
         if args.command == "commit":
             return command_commit(workspace, args)

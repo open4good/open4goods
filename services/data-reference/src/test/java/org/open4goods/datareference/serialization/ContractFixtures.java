@@ -5,7 +5,6 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,8 +30,11 @@ import org.open4goods.datareference.model.evidence.LocalizedTextEvidence;
 import org.open4goods.datareference.model.evidence.MediaEvidence;
 import org.open4goods.datareference.model.evidence.RelationEvidence;
 import org.open4goods.datareference.model.evidence.ScalarEvidence;
-import org.open4goods.datareference.model.projection.DomainSlice;
+import org.open4goods.datareference.model.projection.EvaluationSummary;
+import org.open4goods.datareference.model.projection.OfferSummary;
 import org.open4goods.datareference.model.projection.ProductReferenceProjection;
+import org.open4goods.datareference.model.projection.ProjectionReplayInputs;
+import org.open4goods.datareference.model.projection.SearchSummary;
 import org.open4goods.datareference.model.registry.RegistryVersion;
 import org.open4goods.datareference.model.resolution.ResolutionReason;
 import org.open4goods.datareference.model.resolution.ResolvedValue;
@@ -101,7 +103,12 @@ final class ContractFixtures {
         return new ProductReferenceProjection(
                 new Gtin("4006381333931"),
                 ProjectionSurface.NUDGER_WEB,
-                new RegistryVersion(7),
+                new ProjectionReplayInputs(
+                        new RegistryVersion(7),
+                        new RuleVersion("quantity-normalization", 3),
+                        new RuleVersion("reference-resolution", 2),
+                        List.of(new SourceUsagePolicyRef("icecat-standard", "3")),
+                        Instant.parse("2026-02-01T00:00:00Z")),
                 Instant.parse("2026-02-01T00:00:00Z"),
                 List.of(
                         resolved("name", new LocalizedTextValue("Téléviseur 4K", new LanguageTag("fr"))),
@@ -112,24 +119,14 @@ final class ContractFixtures {
                         resolved("energy-class", new CodeValue("eu-energy-label", "A")),
                         resolved("release-date", new DateValue(LocalDate.of(2026, 3, 15))),
                         resolved("official-page", new UriValue(URI.create("https://example.invalid/p")))),
-                slices());
-    }
-
-    /**
-     * Two slices in a stated order, so that the frozen document pins map ordering
-     * rather than accidentally passing on a single entry.
-     *
-     * @return slices keyed by name, in insertion order
-     */
-    private static Map<String, DomainSlice> slices() {
-        Map<String, DomainSlice> slices = new LinkedHashMap<>();
-        slices.put("offers", new DomainSlice("offers",
-                Map.of("minimumPrice", new DecimalValue(new BigDecimal("499.00")))));
-        Map<String, org.open4goods.datareference.model.value.CanonicalValue> scores = new LinkedHashMap<>();
-        scores.put("impact", new DecimalValue(new BigDecimal("3.20")));
-        scores.put("repairability", new DecimalValue(new BigDecimal("7.10")));
-        slices.put("scores", new DomainSlice("scores", scores));
-        return slices;
+                new OfferSummary(2, true, new BigDecimal("499.00"), "EUR",
+                        Instant.parse("2026-02-01T00:00:00Z")),
+                new EvaluationSummary(new RuleVersion("impact-evaluation", 1),
+                        Instant.parse("2026-02-01T00:00:00Z"),
+                        Map.of(new CanonicalAttributeId("impact"), new DecimalValue(new BigDecimal("3.20"))),
+                        Map.of("class-median", new DecimalValue(new BigDecimal("7.10"))),
+                        List.of(new CanonicalAttributeId("repair-index"))),
+                new SearchSummary(new RuleVersion("lexical-search", 1), List.of("television", "4k")));
     }
 
     private static ResolvedValue resolved(String slug,

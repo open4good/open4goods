@@ -7,8 +7,19 @@ spec:
   purpose: Prove mappings, topology, throughput and cost from production-shaped data before full-catalog ingestion.
   roadmapRef: m7-product-data-reference
   state: ACCEPTED
+  executionPhase: DEVELOPMENT
+  priority: 200
   dependsOn:
     - product-reference-contract
+    - reference-capacity-feasibility
+    - source-assertion-store
+    - price-observation-timeseries
+    - reference-resolution-and-surface-projections
+    - reference-backup-importer
+    - icecat-integration-production-grade
+    - merchant-source-assertion-adapters
+    - eprel-source-assertion-adapter
+    - consumer-search-lexical-refactor
   decisionRefs:
     - ADR-0010
     - ADR-0011
@@ -19,36 +30,45 @@ spec:
     - docs/operations/**
   acceptanceCriteria:
     - id: AC1
-      statement: >-
-        A read-only inventory records aliases, document counts, primary/store sizes, shard counts, replicas, field counts,
-        source mix, assertions per GTIN, offers per GTIN and observed daily price-change rate; every query and timestamp is kept
-        as sanitized WorkOrder evidence and no historical marketing count is used as sizing input.
+      statement: A read-only inventory records aliases, document counts, primary/store sizes, shard counts, replicas, field
+        counts, source mix, assertions per GTIN, offers per GTIN and observed daily price-change rate; every query and timestamp
+        is kept as sanitized WorkOrder evidence and no historical marketing count is used as sizing input.
     - id: AC2
-      statement: >-
-        The benchmark corpus is a deterministic stratified sample covering all seven verticals, source-rich products,
-        offer-heavy products, multilingual values, media and the 95th/99th percentile document sizes; its generation seed and
-        distribution are reproducible without committing provider payloads.
+      statement: The benchmark corpus is a deterministic stratified sample covering all seven verticals, source-rich products,
+        offer-heavy products, multilingual values, media and the 95th/99th percentile document sizes; its generation seed
+        and distribution are reproducible without committing provider payloads.
     - id: AC3
-      statement: >-
-        Candidate strict mappings are measured for source heads, metadata journal, registry, one-GTIN projection, offer heads,
-        raw price changes and daily rollups with synthetic source enabled where compatible and dynamic mapping disabled.
+      statement: Candidate strict mappings are measured for source heads, metadata journal, registry, one-GTIN projection,
+        offer heads, raw price changes and daily rollups with synthetic source enabled where compatible and dynamic mapping
+        disabled.
     - id: AC4
-      statement: >-
-        Reported capacity includes primary and one-replica totals, merge/translog allowance, snapshots, 30 percent free-disk
-        headroom, retention tiers and projected monthly growth for measured low, median and high change rates.
+      statement: Reported capacity includes primary and one-replica totals, merge/translog allowance, snapshots, 30 percent
+        free-disk headroom, retention tiers and projected monthly growth for measured low, median and high change rates.
     - id: AC5
-      statement: >-
-        Load tests sustain twice the measured peak ingestion rate without write rejections, heap above 75 percent or an
-        unbounded merge backlog; a complete current-head replay is projected to finish within 72 hours.
+      statement: Load tests sustain twice the measured peak ingestion rate without write rejections, heap above 75 percent
+        or an unbounded merge backlog; a complete current-head replay is projected to finish within 72 hours.
     - id: AC6
-      statement: >-
-        Product point reads and common filtered searches meet p95 500 ms, daily price-history reads meet p95 750 ms, and
-        representative batch aggregations use projection/rollup indexes and complete within their current production window.
+      statement: Product point reads and common filtered searches meet p95 500 ms, daily price-history reads meet p95 750
+        ms, and representative batch aggregations use projection/rollup indexes and complete within their current production
+        window.
     - id: AC7
-      statement: >-
-        Failure tests cover node loss with one replica, index rollover, snapshot restore, alias rollback and a stopped
+      statement: Failure tests cover node loss with one replica, index rollover, snapshot restore, alias rollback and a stopped
         downsampling or transform job; restore point and restore time are recorded.
     - id: AC8
       statement: >-
-        Final shard, replica, lifecycle, routing and bulk settings are checked into the owning modules only after all gates
-        pass; any failed gate blocks source-assertion-store and price-observation-timeseries rather than accepting an estimate.
+        Final shard, replica, lifecycle, routing and bulk settings are checked into owning modules after all gates pass;
+        failed gates block full-reference-shadow-reingestion and release readiness, not already tested bounded store/adapter
+        implementation. One-replica node-loss proof uses distinct data nodes and does not infer production resilience from
+        a single-node or zero-replica beta run.
+  implementationPlan:
+    - >-
+      Benchmark the actual implemented import, head/journal/event persistence and queries with the feasibility sample;
+      measure price-change rates during controlled beta collection. Declare node count, test duration and concurrency in
+      evidence. Reclaim only verified-restorable old beta indexes; request owner resources when the full topology cannot fit.
+  evidenceRefs:
+    - blocker:AC1/AC5/AC6/AC7 require sanitized measurements from a production-shaped Elasticsearch topology and observed
+      ingestion/price-change traffic; the workspace contains neither a runnable production-shaped stack nor a captured read-only
+      inventory
+    - >-
+      note: 2026-09-11 the beta host and archive are accessible, but disk usage is 90 percent on the backup mount.
+      This supersedes the access assumption, not the unproven capacity gates. Measurements belong to feasibility first.

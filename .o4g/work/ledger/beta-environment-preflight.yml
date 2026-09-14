@@ -1,0 +1,62 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: beta-environment-preflight
+  name: Beta isolation and migration resource inventory
+spec:
+  purpose: Prove beta is a writable isolated validation target and establish the resources needed for the campaign.
+  roadmapRef: m1-config-autonomy
+  state: COMPLETED
+  executionPhase: DEVELOPMENT
+  priority: 10
+  dependsOn: []
+  decisionRefs:
+    - ADR-0013
+  pathScope:
+    - ops/**
+    - scripts/deploy/**
+    - scripts/verify/**
+    - .github/workflows/**
+    - docs/operations/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: Resolve beta host, service processes, Elasticsearch cluster UUIDs, aliases, storage mounts, database/Redis
+        endpoints, media and backup locations from private inputs; record sanitized identities and flag any production/shared
+        destination before writes.
+    - id: AC2
+      statement: Verify existing access to beta GitHub Environment, runtime configuration, Icecat reference catalogue and
+        product backup; provide a per-service name-only input matrix and a disk/heap inventory, without copying credentials
+        or topology into Git.
+    - id: AC3
+      statement: Inventory and disable beta jobs that can mutate shared production stores or invoke production billing, mail
+        or webhooks; document sandbox/test configuration and prove beta sitemaps, images and open-data do not write production
+        resources.
+    - id: AC4
+      statement: Provide a reproducible bounded beta target and checksum-verified frozen export set, with exact obsolete-index
+        cleanup candidates for a bounded reimport rehearsal; retain archives, project free space and require owner action
+        for new spend. Elasticsearch snapshots are not part of migration recovery.
+    - id: AC5
+      statement: Audit every main/tag/manual workflow trigger; implement beta target guards and a manual owner-gated production
+        deploy path with no automatic tag-to-production mutation. Shared beta deployment locks prevent overlapping backend/frontend
+        release writes.
+    - id: AC6
+      statement: Validate the guards with wrong-host/cluster and concurrent-deploy fixtures; record Java, Elasticsearch and
+        frontend runtime versions for later capacity and deployment tests.
+  implementationPlan:
+    - Pin the frozen export set through PRODUCT_BACKUP_SOURCE_URI. Recovery verifies its checksums then reimports it; no Elasticsearch
+      snapshot is created or restored.
+  evidenceRefs:
+    - 'note: 2026-09-11 scripts/mcp/doctor.sh --core passed. Beta guard markers and the matching Environment fingerprint were
+      installed after a read-only target inspection; the remote guard and mismatch/concurrency fixture both pass.'
+    - 'note: 2026-09-11 beta inventory: Java 21.0.12, Node 24.12.0 and Elasticsearch 9.4.3; JVM heaps range 512M to 10G. Sanitized
+      cluster and alias fingerprints verified, 54 aliases and 92218310331 store bytes. The source mount was 90 percent full.'
+    - 'note: four coherent local gzip JSONL product archives total about 27.4 GB; the sole matching beta schedule is backup,
+      with no billing, mail, webhook, sitemap, image or open-data schedule. A shared mail host is flagged; no beta job sends
+      mail. Icecat has four local indexes and 80808 documents; PRODUCT_BACKUP_SOURCE_URI references the frozen set and front-api
+      is UP.'
+    - 'note: the frozen export set and manifest moved to a separate beta mount, passed SHA-256 and full gzip validation, then
+      released the source mount to 87 percent usage. A private inventory records 54 aliases and 12 indexes for later reimport
+      cleanup.'
+    - '2026-09-11 beta preflight complete: guarded GitHub deploy paths, verified isolated target and runtime inventory, frozen
+      export set passed SHA-256 and full gzip validation, Icecat catalogue available locally, and endpoint comparison flagged
+      the shared SMTP host before later writes.'

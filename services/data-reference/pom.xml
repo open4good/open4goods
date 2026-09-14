@@ -13,6 +13,13 @@
   <artifactId>data-reference</artifactId>
   <name>open4goods data reference</name>
   <description>Source-neutral product assertions and canonical reference contracts</description>
+  <dependencies>
+    <dependency>
+      <groupId>com.ibm.icu</groupId>
+      <artifactId>icu4j</artifactId>
+      <version>78.3</version>
+    </dependency>
+  </dependencies>
   <build>
     <plugins>
       <!--
