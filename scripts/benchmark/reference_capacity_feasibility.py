@@ -164,6 +164,50 @@ def pin_sample(path: Path | None) -> dict[str, Any]:
     }
 
 
+def capacity_plan(cluster: dict[str, Any], free_bytes: int, source_head_bytes: int | None,
+                  projection_bytes: int | None, price_store_bytes: int | None, snapshot_bytes: int | None,
+                  replica_count: int, bulk_document_limit: int, bulk_byte_limit: int) -> dict[str, Any]:
+    """Calculate the full-volume disk gate when every candidate store is measured.
+
+    Unknown candidate-store sizes are deliberately not guessed. A later bounded
+    replay supplies all four values and turns this feasibility input into a
+    reproducible capacity decision.
+    """
+    required_headroom = (cluster["storeBytes"] * 30 + 99) // 100
+    plan = {
+        "workspaceFreeBytes": free_bytes,
+        "thirtyPercentCurrentStoreHeadroomBytes": required_headroom,
+        "bulkLimits": {"documents": bulk_document_limit, "bytes": bulk_byte_limit},
+        "oneReplicaRequired": replica_count == 1,
+    }
+    candidates = (source_head_bytes, projection_bytes, price_store_bytes, snapshot_bytes)
+    if all(value is None for value in candidates):
+        return {
+            **plan,
+            "coexistence": "UNKNOWN: source-head, projection, price-store and snapshot sizes require replay measurements",
+            "fullVolumeGate": "BLOCKED unless the controlled replay supplies a restorable cleanup plan or an owner-approved capacity expansion",
+        }
+    if any(value is None for value in candidates):
+        raise FeasibilityError("all candidate store and snapshot sizes must be supplied together")
+    new_primary_bytes = source_head_bytes + projection_bytes + price_store_bytes
+    new_store_bytes = new_primary_bytes * (replica_count + 1)
+    projected_used_bytes = cluster["storeBytes"] + new_store_bytes + snapshot_bytes
+    required_free_bytes = new_store_bytes + snapshot_bytes + (projected_used_bytes * 30 + 99) // 100
+    return {
+        **plan,
+        "candidatePrimaryBytes": {
+            "sourceHead": source_head_bytes,
+            "projection": projection_bytes,
+            "priceStore": price_store_bytes,
+        },
+        "replicaCount": replica_count,
+        "snapshotBytes": snapshot_bytes,
+        "projectedUsedBytesDuringCoexistence": projected_used_bytes,
+        "requiredFreeBytes": required_free_bytes,
+        "fullVolumeGate": "PASS" if free_bytes >= required_free_bytes else "BLOCKED",
+    }
+
+
 def report(arguments: argparse.Namespace) -> dict[str, Any]:
     """Build one explicit feasibility input with unknowns preserved as unknowns."""
     basic_auth = os.environ.get(arguments.basic_auth_env)
@@ -171,7 +215,6 @@ def report(arguments: argparse.Namespace) -> dict[str, Any]:
     cluster = aggregate_cluster(arguments.elasticsearch_url, authorization)
     disk = os.statvfs(arguments.workspace)
     free_bytes = disk.f_bavail * disk.f_frsize
-    required_headroom = (cluster["storeBytes"] * 30 + 99) // 100
     return {
         "schemaVersion": "open4goods.reference-capacity-feasibility/v1",
         "sample": {
@@ -193,12 +236,9 @@ def report(arguments: argparse.Namespace) -> dict[str, Any]:
             "priceChange": "UNKNOWN: measure during beta replay",
             "window": "not yet observed",
         },
-        "disk": {
-            "workspaceFreeBytes": free_bytes,
-            "thirtyPercentCurrentStoreHeadroomBytes": required_headroom,
-            "coexistence": "UNKNOWN: new source-head, projection and price-store sizes require replay measurements",
-            "fullVolumeGate": "BLOCKED unless the controlled replay supplies a restorable cleanup plan or an owner-approved capacity expansion",
-        },
+        "disk": capacity_plan(cluster, free_bytes, arguments.source_head_bytes, arguments.projection_bytes,
+                              arguments.price_store_bytes, arguments.snapshot_bytes, arguments.replica_count,
+                              arguments.bulk_document_limit, arguments.bulk_byte_limit),
         "limitations": [
             "development feasibility only; this is not a throughput, recovery or node-loss qualification",
             "one replica and snapshot capacity remain required inputs for the later full-volume benchmark",
@@ -217,14 +257,30 @@ def main() -> int:
     parser.add_argument("--sample-seed", default="o4g-reference-v1")
     parser.add_argument("--sample-limit", type=int, default=10_000)
     parser.add_argument("--byte-budget", type=int, default=128 * 1024 * 1024)
+    parser.add_argument("--source-head-bytes", type=int,
+                        help="bounded replay measurement for the new source-head primary store")
+    parser.add_argument("--projection-bytes", type=int,
+                        help="bounded replay measurement for the new projection primary store")
+    parser.add_argument("--price-store-bytes", type=int,
+                        help="bounded replay measurement for the new price-store primary store")
+    parser.add_argument("--snapshot-bytes", type=int,
+                        help="space reserved for the coexistence snapshot")
+    parser.add_argument("--replica-count", type=int, default=1,
+                        help="new-store replica count; the development feasibility default is one")
+    parser.add_argument("--bulk-document-limit", type=int, default=1_000)
+    parser.add_argument("--bulk-byte-limit", type=int, default=16 * 1024 * 1024)
     parser.add_argument("--skip-mapping-probe", action="store_true",
                         help="collect read-only aggregates when beta does not grant temporary-index permission")
     parser.add_argument("--output", required=True, type=Path)
     arguments = parser.parse_args()
     if not arguments.elasticsearch_url:
         parser.error("--elasticsearch-url or REFERENCE_BENCHMARK_ELASTICSEARCH_URL is required")
-    if arguments.sample_limit < 1 or arguments.byte_budget < 1:
-        parser.error("sample limits must be positive")
+    if (arguments.sample_limit < 1 or arguments.byte_budget < 1 or arguments.replica_count < 0
+            or arguments.bulk_document_limit < 1 or arguments.bulk_byte_limit < 1):
+        parser.error("sample, replica and bulk limits must be valid")
+    if any(value is not None and value < 0 for value in (arguments.source_head_bytes, arguments.projection_bytes,
+                                                          arguments.price_store_bytes, arguments.snapshot_bytes)):
+        parser.error("candidate store sizes must not be negative")
     try:
         result = report(arguments)
     except FeasibilityError as error:
