@@ -35,9 +35,9 @@ Production and post-production operations await a separate explicit owner order.
 `docs/reference/roadmap.md` and `docs/adr/README.md` are
 generated projections: change the contracts, not the projection.
 
-Before changing anything under `docs/` or `.o4g/`, run `./scripts/lint.sh`. It gates
-the corpus budget, so growing the prose fails the build unless you raise the ceiling
-in the same commit.
+Before changing anything under `docs/` or `.o4g/`, run `./scripts/lint.sh`.
+Detailed WorkOrder designs belong in `.o4g/specifications/<id>.md`, referenced by `spec.specificationRefs`.
+Closing the last open reference archives that file under `archive/specs/`.
 
 ---
 

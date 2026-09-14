@@ -97,6 +97,35 @@ class Workspace:
     def regenerate(self) -> None:
         run(self.root, sys.executable, "scripts/generate/generate_roadmap.py")
 
+    def archive_last_specifications(self, data: dict) -> None:
+        """Archive specifications whose final open WorkOrder reference just closed."""
+        references = (data.get("spec") or {}).get("specificationRefs") or []
+        for reference in references:
+            if not isinstance(reference, str) or not reference.startswith(".o4g/specifications/"):
+                continue
+            if any(reference in ((read_order(path).get("spec") or {}).get("specificationRefs") or [])
+                   for path in self.work_root.glob("*.yml")):
+                continue
+            source = self.root / reference
+            if not source.is_file():
+                continue
+            destination = self.root / "archive" / "specs" / source.name
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            if destination.exists():
+                raise ValueError(f"specification archive destination already exists: {destination}")
+            shutil.move(source, destination)
+            archived = destination.relative_to(self.root).as_posix()
+            for ledger_path in self.work_root.joinpath("ledger").glob("*.yml"):
+                ledger_data = read_order(ledger_path)
+                ledger_spec = ledger_data.get("spec") or {}
+                ledger_refs = ledger_spec.get("specificationRefs") or []
+                if reference not in ledger_refs:
+                    continue
+                ledger_spec["specificationRefs"] = [archived if item == reference else item for item in ledger_refs]
+                ledger_data["spec"] = ledger_spec
+                ledger_path.write_text(yaml.dump(ledger_data, Dumper=IndentedDumper, sort_keys=False, width=120),
+                                       encoding="utf-8")
+
     def transition(self, identifier: str, target: str, evidence: list[str], authorization_ref: str | None = None) -> Path:
         path = self.open_path(identifier)
         data = read_order(path)
@@ -135,6 +164,7 @@ class Workspace:
                 raise ValueError(f"ledger destination already exists: {destination}")
             shutil.move(path, destination)
             path = destination
+            self.archive_last_specifications(data)
         self.regenerate()
         return path
 

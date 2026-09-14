@@ -12,7 +12,7 @@ Default selection is DEVELOPMENT, ordered by priority after resuming active work
 
 | Milestone | Open | READY | BLOCKED | IN_PROGRESS | AWAITING_OWNER_ORDER | Closed |
 |---|---|---|---|---|---|---|
-| m0-governance | 1 | 1 | 0 | 0 | 0 | 3 |
+| m0-governance | 0 | 0 | 0 | 0 | 0 | 4 |
 | m1-config-autonomy | 4 | 0 | 4 | 0 | 0 | 3 |
 | m2-corpus-cleanup | 0 | 0 | 0 | 0 | 0 | 1 |
 | m3-dead-surface-removal | 1 | 0 | 1 | 0 | 0 | 1 |
@@ -26,11 +26,8 @@ Default selection is DEVELOPMENT, ordered by priority after resuming active work
 
 ## m0-governance
 
-| WorkOrder | Phase / priority | Contract state | Availability | Dependencies | Blockers | Purpose |
-|---|---|---|---|---|---|---|
-| [workorder-specifications-corpus](../../.o4g/work/workorder-specifications-corpus.yml) | DEVELOPMENT / 90 | ACCEPTED | READY | -- | -- | Give detailed WorkOrder design a checked home in .o4g/specifications/ so that prompts/nudger-spec.md can demand decision-complete specifications without growing the budgeted open-order corpus, which today is resolved by raising work_open_lines (383 on 2026-09-08, 1442 at HEAD on 2026-09-13). |
 
-*3 closed, see [ledger](../../.o4g/work/ledger).*
+*4 closed, see [ledger](../../.o4g/work/ledger).*
 
 ## m1-config-autonomy
 

@@ -22,6 +22,7 @@ ROOT = Path(__file__).resolve().parents[2]
 FRONT_MATTER = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
 LINK = re.compile(r"(?<!!)\[[^\]]*\]\(([^)]+)\)")
 ADR = re.compile(r"\bADR-(\d{4})\b")
+SPECIFICATION_REF = re.compile(r"^(\.o4g/specifications|archive/specs)/[a-z0-9][a-z0-9-]*\.md$")
 
 # Published website content is authored against the Nuxt Content schema, not
 # ours; generated projections are rewritten by their generator (decision 2, 8).
@@ -114,6 +115,7 @@ def lint(root: Path) -> list[str]:
 
     work_dir = root / ".o4g" / "work"
     if work_dir.is_dir():
+        referenced_specifications: set[str] = set()
         for path in sorted(work_dir.glob("*.yml")):
             try:
                 data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
@@ -141,6 +143,27 @@ def lint(root: Path) -> list[str]:
             for identifier in spec.get("dependsOn") or []:
                 if identifier not in work:
                     problems.append(f"{path.name}: invalid work-order reference {identifier}")
+            references = spec.get("specificationRefs", [])
+            if not isinstance(references, list) or any(not isinstance(reference, str) for reference in references):
+                problems.append(f"{path.name}: specificationRefs must be a list of paths")
+                continue
+            for reference in references:
+                if not SPECIFICATION_REF.fullmatch(reference):
+                    problems.append(f"{path.name}: malformed specification reference {reference!r}")
+                    continue
+                if not reference.startswith(".o4g/specifications/"):
+                    problems.append(f"{path.name}: open WorkOrders may reference only .o4g/specifications/")
+                    continue
+                if not (root / reference).is_file():
+                    problems.append(f"{path.name}: specification reference does not resolve {reference!r}")
+                    continue
+                referenced_specifications.add(reference)
+        specifications = root / ".o4g" / "specifications"
+        if specifications.is_dir():
+            for path in specifications.glob("*.md"):
+                reference = path.relative_to(root).as_posix()
+                if reference not in referenced_specifications:
+                    problems.append(f"{reference}: specification has no open WorkOrder reference")
     return problems
 
 

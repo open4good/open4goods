@@ -189,7 +189,8 @@ allows those governance paths.
 ### Required specification depth
 
 The implementation agent must be able to proceed without choosing behavior or rediscovering the
-system boundary. Encode every applicable item below in the purpose and acceptance criteria:
+system boundary. Put detail beyond a compact purpose and atomic criteria in
+`.o4g/specifications/<id>.md`, then cite it through `spec.specificationRefs`. Encode every applicable item below:
 
 - the verified starting behavior and exact final behavior;
 - named modules, owning layers, important existing symbols and contract boundaries;
@@ -248,9 +249,8 @@ Once intent and graph coherence are complete:
 4. Run `python3 scripts/work/wo.py status <id>` for every created or refined WorkOrder and confirm its
    state, milestone, dependencies, availability, scope and criteria.
 5. Run `python3 scripts/generate/generate_roadmap.py --check` and `./scripts/lint.sh`.
-6. Do not shorten a necessary specification to evade the corpus budget. If open WorkOrder growth
-   requires a ceiling increase, update only the exact measured ceiling in `.o4g/corpus-budget.json`,
-   rerun lint and call out the deliberate increase in the handoff and commit body.
+6. Keep necessary design detail in the referenced `.o4g/specifications/<id>.md` file; do not raise
+   `work_open_lines` merely to fit a specification.
 7. Inspect `git diff`, `git diff --check` and the candidate staged diff for generated noise, unrelated
    paths, secrets, TODOs, duplicate criteria and accidental implementation changes.
 8. Stage only explicit WorkOrder files, the generated roadmap, an approved project milestone change

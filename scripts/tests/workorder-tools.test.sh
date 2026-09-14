@@ -6,9 +6,10 @@ fixture="$(mktemp -d)"
 trap 'rm -rf -- "$fixture"' EXIT
 
 mkdir -p "$fixture/.o4g/work/ledger" "$fixture/docs/reference" \
-  "$fixture/scripts/generate" "$fixture/scripts/work"
+  "$fixture/scripts/generate" "$fixture/scripts/work" "$fixture/scripts/verify"
 cp "$ROOT/scripts/generate/generate_roadmap.py" "$fixture/scripts/generate/"
 cp "$ROOT/scripts/work/wo.py" "$fixture/scripts/work/"
+cp "$ROOT/scripts/verify/documentation_lint.py" "$fixture/scripts/verify/"
 
 printf '%s\n' \
   'apiVersion: open4goods.org/v1' \
@@ -126,6 +127,63 @@ assert 'executionPhase' in cli('next', ok=False).stderr
 write_order('invalid-priority', priority=-1)
 assert 'priority' in cli('next', ok=False).stderr
 (orders / 'invalid-priority.yml').unlink()
+
+specifications = root / '.o4g/specifications'
+specifications.mkdir(parents=True)
+
+def add_ref(identifier, reference):
+    path = orders / f'{identifier}.yml'
+    payload = yaml.safe_load(path.read_text())
+    payload['spec']['specificationRefs'] = [reference]
+    path.write_text(yaml.safe_dump(payload))
+
+unshared_ref = '.o4g/specifications/unshared.md'
+(root / unshared_ref).write_text('# Unshared\n')
+write_order('unshared')
+add_ref('unshared', unshared_ref)
+cli('begin', 'unshared')
+cli('close', 'unshared', '--evidence', 'test:unshared-specification')
+assert not (root / unshared_ref).exists()
+assert (root / 'archive/specs/unshared.md').is_file()
+assert 'archive/specs/unshared.md' in (orders / 'ledger/unshared.yml').read_text()
+
+shared_ref = '.o4g/specifications/shared.md'
+(root / shared_ref).write_text('# Shared\n')
+for identifier in ('shared-first', 'shared-second'):
+    write_order(identifier)
+    add_ref(identifier, shared_ref)
+cli('begin', 'shared-first')
+cli('close', 'shared-first', '--evidence', 'test:shared-specification-first')
+assert (root / shared_ref).is_file()
+assert shared_ref in (orders / 'ledger/shared-first.yml').read_text()
+cli('begin', 'shared-second')
+cli('close', 'shared-second', '--evidence', 'test:shared-specification-last')
+assert not (root / shared_ref).exists()
+assert (root / 'archive/specs/shared.md').is_file()
+for identifier in ('shared-first', 'shared-second'):
+    assert 'archive/specs/shared.md' in (orders / f'ledger/{identifier}.yml').read_text()
+
+lint_spec_ref = '.o4g/specifications/lint-spec.md'
+(root / lint_spec_ref).write_text('# Lint\n')
+write_order('lint-spec')
+add_ref('lint-spec', lint_spec_ref)
+lint = root / 'scripts/verify/documentation_lint.py'
+assert subprocess.run([sys.executable, str(lint), '--root', str(root)], text=True, capture_output=True).returncode == 0
+add_ref('lint-spec', 'archive/specs/lint-spec.md')
+assert 'open WorkOrders may reference' in subprocess.run(
+    [sys.executable, str(lint), '--root', str(root)], text=True, capture_output=True).stderr
+add_ref('lint-spec', '.o4g/specifications/missing.md')
+assert 'does not resolve' in subprocess.run(
+    [sys.executable, str(lint), '--root', str(root)], text=True, capture_output=True).stderr
+add_ref('lint-spec', 'invalid.md')
+assert 'malformed specification reference' in subprocess.run(
+    [sys.executable, str(lint), '--root', str(root)], text=True, capture_output=True).stderr
+add_ref('lint-spec', lint_spec_ref)
+(specifications / 'orphan.md').write_text('# Orphan\n')
+assert 'has no open WorkOrder reference' in subprocess.run(
+    [sys.executable, str(lint), '--root', str(root)], text=True, capture_output=True).stderr
+(specifications / 'orphan.md').unlink()
+
 subprocess.run([sys.executable, str(root / 'scripts/generate/generate_roadmap.py'), '--root', str(root)], check=True,
                capture_output=True)
 roadmap = (root / 'docs/reference/roadmap.md').read_text()
