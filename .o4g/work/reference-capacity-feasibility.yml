@@ -7,7 +7,7 @@ spec:
   purpose: Establish bounded development mappings and capacity inputs without making a full-volume benchmark prerequisite
     to implementation.
   roadmapRef: m7-product-data-reference
-  state: IN_PROGRESS
+  state: BLOCKED
   executionPhase: DEVELOPMENT
   priority: 75
   dependsOn:
@@ -51,3 +51,12 @@ spec:
       and delete only on o4g-capacity-feasibility-*. The strict probe completed on Elasticsearch 9.4.3 and removed its temporary
       index. Elasticsearch derives time-series ids from dimensions and timestamp, so a same-series timestamp transition is
       rejected; the price persistence contract must allocate distinct timestamps before writing. Late events were accepted.'
+    - blocker:2026-09-14 beta dry-run of the built-in product-resource orphan cleanup made no filesystem changes but reached
+      about 7GB of the API 8GB heap while collecting keys for the 54-million-document index. It was cancelled and API restarted
+      cleanly (protected health 401). The 538GB shared cache cannot be safely reclaimed by an unbounded in-memory scan; provide
+      a bounded disk-backed cleanup implementation or approve capacity expansion before full replay.
+  externalBlockers:
+    - blocker:2026-09-14 beta dry-run of the built-in product-resource orphan cleanup made no filesystem changes but reached
+      about 7GB of the API 8GB heap while collecting keys for the 54-million-document index. It was cancelled and API restarted
+      cleanly (protected health 401). The 538GB shared cache cannot be safely reclaimed by an unbounded in-memory scan; provide
+      a bounded disk-backed cleanup implementation or approve capacity expansion before full replay.
