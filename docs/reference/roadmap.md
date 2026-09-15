@@ -13,7 +13,7 @@ Default selection is DEVELOPMENT, ordered by priority after resuming active work
 | Milestone | Open | READY | BLOCKED | IN_PROGRESS | AWAITING_OWNER_ORDER | Closed |
 |---|---|---|---|---|---|---|
 | m0-governance | 0 | 0 | 0 | 0 | 0 | 4 |
-| m1-config-autonomy | 4 | 0 | 3 | 1 | 0 | 3 |
+| m1-config-autonomy | 3 | 1 | 2 | 0 | 0 | 4 |
 | m2-corpus-cleanup | 0 | 0 | 0 | 0 | 0 | 1 |
 | m3-dead-surface-removal | 1 | 0 | 1 | 0 | 0 | 1 |
 | m4-product-page-quality | 0 | 0 | 0 | 0 | 0 | 1 |
@@ -33,12 +33,11 @@ Default selection is DEVELOPMENT, ordered by priority after resuming active work
 
 | WorkOrder | Phase / priority | Contract state | Availability | Dependencies | Blockers | Purpose |
 |---|---|---|---|---|---|---|
-| [beta-credential-isolation](../../.o4g/work/beta-credential-isolation.yml) | DEVELOPMENT / 30 | IN_PROGRESS | IN_PROGRESS | config-contract-and-environments, beta-environment-preflight, systemd-service-runtime | -- | Remove beta dependence on shared leaked internal credentials without modifying production. |
-| [config-beta-cutover](../../.o4g/work/config-beta-cutover.yml) | DEVELOPMENT / 50 | ACCEPTED | BLOCKED | systemd-service-runtime, beta-credential-isolation | beta-credential-isolation | Prove the new configuration and service runtime on the real beta host before production changes. |
+| [config-beta-cutover](../../.o4g/work/config-beta-cutover.yml) | DEVELOPMENT / 50 | ACCEPTED | READY | systemd-service-runtime, beta-credential-isolation | -- | Prove the new configuration and service runtime on the real beta host before production changes. |
 | [config-beta-independence](../../.o4g/work/config-beta-independence.yml) | DEVELOPMENT / 60 | ACCEPTED | BLOCKED | config-beta-cutover | config-beta-cutover | Prove beta build, deployment and recovery no longer need open4goods-config while production retains its current runtime. |
 | [beta-campaign-readiness](../../.o4g/work/beta-campaign-readiness.yml) | DEVELOPMENT / 400 | ACCEPTED | BLOCKED | reference-beta-cutover, product-reference-legacy-retirement, xwiki-decommission, dead-code-removal-lot-1, config-beta-independence, beta-first-workorder-sequencing | reference-beta-cutover, product-reference-legacy-retirement, xwiki-decommission, dead-code-removal-lot-1, config-beta-independence | Close development only when the cleaned beta release and dated dataset are a concrete, reproducible production candidate. |
 
-*3 closed, see [ledger](../../.o4g/work/ledger).*
+*4 closed, see [ledger](../../.o4g/work/ledger).*
 
 ## m2-corpus-cleanup
 
@@ -102,7 +101,7 @@ Default selection is DEVELOPMENT, ordered by priority after resuming active work
 
 | WorkOrder | Phase / priority | Contract state | Availability | Dependencies | Blockers | Purpose |
 |---|---|---|---|---|---|---|
-| [leaked-credential-rotation](../../.o4g/work/leaked-credential-rotation.yml) | PRODUCTION / 800 | BLOCKED | BLOCKED | beta-campaign-readiness, beta-credential-isolation | AC3: owner or AWIN account operator supplies a renewed credential through a private channel, or explicitly retires the integration., beta-campaign-readiness, beta-credential-isolation | Invalidate remaining historically exposed production credentials on the separate owner order. |
+| [leaked-credential-rotation](../../.o4g/work/leaked-credential-rotation.yml) | PRODUCTION / 800 | BLOCKED | BLOCKED | beta-campaign-readiness, beta-credential-isolation | AC3: owner or AWIN account operator supplies a renewed credential through a private channel, or explicitly retires the integration., beta-campaign-readiness | Invalidate remaining historically exposed production credentials on the separate owner order. |
 | [config-prod-cutover](../../.o4g/work/config-prod-cutover.yml) | PRODUCTION / 810 | ACCEPTED | BLOCKED | beta-campaign-readiness, config-beta-cutover, leaked-credential-rotation | beta-campaign-readiness, config-beta-cutover, leaked-credential-rotation | Roll the beta-proven runtime into production and invalidate every credential retained by the legacy repository. |
 | [reference-coordinated-cutover](../../.o4g/work/reference-coordinated-cutover.yml) | PRODUCTION / 820 | ACCEPTED | BLOCKED | full-reference-shadow-reingestion, reference-api-frontend-breaking-cutover, b2b-price-history-facet, beta-campaign-readiness, config-prod-cutover | full-reference-shadow-reingestion, reference-api-frontend-breaking-cutover, b2b-price-history-facet, beta-campaign-readiness, config-prod-cutover | On the separate owner order, promote the beta-validated release and dated dataset, then resume native collections. |
 
