@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import importlib.util
+import gzip
+import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -40,6 +43,35 @@ class CapacityPlanTest(unittest.TestCase):
         self.assertEqual(2_600, result["projectedUsedBytesDuringCoexistence"])
         self.assertEqual(2_380, result["requiredFreeBytes"])
         self.assertEqual("BLOCKED", result["fullVolumeGate"])
+
+
+class BoundedArchiveSampleTest(unittest.TestCase):
+    """Proves the private sample remains bounded and never emits category values."""
+
+    def test_collects_seven_opaque_category_cohorts_and_an_unclassified_gtin(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            archive = root / "archive"
+            archive.mkdir()
+            names = ["products-backup-0.gz", "products-backup-1.gz"]
+            records = [
+                {"gtinInfos": {"normalizedGtin14": "00000000000000"}, "sourceUrls": {}, "offersCount": 1},
+                *[{"gtinInfos": {"normalizedGtin14": f"0000000000000{value}"}, "category": f"category-{value}",
+                   "sourceUrls": {}, "offersCount": value} for value in range(1, 8)],
+            ]
+            for name in names:
+                with gzip.open(archive / name, "wt", encoding="utf-8") as handle:
+                    for record in records:
+                        handle.write(json.dumps(record) + "\n")
+            manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"legacyManifest": {"files": names}}), encoding="utf-8")
+
+            result = CAPACITY.bounded_archive_sample(archive, manifest, "test-seed", 10, 64 * 1024)
+
+        self.assertEqual(7, result["verticalCohortCount"])
+        self.assertEqual(2, result["unclassifiedGtinRecords"])
+        self.assertEqual(7, len(result["selectedVerticalCohortHashes"]))
+        self.assertNotIn("category-1", str(result))
 
 
 if __name__ == "__main__":

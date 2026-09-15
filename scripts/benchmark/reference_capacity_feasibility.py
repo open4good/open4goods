@@ -11,6 +11,9 @@ from __future__ import annotations
 import argparse
 import base64
 import collections
+import gzip
+import hashlib
+import heapq
 import json
 import os
 import sys
@@ -164,6 +167,117 @@ def pin_sample(path: Path | None) -> dict[str, Any]:
     }
 
 
+def stable_hash(value: str) -> str:
+    """Return a one-way coordinate without retaining a product or category value."""
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def category_coordinate(record: dict[str, Any]) -> str | None:
+    """Return a stable opaque legacy category coordinate without exposing its value."""
+    for field in ("vertical", "verticalId", "category", "categoryId", "categoriesByDatasources", "datasourceCategories"):
+        value = record.get(field)
+        if value is not None:
+            return stable_hash(json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True))
+    return None
+
+
+def valid_legacy_gtin(record: dict[str, Any]) -> bool:
+    """Recognize the normalized fourteen-digit backup GTIN without retaining it."""
+    details = record.get("gtinInfos")
+    value = details.get("normalizedGtin14") if isinstance(details, dict) else None
+    return isinstance(value, str) and len(value) == 14 and value.isdigit()
+
+
+def offer_count(record: dict[str, Any]) -> int:
+    """Return the declared legacy offer count when it is a non-negative integer."""
+    value = record.get("offersCount")
+    return value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else 0
+
+
+def bounded_archive_sample(archive_dir: Path, pinned_manifest: Path, seed: str, sample_limit: int,
+                           byte_budget: int, required_vertical_cohorts: int = 7) -> dict[str, Any]:
+    """Survey a fixed byte budget from every validated archive file without retaining raw records.
+
+    Each archive receives the same decompressed-byte allowance so the sample is deterministic and
+    does not silently represent only the first numbered backup file.  A hash reservoir bounds the
+    selected-record count; aggregate tail measurements cover every surveyed record.
+    """
+    try:
+        manifest = json.loads(pinned_manifest.read_text(encoding="utf-8"))
+        names = manifest["legacyManifest"]["files"]
+    except (OSError, KeyError, TypeError, json.JSONDecodeError) as error:
+        raise FeasibilityError("private pinned manifest has no safe archive file inventory") from error
+    if not isinstance(names, list) or not names or not all(isinstance(name, str) and Path(name).name == name for name in names):
+        raise FeasibilityError("private pinned manifest has unsafe archive filenames")
+    files = [archive_dir / name for name in names]
+    if not all(path.is_file() for path in files):
+        raise FeasibilityError("private pinned archive is missing a manifest-listed file")
+    per_file_budget = max(1, byte_budget // len(files))
+    counts: collections.Counter[str] = collections.Counter()
+    document_sizes: list[int] = []
+    verticals: set[str] = set()
+    reservoir: list[tuple[int, str]] = []
+    for path in files:
+        consumed = 0
+        with gzip.open(path, "rt", encoding="utf-8", errors="strict") as handle:
+            for line_number, line in enumerate(handle, start=1):
+                line_bytes = len(line.encode("utf-8"))
+                if consumed + line_bytes > per_file_budget:
+                    break
+                consumed += line_bytes
+                counts["scannedRecords"] += 1
+                counts["scannedBytes"] += line_bytes
+                try:
+                    record = json.loads(line)
+                except json.JSONDecodeError as error:
+                    raise FeasibilityError("private pinned archive contains invalid JSONL") from error
+                if not isinstance(record, dict):
+                    counts["nonObjectRecords"] += 1
+                    continue
+                document_sizes.append(line_bytes)
+                coordinate = category_coordinate(record)
+                if coordinate is None:
+                    counts["unclassifiedRecords"] += 1
+                    if valid_legacy_gtin(record):
+                        counts["unclassifiedGtinRecords"] += 1
+                else:
+                    verticals.add(coordinate)
+                    counts["classifiedRecords"] += 1
+                counts["sourcePresent" if record.get("sourceUrls") is not None else "sourceMissing"] += 1
+                offers = offer_count(record)
+                counts["offersTotal"] += offers
+                counts["offersPresent" if offers else "offersMissing"] += 1
+                priority = int(stable_hash(f"{seed}:{path.name}:{line_number}"), 16)
+                coordinate_hash = stable_hash(f"{path.name}:{line_number}")
+                if len(reservoir) < sample_limit:
+                    heapq.heappush(reservoir, (-priority, coordinate_hash))
+                elif priority < -reservoir[0][0]:
+                    heapq.heapreplace(reservoir, (-priority, coordinate_hash))
+    if len(verticals) < required_vertical_cohorts:
+        raise FeasibilityError("bounded archive sample does not contain the required vertical cohorts")
+    if counts["unclassifiedGtinRecords"] < 1:
+        raise FeasibilityError("bounded archive sample does not contain an unclassified GTIN")
+    if not document_sizes:
+        raise FeasibilityError("bounded archive sample has no object records")
+    return {
+        "status": "MEASURED_BOUNDED",
+        "selection": "equal per-file decompressed-byte budget with deterministic hash reservoir",
+        "seed": seed,
+        "sampleLimit": sample_limit,
+        "byteBudget": byte_budget,
+        "perFileByteBudget": per_file_budget,
+        "sampledRecords": len(reservoir),
+        "scannedRecords": counts["scannedRecords"],
+        "scannedBytes": counts["scannedBytes"],
+        "verticalCohortCount": len(verticals),
+        "selectedVerticalCohortHashes": sorted(verticals)[:required_vertical_cohorts],
+        "unclassifiedGtinRecords": counts["unclassifiedGtinRecords"],
+        "source": {"present": counts["sourcePresent"], "missing": counts["sourceMissing"]},
+        "offers": {"present": counts["offersPresent"], "missing": counts["offersMissing"], "total": counts["offersTotal"]},
+        "documentSizeBytes": {"min": min(document_sizes), "max": max(document_sizes)},
+    }
+
+
 def capacity_plan(cluster: dict[str, Any], free_bytes: int, source_head_bytes: int | None,
                   projection_bytes: int | None, price_store_bytes: int | None, snapshot_bytes: int | None,
                   replica_count: int, bulk_document_limit: int, bulk_byte_limit: int) -> dict[str, Any]:
@@ -215,14 +329,14 @@ def report(arguments: argparse.Namespace) -> dict[str, Any]:
     cluster = aggregate_cluster(arguments.elasticsearch_url, authorization)
     disk = os.statvfs(arguments.workspace)
     free_bytes = disk.f_bavail * disk.f_frsize
-    return {
+    result = {
         "schemaVersion": "open4goods.reference-capacity-feasibility/v1",
         "sample": {
             "seed": arguments.sample_seed,
             "limit": arguments.sample_limit,
             "byteBudget": arguments.byte_budget,
             "location": "private runtime input",
-            "selection": "deterministic reservoir sample; implementation is deferred until the controlled beta replay",
+            "selection": "deterministic hash reservoir; archive sampling is reported separately when supplied",
         },
         "cluster": cluster,
         "pinnedArchiveSample": pin_sample(arguments.pinned_manifest),
@@ -244,6 +358,11 @@ def report(arguments: argparse.Namespace) -> dict[str, Any]:
             "one replica and snapshot capacity remain required inputs for the later full-volume benchmark",
         ],
     }
+    if arguments.pinned_archive_dir:
+        result["boundedArchiveSample"] = bounded_archive_sample(
+            arguments.pinned_archive_dir, arguments.pinned_manifest, arguments.sample_seed,
+            arguments.sample_limit, arguments.byte_budget)
+    return result
 
 
 def main() -> int:
@@ -253,6 +372,8 @@ def main() -> int:
     parser.add_argument("--basic-auth-env", default="REFERENCE_BENCHMARK_ELASTICSEARCH_BASIC_AUTH",
                         help="private environment variable containing username:password; its value is never reported")
     parser.add_argument("--pinned-manifest", type=Path)
+    parser.add_argument("--pinned-archive-dir", type=Path,
+                        help="private directory containing exactly the pinned manifest-listed gzip files")
     parser.add_argument("--workspace", type=Path, default=Path("."))
     parser.add_argument("--sample-seed", default="o4g-reference-v1")
     parser.add_argument("--sample-limit", type=int, default=10_000)
@@ -275,6 +396,8 @@ def main() -> int:
     arguments = parser.parse_args()
     if not arguments.elasticsearch_url:
         parser.error("--elasticsearch-url or REFERENCE_BENCHMARK_ELASTICSEARCH_URL is required")
+    if arguments.pinned_archive_dir and arguments.pinned_manifest is None:
+        parser.error("--pinned-archive-dir requires --pinned-manifest")
     if (arguments.sample_limit < 1 or arguments.byte_budget < 1 or arguments.replica_count < 0
             or arguments.bulk_document_limit < 1 or arguments.bulk_byte_limit < 1):
         parser.error("sample, replica and bulk limits must be valid")
