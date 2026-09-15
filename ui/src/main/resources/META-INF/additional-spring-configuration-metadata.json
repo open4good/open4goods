@@ -33,6 +33,18 @@
   ],
   "properties": [
     {
+      "name": "o4g.actuator.monitor.username",
+      "type": "java.lang.String",
+      "description": "Dedicated Spring Boot Admin username accepted only by Actuator endpoints.",
+      "sourceType": "org.open4goods.ui.config.ActuatorMonitorCredentials"
+    },
+    {
+      "name": "o4g.actuator.monitor.password",
+      "type": "java.lang.String",
+      "description": "Dedicated Spring Boot Admin password accepted only by Actuator endpoints.",
+      "sourceType": "org.open4goods.ui.config.ActuatorMonitorCredentials"
+    },
+    {
       "name": "amazon-config.affiliate-tag",
       "type": "java.lang.String",
       "description": "Affiliate tag appended to generated Amazon links.",

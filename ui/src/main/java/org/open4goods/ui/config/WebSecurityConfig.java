@@ -7,6 +7,7 @@ import org.open4goods.ui.config.yml.UiConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -25,14 +26,18 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
+@EnableConfigurationProperties(ActuatorMonitorCredentials.class)
 public class WebSecurityConfig {
 
 	private final AuthenticationProvider authProvider;
 
+	private final ActuatorMonitorCredentials actuatorMonitorCredentials;
+
 	private @Autowired UiConfig config;
 
-	public WebSecurityConfig(AuthenticationProvider authProvider) {
+	public WebSecurityConfig(AuthenticationProvider authProvider, ActuatorMonitorCredentials actuatorMonitorCredentials) {
 		this.authProvider = authProvider;
+		this.actuatorMonitorCredentials = actuatorMonitorCredentials;
 	}
 
 	@Bean
@@ -42,6 +47,8 @@ public class WebSecurityConfig {
 			.httpBasic(Customizer.withDefaults())
 			.formLogin(Customizer.withDefaults())
 			.logout(Customizer.withDefaults())
+			.authenticationProvider(new ActuatorMonitorAuthenticationProvider(actuatorMonitorCredentials))
+			.authenticationProvider(authProvider)
 			.csrf(AbstractHttpConfigurer::disable);
 
 		if (config.getWebConfig().getWebAuthentication()) {
@@ -78,6 +85,7 @@ public class WebSecurityConfig {
 	@Bean
 	AuthenticationManager authManager(HttpSecurity http) throws Exception {
 		AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+		authenticationManagerBuilder.authenticationProvider(new ActuatorMonitorAuthenticationProvider(actuatorMonitorCredentials));
 		authenticationManagerBuilder.authenticationProvider(authProvider);
 		return authenticationManagerBuilder.build();
 	}

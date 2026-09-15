@@ -318,3 +318,8 @@ spring:
     admin:
       client:
         enabled: false
+o4g:
+  actuator:
+    monitor:
+      username: ${O4G_ACTUATOR_MONITOR_USERNAME:}
+      password: ${O4G_ACTUATOR_MONITOR_PASSWORD:}

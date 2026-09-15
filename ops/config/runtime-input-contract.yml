@@ -83,6 +83,8 @@ services:
       - {property: xwiki.password, input: FRONT_API_XWIKI_PASSWORD, store: secrets, environments: [beta, prod]}
       - {property: spring.boot.admin.client.username, input: FRONT_API_SBA_USERNAME, store: secrets, environments: [beta]}
       - {property: spring.boot.admin.client.password, input: FRONT_API_SBA_PASSWORD, store: secrets, environments: [beta]}
+      - {property: o4g.actuator.monitor.username, input: ADMIN_SBA_USERNAME, store: secrets, environments: [beta]}
+      - {property: o4g.actuator.monitor.password, input: ADMIN_SBA_PASSWORD, store: secrets, environments: [beta]}
   ui:
     defaultSource: packaged
     requiredWhen: service-enabled
@@ -103,6 +105,8 @@ services:
       - {property: xwiki.password, input: UI_XWIKI_PASSWORD, store: secrets, environments: [beta, prod]}
       - {property: spring.boot.admin.client.username, input: UI_SBA_USERNAME, store: secrets, environments: [beta]}
       - {property: spring.boot.admin.client.password, input: UI_SBA_PASSWORD, store: secrets, environments: [beta]}
+      - {property: o4g.actuator.monitor.username, input: ADMIN_SBA_USERNAME, store: secrets, environments: [beta]}
+      - {property: o4g.actuator.monitor.password, input: ADMIN_SBA_PASSWORD, store: secrets, environments: [beta]}
   b2b-frontend:
     defaultSource: packaged
     requiredWhen: service-enabled

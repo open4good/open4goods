@@ -7,7 +7,7 @@ spec:
   purpose: Establish bounded development mappings and capacity inputs without making a full-volume benchmark prerequisite
     to implementation.
   roadmapRef: m7-product-data-reference
-  state: BLOCKED
+  state: IN_PROGRESS
   executionPhase: DEVELOPMENT
   priority: 75
   dependsOn:
@@ -51,12 +51,7 @@ spec:
       and delete only on o4g-capacity-feasibility-*. The strict probe completed on Elasticsearch 9.4.3 and removed its temporary
       index. Elasticsearch derives time-series ids from dimensions and timestamp, so a same-series timestamp transition is
       rejected; the price persistence contract must allocate distinct timestamps before writing. Late events were accepted.'
-    - blocker:2026-09-14 beta dry-run of the built-in product-resource orphan cleanup made no filesystem changes but reached
-      about 7GB of the API 8GB heap while collecting keys for the 54-million-document index. It was cancelled and API restarted
-      cleanly (protected health 401). The 538GB shared cache cannot be safely reclaimed by an unbounded in-memory scan; provide
-      a bounded disk-backed cleanup implementation or approve capacity expansion before full replay.
-  externalBlockers:
-    - blocker:2026-09-14 beta dry-run of the built-in product-resource orphan cleanup made no filesystem changes but reached
-      about 7GB of the API 8GB heap while collecting keys for the 54-million-document index. It was cancelled and API restarted
-      cleanly (protected health 401). The 538GB shared cache cannot be safely reclaimed by an unbounded in-memory scan; provide
-      a bounded disk-backed cleanup implementation or approve capacity expansion before full replay.
+    - '2026-09-15 beta: the disk-backed reconciliation revalidated the completed products-moustik PIT scan, then copied and
+      removed 53,349 exact orphan cache files (12,876,506,889 bytes) under a UI-writer maintenance gate. Recovery copies are
+      retained on the separate diskB filesystem; the source workspace has 109,862,891,520 bytes free. Full-volume coexistence
+      estimates remain explicit UNKNOWN until the controlled replay measures the new store and snapshot sizes.'
