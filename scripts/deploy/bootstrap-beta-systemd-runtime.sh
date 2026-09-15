@@ -47,6 +47,23 @@ write_java_environment() {
   mv -f "$temporary_file" "$environment_file"
 }
 
+# Copy a legacy environment file into the systemd runtime with one atomic rename.
+# The source contains credentials, so this function deliberately never logs its content.
+write_environment_copy() {
+  local service="$1" source_file="$2" additions="${3:-}"
+  local environment_file="/etc/open4goods/${service}.env"
+  local temporary_file
+  [[ -f "$source_file" ]] || { echo "missing legacy environment for ${service}" >&2; return 1; }
+  temporary_file="$(mktemp "${environment_file}.XXXXXX")"
+  cp -- "$source_file" "$temporary_file"
+  if [[ -n "$additions" ]]; then
+    printf '\n%s\n' "$additions" >> "$temporary_file"
+  fi
+  chown root:open4goods "$temporary_file"
+  chmod 0600 "$temporary_file"
+  mv -f "$temporary_file" "$environment_file"
+}
+
 gc_options() {
   local service="$1"
   printf '%s' "-Xlog:gc*,gc+age=trace,safepoint:file=/var/log/open4goods/gc-${service}.log:utctime,level,pid,tags:filecount=10,filesize=32m"
@@ -68,14 +85,9 @@ write_java_environment b2b-api \
   "-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:MetaspaceSize=128m -XX:+ExitOnOutOfMemoryError $(gc_options b2b-api)" \
   '-Dspring.config.location=classpath:/application.yml,file:/opt/open4goods/config/beta/b2b-api/application-active.yml -Dspring.profiles.active=nudger,beta'
 
-install -m 0600 "$legacy_config/infra/.env" /etc/open4goods/infra.env
-for service in frontend b2b-frontend; do
-  install -m 0600 "$legacy_config/${service}/.env" "/etc/open4goods/${service}.env"
-done
-printf '%s\n' 'PORT=3000' 'NODE_OPTIONS=--max-old-space-size=4096' 'TZ=Europe/Paris' \
-  'METRIKS_DATA_DIR=/opt/open4goods/metriks-data' >> /etc/open4goods/frontend.env
-printf '%s\n' 'PORT=3003' 'NODE_OPTIONS=--max-old-space-size=1536' 'TZ=Europe/Paris' \
-  >> /etc/open4goods/b2b-frontend.env
+write_environment_copy infra "$legacy_config/infra/.env"
+write_environment_copy frontend "$legacy_config/frontend/.env" $'PORT=3000\nNODE_OPTIONS=--max-old-space-size=4096\nTZ=Europe/Paris\nMETRIKS_DATA_DIR=/opt/open4goods/metriks-data'
+write_environment_copy b2b-frontend "$legacy_config/b2b-frontend/.env" $'PORT=3003\nNODE_OPTIONS=--max-old-space-size=1536\nTZ=Europe/Paris'
 "$repo_root/scripts/deploy/install-systemd-runtime.sh"
 
 activate_java_service() {
