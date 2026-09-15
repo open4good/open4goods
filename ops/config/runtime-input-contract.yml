@@ -27,6 +27,9 @@ services:
       - {property: feed.api-synch-config.node-name, input: API_FEED_NODE_NAME, store: vars, environments: [beta, prod]}
       - {property: feed.api-synch-config.node-url, input: API_FEED_NODE_URL, store: vars, environments: [beta, prod]}
       - {property: gen-ai-config.google-api-json, input: API_GOOGLE_API_JSON, store: secrets, environments: [beta, prod]}
+      - {property: googlesearch.api-key, input: API_GOOGLE_SEARCH_API_KEY, store: secrets, environments: [beta, prod]}
+      - {property: googlesearch.cx, input: API_GOOGLE_SEARCH_CX, store: vars, environments: [beta, prod]}
+      - {property: googlesearch.search-url, input: API_GOOGLE_SEARCH_URL, store: vars, environments: [beta, prod]}
       - {property: icecat-feature-config.user, input: API_ICECAT_USERNAME, store: secrets, environments: [beta, prod]}
       - {property: icecat-feature-config.password, input: API_ICECAT_PASSWORD, store: secrets, environments: [beta, prod]}
       - {property: spring.ai.openai.api-key, input: API_OPENAI_API_KEY, store: secrets, environments: [beta, prod]}

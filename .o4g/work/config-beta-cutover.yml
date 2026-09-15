@@ -28,3 +28,20 @@ spec:
         by key and reason only. Five named Java actuator endpoints report UP without exporting raw configprops or secret values.
     - id: AC3
       statement: Frontend SSR, application logs and a complete release rollback are verified on the distinct beta host.
+  evidenceRefs:
+    - >-
+      2026-09-15 beta: all eight runtime EnvironmentFiles were inventoried and atomically replaced with mode 0600;
+      five Java listeners and both Nuxt listeners run as open4goods under their named systemd units. Redacted non-secret
+      configprops fingerprints were captured for api, ui and front-api; the expected beta monitor boundary is the only
+      credential-isolation change exercised.
+    - >-
+      2026-09-15 beta: sbadmin, ui, front-api and b2b-api Actuator health checks report UP with their scoped
+      authentication; UI and front-api configprops were queried only to produce redacted non-secret fingerprints.
+      Forced Java and both Nuxt readiness failures restored their exact prior release links, and both Nuxt SSR endpoints
+      returned HTML with no current-day fatal log signature.
+    - >-
+      owner-action: API cannot satisfy the fifth UP check while its backup health reports an empty/stale product backup
+      and an undersized/stale XWiki export, and Google Custom Search is unconfigured. The beta Environment now has the
+      name-only API_GOOGLE_SEARCH_URL variable; provision a newly rotated API_GOOGLE_SEARCH_API_KEY secret and
+      API_GOOGLE_SEARCH_CX variable, then repair the beta XWiki and product backup sources without disabling their
+      health indicators.
