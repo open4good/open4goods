@@ -145,23 +145,28 @@ jobs:
           TARGET: "/opt/open4goods/latest/b2b-frontend"
 
       ############################################
-      # 7b. Publish b2b-frontend container
+      # 7b. Verify the systemd-managed b2b frontend
       ############################################
-      - name: Publish b2b-frontend
+      - name: Verify b2b-frontend runtime
         uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.BETA_DEPLOY_HOST }}
           username: ${{ secrets.BETA_DEPLOY_USER }}
           key: ${{ secrets.BETA_DEPLOY_SSH_PRIVATE_KEY }}
-          script: sh /opt/open4goods/bin/publish-b2b-frontend.sh beta
+          script: |
+            systemctl is-active --quiet open4goods-nuxt@b2b-frontend.service
+            curl --fail --silent --show-error --max-time 10 http://127.0.0.1:3003/ >/dev/null
 
       ############################################
-      # 7c. Restarting Spring Applications
+      # 7c. Verify systemd-managed Spring Applications
       ############################################
-      - name: Publish Applications
+      - name: Verify Java runtime
         uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.BETA_DEPLOY_HOST }}
           username: ${{ secrets.BETA_DEPLOY_USER }}
           key: ${{ secrets.BETA_DEPLOY_SSH_PRIVATE_KEY }}
-          script: sh /opt/open4goods/bin/publish-jars.sh beta
+          script: |
+            for service in sbadmin api ui front-api b2b-api; do
+              systemctl is-active --quiet "open4goods@${service}.service"
+            done
