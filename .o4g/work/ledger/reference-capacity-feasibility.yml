@@ -7,7 +7,7 @@ spec:
   purpose: Establish bounded development mappings and capacity inputs without making a full-volume benchmark prerequisite
     to implementation.
   roadmapRef: m7-product-data-reference
-  state: IN_PROGRESS
+  state: COMPLETED
   executionPhase: DEVELOPMENT
   priority: 75
   dependsOn:
@@ -55,3 +55,10 @@ spec:
       removed 53,349 exact orphan cache files (12,876,506,889 bytes) under a UI-writer maintenance gate. Recovery copies are
       retained on the separate diskB filesystem; the source workspace has 109,862,891,520 bytes free. Full-volume coexistence
       estimates remain explicit UNKNOWN until the controlled replay measures the new store and snapshot sizes.'
+    - '2026-09-15 beta: private v2 feasibility report sampled exactly 134,212,526 bytes across the four pinned archive files
+      with a deterministic hash reservoir of 10,000 records. It measured 4,658 opaque category cohorts, 7,632 unclassified
+      GTIN records, source and offer presence, and document-size tails without retaining raw records.'
+    - '2026-09-15 beta: strict Elasticsearch probe reconfirmed same-series same-timestamp rejection and late-event acceptance.
+      Development bulk limits are 1,000 documents or 16 MiB; full-volume coexistence remains explicitly BLOCKED until future
+      source-head, projection, price-store and snapshot measurements exist, while the recoverable cache cleanup preserves
+      limited fixture development.'
