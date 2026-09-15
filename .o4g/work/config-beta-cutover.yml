@@ -1,21 +1,30 @@
 apiVersion: open4goods.org/v1
 kind: WorkOrder
-metadata: {id: config-beta-cutover, name: Beta configuration and systemd cutover}
+metadata:
+  id: config-beta-cutover
+  name: Beta configuration and systemd cutover
 spec:
   purpose: Prove the new configuration and service runtime on the real beta host before production changes.
   roadmapRef: m1-config-autonomy
-  state: ACCEPTED
+  state: IN_PROGRESS
   executionPhase: DEVELOPMENT
   priority: 50
-  dependsOn: [systemd-service-runtime, beta-credential-isolation]
-  decisionRefs: [ADR-0006]
-  pathScope: ['ops/config/**', 'ops/systemd/**', 'scripts/deploy/**', '.github/workflows/**', 'docs/operations/**']
+  dependsOn:
+    - systemd-service-runtime
+    - beta-credential-isolation
+  decisionRefs:
+    - ADR-0006
+  pathScope:
+    - ops/config/**
+    - ops/systemd/**
+    - scripts/deploy/**
+    - .github/workflows/**
+    - docs/operations/**
   acceptanceCriteria:
     - id: AC1
       statement: Existing /etc/open4goods files are inventoried and replaced atomically from beta without secret output.
     - id: AC2
-      statement: >-
-        Sanitized non-secret configprops have no unexplained drift; expected credential/isolation changes are recorded by key
-        and reason only. Five named Java actuator endpoints report UP without exporting raw configprops or secret values.
+      statement: Sanitized non-secret configprops have no unexplained drift; expected credential/isolation changes are recorded
+        by key and reason only. Five named Java actuator endpoints report UP without exporting raw configprops or secret values.
     - id: AC3
       statement: Frontend SSR, application logs and a complete release rollback are verified on the distinct beta host.

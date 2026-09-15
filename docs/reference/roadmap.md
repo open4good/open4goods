@@ -13,7 +13,7 @@ Default selection is DEVELOPMENT, ordered by priority after resuming active work
 | Milestone | Open | READY | BLOCKED | IN_PROGRESS | AWAITING_OWNER_ORDER | Closed |
 |---|---|---|---|---|---|---|
 | m0-governance | 0 | 0 | 0 | 0 | 0 | 4 |
-| m1-config-autonomy | 3 | 1 | 2 | 0 | 0 | 4 |
+| m1-config-autonomy | 3 | 0 | 2 | 1 | 0 | 4 |
 | m2-corpus-cleanup | 0 | 0 | 0 | 0 | 0 | 1 |
 | m3-dead-surface-removal | 1 | 0 | 1 | 0 | 0 | 1 |
 | m4-product-page-quality | 0 | 0 | 0 | 0 | 0 | 1 |
@@ -33,7 +33,7 @@ Default selection is DEVELOPMENT, ordered by priority after resuming active work
 
 | WorkOrder | Phase / priority | Contract state | Availability | Dependencies | Blockers | Purpose |
 |---|---|---|---|---|---|---|
-| [config-beta-cutover](../../.o4g/work/config-beta-cutover.yml) | DEVELOPMENT / 50 | ACCEPTED | READY | systemd-service-runtime, beta-credential-isolation | -- | Prove the new configuration and service runtime on the real beta host before production changes. |
+| [config-beta-cutover](../../.o4g/work/config-beta-cutover.yml) | DEVELOPMENT / 50 | IN_PROGRESS | IN_PROGRESS | systemd-service-runtime, beta-credential-isolation | -- | Prove the new configuration and service runtime on the real beta host before production changes. |
 | [config-beta-independence](../../.o4g/work/config-beta-independence.yml) | DEVELOPMENT / 60 | ACCEPTED | BLOCKED | config-beta-cutover | config-beta-cutover | Prove beta build, deployment and recovery no longer need open4goods-config while production retains its current runtime. |
 | [beta-campaign-readiness](../../.o4g/work/beta-campaign-readiness.yml) | DEVELOPMENT / 400 | ACCEPTED | BLOCKED | reference-beta-cutover, product-reference-legacy-retirement, xwiki-decommission, dead-code-removal-lot-1, config-beta-independence, beta-first-workorder-sequencing | reference-beta-cutover, product-reference-legacy-retirement, xwiki-decommission, dead-code-removal-lot-1, config-beta-independence | Close development only when the cleaned beta release and dated dataset are a concrete, reproducible production candidate. |
 
