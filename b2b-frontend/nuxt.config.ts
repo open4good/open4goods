@@ -80,7 +80,7 @@ export default defineNuxtConfig({
     apiHost: process.env.NUXT_PUBLIC_PLAUSIBLE_API_HOST || 'https://plausible.io'
   },
   i18n: {
-    baseUrl: 'https://product-data-api.com',
+    baseUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://product-data-api.com',
     strategy: 'prefix_except_default',
     defaultLocale: 'en',
     locales: [
@@ -105,7 +105,7 @@ export default defineNuxtConfig({
     exclude: ['/admin/**', '/dashboard/**', '/auth/**', '/enroll']
   },
   site: {
-    url: 'https://product-data-api.com',
+    url: process.env.NUXT_PUBLIC_SITE_URL || 'https://product-data-api.com',
     name: 'Product Data API'
   },
   vite: {

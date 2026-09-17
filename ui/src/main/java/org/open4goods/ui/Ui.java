@@ -11,11 +11,9 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 /** Main entry point for the open4goods UI (legacy) application. */
 @SpringBootApplication(scanBasePackages = {"org.open4goods.services"}, scanBasePackageClasses = { Ui.class, CacheKeyGenerator.class})
-@EnableScheduling
 @EnableCaching
 @Configuration
 @ConfigurationPropertiesScan

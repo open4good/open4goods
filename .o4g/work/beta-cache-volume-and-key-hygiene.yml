@@ -1,0 +1,94 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: beta-cache-volume-and-key-hygiene
+  name: Beta cache volume cutover and cache-key containment
+spec:
+  purpose: >-
+    Recover beta root-volume capacity by moving only safe, bounded cache data to DiskB, while ensuring remote cache
+    filenames and operational evidence cannot retain request credentials.
+  roadmapRef: m1-config-autonomy
+  state: BLOCKED
+  executionPhase: BETA_VALIDATION
+  priority: 500
+  dependsOn:
+    - systemd-service-runtime
+    - beta-credential-isolation
+    - local-campaign-readiness
+  decisionRefs:
+    - ADR-0006
+    - ADR-0014
+  pathScope:
+    - services/remotefilecaching/**
+    - services/icecat/**
+    - api/src/main/java/org/open4goods/api/services/BatchService.java
+    - api/src/main/java/org/open4goods/api/config/yml/ApiProperties.java
+    - api/src/test/**
+    - ops/systemd/**
+    - scripts/deploy/**
+    - docs/operations/**
+  specificationRefs:
+    - .o4g/specifications/beta-cache-volume-and-key-hygiene.md
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        A sanitized beta inventory records root and DiskB capacity, cache-class totals, ownership and age buckets without
+        outputting cache paths, URLs, query strings or credential values.
+    - id: AC2
+      statement: >-
+        Remote and Icecat cache keys use deterministic SHA-256-derived filenames; neither final nor temporary filenames,
+        logs, exception messages or tests expose URL query values, signed parameters or credentials.
+    - id: AC3
+      statement: >-
+        The cutover classifies product-resource shards, reconstructible remote files and stateful batch/recovery content;
+        only an explicitly approved safe class is relocated or reclaimed, and stateful content remains recoverable.
+    - id: AC4
+      statement: >-
+        Before removing any root-volume cache data, a dry run quantifies reclaimable product-resource orphans and a
+        bounded cleanup or relocation plan keeps DiskB at or below 70 percent used and restores root to at least 20
+        percent free.
+    - id: AC5
+      statement: >-
+        The canonical /opt/open4goods/.cached path is a verified DiskB-backed mount dependency for every beta service
+        that writes it; an unavailable mount fails safely rather than silently rebuilding the cache on the root volume.
+    - id: AC6
+      statement: >-
+        The beta rehearsal verifies mount provenance, ownership, service health and rollback before old cache data is
+        reclaimed; it changes no production host, data or credential.
+  implementationPlan:
+    - >-
+      Replace URL-derived cache names with SHA-256 names, retain no compatibility lookup for unsafe legacy names, and
+      let safe remote cache entries rebuild from their configured sources. Inventory and clean only product-resource
+      shards through the existing guarded cleanup path. Stage a bounded DiskB cache root, bind it to the canonical path
+      with systemd RequiresMountsFor protection, validate beta services, then reclaim only the reviewed old cache class.
+  evidenceRefs:
+    - >-
+      2026-09-16 development: RemoteFileCachingService and IcecatFileDownloadService now use deterministic opaque
+      SHA-256 cache filenames, including temporary files; diagnostic URLs redact query values and exceptions do not
+      concatenate upstream URLs. Focused remotefilecaching and Icecat reactor tests pass.
+    - >-
+      2026-09-16 beta sanitized inventory: root has 103.6 GB free (89 percent used), DiskB has 772.9 GB free (20
+      percent used), and the cache consumes 564.0 GB apparent size. Resource-shaped roots account for 556.2 GB
+      allocated, so copying all cache data would violate the DiskB 70 percent use guardrail. No filename, URL or query
+      value was recorded.
+    - >-
+      2026-09-16 beta preparation: created the empty /diskb/open4goods-cache source as open4goods:open4goods mode
+      0750 and verified it is backed by DiskB. /opt/open4goods/.cached remains unmounted; no cache entry was copied,
+      removed or exposed and no service was restarted.
+    - >-
+      2026-09-17 beta read-only snapshot: root has 100.2 GB free (89 percent used), DiskB has 777.9 GB free (19
+      percent used), and the canonical cache path remains on root; the required mount unit is not installed or active.
+      Aggregate cache age buckets report 7.5 GB (1-7 days), 17.6 GB (8-30 days), 118.5 GB (31-90 days) and 415.5 GB
+      (over 90 days); the root is open4goods:open4goods mode 0750. No beta data, service or credential was changed.
+    - >-
+      2026-09-17 development validation: the sanitized inventory now includes aggregate age-bucket byte and file totals.
+      The systemd runtime rehearsal and the focused remotefilecaching/Icecat Maven reactor pass; JavaLens confirms every
+      known remote cache-key call site uses the opaque SHA-256 helper. The beta runtime remains on earlier releases, so
+      installation awaits a reviewable main-branch release artifact.
+  externalBlockers:
+    - >-
+      The guarded beta orphan-cleanup endpoint is reachable but returns 401 without an administrator credential. An
+      authorized beta DRY_RUN report is required before any product-resource reclaim or relocation can be approved.
+    - >-
+      The fail-closed mount unit and cache-key code require a reviewable main-branch release artifact before beta
+      installation and rehearsal; direct host upload is not an approved release path.

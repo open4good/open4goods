@@ -76,7 +76,14 @@ PATH="$fixture/bin:$PATH" "$ROOT/scripts/deploy/install-systemd-runtime.sh" \
   --unit-dir "$fixture/unit-dir" --environment-dir "$fixture/environment"
 test -f "$fixture/unit-dir/open4goods@.service"
 test -f "$fixture/unit-dir/open4goods-nuxt@.service"
+test -f "$fixture/unit-dir/opt-open4goods-.cached.mount"
+grep -qx 'ReadWritePaths=/srv/open4goods /var/log/open4goods /opt/open4goods/.cached /opt/open4goods/backup' \
+  "$fixture/unit-dir/open4goods@.service"
+grep -qx 'RequiresMountsFor=/opt/open4goods/.cached' "$fixture/unit-dir/open4goods@.service"
+grep -qx 'ConditionPathIsMountPoint=/opt/open4goods/.cached' "$fixture/unit-dir/open4goods@.service"
+grep -qx 'ConditionPathIsMountPoint=/diskb' "$fixture/unit-dir/opt-open4goods-.cached.mount"
 grep -qx 'enable open4goods.target' "$fixture/systemctl.log"
+grep -qx 'enable opt-open4goods-.cached.mount' "$fixture/systemctl.log"
 
 chmod 644 "$fixture/environment/api.env"
 if PATH="$fixture/bin:$PATH" "$ROOT/scripts/deploy/install-systemd-runtime.sh" \
@@ -86,5 +93,5 @@ if PATH="$fixture/bin:$PATH" "$ROOT/scripts/deploy/install-systemd-runtime.sh" \
 fi
 
 systemd-analyze verify "$ROOT/ops/systemd/open4goods@.service" "$ROOT/ops/systemd/open4goods-nuxt@.service" \
-  "$ROOT/ops/systemd/open4goods.target"
+  "$ROOT/ops/systemd/open4goods.target" "$ROOT/ops/systemd/opt-open4goods-.cached.mount"
 echo 'OK: systemd release isolation, health rollback and unit syntax'

@@ -7,7 +7,7 @@ spec:
   state: ACCEPTED
   executionPhase: DEVELOPMENT
   priority: 250
-  dependsOn: [config-beta-independence]
+  dependsOn: [local-full-stack-runtime]
   decisionRefs: [ADR-0009]
   pathScope: ['frontend/**', 'front-api/**', 'model/**', '.github/workflows/**', 'docs/operations/**']
   acceptanceCriteria:
@@ -21,11 +21,11 @@ spec:
       statement: Tests cover tampered tokens, replay, unverified and absent emails, role changes, logout and environment isolation.
     - id: AC5
       statement: >-
-        Real beta sign-in succeeds for an owner-approved test identity and refuses an absent role-map identity; list missing
+        Explicit local sign-in through the loopback callback succeeds for an owner-approved test identity and refuses an absent role-map identity; list missing
         Google client registration, redirect URI or consent configuration as an owner action before implementation stalls.
         ROLE_ADMIN and ROLE_EDITOR remain independent allowlist assignments; no role derives from an email domain alone.
   implementationPlan:
     - >-
-      Configure the beta OAuth client and private email-role allowlist via beta inputs. Google console access and production
+      Configure the loopback OAuth client and private email-role allowlist via ignored local inputs. Google console access and production
       client changes are separate owner actions when unavailable. Keep provider tokens server-side and test role refresh
       against current policy rather than indefinitely trusting old session roles.

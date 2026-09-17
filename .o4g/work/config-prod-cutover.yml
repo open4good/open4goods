@@ -8,7 +8,7 @@ spec:
   executionPhase: PRODUCTION
   priority: 810
   dependsOn: [beta-campaign-readiness, config-beta-cutover, leaked-credential-rotation]
-  decisionRefs: [ADR-0006]
+  decisionRefs: [ADR-0006, ADR-0014]
   pathScope: ['ops/config/**', 'ops/systemd/**', 'scripts/deploy/**', '.github/workflows/**', 'docs/operations/**']
   acceptanceCriteria:
     - id: AC1
@@ -19,6 +19,6 @@ spec:
       statement: Redacted configprops parity, five healthy services and tested rollback are recorded without secret values.
     - id: AC4
       statement: >-
-        On the separate owner order, populate production inputs from the reviewed key-level contract and deploy the runtime
+        At the production gate under the permanent owner order, populate production inputs from the reviewed key-level contract and deploy the runtime
         transition using the retained currently compatible application binaries first. Do not start new reference readers
         against legacy data; coordinated application/data promotion belongs to reference-coordinated-cutover.

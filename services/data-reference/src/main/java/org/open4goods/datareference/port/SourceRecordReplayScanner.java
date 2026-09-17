@@ -1,5 +1,6 @@
 package org.open4goods.datareference.port;
 
+import org.open4goods.datareference.model.Gtin;
 import org.open4goods.datareference.model.SourceId;
 import org.open4goods.datareference.model.SourceRecordHead;
 
@@ -28,4 +29,20 @@ public interface SourceRecordReplayScanner {
      * @return one page of heads
      */
     ScanPage<SourceRecordHead> scanBySource(SourceId sourceId, ScanRequest request);
+
+    /**
+     * Scans heads currently attached to one GTIN.
+     *
+     * @param gtin product identity
+     * @param request page position, size, ordering and failure behavior
+     * @return one page of heads
+     */
+    ScanPage<SourceRecordHead> scanByGtin(Gtin gtin, ScanRequest request);
+
+    /**
+     * Closes the point-in-time snapshot held by a resumable cursor.
+     *
+     * @param cursor cursor returned by this store, or an initial cursor
+     */
+    void cancel(ScanCursor cursor);
 }

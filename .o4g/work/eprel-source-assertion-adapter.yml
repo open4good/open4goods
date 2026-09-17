@@ -19,45 +19,54 @@ spec:
     - services/eprel-service/**
     - services/data-reference/**
     - api/src/main/java/org/open4goods/api/services/completion/EprelCompletionService.java
+    - api/src/main/java/org/open4goods/api/config/ApiConfig.java
     - api/src/test/**
     - model/src/main/java/org/open4goods/model/eprel/**
     - api/pom.xml
     - docs/operations/**
   acceptanceCriteria:
     - id: AC1
-      statement: >-
-        SourceRecordKey uses the EPREL registration/model record identifier rather than GTIN, and every GTIN attachment records
-        exact matching evidence and confidence consistent with the existing model-identity contract.
+      statement: SourceRecordKey uses the EPREL registration/model record identifier rather than GTIN, and every GTIN attachment
+        records exact matching evidence and confidence consistent with the existing model-identity contract.
     - id: AC2
-      statement: >-
-        Assertions use EPREL parameter identifiers and schema version as SourceFieldId; localized values preserve actual BCP 47
-        tags and non-linguistic values use und, with no flattened-label identifier or forced French value.
+      statement: Assertions use EPREL parameter identifiers and schema version as SourceFieldId; localized values preserve
+        actual BCP 47 tags and non-linguistic values use und, with no flattened-label identifier or forced French value.
     - id: AC3
-      statement: >-
-        Catalogue rows produce FULL heads; published corrections, removals and withdrawn models produce replacement or DELETED
-        heads so an assertion absent from the current EPREL record cannot survive indefinitely.
+      statement: Catalogue rows produce FULL heads; published corrections, removals and withdrawn models produce replacement
+        or DELETED heads so an assertion absent from the current EPREL record cannot survive indefinitely.
     - id: AC4
-      statement: >-
-        Regulatory authority is assigned only by configured O4G concept mapping and exact model attachment; unmapped parameters
-        remain stored raw and reported but cannot be resolved through an Icecat name or a global EPREL priority.
+      statement: Regulatory authority is assigned only by configured O4G concept mapping and exact model attachment; unmapped
+        parameters remain stored raw and reported but cannot be resolved through an Icecat name or a global EPREL priority.
     - id: AC5
-      statement: >-
-        The effective EPREL usage policy carries attribution, correction/withdrawal refresh, retention and per-surface
-        redistribution decisions; B2B_API and ODBL_EXPORT remain denied until a reviewed policy version explicitly allows them.
+      statement: The effective EPREL usage policy carries attribution, correction/withdrawal refresh, retention and per-surface
+        redistribution decisions; B2B_API and ODBL_EXPORT remain denied until a reviewed policy version explicitly allows
+        them.
     - id: AC6
-      statement: >-
-        Import is idempotent and resumable by catalogue/version and source-record cursor; a failed page never publishes a partial
-        FULL snapshot and metrics expose mapped, unmapped, rejected, withdrawn and changed record counts.
+      statement: Import is idempotent and resumable by catalogue/version and source-record cursor; a failed page never publishes
+        a partial FULL snapshot and metrics expose mapped, unmapped, rejected, withdrawn and changed record counts.
     - id: AC7
-      statement: >-
-        Product.eprelDatas and direct Product brand/model/attribute writes are absent from the new path and removed after cutover;
-        provider payloads stay in the EPREL source boundary and not in product projections.
+      statement: Product.eprelDatas and direct Product brand/model/attribute writes are absent from the new path and removed
+        after cutover; provider payloads stay in the EPREL source boundary and not in product projections.
     - id: AC8
-      statement: >-
-        Shared adapter contract tests cover repeated values, deletion, unknown language/unit, provider version change,
+      statement: Shared adapter contract tests cover repeated values, deletion, unknown language/unit, provider version change,
         corrected GTIN attachment, withdrawal, policy denial and byte-equivalent output across repeated catalogue ingestion.
   implementationPlan:
-    - >-
-      Fix source-record and locale completeness in fixtures before FULL replacement can remove translations. Persist the
-      catalogue cursor only after acknowledged heads; never infer withdrawal from an interrupted page. Use shared store
-      status semantics, preserve exact matching evidence and run a bounded real beta import after fixtures pass.
+    - Fix source-record and locale completeness in fixtures before FULL replacement can remove translations. Persist the catalogue
+      cursor only after acknowledged heads; never infer withdrawal from an interrupted page. Use shared store status semantics,
+      preserve exact matching evidence and run a bounded live-provider import into isolated local targets after fixtures pass.
+  evidenceRefs:
+    - '2026-09-16 development: the dependency-aware Maven reactor (mvn --offline -pl services/eprel-service -am test) passes
+      after source-record adapter and catalogue importer tests prove registration keys, language and unit preservation, exact
+      GTIN replacement, withdrawal heads, deny-by-default policy surfaces, byte-equivalent replay, checkpoints, incomplete
+      parser batches (including a would-be bulk), and provider-version-only corrections.'
+    - '2026-09-16 beta read-only check: all eight application units are active. The root filesystem is 89 percent used with
+      103656873984 bytes free (103.7 GB), above the order''s 100 GB threshold but below the separate cache rehearsal''s 20
+      percent free margin. No uncommitted development artifact was deployed.'
+    - '2026-09-16 beta read-only recheck: all eight application units remain active. The root filesystem is 89 percent used
+      with 99749478400 bytes free (99.7 GB), below the order''s 100 GB import floor. No cache mount or release symlink was
+      present and no development artifact was deployed.'
+    - 'blocker: AC6 still requires a bounded real beta import. It must run through the main-branch beta workflow after a reviewable
+      release artifact exists and the root filesystem again exceeds the 100 GB import floor; direct host upload is not an
+      approved release path. No destructive cleanup was performed.'
+    - '2026-09-16 beta: AC6 blocked pending a reviewable main-branch release artifact and root capacity above the 100 GB import
+      floor; 99749478400 bytes were free. Direct upload is not approved.'

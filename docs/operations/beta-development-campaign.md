@@ -1,82 +1,77 @@
 ---
-title: "Campagne locale et beta, puis bascule de production"
+title: "Developpement strictement local et promotions phasees"
 normative: false
 audience: PROJECT_SCOPED
 lang: fr
 ---
 
-# Campagne locale et beta, puis bascule de production
+# Developpement strictement local et promotions phasees
 
-Les choix du 2026-09-11 sont portes par ADR-0013 et le contrat
-[Project](../../.o4g/project.yml). Le developpement se fait en local et la recette
-directement sur beta.nudger.fr. Les agents disposent des ecritures beta, de ses
-deploiements, redemarrages, migrations, parametres GitHub et secrets exclusifs a beta.
-La production attend un ordre specifique du proprietaire.
+ADR-0014 et le contrat [Project](../../.o4g/project.yml) decrivent quatre phases.
+DEVELOPMENT utilise uniquement la machine locale; beta sert ensuite a valider le
+candidat deja qualifie, puis le meme SHA, les memes artefacts et le meme dataset
+sont promus en production. L'ordre proprietaire permanent du 17 septembre 2026
+autorise ces deux promotions lorsque les gates sont verts.
 
-## Sequence
+## Stack locale
 
-La [roadmap generee](../reference/roadmap.md) donne les dependances, phases,
-priorites et blockers courants. Le selecteur est la source de l'ordre executable :
+La stack hybride conserve Elasticsearch, Redis et PostgreSQL dans Docker. Kibana
+est dans le profil `tools`; XWiki et MySQL sont dans le profil transitoire `xwiki`.
+Les sept applications Java et les deux frontends tournent nativement sur les ports
+du contrat local.
 
 ```bash
-scripts/work/next-workorder.py
-scripts/work/wo.py next --phase ALL --all --limit 100
-scripts/work/wo.py status <id>
+scripts/local/open4goods.sh init
+scripts/local/open4goods.sh doctor
+scripts/local/open4goods.sh up
+scripts/local/open4goods.sh status
+scripts/local/open4goods.sh logs front-api
+scripts/local/open4goods.sh restart front-api
+scripts/local/open4goods.sh down
 ```
 
-| Etape | Resultat attendu |
-|---|---|
-| Isolation et configuration beta | Cibles verifiees, secrets beta distincts, runtime et retour arriere, independance du depot de configuration |
-| Entrees et faisabilite | Sauvegarde figee, conversion explicite, echantillon borne, ressources et dossiers de revue |
-| Contrats et moteurs | Normalisation, mappings, stores, prix, politiques, composition des scores/offres/recherche |
-| Adaptateurs et lecteurs | Imports fournisseurs et archive, resolution, groupes, recherche lexicale, API et clients |
-| Qualification complete | Benchmark reel, catalogue entier, recette beta et repetition de la bascule |
-| Nettoyage et candidat final | SSO, retrait du code historique/XWiki, lots de code mort, nouvelle recette du SHA final |
-| Ordre de production | Configuration puis promotion du jeu de donnees et des applications compatibles |
-| Apres observation | Retraits physiques et archivage prive apres sept jours sains et verification de restauration |
+`init` conserve tout fichier existant et cree seulement les entrees manquantes.
+Les donnees, PID et logs restent sous `.local/`. Les valeurs privees vivent dans
+`.env.local` et `.local/config/<service>.yml`, tous deux ignores. Les templates
+suivis sont `.env.local.example` et `ops/local/config/*.yml.example`.
 
-SSO et les travaux sans dependance de donnees avancent independamment. La priorite
-departage les lots techniquement disponibles; une dependance incomplete reste bloquante.
-Le benchmark complet ne bloque plus l'implementation des stores sur echantillon,
-mais conditionne l'import integral et la qualification de capacite.
+## Sauvegarde et donnees
 
-## Sauvegarde et fraicheur
+`PRODUCT_BACKUP_SOURCE_URI` designe la copie privee montee en lecture seule et
+`XWIKI_XAR_PATH` le XAR transitoire. La verification attend le manifeste original,
+controle son ensemble gzip et ecrit uniquement des metadonnees sous `.local/backup`.
+Elle ne modifie aucun octet source.
 
-`PRODUCT_BACKUP_SOURCE_URI` designe l'ensemble fige sur le volume beta prive. Le
-controle du 2026-09-11 a trouve quatre archives gzip JSONL, environ 27,4 Go compresses,
-et un manifeste annoncant 51 310 975 produits, termine a 04:20:50 UTC. Ce sont des
-observations, pas une cible de comptage pour les executions futures. Les sommes SHA-256
-et la lecture gzip complete ont valide les archives avant le reimport.
+```bash
+scripts/local/open4goods.sh backup verify
+scripts/local/open4goods.sh data sample
+scripts/local/open4goods.sh data full
+docker compose --profile xwiki up -d mysql xwiki
+scripts/local/open4goods.sh xwiki import
+```
 
-Le nouvel importeur fige un ensemble coherent avec empreintes et reprise par fichier
-et ligne, convertit les donnees dont la provenance est etablie, puis enrichit depuis
-les fournisseurs. L'ancien endpoint d'import ecrit dans Product et ne constitue pas
-le chemin de migration. Les prix agreges historiques restent des minima legacy,
-sans marchand invente; les contenus Amazon ambigus restent hors publication.
+L'echantillon est selectionne par empreinte de contenu et couvre les sept verticales,
+les produits riches, les cas legacy, Amazon ambigu et les erreurs connues. Il sert
+aux boucles rapides. La recette de fermeture utilise le backup entier, des index
+versionnes vides et l'importeur dedie configure par `O4G_LOCAL_FULL_IMPORT_URL`;
+l'ancien import direct vers Product ne fait pas partie de ce chemin.
 
-La fraicheur acceptee est celle d'un snapshot date, suivi de la reprise des collectes.
-Les modifications, suppressions et evenements de prix intervenus entre-temps ne sont
-pas garantis exhaustifs. Le dossier de bascule donne la date du snapshot et la borne
-de l'enrichissement. Les comptes, soldes, cles API et autres donnees transactionnelles
-de production restent distincts des donnees de test beta.
+## Jobs et gates
 
-## Points a anticiper
+Le scheduling commun est desactive dans le profil local. Les connecteurs restent
+accessibles uniquement par commande explicite et chaque lancement est journalise
+sans secret dans `.local/jobs.log`.
 
-Le volume de sauvegarde etait sur un disque occupe a 90 %. L'inventaire de capacite
-mesure aussi l'emplacement reel des index, les replicas, les exports figes et la marge
-de 30 %. La reconstruction beta peut liberer d'anciens index precis apres un reimport
-borne; les archives d'entree restent conservees. Une depense supplementaire revient au
-proprietaire. Une topologie insuffisante ne vaut pas qualification reussie.
+```bash
+scripts/local/open4goods.sh jobs run eprel
+scripts/local/open4goods.sh jobs run icecat
+scripts/local/open4goods.sh jobs run feeds
+scripts/local/open4goods.sh jobs run batch
+scripts/work/wo.py next --phase BETA_VALIDATION
+```
 
-Les correspondances Icecat/O4G et regles de famille ambigues font l'objet de dossiers
-regroupes pour arbitrage. Les permissions de publication par source ont leur propre
-inventaire et revue; une API accessible ne prouve pas le droit de redistribution.
-Les credentials externes absents, dont le renouvellement AWIN historiquement reporte,
-restent des actions explicites. Les restrictions historiques sur l'administration
-beta ont ete remplacees; les anciennes notes conservent leur valeur d'historique.
-
-Chaque critere a une preuve identifiee, un resultat et les versions testees. Les
-tests simules ne remplacent pas la recette beta attendue. La livraison finale est un
-SHA et un jeu de donnees identifies, avec commandes de reimport, criteres d'arret
-et retour arriere. De nouveaux WorkOrders invalident cette preparation jusqu'a leur
-validation. La fermeture des lots beta n'autorise aucune ecriture de production.
+`local-campaign-readiness` ne peut fermer tant qu'un autre ordre DEVELOPMENT reste
+ouvert et exige la preuve exacte `local-full-recette:passed`. La beta reste alors
+`AWAITING_DEVELOPMENT`; la production reste `AWAITING_BETA_VALIDATION`. Les retraits
+physiques d'index historiques et de XWiki attendent sept jours complets sains et une
+restauration verifiee en POST_PRODUCTION.

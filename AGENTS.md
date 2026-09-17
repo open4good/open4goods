@@ -29,9 +29,10 @@ Load what the task needs, knowing the price. Everything below is the project cor
 | [docs/README.md](docs/README.md) | ~0.9k tokens | the rest of the corpus, by subject |
 
 Select a WorkOrder with `scripts/work/next-workorder.py`, then read its YAML under
-`.o4g/work/` and stay within its `pathScope`. The default phase is DEVELOPMENT:
-implement locally and validate directly on beta with the authority in ADR-0013.
-Production and post-production operations await a separate explicit owner order.
+`.o4g/work/` and stay within its `pathScope`. The default phase is DEVELOPMENT and
+is strictly local: no beta host or Nudger domain may be a runtime dependency. Ordered
+BETA_VALIDATION and PRODUCTION promotion use the permanent owner authority in ADR-0014
+after their gates pass. POST_PRODUCTION retirement still requires its healthy-window gate.
 `docs/reference/roadmap.md` and `docs/adr/README.md` are
 generated projections: change the contracts, not the projection.
 

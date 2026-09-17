@@ -1,12 +1,14 @@
 ---
 title: "ADR 0013: Beta-first development and production promotion"
-status: accepted
+status: superseded
 normative: true
 audience: PROJECT_SCOPED
 decisions: [8, 14]
 ---
 
 # ADR 0013: Beta-first development and production promotion
+
+Superseded by ADR-0014.
 
 ## Context
 

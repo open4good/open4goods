@@ -5,10 +5,10 @@ spec:
   purpose: Prove beta build, deployment and recovery no longer need open4goods-config while production retains its current runtime.
   roadmapRef: m1-config-autonomy
   state: ACCEPTED
-  executionPhase: DEVELOPMENT
-  priority: 60
-  dependsOn: [config-beta-cutover]
-  decisionRefs: [ADR-0013]
+  executionPhase: BETA_VALIDATION
+  priority: 520
+  dependsOn: [local-campaign-readiness, config-beta-cutover]
+  decisionRefs: [ADR-0014]
   pathScope:
     - 'ops/**'
     - 'scripts/**'

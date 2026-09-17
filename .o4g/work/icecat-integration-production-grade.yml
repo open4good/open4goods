@@ -1,6 +1,6 @@
 apiVersion: open4goods.org/v1
 kind: WorkOrder
-metadata: {id: icecat-integration-production-grade, name: Icecat beta integration acceptance}
+metadata: {id: icecat-integration-production-grade, name: Icecat local integration acceptance}
 spec:
   purpose: >-
     Verify Icecat end to end through source records, O4G mappings, normalization and licensed projections rather than direct
@@ -42,6 +42,6 @@ spec:
         policy and configuration validation; failure before alias validation leaves the prior projection readable.
     - id: AC5
       statement: >-
-        Run a bounded beta bulk/live case with actual reference indexes and configured provider access; record versions,
+        Run a bounded explicit local bulk/live case with actual local reference indexes and configured provider access; record versions,
         language coverage, approved/unmapped outcomes and policy omissions without raw content. Missing live access is an
-        external blocker, not evidence that a fixture satisfies beta validation.
+        external blocker, not evidence that a fixture satisfies local validation.

@@ -12,6 +12,8 @@ public enum ResolutionReason {
     O4G_CORRECTION,
     /** The concept rule names this source as authoritative. */
     SOURCE_AUTHORITY,
+    /** The per-concept rule assigned the winning source the best rank. */
+    CONFIGURED_SOURCE_RANK,
     /** The candidate carried the highest attachment confidence. */
     HIGHER_CONFIDENCE,
     /** The candidate was observed most recently. */

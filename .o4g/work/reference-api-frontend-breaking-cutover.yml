@@ -67,8 +67,8 @@ spec:
   implementationPlan:
     - >-
       Freeze the new product DTO/OpenAPI and every server-controlled surface, then update generated clients and all readers
-      in the same bounded lot. Include ui image/sitemap/open-data and B2B frontend consumers explicitly. Validate locally
-      and on bounded beta data; the full-reader switch is reference-beta-cutover, not an implicit production deploy.
+      in the same bounded lot. Include ui image/sitemap/open-data and B2B frontend consumers explicitly. Validate on the
+      deterministic local sample and complete local backup; beta receives only the already qualified reader set.
     - >-
       Retain old immutable runtime artifacts for rollback. Do not leave a permanent legacy read fallback in the new release;
       missing policy-allowed data is absent with the existing contract's no-data treatment.

@@ -2,6 +2,7 @@
 /.project
 /.idea/
 /target/
+**/target/
 ui/src/main/resources/application-devsec.yml
 /generated-images/
 /code
@@ -10,6 +11,7 @@ ui/src/main/resources/application-devsec.yml
 .env.local
 .env.*.local
 .envrc
+.local/
 .mcp.local.json
 .codex/local.config.toml
 .gemini/settings.local.json

@@ -29,6 +29,10 @@ done
 install -D -m 0644 "$repo_root/ops/systemd/open4goods@.service" "$unit_dir/open4goods@.service"
 install -D -m 0644 "$repo_root/ops/systemd/open4goods-nuxt@.service" "$unit_dir/open4goods-nuxt@.service"
 install -D -m 0644 "$repo_root/ops/systemd/open4goods.target" "$unit_dir/open4goods.target"
-systemd-analyze verify "$unit_dir/open4goods@.service" "$unit_dir/open4goods-nuxt@.service" "$unit_dir/open4goods.target"
+install -D -m 0644 "$repo_root/ops/systemd/opt-open4goods-.cached.mount" \
+  "$unit_dir/opt-open4goods-.cached.mount"
+systemd-analyze verify "$unit_dir/open4goods@.service" "$unit_dir/open4goods-nuxt@.service" \
+  "$unit_dir/open4goods.target" "$unit_dir/opt-open4goods-.cached.mount"
 systemctl daemon-reload
+systemctl enable opt-open4goods-.cached.mount
 systemctl enable open4goods.target

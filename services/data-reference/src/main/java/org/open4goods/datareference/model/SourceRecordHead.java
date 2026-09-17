@@ -15,11 +15,11 @@ import java.util.Set;
  * outcomes, not the payloads it replaced.
  *
  * <p>Two chronologies are tracked because they answer different questions.
- * {@code observedAt} is the instant the provider's data describes and decides
- * which of two heads is newer; {@code retrievedAt} is when O4G fetched it and
- * decides staleness. A provider that republishes yesterday's data today is newer
- * by retrieval and older by observation, and ordering by the wrong one silently
- * reinstates stale values.
+ * {@code observedAt} is the instant the provider's data describes and is the
+ * primary replacement order; {@code retrievedAt} is when O4G fetched it and
+ * breaks a tie for the same provider observation. A provider that republishes
+ * yesterday's data today therefore cannot reinstate stale values merely because
+ * it was retrieved later.
  *
  * <p>An empty assertion list is meaningful, not degenerate: a {@code FULL} head
  * with no assertions states that the source now asserts nothing for this record.
@@ -107,9 +107,11 @@ public record SourceRecordHead(
     /**
      * Reports whether this head can supersede another head of the same record.
      *
-     * <p>Ordering is by observation, so a re-retrieval of older provider data is
-     * journalled as ignored rather than reinstated. A repeated payload hash is
-     * idempotent and supersedes nothing.
+     * <p>Ordering is first by observation and then by retrieval. A re-retrieval
+     * of older provider data is therefore journalled as ignored rather than
+     * reinstated, while a later retrieval of the same provider observation can
+     * still supersede it. A repeated payload hash is idempotent and supersedes
+     * nothing.
      *
      * @param current head currently stored, or {@code null} when the record is new
      * @return {@code true} when this head should replace {@code current}
@@ -124,7 +126,9 @@ public record SourceRecordHead(
         if (current.payloadHash().equals(payloadHash)) {
             return false;
         }
-        return observedAt.isAfter(current.observedAt());
+        int observationOrder = observedAt.compareTo(current.observedAt());
+        return observationOrder > 0
+                || (observationOrder == 0 && retrievedAt.isAfter(current.retrievedAt()));
     }
 
     /**

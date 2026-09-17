@@ -52,4 +52,19 @@ class JwtCookieServiceTest {
                 .hasSize(2)
                 .allSatisfy(cookie -> assertThat(cookie).contains("Max-Age=0"));
     }
+
+    @Test
+    void omitsCookieDomainForLocalHostOnlyCookies() {
+        final B2bApiProperties properties = new B2bApiProperties();
+        properties.getSecurity().setCookieDomain("");
+        properties.getSecurity().setCookieSecure(false);
+        final MockHttpServletResponse response = new MockHttpServletResponse();
+
+        new JwtCookieService(properties).writeSessionCookies(response, new JwtTokenPair(
+                "access.jwt", Instant.parse("2026-06-15T12:15:00Z"),
+                "refresh.jwt", Instant.parse("2026-07-15T12:00:00Z")));
+
+        assertThat(response.getHeaders(HttpHeaders.SET_COOKIE))
+                .allSatisfy(cookie -> assertThat(cookie).doesNotContain("Domain=").doesNotContain("Secure"));
+    }
 }

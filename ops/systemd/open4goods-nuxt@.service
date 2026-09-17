@@ -2,6 +2,8 @@
 Description=open4goods %i Nuxt service
 After=network-online.target
 Wants=network-online.target
+RequiresMountsFor=/opt/open4goods/.cached
+ConditionPathIsMountPoint=/opt/open4goods/.cached
 
 [Service]
 Type=simple

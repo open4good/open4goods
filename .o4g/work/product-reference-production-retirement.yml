@@ -6,9 +6,10 @@ spec:
   roadmapRef: m9-post-production-retirement
   state: ACCEPTED
   executionPhase: POST_PRODUCTION
+  requiredEvidence: [healthy-window:7-days, restore:verified]
   priority: 900
   dependsOn: [reference-coordinated-cutover]
-  decisionRefs: [ADR-0013]
+  decisionRefs: [ADR-0014]
   pathScope:
     - 'scripts/migration/**'
     - 'scripts/verify/**'

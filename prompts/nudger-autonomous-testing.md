@@ -1,7 +1,7 @@
 # Autonomous functional and technical recette of Nudger
 
-Run a resumable black-box campaign against the local Nuxt and front-api source while their read
-paths use production data. Do not modify product source, production data or remote configuration.
+Run a resumable black-box campaign against the complete strict-local stack and its pinned local
+dataset. Do not call beta/Nudger runtimes or modify the immutable backup source.
 
 ## Parameters and resume
 
@@ -19,20 +19,12 @@ evidence belongs under `artifacts/recette/<run-id>/`, which is ignored by Git.
 
 ## Stack
 
-Run `scripts/recette/nudger-stack.sh start --run "$RUN_ID"`. The launcher starts:
-
-- front-api locally with `SPRING_PROFILES_ACTIVE=devsec,local`;
-- Nuxt locally in SSR mode, pointing its BFF to that front-api;
-- separate log files for front-api and Nuxt SSR.
-
-The default recette does not start api or Elasticsearch because their background jobs may write.
-Wait for the exact `STACK READY:` line, then run `status`. A missing ignored devsec configuration is
-a bootstrap blocker; never search other files or print a candidate credential.
-
-Production access is controlled by agent discipline, as selected by the owner. Remote requests are
-limited to `GET`, `HEAD` and `OPTIONS`. Never exercise login, contribution, refresh, generation,
-index, assignment, cache invalidation or admin mutation against a production URL. Local browser and
-BFF operations may use other methods only when their entire effect remains local.
+Run `scripts/local/open4goods.sh doctor`, then `scripts/local/open4goods.sh up`. The launcher starts
+persistent Docker infrastructure and all seven Java plus two Nuxt applications natively with only
+the `local` profile. PID and log files remain below `.local/`; no scheduler launches a heavy job.
+A missing ignored `.env.local` or `.local/config` input is a bootstrap blocker; never search other
+files or print a candidate credential. All browser and API operations must target loopback. Exercise
+external connector mutations only through an explicit `jobs run` command named by the test case.
 
 ## MCP and browser posture
 
@@ -75,6 +67,6 @@ if the stack cannot restart, the browser is unavailable after three approaches, 
 consecutive cases share the same blocker.
 
 At the end run `board.py matrix` and `board.py report`. Every case must be terminal or explain its
-blocker. Stop the stack but keep the campaign artifacts for resume. Report the revision, matrix,
+blocker. Stop the stack with `scripts/local/open4goods.sh down` but keep the campaign artifacts for resume. Report the revision, matrix,
 highest-priority failures, recurring i18n/server/SSR signals and untested boundaries. Do not edit
 source, create issues, commit, push or deploy from this prompt.

@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 
 import org.open4goods.datareference.model.CanonicalAttributeId;
 import org.open4goods.datareference.model.RuleVersion;
@@ -29,18 +30,23 @@ public record EvaluationSummary(RuleVersion ruleVersion, Instant evaluatedAt,
         Objects.requireNonNull(ruleVersion, "ruleVersion must not be null");
         Objects.requireNonNull(evaluatedAt, "evaluatedAt must not be null");
         scores = immutableValues(scores, "scores");
-        cohortStatistics = Collections.unmodifiableMap(new LinkedHashMap<>(Objects.requireNonNull(
-                cohortStatistics, "cohortStatistics must not be null")));
+        Map<String, DecimalValue> orderedCohorts = new TreeMap<>();
+        for (Map.Entry<String, DecimalValue> entry : Objects.requireNonNull(
+                cohortStatistics, "cohortStatistics must not be null").entrySet()) {
+            orderedCohorts.put(Objects.requireNonNull(entry.getKey(), "cohortStatistics must not contain null keys"),
+                    Objects.requireNonNull(entry.getValue(), "cohortStatistics must not contain null values"));
+        }
+        cohortStatistics = Collections.unmodifiableMap(new LinkedHashMap<>(orderedCohorts));
         missingInputs = List.copyOf(Objects.requireNonNull(missingInputs, "missingInputs must not be null"));
     }
 
     private static Map<CanonicalAttributeId, DecimalValue> immutableValues(
             Map<CanonicalAttributeId, DecimalValue> values, String name) {
         Map<CanonicalAttributeId, DecimalValue> checked = new LinkedHashMap<>();
-        for (Map.Entry<CanonicalAttributeId, DecimalValue> entry : Objects.requireNonNull(values, name + " must not be null").entrySet()) {
-            checked.put(Objects.requireNonNull(entry.getKey(), name + " must not contain null keys"),
-                    Objects.requireNonNull(entry.getValue(), name + " must not contain null values"));
-        }
+        Objects.requireNonNull(values, name + " must not be null").entrySet().stream()
+                .sorted(Map.Entry.comparingByKey(java.util.Comparator.comparing(CanonicalAttributeId::externalForm)))
+                .forEach(entry -> checked.put(Objects.requireNonNull(entry.getKey(), name + " must not contain null keys"),
+                        Objects.requireNonNull(entry.getValue(), name + " must not contain null values")));
         return Collections.unmodifiableMap(checked);
     }
 }

@@ -1,0 +1,44 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: local-first-workorder-sequencing
+  name: Local-first phases and WorkOrder sequencing
+spec:
+  purpose: Replace beta-first development with strict local qualification and ordered automatic promotion gates.
+  roadmapRef: m0-governance
+  state: COMPLETED
+  executionPhase: DEVELOPMENT
+  priority: 0
+  dependsOn:
+    - governance-kit-bootstrap
+  decisionRefs:
+    - ADR-0014
+  pathScope:
+    - .o4g/**
+    - AGENTS.md
+    - prompts/nudger-dev.md
+    - docs/**
+    - scripts/work/**
+    - scripts/generate/generate_roadmap.py
+    - scripts/generate/generate_decision_index.py
+    - scripts/tests/workorder-tools.test.sh
+    - scripts/verify/documentation_lint.py
+  acceptanceCriteria:
+    - id: AC1
+      statement: ADR-0014 supersedes ADR-0013 and the canonical, agent, autonomous-prompt and project contracts define strict
+        local DEVELOPMENT followed by BETA_VALIDATION, PRODUCTION and POST_PRODUCTION.
+    - id: AC2
+      statement: WorkOrder validation, selection, transitions, generated roadmap and tests expose all four phases, global
+        earlier-phase gates and the permanent owner promotion reference without allowing a command-line flag to bypass a gate.
+    - id: AC3
+      statement: The five beta-only orders are rephased and depend on local-campaign-readiness; no DEVELOPMENT order depends
+        on a later phase, and historical ledger entries remain unchanged.
+    - id: AC4
+      statement: Beta-host acceptance in remaining DEVELOPMENT orders is replaced by loopback, deterministic-sample and full
+        local-backup acceptance while genuine publication-right, mapping and provider-schema blockers remain explicit.
+    - id: AC5
+      statement: Generated ADR and roadmap projections, WorkOrder tooling tests and canonical lint all pass.
+  evidenceRefs:
+    - test:scripts/tests/workorder-tools.test.sh passed four-phase gates and permanent promotion authority
+    - test:./scripts/lint.sh passed documentation, projections, WorkOrder tests, Compose and frontend lint
+    - note:five beta-only orders now depend on local-campaign-readiness and no DEVELOPMENT dependency targets a later phase

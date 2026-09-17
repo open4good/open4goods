@@ -13,13 +13,19 @@ spec:
     entryPoint: AGENTS.md
   execution:
     defaultPhase: DEVELOPMENT
-    phases: [DEVELOPMENT, PRODUCTION, POST_PRODUCTION]
-    developmentTargets: [local, beta]
+    phases: [DEVELOPMENT, BETA_VALIDATION, PRODUCTION, POST_PRODUCTION]
+    developmentTargets: [local]
+    developmentNetworkPolicy: no-nudger-or-beta-runtime-dependency
+    betaValidationTargets: [beta]
     betaAuthority: [deploy, restart, migrate, environment-config, beta-only-secrets]
     betaCleanup: exact-targets-after-verified-restore
-    productionWrites: explicit-owner-order-only
+    promotionAuthorizationRef: owner-order-2026-09-17-local-first-promotion
+    betaPromotion: automatic-after-development-gate
+    productionPromotionAuthority: permanent-owner-order
+    productionWrites: automatic-after-beta-validation-gate
     sharedCredentials: owner-action-if-production-is-affected
     productionRollbackDays: 7
+    postProductionRetirement: dependency-gated-after-healthy-window-and-verified-restore
     migrationInputRef: PRODUCT_BACKUP_SOURCE_URI
     migrationStrategy: backup-baseline-then-provider-enrichment
     freshness: dated-snapshot-then-collection-resumption
@@ -35,7 +41,7 @@ spec:
     - id: m1-config-autonomy
       order: 1
       exitCondition: >-
-        Beta runs independently of open4goods-config with isolated services and environment inputs.
+        Local and beta runtimes run independently of open4goods-config with isolated services and environment inputs.
         Production rollout and private repository archival remain separately gated operations.
     - id: m2-corpus-cleanup
       order: 2
@@ -74,7 +80,7 @@ spec:
     - id: m8-production-promotion
       order: 8
       exitCondition: >-
-        An explicit owner order promotes the beta-validated release and dated dataset; configuration,
+        The permanent owner order promotes the beta-validated release and dated dataset; configuration,
         credentials and all readers pass production checks and the seven-day rollback window closes.
     - id: m9-post-production-retirement
       order: 9

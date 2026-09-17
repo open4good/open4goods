@@ -2,11 +2,11 @@ apiVersion: open4goods.org/v1
 kind: WorkOrder
 metadata: {id: beta-campaign-readiness, name: Final beta campaign and production readiness}
 spec:
-  purpose: Close development only when the cleaned beta release and dated dataset are a concrete, reproducible production candidate.
+  purpose: Close beta validation only when the promoted local candidate is a reproducible production candidate.
   roadmapRef: m1-config-autonomy
   state: ACCEPTED
-  executionPhase: DEVELOPMENT
-  priority: 400
+  executionPhase: BETA_VALIDATION
+  priority: 590
   dependsOn:
     - reference-beta-cutover
     - product-reference-legacy-retirement
@@ -14,7 +14,8 @@ spec:
     - dead-code-removal-lot-1
     - config-beta-independence
     - beta-first-workorder-sequencing
-  decisionRefs: [ADR-0013]
+    - local-campaign-readiness
+  decisionRefs: [ADR-0014]
   pathScope:
     - '.o4g/**'
     - 'scripts/verify/**'
@@ -24,9 +25,8 @@ spec:
   acceptanceCriteria:
     - id: AC1
       statement: >-
-        Every current DEVELOPMENT order except this readiness order is COMPLETED; newly added development orders
-        automatically invalidate readiness until completed. Maintain explicit dependencies for the current graph as well
-        as this campaign-wide check.
+        local-campaign-readiness is completed and the promoted SHA, artifacts and dataset digests exactly match its full
+        local recette evidence; any drift returns the candidate to DEVELOPMENT.
     - id: AC2
       statement: >-
         Repeat the beta promotion and forced rollback on the final cleaned SHA, with all local/module/frontend checks,
@@ -47,8 +47,7 @@ spec:
         maintenance order, abort/rollback gates and seven-day retirement checklist, without production writes.
   implementationPlan:
     - >-
-      At the future owner order revalidate the candidate and readiness dependencies; never interpret COMPLETED as
-      permission to deploy.
+      At the production gate revalidate the candidate digests and readiness dependencies against the permanent owner order.
     - >-
       Implement a campaign-readiness check rejecting open DEVELOPMENT orders other than itself and verifying pinned
       evidence digests; rerun it in the production launcher. New orders invalidate readiness even if this order is in the

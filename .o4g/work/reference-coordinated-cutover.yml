@@ -4,7 +4,7 @@ metadata:
   id: reference-coordinated-cutover
   name: Coordinated product reference cutover
 spec:
-  purpose: On the separate owner order, promote the beta-validated release and dated dataset, then resume native collections.
+  purpose: Under the permanent owner order, promote the beta-validated release and dated dataset, then resume native collections.
   roadmapRef: m8-production-promotion
   state: ACCEPTED
   executionPhase: PRODUCTION
@@ -18,6 +18,7 @@ spec:
   decisionRefs:
     - ADR-0010
     - ADR-0011
+    - ADR-0014
   pathScope:
     - api/**
     - front-api/**
@@ -36,7 +37,7 @@ spec:
   acceptanceCriteria:
     - id: AC1
       statement: >-
-        Revalidate the beta-rehearsed runbook, explicit owner order, candidate SHA/digests, dated dataset, private target
+        Revalidate the beta-rehearsed runbook, permanent owner-order reference, candidate SHA/digests, dated dataset, private target
         identities, capacity, source policies, maintenance window, deployment order, abort/rollback gates and communication.
         A changed release, dataset or policy requires renewed beta validation before promotion.
     - id: AC2

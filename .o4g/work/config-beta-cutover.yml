@@ -6,12 +6,13 @@ metadata:
 spec:
   purpose: Prove the new configuration and service runtime on the real beta host before production changes.
   roadmapRef: m1-config-autonomy
-  state: IN_PROGRESS
-  executionPhase: DEVELOPMENT
-  priority: 50
+  state: BLOCKED
+  executionPhase: BETA_VALIDATION
+  priority: 510
   dependsOn:
     - systemd-service-runtime
     - beta-credential-isolation
+    - local-campaign-readiness
   decisionRefs:
     - ADR-0006
   pathScope:
@@ -29,19 +30,26 @@ spec:
     - id: AC3
       statement: Frontend SSR, application logs and a complete release rollback are verified on the distinct beta host.
   evidenceRefs:
-    - >-
-      2026-09-15 beta: all eight runtime EnvironmentFiles were inventoried and atomically replaced with mode 0600;
-      five Java listeners and both Nuxt listeners run as open4goods under their named systemd units. Redacted non-secret
-      configprops fingerprints were captured for api, ui and front-api; the expected beta monitor boundary is the only
-      credential-isolation change exercised.
-    - >-
-      2026-09-15 beta: sbadmin, ui, front-api and b2b-api Actuator health checks report UP with their scoped
-      authentication; UI and front-api configprops were queried only to produce redacted non-secret fingerprints.
-      Forced Java and both Nuxt readiness failures restored their exact prior release links, and both Nuxt SSR endpoints
-      returned HTML with no current-day fatal log signature.
-    - >-
-      owner-action: API cannot satisfy the fifth UP check while its backup health reports an empty/stale product backup
-      and an undersized/stale XWiki export, and Google Custom Search is unconfigured. The beta Environment now has the
-      name-only API_GOOGLE_SEARCH_URL variable; provision a newly rotated API_GOOGLE_SEARCH_API_KEY secret and
-      API_GOOGLE_SEARCH_CX variable, then repair the beta XWiki and product backup sources without disabling their
-      health indicators.
+    - '2026-09-15 beta: all eight runtime EnvironmentFiles were inventoried and atomically replaced with mode 0600; five Java
+      listeners and both Nuxt listeners run as open4goods under their named systemd units. Redacted non-secret configprops
+      fingerprints were captured for api, ui and front-api; the expected beta monitor boundary is the only credential-isolation
+      change exercised.'
+    - '2026-09-15 beta: sbadmin, ui, front-api and b2b-api Actuator health checks report UP with their scoped authentication;
+      UI and front-api configprops were queried only to produce redacted non-secret fingerprints. Forced Java and both Nuxt
+      readiness failures restored their exact prior release links, and both Nuxt SSR endpoints returned HTML with no current-day
+      fatal log signature.'
+    - 'owner-action: API cannot satisfy the fifth UP check while its XWiki export is stale and Google Custom Search is unconfigured.
+      The beta Environment now has the name-only API_GOOGLE_SEARCH_URL variable; provide working beta XWiki credentials plus
+      a newly rotated API_GOOGLE_SEARCH_API_KEY secret and API_GOOGLE_SEARCH_CX variable.'
+    - '2026-09-15 beta: the API now reads a separate writable hard-link copy of the validated four-file product export from
+      the beta data volume, so product backup and disk health report UP without changing the pinned source. The refreshed
+      XWiki export still fails because its configured upstream returns sanitized HTTP 401 responses; the Google Search health
+      also remains DOWN because its credentials are absent. Owner action: provide working beta XWiki credentials and a newly
+      rotated API_GOOGLE_SEARCH_API_KEY with API_GOOGLE_SEARCH_CX, then rerun the five authenticated health checks.'
+    - '2026-09-15 beta: product backup and disk indicators repaired; XWiki export now fails with sanitized HTTP 401 and Google
+      Search lacks owner-provisioned credentials. Blocked pending working beta XWiki credentials plus a rotated API_GOOGLE_SEARCH_API_KEY
+      and API_GOOGLE_SEARCH_CX.'
+  externalBlockers:
+    - '2026-09-15 beta: product backup and disk indicators repaired; XWiki export now fails with sanitized HTTP 401 and Google
+      Search lacks owner-provisioned credentials. Blocked pending working beta XWiki credentials plus a rotated API_GOOGLE_SEARCH_API_KEY
+      and API_GOOGLE_SEARCH_CX.'

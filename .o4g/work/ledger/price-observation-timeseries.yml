@@ -1,0 +1,85 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: price-observation-timeseries
+  name: Provider price observation time series
+spec:
+  purpose: Preserve provider-level price changes and presence without duplicating unchanged polls in Product documents.
+  roadmapRef: m7-product-data-reference
+  state: COMPLETED
+  executionPhase: DEVELOPMENT
+  priority: 120
+  dependsOn:
+    - product-reference-contract
+    - reference-capacity-feasibility
+  decisionRefs:
+    - ADR-0011
+  pathScope:
+    - pom.xml
+    - services/price-history/**
+    - api/src/main/**
+    - api/src/test/**
+    - model/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: services/price-history is a provider-neutral Java 21 module owning OfferHead, PriceChangeEvent, daily rollup,
+        ingestion and query ports; it depends on data-reference contracts but not on api or a provider adapter.
+    - id: AC2
+      statement: OfferHead identity is normalized GTIN plus public provider id plus provider offer id and stores condition,
+        ISO 4217 currency, BigDecimal amount, availability, provider/observation instants, firstSeenAt, lastSeenAt, hash and
+        policy ref.
+    - id: AC3
+      statement: First sight, amount/currency/condition/availability change, disappearance and reappearance append exactly
+        one idempotent event; an unchanged observation updates only head presence and retrying the same observation creates
+        no event.
+    - id: AC4
+      statement: Raw events use an Elasticsearch time-series data stream with GTIN, provider, offer, condition and currency
+        dimensions, observation timestamp and gauge amount. The feasibility-tested Elasticsearch identity strategy prevents
+        duplicates across retries and preserves distinct same-timestamp changes; do not assume arbitrary custom ids are supported
+        by TSDS.
+    - id: AC5
+      statement: Daily provider rollups group GTIN/provider/condition/currency and expose min, max, close, observed-offer
+        count, first/last observation and change count; late events update only still-open or explicitly rebuilt buckets.
+    - id: AC6
+      statement: Lifecycle retains raw changes for 24 months and daily rollups for five years with one production replica,
+        rollover, downsampling/transform monitoring, snapshot policy and the capacity settings approved by the benchmark WorkOrder.
+    - id: AC7
+      statement: Query ports enforce half-open UTC ranges, stable ascending order, opaque cursor pagination and filters for
+        GTIN, provider, condition and currency; ranges over 31 days default to daily rollups rather than scanning raw events.
+    - id: AC8
+      statement: Legacy Product minimum-price points import once as provider LEGACY_PRODUCT_MIN with unknown offer identity
+        and explicit legacy provenance; they never fabricate provider, presence or observation fields and cannot outrank fresh
+        native data.
+    - id: AC9
+      statement: Tests cover simultaneous offers, unchanged polls, oscillating prices, disappearance/reappearance, currencies,
+        out-of-order and late events, retries, daily boundaries, retention, pagination and deterministic legacy backfill.
+    - id: AC10
+      statement: Existing Product price histories and DataFragment.priceHistory cease being write targets after dual validation;
+        current offer summaries consumed by projections are produced from OfferHead, not reconstructed from time-series scans.
+    - id: AC11
+      statement: Offer head updates and append-only event delivery use a recoverable pending-event protocol with deterministic
+        ids, retry reconciliation and crash tests; a failed second write cannot silently lose a price event. Full-feed disappearance
+        events occur only after a successful complete feed, and an older observation cannot roll back the current offer.
+    - id: AC12
+      statement: Daily observed-offer count and first/last presence include unchanged offers via head presence input, without
+        synthetic price events. Define close ordering and the open bucket window explicitly; legacy minima use their separate
+        neutral backfill shape when offer identity is unknown and stay excluded from B2B/open-data by default.
+  implementationPlan:
+    - Use provisional bounded settings from reference-capacity-feasibility; full retention/load/resilience acceptance belongs
+      to the later benchmark. Prove event identity and legacy backfill on the installed Elasticsearch version before wiring
+      feeds.
+    - 'Finalize late-event and daily aggregation rules with deterministic fixtures: UTC close orders by observation time then
+      stable event id, current/previous UTC day stay open, older buckets require an explicit repair job. Materialize presence
+      from OfferHead independently of the sparse event stream; never count changes as the number of observed offers.'
+  evidenceRefs:
+    - '2026-09-15 local: provider-neutral head, sparse-event, complete-feed disappearance, daily presence rollup, legacy backfill
+      and query contracts pass 10 service tests. The versioned mappings define strict TSDS dimensions and derived persistence
+      timestamps; raw data is 24-month ILM and daily data is five-year ILM with one replica.'
+    - '2026-09-16 beta: a temporary file-realm identity limited to o4g-price-history-probe-* plus index-template management
+      installed the strict Elasticsearch 9.4.3 TSDS template and stream. The first document returned HTTP 201, the same dimensions
+      and timestamp returned HTTP 409, and distinct nanosecond timestamps returned HTTP 201. The probe established that the
+      versioned templates must map @timestamp as date_nanos because date truncates the deterministic tie-break to milliseconds.
+      The temporary data stream, template, role and identity were removed and the container has no residual probe entry.'
+    - 'local: 2026-09-16 mvn --offline -pl services/price-history -am clean test passed 130 tests.'
+    - 'beta: 2026-09-16 restricted temporary TSDS probe returned 201 first, 409 duplicate, 201 distinct nanosecond timestamp;
+      all probe resources removed.'

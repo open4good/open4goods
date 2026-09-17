@@ -1,120 +1,98 @@
-services:
-####################################################################
-# Elastic Search
-###################################################################
-  elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch:9.5.1@sha256:b70b3017fbd35310bc57e7e3f8c0ca42ca0b94df3331f747b7cdcfddae430a5a
-    container_name: elastic
-    environment:
-      - http.max_content_length=200mb
-      - node.name=elastic
-      - cluster.name=es-docker-cluster
-      - cluster.initial_master_nodes=elastic
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
-      - xpack.security.enabled=false
-      - logger.level=WARN
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nproc: 65536
-      nofile:
-        soft: 65536
-        hard: 65536
-    volumes:
-      - elastic-data:/usr/share/elasticsearch/data
-    ports:
-      - "9200:9200"
-    networks:
-      - o4g-network
-    env_file: .env
+name: open4goods-local
 
-####################################################################
-# Kibana
-###################################################################
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.5.1@sha256:b70b3017fbd35310bc57e7e3f8c0ca42ca0b94df3331f747b7cdcfddae430a5a
+    environment:
+      bootstrap.memory_lock: "true"
+      cluster.name: open4goods-local
+      discovery.type: single-node
+      ES_JAVA_OPTS: ${O4G_LOCAL_ES_JAVA_OPTS:--Xms1g -Xmx1g}
+      http.max_content_length: 200mb
+      logger.level: WARN
+      node.name: open4goods-local
+      xpack.security.enabled: "false"
+    healthcheck:
+      test: [CMD-SHELL, "curl --fail --silent http://localhost:9200/_cluster/health >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    ports:
+      - "127.0.0.1:9200:9200"
+    ulimits:
+      memlock: {soft: -1, hard: -1}
+      nofile: {soft: 65536, hard: 65536}
+    volumes:
+      - ${O4G_LOCAL_DATA_ROOT:-./.local/data}/elasticsearch:/usr/share/elasticsearch/data
+
+  redis:
+    image: redis:8.2.1-alpine
+    command: [redis-server, --appendonly, "yes"]
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - ${O4G_LOCAL_DATA_ROOT:-./.local/data}/redis:/data
+
+  postgres:
+    image: postgres:17.6-alpine
+    environment:
+      POSTGRES_DB: ${O4G_LOCAL_POSTGRES_DB:-product_data_api}
+      POSTGRES_PASSWORD: ${O4G_LOCAL_POSTGRES_PASSWORD:-open4goods-local}
+      POSTGRES_USER: ${O4G_LOCAL_POSTGRES_USER:-product_data_api}
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - ${O4G_LOCAL_DATA_ROOT:-./.local/data}/postgres:/var/lib/postgresql/data
+
   kibana:
     image: docker.elastic.co/kibana/kibana:9.5.1@sha256:f1e3cb03928b2c88590579445cd3ea3fad750a1b1ced653193ce4211051d2206
-    container_name: kibana
+    profiles: [tools]
     depends_on:
-      - elastic
-    ports:
-      - "5601:5601"
+      elasticsearch: {condition: service_healthy}
     environment:
-      ELASTICSEARCH_URL: http://elastic:9200
-      ELASTICSEARCH_HOSTS: http://elastic:9200
-    networks:
-      - o4g-network
-    env_file: .env
-
-####################################################################
-# API (Backend)
-###################################################################
-  api:
-    image: eclipse-temurin:25.0.3_9-jre@sha256:a214efa3200af4b657e41935799aa12d7aee3336fdb42eb505a0948f6ecdd983
-    container_name: api
-    volumes:
-      - ./api/target/api-0.0.1-SNAPSHOT.jar:/app/app.jar
-      - ./api/src/main/resources:/app/config
-    command: java --add-opens java.base/java.math=ALL-UNNAMED -Dspring.config.additional-location=optional:file:/app/config/ -jar /app/app.jar
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
     ports:
-      - "${SERVER_PORT_API:-8086}:8086"
-    depends_on:
-      - elastic
-    networks:
-      - o4g-network
-    env_file: .env
+      - "127.0.0.1:5601:5601"
+
+  mysql:
+    image: mysql:9.7.2@sha256:257388edf9c84dbc04c763625446d5f3fa6ed60d1b0873bc552c614ba0a7ab4e
+    profiles: [xwiki]
+    command: [mysqld, --character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci]
     environment:
-      - SERVER_PORT=8086
-      - SPRING_ELASTICSEARCH_URIS=http://elastic:9200
-      - SPRING_PROFILES_ACTIVE=dev,devsec
-
-####################################################################
-# Front API (Backend for Frontend)
-###################################################################
-  front-api:
-    image: eclipse-temurin:25.0.3_9-jre@sha256:a214efa3200af4b657e41935799aa12d7aee3336fdb42eb505a0948f6ecdd983
-    container_name: front-api
+      MYSQL_DATABASE: xwiki
+      MYSQL_PASSWORD: ${O4G_LOCAL_XWIKI_DB_PASSWORD:-open4goods-local}
+      MYSQL_ROOT_PASSWORD: ${O4G_LOCAL_XWIKI_ROOT_PASSWORD:-open4goods-local-root}
+      MYSQL_USER: xwiki
+    healthcheck:
+      test: [CMD-SHELL, "mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
     volumes:
-      - ./front-api/target/front-api-0.0.1-SNAPSHOT.jar:/app/app.jar
-    command: java --add-opens java.base/java.math=ALL-UNNAMED -jar /app/app.jar
-    ports:
-      - "${SERVER_PORT_FRONT_API:-8082}:8082"
+      - ${O4G_LOCAL_DATA_ROOT:-./.local/data}/mysql:/var/lib/mysql
+
+  xwiki:
+    image: xwiki:17.10.12-mysql-tomcat@sha256:b46f9542088713c98195c8028c47e6d8aa40e45f33f1a3cca8b914f091cc937c
+    profiles: [xwiki]
     depends_on:
-      - api
-    networks:
-      - o4g-network
-    env_file: .env
+      mysql: {condition: service_healthy}
     environment:
-      - SERVER_PORT=8082
-      - FRONT_EXPOSED_DOCS_BASE_URL=http://api:8086
-      - SPRING_PROFILES_ACTIVE=dev,devsec
-      - SPRING_ELASTICSEARCH_URIS=http://elastic:9200
-
-####################################################################
-# Frontend (SSR)
-###################################################################
-  frontend-ssr:
-    image: node:24@sha256:934240a162082fd8b8a2f90cd5114446443f1eba1c5378f6687167ca405e6584
-    container_name: frontend-ssr
-    working_dir: /usr/src/app
-    volumes:
-      - ./frontend/.output:/usr/src/app/.output
-      - ./frontend/package.json:/usr/src/app/package.json
-    command: ["node", ".output/server/index.mjs"]
-    restart: unless-stopped
-    networks:
-      - o4g-network
+      DB_DATABASE: xwiki
+      DB_HOST: mysql
+      DB_PASSWORD: ${O4G_LOCAL_XWIKI_DB_PASSWORD:-open4goods-local}
+      DB_USER: xwiki
     ports:
-      - "${PORT_FRONTEND_SSR:-3000}:3000"
-    depends_on:
-      - front-api
-    env_file: .env
-
-volumes:
-  elastic-data:
-    driver: local
-
-networks:
-  o4g-network:
-    driver: bridge
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ${O4G_LOCAL_DATA_ROOT:-./.local/data}/xwiki:/usr/local/xwiki
+      - ${PRODUCT_BACKUP_SOURCE_URI:-./.local/backup}:/opt/open4goods/backup:ro

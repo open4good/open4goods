@@ -1,0 +1,53 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: local-full-stack-runtime
+  name: Complete hybrid local runtime
+spec:
+  purpose: Run every open4goods application locally against persistent Docker infrastructure without a Nudger or beta dependency.
+  roadmapRef: m1-config-autonomy
+  state: IN_PROGRESS
+  executionPhase: DEVELOPMENT
+  priority: 5
+  dependsOn:
+    - local-first-workorder-sequencing
+  decisionRefs:
+    - ADR-0014
+  pathScope:
+    - docker-compose.yml
+    - .env.local.example
+    - .gitignore
+    - scripts/local/**
+    - commons/**
+    - api/src/main/**
+    - api/src/test/**
+    - admin/src/main/**
+    - admin/src/test/**
+    - front-api/src/main/**
+    - front-api/src/test/**
+    - ui/src/main/**
+    - ui/src/test/**
+    - b2b-api/src/main/**
+    - b2b-api/src/test/**
+    - services/exposed-docs/src/main/**
+    - services/geocode/src/main/**
+    - frontend/**
+    - b2b-frontend/**
+    - docs/operations/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: Root Compose runs persistent Elasticsearch, Redis and PostgreSQL bind-mounted below O4G_LOCAL_DATA_ROOT;
+        optional tools adds Kibana and optional xwiki adds local XWiki/MySQL with PRODUCT_BACKUP_SOURCE_URI mounted read-only.
+    - id: AC2
+      statement: scripts/local/open4goods.sh non-destructively initializes ignored secrets/config, controls infrastructure
+        and all seven Java plus two Nuxt processes, records PID/log files below .local and exposes doctor, status, restart,
+        logs and down.
+    - id: AC3
+      statement: The local profile uses loopback stores and service URLs, ports 3000, 3001, 8081, 8082, 8085 through 8089,
+        local CORS, local sitemap paths and non-secure domainless B2B cookies; OpenAPI generation uses local backends.
+    - id: AC4
+      statement: A common scheduling property defaults true outside local and false in every local application, while explicit
+        authenticated job commands remain available and no heavy connector or ingestion job starts with the stack.
+    - id: AC5
+      statement: docker compose config, local no-remote guard, health checks for nine native applications, focused tests,
+        both frontend builds and the offline Maven reactor pass without loading devsec.

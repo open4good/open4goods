@@ -65,4 +65,4 @@ spec:
     - >-
       Keep one Icecat product-id head. Single-locale refreshes are PARTIAL updates of that locale's coordinates; FULL
       requires the full configured locale set. Prove an English refresh cannot delete French assertions. Use shared store
-      unavailable/rejected semantics and beta coverage endpoints to report unmapped evidence.
+      unavailable/rejected semantics and local coverage endpoints to report unmapped evidence.

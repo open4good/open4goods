@@ -36,12 +36,12 @@ spec:
       statement: An idempotent migration supports INVENTORY and APPLY modes, explicit index/alias targeting, bounded PIT/search_after
         batches, optimistic retries, checkpoints, cancellation and a final reconciliation report.
     - id: AC4
-      statement: On exact beta migration targets, APPLY excludes proven PA-API and ambiguous potentially PA-API content from
+      statement: On exact versioned local migration targets, APPLY excludes proven PA-API and ambiguous potentially PA-API content from
         the new dataset while preserving approved ASIN identity and proven independent merchant records. It does not selectively
         erase ambiguous legacy evidence or caches whose ownership is unproven; fresh merchant input has explicit origin.
     - id: AC5
-      statement: Delete only exact proven PA-API beta cache objects after target/ownership checks and a recovery record; quarantine
-        ambiguous references from publication. Shared/prod cache purge is deferred to the production runbook and never follows
+      statement: Delete only exact proven PA-API local sample cache objects after target/ownership checks and a recovery record; quarantine
+        ambiguous references from publication. Beta/production cache purge is deferred to later phases and never follows
         a broad Amazon substring. Dry-run reports classes, counts and sanitized coordinates.
     - id: AC6
       statement: A deny-all source policy prevents historical PA-API evidence from entering NUDGER_WEB, B2B_API or ODBL_EXPORT
@@ -70,9 +70,5 @@ spec:
       so exact PA-API/ambiguous counts require the bounded PIT scan during the capacity-gated rebuilt-dataset replay. No real
       legacy document, cache object, alias or source index was changed.
   externalBlockers:
-    - '2026-09-14 beta: disposable exact-index fixture verified INVENTORY and APPLY. It classified one each proven amazon-paapi,
-      ambiguous amazon.fr and independent merchant record; APPLY copied only the merchant record and retained only the approved
-      ASIN identity. All three temporary beta indexes were deleted.'
-    - blocker:the 54-million-document beta legacy products-moustik index stores datasourceNames without indexing or doc values,
-      so exact PA-API/ambiguous counts require the bounded PIT scan during the capacity-gated rebuilt-dataset replay. No real
-      legacy document, cache object, alias or source index was changed.
+    - The owner backup copy and original manifest must finish and be pinned locally before the bounded full PIT scan can classify
+      every ambiguous legacy Amazon record. Historical beta fixture evidence remains valid but cannot satisfy this full-volume gate.

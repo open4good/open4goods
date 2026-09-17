@@ -5,7 +5,7 @@ import java.io.File;
 import org.apache.commons.io.FileUtils;
 import org.open4goods.icecat.config.yml.IcecatConfiguration;
 import org.open4goods.model.exceptions.TechnicalException;
-import org.open4goods.model.helper.IdHelper;
+import org.open4goods.services.remotefilecaching.service.RemoteCacheKey;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,22 +44,23 @@ public class IcecatFileDownloadService {
      * @throws TechnicalException if the download or decompression fails
      */
     public File getOrDownload(String url) throws TechnicalException {
-        LOGGER.info("Retrieving file : {}", url);
-        File destFile = new File(remoteCachingFolder + File.separator + IdHelper.getHashedName(url));
+        LOGGER.info("Retrieving Icecat cache resource: {}", RemoteFileCachingService.loggableUrl(url));
+        File destFile = new File(remoteCachingFolder + File.separator + RemoteCacheKey.fromUrl(url));
         if (destFile.exists()) {
-            LOGGER.info("File {} already cached", url);
+            LOGGER.info("Icecat cache resource is already available: {}", RemoteFileCachingService.loggableUrl(url));
             return destFile;
         }
-        File tmpFile = new File(remoteCachingFolder + File.separator + "tmp-" + IdHelper.getHashedName(url));
+        File tmpFile = new File(remoteCachingFolder + File.separator + RemoteCacheKey.temporaryFromUrl(url));
         try {
-            LOGGER.info("Starting download : {}", url);
+            LOGGER.info("Starting Icecat cache download: {}", RemoteFileCachingService.loggableUrl(url));
             fileCachingService.downloadTo(iceCatConfig.getUser(), iceCatConfig.getPassword(), url, tmpFile);
             LOGGER.info("Uncompressing file : {}", tmpFile);
             fileCachingService.decompressGzipFile(tmpFile, destFile);
-            LOGGER.info("File {} uncompressed", url);
+            LOGGER.info("Icecat cache resource uncompressed: {}", RemoteFileCachingService.loggableUrl(url));
             return destFile;
         } catch (Exception e) {
-            throw new TechnicalException("Error retrieving resource " + url, e);
+            // Icecat and HTTP client failures may contain a signed request URL.
+            throw new TechnicalException("Error retrieving Icecat cache resource");
         } finally {
             FileUtils.deleteQuietly(tmpFile);
         }

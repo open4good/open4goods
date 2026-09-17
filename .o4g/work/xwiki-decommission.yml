@@ -2,7 +2,7 @@ apiVersion: open4goods.org/v1
 kind: WorkOrder
 metadata: {id: xwiki-decommission, name: Decommission XWiki completely}
 spec:
-  purpose: Remove executable XWiki dependencies and validate beta independence; defer production infrastructure removal.
+  purpose: Remove executable XWiki dependencies and validate local independence; defer remote infrastructure removal.
   roadmapRef: m6-xwiki-retirement
   state: ACCEPTED
   executionPhase: DEVELOPMENT
@@ -27,14 +27,14 @@ spec:
   acceptanceCriteria:
     - id: AC1
       statement: >-
-        A restorable beta database/attachment archive and immutable production-compatible release are retained before beta shutdown.
+        A verified local XAR/database import and immutable production-compatible release are retained before local XWiki shutdown.
     - id: AC2
       statement: >-
         Starter, authentication, backup code, Maven repository and properties are absent from the new application runtime;
-        remove only beta-exclusive infrastructure and credentials with a restore record. Shared and production objects remain
+        remove no remote infrastructure or credential in DEVELOPMENT. Shared, beta and production objects remain
         inventoried for xwiki-production-retirement, without becoming new runtime dependencies.
     - id: AC3
-      statement: Real beta smoke tests prove content, SSO, sitemaps, images and open-data with XWiki unavailable.
+      statement: Full local smoke tests prove content, SSO, sitemaps, images and open-data with local XWiki unavailable.
     - id: AC4
       statement: Repository and deployment searches contain no executable XWiki dependency or endpoint.
   implementationPlan:

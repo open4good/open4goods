@@ -1,0 +1,44 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: local-campaign-readiness
+  name: Full local campaign and beta promotion readiness
+spec:
+  purpose: Gate beta promotion on every local WorkOrder and a complete reproducible full-backup recette.
+  roadmapRef: m1-config-autonomy
+  state: ACCEPTED
+  executionPhase: DEVELOPMENT
+  priority: 400
+  dependsOn:
+    - local-full-stack-runtime
+    - local-backup-baseline
+  completionGates: [ALL_OTHER_DEVELOPMENT_COMPLETED]
+  requiredEvidence: [local-full-recette:passed]
+  decisionRefs: [ADR-0014]
+  pathScope:
+    - .o4g/**
+    - scripts/local/**
+    - scripts/verify/**
+    - scripts/migration/**
+    - docs/operations/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        The tooling refuses closure while any other DEVELOPMENT WorkOrder remains open; a newly added local order invalidates
+        readiness without maintaining a static dependency list.
+    - id: AC2
+      statement: >-
+        The complete immutable backup imports into empty versioned local targets and passes replay, cancellation, deterministic
+        digest, coverage, quarantine, throughput, heap, merge, storage and latency gates.
+    - id: AC3
+      statement: >-
+        All seven Java and two Nuxt applications pass local product, search, B2B, auth, admin, image, sitemap and open-data
+        checks, first with migrated XWiki input and then with XWiki stopped.
+    - id: AC4
+      statement: >-
+        Every enabled live connector and merchant feed is exercised only by an explicit traceable command; retries are resumable
+        or idempotent where supported and no scheduled heavy job runs during the campaign.
+    - id: AC5
+      statement: >-
+        Closure supplies exact local-full-recette:passed evidence plus pinned SHA, artifact and dataset digests; those immutable
+        inputs become the sole BETA_VALIDATION candidate.

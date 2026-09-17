@@ -1,0 +1,22 @@
+server:
+  port: 8087
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/product_data_api
+    username: ${O4G_LOCAL_POSTGRES_USER:product_data_api}
+    password: ${O4G_LOCAL_POSTGRES_PASSWORD:open4goods-local}
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  elasticsearch:
+    uris: http://localhost:9200
+open4goods:
+  scheduling:
+    enabled: false
+b2b:
+  public-base-url: http://localhost:3001
+  security:
+    allowed-origins: http://localhost:3001
+    cookie-domain:
+    cookie-secure: false

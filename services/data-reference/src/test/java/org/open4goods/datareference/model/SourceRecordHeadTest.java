@@ -142,6 +142,17 @@ class SourceRecordHeadTest {
     }
 
     @Test
+    void aLaterRetrievalSupersedesTheSameProviderObservation() {
+        SourceRecordHead stored = head(OBSERVED, "aa", List.of());
+        SourceRecordHead laterRetrieval = new SourceRecordHead(KEY, "1", "icecat-2026-01", OBSERVED,
+                RETRIEVED.plusSeconds(1), null, SourceRecordCompleteness.FULL, SourceRecordState.ACTIVE,
+                new PayloadHash("SHA-256", "bb"), URI.create("urn:o4g:evidence:1"),
+                new SourceUsagePolicyRef("icecat-standard", "3"), stored.gtinLinks(), List.of());
+
+        assertThat(laterRetrieval.supersedes(stored)).isTrue();
+    }
+
+    @Test
     void arepeatedPayloadHashIsIdempotent() {
         SourceRecordHead stored = head(OBSERVED, "aa", List.of());
         SourceRecordHead sameContentObservedLater = head(Instant.parse("2026-03-01T00:00:00Z"), "aa", List.of());

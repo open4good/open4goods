@@ -10,7 +10,7 @@ spec:
   state: ACCEPTED
   executionPhase: DEVELOPMENT
   priority: 300
-  dependsOn: [governance-kit-bootstrap, config-beta-independence, product-reference-legacy-retirement, xwiki-decommission]
+  dependsOn: [governance-kit-bootstrap, local-full-stack-runtime, product-reference-legacy-retirement, xwiki-decommission]
   pathScope:
     - 'src/main/site/**'
     - 'src/test/resources/**'

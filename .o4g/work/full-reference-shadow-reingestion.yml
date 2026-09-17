@@ -4,7 +4,7 @@ metadata:
   id: full-reference-shadow-reingestion
   name: Full reference shadow reingestion and comparison
 spec:
-  purpose: Rebuild the full pinned backup catalogue on beta, enrich from providers and validate the production candidate dataset.
+  purpose: Rebuild the full pinned backup catalogue locally, enrich explicitly from providers and validate the promotion candidate dataset.
   roadmapRef: m7-product-data-reference
   state: ACCEPTED
   executionPhase: DEVELOPMENT
@@ -72,7 +72,7 @@ spec:
       statement: >-
         Capacity, indexing throughput, shard balance, merge pressure, heap, query p95 and projected retention remain within the
         benchmark gates for the full data set; otherwise stop the shadow job and retain diagnostic checkpoints without
-        publishing aliases. Delete failed beta indexes only under the exact-target and verified-recovery procedure.
+        publishing aliases. Delete failed local indexes only by exact versioned name after retaining diagnostic checkpoints.
     - id: AC10
       statement: >-
         A checksummed readiness artifact binds index/data-stream versions, counts, canonical hashes, policy/registry/rule
@@ -81,5 +81,5 @@ spec:
     - id: AC11
       statement: >-
         Rehearse the chosen full-dataset transport to a production-shaped isolated restore target using snapshots of the
-        neutral stores plus the immutable input/reimport recipe. Include media and registry/job dependencies; exclude beta
+        neutral stores plus the immutable input/reimport recipe. Include media and registry/job dependencies; exclude local test
         accounts, API keys, billing ledgers and test data. Record restore counts, hashes, elapsed time and required storage.

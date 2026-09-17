@@ -1,0 +1,39 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: local-backup-baseline
+  name: Immutable local backup baseline and sample
+spec:
+  purpose: Pin and qualify the complete owner backup locally while deriving a deterministic representative fast-loop sample.
+  roadmapRef: m7-product-data-reference
+  state: ACCEPTED
+  executionPhase: DEVELOPMENT
+  priority: 15
+  dependsOn:
+    - local-first-workorder-sequencing
+    - local-full-stack-runtime
+    - reference-backup-input-contract
+  decisionRefs: [ADR-0010, ADR-0014]
+  pathScope:
+    - scripts/local/**
+    - scripts/migration/**
+    - api/src/main/**
+    - api/src/test/**
+    - docs/operations/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: >-
+        Verification starts only after the source copy and original products-backup-manifest.json are complete, then checks
+        SHA-256, gzip integrity, line counts, manifest consistency and XAR integrity without changing any source byte.
+    - id: AC2
+      statement: >-
+        A deterministic content-addressed sample covers all seven verticals, source/offer-rich products, legacy-only records,
+        ambiguous Amazon evidence and known error shapes; repeated generation from identical input is byte-equivalent.
+    - id: AC3
+      statement: >-
+        Sample and full commands import only into explicit empty versioned local indexes, never the active legacy alias, and
+        record checkpoints, cancellation, replay, deterministic digests, quarantine counts and resource measurements.
+    - id: AC4
+      statement: >-
+        The local XAR is imported only to validate migrations; the final content, image, sitemap, open-data and authentication
+        recette is repeated after local XWiki stops.

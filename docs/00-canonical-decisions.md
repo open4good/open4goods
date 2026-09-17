@@ -1,7 +1,7 @@
 ---
 title: "Canonical decisions"
 status: accepted
-last_updated: 2026-09-11
+last_updated: 2026-09-17
 normative: true
 audience: PROJECT_SCOPED
 ---
@@ -61,9 +61,10 @@ ADR that changes a rule updates the entry here in the same commit.
     source-neutral GTIN projection. Reintroducing semantic or hybrid retrieval
     requires a dedicated WorkOrder, a relevance benchmark and a capacity benchmark;
     no dormant query-time text embedding or vector-search path is retained.
-14. WorkOrders default to local development and direct beta validation with beta
-    write authority. Production mutation requires a separate explicit owner order;
-    production execution and post-production retirement never gate development.
-    Migration starts from a pinned product backup, then enriches from providers.
-    Promotion accepts a dated snapshot followed by collection resumption, without
-    claiming complete capture of intervening production changes.
+14. WorkOrders progress through DEVELOPMENT, BETA_VALIDATION, PRODUCTION and
+    POST_PRODUCTION. DEVELOPMENT is strictly local: it has no runtime dependency on
+    a Nudger domain or beta host. Beta and production promotion proceed automatically
+    after their phase gates under `owner-order-2026-09-17-local-first-promotion`;
+    physical retirement still waits for seven healthy days and verified restoration.
+    Local migration starts from a pinned product backup, then explicitly triggered live
+    provider enrichment; startup never launches heavy ingestion jobs.

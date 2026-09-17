@@ -123,7 +123,9 @@ def lint(root: Path) -> list[str]:
                 problems.append(f"{path.name}: invalid YAML: {exc}")
                 continue
             spec = data.get("spec") or {}
-            if spec.get("executionPhase") not in {"DEVELOPMENT", "PRODUCTION", "POST_PRODUCTION"}:
+            if spec.get("executionPhase") not in {
+                "DEVELOPMENT", "BETA_VALIDATION", "PRODUCTION", "POST_PRODUCTION"
+            }:
                 problems.append(f"{path.name}: explicit executionPhase is required")
             if type(spec.get("priority")) is not int or spec["priority"] < 0:
                 problems.append(f"{path.name}: nonnegative integer priority is required")

@@ -1,0 +1,29 @@
+{
+  "index_patterns": ["o4g-daily-provider-rollup-*"] ,
+  "data_stream": {},
+  "template": {
+    "settings": {
+      "index.mode": "time_series",
+      "index.routing_path": ["gtin", "provider_id", "condition", "currency"],
+      "index.number_of_replicas": 1,
+      "index.lifecycle.name": "o4g-daily-provider-rollup-5y"
+    },
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "@timestamp": {"type": "date_nanos"},
+        "gtin": {"type": "keyword", "time_series_dimension": true},
+        "provider_id": {"type": "keyword", "time_series_dimension": true},
+        "condition": {"type": "keyword", "time_series_dimension": true},
+        "currency": {"type": "keyword", "time_series_dimension": true},
+        "minimum_amount": {"type": "double", "time_series_metric": "gauge"},
+        "maximum_amount": {"type": "double", "time_series_metric": "gauge"},
+        "close_amount": {"type": "double", "time_series_metric": "gauge"},
+        "observed_offer_count": {"type": "long", "time_series_metric": "gauge"},
+        "change_count": {"type": "long", "time_series_metric": "counter"},
+        "first_observed_at": {"type": "date"},
+        "last_observed_at": {"type": "date"}
+      }
+    }
+  }
+}

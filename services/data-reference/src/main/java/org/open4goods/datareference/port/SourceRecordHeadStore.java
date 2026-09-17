@@ -6,6 +6,8 @@ import java.util.Optional;
 import org.open4goods.datareference.model.Gtin;
 import org.open4goods.datareference.model.SourceRecordHead;
 import org.open4goods.datareference.model.SourceRecordKey;
+import org.open4goods.datareference.model.SourceRecordMutation;
+import org.open4goods.datareference.model.SourceRecordTransition;
 
 /**
  * Persistence of the current head of each provider record.
@@ -13,6 +15,15 @@ import org.open4goods.datareference.model.SourceRecordKey;
  * <p>Implementations keep exactly one head per {@link SourceRecordKey}.
  */
 public interface SourceRecordHeadStore {
+
+    /**
+     * Applies a mutation using compare-and-set semantics and returns the metadata-only journal
+     * entry it must durably deliver. A retry of an accepted transition returns the same id.
+     *
+     * @param mutation source observation and explicit deletion intent
+     * @return outcome and journal metadata
+     */
+    SourceRecordTransition apply(SourceRecordMutation mutation);
 
     /**
      * Reads the current head of one record.

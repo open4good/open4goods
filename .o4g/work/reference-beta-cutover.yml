@@ -5,15 +5,17 @@ spec:
   purpose: Switch all beta readers to the validated projection and rehearse the exact production promotion and rollback operations.
   roadmapRef: m7-product-data-reference
   state: ACCEPTED
-  executionPhase: DEVELOPMENT
-  priority: 230
+  executionPhase: BETA_VALIDATION
+  priority: 550
   dependsOn:
     - full-reference-shadow-reingestion
     - reference-api-frontend-breaking-cutover
     - b2b-price-history-facet
     - config-beta-independence
     - google-sso-allowlisted-roles
-  decisionRefs: [ADR-0013]
+    - local-campaign-readiness
+    - beta-cache-volume-and-key-hygiene
+  decisionRefs: [ADR-0014]
   pathScope:
     - 'api/**'
     - 'front-api/**'

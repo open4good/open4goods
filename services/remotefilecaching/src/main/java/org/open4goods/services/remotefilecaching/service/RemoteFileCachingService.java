@@ -77,7 +77,7 @@ public class RemoteFileCachingService {
 
 	public File getResource(final String url, Integer refreshInDays) throws InvalidParameterException, IOException {
 
-		File resource = new File(resourceFolder+File.separator+IdHelper.getHashedName(url));
+		File resource = new File(resourceFolder + File.separator + RemoteCacheKey.fromUrl(url));
 
 		CacheResourceConfig conf = configs.get(url);
 		if (null == conf) {
@@ -109,8 +109,8 @@ public class RemoteFileCachingService {
 	public File retrieve(final CacheResourceConfig conf) throws TechnicalException {
 
 		try {
-			File tmpFile = new File(resourceFolder+File.separator+"tmp-"+IdHelper.getHashedName(conf.getUrl()));
-			File destFile = new File(resourceFolder+File.separator+IdHelper.getHashedName(conf.getUrl()));
+			File tmpFile = new File(resourceFolder + File.separator + RemoteCacheKey.temporaryFromUrl(conf.getUrl()));
+			File destFile = new File(resourceFolder + File.separator + RemoteCacheKey.fromUrl(conf.getUrl()));
 
 			tmpFile = download(conf.getUrl(), tmpFile);
 
@@ -128,7 +128,8 @@ public class RemoteFileCachingService {
 		} catch (TechnicalException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new TechnicalException("Error retrieving resource",e);
+			// Upstream exception messages can echo a complete signed request URL.
+			throw new TechnicalException("Error retrieving resource");
 		}
 	}
 
@@ -295,7 +296,8 @@ public class RemoteFileCachingService {
             FileUtils.copyURLToFile(new URL(url), tmpFile, connectionTimeout, readTimeout);
 			return tmpFile;
 		} catch (Exception e) {
-			throw new TechnicalException("Cannot download resource", e);
+			// Do not retain the upstream cause: its message can contain request credentials.
+			throw new TechnicalException("Cannot download resource");
 		}
 	}
 
@@ -306,7 +308,7 @@ public class RemoteFileCachingService {
 	 * @param url remote resource URL
 	 * @return URL without query values, or {@code null} when no URL was supplied
 	 */
-	static String loggableUrl(String url) {
+	public static String loggableUrl(String url) {
 		if (url == null) {
 			return null;
 		}

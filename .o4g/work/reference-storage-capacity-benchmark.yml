@@ -59,16 +59,15 @@ spec:
         Final shard, replica, lifecycle, routing and bulk settings are checked into owning modules after all gates pass;
         failed gates block full-reference-shadow-reingestion and release readiness, not already tested bounded store/adapter
         implementation. One-replica node-loss proof uses distinct data nodes and does not infer production resilience from
-        a single-node or zero-replica beta run.
+        a single-node or zero-replica fast-loop run.
   implementationPlan:
     - >-
       Benchmark the actual implemented import, head/journal/event persistence and queries with the feasibility sample;
-      measure price-change rates during controlled beta collection. Declare node count, test duration and concurrency in
-      evidence. Reclaim only verified-restorable old beta indexes; request owner resources when the full topology cannot fit.
+      measure price-change rates during explicitly triggered local collection. Declare node count, test duration and concurrency
+      in evidence. Use empty versioned local indexes; request owner resources when the full local topology cannot fit.
   evidenceRefs:
-    - blocker:AC1/AC5/AC6/AC7 require sanitized measurements from a production-shaped Elasticsearch topology and observed
-      ingestion/price-change traffic; the workspace contains neither a runnable production-shaped stack nor a captured read-only
-      inventory
+    - blocker:AC1/AC5/AC6/AC7 require sanitized measurements from the production-shaped local Elasticsearch topology and observed
+      explicitly triggered ingestion/price-change traffic; fixture-only measurements do not satisfy the full qualification gate
     - >-
       note: 2026-09-11 the beta host and archive are accessible, but disk usage is 90 percent on the backup mount.
       This supersedes the access assumption, not the unproven capacity gates. Measurements belong to feasibility first.

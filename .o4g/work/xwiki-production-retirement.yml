@@ -6,9 +6,10 @@ spec:
   roadmapRef: m9-post-production-retirement
   state: ACCEPTED
   executionPhase: POST_PRODUCTION
+  requiredEvidence: [healthy-window:7-days, restore:verified]
   priority: 920
   dependsOn: [reference-coordinated-cutover, xwiki-decommission]
-  decisionRefs: [ADR-0013]
+  decisionRefs: [ADR-0014]
   pathScope:
     - 'ops/**'
     - 'scripts/**'

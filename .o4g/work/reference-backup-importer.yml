@@ -14,7 +14,7 @@ spec:
     - quantity-and-language-normalization
     - price-observation-timeseries
     - reference-source-policy-review
-  decisionRefs: [ADR-0013]
+  decisionRefs: [ADR-0014]
   pathScope:
     - 'scripts/migration/**'
     - 'api/**'

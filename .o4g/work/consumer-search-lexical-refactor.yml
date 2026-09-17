@@ -74,9 +74,9 @@ spec:
         feature flag.
   implementationPlan:
     - >-
-      Build the 100-query corpus early from actual beta candidates with expected/relevant GTIN judgments and an owner review
+      Build the 100-query corpus early from actual local full-backup candidates with expected/relevant GTIN judgments and an owner review
       packet for ambiguous rankings. Relevance success is computed from that fixed corpus, not queries chosen after tuning.
     - >-
-      Search only NUDGER_WEB-eligible title/class/group/merchant evidence. The local/bounded beta index validates behavior;
-      full capacity is evaluated by reference-storage-capacity-benchmark and the final switch by reference-beta-cutover.
+      Search only NUDGER_WEB-eligible title/class/group/merchant evidence. The deterministic sample validates fast-loop behavior;
+      full local capacity is evaluated by reference-storage-capacity-benchmark before beta promotion.
       Update search callers and generated clients in this lot; remaining product/detail contracts belong to the reader cutover.

@@ -6,7 +6,7 @@ metadata:
 spec:
   purpose: Resolve policy-filtered evidence into auditable per-surface values and a single GTIN read model.
   roadmapRef: m7-product-data-reference
-  state: ACCEPTED
+  state: BLOCKED
   executionPhase: DEVELOPMENT
   priority: 130
   dependsOn:
@@ -26,57 +26,61 @@ spec:
     - api/src/test/**
   acceptanceCriteria:
     - id: AC1
-      statement: >-
-        Git-versioned rules select per canonical concept and surface; there is no global EPREL/Icecat ordering and no
-        cross-source arithmetic mean unless a named rule for that concept explicitly defines it.
+      statement: Git-versioned rules select per canonical concept and surface; there is no global EPREL/Icecat ordering and
+        no cross-source arithmetic mean unless a named rule for that concept explicitly defines it.
     - id: AC2
-      statement: >-
-        Eligibility applies effective usage policy, source-head state/expiry, GTIN-link confidence and normalization validity
-        before ranking, conflict calculation or derivation, so forbidden evidence cannot influence an allowed result indirectly.
+      statement: Eligibility applies effective usage policy, source-head state/expiry, GTIN-link confidence and normalization
+        validity before ranking, conflict calculation or derivation, so forbidden evidence cannot influence an allowed result
+        indirectly.
     - id: AC3
-      statement: >-
-        Ranking is deterministic: in-scope validated O4G correction, configured regulatory authority, configured source rank,
-        match confidence, observation time, then stable source/assertion id; input arrival and Elasticsearch hit order have no effect.
+      statement: 'Ranking is deterministic: in-scope validated O4G correction, configured regulatory authority, configured
+        source rank, match confidence, observation time, then stable source/assertion id; input arrival and Elasticsearch
+        hit order have no effect.'
     - id: AC4
-      statement: >-
-        Every resolved field records deduplicated candidate assertion ids, winner id, rule id/version, reason, conflict status
-        and publishable provenance; materially distinct normalized candidates are retained as conflicts rather than overwritten.
+      statement: Every resolved field records deduplicated candidate assertion ids, winner id, rule id/version, reason, conflict
+        status and publishable provenance; materially distinct normalized candidates are retained as conflicts rather than
+        overwritten.
     - id: AC5
-      statement: >-
-        O4G corrections are immutable audited source records with author, reason, scope and revocation; projection documents are
-        never edited as a correction mechanism and a revoked correction restores the deterministic prior winner on replay.
+      statement: O4G corrections are immutable audited source records with author, reason, scope and revocation; projection
+        documents are never edited as a correction mechanism and a revoked correction restores the deterministic prior winner
+        on replay.
     - id: AC6
-      statement: >-
-        Derived values have their own ids, rule version and input assertion/derived ids; a surface-disallowed input excludes the
-        derivation and prohibited values are absent from public DTOs, exports, logs and operational metric labels.
+      statement: Derived values have their own ids, rule version and input assertion/derived ids; a surface-disallowed input
+        excludes the derivation and prohibited values are absent from public DTOs, exports, logs and operational metric labels.
     - id: AC7
-      statement: >-
-        A strict aliased index stores one document per normalized GTIN with NUDGER_WEB, B2B_API and ODBL_EXPORT decisions plus
-        typed reference, offer-summary, evaluation and search slices assembled by one writer through typed input ports.
+      statement: A strict aliased index stores one document per normalized GTIN with NUDGER_WEB, B2B_API and ODBL_EXPORT decisions
+        plus typed reference, offer-summary, evaluation and search slices assembled by one writer through typed input ports.
     - id: AC8
-      statement: >-
-        A changed source head, registry, policy, correction, rule or domain slice enqueues idempotent GTIN recomputation; full
-        replay uses PIT/search_after checkpoints and two identical replays produce byte-equivalent canonical projections.
+      statement: A changed source head, registry, policy, correction, rule or domain slice enqueues idempotent GTIN recomputation;
+        full replay uses PIT/search_after checkpoints and two identical replays produce byte-equivalent canonical projections.
     - id: AC9
-      statement: >-
-        Search and batch aggregation use indexed projection fields or dedicated rollups, never nested raw assertions; mappings
-        bound nested/object counts and keep audit-only evidence non-indexed to prevent mapping and aggregation blow-ups.
+      statement: Search and batch aggregation use indexed projection fields or dedicated rollups, never nested raw assertions;
+        mappings bound nested/object counts and keep audit-only evidence non-indexed to prevent mapping and aggregation blow-ups.
     - id: AC10
-      statement: >-
-        Unit and Elasticsearch integration tests cover source-order permutations, expiry, policy periods, corrections,
+      statement: Unit and Elasticsearch integration tests cover source-order permutations, expiry, policy periods, corrections,
         regulatory authority, conflicts, anti-leak behavior, optimistic retries, alias migration and composition of all slices.
     - id: AC11
-      statement: >-
-        Implement all offer/evaluation/search producers named by reference-domain-slice-contracts, including cohort statistics
-        and score refresh, through typed ports. Test against eligible source values and OfferHead without a legacy Product
-        fallback; denied evidence cannot affect scores, ranking, grouping or search text indirectly.
+      statement: Implement all offer/evaluation/search producers named by reference-domain-slice-contracts, including cohort
+        statistics and score refresh, through typed ports. Test against eligible source values and OfferHead without a legacy
+        Product fallback; denied evidence cannot affect scores, ranking, grouping or search text indirectly.
     - id: AC12
-      statement: >-
-        Source-transition delivery is acknowledged only after durable recompute enqueue; workers coalesce by GTIN and retry
-        version conflicts. Registry/policy/clock expiry changes have bounded scan checkpoints. A restarted worker repairs
-        missed refreshes, including both sides of a GTIN relink, and metrics expose lag without raw evidence.
+      statement: Source-transition delivery is acknowledged only after durable recompute enqueue; workers coalesce by GTIN
+        and retry version conflicts. Registry/policy/clock expiry changes have bounded scan checkpoints. A restarted worker
+        repairs missed refreshes, including both sides of a GTIN relink, and metrics expose lag without raw evidence.
   implementationPlan:
-    - >-
-      Fix registry, policy, rule/normalizer versions and evaluation instant for replay comparisons. Canonical hash comparison
-      excludes operational delivery timestamps but includes every published value and provenance decision; document that
-      canonical representation. A current-time expiry reevaluation is a new input, not a nondeterministic replay.
+    - Fix registry, policy, rule/normalizer versions and evaluation instant for replay comparisons. Canonical hash comparison
+      excludes operational delivery timestamps but includes every published value and provenance decision; document that canonical
+      representation. A current-time expiry reevaluation is a new input, not a nondeterministic replay.
+  evidenceRefs:
+    - '2026-09-16: deterministic resolver, three-surface strict projection store, source-transition recompute journal,
+      expiry sweep, canonical replay representation and typed sole projection assembler are implemented. Unit tests pass
+      in services/data-reference; the affected api reactor suite reports zero source-record and projection-store test failures.'
+    - '2026-09-16 beta read-only check: all open4goods application and Nuxt units are active with no failed units; root
+      disk use is 89 percent with 97 GB available. No uncommitted development artifact was deployed.'
+    - '2026-09-16 blocker: all tracked EPREL, Icecat, merchant and legacy source policies remain UNREVIEWED with no
+      allowed publication surfaces. The registry has policy references but no reviewed per-concept source-ranking or
+      regulatory-authority decisions. Publishing or inventing those decisions would violate the deny-by-default source policy.'
+  externalBlockers:
+    - 'owner-action: approve source/content/surface publication permissions and commit reviewed per-concept source ranks
+      and regulatory authorities. Then wire the approved Git rules and policy versions into the full local replay before validating
+      non-empty public, B2B or ODBL projections.'

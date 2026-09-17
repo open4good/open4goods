@@ -18,22 +18,16 @@ unverified against the actual system: this document describes the state found on
 
 ## Local development
 
-Start with the [README's "Run in dev mode" section](../../README.md#run-in-dev-mode): Java 21,
-Maven, and either Docker Compose (Elasticsearch + Redis, auto-started by
-`spring-boot-docker-compose`) or `front-api`'s in-memory `local` profile (no infra at all). Module-
-specific local runbooks:
+Start with [the strict-local campaign](beta-development-campaign.md): Java 21, Maven, Node/pnpm
+and Docker Compose. `scripts/local/open4goods.sh` owns startup and connects every native application
+to loopback Elasticsearch, Redis and PostgreSQL. Module-specific local detail:
 
 - `b2b-api` + `b2b-frontend`: [product-data-api-local-runbook.md](product-data-api-local-runbook.md).
-- `frontend`: a `.env` file with `API_URL`, `TOKEN_COOKIE_NAME`, `REFRESH_COOKIE_NAME` (README has
-  the full block); gitignored, kept out of every commit.
-- `api`, `ui`, `admin`: no dedicated runbook yet -- run with `-Dspring.profiles.active=dev` per the
-  README's "Launching" section. Its `com.open4goods.ui.Ui`/`com.open4goods.ui.Api` IDE class paths
-  predate the `org.open4goods` package rename and no longer resolve; use each module's
-  `*Application` class instead (see `AGENTS.md` section 2's package layout).
+- all services: `.env.local` and `.local/config/<service>.yml`, initialized from tracked templates
+  and ignored by Git.
 
-All packaged `application.yml` defaults (one per `@SpringBootApplication` module) hold **no
-secrets** -- that was `config-contract-and-environments`'s AC3. A local `devsec` profile run reads
-real (non-production-secret) Elasticsearch/Redis credentials from that same profile's resources.
+All packaged defaults hold no secrets. DEVELOPMENT loads only the `local` profile; `devsec` is not
+part of the launcher and local runbooks do not use remote Elasticsearch credentials.
 
 ## Where configuration lives today
 
@@ -47,8 +41,8 @@ Three tiers, by how sensitive and how environment-specific a value is:
    Elasticsearch/Kibana files and certs -- see below). This repository is not part of this checkout
    and this document has no visibility into its contents; the full classified inventory of every
    tracked file and key it holds is [legacy-config-inventory.md](legacy-config-inventory.md).
-3. **Local `.env` / `application-active.yml` you create yourself** -- gitignored, per the Local
-   development section above.
+3. **Local `.env.local` / `.local/config/*.yml` created by `open4goods.sh init`** -- gitignored,
+   per the Local development section above.
 
 Tier 2 is being migrated to GitHub Environments (public non-secret variables + environment
 secrets) per [ADR-0006](../adr/0006-github-environments-and-systemd-runtime.md). The `beta` and
@@ -79,6 +73,25 @@ Host path summary: `/opt/open4goods/config/{env}/**` (rendered secrets and topol
 (what's actually mounted/run), `/opt/open4goods/runtime/` and `/opt/open4goods/run/` (live jars and
 PID files -- deliberately outside the synced `bin/` tree, so a config deploy leaves a running
 process's own jar alone).
+
+## Beta DiskB cache cutover
+
+The writable application cache has one canonical path, `/opt/open4goods/.cached`. On beta it is
+backed by `/diskb/open4goods-cache` through `opt-open4goods-.cached.mount`; service templates use
+the path as a mountpoint precondition. This avoids a missing DiskB mount silently growing
+the root filesystem. DiskB also holds Elasticsearch data, so retain at least 30 percent free there
+and at least 20 percent free on root.
+
+Start every rehearsal with `scripts/deploy/inspect-cache-volume.sh`; it emits only aggregate
+capacity, root-level class and ownership-mode counts. Use the authenticated cleanup dry run for
+age and reclaimability, rather than listing cache entries. Prepare the source only through
+`scripts/deploy/prepare-cache-volume.sh`, then install the runtime units and start the cache mount
+before restarting a cache writer. Confirm both the mountpoint and its backing device with `findmnt`.
+Do not list, copy or log legacy cache filenames because upstream request query values can be
+sensitive. Remote files with the former URL-derived names are intentionally rebuilt after the
+SHA-256 cache-key release rather than migrated. Product-resource cleanup stays behind its
+authenticated dry-run and review process; batch and recovery data remain in place until their owner
+verifies recovery.
 
 ## Elasticsearch specifically
 

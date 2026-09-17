@@ -32,7 +32,7 @@ owned, and linked from this index when they become durable project knowledge.
 
 - [Documentation guidelines](conventions/documentation-guidelines.md)
 - [MCP server setup](operations/mcp-servers.md)
-- [Campagne locale et beta](operations/beta-development-campaign.md) - sequence, sauvegarde et future bascule
+- [Developpement strictement local](operations/beta-development-campaign.md) - stack, sauvegarde et promotions phasees
 - [Frontend asset hardening](operations/frontend-asset-hardening.md)
 - [Production log triage](operations/production-log-triage.md)
 - [ADR index](adr/README.md)

@@ -1,0 +1,29 @@
+{
+  "index_patterns": ["o4g-price-change-*"] ,
+  "data_stream": {},
+  "template": {
+    "settings": {
+      "index.mode": "time_series",
+      "index.routing_path": ["gtin", "provider_id", "provider_offer_id", "condition", "currency"],
+      "index.number_of_replicas": 1,
+      "index.lifecycle.name": "o4g-price-change-24m"
+    },
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "@timestamp": {"type": "date_nanos"},
+        "gtin": {"type": "keyword", "time_series_dimension": true},
+        "provider_id": {"type": "keyword", "time_series_dimension": true},
+        "provider_offer_id": {"type": "keyword", "time_series_dimension": true},
+        "condition": {"type": "keyword", "time_series_dimension": true},
+        "currency": {"type": "keyword", "time_series_dimension": true},
+        "amount": {"type": "double", "time_series_metric": "gauge"},
+        "availability": {"type": "keyword"},
+        "event_kind": {"type": "keyword"},
+        "event_id": {"type": "keyword", "index": false, "doc_values": false},
+        "observed_at": {"type": "date"},
+        "policy_ref": {"type": "keyword", "index": false, "doc_values": false}
+      }
+    }
+  }
+}

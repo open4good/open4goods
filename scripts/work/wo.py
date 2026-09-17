@@ -59,6 +59,12 @@ class Workspace:
     def all_orders(self):
         return self.roadmap.load_work_orders(self.work_root)
 
+    def promotion_authorization_ref(self) -> str:
+        """Return the permanent owner order recorded in the project contract."""
+        project = yaml.safe_load((self.root / ".o4g" / "project.yml").read_text(encoding="utf-8"))
+        execution = ((project or {}).get("spec") or {}).get("execution") or {}
+        return str(execution.get("promotionAuthorizationRef") or "").strip()
+
     def open_path(self, identifier: str) -> Path:
         path = self.work_root / f"{identifier}.yml"
         if path.is_file():
@@ -140,12 +146,29 @@ class Workspace:
             raise ValueError(f"refusing {current} -> {target} for {identifier}")
         info = self.describe(identifier)
         if target in {"IN_PROGRESS", "COMPLETED"}:
+            expected_availability = "READY" if target == "IN_PROGRESS" else "IN_PROGRESS"
+            if info["availability"] != expected_availability:
+                raise ValueError(
+                    f"{identifier} is {info['availability']}; expected {expected_availability}"
+                )
             if info["blockers"]:
                 raise ValueError(f"{identifier} has unresolved blockers: {', '.join(info['blockers'])}")
-            if info["executionPhase"] != "DEVELOPMENT":
+            if info["executionPhase"] in {"BETA_VALIDATION", "PRODUCTION"}:
+                permanent_ref = self.promotion_authorization_ref()
+                if not permanent_ref:
+                    raise ValueError("beta and production promotion require spec.execution.promotionAuthorizationRef")
+                if authorization_ref and authorization_ref.strip() != permanent_ref:
+                    raise ValueError("--authorization-ref conflicts with the permanent project authorization")
+                evidence = [*evidence, f"owner-order:{permanent_ref}"]
+            elif info["executionPhase"] == "POST_PRODUCTION":
                 if not authorization_ref or not authorization_ref.strip():
-                    raise ValueError("production phase requires --authorization-ref to an explicit owner order; readiness is not permission")
+                    raise ValueError("post-production retirement requires --authorization-ref after the healthy window")
                 evidence = [*evidence, f"owner-order:{authorization_ref.strip()}"]
+            required_evidence = list(info["requiredEvidence"])
+            if target == "COMPLETED":
+                missing_evidence = [item for item in required_evidence if item not in evidence]
+                if missing_evidence:
+                    raise ValueError(f"{identifier} requires completion evidence: {', '.join(missing_evidence)}")
         if target in {"BLOCKED", "COMPLETED"} and not evidence:
             raise ValueError(f"{target.lower()} requires at least one --evidence entry")
         spec["state"] = target
@@ -186,6 +209,8 @@ class Workspace:
                     "acceptanceCriteria": spec.get("acceptanceCriteria") or [],
                     "evidenceRefs": spec.get("evidenceRefs") or [],
                     "implementationPlan": spec.get("implementationPlan") or [],
+                    "completionGates": spec.get("completionGates") or [],
+                    "requiredEvidence": spec.get("requiredEvidence") or [],
                     "path": str(order.path.relative_to(self.root)),
                 }
         raise ValueError(f"unknown WorkOrder: {identifier}")
@@ -255,19 +280,23 @@ def parser() -> argparse.ArgumentParser:
     next_parser.add_argument("--all", action="store_true")
     next_parser.add_argument("--json", action="store_true")
     next_parser.add_argument("--limit", type=int, default=8)
-    next_parser.add_argument("--phase", choices=["DEVELOPMENT", "PRODUCTION", "POST_PRODUCTION", "ALL"], default="DEVELOPMENT")
+    next_parser.add_argument(
+        "--phase",
+        choices=["DEVELOPMENT", "BETA_VALIDATION", "PRODUCTION", "POST_PRODUCTION", "ALL"],
+        default="DEVELOPMENT",
+    )
     status = commands.add_parser("status")
     status.add_argument("identifier")
     begin = commands.add_parser("begin")
     begin.add_argument("identifier")
-    begin.add_argument("--authorization-ref", help="Reference to an actual explicit owner order; this flag does not grant authority")
+    begin.add_argument("--authorization-ref", help="Post-production owner order, or an assertion matching the permanent promotion order")
     block = commands.add_parser("block")
     block.add_argument("identifier")
     block.add_argument("--evidence", action="append", required=True)
     close = commands.add_parser("close")
     close.add_argument("identifier")
     close.add_argument("--evidence", action="append", required=True)
-    close.add_argument("--authorization-ref", help="Owner order covering this production completion")
+    close.add_argument("--authorization-ref", help="Post-production owner order, or an assertion matching the permanent promotion order")
     commit = commands.add_parser("commit")
     commit.add_argument("identifier")
     commit.add_argument("--message", required=True)
