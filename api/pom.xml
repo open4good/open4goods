@@ -66,7 +66,7 @@
         <dependency>
             <groupId>ai.djl.pytorch</groupId>
             <artifactId>pytorch-engine</artifactId>
-            <version>0.36.0</version>
+            <version>0.38.0</version>
         </dependency>
 
         <dependency>
@@ -78,7 +78,7 @@
         <dependency>
             <groupId>ai.djl.huggingface</groupId>
             <artifactId>tokenizers</artifactId>
-            <version>0.36.0</version>
+            <version>0.38.0</version>
         </dependency>
 
         <!-- web -->
@@ -255,7 +255,7 @@
         <dependency>
             <groupId>org.elasticsearch.client</groupId>
             <artifactId>elasticsearch-rest-client</artifactId>
-            <version>8.18.8</version>
+            <version>8.19.21</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
