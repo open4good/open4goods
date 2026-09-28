@@ -6,7 +6,7 @@ audience: PROJECT_SCOPED
 
 # Product Page Audit & Fix Plan - UI consistency + SEO/affiliate maximization
 
-> **Governance**: this plan is tracked as WorkOrder
+> **Historical governance**: this completed plan was tracked as WorkOrder
 > [`product-page-seo-ui-quality`](../.o4g/work/ledger/product-page-seo-ui-quality.yml)
 > (COMPLETED). Its 9 work packages map to that WorkOrder's AC1-AC9.
 >
@@ -507,13 +507,14 @@ internals, no empty-state noise. Mostly mechanical; keep each step reviewable.
   sessionStorage-gated to once per session, `requestIdleCallback`/2s-timeout
   delay, a standard bottom-left `v-snackbar` with a 4s timeout, no click
   capture outside itself, with test coverage. Nothing to fix here.
-- [ ] **New, out of this WorkOrder's scope** - `PwaOfflineNotice.vue` itself
+- [ ] **New, outside the completed plan's scope** - `PwaOfflineNotice.vue` itself
   still has raw `mdi-wifi-off`/`mdi-refresh`/`mdi-close` string icons (same
   invisible-icon bug as WP5.1/U2, fixed elsewhere this session) - a real but
   separate defect on a component this WP never named. Same bug also found in
   `frontend/app/error.vue`, `useMetriks.ts`, `pages/releases/index.vue` and
   `pages/opensource/index.vue`. File a follow-up icon-migration lot rather
-  than folding these into a product-page WorkOrder.
+  than folding these into the completed product-page work. Track any follow-up
+  in a Nudger Paperclip issue.
 
 ---
 

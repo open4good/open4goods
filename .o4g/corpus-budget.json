@@ -11,13 +11,6 @@
       "resolution": "normative",
       "informational": "bounded by NORMATIVE_PATHS, not by a line count"
     },
-    "work_open_lines": {
-      "resolution": "machine"
-    },
-    "work_ledger_lines": {
-      "resolution": "machine",
-      "informational": "append-only closure records"
-    },
     "adr_lines_max": {
       "resolution": "normative"
     }
@@ -26,8 +19,6 @@
     "non_normative_lines": 6216,
     "rule_shaped_statements_in_non_normative": 140,
     "normative_documents": 15,
-    "work_open_lines": 1966,
-    "work_ledger_lines": 1927,
     "adr_lines_max": 120
   }
 }
