@@ -11,8 +11,12 @@ SERVICES=(api ui admin front-api b2b-api exposed-docs geocode frontend b2b-front
 usage() {
   cat >&2 <<'EOF'
 usage: scripts/local/open4goods.sh <command>
-  init | doctor | up | restart <service> | status | logs [service] | down
+  init | doctor | preflight | up | restart <service> | status | logs [service] | down
   backup verify | xwiki import | data sample | data full | jobs run <job>
+
+set O4G_SHARED_HOST=1 to gate 'up' behind the shared-build-host preflight
+(rootless-only Docker, assigned port block, disk/RAM/CPU/pids budget); see
+docs/operations/buildhost-runtime.md and .env.buildhost.example.
 
 services: api ui admin front-api b2b-api exposed-docs geocode frontend b2b-frontend
 jobs: eprel icecat feeds batch
@@ -105,6 +109,7 @@ start_process() {
 start_java() {
   local service="$1" module="$2" port="$3" config="$O4G_LOCAL_CONFIG_DIR/$1.yml"
   start_process "$service" "$ROOT/$module" env \
+    JAVA_HOME="$(java_home_21)" \
     SPRING_PROFILES_ACTIVE=local \
     SPRING_CONFIG_ADDITIONAL_LOCATION="optional:file:$config" \
     SERVER_PORT="$port" \
@@ -112,37 +117,74 @@ start_java() {
       -Dspring-boot.run.jvmArguments=--add-opens=java.base/java.math=ALL-UNNAMED
 }
 
+java_home_21() {
+  # pom.xml pins java.version=21; mvn forks spring-boot:run under whatever
+  # JAVA_HOME points at, which can be a newer JDK on a shared build host.
+  if [ -n "${JAVA_HOME:-}" ] && "$JAVA_HOME/bin/java" -version 2>&1 | grep -q '"21\.'; then
+    printf '%s\n' "$JAVA_HOME"
+    return
+  fi
+  for candidate in /usr/lib/jvm/java-21-openjdk-amd64 /usr/lib/jvm/java-21-openjdk; do
+    if [ -x "$candidate/bin/java" ]; then
+      printf '%s\n' "$candidate"
+      return
+    fi
+  done
+  printf '%s\n' "${JAVA_HOME:-}"
+}
+
+port_for() {
+  # Every port has a literal fallback so the strict-local contract test can
+  # still find the historical numbers; a buildhost profile overrides them
+  # via .env.buildhost (see docs/operations/buildhost-runtime.md).
+  case "$1" in
+    api) echo "${O4G_PORT_API:-8081}" ;;
+    ui) echo "${O4G_PORT_UI:-8082}" ;;
+    admin) echo "${O4G_PORT_ADMIN:-8085}" ;;
+    front-api) echo "${O4G_PORT_FRONT_API:-8086}" ;;
+    b2b-api) echo "${O4G_PORT_B2B_API:-8087}" ;;
+    exposed-docs) echo "${O4G_PORT_EXPOSED_DOCS:-8088}" ;;
+    geocode) echo "${O4G_PORT_GEOCODE:-8089}" ;;
+    frontend) echo "${O4G_PORT_FRONTEND:-3000}" ;;
+    b2b-frontend) echo "${O4G_PORT_B2B_FRONTEND:-3001}" ;;
+  esac
+}
+
 start_native() {
-  local service="$1"
+  local service="$1" api_port ui_port front_api_port b2b_api_port frontend_port b2b_frontend_port
+  api_port="$(port_for api)"; ui_port="$(port_for ui)"; front_api_port="$(port_for front-api)"
+  b2b_api_port="$(port_for b2b-api)"; frontend_port="$(port_for frontend)"; b2b_frontend_port="$(port_for b2b-frontend)"
   case "$service" in
-    api) start_java api api 8081 ;;
-    ui) start_java ui ui 8082 ;;
-    admin) start_java admin admin 8085 ;;
-    front-api) start_java front-api front-api 8086 ;;
+    api) start_java api api "$api_port" ;;
+    ui) start_java ui ui "$ui_port" ;;
+    admin) start_java admin admin "$(port_for admin)" ;;
+    front-api) start_java front-api front-api "$front_api_port" ;;
     b2b-api)
-      start_process b2b-api "$ROOT/b2b-api" env SPRING_PROFILES_ACTIVE=local B2B_API_PORT=8087 \
+      start_process b2b-api "$ROOT/b2b-api" env JAVA_HOME="$(java_home_21)" \
+        SPRING_PROFILES_ACTIVE=local B2B_API_PORT="$b2b_api_port" \
         SPRING_CONFIG_ADDITIONAL_LOCATION="optional:file:$O4G_LOCAL_CONFIG_DIR/b2b-api.yml" \
         mvn --offline spring-boot:run \
           -Dspring-boot.run.jvmArguments=--add-opens=java.base/java.math=ALL-UNNAMED
       ;;
-    exposed-docs) start_java exposed-docs services/exposed-docs 8088 ;;
-    geocode) start_java geocode services/geocode 8089 ;;
+    exposed-docs) start_java exposed-docs services/exposed-docs "$(port_for exposed-docs)" ;;
+    geocode) start_java geocode services/geocode "$(port_for geocode)" ;;
     frontend)
       start_process frontend "$ROOT/frontend" env \
-        API_URL=http://localhost:8086 PUBLIC_API_URL=http://localhost:8086 STATIC_SERVER=http://localhost:8082 \
-        SITE_URL=http://localhost:3000 SITEMAP_BASE_PATH="$O4G_LOCAL_DATA_ROOT/sitemap" \
+        API_URL="http://localhost:$front_api_port" PUBLIC_API_URL="http://localhost:$front_api_port" \
+        STATIC_SERVER="http://localhost:$ui_port" \
+        SITE_URL="http://localhost:$frontend_port" SITEMAP_BASE_PATH="$O4G_LOCAL_DATA_ROOT/sitemap" \
         NUXT_MACHINE_TOKEN="${FRONT_SECURITY_SHARED_TOKEN:-CHANGE_ME_SHARED_TOKEN}" \
-        pnpm dev --host 127.0.0.1 --port 3000
+        pnpm dev --host 127.0.0.1 --port "$frontend_port"
       ;;
     b2b-frontend)
       start_process b2b-frontend "$ROOT/b2b-frontend" env \
-        NUXT_PUBLIC_BACKEND_BASE_URL=http://localhost:8087 \
-        NUXT_PUBLIC_ROUTER_BASE_URL=http://localhost:8087 \
-        NUXT_PUBLIC_SITE_URL=http://localhost:3001 \
-        BACKEND_OPENAPI_URL=http://localhost:8087/v3/api-docs \
-        NUXT_BACKEND_OPEN_API_URL=http://localhost:8087/v3/api-docs \
-        NUXT_OIDC_GOOGLE_REDIRECT_URI=http://localhost:3001/auth/callback/google \
-        pnpm dev --host 127.0.0.1 --port 3001
+        NUXT_PUBLIC_BACKEND_BASE_URL="http://localhost:$b2b_api_port" \
+        NUXT_PUBLIC_ROUTER_BASE_URL="http://localhost:$b2b_api_port" \
+        NUXT_PUBLIC_SITE_URL="http://localhost:$b2b_frontend_port" \
+        BACKEND_OPENAPI_URL="http://localhost:$b2b_api_port/v3/api-docs" \
+        NUXT_BACKEND_OPEN_API_URL="http://localhost:$b2b_api_port/v3/api-docs" \
+        NUXT_OIDC_GOOGLE_REDIRECT_URI="http://localhost:$b2b_frontend_port/auth/callback/google" \
+        pnpm dev --host 127.0.0.1 --port "$b2b_frontend_port"
       ;;
     *) usage ;;
   esac
@@ -197,20 +239,106 @@ doctor() {
   echo "local doctor passed without exposing configuration values"
 }
 
+cgroup_effective_max() {
+  # cgroup v2 enforces the minimum numeric limit across the whole ancestor
+  # chain; a shared build host sets it above our session scope, not on it.
+  local file="$1" dir value best=""
+  dir="/sys/fs/cgroup$(awk -F: '{print $3}' /proc/self/cgroup 2>/dev/null)"
+  while [ -n "$dir" ] && [ "$dir" != "/sys/fs/cgroup" ] && [ "$dir" != "/" ]; do
+    if [ -r "$dir/$file" ]; then
+      value="$(awk '{print $1}' "$dir/$file" 2>/dev/null)"
+      if [ -n "$value" ] && [ "$value" != max ] && { [ -z "$best" ] || [ "$value" -lt "$best" ]; }; then
+        best="$value"
+      fi
+    fi
+    dir="$(dirname "$dir")"
+  done
+  printf '%s\n' "${best:-max}"
+}
+
+# preflight() is the opt-in shared-build-host gate (O4G_SHARED_HOST=1). It
+# never mutates beta/prod state; it only refuses to start the local stack
+# when isolation or capacity assumptions do not hold. See
+# docs/operations/buildhost-runtime.md for the budget this enforces.
+preflight() {
+  load_env
+  local missing=0 service port mem_max cpu_quota cpu_period pids_max
+  local port_min="${O4G_SHARED_HOST_PORT_MIN:-4100}" port_max="${O4G_SHARED_HOST_PORT_MAX:-4109}"
+  local min_free_gib="${O4G_SHARED_HOST_MIN_FREE_GIB:-20}"
+  local min_mem_gib="${O4G_SHARED_HOST_MIN_MEM_GIB:-8}" min_cpu="${O4G_SHARED_HOST_MIN_CPU:-2}"
+  local min_pids="${O4G_SHARED_HOST_MIN_PIDS:-512}"
+
+  if ! docker info --format '{{json .SecurityOptions}}' 2>/dev/null | grep -q rootless; then
+    echo "rootful or unreachable Docker daemon rejected; DOCKER_HOST must target the rootless daemon" >&2
+    missing=1
+  fi
+
+  for service in "${SERVICES[@]}"; do
+    port="$(port_for "$service")"
+    if [ "$port" -lt "$port_min" ] || [ "$port" -gt "$port_max" ]; then
+      echo "application port outside assigned shared-host block ($port_min-$port_max): $service=$port" >&2
+      missing=1
+    fi
+  done
+
+  local avail_kb
+  avail_kb="$(df -Pk "$O4G_LOCAL_DATA_ROOT" 2>/dev/null | awk 'NR==2{print $4}')"
+  if [ -z "$avail_kb" ] || [ "$((avail_kb / 1024 / 1024))" -lt "$min_free_gib" ]; then
+    echo "insufficient free disk under O4G_LOCAL_DATA_ROOT (need >= ${min_free_gib}GiB)" >&2
+    missing=1
+  fi
+
+  mem_max="$(cgroup_effective_max memory.max)"
+  if [ "$mem_max" != max ] && [ "$((mem_max / 1024 / 1024 / 1024))" -lt "$min_mem_gib" ]; then
+    echo "cgroup memory budget below ${min_mem_gib}GiB" >&2
+    missing=1
+  fi
+
+  cpu_quota="$(cgroup_effective_max cpu.max)"
+  cpu_period="$(awk '{print $2}' "/sys/fs/cgroup$(awk -F: '{print $3}' /proc/self/cgroup)/cpu.max" 2>/dev/null || echo 100000)"
+  if [ "$cpu_quota" != max ] && [ "$((cpu_quota / cpu_period))" -lt "$min_cpu" ]; then
+    echo "cgroup CPU budget below ${min_cpu} cores" >&2
+    missing=1
+  fi
+
+  pids_max="$(cgroup_effective_max pids.max)"
+  if [ "$pids_max" != max ] && [ "$pids_max" -lt "$min_pids" ]; then
+    echo "cgroup pids budget below ${min_pids} tasks" >&2
+    missing=1
+  fi
+
+  [ "$missing" -eq 0 ] || return 1
+  echo "shared-host preflight passed: ports ${port_min}-${port_max}, disk>=${min_free_gib}GiB, mem>=${min_mem_gib}GiB, cpu>=${min_cpu}, pids>=${min_pids}"
+}
+
+# Heavy operations (full stack up, full data import) are serialized across
+# concurrent agents on the shared host with a non-blocking flock: a second
+# caller fails fast instead of silently competing for RAM/CPU/disk.
+with_full_run_lock() {
+  local lock_dir="$LOCAL_ROOT/locks"
+  mkdir -p "$lock_dir"
+  exec 9>"$lock_dir/full-run.lock"
+  if ! flock -n 9; then
+    echo "another full run (up/data full) holds the shared-host lock; retry later" >&2
+    return 1
+  fi
+  "$@"
+}
+
+full_up() {
+  docker compose --env-file "$ENV_FILE" up --detach --wait elasticsearch redis postgres
+  local service
+  for service in "${SERVICES[@]}"; do start_native "$service"; done
+}
+
 status() {
   local service port path
   docker compose ps
   for service in "${SERVICES[@]}"; do
+    port="$(port_for "$service")"
     case "$service" in
-      frontend) port=3000; path=/ ;;
-      b2b-frontend) port=3001; path=/ ;;
-      api) port=8081; path=/actuator/health ;;
-      ui) port=8082; path=/actuator/health ;;
-      admin) port=8085; path=/actuator/health ;;
-      front-api) port=8086; path=/actuator/health ;;
-      b2b-api) port=8087; path=/actuator/health ;;
-      exposed-docs) port=8088; path=/actuator/health ;;
-      geocode) port=8089; path=/actuator/health ;;
+      frontend|b2b-frontend) path=/ ;;
+      *) path=/actuator/health ;;
     esac
     if alive "$service"; then
       if http_ready "$port" "$path"; then
@@ -244,11 +372,12 @@ command_name="${1:-}"
 case "$command_name" in
   init) init_local ;;
   doctor) doctor ;;
+  preflight) preflight ;;
   up)
     init_local
     doctor
-    docker compose --env-file "$ENV_FILE" up --detach --wait elasticsearch redis postgres
-    for service in "${SERVICES[@]}"; do start_native "$service"; done
+    [ "${O4G_SHARED_HOST:-0}" = 1 ] && preflight
+    with_full_run_lock full_up
     status
     ;;
   restart)
@@ -308,7 +437,7 @@ case "$command_name" in
         [[ "$O4G_LOCAL_FULL_IMPORT_URL" == http://localhost:* || "$O4G_LOCAL_FULL_IMPORT_URL" == http://127.0.0.1:* ]] || {
           echo "full import URL must be loopback" >&2; exit 1;
         }
-        curl --fail --show-error --silent --request POST "$O4G_LOCAL_FULL_IMPORT_URL"
+        with_full_run_lock curl --fail --show-error --silent --request POST "$O4G_LOCAL_FULL_IMPORT_URL"
         ;;
       *) usage ;;
     esac
