@@ -3,7 +3,6 @@ apis/AffiliationApi.ts
 apis/AgentsApi.ts
 apis/AssistantConfigsApi.ts
 apis/AuthenticationApi.ts
-apis/BlogApi.ts
 apis/BrandApi.ts
 apis/CategoriesApi.ts
 apis/CommercialEventsApi.ts
@@ -46,8 +45,6 @@ models/AttributeReferentials.ts
 models/AttributesConfigDto.ts
 models/AuthTokensDto.ts
 models/BarcodeAggregationProperties.ts
-models/BlogPostDto.ts
-models/BlogTagDto.ts
 models/Brand.ts
 models/BrandXMeta.ts
 models/CategoriesScoreStatsDto.ts
@@ -99,6 +96,7 @@ models/GlobalSearchResultDto.ts
 models/GlobalSearchVerticalGroupDto.ts
 models/GoogleCategoryDto.ts
 models/GoogleIndexationMetricsDto.ts
+models/GoogleLoginRequest.ts
 models/IcecatFeatureReferential.ts
 models/ImpactScoreConfigDto.ts
 models/IpGeolocationResponse.ts
@@ -106,7 +104,6 @@ models/IpQuotaCategory.ts
 models/IpQuotaStatusDto.ts
 models/IssueCommentDto.ts
 models/LegacyPromptConfig.ts
-models/LoginRequest.ts
 models/LogoutResponse.ts
 models/MailTemplateDto.ts
 models/ManufacturingDistance.ts
@@ -120,7 +117,6 @@ models/OpenDataDatasetDto.ts
 models/OpenDataDownloadLimitsDto.ts
 models/OpenDataOverviewDto.ts
 models/Organisation.ts
-models/PageDto.ts
 models/PageDtoProductDto.ts
 models/PageMetaDto.ts
 models/PlacementCountry.ts
@@ -176,7 +172,6 @@ models/ScoringAggregationConfig.ts
 models/SearchSuggestCategoryDto.ts
 models/SearchSuggestProductDto.ts
 models/SearchSuggestResponseDto.ts
-models/SemanticScoreDiagnosticsDto.ts
 models/ShareCandidateDto.ts
 models/ShareExtractionDto.ts
 models/ShareResolutionRequestDto.ts
@@ -199,6 +194,5 @@ models/VerticalSubCategoryReadMoreDto.ts
 models/VerticalSubsetDto.ts
 models/WikiPageConfig.ts
 models/WikidataPropertyReferential.ts
-models/XwikiContentBlocDto.ts
 models/index.ts
 runtime.ts

@@ -15,20 +15,20 @@
 import * as runtime from '../runtime'
 import type {
   AuthTokensDto,
-  LoginRequest,
+  GoogleLoginRequest,
   LogoutResponse,
 } from '../models/index'
 import {
   AuthTokensDtoFromJSON,
   AuthTokensDtoToJSON,
-  LoginRequestFromJSON,
-  LoginRequestToJSON,
+  GoogleLoginRequestFromJSON,
+  GoogleLoginRequestToJSON,
   LogoutResponseFromJSON,
   LogoutResponseToJSON,
 } from '../models/index'
 
-export interface LoginOperationRequest {
-  loginRequest: LoginRequest
+export interface GoogleLoginOperationRequest {
+  googleLoginRequest: GoogleLoginRequest
 }
 
 export interface RefreshRequest {
@@ -40,17 +40,17 @@ export interface RefreshRequest {
  */
 export class AuthenticationApi extends runtime.BaseAPI {
   /**
-   * Validate credentials against XWiki and return JWT tokens as cookies.
-   * Login with XWiki credentials
+   * Accept an ID token only from the Nuxt BFF and return application JWTs.
+   * Create an application session from a verified Google identity
    */
-  async loginRaw(
-    requestParameters: LoginOperationRequest,
+  async googleLoginRaw(
+    requestParameters: GoogleLoginOperationRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
-    if (requestParameters['loginRequest'] == null) {
+  ): Promise<runtime.ApiResponse<AuthTokensDto>> {
+    if (requestParameters['googleLoginRequest'] == null) {
       throw new runtime.RequiredError(
-        'loginRequest',
-        'Required parameter "loginRequest" was null or undefined when calling login().'
+        'googleLoginRequest',
+        'Required parameter "googleLoginRequest" was null or undefined when calling googleLogin().'
       )
     }
 
@@ -78,7 +78,7 @@ export class AuthenticationApi extends runtime.BaseAPI {
       }
     }
 
-    let urlPath = `/auth/login`
+    let urlPath = `/auth/google`
 
     const response = await this.request(
       {
@@ -86,27 +86,25 @@ export class AuthenticationApi extends runtime.BaseAPI {
         method: 'POST',
         headers: headerParameters,
         query: queryParameters,
-        body: LoginRequestToJSON(requestParameters['loginRequest']),
+        body: GoogleLoginRequestToJSON(requestParameters['googleLoginRequest']),
       },
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      AuthTokensDtoFromJSON(jsonValue)
+    )
   }
 
   /**
-   * Validate credentials against XWiki and return JWT tokens as cookies.
-   * Login with XWiki credentials
+   * Accept an ID token only from the Nuxt BFF and return application JWTs.
+   * Create an application session from a verified Google identity
    */
-  async login(
-    requestParameters: LoginOperationRequest,
+  async googleLogin(
+    requestParameters: GoogleLoginOperationRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
-    const response = await this.loginRaw(requestParameters, initOverrides)
+  ): Promise<AuthTokensDto> {
+    const response = await this.googleLoginRaw(requestParameters, initOverrides)
     return await response.value()
   }
 
@@ -116,7 +114,7 @@ export class AuthenticationApi extends runtime.BaseAPI {
    */
   async logoutRaw(
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<LogoutResponse>> {
     const queryParameters: any = {}
 
     const headerParameters: runtime.HTTPHeaders = {}
@@ -151,11 +149,9 @@ export class AuthenticationApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      LogoutResponseFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -164,7 +160,7 @@ export class AuthenticationApi extends runtime.BaseAPI {
    */
   async logout(
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<LogoutResponse> {
     const response = await this.logoutRaw(initOverrides)
     return await response.value()
   }
@@ -176,7 +172,7 @@ export class AuthenticationApi extends runtime.BaseAPI {
   async refreshRaw(
     requestParameters: RefreshRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<AuthTokensDto>> {
     if (requestParameters['refreshToken'] == null) {
       throw new runtime.RequiredError(
         'refreshToken',
@@ -218,11 +214,9 @@ export class AuthenticationApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      AuthTokensDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -232,7 +226,7 @@ export class AuthenticationApi extends runtime.BaseAPI {
   async refresh(
     requestParameters: RefreshRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<AuthTokensDto> {
     const response = await this.refreshRaw(requestParameters, initOverrides)
     return await response.value()
   }

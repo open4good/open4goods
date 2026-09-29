@@ -71,6 +71,7 @@ public class JwtService {
         JwsHeader header = JwsHeader.with(() -> "HS256").build();
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .subject(auth.getName())
+                .claim("email", auth.getName())
                 .issuedAt(now)
                 .expiresAt(exp)
                 .build();
@@ -84,6 +85,6 @@ public class JwtService {
      * @return subject embedded in the token after successful validation
      */
     public String validateRefreshToken(String token) {
-        return decoder.decode(token).getSubject();
+        return decoder.decode(token).getClaimAsString("email");
     }
 }

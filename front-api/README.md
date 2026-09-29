@@ -74,21 +74,24 @@ export GOOGLE_INDEXATION_SERVICE_ACCOUNT_JSON='{"type":"service_account",...}'
 ## API documentation
 
 Access to the Swagger UI (`/swagger-ui.html`) and the raw OpenAPI specification
-(`/v3/api-docs`) requires valid XWiki credentials. Use HTTP Basic
-authentication when requesting these endpoints. Example commands:
+(`/v3/api-docs`) requires an application JWT for protected operations. The
+Nuxt BFF creates that JWT from a verified Google ID token and the configured
+explicit email-role allowlist.
 
 ```bash
-curl -u XWIKI_USER:XWIKI_PASS http://localhost:8082/swagger-ui.html
-curl -u XWIKI_USER:XWIKI_PASS http://localhost:8082/v3/api-docs
+curl http://localhost:8082/swagger-ui.html
+curl http://localhost:8082/v3/api-docs
 ```
 
-To call secured REST endpoints you must obtain a JWT by authenticating with the
-same credentials:
+The BFF is the only caller of the Google session endpoint. It supplies the
+server-to-server shared token and a provider ID token; browser code must not
+send a password or receive a provider token:
 
 ```bash
-curl -X POST http://localhost:8082/auth/login \
+curl -X POST http://localhost:8082/auth/google \
   -H "Content-Type: application/json" \
-  -d '{"username":"XWIKI_USER","password":"XWIKI_PASS"}'
+  -H "X-Shared-Token: $MACHINE_TOKEN" \
+  -d '{"idToken":"BFF_ONLY_GOOGLE_ID_TOKEN"}'
 ```
 
 The response returns `accessToken` and `refreshToken`; include the access token

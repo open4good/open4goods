@@ -1,6 +1,6 @@
 import { useRuntimeConfig } from '#imports'
 
-const DEFAULT_EDIT_ROLES = ['ROLE_SITEEDITOR', 'XWIKIADMINGROUP']
+const DEFAULT_EDIT_ROLES = ['ROLE_EDITOR', 'ROLE_ADMIN']
 
 const normalizeRoles = (roles: readonly (string | null | undefined)[]) =>
   roles

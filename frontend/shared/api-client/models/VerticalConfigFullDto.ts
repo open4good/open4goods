@@ -13,13 +13,6 @@
  */
 
 import { mapValues } from '../runtime'
-import type { BlogPostDto } from './BlogPostDto'
-import {
-  BlogPostDtoFromJSON,
-  BlogPostDtoFromJSONTyped,
-  BlogPostDtoToJSON,
-  BlogPostDtoToJSONTyped,
-} from './BlogPostDto'
 import type { RecommandationsConfig } from './RecommandationsConfig'
 import {
   RecommandationsConfigFromJSON,
@@ -246,12 +239,6 @@ export interface VerticalConfigFullDto {
    * @memberof VerticalConfigFullDto
    */
   breadCrumb?: Array<CategoryBreadcrumbItemDto>
-  /**
-   * Most recent blog posts tagged with the vertical identifier.
-   * @type {Array<BlogPostDto>}
-   * @memberof VerticalConfigFullDto
-   */
-  relatedPosts?: Array<BlogPostDto>
   /**
    * Localised wiki pages associated with the vertical.
    * @type {Array<WikiPageConfig>}
@@ -495,10 +482,6 @@ export function VerticalConfigFullDtoFromJSONTyped(
         : (json['breadCrumb'] as Array<any>).map(
             CategoryBreadcrumbItemDtoFromJSON
           ),
-    relatedPosts:
-      json['relatedPosts'] == null
-        ? undefined
-        : (json['relatedPosts'] as Array<any>).map(BlogPostDtoFromJSON),
     wikiPages:
       json['wikiPages'] == null
         ? undefined
@@ -650,10 +633,6 @@ export function VerticalConfigFullDtoToJSONTyped(
         : (value['breadCrumb'] as Array<any>).map(
             CategoryBreadcrumbItemDtoToJSON
           ),
-    relatedPosts:
-      value['relatedPosts'] == null
-        ? undefined
-        : (value['relatedPosts'] as Array<any>).map(BlogPostDtoToJSON),
     wikiPages:
       value['wikiPages'] == null
         ? undefined

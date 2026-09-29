@@ -125,7 +125,7 @@ class ProductControllerIT {
                         .param("include", "gtin")
                         .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
-                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_EDITOR)))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.gtin").value(gtin))
                 .andExpect(jsonPath("$.metadatas").doesNotExist());
@@ -140,7 +140,7 @@ class ProductControllerIT {
         mockMvc.perform(get("/products/{gtin}", gtin)
                         .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
-                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_EDITOR)))))
                 .andExpect(status().isNotFound());
     }
 
@@ -155,7 +155,7 @@ class ProductControllerIT {
         mockMvc.perform(post("/products")
                         .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
-                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_EDITOR)))))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("public")))
                 .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("max-age=3600")))
@@ -187,7 +187,7 @@ class ProductControllerIT {
                         .param("verticalId", "electronics")
                         .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
-                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_EDITOR)))))
                 .andExpect(status().isOk());
 
         ArgumentCaptor<AggregationRequestDto> captor = ArgumentCaptor.forClass(AggregationRequestDto.class);
@@ -208,7 +208,7 @@ class ProductControllerIT {
                         .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                         .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
-                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_EDITOR)))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -219,7 +219,7 @@ class ProductControllerIT {
                         .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                         .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
-                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_EDITOR)))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -236,7 +236,7 @@ class ProductControllerIT {
                         .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                         .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
-                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_EDITOR)))))
                 .andExpect(status().isOk());
     }
 
@@ -253,7 +253,7 @@ class ProductControllerIT {
                         .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                         .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
-                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_EDITOR)))))
                 .andExpect(status().isOk());
     }
 
@@ -263,7 +263,7 @@ class ProductControllerIT {
                         .param("include", "wrong")
                         .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
-                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_EDITOR)))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -283,7 +283,7 @@ class ProductControllerIT {
                         .param("verticalId", "electronics")
                         .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
-                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_EDITOR)))))
                 .andExpect(status().isOk());
     }
 
@@ -304,7 +304,7 @@ class ProductControllerIT {
                         .param("verticalId", "electronics")
                         .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
-                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_EDITOR)))))
                 .andExpect(status().isOk());
     }
 
@@ -325,7 +325,7 @@ class ProductControllerIT {
                         .param("verticalId", "electronics")
                         .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
-                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_EDITOR)))))
                 .andExpect(status().isOk());
     }
 
@@ -340,7 +340,7 @@ class ProductControllerIT {
                         .param("verticalId", "electronics")
                         .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
-                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_EDITOR)))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -361,7 +361,7 @@ class ProductControllerIT {
                         .param("verticalId", "electronics")
                         .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
-                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_EDITOR)))))
                 .andExpect(status().isOk());
     }
 
@@ -376,7 +376,7 @@ class ProductControllerIT {
                         .param("verticalId", "electronics")
                         .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
-                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_EDITOR)))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -397,7 +397,7 @@ class ProductControllerIT {
                         .param("verticalId", "electronics")
                         .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
-                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_EDITOR)))))
                 .andExpect(status().isOk());
     }
 
@@ -418,7 +418,7 @@ class ProductControllerIT {
                         .param("verticalId", "electronics")
                         .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
-                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_EDITOR)))))
                 .andExpect(status().isOk());
     }
 
@@ -427,7 +427,7 @@ class ProductControllerIT {
         mockMvc.perform(get("/products/fields/sortable")
                         .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
-                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_EDITOR)))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
     }
@@ -468,7 +468,7 @@ class ProductControllerIT {
                         .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                         .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
-                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_EDITOR)))))
                 .andExpect(status().isOk());
 
         ArgumentCaptor<FilterRequestDto> captor = ArgumentCaptor.forClass(FilterRequestDto.class);
@@ -486,7 +486,7 @@ class ProductControllerIT {
         mockMvc.perform(get("/products/fields/components")
                         .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
-                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_EDITOR)))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
     }
@@ -497,7 +497,7 @@ class ProductControllerIT {
         mockMvc.perform(get("/products/fields/aggregatable")
                         .param("domainLanguage", "fr")
                         .header("X-Shared-Token", SHARED_TOKEN)
-                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_EDITOR)))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
     }

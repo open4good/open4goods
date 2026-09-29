@@ -13,6 +13,14 @@
  */
 
 import { mapValues } from '../runtime'
+import type { ProductScoresDto } from './ProductScoresDto'
+import {
+  ProductScoresDtoFromJSON,
+  ProductScoresDtoFromJSONTyped,
+  ProductScoresDtoToJSON,
+  ProductScoresDtoToJSONTyped,
+} from './ProductScoresDto'
+
 /**
  *
  * @export
@@ -50,11 +58,11 @@ export interface ProductReferenceDto {
    */
   model?: string | null
   /**
-   *
-   * @type {any}
+   * Score and ranking related information
+   * @type {ProductScoresDto}
    * @memberof ProductReferenceDto
    */
-  scores?: any | null
+  scores?: ProductScoresDto
 }
 
 /**
@@ -83,7 +91,10 @@ export function ProductReferenceDtoFromJSONTyped(
     bestName: json['bestName'] == null ? undefined : json['bestName'],
     brand: json['brand'] == null ? undefined : json['brand'],
     model: json['model'] == null ? undefined : json['model'],
-    scores: json['scores'] == null ? undefined : json['scores'],
+    scores:
+      json['scores'] == null
+        ? undefined
+        : ProductScoresDtoFromJSON(json['scores']),
   }
 }
 
@@ -105,6 +116,6 @@ export function ProductReferenceDtoToJSONTyped(
     bestName: value['bestName'],
     brand: value['brand'],
     model: value['model'],
-    scores: value['scores'],
+    scores: ProductScoresDtoToJSON(value['scores']),
   }
 }

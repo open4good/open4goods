@@ -3,6 +3,7 @@ package org.open4goods.nudgerfrontapi.controller;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
@@ -15,9 +16,10 @@ import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
 import org.open4goods.icecat.repository.IcecatFeatureRepository;
 import org.open4goods.icecat.repository.IcecatSupplierRepository;
 import org.open4goods.services.geocode.service.IpGeolocationService;
-import org.open4goods.nudgerfrontapi.dto.auth.LoginRequest;
+import org.open4goods.nudgerfrontapi.dto.auth.GoogleLoginRequest;
 import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.auth.JwtService;
+import org.open4goods.nudgerfrontapi.service.auth.GoogleIdentityService;
 import org.open4goods.xwiki.services.XWikiAuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -32,16 +34,13 @@ import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest(properties = {
         "front.cache.path=${java.io.tmpdir}",
-        "front.security.jwt-secret=0123456789ABCDEF0123456789ABCDEF"})
+        "front.security.jwt-secret=0123456789ABCDEF0123456789ABCDEF0"})
 @AutoConfigureMockMvc
 
 class AuthControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @MockitoBean
-    private XWikiAuthenticationService authService;
 
     @MockitoBean
     private GHRepository ghRepository;
@@ -70,28 +69,36 @@ class AuthControllerIT {
     @Autowired
     private ObjectMapper mapper;
 
+    @MockitoBean
+    private GoogleIdentityService googleIdentityService;
+
     @Test
-    void loginReturnsCookies() throws Exception {
-        given(authService.login("user", "pass")).willReturn(List.of("XWiki.XWikiUsers"));
-        LoginRequest req = new LoginRequest("user", "pass");
-        mockMvc.perform(post("/auth/login")
+    void googleLoginReturnsApplicationTokensForAllowlistedIdentity() throws Exception {
+        given(googleIdentityService.verify("provider-id-token"))
+                .willReturn(new GoogleIdentityService.VerifiedIdentity("owner@example.test", List.of("ROLE_ADMIN")));
+        GoogleLoginRequest req = new GoogleLoginRequest("provider-id-token");
+        mockMvc.perform(post("/auth/google")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsBytes(req))
+                        .header("X-Shared-Token", "CHANGE_ME_SHARED_TOKEN")
                         .param("domainLanguage", "FR"))
                 .andExpect(status().isOk())
-                .andExpect(cookie().exists("access-token"))
-                .andExpect(cookie().exists("refresh-token"));
+                .andExpect(jsonPath("$.accessToken").isNotEmpty())
+                .andExpect(jsonPath("$.refreshToken").isNotEmpty());
     }
 
     @Test
     void refreshIssuesNewAccessToken() throws Exception {
-        var auth = new UsernamePasswordAuthenticationToken("user", "N/A");
+        given(googleIdentityService.identityFor("user@example.test"))
+                .willReturn(new GoogleIdentityService.VerifiedIdentity("user@example.test", List.of("ROLE_EDITOR")));
+        var auth = new UsernamePasswordAuthenticationToken("user@example.test", "N/A");
         String refresh = jwtService.generateRefreshToken(auth);
         mockMvc.perform(post("/auth/refresh")
-                        .cookie(new jakarta.servlet.http.Cookie("refresh-token", refresh))
+                        .cookie(new jakarta.servlet.http.Cookie("refresh_token", refresh))
+                        .header("X-Shared-Token", "CHANGE_ME_SHARED_TOKEN")
                         .param("domainLanguage", "FR"))
                 .andExpect(status().isOk())
-                .andExpect(cookie().exists("access-token"));
+                .andExpect(jsonPath("$.accessToken").isNotEmpty());
     }
 
     @Test
@@ -99,6 +106,7 @@ class AuthControllerIT {
         mockMvc.perform(post("/auth/logout")
                         .cookie(new jakarta.servlet.http.Cookie("access-token", "access"),
                                 new jakarta.servlet.http.Cookie("refresh-token", "refresh"))
+                        .header("X-Shared-Token", "CHANGE_ME_SHARED_TOKEN")
                         .param("domainLanguage", "FR"))
                 .andExpect(status().isOk())
                 .andExpect(cookie().value("access-token", ""))

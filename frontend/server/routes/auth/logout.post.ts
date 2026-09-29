@@ -25,9 +25,10 @@ export default defineEventHandler(async (event: H3Event) => {
 
     await $fetch(`${config.apiUrl}/auth/logout`, {
       method: 'POST',
-      headers: cookieHeader.length
-        ? { cookie: cookieHeader.join('; ') }
-        : undefined,
+      headers: {
+        ...(cookieHeader.length ? { cookie: cookieHeader.join('; ') } : {}),
+        'X-Shared-Token': config.machineToken,
+      },
     })
   } catch (err) {
     clearAuthCookies(event, config.public)

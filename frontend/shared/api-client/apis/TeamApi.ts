@@ -31,7 +31,7 @@ export class TeamApi extends runtime.BaseAPI {
   async teamRaw(
     requestParameters: TeamRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<TeamProperties>> {
     if (requestParameters['domainLanguage'] == null) {
       throw new runtime.RequiredError(
         'domainLanguage',
@@ -77,11 +77,9 @@ export class TeamApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      TeamPropertiesFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -91,7 +89,7 @@ export class TeamApi extends runtime.BaseAPI {
   async team(
     requestParameters: TeamRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<TeamProperties> {
     const response = await this.teamRaw(requestParameters, initOverrides)
     return await response.value()
   }

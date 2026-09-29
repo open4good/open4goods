@@ -48,7 +48,7 @@ export interface GetTreeRequest {
 export interface SearchRequest {
   domainLanguage: SearchDomainLanguageEnum
   query?: string
-  categories?: string
+  categories?: Array<string>
   pathPrefix?: string
   searchContent?: boolean
   includeContent?: boolean
@@ -65,7 +65,7 @@ export class ExposedDocsApi extends runtime.BaseAPI {
   async getContentRaw(
     requestParameters: GetContentRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<ExposedDocsContentDto>> {
     if (requestParameters['categoryId'] == null) {
       throw new runtime.RequiredError(
         'categoryId',
@@ -124,11 +124,9 @@ export class ExposedDocsApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      ExposedDocsContentDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -138,7 +136,7 @@ export class ExposedDocsApi extends runtime.BaseAPI {
   async getContent(
     requestParameters: GetContentRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<ExposedDocsContentDto> {
     const response = await this.getContentRaw(requestParameters, initOverrides)
     return await response.value()
   }
@@ -150,7 +148,7 @@ export class ExposedDocsApi extends runtime.BaseAPI {
   async getOverviewRaw(
     requestParameters: GetOverviewRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<ExposedDocsOverviewDto>> {
     if (requestParameters['domainLanguage'] == null) {
       throw new runtime.RequiredError(
         'domainLanguage',
@@ -187,11 +185,9 @@ export class ExposedDocsApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      ExposedDocsOverviewDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -201,7 +197,7 @@ export class ExposedDocsApi extends runtime.BaseAPI {
   async getOverview(
     requestParameters: GetOverviewRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<ExposedDocsOverviewDto> {
     const response = await this.getOverviewRaw(requestParameters, initOverrides)
     return await response.value()
   }
@@ -213,7 +209,7 @@ export class ExposedDocsApi extends runtime.BaseAPI {
   async getTreeRaw(
     requestParameters: GetTreeRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<ExposedDocsTreeNodeDto>> {
     if (requestParameters['categoryId'] == null) {
       throw new runtime.RequiredError(
         'categoryId',
@@ -261,11 +257,9 @@ export class ExposedDocsApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      ExposedDocsTreeNodeDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -275,7 +269,7 @@ export class ExposedDocsApi extends runtime.BaseAPI {
   async getTree(
     requestParameters: GetTreeRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<ExposedDocsTreeNodeDto> {
     const response = await this.getTreeRaw(requestParameters, initOverrides)
     return await response.value()
   }
@@ -287,7 +281,7 @@ export class ExposedDocsApi extends runtime.BaseAPI {
   async searchRaw(
     requestParameters: SearchRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<string>> {
+  ): Promise<runtime.ApiResponse<ExposedDocsSearchResultDto<any>>> {
     if (requestParameters['domainLanguage'] == null) {
       throw new runtime.RequiredError(
         'domainLanguage',
@@ -344,11 +338,7 @@ export class ExposedDocsApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<string>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse<any>(response)
   }
 
   /**
@@ -358,7 +348,7 @@ export class ExposedDocsApi extends runtime.BaseAPI {
   async search(
     requestParameters: SearchRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<string> {
+  ): Promise<ExposedDocsSearchResultDto<any>> {
     const response = await this.searchRaw(requestParameters, initOverrides)
     return await response.value()
   }

@@ -13,9 +13,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -51,16 +49,13 @@ public class WebSecurityConfig {
 
     private final SecurityProperties securityProperties;
     private final ExposedDocsProperties exposedDocsProperties;
-    private final AuthenticationProvider authenticationProvider;
     private final ActuatorMonitorCredentials actuatorMonitorCredentials;
 
     public WebSecurityConfig(SecurityProperties securityProperties,
                              ExposedDocsProperties exposedDocsProperties,
-                             AuthenticationProvider authenticationProvider,
                              ActuatorMonitorCredentials actuatorMonitorCredentials) {
         this.securityProperties = securityProperties;
         this.exposedDocsProperties = exposedDocsProperties;
-        this.authenticationProvider = authenticationProvider;
         this.actuatorMonitorCredentials = actuatorMonitorCredentials;
     }
 
@@ -91,20 +86,18 @@ public class WebSecurityConfig {
             .setSharedObject(LocaleResolver.class, localeResolver);
 
         if (securityProperties.isEnabled()) {
-            http.authenticationProvider(new ActuatorMonitorAuthenticationProvider(actuatorMonitorCredentials))
-                .authenticationProvider(authenticationProvider);
             http.authorizeHttpRequests(auth -> {
                     if (exposedDocsProperties.isPublicAccess()) {
                         auth.requestMatchers("/exposed/**").permitAll();
                     }
-                    auth.requestMatchers("/", "/v3/api-docs/front",  "/auth/**").permitAll()
+                    auth.requestMatchers("/", "/v3/api-docs/front").permitAll()
+                            // OAuth provider tokens may arrive only through the Nuxt BFF.
+                            .requestMatchers("/auth/**").hasAuthority(RolesConstants.ROLE_FRONTEND)
                             .requestMatchers("/actuator", "/actuator/**")
-                            .hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
+                            .hasAuthority(RolesConstants.ACTUATOR_ADMIN_ROLE)
                             .anyRequest().authenticated();
                 })
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)))
-                .formLogin(Customizer.withDefaults())
-                .httpBasic(Customizer.withDefaults())
                 .addFilterBefore(sharedTokenFilter, BearerTokenAuthenticationFilter.class);
         } else {
             http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
@@ -122,14 +115,6 @@ public class WebSecurityConfig {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
         return converter;
-    }
-
-    @Bean
-    AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
-        builder.authenticationProvider(new ActuatorMonitorAuthenticationProvider(actuatorMonitorCredentials));
-        builder.authenticationProvider(authenticationProvider);
-        return builder.build();
     }
 
     @Bean

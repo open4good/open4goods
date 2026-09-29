@@ -38,6 +38,11 @@ front:
     cors-allowed-hosts: ${FRONT_SECURITY_CORS_ALLOWED_HOSTS:http://localhost:8082,http://localhost:3000}
     jwt-secret: ${FRONT_SECURITY_JWT_SECRET:CHANGE_ME_TO_A_LONG_SECRET_VALUE_32_BYTES_MIN}
     shared-token: ${FRONT_SECURITY_SHARED_TOKEN:CHANGE_ME_SHARED_TOKEN}
+    refresh-token-cookie-name: ${FRONT_SECURITY_REFRESH_TOKEN_COOKIE_NAME:refresh_token}
+    google:
+      issuer: ${FRONT_SECURITY_GOOGLE_ISSUER:https://accounts.google.com}
+      audience: ${FRONT_SECURITY_GOOGLE_AUDIENCE:}
+      allowed-roles: []
   exposed-docs:
     base-url: ${FRONT_EXPOSED_DOCS_BASE_URL:http://localhost:8086}
     public-access: ${FRONT_EXPOSED_DOCS_PUBLIC_ACCESS:true}

@@ -37,7 +37,7 @@ export class ContactApi extends runtime.BaseAPI {
   async submitRaw(
     requestParameters: SubmitRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<ContactResponseDto>> {
     if (requestParameters['domainLanguage'] == null) {
       throw new runtime.RequiredError(
         'domainLanguage',
@@ -93,11 +93,9 @@ export class ContactApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      ContactResponseDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -107,7 +105,7 @@ export class ContactApi extends runtime.BaseAPI {
   async submit(
     requestParameters: SubmitRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<ContactResponseDto> {
     const response = await this.submitRaw(requestParameters, initOverrides)
     return await response.value()
   }

@@ -29,6 +29,23 @@ to loopback Elasticsearch, Redis and PostgreSQL. Module-specific local detail:
 All packaged defaults hold no secrets. DEVELOPMENT loads only the `local` profile; `devsec` is not
 part of the launcher and local runbooks do not use remote Elasticsearch credentials.
 
+## Google sign-in configuration
+
+The consumer frontend uses a Nuxt server-side Authorization Code with PKCE flow. Its Google client
+registration and the front-api identity verifier use separate private environment inputs:
+`GOOGLE_OIDC_CLIENT_ID`, `GOOGLE_OIDC_CLIENT_SECRET`, `GOOGLE_OIDC_REDIRECT_URI`,
+`FRONT_SECURITY_GOOGLE_AUDIENCE`, and indexed
+`FRONT_SECURITY_GOOGLE_ALLOWED_ROLES_<n>_{EMAIL,ROLES}` values. The audience is the same client ID
+and each role entry assigns only `ROLE_ADMIN` and/or `ROLE_EDITOR` to one verified email.
+`FRONT_SECURITY_REFRESH_TOKEN_COOKIE_NAME` matches the Nuxt `REFRESH_COOKIE_NAME` value and defaults
+to `refresh_token` in both applications.
+
+Owner action for a local loopback test: register the exact callback
+`http://localhost:3000/auth/google/callback`, complete the consent-screen setup for the approved
+test identity, and add the values to ignored local inputs. Beta and production callback URIs and
+allowlists live in owner-provisioned environment configuration. Without a client registration or
+allowlist, sign-in rejects the request and has no password alternative.
+
 ## Where configuration lives today
 
 Three tiers, by how sensitive and how environment-specific a value is:

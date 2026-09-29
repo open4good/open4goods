@@ -1,4 +1,7 @@
 {
+  "auth": {
+    "loginWithGoogle": "Continuer avec Google"
+  },
   "buyingGuide": {
     "widget": {
       "empty": "Aucun produit à afficher pour le moment.",

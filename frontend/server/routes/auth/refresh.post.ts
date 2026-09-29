@@ -27,6 +27,7 @@ export default defineEventHandler(async (event: H3Event) => {
         method: 'POST',
         headers: {
           cookie: `${config.public.refreshCookieName}=${refreshToken}`,
+          'X-Shared-Token': config.machineToken,
         },
       }
     )

@@ -44,7 +44,7 @@ export class OpenDataApi extends runtime.BaseAPI {
   async gtinRaw(
     requestParameters: GtinRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<OpenDataDatasetDto>> {
     if (requestParameters['domainLanguage'] == null) {
       throw new runtime.RequiredError(
         'domainLanguage',
@@ -90,11 +90,9 @@ export class OpenDataApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      OpenDataDatasetDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -104,7 +102,7 @@ export class OpenDataApi extends runtime.BaseAPI {
   async gtin(
     requestParameters: GtinRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<OpenDataDatasetDto> {
     const response = await this.gtinRaw(requestParameters, initOverrides)
     return await response.value()
   }
@@ -116,7 +114,7 @@ export class OpenDataApi extends runtime.BaseAPI {
   async isbnRaw(
     requestParameters: IsbnRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<OpenDataDatasetDto>> {
     if (requestParameters['domainLanguage'] == null) {
       throw new runtime.RequiredError(
         'domainLanguage',
@@ -162,11 +160,9 @@ export class OpenDataApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      OpenDataDatasetDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -176,7 +172,7 @@ export class OpenDataApi extends runtime.BaseAPI {
   async isbn(
     requestParameters: IsbnRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<OpenDataDatasetDto> {
     const response = await this.isbnRaw(requestParameters, initOverrides)
     return await response.value()
   }
@@ -188,7 +184,7 @@ export class OpenDataApi extends runtime.BaseAPI {
   async overviewRaw(
     requestParameters: OverviewRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<OpenDataOverviewDto>> {
     if (requestParameters['domainLanguage'] == null) {
       throw new runtime.RequiredError(
         'domainLanguage',
@@ -234,11 +230,9 @@ export class OpenDataApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      OpenDataOverviewDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -248,7 +242,7 @@ export class OpenDataApi extends runtime.BaseAPI {
   async overview(
     requestParameters: OverviewRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<OpenDataOverviewDto> {
     const response = await this.overviewRaw(requestParameters, initOverrides)
     return await response.value()
   }

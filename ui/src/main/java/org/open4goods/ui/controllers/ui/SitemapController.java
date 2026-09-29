@@ -47,7 +47,7 @@ public class SitemapController {
 	 * @throws ResourceNotFoundException
 	 */
 	@GetMapping("/sitemap")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_XWIKI_ALL+"')")
+	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
 	public ModelAndView sitemap(final HttpServletRequest request) throws ResourceNotFoundException {
 
 		sitemapService.generate();

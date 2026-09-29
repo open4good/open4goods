@@ -49,6 +49,39 @@ public class SecurityProperties {
      */
     private Duration refreshTokenExpiry = Duration.ofDays(7);
 
+    /** Google OpenID Connect verification and explicit user-role assignments. */
+    private Google google = new Google();
+
+    /**
+     * Google identity configuration. This is intentionally empty by default so
+     * local startup has no dependency on a remote identity provider.
+     */
+    public static class Google {
+
+        private String issuer = "https://accounts.google.com";
+        private String audience;
+        private List<EmailRoles> allowedRoles = new ArrayList<>();
+
+        public String getIssuer() { return issuer; }
+        public void setIssuer(String issuer) { this.issuer = issuer; }
+        public String getAudience() { return audience; }
+        public void setAudience(String audience) { this.audience = audience; }
+        public List<EmailRoles> getAllowedRoles() { return allowedRoles; }
+        public void setAllowedRoles(List<EmailRoles> allowedRoles) { this.allowedRoles = allowedRoles; }
+    }
+
+    /** Explicit environment-held role assignment for one verified email. */
+    public static class EmailRoles {
+
+        private String email;
+        private List<String> roles = new ArrayList<>();
+
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
+        public List<String> getRoles() { return roles; }
+        public void setRoles(List<String> roles) { this.roles = roles; }
+    }
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -96,4 +129,7 @@ public class SecurityProperties {
     public void setRefreshTokenExpiry(Duration refreshTokenExpiry) {
         this.refreshTokenExpiry = refreshTokenExpiry;
     }
+
+    public Google getGoogle() { return google; }
+    public void setGoogle(Google google) { this.google = google; }
 }

@@ -89,7 +89,7 @@ export class StatsApi extends runtime.BaseAPI {
   async categoriesRaw(
     requestParameters: CategoriesRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<CategoriesStatsDto>> {
     if (requestParameters['domainLanguage'] == null) {
       throw new runtime.RequiredError(
         'domainLanguage',
@@ -135,11 +135,9 @@ export class StatsApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      CategoriesStatsDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -149,7 +147,7 @@ export class StatsApi extends runtime.BaseAPI {
   async categories(
     requestParameters: CategoriesRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<CategoriesStatsDto> {
     const response = await this.categoriesRaw(requestParameters, initOverrides)
     return await response.value()
   }
@@ -161,7 +159,7 @@ export class StatsApi extends runtime.BaseAPI {
   async categoriesScoreRaw(
     requestParameters: CategoriesScoreRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<CategoriesScoreStatsDto>> {
     if (requestParameters['scoreName'] == null) {
       throw new runtime.RequiredError(
         'scoreName',
@@ -218,11 +216,9 @@ export class StatsApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      CategoriesScoreStatsDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -232,7 +228,7 @@ export class StatsApi extends runtime.BaseAPI {
   async categoriesScore(
     requestParameters: CategoriesScoreRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<CategoriesScoreStatsDto> {
     const response = await this.categoriesScoreRaw(
       requestParameters,
       initOverrides
@@ -247,7 +243,7 @@ export class StatsApi extends runtime.BaseAPI {
   async categoriesScoresRaw(
     requestParameters: CategoriesScoresRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<CategoriesScoresStatsDto>> {
     if (requestParameters['domainLanguage'] == null) {
       throw new runtime.RequiredError(
         'domainLanguage',
@@ -293,11 +289,9 @@ export class StatsApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      CategoriesScoresStatsDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -307,7 +301,7 @@ export class StatsApi extends runtime.BaseAPI {
   async categoriesScores(
     requestParameters: CategoriesScoresRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<CategoriesScoresStatsDto> {
     const response = await this.categoriesScoresRaw(
       requestParameters,
       initOverrides
@@ -322,7 +316,7 @@ export class StatsApi extends runtime.BaseAPI {
   async chartQueryRaw(
     requestParameters: ChartQueryRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<DatavizChartQueryResponseDto>> {
     if (requestParameters['verticalId'] == null) {
       throw new runtime.RequiredError(
         'verticalId',
@@ -391,11 +385,9 @@ export class StatsApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      DatavizChartQueryResponseDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -405,7 +397,7 @@ export class StatsApi extends runtime.BaseAPI {
   async chartQuery(
     requestParameters: ChartQueryRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<DatavizChartQueryResponseDto> {
     const response = await this.chartQueryRaw(requestParameters, initOverrides)
     return await response.value()
   }
@@ -417,7 +409,7 @@ export class StatsApi extends runtime.BaseAPI {
   async datavizHeroRaw(
     requestParameters: DatavizHeroRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<DatavizHeroStatsDto>> {
     if (requestParameters['verticalId'] == null) {
       throw new runtime.RequiredError(
         'verticalId',
@@ -474,11 +466,9 @@ export class StatsApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      DatavizHeroStatsDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -488,7 +478,7 @@ export class StatsApi extends runtime.BaseAPI {
   async datavizHero(
     requestParameters: DatavizHeroRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<DatavizHeroStatsDto> {
     const response = await this.datavizHeroRaw(requestParameters, initOverrides)
     return await response.value()
   }
@@ -500,7 +490,7 @@ export class StatsApi extends runtime.BaseAPI {
   async datavizPlanRaw(
     requestParameters: DatavizPlanRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<VerticalDatavizPlanDto>> {
     if (requestParameters['verticalId'] == null) {
       throw new runtime.RequiredError(
         'verticalId',
@@ -557,11 +547,9 @@ export class StatsApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      VerticalDatavizPlanDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -571,7 +559,7 @@ export class StatsApi extends runtime.BaseAPI {
   async datavizPlan(
     requestParameters: DatavizPlanRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<VerticalDatavizPlanDto> {
     const response = await this.datavizPlanRaw(requestParameters, initOverrides)
     return await response.value()
   }
@@ -583,7 +571,7 @@ export class StatsApi extends runtime.BaseAPI {
   async randomRaw(
     requestParameters: RandomRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<ProductDto>> {
     if (requestParameters['domainLanguage'] == null) {
       throw new runtime.RequiredError(
         'domainLanguage',
@@ -641,11 +629,9 @@ export class StatsApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      ProductDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -655,7 +641,7 @@ export class StatsApi extends runtime.BaseAPI {
   async random(
     requestParameters: RandomRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<ProductDto> {
     const response = await this.randomRaw(requestParameters, initOverrides)
     return await response.value()
   }

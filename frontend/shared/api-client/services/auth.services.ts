@@ -41,19 +41,6 @@ const decodeAuthStateFromToken = (
   }
 }
 
-const login = async (username: string, password: string) => {
-  const tokens = await $fetch<AuthTokens>('/auth/login', {
-    method: 'POST',
-    body: { username, password },
-    credentials: 'include',
-  })
-
-  return {
-    tokens,
-    authState: decodeAuthStateFromToken(tokens.accessToken),
-  }
-}
-
 /**
  * Request a new access token using the refresh token cookie.
  */
@@ -76,7 +63,6 @@ const logout = async () =>
 
 export const authService = {
   decodeAuthStateFromToken,
-  login,
   refresh,
   logout,
 }

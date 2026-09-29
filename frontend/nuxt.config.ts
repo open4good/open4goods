@@ -557,6 +557,13 @@ export default defineNuxtConfig({
     // NUXT_MACHINE_TOKEN is the canonical path on prod, but we keep MACHINE_TOKEN as fallback
     machineToken: process.env.NUXT_MACHINE_TOKEN || process.env.MACHINE_TOKEN || 'CHANGE_ME_SHARED_TOKEN',
     apiUrl: process.env.API_URL || 'http://localhost:8082',
+    googleOidc: {
+      clientId: process.env.GOOGLE_OIDC_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_OIDC_CLIENT_SECRET || '',
+      redirectUri:
+        process.env.GOOGLE_OIDC_REDIRECT_URI ||
+        'http://localhost:3000/auth/google/callback',
+    },
     // Runtime directory holding the weekly Metriks reports (deployed by open4goods-config).
     // Falls back to the bundled public dir during local dev when unset.
     metriksDataDir: process.env.METRIKS_DATA_DIR || '',
@@ -590,7 +597,7 @@ export default defineNuxtConfig({
       // Base URL of the backend API
       // Roles allowed to edit content blocks (defaults to backend role names)
       editRoles: (
-        process.env.EDITOR_ROLES || 'ROLE_SITEEDITOR,XWIKIADMINGROUP'
+        process.env.EDITOR_ROLES || 'ROLE_EDITOR,ROLE_ADMIN'
       ).split(','),
       hcaptchaSiteKey: process.env.HCAPTCHA_SITE_KEY || '',
       staticServer: process.env.STATIC_SERVER || 'https://static.nudger.fr',

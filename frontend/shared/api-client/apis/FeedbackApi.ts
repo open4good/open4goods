@@ -73,7 +73,7 @@ export class FeedbackApi extends runtime.BaseAPI {
   async canVoteRaw(
     requestParameters: CanVoteRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<FeedbackVoteEligibilityDto>> {
     if (requestParameters['domainLanguage'] == null) {
       throw new runtime.RequiredError(
         'domainLanguage',
@@ -119,11 +119,9 @@ export class FeedbackApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      FeedbackVoteEligibilityDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -133,7 +131,7 @@ export class FeedbackApi extends runtime.BaseAPI {
   async canVote(
     requestParameters: CanVoteRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<FeedbackVoteEligibilityDto> {
     const response = await this.canVoteRaw(requestParameters, initOverrides)
     return await response.value()
   }
@@ -219,7 +217,7 @@ export class FeedbackApi extends runtime.BaseAPI {
   async remainingVotesRaw(
     requestParameters: RemainingVotesRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<FeedbackRemainingVotesDto>> {
     if (requestParameters['domainLanguage'] == null) {
       throw new runtime.RequiredError(
         'domainLanguage',
@@ -265,11 +263,9 @@ export class FeedbackApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      FeedbackRemainingVotesDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -279,7 +275,7 @@ export class FeedbackApi extends runtime.BaseAPI {
   async remainingVotes(
     requestParameters: RemainingVotesRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<FeedbackRemainingVotesDto> {
     const response = await this.remainingVotesRaw(
       requestParameters,
       initOverrides
@@ -294,7 +290,7 @@ export class FeedbackApi extends runtime.BaseAPI {
   async submitFeedbackRaw(
     requestParameters: SubmitFeedbackRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<FeedbackSubmissionResponseDto>> {
     if (requestParameters['domainLanguage'] == null) {
       throw new runtime.RequiredError(
         'domainLanguage',
@@ -352,11 +348,9 @@ export class FeedbackApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      FeedbackSubmissionResponseDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -366,7 +360,7 @@ export class FeedbackApi extends runtime.BaseAPI {
   async submitFeedback(
     requestParameters: SubmitFeedbackRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<FeedbackSubmissionResponseDto> {
     const response = await this.submitFeedbackRaw(
       requestParameters,
       initOverrides
@@ -381,7 +375,7 @@ export class FeedbackApi extends runtime.BaseAPI {
   async voteRaw(
     requestParameters: VoteRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<FeedbackVoteResponseDto>> {
     if (requestParameters['issueId'] == null) {
       throw new runtime.RequiredError(
         'issueId',
@@ -438,11 +432,9 @@ export class FeedbackApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      FeedbackVoteResponseDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -452,7 +444,7 @@ export class FeedbackApi extends runtime.BaseAPI {
   async vote(
     requestParameters: VoteRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<FeedbackVoteResponseDto> {
     const response = await this.voteRaw(requestParameters, initOverrides)
     return await response.value()
   }

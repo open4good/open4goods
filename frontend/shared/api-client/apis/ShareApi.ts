@@ -45,7 +45,7 @@ export class ShareApi extends runtime.BaseAPI {
   async createResolutionRaw(
     requestParameters: CreateResolutionRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<ShareResolutionResponseDto>> {
     if (requestParameters['domainLanguage'] == null) {
       throw new runtime.RequiredError(
         'domainLanguage',
@@ -103,11 +103,9 @@ export class ShareApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      ShareResolutionResponseDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -117,7 +115,7 @@ export class ShareApi extends runtime.BaseAPI {
   async createResolution(
     requestParameters: CreateResolutionRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<ShareResolutionResponseDto> {
     const response = await this.createResolutionRaw(
       requestParameters,
       initOverrides
@@ -132,7 +130,7 @@ export class ShareApi extends runtime.BaseAPI {
   async getResolutionRaw(
     requestParameters: GetResolutionRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<ShareResolutionResponseDto>> {
     if (requestParameters['token'] == null) {
       throw new runtime.RequiredError(
         'token',
@@ -189,11 +187,9 @@ export class ShareApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      ShareResolutionResponseDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -203,7 +199,7 @@ export class ShareApi extends runtime.BaseAPI {
   async getResolution(
     requestParameters: GetResolutionRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<ShareResolutionResponseDto> {
     const response = await this.getResolutionRaw(
       requestParameters,
       initOverrides

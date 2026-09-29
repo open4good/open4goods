@@ -162,7 +162,7 @@ public record OfferDto(
 
 ## 7. Validation checklist
 1. `mvn spring-boot:run`
-2. Open `/swagger-ui.html` (requires XWiki credentials via Basic auth)
+2. Open `/swagger-ui.html` and exercise protected endpoints with an application JWT
 3. Verify:  
    - all endpoints are listed  
    - each DTO field has description & example  

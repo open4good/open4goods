@@ -4,7 +4,6 @@ import java.util.Arrays;
 
 import org.open4goods.model.RolesConstants;
 import org.open4goods.ui.config.yml.UiConfig;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -33,11 +32,13 @@ public class WebSecurityConfig {
 
 	private final ActuatorMonitorCredentials actuatorMonitorCredentials;
 
-	private @Autowired UiConfig config;
+	private final UiConfig config;
 
-	public WebSecurityConfig(AuthenticationProvider authProvider, ActuatorMonitorCredentials actuatorMonitorCredentials) {
+	public WebSecurityConfig(AuthenticationProvider authProvider, ActuatorMonitorCredentials actuatorMonitorCredentials,
+			UiConfig config) {
 		this.authProvider = authProvider;
 		this.actuatorMonitorCredentials = actuatorMonitorCredentials;
+		this.config = config;
 	}
 
 	@Bean
@@ -53,14 +54,14 @@ public class WebSecurityConfig {
 
 		if (config.getWebConfig().getWebAuthentication()) {
 			http.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/actuator").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
-				.requestMatchers("/actuator/*").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
+				.requestMatchers("/actuator").hasAuthority(RolesConstants.ACTUATOR_ADMIN_ROLE)
+				.requestMatchers("/actuator/*").hasAuthority(RolesConstants.ACTUATOR_ADMIN_ROLE)
 				.requestMatchers("/").denyAll()
 				.anyRequest().authenticated());
 		} else {
 			http.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/actuator").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
-				.requestMatchers("/actuator/*").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
+				.requestMatchers("/actuator").hasAuthority(RolesConstants.ACTUATOR_ADMIN_ROLE)
+				.requestMatchers("/actuator/*").hasAuthority(RolesConstants.ACTUATOR_ADMIN_ROLE)
 				.requestMatchers("/").denyAll()
 				.anyRequest().permitAll());
 		}

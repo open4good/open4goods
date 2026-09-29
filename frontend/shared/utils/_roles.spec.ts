@@ -14,23 +14,23 @@ describe('hasAdminAccess', () => {
     ).toBe(true)
   })
 
-  it('allows XWIKIADMINGROUP by default', () => {
-    expect(hasAdminAccess(['XWIKIADMINGROUP'])).toBe(true)
-    expect(hasAdminAccess(['xwikiadmingroup'])).toBe(true)
+  it('allows ROLE_ADMIN by default', () => {
+    expect(hasAdminAccess(['ROLE_ADMIN'])).toBe(true)
+    expect(hasAdminAccess(['role_admin'])).toBe(true)
   })
 
   it('ignores roles without admin privileges', () => {
     expect(
-      hasAdminAccess(['user'], { allowedRoles: ['ROLE_SITEEDITOR'] })
+      hasAdminAccess(['user'], { allowedRoles: ['ROLE_EDITOR'] })
     ).toBe(false)
     expect(
-      hasAdminAccess(['domain'], { allowedRoles: ['ROLE_SITEEDITOR'] })
+      hasAdminAccess(['domain'], { allowedRoles: ['ROLE_EDITOR'] })
     ).toBe(false)
   })
 
   it('rejects users without configured admin roles', () => {
     expect(
-      hasAdminAccess(['content-editor'], { allowedRoles: ['ROLE_SITEEDITOR'] })
+      hasAdminAccess(['content-editor'], { allowedRoles: ['ROLE_EDITOR'] })
     ).toBe(false)
   })
 })

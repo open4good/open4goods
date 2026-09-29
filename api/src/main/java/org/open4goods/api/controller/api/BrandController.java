@@ -32,7 +32,7 @@ public class BrandController {
     }
 
     @GetMapping("/brands/resolve")
-    @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_XWIKI_ALL + "')")
+    @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
     @Operation(
             summary = "Resolve a brand by raw name",
             description = "Looks up the internal Brand record that matches the supplied raw name string. "
@@ -49,7 +49,7 @@ public class BrandController {
     }
 
     @GetMapping("/brands/stats/companies/missing")
-    @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_XWIKI_ALL + "')")
+    @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
     @Operation(
             summary = "Unresolved brand names sorted by miss count",
             description = "Returns the list of raw brand strings that were looked up but did not match any known brand, "
@@ -64,7 +64,7 @@ public class BrandController {
     }
 
     @GetMapping("/brands/stats/companies/missing/counts")
-    @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_XWIKI_ALL + "')")
+    @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
     @Operation(
             summary = "Unresolved brand names with occurrence counts",
             description = "Returns a map of unresolved raw brand name to miss count. "
@@ -76,7 +76,7 @@ public class BrandController {
     }
 
     @GetMapping("/brands/suggestions")
-    @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_XWIKI_ALL + "')")
+    @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
     @Operation(
             summary = "AI-generated brand creation suggestions",
             description = "Inspects the current miss counter and other heuristics to propose new Brand records "

@@ -147,7 +147,7 @@ Every downstream call should be wrapped in a thin service that:
 - Admin-only UI such as the category filters rely on `hasAdminAccess` from
   `shared/utils/_roles.ts`.
 - `hasAdminAccess` compares the authenticated user's roles with
-  `config.public.editRoles` (defaults to `ROLE_SITEEDITOR,XWIKIADMINGROUP`).
+  `config.public.editRoles` (defaults to `ROLE_EDITOR,ROLE_ADMIN`).
 - Update the `EDITOR_ROLES` environment variable if new roles must be allowed;
   avoid hardcoding role names anywhere else.
 

@@ -428,6 +428,33 @@
       "defaultValue": true
     },
     {
+      "name": "front.security.google.audience",
+      "type": "java.lang.String",
+      "description": "Google OpenID Connect client ID accepted as an ID-token audience."
+    },
+    {
+      "name": "front.security.google.issuer",
+      "type": "java.lang.String",
+      "description": "Google OpenID Connect issuer used to discover signature keys.",
+      "defaultValue": "https://accounts.google.com"
+    },
+    {
+      "name": "front.security.google.allowed-roles[].email",
+      "type": "java.lang.String",
+      "description": "Verified email assigned application roles in this environment."
+    },
+    {
+      "name": "front.security.google.allowed-roles[].roles",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Explicit application roles assigned to the configured email."
+    },
+    {
+      "name": "front.security.refresh-token-cookie-name",
+      "type": "java.lang.String",
+      "description": "Refresh-token cookie name shared with the Nuxt BFF.",
+      "defaultValue": "refresh_token"
+    },
+    {
       "name": "front.security.jwt-secret",
       "type": "java.lang.String",
       "description": "Secret key used to sign JWT tokens."

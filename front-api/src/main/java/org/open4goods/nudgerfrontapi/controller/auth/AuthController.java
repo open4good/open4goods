@@ -3,16 +3,15 @@ package org.open4goods.nudgerfrontapi.controller.auth;
 import java.time.Duration;
 
 import org.open4goods.nudgerfrontapi.dto.auth.AuthTokensDto;
-import org.open4goods.nudgerfrontapi.dto.auth.LoginRequest;
+import org.open4goods.nudgerfrontapi.dto.auth.GoogleLoginRequest;
 import org.open4goods.nudgerfrontapi.dto.auth.LogoutResponse;
+import org.open4goods.nudgerfrontapi.service.auth.GoogleIdentityService;
 import org.open4goods.nudgerfrontapi.service.auth.JwtService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,21 +32,21 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Authentication", description = "Login and refresh tokens")
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final GoogleIdentityService googleIdentityService;
 
-    public AuthController(AuthenticationManager authenticationManager, JwtService jwtService) {
-        this.authenticationManager = authenticationManager;
+    public AuthController(JwtService jwtService, GoogleIdentityService googleIdentityService) {
         this.jwtService = jwtService;
+        this.googleIdentityService = googleIdentityService;
     }
 
-    @PostMapping("/login")
+    @PostMapping("/google")
     @Operation(
-            summary = "Login with XWiki credentials",
-            description = "Validate credentials against XWiki and return JWT tokens as cookies.",
+            summary = "Create an application session from a verified Google identity",
+            description = "Accept an ID token only from the Nuxt BFF and return application JWTs.",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
-                    content = @Content(schema = @Schema(implementation = LoginRequest.class))
+                    content = @Content(schema = @Schema(implementation = GoogleLoginRequest.class))
             ),
 
             responses = {
@@ -59,17 +58,18 @@ public class AuthController {
                     @ApiResponse(responseCode = "401", description = "Authentication failed")
             }
     )
-    public ResponseEntity<AuthTokensDto> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<AuthTokensDto> googleLogin(@RequestBody GoogleLoginRequest request) {
         try {
-            Authentication auth = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.username(), request.password()));
+            GoogleIdentityService.VerifiedIdentity identity = googleIdentityService.verify(request.idToken());
+            Authentication auth = new UsernamePasswordAuthenticationToken(identity.email(), "N/A",
+                    identity.roles().stream().map(org.springframework.security.core.authority.SimpleGrantedAuthority::new).toList());
             String access = jwtService.generateAccessToken(auth);
             String refresh = jwtService.generateRefreshToken(auth);
 
 
             return ResponseEntity.ok()
                     .body(new AuthTokensDto(access, refresh));
-        } catch (AuthenticationException ex) {
+        } catch (Exception ex) {
             return ResponseEntity.status(401).build();
         }
     }
@@ -88,10 +88,12 @@ public class AuthController {
                     @ApiResponse(responseCode = "401", description = "Invalid refresh token")
             }
     )
-    public ResponseEntity<AuthTokensDto> refresh(@CookieValue("refresh-token") String refreshToken                                                ) {
+    public ResponseEntity<AuthTokensDto> refresh(
+            @CookieValue("${front.security.refresh-token-cookie-name:refresh_token}") String refreshToken) {
         try {
-            String user = jwtService.validateRefreshToken(refreshToken);
-            Authentication auth = new UsernamePasswordAuthenticationToken(user, "N/A");
+            GoogleIdentityService.VerifiedIdentity identity = googleIdentityService.identityFor(jwtService.validateRefreshToken(refreshToken));
+            Authentication auth = new UsernamePasswordAuthenticationToken(identity.email(), "N/A",
+                    identity.roles().stream().map(org.springframework.security.core.authority.SimpleGrantedAuthority::new).toList());
             String access = jwtService.generateAccessToken(auth);
             String newRefresh = jwtService.generateRefreshToken(auth);
 

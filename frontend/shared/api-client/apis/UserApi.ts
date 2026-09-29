@@ -32,7 +32,7 @@ export class UserApi extends runtime.BaseAPI {
   async geoloc1Raw(
     requestParameters: Geoloc1Request,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<UserGeoloc>> {
     if (requestParameters['domainLanguage'] == null) {
       throw new runtime.RequiredError(
         'domainLanguage',
@@ -82,11 +82,9 @@ export class UserApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      UserGeolocFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -96,7 +94,7 @@ export class UserApi extends runtime.BaseAPI {
   async geoloc1(
     requestParameters: Geoloc1Request,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<UserGeoloc> {
     const response = await this.geoloc1Raw(requestParameters, initOverrides)
     return await response.value()
   }

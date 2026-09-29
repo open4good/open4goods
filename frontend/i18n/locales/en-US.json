@@ -1,4 +1,7 @@
 {
+  "auth": {
+    "loginWithGoogle": "Continue with Google"
+  },
   "buyingGuide": {
     "widget": {
       "empty": "No product to display right now.",

@@ -128,7 +128,7 @@ export class CategoriesApi extends runtime.BaseAPI {
   async categoryRaw(
     requestParameters: CategoryRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<VerticalConfigFullDto>> {
     if (requestParameters['categoryId'] == null) {
       throw new runtime.RequiredError(
         'categoryId',
@@ -185,11 +185,9 @@ export class CategoriesApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      VerticalConfigFullDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -199,7 +197,7 @@ export class CategoriesApi extends runtime.BaseAPI {
   async category(
     requestParameters: CategoryRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<VerticalConfigFullDto> {
     const response = await this.categoryRaw(requestParameters, initOverrides)
     return await response.value()
   }
@@ -211,7 +209,7 @@ export class CategoriesApi extends runtime.BaseAPI {
   async navigationRaw(
     requestParameters: NavigationRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<CategoryNavigationDto>> {
     if (requestParameters['domainLanguage'] == null) {
       throw new runtime.RequiredError(
         'domainLanguage',
@@ -266,11 +264,9 @@ export class CategoriesApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      CategoryNavigationDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -280,7 +276,7 @@ export class CategoriesApi extends runtime.BaseAPI {
   async navigation(
     requestParameters: NavigationRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<CategoryNavigationDto> {
     const response = await this.navigationRaw(requestParameters, initOverrides)
     return await response.value()
   }

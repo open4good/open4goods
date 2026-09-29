@@ -1,5 +1,4 @@
 // Export service factories and singletons
-export { useBlogService } from './blog.services'
 export { useCategoriesService } from './categories.services'
 export { useAssistantConfigsService } from './assistant-configs.services'
 export { authService } from './auth.services'
