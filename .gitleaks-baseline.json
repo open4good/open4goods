@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "acceptance": "Owner accepted existing findings on 2026-09-29 (GOU-60). Exception only; revocation is not asserted. Structure and traceability added in GOU-103.",
+  "acceptance": "Owner accepted existing findings on 2026-09-29 (GOU-60); structure and traceability added in GOU-103. Among credential-shaped identities, the owner attested on 2026-09-29 that the highest-risk ones are already revoked; the remaining credential-shaped identities are accepted as an exception without a revocation assertion, with rotation tracked in GOU-107, which blocks beta promotion.",
   "sourceCommit": "e0a3e72beab2a398f13ed3f571e2610de254cd34",
   "accepted": {
     "git": [
