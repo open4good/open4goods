@@ -168,6 +168,11 @@ git config core.hooksPath .githooks
 3. Tests added/updated; coverage not reduced.  
 4. `./scripts/lint.sh` passes locally.
 5. Docs (agents.md, README, ADR, Javadoc, spring-configuration-metadata.json) updated.
+6. **Merging deploys beta.** Every merge to `main` deploys the beta, so it needs an explicit
+   owner decision for that PR and its candidate SHA, taken after review and green CI (agents
+   working through Paperclip ask with a `request_confirmation` card on the issue, naming the PR,
+   the SHA and the phase checks). Approving a plan, a review or an earlier promotion does not
+   grant it. Production needs its own decision after beta validation.
 
 ---
 
