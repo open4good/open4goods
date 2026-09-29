@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.net.URI;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -33,6 +34,8 @@ import java.util.Set;
  * @param mediaCache cache restrictions for media and provider content
  * @param attribution publication attribution requirement
  * @param redistribution redistribution permission
+ * @param derivativeLicence licence a derived work must carry; absent reads as {@link DerivativeLicence#NONE}
+ * @param prohibitedUses uses this source forbids; absent reads as every {@link ProhibitedUse}
  * @param legalReviewDate date of the legal review supporting this version
  * @param reviewState whether an owner has reviewed the policy version
  * @param revokedAt first instant at which this version no longer permits publication, or {@code null}
@@ -50,6 +53,8 @@ public record SourceUsagePolicy(
         MediaCachePolicy mediaCache,
         AttributionRequirement attribution,
         RedistributionPolicy redistribution,
+        DerivativeLicence derivativeLicence,
+        Set<ProhibitedUse> prohibitedUses,
         LocalDate legalReviewDate,
         PolicyReviewState reviewState,
         Instant revokedAt,
@@ -74,6 +79,8 @@ public record SourceUsagePolicy(
         Objects.requireNonNull(mediaCache, "mediaCache must not be null");
         Objects.requireNonNull(attribution, "attribution must not be null");
         Objects.requireNonNull(redistribution, "redistribution must not be null");
+        derivativeLicence = derivativeLicence == null ? DerivativeLicence.NONE : derivativeLicence;
+        prohibitedUses = prohibitedUses == null ? EnumSet.allOf(ProhibitedUse.class) : Set.copyOf(prohibitedUses);
         Objects.requireNonNull(legalReviewDate, "legalReviewDate must not be null");
         Objects.requireNonNull(reviewState, "reviewState must not be null");
         if (revokedAt != null && revokedAt.isBefore(effectiveFrom)) {
@@ -103,6 +110,8 @@ public record SourceUsagePolicy(
      * @param mediaCache source media cache restrictions
      * @param attribution publication attribution requirement
      * @param redistribution redistribution permission
+     * @param derivativeLicence licence a derived work must carry
+     * @param prohibitedUses uses this source forbids
      * @param legalReviewDate review date
      * @param evidenceReferences reviewed evidence references
      */
@@ -118,11 +127,13 @@ public record SourceUsagePolicy(
             MediaCachePolicy mediaCache,
             AttributionRequirement attribution,
             RedistributionPolicy redistribution,
+            DerivativeLicence derivativeLicence,
+            Set<ProhibitedUse> prohibitedUses,
             LocalDate legalReviewDate,
             List<URI> evidenceReferences) {
         this(policyId, sourceId, version, contentTypes, allowedSurfaces, effectiveFrom, effectiveUntil, retention,
-                mediaCache, attribution, redistribution, legalReviewDate, PolicyReviewState.REVIEWED, null,
-                evidenceReferences);
+                mediaCache, attribution, redistribution, derivativeLicence, prohibitedUses, legalReviewDate,
+                PolicyReviewState.REVIEWED, null, evidenceReferences);
     }
 
     /**
@@ -153,6 +164,8 @@ public record SourceUsagePolicy(
                 MediaCachePolicy.NONE,
                 AttributionRequirement.NONE,
                 RedistributionPolicy.PROHIBITED,
+                DerivativeLicence.NONE,
+                EnumSet.allOf(ProhibitedUse.class),
                 legalReviewDate,
                 PolicyReviewState.UNREVIEWED,
                 null,
@@ -176,6 +189,29 @@ public record SourceUsagePolicy(
                 && contentTypes.contains(contentType)
                 && allowedSurfaces.contains(surface)
                 && isEffectiveAt(instant);
+    }
+
+    /**
+     * Reports whether this policy explicitly permits a named use of its content.
+     *
+     * <p>Mirrors {@link #allows}: an unreviewed policy or an instant outside the
+     * effective interval denies exactly as it does there, and a use is permitted
+     * only when the content type was reviewed for it and it is not listed in
+     * {@link #prohibitedUses}.
+     *
+     * @param contentType content type the use would draw on
+     * @param use named use being tested, such as AI training
+     * @param instant instant of the proposed use
+     * @return {@code true} only when the reviewed policy covers the content type and does not forbid the use
+     */
+    public boolean allowsUse(SourceContentType contentType, ProhibitedUse use, Instant instant) {
+        if (contentType == null || use == null || instant == null) {
+            return false;
+        }
+        return reviewState == PolicyReviewState.REVIEWED
+                && contentTypes.contains(contentType)
+                && isEffectiveAt(instant)
+                && !prohibitedUses.contains(use);
     }
 
     /**

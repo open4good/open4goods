@@ -12,11 +12,13 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.open4goods.datareference.model.AttributionRequirement;
 import org.open4goods.datareference.model.CanonicalAttributeId;
+import org.open4goods.datareference.model.DerivativeLicence;
 import org.open4goods.datareference.model.Gtin;
 import org.open4goods.datareference.model.GtinLink;
 import org.open4goods.datareference.model.GtinMatchConfidence;
 import org.open4goods.datareference.model.GtinMatchMethod;
 import org.open4goods.datareference.model.MediaCachePolicy;
+import org.open4goods.datareference.model.ProhibitedUse;
 import org.open4goods.datareference.model.PayloadHash;
 import org.open4goods.datareference.model.PolicyReviewState;
 import org.open4goods.datareference.model.ProjectionSurface;
@@ -90,6 +92,24 @@ class DeterministicResolutionServiceTest {
         assertThat(restored.getFirst().reason()).isEqualTo(ResolutionReason.SOURCE_AUTHORITY);
     }
 
+    @Test
+    void excludesAPropagatedInputFromASourceThatProhibitsAiTraining() {
+        SourceRecordHead merchant = head("merchant", "merchant-1", "B", GtinMatchConfidence.EXACT);
+        SourceRecordHead regulator = head("regulator", "regulator-1", "A", GtinMatchConfidence.WEAK);
+        SourceUsagePolicyRegistry policies = new SourceUsagePolicyRegistry(new SourceUsagePolicyDocument(
+                SourceUsagePolicyDocument.SCHEMA_VERSION,
+                List.of(policy("merchant", true), policy("regulator", true, Set.of(ProhibitedUse.AI_TRAINING)))));
+        DeterministicResolutionService service = resolutionService(policies, noCorrections());
+
+        var resolved = service.resolve(GTIN, List.of(merchant, regulator), ProjectionSurface.NUDGER_WEB, NOW);
+
+        assertThat(resolved).hasSize(1);
+        // The regulator source is excluded entirely rather than degrading the result: the
+        // merchant value wins outright instead of the regulator's authority-based reason.
+        assertThat(resolved.getFirst().value()).isEqualTo(new CodeValue("energy", "B"));
+        assertThat(resolved.getFirst().conflicting()).isFalse();
+    }
+
     private static DeterministicResolutionService service() {
         return service(noCorrections());
     }
@@ -98,6 +118,11 @@ class DeterministicResolutionServiceTest {
         SourceUsagePolicyRegistry policies = new SourceUsagePolicyRegistry(new SourceUsagePolicyDocument(
                 SourceUsagePolicyDocument.SCHEMA_VERSION, List.of(policy("merchant", true), policy("regulator", true),
                         policy("denied", false))));
+        return resolutionService(policies, corrections);
+    }
+
+    private static DeterministicResolutionService resolutionService(SourceUsagePolicyRegistry policies,
+            CorrectionsPort corrections) {
         ResolutionRule rule = new ResolutionRule(ATTRIBUTE, ProjectionSurface.NUDGER_WEB,
                 new RuleVersion("energy-class-resolution", 1), List.of(new SourceId("regulator"), new SourceId("merchant")),
                 new SourceId("regulator"));
@@ -111,10 +136,15 @@ class DeterministicResolutionServiceTest {
     }
 
     private static SourceUsagePolicy policy(String source, boolean allowed) {
+        return policy(source, allowed, Set.of());
+    }
+
+    private static SourceUsagePolicy policy(String source, boolean allowed, Set<ProhibitedUse> prohibitedUses) {
         return new SourceUsagePolicy(source + "-policy", new SourceId(source), "1", Set.of(SourceContentType.ATTRIBUTE),
                 allowed ? Set.of(ProjectionSurface.NUDGER_WEB) : Set.of(), NOW.minus(Duration.ofDays(1)), null,
                 Duration.ofDays(1), MediaCachePolicy.NONE, AttributionRequirement.NONE, RedistributionPolicy.ALLOWED,
-                LocalDate.of(2026, 9, 1), allowed ? PolicyReviewState.REVIEWED : PolicyReviewState.UNREVIEWED, null,
+                DerivativeLicence.NONE, prohibitedUses, LocalDate.of(2026, 9, 1),
+                allowed ? PolicyReviewState.REVIEWED : PolicyReviewState.UNREVIEWED, null,
                 List.of(URI.create("urn:o4g:policy:" + source)));
     }
 

@@ -12,6 +12,14 @@ missing policy, a source mismatch, an unreviewed policy, a prohibited
 redistribution setting, an out-of-period policy and a revoked policy. Derived
 fields never inherit a provider permission.
 
+A policy also carries a deny-by-default `derivativeLicence` (e.g. the Icecat
+share-alike obligation), a deny-by-default `prohibitedUses` set (e.g.
+`AI_TRAINING`, `SYNTHETIC_CONTENT_GENERATION`), and an attribution
+`asIsDisclaimerRequired` flag for the Fair Use Policy disclaimer. The mirrored
+`allowsUse` predicate on the policy and the registry checks one named use, and
+`DeterministicResolutionService` consults it to drop a prohibited-use source
+from a derivation before any resolved value is produced.
+
 The inventory records the content observed in the reference contracts. An API,
 a legacy public page or a source's receipt of merchant content is supporting
 evidence, not an O4G redistribution approval. All entries below are intentionally
@@ -37,4 +45,6 @@ term produces a new record rather than editing historical permission.
 `SourceUsagePolicyRegistryTest` loads both this deny inventory and a reviewed
 fixture. It exercises every publication surface at effective, expiry and
 revocation boundaries, requires attribution, rejects prohibited media caching,
-and rejects derived-field inheritance.
+rejects derived-field inheritance, and confirms the deny-by-default reading of
+an inventory fixture that predates `derivativeLicence`, `prohibitedUses` and
+`asIsDisclaimerRequired`.

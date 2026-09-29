@@ -74,8 +74,8 @@ class SourceUsagePolicyRegistryTest {
         SourceUsagePolicy revoked = new SourceUsagePolicy("revoked", FIXTURE_SOURCE, "1",
                 Set.of(SourceContentType.ATTRIBUTE), Set.of(ProjectionSurface.NUDGER_WEB),
                 Instant.parse("2026-01-01T00:00:00Z"), null, Duration.ofDays(30), MediaCachePolicy.NONE,
-                AttributionRequirement.NONE, RedistributionPolicy.ALLOWED, LocalDate.of(2026, 1, 1),
-                PolicyReviewState.REVIEWED, Instant.parse("2026-06-01T00:00:00Z"),
+                AttributionRequirement.NONE, RedistributionPolicy.ALLOWED, DerivativeLicence.NONE, Set.of(),
+                LocalDate.of(2026, 1, 1), PolicyReviewState.REVIEWED, Instant.parse("2026-06-01T00:00:00Z"),
                 List.of(URI.create("https://example.test/terms")));
 
         assertThat(revoked.allows(SourceContentType.ATTRIBUTE, ProjectionSurface.NUDGER_WEB,
@@ -100,6 +100,54 @@ class SourceUsagePolicyRegistryTest {
     }
 
     @Test
+    void loadsAFixtureThatPredatesTheNewFieldsWithTheMostRestrictiveDefaults() throws IOException {
+        SourceUsagePolicy fixture = fixtureRegistry().find(FIXTURE_POLICY).orElseThrow();
+
+        assertThat(fixture.derivativeLicence()).isEqualTo(DerivativeLicence.NONE);
+        assertThat(fixture.prohibitedUses()).containsExactlyInAnyOrder(ProhibitedUse.values());
+        assertThat(fixture.attribution().asIsDisclaimerRequired()).isTrue();
+    }
+
+    @Test
+    void allowsUseMirrorsAllowsForAnExplicitlyClearedUse() {
+        SourceUsagePolicyRef reference = new SourceUsagePolicyRef("cleared-use", "1");
+        SourceUsagePolicy cleared = new SourceUsagePolicy("cleared-use", FIXTURE_SOURCE, "1",
+                Set.of(SourceContentType.TEXT), Set.of(ProjectionSurface.NUDGER_WEB),
+                Instant.parse("2026-01-01T00:00:00Z"), Instant.parse("2026-12-31T23:59:59Z"), Duration.ZERO,
+                MediaCachePolicy.NONE, AttributionRequirement.NONE, RedistributionPolicy.PROHIBITED,
+                DerivativeLicence.NONE, Set.of(), LocalDate.of(2026, 1, 1),
+                List.of(URI.create("https://example.test/terms")));
+        SourceUsagePolicyRegistry registry = new SourceUsagePolicyRegistry(
+                new SourceUsagePolicyDocument(SourceUsagePolicyDocument.SCHEMA_VERSION, List.of(cleared)));
+
+        assertThat(registry.allowsUse(FIXTURE_SOURCE, reference, SourceContentType.TEXT, ProhibitedUse.AI_TRAINING, DURING))
+                .isTrue();
+        // Content type nobody reviewed for this use.
+        assertThat(registry.allowsUse(FIXTURE_SOURCE, reference, SourceContentType.MEDIA, ProhibitedUse.AI_TRAINING, DURING))
+                .isFalse();
+        // Source mismatched against the policy's own source.
+        assertThat(registry.allowsUse(new SourceId("other-source"), reference, SourceContentType.TEXT,
+                ProhibitedUse.AI_TRAINING, DURING)).isFalse();
+        // Reference absent from the registry.
+        assertThat(registry.allowsUse(FIXTURE_SOURCE, new SourceUsagePolicyRef("missing", "1"),
+                SourceContentType.TEXT, ProhibitedUse.AI_TRAINING, DURING)).isFalse();
+    }
+
+    @Test
+    void allowsUseDeniesEveryUseForTheUnreviewedDefaultInventory() throws IOException {
+        SourceUsagePolicyRegistry registry = SourceUsagePolicyRegistry.loadDefault();
+
+        for (SourceUsagePolicy policy : registry.policies()) {
+            for (SourceContentType contentType : SourceContentType.values()) {
+                for (ProhibitedUse use : ProhibitedUse.values()) {
+                    assertThat(registry.allowsUse(policy.sourceId(), policy.reference(), contentType, use, DURING))
+                            .isFalse();
+                }
+            }
+        }
+    }
+
+    @Test
     void derivedFieldsCannotInheritProviderPermission() throws IOException {
         assertThat(fixtureRegistry().allowsDerivedField()).isFalse();
     }
@@ -108,7 +156,7 @@ class SourceUsagePolicyRegistryTest {
     void rejectsDuplicatePolicyVersions() {
         SourceUsagePolicy policy = new SourceUsagePolicy("p", FIXTURE_SOURCE, "1", Set.of(), Set.of(),
                 Instant.EPOCH, null, Duration.ZERO, MediaCachePolicy.NONE, AttributionRequirement.NONE,
-                RedistributionPolicy.PROHIBITED, LocalDate.of(2026, 1, 1),
+                RedistributionPolicy.PROHIBITED, DerivativeLicence.NONE, Set.of(), LocalDate.of(2026, 1, 1),
                 List.of(URI.create("https://example.test/terms")));
 
         assertThatThrownBy(() -> new SourceUsagePolicyRegistry(new SourceUsagePolicyDocument(
