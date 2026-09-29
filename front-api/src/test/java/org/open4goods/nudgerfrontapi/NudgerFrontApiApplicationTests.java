@@ -7,6 +7,7 @@ import org.open4goods.icecat.repository.IcecatCategoryRepository;
 import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
 import org.open4goods.icecat.repository.IcecatFeatureRepository;
 import org.open4goods.icecat.repository.IcecatSupplierRepository;
+import org.open4goods.services.contribution.repository.ContributionVoteRepository;
 import org.open4goods.services.geocode.service.IpGeolocationService;
 
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,6 +40,11 @@ class NudgerFrontApiApplicationTests
 
     @MockitoBean
     private IcecatSupplierRepository icecatSupplierRepository;
+
+    // Same eager-instantiation issue as the icecat repositories above, but for the
+    // Elasticsearch repository backing AffiliationService (ContributionRepositoryConfig).
+    @MockitoBean
+    private ContributionVoteRepository contributionVoteRepository;
 
     @Test
     void contextLoads()
