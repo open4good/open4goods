@@ -7,6 +7,12 @@ LOCAL_ROOT="$ROOT/.local"
 ENV_FILE="$ROOT/.env.local"
 TEMPLATE_ROOT="$ROOT/ops/local/config"
 SERVICES=(api ui admin front-api b2b-api exposed-docs geocode frontend b2b-frontend)
+INFRA_PORT_VARS=(O4G_PORT_ELASTICSEARCH O4G_PORT_REDIS O4G_PORT_POSTGRES O4G_PORT_KIBANA O4G_PORT_XWIKI)
+
+# A worktree checkout is per-agent and disposable; the shared-host lock has to
+# survive independently of which worktree a given invocation runs from, so it
+# lives under the invoking user's home, not under $ROOT/.local.
+SHARED_LOCK_ROOT="${O4G_SHARED_HOST_LOCK_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/open4goods-shared-host}"
 
 usage() {
   cat >&2 <<'EOF'
@@ -107,9 +113,10 @@ start_process() {
 }
 
 start_java() {
-  local service="$1" module="$2" port="$3" config="$O4G_LOCAL_CONFIG_DIR/$1.yml"
+  local service="$1" module="$2" port="$3" config="$O4G_LOCAL_CONFIG_DIR/$1.yml" java21
+  java21="$(java_home_21)" || exit 1
   start_process "$service" "$ROOT/$module" env \
-    JAVA_HOME="$(java_home_21)" \
+    JAVA_HOME="$java21" \
     SPRING_PROFILES_ACTIVE=local \
     SPRING_CONFIG_ADDITIONAL_LOCATION="optional:file:$config" \
     SERVER_PORT="$port" \
@@ -120,17 +127,23 @@ start_java() {
 java_home_21() {
   # pom.xml pins java.version=21; mvn forks spring-boot:run under whatever
   # JAVA_HOME points at, which can be a newer JDK on a shared build host.
+  # Never fall back to an unverified JAVA_HOME: a JDK 25 default (as measured
+  # on this host) would silently run the reactor under the wrong JDK.
+  local candidate
   if [ -n "${JAVA_HOME:-}" ] && "$JAVA_HOME/bin/java" -version 2>&1 | grep -q '"21\.'; then
     printf '%s\n' "$JAVA_HOME"
-    return
+    return 0
   fi
   for candidate in /usr/lib/jvm/java-21-openjdk-amd64 /usr/lib/jvm/java-21-openjdk; do
-    if [ -x "$candidate/bin/java" ]; then
+    if [ -x "$candidate/bin/java" ] && "$candidate/bin/java" -version 2>&1 | grep -q '"21\.'; then
       printf '%s\n' "$candidate"
-      return
+      return 0
     fi
   done
-  printf '%s\n' "${JAVA_HOME:-}"
+  echo "no verified JDK 21 found: JAVA_HOME=${JAVA_HOME:-unset} is not a JDK 21 and neither" \
+    "/usr/lib/jvm/java-21-openjdk-amd64 nor /usr/lib/jvm/java-21-openjdk resolves to one." \
+    "Install a JDK 21 and either export JAVA_HOME to it or place it at one of those paths." >&2
+  return 1
 }
 
 port_for() {
@@ -151,7 +164,7 @@ port_for() {
 }
 
 start_native() {
-  local service="$1" api_port ui_port front_api_port b2b_api_port frontend_port b2b_frontend_port
+  local service="$1" api_port ui_port front_api_port b2b_api_port frontend_port b2b_frontend_port java21
   api_port="$(port_for api)"; ui_port="$(port_for ui)"; front_api_port="$(port_for front-api)"
   b2b_api_port="$(port_for b2b-api)"; frontend_port="$(port_for frontend)"; b2b_frontend_port="$(port_for b2b-frontend)"
   case "$service" in
@@ -160,7 +173,8 @@ start_native() {
     admin) start_java admin admin "$(port_for admin)" ;;
     front-api) start_java front-api front-api "$front_api_port" ;;
     b2b-api)
-      start_process b2b-api "$ROOT/b2b-api" env JAVA_HOME="$(java_home_21)" \
+      java21="$(java_home_21)" || exit 1
+      start_process b2b-api "$ROOT/b2b-api" env JAVA_HOME="$java21" \
         SPRING_PROFILES_ACTIVE=local B2B_API_PORT="$b2b_api_port" \
         SPRING_CONFIG_ADDITIONAL_LOCATION="optional:file:$O4G_LOCAL_CONFIG_DIR/b2b-api.yml" \
         mvn --offline spring-boot:run \
@@ -220,6 +234,7 @@ doctor() {
     if ! command -v "$command_name" >/dev/null; then echo "missing command: $command_name" >&2; missing=1; fi
   done
   docker compose version >/dev/null 2>&1 || { echo "docker compose is unavailable" >&2; missing=1; }
+  java_home_21 >/dev/null || missing=1
   for config in api ui admin front-api b2b-api exposed-docs geocode; do
     [ -f "$O4G_LOCAL_CONFIG_DIR/$config.yml" ] || { echo "missing local config: $config" >&2; missing=1; }
   done
@@ -239,11 +254,14 @@ doctor() {
   echo "local doctor passed without exposing configuration values"
 }
 
+cgroup_self_dir() { printf '/sys/fs/cgroup%s\n' "$(awk -F: '{print $3}' /proc/self/cgroup 2>/dev/null)"; }
+
 cgroup_effective_max() {
   # cgroup v2 enforces the minimum numeric limit across the whole ancestor
   # chain; a shared build host sets it above our session scope, not on it.
+  # Returns "max" only when every ancestor is unbounded for this file.
   local file="$1" dir value best=""
-  dir="/sys/fs/cgroup$(awk -F: '{print $3}' /proc/self/cgroup 2>/dev/null)"
+  dir="$(cgroup_self_dir)"
   while [ -n "$dir" ] && [ "$dir" != "/sys/fs/cgroup" ] && [ "$dir" != "/" ]; do
     if [ -r "$dir/$file" ]; then
       value="$(awk '{print $1}' "$dir/$file" 2>/dev/null)"
@@ -256,27 +274,137 @@ cgroup_effective_max() {
   printf '%s\n' "${best:-max}"
 }
 
+cgroup_effective_headroom_bytes() {
+  # Smallest (max - current) across the ancestor chain, at whichever level
+  # is actually bounded; a declared quota means nothing if other tenants
+  # under the same ancestor have already consumed it.
+  local max_file="$1" current_file="$2" dir max_value cur_value headroom best=""
+  dir="$(cgroup_self_dir)"
+  while [ -n "$dir" ] && [ "$dir" != "/sys/fs/cgroup" ] && [ "$dir" != "/" ]; do
+    if [ -r "$dir/$max_file" ] && [ -r "$dir/$current_file" ]; then
+      max_value="$(awk '{print $1}' "$dir/$max_file" 2>/dev/null)"
+      cur_value="$(cat "$dir/$current_file" 2>/dev/null)"
+      if [ -n "$max_value" ] && [ "$max_value" != max ] && [ -n "$cur_value" ]; then
+        headroom=$(( max_value - cur_value ))
+        if [ -z "$best" ] || [ "$headroom" -lt "$best" ]; then best="$headroom"; fi
+      fi
+    fi
+    dir="$(dirname "$dir")"
+  done
+  printf '%s\n' "${best:-max}"
+}
+
+cgroup_cpu_millicores_max() {
+  # quota/period must be read from the SAME ancestor level: a leaf period
+  # paired with a raw min-quota from a different ancestor is not a real
+  # ratio. Compute millicores per level, then take the min across levels
+  # that are actually bounded.
+  local dir quota period millicores best="" any_bounded=0
+  dir="$(cgroup_self_dir)"
+  while [ -n "$dir" ] && [ "$dir" != "/sys/fs/cgroup" ] && [ "$dir" != "/" ]; do
+    if [ -r "$dir/cpu.max" ]; then
+      read -r quota period < "$dir/cpu.max"
+      if [ "$quota" != max ] && [ -n "${period:-}" ] && [ "$period" -gt 0 ] 2>/dev/null; then
+        any_bounded=1
+        millicores=$(( quota * 1000 / period ))
+        if [ -z "$best" ] || [ "$millicores" -lt "$best" ]; then best="$millicores"; fi
+      fi
+    fi
+    dir="$(dirname "$dir")"
+  done
+  if [ "$any_bounded" -eq 0 ]; then printf 'max\n'; else printf '%s\n' "$best"; fi
+}
+
+# realpath(1) may be absent; readlink -f is POSIX-adjacent and present on
+# every host this script targets.
+resolved_path() { readlink -f -- "$1" 2>/dev/null || printf '%s\n' "$1"; }
+
 # preflight() is the opt-in shared-build-host gate (O4G_SHARED_HOST=1). It
 # never mutates beta/prod state; it only refuses to start the local stack
 # when isolation or capacity assumptions do not hold. See
 # docs/operations/buildhost-runtime.md for the budget this enforces.
+# preflight full-import applies a stricter disk floor: the standard 20GiB
+# default only qualifies the native stack idling, not a full backup import.
 preflight() {
   load_env
-  local missing=0 service port mem_max cpu_quota cpu_period pids_max
+  local mode="${1:-standard}"
+  local missing=0 service port mem_max mem_headroom cpu_millicores pids_max
   local port_min="${O4G_SHARED_HOST_PORT_MIN:-4100}" port_max="${O4G_SHARED_HOST_PORT_MAX:-4109}"
+  local infra_port_min="${O4G_SHARED_HOST_INFRA_PORT_MIN:-4150}" infra_port_max="${O4G_SHARED_HOST_INFRA_PORT_MAX:-4159}"
   local min_free_gib="${O4G_SHARED_HOST_MIN_FREE_GIB:-20}"
+  if [ "$mode" = full-import ]; then
+    min_free_gib="${O4G_SHARED_HOST_MIN_FREE_GIB_FULL_IMPORT:-60}"
+  fi
   local min_mem_gib="${O4G_SHARED_HOST_MIN_MEM_GIB:-8}" min_cpu="${O4G_SHARED_HOST_MIN_CPU:-2}"
   local min_pids="${O4G_SHARED_HOST_MIN_PIDS:-512}"
+  local approved_roots="${O4G_SHARED_HOST_APPROVED_ROOTS:-$LOCAL_ROOT:$HOME/.local/share/open4goods}"
 
   if ! docker info --format '{{json .SecurityOptions}}' 2>/dev/null | grep -q rootless; then
     echo "rootful or unreachable Docker daemon rejected; DOCKER_HOST must target the rootless daemon" >&2
     missing=1
   fi
 
+  declare -A seen_ports=()
   for service in "${SERVICES[@]}"; do
     port="$(port_for "$service")"
     if [ "$port" -lt "$port_min" ] || [ "$port" -gt "$port_max" ]; then
       echo "application port outside assigned shared-host block ($port_min-$port_max): $service=$port" >&2
+      missing=1
+    fi
+    if [ -n "${seen_ports[$port]:-}" ]; then
+      echo "duplicate port $port assigned to both ${seen_ports[$port]} and $service" >&2
+      missing=1
+    fi
+    seen_ports[$port]="$service"
+    if ss -Htln "sport = :$port" 2>/dev/null | grep -q LISTEN; then
+      echo "application port already in use: $service=$port" >&2
+      missing=1
+    fi
+  done
+
+  local infra_var infra_port
+  for infra_var in "${INFRA_PORT_VARS[@]}"; do
+    infra_port="${!infra_var:-}"
+    [ -n "$infra_port" ] || { echo "incomplete config: $infra_var is unset" >&2; missing=1; continue; }
+    if [ "$infra_port" -lt "$infra_port_min" ] || [ "$infra_port" -gt "$infra_port_max" ]; then
+      echo "infra port outside assigned shared-host block ($infra_port_min-$infra_port_max): $infra_var=$infra_port" >&2
+      missing=1
+    fi
+    if [ -n "${seen_ports[$infra_port]:-}" ]; then
+      echo "duplicate port $infra_port assigned to both ${seen_ports[$infra_port]} and $infra_var" >&2
+      missing=1
+    fi
+    seen_ports[$infra_port]="$infra_var"
+    if ss -Htln "sport = :$infra_port" 2>/dev/null | grep -q LISTEN; then
+      echo "infra port already in use: $infra_var=$infra_port" >&2
+      missing=1
+    fi
+  done
+
+  local label path real root root_real within
+  for label in O4G_LOCAL_DATA_ROOT O4G_LOCAL_CONFIG_DIR PRODUCT_BACKUP_SOURCE_URI; do
+    path="${!label}"
+    real="$(resolved_path "$path")"
+    within=1
+    IFS=':' read -ra _approved <<< "$approved_roots"
+    for root in "${_approved[@]}"; do
+      root_real="$(resolved_path "$root")"
+      case "$real" in
+        "$root_real"|"$root_real"/*) within=0 ;;
+      esac
+    done
+    if [ "$within" -ne 0 ]; then
+      echo "$label resolves outside the approved shared-host roots ($approved_roots): $real" >&2
+      missing=1
+    fi
+  done
+
+  local variable
+  for variable in O4G_LOCAL_POSTGRES_PASSWORD O4G_LOCAL_XWIKI_DB_PASSWORD O4G_LOCAL_XWIKI_ROOT_PASSWORD \
+    FRONT_SECURITY_SHARED_TOKEN FRONT_SECURITY_JWT_SECRET B2B_JWT_SECRET O4G_LOCAL_ADMIN_KEY; do
+    value="${!variable:-}"
+    if [ -z "$value" ] || [[ "$value" == CHANGE_ME* ]]; then
+      echo "incomplete config: $variable is unset or still a CHANGE_ME placeholder" >&2
       missing=1
     fi
   done
@@ -284,42 +412,63 @@ preflight() {
   local avail_kb
   avail_kb="$(df -Pk "$O4G_LOCAL_DATA_ROOT" 2>/dev/null | awk 'NR==2{print $4}')"
   if [ -z "$avail_kb" ] || [ "$((avail_kb / 1024 / 1024))" -lt "$min_free_gib" ]; then
-    echo "insufficient free disk under O4G_LOCAL_DATA_ROOT (need >= ${min_free_gib}GiB)" >&2
+    echo "insufficient free disk under O4G_LOCAL_DATA_ROOT (need >= ${min_free_gib}GiB, mode=$mode)" >&2
     missing=1
   fi
 
   mem_max="$(cgroup_effective_max memory.max)"
-  if [ "$mem_max" != max ] && [ "$((mem_max / 1024 / 1024 / 1024))" -lt "$min_mem_gib" ]; then
+  if [ "$mem_max" = max ]; then
+    echo "cgroup memory limit is unbounded across the whole ancestor chain; refused on a shared host" >&2
+    missing=1
+  elif [ "$((mem_max / 1024 / 1024 / 1024))" -lt "$min_mem_gib" ]; then
     echo "cgroup memory budget below ${min_mem_gib}GiB" >&2
     missing=1
+  else
+    mem_headroom="$(cgroup_effective_headroom_bytes memory.max memory.current)"
+    if [ "$mem_headroom" != max ] && [ "$((mem_headroom / 1024 / 1024 / 1024))" -lt "$min_mem_gib" ]; then
+      echo "insufficient memory headroom under current cgroup usage (need >= ${min_mem_gib}GiB free, not just quota)" >&2
+      missing=1
+    fi
   fi
 
-  cpu_quota="$(cgroup_effective_max cpu.max)"
-  cpu_period="$(awk '{print $2}' "/sys/fs/cgroup$(awk -F: '{print $3}' /proc/self/cgroup)/cpu.max" 2>/dev/null || echo 100000)"
-  if [ "$cpu_quota" != max ] && [ "$((cpu_quota / cpu_period))" -lt "$min_cpu" ]; then
+  cpu_millicores="$(cgroup_cpu_millicores_max)"
+  if [ "$cpu_millicores" = max ]; then
+    echo "cgroup CPU limit is unbounded across the whole ancestor chain; refused on a shared host" >&2
+    missing=1
+  elif [ "$cpu_millicores" -lt "$((min_cpu * 1000))" ]; then
     echo "cgroup CPU budget below ${min_cpu} cores" >&2
     missing=1
   fi
 
   pids_max="$(cgroup_effective_max pids.max)"
-  if [ "$pids_max" != max ] && [ "$pids_max" -lt "$min_pids" ]; then
+  if [ "$pids_max" = max ]; then
+    echo "cgroup pids limit is unbounded across the whole ancestor chain; refused on a shared host" >&2
+    missing=1
+  elif [ "$pids_max" -lt "$min_pids" ]; then
     echo "cgroup pids budget below ${min_pids} tasks" >&2
     missing=1
   fi
 
   [ "$missing" -eq 0 ] || return 1
-  echo "shared-host preflight passed: ports ${port_min}-${port_max}, disk>=${min_free_gib}GiB, mem>=${min_mem_gib}GiB, cpu>=${min_cpu}, pids>=${min_pids}"
+  echo "shared-host preflight ($mode) passed: ports ${port_min}-${port_max}/${infra_port_min}-${infra_port_max}, disk>=${min_free_gib}GiB, mem>=${min_mem_gib}GiB, cpu>=${min_cpu}, pids>=${min_pids}"
 }
 
 # Heavy operations (full stack up, full data import) are serialized across
-# concurrent agents on the shared host with a non-blocking flock: a second
-# caller fails fast instead of silently competing for RAM/CPU/disk.
+# concurrent agents on the shared host with a non-blocking flock. The lock
+# lives under SHARED_LOCK_ROOT (the user's home, not $ROOT/.local) because
+# $ROOT is a disposable per-agent worktree: a lock inside it would never be
+# seen by a second worktree and would not serialize anything. The importer
+# call this guards (POST /backup/products/import) is synchronous on the
+# server side -- BackupService.importProducts() blocks the request thread
+# until its internal ExecutorService terminates -- so holding the flock for
+# the duration of the blocking curl call already covers the job's actual
+# completion, not just its submission.
 with_full_run_lock() {
-  local lock_dir="$LOCAL_ROOT/locks"
+  local lock_dir="$SHARED_LOCK_ROOT"
   mkdir -p "$lock_dir"
   exec 9>"$lock_dir/full-run.lock"
   if ! flock -n 9; then
-    echo "another full run (up/data full) holds the shared-host lock; retry later" >&2
+    echo "another full run (up/data full) holds the shared-host lock ($lock_dir/full-run.lock); retry later" >&2
     return 1
   fi
   "$@"
@@ -372,7 +521,7 @@ command_name="${1:-}"
 case "$command_name" in
   init) init_local ;;
   doctor) doctor ;;
-  preflight) preflight ;;
+  preflight) preflight "${2:-standard}" ;;
   up)
     init_local
     doctor
@@ -384,6 +533,7 @@ case "$command_name" in
     load_env
     service="${2:-}"
     is_service "$service" || usage
+    [ "${O4G_SHARED_HOST:-0}" = 1 ] && preflight
     stop_native "$service"
     start_native "$service"
     ;;
@@ -437,6 +587,7 @@ case "$command_name" in
         [[ "$O4G_LOCAL_FULL_IMPORT_URL" == http://localhost:* || "$O4G_LOCAL_FULL_IMPORT_URL" == http://127.0.0.1:* ]] || {
           echo "full import URL must be loopback" >&2; exit 1;
         }
+        [ "${O4G_SHARED_HOST:-0}" = 1 ] && preflight full-import
         with_full_run_lock curl --fail --show-error --silent --request POST "$O4G_LOCAL_FULL_IMPORT_URL"
         ;;
       *) usage ;;

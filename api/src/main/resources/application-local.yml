@@ -19,7 +19,7 @@ spring:
     compose:
       enabled: false
   elasticsearch:
-    uris: http://localhost:9200
+    uris: http://localhost:${O4G_PORT_ELASTICSEARCH:9200}
 
 server:
   port: 8081
@@ -47,6 +47,6 @@ adminKey: open4goods
 
 
 xwiki:
-  baseUrl: http://localhost:8080/xwiki
+  baseUrl: http://localhost:${O4G_PORT_XWIKI:8080}/xwiki
   password: mock
   username: mock
