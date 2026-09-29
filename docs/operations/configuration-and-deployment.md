@@ -6,6 +6,14 @@ audience: PROJECT_SCOPED
 
 # Configuration and deployment
 
+## Historical secret-scan exception
+
+GOU-60 records the owner's 2026-09-29 acceptance of existing findings, not revocation.
+`.gitleaks-baseline.json` pins hashed content/file/rule identities to its source commit;
+history exceptions also bind the original commit. `scripts/verify/secret_scan.py git`
+and `dir` block new findings and scanner failures. CI emits counts only; raw reports
+stay in private temporary storage and are deleted. Baseline changes require review.
+
 ## Purpose
 
 One entry point answering "how do I run this locally, and how does a real environment get its
