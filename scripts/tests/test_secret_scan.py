@@ -120,6 +120,21 @@ class BaselineTest(unittest.TestCase):
                 self.assertEqual(2, SCAN.main())
             scan_mock.assert_not_called()
 
+    def test_credential_shaped_notes_are_not_stale(self):
+        """Every accepted credential-shaped identity must still name a live disposition:
+        the owner's revocation attestation, or the follow-up rotation issue. A note that
+        names neither (e.g. because GOU-107 closed and the text was never updated) must
+        fail loudly instead of silently going stale."""
+        baseline = SCAN.load_baseline(SCAN.BASELINE)
+        markers = ('GOU-107', 'attested revoked')
+        for mode in ('git', 'dir'):
+            for entry in baseline['accepted'][mode]:
+                if entry['classification'] != 'credential-shaped':
+                    continue
+                self.assertTrue(
+                    any(marker in entry['note'] for marker in markers),
+                    f"stale note for {entry['rule']}/{entry['file']}: {entry['note']!r}")
+
     def test_emit_identities_never_prints_secret_or_match(self):
         finding = dict(RuleID='generic-api-key', File='fresh.yml', Secret='fixture-secret',
                        Match='key: fixture-secret', StartLine=3, Commit='abc1234')

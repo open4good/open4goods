@@ -42,7 +42,7 @@
         "file": "code",
         "commit": "94c20d07",
         "classification": "credential-shaped",
-        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+        "note": "Owner-attested revoked 2026-09-29 (GOU-60); highest-risk historical credential, already rotated before this baseline was written."
       },
       {
         "id": "22d6892bd9d8d0c750891b00402c99e3b3dac4990deec1ecad6cbab621a5c341",
@@ -50,7 +50,7 @@
         "file": "ui/src/main/resources/UI-application-devsec.yml",
         "commit": "1c52414e",
         "classification": "credential-shaped",
-        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+        "note": "Owner-attested revoked 2026-09-29 (GOU-60); highest-risk historical credential, already rotated before this baseline was written."
       },
       {
         "id": "2626262d46a7bc3ea6f69ca66bc938abf26f32003022f00c8d32966a705a64f8",
@@ -58,7 +58,7 @@
         "file": "spered-conseil.fr/server/api/contact.post.ts",
         "commit": "d61f15be",
         "classification": "credential-shaped",
-        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation tracked in GOU-107 (follow-up to GOU-60)."
       },
       {
         "id": "29b1538896928d3e02463d2975e732e7537c6bd218268efadffa97b8ae1d6a04",
@@ -66,7 +66,7 @@
         "file": "ui/src/main/resources/UI-application-devsec.yml",
         "commit": "1c52414e",
         "classification": "credential-shaped",
-        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation tracked in GOU-107 (follow-up to GOU-60)."
       },
       {
         "id": "2fb749ba1a6ef35a40a74b9897961d4b88e70729b13635c68d90043d46805d97",
@@ -74,7 +74,7 @@
         "file": "api/src/main/resources/application-dev.yml",
         "commit": "60651096",
         "classification": "credential-shaped",
-        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation tracked in GOU-107 (follow-up to GOU-60)."
       },
       {
         "id": "3a28c1c7ec219a8b863082bc08dfe0f31ceed3701b8cb8791bfd67422fc37b0b",
@@ -98,7 +98,7 @@
         "file": "devsec-api.log",
         "commit": "296ef25b",
         "classification": "credential-shaped",
-        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+        "note": "Owner-attested revoked 2026-09-29 (GOU-60); highest-risk historical credential, already rotated before this baseline was written."
       },
       {
         "id": "3ff9bf9c2877ccb0dc95c30102d5699a9c6ba1d79198831cc49a2e5facbaa65a",
@@ -122,7 +122,7 @@
         "file": "verticals/src/main/resources/verticals/_default.yml",
         "commit": "5f091808",
         "classification": "credential-shaped",
-        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation tracked in GOU-107 (follow-up to GOU-60)."
       },
       {
         "id": "5d49c46d9809bf6b6ff6adb6671ce99a4cbd1af307a8560ddf3056e6323e369e",
@@ -130,7 +130,7 @@
         "file": "api/src/main/resources/application-dev.yml",
         "commit": "0c360f8b",
         "classification": "credential-shaped",
-        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation tracked in GOU-107 (follow-up to GOU-60)."
       },
       {
         "id": "603fac5b2c6f63a66e96373c29f54eaf4fa6dd251fef6e35aff86b161d45574f",
@@ -146,7 +146,7 @@
         "file": "spered-conseil.fr/nuxt.config.ts",
         "commit": "d61f15be",
         "classification": "credential-shaped",
-        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation tracked in GOU-107 (follow-up to GOU-60)."
       },
       {
         "id": "67199430faff20b80f379d4d1f9278fb23921290cb5f223d3205fc3a70ee914f",
@@ -242,7 +242,7 @@
         "file": "api/src/main/resources/API-application-devsec.yml",
         "commit": "1c52414e",
         "classification": "credential-shaped",
-        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+        "note": "Owner-attested revoked 2026-09-29 (GOU-60); highest-risk historical credential, already rotated before this baseline was written."
       },
       {
         "id": "96ff4329ee84d150b53ca960837acc8f3893f148503e3d6472961f9c6dacd7d9",
@@ -266,7 +266,7 @@
         "file": "code",
         "commit": "94c20d07",
         "classification": "credential-shaped",
-        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+        "note": "Owner-attested revoked 2026-09-29 (GOU-60); highest-risk historical credential, already rotated before this baseline was written."
       },
       {
         "id": "9ecdbd7a44da7a37a09fe1a6478f9ecc043c2d33f57750e0bd74c9263f99a4b5",
@@ -282,7 +282,7 @@
         "file": "code",
         "commit": "110dacfa",
         "classification": "credential-shaped",
-        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+        "note": "Owner-attested revoked 2026-09-29 (GOU-60); highest-risk historical credential, already rotated before this baseline was written."
       },
       {
         "id": "a3a435ee72fbf25bd03c6835902799e1377bb3cdf4c6a72c91110d981347b4ac",
@@ -290,7 +290,7 @@
         "file": "code",
         "commit": "110dacfa",
         "classification": "credential-shaped",
-        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+        "note": "Owner-attested revoked 2026-09-29 (GOU-60); highest-risk historical credential, already rotated before this baseline was written."
       },
       {
         "id": "ae4d576bca1afb98110a9a97b3b210548c015ddd7d2c558fd4a379325504acf3",
@@ -306,7 +306,7 @@
         "file": "ui/src/main/resources/UI-application-devsec.yml",
         "commit": "1c52414e",
         "classification": "credential-shaped",
-        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation tracked in GOU-107 (follow-up to GOU-60)."
       },
       {
         "id": "b1846f2558b1979a9431e69cb25ce765e603c4090ef1abc5986456bbc1ed7333",
@@ -330,7 +330,7 @@
         "file": "ui/src/main/resources/application.yml",
         "commit": "84109b52",
         "classification": "credential-shaped",
-        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation tracked in GOU-107 (follow-up to GOU-60)."
       },
       {
         "id": "cd92a0afa5f8c9105d6e598e5c3c74afd4181b506017fa17014214fa1f1720ce",
@@ -354,7 +354,7 @@
         "file": "api/src/main/resources/API-application-devsec.yml",
         "commit": "1c52414e",
         "classification": "credential-shaped",
-        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation tracked in GOU-107 (follow-up to GOU-60)."
       },
       {
         "id": "d87d987d24d80bf35721b7418afae319f4ec4fb3675b3e1cdc20b10e429e6e28",
@@ -386,7 +386,7 @@
         "file": "ui/src/main/resources/application-dev.yml",
         "commit": "0c360f8b",
         "classification": "credential-shaped",
-        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation tracked in GOU-107 (follow-up to GOU-60)."
       },
       {
         "id": "e977eba4eb4ba949461cd77bcc9fcd4ee01a725c3537c723877ff9121d2954e0",
