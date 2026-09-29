@@ -1,84 +1,538 @@
 {
   "version": 1,
-  "acceptance": "Owner accepted existing findings on 2026-09-29 (GOU-60). Exception only; revocation is not asserted.",
+  "acceptance": "Owner accepted existing findings on 2026-09-29 (GOU-60). Exception only; revocation is not asserted. Structure and traceability added in GOU-103.",
   "sourceCommit": "e0a3e72beab2a398f13ed3f571e2610de254cd34",
   "accepted": {
     "git": [
-      "0143ee6c1124b372a539b33d55e003773823a6f3bba90725bccdd1f411587c0a",
-      "02c760f6988839edc5273daeb1d08f8f313864c33ae62082e0b575b79dd6aa59",
-      "06875f5359e3a7ab60567f370890dcf9daf74b7259e961ea80ebec671ee4a72f",
-      "15b27da5e50691f026b8b271983918ed169920f595d3038e92570ca0133dcd10",
-      "2068311ae065978e326bb7ed8b63d2ff09e4d258df01ae9c3fb5f63d2d996e3e",
-      "22d6892bd9d8d0c750891b00402c99e3b3dac4990deec1ecad6cbab621a5c341",
-      "2626262d46a7bc3ea6f69ca66bc938abf26f32003022f00c8d32966a705a64f8",
-      "29b1538896928d3e02463d2975e732e7537c6bd218268efadffa97b8ae1d6a04",
-      "2fb749ba1a6ef35a40a74b9897961d4b88e70729b13635c68d90043d46805d97",
-      "3a28c1c7ec219a8b863082bc08dfe0f31ceed3701b8cb8791bfd67422fc37b0b",
-      "3b9e36c9f15c8e5e71d6c371dcf97d6680a8c13c9fbfdc79eed49fb63ef8d2cf",
-      "3c87e1065acbb517c4b5c831ed2216a69f2d5cce962555bbc27c7f941664a64d",
-      "3ff9bf9c2877ccb0dc95c30102d5699a9c6ba1d79198831cc49a2e5facbaa65a",
-      "489646037a3f9cdd6e76c2f65975ceacd374f5e77a3c001febd85cf7cb9302ae",
-      "49f180a66eb7d7f1149f2e9ad0d89f42847180aa28d2022119a4717fa4d3dac5",
-      "5d49c46d9809bf6b6ff6adb6671ce99a4cbd1af307a8560ddf3056e6323e369e",
-      "603fac5b2c6f63a66e96373c29f54eaf4fa6dd251fef6e35aff86b161d45574f",
-      "643ca01174a2e12ed2605708bb8ce4dc7b41212c7aedcc412ce63a6861a96f84",
-      "67199430faff20b80f379d4d1f9278fb23921290cb5f223d3205fc3a70ee914f",
-      "674ff70e6bf6b72fc8cb3d7c7ae5f54831492ca8ce0122de261c28c6b059ee4a",
-      "6888735a168daa3480fab1b71a8bd31401f3cd72977e5a93444556b1cbb06b1f",
-      "6bc5b79d1cfe6b5b1ba0dbd0b3f1c4e23941e43059b4ef2de9bc2a7dc13001f7",
-      "741bbd32f1e23e6e22e93c442a3c3f7383819c37aebc03ca89b0a9c2599aff6c",
-      "7adce69fdcb9b51de365a4be2fcb4acbc46cf3b99612b63f5888cc90f14123b0",
-      "7c97c24adb64cc84ec65d6fb999d939c310c5811832dced8df9ff113b3bcd6d6",
-      "80b00ddcc4a723ea161c88aac56da372b4add6c69890ca4784e2368d3740db8c",
-      "838aa66ccd7f9895e2a83f2efd8532fcede38b2fa931897caffaed7cadcb3240",
-      "85b80e932b51bff160a7b31af6201b85d1206eff76f0de88c081a827c97700ca",
-      "8864382c8c5d864b4665217a19970c1b7d9cb52dd979414940ad39f6f2eb9aa6",
-      "8d421b9a11a7621c050e6255eb6914887d8c44a1a9a8cac663f23a9307195bc7",
-      "913368afd3d343f8e70e248bdd565f5bfd2fef4f314681b644462e8d6ad86532",
-      "92d3eeb081bc9606d17f9994fb85bc2a317f3404da072708aa65496a53a66ab6",
-      "96ff4329ee84d150b53ca960837acc8f3893f148503e3d6472961f9c6dacd7d9",
-      "9bfcdde38bd5d26d4156f0dac285771ee45c2e9086294e99784376cf810e974e",
-      "9c424c5da1357638449fcc1acfbd131a9c880d3978841baf593dd1e9b88be929",
-      "9ecdbd7a44da7a37a09fe1a6478f9ecc043c2d33f57750e0bd74c9263f99a4b5",
-      "a061e89563ea1dc3eac0f53c9f1af96d4d014287fc2c9aad1e5b988831f07465",
-      "a3a435ee72fbf25bd03c6835902799e1377bb3cdf4c6a72c91110d981347b4ac",
-      "ae4d576bca1afb98110a9a97b3b210548c015ddd7d2c558fd4a379325504acf3",
-      "b0bd7251de85d514455905b30649daad5340b47ff8c9b7d2ffb4dd550be5187a",
-      "b1846f2558b1979a9431e69cb25ce765e603c4090ef1abc5986456bbc1ed7333",
-      "c9051fb4c77586c00ebe9bee5fe0a497c682f4399b8eb5c17b770cef4ff41eb3",
-      "cc971420f0ad0fe3441a4524f505fa5b3b369bb16cbec90114482e792d4a3dc4",
-      "cd92a0afa5f8c9105d6e598e5c3c74afd4181b506017fa17014214fa1f1720ce",
-      "cea023b970172785abe0d42a36edaae72b8958787e7c8e9884e04d00eb1b5330",
-      "cf7085273e91221aada624fb0ab7e2ef1d19750e0f594fec50571346b60cfb3d",
-      "d0eda3999f9327b0511029bfc577af1f67a793dbb29b2c40b50911239bc7191f",
-      "d87d987d24d80bf35721b7418afae319f4ec4fb3675b3e1cdc20b10e429e6e28",
-      "da1d42512ed8d99b68420d1daa031abd0f65853b7202ab22bc5f9aad6d95646d",
-      "dacb873b2ee4626e3cd86bb10177ca542cfa1fbadcb5c73cb49f80b0d58987d5",
-      "e68dbb1f09aeb81a472d9c9404849359fa773cd65dabfeb8696f91d2dfcefc1f",
-      "e977eba4eb4ba949461cd77bcc9fcd4ee01a725c3537c723877ff9121d2954e0",
-      "f17ba2748c27736a708eade4ab3c4497decd321c96074ef3f11374b2f78b208d",
-      "f42066d3775772831799e6e5bcd657c5c0b23e582cf7af86d31dea265e904308"
+      {
+        "id": "0143ee6c1124b372a539b33d55e003773823a6f3bba90725bccdd1f411587c0a",
+        "rule": "curl-auth-header",
+        "file": "b2b-frontend/content/fr/docs/barcodes/check.md",
+        "commit": "4ee5a022",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "02c760f6988839edc5273daeb1d08f8f313864c33ae62082e0b575b79dd6aa59",
+        "rule": "o4g-spring-inline-credential",
+        "file": "b2b-frontend/content.txt",
+        "commit": "f2394f29",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "06875f5359e3a7ab60567f370890dcf9daf74b7259e961ea80ebec671ee4a72f",
+        "rule": "curl-auth-header",
+        "file": "b2b-frontend/content/en/docs/getting-started.md",
+        "commit": "427c025e",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "15b27da5e50691f026b8b271983918ed169920f595d3038e92570ca0133dcd10",
+        "rule": "curl-auth-header",
+        "file": "b2b-frontend/content/fr/docs/barcodes/render.md",
+        "commit": "4ee5a022",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "2068311ae065978e326bb7ed8b63d2ff09e4d258df01ae9c3fb5f63d2d996e3e",
+        "rule": "o4g-spring-inline-credential",
+        "file": "code",
+        "commit": "94c20d07",
+        "classification": "credential-shaped",
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+      },
+      {
+        "id": "22d6892bd9d8d0c750891b00402c99e3b3dac4990deec1ecad6cbab621a5c341",
+        "rule": "openai-api-key",
+        "file": "ui/src/main/resources/UI-application-devsec.yml",
+        "commit": "1c52414e",
+        "classification": "credential-shaped",
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+      },
+      {
+        "id": "2626262d46a7bc3ea6f69ca66bc938abf26f32003022f00c8d32966a705a64f8",
+        "rule": "o4g-spring-inline-credential",
+        "file": "spered-conseil.fr/server/api/contact.post.ts",
+        "commit": "d61f15be",
+        "classification": "credential-shaped",
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+      },
+      {
+        "id": "29b1538896928d3e02463d2975e732e7537c6bd218268efadffa97b8ae1d6a04",
+        "rule": "generic-api-key",
+        "file": "ui/src/main/resources/UI-application-devsec.yml",
+        "commit": "1c52414e",
+        "classification": "credential-shaped",
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+      },
+      {
+        "id": "2fb749ba1a6ef35a40a74b9897961d4b88e70729b13635c68d90043d46805d97",
+        "rule": "o4g-spring-inline-credential",
+        "file": "api/src/main/resources/application-dev.yml",
+        "commit": "60651096",
+        "classification": "credential-shaped",
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+      },
+      {
+        "id": "3a28c1c7ec219a8b863082bc08dfe0f31ceed3701b8cb8791bfd67422fc37b0b",
+        "rule": "o4g-spring-inline-credential",
+        "file": "b2b-frontend/content.txt",
+        "commit": "f2394f29",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "3b9e36c9f15c8e5e71d6c371dcf97d6680a8c13c9fbfdc79eed49fb63ef8d2cf",
+        "rule": "o4g-spring-inline-credential",
+        "file": "b2b-frontend/content.txt",
+        "commit": "f2394f29",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "3c87e1065acbb517c4b5c831ed2216a69f2d5cce962555bbc27c7f941664a64d",
+        "rule": "generic-api-key",
+        "file": "devsec-api.log",
+        "commit": "296ef25b",
+        "classification": "credential-shaped",
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+      },
+      {
+        "id": "3ff9bf9c2877ccb0dc95c30102d5699a9c6ba1d79198831cc49a2e5facbaa65a",
+        "rule": "generic-api-key",
+        "file": "ui/src/main/resources/templates/contact.html",
+        "commit": "cb3d7511",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "489646037a3f9cdd6e76c2f65975ceacd374f5e77a3c001febd85cf7cb9302ae",
+        "rule": "curl-auth-header",
+        "file": "b2b-frontend/content/en/docs/authentication.md",
+        "commit": "427c025e",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "49f180a66eb7d7f1149f2e9ad0d89f42847180aa28d2022119a4717fa4d3dac5",
+        "rule": "generic-api-key",
+        "file": "verticals/src/main/resources/verticals/_default.yml",
+        "commit": "5f091808",
+        "classification": "credential-shaped",
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+      },
+      {
+        "id": "5d49c46d9809bf6b6ff6adb6671ce99a4cbd1af307a8560ddf3056e6323e369e",
+        "rule": "o4g-spring-inline-credential",
+        "file": "api/src/main/resources/application-dev.yml",
+        "commit": "0c360f8b",
+        "classification": "credential-shaped",
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+      },
+      {
+        "id": "603fac5b2c6f63a66e96373c29f54eaf4fa6dd251fef6e35aff86b161d45574f",
+        "rule": "generic-api-key",
+        "file": "ui/src/main/resources/templates/pages/tv/test-tv.html",
+        "commit": "8eb0e7d4",
+        "classification": "false-positive-test",
+        "note": "Synthetic value in a test fixture/integration test, never a live credential."
+      },
+      {
+        "id": "643ca01174a2e12ed2605708bb8ce4dc7b41212c7aedcc412ce63a6861a96f84",
+        "rule": "o4g-spring-inline-credential",
+        "file": "spered-conseil.fr/nuxt.config.ts",
+        "commit": "d61f15be",
+        "classification": "credential-shaped",
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+      },
+      {
+        "id": "67199430faff20b80f379d4d1f9278fb23921290cb5f223d3205fc3a70ee914f",
+        "rule": "generic-api-key",
+        "file": "frontend/guide_2.html",
+        "commit": "a6a388ed",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "674ff70e6bf6b72fc8cb3d7c7ae5f54831492ca8ce0122de261c28c6b059ee4a",
+        "rule": "curl-auth-header",
+        "file": "frontend/prompts/category-update.prompt",
+        "commit": "4e97b5a0",
+        "classification": "false-positive-placeholder",
+        "note": "Example/placeholder token in an AI prompt template, not a live credential."
+      },
+      {
+        "id": "6bc5b79d1cfe6b5b1ba0dbd0b3f1c4e23941e43059b4ef2de9bc2a7dc13001f7",
+        "rule": "o4g-spring-inline-credential",
+        "file": "b2b-frontend/content.txt",
+        "commit": "f2394f29",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "741bbd32f1e23e6e22e93c442a3c3f7383819c37aebc03ca89b0a9c2599aff6c",
+        "rule": "generic-api-key",
+        "file": "ui/src/main/resources/templates/contact.html",
+        "commit": "60651096",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "7adce69fdcb9b51de365a4be2fcb4acbc46cf3b99612b63f5888cc90f14123b0",
+        "rule": "curl-auth-header",
+        "file": "b2b-frontend/content/en/docs/products/price.md",
+        "commit": "427c025e",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "7c97c24adb64cc84ec65d6fb999d939c310c5811832dced8df9ff113b3bcd6d6",
+        "rule": "generic-api-key",
+        "file": "frontend/guide.html",
+        "commit": "a6a388ed",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "80b00ddcc4a723ea161c88aac56da372b4add6c69890ca4784e2368d3740db8c",
+        "rule": "curl-auth-header",
+        "file": "b2b-frontend/content/en/docs/barcodes/render.md",
+        "commit": "4ee5a022",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "838aa66ccd7f9895e2a83f2efd8532fcede38b2fa931897caffaed7cadcb3240",
+        "rule": "o4g-spring-inline-credential",
+        "file": "b2b-frontend/content.txt",
+        "commit": "f2394f29",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "85b80e932b51bff160a7b31af6201b85d1206eff76f0de88c081a827c97700ca",
+        "rule": "generic-api-key",
+        "file": "frontend/guide_2.html",
+        "commit": "39fbef40",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "8864382c8c5d864b4665217a19970c1b7d9cb52dd979414940ad39f6f2eb9aa6",
+        "rule": "aws-access-token",
+        "file": "crawler/src/test/java/org/open4goods/crawler/AmazonServiceTest.java",
+        "commit": "c54f93fb",
+        "classification": "false-positive-test",
+        "note": "Synthetic value in a test fixture/integration test, never a live credential."
+      },
+      {
+        "id": "8d421b9a11a7621c050e6255eb6914887d8c44a1a9a8cac663f23a9307195bc7",
+        "rule": "curl-auth-header",
+        "file": "frontend/prompts/category-update.prompt",
+        "commit": "957b0f10",
+        "classification": "false-positive-placeholder",
+        "note": "Example/placeholder token in an AI prompt template, not a live credential."
+      },
+      {
+        "id": "913368afd3d343f8e70e248bdd565f5bfd2fef4f314681b644462e8d6ad86532",
+        "rule": "openai-api-key",
+        "file": "api/src/main/resources/API-application-devsec.yml",
+        "commit": "1c52414e",
+        "classification": "credential-shaped",
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+      },
+      {
+        "id": "96ff4329ee84d150b53ca960837acc8f3893f148503e3d6472961f9c6dacd7d9",
+        "rule": "generic-api-key",
+        "file": "front-api/src/test/java/org/open4goods/nudgerfrontapi/controller/AuthControllerIT.java",
+        "commit": "428c684c",
+        "classification": "false-positive-test",
+        "note": "Synthetic value in a test fixture/integration test, never a live credential."
+      },
+      {
+        "id": "9bfcdde38bd5d26d4156f0dac285771ee45c2e9086294e99784376cf810e974e",
+        "rule": "curl-auth-header",
+        "file": "frontend/prompts/category-update.prompt",
+        "commit": "957b0f10",
+        "classification": "false-positive-placeholder",
+        "note": "Example/placeholder token in an AI prompt template, not a live credential."
+      },
+      {
+        "id": "9c424c5da1357638449fcc1acfbd131a9c880d3978841baf593dd1e9b88be929",
+        "rule": "o4g-spring-inline-credential",
+        "file": "code",
+        "commit": "94c20d07",
+        "classification": "credential-shaped",
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+      },
+      {
+        "id": "9ecdbd7a44da7a37a09fe1a6478f9ecc043c2d33f57750e0bd74c9263f99a4b5",
+        "rule": "generic-api-key",
+        "file": "frontend/guide.html",
+        "commit": "39fbef40",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "a061e89563ea1dc3eac0f53c9f1af96d4d014287fc2c9aad1e5b988831f07465",
+        "rule": "o4g-spring-inline-credential",
+        "file": "code",
+        "commit": "110dacfa",
+        "classification": "credential-shaped",
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+      },
+      {
+        "id": "a3a435ee72fbf25bd03c6835902799e1377bb3cdf4c6a72c91110d981347b4ac",
+        "rule": "o4g-spring-inline-credential",
+        "file": "code",
+        "commit": "110dacfa",
+        "classification": "credential-shaped",
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+      },
+      {
+        "id": "ae4d576bca1afb98110a9a97b3b210548c015ddd7d2c558fd4a379325504acf3",
+        "rule": "curl-auth-header",
+        "file": "frontend/prompts/category-update.prompt",
+        "commit": "957b0f10",
+        "classification": "false-positive-placeholder",
+        "note": "Example/placeholder token in an AI prompt template, not a live credential."
+      },
+      {
+        "id": "b0bd7251de85d514455905b30649daad5340b47ff8c9b7d2ffb4dd550be5187a",
+        "rule": "generic-api-key",
+        "file": "ui/src/main/resources/UI-application-devsec.yml",
+        "commit": "1c52414e",
+        "classification": "credential-shaped",
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+      },
+      {
+        "id": "b1846f2558b1979a9431e69cb25ce765e603c4090ef1abc5986456bbc1ed7333",
+        "rule": "generic-api-key",
+        "file": "ui/src/main/resources/templates/contact.html",
+        "commit": "9cdb957b",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "c9051fb4c77586c00ebe9bee5fe0a497c682f4399b8eb5c17b770cef4ff41eb3",
+        "rule": "curl-auth-header",
+        "file": "b2b-frontend/content/en/docs/barcodes/check.md",
+        "commit": "4ee5a022",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "cc971420f0ad0fe3441a4524f505fa5b3b369bb16cbec90114482e792d4a3dc4",
+        "rule": "o4g-spring-inline-credential",
+        "file": "ui/src/main/resources/application.yml",
+        "commit": "84109b52",
+        "classification": "credential-shaped",
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+      },
+      {
+        "id": "cd92a0afa5f8c9105d6e598e5c3c74afd4181b506017fa17014214fa1f1720ce",
+        "rule": "curl-auth-header",
+        "file": "frontend/prompts/category-update.prompt",
+        "commit": "1b2a7b46",
+        "classification": "false-positive-placeholder",
+        "note": "Example/placeholder token in an AI prompt template, not a live credential."
+      },
+      {
+        "id": "cea023b970172785abe0d42a36edaae72b8958787e7c8e9884e04d00eb1b5330",
+        "rule": "curl-auth-header",
+        "file": "frontend/prompts/category-update-thresholds.prompt",
+        "commit": "cd7805f9",
+        "classification": "false-positive-placeholder",
+        "note": "Example/placeholder token in an AI prompt template, not a live credential."
+      },
+      {
+        "id": "d0eda3999f9327b0511029bfc577af1f67a793dbb29b2c40b50911239bc7191f",
+        "rule": "generic-api-key",
+        "file": "api/src/main/resources/API-application-devsec.yml",
+        "commit": "1c52414e",
+        "classification": "credential-shaped",
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+      },
+      {
+        "id": "d87d987d24d80bf35721b7418afae319f4ec4fb3675b3e1cdc20b10e429e6e28",
+        "rule": "generic-api-key",
+        "file": "b2b-frontend/content/en/docs/authentication.md",
+        "commit": "427c025e",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "da1d42512ed8d99b68420d1daa031abd0f65853b7202ab22bc5f9aad6d95646d",
+        "rule": "generic-api-key",
+        "file": "b2b-api/src/test/java/org/open4goods/b2bapi/controller/BarcodeControllerIntegrationTest.java",
+        "commit": "4ee5a022",
+        "classification": "false-positive-test",
+        "note": "Synthetic value in a test fixture/integration test, never a live credential."
+      },
+      {
+        "id": "dacb873b2ee4626e3cd86bb10177ca542cfa1fbadcb5c73cb49f80b0d58987d5",
+        "rule": "generic-api-key",
+        "file": "services/reviewgeneration/src/test/resources/application-test.yml",
+        "commit": "041fb9ba",
+        "classification": "false-positive-test",
+        "note": "Synthetic value in a test fixture/integration test, never a live credential."
+      },
+      {
+        "id": "e68dbb1f09aeb81a472d9c9404849359fa773cd65dabfeb8696f91d2dfcefc1f",
+        "rule": "o4g-spring-inline-credential",
+        "file": "ui/src/main/resources/application-dev.yml",
+        "commit": "0c360f8b",
+        "classification": "credential-shaped",
+        "note": "Owner-reviewed historical finding accepted without revocation; rotation decision pending on GOU-60."
+      },
+      {
+        "id": "e977eba4eb4ba949461cd77bcc9fcd4ee01a725c3537c723877ff9121d2954e0",
+        "rule": "curl-auth-header",
+        "file": "frontend/prompts/category-update.prompt",
+        "commit": "a41b047a",
+        "classification": "false-positive-placeholder",
+        "note": "Example/placeholder token in an AI prompt template, not a live credential."
+      },
+      {
+        "id": "f17ba2748c27736a708eade4ab3c4497decd321c96074ef3f11374b2f78b208d",
+        "rule": "curl-auth-user",
+        "file": "front-api/README.md",
+        "commit": "428c684c",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "f42066d3775772831799e6e5bcd657c5c0b23e582cf7af86d31dea265e904308",
+        "rule": "generic-api-key",
+        "file": "b2b-api/src/test/java/org/open4goods/b2bapi/controller/ProductControllerIntegrationTest.java",
+        "commit": "95f73f2b",
+        "classification": "false-positive-test",
+        "note": "Synthetic value in a test fixture/integration test, never a live credential."
+      }
     ],
     "dir": [
-      "00f6cab600edb8966f3bdcefc9e1f77dd6f12a2ccac3ebd833d4de50f263b742",
-      "0c32845b34afee1ef22dc90b7a3c6b37f61e253ca37e8bf7e4ff2f073e6326c0",
-      "14e997037ca138064d6edacf6ce428d478a73316aea64d0490edc86758697c1f",
-      "1f3763582ef2e9f423aaaa011605553a136b6cc382e1a81bb0b8c2b65ee23850",
-      "2eee1c5451f4f295cb768974897131dd8b052271b063b4b7b39fcfe630861de0",
-      "3017a0ba329d166973753faf5d7de6c551410e42ca2ebd9add9652320bca6015",
-      "39f0ba7f851b4c2971775b8b9028d334831a6ac51076657d708774968eb0497f",
-      "715302793db36a0452f4ac210644ece06e66ed344f32d63f40db396e4c55841d",
-      "805b28cbaed6b6dedddd95a78b54b5543ff418bf1efd5923f56937b80858fd21",
-      "811143c78005bca2d7a1ae80531f4c49460edcdfb1dab6ea8c97ec31f5c68874",
-      "8470d83b4ab1ff2cf3eb4fec6e53c674e11a2ccf11b81570d1a7b7bc2e207d7c",
-      "84cf969dc5329f49d9a808d7896b5437c17896405ba4a33323777856aa4e954f",
-      "8b3f48c1e8506d34701fb7a0cfc0df53835f4616e20a8e6a8bc039c03870922a",
-      "aec41d2754c86b699ca3c05bda561f2cb49d6aedfde8d52293b13465dabcea03",
-      "c72d7344c5e11379a443622ddb059d1978dd4a138a1d4946d7b4d4612e8431f0",
-      "db2bd06dc9438984da6a4c7525fedd520f77ee4102ea097ae62e67a5d6cc4024",
-      "e4bef63f82d16a78ec5c830e4bae89a6d726f0692ade62a7e624ac53c577f906",
-      "e83f2f08b838bad09761277ec8de6b24850d7de026e4fc95204b4fefa92b4f61",
-      "e857297f5e531376ca66355b215d2817d071a9e396c4c89ec4a0275974cd4822"
+      {
+        "id": "00f6cab600edb8966f3bdcefc9e1f77dd6f12a2ccac3ebd833d4de50f263b742",
+        "rule": "curl-auth-header",
+        "file": "b2b-frontend/content/en/docs/barcodes/check.md",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "0c32845b34afee1ef22dc90b7a3c6b37f61e253ca37e8bf7e4ff2f073e6326c0",
+        "rule": "generic-api-key",
+        "file": "b2b-api/src/test/java/org/open4goods/b2bapi/controller/ProductControllerIntegrationTest.java",
+        "classification": "false-positive-test",
+        "note": "Synthetic value in a test fixture/integration test, never a live credential."
+      },
+      {
+        "id": "14e997037ca138064d6edacf6ce428d478a73316aea64d0490edc86758697c1f",
+        "rule": "curl-auth-header",
+        "file": "b2b-frontend/content/en/docs/barcodes/render.md",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "1f3763582ef2e9f423aaaa011605553a136b6cc382e1a81bb0b8c2b65ee23850",
+        "rule": "curl-auth-header",
+        "file": "b2b-frontend/content/en/docs/products/price.md",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "3017a0ba329d166973753faf5d7de6c551410e42ca2ebd9add9652320bca6015",
+        "rule": "o4g-spring-inline-credential",
+        "file": "b2b-frontend/content.txt",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "39f0ba7f851b4c2971775b8b9028d334831a6ac51076657d708774968eb0497f",
+        "rule": "o4g-spring-inline-credential",
+        "file": "b2b-frontend/content.txt",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "715302793db36a0452f4ac210644ece06e66ed344f32d63f40db396e4c55841d",
+        "rule": "o4g-spring-inline-credential",
+        "file": "b2b-frontend/content.txt",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "805b28cbaed6b6dedddd95a78b54b5543ff418bf1efd5923f56937b80858fd21",
+        "rule": "curl-auth-header",
+        "file": "b2b-frontend/content/fr/docs/barcodes/check.md",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "811143c78005bca2d7a1ae80531f4c49460edcdfb1dab6ea8c97ec31f5c68874",
+        "rule": "curl-auth-user",
+        "file": "front-api/README.md",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "8470d83b4ab1ff2cf3eb4fec6e53c674e11a2ccf11b81570d1a7b7bc2e207d7c",
+        "rule": "curl-auth-header",
+        "file": "b2b-frontend/content/en/docs/authentication.md",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "84cf969dc5329f49d9a808d7896b5437c17896405ba4a33323777856aa4e954f",
+        "rule": "curl-auth-header",
+        "file": "b2b-frontend/content/en/docs/getting-started.md",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "aec41d2754c86b699ca3c05bda561f2cb49d6aedfde8d52293b13465dabcea03",
+        "rule": "o4g-spring-inline-credential",
+        "file": "b2b-frontend/content.txt",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "c72d7344c5e11379a443622ddb059d1978dd4a138a1d4946d7b4d4612e8431f0",
+        "rule": "generic-api-key",
+        "file": "b2b-api/src/test/java/org/open4goods/b2bapi/controller/BarcodeControllerIntegrationTest.java",
+        "classification": "false-positive-test",
+        "note": "Synthetic value in a test fixture/integration test, never a live credential."
+      },
+      {
+        "id": "db2bd06dc9438984da6a4c7525fedd520f77ee4102ea097ae62e67a5d6cc4024",
+        "rule": "curl-auth-header",
+        "file": "b2b-frontend/content/fr/docs/barcodes/render.md",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "e4bef63f82d16a78ec5c830e4bae89a6d726f0692ade62a7e624ac53c577f906",
+        "rule": "generic-api-key",
+        "file": "front-api/src/test/java/org/open4goods/nudgerfrontapi/controller/AuthControllerIT.java",
+        "classification": "false-positive-test",
+        "note": "Synthetic value in a test fixture/integration test, never a live credential."
+      },
+      {
+        "id": "e83f2f08b838bad09761277ec8de6b24850d7de026e4fc95204b4fefa92b4f61",
+        "rule": "generic-api-key",
+        "file": "b2b-frontend/content/en/docs/authentication.md",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      },
+      {
+        "id": "e857297f5e531376ca66355b215d2817d071a9e396c4c89ec4a0275974cd4822",
+        "rule": "o4g-spring-inline-credential",
+        "file": "b2b-frontend/content.txt",
+        "classification": "false-positive-doc",
+        "note": "Documentation or example content (guide/README/curl sample), not a live credential."
+      }
     ]
   }
 }
