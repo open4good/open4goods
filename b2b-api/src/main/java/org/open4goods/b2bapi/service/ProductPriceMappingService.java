@@ -20,6 +20,9 @@ import org.open4goods.model.price.PriceHistory;
 import org.open4goods.model.price.PriceTrend;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductCondition;
+import org.open4goods.model.provider.PublicProviderLabel;
+import org.open4goods.model.provider.PublicProviderLabelRegistry;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -28,17 +31,21 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProductPriceMappingService {
 
-    private static final String FAVICON_ENDPOINT = "/api/favicon?url=";
+    private final PublicProviderLabelRegistry providerLabels;
     private final Clock clock;
 
     /**
      * Creates a mapper using the system UTC clock for freshness calculations.
+     *
+     * @param providerLabels Git-versioned public provider label registry
      */
-    public ProductPriceMappingService() {
-        this(Clock.systemUTC());
+    @Autowired
+    public ProductPriceMappingService(PublicProviderLabelRegistry providerLabels) {
+        this(providerLabels, Clock.systemUTC());
     }
 
-    ProductPriceMappingService(Clock clock) {
+    ProductPriceMappingService(PublicProviderLabelRegistry providerLabels, Clock clock) {
+        this.providerLabels = Objects.requireNonNull(providerLabels, "providerLabels must not be null");
         this.clock = clock;
     }
 
@@ -102,8 +109,9 @@ public class ProductPriceMappingService {
         if (price == null) {
             return null;
         }
+        PublicProviderLabel label = providerLabels.find(price.getDatasourceName()).orElse(null);
         return new B2bOfferDto(
-                price.shortDataSourceName(),
+                label == null ? null : label.label(),
                 price.getOfferName(),
                 price.getUrl(),
                 price.getProductState(),
@@ -111,7 +119,7 @@ public class ProductPriceMappingService {
                 toJavaCurrency(price.getCurrency()),
                 toInstant(price.getTimeStamp()),
                 freshnessAgeDays(price),
-                buildFaviconUrl(price.shortDataSourceName()));
+                label == null ? null : label.faviconUrl());
     }
 
     private AggregatedPrice bestOffer(List<AggregatedPrice> offers) {
@@ -229,10 +237,6 @@ public class ProductPriceMappingService {
 
     private java.util.Currency toJavaCurrency(org.open4goods.model.price.Currency currency) {
         return currency == null ? null : java.util.Currency.getInstance(currency.name());
-    }
-
-    private String buildFaviconUrl(String merchant) {
-        return isBlank(merchant) ? null : FAVICON_ENDPOINT + merchant;
     }
 
     private Double amount(AggregatedPrice price) {

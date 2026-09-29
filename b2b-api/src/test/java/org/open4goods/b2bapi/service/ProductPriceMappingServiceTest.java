@@ -18,6 +18,9 @@ import org.open4goods.model.price.Currency;
 import org.open4goods.model.price.PriceHistory;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductCondition;
+import org.open4goods.model.provider.PublicProviderLabel;
+import org.open4goods.model.provider.PublicProviderLabelDocument;
+import org.open4goods.model.provider.PublicProviderLabelRegistry;
 
 /**
  * Verifies sanitized B2B price facet mapping from product aggregates.
@@ -25,7 +28,11 @@ import org.open4goods.model.product.ProductCondition;
 class ProductPriceMappingServiceTest {
 
     private static final Instant NOW = Instant.parse("2026-06-15T12:00:00Z");
-    private final ProductPriceMappingService service = new ProductPriceMappingService(Clock.fixed(NOW, ZoneOffset.UTC));
+    private final PublicProviderLabelRegistry providerLabels = new PublicProviderLabelRegistry(
+            new PublicProviderLabelDocument(List.of(
+                    new PublicProviderLabel("amazon.fr", "Amazon Test Fixture", "https://amazon-test-fixture.example/favicon.ico"))));
+    private final ProductPriceMappingService service =
+            new ProductPriceMappingService(providerLabels, Clock.fixed(NOW, ZoneOffset.UTC));
 
     @Test
     void mapsOnlyFreshOffersAndGroupsThemByCondition() {
@@ -39,13 +46,46 @@ class ProductPriceMappingServiceTest {
         assertThat(dto.gtin()).isEqualTo("00012345678905");
         assertThat(dto.offersCount()).isEqualTo(3);
         assertThat(dto.freshOffersCount()).isEqualTo(2);
-        assertThat(dto.bestPrice().merchant()).isEqualTo("market");
+        assertThat(dto.bestPrice().merchant()).isNull();
         assertThat(dto.bestNewOffer().amount()).isEqualTo(799.99);
         assertThat(dto.offersByCondition()).containsOnlyKeys(ProductCondition.NEW, ProductCondition.OCCASION);
         assertThat(dto.offersByCondition().get(ProductCondition.NEW)).extracting(B2bOfferDto::merchant)
-                .containsExactly("amazon");
+                .containsExactly("Amazon Test Fixture");
+        assertThat(dto.offersByCondition().get(ProductCondition.NEW)).extracting(B2bOfferDto::faviconUrl)
+                .containsExactly("https://amazon-test-fixture.example/favicon.ico");
         assertThat(dto.offersByCondition().get(ProductCondition.OCCASION)).extracting(B2bOfferDto::freshnessAgeDays)
                 .containsExactly(2);
+    }
+
+    @Test
+    void unmappedSourceYieldsAbsentLabelRatherThanALeak() {
+        Product product = productWithPrices(offer("market.example", ProductCondition.NEW, 599.99, daysAgo(1)));
+
+        B2bPriceDto dto = service.map(product, "00012345678905", 30);
+
+        B2bOfferDto offer = dto.offersByCondition().get(ProductCondition.NEW).get(0);
+        assertThat(offer.merchant()).isNull();
+        assertThat(offer.faviconUrl()).isNull();
+    }
+
+    @Test
+    void noResponseFieldEverCarriesAnInternalDatasourceName() {
+        Product product = productWithPrices(
+                offer("amazon.fr", ProductCondition.NEW, 799.99, daysAgo(1)),
+                offer("market.example", ProductCondition.OCCASION, 599.99, daysAgo(2)));
+
+        B2bPriceDto dto = service.map(product, "00012345678905", 30);
+
+        List<B2bOfferDto> allOffers = List.of(
+                dto.offersByCondition().get(ProductCondition.NEW).get(0),
+                dto.offersByCondition().get(ProductCondition.OCCASION).get(0));
+        for (B2bOfferDto mappedOffer : allOffers) {
+            assertThat(mappedOffer.merchant() == null
+                    || (!mappedOffer.merchant().contains("amazon.fr") && !mappedOffer.merchant().contains("market.example")))
+                    .isTrue();
+            assertThat(mappedOffer.faviconUrl() == null || !mappedOffer.faviconUrl().contains("market.example"))
+                    .isTrue();
+        }
     }
 
     @Test

@@ -123,7 +123,7 @@ Facet-critical redactions (the source `AggregatedPrice` carries all of these):
 |---|---|
 | `compensation` | private commercial metadata |
 | `affiliationToken` | affiliate secret |
-| raw `datasourceName` | internal id; expose `shortDataSourceName()` label only |
+| raw `datasourceName` | internal id; `merchant`/`faviconUrl` come only from the reviewed `PublicProviderLabelRegistry` (`model` module) - an unmapped source leaves both absent |
 | `quantityInStock`, `shippingTime`, `shippingCost` | unreliably collected; v1 must not imply stock/shipping data |
 
 ## 5. No-data-no-pay matrix
