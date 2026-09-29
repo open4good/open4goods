@@ -69,4 +69,24 @@ describe('Google OAuth callback', () => {
     await expect(handler({} as Parameters<CallbackHandler>[0])).rejects.toThrow('Google sign-in was refused')
     expect(fetchMock).toHaveBeenCalledTimes(2)
   })
+
+  it('purges the one-time cookies even when the state check fails before any provider call', async () => {
+    vi.stubGlobal('getQuery', () => ({ code: 'provider-code', state: 'unexpected-state' }))
+
+    await expect(handler({} as Parameters<CallbackHandler>[0])).rejects.toThrow('Google sign-in was refused')
+
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(deleteCookieMock).toHaveBeenCalledWith(expect.anything(), 'oidc_state', expect.anything())
+    expect(deleteCookieMock).toHaveBeenCalledWith(expect.anything(), 'oidc_nonce', expect.anything())
+    expect(deleteCookieMock).toHaveBeenCalledWith(expect.anything(), 'oidc_verifier', expect.anything())
+    expect(deleteCookieMock).toHaveBeenCalledWith(expect.anything(), 'oidc_redirect', expect.anything())
+  })
+
+  it('rejects a state value carrying a different byte length instead of throwing', async () => {
+    cookies.set('oidc_state', 'état-attendu')
+    vi.stubGlobal('getQuery', () => ({ code: 'provider-code', state: 'etat-attendu' }))
+
+    await expect(handler({} as Parameters<CallbackHandler>[0])).rejects.toThrow('Google sign-in was refused')
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
 })

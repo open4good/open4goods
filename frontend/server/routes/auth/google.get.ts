@@ -8,10 +8,12 @@ const OIDC_COOKIE_OPTIONS = {
   maxAge: 600,
 }
 
-const safeRedirect = (value: unknown) =>
-  typeof value === 'string' && value.startsWith('/') && !value.startsWith('//')
-    ? value
-    : '/'
+const safeRedirect = (value: unknown) => {
+  if (typeof value !== 'string' || value.length === 0) return '/'
+  if (value.includes('\\')) return '/'
+  if (!value.startsWith('/') || value.startsWith('//')) return '/'
+  return value
+}
 
 /** Starts Google Authorization Code with PKCE from the server-side Nuxt BFF. */
 export default defineEventHandler(event => {

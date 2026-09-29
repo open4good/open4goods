@@ -7,8 +7,12 @@ const OIDC_COOKIE_OPTIONS = {
   path: '/auth/google',
 }
 
-const matchingState = (actual: string | undefined, expected: string | undefined) =>
-  Boolean(actual && expected && actual.length === expected.length && timingSafeEqual(Buffer.from(actual), Buffer.from(expected)))
+const matchingState = (actual: string | undefined, expected: string | undefined) => {
+  if (!actual || !expected) return false
+  const actualBuffer = Buffer.from(actual, 'utf8')
+  const expectedBuffer = Buffer.from(expected, 'utf8')
+  return actualBuffer.length === expectedBuffer.length && timingSafeEqual(actualBuffer, expectedBuffer)
+}
 
 const tokenNonce = (idToken: string) => {
   const payload = idToken.split('.')[1]
@@ -29,11 +33,11 @@ export default defineEventHandler(async event => {
   const verifier = getCookie(event, 'oidc_verifier')
   const redirect = getCookie(event, 'oidc_redirect') || '/'
 
-  if (typeof query.error === 'string' || typeof query.code !== 'string' || !matchingState(query.state as string | undefined, expectedState) || !verifier) {
-    throw createError({ statusCode: 401, statusMessage: 'Google sign-in was refused' })
-  }
-
   try {
+    if (typeof query.error === 'string' || typeof query.code !== 'string' || !matchingState(query.state as string | undefined, expectedState) || !verifier) {
+      throw createError({ statusCode: 401, statusMessage: 'Google sign-in was refused' })
+    }
+
     const providerTokens = await $fetch<{ id_token?: string }>('https://oauth2.googleapis.com/token', {
       method: 'POST',
       body: new URLSearchParams({
