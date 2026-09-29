@@ -1,7 +1,7 @@
 ---
 title: "Canonical decisions"
 status: accepted
-last_updated: 2026-09-17
+last_updated: 2026-09-29
 normative: true
 audience: PROJECT_SCOPED
 ---
@@ -64,10 +64,10 @@ ADR that changes a rule updates the entry here in the same commit.
     requires a dedicated Paperclip issue, a relevance benchmark and a capacity benchmark;
     no dormant query-time text embedding or vector-search path is retained.
 14. Issues progress through DEVELOPMENT, BETA_VALIDATION, PRODUCTION and
-    POST_PRODUCTION. DEVELOPMENT is strictly local: it has no runtime dependency on
-    a Nudger domain or beta host. Beta and production promotion each require a
+    POST_PRODUCTION. DEVELOPMENT uses isolated stores and applications, including on
+    a shared build host, with no dependency on beta services or Nudger domains. Beta and production promotion each require a
     recorded, explicit owner decision after their phase checks pass; phase readiness
     alone does not authorize a promotion. Physical retirement still waits for seven
     healthy days and verified restoration.
-    Local migration starts from a pinned product backup, then explicitly triggered live
-    provider enrichment; startup never launches heavy ingestion jobs.
+    Merges run CI without deployment. Final qualification uses a recent pinned product
+    backup and explicit provider enrichment; startup never launches heavy ingestion jobs.

@@ -19,8 +19,9 @@ for code that can and must be qualified locally from the pinned product backup.
 Delivery uses four ordered phases: DEVELOPMENT, BETA_VALIDATION, PRODUCTION and
 POST_PRODUCTION. DEVELOPMENT is strictly local. Its applications and infrastructure use
 loopback endpoints, ignored local configuration and a read-only backup mount; no runtime,
-code generation or test in this phase depends on `nudger.fr`, `beta.nudger.fr` or the beta
-host. Public brand and deployment contracts may retain Nudger production domains.
+code generation or test in this phase depends on `nudger.fr`, `beta.nudger.fr` or beta
+services/data. The 2026-09-29 owner decision permits the shared build host only with
+dedicated rootless stores, separate ports, bounded resources and read-only backup input. Public brand and deployment contracts may retain Nudger production domains.
 
 Local infrastructure runs persistently in Docker while Java and Nuxt applications run
 natively. The `local` Spring profile is the normal path and never implicitly loads
@@ -28,7 +29,8 @@ natively. The `local` Spring profile is the normal path and never implicitly loa
 available only through explicit, logged operator commands; heavy ingestion never starts
 with the stack. Fast loops use a deterministic representative sample, but closing local
 readiness requires an empty-index import and full recette against the complete, immutable,
-checksum-verified backup. XWiki is transitional and local-only for migration validation;
+checksum-verified recent backup. Historical archives serve development loops; a new
+backup is qualified in full before the final beta rehearsal. XWiki is transitional and local-only for migration validation;
 the final local recette runs without it.
 
 Phase gates are global. BETA_VALIDATION waits until every DEVELOPMENT issue, including

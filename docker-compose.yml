@@ -95,4 +95,7 @@ services:
       - "127.0.0.1:8080:8080"
     volumes:
       - ${O4G_LOCAL_DATA_ROOT:-./.local/data}/xwiki:/usr/local/xwiki
-      - ${PRODUCT_BACKUP_SOURCE_URI:-./.local/backup}:/opt/open4goods/backup:ro
+      - type: bind
+        source: ${PRODUCT_BACKUP_SOURCE_URI:-./.local/backup}
+        target: /opt/open4goods/backup
+        read_only: true

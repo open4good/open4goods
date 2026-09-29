@@ -15,8 +15,10 @@ spec:
   execution:
     defaultPhase: DEVELOPMENT
     phases: [DEVELOPMENT, BETA_VALIDATION, PRODUCTION, POST_PRODUCTION]
-    developmentTargets: [local]
-    developmentNetworkPolicy: no-nudger-or-beta-runtime-dependency
+    developmentTargets: [local, isolated-build]
+    developmentNetworkPolicy: no-nudger-or-beta-service-or-data-dependency
+    mergePolicy: independent-review-and-green-ci-without-deployment
+    promotionImplementation: frozen-pending-immutable-artifact-qualification
     betaValidationTargets: [beta]
     betaAuthority: [deploy, restart, migrate, environment-config, beta-only-secrets]
     betaCleanup: exact-targets-after-verified-restore
@@ -28,7 +30,7 @@ spec:
     postProductionRetirement: dependency-gated-after-healthy-window-and-verified-restore
     migrationInputRef: PRODUCT_BACKUP_SOURCE_URI
     migrationStrategy: backup-baseline-then-provider-enrichment
-    freshness: dated-snapshot-then-collection-resumption
+    freshness: recent-snapshot-qualified-before-final-beta-rehearsal
     productionPromotion: pinned-beta-validated-release-and-dataset
     reviewAuthority: owner-for-ambiguous-mappings-and-source-rights
     newInfrastructureSpend: owner-only

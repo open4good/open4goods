@@ -30,8 +30,8 @@ Load what the task needs, knowing the price. Everything below is the project cor
 
 Select work from the [Nudger Paperclip issues](https://yamaka.me/GOU/projects/nudger/issues).
 Read the assigned issue, its blockers and its acceptance criteria before changing code;
-keep the change within its stated scope. DEVELOPMENT is strictly local: no beta host or
-Nudger domain may be a runtime dependency. BETA_VALIDATION and PRODUCTION each require
+keep the change within its stated scope. DEVELOPMENT uses an isolated local runtime, including on the shared build host;
+no beta service, data store or Nudger domain may be a runtime dependency. BETA_VALIDATION and PRODUCTION each require
 an explicit owner decision recorded in Paperclip after their phase checks pass.
 POST_PRODUCTION retirement still requires its healthy-window gate.
 `docs/reference/roadmap.md` is a dated migration index, not a live roadmap.
@@ -168,11 +168,11 @@ git config core.hooksPath .githooks
 3. Tests added/updated; coverage not reduced.  
 4. `./scripts/lint.sh` passes locally.
 5. Docs (agents.md, README, ADR, Javadoc, spring-configuration-metadata.json) updated.
-6. **Merging deploys beta.** Every merge to `main` deploys the beta, so it needs an explicit
-   owner decision for that PR and its candidate SHA, taken after review and green CI (agents
-   working through Paperclip ask with a `request_confirmation` card on the issue, naming the PR,
-   the SHA and the phase checks). Approving a plan, a review or an earlier promotion does not
-   grant it. Production needs its own decision after beta validation.
+6. **Merging does not deploy.** Ordinary PRs require independent review and green CI.
+   Beta and production promotion each require a fresh owner decision in Paperclip for the
+   candidate SHA, artifact and dataset digests, recent backup, rollback and phase evidence.
+   A plan approval does not authorize promotion. The legacy production workflow remains
+   frozen until the immutable-candidate promotion path has been qualified (ADR-0015).
 
 ---
 
