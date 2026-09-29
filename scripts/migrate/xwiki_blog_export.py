@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Export the XWiki 'Blog' space into Nuxt Content Markdown + local media.
 
-AC1 of xwiki-blog-to-nuxt-content (.o4g/work/xwiki-blog-to-nuxt-content.yml): a repeatable
+AC1 of xwiki-blog-to-nuxt-content (.o4g/work/ledger/xwiki-blog-to-nuxt-content.yml): a repeatable
 export that turns each Blog.BlogPostClass page into validated Markdown with stable slug,
 language, author, dates, tags and state, plus its attachments saved as local media.
 

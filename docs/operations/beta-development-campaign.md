@@ -7,11 +7,11 @@ lang: fr
 
 # Developpement strictement local et promotions phasees
 
-ADR-0014 et le contrat [Project](../../.o4g/project.yml) decrivent quatre phases.
+ADR-0014, ADR-0015 et le contrat [Project](../../.o4g/project.yml) decrivent quatre phases.
 DEVELOPMENT utilise uniquement la machine locale; beta sert ensuite a valider le
 candidat deja qualifie, puis le meme SHA, les memes artefacts et le meme dataset
-sont promus en production. L'ordre proprietaire permanent du 17 septembre 2026
-autorise ces deux promotions lorsque les gates sont verts.
+sont promus en production. Chaque promotion beta et production exige une decision
+explicite du proprietaire enregistree dans Paperclip apres validation des gates.
 
 ## Stack locale
 
@@ -67,11 +67,11 @@ scripts/local/open4goods.sh jobs run eprel
 scripts/local/open4goods.sh jobs run icecat
 scripts/local/open4goods.sh jobs run feeds
 scripts/local/open4goods.sh jobs run batch
-scripts/work/wo.py next --phase BETA_VALIDATION
 ```
 
-`local-campaign-readiness` ne peut fermer tant qu'un autre ordre DEVELOPMENT reste
-ouvert et exige la preuve exacte `local-full-recette:passed`. La beta reste alors
-`AWAITING_DEVELOPMENT`; la production reste `AWAITING_BETA_VALIDATION`. Les retraits
+L'[issue local-campaign-readiness](https://yamaka.me/GOU/issues/GOU-45) ne peut fermer
+tant qu'une autre issue DEVELOPMENT reste ouverte et exige la preuve exacte
+`local-full-recette:passed`. Les phases beta et production attendent la fermeture
+de leur gate respectif puis une decision explicite du proprietaire. Les retraits
 physiques d'index historiques et de XWiki attendent sept jours complets sains et une
 restauration verifiee en POST_PRODUCTION.

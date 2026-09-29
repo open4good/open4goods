@@ -4,7 +4,7 @@
 Checks the things a reader cannot check by reading: that every governed document
 declares its resolution, that a normative document is written in a language an
 English-reading agent can parse, that internal links resolve, and that every
-cited ADR and WorkOrder identifier actually exists. Canonical decision 9 is the
+cited ADR identifier actually exists. Canonical decision 9 is the
 reason this is a gate and not a convention -- a stale claim in a guide is a
 defect, and the cheapest ones to catch are the mechanical ones.
 """
@@ -22,7 +22,6 @@ ROOT = Path(__file__).resolve().parents[2]
 FRONT_MATTER = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
 LINK = re.compile(r"(?<!!)\[[^\]]*\]\(([^)]+)\)")
 ADR = re.compile(r"\bADR-(\d{4})\b")
-SPECIFICATION_REF = re.compile(r"^(\.o4g/specifications|archive/specs)/[a-z0-9][a-z0-9-]*\.md$")
 
 # Published website content is authored against the Nuxt Content schema, not
 # ours; generated projections are rewritten by their generator (decision 2, 8).
@@ -75,25 +74,16 @@ def local_link_target(source: Path, target: str) -> Path | None:
     return (source.parent / target).resolve()
 
 
-def active_ids(root: Path) -> tuple[set[str], set[str]]:
+def active_ids(root: Path) -> set[str]:
     adr_dir = root / "docs" / "adr"
     decisions = {p.name[:4] for p in adr_dir.glob("[0-9][0-9][0-9][0-9]-*.md")} if adr_dir.is_dir() else set()
-    work_dir = root / ".o4g" / "work"
-    work: set[str] = set()
-    if work_dir.is_dir():
-        work = {p.stem for p in work_dir.glob("*.yml")}
-        ledger = work_dir / "ledger"
-        if ledger.is_dir():
-            # A closed WorkOrder is compacted into ledger/ (decision 8); a
-            # document may still cite it by id.
-            work |= {p.stem for p in ledger.glob("*.yml")}
-    return decisions, work
+    return decisions
 
 
 def lint(root: Path) -> list[str]:
     root = root.resolve()
     problems: list[str] = []
-    decisions, work = active_ids(root)
+    decisions = active_ids(root)
 
     for path in governed_paths(root):
         relative = path.relative_to(root).as_posix()
@@ -113,59 +103,6 @@ def lint(root: Path) -> list[str]:
             if identifier not in decisions:
                 problems.append(f"{relative}: invalid decision reference ADR-{identifier}")
 
-    work_dir = root / ".o4g" / "work"
-    if work_dir.is_dir():
-        referenced_specifications: set[str] = set()
-        for path in sorted(work_dir.glob("*.yml")):
-            try:
-                data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-            except yaml.YAMLError as exc:
-                problems.append(f"{path.name}: invalid YAML: {exc}")
-                continue
-            spec = data.get("spec") or {}
-            if spec.get("executionPhase") not in {
-                "DEVELOPMENT", "BETA_VALIDATION", "PRODUCTION", "POST_PRODUCTION"
-            }:
-                problems.append(f"{path.name}: explicit executionPhase is required")
-            if type(spec.get("priority")) is not int or spec["priority"] < 0:
-                problems.append(f"{path.name}: nonnegative integer priority is required")
-            criteria = spec.get("acceptanceCriteria") or []
-            if not criteria or any(not isinstance(item, dict) or not item.get("id") or not item.get("statement") for item in criteria):
-                problems.append(f"{path.name}: acceptanceCriteria need id and statement")
-            elif len({item["id"] for item in criteria}) != len(criteria):
-                problems.append(f"{path.name}: duplicate acceptance criterion id")
-            for field in ("implementationPlan", "externalBlockers"):
-                entries = spec.get(field, [])
-                if not isinstance(entries, list) or any(not isinstance(item, str) or not item.strip() for item in entries):
-                    problems.append(f"{path.name}: {field} must be a list of nonempty strings")
-            for identifier in spec.get("decisionRefs") or []:
-                token = str(identifier).removeprefix("ADR-")
-                if token not in decisions:
-                    problems.append(f"{path.name}: invalid decision reference {identifier}")
-            for identifier in spec.get("dependsOn") or []:
-                if identifier not in work:
-                    problems.append(f"{path.name}: invalid work-order reference {identifier}")
-            references = spec.get("specificationRefs", [])
-            if not isinstance(references, list) or any(not isinstance(reference, str) for reference in references):
-                problems.append(f"{path.name}: specificationRefs must be a list of paths")
-                continue
-            for reference in references:
-                if not SPECIFICATION_REF.fullmatch(reference):
-                    problems.append(f"{path.name}: malformed specification reference {reference!r}")
-                    continue
-                if not reference.startswith(".o4g/specifications/"):
-                    problems.append(f"{path.name}: open WorkOrders may reference only .o4g/specifications/")
-                    continue
-                if not (root / reference).is_file():
-                    problems.append(f"{path.name}: specification reference does not resolve {reference!r}")
-                    continue
-                referenced_specifications.add(reference)
-        specifications = root / ".o4g" / "specifications"
-        if specifications.is_dir():
-            for path in specifications.glob("*.md"):
-                reference = path.relative_to(root).as_posix()
-                if reference not in referenced_specifications:
-                    problems.append(f"{reference}: specification has no open WorkOrder reference")
     return problems
 
 

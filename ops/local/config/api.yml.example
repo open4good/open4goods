@@ -2,7 +2,7 @@ server:
   port: 8081
 spring:
   elasticsearch:
-    uris: http://localhost:9200
+    uris: http://localhost:${O4G_PORT_ELASTICSEARCH:9200}
 open4goods:
   scheduling:
     enabled: false
@@ -12,4 +12,4 @@ api:
     data-backup-folder: ${PRODUCT_BACKUP_SOURCE_URI}
     xwiki-backup-file: ${XWIKI_XAR_PATH}
 xwiki:
-  baseUrl: http://localhost:8080/xwiki
+  baseUrl: http://localhost:${O4G_PORT_XWIKI:8080}/xwiki
