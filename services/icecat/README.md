@@ -8,6 +8,18 @@ methods for product enrichment.
 - Downloads and caches Icecat XML files through `RemoteFileCachingService`.
 - Parses languages, brands, feature groups and categories.
 - Provides utilities to resolve Icecat feature names.
+- Streams the Open Icecat reference-catalogue export (CategoriesList, FeaturesList,
+  FeatureGroupsList, LanguageList, and the Full-account CategoryFeaturesList) with a StAX
+  cursor reader (`IcecatReferenceCatalogueReader`), never buffering a whole file — the manual
+  documents CategoryFeaturesList.xml as larger than 10 GB. `IcecatCatalogueInventoryService`
+  resolves each configured `*-file-uri` from a local path (no network, no credential) or a
+  remote URL (delegated to `IcecatFileDownloadService`, which requires an Open Icecat account)
+  and builds an `IcecatCatalogueInventory` of category, feature, feature-group and language
+  counts. `IcecatMappingCoverageService.coverage(LocalDate, IcecatCatalogueInventory)` and
+  `unmappedCategories(LocalDate, int, IcecatCatalogueInventory)` report coverage against that
+  inventory instead of the Elasticsearch index, so coverage can be exercised offline against the
+  hand-built fixtures under `src/test/resources/icecat/inventory/`. Feature-group counts are
+  presentation metadata only; nothing here promotes them to a canonical attribute.
 
 ## Configuration
 
