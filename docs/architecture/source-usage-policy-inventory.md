@@ -12,6 +12,16 @@ missing policy, a source mismatch, an unreviewed policy, a prohibited
 redistribution setting, an out-of-period policy and a revoked policy. Derived
 fields never inherit a provider permission.
 
+Each policy grants surfaces per content type through `surfaceGrants`, a map from
+content type to its allowed projection surfaces, rather than a flat content-type
+set crossed with a flat surface set. A source can clear its identifiers (GTIN,
+MPN) for the `ODBL_EXPORT` surface without that clearing its attributes, text or
+media for the same surface — a distinction a cartesian product could not
+express, and that a second policy record cannot supply either, because a source
+record carries exactly one policy reference. A content type present as a key
+with an empty surface set is still reviewed for `allowsUse` (e.g. a named use
+such as AI training); it is simply published nowhere.
+
 A policy also carries a deny-by-default `derivativeLicence` (e.g. the Icecat
 share-alike obligation), a deny-by-default `prohibitedUses` set (e.g.
 `AI_TRAINING`, `SYNTHETIC_CONTENT_GENERATION`), and an attribution

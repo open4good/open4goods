@@ -4,8 +4,11 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.net.URI;
+import java.util.Collections;
+import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -23,11 +26,21 @@ import java.util.Set;
  * images, and a policy that could only speak about a whole source would have to
  * take the most restrictive reading of all of them.
  *
+ * <p>Surface grants are keyed by content type rather than a cartesian product of
+ * two flat sets, because the two do not vary independently: a source that
+ * clears its identifiers for the ODbL export never clears its attributes or
+ * text for the same surface, and a flat {@code contentTypes x allowedSurfaces}
+ * pair cannot express that without a second policy record, which the
+ * single-reference resolution model cannot evaluate against. A content type
+ * present as a key, even with an empty surface set, is a content type the
+ * policy speaks about for {@link #allowsUse}; a content type absent from the
+ * map is not covered at all.
+ *
  * @param policyId stable policy identifier
  * @param sourceId source governed by the policy
  * @param version policy version
- * @param contentTypes content types this policy speaks about; empty covers none
- * @param allowedSurfaces explicitly allowed projection surfaces; empty denies all
+ * @param surfaceGrants projection surfaces explicitly allowed per content type; a covered content
+ *     type with an empty surface set is reviewed but published nowhere
  * @param effectiveFrom first instant the policy applies
  * @param effectiveUntil last instant the policy applies, or {@code null} when open-ended
  * @param retention maximum retention of source assertions under this policy
@@ -45,8 +58,7 @@ public record SourceUsagePolicy(
         String policyId,
         SourceId sourceId,
         String version,
-        Set<SourceContentType> contentTypes,
-        Set<ProjectionSurface> allowedSurfaces,
+        Map<SourceContentType, Set<ProjectionSurface>> surfaceGrants,
         Instant effectiveFrom,
         Instant effectiveUntil,
         Duration retention,
@@ -67,8 +79,7 @@ public record SourceUsagePolicy(
         policyId = requireText(policyId, "policyId");
         Objects.requireNonNull(sourceId, "sourceId must not be null");
         version = requireText(version, "version");
-        contentTypes = contentTypes == null ? Set.of() : Set.copyOf(contentTypes);
-        allowedSurfaces = allowedSurfaces == null ? Set.of() : Set.copyOf(allowedSurfaces);
+        surfaceGrants = copySurfaceGrants(surfaceGrants);
         Objects.requireNonNull(effectiveFrom, "effectiveFrom must not be null");
         if (effectiveUntil != null && effectiveUntil.isBefore(effectiveFrom)) {
             throw new IllegalArgumentException("effectiveUntil must not precede effectiveFrom");
@@ -102,8 +113,7 @@ public record SourceUsagePolicy(
      * @param policyId stable policy identifier
      * @param sourceId source governed by the policy
      * @param version policy version
-     * @param contentTypes content types the policy covers
-     * @param allowedSurfaces explicitly allowed projection surfaces
+     * @param surfaceGrants projection surfaces explicitly allowed per content type
      * @param effectiveFrom first instant the policy applies
      * @param effectiveUntil last instant the policy applies, or {@code null}
      * @param retention maximum retention of source assertions
@@ -119,8 +129,7 @@ public record SourceUsagePolicy(
             String policyId,
             SourceId sourceId,
             String version,
-            Set<SourceContentType> contentTypes,
-            Set<ProjectionSurface> allowedSurfaces,
+            Map<SourceContentType, Set<ProjectionSurface>> surfaceGrants,
             Instant effectiveFrom,
             Instant effectiveUntil,
             Duration retention,
@@ -131,7 +140,7 @@ public record SourceUsagePolicy(
             Set<ProhibitedUse> prohibitedUses,
             LocalDate legalReviewDate,
             List<URI> evidenceReferences) {
-        this(policyId, sourceId, version, contentTypes, allowedSurfaces, effectiveFrom, effectiveUntil, retention,
+        this(policyId, sourceId, version, surfaceGrants, effectiveFrom, effectiveUntil, retention,
                 mediaCache, attribution, redistribution, derivativeLicence, prohibitedUses, legalReviewDate,
                 PolicyReviewState.REVIEWED, null, evidenceReferences);
     }
@@ -156,8 +165,7 @@ public record SourceUsagePolicy(
                 policyId,
                 sourceId,
                 version,
-                Set.of(),
-                Set.of(),
+                Map.of(),
                 effectiveFrom,
                 null,
                 Duration.ZERO,
@@ -186,8 +194,7 @@ public record SourceUsagePolicy(
         }
         return reviewState == PolicyReviewState.REVIEWED
                 && redistribution != RedistributionPolicy.PROHIBITED
-                && contentTypes.contains(contentType)
-                && allowedSurfaces.contains(surface)
+                && surfaceGrants.getOrDefault(contentType, Set.of()).contains(surface)
                 && isEffectiveAt(instant);
     }
 
@@ -209,9 +216,19 @@ public record SourceUsagePolicy(
             return false;
         }
         return reviewState == PolicyReviewState.REVIEWED
-                && contentTypes.contains(contentType)
+                && surfaceGrants.containsKey(contentType)
                 && isEffectiveAt(instant)
                 && !prohibitedUses.contains(use);
+    }
+
+    /**
+     * Returns the content types this policy speaks about, independently of which
+     * surfaces each one was granted.
+     *
+     * @return content types covered by this policy; empty covers none
+     */
+    public Set<SourceContentType> contentTypes() {
+        return surfaceGrants.keySet();
     }
 
     /**
@@ -269,5 +286,32 @@ public record SourceUsagePolicy(
             throw new IllegalArgumentException(name + " must not be blank");
         }
         return value.trim();
+    }
+
+    /**
+     * Defensively copies the per-content-type surface grants into an immutable
+     * map of immutable sets, rejecting a null key or a null surface set.
+     *
+     * @param surfaceGrants raw grants supplied to the constructor
+     * @return immutable, null-free copy; empty covers no content type
+     */
+    private static Map<SourceContentType, Set<ProjectionSurface>> copySurfaceGrants(
+            Map<SourceContentType, Set<ProjectionSurface>> surfaceGrants) {
+        if (surfaceGrants == null || surfaceGrants.isEmpty()) {
+            return Map.of();
+        }
+        Map<SourceContentType, Set<ProjectionSurface>> copy = new EnumMap<>(SourceContentType.class);
+        for (Map.Entry<SourceContentType, Set<ProjectionSurface>> entry : surfaceGrants.entrySet()) {
+            SourceContentType contentType = entry.getKey();
+            Set<ProjectionSurface> surfaces = entry.getValue();
+            if (contentType == null) {
+                throw new IllegalArgumentException("surfaceGrants must not contain a null content type");
+            }
+            if (surfaces == null) {
+                throw new IllegalArgumentException("surfaceGrants must not contain a null surface set");
+            }
+            copy.put(contentType, Set.copyOf(surfaces));
+        }
+        return Collections.unmodifiableMap(copy);
     }
 }

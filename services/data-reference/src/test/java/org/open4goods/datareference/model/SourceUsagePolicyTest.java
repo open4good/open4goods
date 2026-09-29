@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -23,8 +24,12 @@ class SourceUsagePolicyTest {
     private static final Instant UNTIL = Instant.parse("2026-12-31T23:59:59Z");
     private static final Instant DURING = Instant.parse("2026-06-01T00:00:00Z");
 
-    private static SourceUsagePolicy policy(Set<SourceContentType> types, Set<ProjectionSurface> surfaces) {
-        return new SourceUsagePolicy("icecat-standard", SOURCE, "3", types, surfaces, FROM, UNTIL,
+    private static SourceUsagePolicy policy(SourceContentType type, ProjectionSurface surface) {
+        return policy(Map.of(type, Set.of(surface)));
+    }
+
+    private static SourceUsagePolicy policy(Map<SourceContentType, Set<ProjectionSurface>> surfaceGrants) {
+        return new SourceUsagePolicy("icecat-standard", SOURCE, "3", surfaceGrants, FROM, UNTIL,
                 Duration.ofDays(365), MediaCachePolicy.NONE,
                 new AttributionRequirement(true, "Data by Icecat", URI.create("https://icecat.biz"), true),
                 RedistributionPolicy.ALLOWED, DerivativeLicence.SHARE_ALIKE, Set.of(),
@@ -54,7 +59,7 @@ class SourceUsagePolicyTest {
     @Test
     void permitsOnlyTheApprovedContentTypeAndSurface() {
         SourceUsagePolicy classificationOnWebOnly =
-                policy(Set.of(SourceContentType.CLASSIFICATION), Set.of(ProjectionSurface.NUDGER_WEB));
+                policy(SourceContentType.CLASSIFICATION, ProjectionSurface.NUDGER_WEB);
 
         assertThat(classificationOnWebOnly.allows(
                 SourceContentType.CLASSIFICATION, ProjectionSurface.NUDGER_WEB, DURING)).isTrue();
@@ -67,9 +72,30 @@ class SourceUsagePolicyTest {
     }
 
     @Test
+    void grantingOneContentTypeOnASurfaceDoesNotGrantOthersOnTheSameSurface() {
+        SourceUsagePolicy identityOnlyOnOdblExport = policy(Map.of(
+                SourceContentType.IDENTITY, Set.of(ProjectionSurface.ODBL_EXPORT),
+                SourceContentType.ATTRIBUTE, Set.of(),
+                SourceContentType.TEXT, Set.of(),
+                SourceContentType.MEDIA, Set.of()));
+
+        assertThat(identityOnlyOnOdblExport.allows(
+                SourceContentType.IDENTITY, ProjectionSurface.ODBL_EXPORT, DURING)).isTrue();
+        assertThat(identityOnlyOnOdblExport.allows(
+                SourceContentType.ATTRIBUTE, ProjectionSurface.ODBL_EXPORT, DURING)).isFalse();
+        assertThat(identityOnlyOnOdblExport.allows(
+                SourceContentType.TEXT, ProjectionSurface.ODBL_EXPORT, DURING)).isFalse();
+        assertThat(identityOnlyOnOdblExport.allows(
+                SourceContentType.MEDIA, ProjectionSurface.ODBL_EXPORT, DURING)).isFalse();
+        // The content types with no granted surface are still reviewed, for allowsUse.
+        assertThat(identityOnlyOnOdblExport.allowsUse(
+                SourceContentType.ATTRIBUTE, ProhibitedUse.AI_TRAINING, DURING)).isTrue();
+    }
+
+    @Test
     void permitsNothingOutsideTheEffectiveInterval() {
         SourceUsagePolicy permitted =
-                policy(Set.of(SourceContentType.ATTRIBUTE), Set.of(ProjectionSurface.B2B_API));
+                policy(SourceContentType.ATTRIBUTE, ProjectionSurface.B2B_API);
 
         assertThat(permitted.allows(SourceContentType.ATTRIBUTE, ProjectionSurface.B2B_API,
                 Instant.parse("2025-12-31T23:59:59Z"))).isFalse();
@@ -81,7 +107,7 @@ class SourceUsagePolicyTest {
     @Test
     void anOpenEndedPolicyStaysInForce() {
         SourceUsagePolicy openEnded = new SourceUsagePolicy("p", SOURCE, "1",
-                Set.of(SourceContentType.IDENTITY), Set.of(ProjectionSurface.NUDGER_WEB), FROM, null,
+                Map.of(SourceContentType.IDENTITY, Set.of(ProjectionSurface.NUDGER_WEB)), FROM, null,
                 Duration.ZERO, MediaCachePolicy.NONE, AttributionRequirement.NONE,
                 RedistributionPolicy.ALLOWED, DerivativeLicence.NONE, Set.of(),
                 LocalDate.of(2026, 1, 1), List.of(URI.create("https://example.test/terms")));
@@ -92,7 +118,7 @@ class SourceUsagePolicyTest {
     @Test
     void treatsNullArgumentsAsDenied() {
         SourceUsagePolicy permitted =
-                policy(Set.of(SourceContentType.ATTRIBUTE), Set.of(ProjectionSurface.B2B_API));
+                policy(SourceContentType.ATTRIBUTE, ProjectionSurface.B2B_API);
 
         assertThat(permitted.allows(null, ProjectionSurface.B2B_API, DURING)).isFalse();
         assertThat(permitted.allows(SourceContentType.ATTRIBUTE, null, DURING)).isFalse();
@@ -101,7 +127,7 @@ class SourceUsagePolicyTest {
 
     @Test
     void rejectsAnIntervalThatEndsBeforeItBegins() {
-        assertThatThrownBy(() -> new SourceUsagePolicy("p", SOURCE, "1", Set.of(), Set.of(), UNTIL, FROM,
+        assertThatThrownBy(() -> new SourceUsagePolicy("p", SOURCE, "1", Map.of(), UNTIL, FROM,
                 Duration.ZERO, MediaCachePolicy.NONE, AttributionRequirement.NONE,
                 RedistributionPolicy.PROHIBITED, DerivativeLicence.NONE, Set.of(),
                 LocalDate.of(2026, 1, 1), List.of(URI.create("https://example.test/terms"))))
@@ -112,7 +138,7 @@ class SourceUsagePolicyTest {
     @Test
     void prohibitsPublicationWhenRedistributionIsNotPermitted() {
         SourceUsagePolicy prohibited = new SourceUsagePolicy("p", SOURCE, "1",
-                Set.of(SourceContentType.ATTRIBUTE), Set.of(ProjectionSurface.NUDGER_WEB), FROM, null,
+                Map.of(SourceContentType.ATTRIBUTE, Set.of(ProjectionSurface.NUDGER_WEB)), FROM, null,
                 Duration.ZERO, MediaCachePolicy.NONE, AttributionRequirement.NONE,
                 RedistributionPolicy.PROHIBITED, DerivativeLicence.NONE, Set.of(), LocalDate.of(2026, 1, 1),
                 List.of(URI.create("https://example.test/terms")));
@@ -122,7 +148,7 @@ class SourceUsagePolicyTest {
 
     @Test
     void allowsUseOnlyForTheReviewedContentTypeWithinTheEffectiveIntervalAndWhenNotProhibited() {
-        SourceUsagePolicy cleared = policy(Set.of(SourceContentType.CLASSIFICATION), Set.of(ProjectionSurface.NUDGER_WEB));
+        SourceUsagePolicy cleared = policy(SourceContentType.CLASSIFICATION, ProjectionSurface.NUDGER_WEB);
 
         assertThat(cleared.allowsUse(SourceContentType.CLASSIFICATION, ProhibitedUse.AI_TRAINING, DURING)).isTrue();
         // A content type nobody reviewed for this use.
@@ -135,7 +161,7 @@ class SourceUsagePolicyTest {
     @Test
     void allowsUseDeniesAnUseTheSourceProhibits() {
         SourceUsagePolicy trainingProhibited = new SourceUsagePolicy("p", SOURCE, "1",
-                Set.of(SourceContentType.TEXT), Set.of(ProjectionSurface.NUDGER_WEB), FROM, UNTIL,
+                Map.of(SourceContentType.TEXT, Set.of(ProjectionSurface.NUDGER_WEB)), FROM, UNTIL,
                 Duration.ZERO, MediaCachePolicy.NONE, AttributionRequirement.NONE, RedistributionPolicy.PROHIBITED,
                 DerivativeLicence.SHARE_ALIKE, Set.of(ProhibitedUse.AI_TRAINING), LocalDate.of(2026, 1, 1),
                 List.of(URI.create("https://example.test/terms")));
@@ -159,7 +185,7 @@ class SourceUsagePolicyTest {
     @Test
     void allowsUseDeniesAnUnreviewedPolicyEvenWithClearedContentAndUses() {
         SourceUsagePolicy unreviewed = new SourceUsagePolicy("p", SOURCE, "1",
-                Set.of(SourceContentType.ATTRIBUTE), Set.of(ProjectionSurface.NUDGER_WEB), FROM, UNTIL,
+                Map.of(SourceContentType.ATTRIBUTE, Set.of(ProjectionSurface.NUDGER_WEB)), FROM, UNTIL,
                 Duration.ZERO, MediaCachePolicy.NONE, AttributionRequirement.NONE, RedistributionPolicy.ALLOWED,
                 DerivativeLicence.NONE, Set.of(), LocalDate.of(2026, 1, 1), PolicyReviewState.UNREVIEWED, null,
                 List.of(URI.create("https://example.test/terms")));
@@ -169,7 +195,7 @@ class SourceUsagePolicyTest {
 
     @Test
     void allowsUseTreatsNullArgumentsAsDenied() {
-        SourceUsagePolicy cleared = policy(Set.of(SourceContentType.ATTRIBUTE), Set.of(ProjectionSurface.B2B_API));
+        SourceUsagePolicy cleared = policy(SourceContentType.ATTRIBUTE, ProjectionSurface.B2B_API);
 
         assertThat(cleared.allowsUse(null, ProhibitedUse.AI_TRAINING, DURING)).isFalse();
         assertThat(cleared.allowsUse(SourceContentType.ATTRIBUTE, null, DURING)).isFalse();
@@ -179,7 +205,7 @@ class SourceUsagePolicyTest {
     @Test
     void anAbsentDerivativeLicenceAndProhibitedUsesReadAsTheMostRestrictive() {
         SourceUsagePolicy undeclared = new SourceUsagePolicy("p", SOURCE, "1",
-                Set.of(SourceContentType.ATTRIBUTE), Set.of(ProjectionSurface.NUDGER_WEB), FROM, UNTIL,
+                Map.of(SourceContentType.ATTRIBUTE, Set.of(ProjectionSurface.NUDGER_WEB)), FROM, UNTIL,
                 Duration.ZERO, MediaCachePolicy.NONE, AttributionRequirement.NONE, RedistributionPolicy.ALLOWED,
                 null, null, LocalDate.of(2026, 1, 1), PolicyReviewState.REVIEWED, null,
                 List.of(URI.create("https://example.test/terms")));

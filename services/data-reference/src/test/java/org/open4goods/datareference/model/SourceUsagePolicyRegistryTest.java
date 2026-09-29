@@ -10,6 +10,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -72,7 +73,7 @@ class SourceUsagePolicyRegistryTest {
     @Test
     void revocationTakesEffectAtItsRecordedInstant() {
         SourceUsagePolicy revoked = new SourceUsagePolicy("revoked", FIXTURE_SOURCE, "1",
-                Set.of(SourceContentType.ATTRIBUTE), Set.of(ProjectionSurface.NUDGER_WEB),
+                Map.of(SourceContentType.ATTRIBUTE, Set.of(ProjectionSurface.NUDGER_WEB)),
                 Instant.parse("2026-01-01T00:00:00Z"), null, Duration.ofDays(30), MediaCachePolicy.NONE,
                 AttributionRequirement.NONE, RedistributionPolicy.ALLOWED, DerivativeLicence.NONE, Set.of(),
                 LocalDate.of(2026, 1, 1), PolicyReviewState.REVIEWED, Instant.parse("2026-06-01T00:00:00Z"),
@@ -112,7 +113,7 @@ class SourceUsagePolicyRegistryTest {
     void allowsUseMirrorsAllowsForAnExplicitlyClearedUse() {
         SourceUsagePolicyRef reference = new SourceUsagePolicyRef("cleared-use", "1");
         SourceUsagePolicy cleared = new SourceUsagePolicy("cleared-use", FIXTURE_SOURCE, "1",
-                Set.of(SourceContentType.TEXT), Set.of(ProjectionSurface.NUDGER_WEB),
+                Map.of(SourceContentType.TEXT, Set.of(ProjectionSurface.NUDGER_WEB)),
                 Instant.parse("2026-01-01T00:00:00Z"), Instant.parse("2026-12-31T23:59:59Z"), Duration.ZERO,
                 MediaCachePolicy.NONE, AttributionRequirement.NONE, RedistributionPolicy.PROHIBITED,
                 DerivativeLicence.NONE, Set.of(), LocalDate.of(2026, 1, 1),
@@ -154,7 +155,7 @@ class SourceUsagePolicyRegistryTest {
 
     @Test
     void rejectsDuplicatePolicyVersions() {
-        SourceUsagePolicy policy = new SourceUsagePolicy("p", FIXTURE_SOURCE, "1", Set.of(), Set.of(),
+        SourceUsagePolicy policy = new SourceUsagePolicy("p", FIXTURE_SOURCE, "1", Map.of(),
                 Instant.EPOCH, null, Duration.ZERO, MediaCachePolicy.NONE, AttributionRequirement.NONE,
                 RedistributionPolicy.PROHIBITED, DerivativeLicence.NONE, Set.of(), LocalDate.of(2026, 1, 1),
                 List.of(URI.create("https://example.test/terms")));

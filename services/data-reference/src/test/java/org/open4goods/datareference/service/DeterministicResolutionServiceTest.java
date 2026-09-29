@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -140,8 +141,9 @@ class DeterministicResolutionServiceTest {
     }
 
     private static SourceUsagePolicy policy(String source, boolean allowed, Set<ProhibitedUse> prohibitedUses) {
-        return new SourceUsagePolicy(source + "-policy", new SourceId(source), "1", Set.of(SourceContentType.ATTRIBUTE),
-                allowed ? Set.of(ProjectionSurface.NUDGER_WEB) : Set.of(), NOW.minus(Duration.ofDays(1)), null,
+        return new SourceUsagePolicy(source + "-policy", new SourceId(source), "1",
+                Map.of(SourceContentType.ATTRIBUTE, allowed ? Set.of(ProjectionSurface.NUDGER_WEB) : Set.of()),
+                NOW.minus(Duration.ofDays(1)), null,
                 Duration.ofDays(1), MediaCachePolicy.NONE, AttributionRequirement.NONE, RedistributionPolicy.ALLOWED,
                 DerivativeLicence.NONE, prohibitedUses, LocalDate.of(2026, 9, 1),
                 allowed ? PolicyReviewState.REVIEWED : PolicyReviewState.UNREVIEWED, null,
