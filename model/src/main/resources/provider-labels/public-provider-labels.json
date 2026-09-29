@@ -1,3 +1,11 @@
 {
-  "labels" : [ ]
+  "labels" : [ {
+    "sourceId" : "merchant-feed",
+    "label" : "Merchant Feed Partner",
+    "faviconUrl" : null
+  }, {
+    "sourceId" : "legacy-product-backup",
+    "label" : "Historical Catalogue Archive",
+    "faviconUrl" : null
+  } ]
 }

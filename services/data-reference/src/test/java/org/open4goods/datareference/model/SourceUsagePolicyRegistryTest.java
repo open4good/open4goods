@@ -23,22 +23,36 @@ class SourceUsagePolicyRegistryTest {
 
     private static final SourceId FIXTURE_SOURCE = new SourceId("fixture-source");
     private static final SourceUsagePolicyRef FIXTURE_POLICY = new SourceUsagePolicyRef("fixture-reviewed", "1");
-    private static final Instant DURING = Instant.parse("2026-06-01T00:00:00Z");
+    private static final Instant DURING = Instant.parse("2026-09-30T00:00:00Z");
 
     @Test
-    void defaultInventoryRecordsEveryKnownSourceAsAnUnreviewedDeny() throws IOException {
+    void defaultInventoryRecordsEveryKnownSourceAsAnUnreviewedDenyExceptTheGou28PriceHistoryGrant() throws IOException {
         SourceUsagePolicyRegistry registry = SourceUsagePolicyRegistry.loadDefault();
 
         assertThat(registry.policies()).extracting(SourceUsagePolicy::sourceId)
                 .containsExactly(new SourceId("eprel"), new SourceId("icecat"), new SourceId("merchant-feed"),
                         new SourceId("legacy-product-backup"), new SourceId("amazon-paapi"));
+
+        // GOU-28: merchant-feed and legacy-product-backup are the only two sources reviewed and
+        // authorized to redistribute PRICE (price-history) content on the B2B_API surface. Every
+        // other source, and every other content-type/surface combination for these two sources,
+        // must remain denied by default.
+        Set<SourceId> gou28ReviewedSources =
+                Set.of(new SourceId("merchant-feed"), new SourceId("legacy-product-backup"));
+
         for (SourceUsagePolicy policy : registry.policies()) {
-            assertThat(policy.reviewState()).isEqualTo(PolicyReviewState.UNREVIEWED);
             assertThat(policy.evidenceReferences()).isNotEmpty();
+            boolean isGou28Grant = gou28ReviewedSources.contains(policy.sourceId());
+            assertThat(policy.reviewState())
+                    .isEqualTo(isGou28Grant ? PolicyReviewState.REVIEWED : PolicyReviewState.UNREVIEWED);
             for (SourceContentType contentType : policy.contentTypes()) {
                 for (ProjectionSurface surface : ProjectionSurface.values()) {
+                    boolean expectedAllow = isGou28Grant
+                            && contentType == SourceContentType.PRICE
+                            && surface == ProjectionSurface.B2B_API;
                     assertThat(registry.allows(policy.sourceId(), policy.reference(), contentType, surface, DURING))
-                            .isFalse();
+                            .as("%s allows %s on %s", policy.sourceId(), contentType, surface)
+                            .isEqualTo(expectedAllow);
                 }
             }
         }

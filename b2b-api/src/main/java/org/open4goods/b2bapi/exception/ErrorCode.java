@@ -9,6 +9,8 @@ public enum ErrorCode {
 
     INVALID_GTIN(HttpStatus.BAD_REQUEST, "invalid-gtin", "Invalid GTIN"),
     INVALID_PARAMETER(HttpStatus.BAD_REQUEST, "invalid-parameter", "Invalid parameter"),
+    INVALID_DATE_RANGE(HttpStatus.BAD_REQUEST, "invalid-date-range", "Invalid date range"),
+    CURSOR_MISMATCH(HttpStatus.BAD_REQUEST, "cursor-mismatch", "Cursor does not match the request parameters"),
     MISSING_CREDENTIALS(HttpStatus.UNAUTHORIZED, "missing-credentials", "Missing API key"),
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "invalid-credentials", "Invalid API key"),
     INSUFFICIENT_CREDITS(HttpStatus.PAYMENT_REQUIRED, "insufficient-credits", "Insufficient credits"),

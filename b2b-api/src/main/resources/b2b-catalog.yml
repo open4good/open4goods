@@ -11,6 +11,11 @@ b2b:
       doc: products/energy
       billable-when: never
       source: eprel
+    "[product.price-history]":
+      path: /api/v1/products/{gtin}/price/history
+      credits: 8
+      doc: products/price-history
+      billable-when: has-history
     "[barcode.render]":
       path: /api/v1/barcodes/render
       credits: 1

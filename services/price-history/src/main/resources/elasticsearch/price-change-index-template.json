@@ -22,7 +22,8 @@
         "event_kind": {"type": "keyword"},
         "event_id": {"type": "keyword", "index": false, "doc_values": false},
         "observed_at": {"type": "date"},
-        "policy_ref": {"type": "keyword", "index": false, "doc_values": false}
+        "policy_ref": {"type": "keyword", "index": false, "doc_values": false},
+        "content_hash": {"type": "keyword", "index": false, "doc_values": false}
       }
     }
   }
