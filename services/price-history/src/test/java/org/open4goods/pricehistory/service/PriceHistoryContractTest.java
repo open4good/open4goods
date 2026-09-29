@@ -1,6 +1,7 @@
 package org.open4goods.pricehistory.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -33,6 +34,58 @@ class PriceHistoryContractTest {
         assertThat(query.effectiveGranularity()).isEqualTo(PriceHistoryGranularity.DAY);
         assertThat(PriceHistoryCursor.decode(cursor).timestamp()).isEqualTo(from);
         assertThat(PriceHistoryCursor.decode(cursor).stableId()).isEqualTo("event-1");
+    }
+
+    /** GOU-100: the public `limit` bound is 1..500, tracking {@link PriceHistoryQuery#MAX_PAGE_SIZE}. */
+    @Test
+    void pageSizeAcceptsTheLowerAndUpperBound() {
+        Instant from = Instant.parse("2026-01-01T00:00:00Z");
+        Instant to = from.plusSeconds(86_400);
+
+        PriceHistoryQuery lowerBound = new PriceHistoryQuery(from, to, Optional.empty(), Optional.empty(),
+                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+                PriceHistoryQuery.MIN_PAGE_SIZE, false);
+        PriceHistoryQuery upperBound = new PriceHistoryQuery(from, to, Optional.empty(), Optional.empty(),
+                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+                PriceHistoryQuery.MAX_PAGE_SIZE, false);
+
+        assertThat(lowerBound.pageSize()).isEqualTo(1);
+        assertThat(upperBound.pageSize()).isEqualTo(500);
+        assertThat(PriceHistoryQuery.MAX_PAGE_SIZE).isEqualTo(500);
+    }
+
+    @Test
+    void pageSizeRejectsBothOutOfRangeSides() {
+        Instant from = Instant.parse("2026-01-01T00:00:00Z");
+        Instant to = from.plusSeconds(86_400);
+
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new PriceHistoryQuery(from, to, Optional.empty(), Optional.empty(),
+                        Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+                        PriceHistoryQuery.MIN_PAGE_SIZE - 1, false))
+                .withMessageContaining("pageSize must be between");
+
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new PriceHistoryQuery(from, to, Optional.empty(), Optional.empty(),
+                        Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+                        PriceHistoryQuery.MAX_PAGE_SIZE + 1, false))
+                .withMessageContaining("pageSize must be between");
+    }
+
+    /** A cursor from one page is only meaningful when replayed with the same bounded page size. */
+    @Test
+    void cursorRoundTripsAtTheBoundedPageSize() {
+        Instant from = Instant.parse("2026-01-01T00:00:00Z");
+        Instant to = from.plusSeconds(86_400);
+        String cursor = PriceHistoryCursor.after(from, "event-1");
+
+        PriceHistoryQuery nextPage = new PriceHistoryQuery(from, to, Optional.empty(), Optional.empty(),
+                Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(cursor),
+                PriceHistoryQuery.MAX_PAGE_SIZE, false);
+
+        assertThat(nextPage.cursor()).contains(cursor);
+        assertThat(nextPage.pageSize()).isEqualTo(PriceHistoryQuery.MAX_PAGE_SIZE);
+        assertThat(PriceHistoryCursor.decode(nextPage.cursor().orElseThrow()).stableId()).isEqualTo("event-1");
     }
 
     @Test
