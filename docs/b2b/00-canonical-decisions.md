@@ -66,6 +66,26 @@ and [`../architecture/product-data-api-redis-contract.md`](../architecture/produ
    manual admin grants. There is **no reference implementation** in Infera, so it
    is specified from scratch in
    [`../architecture/product-data-api-stripe-contract.md`](../architecture/product-data-api-stripe-contract.md).
+6. **EPREL-sourced content is zero-rated, free behind an account** (GOU-106,
+   arbitrage 1 of GOU-95). The EPREL API Terms and Conditions 4§1(i) allow
+   redistribution "to add value in your services"; 4§2(a) forbids selling that
+   data "as it is, even when complementary parameters are associated to each
+   record". Not charging for it is what keeps the facet compliant with 4§2(a) -
+   this supersedes any earlier pricing assumption for an EPREL-sourced facet
+   (e.g. the "10 credits" `product.energy` figure in
+   [`product/facet-catalog.md`](product/facet-catalog.md) 3, now corrected to 0).
+   Every catalog entry whose content originates from EPREL must declare
+   `source: eprel`, `credits: 0`, and `billable-when: never` in `b2b-catalog.yml`;
+   `BillingCatalogProperties.Facet` fails Bean Validation at startup if an
+   `eprel`-sourced facet carries a non-zero price. The serving code path for such
+   a facet never calls the credit reservation/settlement services, so it cannot
+   throw `InsufficientCreditsException` regardless of the organization's balance.
+   Free does **not** mean anonymous: the endpoint still requires an authenticated
+   `PDAPI_KEY` (any active API key on an account - no paid plan needed), and every
+   response includes mandatory EPREL attribution
+   (`https://eprel.ec.europa.eu`, API Terms 4§3). Reference implementation: the
+   `product.energy` facet (`B2bProductService.getProductEnergy`,
+   `ProductEprelMappingService`).
 
 ## 3. Documented open questions (NOT resolved here)
 

@@ -78,4 +78,15 @@ class BillingCatalogPropertiesTest {
         assertThat(catalog.getBilling().getPacks()).containsKeys("starter", "growth", "scale");
         assertThat(catalog.getBilling().getSubscriptions()).containsKeys("starter", "growth", "scale");
     }
+
+    @Test
+    void bindsEprelSourcedEnergyFacetAsStructurallyFree() {
+        final BillingCatalogProperties.Facet energy = catalog.getFacets().get("product.energy");
+
+        assertThat(energy).isNotNull();
+        assertThat(energy.getSource()).isEqualToIgnoringCase("eprel");
+        assertThat(energy.getCredits()).isZero();
+        assertThat(energy.getBillableWhen()).isEqualToIgnoringCase("never");
+        assertThat(energy.isEprelFacetStructurallyFree()).isTrue();
+    }
 }

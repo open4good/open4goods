@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.open4goods.b2bapi.config.B2bApiProperties;
 import org.open4goods.b2bapi.config.BillingCatalogProperties;
 import org.open4goods.b2bapi.dto.product.B2bCoverageMeta;
+import org.open4goods.b2bapi.dto.product.B2bEnergyDto;
 import org.open4goods.b2bapi.dto.product.B2bFacetMeta;
 import org.open4goods.b2bapi.dto.product.B2bMeta;
 import org.open4goods.b2bapi.dto.product.B2bPriceDto;
@@ -33,6 +34,7 @@ public class B2bProductService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(B2bProductService.class);
     private static final String FACET_PRICE = "product.price";
+    private static final String FACET_ENERGY = "product.energy";
 
     private final B2bApiProperties b2bApiProperties;
     private final BillingCatalogProperties billingCatalogProperties;
@@ -42,6 +44,7 @@ public class B2bProductService {
     private final GtinNormalizationService gtinNormalizationService;
     private final ProductRepository productRepository;
     private final ProductPriceMappingService productPriceMappingService;
+    private final ProductEprelMappingService productEprelMappingService;
     private final UsageStreamService usageStreamService;
     private final Clock clock;
 
@@ -55,6 +58,7 @@ public class B2bProductService {
             final GtinNormalizationService gtinNormalizationService,
             final ProductRepository productRepository,
             final ProductPriceMappingService productPriceMappingService,
+            final ProductEprelMappingService productEprelMappingService,
             final UsageStreamService usageStreamService) {
         this(
                 b2bApiProperties,
@@ -65,6 +69,7 @@ public class B2bProductService {
                 gtinNormalizationService,
                 productRepository,
                 productPriceMappingService,
+                productEprelMappingService,
                 usageStreamService,
                 Clock.systemUTC());
     }
@@ -78,6 +83,7 @@ public class B2bProductService {
             final GtinNormalizationService gtinNormalizationService,
             final ProductRepository productRepository,
             final ProductPriceMappingService productPriceMappingService,
+            final ProductEprelMappingService productEprelMappingService,
             final UsageStreamService usageStreamService,
             final Clock clock) {
         this.b2bApiProperties = b2bApiProperties;
@@ -88,6 +94,7 @@ public class B2bProductService {
         this.gtinNormalizationService = gtinNormalizationService;
         this.productRepository = productRepository;
         this.productPriceMappingService = productPriceMappingService;
+        this.productEprelMappingService = productEprelMappingService;
         this.usageStreamService = usageStreamService;
         this.clock = clock;
     }
@@ -323,6 +330,112 @@ public class B2bProductService {
                 remainingBalance,
                 billable,
                 b2bApiProperties.getPrice().getFreshnessDays(),
+                totalDuration,
+                List.of(facetMeta),
+                List.of(coverageMeta));
+
+        return new B2bResponse<>(data, meta);
+    }
+
+    /**
+     * Retrieves the EPREL-sourced energy label facet of a product by its raw GTIN string.
+     * <p>
+     * Structural billing guard: this method never calls {@link RedisMeteringService#reserveCredits}
+     * or {@link CreditLedgerService#settleDebit}. Serving EPREL content therefore cannot reserve,
+     * debit, or fail on {@link InsufficientCreditsException} by construction, independent of the
+     * catalog configuration - the free-of-charge rule required by the EPREL API Terms and
+     * Conditions 4§2(a) (no reselling EPREL data as-is) and the "free behind an account" decision.
+     * Authentication is still required upstream (Spring Security + {@code PDAPI_KEY} authority).
+     *
+     * @param rawGtin raw GTIN input
+     * @param language requested response language (e.g. "en", "fr")
+     * @param principal authenticated API key principal
+     * @param request servlet request object
+     * @param response servlet response object
+     * @return standard B2B response envelope containing the sanitized energy facet and metadata
+     */
+    public B2bResponse<B2bEnergyDto> getProductEnergy(
+            final String rawGtin,
+            final String language,
+            final ApiKeyPrincipal principal,
+            final HttpServletRequest request,
+            final HttpServletResponse response) {
+
+        final long startTime = clock.millis();
+        final UUID orgId = principal.organizationId();
+        final UUID keyId = principal.apiKeyId();
+
+        redisMeteringService.checkRateLimit(keyId);
+
+        final String requestId = resolveOrCreateRequestId(request);
+        int httpStatus = 200;
+        String noPayReason = null;
+        String gtin = rawGtin;
+        B2bEnergyDto data = null;
+        long remainingBalance = 0;
+
+        try {
+            final NormalizedGtin normalizedGtin = gtinNormalizationService.normalize(rawGtin);
+            gtin = normalizedGtin.value();
+
+            Product product;
+            try {
+                product = productRepository.getByIdWithoutEmbedding(normalizedGtin.productId());
+            } catch (final org.open4goods.model.exceptions.ResourceNotFoundException ex) {
+                httpStatus = 404;
+                noPayReason = "not-found";
+                throw new org.open4goods.b2bapi.exception.ResourceNotFoundException("Product not found.");
+            }
+
+            data = productEprelMappingService.map(product, gtin);
+            if (data == null) {
+                noPayReason = "no-eprel-data";
+            }
+        } catch (final InvalidGtinException ex) {
+            httpStatus = 400;
+            noPayReason = "invalid-gtin";
+            throw ex;
+        } catch (final org.open4goods.b2bapi.exception.ResourceNotFoundException ex) {
+            throw ex;
+        } catch (final RuntimeException ex) {
+            httpStatus = 500;
+            noPayReason = "internal-error";
+            throw ex;
+        } finally {
+            final long duration = clock.millis() - startTime;
+            try {
+                remainingBalance = creditBucketRepository.sumLiveCredits(orgId);
+            } catch (final Exception e) {
+                LOGGER.warn("Failed to retrieve durable credit balance for orgId={}", orgId, e);
+            }
+            setHeadersAndAttributes(request, response, requestId, 0L, remainingBalance, duration);
+
+            usageStreamService.emit(new UsageStreamEvent(
+                    orgId,
+                    keyId,
+                    FACET_ENERGY,
+                    gtin,
+                    requestId,
+                    httpStatus,
+                    false,
+                    0L,
+                    noPayReason,
+                    (int) duration,
+                    Instant.now(clock)));
+        }
+
+        final long totalDuration = clock.millis() - startTime;
+        final B2bFacetMeta facetMeta = new B2bFacetMeta(FACET_ENERGY, 0, data != null, false);
+        final B2bCoverageMeta coverageMeta = new B2bCoverageMeta(FACET_ENERGY, true);
+
+        final B2bMeta meta = new B2bMeta(
+                requestId,
+                Instant.now(clock),
+                language != null ? language : "en",
+                0L,
+                remainingBalance,
+                false,
+                0,
                 totalDuration,
                 List.of(facetMeta),
                 List.of(coverageMeta));

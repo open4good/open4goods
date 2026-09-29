@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.open4goods.b2bapi.config.OpenApiConfig;
+import org.open4goods.b2bapi.dto.product.B2bEnergyDto;
 import org.open4goods.b2bapi.dto.product.B2bPriceDto;
 import org.open4goods.b2bapi.dto.product.B2bResponse;
 import org.open4goods.b2bapi.service.ApiKeyPrincipal;
@@ -103,5 +104,67 @@ public class ProductController {
             final HttpServletRequest request,
             final HttpServletResponse response) {
         return b2bProductService.getProductPrice(gtin, language, principal, request, response);
+    }
+
+    /**
+     * Retrieves the EPREL-sourced energy label facet of a product by its raw GTIN string.
+     *
+     * @param gtin raw GTIN barcode
+     * @param language language parameter
+     * @param principal authenticated principal
+     * @param request HTTP request
+     * @param response HTTP response
+     * @return response envelope containing the energy facet and metadata
+     */
+    @Operation(
+            summary = "Get product energy label facet",
+            description = "Retrieves the EU energy label facet for a product using its GTIN, sourced from EPREL. "
+                    + "Requires a valid API key (a free authenticated account is enough - no paid plan required). "
+                    + "This facet is always free: never billed, zero credits, per the EPREL API Terms and "
+                    + "Conditions 4§2(a) prohibition on reselling EPREL data as-is. Attribution to "
+                    + "https://eprel.ec.europa.eu is included in every response (article 4§3).",
+            security = @SecurityRequirement(name = OpenApiConfig.PRODUCT_DATA_API_KEY)
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Product energy label retrieved successfully (or absent, still zero credits).",
+            content = @Content(schema = @Schema(implementation = B2bResponse.class))
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Invalid GTIN checksum/format or parameters.",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))
+    )
+    @ApiResponse(
+            responseCode = "401",
+            description = "Missing, invalid, or revoked API key.",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Product not found.",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))
+    )
+    @ApiResponse(
+            responseCode = "429",
+            description = "Rate limit exceeded.",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))
+    )
+    @ApiResponse(
+            responseCode = "500",
+            description = "Unexpected internal server error.",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))
+    )
+    @PreAuthorize("hasAuthority('PDAPI_KEY')")
+    @GetMapping("/{gtin}/energy")
+    public B2bResponse<B2bEnergyDto> getProductEnergy(
+            @Parameter(description = "Barcode identifier (GTIN-8, GTIN-12, GTIN-13, or GTIN-14)", required = true, example = "0885909950805")
+            @PathVariable final String gtin,
+            @Parameter(description = "Locale language for text/display names (e.g. 'en', 'fr')", example = "en")
+            @RequestParam(required = false, defaultValue = "en") final String language,
+            @AuthenticationPrincipal final ApiKeyPrincipal principal,
+            final HttpServletRequest request,
+            final HttpServletResponse response) {
+        return b2bProductService.getProductEnergy(gtin, language, principal, request, response);
     }
 }
