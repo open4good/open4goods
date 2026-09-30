@@ -33,6 +33,7 @@ import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
 import org.open4goods.icecat.repository.IcecatFeatureRepository;
 import org.open4goods.icecat.repository.IcecatSupplierRepository;
 import org.open4goods.icecat.services.IcecatFileDownloadService;
+import org.open4goods.icecat.services.IcecatCategoryVerticalResolver;
 import org.open4goods.icecat.services.IcecatFeatureResolver;
 import org.open4goods.icecat.services.IcecatIndexService;
 import org.open4goods.icecat.services.IcecatService;
@@ -386,10 +387,10 @@ public class ApiConfig {
 	@Bean
 	AggregationFacadeService realtimeAggregationService(@Autowired EvaluationService evaluationService, StandardiserService standardiserService, AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository, ApiProperties apiProperties,
 			@Autowired Gs1PrefixService gs1prefixService, DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, BarcodeValidationService barcodeValidationService, BrandService brandservice, BlablaService blablaService,
-			IcecatService icecatFeatureService, IcecatFeatureResolver icecatFeatureResolver, SerialisationService serialisationService,
+			IcecatService icecatFeatureService, IcecatFeatureResolver icecatFeatureResolver, IcecatCategoryVerticalResolver icecatCategoryVerticalResolver, SerialisationService serialisationService,
 			BarcodeForensicsService barcodeForensicsService) {
 		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService, barcodeValidationService, brandservice, blablaService, icecatFeatureService,
-				icecatFeatureResolver, serialisationService, barcodeForensicsService);
+				icecatFeatureResolver, icecatCategoryVerticalResolver, serialisationService, barcodeForensicsService);
 	}
 
 	//////////////////////////////////////////////////////////
