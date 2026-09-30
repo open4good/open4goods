@@ -31,8 +31,8 @@ Load what the task needs, knowing the price. Everything below is the project cor
 Select work from the [Nudger Paperclip issues](https://yamaka.me/GOU/projects/nudger/issues).
 Read the assigned issue, its blockers and its acceptance criteria before changing code;
 keep the change within its stated scope. DEVELOPMENT uses an isolated local runtime, including on the shared build host;
-no beta service, data store or Nudger domain may be a runtime dependency. BETA_VALIDATION and PRODUCTION each require
-an explicit owner decision recorded in Paperclip after their phase checks pass.
+no beta service, data store or Nudger domain may be a runtime dependency. A recorded delivery mandate may delegate
+BETA_VALIDATION after tooling qualification and phase checks. PRODUCTION requires a fresh owner decision.
 POST_PRODUCTION retirement still requires its healthy-window gate.
 `docs/reference/roadmap.md` is a dated migration index, not a live roadmap.
 `docs/adr/README.md` is generated; change ADRs, not the projection.
@@ -168,11 +168,13 @@ git config core.hooksPath .githooks
 3. Tests added/updated; coverage not reduced.  
 4. `./scripts/lint.sh` passes locally.
 5. Docs (agents.md, README, ADR, Javadoc, spring-configuration-metadata.json) updated.
-6. **Merging does not deploy.** Ordinary PRs require independent review and green CI.
-   Beta and production promotion each require a fresh owner decision in Paperclip for the
-   candidate SHA, artifact and dataset digests, recent backup, rollback and phase evidence.
-   A plan approval does not authorize promotion. The legacy production workflow remains
-   frozen until the immutable-candidate promotion path has been qualified (ADR-0015).
+6. **Merging does not deploy.** Lead Tech approves each PR on its reviewed SHA and ensures
+   its merge after green CI; its own PR needs independent review. A delivery mandate covers
+   conforming PRs and qualified beta promotions, including sensitive designs explicitly approved
+   at framing. Missing decisions and scope deviations return to the owner, not each PR.
+   ADR-0015 defines the live mandate check, candidate evidence and human milestone acceptance.
+   Production still needs a fresh candidate-specific owner decision. The legacy production
+   workflow stays frozen until the immutable-candidate promotion path has been qualified.
 
 ---
 

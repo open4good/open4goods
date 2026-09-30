@@ -1,7 +1,7 @@
 ---
 title: "Canonical decisions"
 status: accepted
-last_updated: 2026-09-29
+last_updated: 2026-09-30
 normative: true
 audience: PROJECT_SCOPED
 ---
@@ -65,9 +65,10 @@ ADR that changes a rule updates the entry here in the same commit.
     no dormant query-time text embedding or vector-search path is retained.
 14. Issues progress through DEVELOPMENT, BETA_VALIDATION, PRODUCTION and
     POST_PRODUCTION. DEVELOPMENT uses isolated stores and applications, including on
-    a shared build host, with no dependency on beta services or Nudger domains. Beta and production promotion each require a
-    recorded, explicit owner decision after their phase checks pass; phase readiness
-    alone does not authorize a promotion. Physical retirement still waits for seven
+    a shared build host, with no dependency on beta services or Nudger domains. An explicit
+    delivery mandate may delegate qualified beta promotions within its scope (ADR-0015).
+    Production requires a fresh candidate-specific owner decision after phase checks;
+    readiness alone never authorizes promotion. Physical retirement still waits for seven
     healthy days and verified restoration.
     Merges run CI without deployment. Final qualification uses a recent pinned product
     backup and explicit provider enrichment; startup never launches heavy ingestion jobs.

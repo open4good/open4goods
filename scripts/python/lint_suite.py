@@ -119,6 +119,8 @@ def lint_governance_tools(suite: LintSuite) -> None:
     suite.run("Recette tooling tests", ["bash", "scripts/tests/recette-tools.test.sh"])
     suite.run("Paperclip readiness and deployment freeze", [sys.executable, "-m", "unittest", "discover",
               "-s", "scripts/verify", "-p", "test_paperclip_readiness.py"])
+    suite.run("Beta delivery mandate", [sys.executable, "-m", "unittest", "discover",
+              "-s", "scripts/verify", "-p", "test_beta_mandate.py"])
 
 
 def lint_yaml(suite: LintSuite) -> None:

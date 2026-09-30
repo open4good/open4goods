@@ -35,9 +35,9 @@ the final local recette runs without it.
 
 Phase gates are global. BETA_VALIDATION waits until every DEVELOPMENT issue, including
 local campaign readiness, is complete. PRODUCTION waits until every beta validation
-issue is complete. After each gate, beta and production promotion require a fresh,
-explicit owner decision recorded in Paperclip, as amended by ADR-0015. The former
-standing order from 2026-09-17 is retired. Candidate SHA, artifacts and dataset
+issue is complete. After each gate, beta requires the explicit scoped mandate or candidate
+decision defined in ADR-0015; production requires a fresh owner decision. The former
+standing order from 2026-09-17 remains retired. Candidate SHA, artifacts and dataset
 digests do not change between phases. POST_PRODUCTION remains dependency-gated and
 cannot physically remove legacy indexes or XWiki until seven complete healthy days
 and a verified restoration.
