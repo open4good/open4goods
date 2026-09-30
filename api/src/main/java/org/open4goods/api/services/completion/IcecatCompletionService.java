@@ -418,6 +418,13 @@ public class IcecatCompletionService extends AbstractCompletionService {
         if (e.category != null && e.category.name != null) {
             df.addProductTag(e.category.name.value);
         }
+        if (e.category != null && StringUtils.isNotBlank(e.category.categoryID)) {
+            try {
+                df.setIcecatCategoryId(Integer.valueOf(e.category.categoryID.trim()));
+            } catch (NumberFormatException ex) {
+                logger.warn("Non-numeric Icecat CategoryID : {}", e.category.categoryID);
+            }
+        }
 
         if (e.productFamily != null && StringUtils.isNotBlank(e.productFamily.value)) {
             df.addAttribute("PRODUCT_FAMILY", e.productFamily.value,

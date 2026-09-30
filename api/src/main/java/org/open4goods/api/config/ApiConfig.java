@@ -18,6 +18,7 @@ import org.open4goods.api.services.completion.WikidataCompletionService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.datareference.port.IngestionCheckpointStore;
 import org.open4goods.datareference.port.SourceRecordHeadStore;
+import org.open4goods.datareference.port.SourceRecordReplayScanner;
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.commons.helper.DevModeService;
 import org.open4goods.commons.services.BarcodeForensicsService;
@@ -33,6 +34,7 @@ import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
 import org.open4goods.icecat.repository.IcecatFeatureRepository;
 import org.open4goods.icecat.repository.IcecatSupplierRepository;
 import org.open4goods.icecat.services.IcecatFileDownloadService;
+import org.open4goods.icecat.services.IcecatCategoryVerticalResolver;
 import org.open4goods.icecat.services.IcecatFeatureResolver;
 import org.open4goods.icecat.services.IcecatIndexService;
 import org.open4goods.icecat.services.IcecatService;
@@ -132,10 +134,11 @@ public class ApiConfig {
 	}
 	@Bean
 	EprelCatalogueService eprelCatalogueService(@Autowired EprelApiClient apiClient,
-			@Autowired SourceRecordHeadStore sourceRecordStore, @Autowired IngestionCheckpointStore checkpointStore,
+			@Autowired SourceRecordHeadStore sourceRecordStore, @Autowired SourceRecordReplayScanner replayScanner,
+			@Autowired IngestionCheckpointStore checkpointStore,
 			@Autowired EprelServiceProperties properties, MeterRegistry meterRegistry) {
-		return new EprelCatalogueService(apiClient, new JsonZipEprelCatalogueParser(), sourceRecordStore, checkpointStore,
-				new EprelSourceRecordAdapter(), properties, meterRegistry);
+		return new EprelCatalogueService(apiClient, new JsonZipEprelCatalogueParser(), sourceRecordStore, replayScanner,
+				checkpointStore, new EprelSourceRecordAdapter(), properties, meterRegistry);
 	}
 
 	@Bean
@@ -386,10 +389,10 @@ public class ApiConfig {
 	@Bean
 	AggregationFacadeService realtimeAggregationService(@Autowired EvaluationService evaluationService, StandardiserService standardiserService, AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository, ApiProperties apiProperties,
 			@Autowired Gs1PrefixService gs1prefixService, DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, BarcodeValidationService barcodeValidationService, BrandService brandservice, BlablaService blablaService,
-			IcecatService icecatFeatureService, IcecatFeatureResolver icecatFeatureResolver, SerialisationService serialisationService,
+			IcecatService icecatFeatureService, IcecatFeatureResolver icecatFeatureResolver, IcecatCategoryVerticalResolver icecatCategoryVerticalResolver, SerialisationService serialisationService,
 			BarcodeForensicsService barcodeForensicsService) {
 		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService, barcodeValidationService, brandservice, blablaService, icecatFeatureService,
-				icecatFeatureResolver, serialisationService, barcodeForensicsService);
+				icecatFeatureResolver, icecatCategoryVerticalResolver, serialisationService, barcodeForensicsService);
 	}
 
 	//////////////////////////////////////////////////////////

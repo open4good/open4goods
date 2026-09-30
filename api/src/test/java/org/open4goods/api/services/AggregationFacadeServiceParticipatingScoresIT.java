@@ -18,6 +18,7 @@ import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.Gs1PrefixService;
 import org.open4goods.commons.services.textgen.BlablaService;
+import org.open4goods.icecat.services.IcecatCategoryVerticalResolver;
 import org.open4goods.icecat.services.IcecatFeatureResolver;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.attribute.AttributeType;
@@ -81,6 +82,7 @@ class AggregationFacadeServiceParticipatingScoresIT {
                 mock(BlablaService.class),
                 mock(IcecatService.class),
                 mock(IcecatFeatureResolver.class),
+                mock(IcecatCategoryVerticalResolver.class),
                 mock(SerialisationService.class),
                 mock(BarcodeForensicsService.class));
     }

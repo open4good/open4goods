@@ -121,6 +121,28 @@ class IcecatCompletionServiceTest {
         }
 
         @Test
+        void convertMapsIcecatCategoryIdAlongsideCategoryName() throws Exception {
+                IceDataItem item = new IceDataItem();
+                item.generalInfo = new GeneralInfo();
+                item.generalInfo.icecatId = 123;
+                item.generalInfo.title = "Test title";
+                item.generalInfo.category = new Category();
+                item.generalInfo.category.categoryID = "1649";
+                item.generalInfo.category.name = new Name();
+                item.generalInfo.category.name.value = "Washing Machines";
+
+                Method convert = IcecatCompletionService.class.getDeclaredMethod("convert", IceDataItem.class, Product.class,
+                        DomainLanguage.class);
+                convert.setAccessible(true);
+
+                Object df = convert.invoke(service, item, product, DomainLanguage.fr);
+                org.open4goods.model.datafragment.DataFragment fragment = (org.open4goods.model.datafragment.DataFragment) df;
+
+                assertThat(fragment.getIcecatCategoryId()).isEqualTo(1649);
+                assertThat(fragment.getCategory()).isNotBlank();
+        }
+
+        @Test
         void convertMapsFamilySeriesLifecycleSummaryBulletsReasonsLogosAndVariants() throws Exception {
                 IceDataItem item = new IceDataItem();
                 item.generalInfo = new GeneralInfo();

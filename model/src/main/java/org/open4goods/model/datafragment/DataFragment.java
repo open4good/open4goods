@@ -114,6 +114,14 @@ public class DataFragment implements Standardisable, Validable {
 	 */
 	private String category;
 
+	/**
+	 * The numeric Icecat category id, set only by the Icecat datasource. Distinct
+	 * from {@link #category}, which holds the free-text category name : this is
+	 * the stable identifier the Git-authored Icecat-to-O4G registry mappings are
+	 * keyed on.
+	 */
+	private Integer icecatCategoryId;
+
 	/** The different ratings **/
 	private Set<Rating> ratings = new HashSet<>();
 
@@ -1140,6 +1148,14 @@ public class DataFragment implements Standardisable, Validable {
 
 	public void setCategory(final String productTags) {
 		category = productTags;
+	}
+
+	public Integer getIcecatCategoryId() {
+		return icecatCategoryId;
+	}
+
+	public void setIcecatCategoryId(final Integer icecatCategoryId) {
+		this.icecatCategoryId = icecatCategoryId;
 	}
 
 	public Boolean getReferentielData() {

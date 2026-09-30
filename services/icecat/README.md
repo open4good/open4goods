@@ -10,7 +10,7 @@ methods for product enrichment.
 - Provides utilities to resolve Icecat feature names.
 - Streams the Open Icecat reference-catalogue export (CategoriesList, FeaturesList,
   FeatureGroupsList, LanguageList, and the Full-account CategoryFeaturesList) with a StAX
-  cursor reader (`IcecatReferenceCatalogueReader`), never buffering a whole file — the manual
+  cursor reader (`IcecatReferenceCatalogueReader`), never buffering a whole file - the manual
   documents CategoryFeaturesList.xml as larger than 10 GB. `IcecatCatalogueInventoryService`
   resolves each configured `*-file-uri` from a local path (no network, no credential) or a
   remote URL (delegated to `IcecatFileDownloadService`, which requires an Open Icecat account)

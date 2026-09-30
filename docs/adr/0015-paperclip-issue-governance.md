@@ -24,12 +24,26 @@ open task dependencies; issue documents hold detailed plans. ADRs and durable
 technical contracts remain in Git. The former WorkOrder ledger remains
 read-only history, and the dated migration index maps legacy IDs to issues.
 
-DEVELOPMENT remains local. Phase readiness is established from the relevant
+DEVELOPMENT remains isolated as defined in ADR-0014. Phase readiness is established from the relevant
 Paperclip issues. Before each beta or production promotion, the owner records
 an explicit decision in Paperclip after reviewing the candidate SHA, data
 digests, backups, rollback and phase evidence. The 2026-09-17 standing order
 no longer authorizes promotion. POST_PRODUCTION physical retirement retains
 its seven healthy days and verified restoration gate.
+
+The 2026-09-29 owner decision separates integration from deployment: ordinary PRs
+require independent review and green CI, not an owner decision for each merge.
+Push and PR workflows never deploy. The legacy production rebuild-and-deploy path
+is frozen until the immutable-artifact promotion and rollback path is qualified.
+Removing this freeze is part of that reviewed implementation, not a runtime switch.
+
+Every executable issue has exactly one phase label. Readiness is recomputed from
+all current project issues, including new and reopened work, before any promotion.
+GOU-63 is the planning-only campaign coordinator. Cancelled or unclassified work
+cannot silently satisfy a gate. The read-only `scripts/verify/paperclip_readiness.py`
+assessment is not authorization: approved candidate evidence, a fresh owner decision,
+and complete issue visibility are separate mandatory promotion checks. Hidden work
+must be reconciled before qualification; the list API omits hidden issues.
 
 ## Consequences
 

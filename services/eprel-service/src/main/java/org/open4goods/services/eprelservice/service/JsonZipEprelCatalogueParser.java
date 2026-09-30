@@ -44,9 +44,20 @@ public class JsonZipEprelCatalogueParser implements EprelCatalogueParser
     @Override
     public void parse(Path zipFile, Consumer<EprelProduct> consumer) throws IOException
     {
+        parse(zipFile, 0, consumer);
+    }
+
+    @Override
+    public void parse(Path zipFile, long skipRecords, Consumer<EprelProduct> consumer) throws IOException
+    {
         Objects.requireNonNull(zipFile, "zipFile");
         Objects.requireNonNull(consumer, "consumer");
+        if (skipRecords < 0)
+        {
+            throw new IllegalArgumentException("skipRecords must not be negative");
+        }
 
+        long[] recordsSeen = {0};
         try (InputStream fileStream = Files.newInputStream(zipFile); ZipInputStream zipInputStream = new ZipInputStream(fileStream))
         {
             ZipEntry entry;
@@ -63,7 +74,7 @@ public class JsonZipEprelCatalogueParser implements EprelCatalogueParser
                     {
                         zipInputStream.transferTo(outputStream);
                     }
-                    processJsonFile(tempJson, consumer);
+                    processJsonFile(tempJson, skipRecords, recordsSeen, consumer);
                 }
                 finally
                 {
@@ -74,7 +85,8 @@ public class JsonZipEprelCatalogueParser implements EprelCatalogueParser
         }
     }
 
-    private void processJsonFile(Path jsonFile, Consumer<EprelProduct> consumer) throws IOException
+    private void processJsonFile(Path jsonFile, long skipRecords, long[] recordsSeen, Consumer<EprelProduct> consumer)
+            throws IOException
     {
         TokenStreamFactory factory = objectMapper.tokenStreamFactory();
         try (JsonParser parser = factory.createParser(jsonFile.toFile()))
@@ -83,8 +95,18 @@ public class JsonZipEprelCatalogueParser implements EprelCatalogueParser
             {
                 while (parser.nextToken() != JsonToken.END_ARRAY)
                 {
-                    EprelProduct product = eprelProductReader.readValue(parser);
-                    consumer.accept(product);
+                    if (recordsSeen[0] < skipRecords)
+                    {
+                        // Already handed to the consumer on a prior attempt: skip the token tree
+                        // without paying the deserialisation cost of a record we will discard.
+                        parser.skipChildren();
+                    }
+                    else
+                    {
+                        EprelProduct product = eprelProductReader.readValue(parser);
+                        consumer.accept(product);
+                    }
+                    recordsSeen[0]++;
                 }
             }
             else

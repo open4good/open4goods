@@ -1,0 +1,7 @@
+# GOU-103: the secret-scan guardrail is only as strong as its review. These four files
+# together define what gitleaks scans, what it accepts, and how; a silent change to any of
+# them can widen the accepted-exception surface without anyone noticing. Require review.
+/.gitleaks-baseline.json           @GoulvenF
+/.gitleaks.toml                    @GoulvenF
+/scripts/verify/secret_scan.py     @GoulvenF
+/.github/workflows/secret-scan.yml @GoulvenF
