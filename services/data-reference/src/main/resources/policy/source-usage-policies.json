@@ -70,7 +70,7 @@
       "TEXT" : [ ],
       "MEDIA" : [ ],
       "OFFER" : [ ],
-      "PRICE" : [ ]
+      "PRICE" : [ "B2B_API" ]
     },
     "effectiveFrom" : "2026-09-12T00:00:00Z",
     "effectiveUntil" : null,
@@ -85,11 +85,11 @@
       "notice" : null,
       "sourceUri" : null
     },
-    "redistribution" : "PROHIBITED",
-    "legalReviewDate" : "2026-09-12",
-    "reviewState" : "UNREVIEWED",
+    "redistribution" : "ALLOWED",
+    "legalReviewDate" : "2026-09-29",
+    "reviewState" : "REVIEWED",
     "revokedAt" : null,
-    "evidenceReferences" : [ "https://support.google.com/merchants/answer/7052112?hl=en-GB" ]
+    "evidenceReferences" : [ "https://support.google.com/merchants/answer/7052112?hl=en-GB", "urn:o4g:private:gou-28-price-history-rights-decision:v1" ]
   }, {
     "policyId" : "legacy-product-backup",
     "sourceId" : "legacy-product-backup",
@@ -102,7 +102,7 @@
       "MEDIA" : [ ],
       "RELATION" : [ ],
       "OFFER" : [ ],
-      "PRICE" : [ ]
+      "PRICE" : [ "B2B_API" ]
     },
     "effectiveFrom" : "2026-09-12T00:00:00Z",
     "effectiveUntil" : null,
@@ -117,11 +117,11 @@
       "notice" : null,
       "sourceUri" : null
     },
-    "redistribution" : "PROHIBITED",
-    "legalReviewDate" : "2026-09-12",
-    "reviewState" : "UNREVIEWED",
+    "redistribution" : "ALLOWED",
+    "legalReviewDate" : "2026-09-29",
+    "reviewState" : "REVIEWED",
     "revokedAt" : null,
-    "evidenceReferences" : [ "urn:o4g:private:product-backup-input-contract:v1" ]
+    "evidenceReferences" : [ "urn:o4g:private:product-backup-input-contract:v1", "urn:o4g:private:gou-28-price-history-rights-decision:v1" ]
   }, {
     "policyId" : "amazon-paapi-quarantine",
     "sourceId" : "amazon-paapi",

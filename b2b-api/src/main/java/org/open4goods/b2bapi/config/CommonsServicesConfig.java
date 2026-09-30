@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.open4goods.commons.services.BarcodeForensicsService;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.Gs1PrefixService;
+import org.open4goods.datareference.model.SourceUsagePolicyRegistry;
 import org.open4goods.model.provider.PublicProviderLabelRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -71,5 +72,18 @@ public class CommonsServicesConfig {
     @Bean
     PublicProviderLabelRegistry publicProviderLabelRegistry() throws IOException {
         return PublicProviderLabelRegistry.loadDefault();
+    }
+
+    /**
+     * Exposes the Git-versioned, deny-by-default source-usage policy registry. It is the only
+     * source of truth for whether a source's price/offer content may be republished on a given
+     * surface (e.g. {@code B2B_API}).
+     *
+     * @return the checked-in source usage policy registry
+     * @throws IOException if the bundled policy resource cannot be read
+     */
+    @Bean
+    SourceUsagePolicyRegistry sourceUsagePolicyRegistry() throws IOException {
+        return SourceUsagePolicyRegistry.loadDefault();
     }
 }

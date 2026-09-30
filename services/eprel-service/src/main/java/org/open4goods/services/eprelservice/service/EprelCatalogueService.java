@@ -5,18 +5,26 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import org.open4goods.datareference.model.IngestionCheckpoint;
 import org.open4goods.datareference.model.SourceId;
+import org.open4goods.datareference.model.SourceRecordHead;
+import org.open4goods.datareference.model.SourceRecordKey;
 import org.open4goods.datareference.model.SourceRecordMutation;
 import org.open4goods.datareference.model.SourceRecordState;
 import org.open4goods.datareference.model.SourceRecordTransitionOutcome;
+import org.open4goods.datareference.model.evidence.ScalarEvidence;
 import org.open4goods.datareference.port.SourceRecordHeadStore;
 import org.open4goods.datareference.port.IngestionCheckpointStore;
 import org.open4goods.datareference.port.ScanCursor;
+import org.open4goods.datareference.port.ScanPage;
+import org.open4goods.datareference.port.ScanRequest;
+import org.open4goods.datareference.port.SourceRecordReplayScanner;
 import org.open4goods.services.eprelservice.client.EprelApiClient;
 import org.open4goods.services.eprelservice.client.EprelProductGroup;
 import org.open4goods.services.eprelservice.config.EprelServiceProperties;
@@ -33,6 +41,11 @@ import io.micrometer.core.instrument.MeterRegistry;
  * {@code EprelProduct} documents or mutate legacy product documents. Each accepted catalogue row
  * is a {@code FULL} source-record replacement, so a later row can remove an assertion that was
  * present in an earlier version of the same EPREL registration.
+ *
+ * <p>A mid-catalogue parse failure is retried against the already-downloaded archive,
+ * resuming past the last record it produced instead of reparsing it from the start. That
+ * resumption never publishes rows early: the source-record store and the completed-catalogue
+ * checkpoint are only written once a parse attempt, first or resumed, runs to completion.
  */
 @Service
 public class EprelCatalogueService {
@@ -40,10 +53,14 @@ public class EprelCatalogueService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EprelCatalogueService.class);
     private static final String SCHEMA_VERSION = "catalogue-v1";
     private static final String CHECKPOINT_OWNER = "eprel-catalogue-v1";
+    private static final String PROGRESS_CHECKPOINT_OWNER = "eprel-catalogue-v1-progress";
+    private static final String PRODUCT_GROUP_FIELD = "productGroup";
+    private static final int RECONCILIATION_PAGE_SIZE = 1_000;
 
     private final EprelApiClient apiClient;
     private final EprelCatalogueParser parser;
     private final SourceRecordHeadStore sourceRecordStore;
+    private final SourceRecordReplayScanner replayScanner;
     private final IngestionCheckpointStore checkpointStore;
     private final EprelSourceRecordAdapter adapter;
     private final EprelServiceProperties properties;
@@ -55,6 +72,7 @@ public class EprelCatalogueService {
      * @param apiClient HTTP client used to interact with EPREL
      * @param parser parser converting catalogues to provider rows
      * @param sourceRecordStore persistent source-record boundary
+     * @param replayScanner bulk read boundary used to reconcile a completed catalogue group
      * @param checkpointStore durable importer progress boundary
      * @param adapter mapper that preserves provider field identities
      * @param properties module configuration
@@ -64,6 +82,7 @@ public class EprelCatalogueService {
             EprelApiClient apiClient,
             EprelCatalogueParser parser,
             SourceRecordHeadStore sourceRecordStore,
+            SourceRecordReplayScanner replayScanner,
             IngestionCheckpointStore checkpointStore,
             EprelSourceRecordAdapter adapter,
             EprelServiceProperties properties,
@@ -71,6 +90,7 @@ public class EprelCatalogueService {
         this.apiClient = Objects.requireNonNull(apiClient, "apiClient must not be null");
         this.parser = Objects.requireNonNull(parser, "parser must not be null");
         this.sourceRecordStore = Objects.requireNonNull(sourceRecordStore, "sourceRecordStore must not be null");
+        this.replayScanner = Objects.requireNonNull(replayScanner, "replayScanner must not be null");
         this.checkpointStore = Objects.requireNonNull(checkpointStore, "checkpointStore must not be null");
         this.adapter = Objects.requireNonNull(adapter, "adapter must not be null");
         this.properties = Objects.requireNonNull(properties, "properties must not be null");
@@ -115,14 +135,19 @@ public class EprelCatalogueService {
             zipPath = apiClient.downloadCatalogueZip(group.urlCode());
             Instant retrievedAt = Instant.now();
             List<SourceRecordMutation> buffer = new ArrayList<>(properties.getIndexBulkSize());
-            parser.parse(zipPath, product -> adapter.adapt(product, SCHEMA_VERSION, retrievedAt).ifPresentOrElse(
-                    buffer::add,
-                    () -> increment("rejected")));
+            Set<SourceRecordKey> observedKeys = new HashSet<>();
+            Set<String> observedGroupValues = new HashSet<>();
+            parseWithResume(group, zipPath, retrievedAt, buffer, observedKeys, observedGroupValues);
             // Do not publish any FULL replacement until the parser has verified the complete
             // catalogue. A parser failure must leave the preceding source heads untouched;
             // otherwise assertions absent from an interrupted catalogue could look like a
             // successful, partial refresh.
             flush(buffer);
+            // A model silently absent from a complete, verified reimport never receives an
+            // explicit DELETED row from EPREL: its status field only covers an explicit
+            // withdrawal, not a disappearance. Reconciliation tombstones what this catalogue
+            // group used to claim but no longer does.
+            reconcileGroup(retrievedAt, observedKeys, observedGroupValues);
             acknowledgeCompletedCatalogue(group, retrievedAt);
         } catch (IOException exception) {
             LOGGER.error("Failed to process EPREL catalogue for {}", group.urlCode(), exception);
@@ -130,6 +155,103 @@ public class EprelCatalogueService {
         } finally {
             deleteTemporaryArchive(zipPath);
         }
+    }
+
+    /**
+     * Parses the already-downloaded archive, retrying in place after a mid-catalogue
+     * failure by resuming past the last record it produced rather than reparsing the
+     * archive from its start.
+     *
+     * <p>Records produced before a failed attempt stay in {@code buffer}/{@code observedKeys}
+     * across retries: nothing is applied to the source-record store until this method
+     * returns, so a permanently unrecoverable catalogue still leaves every prior head
+     * untouched, exactly as an unresumed parse would.
+     */
+    private void parseWithResume(EprelProductGroup group, Path zipPath, Instant retrievedAt,
+            List<SourceRecordMutation> buffer, Set<SourceRecordKey> observedKeys, Set<String> observedGroupValues)
+            throws IOException {
+        long[] recordCursor = {0};
+        int maxRetries = Math.max(0, properties.getMaxCatalogueParseRetries());
+        for (int attempt = 0; ; attempt++) {
+            try {
+                parser.parse(zipPath, recordCursor[0], product -> {
+                    recordCursor[0]++;
+                    if (product.getProductGroup() != null && !product.getProductGroup().isBlank()) {
+                        observedGroupValues.add(product.getProductGroup());
+                    }
+                    adapter.adapt(product, SCHEMA_VERSION, retrievedAt).ifPresentOrElse(mutation -> {
+                        observedKeys.add(mutation.candidate().key());
+                        buffer.add(mutation);
+                    }, () -> increment("rejected"));
+                });
+                return;
+            } catch (IOException exception) {
+                persistParseProgress(group, recordCursor[0]);
+                if (attempt >= maxRetries) {
+                    throw exception;
+                }
+                LOGGER.warn("Resuming EPREL catalogue parse for {} after record {} (attempt {}/{})",
+                        group.urlCode(), recordCursor[0], attempt + 1, maxRetries, exception);
+            }
+        }
+    }
+
+    /**
+     * Best-effort, diagnostic record cursor: it never gates a correctness decision, so a
+     * failure to persist it must not shadow the parse failure that triggered it.
+     */
+    private void persistParseProgress(EprelProductGroup group, long recordIndex) {
+        try {
+            SourceId sourceId = new SourceId(EprelSourceRecordAdapter.SOURCE_ID);
+            Optional<IngestionCheckpoint> current = checkpointStore.find(PROGRESS_CHECKPOINT_OWNER, sourceId);
+            ScanCursor cursor = new ScanCursor(SCHEMA_VERSION + ":" + group.urlCode() + ":" + recordIndex);
+            IngestionCheckpoint next = new IngestionCheckpoint(
+                    PROGRESS_CHECKPOINT_OWNER,
+                    sourceId,
+                    Optional.of(cursor),
+                    0,
+                    Optional.empty(),
+                    Instant.now(),
+                    current.map(IngestionCheckpoint::revision).orElse(0L) + 1);
+            checkpointStore.compareAndSet(next, current.map(IngestionCheckpoint::revision).orElse(0L));
+        } catch (RuntimeException exception) {
+            LOGGER.warn("Unable to persist EPREL catalogue parse progress for {}", group.urlCode(), exception);
+        }
+    }
+
+    private void reconcileGroup(Instant retrievedAt, Set<SourceRecordKey> observedKeys, Set<String> observedGroupValues) {
+        if (observedGroupValues.isEmpty()) {
+            LOGGER.warn("Skipping EPREL tombstone reconciliation: no product group value observed in this catalogue");
+            return;
+        }
+        SourceId sourceId = new SourceId(EprelSourceRecordAdapter.SOURCE_ID);
+        ScanRequest request = ScanRequest.first(RECONCILIATION_PAGE_SIZE);
+        do {
+            ScanPage<SourceRecordHead> page = replayScanner.scanBySource(sourceId, request);
+            for (SourceRecordHead head : page.elements()) {
+                if (head.state() != SourceRecordState.ACTIVE || observedKeys.contains(head.key())
+                        || !belongsToObservedGroup(head, observedGroupValues)) {
+                    continue;
+                }
+                var transition = sourceRecordStore.apply(adapter.tombstone(head.key(), SCHEMA_VERSION, retrievedAt));
+                increment("tombstoned");
+                if (transition.outcome() == SourceRecordTransitionOutcome.ACCEPTED
+                        || transition.outcome() == SourceRecordTransitionOutcome.TOMBSTONED) {
+                    increment("changed");
+                }
+            }
+            if (page.nextCursor().isEmpty()) {
+                return;
+            }
+            request = request.resumeAt(page.nextCursor().orElseThrow());
+        } while (true);
+    }
+
+    private boolean belongsToObservedGroup(SourceRecordHead head, Set<String> observedGroupValues) {
+        return head.assertions().stream()
+                .filter(assertion -> PRODUCT_GROUP_FIELD.equals(assertion.field().key()))
+                .anyMatch(assertion -> assertion.evidence() instanceof ScalarEvidence scalar
+                        && observedGroupValues.contains(scalar.lexicalValue()));
     }
 
     private void flush(List<SourceRecordMutation> buffer) {

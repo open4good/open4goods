@@ -62,6 +62,13 @@ public class EprelServiceProperties
      */
     private List<String> groupsToIndex = List.of();
 
+    /**
+     * Maximum number of times a catalogue parse is retried, resuming after the last
+     * record it produced, before the group refresh is reported as failed.
+     */
+    @Min(0)
+    private int maxCatalogueParseRetries = 3;
+
     public String getApiUrl()
     {
         return apiUrl;
@@ -140,5 +147,15 @@ public class EprelServiceProperties
     public void setGroupsToIndex(List<String> groupsToIndex)
     {
         this.groupsToIndex = groupsToIndex;
+    }
+
+    public int getMaxCatalogueParseRetries()
+    {
+        return maxCatalogueParseRetries;
+    }
+
+    public void setMaxCatalogueParseRetries(int maxCatalogueParseRetries)
+    {
+        this.maxCatalogueParseRetries = maxCatalogueParseRetries;
     }
 }

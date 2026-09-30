@@ -83,4 +83,24 @@ public final class PublicProviderLabelRegistry {
     public Optional<PublicProviderLabel> find(String sourceId) {
         return sourceId == null ? Optional.empty() : Optional.ofNullable(labelsBySourceId.get(sourceId));
     }
+
+    /**
+     * Resolves a caller-supplied public provider selector back to the internal source id.
+     *
+     * <p>Callers of a public API must never be able to select a provider by its internal source
+     * id, only by the reviewed public label - this is the reverse of {@link #find(String)}, used
+     * to translate an inbound {@code provider} filter before it reaches an internal query.
+     *
+     * @param publicLabel exact reviewed public label, as returned by {@link #find(String)}
+     * @return the internal source id carrying this label, or empty when no reviewed entry matches
+     */
+    public Optional<String> findSourceId(String publicLabel) {
+        if (publicLabel == null) {
+            return Optional.empty();
+        }
+        return labelsBySourceId.values().stream()
+                .filter(label -> label.label().equals(publicLabel))
+                .map(PublicProviderLabel::sourceId)
+                .findFirst();
+    }
 }

@@ -18,6 +18,7 @@ import org.open4goods.api.services.completion.WikidataCompletionService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.datareference.port.IngestionCheckpointStore;
 import org.open4goods.datareference.port.SourceRecordHeadStore;
+import org.open4goods.datareference.port.SourceRecordReplayScanner;
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.commons.helper.DevModeService;
 import org.open4goods.commons.services.BarcodeForensicsService;
@@ -133,10 +134,11 @@ public class ApiConfig {
 	}
 	@Bean
 	EprelCatalogueService eprelCatalogueService(@Autowired EprelApiClient apiClient,
-			@Autowired SourceRecordHeadStore sourceRecordStore, @Autowired IngestionCheckpointStore checkpointStore,
+			@Autowired SourceRecordHeadStore sourceRecordStore, @Autowired SourceRecordReplayScanner replayScanner,
+			@Autowired IngestionCheckpointStore checkpointStore,
 			@Autowired EprelServiceProperties properties, MeterRegistry meterRegistry) {
-		return new EprelCatalogueService(apiClient, new JsonZipEprelCatalogueParser(), sourceRecordStore, checkpointStore,
-				new EprelSourceRecordAdapter(), properties, meterRegistry);
+		return new EprelCatalogueService(apiClient, new JsonZipEprelCatalogueParser(), sourceRecordStore, replayScanner,
+				checkpointStore, new EprelSourceRecordAdapter(), properties, meterRegistry);
 	}
 
 	@Bean

@@ -93,6 +93,39 @@ public class EprelSourceRecordAdapter {
         return Optional.of(SourceRecordMutation.full(head));
     }
 
+    /**
+     * Builds an explicit withdrawal for a record no longer present in a complete reimport.
+     *
+     * <p>Used by catalogue-level reconciliation when a key that was active before a full,
+     * verified reimport is absent from it: EPREL's own {@code status} field only covers an
+     * explicit withdrawal, never a silent disappearance from the catalogue.
+     *
+     * @param key identity of the record to withdraw
+     * @param schemaVersion O4G contract version this head is written against
+     * @param retrievedAt instant this reimport completed
+     * @return a DELETED full replacement for the record
+     */
+    public SourceRecordMutation tombstone(SourceRecordKey key, String schemaVersion, Instant retrievedAt) {
+        Objects.requireNonNull(key, "key must not be null");
+        Objects.requireNonNull(schemaVersion, "schemaVersion must not be null");
+        Objects.requireNonNull(retrievedAt, "retrievedAt must not be null");
+        SourceRecordHead head = new SourceRecordHead(
+                key,
+                schemaVersion,
+                null,
+                retrievedAt,
+                retrievedAt,
+                null,
+                SourceRecordCompleteness.FULL,
+                SourceRecordState.DELETED,
+                payloadHash(key, schemaVersion, null, List.of(), List.of(), SourceRecordState.DELETED),
+                URI.create(EVIDENCE_BASE + encode(key.sourceRecordId().value())),
+                USAGE_POLICY,
+                List.of(),
+                List.of());
+        return SourceRecordMutation.full(head);
+    }
+
     private Optional<String> recordId(EprelProduct product) {
         if (hasText(product.getEprelRegistrationNumber())) {
             return Optional.of(product.getEprelRegistrationNumber());
