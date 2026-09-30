@@ -138,6 +138,48 @@ OpenAPI client regeneration: see
 - `http://localhost:8087/swagger-ui` (Swagger UI)
 - Redoc/Scalar UI (path per `OpenApiConfig`)
 
+## 8. Price-history Elasticsearch schema (GOU-144)
+
+`b2b-api` self-provisions on every `ApplicationReadyEvent`
+(`PriceHistoryElasticsearchProvisioner`): ILM policies, then index templates,
+from `services/price-history`'s `elasticsearch/*.json` classpath resources.
+No separate script; idempotent on every boot (local/beta/prod).
+
+Verify against a local Elasticsearch:
+
+```bash
+curl -s localhost:9200/_index_template/o4g-price-change | jq .
+curl -s localhost:9200/_index_template/o4g-daily-provider-rollup | jq .
+curl -s localhost:9200/_ilm/policy/o4g-price-change-24m | jq .
+curl -s localhost:9200/_ilm/policy/o4g-daily-provider-rollup-5y | jq .
+```
+
+All four must return the resource, not `404`. `GET /actuator/health`'s
+`priceHistoryProvisioning` indicator re-checks the live cluster on every probe
+and goes `DOWN` with the missing names otherwise.
+
+To confirm the templates produce a real time-series data stream, index one
+document (current timestamp; data streams only accept writes near "now")
+into a name matching `o4g-price-change-*`:
+
+```bash
+NOW=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)
+curl -s -X POST "localhost:9200/o4g-price-change-smoke/_create?op_type=create" \
+  -H "Content-Type: application/json" -d "{
+  \"@timestamp\": \"$NOW\", \"gtin\": \"0885909950805\", \"provider_id\": \"smoke\",
+  \"provider_offer_id\": \"smoke-1\", \"condition\": \"NEW\", \"currency\": \"EUR\",
+  \"amount\": 1.0, \"availability\": \"IN_STOCK\", \"event_kind\": \"FIRST_SEEN\",
+  \"event_id\": \"smoke-1\", \"observed_at\": \"$NOW\"
+}"
+curl -s localhost:9200/_data_stream/o4g-price-change-smoke | jq '.data_streams[0].index_mode'
+# -> "time_series"
+curl -s localhost:9200/o4g-price-change-smoke/_mapping | jq '.[].mappings.properties."@timestamp".type'
+# -> "date_nanos"
+```
+
+`PriceHistoryElasticsearchProvisionerIT` (`b2b-api`) runs this same sequence
+against a real Elasticsearch on every build.
+
 ## Blockers to record (if validation cannot run)
 
 If local Postgres/Redis/Elasticsearch or Stripe test mode is unavailable, record the exact command, the failure
