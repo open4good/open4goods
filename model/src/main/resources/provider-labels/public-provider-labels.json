@@ -1,6 +1,10 @@
 {
   "labels" : [ {
-    "sourceId" : "merchant-feed",
+    "sourceId" : "merchant-feed.awin",
+    "label" : "Merchant Feed Partner",
+    "faviconUrl" : null
+  }, {
+    "sourceId" : "merchant-feed.effiliation",
     "label" : "Merchant Feed Partner",
     "faviconUrl" : null
   }, {

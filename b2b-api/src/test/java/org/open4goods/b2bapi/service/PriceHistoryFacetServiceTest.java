@@ -117,7 +117,7 @@ class PriceHistoryFacetServiceTest {
 
     @Test
     void defaultsToDayGranularityAndThirtyDayWindowAndBillsWhenServed() {
-        DailyProviderRollup rollup = dailyRollup("merchant-feed", OfferCondition.NEW, "EUR",
+        DailyProviderRollup rollup = dailyRollup("merchant-feed.awin", OfferCondition.NEW, "EUR",
                 LocalDate.of(2026, 10, 10), "749.00", "819.99", "799.99", 3, 2);
         when(priceHistoryQueryPort.queryDaily(any())).thenReturn(new PriceHistoryPage<>(List.of(rollup), Optional.empty()));
         when(creditLedgerService.settleDebit(any(), any(), any(), any(), anyLong()))
@@ -140,7 +140,7 @@ class PriceHistoryFacetServiceTest {
 
     @Test
     void explicitChangeGranularityWithinThirtyOneDaysMapsAmountAndState() {
-        PriceChangeEvent event = changeEvent("merchant-feed", OfferCondition.NEW, "EUR", "799.99",
+        PriceChangeEvent event = changeEvent("merchant-feed.awin", OfferCondition.NEW, "EUR", "799.99",
                 OfferAvailability.AVAILABLE, NOW.minus(java.time.Duration.ofDays(1)));
         when(priceHistoryQueryPort.queryChanges(any())).thenReturn(new PriceHistoryPage<>(List.of(event), Optional.empty()));
         when(creditLedgerService.settleDebit(any(), any(), any(), any(), anyLong()))
@@ -348,7 +348,7 @@ class PriceHistoryFacetServiceTest {
 
     @Test
     void idempotentReplaySettlesZeroCostAndRefundsTheFullReservation() {
-        DailyProviderRollup rollup = dailyRollup("merchant-feed", OfferCondition.NEW, "EUR",
+        DailyProviderRollup rollup = dailyRollup("merchant-feed.awin", OfferCondition.NEW, "EUR",
                 LocalDate.of(2026, 6, 10), "1.00", "1.00", "1.00", 1, 0);
         when(priceHistoryQueryPort.queryDaily(any())).thenReturn(new PriceHistoryPage<>(List.of(rollup), Optional.empty()));
         when(creditLedgerService.settleDebit(any(), any(), any(), any(), anyLong()))
@@ -384,6 +384,6 @@ class PriceHistoryFacetServiceTest {
         return new PriceChangeEvent(eventId, key, PriceChangeKind.CHANGED, condition, Currency.getInstance(currency),
                 new BigDecimal(amount), availability, observedAt, observedAt.plusNanos(1),
                 new PayloadHash("SHA-256", "b".repeat(64)),
-                new SourceUsagePolicyRef("merchant-feed", "1"));
+                new SourceUsagePolicyRef("merchant-feed.awin", "1"));
     }
 }

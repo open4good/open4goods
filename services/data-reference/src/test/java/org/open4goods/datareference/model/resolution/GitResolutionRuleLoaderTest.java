@@ -54,7 +54,7 @@ class GitResolutionRuleLoaderTest {
 
         ResolutionRule widthRule = registry.find(WIDTH, ProjectionSurface.NUDGER_WEB).orElseThrow();
         assertThat(widthRule.version()).isEqualTo(new RuleVersion("resolution-fixture-width", 1));
-        assertThat(widthRule.rankedSources()).containsExactly(new SourceId("icecat"), new SourceId("merchant-feed"));
+        assertThat(widthRule.rankedSources()).containsExactly(new SourceId("icecat"), new SourceId("merchant-feed.awin"));
         assertThat(widthRule.regulatoryAuthority()).isNull();
 
         ResolutionRule energyRule = registry.find(ENERGY, ProjectionSurface.NUDGER_WEB).orElseThrow();
@@ -94,7 +94,7 @@ class GitResolutionRuleLoaderTest {
 
     @Test
     void rejectsARepeatedSourceInRankedSources() {
-        String invalid = fixtureJson().replace("[ \"icecat\", \"merchant-feed\" ]", "[ \"icecat\", \"icecat\" ]");
+        String invalid = fixtureJson().replace("[ \"icecat\", \"merchant-feed.awin\" ]", "[ \"icecat\", \"icecat\" ]");
 
         assertThatThrownBy(() -> load(invalid))
                 .isInstanceOf(ResolutionRuleValidationException.class)
@@ -103,7 +103,7 @@ class GitResolutionRuleLoaderTest {
 
     @Test
     void rejectsAnEmptyRankedSourcesList() {
-        String invalid = fixtureJson().replace("[ \"icecat\", \"merchant-feed\" ]", "[ ]");
+        String invalid = fixtureJson().replace("[ \"icecat\", \"merchant-feed.awin\" ]", "[ ]");
 
         assertThatThrownBy(() -> load(invalid))
                 .isInstanceOf(ResolutionRuleValidationException.class)
@@ -121,7 +121,7 @@ class GitResolutionRuleLoaderTest {
 
     @Test
     void rejectsASourceWithNoUsagePolicyEntry() {
-        String invalid = fixtureJson().replace("\"icecat\", \"merchant-feed\"", "\"icecat\", \"unlisted-source\"");
+        String invalid = fixtureJson().replace("\"icecat\", \"merchant-feed.awin\"", "\"icecat\", \"unlisted-source\"");
 
         assertThatThrownBy(() -> load(invalid))
                 .isInstanceOf(ResolutionRuleValidationException.class)

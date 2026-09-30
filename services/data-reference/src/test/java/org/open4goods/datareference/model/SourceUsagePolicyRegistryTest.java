@@ -26,36 +26,160 @@ class SourceUsagePolicyRegistryTest {
     private static final Instant DURING = Instant.parse("2026-09-30T00:00:00Z");
 
     @Test
-    void defaultInventoryRecordsEveryKnownSourceAsAnUnreviewedDenyExceptTheGou28PriceHistoryGrant() throws IOException {
+    void defaultInventoryHoldsTheElevenGou95RatifiedRowsAllReviewedWithEvidence() throws IOException {
         SourceUsagePolicyRegistry registry = SourceUsagePolicyRegistry.loadDefault();
 
+        // GOU-95/GOU-105: the generic merchant-feed row is replaced by six per-network rows,
+        // because a single record cannot carry six distinct publisher agreements.
         assertThat(registry.policies()).extracting(SourceUsagePolicy::sourceId)
-                .containsExactly(new SourceId("eprel"), new SourceId("icecat"), new SourceId("merchant-feed"),
+                .containsExactly(new SourceId("eprel"), new SourceId("icecat"), new SourceId("icecat.full"),
+                        new SourceId("merchant-feed.awin"), new SourceId("merchant-feed.effiliation"),
+                        new SourceId("merchant-feed.tradetracker"), new SourceId("merchant-feed.kwanko"),
+                        new SourceId("merchant-feed.webgains"), new SourceId("merchant-feed.cj"),
                         new SourceId("legacy-product-backup"), new SourceId("amazon-paapi"));
 
-        // GOU-28: merchant-feed and legacy-product-backup are the only two sources reviewed and
-        // authorized to redistribute PRICE (price-history) content on the B2B_API surface. Every
-        // other source, and every other content-type/surface combination for these two sources,
-        // must remain denied by default.
-        Set<SourceId> gou28ReviewedSources =
-                Set.of(new SourceId("merchant-feed"), new SourceId("legacy-product-backup"));
+        for (SourceUsagePolicy policy : registry.policies()) {
+            assertThat(policy.evidenceReferences()).as("%s evidence", policy.sourceId()).isNotEmpty();
+            // A row in total refusal is still a decided, reviewed refusal, not an unreviewed default.
+            assertThat(policy.reviewState()).as("%s reviewState", policy.sourceId())
+                    .isEqualTo(PolicyReviewState.REVIEWED);
+            assertThat(policy.legalReviewDate()).as("%s legalReviewDate", policy.sourceId())
+                    .isEqualTo(LocalDate.of(2026, 9, 29));
+        }
+    }
+
+    @Test
+    void odblExportIsNotGrantedByAnyOfTheElevenRatifiedRows() throws IOException {
+        SourceUsagePolicyRegistry registry = SourceUsagePolicyRegistry.loadDefault();
 
         for (SourceUsagePolicy policy : registry.policies()) {
-            assertThat(policy.evidenceReferences()).isNotEmpty();
-            boolean isGou28Grant = gou28ReviewedSources.contains(policy.sourceId());
-            assertThat(policy.reviewState())
-                    .isEqualTo(isGou28Grant ? PolicyReviewState.REVIEWED : PolicyReviewState.UNREVIEWED);
-            for (SourceContentType contentType : policy.contentTypes()) {
-                for (ProjectionSurface surface : ProjectionSurface.values()) {
-                    boolean expectedAllow = isGou28Grant
-                            && contentType == SourceContentType.PRICE
-                            && surface == ProjectionSurface.B2B_API;
-                    assertThat(registry.allows(policy.sourceId(), policy.reference(), contentType, surface, DURING))
-                            .as("%s allows %s on %s", policy.sourceId(), contentType, surface)
-                            .isEqualTo(expectedAllow);
-                }
+            for (SourceContentType contentType : SourceContentType.values()) {
+                assertThat(registry.allows(policy.sourceId(), policy.reference(), contentType,
+                        ProjectionSurface.ODBL_EXPORT, DURING))
+                        .as("%s allows %s on ODBL_EXPORT", policy.sourceId(), contentType)
+                        .isFalse();
             }
         }
+    }
+
+    @Test
+    void eprelIsAllowedOnWebAndB2bForItsThreeEmittedContentTypesButNotBeyond() throws IOException {
+        SourceUsagePolicyRegistry registry = SourceUsagePolicyRegistry.loadDefault();
+        SourceId eprel = new SourceId("eprel");
+        SourceUsagePolicyRef ref = registry.find(new SourceUsagePolicyRef("eprel-public-api", "2")).orElseThrow()
+                .reference();
+
+        assertThat(registry.allows(eprel, ref, SourceContentType.ATTRIBUTE, ProjectionSurface.NUDGER_WEB, DURING))
+                .isTrue();
+        assertThat(registry.allows(eprel, ref, SourceContentType.ATTRIBUTE, ProjectionSurface.B2B_API, DURING))
+                .isTrue();
+        // TEXT is never emitted by the EPREL adapter, so it was never reviewed.
+        assertThat(registry.allows(eprel, ref, SourceContentType.TEXT, ProjectionSurface.NUDGER_WEB, DURING))
+                .isFalse();
+    }
+
+    @Test
+    void icecatOpenContentIsAllowedOnWebOnlyAndExcludesSyntheticContentGenerationNotAiTraining() throws IOException {
+        SourceUsagePolicyRegistry registry = SourceUsagePolicyRegistry.loadDefault();
+        SourceId icecat = new SourceId("icecat");
+        SourceUsagePolicyRef ref = new SourceUsagePolicyRef("icecat-open-content", "2");
+
+        assertThat(registry.allows(icecat, ref, SourceContentType.TEXT, ProjectionSurface.NUDGER_WEB, DURING))
+                .isTrue();
+        // OPL forbids charging for network access to the content: B2B_API stays refused.
+        assertThat(registry.allows(icecat, ref, SourceContentType.TEXT, ProjectionSurface.B2B_API, DURING))
+                .isFalse();
+        // OFFER/PRICE are not Icecat content types.
+        assertThat(registry.allows(icecat, ref, SourceContentType.OFFER, ProjectionSurface.NUDGER_WEB, DURING))
+                .isFalse();
+
+        // GOU-95 answer 4: only synthetic content generation is excluded; inference embeddings remain allowed.
+        assertThat(registry.allowsUse(icecat, ref, SourceContentType.TEXT, ProhibitedUse.AI_TRAINING, DURING))
+                .isTrue();
+        assertThat(registry.allowsUse(icecat, ref, SourceContentType.TEXT, ProhibitedUse.SYNTHETIC_CONTENT_GENERATION,
+                DURING)).isFalse();
+    }
+
+    @Test
+    void icecatFullSubscriptionRemainsATotalRefusal() throws IOException {
+        SourceUsagePolicyRegistry registry = SourceUsagePolicyRegistry.loadDefault();
+        SourceId icecatFull = new SourceId("icecat.full");
+        SourceUsagePolicyRef ref = new SourceUsagePolicyRef("icecat-full-subscription", "1");
+
+        assertThat(registry.allows(icecatFull, ref, SourceContentType.IDENTITY, ProjectionSurface.NUDGER_WEB, DURING))
+                .isFalse();
+        assertThat(registry.allowsUse(icecatFull, ref, SourceContentType.IDENTITY, ProhibitedUse.AI_TRAINING, DURING))
+                .isFalse();
+    }
+
+    @Test
+    void awinAndEffiliationAllowOfferAndPriceOnWebAndB2bButNotTextOrMedia() throws IOException {
+        SourceUsagePolicyRegistry registry = SourceUsagePolicyRegistry.loadDefault();
+
+        for (String network : List.of("awin", "effiliation")) {
+            SourceId source = new SourceId("merchant-feed." + network);
+            SourceUsagePolicyRef ref = new SourceUsagePolicyRef("merchant-feed." + network, "1");
+
+            assertThat(registry.allows(source, ref, SourceContentType.OFFER, ProjectionSurface.NUDGER_WEB, DURING))
+                    .as("%s OFFER/NUDGER_WEB", network).isTrue();
+            assertThat(registry.allows(source, ref, SourceContentType.PRICE, ProjectionSurface.B2B_API, DURING))
+                    .as("%s PRICE/B2B_API", network).isTrue();
+            // The publisher agreement covers OFFER/PRICE, not the merchant's own text or images.
+            assertThat(registry.allows(source, ref, SourceContentType.TEXT, ProjectionSurface.NUDGER_WEB, DURING))
+                    .as("%s TEXT/NUDGER_WEB", network).isFalse();
+            assertThat(registry.allows(source, ref, SourceContentType.MEDIA, ProjectionSurface.NUDGER_WEB, DURING))
+                    .as("%s MEDIA/NUDGER_WEB", network).isFalse();
+        }
+    }
+
+    @Test
+    void theFourNetworksWithoutAPublisherAgreementRemainTotalRefusals() throws IOException {
+        SourceUsagePolicyRegistry registry = SourceUsagePolicyRegistry.loadDefault();
+
+        for (String network : List.of("tradetracker", "kwanko", "webgains", "cj")) {
+            SourceId source = new SourceId("merchant-feed." + network);
+            SourceUsagePolicyRef ref = new SourceUsagePolicyRef("merchant-feed." + network, "1");
+
+            assertThat(registry.allows(source, ref, SourceContentType.OFFER, ProjectionSurface.NUDGER_WEB, DURING))
+                    .as("%s OFFER/NUDGER_WEB", network).isFalse();
+            assertThat(registry.allows(source, ref, SourceContentType.PRICE, ProjectionSurface.B2B_API, DURING))
+                    .as("%s PRICE/B2B_API", network).isFalse();
+        }
+    }
+
+    @Test
+    void legacyProductBackupRecordsAReviewedIdentityScopeButPublishesNothingWhileRedistributionIsProhibited()
+            throws IOException {
+        SourceUsagePolicyRegistry registry = SourceUsagePolicyRegistry.loadDefault();
+        SourceId source = new SourceId("legacy-product-backup");
+        SourceUsagePolicyRef ref = new SourceUsagePolicyRef("legacy-product-backup", "2");
+
+        // GOU-95 P4 sets redistribution: PROHIBITED for this row. SourceUsagePolicy.allows() gates
+        // on redistribution != PROHIBITED before ever consulting surfaceGrants, so this row cannot
+        // publish anything while that field holds, even though IDENTITY/NUDGER_WEB is recorded as a
+        // reviewed pair. Flagged to Lead Tech on GOU-105 as a spec/model coherence gap; this test
+        // pins the actual, current behaviour rather than the possibly-unintended one.
+        assertThat(registry.allows(source, ref, SourceContentType.IDENTITY, ProjectionSurface.NUDGER_WEB, DURING))
+                .isFalse();
+        assertThat(registry.allows(source, ref, SourceContentType.IDENTITY, ProjectionSurface.B2B_API, DURING))
+                .isFalse();
+        assertThat(registry.find(ref).orElseThrow().contentTypes()).containsExactly(SourceContentType.IDENTITY);
+        assertThat(registry.find(ref).orElseThrow().attribution().required()).isFalse();
+    }
+
+    @Test
+    void amazonQuarantineIsRevokedAndDeniesAnyAssertionFromItsRevocationOnward() throws IOException {
+        SourceUsagePolicyRegistry registry = SourceUsagePolicyRegistry.loadDefault();
+        SourceUsagePolicy amazon = registry.find(new SourceUsagePolicyRef("amazon-paapi-quarantine", "2"))
+                .orElseThrow();
+        Instant revokedAt = Instant.parse("2026-09-29T00:00:00Z");
+
+        assertThat(amazon.revokedAt()).isEqualTo(revokedAt);
+        assertThat(amazon.isEffectiveAt(revokedAt.minusSeconds(1))).isTrue();
+        assertThat(amazon.isEffectiveAt(revokedAt)).isFalse();
+        assertThat(amazon.isEffectiveAt(Instant.parse("2030-01-01T00:00:00Z"))).isFalse();
+        assertThat(registry.allows(amazon.sourceId(), amazon.reference(), SourceContentType.IDENTITY,
+                ProjectionSurface.NUDGER_WEB, revokedAt.minusSeconds(1))).isFalse();
     }
 
     @Test
@@ -149,13 +273,21 @@ class SourceUsagePolicyRegistryTest {
     }
 
     @Test
-    void allowsUseDeniesEveryUseForTheUnreviewedDefaultInventory() throws IOException {
+    void allowsUseDeniesEveryUseForEveryTotalRefusalRowInTheDefaultInventory() throws IOException {
         SourceUsagePolicyRegistry registry = SourceUsagePolicyRegistry.loadDefault();
+        // eprel and icecat are the two rows with a reviewed named-use clearance
+        // (eprel clears every use with an empty prohibitedUses; icecat clears AI_TRAINING);
+        // every other row is a total, reviewed refusal covering every use.
+        Set<SourceId> reviewedForSomeUse = Set.of(new SourceId("eprel"), new SourceId("icecat"));
 
         for (SourceUsagePolicy policy : registry.policies()) {
+            if (reviewedForSomeUse.contains(policy.sourceId())) {
+                continue;
+            }
             for (SourceContentType contentType : SourceContentType.values()) {
                 for (ProhibitedUse use : ProhibitedUse.values()) {
                     assertThat(registry.allowsUse(policy.sourceId(), policy.reference(), contentType, use, DURING))
+                            .as("%s allowsUse %s on %s", policy.sourceId(), use, contentType)
                             .isFalse();
                 }
             }
