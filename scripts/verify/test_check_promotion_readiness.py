@@ -126,20 +126,27 @@ class MultiplePhaseLabelsTest(TempRepoTestCase):
 
 
 class OpenDevelopmentTaskTest(TempRepoTestCase):
-    def test_open_development_task_is_a_blocker(self) -> None:
-        decision = valid_decision(manifestDigest=self.digest())
-        issues = [issue("GOU-1", "development", status="open")]
-        report = self.build(issues, decision)
-        reasons = {b["reason"] for b in report["blockers"]}
-        self.assertIn("development_task_open", reasons)
-        self.assertFalse(report["ready"])
+    # Real Paperclip status vocabulary: backlog, todo, in_progress, in_review,
+    # blocked, done, cancelled. Only done/cancelled are terminal; everything
+    # else -- including a status this script has never seen -- must block.
+    NON_TERMINAL_STATUSES = ("backlog", "todo", "in_progress", "in_review", "blocked", "unknown_future_status")
 
-    def test_reopened_development_task_is_a_blocker(self) -> None:
+    def test_non_terminal_development_task_is_a_blocker(self) -> None:
+        for status in self.NON_TERMINAL_STATUSES:
+            with self.subTest(status=status):
+                decision = valid_decision(manifestDigest=self.digest())
+                issues = [issue("GOU-1", "development", status=status)]
+                report = self.build(issues, decision)
+                reasons = {b["reason"] for b in report["blockers"]}
+                self.assertIn("development_task_open", reasons)
+                self.assertFalse(report["ready"])
+
+    def test_cancelled_development_task_is_terminal(self) -> None:
         decision = valid_decision(manifestDigest=self.digest())
-        issues = [issue("GOU-1", "development", status="reopened")]
+        issues = [issue("GOU-1", "development", status="cancelled")]
         report = self.build(issues, decision)
-        reasons = {b["reason"] for b in report["blockers"]}
-        self.assertIn("development_task_open", reasons)
+        self.assertEqual(report["blockers"], [])
+        self.assertTrue(report["ready"])
 
 
 class NewDevelopmentTaskAfterPinTest(TempRepoTestCase):
@@ -156,6 +163,39 @@ class NewDevelopmentTaskAfterPinTest(TempRepoTestCase):
         issues = [issue("GOU-1", "production", created_at="2026-10-01T00:00:00Z")]
         report = self.build(issues, decision)
         self.assertEqual(report["blockers"], [])
+
+
+class RealisticInventoryRegressionTest(TempRepoTestCase):
+    """Reproduces the PR #3353 review finding: a realistic-sized inventory where
+    every issue carries a valid phase label but one DEVELOPMENT task is not
+    terminal must never report ready, regardless of how many other issues are
+    done/cancelled."""
+
+    ALL_STATUSES = ("backlog", "todo", "in_progress", "in_review", "blocked", "done", "cancelled")
+
+    def test_large_inventory_with_one_non_terminal_development_task_blocks(self) -> None:
+        decision = valid_decision(manifestDigest=self.digest())
+        issues = [
+            issue(f"GOU-{n}", "development", status="done")
+            for n in range(40)
+        ]
+        issues += [issue(f"GOU-{n}", "beta_validation", status="done") for n in range(40, 44)]
+        # The one non-terminal DEVELOPMENT task, buried in an otherwise-clean inventory.
+        issues.append(issue("GOU-94", "development", status="blocked"))
+        report = self.build(issues, decision)
+        self.assertFalse(report["ready"])
+        reasons = {b["reason"] for b in report["blockers"]}
+        self.assertIn("development_task_open", reasons)
+
+    def test_large_inventory_all_terminal_is_ready(self) -> None:
+        decision = valid_decision(manifestDigest=self.digest())
+        issues = [
+            issue(f"GOU-{n}", "development", status="done" if n % 2 else "cancelled")
+            for n in range(50)
+        ]
+        report = self.build(issues, decision)
+        self.assertEqual(report["blockers"], [])
+        self.assertTrue(report["ready"])
 
 
 class StaleManifestTest(TempRepoTestCase):

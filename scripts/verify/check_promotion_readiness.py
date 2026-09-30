@@ -6,8 +6,10 @@ candidate; it never writes to Paperclip, Git or a deployment target (see
 docs/operations/promotion-readiness-gate.md). It refuses to pass when:
 
   * an issue in the Paperclip project has zero or more than one `phase:` label;
-  * a DEVELOPMENT-phase issue is `open`, `reopened`, or was created after the
-    candidate was pinned;
+  * a DEVELOPMENT-phase issue is not `done` or `cancelled` (fail-closed on the
+    real Paperclip vocabulary: `backlog`, `todo`, `in_progress`, `in_review`,
+    `blocked`, and any unrecognized status all block), or was created after
+    the candidate was pinned;
   * the release manifest's digest no longer matches the one the owner decision
     names (rebuilt, edited or otherwise no longer what was reviewed);
   * the owner decision is missing, was not resolved by a human, or does not name
@@ -47,7 +49,12 @@ from typing import Any
 import beta_mandate
 
 CANONICAL_PHASES = ("development", "beta_validation", "production", "post_production")
-OPEN_STATUSES = {"open", "reopened"}
+# Fail-closed: only these two Paperclip statuses count as finished. Every other
+# status (backlog, todo, in_progress, in_review, blocked, or anything unknown)
+# blocks a DEVELOPMENT-phase task, per the Lead Tech review on PR #3353 —
+# `open`/`reopened` are not part of Paperclip's status vocabulary and were
+# silently treating every real status as "done".
+TERMINAL_STATUSES = {"done", "cancelled"}
 ALLOWED_DECISION_KINDS = {"request_confirmation", "ask_user_questions", "signed_decision_record"}
 REQUIRED_DECISION_FIELDS = (
     "kind", "status", "resolution", "resolvedBy",
@@ -91,7 +98,7 @@ def evaluate_issues(issues: list[dict], pinned_at: str | None) -> list[dict]:
         if valid_phase_labels[0] != "development":
             continue
         status = issue.get("status")
-        if status in OPEN_STATUSES:
+        if status not in TERMINAL_STATUSES:
             blockers.append({"issue": identifier, "reason": "development_task_open", "status": status})
         created_at = issue.get("createdAt")
         if pinned_at and isinstance(created_at, str) and created_at > pinned_at:

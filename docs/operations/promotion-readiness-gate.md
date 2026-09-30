@@ -14,8 +14,11 @@ assembly only) and from the bundling fix in PR #3351.
 
 It fails closed on: a project issue with zero or several `phase:` labels
 (`development`, `beta_validation`, `production`, `post_production`); a
-DEVELOPMENT-phase issue that is `open`, `reopened`, or created after the
-candidate's pin time; a release-manifest digest or `release=` SHA drifted
+DEVELOPMENT-phase issue whose status is anything other than `done` or
+`cancelled` (Paperclip's real vocabulary is `backlog`, `todo`, `in_progress`,
+`in_review`, `blocked`, `done`, `cancelled` — every non-terminal status,
+including one this script has never seen, blocks) or that was created after
+the candidate's pin time; a release-manifest digest or `release=` SHA drifted
 from what the decision names; an owner decision that is absent, resolved by a
 non-human actor, or silent on the exact candidate SHA, dataset, promotion
 target and phase (a `workflow_dispatch` run or a green CI check does not
