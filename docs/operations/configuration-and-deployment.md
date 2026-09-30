@@ -6,6 +6,45 @@ audience: PROJECT_SCOPED
 
 # Configuration and deployment
 
+## Historical secret-scan exception
+
+GOU-60 records the owner's 2026-09-29 acceptance of existing findings, not revocation.
+`.gitleaks-baseline.json` pins hashed content/file/rule identities to its source commit;
+history exceptions also bind the original commit. `scripts/verify/secret_scan.py git`
+and `dir` block new findings and scanner failures. CI emits counts only; raw reports
+stay in private temporary storage and are deleted. Baseline changes require review
+(`CODEOWNERS` covers `.gitleaks-baseline.json`, `.gitleaks.toml`,
+`scripts/verify/secret_scan.py` and `.github/workflows/secret-scan.yml`).
+
+Each accepted identity (GOU-103) is an object, not a bare hash: `rule`, `file`, `commit`
+(`git` mode only), a `classification` (`false-positive-doc`, `false-positive-placeholder`,
+`false-positive-test`, `false-positive-identifier`, or `credential-shaped` for a real positive
+accepted without revocation) and a one-line `note`, all value-free, so a reviewer tells a
+false positive from an accepted real one by reading the baseline alone. `load_baseline()`
+validates this and fails closed (exit 2) otherwise. A red scan prints only the newly found
+identities (`RuleID`/`File`/`StartLine`), leaving the accepted ones and any value out.
+
+On 2026-09-29, the owner closed the open question on GOU-60: the baseline is accepted in full
+now, rather than waiting on a rotation decision per entry, and residual rotation work moved to
+GOU-107. The 17 `credential-shaped` identities in `accepted.git` carry one of two `note` texts
+accordingly, and `credential-shaped` entries always cite one of the two so a note cannot go
+stale silently (`scripts/tests/test_gitleaks_config.py`):
+
+- Attested revoked -- the owner attested on 2026-09-29 that the credential is already revoked.
+  This is the owner's attestation, not cryptographic proof; the value stays in history either
+  way, which is why the entry stays in the baseline.
+- Accepted, rotation tracked in GOU-107 -- accepted as an exception without a revocation
+  assertion. GOU-107 tracks the remaining rotation and blocks promotion to beta until it closes.
+
+To add an exception for a new false positive: confirm by hand it is not a live credential,
+keeping the value out of commits and comments; run `secret_scan.py <mode> --emit-identities`
+to get its `id`/`RuleID`/`File`/`StartLine`/`Commit` (still no `Secret` or `Match` printed);
+append the matching object to `accepted.<mode>`; and re-run the scan to confirm `new: 0`
+before opening a PR, which `CODEOWNERS` routes for review. A non-secret shape recurring
+across many files is better handled by a narrow `.gitleaks.toml` allowlist than by repeated
+baseline entries -- see the `o4g-spring-inline-credential` rule's allowlist for the
+unquoted-JS-identifier case.
+
 ## Purpose
 
 One entry point answering "how do I run this locally, and how does a real environment get its
@@ -62,11 +101,13 @@ manually (or, for the first, on every push to its `main`):
 | `publishInfra.yml` | SSHes in and runs `/opt/open4goods/bin/publish-infra.sh {env}`, which copies `docker-compose.infra.yml`, `kibana.yml`, `elasticsearch.yml`, `elastic-stack-ca.p12`, `elastic-certificates.p12`, `server.xml` and `xwiki.cfg` from `/opt/open4goods/latest/{env}/` into `/opt/open4goods/bin/` (the directory Docker Compose actually mounts from), then brings up `docker-compose.infra.yml` with `--env-file /opt/open4goods/config/{env}/infra/.env`. |
 | `publishJars.yml` | SSHes in and runs `/opt/open4goods/bin/publish-jars.sh {env} [start\|stop\|restart] [service]`, which starts each Spring Boot jar with `-Dspring.config.location=classpath:/application.yml,file:/opt/open4goods/config/{env}/{service}/application-active.yml -Dspring.profiles.active=nudger,{env}`. |
 
-The public repository's `releaseDeployProd.yml` is manually dispatched and deploys the Nuxt
-`frontend`/`b2b-frontend` bundles (`frontend-ssr-{blue,green}`, `b2b-frontend` containers in
-`docker-compose.frontend.yml`, deployed by `deployConfiguration.yml`'s bin-sync step). Every
-remote release checks a host marker and a cluster fingerprint from its GitHub Environment before
-writing; missing or unequal markers fail the release.
+Public push/PR workflows build and test without deployment. Backend and frontend
+candidate artifacts are retained for 30 days. `releaseDeployProd.yml` now rejects
+all dispatches while the immutable-candidate promotion path is being qualified.
+The read-only phase assessment is `python3 scripts/verify/paperclip_readiness.py
+--target beta --project <project-id>`, using private `PAPERCLIP_API_URL`,
+`PAPERCLIP_API_KEY` and `PAPERCLIP_COMPANY_ID` environment inputs. It reports current
+blockers; a passing report is not a promotion decision. ADR-0015 defines the gates.
 
 Host path summary: `/opt/open4goods/config/{env}/**` (rendered secrets and topology),
 `/opt/open4goods/latest/{env}/**` (compose files and infra assets, pre-copy), `/opt/open4goods/bin/`
