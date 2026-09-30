@@ -7,7 +7,7 @@
         }
       },
       "delete": {
-        "min_age": "24M",
+        "min_age": "730d",
         "actions": {"delete": {}}
       }
     }
@@ -20,7 +20,7 @@
         }
       },
       "delete": {
-        "min_age": "5y",
+        "min_age": "1825d",
         "actions": {"delete": {}}
       }
     }
