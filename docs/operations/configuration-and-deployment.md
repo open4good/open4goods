@@ -74,7 +74,7 @@ all dispatches while the immutable-candidate promotion path is being qualified.
 The read-only phase assessment is `python3 scripts/verify/paperclip_readiness.py
 --target beta --project <project-id>`, using private `PAPERCLIP_API_URL`,
 `PAPERCLIP_API_KEY` and `PAPERCLIP_COMPANY_ID` environment inputs. It reports current
-blockers; a passing report is not a promotion decision. ADR-0015 defines the gates.
+blockers; a passing report is not authorization. ADR-0015 defines the beta mandate check and production gates.
 
 Host path summary: `/opt/open4goods/config/{env}/**` (rendered secrets and topology),
 `/opt/open4goods/latest/{env}/**` (compose files and infra assets, pre-copy), `/opt/open4goods/bin/`
