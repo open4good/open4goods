@@ -45,6 +45,7 @@ import org.open4goods.icecat.repository.IcecatCategoryRepository;
 import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
 import org.open4goods.icecat.repository.IcecatFeatureRepository;
 import org.open4goods.icecat.repository.IcecatSupplierRepository;
+import org.open4goods.services.contribution.repository.ContributionVoteRepository;
 import org.open4goods.services.geocode.service.IpGeolocationService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,6 +101,9 @@ class ProductControllerIT {
 
     @MockitoBean
     private IcecatSupplierRepository icecatSupplierRepository;
+
+    @MockitoBean
+    private ContributionVoteRepository contributionVoteRepository;
 
     @Autowired
     private HealthEndpoint healthEndpoint;
