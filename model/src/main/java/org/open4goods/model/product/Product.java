@@ -154,6 +154,14 @@ public class Product implements Standardisable {
 	private Integer googleTaxonomyId;
 
 	/**
+	 * The numeric Icecat category id reported by the Icecat datasource for this
+	 * product, if any. Distinct from {@link #datasourceCategories}, which holds
+	 * free-text category names : this is the stable identifier the Git-authored
+	 * Icecat-to-O4G registry mappings are keyed on.
+	 */
+	private Integer icecatCategoryId;
+
+	/**
 	 * The set of participating "productCategories", on datasources that build this
 	 * aggregatedData
 	 */
@@ -1235,6 +1243,14 @@ public class Product implements Standardisable {
 
 	public void setGoogleTaxonomyId(Integer googleTaxonomyId) {
 		this.googleTaxonomyId = googleTaxonomyId;
+	}
+
+	public Integer getIcecatCategoryId() {
+		return icecatCategoryId;
+	}
+
+	public void setIcecatCategoryId(Integer icecatCategoryId) {
+		this.icecatCategoryId = icecatCategoryId;
 	}
 
 	public ExternalIds getExternalIds() {
