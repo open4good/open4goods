@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Build a self-verifying release bundle for the five Java and two Nuxt artifacts.
+# Build a self-verifying release bundle for the seven Java and two Nuxt artifacts.
 set -euo pipefail
 
 usage() {
   echo "usage: $0 --release SHA --contract-version VERSION --output DIRECTORY \\" >&2
   echo "  --sbadmin JAR --api JAR --front-api JAR --ui JAR --b2b-api JAR \\" >&2
+  echo "  --exposed-docs JAR --geocode JAR \\" >&2
   echo "  --frontend-ssr DIRECTORY --b2b-frontend DIRECTORY" >&2
   exit 2
 }
@@ -18,7 +19,7 @@ while (($#)); do
     --release) release="${2:-}"; shift 2 ;;
     --contract-version) contract_version="${2:-}"; shift 2 ;;
     --output) output="${2:-}"; shift 2 ;;
-    --sbadmin|--api|--front-api|--ui|--b2b-api|--frontend-ssr|--b2b-frontend)
+    --sbadmin|--api|--front-api|--ui|--b2b-api|--exposed-docs|--geocode|--frontend-ssr|--b2b-frontend)
       source["${1#--}"]="${2:-}"; shift 2 ;;
     *) usage ;;
   esac
@@ -28,7 +29,7 @@ done
 [[ "$contract_version" =~ ^[A-Za-z0-9._-]+$ ]] || { echo 'contract version is invalid' >&2; exit 2; }
 [[ -n "$output" && ! -e "$output" ]] || { echo 'output must not already exist' >&2; exit 2; }
 
-artifacts=(sbadmin api front-api ui b2b-api frontend-ssr b2b-frontend)
+artifacts=(sbadmin api front-api ui b2b-api exposed-docs geocode frontend-ssr b2b-frontend)
 for artifact in "${artifacts[@]}"; do
   [[ -n "${source[$artifact]:-}" && -e "${source[$artifact]}" ]] || {
     echo "missing source for ${artifact}" >&2; exit 2;
@@ -36,7 +37,7 @@ for artifact in "${artifacts[@]}"; do
 done
 
 mkdir -p "$output"
-for artifact in sbadmin api front-api ui b2b-api; do
+for artifact in sbadmin api front-api ui b2b-api exposed-docs geocode; do
   cp -- "${source[$artifact]}" "$output/${artifact}.jar"
 done
 tar -C "${source[frontend-ssr]}" -czf "$output/frontend-ssr.tar.gz" .

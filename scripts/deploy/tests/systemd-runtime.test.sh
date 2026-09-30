@@ -9,7 +9,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-for name in sbadmin api front-api ui b2b-api; do
+for name in sbadmin api front-api ui b2b-api exposed-docs geocode; do
   printf '%s\n' "$name" > "$fixture/${name}.jar"
 done
 mkdir -p "$fixture/frontend-ssr" "$fixture/b2b-frontend"
@@ -17,7 +17,9 @@ printf '%s\n' frontend > "$fixture/frontend-ssr/index.html"
 printf '%s\n' b2b > "$fixture/b2b-frontend/index.html"
 "$ROOT/scripts/deploy/build-release-bundle.sh" --release abcdef1 --contract-version 1 --output "$fixture/bundle" \
   --sbadmin "$fixture/sbadmin.jar" --api "$fixture/api.jar" --front-api "$fixture/front-api.jar" \
-  --ui "$fixture/ui.jar" --b2b-api "$fixture/b2b-api.jar" --frontend-ssr "$fixture/frontend-ssr" \
+  --ui "$fixture/ui.jar" --b2b-api "$fixture/b2b-api.jar" \
+  --exposed-docs "$fixture/exposed-docs.jar" --geocode "$fixture/geocode.jar" \
+  --frontend-ssr "$fixture/frontend-ssr" \
   --b2b-frontend "$fixture/b2b-frontend"
 
 mkdir -p "$fixture/bin" "$fixture/runtime/services/api"
@@ -76,7 +78,7 @@ test "$(readlink "$fixture/runtime/services/frontend/current")" = ../../releases
 grep -qx 'restart open4goods-nuxt@frontend.service' "$fixture/systemctl.log"
 
 mkdir -p "$fixture/environment" "$fixture/unit-dir"
-for service in sbadmin api front-api ui b2b-api frontend b2b-frontend; do
+for service in sbadmin api front-api ui b2b-api exposed-docs geocode frontend b2b-frontend; do
   : > "$fixture/environment/${service}.env"
   chmod 600 "$fixture/environment/${service}.env"
 done

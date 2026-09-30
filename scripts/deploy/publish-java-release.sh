@@ -2,7 +2,7 @@
 # Install one verified Java artifact and restore its prior symlink if health fails.
 set -euo pipefail
 
-readonly JAVA_SERVICES=(sbadmin api front-api ui b2b-api)
+readonly JAVA_SERVICES=(sbadmin api front-api ui b2b-api exposed-docs geocode)
 
 usage() {
   echo "usage: $0 --release SHA --bundle DIRECTORY --service SERVICE --health-url URL [--health-status CODES] [--root DIRECTORY]" >&2
