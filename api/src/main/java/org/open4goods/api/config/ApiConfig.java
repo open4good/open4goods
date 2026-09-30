@@ -37,6 +37,7 @@ import org.open4goods.icecat.services.IcecatFileDownloadService;
 import org.open4goods.icecat.services.IcecatCategoryVerticalResolver;
 import org.open4goods.icecat.services.IcecatFeatureResolver;
 import org.open4goods.icecat.services.IcecatIndexService;
+import org.open4goods.icecat.services.IcecatRegistryProjectionService;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.icecat.services.loader.CategoryLoader;
 import org.open4goods.icecat.services.loader.FeatureLoader;
@@ -191,6 +192,11 @@ public class ApiConfig {
 	@Bean
 	IcecatFeatureResolver icecatFeatureResolver(IcecatIndexService icecatIndexService) {
 		return new IcecatFeatureResolver(icecatIndexService);
+	}
+
+	@Bean
+	IcecatCategoryVerticalResolver icecatCategoryVerticalResolver(IcecatRegistryProjectionService icecatRegistryProjectionService) {
+		return new IcecatCategoryVerticalResolver(icecatRegistryProjectionService);
 	}
 
 	@Bean
