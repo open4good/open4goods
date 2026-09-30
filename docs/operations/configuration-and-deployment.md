@@ -6,6 +6,14 @@ audience: PROJECT_SCOPED
 
 # Configuration and deployment
 
+## Historical secret-scan exception
+
+GOU-60 records the owner's 2026-09-29 acceptance of existing findings, not revocation.
+`.gitleaks-baseline.json` pins hashed content/file/rule identities to its source commit;
+history exceptions also bind the original commit. `scripts/verify/secret_scan.py git`
+and `dir` block new findings and scanner failures. CI emits counts only; raw reports
+stay in private temporary storage and are deleted. Baseline changes require review.
+
 ## Purpose
 
 One entry point answering "how do I run this locally, and how does a real environment get its
@@ -62,11 +70,13 @@ manually (or, for the first, on every push to its `main`):
 | `publishInfra.yml` | SSHes in and runs `/opt/open4goods/bin/publish-infra.sh {env}`, which copies `docker-compose.infra.yml`, `kibana.yml`, `elasticsearch.yml`, `elastic-stack-ca.p12`, `elastic-certificates.p12`, `server.xml` and `xwiki.cfg` from `/opt/open4goods/latest/{env}/` into `/opt/open4goods/bin/` (the directory Docker Compose actually mounts from), then brings up `docker-compose.infra.yml` with `--env-file /opt/open4goods/config/{env}/infra/.env`. |
 | `publishJars.yml` | SSHes in and runs `/opt/open4goods/bin/publish-jars.sh {env} [start\|stop\|restart] [service]`, which starts each Spring Boot jar with `-Dspring.config.location=classpath:/application.yml,file:/opt/open4goods/config/{env}/{service}/application-active.yml -Dspring.profiles.active=nudger,{env}`. |
 
-The public repository's `releaseDeployProd.yml` is manually dispatched and deploys the Nuxt
-`frontend`/`b2b-frontend` bundles (`frontend-ssr-{blue,green}`, `b2b-frontend` containers in
-`docker-compose.frontend.yml`, deployed by `deployConfiguration.yml`'s bin-sync step). Every
-remote release checks a host marker and a cluster fingerprint from its GitHub Environment before
-writing; missing or unequal markers fail the release.
+Public push/PR workflows build and test without deployment. Backend and frontend
+candidate artifacts are retained for 30 days. `releaseDeployProd.yml` now rejects
+all dispatches while the immutable-candidate promotion path is being qualified.
+The read-only phase assessment is `python3 scripts/verify/paperclip_readiness.py
+--target beta --project <project-id>`, using private `PAPERCLIP_API_URL`,
+`PAPERCLIP_API_KEY` and `PAPERCLIP_COMPANY_ID` environment inputs. It reports current
+blockers; a passing report is not a promotion decision. ADR-0015 defines the gates.
 
 Host path summary: `/opt/open4goods/config/{env}/**` (rendered secrets and topology),
 `/opt/open4goods/latest/{env}/**` (compose files and infra assets, pre-copy), `/opt/open4goods/bin/`

@@ -1,7 +1,7 @@
 ---
 title: "Canonical decisions"
 status: accepted
-last_updated: 2026-09-17
+last_updated: 2026-09-29
 normative: true
 audience: PROJECT_SCOPED
 ---
@@ -22,10 +22,11 @@ ADR that changes a rule updates the entry here in the same commit.
    the project corpus's budget and lint. The **build payload** is whatever a build
    step packages into an artifact; a build step never sweeps the repository
    wholesale to find it.
-3. Every concept exists exactly twice: once as a machine contract under `.o4g/`,
-   once as a short human explanation. The third form -- a long narrative document
-   restating both -- is refused. Every governed Markdown document declares `title`,
-   `normative` and `audience` in front matter.
+3. Each governed concept has one authoritative contract: project and corpus
+   contracts under `.o4g/`, or a Paperclip issue for active tasks. Human
+   explanations stay short and link to that contract. A long narrative
+   document restating both is refused. Every governed Markdown document
+   declares `title`, `normative` and `audience` in front matter.
 4. Only `AGENTS.md`, this document and `docs/adr/**` may state rules
    (`normative: true`). Everywhere else, rule-shaped language is counted and
    budgeted: a rule found there belongs in an ADR or in this list.
@@ -38,10 +39,11 @@ ADR that changes a rule updates the entry here in the same commit.
 7. The corpus budget in `.o4g/corpus-budget.json` is a ratchet. Lowering a ceiling
    is an ordinary commit and needs no ceremony. Raising one is a deliberate,
    reviewable act recorded in the same commit as the growth it permits.
-8. Bounded change is carried by a WorkOrder under `.o4g/work/`, which names its
-   purpose, its `pathScope`, and its acceptance criteria. A closed WorkOrder moves
-   to `.o4g/work/ledger/` rather than being deleted. `docs/reference/roadmap.md`
-   and `docs/adr/README.md` are generated projections and are never hand-edited.
+8. Bounded change is tracked by an issue in the Nudger Paperclip project. The issue
+   owns its purpose, scope, acceptance criteria, dependencies, blockers, assignee
+   and evidence. Legacy closed WorkOrders remain read-only historical records under
+   `.o4g/work/ledger/`. `docs/reference/roadmap.md` is a dated migration index;
+   `docs/adr/README.md` remains a generated projection.
 9. A claim about the system in a governed document is verified against the code
    before it is written, and corrected at the source when found false. A stale
    agent guide is a defect with the same standing as a stale test: it is what
@@ -59,12 +61,13 @@ ADR that changes a rule updates the entry here in the same commit.
     only when a reviewed brand-and-class pattern rule gives it semantics.
 13. Public consumer product search is lexical Elasticsearch search over the
     source-neutral GTIN projection. Reintroducing semantic or hybrid retrieval
-    requires a dedicated WorkOrder, a relevance benchmark and a capacity benchmark;
+    requires a dedicated Paperclip issue, a relevance benchmark and a capacity benchmark;
     no dormant query-time text embedding or vector-search path is retained.
-14. WorkOrders progress through DEVELOPMENT, BETA_VALIDATION, PRODUCTION and
-    POST_PRODUCTION. DEVELOPMENT is strictly local: it has no runtime dependency on
-    a Nudger domain or beta host. Beta and production promotion proceed automatically
-    after their phase gates under `owner-order-2026-09-17-local-first-promotion`;
-    physical retirement still waits for seven healthy days and verified restoration.
-    Local migration starts from a pinned product backup, then explicitly triggered live
-    provider enrichment; startup never launches heavy ingestion jobs.
+14. Issues progress through DEVELOPMENT, BETA_VALIDATION, PRODUCTION and
+    POST_PRODUCTION. DEVELOPMENT uses isolated stores and applications, including on
+    a shared build host, with no dependency on beta services or Nudger domains. Beta and production promotion each require a
+    recorded, explicit owner decision after their phase checks pass; phase readiness
+    alone does not authorize a promotion. Physical retirement still waits for seven
+    healthy days and verified restoration.
+    Merges run CI without deployment. Final qualification uses a recent pinned product
+    backup and explicit provider enrichment; startup never launches heavy ingestion jobs.

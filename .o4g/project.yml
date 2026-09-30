@@ -6,6 +6,7 @@ metadata:
 spec:
   contractDirectory: .o4g
   repository: open4good/open4goods
+  issueTracker: https://yamaka.me/GOU/projects/nudger/issues
   visibility: PUBLIC
   purpose: Product comparison and environmental impact scoring platform
   documentation:
@@ -14,21 +15,22 @@ spec:
   execution:
     defaultPhase: DEVELOPMENT
     phases: [DEVELOPMENT, BETA_VALIDATION, PRODUCTION, POST_PRODUCTION]
-    developmentTargets: [local]
-    developmentNetworkPolicy: no-nudger-or-beta-runtime-dependency
+    developmentTargets: [local, isolated-build]
+    developmentNetworkPolicy: no-nudger-or-beta-service-or-data-dependency
+    mergePolicy: independent-review-and-green-ci-without-deployment
+    promotionImplementation: frozen-pending-immutable-artifact-qualification
     betaValidationTargets: [beta]
     betaAuthority: [deploy, restart, migrate, environment-config, beta-only-secrets]
     betaCleanup: exact-targets-after-verified-restore
-    promotionAuthorizationRef: owner-order-2026-09-17-local-first-promotion
-    betaPromotion: automatic-after-development-gate
-    productionPromotionAuthority: permanent-owner-order
-    productionWrites: automatic-after-beta-validation-gate
+    betaPromotion: explicit-owner-decision-after-development-gate
+    productionPromotionAuthority: explicit-owner-decision
+    productionWrites: explicit-owner-decision-after-beta-validation-gate
     sharedCredentials: owner-action-if-production-is-affected
     productionRollbackDays: 7
     postProductionRetirement: dependency-gated-after-healthy-window-and-verified-restore
     migrationInputRef: PRODUCT_BACKUP_SOURCE_URI
     migrationStrategy: backup-baseline-then-provider-enrichment
-    freshness: dated-snapshot-then-collection-resumption
+    freshness: recent-snapshot-qualified-before-final-beta-rehearsal
     productionPromotion: pinned-beta-validated-release-and-dataset
     reviewAuthority: owner-for-ambiguous-mappings-and-source-rights
     newInfrastructureSpend: owner-only
@@ -80,7 +82,7 @@ spec:
     - id: m8-production-promotion
       order: 8
       exitCondition: >-
-        The permanent owner order promotes the beta-validated release and dated dataset; configuration,
+        An explicit owner decision promotes the beta-validated release and dated dataset; configuration,
         credentials and all readers pass production checks and the seven-day rollback window closes.
     - id: m9-post-production-retirement
       order: 9

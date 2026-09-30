@@ -24,21 +24,22 @@ Load what the task needs, knowing the price. Everything below is the project cor
 |---|---|---|
 | [canonical decisions](docs/00-canonical-decisions.md) | ~0.8k tokens | the numbered rules everything else cites |
 | [ADR index](docs/adr/README.md) | ~0.4k tokens | which ADR owns a boundary, before opening one |
-| [roadmap](docs/reference/roadmap.md) | ~1.2k tokens | the open WorkOrders, their state and their blockers |
+| [issue index](docs/reference/roadmap.md) | ~0.5k tokens | legacy IDs and their Paperclip issues |
 | this guide, sections 1-11 | ~2.5k tokens | conventions for writing code here |
 | [docs/README.md](docs/README.md) | ~0.9k tokens | the rest of the corpus, by subject |
 
-Select a WorkOrder with `scripts/work/next-workorder.py`, then read its YAML under
-`.o4g/work/` and stay within its `pathScope`. The default phase is DEVELOPMENT and
-is strictly local: no beta host or Nudger domain may be a runtime dependency. Ordered
-BETA_VALIDATION and PRODUCTION promotion use the permanent owner authority in ADR-0014
-after their gates pass. POST_PRODUCTION retirement still requires its healthy-window gate.
-`docs/reference/roadmap.md` and `docs/adr/README.md` are
-generated projections: change the contracts, not the projection.
+Select work from the [Nudger Paperclip issues](https://yamaka.me/GOU/projects/nudger/issues).
+Read the assigned issue, its blockers and its acceptance criteria before changing code;
+keep the change within its stated scope. DEVELOPMENT uses an isolated local runtime, including on the shared build host;
+no beta service, data store or Nudger domain may be a runtime dependency. BETA_VALIDATION and PRODUCTION each require
+an explicit owner decision recorded in Paperclip after their phase checks pass.
+POST_PRODUCTION retirement still requires its healthy-window gate.
+`docs/reference/roadmap.md` is a dated migration index, not a live roadmap.
+`docs/adr/README.md` is generated; change ADRs, not the projection.
 
 Before changing anything under `docs/` or `.o4g/`, run `./scripts/lint.sh`.
-Detailed WorkOrder designs belong in `.o4g/specifications/<id>.md`, referenced by `spec.specificationRefs`.
-Closing the last open reference archives that file under `archive/specs/`.
+Keep issue-specific plans in Paperclip issue documents. Keep durable architecture
+and operational contracts in `docs/`.
 
 ---
 
@@ -167,6 +168,11 @@ git config core.hooksPath .githooks
 3. Tests added/updated; coverage not reduced.  
 4. `./scripts/lint.sh` passes locally.
 5. Docs (agents.md, README, ADR, Javadoc, spring-configuration-metadata.json) updated.
+6. **Merging does not deploy.** Ordinary PRs require independent review and green CI.
+   Beta and production promotion each require a fresh owner decision in Paperclip for the
+   candidate SHA, artifact and dataset digests, recent backup, rollback and phase evidence.
+   A plan approval does not authorize promotion. The legacy production workflow remains
+   frozen until the immutable-candidate promotion path has been qualified (ADR-0015).
 
 ---
 
@@ -218,7 +224,7 @@ configuration is shared by Claude, Codex, Gemini and VS Code; edit
 - Use Playwright for browser recette and Nuxt MCP while the local frontend exposes it.
 
 If a required server fails the doctor, record its sanitized failure as evidence.
-Only then may Java navigation fall back to `rg` within the WorkOrder `pathScope`.
+Only then may Java navigation fall back to `rg` within the issue's stated scope.
 
 ---
 

@@ -6,7 +6,7 @@ metadata:
 spec:
   purpose: Run every open4goods application locally against persistent Docker infrastructure without a Nudger or beta dependency.
   roadmapRef: m1-config-autonomy
-  state: IN_PROGRESS
+  state: COMPLETED
   executionPhase: DEVELOPMENT
   priority: 5
   dependsOn:
@@ -51,3 +51,8 @@ spec:
     - id: AC5
       statement: docker compose config, local no-remote guard, health checks for nine native applications, focused tests,
         both frontend builds and the offline Maven reactor pass without loading devsec.
+  evidenceRefs:
+    - test:scripts/local/test_local_contract.sh passed strict-local Compose, port and no-remote checks
+    - test:./scripts/local/open4goods.sh up reached all nine loopback health endpoints; down completed cleanly
+    - test:mvn --offline clean install passed complete reactor and integration tests
+    - test:pnpm --dir frontend build, pnpm --dir b2b-frontend build and ./scripts/lint.sh passed

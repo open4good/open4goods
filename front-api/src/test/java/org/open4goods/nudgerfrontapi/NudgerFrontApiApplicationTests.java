@@ -7,6 +7,7 @@ import org.open4goods.icecat.repository.IcecatCategoryRepository;
 import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
 import org.open4goods.icecat.repository.IcecatFeatureRepository;
 import org.open4goods.icecat.repository.IcecatSupplierRepository;
+import org.open4goods.services.contribution.repository.ContributionVoteRepository;
 import org.open4goods.services.geocode.service.IpGeolocationService;
 
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,6 +40,12 @@ class NudgerFrontApiApplicationTests
 
     @MockitoBean
     private IcecatSupplierRepository icecatSupplierRepository;
+
+    // Same reason as the Icecat repositories above: ContributionVoteRepository is a Spring Data
+    // Elasticsearch repository proxy (@EnableElasticsearchRepositories on ContributionRepositoryConfig),
+    // eagerly instantiated on context load and reachable here via AffiliationService.
+    @MockitoBean
+    private ContributionVoteRepository contributionVoteRepository;
 
     @Test
     void contextLoads()

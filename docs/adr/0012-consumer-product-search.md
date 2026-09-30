@@ -57,7 +57,7 @@ The former list endpoint, grouped response, missing-vertical lane and semantic f
 are removed only in the coordinated breaking cutover.
 
 The final index is built and evaluated in shadow, then switched by alias with an alias
-rollback. Reintroducing semantic or hybrid retrieval requires a new WorkOrder plus both
+rollback. Reintroducing semantic or hybrid retrieval requires a new Paperclip issue plus both
 a judged relevance benchmark and a production-shaped capacity benchmark. Experimental
 hybrid/RRF code is not retained dormant in the production path.
 

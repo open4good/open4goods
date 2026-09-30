@@ -34,3 +34,4 @@ contract, infrastructure, data layout, security posture or developer workflow.
 | [0012](0012-consumer-product-search.md) | ADR 0012: Consumer product search | ACCEPTED | 13 |
 | [0013](0013-beta-first-development-and-production-promotion.md) | ADR 0013: Beta-first development and production promotion | SUPERSEDED | 8, 14 |
 | [0014](0014-local-first-development-and-staged-promotion.md) | ADR 0014: Local-first development and staged promotion | ACCEPTED | 8, 14 |
+| [0015](0015-paperclip-issue-governance.md) | ADR 0015: Paperclip issue governance | ACCEPTED | 3, 8, 14 |

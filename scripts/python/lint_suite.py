@@ -107,7 +107,6 @@ def lint_corpus(suite: LintSuite) -> None:
         [sys.executable, "scripts/verify/check_runtime_input_contract.py"],
     )
     for label, script in (
-        ("Generated roadmap", "scripts/generate/generate_roadmap.py"),
         ("Generated ADR index", "scripts/generate/generate_decision_index.py"),
         ("Generated MCP client configs", "scripts/generate/generate_mcp_configs.py"),
     ):
@@ -116,9 +115,10 @@ def lint_corpus(suite: LintSuite) -> None:
 
 
 def lint_governance_tools(suite: LintSuite) -> None:
-    """Exercise the WorkOrder lifecycle and recette evidence tools on disposable fixtures."""
-    suite.run("WorkOrder tooling tests", ["bash", "scripts/tests/workorder-tools.test.sh"])
+    """Exercise the recette evidence tools on disposable fixtures."""
     suite.run("Recette tooling tests", ["bash", "scripts/tests/recette-tools.test.sh"])
+    suite.run("Paperclip readiness and deployment freeze", [sys.executable, "-m", "unittest", "discover",
+              "-s", "scripts/verify", "-p", "test_paperclip_readiness.py"])
 
 
 def lint_yaml(suite: LintSuite) -> None:
