@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIOException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -21,10 +22,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.open4goods.datareference.model.SourceRecordHead;
+import org.open4goods.datareference.model.SourceRecordKey;
+import org.open4goods.datareference.model.SourceRecordState;
 import org.open4goods.datareference.model.SourceRecordTransition;
 import org.open4goods.datareference.model.SourceRecordTransitionOutcome;
 import org.open4goods.datareference.port.SourceRecordHeadStore;
 import org.open4goods.datareference.port.IngestionCheckpointStore;
+import org.open4goods.datareference.port.ScanPage;
+import org.open4goods.datareference.port.SourceRecordReplayScanner;
 import org.open4goods.model.eprel.EprelProduct;
 import org.open4goods.services.eprelservice.client.EprelApiClient;
 import org.open4goods.services.eprelservice.client.EprelProductGroup;
@@ -46,6 +52,8 @@ class EprelCatalogueServiceTest {
     @Mock
     private SourceRecordHeadStore sourceRecordStore;
     @Mock
+    private SourceRecordReplayScanner replayScanner;
+    @Mock
     private IngestionCheckpointStore checkpointStore;
     @Mock
     private SourceRecordTransition transition;
@@ -59,7 +67,7 @@ class EprelCatalogueServiceTest {
         EprelServiceProperties properties = new EprelServiceProperties();
         properties.setIndexBulkSize(2);
         meterRegistry = new SimpleMeterRegistry();
-        service = new EprelCatalogueService(apiClient, parser, sourceRecordStore, checkpointStore,
+        service = new EprelCatalogueService(apiClient, parser, sourceRecordStore, replayScanner, checkpointStore,
                 new EprelSourceRecordAdapter(), properties, meterRegistry);
         tempZip = Files.createTempFile("eprel-service-test", ".zip");
     }
@@ -126,6 +134,44 @@ class EprelCatalogueServiceTest {
 
         verify(sourceRecordStore, never()).apply(any());
         verify(checkpointStore, never()).compareAndSet(any(), anyLong());
+    }
+
+    @Test
+    void tombstonesAModelSilentlyAbsentFromACompleteReimport() throws IOException {
+        EprelProductGroup group = new EprelProductGroup("tv", "televisions", "Televisions", "REG");
+        when(apiClient.fetchProductGroups()).thenReturn(java.util.List.of(group));
+        when(apiClient.downloadCatalogueZip(group.urlCode())).thenReturn(tempZip);
+        when(sourceRecordStore.apply(any())).thenReturn(transition);
+        when(checkpointStore.find(any(), any())).thenReturn(java.util.Optional.empty());
+        when(checkpointStore.compareAndSet(any(), any(Long.class))).thenReturn(true);
+        when(transition.outcome()).thenReturn(SourceRecordTransitionOutcome.ACCEPTED);
+
+        EprelSourceRecordAdapter adapter = new EprelSourceRecordAdapter();
+        EprelProduct disappearedModel = product("55");
+        disappearedModel.setProductGroup("televisions2019");
+        SourceRecordHead previouslyActiveHead = adapter
+                .adapt(disappearedModel, "catalogue-v1", java.time.Instant.now().minusSeconds(3600))
+                .orElseThrow().candidate();
+        SourceRecordKey absentKey = previouslyActiveHead.key();
+        when(replayScanner.scanBySource(any(), any())).thenReturn(ScanPage.last(java.util.List.of(previouslyActiveHead)));
+
+        doAnswer(invocation -> {
+            @SuppressWarnings("unchecked")
+            Consumer<EprelProduct> consumer = invocation.getArgument(1, Consumer.class);
+            EprelProduct stillPresent = product("42");
+            stillPresent.setProductGroup("televisions2019");
+            consumer.accept(stillPresent);
+            return null;
+        }).when(parser).parse(any(), any());
+
+        service.refreshCatalogue();
+
+        // The vanished model carries no explicit withdrawal status, so only catalogue-level
+        // reconciliation against the previously stored key can detect its absence.
+        verify(sourceRecordStore).apply(argThat(mutation -> mutation.candidate().key().equals(absentKey)
+                && mutation.candidate().state() == SourceRecordState.DELETED));
+        assertThat(meterRegistry.get("o4g.eprel.catalogue.records").tag("outcome", "tombstoned").counter().count())
+                .isEqualTo(1.0d);
     }
 
     private EprelProduct product(String registration) {
