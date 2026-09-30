@@ -71,3 +71,18 @@ regexes = [
   '^latencyP50Ms$',
   '^NV7B4550VAS/U1$',
 ]
+
+# GOU-28: the B2B docs set shows one `curl -H "Authorization: Bearer <key>"` example per
+# facet page, so every new facet page trips the default `curl-auth-header` rule with the
+# same two placeholder keys. The rule-scoped allowlist above only covers the custom
+# o4g-spring-inline-credential rule; a default rule honours global allowlists only, which
+# is why the pre-existing price.md occurrence sits in the baseline instead. Allowlisting the
+# two literals here stops that baseline churn at the source: these are documentation
+# placeholders, exact and anchored, and no real key can match them.
+[[allowlists]]
+description = "Documented B2B API key placeholders in facet doc pages (GOU-28)"
+regexTarget = "secret"
+regexes = [
+  '^pdapi_YOUR_KEY_HERE$',
+  '^pdapi_VOTRE_CLÉ_ICI$',
+]
