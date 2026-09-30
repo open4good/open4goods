@@ -23,3 +23,9 @@ spring:
         default-retries: 1
       instance-auth:
         enabled: true
+
+o4g:
+  sba:
+    registration:
+      username: ${SBA_REGISTRATION_USERNAME:}
+      password: ${SBA_REGISTRATION_PASSWORD:}

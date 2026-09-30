@@ -18,7 +18,7 @@ import org.open4goods.icecat.config.yml.IcecatConfiguration;
 import org.open4goods.icecat.jaxb.Category;
 import org.open4goods.icecat.jaxb.Name;
 import org.open4goods.icecat.services.IcecatFileDownloadService;
-import org.open4goods.model.helper.IdHelper;
+import org.open4goods.services.remotefilecaching.service.RemoteCacheKey;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.verticals.VerticalsConfigService;
 
@@ -61,7 +61,7 @@ public class CategoryLoaderTest {
     }
 
     private static void seedCache(Path cacheDir, String uri, String classpathResource) throws Exception {
-        File cachedFile = new File(cacheDir.toFile(), IdHelper.getHashedName(uri));
+        File cachedFile = new File(cacheDir.toFile(), RemoteCacheKey.fromUrl(uri));
         try (InputStream in = CategoryLoaderTest.class.getResourceAsStream(classpathResource)) {
             assertNotNull(in, "test fixture " + classpathResource + " must be on the classpath");
             Files.copy(in, cachedFile.toPath(), StandardCopyOption.REPLACE_EXISTING);

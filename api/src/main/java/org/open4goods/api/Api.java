@@ -12,11 +12,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 /** Main entry point for the open4goods API application. */
 @SpringBootApplication(scanBasePackages = {"org.open4goods.services"}, scanBasePackageClasses = { Api.class, CacheKeyGenerator.class})
-@EnableScheduling
 @EnableElasticsearchRepositories(basePackageClasses = {ElasticProductRepository.class, EprelProductRepository.class, IcecatFeatureRepository.class, WikidataEntityRepository.class})
 @EnableCaching
 public class Api {

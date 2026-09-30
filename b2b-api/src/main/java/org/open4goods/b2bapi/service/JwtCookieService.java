@@ -55,11 +55,12 @@ public class JwtCookieService {
     }
 
     private ResponseCookie.ResponseCookieBuilder cookie(final String name, final String value) {
-        return ResponseCookie.from(name, value)
-                .domain(properties.getSecurity().getCookieDomain())
+        final ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(name, value)
                 .path("/")
                 .httpOnly(true)
                 .secure(properties.getSecurity().isCookieSecure())
                 .sameSite(properties.getSecurity().getCookieSameSite());
+        final String domain = properties.getSecurity().getCookieDomain();
+        return domain == null || domain.isBlank() ? builder : builder.domain(domain);
     }
 }

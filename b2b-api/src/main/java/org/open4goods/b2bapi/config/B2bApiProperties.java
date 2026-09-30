@@ -176,7 +176,6 @@ public class B2bApiProperties {
 
         private List<String> adminEmails = new ArrayList<>();
 
-        @NotBlank
         private String cookieDomain = ".product-data-api.com";
 
         private boolean cookieSecure = true;

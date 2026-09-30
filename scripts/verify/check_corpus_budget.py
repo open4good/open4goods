@@ -8,10 +8,10 @@ from the file that calls itself the canonical entry point. Prose is cheap for a
 language model to produce, so authority accrued to whatever grew fastest. Both
 effects are now bounded mechanically.
 
-Two-resolution rule. Every concept exists exactly twice: a machine contract under
-.o4g/, and one short human explanation. The third form -- the long narrative
-document restating both -- is what this rejects. Every governed Markdown document
-therefore declares its resolution in front matter:
+Two-resolution rule. Project and corpus contracts live under .o4g/; active
+task contracts live in Paperclip issues. A short human explanation points
+to the authoritative contract. Long narrative documents restating both
+are rejected. Every governed Markdown document declares its resolution:
 
     normative: true     states rules; permitted only where NORMATIVE_PATHS allows
     normative: false    derived and explanatory; rule-shaped language is counted
@@ -88,17 +88,13 @@ MEASURE_RESOLUTION = {
     "rule_shaped_statements_in_non_normative": "non-normative",
     "normative_documents": "normative",
     "adr_lines_max": "normative",
-    "work_open_lines": "machine",
-    "work_ledger_lines": "machine",
 }
 
 # Measures recorded but not ratcheted, and why. Both grow by construction: an ADR
-# is how a rule is meant to be added, and a ledger record is how a WorkOrder is
-# meant to close, so gating either on a ceiling would make the intended act the
-# thing that blocks a merge.
+# is how a rule is meant to be added, so gating it on a ceiling would make the
+# intended act the thing that blocks a merge.
 UNRATCHETED = {
     "normative_documents": "bounded by NORMATIVE_PATHS, not by a line count",
-    "work_ledger_lines": "append-only closure records",
 }
 
 
@@ -156,22 +152,6 @@ def body_of(text: str) -> str:
 
 def is_normative_path(rel: str) -> bool:
     return any(rel == p or rel.startswith(p) for p in NORMATIVE_PATHS)
-
-
-def yaml_lines(path: Path) -> int:
-    return len([ln for ln in path.read_text(encoding="utf-8").splitlines() if ln.strip()])
-
-
-def measure_work_lines() -> tuple[int, int]:
-    """(work_open_lines, work_ledger_lines): the live open-order corpus an agent
-    must load, and the compacted closure records under ledger/."""
-    root = ROOT / ".o4g" / "work"
-    if not root.is_dir():
-        return 0, 0
-    open_lines = sum(yaml_lines(path) for path in root.glob("*.yml"))
-    ledger = root / "ledger"
-    ledger_lines = sum(yaml_lines(p) for p in ledger.glob("*.yml")) if ledger.is_dir() else 0
-    return open_lines, ledger_lines
 
 
 def measure_adr_lines_max() -> int:
@@ -237,14 +217,11 @@ def measure() -> tuple[dict[str, int], list[str]]:
         non_normative_lines += len(lines)
         rule_shaped += sum(1 for ln in lines if RULE_SHAPED.search(ln))
 
-    work_open_lines, work_ledger_lines = measure_work_lines()
     return (
         {
             "non_normative_lines": non_normative_lines,
             "rule_shaped_statements_in_non_normative": rule_shaped,
             "normative_documents": normative_docs,
-            "work_open_lines": work_open_lines,
-            "work_ledger_lines": work_ledger_lines,
             "adr_lines_max": measure_adr_lines_max(),
         },
         problems,

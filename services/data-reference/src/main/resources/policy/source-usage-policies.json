@@ -1,0 +1,124 @@
+{
+  "schemaVersion" : "https://open4goods.org/schema/source-usage-policy-1.json",
+  "policies" : [ {
+    "policyId" : "eprel-public-api",
+    "sourceId" : "eprel",
+    "version" : "1",
+    "contentTypes" : [ "IDENTITY", "CLASSIFICATION", "ATTRIBUTE", "TEXT", "MEDIA", "RELATION" ],
+    "allowedSurfaces" : [ ],
+    "effectiveFrom" : "2024-06-03T00:00:00Z",
+    "effectiveUntil" : null,
+    "retention" : "PT0S",
+    "mediaCache" : {
+      "imageBytesAllowed" : false,
+      "imageLinkRetention" : "PT0S",
+      "nonImageRetention" : "PT0S"
+    },
+    "attribution" : {
+      "required" : false,
+      "notice" : null,
+      "sourceUri" : null
+    },
+    "redistribution" : "PROHIBITED",
+    "legalReviewDate" : "2026-09-12",
+    "reviewState" : "UNREVIEWED",
+    "revokedAt" : null,
+    "evidenceReferences" : [ "https://ec.europa.eu/assets/move-ener/eprel/EPREL%20Public/Public%20API%20Term%20and%20Conditions/API_TERMS_AND_CONDITIONS_EN.pdf", "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02024R0994-20240402" ]
+  }, {
+    "policyId" : "icecat-open-content",
+    "sourceId" : "icecat",
+    "version" : "1",
+    "contentTypes" : [ "IDENTITY", "CLASSIFICATION", "ATTRIBUTE", "TEXT", "MEDIA", "RELATION" ],
+    "allowedSurfaces" : [ ],
+    "effectiveFrom" : "2026-09-12T00:00:00Z",
+    "effectiveUntil" : null,
+    "retention" : "PT0S",
+    "mediaCache" : {
+      "imageBytesAllowed" : false,
+      "imageLinkRetention" : "PT0S",
+      "nonImageRetention" : "PT0S"
+    },
+    "attribution" : {
+      "required" : false,
+      "notice" : null,
+      "sourceUri" : null
+    },
+    "redistribution" : "PROHIBITED",
+    "legalReviewDate" : "2026-09-12",
+    "reviewState" : "UNREVIEWED",
+    "revokedAt" : null,
+    "evidenceReferences" : [ "https://icecat.com/content-subscription/", "https://icecat.com/structured-data-content-users/" ]
+  }, {
+    "policyId" : "merchant-feed",
+    "sourceId" : "merchant-feed",
+    "version" : "1",
+    "contentTypes" : [ "IDENTITY", "ATTRIBUTE", "TEXT", "MEDIA", "OFFER", "PRICE" ],
+    "allowedSurfaces" : [ ],
+    "effectiveFrom" : "2026-09-12T00:00:00Z",
+    "effectiveUntil" : null,
+    "retention" : "PT0S",
+    "mediaCache" : {
+      "imageBytesAllowed" : false,
+      "imageLinkRetention" : "PT0S",
+      "nonImageRetention" : "PT0S"
+    },
+    "attribution" : {
+      "required" : false,
+      "notice" : null,
+      "sourceUri" : null
+    },
+    "redistribution" : "PROHIBITED",
+    "legalReviewDate" : "2026-09-12",
+    "reviewState" : "UNREVIEWED",
+    "revokedAt" : null,
+    "evidenceReferences" : [ "https://support.google.com/merchants/answer/7052112?hl=en-GB" ]
+  }, {
+    "policyId" : "legacy-product-backup",
+    "sourceId" : "legacy-product-backup",
+    "version" : "1",
+    "contentTypes" : [ "IDENTITY", "CLASSIFICATION", "ATTRIBUTE", "TEXT", "MEDIA", "RELATION", "OFFER", "PRICE" ],
+    "allowedSurfaces" : [ ],
+    "effectiveFrom" : "2026-09-12T00:00:00Z",
+    "effectiveUntil" : null,
+    "retention" : "PT0S",
+    "mediaCache" : {
+      "imageBytesAllowed" : false,
+      "imageLinkRetention" : "PT0S",
+      "nonImageRetention" : "PT0S"
+    },
+    "attribution" : {
+      "required" : false,
+      "notice" : null,
+      "sourceUri" : null
+    },
+    "redistribution" : "PROHIBITED",
+    "legalReviewDate" : "2026-09-12",
+    "reviewState" : "UNREVIEWED",
+    "revokedAt" : null,
+    "evidenceReferences" : [ "urn:o4g:private:product-backup-input-contract:v1" ]
+  }, {
+    "policyId" : "amazon-paapi-quarantine",
+    "sourceId" : "amazon-paapi",
+    "version" : "1",
+    "contentTypes" : [ "IDENTITY", "CLASSIFICATION", "ATTRIBUTE", "TEXT", "MEDIA", "RELATION", "OFFER", "PRICE" ],
+    "allowedSurfaces" : [ ],
+    "effectiveFrom" : "2026-09-12T00:00:00Z",
+    "effectiveUntil" : null,
+    "retention" : "PT0S",
+    "mediaCache" : {
+      "imageBytesAllowed" : false,
+      "imageLinkRetention" : "PT0S",
+      "nonImageRetention" : "PT0S"
+    },
+    "attribution" : {
+      "required" : false,
+      "notice" : null,
+      "sourceUri" : null
+    },
+    "redistribution" : "PROHIBITED",
+    "legalReviewDate" : "2026-09-12",
+    "reviewState" : "UNREVIEWED",
+    "revokedAt" : null,
+    "evidenceReferences" : [ "https://affiliate-program.amazon.com/help/operating/policies?ac-ms-src=ac-nav", "https://webservices.amazon.co.uk/paapi5/documentation/best-programming-practices.html" ]
+  } ]
+}

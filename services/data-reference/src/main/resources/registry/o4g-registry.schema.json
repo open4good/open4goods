@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://open4goods.org/schema/o4g-registry-1.json",
+  "title": "O4G canonical concept registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "registryVersion", "classes", "attributes", "verticalViews"],
+  "properties": {
+    "schemaVersion": {"const": "https://open4goods.org/schema/o4g-registry-1.json"},
+    "registryVersion": {"type": "integer", "minimum": 1},
+    "classes": {"type": "array", "items": {"$ref": "#/$defs/class"}},
+    "attributes": {"type": "array", "items": {"$ref": "#/$defs/attribute"}},
+    "verticalViews": {"type": "array", "items": {"$ref": "#/$defs/verticalView"}}
+  },
+  "$defs": {
+    "labels": {
+      "type": "object",
+      "additionalProperties": {"type": "string", "minLength": 1},
+      "required": ["en", "fr"],
+      "properties": {"en": {"type": "string", "minLength": 1}, "fr": {"type": "string", "minLength": 1}}
+    },
+    "mapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system", "externalId", "status", "effectiveFrom"],
+      "properties": {
+        "system": {"type": "string"}, "externalId": {"type": "string"}, "status": {"enum": ["REVIEWED", "PROPOSED", "REJECTED"]},
+        "effectiveFrom": {"type": "string", "format": "date"}, "effectiveTo": {"type": ["string", "null"], "format": "date"}
+      }
+    },
+    "class": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "lifecycle", "labels", "attributes", "mappings"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^o4g:class:[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "lifecycle": {"enum": ["ACTIVE", "DEPRECATED", "RETIRED"]}, "labels": {"$ref": "#/$defs/labels"},
+        "parent": {"type": ["string", "null"]}, "attributes": {"type": "array", "items": {"type": "string"}},
+        "mappings": {"type": "array", "items": {"$ref": "#/$defs/mapping"}}
+      }
+    },
+    "attribute": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "lifecycle", "labels", "valueType", "cardinality", "constraints", "mappings", "resolutionPolicy"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^o4g:attribute:[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "lifecycle": {"enum": ["ACTIVE", "DEPRECATED", "RETIRED"]}, "labels": {"$ref": "#/$defs/labels"},
+        "valueType": {"enum": ["LOCALIZED_TEXT", "BOOLEAN", "INTEGER", "DECIMAL", "QUANTITY", "CODE", "DATE", "URI"]},
+        "cardinality": {"enum": ["SINGLE", "MULTIPLE"]}, "dimension": {"type": ["string", "null"]},
+        "canonicalUnit": {"type": ["string", "null"]},
+        "constraints": {
+          "type": "object", "additionalProperties": false, "required": ["allowedCodes"],
+          "properties": {"minimum": {"type": ["number", "null"]}, "maximum": {"type": ["number", "null"]}, "allowedCodes": {"type": "array", "items": {"type": "string"}}}
+        },
+        "mappings": {"type": "array", "items": {"$ref": "#/$defs/mapping"}}, "resolutionPolicy": {"type": "string"}
+      }
+    },
+    "verticalView": {
+      "type": "object", "additionalProperties": false,
+      "required": ["verticalId", "includedClasses"],
+      "properties": {
+        "verticalId": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "includedClasses": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^o4g:class:[a-z0-9]+(?:-[a-z0-9]+)*$"}}
+      }
+    }
+  }
+}

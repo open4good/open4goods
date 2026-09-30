@@ -1,13 +1,15 @@
-name: Frontend CI & Deploy
+name: Frontend CI and artifacts
 on:
   push:
     paths:
       - "frontend/**"
+      - ".github/workflows/frontend-ci.yml"
       - "verticals/src/main/resources/guides/**"
     branches: [main]
   pull_request:
     paths:
       - "frontend/**"
+      - ".github/workflows/frontend-ci.yml"
       - "verticals/src/main/resources/guides/**"
 
 concurrency:
@@ -34,152 +36,11 @@ jobs:
         run: pnpm build
         working-directory: frontend
 
-      - name: Deploy SSR output to Beta server
+      - name: Retain candidate SSR output
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        uses: easingthemes/ssh-deploy@2cc5b27bf3029d0455dd5e09fe02633904031447 # main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rltgoDzvO --delete"
-          SOURCE: "frontend/.output"
-          REMOTE_HOST: ${{ secrets.REMOTE_BETA_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
-          TARGET: "/opt/open4goods/latest/frontend-ssr"
-
-      - name: Preserve previous Nuxt chunks in Beta staging
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          host: ${{ secrets.REMOTE_BETA_HOST }}
-          username: ${{ secrets.REMOTE_BETA_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            set -eu
-            staging="/opt/open4goods/latest/frontend-ssr/.output/public/_nuxt"
-            mkdir -p "${staging}"
-            for source_bundle in /opt/open4goods/bin/frontend-ssr /opt/open4goods/previous/frontend-ssr; do
-              source_nuxt="${source_bundle}/.output/public/_nuxt"
-              if [ ! -d "${source_nuxt}" ]; then
-                echo "Skipping missing Nuxt asset source: ${source_nuxt}"
-                continue
-              fi
-              find "${source_nuxt}" -type f | while IFS= read -r source_file; do
-                relative_path="${source_file#"${source_nuxt}/"}"
-                target_file="${staging}/${relative_path}"
-                if [ -e "${target_file}" ]; then
-                  continue
-                fi
-                mkdir -p "$(dirname "${target_file}")"
-                cp -p "${source_file}" "${target_file}"
-              done
-            done
-            echo "Nuxt asset preservation complete for ${staging}"
-
-      - name: Publish frontend
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
-        with:
-          host: ${{ secrets.REMOTE_BETA_HOST }}
-          username: ${{ secrets.REMOTE_BETA_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: sh /opt/open4goods/bin/publish-frontend.sh beta
-
-      - name: Validate published Beta Nuxt assets
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
-        with:
-          host: ${{ secrets.REMOTE_BETA_HOST }}
-          username: ${{ secrets.REMOTE_BETA_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            python3 - <<'PY'
-            import html.parser
-            import pathlib
-            import re
-            import sys
-            import time
-            import urllib.error
-            import urllib.parse
-            import urllib.request
-
-            def active_frontend_base():
-                upstream_file = pathlib.Path("/etc/nginx/open4goods/nudger-frontend-upstream.conf")
-                content = upstream_file.read_text(encoding="utf-8")
-                match = re.search(r"127\.0\.0\.1:(\d+)", content)
-                if not match:
-                    raise RuntimeError(f"Cannot find frontend port in {upstream_file}")
-                return f"http://127.0.0.1:{match.group(1)}"
-
-            base = active_frontend_base()
-            pages = [
-                base + "/",
-                base + "/televiseurs/televiseur-55-pouces",
-            ]
-
-            class Parser(html.parser.HTMLParser):
-                def __init__(self):
-                    super().__init__()
-                    self.assets = set()
-
-                def handle_starttag(self, tag, attrs):
-                    for name, value in attrs:
-                        if name in {"src", "href"} and value and "/_nuxt/" in value:
-                            self.assets.add(value)
-
-            def fetch(url, attempts=1, delay=2):
-                request = urllib.request.Request(url, headers={"User-Agent": "open4goods-post-publish-asset-check/1.0"})
-                last_error = None
-                for attempt in range(1, attempts + 1):
-                    try:
-                        with urllib.request.urlopen(request, timeout=20) as response:
-                            return response.status, dict(response.headers), response.read()
-                    except urllib.error.HTTPError as exc:
-                        return exc.code, dict(exc.headers), exc.read()
-                    except Exception as exc:
-                        last_error = exc
-                        if attempt == attempts:
-                            break
-                        print(f"Waiting for {url}: {exc} (attempt {attempt}/{attempts})")
-                        time.sleep(delay)
-                raise last_error
-
-            failures = []
-            checked = 0
-            for page in pages:
-                status, _, body = fetch(page, attempts=12, delay=5)
-                if status >= 400:
-                    failures.append((status, page, {}, "page failed"))
-                    continue
-                parser = Parser()
-                parser.feed(body.decode("utf-8", errors="replace"))
-                for asset in sorted(parser.assets):
-                    asset_url = urllib.parse.urljoin(page, asset)
-                    checked += 1
-                    try:
-                        asset_status, headers, asset_body = fetch(asset_url)
-                    except Exception as exc:
-                        failures.append((0, asset_url, {}, str(exc)))
-                        continue
-                    if asset_status >= 400:
-                        failures.append((asset_status, asset_url, headers, asset_body[:512].decode("utf-8", errors="replace")))
-
-            for path in ("/sw.js", "/_nuxt/builds/latest.json"):
-                asset_url = base + path
-                checked += 1
-                try:
-                    asset_status, headers, asset_body = fetch(asset_url)
-                except Exception as exc:
-                    failures.append((0, asset_url, {}, str(exc)))
-                    continue
-                if asset_status >= 400:
-                    failures.append((asset_status, asset_url, headers, asset_body[:512].decode("utf-8", errors="replace")))
-
-            if failures:
-                print("frontend_asset_failure")
-                for status, url, headers, excerpt in failures:
-                    print(f"{status} {url}")
-                    print({name: headers.get(name, "") for name in ("cf-ray", "cf-cache-status", "cache-control", "server")})
-                    print(excerpt[:200])
-                sys.exit(1)
-
-            print(f"Validated {checked} Nuxt asset(s) from {len(pages)} page(s).")
-            PY
+          name: frontend-${{ github.sha }}
+          path: frontend/.output
+          if-no-files-found: error
+          retention-days: 30

@@ -18,6 +18,15 @@ spring:
   docker:
     compose:
       enabled: false
+  elasticsearch:
+    uris: http://localhost:9200
+
+server:
+  port: 8081
+
+open4goods:
+  scheduling:
+    enabled: false
 
 # Folder where work data will be store
 rootFolder: ./
@@ -25,9 +34,9 @@ datasourcesfolder: "./datasources/"
 
 api:
   backup:
-    xwiki-backup-file: ./backup/xwiki-backup.zip
-    data-backup-folder: ./backup/products
-    import-product-path: ./backup/import
+    xwiki-backup-file: ${XWIKI_XAR_PATH:./.local/backup/xwiki-backup.xar}
+    data-backup-folder: ${PRODUCT_BACKUP_SOURCE_URI:./.local/backup}
+    import-product-path: ${O4G_LOCAL_DATA_ROOT:./.local/data}/import
     copy-page-size: 5000
     copy-bulk-size: 500
     copy-threads: 2

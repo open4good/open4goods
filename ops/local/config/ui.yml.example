@@ -1,0 +1,13 @@
+server:
+  port: 8082
+spring:
+  elasticsearch:
+    uris: http://localhost:9200
+open4goods:
+  scheduling:
+    enabled: false
+xwiki:
+  baseUrl: http://localhost:8080/xwiki
+  username: ${XWIKI_USERNAME:local}
+  password: ${XWIKI_PASSWORD:local-only}
+  httpsOnly: false

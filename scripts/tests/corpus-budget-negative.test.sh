@@ -9,7 +9,8 @@ ROOT="$(pwd)"
 FIXTURE_DIR="$(mktemp -d)"
 trap 'rm -rf "${FIXTURE_DIR}"' EXIT
 
-mkdir -p "${FIXTURE_DIR}/scripts/verify" "${FIXTURE_DIR}/docs" "${FIXTURE_DIR}/.o4g"
+mkdir -p "${FIXTURE_DIR}/scripts/verify" "${FIXTURE_DIR}/docs" "${FIXTURE_DIR}/.o4g/specifications" \
+  "${FIXTURE_DIR}/archive/specs"
 cp "${ROOT}/scripts/verify/check_corpus_budget.py" "${FIXTURE_DIR}/scripts/verify/check_corpus_budget.py"
 
 cat > "${FIXTURE_DIR}/AGENTS.md" <<'MD'
@@ -56,6 +57,18 @@ CHECK="${FIXTURE_DIR}/scripts/verify/check_corpus_budget.py"
 # The unmodified fixture is within its own just-written budget.
 if ! (cd "${FIXTURE_DIR}" && python3 "${CHECK}") > /dev/null; then
   echo "FAIL: fixture should pass its own freshly-written budget"
+  exit 1
+fi
+
+# Long specification files live outside the governed documentation roots, so
+# they do not alter any corpus measure.
+for directory in .o4g/specifications archive/specs; do
+  for _ in $(seq 1 600); do
+    echo "Detailed implementation coordinate." >> "${FIXTURE_DIR}/${directory}/large-spec.md"
+  done
+done
+if ! (cd "${FIXTURE_DIR}" && python3 "${CHECK}") > /dev/null; then
+  echo "FAIL: specification files should not alter corpus measures"
   exit 1
 fi
 

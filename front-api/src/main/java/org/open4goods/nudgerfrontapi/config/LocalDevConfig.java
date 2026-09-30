@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 
 @Configuration
-@Profile("local")
+@Profile("local-mock")
 public class LocalDevConfig {
 
     /**

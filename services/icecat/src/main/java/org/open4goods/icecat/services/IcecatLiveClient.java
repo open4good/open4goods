@@ -4,6 +4,7 @@ import org.open4goods.icecat.config.yml.IcecatCompletionConfig;
 import org.open4goods.icecat.model.IcecatLiveApiResponse;
 import org.open4goods.icecat.model.IcecatLiveApiResponse.IceDataItem;
 import org.open4goods.model.localization.DomainLanguage;
+import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -73,7 +74,7 @@ public class IcecatLiveClient {
 
     private IcecatLiveLookupResult fetch(String url, String label) {
         int maxAttempts = Math.max(1, config.getMaxRetryAttempts());
-        LOGGER.info("Loading icecat data {}", url);
+        LOGGER.info("Loading Icecat data {}", RemoteFileCachingService.loggableUrl(url));
         for (int attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
                 String content = restClient.get().uri(url).retrieve().body(String.class);
@@ -84,7 +85,7 @@ public class IcecatLiveClient {
                 }
                 return IcecatLiveLookupResult.found(item);
             } catch (UnrecognizedPropertyException e) {
-                LOGGER.error("Unknown property at {} : {}", url, e.getOriginalMessage());
+                LOGGER.error("Unknown Icecat response property at {}", RemoteFileCachingService.loggableUrl(url));
                 return IcecatLiveLookupResult.error(e.getOriginalMessage());
             } catch (HttpClientErrorException.NotFound | HttpClientErrorException.BadRequest e) {
                 LOGGER.info("{} is not found in Icecat", label);
@@ -95,15 +96,16 @@ public class IcecatLiveClient {
             } catch (HttpServerErrorException | ResourceAccessException e) {
                 // Transient (5xx, connect/read timeout) : retry up to maxAttempts, others are terminal.
                 if (attempt >= maxAttempts) {
-                    LOGGER.error("Icecat live call failed after {} attempt(s) for {}", attempt, label, e);
-                    return IcecatLiveLookupResult.error(e.getMessage());
+                    LOGGER.error("Icecat live call failed after {} attempt(s) for {} ({})", attempt, label,
+                            e.getClass().getSimpleName());
+                    return IcecatLiveLookupResult.error("Icecat live call failed");
                 }
-                LOGGER.warn("Icecat live call attempt {}/{} failed for {}, retrying : {}", attempt, maxAttempts, label,
-                        e.getMessage());
+                LOGGER.warn("Icecat live call attempt {}/{} failed for {} ({}), retrying", attempt, maxAttempts, label,
+                        e.getClass().getSimpleName());
                 sleep(config.getRetryBackoffMs());
             } catch (Exception e) {
-                LOGGER.error("Unexpected error in icecat parsing for {}", label, e);
-                return IcecatLiveLookupResult.error(e.getMessage());
+                LOGGER.error("Unexpected Icecat parsing error for {} ({})", label, e.getClass().getSimpleName());
+                return IcecatLiveLookupResult.error("Icecat parsing failed");
             }
         }
         return IcecatLiveLookupResult.error("Icecat live call failed after " + maxAttempts + " attempt(s) for " + label);

@@ -1,0 +1,14 @@
+[Unit]
+Description=open4goods DiskB cache mount
+Before=open4goods.target
+ConditionPathIsMountPoint=/diskb
+
+[Mount]
+What=/diskb/open4goods-cache
+Where=/opt/open4goods/.cached
+Type=none
+Options=bind
+DirectoryMode=0750
+
+[Install]
+RequiredBy=open4goods.target

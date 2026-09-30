@@ -3,6 +3,9 @@ package org.open4goods.datareference.model;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * Stable identifier for an independently authored O4G class or attribute.
  */
@@ -29,6 +32,7 @@ public sealed interface CanonicalConceptId permits CanonicalAttributeId, Canonic
      *
      * @return identifier such as {@code o4g:attribute:width}
      */
+    @JsonValue
     default String externalForm() {
         return "o4g:" + kind() + ":" + slug();
     }
@@ -40,6 +44,7 @@ public sealed interface CanonicalConceptId permits CanonicalAttributeId, Canonic
      * @return typed canonical identifier
      * @throws IllegalArgumentException when the prefix, kind, or slug is invalid
      */
+    @JsonCreator
     static CanonicalConceptId parse(String value) {
         Objects.requireNonNull(value, "value must not be null");
         if (value.startsWith("o4g:class:")) {

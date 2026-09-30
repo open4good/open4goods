@@ -1,0 +1,42 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: nudger-spec-prompt
+  name: Nudger WorkOrder specification prompt
+spec:
+  purpose: Provide a repository-grounded prompt that turns a free-form feature, bug, refactoring or documentation request
+    into either a directly delivered micro-WorkOrder or a decision-complete ACCEPTED WorkOrder DAG, reconciled with every
+    active contract.
+  roadmapRef: m0-governance
+  state: COMPLETED
+  dependsOn:
+    - governance-kit-bootstrap
+  pathScope:
+    - prompts/nudger-spec.md
+  acceptanceCriteria:
+    - id: AC1
+      statement: The prompt discovers repository facts before asking targeted product questions, records the user-visible
+        goal and current verified behavior, and refuses to accept a contract while a material interface, scope, migration
+        or failure decision is unresolved.
+    - id: AC2
+      statement: A justified simple request is executed through a micro-WorkOrder created as ACCEPTED, transitioned to IN_PROGRESS
+        and closed only with evidence; all other requests create one decision-complete ACCEPTED WorkOrder or a topologically
+        valid DAG without implementing application code.
+    - id: AC3
+      statement: Every generated WorkOrder has an exact purpose, minimal complete pathScope, verified decision and dependency
+        references, and atomic observable acceptance criteria covering interfaces, data flow, failures, compatibility, documentation
+        and proportionate tests without TODOs or unresolved alternatives.
+    - id: AC4
+      statement: The prompt reconciles the request with ACCEPTED, IN_PROGRESS and BLOCKED WorkOrders plus relevant ledger
+        history, avoids duplicate or contradictory contracts, handles an absent milestone only after explicit owner validation,
+        and regenerates rather than edits the roadmap.
+    - id: AC5
+      statement: Repository mutations preserve unrelated dirtiness, never expose secrets or mutate production, pass the applicable
+        WorkOrder and lint checks, create only an explicit local commit without push, and report created ids, dependencies,
+        readiness, evidence and any blocker.
+  evidenceRefs:
+    - test:static prompt contract assertions passed for outcomes, lifecycle states, active-WorkOrder reconciliation, DAG authoring,
+      specification depth, milestone approval, safety and local-only delivery
+    - test:python3 scripts/generate/generate_roadmap.py --check passed with the governing WorkOrder in progress
+    - test:./scripts/lint.sh passed, including documentation, corpus budget, generated roadmap, WorkOrder tooling, YAML, shell,
+      actions and frontend lint

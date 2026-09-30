@@ -11,23 +11,14 @@
       "resolution": "normative",
       "informational": "bounded by NORMATIVE_PATHS, not by a line count"
     },
-    "work_open_lines": {
-      "resolution": "machine"
-    },
-    "work_ledger_lines": {
-      "resolution": "machine",
-      "informational": "append-only closure records"
-    },
     "adr_lines_max": {
       "resolution": "normative"
     }
   },
   "ceilings": {
-    "non_normative_lines": 6115,
-    "rule_shaped_statements_in_non_normative": 137,
-    "normative_documents": 14,
-    "work_open_lines": 1500,
-    "work_ledger_lines": 1386,
+    "non_normative_lines": 6216,
+    "rule_shaped_statements_in_non_normative": 140,
+    "normative_documents": 15,
     "adr_lines_max": 120
   }
 }

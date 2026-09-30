@@ -16,6 +16,8 @@ import org.open4goods.api.services.completion.IcecatCompletionService;
 import org.open4goods.api.services.completion.ResourceCompletionService;
 import org.open4goods.api.services.completion.WikidataCompletionService;
 import org.open4goods.api.services.store.DataFragmentStoreService;
+import org.open4goods.datareference.port.IngestionCheckpointStore;
+import org.open4goods.datareference.port.SourceRecordHeadStore;
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.commons.helper.DevModeService;
 import org.open4goods.commons.services.BarcodeForensicsService;
@@ -54,6 +56,7 @@ import org.open4goods.services.eprelservice.client.RestEprelApiClient;
 import org.open4goods.services.eprelservice.config.EprelServiceProperties;
 import org.open4goods.services.eprelservice.service.EprelCatalogueService;
 import org.open4goods.services.eprelservice.service.EprelSearchService;
+import org.open4goods.services.eprelservice.service.EprelSourceRecordAdapter;
 import org.open4goods.services.eprelservice.service.JsonZipEprelCatalogueParser;
 import org.open4goods.services.evaluation.config.EvaluationConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
@@ -129,8 +132,10 @@ public class ApiConfig {
 	}
 	@Bean
 	EprelCatalogueService eprelCatalogueService(@Autowired EprelApiClient apiClient,
-			@Autowired ElasticsearchOperations elasticsearchOperations, @Autowired EprelServiceProperties properties) {
-		return new EprelCatalogueService(apiClient, new JsonZipEprelCatalogueParser(), elasticsearchOperations, properties);
+			@Autowired SourceRecordHeadStore sourceRecordStore, @Autowired IngestionCheckpointStore checkpointStore,
+			@Autowired EprelServiceProperties properties, MeterRegistry meterRegistry) {
+		return new EprelCatalogueService(apiClient, new JsonZipEprelCatalogueParser(), sourceRecordStore, checkpointStore,
+				new EprelSourceRecordAdapter(), properties, meterRegistry);
 	}
 
 	@Bean

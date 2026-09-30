@@ -1,85 +1,28 @@
-# Autonomous development of open4goods WorkOrders
+# Autonomous development of Nudger Paperclip issues
 
-You are the autonomous implementation operator for the current open4goods checkout. Advance one
-bounded WorkOrder at a time until none is actionable or a user stops the run.
+You implement one bounded issue from the [Nudger board](https://yamaka.me/GOU/projects/nudger/issues) at a time. Read the repository `AGENTS.md`, the closest module guide, the assigned issue, its linked document, native blockers and named ADRs. The issue owns task state, scope, acceptance criteria and evidence.
 
-## Start and selection
+## Selection and safety
 
-1. Read `AGENTS.md`, then the closest module `AGENTS.md` for files in scope.
-2. Run `scripts/work/next-workorder.py`. Do not choose work from the generated roadmap.
-3. Inspect the first candidate with `scripts/work/wo.py status <id>` and read only its named ADRs
-   and the durable documents needed by its acceptance criteria.
-4. Verify the premise against code and current external state before changing anything.
-
-Resume `IN_PROGRESS` before starting `ACCEPTED`. Dependencies and milestone order are authoritative.
-Never hide work because a note looks old; correct stale claims in the WorkOrder.
-
-## Repository safety
-
-- Record `git status --short`, the current branch and HEAD before each lot. Existing changes belong
-  to another session. Preserve them and never use `git add -A`, reset, checkout or clean.
-- Pull the current branch with `git pull --ff-only` before `begin`. Stop that lot on divergence or
-  an overlapping tracked edit; continue with an independent lot when possible.
-- Run `scripts/work/wo.py begin <id>`. Work only within `pathScope`; widen the contract explicitly
-  when verified implementation requires it.
-- This prompt authorizes commit and push to the current branch, including `main`. It does not
-  authorize deployment, production mutation, secret rotation or repository administration.
-- Never print, commit, copy into evidence or ask the user to paste a secret.
-
-## Required tool routing
-
-- Java symbol, reference, implementation and call questions: use JavaLens before narrow `rg`.
-- Maven dependency, effective model and available-version questions: use `maven-deps` or
-  `maven-tools`; execute builds with the repository Maven commands.
-- Vue or Vuetify changes: use the Vuetify MCP for the installed component API before editing.
-- Stack state and logs: use the read-only Docker MCP. Controlled scripts own start and stop.
-- Browser behavior: use Playwright; use Nuxt MCP while the local dev server exposes it.
-
-Run `scripts/mcp/doctor.sh --core` if a required server is absent. Record a sanitized blocker when
-the doctor fails. A text search may replace JavaLens only for a narrow path after that failure.
+- Select an assigned, unblocked DEVELOPMENT issue. Resume an issue already in progress before starting another. Do not infer readiness from priority alone.
+- Use a separate Git worktree. Record branch, HEAD and `git status --short` before each lot; preserve another session's changes. Never reset, clean, stash or broadly stage them.
+- Use Paperclip checkout to claim the issue atomically. Keep work inside its stated scope, or update the issue with a justified scope change.
+- DEVELOPMENT is strictly local. No Nudger or beta runtime is a development dependency. Use the local stack and pinned backup contract in ADR-0014.
+- A task is not permission to mutate beta or production. Beta and production promotion each require an explicit owner decision recorded in Paperclip after their phase checks pass, per ADR-0015. Physical retirement also requires the healthy-window and verified-restore gate.
+- Never expose secrets, credentials, private topology or authenticated URLs in code, logs, comments or issue evidence.
 
 ## Implementation loop
 
-For every acceptance criterion:
+1. Verify the issue premise against code and current state. Record a failing test, inspection or measurable baseline for every acceptance criterion.
+2. Implement the smallest cohesive change, including tests, Javadoc, configuration metadata and durable documentation when behavior changes.
+3. Run focused checks. Record concise, sanitized observations and artifact references in the issue. A skipped external check remains an explicit blocker.
+4. Inspect the diff for unrelated files, TODOs, generated noise and secrets.
+5. Before handoff, run `./scripts/lint.sh` and `mvn --offline clean install`; for frontend work run its applicable lint, tests and build. Report the exact checks actually run.
 
-1. Establish a failing test, inspection or measurable baseline.
-2. Implement the smallest cohesive change inside scope, including Javadoc, configuration metadata
-   and durable documentation when its contract changes.
-3. Run the focused check and record a short `test:` or `note:` evidence reference. Evidence states
-   the observed result and never contains a credential, host or private topology.
-4. Inspect the diff for TODOs, generated noise, unrelated files and accidental secrets.
+Use the repository's MCP routing: JavaLens for Java navigation, Maven tools for dependency questions, Vuetify MCP before component API changes, read-only Docker MCP for stack state, and Playwright for local browser behavior. Run `scripts/mcp/doctor.sh --core` when a required server is absent. A narrow `rg` fallback follows only after the doctor failure is recorded.
 
-Use Java 21, constructor injection, Spring stereotypes, Problem Details and records as specified by
-the guides. Frontend code is typed, SSR-safe, localized and uses the generated OpenAPI client.
+## Delivery
 
-## Verification and completion
+Push an issue-specific branch and open a PR. Link the PR, candidate commit and test evidence in the Paperclip issue. Move it to review; close only when the criteria are evidenced and the review is complete. Do not push implementation directly to `main` or promote a release from an issue's status alone. If blocked, set the issue to blocked with a concrete native blocker, owner action or approval path, then continue independent work.
 
-Run focused tests while developing. Before closing, run:
-
-```bash
-./scripts/lint.sh
-mvn --offline clean install
-```
-
-For frontend changes also run its lint, tests and build. If another session has overlapping dirty
-source, do not claim a full-tree result; record the exact focused checks that remain valid.
-
-Close only when every criterion is evidenced:
-
-```bash
-scripts/work/wo.py close <id> --evidence 'test:<command and result>' [...]
-scripts/work/wo.py commit <id> --message '<type>(<scope>): <subject>' --push <explicit paths...>
-```
-
-The commit contains only explicit scoped paths and the WorkOrder closure. After the push, fetch and
-pull with `--ff-only`, then select the next lot.
-
-For a real blocker, use:
-
-```bash
-scripts/work/wo.py block <id> --evidence 'note:<criterion, observed blocker, required resolution>'
-```
-
-Commit and push that single governance update, then continue with an independent candidate. Stop
-when no candidate is actionable, three consecutive lots are blocked by the same external cause, or
-the user stops the run.
+Do not silently change a decision. Put enduring architecture and operations contracts in Git and record the related issue/ADR link.

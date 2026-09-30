@@ -7,24 +7,21 @@ audience: PROJECT_SCOPED
 # Product Data API - local runbook
 
 > Canonical authority: [`../b2b/00-canonical-decisions.md`](../b2b/00-canonical-decisions.md).
-> How to run `b2b-api` + `b2b-frontend` locally end to end. Related memory:
-> the open4goods devsec launch pattern (point Spring at source resources; ES
-> devsec is the prod cluster).
+> How to run `b2b-api` + `b2b-frontend` locally end to end under ADR-0014.
 
 ## Prerequisites
 
 - Java 21, Maven, pnpm, Node (per `frontend` tooling).
-- Docker (Postgres + Redis).
+- Docker (the root Compose provides Postgres, Redis and Elasticsearch).
 - Stripe CLI (test mode) for webhook testing.
-- Access to the devsec Elasticsearch (prod cluster, `products-moustik`) for real
-  product lookups; otherwise mock `ProductRepository`.
+- A pinned local sample or full backup imported into versioned local indexes.
 
 ## 1. Backing services (Docker)
 
 ```bash
-docker run -d --name pdapi-postgres -e POSTGRES_DB=product_data_api -e POSTGRES_USER=product_data_api \
-  -e POSTGRES_PASSWORD=product_data_api -p 5433:5432 postgres:16
-docker run -d --name pdapi-redis -p 6379:6379 redis:7
+scripts/local/open4goods.sh init
+scripts/local/open4goods.sh doctor
+docker compose --env-file .env.local up -d --wait elasticsearch redis postgres
 ```
 
 Flyway runs `V1__product_data_api_init.sql` on boot (see
@@ -38,19 +35,17 @@ Build the reactor module:
 mvn -pl b2b-api -am install
 ```
 
-Run with the `devsec` profile. As with `api`/`front-api`, the fat jar **excludes**
-`application-devsec.yml`, so for a jar run point Spring at the source resources
-(IDE/source runs pick it up automatically):
+Run with the tracked `local` profile and ignored local override. The full launcher
+starts this service automatically; the equivalent isolated command is:
 
 ```bash
-java -jar b2b-api/target/b2b-api-*.jar \
-  --spring.profiles.active=devsec \
-  --spring.config.additional-location=optional:file:./b2b-api/src/main/resources/
+SPRING_PROFILES_ACTIVE=local \
+SPRING_CONFIG_ADDITIONAL_LOCATION=optional:file:.local/config/b2b-api.yml \
+mvn --offline -f b2b-api/pom.xml spring-boot:run
 ```
 
-`devsec` points Elasticsearch at the prod cluster (host and port come from the
-`devsec` profile, which is gitignored; index `products-moustik`). Postgres defaults
-to `localhost:5433` and Redis defaults to `localhost:6379`. Default port **8087**.
+The local profile points only at loopback: Elasticsearch 9200, PostgreSQL 5432,
+Redis 6379 and the B2B API on 8087. The selected profile is only `local`; `devsec` is absent.
 
 Required env (test values, never commit real secrets) - see
 [auth](../architecture/product-data-api-auth.md) and
@@ -145,5 +140,5 @@ OpenAPI client regeneration: see
 
 ## Blockers to record (if validation cannot run)
 
-If Postgres/Redis/ES/Stripe is unavailable, record the exact command, the failure
+If local Postgres/Redis/Elasticsearch or Stripe test mode is unavailable, record the exact command, the failure
 reason, and the smallest next step (per [`master-prompt.md`](../b2b/implementation/master-prompt.md) validation policy).

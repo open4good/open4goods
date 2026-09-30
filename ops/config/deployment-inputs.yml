@@ -5,30 +5,57 @@
 # secrets.NAME or vars.NAME without adding it here first: that is the "unclassified" gate, a
 # deliberate, reviewed decision instead of a silent new deployment input.
 #
-# store: which GitHub Actions store this name must resolve from today. No GitHub Environment
-# (job-level `environment:`) is used anywhere yet -- AC2 (moving these into beta/prod GitHub
-# Environments) is unattempted, see docs/operations/legacy-config-inventory.md. Every input below
-# is a repository-level secret; none use the separate, non-masked `vars` store.
+# store: GitHub Actions store from which the workflow resolves this name. Targeted deployment jobs
+# declare their GitHub Environment; target-specific credentials and non-secret build inputs are
+# placed there. Production names may be declared before their values are owner-provisioned.
 inputs:
   SSH_PRIVATE_KEY:
     store: secrets
+    environments: [prod]
     note: deploy SSH private key; multi-line, so GitHub's log-masking is unreliable for it -- never echo it
   REMOTE_HOST:
     store: secrets
+    environments: [prod]
     note: production deploy host -- topology, kept out of docs per leaked-credential-rotation AC8
   REMOTE_USER:
     store: secrets
-  REMOTE_BETA_HOST:
+    environments: [prod]
+  BETA_DEPLOY_HOST:
     store: secrets
+    environments: [beta]
     note: beta deploy host -- topology
-  REMOTE_BETA_USER:
+  BETA_DEPLOY_USER:
     store: secrets
+    environments: [beta]
+  BETA_DEPLOY_SSH_PRIVATE_KEY:
+    store: secrets
+    environments: [beta]
+    note: beta-only deployment key
+  B2B_FRONTEND_PUBLIC_BACKEND_BASE_URL:
+    store: vars
+    environments: [beta]
+    note: beta B2B public API location baked into the Nuxt build
+  B2B_FRONTEND_BACKEND_PROXY_TARGET:
+    store: vars
+    environments: [beta]
+    note: beta B2B server-side proxy target
+  O4G_TARGET_CLUSTER_FINGERPRINT:
+    store: vars
+    environments: [beta, prod]
+    note: non-secret SHA-256 fingerprint of the target Elasticsearch cluster, set independently in each GitHub Environment
   API_URL:
     store: secrets
+    environments: [prod]
     note: baked into the Nuxt production build
   HCAPTCHA_SITE_KEY:
     store: secrets
+    environments: [prod]
     note: hCaptcha's own design makes site keys public-facing, but it is stored as a secret today
   GITHUB_TOKEN:
     store: secrets
+    environments: [prod]
     note: GitHub Actions' own automatic per-run token, not an owner-managed repository secret
+  PRODUCT_BACKUP_SOURCE_URI:
+    store: vars
+    environments: [beta]
+    note: frozen product-export location for the beta reimport path

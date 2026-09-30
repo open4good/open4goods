@@ -1,12 +1,12 @@
 package org.open4goods.datareference.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 import java.time.LocalDate;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.datareference.model.value.BooleanValue;
@@ -20,30 +20,64 @@ import org.open4goods.datareference.model.value.LocalizedTextValue;
 import org.open4goods.datareference.model.value.QuantityValue;
 import org.open4goods.datareference.model.value.UriValue;
 
+/**
+ * Each canonical value type reports its own frozen discriminator and refuses to
+ * be constructed without the parts that give it meaning.
+ */
 class CanonicalValueTest {
 
     @Test
-    void exposesTheClosedSetOfStructuredValueTypes() {
-        List<CanonicalValue> values = List.of(
-                new LocalizedTextValue("Largeur", new LanguageTag("fr")),
-                new BooleanValue(true),
-                new IntegerValue(new BigInteger("9223372036854775808")),
-                new DecimalValue(new BigDecimal("0.1000000000000000001")),
-                new QuantityValue(new BigDecimal("0.845"), "length", "m"),
-                new CodeValue("energy-class", "A"),
-                new DateValue(LocalDate.parse("2026-09-09")),
-                new UriValue(URI.create("https://example.test/evidence")));
+    void everyTypeReportsItsOwnDiscriminator() {
+        assertThat(new LocalizedTextValue("x", LanguageTag.UND).type())
+                .isEqualTo(CanonicalValueType.LOCALIZED_TEXT);
+        assertThat(new BooleanValue(true).type()).isEqualTo(CanonicalValueType.BOOLEAN);
+        assertThat(new IntegerValue(BigInteger.ONE).type()).isEqualTo(CanonicalValueType.INTEGER);
+        assertThat(new DecimalValue(BigDecimal.ONE).type()).isEqualTo(CanonicalValueType.DECIMAL);
+        assertThat(QuantityValue.of(BigDecimal.ONE, "LENGTH", "m").type())
+                .isEqualTo(CanonicalValueType.QUANTITY);
+        assertThat(new CodeValue("eu-energy-label", "A").type()).isEqualTo(CanonicalValueType.CODE);
+        assertThat(new DateValue(LocalDate.of(2026, 1, 1)).type()).isEqualTo(CanonicalValueType.DATE);
+        assertThat(new UriValue(URI.create("https://example.invalid")).type())
+                .isEqualTo(CanonicalValueType.URI);
+    }
 
-        assertThat(values).extracting(CanonicalValue::type).containsExactly(
-                CanonicalValueType.LOCALIZED_TEXT,
-                CanonicalValueType.BOOLEAN,
-                CanonicalValueType.INTEGER,
-                CanonicalValueType.DECIMAL,
-                CanonicalValueType.QUANTITY,
-                CanonicalValueType.CODE,
-                CanonicalValueType.DATE,
-                CanonicalValueType.URI);
-        assertThat(((QuantityValue) values.get(4)).value()).isEqualByComparingTo("0.845");
-        assertThat(((QuantityValue) values.get(4)).dimension()).isEqualTo("LENGTH");
+    @Test
+    void theUnionIsClosedAndCoveredByTheDiscriminatorEnum() {
+        // A new subtype without a matching constant would break every stored document.
+        assertThat(CanonicalValue.class.getPermittedSubclasses())
+                .hasSize(CanonicalValueType.values().length);
+    }
+
+    @Test
+    void aTextValueStatesItsLanguage() {
+        assertThatThrownBy(() -> new LocalizedTextValue("x", null))
+                .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    void aCodeValueStatesItsCodeSystem() {
+        assertThatThrownBy(() -> new CodeValue(null, "A")).isInstanceOf(Exception.class);
+        assertThatThrownBy(() -> new CodeValue("eu-energy-label", null)).isInstanceOf(Exception.class);
+    }
+
+    @Test
+    void aQuantityStatesADimensionAndAUnit() {
+        assertThatThrownBy(() -> QuantityValue.of(BigDecimal.ONE, " ", "m"))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> QuantityValue.of(BigDecimal.ONE, "LENGTH", "centimetres"))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void aQuantityKeepsTheScaleItWasGiven() {
+        assertThat(QuantityValue.of(new BigDecimal("0.5500"), "LENGTH", "m").amount().scale()).isEqualTo(4);
+    }
+
+    @Test
+    void requiredValuesAreNeverNull() {
+        assertThatThrownBy(() -> new IntegerValue(null)).isInstanceOf(Exception.class);
+        assertThatThrownBy(() -> new DecimalValue(null)).isInstanceOf(Exception.class);
+        assertThatThrownBy(() -> new DateValue(null)).isInstanceOf(Exception.class);
+        assertThatThrownBy(() -> new UriValue(null)).isInstanceOf(Exception.class);
     }
 }

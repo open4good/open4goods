@@ -4,25 +4,44 @@ import java.math.BigDecimal;
 import java.util.Locale;
 import java.util.Objects;
 
+import org.open4goods.datareference.model.UcumCode;
+
 /**
- * Canonical quantity represented without binary floating-point loss.
+ * A canonical quantity: a decimal amount and the UCUM unit it is expressed in.
  *
- * @param value decimal quantity
- * @param dimension canonical physical dimension
- * @param ucumCode canonical UCUM code selected by the attribute contract
+ * <p>The amount is {@link BigDecimal} so that a stored value survives a
+ * round-trip unchanged. Binary floating point would make {@code 0.55 m} and the
+ * value read back from the index differ in the last digits, and a comparison
+ * between two sources would then depend on how each was parsed.
+ *
+ * @param amount decimal quantity
+ * @param dimension canonical physical dimension, such as {@code LENGTH}
+ * @param unit validated UCUM unit the amount is expressed in
  */
-public record QuantityValue(BigDecimal value, String dimension, String ucumCode) implements CanonicalValue {
+public record QuantityValue(BigDecimal amount, String dimension, UcumCode unit) implements CanonicalValue {
 
     /**
-     * Validates the quantity and preserves the case-sensitive UCUM code.
+     * Validates the quantity.
      */
     public QuantityValue {
-        Objects.requireNonNull(value, "value must not be null");
-        if (dimension == null || dimension.isBlank() || ucumCode == null || ucumCode.isBlank()) {
-            throw new IllegalArgumentException("quantity dimension and UCUM code must not be blank");
+        Objects.requireNonNull(amount, "amount must not be null");
+        Objects.requireNonNull(unit, "unit must not be null");
+        if (dimension == null || dimension.isBlank()) {
+            throw new IllegalArgumentException("quantity dimension must not be blank");
         }
         dimension = dimension.trim().toUpperCase(Locale.ROOT);
-        ucumCode = ucumCode.trim();
+    }
+
+    /**
+     * Builds a quantity from a raw UCUM code.
+     *
+     * @param amount decimal quantity
+     * @param dimension canonical physical dimension
+     * @param ucumCode UCUM unit code
+     * @return validated quantity
+     */
+    public static QuantityValue of(BigDecimal amount, String dimension, String ucumCode) {
+        return new QuantityValue(amount, dimension, new UcumCode(ucumCode));
     }
 
     @Override

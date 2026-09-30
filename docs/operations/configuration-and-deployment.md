@@ -6,6 +6,14 @@ audience: PROJECT_SCOPED
 
 # Configuration and deployment
 
+## Historical secret-scan exception
+
+GOU-60 records the owner's 2026-09-29 acceptance of existing findings, not revocation.
+`.gitleaks-baseline.json` pins hashed content/file/rule identities to its source commit;
+history exceptions also bind the original commit. `scripts/verify/secret_scan.py git`
+and `dir` block new findings and scanner failures. CI emits counts only; raw reports
+stay in private temporary storage and are deleted. Baseline changes require review.
+
 ## Purpose
 
 One entry point answering "how do I run this locally, and how does a real environment get its
@@ -18,22 +26,16 @@ unverified against the actual system: this document describes the state found on
 
 ## Local development
 
-Start with the [README's "Run in dev mode" section](../../README.md#run-in-dev-mode): Java 21,
-Maven, and either Docker Compose (Elasticsearch + Redis, auto-started by
-`spring-boot-docker-compose`) or `front-api`'s in-memory `local` profile (no infra at all). Module-
-specific local runbooks:
+Start with [the strict-local campaign](beta-development-campaign.md): Java 21, Maven, Node/pnpm
+and Docker Compose. `scripts/local/open4goods.sh` owns startup and connects every native application
+to loopback Elasticsearch, Redis and PostgreSQL. Module-specific local detail:
 
 - `b2b-api` + `b2b-frontend`: [product-data-api-local-runbook.md](product-data-api-local-runbook.md).
-- `frontend`: a `.env` file with `API_URL`, `TOKEN_COOKIE_NAME`, `REFRESH_COOKIE_NAME` (README has
-  the full block); gitignored, kept out of every commit.
-- `api`, `ui`, `admin`: no dedicated runbook yet -- run with `-Dspring.profiles.active=dev` per the
-  README's "Launching" section. Its `com.open4goods.ui.Ui`/`com.open4goods.ui.Api` IDE class paths
-  predate the `org.open4goods` package rename and no longer resolve; use each module's
-  `*Application` class instead (see `AGENTS.md` section 2's package layout).
+- all services: `.env.local` and `.local/config/<service>.yml`, initialized from tracked templates
+  and ignored by Git.
 
-All packaged `application.yml` defaults (one per `@SpringBootApplication` module) hold **no
-secrets** -- that was `config-contract-and-environments`'s AC3. A local `devsec` profile run reads
-real (non-production-secret) Elasticsearch/Redis credentials from that same profile's resources.
+All packaged defaults hold no secrets. DEVELOPMENT loads only the `local` profile; `devsec` is not
+part of the launcher and local runbooks do not use remote Elasticsearch credentials.
 
 ## Where configuration lives today
 
@@ -47,15 +49,14 @@ Three tiers, by how sensitive and how environment-specific a value is:
    Elasticsearch/Kibana files and certs -- see below). This repository is not part of this checkout
    and this document has no visibility into its contents; the full classified inventory of every
    tracked file and key it holds is [legacy-config-inventory.md](legacy-config-inventory.md).
-3. **Local `.env` / `application-active.yml` you create yourself** -- gitignored, per the Local
-   development section above.
+3. **Local `.env.local` / `.local/config/*.yml` created by `open4goods.sh init`** -- gitignored,
+   per the Local development section above.
 
 Tier 2 is being migrated to GitHub Environments (public non-secret variables + environment
-secrets) per [ADR-0006](../adr/0006-github-environments-and-systemd-runtime.md). That migration is
-`config-contract-and-environments`, currently **BLOCKED**: no `beta` or `prod` GitHub Environment
-exists yet in this repository (verified via `gh api repos/open4good/open4goods/environments`,
-2026-09-09) -- creating them is repository administration, an owner action. Until then, tier 2's
-private repository remains the actual source of truth for beta and prod.
+secrets) per [ADR-0006](../adr/0006-github-environments-and-systemd-runtime.md). The `beta` and
+`prod` Environments exist; beta holds its target fingerprint, while both lack secrets and protection
+rules. Until their inputs are populated, the private repository remains the actual source of truth
+for beta and prod.
 
 ## How configuration reaches beta and prod today
 
@@ -69,17 +70,38 @@ manually (or, for the first, on every push to its `main`):
 | `publishInfra.yml` | SSHes in and runs `/opt/open4goods/bin/publish-infra.sh {env}`, which copies `docker-compose.infra.yml`, `kibana.yml`, `elasticsearch.yml`, `elastic-stack-ca.p12`, `elastic-certificates.p12`, `server.xml` and `xwiki.cfg` from `/opt/open4goods/latest/{env}/` into `/opt/open4goods/bin/` (the directory Docker Compose actually mounts from), then brings up `docker-compose.infra.yml` with `--env-file /opt/open4goods/config/{env}/infra/.env`. |
 | `publishJars.yml` | SSHes in and runs `/opt/open4goods/bin/publish-jars.sh {env} [start\|stop\|restart] [service]`, which starts each Spring Boot jar with `-Dspring.config.location=classpath:/application.yml,file:/opt/open4goods/config/{env}/{service}/application-active.yml -Dspring.profiles.active=nudger,{env}`. |
 
-The public repository's own `releaseDeployProd.yml` builds and tags releases and deploys the Nuxt
-`frontend`/`b2b-frontend` bundles (`frontend-ssr-{blue,green}`, `b2b-frontend` containers in
-`docker-compose.frontend.yml`, deployed by `deployConfiguration.yml`'s bin-sync step) -- those
-containers read `env_file: /opt/open4goods/config/{env}/{frontend,b2b-frontend}/.env`, the same
-files `deployConfiguration.yml` places.
+Public push/PR workflows build and test without deployment. Backend and frontend
+candidate artifacts are retained for 30 days. `releaseDeployProd.yml` now rejects
+all dispatches while the immutable-candidate promotion path is being qualified.
+The read-only phase assessment is `python3 scripts/verify/paperclip_readiness.py
+--target beta --project <project-id>`, using private `PAPERCLIP_API_URL`,
+`PAPERCLIP_API_KEY` and `PAPERCLIP_COMPANY_ID` environment inputs. It reports current
+blockers; a passing report is not a promotion decision. ADR-0015 defines the gates.
 
 Host path summary: `/opt/open4goods/config/{env}/**` (rendered secrets and topology),
 `/opt/open4goods/latest/{env}/**` (compose files and infra assets, pre-copy), `/opt/open4goods/bin/`
 (what's actually mounted/run), `/opt/open4goods/runtime/` and `/opt/open4goods/run/` (live jars and
 PID files -- deliberately outside the synced `bin/` tree, so a config deploy leaves a running
 process's own jar alone).
+
+## Beta DiskB cache cutover
+
+The writable application cache has one canonical path, `/opt/open4goods/.cached`. On beta it is
+backed by `/diskb/open4goods-cache` through `opt-open4goods-.cached.mount`; service templates use
+the path as a mountpoint precondition. This avoids a missing DiskB mount silently growing
+the root filesystem. DiskB also holds Elasticsearch data, so retain at least 30 percent free there
+and at least 20 percent free on root.
+
+Start every rehearsal with `scripts/deploy/inspect-cache-volume.sh`; it emits only aggregate
+capacity, root-level class and ownership-mode counts. Use the authenticated cleanup dry run for
+age and reclaimability, rather than listing cache entries. Prepare the source only through
+`scripts/deploy/prepare-cache-volume.sh`, then install the runtime units and start the cache mount
+before restarting a cache writer. Confirm both the mountpoint and its backing device with `findmnt`.
+Do not list, copy or log legacy cache filenames because upstream request query values can be
+sensitive. Remote files with the former URL-derived names are intentionally rebuilt after the
+SHA-256 cache-key release rather than migrated. Product-resource cleanup stays behind its
+authenticated dry-run and review process; batch and recovery data remain in place until their owner
+verifies recovery.
 
 ## Elasticsearch specifically
 

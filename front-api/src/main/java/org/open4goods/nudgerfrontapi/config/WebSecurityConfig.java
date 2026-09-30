@@ -8,6 +8,8 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.open4goods.nudgerfrontapi.config.properties.ExposedDocsProperties;
 import org.open4goods.nudgerfrontapi.config.properties.SecurityProperties;
+import org.open4goods.model.RolesConstants;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -44,18 +46,22 @@ import io.jsonwebtoken.security.Keys;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
+@EnableConfigurationProperties(ActuatorMonitorCredentials.class)
 public class WebSecurityConfig {
 
     private final SecurityProperties securityProperties;
     private final ExposedDocsProperties exposedDocsProperties;
     private final AuthenticationProvider authenticationProvider;
+    private final ActuatorMonitorCredentials actuatorMonitorCredentials;
 
     public WebSecurityConfig(SecurityProperties securityProperties,
                              ExposedDocsProperties exposedDocsProperties,
-                             AuthenticationProvider authenticationProvider) {
+                             AuthenticationProvider authenticationProvider,
+                             ActuatorMonitorCredentials actuatorMonitorCredentials) {
         this.securityProperties = securityProperties;
         this.exposedDocsProperties = exposedDocsProperties;
         this.authenticationProvider = authenticationProvider;
+        this.actuatorMonitorCredentials = actuatorMonitorCredentials;
     }
 
     @Bean
@@ -85,11 +91,15 @@ public class WebSecurityConfig {
             .setSharedObject(LocaleResolver.class, localeResolver);
 
         if (securityProperties.isEnabled()) {
+            http.authenticationProvider(new ActuatorMonitorAuthenticationProvider(actuatorMonitorCredentials))
+                .authenticationProvider(authenticationProvider);
             http.authorizeHttpRequests(auth -> {
                     if (exposedDocsProperties.isPublicAccess()) {
                         auth.requestMatchers("/exposed/**").permitAll();
                     }
-                    auth.requestMatchers("/", "/v3/api-docs/front",  "/auth/**", "/actuator/**").permitAll()
+                    auth.requestMatchers("/", "/v3/api-docs/front",  "/auth/**").permitAll()
+                            .requestMatchers("/actuator", "/actuator/**")
+                            .hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
                             .anyRequest().authenticated();
                 })
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)))
@@ -117,6 +127,7 @@ public class WebSecurityConfig {
     @Bean
     AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        builder.authenticationProvider(new ActuatorMonitorAuthenticationProvider(actuatorMonitorCredentials));
         builder.authenticationProvider(authenticationProvider);
         return builder.build();
     }

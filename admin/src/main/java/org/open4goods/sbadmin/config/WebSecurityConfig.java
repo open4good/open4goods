@@ -10,10 +10,9 @@ import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -29,6 +28,7 @@ import de.codecentric.boot.admin.server.config.AdminServerProperties;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
+@EnableConfigurationProperties(SbaRegistrationCredentials.class)
 /**
  * HTTP Security configuration
  * 
@@ -44,9 +44,13 @@ public class WebSecurityConfig {
 
 	private final AuthenticationProvider authProvider;
 
-	public WebSecurityConfig(AuthenticationProvider authProvider, AdminServerProperties adminServer) {
+	private final SbaRegistrationCredentials registrationCredentials;
+
+	public WebSecurityConfig(AuthenticationProvider authProvider, AdminServerProperties adminServer,
+			SbaRegistrationCredentials registrationCredentials) {
 		this.authProvider = authProvider;
 		this.adminServer = adminServer;
+		this.registrationCredentials = registrationCredentials;
 	}
 
 	//////////////////////////////////////////////
@@ -60,6 +64,8 @@ public class WebSecurityConfig {
 		successHandler.setDefaultTargetUrl(this.adminServer.getContextPath() + "/");
 
 		http
+				.authenticationProvider(new SbaRegistrationAuthenticationProvider(registrationCredentials))
+				.authenticationProvider(authProvider)
 				.authorizeHttpRequests(
 						req -> req.requestMatchers(this.adminServer.getContextPath() + "/assets/**").permitAll()
 								.requestMatchers(this.adminServer.getContextPath() + "/login").permitAll()
@@ -72,14 +78,6 @@ public class WebSecurityConfig {
 
 		return http.build();
 
-	}
-
-	@Bean
-	AuthenticationManager authManager(HttpSecurity http) throws Exception {
-		AuthenticationManagerBuilder authenticationManagerBuilder = http
-				.getSharedObject(AuthenticationManagerBuilder.class);
-		authenticationManagerBuilder.authenticationProvider(authProvider);
-		return authenticationManagerBuilder.build();
 	}
 
 	@Bean

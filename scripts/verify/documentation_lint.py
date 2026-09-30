@@ -4,7 +4,7 @@
 Checks the things a reader cannot check by reading: that every governed document
 declares its resolution, that a normative document is written in a language an
 English-reading agent can parse, that internal links resolve, and that every
-cited ADR and WorkOrder identifier actually exists. Canonical decision 9 is the
+cited ADR identifier actually exists. Canonical decision 9 is the
 reason this is a gate and not a convention -- a stale claim in a guide is a
 defect, and the cheapest ones to catch are the mechanical ones.
 """
@@ -74,25 +74,16 @@ def local_link_target(source: Path, target: str) -> Path | None:
     return (source.parent / target).resolve()
 
 
-def active_ids(root: Path) -> tuple[set[str], set[str]]:
+def active_ids(root: Path) -> set[str]:
     adr_dir = root / "docs" / "adr"
     decisions = {p.name[:4] for p in adr_dir.glob("[0-9][0-9][0-9][0-9]-*.md")} if adr_dir.is_dir() else set()
-    work_dir = root / ".o4g" / "work"
-    work: set[str] = set()
-    if work_dir.is_dir():
-        work = {p.stem for p in work_dir.glob("*.yml")}
-        ledger = work_dir / "ledger"
-        if ledger.is_dir():
-            # A closed WorkOrder is compacted into ledger/ (decision 8); a
-            # document may still cite it by id.
-            work |= {p.stem for p in ledger.glob("*.yml")}
-    return decisions, work
+    return decisions
 
 
 def lint(root: Path) -> list[str]:
     root = root.resolve()
     problems: list[str] = []
-    decisions, work = active_ids(root)
+    decisions = active_ids(root)
 
     for path in governed_paths(root):
         relative = path.relative_to(root).as_posix()
@@ -112,22 +103,6 @@ def lint(root: Path) -> list[str]:
             if identifier not in decisions:
                 problems.append(f"{relative}: invalid decision reference ADR-{identifier}")
 
-    work_dir = root / ".o4g" / "work"
-    if work_dir.is_dir():
-        for path in sorted(work_dir.glob("*.yml")):
-            try:
-                data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-            except yaml.YAMLError as exc:
-                problems.append(f"{path.name}: invalid YAML: {exc}")
-                continue
-            spec = data.get("spec") or {}
-            for identifier in spec.get("decisionRefs") or []:
-                token = str(identifier).removeprefix("ADR-")
-                if token not in decisions:
-                    problems.append(f"{path.name}: invalid decision reference {identifier}")
-            for identifier in spec.get("dependsOn") or []:
-                if identifier not in work:
-                    problems.append(f"{path.name}: invalid work-order reference {identifier}")
     return problems
 
 

@@ -8,7 +8,10 @@ import java.util.Locale;
  *
  * @param value canonical BCP 47 tag or {@code und} for non-linguistic data
  */
-public record LanguageTag(String value) {
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
+public record LanguageTag(@JsonValue String value) {
 
     /** Language tag for non-linguistic or genuinely unknown content. */
     public static final LanguageTag UND = new LanguageTag("und");
@@ -25,6 +28,17 @@ public record LanguageTag(String value) {
         } catch (IllformedLocaleException exception) {
             throw new IllegalArgumentException("Invalid BCP 47 language tag: " + value, exception);
         }
+    }
+
+    /**
+     * Rebuilds the identifier from its serialized form.
+     *
+     * @param value serialized value
+     * @return validated identifier
+     */
+    @JsonCreator
+    public static LanguageTag fromJson(String value) {
+        return new LanguageTag(value);
     }
 
     @Override

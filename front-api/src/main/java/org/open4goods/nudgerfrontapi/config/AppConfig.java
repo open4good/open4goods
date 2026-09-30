@@ -44,7 +44,6 @@ public class AppConfig {
     }
 
     @Bean
-    @org.springframework.context.annotation.Profile("!local")
     ProductRepository productRepository(ElasticsearchOperations elasticsearchOperations) {
         return new ProductRepository(elasticsearchOperations);
     }

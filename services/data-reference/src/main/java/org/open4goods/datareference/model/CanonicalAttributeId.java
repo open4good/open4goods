@@ -5,6 +5,8 @@ package org.open4goods.datareference.model;
  *
  * @param slug independently authored lower-case kebab-case slug
  */
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 public record CanonicalAttributeId(String slug) implements CanonicalConceptId {
 
     /**
@@ -17,6 +19,20 @@ public record CanonicalAttributeId(String slug) implements CanonicalConceptId {
     @Override
     public String kind() {
         return "attribute";
+    }
+
+    /**
+     * Rebuilds the identifier from its serialized form.
+     *
+     * @param value serialized identifier such as {@code o4g:attribute:width}
+     * @return validated identifier
+     */
+    @JsonCreator
+    public static CanonicalAttributeId fromJson(String value) {
+        if (!(CanonicalConceptId.parse(value) instanceof CanonicalAttributeId id)) {
+            throw new IllegalArgumentException("Not an O4G attribute identifier: " + value);
+        }
+        return id;
     }
 
     @Override

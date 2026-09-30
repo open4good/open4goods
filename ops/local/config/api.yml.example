@@ -1,0 +1,15 @@
+server:
+  port: 8081
+spring:
+  elasticsearch:
+    uris: http://localhost:9200
+open4goods:
+  scheduling:
+    enabled: false
+adminKey: ${O4G_LOCAL_ADMIN_KEY}
+api:
+  backup:
+    data-backup-folder: ${PRODUCT_BACKUP_SOURCE_URI}
+    xwiki-backup-file: ${XWIKI_XAR_PATH}
+xwiki:
+  baseUrl: http://localhost:8080/xwiki

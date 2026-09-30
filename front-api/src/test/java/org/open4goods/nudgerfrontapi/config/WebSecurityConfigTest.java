@@ -21,7 +21,8 @@ class WebSecurityConfigTest {
         AuthenticationProvider authProvider = mock(AuthenticationProvider.class);
         ExposedDocsProperties exposedDocsProperties = new ExposedDocsProperties();
 
-        JwtDecoder decoder = new WebSecurityConfig(properties, exposedDocsProperties, authProvider).jwtDecoder();
+        JwtDecoder decoder = new WebSecurityConfig(properties, exposedDocsProperties, authProvider,
+                new ActuatorMonitorCredentials()).jwtDecoder();
 
         assertThat(decoder).isNotNull();
     }

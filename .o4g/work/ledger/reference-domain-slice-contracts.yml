@@ -1,0 +1,52 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: reference-domain-slice-contracts
+  name: Typed offer score and search composition ports
+spec:
+  purpose: Define the typed data and producers needed to rebuild full product behavior from source-neutral reference data.
+  roadmapRef: m7-product-data-reference
+  state: COMPLETED
+  executionPhase: DEVELOPMENT
+  priority: 65
+  dependsOn:
+    - canonical-concept-registry
+    - product-reference-contract
+  decisionRefs:
+    - ADR-0013
+  pathScope:
+    - services/data-reference/**
+    - services/evaluation/**
+    - services/product-repository/**
+    - api/**
+    - model/**
+    - verticals/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: Inventory consumers of current price, availability, scores, rankings, search, dataviz, images and sitemaps;
+        assign each input to a typed port and an owning implementation order.
+    - id: AC2
+      statement: Replace generic domain-slice payload assumptions with versioned offer-summary, evaluation and search contracts;
+        reference contracts have no legacy Product or provider dependency.
+    - id: AC3
+      statement: Define the evaluation bridge from eligible normalized reference values and OfferHead summaries, including
+        cohort/statistics computation, score refresh triggers and missing-input behavior; it cannot fetch legacy Product as
+        a hidden fallback.
+    - id: AC4
+      statement: Define registry/rule/policy/normalization versions and a fixed evaluation instant as explicit replay inputs;
+        clocks, collection order and refresh timestamps cannot break deterministic hash comparisons.
+    - id: AC5
+      statement: Golden and module-boundary tests freeze the contracts, and the resolution WorkOrder owns wiring all production
+        implementations into the sole projection writer.
+  implementationPlan:
+    - Start from existing DomainSliceComposer, NormalizationPort and projection contracts; extend their owners rather than
+      adding parallel DTO hierarchies.
+    - ProductReferenceProjection currently represents one surface. Define a storage envelope keyed by normalized GTIN containing
+      the three surface components, so the strict target index remains one document per GTIN rather than three. Freeze its
+      wire shape and port mapping before persistence or public API changes; keep existing per-surface policy isolation.
+  evidenceRefs:
+    - 'test: 2026-09-12 mvn --offline -pl services/data-reference test passed with 98 tests; typed offer, evaluation, lexical-search,
+      replay-input and three-surface envelope contracts are frozen by golden and boundary tests.'
+    - 'test: ProjectionConsumer inventories current price/availability, scores/rankings/dataviz, lexical search, images and
+      sitemaps with typed inputs and owning implementation WorkOrders; EvaluationBridge accepts only resolved values, offer
+      summaries and fixed replay inputs.'

@@ -1,0 +1,118 @@
+apiVersion: open4goods.org/v1
+kind: WorkOrder
+metadata:
+  id: product-reference-contract
+  name: Source-neutral product reference contract
+spec:
+  purpose: Establish the Java and serialization contracts that every reference source and consumer shares.
+  roadmapRef: m7-product-data-reference
+  state: COMPLETED
+  dependsOn: []
+  decisionRefs:
+    - ADR-0010
+  pathScope:
+    - pom.xml
+    - services/data-reference/**
+  acceptanceCriteria:
+    - id: AC1
+      statement: services/data-reference is a Java 21 reactor module with no dependency on api or a provider module; api and
+        provider adapters depend on its public ports, never the reverse.
+    - id: AC2
+      statement: Stable value objects validate normalized GTINs, source ids, source-record ids, provider field ids, canonical
+        concept ids, BCP 47 language tags, content hashes, policy references and rule versions without provider-specific members.
+    - id: AC3
+      statement: SourceRecordKey is exactly sourceId plus sourceRecordId; GTIN attachment is a separate ordered GtinLink carrying
+        confidence, match method and evidence, so a corrected attachment does not change provider-record identity.
+    - id: AC4
+      statement: SourceRecordHead models schema/provider versions, observed/retrieved/expires instants, FULL or PARTIAL completeness,
+        ACTIVE/DELETED/UNAVAILABLE/REJECTED state, payload hash, evidence reference, usage policy, GTIN links and assertions.
+    - id: AC5
+      statement: 'SourceAssertion contains a stable assertion id, versioned SourceFieldId, ordinal and one sealed evidence
+        payload: scalar, localized text, media, classification or relation; payloads preserve provider lexical value, unit
+        and language, brand/model use scalar evidence and images use media.'
+    - id: AC6
+      statement: SourceContentType covers IDENTITY, CLASSIFICATION, ATTRIBUTE, TEXT, MEDIA, RELATION, OFFER and PRICE; usage
+        policies select source plus content type plus effective interval and deny every unspecified publication surface.
+    - id: AC7
+      statement: Canonical values are a sealed union of localized text, boolean, integer, decimal, quantity, code, date and
+        URI; quantity amount is BigDecimal and its unit is a validated UCUM code rather than localizable free text.
+    - id: AC8
+      statement: Typed ports exist for head persistence, replay scanning, registry lookup, normalization, resolution, corrections,
+        projection reads/writes and domain-slice composition; every batch port defines cursor, ordering and failure behavior.
+    - id: AC9
+      statement: Jackson round-trip and golden JSON tests freeze all public discriminators, ids, nullability and collection
+        ordering; invalid chronology, duplicate coordinates, malformed ids and an unrecognized payload discriminator fail
+        explicitly.
+    - id: AC10
+      statement: 'The existing draft module is reconciled rather than layered over: SourceSnapshot no longer embeds GTIN identity
+        in its key, String-only SourceAssertion is replaced, and tests plus Javadoc describe the final contract with no compatibility
+        shim to the uncommitted draft.'
+  evidenceRefs:
+    - 'test: mvn --offline clean install -> BUILD SUCCESS, 0 failures and 0 errors across the reactor; services/data-reference
+      alone runs 80 tests. scripts/lint.sh -> OK, all lint checks passed. No frontend change in this lot.'
+    - 'test: AC1. mvn dependency:tree on services/data-reference resolves org.open4goods:data-reference with exactly one compile
+      dependency, tools.jackson.core:jackson-databind, and no open4goods module at all. The direction is now enforced by the
+      build rather than by convention: a maven-enforcer bannedDependencies execution in the module pom refuses api, front-api,
+      model, commons, product-repository and every provider module transitively. Proven to bite: adding org.open4goods:model
+      to the module pom fails the build with the rule message, and the pom was restored. The ban is deliberately wider than
+      AC1 asks (model, commons and product-repository are not providers) because ADR-0010 makes this module source-neutral,
+      and the legacy Product model is exactly what it must not reach for. The second clause, that api and provider adapters
+      depend on these ports, has no consumer yet by design: wiring arrives with source-assertion-store and the adapter WorkOrders.'
+    - 'test: AC2. Value objects validate normalized GTINs (Gtin, 8/12/13/14 digits, leading zeroes preserved), source ids
+      (SourceId, lower-case identifier), source-record ids (SourceRecordId, provider spelling preserved and length-bounded),
+      provider field ids (SourceFieldId), canonical concept ids (CanonicalConceptId sealed over class and attribute), BCP
+      47 language tags (LanguageTag, canonicalized, und for unknown), content hashes (PayloadHash), policy references (SourceUsagePolicyRef)
+      and rule versions (RuleVersion, RegistryVersion). None carries a provider-specific member. Covered by SourceRecordKeyTest,
+      UcumCodeTest, CanonicalConceptIdTest and the serialization suite.'
+    - 'test: AC3. SourceRecordKey is exactly SourceId plus SourceRecordId; the GTIN is not in it. Attachment moved to an ordered
+      GtinLink carrying confidence, a new GtinMatchMethod and an evidence reference. SourceRecordKeyTest.correctingAGtinAttachmentDoesNotChangeRecordIdentity
+      shows a corrected attachment leaving record identity untouched, and ContractSerializationTest.gtinLinkOrderIsPreserved
+      pins the ordering the resolver tie-break depends on.'
+    - 'test: AC4. SourceRecordHead models schemaVersion and providerVersion, observedAt/retrievedAt/expiresAt, FULL or PARTIAL
+      completeness, ACTIVE/DELETED/UNAVAILABLE/REJECTED state, payload hash, evidence reference, usage policy reference, ordered
+      GTIN links and ordered assertions. supersedes() orders by observation rather than retrieval so a replayed archive cannot
+      reinstate stale values, and treats a repeated payload hash as idempotent. SourceRecordHeadTest, 13 tests, covers invalid
+      chronology in both directions, duplicate coordinates, duplicate GTIN links, an assertion claiming another record or
+      another coordinate, idempotence, older-observation refusal and expiry.'
+    - 'test: AC5. SourceAssertion is now assertionId, versioned SourceFieldId, ordinal, SourceContentType and one sealed SourceEvidence
+      payload: ScalarEvidence, LocalizedTextEvidence, MediaEvidence, ClassificationEvidence or RelationEvidence. Payloads
+      preserve the provider lexical value, the provider unit as written and the stated language; brand and model are scalar
+      evidence and images are media evidence, so policy filtering can find media by shape rather than by parsing a URL out
+      of text. AssertionId is derived from record key, field and ordinal, and SourceRecordHead now rejects an assertion whose
+      id does not match its own coordinate, so the audit trail from a projection back to a head cannot point at a record that
+      never said it.'
+    - 'test: AC6. SourceContentType covers IDENTITY, CLASSIFICATION, ATTRIBUTE, TEXT, MEDIA, RELATION, OFFER and PRICE. SourceUsagePolicy
+      is keyed by source, content types, allowed surfaces and an effective interval; allows(contentType, surface, instant)
+      returns true only when all four were explicitly approved and returns false for any null argument. SourceUsagePolicyTest.denyAllPermitsNothing
+      sweeps every content type against every surface on a denyAll policy and expects a refusal each time.'
+    - 'test: AC7. CanonicalValue is a sealed union of localized text, boolean, integer, decimal, quantity, code, date and
+      URI, and CanonicalValueTest asserts the permitted-subclass count matches the discriminator enum so a new subtype cannot
+      be added without a constant. QuantityValue.amount is BigDecimal and its unit is a UcumCode, validated by composition
+      rather than by pattern: each term must be a known unit atom, optionally metric-prefixed and exponented. A pattern alone
+      accepted centimetres, which is precisely the localizable free text the type exists to keep out; UcumCodeTest now proves
+      centimetres, pouces par seconde and square metres are all refused while cm, kW.h, km/h, Cel and % are accepted, and
+      that mm and Mm stay distinct.'
+    - 'test: AC8. Typed ports: SourceRecordHeadStore (head persistence), SourceRecordReplayScanner (replay scanning), CanonicalRegistryLookup
+      (registry lookup, read-only so runtime cannot redefine the authored registry), NormalizationPort, ResolutionPort (surface
+      and instant are arguments, so policy filtering happens before selection), CorrectionsPort, ProjectionReadPort, ProjectionWritePort
+      and DomainSliceComposer. Every batch port takes a ScanRequest stating cursor, page size, ScanOrder and ScanFailurePolicy,
+      and returns a ScanPage; ScanOrder documents that RECORD_KEY is stable under concurrent writes and OBSERVED_AT is not.
+      ProjectionWritePort.writeAll states that it continues past a failure, is not atomic, and reports every element it could
+      not write. ScanContractTest, 8 tests, including that an empty page carrying a cursor is not the end of a scan.'
+    - 'test: AC9. DataReferenceJson is the single mapper the contract is defined against: ISO-8601 instants stated explicitly
+      rather than inherited, unknown properties fail, map entries are never sorted on the way out. Two golden documents under
+      src/test/resources/golden freeze a head carrying one assertion of every evidence kind and a projection carrying one
+      resolved value of every canonical value type. ContractSerializationTest, 21 tests: byte-exact match against both goldens,
+      read-back equality, coverage guards that fail if a sealed subtype has no fixture, and explicit failure for an unrecognized
+      evidence discriminator, an unrecognized canonical value discriminator, an unknown property, a malformed GTIN, a GTIN
+      of the wrong length, a canonical id of the wrong kind, a malformed rule version, invalid chronology, a duplicate coordinate
+      and an assertion id belonging to another record. Ordering is pinned rather than assumed: assertion ordinals, candidate
+      ids, GTIN links, slice keys and slice field keys are all asserted, and both maps were switched from Map.copyOf to insertion-ordered
+      unmodifiable maps because an immutable map iterates in an order that is salted per JVM run and would have made the frozen
+      documents intermittently red once a second entry existed.'
+    - 'note: AC10. The draft was reconciled, not layered over. SourceSnapshot and SourceSnapshotKey are deleted, the String-only
+      SourceAssertion is replaced by the sealed-evidence assertion, and the three draft tests written against them (SourceSnapshotTest,
+      CanonicalValueTest, SourceUsagePolicyTest) were rewritten against the final contract rather than adapted. No shim, no
+      deprecated alias and no compatibility constructor to the uncommitted draft exists anywhere in the module; the only bridge
+      kept is the shared trusted-source ordering the legacy aggregator already used, which lives in the legacy model module
+      and is untouched here.'

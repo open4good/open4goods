@@ -9,10 +9,10 @@ audience: PROJECT_SCOPED
 Use this directory as the canonical documentation entry point. Keep docs small,
 owned, and linked from this index when they become durable project knowledge.
 
-- [Canonical decisions](00-canonical-decisions.md) - the 9 numbered rules every
+- [Canonical decisions](00-canonical-decisions.md) - the numbered rules every
   other document cites by number
-- [Contractual roadmap](reference/roadmap.md) - generated projection of the
-  WorkOrders under [`.o4g/work/`](../.o4g/work)
+- [Nudger issues](https://yamaka.me/GOU/projects/nudger/issues) - live work board
+- [Issue migration index](reference/roadmap.md) - legacy WorkOrder ID mapping
 
 ## Sections
 
@@ -32,11 +32,13 @@ owned, and linked from this index when they become durable project knowledge.
 
 - [Documentation guidelines](conventions/documentation-guidelines.md)
 - [MCP server setup](operations/mcp-servers.md)
+- [Developpement strictement local](operations/beta-development-campaign.md) - stack, sauvegarde et promotions phasees
 - [Frontend asset hardening](operations/frontend-asset-hardening.md)
 - [Production log triage](operations/production-log-triage.md)
 - [ADR index](adr/README.md)
 - [Icecat reference data](architecture/icecat-reference-data.md)
 - [Amazon PA-API completion](architecture/amazon-paapi-completion.md)
+- [Source usage policy inventory](architecture/source-usage-policy-inventory.md)
 - [ETIM integration and cross-referential design](architecture/etim_integration_design.md)
 - [ADR 0001: EPREL matching logic scoring](adr/0001-eprel-matching-logic-scoring.md)
 - [ADR 0002: Product model identity confidence](adr/0002-product-model-identity-confidence.md)
@@ -67,8 +69,8 @@ owned, and linked from this index when they become durable project knowledge.
 
 ## Plans
 
-- [Product page SEO & UI audit](product_page_audit_plan.md) - tracked by
-  WorkOrder [`product-page-seo-ui-quality`](../.o4g/work/ledger/product-page-seo-ui-quality.yml) (closed)
+- [Product page SEO & UI audit](product_page_audit_plan.md) - historical closure in
+  [`product-page-seo-ui-quality`](../.o4g/work/ledger/product-page-seo-ui-quality.yml)
 - [Dataviz statistics plan (fr)](front_dataviz_stats_plan.md)
 
 ## Product Data API (B2B)

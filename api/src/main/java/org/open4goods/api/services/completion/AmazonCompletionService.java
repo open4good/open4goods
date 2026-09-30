@@ -71,6 +71,9 @@ import com.amazon.paapi5.v1.UnitBasedAttribute;
  */
 public class AmazonCompletionService extends AbstractCompletionService {
 
+    /** PA-API content is licensed legacy input and is permanently quarantined. */
+    private static final boolean PAAPI_QUARANTINED = true;
+
     static final String DATASOURCE_NAME = "amazon.fr";
     private static final String AMAZON_PRODUCT_STATE_NEW = "New";
     private static final String AMAZON_PRODUCT_STATE_USED = "Used";
@@ -122,7 +125,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
             ApiProperties apiProperties, DataSourceConfigService dataSourceConfigService,
             AggregationFacadeService aggregationFacadeService) {
         this(dataRepository, verticalConfigService, apiProperties, dataSourceConfigService, aggregationFacadeService,
-                apiProperties.getAmazonConfig().isConfigured()
+                !PAAPI_QUARANTINED && apiProperties.getAmazonConfig().isConfigured()
                         ? AmazonPaapiClient.fromConfig(apiProperties.getAmazonConfig())
                         : null);
     }
@@ -140,7 +143,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
 
     @Override
     public boolean shouldProcess(VerticalConfig vertical, Product data) {
-        if (!amazonConfig.isConfigured()) {
+        if (PAAPI_QUARANTINED || !amazonConfig.isConfigured()) {
             return false;
         }
 
@@ -169,6 +172,10 @@ public class AmazonCompletionService extends AbstractCompletionService {
      */
     @Override
     public void completeAll(Integer max, boolean withExcluded) {
+        if (PAAPI_QUARANTINED) {
+            logger.info("Amazon PA-API completion is quarantined");
+            return;
+        }
         int remaining = max == null ? amazonConfig.getMaxCallsPerBatch() : max;
         logger.info("Amazon completion for all verticals, max {} products", remaining);
         for (VerticalConfig vertical : verticalConfigService.getConfigsWithoutDefault()) {
@@ -206,8 +213,8 @@ public class AmazonCompletionService extends AbstractCompletionService {
      */
     @Override
     public void processProduct(VerticalConfig vertical, Product data) {
-        if (!amazonConfig.isConfigured() || paapiClient == null) {
-            logger.info("Amazon completion is disabled or missing PA-API credentials");
+        if (PAAPI_QUARANTINED || !amazonConfig.isConfigured() || paapiClient == null) {
+            logger.info("Amazon PA-API completion is quarantined or unavailable");
             return;
         }
 

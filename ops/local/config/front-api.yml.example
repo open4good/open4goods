@@ -1,0 +1,23 @@
+server:
+  port: 8086
+spring:
+  elasticsearch:
+    uris: http://localhost:9200
+open4goods:
+  scheduling:
+    enabled: false
+feedback:
+  github:
+    enabled: false
+front:
+  cache:
+    path: ${O4G_LOCAL_DATA_ROOT:./.local/data}/cache/front-api
+  resource-root-path: http://localhost:8082
+  security:
+    cors-allowed-hosts: http://localhost:3000,http://localhost:3001
+  exposed-docs:
+    base-url: http://localhost:8088
+  geocode:
+    base-url: http://localhost:8089
+xwiki:
+  base-url: http://localhost:8080/xwiki

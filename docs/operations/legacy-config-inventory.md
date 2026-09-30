@@ -72,9 +72,9 @@ Prod-only keys not in beta: `api`'s `googlesearch.*`, `amazon-config.*`,
 `urlfetcher.proxy.*`, `vertex.batch.credentials-json`, `spring.ai.openai.{embedding,image,audio,moderation}`;
 `front-api`/`ui`'s `spring.boot.admin.client.{connect-timeout,read-timeout,period,register-once}`,
 `spring.elasticsearch.{socket-timeout,connection-timeout}`; `ui`'s `google-api-json`.
-Beta-only: `api`'s `review.generation.search-*` fields. These deltas are AC2
-material (which of beta/prod's nine legacy secrets and four missing references
-map to which key), not resolved further here.
+Beta-only: `api`'s `review.generation.search-*` fields. AC2 maps these actual keys to
+environment inputs. The earlier nine/five/four counts had no established mapping
+and were replaced on 2026-09-11; beta is populated first under ADR-0013.
 
 ## Key-level appendix: other mixed files
 
@@ -100,13 +100,14 @@ map to which key), not resolved further here.
   but the personal documents warrant flagging on their own: they sit inside a
   private repository this roadmap plans to eventually archive
   (`config-repository-retirement`), and their disposition is the owner's call,
-  separate from this WorkOrder.
+  separate from this historical audit.
 - **New secret exposure**: `docker-compose/beta/kibana.yml` line 3 holds a live
   `kibana_system` Elasticsearch password in plaintext. It surfaced in this
   session's tool output while confirming the file's key structure and is now in
   this session's transcript. Rotation is out of scope for AC1 (no production
   access authorized in this lot) and should be tracked as a new
-  `leaked-credential-rotation` acceptance criterion or a sibling WorkOrder.
+  [`leaked-credential-rotation`](https://yamaka.me/GOU/issues/GOU-44)
+  acceptance criterion or a separate Paperclip issue.
   Prod's copy is presumed to hold its own value at the same key; not read, to
   avoid repeating the exposure.
 - **Possible stale token in documentation**: `root/root/README-prepare-box.md`
@@ -123,6 +124,8 @@ map to which key), not resolved further here.
 
 ## Out of scope for this pass
 
-AC2 (environment secret/variable placement), AC3 (packaged non-secret
-defaults) and AC4 (CI classification gate) are separate acceptance criteria in
-the same WorkOrder and are not attempted here.
+This is the historical AC1 audit, not current execution status. AC2 (input placement),
+AC3 (packaged defaults) and AC4 (CI gate) have their current evidence in the
+historical record. Beta and production promotion now require separate explicit
+owner decisions in Paperclip (ADR-0015). Findings above remain historical
+observations to revalidate.

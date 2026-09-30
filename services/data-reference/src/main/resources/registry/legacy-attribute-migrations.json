@@ -1,0 +1,569 @@
+{
+  "registryVersion": 4,
+  "migrations": [
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/AIR_CONDITIONER_FUNCTION_TYPE.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:air-conditioner-function-type",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/AMBIENT_TEMPERATURE_MAX.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:ambient-temperature-max",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/AMBIENT_TEMPERATURE_MIN.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:ambient-temperature-min",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/AUTO_BRIGHTNESS_CONTROL_AVAILABLE.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:auto-brightness-control-available",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/BRAND_BCORP_SCORING.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:brand-bcorp-scoring",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/BRAND_CDP_SCORING.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:brand-cdp-scoring",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/CLASSE_ENERGY.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:classe-energy",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/CLASSE_ENERGY_HDR.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:classe-energy-hdr",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/CLASSE_ENERGY_SDR.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:classe-energy-sdr",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/CLEANINGPERFORMANCEINDEXV2.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:cleaningperformanceindexv2",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/CLIMATE_CLASS.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:climate-class",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/COLOR.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:color",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/COMPARTMENT_COUNT.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:compartment-count",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/COOLING_CAPACITY.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:cooling-capacity",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/COOLING_SYSTEM.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:cooling-system",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/COULEUR_EXTERIEURE.yml",
+      "status": "MERGED",
+      "replacement": "o4g:attribute:color",
+      "rationale": "Exterior colour is a presentation-specific variant of the reviewed O4G colour attribute."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/DATA_QUALITY.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:data-quality",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/DEPTH.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:depth",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/DIAGONALE_POUCES.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:diagonale-pouces",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/DISPLAY_TECHNOLOGY.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:display-technology",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/DISPOSITIF_DE_SECURITE.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:dispositif-de-securite",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/DOOR_COUNT.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:door-count",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/DRYINGPERFORMANCEINDEXV2.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:dryingperformanceindexv2",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/DURABILITY.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:durability",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/ENERGY_CONSUMPTION.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:energy-consumption",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/ENERGY_CONSUMPTION_100_CYCLES.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:energy-consumption-100-cycles",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/ENERGY_CONSUMPTION_ANNUAL.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:energy-consumption-annual",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/ENERGY_CONSUMPTION_PER_CYCLE.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:energy-consumption-per-cycle",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/ENERGY_EFFICIENCY_INDEX.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:energy-efficiency-index",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/ESG.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:esg",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/FAST_FREEZE.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:fast-freeze",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/FEATURES.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:features",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/FREEZER_NET_CAPACITY.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:freezer-net-capacity",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/FREEZER_STARS.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:freezer-stars",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/FREQUENCY_RATE.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:frequency-rate",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/FRIDGE_NET_CAPACITY.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:fridge-net-capacity",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/HDMI_PORTS_QUANTITY.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:hdmi-ports-quantity",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/HEIGHT.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:height",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/INSTALLATION_TYPE.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:installation-type",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/LOADING_TYPE.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:loading-type",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/LOW_NOISE.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:low-noise",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/MINAVAILABILITYSOFTWAREUPDATESYEARS.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:minavailabilitysoftwareupdatesyears",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/MINAVAILABILITYSPAREPARTSYEARS.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:minavailabilitysparepartsyears",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/MINGUARANTEEDSUPPORTYEARS.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:minguaranteedsupportyears",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/MOBILE_NETWORK_GENERATION.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:mobile-network-generation",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/NOISE_CLASS.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:noise-class",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/NOISE_LEVEL.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:noise-level",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/NOISE_LEVEL_SPIN.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:noise-level-spin",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/OPENING_TYPE.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:opening-type",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/OPERATING_SYSTEM.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:operating-system",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/OVEN_CAPACITY.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:oven-capacity",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/OVEN_CAVITY_COUNT.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:oven-cavity-count",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/OVEN_CLEANING_MODE.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:oven-cleaning-mode",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/OVEN_COOKING_MODES.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:oven-cooking-modes",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/OVEN_ENERGY_CONSUMPTION_CYCLE.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:oven-energy-consumption-cycle",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/OVEN_ENERGY_EFFICIENCY_INDEX.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:oven-energy-efficiency-index",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/OVEN_ENERGY_TYPE.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:oven-energy-type",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/OVEN_INSTALLATION_TYPE.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:oven-installation-type",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/OVEN_POWER.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:oven-power",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/PLACE_SETTINGS.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:place-settings",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/POWERDELAYSTART.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:powerdelaystart",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/POWER_CONSUMPTION_HDR.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:power-consumption-hdr",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/POWER_CONSUMPTION_OFF.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:power-consumption-off",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/POWER_CONSUMPTION_SDR.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:power-consumption-sdr",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/POWER_CONSUMPTION_STANDBY.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:power-consumption-standby",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/POWER_CONSUMPTION_STANDBY_NETWORKD.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:power-consumption-standby-networkd",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/POWER_CONSUMPTION_TYPICAL.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:power-consumption-typical",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/PRODUCT_TYPE.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:product-type",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/PROGRAM_COUNT.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:program-count",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/RAM_CAPACITY.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:ram-capacity",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/REFRIGERANT_GWP.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:refrigerant-gwp",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/REFRIGERANT_NAME.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:refrigerant-name",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/REFRIGERATOR_TYPE.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:refrigerator-type",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/REPAIRABILITY_INDEX.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:repairability-index",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/REPARABILITY.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:reparability",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/SIM_SLOTS.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:sim-slots",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/SMART_TV.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:smart-tv",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/SPIN_CLASS.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:spin-class",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/SPIN_SPEED.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:spin-speed",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/STORAGE_CAPACITY.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:storage-capacity",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/TOTAL_VOLUME.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:total-volume",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/TYPE_DE_PRODUIT.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:type-de-produit",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/TYPE_HD.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:type-hd",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/USAGE_COST_YEAR.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:usage-cost-year",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/VOICE_AVAILABLE.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:voice-available",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/WARRANTY.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:warranty",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/WASHING_CAPACITY.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:washing-capacity",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/WATER_CONSUMPTION.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:water-consumption",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/WATER_CONSUMPTION_ANNUAL.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:water-consumption-annual",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/WEIGHT.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:weight",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/WIDTH.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:width",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/WIFI.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:wifi",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/WINE_STORAGE.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:wine-storage",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    },
+    {
+      "legacyResource": "verticals/src/main/resources/attributes/YEAR.yml",
+      "status": "MIGRATED",
+      "replacement": "o4g:attribute:year",
+      "rationale": "The legacy configuration has one reviewed O4G attribute replacement."
+    }
+  ]
+}

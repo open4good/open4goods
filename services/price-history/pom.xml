@@ -1,0 +1,55 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.open4goods</groupId>
+    <artifactId>org.open4goods</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <relativePath>../..</relativePath>
+  </parent>
+
+  <artifactId>price-history</artifactId>
+  <name>open4goods price history</name>
+  <description>Provider-neutral offer heads, price changes and daily rollups</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.open4goods</groupId>
+      <artifactId>data-reference</artifactId>
+      <version>${global.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>enforce-provider-neutrality</id>
+            <goals><goal>enforce</goal></goals>
+            <configuration>
+              <rules>
+                <bannedDependencies>
+                  <searchTransitive>true</searchTransitive>
+                  <excludes>
+                    <exclude>org.open4goods:api</exclude>
+                    <exclude>org.open4goods:front-api</exclude>
+                    <exclude>org.open4goods:model</exclude>
+                    <exclude>org.open4goods:icecat</exclude>
+                    <exclude>org.open4goods:eprel-service</exclude>
+                  </excludes>
+                  <message>services/price-history owns provider-neutral price contracts and must not depend on readers, legacy Product, or provider adapters.</message>
+                </bannedDependencies>
+              </rules>
+              <fail>true</fail>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

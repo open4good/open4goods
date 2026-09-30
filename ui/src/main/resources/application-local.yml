@@ -1,0 +1,27 @@
+server:
+  port: 8082
+spring:
+  docker:
+    compose:
+      enabled: false
+  elasticsearch:
+    uris: http://localhost:9200
+open4goods:
+  scheduling:
+    enabled: false
+xwiki:
+  baseUrl: http://localhost:8080/xwiki
+  httpsOnly: false
+  username: ${XWIKI_USERNAME:local}
+  password: ${XWIKI_PASSWORD:local-only}
+rootFolder: ${O4G_LOCAL_DATA_ROOT:./.local/data}
+image-base-url: http://localhost:8082
+open-data-config:
+  generation-enabled: false
+namings:
+  serverNames:
+    fr: localhost
+    default: localhost
+  baseUrls:
+    fr: http://localhost:3000/
+    default: http://localhost:3000/
