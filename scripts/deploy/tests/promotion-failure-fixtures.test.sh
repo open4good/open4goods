@@ -23,10 +23,22 @@ esac
 
 mkdir -p "$fixture/bin"
 printf '%s\n' '#!/usr/bin/env bash' 'echo "$*" >> "'"$fixture"'/systemctl.log"' 'exit 0' > "$fixture/bin/systemctl"
+# shellcheck disable=SC2016 # The fixture script must expand this at its own runtime.
 printf '%s\n' '#!/usr/bin/env bash' \
   'if [ "${O4G_TEST_CURL_STATUS:-0}" -eq 0 ]; then printf 200; else printf 000; fi' > "$fixture/bin/curl"
 chmod +x "$fixture/bin/systemctl" "$fixture/bin/curl"
 export PATH="$fixture/bin:$PATH"
+
+# The publish scripts are `#!/usr/bin/env bash`, so a BASH_ENV startup file inherited from the
+# caller runs first and can re-export PATH, silently handing them the real systemctl/curl. Drop
+# BASH_ENV for every invocation so the stubs stay the only reachable implementation.
+isolated() { PATH="$fixture/bin:$PATH" env -u BASH_ENV "$@"; }
+
+resolved="$(isolated bash -c 'command -v systemctl')"
+[[ "$resolved" == "$fixture/bin/systemctl" ]] || {
+  echo "FAIL: publish scripts would resolve $resolved, not the isolated stub" >&2
+  exit 1
+}
 
 for name in sbadmin api front-api ui b2b-api; do
   printf '%s\n' "$name" > "$fixture/${name}.jar"
@@ -59,7 +71,7 @@ assert_symlink_unchanged() {
 
 assert_publish_fails() {
   local label="$1"; shift
-  if PATH="$fixture/bin:$PATH" "$@" >"$fixture/last-stderr.log" 2>&1; then
+  if isolated "$@" >"$fixture/last-stderr.log" 2>&1; then
     echo "FAIL ($label): expected publish to be rejected but it succeeded" >&2
     cat "$fixture/last-stderr.log" >&2
     exit 1
@@ -137,7 +149,7 @@ test "$(cat "$root/releases/abcdef1/sbadmin.jar")" = crashed-mid-stage
 nuxt_root="$fixture/runtime-nuxt"
 mkdir -p "$nuxt_root/services/frontend"
 ln -s ../../releases/old-frontend "$nuxt_root/services/frontend/current"
-"$ROOT/scripts/deploy/publish-java-release.sh" --release abcdef1 --bundle "$fixture/bundle" \
+isolated "$ROOT/scripts/deploy/publish-java-release.sh" --release abcdef1 --bundle "$fixture/bundle" \
   --service api --health-url http://127.0.0.1/health --root "$nuxt_root" >/dev/null
 chmod -R u+w "$nuxt_root/releases/abcdef1"
 : > "$nuxt_root/releases/abcdef1/frontend-ssr.tar.gz"
@@ -156,7 +168,14 @@ for marker in account billing credential secret; do
     exit 1
   fi
 done
-[[ "$(command -v curl)" == "$fixture/bin/curl" ]] || { echo 'FAIL: real curl was reachable, not the isolated stub' >&2; exit 1; }
-[[ "$(command -v systemctl)" == "$fixture/bin/systemctl" ]] || { echo 'FAIL: real systemctl was reachable, not the isolated stub' >&2; exit 1; }
+# Assert against what a published script actually resolves, not what this shell resolves: the
+# two differ whenever a BASH_ENV startup file rewrites PATH for child bash scripts.
+for tool in curl systemctl; do
+  resolved="$(isolated bash -c "command -v $tool")"
+  [[ "$resolved" == "$fixture/bin/$tool" ]] || {
+    echo "FAIL: real $tool was reachable ($resolved), not the isolated stub" >&2
+    exit 1
+  }
+done
 
 echo 'OK: promotion forced-failure and rollback fixtures (manifest, digest, missing artifact, health, partial write)'
