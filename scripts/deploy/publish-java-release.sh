@@ -51,6 +51,10 @@ verify_artifact() {
   [[ "$actual" == "$expected" ]]
 }
 
+# Cheap pre-lock sanity check only: catches an obviously wrong bundle early, but is not the
+# authorization boundary. A racing writer can still mutate $bundle after this returns, which is
+# why the loop below re-verifies the staged copies (not $bundle) right before publish, holding the
+# lock the whole time.
 for name in "${JAVA_SERVICES[@]}"; do
   verify_artifact "$name" "$bundle/${name}.jar" || {
     echo "invalid Java artifact: ${name}" >&2; exit 2;
@@ -81,6 +85,19 @@ else
     cp -- "$bundle/${name}.tar.gz" "$stage_dir/${name}.tar.gz"
     mkdir "$stage_dir/${name}"
     tar -xzf "$bundle/${name}.tar.gz" -C "$stage_dir/${name}"
+  done
+  # Re-verify the staged copies, not $bundle: this is the authoritative check, taken while the
+  # lock is held and immediately before the release is made immutable and published, so a bundle
+  # swapped after the pre-lock check above cannot smuggle unverified bytes into a "verified" release.
+  for name in "${JAVA_SERVICES[@]}"; do
+    verify_artifact "$name" "$stage_dir/${name}.jar" || {
+      echo "staged Java artifact changed since it was verified: ${name}" >&2; exit 1;
+    }
+  done
+  for name in frontend-ssr b2b-frontend; do
+    verify_artifact "$name" "$stage_dir/${name}.tar.gz" || {
+      echo "staged Nuxt artifact changed since it was verified: ${name}" >&2; exit 1;
+    }
   done
   chmod -R a-w "$stage_dir"
   mv -- "$stage_dir" "$release_dir"
