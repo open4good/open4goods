@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatIOException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -88,7 +89,7 @@ class EprelCatalogueServiceTest {
         when(transition.outcome()).thenReturn(SourceRecordTransitionOutcome.ACCEPTED);
         doAnswer(invocation -> {
             @SuppressWarnings("unchecked")
-            Consumer<EprelProduct> consumer = invocation.getArgument(1, Consumer.class);
+            Consumer<EprelProduct> consumer = invocation.getArgument(2, Consumer.class);
             consumer.accept(product("42"));
             EprelProduct mapped = product("43");
             mapped.setGtinIdentifier("4006381333931");
@@ -98,7 +99,7 @@ class EprelCatalogueServiceTest {
             consumer.accept(withdrawn);
             consumer.accept(new EprelProduct());
             return null;
-        }).when(parser).parse(any(), any());
+        }).when(parser).parse(any(), anyLong(), any());
 
         service.refreshCatalogue();
 
@@ -123,17 +124,51 @@ class EprelCatalogueServiceTest {
         when(apiClient.downloadCatalogueZip(group.urlCode())).thenReturn(tempZip);
         doAnswer(invocation -> {
             @SuppressWarnings("unchecked")
-            Consumer<EprelProduct> consumer = invocation.getArgument(1, Consumer.class);
+            Consumer<EprelProduct> consumer = invocation.getArgument(2, Consumer.class);
             consumer.accept(product("42"));
             consumer.accept(product("43"));
             throw new IOException("incomplete catalogue");
-        }).when(parser).parse(any(), any());
+        }).when(parser).parse(any(), anyLong(), any());
 
         assertThatIOException().isThrownBy(service::refreshCatalogue)
                 .withMessageContaining("incomplete catalogue");
 
         verify(sourceRecordStore, never()).apply(any());
-        verify(checkpointStore, never()).compareAndSet(any(), anyLong());
+        // A permanently failing catalogue never publishes rows or the completed-catalogue
+        // cursor; only the best-effort, diagnostic record-progress cursor advances.
+        verify(checkpointStore, never()).compareAndSet(argThat(cp -> "eprel-catalogue-v1".equals(cp.owner())), anyLong());
+        verify(checkpointStore, org.mockito.Mockito.atLeastOnce())
+                .compareAndSet(argThat(cp -> "eprel-catalogue-v1-progress".equals(cp.owner())), anyLong());
+    }
+
+    @Test
+    void resumesPastAlreadyProducedRecordsAfterATransientParseFailure() throws IOException {
+        EprelProductGroup group = new EprelProductGroup("tv", "televisions", "Televisions", "REG");
+        when(apiClient.fetchProductGroups()).thenReturn(java.util.List.of(group));
+        when(apiClient.downloadCatalogueZip(group.urlCode())).thenReturn(tempZip);
+        when(sourceRecordStore.apply(any())).thenReturn(transition);
+        when(checkpointStore.find(any(), any())).thenReturn(java.util.Optional.empty());
+        when(checkpointStore.compareAndSet(any(), any(Long.class))).thenReturn(true);
+        when(transition.outcome()).thenReturn(SourceRecordTransitionOutcome.ACCEPTED);
+        doAnswer(invocation -> {
+            long skipRecords = invocation.getArgument(1, Long.class);
+            @SuppressWarnings("unchecked")
+            Consumer<EprelProduct> consumer = invocation.getArgument(2, Consumer.class);
+            if (skipRecords == 0) {
+                consumer.accept(product("42"));
+                consumer.accept(product("43"));
+                throw new IOException("transient failure");
+            }
+            consumer.accept(product("44"));
+            return null;
+        }).when(parser).parse(any(), anyLong(), any());
+
+        service.refreshCatalogue();
+
+        verify(parser).parse(any(), eq(0L), any());
+        verify(parser).parse(any(), eq(2L), any());
+        verify(sourceRecordStore, times(3)).apply(any());
+        verify(checkpointStore).compareAndSet(argThat(cp -> "eprel-catalogue-v1".equals(cp.owner())), anyLong());
     }
 
     @Test
@@ -157,12 +192,12 @@ class EprelCatalogueServiceTest {
 
         doAnswer(invocation -> {
             @SuppressWarnings("unchecked")
-            Consumer<EprelProduct> consumer = invocation.getArgument(1, Consumer.class);
+            Consumer<EprelProduct> consumer = invocation.getArgument(2, Consumer.class);
             EprelProduct stillPresent = product("42");
             stillPresent.setProductGroup("televisions2019");
             consumer.accept(stillPresent);
             return null;
-        }).when(parser).parse(any(), any());
+        }).when(parser).parse(any(), anyLong(), any());
 
         service.refreshCatalogue();
 

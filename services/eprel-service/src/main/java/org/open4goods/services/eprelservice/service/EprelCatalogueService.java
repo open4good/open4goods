@@ -41,6 +41,11 @@ import io.micrometer.core.instrument.MeterRegistry;
  * {@code EprelProduct} documents or mutate legacy product documents. Each accepted catalogue row
  * is a {@code FULL} source-record replacement, so a later row can remove an assertion that was
  * present in an earlier version of the same EPREL registration.
+ *
+ * <p>A mid-catalogue parse failure is retried against the already-downloaded archive,
+ * resuming past the last record it produced instead of reparsing it from the start. That
+ * resumption never publishes rows early: the source-record store and the completed-catalogue
+ * checkpoint are only written once a parse attempt, first or resumed, runs to completion.
  */
 @Service
 public class EprelCatalogueService {
@@ -48,6 +53,7 @@ public class EprelCatalogueService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EprelCatalogueService.class);
     private static final String SCHEMA_VERSION = "catalogue-v1";
     private static final String CHECKPOINT_OWNER = "eprel-catalogue-v1";
+    private static final String PROGRESS_CHECKPOINT_OWNER = "eprel-catalogue-v1-progress";
     private static final String PRODUCT_GROUP_FIELD = "productGroup";
     private static final int RECONCILIATION_PAGE_SIZE = 1_000;
 
@@ -131,15 +137,7 @@ public class EprelCatalogueService {
             List<SourceRecordMutation> buffer = new ArrayList<>(properties.getIndexBulkSize());
             Set<SourceRecordKey> observedKeys = new HashSet<>();
             Set<String> observedGroupValues = new HashSet<>();
-            parser.parse(zipPath, product -> {
-                if (product.getProductGroup() != null && !product.getProductGroup().isBlank()) {
-                    observedGroupValues.add(product.getProductGroup());
-                }
-                adapter.adapt(product, SCHEMA_VERSION, retrievedAt).ifPresentOrElse(mutation -> {
-                    observedKeys.add(mutation.candidate().key());
-                    buffer.add(mutation);
-                }, () -> increment("rejected"));
-            });
+            parseWithResume(group, zipPath, retrievedAt, buffer, observedKeys, observedGroupValues);
             // Do not publish any FULL replacement until the parser has verified the complete
             // catalogue. A parser failure must leave the preceding source heads untouched;
             // otherwise assertions absent from an interrupted catalogue could look like a
@@ -156,6 +154,68 @@ public class EprelCatalogueService {
             throw exception;
         } finally {
             deleteTemporaryArchive(zipPath);
+        }
+    }
+
+    /**
+     * Parses the already-downloaded archive, retrying in place after a mid-catalogue
+     * failure by resuming past the last record it produced rather than reparsing the
+     * archive from its start.
+     *
+     * <p>Records produced before a failed attempt stay in {@code buffer}/{@code observedKeys}
+     * across retries: nothing is applied to the source-record store until this method
+     * returns, so a permanently unrecoverable catalogue still leaves every prior head
+     * untouched, exactly as an unresumed parse would.
+     */
+    private void parseWithResume(EprelProductGroup group, Path zipPath, Instant retrievedAt,
+            List<SourceRecordMutation> buffer, Set<SourceRecordKey> observedKeys, Set<String> observedGroupValues)
+            throws IOException {
+        long[] recordCursor = {0};
+        int maxRetries = Math.max(0, properties.getMaxCatalogueParseRetries());
+        for (int attempt = 0; ; attempt++) {
+            try {
+                parser.parse(zipPath, recordCursor[0], product -> {
+                    recordCursor[0]++;
+                    if (product.getProductGroup() != null && !product.getProductGroup().isBlank()) {
+                        observedGroupValues.add(product.getProductGroup());
+                    }
+                    adapter.adapt(product, SCHEMA_VERSION, retrievedAt).ifPresentOrElse(mutation -> {
+                        observedKeys.add(mutation.candidate().key());
+                        buffer.add(mutation);
+                    }, () -> increment("rejected"));
+                });
+                return;
+            } catch (IOException exception) {
+                persistParseProgress(group, recordCursor[0]);
+                if (attempt >= maxRetries) {
+                    throw exception;
+                }
+                LOGGER.warn("Resuming EPREL catalogue parse for {} after record {} (attempt {}/{})",
+                        group.urlCode(), recordCursor[0], attempt + 1, maxRetries, exception);
+            }
+        }
+    }
+
+    /**
+     * Best-effort, diagnostic record cursor: it never gates a correctness decision, so a
+     * failure to persist it must not shadow the parse failure that triggered it.
+     */
+    private void persistParseProgress(EprelProductGroup group, long recordIndex) {
+        try {
+            SourceId sourceId = new SourceId(EprelSourceRecordAdapter.SOURCE_ID);
+            Optional<IngestionCheckpoint> current = checkpointStore.find(PROGRESS_CHECKPOINT_OWNER, sourceId);
+            ScanCursor cursor = new ScanCursor(SCHEMA_VERSION + ":" + group.urlCode() + ":" + recordIndex);
+            IngestionCheckpoint next = new IngestionCheckpoint(
+                    PROGRESS_CHECKPOINT_OWNER,
+                    sourceId,
+                    Optional.of(cursor),
+                    0,
+                    Optional.empty(),
+                    Instant.now(),
+                    current.map(IngestionCheckpoint::revision).orElse(0L) + 1);
+            checkpointStore.compareAndSet(next, current.map(IngestionCheckpoint::revision).orElse(0L));
+        } catch (RuntimeException exception) {
+            LOGGER.warn("Unable to persist EPREL catalogue parse progress for {}", group.urlCode(), exception);
         }
     }
 

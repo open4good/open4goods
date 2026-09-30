@@ -43,6 +43,25 @@ class JsonZipEprelCatalogueParserTest
         }
     }
 
+    @Test
+    @DisplayName("The parser should resume past already-produced records without reparsing them")
+    void shouldResumeFromARecordPosition() throws IOException
+    {
+        Path zipFile = Files.createTempFile("eprel-parser-test", ".zip");
+        try
+        {
+            writeZipWithProducts(zipFile);
+            List<EprelProduct> products = new ArrayList<>();
+            parser.parse(zipFile, 1, products::add);
+            assertThat(products).hasSize(1);
+            assertThat(products.get(0).getModelIdentifier()).isEqualTo("MODEL-2");
+        }
+        finally
+        {
+            Files.deleteIfExists(zipFile);
+        }
+    }
+
     private void writeZipWithProducts(Path zipFile) throws IOException
     {
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(zipFile)))

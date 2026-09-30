@@ -29,6 +29,12 @@
       "type": "java.lang.Integer",
       "description": "Maximum number of spaces allowed in alternative model identifiers when searching.",
       "defaultValue": 2
+    },
+    {
+      "name": "eprel.max-catalogue-parse-retries",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of times a catalogue parse is retried, resuming after the last record it produced, before the group refresh is reported as failed.",
+      "defaultValue": 3
     }
   ]
 }
