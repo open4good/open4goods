@@ -121,6 +121,8 @@ def lint_governance_tools(suite: LintSuite) -> None:
               "-s", "scripts/verify", "-p", "test_paperclip_readiness.py"])
     suite.run("Beta delivery mandate", [sys.executable, "-m", "unittest", "discover",
               "-s", "scripts/verify", "-p", "test_beta_mandate.py"])
+    suite.run("Promotion readiness gate", [sys.executable, "-m", "unittest", "discover",
+              "-s", "scripts/verify", "-p", "test_check_promotion_readiness.py"])
 
 
 def lint_yaml(suite: LintSuite) -> None:
