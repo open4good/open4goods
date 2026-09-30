@@ -73,9 +73,61 @@ export const FACET_PRICE: FacetDescriptor = {
   ]
 }
 
+export const FACET_PRICE_HISTORY: FacetDescriptor = {
+  id: 'product.price-history',
+  endpointPath: '/api/v1/products/{gtin}/price/history',
+  playgroundEndpoint: '/api/v1/customer/playground/products/price-history',
+  credits: 8,
+  docSlug: 'products/price-history',
+  sampleFixtures: {
+    '0885909950805': {
+      billable: true,
+      creditsConsumed: 8,
+      reason: 'has-history',
+      data: {
+        gtin: '0885909950805',
+        from: '2026-05-16T00:00:00Z',
+        to: '2026-06-15T00:00:00Z',
+        granularity: 'DAY',
+        series: [
+          {
+            provider: 'Merchant Feed Partner',
+            condition: 'NEW',
+            currency: 'EUR',
+            dayPoints: [
+              { date: '2026-06-14', minAmount: 749.0, maxAmount: 819.99, closeAmount: 799.99, offerCount: 3 }
+            ],
+            changePoints: null
+          }
+        ],
+        nextCursor: null
+      }
+    },
+    '0194253408994': {
+      billable: false,
+      creditsConsumed: 0,
+      reason: 'no-price-history',
+      data: null
+    },
+    '0000000000000': {
+      billable: false,
+      creditsConsumed: 0,
+      reason: 'product-not-found',
+      data: null
+    }
+  },
+  examples: [
+    { labelKey: 'playground.example.fresh', gtin: '0885909950805', billable: true },
+    { labelKey: 'playground.example.stale', gtin: '0194253408994', billable: false },
+    { labelKey: 'playground.example.notFound', gtin: '0000000000000', billable: false },
+    { labelKey: 'playground.example.invalid', gtin: '12345', billable: false }
+  ]
+}
+
 /** Registry of all known facets. Add new entries here as facets ship. */
 export const FACETS: Record<string, FacetDescriptor> = {
-  'product.price': FACET_PRICE
+  'product.price': FACET_PRICE,
+  'product.price-history': FACET_PRICE_HISTORY
 }
 
 export function buildSampleResponse (facet: FacetDescriptor, gtin: string, creditsRemaining = 2495, index = 1) {

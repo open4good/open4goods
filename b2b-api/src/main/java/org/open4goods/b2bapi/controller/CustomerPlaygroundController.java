@@ -14,12 +14,14 @@ import org.open4goods.b2bapi.dto.playground.PlaygroundCheckRequest;
 import org.open4goods.b2bapi.dto.playground.PlaygroundRequest;
 import org.open4goods.b2bapi.dto.playground.PlaygroundResponse;
 import org.open4goods.b2bapi.dto.product.B2bPriceDto;
+import org.open4goods.b2bapi.dto.product.B2bPriceHistoryDto;
 import org.open4goods.b2bapi.dto.product.B2bResponse;
 import org.open4goods.b2bapi.dto.barcode.B2bBarcodeRenderResponse;
 import org.open4goods.b2bapi.exception.ErrorCode;
 import org.open4goods.b2bapi.exception.InsufficientCreditsException;
 import org.open4goods.b2bapi.exception.InvalidBarcodeException;
 import org.open4goods.b2bapi.exception.InvalidGtinException;
+import org.open4goods.b2bapi.exception.InvalidPriceHistoryQueryException;
 import org.open4goods.b2bapi.exception.ResourceNotFoundException;
 import org.open4goods.b2bapi.model.ApiKey;
 import org.open4goods.b2bapi.model.ApiKeyStatus;
@@ -29,6 +31,7 @@ import org.open4goods.b2bapi.service.B2bBarcodeCheckService;
 import org.open4goods.b2bapi.service.B2bBarcodeService;
 import org.open4goods.b2bapi.service.B2bProductService;
 import org.open4goods.b2bapi.service.DashboardPrincipal;
+import org.open4goods.b2bapi.service.PriceHistoryFacetService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.AccessDeniedException;
@@ -48,16 +51,19 @@ public class CustomerPlaygroundController {
 
     private final ApiKeyRepository apiKeyRepository;
     private final B2bProductService b2bProductService;
+    private final PriceHistoryFacetService priceHistoryFacetService;
     private final B2bBarcodeService b2bBarcodeService;
     private final B2bBarcodeCheckService b2bBarcodeCheckService;
 
     public CustomerPlaygroundController(
             final ApiKeyRepository apiKeyRepository,
             final B2bProductService b2bProductService,
+            final PriceHistoryFacetService priceHistoryFacetService,
             final B2bBarcodeService b2bBarcodeService,
             final B2bBarcodeCheckService b2bBarcodeCheckService) {
         this.apiKeyRepository = apiKeyRepository;
         this.b2bProductService = b2bProductService;
+        this.priceHistoryFacetService = priceHistoryFacetService;
         this.b2bBarcodeService = b2bBarcodeService;
         this.b2bBarcodeCheckService = b2bBarcodeCheckService;
     }
@@ -153,6 +159,127 @@ public class CustomerPlaygroundController {
         }
 
         // Retrieve remaining credits from wrapper header if not set by success path
+        if (creditsRemaining == 0) {
+            final String remainingStr = responseWrapper.getInterceptedHeaders().get("X-Credits-Remaining");
+            if (remainingStr != null) {
+                try {
+                    creditsRemaining = Long.parseLong(remainingStr);
+                } catch (final NumberFormatException ignored) {
+                }
+            }
+        }
+
+        final PlaygroundResponse.PlaygroundResponseDetails responseDetails = new PlaygroundResponse.PlaygroundResponseDetails(
+                status,
+                responseWrapper.getInterceptedHeaders(),
+                responseBody
+        );
+
+        final PlaygroundResponse.PlaygroundMeteringDetails meteringDetails = new PlaygroundResponse.PlaygroundMeteringDetails(
+                billable,
+                creditsConsumed,
+                creditsRemaining,
+                reason
+        );
+
+        return new PlaygroundResponse(requestDetails, responseDetails, meteringDetails);
+    }
+
+    /**
+     * Proxies price-history requests on behalf of dashboard playground sessions without revealing
+     * API keys. Runs the default window/granularity only (30 days, DAY) - the playground offers a
+     * quick preview, not the full parameter surface of the real endpoint.
+     */
+    @PostMapping("/products/price-history")
+    @PreAuthorize("@organizationRbacService.canUsePlaygroundOrReadUsage(authentication)")
+    public PlaygroundResponse proxyProductPriceHistory(
+            @Valid @RequestBody final PlaygroundRequest body,
+            final Authentication authentication,
+            final HttpServletRequest servletRequest,
+            final HttpServletResponse servletResponse) {
+
+        final DashboardPrincipal principal = principal(authentication);
+        final UUID orgId = principal.organizationId();
+
+        final ApiKey apiKey = apiKeyRepository.findByIdAndOrganizationId(body.apiKeyId(), orgId)
+                .orElseThrow(() -> new ResourceNotFoundException("API key not found."));
+
+        final String maskedKey = "Bearer pdapi_" + apiKey.getKeyPrefix() + "...masked";
+        final String requestPath = "/api/v1/products/" + body.gtin() + "/price/history"
+                + (body.language() != null ? "?language=" + body.language() : "?language=en");
+
+        final PlaygroundResponse.PlaygroundRequestDetails requestDetails = new PlaygroundResponse.PlaygroundRequestDetails(
+                "GET",
+                requestPath,
+                Map.of("Authorization", maskedKey)
+        );
+
+        if (apiKey.getStatus() != ApiKeyStatus.ACTIVE) {
+            final ProblemDetail problem = toProblem(
+                    ErrorCode.INVALID_CREDENTIALS,
+                    "Missing, invalid, or revoked API key.",
+                    requestPath,
+                    "unavailable"
+            );
+            return new PlaygroundResponse(
+                    requestDetails,
+                    new PlaygroundResponse.PlaygroundResponseDetails(401, Map.of(), problem),
+                    new PlaygroundResponse.PlaygroundMeteringDetails(false, 0L, 0L, "invalid-credentials")
+            );
+        }
+
+        final HeaderInterceptingResponse responseWrapper = new HeaderInterceptingResponse(servletResponse);
+
+        int status = 200;
+        Object responseBody = null;
+        boolean billable = false;
+        long creditsConsumed = 0;
+        long creditsRemaining = 0;
+        String reason = null;
+
+        try {
+            final ApiKeyPrincipal apiKeyPrincipal = new ApiKeyPrincipal(orgId, apiKey.getId());
+            final B2bResponse<B2bPriceHistoryDto> b2bResponse = priceHistoryFacetService.getProductPriceHistory(
+                    body.gtin(),
+                    body.language() != null ? body.language() : "en",
+                    null, null, null, null, null, null, null, null,
+                    apiKeyPrincipal,
+                    servletRequest,
+                    responseWrapper
+            );
+            responseBody = b2bResponse;
+            billable = b2bResponse.meta().billable();
+            creditsConsumed = b2bResponse.meta().creditsConsumed();
+            creditsRemaining = b2bResponse.meta().creditsRemaining();
+            reason = billable ? "has-history" : "no-price-history";
+
+        } catch (final InvalidGtinException ex) {
+            status = 400;
+            reason = "invalid-gtin";
+            final String requestId = responseWrapper.getInterceptedHeaders().getOrDefault("X-Request-Id", "unavailable");
+            responseBody = toProblem(ErrorCode.INVALID_GTIN, ex.getMessage(), requestPath, requestId);
+        } catch (final InvalidPriceHistoryQueryException ex) {
+            status = 400;
+            reason = "invalid-parameter";
+            final String requestId = responseWrapper.getInterceptedHeaders().getOrDefault("X-Request-Id", "unavailable");
+            responseBody = toProblem(ex.errorCode(), ex.getMessage(), requestPath, requestId);
+        } catch (final InsufficientCreditsException ex) {
+            status = 402;
+            reason = "insufficient-credits";
+            final String requestId = responseWrapper.getInterceptedHeaders().getOrDefault("X-Request-Id", "unavailable");
+            responseBody = toProblem(ErrorCode.INSUFFICIENT_CREDITS, ex.getMessage(), requestPath, requestId);
+        } catch (final ResourceNotFoundException ex) {
+            status = 404;
+            reason = "not-found";
+            final String requestId = responseWrapper.getInterceptedHeaders().getOrDefault("X-Request-Id", "unavailable");
+            responseBody = toProblem(ErrorCode.PRODUCT_NOT_FOUND, ex.getMessage(), requestPath, requestId);
+        } catch (final Exception ex) {
+            status = 500;
+            reason = "internal-error";
+            final String requestId = responseWrapper.getInterceptedHeaders().getOrDefault("X-Request-Id", "unavailable");
+            responseBody = toProblem(ErrorCode.INTERNAL_ERROR, "Unexpected server error.", requestPath, requestId);
+        }
+
         if (creditsRemaining == 0) {
             final String remainingStr = responseWrapper.getInterceptedHeaders().get("X-Credits-Remaining");
             if (remainingStr != null) {

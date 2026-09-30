@@ -371,7 +371,8 @@ public class PriceHistoryFacetService {
 
         Optional<String> innerCursor = Optional.empty();
         if (rawCursor != null && !rawCursor.isBlank()) {
-            innerCursor = PriceHistoryPublicCursor.decode(rawCursor, fingerprint);
+            innerCursor = PriceHistoryPublicCursor.decode(
+                    b2bApiProperties.getPriceHistory().getCursorSecret(), rawCursor, fingerprint);
             if (innerCursor.isEmpty()) {
                 throw new InvalidPriceHistoryQueryException(ErrorCode.CURSOR_MISMATCH,
                         "cursor does not match the current request parameters");
@@ -430,7 +431,7 @@ public class PriceHistoryFacetService {
         String nextInnerCursor = null;
 
         if (granularity == PriceHistoryGranularity.DAY) {
-            final PriceHistoryPage<DailyProviderRollup> page = priceHistoryQueryPort.queryDaily(query);
+            final PriceHistoryPage<DailyProviderRollup> page = queryDailySafely(query);
             for (final DailyProviderRollup rollup : page.values()) {
                 if (!isDailyProviderAllowed(rollup, now)) {
                     continue;
@@ -446,7 +447,7 @@ public class PriceHistoryFacetService {
             }
             nextInnerCursor = page.nextCursor().orElse(null);
         } else {
-            final PriceHistoryPage<PriceChangeEvent> page = priceHistoryQueryPort.queryChanges(query);
+            final PriceHistoryPage<PriceChangeEvent> page = queryChangesSafely(query);
             for (final PriceChangeEvent event : page.values()) {
                 if (!sourceUsagePolicyRegistry.allows(event.key().providerId(), event.policyRef(),
                         SourceContentType.PRICE, ProjectionSurface.B2B_API, now)) {
@@ -475,9 +476,36 @@ public class PriceHistoryFacetService {
 
         final String nextCursor = nextInnerCursor == null
                 ? null
-                : PriceHistoryPublicCursor.encode(nextInnerCursor, parsed.fingerprint());
+                : PriceHistoryPublicCursor.encode(
+                        b2bApiProperties.getPriceHistory().getCursorSecret(), nextInnerCursor, parsed.fingerprint());
 
         return new B2bPriceHistoryDto(gtin, query.from(), query.to(), granularity, series, nextCursor);
+    }
+
+    /**
+     * Defends against a decoded inner cursor that the Elasticsearch adapter cannot resume from (a
+     * malformed position tuple). With the AEAD-encrypted public cursor
+     * ({@link PriceHistoryPublicCursor}) this should be unreachable in practice - only this server
+     * can produce a cursor that decrypts and authenticates - but a query-plan or index-shape change
+     * must still surface as a client validation error, never a 500.
+     */
+    private PriceHistoryPage<DailyProviderRollup> queryDailySafely(final PriceHistoryQuery query) {
+        try {
+            return priceHistoryQueryPort.queryDaily(query);
+        } catch (final IllegalArgumentException | IllegalStateException ex) {
+            throw new InvalidPriceHistoryQueryException(ErrorCode.CURSOR_MISMATCH,
+                    "cursor does not match the current request parameters");
+        }
+    }
+
+    /** @see #queryDailySafely(PriceHistoryQuery) */
+    private PriceHistoryPage<PriceChangeEvent> queryChangesSafely(final PriceHistoryQuery query) {
+        try {
+            return priceHistoryQueryPort.queryChanges(query);
+        } catch (final IllegalArgumentException | IllegalStateException ex) {
+            throw new InvalidPriceHistoryQueryException(ErrorCode.CURSOR_MISMATCH,
+                    "cursor does not match the current request parameters");
+        }
     }
 
     /**
