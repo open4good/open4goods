@@ -2,7 +2,7 @@ name: open4goods-local
 
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:9.5.1@sha256:b70b3017fbd35310bc57e7e3f8c0ca42ca0b94df3331f747b7cdcfddae430a5a
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.5.4@sha256:82ac14f43fe701992e601f4cc81e1c0d7dbc5a2576d8cd736006452925df4026
     environment:
       bootstrap.memory_lock: "true"
       cluster.name: open4goods-local
@@ -26,7 +26,7 @@ services:
       - ${O4G_LOCAL_DATA_ROOT:-./.local/data}/elasticsearch:/usr/share/elasticsearch/data
 
   redis:
-    image: redis:8.2.1-alpine
+    image: redis:8.10.1-alpine@sha256:bd999b5cfee25fb24b8320a31fddbd69f462df44c8138c66e369582937beebc0
     command: [redis-server, --appendonly, "yes"]
     healthcheck:
       test: [CMD, redis-cli, ping]
@@ -39,7 +39,7 @@ services:
       - ${O4G_LOCAL_DATA_ROOT:-./.local/data}/redis:/data
 
   postgres:
-    image: postgres:17.6-alpine
+    image: postgres:17.11-alpine@sha256:f02121de6f74d30d8a94cd1d9584125e2178d7e6c377d8130112d4e52d867995
     environment:
       POSTGRES_DB: ${O4G_LOCAL_POSTGRES_DB:-product_data_api}
       POSTGRES_PASSWORD: ${O4G_LOCAL_POSTGRES_PASSWORD:-open4goods-local}
@@ -55,7 +55,7 @@ services:
       - ${O4G_LOCAL_DATA_ROOT:-./.local/data}/postgres:/var/lib/postgresql/data
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:9.5.1@sha256:f1e3cb03928b2c88590579445cd3ea3fad750a1b1ced653193ce4211051d2206
+    image: docker.elastic.co/kibana/kibana:9.5.4@sha256:b1b4cea273350ffcb67292d7b90dd034598c1627bfa3cd0783315e9237dbe737
     profiles: [tools]
     depends_on:
       elasticsearch: {condition: service_healthy}
@@ -65,7 +65,7 @@ services:
       - "127.0.0.1:5601:5601"
 
   mysql:
-    image: mysql:9.7.2@sha256:257388edf9c84dbc04c763625446d5f3fa6ed60d1b0873bc552c614ba0a7ab4e
+    image: mysql:9.7.2@sha256:29abb0a179982e4a8928138bfc7f918af9eda64e7eeb1b1d084c1720a20159e6
     profiles: [xwiki]
     command: [mysqld, --character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci]
     environment:
@@ -82,7 +82,7 @@ services:
       - ${O4G_LOCAL_DATA_ROOT:-./.local/data}/mysql:/var/lib/mysql
 
   xwiki:
-    image: xwiki:17.10.12-mysql-tomcat@sha256:b46f9542088713c98195c8028c47e6d8aa40e45f33f1a3cca8b914f091cc937c
+    image: xwiki:17.10.13-mysql-tomcat@sha256:64f3a14fc3f86da037987f361f8a94e89083341ef3e5631de04ac757a0222e67
     profiles: [xwiki]
     depends_on:
       mysql: {condition: service_healthy}
