@@ -20,9 +20,15 @@ SPEC.loader.exec_module(GATE)
 
 CANDIDATE_SHA = "a" * 40
 DATASET = "products-backup-2026-09-30"
-PROMOTION_TARGET = "beta"
+PROMOTION_TARGET = "production"
 PHASE = "beta_validation"
 PINNED_AT = "2026-09-30T00:00:00Z"
+
+MANDATE_IDS = dict(
+    mandate_milestone_id="GOU-150", mandate_goal_id="goal-1",
+    mandate_comment_id="comment-1", mandate_owner_id="owner-1",
+    mandate_qualification_id="qual-1",
+)
 
 
 def phase_label(phase: str) -> dict:
@@ -343,6 +349,73 @@ class MainEndToEndTest(TempRepoTestCase):
             "--issues", str(self.root / "missing.json"),
         ])
         self.assertEqual(rc, 2)
+
+
+class BetaMandateCompositionTest(TempRepoTestCase):
+    """GOU-150/GOU-151: beta composes with, never replaces, the live mandate check."""
+
+    def cli_args(self, decision_path: Path | None, issues_path: Path, **mandate_overrides) -> list[str]:
+        args = [
+            "--project-id", "proj-1", "--company-id", "company-1",
+            "--api-base", "https://example.invalid", "--api-token", "token",
+            "--cache-file", str(self.cache_path), "--manifest", str(self.manifest_path),
+            "--candidate-sha", CANDIDATE_SHA, "--dataset", DATASET,
+            "--promotion-target", "beta", "--phase", PHASE,
+            "--issues", str(issues_path),
+        ]
+        if decision_path is not None:
+            args += ["--decision", str(decision_path)]
+        else:
+            args += ["--decision-issue-id", "GOU-150", "--decision-interaction-id", "interaction-1"]
+        mandate = dict(MANDATE_IDS)
+        mandate.update(mandate_overrides)
+        for key, value in mandate.items():
+            if value is not None:
+                args += ["--" + key.replace("_", "-"), value]
+        return args
+
+    def write_issues(self, issues: list[dict]) -> Path:
+        path = self.root / "issues.json"
+        path.write_text(json.dumps(issues), encoding="utf-8")
+        return path
+
+    def test_local_decision_file_is_refused_for_beta(self) -> None:
+        decision_path = self.root / "decision.json"
+        decision_path.write_text(
+            json.dumps(valid_decision(manifestDigest=self.digest(), promotionTarget="beta")),
+            encoding="utf-8")
+        rc = GATE.main(self.cli_args(decision_path, self.write_issues([issue("GOU-1", "development")])))
+        self.assertEqual(rc, 2)
+
+    def test_missing_mandate_identities_fails_closed(self) -> None:
+        rc = GATE.main(self.cli_args(
+            None, self.write_issues([issue("GOU-1", "development")]), mandate_comment_id=None))
+        self.assertEqual(rc, 2)
+
+    def test_mandate_failure_fails_closed(self) -> None:
+        original = GATE.beta_mandate.check_live
+        GATE.beta_mandate.check_live = lambda *a, **k: (_ for _ in ()).throw(
+            GATE.beta_mandate.MandateError("simulated mandate refusal"))
+        try:
+            rc = GATE.main(self.cli_args(None, self.write_issues([issue("GOU-1", "development")])))
+        finally:
+            GATE.beta_mandate.check_live = original
+        self.assertEqual(rc, 2)
+
+    def test_clean_beta_pass_composes_live_decision_and_mandate(self) -> None:
+        decision = valid_decision(manifestDigest=self.digest(), promotionTarget="beta")
+        original_fetch_decision = GATE.fetch_decision
+        original_check_live = GATE.beta_mandate.check_live
+        GATE.fetch_decision = lambda *a, **k: decision
+        GATE.beta_mandate.check_live = lambda *a, **k: {
+            "mandateValid": True, "authorized": False, "target": "beta",
+        }
+        try:
+            rc = GATE.main(self.cli_args(None, self.write_issues([issue("GOU-1", "development")])))
+        finally:
+            GATE.fetch_decision = original_fetch_decision
+            GATE.beta_mandate.check_live = original_check_live
+        self.assertEqual(rc, 0)
 
 
 if __name__ == "__main__":

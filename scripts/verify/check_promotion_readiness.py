@@ -16,6 +16,15 @@ docs/operations/promotion-readiness-gate.md). It refuses to pass when:
   * the Paperclip issue fetch fails, is short relative to the last known-good
     count (a possible hidden page), or returns a shape this script cannot
     fully validate.
+  * for a beta promotion target, the live GOU-151 beta mandate
+    (`scripts/verify/beta_mandate.py`) does not independently confirm the
+    owner-authored, undeleted Paperclip comment, milestone, goal and
+    qualification records. A locally supplied `--decision` JSON file (even one
+    declaring `resolvedBy.type=human`) is refused for beta: it cannot be
+    authenticated as a live Paperclip actor, so it is never accepted as the
+    owner decision for that target. The mandate check itself never returns
+    `authorized=true`; it is combined here with, not a substitute for, the
+    manifest/phase/decision checks above.
 
 Any of the above exits non-zero. A clean pass exits 0. This script performs no
 Paperclip, Git or deployment write of any kind.
@@ -34,6 +43,8 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any
+
+import beta_mandate
 
 CANONICAL_PHASES = ("development", "beta_validation", "production", "post_production")
 OPEN_STATUSES = {"open", "reopened"}
@@ -227,8 +238,38 @@ def fetch_decision(base: str, token: str, issue_id: str, interaction_id: str) ->
     return decision
 
 
+def check_beta_mandate(*, api_base: str, api_token: str, company_id: str, project_id: str,
+                        mandate_milestone_id: str, mandate_goal_id: str, mandate_comment_id: str,
+                        mandate_owner_id: str, mandate_qualification_id: str) -> dict:
+    """Independently confirm the live GOU-151 beta mandate; never itself a go/no-go.
+
+    Composed alongside (not instead of) the manifest/phase/decision checks: a
+    passing mandate only means the owner-authored comment, milestone, goal and
+    qualification records were read live and match; it never sets
+    ``authorized`` true and is not a substitute for the owner-decision record
+    validated separately via ``--decision-issue-id``/``--decision-interaction-id``.
+    """
+    missing = [name for name, value in (
+        ("mandate-milestone-id", mandate_milestone_id), ("mandate-goal-id", mandate_goal_id),
+        ("mandate-comment-id", mandate_comment_id), ("mandate-owner-id", mandate_owner_id),
+        ("mandate-qualification-id", mandate_qualification_id),
+    ) if not value]
+    if missing:
+        raise ReadinessError(
+            "Beta promotion requires live mandate identities: " + ", ".join(missing))
+    try:
+        return beta_mandate.check_live(
+            api_base, api_token, company_id=company_id, project_id=project_id,
+            milestone_id=mandate_milestone_id, goal_id=mandate_goal_id,
+            comment_id=mandate_comment_id, owner_id=mandate_owner_id,
+            qualification_id=mandate_qualification_id, target="beta")
+    except beta_mandate.MandateError as exc:
+        raise ReadinessError(f"Beta mandate refused: {exc}") from exc
+
+
 def build_report(*, issues: list[dict], cache_path: Path, manifest_path: Path, decision: Any,
-                  candidate_sha: str, dataset: str, promotion_target: str, phase: str) -> dict:
+                  candidate_sha: str, dataset: str, promotion_target: str, phase: str,
+                  mandate_report: dict | None = None) -> dict:
     blockers: list[dict] = []
     reconciliation = reconcile_issue_count(len(issues), cache_path)
 
@@ -259,6 +300,7 @@ def build_report(*, issues: list[dict], cache_path: Path, manifest_path: Path, d
         "issueCount": len(issues),
         "issueCountReconciliation": reconciliation,
         "manifestDigest": digest,
+        "betaMandate": mandate_report,
         "blockers": blockers,
     }
 
@@ -276,9 +318,19 @@ def main(argv: list[str] | None = None) -> int:
                          help="Last known-good issue-count cache, used to catch a truncated page")
     parser.add_argument("--manifest", type=Path, required=True,
                          help="release-manifest produced by scripts/deploy/build-release-bundle.sh")
-    parser.add_argument("--decision", type=Path, help="Local owner-decision JSON record")
+    parser.add_argument("--decision", type=Path,
+                         help="Local owner-decision JSON record; refused for --promotion-target beta, "
+                              "where only a live-fetched decision plus the beta mandate is accepted")
     parser.add_argument("--decision-issue-id", help="Paperclip issue holding the owner decision interaction")
     parser.add_argument("--decision-interaction-id", help="Resolved interaction id, fetched live (read-only)")
+    parser.add_argument("--mandate-milestone-id",
+                         help="Beta only: milestone issue id for the live GOU-151 mandate check")
+    parser.add_argument("--mandate-goal-id", help="Beta only: goal id for the live mandate check")
+    parser.add_argument("--mandate-comment-id",
+                         help="Beta only: owner-authored board comment id for the live mandate check")
+    parser.add_argument("--mandate-owner-id", help="Beta only: expected owner user id for the mandate check")
+    parser.add_argument("--mandate-qualification-id",
+                         help="Beta only: qualification issue id for the live mandate check")
     parser.add_argument("--candidate-sha", required=True, help="Git SHA under review for promotion")
     parser.add_argument("--dataset", required=True, help="Dataset identifier or digest under review")
     parser.add_argument("--promotion-target", required=True, choices=("beta", "production"))
@@ -297,6 +349,12 @@ def main(argv: list[str] | None = None) -> int:
         else:
             issues = fetch_issues(args.api_base, args.api_token, args.company_id, args.project_id)
 
+        if args.promotion_target == "beta" and args.decision is not None:
+            raise ReadinessError(
+                "A local --decision file cannot authorize a beta promotion; it is not an "
+                "authenticated live Paperclip actor. Use --decision-issue-id/"
+                "--decision-interaction-id together with the --mandate-* identities")
+
         if args.decision is not None:
             try:
                 decision = json.loads(args.decision.read_text(encoding="utf-8"))
@@ -310,10 +368,20 @@ def main(argv: list[str] | None = None) -> int:
                 "No owner decision source: pass --decision or "
                 "--decision-issue-id/--decision-interaction-id")
 
+        mandate_report = None
+        if args.promotion_target == "beta":
+            mandate_report = check_beta_mandate(
+                api_base=args.api_base, api_token=args.api_token,
+                company_id=args.company_id, project_id=args.project_id,
+                mandate_milestone_id=args.mandate_milestone_id, mandate_goal_id=args.mandate_goal_id,
+                mandate_comment_id=args.mandate_comment_id, mandate_owner_id=args.mandate_owner_id,
+                mandate_qualification_id=args.mandate_qualification_id,
+            )
+
         report = build_report(
             issues=issues, cache_path=args.cache_file, manifest_path=args.manifest, decision=decision,
             candidate_sha=args.candidate_sha, dataset=args.dataset,
-            promotion_target=args.promotion_target, phase=args.phase,
+            promotion_target=args.promotion_target, phase=args.phase, mandate_report=mandate_report,
         )
         print(json.dumps(report, indent=2))
         return 0 if report["ready"] else 1
