@@ -30,6 +30,10 @@ api:
     copy-bulk-size: 500
     copy-threads: 4
     copy-queue-size: 50
+  legacybackupimport:
+    dataset-root: /opt/open4goods/backup/products
+    dead-letter-folder: /opt/open4goods/backup/legacy-import-dead-letters
+    batch-size: 500
 
 management:
   health:
