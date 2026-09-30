@@ -167,18 +167,11 @@ Each shipped facet has a dedicated lifecycle spec under
 | `product.energy` | `.../energy` | future | 10 | ~47K (exclusive) |
 | `product.taxonomy` | `.../taxonomy` | future | 15 | curated (exclusive) |
 
-### `product.price-history` pagination bound (GOU-100)
-
-The future price-history facet's `limit` query parameter spans **1..500**, not
-1..1000. The read port behind it, `PriceHistoryQuery.MAX_PAGE_SIZE` in
-`org.open4goods.pricehistory.model`, is the single source of truth for that
-upper bound - raising it later stays backward compatible, while shrinking a
-published maximum would not. OpenAPI, generated clients, the English/French
-docs and the playground read `1..500` from that constant, rather than each
-restating either number by hand. An out-of-range `limit` returns an RFC 9457
-validation error, matching [`product-data-api-errors.md`](product-data-api-errors.md).
-See [GOU-100](/GOU/issues/GOU-100) for the arbitration record and
-[GOU-28](/GOU/issues/GOU-28) for the facet this constrains.
+`product.price-history` paginates on `limit`, bounded by `PriceHistoryQuery`'s
+`MIN_PAGE_SIZE`/`MAX_PAGE_SIZE` (GOU-100). OpenAPI, generated clients, the docs and
+the playground read the range from those constants rather than restating a number,
+since a published maximum can be raised compatibly but not shrunk; out of range is an
+RFC 9457 error ([`product-data-api-errors.md`](product-data-api-errors.md)).
 
 ## Playground proxy (session-authenticated)
 
