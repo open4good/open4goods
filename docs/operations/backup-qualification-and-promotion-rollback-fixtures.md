@@ -43,6 +43,12 @@ rejection happens before staging, and leaves a partial-write fixture's bytes as 
 test also checks the fixture tree names no account, billing or credential path, and that
 `curl`/`systemctl` resolve to the fixture's own stubs.
 
+Stub isolation is asserted against what a *child* script resolves, not the test's own shell:
+the deploy scripts are `#!/usr/bin/env bash`, so an inherited `BASH_ENV` startup file runs
+first and can re-export `PATH`, which would hand them the real `systemctl` and restart a live
+unit. Every stubbed invocation therefore goes through `env -u BASH_ENV`, and the fixtures fail
+up front if the stub is not what a child bash resolves.
+
 ```bash
 python3 -m unittest scripts.verify.test_check_product_backup_qualification -v
 bash scripts/deploy/tests/promotion-failure-fixtures.test.sh

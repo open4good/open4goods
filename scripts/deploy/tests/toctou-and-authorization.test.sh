@@ -65,7 +65,7 @@ cp "$fixture/bin/systemctl" "$fixture/bin/curl" "$fixture/race-bin/"
 
 pids=()
 for _ in 1 2; do
-  PATH="$fixture/race-bin:$PATH" "$ROOT/scripts/deploy/publish-java-release.sh" \
+  PATH="$fixture/race-bin:$PATH" env -u BASH_ENV "$ROOT/scripts/deploy/publish-java-release.sh" \
     --release "$race_release" --bundle "$fixture/bundle-race" --service api \
     --health-url http://127.0.0.1/health --root "$fixture/runtime-race" \
     >>"$fixture/race.out" 2>&1 &
@@ -119,7 +119,7 @@ exec /usr/bin/cp "\$@"
 EOF
 chmod +x "$fixture/toctou-bin/cp"
 
-if PATH="$fixture/toctou-bin:$PATH" "$ROOT/scripts/deploy/publish-java-release.sh" \
+if PATH="$fixture/toctou-bin:$PATH" env -u BASH_ENV "$ROOT/scripts/deploy/publish-java-release.sh" \
   --release "$toctou_release" --bundle "$fixture/bundle-toctou" --service api \
   --health-url http://127.0.0.1/health --root "$fixture/runtime-toctou" \
   >"$fixture/toctou.out" 2>&1; then
@@ -137,7 +137,7 @@ test ! -L "$fixture/runtime-toctou/services/api/current"
 nuxt_release='3333333'
 build_bundle "$nuxt_release" "$fixture/bundle-nuxt"
 mkdir -p "$fixture/runtime-nuxt/releases"
-PATH="$fixture/bin:$PATH" "$ROOT/scripts/deploy/publish-java-release.sh" \
+PATH="$fixture/bin:$PATH" env -u BASH_ENV "$ROOT/scripts/deploy/publish-java-release.sh" \
   --release "$nuxt_release" --bundle "$fixture/bundle-nuxt" --service api \
   --health-url http://127.0.0.1/health --root "$fixture/runtime-nuxt" >/dev/null
 : > "$fixture/nuxt-systemctl.log"
@@ -150,7 +150,7 @@ EOF
 chmod +x "$fixture/race-bin/systemctl"
 nuxt_pids=()
 for _ in 1 2; do
-  PATH="$fixture/race-bin:$PATH" "$ROOT/scripts/deploy/publish-nuxt-release.sh" \
+  PATH="$fixture/race-bin:$PATH" env -u BASH_ENV "$ROOT/scripts/deploy/publish-nuxt-release.sh" \
     --release "$nuxt_release" --service frontend --health-url http://127.0.0.1/health \
     --root "$fixture/runtime-nuxt" >>"$fixture/nuxt-race.out" 2>&1 &
   nuxt_pids+=("$!")
@@ -175,7 +175,7 @@ done
 printf '%s\n' '#!/usr/bin/env bash' 'echo "unit validation rejected" >&2' 'exit 1' > "$fixture/auth-bin/systemd-analyze"
 printf '%s\n' '#!/usr/bin/env bash' 'echo "$*" >> "'"$fixture"'/auth-systemctl.log"' 'exit 0' > "$fixture/auth-bin/systemctl"
 chmod +x "$fixture/auth-bin/systemd-analyze" "$fixture/auth-bin/systemctl"
-if PATH="$fixture/auth-bin:$PATH" "$ROOT/scripts/deploy/install-systemd-runtime.sh" \
+if PATH="$fixture/auth-bin:$PATH" env -u BASH_ENV "$ROOT/scripts/deploy/install-systemd-runtime.sh" \
   --unit-dir "$fixture/auth-unit-dir" --environment-dir "$fixture/auth-environment"; then
   echo "expected failed unit validation to block systemd install" >&2
   exit 1
