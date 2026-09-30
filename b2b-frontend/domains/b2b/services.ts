@@ -69,10 +69,12 @@ export const SERVICES: ServiceDescriptor[] = [
     slug: 'price-history',
     icon: 'mdi-chart-line',
     category: 'product',
-    status: 'coming-soon',
+    status: 'live',
     credits: 8,
     featured: true,
-    order: 6
+    order: 6,
+    docSlug: 'products/price-history',
+    playgroundPath: '/docs/products/price-history/playground'
   },
   {
     id: 'product.impact',
