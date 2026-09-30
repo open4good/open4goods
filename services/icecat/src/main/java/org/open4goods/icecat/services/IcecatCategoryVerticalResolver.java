@@ -7,8 +7,6 @@ import java.util.Optional;
 import org.open4goods.datareference.model.CanonicalClassId;
 import org.open4goods.datareference.model.registry.RegistryRuntimeIndex;
 import org.open4goods.datareference.model.registry.RegistryVerticalView;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * Resolves an editorial vertical id for an Icecat category, using only reviewed
@@ -20,12 +18,10 @@ import org.springframework.stereotype.Service;
  * to {@link Optional#empty()} : callers must not fall back to a heuristic guess,
  * since only an approved mapping may assign a vertical to a product.
  */
-@Service
 public class IcecatCategoryVerticalResolver {
 
     private final IcecatRegistryProjectionService projectionService;
 
-    @Autowired
     public IcecatCategoryVerticalResolver(IcecatRegistryProjectionService projectionService) {
         this.projectionService = Objects.requireNonNull(projectionService, "projectionService must not be null");
     }
