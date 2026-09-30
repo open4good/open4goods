@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.kohsuke.github.GHRepository;
 import org.open4goods.brand.service.BrandService;
@@ -79,7 +78,6 @@ class AuthControllerIT {
     private ObjectMapper mapper;
 
     @Test
-    @Disabled("access-token cookie not set in test context - tracked in GOU-146")
     void loginReturnsCookies() throws Exception {
         given(authService.login("user", "pass")).willReturn(List.of("XWiki.XWikiUsers"));
         LoginRequest req = new LoginRequest("user", "pass");
@@ -93,7 +91,6 @@ class AuthControllerIT {
     }
 
     @Test
-    @Disabled("access-token cookie not set in test context - tracked in GOU-146")
     void refreshIssuesNewAccessToken() throws Exception {
         var auth = new UsernamePasswordAuthenticationToken("user", "N/A");
         String refresh = jwtService.generateRefreshToken(auth);

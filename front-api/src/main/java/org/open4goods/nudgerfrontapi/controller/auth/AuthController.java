@@ -66,8 +66,13 @@ public class AuthController {
             String access = jwtService.generateAccessToken(auth);
             String refresh = jwtService.generateRefreshToken(auth);
 
+            ResponseCookie accessTokenCookie = buildCookie("access-token", access,
+                    jwtService.getProperties().getAccessTokenExpiry());
+            ResponseCookie refreshTokenCookie = buildCookie("refresh-token", refresh,
+                    jwtService.getProperties().getRefreshTokenExpiry());
 
             return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString(), refreshTokenCookie.toString())
                     .body(new AuthTokensDto(access, refresh));
         } catch (AuthenticationException ex) {
             return ResponseEntity.status(401).build();
@@ -95,12 +100,25 @@ public class AuthController {
             String access = jwtService.generateAccessToken(auth);
             String newRefresh = jwtService.generateRefreshToken(auth);
 
+            ResponseCookie accessTokenCookie = buildCookie("access-token", access,
+                    jwtService.getProperties().getAccessTokenExpiry());
+            ResponseCookie refreshTokenCookie = buildCookie("refresh-token", newRefresh,
+                    jwtService.getProperties().getRefreshTokenExpiry());
 
             return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString(), refreshTokenCookie.toString())
                     .body(new AuthTokensDto(access, newRefresh));
         } catch (Exception ex) {
             return ResponseEntity.status(401).build();
         }
+    }
+
+    private static ResponseCookie buildCookie(String name, String value, Duration maxAge) {
+        return ResponseCookie.from(name, value)
+                .httpOnly(true)
+                .maxAge(maxAge)
+                .path("/")
+                .build();
     }
 
     @PostMapping("/logout")
