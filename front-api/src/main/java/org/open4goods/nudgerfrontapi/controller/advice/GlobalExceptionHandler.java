@@ -10,8 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -28,6 +30,7 @@ public class GlobalExceptionHandler {
     private final Counter notFoundCounter;
     private final Counter accessDeniedCounter;
     private final Counter invalidTokenCounter;
+    private final Counter badRequestCounter;
     private final Counter unhandledExceptionCounter;
 
     public GlobalExceptionHandler(MeterRegistry meterRegistry) {
@@ -47,6 +50,12 @@ public class GlobalExceptionHandler {
                 .tag("type", "invalid_affiliation_token")
                 .tag("status", String.valueOf(HttpStatus.BAD_REQUEST.value()))
                 .description("Count of invalid affiliation token exceptions")
+                .register(meterRegistry);
+
+        this.badRequestCounter = Counter.builder("api.exceptions")
+                .tag("type", "bad_request")
+                .tag("status", String.valueOf(HttpStatus.BAD_REQUEST.value()))
+                .description("Count of malformed request exceptions (missing or invalid parameters)")
                 .register(meterRegistry);
 
         this.unhandledExceptionCounter = Counter.builder("api.exceptions")
@@ -82,6 +91,26 @@ public class GlobalExceptionHandler {
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         pd.setTitle("Invalid affiliation token");
         pd.setDetail(exception.getMessage() != null ? exception.getMessage() : exception.toString());
+        return pd;
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ProblemDetail handleMissingServletRequestParameter(MissingServletRequestParameterException ex) {
+        badRequestCounter.increment();
+        log.warn("Missing request parameter: {}", ex.getMessage());
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        pd.setTitle("Bad Request");
+        pd.setDetail(ex.getMessage());
+        return pd;
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ProblemDetail handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        badRequestCounter.increment();
+        log.warn("Invalid request parameter: {}", ex.getMessage());
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        pd.setTitle("Bad Request");
+        pd.setDetail("Parameter '" + ex.getName() + "' has an invalid value");
         return pd;
     }
 
