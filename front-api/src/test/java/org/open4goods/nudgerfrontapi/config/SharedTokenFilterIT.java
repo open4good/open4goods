@@ -6,7 +6,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.kohsuke.github.GHRepository;
 import org.open4goods.brand.service.BrandService;
@@ -31,7 +30,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
         "front.security.enabled=true",
         "front.security.shared-token=test-token"})
 @AutoConfigureMockMvc
-@Disabled("Returns 500 instead of 401/200 on /products/fields/sortable - tracked in GOU-145")
 class SharedTokenFilterIT {
 
     @Autowired
@@ -68,22 +66,28 @@ class SharedTokenFilterIT {
 
     @Test
     void missingTokenIsRejected() throws Exception {
+        // No shared token: the JWT alone carries ROLE_XWIKI_ALL, which lacks the
+        // ROLE_FRONTEND/ROLE_EDITOR authority required by ProductController, so
+        // the request is authenticated but forbidden (403), not unauthenticated (401).
         mockMvc.perform(get("/products/fields/sortable")
+                .param("domainLanguage", "fr")
                 .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
     @Test
     void wrongTokenIsRejected() throws Exception {
         mockMvc.perform(get("/products/fields/sortable")
+                .param("domainLanguage", "fr")
                 .header("X-Shared-Token", "wrong")
                 .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
     @Test
     void validTokenAllowsAccess() throws Exception {
         mockMvc.perform(get("/products/fields/sortable")
+                .param("domainLanguage", "fr")
                 .header("X-Shared-Token", SHARED_TOKEN)
                 .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk());
