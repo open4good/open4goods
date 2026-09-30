@@ -131,6 +131,29 @@ To compile **all modules**:
 mvn --offline clean install
 ```
 
+**`*IT` classes are integration tests, executed by `maven-failsafe-plugin`, not
+`maven-surefire-plugin`.** Surefire (unit tests, `*Test.java`) excludes `*IT.java`
+by convention; failsafe has no default lifecycle binding, so its `<executions>`
+in the root `pom.xml` (goals `integration-test` and `verify`) are what make it run
+at all. `mvn install` already runs both phases for every module that declares an
+`*IT` class - no extra CI step is needed, and no module should redeclare or skip
+the failsafe execution. Some `*IT` classes need Docker (Testcontainers); GitHub
+Actions' `ubuntu-latest` runners ship Docker by default, so this works unmodified
+in `ci-pr.yml`.
+
+The same failsafe block also pins `<classesDirectory>` to `target/classes`. Failsafe
+runs *after* `package`, and by default it tests the module's main artifact - which
+`spring-boot:repackage` has already replaced with a fat jar whose classes sit under
+`BOOT-INF/classes`. Without that pin every `*IT` in a Spring Boot module fails with
+`NoClassDefFoundError` on the class it is testing. Do not remove it.
+
+If you add an `*IT` test, verify it actually runs **through a real `install`**
+(`mvn -pl <module> -am install`, or `mvn -pl <module> install` when the reactor is
+already built). Do not settle for `mvn -pl <module> test-compile failsafe:verify`:
+that skips `package`, so it passes even when the packaged build would not, which is
+exactly how the two defects above stayed invisible. An `*IT` class that silently
+never executes is worse than no test at all.
+
 Run the canonical lint suite before handoff:
 
 ```bash

@@ -344,6 +344,26 @@
                         <plugin>
                                 <groupId>org.apache.maven.plugins</groupId>
                                 <artifactId>maven-failsafe-plugin</artifactId>
+                                <configuration>
+                                        <!--
+                                          Failsafe runs after `package`, and it puts the module's *main
+                                          artifact* on the test classpath rather than target/classes. For the
+                                          Spring Boot applications here (api, front-api, b2b-api, admin...),
+                                          spring-boot:repackage has by then replaced that artifact with a fat
+                                          jar whose classes live under BOOT-INF/classes, so every *IT fails
+                                          with NoClassDefFoundError on the very classes it tests. Point
+                                          failsafe back at target/classes, like surefire.
+                                        -->
+                                        <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+                                </configuration>
+                                <executions>
+                                        <execution>
+                                                <goals>
+                                                        <goal>integration-test</goal>
+                                                        <goal>verify</goal>
+                                                </goals>
+                                        </execution>
+                                </executions>
                         </plugin>
 
                 </plugins>
