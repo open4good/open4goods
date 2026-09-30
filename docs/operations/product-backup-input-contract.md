@@ -39,10 +39,10 @@ par Git : `products-sample.jsonl.gz` et son descripteur `products-sample-manifes
 Le descripteur porte l'empreinte SHA-256 du manifeste legacy source, le nombre de lignes
 lues, le nom, l'empreinte SHA-256 et le nombre d'enregistrements de l'echantillon, la
 taille par compartiment demandee, et la liste des empreintes SHA-256 retenues par
-compartiment. Les compartiments obligatoires sont les sept verticales
-(`air-conditioner`, `dishwasher`, `oven`, `refrigerator`, `smartphones`, `tv`,
-`washing-machine`) plus `source-rich`, `legacy-only`, `amazon-ambiguous` et
-`known-error`; la generation echoue si l'un d'eux reste vide. La selection retient les
+compartiment. La generation echoue si l'un des compartiments suivants reste vide :
+les sept verticales (`air-conditioner`, `dishwasher`, `oven`, `refrigerator`,
+`smartphones`, `tv`, `washing-machine`) plus `source-rich`, `legacy-only`,
+`amazon-ambiguous` et `known-error`. La selection retient les
 empreintes de contenu les plus petites par compartiment et trie la sortie par empreinte,
 donc une generation repetee depuis la meme entree produit un fichier et un descripteur
 strictement identiques (test `test_repeated_generation_is_byte_identical_and_covers_every_bucket`).
