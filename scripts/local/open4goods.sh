@@ -572,7 +572,7 @@ case "$command_name" in
     unzip -tq "$XWIKI_XAR_PATH" >/dev/null
     curl --fail --show-error --silent --user "$XWIKI_USERNAME:$XWIKI_PASSWORD" \
       --form "action=import" --form "file=@$XWIKI_XAR_PATH" \
-      http://127.0.0.1:8080/xwiki/bin/import/XWiki/XWikiPreferences >/dev/null
+      "http://127.0.0.1:${O4G_PORT_XWIKI:-8080}/xwiki/bin/import/XWiki/XWikiPreferences" >/dev/null
     echo "local XWiki import request completed"
     ;;
   data)
