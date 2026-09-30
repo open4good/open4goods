@@ -12,6 +12,24 @@ missing policy, a source mismatch, an unreviewed policy, a prohibited
 redistribution setting, an out-of-period policy and a revoked policy. Derived
 fields never inherit a provider permission.
 
+Each policy grants surfaces per content type through `surfaceGrants`, a map from
+content type to its allowed projection surfaces, rather than a flat content-type
+set crossed with a flat surface set. A source can clear its identifiers (GTIN,
+MPN) for the `ODBL_EXPORT` surface without that clearing its attributes, text or
+media for the same surface - a distinction a cartesian product could not
+express, and that a second policy record cannot supply either, because a source
+record carries exactly one policy reference. A content type present as a key
+with an empty surface set is still reviewed for `allowsUse` (e.g. a named use
+such as AI training); it is simply published nowhere.
+
+A policy also carries a deny-by-default `derivativeLicence` (e.g. the Icecat
+share-alike obligation), a deny-by-default `prohibitedUses` set (e.g.
+`AI_TRAINING`, `SYNTHETIC_CONTENT_GENERATION`), and an attribution
+`asIsDisclaimerRequired` flag for the Fair Use Policy disclaimer. The mirrored
+`allowsUse` predicate on the policy and the registry checks one named use, and
+`DeterministicResolutionService` consults it to drop a prohibited-use source
+from a derivation before any resolved value is produced.
+
 The inventory records the content observed in the reference contracts. An API,
 a legacy public page or a source's receipt of merchant content is supporting
 evidence, not an O4G redistribution approval. All entries below are intentionally
@@ -37,4 +55,6 @@ term produces a new record rather than editing historical permission.
 `SourceUsagePolicyRegistryTest` loads both this deny inventory and a reviewed
 fixture. It exercises every publication surface at effective, expiry and
 revocation boundaries, requires attribution, rejects prohibited media caching,
-and rejects derived-field inheritance.
+rejects derived-field inheritance, and confirms the deny-by-default reading of
+an inventory fixture that predates `derivativeLicence`, `prohibitedUses` and
+`asIsDisclaimerRequired`.

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ICECAT-interface>
+  <Response Status="OK" Request_ID="1" ID="1" Date="2026-01-01">
+    <FeatureGroupsList>
+      <FeatureGroup ID="7" Updated="2026-01-01">
+        <Name ID="1" langid="1" Value="Display"/>
+      </FeatureGroup>
+      <FeatureGroup ID="8" Updated="2026-01-01">
+        <Name ID="2" langid="1" Value="General"/>
+      </FeatureGroup>
+    </FeatureGroupsList>
+  </Response>
+</ICECAT-interface>

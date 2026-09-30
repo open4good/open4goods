@@ -27,7 +27,7 @@ lang: fr
 | 5 | `product.documents` | `/products/{gtin}/documents` | `resources` PDF | <125 K | 3 | interne ES | datasheets/manuels |
 | 6 | `product.price-history` | `/products/{gtin}/price/history` | `price` history/trends | ⊂ 34 M | 8 | interne (persisté) | série temporelle |
 | 7 | `product.impact` ⭐⭐ | `/products/{gtin}/impact` | `scores` (ECOSCORE, réparabilité, durabilité, ranking) | ~45-50 K | **15** | **interne EXCLUSIF** | **éco / réparabilité / CO₂** |
-| 8 | `product.energy` ⭐⭐ | `/products/{gtin}/energy` | `eprelDatas` + `CLASSE_ENERGY` | ~47 K | 10 | **interne EXCLUSIF** | **étiquette énergie UE** |
+| 8 | `product.energy` ⭐⭐ | `/products/{gtin}/energy` | `eprelDatas` + `CLASSE_ENERGY` | ~47 K | **0** (gratuit, compte requis) | **interne EXCLUSIF** | **étiquette énergie UE** |
 | 9 | `product.taxonomy` | `/products/{gtin}/taxonomy` | référentiels Google/ICECAT/ETIM/Wikidata | curé | 15 | **interne EXCLUSIF** | mapping multi-taxonomies |
 | 10 | _exp._ `product.alternatives` | `/products/{gtin}/alternatives` | embedding KNN / ranking | curé | 20 | interne (KNN) | reco mieux notés |
 
@@ -40,7 +40,10 @@ lang: fr
   `ProductScoresDto`. Chaque score porte `value`, `absolute`/`relativ` (cardinalités), `letter()` (A-E).
   → **Aucun concurrent du panel n'a cette donnée.**
 - **`product.energy`** - `eprelDatas` (EPREL UE) + score `CLASSE_ENERGY` (et HDR/SDR pour TV). DTO :
-  `ProductEprelDto`. Vendable sur électroménager + TV.
+  `ProductEprelDto`. **Gratuit, compte requis, jamais facturé** - décision
+  [`00-canonical-decisions.md`](../00-canonical-decisions.md) 2.6 (GOU-106) :
+  les CGU EPREL (art. 4§2(a)) interdisent de revendre ces données telles
+  quelles ; ce tableau listait auparavant 10 crédits, ce chiffre est corrigé.
 ---
 
 ## 2. Facettes " marché " non couvertes par nudger
@@ -70,7 +73,8 @@ L'étude concurrentielle liste des facettes **scraping/marketplace** que nudger 
 | M | `attributes`, `images`, `documents` | 3-4 | 0,006-0,008 € | enrichissement |
 | **Baseline** | **`price`** | **5** | **0,010 €** | aligné PriceAPI Starter, volume |
 | L | `price-history` | 8 | 0,016 € | persistance série temporelle |
-| **Premium** | **`energy`**, **`impact`**, **`taxonomy`** | 10-15 | 0,020-0,030 € | **exclusif**, faible volume, forte valeur |
+| **Premium** | **`impact`**, **`taxonomy`** | 10-15 | 0,020-0,030 € | **exclusif**, faible volume, forte valeur |
+| Gratuit (compte requis) | `energy` | **0** | 0 € | EPREL : redistribution non-marchande imposée par les CGU (4§2(a)) - décision GOU-106 |
 
 Don de bienvenue freemium : **2 500 crédits** (≈ 5 €) - cohérent avec
 [`master-prompt.md`](../implementation/master-prompt.md).

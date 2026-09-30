@@ -5,6 +5,12 @@ b2b:
       credits: 5
       doc: products/price
       billable-when: fresh-offer
+    "[product.energy]":
+      path: /api/v1/products/{gtin}/energy
+      credits: 0
+      doc: products/energy
+      billable-when: never
+      source: eprel
     "[barcode.render]":
       path: /api/v1/barcodes/render
       credits: 1

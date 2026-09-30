@@ -31,6 +31,7 @@ import org.open4goods.b2bapi.repository.OrganizationRepository;
 import org.open4goods.b2bapi.repository.UserRepository;
 import org.open4goods.b2bapi.service.ApiKeySecretGenerator;
 import org.open4goods.b2bapi.service.RedisMeteringService;
+import org.open4goods.model.eprel.EprelProduct;
 import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.AggregatedPrices;
 import org.open4goods.model.product.Product;
@@ -328,6 +329,91 @@ class ProductControllerIntegrationTest {
                 .andExpect(header().string("X-Credits-Remaining", "5"));
 
         assertThat(creditBucketRepository.sumLiveCredits(organization.getId())).isEqualTo(5);
+    }
+
+    // --- GOU-106: EPREL-sourced content is structurally free behind an account ---
+
+    @Test
+    void unauthenticatedEnergyRequestReturns401() throws Exception {
+        mockMvc.perform(get("/api/v1/products/885909950805/energy"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void authenticatedEprelOnlyRequestConsumesZeroCreditsAndIsNeverBillable() throws Exception {
+        saveBucket(organization, 10);
+        when(productRepository.getByIdWithoutEmbedding(885909950805L)).thenReturn(eprelProduct());
+
+        mockMvc.perform(get("/api/v1/products/885909950805/energy")
+                        .header(HttpHeaders.AUTHORIZATION, apiKeyHeader))
+                .andExpect(status().isOk())
+                .andExpect(header().string("X-Credits-Consumed", "0"))
+                .andExpect(header().string("X-Credits-Remaining", "10"))
+                .andExpect(jsonPath("$.data.energyClass").value("A"))
+                .andExpect(jsonPath("$.data.attribution.sourceUrl").value("https://eprel.ec.europa.eu"))
+                .andExpect(jsonPath("$.meta.billable").value(false))
+                .andExpect(jsonPath("$.meta.creditsConsumed").value(0))
+                .andExpect(jsonPath("$.meta.facets[0].id").value("product.energy"))
+                .andExpect(jsonPath("$.meta.facets[0].billable").value(false));
+
+        assertThat(creditBucketRepository.sumLiveCredits(organization.getId())).isEqualTo(10);
+    }
+
+    @Test
+    void authenticatedEprelRequestSucceedsEvenWithZeroCreditBalance() throws Exception {
+        // No bucket saved: durable balance is zero. A price-facet call would be rejected with 402;
+        // the energy facet must never reserve, debit, or throw InsufficientCreditsException.
+        when(productRepository.getByIdWithoutEmbedding(885909950805L)).thenReturn(eprelProduct());
+
+        mockMvc.perform(get("/api/v1/products/885909950805/energy")
+                        .header(HttpHeaders.AUTHORIZATION, apiKeyHeader))
+                .andExpect(status().isOk())
+                .andExpect(header().string("X-Credits-Consumed", "0"))
+                .andExpect(header().string("X-Credits-Remaining", "0"))
+                .andExpect(jsonPath("$.meta.billable").value(false));
+    }
+
+    @Test
+    void mixedPriceAndEnergyRequestsOnlyBillThePriceFacet() throws Exception {
+        saveBucket(organization, 10);
+
+        final Product product = eprelProduct();
+        final AggregatedPrices prices = new AggregatedPrices();
+        final AggregatedPrice offer = new AggregatedPrice();
+        offer.setPrice(19.99);
+        offer.setCurrency(org.open4goods.model.price.Currency.EUR);
+        offer.setProductState(ProductCondition.NEW);
+        offer.setTimeStamp(Instant.now().toEpochMilli());
+        prices.setOffers(Set.of(offer));
+        product.setPrice(prices);
+
+        when(productRepository.getByIdWithoutEmbedding(885909950805L)).thenReturn(product);
+
+        mockMvc.perform(get("/api/v1/products/885909950805/price")
+                        .header(HttpHeaders.AUTHORIZATION, apiKeyHeader))
+                .andExpect(status().isOk())
+                .andExpect(header().string("X-Credits-Consumed", "5"))
+                .andExpect(jsonPath("$.meta.facets[0].id").value("product.price"))
+                .andExpect(jsonPath("$.meta.facets[0].billable").value(true));
+
+        mockMvc.perform(get("/api/v1/products/885909950805/energy")
+                        .header(HttpHeaders.AUTHORIZATION, apiKeyHeader))
+                .andExpect(status().isOk())
+                .andExpect(header().string("X-Credits-Consumed", "0"))
+                .andExpect(header().string("X-Credits-Remaining", "5"))
+                .andExpect(jsonPath("$.meta.facets[0].id").value("product.energy"))
+                .andExpect(jsonPath("$.meta.facets[0].billable").value(false));
+
+        assertThat(creditBucketRepository.sumLiveCredits(organization.getId())).isEqualTo(5);
+    }
+
+    private Product eprelProduct() {
+        final Product product = new Product(885909950805L);
+        final EprelProduct eprel = new EprelProduct();
+        eprel.setEnergyClass("A");
+        eprel.setModelIdentifier("MODEL-123");
+        product.setEprelDatas(eprel);
+        return product;
     }
 
     private void saveBucket(final Organization org, final long credits) {

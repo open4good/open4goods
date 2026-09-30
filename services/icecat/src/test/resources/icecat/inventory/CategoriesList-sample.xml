@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ICECAT-interface>
+  <Response Status="OK" Request_ID="1" ID="1" Date="2026-01-01">
+    <CategoriesList>
+      <Category ID="1584" Searchable="true" Visible="true" Score="10" Updated="2026-01-01">
+        <Name ID="1" langid="1">Televisions</Name>
+        <Name ID="2" langid="3">Televiseurs</Name>
+      </Category>
+      <Category ID="224" Searchable="true" Visible="true" Score="8" Updated="2026-01-01">
+        <Name ID="3" langid="1">Air conditioners</Name>
+        <Name ID="4" langid="3">Climatiseurs</Name>
+      </Category>
+      <Category ID="999" Searchable="true" Visible="true" Score="1" Updated="2026-01-01">
+        <ParentCategory ID="1584"/>
+        <Name ID="5" langid="1">TV-like but unreviewed</Name>
+      </Category>
+    </CategoriesList>
+  </Response>
+</ICECAT-interface>

@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
@@ -58,6 +59,13 @@ public class BillingCatalogProperties {
         @NotBlank
         private String billableWhen;
 
+        /**
+         * Content provenance for this facet (e.g. {@code "eprel"}). Drives the
+         * {@link #isEprelFacetStructurallyFree()} guard: a source whose redistribution terms forbid
+         * selling the data as-is (EPREL API Terms and Conditions 4§2(a)) must never carry a price.
+         */
+        private String source;
+
         public String getPath() {
             return path;
         }
@@ -88,6 +96,29 @@ public class BillingCatalogProperties {
 
         public void setBillableWhen(final String billableWhen) {
             this.billableWhen = billableWhen;
+        }
+
+        public String getSource() {
+            return source;
+        }
+
+        public void setSource(final String source) {
+            this.source = source;
+        }
+
+        /**
+         * Structural, fail-fast compliance guard: a facet declared as sourced from {@code eprel}
+         * must be configured free (zero credits, never billable) so no future YAML edit can put the
+         * catalog on the wrong side of the EPREL API Terms and Conditions 4§2(a) redistribution ban.
+         *
+         * @return {@code true} when the facet is not EPREL-sourced, or is EPREL-sourced and free
+         */
+        @AssertTrue(message = "an eprel-sourced facet must declare credits: 0 and billable-when: never")
+        public boolean isEprelFacetStructurallyFree() {
+            if (!"eprel".equalsIgnoreCase(source)) {
+                return true;
+            }
+            return credits == 0 && "never".equalsIgnoreCase(billableWhen);
         }
     }
 

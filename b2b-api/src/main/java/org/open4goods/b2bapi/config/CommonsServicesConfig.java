@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.open4goods.commons.services.BarcodeForensicsService;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.Gs1PrefixService;
+import org.open4goods.model.provider.PublicProviderLabelRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,5 +58,18 @@ public class CommonsServicesConfig {
     org.open4goods.services.productrepository.services.ProductRepository productRepository(
             org.springframework.data.elasticsearch.core.ElasticsearchOperations elasticsearchOperations) {
         return new org.open4goods.services.productrepository.services.ProductRepository(elasticsearchOperations);
+    }
+
+    /**
+     * Exposes the Git-versioned public provider label registry. It is the only
+     * source for a public merchant label or favicon URL; no code may derive
+     * either from an internal datasource id.
+     *
+     * @return the checked-in public provider label registry
+     * @throws IOException if the bundled registry resource cannot be read
+     */
+    @Bean
+    PublicProviderLabelRegistry publicProviderLabelRegistry() throws IOException {
+        return PublicProviderLabelRegistry.loadDefault();
     }
 }

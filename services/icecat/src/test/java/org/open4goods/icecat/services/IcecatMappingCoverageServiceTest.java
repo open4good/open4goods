@@ -9,8 +9,11 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.datareference.model.registry.GitRegistryRuntimeImporter;
+import org.open4goods.icecat.model.IcecatCatalogueCategory;
+import org.open4goods.icecat.model.IcecatCatalogueInventory;
 import org.open4goods.icecat.model.IcecatCategoryDocument;
 import org.open4goods.icecat.model.IcecatMappingCoverage;
+import org.open4goods.icecat.model.IcecatUnmappedCategory;
 
 class IcecatMappingCoverageServiceTest {
 
@@ -48,6 +51,40 @@ class IcecatMappingCoverageServiceTest {
             assertThat(category.id()).isEqualTo(998);
             assertThat(category.name()).isEqualTo("Candidate");
         });
+    }
+
+    @Test
+    void reportsCoverageAgainstAStreamedCatalogueInventoryWithoutTouchingTheIndex() {
+        IcecatIndexService indexService = mock(IcecatIndexService.class);
+        IcecatCatalogueInventory inventory = new IcecatCatalogueInventory(2, 2, 3,
+                List.of(new IcecatCatalogueCategory(1584, "Televisions", null, 10),
+                        new IcecatCatalogueCategory(224, "Air conditioners", null, 8),
+                        new IcecatCatalogueCategory(999, "TV-like but unreviewed", 1584, 1)));
+
+        IcecatMappingCoverageService service = new IcecatMappingCoverageService(indexService, projectionService());
+
+        IcecatMappingCoverage coverage = service.coverage(EFFECTIVE_ON, inventory);
+
+        assertThat(coverage.categoryCount()).isEqualTo(3);
+        assertThat(coverage.mappedCategoryCount()).isEqualTo(2);
+        assertThat(coverage.unmappedCategoryCount()).isEqualTo(1);
+        assertThat(coverage.mappedCategoriesByVertical()).containsEntry("air-conditioner", 1L).containsEntry("tv", 1L);
+        org.mockito.Mockito.verifyNoInteractions(indexService);
+    }
+
+    @Test
+    void exposesUnmappedCategoriesFromAStreamedCatalogueInventoryWithoutInferringAMapping() {
+        IcecatIndexService indexService = mock(IcecatIndexService.class);
+        IcecatCatalogueInventory inventory = new IcecatCatalogueInventory(0, 0, 0,
+                List.of(new IcecatCatalogueCategory(1584, "Televisions", null, 10),
+                        new IcecatCatalogueCategory(999, "TV-like but unreviewed", 1584, 1),
+                        new IcecatCatalogueCategory(998, "Candidate", null, 1)));
+
+        IcecatMappingCoverageService service = new IcecatMappingCoverageService(indexService, projectionService());
+
+        assertThat(service.unmappedCategories(EFFECTIVE_ON, 10, inventory))
+                .extracting(IcecatUnmappedCategory::id)
+                .containsExactly(998, 999);
     }
 
     private IcecatCategoryDocument category(int id, String name) {

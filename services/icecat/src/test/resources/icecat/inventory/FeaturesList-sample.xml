@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ICECAT-interface>
+  <Response Status="OK" Request_ID="1" ID="1" Date="2026-01-01">
+    <FeaturesList>
+      <Feature ID="42" Type="numerical" CategoryFeatureGroup_ID="7" CategoryFeature_ID="1001" Updated="2026-01-01">
+        <Names>
+          <Name ID="1" langid="1" Value="Screen size"/>
+        </Names>
+      </Feature>
+      <Feature ID="43" Type="alphanumeric" CategoryFeatureGroup_ID="7" CategoryFeature_ID="1002" Updated="2026-01-01">
+        <Names>
+          <Name ID="2" langid="1" Value="Panel type"/>
+        </Names>
+      </Feature>
+    </FeaturesList>
+  </Response>
+</ICECAT-interface>

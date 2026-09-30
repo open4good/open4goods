@@ -11,8 +11,15 @@ import java.util.Objects;
  */
 public record SourceUsagePolicyDocument(String schemaVersion, List<SourceUsagePolicy> policies) {
 
-    /** Current schema identifier for source-usage policy resources. */
-    public static final String SCHEMA_VERSION = "https://open4goods.org/schema/source-usage-policy-1.json";
+    /**
+     * Current schema identifier for source-usage policy resources.
+     *
+     * <p>Version 2 replaced the flat {@code contentTypes} / {@code allowedSurfaces}
+     * pair with per-content-type {@code surfaceGrants}, because the flat pair read
+     * as a cartesian product and could not express a surface granted for one
+     * content type but not another.
+     */
+    public static final String SCHEMA_VERSION = "https://open4goods.org/schema/source-usage-policy-2.json";
 
     /**
      * Validates the contract version and policy list.

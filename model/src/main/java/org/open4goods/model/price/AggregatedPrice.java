@@ -54,6 +54,10 @@ public class AggregatedPrice extends Price {
 	}
 
 	/**
+	 * Truncates the internal datasource name; still an internal id, never a
+	 * reviewed public label. Public-facing code (e.g. a merchant field) must
+	 * resolve a label through {@code org.open4goods.model.provider.PublicProviderLabelRegistry}
+	 * instead of calling this method.
 	 *
 	 * @return the datasource name without tld
 	 */

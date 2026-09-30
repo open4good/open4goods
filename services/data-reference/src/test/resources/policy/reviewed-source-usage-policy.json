@@ -1,11 +1,13 @@
 {
-  "schemaVersion" : "https://open4goods.org/schema/source-usage-policy-1.json",
+  "schemaVersion" : "https://open4goods.org/schema/source-usage-policy-2.json",
   "policies" : [ {
     "policyId" : "fixture-reviewed",
     "sourceId" : "fixture-source",
     "version" : "1",
-    "contentTypes" : [ "ATTRIBUTE", "MEDIA" ],
-    "allowedSurfaces" : [ "NUDGER_WEB", "B2B_API", "ODBL_EXPORT" ],
+    "surfaceGrants" : {
+      "ATTRIBUTE" : [ "NUDGER_WEB", "B2B_API", "ODBL_EXPORT" ],
+      "MEDIA" : [ "NUDGER_WEB", "B2B_API", "ODBL_EXPORT" ]
+    },
     "effectiveFrom" : "2026-01-01T00:00:00Z",
     "effectiveUntil" : "2026-12-31T23:59:59Z",
     "retention" : "P30D",

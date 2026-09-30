@@ -18,7 +18,7 @@ services:
       timeout: 5s
       retries: 30
     ports:
-      - "127.0.0.1:9200:9200"
+      - "127.0.0.1:${O4G_PORT_ELASTICSEARCH:-9200}:9200"
     ulimits:
       memlock: {soft: -1, hard: -1}
       nofile: {soft: 65536, hard: 65536}
@@ -34,7 +34,7 @@ services:
       timeout: 3s
       retries: 30
     ports:
-      - "127.0.0.1:6379:6379"
+      - "127.0.0.1:${O4G_PORT_REDIS:-6379}:6379"
     volumes:
       - ${O4G_LOCAL_DATA_ROOT:-./.local/data}/redis:/data
 
@@ -50,7 +50,7 @@ services:
       timeout: 3s
       retries: 30
     ports:
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:${O4G_PORT_POSTGRES:-5432}:5432"
     volumes:
       - ${O4G_LOCAL_DATA_ROOT:-./.local/data}/postgres:/var/lib/postgresql/data
 
@@ -62,7 +62,7 @@ services:
     environment:
       ELASTICSEARCH_HOSTS: http://elasticsearch:9200
     ports:
-      - "127.0.0.1:5601:5601"
+      - "127.0.0.1:${O4G_PORT_KIBANA:-5601}:5601"
 
   mysql:
     image: mysql:9.7.2@sha256:257388edf9c84dbc04c763625446d5f3fa6ed60d1b0873bc552c614ba0a7ab4e
@@ -92,7 +92,7 @@ services:
       DB_PASSWORD: ${O4G_LOCAL_XWIKI_DB_PASSWORD:-open4goods-local}
       DB_USER: xwiki
     ports:
-      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:${O4G_PORT_XWIKI:-8080}:8080"
     volumes:
       - ${O4G_LOCAL_DATA_ROOT:-./.local/data}/xwiki:/usr/local/xwiki
       - type: bind

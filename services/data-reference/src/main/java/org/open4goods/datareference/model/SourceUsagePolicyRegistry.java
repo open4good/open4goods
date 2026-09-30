@@ -97,6 +97,32 @@ public final class SourceUsagePolicyRegistry {
     }
 
     /**
+     * Tests direct source evidence against a single named use, such as AI
+     * training, mirroring {@link #allows}.
+     *
+     * @param sourceId source that produced the assertion
+     * @param reference exact policy version carried by the source head
+     * @param contentType assertion content type
+     * @param use named use being tested
+     * @param instant instant of the proposed use
+     * @return {@code true} only for an existing, matching, reviewed policy that does not forbid the use
+     */
+    public boolean allowsUse(
+            SourceId sourceId,
+            SourceUsagePolicyRef reference,
+            SourceContentType contentType,
+            ProhibitedUse use,
+            Instant instant) {
+        if (sourceId == null || reference == null) {
+            return false;
+        }
+        return find(reference)
+                .filter(policy -> policy.sourceId().equals(sourceId))
+                .map(policy -> policy.allowsUse(contentType, use, instant))
+                .orElse(false);
+    }
+
+    /**
      * Derived values never inherit a source redistribution permission.
      *
      * @return always {@code false}; a separate owner-reviewed policy is required

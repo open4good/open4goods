@@ -1,0 +1,11 @@
+{
+  "labels" : [ {
+    "sourceId" : "test-fixture-merchant-alpha.example",
+    "label" : "Test Fixture Merchant Alpha",
+    "faviconUrl" : "https://merchant-alpha.example/favicon.ico"
+  }, {
+    "sourceId" : "test-fixture-merchant-beta.example",
+    "label" : "Test Fixture Merchant Beta",
+    "faviconUrl" : null
+  } ]
+}

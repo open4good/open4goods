@@ -15,6 +15,7 @@ import org.open4goods.datareference.model.CanonicalAttributeId;
 import org.open4goods.datareference.model.Gtin;
 import org.open4goods.datareference.model.GtinLink;
 import org.open4goods.datareference.model.GtinMatchConfidence;
+import org.open4goods.datareference.model.ProhibitedUse;
 import org.open4goods.datareference.model.ProjectionSurface;
 import org.open4goods.datareference.model.SourceAssertion;
 import org.open4goods.datareference.model.SourceRecordHead;
@@ -104,6 +105,9 @@ public final class DeterministicResolutionService implements ResolutionPort {
                 if (!policies.allows(head.key().sourceId(), head.usagePolicyRef(), assertion.contentType(), surface, at)) {
                     continue;
                 }
+                if (isProhibitedForDerivation(head, assertion, at)) {
+                    continue;
+                }
                 NormalizationResult normalized = normalization.normalize(new NormalizationRequest(head.key().sourceId(), assertion,
                         sourceLocale.apply(head), sourceLanguage.apply(head), at.atZone(ZoneOffset.UTC).toLocalDate()));
                 if (normalized.status() != NormalizationStatus.SUCCESS) {
@@ -119,6 +123,24 @@ public final class DeterministicResolutionService implements ResolutionPort {
             }
         }
         return candidates;
+    }
+
+    /**
+     * Excludes a source assertion from derivation, rather than degrading its
+     * weight, when its reviewed policy forbids the assertion's content from
+     * feeding a derived value, an embedding or generated text.
+     *
+     * <p>Every resolved value produced here can end up as GenAI input downstream
+     * (see GOU-99), so the exclusion is unconditional on the ordinary content
+     * type and surface eligibility already checked by {@code policies.allows}.
+     */
+    private boolean isProhibitedForDerivation(SourceRecordHead head, SourceAssertion assertion, Instant at) {
+        for (ProhibitedUse use : ProhibitedUse.values()) {
+            if (!policies.allowsUse(head.key().sourceId(), head.usagePolicyRef(), assertion.contentType(), use, at)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private java.util.Optional<ResolvedValue> resolveField(

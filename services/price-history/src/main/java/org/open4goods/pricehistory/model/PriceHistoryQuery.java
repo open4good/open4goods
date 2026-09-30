@@ -20,7 +20,7 @@ import org.open4goods.datareference.model.SourceId;
  * @param condition optional condition filter
  * @param currency optional ISO 4217 currency filter
  * @param cursor opaque continuation returned by a previous page
- * @param pageSize bounded number of entries
+ * @param pageSize bounded number of entries, {@link #MIN_PAGE_SIZE}..{@link #MAX_PAGE_SIZE}
  * @param includeLegacy whether the separate neutral legacy shape is requested
  */
 public record PriceHistoryQuery(
@@ -35,7 +35,14 @@ public record PriceHistoryQuery(
         int pageSize,
         boolean includeLegacy) {
 
-    private static final int MAX_PAGE_SIZE = 500;
+    /**
+     * Single source of truth for the public {@code limit} bound (GOU-100). The read
+     * port never serves a larger page, so the B2B contract, OpenAPI, generated
+     * clients, docs and playground must all derive their upper bound from this
+     * constant rather than restating it.
+     */
+    public static final int MIN_PAGE_SIZE = 1;
+    public static final int MAX_PAGE_SIZE = 500;
 
     /** Validates range semantics and request bounds. */
     public PriceHistoryQuery {
@@ -53,8 +60,9 @@ public record PriceHistoryQuery(
         if (cursor.isPresent() && cursor.get().isBlank()) {
             throw new IllegalArgumentException("cursor must be opaque and nonblank when present");
         }
-        if (pageSize < 1 || pageSize > MAX_PAGE_SIZE) {
-            throw new IllegalArgumentException("pageSize must be between 1 and " + MAX_PAGE_SIZE);
+        if (pageSize < MIN_PAGE_SIZE || pageSize > MAX_PAGE_SIZE) {
+            throw new IllegalArgumentException(
+                    "pageSize must be between " + MIN_PAGE_SIZE + " and " + MAX_PAGE_SIZE);
         }
     }
 
