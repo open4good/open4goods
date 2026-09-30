@@ -7,54 +7,21 @@ audience: PROJECT_SCOPED
 # Source usage policy inventory
 
 The Git-authored [policy inventory](../../services/data-reference/src/main/resources/policy/source-usage-policies.json)
-is the publication authority for source evidence. Its typed loader denies a
-missing policy, a source mismatch, an unreviewed policy, a prohibited
-redistribution setting, an out-of-period policy and a revoked policy. Derived
-fields never inherit a provider permission.
+is the publication authority for source evidence, and the only place to read a
+per-source fact: every record carries its content types and granted surfaces,
+evidence links, effective period, retention, attribution, media-cache setting and
+review state. [ADR-0010](../adr/0010-source-neutral-product-reference.md) states
+how a policy is read; `SourceUsagePolicyRegistryTest` is its executable reading,
+over both this deny inventory and a reviewed fixture.
 
-Each policy grants surfaces per content type through `surfaceGrants`, a map from
-content type to its allowed projection surfaces, rather than a flat content-type
-set crossed with a flat surface set. A source can clear its identifiers (GTIN,
-MPN) for the `ODBL_EXPORT` surface without that clearing its attributes, text or
-media for the same surface - a distinction a cartesian product could not
-express, and that a second policy record cannot supply either, because a source
-record carries exactly one policy reference. A content type present as a key
-with an empty surface set is still reviewed for `allowsUse` (e.g. a named use
-such as AI training); it is simply published nowhere.
-
-A policy also carries a deny-by-default `derivativeLicence` (e.g. the Icecat
-share-alike obligation), a deny-by-default `prohibitedUses` set (e.g.
-`AI_TRAINING`, `SYNTHETIC_CONTENT_GENERATION`), and an attribution
-`asIsDisclaimerRequired` flag for the Fair Use Policy disclaimer. The mirrored
-`allowsUse` predicate on the policy and the registry checks one named use, and
-`DeterministicResolutionService` consults it to drop a prohibited-use source
-from a derivation before any resolved value is produced.
-
-The inventory records the content observed in the reference contracts. An API,
-a legacy public page or a source's receipt of merchant content is supporting
-evidence, not an O4G redistribution approval. All entries below are intentionally
-unreviewed and publish to no `NUDGER_WEB`, `B2B_API` or `ODBL_EXPORT` surface.
-
-| Source / version | Content types inventoried | Supporting evidence | Period / retention | Attribution / media | Owner decision |
-|---|---|---|---|---|---|
-| EPREL public API / 1 | identity, classification, attribute, text, media, relation | [API terms](https://ec.europa.eu/assets/move-ener/eprel/EPREL%20Public/Public%20API%20Term%20and%20Conditions/API_TERMS_AND_CONDITIONS_EN.pdf), [Regulation 2024/994](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02024R0994-20240402) | 2024-06-03 onward / none | unset / no cache | approve exact public fields, surfaces, attribution and retention |
-| Icecat open content / 1 | identity, classification, attribute, text, media, relation | [subscription](https://icecat.com/content-subscription/), [content overview](https://icecat.com/structured-data-content-users/) | 2026-09-12 onward / none | unset / no cache | identify the applicable license and approved brand/content scope |
-| Merchant feed / 1 | identity, attribute, text, media, offer, price | [Merchant specification](https://support.google.com/merchants/answer/7052112?hl=en-GB) | 2026-09-12 onward / none | unset / no cache | obtain each merchant's grant, price retention and display terms |
-| Legacy product backup / 1 | identity, classification, attribute, text, media, relation, offer, price | [private input contract](../operations/product-backup-input-contract.md) | 2026-09-12 onward / none | unset / no cache | establish provenance per field before any publication |
-| Amazon PA-API / 1 | identity, classification, attribute, text, media, relation, offer, price | [Associates policies](https://affiliate-program.amazon.com/help/operating/policies?ac-ms-src=ac-nav), [API cache guide](https://webservices.amazon.co.uk/paapi5/documentation/best-programming-practices.html) | 2026-09-12 onward / none | unset / no cache | remains quarantined; no approval is requested for historical payloads |
+Today every record is `UNREVIEWED` and grants no surface, so nothing published
+derives from one. An API, a legacy public page or a source's receipt of merchant
+content is supporting evidence, not an O4G redistribution approval.
 
 ## Owner review packet
 
-Each unresolved row is a packet with the source/version and content/surface
-matrix above, the linked supporting evidence, proposed effective dates,
-retention, attribution wording and media-cache setting. The owner records one
-of: an exact reviewed policy version, a revocation timestamp, or an explicit
-denial. The policy resource retains all prior versions for replay; a changed
-term produces a new record rather than editing historical permission.
-
-`SourceUsagePolicyRegistryTest` loads both this deny inventory and a reviewed
-fixture. It exercises every publication surface at effective, expiry and
-revocation boundaries, requires attribution, rejects prohibited media caching,
-rejects derived-field inheritance, and confirms the deny-by-default reading of
-an inventory fixture that predates `derivativeLicence`, `prohibitedUses` and
-`asIsDisclaimerRequired`.
+Each unreviewed record is a packet: source, version, content/surface matrix and
+evidence links as recorded in the JSON, plus proposed effective dates, retention,
+attribution wording and media-cache setting. The owner answers with an exact
+reviewed policy version, a revocation timestamp, or an explicit denial -- tracked
+on that source's Paperclip issue, which keeps a pending decision out of the corpus.

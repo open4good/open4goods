@@ -35,3 +35,5 @@ contract, infrastructure, data layout, security posture or developer workflow.
 | [0013](0013-beta-first-development-and-production-promotion.md) | ADR 0013: Beta-first development and production promotion | SUPERSEDED | 8, 14 |
 | [0014](0014-local-first-development-and-staged-promotion.md) | ADR 0014: Local-first development and staged promotion | ACCEPTED | 8, 14 |
 | [0015](0015-paperclip-issue-governance.md) | ADR 0015: Paperclip issue governance | ACCEPTED | 3, 8, 14 |
+| [0016](0016-secret-scan-accepted-baseline.md) | ADR 0016: Secret-scan baseline as a reviewed exception ledger | ACCEPTED | 1 |
+| [0017](0017-eprel-sourced-facets-are-zero-rated.md) | ADR 0017: EPREL-sourced facets are zero-rated | ACCEPTED | -- |

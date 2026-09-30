@@ -40,10 +40,9 @@ lang: fr
   `ProductScoresDto`. Chaque score porte `value`, `absolute`/`relativ` (cardinalités), `letter()` (A-E).
   → **Aucun concurrent du panel n'a cette donnée.**
 - **`product.energy`** - `eprelDatas` (EPREL UE) + score `CLASSE_ENERGY` (et HDR/SDR pour TV). DTO :
-  `ProductEprelDto`. **Gratuit, compte requis, jamais facturé** - décision
-  [`00-canonical-decisions.md`](../00-canonical-decisions.md) 2.6 (GOU-106) :
-  les CGU EPREL (art. 4§2(a)) interdisent de revendre ces données telles
-  quelles ; ce tableau listait auparavant 10 crédits, ce chiffre est corrigé.
+  `ProductEprelDto`. Gratuit, compte requis, hors facturation
+  ([ADR-0017](../../adr/0017-eprel-sourced-facets-are-zero-rated.md)) ; le chiffre
+  de 10 crédits qui figurait ici est corrigé.
 ---
 
 ## 2. Facettes " marché " non couvertes par nudger

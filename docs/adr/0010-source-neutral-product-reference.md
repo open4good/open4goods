@@ -55,10 +55,22 @@ non-linguistic or unknown content. Locale-sensitive parsing and formatting use
 ICU4J/CLDR; formatting never changes stored values.
 
 Usage policies are deny-by-default and keyed by source, content type and effective
-period. They declare allowed `NUDGER_WEB`, `B2B_API` and `ODBL_EXPORT` surfaces,
-retention, media caching, attribution, redistribution and legal-review metadata. The
-resolver removes disallowed evidence before selection or derivation, including logs
-and audit payloads exposed outside operations.
+period. They declare retention, media caching, attribution, redistribution and
+legal-review metadata. Allowed surfaces are granted per content type -- a
+`surfaceGrants` map from content type to its permitted `NUDGER_WEB`, `B2B_API` and
+`ODBL_EXPORT` surfaces, not a flat content-type set crossed with a flat surface set.
+A source can clear its identifiers for `ODBL_EXPORT` without that clearing its text
+or media on the same surface; a cartesian product cannot express that, and a second
+record cannot supply it either, because a source record carries exactly one policy
+reference. A content type keyed with an empty surface set is still evaluated for a
+named use, and publishes nowhere. A policy also carries a deny-by-default derivative
+licence and prohibited-use set, and an as-is disclaimer flag; a named use is checked
+through one mirrored predicate on both the policy and the registry. A source record
+carries exactly one policy version, all versions are retained for replay, and a
+changed term produces a new version rather than an edit to a historical permission.
+The resolver removes disallowed evidence, and drops a prohibited-use source from a
+derivation, before selection or derivation -- including in logs and audit payloads
+exposed outside operations. A derived field never inherits a provider permission.
 
 Resolution rules are versioned per canonical concept. Validated O4G corrections win in
 their declared scope. EPREL is authoritative only for configured regulatory concepts
