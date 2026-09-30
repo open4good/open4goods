@@ -1,58 +1,109 @@
 package org.open4goods.b2bapi.service.pricehistory;
 
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HexFormat;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.open4goods.pricehistory.model.PriceHistoryGranularity;
 
 /**
- * Opaque, client-facing price-history cursor that binds the internal Elasticsearch cursor to a
- * fingerprint of every query filter, so a cursor replayed against a different query fails fast as a
- * validation error (GOU-28 AC2 "cursor/query mismatch") instead of silently resuming a different
- * result set.
+ * Opaque, client-facing price-history cursor. It authenticate-encrypts (AES-256-GCM, keyed by a
+ * server-only secret) the internal Elasticsearch cursor together with a fingerprint of every query
+ * filter it was issued for.
+ *
+ * <p>Two properties fall out of using AEAD rather than plain Base64: (1) the internal
+ * {@code provider_id}/{@code event_id} coordinates carried by the inner cursor never appear in any
+ * form a client can read (GOU-28 AC4), and (2) a client cannot construct a syntactically valid
+ * opaque cursor without the server secret, so forged or corrupted input fails authentication and is
+ * always rejected as {@code cursor-mismatch} - it can never reach the inner
+ * {@link org.open4goods.pricehistory.service.PriceHistoryCursor} decoder and trigger an unhandled
+ * exception (GOU-28 AC2).
  */
 public final class PriceHistoryPublicCursor {
 
     private static final char SEPARATOR = '\u0000';
+    private static final String CIPHER_TRANSFORM = "AES/GCM/NoPadding";
+    private static final int GCM_IV_LENGTH_BYTES = 12;
+    private static final int GCM_TAG_LENGTH_BITS = 128;
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     private PriceHistoryPublicCursor() {
     }
 
     /**
-     * Encodes the opaque internal cursor together with a fingerprint of the query it was issued for.
+     * Encrypts the opaque internal cursor together with a fingerprint of the query it was issued for.
      *
+     * @param cursorSecret server-only secret; never derived from request data
      * @param innerCursor opaque cursor returned by {@link org.open4goods.pricehistory.port.PriceHistoryQueryPort}
      * @param fingerprint query fingerprint from {@link #fingerprint}
      * @return opaque, URL-safe public cursor
      */
-    public static String encode(final String innerCursor, final String fingerprint) {
+    public static String encode(final String cursorSecret, final String innerCursor, final String fingerprint) {
+        Objects.requireNonNull(cursorSecret, "cursorSecret must not be null");
         Objects.requireNonNull(innerCursor, "innerCursor must not be null");
         Objects.requireNonNull(fingerprint, "fingerprint must not be null");
-        final String material = fingerprint + SEPARATOR + innerCursor;
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(material.getBytes(StandardCharsets.UTF_8));
+        final byte[] plaintext = (fingerprint + SEPARATOR + innerCursor).getBytes(StandardCharsets.UTF_8);
+        final byte[] iv = new byte[GCM_IV_LENGTH_BYTES];
+        RANDOM.nextBytes(iv);
+        try {
+            final Cipher cipher = Cipher.getInstance(CIPHER_TRANSFORM);
+            cipher.init(Cipher.ENCRYPT_MODE, deriveKey(cursorSecret), new GCMParameterSpec(GCM_TAG_LENGTH_BITS, iv));
+            final byte[] ciphertext = cipher.doFinal(plaintext);
+            final byte[] combined = new byte[iv.length + ciphertext.length];
+            System.arraycopy(iv, 0, combined, 0, iv.length);
+            System.arraycopy(ciphertext, 0, combined, iv.length, ciphertext.length);
+            return Base64.getUrlEncoder().withoutPadding().encodeToString(combined);
+        } catch (final GeneralSecurityException ex) {
+            throw new IllegalStateException("failed to encrypt price-history cursor", ex);
+        }
     }
 
     /**
-     * Decodes a public cursor, verifying it was issued for the exact same query.
+     * Decrypts a public cursor, verifying its authenticity and that it was issued for the exact same
+     * query. Never throws on malformed or forged input - both are indistinguishable from a
+     * fingerprint mismatch to the caller.
      *
+     * @param cursorSecret server-only secret; never derived from request data
      * @param opaqueCursor client-supplied cursor
      * @param expectedFingerprint fingerprint of the request currently being served
-     * @return decoded internal cursor, when the fingerprint matches
+     * @return decoded internal cursor, when the cursor authenticates and the fingerprint matches
      */
-    public static Optional<String> decode(final String opaqueCursor, final String expectedFingerprint) {
+    public static Optional<String> decode(
+            final String cursorSecret, final String opaqueCursor, final String expectedFingerprint) {
+        Objects.requireNonNull(cursorSecret, "cursorSecret must not be null");
         if (opaqueCursor == null || opaqueCursor.isBlank()) {
             return Optional.empty();
         }
+        final byte[] combined;
+        try {
+            combined = Base64.getUrlDecoder().decode(opaqueCursor);
+        } catch (final IllegalArgumentException ex) {
+            return Optional.empty();
+        }
+        if (combined.length <= GCM_IV_LENGTH_BYTES) {
+            return Optional.empty();
+        }
+        final byte[] iv = Arrays.copyOfRange(combined, 0, GCM_IV_LENGTH_BYTES);
+        final byte[] ciphertext = Arrays.copyOfRange(combined, GCM_IV_LENGTH_BYTES, combined.length);
         final String value;
         try {
-            value = new String(Base64.getUrlDecoder().decode(opaqueCursor), StandardCharsets.UTF_8);
-        } catch (final IllegalArgumentException ex) {
+            final Cipher cipher = Cipher.getInstance(CIPHER_TRANSFORM);
+            cipher.init(Cipher.DECRYPT_MODE, deriveKey(cursorSecret), new GCMParameterSpec(GCM_TAG_LENGTH_BITS, iv));
+            value = new String(cipher.doFinal(ciphertext), StandardCharsets.UTF_8);
+        } catch (final GeneralSecurityException | IllegalArgumentException ex) {
             return Optional.empty();
         }
         final int separator = value.indexOf(SEPARATOR);
@@ -65,6 +116,15 @@ public final class PriceHistoryPublicCursor {
             return Optional.empty();
         }
         return Optional.of(innerCursor);
+    }
+
+    private static SecretKeySpec deriveKey(final String cursorSecret) {
+        try {
+            final byte[] key = MessageDigest.getInstance("SHA-256").digest(cursorSecret.getBytes(StandardCharsets.UTF_8));
+            return new SecretKeySpec(key, "AES");
+        } catch (final NoSuchAlgorithmException ex) {
+            throw new IllegalStateException("the JDK must provide SHA-256", ex);
+        }
     }
 
     /**

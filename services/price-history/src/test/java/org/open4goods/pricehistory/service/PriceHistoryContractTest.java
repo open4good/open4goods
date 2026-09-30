@@ -33,7 +33,20 @@ class PriceHistoryContractTest {
 
         assertThat(query.effectiveGranularity()).isEqualTo(PriceHistoryGranularity.DAY);
         assertThat(PriceHistoryCursor.decode(cursor).timestamp()).isEqualTo(from);
-        assertThat(PriceHistoryCursor.decode(cursor).stableId()).isEqualTo("event-1");
+        assertThat(PriceHistoryCursor.decode(cursor).sortKeys()).containsExactly("event-1");
+    }
+
+    /** GOU-28 review fix: the daily-rollup sort has three stable keys, not one - the cursor must
+     *  carry all of them so {@code search_after} arity matches the sort clause it was captured from. */
+    @Test
+    void cursorRoundTripsMultipleSortKeys() {
+        Instant from = Instant.parse("2026-01-01T00:00:00Z");
+        String cursor = PriceHistoryCursor.after(from, "provider-1", "NEW", "EUR");
+
+        PriceHistoryCursor.Position decoded = PriceHistoryCursor.decode(cursor);
+
+        assertThat(decoded.timestamp()).isEqualTo(from);
+        assertThat(decoded.sortKeys()).containsExactly("provider-1", "NEW", "EUR");
     }
 
     /** GOU-100: the public `limit` bound is 1..500, tracking {@link PriceHistoryQuery#MAX_PAGE_SIZE}. */
@@ -85,7 +98,7 @@ class PriceHistoryContractTest {
 
         assertThat(nextPage.cursor()).contains(cursor);
         assertThat(nextPage.pageSize()).isEqualTo(PriceHistoryQuery.MAX_PAGE_SIZE);
-        assertThat(PriceHistoryCursor.decode(nextPage.cursor().orElseThrow()).stableId()).isEqualTo("event-1");
+        assertThat(PriceHistoryCursor.decode(nextPage.cursor().orElseThrow()).sortKeys()).containsExactly("event-1");
     }
 
     @Test

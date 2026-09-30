@@ -117,7 +117,7 @@ fields shown in the envelope above (`requestId`, `timestamp`, `language`,
 | `bestOccasionOffer` | B2bOfferDto (nullable) | `AggregatedPrices.bestOccasionOffer()` | |
 | `offersByCondition` | Map<ProductCondition, List<B2bOfferDto>> | `AggregatedPrices.sortedOffers(condition)` | sanitized offers grouped |
 | `newTrend` / `occasionTrend` | B2bPriceTrendDto (nullable) | `AggregatedPrices.getTrends()` | "already available, no heavy work" |
-| `newHistorySummary` / `occasionHistorySummary` | B2bPriceHistorySummaryDto (nullable) | `getHistoryLowest/Highest/Average` | summary only in price facet; full series is the future `price-history` facet |
+| `newHistorySummary` / `occasionHistorySummary` | B2bPriceHistorySummaryDto (nullable) | `getHistoryLowest/Highest/Average` | summary only in the price facet; the full series is the dedicated `product.price-history` facet below |
 
 ### `B2bOfferDto` (sanitized offer)
 
@@ -162,16 +162,40 @@ Each shipped facet has a dedicated lifecycle spec under
 | `product.identity` | `/products/{gtin}/identity` | future | 1 | ~34M |
 | `product.attributes` | `/products/{gtin}/attributes` | future | 4 | ~34M |
 | `product.images` / `product.documents` | `.../images` `.../documents` | future | 3 | ~125K |
-| `product.price-history` | `.../price/history` | future | 8 | subset |
+| `product.price-history` | `.../price/history` | **yes** | 8 | subset (licensed sources only) |
 | `product.impact` | `.../impact` | future | 15 | ~45-50K (exclusive) |
 | `product.energy` | `.../energy` | future | 10 | ~47K (exclusive) |
 | `product.taxonomy` | `.../taxonomy` | future | 15 | curated (exclusive) |
 
-`product.price-history` paginates on `limit`, bounded by `PriceHistoryQuery`'s
-`MIN_PAGE_SIZE`/`MAX_PAGE_SIZE` (GOU-100). OpenAPI, generated clients, the docs and
-the playground read the range from those constants rather than restating a number,
-since a published maximum can be raised compatibly but not shrunk; out of range is an
-RFC 9457 error ([`product-data-api-errors.md`](product-data-api-errors.md)).
+### `product.price-history` (GOU-28)
+
+`GET /api/v1/products/{gtin}/price/history` serves licensed provider price
+history - daily rollups (`DAY`, up to 5 years) or sparse change events
+(`CHANGE`, up to 31 days) - read from dedicated Elasticsearch data streams
+(`o4g-daily-provider-rollup-*` / `o4g-price-change-*`), never the Product
+index. Full spec: [`../b2b/facets/product-price-history.md`](../b2b/facets/product-price-history.md).
+
+- **`limit` bound**: spans **1..500**, not 1..1000. The read port,
+  `PriceHistoryQuery.MAX_PAGE_SIZE` in `org.open4goods.pricehistory.model`, is
+  the single source of truth for that upper bound - raising it later stays
+  backward compatible, while shrinking a published maximum would not. OpenAPI,
+  generated clients, the English/French docs and the playground read `1..500`
+  from that constant, rather than each restating either number by hand. An
+  out-of-range `limit` returns an RFC 9457 validation error, matching
+  [`product-data-api-errors.md`](product-data-api-errors.md). See
+  [GOU-100](/GOU/issues/GOU-100) for the arbitration record.
+- **Cursor format**: the public `cursor` is AES-256-GCM authenticate-encrypted
+  (server-only key, `b2b.price-history.cursor-secret`) over the internal
+  Elasticsearch position plus a fingerprint of every query filter. This is
+  deliberate, not an implementation detail an integration should depend on:
+  internal provider/offer coordinates never appear in any form a client can
+  decode (AC4), and a cursor that does not authenticate - forged, corrupted,
+  or replayed against different query parameters - always fails as a 400
+  `cursor-mismatch`, never a 500. Treat the cursor as fully opaque and only
+  ever pass back a value the API itself returned.
+- **Billing**: 8 credits, billed only when at least one policy-allowed point
+  is served (`has-history`); see AC5/AC6 on [GOU-28](/GOU/issues/GOU-28) for
+  the full no-pay matrix.
 
 ## Playground proxy (session-authenticated)
 

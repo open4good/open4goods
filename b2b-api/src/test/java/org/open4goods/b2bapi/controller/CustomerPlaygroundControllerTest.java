@@ -43,6 +43,7 @@ import org.open4goods.b2bapi.service.B2bBarcodeCheckService;
 import org.open4goods.b2bapi.service.B2bBarcodeService;
 import org.open4goods.b2bapi.service.B2bProductService;
 import org.open4goods.b2bapi.service.DashboardPrincipal;
+import org.open4goods.b2bapi.service.PriceHistoryFacetService;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -53,6 +54,7 @@ class CustomerPlaygroundControllerTest {
 
     private final ApiKeyRepository apiKeyRepository = mock(ApiKeyRepository.class);
     private final B2bProductService b2bProductService = mock(B2bProductService.class);
+    private final PriceHistoryFacetService priceHistoryFacetService = mock(PriceHistoryFacetService.class);
     private final B2bBarcodeService b2bBarcodeService = mock(B2bBarcodeService.class);
     private final B2bBarcodeCheckService b2bBarcodeCheckService = mock(B2bBarcodeCheckService.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -64,7 +66,7 @@ class CustomerPlaygroundControllerTest {
 
     @BeforeEach
     void setUp() {
-        final CustomerPlaygroundController controller = new CustomerPlaygroundController(apiKeyRepository, b2bProductService, b2bBarcodeService, b2bBarcodeCheckService);
+        final CustomerPlaygroundController controller = new CustomerPlaygroundController(apiKeyRepository, b2bProductService, priceHistoryFacetService, b2bBarcodeService, b2bBarcodeCheckService);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
 
         final DashboardPrincipal principal = new DashboardPrincipal(

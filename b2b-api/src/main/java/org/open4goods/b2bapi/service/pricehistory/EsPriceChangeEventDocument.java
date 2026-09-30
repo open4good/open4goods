@@ -1,7 +1,6 @@
 package org.open4goods.b2bapi.service.pricehistory;
 
 import java.time.Instant;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
@@ -12,10 +11,15 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
  * <p>Field names mirror the index template mapping exactly (snake_case); this class exists only
  * to deserialize search hits and is never used to write documents (no writer for this index
  * exists yet - see {@code services/price-history} port implementations).
+ *
+ * <p>{@code event_id} is deliberately <strong>not</strong> {@code @Id}-annotated: this index is a
+ * time-series data stream, where Elasticsearch always computes the document {@code _id} itself from
+ * the TSID and {@code @timestamp} and rejects any client-supplied {@code _id}. An {@code @Id} field
+ * would have Spring Data Elasticsearch overwrite {@code eventId} with that opaque server-generated
+ * id on every read, discarding the real business identifier carried in {@code _source}.
  */
 public class EsPriceChangeEventDocument {
 
-    @Id
     @Field(name = "event_id", type = FieldType.Keyword)
     private String eventId;
 

@@ -108,6 +108,32 @@ class GitleaksConfigTest(unittest.TestCase):
             self.assertTrue(any(f.endswith("Fixture.vue") for f in files))
             self.assertTrue(any(f.endswith("fixture.mjs") for f in files))
 
+    def test_doc_placeholder_key_allowlisted_but_real_bearer_token_detected(self):
+        """GOU-28: the two documented `pdapi_` placeholders carry no secret, so a new facet
+        doc page must not need a baseline entry for its curl example. A real-looking bearer
+        token in the very same header shape must still be detected - the allowlist is
+        anchored on the exact placeholder, not on the surrounding `curl -H` line."""
+        with tempfile.TemporaryDirectory(prefix="o4g-gitleaks-") as tmp:
+            source = Path(tmp) / "source"
+            source.mkdir()
+            page = source / "facet.md"
+            page.write_text(
+                'curl -H "Authorization: Bearer pdapi_YOUR_KEY_HERE" \\\n'
+                '  "https://example.test/api/v1/products/0885909950805/price/history"\n'
+                'curl -H "Authorization: Bearer pdapi_VOTRE_CLÉ_ICI" \\\n'
+                '  "https://example.test/api/v1/products/0885909950805/price/history"\n'
+            )
+            code, findings = self.scan(source)
+            self.assertEqual(0, code, "documented placeholder keys must not be flagged")
+            self.assertEqual([], findings)
+
+            canary = "pdapi_" + secrets.token_hex(20)
+            with page.open("a") as stream:
+                stream.write(f'curl -H "Authorization: Bearer {canary}"\n')
+            code, findings = self.scan(source)
+            self.assertEqual(1, code, "a real bearer token must stay detected")
+            self.assertIn("curl-auth-header", {item["RuleID"] for item in findings})
+
 
 if __name__ == "__main__":
     if not SCANNER:

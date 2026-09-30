@@ -101,7 +101,8 @@ Chaque nouvelle facette suit le **cycle de vie** décrit dans [`facets/README.md
 - `product.identity` (1 cr.) - friction nulle, améliore playground/matching.
 - `product.attributes` (4 cr.) - ouvre le marché catalogue (34 M couverts).
 - `product.images` + `product.documents` (3 cr.) - UX, couverture faible → no-data-no-pay protège.
-- `product.price-history` (8 cr.) - persistance interne, forte rétention.
+- **`product.price-history`** (8 cr.) - persistance interne, forte rétention -
+  spec : [`facets/product-price-history.md`](../facets/product-price-history.md) (GOU-28).
 
 ### Vague 2 - différenciation propriétaire (le vrai pitch, marge)
 - **`product.impact`** (15 cr.) - DTO `ProductScoresDto` déjà existant, données indexées ES ✅.

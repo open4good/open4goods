@@ -18,8 +18,6 @@ import org.open4goods.b2bapi.service.ApiKeyPrincipal;
 import org.open4goods.b2bapi.service.B2bProductService;
 import org.open4goods.b2bapi.service.PriceHistoryFacetService;
 import org.open4goods.pricehistory.model.PriceHistoryQuery;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -256,9 +254,9 @@ public class ProductController {
             @RequestParam(required = false) final String condition,
             @Parameter(description = "ISO 4217 currency filter.", example = "EUR")
             @RequestParam(required = false) final String currency,
-            @Parameter(description = "Page size.", example = "100")
-            @RequestParam(required = false)
-            @Min(PriceHistoryQuery.MIN_PAGE_SIZE) @Max(PriceHistoryQuery.MAX_PAGE_SIZE) final Integer limit,
+            @Parameter(description = "Page size.", example = "100",
+                    schema = @Schema(minimum = "" + PriceHistoryQuery.MIN_PAGE_SIZE, maximum = "" + PriceHistoryQuery.MAX_PAGE_SIZE))
+            @RequestParam(required = false) final Integer limit,
             @Parameter(description = "Opaque continuation from a previous page.", example = "cHJpY2UtaGlzdG9yeS1jdXJzb3I6MTAw")
             @RequestParam(required = false) final String cursor,
             @AuthenticationPrincipal final ApiKeyPrincipal principal,
