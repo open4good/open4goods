@@ -4,6 +4,9 @@ set -euo pipefail
 
 readonly JAVA_SERVICES=(sbadmin api front-api ui b2b-api)
 
+systemctl_bin="${O4G_SYSTEMCTL:-systemctl}"
+curl_bin="${O4G_CURL:-curl}"
+
 usage() {
   echo "usage: $0 --release SHA --bundle DIRECTORY --service SERVICE --health-url URL [--health-status CODES] [--root DIRECTORY]" >&2
   exit 2
@@ -117,19 +120,19 @@ rollback() {
   if [[ -n "$previous" ]]; then
     ln -s "$previous" "$temporary"
     mv -Tf "$temporary" "$current"
-    systemctl restart "open4goods@${service}.service"
+    "$systemctl_bin" restart "open4goods@${service}.service"
   else
     rm -f -- "$current"
-    systemctl stop "open4goods@${service}.service" || true
+    "$systemctl_bin" stop "open4goods@${service}.service" || true
   fi
 }
 
-if ! systemctl restart "open4goods@${service}.service"; then
+if ! "$systemctl_bin" restart "open4goods@${service}.service"; then
   rollback
   exit 1
 fi
 for _ in $(seq 1 "$health_attempts"); do
-  http_status="$(curl --silent --output /dev/null --write-out '%{http_code}' --max-time 5 "$health_url" || true)"
+  http_status="$("$curl_bin" --silent --output /dev/null --write-out '%{http_code}' --max-time 5 "$health_url" || true)"
   if [[ ",$health_status," == *",$http_status,"* ]]; then
     echo "published ${service} release ${release}"
     exit 0
