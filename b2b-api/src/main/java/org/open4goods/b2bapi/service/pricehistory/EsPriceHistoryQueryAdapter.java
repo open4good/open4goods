@@ -62,10 +62,10 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 @Repository
 public class EsPriceHistoryQueryAdapter implements PriceHistoryQueryPort {
 
-    /** Data stream backing sparse price-change events (retained 24 months). */
-    public static final String PRICE_CHANGE_INDEX = "o4g-price-change";
-    /** Data stream backing daily provider rollups (retained 5 years). */
-    public static final String DAILY_ROLLUP_INDEX = "o4g-daily-provider-rollup";
+    /** Index pattern backing sparse price-change events (retained 24 months), matching the data stream's {@code index_patterns}. */
+    public static final String PRICE_CHANGE_INDEX = "o4g-price-change-*";
+    /** Index pattern backing daily provider rollups (retained 5 years), matching the data stream's {@code index_patterns}. */
+    public static final String DAILY_ROLLUP_INDEX = "o4g-daily-provider-rollup-*";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EsPriceHistoryQueryAdapter.class);
 

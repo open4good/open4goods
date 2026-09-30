@@ -2,12 +2,15 @@ package org.open4goods.b2bapi.service.pricehistory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Currency;
 import java.util.Optional;
 
@@ -36,14 +39,25 @@ import org.testcontainers.utility.DockerImageName;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 
 /**
- * Integration coverage for {@link EsPriceHistoryQueryAdapter} against a real Elasticsearch.
+ * Integration coverage for {@link EsPriceHistoryQueryAdapter} against a real Elasticsearch,
+ * provisioned from the production index templates ({@code services/price-history/.../elasticsearch/*.json})
+ * rather than a mapping hand-copied into the test.
  *
- * <p>This is the test that would have caught the two GOU-28 review defects that unit tests
- * (mocking {@link org.open4goods.pricehistory.port.PriceHistoryQueryPort}) structurally cannot see:
- * a {@code search_after} arity mismatch on the very first DAY-granularity second page, and a sort
- * on a {@code doc_values: false} field ({@code event_id}) that Elasticsearch rejects on every
- * CHANGE-granularity query. Both reproduce here against the exact field mappings the production
- * index templates declare (queried directly, never through the Product index - GOU-28 AC8).
+ * <p>Data stream names used here ({@link #PRICE_CHANGE_DATA_STREAM}, {@link #DAILY_ROLLUP_DATA_STREAM})
+ * are written independently of {@link EsPriceHistoryQueryAdapter#PRICE_CHANGE_INDEX} /
+ * {@link EsPriceHistoryQueryAdapter#DAILY_ROLLUP_INDEX} - they only happen to match the real
+ * {@code index_patterns} declared in the templates. The adapter under test is exercised through its
+ * own constants, so a constant that drifts from the templates' {@code index_patterns} (e.g. missing
+ * the {@code -*} suffix) reproduces here as the same {@code index_not_found_exception} it would in
+ * production, instead of being silently absorbed by a test-local index created under that same wrong
+ * name.
+ *
+ * <p>This is also the test that catches defects unit tests (mocking
+ * {@link org.open4goods.pricehistory.port.PriceHistoryQueryPort}) structurally cannot see: a
+ * {@code search_after} arity mismatch on the very first DAY-granularity second page, and a sort on a
+ * {@code doc_values: false} field ({@code event_id}) that Elasticsearch rejects on every
+ * CHANGE-granularity query. Both reproduce against the exact field mappings the production index
+ * templates declare (queried directly, never through the Product index - GOU-28 AC8).
  */
 @Testcontainers
 class EsPriceHistoryQueryAdapterIT {
@@ -54,16 +68,23 @@ class EsPriceHistoryQueryAdapterIT {
             .withEnv("xpack.security.enabled", "false")
             .withEnv("discovery.type", "single-node");
 
+    /** Matches the {@code o4g-price-change-*} pattern declared by the real index template. */
+    private static final String PRICE_CHANGE_DATA_STREAM = "o4g-price-change-it";
+    /** Matches the {@code o4g-daily-provider-rollup-*} pattern declared by the real index template. */
+    private static final String DAILY_ROLLUP_DATA_STREAM = "o4g-daily-provider-rollup-it";
+
     private static final String GTIN = "1234567890123";
     private static final HttpClient HTTP = HttpClient.newHttpClient();
 
     static ElasticsearchOperations operations;
     static EsPriceHistoryQueryAdapter adapter;
     static String esBaseUrl;
+    static Instant now;
 
     @BeforeAll
     static void connect() throws Exception {
         esBaseUrl = "http://" + ELASTICSEARCH.getHttpHostAddress();
+        now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
         ClientConfiguration clientConfiguration = ClientConfiguration.builder()
                 .connectedTo(ELASTICSEARCH.getHttpHostAddress())
                 .build();
@@ -71,50 +92,22 @@ class EsPriceHistoryQueryAdapterIT {
         operations = new ElasticsearchTemplate(client);
         adapter = new EsPriceHistoryQueryAdapter(operations);
 
-        put("/" + EsPriceHistoryQueryAdapter.PRICE_CHANGE_INDEX, """
-                {"mappings":{"properties":{
-                  "event_id":{"type":"keyword"},
-                  "gtin":{"type":"keyword"},
-                  "provider_id":{"type":"keyword"},
-                  "provider_offer_id":{"type":"keyword"},
-                  "condition":{"type":"keyword"},
-                  "currency":{"type":"keyword"},
-                  "amount":{"type":"double"},
-                  "availability":{"type":"keyword"},
-                  "event_kind":{"type":"keyword"},
-                  "observed_at":{"type":"date"},
-                  "policy_ref":{"type":"keyword","index":false,"doc_values":false},
-                  "content_hash":{"type":"keyword","index":false,"doc_values":false},
-                  "@timestamp":{"type":"date_nanos"}
-                }}}
-                """);
-        put("/" + EsPriceHistoryQueryAdapter.DAILY_ROLLUP_INDEX, """
-                {"mappings":{"properties":{
-                  "@timestamp":{"type":"date_nanos"},
-                  "gtin":{"type":"keyword"},
-                  "provider_id":{"type":"keyword"},
-                  "condition":{"type":"keyword"},
-                  "currency":{"type":"keyword"},
-                  "minimum_amount":{"type":"double"},
-                  "maximum_amount":{"type":"double"},
-                  "close_amount":{"type":"double"},
-                  "observed_offer_count":{"type":"long"},
-                  "change_count":{"type":"long"},
-                  "first_observed_at":{"type":"date"},
-                  "last_observed_at":{"type":"date"}
-                }}}
-                """);
+        // ILM policies are intentionally not provisioned here: index.lifecycle.name only needs a
+        // matching policy once ILM actually runs an action (rollover/delete), which this short-lived
+        // IT never triggers, and index template registration does not validate the reference eagerly.
+        provisionIndexTemplate("o4g-price-change", "elasticsearch/price-change-index-template.json");
+        provisionIndexTemplate("o4g-daily-provider-rollup", "elasticsearch/daily-provider-rollup-index-template.json");
     }
 
     @AfterEach
     void cleanUp() throws Exception {
         HTTP.send(HttpRequest.newBuilder()
-                        .uri(URI.create(esBaseUrl + "/" + EsPriceHistoryQueryAdapter.PRICE_CHANGE_INDEX + "/_delete_by_query?refresh=true"))
+                        .uri(URI.create(esBaseUrl + "/" + PRICE_CHANGE_DATA_STREAM + "/_delete_by_query?refresh=true&ignore_unavailable=true"))
                         .header("Content-Type", "application/json")
                         .POST(BodyPublishers.ofString("{\"query\":{\"match_all\":{}}}"))
                         .build(), HttpResponse.BodyHandlers.discarding());
         HTTP.send(HttpRequest.newBuilder()
-                        .uri(URI.create(esBaseUrl + "/" + EsPriceHistoryQueryAdapter.DAILY_ROLLUP_INDEX + "/_delete_by_query?refresh=true"))
+                        .uri(URI.create(esBaseUrl + "/" + DAILY_ROLLUP_DATA_STREAM + "/_delete_by_query?refresh=true&ignore_unavailable=true"))
                         .header("Content-Type", "application/json")
                         .POST(BodyPublishers.ofString("{\"query\":{\"match_all\":{}}}"))
                         .build(), HttpResponse.BodyHandlers.discarding());
@@ -129,11 +122,11 @@ class EsPriceHistoryQueryAdapterIT {
      */
     @Test
     void dailyPaginationWalksAllPagesAtASharedTimestamp() {
-        Instant timestamp = Instant.parse("2026-01-01T00:00:00Z");
+        Instant timestamp = now.minus(1, ChronoUnit.HOURS);
         indexDailyRollup(timestamp, "merchant-a", "NEW", "EUR");
         indexDailyRollup(timestamp, "merchant-b", "NEW", "EUR");
         indexDailyRollup(timestamp, "merchant-c", "NEW", "EUR");
-        refresh(EsPriceHistoryQueryAdapter.DAILY_ROLLUP_INDEX);
+        refresh(DAILY_ROLLUP_DATA_STREAM);
 
         PriceHistoryQuery firstPage = dailyQuery(1, Optional.empty());
         PriceHistoryPage<DailyProviderRollup> page1 = adapter.queryDaily(firstPage);
@@ -162,11 +155,11 @@ class EsPriceHistoryQueryAdapterIT {
      */
     @Test
     void changePaginationWalksAllPagesAtASharedTimestampWithoutSortingOnTheStoredOnlyEventId() {
-        Instant observedAt = Instant.parse("2026-01-01T00:00:00Z");
+        Instant observedAt = now.minus(1, ChronoUnit.HOURS);
         indexChangeEvent(observedAt, "offer-1");
         indexChangeEvent(observedAt, "offer-2");
         indexChangeEvent(observedAt, "offer-3");
-        refresh(EsPriceHistoryQueryAdapter.PRICE_CHANGE_INDEX);
+        refresh(PRICE_CHANGE_DATA_STREAM);
 
         PriceHistoryQuery firstPage = changeQuery(1, Optional.empty());
         PriceHistoryPage<PriceChangeEvent> page1 = adapter.queryChanges(firstPage);
@@ -188,12 +181,12 @@ class EsPriceHistoryQueryAdapterIT {
 
     @Test
     void dailyQueryFiltersByProviderConditionAndCurrency() {
-        Instant timestamp = Instant.parse("2026-01-01T00:00:00Z");
+        Instant timestamp = now.minus(1, ChronoUnit.HOURS);
         indexDailyRollup(timestamp, "merchant-a", "NEW", "EUR");
         indexDailyRollup(timestamp, "merchant-a", "OCCASION", "EUR");
         indexDailyRollup(timestamp, "merchant-a", "NEW", "USD");
         indexDailyRollup(timestamp, "merchant-b", "NEW", "EUR");
-        refresh(EsPriceHistoryQueryAdapter.DAILY_ROLLUP_INDEX);
+        refresh(DAILY_ROLLUP_DATA_STREAM);
 
         PriceHistoryQuery query = new PriceHistoryQuery(
                 timestamp.minusSeconds(3600), timestamp.plusSeconds(3600), Optional.of(PriceHistoryGranularity.DAY),
@@ -215,9 +208,9 @@ class EsPriceHistoryQueryAdapterIT {
      */
     @Test
     void aCursorWithTheWrongArityIsRejectedAsMalformed() {
-        Instant timestamp = Instant.parse("2026-01-01T00:00:00Z");
+        Instant timestamp = now.minus(1, ChronoUnit.HOURS);
         indexDailyRollup(timestamp, "merchant-a", "NEW", "EUR");
-        refresh(EsPriceHistoryQueryAdapter.DAILY_ROLLUP_INDEX);
+        refresh(DAILY_ROLLUP_DATA_STREAM);
 
         // A single-key cursor (as CHANGE granularity would carry) replayed against DAY, which
         // expects three sort keys, must not silently resume - it must fail fast.
@@ -230,14 +223,14 @@ class EsPriceHistoryQueryAdapterIT {
 
     private PriceHistoryQuery dailyQuery(int pageSize, Optional<String> cursor) {
         return new PriceHistoryQuery(
-                Instant.parse("2025-12-31T00:00:00Z"), Instant.parse("2026-01-02T00:00:00Z"),
+                now.minus(2, ChronoUnit.HOURS), now.plus(1, ChronoUnit.HOURS),
                 Optional.of(PriceHistoryGranularity.DAY), Optional.of(new Gtin(GTIN)), Optional.empty(),
                 Optional.empty(), Optional.empty(), cursor, pageSize, false);
     }
 
     private PriceHistoryQuery changeQuery(int pageSize, Optional<String> cursor) {
         return new PriceHistoryQuery(
-                Instant.parse("2025-12-31T00:00:00Z"), Instant.parse("2026-01-02T00:00:00Z"),
+                now.minus(2, ChronoUnit.HOURS), now.plus(1, ChronoUnit.HOURS),
                 Optional.of(PriceHistoryGranularity.CHANGE), Optional.of(new Gtin(GTIN)), Optional.empty(),
                 Optional.empty(), Optional.empty(), cursor, pageSize, false);
     }
@@ -253,7 +246,9 @@ class EsPriceHistoryQueryAdapterIT {
                  "first_observed_at":%d,"last_observed_at":%d}
                 """.formatted(timestamp.toEpochMilli(), GTIN, providerId, condition, currency,
                 timestamp.toEpochMilli(), timestamp.toEpochMilli());
-        post("/" + EsPriceHistoryQueryAdapter.DAILY_ROLLUP_INDEX + "/_doc", body);
+        // Data streams only accept appends: an explicit document id requires the `_create` op,
+        // a plain `_doc` PUT/POST-with-id is rejected outright.
+        post(DAILY_ROLLUP_DATA_STREAM + "/_doc", body);
     }
 
     private void indexChangeEvent(Instant observedAt, String providerOfferId) {
@@ -265,11 +260,24 @@ class EsPriceHistoryQueryAdapterIT {
                  "policy_ref":"merchant-feed:1","content_hash":"SHA-256:%s","@timestamp":%d}
                 """.formatted(eventId, GTIN, providerOfferId, observedAt.toEpochMilli(), "b".repeat(64),
                 observedAt.toEpochMilli());
-        // The document's own event_id must also be the ES document _id: EsPriceChangeEventDocument
-        // maps event_id with @Id, so Spring Data Elasticsearch fills it from ES's _id metadata on
-        // read - an auto-generated _id would silently overwrite the event_id carried in _source.
-        post("/" + EsPriceHistoryQueryAdapter.PRICE_CHANGE_INDEX + "/_doc/"
-                + java.net.URLEncoder.encode(eventId, java.nio.charset.StandardCharsets.UTF_8), body);
+        // No explicit document id: a time-series data stream always computes its own _id from the
+        // TSID and @timestamp and rejects a client-supplied one, even via `_create`. The business
+        // identifier lives only in the `event_id` source field (see EsPriceChangeEventDocument).
+        post(PRICE_CHANGE_DATA_STREAM + "/_doc", body);
+    }
+
+    private static void provisionIndexTemplate(String templateName, String classpathResource) throws Exception {
+        String templateBody = readClasspathResource(classpathResource);
+        put("/_index_template/" + templateName, templateBody);
+    }
+
+    private static String readClasspathResource(String path) throws Exception {
+        try (InputStream in = EsPriceHistoryQueryAdapterIT.class.getClassLoader().getResourceAsStream(path)) {
+            if (in == null) {
+                throw new IllegalStateException("classpath resource not found: " + path);
+            }
+            return new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        }
     }
 
     private static void put(String path, String body) throws Exception {
@@ -286,7 +294,7 @@ class EsPriceHistoryQueryAdapterIT {
     private static void post(String path, String body) {
         try {
             HttpResponse<String> response = HTTP.send(HttpRequest.newBuilder()
-                            .uri(URI.create(esBaseUrl + path))
+                            .uri(URI.create(esBaseUrl + "/" + path))
                             .header("Content-Type", "application/json")
                             .POST(BodyPublishers.ofString(body))
                             .build(), HttpResponse.BodyHandlers.ofString());
@@ -301,17 +309,17 @@ class EsPriceHistoryQueryAdapterIT {
     private static String sha256Hex(String value) {
         try {
             byte[] digest = java.security.MessageDigest.getInstance("SHA-256")
-                    .digest(value.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                    .digest(value.getBytes(StandardCharsets.UTF_8));
             return java.util.HexFormat.of().formatHex(digest);
         } catch (final java.security.NoSuchAlgorithmException ex) {
             throw new IllegalStateException(ex);
         }
     }
 
-    private static void refresh(String index) {
+    private static void refresh(String dataStream) {
         try {
             HTTP.send(HttpRequest.newBuilder()
-                            .uri(URI.create(esBaseUrl + "/" + index + "/_refresh"))
+                            .uri(URI.create(esBaseUrl + "/" + dataStream + "/_refresh"))
                             .POST(BodyPublishers.noBody())
                             .build(), HttpResponse.BodyHandlers.discarding());
         } catch (final Exception ex) {
