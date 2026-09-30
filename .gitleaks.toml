@@ -19,7 +19,7 @@ regex = '''(?im)^[ \t]*(?:password|passwd|secret|jwt-secret|shared-token|admin-k
 secretGroup = 1
 tags = ["spring", "credential"]
 
-  [rules.allowlist]
+  [[rules.allowlists]]
   description = "Placeholders, documented examples, and the gitignored local-dev profiles"
   regexTarget = "match"
   regexes = [
@@ -32,6 +32,23 @@ tags = ["spring", "credential"]
     '''.*/src/test/.*''',
     '''.*application-devsec\.yml$''',             # gitignored; local dev only
     '''.*application-local\.yml$''',
+  ]
+
+  # GOU-103: `secret:` in a JS/TS/Vue object literal is a prop or variable *name*, not a
+  # value, when its right-hand side is the bare word `undefined` or a bare identifier with
+  # no quotes (e.g. `secret: secretName`). Scoped to the object-literal key `secret` only
+  # (not `jwt-secret`, `client-secret`, etc.) and to the four extensions that use this
+  # syntax; a quoted literal on the same key and path stays detected because the allowlist
+  # regex requires the value to start right after the colon with no quote.
+  [[rules.allowlists]]
+  description = "Unquoted JS/TS/Vue identifier assigned to a `secret:` object key, not a value"
+  condition = "AND"
+  regexTarget = "line"
+  paths = [
+    '''\.(?:js|mjs|ts|vue)$''',
+  ]
+  regexes = [
+    '''(?im)^[ \t]*secret[ \t]*:[ \t]*(?:undefined|[A-Za-z_$][A-Za-z0-9_$]*)[ \t]*,?[ \t]*$''',
   ]
 
 [[allowlists]]

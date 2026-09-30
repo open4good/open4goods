@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Exercise reviewed false positives without suppressing nearby credentials."""
 
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -12,6 +13,28 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 SCANNER = os.environ.get("GITLEAKS_BIN") or shutil.which("gitleaks")
+
+_SPEC = importlib.util.spec_from_file_location(
+    'secret_scan', ROOT / 'scripts/verify/secret_scan.py')
+_SCAN = importlib.util.module_from_spec(_SPEC)
+_SPEC.loader.exec_module(_SCAN)
+
+
+class BaselineNoteTest(unittest.TestCase):
+    def test_credential_shaped_notes_are_not_stale(self):
+        """Every accepted credential-shaped identity must still name a live disposition:
+        the owner's revocation attestation, or the follow-up rotation issue. A note that
+        names neither (e.g. because GOU-107 closed and the text was never updated) must
+        fail loudly instead of silently going stale."""
+        baseline = _SCAN.load_baseline(_SCAN.BASELINE)
+        markers = ('GOU-107', 'attested revoked')
+        for mode in ('git', 'dir'):
+            for entry in baseline['accepted'][mode]:
+                if entry['classification'] != 'credential-shaped':
+                    continue
+                self.assertTrue(
+                    any(marker in entry['note'] for marker in markers),
+                    f"stale note for {entry['rule']}/{entry['file']}: {entry['note']!r}")
 
 
 class GitleaksConfigTest(unittest.TestCase):
@@ -45,6 +68,45 @@ class GitleaksConfigTest(unittest.TestCase):
             self.assertEqual(1, code)
             self.assertIn("generic-api-key", {item["RuleID"] for item in findings})
             self.assertIn("o4g-spring-inline-credential", {item["RuleID"] for item in findings})
+
+    def test_unquoted_js_identifier_allowlisted_but_quoted_literal_detected(self):
+        """GOU-103: `secret: undefined` / `secret: name` are identifiers, not values, only
+        when unquoted on the `.js/.mjs/.ts/.vue` extensions the allowlist targets; a real
+        quoted literal on the same key and extensions must stay detected."""
+        with tempfile.TemporaryDirectory(prefix="o4g-gitleaks-") as tmp:
+            source = Path(tmp) / "source"
+            source.mkdir()
+            (source / "Fixture.vue").write_text(
+                "<script setup lang=\"ts\">\n"
+                "withDefaults(defineProps<{ secret?: string }>(), {\n"
+                "  secret: undefined,\n"
+                "})\n"
+                "</script>\n"
+            )
+            (source / "fixture.mjs").write_text(
+                "const secretName = 'API_KEY';\n"
+                "checks.push({ secret: secretName });\n"
+            )
+            code, findings = self.scan(source)
+            self.assertEqual(0, code, "unquoted JS identifiers must not be flagged")
+            self.assertEqual([], findings)
+
+            canary = secrets.token_hex(20)
+            (source / "Fixture.vue").write_text(
+                "<script setup lang=\"ts\">\n"
+                "withDefaults(defineProps<{ secret?: string }>(), {\n"
+                f"  secret: \"{canary}\",\n"
+                "})\n"
+                "</script>\n"
+            )
+            (source / "fixture.mjs").write_text(
+                f"checks.push({{ secret: \"{canary}\" }});\n"
+            )
+            code, findings = self.scan(source)
+            self.assertEqual(1, code, "a quoted literal on the same key must stay detected")
+            files = {item["File"] for item in findings}
+            self.assertTrue(any(f.endswith("Fixture.vue") for f in files))
+            self.assertTrue(any(f.endswith("fixture.mjs") for f in files))
 
 
 if __name__ == "__main__":

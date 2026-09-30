@@ -12,7 +12,38 @@ GOU-60 records the owner's 2026-09-29 acceptance of existing findings, not revoc
 `.gitleaks-baseline.json` pins hashed content/file/rule identities to its source commit;
 history exceptions also bind the original commit. `scripts/verify/secret_scan.py git`
 and `dir` block new findings and scanner failures. CI emits counts only; raw reports
-stay in private temporary storage and are deleted. Baseline changes require review.
+stay in private temporary storage and are deleted. Baseline changes require review
+(`CODEOWNERS` covers `.gitleaks-baseline.json`, `.gitleaks.toml`,
+`scripts/verify/secret_scan.py` and `.github/workflows/secret-scan.yml`).
+
+Each accepted identity (GOU-103) is an object, not a bare hash: `rule`, `file`, `commit`
+(`git` mode only), a `classification` (`false-positive-doc`, `false-positive-placeholder`,
+`false-positive-test`, `false-positive-identifier`, or `credential-shaped` for a real positive
+accepted without revocation) and a one-line `note`, all value-free, so a reviewer tells a
+false positive from an accepted real one by reading the baseline alone. `load_baseline()`
+validates this and fails closed (exit 2) otherwise. A red scan prints only the newly found
+identities (`RuleID`/`File`/`StartLine`), leaving the accepted ones and any value out.
+
+On 2026-09-29, the owner closed the open question on GOU-60: the baseline is accepted in full
+now, rather than waiting on a rotation decision per entry, and residual rotation work moved to
+GOU-107. The 17 `credential-shaped` identities in `accepted.git` carry one of two `note` texts
+accordingly, and `credential-shaped` entries always cite one of the two so a note cannot go
+stale silently (`scripts/tests/test_gitleaks_config.py`):
+
+- Attested revoked -- the owner attested on 2026-09-29 that the credential is already revoked.
+  This is the owner's attestation, not cryptographic proof; the value stays in history either
+  way, which is why the entry stays in the baseline.
+- Accepted, rotation tracked in GOU-107 -- accepted as an exception without a revocation
+  assertion. GOU-107 tracks the remaining rotation and blocks promotion to beta until it closes.
+
+To add an exception for a new false positive: confirm by hand it is not a live credential,
+keeping the value out of commits and comments; run `secret_scan.py <mode> --emit-identities`
+to get its `id`/`RuleID`/`File`/`StartLine`/`Commit` (still no `Secret` or `Match` printed);
+append the matching object to `accepted.<mode>`; and re-run the scan to confirm `new: 0`
+before opening a PR, which `CODEOWNERS` routes for review. A non-secret shape recurring
+across many files is better handled by a narrow `.gitleaks.toml` allowlist than by repeated
+baseline entries -- see the `o4g-spring-inline-credential` rule's allowlist for the
+unquoted-JS-identifier case.
 
 ## Purpose
 
