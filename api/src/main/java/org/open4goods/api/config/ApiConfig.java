@@ -39,6 +39,7 @@ import org.open4goods.icecat.services.IcecatFeatureResolver;
 import org.open4goods.icecat.services.IcecatIndexService;
 import org.open4goods.icecat.services.IcecatRegistryProjectionService;
 import org.open4goods.icecat.services.IcecatService;
+import org.open4goods.icecat.services.IcecatSourceRecordAdapter;
 import org.open4goods.icecat.services.loader.CategoryLoader;
 import org.open4goods.icecat.services.loader.FeatureLoader;
 import org.open4goods.model.StandardiserService;
@@ -200,8 +201,8 @@ public class ApiConfig {
 	}
 
 	@Bean
-	IcecatCompletionService icecatCompletionService(ProductRepository productRepository, VerticalsConfigService verticalConfigService, DataSourceConfigService dataSourceConfigService, AggregationFacadeService aggregationFacade) throws TechnicalException {
-		return new IcecatCompletionService(productRepository, verticalConfigService, apiProperties, dataSourceConfigService, aggregationFacade);
+	IcecatCompletionService icecatCompletionService(ProductRepository productRepository, VerticalsConfigService verticalConfigService, DataSourceConfigService dataSourceConfigService, IcecatSourceRecordAdapter icecatSourceRecordAdapter, SourceRecordHeadStore sourceRecordHeadStore, IngestionCheckpointStore ingestionCheckpointStore) throws TechnicalException {
+		return new IcecatCompletionService(productRepository, verticalConfigService, apiProperties, dataSourceConfigService, icecatSourceRecordAdapter, sourceRecordHeadStore, ingestionCheckpointStore);
 	}
 
 	@Bean
