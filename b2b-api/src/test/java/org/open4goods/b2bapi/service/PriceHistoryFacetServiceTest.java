@@ -199,7 +199,8 @@ class PriceHistoryFacetServiceTest {
     @Test
     void rejectsCursorThatDoesNotMatchTheCurrentQuery() {
         String cursorForADifferentRequest = org.open4goods.b2bapi.service.pricehistory.PriceHistoryPublicCursor.encode(
-                "inner", org.open4goods.b2bapi.service.pricehistory.PriceHistoryPublicCursor.fingerprint(
+                new B2bApiProperties().getPriceHistory().getCursorSecret(), "inner",
+                org.open4goods.b2bapi.service.pricehistory.PriceHistoryPublicCursor.fingerprint(
                         GTIN, org.open4goods.pricehistory.model.PriceHistoryGranularity.DAY, null, null, null,
                         NOW.minus(java.time.Duration.ofDays(99)), NOW, 100));
 
@@ -207,6 +208,52 @@ class PriceHistoryFacetServiceTest {
                 .isInstanceOf(InvalidPriceHistoryQueryException.class)
                 .satisfies(ex -> assertThat(((InvalidPriceHistoryQueryException) ex).errorCode()).isEqualTo(ErrorCode.CURSOR_MISMATCH));
         verify(redisMeteringService, never()).reserveCredits(any(), anyLong());
+    }
+
+    /**
+     * A cursor a client could plausibly tamper with or forge (garbage Base64, or a value re-signed
+     * with an unkeyed hash the old implementation used) must still surface as a 400
+     * {@code cursor-mismatch}, never bubble past decode as an unhandled 500 (GOU-28 review point 3).
+     */
+    @Test
+    void rejectsAForgedOrGarbageCursorAsMismatchNeverAsAnInternalError() {
+        assertThatThrownBy(() -> call(null, null, null, null, null, null, null, "not-valid-base64-at-all!!"))
+                .isInstanceOf(InvalidPriceHistoryQueryException.class)
+                .satisfies(ex -> assertThat(((InvalidPriceHistoryQueryException) ex).errorCode()).isEqualTo(ErrorCode.CURSOR_MISMATCH));
+
+        assertThatThrownBy(() -> call(null, null, null, null, null, null, null,
+                java.util.Base64.getUrlEncoder().withoutPadding().encodeToString("short".getBytes())))
+                .isInstanceOf(InvalidPriceHistoryQueryException.class)
+                .satisfies(ex -> assertThat(((InvalidPriceHistoryQueryException) ex).errorCode()).isEqualTo(ErrorCode.CURSOR_MISMATCH));
+        verify(redisMeteringService, never()).reserveCredits(any(), anyLong());
+    }
+
+    /**
+     * The public cursor a page actually returns must be accepted as the very next page's request
+     * cursor (round trip through the real AES-GCM encode/decode, not a mocked port).
+     */
+    @Test
+    void nextCursorFromOnePageIsAcceptedToResumeTheNextPage() {
+        DailyProviderRollup rollup = dailyRollup("merchant-feed", OfferCondition.NEW, "EUR",
+                LocalDate.of(2026, 10, 10), "749.00", "819.99", "799.99", 3, 2);
+        String innerCursor = org.open4goods.pricehistory.service.PriceHistoryCursor.after(NOW, "merchant-feed", "NEW", "EUR");
+        when(priceHistoryQueryPort.queryDaily(any()))
+                .thenReturn(new PriceHistoryPage<>(List.of(rollup), Optional.of(innerCursor)))
+                .thenReturn(new PriceHistoryPage<>(List.of(rollup), Optional.empty()));
+        when(creditLedgerService.settleDebit(any(), any(), any(), any(), anyLong()))
+                .thenReturn(new CreditSettlementResult(992L, 8L, false));
+
+        B2bResponse<B2bPriceHistoryDto> firstPage = call(null, null, null, null, null, null, null, null);
+        assertThat(firstPage.data().nextCursor()).isNotBlank();
+
+        B2bResponse<B2bPriceHistoryDto> secondPage = call(null, null, null, null, null, null, null,
+                firstPage.data().nextCursor());
+        assertThat(secondPage.data().nextCursor()).isNull();
+
+        org.mockito.ArgumentCaptor<org.open4goods.pricehistory.model.PriceHistoryQuery> captor =
+                org.mockito.ArgumentCaptor.forClass(org.open4goods.pricehistory.model.PriceHistoryQuery.class);
+        verify(priceHistoryQueryPort, org.mockito.Mockito.times(2)).queryDaily(captor.capture());
+        assertThat(captor.getAllValues().get(1).cursor()).contains(innerCursor);
     }
 
     @Test

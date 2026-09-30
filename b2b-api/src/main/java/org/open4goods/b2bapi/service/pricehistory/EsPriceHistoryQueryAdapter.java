@@ -1,6 +1,7 @@
 package org.open4goods.b2bapi.service.pricehistory;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Currency;
@@ -43,8 +44,13 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Query;
  * Product index - every query below is scoped by {@code gtin} directly against a time-series data
  * stream, so serving this facet never scans Product documents (GOU-28 AC8).
  *
- * <p>Cursor stability: pages are ordered by (timestamp, stable id) ascending and paginated with
- * Elasticsearch {@code search_after}, encoded through {@link PriceHistoryCursor}. A fixed query
+ * <p>Cursor stability: pages are ordered ascending by (timestamp, ...stable dimension keys) and
+ * paginated with Elasticsearch {@code search_after}; {@link PriceHistoryCursor} carries as many
+ * sort-key values as the query's {@code sort} clause, so the {@code search_after} arity always
+ * matches. Sort/tiebreaker keys are drawn only from index-template dimension fields
+ * ({@code time_series_dimension: true}, e.g. {@code provider_id}/{@code provider_offer_id}); the
+ * time-series id fields {@code event_id} and {@code policy_ref}/{@code content_hash} are mapped
+ * {@code index: false, doc_values: false} (stored-only) and cannot be sorted on. A fixed query
  * (same filters) therefore always resumes at the same exclusive position.
  *
  * <p>Storage convention for flattened references (no structured mapping exists for these two
@@ -74,9 +80,10 @@ public class EsPriceHistoryQueryAdapter implements PriceHistoryQueryPort {
         Objects.requireNonNull(query, "query must not be null");
         final NativeQueryBuilder builder = NativeQuery.builder()
                 .withQuery(buildFilterQuery(query, "observed_at"))
-                .withSort(Sort.by(Sort.Order.asc("observed_at"), Sort.Order.asc("event_id")))
+                .withSort(Sort.by(Sort.Order.asc("observed_at"), Sort.Order.asc("provider_id"),
+                        Sort.Order.asc("provider_offer_id"), Sort.Order.asc("condition"), Sort.Order.asc("currency")))
                 .withMaxResults(query.pageSize() + 1);
-        query.cursor().ifPresent(cursor -> applySearchAfter(builder, cursor));
+        query.cursor().ifPresent(cursor -> applySearchAfter(builder, cursor, false));
 
         final SearchHits<EsPriceChangeEventDocument> hits = elasticsearchOperations.search(
                 builder.build(), EsPriceChangeEventDocument.class, IndexCoordinates.of(PRICE_CHANGE_INDEX));
@@ -92,7 +99,8 @@ public class EsPriceHistoryQueryAdapter implements PriceHistoryQueryPort {
         Optional<String> nextCursor = Optional.empty();
         if (hasMore && !page.isEmpty()) {
             final EsPriceChangeEventDocument last = page.get(page.size() - 1).getContent();
-            nextCursor = Optional.of(PriceHistoryCursor.after(last.getObservedAt(), last.getEventId()));
+            nextCursor = Optional.of(PriceHistoryCursor.after(last.getObservedAt(),
+                    last.getProviderId(), last.getProviderOfferId(), last.getCondition(), last.getCurrency()));
         }
         return new PriceHistoryPage<>(values, nextCursor);
     }
@@ -105,7 +113,7 @@ public class EsPriceHistoryQueryAdapter implements PriceHistoryQueryPort {
                 .withSort(Sort.by(Sort.Order.asc("@timestamp"), Sort.Order.asc("provider_id"),
                         Sort.Order.asc("condition"), Sort.Order.asc("currency")))
                 .withMaxResults(query.pageSize() + 1);
-        query.cursor().ifPresent(cursor -> applySearchAfter(builder, cursor));
+        query.cursor().ifPresent(cursor -> applySearchAfter(builder, cursor, true));
 
         final SearchHits<EsDailyProviderRollupDocument> hits = elasticsearchOperations.search(
                 builder.build(), EsDailyProviderRollupDocument.class, IndexCoordinates.of(DAILY_ROLLUP_INDEX));
@@ -121,7 +129,8 @@ public class EsPriceHistoryQueryAdapter implements PriceHistoryQueryPort {
         Optional<String> nextCursor = Optional.empty();
         if (hasMore && !page.isEmpty()) {
             final EsDailyProviderRollupDocument last = page.get(page.size() - 1).getContent();
-            nextCursor = Optional.of(PriceHistoryCursor.after(last.getTimestamp(), rollupStableId(last)));
+            nextCursor = Optional.of(PriceHistoryCursor.after(last.getTimestamp(),
+                    last.getProviderId(), last.getCondition(), last.getCurrency()));
         }
         return new PriceHistoryPage<>(values, nextCursor);
     }
@@ -147,13 +156,26 @@ public class EsPriceHistoryQueryAdapter implements PriceHistoryQueryPort {
         }));
     }
 
-    private void applySearchAfter(final NativeQueryBuilder builder, final String opaqueCursor) {
+    /**
+     * Builds the {@code search_after} boundary matching the sort clause's first field. {@code
+     * date} fields (e.g. {@code observed_at}) sort on milliseconds-since-epoch; {@code date_nanos}
+     * fields (e.g. {@code @timestamp}) sort on <strong>nanoseconds</strong>-since-epoch - supplying
+     * the wrong unit does not error, it silently produces a boundary many orders of magnitude off,
+     * so every document compares as "after" it regardless of the intended tiebreak keys.
+     */
+    private void applySearchAfter(final NativeQueryBuilder builder, final String opaqueCursor, final boolean nanosecondTimestamp) {
         final PriceHistoryCursor.Position position = PriceHistoryCursor.decode(opaqueCursor);
-        builder.withSearchAfter(List.of(position.timestamp().toEpochMilli(), position.stableId()));
+        final long timestampSortValue = nanosecondTimestamp
+                ? toEpochNanos(position.timestamp())
+                : position.timestamp().toEpochMilli();
+        final List<Object> searchAfter = new ArrayList<>(1 + position.sortKeys().size());
+        searchAfter.add(timestampSortValue);
+        searchAfter.addAll(position.sortKeys());
+        builder.withSearchAfter(searchAfter);
     }
 
-    private String rollupStableId(final EsDailyProviderRollupDocument document) {
-        return document.getProviderId() + "\u0001" + document.getCondition() + "\u0001" + document.getCurrency();
+    private static long toEpochNanos(final Instant instant) {
+        return instant.getEpochSecond() * 1_000_000_000L + instant.getNano();
     }
 
     private Optional<PriceChangeEvent> toDomain(final EsPriceChangeEventDocument document) {

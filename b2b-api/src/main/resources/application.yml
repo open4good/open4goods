@@ -103,6 +103,8 @@ b2b:
   stripe:
     secret-key: ${B2B_STRIPE_SECRET_KEY:}
     webhook-secret: ${B2B_STRIPE_WEBHOOK_SECRET:}
+  price-history:
+    cursor-secret: ${B2B_PRICE_HISTORY_CURSOR_SECRET:change-me-dev-only-change-me-dev-only}
 
 ---
 spring:

@@ -51,6 +51,9 @@ public class B2bApiProperties {
     @Valid
     private Stripe stripe = new Stripe();
 
+    @Valid
+    private PriceHistory priceHistory = new PriceHistory();
+
     public URI getPublicBaseUrl() {
         return publicBaseUrl;
     }
@@ -129,6 +132,14 @@ public class B2bApiProperties {
 
     public void setStripe(final Stripe stripe) {
         this.stripe = stripe;
+    }
+
+    public PriceHistory getPriceHistory() {
+        return priceHistory;
+    }
+
+    public void setPriceHistory(final PriceHistory priceHistory) {
+        this.priceHistory = priceHistory;
     }
 
     public static class Credits {
@@ -571,6 +582,25 @@ public class B2bApiProperties {
 
         public void setWebhookSecret(final String webhookSecret) {
             this.webhookSecret = webhookSecret;
+        }
+    }
+
+    public static class PriceHistory {
+
+        /**
+         * Server-side key used to authenticate-and-encrypt (AES-GCM) the public price-history
+         * cursor. Never derived from request data - a value used to sign or forge a cursor
+         * without knowing this secret must be rejected as {@code cursor-mismatch}, not accepted.
+         */
+        @NotBlank
+        private String cursorSecret = "change-me-dev-only-change-me-dev-only";
+
+        public String getCursorSecret() {
+            return cursorSecret;
+        }
+
+        public void setCursorSecret(final String cursorSecret) {
+            this.cursorSecret = cursorSecret;
         }
     }
 }
