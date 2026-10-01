@@ -1,10 +1,14 @@
 package org.open4goods.nudgerfrontapi.service.auth;
 
 import java.time.Instant;
+import java.util.List;
 
 import org.open4goods.nudgerfrontapi.config.properties.SecurityProperties;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -71,6 +75,8 @@ public class JwtService {
         JwsHeader header = JwsHeader.with(() -> "HS256").build();
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .subject(auth.getName())
+                .claim("roles", auth.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority).toList())
                 .issuedAt(now)
                 .expiresAt(exp)
                 .build();
@@ -78,12 +84,19 @@ public class JwtService {
     }
 
     /**
-     * Validate a token and return the authentication subject.
+     * Validate a refresh token and rebuild the authentication it carries,
+     * including its granted roles so a role refresh never silently drops
+     * ROLE_EDITOR or an admin allowlist assignment.
      *
      * @param token refresh token value
-     * @return subject embedded in the token after successful validation
+     * @return authentication rebuilt from the token's subject and roles claim
      */
-    public String validateRefreshToken(String token) {
-        return decoder.decode(token).getSubject();
+    public Authentication validateRefreshToken(String token) {
+        Jwt jwt = decoder.decode(token);
+        List<String> roles = jwt.getClaimAsStringList("roles");
+        List<GrantedAuthority> authorities = roles == null
+                ? List.of()
+                : roles.stream().<GrantedAuthority>map(SimpleGrantedAuthority::new).toList();
+        return new UsernamePasswordAuthenticationToken(jwt.getSubject(), "N/A", authorities);
     }
 }
