@@ -124,7 +124,7 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		}
 
 		String knownIcecatId = data.getExternalIds().getIcecat();
-		boolean idAlreadyKnown = StringUtils.isNotEmpty(knownIcecatId);
+		boolean idAlreadyKnown = isUsableIcecatId(knownIcecatId);
 		IcecatLiveLookupResult result = idAlreadyKnown
 				? liveClient.fetchProductByIcecatId(knownIcecatId, icecatConfig.getDomainLanguage())
 				: liveClient.fetchProduct(data.getId(), icecatConfig.getDomainLanguage());
@@ -193,6 +193,26 @@ public class IcecatCompletionService extends AbstractCompletionService {
 				? adapter.restricted(recordKey(knownIcecatId), SCHEMA_VERSION, retrievedAt, sanitizedErrorCode)
 				: adapter.unavailable(recordKey(knownIcecatId), SCHEMA_VERSION, retrievedAt, sanitizedErrorCode);
 		apply(mutation);
+	}
+
+	/**
+	 * A record key is built from the numeric Icecat product id, so an id persisted by an older
+	 * code path that is not a positive {@code int} is treated as unknown: the product falls back
+	 * to a GTIN search, which rewrites a usable id on a match, rather than failing key creation.
+	 *
+	 * @param icecatId the id currently persisted on the product, possibly null or legacy
+	 * @return true when the id can key a source record
+	 */
+	private static boolean isUsableIcecatId(String icecatId) {
+		if (!StringUtils.isNumeric(icecatId)) {
+			return false;
+		}
+		try {
+			Integer.parseInt(icecatId);
+			return true;
+		} catch (NumberFormatException overflow) {
+			return false;
+		}
 	}
 
 	private SourceRecordKey recordKey(String icecatId) {

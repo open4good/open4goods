@@ -154,6 +154,19 @@ class IcecatCompletionServiceTest {
         }
 
         @Test
+        void processProductFallsBackToGtinSearchWhenPersistedIcecatIdIsNotAKey() {
+                product.getExternalIds().setIcecat("ICECAT-LEGACY");
+                Mockito.when(liveClient.fetchProduct(anyLong(), any(DomainLanguage.class)))
+                        .thenReturn(IcecatLiveLookupResult.notFound());
+
+                assertThatCode(() -> service.processProduct(vertical, product)).doesNotThrowAnyException();
+
+                Mockito.verify(liveClient).fetchProduct(1L, config.getDomainLanguage());
+                Mockito.verify(liveClient, Mockito.never()).fetchProductByIcecatId(anyString(), any());
+                Mockito.verifyNoInteractions(adapter, sourceRecordStore);
+        }
+
+        @Test
         void processProductRefreshesByIcecatIdWhenAlreadyMatched() {
                 product.getExternalIds().setIcecat("42");
                 SourceRecordKey key = key(42);
