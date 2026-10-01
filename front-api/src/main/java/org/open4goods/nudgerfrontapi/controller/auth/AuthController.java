@@ -107,7 +107,9 @@ public class AuthController {
             GoogleIdentity identity = googleIdentityService.verify(request.idToken(), request.nonce());
             List<GrantedAuthority> authorities = identity.roles().stream()
                     .<GrantedAuthority>map(SimpleGrantedAuthority::new).toList();
-            Authentication auth = new UsernamePasswordAuthenticationToken(identity.email(), "N/A", authorities);
+            UsernamePasswordAuthenticationToken auth =
+                    new UsernamePasswordAuthenticationToken(identity.email(), "N/A", authorities);
+            auth.setDetails(JwtService.AMR_GOOGLE_SSO);
 
             String access = jwtService.generateAccessToken(auth);
             String refresh = jwtService.generateRefreshToken(auth);
