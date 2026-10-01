@@ -28,9 +28,9 @@ A policy also carries a deny-by-default `derivativeLicence` (e.g. the Icecat
 share-alike obligation), a deny-by-default `prohibitedUses` set (e.g.
 `AI_TRAINING`, `SYNTHETIC_CONTENT_GENERATION`), and an attribution
 `asIsDisclaimerRequired` flag for the Fair Use Policy disclaimer. The mirrored
-`allowsUse` predicate on the policy and the registry checks one named use, and
-`DeterministicResolutionService` consults it to drop a prohibited-use source
-from a derivation before any resolved value is produced.
+`allowsUse` predicate checks one named use. `DeterministicResolutionService` ignores `prohibitedUses` ([GOU-171](/GOU/issues/GOU-171)):
+reaching a surface is redistribution, governed by `allows` alone, not the training or synthetic generation those two uses forbid. A
+caller that does train a model or generate synthetic content from resolved values calls `allowsUse` for that use itself.
 
 ## Ratified matrix (GOU-95, 2026-09-29)
 

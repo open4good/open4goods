@@ -15,7 +15,6 @@ import org.open4goods.datareference.model.CanonicalAttributeId;
 import org.open4goods.datareference.model.Gtin;
 import org.open4goods.datareference.model.GtinLink;
 import org.open4goods.datareference.model.GtinMatchConfidence;
-import org.open4goods.datareference.model.ProhibitedUse;
 import org.open4goods.datareference.model.ProjectionSurface;
 import org.open4goods.datareference.model.SourceAssertion;
 import org.open4goods.datareference.model.SourceRecordHead;
@@ -31,6 +30,8 @@ import org.open4goods.datareference.model.resolution.ResolvedValue;
 import org.open4goods.datareference.port.CorrectionsPort;
 import org.open4goods.datareference.port.NormalizationPort;
 import org.open4goods.datareference.port.ResolutionPort;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Resolves source evidence only after policy, lifecycle and attachment gates.
@@ -40,6 +41,8 @@ import org.open4goods.datareference.port.ResolutionPort;
  * excluded before they can affect a conflict flag.
  */
 public final class DeterministicResolutionService implements ResolutionPort {
+
+    private static final Logger log = LoggerFactory.getLogger(DeterministicResolutionService.class);
 
     private final SourceUsagePolicyRegistry policies;
     private final NormalizationPort normalization;
@@ -103,9 +106,8 @@ public final class DeterministicResolutionService implements ResolutionPort {
             }
             for (SourceAssertion assertion : head.assertions()) {
                 if (!policies.allows(head.key().sourceId(), head.usagePolicyRef(), assertion.contentType(), surface, at)) {
-                    continue;
-                }
-                if (isProhibitedForDerivation(head, assertion, at)) {
+                    log.debug("Excluding {}/{} from {}: usage policy {} does not permit redistribution on this surface",
+                            head.key().sourceId(), assertion.contentType(), surface, head.usagePolicyRef());
                     continue;
                 }
                 NormalizationResult normalized = normalization.normalize(new NormalizationRequest(head.key().sourceId(), assertion,
@@ -123,24 +125,6 @@ public final class DeterministicResolutionService implements ResolutionPort {
             }
         }
         return candidates;
-    }
-
-    /**
-     * Excludes a source assertion from derivation, rather than degrading its
-     * weight, when its reviewed policy forbids the assertion's content from
-     * feeding a derived value, an embedding or generated text.
-     *
-     * <p>Every resolved value produced here can end up as GenAI input downstream
-     * (see GOU-99), so the exclusion is unconditional on the ordinary content
-     * type and surface eligibility already checked by {@code policies.allows}.
-     */
-    private boolean isProhibitedForDerivation(SourceRecordHead head, SourceAssertion assertion, Instant at) {
-        for (ProhibitedUse use : ProhibitedUse.values()) {
-            if (!policies.allowsUse(head.key().sourceId(), head.usagePolicyRef(), assertion.contentType(), use, at)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private java.util.Optional<ResolvedValue> resolveField(
