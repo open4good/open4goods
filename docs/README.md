@@ -35,6 +35,7 @@ owned, and linked from this index when they become durable project knowledge.
 - [Developpement strictement local](operations/beta-development-campaign.md) - stack, sauvegarde et promotions phasees
 - [Nudger local runtime on the shared build host](operations/buildhost-runtime.md) - isolation, port plan and capacity budget
 - [Frontend asset hardening](operations/frontend-asset-hardening.md)
+- [Local promotion readiness gate](operations/promotion-readiness-gate.md)
 - [Production log triage](operations/production-log-triage.md)
 - [ADR index](adr/README.md)
 - [Icecat reference data](architecture/icecat-reference-data.md)
