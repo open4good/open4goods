@@ -42,7 +42,7 @@ backfills the missing declarations from the `unknownColumns` reports.
 ### Per-network scheduler configuration
 
 Each affiliation network is configured directly under `feed.<network>.*` (not nested
-under a `providers:` key — that form is silently ignored, see below):
+under a `providers:` key - that form is silently ignored, see below):
 
 - `cron`: refresh schedule, read directly by the network's `@Scheduled(cron =
   "${feed.<network>.cron:-}")` method. A missing key resolves to the disabling `-`
