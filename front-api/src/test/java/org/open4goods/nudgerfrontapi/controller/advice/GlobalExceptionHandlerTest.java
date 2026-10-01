@@ -8,6 +8,7 @@ import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.server.ResponseStatusException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,5 +44,19 @@ class GlobalExceptionHandlerTest {
         assertThat(output.getOut()).contains("Internal error");
         // Ensure stack trace IS logged
         assertThat(output.getOut()).contains("at org.open4goods.nudgerfrontapi.controller.advice.GlobalExceptionHandlerTest");
+    }
+
+    @Test
+    void handleMissingServletRequestParameter_Returns400() {
+        io.micrometer.core.instrument.simple.SimpleMeterRegistry simpleRegistry = new io.micrometer.core.instrument.simple.SimpleMeterRegistry();
+        GlobalExceptionHandler globalExceptionHandler = new GlobalExceptionHandler(simpleRegistry);
+
+        MissingServletRequestParameterException ex =
+                new MissingServletRequestParameterException("domainLanguage", "DomainLanguage");
+
+        ProblemDetail pd = globalExceptionHandler.handleMissingServletRequestParameter(ex);
+
+        assertThat(pd.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(pd.getDetail()).contains("domainLanguage");
     }
 }

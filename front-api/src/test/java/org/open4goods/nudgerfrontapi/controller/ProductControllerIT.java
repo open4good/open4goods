@@ -437,6 +437,14 @@ class ProductControllerIT {
     }
 
     @Test
+    void sortableFieldsEndpointMissingDomainLanguageReturns400() throws Exception {
+        mockMvc.perform(get("/products/fields/sortable")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void sortableFieldsForVerticalReturnsList() throws Exception {
         VerticalConfig config = new VerticalConfig();
         config.setId("oven");
