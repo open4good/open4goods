@@ -28,6 +28,10 @@ printf '%s\n' '#!/usr/bin/env bash' \
   'if [ "${O4G_TEST_CURL_STATUS:-0}" -eq 0 ]; then printf 200; else printf 000; fi' > "$fixture/bin/curl"
 chmod +x "$fixture/bin/systemctl" "$fixture/bin/curl"
 export PATH="$fixture/bin:$PATH"
+# Test-only HMAC key (GOU-174): not a secret, just a fixture standing in for the real
+# O4G_GATE_PROOF_HMAC_KEY that only the pipeline holds in a deployed environment.
+export O4G_GATE_PROOF_HMAC_KEY
+O4G_GATE_PROOF_HMAC_KEY="$(printf '4%.0s' $(seq 1 64))"
 
 # The publish scripts are `#!/usr/bin/env bash`, so a BASH_ENV startup file inherited from the
 # caller runs first and can re-export PATH, silently handing them the real systemctl/curl. Drop
@@ -54,11 +58,27 @@ printf '%s\n' b2b > "$fixture/b2b-frontend/index.html"
 
 write_gate_proof() {
   local proof_file="$1" release="$2" manifest_path="$3"
-  local digest generated_at
+  local digest generated_at seal
   digest="$(sha256sum "$manifest_path" | awk '{print $1}')"
   generated_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  printf '{"ready": true, "candidateSha": "%s", "promotionTarget": "beta", "manifestDigest": "%s", "generatedAt": "%s"}\n' \
-    "$release" "$digest" "$generated_at" > "$proof_file"
+  seal="$(python3 - "$release" "$digest" "$generated_at" <<PYEOF
+import os, sys
+sys.path.insert(0, "$ROOT/scripts/deploy")
+import gate_proof_seal
+release, digest, generated_at = sys.argv[1:4]
+proof = {
+    "ready": True,
+    "candidateSha": release,
+    "promotionTarget": "beta",
+    "manifestDigest": digest,
+    "generatedAt": generated_at,
+}
+key = bytes.fromhex(os.environ["O4G_GATE_PROOF_HMAC_KEY"])
+print(gate_proof_seal.compute_seal(key, proof))
+PYEOF
+  )"
+  printf '{"ready": true, "candidateSha": "%s", "promotionTarget": "beta", "manifestDigest": "%s", "generatedAt": "%s", "seal": "%s"}\n' \
+    "$release" "$digest" "$generated_at" "$seal" > "$proof_file"
 }
 write_gate_proof "$fixture/gate-proof.json" abcdef1 "$fixture/bundle/release-manifest"
 gate_args=(--promotion-target beta --gate-proof "$fixture/gate-proof.json")
