@@ -29,7 +29,16 @@ to rewrite the ceilings from the current tree.
 Direction. Pass --assert-no-ceiling-increase REF to compare the ceilings against
 those at REF and fail if any rose.
 
-Exit status 0 when the corpus is within budget, 1 otherwise.
+Margin warning. A pass with little room left is indistinguishable from a
+comfortable pass until the next documentation PR fails on it, so a successful
+run also reports how many non-normative lines remain before the ceiling, and
+warns -- without failing -- once that margin drops under
+MARGIN_WARNING_THRESHOLD. The warning is for the next writer, not this run: a
+tight margin is not this run's fault and not this run's problem to fix.
+
+Exit status 0 when the corpus is within budget, 1 otherwise. The margin
+warning never changes this: it is printed on the success path and the exit
+status stays 0.
 """
 
 from __future__ import annotations
@@ -54,6 +63,12 @@ NORMATIVE_PATHS = (
 )
 
 SEARCH_ROOTS = ("docs",)
+
+# Below this many lines of non-normative margin left under the ceiling, a
+# successful run warns: the next documentation PR will likely need to shrink
+# something before it can land, and it is cheaper to know that before writing
+# it than after CI fails.
+MARGIN_WARNING_THRESHOLD = 40
 
 # README.md is intentionally absent -- see the module docstring.
 ROOT_DOCS = ("AGENTS.md",)
@@ -340,7 +355,11 @@ def run_merge_check(base_ref: str) -> int:
 BUDGET_COMMENT = (
     "Ceilings for the open4goods corpus. Exceeding one fails CI. Lowering one is "
     "the intended direction and needs no ceremony; raising one is a deliberate, "
-    "reviewable act. Regenerate with scripts/verify/check_corpus_budget.py --update."
+    "reviewable act. Regenerate with scripts/verify/check_corpus_budget.py --update. "
+    f"A passing run also warns in its own output, without failing, once the "
+    f"non_normative_lines margin drops under {MARGIN_WARNING_THRESHOLD} lines "
+    "(MARGIN_WARNING_THRESHOLD in check_corpus_budget.py) -- so the next writer "
+    "knows the margin is tight before a documentation PR hits the ceiling, not after."
 )
 
 
@@ -424,14 +443,26 @@ def main() -> int:
             )
         return 1
 
-    print(
+    print(success_message(measured, ceilings))
+    return 0
+
+
+def success_message(measured: dict[str, int], ceilings: dict[str, int]) -> str:
+    margin = ceilings["non_normative_lines"] - measured["non_normative_lines"]
+    message = (
         "OK: corpus within budget "
         f"({measured['non_normative_lines']}/{ceilings['non_normative_lines']} non-normative lines, "
+        f"{margin} lines of margin, "
         f"{measured['rule_shaped_statements_in_non_normative']}/"
         f"{ceilings['rule_shaped_statements_in_non_normative']} rule-shaped statements "
         "outside normative docs)."
     )
-    return 0
+    if margin < MARGIN_WARNING_THRESHOLD:
+        message += (
+            f"\nWARN: only {margin} lines of margin remain; the next "
+            "documentation PR will likely fail."
+        )
+    return message
 
 
 if __name__ == "__main__":
