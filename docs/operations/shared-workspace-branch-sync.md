@@ -50,3 +50,9 @@ provisioning step from writing a sync-merge commit again; that step runs
 outside this repository's control (no tracked hook observes it). Treat a
 guard failure as the signal to reset `main` and, if it recurs, escalate to
 whoever operates the shared build host's workspace provisioning.
+
+This guard catches contamination flowing *downstream*, into a branch cut from
+a drifted `main`. See the
+[default-branch commit guard](default-branch-commit-guard.md) (GOU-183) for
+the complementary *upstream* case: an agent's own commit landing on `main`
+directly, which this guard alone does not prevent.

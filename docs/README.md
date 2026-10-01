@@ -35,6 +35,7 @@ owned, and linked from this index when they become durable project knowledge.
 - [Developpement strictement local](operations/beta-development-campaign.md) - stack, sauvegarde et promotions phasees
 - [Nudger local runtime on the shared build host](operations/buildhost-runtime.md) - isolation, port plan and capacity budget
 - [Shared workspace branch-sync guard](operations/shared-workspace-branch-sync.md) - why local `main` can drift from `origin/main` and how to detect it
+- [Default-branch commit guard](operations/default-branch-commit-guard.md) - the `pre-commit` hook that refuses a commit made directly on `main`
 - [Frontend asset hardening](operations/frontend-asset-hardening.md)
 - [Local promotion readiness gate](operations/promotion-readiness-gate.md)
 - [Production log triage](operations/production-log-triage.md)
