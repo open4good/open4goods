@@ -168,12 +168,22 @@ public class FeedRowReferenceOfferAdapter {
             SourceFieldId fieldId = new SourceFieldId(
                     definition.sourceId().value(), referenceField.canonicalFieldId(), definition.providerSchemaVersion());
             int ordinal = ordinals.merge(referenceField.canonicalFieldId(), 0, (existing, increment) -> existing + 1);
+            // ScalarEvidence/LocalizedTextEvidence keep the provider value unmodified; trimming here would violate that contract.
             SourceEvidence evidence = referenceField.contentType() == SourceContentType.TEXT
-                    ? new LocalizedTextEvidence(rawValue.trim(), languageTag(definition.language()))
-                    : new ScalarEvidence(rawValue.trim(), definition.unitColumns().get(entry.getKey()), LanguageTag.UND);
+                    ? new LocalizedTextEvidence(rawValue, languageTag(definition.language()))
+                    : new ScalarEvidence(rawValue, unitValue(definition, row, entry.getKey()), LanguageTag.UND);
             assertions.add(SourceAssertion.of(key, fieldId, ordinal, referenceField.contentType(), evidence));
         }
         return List.copyOf(assertions);
+    }
+
+    private String unitValue(FeedDefinition definition, Map<String, String> row, String column) {
+        String unitColumn = definition.unitColumns().get(column);
+        if (unitColumn == null) {
+            return null;
+        }
+        String unit = row.get(unitColumn);
+        return StringUtils.isBlank(unit) ? null : unit;
     }
 
     private Optional<OfferObservation> offerObservation(
