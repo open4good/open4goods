@@ -40,6 +40,7 @@ public class FeedIndexingService implements HealthIndicator {
     private final BlockingQueue<DataSourceProperties> queue = new LinkedBlockingQueue<>(JOBS_QUEUE_CAPACITY);
     private final Map<String, FeedIndexingJobStat> runningJobs = new ConcurrentHashMap<>();
     private final AtomicLong feedNoUrls = new AtomicLong(0L);
+    private final AtomicLong feedMissingRequiredColumns = new AtomicLong(0L);
     private final Set<String> brokenCsvFiles = Collections.synchronizedSet(new HashSet<>());
 
     public FeedIndexingService(FeedIndexingProperties properties, DataFragmentCompletionService completionService,
@@ -110,6 +111,14 @@ public class FeedIndexingService implements HealthIndicator {
         feedNoUrls.incrementAndGet();
     }
 
+    /**
+     * Counts feeds skipped because their {@code csvDatasource} configuration declares neither
+     * an explicit url nor an explicit price column (AC2 fail-closed, never guessed by label).
+     */
+    public synchronized void incrementFeedMissingRequiredColumns() {
+        feedMissingRequiredColumns.incrementAndGet();
+    }
+
     public synchronized void brokenCsv(String url) {
         brokenCsvFiles.add(url);
     }
@@ -118,6 +127,7 @@ public class FeedIndexingService implements HealthIndicator {
     public Health health() {
         return Health.up()
                 .withDetail("feed_without_urls", feedNoUrls.get())
+                .withDetail("feed_missing_required_columns", feedMissingRequiredColumns.get())
                 .withDetail("invalid_csv_files", StringUtils.join(brokenCsvFiles, "\n"))
                 .build();
     }
