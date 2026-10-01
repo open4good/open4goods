@@ -2,4 +2,9 @@
 # Run the repository lint suite before pushing.
 set -euo pipefail
 
-exec "$(git rev-parse --show-toplevel)/scripts/lint.sh"
+repo_root="$(git rev-parse --show-toplevel)"
+# Git exports worktree-local variables to hooks. Test fixtures create temporary
+# repositories and must not inherit the caller's Git directory or index.
+while IFS= read -r name; do unset "$name"; done < <(git rev-parse --local-env-vars)
+export PYTHONDONTWRITEBYTECODE=1
+exec "$repo_root/scripts/lint.sh"

@@ -399,6 +399,21 @@ preflight() {
     fi
   done
 
+  # Container UIDs can make data unreadable to Paperclip's workspace restore.
+  # Keep all Docker bind mounts outside the issue worktree on shared hosts.
+  real="$(resolved_path "$O4G_LOCAL_DATA_ROOT")"
+  root_real="$(resolved_path "$ROOT")"
+  case "$real" in
+    "$root_real"|"$root_real"/*)
+      echo "O4G_LOCAL_DATA_ROOT must be outside the issue worktree: $real" >&2
+      missing=1
+      ;;
+    */GOU-REPLACE/*)
+      echo "replace GOU-REPLACE with the active issue ID in O4G_LOCAL_DATA_ROOT" >&2
+      missing=1
+      ;;
+  esac
+
   local variable
   for variable in O4G_LOCAL_POSTGRES_PASSWORD O4G_LOCAL_XWIKI_DB_PASSWORD O4G_LOCAL_XWIKI_ROOT_PASSWORD \
     FRONT_SECURITY_SHARED_TOKEN FRONT_SECURITY_JWT_SECRET B2B_JWT_SECRET O4G_LOCAL_ADMIN_KEY; do
