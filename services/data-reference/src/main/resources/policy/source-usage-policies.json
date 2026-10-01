@@ -324,10 +324,45 @@
     "redistribution" : "VALUE_ADDED_ONLY",
     "derivativeLicence" : "NONE",
     "prohibitedUses" : [ "AI_TRAINING", "SYNTHETIC_CONTENT_GENERATION" ],
-    "legalReviewDate" : "2026-09-29",
+    "legalReviewDate" : "2026-10-01",
     "reviewState" : "REVIEWED",
     "revokedAt" : null,
     "evidenceReferences" : [ "urn:o4g:private:product-backup-input-contract:v1", "urn:o4g:private:gou-28-price-history-rights-decision:v1" ]
+  }, {
+    "policyId" : "legacy-backup-import",
+    "sourceId" : "legacy-backup",
+    "version" : "1",
+    "surfaceGrants" : {
+      "IDENTITY" : [ ],
+      "CLASSIFICATION" : [ ],
+      "ATTRIBUTE" : [ ],
+      "TEXT" : [ ],
+      "MEDIA" : [ ],
+      "RELATION" : [ ],
+      "OFFER" : [ ],
+      "PRICE" : [ ]
+    },
+    "effectiveFrom" : "2026-09-30T00:00:00Z",
+    "effectiveUntil" : null,
+    "retention" : "PT0S",
+    "mediaCache" : {
+      "imageBytesAllowed" : false,
+      "imageLinkRetention" : "PT0S",
+      "nonImageRetention" : "PT0S"
+    },
+    "attribution" : {
+      "required" : false,
+      "notice" : null,
+      "sourceUri" : null,
+      "asIsDisclaimerRequired" : false
+    },
+    "redistribution" : "PROHIBITED",
+    "derivativeLicence" : "NONE",
+    "prohibitedUses" : [ "AI_TRAINING", "SYNTHETIC_CONTENT_GENERATION" ],
+    "legalReviewDate" : "2026-09-30",
+    "reviewState" : "REVIEWED",
+    "revokedAt" : null,
+    "evidenceReferences" : [ "urn:o4g:private:gou-52-legacy-backup-importer-no-rights-review:v1" ]
   }, {
     "policyId" : "amazon-paapi-quarantine",
     "sourceId" : "amazon-paapi",

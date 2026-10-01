@@ -15,8 +15,8 @@ public final class PaapiQuarantinePolicy {
     public static final SourceId SOURCE_ID = new SourceId("amazon-paapi");
     /** Immutable deny-all policy used by the reference importer and projections. */
     public static final SourceUsagePolicy POLICY = SourceUsagePolicy.denyAll(
-            "amazon-paapi-quarantine", SOURCE_ID, "1", Instant.parse("2026-09-12T00:00:00Z"),
-            LocalDate.of(2026, 9, 12));
+            "amazon-paapi-quarantine", SOURCE_ID, "2", Instant.parse("2026-09-12T00:00:00Z"),
+            LocalDate.of(2026, 9, 29));
 
     private PaapiQuarantinePolicy() {
     }
