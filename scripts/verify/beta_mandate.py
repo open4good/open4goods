@@ -22,6 +22,16 @@ class MandateError(ValueError):
     """The delegation is absent, stale, out of scope or not qualified."""
 
 
+# Live records show a native board/API write carries sourceTrust=None and
+# derivedAuthorSource=None; anything else means the comment was attributed to
+# the owner through a bridged or derived channel and cannot be trusted as a
+# directly authenticated owner decision.
+ACCEPTED_COMMENT_SOURCE_TRUST = frozenset({None})
+
+DELETION_MARKERS = ("deletedAt", "deletedByType", "deletedByUserId",
+                    "deletedByAgentId", "deletedByRunId")
+
+
 def validate_mandate(comment: dict, milestone: dict, goal: dict, qualification: dict,
                      *, company_id: str, project_id: str, milestone_id: str,
                      goal_id: str, comment_id: str, owner_id: str,
@@ -37,10 +47,12 @@ def validate_mandate(comment: dict, milestone: dict, goal: dict, qualification: 
             raise MandateError("Malformed or foreign mandate record")
     if (comment.get("id") != comment_id or comment.get("issueId") != milestone_id
             or comment.get("authorUserId") != owner_id or comment.get("authorType") != "user"
+            or comment.get("sourceTrust") not in ACCEPTED_COMMENT_SOURCE_TRUST
             or any(comment.get(key) is not None for key in
                    ("authorAgentId", "onBehalfOfUserId", "createdByRunId",
-                    "derivedAuthorAgentId", "derivedCreatedByRunId", "deletedAt"))):
-        raise MandateError("Mandate must be an undeleted owner-authored board comment")
+                    "derivedAuthorAgentId", "derivedCreatedByRunId", "derivedAuthorSource",
+                    *DELETION_MARKERS))):
+        raise MandateError("Mandate must be an undeleted, directly authenticated owner board comment")
     try:
         decision = json.loads(comment.get("body", ""))
     except (ValueError, TypeError) as exc:

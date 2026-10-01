@@ -9,6 +9,40 @@ from unittest.mock import patch
 
 from beta_mandate import MandateError, api_get, check_live, main, validate_mandate
 
+# Captured from live Paperclip comment/issue/goal records during GOU-155's
+# review (an owner board comment, the GOU-150 milestone issue, and its goal).
+# Pins the exact field contract beta_mandate.py may rely on: validate_mandate
+# reading any field outside these sets means either a dependency on an
+# unverified field or that the fixtures below are stale and need re-capturing
+# from the live API before being trusted.
+COMMENT_CONTRACT_FIELDS = frozenset({
+    "id", "issueId", "companyId", "authorType", "authorUserId", "authorAgentId",
+    "onBehalfOfUserId", "createdByRunId", "derivedAuthorAgentId",
+    "derivedCreatedByRunId", "derivedAuthorSource", "sourceTrust",
+    "deletedAt", "deletedByType", "deletedByUserId", "deletedByAgentId",
+    "deletedByRunId", "body",
+})
+ISSUE_CONTRACT_FIELDS = frozenset({
+    "id", "companyId", "projectId", "goalId", "hiddenAt", "reviewPolicy", "status",
+})
+GOAL_CONTRACT_FIELDS = frozenset({"id", "companyId", "status"})
+QUALIFICATION_CONTRACT_FIELDS = frozenset({
+    "id", "companyId", "projectId", "status", "hiddenAt",
+})
+
+
+class RealShapeDict(dict):
+    """Raises if code reads a field outside the documented live contract."""
+
+    def __init__(self, allowed, data):
+        assert set(data) <= allowed, f"fixture has undocumented keys: {set(data) - allowed}"
+        super().__init__(data)
+        self._allowed = allowed
+
+    def get(self, key, default=None):
+        assert key in self._allowed, f"beta_mandate.py reads undocumented field {key!r}"
+        return super().get(key, default)
+
 
 class BetaMandateTest(unittest.TestCase):
     def setUp(self):
@@ -21,7 +55,8 @@ class BetaMandateTest(unittest.TestCase):
                              qualificationIssueId="qualification", productionAuthorized=False)
         self.records = [
             dict(id="comment", companyId="company", issueId="milestone", authorUserId="owner",
-                 authorType="user", body=json.dumps(self.decision)),
+                 authorType="user", sourceTrust=None, derivedAuthorSource=None,
+                 body=json.dumps(self.decision)),
             dict(id="milestone", companyId="company", projectId="project", goalId="goal",
                  status="in_progress", reviewPolicy="human_only"),
             dict(id="goal", companyId="company", status="active"),
@@ -48,7 +83,11 @@ class BetaMandateTest(unittest.TestCase):
     def test_forged_revoked_or_unqualified_records_are_refused(self):
         cases = [(0, "authorType", "agent"), (0, "authorAgentId", "agent"),
                  (0, "onBehalfOfUserId", "owner"), (0, "derivedAuthorAgentId", "agent"),
-                 (0, "deletedAt", "now"), (0, "companyId", "foreign"),
+                 (0, "derivedCreatedByRunId", "run"), (0, "derivedAuthorSource", "external_chat"),
+                 (0, "sourceTrust", "external_chat"), (0, "sourceTrust", "untrusted"),
+                 (0, "deletedAt", "now"), (0, "deletedByType", "agent"),
+                 (0, "deletedByUserId", "owner"), (0, "deletedByAgentId", "agent"),
+                 (0, "deletedByRunId", "run"), (0, "companyId", "foreign"),
                  (0, "body", "CI green"), (0, "body", "[]"),
                  (1, "status", "backlog"), (1, "status", "blocked"),
                  (1, "status", "done"), (1, "status", "cancelled"),
@@ -74,6 +113,16 @@ class BetaMandateTest(unittest.TestCase):
         self.records[0]["body"] = json.dumps(self.decision)
         with self.assertRaises(MandateError):
             validate_mandate(*self.records, **self.ids)
+
+    def test_validator_only_reads_documented_live_fields(self):
+        records = [
+            RealShapeDict(COMMENT_CONTRACT_FIELDS, self.records[0]),
+            RealShapeDict(ISSUE_CONTRACT_FIELDS, self.records[1]),
+            RealShapeDict(GOAL_CONTRACT_FIELDS, self.records[2]),
+            RealShapeDict(QUALIFICATION_CONTRACT_FIELDS, self.records[3]),
+        ]
+        report = validate_mandate(*records, **self.ids)
+        self.assertTrue(report["mandateValid"])
 
     def test_concurrent_revocation_fails_closed(self):
         after = copy.deepcopy(self.records)
