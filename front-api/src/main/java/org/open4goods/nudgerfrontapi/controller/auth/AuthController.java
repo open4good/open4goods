@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.open4goods.nudgerfrontapi.dto.auth.AuthTokensDto;
 import org.open4goods.nudgerfrontapi.dto.auth.GoogleSsoLoginRequest;
-import org.open4goods.nudgerfrontapi.dto.auth.LoginRequest;
 import org.open4goods.nudgerfrontapi.dto.auth.LogoutResponse;
 import org.open4goods.nudgerfrontapi.service.auth.GoogleIdentity;
 import org.open4goods.nudgerfrontapi.service.auth.GoogleIdentityService;
@@ -15,10 +14,8 @@ import org.open4goods.nudgerfrontapi.service.exception.GoogleSsoDisabledExceptio
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -41,53 +38,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Authentication", description = "Login and refresh tokens")
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final GoogleIdentityService googleIdentityService;
 
-    public AuthController(AuthenticationManager authenticationManager, JwtService jwtService,
-            GoogleIdentityService googleIdentityService) {
-        this.authenticationManager = authenticationManager;
+    public AuthController(JwtService jwtService, GoogleIdentityService googleIdentityService) {
         this.jwtService = jwtService;
         this.googleIdentityService = googleIdentityService;
-    }
-
-    @PostMapping("/login")
-    @Operation(
-            summary = "Login with XWiki credentials",
-            description = "Validate credentials against XWiki and return JWT tokens as cookies.",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    content = @Content(schema = @Schema(implementation = LoginRequest.class))
-            ),
-
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Authentication success",
-                            headers = @io.swagger.v3.oas.annotations.headers.Header(name = "X-Locale",
-                                    description = "Resolved locale for textual payloads.",
-                                    schema = @Schema(type = "string", example = "fr-FR")),
-                            content = @Content(schema = @Schema(implementation = AuthTokensDto.class))),
-                    @ApiResponse(responseCode = "401", description = "Authentication failed")
-            }
-    )
-    public ResponseEntity<AuthTokensDto> login(@RequestBody LoginRequest request) {
-        try {
-            Authentication auth = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.username(), request.password()));
-            String access = jwtService.generateAccessToken(auth);
-            String refresh = jwtService.generateRefreshToken(auth);
-
-            ResponseCookie accessTokenCookie = buildCookie("access-token", access,
-                    jwtService.getProperties().getAccessTokenExpiry());
-            ResponseCookie refreshTokenCookie = buildCookie("refresh-token", refresh,
-                    jwtService.getProperties().getRefreshTokenExpiry());
-
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString(), refreshTokenCookie.toString())
-                    .body(new AuthTokensDto(access, refresh));
-        } catch (AuthenticationException ex) {
-            return ResponseEntity.status(401).build();
-        }
     }
 
     @PostMapping("/google")

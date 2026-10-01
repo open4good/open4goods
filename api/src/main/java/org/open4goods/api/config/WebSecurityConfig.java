@@ -14,11 +14,8 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -48,11 +45,8 @@ public class WebSecurityConfig {
 
 	private final ApiProperties apiProperties;
 
-	private final AuthenticationProvider  authProvider;
-	
-	public WebSecurityConfig(ApiProperties apiProperties, AuthenticationProvider  authProvider) {
+	public WebSecurityConfig(ApiProperties apiProperties) {
 		this.apiProperties = apiProperties;
-		this.authProvider = authProvider;
 	}
 	
 	@Bean
@@ -162,19 +156,6 @@ public class WebSecurityConfig {
 	    return source;
 	}
 
-
-	/**
-	 * Authentication manager
-	 * @param http
-	 * @return
-	 * @throws Exception
-	 */
-	@Bean
-	AuthenticationManager authManager(HttpSecurity http) throws Exception {
-		AuthenticationManagerBuilder authenticationManagerBuilder =	http.getSharedObject(AuthenticationManagerBuilder.class);
-		authenticationManagerBuilder.authenticationProvider(authProvider);
-		return authenticationManagerBuilder.build();
-	}
 
 	@Bean
 	PasswordEncoder passwordEncoder() {

@@ -43,8 +43,3 @@ api:
 
 # The key to provide to get ADMIN_ROLE
 adminKey: open4goods
-
-xwiki:
-  baseUrl: http://localhost:${O4G_PORT_XWIKI:8080}/xwiki
-  password: mock
-  username: mock
