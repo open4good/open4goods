@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 import json
 import os
 import sys
@@ -11,6 +12,9 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
+
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 
 MODULE_PATH = Path(__file__).with_name("check_promotion_readiness.py")
@@ -20,9 +24,12 @@ GATE = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = GATE
 SPEC.loader.exec_module(GATE)
 
-# Test-only HMAC key (GOU-174): not a secret, just long enough to satisfy
-# gate_proof_seal.load_key_from_hex's minimum-length check for this module's offline fixtures.
-TEST_HMAC_KEY_HEX = "11" * 32
+# Test-only Ed25519 keypair (GOU-174/GOU-177): not the real pipeline key, just a disposable
+# fixture keypair for these offline tests.
+TEST_SIGNING_KEY_HEX = "11" * 32
+TEST_SIGNING_KEY = Ed25519PrivateKey.from_private_bytes(bytes.fromhex(TEST_SIGNING_KEY_HEX))
+TEST_PUBLIC_KEY_HEX = TEST_SIGNING_KEY.public_key().public_bytes(
+    encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw).hex()
 
 CANDIDATE_SHA = "a" * 40
 DATASET = "products-backup-2026-09-30"
@@ -79,7 +86,8 @@ class TempRepoTestCase(unittest.TestCase):
         self.manifest_path = self.root / "release-manifest"
         self.write_manifest()
         # main() refuses to seal a report without this; build_report() itself is unaffected.
-        self.enterContext(mock.patch.dict(os.environ, {GATE.gate_proof_seal.ENV_VAR: TEST_HMAC_KEY_HEX}))
+        self.enterContext(mock.patch.dict(
+            os.environ, {GATE.gate_proof_seal.SIGNING_KEY_ENV_VAR: TEST_SIGNING_KEY_HEX}))
 
     def tearDown(self) -> None:
         self.temp.cleanup()
@@ -384,8 +392,8 @@ class GateProofSealTest(TempRepoTestCase):
         stdout = self.run_and_capture_stdout(self.write_clean_fixtures())
         report = json.loads(stdout)
         self.assertTrue(report["ready"])
-        key = GATE.gate_proof_seal.load_key_from_hex(TEST_HMAC_KEY_HEX)
-        self.assertTrue(GATE.gate_proof_seal.verify_seal(key, report, report.get("seal")))
+        public_key = GATE.gate_proof_seal.load_public_key_from_hex(TEST_PUBLIC_KEY_HEX)
+        self.assertTrue(GATE.gate_proof_seal.verify_seal(public_key, report, report.get("seal")))
 
     def test_hand_written_report_does_not_verify_against_the_real_key(self) -> None:
         """Reproduces the GOU-174 counter-example: five correct-looking fields, hand-typed, with
@@ -397,29 +405,48 @@ class GateProofSealTest(TempRepoTestCase):
             "manifestDigest": self.digest(),
             "generatedAt": "2026-10-01T00:00:00Z",
         }
-        key = GATE.gate_proof_seal.load_key_from_hex(TEST_HMAC_KEY_HEX)
-        self.assertFalse(GATE.gate_proof_seal.verify_seal(key, forged, forged.get("seal")))
+        public_key = GATE.gate_proof_seal.load_public_key_from_hex(TEST_PUBLIC_KEY_HEX)
+        self.assertFalse(GATE.gate_proof_seal.verify_seal(public_key, forged, forged.get("seal")))
         forged["seal"] = "deadbeef" * 8
-        self.assertFalse(GATE.gate_proof_seal.verify_seal(key, forged, forged["seal"]))
+        self.assertFalse(GATE.gate_proof_seal.verify_seal(public_key, forged, forged["seal"]))
 
-    def test_missing_hmac_key_fails_closed(self) -> None:
+    def test_missing_signing_key_fails_closed(self) -> None:
         args = self.write_clean_fixtures()
         with mock.patch.dict(os.environ, {}, clear=False):
-            del os.environ[GATE.gate_proof_seal.ENV_VAR]
+            del os.environ[GATE.gate_proof_seal.SIGNING_KEY_ENV_VAR]
             rc = GATE.main(args)
         self.assertEqual(rc, 2)
 
-    def test_malformed_hmac_key_fails_closed(self) -> None:
+    def test_malformed_signing_key_fails_closed(self) -> None:
         args = self.write_clean_fixtures()
-        with mock.patch.dict(os.environ, {GATE.gate_proof_seal.ENV_VAR: "not-hex"}):
+        with mock.patch.dict(os.environ, {GATE.gate_proof_seal.SIGNING_KEY_ENV_VAR: "not-hex"}):
             rc = GATE.main(args)
         self.assertEqual(rc, 2)
 
-    def test_short_hmac_key_fails_closed(self) -> None:
+    def test_short_signing_key_fails_closed(self) -> None:
         args = self.write_clean_fixtures()
-        with mock.patch.dict(os.environ, {GATE.gate_proof_seal.ENV_VAR: "aa"}):
+        with mock.patch.dict(os.environ, {GATE.gate_proof_seal.SIGNING_KEY_ENV_VAR: "aa"}):
             rc = GATE.main(args)
         self.assertEqual(rc, 2)
+
+    def test_deploy_host_with_only_the_public_key_cannot_forge_a_seal(self) -> None:
+        """GOU-177: unlike the GOU-174 HMAC, the deploy host's public key is not enough to sign a
+        new proof -- only scripts/verify/check_promotion_readiness.py's O4G_GATE_PROOF_SIGNING_KEY
+        can. This is the property the symmetric scheme could not offer."""
+        public_key = GATE.gate_proof_seal.load_public_key_from_hex(TEST_PUBLIC_KEY_HEX)
+        forged = {
+            "ready": True,
+            "candidateSha": CANDIDATE_SHA,
+            "promotionTarget": PROMOTION_TARGET,
+            "manifestDigest": self.digest(),
+            "generatedAt": "2026-10-01T00:00:00Z",
+        }
+        with self.assertRaises(Exception):
+            # A public key object exposes no signing method at all: an attacker who extracted
+            # only the public key (e.g. by reading the deploy host's environment or repo file)
+            # has no API surface here that produces a signature, unlike an HMAC key which signs
+            # and verifies with the same bytes.
+            public_key.sign(GATE.gate_proof_seal.canonical_form(forged))
 
     def run_and_capture_stdout(self, args: list[str]) -> str:
         import contextlib
@@ -533,6 +560,33 @@ class BetaMandateCompositionTest(TempRepoTestCase):
             GATE.fetch_decision = original_fetch_decision
             GATE.beta_mandate.check_live = original_check_live
         self.assertEqual(rc, 0)
+
+
+class MissingCryptographyDependencyFailsClosedTest(TempRepoTestCase):
+    """If `cryptography` is not installed where check_promotion_readiness.py runs, main() must
+    refuse with a readable stderr message and a non-zero exit -- never a bare ModuleNotFoundError
+    traceback (GOU-177 review on PR #3399: the import itself must stay fail-closed)."""
+
+    def test_main_rejects_cleanly_when_cryptography_is_unavailable(self) -> None:
+        decision_path = self.root / "decision.json"
+        decision_path.write_text(json.dumps(valid_decision(manifestDigest=self.digest())), encoding="utf-8")
+        issues_path = self.root / "issues.json"
+        issues_path.write_text(json.dumps([issue("GOU-1", "development")]), encoding="utf-8")
+        fake_error = ModuleNotFoundError("No module named 'cryptography'")
+        stderr = io.StringIO()
+        with mock.patch.object(GATE, "GATE_PROOF_SEAL_IMPORT_ERROR", fake_error):
+            with mock.patch("sys.stderr", stderr):
+                rc = GATE.main([
+                    "--project-id", "proj-1", "--cache-file", str(self.cache_path),
+                    "--manifest", str(self.manifest_path), "--candidate-sha", CANDIDATE_SHA,
+                    "--dataset", DATASET, "--promotion-target", PROMOTION_TARGET, "--phase", PHASE,
+                    "--issues", str(issues_path), "--decision", str(decision_path),
+                ])
+        self.assertEqual(rc, 2)
+        message = stderr.getvalue()
+        self.assertIn("cryptography", message)
+        self.assertIn("GOU-177", message)
+        self.assertNotIn("Traceback", message)
 
 
 if __name__ == "__main__":
