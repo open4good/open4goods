@@ -154,11 +154,54 @@ runs *after* `package`, and by default it tests the module's main artifact - whi
 `NoClassDefFoundError` on the class it is testing. Do not remove it.
 
 If you add an `*IT` test, verify it actually runs **through a real `install`**
-(`mvn -pl <module> -am install`, or `mvn -pl <module> install` when the reactor is
-already built). Do not settle for `mvn -pl <module> test-compile failsafe:verify`:
-that skips `package`, so it passes even when the packaged build would not, which is
-exactly how the two defects above stayed invisible. An `*IT` class that silently
-never executes is worse than no test at all.
+(`mvn -pl <module> -am install`). Do not settle for
+`mvn -pl <module> test-compile failsafe:verify`: that skips `package`, so it
+passes even when the packaged build would not, which is exactly how the two
+defects above stayed invisible. An `*IT` class that silently never executes is
+worse than no test at all.
+
+**On the shared build host, `~/.m2/repository` is one directory shared by every
+agent's run.** Always pass `-am` to `mvn -pl <module> ...`: without it, Maven
+resolves sibling modules from that shared repository instead of from this
+worktree, i.e. from whatever another agent's `mvn install` last published there
+- possibly a different branch. `mvn -pl <module> install` "when the reactor is
+already built" is never a safe shortcut here, because "already built" cannot be
+guaranteed to still mean *your* build between one command and the next (see
+GOU-142: a test failed against a classpath that still carried another agent's
+branch, even though the worktree and git index were clean). Conversely, `mvn
+install` of any module **publishes it for every other agent on the host**;
+treat it as a shared, observable side effect, not a private cache warm-up.
+
+If a test result looks inconsistent with the source in the worktree (wrong
+field count, a test failing for a reason the code doesn't support), suspect the
+shared classpath before the worktree: diff the dependency jar in
+`~/.m2/repository` against what the worktree's source would actually produce.
+
+To build or test without touching the shared repository at all, bootstrap a
+private one with `scripts/local/isolated-maven-repo.sh` and pass it as
+`-Dmaven.repo.local`:
+
+```bash
+M2_REPO="$(scripts/local/isolated-maven-repo.sh)"
+mvn -Dmaven.repo.local="$M2_REPO" -pl b2b-api -am test
+```
+
+The script does a real copy (`cp -a`) of `~/.m2/repository`, not a hard-link
+bootstrap (`cp -al`): a hard-linked artifact still shares one inode with the
+shared copy, and `mvn install` overwrites an existing artifact file in place
+rather than replacing it, so a hard-linked private repo corrupts the shared
+cache exactly like the incident above - verified on this host's Maven 3.8.7 by
+installing through a hard-linked repo and observing the shared jar's mtime and
+bytes change. The real copy costs ~1.8 GB of disk and a few seconds per run id
+(measured on this host on 2026-10-01: ~4-6 s to bootstrap, ~15 s for a full
+`-am -o install` of a module through it, well under build/test time, with
+626 GB free on the partition backing `$HOME`; re-measure before relying on
+this elsewhere, since the shared repository size and host headroom drift).
+Reach for it for anything sensitive to classpath drift (debugging a
+GOU-142-shaped inconsistency, `*IT`/`install` on a module with concurrent
+agents active); the default
+`mvn --offline clean install` without `-Dmaven.repo.local` remains fine for a
+normal, uncontended full-reactor build.
 
 Run the canonical lint suite before handoff:
 
