@@ -232,8 +232,11 @@ The suite covers Markdown/JSON text normalization, YAML, shell scripts, GitHub
 Actions, Docker Compose, Dockerfiles when `hadolint` is installed, and the Nuxt
 frontend lint checks. It does not build or generate the frontend.
 
-The repository uses a tracked pre-push hook in `.githooks/pre-push`. Enable it
-with:
+The repository uses two tracked hooks: `.githooks/pre-push` runs the lint
+suite before pushing, and `.githooks/pre-commit` refuses a commit made
+directly on the default branch (see
+[docs/operations/default-branch-commit-guard.md](docs/operations/default-branch-commit-guard.md),
+GOU-183). Enable both with:
 
 ```bash
 git config core.hooksPath .githooks
