@@ -36,6 +36,8 @@ front:
   security:
     enabled: true
     cors-allowed-hosts: ${FRONT_SECURITY_CORS_ALLOWED_HOSTS:http://localhost:8082,http://localhost:3000}
+    cookie-secure: ${FRONT_SECURITY_COOKIE_SECURE:true}
+    cookie-same-site: ${FRONT_SECURITY_COOKIE_SAME_SITE:Lax}
     jwt-secret: ${FRONT_SECURITY_JWT_SECRET:CHANGE_ME_TO_A_LONG_SECRET_VALUE_32_BYTES_MIN}
     shared-token: ${FRONT_SECURITY_SHARED_TOKEN:CHANGE_ME_SHARED_TOKEN}
   exposed-docs:
