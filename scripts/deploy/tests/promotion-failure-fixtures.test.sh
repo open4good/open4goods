@@ -28,6 +28,10 @@ printf '%s\n' '#!/usr/bin/env bash' \
   'if [ "${O4G_TEST_CURL_STATUS:-0}" -eq 0 ]; then printf 200; else printf 000; fi' > "$fixture/bin/curl"
 chmod +x "$fixture/bin/systemctl" "$fixture/bin/curl"
 export PATH="$fixture/bin:$PATH"
+# Test-only HMAC key (GOU-174): not a secret, just a fixture standing in for the real
+# O4G_GATE_PROOF_HMAC_KEY that only the pipeline holds in a deployed environment.
+export O4G_GATE_PROOF_HMAC_KEY
+O4G_GATE_PROOF_HMAC_KEY="$(printf '4%.0s' $(seq 1 64))"
 
 # The publish scripts are `#!/usr/bin/env bash`, so a BASH_ENV startup file inherited from the
 # caller runs first and can re-export PATH, silently handing them the real systemctl/curl. Drop
@@ -51,6 +55,33 @@ printf '%s\n' b2b > "$fixture/b2b-frontend/index.html"
   --ui "$fixture/ui.jar" --b2b-api "$fixture/b2b-api.jar" --exposed-docs "$fixture/exposed-docs.jar" \
   --geocode "$fixture/geocode.jar" --frontend-ssr "$fixture/frontend-ssr" \
   --b2b-frontend "$fixture/b2b-frontend"
+
+write_gate_proof() {
+  local proof_file="$1" release="$2" manifest_path="$3"
+  local digest generated_at seal
+  digest="$(sha256sum "$manifest_path" | awk '{print $1}')"
+  generated_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  seal="$(python3 - "$release" "$digest" "$generated_at" <<PYEOF
+import os, sys
+sys.path.insert(0, "$ROOT/scripts/deploy")
+import gate_proof_seal
+release, digest, generated_at = sys.argv[1:4]
+proof = {
+    "ready": True,
+    "candidateSha": release,
+    "promotionTarget": "beta",
+    "manifestDigest": digest,
+    "generatedAt": generated_at,
+}
+key = bytes.fromhex(os.environ["O4G_GATE_PROOF_HMAC_KEY"])
+print(gate_proof_seal.compute_seal(key, proof))
+PYEOF
+  )"
+  printf '{"ready": true, "candidateSha": "%s", "promotionTarget": "beta", "manifestDigest": "%s", "generatedAt": "%s", "seal": "%s"}\n' \
+    "$release" "$digest" "$generated_at" "$seal" > "$proof_file"
+}
+write_gate_proof "$fixture/gate-proof.json" abcdef1 "$fixture/bundle/release-manifest"
+gate_args=(--promotion-target beta --gate-proof "$fixture/gate-proof.json")
 
 fresh_runtime_root() {
   local label="$1"
@@ -87,7 +118,7 @@ root="$(fresh_runtime_root corrupt-manifest)"
 rm -f "$fixture/systemctl.log"
 assert_publish_fails corrupt-manifest \
   "$ROOT/scripts/deploy/publish-java-release.sh" --release abcdef1 --bundle "$corrupt_manifest_bundle" \
-  --service api --health-url http://127.0.0.1/health --root "$root"
+  --service api --health-url http://127.0.0.1/health --root "$root" "${gate_args[@]}"
 grep -q 'manifest contract is invalid' "$fixture/last-stderr.log"
 assert_symlink_unchanged "$root" ../../releases/old corrupt-manifest
 [[ ! -d "$root/releases/abcdef1" ]] || { echo 'FAIL (corrupt-manifest): release directory must not be staged' >&2; exit 1; }
@@ -101,7 +132,7 @@ root="$(fresh_runtime_root digest-mismatch)"
 rm -f "$fixture/systemctl.log"
 assert_publish_fails digest-mismatch \
   "$ROOT/scripts/deploy/publish-java-release.sh" --release abcdef1 --bundle "$digest_mismatch_bundle" \
-  --service api --health-url http://127.0.0.1/health --root "$root"
+  --service api --health-url http://127.0.0.1/health --root "$root" "${gate_args[@]}"
 grep -q 'invalid Java artifact: api' "$fixture/last-stderr.log"
 assert_symlink_unchanged "$root" ../../releases/old digest-mismatch
 [[ ! -d "$root/releases/abcdef1" ]] || { echo 'FAIL (digest-mismatch): release directory must not be staged' >&2; exit 1; }
@@ -115,7 +146,7 @@ root="$(fresh_runtime_root missing-artifact)"
 rm -f "$fixture/systemctl.log"
 assert_publish_fails missing-artifact \
   "$ROOT/scripts/deploy/publish-java-release.sh" --release abcdef1 --bundle "$missing_artifact_bundle" \
-  --service api --health-url http://127.0.0.1/health --root "$root"
+  --service api --health-url http://127.0.0.1/health --root "$root" "${gate_args[@]}"
 grep -q 'invalid Java artifact: ui' "$fixture/last-stderr.log"
 assert_symlink_unchanged "$root" ../../releases/old missing-artifact
 [[ ! -f "$fixture/systemctl.log" ]] || { echo 'FAIL (missing-artifact): systemctl must not run' >&2; exit 1; }
@@ -126,7 +157,7 @@ rm -f "$fixture/systemctl.log"
 assert_publish_fails health-check-failure \
   env O4G_TEST_CURL_STATUS=1 O4G_HEALTH_ATTEMPTS=1 O4G_HEALTH_DELAY_SECONDS=0 \
   "$ROOT/scripts/deploy/publish-java-release.sh" --release abcdef1 --bundle "$fixture/bundle" \
-  --service api --health-url http://127.0.0.1/health --root "$root"
+  --service api --health-url http://127.0.0.1/health --root "$root" "${gate_args[@]}"
 grep -q 'health check failed for api; restoring prior release' "$fixture/last-stderr.log"
 assert_symlink_unchanged "$root" ../../releases/old health-check-failure
 test "$(wc -l < "$fixture/systemctl.log")" -eq 2
@@ -139,7 +170,7 @@ printf 'crashed-mid-stage\n' > "$root/releases/abcdef1/sbadmin.jar"
 rm -f "$fixture/systemctl.log"
 assert_publish_fails partial-write \
   "$ROOT/scripts/deploy/publish-java-release.sh" --release abcdef1 --bundle "$fixture/bundle" \
-  --service api --health-url http://127.0.0.1/health --root "$root"
+  --service api --health-url http://127.0.0.1/health --root "$root" "${gate_args[@]}"
 grep -q 'existing release is incomplete' "$fixture/last-stderr.log"
 assert_symlink_unchanged "$root" ../../releases/old partial-write
 [[ ! -f "$root/releases/abcdef1/release-manifest" ]] || { echo 'FAIL (partial-write): must not backfill the manifest' >&2; exit 1; }
@@ -151,13 +182,13 @@ nuxt_root="$fixture/runtime-nuxt"
 mkdir -p "$nuxt_root/services/frontend"
 ln -s ../../releases/old-frontend "$nuxt_root/services/frontend/current"
 isolated "$ROOT/scripts/deploy/publish-java-release.sh" --release abcdef1 --bundle "$fixture/bundle" \
-  --service api --health-url http://127.0.0.1/health --root "$nuxt_root" >/dev/null
+  --service api --health-url http://127.0.0.1/health --root "$nuxt_root" "${gate_args[@]}" >/dev/null
 chmod -R u+w "$nuxt_root/releases/abcdef1"
 : > "$nuxt_root/releases/abcdef1/frontend-ssr.tar.gz"
 rm -f "$fixture/systemctl.log"
 assert_publish_fails nuxt-digest-mismatch \
   "$ROOT/scripts/deploy/publish-nuxt-release.sh" --release abcdef1 --service frontend \
-  --health-url http://127.0.0.1/health --root "$nuxt_root"
+  --health-url http://127.0.0.1/health --root "$nuxt_root" "${gate_args[@]}"
 grep -q 'release artifact checksum does not match' "$fixture/last-stderr.log"
 test "$(readlink "$nuxt_root/services/frontend/current")" = ../../releases/old-frontend
 [[ ! -f "$fixture/systemctl.log" ]] || { echo 'FAIL (nuxt-digest-mismatch): systemctl must not run' >&2; exit 1; }

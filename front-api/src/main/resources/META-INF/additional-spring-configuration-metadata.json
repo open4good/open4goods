@@ -738,6 +738,39 @@
       "name": "xwiki.username",
       "type": "java.lang.String",
       "description": "Username used to authenticate against XWiki."
+    },
+    {
+      "name": "front.security.google-sso.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Master switch for the Google SSO login endpoint. Must stay false outside an explicitly authorized environment.",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GoogleSsoProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "front.security.google-sso.client-id",
+      "type": "java.lang.String",
+      "description": "OAuth client id issued by Google for this environment's loopback client.",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GoogleSsoProperties"
+    },
+    {
+      "name": "front.security.google-sso.issuer",
+      "type": "java.lang.String",
+      "description": "Expected iss claim of the Google ID token.",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GoogleSsoProperties",
+      "defaultValue": "https://accounts.google.com"
+    },
+    {
+      "name": "front.security.google-sso.jwks-uri",
+      "type": "java.lang.String",
+      "description": "JWKS endpoint used to resolve Google's signing keys.",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GoogleSsoProperties",
+      "defaultValue": "https://www.googleapis.com/oauth2/v3/certs"
+    },
+    {
+      "name": "front.security.google-sso.role-allowlist",
+      "type": "java.util.Map<java.lang.String,java.util.List<java.lang.String>>",
+      "description": "Deny-by-default email to role list allowlist. Keys are lower-cased emails; values are granted authorities (e.g. ROLE_SITEEDITOR, XWIKIADMINGROUP). An email missing from this map is refused.",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GoogleSsoProperties"
     }
   ]
 }

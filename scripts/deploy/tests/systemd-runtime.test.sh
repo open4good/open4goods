@@ -29,6 +29,36 @@ printf '%s\n' '#!/usr/bin/env bash' 'if [ "${O4G_TEST_CURL_STATUS:-0}" -eq 0 ]; 
 chmod +x "$fixture/bin/systemctl" "$fixture/bin/curl"
 ln -s ../../releases/old "$fixture/runtime/services/api/current"
 
+# Test-only HMAC key (GOU-174): not a secret, just a fixture standing in for the real
+# O4G_GATE_PROOF_HMAC_KEY that only the pipeline holds in a deployed environment.
+TEST_HMAC_KEY_HEX="$(printf '4%.0s' $(seq 1 64))"
+
+write_gate_proof() {
+  local proof_file="$1" release="$2" manifest_path="$3"
+  local digest generated_at seal
+  digest="$(sha256sum "$manifest_path" | awk '{print $1}')"
+  generated_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  seal="$(TEST_HMAC_KEY_HEX="$TEST_HMAC_KEY_HEX" python3 - "$release" "$digest" "$generated_at" <<PYEOF
+import os, sys
+sys.path.insert(0, "$ROOT/scripts/deploy")
+import gate_proof_seal
+release, digest, generated_at = sys.argv[1:4]
+proof = {
+    "ready": True,
+    "candidateSha": release,
+    "promotionTarget": "beta",
+    "manifestDigest": digest,
+    "generatedAt": generated_at,
+}
+key = bytes.fromhex(os.environ["TEST_HMAC_KEY_HEX"])
+print(gate_proof_seal.compute_seal(key, proof))
+PYEOF
+  )"
+  printf '{"ready": true, "candidateSha": "%s", "promotionTarget": "beta", "manifestDigest": "%s", "generatedAt": "%s", "seal": "%s"}\n' \
+    "$release" "$digest" "$generated_at" "$seal" > "$proof_file"
+}
+write_gate_proof "$fixture/gate-proof.json" abcdef1 "$fixture/bundle/release-manifest"
+
 # Stubs are wired in by absolute path (O4G_SYSTEMCTL/O4G_CURL/O4G_SYSTEMD_ANALYZE), the real
 # guarantee that a test cannot reach a system binary. `isolated` also drops BASH_ENV as
 # defense in depth: the deploy scripts are `#!/usr/bin/env bash`, so a BASH_ENV startup file
@@ -45,27 +75,30 @@ resolved="$(isolated bash -c 'command -v systemctl')"
 systemctl_stub="$fixture/bin/systemctl"
 curl_stub="$fixture/bin/curl"
 
-isolated env O4G_SYSTEMCTL="$systemctl_stub" O4G_CURL="$curl_stub" \
+isolated env O4G_SYSTEMCTL="$systemctl_stub" O4G_CURL="$curl_stub" O4G_GATE_PROOF_HMAC_KEY="$TEST_HMAC_KEY_HEX" \
   "$ROOT/scripts/deploy/publish-java-release.sh" --release abcdef1 --bundle "$fixture/bundle" \
-  --service api --health-url http://127.0.0.1/health --root "$fixture/runtime"
+  --service api --health-url http://127.0.0.1/health --promotion-target beta \
+  --gate-proof "$fixture/gate-proof.json" --root "$fixture/runtime"
 test "$(readlink "$fixture/runtime/services/api/current")" = ../../releases/abcdef1
 grep -qx 'restart open4goods@api.service' "$fixture/systemctl.log"
 test "$(wc -l < "$fixture/systemctl.log")" -eq 1
 test ! -w "$fixture/runtime/releases/abcdef1/release-manifest"
 test -f "$fixture/runtime/releases/abcdef1/frontend-ssr/index.html"
 
-isolated env O4G_SYSTEMCTL="$systemctl_stub" O4G_CURL="$curl_stub" \
+isolated env O4G_SYSTEMCTL="$systemctl_stub" O4G_CURL="$curl_stub" O4G_GATE_PROOF_HMAC_KEY="$TEST_HMAC_KEY_HEX" \
   "$ROOT/scripts/deploy/publish-nuxt-release.sh" --release abcdef1 \
-  --service frontend --health-url http://127.0.0.1/health --root "$fixture/runtime"
+  --service frontend --health-url http://127.0.0.1/health --promotion-target beta \
+  --gate-proof "$fixture/gate-proof.json" --root "$fixture/runtime"
 test "$(readlink "$fixture/runtime/services/frontend/current")" = ../../releases/abcdef1/frontend-ssr
 grep -qx 'restart open4goods-nuxt@frontend.service' "$fixture/systemctl.log"
 
 rm -f "$fixture/systemctl.log"
 ln -s ../../releases/old "$fixture/runtime/services/api/current.rollback"
 mv -Tf "$fixture/runtime/services/api/current.rollback" "$fixture/runtime/services/api/current"
-if isolated env O4G_SYSTEMCTL="$systemctl_stub" O4G_CURL="$curl_stub" O4G_TEST_CURL_STATUS=1 O4G_HEALTH_ATTEMPTS=1 O4G_HEALTH_DELAY_SECONDS=0 \
+if isolated env O4G_SYSTEMCTL="$systemctl_stub" O4G_CURL="$curl_stub" O4G_GATE_PROOF_HMAC_KEY="$TEST_HMAC_KEY_HEX" O4G_TEST_CURL_STATUS=1 O4G_HEALTH_ATTEMPTS=1 O4G_HEALTH_DELAY_SECONDS=0 \
   "$ROOT/scripts/deploy/publish-java-release.sh" --release abcdef1 \
-  --bundle "$fixture/bundle" --service api --health-url http://127.0.0.1/health --root "$fixture/runtime"; then
+  --bundle "$fixture/bundle" --service api --health-url http://127.0.0.1/health --promotion-target beta \
+  --gate-proof "$fixture/gate-proof.json" --root "$fixture/runtime"; then
   echo 'expected failing health check' >&2
   exit 1
 fi
@@ -75,9 +108,10 @@ test "$(wc -l < "$fixture/systemctl.log")" -eq 2
 
 ln -s ../../releases/old-frontend "$fixture/runtime/services/frontend/current.rollback"
 mv -Tf "$fixture/runtime/services/frontend/current.rollback" "$fixture/runtime/services/frontend/current"
-if isolated env O4G_SYSTEMCTL="$systemctl_stub" O4G_CURL="$curl_stub" O4G_TEST_CURL_STATUS=1 O4G_HEALTH_ATTEMPTS=1 O4G_HEALTH_DELAY_SECONDS=0 \
+if isolated env O4G_SYSTEMCTL="$systemctl_stub" O4G_CURL="$curl_stub" O4G_GATE_PROOF_HMAC_KEY="$TEST_HMAC_KEY_HEX" O4G_TEST_CURL_STATUS=1 O4G_HEALTH_ATTEMPTS=1 O4G_HEALTH_DELAY_SECONDS=0 \
   "$ROOT/scripts/deploy/publish-nuxt-release.sh" --release abcdef1 --service frontend \
-  --health-url http://127.0.0.1/health --root "$fixture/runtime"; then
+  --health-url http://127.0.0.1/health --promotion-target beta \
+  --gate-proof "$fixture/gate-proof.json" --root "$fixture/runtime"; then
   echo 'expected failing Nuxt health check' >&2
   exit 1
 fi

@@ -6,6 +6,7 @@
 ui/src/main/resources/application-devsec.yml
 /generated-images/
 /code
+.worktrees/
 
 # Local secrets and per-user agent configuration.
 .env.local

@@ -3,20 +3,22 @@
 set -euo pipefail
 
 usage() {
-  echo "usage: $0 --release SHA --bundle DIRECTORY" >&2
+  echo "usage: $0 --release SHA --bundle DIRECTORY --gate-proof FILE" >&2
   exit 2
 }
 
 release=''
 bundle=''
+gate_proof=''
 while (($#)); do
   case "$1" in
     --release) release="${2:-}"; shift 2 ;;
     --bundle) bundle="${2:-}"; shift 2 ;;
+    --gate-proof) gate_proof="${2:-}"; shift 2 ;;
     *) usage ;;
   esac
 done
-[[ "$release" =~ ^[0-9a-f]{7,64}$ && -d "$bundle" ]] || usage
+[[ "$release" =~ ^[0-9a-f]{7,64}$ && -d "$bundle" && -n "$gate_proof" ]] || usage
 [[ "$(id -u)" == '0' ]] || { echo 'bootstrap must run as root' >&2; exit 1; }
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -97,7 +99,8 @@ activate_java_service() {
     return 1
   fi
   if "$repo_root/scripts/deploy/publish-java-release.sh" --release "$release" --bundle "$bundle" \
-    --service "$service" --health-url "http://127.0.0.1:${port}/actuator/health" --health-status "$statuses"; then
+    --service "$service" --health-url "http://127.0.0.1:${port}/actuator/health" --health-status "$statuses" \
+    --promotion-target beta --gate-proof "$gate_proof"; then
     return 0
   fi
   systemctl stop "open4goods@${service}.service" || true

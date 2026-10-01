@@ -408,11 +408,30 @@ preflight() {
       echo "O4G_LOCAL_DATA_ROOT must be outside the issue worktree: $real" >&2
       missing=1
       ;;
-    */GOU-REPLACE/*)
+    *GOU-REPLACE*)
       echo "replace GOU-REPLACE with the active issue ID in O4G_LOCAL_DATA_ROOT" >&2
       missing=1
       ;;
   esac
+
+  # A workspace-restore copy of a worktree loses its .git pointer file and
+  # silently resolves to this repo: forbid any git worktree registered inside
+  # the repo root so one never exists to be copied. Additional worktrees go
+  # under the per-issue persistent path (AGENTS.md), never under $ROOT.
+  if git -C "$ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    local wt_path wt_real
+    while IFS= read -r wt_path; do
+      [ -n "$wt_path" ] || continue
+      wt_real="$(resolved_path "$wt_path")"
+      case "$wt_real" in
+        "$root_real") ;;
+        "$root_real"/*)
+          echo "git worktree found inside the repo root (forbidden): $wt_real" >&2
+          missing=1
+          ;;
+      esac
+    done < <(git -C "$ROOT" worktree list --porcelain 2>/dev/null | awk '/^worktree /{print substr($0,10)}')
+  fi
 
   local variable
   for variable in O4G_LOCAL_POSTGRES_PASSWORD O4G_LOCAL_XWIKI_DB_PASSWORD O4G_LOCAL_XWIKI_ROOT_PASSWORD \

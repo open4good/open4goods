@@ -37,12 +37,42 @@ printf '%s\n' '#!/usr/bin/env bash' 'echo "$*" >> "'"$fixture"'/systemctl.log"' 
 printf '%s\n' '#!/usr/bin/env bash' 'printf 200' > "$fixture/bin/curl"
 chmod +x "$fixture/bin/systemctl" "$fixture/bin/curl"
 
+# Test-only HMAC key (GOU-174): not a secret, just a fixture standing in for the real
+# O4G_GATE_PROOF_HMAC_KEY that only the pipeline holds in a deployed environment.
+TEST_HMAC_KEY_HEX="$(printf '4%.0s' $(seq 1 64))"
+
+write_gate_proof() {
+  local proof_file="$1" release="$2" manifest_path="$3"
+  local digest generated_at seal
+  digest="$(sha256sum "$manifest_path" | awk '{print $1}')"
+  generated_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  seal="$(TEST_HMAC_KEY_HEX="$TEST_HMAC_KEY_HEX" python3 - "$release" "$digest" "$generated_at" <<PYEOF
+import os, sys
+sys.path.insert(0, "$ROOT/scripts/deploy")
+import gate_proof_seal
+release, digest, generated_at = sys.argv[1:4]
+proof = {
+    "ready": True,
+    "candidateSha": release,
+    "promotionTarget": "beta",
+    "manifestDigest": digest,
+    "generatedAt": generated_at,
+}
+key = bytes.fromhex(os.environ["TEST_HMAC_KEY_HEX"])
+print(gate_proof_seal.compute_seal(key, proof))
+PYEOF
+  )"
+  printf '{"ready": true, "candidateSha": "%s", "promotionTarget": "beta", "manifestDigest": "%s", "generatedAt": "%s", "seal": "%s"}\n' \
+    "$release" "$digest" "$generated_at" "$seal" > "$proof_file"
+}
+
 ##############################################################################
 # 1. flock actually serializes a racing writer publishing the same new release.
 ##############################################################################
 race_release='1111111'
 build_bundle "$race_release" "$fixture/bundle-race"
 mkdir -p "$fixture/race-bin" "$fixture/runtime-race"
+write_gate_proof "$fixture/gate-proof-race.json" "$race_release" "$fixture/bundle-race/release-manifest"
 critical_log="$fixture/critical.log"
 : > "$critical_log"
 # A slow `mkdir` fires only for the staging directory, i.e. only inside the flock-held critical
@@ -67,10 +97,11 @@ cp "$fixture/bin/systemctl" "$fixture/bin/curl" "$fixture/race-bin/"
 pids=()
 for _ in 1 2; do
   PATH="$fixture/race-bin:$PATH" env -u BASH_ENV \
-    O4G_SYSTEMCTL="$fixture/race-bin/systemctl" O4G_CURL="$fixture/race-bin/curl" \
+    O4G_SYSTEMCTL="$fixture/race-bin/systemctl" O4G_CURL="$fixture/race-bin/curl" O4G_GATE_PROOF_HMAC_KEY="$TEST_HMAC_KEY_HEX" \
     "$ROOT/scripts/deploy/publish-java-release.sh" \
     --release "$race_release" --bundle "$fixture/bundle-race" --service api \
     --health-url http://127.0.0.1/health --root "$fixture/runtime-race" \
+    --promotion-target beta --gate-proof "$fixture/gate-proof-race.json" \
     >>"$fixture/race.out" 2>&1 &
   pids+=("$!")
 done
@@ -106,6 +137,7 @@ PY
 toctou_release='2222222'
 build_bundle "$toctou_release" "$fixture/bundle-toctou"
 mkdir -p "$fixture/toctou-bin" "$fixture/runtime-toctou"
+write_gate_proof "$fixture/gate-proof-toctou.json" "$toctou_release" "$fixture/bundle-toctou/release-manifest"
 cp "$fixture/bin/systemctl" "$fixture/bin/curl" "$fixture/toctou-bin/"
 # Swap the bundle's api.jar for unverified content the first time `cp` is asked to stage it,
 # simulating a writer that mutates the bundle in the window between the pre-lock check and use.
@@ -123,10 +155,11 @@ EOF
 chmod +x "$fixture/toctou-bin/cp"
 
 if PATH="$fixture/toctou-bin:$PATH" env -u BASH_ENV \
-  O4G_SYSTEMCTL="$fixture/toctou-bin/systemctl" O4G_CURL="$fixture/toctou-bin/curl" \
+  O4G_SYSTEMCTL="$fixture/toctou-bin/systemctl" O4G_CURL="$fixture/toctou-bin/curl" O4G_GATE_PROOF_HMAC_KEY="$TEST_HMAC_KEY_HEX" \
   "$ROOT/scripts/deploy/publish-java-release.sh" \
   --release "$toctou_release" --bundle "$fixture/bundle-toctou" --service api \
   --health-url http://127.0.0.1/health --root "$fixture/runtime-toctou" \
+  --promotion-target beta --gate-proof "$fixture/gate-proof-toctou.json" \
   >"$fixture/toctou.out" 2>&1; then
   echo "expected a bundle mutated mid-publish to be rejected" >&2
   cat "$fixture/toctou.out" >&2
@@ -142,11 +175,13 @@ test ! -L "$fixture/runtime-toctou/services/api/current"
 nuxt_release='3333333'
 build_bundle "$nuxt_release" "$fixture/bundle-nuxt"
 mkdir -p "$fixture/runtime-nuxt/releases"
+write_gate_proof "$fixture/gate-proof-nuxt.json" "$nuxt_release" "$fixture/bundle-nuxt/release-manifest"
 PATH="$fixture/bin:$PATH" env -u BASH_ENV \
-  O4G_SYSTEMCTL="$fixture/bin/systemctl" O4G_CURL="$fixture/bin/curl" \
+  O4G_SYSTEMCTL="$fixture/bin/systemctl" O4G_CURL="$fixture/bin/curl" O4G_GATE_PROOF_HMAC_KEY="$TEST_HMAC_KEY_HEX" \
   "$ROOT/scripts/deploy/publish-java-release.sh" \
   --release "$nuxt_release" --bundle "$fixture/bundle-nuxt" --service api \
-  --health-url http://127.0.0.1/health --root "$fixture/runtime-nuxt" >/dev/null
+  --health-url http://127.0.0.1/health --root "$fixture/runtime-nuxt" \
+  --promotion-target beta --gate-proof "$fixture/gate-proof-nuxt.json" >/dev/null
 : > "$fixture/nuxt-systemctl.log"
 cat > "$fixture/race-bin/systemctl" <<EOF
 #!/usr/bin/env bash
@@ -158,10 +193,12 @@ chmod +x "$fixture/race-bin/systemctl"
 nuxt_pids=()
 for _ in 1 2; do
   PATH="$fixture/race-bin:$PATH" env -u BASH_ENV \
-    O4G_SYSTEMCTL="$fixture/race-bin/systemctl" O4G_CURL="$fixture/race-bin/curl" \
+    O4G_SYSTEMCTL="$fixture/race-bin/systemctl" O4G_CURL="$fixture/race-bin/curl" O4G_GATE_PROOF_HMAC_KEY="$TEST_HMAC_KEY_HEX" \
     "$ROOT/scripts/deploy/publish-nuxt-release.sh" \
     --release "$nuxt_release" --service frontend --health-url http://127.0.0.1/health \
-    --root "$fixture/runtime-nuxt" >>"$fixture/nuxt-race.out" 2>&1 &
+    --root "$fixture/runtime-nuxt" \
+    --promotion-target beta --gate-proof "$fixture/gate-proof-nuxt.json" \
+    >>"$fixture/nuxt-race.out" 2>&1 &
   nuxt_pids+=("$!")
 done
 nuxt_race_failed=0
@@ -217,7 +254,8 @@ if [[ "$(id -u)" == '0' ]]; then
   echo "SKIP: root-only bootstrap authorization check cannot run as root" >&2
 else
   if "$ROOT/scripts/deploy/bootstrap-beta-systemd-runtime.sh" \
-    --release "$nuxt_release" --bundle "$fixture/bundle-nuxt" >"$fixture/bootstrap-non-root.out" 2>&1; then
+    --release "$nuxt_release" --bundle "$fixture/bundle-nuxt" --gate-proof "$fixture/gate-proof-nuxt.json" \
+    >"$fixture/bootstrap-non-root.out" 2>&1; then
     echo "expected non-root bootstrap invocation to be rejected" >&2
     exit 1
   fi

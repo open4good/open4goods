@@ -27,6 +27,11 @@ docs/operations/promotion-readiness-gate.md). It refuses to pass when:
     owner decision for that target. The mandate check itself never returns
     `authorized=true`; it is combined here with, not a substitute for, the
     manifest/phase/decision checks above.
+  * the `O4G_GATE_PROOF_HMAC_KEY` environment variable is missing or unusable.
+    A clean report is sealed (see scripts/deploy/gate_proof_seal.py, GOU-174)
+    before being printed, so that `scripts/deploy/verify_gate_proof.py` -- run
+    later, on a deploy host with no Paperclip API access -- can authenticate
+    it instead of trusting a hand-written file with the right field names.
 
 Any of the above exits non-zero. A clean pass exits 0. This script performs no
 Paperclip, Git or deployment write of any kind.
@@ -43,10 +48,14 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import beta_mandate
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "deploy"))
+import gate_proof_seal  # noqa: E402  (path must be extended first)
 
 CANONICAL_PHASES = ("development", "beta_validation", "production", "post_production")
 # Fail-closed: only these two Paperclip statuses count as finished. Every other
@@ -309,6 +318,14 @@ def build_report(*, issues: list[dict], cache_path: Path, manifest_path: Path, d
         "manifestDigest": digest,
         "betaMandate": mandate_report,
         "blockers": blockers,
+        # Echoed back (not just computed) so a publish script can verify this report names the
+        # exact candidate/target it is about to mutate state for, without re-deriving them from a
+        # trusted-by-assumption source; see scripts/deploy/verify_gate_proof.py (GOU-164).
+        "candidateSha": candidate_sha,
+        "promotionTarget": promotion_target,
+        "dataset": dataset,
+        "phase": phase,
+        "generatedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
     }
 
 
@@ -390,6 +407,15 @@ def main(argv: list[str] | None = None) -> int:
             candidate_sha=args.candidate_sha, dataset=args.dataset,
             promotion_target=args.promotion_target, phase=args.phase, mandate_report=mandate_report,
         )
+        hex_key = os.environ.get(gate_proof_seal.ENV_VAR, "")
+        if not hex_key:
+            raise ReadinessError(
+                f"{gate_proof_seal.ENV_VAR} is not set; cannot seal the gate proof")
+        try:
+            hmac_key = gate_proof_seal.load_key_from_hex(hex_key)
+        except ValueError as exc:
+            raise ReadinessError(str(exc)) from exc
+        report["seal"] = gate_proof_seal.compute_seal(hmac_key, report)
         print(json.dumps(report, indent=2))
         return 0 if report["ready"] else 1
     except ReadinessError as exc:

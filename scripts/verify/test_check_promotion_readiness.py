@@ -5,10 +5,12 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 MODULE_PATH = Path(__file__).with_name("check_promotion_readiness.py")
@@ -17,6 +19,10 @@ assert SPEC and SPEC.loader
 GATE = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = GATE
 SPEC.loader.exec_module(GATE)
+
+# Test-only HMAC key (GOU-174): not a secret, just long enough to satisfy
+# gate_proof_seal.load_key_from_hex's minimum-length check for this module's offline fixtures.
+TEST_HMAC_KEY_HEX = "11" * 32
 
 CANDIDATE_SHA = "a" * 40
 DATASET = "products-backup-2026-09-30"
@@ -72,6 +78,8 @@ class TempRepoTestCase(unittest.TestCase):
         self.cache_path = self.root / "cache.json"
         self.manifest_path = self.root / "release-manifest"
         self.write_manifest()
+        # main() refuses to seal a report without this; build_report() itself is unaffected.
+        self.enterContext(mock.patch.dict(os.environ, {GATE.gate_proof_seal.ENV_VAR: TEST_HMAC_KEY_HEX}))
 
     def tearDown(self) -> None:
         self.temp.cleanup()
@@ -352,6 +360,75 @@ class ApiFailureTest(TempRepoTestCase):
         path = self.root / "decision.json"
         path.write_text(json.dumps(decision), encoding="utf-8")
         return path
+
+
+class GateProofSealTest(TempRepoTestCase):
+    """GOU-174: the printed report must be sealed, and sealing must itself fail closed."""
+
+    def cli_args(self, issues_path: Path, decision_path: Path) -> list[str]:
+        return [
+            "--project-id", "proj-1", "--cache-file", str(self.cache_path),
+            "--manifest", str(self.manifest_path), "--candidate-sha", CANDIDATE_SHA,
+            "--dataset", DATASET, "--promotion-target", PROMOTION_TARGET, "--phase", PHASE,
+            "--issues", str(issues_path), "--decision", str(decision_path),
+        ]
+
+    def write_clean_fixtures(self) -> list[str]:
+        decision_path = self.root / "decision.json"
+        decision_path.write_text(json.dumps(valid_decision(manifestDigest=self.digest())), encoding="utf-8")
+        issues_path = self.root / "issues.json"
+        issues_path.write_text(json.dumps([issue("GOU-1", "development")]), encoding="utf-8")
+        return self.cli_args(issues_path, decision_path)
+
+    def test_clean_pass_is_sealed_and_the_seal_verifies(self) -> None:
+        stdout = self.run_and_capture_stdout(self.write_clean_fixtures())
+        report = json.loads(stdout)
+        self.assertTrue(report["ready"])
+        key = GATE.gate_proof_seal.load_key_from_hex(TEST_HMAC_KEY_HEX)
+        self.assertTrue(GATE.gate_proof_seal.verify_seal(key, report, report.get("seal")))
+
+    def test_hand_written_report_does_not_verify_against_the_real_key(self) -> None:
+        """Reproduces the GOU-174 counter-example: five correct-looking fields, hand-typed, with
+        no seal at all, must not authenticate -- the defect this issue closes."""
+        forged = {
+            "ready": True,
+            "candidateSha": CANDIDATE_SHA,
+            "promotionTarget": PROMOTION_TARGET,
+            "manifestDigest": self.digest(),
+            "generatedAt": "2026-10-01T00:00:00Z",
+        }
+        key = GATE.gate_proof_seal.load_key_from_hex(TEST_HMAC_KEY_HEX)
+        self.assertFalse(GATE.gate_proof_seal.verify_seal(key, forged, forged.get("seal")))
+        forged["seal"] = "deadbeef" * 8
+        self.assertFalse(GATE.gate_proof_seal.verify_seal(key, forged, forged["seal"]))
+
+    def test_missing_hmac_key_fails_closed(self) -> None:
+        args = self.write_clean_fixtures()
+        with mock.patch.dict(os.environ, {}, clear=False):
+            del os.environ[GATE.gate_proof_seal.ENV_VAR]
+            rc = GATE.main(args)
+        self.assertEqual(rc, 2)
+
+    def test_malformed_hmac_key_fails_closed(self) -> None:
+        args = self.write_clean_fixtures()
+        with mock.patch.dict(os.environ, {GATE.gate_proof_seal.ENV_VAR: "not-hex"}):
+            rc = GATE.main(args)
+        self.assertEqual(rc, 2)
+
+    def test_short_hmac_key_fails_closed(self) -> None:
+        args = self.write_clean_fixtures()
+        with mock.patch.dict(os.environ, {GATE.gate_proof_seal.ENV_VAR: "aa"}):
+            rc = GATE.main(args)
+        self.assertEqual(rc, 2)
+
+    def run_and_capture_stdout(self, args: list[str]) -> str:
+        import contextlib
+        import io
+        buffer = io.StringIO()
+        with contextlib.redirect_stdout(buffer):
+            rc = GATE.main(args)
+        self.assertEqual(rc, 0)
+        return buffer.getvalue()
 
 
 class MainEndToEndTest(TempRepoTestCase):

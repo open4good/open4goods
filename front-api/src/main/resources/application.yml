@@ -40,6 +40,12 @@ front:
     cookie-same-site: ${FRONT_SECURITY_COOKIE_SAME_SITE:Lax}
     jwt-secret: ${FRONT_SECURITY_JWT_SECRET:CHANGE_ME_TO_A_LONG_SECRET_VALUE_32_BYTES_MIN}
     shared-token: ${FRONT_SECURITY_SHARED_TOKEN:CHANGE_ME_SHARED_TOKEN}
+    google-sso:
+      enabled: ${FRONT_SECURITY_GOOGLE_SSO_ENABLED:false}
+      client-id: ${FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID:}
+      issuer: ${FRONT_SECURITY_GOOGLE_SSO_ISSUER:https://accounts.google.com}
+      jwks-uri: ${FRONT_SECURITY_GOOGLE_SSO_JWKS_URI:https://www.googleapis.com/oauth2/v3/certs}
+      role-allowlist: {}
   exposed-docs:
     base-url: ${FRONT_EXPOSED_DOCS_BASE_URL:http://localhost:8086}
     public-access: ${FRONT_EXPOSED_DOCS_PUBLIC_ACCESS:true}
