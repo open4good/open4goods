@@ -7,7 +7,10 @@
 #   3. publish refused with a proof for a different promotion target (not replayable across targets);
 #   4. publish refused with a stale proof (bounded freshness, not an unbounded pass);
 #   5. publish accepted with a fresh, exactly-matching proof -- the golden path these fixtures
-#      guard against regressing.
+#      guard against regressing;
+#   6. GOU-174: publish refused with a hand-written proof naming every field correctly but
+#      carrying no valid HMAC seal -- the exact counter-example from that issue's body, which
+#      passed before this fix.
 # Never touches a shared or real target directory: the fixture root is a fresh mktemp tree and
 # systemctl/curl are local stub scripts, not the real tools.
 set -euo pipefail
@@ -24,7 +27,13 @@ mkdir -p "$fixture/bin"
 printf '%s\n' '#!/usr/bin/env bash' 'echo "$*" >> "'"$fixture"'/systemctl.log"' 'exit 0' > "$fixture/bin/systemctl"
 printf '%s\n' '#!/usr/bin/env bash' 'printf 200' > "$fixture/bin/curl"
 chmod +x "$fixture/bin/systemctl" "$fixture/bin/curl"
-isolated() { PATH="$fixture/bin:$PATH" env -u BASH_ENV O4G_SYSTEMCTL="$fixture/bin/systemctl" O4G_CURL="$fixture/bin/curl" "$@"; }
+# Test-only HMAC key (GOU-174): not a secret, just a fixture standing in for the real
+# O4G_GATE_PROOF_HMAC_KEY that only the pipeline holds in a deployed environment.
+TEST_HMAC_KEY_HEX="$(printf '4%.0s' $(seq 1 64))"
+isolated() {
+  PATH="$fixture/bin:$PATH" env -u BASH_ENV O4G_SYSTEMCTL="$fixture/bin/systemctl" O4G_CURL="$fixture/bin/curl" \
+    O4G_GATE_PROOF_HMAC_KEY="$TEST_HMAC_KEY_HEX" "$@"
+}
 
 # Derive the Java service list from publish-java-release.sh itself rather than recopying it,
 # so this fixture cannot silently fall behind when a service is added there.
@@ -45,14 +54,39 @@ build_bundle_args+=(--frontend-ssr "$fixture/frontend-ssr" --b2b-frontend "$fixt
 "$ROOT/scripts/deploy/build-release-bundle.sh" "${build_bundle_args[@]}"
 manifest_digest="$(sha256sum "$fixture/bundle/release-manifest" | awk '{print $1}')"
 
+# Computes the seal the way scripts/verify/check_promotion_readiness.py does, over exactly the
+# fields written below, using the same test key the verifier is given through `isolated`.
+seal_for() {
+  local ready="$1" sha="$2" target="$3" digest="$4" generated_at="$5"
+  TEST_HMAC_KEY_HEX="$TEST_HMAC_KEY_HEX" python3 - "$ready" "$sha" "$target" "$digest" "$generated_at" \
+    <<PYEOF
+import os, sys
+sys.path.insert(0, "$ROOT/scripts/deploy")
+import gate_proof_seal
+ready, sha, target, digest, generated_at = sys.argv[1:6]
+proof = {
+    "ready": ready == "true",
+    "candidateSha": sha,
+    "promotionTarget": target,
+    "manifestDigest": digest,
+    "generatedAt": generated_at,
+}
+key = bytes.fromhex(os.environ["TEST_HMAC_KEY_HEX"])
+print(gate_proof_seal.compute_seal(key, proof))
+PYEOF
+}
+
 write_proof() {
   local proof_file="$1"
   local release_field="$2"
   local target_field="$3"
   local digest_field="$4"
   local generated_at="$5"
-  printf '{"ready": true, "candidateSha": "%s", "promotionTarget": "%s", "manifestDigest": "%s", "generatedAt": "%s"}\n' \
-    "$release_field" "$target_field" "$digest_field" "$generated_at" > "$proof_file"
+  local ready="${6:-true}"
+  local seal
+  seal="$(seal_for "$ready" "$release_field" "$target_field" "$digest_field" "$generated_at")"
+  printf '{"ready": %s, "candidateSha": "%s", "promotionTarget": "%s", "manifestDigest": "%s", "generatedAt": "%s", "seal": "%s"}\n' \
+    "$ready" "$release_field" "$target_field" "$digest_field" "$generated_at" "$seal" > "$proof_file"
 }
 now_iso() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 iso_minus_seconds() { date -u -d "@$(( $(date -u +%s) - "$1" ))" +%Y-%m-%dT%H:%M:%SZ; }
@@ -138,10 +172,10 @@ assert_rejected wrong-digest 'gate proof does not name this exact candidate' \
   --promotion-target beta --gate-proof "$fixture/proof-wrong-digest.json"
 
 ##############################################################################
-# 6. Proof is ready:false: rejected even though every other field matches.
+# 6. Proof is ready:false: rejected even though every other field matches (and is correctly
+#    sealed for ready:false, so this fails on readiness, not on the seal).
 ##############################################################################
-printf '{"ready": false, "candidateSha": "%s", "promotionTarget": "beta", "manifestDigest": "%s", "generatedAt": "%s"}\n' \
-  "$release" "$manifest_digest" "$(now_iso)" > "$fixture/proof-not-ready.json"
+write_proof "$fixture/proof-not-ready.json" "$release" beta "$manifest_digest" "$(now_iso)" false
 assert_rejected not-ready 'gate proof is not ready' \
   --promotion-target beta --gate-proof "$fixture/proof-not-ready.json"
 
@@ -153,8 +187,51 @@ assert_rejected stale 'gate proof is stale' \
   --promotion-target beta --gate-proof "$fixture/proof-stale.json" --gate-proof-max-age-seconds 900
 
 ##############################################################################
-# 8. Golden path: a fresh, exactly-matching proof is accepted and the mutation proceeds, for
-#    both the Java and Nuxt publish entrypoints.
+# 8. GOU-174: the exact counter-example from the issue body. A hand-written proof naming the
+#    real candidate SHA, target and manifest digest, fresh, but with no seal at all -- anyone who
+#    can run the publish script could write this. Must now be rejected.
+##############################################################################
+printf '{"ready": true, "candidateSha": "%s", "promotionTarget": "beta", "manifestDigest": "%s", "generatedAt": "%s"}\n' \
+  "$release" "$manifest_digest" "$(now_iso)" > "$fixture/proof-forged-no-seal.json"
+assert_rejected forged-no-seal 'gate proof seal is missing or invalid' \
+  --promotion-target beta --gate-proof "$fixture/proof-forged-no-seal.json"
+
+##############################################################################
+# 9. Same counter-example, but with a guessed/garbage seal value instead of none at all.
+##############################################################################
+printf '{"ready": true, "candidateSha": "%s", "promotionTarget": "beta", "manifestDigest": "%s", "generatedAt": "%s", "seal": "%s"}\n' \
+  "$release" "$manifest_digest" "$(now_iso)" "$(printf 'd%.0s' $(seq 1 64))" > "$fixture/proof-forged-bad-seal.json"
+assert_rejected forged-bad-seal 'gate proof seal is missing or invalid' \
+  --promotion-target beta --gate-proof "$fixture/proof-forged-bad-seal.json"
+
+##############################################################################
+# 10. A correctly sealed, fresh, exactly-matching proof is rejected if the deploy host has no
+#     O4G_GATE_PROOF_HMAC_KEY configured: the seal cannot be verified without it, so it must fail
+#     closed rather than skip the check.
+##############################################################################
+write_proof "$fixture/proof-good-no-host-key.json" "$release" beta "$manifest_digest" "$(now_iso)"
+root="$(fresh_runtime_root no-host-key)"
+rm -f "$fixture/systemctl.log"
+if PATH="$fixture/bin:$PATH" env -u BASH_ENV O4G_SYSTEMCTL="$fixture/bin/systemctl" O4G_CURL="$fixture/bin/curl" \
+  "$ROOT/scripts/deploy/publish-java-release.sh" --release "$release" --bundle "$fixture/bundle" \
+  --service api --health-url http://127.0.0.1/health --root "$root" \
+  --promotion-target beta --gate-proof "$fixture/proof-good-no-host-key.json" \
+  >"$fixture/no-host-key.log" 2>&1; then
+  echo 'FAIL (no-host-key): expected publish to be rejected but it succeeded' >&2
+  cat "$fixture/no-host-key.log" >&2
+  exit 1
+fi
+grep -q 'O4G_GATE_PROOF_HMAC_KEY is not set' "$fixture/no-host-key.log" || {
+  echo "FAIL (no-host-key): expected stderr to mention the missing key" >&2
+  cat "$fixture/no-host-key.log" >&2
+  exit 1
+}
+[[ "$(readlink "$root/services/api/current")" == ../../releases/old ]]
+[[ ! -f "$fixture/systemctl.log" ]]
+
+##############################################################################
+# 11. Golden path: a fresh, exactly-matching, correctly sealed proof is accepted and the
+#     mutation proceeds, for both the Java and Nuxt publish entrypoints.
 ##############################################################################
 write_proof "$fixture/proof-good.json" "$release" beta "$manifest_digest" "$(now_iso)"
 root="$(fresh_runtime_root golden)"

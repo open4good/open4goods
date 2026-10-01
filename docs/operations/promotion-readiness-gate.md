@@ -31,8 +31,8 @@ run or a test, without touching the live API or authorizing a promotion.
 `--cache-file` is local, unshared state.
 
 Exit codes: `2` run could not be validated (API failure, missing decision
-source); `1` validated cleanly but found blockers; `0` clean pass, with a
-JSON report on stdout.
+source, missing/malformed `O4G_GATE_PROOF_HMAC_KEY` seal key, GOU-174); `1`
+validated cleanly but found blockers; `0` clean pass, JSON report on stdout.
 
 Not wired into `.github/workflows/testAndPublishBeta.yml` or any live
 deploy workflow - see [ADR-0018](../adr/0018-promotion-readiness-gate.md).

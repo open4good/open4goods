@@ -13,19 +13,27 @@ operator to a file); it is rejected unless it is all of:
     a proof for a different candidate or target, or a stale manifest digest, is refused, so a
     proof cannot be replayed across SHAs, targets or an edited-then-rebuilt manifest;
   * generated within a bounded freshness window of "now", so a once-valid proof cannot authorize
-    an unbounded number of later, unrelated publishes.
+    an unbounded number of later, unrelated publishes;
+  * sealed with an HMAC (see gate_proof_seal.py, GOU-174) over exactly those fields, keyed with a
+    secret the publish-script operator does not hold. Without this, the proof is just five lines
+    of JSON anyone who can run this script could hand-write; the seal is what makes it
+    authenticate instead of merely describe.
 
-Fail-closed: any missing field, mismatch, malformed timestamp or stale proof exits non-zero.
+Fail-closed: any missing field, mismatch, malformed timestamp, stale proof, or missing/invalid
+seal exits non-zero.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+
+import gate_proof_seal
 
 
 class GateProofError(ValueError):
@@ -48,9 +56,13 @@ def parse_generated_at(value: object) -> float:
 
 
 def verify(proof: object, *, candidate_sha: str, promotion_target: str, manifest_digest: str,
-           max_age_seconds: int, now: float) -> None:
+           max_age_seconds: int, now: float, hmac_key: bytes) -> None:
     if not isinstance(proof, dict):
         raise GateProofError("gate proof must be a JSON object")
+    # Checked before any field is trusted: a mismatched field on a forged proof must fail on the
+    # seal, not on the field check, so an attacker never learns which hand-written field was wrong.
+    if not gate_proof_seal.verify_seal(hmac_key, proof, proof.get("seal")):
+        raise GateProofError("gate proof seal is missing or invalid")
     if proof.get("ready") is not True:
         raise GateProofError(f"gate proof is not ready: ready={proof.get('ready')!r}")
     checks = {
@@ -68,6 +80,16 @@ def verify(proof: object, *, candidate_sha: str, promotion_target: str, manifest
         raise GateProofError(f"gate proof generatedAt is in the future (clock skew?): age={age:.0f}s")
     if age > max_age_seconds:
         raise GateProofError(f"gate proof is stale: age={age:.0f}s exceeds max {max_age_seconds}s")
+
+
+def load_hmac_key() -> bytes:
+    hex_key = os.environ.get(gate_proof_seal.ENV_VAR, "")
+    if not hex_key:
+        raise GateProofError(f"{gate_proof_seal.ENV_VAR} is not set; cannot verify the gate proof seal")
+    try:
+        return gate_proof_seal.load_key_from_hex(hex_key)
+    except ValueError as exc:
+        raise GateProofError(str(exc)) from exc
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -88,6 +110,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.max_age_seconds <= 0:
             raise GateProofError(f"--max-age-seconds must be positive: {args.max_age_seconds}")
+        hmac_key = load_hmac_key()
         if not args.proof.is_file():
             raise GateProofError(f"gate proof not found: {args.proof}")
         try:
@@ -97,7 +120,8 @@ def main(argv: list[str] | None = None) -> int:
 
         now = args.now if args.now is not None else time.time()
         verify(proof, candidate_sha=args.candidate_sha, promotion_target=args.promotion_target,
-               manifest_digest=args.manifest_digest, max_age_seconds=args.max_age_seconds, now=now)
+               manifest_digest=args.manifest_digest, max_age_seconds=args.max_age_seconds, now=now,
+               hmac_key=hmac_key)
         return 0
     except GateProofError as exc:
         print(f"Promotion gate proof rejected: {exc}", file=sys.stderr)
