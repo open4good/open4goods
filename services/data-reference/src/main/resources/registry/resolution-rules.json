@@ -1,4 +1,340 @@
 {
   "schemaVersion" : "https://open4goods.org/schema/resolution-rules-1.json",
-  "rules" : [ ]
+  "rules" : [ {
+    "attribute" : "o4g:attribute:classe-energy",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-classe-energy-nudger-web@1",
+    "rankedSources" : [ "eprel", "icecat" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:classe-energy",
+    "surface" : "B2B_API",
+    "version" : "resolution-classe-energy-b2b-api@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:classe-energy-hdr",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-classe-energy-hdr-nudger-web@1",
+    "rankedSources" : [ "eprel", "icecat" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:classe-energy-hdr",
+    "surface" : "B2B_API",
+    "version" : "resolution-classe-energy-hdr-b2b-api@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:classe-energy-sdr",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-classe-energy-sdr-nudger-web@1",
+    "rankedSources" : [ "eprel", "icecat" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:classe-energy-sdr",
+    "surface" : "B2B_API",
+    "version" : "resolution-classe-energy-sdr-b2b-api@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:cleaningperformanceindexv2",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-cleaningperformanceindexv2-nudger-web@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:cleaningperformanceindexv2",
+    "surface" : "B2B_API",
+    "version" : "resolution-cleaningperformanceindexv2-b2b-api@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:climate-class",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-climate-class-nudger-web@1",
+    "rankedSources" : [ "eprel", "icecat" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:climate-class",
+    "surface" : "B2B_API",
+    "version" : "resolution-climate-class-b2b-api@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:minavailabilitysoftwareupdatesyears",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-minavailabilitysoftwareupdatesyears-nudger-web@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:minavailabilitysoftwareupdatesyears",
+    "surface" : "B2B_API",
+    "version" : "resolution-minavailabilitysoftwareupdatesyears-b2b-api@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:minavailabilitysparepartsyears",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-minavailabilitysparepartsyears-nudger-web@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:minavailabilitysparepartsyears",
+    "surface" : "B2B_API",
+    "version" : "resolution-minavailabilitysparepartsyears-b2b-api@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:power-consumption-hdr",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-power-consumption-hdr-nudger-web@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:power-consumption-hdr",
+    "surface" : "B2B_API",
+    "version" : "resolution-power-consumption-hdr-b2b-api@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:power-consumption-off",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-power-consumption-off-nudger-web@1",
+    "rankedSources" : [ "eprel", "icecat" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:power-consumption-off",
+    "surface" : "B2B_API",
+    "version" : "resolution-power-consumption-off-b2b-api@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:power-consumption-sdr",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-power-consumption-sdr-nudger-web@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:power-consumption-sdr",
+    "surface" : "B2B_API",
+    "version" : "resolution-power-consumption-sdr-b2b-api@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:power-consumption-standby",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-power-consumption-standby-nudger-web@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:power-consumption-standby",
+    "surface" : "B2B_API",
+    "version" : "resolution-power-consumption-standby-b2b-api@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:power-consumption-standby-networkd",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-power-consumption-standby-networkd-nudger-web@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:power-consumption-standby-networkd",
+    "surface" : "B2B_API",
+    "version" : "resolution-power-consumption-standby-networkd-b2b-api@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : "eprel"
+  }, {
+    "attribute" : "o4g:attribute:auto-brightness-control-available",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-auto-brightness-control-available-nudger-web@1",
+    "rankedSources" : [ "eprel", "icecat" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:auto-brightness-control-available",
+    "surface" : "B2B_API",
+    "version" : "resolution-auto-brightness-control-available-b2b-api@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:cooling-capacity",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-cooling-capacity-nudger-web@1",
+    "rankedSources" : [ "eprel", "icecat" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:cooling-capacity",
+    "surface" : "B2B_API",
+    "version" : "resolution-cooling-capacity-b2b-api@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:depth",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-depth-nudger-web@1",
+    "rankedSources" : [ "eprel", "icecat" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:depth",
+    "surface" : "B2B_API",
+    "version" : "resolution-depth-b2b-api@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:diagonale-pouces",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-diagonale-pouces-nudger-web@1",
+    "rankedSources" : [ "eprel", "icecat" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:diagonale-pouces",
+    "surface" : "B2B_API",
+    "version" : "resolution-diagonale-pouces-b2b-api@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:display-technology",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-display-technology-nudger-web@1",
+    "rankedSources" : [ "eprel", "icecat" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:display-technology",
+    "surface" : "B2B_API",
+    "version" : "resolution-display-technology-b2b-api@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:frequency-rate",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-frequency-rate-nudger-web@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:frequency-rate",
+    "surface" : "B2B_API",
+    "version" : "resolution-frequency-rate-b2b-api@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:minguaranteedsupportyears",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-minguaranteedsupportyears-nudger-web@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:minguaranteedsupportyears",
+    "surface" : "B2B_API",
+    "version" : "resolution-minguaranteedsupportyears-b2b-api@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:oven-capacity",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-oven-capacity-nudger-web@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:oven-capacity",
+    "surface" : "B2B_API",
+    "version" : "resolution-oven-capacity-b2b-api@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:oven-cavity-count",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-oven-cavity-count-nudger-web@1",
+    "rankedSources" : [ "eprel", "icecat" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:oven-cavity-count",
+    "surface" : "B2B_API",
+    "version" : "resolution-oven-cavity-count-b2b-api@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:voice-available",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-voice-available-nudger-web@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:voice-available",
+    "surface" : "B2B_API",
+    "version" : "resolution-voice-available-b2b-api@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:warranty",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-warranty-nudger-web@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:warranty",
+    "surface" : "B2B_API",
+    "version" : "resolution-warranty-b2b-api@1",
+    "rankedSources" : [ "eprel" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:air-conditioner-function-type",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-air-conditioner-function-type-nudger-web@1",
+    "rankedSources" : [ "icecat" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:ambient-temperature-max",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-ambient-temperature-max-nudger-web@1",
+    "rankedSources" : [ "icecat" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:ambient-temperature-min",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-ambient-temperature-min-nudger-web@1",
+    "rankedSources" : [ "icecat" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:dispositif-de-securite",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-dispositif-de-securite-nudger-web@1",
+    "rankedSources" : [ "icecat" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:hdmi-ports-quantity",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-hdmi-ports-quantity-nudger-web@1",
+    "rankedSources" : [ "icecat" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:height",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-height-nudger-web@1",
+    "rankedSources" : [ "icecat" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:oven-power",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-oven-power-nudger-web@1",
+    "rankedSources" : [ "icecat" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:power-consumption-typical",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-power-consumption-typical-nudger-web@1",
+    "rankedSources" : [ "icecat" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:weight",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-weight-nudger-web@1",
+    "rankedSources" : [ "icecat" ],
+    "regulatoryAuthority" : null
+  }, {
+    "attribute" : "o4g:attribute:width",
+    "surface" : "NUDGER_WEB",
+    "version" : "resolution-width-nudger-web@1",
+    "rankedSources" : [ "icecat" ],
+    "regulatoryAuthority" : null
+  } ]
 }
