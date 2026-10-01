@@ -96,6 +96,7 @@ import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.scheduling.TaskScheduler;
@@ -115,6 +116,7 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 
 @Configuration
+@Import(IcecatSourceRecordAdapter.class)
 public class ApiConfig {
 
 	private final ApiProperties apiProperties;
