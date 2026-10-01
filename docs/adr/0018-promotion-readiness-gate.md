@@ -101,12 +101,12 @@ account, reachable only through a narrow audited `sudo` rule) this repo
 has no tooling for. Ed25519 closes the hole structurally instead: there is
 no secret on the verifying side to isolate.
 
-Dependency cost: `cryptography` (`...asymmetric.ed25519`) is the only
-third-party Python import under `scripts/deploy/` or `scripts/verify/`;
-elsewhere there both are stdlib-only. It is already present in this
-project's reference build host's system Python, as an existing
-OS/toolchain dependency, so the marginal cost is confirming its presence
-per host, not adding and maintaining a new package.
+Dependency cost: `cryptography` is the only third-party Python import
+under `scripts/deploy/` or `scripts/verify/`. CI's bare `ubuntu-latest`
+image lacks it, so `lint-suite.yml` installs it; any promotion host must
+too. Missing it fails closed, not crashes mid-publish: both scripts catch
+`ModuleNotFoundError` on import and report it via `GateProofError`/
+`ReadinessError`.
 
 No keypair is provisioned yet, by design: GOU-94's beta freeze means no
 promotion should run. The private key is a new secret, not derived from

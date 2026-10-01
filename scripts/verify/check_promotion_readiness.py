@@ -57,7 +57,13 @@ from typing import Any
 import beta_mandate
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "deploy"))
-import gate_proof_seal  # noqa: E402  (path must be extended first)
+try:
+    import gate_proof_seal  # noqa: E402  (path must be extended first)
+except ModuleNotFoundError as _gate_proof_seal_import_error:  # noqa: E402
+    gate_proof_seal = None
+    GATE_PROOF_SEAL_IMPORT_ERROR = _gate_proof_seal_import_error
+else:
+    GATE_PROOF_SEAL_IMPORT_ERROR = None
 
 CANONICAL_PHASES = ("development", "beta_validation", "production", "post_production")
 # Fail-closed: only these two Paperclip statuses count as finished. Every other
@@ -365,6 +371,12 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     try:
+        if GATE_PROOF_SEAL_IMPORT_ERROR is not None:
+            raise ReadinessError(
+                "cannot seal the gate proof: the 'cryptography' package is not installed "
+                f"({GATE_PROOF_SEAL_IMPORT_ERROR}); promotion is inoperative until it is "
+                "provisioned on this host (GOU-177)")
+
         if not re.fullmatch(r"[0-9a-f]{7,64}", args.candidate_sha):
             raise ReadinessError("candidate SHA must be a lowercase hex Git SHA")
 

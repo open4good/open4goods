@@ -35,8 +35,15 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-import gate_proof_seal
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+try:
+    import gate_proof_seal
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+except ModuleNotFoundError as _gate_proof_seal_import_error:
+    gate_proof_seal = None
+    Ed25519PublicKey = None
+    GATE_PROOF_SEAL_IMPORT_ERROR = _gate_proof_seal_import_error
+else:
+    GATE_PROOF_SEAL_IMPORT_ERROR = None
 
 
 class GateProofError(ValueError):
@@ -120,6 +127,11 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     try:
+        if GATE_PROOF_SEAL_IMPORT_ERROR is not None:
+            raise GateProofError(
+                "the 'cryptography' package is not installed "
+                f"({GATE_PROOF_SEAL_IMPORT_ERROR}); promotion is inoperative until it is "
+                "provisioned on this deploy host (GOU-177)")
         if args.max_age_seconds <= 0:
             raise GateProofError(f"--max-age-seconds must be positive: {args.max_age_seconds}")
         public_key = load_public_key()

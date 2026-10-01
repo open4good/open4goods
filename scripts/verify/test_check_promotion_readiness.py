@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 import json
 import os
 import sys
@@ -559,6 +560,33 @@ class BetaMandateCompositionTest(TempRepoTestCase):
             GATE.fetch_decision = original_fetch_decision
             GATE.beta_mandate.check_live = original_check_live
         self.assertEqual(rc, 0)
+
+
+class MissingCryptographyDependencyFailsClosedTest(TempRepoTestCase):
+    """If `cryptography` is not installed where check_promotion_readiness.py runs, main() must
+    refuse with a readable stderr message and a non-zero exit -- never a bare ModuleNotFoundError
+    traceback (GOU-177 review on PR #3399: the import itself must stay fail-closed)."""
+
+    def test_main_rejects_cleanly_when_cryptography_is_unavailable(self) -> None:
+        decision_path = self.root / "decision.json"
+        decision_path.write_text(json.dumps(valid_decision(manifestDigest=self.digest())), encoding="utf-8")
+        issues_path = self.root / "issues.json"
+        issues_path.write_text(json.dumps([issue("GOU-1", "development")]), encoding="utf-8")
+        fake_error = ModuleNotFoundError("No module named 'cryptography'")
+        stderr = io.StringIO()
+        with mock.patch.object(GATE, "GATE_PROOF_SEAL_IMPORT_ERROR", fake_error):
+            with mock.patch("sys.stderr", stderr):
+                rc = GATE.main([
+                    "--project-id", "proj-1", "--cache-file", str(self.cache_path),
+                    "--manifest", str(self.manifest_path), "--candidate-sha", CANDIDATE_SHA,
+                    "--dataset", DATASET, "--promotion-target", PROMOTION_TARGET, "--phase", PHASE,
+                    "--issues", str(issues_path), "--decision", str(decision_path),
+                ])
+        self.assertEqual(rc, 2)
+        message = stderr.getvalue()
+        self.assertIn("cryptography", message)
+        self.assertIn("GOU-177", message)
+        self.assertNotIn("Traceback", message)
 
 
 if __name__ == "__main__":

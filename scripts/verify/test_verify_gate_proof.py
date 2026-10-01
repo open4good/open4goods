@@ -12,6 +12,7 @@ public key cannot mint a new valid seal, even with full read access to its own e
 from __future__ import annotations
 
 import importlib.util
+import io
 import json
 import os
 import sys
@@ -220,6 +221,33 @@ class MainCliEndToEndTest(unittest.TestCase):
         with mock.patch.object(SEAL, "PUBLIC_KEY_FILE", Path("/nonexistent/gate_proof_public_key.hex")):
             rc = self.run_main(good_path, None)
         self.assertNotEqual(rc, 0)
+
+
+class MissingCryptographyDependencyFailsClosedTest(unittest.TestCase):
+    """If `cryptography` is not installed on the deploy host, main() must refuse with a readable
+    stderr message and a non-zero exit -- never a bare ModuleNotFoundError traceback mid-publish
+    (GOU-177 review on PR #3399: the import itself must stay fail-closed, not just the checks)."""
+
+    def test_main_rejects_cleanly_when_cryptography_is_unavailable(self) -> None:
+        good_path = Path(tempfile.mkstemp()[1])
+        try:
+            good_path.write_text(json.dumps(good_proof()), encoding="utf-8")
+            fake_error = ModuleNotFoundError("No module named 'cryptography'")
+            with mock.patch.object(VERIFY, "GATE_PROOF_SEAL_IMPORT_ERROR", fake_error):
+                with mock.patch.dict(os.environ, {SEAL.PUBLIC_KEY_ENV_VAR: _public_key_hex(REAL_PUBLIC_KEY)}):
+                    with mock.patch("sys.stderr", new_callable=io.StringIO) as stderr:
+                        rc = VERIFY.main([
+                            "--proof", str(good_path), "--candidate-sha", CANDIDATE_SHA,
+                            "--promotion-target", PROMOTION_TARGET, "--manifest-digest", MANIFEST_DIGEST,
+                            "--now", str(NOW),
+                        ])
+            self.assertEqual(rc, 1)
+            message = stderr.getvalue()
+            self.assertIn("cryptography", message)
+            self.assertIn("GOU-177", message)
+            self.assertNotIn("Traceback", message)
+        finally:
+            good_path.unlink(missing_ok=True)
 
 
 if __name__ == "__main__":
