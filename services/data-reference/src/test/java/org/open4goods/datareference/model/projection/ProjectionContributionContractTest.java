@@ -67,7 +67,7 @@ class ProjectionContributionContractTest {
                         new RuleVersion("resolution", 1), List.of(new SourceUsagePolicyRef("policy", "1")), Instant.EPOCH),
                 Instant.EPOCH, List.of(), new OfferSummary(0, false, null, null, Instant.EPOCH),
                 new EvaluationSummary(new RuleVersion("evaluation", 1), Instant.EPOCH, Map.of(), Map.of(), List.of()),
-                new SearchSummary(new RuleVersion("lexical-search", 1), List.of()));
+                new SearchSummary(new RuleVersion("lexical-search", 1), List.of()), GroupAssignment.NONE);
 
         assertThatThrownBy(() -> new ProductReferenceProjectionEnvelope(component.gtin(),
                 Map.of(ProjectionSurface.NUDGER_WEB, component)))

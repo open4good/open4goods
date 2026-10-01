@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.open4goods.datareference.model.Gtin;
 import org.open4goods.datareference.model.ProjectionSurface;
+import org.open4goods.datareference.model.grouping.GroupId;
 import org.open4goods.datareference.model.projection.ProductReferenceProjection;
 import org.open4goods.datareference.model.projection.ProductReferenceProjectionEnvelope;
 import org.open4goods.datareference.port.ProjectionReadPort;
@@ -54,7 +55,7 @@ public class ElasticsearchProjectionStore implements ProjectionReadPort, Project
     /** Write alias for the GTIN projection index. */
     public static final String WRITE_ALIAS = "o4g-product-reference-projections-write";
 
-    private static final String VERSION = "v1";
+    private static final String VERSION = "v2";
     private static final String PIT_KEEP_ALIVE = "2m";
 
     private final ElasticsearchClient client;
@@ -204,6 +205,11 @@ public class ElasticsearchProjectionStore implements ProjectionReadPort, Project
                 document.put(prefix + "OfferCount", component.offers().activeOfferCount());
                 document.put(prefix + "Available", component.offers().available());
                 document.put(prefix + "EvaluationScoreCount", component.evaluation().scores().size());
+                component.groups().modelGroup().ifPresent(
+                        modelGroupId -> document.put(prefix + "ModelGroupId", modelGroupId.externalForm()));
+                document.put(prefix + "FamilyGroupIds",
+                        component.groups().familyGroupIds().stream().map(GroupId::externalForm).toList());
+                document.put(prefix + "ModelSearchTokens", component.groups().searchTokens());
             }
             return document;
         } catch (RuntimeException exception) {
@@ -239,6 +245,9 @@ public class ElasticsearchProjectionStore implements ProjectionReadPort, Project
             builder.properties(prefix + "OfferCount", property -> property.integer(number -> number));
             builder.properties(prefix + "Available", property -> property.boolean_(bool -> bool));
             builder.properties(prefix + "EvaluationScoreCount", property -> property.integer(number -> number));
+            builder.properties(prefix + "ModelGroupId", property -> property.keyword(keyword -> keyword));
+            builder.properties(prefix + "FamilyGroupIds", property -> property.keyword(keyword -> keyword));
+            builder.properties(prefix + "ModelSearchTokens", property -> property.keyword(keyword -> keyword));
         }
         return builder.build();
     }

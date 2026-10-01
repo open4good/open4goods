@@ -19,6 +19,7 @@ import org.open4goods.datareference.model.SourceRecordKey;
 import org.open4goods.datareference.model.SourceUsagePolicyRef;
 import org.open4goods.datareference.model.projection.EvaluationRefreshTrigger;
 import org.open4goods.datareference.model.projection.EvaluationSummary;
+import org.open4goods.datareference.model.projection.GroupAssignment;
 import org.open4goods.datareference.model.projection.OfferSummary;
 import org.open4goods.datareference.model.projection.ProductReferenceProjectionEnvelope;
 import org.open4goods.datareference.model.projection.ProjectionReplayInputs;
@@ -54,7 +55,10 @@ class ProjectionAssemblyServiceTest {
                 (gtin, surface, inputs, values) -> {
                     assertThat(values).containsExactly(ALLOWED_VALUE);
                     return new SearchSummary(new RuleVersion("lexical-search", 1), List.of("allowed"));
-                }, new DeterministicDomainSliceComposer(), writer, Clock.fixed(AT, ZoneOffset.UTC));
+                },
+                (gtin, surface, values, resolvedClass) -> GroupAssignment.NONE,
+                (gtin, surface) -> Optional.empty(),
+                new DeterministicDomainSliceComposer(), writer, Clock.fixed(AT, ZoneOffset.UTC));
 
         ProductReferenceProjectionEnvelope result = service.rebuild(GTIN, replayInputs(), EvaluationRefreshTrigger.REFERENCE_CHANGED);
 

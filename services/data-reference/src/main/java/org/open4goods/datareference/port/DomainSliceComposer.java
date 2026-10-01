@@ -6,6 +6,7 @@ import java.util.List;
 import org.open4goods.datareference.model.Gtin;
 import org.open4goods.datareference.model.ProjectionSurface;
 import org.open4goods.datareference.model.projection.EvaluationSummary;
+import org.open4goods.datareference.model.projection.GroupAssignment;
 import org.open4goods.datareference.model.projection.OfferSummary;
 import org.open4goods.datareference.model.projection.ProductReferenceProjection;
 import org.open4goods.datareference.model.projection.ProjectionReplayInputs;
@@ -31,6 +32,7 @@ public interface DomainSliceComposer {
      * @param offers current offer state supplied by the offer domain
      * @param evaluation deterministic evaluation output
      * @param search lexical search fields
+     * @param groups confirmed model/family grouping and search tokens
      * @param builtAt instant to record as the build time
      * @return the assembled document
      */
@@ -42,5 +44,6 @@ public interface DomainSliceComposer {
             OfferSummary offers,
             EvaluationSummary evaluation,
             SearchSummary search,
+            GroupAssignment groups,
             Instant builtAt);
 }

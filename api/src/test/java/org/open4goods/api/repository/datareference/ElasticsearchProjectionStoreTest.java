@@ -17,7 +17,10 @@ import org.open4goods.datareference.model.Gtin;
 import org.open4goods.datareference.model.ProjectionSurface;
 import org.open4goods.datareference.model.RuleVersion;
 import org.open4goods.datareference.model.SourceUsagePolicyRef;
+import org.open4goods.datareference.model.grouping.GroupId;
+import org.open4goods.datareference.model.grouping.GroupType;
 import org.open4goods.datareference.model.projection.EvaluationSummary;
+import org.open4goods.datareference.model.projection.GroupAssignment;
 import org.open4goods.datareference.model.projection.OfferSummary;
 import org.open4goods.datareference.model.projection.ProductReferenceProjection;
 import org.open4goods.datareference.model.projection.ProductReferenceProjectionEnvelope;
@@ -92,9 +95,11 @@ class ElasticsearchProjectionStoreTest {
         assertThat(last.elements()).extracting(value -> value.gtin().value()).containsExactly(first.gtin().value());
         assertThat(last.nextCursor()).isEmpty();
         assertThat(raw).containsKeys("gtin", "projectionJson", "nudgerWebSearchTerms", "b2bApiSearchTerms",
-                "odblExportSearchTerms").doesNotContainKeys("resolvedValues", "candidateAssertionIds", "assertions");
+                "odblExportSearchTerms", "nudgerWebModelGroupId", "nudgerWebFamilyGroupIds", "nudgerWebModelSearchTokens")
+                .doesNotContainKeys("resolvedValues", "candidateAssertionIds", "assertions");
+        assertThat(raw.get("nudgerWebModelGroupId")).isEqualTo("model:acme-widget-x1");
         assertThat(client.indices().getMapping(get -> get.index(ElasticsearchProjectionStore.READ_ALIAS)).mappings()
-                .get(ElasticsearchProjectionStore.READ_ALIAS + "-v1-000001").mappings().dynamic())
+                .get(ElasticsearchProjectionStore.READ_ALIAS + "-v2-000001").mappings().dynamic())
                 .isEqualTo(co.elastic.clients.elasticsearch._types.mapping.DynamicMapping.Strict);
     }
 
@@ -113,7 +118,7 @@ class ElasticsearchProjectionStoreTest {
 
         assertThat(store.find(legacy.gtin())).contains(legacy);
         assertThat(client.indices().getAlias(get -> get.name(ElasticsearchProjectionStore.READ_ALIAS)).aliases().keySet())
-                .containsExactly(ElasticsearchProjectionStore.READ_ALIAS + "-v1-000001");
+                .containsExactly(ElasticsearchProjectionStore.READ_ALIAS + "-v2-000001");
     }
 
     private static ProductReferenceProjectionEnvelope projection(String gtinValue) {
@@ -123,7 +128,9 @@ class ElasticsearchProjectionStoreTest {
             components.put(surface, new ProductReferenceProjection(gtin, surface, replayInputs(), Instant.EPOCH, List.of(),
                     new OfferSummary(0, false, null, null, Instant.EPOCH),
                     new EvaluationSummary(new RuleVersion("evaluation", 1), Instant.EPOCH, Map.of(), Map.of(), List.of()),
-                    new SearchSummary(new RuleVersion("lexical-search", 1), List.of(surface.name().toLowerCase()))));
+                    new SearchSummary(new RuleVersion("lexical-search", 1), List.of(surface.name().toLowerCase())),
+                    new GroupAssignment(new GroupId(GroupType.MODEL, "acme-widget-x1"),
+                            List.of(new GroupId(GroupType.FAMILY, "acme-widget")), List.of("x1"))));
         }
         return new ProductReferenceProjectionEnvelope(gtin, components);
     }

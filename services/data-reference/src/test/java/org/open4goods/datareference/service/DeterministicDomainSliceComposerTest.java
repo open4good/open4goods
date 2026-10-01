@@ -15,6 +15,7 @@ import org.open4goods.datareference.model.ProjectionSurface;
 import org.open4goods.datareference.model.RuleVersion;
 import org.open4goods.datareference.model.SourceUsagePolicyRef;
 import org.open4goods.datareference.model.projection.EvaluationSummary;
+import org.open4goods.datareference.model.projection.GroupAssignment;
 import org.open4goods.datareference.model.projection.OfferSummary;
 import org.open4goods.datareference.model.projection.ProjectionReplayInputs;
 import org.open4goods.datareference.model.projection.SearchSummary;
@@ -30,7 +31,8 @@ class DeterministicDomainSliceComposerTest {
     void ordersResolvedValuesByCanonicalAttributeRatherThanInputOrder() {
         var result = new DeterministicDomainSliceComposer().compose(
                 new Gtin("4006381333931"), ProjectionSurface.NUDGER_WEB, replayInputs(),
-                List.of(value("zeta"), value("alpha")), offerSummary(), evaluationSummary(), searchSummary(), Instant.EPOCH);
+                List.of(value("zeta"), value("alpha")), offerSummary(), evaluationSummary(), searchSummary(),
+                GroupAssignment.NONE, Instant.EPOCH);
 
         assertThat(result.resolvedValues()).extracting(value -> value.attribute().externalForm())
                 .containsExactly("o4g:attribute:alpha", "o4g:attribute:zeta");
