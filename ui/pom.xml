@@ -94,9 +94,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.open4goods</groupId>
-            <artifactId>xwiki-spring-boot-starter</artifactId>
-            <version>${global.version}</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-client</artifactId>
         </dependency>
 
         <!-- web -->
