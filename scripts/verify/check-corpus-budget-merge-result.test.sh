@@ -106,15 +106,19 @@ git -C "${REPO}" commit -q -m "PR branch adds its own content"
 # CI fetches the base ref, as the real lint-suite workflow does.
 git -C "${REPO}" fetch -q origin main
 
-# Base alone (a + b = 4 lines) is within the 6-line ceiling.
-if ! (cd "${REPO}" && git checkout -q main && python3 "${CHECK}") > /dev/null; then
+# Base alone (a + b = 4 lines) is within the 6-line ceiling. Unset
+# GITHUB_BASE_REF explicitly: this fixture runs inside the real lint-suite
+# job, which already has it set for the actual PR, and inheriting it here
+# would make the script merge-check against the fixture's own origin/main
+# instead of measuring the checked-out branch alone.
+if ! (cd "${REPO}" && unset GITHUB_BASE_REF && git checkout -q main && python3 "${CHECK}") > /dev/null; then
   echo "FAIL: base branch alone should be within budget"
   exit 1
 fi
 
 # The PR branch alone (a + c = 5 lines) is within the 6-line ceiling too.
 git -C "${REPO}" checkout -q pr-a
-if ! (cd "${REPO}" && python3 "${CHECK}") > /dev/null; then
+if ! (cd "${REPO}" && unset GITHUB_BASE_REF && python3 "${CHECK}") > /dev/null; then
   echo "FAIL: PR branch alone should be within budget"
   exit 1
 fi
