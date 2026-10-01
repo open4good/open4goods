@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.Normalizer;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -36,6 +35,11 @@ import org.open4goods.model.product.InStock;
 import org.open4goods.model.product.ProductCondition;
 import org.open4goods.model.rating.Rating;
 import org.open4goods.model.resource.Resource;
+import org.open4goods.services.feedservice.definition.ColumnResolution;
+import org.open4goods.services.feedservice.definition.FeedColumnResolver;
+import org.open4goods.services.feedservice.definition.FeedDefinition;
+import org.open4goods.services.feedservice.definition.FeedDefinitionFactory;
+import org.open4goods.services.feedservice.definition.MissingRequiredColumnsException;
 import org.open4goods.services.feedservice.model.FeedIndexingJobStat;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.slf4j.Logger;
@@ -85,187 +89,6 @@ public class FeedIndexingWorker implements Runnable {
 	        .build();
 
 	private static final String CLASSPATH_PREFIX = "classpath:";
-
-	// TODO : Should be fully from yaml config. And definitions should be case insensitive
-	private static final List<String> DEFAULT_URL_COLUMNS = List.of(
-	        "product_url",
-	        "product URL",
-	        "product page URL",
-	        "url",
-	        "URL",
-	        "link",
-	        "aw_deep_link",
-	        "merchant_deep_link",
-	        "productURL",
-	        "url_product",
-	        "URL produit",
-	        "URL page produit",
-	        "URLproduit",
-	        "urlficheproduit");
-
-	private static final List<String> DEFAULT_AFFILIATED_URL_COLUMNS = List.of(
-	        "tracking_url",
-	        "tracked_url",
-	        "tracking link",
-	        "affiliated_url",
-	        "affiliate_url",
-	        "aw_deep_link",
-	        "deep_link",
-	        "link",
-	        "productURL",
-	        "URL produit",
-	        "URL page produit",
-	        "URLproduit",
-	        "urlficheproduit");
-
-	private static final List<String> DEFAULT_NAME_COLUMNS = List.of(
-	        "product_name",
-	        "product name",
-	        "name of the product",
-	        "name",
-	        "title",
-	        "nomproduit",
-	        "nom usuel du produit",
-	        "Nom",
-	        "Désignation",
-	        "designation");
-
-	private static final List<String> DEFAULT_PRICE_COLUMNS = List.of(
-	        "price",
-	        "Price",
-	        "current price",
-	        "Current price",
-	        "Prix actuel",
-	        "Prix actuel TTC",
-	        "prix actuel",
-	        "prix actuel ttc",
-	        "prix actuel TTC du produit",
-	        "product_price",
-	        "sale_price",
-	        "search_price",
-	        "price_vat_inc",
-	        "base_price",
-	        "prix",
-	        "prix ttc",
-	        "prix_ttc",
-	        "prix barré",
-	        "prix barre",
-	        "prix barré TTC",
-	        "Prix barré TTC",
-	        "prix barré TTC du produit",
-	        "prix barre TTC du produit",
-	        "StrikePrice");
-
-	private static final List<String> DEFAULT_DESCRIPTION_COLUMNS = List.of(
-	        "description",
-	        "short_description",
-	        "short description",
-	        "long_description",
-	        "long description",
-	        "product_description",
-	        "product description",
-	        "product_short_description",
-	        "product short description",
-	        "descriptif");
-
-	private static final List<String> DEFAULT_IMAGE_COLUMNS = List.of(
-	        "image",
-	        "Image",
-	        "image_url",
-	        "image URL",
-	        "Image URL",
-	        "big image",
-	        "URL related to the big image",
-	        "large_image",
-	        "large image",
-	        "product_image",
-	        "product image",
-	        "picture",
-	        "picture_url",
-	        "aw_image_url",
-	        "merchant_image_url",
-	        "url_image",
-	        "URL image",
-	        "URL image produit",
-	        "URL image grande",
-	        "URL image moyenne",
-	        "URL image petite",
-	        "urlimageoriginal");
-
-	private static final List<String> DEFAULT_PRODUCT_STATE_COLUMNS = List.of(
-	        "condition",
-	        "product condition",
-	        "item condition",
-	        "state",
-	        "etat",
-	        "état",
-	        "etat produit",
-	        "état produit");
-
-	private static final List<String> DEFAULT_IN_STOCK_COLUMNS = List.of(
-	        "availability",
-	        "Availability",
-	        "product availability",
-	        "stock indicator",
-	        "StockIndicator",
-	        "stock status",
-	        "Stock status",
-	        "stock_status",
-	        "in_stock",
-	        "indicateur de stock",
-	        "Indicateur de stock",
-	        "disponibilite",
-	        "disponibilité",
-	        "stock");
-
-	private static final List<String> DEFAULT_QUANTITY_IN_STOCK_COLUMNS = List.of(
-	        "quantity",
-	        "quantity_in_stock",
-	        "stock quantity",
-	        "stock_quantity",
-	        "stock qty",
-	        "qty",
-	        "indicateur de stock",
-	        "Indicateur de stock",
-	        "available quantity");
-
-	private static final List<String> DEFAULT_SHIPPING_COST_COLUMNS = List.of(
-	        "shipping costs",
-	        "shipping cost",
-	        "shipping_cost",
-	        "delivery cost",
-	        "delivery_cost",
-	        "frais de port",
-	        "frais de port ttc",
-	        "frais de livraison");
-
-	private static final List<String> DEFAULT_SHIPPING_TIME_COLUMNS = List.of(
-	        "shipping time",
-	        "shipping_time",
-	        "delivery time",
-	        "delivery delay",
-	        "delivery_time",
-	        "delais de livraison",
-	        "délais de livraison",
-	        "délai de livraison",
-	        "Délai de livraison");
-
-	private static final Map<ReferentielKey, List<String>> DEFAULT_REFERENTIEL_COLUMNS = Map.of(
-	        ReferentielKey.GTIN, List.of("EAN or ISBN", "EAN", "ISBN", "gtin", "GTIN", "ean", "ean13", "EAN13",
-	                "barcode", "product_GTIN", "upc", "codebarre", "Code barre"),
-	        ReferentielKey.BRAND, List.of("brand", "Brand", "brand name", "Brand name", "brand_name", "manufacturer",
-	                "Manufacturer", "manufacturer name", "merchant_name", "Marque", "marque"),
-	        ReferentielKey.MODEL, List.of("manufacturer reference", "Manufacturer reference", "internal reference",
-	                "Internal reference", "model", "Model", "reference", "product_reference", "mpn", "MPN",
-	                "model_number", "product_model", "Référence fabricant", "reference fabriquant",
-	                "référence fabricant", "Référence interne", "reference interne"));
-
-	private static final List<String> DEFAULT_MPN_COLUMNS = List.of("manufacturer reference", "Manufacturer reference",
-	        "mpn", "MPN", "model_number", "product_model", "reference", "Référence fabricant",
-	        "reference fabriquant", "référence fabricant");
-
-	private static final List<String> DEFAULT_SKU_COLUMNS = List.of("sku", "SKU", "internal reference", "Internal reference",
-	        "merchant_product_id", "aw_product_id", "Référence interne", "reference interne", "ID");
 
 	/** The service used to "atomically" fetch and store / update DataFragments **/
 	private final FeedIndexingService csvService;
@@ -366,14 +189,28 @@ public class FeedIndexingWorker implements Runnable {
 			csvService.incrementFeedNoUrls();
 			logger.error("No url's defined for datasource {}",dsProperties.getDatasourceConfigName());
 			dedicatedLogger.error("No url's defined for datasource {}",dsProperties.getDatasourceConfigName());
-			
+
 		}
-		
+
+		FeedDefinition feedDefinition;
+		try {
+			feedDefinition = FeedDefinitionFactory.from(dsProperties);
+		} catch (MissingRequiredColumnsException e) {
+			// AC2 : no column is ever guessed by label. A feed whose config declares neither an
+			// explicit url nor an explicit price column is not indexed, it is reported instead.
+			csvService.incrementFeedMissingRequiredColumns();
+			logger.error("Feed {} has no explicit url/price column mapping declared; skipping indexing: {}", dsConfName, e.getMessage());
+			dedicatedLogger.error("Feed {} has no explicit url/price column mapping declared; skipping indexing: {}", dsConfName, e.getMessage());
+			return;
+		}
+
 		for (String url : urls) {
 			resolvedKeysCache.clear();
 			dedicatedLogger.warn("STARTING FEED URL {} - {}", url, dsProperties);
 			// Updating status with actual feed
 			stats = new FeedIndexingJobStat(dsProperties.getDatasourceConfigName(), url, FeedIndexingJobStat.TYPE_CSV);
+			// Resolved once from the first header row of this URL, reused for every data row (AC2/AC7).
+			ColumnResolution columnResolution = null;
 
 			int okItems = 0;
 			int validationFailedItems = 0;
@@ -429,6 +266,21 @@ public class FeedIndexingWorker implements Runnable {
 							        e -> e.getKey(),
 							        e -> e.getValue() == null ? "" : normalizeCsvValue(e.getValue())
 							    ));
+
+						if (columnResolution == null) {
+							// Resolved once per header row, not per data row (an Awin feed has hundreds of
+							// thousands of lines) : AC2 reports unknown columns, it never guesses from them.
+							columnResolution = FeedColumnResolver.resolve(feedDefinition, line.keySet());
+							if (!columnResolution.unknownColumns().isEmpty()) {
+								dedicatedLogger.warn("Unknown columns reported for {} ({}): {}", dsConfName, url, columnResolution.unknownColumns());
+								logger.warn("Unknown columns reported for {} ({}): {}", dsConfName, url, columnResolution.unknownColumns());
+								stats.addUnknownColumns(columnResolution.unknownColumns());
+							}
+							if (!columnResolution.missingUnitColumns().isEmpty()) {
+								dedicatedLogger.warn("Missing unit columns for {} ({}): {}", dsConfName, url, columnResolution.missingUnitColumns());
+							}
+						}
+
 						DataFragment df = parseCsvLine(dsProperties, line, dsConfName, dedicatedLogger, url);
 
 						// Store the feedUrl as an attribute (for debug)
@@ -603,11 +455,11 @@ public class FeedIndexingWorker implements Runnable {
 	        CsvDataSourceProperties csvProperties = config.getCsvDatasource();
 	        String url = !StringUtils.isEmpty(csvProperties.getExtractUrlFromParam()) ? extractUrlFromParam(item, csvProperties) : null;
 	        if (StringUtils.isEmpty(url)) {
-	            url = getFromCsvRow(item, candidateColumns(csvProperties.getUrl(), DEFAULT_URL_COLUMNS));
+	            url = getFromCsvRow(item, csvProperties.getUrl());
 	        }
 	        dataFragment.setUrl(url);
 	        // revove from the source to prevent further integration
-	        removeFromSource(item, candidateColumns(csvProperties.getUrl(), DEFAULT_URL_COLUMNS));
+	        removeFromSource(item, csvProperties.getUrl());
 	        
 	    } catch (Exception e) {
 	        logger.info("Error while extracting url in dataset {} ({} columns)", datasetUrl, item.size());
@@ -654,7 +506,7 @@ public class FeedIndexingWorker implements Runnable {
 	private void setAffiliatedUrl(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger) {
 	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
 	    if (!StringUtils.isEmpty(csvProperties.getAffiliatedUrl())) {
-	        String url = getFromCsvRow(item, candidateColumns(csvProperties.getAffiliatedUrl(), DEFAULT_AFFILIATED_URL_COLUMNS));
+	        String url = getFromCsvRow(item, csvProperties.getAffiliatedUrl());
 	        if (url != null && csvProperties.getAffiliatedUrlReplacementTokens() != null) {
 	            for (Map.Entry<String, String> token : csvProperties.getAffiliatedUrlReplacementTokens().entrySet()) {
 	                url = url.replace(token.getKey(), token.getValue());
@@ -691,27 +543,15 @@ public class FeedIndexingWorker implements Runnable {
 	private void setPrice(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger) {
 	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
 	    Set<String> configuredPriceColumns = csvProperties.getPrice();
-	    Set<String> attemptedPriceColumns = new LinkedHashSet<>();
 	    if (configuredPriceColumns != null) {
-	        attemptedPriceColumns.addAll(configuredPriceColumns);
 	        trySetPriceFromColumns(dataFragment, item, configuredPriceColumns, config, logger);
 	    }
 	    if (null == dataFragment.getPrice() || null == dataFragment.getPrice().getPrice()) {
-	        List<String> fallbackPriceColumns = DEFAULT_PRICE_COLUMNS.stream()
-	                .filter(candidate -> attemptedPriceColumns.stream()
-	                        .noneMatch(attempted -> comparableCsvHeader(attempted).equals(comparableCsvHeader(candidate))))
-	                .toList();
-	        trySetPriceFromColumns(dataFragment, item, fallbackPriceColumns, config, logger);
-	    }
-	    if (null == dataFragment.getPrice() || null == dataFragment.getPrice().getPrice()) {
-	        logger.warn("No price extracted for row with {} columns; configured price columns {}; default price columns {}; available row values {}",
+	        logger.warn("No price extracted for row with {} columns; configured price columns {}; available row values {}",
 	                item.size(),
 	                csvProperties.getPrice(),
-	                DEFAULT_PRICE_COLUMNS,
 	                item);
 	    }
-	    
-	    
 	}
 
 	/**
@@ -772,11 +612,11 @@ public class FeedIndexingWorker implements Runnable {
 	 */
 	private void setNameAndTags(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config) {
 	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
-	    List<String> nameColumns = candidateColumns(csvProperties.getName(), DEFAULT_NAME_COLUMNS);
-	    dataFragment.addName(getFromCsvRow(item, nameColumns));
-	    
+	    String nameColumn = csvProperties.getName();
+	    dataFragment.addName(getFromCsvRow(item, nameColumn));
+
         // Delete from source
-        removeFromSource(item, nameColumns);
+        removeFromSource(item, nameColumn);
         
 	    dataFragment.addProductTags(getCategoryFromCsvRows(item));
 	}
@@ -831,7 +671,7 @@ public class FeedIndexingWorker implements Runnable {
 	 */
 	private void setDescription(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config) {
 	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
-	    for (String descColumn : candidateColumns(csvProperties.getDescription(), DEFAULT_DESCRIPTION_COLUMNS)) {
+	    for (String descColumn : configuredColumns(csvProperties.getDescription())) {
 	        String description = getFromCsvRow(item, descColumn);
 	        if (!StringUtils.isEmpty(description) && config.getDescriptionRemoveToken() != null) {
 	            for (String token : config.getDescriptionRemoveToken()) {
@@ -855,7 +695,7 @@ public class FeedIndexingWorker implements Runnable {
 	private void addResources(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger) {
 	    try {
 	        CsvDataSourceProperties csvProperties = config.getCsvDatasource();
-	        for (String imgCell : candidateColumns(csvProperties.getImage(), DEFAULT_IMAGE_COLUMNS)) {
+	        for (String imgCell : configuredColumns(csvProperties.getImage())) {
 	            String resource = getFromCsvRow(item, imgCell);
 	            if (!StringUtils.isEmpty(resource) && shouldIncludeResource(resource, csvProperties)) {
 	                dataFragment.addResource(new Resource(resource));
@@ -916,7 +756,7 @@ public class FeedIndexingWorker implements Runnable {
 	private boolean setInStock(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger) {
 	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
 	    dataFragment.setInStock(InStock.INSTOCK);
-	    for (String inStockColumn : candidateColumns(csvProperties.getInStock(), DEFAULT_IN_STOCK_COLUMNS)) {
+	    for (String inStockColumn : configuredColumns(csvProperties.getInStock())) {
 	        String value = getFromCsvRow(item, inStockColumn);
 	        if (StringUtils.isEmpty(value)) {
 	            continue;
@@ -960,21 +800,22 @@ public class FeedIndexingWorker implements Runnable {
 	 * @param logger Logger for logging information
 	 */
 	private void setShippingTime(DataFragment dataFragment, Map<String, String> item, CsvDataSourceProperties csvProperties, Logger logger) {
-	    for (String shippingTimeColumn : candidateColumns(csvProperties.getShippingTime(), DEFAULT_SHIPPING_TIME_COLUMNS)) {
-	        String shippingTimeStr = getFromCsvRow(item, shippingTimeColumn);
-	        if (StringUtils.isEmpty(shippingTimeStr)) {
-	            continue;
+	    String shippingTimeColumn = csvProperties.getShippingTime();
+	    if (StringUtils.isEmpty(shippingTimeColumn)) {
+	        return;
+	    }
+	    String shippingTimeStr = getFromCsvRow(item, shippingTimeColumn);
+	    if (StringUtils.isEmpty(shippingTimeStr)) {
+	        return;
+	    }
+	    try {
+	        Integer shippingTime = ShippingTimeParser.parse(shippingTimeStr);
+	        if (shippingTime != null) {
+	            dataFragment.setShippingTime(shippingTime);
+	            removeFromSource(item, shippingTimeColumn);
 	        }
-	        try {
-	            Integer shippingTime = ShippingTimeParser.parse(shippingTimeStr);
-	            if (shippingTime != null) {
-	                dataFragment.setShippingTime(shippingTime);
-	                removeFromSource(item, shippingTimeColumn);
-	                return;
-	            }
-	        } catch (Exception e) {
-	            logger.info("Cannot parse shippingTime : {}", e.getMessage());
-	        }
+	    } catch (Exception e) {
+	        logger.info("Cannot parse shippingTime : {}", e.getMessage());
 	    }
 	}
 
@@ -987,23 +828,24 @@ public class FeedIndexingWorker implements Runnable {
 	 * @param logger Logger for logging information
 	 */
 	private void setQuantityInStock(DataFragment dataFragment, Map<String, String> item, CsvDataSourceProperties csvProperties, Logger logger, boolean explicitStockAvailability) {
-	    for (String quantityColumn : candidateColumns(csvProperties.getQuantityInStock(), DEFAULT_QUANTITY_IN_STOCK_COLUMNS)) {
-	        String quantityStr = getFromCsvRow(item, quantityColumn);
-	        if (StringUtils.isEmpty(quantityStr)) {
-	            continue;
+	    String quantityColumn = csvProperties.getQuantityInStock();
+	    if (StringUtils.isEmpty(quantityColumn)) {
+	        return;
+	    }
+	    String quantityStr = getFromCsvRow(item, quantityColumn);
+	    if (StringUtils.isEmpty(quantityStr)) {
+	        return;
+	    }
+	    try {
+	        Integer quantity = StockQuantityParser.parse(quantityStr);
+	        dataFragment.setQuantityInStock(quantity);
+	        if (!explicitStockAvailability && quantity == 0) {
+	            dataFragment.setInStock(InStock.OUTOFSTOCK);
 	        }
-	        try {
-	            Integer quantity = StockQuantityParser.parse(quantityStr);
-	            dataFragment.setQuantityInStock(quantity);
-	            if (!explicitStockAvailability && quantity == 0) {
-	                dataFragment.setInStock(InStock.OUTOFSTOCK);
-	            }
-	            // Delete from source
-                removeFromSource(item, quantityColumn);
-                return;
-	        } catch (Exception e) {
-	            logger.info("Cannot parse QuantityInStock : {}", e.getMessage());
-	        }
+	        // Delete from source
+            removeFromSource(item, quantityColumn);
+	    } catch (Exception e) {
+	        logger.info("Cannot parse QuantityInStock : {}", e.getMessage());
 	    }
 	}
 
@@ -1016,19 +858,20 @@ public class FeedIndexingWorker implements Runnable {
 	 * @param logger Logger for logging information
 	 */
 	private void setShippingCost(DataFragment dataFragment, Map<String, String> item, CsvDataSourceProperties csvProperties, Logger logger) {
-	    for (String shippingCostColumn : candidateColumns(csvProperties.getShippingCost(), DEFAULT_SHIPPING_COST_COLUMNS)) {
-	        String costStr = getFromCsvRow(item, shippingCostColumn);
-	        if (StringUtils.isEmpty(costStr)) {
-	            continue;
-	        }
-	        try {
-	            dataFragment.setShippingCost(ShippingCostParser.parse(costStr));
-	         // Delete from source
-                removeFromSource(item, shippingCostColumn);
-                return;
-	        } catch (Exception e) {
-	            logger.info("Cannot parse ShippingCost : {}", e.getMessage());
-	        }
+	    String shippingCostColumn = csvProperties.getShippingCost();
+	    if (StringUtils.isEmpty(shippingCostColumn)) {
+	        return;
+	    }
+	    String costStr = getFromCsvRow(item, shippingCostColumn);
+	    if (StringUtils.isEmpty(costStr)) {
+	        return;
+	    }
+	    try {
+	        dataFragment.setShippingCost(ShippingCostParser.parse(costStr));
+	        // Delete from source
+            removeFromSource(item, shippingCostColumn);
+	    } catch (Exception e) {
+	        logger.info("Cannot parse ShippingCost : {}", e.getMessage());
 	    }
 	}
 
@@ -1064,7 +907,7 @@ public class FeedIndexingWorker implements Runnable {
 	private void setProductState(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger) {
 	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
 	    dataFragment.setProductState(config.getDefaultItemCondition());
-	    for (String productStateColumn : candidateColumns(csvProperties.getProductState(), DEFAULT_PRODUCT_STATE_COLUMNS)) {
+	    for (String productStateColumn : configuredColumns(csvProperties.getProductState())) {
 	        String value = getFromCsvRow(item, productStateColumn);
 	        if (StringUtils.isEmpty(value)) {
 	            continue;
@@ -1104,22 +947,6 @@ public class FeedIndexingWorker implements Runnable {
 	            }
 	        }
 	    }
-	    for (Map.Entry<ReferentielKey, List<String>> entry : DEFAULT_REFERENTIEL_COLUMNS.entrySet()) {
-	        if (dataFragment.getReferentielAttributes().containsKey(entry.getKey())) {
-	            continue;
-	        }
-	        for (String key : entry.getValue()) {
-	            String value = getFromCsvRow(item, key);
-	            if (!StringUtils.isEmpty(value)) {
-	                dataFragment.addReferentielAttribute(entry.getKey().name(), value);
-	                if (ReferentielKey.MODEL.equals(entry.getKey()) && isDefaultMpnColumn(key)) {
-	                    dataFragment.getExternalIds().getMpn().add(value);
-	                }
-	                removeFromSource(item, key);
-	                break;
-	            }
-	        }
-	    }
 	}
 
 	/**
@@ -1131,25 +958,20 @@ public class FeedIndexingWorker implements Runnable {
 	 */
 	private void addExternalIds(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config) {
 	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
-	    for (String key : candidateColumns(csvProperties.getMpn(), DEFAULT_MPN_COLUMNS)) {
+	    for (String key : configuredColumns(csvProperties.getMpn())) {
 	        String value = getFromCsvRow(item, key);
 	        if (!StringUtils.isEmpty(value)) {
 	            dataFragment.getExternalIds().getMpn().add(value);
 	            removeFromSource(item, key);
 	        }
 	    }
-	    for (String key : candidateColumns(csvProperties.getSku(), DEFAULT_SKU_COLUMNS)) {
+	    for (String key : configuredColumns(csvProperties.getSku())) {
 	        String value = getFromCsvRow(item, key);
 	        if (!StringUtils.isEmpty(value)) {
 	            dataFragment.getExternalIds().getSku().add(value);
 	            removeFromSource(item, key);
 	        }
 	    }
-	}
-
-	private boolean isDefaultMpnColumn(String key) {
-	    return DEFAULT_MPN_COLUMNS.stream()
-	            .anyMatch(candidate -> comparableCsvHeader(candidate).equals(comparableCsvHeader(key)));
 	}
 
 	/**
@@ -1279,22 +1101,11 @@ public class FeedIndexingWorker implements Runnable {
 	 * @param colName
 	 * @return
 	 */
-	private List<String> candidateColumns(String configuredColumn, List<String> defaultColumns) {
-	    LinkedHashSet<String> candidates = new LinkedHashSet<>();
-	    if (!StringUtils.isEmpty(configuredColumn)) {
-	        candidates.add(configuredColumn);
-	    }
-	    candidates.addAll(defaultColumns);
-	    return candidates.stream().toList();
-	}
-
-	private List<String> candidateColumns(Set<String> configuredColumns, List<String> defaultColumns) {
-	    LinkedHashSet<String> candidates = new LinkedHashSet<>();
-	    if (configuredColumns != null) {
-	        candidates.addAll(configuredColumns);
-	    }
-	    candidates.addAll(defaultColumns);
-	    return candidates.stream().toList();
+	/**
+	 * Returns the columns explicitly configured for a field, never a guessed default (AC2).
+	 */
+	private static List<String> configuredColumns(Set<String> configured) {
+	    return configured == null ? List.of() : List.copyOf(configured);
 	}
 
 	private String getFromCsvRow(final Map<String, String> item, final String colName) {
