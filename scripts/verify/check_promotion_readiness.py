@@ -27,11 +27,13 @@ docs/operations/promotion-readiness-gate.md). It refuses to pass when:
     owner decision for that target. The mandate check itself never returns
     `authorized=true`; it is combined here with, not a substitute for, the
     manifest/phase/decision checks above.
-  * the `O4G_GATE_PROOF_HMAC_KEY` environment variable is missing or unusable.
-    A clean report is sealed (see scripts/deploy/gate_proof_seal.py, GOU-174)
-    before being printed, so that `scripts/deploy/verify_gate_proof.py` -- run
-    later, on a deploy host with no Paperclip API access -- can authenticate
-    it instead of trusting a hand-written file with the right field names.
+  * the `O4G_GATE_PROOF_SIGNING_KEY` environment variable is missing or
+    unusable. A clean report is signed with Ed25519 (see
+    scripts/deploy/gate_proof_seal.py, GOU-174/GOU-177) before being printed,
+    so that `scripts/deploy/verify_gate_proof.py` -- run later, on a deploy
+    host with no Paperclip API access and only the matching public key --
+    can authenticate it instead of trusting a hand-written file with the
+    right field names.
 
 Any of the above exits non-zero. A clean pass exits 0. This script performs no
 Paperclip, Git or deployment write of any kind.
@@ -407,15 +409,15 @@ def main(argv: list[str] | None = None) -> int:
             candidate_sha=args.candidate_sha, dataset=args.dataset,
             promotion_target=args.promotion_target, phase=args.phase, mandate_report=mandate_report,
         )
-        hex_key = os.environ.get(gate_proof_seal.ENV_VAR, "")
+        hex_key = os.environ.get(gate_proof_seal.SIGNING_KEY_ENV_VAR, "")
         if not hex_key:
             raise ReadinessError(
-                f"{gate_proof_seal.ENV_VAR} is not set; cannot seal the gate proof")
+                f"{gate_proof_seal.SIGNING_KEY_ENV_VAR} is not set; cannot sign the gate proof")
         try:
-            hmac_key = gate_proof_seal.load_key_from_hex(hex_key)
+            signing_key = gate_proof_seal.load_signing_key_from_hex(hex_key)
         except ValueError as exc:
             raise ReadinessError(str(exc)) from exc
-        report["seal"] = gate_proof_seal.compute_seal(hmac_key, report)
+        report["seal"] = gate_proof_seal.compute_seal(signing_key, report)
         print(json.dumps(report, indent=2))
         return 0 if report["ready"] else 1
     except ReadinessError as exc:

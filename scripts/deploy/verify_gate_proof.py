@@ -14,13 +14,15 @@ operator to a file); it is rejected unless it is all of:
     proof cannot be replayed across SHAs, targets or an edited-then-rebuilt manifest;
   * generated within a bounded freshness window of "now", so a once-valid proof cannot authorize
     an unbounded number of later, unrelated publishes;
-  * sealed with an HMAC (see gate_proof_seal.py, GOU-174) over exactly those fields, keyed with a
-    secret the publish-script operator does not hold. Without this, the proof is just five lines
-    of JSON anyone who can run this script could hand-write; the seal is what makes it
+  * sealed with an Ed25519 signature (see gate_proof_seal.py, GOU-174/GOU-177) over exactly those
+    fields. This process verifies the signature against the pipeline's public key only -- it never
+    reads, derives or holds the private signing key, so nothing the publish-script operator's
+    environment exposes lets them mint a new valid seal. Without this, the proof is just five
+    lines of JSON anyone who can run this script could hand-write; the seal is what makes it
     authenticate instead of merely describe.
 
-Fail-closed: any missing field, mismatch, malformed timestamp, stale proof, or missing/invalid
-seal exits non-zero.
+Fail-closed: any missing field, mismatch, malformed timestamp, stale proof, missing/invalid seal,
+or unprovisioned public key exits non-zero.
 """
 
 from __future__ import annotations
@@ -34,6 +36,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import gate_proof_seal
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
 
 class GateProofError(ValueError):
@@ -56,12 +59,12 @@ def parse_generated_at(value: object) -> float:
 
 
 def verify(proof: object, *, candidate_sha: str, promotion_target: str, manifest_digest: str,
-           max_age_seconds: int, now: float, hmac_key: bytes) -> None:
+           max_age_seconds: int, now: float, public_key: Ed25519PublicKey) -> None:
     if not isinstance(proof, dict):
         raise GateProofError("gate proof must be a JSON object")
     # Checked before any field is trusted: a mismatched field on a forged proof must fail on the
     # seal, not on the field check, so an attacker never learns which hand-written field was wrong.
-    if not gate_proof_seal.verify_seal(hmac_key, proof, proof.get("seal")):
+    if not gate_proof_seal.verify_seal(public_key, proof, proof.get("seal")):
         raise GateProofError("gate proof seal is missing or invalid")
     if proof.get("ready") is not True:
         raise GateProofError(f"gate proof is not ready: ready={proof.get('ready')!r}")
@@ -82,12 +85,21 @@ def verify(proof: object, *, candidate_sha: str, promotion_target: str, manifest
         raise GateProofError(f"gate proof is stale: age={age:.0f}s exceeds max {max_age_seconds}s")
 
 
-def load_hmac_key() -> bytes:
-    hex_key = os.environ.get(gate_proof_seal.ENV_VAR, "")
+def load_public_key() -> Ed25519PublicKey:
+    """Load the pipeline's Ed25519 public key: from PUBLIC_KEY_ENV_VAR for tests and local
+    fixtures, otherwise from the repo-committed PUBLIC_KEY_FILE. Never reads, derives or needs the
+    private signing key -- this process cannot mint a seal, only check one."""
+    hex_key = os.environ.get(gate_proof_seal.PUBLIC_KEY_ENV_VAR, "")
     if not hex_key:
-        raise GateProofError(f"{gate_proof_seal.ENV_VAR} is not set; cannot verify the gate proof seal")
+        if not gate_proof_seal.PUBLIC_KEY_FILE.is_file():
+            raise GateProofError(
+                "no gate proof public key is provisioned: "
+                f"{gate_proof_seal.PUBLIC_KEY_FILE} is missing and "
+                f"{gate_proof_seal.PUBLIC_KEY_ENV_VAR} is not set (GOU-177); "
+                "promotion is inoperative until the pipeline's Ed25519 keypair is provisioned")
+        hex_key = gate_proof_seal.PUBLIC_KEY_FILE.read_text(encoding="utf-8").strip()
     try:
-        return gate_proof_seal.load_key_from_hex(hex_key)
+        return gate_proof_seal.load_public_key_from_hex(hex_key)
     except ValueError as exc:
         raise GateProofError(str(exc)) from exc
 
@@ -110,7 +122,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.max_age_seconds <= 0:
             raise GateProofError(f"--max-age-seconds must be positive: {args.max_age_seconds}")
-        hmac_key = load_hmac_key()
+        public_key = load_public_key()
         if not args.proof.is_file():
             raise GateProofError(f"gate proof not found: {args.proof}")
         try:
@@ -121,7 +133,7 @@ def main(argv: list[str] | None = None) -> int:
         now = args.now if args.now is not None else time.time()
         verify(proof, candidate_sha=args.candidate_sha, promotion_target=args.promotion_target,
                manifest_digest=args.manifest_digest, max_age_seconds=args.max_age_seconds, now=now,
-               hmac_key=hmac_key)
+               public_key=public_key)
         return 0
     except GateProofError as exc:
         print(f"Promotion gate proof rejected: {exc}", file=sys.stderr)
