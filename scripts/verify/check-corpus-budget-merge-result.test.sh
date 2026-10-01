@@ -125,18 +125,18 @@ fi
 
 # But their merge (a + b + c = 7 lines) exceeds it. This is the defect: CI
 # must measure the merge result, not the PR branch's tip.
+CHECK_OUTPUT="${FIXTURE_DIR}/corpus-budget-merge-result.out"
 if (cd "${REPO}" && GITHUB_BASE_REF=main python3 "${CHECK}") \
-    > /tmp/corpus-budget-merge-result.out 2>&1; then
+    > "${CHECK_OUTPUT}" 2>&1; then
   echo "FAIL: the merge of main into the PR branch exceeds the budget and should have failed"
-  cat /tmp/corpus-budget-merge-result.out
+  cat "${CHECK_OUTPUT}"
   exit 1
 fi
 
-if ! grep -q "Corpus budget exceeded" /tmp/corpus-budget-merge-result.out; then
+if ! grep -q "Corpus budget exceeded" "${CHECK_OUTPUT}"; then
   echo "FAIL: expected 'Corpus budget exceeded' in the merge-result check's output"
-  cat /tmp/corpus-budget-merge-result.out
+  cat "${CHECK_OUTPUT}"
   exit 1
 fi
 
-rm -f /tmp/corpus-budget-merge-result.out
 echo "corpus-budget-merge-result test passed"
