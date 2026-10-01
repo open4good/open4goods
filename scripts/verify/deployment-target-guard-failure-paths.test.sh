@@ -126,7 +126,7 @@ chmod +x "$race_bin/tr"
 racer_pid=$!
 
 expect_rejected 'a cluster fingerprint swapped in after the target check started' \
-  env PATH="$race_bin:$PATH" \
+  env O4G_TR="$race_bin/tr" \
   O4G_EXPECTED_TARGET=beta O4G_EXPECTED_CLUSTER_FINGERPRINT="$fingerprint_a" \
   O4G_TARGET_MARKER_FILE="$race_target" O4G_CLUSTER_FINGERPRINT_FILE="$race_cluster" \
   "$ROOT/scripts/verify/deployment-target-guard.sh"
