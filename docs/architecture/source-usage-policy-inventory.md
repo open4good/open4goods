@@ -18,7 +18,7 @@ Each policy grants surfaces per content type through `surfaceGrants`, a map from
 content type to its allowed projection surfaces, rather than a flat content-type
 set crossed with a flat surface set. A source can clear its identifiers (GTIN,
 MPN) for the `ODBL_EXPORT` surface without that clearing its attributes, text or
-media for the same surface — a distinction a cartesian product could not
+media for the same surface - a distinction a cartesian product could not
 express, and that a second policy record cannot supply either, because a source
 record carries exactly one policy reference. A content type present as a key
 with an empty surface set is still reviewed for `allowsUse` (e.g. a named use
@@ -45,12 +45,12 @@ record cannot carry six publisher agreements.
 |---|---|---|---|---|
 | `eprel-public-api` / 2 | IDENTITY, CLASSIFICATION, ATTRIBUTE | NUDGER_WEB, B2B_API | VALUE_ADDED_ONLY | P35D |
 | `icecat-open-content` / 2 | IDENTITY, CLASSIFICATION, ATTRIBUTE, TEXT, MEDIA, RELATION | NUDGER_WEB | ALLOWED + SHARE_ALIKE | P365D |
-| `icecat-full-subscription` / 1 | — (total refusal) | — | PROHIBITED | PT0S |
+| `icecat-full-subscription` / 1 | - (total refusal) | - | PROHIBITED | PT0S |
 | `merchant-feed.awin` / 1 | IDENTITY, ATTRIBUTE, OFFER, PRICE | NUDGER_WEB, B2B_API | VALUE_ADDED_ONLY | P1825D |
 | `merchant-feed.effiliation` / 1 | IDENTITY, ATTRIBUTE, OFFER, PRICE | NUDGER_WEB, B2B_API | VALUE_ADDED_ONLY | P1825D |
-| `merchant-feed.tradetracker` / `.kwanko` / `.webgains` / `.cj` — 1 | — (total refusal) | — | PROHIBITED | PT0S |
+| `merchant-feed.tradetracker` / `.kwanko` / `.webgains` / `.cj` - 1 | - (total refusal) | - | PROHIBITED | PT0S |
 | `legacy-product-backup` / 2 | IDENTITY (in `surfaceGrants`) | NUDGER_WEB (in `surfaceGrants`) | PROHIBITED | P1825D |
-| `amazon-paapi-quarantine` / 2 | — (total refusal, `revokedAt` set) | — | PROHIBITED | PT0S |
+| `amazon-paapi-quarantine` / 2 | - (total refusal, `revokedAt` set) | - | PROHIBITED | PT0S |
 
 EPREL's B2B grant is free-with-account (T&C 4§2(a)). Icecat's OPL forbids
 charging for network access, so `B2B_API` stays refused despite
@@ -69,6 +69,6 @@ licence terms, replaced by the verified [Open Content License v1.4](https://icec
 Open question for the resource owner: `legacy-product-backup` / 2 records
 `IDENTITY → NUDGER_WEB` in `surfaceGrants` but carries
 `redistribution: PROHIBITED`, and `allows()` requires the latter to be
-non-`PROHIBITED` before ever reading `surfaceGrants` — so as specified this row
+non-`PROHIBITED` before ever reading `surfaceGrants` - so as specified this row
 publishes nothing, unlike `icecat-open-content`, where GOU-95 reasons through
 that same interaction. The JSON implements the ratified fields literally.
