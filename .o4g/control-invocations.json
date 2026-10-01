@@ -16,6 +16,9 @@
     "scripts/verify/check_usage_policy_registry.py": {
       "invokedBy": ["scripts/python/lint_suite.py"]
     },
+    "scripts/verify/check_icecat_legacy_symbols.py": {
+      "invokedBy": ["scripts/python/lint_suite.py"]
+    },
     "scripts/verify/check_default_branch_commit.py": {
       "invokedBy": [".githooks/pre-commit"]
     },
