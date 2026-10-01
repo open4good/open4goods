@@ -15,6 +15,12 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.datareference.serialization.DataReferenceJson;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 
 /**
  * Policy inventory and publication-gate boundary tests.
@@ -26,25 +32,38 @@ class SourceUsagePolicyRegistryTest {
     private static final Instant DURING = Instant.parse("2026-09-30T00:00:00Z");
 
     @Test
-    void defaultInventoryHoldsTheElevenGou95RatifiedRowsAllReviewedWithEvidence() throws IOException {
+    void defaultInventoryHoldsTheTwelveRatifiedRowsAllReviewedWithEvidence() throws IOException {
         SourceUsagePolicyRegistry registry = SourceUsagePolicyRegistry.loadDefault();
 
         // GOU-95/GOU-105: the generic merchant-feed row is replaced by six per-network rows,
         // because a single record cannot carry six distinct publisher agreements.
+        // GOU-165: legacy-backup-import is added so LegacyBackupUsagePolicy.POLICY's reference,
+        // built in code (GOU-52), is never a policy reference pending from the registry.
         assertThat(registry.policies()).extracting(SourceUsagePolicy::sourceId)
                 .containsExactly(new SourceId("eprel"), new SourceId("icecat"), new SourceId("icecat.full"),
                         new SourceId("merchant-feed.awin"), new SourceId("merchant-feed.effiliation"),
                         new SourceId("merchant-feed.tradetracker"), new SourceId("merchant-feed.kwanko"),
                         new SourceId("merchant-feed.webgains"), new SourceId("merchant-feed.cj"),
-                        new SourceId("legacy-product-backup"), new SourceId("amazon-paapi"));
+                        new SourceId("legacy-product-backup"), new SourceId("legacy-backup"),
+                        new SourceId("amazon-paapi"));
 
         for (SourceUsagePolicy policy : registry.policies()) {
             assertThat(policy.evidenceReferences()).as("%s evidence", policy.sourceId()).isNotEmpty();
             // A row in total refusal is still a decided, reviewed refusal, not an unreviewed default.
             assertThat(policy.reviewState()).as("%s reviewState", policy.sourceId())
                     .isEqualTo(PolicyReviewState.REVIEWED);
+            // legacy-product-backup's legalReviewDate is 2026-10-01: GOU-165 corrects the
+            // 2026-09-29 authoring-time value to the date the owner actually ratified its
+            // redistribution field (carte b4f18dfe). legacy-backup-import was reviewed on
+            // 2026-09-30, the day its deny-all policy was authored in code (GOU-52). Every
+            // other row was reviewed on 2026-09-29.
+            LocalDate expectedReviewDate = switch (policy.policyId()) {
+                case "legacy-product-backup" -> LocalDate.of(2026, 10, 1);
+                case "legacy-backup-import" -> LocalDate.of(2026, 9, 30);
+                default -> LocalDate.of(2026, 9, 29);
+            };
             assertThat(policy.legalReviewDate()).as("%s legalReviewDate", policy.sourceId())
-                    .isEqualTo(LocalDate.of(2026, 9, 29));
+                    .isEqualTo(expectedReviewDate);
         }
     }
 
@@ -166,6 +185,22 @@ class SourceUsagePolicyRegistryTest {
     }
 
     @Test
+    void legacyBackupImportResolvesAsATotalRefusalMatchingTheCodeConstructedPolicy() throws IOException {
+        SourceUsagePolicyRegistry registry = SourceUsagePolicyRegistry.loadDefault();
+        SourceUsagePolicyRef ref = new SourceUsagePolicyRef("legacy-backup-import", "1");
+
+        // GOU-165 AC1: this reference is built in code (LegacyBackupUsagePolicy.POLICY, GOU-52)
+        // and must resolve here rather than being an unaudited, pending reference.
+        assertThat(registry.find(ref)).isPresent();
+        for (SourceContentType contentType : SourceContentType.values()) {
+            for (ProjectionSurface surface : ProjectionSurface.values()) {
+                assertThat(registry.allows(new SourceId("legacy-backup"), ref, contentType, surface, DURING))
+                        .isFalse();
+            }
+        }
+    }
+
+    @Test
     void amazonQuarantineIsRevokedAndDeniesAnyAssertionFromItsRevocationOnward() throws IOException {
         SourceUsagePolicyRegistry registry = SourceUsagePolicyRegistry.loadDefault();
         SourceUsagePolicy amazon = registry.find(new SourceUsagePolicyRef("amazon-paapi-quarantine", "2"))
@@ -188,6 +223,43 @@ class SourceUsagePolicyRegistryTest {
                 SourceContentType.ATTRIBUTE, ProjectionSurface.NUDGER_WEB, DURING)).isFalse();
         assertThat(registry.allows(new SourceId("other-source"), FIXTURE_POLICY,
                 SourceContentType.ATTRIBUTE, ProjectionSurface.NUDGER_WEB, DURING)).isFalse();
+    }
+
+    @Test
+    void anUnresolvablePersistedReferenceWarnsInsteadOfDenyingSilently() throws IOException {
+        SourceUsagePolicyRegistry registry = fixtureRegistry();
+        Logger registryLogger = (Logger) LoggerFactory.getLogger(SourceUsagePolicyRegistry.class);
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        registryLogger.addAppender(appender);
+
+        try {
+            // GOU-165 AC3: an unknown reference must be visibly denied, not just denied.
+            boolean allowed = registry.allows(FIXTURE_SOURCE, new SourceUsagePolicyRef("missing", "1"),
+                    SourceContentType.ATTRIBUTE, ProjectionSurface.NUDGER_WEB, DURING);
+            assertThat(allowed).isFalse();
+            assertThat(appender.list).as("WARN log for an unresolvable reference").hasSize(1);
+            ILoggingEvent event = appender.list.get(0);
+            assertThat(event.getLevel()).isEqualTo(Level.WARN);
+            assertThat(event.getFormattedMessage()).contains("missing").contains("1").contains("fixture-source");
+
+            appender.list.clear();
+
+            // A policy that resolves and itself refuses must stay silent: that is the ordinary
+            // deny-by-default path, not the "nobody can see why" gap this issue closes.
+            boolean deniedButResolved = registry.allows(FIXTURE_SOURCE, FIXTURE_POLICY,
+                    SourceContentType.TEXT, ProjectionSurface.NUDGER_WEB, DURING);
+            assertThat(deniedButResolved).isFalse();
+            assertThat(appender.list).as("no WARN for a resolved policy that itself denies").isEmpty();
+
+            // Source mismatch is also an unresolvable reference for the claimed source.
+            registry.allowsUse(new SourceId("other-source"), FIXTURE_POLICY, SourceContentType.ATTRIBUTE,
+                    ProhibitedUse.AI_TRAINING, DURING);
+            assertThat(appender.list).as("WARN log for a source-mismatched reference").hasSize(1);
+            assertThat(appender.list.get(0).getLevel()).isEqualTo(Level.WARN);
+        } finally {
+            registryLogger.detachAppender(appender);
+        }
     }
 
     @Test
