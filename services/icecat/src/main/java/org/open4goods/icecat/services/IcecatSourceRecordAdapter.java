@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.IntFunction;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.datareference.model.Gtin;
@@ -35,6 +36,7 @@ import org.open4goods.datareference.model.evidence.MediaEvidence;
 import org.open4goods.datareference.model.evidence.ScalarEvidence;
 import org.open4goods.datareference.model.evidence.SourceEvidence;
 import org.open4goods.datareference.serialization.DataReferenceJson;
+import org.open4goods.icecat.jaxb.Product;
 import org.open4goods.icecat.model.IcecatLiveApiResponse.Description;
 import org.open4goods.icecat.model.IcecatLiveApiResponse.Feature;
 import org.open4goods.icecat.model.IcecatLiveApiResponse.FeatureLogos;
@@ -44,6 +46,7 @@ import org.open4goods.icecat.model.IcecatLiveApiResponse.Gallery;
 import org.open4goods.icecat.model.IcecatLiveApiResponse.GeneralInfo;
 import org.open4goods.icecat.model.IcecatLiveApiResponse.IceDataItem;
 import org.open4goods.icecat.model.IcecatLiveApiResponse.Multimedia;
+import org.open4goods.icecat.services.loader.IcecatBulkProductConverter;
 import org.springframework.stereotype.Component;
 
 /**
@@ -58,10 +61,11 @@ import org.springframework.stereotype.Component;
  * identifiers so that reviewed mapping (see {@code IcecatCategoryVerticalResolver} and
  * the shared normalization service) can resolve them later.
  *
- * <p>Bulk XML import shares the same {@code IceDataItem}-shaped neutral result today
- * only through the live client; wiring the JAXB bulk-export model into this same
- * {@code adapt} contract is tracked separately so both paths converge on one head per
- * Icecat product id, as required by the source-record adapter contract.
+ * <p>Bulk catalogue import reaches this same contract through {@link #adapt(Product,
+ * LanguageTag, Set, String, Instant, IntFunction)}, which maps the JAXB bulk-export model
+ * onto the live API's {@code IceDataItem} shape before delegating to {@link #adapt(IceDataItem,
+ * LanguageTag, Set, String, Instant)}: a bulk import and a live per-product refresh of the same
+ * Icecat product therefore converge on one {@link SourceRecordHead}.
  *
  * <p>The live API returns one language per call, so a field whose value differs by
  * language is keyed with an explicit {@code #<language>} suffix; a single-language
@@ -137,6 +141,28 @@ public class IcecatSourceRecordAdapter {
                 gtinLinks,
                 assertions);
         return Optional.of(SourceRecordMutation.full(head));
+    }
+
+    /**
+     * Converts one Icecat bulk-export product into the same source-record mutation
+     * {@link #adapt(IceDataItem, LanguageTag, Set, String, Instant)} produces for a live-API
+     * response of the same product, by first mapping the JAXB bulk model onto the live API's
+     * neutral {@code IceDataItem} shape (see {@link IcecatBulkProductConverter}).
+     *
+     * @param bulkProduct JAXB product read from an Icecat bulk-export file
+     * @param language language this bulk export file is considered to represent
+     * @param configuredLocales full set of languages this deployment is configured to track
+     * @param schemaVersion Icecat reference/registry version selected by the importer
+     * @param retrievedAt instant at which this export was retrieved
+     * @param languageOf resolves an Icecat {@code langid} to the language it designates
+     * @return a mutation, or empty when the bulk export supplied no stable product identifier
+     */
+    public Optional<SourceRecordMutation> adapt(
+            Product bulkProduct, LanguageTag language, Set<LanguageTag> configuredLocales, String schemaVersion,
+            Instant retrievedAt, IntFunction<LanguageTag> languageOf) {
+        Objects.requireNonNull(bulkProduct, "bulkProduct must not be null");
+        IceDataItem item = IcecatBulkProductConverter.toLiveModel(bulkProduct, language, languageOf);
+        return adapt(item, language, configuredLocales, schemaVersion, retrievedAt);
     }
 
     /**

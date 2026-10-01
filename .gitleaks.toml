@@ -72,6 +72,23 @@ regexes = [
   '^NV7B4550VAS/U1$',
 ]
 
+# GOU-177: the default generic-api-key rule flags SIGNING_KEY_ENV_VAR's value because it
+# contains the substring "SIGNING_KEY" -- but the value is the *name* of an environment
+# variable (O4G_GATE_PROOF_SIGNING_KEY), never a secret itself. The neighboring
+# PUBLIC_KEY_ENV_VAR on the very next line does not trip the rule, confirming it is the
+# word "KEY" in the identifier, not an actual credential, that matches. Anchored to this
+# exact file and this exact literal so a real secret added nearby still gets caught.
+[[allowlists]]
+description = "Env var name, not a secret value (GOU-177)"
+condition = "AND"
+regexTarget = "secret"
+paths = [
+  '''(^|/)scripts/deploy/gate_proof_seal\.py$''',
+]
+regexes = [
+  '^O4G_GATE_PROOF_SIGNING_KEY$',
+]
+
 # GOU-28: the B2B docs set shows one `curl -H "Authorization: Bearer <key>"` example per
 # facet page, so every new facet page trips the default `curl-auth-header` rule with the
 # same two placeholder keys. The rule-scoped allowlist above only covers the custom

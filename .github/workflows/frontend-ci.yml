@@ -36,11 +36,16 @@ jobs:
         run: pnpm build
         working-directory: frontend
 
+      - name: Verify SSR output is present
+        run: |
+          test -d frontend/.output/server
+          test -d frontend/.output/public
+
       - name: Retain candidate SSR output
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: frontend-${{ github.sha }}
           path: frontend/.output
-          if-no-files-found: error
-          retention-days: 30
+          include-hidden-files: true
+          if-no-files-found: ${{ (github.ref == 'refs/heads/main' && github.event_name == 'push') && 'error' || 'warn' }}
+          retention-days: ${{ (github.ref == 'refs/heads/main' && github.event_name == 'push') && 30 || 1 }}

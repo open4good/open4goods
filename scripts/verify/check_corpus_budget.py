@@ -286,6 +286,54 @@ def assert_no_ceiling_increase(ref: str) -> int:
     return 0
 
 
+def merge_into_worktree(
+    worktree_dir: str, base_ref: str, env: dict[str, str] | None = None
+) -> subprocess.CompletedProcess:
+    """Attempt the measurement merge inside worktree_dir, under a throwaway
+    committer identity scoped to this one command.
+
+    `git merge --no-ff` validates the committer identity before it looks at
+    content, even with --no-commit: a GitHub runner has none configured, so an
+    unscoped call fails identically whether the branches conflict or not. The
+    `-c` flags set that identity for this invocation alone -- no global config
+    is touched and no trace is left in the repository, since --no-commit means
+    the identity is never actually used to create anything.
+
+    env defaults to None, which inherits the caller's environment (the
+    production path); tests pass a stripped environment to prove the merge
+    still succeeds with no git identity configured anywhere.
+    """
+    return subprocess.run(
+        [
+            "git",
+            "-c", "user.name=corpus-budget",
+            "-c", "user.email=corpus-budget@invalid",
+            "merge", "--no-commit", "--no-ff", base_ref,
+        ],
+        cwd=worktree_dir,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+
+def merge_left_conflicts(worktree_dir: str) -> bool:
+    """Whether a failed merge in worktree_dir left real conflicted paths.
+
+    A merge can fail before it ever touches a path -- an unknown ref, a
+    corrupt object, a missing identity -- and that failure is not "a merge
+    conflict with the base branch". Only unmerged entries in the index mean
+    the content actually conflicted.
+    """
+    unmerged = subprocess.run(
+        ["git", "diff", "--name-only", "--diff-filter=U"],
+        cwd=worktree_dir,
+        capture_output=True,
+        text=True,
+    )
+    return bool(unmerged.stdout.strip())
+
+
 def run_merge_check(base_ref: str) -> int:
     """Measure the corpus budget on the tree a merge of base_ref into HEAD would
     produce, not on HEAD alone.
@@ -294,8 +342,9 @@ def run_merge_check(base_ref: str) -> int:
     branch that is individually within budget can still push the corpus over
     its ceiling once combined with commits that landed on the base branch
     after the branch was forked -- a combination plain HEAD measurement never
-    sees. A merge conflict here is reported as a failure, not swallowed into a
-    pass.
+    sees. A real merge conflict here is reported as a failure, not swallowed
+    into a pass; a merge that cannot even be attempted (environment, tooling)
+    is reported as that, not misreported as a conflict.
     """
     worktree_dir = tempfile.mkdtemp(prefix="corpus-budget-merge-")
     try:
@@ -313,26 +362,32 @@ def run_merge_check(base_ref: str) -> int:
             )
             return 2
 
-        merged = subprocess.run(
-            ["git", "merge", "--no-commit", "--no-ff", base_ref],
-            cwd=worktree_dir,
-            capture_output=True,
-            text=True,
-        )
+        merged = merge_into_worktree(worktree_dir, base_ref)
         if merged.returncode != 0:
+            if merge_left_conflicts(worktree_dir):
+                print(
+                    f"Merge conflict between HEAD and {base_ref}:\n",
+                    file=sys.stderr,
+                )
+                print(merged.stdout, file=sys.stderr)
+                print(merged.stderr, file=sys.stderr)
+                print(
+                    "\nThis is a merge conflict with the base branch: resolve it "
+                    "on the branch. This is not a budget failure.",
+                    file=sys.stderr,
+                )
+                return 1
             print(
-                f"Cannot merge {base_ref} into HEAD to measure the corpus budget "
-                "the merge would produce:\n",
+                f"Cannot measure the corpus budget the merge with {base_ref} would "
+                "produce: the merge command itself failed for a reason other than "
+                "a content conflict (see output below). This is an environment or "
+                "tooling problem, not a conflict with the base branch -- do not "
+                "look for conflicting files.\n",
                 file=sys.stderr,
             )
             print(merged.stdout, file=sys.stderr)
             print(merged.stderr, file=sys.stderr)
-            print(
-                "\nThis is a merge conflict with the base branch, not a passing "
-                "budget check.",
-                file=sys.stderr,
-            )
-            return 1
+            return 2
 
         env = os.environ.copy()
         env.pop("GITHUB_BASE_REF", None)

@@ -20,6 +20,11 @@ import tools.jackson.databind.ObjectMapper;
  * <p>A rule cannot pre-authorise a source: every ranked source must already
  * carry a reviewed-or-not usage-policy entry, so a resolution rule can never be
  * the first place a source is introduced to the system.
+ *
+ * <p>A merchant-feed source (AC5) never ranks for a canonical reference
+ * attribute: it stays authoritative for its own current offer and price only,
+ * through {@code OfferHead}, and cannot override a regulatory or technical
+ * reference value resolved here.
  */
 public final class GitResolutionRuleLoader {
 
@@ -27,6 +32,8 @@ public final class GitResolutionRuleLoader {
     public static final String SCHEMA_RESOURCE = "/registry/resolution-rules.schema.json";
     /** Classpath resource containing the authored, checked-in resolution rules. */
     public static final String RESOURCE = "/registry/resolution-rules.json";
+    /** Source id prefix reserved for per-network merchant feed sources. */
+    private static final String MERCHANT_FEED_PREFIX = "merchant-feed.";
 
     private final ObjectMapper mapper;
     private final CanonicalRegistryLookup registry;
@@ -104,6 +111,10 @@ public final class GitResolutionRuleLoader {
             if (policies.policies().stream().noneMatch(policy -> policy.sourceId().equals(source))) {
                 throw new ResolutionRuleValidationException(
                         "resolution rule names a source with no usage-policy entry: " + source);
+            }
+            if (source.value().startsWith(MERCHANT_FEED_PREFIX)) {
+                throw new ResolutionRuleValidationException(
+                        "resolution rule must not rank a merchant-feed source for a reference attribute: " + source);
             }
         }
     }
