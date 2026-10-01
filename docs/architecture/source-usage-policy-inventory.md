@@ -73,3 +73,14 @@ of being shadowed by `allows()`'s redistribution gate, mirroring how
 `icecat-open-content` reasons through the same interaction.
 
 GOU-165: `scripts/verify/check_usage_policy_registry.py` rejects a code-cited reference missing here (e.g. `legacy-backup-import` / 1) or a deleted `(policyId, version)` row; `SourceUsagePolicyRegistry` now `WARN`s on an unresolved one. `legacy-product-backup`'s `legalReviewDate`, `2026-10-01`, is the actual GOU-105 ratification date, not a new rights period.
+
+## Merchant feeds never rank for a reference attribute (GOU-114, AC5)
+
+A merchant-feed source's `OFFER`/`PRICE` grant covers its own current offer,
+carried through `OfferHead` and read directly rather than through the
+canonical-attribute resolution rules above. `GitResolutionRuleLoader` rejects
+any `resolution-rules.json` rule that ranks a `merchant-feed.*` source,
+regardless of surface or attribute, so a merchant feed can never win or
+conflict-flag a regulatory or technical reference value (e.g. `eprel`'s
+`classe-energy`). `GitResolutionRuleLoaderTest.rejectsAMerchantFeedSourceRankedForAReferenceAttribute`
+is the executable check.
