@@ -44,23 +44,18 @@ class BackupServiceTest {
     void setUp() throws IOException {
         productBackupFolder = tempDir.resolve("products");
         Files.createDirectories(productBackupFolder);
-        Path xwikiBackup = tempDir.resolve("xwiki.zip");
-        Files.writeString(xwikiBackup, "xwiki", StandardCharsets.UTF_8);
 
         backupConfig = new BackupConfig();
-        backupConfig.setXwikiBackupFile(xwikiBackup.toString());
         backupConfig.setDataBackupFolder(productBackupFolder.toString());
         backupConfig.setImportProductPath(tempDir.resolve("import").toString());
         backupConfig.setProductsExportThreads(2);
         backupConfig.setProductExportPageSize(1000);
-        backupConfig.setMinXwikiBackupFileSizeInMb(0);
         backupConfig.setMinProductsBackupFolderSizeInMb(0);
-        backupConfig.setMaxWikiBackupAgeInHours(24);
         backupConfig.setMaxProductsBackupAgeInHours(24);
 
         productRepository = mock(ProductRepository.class);
         serialisationService = mock(SerialisationService.class);
-        backupService = new BackupService(null, productRepository, backupConfig, serialisationService, null);
+        backupService = new BackupService(productRepository, backupConfig, serialisationService, null);
     }
 
     @Test

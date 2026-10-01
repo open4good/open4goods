@@ -20,23 +20,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  */
 @RestController
 @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
-@Tag(name = "Backup", description = "Manual backup and restore operations for XWiki content and Elasticsearch product data.")
+@Tag(name = "Backup", description = "Manual backup and restore operations for Elasticsearch product data.")
 public class BackupController {
 
 	private final BackupService backupService;
 
 	public BackupController(BackupService backupService) {
 		this.backupService = backupService;
-	}
-
-	@PostMapping("/backup/xwiki")
-	@Operation(
-			summary = "Launch a XWiki backup",
-			description = "Triggers a full backup of the XWiki content (brand pages, vertical descriptions, guides). "
-					+ "The backup is written to the configured backup directory on the server filesystem.")
-	@ApiResponse(responseCode = "200", description = "XWiki backup started")
-	public void xwikiBackup() throws InvalidParameterException, IOException {
-		backupService.backupXwiki();
 	}
 
 	@PostMapping("/backup/products/export")

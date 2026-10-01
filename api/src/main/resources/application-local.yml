@@ -25,7 +25,6 @@ datasourcesfolder: "./datasources/"
 
 api:
   backup:
-    xwiki-backup-file: ./backup/xwiki-backup.zip
     data-backup-folder: ./backup/products
     import-product-path: ./backup/import
     copy-page-size: 5000
@@ -39,7 +38,6 @@ embedding:
 
 # The key to provide to get ADMIN_ROLE
 adminKey: open4goods
-
 
 xwiki:
   baseUrl: http://localhost:8080/xwiki

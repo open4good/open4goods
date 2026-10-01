@@ -4,7 +4,6 @@ datasourcesfolder: "./datasources/"
 
 api:
   backup:
-    xwiki-backup-file: ./backup/xwiki-backup.zip
     data-backup-folder: ./backup/products
     import-product-path: ./backup/import
     copy-page-size: 5000
@@ -36,11 +35,11 @@ spring:
       cache: false
 
 
-elasticsearch.password:  
+elasticsearch.password:
 elasticsearch.host: 127.0.0.1
 
 xwiki:
   baseUrl: http://localhost:8080/xwiki
   password: mock
   username: mock
-             
+
