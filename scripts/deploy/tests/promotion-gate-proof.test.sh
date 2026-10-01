@@ -26,17 +26,23 @@ printf '%s\n' '#!/usr/bin/env bash' 'printf 200' > "$fixture/bin/curl"
 chmod +x "$fixture/bin/systemctl" "$fixture/bin/curl"
 isolated() { PATH="$fixture/bin:$PATH" env -u BASH_ENV O4G_SYSTEMCTL="$fixture/bin/systemctl" O4G_CURL="$fixture/bin/curl" "$@"; }
 
-for name in sbadmin api front-api ui b2b-api; do
+# Derive the Java service list from publish-java-release.sh itself rather than recopying it,
+# so this fixture cannot silently fall behind when a service is added there.
+eval "$(grep -m1 '^readonly JAVA_SERVICES=' "$ROOT/scripts/deploy/publish-java-release.sh")"
+
+for name in "${JAVA_SERVICES[@]}"; do
   printf '%s\n' "$name" > "$fixture/${name}.jar"
 done
 mkdir -p "$fixture/frontend-ssr" "$fixture/b2b-frontend"
 printf '%s\n' frontend > "$fixture/frontend-ssr/index.html"
 printf '%s\n' b2b > "$fixture/b2b-frontend/index.html"
 release='abcdef1'
-"$ROOT/scripts/deploy/build-release-bundle.sh" --release "$release" --contract-version 1 --output "$fixture/bundle" \
-  --sbadmin "$fixture/sbadmin.jar" --api "$fixture/api.jar" --front-api "$fixture/front-api.jar" \
-  --ui "$fixture/ui.jar" --b2b-api "$fixture/b2b-api.jar" --frontend-ssr "$fixture/frontend-ssr" \
-  --b2b-frontend "$fixture/b2b-frontend"
+build_bundle_args=(--release "$release" --contract-version 1 --output "$fixture/bundle")
+for name in "${JAVA_SERVICES[@]}"; do
+  build_bundle_args+=("--${name}" "$fixture/${name}.jar")
+done
+build_bundle_args+=(--frontend-ssr "$fixture/frontend-ssr" --b2b-frontend "$fixture/b2b-frontend")
+"$ROOT/scripts/deploy/build-release-bundle.sh" "${build_bundle_args[@]}"
 manifest_digest="$(sha256sum "$fixture/bundle/release-manifest" | awk '{print $1}')"
 
 write_proof() {
