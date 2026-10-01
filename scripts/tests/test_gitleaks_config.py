@@ -49,6 +49,24 @@ class GitleaksConfigTest(unittest.TestCase):
         self.assertIn(result.returncode, [0, 1], "Scanner configuration or invocation failed")
         return result.returncode, json.loads(report.read_text()) if report.exists() else []
 
+    def regenerate_until_detected(self, write_fixture, rule_id, max_attempts=8):
+        """Write fixtures via `write_fixture(canary) -> (source, code, findings)`,
+        regenerating the canary until `rule_id` fires. gitleaks' built-in generic-api-key
+        rule rejects any match containing one of its internal stopwords (dead, cafe, face,
+        feed, bad, ace, ...); a random hex token hits one of those often enough to flake a
+        guard test that depends on it (GOU-163). Capped so a real regression - the rule
+        disabled or broken, not just unlucky stopwords - still fails loudly."""
+        code, findings, rule_ids = None, [], set()
+        for _ in range(max_attempts):
+            canary = secrets.token_hex(24)
+            code, findings = write_fixture(canary)
+            rule_ids = {item["RuleID"] for item in findings}
+            if rule_id in rule_ids:
+                return code, findings
+        self.fail(
+            f"{rule_id} did not fire on any of {max_attempts} regenerated canaries; "
+            "this looks like the rule being disabled or broken, not bad luck")
+
     def test_exact_identifiers_only(self):
         with tempfile.TemporaryDirectory(prefix="o4g-gitleaks-") as tmp:
             source = Path(tmp) / "source"
@@ -63,30 +81,19 @@ class GitleaksConfigTest(unittest.TestCase):
             self.assertEqual([], findings)
 
             # A generated canary is not a provider credential and must still be detected.
-            # Gitleaks' built-in generic-api-key rule rejects any match containing one of
-            # its internal stopwords (dead, cafe, face, feed, bad, ace, ...). A random hex
-            # token hits one of those ~7% of the time, which made this test flaky (GOU-163).
-            # Regenerate the canary until the rule actually fires, capped at a handful of
-            # attempts so a real regression (rule disabled or broken, not just unlucky
-            # stopwords) still fails loudly instead of retrying forever.
+            # regenerate_until_detected works around gitleaks' built-in generic-api-key
+            # stopword list (GOU-163) - see its docstring.
             password = secrets.token_hex(20)
-            max_attempts = 8
-            rule_ids = set()
-            for _ in range(max_attempts):
-                canary = secrets.token_hex(24)
+
+            def write_fixture(canary):
                 path.write_text(
                     baseline_text
                     + "api_key: " + canary + "\n"
                     + "password: " + password + "\n")
-                code, findings = self.scan(source)
-                rule_ids = {item["RuleID"] for item in findings}
-                if "generic-api-key" in rule_ids:
-                    break
-            else:
-                self.fail(
-                    f"generic-api-key did not fire on any of {max_attempts} regenerated "
-                    "canaries; this looks like the rule being disabled or broken, not bad luck")
+                return self.scan(source)
 
+            code, findings = self.regenerate_until_detected(write_fixture, "generic-api-key")
+            rule_ids = {item["RuleID"] for item in findings}
             self.assertEqual(1, code)
             self.assertIn("generic-api-key", rule_ids)
             self.assertIn("o4g-spring-inline-credential", rule_ids)
@@ -128,18 +135,23 @@ class GitleaksConfigTest(unittest.TestCase):
             self.assertEqual(0, code, "unquoted JS identifiers must not be flagged")
             self.assertEqual([], findings)
 
-            canary = secrets.token_hex(20)
-            (source / "Fixture.vue").write_text(
-                "<script setup lang=\"ts\">\n"
-                "withDefaults(defineProps<{ secret?: string }>(), {\n"
-                f"  secret: \"{canary}\",\n"
-                "})\n"
-                "</script>\n"
-            )
-            (source / "fixture.mjs").write_text(
-                f"checks.push({{ secret: \"{canary}\" }});\n"
-            )
-            code, findings = self.scan(source)
+            # `secret:` is not at line start in the .mjs fixture, so only gitleaks' built-in
+            # generic-api-key rule can catch it there; regenerate_until_detected works around
+            # its stopword list (GOU-163) - see its docstring.
+            def write_fixture(canary):
+                (source / "Fixture.vue").write_text(
+                    "<script setup lang=\"ts\">\n"
+                    "withDefaults(defineProps<{ secret?: string }>(), {\n"
+                    f"  secret: \"{canary}\",\n"
+                    "})\n"
+                    "</script>\n"
+                )
+                (source / "fixture.mjs").write_text(
+                    f"checks.push({{ secret: \"{canary}\" }});\n"
+                )
+                return self.scan(source)
+
+            code, findings = self.regenerate_until_detected(write_fixture, "generic-api-key")
             self.assertEqual(1, code, "a quoted literal on the same key must stay detected")
             files = {item["File"] for item in findings}
             self.assertTrue(any(f.endswith("Fixture.vue") for f in files))
