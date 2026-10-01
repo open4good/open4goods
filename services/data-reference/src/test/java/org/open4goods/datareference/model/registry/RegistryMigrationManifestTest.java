@@ -102,7 +102,7 @@ class RegistryMigrationManifestTest {
 
     private static Set<String> currentLegacyResources() throws IOException {
         Path root = Path.of("").toAbsolutePath();
-        while (!Files.isDirectory(root.resolve(".git"))) {
+        while (!Files.exists(root.resolve(".git"))) {
             root = root.getParent();
             if (root == null) {
                 throw new IllegalStateException("cannot locate repository root from the Maven working directory");
