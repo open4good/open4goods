@@ -26,7 +26,7 @@ class GitModelPatternRuleLoaderTest {
         assertThat(registry.matchFamily("Acme", new CanonicalClassId("television"), "XR-500-EU"))
                 .isEqualTo(registry.matchFamily("Acme", new CanonicalClassId("television"), "XR500FR"));
         assertThat(registry.matchFamily("Acme", new CanonicalClassId("television"), "XR-500-EU"))
-                .contains(new GroupId(GroupType.FAMILY, "television-acme-xr"));
+                .contains(new GroupId(GroupType.FAMILY, "10-television-4-acme-2-xr"));
     }
 
     @Test

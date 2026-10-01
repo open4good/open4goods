@@ -102,7 +102,7 @@ class RegistryClassAssignmentPortTest {
         GroupAssignment assignment = grouping.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB, List.of(),
                 List.of(resolvedValue(brandAttribute, "Acme"), resolvedValue(modelAttribute, "XR-500")), resolvedClass);
 
-        assertThat(assignment.modelGroup()).contains(new GroupId(GroupType.MODEL, "television-acme-xr-500"));
+        assertThat(assignment.modelGroup()).contains(new GroupId(GroupType.MODEL, "10-television-4-acme-6-xr-500"));
     }
 
     /**

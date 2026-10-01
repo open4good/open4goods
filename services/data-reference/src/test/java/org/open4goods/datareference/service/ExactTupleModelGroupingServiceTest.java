@@ -44,8 +44,20 @@ class ExactTupleModelGroupingServiceTest {
         GroupAssignment second = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB, List.of(),
                 List.of(model("xr 500"), brand("ACME")), Optional.of(TV_CLASS));
 
-        assertThat(first.modelGroup()).contains(new GroupId(GroupType.MODEL, "television-acme-xr-500"));
+        assertThat(first.modelGroup()).contains(new GroupId(GroupType.MODEL, "10-television-4-acme-6-xr-500"));
         assertThat(second.modelGroup()).isEqualTo(first.modelGroup());
+    }
+
+    @Test
+    void aBrandRepeatedInsideTheModelFieldDoesNotCollideWithASplitBrandModel() {
+        GroupAssignment brandCarriesTwoWords = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB, List.of(),
+                List.of(brand("Sony Ericsson"), model("XR500")), Optional.of(TV_CLASS));
+        GroupAssignment modelRepeatsBrand = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB, List.of(),
+                List.of(brand("Sony"), model("Ericsson XR500")), Optional.of(TV_CLASS));
+
+        assertThat(brandCarriesTwoWords.modelGroup()).isNotEmpty();
+        assertThat(modelRepeatsBrand.modelGroup()).isNotEmpty();
+        assertThat(brandCarriesTwoWords.modelGroup()).isNotEqualTo(modelRepeatsBrand.modelGroup());
     }
 
     @Test
@@ -110,7 +122,7 @@ class ExactTupleModelGroupingServiceTest {
         GroupAssignment assignment = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB, List.of(),
                 List.of(codedBrand, model("XR-500")), Optional.of(TV_CLASS));
 
-        assertThat(assignment.modelGroup()).contains(new GroupId(GroupType.MODEL, "television-acme-xr-500"));
+        assertThat(assignment.modelGroup()).contains(new GroupId(GroupType.MODEL, "10-television-4-acme-6-xr-500"));
     }
 
     private static ResolvedValue brand(String value) {

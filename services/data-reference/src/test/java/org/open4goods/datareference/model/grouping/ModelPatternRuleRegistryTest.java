@@ -31,7 +31,7 @@ class ModelPatternRuleRegistryTest {
         Optional<GroupId> eu = registry.matchFamily("Acme", TV, "XR-500-EU");
         Optional<GroupId> us = registry.matchFamily("Acme", TV, "XR-500-US");
 
-        assertThat(eu).contains(new GroupId(GroupType.FAMILY, "television-acme-xr"));
+        assertThat(eu).contains(new GroupId(GroupType.FAMILY, "10-television-4-acme-2-xr"));
         assertThat(eu).isEqualTo(us);
     }
 
@@ -44,7 +44,7 @@ class ModelPatternRuleRegistryTest {
         Optional<GroupId> size650 = registry.matchFamily("Acme", TV, "XR-650-EU");
 
         assertThat(size500).isEqualTo(size650);
-        assertThat(size500).contains(new GroupId(GroupType.FAMILY, "television-acme-xr"));
+        assertThat(size500).contains(new GroupId(GroupType.FAMILY, "10-television-4-acme-2-xr"));
     }
 
     @Test
@@ -83,9 +83,9 @@ class ModelPatternRuleRegistryTest {
         ModelPatternRuleRegistry registry = new ModelPatternRuleRegistry(List.of(tvRule, fridgeRule));
 
         assertThat(registry.matchFamily("acme", TV, "XR-500-EU"))
-                .isEqualTo(Optional.of(new GroupId(GroupType.FAMILY, "television-acme-xr")));
+                .isEqualTo(Optional.of(new GroupId(GroupType.FAMILY, "10-television-4-acme-2-xr")));
         assertThat(registry.matchFamily("acme", FRIDGE, "XR-500-EU"))
-                .isEqualTo(Optional.of(new GroupId(GroupType.FAMILY, "refrigerator-acme-xr")));
+                .isEqualTo(Optional.of(new GroupId(GroupType.FAMILY, "12-refrigerator-4-acme-2-xr")));
     }
 
     private static ModelPatternRule xrRule(String brand, CanonicalClassId canonicalClass, List<String> examples,

@@ -47,8 +47,8 @@ class PatternRuleFamilyGroupingServiceTest {
         GroupAssignment assignment = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB, List.of(),
                 List.of(brand("Acme"), model("XR-500-EU")), Optional.of(TV));
 
-        assertThat(assignment.modelGroup()).contains(new GroupId(GroupType.MODEL, "television-acme-xr-500-eu"));
-        assertThat(assignment.familyGroupIds()).containsExactly(new GroupId(GroupType.FAMILY, "television-acme-xr"));
+        assertThat(assignment.modelGroup()).contains(new GroupId(GroupType.MODEL, "10-television-4-acme-9-xr-500-eu"));
+        assertThat(assignment.familyGroupIds()).containsExactly(new GroupId(GroupType.FAMILY, "10-television-4-acme-2-xr"));
     }
 
     @Test
