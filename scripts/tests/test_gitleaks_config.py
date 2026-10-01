@@ -54,20 +54,57 @@ class GitleaksConfigTest(unittest.TestCase):
             source = Path(tmp) / "source"
             source.mkdir()
             path = source / "config.yml"
-            path.write_text("storage_key: nudger-ip-quota-v1\nkey: ENERGY_CONSUMPTION_100_CYCLES\n"
-                            "key: latencyP50Ms\nmodel_key: NV7B4550VAS/U1\n")
+            baseline_text = (
+                "storage_key: nudger-ip-quota-v1\nkey: ENERGY_CONSUMPTION_100_CYCLES\n"
+                "key: latencyP50Ms\nmodel_key: NV7B4550VAS/U1\n")
+            path.write_text(baseline_text)
             code, findings = self.scan(source)
             self.assertEqual(0, code)
             self.assertEqual([], findings)
+
             # A generated canary is not a provider credential and must still be detected.
-            canary = secrets.token_hex(24)
-            with path.open("a") as stream:
-                stream.write("api_key: " + canary + "\n")
-                stream.write("password: " + secrets.token_hex(20) + "\n")
+            # Gitleaks' built-in generic-api-key rule rejects any match containing one of
+            # its internal stopwords (dead, cafe, face, feed, bad, ace, ...). A random hex
+            # token hits one of those ~7% of the time, which made this test flaky (GOU-163).
+            # Regenerate the canary until the rule actually fires, capped at a handful of
+            # attempts so a real regression (rule disabled or broken, not just unlucky
+            # stopwords) still fails loudly instead of retrying forever.
+            password = secrets.token_hex(20)
+            max_attempts = 8
+            rule_ids = set()
+            for _ in range(max_attempts):
+                canary = secrets.token_hex(24)
+                path.write_text(
+                    baseline_text
+                    + "api_key: " + canary + "\n"
+                    + "password: " + password + "\n")
+                code, findings = self.scan(source)
+                rule_ids = {item["RuleID"] for item in findings}
+                if "generic-api-key" in rule_ids:
+                    break
+            else:
+                self.fail(
+                    f"generic-api-key did not fire on any of {max_attempts} regenerated "
+                    "canaries; this looks like the rule being disabled or broken, not bad luck")
+
+            self.assertEqual(1, code)
+            self.assertIn("generic-api-key", rule_ids)
+            self.assertIn("o4g-spring-inline-credential", rule_ids)
+
+    def test_generic_api_key_rule_fires_on_known_non_stopword_canary(self):
+        """Fixed, non-random canary confirmed to contain none of gitleaks' generic-api-key
+        stopwords. Unlike test_exact_identifiers_only above, this never retries: if
+        generic-api-key is disabled or its pattern regresses, this must fail every run, so
+        the retry loop above can never mask a real break in the rule."""
+        with tempfile.TemporaryDirectory(prefix="o4g-gitleaks-") as tmp:
+            source = Path(tmp) / "source"
+            source.mkdir()
+            path = source / "config.yml"
+            known_canary = "0e00fddf60ae3cf13bd37c75b0c2bf7a33452b05157ffa8c"
+            path.write_text("api_key: " + known_canary + "\n")
             code, findings = self.scan(source)
             self.assertEqual(1, code)
             self.assertIn("generic-api-key", {item["RuleID"] for item in findings})
-            self.assertIn("o4g-spring-inline-credential", {item["RuleID"] for item in findings})
 
     def test_unquoted_js_identifier_allowlisted_but_quoted_literal_detected(self):
         """GOU-103: `secret: undefined` / `secret: name` are identifiers, not values, only
