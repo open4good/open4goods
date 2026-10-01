@@ -35,9 +35,12 @@ Exit status 0 when the corpus is within budget, 1 otherwise.
 from __future__ import annotations
 
 import json
+import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -268,6 +271,72 @@ def assert_no_ceiling_increase(ref: str) -> int:
     return 0
 
 
+def run_merge_check(base_ref: str) -> int:
+    """Measure the corpus budget on the tree a merge of base_ref into HEAD would
+    produce, not on HEAD alone.
+
+    The repository does not require PR branches to be kept up to date, so a
+    branch that is individually within budget can still push the corpus over
+    its ceiling once combined with commits that landed on the base branch
+    after the branch was forked -- a combination plain HEAD measurement never
+    sees. A merge conflict here is reported as a failure, not swallowed into a
+    pass.
+    """
+    worktree_dir = tempfile.mkdtemp(prefix="corpus-budget-merge-")
+    try:
+        added = subprocess.run(
+            ["git", "worktree", "add", "--detach", "--quiet", worktree_dir, "HEAD"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+        )
+        if added.returncode != 0:
+            print(
+                f"Cannot create a worktree to measure the merge with {base_ref}:\n"
+                f"{added.stderr}",
+                file=sys.stderr,
+            )
+            return 2
+
+        merged = subprocess.run(
+            ["git", "merge", "--no-commit", "--no-ff", base_ref],
+            cwd=worktree_dir,
+            capture_output=True,
+            text=True,
+        )
+        if merged.returncode != 0:
+            print(
+                f"Cannot merge {base_ref} into HEAD to measure the corpus budget "
+                "the merge would produce:\n",
+                file=sys.stderr,
+            )
+            print(merged.stdout, file=sys.stderr)
+            print(merged.stderr, file=sys.stderr)
+            print(
+                "\nThis is a merge conflict with the base branch, not a passing "
+                "budget check.",
+                file=sys.stderr,
+            )
+            return 1
+
+        env = os.environ.copy()
+        env.pop("GITHUB_BASE_REF", None)
+        result = subprocess.run(
+            [sys.executable, "scripts/verify/check_corpus_budget.py"],
+            cwd=worktree_dir,
+            env=env,
+        )
+        return result.returncode
+    finally:
+        subprocess.run(
+            ["git", "worktree", "remove", "--force", worktree_dir],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+        )
+        shutil.rmtree(worktree_dir, ignore_errors=True)
+
+
 BUDGET_COMMENT = (
     "Ceilings for the open4goods corpus. Exceeding one fails CI. Lowering one is "
     "the intended direction and needs no ceremony; raising one is a deliberate, "
@@ -283,6 +352,10 @@ def main() -> int:
             print("usage: --assert-no-ceiling-increase REF", file=sys.stderr)
             return 2
         return assert_no_ceiling_increase(argv[index + 1])
+
+    base_ref = os.environ.get("GITHUB_BASE_REF")
+    if base_ref and "--update" not in argv:
+        return run_merge_check(f"origin/{base_ref}")
 
     measured, problems = measure()
 

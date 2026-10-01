@@ -19,6 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
@@ -39,7 +41,7 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: frontend
 
-      - name: Fetch base ref for corpus budget direction check
+      - name: Fetch base ref for corpus budget direction and merge checks
         run: |
           base_ref="${GITHUB_BASE_REF:-main}"
           git fetch origin "${base_ref}:refs/remotes/origin/${base_ref}" --quiet
