@@ -43,6 +43,7 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -309,6 +310,14 @@ def build_report(*, issues: list[dict], cache_path: Path, manifest_path: Path, d
         "manifestDigest": digest,
         "betaMandate": mandate_report,
         "blockers": blockers,
+        # Echoed back (not just computed) so a publish script can verify this report names the
+        # exact candidate/target it is about to mutate state for, without re-deriving them from a
+        # trusted-by-assumption source; see scripts/deploy/verify_gate_proof.py (GOU-164).
+        "candidateSha": candidate_sha,
+        "promotionTarget": promotion_target,
+        "dataset": dataset,
+        "phase": phase,
+        "generatedAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
     }
 
 

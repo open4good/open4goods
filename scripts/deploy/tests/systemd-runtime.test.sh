@@ -29,6 +29,16 @@ printf '%s\n' '#!/usr/bin/env bash' 'if [ "${O4G_TEST_CURL_STATUS:-0}" -eq 0 ]; 
 chmod +x "$fixture/bin/systemctl" "$fixture/bin/curl"
 ln -s ../../releases/old "$fixture/runtime/services/api/current"
 
+write_gate_proof() {
+  local proof_file="$1" release="$2" manifest_path="$3"
+  local digest generated_at
+  digest="$(sha256sum "$manifest_path" | awk '{print $1}')"
+  generated_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  printf '{"ready": true, "candidateSha": "%s", "promotionTarget": "beta", "manifestDigest": "%s", "generatedAt": "%s"}\n' \
+    "$release" "$digest" "$generated_at" > "$proof_file"
+}
+write_gate_proof "$fixture/gate-proof.json" abcdef1 "$fixture/bundle/release-manifest"
+
 # Stubs are wired in by absolute path (O4G_SYSTEMCTL/O4G_CURL/O4G_SYSTEMD_ANALYZE), the real
 # guarantee that a test cannot reach a system binary. `isolated` also drops BASH_ENV as
 # defense in depth: the deploy scripts are `#!/usr/bin/env bash`, so a BASH_ENV startup file
@@ -47,7 +57,8 @@ curl_stub="$fixture/bin/curl"
 
 isolated env O4G_SYSTEMCTL="$systemctl_stub" O4G_CURL="$curl_stub" \
   "$ROOT/scripts/deploy/publish-java-release.sh" --release abcdef1 --bundle "$fixture/bundle" \
-  --service api --health-url http://127.0.0.1/health --root "$fixture/runtime"
+  --service api --health-url http://127.0.0.1/health --promotion-target beta \
+  --gate-proof "$fixture/gate-proof.json" --root "$fixture/runtime"
 test "$(readlink "$fixture/runtime/services/api/current")" = ../../releases/abcdef1
 grep -qx 'restart open4goods@api.service' "$fixture/systemctl.log"
 test "$(wc -l < "$fixture/systemctl.log")" -eq 1
@@ -56,7 +67,8 @@ test -f "$fixture/runtime/releases/abcdef1/frontend-ssr/index.html"
 
 isolated env O4G_SYSTEMCTL="$systemctl_stub" O4G_CURL="$curl_stub" \
   "$ROOT/scripts/deploy/publish-nuxt-release.sh" --release abcdef1 \
-  --service frontend --health-url http://127.0.0.1/health --root "$fixture/runtime"
+  --service frontend --health-url http://127.0.0.1/health --promotion-target beta \
+  --gate-proof "$fixture/gate-proof.json" --root "$fixture/runtime"
 test "$(readlink "$fixture/runtime/services/frontend/current")" = ../../releases/abcdef1/frontend-ssr
 grep -qx 'restart open4goods-nuxt@frontend.service' "$fixture/systemctl.log"
 
@@ -65,7 +77,8 @@ ln -s ../../releases/old "$fixture/runtime/services/api/current.rollback"
 mv -Tf "$fixture/runtime/services/api/current.rollback" "$fixture/runtime/services/api/current"
 if isolated env O4G_SYSTEMCTL="$systemctl_stub" O4G_CURL="$curl_stub" O4G_TEST_CURL_STATUS=1 O4G_HEALTH_ATTEMPTS=1 O4G_HEALTH_DELAY_SECONDS=0 \
   "$ROOT/scripts/deploy/publish-java-release.sh" --release abcdef1 \
-  --bundle "$fixture/bundle" --service api --health-url http://127.0.0.1/health --root "$fixture/runtime"; then
+  --bundle "$fixture/bundle" --service api --health-url http://127.0.0.1/health --promotion-target beta \
+  --gate-proof "$fixture/gate-proof.json" --root "$fixture/runtime"; then
   echo 'expected failing health check' >&2
   exit 1
 fi
@@ -77,7 +90,8 @@ ln -s ../../releases/old-frontend "$fixture/runtime/services/frontend/current.ro
 mv -Tf "$fixture/runtime/services/frontend/current.rollback" "$fixture/runtime/services/frontend/current"
 if isolated env O4G_SYSTEMCTL="$systemctl_stub" O4G_CURL="$curl_stub" O4G_TEST_CURL_STATUS=1 O4G_HEALTH_ATTEMPTS=1 O4G_HEALTH_DELAY_SECONDS=0 \
   "$ROOT/scripts/deploy/publish-nuxt-release.sh" --release abcdef1 --service frontend \
-  --health-url http://127.0.0.1/health --root "$fixture/runtime"; then
+  --health-url http://127.0.0.1/health --promotion-target beta \
+  --gate-proof "$fixture/gate-proof.json" --root "$fixture/runtime"; then
   echo 'expected failing Nuxt health check' >&2
   exit 1
 fi
