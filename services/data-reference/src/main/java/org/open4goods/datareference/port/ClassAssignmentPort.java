@@ -12,9 +12,12 @@ import org.open4goods.datareference.model.ProjectionSurface;
  * <p>Class resolution is a model-level fact, not a canonical-attribute value,
  * so it is not part of {@link ResolutionPort}. Model grouping depends on it
  * per ADR-0010 ("missing brand/class/model prevents automatic exact
- * grouping"); until a dedicated class-resolution capability exists, an
- * implementation may always return {@link Optional#empty()}, which correctly
- * suppresses automatic model grouping rather than guessing.
+ * grouping"): an implementation must return {@link Optional#empty()} whenever
+ * the class is not confirmed beyond doubt (no evidence, no reviewed mapping,
+ * or disagreeing sources), which correctly suppresses automatic model
+ * grouping rather than guessing. See
+ * {@code org.open4goods.datareference.service.RegistryClassAssignmentPort}
+ * for the production resolver.
  */
 public interface ClassAssignmentPort {
 
