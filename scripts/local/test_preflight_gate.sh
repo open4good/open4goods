@@ -108,6 +108,19 @@ echo "O4G_LOCAL_DATA_ROOT=$SCRATCH/repo/.local/data" >> "$env_worktree"
 run_preflight "$env_worktree" >/dev/null 2>&1 && fail "Docker data inside the worktree was accepted" || true
 echo "ok: Docker data inside the worktree rejected"
 
+# --- case: a git worktree registered inside the repo root is rejected ---
+env_nested_wt="$(base_env nested-wt)"
+git -C "$SCRATCH/repo" init -q
+git -C "$SCRATCH/repo" -c user.name=test -c user.email=test@example.com \
+  commit -q --allow-empty -m init
+git -C "$SCRATCH/repo" worktree add -q -b gou-nested-test \
+  "$SCRATCH/repo/.worktrees/gou-nested-test" >/dev/null
+run_preflight "$env_nested_wt" >/dev/null 2>&1 && fail "a git worktree inside the repo root was accepted" || true
+echo "ok: git worktree inside the repo root rejected"
+git -C "$SCRATCH/repo" worktree remove --force "$SCRATCH/repo/.worktrees/gou-nested-test"
+run_preflight "$env_nested_wt" >/dev/null || fail "preflight stayed rejected after removing the in-tree worktree"
+echo "ok: preflight passes again once the in-tree worktree is removed"
+
 # --- case: the full-import floor is stricter than the standard floor ---
 env_ok2="$(base_env floor)"
 standard_msg="$(run_preflight "$env_ok2" standard)"

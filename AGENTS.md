@@ -41,6 +41,14 @@ checkout. Work only in that issue's worktree and branch; repair any mismatch fir
 On the shared build host, keep Docker bind-mount data in an issue-specific path
 outside all worktrees, check the allocated ports before tests, and run at most
 one Docker test or heavy build at a time.
+No git worktree may live under the repo root: Paperclip's workspace restore
+copies a worktree's directory tree but not its `.git` pointer file, so a
+copied worktree silently stops being a worktree and resolves to this repo
+instead. Put any extra worktree under
+`${HOME}/.local/share/open4goods/<ISSUE>/worktrees/...`, the same
+per-issue-persistent, out-of-tree principle as `O4G_LOCAL_DATA_ROOT`
+(see `scripts/local/open4goods.sh`). `preflight` refuses to start if a git
+worktree is registered inside the repo root.
 `docs/adr/README.md` is generated; change ADRs, not the projection.
 
 Before changing anything under `docs/` or `.o4g/`, run `./scripts/lint.sh`.
