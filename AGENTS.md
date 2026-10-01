@@ -186,6 +186,12 @@ git config core.hooksPath .githooks
 
 ## 7  Pull-request checklist
 
+0. Before branching, in the shared workspace, run
+   `./scripts/verify/check-branch-sync.sh` and fix any drift it reports before
+   creating a branch. The shared build host's workspace provisioning can leave
+   local `main` ahead of `origin/main`; a branch cut from a drifted `main`
+   silently carries foreign commits into its PR (see GOU-159 and
+   [docs/operations/shared-workspace-branch-sync.md](docs/operations/shared-workspace-branch-sync.md)).
 1. Clear commit & PR description (**why** and **what**).  
 2. `mvn --offline clean install` passes locally.  
 3. Tests added/updated; coverage not reduced.  
