@@ -39,6 +39,7 @@ import org.open4goods.icecat.services.IcecatFeatureResolver;
 import org.open4goods.icecat.services.IcecatIndexService;
 import org.open4goods.icecat.services.IcecatRegistryProjectionService;
 import org.open4goods.icecat.services.IcecatService;
+import org.open4goods.icecat.services.IcecatSourceRecordAdapter;
 import org.open4goods.icecat.services.loader.CategoryLoader;
 import org.open4goods.icecat.services.loader.FeatureLoader;
 import org.open4goods.model.StandardiserService;
@@ -95,6 +96,7 @@ import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.scheduling.TaskScheduler;
@@ -114,6 +116,7 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 
 @Configuration
+@Import(IcecatSourceRecordAdapter.class)
 public class ApiConfig {
 
 	private final ApiProperties apiProperties;
@@ -200,8 +203,8 @@ public class ApiConfig {
 	}
 
 	@Bean
-	IcecatCompletionService icecatCompletionService(ProductRepository productRepository, VerticalsConfigService verticalConfigService, DataSourceConfigService dataSourceConfigService, AggregationFacadeService aggregationFacade) throws TechnicalException {
-		return new IcecatCompletionService(productRepository, verticalConfigService, apiProperties, dataSourceConfigService, aggregationFacade);
+	IcecatCompletionService icecatCompletionService(ProductRepository productRepository, VerticalsConfigService verticalConfigService, DataSourceConfigService dataSourceConfigService, IcecatSourceRecordAdapter icecatSourceRecordAdapter, SourceRecordHeadStore sourceRecordHeadStore, IngestionCheckpointStore ingestionCheckpointStore) throws TechnicalException {
+		return new IcecatCompletionService(productRepository, verticalConfigService, apiProperties, dataSourceConfigService, icecatSourceRecordAdapter, sourceRecordHeadStore, ingestionCheckpointStore);
 	}
 
 	@Bean
