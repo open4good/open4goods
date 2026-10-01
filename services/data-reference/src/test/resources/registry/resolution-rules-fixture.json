@@ -4,12 +4,12 @@
     "attribute" : "o4g:attribute:width",
     "surface" : "NUDGER_WEB",
     "version" : "resolution-fixture-width@1",
-    "rankedSources" : [ "icecat", "merchant-feed" ]
+    "rankedSources" : [ "icecat", "merchant-feed.awin" ]
   }, {
     "attribute" : "o4g:attribute:classe-energy",
     "surface" : "NUDGER_WEB",
     "version" : "resolution-fixture-energy@1",
-    "rankedSources" : [ "eprel", "merchant-feed" ],
+    "rankedSources" : [ "eprel", "merchant-feed.awin" ],
     "regulatoryAuthority" : "eprel"
   } ]
 }

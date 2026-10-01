@@ -5,12 +5,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.datareference.model.GtinMatchConfidence;
 import org.open4goods.datareference.model.LanguageTag;
+import org.open4goods.datareference.model.ProjectionSurface;
 import org.open4goods.datareference.model.SourceContentType;
 import org.open4goods.datareference.model.SourceRecordMutation;
+import org.open4goods.datareference.model.SourceRecordState;
+import org.open4goods.datareference.model.SourceUsagePolicyRegistry;
 import org.open4goods.datareference.model.evidence.LocalizedTextEvidence;
 import org.open4goods.datareference.model.evidence.ScalarEvidence;
 import org.open4goods.datareference.testsupport.SourceRecordAdapterContractFixture;
@@ -134,6 +138,81 @@ class EprelSourceRecordAdapterTest extends SourceRecordAdapterContractTest<Eprel
             assertThat(assertion.field().key()).isEqualTo("coolingPower");
             assertThat(assertion.evidence()).isEqualTo(new ScalarEvidence("12.5", "furlong-per-fortnight", LanguageTag.UND));
         });
+    }
+
+    @Test
+    void changesTheAttachmentAndProviderVersionWithoutChangingTheEprelRecordKey() {
+        EprelProduct original = product("12345");
+        original.setGtinIdentifier("0123456789012");
+        original.setVersionId(1L);
+        EprelProduct corrected = product("12345");
+        corrected.setGtinIdentifier("4006381333931");
+        corrected.setVersionId(2L);
+
+        var first = adapter.adapt(original, "catalogue-2026-09", RETRIEVED).orElseThrow().candidate();
+        var replacement = adapter.adapt(corrected, "catalogue-2026-09", RETRIEVED.plusSeconds(1)).orElseThrow().candidate();
+
+        assertThat(replacement.key()).isEqualTo(first.key());
+        assertThat(replacement.providerVersion()).isEqualTo("version-id:2");
+        assertThat(replacement.gtinLinks()).extracting(link -> link.gtin().value()).containsExactly("4006381333931");
+        assertThat(replacement.payloadHash()).isNotEqualTo(first.payloadHash());
+    }
+
+    @Test
+    void treatsAProviderVersionOnlyChangeAsANewSourceObservation() {
+        EprelProduct original = product("12345");
+        original.setVersionId(1L);
+        EprelProduct corrected = product("12345");
+        corrected.setVersionId(2L);
+
+        var first = adapter.adapt(original, "catalogue-2026-09", RETRIEVED).orElseThrow().candidate();
+        var replacement = adapter.adapt(corrected, "catalogue-2026-09", RETRIEVED.plusSeconds(1)).orElseThrow()
+                .candidate();
+
+        assertThat(replacement.key()).isEqualTo(first.key());
+        assertThat(replacement.providerVersion()).isEqualTo("version-id:2");
+        assertThat(replacement.payloadHash()).isNotEqualTo(first.payloadHash());
+    }
+
+    @Override
+    protected Set<ProjectionSurface> reviewedOpenAttributeSurfaces() {
+        // GOU-95/GOU-105: reviewed value-added-only redistribution opens NUDGER_WEB and B2B_API.
+        return Set.of(ProjectionSurface.NUDGER_WEB, ProjectionSurface.B2B_API);
+    }
+
+    @Test
+    void reviewedEprelPolicyAllowsWebAndB2bAttributesButDeniesOdblAndUnreviewedContentTypes() throws Exception {
+        var head = adapter.adapt(product("12345"), "catalogue-2026-09", RETRIEVED).orElseThrow().candidate();
+        SourceUsagePolicyRegistry policies = SourceUsagePolicyRegistry.loadDefault();
+
+        // GOU-95/GOU-105: reviewed value-added-only redistribution opens NUDGER_WEB and B2B_API.
+        assertThat(policies.allows(head.key().sourceId(), head.usagePolicyRef(), SourceContentType.ATTRIBUTE,
+                ProjectionSurface.NUDGER_WEB, RETRIEVED)).isTrue();
+        assertThat(policies.allows(head.key().sourceId(), head.usagePolicyRef(), SourceContentType.ATTRIBUTE,
+                ProjectionSurface.B2B_API, RETRIEVED)).isTrue();
+        // ODbL export is not opened on any source at this stage.
+        assertThat(policies.allows(head.key().sourceId(), head.usagePolicyRef(), SourceContentType.ATTRIBUTE,
+                ProjectionSurface.ODBL_EXPORT, RETRIEVED)).isFalse();
+        // TEXT is not a type EprelSourceRecordAdapter emits, so it was never reviewed.
+        assertThat(policies.allows(head.key().sourceId(), head.usagePolicyRef(), SourceContentType.TEXT,
+                ProjectionSurface.NUDGER_WEB, RETRIEVED)).isFalse();
+    }
+
+    @Test
+    void producesADeletedFullHeadForWithdrawnRecords() {
+        EprelProduct product = product("12345");
+        product.setStatus("WITHDRAWN");
+
+        var mutation = adapter.adapt(product, "catalogue-2026-09", RETRIEVED).orElseThrow();
+
+        assertThat(mutation.candidate().state()).isEqualTo(SourceRecordState.DELETED);
+        assertThat(mutation.candidate().assertions()).isEmpty();
+        assertThat(mutation.candidate().gtinLinks()).isEmpty();
+    }
+
+    @Test
+    void rejectsRowsWithoutAnEprelRegistrationOrModelIdentifier() {
+        assertThat(adapter.adapt(new EprelProduct(), "catalogue-2026-09", RETRIEVED)).isEmpty();
     }
 
     private static EprelProduct product(String registration) {

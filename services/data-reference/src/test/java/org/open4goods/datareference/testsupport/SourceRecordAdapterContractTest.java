@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.datareference.model.GtinMatchConfidence;
@@ -112,15 +113,26 @@ public abstract class SourceRecordAdapterContractTest<T> {
         assertThat(head.gtinLinks()).isEmpty();
     }
 
+    /**
+     * Publication surfaces a GOU-95 review has opened for {@link SourceContentType#ATTRIBUTE} on
+     * this adapter's source. Empty by default: an unreviewed policy denies every surface. A source
+     * whose policy row has since been reviewed and partially opened overrides this to match.
+     */
+    protected Set<ProjectionSurface> reviewedOpenAttributeSurfaces() {
+        return Set.of();
+    }
+
     @Test
-    void theDefaultUsagePolicyDeniesEveryPublicationSurface() throws IOException {
+    void theUsagePolicyOpensOnlyItsReviewedAttributeSurfaces() throws IOException {
         SourceRecordAdapterContractFixture<T> fx = fixture();
         SourceRecordHead head = fx.adapt(fx.repeatableRow(), SCHEMA_VERSION, RETRIEVED).candidate();
         SourceUsagePolicyRegistry policies = SourceUsagePolicyRegistry.loadDefault();
+        Set<ProjectionSurface> openSurfaces = reviewedOpenAttributeSurfaces();
 
         for (ProjectionSurface surface : ProjectionSurface.values()) {
-            assertThat(policies.allows(head.key().sourceId(), head.usagePolicyRef(), SourceContentType.ATTRIBUTE,
-                    surface, RETRIEVED)).isFalse();
+            boolean allowed = policies.allows(head.key().sourceId(), head.usagePolicyRef(),
+                    SourceContentType.ATTRIBUTE, surface, RETRIEVED);
+            assertThat(allowed).isEqualTo(openSurfaces.contains(surface));
         }
     }
 

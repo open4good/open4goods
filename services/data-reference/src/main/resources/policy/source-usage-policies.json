@@ -3,96 +3,69 @@
   "policies" : [ {
     "policyId" : "eprel-public-api",
     "sourceId" : "eprel",
-    "version" : "1",
+    "version" : "2",
     "surfaceGrants" : {
-      "IDENTITY" : [ ],
-      "CLASSIFICATION" : [ ],
-      "ATTRIBUTE" : [ ],
-      "TEXT" : [ ],
-      "MEDIA" : [ ],
-      "RELATION" : [ ]
+      "IDENTITY" : [ "NUDGER_WEB", "B2B_API" ],
+      "CLASSIFICATION" : [ "NUDGER_WEB", "B2B_API" ],
+      "ATTRIBUTE" : [ "NUDGER_WEB", "B2B_API" ]
     },
     "effectiveFrom" : "2024-06-03T00:00:00Z",
     "effectiveUntil" : null,
-    "retention" : "PT0S",
+    "retention" : "P35D",
     "mediaCache" : {
       "imageBytesAllowed" : false,
       "imageLinkRetention" : "PT0S",
       "nonImageRetention" : "PT0S"
     },
     "attribution" : {
-      "required" : false,
-      "notice" : null,
-      "sourceUri" : null
+      "required" : true,
+      "notice" : "Energy label and product data sourced from the EU EPREL public registry.",
+      "sourceUri" : "https://eprel.ec.europa.eu",
+      "asIsDisclaimerRequired" : true
     },
-    "redistribution" : "PROHIBITED",
-    "legalReviewDate" : "2026-09-12",
-    "reviewState" : "UNREVIEWED",
+    "redistribution" : "VALUE_ADDED_ONLY",
+    "derivativeLicence" : "NONE",
+    "prohibitedUses" : [ ],
+    "legalReviewDate" : "2026-09-29",
+    "reviewState" : "REVIEWED",
     "revokedAt" : null,
     "evidenceReferences" : [ "https://ec.europa.eu/assets/move-ener/eprel/EPREL%20Public/Public%20API%20Term%20and%20Conditions/API_TERMS_AND_CONDITIONS_EN.pdf", "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02024R0994-20240402" ]
   }, {
     "policyId" : "icecat-open-content",
     "sourceId" : "icecat",
-    "version" : "1",
+    "version" : "2",
     "surfaceGrants" : {
-      "IDENTITY" : [ ],
-      "CLASSIFICATION" : [ ],
-      "ATTRIBUTE" : [ ],
-      "TEXT" : [ ],
-      "MEDIA" : [ ],
-      "RELATION" : [ ]
+      "IDENTITY" : [ "NUDGER_WEB" ],
+      "CLASSIFICATION" : [ "NUDGER_WEB" ],
+      "ATTRIBUTE" : [ "NUDGER_WEB" ],
+      "TEXT" : [ "NUDGER_WEB" ],
+      "MEDIA" : [ "NUDGER_WEB" ],
+      "RELATION" : [ "NUDGER_WEB" ]
     },
     "effectiveFrom" : "2026-09-12T00:00:00Z",
     "effectiveUntil" : null,
-    "retention" : "PT0S",
+    "retention" : "P365D",
     "mediaCache" : {
-      "imageBytesAllowed" : false,
-      "imageLinkRetention" : "PT0S",
-      "nonImageRetention" : "PT0S"
+      "imageBytesAllowed" : true,
+      "imageLinkRetention" : "P365D",
+      "nonImageRetention" : "P365D"
     },
     "attribution" : {
-      "required" : false,
-      "notice" : null,
-      "sourceUri" : null
-    },
-    "redistribution" : "PROHIBITED",
-    "legalReviewDate" : "2026-09-12",
-    "reviewState" : "UNREVIEWED",
-    "revokedAt" : null,
-    "evidenceReferences" : [ "https://icecat.com/content-subscription/", "https://icecat.com/structured-data-content-users/" ]
-  }, {
-    "policyId" : "merchant-feed",
-    "sourceId" : "merchant-feed",
-    "version" : "1",
-    "surfaceGrants" : {
-      "IDENTITY" : [ ],
-      "ATTRIBUTE" : [ ],
-      "TEXT" : [ ],
-      "MEDIA" : [ ],
-      "OFFER" : [ ],
-      "PRICE" : [ "B2B_API" ]
-    },
-    "effectiveFrom" : "2026-09-12T00:00:00Z",
-    "effectiveUntil" : null,
-    "retention" : "PT0S",
-    "mediaCache" : {
-      "imageBytesAllowed" : false,
-      "imageLinkRetention" : "PT0S",
-      "nonImageRetention" : "PT0S"
-    },
-    "attribution" : {
-      "required" : false,
-      "notice" : null,
-      "sourceUri" : null
+      "required" : true,
+      "notice" : "Product content supplied by Icecat.biz under the Open Icecat Content License.",
+      "sourceUri" : "https://icecat.biz",
+      "asIsDisclaimerRequired" : true
     },
     "redistribution" : "ALLOWED",
+    "derivativeLicence" : "SHARE_ALIKE",
+    "prohibitedUses" : [ "SYNTHETIC_CONTENT_GENERATION" ],
     "legalReviewDate" : "2026-09-29",
     "reviewState" : "REVIEWED",
     "revokedAt" : null,
-    "evidenceReferences" : [ "https://support.google.com/merchants/answer/7052112?hl=en-GB", "urn:o4g:private:gou-28-price-history-rights-decision:v1" ]
+    "evidenceReferences" : [ "https://iceclog.com/open-content-license/", "https://iceclog.com/open-icecat-fair-use-policy/", "https://icecat.biz/ssr/en/menu/disclaimer" ]
   }, {
-    "policyId" : "legacy-product-backup",
-    "sourceId" : "legacy-product-backup",
+    "policyId" : "icecat-full-subscription",
+    "sourceId" : "icecat.full",
     "version" : "1",
     "surfaceGrants" : {
       "IDENTITY" : [ ],
@@ -102,9 +75,9 @@
       "MEDIA" : [ ],
       "RELATION" : [ ],
       "OFFER" : [ ],
-      "PRICE" : [ "B2B_API" ]
+      "PRICE" : [ ]
     },
-    "effectiveFrom" : "2026-09-12T00:00:00Z",
+    "effectiveFrom" : "2026-09-29T00:00:00Z",
     "effectiveUntil" : null,
     "retention" : "PT0S",
     "mediaCache" : {
@@ -115,9 +88,242 @@
     "attribution" : {
       "required" : false,
       "notice" : null,
-      "sourceUri" : null
+      "sourceUri" : null,
+      "asIsDisclaimerRequired" : false
     },
-    "redistribution" : "ALLOWED",
+    "redistribution" : "PROHIBITED",
+    "derivativeLicence" : "NONE",
+    "prohibitedUses" : [ "AI_TRAINING", "SYNTHETIC_CONTENT_GENERATION" ],
+    "legalReviewDate" : "2026-09-29",
+    "reviewState" : "REVIEWED",
+    "revokedAt" : null,
+    "evidenceReferences" : [ "https://iceclog.com/content-license-icecat/" ]
+  }, {
+    "policyId" : "merchant-feed.awin",
+    "sourceId" : "merchant-feed.awin",
+    "version" : "1",
+    "surfaceGrants" : {
+      "IDENTITY" : [ "NUDGER_WEB", "B2B_API" ],
+      "ATTRIBUTE" : [ "NUDGER_WEB", "B2B_API" ],
+      "OFFER" : [ "NUDGER_WEB", "B2B_API" ],
+      "PRICE" : [ "NUDGER_WEB", "B2B_API" ]
+    },
+    "effectiveFrom" : "2026-09-12T00:00:00Z",
+    "effectiveUntil" : null,
+    "retention" : "P1825D",
+    "mediaCache" : {
+      "imageBytesAllowed" : false,
+      "imageLinkRetention" : "PT0S",
+      "nonImageRetention" : "PT0S"
+    },
+    "attribution" : {
+      "required" : true,
+      "notice" : "Merchant offer and price data distributed via the Awin affiliate network.",
+      "sourceUri" : "https://www.awin.com",
+      "asIsDisclaimerRequired" : true
+    },
+    "redistribution" : "VALUE_ADDED_ONLY",
+    "derivativeLicence" : "NONE",
+    "prohibitedUses" : [ "AI_TRAINING", "SYNTHETIC_CONTENT_GENERATION" ],
+    "legalReviewDate" : "2026-09-29",
+    "reviewState" : "REVIEWED",
+    "revokedAt" : null,
+    "evidenceReferences" : [ "https://support.google.com/merchants/answer/7052112?hl=en-GB", "urn:o4g:private:gou-28-price-history-rights-decision:v1" ]
+  }, {
+    "policyId" : "merchant-feed.effiliation",
+    "sourceId" : "merchant-feed.effiliation",
+    "version" : "1",
+    "surfaceGrants" : {
+      "IDENTITY" : [ "NUDGER_WEB", "B2B_API" ],
+      "ATTRIBUTE" : [ "NUDGER_WEB", "B2B_API" ],
+      "OFFER" : [ "NUDGER_WEB", "B2B_API" ],
+      "PRICE" : [ "NUDGER_WEB", "B2B_API" ]
+    },
+    "effectiveFrom" : "2026-09-12T00:00:00Z",
+    "effectiveUntil" : null,
+    "retention" : "P1825D",
+    "mediaCache" : {
+      "imageBytesAllowed" : false,
+      "imageLinkRetention" : "PT0S",
+      "nonImageRetention" : "PT0S"
+    },
+    "attribution" : {
+      "required" : true,
+      "notice" : "Merchant offer and price data distributed via the Effiliation affiliate network.",
+      "sourceUri" : "https://www.effiliation.com",
+      "asIsDisclaimerRequired" : true
+    },
+    "redistribution" : "VALUE_ADDED_ONLY",
+    "derivativeLicence" : "NONE",
+    "prohibitedUses" : [ "AI_TRAINING", "SYNTHETIC_CONTENT_GENERATION" ],
+    "legalReviewDate" : "2026-09-29",
+    "reviewState" : "REVIEWED",
+    "revokedAt" : null,
+    "evidenceReferences" : [ "https://support.google.com/merchants/answer/7052112?hl=en-GB", "urn:o4g:private:gou-28-price-history-rights-decision:v1" ]
+  }, {
+    "policyId" : "merchant-feed.tradetracker",
+    "sourceId" : "merchant-feed.tradetracker",
+    "version" : "1",
+    "surfaceGrants" : {
+      "IDENTITY" : [ ],
+      "CLASSIFICATION" : [ ],
+      "ATTRIBUTE" : [ ],
+      "TEXT" : [ ],
+      "MEDIA" : [ ],
+      "RELATION" : [ ],
+      "OFFER" : [ ],
+      "PRICE" : [ ]
+    },
+    "effectiveFrom" : "2026-09-29T00:00:00Z",
+    "effectiveUntil" : null,
+    "retention" : "PT0S",
+    "mediaCache" : {
+      "imageBytesAllowed" : false,
+      "imageLinkRetention" : "PT0S",
+      "nonImageRetention" : "PT0S"
+    },
+    "attribution" : {
+      "required" : false,
+      "notice" : null,
+      "sourceUri" : null,
+      "asIsDisclaimerRequired" : false
+    },
+    "redistribution" : "PROHIBITED",
+    "derivativeLicence" : "NONE",
+    "prohibitedUses" : [ "AI_TRAINING", "SYNTHETIC_CONTENT_GENERATION" ],
+    "legalReviewDate" : "2026-09-29",
+    "reviewState" : "REVIEWED",
+    "revokedAt" : null,
+    "evidenceReferences" : [ "urn:o4g:private:gou-95-merchant-network-inventory:tradetracker:v1" ]
+  }, {
+    "policyId" : "merchant-feed.kwanko",
+    "sourceId" : "merchant-feed.kwanko",
+    "version" : "1",
+    "surfaceGrants" : {
+      "IDENTITY" : [ ],
+      "CLASSIFICATION" : [ ],
+      "ATTRIBUTE" : [ ],
+      "TEXT" : [ ],
+      "MEDIA" : [ ],
+      "RELATION" : [ ],
+      "OFFER" : [ ],
+      "PRICE" : [ ]
+    },
+    "effectiveFrom" : "2026-09-29T00:00:00Z",
+    "effectiveUntil" : null,
+    "retention" : "PT0S",
+    "mediaCache" : {
+      "imageBytesAllowed" : false,
+      "imageLinkRetention" : "PT0S",
+      "nonImageRetention" : "PT0S"
+    },
+    "attribution" : {
+      "required" : false,
+      "notice" : null,
+      "sourceUri" : null,
+      "asIsDisclaimerRequired" : false
+    },
+    "redistribution" : "PROHIBITED",
+    "derivativeLicence" : "NONE",
+    "prohibitedUses" : [ "AI_TRAINING", "SYNTHETIC_CONTENT_GENERATION" ],
+    "legalReviewDate" : "2026-09-29",
+    "reviewState" : "REVIEWED",
+    "revokedAt" : null,
+    "evidenceReferences" : [ "urn:o4g:private:gou-95-merchant-network-inventory:kwanko:v1" ]
+  }, {
+    "policyId" : "merchant-feed.webgains",
+    "sourceId" : "merchant-feed.webgains",
+    "version" : "1",
+    "surfaceGrants" : {
+      "IDENTITY" : [ ],
+      "CLASSIFICATION" : [ ],
+      "ATTRIBUTE" : [ ],
+      "TEXT" : [ ],
+      "MEDIA" : [ ],
+      "RELATION" : [ ],
+      "OFFER" : [ ],
+      "PRICE" : [ ]
+    },
+    "effectiveFrom" : "2026-09-29T00:00:00Z",
+    "effectiveUntil" : null,
+    "retention" : "PT0S",
+    "mediaCache" : {
+      "imageBytesAllowed" : false,
+      "imageLinkRetention" : "PT0S",
+      "nonImageRetention" : "PT0S"
+    },
+    "attribution" : {
+      "required" : false,
+      "notice" : null,
+      "sourceUri" : null,
+      "asIsDisclaimerRequired" : false
+    },
+    "redistribution" : "PROHIBITED",
+    "derivativeLicence" : "NONE",
+    "prohibitedUses" : [ "AI_TRAINING", "SYNTHETIC_CONTENT_GENERATION" ],
+    "legalReviewDate" : "2026-09-29",
+    "reviewState" : "REVIEWED",
+    "revokedAt" : null,
+    "evidenceReferences" : [ "urn:o4g:private:gou-95-merchant-network-inventory:webgains:v1" ]
+  }, {
+    "policyId" : "merchant-feed.cj",
+    "sourceId" : "merchant-feed.cj",
+    "version" : "1",
+    "surfaceGrants" : {
+      "IDENTITY" : [ ],
+      "CLASSIFICATION" : [ ],
+      "ATTRIBUTE" : [ ],
+      "TEXT" : [ ],
+      "MEDIA" : [ ],
+      "RELATION" : [ ],
+      "OFFER" : [ ],
+      "PRICE" : [ ]
+    },
+    "effectiveFrom" : "2026-09-29T00:00:00Z",
+    "effectiveUntil" : null,
+    "retention" : "PT0S",
+    "mediaCache" : {
+      "imageBytesAllowed" : false,
+      "imageLinkRetention" : "PT0S",
+      "nonImageRetention" : "PT0S"
+    },
+    "attribution" : {
+      "required" : false,
+      "notice" : null,
+      "sourceUri" : null,
+      "asIsDisclaimerRequired" : false
+    },
+    "redistribution" : "PROHIBITED",
+    "derivativeLicence" : "NONE",
+    "prohibitedUses" : [ "AI_TRAINING", "SYNTHETIC_CONTENT_GENERATION" ],
+    "legalReviewDate" : "2026-09-29",
+    "reviewState" : "REVIEWED",
+    "revokedAt" : null,
+    "evidenceReferences" : [ "urn:o4g:private:gou-95-merchant-network-inventory:cj:v1" ]
+  }, {
+    "policyId" : "legacy-product-backup",
+    "sourceId" : "legacy-product-backup",
+    "version" : "2",
+    "surfaceGrants" : {
+      "IDENTITY" : [ "NUDGER_WEB" ]
+    },
+    "effectiveFrom" : "2026-09-12T00:00:00Z",
+    "effectiveUntil" : null,
+    "retention" : "P1825D",
+    "mediaCache" : {
+      "imageBytesAllowed" : false,
+      "imageLinkRetention" : "PT0S",
+      "nonImageRetention" : "PT0S"
+    },
+    "attribution" : {
+      "required" : false,
+      "notice" : null,
+      "sourceUri" : null,
+      "asIsDisclaimerRequired" : false
+    },
+    "redistribution" : "PROHIBITED",
+    "derivativeLicence" : "NONE",
+    "prohibitedUses" : [ "AI_TRAINING", "SYNTHETIC_CONTENT_GENERATION" ],
     "legalReviewDate" : "2026-09-29",
     "reviewState" : "REVIEWED",
     "revokedAt" : null,
@@ -125,7 +331,7 @@
   }, {
     "policyId" : "amazon-paapi-quarantine",
     "sourceId" : "amazon-paapi",
-    "version" : "1",
+    "version" : "2",
     "surfaceGrants" : {
       "IDENTITY" : [ ],
       "CLASSIFICATION" : [ ],
@@ -147,12 +353,15 @@
     "attribution" : {
       "required" : false,
       "notice" : null,
-      "sourceUri" : null
+      "sourceUri" : null,
+      "asIsDisclaimerRequired" : false
     },
     "redistribution" : "PROHIBITED",
-    "legalReviewDate" : "2026-09-12",
-    "reviewState" : "UNREVIEWED",
-    "revokedAt" : null,
+    "derivativeLicence" : "NONE",
+    "prohibitedUses" : [ "AI_TRAINING", "SYNTHETIC_CONTENT_GENERATION" ],
+    "legalReviewDate" : "2026-09-29",
+    "reviewState" : "REVIEWED",
+    "revokedAt" : "2026-09-29T00:00:00Z",
     "evidenceReferences" : [ "https://affiliate-program.amazon.com/help/operating/policies?ac-ms-src=ac-nav", "https://webservices.amazon.co.uk/paapi5/documentation/best-programming-practices.html" ]
   } ]
 }

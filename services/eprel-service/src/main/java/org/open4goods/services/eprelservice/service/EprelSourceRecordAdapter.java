@@ -48,8 +48,8 @@ public class EprelSourceRecordAdapter {
 
     /** EPREL source identity used by the policy and source-record contracts. */
     public static final String SOURCE_ID = "eprel";
-    /** Policy reference is intentionally deny-by-default until the owner approves it. */
-    public static final SourceUsagePolicyRef USAGE_POLICY = new SourceUsagePolicyRef("eprel-public-api", "1");
+    /** GOU-95/GOU-105: reviewed, value-added-only publication on NUDGER_WEB and B2B_API. */
+    public static final SourceUsagePolicyRef USAGE_POLICY = new SourceUsagePolicyRef("eprel-public-api", "2");
 
     private static final String FIELD_NAMESPACE = "eprel";
     private static final URI EVIDENCE_BASE = URI.create("urn:o4g:eprel:record:");
