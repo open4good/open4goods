@@ -35,4 +35,4 @@ source); `1` validated cleanly but found blockers; `0` clean pass, with a
 JSON report on stdout.
 
 Not wired into `.github/workflows/testAndPublishBeta.yml` or any live
-deploy workflow — see [ADR-0018](../adr/0018-promotion-readiness-gate.md).
+deploy workflow - see [ADR-0018](../adr/0018-promotion-readiness-gate.md).

@@ -25,9 +25,9 @@ following holds:
 - a project issue carries zero or several `phase:` labels (`development`,
   `beta_validation`, `production`, `post_production`);
 - a DEVELOPMENT-phase issue's status is anything other than `done` or
-  `cancelled` — Paperclip's real vocabulary is `backlog`, `todo`,
+  `cancelled` - Paperclip's real vocabulary is `backlog`, `todo`,
   `in_progress`, `in_review`, `blocked`, `done`, `cancelled`, and every
-  non-terminal status, including one this gate has never seen, blocks — or
+  non-terminal status, including one this gate has never seen, blocks - or
   the issue was created after the candidate's pin time;
 - a release-manifest digest or `release=` SHA drifted from what the owner
   decision names;
@@ -71,4 +71,4 @@ owner-decision checks above, not a replacement for any of them, and
 production keeps its own dedicated decision (decision 14).
 
 Not wired into `.github/workflows/testAndPublishBeta.yml` or any live
-deploy workflow — that stays frozen by GOU-91, as a separate follow-up.
+deploy workflow - that stays frozen by GOU-91, as a separate follow-up.
