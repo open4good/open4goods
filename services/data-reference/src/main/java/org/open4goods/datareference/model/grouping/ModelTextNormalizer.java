@@ -10,11 +10,15 @@ import java.util.regex.Pattern;
  * Normalizes a provider-written brand or model string for exact-tuple matching
  * and search tokenization.
  *
- * <p>Folds case and punctuation so that {@code "XR-500"}, {@code "xr 500"} and
- * {@code "XR500"} normalize identically, per ADR-0010's "exact normalized
- * tuple." This is intentionally simpler than the reviewed family-pattern
- * engine: it never strips a regional suffix or an embedded size, because doing
- * so would turn an exact match into a similarity heuristic.
+ * <p>Folds case and collapses every run of non-alphanumeric characters into a
+ * single {@code -}, so {@code "XR-500"} and {@code "xr 500"} normalize
+ * identically. {@code "XR500"} deliberately does <em>not</em>: a separator is a
+ * character of the model string, and dropping it would put {@code "XR500"} and
+ * {@code "XR-500"} in one group without evidence that they are the same model.
+ * That follows ADR-0010's "exact normalized tuple" for the same reason this
+ * normalizer never strips a regional suffix or an embedded size — either would
+ * turn an exact match into a similarity heuristic. Joining separated and
+ * unseparated spellings is the reviewed family-pattern engine's job (AC3/AC4).
  */
 public final class ModelTextNormalizer {
 

@@ -9,9 +9,10 @@ import org.junit.jupiter.api.Test;
 class ModelTextNormalizerTest {
 
     @Test
-    void foldsCaseAndPunctuationToTheSameSlugFragment() {
+    void foldsCaseAndSeparatorRunsButKeepsSeparatorPresence() {
         assertThat(ModelTextNormalizer.normalize("XR-500")).isEqualTo("xr-500");
         assertThat(ModelTextNormalizer.normalize("xr 500")).isEqualTo("xr-500");
+        // Separator presence is part of the exact tuple: "XR500" stays its own group.
         assertThat(ModelTextNormalizer.normalize("XR500")).isEqualTo("xr500");
     }
 
