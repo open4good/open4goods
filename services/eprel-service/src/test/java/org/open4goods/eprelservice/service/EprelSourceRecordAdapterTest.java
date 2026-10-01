@@ -5,12 +5,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.datareference.model.GtinMatchConfidence;
 import org.open4goods.datareference.model.LanguageTag;
+import org.open4goods.datareference.model.ProjectionSurface;
 import org.open4goods.datareference.model.SourceContentType;
 import org.open4goods.datareference.model.SourceRecordMutation;
+import org.open4goods.datareference.model.SourceRecordState;
+import org.open4goods.datareference.model.SourceUsagePolicyRegistry;
 import org.open4goods.datareference.model.evidence.LocalizedTextEvidence;
 import org.open4goods.datareference.model.evidence.ScalarEvidence;
 import org.open4goods.datareference.testsupport.SourceRecordAdapterContractFixture;
@@ -168,6 +172,12 @@ class EprelSourceRecordAdapterTest extends SourceRecordAdapterContractTest<Eprel
         assertThat(replacement.key()).isEqualTo(first.key());
         assertThat(replacement.providerVersion()).isEqualTo("version-id:2");
         assertThat(replacement.payloadHash()).isNotEqualTo(first.payloadHash());
+    }
+
+    @Override
+    protected Set<ProjectionSurface> reviewedOpenAttributeSurfaces() {
+        // GOU-95/GOU-105: reviewed value-added-only redistribution opens NUDGER_WEB and B2B_API.
+        return Set.of(ProjectionSurface.NUDGER_WEB, ProjectionSurface.B2B_API);
     }
 
     @Test
