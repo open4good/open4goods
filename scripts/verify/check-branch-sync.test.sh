@@ -2,6 +2,9 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# Git hooks export repository-local variables. The fixture must use its own
+# repository, or its commits can land on the caller's branch during pre-push.
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_PREFIX GIT_COMMON_DIR
 fixture="$(mktemp -d)"
 trap 'rm -rf -- "$fixture"' EXIT
 
