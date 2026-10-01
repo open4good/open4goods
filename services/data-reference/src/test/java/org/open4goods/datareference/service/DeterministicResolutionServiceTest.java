@@ -94,7 +94,13 @@ class DeterministicResolutionServiceTest {
     }
 
     @Test
-    void excludesAPropagatedInputFromASourceThatProhibitsAiTraining() {
+    void doesNotExcludeASourceThatOnlyProhibitsAiTrainingBecauseResolvingToASurfaceIsRedistributionNotTraining() {
+        // GOU-171: resolving to a publication surface is redistribution, not model
+        // training or synthetic content generation. A source whose reviewed policy
+        // permits redistribution on this surface but separately forbids AI_TRAINING
+        // must still compete for the field; only a caller that actually performs
+        // AI training must consult SourceUsagePolicyRegistry.allowsUse(AI_TRAINING)
+        // itself before doing so.
         SourceRecordHead merchant = head("merchant", "merchant-1", "B", GtinMatchConfidence.EXACT);
         SourceRecordHead regulator = head("regulator", "regulator-1", "A", GtinMatchConfidence.WEAK);
         SourceUsagePolicyRegistry policies = new SourceUsagePolicyRegistry(new SourceUsagePolicyDocument(
@@ -105,10 +111,12 @@ class DeterministicResolutionServiceTest {
         var resolved = service.resolve(GTIN, List.of(merchant, regulator), ProjectionSurface.NUDGER_WEB, NOW);
 
         assertThat(resolved).hasSize(1);
-        // The regulator source is excluded entirely rather than degrading the result: the
-        // merchant value wins outright instead of the regulator's authority-based reason.
-        assertThat(resolved.getFirst().value()).isEqualTo(new CodeValue("energy", "B"));
-        assertThat(resolved.getFirst().conflicting()).isFalse();
+        // The regulator still wins by its configured authority; the differing
+        // merchant value correctly flags a conflict instead of being the only
+        // remaining candidate.
+        assertThat(resolved.getFirst().value()).isEqualTo(new CodeValue("energy", "A"));
+        assertThat(resolved.getFirst().reason()).isEqualTo(ResolutionReason.SOURCE_AUTHORITY);
+        assertThat(resolved.getFirst().conflicting()).isTrue();
     }
 
     private static DeterministicResolutionService service() {
