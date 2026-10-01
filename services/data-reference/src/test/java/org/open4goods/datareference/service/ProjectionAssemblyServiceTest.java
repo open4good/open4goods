@@ -56,7 +56,7 @@ class ProjectionAssemblyServiceTest {
                     assertThat(values).containsExactly(ALLOWED_VALUE);
                     return new SearchSummary(new RuleVersion("lexical-search", 1), List.of("allowed"));
                 },
-                (gtin, surface, values, resolvedClass) -> GroupAssignment.NONE,
+                (gtin, surface, heads, values, resolvedClass) -> GroupAssignment.NONE,
                 (gtin, surface) -> Optional.empty(),
                 new DeterministicDomainSliceComposer(), writer, Clock.fixed(AT, ZoneOffset.UTC));
 

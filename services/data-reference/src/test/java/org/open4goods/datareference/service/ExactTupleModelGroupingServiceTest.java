@@ -39,9 +39,9 @@ class ExactTupleModelGroupingServiceTest {
 
     @Test
     void assignsTheSameModelGroupRegardlessOfPunctuationCaseOrArrivalOrder() {
-        GroupAssignment first = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB,
+        GroupAssignment first = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB, List.of(),
                 List.of(brand("Acme"), model("XR-500")), Optional.of(TV_CLASS));
-        GroupAssignment second = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB,
+        GroupAssignment second = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB, List.of(),
                 List.of(model("xr 500"), brand("ACME")), Optional.of(TV_CLASS));
 
         assertThat(first.modelGroup()).contains(new GroupId(GroupType.MODEL, "television-acme-xr-500"));
@@ -50,9 +50,9 @@ class ExactTupleModelGroupingServiceTest {
 
     @Test
     void identicalBrandAndModelInADifferentClassProduceADifferentGroup() {
-        GroupAssignment tv = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB,
+        GroupAssignment tv = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB, List.of(),
                 List.of(brand("Acme"), model("X1")), Optional.of(TV_CLASS));
-        GroupAssignment fridge = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB,
+        GroupAssignment fridge = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB, List.of(),
                 List.of(brand("Acme"), model("X1")), Optional.of(FRIDGE_CLASS));
 
         assertThat(tv.modelGroup()).isNotEqualTo(fridge.modelGroup());
@@ -60,7 +60,7 @@ class ExactTupleModelGroupingServiceTest {
 
     @Test
     void missingBrandSuppressesAutomaticGrouping() {
-        GroupAssignment assignment = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB,
+        GroupAssignment assignment = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB, List.of(),
                 List.of(model("XR-500")), Optional.of(TV_CLASS));
 
         assertThat(assignment.modelGroup()).isEmpty();
@@ -69,7 +69,7 @@ class ExactTupleModelGroupingServiceTest {
 
     @Test
     void missingClassSuppressesAutomaticGrouping() {
-        GroupAssignment assignment = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB,
+        GroupAssignment assignment = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB, List.of(),
                 List.of(brand("Acme"), model("XR-500")), Optional.empty());
 
         assertThat(assignment.modelGroup()).isEmpty();
@@ -77,7 +77,7 @@ class ExactTupleModelGroupingServiceTest {
 
     @Test
     void missingModelSuppressesAutomaticGroupingAndProducesNoSearchTokens() {
-        GroupAssignment assignment = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB,
+        GroupAssignment assignment = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB, List.of(),
                 List.of(brand("Acme")), Optional.of(TV_CLASS));
 
         assertThat(assignment.modelGroup()).isEmpty();
@@ -86,9 +86,9 @@ class ExactTupleModelGroupingServiceTest {
 
     @Test
     void aSizeEmbeddedInTheModelCodeIsPartOfTheExactTupleNotStripped() {
-        GroupAssignment with55 = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB,
+        GroupAssignment with55 = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB, List.of(),
                 List.of(brand("Acme"), model("TV55")), Optional.of(TV_CLASS));
-        GroupAssignment with65 = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB,
+        GroupAssignment with65 = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB, List.of(),
                 List.of(brand("Acme"), model("TV65")), Optional.of(TV_CLASS));
 
         assertThat(with55.modelGroup()).isNotEqualTo(with65.modelGroup());
@@ -98,7 +98,7 @@ class ExactTupleModelGroupingServiceTest {
     void anUnsupportedResolvedValueTypeIsTreatedAsAbsent() {
         ResolvedValue nonTextBrand = resolved(BRAND, new org.open4goods.datareference.model.value.IntegerValue(
                 java.math.BigInteger.valueOf(7)));
-        GroupAssignment assignment = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB,
+        GroupAssignment assignment = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB, List.of(),
                 List.of(nonTextBrand, model("XR-500")), Optional.of(TV_CLASS));
 
         assertThat(assignment.modelGroup()).isEmpty();
@@ -107,7 +107,7 @@ class ExactTupleModelGroupingServiceTest {
     @Test
     void aCodeValueIsUsableAsExactTupleText() {
         ResolvedValue codedBrand = resolved(BRAND, new CodeValue("brand-registry", "Acme"));
-        GroupAssignment assignment = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB,
+        GroupAssignment assignment = service.assignGroups(GTIN, ProjectionSurface.NUDGER_WEB, List.of(),
                 List.of(codedBrand, model("XR-500")), Optional.of(TV_CLASS));
 
         assertThat(assignment.modelGroup()).contains(new GroupId(GroupType.MODEL, "television-acme-xr-500"));
