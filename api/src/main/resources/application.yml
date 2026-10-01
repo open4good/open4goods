@@ -119,25 +119,28 @@ gen-ai-config:
 feed:
   indexation:
     cron: 19 13 23 * * ?
-  providers:
-    awin:
-      cron: 0 43 1 * * ?
-      enabled: true
-      cache-ttl-days: 1
-    effiliation:
-      cron: 30 43 1 * * ?
-      enabled: true
-      cache-ttl-days: 1
-      max-jitter-seconds: 30
-    tradetracker:
-      cron: 0 43 1 * * ?
-      enabled: false
-      cache-ttl-days: 1
-    kwanko:
-      cron: 0 43 1 * * ?
-      enabled: false
-      cache-ttl-days: 1
-    webgains:
-      cron: 0 43 1 * * ?
-      enabled: false
+  awin:
+    cron: 0 43 1 * * ?
+    enabled: true
+    cache-ttl-days: 1
+  effiliation:
+    cron: 30 43 1 * * ?
+    enabled: true
+    cache-ttl-days: 1
+    max-jitter-seconds: 30
+  tradetracker:
+    cron: 0 43 1 * * ?
+    enabled: false
+    cache-ttl-days: 1
+  kwanko:
+    cron: 0 43 1 * * ?
+    enabled: false
+    cache-ttl-days: 1
+  webgains:
+    cron: 0 43 1 * * ?
+    enabled: false
+    cache-ttl-days: 1
+  cj:
+    cron: 0 43 1 * * ?
+    enabled: false
     cache-ttl-days: 1
