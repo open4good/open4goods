@@ -11,6 +11,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.open4goods.datareference.serialization.DataReferenceJson;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Immutable, deny-by-default lookup over Git-versioned source-usage policies.
@@ -20,6 +22,8 @@ import org.open4goods.datareference.serialization.DataReferenceJson;
  * id from becoming an implicit publication permission.
  */
 public final class SourceUsagePolicyRegistry {
+
+    private static final Logger log = LoggerFactory.getLogger(SourceUsagePolicyRegistry.class);
 
     /** Classpath location of the authored policy inventory. */
     public static final String POLICY_RESOURCE = "/policy/source-usage-policies.json";
@@ -90,8 +94,7 @@ public final class SourceUsagePolicyRegistry {
         if (sourceId == null || reference == null) {
             return false;
         }
-        return find(reference)
-                .filter(policy -> policy.sourceId().equals(sourceId))
+        return resolve(sourceId, reference)
                 .map(policy -> policy.allows(contentType, surface, instant))
                 .orElse(false);
     }
@@ -116,10 +119,33 @@ public final class SourceUsagePolicyRegistry {
         if (sourceId == null || reference == null) {
             return false;
         }
-        return find(reference)
-                .filter(policy -> policy.sourceId().equals(sourceId))
+        return resolve(sourceId, reference)
                 .map(policy -> policy.allowsUse(contentType, use, instant))
                 .orElse(false);
+    }
+
+    /**
+     * Resolves a persisted policy reference against its claimed source, warning
+     * once whenever the reference cannot be resolved rather than denying silently.
+     *
+     * <p>A policy that resolves and then itself refuses a publication is the
+     * ordinary, expected deny path and never logged here: the signal this method
+     * adds is reserved for a reference that no longer (or never did) name a
+     * reviewed policy for its claimed source, since that case means a persisted
+     * head is being denied for a reason nobody can see without this log line.
+     *
+     * @param sourceId source that produced the assertion
+     * @param reference exact policy version carried by the source head
+     * @return the matching policy, when the reference resolves against this source
+     */
+    private Optional<SourceUsagePolicy> resolve(SourceId sourceId, SourceUsagePolicyRef reference) {
+        Optional<SourceUsagePolicy> policy = find(reference).filter(candidate -> candidate.sourceId().equals(sourceId));
+        if (policy.isEmpty()) {
+            log.warn("Denying publication: source usage policy reference {} is unknown for source {}; "
+                    + "check source-usage-policies.json for a missing or superseded version",
+                    reference, sourceId);
+        }
+        return policy;
     }
 
     /**
