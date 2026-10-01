@@ -18,7 +18,7 @@ while (($#)); do
 done
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-for service in sbadmin api front-api ui b2b-api exposed-docs geocode frontend b2b-frontend; do
+for service in sbadmin api front-api ui b2b-api frontend b2b-frontend; do
   environment_file="$environment_dir/${service}.env"
   [[ -f "$environment_file" ]] || { echo "missing ${environment_file}" >&2; exit 1; }
   [[ "$(stat -c '%a' "$environment_file")" == '600' ]] || {

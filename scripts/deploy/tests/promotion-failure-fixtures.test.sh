@@ -40,7 +40,7 @@ resolved="$(isolated bash -c 'command -v systemctl')"
   exit 1
 }
 
-for name in sbadmin api front-api ui b2b-api; do
+for name in sbadmin api front-api ui b2b-api exposed-docs geocode; do
   printf '%s\n' "$name" > "$fixture/${name}.jar"
 done
 mkdir -p "$fixture/frontend-ssr" "$fixture/b2b-frontend"
@@ -48,7 +48,8 @@ printf '%s\n' frontend > "$fixture/frontend-ssr/index.html"
 printf '%s\n' b2b > "$fixture/b2b-frontend/index.html"
 "$ROOT/scripts/deploy/build-release-bundle.sh" --release abcdef1 --contract-version 1 --output "$fixture/bundle" \
   --sbadmin "$fixture/sbadmin.jar" --api "$fixture/api.jar" --front-api "$fixture/front-api.jar" \
-  --ui "$fixture/ui.jar" --b2b-api "$fixture/b2b-api.jar" --frontend-ssr "$fixture/frontend-ssr" \
+  --ui "$fixture/ui.jar" --b2b-api "$fixture/b2b-api.jar" --exposed-docs "$fixture/exposed-docs.jar" \
+  --geocode "$fixture/geocode.jar" --frontend-ssr "$fixture/frontend-ssr" \
   --b2b-frontend "$fixture/b2b-frontend"
 
 fresh_runtime_root() {

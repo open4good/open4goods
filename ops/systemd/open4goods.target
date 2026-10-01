@@ -1,6 +1,6 @@
 [Unit]
 Description=open4goods Java services
-Wants=open4goods@sbadmin.service open4goods@api.service open4goods@front-api.service open4goods@ui.service open4goods@b2b-api.service open4goods@exposed-docs.service open4goods@geocode.service
+Wants=open4goods@sbadmin.service open4goods@api.service open4goods@front-api.service open4goods@ui.service open4goods@b2b-api.service
 After=network-online.target
 
 [Install]
