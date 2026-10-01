@@ -148,19 +148,17 @@ class SourceUsagePolicyRegistryTest {
     }
 
     @Test
-    void legacyProductBackupRecordsAReviewedIdentityScopeButPublishesNothingWhileRedistributionIsProhibited()
+    void legacyProductBackupPublishesIdentityOnNudgerWebOnlyUnderValueAddedOnlyRedistribution()
             throws IOException {
         SourceUsagePolicyRegistry registry = SourceUsagePolicyRegistry.loadDefault();
         SourceId source = new SourceId("legacy-product-backup");
-        SourceUsagePolicyRef ref = new SourceUsagePolicyRef("legacy-product-backup", "2");
+        SourceUsagePolicyRef ref = new SourceUsagePolicyRef("legacy-product-backup", "3");
 
-        // GOU-95 P4 sets redistribution: PROHIBITED for this row. SourceUsagePolicy.allows() gates
-        // on redistribution != PROHIBITED before ever consulting surfaceGrants, so this row cannot
-        // publish anything while that field holds, even though IDENTITY/NUDGER_WEB is recorded as a
-        // reviewed pair. Flagged to Lead Tech on GOU-105 as a spec/model coherence gap; this test
-        // pins the actual, current behaviour rather than the possibly-unintended one.
+        // Lead Tech/Goulven resolved the GOU-105 coherence question on the ask_user_questions
+        // interaction: redistribution moves to VALUE_ADDED_ONLY so the ratified IDENTITY/NUDGER_WEB
+        // surfaceGrant is actually effective, instead of being shadowed by a PROHIBITED gate.
         assertThat(registry.allows(source, ref, SourceContentType.IDENTITY, ProjectionSurface.NUDGER_WEB, DURING))
-                .isFalse();
+                .isTrue();
         assertThat(registry.allows(source, ref, SourceContentType.IDENTITY, ProjectionSurface.B2B_API, DURING))
                 .isFalse();
         assertThat(registry.find(ref).orElseThrow().contentTypes()).containsExactly(SourceContentType.IDENTITY);

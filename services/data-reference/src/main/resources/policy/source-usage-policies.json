@@ -303,7 +303,7 @@
   }, {
     "policyId" : "legacy-product-backup",
     "sourceId" : "legacy-product-backup",
-    "version" : "2",
+    "version" : "3",
     "surfaceGrants" : {
       "IDENTITY" : [ "NUDGER_WEB" ]
     },
@@ -321,7 +321,7 @@
       "sourceUri" : null,
       "asIsDisclaimerRequired" : false
     },
-    "redistribution" : "PROHIBITED",
+    "redistribution" : "VALUE_ADDED_ONLY",
     "derivativeLicence" : "NONE",
     "prohibitedUses" : [ "AI_TRAINING", "SYNTHETIC_CONTENT_GENERATION" ],
     "legalReviewDate" : "2026-09-29",
