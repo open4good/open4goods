@@ -39,11 +39,26 @@ feed key, and counted in the `feed_missing_required_columns` health indicator
 label-guessing behaviour: the operational follow-up (GOU-172) inventories `datasources` files and
 backfills the missing declarations from the `unknownColumns` reports.
 
-### Effiliation scheduler
+### Per-network scheduler configuration
 
-Effiliation refresh is controlled by `feed.effiliation.*` properties:
+Each affiliation network is configured directly under `feed.<network>.*` (not nested
+under a `providers:` key — that form is silently ignored, see below):
 
-- `cron`: refresh schedule
-- `enabled`: enables/disables all Effiliation retrieval methods
-- `cache-ttl-days`: remote cache TTL
-- `max-jitter-seconds`: random delay applied before scheduled execution
+- `cron`: refresh schedule, read directly by the network's `@Scheduled(cron =
+  "${feed.<network>.cron:-}")` method. A missing key resolves to the disabling `-`
+  sentinel, so the job never fires.
+- `enabled`: read from `FeedConfiguration.get<Network>().isEnabled()`; gates every
+  retrieval method on that network's feed service.
+- `cache-ttl-days`: remote cache TTL, read from `FeedConfiguration.get<Network>().getCacheTtlDays()`.
+- `max-jitter-seconds` (Effiliation only): random delay applied before scheduled execution.
+
+Networks: `awin`, `effiliation`, `tradetracker`, `kwanko`, `webgains`, `cj`. Each maps to a
+nested config class on `FeedConfiguration` (`AwinConfig`, `EffiliationConfig`, ...) bound at
+the root `feed` prefix (`@ConfigurationProperties(prefix = "feed")`), e.g. `feed.awin.cron` →
+`FeedConfiguration.getAwin().getCron()`.
+
+`FeedConfiguration.providers` (a `Map<String, FeedConfiguration>`) and the `feed.providers.*`
+YAML key space it looks like they'd bind to are unrelated to this per-network scheduling: the
+map's values are plain `FeedConfiguration` instances with their own (unset) nested network
+configs, not accessors for `cron`/`enabled`/`cache-ttl-days`. Declaring those keys under
+`feed.providers.<network>.*` compiles and starts, but every one of them is dropped on the floor.
