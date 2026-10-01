@@ -39,7 +39,7 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: frontend
 
-      - name: Fetch base ref for corpus budget direction check
+      - name: Fetch base ref for corpus budget direction and merge checks
         run: |
           base_ref="${GITHUB_BASE_REF:-main}"
           git fetch origin "${base_ref}:refs/remotes/origin/${base_ref}" --quiet
