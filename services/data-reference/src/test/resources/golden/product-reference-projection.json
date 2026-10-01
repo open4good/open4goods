@@ -132,5 +132,10 @@
   "search" : {
     "ruleVersion" : "lexical-search@1",
     "lexicalTerms" : [ "television", "4k" ]
+  },
+  "groups" : {
+    "modelGroupId" : "model:television-acme-4k55",
+    "familyGroupIds" : [ "family:acme-4k-series" ],
+    "searchTokens" : [ "acme", "4k55" ]
   }
 }

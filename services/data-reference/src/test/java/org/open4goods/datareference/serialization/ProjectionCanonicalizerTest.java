@@ -29,7 +29,8 @@ class ProjectionCanonicalizerTest {
         Map<ProjectionSurface, ProductReferenceProjection> components = new EnumMap<>(ProjectionSurface.class);
         for (ProjectionSurface surface : ProjectionSurface.values()) {
             components.put(surface, new ProductReferenceProjection(new Gtin("4006381333931"), surface,
-                    fixture.replayInputs(), builtAt, fixture.resolvedValues(), fixture.offers(), fixture.evaluation(), fixture.search()));
+                    fixture.replayInputs(), builtAt, fixture.resolvedValues(), fixture.offers(), fixture.evaluation(),
+                    fixture.search(), fixture.groups()));
         }
         return new ProductReferenceProjectionEnvelope(new Gtin("4006381333931"), components);
     }

@@ -27,6 +27,8 @@ import org.open4goods.datareference.model.resolution.ResolvedValue;
  * @param offers current offer state supplied by the offer domain
  * @param evaluation deterministic score and cohort output supplied by evaluation
  * @param search lexical search fields supplied by search composition
+ * @param groups confirmed model/family grouping and search tokens for this leaf;
+ *     never changes {@code gtin} and never stands in for a product
  */
 public record ProductReferenceProjection(
         Gtin gtin,
@@ -36,7 +38,8 @@ public record ProductReferenceProjection(
         List<ResolvedValue> resolvedValues,
         OfferSummary offers,
         EvaluationSummary evaluation,
-        SearchSummary search) {
+        SearchSummary search,
+        GroupAssignment groups) {
 
     /**
      * Validates the document and rejects a repeated canonical attribute.
@@ -57,5 +60,6 @@ public record ProductReferenceProjection(
         Objects.requireNonNull(offers, "offers must not be null");
         Objects.requireNonNull(evaluation, "evaluation must not be null");
         Objects.requireNonNull(search, "search must not be null");
+        Objects.requireNonNull(groups, "groups must not be null");
     }
 }

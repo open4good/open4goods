@@ -8,6 +8,7 @@ import java.util.Objects;
 import org.open4goods.datareference.model.Gtin;
 import org.open4goods.datareference.model.ProjectionSurface;
 import org.open4goods.datareference.model.projection.EvaluationSummary;
+import org.open4goods.datareference.model.projection.GroupAssignment;
 import org.open4goods.datareference.model.projection.OfferSummary;
 import org.open4goods.datareference.model.projection.ProductReferenceProjection;
 import org.open4goods.datareference.model.projection.ProjectionReplayInputs;
@@ -40,6 +41,7 @@ public final class DeterministicDomainSliceComposer implements DomainSliceCompos
             OfferSummary offers,
             EvaluationSummary evaluation,
             SearchSummary search,
+            GroupAssignment groups,
             Instant builtAt) {
         Objects.requireNonNull(resolvedValues, "resolvedValues must not be null");
         List<ResolvedValue> canonicalValues = resolvedValues.stream()
@@ -47,6 +49,6 @@ public final class DeterministicDomainSliceComposer implements DomainSliceCompos
                 .sorted(Comparator.comparing(value -> value.attribute().externalForm()))
                 .toList();
         return new ProductReferenceProjection(gtin, surface, replayInputs, builtAt, canonicalValues,
-                offers, evaluation, search);
+                offers, evaluation, search, groups);
     }
 }
