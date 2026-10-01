@@ -5,23 +5,22 @@ import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.backup.BackupService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.serialisation.service.SerialisationService;
-import org.open4goods.xwiki.services.XWikiReadService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 /**
- * Creates the real backup service for profiles that have the required storage,
- * repository, and XWiki dependencies.
+ * Creates the real backup service for profiles that have the required storage
+ * and repository dependencies.
  */
 @Configuration
 @Profile({ "beta", "dev", "devsec", "prod" })
 public class BackupServiceConfig {
 
 	@Bean
-	BackupService backupService(XWikiReadService xwikiService, ProductRepository productRepository,
+	BackupService backupService(ProductRepository productRepository,
 			BackupConfig backupConfig, SerialisationService serialisationService,
 			AggregationFacadeService aggregationService) {
-		return new BackupService(xwikiService, productRepository, backupConfig, serialisationService, aggregationService);
+		return new BackupService(productRepository, backupConfig, serialisationService, aggregationService);
 	}
 }

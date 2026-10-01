@@ -7,16 +7,10 @@ server:
 
 
 # Logging configuration
-logging: 
+logging:
     level:
         ROOT: info
         org.open4goods: info
-        
-# XWiki instance that holds website contents
-#wikiConfig:
-#    user: 
-#    password:  
-#    baseUrl: https://wiki.nudger.fr
 
 xwiki:
     baseUrl: "https://wiki.nudger.fr"
@@ -28,8 +22,8 @@ xwiki:
     api:
         entryPoint: "rest"
         wiki: "xwiki"
-        
-        
+
+
 spring:
   boot:
     admin:

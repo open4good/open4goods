@@ -99,7 +99,6 @@
             <version>${global.version}</version>
         </dependency>
 
-
         <!-- web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

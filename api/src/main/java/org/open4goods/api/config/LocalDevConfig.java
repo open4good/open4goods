@@ -100,7 +100,7 @@ public class LocalDevConfig {
 	@Bean
 	@Primary
 	BackupService backupService(BackupConfig backupConfig) {
-		return new BackupService(null, null, backupConfig, null, null) {
+		return new BackupService(null, backupConfig, null, null) {
 			@Override
 			public void backupProducts() {
 				// no-op for local profile
@@ -118,11 +118,6 @@ public class LocalDevConfig {
 
 			@Override
 			public void copyTo(String suffix) {
-				// no-op for local profile
-			}
-
-			@Override
-			public void backupXwiki() {
 				// no-op for local profile
 			}
 
