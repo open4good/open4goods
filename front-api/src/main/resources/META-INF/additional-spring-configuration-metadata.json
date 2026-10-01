@@ -417,6 +417,18 @@
       "defaultValue": "15m"
     },
     {
+      "name": "front.security.cookie-secure",
+      "type": "java.lang.Boolean",
+      "description": "Whether authentication cookies must be flagged Secure. Only disable for local HTTP development.",
+      "defaultValue": true
+    },
+    {
+      "name": "front.security.cookie-same-site",
+      "type": "java.lang.String",
+      "description": "SameSite attribute applied to authentication cookies.",
+      "defaultValue": "Lax"
+    },
+    {
       "name": "front.security.cors-allowed-hosts",
       "type": "java.util.List<java.lang.String>",
       "description": "Origins allowed for CORS requests."

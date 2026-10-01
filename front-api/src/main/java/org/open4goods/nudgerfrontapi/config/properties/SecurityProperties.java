@@ -49,6 +49,17 @@ public class SecurityProperties {
      */
     private Duration refreshTokenExpiry = Duration.ofDays(7);
 
+    /**
+     * Whether authentication cookies must be flagged {@code Secure}. Defaults to
+     * {@code true}; only disable for local HTTP development.
+     */
+    private boolean cookieSecure = true;
+
+    /**
+     * {@code SameSite} attribute applied to authentication cookies.
+     */
+    private String cookieSameSite = "Lax";
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -95,5 +106,21 @@ public class SecurityProperties {
 
     public void setRefreshTokenExpiry(Duration refreshTokenExpiry) {
         this.refreshTokenExpiry = refreshTokenExpiry;
+    }
+
+    public boolean isCookieSecure() {
+        return cookieSecure;
+    }
+
+    public void setCookieSecure(boolean cookieSecure) {
+        this.cookieSecure = cookieSecure;
+    }
+
+    public String getCookieSameSite() {
+        return cookieSameSite;
+    }
+
+    public void setCookieSameSite(String cookieSameSite) {
+        this.cookieSameSite = cookieSameSite;
     }
 }

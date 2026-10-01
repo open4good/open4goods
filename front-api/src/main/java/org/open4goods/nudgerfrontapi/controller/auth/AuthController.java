@@ -113,9 +113,11 @@ public class AuthController {
         }
     }
 
-    private static ResponseCookie buildCookie(String name, String value, Duration maxAge) {
+    private ResponseCookie buildCookie(String name, String value, Duration maxAge) {
         return ResponseCookie.from(name, value)
                 .httpOnly(true)
+                .secure(jwtService.getProperties().isCookieSecure())
+                .sameSite(jwtService.getProperties().getCookieSameSite())
                 .maxAge(maxAge)
                 .path("/")
                 .build();
@@ -131,16 +133,8 @@ public class AuthController {
             }
     )
     public ResponseEntity<LogoutResponse> logout() {
-        ResponseCookie clearAccessToken = ResponseCookie.from("access-token", "")
-                .httpOnly(true)
-                .maxAge(Duration.ZERO)
-                .path("/")
-                .build();
-        ResponseCookie clearRefreshToken = ResponseCookie.from("refresh-token", "")
-                .httpOnly(true)
-                .maxAge(Duration.ZERO)
-                .path("/")
-                .build();
+        ResponseCookie clearAccessToken = buildCookie("access-token", "", Duration.ZERO);
+        ResponseCookie clearRefreshToken = buildCookie("refresh-token", "", Duration.ZERO);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, clearAccessToken.toString(), clearRefreshToken.toString())

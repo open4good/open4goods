@@ -1,5 +1,6 @@
 package org.open4goods.nudgerfrontapi.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
@@ -81,29 +82,33 @@ class AuthControllerIT {
     void loginReturnsCookies() throws Exception {
         given(authService.login("user", "pass")).willReturn(List.of("XWiki.XWikiUsers"));
         LoginRequest req = new LoginRequest("user", "pass");
-        mockMvc.perform(post("/auth/login")
+        var result = mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsBytes(req))
                         .param("domainLanguage", "FR"))
                 .andExpect(status().isOk())
                 .andExpect(cookie().exists("access-token"))
-                .andExpect(cookie().exists("refresh-token"));
+                .andExpect(cookie().exists("refresh-token"))
+                .andReturn();
+        assertSecureAndSameSite(result.getResponse().getHeaders("Set-Cookie"));
     }
 
     @Test
     void refreshIssuesNewAccessToken() throws Exception {
         var auth = new UsernamePasswordAuthenticationToken("user", "N/A");
         String refresh = jwtService.generateRefreshToken(auth);
-        mockMvc.perform(post("/auth/refresh")
+        var result = mockMvc.perform(post("/auth/refresh")
                         .cookie(new jakarta.servlet.http.Cookie("refresh-token", refresh))
                         .param("domainLanguage", "FR"))
                 .andExpect(status().isOk())
-                .andExpect(cookie().exists("access-token"));
+                .andExpect(cookie().exists("access-token"))
+                .andReturn();
+        assertSecureAndSameSite(result.getResponse().getHeaders("Set-Cookie"));
     }
 
     @Test
     void logoutClearsAuthCookies() throws Exception {
-        mockMvc.perform(post("/auth/logout")
+        var result = mockMvc.perform(post("/auth/logout")
                         .cookie(new jakarta.servlet.http.Cookie("access-token", "access"),
                                 new jakarta.servlet.http.Cookie("refresh-token", "refresh"))
                         .param("domainLanguage", "FR"))
@@ -111,6 +116,16 @@ class AuthControllerIT {
                 .andExpect(cookie().value("access-token", ""))
                 .andExpect(cookie().maxAge("access-token", 0))
                 .andExpect(cookie().value("refresh-token", ""))
-                .andExpect(cookie().maxAge("refresh-token", 0));
+                .andExpect(cookie().maxAge("refresh-token", 0))
+                .andReturn();
+        assertSecureAndSameSite(result.getResponse().getHeaders("Set-Cookie"));
+    }
+
+    private static void assertSecureAndSameSite(List<String> setCookieHeaders) {
+        assertThat(setCookieHeaders).isNotEmpty();
+        assertThat(setCookieHeaders).allSatisfy(header -> {
+            assertThat(header).containsIgnoringCase("Secure");
+            assertThat(header).containsIgnoringCase("SameSite=Lax");
+        });
     }
 }
