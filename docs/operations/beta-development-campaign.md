@@ -31,7 +31,8 @@ scripts/local/open4goods.sh down
 ```
 
 `init` conserve tout fichier existant et cree seulement les entrees manquantes.
-Les donnees, PID et logs restent sous `.local/`. Les valeurs privees vivent dans
+Sur l'hote partage, les donnees Docker sont dans `O4G_LOCAL_DATA_ROOT`, hors worktree ; PID et logs restent sous `.local/`.
+Les valeurs privees vivent dans
 `.env.local` et `.local/config/<service>.yml`, tous deux ignores. Les templates
 suivis sont `.env.local.example` et `ops/local/config/*.yml.example`.
 
@@ -46,7 +47,9 @@ Elle ne modifie aucun octet source.
 scripts/local/open4goods.sh backup verify
 scripts/local/open4goods.sh data sample
 scripts/local/open4goods.sh data full
-docker compose --profile xwiki up -d mysql xwiki
+scripts/local/open4goods.sh preflight
+set -a; source .env.local; set +a
+docker compose --env-file .env.local --profile xwiki up -d mysql xwiki
 scripts/local/open4goods.sh xwiki import
 ```
 

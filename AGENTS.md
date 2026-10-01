@@ -35,6 +35,12 @@ no beta service, data store or Nudger domain may be a runtime dependency. A reco
 BETA_VALIDATION after tooling qualification and phase checks. PRODUCTION requires a fresh owner decision.
 POST_PRODUCTION retirement still requires its healthy-window gate.
 `docs/reference/roadmap.md` is a dated migration index, not a live roadmap.
+At the start of each issue, run `git rev-parse --show-toplevel`,
+`git branch --show-current`, and `git worktree list --porcelain` from the actual
+checkout. Work only in that issue's worktree and branch; repair any mismatch first.
+On the shared build host, keep Docker bind-mount data in an issue-specific path
+outside all worktrees, check the allocated ports before tests, and run at most
+one Docker test or heavy build at a time.
 `docs/adr/README.md` is generated; change ADRs, not the projection.
 
 Before changing anything under `docs/` or `.o4g/`, run `./scripts/lint.sh`.

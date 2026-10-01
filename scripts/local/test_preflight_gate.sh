@@ -23,6 +23,13 @@ run_preflight() {
     ROOT="$ROOT"
     # shellcheck disable=SC1090
     source "$FUNCTIONS"
+    # Supply a safe, repeatable host budget; each case still executes the real
+    # path and port validation without requiring a Docker daemon in CI.
+    docker() { [ "$1" = info ] && printf '["name=rootless"]\n'; }
+    ss() { :; }
+    cgroup_effective_max() { if [ "$1" = memory.max ]; then echo 34359738368; else echo 4096; fi; }
+    cgroup_effective_headroom_bytes() { echo 17179869184; }
+    cgroup_cpu_millicores_max() { echo 8000; }
     ROOT="$SCRATCH/repo"
     LOCAL_ROOT="$ROOT/.local"
     ENV_FILE="$ROOT/.env.local"
@@ -57,10 +64,13 @@ FRONT_SECURITY_JWT_SECRET=dev-only-32-bytes-minimum-placeholder-x
 B2B_JWT_SECRET=dev-only
 O4G_LOCAL_ADMIN_KEY=dev-only
 EOF
+  printf 'O4G_LOCAL_DATA_ROOT=%s\n' "$SCRATCH/issue-GOU-133/data" >> "$out"
+  printf 'O4G_SHARED_HOST_APPROVED_ROOTS=%s:%s\n' "$SCRATCH/repo/.local" "$SCRATCH/issue-GOU-133" >> "$out"
   printf '%s\n' "$out"
 }
 
 mkdir -p "$SCRATCH/repo/.local/data" "$SCRATCH/repo/.local/config"
+mkdir -p "$SCRATCH/issue-GOU-133/data"
 
 # --- case: a valid buildhost env passes ---
 env_ok="$(base_env ok)"
@@ -91,6 +101,12 @@ ln -sfn /etc "$SCRATCH/repo/.local/escape"
 echo "O4G_LOCAL_DATA_ROOT=$SCRATCH/repo/.local/escape" >> "$env_symlink"
 run_preflight "$env_symlink" >/dev/null 2>&1 && fail "a symlink escaping the approved root was accepted" || true
 echo "ok: symlink escape outside approved roots rejected"
+
+# --- case: Docker bind mounts inside the worktree are rejected ---
+env_worktree="$(base_env worktree)"
+echo "O4G_LOCAL_DATA_ROOT=$SCRATCH/repo/.local/data" >> "$env_worktree"
+run_preflight "$env_worktree" >/dev/null 2>&1 && fail "Docker data inside the worktree was accepted" || true
+echo "ok: Docker data inside the worktree rejected"
 
 # --- case: the full-import floor is stricter than the standard floor ---
 env_ok2="$(base_env floor)"

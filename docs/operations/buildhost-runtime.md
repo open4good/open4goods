@@ -14,7 +14,9 @@ there. It is the shared-host reading of
 stores and applications, no beta or prod dependency.
 
 Every knob and default is in [`.env.buildhost.example`](../../.env.buildhost.example);
-the gate is the script's own `preflight`, run before `up`, `restart` and
+replace `GOU-REPLACE` with the issue ID, keeping Docker data outside the worktree.
+Preflight rejects in-worktree data and occupied ports.
+The gate is the script's own `preflight`, run before `up`, `restart` and
 `data full`, covering Docker rootlessness, loopback port blocks (templated through
 `ops/local/config/*.yml.example` and each module's `application-local.yml`),
 approved data/config/backup roots, unreplaced `CHANGE_ME` secrets, and cgroup and
