@@ -1,7 +1,2 @@
 server:
   port: 8085
-xwiki:
-  baseUrl: http://localhost:${O4G_PORT_XWIKI:8080}/xwiki
-  username: ${XWIKI_USERNAME:local}
-  password: ${XWIKI_PASSWORD:local-only}
-  httpsOnly: false
