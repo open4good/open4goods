@@ -41,7 +41,6 @@ import org.open4goods.api.services.backup.ProductBackupThread.ProductBackupFile;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.serialisation.service.SerialisationService;
-import org.open4goods.xwiki.services.XWikiReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.health.contributor.Health;
@@ -73,7 +72,6 @@ public class BackupService implements HealthIndicator {
 
 
 
-	private XWikiReadService xwikiService;
 	private ProductRepository productRepo;
 	private SerialisationService serialisationService;
 
@@ -82,7 +80,6 @@ public class BackupService implements HealthIndicator {
 	private BackupConfig backupConfig;
 
 	// Used to trigger Health.down() if exception occurs
-	private String wikiException;
 	private String dataBackupException;
 	private String dataCopyException;
 
@@ -91,7 +88,6 @@ public class BackupService implements HealthIndicator {
 	private AtomicLong expectedBackupedProducts = new AtomicLong(0L);
 
 	// Flags to avoid conccurent export running
-	private AtomicBoolean wikiExportRunning = new AtomicBoolean(false);
 	private AtomicBoolean productExportRunning = new AtomicBoolean(false);
 	private AtomicBoolean productCopyRunning = new AtomicBoolean(false);
 
@@ -99,9 +95,8 @@ public class BackupService implements HealthIndicator {
 
 
 
-	public BackupService(XWikiReadService xwikiService, ProductRepository productRepo, BackupConfig backupConfig, SerialisationService serialisationService, AggregationFacadeService aggregationService) {
+	public BackupService(ProductRepository productRepo, BackupConfig backupConfig, SerialisationService serialisationService, AggregationFacadeService aggregationService) {
 		super();
-		this.xwikiService = xwikiService;
 		this.productRepo = productRepo;
 		this.backupConfig = backupConfig;
 		this.serialisationService = serialisationService;
@@ -506,92 +501,12 @@ public class BackupService implements HealthIndicator {
 	}
 
 	/**
-	 * This method will periodicaly backup the Xwiki content
-	 */
-	// TODO(p3,conf) : Schedule from conf
-	@Scheduled(initialDelay = 1000 * 3600, fixedDelay = 1000 * 3600 * 12)
-	@Timed(value = "backup.wiki", description = "Backup of all the xwiki content", extraTags = { "service" })
-	public void backupXwiki() {
-
-		// Checking not already running
-		if (wikiExportRunning.get()) {
-			logger.warn("Xwiki export is already running. Skipped.");
-			return;
-		} else {
-			wikiExportRunning.set(true);
-		}
-
-		logger.info("Xwiki backup - start");
-		try {
-			// Creating parent folders if necessary
-			File parent = new File(backupConfig.getXwikiBackupFile()).getParentFile();
-			parent.mkdirs();
-
-			// Creating tmp file
-			File tmp = File.createTempFile("xwiki-backup", "backup");
-
-			// Exporting to tmp file
-			xwikiService.exportXwikiContent(tmp);
-
-			// Checking tmp file exists and not empty
-			if (!tmp.exists() || tmp.length() < backupConfig.getMinXwikiBackupFileSizeInMb() * 1024 * 1024) {
-				throw new Exception("Empty or not large enough tmp xwiki backup file");
-			}
-
-			// Move to target file
-		    Files.move(tmp.toPath(), Path.of(backupConfig.getXwikiBackupFile()), StandardCopyOption.REPLACE_EXISTING);
-
-		    this.wikiException = null;
-
-		} catch (Exception e) {
-			logger.error("Error while backuping Xwiki", e);
-			this.wikiException = e.getMessage();
-		} finally {
-		}
-
-		wikiExportRunning.set(false);
-		logger.info("Xwiki backup - finished");
-	}
-
-	/**
 	 * Health Check computing
 	 */
 	@Override
 	public Health health() {
 
 		Map<String, String> errorMessages = new HashMap<>();
-
-		/////////////////////////////
-		// Xwiki file check
-		/////////////////////////////
-
-
-		File wikiFile = new File(backupConfig.getXwikiBackupFile());
-		long wikiLastModified = wikiFile.lastModified();
-		long wikiFileSize = wikiFile.length();
-
-
-		// Check exceptions during processing
-		if (null != wikiException) {
-			errorMessages.put("xwiki_export_exception", wikiException);
-		}
-
-		// Check exists
-		if (!Files.exists(Path.of(backupConfig.getXwikiBackupFile()))) {
-			errorMessages.put("xwiki_backup_missing", backupConfig.getXwikiBackupFile());
-		}
-
-		// Check minimum size
-		if (wikiFileSize < backupConfig.getMinXwikiBackupFileSizeInMb() * 1024L * 1024L) {
-			errorMessages.put("xwiki_backup_size_too_small", FileUtils.byteCountToDisplaySize(wikiFileSize) + " < " + backupConfig.getMinXwikiBackupFileSizeInMb() + " Mb");
-		}
-
-		// Check date is not to old
-		// NOTE : In the best world, MAX_WIKI_BACKUP_AGE would be derivated from the
-		// schedule rate
-		if (System.currentTimeMillis() - wikiLastModified > backupConfig.getMaxWikiBackupAgeInHours() * 3600 * 1000) {
-			errorMessages.put("xwiki_backup_too_old", String.valueOf(wikiLastModified));
-		}
 
 		/////////////////////////////
 		// Products backup files check
@@ -670,10 +585,6 @@ public class BackupService implements HealthIndicator {
 					.withDetail("product_backup_date", new Date (productLastModified).toString())
 					.withDetail("product_backup_size", FileUtils.byteCountToDisplaySize(productFolderSize))
 					.withDetail("last_product_export_items_count",  expordedProductsCounter.longValue())
-
-					.withDetail("xwiki_export_running", wikiExportRunning.get())
-					.withDetail("xwiki_backup_date", new Date (wikiLastModified).toString())
-					.withDetail("xwiki_backup_size", FileUtils.byteCountToDisplaySize(wikiFileSize))
 					.build();
 		} else {
 			health = Health.down().withDetails(errorMessages).build();

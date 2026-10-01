@@ -6,12 +6,6 @@ server:
   http2:
     enabled: true
 
-wikiConfig:
-    user: Admin
-    password: 
-    baseUrl: https://wiki.web-equitable.org/xwiki
-
-
 management:
   
   health:

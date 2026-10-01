@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.verticals.VerticalsConfigService;
-import org.open4goods.xwiki.services.XWikiHtmlService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +34,6 @@ public class UiService {
 
 	private @Autowired Environment env;
 	protected @Autowired UiConfig config;
-	private @Autowired XWikiHtmlService xwikiService;
 	private @Autowired VerticalsConfigService verticalsConfigService;
 		
 	// Used to load Datasource configurations from classpath
@@ -107,8 +105,6 @@ public class UiService {
 		/* test Laurent */
 
 		ret.addObject("gaId",config.getWebConfig().getGoogleAnalyticsId());
-
-		ret.addObject("wiki",xwikiService);
 
 		ret.addObject("internalReferer", isInternalReferer(request));
 		

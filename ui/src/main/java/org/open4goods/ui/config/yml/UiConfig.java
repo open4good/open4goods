@@ -15,7 +15,6 @@ import org.open4goods.model.Localisable;
 import org.open4goods.model.priceevents.PriceRestitutionConfig;
 import org.open4goods.model.vertical.SiteNaming;
 import org.open4goods.ui.interceptors.ImageResizeInterceptor;
-import org.open4goods.xwiki.config.XWikiServiceProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -144,11 +143,6 @@ public class UiConfig {
 	 * Config for IP and UA banChecking
 	 */
 	private BanCheckerConfig bancheckerConfig = new BanCheckerConfig();
-
-	/**
-	 * The Xwiki instance configuration
-	 */
-	private XWikiServiceProperties wikiConfig = new XWikiServiceProperties();
 
 	/**
 	 * Containing the project members, for restitution in /team
@@ -297,16 +291,6 @@ public class UiConfig {
 		this.email = email;
 	}
 
-
-
-	public XWikiServiceProperties getWikiConfig() {
-		return wikiConfig;
-	}
-
-
-	public void setWikiConfig(XWikiServiceProperties wikiConfig) {
-		this.wikiConfig = wikiConfig;
-	}
 
 
 	public String getResourceTemplateFolder() {
