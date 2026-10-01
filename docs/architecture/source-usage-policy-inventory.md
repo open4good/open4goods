@@ -28,19 +28,9 @@ A policy also carries a deny-by-default `derivativeLicence` (e.g. the Icecat
 share-alike obligation), a deny-by-default `prohibitedUses` set (e.g.
 `AI_TRAINING`, `SYNTHETIC_CONTENT_GENERATION`), and an attribution
 `asIsDisclaimerRequired` flag for the Fair Use Policy disclaimer. The mirrored
-`allowsUse` predicate on the policy and the registry checks one named use.
-
-Resolving to a publication surface is redistribution, governed by `allows`
-(content type, surface, redistribution and effective period), not model
-training or synthetic content generation. `DeterministicResolutionService`
-does not consult `prohibitedUses` at all: `AI_TRAINING` and
-`SYNTHETIC_CONTENT_GENERATION` forbid uses this resolver never makes, so
-listing either in a policy's `prohibitedUses` must not exclude the source from
-ordinary redistribution, as `icecat-open-content`'s
-`SYNTHETIC_CONTENT_GENERATION` entry used to do until GOU-171. A caller that
-does perform one of those uses on resolved values must call
-`SourceUsagePolicyRegistry#allowsUse` itself for that specific use before
-doing so.
+`allowsUse` predicate checks one named use. `DeterministicResolutionService` ignores `prohibitedUses` ([GOU-171](/GOU/issues/GOU-171)):
+reaching a surface is redistribution, governed by `allows` alone, not the training or synthetic generation those two uses forbid. A
+caller that does train a model or generate synthetic content from resolved values calls `allowsUse` for that use itself.
 
 ## Ratified matrix (GOU-95, 2026-09-29)
 
@@ -60,6 +50,7 @@ record cannot carry six publisher agreements.
 | `merchant-feed.effiliation` / 1 | IDENTITY, ATTRIBUTE, OFFER, PRICE | NUDGER_WEB, B2B_API | VALUE_ADDED_ONLY | P1825D |
 | `merchant-feed.tradetracker` / `.kwanko` / `.webgains` / `.cj` - 1 | - (total refusal) | - | PROHIBITED | PT0S |
 | `legacy-product-backup` / 3 | IDENTITY | NUDGER_WEB | VALUE_ADDED_ONLY | P1825D |
+| `legacy-backup-import` / 1 | - (total refusal) | - | PROHIBITED | PT0S |
 | `amazon-paapi-quarantine` / 2 | - (total refusal, `revokedAt` set) | - | PROHIBITED | PT0S |
 
 EPREL's B2B grant is free-with-account (T&C 4§2(a)). Icecat's OPL forbids
@@ -70,11 +61,9 @@ publisher agreements cover `OFFER`/`PRICE` only, so `TEXT`/`MEDIA` stay
 refused. The other four networks have no publisher agreement. Amazon's PA-API
 5 is deprecated and its 2026-04-14 Program Policies prohibit resale.
 
-Icecat's two prior evidence URIs (`icecat.com/content-subscription/`,
-`icecat.com/structured-data-content-users/`) were marketing pages with no
-licence terms, replaced by the verified [Open Content License v1.4](https://iceclog.com/open-content-license/),
-[Fair Use Policy](https://iceclog.com/open-icecat-fair-use-policy/) and
-[Disclaimer](https://icecat.biz/ssr/en/menu/disclaimer).
+Icecat's two prior evidence URIs were unlicensed marketing pages, replaced by the verified
+[Open Content License v1.4](https://iceclog.com/open-content-license/), [Fair Use Policy](https://iceclog.com/open-icecat-fair-use-policy/)
+and [Disclaimer](https://icecat.biz/ssr/en/menu/disclaimer).
 
 Lead Tech/Goulven resolved the `legacy-product-backup` coherence question
 raised while authoring this inventory: `redistribution` moved from
@@ -82,3 +71,5 @@ raised while authoring this inventory: `redistribution` moved from
 `IDENTITY → NUDGER_WEB` `surfaceGrants` entry is actually effective, instead
 of being shadowed by `allows()`'s redistribution gate, mirroring how
 `icecat-open-content` reasons through the same interaction.
+
+GOU-165: `scripts/verify/check_usage_policy_registry.py` rejects a code-cited reference missing here (e.g. `legacy-backup-import` / 1) or a deleted `(policyId, version)` row; `SourceUsagePolicyRegistry` now `WARN`s on an unresolved one. `legacy-product-backup`'s `legalReviewDate`, `2026-10-01`, is the actual GOU-105 ratification date, not a new rights period.

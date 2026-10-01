@@ -1,7 +1,5 @@
 package org.open4goods.datareference.service;
 
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -32,6 +30,8 @@ import org.open4goods.datareference.model.resolution.ResolvedValue;
 import org.open4goods.datareference.port.CorrectionsPort;
 import org.open4goods.datareference.port.NormalizationPort;
 import org.open4goods.datareference.port.ResolutionPort;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Resolves source evidence only after policy, lifecycle and attachment gates.
@@ -42,7 +42,7 @@ import org.open4goods.datareference.port.ResolutionPort;
  */
 public final class DeterministicResolutionService implements ResolutionPort {
 
-    private static final Logger LOG = System.getLogger(DeterministicResolutionService.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(DeterministicResolutionService.class);
 
     private final SourceUsagePolicyRegistry policies;
     private final NormalizationPort normalization;
@@ -106,7 +106,7 @@ public final class DeterministicResolutionService implements ResolutionPort {
             }
             for (SourceAssertion assertion : head.assertions()) {
                 if (!policies.allows(head.key().sourceId(), head.usagePolicyRef(), assertion.contentType(), surface, at)) {
-                    LOG.log(Level.DEBUG, "Excluding {0}/{1} from {2}: usage policy {3} does not permit redistribution on this surface",
+                    log.debug("Excluding {}/{} from {}: usage policy {} does not permit redistribution on this surface",
                             head.key().sourceId(), assertion.contentType(), surface, head.usagePolicyRef());
                     continue;
                 }

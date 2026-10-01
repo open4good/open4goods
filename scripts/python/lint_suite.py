@@ -109,6 +109,15 @@ def lint_corpus(suite: LintSuite) -> None:
         ],
     )
     suite.run(
+        "Source usage policy registry",
+        [
+            sys.executable,
+            "scripts/verify/check_usage_policy_registry.py",
+            "--against",
+            f"origin/{base_ref}",
+        ],
+    )
+    suite.run(
         "Deployment inputs",
         [sys.executable, "scripts/verify/check_deployment_inputs.py"],
     )
