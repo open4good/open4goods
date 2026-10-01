@@ -38,7 +38,9 @@ ADR that changes a rule updates the entry here in the same commit.
    rule an English-reading agent cannot parse is a rule that does not apply.
 7. The corpus budget in `.o4g/corpus-budget.json` is a ratchet. Lowering a ceiling
    is an ordinary commit and needs no ceremony. Raising one is a deliberate,
-   reviewable act recorded in the same commit as the growth it permits.
+   reviewable act recorded in the same commit as the growth it permits. CI enforces
+   the direction against the default branch; a raise is satisfied only by the PR
+   reviewer approving that commit.
 8. Bounded change is tracked by an issue in the Nudger Paperclip project. The issue
    owns its purpose, scope, acceptance criteria, dependencies, blockers, assignee
    and evidence. Legacy closed WorkOrders remain read-only historical records under
