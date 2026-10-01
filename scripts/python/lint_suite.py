@@ -144,13 +144,8 @@ def lint_governance_tools(suite: LintSuite) -> None:
         relative = script.relative_to(suite.root)
         suite.run(f"Deploy fixture: {relative.name}", ["bash", str(relative)])
 
-    # deployment-target-guard.test.sh asserts a deploy/{verify step} workflow shape that no
-    # longer exists (GOU-160); fixing it means editing deploy workflows, out of this gate's scope.
-    verify_tests_skip = {"deployment-target-guard.test.sh"}
     verify_tests_dir = suite.root / "scripts" / "verify"
     for script in sorted(verify_tests_dir.glob("*.test.sh")):
-        if script.name in verify_tests_skip:
-            continue
         relative = script.relative_to(suite.root)
         suite.run(f"Verify fixture: {relative.name}", ["bash", str(relative)])
 

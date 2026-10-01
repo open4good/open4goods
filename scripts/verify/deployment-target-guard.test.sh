@@ -33,6 +33,11 @@ if run_guard beta "$fingerprint_b" >/dev/null 2>&1; then
   exit 1
 fi
 
+# GOU-160: these workflows have no CI-driven auto-deploy job today. Beta/prod promotion
+# runs through scripts/deploy (systemd runtime install + gate_proof_seal.py), not a GitHub
+# Actions `deploy`/`release` step, and production is deliberately frozen pending GOU-53/GOU-31.
+# This asserts that current, intentional shape so a `deploy`/`release` job can't be added back
+# silently without updating this guard (and re-adding the target-identity check it used to pin).
 python3 - "$ROOT" <<'PY'
 import sys
 from pathlib import Path
@@ -45,24 +50,27 @@ def load(name):
     return yaml.load((root / '.github' / 'workflows' / name).read_text(), Loader=yaml.BaseLoader)
 
 beta = load('testAndPublishBeta.yml')
-beta_job = beta['jobs']['deploy']
-assert beta_job['environment'] == 'beta'
-assert beta_job['concurrency']['group'] == 'deploy-beta'
-assert beta_job['concurrency']['cancel-in-progress'] == 'false'
-assert any(step.get('name') == 'Verify beta target identity' for step in beta_job['steps'])
+assert set(beta['jobs']) == {'build'}, (
+    "testAndPublishBeta.yml grew a job beyond 'build': if this is a new CI-driven deploy job, "
+    "it needs a 'Verify beta target identity' step and this guard must be updated to check for it"
+)
 
 frontend = load('frontend-ci.yml')
-frontend_deploy = frontend['jobs']['deploy']
-assert frontend_deploy['environment'] == 'beta'
-assert frontend_deploy['concurrency']['group'] == 'deploy-beta'
-assert frontend_deploy['concurrency']['cancel-in-progress'] == 'false'
-assert any(step.get('name') == 'Verify beta target identity' for step in frontend_deploy['steps'])
+assert set(frontend['jobs']) == {'build'}, (
+    "frontend-ci.yml grew a job beyond 'build': if this is a new CI-driven deploy job, "
+    "it needs a 'Verify beta target identity' step and this guard must be updated to check for it"
+)
 
 production = load('releaseDeployProd.yml')
-assert 'push' not in production['on']
-production_job = production['jobs']['release']
-assert production_job['environment'] == 'prod'
-assert any(step.get('name') == 'Verify production target identity' for step in production_job['steps'])
+assert set(production['jobs']) == {'frozen'}, (
+    "releaseDeployProd.yml grew a job beyond 'frozen': production promotion requires a fresh "
+    "owner decision after GOU-53/GOU-31 (see GOU-94); if that decision has landed, this guard "
+    "must be updated to assert the new 'release' job runs 'Verify production target identity'"
+)
+frozen_job = production['jobs']['frozen']
+assert any('exit 1' in step.get('run', '') for step in frozen_job['steps']), (
+    "the 'frozen' job must keep unconditionally refusing production promotion until GOU-94 lands"
+)
 PY
 
 echo "OK: deployment target and shared beta deployment guard fixtures"
