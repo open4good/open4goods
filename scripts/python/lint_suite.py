@@ -115,14 +115,30 @@ def lint_corpus(suite: LintSuite) -> None:
 
 
 def lint_governance_tools(suite: LintSuite) -> None:
-    """Exercise the recette evidence tools on disposable fixtures."""
+    """Exercise the recette evidence tools, the promotion/rollback fixtures (GOU-94 AC proof),
+    and the verify module's unit tests -- all by discovery, so a new suite is wired in by adding
+    the file rather than by editing this function."""
     suite.run("Recette tooling tests", ["bash", "scripts/tests/recette-tools.test.sh"])
-    suite.run("Paperclip readiness and deployment freeze", [sys.executable, "-m", "unittest", "discover",
-              "-s", "scripts/verify", "-p", "test_paperclip_readiness.py"])
-    suite.run("Beta delivery mandate", [sys.executable, "-m", "unittest", "discover",
-              "-s", "scripts/verify", "-p", "test_beta_mandate.py"])
-    suite.run("Promotion readiness gate", [sys.executable, "-m", "unittest", "discover",
-              "-s", "scripts/verify", "-p", "test_check_promotion_readiness.py"])
+
+    deploy_tests_dir = suite.root / "scripts" / "deploy" / "tests"
+    for script in sorted(deploy_tests_dir.glob("*.test.sh")):
+        relative = script.relative_to(suite.root)
+        suite.run(f"Deploy fixture: {relative.name}", ["bash", str(relative)])
+
+    # deployment-target-guard.test.sh asserts a deploy/{verify step} workflow shape that no
+    # longer exists (GOU-160); fixing it means editing deploy workflows, out of this gate's scope.
+    verify_tests_skip = {"deployment-target-guard.test.sh"}
+    verify_tests_dir = suite.root / "scripts" / "verify"
+    for script in sorted(verify_tests_dir.glob("*.test.sh")):
+        if script.name in verify_tests_skip:
+            continue
+        relative = script.relative_to(suite.root)
+        suite.run(f"Verify fixture: {relative.name}", ["bash", str(relative)])
+
+    suite.run(
+        "Verify module unit tests",
+        [sys.executable, "-m", "unittest", "discover", "-s", "scripts/verify", "-p", "test_*.py"],
+    )
 
 
 def lint_yaml(suite: LintSuite) -> None:

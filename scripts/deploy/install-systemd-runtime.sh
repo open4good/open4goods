@@ -9,6 +9,8 @@ usage() {
 
 unit_dir='/etc/systemd/system'
 environment_dir='/etc/open4goods'
+systemctl_bin="${O4G_SYSTEMCTL:-systemctl}"
+systemd_analyze_bin="${O4G_SYSTEMD_ANALYZE:-systemd-analyze}"
 while (($#)); do
   case "$1" in
     --unit-dir) unit_dir="${2:-}"; shift 2 ;;
@@ -31,8 +33,8 @@ install -D -m 0644 "$repo_root/ops/systemd/open4goods-nuxt@.service" "$unit_dir/
 install -D -m 0644 "$repo_root/ops/systemd/open4goods.target" "$unit_dir/open4goods.target"
 install -D -m 0644 "$repo_root/ops/systemd/opt-open4goods-.cached.mount" \
   "$unit_dir/opt-open4goods-.cached.mount"
-systemd-analyze verify "$unit_dir/open4goods@.service" "$unit_dir/open4goods-nuxt@.service" \
+"$systemd_analyze_bin" verify "$unit_dir/open4goods@.service" "$unit_dir/open4goods-nuxt@.service" \
   "$unit_dir/open4goods.target" "$unit_dir/opt-open4goods-.cached.mount"
-systemctl daemon-reload
-systemctl enable opt-open4goods-.cached.mount
-systemctl enable open4goods.target
+"$systemctl_bin" daemon-reload
+"$systemctl_bin" enable opt-open4goods-.cached.mount
+"$systemctl_bin" enable open4goods.target

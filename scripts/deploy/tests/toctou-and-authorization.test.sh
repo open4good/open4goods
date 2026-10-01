@@ -65,7 +65,9 @@ cp "$fixture/bin/systemctl" "$fixture/bin/curl" "$fixture/race-bin/"
 
 pids=()
 for _ in 1 2; do
-  PATH="$fixture/race-bin:$PATH" env -u BASH_ENV "$ROOT/scripts/deploy/publish-java-release.sh" \
+  PATH="$fixture/race-bin:$PATH" env -u BASH_ENV \
+    O4G_SYSTEMCTL="$fixture/race-bin/systemctl" O4G_CURL="$fixture/race-bin/curl" \
+    "$ROOT/scripts/deploy/publish-java-release.sh" \
     --release "$race_release" --bundle "$fixture/bundle-race" --service api \
     --health-url http://127.0.0.1/health --root "$fixture/runtime-race" \
     >>"$fixture/race.out" 2>&1 &
@@ -119,7 +121,9 @@ exec /usr/bin/cp "\$@"
 EOF
 chmod +x "$fixture/toctou-bin/cp"
 
-if PATH="$fixture/toctou-bin:$PATH" env -u BASH_ENV "$ROOT/scripts/deploy/publish-java-release.sh" \
+if PATH="$fixture/toctou-bin:$PATH" env -u BASH_ENV \
+  O4G_SYSTEMCTL="$fixture/toctou-bin/systemctl" O4G_CURL="$fixture/toctou-bin/curl" \
+  "$ROOT/scripts/deploy/publish-java-release.sh" \
   --release "$toctou_release" --bundle "$fixture/bundle-toctou" --service api \
   --health-url http://127.0.0.1/health --root "$fixture/runtime-toctou" \
   >"$fixture/toctou.out" 2>&1; then
@@ -137,7 +141,9 @@ test ! -L "$fixture/runtime-toctou/services/api/current"
 nuxt_release='3333333'
 build_bundle "$nuxt_release" "$fixture/bundle-nuxt"
 mkdir -p "$fixture/runtime-nuxt/releases"
-PATH="$fixture/bin:$PATH" env -u BASH_ENV "$ROOT/scripts/deploy/publish-java-release.sh" \
+PATH="$fixture/bin:$PATH" env -u BASH_ENV \
+  O4G_SYSTEMCTL="$fixture/bin/systemctl" O4G_CURL="$fixture/bin/curl" \
+  "$ROOT/scripts/deploy/publish-java-release.sh" \
   --release "$nuxt_release" --bundle "$fixture/bundle-nuxt" --service api \
   --health-url http://127.0.0.1/health --root "$fixture/runtime-nuxt" >/dev/null
 : > "$fixture/nuxt-systemctl.log"
@@ -150,7 +156,9 @@ EOF
 chmod +x "$fixture/race-bin/systemctl"
 nuxt_pids=()
 for _ in 1 2; do
-  PATH="$fixture/race-bin:$PATH" env -u BASH_ENV "$ROOT/scripts/deploy/publish-nuxt-release.sh" \
+  PATH="$fixture/race-bin:$PATH" env -u BASH_ENV \
+    O4G_SYSTEMCTL="$fixture/race-bin/systemctl" O4G_CURL="$fixture/race-bin/curl" \
+    "$ROOT/scripts/deploy/publish-nuxt-release.sh" \
     --release "$nuxt_release" --service frontend --health-url http://127.0.0.1/health \
     --root "$fixture/runtime-nuxt" >>"$fixture/nuxt-race.out" 2>&1 &
   nuxt_pids+=("$!")
@@ -172,15 +180,32 @@ for service in sbadmin api front-api ui b2b-api frontend b2b-frontend; do
   : > "$fixture/auth-environment/${service}.env"
   chmod 600 "$fixture/auth-environment/${service}.env"
 done
-printf '%s\n' '#!/usr/bin/env bash' 'echo "unit validation rejected" >&2' 'exit 1' > "$fixture/auth-bin/systemd-analyze"
 printf '%s\n' '#!/usr/bin/env bash' 'echo "$*" >> "'"$fixture"'/auth-systemctl.log"' 'exit 0' > "$fixture/auth-bin/systemctl"
-chmod +x "$fixture/auth-bin/systemd-analyze" "$fixture/auth-bin/systemctl"
-if PATH="$fixture/auth-bin:$PATH" env -u BASH_ENV "$ROOT/scripts/deploy/install-systemd-runtime.sh" \
+chmod +x "$fixture/auth-bin/systemctl"
+
+# Positive control: prove O4G_SYSTEMCTL/O4G_SYSTEMD_ANALYZE are actually wired to these stubs
+# before relying on the absence of a log entry below. Without this control, a stub that silently
+# failed to resolve (e.g. a typo'd env var name) would make the negative assertion pass vacuously,
+# because no stub -- passing or failing -- would ever be invoked.
+printf '%s\n' '#!/usr/bin/env bash' 'exit 0' > "$fixture/auth-bin/systemd-analyze-ok"
+chmod +x "$fixture/auth-bin/systemd-analyze-ok"
+PATH="$fixture/auth-bin:$PATH" env -u BASH_ENV \
+  O4G_SYSTEMCTL="$fixture/auth-bin/systemctl" O4G_SYSTEMD_ANALYZE="$fixture/auth-bin/systemd-analyze-ok" \
+  "$ROOT/scripts/deploy/install-systemd-runtime.sh" \
+  --unit-dir "$fixture/auth-unit-dir" --environment-dir "$fixture/auth-environment"
+grep -qx 'enable open4goods.target' "$fixture/auth-systemctl.log"
+control_log_lines="$(wc -l < "$fixture/auth-systemctl.log")"
+
+printf '%s\n' '#!/usr/bin/env bash' 'echo "unit validation rejected" >&2' 'exit 1' > "$fixture/auth-bin/systemd-analyze"
+chmod +x "$fixture/auth-bin/systemd-analyze"
+if PATH="$fixture/auth-bin:$PATH" env -u BASH_ENV \
+  O4G_SYSTEMCTL="$fixture/auth-bin/systemctl" O4G_SYSTEMD_ANALYZE="$fixture/auth-bin/systemd-analyze" \
+  "$ROOT/scripts/deploy/install-systemd-runtime.sh" \
   --unit-dir "$fixture/auth-unit-dir" --environment-dir "$fixture/auth-environment"; then
   echo "expected failed unit validation to block systemd install" >&2
   exit 1
 fi
-test ! -f "$fixture/auth-systemctl.log"
+test "$(wc -l < "$fixture/auth-systemctl.log")" -eq "$control_log_lines"
 
 ##############################################################################
 # 5. Authorization: the beta systemd bootstrap refuses to run without root, and without the

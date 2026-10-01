@@ -7,6 +7,7 @@ set -euo pipefail
 
 target_marker_file="${O4G_TARGET_MARKER_FILE:-/etc/open4goods/deployment-target}"
 cluster_fingerprint_file="${O4G_CLUSTER_FINGERPRINT_FILE:-/etc/open4goods/elasticsearch-cluster-fingerprint}"
+TR="${O4G_TR:-tr}"
 
 if [[ ! "${O4G_EXPECTED_TARGET}" =~ ^[a-z][a-z0-9-]*$ ]]; then
   echo "deployment target guard rejected an invalid expected target" >&2
@@ -25,7 +26,7 @@ read_marker() {
     exit 1
   fi
 
-  tr -d '\r\n' < "${marker_file}"
+  "${TR}" -d '\r\n' < "${marker_file}"
 }
 
 actual_target="$(read_marker "${target_marker_file}")"

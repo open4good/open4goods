@@ -27,9 +27,11 @@ printf '%s\n' '#!/usr/bin/env bash' 'if [ "${O4G_TEST_CURL_STATUS:-0}" -eq 0 ]; 
 chmod +x "$fixture/bin/systemctl" "$fixture/bin/curl"
 ln -s ../../releases/old "$fixture/runtime/services/api/current"
 
-# The deploy scripts are `#!/usr/bin/env bash`, so a BASH_ENV startup file inherited from the
-# caller runs first and can re-export PATH, silently handing them the real systemctl/curl. Drop
-# BASH_ENV for every invocation so the stubs stay the only reachable implementation.
+# Stubs are wired in by absolute path (O4G_SYSTEMCTL/O4G_CURL/O4G_SYSTEMD_ANALYZE), the real
+# guarantee that a test cannot reach a system binary. `isolated` also drops BASH_ENV as
+# defense in depth: the deploy scripts are `#!/usr/bin/env bash`, so a BASH_ENV startup file
+# inherited from the caller runs first and can re-export PATH, silently handing an unresolved
+# call the real systemctl/curl.
 isolated() { PATH="$fixture/bin:$PATH" env -u BASH_ENV "$@"; }
 
 resolved="$(isolated bash -c 'command -v systemctl')"
@@ -38,7 +40,11 @@ resolved="$(isolated bash -c 'command -v systemctl')"
   exit 1
 }
 
-isolated "$ROOT/scripts/deploy/publish-java-release.sh" --release abcdef1 --bundle "$fixture/bundle" \
+systemctl_stub="$fixture/bin/systemctl"
+curl_stub="$fixture/bin/curl"
+
+isolated env O4G_SYSTEMCTL="$systemctl_stub" O4G_CURL="$curl_stub" \
+  "$ROOT/scripts/deploy/publish-java-release.sh" --release abcdef1 --bundle "$fixture/bundle" \
   --service api --health-url http://127.0.0.1/health --root "$fixture/runtime"
 test "$(readlink "$fixture/runtime/services/api/current")" = ../../releases/abcdef1
 grep -qx 'restart open4goods@api.service' "$fixture/systemctl.log"
@@ -46,7 +52,8 @@ test "$(wc -l < "$fixture/systemctl.log")" -eq 1
 test ! -w "$fixture/runtime/releases/abcdef1/release-manifest"
 test -f "$fixture/runtime/releases/abcdef1/frontend-ssr/index.html"
 
-isolated "$ROOT/scripts/deploy/publish-nuxt-release.sh" --release abcdef1 \
+isolated env O4G_SYSTEMCTL="$systemctl_stub" O4G_CURL="$curl_stub" \
+  "$ROOT/scripts/deploy/publish-nuxt-release.sh" --release abcdef1 \
   --service frontend --health-url http://127.0.0.1/health --root "$fixture/runtime"
 test "$(readlink "$fixture/runtime/services/frontend/current")" = ../../releases/abcdef1/frontend-ssr
 grep -qx 'restart open4goods-nuxt@frontend.service' "$fixture/systemctl.log"
@@ -54,7 +61,7 @@ grep -qx 'restart open4goods-nuxt@frontend.service' "$fixture/systemctl.log"
 rm -f "$fixture/systemctl.log"
 ln -s ../../releases/old "$fixture/runtime/services/api/current.rollback"
 mv -Tf "$fixture/runtime/services/api/current.rollback" "$fixture/runtime/services/api/current"
-if isolated env O4G_TEST_CURL_STATUS=1 O4G_HEALTH_ATTEMPTS=1 O4G_HEALTH_DELAY_SECONDS=0 \
+if isolated env O4G_SYSTEMCTL="$systemctl_stub" O4G_CURL="$curl_stub" O4G_TEST_CURL_STATUS=1 O4G_HEALTH_ATTEMPTS=1 O4G_HEALTH_DELAY_SECONDS=0 \
   "$ROOT/scripts/deploy/publish-java-release.sh" --release abcdef1 \
   --bundle "$fixture/bundle" --service api --health-url http://127.0.0.1/health --root "$fixture/runtime"; then
   echo 'expected failing health check' >&2
@@ -66,7 +73,7 @@ test "$(wc -l < "$fixture/systemctl.log")" -eq 2
 
 ln -s ../../releases/old-frontend "$fixture/runtime/services/frontend/current.rollback"
 mv -Tf "$fixture/runtime/services/frontend/current.rollback" "$fixture/runtime/services/frontend/current"
-if isolated env O4G_TEST_CURL_STATUS=1 O4G_HEALTH_ATTEMPTS=1 O4G_HEALTH_DELAY_SECONDS=0 \
+if isolated env O4G_SYSTEMCTL="$systemctl_stub" O4G_CURL="$curl_stub" O4G_TEST_CURL_STATUS=1 O4G_HEALTH_ATTEMPTS=1 O4G_HEALTH_DELAY_SECONDS=0 \
   "$ROOT/scripts/deploy/publish-nuxt-release.sh" --release abcdef1 --service frontend \
   --health-url http://127.0.0.1/health --root "$fixture/runtime"; then
   echo 'expected failing Nuxt health check' >&2
@@ -83,7 +90,10 @@ done
 printf '%s\n' '#!/usr/bin/env bash' 'exit 0' > "$fixture/bin/systemd-analyze"
 printf '%s\n' '#!/usr/bin/env bash' 'echo "$*" >> "'"$fixture"'/systemctl.log"' 'exit 0' > "$fixture/bin/systemctl"
 chmod +x "$fixture/bin/systemd-analyze" "$fixture/bin/systemctl"
-isolated "$ROOT/scripts/deploy/install-systemd-runtime.sh" \
+systemd_analyze_stub="$fixture/bin/systemd-analyze"
+
+isolated env O4G_SYSTEMCTL="$systemctl_stub" O4G_SYSTEMD_ANALYZE="$systemd_analyze_stub" \
+  "$ROOT/scripts/deploy/install-systemd-runtime.sh" \
   --unit-dir "$fixture/unit-dir" --environment-dir "$fixture/environment"
 test -f "$fixture/unit-dir/open4goods@.service"
 test -f "$fixture/unit-dir/open4goods-nuxt@.service"
@@ -97,7 +107,8 @@ grep -qx 'enable open4goods.target' "$fixture/systemctl.log"
 grep -qx 'enable opt-open4goods-.cached.mount' "$fixture/systemctl.log"
 
 chmod 644 "$fixture/environment/api.env"
-if isolated "$ROOT/scripts/deploy/install-systemd-runtime.sh" \
+if isolated env O4G_SYSTEMCTL="$systemctl_stub" O4G_SYSTEMD_ANALYZE="$systemd_analyze_stub" \
+  "$ROOT/scripts/deploy/install-systemd-runtime.sh" \
   --unit-dir "$fixture/unit-dir" --environment-dir "$fixture/environment"; then
   echo 'expected insecure environment file to be rejected' >&2
   exit 1
