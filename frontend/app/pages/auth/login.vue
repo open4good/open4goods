@@ -25,11 +25,24 @@
       </v-btn>
     </v-form>
     <v-alert v-if="error" type="error" class="mt-4">{{ error }}</v-alert>
+    <template v-if="isGoogleSsoEnabled">
+      <v-divider class="my-4" />
+      <v-btn
+        variant="outlined"
+        block
+        prepend-icon="mdi-google"
+        :href="googleSignInHref"
+        data-testid="google-sign-in"
+      >
+        {{ $t('auth.google.signIn') }}
+      </v-btn>
+    </template>
   </v-container>
 </template>
 
 <script setup lang="ts">
 import { authService } from '~~/shared/api-client/services/auth.services'
+import { isSafeRedirectTarget } from '~~/shared/utils/_safe-redirect'
 import { useAuthStore } from '~/stores/useAuthStore'
 
 const username = ref('')
@@ -40,8 +53,14 @@ const valid = ref(true)
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
+const config = useRuntimeConfig()
 
 const canonicalUrl = useCanonicalUrl()
+
+const isGoogleSsoEnabled = computed(() => config.public.googleSsoEnabled)
+const googleSignInHref = computed(
+  () => `/auth/google?redirect=${encodeURIComponent(resolveRedirectTarget())}`
+)
 
 useHead(() => ({
   link: canonicalUrl.value
@@ -57,11 +76,6 @@ useHead(() => ({
 useSeoMeta({
   ogUrl: () => canonicalUrl.value || undefined,
 })
-
-const isSafeRedirectTarget = (target: unknown): target is string =>
-  typeof target === 'string' &&
-  target.startsWith('/') &&
-  !target.startsWith('//')
 
 const resolveRedirectTarget = () => {
   const redirectQuery = route.query.redirect
