@@ -15,7 +15,7 @@ mvn test
 
 See the [main project](../../README.md) for details.
 
-### CSV column mapping — no label-guessing
+### CSV column mapping - no label-guessing
 
 `FeedIndexingWorker` reads each CSV cell only from the column names declared in the feed's
 `csvDatasource` configuration (`CsvDataSourceProperties`: `url`, `price`, `name`, `image`,
