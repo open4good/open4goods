@@ -13,6 +13,9 @@
     "scripts/verify/check_control_invocations.py": {
       "invokedBy": ["scripts/python/lint_suite.py"]
     },
+    "scripts/verify/check_usage_policy_registry.py": {
+      "invokedBy": ["scripts/python/lint_suite.py"]
+    },
     "scripts/verify/check_product_backup_qualification.py": {
       "invokedBy": ["scripts/local/open4goods.sh"]
     },
