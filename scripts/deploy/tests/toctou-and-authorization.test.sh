@@ -20,14 +20,15 @@ build_bundle() {
   local src="$fixture/src-${release}"
   rm -rf -- "$src"
   mkdir -p "$src/frontend-ssr" "$src/b2b-frontend"
-  for name in sbadmin api front-api ui b2b-api; do
+  for name in sbadmin api front-api ui b2b-api exposed-docs geocode; do
     printf '%s\n' "$name-$release" > "$src/${name}.jar"
   done
   printf '%s\n' "frontend-$release" > "$src/frontend-ssr/index.html"
   printf '%s\n' "b2b-$release" > "$src/b2b-frontend/index.html"
   "$ROOT/scripts/deploy/build-release-bundle.sh" --release "$release" --contract-version 1 --output "$output" \
     --sbadmin "$src/sbadmin.jar" --api "$src/api.jar" --front-api "$src/front-api.jar" \
-    --ui "$src/ui.jar" --b2b-api "$src/b2b-api.jar" --frontend-ssr "$src/frontend-ssr" \
+    --ui "$src/ui.jar" --b2b-api "$src/b2b-api.jar" --exposed-docs "$src/exposed-docs.jar" \
+    --geocode "$src/geocode.jar" --frontend-ssr "$src/frontend-ssr" \
     --b2b-frontend "$src/b2b-frontend"
 }
 

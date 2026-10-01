@@ -2,7 +2,7 @@
 # Install one verified Java artifact and restore its prior symlink if health fails.
 set -euo pipefail
 
-readonly JAVA_SERVICES=(sbadmin api front-api ui b2b-api)
+readonly JAVA_SERVICES=(sbadmin api front-api ui b2b-api exposed-docs geocode)
 
 systemctl_bin="${O4G_SYSTEMCTL:-systemctl}"
 curl_bin="${O4G_CURL:-curl}"
