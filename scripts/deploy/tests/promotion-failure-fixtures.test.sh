@@ -52,6 +52,17 @@ printf '%s\n' b2b > "$fixture/b2b-frontend/index.html"
   --geocode "$fixture/geocode.jar" --frontend-ssr "$fixture/frontend-ssr" \
   --b2b-frontend "$fixture/b2b-frontend"
 
+write_gate_proof() {
+  local proof_file="$1" release="$2" manifest_path="$3"
+  local digest generated_at
+  digest="$(sha256sum "$manifest_path" | awk '{print $1}')"
+  generated_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  printf '{"ready": true, "candidateSha": "%s", "promotionTarget": "beta", "manifestDigest": "%s", "generatedAt": "%s"}\n' \
+    "$release" "$digest" "$generated_at" > "$proof_file"
+}
+write_gate_proof "$fixture/gate-proof.json" abcdef1 "$fixture/bundle/release-manifest"
+gate_args=(--promotion-target beta --gate-proof "$fixture/gate-proof.json")
+
 fresh_runtime_root() {
   local label="$1"
   local root="$fixture/runtime-${label}"
@@ -87,7 +98,7 @@ root="$(fresh_runtime_root corrupt-manifest)"
 rm -f "$fixture/systemctl.log"
 assert_publish_fails corrupt-manifest \
   "$ROOT/scripts/deploy/publish-java-release.sh" --release abcdef1 --bundle "$corrupt_manifest_bundle" \
-  --service api --health-url http://127.0.0.1/health --root "$root"
+  --service api --health-url http://127.0.0.1/health --root "$root" "${gate_args[@]}"
 grep -q 'manifest contract is invalid' "$fixture/last-stderr.log"
 assert_symlink_unchanged "$root" ../../releases/old corrupt-manifest
 [[ ! -d "$root/releases/abcdef1" ]] || { echo 'FAIL (corrupt-manifest): release directory must not be staged' >&2; exit 1; }
@@ -101,7 +112,7 @@ root="$(fresh_runtime_root digest-mismatch)"
 rm -f "$fixture/systemctl.log"
 assert_publish_fails digest-mismatch \
   "$ROOT/scripts/deploy/publish-java-release.sh" --release abcdef1 --bundle "$digest_mismatch_bundle" \
-  --service api --health-url http://127.0.0.1/health --root "$root"
+  --service api --health-url http://127.0.0.1/health --root "$root" "${gate_args[@]}"
 grep -q 'invalid Java artifact: api' "$fixture/last-stderr.log"
 assert_symlink_unchanged "$root" ../../releases/old digest-mismatch
 [[ ! -d "$root/releases/abcdef1" ]] || { echo 'FAIL (digest-mismatch): release directory must not be staged' >&2; exit 1; }
@@ -115,7 +126,7 @@ root="$(fresh_runtime_root missing-artifact)"
 rm -f "$fixture/systemctl.log"
 assert_publish_fails missing-artifact \
   "$ROOT/scripts/deploy/publish-java-release.sh" --release abcdef1 --bundle "$missing_artifact_bundle" \
-  --service api --health-url http://127.0.0.1/health --root "$root"
+  --service api --health-url http://127.0.0.1/health --root "$root" "${gate_args[@]}"
 grep -q 'invalid Java artifact: ui' "$fixture/last-stderr.log"
 assert_symlink_unchanged "$root" ../../releases/old missing-artifact
 [[ ! -f "$fixture/systemctl.log" ]] || { echo 'FAIL (missing-artifact): systemctl must not run' >&2; exit 1; }
@@ -126,7 +137,7 @@ rm -f "$fixture/systemctl.log"
 assert_publish_fails health-check-failure \
   env O4G_TEST_CURL_STATUS=1 O4G_HEALTH_ATTEMPTS=1 O4G_HEALTH_DELAY_SECONDS=0 \
   "$ROOT/scripts/deploy/publish-java-release.sh" --release abcdef1 --bundle "$fixture/bundle" \
-  --service api --health-url http://127.0.0.1/health --root "$root"
+  --service api --health-url http://127.0.0.1/health --root "$root" "${gate_args[@]}"
 grep -q 'health check failed for api; restoring prior release' "$fixture/last-stderr.log"
 assert_symlink_unchanged "$root" ../../releases/old health-check-failure
 test "$(wc -l < "$fixture/systemctl.log")" -eq 2
@@ -139,7 +150,7 @@ printf 'crashed-mid-stage\n' > "$root/releases/abcdef1/sbadmin.jar"
 rm -f "$fixture/systemctl.log"
 assert_publish_fails partial-write \
   "$ROOT/scripts/deploy/publish-java-release.sh" --release abcdef1 --bundle "$fixture/bundle" \
-  --service api --health-url http://127.0.0.1/health --root "$root"
+  --service api --health-url http://127.0.0.1/health --root "$root" "${gate_args[@]}"
 grep -q 'existing release is incomplete' "$fixture/last-stderr.log"
 assert_symlink_unchanged "$root" ../../releases/old partial-write
 [[ ! -f "$root/releases/abcdef1/release-manifest" ]] || { echo 'FAIL (partial-write): must not backfill the manifest' >&2; exit 1; }
@@ -151,13 +162,13 @@ nuxt_root="$fixture/runtime-nuxt"
 mkdir -p "$nuxt_root/services/frontend"
 ln -s ../../releases/old-frontend "$nuxt_root/services/frontend/current"
 isolated "$ROOT/scripts/deploy/publish-java-release.sh" --release abcdef1 --bundle "$fixture/bundle" \
-  --service api --health-url http://127.0.0.1/health --root "$nuxt_root" >/dev/null
+  --service api --health-url http://127.0.0.1/health --root "$nuxt_root" "${gate_args[@]}" >/dev/null
 chmod -R u+w "$nuxt_root/releases/abcdef1"
 : > "$nuxt_root/releases/abcdef1/frontend-ssr.tar.gz"
 rm -f "$fixture/systemctl.log"
 assert_publish_fails nuxt-digest-mismatch \
   "$ROOT/scripts/deploy/publish-nuxt-release.sh" --release abcdef1 --service frontend \
-  --health-url http://127.0.0.1/health --root "$nuxt_root"
+  --health-url http://127.0.0.1/health --root "$nuxt_root" "${gate_args[@]}"
 grep -q 'release artifact checksum does not match' "$fixture/last-stderr.log"
 test "$(readlink "$nuxt_root/services/frontend/current")" = ../../releases/old-frontend
 [[ ! -f "$fixture/systemctl.log" ]] || { echo 'FAIL (nuxt-digest-mismatch): systemctl must not run' >&2; exit 1; }
