@@ -594,6 +594,8 @@ case "$command_name" in
     }
     python3 "$ROOT/scripts/migration/pin_product_backup.py" \
       --source-uri "$PRODUCT_BACKUP_SOURCE_URI" --output "$LOCAL_ROOT/backup/products-backup-pin.json"
+    python3 "$ROOT/scripts/verify/check_product_backup_qualification.py" \
+      "$LOCAL_ROOT/backup/products-backup-pin.json"
     if [ -f "$XWIKI_XAR_PATH" ]; then unzip -tq "$XWIKI_XAR_PATH" >/dev/null; fi
     echo "backup and optional XAR verification passed"
     ;;
