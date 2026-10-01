@@ -5,12 +5,16 @@ and for the merge-based measurement's identity handling and conflict/environment
 
 from __future__ import annotations
 
+import contextlib
 import importlib.util
+import io
+import os
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 MODULE_PATH = Path(__file__).with_name("check_corpus_budget.py")
 SPEC = importlib.util.spec_from_file_location("check_corpus_budget", MODULE_PATH)
@@ -187,6 +191,67 @@ class MergeIdentityAndConflictTests(unittest.TestCase):
 
         self.assertNotEqual(merged.returncode, 0)
         self.assertFalse(BUDGET.merge_left_conflicts(str(worktree_dir)))
+
+    def _run_merge_check(self, repo: Path, base_ref: str) -> tuple[int, str]:
+        """run_merge_check() against repo's HEAD, with the runner's condition in
+        the ambient environment: no git identity reachable from any variable or
+        config file. run_merge_check() takes no env parameter -- it is the
+        production entry point -- so the condition is established in os.environ.
+        """
+        captured = io.StringIO()
+        with mock.patch.object(BUDGET, "ROOT", repo), \
+                mock.patch.dict(os.environ, self.no_identity_env, clear=True), \
+                contextlib.redirect_stderr(captured):
+            code = BUDGET.run_merge_check(base_ref)
+        return code, captured.getvalue()
+
+    def test_run_merge_check_reports_a_real_conflict_as_a_conflict(self) -> None:
+        """A content conflict exits 1 and says so. Neutralising the
+        merge_left_conflicts() branch in run_merge_check() fails this test: the
+        helpers being correct in isolation does not prove they are wired up.
+        """
+        repo = self._conflicting_repo()
+
+        code, stderr = self._run_merge_check(repo, "main")
+
+        self.assertEqual(code, 1, msg=stderr)
+        self.assertIn("merge conflict with the base branch", stderr)
+        self.assertNotIn("environment or tooling problem", stderr)
+
+    def test_run_merge_check_reports_an_unmergeable_ref_as_an_environment_failure(self) -> None:
+        """A merge that never reaches any path exits 2 and must not accuse a
+        conflict -- the false diagnosis GOU-185 exists to remove.
+        """
+        repo = self._init_repo()
+
+        code, stderr = self._run_merge_check(repo, "does-not-exist")
+
+        self.assertEqual(code, 2, msg=stderr)
+        self.assertIn("environment or tooling problem", stderr)
+        self.assertIn("do not look for conflicting files", stderr.replace("\n", " "))
+        self.assertNotIn("Merge conflict between HEAD", stderr)
+
+    def _conflicting_repo(self) -> Path:
+        """A repo whose HEAD (branch "feature") conflicts with "main" on file.txt."""
+        repo = self._init_repo()
+        self._git(repo, "checkout", "--quiet", "-b", "feature")
+        (repo / "file.txt").write_text("feature line\n", encoding="utf-8")
+        self._git(repo, "add", "file.txt")
+        self._git(
+            repo,
+            "-c", "user.name=seed", "-c", "user.email=seed@invalid",
+            "commit", "--quiet", "-m", "feature changes the line",
+        )
+        self._git(repo, "checkout", "--quiet", "main")
+        (repo / "file.txt").write_text("main line\n", encoding="utf-8")
+        self._git(repo, "add", "file.txt")
+        self._git(
+            repo,
+            "-c", "user.name=seed", "-c", "user.email=seed@invalid",
+            "commit", "--quiet", "-m", "main changes the same line",
+        )
+        self._git(repo, "checkout", "--quiet", "feature")
+        return repo
 
 
 if __name__ == "__main__":
