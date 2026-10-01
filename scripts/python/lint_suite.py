@@ -98,6 +98,16 @@ def lint_corpus(suite: LintSuite) -> None:
         "Corpus budget",
         [sys.executable, "scripts/verify/check_corpus_budget.py"],
     )
+    base_ref = os.environ.get("GITHUB_BASE_REF") or "main"
+    suite.run(
+        "Corpus budget direction",
+        [
+            sys.executable,
+            "scripts/verify/check_corpus_budget.py",
+            "--assert-no-ceiling-increase",
+            f"origin/{base_ref}",
+        ],
+    )
     suite.run(
         "Deployment inputs",
         [sys.executable, "scripts/verify/check_deployment_inputs.py"],
