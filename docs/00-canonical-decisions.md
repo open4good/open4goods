@@ -74,3 +74,9 @@ ADR that changes a rule updates the entry here in the same commit.
     healthy days and verified restoration.
     Merges run CI without deployment. Final qualification uses a recent pinned product
     backup and explicit provider enrichment; startup never launches heavy ingestion jobs.
+15. Legacy backup import exposes explicit INVENTORY, SAMPLE, APPLY, STATUS and CANCEL
+    operations, never run on boot. Progress is a per-file checkpoint that resumes by
+    decompress-and-skip, never by seeking a compressed offset, and advances only once a
+    batch is fully reconciled. Record ids are deterministic, so the target store's own
+    find-before-write is the dedup oracle: a conflicting duplicate is dead-lettered on
+    both sides for review instead of a thread-order winner.

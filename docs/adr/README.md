@@ -39,3 +39,4 @@ contract, infrastructure, data layout, security posture or developer workflow.
 | [0017](0017-eprel-sourced-facets-are-zero-rated.md) | ADR 0017: EPREL-sourced facets are zero-rated | ACCEPTED | -- |
 | [0018](0018-promotion-readiness-gate.md) | ADR 0018: Local promotion readiness gate | ACCEPTED | 8, 14 |
 | [0019](0019-dependency-maintenance-policy.md) | ADR 0019: Dependency maintenance and release policy | ACCEPTED | -- |
+| [0020](0020-legacy-backup-import-contract.md) | ADR 0020: Legacy backup import contract | ACCEPTED | 15 |
