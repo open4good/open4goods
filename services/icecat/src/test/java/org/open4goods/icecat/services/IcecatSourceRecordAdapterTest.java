@@ -237,11 +237,19 @@ class IcecatSourceRecordAdapterTest {
         assertThat(head.assertions()).anySatisfy(assertion -> assertThat(assertion.field().key()).isEqualTo("feature:555"));
     }
 
+    /**
+     * The policy reference carried by every head must name a row that actually exists: resolution
+     * is version-exact, so a reference to a superseded version resolves to nothing and silently
+     * denies every surface. This pins the reviewed GOU-95 row (NUDGER_WEB only) instead of letting
+     * a stale version read as a deliberate refusal.
+     */
     @Test
-    void defaultIcecatPolicyDeniesAllPublicationSurfacesUntilReviewed() throws Exception {
+    void icecatPolicyOpensOnlyTheReviewedNudgerWebSurface() throws Exception {
         var head = adapter.adapt(itemWithId(123), EN, Set.of(EN), "v1", RETRIEVED).orElseThrow().candidate();
         SourceUsagePolicyRegistry policies = SourceUsagePolicyRegistry.loadDefault();
 
+        assertThat(policies.allows(head.key().sourceId(), head.usagePolicyRef(), SourceContentType.ATTRIBUTE,
+                ProjectionSurface.NUDGER_WEB, RETRIEVED)).isTrue();
         assertThat(policies.allows(head.key().sourceId(), head.usagePolicyRef(), SourceContentType.ATTRIBUTE,
                 ProjectionSurface.B2B_API, RETRIEVED)).isFalse();
         assertThat(policies.allows(head.key().sourceId(), head.usagePolicyRef(), SourceContentType.ATTRIBUTE,

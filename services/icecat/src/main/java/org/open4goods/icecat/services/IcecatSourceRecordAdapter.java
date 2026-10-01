@@ -75,8 +75,12 @@ public class IcecatSourceRecordAdapter {
 
     /** Icecat source identity used by the policy and source-record contracts. */
     public static final String SOURCE_ID = "icecat";
-    /** Policy reference is intentionally deny-by-default until the owner approves it. */
-    public static final SourceUsagePolicyRef USAGE_POLICY = new SourceUsagePolicyRef("icecat-open-content", "1");
+    /**
+     * GOU-95/GOU-105: Open Icecat content reviewed for NUDGER_WEB only, share-alike, with
+     * attribution. Policy resolution is version-exact, so this must name the reviewed row's
+     * version: an unknown version resolves to nothing and denies every surface.
+     */
+    public static final SourceUsagePolicyRef USAGE_POLICY = new SourceUsagePolicyRef("icecat-open-content", "2");
 
     private static final String FIELD_NAMESPACE = "icecat";
     private static final URI EVIDENCE_BASE = URI.create("urn:o4g:icecat:record:");
