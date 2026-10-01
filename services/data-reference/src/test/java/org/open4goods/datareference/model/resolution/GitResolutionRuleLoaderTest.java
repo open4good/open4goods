@@ -205,7 +205,7 @@ class GitResolutionRuleLoaderTest {
 
     @Test
     void rejectsARepeatedSourceInRankedSources() {
-        String invalid = fixtureJson().replace("[ \"icecat\", \"merchant-feed.awin\" ]", "[ \"icecat\", \"icecat\" ]");
+        String invalid = fixtureJson().replace("[ \"icecat\", \"eprel\" ]", "[ \"icecat\", \"icecat\" ]");
 
         assertThatThrownBy(() -> load(invalid))
                 .isInstanceOf(ResolutionRuleValidationException.class)
@@ -214,11 +214,23 @@ class GitResolutionRuleLoaderTest {
 
     @Test
     void rejectsAnEmptyRankedSourcesList() {
-        String invalid = fixtureJson().replace("[ \"icecat\", \"merchant-feed.awin\" ]", "[ ]");
+        String invalid = fixtureJson().replace("[ \"icecat\", \"eprel\" ]", "[ ]");
 
         assertThatThrownBy(() -> load(invalid))
                 .isInstanceOf(ResolutionRuleValidationException.class)
                 .hasMessageContaining("rankedSources must not be empty");
+    }
+
+    @Test
+    void rejectsAMerchantFeedSourceRankedForAReferenceAttribute() {
+        // AC5: a merchant-feed source stays authoritative for its own offer and
+        // price via OfferHead only, and must never rank for a canonical reference
+        // attribute resolved by this registry.
+        String invalid = fixtureJson().replace("[ \"icecat\", \"eprel\" ]", "[ \"icecat\", \"merchant-feed.awin\" ]");
+
+        assertThatThrownBy(() -> load(invalid))
+                .isInstanceOf(ResolutionRuleValidationException.class)
+                .hasMessageContaining("must not rank a merchant-feed source");
     }
 
     @Test
@@ -232,7 +244,7 @@ class GitResolutionRuleLoaderTest {
 
     @Test
     void rejectsASourceWithNoUsagePolicyEntry() {
-        String invalid = fixtureJson().replace("\"icecat\", \"merchant-feed.awin\"", "\"icecat\", \"unlisted-source\"");
+        String invalid = fixtureJson().replace("\"icecat\", \"eprel\"", "\"icecat\", \"unlisted-source\"");
 
         assertThatThrownBy(() -> load(invalid))
                 .isInstanceOf(ResolutionRuleValidationException.class)
