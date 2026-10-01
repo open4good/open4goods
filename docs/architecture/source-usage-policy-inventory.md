@@ -49,7 +49,7 @@ record cannot carry six publisher agreements.
 | `merchant-feed.awin` / 1 | IDENTITY, ATTRIBUTE, OFFER, PRICE | NUDGER_WEB, B2B_API | VALUE_ADDED_ONLY | P1825D |
 | `merchant-feed.effiliation` / 1 | IDENTITY, ATTRIBUTE, OFFER, PRICE | NUDGER_WEB, B2B_API | VALUE_ADDED_ONLY | P1825D |
 | `merchant-feed.tradetracker` / `.kwanko` / `.webgains` / `.cj` - 1 | - (total refusal) | - | PROHIBITED | PT0S |
-| `legacy-product-backup` / 2 | IDENTITY (in `surfaceGrants`) | NUDGER_WEB (in `surfaceGrants`) | PROHIBITED | P1825D |
+| `legacy-product-backup` / 3 | IDENTITY | NUDGER_WEB | VALUE_ADDED_ONLY | P1825D |
 | `amazon-paapi-quarantine` / 2 | - (total refusal, `revokedAt` set) | - | PROHIBITED | PT0S |
 
 EPREL's B2B grant is free-with-account (T&C 4§2(a)). Icecat's OPL forbids
@@ -66,9 +66,9 @@ licence terms, replaced by the verified [Open Content License v1.4](https://icec
 [Fair Use Policy](https://iceclog.com/open-icecat-fair-use-policy/) and
 [Disclaimer](https://icecat.biz/ssr/en/menu/disclaimer).
 
-Open question for the resource owner: `legacy-product-backup` / 2 records
-`IDENTITY → NUDGER_WEB` in `surfaceGrants` but carries
-`redistribution: PROHIBITED`, and `allows()` requires the latter to be
-non-`PROHIBITED` before ever reading `surfaceGrants` - so as specified this row
-publishes nothing, unlike `icecat-open-content`, where GOU-95 reasons through
-that same interaction. The JSON implements the ratified fields literally.
+Lead Tech/Goulven resolved the `legacy-product-backup` coherence question
+raised while authoring this inventory: `redistribution` moved from
+`PROHIBITED` to `VALUE_ADDED_ONLY` (version 3) so the ratified
+`IDENTITY → NUDGER_WEB` `surfaceGrants` entry is actually effective, instead
+of being shadowed by `allows()`'s redistribution gate, mirroring how
+`icecat-open-content` reasons through the same interaction.
