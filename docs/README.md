@@ -41,6 +41,7 @@ owned, and linked from this index when they become durable project knowledge.
 - [ADR index](adr/README.md)
 - [Icecat reference data](architecture/icecat-reference-data.md)
 - [Amazon PA-API completion](architecture/amazon-paapi-completion.md)
+- [Resumable legacy backup to neutral data importer](operations/legacy-backup-neutral-import.md)
 - [Source usage policy inventory](architecture/source-usage-policy-inventory.md)
 - [ETIM integration and cross-referential design](architecture/etim_integration_design.md)
 - [ADR 0001: EPREL matching logic scoring](adr/0001-eprel-matching-logic-scoring.md)
