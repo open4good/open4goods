@@ -9,6 +9,7 @@ docker compose --project-directory "$ROOT" --env-file "$ROOT/.env.buildhost.exam
 python3 -m unittest "$ROOT/scripts/local/test_product_backup_sample.py"
 python3 -m unittest "$ROOT/scripts/local/test_resolved_configs.py"
 bash "$ROOT/scripts/local/test_preflight_gate.sh"
+bash "$ROOT/scripts/local/test_isolated_maven_repo.sh"
 
 # grep, not rg: rg is absent for this account on the shared build host (see
 # docs/operations/buildhost-runtime.md), and this script must run there.
