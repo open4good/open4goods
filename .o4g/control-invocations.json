@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "controls": {
+    "scripts/verify/check_corpus_budget.py": {
+      "invokedBy": ["scripts/python/lint_suite.py"]
+    },
+    "scripts/verify/check_deployment_inputs.py": {
+      "invokedBy": ["scripts/python/lint_suite.py"]
+    },
+    "scripts/verify/check_runtime_input_contract.py": {
+      "invokedBy": ["scripts/python/lint_suite.py"]
+    },
+    "scripts/verify/check_control_invocations.py": {
+      "invokedBy": ["scripts/python/lint_suite.py"]
+    },
+    "scripts/verify/check_product_backup_qualification.py": {
+      "invokedBy": ["scripts/local/open4goods.sh"]
+    },
+    "scripts/deploy/verify_gate_proof.py": {
+      "invokedBy": ["scripts/deploy/publish-java-release.sh", "scripts/deploy/publish-nuxt-release.sh"]
+    },
+    "scripts/verify/check_github_environment_inputs.py": {
+      "exempt": true,
+      "justification": "Lists GitHub Environment secret/variable names via `gh secret list` / `gh variable list`, which needs a repo-admin-scoped token. The workflows' default GITHUB_TOKEN cannot read that listing (no such permission exists in the Actions permissions block), and this repo provisions no admin PAT for CI -- adding one to wire this in would itself be the sensitive, separately-reviewed change GOU-178 is not scoped to make. Run manually by an operator with `gh auth login` before rotating ops/config/deployment-inputs.yml or ops/config/runtime-input-contract.yml, the same class of exemption as check_promotion_readiness.py below."
+    },
+    "scripts/verify/check_promotion_readiness.py": {
+      "exempt": true,
+      "justification": "Reconciles the live Paperclip project (phase labels, owner decision, beta mandate) before a promotion; its own docstring states it is local, read-only and requires the live Paperclip API, which CI does not have. publish-java-release.sh and publish-nuxt-release.sh instead require and verify an Ed25519-signed gate proof (scripts/deploy/verify_gate_proof.py) that this script alone produces -- see docs/operations/promotion-readiness-gate.md. Running it is therefore an operator action before publish, not a CI or publish-script invocation."
+    }
+  }
+}

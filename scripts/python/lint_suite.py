@@ -116,6 +116,10 @@ def lint_corpus(suite: LintSuite) -> None:
         "Runtime input contract",
         [sys.executable, "scripts/verify/check_runtime_input_contract.py"],
     )
+    suite.run(
+        "Control invocation registry",
+        [sys.executable, "scripts/verify/check_control_invocations.py"],
+    )
     for label, script in (
         ("Generated ADR index", "scripts/generate/generate_decision_index.py"),
         ("Generated MCP client configs", "scripts/generate/generate_mcp_configs.py"),
