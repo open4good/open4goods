@@ -30,7 +30,10 @@ import org.open4goods.datareference.model.evidence.LocalizedTextEvidence;
 import org.open4goods.datareference.model.evidence.MediaEvidence;
 import org.open4goods.datareference.model.evidence.RelationEvidence;
 import org.open4goods.datareference.model.evidence.ScalarEvidence;
+import org.open4goods.datareference.model.grouping.GroupId;
+import org.open4goods.datareference.model.grouping.GroupType;
 import org.open4goods.datareference.model.projection.EvaluationSummary;
+import org.open4goods.datareference.model.projection.GroupAssignment;
 import org.open4goods.datareference.model.projection.OfferSummary;
 import org.open4goods.datareference.model.projection.ProductReferenceProjection;
 import org.open4goods.datareference.model.projection.ProjectionReplayInputs;
@@ -126,7 +129,11 @@ final class ContractFixtures {
                         Map.of(new CanonicalAttributeId("impact"), new DecimalValue(new BigDecimal("3.20"))),
                         Map.of("class-median", new DecimalValue(new BigDecimal("7.10"))),
                         List.of(new CanonicalAttributeId("repair-index"))),
-                new SearchSummary(new RuleVersion("lexical-search", 1), List.of("television", "4k")));
+                new SearchSummary(new RuleVersion("lexical-search", 1), List.of("television", "4k")),
+                new GroupAssignment(
+                        new GroupId(GroupType.MODEL, "television-acme-4k55"),
+                        List.of(new GroupId(GroupType.FAMILY, "acme-4k-series")),
+                        List.of("acme", "4k55")));
     }
 
     private static ResolvedValue resolved(String slug,

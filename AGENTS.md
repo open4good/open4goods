@@ -211,6 +211,16 @@ agents active); the default
 `mvn --offline clean install` without `-Dmaven.repo.local` remains fine for a
 normal, uncontended full-reactor build.
 
+The script purges run directories under `${HOME}/.local/state/open4goods-m2/`
+that have not been bootstrapped or reused in the last 24h (`O4G_LOCAL_M2_MAX_AGE_HOURS`),
+and refuses to bootstrap a new one when free space on that partition drops
+below 20GiB (`O4G_LOCAL_M2_MIN_FREE_GIB`), with an explicit error instead of
+silently filling the host. This is the same "nettoie tes conteneurs et images
+en fin de run" rule the team applies to Docker state, extended to this
+directory: a run that dies without cleaning up is the normal case here, not
+the rare one, so do not rely on the calling run to delete its own isolated
+repository - the next bootstrap's purge pass is what actually reclaims it.
+
 Run the canonical lint suite before handoff:
 
 ```bash
@@ -222,8 +232,11 @@ The suite covers Markdown/JSON text normalization, YAML, shell scripts, GitHub
 Actions, Docker Compose, Dockerfiles when `hadolint` is installed, and the Nuxt
 frontend lint checks. It does not build or generate the frontend.
 
-The repository uses a tracked pre-push hook in `.githooks/pre-push`. Enable it
-with:
+The repository uses two tracked hooks: `.githooks/pre-push` runs the lint
+suite before pushing, and `.githooks/pre-commit` refuses a commit made
+directly on the default branch (see
+[docs/operations/default-branch-commit-guard.md](docs/operations/default-branch-commit-guard.md),
+GOU-183). Enable both with:
 
 ```bash
 git config core.hooksPath .githooks

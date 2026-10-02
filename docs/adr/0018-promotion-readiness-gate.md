@@ -72,3 +72,49 @@ production keeps its own dedicated decision (decision 14).
 
 Not wired into `.github/workflows/testAndPublishBeta.yml` or any live
 deploy workflow - that stays frozen by GOU-91, as a separate follow-up.
+
+## Gate proof seal (GOU-174, GOU-177)
+
+The clean-pass report is sealed so `scripts/deploy/verify_gate_proof.py`,
+run later on the deploy host with no Paperclip access, can authenticate it
+instead of trusting a hand-written file (GOU-174). GOU-174's HMAC made the
+verifier a second holder of the signing secret: it ran inside the publish
+script's own process, so whoever could read that process's environment
+could forge a new proof, not just check one.
+
+GOU-177 replaces the HMAC with Ed25519 (`scripts/deploy/gate_proof_seal.py`).
+The producer (`check_promotion_readiness.py`) holds the private signing key
+(`O4G_GATE_PROOF_SIGNING_KEY`, a secret, provisioned only where it runs with
+live Paperclip access). The verifier holds only the matching public key
+(`scripts/deploy/gate_proof_public_key.hex`, not a secret, or
+`O4G_GATE_PROOF_PUBLIC_KEY` for tests) - it authenticates a seal but cannot
+produce one. The publish-script operator's account therefore never holds
+anything that mints a valid seal, however fully its environment is read.
+
+Rejected alternative: symmetric HMAC isolated by host file permissions
+(`install-systemd-runtime.sh`'s 0600 `exposed-docs.env`/`geocode.env`
+pattern). That isolates a human operator from a runtime secret a started
+process already holds - a different boundary than isolating the verifying
+process itself from a key it must read synchronously, inline, to do its
+job; doing that would need a privilege-separation boundary (a second
+account, reachable only through a narrow audited `sudo` rule) this repo
+has no tooling for. Ed25519 closes the hole structurally instead: there is
+no secret on the verifying side to isolate.
+
+Dependency cost: `cryptography` is the only third-party Python import
+under `scripts/deploy/` or `scripts/verify/`. CI's bare `ubuntu-latest`
+image lacks it, so `lint-suite.yml` installs it; any promotion host must
+too. Missing it fails closed, not crashes mid-publish: both scripts catch
+`ModuleNotFoundError` on import and report it via `GateProofError`/
+`ReadinessError`.
+
+No keypair is provisioned yet, by design: GOU-94's beta freeze means no
+promotion should run. The private key is a new secret, not derived from
+one already granted. Generating a keypair is within any agent's rights;
+deciding this is the moment to mint the one real key, naming its
+custodian, and provisioning it to wherever `check_promotion_readiness.py`
+runs outside this repository are not - they are infrastructure and
+secret-custody decisions reserved to Goulven. Until
+`scripts/deploy/gate_proof_public_key.hex` is committed, `verify_gate_proof.py`
+fails closed with "no gate proof public key is provisioned", which is the
+correct state during the freeze.

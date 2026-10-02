@@ -6,17 +6,22 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
+import org.open4goods.datareference.model.CanonicalClassId;
 import org.open4goods.datareference.model.Gtin;
 import org.open4goods.datareference.model.ProjectionSurface;
 import org.open4goods.datareference.model.projection.EvaluationInput;
 import org.open4goods.datareference.model.projection.EvaluationRefreshTrigger;
+import org.open4goods.datareference.model.projection.GroupAssignment;
 import org.open4goods.datareference.model.projection.ProductReferenceProjection;
 import org.open4goods.datareference.model.projection.ProductReferenceProjectionEnvelope;
 import org.open4goods.datareference.model.projection.ProjectionReplayInputs;
 import org.open4goods.datareference.model.resolution.ResolvedValue;
+import org.open4goods.datareference.port.ClassAssignmentPort;
 import org.open4goods.datareference.port.DomainSliceComposer;
 import org.open4goods.datareference.port.EvaluationBridge;
+import org.open4goods.datareference.port.ModelGroupingPort;
 import org.open4goods.datareference.port.OfferSummaryPort;
 import org.open4goods.datareference.port.ProjectionWritePort;
 import org.open4goods.datareference.port.ResolutionPort;
@@ -37,6 +42,8 @@ public final class ProjectionAssemblyService {
     private final OfferSummaryPort offers;
     private final EvaluationBridge evaluation;
     private final SearchSummaryPort search;
+    private final ModelGroupingPort grouping;
+    private final ClassAssignmentPort classAssignment;
     private final DomainSliceComposer composer;
     private final ProjectionWritePort writer;
     private final Clock clock;
@@ -44,12 +51,15 @@ public final class ProjectionAssemblyService {
     /** Creates an assembler with an explicit operational clock. */
     public ProjectionAssemblyService(SourceRecordHeadStore sourceHeads, ResolutionPort resolution,
             OfferSummaryPort offers, EvaluationBridge evaluation, SearchSummaryPort search,
+            ModelGroupingPort grouping, ClassAssignmentPort classAssignment,
             DomainSliceComposer composer, ProjectionWritePort writer, Clock clock) {
         this.sourceHeads = Objects.requireNonNull(sourceHeads, "sourceHeads must not be null");
         this.resolution = Objects.requireNonNull(resolution, "resolution must not be null");
         this.offers = Objects.requireNonNull(offers, "offers must not be null");
         this.evaluation = Objects.requireNonNull(evaluation, "evaluation must not be null");
         this.search = Objects.requireNonNull(search, "search must not be null");
+        this.grouping = Objects.requireNonNull(grouping, "grouping must not be null");
+        this.classAssignment = Objects.requireNonNull(classAssignment, "classAssignment must not be null");
         this.composer = Objects.requireNonNull(composer, "composer must not be null");
         this.writer = Objects.requireNonNull(writer, "writer must not be null");
         this.clock = Objects.requireNonNull(clock, "clock must not be null");
@@ -77,8 +87,10 @@ public final class ProjectionAssemblyService {
             var evaluationSummary = evaluation.evaluate(new EvaluationInput(gtin, surface, replayInputs, values,
                     offerSummary, trigger));
             var searchSummary = search.summarize(gtin, surface, replayInputs, values);
+            Optional<CanonicalClassId> resolvedClass = classAssignment.resolveClass(gtin, surface);
+            GroupAssignment groupAssignment = grouping.assignGroups(gtin, surface, values, resolvedClass);
             components.put(surface, composer.compose(gtin, surface, replayInputs, values, offerSummary,
-                    evaluationSummary, searchSummary, builtAt));
+                    evaluationSummary, searchSummary, groupAssignment, builtAt));
         }
         ProductReferenceProjectionEnvelope envelope = new ProductReferenceProjectionEnvelope(gtin, components);
         writer.write(envelope);

@@ -557,6 +557,12 @@ export default defineNuxtConfig({
     // NUXT_MACHINE_TOKEN is the canonical path on prod, but we keep MACHINE_TOKEN as fallback
     machineToken: process.env.NUXT_MACHINE_TOKEN || process.env.MACHINE_TOKEN || 'CHANGE_ME_SHARED_TOKEN',
     apiUrl: process.env.API_URL || 'http://localhost:8082',
+    // Google OAuth client id for the loopback-local SSO flow (GOU-167). Not a secret:
+    // the BFF uses Authorization Code + PKCE, so no client_secret is ever required.
+    googleOAuthClientId: process.env.GOOGLE_OAUTH_CLIENT_ID || '',
+    // Redirect URI registered with Google for the loopback OAuth client. Must match
+    // exactly what's configured on Google's side (e.g. http://127.0.0.1:4100/auth/google/callback).
+    googleOAuthRedirectUri: process.env.GOOGLE_OAUTH_REDIRECT_URI || '',
     // Runtime directory holding the weekly Metriks reports (deployed by open4goods-config).
     // Falls back to the bundled public dir during local dev when unset.
     metriksDataDir: process.env.METRIKS_DATA_DIR || '',
@@ -586,6 +592,9 @@ export default defineNuxtConfig({
       tokenCookieName: process.env.TOKEN_COOKIE_NAME || 'access_token',
       // Name of the cookie storing the refresh token
       refreshCookieName: process.env.REFRESH_COOKIE_NAME || 'refresh_token',
+      // Master switch for the Google SSO login button and server routes. Must stay
+      // false outside an explicitly authorized environment; defaults to disabled.
+      googleSsoEnabled: process.env.GOOGLE_SSO_ENABLED === 'true',
 
       // Base URL of the backend API
       // Roles allowed to edit content blocks (defaults to backend role names)

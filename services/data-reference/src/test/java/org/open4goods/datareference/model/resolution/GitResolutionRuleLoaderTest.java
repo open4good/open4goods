@@ -98,15 +98,15 @@ class GitResolutionRuleLoaderTest {
     }
 
     @Test
-    void resolvesEprelOnNudgerWebIndependentlyOfInputOrderBecauseIcecatsOwnPolicyExcludesItFromDerivation() throws IOException {
-        // icecat's reviewed usage policy prohibits SYNTHETIC_CONTENT_GENERATION, and
-        // DeterministicResolutionService.isProhibitedForDerivation excludes a source
-        // from every resolved value, not just generation, whenever it carries any
-        // prohibited use. So even though classe-energy/NUDGER_WEB ranks icecat right
-        // after eprel for conflict detection, icecat never reaches the candidate set
-        // today: eprel is the only currently derivation-eligible source in the
-        // checked-in policy inventory. This is existing DeterministicResolutionService
-        // behaviour, not something GOU-109 changes.
+    void resolvesEprelOnNudgerWebIndependentlyOfInputOrderByRegulatoryAuthorityAndFlagsIcecatAsAConflict() throws IOException {
+        // classe-energy/NUDGER_WEB ranks eprel ahead of icecat and reserves
+        // regulatory authority to eprel, so eprel wins regardless of arrival
+        // order. Resolving to a publication surface is redistribution, not model
+        // training or synthetic content generation (GOU-171): icecat's reviewed
+        // usage policy permits redistributing ATTRIBUTE content on NUDGER_WEB, so
+        // icecat genuinely competes here and a differing value correctly flags a
+        // conflict, instead of icecat being silently dropped before it can be
+        // compared at all.
         DeterministicResolutionService service = realDefaultService();
         SourceRecordHead eprelHead = eprelHead("A");
         SourceRecordHead icecatHead = icecatHead("B");
@@ -117,7 +117,26 @@ class GitResolutionRuleLoaderTest {
         assertThat(first).isEqualTo(second);
         assertThat(first).hasSize(1);
         assertThat(first.getFirst().value()).isEqualTo(new CodeValue("energy", "A"));
-        assertThat(first.getFirst().conflicting()).isFalse();
+        assertThat(first.getFirst().conflicting()).isTrue();
+    }
+
+    @Test
+    void selectsIcecatOnNudgerWebForClasseEnergyWhenNoEprelIsAvailable() throws IOException {
+        // GOU-171: icecat's own reviewed usage policy excluded it from every
+        // resolved value because DeterministicResolutionService used to check the
+        // union of every ProhibitedUse, even though icecat only forbids
+        // SYNTHETIC_CONTENT_GENERATION, not redistribution to a publication
+        // surface. On 8d92f90b0 this produced an empty result even though no
+        // eprel evidence exists to compete with icecat. Using the real, checked-in
+        // GOU-109 rule set and the real, checked-in icecat-open-content policy.
+        DeterministicResolutionService service = realDefaultService();
+        SourceRecordHead icecatHead = icecatHead("B");
+
+        var resolved = service.resolve(GTIN, List.of(icecatHead), ProjectionSurface.NUDGER_WEB, NOW);
+
+        assertThat(resolved).hasSize(1);
+        assertThat(resolved.getFirst().value()).isEqualTo(new CodeValue("energy", "B"));
+        assertThat(resolved.getFirst().conflicting()).isFalse();
     }
 
     @Test
@@ -186,7 +205,7 @@ class GitResolutionRuleLoaderTest {
 
     @Test
     void rejectsARepeatedSourceInRankedSources() {
-        String invalid = fixtureJson().replace("[ \"icecat\", \"merchant-feed.awin\" ]", "[ \"icecat\", \"icecat\" ]");
+        String invalid = fixtureJson().replace("[ \"icecat\", \"eprel\" ]", "[ \"icecat\", \"icecat\" ]");
 
         assertThatThrownBy(() -> load(invalid))
                 .isInstanceOf(ResolutionRuleValidationException.class)
@@ -195,11 +214,23 @@ class GitResolutionRuleLoaderTest {
 
     @Test
     void rejectsAnEmptyRankedSourcesList() {
-        String invalid = fixtureJson().replace("[ \"icecat\", \"merchant-feed.awin\" ]", "[ ]");
+        String invalid = fixtureJson().replace("[ \"icecat\", \"eprel\" ]", "[ ]");
 
         assertThatThrownBy(() -> load(invalid))
                 .isInstanceOf(ResolutionRuleValidationException.class)
                 .hasMessageContaining("rankedSources must not be empty");
+    }
+
+    @Test
+    void rejectsAMerchantFeedSourceRankedForAReferenceAttribute() {
+        // AC5: a merchant-feed source stays authoritative for its own offer and
+        // price via OfferHead only, and must never rank for a canonical reference
+        // attribute resolved by this registry.
+        String invalid = fixtureJson().replace("[ \"icecat\", \"eprel\" ]", "[ \"icecat\", \"merchant-feed.awin\" ]");
+
+        assertThatThrownBy(() -> load(invalid))
+                .isInstanceOf(ResolutionRuleValidationException.class)
+                .hasMessageContaining("must not rank a merchant-feed source");
     }
 
     @Test
@@ -213,7 +244,7 @@ class GitResolutionRuleLoaderTest {
 
     @Test
     void rejectsASourceWithNoUsagePolicyEntry() {
-        String invalid = fixtureJson().replace("\"icecat\", \"merchant-feed.awin\"", "\"icecat\", \"unlisted-source\"");
+        String invalid = fixtureJson().replace("\"icecat\", \"eprel\"", "\"icecat\", \"unlisted-source\"");
 
         assertThatThrownBy(() -> load(invalid))
                 .isInstanceOf(ResolutionRuleValidationException.class)

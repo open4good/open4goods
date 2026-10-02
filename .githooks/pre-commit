@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Refuse a commit landing directly on the default branch (GOU-183).
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+while IFS= read -r name; do unset "$name"; done < <(git rev-parse --local-env-vars)
+export PYTHONDONTWRITEBYTECODE=1
+exec python3 "$repo_root/scripts/verify/check_default_branch_commit.py"

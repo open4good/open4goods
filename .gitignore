@@ -33,3 +33,5 @@ apache-maven-*-bin.tar.gz
 /api.log
 *.log
 /artifacts/
+__pycache__/
+*.pyc

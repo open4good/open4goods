@@ -1,5 +1,7 @@
 package org.open4goods.services.feedservice.model;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -20,6 +22,12 @@ public class FeedIndexingJobStat {
     private long exceptions = 0;
     private Boolean fail = false;
     private String type;
+
+    /**
+     * Headers present in the source but declared nowhere in the feed's {@code FeedDefinition};
+     * reported here rather than guessed from their label (AC2/AC7).
+     */
+    private Set<String> unknownColumns = new LinkedHashSet<>();
 
     public FeedIndexingJobStat() {
     }
@@ -51,6 +59,20 @@ public class FeedIndexingJobStat {
 
     public void incrementIndexed() {
         indexed++;
+    }
+
+    public void addUnknownColumns(Set<String> columns) {
+        if (columns != null) {
+            unknownColumns.addAll(columns);
+        }
+    }
+
+    public Set<String> getUnknownColumns() {
+        return unknownColumns;
+    }
+
+    public void setUnknownColumns(Set<String> unknownColumns) {
+        this.unknownColumns = unknownColumns == null ? new LinkedHashSet<>() : unknownColumns;
     }
 
     public String getId() {

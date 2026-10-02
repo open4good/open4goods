@@ -35,6 +35,7 @@ owned, and linked from this index when they become durable project knowledge.
 - [Developpement strictement local](operations/beta-development-campaign.md) - stack, sauvegarde et promotions phasees
 - [Nudger local runtime on the shared build host](operations/buildhost-runtime.md) - isolation, port plan and capacity budget
 - [Shared workspace branch-sync guard](operations/shared-workspace-branch-sync.md) - why local `main` can drift from `origin/main` and how to detect it
+- [Default-branch commit guard](operations/default-branch-commit-guard.md) - the `pre-commit` hook that refuses a commit made directly on `main`
 - [Frontend asset hardening](operations/frontend-asset-hardening.md)
 - [Local promotion readiness gate](operations/promotion-readiness-gate.md)
 - [Production log triage](operations/production-log-triage.md)
@@ -73,9 +74,11 @@ owned, and linked from this index when they become durable project knowledge.
 
 ## Plans
 
-- [Product page SEO & UI audit](product_page_audit_plan.md) - historical closure in
-  [`product-page-seo-ui-quality`](../.o4g/work/ledger/product-page-seo-ui-quality.yml)
 - [Dataviz statistics plan (fr)](front_dataviz_stats_plan.md)
+
+The product page SEO & UI audit plan is retired: fully implemented and closed
+as [`product-page-seo-ui-quality`](../.o4g/work/ledger/product-page-seo-ui-quality.yml)
+(COMPLETED), which keeps the full per-item evidence.
 
 ## Product Data API (B2B)
 
