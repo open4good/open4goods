@@ -64,18 +64,6 @@ mvn --offline -pl services/<service-name> test
 
 Each service has unique responsibilities and may have specific conventions beyond the common patterns above.
 
-### blog
-
-**Purpose**: Handles blog posts fetched from XWiki and generates RSS feeds.
-
-**Key Responsibilities**:
-- Fetch blog content from XWiki API
-- Transform XWiki markup to web-friendly formats
-- Generate RSS/Atom feeds
-- Cache blog content appropriately
-
----
-
 ### brand
 
 **Purpose**: Brand resolution and scoring logic reused across applications.
@@ -375,23 +363,6 @@ Each service has unique responsibilities and may have specific conventions beyon
 - Implement circuit breakers
 - Log failed requests for debugging
 - Monitor response times and error rates
-
----
-
-### xwiki-spring-boot-starter
-
-**Purpose**: Spring Boot starter for XWiki integration.
-
-**Key Responsibilities**:
-- Provide auto-configuration for XWiki clients
-- Simplify XWiki API integration
-- Handle XWiki authentication
-- Provide common XWiki utilities
-
-**Usage**:
-- Add as dependency to services needing XWiki integration
-- Configure via `application.yml` or `application.properties`
-- Follow Spring Boot starter conventions
 
 ---
 

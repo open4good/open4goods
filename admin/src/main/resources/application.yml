@@ -2,7 +2,8 @@
 # open4goods -- admin module (Spring Boot Admin server) -- Default configuration
 #
 # All keys here are shared across every environment (dev, beta, prod).
-# Secrets and host topology (xwiki.*, spring.boot.admin.instance-auth.default-*)
+# Secrets and host topology (spring.security.oauth2.client.registration.google.*,
+# admin.security.google-sso.role-allowlist, spring.boot.admin.instance-auth.default-*)
 # live in the profile-specific files (application-devsec.yml,
 # configs/*/admin/application-active.yml).
 ####################################################################

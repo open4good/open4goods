@@ -696,49 +696,6 @@
       "description": "Full name of a core team member."
     },
     {
-      "name": "xwiki.api-entrypoint",
-      "type": "java.lang.String",
-      "description": "XWiki REST API entrypoint path.",
-      "defaultValue": "rest"
-    },
-    {
-      "name": "xwiki.api-wiki",
-      "type": "java.lang.String",
-      "description": "XWiki wiki identifier used in REST API URLs.",
-      "defaultValue": "xwiki"
-    },
-    {
-      "name": "xwiki.base-url",
-      "type": "java.lang.String",
-      "description": "Base URL of the XWiki instance."
-    },
-    {
-      "name": "xwiki.https-only",
-      "type": "java.lang.Boolean",
-      "description": "Force generated XWiki URLs to use HTTPS."
-    },
-    {
-      "name": "xwiki.media",
-      "type": "java.lang.String",
-      "description": "XWiki REST media format.",
-      "defaultValue": "json"
-    },
-    {
-      "name": "xwiki.password",
-      "type": "java.lang.String",
-      "description": "Password used to authenticate against XWiki."
-    },
-    {
-      "name": "xwiki.proxyfication-root-url",
-      "type": "java.lang.String",
-      "description": "Static root URL used when proxyfying XWiki resources."
-    },
-    {
-      "name": "xwiki.username",
-      "type": "java.lang.String",
-      "description": "Username used to authenticate against XWiki."
-    },
-    {
       "name": "front.security.google-sso.enabled",
       "type": "java.lang.Boolean",
       "description": "Master switch for the Google SSO login endpoint. Must stay false outside an explicitly authorized environment.",

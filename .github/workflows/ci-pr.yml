@@ -23,20 +23,5 @@ jobs:
           java-version: "21"
           cache: "maven"
 
-      - name: Set up Maven Repositories
-        uses: s4u/maven-settings-action@894661b3ddae382f1ae8edbeab60987e08cf0788 # v4.0.0
-        with:
-          repositories: |
-            [
-              {
-                "id": "xwiki-releases",
-                "name": "xwiki-releases",
-                "url": "https://maven.xwiki.org/releases/",
-                "snapshots": {
-                  "enabled": false
-                }
-              }
-            ]
-
       - name: Build and Test
         run: mvn --batch-mode --update-snapshots install

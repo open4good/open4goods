@@ -123,6 +123,15 @@ public class ApiConfig {
 
 
 
+	/**
+	 * Plain RestTemplate for outbound REST calls (e.g. the EPREL client).
+	 * Previously supplied transitively by the now-removed xwiki-spring-boot-starter.
+	 */
+	@Bean
+	RestTemplate restTemplate() {
+		return new RestTemplate();
+	}
+
 	@Bean EprelApiClient apiClient(@Autowired  RestTemplate restTemplate, @Autowired  EprelServiceProperties properties) {
 		return new RestEprelApiClient(restTemplate, properties);
 	}
