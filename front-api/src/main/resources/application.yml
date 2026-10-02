@@ -121,11 +121,6 @@ feedback:
     required-label: ${FEEDBACK_VOTING_REQUIRED_LABEL:votable}
     default-votable: ${FEEDBACK_VOTING_DEFAULT_VOTABLE:true}
 
-xwiki:
-    username: ${XWIKI_USERNAME:user}
-    password: ${XWIKI_PASSWORD:pwd}
-    base-url: ${XWIKI_BASE_URL:https://dummy.fr}
-    
 management:
   health:
     diskspace:

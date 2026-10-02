@@ -21,7 +21,5 @@ front:
     base-url: http://localhost:${O4G_PORT_GEOCODE:8089}
   google-indexation:
     enabled: false
-xwiki:
-  base-url: http://localhost:${O4G_PORT_XWIKI:8080}/xwiki
 open-data-config:
   generation-enabled: false
