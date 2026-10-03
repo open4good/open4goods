@@ -19,6 +19,9 @@ import org.open4goods.api.services.store.DataFragmentStoreService;
 import org.open4goods.datareference.port.IngestionCheckpointStore;
 import org.open4goods.datareference.port.SourceRecordHeadStore;
 import org.open4goods.datareference.port.SourceRecordReplayScanner;
+import org.open4goods.pricehistory.port.OfferHeadStore;
+import org.open4goods.pricehistory.port.PriceChangeEventStore;
+import org.open4goods.pricehistory.service.PriceObservationService;
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.commons.helper.DevModeService;
 import org.open4goods.commons.services.BarcodeForensicsService;
@@ -152,6 +155,12 @@ public class ApiConfig {
 			@Autowired EprelServiceProperties properties, MeterRegistry meterRegistry) {
 		return new EprelCatalogueService(apiClient, new JsonZipEprelCatalogueParser(), sourceRecordStore, replayScanner,
 				checkpointStore, new EprelSourceRecordAdapter(), properties, meterRegistry);
+	}
+
+	@Bean
+	PriceObservationService priceObservationService(@Autowired OfferHeadStore offerHeadStore,
+			@Autowired PriceChangeEventStore priceChangeEventStore) {
+		return new PriceObservationService(offerHeadStore, priceChangeEventStore);
 	}
 
 	@Bean
