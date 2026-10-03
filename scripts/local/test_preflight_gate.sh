@@ -72,6 +72,46 @@ EOF
 mkdir -p "$SCRATCH/repo/.local/data" "$SCRATCH/repo/.local/config"
 mkdir -p "$SCRATCH/issue-GOU-133/data"
 
+# --- case: headroom ignores the reclaimable page cache, not memory.current ---
+# GOU-208: a cgroup that is nearly full of page cache (reclaimable on demand,
+# never fails an allocation) must not be reported as low on headroom just
+# because memory.current is high.
+mem_scratch="$SCRATCH/cgroup-mem"
+mkdir -p "$mem_scratch"
+echo 17179869184 > "$mem_scratch/memory.max" # 16 GiB
+cat > "$mem_scratch/memory.stat" <<'EOF'
+anon 3929849856
+slab 1041204224
+file 11857881088
+inactive_file 10263897088
+EOF
+headroom_cache_heavy="$(
+  # shellcheck disable=SC1090
+  source "$FUNCTIONS"
+  cgroup_self_dir() { printf '%s\n' "$mem_scratch"; }
+  cgroup_effective_headroom_bytes memory.max memory.stat
+)"
+[ "$((headroom_cache_heavy / 1024 / 1024 / 1024))" -ge 8 ] || \
+  fail "a cache-heavy memory.stat starved the headroom calc: $headroom_cache_heavy bytes"
+echo "ok: a high page cache no longer starves the memory headroom calc"
+
+# --- case: headroom still refuses when anon actually consumes the budget ---
+cat > "$mem_scratch/memory.stat" <<'EOF'
+anon 15032385536
+slab 1041204224
+file 107374182
+inactive_file 53687091
+EOF
+headroom_anon_heavy="$(
+  # shellcheck disable=SC1090
+  source "$FUNCTIONS"
+  cgroup_self_dir() { printf '%s\n' "$mem_scratch"; }
+  cgroup_effective_headroom_bytes memory.max memory.stat
+)"
+[ "$((headroom_anon_heavy / 1024 / 1024 / 1024))" -lt 8 ] || \
+  fail "high anon usage did not trip the memory headroom floor: $headroom_anon_heavy bytes"
+echo "ok: high anon usage still trips the memory headroom floor"
+
 # --- case: a valid buildhost env passes ---
 env_ok="$(base_env ok)"
 run_preflight "$env_ok" >/dev/null || fail "a fully valid shared-host env was rejected"
