@@ -18,14 +18,12 @@ import org.open4goods.icecat.repository.IcecatSupplierRepository;
 import org.open4goods.services.contribution.repository.ContributionVoteRepository;
 import org.open4goods.services.geocode.service.IpGeolocationService;
 import org.open4goods.nudgerfrontapi.dto.auth.GoogleSsoLoginRequest;
-import org.open4goods.nudgerfrontapi.dto.auth.LoginRequest;
 import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.auth.GoogleIdentity;
 import org.open4goods.nudgerfrontapi.service.auth.GoogleIdentityService;
 import org.open4goods.nudgerfrontapi.service.auth.JwtService;
 import org.open4goods.nudgerfrontapi.service.exception.GoogleIdentityVerificationException;
 import org.open4goods.nudgerfrontapi.service.exception.GoogleSsoDisabledException;
-import org.open4goods.xwiki.services.XWikiAuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -51,9 +49,6 @@ class AuthControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @MockitoBean
-    private XWikiAuthenticationService authService;
 
     @MockitoBean
     private GHRepository ghRepository;
@@ -90,21 +85,6 @@ class AuthControllerIT {
 
     @Autowired
     private ObjectMapper mapper;
-
-    @Test
-    void loginReturnsCookies() throws Exception {
-        given(authService.login("user", "pass")).willReturn(List.of("XWiki.XWikiUsers"));
-        LoginRequest req = new LoginRequest("user", "pass");
-        var result = mockMvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsBytes(req))
-                        .param("domainLanguage", "FR"))
-                .andExpect(status().isOk())
-                .andExpect(cookie().exists("access-token"))
-                .andExpect(cookie().exists("refresh-token"))
-                .andReturn();
-        assertSecureAndSameSite(result.getResponse().getHeaders("Set-Cookie"));
-    }
 
     @Test
     void refreshIssuesNewAccessToken() throws Exception {

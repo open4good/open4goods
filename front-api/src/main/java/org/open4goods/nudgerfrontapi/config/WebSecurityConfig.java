@@ -12,10 +12,7 @@ import org.open4goods.model.RolesConstants;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -51,16 +48,13 @@ public class WebSecurityConfig {
 
     private final SecurityProperties securityProperties;
     private final ExposedDocsProperties exposedDocsProperties;
-    private final AuthenticationProvider authenticationProvider;
     private final ActuatorMonitorCredentials actuatorMonitorCredentials;
 
     public WebSecurityConfig(SecurityProperties securityProperties,
                              ExposedDocsProperties exposedDocsProperties,
-                             AuthenticationProvider authenticationProvider,
                              ActuatorMonitorCredentials actuatorMonitorCredentials) {
         this.securityProperties = securityProperties;
         this.exposedDocsProperties = exposedDocsProperties;
-        this.authenticationProvider = authenticationProvider;
         this.actuatorMonitorCredentials = actuatorMonitorCredentials;
     }
 
@@ -91,8 +85,7 @@ public class WebSecurityConfig {
             .setSharedObject(LocaleResolver.class, localeResolver);
 
         if (securityProperties.isEnabled()) {
-            http.authenticationProvider(new ActuatorMonitorAuthenticationProvider(actuatorMonitorCredentials))
-                .authenticationProvider(authenticationProvider);
+            http.authenticationProvider(new ActuatorMonitorAuthenticationProvider(actuatorMonitorCredentials));
             http.authorizeHttpRequests(auth -> {
                     if (exposedDocsProperties.isPublicAccess()) {
                         auth.requestMatchers("/exposed/**").permitAll();
@@ -122,14 +115,6 @@ public class WebSecurityConfig {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
         return converter;
-    }
-
-    @Bean
-    AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
-        builder.authenticationProvider(new ActuatorMonitorAuthenticationProvider(actuatorMonitorCredentials));
-        builder.authenticationProvider(authenticationProvider);
-        return builder.build();
     }
 
     @Bean

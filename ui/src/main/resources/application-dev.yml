@@ -12,17 +12,6 @@ logging:
         ROOT: info
         org.open4goods: info
 
-xwiki:
-    baseUrl: "https://wiki.nudger.fr"
-    auth:
-        password:
-        username:
-    httpsOnly: true
-    media: "json"
-    api:
-        entryPoint: "rest"
-        wiki: "xwiki"
-
 
 spring:
   boot:

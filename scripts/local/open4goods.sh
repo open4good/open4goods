@@ -275,17 +275,22 @@ cgroup_effective_max() {
 }
 
 cgroup_effective_headroom_bytes() {
-  # Smallest (max - current) across the ancestor chain, at whichever level
-  # is actually bounded; a declared quota means nothing if other tenants
-  # under the same ancestor have already consumed it.
-  local max_file="$1" current_file="$2" dir max_value cur_value headroom best=""
+  # Smallest (max - unreclaimable) across the ancestor chain, at whichever
+  # level is actually bounded; a declared quota means nothing if other
+  # tenants under the same ancestor have already consumed it.
+  # Unreclaimable = anon + slab + shmem from memory.stat, not memory.current:
+  # memory.current also counts the reclaimable page cache (inactive_file and
+  # friends), which the kernel evicts on demand rather than failing an
+  # allocation over, so counting it against headroom produces a false
+  # "insufficient memory" refusal on a host with a warm cache.
+  local max_file="$1" stat_file="$2" dir max_value unreclaimable headroom best=""
   dir="$(cgroup_self_dir)"
   while [ -n "$dir" ] && [ "$dir" != "/sys/fs/cgroup" ] && [ "$dir" != "/" ]; do
-    if [ -r "$dir/$max_file" ] && [ -r "$dir/$current_file" ]; then
+    if [ -r "$dir/$max_file" ] && [ -r "$dir/$stat_file" ]; then
       max_value="$(awk '{print $1}' "$dir/$max_file" 2>/dev/null)"
-      cur_value="$(cat "$dir/$current_file" 2>/dev/null)"
-      if [ -n "$max_value" ] && [ "$max_value" != max ] && [ -n "$cur_value" ]; then
-        headroom=$(( max_value - cur_value ))
+      unreclaimable="$(awk '$1 == "anon" || $1 == "slab" || $1 == "shmem" {sum += $2} END {print sum + 0}' "$dir/$stat_file" 2>/dev/null)"
+      if [ -n "$max_value" ] && [ "$max_value" != max ] && [ -n "$unreclaimable" ]; then
+        headroom=$(( max_value - unreclaimable ))
         if [ -z "$best" ] || [ "$headroom" -lt "$best" ]; then best="$headroom"; fi
       fi
     fi
@@ -458,7 +463,7 @@ preflight() {
     echo "cgroup memory budget below ${min_mem_gib}GiB" >&2
     missing=1
   else
-    mem_headroom="$(cgroup_effective_headroom_bytes memory.max memory.current)"
+    mem_headroom="$(cgroup_effective_headroom_bytes memory.max memory.stat)"
     if [ "$mem_headroom" != max ] && [ "$((mem_headroom / 1024 / 1024 / 1024))" -lt "$min_mem_gib" ]; then
       echo "insufficient memory headroom under current cgroup usage (need >= ${min_mem_gib}GiB free, not just quota)" >&2
       missing=1

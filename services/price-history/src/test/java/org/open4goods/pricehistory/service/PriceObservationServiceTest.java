@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -97,6 +98,36 @@ class PriceObservationServiceTest {
     }
 
     @Test
+    void reconcileCompletedFeedClosesTheProviderStreamAfterANormalReconciliation() {
+        InMemoryHeads heads = new InMemoryHeads();
+        InMemoryEvents events = new InMemoryEvents();
+        PriceObservationService service = new PriceObservationService(heads, events);
+        Instant start = Instant.parse("2026-09-15T00:00:00Z");
+        service.ingest(observation(start, "aa", "10.00"));
+
+        service.reconcileCompletedFeed(new CompletedOfferFeed(new SourceId("fixture"), start.plusSeconds(60), Set.of()));
+
+        assertThat(heads.providerStreamCloseCount()).isEqualTo(1);
+    }
+
+    @Test
+    void reconcileCompletedFeedClosesTheProviderStreamWhenConsumptionThrows() {
+        InMemoryHeads heads = new InMemoryHeads();
+        PriceObservationService seedingService = new PriceObservationService(heads, new InMemoryEvents());
+        Instant start = Instant.parse("2026-09-15T00:00:00Z");
+        seedingService.ingest(observation(start, "aa", "10.00"));
+
+        FailOnceEvents failingEvents = new FailOnceEvents();
+        PriceObservationService service = new PriceObservationService(heads, failingEvents);
+
+        assertThatThrownBy(() -> service.reconcileCompletedFeed(
+                new CompletedOfferFeed(new SourceId("fixture"), start.plusSeconds(60), Set.of())))
+                .isInstanceOf(IllegalStateException.class);
+
+        assertThat(heads.providerStreamCloseCount()).isEqualTo(1);
+    }
+
+    @Test
     void anOlderObservationCannotRollBackTheCurrentOffer() {
         InMemoryHeads heads = new InMemoryHeads();
         InMemoryEvents events = new InMemoryEvents();
@@ -136,6 +167,7 @@ class PriceObservationServiceTest {
 
     private static final class InMemoryHeads implements OfferHeadStore {
         private final Map<OfferKey, OfferHead> values = new LinkedHashMap<>();
+        private final AtomicInteger providerStreamCloseCount = new AtomicInteger();
 
         @Override
         public Optional<OfferHead> find(OfferKey key) {
@@ -155,7 +187,12 @@ class PriceObservationServiceTest {
 
         @Override
         public Stream<OfferHead> findByProvider(SourceId providerId) {
-            return values.values().stream().filter(head -> head.observation().key().providerId().equals(providerId));
+            return values.values().stream().filter(head -> head.observation().key().providerId().equals(providerId))
+                    .onClose(providerStreamCloseCount::incrementAndGet);
+        }
+
+        int providerStreamCloseCount() {
+            return providerStreamCloseCount.get();
         }
     }
 
