@@ -25,8 +25,13 @@ public interface OfferHeadStore {
     /**
      * Streams the provider's current heads for a successful complete-feed reconciliation.
      *
+     * <p>The returned stream holds an open server-side resource (e.g. an Elasticsearch
+     * point-in-time) for its whole traversal. The caller <strong>must</strong> close it — typically
+     * with try-with-resources — on every path, including when consumption is interrupted by an
+     * exception, or the resource leaks until its own keep-alive expires.
+     *
      * @param providerId public provider identity
-     * @return heads owned by that provider
+     * @return heads owned by that provider; must be closed by the caller
      */
     default Stream<OfferHead> findByProvider(SourceId providerId) {
         throw new UnsupportedOperationException("provider reconciliation is not implemented by this head store");
