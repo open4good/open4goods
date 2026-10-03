@@ -19,5 +19,3 @@ front:
     base-url: http://localhost:${O4G_PORT_EXPOSED_DOCS:8088}
   geocode:
     base-url: http://localhost:${O4G_PORT_GEOCODE:8089}
-xwiki:
-  base-url: http://localhost:${O4G_PORT_XWIKI:8080}/xwiki
