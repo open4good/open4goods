@@ -2,6 +2,7 @@ package org.open4goods.pricehistory.service;
 
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.open4goods.pricehistory.model.OfferHead;
 import org.open4goods.pricehistory.model.OfferAvailability;
@@ -88,15 +89,17 @@ public final class PriceObservationService {
     public int reconcileCompletedFeed(CompletedOfferFeed feed) {
         Objects.requireNonNull(feed, "feed must not be null");
         Set<OfferKey> published = feed.publishedOfferKeys();
-        return (int) heads.findByProvider(feed.providerId())
-                .filter(head -> head.observation().availability() != OfferAvailability.UNAVAILABLE)
-                .filter(head -> !published.contains(head.observation().key()))
-                .map(head -> new OfferObservation(head.observation().key(), head.observation().condition(),
-                        head.observation().currency(), head.observation().amount(), OfferAvailability.UNAVAILABLE,
-                        head.observation().providerObservedAt(), feed.completedAt(), head.contentHash(), head.policyRef()))
-                .map(this::ingest)
-                .filter(PriceChangeKind.DISAPPEARED::equals)
-                .count();
+        try (Stream<OfferHead> providerHeads = heads.findByProvider(feed.providerId())) {
+            return (int) providerHeads
+                    .filter(head -> head.observation().availability() != OfferAvailability.UNAVAILABLE)
+                    .filter(head -> !published.contains(head.observation().key()))
+                    .map(head -> new OfferObservation(head.observation().key(), head.observation().condition(),
+                            head.observation().currency(), head.observation().amount(), OfferAvailability.UNAVAILABLE,
+                            head.observation().providerObservedAt(), feed.completedAt(), head.contentHash(), head.policyRef()))
+                    .map(this::ingest)
+                    .filter(PriceChangeKind.DISAPPEARED::equals)
+                    .count();
+        }
     }
 
     private PriceChangeKind transitionKind(OfferHead current, OfferObservation observation) {
