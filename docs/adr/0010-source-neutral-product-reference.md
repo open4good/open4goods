@@ -91,6 +91,16 @@ V1 creates automatic model groups only from explicit source relations or the exa
 of canonical brand, class and normalized full model. Family/prefix rules are reviewed,
 versioned by brand and class; an unmatched prefix produces candidates, not membership.
 
+The compact group index (GOU-199) carries the same discipline at the group level: one
+`GroupIndexEntry` per group id with a capped representative-GTIN sample and a member
+count, never an unbounded member array. A merge keeps one canonical id and aliases the
+predecessors; a reindex detects a split when a group's former members resolve under two
+or more new ids and leaves a `GroupLineageEvent` audit link. The index is built and
+queried per `ProjectionSurface`, one index per surface, so a surface a relation's source
+usage policy forbids never contributes a member to another surface's counts or
+representatives; `GroupLookupPort`, `GtinGroupLookupPort` and `GroupSearchPort` are the
+query ports, and prefix search responses distinguish `CONFIRMED` from `CANDIDATE`.
+
 ## Consequences
 
 Rule and policy changes can rebuild current projections without provider access. Storage
