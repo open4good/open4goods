@@ -101,6 +101,81 @@ class ControlInvocationRegistryTest(unittest.TestCase):
             problems = GATE.check(root)
             self.assertTrue(any("no longer references check_example.py" in problem for problem in problems))
 
+    def test_required_arg_present_passes(self) -> None:
+        """A control invoked with its required flag passes, using the object invokedBy form."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_control(root, "scripts/verify/check_example.py")
+            invoker = root / "scripts" / "python" / "lint_suite.py"
+            invoker.parent.mkdir(parents=True, exist_ok=True)
+            invoker.write_text("run check_example.py --assert-no-ceiling-increase here\n", encoding="utf-8")
+            write_registry(
+                root,
+                {
+                    "scripts/verify/check_example.py": {
+                        "invokedBy": [
+                            {
+                                "file": "scripts/python/lint_suite.py",
+                                "requiredArgs": ["--assert-no-ceiling-increase"],
+                            }
+                        ]
+                    }
+                },
+            )
+            self.assertEqual(GATE.check(root), [])
+
+    def test_missing_required_arg_fails(self) -> None:
+        """GOU-189: the invoker mentions the script's basename but not its required flag --
+        check_corpus_budget.py was invoked by lint_suite.py without --assert-no-ceiling-increase
+        and the registry was green. This must fail instead."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_control(root, "scripts/verify/check_example.py")
+            invoker = root / "scripts" / "python" / "lint_suite.py"
+            invoker.parent.mkdir(parents=True, exist_ok=True)
+            invoker.write_text("run check_example.py here\n", encoding="utf-8")
+            write_registry(
+                root,
+                {
+                    "scripts/verify/check_example.py": {
+                        "invokedBy": [
+                            {
+                                "file": "scripts/python/lint_suite.py",
+                                "requiredArgs": ["--assert-no-ceiling-increase"],
+                            }
+                        ]
+                    }
+                },
+            )
+            problems = GATE.check(root)
+            self.assertTrue(
+                any(
+                    "missing required argument" in problem and "--assert-no-ceiling-increase" in problem
+                    for problem in problems
+                )
+            )
+
+    def test_check_corpus_budget_requires_its_ceiling_flag_in_lint_suite(self) -> None:
+        """GOU-189 AC4: demonstrate by execution against the real tree -- dropping
+        --assert-no-ceiling-increase from the real lint_suite.py call must fail the real gate."""
+        lint_suite_path = ROOT / "scripts" / "python" / "lint_suite.py"
+        original = lint_suite_path.read_text(encoding="utf-8")
+        stripped = original.replace("--assert-no-ceiling-increase", "")
+        self.assertNotEqual(original, stripped)
+        lint_suite_path.write_text(stripped, encoding="utf-8")
+        try:
+            problems = GATE.check(ROOT)
+        finally:
+            lint_suite_path.write_text(original, encoding="utf-8")
+        self.assertTrue(
+            any(
+                "check_corpus_budget.py" in problem
+                and "missing required argument" in problem
+                and "--assert-no-ceiling-increase" in problem
+                for problem in problems
+            )
+        )
+
     def test_this_gate_remains_wired_into_lint_suite(self) -> None:
         """AC5: the fixture dies with the control -- if the real lint_suite.py drops the call to
         this gate, this assertion fails."""

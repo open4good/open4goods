@@ -13,8 +13,15 @@ basename (verified here by reading them, not trusted), or `exempt: true` with a 
 registered `invokedBy` file that no longer mentions the script also fails -- a wiring, once
 declared, cannot be silently dropped either.
 
+An `invokedBy` entry is either a plain string (just the invoker path), or an object
+`{"file": <invoker path>, "requiredArgs": [<flag>, ...]}` for a control that only does its job
+with specific flags (GOU-189: check_corpus_budget.py was wired into lint_suite.py, but without
+its `--assert-no-ceiling-increase` flag -- the registry was green while the regression it exists
+to catch went unchecked). For an object entry, the invoker file must mention both the control's
+basename and every string in `requiredArgs`.
+
 Exit status 0 when every discovered control is registered and every declared, non-exempt
-invocation point still names the script; 1 otherwise.
+invocation point still names the script and all of its required arguments; 1 otherwise.
 """
 
 from __future__ import annotations
@@ -81,13 +88,33 @@ def check(root: Path) -> list[str]:
             continue
 
         basename = Path(script).name
-        for invoker in invoked_by:
+        for entry in invoked_by:
+            if isinstance(entry, str):
+                invoker, required_args = entry, []
+            elif isinstance(entry, dict):
+                invoker = entry.get("file")
+                required_args = entry.get("requiredArgs") or []
+                if not isinstance(invoker, str) or not isinstance(required_args, list):
+                    problems.append(f"{script}: invokedBy entry must have a string 'file' and a list 'requiredArgs'")
+                    continue
+            else:
+                problems.append(f"{script}: invokedBy entries must be a string or an object")
+                continue
+
             invoker_path = root / invoker
             if not invoker_path.exists():
                 problems.append(f"{script}: declared invocation point {invoker} does not exist")
                 continue
-            if basename not in invoker_path.read_text(encoding="utf-8"):
+            invoker_text = invoker_path.read_text(encoding="utf-8")
+            if basename not in invoker_text:
                 problems.append(f"{script}: {invoker} no longer references {basename}")
+                continue
+            missing_args = [arg for arg in required_args if arg not in invoker_text]
+            if missing_args:
+                problems.append(
+                    f"{script}: {invoker} references {basename} but is missing required argument(s) "
+                    f"{', '.join(missing_args)}"
+                )
 
     return problems
 

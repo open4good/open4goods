@@ -2,7 +2,20 @@
   "version": 1,
   "controls": {
     "scripts/verify/check_corpus_budget.py": {
-      "invokedBy": ["scripts/python/lint_suite.py"]
+      "invokedBy": [
+        {
+          "file": "scripts/python/lint_suite.py",
+          "requiredArgs": ["--assert-no-ceiling-increase"]
+        }
+      ]
+    },
+    "scripts/verify/check_usage_policy_registry.py": {
+      "invokedBy": [
+        {
+          "file": "scripts/python/lint_suite.py",
+          "requiredArgs": ["--against"]
+        }
+      ]
     },
     "scripts/verify/check_deployment_inputs.py": {
       "invokedBy": ["scripts/python/lint_suite.py"]
