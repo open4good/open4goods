@@ -68,8 +68,18 @@ public final class ModelTextNormalizer {
     /**
      * Joins already-normalized, non-blank fragments into a group slug.
      *
+     * <p>Each fragment may itself contain a {@code -}, since {@link #normalize}
+     * folds any punctuation to one. A plain {@code String.join("-", ...)} would
+     * therefore not be injective: {@code ["tv", "sony-ericsson", "xr500"]} and
+     * {@code ["tv", "sony", "ericsson-xr500"]} would both join to
+     * {@code "tv-sony-ericsson-xr500"}. Each fragment is instead prefixed with
+     * its own length, so the boundary between fragments is recoverable from the
+     * encoded string alone: a reader consumes the decimal length, skips the
+     * delimiter, then takes exactly that many characters as the fragment,
+     * regardless of any {@code -} inside it.
+     *
      * @param fragments fragments to join, every one of which must be non-blank
-     * @return the joined slug
+     * @return the joined slug, unique per distinct fragment sequence
      */
     public static String joinSlug(String... fragments) {
         List<String> nonBlank = new ArrayList<>();
@@ -80,6 +90,14 @@ public final class ModelTextNormalizer {
             }
             nonBlank.add(fragment);
         }
-        return String.join("-", nonBlank);
+        StringBuilder slug = new StringBuilder();
+        for (int i = 0; i < nonBlank.size(); i++) {
+            if (i > 0) {
+                slug.append('-');
+            }
+            String fragment = nonBlank.get(i);
+            slug.append(fragment.length()).append('-').append(fragment);
+        }
+        return slug.toString();
     }
 }

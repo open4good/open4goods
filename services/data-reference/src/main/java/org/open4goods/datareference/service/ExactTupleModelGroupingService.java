@@ -8,6 +8,7 @@ import org.open4goods.datareference.model.CanonicalAttributeId;
 import org.open4goods.datareference.model.CanonicalClassId;
 import org.open4goods.datareference.model.Gtin;
 import org.open4goods.datareference.model.ProjectionSurface;
+import org.open4goods.datareference.model.SourceRecordHead;
 import org.open4goods.datareference.model.grouping.GroupId;
 import org.open4goods.datareference.model.grouping.GroupType;
 import org.open4goods.datareference.model.grouping.ModelTextNormalizer;
@@ -22,11 +23,14 @@ import org.open4goods.datareference.port.ModelGroupingPort;
  * Assigns a confirmed model group only from the exact normalized tuple of
  * canonical brand, O4G class and full model (ADR-0010, AC2 of GOU-49).
  *
- * <p>Explicit resolved source relations are a separate, later grouping path
- * (not yet wired here); a missing brand, class or model deterministically
- * suppresses grouping rather than falling back to a weaker match. Family
- * grouping (reviewed pattern rules, candidate-only prefix similarity) is also
- * out of scope for this port and always returns no family memberships.
+ * <p>A missing brand, class or model deterministically suppresses grouping
+ * rather than falling back to a weaker match. Explicit resolved source
+ * relations (the other AC2 path) are a separate port implementation,
+ * {@link ExplicitRelationModelGroupingService}, composed alongside this one
+ * by {@link CompositeModelGroupingService}; this service ignores
+ * {@code sourceHeads} entirely. Reviewed pattern rules and candidate-only
+ * prefix similarity are also out of scope for this port and it always returns
+ * no family memberships.
  */
 public final class ExactTupleModelGroupingService implements ModelGroupingPort {
 
@@ -45,10 +49,11 @@ public final class ExactTupleModelGroupingService implements ModelGroupingPort {
     }
 
     @Override
-    public GroupAssignment assignGroups(Gtin gtin, ProjectionSurface surface, List<ResolvedValue> resolvedValues,
-            Optional<CanonicalClassId> resolvedClass) {
+    public GroupAssignment assignGroups(Gtin gtin, ProjectionSurface surface, List<SourceRecordHead> sourceHeads,
+            List<ResolvedValue> resolvedValues, Optional<CanonicalClassId> resolvedClass) {
         Objects.requireNonNull(gtin, "gtin must not be null");
         Objects.requireNonNull(surface, "surface must not be null");
+        Objects.requireNonNull(sourceHeads, "sourceHeads must not be null");
         Objects.requireNonNull(resolvedValues, "resolvedValues must not be null");
         Objects.requireNonNull(resolvedClass, "resolvedClass must not be null");
 

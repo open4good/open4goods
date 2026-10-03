@@ -194,4 +194,18 @@ class FeedRowReferenceOfferAdapterTest {
                 .filteredOn(a -> a.field().key().equals("weight"))
                 .first().extracting("evidence").isInstanceOf(ScalarEvidence.class);
     }
+
+    @Test
+    void weightEvidenceCarriesTheRowsUnitValueNotTheUnitColumnName() {
+        FeedRowTranslation translation =
+                adapter.translate(DEFINITION, resolution(), row(), GTIN, EUR, RETRIEVED_AT, POLICY);
+
+        SourceRecordMutation mutation = translation.referenceMutation().orElseThrow();
+        ScalarEvidence weightEvidence = (ScalarEvidence) mutation.candidate().assertions().stream()
+                .filter(a -> a.field().key().equals("weight"))
+                .findFirst().orElseThrow()
+                .evidence();
+
+        assertThat(weightEvidence.lexicalUnit()).isEqualTo("kg");
+    }
 }

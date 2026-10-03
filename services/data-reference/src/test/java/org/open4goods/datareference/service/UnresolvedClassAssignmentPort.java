@@ -8,13 +8,14 @@ import org.open4goods.datareference.model.ProjectionSurface;
 import org.open4goods.datareference.port.ClassAssignmentPort;
 
 /**
- * Placeholder {@link ClassAssignmentPort} for use before a dedicated
- * class-resolution capability exists.
+ * Test-only {@link ClassAssignmentPort} double reserved for fixtures that do
+ * not care about class resolution.
  *
  * <p>Always reports no confirmed class, which correctly suppresses automatic
  * model grouping (ADR-0010: "missing brand/class/model prevents automatic
- * exact grouping") rather than guessing one. Replace with a real resolver once
- * GTIN-to-class resolution is implemented.
+ * exact grouping") rather than guessing one. {@link RegistryClassAssignmentPort}
+ * is the production resolver; this type lives under {@code src/test} so it
+ * cannot be wired into a production path (GOU-204).
  */
 public final class UnresolvedClassAssignmentPort implements ClassAssignmentPort {
 
