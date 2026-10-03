@@ -37,9 +37,3 @@ spring:
 
 elasticsearch.password:
 elasticsearch.host: 127.0.0.1
-
-xwiki:
-  baseUrl: http://localhost:8080/xwiki
-  password: mock
-  username: mock
-

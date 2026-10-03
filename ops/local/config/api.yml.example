@@ -11,5 +11,3 @@ api:
   backup:
     data-backup-folder: ${PRODUCT_BACKUP_SOURCE_URI}
     xwiki-backup-file: ${XWIKI_XAR_PATH}
-xwiki:
-  baseUrl: http://localhost:${O4G_PORT_XWIKI:8080}/xwiki

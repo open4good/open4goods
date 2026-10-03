@@ -88,21 +88,19 @@ SERVICES = {
 # once the shared-host env is applied. Keys are dotted paths into the
 # resolved config tree.
 EXPECTED = {
-    "api": {"spring.elasticsearch.uris": "O4G_PORT_ELASTICSEARCH", "xwiki.baseUrl": "O4G_PORT_XWIKI"},
+    "api": {"spring.elasticsearch.uris": "O4G_PORT_ELASTICSEARCH"},
     "ui": {
         "spring.elasticsearch.uris": "O4G_PORT_ELASTICSEARCH",
-        "xwiki.baseUrl": "O4G_PORT_XWIKI",
         "image-base-url": "O4G_PORT_UI",
         "namings.baseUrls.fr": "O4G_PORT_FRONTEND",
         "namings.baseUrls.default": "O4G_PORT_FRONTEND",
     },
-    "admin": {"xwiki.baseUrl": "O4G_PORT_XWIKI"},
+    "admin": {},
     "front-api": {
         "spring.elasticsearch.uris": "O4G_PORT_ELASTICSEARCH",
         "front.resource-root-path": "O4G_PORT_UI",
         "front.exposed-docs.base-url": "O4G_PORT_EXPOSED_DOCS",
         "front.geocode.base-url": "O4G_PORT_GEOCODE",
-        "xwiki.base-url": "O4G_PORT_XWIKI",
     },
     "b2b-api": {
         "spring.datasource.url": "O4G_PORT_POSTGRES",
