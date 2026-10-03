@@ -22,10 +22,14 @@ import org.open4goods.datareference.model.RuleVersion;
  * outright; a weaker, unreviewed similarity signal is a separate mechanism
  * that must never be expressed as a {@code ModelPatternRule}.
  *
- * <p>The compact constructor compiles the pattern, rejects a catastrophic
- * (ReDoS-prone) shape, requires a named {@code family} capture group, and
- * replays every example and counterexample so a rule that cannot prove itself
- * against its own fixtures never enters the registry.
+ * <p>The compact constructor compiles the pattern, rejects a pattern with a
+ * nested-quantifier shape (see {@link NestedQuantifierGuard}), requires a
+ * named {@code family} capture group, and replays every example and
+ * counterexample so a rule that cannot prove itself against its own fixtures
+ * never enters the registry. That rejection is a narrow structural check, not
+ * a general ReDoS guarantee: {@link ModelPatternRuleRegistry} additionally
+ * bounds the time any match against untrusted provider text may take, which
+ * is the only guard that covers every exponential shape.
  *
  * @param version effective, monotonic rule coordinate
  * @param canonicalBrand normalized brand slug this rule is scoped to
@@ -73,9 +77,10 @@ public record ModelPatternRule(
             throw new ModelPatternRuleValidationException("reviewer must not be blank: " + version);
         }
 
-        if (CatastrophicRegexDetector.isCatastrophic(pattern)) {
+        if (NestedQuantifierGuard.hasNestedQuantifier(pattern)) {
             throw new ModelPatternRuleValidationException(
-                    "pattern rejected as a catastrophic (ReDoS-prone) regex: " + version + " -> " + pattern);
+                    "pattern rejected for a nested-quantifier shape known to cause catastrophic backtracking: "
+                            + version + " -> " + pattern);
         }
         Pattern compiled;
         try {

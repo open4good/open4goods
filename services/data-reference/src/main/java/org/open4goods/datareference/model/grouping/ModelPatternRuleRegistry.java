@@ -1,5 +1,6 @@
 package org.open4goods.datareference.model.grouping;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,6 +11,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.open4goods.datareference.model.CanonicalClassId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Immutable, compiled lookup over Git-authored {@link ModelPatternRule}s,
@@ -20,8 +23,20 @@ import org.open4goods.datareference.model.CanonicalClassId;
  * other rule's pattern, an engine matching real provider text could pick
  * either one depending on rule order, which is exactly the silent
  * non-determinism ADR-0010 rules out for a confirmed {@code FAMILY} group.
+ *
+ * <p>{@link ModelPatternRule}'s own {@link NestedQuantifierGuard} check at
+ * authoring time only rejects one exponential shape, nested quantifiers; it
+ * cannot prove a pattern safe against every ReDoS shape (e.g. overlapping
+ * alternation such as {@code (a|a)+}). Matching here against raw,
+ * unbounded provider text is therefore itself time-bounded: a match that runs
+ * past {@link #MATCH_TIMEOUT_NANOS} is aborted and treated as no match,
+ * instead of being allowed to run unbounded.
  */
 public final class ModelPatternRuleRegistry {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ModelPatternRuleRegistry.class);
+
+    private static final long MATCH_TIMEOUT_NANOS = Duration.ofMillis(200).toNanos();
 
     private final Map<Scope, List<CompiledRule>> rulesByScope;
 
@@ -107,8 +122,14 @@ public final class ModelPatternRuleRegistry {
     private record CompiledRule(ModelPatternRule rule, Pattern compiled) {
 
         Optional<String> family(String text) {
-            Matcher matcher = compiled.matcher(text);
-            if (!matcher.find()) {
+            Matcher matcher = compiled.matcher(new TimeBoundedCharSequence(text, MATCH_TIMEOUT_NANOS));
+            try {
+                if (!matcher.find()) {
+                    return Optional.empty();
+                }
+            } catch (RegexMatchTimeoutException timeout) {
+                LOG.warn("Pattern match for rule {} exceeded its {} ms time budget and was aborted; treating as no match",
+                        rule.version(), Duration.ofNanos(MATCH_TIMEOUT_NANOS).toMillis());
                 return Optional.empty();
             }
             String family = matcher.group(ModelPatternRule.FAMILY_GROUP);

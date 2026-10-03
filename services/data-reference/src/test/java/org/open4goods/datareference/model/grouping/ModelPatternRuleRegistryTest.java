@@ -3,6 +3,7 @@ package org.open4goods.datareference.model.grouping;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
@@ -86,6 +87,29 @@ class ModelPatternRuleRegistryTest {
                 .isEqualTo(Optional.of(new GroupId(GroupType.FAMILY, "10-television-4-acme-2-xr")));
         assertThat(registry.matchFamily("acme", FRIDGE, "XR-500-EU"))
                 .isEqualTo(Optional.of(new GroupId(GroupType.FAMILY, "12-refrigerator-4-acme-2-xr")));
+    }
+
+    /**
+     * GOU-242 AC2: {@link NestedQuantifierGuard} only rejects nested quantifiers
+     * at authoring time, so a pattern built from overlapping alternation inside
+     * a quantified group -- exponential, but no nested quantifier -- clears
+     * construction and reaches {@link ModelPatternRuleRegistry#matchFamily}.
+     * Matching it against a crafted worst-case input must still return
+     * promptly instead of blocking on unbounded backtracking.
+     */
+    @Test
+    void boundsMatchTimeAgainstAnOverlappingAlternationPattern() {
+        ModelPatternRule rule = new ModelPatternRule(new RuleVersion("family-acme-redos-television", 1), "acme", TV,
+                "^(?<family>(?:a|a)+)b$", List.of("aaab"), List.of(), "catalog-review@open4goods.org");
+        ModelPatternRuleRegistry registry = new ModelPatternRuleRegistry(List.of(rule));
+        String worstCaseInput = "a".repeat(40) + "c";
+
+        long startNanos = System.nanoTime();
+        Optional<GroupId> result = registry.matchFamily("acme", TV, worstCaseInput);
+        long elapsedMillis = Duration.ofNanos(System.nanoTime() - startNanos).toMillis();
+
+        assertThat(result).isEmpty();
+        assertThat(elapsedMillis).isLessThan(2_000L);
     }
 
     private static ModelPatternRule xrRule(String brand, CanonicalClassId canonicalClass, List<String> examples,
