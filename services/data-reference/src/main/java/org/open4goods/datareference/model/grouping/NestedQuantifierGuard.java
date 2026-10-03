@@ -4,30 +4,40 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 /**
- * Static structural guard against the classic catastrophic-backtracking
- * (ReDoS) regex shape before a {@link ModelPatternRule} pattern is ever
- * matched against untrusted provider text.
+ * Static structural check for one specific catastrophic-backtracking
+ * (ReDoS) regex shape: a quantified group that itself contains a quantified
+ * sub-expression, the root cause of exponential backtracking in patterns
+ * such as {@code (a+)+} or {@code ([a-z]+)*}.
  *
- * <p>A reviewed family pattern comes from Git, but the text it runs against is
- * provider-supplied and unbounded. This rejects a quantified group that itself
- * contains a quantified sub-expression -- the root cause of exponential
- * backtracking in patterns such as {@code (a+)+} or {@code ([a-z]+)*} -- at
- * authoring time, deterministically and without ever running the pattern
- * against a crafted worst-case input.
+ * <p>This is <strong>not</strong> a general ReDoS safety check. A pattern that
+ * passes {@link #hasNestedQuantifier(String)} can still be exponential through
+ * a different shape this does not analyze -- most notably overlapping
+ * alternation inside a quantified group, such as {@code (a|a)+} or
+ * {@code (a|ab)+}, which contains no nested quantifier at all. A
+ * {@link ModelPatternRule} pattern that clears this check is only known to be
+ * free of the nested-quantifier shape; it still runs against untrusted
+ * provider text under the runtime match-time bound in
+ * {@link ModelPatternRuleRegistry}, which is the only guard that can catch
+ * every exponential shape, including this one.
  */
-final class CatastrophicRegexDetector {
+final class NestedQuantifierGuard {
 
-    private CatastrophicRegexDetector() {
+    private NestedQuantifierGuard() {
     }
 
     /**
      * Detects a nested-quantifier shape known to cause catastrophic backtracking.
      *
+     * <p>Propagates correctly through an optional wrapper group, so
+     * {@code ((a+)?)+} is detected. Does <strong>not</strong> detect overlapping
+     * alternation such as {@code (a|a)+}, which contains no nested quantifier --
+     * see the class-level Javadoc.
+     *
      * @param pattern raw regex source, as written by the rule author
      * @return {@code true} when a quantified group contains its own quantified
      *     sub-expression
      */
-    static boolean isCatastrophic(String pattern) {
+    static boolean hasNestedQuantifier(String pattern) {
         Deque<boolean[]> groupContainsQuantifier = new ArrayDeque<>();
         boolean inClass = false;
         int length = pattern.length();
