@@ -36,6 +36,7 @@ import org.open4goods.datareference.model.SourceRecordTransitionOutcome;
 import org.open4goods.datareference.model.SourceUsagePolicyRegistry;
 import org.open4goods.datareference.model.projection.EvaluationRefreshTrigger;
 import org.open4goods.datareference.model.projection.EvaluationSummary;
+import org.open4goods.datareference.model.projection.GroupAssignment;
 import org.open4goods.datareference.model.projection.OfferSummary;
 import org.open4goods.datareference.model.projection.ProductReferenceProjection;
 import org.open4goods.datareference.model.projection.ProductReferenceProjectionEnvelope;
@@ -209,6 +210,8 @@ class IcecatPipelineEndToEndIT {
                     (g, surface, inputs) -> new OfferSummary(0, false, null, null, Instant.now()),
                     input -> new EvaluationSummary(new RuleVersion("evaluation", 1), Instant.now(), Map.of(), Map.of(), List.of()),
                     (g, surface, inputs, values) -> new SearchSummary(new RuleVersion("lexical-search", 1), List.of()),
+                    (g, surface, heads, values, resolvedClass) -> GroupAssignment.NONE,
+                    (g, surface) -> Optional.empty(),
                     new DeterministicDomainSliceComposer(), writer, Clock.systemUTC());
 
             ProjectionReplayInputs replayInputs = new ProjectionReplayInputs(new RegistryVersion(1),
