@@ -47,6 +47,23 @@ repositories, bounded by small local caches (`IcecatIndexService.featureCache`,
 `IcecatFeatureResolver`'s normalized-name and by-id caches) with size-inspection methods for
 health checks.
 
+## Legacy Real-Time Aggregation Path
+
+Besides the source-record/projection pipeline above, four classes still run Icecat-coupled
+logic inline during real-time aggregation, wired from `AggregationFacadeService.java:324-348`:
+
+- `api/.../aggregation/services/realtime/TaxonomyRealTimeAggregationService.java`
+- `api/.../aggregation/services/realtime/AttributeRealtimeAggregationService.java`
+- `api/.../aggregation/services/realtime/MediaAggregationService.java`
+- `api/.../services/TaxonomyMappingService.java`
+
+This path is **in service, not dead code**: GOU-187 arbitrated that it stays for the
+transition. Retiring it is [GOU-50](/GOU/issues/GOU-50)'s scope, not this document's
+acceptance criteria. Per GOU-39 AC2, no new Icecat logic is added here: any
+evolution goes through the source-record/projection pipeline instead, and
+`scripts/verify/check_icecat_legacy_symbols.py` fails CI if the set of Icecat symbols these
+four classes import grows.
+
 ## Import and Versioning
 
 `IcecatIndexService.syncFromLoaders()` is the only entry point that downloads and parses the

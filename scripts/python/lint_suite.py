@@ -129,6 +129,10 @@ def lint_corpus(suite: LintSuite) -> None:
         "Control invocation registry",
         [sys.executable, "scripts/verify/check_control_invocations.py"],
     )
+    suite.run(
+        "Icecat legacy-path symbol guard",
+        [sys.executable, "scripts/verify/check_icecat_legacy_symbols.py"],
+    )
     for label, script in (
         ("Generated ADR index", "scripts/generate/generate_decision_index.py"),
         ("Generated MCP client configs", "scripts/generate/generate_mcp_configs.py"),
