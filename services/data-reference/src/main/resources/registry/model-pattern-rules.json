@@ -1,0 +1,12 @@
+{
+  "schemaVersion" : "https://open4goods.org/schema/model-pattern-rules-1.json",
+  "rules" : [ {
+    "version" : "family-acme-xr-television@1",
+    "canonicalBrand" : "acme",
+    "canonicalClass" : "o4g:class:television",
+    "pattern" : "(?i)^(?<family>xr)[- ]?(?<model>\\d{3,4})(?:[- ]?(?:eu|fr|us|uk))?$",
+    "examples" : [ "XR-500-EU", "XR500FR", "XR 500 US", "XR-650-EU", "xr720uk" ],
+    "counterexamples" : [ "QX-500-EU", "XR-PRO-TAB", "XR50-EU" ],
+    "reviewer" : "catalog-review@open4goods.org"
+  } ]
+}

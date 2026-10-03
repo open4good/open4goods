@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.open4goods.datareference.model.CanonicalClassId;
 import org.open4goods.datareference.model.Gtin;
 import org.open4goods.datareference.model.ProjectionSurface;
+import org.open4goods.datareference.model.SourceRecordHead;
 import org.open4goods.datareference.model.projection.GroupAssignment;
 import org.open4goods.datareference.model.resolution.ResolvedValue;
 
@@ -17,6 +18,11 @@ import org.open4goods.datareference.model.resolution.ResolvedValue;
  * and the confirmed class, and this port returns a fully formed
  * {@link GroupAssignment} that {@link DomainSliceComposer} only assembles,
  * never derives.
+ *
+ * <p>{@code sourceHeads} is carried alongside the resolved values because an
+ * explicit provider relation (GOU-49 AC2/AC3) is evidence on the raw head's
+ * assertions, not a canonical-attribute value a {@link ResolvedValue} could
+ * carry.
  */
 public interface ModelGroupingPort {
 
@@ -25,11 +31,12 @@ public interface ModelGroupingPort {
      *
      * @param gtin product identity
      * @param surface surface the grouping applies to
+     * @param sourceHeads current heads of every provider record attached to the GTIN
      * @param resolvedValues resolved reference values for that surface
      * @param resolvedClass confirmed O4G class, when one is resolved
      * @return the assignment; never {@code null}, use {@link GroupAssignment#NONE}
      *     when nothing is confirmed
      */
-    GroupAssignment assignGroups(Gtin gtin, ProjectionSurface surface, List<ResolvedValue> resolvedValues,
-            Optional<CanonicalClassId> resolvedClass);
+    GroupAssignment assignGroups(Gtin gtin, ProjectionSurface surface, List<SourceRecordHead> sourceHeads,
+            List<ResolvedValue> resolvedValues, Optional<CanonicalClassId> resolvedClass);
 }

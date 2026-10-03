@@ -88,7 +88,7 @@ public final class ProjectionAssemblyService {
                     offerSummary, trigger));
             var searchSummary = search.summarize(gtin, surface, replayInputs, values);
             Optional<CanonicalClassId> resolvedClass = classAssignment.resolveClass(gtin, surface);
-            GroupAssignment groupAssignment = grouping.assignGroups(gtin, surface, values, resolvedClass);
+            GroupAssignment groupAssignment = grouping.assignGroups(gtin, surface, heads, values, resolvedClass);
             components.put(surface, composer.compose(gtin, surface, replayInputs, values, offerSummary,
                     evaluationSummary, searchSummary, groupAssignment, builtAt));
         }
