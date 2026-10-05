@@ -631,7 +631,7 @@ export default defineNuxtConfig({
       }
 
       const wikiSourcePage = pages.find(page =>
-        normalizePath(page.file)?.includes('/app/pages/xwiki-fullpage.vue')
+        normalizePath(page.file)?.includes('/app/pages/cms-fullpage.vue')
       )
 
       if (!wikiSourcePage) {

@@ -1,5 +1,5 @@
 import { computed, toValue, type MaybeRefOrGetter } from 'vue'
-import type { XwikiContentBlocDto } from '~~/shared/api-client'
+import type { ContentBloc } from '~~/shared/utils/content-bloc'
 
 /**
  * Composable to retrieve dynamic content blocs with SSR-aware caching.
@@ -12,7 +12,7 @@ export const useContentBloc = async (
     return id ? `content-bloc:${id}` : 'content-bloc:empty'
   })
 
-  const asyncState = await useAsyncData<XwikiContentBlocDto | null>(
+  const asyncState = await useAsyncData<ContentBloc | null>(
     () => key.value,
     async () => {
       const id = toValue(blocId)
@@ -21,7 +21,7 @@ export const useContentBloc = async (
       }
 
       const headers = useRequestHeaders(['host', 'x-forwarded-host'])
-      return $fetch<XwikiContentBlocDto>(`/api/blocs/${id}`, {
+      return $fetch<ContentBloc>(`/api/blocs/${id}`, {
         headers,
       })
     },

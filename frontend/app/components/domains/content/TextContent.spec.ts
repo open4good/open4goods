@@ -107,7 +107,7 @@ describe('TextContent', () => {
 
     const wrapper = await mountComponent()
 
-    expect(wrapper.get('.xwiki-sandbox').element.innerHTML).toBe(
+    expect(wrapper.get('.cms-sandbox').element.innerHTML).toBe(
       '<p>Server content</p>'
     )
     expect(wrapper.find('.v-progress-circular-stub').exists()).toBe(false)
@@ -121,7 +121,7 @@ describe('TextContent', () => {
     const wrapper = await mountComponent()
 
     expect(wrapper.find('.v-progress-circular-stub').exists()).toBe(true)
-    expect(wrapper.find('.xwiki-sandbox').exists()).toBe(false)
+    expect(wrapper.find('.cms-sandbox').exists()).toBe(false)
     expect(wrapper.find('.edit-link').exists()).toBe(false)
   })
 
@@ -134,7 +134,7 @@ describe('TextContent', () => {
     expect(wrapper.find('.v-alert-stub').text()).toContain(
       'Unable to load bloc'
     )
-    expect(wrapper.find('.xwiki-sandbox').exists()).toBe(false)
+    expect(wrapper.find('.cms-sandbox').exists()).toBe(false)
   })
 
   it('falls back to generated lorem ipsum when no content is returned', async () => {
@@ -144,7 +144,7 @@ describe('TextContent', () => {
     const wrapper = await mountComponent({ ipsumLength: 120 })
 
     expect(generateLoremMock).toHaveBeenCalledWith(120)
-    expect(wrapper.get('.xwiki-sandbox').element.innerHTML).toBe(
+    expect(wrapper.get('.cms-sandbox').element.innerHTML).toBe(
       'generated-lorem'
     )
   })
@@ -174,7 +174,7 @@ describe('TextContent', () => {
 
     const blocResponse = createBlocResponse({
       htmlContent: '<p>Editable</p>',
-      editLink: 'https://xwiki.example.com/edit/Main.WebHome',
+      editLink: 'https://cms.example.com/edit/Main.WebHome',
     })
     useContentBlocMock.mockResolvedValue(blocResponse)
 
@@ -182,7 +182,7 @@ describe('TextContent', () => {
 
     const editLink = wrapper.get('a.edit-link')
     expect(editLink.attributes('href')).toBe(
-      'https://xwiki.example.com/edit/Main.WebHome'
+      'https://cms.example.com/edit/Main.WebHome'
     )
     expect(editLink.attributes('target')).toBe('_blank')
     expect(editLink.attributes('rel')).toBe('noopener')
@@ -196,7 +196,7 @@ describe('TextContent', () => {
 
     const blocResponse = createBlocResponse({
       htmlContent: '<p>Content</p>',
-      editLink: 'https://xwiki.example.com/edit/Main.WebHome',
+      editLink: 'https://cms.example.com/edit/Main.WebHome',
     })
     useContentBlocMock.mockResolvedValue(blocResponse)
 

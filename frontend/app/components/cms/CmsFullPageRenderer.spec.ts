@@ -108,7 +108,7 @@ const mountComponent = async (
   props: Record<string, unknown> = {},
   slots: Record<string, () => ReturnType<typeof h>> = {}
 ) => {
-  const module = await import('./XwikiFullPageRenderer.vue')
+  const module = await import('./CmsFullPageRenderer.vue')
   const Component = module.default
 
   const wrapper = await mountSuspended(Component, {
@@ -140,7 +140,7 @@ const mountComponent = async (
   return wrapper
 }
 
-describe('XwikiFullPageRenderer', () => {
+describe('CmsFullPageRenderer', () => {
   beforeEach(() => {
     useFullPageMock.mockResolvedValue(createFullPageResponse())
   })

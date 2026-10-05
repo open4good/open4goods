@@ -1,13 +1,13 @@
 import { createError, defineEventHandler, getRouterParam } from 'h3'
 
-import type { XwikiContentBlocDto } from '~~/shared/api-client'
+import type { ContentBloc } from '~~/shared/utils/content-bloc'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
 import { setDomainLanguageCacheHeaders } from '../../utils/cache-headers'
 import { getStaticContentBloc } from '../../utils/static-content-blocs'
 
 export default defineEventHandler(
-  async (event): Promise<XwikiContentBlocDto> => {
+  async (event): Promise<ContentBloc> => {
     const blocId = getRouterParam(event, 'blocId')
     if (!blocId) {
       throw createError({

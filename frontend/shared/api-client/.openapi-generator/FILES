@@ -199,6 +199,5 @@ models/VerticalSubCategoryReadMoreDto.ts
 models/VerticalSubsetDto.ts
 models/WikiPageConfig.ts
 models/WikidataPropertyReferential.ts
-models/XwikiContentBlocDto.ts
 models/index.ts
 runtime.ts
