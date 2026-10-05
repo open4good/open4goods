@@ -7,11 +7,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.kohsuke.github.GHRepository;
+import org.open4goods.icecat.repository.IcecatCategoryRepository;
+import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
+import org.open4goods.icecat.repository.IcecatFeatureRepository;
+import org.open4goods.icecat.repository.IcecatSupplierRepository;
 import org.open4goods.model.RolesConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
@@ -27,6 +33,21 @@ class SharedTokenFilterIT {
     @Autowired
     private MockMvc mockMvc;
 
+    @MockitoBean
+    private GHRepository ghRepository;
+
+    @MockitoBean
+    private IcecatFeatureRepository icecatFeatureRepository;
+
+    @MockitoBean
+    private IcecatCategoryRepository icecatCategoryRepository;
+
+    @MockitoBean
+    private IcecatFeatureGroupRepository icecatFeatureGroupRepository;
+
+    @MockitoBean
+    private IcecatSupplierRepository icecatSupplierRepository;
+
     /**
      * Shared token used for authenticated requests in tests.
      */
@@ -34,22 +55,26 @@ class SharedTokenFilterIT {
 
     @Test
     void missingTokenIsRejected() throws Exception {
+        // Authenticated via JWT but without ROLE_FRONTEND/ROLE_EDITOR: @PreAuthorize denies with 403.
         mockMvc.perform(get("/products/fields/sortable")
+                .param("domainLanguage", "fr")
                 .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
     @Test
     void wrongTokenIsRejected() throws Exception {
         mockMvc.perform(get("/products/fields/sortable")
+                .param("domainLanguage", "fr")
                 .header("X-Shared-Token", "wrong")
                 .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
     @Test
     void validTokenAllowsAccess() throws Exception {
         mockMvc.perform(get("/products/fields/sortable")
+                .param("domainLanguage", "fr")
                 .header("X-Shared-Token", SHARED_TOKEN)
                 .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
                 .andExpect(status().isOk());
