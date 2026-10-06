@@ -7,28 +7,9 @@ const useContentBlocMock = vi.hoisted(() => vi.fn())
 const generateLoremMock = vi.hoisted(() =>
   vi.fn<(length?: number) => string>(() => 'generated-lorem')
 )
-const hasRoleMock = vi.fn<(role: string) => boolean>(() => false)
-
-const authState = {
-  isLoggedIn: ref(false),
-  roles: ref<string[]>([]),
-  username: ref<string | null>(null),
-  hasRole: hasRoleMock,
-  logout: vi.fn(),
-}
-
-let runtimeConfig: { public: { editRoles: string[] } }
 
 vi.mock('~/composables/content/useContentBloc', () => ({
   useContentBloc: useContentBlocMock,
-}))
-
-vi.mock('~/composables/useAuth', () => ({
-  useAuth: () => authState,
-}))
-
-vi.mock('#app', () => ({
-  useRuntimeConfig: () => runtimeConfig,
 }))
 
 vi.mock('~/utils/content/_loremIpsum', () => ({
@@ -45,7 +26,6 @@ const defaultStubs = {
 
 type BlocMockOptions = {
   htmlContent?: string
-  editLink?: string | null
   pending?: boolean
   error?: string | null
 }
@@ -53,7 +33,6 @@ type BlocMockOptions = {
 const createBlocResponse = (options: BlocMockOptions = {}) => {
   return {
     htmlContent: ref(options.htmlContent ?? '<p>Content</p>'),
-    editLink: ref(options.editLink ?? null),
     pending: ref(options.pending ?? false),
     error: ref(options.error ?? null),
     refresh: vi.fn(),
@@ -73,11 +52,6 @@ const mountComponent = async (props: Record<string, unknown> = {}) => {
 }
 
 beforeEach(() => {
-  runtimeConfig = { public: { editRoles: [] } }
-  authState.isLoggedIn.value = false
-  authState.roles.value = []
-  hasRoleMock.mockReset()
-  hasRoleMock.mockReturnValue(false)
   generateLoremMock.mockReset()
   generateLoremMock.mockReturnValue('generated-lorem')
   useContentBlocMock.mockReset()
@@ -122,7 +96,6 @@ describe('TextContent', () => {
 
     expect(wrapper.find('.v-progress-circular-stub').exists()).toBe(true)
     expect(wrapper.find('.cms-sandbox').exists()).toBe(false)
-    expect(wrapper.find('.edit-link').exists()).toBe(false)
   })
 
   it('shows an error alert when the bloc request fails', async () => {
@@ -165,43 +138,5 @@ describe('TextContent', () => {
     await mountComponent()
 
     expect(generateLoremMock).toHaveBeenCalledWith(480)
-  })
-
-  it('renders an edit link when the user has the required role', async () => {
-    runtimeConfig.public.editRoles = ['content-editor', 'admin']
-    authState.isLoggedIn.value = true
-    hasRoleMock.mockImplementation((role: string) => role === 'content-editor')
-
-    const blocResponse = createBlocResponse({
-      htmlContent: '<p>Editable</p>',
-      editLink: 'https://cms.example.com/edit/Main.WebHome',
-    })
-    useContentBlocMock.mockResolvedValue(blocResponse)
-
-    const wrapper = await mountComponent()
-
-    const editLink = wrapper.get('a.edit-link')
-    expect(editLink.attributes('href')).toBe(
-      'https://cms.example.com/edit/Main.WebHome'
-    )
-    expect(editLink.attributes('target')).toBe('_blank')
-    expect(editLink.attributes('rel')).toBe('noopener')
-    expect(hasRoleMock).toHaveBeenCalledWith('content-editor')
-  })
-
-  it('hides the edit link when the user lacks the required role', async () => {
-    runtimeConfig.public.editRoles = ['content-editor']
-    authState.isLoggedIn.value = true
-    hasRoleMock.mockReturnValue(false)
-
-    const blocResponse = createBlocResponse({
-      htmlContent: '<p>Content</p>',
-      editLink: 'https://cms.example.com/edit/Main.WebHome',
-    })
-    useContentBlocMock.mockResolvedValue(blocResponse)
-
-    const wrapper = await mountComponent()
-
-    expect(wrapper.find('.edit-link').exists()).toBe(false)
   })
 })

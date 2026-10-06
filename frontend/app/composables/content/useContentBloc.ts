@@ -33,11 +33,9 @@ export const useContentBloc = async (
   )
 
   const htmlContent = computed(() => asyncState.data.value?.htmlContent ?? '')
-  const editLink = computed(() => asyncState.data.value?.editLink)
 
   return {
     htmlContent,
-    editLink,
     pending: asyncState.pending,
     error: asyncState.error,
     refresh: asyncState.refresh,

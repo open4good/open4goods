@@ -9,5 +9,4 @@ export interface CmsFullPage {
   metaTitle?: string | null
   metaDescription?: string | null
   width?: string | null
-  editLink?: string | null
 }

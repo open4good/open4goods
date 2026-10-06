@@ -164,7 +164,7 @@ Nudger – Goulven FURET</p>
 /**
  * Looks up a real static full page for a page id, mirroring `getStaticContentBloc`. Falls back
  * from the requested language to French, then returns `null` when the page id has no static
- * entry -- callers should fall through to the live XWiki fetch in that case.
+ * entry.
  */
 export function getStaticFullPage(
   pageId: string,
@@ -184,6 +184,5 @@ export function getStaticFullPage(
     metaTitle: entry.metaTitle,
     metaDescription: entry.metaDescription,
     width: entry.width,
-    editLink: null,
   }
 }

@@ -442,21 +442,6 @@ useHead(() => ({
         t('blog.article.empty')
       }}</v-alert>
     </section>
-
-    <footer class="article-footer">
-      <v-btn
-        v-if="isLoggedIn && article.editLink"
-        :href="article.editLink"
-        target="_blank"
-        rel="noopener noreferrer"
-        prepend-icon="mdi-open-in-new"
-        variant="text"
-        size="small"
-        data-test="article-edit-link"
-      >
-        {{ t('blog.article.edit') }}
-      </v-btn>
-    </footer>
   </v-sheet>
 </template>
 
@@ -574,11 +559,6 @@ useHead(() => ({
   border-radius: 12px
   margin: 1.5rem 0
 
-.article-footer
-  display: flex
-  justify-content: flex-end
-
-
 @media (max-width: 960px)
   .blog-article
     padding: 1.5rem
@@ -590,7 +570,4 @@ useHead(() => ({
   .article-meta
     flex-direction: column
     align-items: flex-start
-
-  .article-footer
-    justify-content: flex-start
 </style>

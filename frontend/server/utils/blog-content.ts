@@ -85,7 +85,6 @@ export async function toBlogPostDto(doc: BlogContentDoc): Promise<BlogPostDto> {
     body: await renderBody(doc.language, slug),
     category: doc.tags,
     image: doc.image,
-    editLink: undefined,
     createdMs: toEpochMs(doc.date) ?? undefined,
     modifiedMs: toEpochMs(doc.updatedAt) ?? undefined,
   }

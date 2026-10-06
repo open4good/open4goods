@@ -54,7 +54,6 @@
 - Scoped SASS/CSS is allowed when Vuetify tokens alone cannot express the design (hero layouts, animations, etc.). Use BEM-style class names and keep selectors minimal.
 - Global styles belong in `app/assets`. Avoid inline styles except for trivial tweaks.
 - Always mutualize styles when possible
-- When integrating CMS/XWiki content, ensure the preprocess step (`pnpm preprocess:css`) stays current.
 
 ### components mutualisation
 

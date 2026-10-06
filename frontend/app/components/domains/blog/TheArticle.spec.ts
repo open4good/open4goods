@@ -48,8 +48,6 @@ vi.mock('vue-i18n', () => ({
           return `Featured image for ${params.title}`
         case 'blog.article.empty':
           return 'The content of this article will be available soon.'
-        case 'blog.article.edit':
-          return 'Edit this article'
         case 'blog.breadcrumbs.home':
           return 'Home'
         case 'blog.breadcrumbs.blog':
@@ -82,7 +80,6 @@ describe('TheArticle.vue', () => {
     body: '<p>Hello <strong>world</strong>!</p>',
     createdMs: Date.UTC(2024, 0, 10),
     modifiedMs: Date.UTC(2024, 0, 12),
-    editLink: 'https://cms.example.com/edit',
   }
 
   const mountComponent = async (overrides: Record<string, unknown> = {}) => {
@@ -103,10 +100,6 @@ describe('TheArticle.vue', () => {
           },
           VDivider: {
             template: '<hr />',
-          },
-          VBtn: {
-            template: '<button><slot /></button>',
-            props: ['href', 'target', 'rel', 'prependIcon', 'variant', 'size'],
           },
           VAlert: {
             template: '<div class="v-alert"><slot /></div>',
@@ -153,13 +146,5 @@ describe('TheArticle.vue', () => {
 
     const readingTime = wrapper.get('[data-test="article-reading-time"]').text()
     expect(readingTime).toContain('Approx. ')
-  })
-
-  test('hides the edit link when the user is not authenticated', async () => {
-    isLoggedInRef.value = false
-
-    const wrapper = await mountComponent()
-
-    expect(wrapper.find('[data-test="article-edit-link"]').exists()).toBe(false)
   })
 })

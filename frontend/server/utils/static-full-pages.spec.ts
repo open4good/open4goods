@@ -9,7 +9,6 @@ describe('getStaticFullPage', () => {
     expect(result?.pageTitle).toBe('Les mentions légales et les CGU de Nudger')
     expect(result?.metaTitle).toBe('Mentions légales | Nudger')
     expect(result?.width).toBe('container-semi-fluid')
-    expect(result?.editLink).toBeNull()
     expect(result?.htmlContent).toContain('<h2>1. Présentation du site et de l’éditeur</h2>')
   })
 

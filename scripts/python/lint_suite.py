@@ -17,6 +17,7 @@ EXCLUDED_DIRS = {
     ".husky",
     ".nuxt",
     ".output",
+    ".paperclip-runtime",
     ".venv",
     "__pycache__",
     "coverage",

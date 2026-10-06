@@ -84,7 +84,6 @@ describe('blog-content', () => {
       expect(dto.createdMs).toBe(Date.parse('2026-01-01T00:00:00Z'))
       expect(dto.modifiedMs).toBe(Date.parse('2026-01-02T00:00:00Z'))
       expect(dto.body).toContain('<strong>world</strong>')
-      expect(dto.editLink).toBeUndefined()
     })
 
     it('unwraps a bare [assistant] marker out of its markdown-it paragraph wrapper', async () => {

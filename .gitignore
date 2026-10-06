@@ -19,6 +19,7 @@ apache-maven-*-bin.tar.gz
 /logs/
 /jstack.log
 /.claude/
+/.paperclip-runtime/
 /products_with_offers.json
 /random_dishwasher.json
 /random_fridge.json
