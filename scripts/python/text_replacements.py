@@ -28,6 +28,7 @@ EXCLUDED_DIRS = {
     ".mvn",
     ".nuxt",
     ".output",
+    ".paperclip-runtime",
     ".venv",
     ".vscode/chrome-debug-profile",
     "__pycache__",
