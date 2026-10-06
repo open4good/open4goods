@@ -6,8 +6,8 @@ const route = useRoute()
 
 definePageMeta({ lazy: true })
 
-const XwikiFullPageRenderer = defineAsyncComponent(
-  () => import('~/components/cms/XwikiFullPageRenderer.vue')
+const CmsFullPageRenderer = defineAsyncComponent(
+  () => import('~/components/cms/CmsFullPageRenderer.vue')
 )
 
 const matchedRoute = computed(() => matchLocalizedWikiRouteByPath(route.path))
@@ -20,5 +20,5 @@ const pageId = computed(() => matchedRoute.value?.pageId ?? null)
 </script>
 
 <template>
-  <XwikiFullPageRenderer :page-id="pageId" />
+  <CmsFullPageRenderer :page-id="pageId" />
 </template>

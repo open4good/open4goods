@@ -96,7 +96,7 @@
             aria-label="CMS content"
           >
             <!-- eslint-disable-next-line vue/no-v-html -->
-            <div class="xwiki-sandbox" v-html="htmlContent" />
+            <div class="cms-sandbox" v-html="htmlContent" />
           </div>
         </v-sheet>
       </div>

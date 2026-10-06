@@ -81,9 +81,9 @@ const displayHtml = computed(() => {
       error
     }}</v-alert>
 
-    <!-- Encapsulated XWiki content -->
+    <!-- Encapsulated content bloc -->
     <!-- eslint-disable-next-line vue/no-v-html -->
-    <div v-else class="xwiki-sandbox" v-html="displayHtml" />
+    <div v-else class="cms-sandbox" v-html="displayHtml" />
 
     <!-- Edit link -->
     <a
@@ -115,13 +115,13 @@ const displayHtml = computed(() => {
   font-size: 0.875rem;
 }
 
-/* Scoped sandbox to contain Bootstrap + XWiki styles */
-.xwiki-sandbox {
+/* Scoped sandbox to contain inherited rich-text styles */
+.cms-sandbox {
   display: block;
   font-family: inherit;
 }
 
-.xwiki-sandbox * {
+.cms-sandbox * {
   box-sizing: border-box;
   font-family: inherit;
 }

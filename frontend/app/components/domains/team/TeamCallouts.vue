@@ -107,7 +107,7 @@ const props = defineProps<Props>()
   &__text :deep(.text-content)
     padding: 0
 
-  &__text :deep(.xwiki-sandbox)
+  &__text :deep(.cms-sandbox)
     font-size: 1.05rem
     line-height: 1.7
 

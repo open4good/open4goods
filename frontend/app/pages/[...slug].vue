@@ -1,6 +1,6 @@
 <template>
   <ProductPage v-if="productRoute" :product-route="productRoute" />
-  <XwikiFullPageRenderer v-else-if="wikiRoute" :page-id="wikiRoute.pageId" />
+  <CmsFullPageRenderer v-else-if="wikiRoute" :page-id="wikiRoute.pageId" />
   <CategoryPage v-else-if="categorySlug" :slug="categorySlug" />
 </template>
 
@@ -13,8 +13,8 @@ defineRouteRules({
   isr: 3600, // Cache products, categories and wiki pages for 1 hour
 })
 
-const XwikiFullPageRenderer = defineAsyncComponent(
-  () => import('~/components/cms/XwikiFullPageRenderer.vue')
+const CmsFullPageRenderer = defineAsyncComponent(
+  () => import('~/components/cms/CmsFullPageRenderer.vue')
 )
 const ProductPage = defineAsyncComponent(
   () => import('~/components/pages/ProductPage.vue')

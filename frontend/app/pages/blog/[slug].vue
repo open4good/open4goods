@@ -10,8 +10,8 @@ interface BlogArticle extends BlogPostDto {
   content?: string
 }
 
-const XwikiFullPageRenderer = defineAsyncComponent(
-  () => import('~/components/cms/XwikiFullPageRenderer.vue')
+const CmsFullPageRenderer = defineAsyncComponent(
+  () => import('~/components/cms/CmsFullPageRenderer.vue')
 )
 
 const route = useRoute()
@@ -67,7 +67,7 @@ const assistantCategoryId = computed(() =>
 </script>
 
 <template>
-  <XwikiFullPageRenderer v-if="wikiRoute" :page-id="wikiRoute.pageId" />
+  <CmsFullPageRenderer v-if="wikiRoute" :page-id="wikiRoute.pageId" />
   <v-container v-else class="py-10 px-4 mx-auto" max-width="xl">
     <v-row>
       <v-col cols="12">
