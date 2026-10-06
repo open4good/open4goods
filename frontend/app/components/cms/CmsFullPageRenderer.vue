@@ -33,20 +33,6 @@
               >
                 {{ effectiveMetaDescription }}
               </p>
-              <div class="cms-page__hero-actions">
-                <v-btn
-                  v-if="canEdit"
-                  :href="editLink || undefined"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  prepend-icon="mdi-open-in-new"
-                  variant="outlined"
-                  color="white"
-                  class="cms-page__edit-button"
-                >
-                  {{ t('cms.page.edit') }}
-                </v-btn>
-              </div>
             </div>
           </div>
         </v-sheet>
@@ -110,7 +96,6 @@ import { useI18n } from 'vue-i18n'
 
 import CategoryNavigationBreadcrumbs from '~/components/category/navigation/CategoryNavigationBreadcrumbs.vue'
 import { useFullPage } from '~/composables/cms/useFullPage'
-import { useAuth } from '~/composables/useAuth'
 
 type BreadcrumbInput = {
   title?: string | null
@@ -127,7 +112,6 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
-const config = useRuntimeConfig()
 const slots = useSlots()
 
 const resolvedPageId = computed(() => props.pageId?.trim() ?? null)
@@ -142,7 +126,6 @@ const {
   metaTitle,
   metaDescription,
   htmlContent,
-  editLink,
   pending,
   error,
   refresh,
@@ -187,15 +170,6 @@ const heroImage = computed(() => props.heroImage?.trim() ?? '')
 const hasHeroImage = computed(() => heroImage.value.length > 0)
 
 const canonicalUrl = useCanonicalUrl()
-
-const { isLoggedIn, hasRole } = useAuth()
-const allowedRoles = computed(() => (config.public.editRoles as string[]) || [])
-const canEdit = computed(() => {
-  const link = editLink.value
-  return (
-    isLoggedIn.value && !!link && allowedRoles.value.some(role => hasRole(role))
-  )
-})
 
 const containerClass = computed(() => [
   'cms-page__container',
@@ -342,16 +316,6 @@ useHead(() => ({
   margin: 0
   font-size: clamp(1.05rem, 1.8vw, 1.25rem)
   color: rgba(var(--v-theme-hero-overlay-soft), 0.92)
-
-.cms-page__hero-actions
-  display: flex
-  gap: 0.75rem
-  flex-wrap: wrap
-  margin-top: 0.5rem
-
-.cms-page__edit-button
-  color: rgb(var(--v-theme-hero-overlay-strong))
-  border-color: rgba(var(--v-theme-hero-overlay-soft), 0.6)
 
 .cms-page__loader
   margin-inline: auto

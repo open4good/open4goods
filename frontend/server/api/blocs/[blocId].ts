@@ -35,6 +35,6 @@ export default defineEventHandler(
       })
     }
 
-    return { blocId, htmlContent: staticContent, editLink: null }
+    return { blocId, htmlContent: staticContent }
   }
 )

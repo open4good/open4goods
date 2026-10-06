@@ -6,5 +6,4 @@
 export interface ContentBloc {
   blocId?: string
   htmlContent?: string
-  editLink?: string | null
 }

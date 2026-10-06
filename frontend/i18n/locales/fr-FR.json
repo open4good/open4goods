@@ -44,7 +44,6 @@
   "blog": {
     "article": {
       "back": "Retour",
-      "edit": "Modifier cet article",
       "empty": "Le contenu de cet article sera disponible bientôt.",
       "featuredImageAlt": "Image mise en avant pour {title}",
       "readingTime": "Env. {minutes} min de lecture",
@@ -895,7 +894,6 @@
   },
   "cms": {
     "page": {
-      "edit": "Modifier cette page",
       "error": "Nous n'avons pas pu charger cette page. Merci de réessayer plus tard.",
       "loading": "Chargement de la page..."
     }

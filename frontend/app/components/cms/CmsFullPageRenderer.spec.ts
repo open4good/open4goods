@@ -42,17 +42,6 @@ vi.mock(
   })
 )
 
-vi.mock('~/composables/useAuth', () => ({
-  useAuth: () => ({
-    isLoggedIn: ref(false),
-    hasRole: vi.fn(() => false),
-  }),
-}))
-
-vi.mock('#app', () => ({
-  useRuntimeConfig: () => ({ public: { editRoles: [] } }),
-}))
-
 const useSeoMetaMock = vi.fn()
 const useHeadMock = vi.fn()
 const useCanonicalUrlMock = vi.fn(() => ref('https://example.com/cms/page'))
@@ -67,7 +56,6 @@ vi.mock('#imports', () => ({
         'cms.page.error': 'Unable to load content',
         'common.actions.retry': 'Retry',
         'cms.page.loading': 'Loading',
-        'cms.page.edit': 'Edit',
         'category.hero.breadcrumbAriaLabel': 'Category navigation breadcrumb',
       }
 
@@ -83,7 +71,6 @@ vi.mock('vue-i18n', () => ({
         'cms.page.error': 'Unable to load content',
         'common.actions.retry': 'Retry',
         'cms.page.loading': 'Loading',
-        'cms.page.edit': 'Edit',
         'category.hero.breadcrumbAriaLabel': 'Category navigation breadcrumb',
       }
 
@@ -98,7 +85,6 @@ const createFullPageResponse = () => ({
   metaTitle: ref('Guide Title'),
   metaDescription: ref('Meta description'),
   htmlContent: ref('<p>Guide content</p>'),
-  editLink: ref<string | null>(null),
   pending: ref(false),
   error: ref(null),
   refresh: vi.fn(),
