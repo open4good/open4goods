@@ -20,6 +20,11 @@ import java.util.Locale;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.kohsuke.github.GHRepository;
+import org.open4goods.icecat.repository.IcecatCategoryRepository;
+import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
+import org.open4goods.icecat.repository.IcecatFeatureRepository;
+import org.open4goods.icecat.repository.IcecatSupplierRepository;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.nudgerfrontapi.controller.api.ProductController;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
@@ -60,6 +65,21 @@ class ProductControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockitoBean
+    private GHRepository ghRepository;
+
+    @MockitoBean
+    private IcecatFeatureRepository icecatFeatureRepository;
+
+    @MockitoBean
+    private IcecatCategoryRepository icecatCategoryRepository;
+
+    @MockitoBean
+    private IcecatFeatureGroupRepository icecatFeatureGroupRepository;
+
+    @MockitoBean
+    private IcecatSupplierRepository icecatSupplierRepository;
 
     @Autowired
     private ProductController controller;
