@@ -136,12 +136,36 @@ frontend.
 
 ### Running Locally (Offline Mode)
 
-By default, the `front-api` runs in **Local Mode** (`local` profile). This mode uses an in-memory H2 database and mocks external services like Elasticsearch, allowing you to run the application without any infrastructure dependencies.
+By default, the `front-api` runs in **Local Mode** (`local` profile, see
+`front-api/src/main/resources/application-local.yml`). This mode starts with **no network
+access, no token and no pre-existing cache file**:
+
+- **Simulated**: the product repository and the contribution-vote repository are stubbed
+  in-memory (no real Elasticsearch connection needed to create their beans), as is the brand
+  referential (empty, instead of GitHub's `brands-company-mapping`).
+- **Disabled**: the GitHub-backed feedback integration (`feedback.github.enabled: false`);
+  creating/listing feedback issues and votes falls back to an in-memory no-op instead of
+  calling the GitHub API.
+- **Degraded, not blocking**: the GeoNames (city lookup) and MaxMind (IP geolocation) datasets
+  still try to download on startup, but a failed download (no network) leaves them unloaded
+  instead of failing startup - `/actuator/health` then reports `DOWN` for `geoNames`/`maxMind`,
+  which is expected offline, not an error.
+- **Still live and reaching the real internet** (not disabled by this profile): the Icecat
+  product/category/feature Elasticsearch repositories use a stub converter just to let their
+  proxies be created without a server; any actual query against them still needs a reachable
+  Elasticsearch, as does the affiliation-partners refresh job and the geocode microservice
+  proxied by the frontend's generated client.
 
 **1. Start the Backend (Front-API)**
 
 ```bash
 mvn spring-boot:run -pl front-api
+```
+
+or, from a built jar:
+
+```bash
+java -jar front-api/target/front-api-0.0.1-SNAPSHOT.jar --spring.profiles.active=local
 ```
 
 The API will start on `http://localhost:8082`.

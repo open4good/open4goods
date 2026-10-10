@@ -50,6 +50,7 @@ public class AppConfig {
     }
 
     @Bean
+    @org.springframework.context.annotation.Profile("!local")
     BrandService brandService(RemoteFileCachingService remoteFileCachingService,
             SerialisationService serialisationService) throws Exception {
         return new BrandService(remoteFileCachingService, serialisationService);

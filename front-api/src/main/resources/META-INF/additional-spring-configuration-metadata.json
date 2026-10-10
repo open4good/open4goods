@@ -22,6 +22,12 @@
       "defaultValue": "ROLE_HUMAN"
     },
     {
+      "name": "feedback.github.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enables the GitHub-backed feedback beans (GHRepository, GitHubIssueService). Disabled by the \"local\" profile so startup needs no GitHub token or network access; LocalMockConfig.mockIssueService then serves the IssueService contract.",
+      "defaultValue": true
+    },
+    {
       "name": "feedback.github.access-token",
       "type": "java.lang.String",
       "description": "GitHub token used to create and update feedback issues."
