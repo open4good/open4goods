@@ -11,9 +11,9 @@ import {
 } from '../../utils/google-sso'
 
 /**
- * Starts the loopback-local Google SSO flow (GOU-167): disabled unless the
- * flag and the OAuth client are both configured, so the existing password
- * login remains the only reachable path by default.
+ * Starts the Google SSO flow (GOU-317): disabled unless the flag and the
+ * OAuth client are both configured, so the existing password login remains
+ * the only reachable path by default.
  */
 export default defineEventHandler((event: H3Event) => {
   const config = useRuntimeConfig()
@@ -24,6 +24,16 @@ export default defineEventHandler((event: H3Event) => {
     !config.googleOAuthRedirectUri
   ) {
     throw createError({ statusCode: 404, statusMessage: 'Not Found' })
+  }
+
+  if (!config.googleOAuthClientSecret) {
+    console.error(
+      'Google SSO is misconfigured: missing GOOGLE_OAUTH_CLIENT_SECRET'
+    )
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Google SSO is misconfigured',
+    })
   }
 
   const query = getQuery(event)

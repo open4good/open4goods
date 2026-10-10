@@ -21,6 +21,7 @@ owned, and linked from this index when they become durable project knowledge.
 
 - [Documentation guidelines](conventions/documentation-guidelines.md)
 - [MCP server setup](operations/mcp-servers.md)
+- [Google SSO OAuth clients](operations/google-sso-oauth-clients.md)
 - [Frontend asset hardening](operations/frontend-asset-hardening.md)
 - [Production log triage](operations/production-log-triage.md)
 - [ADR index](adr/README.md)

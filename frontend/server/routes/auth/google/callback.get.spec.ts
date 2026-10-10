@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { FetchError } from 'ofetch'
 
 import {
   GOOGLE_SSO_PENDING_COOKIE,
@@ -16,6 +17,7 @@ const runtimeConfig = vi.hoisted(() => ({
   },
   googleOAuthClientId: 'client-123',
   googleOAuthRedirectUri: 'http://127.0.0.1:4100/auth/google/callback',
+  googleOAuthClientSecret: 'client-secret-xyz',
   apiUrl: 'http://localhost:8082',
 }))
 
@@ -72,6 +74,7 @@ describe('GET /auth/google/callback', () => {
     runtimeConfig.googleOAuthClientId = 'client-123'
     runtimeConfig.googleOAuthRedirectUri =
       'http://127.0.0.1:4100/auth/google/callback'
+    runtimeConfig.googleOAuthClientSecret = 'client-secret-xyz'
 
     vi.stubGlobal('defineEventHandler', (fn: CallbackHandler) => fn)
     vi.stubGlobal('useRuntimeConfig', () => runtimeConfig)
@@ -94,6 +97,21 @@ describe('GET /auth/google/callback', () => {
       statusCode: 404,
     })
     expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('returns 500 when the client secret is not configured', async () => {
+    runtimeConfig.googleOAuthClientSecret = ''
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    await expect(handler(fakeEvent)).rejects.toMatchObject({
+      statusCode: 500,
+    })
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(consoleErrorSpy.mock.calls.flat().join(' ')).not.toContain(
+      'client-secret-xyz'
+    )
+
+    consoleErrorSpy.mockRestore()
   })
 
   it('rejects when the pending cookie is missing or expired', async () => {
@@ -135,6 +153,36 @@ describe('GET /auth/google/callback', () => {
     expect(setCookieMock).not.toHaveBeenCalled()
   })
 
+  it('does not leak the client secret when the token endpoint rejects the request', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const fetchError = new FetchError('Request failed')
+    Object.assign(fetchError, {
+      response: { status: 400 },
+      data: { error: 'invalid_grant' },
+      options: {
+        body: new URLSearchParams({
+          client_secret: 'client-secret-xyz',
+        }).toString(),
+      },
+    })
+    fetchMock.mockRejectedValueOnce(fetchError)
+
+    let caught: unknown
+    try {
+      await handler(fakeEvent)
+    } catch (err) {
+      caught = err
+    }
+
+    expect(caught).toMatchObject({ statusCode: 401 })
+    expect(JSON.stringify(caught)).not.toContain('client-secret-xyz')
+    expect(consoleErrorSpy.mock.calls.flat().map(arg => JSON.stringify(arg)).join(' ')).not.toContain(
+      'client-secret-xyz'
+    )
+
+    consoleErrorSpy.mockRestore()
+  })
+
   it('exchanges the code, verifies the identity with front-api and sets session cookies', async () => {
     fetchMock
       .mockResolvedValueOnce({ id_token: 'google-id-token' })
@@ -148,8 +196,13 @@ describe('GET /auth/google/callback', () => {
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
       'https://oauth2.googleapis.com/token',
-      expect.objectContaining({ method: 'POST' })
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.stringContaining('client_secret=client-secret-xyz'),
+      })
     )
+    const firstCallBody = fetchMock.mock.calls[0][1].body as string
+    expect(firstCallBody).toContain('code_verifier=verifier-123')
     expect(fetchMock).toHaveBeenNthCalledWith(
       2,
       'http://localhost:8082/auth/google',
