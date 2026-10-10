@@ -30,6 +30,10 @@ public class LocalDevConfig {
      */
     @Bean(name = { "elasticsearchOperations", "elasticsearchTemplate" })
     public ElasticsearchOperations elasticsearchOperations() {
+        SimpleElasticsearchMappingContext mappingContext = new SimpleElasticsearchMappingContext();
+        mappingContext.setInitialEntitySet(Collections.emptySet());
+        mappingContext.afterPropertiesSet();
+
         return (ElasticsearchOperations) Proxy.newProxyInstance(
             ElasticsearchOperations.class.getClassLoader(),
             new Class[] { ElasticsearchOperations.class },
@@ -40,10 +44,7 @@ public class LocalDevConfig {
                         new Class[] { ElasticsearchConverter.class },
                         (converterProxy, converterMethod, converterArgs) -> {
                             if (converterMethod.getName().equals("getMappingContext")) {
-                                SimpleElasticsearchMappingContext context = new SimpleElasticsearchMappingContext();
-                                context.setInitialEntitySet(Collections.emptySet());
-                                context.afterPropertiesSet();
-                                return context;
+                                return mappingContext;
                             }
                             return null;
                         });
@@ -75,7 +76,6 @@ public class LocalDevConfig {
      * first, offline run.
      */
     @Bean
-    @Primary
     public BrandService brandService(RemoteFileCachingService remoteFileCachingService,
             SerialisationService serialisationService) throws Exception {
         return new BrandService(remoteFileCachingService, serialisationService,

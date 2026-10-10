@@ -146,9 +146,10 @@ access, no token and no pre-existing cache file**:
 - **Disabled**: the GitHub-backed feedback integration (`feedback.github.enabled: false`);
   creating/listing feedback issues and votes falls back to an in-memory no-op instead of
   calling the GitHub API.
-- **Degraded, not blocking**: the GeoNames (city lookup) and MaxMind (IP geolocation) datasets
-  still try to download on startup, but a failed download (no network) leaves them unloaded
-  instead of failing startup - `/actuator/health` then reports `DOWN` for `geoNames`/`maxMind`,
+- **Degraded, not blocking**: the GeoNames (city lookup) and MaxMind (IP geolocation) datasets,
+  and the Google product taxonomy, still try to download on startup, but a failed download (no
+  network) leaves them unloaded instead of failing startup - `/actuator/health` then reports
+  `DOWN` for `geoNames`/`maxMind`, and verticals simply have no Google taxonomy id attached,
   which is expected offline, not an error.
 - **Still live and reaching the real internet** (not disabled by this profile): the Icecat
   product/category/feature Elasticsearch repositories use a stub converter just to let their

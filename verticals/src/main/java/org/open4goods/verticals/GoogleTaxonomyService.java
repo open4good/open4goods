@@ -156,11 +156,20 @@ public class GoogleTaxonomyService {
 	}
 
 	/**
+	 * Associates a vertical config with its Google taxonomy category. No-op,
+	 * fail-soft when the taxonomy was never loaded (e.g. offline / local profile)
+	 * or the configured taxonomy id is unknown.
 	 *
 	 * @param v
 	 */
 	public void updateCategoryWithVertical(VerticalConfig v) {
-		categoriesById.get(v.getGoogleTaxonomyId()).vertical(v);
+		ProductCategory category = categoriesById.get(v.getGoogleTaxonomyId());
+		if (category == null) {
+			logger.warn("Cannot associate vertical '{}' with Google taxonomy id {} : taxonomy not loaded or id unknown",
+					v.getId(), v.getGoogleTaxonomyId());
+			return;
+		}
+		category.vertical(v);
 	}
 
 	/**

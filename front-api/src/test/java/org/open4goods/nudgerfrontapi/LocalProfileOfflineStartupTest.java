@@ -17,12 +17,16 @@ import org.open4goods.icecat.repository.IcecatSupplierRepository;
 import org.open4goods.services.feedback.service.GitHubIssueService;
 import org.open4goods.services.geocode.service.GeoNamesIndexService;
 import org.open4goods.services.geocode.service.IpGeolocationService;
+import org.open4goods.verticals.GoogleTaxonomyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.hamcrest.Matchers;
 
 /**
  * Guards front-api's "local" profile offline startup contract (see README,
@@ -51,6 +55,8 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest(properties = {
         "geocode.geonames.url=http://203.0.113.1:9/cities5000.zip",
         "geocode.maxmind.url=http://203.0.113.1:9/maxmind.tar.gz",
+        "front.google-taxonomy.french-taxonomy-url=http://203.0.113.1:9/taxonomy-fr.txt",
+        "front.google-taxonomy.english-taxonomy-url=http://203.0.113.1:9/taxonomy-en.txt",
         "remote-file-caching.connection-timeout=1000",
         "remote-file-caching.read-timeout=1000",
         "o4g.actuator.monitor.username=monitor",
@@ -85,10 +91,13 @@ class LocalProfileOfflineStartupTest
     private IcecatSupplierRepository icecatSupplierRepository;
 
     @Autowired
+    private GoogleTaxonomyService googleTaxonomyService;
+
+    @Autowired
     private MockMvc mockMvc;
 
-    @org.springframework.test.context.DynamicPropertySource
-    static void offlineCachePaths(org.springframework.test.context.DynamicPropertyRegistry registry)
+    @DynamicPropertySource
+    static void offlineCachePaths(DynamicPropertyRegistry registry)
     {
         registry.add("front.cache.path", () -> new File(tempDir, "front-cache").getAbsolutePath());
         registry.add("geocode.cache.path", () -> new File(tempDir, "geocode-cache").getAbsolutePath());
@@ -142,6 +151,19 @@ class LocalProfileOfflineStartupTest
     }
 
     /**
+     * B5: the Google taxonomy dataset is also unreachable here. The context must still start,
+     * with the taxonomy/vertical wiring {@link GoogleTaxonomyService#updateCategoryWithVertical}
+     * skipped rather than throwing, and {@code verticalsConfigService} must be a real bean.
+     */
+    @Test
+    void verticalsStartWithoutGoogleTaxonomy()
+    {
+        assertThat(applicationContext.getBean("verticalsConfigService")).isNotNull();
+        assertThat(googleTaxonomyService.getCategories()).isNotNull();
+        assertThat(googleTaxonomyService.byId(1)).isNull();
+    }
+
+    /**
      * {@code /actuator/health} must respond even though GeoNames/MaxMind are degraded.
      * Spring Boot reports a {@code 503} (not {@code 200}) once any indicator is {@code DOWN};
      * that is expected local-profile behaviour here (not just for geoNames/maxMind, but also
@@ -153,7 +175,7 @@ class LocalProfileOfflineStartupTest
     {
         mockMvc.perform(get("/actuator/health").with(httpBasic("monitor", "monitor-secret")))
                 .andExpect(result -> assertThat(result.getResponse().getStatus()).isIn(200, 503))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("\"geoNames\"")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("\"maxMind\"")));
+                .andExpect(content().string(Matchers.containsString("\"geoNames\"")))
+                .andExpect(content().string(Matchers.containsString("\"maxMind\"")));
     }
 }

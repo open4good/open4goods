@@ -18,3 +18,9 @@ feedback:
     # Disables the GHRepository bean (GitHubClientConfig), which otherwise calls the GitHub
     # API during startup and fails with "Bad credentials" when no real token is configured.
     enabled: false
+
+favicon:
+  # Default is /opt/open4goods/.cached/, a path outside this workspace that `local` has no
+  # business requiring. Repointed under the same workspace-relative cache root as
+  # front.cache.path (./cache) so the profile needs nothing from the filesystem outside it.
+  cache-folder: ./cache/favicon/
