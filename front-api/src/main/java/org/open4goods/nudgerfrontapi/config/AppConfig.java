@@ -25,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 
@@ -37,19 +39,20 @@ public class AppConfig {
     private static final Logger logger = LoggerFactory.getLogger(AppConfig.class);
 
     @Bean
-    @org.springframework.context.annotation.Primary
+    @Primary
     RemoteFileCachingService remoteFileCachingService(CacheProperties cacheProperties,
             RemoteFileCachingProperties props) {
         return new RemoteFileCachingService(cacheProperties.getPath(), props);
     }
 
     @Bean
-    @org.springframework.context.annotation.Profile("!local")
+    @Profile("!local")
     ProductRepository productRepository(ElasticsearchOperations elasticsearchOperations) {
         return new ProductRepository(elasticsearchOperations);
     }
 
     @Bean
+    @Profile("!local")
     BrandService brandService(RemoteFileCachingService remoteFileCachingService,
             SerialisationService serialisationService) throws Exception {
         return new BrandService(remoteFileCachingService, serialisationService);

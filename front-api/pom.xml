@@ -245,6 +245,46 @@
           </requiresUnpack>
         </configuration>
       </plugin>
+      <!--
+        LocalProfileOfflineStartupTest asserts that the "local" profile starts with zero
+        outbound network access. Running it in the shared, reused fork would require a
+        JVM-wide dead proxy for the whole module's ~115 other tests. Instead it gets its
+        own, non-reused fork so the dead HTTP(S) proxy is confined to this one test: any
+        new network call added to local-profile startup will time out and fail this test
+        instead of silently succeeding because the test host happens to have internet.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>default-test</id>
+            <configuration>
+              <excludes>
+                <exclude>**/LocalProfileOfflineStartupTest.java</exclude>
+              </excludes>
+            </configuration>
+          </execution>
+          <execution>
+            <id>local-profile-offline-startup</id>
+            <phase>test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <reuseForks>false</reuseForks>
+              <includes>
+                <include>**/LocalProfileOfflineStartupTest.java</include>
+              </includes>
+              <argLine>
+                -Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=1
+                -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=1
+                -Djava.net.useSystemProxies=false
+              </argLine>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 

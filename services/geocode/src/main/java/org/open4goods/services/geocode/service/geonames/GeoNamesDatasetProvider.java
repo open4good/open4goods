@@ -52,6 +52,13 @@ public class GeoNamesDatasetProvider
             File zipFile = remoteFileCachingService.getResource(
                     geoNamesProperties.getUrl(),
                     geoNamesProperties.getRefreshInDays());
+            if (!zipFile.exists())
+            {
+                // RemoteFileCachingService.getResource() swallows download failures and still
+                // returns the (never written) target File; surface that as the real cause
+                // instead of letting the caller hit a confusing NoSuchFileException downstream.
+                throw new IOException("GeoNames archive could not be downloaded from " + geoNamesProperties.getUrl());
+            }
             Path zipPath = zipFile.toPath();
             Path extractedPath = zipPath.getParent().resolve(geoNamesProperties.getExtractedFileName());
 

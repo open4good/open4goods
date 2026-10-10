@@ -3,10 +3,6 @@ package org.open4goods.nudgerfrontapi;
 import org.junit.jupiter.api.Test;
 import org.kohsuke.github.GHRepository;
 import org.open4goods.brand.service.BrandService;
-import org.open4goods.icecat.repository.IcecatCategoryRepository;
-import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
-import org.open4goods.icecat.repository.IcecatFeatureRepository;
-import org.open4goods.icecat.repository.IcecatSupplierRepository;
 import org.open4goods.services.geocode.service.IpGeolocationService;
 
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,20 +21,12 @@ class NudgerFrontApiApplicationTests
     @MockitoBean
     private IpGeolocationService ipGeolocationService;
 
-    // This context-load-only test carries no real Elasticsearch connection (no spring.elasticsearch.*
-    // in the base application.yml), and these Spring Data repository proxies are eagerly
-    // instantiated regardless of @Lazy on their consumers, so they need a stand-in here.
-    @MockitoBean
-    private IcecatFeatureRepository icecatFeatureRepository;
-
-    @MockitoBean
-    private IcecatCategoryRepository icecatCategoryRepository;
-
-    @MockitoBean
-    private IcecatFeatureGroupRepository icecatFeatureGroupRepository;
-
-    @MockitoBean
-    private IcecatSupplierRepository icecatSupplierRepository;
+    // Icecat*Repository proxies no longer need a stand-in here: LocalDevConfig's
+    // elasticsearchOperations() stub now answers getElasticsearchConverter().getMappingContext()
+    // with a real SimpleElasticsearchMappingContext, which is all
+    // @EnableElasticsearchRepositories needs to create the repository proxies without a real
+    // Elasticsearch connection (this test runs under the "local" profile, which is front-api's
+    // default profile).
 
     @Test
     void contextLoads()

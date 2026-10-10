@@ -1,0 +1,26 @@
+# Offline defaults for the "local" profile (README: "Running Locally (Offline Mode)").
+#
+# `local` is front-api's default profile (see spring.profiles.default in application.yml),
+# so these settings apply whenever no other profile is explicitly activated. The intent is
+# that `--spring.profiles.active=local` (or no profile at all) starts the application with
+# no network access, no token and no pre-existing cache file.
+#
+# Elasticsearch-backed repositories (product search, Icecat reference data) and the
+# contribution vote repository are already stubbed in LocalDevConfig /
+# ContributionRepositoryConfig for this profile; they need no flag here.
+#
+# The geocode datasets (GeoNames cities, MaxMind GeoIP) are not disabled by a flag: both
+# GeoNamesIndexService and MaxMindIpGeolocationService fail soft on startup (WARN log,
+# health indicator reporting DOWN) when the dataset cannot be downloaded, so they do not
+# block startup offline.
+feedback:
+  github:
+    # Disables the GHRepository bean (GitHubClientConfig), which otherwise calls the GitHub
+    # API during startup and fails with "Bad credentials" when no real token is configured.
+    enabled: false
+
+favicon:
+  # Default is /opt/open4goods/.cached/, a path outside this workspace that `local` has no
+  # business requiring. Repointed under the same workspace-relative cache root as
+  # front.cache.path (./cache) so the profile needs nothing from the filesystem outside it.
+  cache-folder: ./cache/favicon/
