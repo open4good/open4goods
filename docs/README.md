@@ -24,6 +24,7 @@ owned, and linked from this index when they become durable project knowledge.
 - [Google SSO OAuth clients](operations/google-sso-oauth-clients.md)
 - [Frontend asset hardening](operations/frontend-asset-hardening.md)
 - [Production log triage](operations/production-log-triage.md)
+- [Disabled GitHub Actions workflows status](operations/ci-workflows-status.md)
 - [ADR index](adr/README.md)
 - [Icecat reference data](architecture/icecat-reference-data.md)
 - [Amazon PA-API completion](architecture/amazon-paapi-completion.md)
