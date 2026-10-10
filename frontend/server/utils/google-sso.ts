@@ -35,8 +35,9 @@ export const createPkcePair = () => {
 }
 
 /**
- * Starts a new Google SSO attempt: the Authorization Code + PKCE exchange
- * means no client_secret is ever required or stored.
+ * Starts a new Google SSO attempt: PKCE is kept as defense in depth even
+ * though the code exchange (GOU-317) uses a confidential "Web" OAuth client
+ * with a client_secret.
  */
 export const createGoogleSsoAttempt = (redirect: string) => {
   const { codeVerifier, codeChallenge } = createPkcePair()

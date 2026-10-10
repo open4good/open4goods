@@ -12,6 +12,7 @@ const runtimeConfig = vi.hoisted(() => ({
   },
   googleOAuthClientId: 'client-123',
   googleOAuthRedirectUri: 'http://127.0.0.1:4100/auth/google/callback',
+  googleOAuthClientSecret: 'client-secret-xyz',
   apiUrl: 'http://localhost:8082',
 }))
 
@@ -50,6 +51,7 @@ describe('GET /auth/google', () => {
     runtimeConfig.googleOAuthClientId = 'client-123'
     runtimeConfig.googleOAuthRedirectUri =
       'http://127.0.0.1:4100/auth/google/callback'
+    runtimeConfig.googleOAuthClientSecret = 'client-secret-xyz'
     vi.stubGlobal('defineEventHandler', (fn: GoogleGetHandler) => fn)
     vi.stubGlobal('useRuntimeConfig', () => runtimeConfig)
     vi.stubGlobal('getQuery', getQueryMock)
@@ -83,6 +85,25 @@ describe('GET /auth/google', () => {
       expect(err).toMatchObject({ statusCode: 404 })
     }
     expect(sendRedirectMock).not.toHaveBeenCalled()
+  })
+
+  it('returns 500 when the client secret is not configured', () => {
+    runtimeConfig.googleOAuthClientSecret = ''
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    expect.assertions(4)
+    try {
+      handler(fakeEvent)
+    } catch (err) {
+      expect(err).toMatchObject({ statusCode: 500 })
+    }
+    expect(sendRedirectMock).not.toHaveBeenCalled()
+    expect(setCookieMock).not.toHaveBeenCalled()
+    expect(consoleErrorSpy.mock.calls.flat().join(' ')).not.toContain(
+      'client-secret-xyz'
+    )
+
+    consoleErrorSpy.mockRestore()
   })
 
   it('stores the pending state and redirects to Google with state, nonce and PKCE challenge', async () => {

@@ -20,11 +20,11 @@ interface AuthTokensResponse {
 }
 
 /**
- * Completes the loopback-local Google SSO flow (GOU-167): checks the
- * anti-CSRF state bound in google.get.ts, exchanges the authorization code
- * with PKCE (no client_secret involved), then forwards the resulting Google
- * ID token to front-api's /auth/google for verification against the role
- * allowlist before issuing session cookies.
+ * Completes the Google SSO flow (GOU-317): checks the anti-CSRF state bound
+ * in google.get.ts, exchanges the authorization code with the confidential
+ * "Web" OAuth client (client_secret + PKCE as defense in depth), then
+ * forwards the resulting Google ID token to front-api's /auth/google for
+ * verification against the role allowlist before issuing session cookies.
  */
 export default defineEventHandler(async (event: H3Event) => {
   const config = useRuntimeConfig()
@@ -35,6 +35,16 @@ export default defineEventHandler(async (event: H3Event) => {
     !config.googleOAuthRedirectUri
   ) {
     throw createError({ statusCode: 404, statusMessage: 'Not Found' })
+  }
+
+  if (!config.googleOAuthClientSecret) {
+    console.error(
+      'Google SSO is misconfigured: missing GOOGLE_OAUTH_CLIENT_SECRET'
+    )
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Google SSO is misconfigured',
+    })
   }
 
   const pendingRaw = getCookie(event, GOOGLE_SSO_PENDING_COOKIE)
@@ -70,22 +80,33 @@ export default defineEventHandler(async (event: H3Event) => {
     ? pending.redirect
     : '/'
 
+  let tokenResponse: GoogleTokenResponse
   try {
-    const tokenResponse = await $fetch<GoogleTokenResponse>(
-      GOOGLE_TOKEN_ENDPOINT,
-      {
-        method: 'POST',
-        body: new URLSearchParams({
-          client_id: config.googleOAuthClientId,
-          redirect_uri: config.googleOAuthRedirectUri,
-          code,
-          code_verifier: pending.codeVerifier,
-          grant_type: 'authorization_code',
-        }).toString(),
-        headers: { 'content-type': 'application/x-www-form-urlencoded' },
-      }
-    )
+    tokenResponse = await $fetch<GoogleTokenResponse>(GOOGLE_TOKEN_ENDPOINT, {
+      method: 'POST',
+      body: new URLSearchParams({
+        client_id: config.googleOAuthClientId,
+        client_secret: config.googleOAuthClientSecret,
+        redirect_uri: config.googleOAuthRedirectUri,
+        code,
+        code_verifier: pending.codeVerifier,
+        grant_type: 'authorization_code',
+      }).toString(),
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    })
+  } catch (err) {
+    // FetchError.options carries the request body (so the client_secret):
+    // never attach it, via `cause` or otherwise, to the error we throw.
+    const statusCode = err instanceof FetchError ? err.response?.status : undefined
+    const payload = err instanceof FetchError ? err.data : undefined
+    console.error('Google SSO token exchange failed', { statusCode, payload })
+    throw createError({
+      statusCode: statusCode === 404 ? 404 : 401,
+      statusMessage: 'Google SSO authentication failed',
+    })
+  }
 
+  try {
     const idToken = tokenResponse.id_token
     if (!idToken) {
       throw createError({
