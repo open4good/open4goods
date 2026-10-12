@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
@@ -46,6 +47,9 @@ public class BillingCatalogProperties {
 
     public static class Facet {
 
+        private static final String EPREL_SOURCE = "eprel";
+        private static final String NEVER_BILLABLE = "never";
+
         @NotBlank
         private String path;
 
@@ -57,6 +61,28 @@ public class BillingCatalogProperties {
 
         @NotBlank
         private String billableWhen;
+
+        private String source;
+
+        /**
+         * Enforces ADR 0017: an EPREL-sourced facet must be free and never billable,
+         * since EPREL's terms forbid selling its data.
+         */
+        @AssertTrue(message = "an eprel-sourced facet must have credits=0 and billable-when=never")
+        public boolean isEprelFacetStructurallyFree() {
+            if (!EPREL_SOURCE.equals(source)) {
+                return true;
+            }
+            return credits == 0 && NEVER_BILLABLE.equals(billableWhen);
+        }
+
+        public String getSource() {
+            return source;
+        }
+
+        public void setSource(final String source) {
+            this.source = source;
+        }
 
         public String getPath() {
             return path;
