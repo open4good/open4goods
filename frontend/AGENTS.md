@@ -160,7 +160,7 @@ Every downstream call should be wrapped in a thin service that:
   only overrides `jwtSecret` at runtime via `NUXT_JWT_SECRET`. **The
   `frontend-ssr` deployment must set `FRONT_SECURITY_JWT_SECRET` in its
   runtime environment, with the same value as front-api's
-  `front.security.jwt-secret`** — otherwise every admin request fails with a
+  `front.security.jwt-secret`** - otherwise every admin request fails with a
   500.
 
 ## When Unsure
