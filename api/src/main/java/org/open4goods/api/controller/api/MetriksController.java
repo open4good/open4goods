@@ -3,6 +3,7 @@ package org.open4goods.api.controller.api;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -115,19 +116,51 @@ public class MetriksController {
     @GetMapping("/seo")
     @Operation(
             summary = "Get SEO metrics from Google Search Console",
-            description = "Returns the number of pages indexed by Google Search Console as a Metriks schema-2.0 event. "
-                    + "Requires a valid Google Search Console credential to be configured.")
+            description = "Returns the number of distinct pages that received at least one impression in Search "
+                    + "Console's Search Analytics report over a rolling 28-day window, as a Metriks schema-2.0 "
+                    + "event. This is a proxy for indexation, not an exact measure: a page that Google has indexed "
+                    + "but which received no impression in the window is not counted. Requires a valid Google "
+                    + "Search Console credential to be configured.")
     @ApiResponse(responseCode = "200", description = "MetriksResponse containing SEO metric events")
     public MetriksResponse getSeoMetrics() {
         MetriksResponse response = newResponse();
         List<MetriksEvent> events = new ArrayList<>();
 
-        events.add(measure("seo.gsc.indexed_pages", "Pages indexées (Search Console)", "count",
-                List.of("seo"), List.of("gsc", "google", "indexation"),
-                searchConsoleService::countIndexedPages));
+        events.add(measurePagesWithImpressions());
 
         response.setEvents(events);
         return response;
+    }
+
+    /**
+     * Builds the {@code seo.gsc.pages_with_impressions} event, exposing the Search Analytics window
+     * bounds and an optional truncation warning in {@code params}.
+     */
+    private MetriksEvent measurePagesWithImpressions() {
+        String id = "seo.gsc.pages_with_impressions";
+        String name = "Pages avec impressions (Search Console, 28 j)";
+        String unit = "count";
+        List<String> groups = List.of("seo");
+        List<String> tags = List.of("gsc", "google", "search-analytics");
+
+        try {
+            GoogleSearchConsoleService.PagesWithImpressionsResult result = searchConsoleService.countPagesWithImpressions();
+            MetriksEvent event = event(id, name, result.count(), unit, groups, tags);
+            Map<String, Object> params = new HashMap<>(event.getParams());
+            params.put("windowStartDate", result.startDate().toString());
+            params.put("windowEndDate", result.endDate().toString());
+            if (result.truncated()) {
+                params.put("truncated", "true");
+            }
+            event.setParams(params);
+            return event;
+        } catch (Exception e) {
+            LOGGER.warn("Metriks measure failed for {}: {}", id, e.getMessage());
+            MetriksEvent error = event(id, name, null, unit, groups, tags);
+            error.setStatus("error");
+            error.setErrorMessage(e.getMessage());
+            return error;
+        }
     }
 
     // ------------------------------------------------------------------
