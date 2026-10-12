@@ -43,6 +43,7 @@
           <v-carousel-item
             v-for="(slide, slideIndex) in slides"
             :key="`affiliation-slide-${slideIndex}`"
+            eager
           >
             <div class="partners-affiliation__slide">
               <article

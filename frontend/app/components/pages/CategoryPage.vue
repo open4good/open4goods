@@ -924,26 +924,45 @@ useHead(() => ({
 
 const verticalId = computed(() => category.value?.id ?? null)
 
-const { data: initialProductsData } = await useAsyncData(
-  `category-products-${slug}-${subCategorySlug ?? 'base'}`,
-  async () => {
-    if (!verticalId.value) {
-      return null
-    }
+const productError = ref<string | null>(null)
 
-    return await $fetch<ProductSearchResponseDto>('/api/products/search', {
-      method: 'POST',
-      query: { include: LISTING_COMPONENTS },
-      body: {
-        verticalId: verticalId.value,
-        pageNumber: 0,
-        pageSize: CATEGORY_PAGE_SIZES[CATEGORY_DEFAULT_VIEW_MODE],
-        filters: subCategoryBaseFilters.value,
-      },
-    })
-  },
-  { server: true, immediate: true }
-)
+const { data: initialProductsData, error: initialProductsError } =
+  await useAsyncData(
+    `category-products-${slug}-${subCategorySlug ?? 'base'}`,
+    async () => {
+      if (!verticalId.value) {
+        return null
+      }
+
+      return await $fetch<ProductSearchResponseDto>('/api/products/search', {
+        method: 'POST',
+        query: { include: LISTING_COMPONENTS },
+        body: {
+          verticalId: verticalId.value,
+          pageNumber: 0,
+          pageSize: CATEGORY_PAGE_SIZES[CATEGORY_DEFAULT_VIEW_MODE],
+          filters: subCategoryBaseFilters.value,
+        },
+      })
+    },
+    { server: true, immediate: true }
+  )
+
+if (initialProductsError.value) {
+  // Surface the failure instead of silently rendering an empty "0 produits"
+  // page: without this, a backend/CSRF error during SSR looks identical to a
+  // category that genuinely has no matching products.
+  if (import.meta.server) {
+    console.error(
+      `[CategoryPage] Failed to load products for vertical "${verticalId.value}" (slug: ${slug}):`,
+      initialProductsError.value
+    )
+  }
+  productError.value =
+    initialProductsError.value instanceof Error
+      ? initialProductsError.value.message
+      : t('category.products.fetchError')
+}
 
 const productsData = ref<ProductSearchResponseDto | null>(
   initialProductsData.value ?? null
@@ -2094,7 +2113,6 @@ const viewComponentProps = computed(() => {
 })
 
 const loadingProducts = ref(false)
-const productError = ref<string | null>(null)
 const hasHydrated = ref(false)
 
 const skeletonCardCount = computed(() => (isDesktop.value ? 9 : 4))

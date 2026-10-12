@@ -101,4 +101,24 @@ describe('PartnersAffiliationSection', () => {
 
     await wrapper.unmount()
   })
+
+  it('renders every partner across all carousel slides, not just the active one', async () => {
+    // Regression guard: SEO crawlers (and curl without JS) only ever receive the
+    // server-rendered HTML. v-carousel-item lazily mounts its content, so without
+    // `eager`, only the active slide's partners end up in the markup even though
+    // the full list is available server-side.
+    const manyPartners = Array.from({ length: 10 }, (_, index) => ({
+      id: `partner-${index}`,
+      name: `Partner ${index}`,
+      affiliationLink: `https://partner-${index}.example`,
+      logoUrl: `https://cdn.example/partner-${index}.png`,
+    }))
+
+    const wrapper = await mountComponent({ partners: manyPartners })
+
+    const cards = wrapper.findAll('.partners-affiliation__card')
+    expect(cards.length).toBe(manyPartners.length)
+
+    await wrapper.unmount()
+  })
 })
