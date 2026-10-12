@@ -430,24 +430,7 @@
       "cta": "Browse all articles",
       "readMore": "Read article",
       "emptyState": "New blog posts will land here shortly.",
-      "carouselAriaLabel": "Featured blog posts carousel",
-      "items": {
-        "first": {
-          "title": "How we keep our AI frugal",
-          "date": "15 Jan 2025",
-          "excerpt": "The technical choices that keep Nudger's computations low-carbon."
-        },
-        "second": {
-          "title": "Prioritising durability and repairability",
-          "date": "8 Jan 2025",
-          "excerpt": "Why repairability weighs more in the Impact Score."
-        },
-        "third": {
-          "title": "Balancing price and impact, step by step",
-          "date": "20 Dec 2024",
-          "excerpt": "Nudger's method to align ecology and budget without compromise."
-        }
-      }
+      "carouselAriaLabel": "Featured blog posts carousel"
     },
     "objections": {
       "title": "Straight questions, clear answers",

@@ -309,24 +309,7 @@
       "cta": "Voir tous les articles",
       "readMore": "Lire l'article",
       "emptyState": "Les nouveaux articles seront affichés ici très bientôt.",
-      "carouselAriaLabel": "Carrousel des articles du blog",
-      "items": {
-        "first": {
-          "title": "Comment nous gardons une IA frugale",
-          "date": "15 janv. 2025",
-          "excerpt": "Nos choix techniques pour limiter l'empreinte carbone des calculs Nudger."
-        },
-        "second": {
-          "title": "Prioriser durabilité et réparabilité",
-          "date": "8 janv. 2025",
-          "excerpt": "Pourquoi les critères de réparabilité ont plus de poids dans l'Impact Score."
-        },
-        "third": {
-          "title": "Comparer prix et impact, mode d'emploi",
-          "date": "20 déc. 2024",
-          "excerpt": "La méthode Nudger pour confronter écologie et budget sans compromis."
-        }
-      }
+      "carouselAriaLabel": "Carrousel des articles du blog"
     },
     "objections": {
       "title": "On va nous dire...",

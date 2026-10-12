@@ -344,6 +344,11 @@ export default defineNuxtConfig({
     '/blog/impact-score-ia': { redirect: { to: '/blog', statusCode: 301 } },
     '/blog/prioriser-durabilite': { redirect: { to: '/blog', statusCode: 301 } },
     '/blog/equilibrer-prix-impact': { redirect: { to: '/blog', statusCode: 301 } },
+    // Historical URL indexed from the XWiki-era blog (triple-dash slug, served 200
+    // in prod): redirect to the current Markdown post's slug (GOU-386).
+    '/blog/v-0-0-1---premiere-iteration': {
+      redirect: { to: '/blog/v-0-0-1-premiere-iteration', statusCode: 301 },
+    },
     // Fix SWR handler error by disabling cache for assistant configs (conflicts with cookie setting)
     '/assistant-configs/**': { cache: false },
     '/api/assistant-configs/**': { cache: false },
