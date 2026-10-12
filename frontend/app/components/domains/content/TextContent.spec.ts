@@ -139,4 +139,30 @@ describe('TextContent', () => {
 
     expect(generateLoremMock).toHaveBeenCalledWith(480)
   })
+
+  it('renders nothing instead of lorem ipsum when the generated placeholder is disallowed and no fallback text is set', async () => {
+    const blocResponse = createBlocResponse({ htmlContent: '' })
+    useContentBlocMock.mockResolvedValue(blocResponse)
+
+    const wrapper = await mountComponent({ allowGeneratedPlaceholder: false })
+
+    expect(generateLoremMock).not.toHaveBeenCalled()
+    expect(wrapper.find('.text-content').exists()).toBe(false)
+    expect(wrapper.text()).toBe('')
+  })
+
+  it('renders the provided fallback text instead of lorem ipsum when the generated placeholder is disallowed', async () => {
+    const blocResponse = createBlocResponse({ htmlContent: '' })
+    useContentBlocMock.mockResolvedValue(blocResponse)
+
+    const wrapper = await mountComponent({
+      allowGeneratedPlaceholder: false,
+      fallbackText: 'Ils nous aident au quotidien.',
+    })
+
+    expect(generateLoremMock).not.toHaveBeenCalled()
+    expect(wrapper.get('.cms-sandbox').text()).toBe(
+      'Ils nous aident au quotidien.'
+    )
+  })
 })

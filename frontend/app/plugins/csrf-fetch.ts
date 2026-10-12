@@ -62,10 +62,6 @@ export default defineNuxtPlugin(nuxtApp => {
       if (import.meta.server && !token) {
         const event = useRequestEvent()
         if (event?.context.csrfToken) {
-          console.log(
-            '[CSRF-Plugin] Using context token for SSR:',
-            event.context.csrfToken
-          )
           token = event.context.csrfToken as string
         }
       }

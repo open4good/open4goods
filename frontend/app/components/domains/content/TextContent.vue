@@ -14,11 +14,13 @@ const props = withDefaults(
     defaultLength?: number
     ipsumLength?: number
     fallbackText?: string
+    allowGeneratedPlaceholder?: boolean
   }>(),
   {
     defaultLength: DEFAULT_LOREM_LENGTH,
     ipsumLength: undefined,
     fallbackText: undefined,
+    allowGeneratedPlaceholder: true,
   }
 )
 
@@ -59,12 +61,16 @@ const displayHtml = computed(() => {
     return fallbackHtml.value
   }
 
+  if (!props.allowGeneratedPlaceholder) {
+    return null
+  }
+
   return _generateLoremIpsum(fallbackLoremLength.value)
 })
 </script>
 
 <template>
-  <div class="text-content">
+  <div v-if="pending || error || displayHtml" class="text-content">
     <v-progress-circular v-if="pending" indeterminate />
     <v-alert v-else-if="error" type="error" variant="tonal">{{
       error
