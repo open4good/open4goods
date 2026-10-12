@@ -75,7 +75,12 @@ export const requireAdminAccess = (
   const config = useRuntimeConfig()
   const cookieName =
     options?.cookieName ?? config.public.tokenCookieName ?? 'access_token'
-  const secret = options?.secret ?? config.jwtSecret
+  // `config.jwtSecret` is baked in at build time (process.env.FRONT_SECURITY_JWT_SECRET
+  // read in nuxt.config.ts) and Nuxt only overrides it at runtime via NUXT_JWT_SECRET,
+  // which frontend-ssr's deployment does not set. Re-read FRONT_SECURITY_JWT_SECRET here
+  // so the secret present in the container's runtime env is actually used (GOU-438 review).
+  const secret =
+    options?.secret ?? (config.jwtSecret || process.env.FRONT_SECURITY_JWT_SECRET || '')
 
   const token = getCookie(event, cookieName)
   if (!token) {
@@ -86,6 +91,9 @@ export const requireAdminAccess = (
   }
 
   if (!secret) {
+    console.error(
+      '[metriks-auth] FRONT_SECURITY_JWT_SECRET is not set: cannot verify admin access tokens'
+    )
     throw createError({
       statusCode: 500,
       statusMessage: 'Server misconfiguration',

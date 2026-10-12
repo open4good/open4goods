@@ -1,17 +1,31 @@
 import { createHmac } from 'node:crypto'
 
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { afterEach, describe, expect, it, vi, beforeEach } from 'vitest'
 
 import { requireAdminAccess, verifyAccessToken } from './auth'
 
 const getCookieMock = vi.hoisted(() => vi.fn())
 const createErrorMock = vi.hoisted(() => vi.fn())
+const runtimeConfig = vi.hoisted(() => ({
+  public: { tokenCookieName: 'access_token' },
+  jwtSecret: '',
+}))
 
 vi.mock('h3', async importOriginal => ({
   ...(await importOriginal<typeof import('h3')>()),
   createError: createErrorMock,
   getCookie: getCookieMock,
 }))
+
+vi.mock('#imports', async importOriginal => ({
+  ...(await importOriginal<typeof import('h3')>()),
+  createError: createErrorMock,
+  getCookie: getCookieMock,
+  useRuntimeConfig: () => runtimeConfig,
+}))
+
+vi.mock('nuxt/app', () => ({ useRuntimeConfig: () => runtimeConfig }))
+vi.mock('#app/nuxt', () => ({ useRuntimeConfig: () => runtimeConfig }))
 
 const SECRET = 'test-jwt-secret-at-least-32-characters-long'
 const COOKIE_NAME = 'access_token'
@@ -75,6 +89,8 @@ describe('verifyAccessToken', () => {
 describe('requireAdminAccess', () => {
   const event = {} as Parameters<typeof requireAdminAccess>[0]
 
+  const originalEnvSecret = process.env.FRONT_SECURITY_JWT_SECRET
+
   beforeEach(() => {
     getCookieMock.mockReset()
     createErrorMock.mockReset()
@@ -82,6 +98,16 @@ describe('requireAdminAccess', () => {
       (input: { statusCode: number; statusMessage: string }) =>
         Object.assign(new Error(input.statusMessage), input)
     )
+    runtimeConfig.jwtSecret = ''
+    delete process.env.FRONT_SECURITY_JWT_SECRET
+  })
+
+  afterEach(() => {
+    if (originalEnvSecret === undefined) {
+      delete process.env.FRONT_SECURITY_JWT_SECRET
+    } else {
+      process.env.FRONT_SECURITY_JWT_SECRET = originalEnvSecret
+    }
   })
 
   it('throws 401 when there is no access token cookie', () => {
@@ -114,5 +140,20 @@ describe('requireAdminAccess', () => {
     expect(() =>
       requireAdminAccess(event, { cookieName: COOKIE_NAME, secret: SECRET })
     ).not.toThrow()
+  })
+
+  it('throws 500 when no secret is configured anywhere (runtime config nor env)', () => {
+    getCookieMock.mockReturnValue(sign({ roles: ['XWIKIADMINGROUP'], exp: futureExp() }))
+
+    expect(() => requireAdminAccess(event, { cookieName: COOKIE_NAME })).toThrow(
+      expect.objectContaining({ statusCode: 500 })
+    )
+  })
+
+  it('falls back to FRONT_SECURITY_JWT_SECRET when runtime config has no jwtSecret baked in', () => {
+    process.env.FRONT_SECURITY_JWT_SECRET = SECRET
+    getCookieMock.mockReturnValue(sign({ roles: ['XWIKIADMINGROUP'], exp: futureExp() }))
+
+    expect(() => requireAdminAccess(event, { cookieName: COOKIE_NAME })).not.toThrow()
   })
 })
