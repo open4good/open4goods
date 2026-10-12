@@ -35,14 +35,15 @@ const toEpochMs = (value: string | null): number | null => {
  * Markdown source files reference their inline images by filename only (e.g. `![](tv-planet.jpeg)`),
  * relative to the image folder exported alongside the post rather than to the rendered `/blog/<slug>`
  * route. Left as-is, the browser resolves them against the page URL and requests `/blog/<file>`,
- * which hits the `[slug].vue` catch-all instead of the image. Absolute URLs and already-rooted paths
- * (starting with a single `/`) are left untouched.
+ * which hits the `[slug].vue` catch-all instead of the image. Absolute URLs, already-rooted paths
+ * (starting with a single `/`), other URI schemes (`data:`, `mailto:`, …) and fragment-only
+ * references (`#…`) are left untouched.
  */
 export function resolveRelativeImageSrc(html: string, slug: string): string {
   return html.replace(
     /(<img[^>]*\ssrc=")([^"]+)(")/g,
     (match, prefix: string, src: string, suffix: string) => {
-      if (/^(?:[a-z]+:)?\/\//i.test(src) || src.startsWith('/')) {
+      if (src.startsWith('/') || src.startsWith('#') || /^[a-z][a-z0-9+.-]*:/i.test(src)) {
         return match
       }
       return `${prefix}/images/blog/${slug}/${src}${suffix}`
