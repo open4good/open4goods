@@ -574,6 +574,11 @@ export default defineNuxtConfig({
     // Runtime directory holding the weekly Metriks reports (deployed by open4goods-config).
     // Falls back to the bundled public dir during local dev when unset.
     metriksDataDir: process.env.METRIKS_DATA_DIR || '',
+    // Shared secret used by front-api to sign JWTs (front.security.jwt-secret /
+    // FRONT_SECURITY_JWT_SECRET, same .env as front-api). Server-only: lets the
+    // frontend verify the access token's signature before trusting its roles
+    // claim (GOU-438), instead of decoding it without verification.
+    jwtSecret: process.env.FRONT_SECURITY_JWT_SECRET || '',
     staticMainPageRoutes: STATIC_MAIN_PAGE_ROUTE_NAMES,
     sitemapLocalFiles: {
       fr: [

@@ -14,6 +14,10 @@ import MarkdownIt from 'markdown-it'
  *   <root>/data/<provider>/latest.json
  *   <root>/data/<provider>/events.ndjson
  *   <root>/weekly/latest.md
+ *
+ * The local dev fallback lives under `server/fixtures/metriks` (not `app/public/`):
+ * these are internal, non-public metrics (GOU-438) and must never be reachable as
+ * static files.
  */
 const markdown = new MarkdownIt({ html: true, linkify: true, breaks: true })
 
@@ -37,11 +41,9 @@ const candidateRoots = (): string[] => {
   const configured = configuredDir()
   const roots: string[] = []
   if (configured) roots.push(configured)
-  roots.push(
-    path.join(PROJECT_ROOT, '.output', 'public', 'reports', 'metriks'),
-    path.join(PROJECT_ROOT, 'app', 'public', 'reports', 'metriks'),
-    path.join(PROJECT_ROOT, 'public', 'reports', 'metriks')
-  )
+  // Dev-only fallback fixtures, kept outside `app/public/` so they are never
+  // servable as static files (GOU-438).
+  roots.push(path.join(PROJECT_ROOT, 'server', 'fixtures', 'metriks'))
   return roots
 }
 
