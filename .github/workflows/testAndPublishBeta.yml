@@ -1,9 +1,7 @@
+# Beta deployment is voluntary: dispatch manually on `main` only (GOU-387).
+# No push trigger, so a merge on `main` never redeploys beta.
 on:
-  push:
-    branches:
-      - "main"
-    paths-ignore:
-      - "frontend/**"
+  workflow_dispatch:
 
 name: 🔘 Beta - Build, Test, and Publish
 run-name: 🔘 Beta Build by @${{ github.actor }}
@@ -11,6 +9,7 @@ run-name: 🔘 Beta Build by @${{ github.actor }}
 jobs:
   deploy:
     name: Beta Test, Build, and Publish
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     concurrency:
       group: deploy-beta

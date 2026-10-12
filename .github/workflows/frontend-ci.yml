@@ -1,14 +1,9 @@
 name: Frontend CI & Deploy
+# Beta deployment is voluntary: dispatch manually on `main` only (GOU-387).
+# PR checks live in frontend-pr.yml; no push trigger, so a merge on `main`
+# never redeploys beta.
 on:
-  push:
-    paths:
-      - "frontend/**"
-      - "verticals/src/main/resources/guides/**"
-    branches: [main]
-  pull_request:
-    paths:
-      - "frontend/**"
-      - "verticals/src/main/resources/guides/**"
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -16,6 +11,7 @@ concurrency:
 
 jobs:
   build:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -35,7 +31,7 @@ jobs:
         working-directory: frontend
 
       - name: Deploy SSR output to Beta server
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
         uses: easingthemes/ssh-deploy@2cc5b27bf3029d0455dd5e09fe02633904031447 # main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -46,7 +42,7 @@ jobs:
           TARGET: "/opt/open4goods/latest/frontend-ssr"
 
       - name: Preserve previous Nuxt chunks in Beta staging
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
         uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.REMOTE_BETA_HOST }}
@@ -75,7 +71,7 @@ jobs:
             echo "Nuxt asset preservation complete for ${staging}"
 
       - name: Publish frontend
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
         uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.REMOTE_BETA_HOST }}
@@ -84,7 +80,7 @@ jobs:
           script: sh /opt/open4goods/bin/publish-frontend.sh beta
 
       - name: Validate published Beta Nuxt assets
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
         uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.REMOTE_BETA_HOST }}
