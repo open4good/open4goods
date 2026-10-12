@@ -45,3 +45,6 @@ jobs:
           nm -D --defined-only "$addon" | grep node_register_module_v137 >/dev/null || { echo "::error::$addon was not built for ABI 137 (Node 24)"; exit 1; }
           node -e "require(require('node:path').resolve(process.argv[1]))" "$addon"
           echo "better-sqlite3 native addon built for ABI 137 (Node 24)"
+      - name: Check the standalone .output bundle serves the blog (no content/ next to it)
+        working-directory: frontend
+        run: scripts/check-standalone-output.sh 4105

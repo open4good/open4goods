@@ -9,14 +9,8 @@ import {
   type BlogContentDoc,
 } from './blog-content'
 
-const readFileMock = vi.hoisted(() => vi.fn())
 const queryCollectionMock = vi.hoisted(() => vi.fn())
 
-vi.mock('node:fs/promises', () => ({
-  __esModule: true,
-  readFile: readFileMock,
-  default: { readFile: readFileMock },
-}))
 vi.mock('@nuxt/content/server', () => ({
   queryCollection: queryCollectionMock,
 }))
@@ -32,6 +26,7 @@ const doc = (overrides: Partial<BlogContentDoc>): BlogContentDoc => ({
   updatedAt: '2026-01-02T00:00:00Z',
   draft: false,
   published: true,
+  rawbody: '---\ntitle: x\n---\nHello',
   ...overrides,
 })
 
@@ -76,9 +71,9 @@ describe('blog-content', () => {
 
   describe('toBlogPostDto', () => {
     it('maps dates to epoch ms and slug to the url field', async () => {
-      readFileMock.mockResolvedValue('---\ntitle: x\n---\nHello **world**')
-
-      const dto = await toBlogPostDto(doc({ path: '/blog/fr/hello-world' }))
+      const dto = await toBlogPostDto(
+        doc({ path: '/blog/fr/hello-world', rawbody: '---\ntitle: x\n---\nHello **world**' })
+      )
 
       expect(dto.url).toBe('hello-world')
       expect(dto.createdMs).toBe(Date.parse('2026-01-01T00:00:00Z'))
@@ -87,9 +82,9 @@ describe('blog-content', () => {
     })
 
     it('unwraps a bare [assistant] marker out of its markdown-it paragraph wrapper', async () => {
-      readFileMock.mockResolvedValue('---\ntitle: x\n---\nBefore\n\n[assistant]\n\nAfter')
-
-      const dto = await toBlogPostDto(doc({}))
+      const dto = await toBlogPostDto(
+        doc({ rawbody: '---\ntitle: x\n---\nBefore\n\n[assistant]\n\nAfter' })
+      )
 
       expect(dto.body).toContain('[assistant]')
       expect(dto.body).not.toContain('<p>[assistant]</p>')

@@ -23,6 +23,9 @@ export default defineContentConfig({
         draft: z.boolean().default(false),
         published: z.boolean().default(true),
         image: z.string().optional(),
+        // Filled by Nuxt Content with the source file's raw Markdown, so the deployed .output bundle
+        // can render BlogPostDto.body without content/ next to it (see server/utils/blog-content.ts).
+        rawbody: z.string(),
       }),
       indexes: [
         { columns: ['path'], unique: true },
