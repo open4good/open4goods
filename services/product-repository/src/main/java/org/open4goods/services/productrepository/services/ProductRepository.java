@@ -627,11 +627,11 @@ public class ProductRepository {
             criteria = criteria.and(new Criteria("excluded").is(false));
         }
 
-        criteria = criteria.and(new Criteria("scores.IMPACTSCORE.value").exists());
+        criteria = criteria.and(new Criteria("scores.ECOSCORE.value").exists());
 
         SortOptions impactScoreSort = new SortOptions.Builder()
                 .field(new FieldSort.Builder()
-                        .field("scores.IMPACTSCORE.value")
+                        .field("scores.ECOSCORE.value")
                         .order(SortOrder.Desc)
                         .unmappedType(FieldType.Float)
                         .missing("_last")
@@ -1149,7 +1149,7 @@ public class ProductRepository {
         public Long countMainIndexHavingImpactScore() {
                 Criteria criteria = getRecentPriceQuery()
                         .and(new Criteria("excluded").is(false))
-                        .and(new Criteria("scores.IMPACTSCORE.value").exists());
+                        .and(new Criteria("scores.ECOSCORE.value").exists());
                 CriteriaQuery query = new CriteriaQuery(criteria);
                 return elasticsearchOperations.count(query, CURRENT_INDEX);
         }

@@ -171,7 +171,7 @@ class ProductRepositoryTest
     }
 
     @Test
-    void countMainIndexHavingImpactScoreUsesImpactScoreField()
+    void countMainIndexHavingImpactScoreUsesEcoscoreField()
     {
         when(elasticsearchOperations.count(any(CriteriaQuery.class), eq(ProductRepository.CURRENT_INDEX))).thenReturn(4L);
 
@@ -179,8 +179,29 @@ class ProductRepositoryTest
 
         ArgumentCaptor<CriteriaQuery> queryCaptor = ArgumentCaptor.forClass(CriteriaQuery.class);
         verify(elasticsearchOperations).count(queryCaptor.capture(), eq(ProductRepository.CURRENT_INDEX));
-        assertThat(criteriaFields(queryCaptor.getValue().getCriteria())).contains("scores.IMPACTSCORE.value");
-        assertThat(criteriaFields(queryCaptor.getValue().getCriteria())).doesNotContain("scores.ECOSCORE.value");
+        assertThat(criteriaFields(queryCaptor.getValue().getCriteria())).contains("scores.ECOSCORE.value");
+        assertThat(criteriaFields(queryCaptor.getValue().getCriteria())).doesNotContain("scores.IMPACTSCORE.value");
+    }
+
+    @Test
+    void exportVerticalWithValidDateOrderByImpactScoreSortsByEcoscore()
+    {
+        org.springframework.data.elasticsearch.core.SearchHitsIterator<Product> emptyIterator =
+                org.mockito.Mockito.mock(org.springframework.data.elasticsearch.core.SearchHitsIterator.class);
+        when(elasticsearchOperations.searchForStream(any(NativeQuery.class), eq(Product.class), eq(ProductRepository.CURRENT_INDEX)))
+                .thenReturn(emptyIterator);
+
+        repository.exportVerticalWithValidDateOrderByImpactScore("tv", false);
+
+        ArgumentCaptor<NativeQuery> queryCaptor = ArgumentCaptor.forClass(NativeQuery.class);
+        verify(elasticsearchOperations).searchForStream(queryCaptor.capture(), eq(Product.class), eq(ProductRepository.CURRENT_INDEX));
+
+        NativeQuery submittedQuery = queryCaptor.getValue();
+        CriteriaQuery springDataQuery = (CriteriaQuery) submittedQuery.getSpringDataQuery();
+        assertThat(criteriaFields(springDataQuery.getCriteria())).contains("scores.ECOSCORE.value");
+        assertThat(criteriaFields(springDataQuery.getCriteria())).doesNotContain("scores.IMPACTSCORE.value");
+        assertThat(submittedQuery.getSortOptions()).hasSize(1);
+        assertThat(submittedQuery.getSortOptions().getFirst().field().field()).isEqualTo("scores.ECOSCORE.value");
     }
 
     @Test
