@@ -44,6 +44,13 @@ qui suit GOU-387 ne les réactive pas.
   `pnpm test --run` et `pnpm build` dans `frontend/`, avec les mêmes versions
   pnpm/Node que `frontend-ci.yml`. **Aucune étape de déploiement, aucun secret
   de déploiement.**
+- Node 24 (GOU-394) : `frontend-ci.yml` et `frontend-pr.yml` fixent
+  `actions/setup-node` en `node-version: "24"`, la version du conteneur
+  `frontend-ssr` (`node:24`, ABI 137). `pnpm install` compile `better-sqlite3`
+  (Nuxt Content) pour ce Node ; une étape après `pnpm build` fait échouer le
+  run si `.output/server/node_modules/better-sqlite3/build/Release/better_sqlite3.node`
+  n'exporte pas `node_register_module_v137`, avant tout déploiement. Les PR qui
+  modifient ces deux workflows déclenchent aussi `frontend-pr.yml`.
 - Ce workflow ne couvre pas les push sur `main` : `frontend-ci.yml` ne
   s'exécute plus que sur dispatch. Un échec de test uniquement visible après
   merge sur `main` n'apparaît qu'au prochain dispatch de déploiement. Les PR
