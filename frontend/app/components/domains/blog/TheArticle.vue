@@ -200,6 +200,19 @@ try {
 
 const canonicalUrl = computed(() => requestUrl?.href)
 
+const absoluteImageUrl = computed(() => {
+  const image = article.value.image
+  if (!image || !requestUrl) {
+    return undefined
+  }
+
+  try {
+    return new URL(image, requestUrl.origin).toString()
+  } catch {
+    return undefined
+  }
+})
+
 const toTrimmedString = (value: unknown): string | undefined => {
   if (typeof value !== 'string') {
     return undefined
@@ -256,7 +269,7 @@ useSeoMeta({
   description: computed(() => metaDescription.value || undefined),
   ogDescription: computed(() => metaDescription.value || undefined),
   ogType: 'article',
-  ogImage: computed(() => article.value.image || undefined),
+  ogImage: absoluteImageUrl,
   articlePublishedTime: computed(() => publishedDate.value?.iso),
   articleModifiedTime: computed(
     () => updatedDate.value?.iso ?? publishedDate.value?.iso

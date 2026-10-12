@@ -58,6 +58,14 @@ await useAsyncData(
   }
 )
 
+if (!wikiRoute.value && !currentArticle.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Article not found',
+    fatal: true,
+  })
+}
+
 const article = computed(() => currentArticle.value as BlogArticle | null)
 
 const assistantConfigId = computed(() => slug.value)
