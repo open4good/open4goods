@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -82,12 +83,30 @@ public class MetriksControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     public void testGetSeoMetrics() throws Exception {
-        when(searchConsoleService.countIndexedPages()).thenReturn(5000L);
+        GoogleSearchConsoleService.PagesWithImpressionsResult result =
+                new GoogleSearchConsoleService.PagesWithImpressionsResult(
+                        5000L, LocalDate.of(2026, 9, 11), LocalDate.of(2026, 10, 8), false);
+        when(searchConsoleService.countPagesWithImpressions()).thenReturn(result);
 
         mockMvc.perform(get("/api/metriks/seo"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.schemaVersion").value("2.0"))
-                .andExpect(jsonPath("$.events[0].id").value("seo.gsc.indexed_pages"))
-                .andExpect(jsonPath("$.events[0].value").value(5000));
+                .andExpect(jsonPath("$.events[0].id").value("seo.gsc.pages_with_impressions"))
+                .andExpect(jsonPath("$.events[0].value").value(5000))
+                .andExpect(jsonPath("$.events[0].params.windowStartDate").value("2026-09-11"))
+                .andExpect(jsonPath("$.events[0].params.windowEndDate").value("2026-10-08"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    public void testGetSeoMetricsOnErrorReturnsErrorEvent() throws Exception {
+        when(searchConsoleService.countPagesWithImpressions())
+                .thenThrow(new java.io.IOException("Search Console API HTTP 500: boom"));
+
+        mockMvc.perform(get("/api/metriks/seo"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.events[0].id").value("seo.gsc.pages_with_impressions"))
+                .andExpect(jsonPath("$.events[0].status").value("error"))
+                .andExpect(jsonPath("$.events[0].errorMessage").value("Search Console API HTTP 500: boom"));
     }
 }
