@@ -525,42 +525,8 @@ const blogDateFormatter = computed(
   () => new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium' })
 )
 
-const fallbackBlogEntries = computed<HomeBlogItem[]>(() => [
-  {
-    url: localePath({ name: 'blog-slug', params: { slug: 'impact-score-ia' } }),
-    title: String(t('home.blog.items.first.title')),
-    summary: String(t('home.blog.items.first.excerpt')),
-    formattedDate: String(t('home.blog.items.first.date')),
-    slug: 'impact-score-ia',
-  },
-  {
-    url: localePath({
-      name: 'blog-slug',
-      params: { slug: 'prioriser-durabilite' },
-    }),
-    title: String(t('home.blog.items.second.title')),
-    summary: String(t('home.blog.items.second.excerpt')),
-    formattedDate: String(t('home.blog.items.second.date')),
-    slug: 'prioriser-durabilite',
-  },
-  {
-    url: localePath({
-      name: 'blog-slug',
-      params: { slug: 'equilibrer-prix-impact' },
-    }),
-    title: String(t('home.blog.items.third.title')),
-    summary: String(t('home.blog.items.third.excerpt')),
-    formattedDate: String(t('home.blog.items.third.date')),
-    slug: 'equilibrer-prix-impact',
-  },
-])
-
 const blogListItems = computed<HomeBlogItem[]>(() => {
   const articles = paginatedArticles.value.slice(0, BLOG_ARTICLES_LIMIT)
-
-  if (!articles.length) {
-    return fallbackBlogEntries.value
-  }
 
   return articles.map(article => {
     const formattedDate = article.createdMs
