@@ -13,6 +13,12 @@ export const DEFAULT_IMAGE = '/nudger-icon-512x512.png'
 export const isValidImageUrl = (url: string): boolean => {
   if (!url || typeof url !== 'string') return false
 
+  // Site-root-relative paths (e.g. "/images/blog/<slug>/<file>") are valid: they resolve against
+  // the current origin. A leading "//" is a protocol-relative URL, not a root-relative path.
+  if (url.startsWith('/') && !url.startsWith('//')) {
+    return true
+  }
+
   try {
     const urlObj = new URL(url)
     return urlObj.protocol === 'http:' || urlObj.protocol === 'https:'

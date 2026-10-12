@@ -32,6 +32,26 @@ const toEpochMs = (value: string | null): number | null => {
 }
 
 /**
+ * Markdown source files reference their inline images by filename only (e.g. `![](tv-planet.jpeg)`),
+ * relative to the image folder exported alongside the post rather than to the rendered `/blog/<slug>`
+ * route. Left as-is, the browser resolves them against the page URL and requests `/blog/<file>`,
+ * which hits the `[slug].vue` catch-all instead of the image. Absolute URLs, already-rooted paths
+ * (starting with a single `/`), other URI schemes (`data:`, `mailto:`, …) and fragment-only
+ * references (`#…`) are left untouched.
+ */
+export function resolveRelativeImageSrc(html: string, slug: string): string {
+  return html.replace(
+    /(<img[^>]*\ssrc=")([^"]+)(")/g,
+    (match, prefix: string, src: string, suffix: string) => {
+      if (src.startsWith('/') || src.startsWith('#') || /^[a-z][a-z0-9+.-]*:/i.test(src)) {
+        return match
+      }
+      return `${prefix}/images/blog/${slug}/${src}${suffix}`
+    }
+  )
+}
+
+/**
  * Renders a post's Markdown body to the sanitizer-ready HTML string BlogPostDto.body has always
  * carried. Rendered from the collection's `rawbody` (the source file as stored in the content
  * database) rather than its parsed AST -- the AST is shaped for <ContentRenderer>, not for producing
@@ -41,9 +61,12 @@ const toEpochMs = (value: string | null): number | null => {
  * is unwrapped from the `<p>` markdown-it puts around it, so TheArticle.vue's
  * `content.split('[assistant]')` still finds a clean split point.
  */
-function renderBody(raw: string): string {
+function renderBody(raw: string, slug: string): string {
   const body = raw.replace(/^---\n[\s\S]*?\n---\n/, '')
-  return markdown.render(body).replace('<p>[assistant]</p>', '[assistant]')
+  const rendered = markdown
+    .render(body)
+    .replace('<p>[assistant]</p>', '[assistant]')
+  return resolveRelativeImageSrc(rendered, slug)
 }
 
 /**
@@ -74,7 +97,7 @@ export async function toBlogPostDto(doc: BlogContentDoc): Promise<BlogPostDto> {
     title: doc.title,
     author: doc.author,
     summary: doc.description,
-    body: renderBody(doc.rawbody),
+    body: renderBody(doc.rawbody, slug),
     category: doc.tags,
     image: doc.image,
     createdMs: toEpochMs(doc.date) ?? undefined,

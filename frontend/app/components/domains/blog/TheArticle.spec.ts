@@ -1,19 +1,15 @@
-import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
 import { ref } from 'vue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock('#imports', () => {
-  const useHeadMock = vi.fn()
-  const useSeoMetaMock = vi.fn()
-  const useRequestURLMock = () =>
-    new URL('https://example.com/blog/test-article')
+const seoMetaSpy = vi.fn()
 
-  return {
-    useHead: useHeadMock,
-    useSeoMeta: useSeoMetaMock,
-    useRequestURL: useRequestURLMock,
-  }
-})
+mockNuxtImport('useHead', () => vi.fn())
+mockNuxtImport('useSeoMeta', () => (input: unknown) => seoMetaSpy(input))
+mockNuxtImport(
+  'useRequestURL',
+  () => () => new URL('https://example.com/blog/test-article')
+)
 
 vi.mock('#i18n', () => ({
   useLocalePath: () => (input: unknown) =>
@@ -146,5 +142,18 @@ describe('TheArticle.vue', () => {
 
     const readingTime = wrapper.get('[data-test="article-reading-time"]').text()
     expect(readingTime).toContain('Approx. ')
+  })
+
+  test('resolves a root-relative article image into an absolute og:image', async () => {
+    await mountComponent({
+      image: '/images/blog/test-article/cover.png',
+    })
+
+    const seoMetaCall = seoMetaSpy.mock.calls[0]?.[0] as {
+      ogImage: { value: string }
+    }
+    expect(seoMetaCall.ogImage.value).toBe(
+      'https://example.com/images/blog/test-article/cover.png'
+    )
   })
 })
