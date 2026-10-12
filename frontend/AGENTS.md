@@ -147,6 +147,21 @@ Every downstream call should be wrapped in a thin service that:
   `config.public.editRoles` (defaults to `ROLE_SITEEDITOR,XWIKIADMINGROUP`).
 - Update the `EDITOR_ROLES` environment variable if new roles must be allowed;
   avoid hardcoding role names anywhere else.
+- Server-side admin routes (e.g. `/api/metriks/**`) must call
+  `requireAdminAccess(event)` from `server/utils/auth.ts` instead of trusting
+  an unverified JWT: it checks the cookie named by
+  `config.public.tokenCookieName`, verifies its HS256 signature, and checks
+  `hasAdminAccess` on the `roles` claim, throwing 401/403 without a body
+  otherwise.
+- `requireAdminAccess` needs the HS256 signing secret shared with front-api
+  (`front.security.jwt-secret`). It reads `config.jwtSecret` (baked in at
+  build time from `FRONT_SECURITY_JWT_SECRET`) and falls back to
+  `process.env.FRONT_SECURITY_JWT_SECRET` read at request time, since Nuxt
+  only overrides `jwtSecret` at runtime via `NUXT_JWT_SECRET`. **The
+  `frontend-ssr` deployment must set `FRONT_SECURITY_JWT_SECRET` in its
+  runtime environment, with the same value as front-api's
+  `front.security.jwt-secret`** - otherwise every admin request fails with a
+  500.
 
 ## When Unsure
 

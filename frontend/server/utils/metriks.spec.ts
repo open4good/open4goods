@@ -59,22 +59,8 @@ describe('metriks server utilities', () => {
     vi.resetModules()
     delete process.env.METRIKS_DATA_DIR
     tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'metriks-'))
-    dataDir = path.join(
-      tempRoot,
-      '.output',
-      'public',
-      'reports',
-      'metriks',
-      'data'
-    )
-    weeklyDir = path.join(
-      tempRoot,
-      '.output',
-      'public',
-      'reports',
-      'metriks',
-      'weekly'
-    )
+    dataDir = path.join(tempRoot, 'server', 'fixtures', 'metriks', 'data')
+    weeklyDir = path.join(tempRoot, 'server', 'fixtures', 'metriks', 'weekly')
     await fs.mkdir(dataDir, { recursive: true })
     await fs.mkdir(weeklyDir, { recursive: true })
     cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue(tempRoot)
