@@ -884,6 +884,14 @@
       "credits": "credits",
       "free": "Free"
     },
+    "attribution": {
+      "eprel": {
+        "label": "Data source",
+        "text": "Energy label data is sourced from the European Product Registry for Energy Labelling (EPREL), European Commission.",
+        "linkText": "eprel.ec.europa.eu",
+        "free": "Free to use under EPREL's terms: an active API key is required, no paid plan."
+      }
+    },
     "cta": {
       "learn": "Learn more",
       "playground": "Try it",

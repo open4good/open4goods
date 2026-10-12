@@ -28,6 +28,23 @@ describe('SERVICES catalog', () => {
     expect(review?.status).toBe('coming-soon')
     expect(review?.featured).toBe(true)
   })
+
+  it('has product.energy sourced from EPREL and zero-rated', () => {
+    const energy = SERVICES.find(s => s.id === 'product.energy')
+    expect(energy).toBeDefined()
+    expect(energy?.source).toBe('eprel')
+    expect(energy?.credits).toBe(0)
+  })
+})
+
+describe('EPREL provenance guard (ADR 0017)', () => {
+  it('never bills a facet sourced from EPREL', () => {
+    const eprelSourced = SERVICES.filter(s => s.source === 'eprel')
+    expect(eprelSourced.length).toBeGreaterThan(0)
+    for (const service of eprelSourced) {
+      expect(service.credits).toBe(0)
+    }
+  })
 })
 
 describe('allServices()', () => {

@@ -9,6 +9,12 @@ export interface ServiceDescriptor {
   order: number
   docSlug?: string
   playgroundPath?: string
+  /**
+   * Upstream provenance of the facet content. A facet sourced from EPREL is
+   * zero-rated and never billable (ADR 0017): its content comes from the
+   * EPREL public API, whose terms forbid reselling the data as-is.
+   */
+  source?: 'eprel'
 }
 
 export const SERVICES: ServiceDescriptor[] = [
@@ -90,9 +96,10 @@ export const SERVICES: ServiceDescriptor[] = [
     icon: 'mdi-lightning-bolt-outline',
     category: 'product',
     status: 'coming-soon',
-    credits: 10,
+    credits: 0,
     featured: true,
-    order: 8
+    order: 8,
+    source: 'eprel'
   },
   {
     id: 'product.review',
