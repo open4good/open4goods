@@ -24,6 +24,7 @@ const doc = (overrides: Partial<BlogContentDoc>): BlogContentDoc => ({
   updatedAt: '2026-01-02T00:00:00Z',
   draft: false,
   published: true,
+  rawbody: '',
   ...overrides,
 })
 
@@ -37,7 +38,7 @@ describe('sitemap-blog-posts plugin', () => {
 
   beforeEach(() => {
     mockHook = vi.fn()
-    mockCtx = { event: {}, sitemapName: 'blog-posts.xml', sources: [] }
+    mockCtx = { event: {}, sitemapName: 'blog-posts', sources: [] }
     vi.clearAllMocks()
   })
 
