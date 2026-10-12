@@ -891,6 +891,14 @@
       "credits": "crédits",
       "free": "Gratuit"
     },
+    "attribution": {
+      "eprel": {
+        "label": "Source des données",
+        "text": "Les données d'étiquette énergie proviennent du registre européen des produits pour l'étiquetage énergétique (EPREL), Commission européenne.",
+        "linkText": "eprel.ec.europa.eu",
+        "free": "Gratuit selon les conditions EPREL : une clé API active est requise, sans plan payant."
+      }
+    },
     "cta": {
       "learn": "En savoir plus",
       "playground": "Tester",
