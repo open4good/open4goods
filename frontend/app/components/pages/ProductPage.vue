@@ -410,6 +410,17 @@ const {
   { server: true, immediate: true }
 )
 
+// useAsyncData only stores the handler's error in `error.value`; it does not
+// propagate it to the SSR response. An unknown GTIN must bubble up as a real
+// 404 (not a 200 "soft 404" with a fallback title), so rethrow it here.
+if (error.value?.statusCode === 404) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Product not found',
+    fatal: true,
+  })
+}
+
 const product = computed(() => productData.value)
 
 if (product.value?.fullSlug) {
