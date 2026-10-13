@@ -42,9 +42,18 @@ o4g:
   `X-Event-Signature: sha256=<hex HMAC-SHA256(secret, "<timestamp>." + corps brut)>`. Recalculés à
   chaque tentative.
 - **Confirmation DOWN** : une transition vers `DOWN` est retenue pendant
-  `down-confirmation-delay` (60 s par défaut) puis relit l'instance en base. Si elle est toujours
-  `DOWN`, l'événement est envoyé ; sinon rien n'est envoyé (anti-bruit sur un flap résolu seul).
+  `down-confirmation-delay` (60 s par défaut) puis relit l'instance en base. Elle n'est confirmée,
+  et donc envoyée, que si l'instance est toujours `DOWN` **pour cette même transition**
+  (l'horodatage de statut relu doit correspondre à celui de l'événement) ; sinon rien n'est envoyé.
+  Cela évite qu'un flap résolu seul déclenche l'alerte, et qu'un flap `DOWN → UP → DOWN` dans le
+  délai ne déclenche deux envois (seul le dernier `DOWN`, avec son propre minuteur, est confirmé).
   Toutes les autres transitions, y compris le retour `UP`, partent immédiatement.
+- **Dernier statut signalé** : contrairement au suivi interne par défaut de
+  `AbstractStatusChangeNotifier` (qui avancerait dès la fin de `notify()`, donc avant même la
+  confirmation d'un `DOWN` retenu), le notifier tient son propre état du dernier statut **réellement
+  signalé** par instance. Il n'avance que lorsqu'un envoi est décidé (immédiat, ou `DOWN` confirmé) ;
+  un `DOWN` non confirmé ne le modifie jamais. C'est ce qui garantit qu'une panne réelle survenant
+  après un flap n'est pas masquée par un état `lastStatus` périmé.
 - **Résilience** : timeout de 5 s par tentative, 3 tentatives au plus avec backoff, puis un `WARN`
   (sans le secret) si toutes échouent. L'échec n'est jamais propagé à SBA.
 
@@ -74,4 +83,8 @@ Received event:
 `EventWebhookNotifierTest` (`admin/src/test/java/org/open4goods/sbadmin/notify`) couvre les
 critères 1 à 6 du plan : signature HMAC, corps fermé à 8 clés, désactivation sans `url`/`secret`,
 cycle `DOWN` confirmé → `UP`, anti-bruit sur un `DOWN` qui revient avant confirmation, et bornage
-des tentatives sans jamais propager d'erreur à SBA.
+des tentatives sans jamais propager d'erreur à SBA. Elle couvre aussi le suivi du dernier statut
+signalé : un flap `DOWN → UP` avant confirmation ne doit ni se faire passer pour un `DOWN` déjà
+signalé, ni empêcher le `DOWN` réellement maintenu qui suit d'être signalé (`from=UP`) ; et un flap
+`DOWN → UP → DOWN` dans le délai ne doit produire qu'un seul envoi `DOWN`, le minuteur du premier
+`DOWN` se reconnaissant périmé à son échéance.

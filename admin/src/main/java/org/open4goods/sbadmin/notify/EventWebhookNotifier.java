@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HexFormat;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -21,6 +22,7 @@ import de.codecentric.boot.admin.server.domain.entities.Instance;
 import de.codecentric.boot.admin.server.domain.entities.InstanceRepository;
 import de.codecentric.boot.admin.server.domain.events.InstanceEvent;
 import de.codecentric.boot.admin.server.domain.events.InstanceStatusChangedEvent;
+import de.codecentric.boot.admin.server.domain.values.InstanceId;
 import de.codecentric.boot.admin.server.domain.values.StatusInfo;
 import de.codecentric.boot.admin.server.notify.AbstractStatusChangeNotifier;
 
@@ -40,6 +42,14 @@ import tools.jackson.databind.json.JsonMapper;
  * flap that resolves on its own. Every other transition, including the return to {@code UP}, is
  * sent immediately. Delivery never surfaces an error back to SBA: failures are retried a bounded
  * number of times, then logged and swallowed.
+ * <p>
+ * The last status <em>reported</em> to the gateway is tracked independently of
+ * {@link AbstractStatusChangeNotifier}'s own {@code lastStatuses} map: that map is updated as soon as
+ * {@code notify()} completes, i.e. immediately for a held {@code DOWN} transition, before the delay even
+ * elapses. Relying on it here would let an intervening flap mark the pending {@code DOWN} as already
+ * reported and mask the real outage that follows. {@link #lastReportedStatus} only advances when this
+ * notifier itself decides to send, so {@link #shouldNotify} and {@link #doNotify} stay consistent with
+ * what was actually delivered.
  */
 public class EventWebhookNotifier extends AbstractStatusChangeNotifier {
 
@@ -62,6 +72,9 @@ public class EventWebhookNotifier extends AbstractStatusChangeNotifier {
     private final Duration downConfirmationDelay;
 
     private final JsonMapper jsonMapper = JsonMapper.builder().build();
+
+    /** Last status reported to the gateway per instance, advanced only when a send is actually decided. */
+    private final ConcurrentHashMap<InstanceId, String> lastReportedStatus = new ConcurrentHashMap<>();
 
     public EventWebhookNotifier(InstanceRepository repository, WebClient.Builder webClientBuilder,
             SbaEventWebhookProperties properties) {
@@ -90,23 +103,46 @@ public class EventWebhookNotifier extends AbstractStatusChangeNotifier {
     }
 
     @Override
+    protected boolean shouldNotify(InstanceEvent event, Instance instance) {
+        if (!(event instanceof InstanceStatusChangedEvent statusEvent)) {
+            return false;
+        }
+        String from = lastReportedStatus.getOrDefault(event.getInstance(), StatusInfo.STATUS_UNKNOWN);
+        String to = statusEvent.getStatusInfo().getStatus();
+        if (from.equals(to)) {
+            return false;
+        }
+        return !(StatusInfo.STATUS_UNKNOWN.equals(from) && StatusInfo.STATUS_UP.equals(to));
+    }
+
+    @Override
     protected Mono<Void> doNotify(InstanceEvent event, Instance instance) {
         if (!(event instanceof InstanceStatusChangedEvent statusEvent)) {
             return Mono.empty();
         }
-        String from = getLastStatus(event.getInstance());
+        InstanceId instanceId = event.getInstance();
+        String from = lastReportedStatus.getOrDefault(instanceId, StatusInfo.STATUS_UNKNOWN);
         String to = statusEvent.getStatusInfo().getStatus();
 
         if (StatusInfo.STATUS_DOWN.equals(to)) {
+            Instant transitionTimestamp = event.getTimestamp();
             // repository.find(...) must be deferred: Mono.then(Mono) evaluates its argument eagerly
             // at chain-construction time, which would re-check the instance before the delay even
             // elapses instead of after it.
             return Mono.delay(downConfirmationDelay)
-                    .then(Mono.defer(() -> repository.find(event.getInstance())))
-                    .filter(current -> current.getStatusInfo().isDown())
-                    .flatMap(current -> sendEvent(event, instance, from, to))
+                    .then(Mono.defer(() -> repository.find(instanceId)))
+                    // Compare against this event's own transition timestamp, not just "is it still
+                    // DOWN": a later DOWN->UP->DOWN flap keeps the instance down but starts its own
+                    // timer, and only that newer timer's expiry should report it.
+                    .filter(current -> current.getStatusInfo().isDown()
+                            && transitionTimestamp.equals(current.getStatusTimestamp()))
+                    .flatMap(current -> {
+                        lastReportedStatus.put(instanceId, to);
+                        return sendEvent(event, instance, from, to);
+                    })
                     .then();
         }
+        lastReportedStatus.put(instanceId, to);
         return sendEvent(event, instance, from, to);
     }
 
