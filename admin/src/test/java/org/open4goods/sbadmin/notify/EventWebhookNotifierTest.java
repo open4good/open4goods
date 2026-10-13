@@ -153,6 +153,27 @@ class EventWebhookNotifierTest {
     }
 
     @Test
+    void initialUpIsNotSentButTheFirstOutageIsReportedFromUp() throws IOException {
+        CapturingHandler handler = new CapturingHandler(200);
+        server = startServer(handler);
+        Instance up = instance(StatusInfo.ofUp());
+        StubInstanceRepository repository = new StubInstanceRepository(up);
+        EventWebhookNotifier notifier = notifier(repository, Duration.ofMillis(150));
+
+        notifier.notify(eventFor(up)).block(Duration.ofSeconds(2));
+        assertThat(handler.requestCount.get()).isZero();
+
+        Instance down = up.withStatusInfo(StatusInfo.ofDown());
+        repository.set(down);
+        notifier.notify(eventFor(down)).block(Duration.ofSeconds(2));
+
+        assertThat(handler.requestCount.get()).isEqualTo(1);
+        Map<String, Object> downBody = JSON.readValue(handler.lastBody.get(), Map.class);
+        assertThat(downBody.get("from")).isEqualTo("UP");
+        assertThat(downBody.get("to")).isEqualTo("DOWN");
+    }
+
+    @Test
     void downThatFlapsBackToUpBeforeConfirmationStillReportsTheNextSustainedDownOnce()
             throws IOException, InterruptedException {
         CapturingHandler handler = new CapturingHandler(200);
