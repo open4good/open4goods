@@ -10,9 +10,9 @@ const runtimeConfig = vi.hoisted(() => ({
     tokenCookieName: 'access_token',
     refreshCookieName: 'refresh_token',
   },
-  googleOAuthClientId: 'client-123',
-  googleOAuthRedirectUri: 'http://127.0.0.1:4100/auth/google/callback',
-  googleOAuthClientSecret: 'client-secret-xyz',
+  googleOauthClientId: 'client-123',
+  googleOauthRedirectUri: 'http://127.0.0.1:4100/auth/google/callback',
+  googleOauthClientSecret: 'client-secret-xyz',
   apiUrl: 'http://localhost:8082',
 }))
 
@@ -48,10 +48,10 @@ describe('GET /auth/google', () => {
     setCookieMock.mockReset()
     sendRedirectMock.mockReset()
     runtimeConfig.public.googleSsoEnabled = true
-    runtimeConfig.googleOAuthClientId = 'client-123'
-    runtimeConfig.googleOAuthRedirectUri =
+    runtimeConfig.googleOauthClientId = 'client-123'
+    runtimeConfig.googleOauthRedirectUri =
       'http://127.0.0.1:4100/auth/google/callback'
-    runtimeConfig.googleOAuthClientSecret = 'client-secret-xyz'
+    runtimeConfig.googleOauthClientSecret = 'client-secret-xyz'
     vi.stubGlobal('defineEventHandler', (fn: GoogleGetHandler) => fn)
     vi.stubGlobal('useRuntimeConfig', () => runtimeConfig)
     vi.stubGlobal('getQuery', getQueryMock)
@@ -76,7 +76,7 @@ describe('GET /auth/google', () => {
   })
 
   it('returns 404 when the OAuth client is not configured', () => {
-    runtimeConfig.googleOAuthClientId = ''
+    runtimeConfig.googleOauthClientId = ''
 
     expect.assertions(2)
     try {
@@ -88,7 +88,7 @@ describe('GET /auth/google', () => {
   })
 
   it('returns 500 when the client secret is not configured', () => {
-    runtimeConfig.googleOAuthClientSecret = ''
+    runtimeConfig.googleOauthClientSecret = ''
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
     expect.assertions(4)

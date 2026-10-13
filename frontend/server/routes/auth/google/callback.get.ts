@@ -31,13 +31,13 @@ export default defineEventHandler(async (event: H3Event) => {
 
   if (
     !config.public.googleSsoEnabled ||
-    !config.googleOAuthClientId ||
-    !config.googleOAuthRedirectUri
+    !config.googleOauthClientId ||
+    !config.googleOauthRedirectUri
   ) {
     throw createError({ statusCode: 404, statusMessage: 'Not Found' })
   }
 
-  if (!config.googleOAuthClientSecret) {
+  if (!config.googleOauthClientSecret) {
     console.error(
       'Google SSO is misconfigured: missing GOOGLE_OAUTH_CLIENT_SECRET'
     )
@@ -85,9 +85,9 @@ export default defineEventHandler(async (event: H3Event) => {
     tokenResponse = await $fetch<GoogleTokenResponse>(GOOGLE_TOKEN_ENDPOINT, {
       method: 'POST',
       body: new URLSearchParams({
-        client_id: config.googleOAuthClientId,
-        client_secret: config.googleOAuthClientSecret,
-        redirect_uri: config.googleOAuthRedirectUri,
+        client_id: config.googleOauthClientId,
+        client_secret: config.googleOauthClientSecret,
+        redirect_uri: config.googleOauthRedirectUri,
         code,
         code_verifier: pending.codeVerifier,
         grant_type: 'authorization_code',
