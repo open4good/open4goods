@@ -302,6 +302,8 @@ const ProductVigilanceSection = defineAsyncComponent(
 
 const route = useRoute()
 const requestURL = useRequestURL()
+const requestFetch = useRequestFetch()
+const domainHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 const runtimeConfig = useRuntimeConfig()
 const { $fetch: csrfFetch } = useNuxtApp()
 const { t, locale } = useI18n()
@@ -375,9 +377,9 @@ const {
   async () => {
     productLoadError.value = null
     try {
-      const baseUrl = import.meta.server ? requestURL.origin : ''
-      return await $fetch<ProductDto>(`${baseUrl}/api/products/${gtin}`, {
+      return await requestFetch<ProductDto>(`/api/products/${gtin}`, {
         query: { include: PRODUCT_COMPONENTS },
+        headers: domainHeaders,
       })
     } catch (fetchError) {
       if (isBackendNotFoundError(fetchError)) {
