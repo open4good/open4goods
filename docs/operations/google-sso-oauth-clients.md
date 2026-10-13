@@ -39,7 +39,7 @@ lists real client ids, secrets, or fingerprints.
 ## Client id consistency
 
 `FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID` (front-api) **must** carry the exact
-same "Web" client id as `GOOGLE_OAUTH_CLIENT_ID` (frontend). front-api checks
+same "Web" client id as `NUXT_GOOGLE_OAUTH_CLIENT_ID` (frontend). front-api checks
 the ID token audience (`aud`) against this value: a mismatch makes every
 Google login fail the verification step even though the code exchange with
 Google succeeded.
@@ -60,7 +60,7 @@ local flow keeps working unchanged.
 
 ## Where the secret lives
 
-`GOOGLE_OAUTH_CLIENT_SECRET` is deployed through `open4goods-config`, posed by
+`NUXT_GOOGLE_OAUTH_CLIENT_SECRET` is deployed through `open4goods-config`, posed by
 Goulven. It is never committed to this repository, never logged, and never
 present in any `public` runtime config key.
 

@@ -39,7 +39,7 @@ export default defineEventHandler(async (event: H3Event) => {
 
   if (!config.googleOauthClientSecret) {
     console.error(
-      'Google SSO is misconfigured: missing GOOGLE_OAUTH_CLIENT_SECRET'
+      'Google SSO is misconfigured: missing NUXT_GOOGLE_OAUTH_CLIENT_SECRET'
     )
     throw createError({
       statusCode: 500,
