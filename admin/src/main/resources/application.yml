@@ -24,3 +24,14 @@ spring:
         default-retries: 1
       instance-auth:
         enabled: true
+
+# SBA event webhook notifier: disabled unless url and secret are both set. Real values
+# (O4G_SBA_EVENT_WEBHOOK_URL / O4G_SBA_EVENT_WEBHOOK_SECRET / O4G_SBA_EVENT_WEBHOOK_ENVIRONMENT)
+# live in open4goods-config or environment variables, never in this repository.
+o4g:
+  sba:
+    event-webhook:
+      url: ""
+      secret: ""
+      environment: ""
+      down-confirmation-delay: 60s
