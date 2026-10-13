@@ -20,15 +20,15 @@ export default defineEventHandler((event: H3Event) => {
 
   if (
     !config.public.googleSsoEnabled ||
-    !config.googleOAuthClientId ||
-    !config.googleOAuthRedirectUri
+    !config.googleOauthClientId ||
+    !config.googleOauthRedirectUri
   ) {
     throw createError({ statusCode: 404, statusMessage: 'Not Found' })
   }
 
-  if (!config.googleOAuthClientSecret) {
+  if (!config.googleOauthClientSecret) {
     console.error(
-      'Google SSO is misconfigured: missing GOOGLE_OAUTH_CLIENT_SECRET'
+      'Google SSO is misconfigured: missing NUXT_GOOGLE_OAUTH_CLIENT_SECRET'
     )
     throw createError({
       statusCode: 500,
@@ -60,8 +60,8 @@ export default defineEventHandler((event: H3Event) => {
   )
 
   const authorizationUrl = buildGoogleAuthorizationUrl({
-    clientId: config.googleOAuthClientId,
-    redirectUri: config.googleOAuthRedirectUri,
+    clientId: config.googleOauthClientId,
+    redirectUri: config.googleOauthRedirectUri,
     state: pending.state,
     nonce: pending.nonce,
     codeChallenge,

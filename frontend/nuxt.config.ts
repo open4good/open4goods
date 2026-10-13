@@ -564,13 +564,13 @@ export default defineNuxtConfig({
     // exchange happens server-side with client_secret, PKCE is kept as defense in
     // depth. The client id itself is not a secret, but must match front-api's
     // front.security.google-sso.client-id (ID token audience check).
-    googleOAuthClientId: process.env.GOOGLE_OAUTH_CLIENT_ID || '',
+    googleOauthClientId: process.env.GOOGLE_OAUTH_CLIENT_ID || '',
     // Redirect URI registered with Google for the OAuth client. Must match
     // exactly what's configured on Google's side (e.g. http://127.0.0.1:4100/auth/google/callback).
-    googleOAuthRedirectUri: process.env.GOOGLE_OAUTH_REDIRECT_URI || '',
+    googleOauthRedirectUri: process.env.GOOGLE_OAUTH_REDIRECT_URI || '',
     // Client secret for the confidential "Web" OAuth client (GOU-317). Server-only:
     // never expose this under `public`.
-    googleOAuthClientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET || '',
+    googleOauthClientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET || '',
     // Runtime directory holding the weekly Metriks reports (deployed by open4goods-config).
     // Falls back to the bundled public dir during local dev when unset.
     metriksDataDir: process.env.METRIKS_DATA_DIR || '',
