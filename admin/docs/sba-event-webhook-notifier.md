@@ -60,29 +60,26 @@ o4g:
 ## Démonstration (critère 7)
 
 Un récepteur HTTP local (`com.sun.net.httpserver.HttpServer`, `127.0.0.1:4104`) a rejoué le cycle
-`UP → DOWN (confirmé après 3 s) → UP` avec le vrai `EventWebhookNotifier` et a vérifié la signature
-HMAC-SHA256 reçue :
+`UP (enregistrement) → DOWN (avec details, confirmé après 1 s) → UP` avec le vrai `EventWebhookNotifier`
+et a recalculé la signature HMAC-SHA256 à partir du secret et des octets reçus. Le `UP` initial n'est
+pas envoyé (aucun incident à ouvrir ni à clore) mais sert de `from` à la panne suivante ; les `details`
+de santé ne sortent jamais :
 
 ```
-Received event:
-  body      = {"source":"sba","environment":"beta","application":"front-api","instanceId":"demo-777de8a5e899","from":"UNKNOWN","to":"DOWN","at":"2026-10-13T11:36:39.261684355Z","eventId":"f076f5ea-ec4f-384f-9f7d-515f9adf8e98"}
-  timestamp = 1791891402
-  signature = sha256=763c4b843aa3a77ddef651f7de3537335d532ff690564fd477725da2f2fce5e3
-  expected  = sha256=763c4b843aa3a77ddef651f7de3537335d532ff690564fd477725da2f2fce5e3
-  valid     = true
-Received event:
-  body      = {"source":"sba","environment":"beta","application":"front-api","instanceId":"demo-777de8a5e899","from":"DOWN","to":"UP","at":"2026-10-13T11:36:42.852415218Z","eventId":"22053ddc-44a1-3d25-90bb-afda4ffd42bd"}
-  timestamp = 1791891402
-  signature = sha256=79daeb9e9ecc7cb5df23a65c2f48a0005f9f70334aa1a6307dc1dba691162839
-  expected  = sha256=79daeb9e9ecc7cb5df23a65c2f48a0005f9f70334aa1a6307dc1dba691162839
-  valid     = true
+SBA -> UP
+SBA -> DOWN
+RECEIVER body={"source":"sba","environment":"beta","application":"front-api","instanceId":"demo-lead","from":"UP","to":"DOWN","at":"2026-10-13T14:30:57.229892433Z","eventId":"c65d9fef-33c8-3924-ac49-efb71d64a5c7"}
+RECEIVER ts=1791901858 signatureValid=true
+SBA -> UP
+RECEIVER body={"source":"sba","environment":"beta","application":"front-api","instanceId":"demo-lead","from":"DOWN","to":"UP","at":"2026-10-13T14:30:57.229929930Z","eventId":"7e7e3031-49b6-3f7d-a945-b673d9c66d70"}
+RECEIVER ts=1791901858 signatureValid=true
 ```
 
 ## Tests
 
 `EventWebhookNotifierTest` (`admin/src/test/java/org/open4goods/sbadmin/notify`) couvre les
 critères 1 à 6 du plan : signature HMAC, corps fermé à 8 clés, désactivation sans `url`/`secret`,
-cycle `DOWN` confirmé → `UP`, anti-bruit sur un `DOWN` qui revient avant confirmation, et bornage
+cycle `DOWN` confirmé → `UP`, premier `UP` non envoyé mais retenu comme `from` de la panne suivante, anti-bruit sur un `DOWN` qui revient avant confirmation, et bornage
 des tentatives sans jamais propager d'erreur à SBA. Elle couvre aussi le suivi du dernier statut
 signalé : un flap `DOWN → UP` avant confirmation ne doit ni se faire passer pour un `DOWN` déjà
 signalé, ni empêcher le `DOWN` réellement maintenu qui suit d'être signalé (`from=UP`) ; et un flap

@@ -107,12 +107,15 @@ public class EventWebhookNotifier extends AbstractStatusChangeNotifier {
         if (!(event instanceof InstanceStatusChangedEvent statusEvent)) {
             return false;
         }
-        String from = lastReportedStatus.getOrDefault(event.getInstance(), StatusInfo.STATUS_UNKNOWN);
+        String reported = lastReportedStatus.get(event.getInstance());
         String to = statusEvent.getStatusInfo().getStatus();
-        if (from.equals(to)) {
+        if (reported == null && StatusInfo.STATUS_UP.equals(to)) {
+            // First UP after registration: no incident to open or close, so nothing is sent, but it is
+            // recorded so that the next outage is reported as from=UP rather than from=UNKNOWN.
+            lastReportedStatus.put(event.getInstance(), to);
             return false;
         }
-        return !(StatusInfo.STATUS_UNKNOWN.equals(from) && StatusInfo.STATUS_UP.equals(to));
+        return !(reported == null ? StatusInfo.STATUS_UNKNOWN : reported).equals(to);
     }
 
     @Override
