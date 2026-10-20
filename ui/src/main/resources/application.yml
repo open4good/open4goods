@@ -27,8 +27,9 @@ server:
 management:
   health:
     diskspace:
-      # Alert threshold for the disk-space health indicator.
-      threshold: 100GB
+      # Alert threshold for the disk-space health indicator (GOU-795: 100GB
+      # tripped on the ~860 GB prod root disk while ~85 GB were still free).
+      threshold: 20GB
   endpoints:
     web:
       exposure:

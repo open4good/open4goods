@@ -130,7 +130,9 @@ feedback:
 management:
   health:
     diskspace:
-      threshold: 100GB  
+      # Minimum free space on the data disk before health turns DOWN (GOU-795):
+      # 100GB tripped on the ~860 GB prod root disk while ~85 GB were still free.
+      threshold: 20GB
   endpoints:
     web:
       exposure:
