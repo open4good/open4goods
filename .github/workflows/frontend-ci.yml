@@ -13,6 +13,8 @@ jobs:
   build:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    # Google SSO values come from the `beta` GitHub Environment (ADR-0006, GOU-767).
+    environment: beta
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
@@ -87,6 +89,20 @@ jobs:
               done
             done
             echo "Nuxt asset preservation complete for ${staging}"
+
+      - name: Render Google SSO env on Beta
+        # Replaces only these keys in the env_file of docker-compose.frontend.yml, read when publish-frontend.sh
+        # recreates the container. open4goods-config's deploy rewrites this file: rendered before every publish.
+        if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+        env:
+          DEPLOY_SSH_HOST: ${{ secrets.REMOTE_BETA_HOST }}
+          DEPLOY_SSH_USER: ${{ secrets.REMOTE_BETA_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          NUXT_GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_SSO_CLIENT_ID }}
+          NUXT_GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_SSO_CLIENT_SECRET }}
+        run: >-
+          scripts/deploy/push-remote-env.sh /opt/open4goods/config/beta/frontend/.env
+          NUXT_GOOGLE_OAUTH_CLIENT_ID NUXT_GOOGLE_OAUTH_CLIENT_SECRET
 
       - name: Publish frontend
         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
