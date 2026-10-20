@@ -11,6 +11,8 @@ jobs:
     name: Beta Test, Build, and Publish
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    # Google SSO values come from the `beta` GitHub Environment (ADR-0006, GOU-767).
+    environment: beta
     concurrency:
       group: deploy-beta
       cancel-in-progress: true
@@ -126,6 +128,18 @@ jobs:
       ############################################
       # 7c. Restarting Spring Applications
       ############################################
+      - name: Render front-api Google SSO env on Beta
+        # Sourced by publish-jars.sh for front-api, outside the tree open4goods-config's deploy rsyncs with --delete.
+        # The OS env var beats application-active.yml (Spring Boot property order).
+        env:
+          DEPLOY_SSH_HOST: ${{ secrets.REMOTE_BETA_HOST }}
+          DEPLOY_SSH_USER: ${{ secrets.REMOTE_BETA_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID: ${{ secrets.GOOGLE_SSO_CLIENT_ID }}
+        run: >-
+          scripts/deploy/push-remote-env.sh /etc/open4goods/front-api.env
+          FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID
+
       - name: Publish Applications
         uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:

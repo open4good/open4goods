@@ -33,8 +33,39 @@ re-evaluates `nuxt.config.ts` on every start), but these have no effect once
 the app is built: always use the `NUXT_*` names above for a deployed
 artifact.
 
-All values are posed by Goulven in `open4goods-config`; this document never
-lists real client ids, secrets, or fingerprints.
+Switches and redirect URIs stay in `open4goods-config`. On beta, the client id
+and secret come from the `beta` GitHub Environment (see
+[Beta source](#beta-source-github-environment)). This document never lists real
+client ids, secrets, or fingerprints.
+
+## Beta source: GitHub Environment
+
+Decision of 2026-10-20 (GOU-501, GOU-767, ADR-0006): on beta, the Google
+"Web" client comes from the `beta` GitHub Environment of
+`open4good/open4goods`, the single source of the client id:
+
+| Environment secret          | Rendered as                          | File on the beta host                          | Rendered by                                  |
+| --------------------------- | ------------------------------------ | ---------------------------------------------- | -------------------------------------------- |
+| `GOOGLE_SSO_CLIENT_ID`      | `NUXT_GOOGLE_OAUTH_CLIENT_ID`        | `/opt/open4goods/config/beta/frontend/.env`    | `frontend-ci.yml`, before `publish-frontend.sh` |
+| `GOOGLE_SSO_CLIENT_SECRET`  | `NUXT_GOOGLE_OAUTH_CLIENT_SECRET`    | `/opt/open4goods/config/beta/frontend/.env`    | `frontend-ci.yml`, before `publish-frontend.sh` |
+| `GOOGLE_SSO_CLIENT_ID`      | `FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID` | `/etc/open4goods/front-api.env`               | `testAndPublishBeta.yml`, before `publish-jars.sh` |
+
+`scripts/deploy/push-remote-env.sh` replaces only these keys in the target
+file: values travel through SSH stdin (never a command line, an artifact or a
+log), the file is rebuilt atomically with mode 600. These keys are no longer
+in `open4goods-config` `configs/beta/*`.
+
+- front-api: `publish-jars.sh` sources `/etc/open4goods/front-api.env`, which
+  sits outside the tree that `open4goods-config`'s deploy rsyncs with
+  `--delete`, so it survives config deploys and `publishJars.yml` restarts.
+  The OS environment variable also beats `application-active.yml`.
+- frontend: the compose file (owned by `open4goods-config`) only reads
+  `config/beta/frontend/.env`, which every config deploy rewrites without
+  these keys. Running containers keep their environment; recreating them
+  outside `frontend-ci.yml` (manual `publish-frontend.sh`) after a config
+  deploy starts them without the client. Redeploy through `frontend-ci.yml`.
+
+Production still reads `open4goods-config` until the iso-prod migration.
 
 ## Client id consistency
 
@@ -60,7 +91,8 @@ local flow keeps working unchanged.
 
 ## Where the secret lives
 
-`NUXT_GOOGLE_OAUTH_CLIENT_SECRET` is deployed through `open4goods-config`, posed by
+`NUXT_GOOGLE_OAUTH_CLIENT_SECRET` comes from the `beta` GitHub Environment on
+beta (`GOOGLE_SSO_CLIENT_SECRET`) and from `open4goods-config` elsewhere, posed by
 Goulven. It is never committed to this repository, never logged, and never
 present in any `public` runtime config key.
 
@@ -68,7 +100,7 @@ present in any `public` runtime config key.
 
 - Local dev: works with the "Web" client (code exchange includes
   `client_secret`).
-- beta.nudger.fr: the frontend/front-api code is ready; the actual deployment
-  depends on the beta environment rework (GOU-251), tracked separately.
+- beta.nudger.fr: client id and secret rendered from the `beta` GitHub
+  Environment at deploy time (GOU-767).
 - Production (nudger.fr): `google-sso.enabled` stays `false` until Goulven
   explicitly turns it on.
