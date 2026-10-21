@@ -103,6 +103,17 @@ jobs:
           fetch-depth: 0
           ref: ${{ steps.meta.outputs.checkout_ref }}
 
+      - name: 🔐 Check Google SSO render script
+        # Runs in MODE=test too: the render steps use the deployed ref's script, absent before GOU-767 (v1.0.61 included).
+        # Failing here keeps a release from stopping after the JAR upload, with the services not restarted.
+        env:
+          CHECKOUT_REF: ${{ steps.meta.outputs.checkout_ref }}
+        run: |
+          if [ ! -x scripts/deploy/push-remote-env.sh ]; then
+            echo "::error::scripts/deploy/push-remote-env.sh is missing from ${CHECKOUT_REF}: deploy a ref cut after GOU-767"
+            exit 1
+          fi
+
       ############################################
       # 🗂️ Prepare reports directories (target)
       ############################################

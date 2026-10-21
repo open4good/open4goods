@@ -87,6 +87,11 @@ either secret is empty or holds characters the script would reject, without
 any SSH access and without printing a value. A `mode=test` rehearsal therefore
 proves the `production` Environment is ready.
 
+The rendering steps run the script of the deployed ref. A step right after
+the checkout, also run in every mode, fails when that ref has no
+`scripts/deploy/push-remote-env.sh`: deploy a ref cut after GOU-767 (tags up
+to v1.0.61 do not contain it).
+
 The same caveats as beta apply: `/etc/open4goods/front-api.env` survives
 config deploys, while `config/prod/frontend/.env` is rewritten by every
 `open4goods-config` deploy, so recreate the frontend containers through
