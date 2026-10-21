@@ -26,8 +26,8 @@ jobs:
   release:
     if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
-    # Google SSO values come from the `production` GitHub Environment (ADR-0006, GOU-826).
-    environment: production
+    # Google SSO values come from the `prod` GitHub Environment (ADR-0006, GOU-826).
+    environment: prod
 
     env:
       MODE: ${{ inputs.mode || 'release' }}
@@ -38,10 +38,10 @@ jobs:
 
     steps:
       ############################################
-      # 🔐 Google SSO secrets (production Environment)
+      # 🔐 Google SSO secrets (prod Environment)
       ############################################
       - name: 🔐 Check Google SSO secrets
-        # Runs in MODE=test too, so a rehearsal proves the `production` Environment is ready.
+        # Runs in MODE=test too, so a rehearsal proves the `prod` Environment is ready.
         # No SSH access, no value printed; same character set as scripts/deploy/push-remote-env.sh.
         shell: bash
         env:
@@ -53,7 +53,7 @@ jobs:
           for key in GOOGLE_SSO_CLIENT_ID GOOGLE_SSO_CLIENT_SECRET; do
             value="${!key:-}"
             if [ -z "${value}" ]; then
-              echo "::error::${key} is empty or missing from the production GitHub Environment"
+              echo "::error::${key} is empty or missing from the prod GitHub Environment"
               failed=1
             elif [[ "${value}" =~ [^A-Za-z0-9._-] ]]; then
               echo "::error::${key} contains characters outside [A-Za-z0-9._-]"
@@ -61,7 +61,7 @@ jobs:
             fi
           done
           [ "${failed}" -eq 0 ]
-          echo "Google SSO secrets are set in the production GitHub Environment."
+          echo "Google SSO secrets are set in the prod GitHub Environment."
 
       ############################################
       # 🧭 Resolve ref & versioning

@@ -35,7 +35,7 @@ artifact.
 
 Switches and redirect URIs stay in `open4goods-config`. The client id and
 secret come from the `beta` GitHub Environment on beta (see
-[Beta source](#beta-source-github-environment)) and from the `production`
+[Beta source](#beta-source-github-environment)) and from the `prod`
 GitHub Environment in production (see
 [Production source](#production-source-github-environment)). This document
 never lists real client ids, secrets, or fingerprints.
@@ -70,9 +70,9 @@ in `open4goods-config` `configs/beta/*`.
 ## Production source: GitHub Environment
 
 Decision of 2026-10-21 (GOU-255, GOU-826, ADR-0006): in production, the same
-Google "Web" client as beta comes from the `production` GitHub Environment of
+Google "Web" client as beta comes from the `prod` GitHub Environment of
 `open4good/open4goods`. The `release` job of `releaseDeployProd.yml` declares
-`environment: production`:
+`environment: prod`:
 
 | Environment secret          | Rendered as                          | File on the prod host                          | Rendered by                                  |
 | --------------------------- | ------------------------------------ | ---------------------------------------------- | -------------------------------------------- |
@@ -85,7 +85,7 @@ as beta) and only run with `mode=release`. The first step of the job, "Check
 Google SSO secrets", runs in every mode, including `mode=test`: it fails when
 either secret is empty or holds characters the script would reject, without
 any SSH access and without printing a value. A `mode=test` rehearsal therefore
-proves the `production` Environment is ready.
+proves the `prod` Environment is ready.
 
 The rendering steps run the script of the deployed ref. A step right after
 the checkout, also run in every mode, fails when that ref has no
@@ -121,7 +121,7 @@ local flow keeps working unchanged.
 ## Where the secret lives
 
 `NUXT_GOOGLE_OAUTH_CLIENT_SECRET` comes from the `GOOGLE_SSO_CLIENT_SECRET`
-secret of the `beta` GitHub Environment on beta and of the `production` GitHub
+secret of the `beta` GitHub Environment on beta and of the `prod` GitHub
 Environment in production. It is never committed to this repository, never logged, and never
 present in any `public` runtime config key.
 
@@ -132,5 +132,5 @@ present in any `public` runtime config key.
 - beta.nudger.fr: client id and secret rendered from the `beta` GitHub
   Environment at deploy time (GOU-767).
 - Production (nudger.fr): client id and secret rendered by
-  `releaseDeployProd.yml` from the `production` GitHub Environment (GOU-826).
+  `releaseDeployProd.yml` from the `prod` GitHub Environment (GOU-826).
   The `google-sso.enabled` switches stay in `open4goods-config`.
