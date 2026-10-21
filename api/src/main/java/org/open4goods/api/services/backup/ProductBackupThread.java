@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -37,7 +38,7 @@ public class ProductBackupThread implements Callable<ProductBackupThread.Product
     private long writtenProducts;
 
     public ProductBackupThread(LinkedBlockingQueue<Product> queue, SerialisationService serialisationService, int fileNumber,
-            AtomicBoolean producerDone, AtomicReference<Throwable> failure) throws Exception {
+            AtomicBoolean producerDone, AtomicReference<Throwable> failure, Path tmpFolder) throws Exception {
         this.queue = queue;
         this.serialisationService = serialisationService;
         this.fileNumber = fileNumber;
@@ -47,8 +48,9 @@ public class ProductBackupThread implements Callable<ProductBackupThread.Product
         logger.info("Starting product backup thread {}", fileNumber);
         try {
 
-            // Create temporary file for backup
-            tmpFile = File.createTempFile("product-backup-" + fileNumber, ".gz");
+            // Temporary file lives on the destination filesystem (not java.io.tmpdir) so the final move is an atomic rename
+            Files.createDirectories(tmpFolder);
+            tmpFile = Files.createTempFile(tmpFolder, "product-backup-" + fileNumber + "-", ".gz").toFile();
             
             // Streams and writers
             FileOutputStream fos = new FileOutputStream(tmpFile);

@@ -156,6 +156,60 @@ class BackupServiceTest {
         assertThat(backupService.health().getDetails()).containsKey("product_export_exception");
     }
 
+    @Test
+    void backupUsesTmpSubfolderCleansLeftoversAndPublishesByRename() throws Exception {
+        Path tmpFolder = productBackupFolder.resolve(".tmp");
+        Files.createDirectories(tmpFolder);
+        Path leftover = tmpFolder.resolve("product-backup-9-leftover.gz");
+        Files.writeString(leftover, "stale");
+        when(productRepository.countMainIndex()).thenReturn(1L);
+        when(productRepository.exportAll(1000)).thenReturn(Stream.of(new Product()));
+        when(serialisationService.toJson(any(Product.class))).thenAnswer(inv -> {
+            try (Stream<Path> files = Files.list(tmpFolder)) {
+                assertThat(files.map(f -> f.getFileName().toString()))
+                        .allMatch(n -> n.startsWith("product-backup-") && n.endsWith(".gz"))
+                        .hasSize(2)
+                        .doesNotContain(leftover.getFileName().toString());
+            }
+            return "{\"id\":1}";
+        });
+
+        backupService.backupProducts();
+
+        assertThat(backupService.health().getDetails()).doesNotContainKey("product_export_exception");
+        assertThat(Files.exists(leftover)).isFalse();
+        try (Stream<Path> files = Files.list(tmpFolder)) {
+            assertThat(files).isEmpty();
+        }
+        assertThat(Files.exists(productBackupFolder.resolve("products-backup-0.gz"))).isTrue();
+        assertThat(Files.exists(productBackupFolder.resolve("products-backup-1.gz"))).isTrue();
+    }
+
+    @Test
+    void failedBackupRemovesTmpFiles() throws Exception {
+        when(productRepository.countMainIndex()).thenReturn(1L);
+        when(productRepository.exportAll(1000)).thenReturn(Stream.of(new Product()));
+        when(serialisationService.toJson(any(Product.class))).thenThrow(new IllegalStateException("json failed"));
+
+        backupService.backupProducts();
+
+        try (Stream<Path> files = Files.list(productBackupFolder.resolve(".tmp"))) {
+            assertThat(files).isEmpty();
+        }
+    }
+
+    @Test
+    void healthIgnoresTmpSubfolderAndItsFiles() throws IOException {
+        writeExistingBackup();
+        Path tmpFolder = Files.createDirectories(productBackupFolder.resolve(".tmp"));
+        writeGzip(tmpFolder.resolve("products-backup-7.gz"), "partial");
+
+        Health health = backupService.health();
+
+        assertThat(health.getStatus()).isEqualTo(Status.UP);
+        assertThat(health.getDetails()).doesNotContainKey("product_backup_file_count");
+    }
+
     private void writeExistingBackup() throws IOException {
         writeGzip(productBackupFolder.resolve("products-backup-0.gz"), "old-0");
         writeGzip(productBackupFolder.resolve("products-backup-1.gz"), "old-1");
