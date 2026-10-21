@@ -67,6 +67,8 @@ public class BackupService implements HealthIndicator {
 
 	private static final String PRODUCT_BACKUP_FILE_PREFIX = "products-backup-";
 	private static final String PRODUCT_BACKUP_FILE_SUFFIX = ".gz";
+	/** Sub-folder of the backup folder holding in-progress files. */
+	static final String PRODUCT_BACKUP_TMP_FOLDER = ".tmp";
 	private static final String PRODUCT_BACKUP_MANIFEST = "products-backup-manifest.json";
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -118,6 +120,7 @@ public class BackupService implements HealthIndicator {
 		}
 
 		List<ProductBackupFile> tempFiles = new ArrayList<>();
+		Path tmpFolder = null;
 		ExecutorService executorService = null;
 		AtomicBoolean producerDone = new AtomicBoolean(false);
 		AtomicReference<Throwable> workerFailure = new AtomicReference<>();
@@ -129,11 +132,12 @@ public class BackupService implements HealthIndicator {
 			expordedProductsCounter.set(0L);
 
 			File backupFolder = ensureProductBackupFolder();
+			tmpFolder = prepareProductBackupTmpFolder(backupFolder.toPath());
 			executorService = Executors.newFixedThreadPool(exportThreads);
 			List<Future<ProductBackupFile>> futures = new ArrayList<>();
 			for (int i = 0; i < exportThreads; i++) {
 				futures.add(executorService.submit(
-						new ProductBackupThread(blockingQueue, serialisationService, i, producerDone, workerFailure)));
+						new ProductBackupThread(blockingQueue, serialisationService, i, producerDone, workerFailure, tmpFolder)));
 			}
 
 			expectedBackupedProducts.set(productRepo.countMainIndex());
@@ -189,6 +193,9 @@ public class BackupService implements HealthIndicator {
 					executorService.shutdownNow();
 				}
 			}
+			if (tmpFolder != null) {
+				clearProductBackupTmpFolder(tmpFolder);
+			}
 			productExportRunning.set(false);
 		}
 
@@ -205,6 +212,30 @@ public class BackupService implements HealthIndicator {
 			throw new IOException("Failed to create parent directories: " + backupFolder.getAbsolutePath());
 		}
 		return backupFolder;
+	}
+
+	/**
+	 * Creates the temporary folder of the backup (same filesystem as the destination) and removes
+	 * the leftovers of an interrupted backup.
+	 */
+	private Path prepareProductBackupTmpFolder(Path backupFolder) throws IOException {
+		Path tmpFolder = backupFolder.resolve(PRODUCT_BACKUP_TMP_FOLDER);
+		Files.createDirectories(tmpFolder);
+		clearProductBackupTmpFolder(tmpFolder);
+		return tmpFolder;
+	}
+
+	/** Deletes the regular files left in the temporary folder (interrupted or failed backup). */
+	private void clearProductBackupTmpFolder(Path tmpFolder) {
+		try (Stream<Path> leftovers = Files.list(tmpFolder)) {
+			for (Path leftover : leftovers.toList()) {
+				if (Files.isRegularFile(leftover)) {
+					Files.deleteIfExists(leftover);
+				}
+			}
+		} catch (IOException e) {
+			logger.warn("Could not clean product backup temporary folder {}", tmpFolder, e);
+		}
 	}
 
 	private void queueProductForBackup(LinkedBlockingQueue<Product> blockingQueue, AtomicReference<Throwable> workerFailure,
@@ -317,7 +348,7 @@ public class BackupService implements HealthIndicator {
 	    AtomicLong counter = new AtomicLong(0);
 	    ExecutorService executorService = Executors.newFixedThreadPool(backupConfig.getProductImportThreads());
 
-	    for (File importFile : importFolder.listFiles()) {
+	    for (File importFile : importFolder.listFiles(File::isFile)) {
 	        executorService.submit(() -> {
 	            logger.info("Importing file started : {}", importFile.getAbsolutePath());
 	            try (InputStream inputStream = new FileInputStream(importFile);
@@ -595,7 +626,7 @@ public class BackupService implements HealthIndicator {
 
 	private File[] listProductBackupFiles(File productFolder) {
 		File[] files = productFolder.listFiles((dir, name) -> name.startsWith(PRODUCT_BACKUP_FILE_PREFIX)
-				&& name.endsWith(PRODUCT_BACKUP_FILE_SUFFIX));
+				&& name.endsWith(PRODUCT_BACKUP_FILE_SUFFIX) && new File(dir, name).isFile());
 		if (files == null) {
 			return new File[0];
 		}
