@@ -33,10 +33,12 @@ re-evaluates `nuxt.config.ts` on every start), but these have no effect once
 the app is built: always use the `NUXT_*` names above for a deployed
 artifact.
 
-Switches and redirect URIs stay in `open4goods-config`. On beta, the client id
-and secret come from the `beta` GitHub Environment (see
-[Beta source](#beta-source-github-environment)). This document never lists real
-client ids, secrets, or fingerprints.
+Switches and redirect URIs stay in `open4goods-config`. The client id and
+secret come from the `beta` GitHub Environment on beta (see
+[Beta source](#beta-source-github-environment)) and from the `production`
+GitHub Environment in production (see
+[Production source](#production-source-github-environment)). This document
+never lists real client ids, secrets, or fingerprints.
 
 ## Beta source: GitHub Environment
 
@@ -65,7 +67,35 @@ in `open4goods-config` `configs/beta/*`.
   outside `frontend-ci.yml` (manual `publish-frontend.sh`) after a config
   deploy starts them without the client. Redeploy through `frontend-ci.yml`.
 
-Production still reads `open4goods-config` until the iso-prod migration.
+## Production source: GitHub Environment
+
+Decision of 2026-10-21 (GOU-255, GOU-826, ADR-0006): in production, the same
+Google "Web" client as beta comes from the `production` GitHub Environment of
+`open4good/open4goods`. The `release` job of `releaseDeployProd.yml` declares
+`environment: production`:
+
+| Environment secret          | Rendered as                          | File on the prod host                          | Rendered by                                  |
+| --------------------------- | ------------------------------------ | ---------------------------------------------- | -------------------------------------------- |
+| `GOOGLE_SSO_CLIENT_ID`      | `NUXT_GOOGLE_OAUTH_CLIENT_ID`        | `/opt/open4goods/config/prod/frontend/.env`    | `releaseDeployProd.yml`, before `publish-frontend.sh` |
+| `GOOGLE_SSO_CLIENT_SECRET`  | `NUXT_GOOGLE_OAUTH_CLIENT_SECRET`    | `/opt/open4goods/config/prod/frontend/.env`    | `releaseDeployProd.yml`, before `publish-frontend.sh` |
+| `GOOGLE_SSO_CLIENT_ID`      | `FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID` | `/etc/open4goods/front-api.env`               | `releaseDeployProd.yml`, before `publish-jars.sh` |
+
+The rendering steps use `scripts/deploy/push-remote-env.sh` (same guarantees
+as beta) and only run with `mode=release`. The first step of the job, "Check
+Google SSO secrets", runs in every mode, including `mode=test`: it fails when
+either secret is empty or holds characters the script would reject, without
+any SSH access and without printing a value. A `mode=test` rehearsal therefore
+proves the `production` Environment is ready.
+
+The rendering steps run the script of the deployed ref. A step right after
+the checkout, also run in every mode, fails when that ref has no
+`scripts/deploy/push-remote-env.sh`: deploy a ref cut after GOU-767 (tags up
+to v1.0.61 do not contain it).
+
+The same caveats as beta apply: `/etc/open4goods/front-api.env` survives
+config deploys, while `config/prod/frontend/.env` is rewritten by every
+`open4goods-config` deploy, so recreate the frontend containers through
+`releaseDeployProd.yml` rather than a manual `publish-frontend.sh`.
 
 ## Client id consistency
 
@@ -83,17 +113,16 @@ Register all of the following on the Google Cloud Console (project
 - `http://localhost:3000/auth/google/callback` (local dev, default Nuxt port)
 - `http://127.0.0.1:4100/auth/google/callback` (agents' dev port range)
 - `https://beta.nudger.fr/auth/google/callback`
-- `https://nudger.fr/auth/google/callback` (kept registered but inactive: production stays
-  `google-sso.enabled: false` until Goulven's go-ahead)
+- `https://nudger.fr/auth/google/callback`
 
 A "Web" client also accepts `http://localhost` redirect URIs, so the existing
 local flow keeps working unchanged.
 
 ## Where the secret lives
 
-`NUXT_GOOGLE_OAUTH_CLIENT_SECRET` comes from the `beta` GitHub Environment on
-beta (`GOOGLE_SSO_CLIENT_SECRET`) and from `open4goods-config` elsewhere, posed by
-Goulven. It is never committed to this repository, never logged, and never
+`NUXT_GOOGLE_OAUTH_CLIENT_SECRET` comes from the `GOOGLE_SSO_CLIENT_SECRET`
+secret of the `beta` GitHub Environment on beta and of the `production` GitHub
+Environment in production. It is never committed to this repository, never logged, and never
 present in any `public` runtime config key.
 
 ## Rollout status
@@ -102,5 +131,6 @@ present in any `public` runtime config key.
   `client_secret`).
 - beta.nudger.fr: client id and secret rendered from the `beta` GitHub
   Environment at deploy time (GOU-767).
-- Production (nudger.fr): `google-sso.enabled` stays `false` until Goulven
-  explicitly turns it on.
+- Production (nudger.fr): client id and secret rendered by
+  `releaseDeployProd.yml` from the `production` GitHub Environment (GOU-826).
+  The `google-sso.enabled` switches stay in `open4goods-config`.
