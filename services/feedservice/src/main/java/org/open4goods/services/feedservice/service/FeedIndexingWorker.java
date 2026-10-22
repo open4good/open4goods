@@ -560,7 +560,7 @@ public class FeedIndexingWorker implements Runnable {
 	 * @return DataFragment object containing parsed data
 	 * @throws ValidationException if validation fails
 	 */
-	private DataFragment parseCsvLine(final DataSourceProperties config, final Map<String, String> item, final String datasourceConfigName, final Logger dedicatedLogger, String datasetUrl) throws ValidationException {
+	DataFragment parseCsvLine(final DataSourceProperties config, final Map<String, String> item, final String datasourceConfigName, final Logger dedicatedLogger, String datasetUrl) throws ValidationException {
 	    dedicatedLogger.debug("Parsing line : {}", item);
 	    
 	    DataFragment dataFragment = new DataFragment();
