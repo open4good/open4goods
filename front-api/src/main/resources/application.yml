@@ -43,6 +43,10 @@ front:
       client-id: ${FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID:}
       issuer: ${FRONT_SECURITY_GOOGLE_SSO_ISSUER:https://accounts.google.com}
       jwks-uri: ${FRONT_SECURITY_GOOGLE_SSO_JWKS_URI:https://www.googleapis.com/oauth2/v3/certs}
+      # E-mail keys MUST be quoted and bracketed, otherwise Spring Boot drops the '@'
+      # and the entry never matches (see docs/operations/google-sso-oauth-clients.md):
+      #   role-allowlist:
+      #     "[john.doe@example.com]": [ROLE_SITEEDITOR]
       role-allowlist: {}
   exposed-docs:
     base-url: ${FRONT_EXPOSED_DOCS_BASE_URL:http://localhost:8086}

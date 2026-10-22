@@ -708,7 +708,7 @@
     {
       "name": "front.security.google-sso.role-allowlist",
       "type": "java.util.Map<java.lang.String,java.util.List<java.lang.String>>",
-      "description": "Deny-by-default email to role list allowlist. Keys are lower-cased emails; values are granted authorities (e.g. ROLE_SITEEDITOR, XWIKIADMINGROUP). An email missing from this map is refused.",
+      "description": "Deny-by-default email to role list allowlist. Keys are emails, lower-cased on binding; in YAML each key must be quoted and bracketed (\"[john.doe@example.com]\") or Spring Boot drops the @ and the entry never matches. Values are granted authorities (e.g. ROLE_SITEEDITOR, XWIKIADMINGROUP). An email missing from this map is refused.",
       "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GoogleSsoProperties"
     }
   ]

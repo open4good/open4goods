@@ -12,9 +12,12 @@ import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.open4goods.nudgerfrontapi.config.properties.GoogleSsoProperties;
 import org.open4goods.nudgerfrontapi.service.exception.GoogleIdentityVerificationException;
 import org.open4goods.nudgerfrontapi.service.exception.GoogleSsoDisabledException;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -32,6 +35,7 @@ import com.sun.net.httpserver.HttpServer;
  * 4100-4109 loopback range reserved for dev/test servers on the shared build
  * host.
  */
+@ExtendWith(OutputCaptureExtension.class)
 class GoogleIdentityServiceTest {
 
     private static final Instant NOW = Instant.now();
@@ -147,7 +151,55 @@ class GoogleIdentityServiceTest {
 
         assertThatThrownBy(() -> service.verify(token, "n"))
                 .isInstanceOf(GoogleIdentityVerificationException.class)
-                .hasMessageContaining("allowlist");
+                .hasMessageContaining("allowlist")
+                .hasMessageContaining("s***@example.com")
+                .hasMessageNotContaining("stranger@example.com");
+    }
+
+    @Test
+    void resolvesAllowlistedEmailRegardlessOfKeyCase() throws Exception {
+        properties.setRoleAllowlist(Map.of("Owner@Example.com", List.of("ROLE_SITEEDITOR")));
+        String token = signedToken(ALLOWED_EMAIL, true, "n", NOW.plusSeconds(300), CLIENT_ID, ISSUER);
+
+        assertThat(service.verify(token, "n").roles()).containsExactly("ROLE_SITEEDITOR");
+    }
+
+    @Test
+    void startupCheckLogsErrorForKeyWithoutAtSign(CapturedOutput output) {
+        properties.setRoleAllowlist(Map.of("john.doeexample.com", List.of("ROLE_SITEEDITOR")));
+
+        service.checkAllowlistConfiguration();
+
+        assertThat(output).contains("ERROR")
+                .contains("1 key(s) that are not e-mail addresses ([j***])")
+                .contains("\"[adresse@domaine]\"")
+                .doesNotContain("john.doeexample.com");
+    }
+
+    @Test
+    void startupCheckIsSilentForValidAllowlist(CapturedOutput output) {
+        service.checkAllowlistConfiguration();
+
+        assertThat(output).doesNotContain("role allowlist");
+    }
+
+    @Test
+    void startupCheckIsSilentWhenDisabled(CapturedOutput output) {
+        properties.setEnabled(false);
+        properties.setRoleAllowlist(Map.of("john.doeexample.com", List.of("ROLE_SITEEDITOR")));
+
+        service.checkAllowlistConfiguration();
+
+        assertThat(output).doesNotContain("role allowlist");
+    }
+
+    @Test
+    void startupCheckWarnsOnEmptyAllowlist(CapturedOutput output) {
+        properties.setRoleAllowlist(Map.of());
+
+        service.checkAllowlistConfiguration();
+
+        assertThat(output).contains("WARN").contains("role-allowlist is empty");
     }
 
     private static HttpServer startOnFirstAvailablePort(RSAKey key) throws Exception {
