@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -70,6 +71,8 @@ public class BackupService implements HealthIndicator {
 	/** Sub-folder of the backup folder holding in-progress files. */
 	static final String PRODUCT_BACKUP_TMP_FOLDER = ".tmp";
 	private static final String PRODUCT_BACKUP_MANIFEST = "products-backup-manifest.json";
+	/** sha256sum-format checksum file, written last: its presence marks a complete generation. */
+	static final String PRODUCT_BACKUP_CHECKSUMS = "products-backup.sha256";
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
 
@@ -257,17 +260,37 @@ public class BackupService implements HealthIndicator {
 	private void publishProductBackupFiles(Path backupFolder, List<ProductBackupFile> tempFiles, long expectedProducts,
 			long exportedProducts, int pageSize) throws IOException {
 		List<String> fileNames = new ArrayList<>();
+		Map<String, String> checksums = new LinkedHashMap<>();
+		// The previous checksum file no longer describes the folder once files start being replaced
+		Files.deleteIfExists(backupFolder.resolve(PRODUCT_BACKUP_CHECKSUMS));
 		for (ProductBackupFile tempFile : tempFiles) {
 			Path destination = backupFolder
 					.resolve(PRODUCT_BACKUP_FILE_PREFIX + tempFile.fileNumber() + PRODUCT_BACKUP_FILE_SUFFIX);
 			Files.move(tempFile.path(), destination, StandardCopyOption.REPLACE_EXISTING);
 			fileNames.add(destination.getFileName().toString());
+			checksums.put(destination.getFileName().toString(), tempFile.sha256());
 		}
 
 		ProductBackupManifest manifest = new ProductBackupManifest(Instant.now().toString(),
-				System.currentTimeMillis(), expectedProducts, exportedProducts, pageSize, fileNames);
+				System.currentTimeMillis(), expectedProducts, exportedProducts, pageSize, fileNames, checksums);
 		OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(backupFolder.resolve(PRODUCT_BACKUP_MANIFEST).toFile(),
 				manifest);
+		writeChecksumFile(backupFolder, checksums);
+	}
+
+	/**
+	 * Writes the sha256sum-compatible checksum file atomically (temporary file in the same folder, then atomic move).
+	 */
+	private void writeChecksumFile(Path backupFolder, Map<String, String> checksums) throws IOException {
+		StringBuilder content = new StringBuilder();
+		checksums.forEach((name, hash) -> content.append(hash).append("  ").append(name).append('\n'));
+		Path tmp = Files.createTempFile(backupFolder, PRODUCT_BACKUP_CHECKSUMS, ".tmp");
+		try {
+			Files.writeString(tmp, content.toString(), StandardCharsets.UTF_8);
+			Files.move(tmp, backupFolder.resolve(PRODUCT_BACKUP_CHECKSUMS), StandardCopyOption.ATOMIC_MOVE);
+		} finally {
+			Files.deleteIfExists(tmp);
+		}
 	}
 
 	private void cleanupTempFiles(List<ProductBackupFile> tempFiles) {
@@ -667,6 +690,12 @@ public class BackupService implements HealthIndicator {
 					actualFiles + " <> " + Objects.toString(manifest.files(), List.of().toString()));
 		}
 
+		if (manifest.sha256() != null && !manifest.sha256().isEmpty()
+				&& !Files.exists(productFolder.toPath().resolve(PRODUCT_BACKUP_CHECKSUMS))) {
+			errorMessages.put("product_backup_checksum_missing",
+					productFolder.toPath().resolve(PRODUCT_BACKUP_CHECKSUMS).toString());
+		}
+
 		if (manifest.files() != null) {
 			for (String file : manifest.files()) {
 				Path filePath = productFolder.toPath().resolve(file);
@@ -686,9 +715,10 @@ public class BackupService implements HealthIndicator {
 	 * @param exportedCount successfully serialized product count
 	 * @param pageSize Elasticsearch export page size
 	 * @param files final backup files published by the export
+	 * @param sha256 file name to lowercase hex SHA-256 of the file; optional, absent in older manifests
 	 */
 	public record ProductBackupManifest(String completedAt, long completedEpochMillis, long expectedCount,
-			long exportedCount, int pageSize, List<String> files) {
+			long exportedCount, int pageSize, List<String> files, Map<String, String> sha256) {
 	}
 
 }
