@@ -6,9 +6,7 @@ import static org.open4goods.api.services.metriks.affiliation.AffiliationTestSup
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
-import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,12 +31,7 @@ class AffiliationSecretLeakTest {
 
     private static final String AWIN_TOKEN = "AWINSECRET0123456789";
     private static final String EFFILIATION_KEY = "EFFISECRET0123456789";
-    private static final String RAKUTEN_ID = "RKIDSECRET0123456789";
-    private static final String RAKUTEN_SECRET = "RKSECRETVALUE0123456789";
-    private static final String RAKUTEN_TOKEN_KEY = Base64.getEncoder()
-            .encodeToString((RAKUTEN_ID + ":" + RAKUTEN_SECRET).getBytes(StandardCharsets.UTF_8));
-    private static final List<String> SECRETS = List.of(AWIN_TOKEN, EFFILIATION_KEY, RAKUTEN_ID, RAKUTEN_SECRET,
-            RAKUTEN_TOKEN_KEY);
+    private static final List<String> SECRETS = List.of(AWIN_TOKEN, EFFILIATION_KEY);
     private static final String EFFILIATION_URL =
             "https://api.effinity.fr/apiv3/" + EFFILIATION_KEY + "/publisher/conversions?start=2026-10-01";
 
@@ -93,10 +86,7 @@ class AffiliationSecretLeakTest {
                 new AwinReportClient("100000", AWIN_TOKEN, new FakeHttp(request -> response(401,
                         "{\"error\":\"invalid token " + AWIN_TOKEN + "\"}")).client),
                 new EffiliationReportClient(EFFILIATION_KEY, new FakeHttp(request -> response(500,
-                        "Fatal error while processing " + EFFILIATION_URL)).client),
-                new RakutenReportClient(RAKUTEN_ID, RAKUTEN_SECRET, "1234567", new FakeHttp(request -> response(400,
-                        "{\"error\":\"invalid_client\",\"client_id\":\"" + RAKUTEN_ID + "\",\"key\":\"" + RAKUTEN_TOKEN_KEY
-                                + "\"}")).client));
+                        "Fatal error while processing " + EFFILIATION_URL)).client));
 
         assertNoSecret(events);
         assertThat(events.get(0).getErrorMessage()).isEqualTo("Awin : HTTP 401 (transactions)");
@@ -120,8 +110,8 @@ class AffiliationSecretLeakTest {
         List<MetriksEvent> events = collect(
                 new EffiliationReportClient(EFFILIATION_KEY, new FakeHttp(request -> response(200,
                         "<html>" + EFFILIATION_URL + "</html>")).client),
-                new RakutenReportClient(RAKUTEN_ID, RAKUTEN_SECRET, "1234567", new FakeHttp(request -> response(200,
-                        "{\"token\":\"" + RAKUTEN_SECRET + "\"}")).client));
+                new AwinReportClient("100000", AWIN_TOKEN, new FakeHttp(request -> response(200,
+                        "<html>" + AWIN_TOKEN + "</html>")).client));
 
         assertNoSecret(events);
     }

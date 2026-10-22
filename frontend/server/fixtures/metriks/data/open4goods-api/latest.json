@@ -376,10 +376,10 @@
         "id": "affiliation.effiliation.commission.validated.7d",
         "name": "Affiliation effiliation : Commissions validées (7d)",
         "description": "Commissions validées effiliation sur 7d",
-        "value": 265.0,
+        "value": null,
         "unit": "currency",
-        "status": "ok",
-        "errorMessage": null,
+        "status": "error",
+        "errorMessage": "Credential manquant : metriks.affiliation.effiliation.api-key",
         "url": null,
         "params": {
           "provider": "open4goods-api",
@@ -402,10 +402,10 @@
         "id": "affiliation.effiliation.commission.pending.7d",
         "name": "Affiliation effiliation : Commissions en attente (7d)",
         "description": "Commissions en attente effiliation sur 7d",
-        "value": 40.0,
+        "value": null,
         "unit": "currency",
-        "status": "ok",
-        "errorMessage": null,
+        "status": "error",
+        "errorMessage": "Credential manquant : metriks.affiliation.effiliation.api-key",
         "url": null,
         "params": {
           "provider": "open4goods-api",
@@ -428,10 +428,10 @@
         "id": "affiliation.effiliation.sales.7d",
         "name": "Affiliation effiliation : Ventes (7d)",
         "description": "Ventes effiliation sur 7d",
-        "value": 19,
+        "value": null,
         "unit": "count",
-        "status": "ok",
-        "errorMessage": null,
+        "status": "error",
+        "errorMessage": "Credential manquant : metriks.affiliation.effiliation.api-key",
         "url": null,
         "params": {
           "provider": "open4goods-api",
@@ -451,91 +451,13 @@
       },
       {
         "schemaVersion": "2.0",
-        "id": "affiliation.rakuten.commission.validated.7d",
-        "name": "Affiliation rakuten : Commissions validées (7d)",
-        "description": "Commissions validées rakuten sur 7d",
-        "value": null,
-        "unit": "currency",
-        "status": "error",
-        "errorMessage": "Credential manquant : metriks.affiliation.rakuten.client-id",
-        "url": null,
-        "params": {
-          "provider": "open4goods-api",
-          "network": "rakuten",
-          "currency": "EUR",
-          "windowStartDate": "2026-10-05",
-          "windowEndDate": "2026-10-11"
-        },
-        "groups": [
-          "business",
-          "affiliation"
-        ],
-        "tags": [
-          "affiliation",
-          "rakuten"
-        ]
-      },
-      {
-        "schemaVersion": "2.0",
-        "id": "affiliation.rakuten.commission.pending.7d",
-        "name": "Affiliation rakuten : Commissions en attente (7d)",
-        "description": "Commissions en attente rakuten sur 7d",
-        "value": null,
-        "unit": "currency",
-        "status": "error",
-        "errorMessage": "Credential manquant : metriks.affiliation.rakuten.client-id",
-        "url": null,
-        "params": {
-          "provider": "open4goods-api",
-          "network": "rakuten",
-          "currency": "EUR",
-          "windowStartDate": "2026-10-05",
-          "windowEndDate": "2026-10-11"
-        },
-        "groups": [
-          "business",
-          "affiliation"
-        ],
-        "tags": [
-          "affiliation",
-          "rakuten"
-        ]
-      },
-      {
-        "schemaVersion": "2.0",
-        "id": "affiliation.rakuten.sales.7d",
-        "name": "Affiliation rakuten : Ventes (7d)",
-        "description": "Ventes rakuten sur 7d",
-        "value": null,
-        "unit": "count",
-        "status": "error",
-        "errorMessage": "Credential manquant : metriks.affiliation.rakuten.client-id",
-        "url": null,
-        "params": {
-          "provider": "open4goods-api",
-          "network": "rakuten",
-          "currency": "EUR",
-          "windowStartDate": "2026-10-05",
-          "windowEndDate": "2026-10-11"
-        },
-        "groups": [
-          "business",
-          "affiliation"
-        ],
-        "tags": [
-          "affiliation",
-          "rakuten"
-        ]
-      },
-      {
-        "schemaVersion": "2.0",
         "id": "affiliation.total.commission.validated.7d",
         "name": "Affiliation total : Commissions validées (7d)",
         "description": "Commissions validées, somme des réseaux sur 7d",
         "value": null,
         "unit": "currency",
         "status": "error",
-        "errorMessage": "Réseau(x) en erreur : rakuten",
+        "errorMessage": "Réseau(x) en erreur : effiliation",
         "url": null,
         "params": {
           "provider": "open4goods-api",
@@ -560,7 +482,7 @@
         "value": null,
         "unit": "currency",
         "status": "error",
-        "errorMessage": "Réseau(x) en erreur : rakuten",
+        "errorMessage": "Réseau(x) en erreur : effiliation",
         "url": null,
         "params": {
           "provider": "open4goods-api",
@@ -585,7 +507,7 @@
         "value": null,
         "unit": "count",
         "status": "error",
-        "errorMessage": "Réseau(x) en erreur : rakuten",
+        "errorMessage": "Réseau(x) en erreur : effiliation",
         "url": null,
         "params": {
           "provider": "open4goods-api",
@@ -685,10 +607,10 @@
         "id": "affiliation.effiliation.commission.validated.28d",
         "name": "Affiliation effiliation : Commissions validées (28d)",
         "description": "Commissions validées effiliation sur 28d",
-        "value": 1060.0,
+        "value": null,
         "unit": "currency",
-        "status": "ok",
-        "errorMessage": null,
+        "status": "error",
+        "errorMessage": "Credential manquant : metriks.affiliation.effiliation.api-key",
         "url": null,
         "params": {
           "provider": "open4goods-api",
@@ -711,10 +633,10 @@
         "id": "affiliation.effiliation.commission.pending.28d",
         "name": "Affiliation effiliation : Commissions en attente (28d)",
         "description": "Commissions en attente effiliation sur 28d",
-        "value": 160.0,
+        "value": null,
         "unit": "currency",
-        "status": "ok",
-        "errorMessage": null,
+        "status": "error",
+        "errorMessage": "Credential manquant : metriks.affiliation.effiliation.api-key",
         "url": null,
         "params": {
           "provider": "open4goods-api",
@@ -737,10 +659,10 @@
         "id": "affiliation.effiliation.sales.28d",
         "name": "Affiliation effiliation : Ventes (28d)",
         "description": "Ventes effiliation sur 28d",
-        "value": 76,
+        "value": null,
         "unit": "count",
-        "status": "ok",
-        "errorMessage": null,
+        "status": "error",
+        "errorMessage": "Credential manquant : metriks.affiliation.effiliation.api-key",
         "url": null,
         "params": {
           "provider": "open4goods-api",
@@ -760,91 +682,13 @@
       },
       {
         "schemaVersion": "2.0",
-        "id": "affiliation.rakuten.commission.validated.28d",
-        "name": "Affiliation rakuten : Commissions validées (28d)",
-        "description": "Commissions validées rakuten sur 28d",
-        "value": null,
-        "unit": "currency",
-        "status": "error",
-        "errorMessage": "Credential manquant : metriks.affiliation.rakuten.client-id",
-        "url": null,
-        "params": {
-          "provider": "open4goods-api",
-          "network": "rakuten",
-          "currency": "EUR",
-          "windowStartDate": "2026-09-18",
-          "windowEndDate": "2026-10-11"
-        },
-        "groups": [
-          "business",
-          "affiliation"
-        ],
-        "tags": [
-          "affiliation",
-          "rakuten"
-        ]
-      },
-      {
-        "schemaVersion": "2.0",
-        "id": "affiliation.rakuten.commission.pending.28d",
-        "name": "Affiliation rakuten : Commissions en attente (28d)",
-        "description": "Commissions en attente rakuten sur 28d",
-        "value": null,
-        "unit": "currency",
-        "status": "error",
-        "errorMessage": "Credential manquant : metriks.affiliation.rakuten.client-id",
-        "url": null,
-        "params": {
-          "provider": "open4goods-api",
-          "network": "rakuten",
-          "currency": "EUR",
-          "windowStartDate": "2026-09-18",
-          "windowEndDate": "2026-10-11"
-        },
-        "groups": [
-          "business",
-          "affiliation"
-        ],
-        "tags": [
-          "affiliation",
-          "rakuten"
-        ]
-      },
-      {
-        "schemaVersion": "2.0",
-        "id": "affiliation.rakuten.sales.28d",
-        "name": "Affiliation rakuten : Ventes (28d)",
-        "description": "Ventes rakuten sur 28d",
-        "value": null,
-        "unit": "count",
-        "status": "error",
-        "errorMessage": "Credential manquant : metriks.affiliation.rakuten.client-id",
-        "url": null,
-        "params": {
-          "provider": "open4goods-api",
-          "network": "rakuten",
-          "currency": "EUR",
-          "windowStartDate": "2026-09-18",
-          "windowEndDate": "2026-10-11"
-        },
-        "groups": [
-          "business",
-          "affiliation"
-        ],
-        "tags": [
-          "affiliation",
-          "rakuten"
-        ]
-      },
-      {
-        "schemaVersion": "2.0",
         "id": "affiliation.total.commission.validated.28d",
         "name": "Affiliation total : Commissions validées (28d)",
         "description": "Commissions validées, somme des réseaux sur 28d",
         "value": null,
         "unit": "currency",
         "status": "error",
-        "errorMessage": "Réseau(x) en erreur : rakuten",
+        "errorMessage": "Réseau(x) en erreur : effiliation",
         "url": null,
         "params": {
           "provider": "open4goods-api",
@@ -869,7 +713,7 @@
         "value": null,
         "unit": "currency",
         "status": "error",
-        "errorMessage": "Réseau(x) en erreur : rakuten",
+        "errorMessage": "Réseau(x) en erreur : effiliation",
         "url": null,
         "params": {
           "provider": "open4goods-api",
@@ -894,7 +738,7 @@
         "value": null,
         "unit": "count",
         "status": "error",
-        "errorMessage": "Réseau(x) en erreur : rakuten",
+        "errorMessage": "Réseau(x) en erreur : effiliation",
         "url": null,
         "params": {
           "provider": "open4goods-api",

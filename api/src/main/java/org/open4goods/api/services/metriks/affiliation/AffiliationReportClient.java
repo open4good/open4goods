@@ -15,8 +15,7 @@ import java.util.List;
 public interface AffiliationReportClient {
 
     /**
-     * @return network key used in the Metriks event ids and properties ({@code awin}, {@code effiliation},
-     *         {@code rakuten})
+     * @return network key used in the Metriks event ids and properties ({@code awin}, {@code effiliation})
      */
     String network();
 

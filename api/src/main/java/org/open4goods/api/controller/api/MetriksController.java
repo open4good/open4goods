@@ -154,8 +154,8 @@ public class MetriksController {
 
     @GetMapping("/affiliation")
     @Operation(
-            summary = "Get affiliation revenue metrics (Awin, Effiliation, Rakuten)",
-            description = "Returns, for each affiliation network (awin, effiliation, rakuten) and for their total, "
+            summary = "Get affiliation revenue metrics (Awin, Effiliation)",
+            description = "Returns, for each affiliation network (awin, effiliation) and for their total, "
                     + "the validated commissions, the pending commissions (EUR) and the sales count (validated + "
                     + "pending, declined excluded) over the last 7 days [D-7, D-1] and 28 days [D-28, D-1], "
                     + "Europe/Paris, by transaction date, as Metriks schema-2.0 events. A network without credentials "

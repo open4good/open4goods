@@ -33,13 +33,6 @@ class AffiliationMetriksServiceTest {
                 new FakeHttp(request -> response(200, fixture("effiliation-transactions.json"))).client);
     }
 
-    private static RakutenReportClient rakuten() {
-        return new RakutenReportClient("rk-client-id", "rk-client-secret", "1234567", new FakeHttp(
-                request -> request.uri().getPath().equals("/token")
-                        ? response(200, "{\"access_token\":\"rk-access-value\"}")
-                        : response(200, fixture("rakuten-events.json"))).client);
-    }
-
     private static Map<String, MetriksEvent> collect(AffiliationReportClient... clients) {
         List<MetriksEvent> events = new AffiliationMetriksService(List.of(clients), CLOCK).collectEvents();
         return events.stream().collect(Collectors.toMap(MetriksEvent::getId, Function.identity(),
@@ -67,10 +60,19 @@ class AffiliationMetriksServiceTest {
     }
 
     @Test
-    void nominal_emits24EventsWithTheFiguresOfEachNetworkAndTheirTotals() {
-        Map<String, MetriksEvent> events = collect(rakuten(), awin(), effiliation());
+    void nominal_emits18EventsWithTheFiguresOfEachNetworkAndTheirTotals() {
+        Map<String, MetriksEvent> events = collect(effiliation(), awin());
 
-        assertThat(events).hasSize(24);
+        assertThat(events).hasSize(18);
+        List<String> expectedIds = new java.util.ArrayList<>();
+        for (String network : List.of("awin", "effiliation", "total")) {
+            for (String window : List.of("7d", "28d")) {
+                for (String metric : List.of("commission.validated", "commission.pending", "sales")) {
+                    expectedIds.add("affiliation." + network + "." + metric + "." + window);
+                }
+            }
+        }
+        assertThat(events.keySet()).containsExactlyElementsOf(expectedIds);
         assertThat(events.keySet()).startsWith("affiliation.awin.commission.validated.7d",
                 "affiliation.awin.commission.pending.7d", "affiliation.awin.sales.7d",
                 "affiliation.awin.commission.validated.28d");
@@ -91,24 +93,17 @@ class AffiliationMetriksServiceTest {
         assertOk(events, "affiliation.effiliation.commission.pending.28d", "4.00");
         assertOk(events, "affiliation.effiliation.sales.28d", 4L);
 
-        assertOk(events, "affiliation.rakuten.commission.validated.7d", "1.00");
-        assertOk(events, "affiliation.rakuten.commission.pending.7d", "0.80");
-        assertOk(events, "affiliation.rakuten.sales.7d", 2L);
-        assertOk(events, "affiliation.rakuten.commission.validated.28d", "4.30");
-        assertOk(events, "affiliation.rakuten.commission.pending.28d", "1.30");
-        assertOk(events, "affiliation.rakuten.sales.28d", 4L);
-
-        assertOk(events, "affiliation.total.commission.validated.7d", "11.50");
-        assertOk(events, "affiliation.total.commission.pending.7d", "4.30");
-        assertOk(events, "affiliation.total.sales.7d", 6L);
-        assertOk(events, "affiliation.total.commission.validated.28d", "24.20");
-        assertOk(events, "affiliation.total.commission.pending.28d", "10.40");
-        assertOk(events, "affiliation.total.sales.28d", 12L);
+        assertOk(events, "affiliation.total.commission.validated.7d", "10.50");
+        assertOk(events, "affiliation.total.commission.pending.7d", "3.50");
+        assertOk(events, "affiliation.total.sales.7d", 4L);
+        assertOk(events, "affiliation.total.commission.validated.28d", "19.90");
+        assertOk(events, "affiliation.total.commission.pending.28d", "9.10");
+        assertOk(events, "affiliation.total.sales.28d", 8L);
     }
 
     @Test
     void nominal_eventsCarryTheContractMetadata() {
-        Map<String, MetriksEvent> events = collect(awin(), effiliation(), rakuten());
+        Map<String, MetriksEvent> events = collect(awin(), effiliation());
 
         MetriksEvent sevenDays = events.get("affiliation.awin.commission.validated.7d");
         assertThat(sevenDays.getUnit()).isEqualTo("currency");
@@ -131,42 +126,61 @@ class AffiliationMetriksServiceTest {
     @Test
     void missingCredential_putsTheNetworkAndTheTotalsInErrorNeverZero() {
         FakeHttp unused = new FakeHttp(request -> response(200, "[]"));
-        Map<String, MetriksEvent> events = collect(
-                new AwinReportClient("100000", "", unused.client), effiliation(),
-                new RakutenReportClient("", "", "", unused.client));
+        Map<String, MetriksEvent> events = collect(awin(), new EffiliationReportClient("", unused.client));
 
+        assertThat(events).hasSize(18);
         for (String metric : List.of("commission.validated", "commission.pending", "sales")) {
             for (String window : List.of("7d", "28d")) {
-                assertError(events, "affiliation.awin." + metric + "." + window,
-                        "Credential manquant : metriks.affiliation.awin.api-token");
-                assertError(events, "affiliation.rakuten." + metric + "." + window,
-                        "Credential manquant : metriks.affiliation.rakuten.client-id, "
-                                + "metriks.affiliation.rakuten.client-secret, metriks.affiliation.rakuten.sid");
-                assertThat(events.get("affiliation.effiliation." + metric + "." + window).getStatus()).isEqualTo("ok");
+                assertError(events, "affiliation.effiliation." + metric + "." + window,
+                        "Credential manquant : metriks.affiliation.effiliation.api-key");
+                assertThat(events.get("affiliation.awin." + metric + "." + window).getStatus()).isEqualTo("ok");
                 assertError(events, "affiliation.total." + metric + "." + window,
-                        "Total indisponible : réseau(x) en erreur : awin, rakuten");
+                        "Total indisponible : réseau(x) en erreur : effiliation");
             }
         }
         assertThat(unused.requests).isEmpty();
     }
 
     @Test
+    void missingCredentialOnBothNetworks_listsThemInTheTotalError() {
+        FakeHttp unused = new FakeHttp(request -> response(200, "[]"));
+        Map<String, MetriksEvent> events = collect(new AwinReportClient("100000", "", unused.client),
+                new EffiliationReportClient("", unused.client));
+
+        assertError(events, "affiliation.awin.sales.7d", "Credential manquant : metriks.affiliation.awin.api-token");
+        assertError(events, "affiliation.effiliation.sales.7d",
+                "Credential manquant : metriks.affiliation.effiliation.api-key");
+        assertError(events, "affiliation.total.commission.validated.28d",
+                "Total indisponible : réseau(x) en erreur : awin, effiliation");
+        assertThat(unused.requests).isEmpty();
+    }
+
+    @Test
     void failingNetwork_onlyPutsItsOwnEventsInError() {
-        RakutenReportClient timingOut = new RakutenReportClient("id", "secret", "1234567",
-                new FakeHttp(request -> {
-                    throw new HttpTimeoutException("request timed out");
-                }).client);
         EffiliationReportClient serverError = new EffiliationReportClient("effi-key-value",
                 new FakeHttp(request -> response(503, "Service Unavailable")).client);
 
-        Map<String, MetriksEvent> events = collect(awin(), serverError, timingOut);
+        Map<String, MetriksEvent> events = collect(awin(), serverError);
 
         assertOk(events, "affiliation.awin.commission.validated.28d", "5.75");
         assertOk(events, "affiliation.awin.sales.7d", 2L);
         assertError(events, "affiliation.effiliation.sales.28d", "Effiliation : HTTP 503 (conversions)");
-        assertError(events, "affiliation.rakuten.commission.pending.7d", "Rakuten : délai dépassé (jeton OAuth)");
         assertError(events, "affiliation.total.commission.validated.7d",
-                "Total indisponible : réseau(x) en erreur : effiliation, rakuten");
+                "Total indisponible : réseau(x) en erreur : effiliation");
+    }
+
+    @Test
+    void timingOutNetwork_isInErrorAndKeepsTheOtherOne() {
+        AwinReportClient timingOut = new AwinReportClient("100000", "awin-token-value",
+                new FakeHttp(request -> {
+                    throw new HttpTimeoutException("request timed out");
+                }).client);
+
+        Map<String, MetriksEvent> events = collect(timingOut, effiliation());
+
+        assertError(events, "affiliation.awin.commission.pending.7d", "Awin : délai dépassé (transactions)");
+        assertOk(events, "affiliation.effiliation.sales.28d", 4L);
+        assertError(events, "affiliation.total.sales.7d", "Total indisponible : réseau(x) en erreur : awin");
     }
 
     @Test
@@ -188,7 +202,7 @@ class AffiliationMetriksServiceTest {
         AwinReportClient dollars = new AwinReportClient("100000", "awin-token-value",
                 new FakeHttp(request -> response(200, usd)).client);
 
-        Map<String, MetriksEvent> events = collect(dollars, effiliation(), rakuten());
+        Map<String, MetriksEvent> events = collect(dollars, effiliation());
 
         assertError(events, "affiliation.awin.commission.validated.28d",
                 "Awin : devise USD non prise en charge (EUR attendu, aucune conversion)");

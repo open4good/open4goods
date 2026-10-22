@@ -123,9 +123,6 @@ jobs:
           API_METRIKS_AWIN_PUBLISHER_ID: ${{ secrets.API_METRIKS_AWIN_PUBLISHER_ID }}
           API_METRIKS_AWIN_API_TOKEN: ${{ secrets.API_METRIKS_AWIN_API_TOKEN }}
           API_METRIKS_EFFILIATION_API_KEY: ${{ secrets.API_METRIKS_EFFILIATION_API_KEY }}
-          API_METRIKS_RAKUTEN_CLIENT_ID: ${{ secrets.API_METRIKS_RAKUTEN_CLIENT_ID }}
-          API_METRIKS_RAKUTEN_CLIENT_SECRET: ${{ secrets.API_METRIKS_RAKUTEN_CLIENT_SECRET }}
-          API_METRIKS_RAKUTEN_SID: ${{ secrets.API_METRIKS_RAKUTEN_SID }}
         run: |
           if [ ! -x scripts/deploy/render-service-secrets.sh ]; then
             echo "::warning::scripts/deploy/render-service-secrets.sh is missing from ${CHECKOUT_REF}: api secrets are not rendered"
@@ -503,9 +500,6 @@ jobs:
           API_METRIKS_AWIN_PUBLISHER_ID: ${{ secrets.API_METRIKS_AWIN_PUBLISHER_ID }}
           API_METRIKS_AWIN_API_TOKEN: ${{ secrets.API_METRIKS_AWIN_API_TOKEN }}
           API_METRIKS_EFFILIATION_API_KEY: ${{ secrets.API_METRIKS_EFFILIATION_API_KEY }}
-          API_METRIKS_RAKUTEN_CLIENT_ID: ${{ secrets.API_METRIKS_RAKUTEN_CLIENT_ID }}
-          API_METRIKS_RAKUTEN_CLIENT_SECRET: ${{ secrets.API_METRIKS_RAKUTEN_CLIENT_SECRET }}
-          API_METRIKS_RAKUTEN_SID: ${{ secrets.API_METRIKS_RAKUTEN_SID }}
         run: |
           if [ ! -x scripts/deploy/render-service-secrets.sh ]; then
             echo "::warning::scripts/deploy/render-service-secrets.sh is missing from ${CHECKOUT_REF}: api secrets are not rendered"

@@ -144,24 +144,6 @@
       "type": "java.lang.String",
       "description": "Effiliation publisher API key read by the Metriks affiliation report (sent in the query string, never logged). Secret. Production: METRIKS_AFFILIATION_EFFILIATION_API_KEY in /etc/open4goods/api.env.",
       "defaultValue": ""
-    },
-    {
-      "name": "metriks.affiliation.rakuten.client-id",
-      "type": "java.lang.String",
-      "description": "Rakuten Advertising Developer Portal client id read by the Metriks affiliation report. Secret. Production: METRIKS_AFFILIATION_RAKUTEN_CLIENT_ID in /etc/open4goods/api.env.",
-      "defaultValue": ""
-    },
-    {
-      "name": "metriks.affiliation.rakuten.client-secret",
-      "type": "java.lang.String",
-      "description": "Rakuten Advertising Developer Portal client secret read by the Metriks affiliation report. Secret. Production: METRIKS_AFFILIATION_RAKUTEN_CLIENT_SECRET in /etc/open4goods/api.env.",
-      "defaultValue": ""
-    },
-    {
-      "name": "metriks.affiliation.rakuten.sid",
-      "type": "java.lang.String",
-      "description": "Rakuten Advertising publisher site id (SID, numeric), the OAuth scope of the Metriks affiliation report. Production: METRIKS_AFFILIATION_RAKUTEN_SID in /etc/open4goods/api.env.",
-      "defaultValue": ""
     }
   ]
 }

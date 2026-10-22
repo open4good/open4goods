@@ -128,10 +128,10 @@ public class MetriksControllerTest {
         ok.setValue(new java.math.BigDecimal("4.50"));
         ok.setParams(Map.of("provider", "open4goods-api", "network", "awin", "currency", "EUR"));
         MetriksEvent error = new MetriksEvent();
-        error.setId("affiliation.rakuten.sales.7d");
+        error.setId("affiliation.effiliation.sales.7d");
         error.setUnit("count");
         error.setStatus("error");
-        error.setErrorMessage("Credential manquant : metriks.affiliation.rakuten.sid");
+        error.setErrorMessage("Credential manquant : metriks.affiliation.effiliation.api-key");
         when(affiliationMetriksService.collectEvents()).thenReturn(List.of(ok, error));
 
         mockMvc.perform(get("/api/metriks/affiliation"))
@@ -142,7 +142,7 @@ public class MetriksControllerTest {
                 .andExpect(jsonPath("$.events[0].params.currency").value("EUR"))
                 .andExpect(jsonPath("$.events[1].status").value("error"))
                 .andExpect(jsonPath("$.events[1].value").doesNotExist())
-                .andExpect(jsonPath("$.events[1].errorMessage").value("Credential manquant : metriks.affiliation.rakuten.sid"));
+                .andExpect(jsonPath("$.events[1].errorMessage").value("Credential manquant : metriks.affiliation.effiliation.api-key"));
     }
 
     private static GoogleSearchConsoleService.Outcome<GoogleSearchConsoleService.Totals> totals(
