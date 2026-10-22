@@ -234,6 +234,43 @@ public class BatchServiceResourceCleanupTest {
     }
 
     /**
+     * DRY_RUN and MOVE must never remove shard folders, even empty ones : an empty shard may have
+     * just been created by ResourceService.getCacheFile for a download still in flight.
+     */
+    @Test
+    public void testNonDeleteModesLeaveEmptyShardFoldersInPlace() throws Exception {
+        for (ResourceCleanupMode mode : List.of(ResourceCleanupMode.DRY_RUN, ResourceCleanupMode.MOVE)) {
+            when(productRepository.exportAll()).thenReturn(Stream.of(productWithResource()));
+            Path emptyShard = Files.createDirectories(tempCacheDir.resolve("E/M/P"));
+            String orphanKey = "orphan_stale_key";
+            String orphanShard = Resource.folderHashPrefix(orphanKey);
+            createFileInCache(orphanShard + "/" + orphanKey, "content", System.currentTimeMillis() - 10000);
+
+            batchService.cleanOrphanResources(mode);
+
+            assertTrue(Files.isDirectory(emptyShard), mode + " must leave an empty shard folder in place");
+            assertTrue(Files.isDirectory(tempCacheDir.resolve(orphanShard)), mode + " must leave the orphan shard folder in place");
+        }
+    }
+
+    /**
+     * DELETE drops the shards it has emptied, but not those already empty before the run.
+     */
+    @Test
+    public void testDeleteModeDropsOnlyShardsItEmptied() throws Exception {
+        when(productRepository.exportAll()).thenReturn(Stream.of(productWithResource()));
+        Path preExistingEmptyShard = Files.createDirectories(tempCacheDir.resolve("E/M/P"));
+        String orphanKey = "orphan_stale_key";
+        String orphanShard = Resource.folderHashPrefix(orphanKey);
+        createFileInCache(orphanShard + "/" + orphanKey, "content", System.currentTimeMillis() - 10000);
+
+        batchService.cleanOrphanResources(ResourceCleanupMode.DELETE);
+
+        assertFalse(Files.exists(tempCacheDir.resolve(orphanShard)), "Shard emptied by DELETE should be dropped");
+        assertTrue(Files.isDirectory(preExistingEmptyShard), "Shard already empty before the run must be kept");
+    }
+
+    /**
      * DELETE reclaims the space in place, where MOVE only parks the file on the same filesystem.
      */
     @Test
