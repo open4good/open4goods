@@ -222,6 +222,7 @@ import {
   ref,
   watch,
 } from 'vue'
+import { useDisplay } from 'vuetify'
 import { createError } from 'h3'
 import {
   mdiAlertCircleOutline,
@@ -308,7 +309,7 @@ const { $fetch: csrfFetch } = useNuxtApp()
 const { t, locale } = useI18n()
 const { isLoggedIn } = useAuth()
 const { y: scrollY } = useWindowScroll()
-const display = useHydrationSafeDisplay()
+const display = useDisplay()
 
 const isStickyBannerOpen = ref(false)
 

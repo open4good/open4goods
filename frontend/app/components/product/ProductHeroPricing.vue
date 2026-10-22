@@ -125,9 +125,9 @@
 <script setup lang="ts">
 import { computed, ref, watch, type PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useDisplay } from 'vuetify'
 import { mdiBasketOffOutline, mdiTagOutline, mdiRecycleVariant } from '@mdi/js'
 import { useAnalytics } from '~/composables/useAnalytics'
-import { useHydrationSafeDisplay } from '~/composables/useHydrationSafeDisplay'
 import { useProductPriceTrend } from '~/composables/useProductPriceTrend'
 import { resolveOfferHref } from '~/utils/_product-pricing'
 import type { ProductDto } from '~~/shared/api-client'
@@ -145,7 +145,7 @@ const props = defineProps({
 })
 
 const { n, t, locale } = useI18n()
-const display = useHydrationSafeDisplay()
+const display = useDisplay()
 const {
   trackProductRedirect,
   trackAffiliateClick,

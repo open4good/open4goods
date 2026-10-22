@@ -167,6 +167,36 @@ describe('ProductLifeTimeline', () => {
     )
   })
 
+  it('groups and labels events in UTC whatever the runtime time zone (SSR/client hydration)', async () => {
+    const originalTimeZone = process.env.TZ
+    // Browser time zone ahead of the UTC server: 23:30 UTC on Dec 31 is already next year.
+    process.env.TZ = 'Europe/Paris'
+
+    try {
+      const wrapper = await mountComponent({
+        events: [
+          {
+            type: ProductTimelineEventType.PriceFirstSeenNew,
+            source: ProductTimelineEventSource.PriceHistory,
+            timestamp: Date.UTC(2023, 11, 31, 23, 30),
+          },
+        ],
+      })
+
+      const yearLabels = wrapper
+        .findAll('.product-life-timeline__year-label')
+        .map(node => node.text())
+      const monthLabels = wrapper
+        .findAll('.product-life-timeline__month-label')
+        .map(node => node.text())
+
+      expect(yearLabels).toEqual(['2023'])
+      expect(monthLabels).toEqual(['December'])
+    } finally {
+      process.env.TZ = originalTimeZone
+    }
+  })
+
   it('hides EPREL market end dates beyond 15 years and shows explanatory note', async () => {
     const timeline: ProductTimelineDto = {
       events: [
