@@ -20,9 +20,6 @@ both workflows:
 | `API_METRIKS_AWIN_PUBLISHER_ID` | - | `METRIKS_AFFILIATION_AWIN_PUBLISHER_ID=<value>` (`api.env`) | `api` | Metriks affiliation report (`metriks.affiliation.awin.publisher-id`) | `prodSecrets.yml`, `releaseDeployProd.yml` (`mode=release`) |
 | `API_METRIKS_AWIN_API_TOKEN` | - | `METRIKS_AFFILIATION_AWIN_API_TOKEN=<value>` (`api.env`) | `api` | Metriks affiliation report (`metriks.affiliation.awin.api-token`) | `prodSecrets.yml`, `releaseDeployProd.yml` (`mode=release`) |
 | `API_METRIKS_EFFILIATION_API_KEY` | - | `METRIKS_AFFILIATION_EFFILIATION_API_KEY=<value>` (`api.env`) | `api` | Metriks affiliation report (`metriks.affiliation.effiliation.api-key`) | `prodSecrets.yml`, `releaseDeployProd.yml` (`mode=release`) |
-| `API_METRIKS_RAKUTEN_CLIENT_ID` | - | `METRIKS_AFFILIATION_RAKUTEN_CLIENT_ID=<value>` (`api.env`) | `api` | Metriks affiliation report (`metriks.affiliation.rakuten.client-id`) | `prodSecrets.yml`, `releaseDeployProd.yml` (`mode=release`) |
-| `API_METRIKS_RAKUTEN_CLIENT_SECRET` | - | `METRIKS_AFFILIATION_RAKUTEN_CLIENT_SECRET=<value>` (`api.env`) | `api` | Metriks affiliation report (`metriks.affiliation.rakuten.client-secret`) | `prodSecrets.yml`, `releaseDeployProd.yml` (`mode=release`) |
-| `API_METRIKS_RAKUTEN_SID` | - | `METRIKS_AFFILIATION_RAKUTEN_SID=<value>` (`api.env`) | `api` | Metriks affiliation report (`metriks.affiliation.rakuten.sid`) | `prodSecrets.yml`, `releaseDeployProd.yml` (`mode=release`) |
 
 - `API_GOOGLE_API_JSON` is the JSON key of the `nudger-indexation` Google
   service account. Before anything is written, the runner checks that it is a
@@ -42,13 +39,11 @@ both workflows:
 - The `API_METRIKS_*` secrets (GOU-957) are the report credentials of the
   affiliation networks read by `GET /api/metriks/affiliation`
   (`AffiliationMetriksService`): Awin publisher id and Publisher API token,
-  Effiliation API key, Rakuten Advertising Developer Portal client id, client
-  secret and site id (SID). Each one is **optional**: a missing secret is a
+  and Effiliation API key. Each one is **optional**: a missing secret is a
   `::warning::`, is not rendered and does not stop the others, and the
   network's Metriks events then report `Credential manquant :
   metriks.affiliation.<network>.<property>` (never 0). A set secret must match
-  `[A-Za-z0-9/._-]` (digits only for the Awin publisher id and the Rakuten
-  SID), checked before anything is written. `AffiliationCredentialsBindingTest`
+  `[A-Za-z0-9/._-]` (digits only for the Awin publisher id), checked before anything is written. `AffiliationCredentialsBindingTest`
   covers the relaxed binding of the `METRIKS_AFFILIATION_*` variables. None of
   these values lives in this repository or in open4goods-config.
 

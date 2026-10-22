@@ -22,14 +22,11 @@
 # | api     | API_METRIKS_AWIN_PUBLISHER_ID     | -                                              | METRIKS_AFFILIATION_AWIN_PUBLISHER_ID=<value>      |
 # | api     | API_METRIKS_AWIN_API_TOKEN        | -                                              | METRIKS_AFFILIATION_AWIN_API_TOKEN=<value>         |
 # | api     | API_METRIKS_EFFILIATION_API_KEY   | -                                              | METRIKS_AFFILIATION_EFFILIATION_API_KEY=<value>    |
-# | api     | API_METRIKS_RAKUTEN_CLIENT_ID     | -                                              | METRIKS_AFFILIATION_RAKUTEN_CLIENT_ID=<value>      |
-# | api     | API_METRIKS_RAKUTEN_CLIENT_SECRET | -                                              | METRIKS_AFFILIATION_RAKUTEN_CLIENT_SECRET=<value>  |
-# | api     | API_METRIKS_RAKUTEN_SID           | -                                              | METRIKS_AFFILIATION_RAKUTEN_SID=<value>            |
 #
 # The API_METRIKS_* secrets (Metriks affiliation report, GOU-957) are optional, with
 # or without --if-present: a missing one is a ::warning::, is not rendered and does
 # not stop the others (the network's Metriks events then report the missing
-# credential). A set one must match [A-Za-z0-9/._-] (digits only for the ids).
+# credential). A set one must match [A-Za-z0-9/._-] (digits only for the Awin publisher id).
 #
 # publish-jars.sh (open4goods-config) sources /etc/open4goods/<service>.env,
 # which sits outside the tree open4goods-config's deploy rsyncs with --delete;
@@ -92,10 +89,7 @@ API_ENV_FILE=/etc/open4goods/api.env
 # <prod secret>:<line in api.env>
 API_METRIKS_SECRETS="API_METRIKS_AWIN_PUBLISHER_ID:METRIKS_AFFILIATION_AWIN_PUBLISHER_ID
 API_METRIKS_AWIN_API_TOKEN:METRIKS_AFFILIATION_AWIN_API_TOKEN
-API_METRIKS_EFFILIATION_API_KEY:METRIKS_AFFILIATION_EFFILIATION_API_KEY
-API_METRIKS_RAKUTEN_CLIENT_ID:METRIKS_AFFILIATION_RAKUTEN_CLIENT_ID
-API_METRIKS_RAKUTEN_CLIENT_SECRET:METRIKS_AFFILIATION_RAKUTEN_CLIENT_SECRET
-API_METRIKS_RAKUTEN_SID:METRIKS_AFFILIATION_RAKUTEN_SID"
+API_METRIKS_EFFILIATION_API_KEY:METRIKS_AFFILIATION_EFFILIATION_API_KEY"
 
 # Sets api_google (true when API_GOOGLE_API_JSON is set), api_metriks (the pairs of
 # API_METRIKS_SECRETS whose secret is set) and api_metriks_missing (the other secrets).
@@ -129,7 +123,7 @@ check_api() {
       *[!A-Za-z0-9/._-]*) fail "$secret contains characters outside [A-Za-z0-9/._-]" ;;
     esac
     case "$secret" in
-      API_METRIKS_AWIN_PUBLISHER_ID | API_METRIKS_RAKUTEN_SID)
+      API_METRIKS_AWIN_PUBLISHER_ID)
         case "$(printenv "$secret")" in
           *[!0-9]*) fail "$secret must contain digits only" ;;
         esac

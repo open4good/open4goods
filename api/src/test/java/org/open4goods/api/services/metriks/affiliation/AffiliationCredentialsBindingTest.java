@@ -30,10 +30,7 @@ class AffiliationCredentialsBindingTest {
     private static final Map<String, Object> RENDERED = Map.of(
             "METRIKS_AFFILIATION_AWIN_PUBLISHER_ID", "100000",
             "METRIKS_AFFILIATION_AWIN_API_TOKEN", "awin-token",
-            "METRIKS_AFFILIATION_EFFILIATION_API_KEY", "effi-key",
-            "METRIKS_AFFILIATION_RAKUTEN_CLIENT_ID", "rk-id",
-            "METRIKS_AFFILIATION_RAKUTEN_CLIENT_SECRET", "rk-secret",
-            "METRIKS_AFFILIATION_RAKUTEN_SID", "1234567");
+            "METRIKS_AFFILIATION_EFFILIATION_API_KEY", "effi-key");
 
     @TempDir
     Path tempDir;
@@ -49,12 +46,8 @@ class AffiliationCredentialsBindingTest {
             assertThat(effiliation).extracting("apiKey").isEqualTo("effi-key");
             assertThat(effiliation.missingCredentials()).isEmpty();
 
-            RakutenReportClient rakuten = context.getBean(RakutenReportClient.class);
-            assertThat(rakuten).extracting("clientId", "clientSecret", "sid").containsExactly("rk-id", "rk-secret", "1234567");
-            assertThat(rakuten.missingCredentials()).isEmpty();
-
             assertThat(context.getBean(AffiliationMetriksService.class)).extracting("clients")
-                    .asInstanceOf(org.assertj.core.api.InstanceOfAssertFactories.LIST).hasSize(3);
+                    .asInstanceOf(org.assertj.core.api.InstanceOfAssertFactories.LIST).hasSize(2);
         }
     }
 
@@ -65,9 +58,6 @@ class AffiliationCredentialsBindingTest {
                     "metriks.affiliation.awin.publisher-id", "metriks.affiliation.awin.api-token");
             assertThat(context.getBean(EffiliationReportClient.class).missingCredentials())
                     .containsExactly("metriks.affiliation.effiliation.api-key");
-            assertThat(context.getBean(RakutenReportClient.class).missingCredentials()).containsExactly(
-                    "metriks.affiliation.rakuten.client-id", "metriks.affiliation.rakuten.client-secret",
-                    "metriks.affiliation.rakuten.sid");
         }
     }
 
@@ -93,8 +83,7 @@ class AffiliationCredentialsBindingTest {
     }
 
     @Configuration(proxyBeanMethods = false)
-    @Import({ AwinReportClient.class, EffiliationReportClient.class, RakutenReportClient.class,
-            AffiliationMetriksService.class })
+    @Import({ AwinReportClient.class, EffiliationReportClient.class, AffiliationMetriksService.class })
     static class AffiliationConfig {
     }
 }

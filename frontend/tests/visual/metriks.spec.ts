@@ -101,7 +101,7 @@ test.describe('metriks dashboard — GSC tops, euros and errors', () => {
     await expect(errors.first()).toContainText('Credential manquant')
     const row = page
       .locator('tr')
-      .filter({ hasText: 'rakuten : Commissions validées (7d)' })
+      .filter({ hasText: 'effiliation : Commissions validées (7d)' })
     await expect(row).toContainText('Credential manquant')
     await expect(row).not.toContainText(/^\s*0(,00)?\s*€/)
   })

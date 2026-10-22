@@ -199,14 +199,12 @@ fi
 # render-service-secrets.sh: Metriks affiliation secrets (GOU-957)
 ########################################
 AWIN_SENTINEL="SENTINELAWINVALUE42"
-RAKUTEN_SENTINEL="SENTINELRAKUTENVALUE42"
+EFFILIATION_SENTINEL="SENTINELEFFILIATIONVALUE42"
 metriks_env() {
-  env API_METRIKS_AWIN_PUBLISHER_ID=100000 API_METRIKS_AWIN_API_TOKEN="${AWIN_SENTINEL}" \
-    API_METRIKS_RAKUTEN_CLIENT_SECRET="${RAKUTEN_SENTINEL}" \
-    API_METRIKS_RAKUTEN_SID=1234567 "$@"
+  env API_METRIKS_AWIN_PUBLISHER_ID=100000 API_METRIKS_AWIN_API_TOKEN="${AWIN_SENTINEL}" "$@"
 }
 no_metriks_secret_in() {
-  ! grep -q -e "${AWIN_SENTINEL}" -e "${RAKUTEN_SENTINEL}" "$@" 2>/dev/null
+  ! grep -q -e "${AWIN_SENTINEL}" -e "${EFFILIATION_SENTINEL}" "$@" 2>/dev/null
 }
 
 # Only some Metriks secrets, no Google JSON, --if-present (release): the present ones are rendered.
@@ -218,26 +216,26 @@ printf 'JAVA_OPTS=-Xmx4g\nMETRIKS_AFFILIATION_AWIN_API_TOKEN=old\n' > "${FAKE_RO
 unset API_GOOGLE_API_JSON
 run metriks_env "${DEPLOY}/render-service-secrets.sh" --if-present apply api
 api_env="$(cat "${FAKE_ROOT}/etc/open4goods/api.env")"
-expected_env=$'JAVA_OPTS=-Xmx4g\nMETRIKS_AFFILIATION_AWIN_PUBLISHER_ID=100000\nMETRIKS_AFFILIATION_AWIN_API_TOKEN='"${AWIN_SENTINEL}"$'\nMETRIKS_AFFILIATION_RAKUTEN_CLIENT_SECRET='"${RAKUTEN_SENTINEL}"$'\nMETRIKS_AFFILIATION_RAKUTEN_SID=1234567'
+expected_env=$'JAVA_OPTS=-Xmx4g\nMETRIKS_AFFILIATION_AWIN_PUBLISHER_ID=100000\nMETRIKS_AFFILIATION_AWIN_API_TOKEN='"${AWIN_SENTINEL}"
 if [[ ${status} -eq 0 ]] && [[ "${api_env}" == "${expected_env}" ]] \
   && [[ ! -e "${FAKE_ROOT}/etc/open4goods/secrets/google-indexation.json" ]]; then
   pass "render: Metriks secrets are rendered without the Google JSON, keeping api.env's other lines"
 else
   ko "render Metriks only (status ${status}): ${out} / ${api_env}"
 fi
-for missing in API_GOOGLE_API_JSON API_METRIKS_EFFILIATION_API_KEY API_METRIKS_RAKUTEN_CLIENT_ID; do
+for missing in API_GOOGLE_API_JSON API_METRIKS_EFFILIATION_API_KEY; do
   if [[ "${out}" == *"::warning::${missing} is not set"* ]]; then
     pass "render: missing ${missing} is a warning"
   else
     ko "render: no warning for missing ${missing}: ${out}"
   fi
 done
-if [[ "${out}" != *"::error::"* ]] && grep -q "Not set in prod, not rendered: API_METRIKS_EFFILIATION_API_KEY API_METRIKS_RAKUTEN_CLIENT_ID" "${GITHUB_STEP_SUMMARY}"; then
+if [[ "${out}" != *"::error::"* ]] && grep -q "Not set in prod, not rendered: API_METRIKS_EFFILIATION_API_KEY$" "${GITHUB_STEP_SUMMARY}"; then
   pass "render: summary lists the Metriks secrets not rendered"
 else
   ko "render Metriks summary: ${out}"
 fi
-if [[ "${out}" != *"${AWIN_SENTINEL}"* ]] && [[ "${out}" != *"${RAKUTEN_SENTINEL}"* ]] \
+if [[ "${out}" != *"${AWIN_SENTINEL}"* ]] \
   && no_metriks_secret_in "${GITHUB_STEP_SUMMARY}" "${FAKE_SSH_LOG}"; then
   pass "render: Metriks secret values absent from the output, the summary and the SSH command line"
 else
@@ -249,13 +247,13 @@ rm -rf "${FAKE_ROOT:?}/etc"
 mkdir -p "${FAKE_ROOT}/etc/open4goods"
 : > "${FAKE_SSH_LOG}"
 export API_GOOGLE_API_JSON="${VALID_JSON}"
-run metriks_env API_METRIKS_EFFILIATION_API_KEY=effikey API_METRIKS_RAKUTEN_CLIENT_ID=rkid \
+run metriks_env API_METRIKS_EFFILIATION_API_KEY="${EFFILIATION_SENTINEL}" \
   "${DEPLOY}/render-service-secrets.sh" apply api
 if [[ ${status} -eq 0 ]] \
   && grep -qx "GOOGLE_INDEXATION_SERVICE_ACCOUNT_PATH=/etc/open4goods/secrets/google-indexation.json" "${FAKE_ROOT}/etc/open4goods/api.env" \
-  && [[ "$(grep -c '^METRIKS_AFFILIATION_' "${FAKE_ROOT}/etc/open4goods/api.env")" == 6 ]] \
+  && [[ "$(grep -c '^METRIKS_AFFILIATION_' "${FAKE_ROOT}/etc/open4goods/api.env")" == 3 ]] \
   && [[ "$(stat -c '%a' "${FAKE_ROOT}/etc/open4goods/api.env")" == 600 ]]; then
-  pass "render: apply writes the Google path and the six Metriks lines (600)"
+  pass "render: apply writes the Google path and the three Metriks lines (600)"
 else
   ko "render all (status ${status}): ${out}"
 fi
@@ -274,10 +272,11 @@ rm -rf "${FAKE_ROOT:?}/etc"
 unset API_GOOGLE_API_JSON
 case_index=0
 for bad in "API_METRIKS_AWIN_API_TOKEN=${AWIN_SENTINEL}+x" "API_METRIKS_AWIN_API_TOKEN=${AWIN_SENTINEL} x" \
-  "API_METRIKS_RAKUTEN_SID=12a4" "API_METRIKS_AWIN_PUBLISHER_ID=1/2"; do
+  "API_METRIKS_EFFILIATION_API_KEY=${EFFILIATION_SENTINEL};x" "API_METRIKS_AWIN_PUBLISHER_ID=1/2"; do
   case_index=$((case_index + 1))
   run env "${bad}" "${DEPLOY}/render-service-secrets.sh" --if-present apply api
-  if [[ ${status} -ne 0 ]] && [[ "${out}" != *"${AWIN_SENTINEL}"* ]] && [[ ! -s "${FAKE_SSH_LOG}" ]] \
+  if [[ ${status} -ne 0 ]] && [[ "${out}" != *"${AWIN_SENTINEL}"* ]] && [[ "${out}" != *"${EFFILIATION_SENTINEL}"* ]] \
+    && [[ ! -s "${FAKE_SSH_LOG}" ]] \
     && [[ ! -e "${FAKE_ROOT}/etc" ]]; then
     pass "render: rejects malformed ${bad%%=*} (case ${case_index}) without writing or printing it"
   else

@@ -142,7 +142,7 @@ describe('open4goods-api fixture', () => {
     }
     expect(
       events.some(
-        e => e.id.startsWith('affiliation.rakuten.') && e.status === 'error'
+        e => e.id.startsWith('affiliation.effiliation.') && e.status === 'error'
       )
     ).toBe(true)
   })
