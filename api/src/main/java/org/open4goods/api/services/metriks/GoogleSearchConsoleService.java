@@ -13,6 +13,9 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,6 +54,12 @@ public class GoogleSearchConsoleService {
     private static final String WEBMASTERS_READONLY_SCOPE = "https://www.googleapis.com/auth/webmasters.readonly";
     private static final String SEARCH_ANALYTICS_API = "https://www.googleapis.com/webmasters/v3/sites/%s/searchAnalytics/query";
     private static final int ROW_LIMIT = 25000;
+    /** Number of rows kept in the top queries / top pages events. */
+    private static final int TOP_LIMIT = 20;
+    /** Number of rows of the previous window scanned to find the {@code previous*} values of a top row. */
+    private static final int PREVIOUS_LOOKUP_LIMIT = 1000;
+    /** Maximum length of an upstream error body copied into an error message. */
+    private static final int MAX_ERROR_BODY = 300;
     /** Row count at or above which we warn the caller that the real total may be higher. */
     private static final long TRUNCATION_WARNING_THRESHOLD = 50000L;
 
@@ -64,6 +73,9 @@ public class GoogleSearchConsoleService {
     private final int lagDays;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient;
+
+    /** Supplies the OAuth access token; overridable by tests to avoid real Google credentials. */
+    private final TokenSupplier tokenSupplier;
 
     private volatile GoogleCredentials credentials;
 
@@ -89,6 +101,21 @@ public class GoogleSearchConsoleService {
         this.windowDays = windowDays;
         this.lagDays = lagDays;
         this.httpClient = httpClient;
+        this.tokenSupplier = this::accessToken;
+    }
+
+    /**
+     * Package-private constructor for tests: injects both the {@link HttpClient} and the token source.
+     */
+    GoogleSearchConsoleService(String siteUrl, int windowDays, int lagDays, HttpClient httpClient,
+                                TokenSupplier tokenSupplier) {
+        this.serviceAccountJson = "";
+        this.serviceAccountPath = "";
+        this.siteUrl = siteUrl;
+        this.windowDays = windowDays;
+        this.lagDays = lagDays;
+        this.httpClient = httpClient;
+        this.tokenSupplier = tokenSupplier;
     }
 
     /**
@@ -150,14 +177,24 @@ public class GoogleSearchConsoleService {
 
     private String fetchPage(URI uri, String token, LocalDate startDate, LocalDate endDate, int startRow)
             throws IOException, InterruptedException {
-        String requestBody = objectMapper.writeValueAsString(Map.of(
-                "startDate", startDate.toString(),
-                "endDate", endDate.toString(),
-                "dimensions", List.of("page"),
-                "type", "web",
-                "dataState", "final",
-                "rowLimit", ROW_LIMIT,
-                "startRow", startRow));
+        Map<String, Object> body = new HashMap<>(baseBody(startDate, endDate));
+        body.put("dimensions", List.of("page"));
+        body.put("rowLimit", ROW_LIMIT);
+        body.put("startRow", startRow);
+        return post(uri, token, body);
+    }
+
+    private Map<String, Object> baseBody(LocalDate startDate, LocalDate endDate) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("startDate", startDate.toString());
+        body.put("endDate", endDate.toString());
+        body.put("type", "web");
+        body.put("dataState", "final");
+        return body;
+    }
+
+    private String post(URI uri, String token, Map<String, Object> bodyMap) throws IOException, InterruptedException {
+        String requestBody = objectMapper.writeValueAsString(bodyMap);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(uri)
@@ -170,9 +207,107 @@ public class GoogleSearchConsoleService {
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
-            throw new IOException("Search Console API HTTP " + response.statusCode() + ": " + response.body());
+            throw new IOException("Search Console API HTTP " + response.statusCode() + ": "
+                    + abbreviate(redact(response.body(), token)));
         }
         return response.body();
+    }
+
+    private static String redact(String text, String token) {
+        if (text == null) {
+            return "";
+        }
+        return StringUtils.hasText(token) ? text.replace(token, "[redacted]") : text;
+    }
+
+    private static String abbreviate(String text) {
+        return text.length() > MAX_ERROR_BODY ? text.substring(0, MAX_ERROR_BODY) + "..." : text;
+    }
+
+    /**
+     * Fetches the Search Console SEO figures (totals and top queries/pages) for the current window and
+     * the contiguous previous one. The access token is loaded once; each part succeeds or fails
+     * independently, except that a credential failure fails every part.
+     *
+     * @return the SEO figures, with one {@link Outcome} per metric group
+     */
+    public SeoMetrics fetchSeoMetrics() {
+        LocalDate endDate = LocalDate.now(ZoneOffset.UTC).minusDays(lagDays);
+        Window current = new Window(endDate.minusDays(windowDays - 1L), endDate);
+        Window previous = new Window(current.start().minusDays(windowDays), current.start().minusDays(1L));
+
+        String token;
+        try {
+            token = tokenSupplier.get();
+        } catch (Exception e) {
+            String message = "Search Console credentials unavailable: " + e.getMessage();
+            return new SeoMetrics(current, previous, Outcome.failure(message), Outcome.failure(message),
+                    Outcome.failure(message), Outcome.failure(message));
+        }
+
+        URI uri = URI.create(String.format(SEARCH_ANALYTICS_API, URLEncoder.encode(siteUrl, StandardCharsets.UTF_8)));
+        Outcome<Totals> currentTotals = attempt(() -> fetchTotals(uri, token, current), token);
+        Outcome<Totals> previousTotals = attempt(() -> fetchTotals(uri, token, previous), token);
+        Outcome<TopRows> queries = attempt(() -> fetchTop(uri, token, current, previous, "query"), token);
+        Outcome<TopRows> pages = attempt(() -> fetchTop(uri, token, current, previous, "page"), token);
+        return new SeoMetrics(current, previous, currentTotals, previousTotals, queries, pages);
+    }
+
+    private <T> Outcome<T> attempt(Fetch<T> fetch, String token) {
+        try {
+            return Outcome.success(fetch.run());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return Outcome.failure("Search Console request interrupted");
+        } catch (Exception e) {
+            LOGGER.warn("Search Console query failed: {}", redact(e.getMessage(), token));
+            return Outcome.failure(abbreviate(redact(String.valueOf(e.getMessage()), token)));
+        }
+    }
+
+    private Totals fetchTotals(URI uri, String token, Window window) throws IOException, InterruptedException {
+        String body = post(uri, token, baseBody(window.start(), window.end()));
+        JsonNode rows = objectMapper.readTree(body).path("rows");
+        if (!rows.isArray() || rows.isEmpty()) {
+            return new Totals(0L, 0L, 0.0, 0.0);
+        }
+        JsonNode row = rows.get(0);
+        return new Totals(row.path("clicks").asLong(0L), row.path("impressions").asLong(0L),
+                row.path("ctr").asDouble(0.0), row.path("position").asDouble(0.0));
+    }
+
+    private TopRows fetchTop(URI uri, String token, Window current, Window previous, String dimension)
+            throws IOException, InterruptedException {
+        List<Row> currentRows = fetchRows(uri, token, current, dimension, TOP_LIMIT);
+        List<Row> previousRows = fetchRows(uri, token, previous, dimension, PREVIOUS_LOOKUP_LIMIT);
+        Map<String, Row> previousByKey = new HashMap<>();
+        for (Row row : previousRows) {
+            previousByKey.putIfAbsent(row.key(), row);
+        }
+        return new TopRows(currentRows, previousByKey);
+    }
+
+    private List<Row> fetchRows(URI uri, String token, Window window, String dimension, int limit)
+            throws IOException, InterruptedException {
+        Map<String, Object> bodyMap = new HashMap<>(baseBody(window.start(), window.end()));
+        bodyMap.put("dimensions", List.of(dimension));
+        bodyMap.put("rowLimit", limit);
+        String body = post(uri, token, bodyMap);
+        JsonNode rows = objectMapper.readTree(body).path("rows");
+        List<Row> result = new ArrayList<>();
+        if (rows.isArray()) {
+            for (JsonNode row : rows) {
+                JsonNode keys = row.path("keys");
+                if (!keys.isArray() || keys.isEmpty()) {
+                    continue;
+                }
+                result.add(new Row(keys.get(0).asString(), row.path("clicks").asLong(0L),
+                        row.path("impressions").asLong(0L), row.path("ctr").asDouble(0.0),
+                        row.path("position").asDouble(0.0)));
+            }
+        }
+        result.sort(Comparator.comparingLong(Row::clicks).reversed());
+        return result.size() > limit ? new ArrayList<>(result.subList(0, limit)) : result;
     }
 
     /**
@@ -222,6 +357,52 @@ public class GoogleSearchConsoleService {
      *                   signalling the real total may be higher than reported
      */
     public record PagesWithImpressionsResult(long count, LocalDate startDate, LocalDate endDate, boolean truncated) {
+    }
+
+    /** Inclusive Search Analytics date range (UTC). */
+    public record Window(LocalDate start, LocalDate end) {
+    }
+
+    /** Totals of a window; {@code ctr} is a fraction (0..1) as returned by Google. */
+    public record Totals(long clicks, long impressions, double ctr, double position) {
+    }
+
+    /** One Search Analytics row for a {@code query} or {@code page} dimension; {@code ctr} is a fraction. */
+    public record Row(String key, long clicks, long impressions, double ctr, double position) {
+    }
+
+    /** Top rows of the current window, plus the previous window's rows indexed by key. */
+    public record TopRows(List<Row> rows, Map<String, Row> previousByKey) {
+    }
+
+    /** Value or error message of one metric group. */
+    public record Outcome<T>(T value, String error) {
+        static <T> Outcome<T> success(T value) {
+            return new Outcome<>(value, null);
+        }
+
+        static <T> Outcome<T> failure(String error) {
+            return new Outcome<>(null, error);
+        }
+
+        public boolean isFailure() {
+            return error != null;
+        }
+    }
+
+    /** Result of {@link #fetchSeoMetrics()}. */
+    public record SeoMetrics(Window current, Window previous, Outcome<Totals> currentTotals,
+                             Outcome<Totals> previousTotals, Outcome<TopRows> topQueries, Outcome<TopRows> topPages) {
+    }
+
+    @FunctionalInterface
+    interface TokenSupplier {
+        String get() throws Exception;
+    }
+
+    @FunctionalInterface
+    private interface Fetch<T> {
+        T run() throws Exception;
     }
 
     @FunctionalInterface
