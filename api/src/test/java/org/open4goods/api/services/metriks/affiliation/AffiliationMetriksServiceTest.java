@@ -163,7 +163,7 @@ class AffiliationMetriksServiceTest {
 
         assertOk(events, "affiliation.awin.commission.validated.28d", "5.75");
         assertOk(events, "affiliation.awin.sales.7d", 2L);
-        assertError(events, "affiliation.effiliation.sales.28d", "Effiliation : HTTP 503 (transaction.json)");
+        assertError(events, "affiliation.effiliation.sales.28d", "Effiliation : HTTP 503 (conversions)");
         assertError(events, "affiliation.rakuten.commission.pending.7d", "Rakuten : délai dépassé (jeton OAuth)");
         assertError(events, "affiliation.total.commission.validated.7d",
                 "Total indisponible : réseau(x) en erreur : effiliation, rakuten");
@@ -179,7 +179,7 @@ class AffiliationMetriksServiceTest {
         Map<String, MetriksEvent> events = collect(failing);
 
         assertError(events, "affiliation.effiliation.sales.7d",
-                "Effiliation : erreur réseau (transaction.json, IOException)");
+                "Effiliation : erreur réseau (conversions, IOException)");
     }
 
     @Test
@@ -202,7 +202,7 @@ class AffiliationMetriksServiceTest {
             @Override
             public List<AffiliationReportTransaction> fetchTransactions(java.time.LocalDate startDate,
                     java.time.LocalDate endDate, java.time.ZoneId zone) {
-                throw new IllegalStateException("https://apiv2.effiliation.com/apiv2/transaction.json?key=effi-key-value");
+                throw new IllegalStateException("https://api.effinity.fr/apiv3/effi-key-value/publisher/conversions");
             }
         };
 
