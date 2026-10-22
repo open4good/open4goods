@@ -18,6 +18,7 @@ import org.open4goods.api.services.metriks.GoogleSearchConsoleService.Outcome;
 import org.open4goods.api.services.metriks.GoogleSearchConsoleService.Row;
 import org.open4goods.api.services.metriks.GoogleSearchConsoleService.TopRows;
 import org.open4goods.api.services.metriks.GoogleSearchConsoleService.Totals;
+import org.open4goods.api.services.metriks.affiliation.AffiliationMetriksService;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -55,15 +56,18 @@ public class MetriksController {
     private final ElasticsearchOperations elasticsearchOperations;
     private final ProductRepository productRepository;
     private final GoogleSearchConsoleService searchConsoleService;
+    private final AffiliationMetriksService affiliationMetriksService;
 
     public MetriksController(FeedService feedService,
                              ElasticsearchOperations elasticsearchOperations,
                              ProductRepository productRepository,
-                             GoogleSearchConsoleService searchConsoleService) {
+                             GoogleSearchConsoleService searchConsoleService,
+                             AffiliationMetriksService affiliationMetriksService) {
         this.feedService = feedService;
         this.elasticsearchOperations = elasticsearchOperations;
         this.productRepository = productRepository;
         this.searchConsoleService = searchConsoleService;
+        this.affiliationMetriksService = affiliationMetriksService;
     }
 
     @GetMapping("/system")
@@ -145,6 +149,22 @@ public class MetriksController {
         events.addAll(measureSearchAnalytics());
 
         response.setEvents(events);
+        return response;
+    }
+
+    @GetMapping("/affiliation")
+    @Operation(
+            summary = "Get affiliation revenue metrics (Awin, Effiliation, Rakuten)",
+            description = "Returns, for each affiliation network (awin, effiliation, rakuten) and for their total, "
+                    + "the validated commissions, the pending commissions (EUR) and the sales count (validated + "
+                    + "pending, declined excluded) over the last 7 days [D-7, D-1] and 28 days [D-28, D-1], "
+                    + "Europe/Paris, by transaction date, as Metriks schema-2.0 events. A network without credentials "
+                    + "or whose API fails has its events in error (never zero); the totals are then in error too. "
+                    + "Always answers 200.")
+    @ApiResponse(responseCode = "200", description = "MetriksResponse containing affiliation revenue events")
+    public MetriksResponse getAffiliationMetrics() {
+        MetriksResponse response = newResponse();
+        response.setEvents(affiliationMetriksService.collectEvents());
         return response;
     }
 

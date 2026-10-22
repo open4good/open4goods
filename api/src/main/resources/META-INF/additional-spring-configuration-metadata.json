@@ -126,6 +126,42 @@
       "name": "feed.providers.*.default-csv-properties",
       "type": "org.open4goods.commons.config.yml.datasource.CsvDataSourceProperties",
       "description": "Default CSV mapping applied to generated datasource definitions."
+    },
+    {
+      "name": "metriks.affiliation.awin.publisher-id",
+      "type": "java.lang.String",
+      "description": "Awin publisher id (numeric) read by the Metriks affiliation report. Empty: the Awin events are in error (missing credential). Production: METRIKS_AFFILIATION_AWIN_PUBLISHER_ID in /etc/open4goods/api.env.",
+      "defaultValue": ""
+    },
+    {
+      "name": "metriks.affiliation.awin.api-token",
+      "type": "java.lang.String",
+      "description": "Awin Publisher API token (OAuth2 bearer) read by the Metriks affiliation report. Secret. Production: METRIKS_AFFILIATION_AWIN_API_TOKEN in /etc/open4goods/api.env.",
+      "defaultValue": ""
+    },
+    {
+      "name": "metriks.affiliation.effiliation.api-key",
+      "type": "java.lang.String",
+      "description": "Effiliation publisher API key read by the Metriks affiliation report (sent in the query string, never logged). Secret. Production: METRIKS_AFFILIATION_EFFILIATION_API_KEY in /etc/open4goods/api.env.",
+      "defaultValue": ""
+    },
+    {
+      "name": "metriks.affiliation.rakuten.client-id",
+      "type": "java.lang.String",
+      "description": "Rakuten Advertising Developer Portal client id read by the Metriks affiliation report. Secret. Production: METRIKS_AFFILIATION_RAKUTEN_CLIENT_ID in /etc/open4goods/api.env.",
+      "defaultValue": ""
+    },
+    {
+      "name": "metriks.affiliation.rakuten.client-secret",
+      "type": "java.lang.String",
+      "description": "Rakuten Advertising Developer Portal client secret read by the Metriks affiliation report. Secret. Production: METRIKS_AFFILIATION_RAKUTEN_CLIENT_SECRET in /etc/open4goods/api.env.",
+      "defaultValue": ""
+    },
+    {
+      "name": "metriks.affiliation.rakuten.sid",
+      "type": "java.lang.String",
+      "description": "Rakuten Advertising publisher site id (SID, numeric), the OAuth scope of the Metriks affiliation report. Production: METRIKS_AFFILIATION_RAKUTEN_SID in /etc/open4goods/api.env.",
+      "defaultValue": ""
     }
   ]
 }
