@@ -90,9 +90,7 @@
       "eyebrow": "Responsible shopping",
       "title": "Nudger: The eco-friendly comparator",
       "animatedSubtitle": "",
-      "titleSubtitle": [
-        "Buy better. Spend smarter."
-      ],
+      "titleSubtitle": ["Buy better. Spend smarter."],
       "subtitles": [
         "Save time, stay true to your values. Compare effortlessly, choose freely.",
         "Shop smarter without compromise. Nudger balances planet and price.",
@@ -157,9 +155,7 @@
         ],
         "partnerLinkLabel": "{formattedCount} partner | {formattedCount} partners",
         "partnerLinkFallback": "our partners",
-        "placeholders": [
-          "Search a product (e.g. television, smartphone...)"
-        ]
+        "placeholders": ["Search a product (e.g. television, smartphone...)"]
       },
       "highlights": [
         {
@@ -3812,6 +3808,22 @@
       },
       "providers": "Providers",
       "drilldown": "See details"
+    },
+    "previousWindow": "Previous 28 d: {value}",
+    "error": {
+      "label": "Error",
+      "unknown": "Measure unavailable (error without message)"
+    },
+    "top": {
+      "rank": "#",
+      "query": "Query",
+      "page": "Page",
+      "clicks": "Clicks",
+      "impressions": "Impressions",
+      "ctr": "CTR",
+      "position": "Position",
+      "evolution": "Clicks vs previous window",
+      "new": "new"
     }
   }
 }

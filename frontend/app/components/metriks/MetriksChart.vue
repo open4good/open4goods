@@ -21,7 +21,7 @@ const props = withDefaults(
   }
 )
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const chartRef = ref<InstanceType<typeof import('vue-echarts').default> | null>(
   null
@@ -138,7 +138,7 @@ const chartOption = computed(() => {
             m => m.name === p.seriesName
           )
           const unit = metrik?.unit ?? 'count'
-          const formatted = formatMetrikValue(p.value, unit)
+          const formatted = formatMetrikValue(p.value, unit, locale.value)
           html += `<span style="color:${p.color}">●</span> ${p.seriesName}: <strong>${formatted}</strong><br/>`
         }
         return html
