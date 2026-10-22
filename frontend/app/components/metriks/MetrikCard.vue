@@ -8,7 +8,11 @@
  * - xl: Large "hero card" with big MDI icon.
  */
 import type { MetrikWithTrend, MetrikVariant } from '~/types/metriks'
-import { formatMetrikValue, getMetrikIcon } from '~/composables/useMetriks'
+import {
+  formatMetrikValue,
+  getMetrikIcon,
+  getParamsPreviousValue,
+} from '~/composables/useMetriks'
 
 const props = withDefaults(
   defineProps<{
@@ -28,9 +32,30 @@ const props = withDefaults(
   }
 )
 
+const { t, locale } = useI18n()
+
+const isError = computed(() => props.metrik.status === 'error')
+
+/** Error events never render as a number: show an explicit label instead. */
 const formattedValue = computed(() =>
-  formatMetrikValue(props.metrik.value, props.metrik.unit)
+  isError.value
+    ? t('metriks.error.label')
+    : formatMetrikValue(props.metrik.value, props.metrik.unit, locale.value)
 )
+
+const errorMessage = computed(
+  () => props.metrik.errorMessage || t('metriks.error.unknown')
+)
+
+/** Previous-window value announced by the API (GSC totals). */
+const previousWindowLabel = computed(() => {
+  if (isError.value) return null
+  const prev = getParamsPreviousValue(props.metrik.params)
+  if (prev === null) return null
+  return t('metriks.previousWindow', {
+    value: formatMetrikValue(prev, props.metrik.unit, locale.value),
+  })
+})
 
 const icon = computed(() => getMetrikIcon(props.metrik.groups, props.metrik.id))
 
@@ -56,14 +81,12 @@ const trendLabel = computed(() => {
 
   if (props.metrik.absoluteChange !== null) {
     const absSign = props.metrik.absoluteChange > 0 ? '+' : ''
-    const abs = `${absSign}${formatMetrikValue(props.metrik.absoluteChange, props.metrik.unit)}`
+    const abs = `${absSign}${formatMetrikValue(props.metrik.absoluteChange, props.metrik.unit, locale.value)}`
     return `${abs} (${percent})`
   }
 
   return percent
 })
-
-const isError = computed(() => props.metrik.status === 'error')
 </script>
 
 <template>
@@ -111,6 +134,15 @@ const isError = computed(() => props.metrik.status === 'error')
         >
           {{ formattedValue }}
         </div>
+        <div v-if="isError" class="text-caption text-error metrik-error">
+          {{ errorMessage }}
+        </div>
+        <div
+          v-else-if="previousWindowLabel"
+          class="text-caption text-medium-emphasis"
+        >
+          {{ previousWindowLabel }}
+        </div>
       </div>
       <v-chip
         v-if="showTrend && trendIcon"
@@ -154,6 +186,15 @@ const isError = computed(() => props.metrik.status === 'error')
         :class="{ 'text-error': isError }"
       >
         {{ formattedValue }}
+      </div>
+      <div v-if="isError" class="text-caption text-error metrik-error mb-2">
+        {{ errorMessage }}
+      </div>
+      <div
+        v-else-if="previousWindowLabel"
+        class="text-caption text-medium-emphasis mb-2"
+      >
+        {{ previousWindowLabel }}
       </div>
       <v-chip
         v-if="showTrend && trendIcon"

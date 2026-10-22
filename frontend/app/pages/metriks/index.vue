@@ -11,6 +11,7 @@ import type {
   MetrikChartType,
 } from '~/composables/useMetriks'
 import { useAuth } from '~/composables/useAuth'
+import { isTopRowsMetrik } from '~/composables/useMetriks'
 import { hasAdminAccess } from '~~/shared/utils/_roles'
 
 const { t } = useI18n()
@@ -94,6 +95,16 @@ async function loadWeeklyDigest(): Promise<void> {
 /** Ordered list of selected metrics (for the chart). */
 const selectedMetriks = computed(() =>
   allMetriks.value.filter(m => selectedIds.value.has(m.id))
+)
+
+/** Search Console top lists (queries / pages), rendered as tables. */
+const topRowsMetriks = computed(() =>
+  allMetriks.value.filter(
+    m =>
+      isTopRowsMetrik(m.id) &&
+      (selectedProviders.value.length === 0 ||
+        selectedProviders.value.includes(m.provider))
+  )
 )
 
 /** Top KPI metrics for the hero section (first 4 global analytics metrics). */
@@ -285,6 +296,13 @@ onMounted(() => {
                 {{ m.name }}
               </v-chip>
             </div>
+          </v-col>
+        </v-row>
+
+        <!-- Search Console tops -->
+        <v-row v-if="topRowsMetriks.length > 0" class="mb-6">
+          <v-col v-for="m in topRowsMetriks" :key="m.id" cols="12" lg="6">
+            <MetriksTopRows :metrik="m" />
           </v-col>
         </v-row>
 
