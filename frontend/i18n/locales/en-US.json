@@ -1646,7 +1646,9 @@
         "summary": {
           "records": "Total records",
           "size": "Compressed size",
-          "updated": "Last updated"
+          "updated": "Last updated",
+          "format": "Format",
+          "formatValue": "Compressed CSV (ZIP)"
         }
       },
       "creator": {
@@ -1972,6 +1974,45 @@
         "description": "Total compressed footprint of weekly exports.",
         "label": "Combined size"
       }
+    },
+    "explore": {
+      "title": "Explore products",
+      "subtitle": "Browse Nudger categories and open product pages identified by their GTIN.",
+      "categoryAriaLabel": "View the {category} category",
+      "gtinLabel": "GTIN",
+      "categories": {
+        "tv": "TVs",
+        "washing-machine": "Washing machines",
+        "dishwasher": "Dishwashers",
+        "oven": "Ovens",
+        "air-conditioner": "Air conditioners"
+      }
+    },
+    "mirrors": {
+      "title": "Also available on",
+      "referenceLicense": "The reference version, on nudger.fr, is under ODbL. The mirrors below state their own license.",
+      "linkAriaLabel": "Open the dataset on {name} (new tab)",
+      "items": {
+        "datagouv": {
+          "name": "data.gouv.fr",
+          "license": "License: ODbL"
+        },
+        "zenodo": {
+          "name": "Zenodo",
+          "license": "License: CC BY 4.0"
+        },
+        "kaggle": {
+          "name": "Kaggle",
+          "license": "License: CC BY 4.0"
+        },
+        "figshare": {
+          "name": "Figshare",
+          "license": "License: CC BY 4.0"
+        }
+      }
+    },
+    "summary": {
+      "title": "The datasets at a glance"
     }
   },
   "opensource": {

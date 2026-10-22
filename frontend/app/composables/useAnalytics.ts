@@ -27,6 +27,18 @@ type OpenDataDownloadContext = {
   href?: string
 }
 
+export type OpenDataLinkBlock = 'explore-products' | 'mirrors'
+export type OpenDataLinkTarget =
+  'category' | 'product' | 'datagouv' | 'zenodo' | 'kaggle' | 'figshare'
+export type OpenDataLinkPage = 'opendata' | 'gtin' | 'isbn'
+
+type OpenDataLinkContext = {
+  block: OpenDataLinkBlock
+  target: OpenDataLinkTarget
+  page: OpenDataLinkPage
+  category?: string | null
+}
+
 type AffiliateClickContext = {
   token?: string | null
   url?: string | null
@@ -397,6 +409,18 @@ export const useAnalytics = () => {
     })
   }
 
+  // Low-cardinality props only: never the GTIN.
+  const trackOpenDataOutboundClick = ({
+    block,
+    target,
+    page,
+    category,
+  }: OpenDataLinkContext) => {
+    trackEvent('open-data-link', {
+      props: compactProps({ block, target, page, category }),
+    })
+  }
+
   const trackProductRedirect = ({
     token,
     placement,
@@ -438,6 +462,7 @@ export const useAnalytics = () => {
   return {
     trackEvent,
     trackOpenDataDownload,
+    trackOpenDataOutboundClick,
     trackProductRedirect,
     trackSearch,
     trackAffiliateClick,

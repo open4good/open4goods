@@ -103,6 +103,10 @@
       :options="downloadOptions"
     />
 
+    <OpendataExploreProducts page="gtin" />
+
+    <OpendataMirrors page="gtin" />
+
     <OpendataLicenseSection
       :title="t('opendata.license.title')"
       :description="t('opendata.license.description')"
@@ -131,6 +135,8 @@ import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 import PageHeader from '~/components/shared/header/PageHeader.vue'
 import OpendataDatasetSummary from '~/components/domains/opendata/OpendataDatasetSummary.vue'
 import OpendataDownloadComparison from '~/components/domains/opendata/OpendataDownloadComparison.vue'
+import OpendataExploreProducts from '~/components/domains/opendata/OpendataExploreProducts.vue'
+import OpendataMirrors from '~/components/domains/opendata/OpendataMirrors.vue'
 import OpendataFaqSection from '~/components/domains/opendata/OpendataFaqSection.vue'
 import OpendataLicenseSection from '~/components/domains/opendata/OpendataLicenseSection.vue'
 
@@ -175,6 +181,11 @@ const placeholder = computed(() =>
 )
 
 const summaryItems = computed(() => [
+  {
+    label: String(t('opendata.datasets.common.summary.format')),
+    value: String(t('opendata.datasets.common.summary.formatValue')),
+    icon: 'mdi-folder-zip-outline',
+  },
   {
     label: String(t('opendata.datasets.common.summary.records')),
     value: dataset.value?.recordCount ?? placeholder.value,
