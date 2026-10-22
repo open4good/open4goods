@@ -55,8 +55,8 @@ jobs:
             if [ -z "${value}" ]; then
               echo "::error::${key} is empty or missing from the prod GitHub Environment"
               failed=1
-            elif [[ "${value}" =~ [^A-Za-z0-9._-] ]]; then
-              echo "::error::${key} contains characters outside [A-Za-z0-9._-]"
+            elif [[ "${value}" =~ [^A-Za-z0-9/._-] ]]; then
+              echo "::error::${key} contains characters outside [A-Za-z0-9/._-]"
               failed=1
             fi
           done
@@ -113,6 +113,19 @@ jobs:
             echo "::error::scripts/deploy/push-remote-env.sh is missing from ${CHECKOUT_REF}: deploy a ref cut after GOU-767"
             exit 1
           fi
+
+      - name: 🔐 Check prod service secrets (api)
+        # Runs in MODE=test too. Same definition as prodSecrets.yml (GOU-933): a set but malformed secret fails here,
+        # before any build. Until API_GOOGLE_API_JSON exists in `prod`, or on a ref without the script, warns only.
+        env:
+          CHECKOUT_REF: ${{ steps.meta.outputs.checkout_ref }}
+          API_GOOGLE_API_JSON: ${{ secrets.API_GOOGLE_API_JSON }}
+        run: |
+          if [ ! -x scripts/deploy/render-service-secrets.sh ]; then
+            echo "::warning::scripts/deploy/render-service-secrets.sh is missing from ${CHECKOUT_REF}: api secrets are not rendered"
+            exit 0
+          fi
+          scripts/deploy/render-service-secrets.sh --if-present check api
 
       ############################################
       # 🗂️ Prepare reports directories (target)
@@ -469,6 +482,23 @@ jobs:
         run: >-
           scripts/deploy/push-remote-env.sh /etc/open4goods/front-api.env
           FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID
+
+      - name: Render api secrets on Prod
+        # Same files as prodSecrets.yml (scripts/deploy/render-service-secrets.sh, GOU-933), restarted just below.
+        # Without API_GOOGLE_API_JSON in `prod`: warning, nothing rendered, api keeps its previous configuration.
+        if: env.MODE != 'test'
+        env:
+          CHECKOUT_REF: ${{ steps.meta.outputs.checkout_ref }}
+          DEPLOY_SSH_HOST: ${{ secrets.REMOTE_HOST }}
+          DEPLOY_SSH_USER: ${{ secrets.REMOTE_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          API_GOOGLE_API_JSON: ${{ secrets.API_GOOGLE_API_JSON }}
+        run: |
+          if [ ! -x scripts/deploy/render-service-secrets.sh ]; then
+            echo "::warning::scripts/deploy/render-service-secrets.sh is missing from ${CHECKOUT_REF}: api secrets are not rendered"
+            exit 0
+          fi
+          scripts/deploy/render-service-secrets.sh --if-present apply api
 
       - name: 🔁 Start Applications
         if: env.MODE != 'test'

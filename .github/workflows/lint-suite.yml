@@ -41,3 +41,6 @@ jobs:
 
       - name: Run lint suite
         run: ./scripts/lint.sh
+
+      - name: Deploy script tests
+        run: scripts/tests/push-remote-file.test.sh
