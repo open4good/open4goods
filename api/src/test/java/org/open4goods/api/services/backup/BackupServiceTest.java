@@ -13,7 +13,9 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
 import java.time.Instant;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
@@ -183,6 +185,58 @@ class BackupServiceTest {
         }
         assertThat(Files.exists(productBackupFolder.resolve("products-backup-0.gz"))).isTrue();
         assertThat(Files.exists(productBackupFolder.resolve("products-backup-1.gz"))).isTrue();
+    }
+
+    @Test
+    void backupWritesSha256FileVerifiableBySha256sum() throws Exception {
+        when(productRepository.countMainIndex()).thenReturn(1L);
+        when(productRepository.exportAll(1000)).thenReturn(Stream.of(new Product()));
+        when(serialisationService.toJson(any(Product.class))).thenReturn("{\"id\":1}");
+
+        backupService.backupProducts();
+
+        Path checksums = productBackupFolder.resolve("products-backup.sha256");
+        List<String> lines = Files.readAllLines(checksums);
+        assertThat(lines).hasSize(2);
+        for (String line : lines) {
+            String[] parts = line.split("  ", 2);
+            byte[] digest = MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(productBackupFolder.resolve(parts[1])));
+            assertThat(parts[0]).isEqualTo(HexFormat.of().formatHex(digest));
+        }
+        assertThat(lines.get(0)).endsWith("  products-backup-0.gz");
+        assertThat(lines.get(1)).endsWith("  products-backup-1.gz");
+
+        String manifest = Files.readString(productBackupFolder.resolve("products-backup-manifest.json"));
+        for (String line : lines) {
+            assertThat(manifest).contains(line.split("  ", 2)[0]);
+        }
+        assertThat(backupService.health().getDetails()).doesNotContainKey("product_backup_checksum_missing");
+
+        try (Stream<Path> files = Files.list(productBackupFolder)) {
+            assertThat(files.map(f -> f.getFileName().toString())).noneMatch(n -> n.endsWith(".tmp") && !n.equals(".tmp"));
+        }
+    }
+
+    @Test
+    void healthFailsWhenManifestDeclaresSha256ButFileIsMissing() throws Exception {
+        when(productRepository.countMainIndex()).thenReturn(1L);
+        when(productRepository.exportAll(1000)).thenReturn(Stream.of(new Product()));
+        when(serialisationService.toJson(any(Product.class))).thenReturn("{\"id\":1}");
+        backupService.backupProducts();
+        Files.delete(productBackupFolder.resolve("products-backup.sha256"));
+
+        assertThat(backupService.health().getDetails()).containsKey("product_backup_checksum_missing");
+    }
+
+    @Test
+    void oldManifestWithoutSha256IsStillValid() throws IOException {
+        writeExistingBackup();
+
+        Health health = backupService.health();
+
+        assertThat(health.getStatus()).isEqualTo(Status.UP);
+        assertThat(health.getDetails()).doesNotContainKey("product_backup_checksum_missing");
+        assertThat(health.getDetails()).doesNotContainKey("product_backup_manifest_invalid");
     }
 
     @Test
