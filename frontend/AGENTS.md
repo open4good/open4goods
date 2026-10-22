@@ -42,6 +42,7 @@
 - Prefer `ref`, `computed`, `watch`, `useState`, `useFetch`, `useAsyncData`, etc. via Nuxt auto-imports.
 - Type everything: rely on interfaces/types; avoid `any`. Use discriminated unions or type guards when needed.
 - Keep code SSR-friendly (guard against `window`/`document`).
+- Format dates rendered during SSR with an explicit `timeZone` (`Intl.DateTimeFormat`, `getUTC*`): the server runs in UTC and the browser in the user's zone, so an implicit zone causes hydration mismatches.
 - Keep composables thin; delegate heavy logic to server routes or shared utilities.
 - All static texts must be internationalised
 - Also write or update tests (component-level tests) if pertinent
