@@ -90,9 +90,7 @@
       "eyebrow": "Comparateur responsable",
       "title": "Acheter mieux. Sans dépenser plus.",
       "animatedSubtitle": "",
-      "titleSubtitle": [
-        "Nudger : le comparateur écologique tech & électro"
-      ],
+      "titleSubtitle": ["Nudger : le comparateur écologique tech & électro"],
       "subtitles": [
         "Gagnez du temps. Choisissez librement.",
         "Consommez mieux sans payer plus. Nudger équilibre planète et budget.",
@@ -3716,6 +3714,22 @@
       },
       "providers": "Sources",
       "drilldown": "Voir le détail"
+    },
+    "previousWindow": "28 j précédents : {value}",
+    "error": {
+      "label": "Erreur",
+      "unknown": "Mesure indisponible (erreur sans message)"
+    },
+    "top": {
+      "rank": "#",
+      "query": "Requête",
+      "page": "Page",
+      "clicks": "Clics",
+      "impressions": "Impressions",
+      "ctr": "CTR",
+      "position": "Position",
+      "evolution": "Clics vs fenêtre précédente",
+      "new": "nouveau"
     }
   }
 }

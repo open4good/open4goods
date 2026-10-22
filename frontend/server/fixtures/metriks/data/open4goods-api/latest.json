@@ -1,0 +1,916 @@
+{
+  "schemaVersion": "2.0",
+  "type": "latest",
+  "meta": {
+    "type": "meta",
+    "schemaVersion": "2.0",
+    "provider": "open4goods-api",
+    "providerDisplayName": "Open4goods API",
+    "createdAt": "2026-10-14T06:00:00Z",
+    "config": {
+      "provider": {
+        "displayName": "Open4goods API",
+        "groups": [
+          "business"
+        ],
+        "tags": [
+          "open4goods-api"
+        ]
+      },
+      "defaults": {
+        "params": {
+          "provider": "open4goods-api"
+        }
+      }
+    }
+  },
+  "run": {
+    "type": "run",
+    "schemaVersion": "2.0",
+    "provider": "open4goods-api",
+    "runId": "2026-10-22T06:00:00Z",
+    "collectedAt": "2026-10-22T06:00:00Z",
+    "period": {
+      "dateFrom": "2026-10-08",
+      "dateTo": "2026-10-22"
+    },
+    "git": {
+      "repository": "open4good/open4goods-config",
+      "sha": "0000000000000000000000000000000000000000",
+      "ref": "refs/heads/main",
+      "event": "schedule"
+    },
+    "events": [
+      {
+        "schemaVersion": "2.0",
+        "id": "seo.gsc.clicks",
+        "name": "Search Console : clics",
+        "description": "Clics Google (28 j)",
+        "value": 1240,
+        "unit": "count",
+        "status": "ok",
+        "errorMessage": null,
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "windowStartDate": "2026-09-15",
+          "windowEndDate": "2026-10-12",
+          "previousWindowStartDate": "2026-08-18",
+          "previousWindowEndDate": "2026-09-14",
+          "previousValue": 1116
+        },
+        "groups": [
+          "seo"
+        ],
+        "tags": [
+          "gsc",
+          "google",
+          "search-analytics"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "seo.gsc.impressions",
+        "name": "Search Console : impressions",
+        "description": "Impressions Google (28 j)",
+        "value": 58200,
+        "unit": "count",
+        "status": "ok",
+        "errorMessage": null,
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "windowStartDate": "2026-09-15",
+          "windowEndDate": "2026-10-12",
+          "previousWindowStartDate": "2026-08-18",
+          "previousWindowEndDate": "2026-09-14",
+          "previousValue": 52380
+        },
+        "groups": [
+          "seo"
+        ],
+        "tags": [
+          "gsc",
+          "google",
+          "search-analytics"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "seo.gsc.ctr",
+        "name": "Search Console : CTR",
+        "description": "CTR moyen (28 j)",
+        "value": 2.13,
+        "unit": "percent",
+        "status": "ok",
+        "errorMessage": null,
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "windowStartDate": "2026-09-15",
+          "windowEndDate": "2026-10-12",
+          "previousWindowStartDate": "2026-08-18",
+          "previousWindowEndDate": "2026-09-14",
+          "previousValue": 2.13
+        },
+        "groups": [
+          "seo"
+        ],
+        "tags": [
+          "gsc",
+          "google",
+          "search-analytics"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "seo.gsc.position",
+        "name": "Search Console : position moyenne",
+        "description": "Position moyenne (28 j)",
+        "value": 14.82,
+        "unit": "ratio",
+        "status": "ok",
+        "errorMessage": null,
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "windowStartDate": "2026-09-15",
+          "windowEndDate": "2026-10-12",
+          "previousWindowStartDate": "2026-08-18",
+          "previousWindowEndDate": "2026-09-14",
+          "previousValue": 14.82
+        },
+        "groups": [
+          "seo"
+        ],
+        "tags": [
+          "gsc",
+          "google",
+          "search-analytics"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "seo.gsc.top_queries",
+        "name": "Search Console : top requêtes",
+        "description": "Top 20 requêtes par clics (28 j)",
+        "value": 5,
+        "unit": "count",
+        "status": "ok",
+        "errorMessage": null,
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "windowStartDate": "2026-09-15",
+          "windowEndDate": "2026-10-12",
+          "previousWindowStartDate": "2026-08-18",
+          "previousWindowEndDate": "2026-09-14",
+          "rows": [
+            {
+              "rank": 1,
+              "key": "meilleur lave-linge 2026",
+              "clicks": 212,
+              "impressions": 9400,
+              "ctr": 2.26,
+              "position": 6.1,
+              "previousClicks": 180,
+              "previousImpressions": 9100,
+              "previousPosition": 7.4
+            },
+            {
+              "rank": 2,
+              "key": "comparatif téléviseur oled",
+              "clicks": 148,
+              "impressions": 7100,
+              "ctr": 2.08,
+              "position": 8.3,
+              "previousClicks": 150,
+              "previousImpressions": 7000,
+              "previousPosition": 8.1
+            },
+            {
+              "rank": 3,
+              "key": "aspirateur robot pas cher",
+              "clicks": 97,
+              "impressions": 6200,
+              "ctr": 1.56,
+              "position": 11.9,
+              "previousClicks": null,
+              "previousImpressions": null,
+              "previousPosition": null
+            },
+            {
+              "rank": 4,
+              "key": "impact environnemental smartphone",
+              "clicks": 63,
+              "impressions": 2100,
+              "ctr": 3.0,
+              "position": 5.2,
+              "previousClicks": 40,
+              "previousImpressions": 1900,
+              "previousPosition": 6.8
+            },
+            {
+              "rank": 5,
+              "key": "réfrigérateur classe A",
+              "clicks": 41,
+              "impressions": 3900,
+              "ctr": 1.05,
+              "position": 15.4,
+              "previousClicks": 55,
+              "previousImpressions": 4100,
+              "previousPosition": 14.9
+            }
+          ]
+        },
+        "groups": [
+          "seo"
+        ],
+        "tags": [
+          "gsc",
+          "google",
+          "search-analytics"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "seo.gsc.top_pages",
+        "name": "Search Console : top pages",
+        "description": "Top 20 pages par clics (28 j)",
+        "value": 3,
+        "unit": "count",
+        "status": "ok",
+        "errorMessage": null,
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "windowStartDate": "2026-09-15",
+          "windowEndDate": "2026-10-12",
+          "previousWindowStartDate": "2026-08-18",
+          "previousWindowEndDate": "2026-09-14",
+          "rows": [
+            {
+              "rank": 1,
+              "key": "https://nudger.fr/lave-linge/lg-f4wv",
+              "clicks": 301,
+              "impressions": 12000,
+              "ctr": 2.51,
+              "position": 7.0,
+              "previousClicks": 260,
+              "previousImpressions": 11800,
+              "previousPosition": 7.6
+            },
+            {
+              "rank": 2,
+              "key": "https://nudger.fr/televiseurs",
+              "clicks": 188,
+              "impressions": 9800,
+              "ctr": 1.92,
+              "position": 9.4,
+              "previousClicks": 190,
+              "previousImpressions": 9900,
+              "previousPosition": 9.2
+            },
+            {
+              "rank": 3,
+              "key": "https://nudger.fr/blog/ecoscore",
+              "clicks": 76,
+              "impressions": 2500,
+              "ctr": 3.04,
+              "position": 6.3,
+              "previousClicks": null,
+              "previousImpressions": null,
+              "previousPosition": null
+            }
+          ]
+        },
+        "groups": [
+          "seo"
+        ],
+        "tags": [
+          "gsc",
+          "google",
+          "search-analytics"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.awin.commission.validated.7d",
+        "name": "Affiliation awin : Commissions validées (7d)",
+        "description": "Commissions validées awin sur 7d",
+        "value": 412.5,
+        "unit": "currency",
+        "status": "ok",
+        "errorMessage": null,
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "network": "awin",
+          "currency": "EUR",
+          "windowStartDate": "2026-10-05",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "awin"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.awin.commission.pending.7d",
+        "name": "Affiliation awin : Commissions en attente (7d)",
+        "description": "Commissions en attente awin sur 7d",
+        "value": 88.2,
+        "unit": "currency",
+        "status": "ok",
+        "errorMessage": null,
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "network": "awin",
+          "currency": "EUR",
+          "windowStartDate": "2026-10-05",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "awin"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.awin.sales.7d",
+        "name": "Affiliation awin : Ventes (7d)",
+        "description": "Ventes awin sur 7d",
+        "value": 31,
+        "unit": "count",
+        "status": "ok",
+        "errorMessage": null,
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "network": "awin",
+          "currency": "EUR",
+          "windowStartDate": "2026-10-05",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "awin"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.effiliation.commission.validated.7d",
+        "name": "Affiliation effiliation : Commissions validées (7d)",
+        "description": "Commissions validées effiliation sur 7d",
+        "value": 265.0,
+        "unit": "currency",
+        "status": "ok",
+        "errorMessage": null,
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "network": "effiliation",
+          "currency": "EUR",
+          "windowStartDate": "2026-10-05",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "effiliation"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.effiliation.commission.pending.7d",
+        "name": "Affiliation effiliation : Commissions en attente (7d)",
+        "description": "Commissions en attente effiliation sur 7d",
+        "value": 40.0,
+        "unit": "currency",
+        "status": "ok",
+        "errorMessage": null,
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "network": "effiliation",
+          "currency": "EUR",
+          "windowStartDate": "2026-10-05",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "effiliation"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.effiliation.sales.7d",
+        "name": "Affiliation effiliation : Ventes (7d)",
+        "description": "Ventes effiliation sur 7d",
+        "value": 19,
+        "unit": "count",
+        "status": "ok",
+        "errorMessage": null,
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "network": "effiliation",
+          "currency": "EUR",
+          "windowStartDate": "2026-10-05",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "effiliation"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.rakuten.commission.validated.7d",
+        "name": "Affiliation rakuten : Commissions validées (7d)",
+        "description": "Commissions validées rakuten sur 7d",
+        "value": null,
+        "unit": "currency",
+        "status": "error",
+        "errorMessage": "Credential manquant : metriks.affiliation.rakuten.client-id",
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "network": "rakuten",
+          "currency": "EUR",
+          "windowStartDate": "2026-10-05",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "rakuten"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.rakuten.commission.pending.7d",
+        "name": "Affiliation rakuten : Commissions en attente (7d)",
+        "description": "Commissions en attente rakuten sur 7d",
+        "value": null,
+        "unit": "currency",
+        "status": "error",
+        "errorMessage": "Credential manquant : metriks.affiliation.rakuten.client-id",
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "network": "rakuten",
+          "currency": "EUR",
+          "windowStartDate": "2026-10-05",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "rakuten"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.rakuten.sales.7d",
+        "name": "Affiliation rakuten : Ventes (7d)",
+        "description": "Ventes rakuten sur 7d",
+        "value": null,
+        "unit": "count",
+        "status": "error",
+        "errorMessage": "Credential manquant : metriks.affiliation.rakuten.client-id",
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "network": "rakuten",
+          "currency": "EUR",
+          "windowStartDate": "2026-10-05",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "rakuten"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.total.commission.validated.7d",
+        "name": "Affiliation total : Commissions validées (7d)",
+        "description": "Commissions validées, somme des réseaux sur 7d",
+        "value": null,
+        "unit": "currency",
+        "status": "error",
+        "errorMessage": "Réseau(x) en erreur : rakuten",
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "currency": "EUR",
+          "windowStartDate": "2026-10-05",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "total"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.total.commission.pending.7d",
+        "name": "Affiliation total : Commissions en attente (7d)",
+        "description": "Commissions en attente, somme des réseaux sur 7d",
+        "value": null,
+        "unit": "currency",
+        "status": "error",
+        "errorMessage": "Réseau(x) en erreur : rakuten",
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "currency": "EUR",
+          "windowStartDate": "2026-10-05",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "total"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.total.sales.7d",
+        "name": "Affiliation total : Ventes (7d)",
+        "description": "Ventes, somme des réseaux sur 7d",
+        "value": null,
+        "unit": "count",
+        "status": "error",
+        "errorMessage": "Réseau(x) en erreur : rakuten",
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "currency": "EUR",
+          "windowStartDate": "2026-10-05",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "total"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.awin.commission.validated.28d",
+        "name": "Affiliation awin : Commissions validées (28d)",
+        "description": "Commissions validées awin sur 28d",
+        "value": 1650.0,
+        "unit": "currency",
+        "status": "ok",
+        "errorMessage": null,
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "network": "awin",
+          "currency": "EUR",
+          "windowStartDate": "2026-09-18",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "awin"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.awin.commission.pending.28d",
+        "name": "Affiliation awin : Commissions en attente (28d)",
+        "description": "Commissions en attente awin sur 28d",
+        "value": 352.8,
+        "unit": "currency",
+        "status": "ok",
+        "errorMessage": null,
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "network": "awin",
+          "currency": "EUR",
+          "windowStartDate": "2026-09-18",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "awin"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.awin.sales.28d",
+        "name": "Affiliation awin : Ventes (28d)",
+        "description": "Ventes awin sur 28d",
+        "value": 124,
+        "unit": "count",
+        "status": "ok",
+        "errorMessage": null,
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "network": "awin",
+          "currency": "EUR",
+          "windowStartDate": "2026-09-18",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "awin"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.effiliation.commission.validated.28d",
+        "name": "Affiliation effiliation : Commissions validées (28d)",
+        "description": "Commissions validées effiliation sur 28d",
+        "value": 1060.0,
+        "unit": "currency",
+        "status": "ok",
+        "errorMessage": null,
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "network": "effiliation",
+          "currency": "EUR",
+          "windowStartDate": "2026-09-18",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "effiliation"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.effiliation.commission.pending.28d",
+        "name": "Affiliation effiliation : Commissions en attente (28d)",
+        "description": "Commissions en attente effiliation sur 28d",
+        "value": 160.0,
+        "unit": "currency",
+        "status": "ok",
+        "errorMessage": null,
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "network": "effiliation",
+          "currency": "EUR",
+          "windowStartDate": "2026-09-18",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "effiliation"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.effiliation.sales.28d",
+        "name": "Affiliation effiliation : Ventes (28d)",
+        "description": "Ventes effiliation sur 28d",
+        "value": 76,
+        "unit": "count",
+        "status": "ok",
+        "errorMessage": null,
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "network": "effiliation",
+          "currency": "EUR",
+          "windowStartDate": "2026-09-18",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "effiliation"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.rakuten.commission.validated.28d",
+        "name": "Affiliation rakuten : Commissions validées (28d)",
+        "description": "Commissions validées rakuten sur 28d",
+        "value": null,
+        "unit": "currency",
+        "status": "error",
+        "errorMessage": "Credential manquant : metriks.affiliation.rakuten.client-id",
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "network": "rakuten",
+          "currency": "EUR",
+          "windowStartDate": "2026-09-18",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "rakuten"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.rakuten.commission.pending.28d",
+        "name": "Affiliation rakuten : Commissions en attente (28d)",
+        "description": "Commissions en attente rakuten sur 28d",
+        "value": null,
+        "unit": "currency",
+        "status": "error",
+        "errorMessage": "Credential manquant : metriks.affiliation.rakuten.client-id",
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "network": "rakuten",
+          "currency": "EUR",
+          "windowStartDate": "2026-09-18",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "rakuten"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.rakuten.sales.28d",
+        "name": "Affiliation rakuten : Ventes (28d)",
+        "description": "Ventes rakuten sur 28d",
+        "value": null,
+        "unit": "count",
+        "status": "error",
+        "errorMessage": "Credential manquant : metriks.affiliation.rakuten.client-id",
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "network": "rakuten",
+          "currency": "EUR",
+          "windowStartDate": "2026-09-18",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "rakuten"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.total.commission.validated.28d",
+        "name": "Affiliation total : Commissions validées (28d)",
+        "description": "Commissions validées, somme des réseaux sur 28d",
+        "value": null,
+        "unit": "currency",
+        "status": "error",
+        "errorMessage": "Réseau(x) en erreur : rakuten",
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "currency": "EUR",
+          "windowStartDate": "2026-09-18",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "total"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.total.commission.pending.28d",
+        "name": "Affiliation total : Commissions en attente (28d)",
+        "description": "Commissions en attente, somme des réseaux sur 28d",
+        "value": null,
+        "unit": "currency",
+        "status": "error",
+        "errorMessage": "Réseau(x) en erreur : rakuten",
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "currency": "EUR",
+          "windowStartDate": "2026-09-18",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "total"
+        ]
+      },
+      {
+        "schemaVersion": "2.0",
+        "id": "affiliation.total.sales.28d",
+        "name": "Affiliation total : Ventes (28d)",
+        "description": "Ventes, somme des réseaux sur 28d",
+        "value": null,
+        "unit": "count",
+        "status": "error",
+        "errorMessage": "Réseau(x) en erreur : rakuten",
+        "url": null,
+        "params": {
+          "provider": "open4goods-api",
+          "currency": "EUR",
+          "windowStartDate": "2026-09-18",
+          "windowEndDate": "2026-10-11"
+        },
+        "groups": [
+          "business",
+          "affiliation"
+        ],
+        "tags": [
+          "affiliation",
+          "total"
+        ]
+      }
+    ]
+  }
+}

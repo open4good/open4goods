@@ -90,6 +90,7 @@ public class MetriksControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     public void testGetSeoMetrics() throws Exception {
+        when(searchConsoleService.fetchSeoMetrics()).thenThrow(new IllegalStateException("unused"));
         GoogleSearchConsoleService.PagesWithImpressionsResult result =
                 new GoogleSearchConsoleService.PagesWithImpressionsResult(
                         5000L, LocalDate.of(2026, 9, 11), LocalDate.of(2026, 10, 8), false);
@@ -107,6 +108,7 @@ public class MetriksControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     public void testGetSeoMetricsOnErrorReturnsErrorEvent() throws Exception {
+        when(searchConsoleService.fetchSeoMetrics()).thenThrow(new IllegalStateException("unused"));
         when(searchConsoleService.countPagesWithImpressions())
                 .thenThrow(new java.io.IOException("Search Console API HTTP 500: boom"));
 
@@ -141,5 +143,81 @@ public class MetriksControllerTest {
                 .andExpect(jsonPath("$.events[1].status").value("error"))
                 .andExpect(jsonPath("$.events[1].value").doesNotExist())
                 .andExpect(jsonPath("$.events[1].errorMessage").value("Credential manquant : metriks.affiliation.rakuten.sid"));
+    }
+
+    private static GoogleSearchConsoleService.Outcome<GoogleSearchConsoleService.Totals> totals(
+            long clicks, long impressions, double ctr, double position) {
+        return new GoogleSearchConsoleService.Outcome<>(
+                new GoogleSearchConsoleService.Totals(clicks, impressions, ctr, position), null);
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    public void testGetSeoMetricsReturnsTotalsAndTops() throws Exception {
+        var current = new GoogleSearchConsoleService.Window(LocalDate.of(2026, 9, 11), LocalDate.of(2026, 10, 8));
+        var previous = new GoogleSearchConsoleService.Window(LocalDate.of(2026, 8, 14), LocalDate.of(2026, 9, 10));
+        var rows = new GoogleSearchConsoleService.TopRows(
+                java.util.List.of(
+                        new GoogleSearchConsoleService.Row("alpha", 50, 500, 0.1, 3.456),
+                        new GoogleSearchConsoleService.Row("beta", 10, 400, 0.025, 8.0)),
+                java.util.Map.of("alpha", new GoogleSearchConsoleService.Row("alpha", 40, 450, 0.09, 4.0)));
+        when(searchConsoleService.fetchSeoMetrics()).thenReturn(new GoogleSearchConsoleService.SeoMetrics(
+                current, previous, totals(120, 3000, 0.04567, 12.345), totals(100, 2500, 0.04, 14.0),
+                new GoogleSearchConsoleService.Outcome<>(rows, null),
+                new GoogleSearchConsoleService.Outcome<>(rows, null)));
+
+        mockMvc.perform(get("/api/metriks/seo"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.events[1].id").value("seo.gsc.clicks"))
+                .andExpect(jsonPath("$.events[1].value").value(120))
+                .andExpect(jsonPath("$.events[1].unit").value("count"))
+                .andExpect(jsonPath("$.events[1].params.previousValue").value(100))
+                .andExpect(jsonPath("$.events[1].params.previousWindowEndDate").value("2026-09-10"))
+                .andExpect(jsonPath("$.events[2].id").value("seo.gsc.impressions"))
+                .andExpect(jsonPath("$.events[3].id").value("seo.gsc.ctr"))
+                .andExpect(jsonPath("$.events[3].unit").value("percent"))
+                .andExpect(jsonPath("$.events[3].value").value(4.57))
+                .andExpect(jsonPath("$.events[4].id").value("seo.gsc.position"))
+                .andExpect(jsonPath("$.events[4].value").value(12.35))
+                .andExpect(jsonPath("$.events[5].id").value("seo.gsc.top_queries"))
+                .andExpect(jsonPath("$.events[5].value").value(2))
+                .andExpect(jsonPath("$.events[5].params.rows[0].rank").value(1))
+                .andExpect(jsonPath("$.events[5].params.rows[0].ctr").value(10.0))
+                .andExpect(jsonPath("$.events[5].params.rows[0].previousClicks").value(40))
+                .andExpect(jsonPath("$.events[5].params.rows[1].rank").value(2))
+                .andExpect(jsonPath("$.events[5].params.rows[1].previousClicks").doesNotExist())
+                .andExpect(jsonPath("$.events[6].id").value("seo.gsc.top_pages"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    public void testGetSeoMetricsWithMissingCredentialReturnsErrorsWith200() throws Exception {
+        var current = new GoogleSearchConsoleService.Window(LocalDate.of(2026, 9, 11), LocalDate.of(2026, 10, 8));
+        var previous = new GoogleSearchConsoleService.Window(LocalDate.of(2026, 8, 14), LocalDate.of(2026, 9, 10));
+        String message = "Search Console credentials unavailable: Missing Google credentials";
+        var failed = new GoogleSearchConsoleService.Outcome<GoogleSearchConsoleService.Totals>(null, message);
+        var failedTop = new GoogleSearchConsoleService.Outcome<GoogleSearchConsoleService.TopRows>(null, message);
+        when(searchConsoleService.fetchSeoMetrics()).thenReturn(
+                new GoogleSearchConsoleService.SeoMetrics(current, previous, failed, failed, failedTop, failedTop));
+        when(searchConsoleService.countPagesWithImpressions()).thenThrow(new java.io.IOException(message));
+
+        mockMvc.perform(get("/api/metriks/seo"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.events.length()").value(7))
+                .andExpect(jsonPath("$.events[?(@.status == 'error')].id").value(org.hamcrest.Matchers.hasSize(7)))
+                .andExpect(jsonPath("$.events[1].value").doesNotExist())
+                .andExpect(jsonPath("$.events[1].errorMessage").value(message));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    public void testGetSeoMetricsWhenServiceThrowsReturnsErrorsWith200() throws Exception {
+        when(searchConsoleService.countPagesWithImpressions()).thenThrow(new java.io.IOException("HTTP 401"));
+        when(searchConsoleService.fetchSeoMetrics()).thenThrow(new IllegalStateException("HTTP 401"));
+
+        mockMvc.perform(get("/api/metriks/seo"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.events.length()").value(7))
+                .andExpect(jsonPath("$.events[?(@.status == 'error')].id").value(org.hamcrest.Matchers.hasSize(7)));
     }
 }

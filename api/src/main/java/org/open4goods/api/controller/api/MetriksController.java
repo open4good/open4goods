@@ -3,7 +3,10 @@ package org.open4goods.api.controller.api;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +14,10 @@ import org.open4goods.api.dto.metriks.MetriksEvent;
 import org.open4goods.api.dto.metriks.MetriksPeriod;
 import org.open4goods.api.dto.metriks.MetriksResponse;
 import org.open4goods.api.services.metriks.GoogleSearchConsoleService;
+import org.open4goods.api.services.metriks.GoogleSearchConsoleService.Outcome;
+import org.open4goods.api.services.metriks.GoogleSearchConsoleService.Row;
+import org.open4goods.api.services.metriks.GoogleSearchConsoleService.TopRows;
+import org.open4goods.api.services.metriks.GoogleSearchConsoleService.Totals;
 import org.open4goods.api.services.metriks.affiliation.AffiliationMetriksService;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.services.feedservice.service.FeedService;
@@ -42,6 +49,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class MetriksController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetriksController.class);
+    private static final List<String> GSC_GROUPS = List.of("seo");
+    private static final List<String> GSC_TAGS = List.of("gsc", "google", "search-analytics");
     /** Default locale used when counting products that carry an AI review. */
     private final FeedService feedService;
     private final ElasticsearchOperations elasticsearchOperations;
@@ -124,13 +133,20 @@ public class MetriksController {
                     + "Console's Search Analytics report over a rolling 28-day window, as a Metriks schema-2.0 "
                     + "event. This is a proxy for indexation, not an exact measure: a page that Google has indexed "
                     + "but which received no impression in the window is not counted. Requires a valid Google "
-                    + "Search Console credential to be configured.")
+                    + "Search Console credential to be configured. It also returns, for the last 28 days ending "
+                    + "'metriks.gsc.lag-days' days ago (UTC) compared with the 28 contiguous days before: clicks, "
+                    + "impressions, CTR (percent), average position (seo.gsc.clicks, impressions, ctr, position, each "
+                    + "with 'previousValue' in params) and the top 20 queries and pages by clicks "
+                    + "(seo.gsc.top_queries, seo.gsc.top_pages, 'params.rows' with previous-window values, null when "
+                    + "the key is absent from the first 1000 previous rows). A failing metric is reported as an "
+                    + "event with status 'error'; the endpoint still answers 200.")
     @ApiResponse(responseCode = "200", description = "MetriksResponse containing SEO metric events")
     public MetriksResponse getSeoMetrics() {
         MetriksResponse response = newResponse();
         List<MetriksEvent> events = new ArrayList<>();
 
         events.add(measurePagesWithImpressions());
+        events.addAll(measureSearchAnalytics());
 
         response.setEvents(events);
         return response;
@@ -181,6 +197,104 @@ public class MetriksController {
             error.setErrorMessage(e.getMessage());
             return error;
         }
+    }
+
+    /**
+     * Builds the Search Analytics totals and top-20 events. A failure of the whole call or of one
+     * metric group turns the affected events into {@code error} events.
+     */
+    private List<MetriksEvent> measureSearchAnalytics() {
+        GoogleSearchConsoleService.SeoMetrics metrics;
+        try {
+            metrics = searchConsoleService.fetchSeoMetrics();
+        } catch (Exception e) {
+            LOGGER.warn("Metriks Search Console fetch failed: {}", e.getMessage());
+            String message = String.valueOf(e.getMessage());
+            return List.of(
+                    gscError("seo.gsc.clicks", "Clics (Search Console, 28 j)", "count", message),
+                    gscError("seo.gsc.impressions", "Impressions (Search Console, 28 j)", "count", message),
+                    gscError("seo.gsc.ctr", "CTR (Search Console, 28 j)", "percent", message),
+                    gscError("seo.gsc.position", "Position moyenne (Search Console, 28 j)", "ratio", message),
+                    gscError("seo.gsc.top_queries", "Top 20 requêtes (Search Console, 28 j)", "count", message),
+                    gscError("seo.gsc.top_pages", "Top 20 pages (Search Console, 28 j)", "count", message));
+        }
+
+        Outcome<Totals> cur = metrics.currentTotals();
+        Outcome<Totals> prev = metrics.previousTotals();
+        List<MetriksEvent> events = new ArrayList<>();
+        events.add(totalsEvent("seo.gsc.clicks", "Clics (Search Console, 28 j)", "count", metrics, cur, prev,
+                t -> BigDecimal.valueOf(t.clicks())));
+        events.add(totalsEvent("seo.gsc.impressions", "Impressions (Search Console, 28 j)", "count", metrics, cur, prev,
+                t -> BigDecimal.valueOf(t.impressions())));
+        events.add(totalsEvent("seo.gsc.ctr", "CTR (Search Console, 28 j)", "percent", metrics, cur, prev,
+                t -> round2(t.ctr() * 100)));
+        events.add(totalsEvent("seo.gsc.position", "Position moyenne (Search Console, 28 j)", "ratio", metrics, cur, prev,
+                t -> round2(t.position())));
+        events.add(topEvent("seo.gsc.top_queries", "Top 20 requêtes (Search Console, 28 j)", metrics, metrics.topQueries()));
+        events.add(topEvent("seo.gsc.top_pages", "Top 20 pages (Search Console, 28 j)", metrics, metrics.topPages()));
+        return events;
+    }
+
+    private MetriksEvent totalsEvent(String id, String name, String unit, GoogleSearchConsoleService.SeoMetrics metrics,
+                                     Outcome<Totals> cur, Outcome<Totals> prev, java.util.function.Function<Totals, BigDecimal> extractor) {
+        if (cur.isFailure() || prev.isFailure()) {
+            return gscError(id, name, unit, cur.isFailure() ? cur.error() : prev.error());
+        }
+        BigDecimal value = extractor.apply(cur.value());
+        MetriksEvent event = event(id, name, value, unit, GSC_GROUPS, GSC_TAGS);
+        Map<String, Object> params = windowParams(event.getParams(), metrics);
+        params.put("previousValue", extractor.apply(prev.value()));
+        event.setParams(params);
+        return event;
+    }
+
+    private MetriksEvent topEvent(String id, String name, GoogleSearchConsoleService.SeoMetrics metrics,
+                                  Outcome<TopRows> outcome) {
+        if (outcome.isFailure()) {
+            return gscError(id, name, "count", outcome.error());
+        }
+        TopRows top = outcome.value();
+        List<Map<String, Object>> rows = new ArrayList<>();
+        int rank = 1;
+        for (Row row : top.rows()) {
+            Row previous = top.previousByKey().get(row.key());
+            Map<String, Object> entry = new LinkedHashMap<>();
+            entry.put("rank", rank++);
+            entry.put("key", row.key());
+            entry.put("clicks", row.clicks());
+            entry.put("impressions", row.impressions());
+            entry.put("ctr", round2(row.ctr() * 100));
+            entry.put("position", round2(row.position()));
+            entry.put("previousClicks", previous == null ? null : previous.clicks());
+            entry.put("previousImpressions", previous == null ? null : previous.impressions());
+            entry.put("previousPosition", previous == null ? null : round2(previous.position()));
+            rows.add(entry);
+        }
+        MetriksEvent event = event(id, name, rows.size(), "count", GSC_GROUPS, GSC_TAGS);
+        Map<String, Object> params = windowParams(event.getParams(), metrics);
+        params.put("rows", rows);
+        event.setParams(params);
+        return event;
+    }
+
+    private Map<String, Object> windowParams(Map<String, Object> base, GoogleSearchConsoleService.SeoMetrics metrics) {
+        Map<String, Object> params = new HashMap<>(base);
+        params.put("windowStartDate", metrics.current().start().toString());
+        params.put("windowEndDate", metrics.current().end().toString());
+        params.put("previousWindowStartDate", metrics.previous().start().toString());
+        params.put("previousWindowEndDate", metrics.previous().end().toString());
+        return params;
+    }
+
+    private MetriksEvent gscError(String id, String name, String unit, String message) {
+        MetriksEvent error = event(id, name, null, unit, GSC_GROUPS, GSC_TAGS);
+        error.setStatus("error");
+        error.setErrorMessage(message);
+        return error;
+    }
+
+    private static BigDecimal round2(double value) {
+        return BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP);
     }
 
     // ------------------------------------------------------------------
