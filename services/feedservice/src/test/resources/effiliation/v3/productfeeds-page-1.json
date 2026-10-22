@@ -1,0 +1,39 @@
+{
+  "pagination": {
+    "currentPage": 1,
+    "perPage": 1000,
+    "total": 4,
+    "from": 1,
+    "to": 2,
+    "lastPage": 2
+  },
+  "links": [
+    {
+      "linkId": 1024,
+      "linkType": "productFeed",
+      "programId": 300000101,
+      "sessionId": 3001,
+      "programName": "PRG-ACTIVE",
+      "linkName": "Active Merchant - Flux produits",
+      "merchantId": 6600000101,
+      "merchantName": "Example Active Merchant",
+      "merchantUrl": "https://active.example",
+      "urlRedir": "https://active.example/landing",
+      "trackedLink": "https://feeds.example/active-feed.csv",
+      "feedInfos": {
+        "lastUpdate": "2026-10-21T04:00:00Z",
+        "nbProducts": 1200
+      }
+    },
+    {
+      "linkId": 1025,
+      "linkType": "productFeed",
+      "programId": 300000303,
+      "linkName": "Frozen Merchant - Flux produits",
+      "merchantId": 6600000303,
+      "merchantName": "Example Frozen Merchant",
+      "merchantUrl": "https://frozen.example",
+      "trackedLink": "https://feeds.example/frozen-feed.csv"
+    }
+  ]
+}

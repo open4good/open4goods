@@ -1,13 +1,20 @@
 package org.open4goods.services.feedservice.service;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,69 +22,103 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.util.HttpUtils;
+import org.open4goods.model.affiliation.AffiliationCapability;
+import org.open4goods.model.affiliation.AffiliationProgram;
+import org.open4goods.model.affiliation.AffiliationPromotion;
+import org.open4goods.model.affiliation.AffiliationTransaction;
 import org.open4goods.services.feedservice.config.FeedConfiguration;
 import org.open4goods.services.feedservice.model.EffiliationProgram;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.open4goods.model.affiliation.AffiliationCapability;
-import org.open4goods.model.affiliation.AffiliationProgram;
-import org.open4goods.model.affiliation.AffiliationPromotion;
-import org.open4goods.model.affiliation.AffiliationTransaction;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.Collection;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import tools.jackson.core.type.TypeReference;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 /**
- * Feed service implementation for Effiliation.
+ * Feed service implementation for Effiliation (now Effinity).
  *
- * <p>This service fetches metadata from Effiliation's REST API (JSON), caches it locally
- * using {@link RemoteFileCachingService}, and maps the results to {@link DataSourceProperties}.
+ * <p>This service reads the Effinity publisher API v3 (JSON), which replaces the API v2 shut down by Effiliation
+ * on 11/01/2027 (dd/MM/yyyy), caches the responses locally using {@link RemoteFileCachingService}, and maps them to
+ * {@link DataSourceProperties} and to the normalised affiliation models.</p>
  *
- * <h3>Hardening</h3>
+ * <h3>Endpoints</h3>
+ * All of them are {@code GET https://api.effinity.fr/apiv3/{apikey}/...}, paginated with {@code page} /
+ * {@code perPage} and read until {@code pagination.lastPage}:
  * <ul>
- *   <li>Never logs the API key (masked in logs).</li>
- *   <li>Validates required JSON fields.</li>
- *   <li>Returns an empty datasource set if programs cannot be retrieved (per requirement).</li>
- *   <li>Uses cached API responses (TTL expressed in days).</li>
+ *   <li>{@code publisher/programs?status=active&status=inactive}: the programs the publisher is subscribed to
+ *       (the {@code filter=mines} of the API v2);</li>
+ *   <li>{@code publisher/links/productfeeds}: the product feeds, one datasource per feed;</li>
+ *   <li>{@code publisher/links?linkType=voucherOrDeal}: the promotional offers (the {@code commercialtrades} of the
+ *       API v2);</li>
+ *   <li>{@code publisher/conversions}: the sales and leads, by windows of at most 90 days as required by the API
+ *       (the {@code transaction} of the API v2).</li>
  * </ul>
  *
- * <h3>API alignment</h3>
- * Uses official fields as documented:
+ * <h3>Mapping</h3>
  * <ul>
- *   <li>productfeeds: {@code nom}, {@code code}, {@code url_affilieur}, {@code id_affilieur}</li>
- *   <li>programs: {@code id_affilieur}, {@code url_tracke}, {@code urllo}, {@code pays}</li>
+ *   <li>Program identifier exposed to callers: the {@code merchantId} (advertiser), as the {@code id_affilieur} of
+ *       the API v2 was; feeds, promotions and conversions are joined on it.</li>
+ *   <li>Product feed: datasource name from {@code linkName} (the v2 {@code nom}), feed URL from
+ *       {@code trackedLink} (the v2 {@code code}), portal from {@code merchantUrl} (the v2 {@code url_affilieur}).
+ *       A feed whose program is {@code frozen} or {@code closed} is skipped.</li>
+ *   <li>Fields the API v3 no longer provides (program click, sale, lead and display commissions, EPC, conversion
+ *       rate, signup URL; transaction product id) stay {@code null}: an absent value is never reported as zero.</li>
  * </ul>
+ *
+ * <h3>Secrets</h3>
+ * The API only accepts the publisher key as a path segment, so every request URL carries it. Those URLs are never
+ * logged, put in a message or attached to an exception: logs use the {@code {apikey}} placeholder instead, and the
+ * cache is given the same label (see {@link RemoteFileCachingService#getResource(String, Integer, String)}). The
+ * hypermedia {@code links} of the payloads, which also carry the key, are never mapped.
+ *
+ * @see <a href="https://api.effinity.fr/apiv3/docs">Effinity API v3, OpenAPI description</a>
  */
 public class EffiliationFeedService extends AbstractFeedService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EffiliationFeedService.class);
 
+    /** Base URL of the Effinity API v3; the publisher API key is the next path segment. */
+    static final String API_BASE_URL = "https://api.effinity.fr/apiv3/";
+
+    /** Replaces the API key in everything that is logged. */
+    private static final String API_KEY_PLACEHOLDER = "{apikey}";
+
+    static final String PROGRAMS_RESOURCE = "publisher/programs?status=active&status=inactive";
+    static final String PRODUCT_FEEDS_RESOURCE = "publisher/links/productfeeds";
+    static final String PROMOTIONS_RESOURCE = "publisher/links?linkType=voucherOrDeal";
+    static final String CONVERSIONS_RESOURCE = "publisher/conversions";
+
+    /** Elements per page, the API maximum default. */
+    static final int PER_PAGE = 1000;
+
+    /** Guard against a pagination that never ends. */
+    static final int MAX_PAGES = 50;
+
+    /** Longest {@code start}..{@code end} span accepted by the conversions endpoint, in days. */
+    static final int MAX_CONVERSION_WINDOW_DAYS = 90;
+
+    /** Time zone of the dates returned by the API, which carry no offset. */
+    private static final ZoneId API_ZONE = ZoneId.of("Europe/Paris");
+
     private static final Pattern NUMERIC_PATTERN = Pattern.compile("^\\d+$");
+    private static final Pattern LEADING_INTEGER_PATTERN = Pattern.compile("^\\s*(\\d+)");
 
-        /** Effiliation filter value: "mines" = programs publisher is registered to. :contentReference[oaicite:2]{index=2} */
-    private static final String FILTER_MINES = "mines";
+    /** Program states for which feeds are still ingested ({@code frozen} and {@code closed} are not). */
+    private static final Set<String> ACTIVE_PROGRAM_STATES = Set.of("active", "closing");
 
-    /**
-     * Supported Effiliation output languages (lg).
-     * Docs mention: fr, en, es, it, pt, de, nl. :contentReference[oaicite:3]{index=3}
-     */
-    private static final Set<String> SUPPORTED_LG =
-            Set.of("fr", "en", "es", "it", "pt", "de", "nl");
+    private static final List<DateTimeFormatter> LOCAL_DATE_TIME_FORMATS = List.of(
+            DateTimeFormatter.ISO_LOCAL_DATE_TIME,
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
     private final ObjectMapper objectMapper;
     private final String effiliationApiKey;
@@ -89,7 +130,7 @@ public class EffiliationFeedService extends AbstractFeedService {
      * @param remoteFileCachingService service for caching remote files
      * @param dataSourceConfigService service to retrieve existing datasource properties
      * @param serialisationService service to deep copy datasource properties
-     * @param effiliationApiKey the Effiliation API key
+     * @param effiliationApiKey the Effiliation (Effinity) publisher API key
      */
     public EffiliationFeedService(FeedConfiguration feedConfig,
                                  RemoteFileCachingService remoteFileCachingService,
@@ -132,36 +173,18 @@ public class EffiliationFeedService extends AbstractFeedService {
             return result;
         }
 
-        // Programs are mandatory to enrich datasources (per your failure policy: "return none").
-        Map<String, EffiliationProgram> programs = retrieveEffiliationPrograms(effiliationApiKey, "fr");
+        // Programs are mandatory to enrich datasources: without them, no datasource is returned.
+        Map<String, EffiliationProgram> programs = retrieveEffiliationPrograms(effiliationApiKey);
         if (programs.isEmpty()) {
             LOGGER.error("Effiliation programs list is empty/unavailable; returning no datasources (per policy).");
             return result;
         }
 
-        /*
-         * Language driven by datasource/country:
-         * 1) fetch productfeeds in multiple language buckets (lg=fr/en/de/...) to match target feed countries.
-         * 2) merge feeds, keeping first occurrence per feedKey (nom).
-         *
-         * Why: productfeeds endpoint supports lg, but it's a request-level param. :contentReference[oaicite:4]{index=4}
-         */
-        Map<String, JsonNode> feedsByName = new HashMap<>();
-        for (String lg : computeLikelyLanguages(programs)) {
-            JsonNode root = retrieveEffiliationFeeds(effiliationApiKey, lg, null);
-            JsonNode feedsNode = (root == null) ? null : root.get("feeds");
-            if (feedsNode == null || !feedsNode.isArray()) {
-                LOGGER.warn("No 'feeds' array found for productfeeds (lg='{}').", lg);
-                continue;
-            }
-            for (JsonNode feedNode : feedsNode) {
-                String name = firstNonBlank(
-                        textOrNull(feedNode, "nom"),
-                        textOrNull(feedNode, "name") // fallback alias (non-breaking)
-                );
-                if (isBlank(name)) {
-                    continue;
-                }
+        // One datasource per feed name, keeping the first occurrence.
+        Map<String, JsonNode> feedsByName = new LinkedHashMap<>();
+        for (JsonNode feedNode : retrieveEffiliationFeeds(effiliationApiKey)) {
+            String name = textOrNull(feedNode, "linkName");
+            if (!isBlank(name)) {
                 feedsByName.putIfAbsent(name, feedNode);
             }
         }
@@ -171,59 +194,39 @@ public class EffiliationFeedService extends AbstractFeedService {
             return result;
         }
 
-        // Build datasources from merged feed set.
         for (Map.Entry<String, JsonNode> e : feedsByName.entrySet()) {
             JsonNode feedNode = e.getValue();
-
             String feedKey = e.getKey();
 
-            // Official: "code" is the product feed URL. :contentReference[oaicite:5]{index=5}
-            String feedUrl = firstNonBlank(
-                    textOrNull(feedNode, "code"),
-                    textOrNull(feedNode, "url"),       // fallback if API variant uses url
-                    textOrNull(feedNode, "feed_url")   // fallback alias
-            );
+            String feedUrl = textOrNull(feedNode, "trackedLink");
             if (isBlank(feedUrl)) {
-                LOGGER.warn("Skipping Effiliation feed '{}' due to missing feed URL field (code/url).", feedKey);
+                LOGGER.warn("Skipping Effiliation feed '{}' due to missing feed URL field (trackedLink).", feedKey);
                 continue;
             }
             feedUrl = HttpUtils.normalizeUrl(feedUrl);
 
-            String idAffilieur = firstNonBlank(
-                    textOrNull(feedNode, "id_affilieur"),
-                    textOrNull(feedNode, "idAffilieur") // fallback alias
-            );
-            if (!isValidAffilieurId(idAffilieur)) {
-                LOGGER.warn("Skipping Effiliation feed '{}' due to invalid 'id_affilieur' value '{}'.", feedKey, idAffilieur);
+            String merchantId = textOrNull(feedNode, "merchantId");
+            if (!isValidMerchantId(merchantId)) {
+                LOGGER.warn("Skipping Effiliation feed '{}' due to invalid 'merchantId' value '{}'.", feedKey, merchantId);
                 continue;
             }
 
-            EffiliationProgram program = programs.get(idAffilieur);
+            EffiliationProgram program = programs.get(merchantId.trim());
             if (program == null) {
-                // Keep previous behavior: do not emit datasource if program is missing.
-                LOGGER.warn("Program with affiliation id {} not found (feed='{}').", idAffilieur, feedKey);
+                LOGGER.warn("Program of merchant {} not found (feed='{}').", merchantId, feedKey);
                 continue;
             }
 
             if (!isProgramActive(program)) {
-                LOGGER.info("Skipping Effiliation feed '{}' because advertiser {} is not active (etat='{}').",
-                        feedKey, idAffilieur, program.getEtat());
+                LOGGER.info("Skipping Effiliation feed '{}' because the program of merchant {} is not active (state='{}').",
+                        feedKey, merchantId, program.state());
                 continue;
             }
 
             DataSourceProperties ds = getVolatileDatasource(feedKey, feedConfig, feedUrl);
-
-            // Official: advertiser url is "url_affilieur". :contentReference[oaicite:6]{index=6}
-            String portalUrl = firstNonBlank(
-                    textOrNull(feedNode, "url_affilieur"),
-                    textOrNull(feedNode, "urlannonceur"), // some APIs name it this way
-                    textOrNull(feedNode, "portal_url")    // fallback alias
-            );
-            ds.setPortalUrl(HttpUtils.normalizeUrl(portalUrl));
-
-            // Program enrichment from programs API fields. :contentReference[oaicite:7]{index=7}
-            ds.setAffiliatedPortalUrl(HttpUtils.normalizeUrl(program.getUrlTracke()));
-            ds.setLogo(HttpUtils.normalizeUrl(program.getUrlLogo())); // assuming your model maps urllo/url_logo to getUrlLogo()
+            ds.setPortalUrl(HttpUtils.normalizeUrl(firstNonBlank(textOrNull(feedNode, "merchantUrl"), program.merchantUrl())));
+            ds.setAffiliatedPortalUrl(HttpUtils.normalizeUrl(program.defaultTrackedLink()));
+            ds.setLogo(HttpUtils.normalizeUrl(program.programLogoUrl()));
 
             // Keep existing behavior: derive name from portal URL.
             ds.setName(extractNameAndTld(ds.getPortalUrl()));
@@ -236,15 +239,14 @@ public class EffiliationFeedService extends AbstractFeedService {
     }
 
     /**
-     * Retrieves Effiliation programs using cached API response.
+     * Retrieves the programs the publisher is subscribed to.
      *
-     * <p>Per requirement: programs are mandatory. Callers treat an empty map as a hard failure.
+     * <p>Programs are mandatory: callers treat an empty map as a hard failure.</p>
      *
-     * @param apiKey Effiliation API key
-     * @param lg output language (fr/en/...)
-     * @return map of id_affilieur -> EffiliationProgram
+     * @param apiKey Effinity publisher API key
+     * @return map of merchantId -> program, first program kept for a merchant
      */
-    private Map<String, EffiliationProgram> retrieveEffiliationPrograms(String apiKey, String lg) {
+    private Map<String, EffiliationProgram> retrieveEffiliationPrograms(String apiKey) {
         if (isBlank(apiKey)) {
             LOGGER.error("Effiliation API key is blank; cannot retrieve programs.");
             return Collections.emptyMap();
@@ -252,387 +254,176 @@ public class EffiliationFeedService extends AbstractFeedService {
 
         try {
             Map<String, EffiliationProgram> programs = new LinkedHashMap<>();
-            int page = 1;
-            while (true) {
-                JsonNode root = readCachedJson(
-                        buildProgramsEndpoint(apiKey, normalizeLg(lg), FILTER_MINES, null, null, page));
-                JsonNode programsNode = root.path("programs");
-
-                if (!programsNode.isArray()) {
-                    LOGGER.error("Effiliation programs payload has no 'programs' array (page={}).", page);
-                    return Collections.emptyMap();
+            for (JsonNode node : readAllPages(apiKey, PROGRAMS_RESOURCE, "programs")) {
+                EffiliationProgram program = objectMapper.convertValue(node, EffiliationProgram.class);
+                if (program != null && program.merchantId() != null) {
+                    programs.putIfAbsent(String.valueOf(program.merchantId()), program);
                 }
-
-                List<EffiliationProgram> programList =
-                        objectMapper.convertValue(programsNode, new TypeReference<List<EffiliationProgram>>() {});
-                for (EffiliationProgram program : programList) {
-                    if (program != null && program.getIdAffilieur() != null) {
-                        programs.putIfAbsent(String.valueOf(program.getIdAffilieur()), program);
-                    }
-                }
-
-                if (!hasNextPage(root, page)) {
-                    break;
-                }
-                page++;
             }
-
             return programs;
         } catch (Exception e) {
-            LOGGER.warn("Failed to retrieve/parse Effiliation programs.", e);
+            LOGGER.warn("Failed to retrieve/parse Effiliation programs ({}).", describe(e));
             return Collections.emptyMap();
         }
     }
 
     /**
-     * Retrieves Effiliation product feed metadata using cached API response.
+     * Retrieves the product feeds of the programs the publisher is subscribed to, all pages merged.
      *
-     * <p>Official endpoint: /productfeeds.json with params filter, lg, country, etc. :contentReference[oaicite:8]{index=8}
-     *
-     * @param apiKey Effiliation API key
-     * @param lg output language (fr/en/...)
-     * @param country optional country filter (comma-separated list accepted by API)
-     * @return response JsonNode, or null if retrieval fails
-     * @throws Exception on missing cache file or invalid JSON
+     * @param apiKey Effinity publisher API key
+     * @return the product feed links ({@code LinkRestDto})
+     * @throws IllegalStateException on missing cache file, invalid JSON or unexpected payload
      */
-    public JsonNode retrieveEffiliationFeeds(String apiKey, String lg, String country) throws Exception {
+    List<JsonNode> retrieveEffiliationFeeds(String apiKey) {
         assertEnabled();
         if (isBlank(apiKey)) {
             throw new IllegalArgumentException("Effiliation API key is blank.");
         }
-
-        JsonNode mergedRoot = null;
-        List<JsonNode> mergedFeeds = new ArrayList<>();
-        int page = 1;
-
-        while (true) {
-            String endpoint = buildProductFeedsEndpoint(apiKey, normalizeLg(lg), FILTER_MINES, country, null, page);
-            LOGGER.info("Retrieving Effiliation productfeeds (endpoint='{}').", safeEndpointForLogs(endpoint));
-
-            JsonNode root = readCachedJson(endpoint);
-            if (mergedRoot == null) {
-                mergedRoot = root.deepCopy();
-            }
-
-            JsonNode feedsNode = root.path("feeds");
-            if (feedsNode.isArray()) {
-                for (JsonNode feed : feedsNode) {
-                    mergedFeeds.add(feed);
-                }
-            }
-
-            if (!hasNextPage(root, page)) {
-                break;
-            }
-            page++;
-        }
-
-        if (mergedRoot == null) {
-            return objectMapper.createObjectNode();
-        }
-
-        ((tools.jackson.databind.node.ObjectNode) mergedRoot).set("feeds", objectMapper.valueToTree(mergedFeeds));
-        return mergedRoot;
-    }
-
-    /* ==========================================================================================
-     * Additional Effiliation documented endpoints (cached retrieval)
-     * These are implemented as helpers so other services can consume them without reimplementing
-     * caching / key masking / URL building.
-     * ========================================================================================== */
-
-    /**
-     * Links API: banners/text/flash links. :contentReference[oaicite:9]{index=9}
-     */
-    public JsonNode retrieveEffiliationLinks(String apiKey, String lg, String country) throws Exception {
-        assertEnabled();
-        String endpoint = buildLinksEndpoint(apiKey, normalizeLg(lg), FILTER_MINES, country, null, null, null, null);
-        LOGGER.info("Retrieving Effiliation links (endpoint='{}').", safeEndpointForLogs(endpoint));
-        return readCachedJson(endpoint);
+        return readAllPages(apiKey, PRODUCT_FEEDS_RESOURCE, "links");
     }
 
     /**
-     * Retrieves promotional offers, called "commercial trades" by Effiliation's API.
+     * Retrieves the promotional offers (vouchers and deals), all pages merged.
      *
-     * @param apiKey Effiliation API key
-     * @param lg output language
-     * @param country optional country filter
-     * @return raw API payload
-     * @throws Exception when the cached API response cannot be read
+     * @param apiKey Effinity publisher API key
+     * @return the promotional offer links ({@code LinkRestDto})
+     * @throws IllegalStateException on missing cache file, invalid JSON or unexpected payload
      */
-    public JsonNode retrieveEffiliationPromotionalOffers(String apiKey, String lg, String country) throws Exception {
+    List<JsonNode> retrieveEffiliationPromotionalOffers(String apiKey) {
         assertEnabled();
-        String endpoint = buildPromotionalOffersEndpoint(apiKey, normalizeLg(lg), FILTER_MINES, country, null, null);
-        LOGGER.info("Retrieving Effiliation commercial trades (endpoint='{}').", safeEndpointForLogs(endpoint));
-        return readCachedJson(endpoint);
+        return readAllPages(apiKey, PROMOTIONS_RESOURCE, "links");
     }
 
     /**
-     * Categories API. Listed under "Others". :contentReference[oaicite:11]{index=11}
-     */
-    public JsonNode retrieveEffiliationCategories(String apiKey, String lg) throws Exception {
-        assertEnabled();
-        String endpoint = buildCategoriesEndpoint(apiKey, normalizeLg(lg));
-        LOGGER.info("Retrieving Effiliation categories (endpoint='{}').", safeEndpointForLogs(endpoint));
-        return readCachedJson(endpoint);
-    }
-
-    /**
-     * Acturss (news/rss) endpoint under "Others". :contentReference[oaicite:12]{index=12}
-     */
-    public JsonNode retrieveEffiliationActuRss(String apiKey, String lg) throws Exception {
-        assertEnabled();
-        String endpoint = buildActuRssEndpoint(apiKey, normalizeLg(lg));
-        LOGGER.info("Retrieving Effiliation acturss (endpoint='{}').", safeEndpointForLogs(endpoint));
-        return readCachedJson(endpoint);
-    }
-
-    /**
-     * Reporting endpoint. :contentReference[oaicite:13]{index=13}
-     */
-    public JsonNode retrieveEffiliationReporting(String apiKey, String lg, String type, String start, String end) throws Exception {
-        assertEnabled();
-        String endpoint = buildReportingEndpoint(apiKey, normalizeLg(lg), type, start, end, null, null);
-        LOGGER.info("Retrieving Effiliation reporting (endpoint='{}').", safeEndpointForLogs(endpoint));
-        return readCachedJson(endpoint);
-    }
-
-    /**
-     * Transactions endpoint. :contentReference[oaicite:14]{index=14}
-     */
-    public JsonNode retrieveEffiliationTransactions(String apiKey, String lg, String start, String end, String dateType) throws Exception {
-        assertEnabled();
-        String endpoint = buildTransactionsEndpoint(apiKey, normalizeLg(lg), start, end, dateType, null, null);
-        LOGGER.info("Retrieving Effiliation transactions (endpoint='{}').", safeEndpointForLogs(endpoint));
-        return readCachedJson(endpoint);
-    }
-
-    /**
-     * UpdatedTransactions endpoint (exists in reporting section navigation). :contentReference[oaicite:15]{index=15}
+     * Retrieves the conversions (sales and leads, any status) whose conversion date is in the given range,
+     * querying the API by windows of at most {@value #MAX_CONVERSION_WINDOW_DAYS} days.
      *
-     * <p>Kept generic because parameters vary depending on how you use it in your project.</p>
+     * @param apiKey Effinity publisher API key
+     * @param start first day, inclusive
+     * @param end last day, inclusive
+     * @return the conversions ({@code ConversionApiDto})
+     * @throws IllegalStateException on missing cache file, invalid JSON or unexpected payload
      */
-    public JsonNode retrieveEffiliationUpdatedTransactions(String apiKey, String lg, String start, String end) throws Exception {
+    List<JsonNode> retrieveEffiliationConversions(String apiKey, LocalDate start, LocalDate end) {
         assertEnabled();
-        String endpoint = buildUpdatedTransactionsEndpoint(apiKey, normalizeLg(lg), start, end, null);
-        LOGGER.info("Retrieving Effiliation updatedtransactions (endpoint='{}').", safeEndpointForLogs(endpoint));
-        return readCachedJson(endpoint);
+        List<JsonNode> conversions = new ArrayList<>();
+        for (LocalDate windowStart = start; !windowStart.isAfter(end);
+                windowStart = windowStart.plusDays(MAX_CONVERSION_WINDOW_DAYS)) {
+            LocalDate windowEnd = windowStart.plusDays(MAX_CONVERSION_WINDOW_DAYS - 1L);
+            if (windowEnd.isAfter(end)) {
+                windowEnd = end;
+            }
+            conversions.addAll(readAllPages(apiKey, CONVERSIONS_RESOURCE
+                    + "?start=" + windowStart + "&end=" + windowEnd
+                    + "&dateType=conversionDate&conversionType=all&status=all", "conversions"));
+        }
+        return conversions;
     }
 
     /* ==========================================================================================
-     * URL builders (official docs + safe encoding)
+     * Paginated, cached read
      * ========================================================================================== */
 
-    private String buildProgramsEndpoint(String apiKey,
-                                         String lg,
-                                         String filter,
-                                         String country,
-                                         String categories,
-                                         Integer page) {
-        // Official: /programs.json supports filter, lg, country, categories... :contentReference[oaicite:16]{index=16}
-        return "https://apiv2.effiliation.com/apiv2/programs.json"
-                + "?key=" + urlEncode(apiKey)
-                + "&filter=" + urlEncode(nullSafe(filter))
-                + "&lg=" + urlEncode(lg)
-                + (isBlank(country) ? "" : "&country=" + urlEncode(country))
-                + (isBlank(categories) ? "" : "&categories=" + urlEncode(categories))
-                + (page == null ? "" : "&page=" + page);
+    /**
+     * Reads every page of a paginated API v3 resource and merges the items of its list field.
+     *
+     * @param apiKey Effinity publisher API key
+     * @param resource resource path relative to the key segment, with its query string if any
+     * @param listField name of the array holding the items
+     * @return the items of all pages
+     * @throws IllegalStateException on missing cache file, invalid JSON, missing list or runaway pagination
+     */
+    private List<JsonNode> readAllPages(String apiKey, String resource, String listField) {
+        List<JsonNode> items = new ArrayList<>();
+        int lastPage = 1;
+        for (int page = 1; page <= lastPage; page++) {
+            if (page > MAX_PAGES) {
+                throw new IllegalStateException("Effiliation " + listField + ": more than " + MAX_PAGES + " pages.");
+            }
+            String pagedResource = resource + (resource.contains("?") ? "&" : "?") + "page=" + page + "&perPage=" + PER_PAGE;
+            JsonNode root = readCachedJson(apiKey, pagedResource);
+            JsonNode list = root.path(listField);
+            if (!list.isArray()) {
+                throw new IllegalStateException("Effiliation payload has no '" + listField + "' array (page " + page + ").");
+            }
+            list.forEach(items::add);
+            lastPage = root.path("pagination").path("lastPage").asInt(1);
+        }
+        return items;
     }
 
-    private String buildProductFeedsEndpoint(String apiKey,
-                                            String lg,
-                                            String filter,
-                                            String country,
-                                            String type,
-                                            Integer page) {
-        // Official: /productfeeds.json supports filter, lg, country, type... :contentReference[oaicite:17]{index=17}
-        return "https://apiv2.effiliation.com/apiv2/productfeeds.json"
-                + "?key=" + urlEncode(apiKey)
-                + "&filter=" + urlEncode(nullSafe(filter))
-                + "&lg=" + urlEncode(lg)
-                + (isBlank(country) ? "" : "&country=" + urlEncode(country))
-                + (isBlank(type) ? "" : "&type=" + urlEncode(type))
-                + (page == null ? "" : "&page=" + page);
-    }
-
-    private String buildLinksEndpoint(String apiKey,
-                                     String lg,
-                                     String filter,
-                                     String country,
-                                     String categories,
-                                     String type,
-                                     String sessions,
-                                     String mode) {
-        // Official: /links.json supports filter, lg, country, categories, type, sessions, mode... :contentReference[oaicite:18]{index=18}
-        return "https://apiv2.effiliation.com/apiv2/links.json"
-                + "?key=" + urlEncode(apiKey)
-                + "&filter=" + urlEncode(nullSafe(filter))
-                + "&lg=" + urlEncode(lg)
-                + (isBlank(mode) ? "" : "&mode=" + urlEncode(mode))
-                + (isBlank(country) ? "" : "&country=" + urlEncode(country))
-                + (isBlank(categories) ? "" : "&categories=" + urlEncode(categories))
-                + (isBlank(type) ? "" : "&type=" + urlEncode(type))
-                + (isBlank(sessions) ? "" : "&sessions=" + urlEncode(sessions));
-    }
-
-    private String buildPromotionalOffersEndpoint(String apiKey,
-                                                 String lg,
-                                                 String filter,
-                                                 String country,
-                                                 String categories,
-                                                 String mode) {
-        // Official Promotionaloffers API URL is named commercialtrades.
-        return "https://apiv2.effiliation.com/apiv2/commercialtrades.json"
-                + "?key=" + urlEncode(apiKey)
-                + "&filter=" + urlEncode(nullSafe(filter))
-                + "&lg=" + urlEncode(lg)
-                + (isBlank(mode) ? "" : "&mode=" + urlEncode(mode))
-                + (isBlank(country) ? "" : "&country=" + urlEncode(country))
-                + (isBlank(categories) ? "" : "&categories=" + urlEncode(categories));
-    }
-
-    private String buildCategoriesEndpoint(String apiKey, String lg) {
-        // Listed under Others -> Categories.
-        return "https://apiv2.effiliation.com/apiv2/categories.json"
-                + "?key=" + urlEncode(apiKey)
-                + "&lg=" + urlEncode(lg);
-    }
-
-    private String buildActuRssEndpoint(String apiKey, String lg) {
-        // Listed under Others -> Acturss.
-        return "https://apiv2.effiliation.com/apiv2/acturss.json"
-                + "?key=" + urlEncode(apiKey)
-                + "&lg=" + urlEncode(lg);
-    }
-
-    private String buildReportingEndpoint(String apiKey,
-                                         String lg,
-                                         String type,
-                                         String start,
-                                         String end,
-                                         String fields,
-                                         String detail) {
-        // Official: /reporting.json supports lg,type,start,end,fields,detail. :contentReference[oaicite:20]{index=20}
-        return "https://apiv2.effiliation.com/apiv2/reporting.json"
-                + "?key=" + urlEncode(apiKey)
-                + "&lg=" + urlEncode(lg)
-                + "&type=" + urlEncode(nullSafe(type))
-                + "&start=" + urlEncode(nullSafe(start))
-                + "&end=" + urlEncode(nullSafe(end))
-                + (isBlank(fields) ? "" : "&fields=" + urlEncode(fields))
-                + (isBlank(detail) ? "" : "&detail=" + urlEncode(detail));
-    }
-
-    private String buildTransactionsEndpoint(String apiKey,
-                                            String lg,
-                                            String start,
-                                            String end,
-                                            String type,
-                                            String idAffilieur,
-                                            String effiId) {
-        // Official: /transaction.json exists; parameters include start/end/type and filters like id_affilieur, effi_id. :contentReference[oaicite:21]{index=21}
-        return "https://apiv2.effiliation.com/apiv2/transaction.json"
-                + "?key=" + urlEncode(apiKey)
-                + "&lg=" + urlEncode(lg)
-                + "&start=" + urlEncode(nullSafe(start))
-                + "&end=" + urlEncode(nullSafe(end))
-                + "&type=" + urlEncode(nullSafe(type))
-                + (isBlank(idAffilieur) ? "" : "&id_affilieur=" + urlEncode(idAffilieur))
-                + (isBlank(effiId) ? "" : "&effi_id=" + urlEncode(effiId));
-    }
-
-    private String buildUpdatedTransactionsEndpoint(String apiKey,
-                                                   String lg,
-                                                   String start,
-                                                   String end,
-                                                   String fields) {
-        // Present in docs nav as UpdatedTransactions. Keep generic.
-        return "https://apiv2.effiliation.com/apiv2/updatedtransactions.json"
-                + "?key=" + urlEncode(apiKey)
-                + "&lg=" + urlEncode(lg)
-                + "&start=" + urlEncode(nullSafe(start))
-                + "&end=" + urlEncode(nullSafe(end))
-                + (isBlank(fields) ? "" : "&fields=" + urlEncode(fields));
-    }
-
-    /* ==========================================================================================
-     * Cached read helper
-     * ========================================================================================== */
-
-    private JsonNode readCachedJson(String endpoint) throws Exception {
+    /**
+     * Reads a resource through the cache, falling back to a stale copy when the refresh fails.
+     *
+     * @param apiKey Effinity publisher API key, only placed in the request URL
+     * @param resource resource path relative to the key segment, with its query string
+     * @return the parsed response
+     * @throws IllegalStateException when no cached copy exists or it cannot be read or parsed; it never carries a
+     *         cause, whose message could quote the URL and therefore the key
+     */
+    private JsonNode readCachedJson(String apiKey, String resource) {
+        if (isBlank(apiKey)) {
+            throw new IllegalArgumentException("Effiliation API key is blank.");
+        }
+        // The URL carries the key: only the label is ever logged.
+        String url = API_BASE_URL + urlEncode(apiKey.trim()) + "/" + resource;
+        String label = API_BASE_URL + API_KEY_PLACEHOLDER + "/" + resource;
         int cacheTtl = feedConfig.getEffiliation().getCacheTtlDays();
+        LOGGER.info("Retrieving Effiliation resource '{}'.", label);
+
         File cachedResponse;
         try {
-            cachedResponse = remoteFileCachingService.getResource(endpoint, cacheTtl);
+            cachedResponse = remoteFileCachingService.getResource(url, cacheTtl, label);
         } catch (Exception exception) {
-            LOGGER.warn("Effiliation live cache refresh failed, retrying using stale cache (endpoint='{}').",
-                    safeEndpointForLogs(endpoint), exception);
+            LOGGER.warn("Effiliation live cache refresh failed ({}), retrying using stale cache (resource='{}').",
+                    exception.getClass().getSimpleName(), label);
             cachedResponse = null;
         }
 
         if (cachedResponse == null || !cachedResponse.exists()) {
-            LOGGER.warn("Effiliation response unavailable with configured TTL, retrying using stale cache (endpoint='{}').",
-                    safeEndpointForLogs(endpoint));
-            cachedResponse = remoteFileCachingService.getResource(endpoint, Integer.MAX_VALUE);
+            LOGGER.warn("Effiliation response unavailable with configured TTL, retrying using stale cache (resource='{}').",
+                    label);
+            try {
+                cachedResponse = remoteFileCachingService.getResource(url, Integer.MAX_VALUE, label);
+            } catch (Exception exception) {
+                throw new IllegalStateException("Effiliation stale cache read failed (" + exception.getClass().getSimpleName()
+                        + ", resource='" + label + "').");
+            }
         }
 
         if (cachedResponse == null || !cachedResponse.exists()) {
-            throw new Exception("Effiliation cached response file not found.");
+            throw new IllegalStateException("Effiliation cached response file not found (resource='" + label + "').");
         }
 
-        String jsonResponse = Files.readString(cachedResponse.toPath(), StandardCharsets.UTF_8);
-        if (isBlank(jsonResponse)) {
-            throw new Exception("Effiliation cached response is empty.");
+        String jsonResponse;
+        try {
+            jsonResponse = Files.readString(cachedResponse.toPath(), StandardCharsets.UTF_8);
+        } catch (IOException exception) {
+            throw new IllegalStateException("Effiliation cached response cannot be read (resource='" + label + "').");
         }
-        return objectMapper.readTree(jsonResponse);
+        if (isBlank(jsonResponse)) {
+            throw new IllegalStateException("Effiliation cached response is empty (resource='" + label + "').");
+        }
+        try {
+            return objectMapper.readTree(jsonResponse);
+        } catch (JacksonException exception) {
+            throw new IllegalStateException("Effiliation response is not valid JSON (resource='" + label + "').");
+        }
     }
 
     /* ==========================================================================================
-     * Language/country heuristics (driven by datasource/country)
+     * Helpers
      * ========================================================================================== */
 
     /**
-     * Computes a list of likely languages based on program coverage (pays) and common countries.
-     *
-     * <p>We keep this deterministic & small to avoid extra API calls.</p>
+     * Describes a failure for the logs: the message of the exceptions raised by this class, which only carry the
+     * {@code {apikey}} label, otherwise the exception type alone.
      */
-    private List<String> computeLikelyLanguages(Map<String, EffiliationProgram> programs) {
-        EnumSet<Lg> langs = EnumSet.noneOf(Lg.class);
-
-        // Attempt to detect from program "pays" / "country"-like fields (model dependent).
-        // If model does not provide it, we fall back to always include FR.
-        for (EffiliationProgram p : programs.values()) {
-            String pays = p == null ? null : p.getPays();
-            if (!isBlank(pays)) {
-                for (String c : splitCountries(pays)) {
-                    langs.add(Lg.fromCountry(c));
-                }
-            }
+    private static String describe(Exception e) {
+        if (e instanceof IllegalStateException || e instanceof IllegalArgumentException) {
+            return e.getMessage();
         }
-
-        // Always include FR to preserve current behavior.
-        langs.add(Lg.FR);
-
-        List<String> out = new ArrayList<>();
-        for (Lg l : langs) {
-            out.add(l.lg);
-        }
-        return out;
-    }
-
-    private List<String> splitCountries(String pays) {
-        if (isBlank(pays)) {
-            return List.of();
-        }
-        String[] parts = pays.split("[,;\\s]+");
-        List<String> out = new ArrayList<>();
-        for (String p : parts) {
-            String c = p.trim().toLowerCase(Locale.ROOT);
-            if (!c.isEmpty()) {
-                out.add(c);
-            }
-        }
-        return out;
+        return e.getClass().getSimpleName();
     }
 
     private boolean isEnabled() {
@@ -665,113 +456,15 @@ public class EffiliationFeedService extends AbstractFeedService {
         }
     }
 
-    private boolean isValidAffilieurId(String idAffilieur) {
-        return !isBlank(idAffilieur) && NUMERIC_PATTERN.matcher(idAffilieur.trim()).matches();
+    private boolean isValidMerchantId(String merchantId) {
+        return !isBlank(merchantId) && NUMERIC_PATTERN.matcher(merchantId.trim()).matches();
     }
 
     private boolean isProgramActive(EffiliationProgram program) {
-        if (program == null || isBlank(program.getEtat())) {
+        if (program == null || isBlank(program.state())) {
             return true;
         }
-        String normalizedStatus = program.getEtat().trim().toLowerCase(Locale.ROOT);
-        return "active".equals(normalizedStatus)
-                || "actif".equals(normalizedStatus)
-                || "1".equals(normalizedStatus)
-                || "on".equals(normalizedStatus)
-                || "enabled".equals(normalizedStatus)
-                || "inscrit".equals(normalizedStatus);
-    }
-
-    private boolean hasNextPage(JsonNode root, int currentPage) {
-        JsonNode nextPage = root.path("next_page");
-        if (nextPage.isInt()) {
-            return nextPage.asInt() > currentPage;
-        }
-        if (!nextPage.isMissingNode() && !nextPage.isNull() && nextPage.asText() != null) {
-            String value = nextPage.asText().trim();
-            if (!value.isEmpty()) {
-                try {
-                    return Integer.parseInt(value) > currentPage;
-                } catch (NumberFormatException ignored) {
-                    return true;
-                }
-            }
-        }
-
-        JsonNode totalPages = root.path("total_pages");
-        if (totalPages.isInt()) {
-            return currentPage < totalPages.asInt();
-        }
-        if (!totalPages.isMissingNode() && !totalPages.isNull()) {
-            String value = totalPages.asText().trim();
-            if (!value.isEmpty()) {
-                try {
-                    return currentPage < Integer.parseInt(value);
-                } catch (NumberFormatException ignored) {
-                    return false;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    private String normalizeLg(String lg) {
-        String v = isBlank(lg) ? "fr" : lg.trim().toLowerCase(Locale.ROOT);
-        return SUPPORTED_LG.contains(v) ? v : "fr";
-    }
-
-    /**
-     * Minimal mapping of country -> output language (lg) for Effiliation calls.
-     *
-     * <p>Countries list is in productfeeds/programs docs. :contentReference[oaicite:23]{index=23}</p>
-     */
-    private enum Lg {
-        FR("fr"), EN("en"), DE("de"), ES("es"), IT("it"), PT("pt"), NL("nl");
-
-        final String lg;
-
-        Lg(String lg) {
-            this.lg = lg;
-        }
-
-        static Lg fromCountry(String country) {
-            if (country == null) {
-                return FR;
-            }
-            switch (country.toLowerCase(Locale.ROOT)) {
-                case "uk":
-                case "en":
-                    return EN;
-                case "ge":
-                case "de":
-                case "at":
-                case "ch":
-                    return DE;
-                case "sp":
-                case "es":
-                    return ES;
-                case "it":
-                    return IT;
-                case "pt":
-                case "br":
-                    return PT;
-                case "nl":
-                case "be":
-                    return NL;
-                case "fr":
-                default:
-                    return FR;
-            }
-        }
-    }
-
-    /* ==========================================================================================
-     * Low-level helpers
-     * ========================================================================================== */
-
-    private String safeEndpointForLogs(String endpoint) {
-        return HttpUtils.safeEndpointForLogs(endpoint);
+        return ACTIVE_PROGRAM_STATES.contains(program.state().trim().toLowerCase(Locale.ROOT));
     }
 
     private String urlEncode(String value) {
@@ -782,20 +475,16 @@ public class EffiliationFeedService extends AbstractFeedService {
         return HttpUtils.isBlank(s);
     }
 
-    private String nullSafe(String s) {
-        return s == null ? "" : s;
-    }
-
     private String textOrNull(JsonNode node, String field) {
         if (node == null || field == null) {
             return null;
         }
         JsonNode v = node.get(field);
-        if (v == null || v.isNull()) {
+        if (v == null || v.isNull() || v.isContainer()) {
             return null;
         }
         String s = v.asText();
-        return isBlank(s) ? null : s;
+        return isBlank(s) ? null : s.trim();
     }
 
     private String firstNonBlank(String... values) {
@@ -810,28 +499,66 @@ public class EffiliationFeedService extends AbstractFeedService {
         return null;
     }
 
-    private LocalDate parseEffiliationLocalDate(String value) {
+    private BigDecimal decimalOrNull(String value) {
+        if (isBlank(value)) {
+            return null;
+        }
+        try {
+            return new BigDecimal(value.trim());
+        } catch (NumberFormatException ignored) {
+            return null;
+        }
+    }
+
+    private Set<String> lowerCaseSet(List<String> values) {
+        if (values == null) {
+            return null;
+        }
+        Set<String> out = new HashSet<>();
+        for (String value : values) {
+            if (!isBlank(value)) {
+                out.add(value.trim().toLowerCase(Locale.ROOT));
+            }
+        }
+        return out;
+    }
+
+    /** Reads the number of days of a duration such as {@code "30 days"}. */
+    private Integer parseDays(String duration) {
+        if (isBlank(duration)) {
+            return null;
+        }
+        Matcher matcher = LEADING_INTEGER_PATTERN.matcher(duration);
+        return matcher.find() ? Integer.valueOf(matcher.group(1)) : null;
+    }
+
+    private LocalDate parseLocalDate(String value) {
+        if (isBlank(value) || value.trim().length() < 10) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(value.trim().substring(0, 10));
+        } catch (DateTimeParseException ignored) {
+            return null;
+        }
+    }
+
+    /** Reads an API date-time, local to {@link #API_ZONE} unless it carries an offset. */
+    private Instant parseInstant(String value) {
         if (isBlank(value)) {
             return null;
         }
         String trimmed = value.trim();
-        if (trimmed.length() >= 10) {
-            try {
-                return LocalDate.parse(trimmed.substring(0, 10));
-            } catch (DateTimeParseException ignored) {
-                // Try Effiliation's documented French date format below.
-            }
+        try {
+            return OffsetDateTime.parse(trimmed).toInstant();
+        } catch (DateTimeParseException ignored) {
+            // Documented format: a local date-time.
         }
-        for (DateTimeFormatter formatter : List.of(
-                DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"),
-                DateTimeFormatter.ofPattern("dd/MM/yyyy"))) {
+        for (DateTimeFormatter formatter : LOCAL_DATE_TIME_FORMATS) {
             try {
-                if (formatter.toString().contains("HourOfDay")) {
-                    return LocalDateTime.parse(trimmed, formatter).toLocalDate();
-                }
-                return LocalDate.parse(trimmed, formatter);
+                return LocalDateTime.parse(trimmed, formatter).atZone(API_ZONE).toInstant();
             } catch (DateTimeParseException ignored) {
-                // Try the next documented variant.
+                // Try the next format.
             }
         }
         return null;
@@ -858,57 +585,28 @@ public class EffiliationFeedService extends AbstractFeedService {
     @Override
     protected Collection<AffiliationProgram> loadProgramsInternal() throws Exception
     {
-        Map<String, EffiliationProgram> raw = retrieveEffiliationPrograms(effiliationApiKey, "fr");
-        if (raw == null || raw.isEmpty())
+        Map<String, EffiliationProgram> raw = retrieveEffiliationPrograms(effiliationApiKey);
+        if (raw.isEmpty())
         {
             return Collections.emptyList();
         }
         List<AffiliationProgram> list = new ArrayList<>();
-        for (EffiliationProgram ep : raw.values())
+        for (Map.Entry<String, EffiliationProgram> entry : raw.entrySet())
         {
+            EffiliationProgram ep = entry.getValue();
             AffiliationProgram ap = new AffiliationProgram();
             ap.setProviderName(getProviderName());
-            ap.setProgramId(String.valueOf(ep.getIdAffilieur()));
-            ap.setAdvertiserName(ep.getNom());
-            ap.setStatus(ep.getEtat());
-            
-            if (ep.getPays() != null)
-            {
-                ap.setCountryCodes(new HashSet<>(splitCountries(ep.getPays())));
-            }
+            ap.setProgramId(entry.getKey());
+            ap.setAdvertiserName(firstNonBlank(ep.merchantName(), ep.programName()));
+            ap.setStatus(firstNonBlank(ep.state(), ep.status()));
+            ap.setCountryCodes(lowerCaseSet(ep.coverageCountries()));
             ap.setCurrency("EUR"); // Default currency for Effiliation
-            if (ep.getCategories() != null)
-            {
-                ap.setCategories(new HashSet<>(splitCountries(ep.getCategories())));
-            }
-            ap.setCookieDurationDays(ep.getDureeCookies());
-            ap.setClickCommission(ep.getClic());
-            ap.setSaleCommissionPercent(ep.getVenteFixe());
-            ap.setLeadCommission(ep.getLead());
-            ap.setDisplayCpm(ep.getAffichage());
-            
-            if (ep.getEpc() != null)
-            {
-                try
-                {
-                    ap.setEpc(new BigDecimal(ep.getEpc().trim()));
-                }
-                catch (Exception ignored) {}
-            }
-            if (ep.getTransformation() != null)
-            {
-                try
-                {
-                    ap.setConversionRate(new BigDecimal(ep.getTransformation().trim()));
-                }
-                catch (Exception ignored) {}
-            }
-            ap.setLogoUrl(ep.getUrlLogo());
-            ap.setPortalUrl(ep.getUrlAnnonceur());
-            ap.setTrackingUrl(ep.getUrlTracke());
-            ap.setSignupUrl(ep.getUrlInscription());
-            ap.setDescription(ep.getDescription());
-            
+            ap.setCategories(lowerCaseSet(ep.programCategories()));
+            ap.setCookieDurationDays(parseDays(ep.cookieDurationPostClick()));
+            ap.setLogoUrl(ep.programLogoUrl());
+            ap.setPortalUrl(ep.merchantUrl());
+            ap.setTrackingUrl(ep.defaultTrackedLink());
+            ap.setDescription(ep.merchantDescription());
             list.add(ap);
         }
         return list;
@@ -921,75 +619,24 @@ public class EffiliationFeedService extends AbstractFeedService {
         {
             return Collections.emptyList();
         }
-        JsonNode root = retrieveEffiliationPromotionalOffers(effiliationApiKey, "fr", null);
-        if (root == null)
-        {
-            return Collections.emptyList();
-        }
-        JsonNode offersNode = root.path("supports");
-        if (offersNode.isMissingNode() || !offersNode.isArray())
-        {
-            offersNode = root.path("commercialtrades");
-        }
-        if (offersNode.isMissingNode() || !offersNode.isArray())
-        {
-            offersNode = root.path("promotionaloffers");
-            if (offersNode.isMissingNode() || !offersNode.isArray())
-            {
-                offersNode = root.path("promotions");
-                if (offersNode.isMissingNode() || !offersNode.isArray())
-                {
-                    if (root.isArray())
-                    {
-                        offersNode = root;
-                    }
-                    else
-                    {
-                        LOGGER.warn("Effiliation commercial trades payload has no supported offer array.");
-                        return Collections.emptyList();
-                    }
-                }
-            }
-        }
-        
+
         List<AffiliationPromotion> list = new ArrayList<>();
-        for (JsonNode node : offersNode)
+        for (JsonNode node : retrieveEffiliationPromotionalOffers(effiliationApiKey))
         {
+            JsonNode promo = node.path("promo");
             AffiliationPromotion ap = new AffiliationPromotion();
             ap.setProviderName(getProviderName());
-            ap.setProgramId(firstNonBlank(textOrNull(node, "id_annonceur"), textOrNull(node, "id_affilieur"), textOrNull(node, "program_id")));
-            ap.setAdvertiserName(firstNonBlank(textOrNull(node, "site_affilieur"), textOrNull(node, "nom_annonceur"), textOrNull(node, "advertiser_name"), textOrNull(node, "nomprogramme")));
-            ap.setTitle(firstNonBlank(textOrNull(node, "nom"), textOrNull(node, "titre"), textOrNull(node, "title"), textOrNull(node, "intitule")));
-            ap.setDescription(firstNonBlank(textOrNull(node, "description"), textOrNull(node, "desc")));
-            ap.setVoucherCode(firstNonBlank(textOrNull(node, "intitule"), textOrNull(node, "voucher_code"), textOrNull(node, "code_promo")));
-            ap.setDiscountType(firstNonBlank(textOrNull(node, "type"), textOrNull(node, "type_remise"), textOrNull(node, "discount_type")));
-            
-            String valStr = firstNonBlank(textOrNull(node, "valeur_remise"), textOrNull(node, "discount_value"));
-            if (valStr != null)
-            {
-                try
-                {
-                    ap.setDiscountValue(new BigDecimal(valStr.trim()));
-                }
-                catch (Exception ignored) {}
-            }
-            
-            String startStr = firstNonBlank(textOrNull(node, "date_debut"), textOrNull(node, "start_date"));
-            ap.setStartDate(parseEffiliationLocalDate(startStr));
-            
-            String endStr = firstNonBlank(textOrNull(node, "date_fin"), textOrNull(node, "end_date"));
-            ap.setEndDate(parseEffiliationLocalDate(endStr));
-            
-            ap.setLandingUrl(firstNonBlank(textOrNull(node, "url_affilieur"), textOrNull(node, "url_redir"), textOrNull(node, "url_redirection"), textOrNull(node, "landing_url")));
-            ap.setTrackingUrl(firstNonBlank(textOrNull(node, "url_tracke"), textOrNull(node, "url_tracking"), textOrNull(node, "tracking_url"), textOrNull(node, "url_redir")));
-            ap.setConditions(firstNonBlank(textOrNull(node, "conditions"), textOrNull(node, "terms")));
-            
-            String pays = firstNonBlank(textOrNull(node, "pays"), textOrNull(node, "countries"));
-            if (pays != null)
-            {
-                ap.setCountryCodes(new HashSet<>(splitCountries(pays)));
-            }
-            
+            ap.setProgramId(textOrNull(node, "merchantId"));
+            ap.setAdvertiserName(firstNonBlank(textOrNull(node, "merchantName"), textOrNull(node, "programName")));
+            ap.setTitle(textOrNull(node, "linkName"));
+            ap.setDescription(textOrNull(promo, "description"));
+            ap.setVoucherCode(firstNonBlank(textOrNull(promo, "voucher"), textOrNull(promo, "code")));
+            ap.setDiscountType(firstNonBlank(textOrNull(promo, "promoType"), textOrNull(promo, "valueType")));
+            ap.setDiscountValue(decimalOrNull(textOrNull(promo, "value")));
+            ap.setStartDate(parseLocalDate(firstNonBlank(textOrNull(promo, "validityStartDate"), textOrNull(node, "startDate"))));
+            ap.setEndDate(parseLocalDate(firstNonBlank(textOrNull(promo, "validityEndDate"), textOrNull(node, "endDate"))));
+            ap.setLandingUrl(textOrNull(node, "urlRedir"));
+            ap.setTrackingUrl(textOrNull(node, "trackedLink"));
             list.add(ap);
         }
         return list;
@@ -1004,94 +651,29 @@ public class EffiliationFeedService extends AbstractFeedService {
         }
         try
         {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(java.time.ZoneId.of("UTC"));
-            String start = formatter.format(from);
-            String end = formatter.format(to);
-            JsonNode root = retrieveEffiliationTransactions(effiliationApiKey, "fr", start, end, "action");
-            if (root == null)
-            {
-                return Collections.emptyList();
-            }
-            
-            JsonNode txNode = root.path("transactions");
-            if (txNode.isMissingNode() || !txNode.isArray())
-            {
-                txNode = root.path("reporting");
-                if (txNode.isMissingNode() || !txNode.isArray())
-                {
-                    if (root.isArray())
-                    {
-                        txNode = root;
-                    }
-                    else
-                    {
-                        return Collections.emptyList();
-                    }
-                }
-            }
-            
+            LocalDate start = LocalDate.ofInstant(from, API_ZONE);
+            LocalDate end = LocalDate.ofInstant(to, API_ZONE);
             List<AffiliationTransaction> list = new ArrayList<>();
-            for (JsonNode node : txNode)
+            for (JsonNode node : retrieveEffiliationConversions(effiliationApiKey, start, end))
             {
                 AffiliationTransaction tx = new AffiliationTransaction();
                 tx.setProviderName(getProviderName());
-                tx.setTransactionId(firstNonBlank(textOrNull(node, "id_transaction"), textOrNull(node, "transaction_id"), textOrNull(node, "id")));
-                tx.setProgramId(firstNonBlank(textOrNull(node, "id_annonceur"), textOrNull(node, "id_affilieur"), textOrNull(node, "program_id")));
-                
-                String clickDateStr = firstNonBlank(textOrNull(node, "date_clic"), textOrNull(node, "click_date"));
-                if (clickDateStr != null)
-                {
-                    try
-                    {
-                        tx.setClickDate(Instant.parse(clickDateStr));
-                    }
-                    catch (Exception ignored) {}
-                }
-                
-                String txDateStr = firstNonBlank(textOrNull(node, "date_action"), textOrNull(node, "date_commande"), textOrNull(node, "transaction_date"));
-                if (txDateStr != null)
-                {
-                    try
-                    {
-                        tx.setTransactionDate(Instant.parse(txDateStr));
-                    }
-                    catch (Exception ignored) {}
-                }
-                
-                tx.setStatus(firstNonBlank(textOrNull(node, "etat"), textOrNull(node, "status")));
-                
-                String saleStr = firstNonBlank(textOrNull(node, "montant_panier"), textOrNull(node, "montant_vente"), textOrNull(node, "sale_amount"));
-                if (saleStr != null)
-                {
-                    try
-                    {
-                        tx.setSaleAmount(new BigDecimal(saleStr.trim()));
-                    }
-                    catch (Exception ignored) {}
-                }
-                
-                String commStr = firstNonBlank(textOrNull(node, "commission"), textOrNull(node, "montant_commission"), textOrNull(node, "commission_amount"));
-                if (commStr != null)
-                {
-                    try
-                    {
-                        tx.setCommissionAmount(new BigDecimal(commStr.trim()));
-                    }
-                    catch (Exception ignored) {}
-                }
-                
-                tx.setCurrency(firstNonBlank(textOrNull(node, "devise"), textOrNull(node, "currency"), "EUR"));
-                tx.setSubId(firstNonBlank(textOrNull(node, "subid"), textOrNull(node, "subid1"), textOrNull(node, "site_affilie")));
-                tx.setProductId(firstNonBlank(textOrNull(node, "id_produit"), textOrNull(node, "product_id")));
-                
+                tx.setTransactionId(textOrNull(node, "conversionId"));
+                tx.setProgramId(textOrNull(node, "merchantId"));
+                tx.setClickDate(parseInstant(textOrNull(node, "clicDate")));
+                tx.setTransactionDate(parseInstant(textOrNull(node, "conversionDate")));
+                tx.setStatus(textOrNull(node, "status"));
+                tx.setSaleAmount(decimalOrNull(textOrNull(node, "amount")));
+                tx.setCommissionAmount(decimalOrNull(textOrNull(node, "commissionAmount")));
+                tx.setCurrency(firstNonBlank(textOrNull(node, "currency"), "EUR"));
+                tx.setSubId(textOrNull(node, "effiId"));
                 list.add(tx);
             }
-            
             return list;
         }
         catch (Exception e)
         {
-            LOGGER.warn("Failed to retrieve/parse Effiliation transactions.", e);
+            LOGGER.warn("Failed to retrieve/parse Effiliation transactions ({}).", describe(e));
             return Collections.emptyList();
         }
     }

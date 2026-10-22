@@ -76,28 +76,43 @@ public class RemoteFileCachingService {
 
 
 	public File getResource(final String url, Integer refreshInDays) throws InvalidParameterException, IOException {
+		return getResource(url, refreshInDays, null);
+	}
+
+	/**
+	 * Returns the cached copy of a remote resource, downloading it when missing or older than
+	 * {@code refreshInDays}.
+	 *
+	 * @param url remote resource URL
+	 * @param refreshInDays cache TTL, in days
+	 * @param logLabel label written in diagnostic logs instead of the URL, for URLs that carry a secret outside
+	 *        of their query string; {@code null} to log the URL without its query values
+	 * @return the cached file, which may not exist when the resource could never be retrieved
+	 */
+	public File getResource(final String url, Integer refreshInDays, String logLabel) throws InvalidParameterException, IOException {
 
 		File resource = new File(resourceFolder+File.separator+IdHelper.getHashedName(url));
 
 		CacheResourceConfig conf = configs.get(url);
 		if (null == conf) {
-			logger.info("No cache config for resource {}, caching with default config", loggableUrl(url));
 			conf = new CacheResourceConfig();
 			conf.setRefreshInDays(refreshInDays);
 			conf.setUrl(url);
+			conf.setLogLabel(logLabel);
 			configs.put(url, conf);
+			logger.info("No cache config for resource {}, caching with default config", loggableResource(conf));
 		}
 
 		try {
 			if (!resource.exists()) {
-				logger.info("Resource {} does not exist, will download it", loggableUrl(url));
+				logger.info("Resource {} does not exist, will download it", loggableResource(conf));
 				resource = retrieve(conf);
 			} else if ((System.currentTimeMillis() - resource.lastModified()) > (conf.getRefreshInDays() * 24 *3600 * 1000)) {
-				logger.warn("Resource {} is outdated, will replace it", loggableUrl(url));
+				logger.warn("Resource {} is outdated, will replace it", loggableResource(conf));
 				resource = retrieve(conf);
 			}
 		} catch (final Exception e) {
-			logger.error("Resource {} cannot be retrieved ({})", loggableUrl(url), e.getClass().getSimpleName());
+			logger.error("Resource {} cannot be retrieved ({})", loggableResource(conf), e.getClass().getSimpleName());
 		}
 
 		return resource;
@@ -112,7 +127,7 @@ public class RemoteFileCachingService {
 			File tmpFile = new File(resourceFolder+File.separator+"tmp-"+IdHelper.getHashedName(conf.getUrl()));
 			File destFile = new File(resourceFolder+File.separator+IdHelper.getHashedName(conf.getUrl()));
 
-			tmpFile = download(conf.getUrl(), tmpFile);
+			tmpFile = download(conf.getUrl(), tmpFile, loggableResource(conf));
 
 
 
@@ -288,15 +303,28 @@ public class RemoteFileCachingService {
 	 * @throws TechnicalException
 	 */
 	public File download(final String url,final File tmpFile) throws TechnicalException {
+		return download(url, tmpFile, loggableUrl(url));
+	}
 
-
-                try {
-                        logger.info("Downloading resource from {} to {}", loggableUrl(url), tmpFile);
-            FileUtils.copyURLToFile(new URL(url), tmpFile, connectionTimeout, readTimeout);
+	private File download(final String url, final File tmpFile, final String logLabel) throws TechnicalException {
+		try {
+			logger.info("Downloading resource from {} to {}", logLabel, tmpFile);
+			FileUtils.copyURLToFile(new URL(url), tmpFile, connectionTimeout, readTimeout);
 			return tmpFile;
 		} catch (Exception e) {
 			throw new TechnicalException("Cannot download resource", e);
 		}
+	}
+
+	/**
+	 * Returns how a cached resource appears in diagnostic logs: its log label when set, otherwise its URL
+	 * without query values.
+	 *
+	 * @param conf cached resource configuration
+	 * @return text safe to log
+	 */
+	static String loggableResource(CacheResourceConfig conf) {
+		return conf.getLogLabel() != null ? conf.getLogLabel() : loggableUrl(conf.getUrl());
 	}
 
 	/**

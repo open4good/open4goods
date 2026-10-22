@@ -1,0 +1,39 @@
+{
+  "pagination": {
+    "currentPage": 1,
+    "perPage": 1000,
+    "total": 2,
+    "from": 1,
+    "to": 2,
+    "lastPage": 1
+  },
+  "conversions": [
+    {
+      "conversionId": "anon-conv-0001",
+      "merchantId": 6600000101,
+      "merchantName": "Example Active Merchant",
+      "programId": 300000101,
+      "programName": "PRG-ACTIVE",
+      "sessionId": 3001,
+      "reference": "ORDER-0001",
+      "status": "validated",
+      "conversionDate": "2026-05-29T14:00:00",
+      "clicDate": "2026-05-28T09:30:00",
+      "amount": 120.50,
+      "commissionAmount": 6.03,
+      "conversionType": "sale",
+      "effiId": "sub-0001",
+      "currency": "EUR",
+      "isPaid": false
+    },
+    {
+      "conversionId": "anon-conv-0002",
+      "merchantId": 6600000202,
+      "programId": 300000202,
+      "status": "pending",
+      "conversionDate": "2026-05-30 08:00:00",
+      "commissionAmount": 1.4,
+      "conversionType": "lead"
+    }
+  ]
+}

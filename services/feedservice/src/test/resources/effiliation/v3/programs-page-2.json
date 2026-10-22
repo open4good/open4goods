@@ -1,0 +1,25 @@
+{
+  "pagination": {
+    "currentPage": 2,
+    "perPage": 1000,
+    "total": 3,
+    "from": 3,
+    "to": 3,
+    "lastPage": 2
+  },
+  "programs": [
+    {
+      "merchantId": 6600000202,
+      "programId": 300000202,
+      "merchantName": "Example Closing Merchant",
+      "merchantUrl": "https://closing.example",
+      "programName": "PRG-CLOSING",
+      "programLogoUrl": "https://cdn.example/closing-logo.png",
+      "status": "active",
+      "defaultTrackedLink": "https://track.example/closing",
+      "programCategories": [],
+      "state": "closing",
+      "coverageCountries": ["DE"]
+    }
+  ]
+}
