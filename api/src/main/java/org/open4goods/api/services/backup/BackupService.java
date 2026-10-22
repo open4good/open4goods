@@ -261,6 +261,8 @@ public class BackupService implements HealthIndicator {
 			long exportedProducts, int pageSize) throws IOException {
 		List<String> fileNames = new ArrayList<>();
 		Map<String, String> checksums = new LinkedHashMap<>();
+		// The previous checksum file no longer describes the folder once files start being replaced
+		Files.deleteIfExists(backupFolder.resolve(PRODUCT_BACKUP_CHECKSUMS));
 		for (ProductBackupFile tempFile : tempFiles) {
 			Path destination = backupFolder
 					.resolve(PRODUCT_BACKUP_FILE_PREFIX + tempFile.fileNumber() + PRODUCT_BACKUP_FILE_SUFFIX);
