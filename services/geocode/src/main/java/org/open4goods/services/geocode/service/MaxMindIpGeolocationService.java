@@ -3,6 +3,7 @@ package org.open4goods.services.geocode.service;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
@@ -14,6 +15,8 @@ import org.open4goods.services.geocode.service.maxmind.GeoIpDatabaseReaderFactor
 import org.open4goods.services.geocode.service.maxmind.MaxMindDatasetProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.maxmind.geoip2.exception.AddressNotFoundException;
@@ -33,11 +36,17 @@ public class MaxMindIpGeolocationService implements IpGeolocationService
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(MaxMindIpGeolocationService.class);
 
+    /** Minimum delay between two failed load attempts, to avoid hammering the remote source. */
+    static final Duration DEFAULT_RETRY_INTERVAL = Duration.ofMinutes(5);
+
     private final MaxMindDatasetProvider datasetProvider;
     private final GeoIpDatabaseReaderFactory readerFactory;
     private final AtomicBoolean loaded = new AtomicBoolean(false);
+    private final Clock clock;
+    private final Duration retryInterval;
 
-    private GeoIpDatabaseReader reader;
+    private volatile GeoIpDatabaseReader reader;
+    private Instant lastAttempt;
 
     /**
      * Creates a new MaxMind geolocation service.
@@ -45,11 +54,49 @@ public class MaxMindIpGeolocationService implements IpGeolocationService
      * @param datasetProvider dataset provider
      * @param readerFactory database reader factory
      */
+    @Autowired
     public MaxMindIpGeolocationService(MaxMindDatasetProvider datasetProvider,
             GeoIpDatabaseReaderFactory readerFactory)
     {
+        this(datasetProvider, readerFactory, Clock.systemUTC(), DEFAULT_RETRY_INTERVAL);
+    }
+
+    /**
+     * Creates a new MaxMind geolocation service with explicit retry settings.
+     *
+     * @param datasetProvider dataset provider
+     * @param readerFactory database reader factory
+     * @param clock clock used to throttle load attempts
+     * @param retryInterval minimum delay between two failed load attempts
+     */
+    MaxMindIpGeolocationService(MaxMindDatasetProvider datasetProvider,
+            GeoIpDatabaseReaderFactory readerFactory, Clock clock, Duration retryInterval)
+    {
         this.datasetProvider = datasetProvider;
         this.readerFactory = readerFactory;
+        this.clock = clock;
+        this.retryInterval = retryInterval;
+    }
+
+    /**
+     * Retries loading the database in the background when the startup load failed
+     * (for instance because the remote download was unavailable).
+     */
+    @Scheduled(initialDelayString = "PT5M", fixedDelayString = "PT5M")
+    public void retryLoadIfNeeded()
+    {
+        if (loaded.get())
+        {
+            return;
+        }
+        try
+        {
+            loadDatabaseThrottled();
+        }
+        catch (Exception ex)
+        {
+            LOGGER.warn("MaxMind GeoIP database still unavailable, will retry later: {}", ex.getMessage());
+        }
     }
 
     /**
@@ -60,11 +107,11 @@ public class MaxMindIpGeolocationService implements IpGeolocationService
     {
         try
         {
-            loadDatabase();
+            loadDatabaseThrottled();
         }
         catch (Exception ex)
         {
-            LOGGER.warn("Failed to initialize MaxMind GeoIP database on startup. Geolocation will be unavailable.", ex);
+            LOGGER.warn("Failed to initialize MaxMind GeoIP database on startup. Geolocation will be unavailable until a retry succeeds.", ex);
         }
     }
 
@@ -77,7 +124,7 @@ public class MaxMindIpGeolocationService implements IpGeolocationService
         Objects.requireNonNull(ip, "ip");
         if (!loaded.get())
         {
-            loadDatabase();
+            loadDatabaseThrottled();
         }
         InetAddress address = parseAddress(ip);
         if (address == null)
@@ -125,6 +172,27 @@ public class MaxMindIpGeolocationService implements IpGeolocationService
                 LOGGER.warn("Failed to close GeoIP database reader", ex);
             }
         }
+    }
+
+    /**
+     * Loads the database unless a previous attempt failed less than {@code retryInterval} ago.
+     *
+     * @throws IllegalStateException when the database is not loaded
+     */
+    private synchronized void loadDatabaseThrottled()
+    {
+        if (loaded.get())
+        {
+            return;
+        }
+        Instant now = clock.instant();
+        if (lastAttempt != null && Duration.between(lastAttempt, now).compareTo(retryInterval) < 0)
+        {
+            throw new IllegalStateException("MaxMind GeoIP database unavailable, next attempt in "
+                    + retryInterval.minus(Duration.between(lastAttempt, now)).toSeconds() + "s");
+        }
+        lastAttempt = now;
+        loadDatabase();
     }
 
     /**
