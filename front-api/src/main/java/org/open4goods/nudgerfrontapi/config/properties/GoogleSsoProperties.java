@@ -2,7 +2,9 @@ package org.open4goods.nudgerfrontapi.config.properties;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -15,6 +17,12 @@ import org.springframework.validation.annotation.Validated;
  * configuration alone. The role allowlist is deny-by-default - an email absent
  * from {@link #roleAllowlist} is refused, and no role is ever derived from an
  * email domain.
+ * </p>
+ * <p>
+ * Allowlist keys are e-mail addresses and must be bracketed in YAML
+ * ({@code "[john.doe@example.com]": [ROLE_SITEEDITOR]}): Spring Boot drops the
+ * {@code @} of an unbracketed map key, so the entry would never match a login.
+ * {@link #malformedAllowlistKeys()} exposes such keys for the startup check.
  * </p>
  */
 @Validated
@@ -43,9 +51,11 @@ public class GoogleSsoProperties {
     private String jwksUri = "https://www.googleapis.com/oauth2/v3/certs";
 
     /**
-     * Deny-by-default email to role list allowlist. Keys are lower-cased emails;
-     * values are the granted authorities (e.g. {@code ROLE_SITEEDITOR},
-     * {@code XWIKIADMINGROUP}). An email missing from this map is refused.
+     * Deny-by-default email to role list allowlist. Keys are emails, normalized
+     * to lower case on binding; values are the granted authorities (e.g.
+     * {@code ROLE_SITEEDITOR}, {@code XWIKIADMINGROUP}). An email missing from
+     * this map is refused. In YAML each key must be bracketed
+     * ({@code "[john.doe@example.com]"}) to keep its {@code @}.
      */
     private Map<String, List<String>> roleAllowlist = new HashMap<>();
 
@@ -85,8 +95,29 @@ public class GoogleSsoProperties {
         return roleAllowlist;
     }
 
+    /**
+     * Replace the allowlist, normalizing every key (trimmed, lower case with
+     * {@link Locale#ROOT}) so that lookups are case-insensitive. Two keys that
+     * only differ by case are merged into the union of their roles.
+     *
+     * @param roleAllowlist email to roles map; {@code null} clears the allowlist
+     */
     public void setRoleAllowlist(Map<String, List<String>> roleAllowlist) {
-        this.roleAllowlist = roleAllowlist == null ? new HashMap<>() : roleAllowlist;
+        Map<String, List<String>> normalized = new HashMap<>();
+        if (roleAllowlist != null) {
+            roleAllowlist.forEach((email, roles) -> {
+                if (email == null) {
+                    return;
+                }
+                LinkedHashSet<String> merged = new LinkedHashSet<>(
+                        normalized.getOrDefault(normalize(email), List.of()));
+                if (roles != null) {
+                    merged.addAll(roles);
+                }
+                normalized.put(normalize(email), new ArrayList<>(merged));
+            });
+        }
+        this.roleAllowlist = normalized;
     }
 
     /**
@@ -99,7 +130,30 @@ public class GoogleSsoProperties {
         if (email == null) {
             return List.of();
         }
-        List<String> roles = roleAllowlist.get(email.toLowerCase(java.util.Locale.ROOT));
+        List<String> roles = roleAllowlist.get(normalize(email));
         return roles == null ? List.of() : new ArrayList<>(roles);
+    }
+
+    /**
+     * List the allowlist keys that cannot be e-mail addresses (no {@code @}, or
+     * nothing before or after it). Such a key usually comes from a YAML map key
+     * written without brackets, whose {@code @} Spring Boot dropped on binding;
+     * it never matches a login.
+     *
+     * @return the malformed keys, in no particular order; empty when all keys are valid
+     */
+    public List<String> malformedAllowlistKeys() {
+        return roleAllowlist.keySet().stream()
+                .filter(key -> !looksLikeEmail(key))
+                .toList();
+    }
+
+    private static boolean looksLikeEmail(String key) {
+        int at = key.indexOf('@');
+        return at > 0 && at < key.length() - 1;
+    }
+
+    private static String normalize(String email) {
+        return email.strip().toLowerCase(Locale.ROOT);
     }
 }

@@ -109,6 +109,39 @@ the ID token audience (`aud`) against this value: a mismatch makes every
 Google login fail the verification step even though the code exchange with
 Google succeeded.
 
+## Role allowlist (front-api)
+
+Context: GOU-945, GOU-949. Once the ID token is verified, front-api grants
+roles only to the e-mail addresses listed in
+`front.security.google-sso.role-allowlist` (deny by default). The allowlist
+lives in `open4goods-config`, next to the `google-sso.enabled` switch.
+
+Each key is an e-mail address and **must be quoted and bracketed** in YAML:
+
+```yaml
+front:
+  security:
+    google-sso:
+      role-allowlist:
+        "[john.doe@example.com]": [ROLE_SITEEDITOR]
+        "[jane.roe@example.org]": [ROLE_SITEEDITOR, XWIKIADMINGROUP]
+```
+
+Without brackets (`john.doe@example.com: [...]`), Spring Boot drops the `@`
+while binding the map key: the entry becomes `john.doeexample.com`, never
+matches a login, and every Google login of that user gets a 401.
+
+- Keys are lower-cased on binding; the lookup ignores case.
+- At startup, when Google SSO is enabled, front-api logs an `ERROR` for every
+  key without `@` (masked, e.g. `j***`) and reminds the `"[adresse@domaine]"`
+  notation. It logs a `WARN` when the allowlist is empty. The application
+  still starts, so a bad allowlist does not take the rest of front-api down.
+- Every refused Google login logs a `WARN`
+  `Google SSO login refused (401): <reason>` (issuer, audience, nonce,
+  unverified e-mail, token verification failure, or e-mail absent from the
+  allowlist). The ID token and the nonce are never logged; the e-mail is
+  masked (`j***@example.com`).
+
 ## Redirect URIs to register on the "Web" client
 
 Register all of the following on the Google Cloud Console (project

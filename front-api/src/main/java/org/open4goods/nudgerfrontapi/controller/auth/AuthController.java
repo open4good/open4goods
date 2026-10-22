@@ -11,6 +11,8 @@ import org.open4goods.nudgerfrontapi.service.auth.GoogleIdentityService;
 import org.open4goods.nudgerfrontapi.service.auth.JwtService;
 import org.open4goods.nudgerfrontapi.service.exception.GoogleIdentityVerificationException;
 import org.open4goods.nudgerfrontapi.service.exception.GoogleSsoDisabledException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +39,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/auth")
 @Tag(name = "Authentication", description = "Login and refresh tokens")
 public class AuthController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthController.class);
 
     private final JwtService jwtService;
     private final GoogleIdentityService googleIdentityService;
@@ -86,8 +90,28 @@ public class AuthController {
         } catch (GoogleSsoDisabledException ex) {
             return ResponseEntity.notFound().build();
         } catch (GoogleIdentityVerificationException ex) {
+            LOGGER.warn("Google SSO login refused (401): {}", refusalReason(ex));
             return ResponseEntity.status(401).build();
         }
+    }
+
+    /**
+     * Describe why a Google SSO login was refused, for the WARN log.
+     * <p>
+     * Only exception messages are used: {@link GoogleIdentityService} never puts
+     * the ID token or the nonce in them, and masks the e-mail address. The cause
+     * (e.g. an expired or badly signed token) is appended when present.
+     * </p>
+     *
+     * @param ex refusal raised by {@link GoogleIdentityService#verify(String, String)}
+     * @return a log-safe reason
+     */
+    private static String refusalReason(GoogleIdentityVerificationException ex) {
+        Throwable cause = ex.getCause();
+        if (cause == null) {
+            return ex.getMessage();
+        }
+        return ex.getMessage() + " (" + cause.getClass().getSimpleName() + ": " + cause.getMessage() + ")";
     }
 
     @PostMapping("/refresh")
