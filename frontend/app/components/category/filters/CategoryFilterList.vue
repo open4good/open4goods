@@ -104,20 +104,17 @@ const props = withDefaults(
     aggregations: Record<string, AggregationResponseDto>
     baselineAggregations?: Record<string, AggregationResponseDto>
     activeFilters: Filter[]
-    searchType?: string | null
     mode?: 'grid' | 'row' | 'bar'
   }>(),
   {
     baselineAggregations: () => ({}) as Record<string, AggregationResponseDto>,
     mode: 'grid',
-    searchType: null,
   }
 )
 
 const emit = defineEmits<{
   'update-range': [field: string, payload: { min?: number; max?: number }]
   'update-terms': [field: string, terms: string[]]
-  'update:searchType': [value: string | null]
 }>()
 
 const resolveComponent = (field: FieldMetadataDto) => {

@@ -137,9 +137,7 @@ public class DatavizStatsService {
                 verticalId.trim(),
                 null,
                 aggregationQuery,
-                filters,
-                false,
-                "TEXT"
+                filters
         );
 
         return formatResponse(preset, result);
@@ -201,9 +199,7 @@ public class DatavizStatsService {
                 verticalId.trim(),
                 null,
                 aggregationQuery,
-                filters,
-                false,
-                "TEXT"
+                filters
         );
 
         DatavizHeroStatsDto standardStats = buildHeroStatsFromResult(result);

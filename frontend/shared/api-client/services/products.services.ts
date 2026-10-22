@@ -179,7 +179,6 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
           query: normalizedQuery,
           filters: payload.filters,
           sort: payload.sort,
-          searchType: payload.searchType,
         },
       })
     } catch (error) {

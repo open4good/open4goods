@@ -1,65 +1,22 @@
 package org.open4goods.embedding.config;
 
-import org.open4goods.embedding.health.DjlEmbeddingHealthIndicator;
-import org.open4goods.embedding.service.DefaultTextModelFactory;
-import org.open4goods.embedding.service.DjlTextEmbeddingService;
-import org.open4goods.embedding.service.AbstractTextModelFactory;
-import org.open4goods.embedding.service.OpenAiCompatibleTextEmbeddingService;
-import org.open4goods.embedding.service.TextEmbeddingService;
 import org.open4goods.embedding.service.image.AbstractImageModelFactory;
 import org.open4goods.embedding.service.image.DefaultImageModelFactory;
 import org.open4goods.embedding.service.image.DjlImageEmbeddingService;
-import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-import tools.jackson.databind.ObjectMapper;
-
 /**
- * Auto-configuration for local DJL and OpenAI-compatible embedding backends.
+ * Auto-configuration for local DJL image embeddings.
  */
 @AutoConfiguration
 @EnableConfigurationProperties(DjlEmbeddingProperties.class)
 @ConditionalOnProperty(prefix = "embedding", name = "enabled", matchIfMissing = true)
 public class DjlEmbeddingAutoConfiguration
 {
-    @Bean
-    @ConditionalOnMissingBean(AbstractTextModelFactory.class)
-    AbstractTextModelFactory embeddingModelFactory()
-    {
-        return new DefaultTextModelFactory();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(TextEmbeddingService.class)
-    @ConditionalOnProperty(prefix = "embedding", name = "provider", havingValue = "djl", matchIfMissing = true)
-    DjlTextEmbeddingService djlTextEmbeddingService(DjlEmbeddingProperties properties, AbstractTextModelFactory modelFactory)
-    {
-        return new DjlTextEmbeddingService(properties, modelFactory);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(TextEmbeddingService.class)
-    @ConditionalOnProperty(prefix = "embedding", name = "provider", havingValue = "openai-compatible")
-    OpenAiCompatibleTextEmbeddingService openAiCompatibleTextEmbeddingService(
-            DjlEmbeddingProperties properties,
-            ObjectMapper objectMapper)
-    {
-        return new OpenAiCompatibleTextEmbeddingService(properties, objectMapper);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    ObjectMapper embeddingObjectMapper()
-    {
-        return new ObjectMapper();
-    }
-
     @Bean
     @ConditionalOnMissingBean(AbstractImageModelFactory.class)
     AbstractImageModelFactory imageModelFactory()
@@ -72,13 +29,5 @@ public class DjlEmbeddingAutoConfiguration
     DjlImageEmbeddingService djlImageEmbeddingService(DjlEmbeddingProperties properties, AbstractImageModelFactory modelFactory)
     {
         return new DjlImageEmbeddingService(properties, modelFactory);
-    }
-
-    @Bean
-    @ConditionalOnClass(HealthIndicator.class)
-    @ConditionalOnBean(DjlTextEmbeddingService.class)
-    DjlEmbeddingHealthIndicator djlEmbeddingHealthIndicator(DjlTextEmbeddingService service)
-    {
-        return new DjlEmbeddingHealthIndicator(service);
     }
 }
