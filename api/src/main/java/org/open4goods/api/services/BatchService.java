@@ -281,23 +281,33 @@ public class BatchService {
 		}
 	}
 
-	private void sweepShards(File folder, OrphanSweep sweep, int depth) {
+	/**
+	 * Sweeps one shard folder and its sub shards.
+	 *
+	 * @return true when the folder held at least one entry before the sweep
+	 */
+	private boolean sweepShards(File folder, OrphanSweep sweep, int depth) {
 		File[] children = folder.listFiles();
 		if (children == null) {
-			return;
+			return false;
 		}
 		for (File child : children) {
 			if (child.isDirectory()) {
+				boolean hadEntries;
 				if (depth < SHARD_DEPTH && isShardFolder(child.getName())) {
-					sweepShards(child, sweep, depth + 1);
+					hadEntries = sweepShards(child, sweep, depth + 1);
 				} else {
 					sweep.outOfScope();
 					continue;
 				}
-				// Drop shards emptied by a DELETE run, list() returning an empty array
-				String[] remaining = child.list();
-				if (remaining != null && remaining.length == 0) {
-					child.delete();
+				// Drop only the shards a DELETE run has just emptied. DRY_RUN and MOVE never touch
+				// folders, and a shard already empty before the sweep may be one that
+				// ResourceService.getCacheFile has just created for a download in flight.
+				if (sweep.mode == ResourceCleanupMode.DELETE && hadEntries) {
+					String[] remaining = child.list();
+					if (remaining != null && remaining.length == 0) {
+						child.delete();
+					}
 				}
 			} else if (child.isFile()) {
 				if (depth == SHARD_DEPTH) {
@@ -307,6 +317,7 @@ public class BatchService {
 				}
 			}
 		}
+		return children.length > 0;
 	}
 
 	/**
