@@ -3,24 +3,32 @@ package org.open4goods.services.feedservice.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.ArgumentCaptor;
 import org.open4goods.commons.config.yml.datasource.CsvDataSourceProperties;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.services.DataSourceConfigService;
@@ -30,11 +38,20 @@ import org.open4goods.model.affiliation.AffiliationTransaction;
 import org.open4goods.services.feedservice.config.FeedConfiguration;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.services.serialisation.service.SerialisationService;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.IThrowableProxy;
+import ch.qos.logback.core.read.ListAppender;
 
 /**
- * Tests for {@link EffiliationFeedService} pagination, enablement and cache fallback behavior.
+ * Tests for {@link EffiliationFeedService} on anonymised Effinity API v3 responses: requests, pagination,
+ * mapping, enablement, cache fallback and secret handling.
  */
 class EffiliationFeedServiceTest {
+
+    private static final String API_KEY = "effi-secret-key";
 
     @TempDir
     Path tempDir;
@@ -43,84 +60,261 @@ class EffiliationFeedServiceTest {
     void retrieveEffiliationFeedsShouldThrowWhenDisabled() {
         EffiliationFeedService service = buildService(false, mock(RemoteFileCachingService.class));
 
-        assertThatThrownBy(() -> service.retrieveEffiliationFeeds("api-key", "fr", null))
+        assertThatThrownBy(() -> service.retrieveEffiliationFeeds(API_KEY))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("disabled");
     }
 
     @Test
-    void retrieveEffiliationFeedsShouldMergePaginatedPayloads() throws Exception {
+    void retrieveEffiliationFeedsShouldMergeAllPages() throws Exception {
         RemoteFileCachingService cacheService = mock(RemoteFileCachingService.class);
-        File page1 = jsonFile("""
-                {"total_pages":2,"feeds":[{"nom":"Feed One","code":"https://one.test/feed.csv","id_affilieur":"11"}]}
-                """);
-        File page2 = jsonFile("""
-                {"total_pages":2,"feeds":[{"nom":"Feed Two","code":"https://two.test/feed.csv","id_affilieur":"22"}]}
-                """);
+        stubPage(cacheService, "publisher/links/productfeeds", 1, "productfeeds-page-1.json");
+        stubPage(cacheService, "publisher/links/productfeeds", 2, "productfeeds-page-2.json");
 
-        when(cacheService.getResource(contains("page=1"), anyInt())).thenReturn(page1);
-        when(cacheService.getResource(contains("page=2"), anyInt())).thenReturn(page2);
+        var feeds = buildService(true, cacheService).retrieveEffiliationFeeds(API_KEY);
 
-        EffiliationFeedService service = buildService(true, cacheService);
+        assertThat(feeds).extracting(feed -> feed.path("linkId").asInt())
+                .containsExactly(1024, 1025, 1026, 1027, 1028);
+    }
 
-        var merged = service.retrieveEffiliationFeeds("api-key", "fr", null);
+    @Test
+    void getDatasourcesShouldBuildOneDatasourcePerActiveFeed() throws Exception {
+        RemoteFileCachingService cacheService = programsAndFeeds();
 
-        assertThat(merged.path("feeds")).hasSize(2);
-        assertThat(merged.path("feeds").get(0).path("nom").asText()).isEqualTo("Feed One");
-        assertThat(merged.path("feeds").get(1).path("nom").asText()).isEqualTo("Feed Two");
+        Set<DataSourceProperties> datasources = buildService(true, cacheService).getDatasources();
+
+        // Skipped: frozen program, feed without merchant, feed without URL.
+        Map<String, DataSourceProperties> byFeedKey = datasources.stream()
+                .collect(Collectors.toMap(DataSourceProperties::getFeedKey, ds -> ds));
+        assertThat(byFeedKey).containsOnlyKeys("Active Merchant - Flux produits", "Closing Merchant - Flux produits");
+
+        DataSourceProperties active = byFeedKey.get("Active Merchant - Flux produits");
+        assertThat(active.getCsvDatasource().getDatasourceUrls()).containsExactly("https://feeds.example/active-feed.csv");
+        assertThat(active.getPortalUrl()).isEqualTo("https://active.example");
+        assertThat(active.getAffiliatedPortalUrl()).isEqualTo("https://track.example/active");
+        assertThat(active.getLogo()).isEqualTo("https://cdn.example/active-logo.png");
+        assertThat(active.getName()).isEqualTo("active.example");
+
+        DataSourceProperties closing = byFeedKey.get("Closing Merchant - Flux produits");
+        assertThat(closing.getCsvDatasource().getDatasourceUrls()).containsExactly("https://feeds.example/closing-feed.csv");
+    }
+
+    @Test
+    void requestsShouldTargetApiV3WithTheKeyAsPathSegmentAndPaginate() throws Exception {
+        RemoteFileCachingService cacheService = programsAndFeeds();
+
+        buildService(true, cacheService).getDatasources();
+
+        ArgumentCaptor<String> urls = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> labels = ArgumentCaptor.forClass(String.class);
+        verify(cacheService, atLeastOnce()).getResource(urls.capture(), eq(1), labels.capture());
+
+        // load() also refreshes programs and promotions.
+        assertThat(urls.getAllValues()).contains(
+                "https://api.effinity.fr/apiv3/effi-secret-key/publisher/programs?status=active&status=inactive&page=1&perPage=1000",
+                "https://api.effinity.fr/apiv3/effi-secret-key/publisher/programs?status=active&status=inactive&page=2&perPage=1000",
+                "https://api.effinity.fr/apiv3/effi-secret-key/publisher/links/productfeeds?page=1&perPage=1000",
+                "https://api.effinity.fr/apiv3/effi-secret-key/publisher/links/productfeeds?page=2&perPage=1000");
+        assertThat(urls.getAllValues()).allSatisfy(url -> {
+            URI uri = URI.create(url);
+            assertThat(uri.getHost()).isEqualTo("api.effinity.fr");
+            assertThat(uri.getPath()).startsWith("/apiv3/" + API_KEY + "/publisher/");
+        });
+        assertThat(labels.getAllValues()).allSatisfy(label -> assertThat(label)
+                .startsWith("https://api.effinity.fr/apiv3/{apikey}/publisher/")
+                .doesNotContain(API_KEY));
     }
 
     @Test
     void getDatasourcesShouldUseStaleCacheWhenRefreshFails() throws Exception {
         RemoteFileCachingService cacheService = mock(RemoteFileCachingService.class);
+        stubPage(cacheService, "publisher/programs", 1, "programs-page-1.json");
+        stubPage(cacheService, "publisher/programs", 2, "programs-page-2.json");
+        when(cacheService.getResource(argThat(url -> url != null && url.contains("publisher/links/productfeeds")), eq(1), anyString()))
+                .thenThrow(new IOException("network down for " + API_KEY));
+        when(cacheService.getResource(argThat(url -> url != null && url.contains("publisher/links/productfeeds") && url.contains("page=1&")),
+                eq(Integer.MAX_VALUE), anyString())).thenReturn(fixture("productfeeds-page-1.json"));
+        when(cacheService.getResource(argThat(url -> url != null && url.contains("publisher/links/productfeeds") && url.contains("page=2&")),
+                eq(Integer.MAX_VALUE), anyString())).thenReturn(fixture("productfeeds-page-2.json"));
 
-        File programs = jsonFile("""
-                {"programs":[{"id_affilieur":101,"url_tracke":"track.example","urllo":"logo.example","etat":"actif","pays":"fr"}]}
-                """);
-        File feeds = jsonFile("""
-                {"feeds":[{"nom":"Merchant","code":"merchant.example/feed.csv","url_affilieur":"merchant.example","id_affilieur":"101"}]}
-                """);
+        Set<DataSourceProperties> datasources = buildService(true, cacheService).getDatasources();
 
-        when(cacheService.getResource(contains("programs.json"), anyInt())).thenReturn(programs);
-        when(cacheService.getResource(contains("productfeeds.json"), eq(1))).thenThrow(new IOException("network down"));
-        when(cacheService.getResource(contains("productfeeds.json"), eq(Integer.MAX_VALUE))).thenReturn(feeds);
-
-        EffiliationFeedService service = buildService(true, cacheService);
-        Set<DataSourceProperties> datasources = service.getDatasources();
-
-        assertThat(datasources).hasSize(1);
-        DataSourceProperties datasource = datasources.iterator().next();
-        assertThat(datasource.getPortalUrl()).isEqualTo("https://merchant.example");
-        assertThat(datasource.getAffiliatedPortalUrl()).isEqualTo("https://track.example");
+        assertThat(datasources).extracting(DataSourceProperties::getFeedKey)
+                .containsExactlyInAnyOrder("Active Merchant - Flux produits", "Closing Merchant - Flux produits");
     }
 
     @Test
-    void getDatasourcesShouldSkipInvalidIdAndInactiveProgram() throws Exception {
+    void getDatasourcesShouldReturnNoneWhenProgramsPayloadIsInvalid() throws Exception {
         RemoteFileCachingService cacheService = mock(RemoteFileCachingService.class);
+        when(cacheService.getResource(argThat(url -> url != null && url.contains("publisher/programs")), anyInt(), anyString()))
+                .thenReturn(jsonFile("{\"pagination\":{\"lastPage\":1},\"message\":\"unexpected\"}"));
+        stubPage(cacheService, "publisher/links/productfeeds", 1, "productfeeds-page-1.json");
+        stubPage(cacheService, "publisher/links/productfeeds", 2, "productfeeds-page-2.json");
 
-        File programs = jsonFile("""
-                {"programs":[
-                  {"id_affilieur":101,"url_tracke":"https://active.example/track","urllo":"https://active.example/logo.png","etat":"actif","pays":"fr"},
-                  {"id_affilieur":303,"url_tracke":"https://inactive.example/track","urllo":"https://inactive.example/logo.png","etat":"suspended","pays":"fr"}
-                ]}
-                """);
-        File feeds = jsonFile("""
-                {"feeds":[
-                  {"nom":"Valid Merchant","code":"https://active.example/feed.csv","url_affilieur":"https://active.example","id_affilieur":"101"},
-                  {"nom":"Invalid Id Merchant","code":"https://invalid.example/feed.csv","url_affilieur":"https://invalid.example","id_affilieur":"invalid"},
-                  {"nom":"Inactive Merchant","code":"https://inactive.example/feed.csv","url_affilieur":"https://inactive.example","id_affilieur":"303"}
-                ]}
-                """);
+        assertThat(buildService(true, cacheService).getDatasources()).isEmpty();
+    }
 
-        when(cacheService.getResource(contains("programs.json"), anyInt())).thenReturn(programs);
-        when(cacheService.getResource(contains("productfeeds.json"), anyInt())).thenReturn(feeds);
+    @Test
+    void paginationShouldStopOnRunawayLastPage() throws Exception {
+        RemoteFileCachingService cacheService = mock(RemoteFileCachingService.class);
+        when(cacheService.getResource(argThat(url -> url != null && url.contains("publisher/links/productfeeds")), anyInt(), anyString()))
+                .thenReturn(jsonFile("{\"pagination\":{\"lastPage\":100000},\"links\":[]}"));
 
-        EffiliationFeedService service = buildService(true, cacheService);
+        assertThatThrownBy(() -> buildService(true, cacheService).retrieveEffiliationFeeds(API_KEY))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("more than " + EffiliationFeedService.MAX_PAGES + " pages");
+    }
 
-        Set<DataSourceProperties> datasources = service.getDatasources();
+    @Test
+    void getProgramsShouldReturnMappedPrograms() throws Exception {
+        RemoteFileCachingService cacheService = mock(RemoteFileCachingService.class);
+        stubPage(cacheService, "publisher/programs", 1, "programs-page-1.json");
+        stubPage(cacheService, "publisher/programs", 2, "programs-page-2.json");
 
-        assertThat(datasources).hasSize(1);
-        assertThat(datasources.iterator().next().getDatasourceConfigName()).isEqualTo("Valid Merchant");
+        Collection<AffiliationProgram> mapped = buildService(true, cacheService).getPrograms();
+
+        assertThat(mapped).extracting(AffiliationProgram::getProgramId)
+                .containsExactly("6600000101", "6600000303", "6600000202");
+        AffiliationProgram ap = mapped.iterator().next();
+        assertThat(ap.getProviderName()).isEqualTo("Effiliation");
+        assertThat(ap.getAdvertiserName()).isEqualTo("Example Active Merchant");
+        assertThat(ap.getStatus()).isEqualTo("active");
+        assertThat(ap.getCountryCodes()).containsExactlyInAnyOrder("fr", "be");
+        assertThat(ap.getCategories()).containsExactlyInAnyOrder("high-tech", "home appliances");
+        assertThat(ap.getCurrency()).isEqualTo("EUR");
+        assertThat(ap.getCookieDurationDays()).isEqualTo(30);
+        assertThat(ap.getLogoUrl()).isEqualTo("https://cdn.example/active-logo.png");
+        assertThat(ap.getPortalUrl()).isEqualTo("https://active.example");
+        assertThat(ap.getTrackingUrl()).isEqualTo("https://track.example/active");
+        assertThat(ap.getDescription()).isEqualTo("Example merchant selling appliances.");
+        // Not provided by the API v3: absent, never zero, and no hypermedia link (it carries the key).
+        assertThat(ap.getClickCommission()).isNull();
+        assertThat(ap.getSaleCommissionPercent()).isNull();
+        assertThat(ap.getLeadCommission()).isNull();
+        assertThat(ap.getDisplayCpm()).isNull();
+        assertThat(ap.getEpc()).isNull();
+        assertThat(ap.getConversionRate()).isNull();
+        assertThat(ap.getSignupUrl()).isNull();
+    }
+
+    @Test
+    void getPromotionsShouldReturnMappedPromotions() throws Exception {
+        RemoteFileCachingService cacheService = mock(RemoteFileCachingService.class);
+        when(cacheService.getResource(argThat(url -> url != null
+                && url.contains("/publisher/links?linkType=voucherOrDeal&page=1&perPage=1000")), anyInt(), anyString()))
+                .thenReturn(fixture("promotions.json"));
+
+        Collection<AffiliationPromotion> mapped = buildService(true, cacheService).getPromotions();
+
+        assertThat(mapped).hasSize(1);
+        AffiliationPromotion ap = mapped.iterator().next();
+        assertThat(ap.getProviderName()).isEqualTo("Effiliation");
+        assertThat(ap.getProgramId()).isEqualTo("6600000101");
+        assertThat(ap.getAdvertiserName()).isEqualTo("Example Active Merchant");
+        assertThat(ap.getTitle()).isEqualTo("Promo Title");
+        assertThat(ap.getDescription()).isEqualTo("20% off");
+        assertThat(ap.getVoucherCode()).isEqualTo("PROMO20");
+        assertThat(ap.getDiscountType()).isEqualTo("voucher");
+        assertThat(ap.getDiscountValue()).isEqualByComparingTo("20");
+        assertThat(ap.getStartDate()).isEqualTo(LocalDate.of(2026, 1, 1));
+        assertThat(ap.getEndDate()).isEqualTo(LocalDate.of(2026, 12, 31));
+        assertThat(ap.getLandingUrl()).isEqualTo("https://active.example/promo");
+        assertThat(ap.getTrackingUrl()).isEqualTo("https://track.example/promo");
+    }
+
+    @Test
+    void getTransactionsShouldReturnMappedConversions() throws Exception {
+        RemoteFileCachingService cacheService = mock(RemoteFileCachingService.class);
+        when(cacheService.getResource(argThat(url -> url != null && url.contains("publisher/conversions")), anyInt(), anyString()))
+                .thenReturn(fixture("conversions.json"));
+
+        Collection<AffiliationTransaction> mapped = buildService(true, cacheService)
+                .getTransactions(Instant.parse("2026-05-01T00:00:00Z"), Instant.parse("2026-05-31T21:59:59Z"));
+
+        ArgumentCaptor<String> urls = ArgumentCaptor.forClass(String.class);
+        verify(cacheService).getResource(urls.capture(), eq(1), anyString());
+        assertThat(urls.getValue()).isEqualTo("https://api.effinity.fr/apiv3/effi-secret-key/publisher/conversions"
+                + "?start=2026-05-01&end=2026-05-31&dateType=conversionDate&conversionType=all&status=all&page=1&perPage=1000");
+
+        assertThat(mapped).hasSize(2);
+        AffiliationTransaction at = mapped.iterator().next();
+        assertThat(at.getProviderName()).isEqualTo("Effiliation");
+        assertThat(at.getTransactionId()).isEqualTo("anon-conv-0001");
+        assertThat(at.getProgramId()).isEqualTo("6600000101");
+        // Local Europe/Paris date-times (UTC+2 in May).
+        assertThat(at.getTransactionDate()).isEqualTo(Instant.parse("2026-05-29T12:00:00Z"));
+        assertThat(at.getClickDate()).isEqualTo(Instant.parse("2026-05-28T07:30:00Z"));
+        assertThat(at.getStatus()).isEqualTo("validated");
+        assertThat(at.getSaleAmount()).isEqualByComparingTo("120.50");
+        assertThat(at.getCommissionAmount()).isEqualByComparingTo("6.03");
+        assertThat(at.getCurrency()).isEqualTo("EUR");
+        assertThat(at.getSubId()).isEqualTo("sub-0001");
+
+        AffiliationTransaction lead = mapped.stream().skip(1).findFirst().orElseThrow();
+        assertThat(lead.getTransactionDate()).isEqualTo(Instant.parse("2026-05-30T06:00:00Z"));
+        assertThat(lead.getStatus()).isEqualTo("pending");
+        assertThat(lead.getSaleAmount()).isNull();
+        assertThat(lead.getCommissionAmount()).isEqualByComparingTo("1.4");
+        assertThat(lead.getCurrency()).isEqualTo("EUR");
+    }
+
+    @Test
+    void conversionsShouldBeRequestedByWindowsOfAtMost90Days() throws Exception {
+        RemoteFileCachingService cacheService = mock(RemoteFileCachingService.class);
+        when(cacheService.getResource(argThat(url -> url != null && url.contains("publisher/conversions")), anyInt(), anyString()))
+                .thenReturn(jsonFile("{\"pagination\":{\"lastPage\":1},\"conversions\":[]}"));
+
+        List<?> conversions = buildService(true, cacheService)
+                .retrieveEffiliationConversions(API_KEY, LocalDate.of(2026, 1, 1), LocalDate.of(2026, 5, 31));
+
+        ArgumentCaptor<String> urls = ArgumentCaptor.forClass(String.class);
+        verify(cacheService, atLeastOnce()).getResource(urls.capture(), eq(1), anyString());
+        assertThat(conversions).isEmpty();
+        assertThat(urls.getAllValues()).extracting(url -> url.substring(url.indexOf('?'), url.indexOf("&dateType")))
+                .containsExactly("?start=2026-01-01&end=2026-03-31", "?start=2026-04-01&end=2026-05-31");
+    }
+
+    @Test
+    void apiKeyShouldNeverReachTheLogs() throws Exception {
+        RemoteFileCachingService cacheService = mock(RemoteFileCachingService.class);
+        when(cacheService.getResource(anyString(), anyInt(), anyString()))
+                .thenThrow(new IOException("Server returned HTTP response code: 403 for URL: https://api.effinity.fr/apiv3/"
+                        + API_KEY + "/publisher/programs"));
+
+        Logger logger = (Logger) LoggerFactory.getLogger(EffiliationFeedService.class);
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            EffiliationFeedService service = buildService(true, cacheService);
+            service.getDatasources();
+            service.getTransactions(Instant.parse("2026-05-01T00:00:00Z"), Instant.parse("2026-05-31T00:00:00Z"));
+        } finally {
+            logger.detachAppender(appender);
+        }
+
+        assertThat(appender.list).isNotEmpty();
+        assertThat(appender.list).allSatisfy(event -> {
+            assertThat(event.getFormattedMessage()).doesNotContain(API_KEY);
+            for (IThrowableProxy proxy = event.getThrowableProxy(); proxy != null; proxy = proxy.getCause()) {
+                assertThat(String.valueOf(proxy.getMessage())).doesNotContain(API_KEY);
+            }
+        });
+    }
+
+    private RemoteFileCachingService programsAndFeeds() throws Exception {
+        RemoteFileCachingService cacheService = mock(RemoteFileCachingService.class);
+        stubPage(cacheService, "publisher/programs", 1, "programs-page-1.json");
+        stubPage(cacheService, "publisher/programs", 2, "programs-page-2.json");
+        stubPage(cacheService, "publisher/links/productfeeds", 1, "productfeeds-page-1.json");
+        stubPage(cacheService, "publisher/links/productfeeds", 2, "productfeeds-page-2.json");
+        return cacheService;
+    }
+
+    private void stubPage(RemoteFileCachingService cacheService, String resource, int page, String fixture) throws Exception {
+        File file = fixture(fixture);
+        when(cacheService.getResource(argThat(url -> url != null && url.contains(resource) && url.contains("page=" + page + "&")),
+                anyInt(), anyString())).thenReturn(file);
     }
 
     private EffiliationFeedService buildService(boolean enabled, RemoteFileCachingService cacheService) {
@@ -135,7 +329,7 @@ class EffiliationFeedServiceTest {
         config.setDefaultCsvProperties(csvDataSourceProperties);
 
         DataSourceConfigService dataSourceConfigService = mock(DataSourceConfigService.class);
-        when(dataSourceConfigService.getDatasourcePropertiesForFeed(org.mockito.ArgumentMatchers.anyString())).thenReturn(null);
+        when(dataSourceConfigService.getDatasourcePropertiesForFeed(anyString())).thenReturn(null);
         when(dataSourceConfigService.datasourceConfigs()).thenReturn(Map.of());
 
         return new EffiliationFeedService(
@@ -143,127 +337,14 @@ class EffiliationFeedServiceTest {
                 cacheService,
                 dataSourceConfigService,
                 new SerialisationService(),
-                "api-key");
+                API_KEY);
     }
 
-    @Test
-    void getProgramsShouldReturnMappedPrograms() throws Exception {
-        RemoteFileCachingService cacheService = mock(RemoteFileCachingService.class);
-        File programs = jsonFile("""
-                {"programs":[
-                  {
-                    "id_affilieur":101,
-                    "nom":"Test Program",
-                    "urllo":"https://logo",
-                    "url_tracke":"https://track",
-                    "pays":"fr,be",
-                    "categories":"High-tech",
-                    "description":"desc",
-                    "etat":"actif",
-                    "dureecookies":30,
-                    "clic":0.05,
-                    "ventefixe":12.50,
-                    "lead":1.50,
-                    "affichage":0.10,
-                    "epc":"0.45",
-                    "transformation":"0.02"
-                  }
-                ]}
-                """);
-
-        when(cacheService.getResource(contains("programs.json"), anyInt())).thenReturn(programs);
-
-        EffiliationFeedService service = buildService(true, cacheService);
-        Collection<AffiliationProgram> mapped = service.getPrograms();
-
-        assertThat(mapped).hasSize(1);
-        AffiliationProgram ap = mapped.iterator().next();
-        assertThat(ap.getProgramId()).isEqualTo("101");
-        assertThat(ap.getAdvertiserName()).isEqualTo("Test Program");
-        assertThat(ap.getLogoUrl()).isEqualTo("https://logo");
-        assertThat(ap.getTrackingUrl()).isEqualTo("https://track");
-        assertThat(ap.getCountryCodes()).containsExactlyInAnyOrder("fr", "be");
-        assertThat(ap.getCategories()).containsExactlyInAnyOrder("high-tech");
-        assertThat(ap.getDescription()).isEqualTo("desc");
-        assertThat(ap.getStatus()).isEqualTo("actif");
-        assertThat(ap.getCookieDurationDays()).isEqualTo(30);
-        assertThat(ap.getClickCommission()).isEqualByComparingTo("0.05");
-        assertThat(ap.getSaleCommissionPercent()).isEqualByComparingTo("12.50");
-        assertThat(ap.getLeadCommission()).isEqualByComparingTo("1.50");
-        assertThat(ap.getDisplayCpm()).isEqualByComparingTo("0.10");
-        assertThat(ap.getEpc()).isEqualByComparingTo("0.45");
-        assertThat(ap.getConversionRate()).isEqualByComparingTo("0.02");
-    }
-
-    @Test
-    void getPromotionsShouldReturnMappedPromotions() throws Exception {
-        RemoteFileCachingService cacheService = mock(RemoteFileCachingService.class);
-        File promotions = jsonFile("""
-                {"supports":[
-                  {
-                    "id_lien":"promo-1",
-                    "id_affilieur":"101",
-                    "site_affilieur":"Promo Test",
-                    "nom":"Promo Title",
-                    "intitule":"PROMO20",
-                    "code":"PROMO20",
-                    "date_debut":"01/01/2026 00:00:00",
-                    "date_fin":"31/12/2026 23:59:59",
-                    "type":"Code de réduction",
-                    "url_tracke":"https://promo-track",
-                    "description":"20% off"
-                  }
-                ]}
-                """);
-
-        when(cacheService.getResource(contains("commercialtrades.json"), anyInt())).thenReturn(promotions);
-
-        EffiliationFeedService service = buildService(true, cacheService);
-        Collection<AffiliationPromotion> mapped = service.getPromotions();
-
-        assertThat(mapped).hasSize(1);
-        AffiliationPromotion ap = mapped.iterator().next();
-        assertThat(ap.getProgramId()).isEqualTo("101");
-        assertThat(ap.getAdvertiserName()).isEqualTo("Promo Test");
-        assertThat(ap.getTitle()).isEqualTo("Promo Title");
-        assertThat(ap.getVoucherCode()).isEqualTo("PROMO20");
-        assertThat(ap.getStartDate().toString()).isEqualTo("2026-01-01");
-        assertThat(ap.getEndDate().toString()).isEqualTo("2026-12-31");
-        assertThat(ap.getDiscountType()).isEqualTo("Code de réduction");
-        assertThat(ap.getTrackingUrl()).isEqualTo("https://promo-track");
-        assertThat(ap.getDescription()).isEqualTo("20% off");
-    }
-
-    @Test
-    void getTransactionsShouldReturnMappedTransactions() throws Exception {
-        RemoteFileCachingService cacheService = mock(RemoteFileCachingService.class);
-        File transactions = jsonFile("""
-                {"transactions":[
-                  {
-                    "id_transaction":"tx-1",
-                    "id_affilieur":"101",
-                    "date_action":"2026-05-29T12:00:00Z",
-                    "etat":"valide",
-                    "montant_panier":120.50,
-                    "commission":6.03,
-                    "devise":"EUR"
-                  }
-                ]}
-                """);
-
-        when(cacheService.getResource(contains("transaction.json"), anyInt())).thenReturn(transactions);
-
-        EffiliationFeedService service = buildService(true, cacheService);
-        Collection<AffiliationTransaction> mapped = service.getTransactions(Instant.parse("2026-05-01T00:00:00Z"), Instant.parse("2026-05-31T23:59:59Z"));
-
-        assertThat(mapped).hasSize(1);
-        AffiliationTransaction at = mapped.iterator().next();
-        assertThat(at.getTransactionId()).isEqualTo("tx-1");
-        assertThat(at.getProgramId()).isEqualTo("101");
-        assertThat(at.getTransactionDate()).isEqualTo(java.time.Instant.parse("2026-05-29T12:00:00Z"));
-        assertThat(at.getStatus()).isEqualTo("valide");
-        assertThat(at.getSaleAmount()).isEqualByComparingTo("120.50");
-        assertThat(at.getCommissionAmount()).isEqualByComparingTo("6.03");
+    private File fixture(String name) throws IOException {
+        try (InputStream in = getClass().getResourceAsStream("/effiliation/v3/" + name)) {
+            assertThat(in).as("fixture %s", name).isNotNull();
+            return jsonFile(new String(in.readAllBytes(), StandardCharsets.UTF_8));
+        }
     }
 
     private File jsonFile(String content) throws IOException {

@@ -8,6 +8,8 @@ archive extraction.
 - Download files with configurable timeouts.
 - Refresh files based on a configurable period.
 - Supports GZIP decompression when retrieving archives.
+- Logs URLs without their query values; `getResource(url, ttl, logLabel)` logs
+  a caller-supplied label instead, for URLs carrying a secret in their path.
 
 ## Configuration
 
