@@ -120,6 +120,12 @@ jobs:
         env:
           CHECKOUT_REF: ${{ steps.meta.outputs.checkout_ref }}
           API_GOOGLE_API_JSON: ${{ secrets.API_GOOGLE_API_JSON }}
+          API_METRIKS_AWIN_PUBLISHER_ID: ${{ secrets.API_METRIKS_AWIN_PUBLISHER_ID }}
+          API_METRIKS_AWIN_API_TOKEN: ${{ secrets.API_METRIKS_AWIN_API_TOKEN }}
+          API_METRIKS_EFFILIATION_API_KEY: ${{ secrets.API_METRIKS_EFFILIATION_API_KEY }}
+          API_METRIKS_RAKUTEN_CLIENT_ID: ${{ secrets.API_METRIKS_RAKUTEN_CLIENT_ID }}
+          API_METRIKS_RAKUTEN_CLIENT_SECRET: ${{ secrets.API_METRIKS_RAKUTEN_CLIENT_SECRET }}
+          API_METRIKS_RAKUTEN_SID: ${{ secrets.API_METRIKS_RAKUTEN_SID }}
         run: |
           if [ ! -x scripts/deploy/render-service-secrets.sh ]; then
             echo "::warning::scripts/deploy/render-service-secrets.sh is missing from ${CHECKOUT_REF}: api secrets are not rendered"
@@ -485,7 +491,8 @@ jobs:
 
       - name: Render api secrets on Prod
         # Same files as prodSecrets.yml (scripts/deploy/render-service-secrets.sh, GOU-933), restarted just below.
-        # Without API_GOOGLE_API_JSON in `prod`: warning, nothing rendered, api keeps its previous configuration.
+        # A secret missing from `prod` is a warning and is not rendered (api keeps its previous value); the others
+        # still are (API_METRIKS_*: Metriks affiliation report, GOU-957).
         if: env.MODE != 'test'
         env:
           CHECKOUT_REF: ${{ steps.meta.outputs.checkout_ref }}
@@ -493,6 +500,12 @@ jobs:
           DEPLOY_SSH_USER: ${{ secrets.REMOTE_USER }}
           DEPLOY_SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           API_GOOGLE_API_JSON: ${{ secrets.API_GOOGLE_API_JSON }}
+          API_METRIKS_AWIN_PUBLISHER_ID: ${{ secrets.API_METRIKS_AWIN_PUBLISHER_ID }}
+          API_METRIKS_AWIN_API_TOKEN: ${{ secrets.API_METRIKS_AWIN_API_TOKEN }}
+          API_METRIKS_EFFILIATION_API_KEY: ${{ secrets.API_METRIKS_EFFILIATION_API_KEY }}
+          API_METRIKS_RAKUTEN_CLIENT_ID: ${{ secrets.API_METRIKS_RAKUTEN_CLIENT_ID }}
+          API_METRIKS_RAKUTEN_CLIENT_SECRET: ${{ secrets.API_METRIKS_RAKUTEN_CLIENT_SECRET }}
+          API_METRIKS_RAKUTEN_SID: ${{ secrets.API_METRIKS_RAKUTEN_SID }}
         run: |
           if [ ! -x scripts/deploy/render-service-secrets.sh ]; then
             echo "::warning::scripts/deploy/render-service-secrets.sh is missing from ${CHECKOUT_REF}: api secrets are not rendered"

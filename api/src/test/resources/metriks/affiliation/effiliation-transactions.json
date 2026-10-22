@@ -1,0 +1,71 @@
+{
+  "transactions": [
+    {
+      "id_transaction": "EFF-0001",
+      "id_affilieur": 20001,
+      "id_programme": 30001,
+      "nom_programme": "Example programme A",
+      "effi_id": "anon-1",
+      "type": "Vente",
+      "etat": "Valide",
+      "montant": "120.00",
+      "commission": "6.00",
+      "datetran": "2026-10-21 23:50:00",
+      "datevalidation": "2026-10-22 08:00:00",
+      "payed": "false"
+    },
+    {
+      "id_transaction": "EFF-0002",
+      "id_affilieur": 20002,
+      "id_programme": 30002,
+      "nom_programme": "Example programme B",
+      "effi_id": "anon-2",
+      "type": "Vente",
+      "etat": "Attente",
+      "montant": "28.00",
+      "commission": "1,40",
+      "datetran": "2026-10-16 09:00:00",
+      "payed": "false"
+    },
+    {
+      "id_transaction": "EFF-0003",
+      "id_affilieur": 20001,
+      "id_programme": 30001,
+      "nom_programme": "Example programme A",
+      "effi_id": "anon-3",
+      "type": "Vente",
+      "etat": "Attente",
+      "montant": "52.00",
+      "commission": "2.60",
+      "datetran": "2026-09-30 10:00:00",
+      "payed": "false"
+    },
+    {
+      "id_transaction": "EFF-0004",
+      "id_affilieur": 20003,
+      "id_programme": 30003,
+      "nom_programme": "Example programme C",
+      "effi_id": "anon-4",
+      "type": "Vente",
+      "etat": "Valide",
+      "montant": 163.0,
+      "commission": 8.15,
+      "datetran": "2026-10-02 11:00:00",
+      "datevalidation": "2026-10-12 08:00:00",
+      "payed": "false"
+    },
+    {
+      "id_transaction": "EFF-0005",
+      "id_affilieur": 20002,
+      "id_programme": 30002,
+      "nom_programme": "Example programme B",
+      "effi_id": "anon-5",
+      "type": "Vente",
+      "etat": "Refus",
+      "montant": "100.00",
+      "commission": "5.00",
+      "datetran": "2026-10-19 15:00:00",
+      "payed": "false"
+    }
+  ]
+}

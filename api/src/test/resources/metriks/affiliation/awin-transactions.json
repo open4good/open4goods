@@ -1,0 +1,92 @@
+[
+  {
+    "id": 900000001,
+    "url": "https://www.example-merchant-a.test",
+    "advertiserId": 10001,
+    "publisherId": 100000,
+    "siteName": "Example publisher",
+    "commissionStatus": "approved",
+    "commissionAmount": { "amount": 4.5, "currency": "EUR" },
+    "saleAmount": { "amount": 90.0, "currency": "EUR" },
+    "clickRefs": { "clickRef": "anon-1" },
+    "clickDate": "2026-10-20T09:40:00",
+    "transactionDate": "2026-10-20T10:00:00",
+    "validationDate": "2026-10-21T08:00:00",
+    "type": "Commission group transaction",
+    "declineReason": null,
+    "amended": false,
+    "paidToPublisher": false
+  },
+  {
+    "id": 900000002,
+    "advertiserId": 10002,
+    "publisherId": 100000,
+    "commissionStatus": "pending",
+    "commissionAmount": { "amount": 2.1, "currency": "EUR" },
+    "saleAmount": { "amount": 42.0, "currency": "EUR" },
+    "transactionDate": "2026-10-14T22:30:00",
+    "validationDate": null,
+    "type": "Commission group transaction",
+    "declineReason": null
+  },
+  {
+    "id": 900000003,
+    "advertiserId": 10001,
+    "publisherId": 100000,
+    "commissionStatus": "pending",
+    "commissionAmount": { "amount": 3.0, "currency": "EUR" },
+    "saleAmount": { "amount": 60.0, "currency": "EUR" },
+    "transactionDate": "2026-10-01T09:00:00",
+    "validationDate": null,
+    "type": "Commission group transaction",
+    "declineReason": null
+  },
+  {
+    "id": 900000004,
+    "advertiserId": 10003,
+    "publisherId": 100000,
+    "commissionStatus": "approved",
+    "commissionAmount": { "amount": 1.25, "currency": "EUR" },
+    "saleAmount": { "amount": 25.0, "currency": "EUR" },
+    "transactionDate": "2026-09-24T08:00:00",
+    "validationDate": "2026-10-02T08:00:00",
+    "type": "Commission group transaction",
+    "declineReason": null
+  },
+  {
+    "id": 900000005,
+    "advertiserId": 10002,
+    "publisherId": 100000,
+    "commissionStatus": "declined",
+    "commissionAmount": { "amount": 9.99, "currency": "EUR" },
+    "saleAmount": { "amount": 199.8, "currency": "EUR" },
+    "transactionDate": "2026-10-18T12:00:00",
+    "validationDate": "2026-10-20T08:00:00",
+    "type": "Commission group transaction",
+    "declineReason": "Order cancelled"
+  },
+  {
+    "id": 900000006,
+    "advertiserId": 10003,
+    "publisherId": 100000,
+    "commissionStatus": "deleted",
+    "commissionAmount": { "amount": 7.0, "currency": "EUR" },
+    "saleAmount": { "amount": 140.0, "currency": "EUR" },
+    "transactionDate": "2026-10-10T12:00:00",
+    "validationDate": null,
+    "type": "Commission group transaction",
+    "declineReason": null
+  },
+  {
+    "id": 900000007,
+    "advertiserId": 10001,
+    "publisherId": 100000,
+    "commissionStatus": "approved",
+    "commissionAmount": { "amount": 100.0, "currency": "EUR" },
+    "saleAmount": { "amount": 2000.0, "currency": "EUR" },
+    "transactionDate": "2026-09-23T21:59:59",
+    "validationDate": "2026-09-30T08:00:00",
+    "type": "Commission group transaction",
+    "declineReason": null
+  }
+]

@@ -7,10 +7,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.open4goods.api.dto.metriks.MetriksEvent;
 import org.open4goods.api.services.metriks.GoogleSearchConsoleService;
+import org.open4goods.api.services.metriks.affiliation.AffiliationMetriksService;
 import org.open4goods.model.affiliation.AffiliationPartner;
 import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -43,6 +47,9 @@ public class MetriksControllerTest {
 
     @MockitoBean
     private GoogleSearchConsoleService searchConsoleService;
+
+    @MockitoBean
+    private AffiliationMetriksService affiliationMetriksService;
 
     @Test
     @WithMockUser(roles = "ADMIN")
@@ -108,5 +115,31 @@ public class MetriksControllerTest {
                 .andExpect(jsonPath("$.events[0].id").value("seo.gsc.pages_with_impressions"))
                 .andExpect(jsonPath("$.events[0].status").value("error"))
                 .andExpect(jsonPath("$.events[0].errorMessage").value("Search Console API HTTP 500: boom"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    public void testGetAffiliationMetrics() throws Exception {
+        MetriksEvent ok = new MetriksEvent();
+        ok.setId("affiliation.awin.commission.validated.7d");
+        ok.setUnit("currency");
+        ok.setValue(new java.math.BigDecimal("4.50"));
+        ok.setParams(Map.of("provider", "open4goods-api", "network", "awin", "currency", "EUR"));
+        MetriksEvent error = new MetriksEvent();
+        error.setId("affiliation.rakuten.sales.7d");
+        error.setUnit("count");
+        error.setStatus("error");
+        error.setErrorMessage("Credential manquant : metriks.affiliation.rakuten.sid");
+        when(affiliationMetriksService.collectEvents()).thenReturn(List.of(ok, error));
+
+        mockMvc.perform(get("/api/metriks/affiliation"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.schemaVersion").value("2.0"))
+                .andExpect(jsonPath("$.events[0].id").value("affiliation.awin.commission.validated.7d"))
+                .andExpect(jsonPath("$.events[0].value").value(4.50))
+                .andExpect(jsonPath("$.events[0].params.currency").value("EUR"))
+                .andExpect(jsonPath("$.events[1].status").value("error"))
+                .andExpect(jsonPath("$.events[1].value").doesNotExist())
+                .andExpect(jsonPath("$.events[1].errorMessage").value("Credential manquant : metriks.affiliation.rakuten.sid"));
     }
 }
