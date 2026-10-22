@@ -22,6 +22,7 @@ owned, and linked from this index when they become durable project knowledge.
 - [Documentation guidelines](conventions/documentation-guidelines.md)
 - [MCP server setup](operations/mcp-servers.md)
 - [Google SSO OAuth clients](operations/google-sso-oauth-clients.md)
+- [Production service secrets (render + restart)](operations/prod-service-secrets.md)
 - [Frontend asset hardening](operations/frontend-asset-hardening.md)
 - [Production log triage](operations/production-log-triage.md)
 - [Beta deployment workflows (manual dispatch on main)](operations/ci-workflows-status.md)

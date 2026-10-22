@@ -44,8 +44,9 @@ for key in "$@"; do
   value=$(printenv "$key" || true)
   [ -n "$value" ] || fail "$key is empty or missing from the job environment"
   # Values are written unquoted (docker compose env_file) and sourced by publish-jars.sh.
+  # '/' is allowed for file paths (GOU-933).
   case "$value" in
-    *[!A-Za-z0-9._-]*) fail "$key contains characters outside [A-Za-z0-9._-]" ;;
+    *[!A-Za-z0-9/._-]*) fail "$key contains characters outside [A-Za-z0-9/._-]" ;;
   esac
   printf '%s=%s\n' "$key" "$value" >> "$work/keys.env"
   pattern="${pattern:+$pattern|}$key"
@@ -65,7 +66,7 @@ if [ -f \"\$f\" ]; then
 fi
 cat >> \"\$tmp\"
 mv \"\$tmp\" \"\$f\"
-echo \"Updated keys in \$f: $*\""
+echo \"Updated keys in \$f (\$(stat -c '%a %U:%G' \"\$f\")): $*\""
 
 ssh -i "$work/id" \
   -o BatchMode=yes \

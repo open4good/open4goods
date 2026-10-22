@@ -92,6 +92,10 @@ the checkout, also run in every mode, fails when that ref has no
 `scripts/deploy/push-remote-env.sh`: deploy a ref cut after GOU-767 (tags up
 to v1.0.61 do not contain it).
 
+Other production secrets, rendered by the same release and by the
+dispatchable `prodSecrets.yml`, are listed in
+[Production service secrets](prod-service-secrets.md).
+
 The same caveats as beta apply: `/etc/open4goods/front-api.env` survives
 config deploys, while `config/prod/frontend/.env` is rewritten by every
 `open4goods-config` deploy, so recreate the frontend containers through
