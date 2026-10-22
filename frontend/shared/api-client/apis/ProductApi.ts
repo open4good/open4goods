@@ -101,7 +101,7 @@ export class ProductApi extends runtime.BaseAPI {
   async componentsRaw(
     requestParameters: ComponentsRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<Array<string>>> {
     if (requestParameters['domainLanguage'] == null) {
       throw new runtime.RequiredError(
         'domainLanguage',
@@ -147,11 +147,7 @@ export class ProductApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse<any>(response)
   }
 
   /**
@@ -161,7 +157,7 @@ export class ProductApi extends runtime.BaseAPI {
   async components(
     requestParameters: ComponentsRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<Array<string>> {
     const response = await this.componentsRaw(requestParameters, initOverrides)
     return await response.value()
   }
@@ -173,7 +169,7 @@ export class ProductApi extends runtime.BaseAPI {
   async filterableFieldsRaw(
     requestParameters: FilterableFieldsRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<Array<string>>> {
     if (requestParameters['domainLanguage'] == null) {
       throw new runtime.RequiredError(
         'domainLanguage',
@@ -219,11 +215,7 @@ export class ProductApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse<any>(response)
   }
 
   /**
@@ -233,7 +225,7 @@ export class ProductApi extends runtime.BaseAPI {
   async filterableFields(
     requestParameters: FilterableFieldsRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<Array<string>> {
     const response = await this.filterableFieldsRaw(
       requestParameters,
       initOverrides
@@ -248,7 +240,7 @@ export class ProductApi extends runtime.BaseAPI {
   async filterableFieldsForVerticalRaw(
     requestParameters: FilterableFieldsForVerticalRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<ProductFieldOptionsResponse>> {
     if (requestParameters['verticalId'] == null) {
       throw new runtime.RequiredError(
         'verticalId',
@@ -305,11 +297,9 @@ export class ProductApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      ProductFieldOptionsResponseFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -319,7 +309,7 @@ export class ProductApi extends runtime.BaseAPI {
   async filterableFieldsForVertical(
     requestParameters: FilterableFieldsForVerticalRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<ProductFieldOptionsResponse> {
     const response = await this.filterableFieldsForVerticalRaw(
       requestParameters,
       initOverrides
@@ -328,13 +318,13 @@ export class ProductApi extends runtime.BaseAPI {
   }
 
   /**
-   * Runs an embeddings-only search strategy with optional filters and sorting.
+   * Runs a lexical Elasticsearch search with optional filters and sorting.
    * Execute a global search
    */
   async globalSearchRaw(
     requestParameters: GlobalSearchRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<GlobalSearchResponseDto>> {
     if (requestParameters['domainLanguage'] == null) {
       throw new runtime.RequiredError(
         'domainLanguage',
@@ -392,21 +382,19 @@ export class ProductApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      GlobalSearchResponseDtoFromJSON(jsonValue)
+    )
   }
 
   /**
-   * Runs an embeddings-only search strategy with optional filters and sorting.
+   * Runs a lexical Elasticsearch search with optional filters and sorting.
    * Execute a global search
    */
   async globalSearch(
     requestParameters: GlobalSearchRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<GlobalSearchResponseDto> {
     const response = await this.globalSearchRaw(
       requestParameters,
       initOverrides
@@ -421,7 +409,7 @@ export class ProductApi extends runtime.BaseAPI {
   async productRaw(
     requestParameters: ProductRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<ProductDto>> {
     if (requestParameters['gtin'] == null) {
       throw new runtime.RequiredError(
         'gtin',
@@ -482,11 +470,9 @@ export class ProductApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      ProductDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -496,7 +482,7 @@ export class ProductApi extends runtime.BaseAPI {
   async product(
     requestParameters: ProductRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<ProductDto> {
     const response = await this.productRaw(requestParameters, initOverrides)
     return await response.value()
   }
@@ -508,7 +494,7 @@ export class ProductApi extends runtime.BaseAPI {
   async productsRaw(
     requestParameters: ProductsRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<ProductSearchResponseDto>> {
     if (requestParameters['domainLanguage'] == null) {
       throw new runtime.RequiredError(
         'domainLanguage',
@@ -579,11 +565,9 @@ export class ProductApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      ProductSearchResponseDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -593,7 +577,7 @@ export class ProductApi extends runtime.BaseAPI {
   async products(
     requestParameters: ProductsRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<ProductSearchResponseDto> {
     const response = await this.productsRaw(requestParameters, initOverrides)
     return await response.value()
   }
@@ -605,7 +589,7 @@ export class ProductApi extends runtime.BaseAPI {
   async sortableFieldsRaw(
     requestParameters: SortableFieldsRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<Array<string>>> {
     if (requestParameters['domainLanguage'] == null) {
       throw new runtime.RequiredError(
         'domainLanguage',
@@ -651,11 +635,7 @@ export class ProductApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse<any>(response)
   }
 
   /**
@@ -665,7 +645,7 @@ export class ProductApi extends runtime.BaseAPI {
   async sortableFields(
     requestParameters: SortableFieldsRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<Array<string>> {
     const response = await this.sortableFieldsRaw(
       requestParameters,
       initOverrides
@@ -680,7 +660,7 @@ export class ProductApi extends runtime.BaseAPI {
   async sortableFieldsForVerticalRaw(
     requestParameters: SortableFieldsForVerticalRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<ProductFieldOptionsResponse>> {
     if (requestParameters['verticalId'] == null) {
       throw new runtime.RequiredError(
         'verticalId',
@@ -737,11 +717,9 @@ export class ProductApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      ProductFieldOptionsResponseFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -751,7 +729,7 @@ export class ProductApi extends runtime.BaseAPI {
   async sortableFieldsForVertical(
     requestParameters: SortableFieldsForVerticalRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<ProductFieldOptionsResponse> {
     const response = await this.sortableFieldsForVerticalRaw(
       requestParameters,
       initOverrides
@@ -766,7 +744,7 @@ export class ProductApi extends runtime.BaseAPI {
   async suggestRaw(
     requestParameters: SuggestRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+  ): Promise<runtime.ApiResponse<SearchSuggestResponseDto>> {
     if (requestParameters['query'] == null) {
       throw new runtime.RequiredError(
         'query',
@@ -823,11 +801,9 @@ export class ProductApi extends runtime.BaseAPI {
       initOverrides
     )
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
-    } else {
-      return new runtime.TextApiResponse(response) as any
-    }
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      SearchSuggestResponseDtoFromJSON(jsonValue)
+    )
   }
 
   /**
@@ -837,7 +813,7 @@ export class ProductApi extends runtime.BaseAPI {
   async suggest(
     requestParameters: SuggestRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<SearchSuggestResponseDto> {
     const response = await this.suggestRaw(requestParameters, initOverrides)
     return await response.value()
   }

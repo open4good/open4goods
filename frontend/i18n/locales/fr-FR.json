@@ -709,10 +709,6 @@
         "medium": "Moyenne",
         "high": "Élevée"
       },
-      "searchMode": {
-        "semantic": "Recherche sémantique",
-        "text": "Recherche textuelle"
-      },
       "showMoreImpact": "Plus de filtres",
       "showMoreTechnical": "Plus de filtres",
       "technicalTitle": "La technique",
@@ -2123,10 +2119,6 @@
       "title": "Recherche de produits",
       "description": "Recherchez dans le catalogue de consommation responsable de Nudger pour découvrir produits, marques et verticales.",
       "imageAlt": "Illustration de l'expérience de recherche Nudger"
-    },
-    "modes": {
-      "exact_vertical": "Exact (catégories)",
-      "semantic": "Sémantique"
     }
   },
   "compare": {

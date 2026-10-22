@@ -1052,16 +1052,13 @@ public class ProductMappingService {
      * @param query          optional free text query
      * @param filters        optional search filters applied on the Elasticsearch
      *                       query
-     * @param semanticSearch whether semantic search should replace lexical
-     *                       matching when a query is provided
      * @return response payload containing paginated products and aggregations
      */
     public ProductSearchResponseDto searchProducts(Pageable pageable, Locale locale, Set<String> includes,
             AggregationRequestDto aggregation, DomainLanguage domainLanguage, String verticalId, String query,
-            FilterRequestDto filters, boolean semanticSearch, String searchType) {
+            FilterRequestDto filters) {
 
-        SearchService.SearchResult result = searchService.search(pageable, verticalId, query, aggregation, filters,
-                 semanticSearch, searchType);
+        SearchService.SearchResult result = searchService.search(pageable, verticalId, query, aggregation, filters);
         SearchHits<Product> hits = result.hits();
 
         List<ProductDto> items = hits.getSearchHits().stream()

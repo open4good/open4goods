@@ -75,6 +75,10 @@ describe('server/api/products/search.post', () => {
       products: { data: [{ gtin: 123 }] },
       aggregations: { brands: {} },
     })
+    searchGlobalProductsMock.mockResolvedValue({
+      verticalGroups: [],
+      missingVerticalResults: [],
+    })
 
     handler = (await import('./search.post')).default
   })
@@ -169,6 +173,56 @@ describe('server/api/products/search.post', () => {
       pageSize: undefined,
       query: 'repairable',
       include: ['base', 'names'],
+    })
+  })
+
+  it('accepts legacy semantic flags but omits them from global search', async () => {
+    const event = {
+      node: { req: { headers: { host: 'nudger.fr' } } },
+      context: {
+        body: {
+          query: 'television',
+          semanticSearch: true,
+          searchType: 'SEMANTIC',
+        },
+      },
+    } as unknown as Parameters<SearchHandler>[0]
+
+    await handler(event)
+
+    expect(searchProductsMock).not.toHaveBeenCalled()
+    expect(searchGlobalProductsMock).toHaveBeenCalledWith({
+      query: 'television',
+      filters: undefined,
+      sort: undefined,
+      pageNumber: undefined,
+      pageSize: undefined,
+    })
+  })
+
+  it('accepts legacy semantic flags but omits them from product search', async () => {
+    const event = {
+      node: { req: { headers: { host: 'nudger.fr' } } },
+      context: {
+        body: {
+          query: 'television',
+          aggs: { aggs: [] },
+          semanticSearch: true,
+          searchType: 'SEMANTIC',
+        },
+      },
+    } as unknown as Parameters<SearchHandler>[0]
+
+    await handler(event)
+
+    expect(searchGlobalProductsMock).not.toHaveBeenCalled()
+    expect(searchProductsMock).toHaveBeenCalledWith({
+      verticalId: undefined,
+      pageNumber: undefined,
+      pageSize: undefined,
+      query: 'television',
+      include: undefined,
+      body: { aggs: { aggs: [] } },
     })
   })
 })

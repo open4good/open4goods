@@ -4,13 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.embedding.config.DjlEmbeddingAutoConfiguration;
-import org.open4goods.embedding.health.DjlEmbeddingHealthIndicator;
-import org.open4goods.embedding.service.AbstractTextModelFactory;
-import org.open4goods.embedding.service.DjlTextEmbeddingService;
-import org.open4goods.embedding.service.OpenAiCompatibleTextEmbeddingService;
-import org.open4goods.embedding.service.TextEmbeddingService;
 import org.open4goods.embedding.service.image.AbstractImageModelFactory;
-import org.springframework.boot.health.contributor.Status;
+import org.open4goods.embedding.service.image.DjlImageEmbeddingService;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
@@ -19,66 +14,47 @@ import ai.djl.modality.cv.Image;
 import ai.djl.repository.zoo.ZooModel;
 import ai.djl.translate.TranslateException;
 
+/**
+ * Verifies that the starter registers image embedding only.
+ */
 class DjlEmbeddingAutoConfigurationTest
 {
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withPropertyValues("embedding.text-model-url=text-model",
+            .withPropertyValues(
+                    "embedding.vision-model-url=image-model",
                     "embedding.async-loading=false",
                     "embedding.predictor-pool-size=1")
             .withConfiguration(AutoConfigurations.of(DjlEmbeddingAutoConfiguration.class));
 
+    /**
+     * Verifies image embedding remains available after text embedding removal.
+     */
     @Test
-    void autoConfigurationRegistersServiceAndHealthIndicator()
+    void autoConfigurationRegistersImageServiceOnly()
     {
-        contextRunner.withBean(AbstractTextModelFactory.class, StubFactory::new)
-                .withBean(AbstractImageModelFactory.class, StubImageFactory::new)
+        contextRunner.withBean(AbstractImageModelFactory.class, StubImageFactory::new)
                 .run(context -> {
-                    assertThat(context).hasSingleBean(DjlTextEmbeddingService.class);
-                    assertThat(context).hasSingleBean(TextEmbeddingService.class);
-                    assertThat(context).hasSingleBean(DjlEmbeddingHealthIndicator.class);
-
-                    DjlEmbeddingHealthIndicator indicator = context.getBean(DjlEmbeddingHealthIndicator.class);
-                    assertThat(indicator.health().getStatus()).isEqualTo(Status.UP);
+                    assertThat(context).hasSingleBean(DjlImageEmbeddingService.class);
+                    assertThat(context.getBeansOfType(AbstractImageModelFactory.class)).hasSize(1);
                 });
     }
 
+    /**
+     * Verifies the starter can be disabled without registering image infrastructure.
+     */
     @Test
-    void autoConfigurationCanSwitchToOpenAiCompatibleService()
+    void autoConfigurationCanBeDisabled()
     {
-        contextRunner.withPropertyValues(
-                    "embedding.provider=openai-compatible",
-                    "embedding.openai.base-url=http://localhost:8080/v1",
-                    "embedding.openai.api-key=localai",
-                    "embedding.openai.model=local-model")
-                .withBean(AbstractImageModelFactory.class, StubImageFactory::new)
+        contextRunner.withPropertyValues("embedding.enabled=false")
                 .run(context -> {
-                    assertThat(context).hasSingleBean(OpenAiCompatibleTextEmbeddingService.class);
-                    assertThat(context).hasSingleBean(TextEmbeddingService.class);
-                    assertThat(context).doesNotHaveBean(DjlTextEmbeddingService.class);
-                    assertThat(context).doesNotHaveBean(DjlEmbeddingHealthIndicator.class);
+                    assertThat(context).doesNotHaveBean(DjlImageEmbeddingService.class);
+                    assertThat(context).doesNotHaveBean(AbstractImageModelFactory.class);
                 });
     }
 
-    private static class StubFactory extends AbstractTextModelFactory
-    {
-        @Override
-        public ZooModel<String, float[]> loadModel(String modelLocation, String poolingMode, String engine) throws Exception
-        {
-            return buildModel(new float[] { 0.9f, 0.1f });
-        }
-
-        private ZooModel<String, float[]> buildModel(float[] vector) throws Exception
-        {
-            Predictor<String, float[]> predictor = org.mockito.Mockito.mock(Predictor.class);
-            org.mockito.Mockito.when(predictor.predict(org.mockito.ArgumentMatchers.anyString())).thenReturn(vector);
-
-            @SuppressWarnings("unchecked")
-            ZooModel<String, float[]> model = org.mockito.Mockito.mock(ZooModel.class);
-            org.mockito.Mockito.when(model.newPredictor()).thenReturn(predictor);
-            return model;
-        }
-    }
-
+    /**
+     * Supplies an offline image model to the application context.
+     */
     private static class StubImageFactory extends AbstractImageModelFactory
     {
         @Override

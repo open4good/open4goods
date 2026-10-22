@@ -10,12 +10,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record GlobalSearchResponseDto(
         @Schema(description = "Vertical groups produced by the primary search pass")
         List<GlobalSearchVerticalGroupDto> verticalGroups,
-        @Schema(description = "Semantic results that have no vertical assigned")
+        @Schema(description = "Lexical results that have no vertical assigned")
         List<GlobalSearchResultDto> missingVerticalResults,
         @Schema(description = "Pagination metadata for missing-vertical results")
         GlobalSearchPageMetaDto missingVerticalPage,
         @Schema(description = "Category suggestion if a strict match is found")
-        SearchSuggestCategoryDto verticalCta,
-        @Schema(description = "Semantic score diagnostics when enabled", nullable = true)
-        SemanticScoreDiagnosticsDto semanticDiagnostics) {
+        SearchSuggestCategoryDto verticalCta) {
 }
