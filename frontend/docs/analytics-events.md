@@ -107,6 +107,19 @@ Props:
 
 - `dataset`, `method`, `href`
 
+### `open-data-link`
+
+Tracks clicks on the `/opendata`, `/opendata/gtin` and `/opendata/isbn` pages blocks "Explore products" and "Also available on" (emitted by `trackOpenDataOutboundClick`). Respects Do Not Track like every other event.
+
+Props (low cardinality, no GTIN):
+
+- `block`: `explore-products` | `mirrors`
+- `target`: `category` | `product` | `datagouv` | `zenodo` | `kaggle` | `figshare`
+- `page`: `opendata` | `gtin` | `isbn`
+- `category`: category slug (`verticalId`, e.g. `tv`), only for `category` and `product` targets
+
+Plausible setup: create a custom event goal named `open-data-link` (Settings > Goals > Add goal > Custom event), then register the custom properties `block`, `target`, `page` and `category` (Settings > Custom properties) to break the goal down.
+
 ### `file-download`
 
 Tracks generic file downloads (e.g., PDF documentation).

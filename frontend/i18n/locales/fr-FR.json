@@ -1521,7 +1521,9 @@
         "summary": {
           "records": "Nombre total d'enregistrements",
           "size": "Taille compressée",
-          "updated": "Dernière mise à jour"
+          "updated": "Dernière mise à jour",
+          "format": "Format",
+          "formatValue": "CSV compressé (ZIP)"
         }
       },
       "creator": {
@@ -1847,6 +1849,45 @@
         "description": "On est pas des petits joueurs.",
         "label": "Taille cumulée des fichiers"
       }
+    },
+    "explore": {
+      "title": "Explorer les produits",
+      "subtitle": "Parcourez les catégories de Nudger et ouvrez des fiches produits identifiées par leur GTIN.",
+      "categoryAriaLabel": "Voir la catégorie {category}",
+      "gtinLabel": "GTIN",
+      "categories": {
+        "tv": "Téléviseurs",
+        "washing-machine": "Lave-linges",
+        "dishwasher": "Lave-vaisselles",
+        "oven": "Fours",
+        "air-conditioner": "Climatiseurs"
+      }
+    },
+    "mirrors": {
+      "title": "Aussi disponible sur",
+      "referenceLicense": "La version de référence, sur nudger.fr, est sous ODbL. Les miroirs ci-dessous indiquent leur propre licence.",
+      "linkAriaLabel": "Ouvrir le jeu de données sur {name} (nouvel onglet)",
+      "items": {
+        "datagouv": {
+          "name": "data.gouv.fr",
+          "license": "Licence : ODbL"
+        },
+        "zenodo": {
+          "name": "Zenodo",
+          "license": "Licence : CC BY 4.0"
+        },
+        "kaggle": {
+          "name": "Kaggle",
+          "license": "Licence : CC BY 4.0"
+        },
+        "figshare": {
+          "name": "Figshare",
+          "license": "Licence : celle affichée sur la fiche Figshare"
+        }
+      }
+    },
+    "summary": {
+      "title": "Les jeux de données en bref"
     }
   },
   "opensource": {
