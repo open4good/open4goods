@@ -40,7 +40,7 @@ class AffiliationSecretLeakTest {
     private static final List<String> SECRETS = List.of(AWIN_TOKEN, EFFILIATION_KEY, RAKUTEN_ID, RAKUTEN_SECRET,
             RAKUTEN_TOKEN_KEY);
     private static final String EFFILIATION_URL =
-            "https://apiv2.effiliation.com/apiv2/transaction.json?key=" + EFFILIATION_KEY + "&lg=fr";
+            "https://api.effinity.fr/apiv3/" + EFFILIATION_KEY + "/publisher/conversions?start=2026-10-01";
 
     private final ListAppender<ILoggingEvent> appender = new ListAppender<>();
     private Logger root;
@@ -129,8 +129,8 @@ class AffiliationSecretLeakTest {
     @Test
     void aStatusValueEchoingTheSecretIsScrubbed() {
         List<MetriksEvent> events = collect(new EffiliationReportClient(EFFILIATION_KEY, new FakeHttp(request -> response(200,
-                "{\"transactions\":[{\"etat\":\"" + EFFILIATION_KEY + "\",\"datetran\":\"2026-10-16 09:00:00\","
-                        + "\"commission\":\"1\"}]}")).client));
+                "{\"conversions\":[{\"status\":\"" + EFFILIATION_KEY + "\",\"conversionDate\":\"2026-10-16T09:00:00\","
+                        + "\"commissionAmount\":1}]}")).client));
 
         assertNoSecret(events);
         assertThat(events.get(0).getErrorMessage()).isEqualTo("Effiliation : statut inconnu : ***");
