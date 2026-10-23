@@ -56,7 +56,8 @@ class ProductControllerTest {
 
     @BeforeEach
     void setUp() {
-        controller = new ProductController(productMappingService, verticalsConfigService, searchService);
+        controller = new ProductController(productMappingService, verticalsConfigService, searchService,
+                new org.open4goods.nudgerfrontapi.config.properties.ApiProperties());
         // Default lenient mock for vertical existence check
         org.mockito.Mockito.lenient().when(verticalsConfigService.getConfigById(any())).thenReturn(new VerticalConfig());
     }
@@ -87,6 +88,29 @@ class ProductControllerTest {
 
         assertThat(filterCaptor.getValue().filters()).extracting(Filter::field)
                 .contains("scores.ENERGY_CONSUMPTION.value");
+    }
+
+    @Test
+    void lastPageInsideResultWindowIsServed() {
+        SearchService.SearchCapabilities capabilities = new SearchService.SearchCapabilities(Set.of(), Set.of(), Set.of());
+        when(searchService.buildSearchCapabilities(any(), any(), any())).thenReturn(capabilities);
+        PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(99, 100, 1, 1), List.of());
+        when(searchService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(), any()))
+                .thenReturn(new ProductSearchResponseDto(page, List.of()));
+
+        ResponseEntity<ProductSearchResponseDto> response = controller.products(PageRequest.of(99, 100), Set.of(),
+                "electronics", null, DomainLanguage.fr, Locale.FRANCE, null);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void firstPageOutsideResultWindowIsRejectedWithoutCallingSearch() {
+        ResponseEntity<ProductSearchResponseDto> response = controller.products(PageRequest.of(100, 100), Set.of(),
+                "electronics", null, DomainLanguage.fr, Locale.FRANCE, null);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        org.mockito.Mockito.verifyNoInteractions(searchService);
     }
 
     @Test
@@ -172,6 +196,19 @@ class ProductControllerTest {
                 searchRequest);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void globalSearchCapsTotalPagesToResultWindow() {
+        when(searchService.globalSearch(any(), any(), any(), any(), any())).thenReturn(
+                new SearchService.GlobalSearchResult(List.of(), List.of(), 5_000_000L, 250_000, 0, 20, null));
+
+        ResponseEntity<org.open4goods.nudgerfrontapi.dto.search.GlobalSearchResponseDto> response =
+                controller.globalSearch(DomainLanguage.fr, new org.open4goods.nudgerfrontapi.dto.search.GlobalSearchRequestDto(
+                        "tv", null, null, null, 0, 20));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().missingVerticalPage().totalPages()).isEqualTo(500);
     }
 
     @Test
