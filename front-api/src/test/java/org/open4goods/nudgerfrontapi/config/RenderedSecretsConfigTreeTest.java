@@ -26,6 +26,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.elasticsearch.autoconfigure.ElasticsearchProperties;
 import org.springframework.boot.mail.autoconfigure.MailProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
@@ -66,7 +67,9 @@ class RenderedSecretsConfigTreeTest {
             entry("spring.mail.password", binder -> bind(binder, "spring.mail", MailProperties.class).getPassword()),
             entry("captcha.secret-key", binder -> bind(binder, "captcha", HcaptchaProperties.class).getSecretKey()),
             entry("feedback.github.access-token",
-                    binder -> bind(binder, "feedback", FeedbackConfiguration.class).getGithub().getAccessToken()));
+                    binder -> bind(binder, "feedback", FeedbackConfiguration.class).getGithub().getAccessToken()),
+            entry("spring.elasticsearch.password",
+                    binder -> bind(binder, "spring.elasticsearch", ElasticsearchProperties.class).getPassword()));
 
     @TempDir
     Path tempDir;

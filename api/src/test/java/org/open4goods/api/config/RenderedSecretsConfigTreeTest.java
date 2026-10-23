@@ -27,6 +27,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.elasticsearch.autoconfigure.ElasticsearchProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.MutablePropertySources;
@@ -76,7 +77,9 @@ class RenderedSecretsConfigTreeTest {
             entry("icecat-feature-config.password", binder -> api(binder).getIcecatFeatureConfig().getPassword()),
             entry("spring.boot.admin.client.password",
                     binder -> bind(binder, "spring.boot.admin.client", ClientProperties.class).getPassword()),
-            entry("admin-key", binder -> api(binder).getAdminKey()));
+            entry("admin-key", binder -> api(binder).getAdminKey()),
+            entry("spring.elasticsearch.password",
+                    binder -> bind(binder, "spring.elasticsearch", ElasticsearchProperties.class).getPassword()));
 
     @TempDir
     Path tempDir;

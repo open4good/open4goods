@@ -451,9 +451,12 @@ import pathlib, re, sys
 import yaml
 
 render, workflows = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
-table = {}
-for service, secret in re.findall(r"(?m)^(api|ui|front-api|admin|b2b-api|frontend) ([A-Z0-9_]+) ", render.read_text()):
-    table.setdefault(service, set()).add(secret)
+table, source = {}, {}
+for service, secret, need in re.findall(
+        r"(?m)^(api|ui|front-api|admin|b2b-api|frontend|infra) ([A-Z0-9_]+) \S+ \S+ (\S+)$", render.read_text()):
+    # `source` rows are only rendered with --source (infraSecrets.yml), which renders nothing else.
+    (source if need == "source" else table).setdefault(service, set()).add(secret)
+    table.setdefault(service, set())
 errors, steps = [], 0
 for workflow in sorted(workflows.glob("*.yml")):
     for job in (yaml.safe_load(workflow.read_text()).get("jobs") or {}).values():
@@ -469,7 +472,9 @@ for workflow in sorted(workflows.glob("*.yml")):
                 services = set(loop.group(1).split()) if loop else {script.split()[-1]}
             env = step.get("env") or {}
             for service in sorted(services):
-                for secret in sorted(table[service]):
+                # --source renders the `source` rows only; without it, every other row.
+                needed = source.get(service, set()) if "--source" in script else table[service]
+                for secret in sorted(needed):
                     if f"secrets.{secret}" not in str(env.get(secret, "")):
                         errors.append(f"{workflow.name} / {step.get('name')}: {secret} ({service}) not mapped")
 print("\n".join(errors) or f"{steps} steps checked")

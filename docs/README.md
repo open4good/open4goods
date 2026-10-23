@@ -23,6 +23,7 @@ owned, and linked from this index when they become durable project knowledge.
 - [MCP server setup](operations/mcp-servers.md)
 - [Google SSO OAuth clients](operations/google-sso-oauth-clients.md)
 - [Service secrets, beta and prod (render + restart)](operations/prod-service-secrets.md)
+- [Infrastructure secrets, beta and prod (wave 3 runbook)](operations/infra-secrets-rotation.md)
 - [Frontend asset hardening](operations/frontend-asset-hardening.md)
 - [Production log triage](operations/production-log-triage.md)
 - [Beta deployment workflows (auto deploy on merge, BETA_DEPLOY_FREEZE)](operations/ci-workflows-status.md)
