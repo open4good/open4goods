@@ -437,9 +437,9 @@ public class FeedIndexingWorker implements Runnable {
 							    ));
 						DataFragment df = parseCsvLine(dsProperties, line, dsConfName, dedicatedLogger, feedLabel);
 
-						// Store the feedUrl as an attribute (for debug)
+						// Store the feed label (never the URL, which can carry an API key) as an attribute (for debug)
 						// TODO(p3,conf) : from conf
-						df.addAttribute("feed_url", url, "fr", null);
+						df.addAttribute("feed_url", feedLabel, "fr", null);
 
 						dataFragmentIndexer.index(df, dsConfName);
 						stats.incrementIndexed();

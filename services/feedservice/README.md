@@ -20,6 +20,8 @@ contain a full feed or catalog URL:
   host and port, then the first 12 hexadecimal characters of the SHA-256 of the
   URL (`https://productdata.awin.com/<redacted> #4c0cf312e02d`), also used in
   the `invalid_csv_files` health detail and `FeedIndexingJobStat.url`;
+- the `feed_url` attribute added to each `DataFragment` (debug) holds this same
+  label, never the URL, so no API key is persisted with the fragments;
 - Awin catalog lines are logged by advertiser ID and column names, never by
   their values;
 - API endpoints are logged with `HttpUtils.safeEndpointForLogs`, which masks
