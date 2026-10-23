@@ -139,7 +139,7 @@ jobs:
       github.ref == 'refs/heads/main'
       && (github.event_name == 'workflow_dispatch' || vars.BETA_DEPLOY_FREEZE != 'true')
     runs-on: ubuntu-latest
-    # Google SSO values come from the `beta` GitHub Environment (ADR-0006, GOU-767).
+    # Service secrets (Google SSO included) come from the `beta` GitHub Environment (ADR-0006, GOU-767, GOU-1041).
     environment: beta
     # One backend deploy at a time; a running restart is never interrupted. GitHub keeps only the newest
     # pending run, so the last merge ends up deployed.
@@ -196,34 +196,44 @@ jobs:
       ############################################
       # 7c. Restarting Spring Applications
       ############################################
-      - name: Render front-api Google SSO env on Beta
-        # Sourced by publish-jars.sh for front-api, outside the tree open4goods-config's deploy rsyncs with --delete.
-        # The OS env var beats application-active.yml (Spring Boot property order).
+      - name: 🔐 Render service secrets on Beta
+        # Same definition as serviceSecrets.yml and the release (scripts/deploy/render-service-secrets.sh, GOU-1041):
+        # config tree files and env lines sourced by publish-jars.sh, outside the tree open4goods-config's deploy
+        # rsyncs with --delete. A secret missing from `beta` is a warning and is not rendered: the service keeps its
+        # previous render or the open4goods-config value. A set but malformed secret fails before anything is written.
         env:
           DEPLOY_SSH_HOST: ${{ secrets.REMOTE_BETA_HOST }}
           DEPLOY_SSH_USER: ${{ secrets.REMOTE_BETA_USER }}
           DEPLOY_SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID: ${{ secrets.GOOGLE_SSO_CLIENT_ID }}
-        run: >-
-          scripts/deploy/push-remote-env.sh /etc/open4goods/front-api.env
-          FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID
-
-      - name: Render api Effinity env on Beta
-        # Effinity key of the Effiliation product feeds (affiliation-config.effiliation-api-key, GOU-1014), sourced by
-        # publish-jars.sh for api from /etc/open4goods/api.env; the OS env var beats application-active.yml.
-        # Until API_EFFILIATION_API_KEY exists in `beta`, warns only: api keeps its current value (previous render
-        # or open4goods-config).
-        env:
-          DEPLOY_SSH_HOST: ${{ secrets.REMOTE_BETA_HOST }}
-          DEPLOY_SSH_USER: ${{ secrets.REMOTE_BETA_USER }}
-          DEPLOY_SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          AFFILIATIONCONFIG_EFFILIATIONAPIKEY: ${{ secrets.API_EFFILIATION_API_KEY }}
+          API_GOOGLE_API_JSON: ${{ secrets.API_GOOGLE_API_JSON }}
+          API_METRIKS_AWIN_PUBLISHER_ID: ${{ secrets.API_METRIKS_AWIN_PUBLISHER_ID }}
+          API_METRIKS_AWIN_API_TOKEN: ${{ secrets.API_METRIKS_AWIN_API_TOKEN }}
+          API_METRIKS_EFFILIATION_API_KEY: ${{ secrets.API_METRIKS_EFFILIATION_API_KEY }}
+          API_EFFILIATION_API_KEY: ${{ secrets.API_EFFILIATION_API_KEY }}
+          API_VERTEX_API_JSON: ${{ secrets.API_VERTEX_API_JSON }}
+          API_VERTEX_BATCH_JSON: ${{ secrets.API_VERTEX_BATCH_JSON }}
+          API_GOOGLE_SEARCH_API_KEY: ${{ secrets.API_GOOGLE_SEARCH_API_KEY }}
+          API_OPENAI_API_KEY: ${{ secrets.API_OPENAI_API_KEY }}
+          API_AMAZON_ACCESS_KEY: ${{ secrets.API_AMAZON_ACCESS_KEY }}
+          API_AMAZON_SECRET_KEY: ${{ secrets.API_AMAZON_SECRET_KEY }}
+          API_AWIN_ACCESS_TOKEN: ${{ secrets.API_AWIN_ACCESS_TOKEN }}
+          API_KWANKO_TOKEN: ${{ secrets.API_KWANKO_TOKEN }}
+          API_TRADETRACKER_API_KEY: ${{ secrets.API_TRADETRACKER_API_KEY }}
+          API_EPREL_API_KEY: ${{ secrets.API_EPREL_API_KEY }}
+          O4G_ICECAT_PASSWORD: ${{ secrets.O4G_ICECAT_PASSWORD }}
+          O4G_SBA_PASSWORD: ${{ secrets.O4G_SBA_PASSWORD }}
+          O4G_INTERNAL_API_KEY: ${{ secrets.O4G_INTERNAL_API_KEY }}
+          O4G_CAPTCHA_SECRET: ${{ secrets.O4G_CAPTCHA_SECRET }}
+          O4G_MAIL_PASSWORD: ${{ secrets.O4G_MAIL_PASSWORD }}
+          FRONT_API_JWT_SECRET: ${{ secrets.FRONT_API_JWT_SECRET }}
+          O4G_MACHINE_TOKEN: ${{ secrets.O4G_MACHINE_TOKEN }}
+          FRONT_API_GITHUB_TOKEN: ${{ secrets.FRONT_API_GITHUB_TOKEN }}
+          GOOGLE_SSO_CLIENT_ID: ${{ secrets.GOOGLE_SSO_CLIENT_ID }}
         run: |
-          if [ -z "${AFFILIATIONCONFIG_EFFILIATIONAPIKEY}" ]; then
-            echo "::warning::API_EFFILIATION_API_KEY is not set in the beta GitHub Environment: not rendered for api (previous value kept)."
-            exit 0
-          fi
-          scripts/deploy/push-remote-env.sh /etc/open4goods/api.env AFFILIATIONCONFIG_EFFILIATIONAPIKEY
+          set -eu
+          for svc in admin api front-api ui b2b-api; do
+            scripts/deploy/render-service-secrets.sh --if-present apply beta "${svc}"
+          done
 
       - name: Publish Applications
         uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5

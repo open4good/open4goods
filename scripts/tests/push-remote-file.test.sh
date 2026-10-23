@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Tests scripts/deploy/push-remote-file.sh, push-remote-env.sh and render-service-secrets.sh
-# against a fake `ssh` that runs the remote script locally, with /etc/open4goods/ mapped to a temp dir.
+# against a fake `ssh` that runs the remote script locally, with /etc/open4goods/ and /opt/open4goods/ mapped to a
+# temp dir.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -15,7 +16,8 @@ cat > "${WORK}/bin/ssh" <<'SH'
 # Fake ssh: record the arguments, then run the last one (the remote script) locally.
 printf '%s\n' "$@" >> "$FAKE_SSH_LOG"
 for arg; do last=$arg; done
-script=$(printf '%s' "$last" | sed "s#/etc/open4goods/#$FAKE_ROOT/etc/open4goods/#g")
+script=$(printf '%s' "$last" | sed -e "s#/etc/open4goods/#$FAKE_ROOT/etc/open4goods/#g" \
+  -e "s#/opt/open4goods/#$FAKE_ROOT/opt/open4goods/#g")
 exec sh -c "$script"
 SH
 chmod +x "${WORK}/bin/ssh"
@@ -145,32 +147,130 @@ else
   ko "push-remote-env.sh (status ${status}): ${out}"
 fi
 TARGET_PATH='/a b' expect_fail "push-remote-env.sh still rejects spaces" "${DEPLOY}/push-remote-env.sh" /etc/open4goods/x.env TARGET_PATH
-
-########################################
-# render-service-secrets.sh
-########################################
-rm -rf "${FAKE_ROOT:?}/etc"
-: > "${FAKE_SSH_LOG}"
-unset SA_JSON API_GOOGLE_API_JSON
-
-expect_fail "render: unknown service" "${DEPLOY}/render-service-secrets.sh" check ui
-expect_fail "render: unknown action" "${DEPLOY}/render-service-secrets.sh" render api
-expect_fail "render: check fails when the secret is missing" "${DEPLOY}/render-service-secrets.sh" check api
-
-run "${DEPLOY}/render-service-secrets.sh" --if-present apply api
-if [[ ${status} -eq 0 ]] && [[ "${out}" == *"::warning::API_GOOGLE_API_JSON is not set"* ]] && [[ ! -s "${FAKE_SSH_LOG}" ]]; then
-  pass "render: --if-present warns and renders nothing when the secret is missing"
+TARGET_PATH='optional:configtree:/etc/open4goods/secrets/x/' run "${DEPLOY}/push-remote-env.sh" /etc/open4goods/x.env TARGET_PATH
+if [[ ${status} -eq 0 ]] && grep -qx 'TARGET_PATH=optional:configtree:/etc/open4goods/secrets/x/' "${FAKE_ROOT}/etc/open4goods/x.env"; then
+  pass "push-remote-env.sh accepts ':' (Spring config import location)"
 else
-  ko "render --if-present missing (status ${status}): ${out}"
+  ko "push-remote-env.sh ':' (status ${status}): ${out}"
 fi
 
-API_GOOGLE_API_JSON='{"type":"service_account"}' expect_fail "render: --if-present still fails on a malformed secret" \
-  "${DEPLOY}/render-service-secrets.sh" --if-present check api
+########################################
+# push-remote-file.sh --exact: the value as is, no trailing newline
+########################################
+ANY_VALUE=$'line one "quoted" $HOME #x\nline two: {json}'
+ANY_VALUE="${ANY_VALUE}" run "${DEPLOY}/push-remote-file.sh" --exact /etc/open4goods/secrets/x/some.property ANY_VALUE
+exact_file="${FAKE_ROOT}/etc/open4goods/secrets/x/some.property"
+if [[ ${status} -eq 0 ]] && [[ "$(stat -c '%a' "${exact_file}")" == 600 ]] \
+  && cmp -s "${exact_file}" <(printf '%s' "${ANY_VALUE}"); then
+  pass "push-remote-file.sh --exact writes the exact value (600), without a trailing newline"
+else
+  ko "push-remote-file.sh --exact (status ${status}): ${out}"
+fi
 
-export API_GOOGLE_API_JSON="${VALID_JSON}"
-run "${DEPLOY}/render-service-secrets.sh" check api
-if [[ ${status} -eq 0 ]] && [[ ! -s "${FAKE_SSH_LOG}" ]] && [[ ! -e "${FAKE_ROOT}/etc" ]]; then
-  pass "render: check uses no SSH and writes nothing"
+########################################
+# render-service-secrets.sh: arguments
+########################################
+RENDER="${DEPLOY}/render-service-secrets.sh"
+SECRET_NAMES="$(sed -n 's/^[a-z2-]* \([A-Z0-9_]*\) .*/\1/p' "${RENDER}" | sort -u)"
+# Runs the script with none of the table's secrets in the environment, whatever the caller exported.
+render() {
+  local unset_args=()
+  local name
+  for name in ${SECRET_NAMES}; do
+    unset_args+=(-u "${name}")
+  done
+  env "${unset_args[@]}" "${RENDER}" "$@"
+}
+# Same, with the given NAME=value pairs first, then the script arguments after `--`.
+render_with() {
+  local pairs=()
+  while [[ "$1" != "--" ]]; do
+    pairs+=("$1")
+    shift
+  done
+  shift
+  local unset_args=()
+  local name
+  for name in ${SECRET_NAMES}; do
+    unset_args+=(-u "${name}")
+  done
+  env "${unset_args[@]}" "${pairs[@]}" "${RENDER}" "$@"
+}
+reset_host() {
+  rm -rf "${FAKE_ROOT:?}/etc" "${FAKE_ROOT:?}/opt"
+  : > "${FAKE_SSH_LOG}"
+  : > "${GITHUB_STEP_SUMMARY}"
+}
+export GITHUB_STEP_SUMMARY="${WORK}/summary.md"
+reset_host
+
+[[ "${SECRET_NAMES}" == *O4G_SBA_PASSWORD* ]] && [[ "${SECRET_NAMES}" == *API_GOOGLE_API_JSON* ]] \
+  && pass "render: the table's secret names are read" || ko "render: secret names not read: ${SECRET_NAMES}"
+
+expect_fail "render: unknown service" render check prod xwiki
+expect_fail "render: unknown environment" render check staging api
+expect_fail "render: unknown action" render render prod api
+expect_fail "render: missing environment (old interface)" render check api
+
+########################################
+# render-service-secrets.sh: nothing set
+########################################
+for service in api ui front-api admin b2b-api frontend; do
+  for env_name in beta prod; do
+    run render --if-present check "${env_name}" "${service}"
+    if [[ ${status} -eq 0 ]] && [[ "${out}" == *"::warning::"*"is not set in the ${env_name} GitHub Environment: not rendered for ${service}"* ]] \
+      && [[ "${out}" == *"No secret of ${service} is set in the ${env_name} GitHub Environment."* ]] \
+      && [[ ! -s "${FAKE_SSH_LOG}" ]]; then
+      pass "render: --if-present check ${env_name} ${service} warns, uses no SSH, passes"
+    else
+      ko "render --if-present check ${env_name} ${service} (status ${status}): ${out}"
+    fi
+  done
+done
+for service in api ui admin b2b-api; do
+  run render check prod "${service}"
+  [[ ${status} -eq 0 ]] && pass "render: check prod ${service} passes with every optional secret missing" \
+    || ko "render check prod ${service} (status ${status}): ${out}"
+done
+for service in front-api frontend; do
+  run render check beta "${service}"
+  if [[ ${status} -ne 0 ]] && [[ "${out}" == *"::error::GOOGLE_SSO_CLIENT_ID is empty or missing from the beta GitHub Environment"* ]]; then
+    pass "render: check without --if-present fails on the missing required GOOGLE_SSO_CLIENT_ID (${service})"
+  else
+    ko "render check beta ${service} without SSO (status ${status}): ${out}"
+  fi
+done
+
+# apply with nothing set: the env file only gains the config tree import (a no-op without a tree).
+mkdir -p "${FAKE_ROOT}/etc/open4goods"
+printf 'JAVA_OPTS=-Xmx4g\n' > "${FAKE_ROOT}/etc/open4goods/ui.env"
+run render --if-present apply beta ui
+if [[ ${status} -eq 0 ]] \
+  && [[ "$(cat "${FAKE_ROOT}/etc/open4goods/ui.env")" == $'JAVA_OPTS=-Xmx4g\nSPRING_CONFIG_IMPORT=optional:configtree:/etc/open4goods/secrets/ui/' ]] \
+  && [[ ! -e "${FAKE_ROOT}/etc/open4goods/secrets" ]]; then
+  pass "render: apply with nothing set writes only the config tree import, keeping the other lines"
+else
+  ko "render apply nothing set (status ${status}): ${out}"
+fi
+run render --if-present apply beta frontend
+if [[ ${status} -eq 0 ]] && [[ ! -e "${FAKE_ROOT}/opt" ]] && [[ "${out}" != *"Updated keys"* ]]; then
+  pass "render: frontend apply with nothing set writes nothing"
+else
+  ko "render frontend apply nothing set (status ${status}): ${out}"
+fi
+
+########################################
+# render-service-secrets.sh: api, Google indexation JSON (path + line, GOU-933)
+########################################
+reset_host
+API_IMPORT='SPRING_CONFIG_IMPORT=optional:configtree:/etc/open4goods/secrets/api/'
+expect_fail "render: a malformed API_GOOGLE_API_JSON fails, even with --if-present" \
+  render_with API_GOOGLE_API_JSON='{"type":"service_account"}' -- --if-present check prod api
+
+run render_with API_GOOGLE_API_JSON="${VALID_JSON}" -- check prod api
+if [[ ${status} -eq 0 ]] && [[ ! -s "${FAKE_SSH_LOG}" ]] && [[ ! -e "${FAKE_ROOT}/etc" ]] \
+  && [[ "${out}" == *"- API_GOOGLE_API_JSON -> GOOGLE_INDEXATION_SERVICE_ACCOUNT_PATH (path-sa)"* ]]; then
+  pass "render: check lists what would be rendered, uses no SSH and writes nothing"
 else
   ko "render check (status ${status}): ${out}"
 fi
@@ -178,146 +278,205 @@ fi
 mkdir -p "${FAKE_ROOT}/etc/open4goods"
 printf 'JAVA_OPTS=-Xmx4g\nGOOGLE_INDEXATION_SERVICE_ACCOUNT_PATH=/opt/open4goods/config/google-api.json\n' \
   > "${FAKE_ROOT}/etc/open4goods/api.env"
-export GITHUB_STEP_SUMMARY="${WORK}/summary.md"
-run "${DEPLOY}/render-service-secrets.sh" apply api
+run render_with API_GOOGLE_API_JSON="${VALID_JSON}" -- apply prod api
 json="${FAKE_ROOT}/etc/open4goods/secrets/google-indexation.json"
 if [[ ${status} -eq 0 ]] && [[ "$(stat -c '%a' "${json}")" == 600 ]] \
   && jq -e '.type == "service_account"' "${json}" >/dev/null \
-  && [[ "$(cat "${FAKE_ROOT}/etc/open4goods/api.env")" == $'JAVA_OPTS=-Xmx4g\nGOOGLE_INDEXATION_SERVICE_ACCOUNT_PATH=/etc/open4goods/secrets/google-indexation.json' ]]; then
+  && [[ "$(cat "${FAKE_ROOT}/etc/open4goods/api.env")" == $'JAVA_OPTS=-Xmx4g\nGOOGLE_INDEXATION_SERVICE_ACCOUNT_PATH=/etc/open4goods/secrets/google-indexation.json\n'"${API_IMPORT}" ]]; then
   pass "render: apply writes the JSON (600) and api.env, keeping its other lines"
 else
-  ko "render apply (status ${status}): ${out}"
+  ko "render apply (status ${status}): ${out} / $(cat "${FAKE_ROOT}/etc/open4goods/api.env")"
 fi
-if [[ "${out}" == *"indexation@nudger-test.iam.gserviceaccount.com (private_key_id 01234567...)"* ]] \
-  && [[ "${out}" != *"89abcdef"* ]] && [[ "${out}" != *"${SENTINEL}"* ]] && no_secret_in "${GITHUB_STEP_SUMMARY}" "${FAKE_SSH_LOG}"; then
+if [[ "${out}" != *"89abcdef"* ]] && [[ "${out}" != *"${SENTINEL}"* ]] \
+  && grep -q "indexation@nudger-test.iam.gserviceaccount.com (private_key_id 01234567...)" "${GITHUB_STEP_SUMMARY}" \
+  && no_secret_in "${GITHUB_STEP_SUMMARY}" "${FAKE_SSH_LOG}"; then
   pass "render: summary shows identifiers only"
 else
   ko "render summary: ${out}"
 fi
 
 ########################################
-# render-service-secrets.sh: Metriks affiliation secrets (GOU-957)
+# render-service-secrets.sh: api env lines (Metriks GOU-957, Effiliation feeds GOU-1014)
 ########################################
 AWIN_SENTINEL="SENTINELAWINVALUE42"
 EFFILIATION_SENTINEL="SENTINELEFFILIATIONVALUE42"
 FEED_SENTINEL="SENTINELEFFILIATIONFEEDKEY42"
-metriks_env() {
-  env API_METRIKS_AWIN_PUBLISHER_ID=100000 API_METRIKS_AWIN_API_TOKEN="${AWIN_SENTINEL}" "$@"
-}
-no_metriks_secret_in() {
+no_env_secret_in() {
   ! grep -q -e "${AWIN_SENTINEL}" -e "${EFFILIATION_SENTINEL}" -e "${FEED_SENTINEL}" "$@" 2>/dev/null
 }
 
-# Only some Metriks secrets, no Google JSON, --if-present (release): the present ones are rendered.
-rm -rf "${FAKE_ROOT:?}/etc"
+reset_host
 mkdir -p "${FAKE_ROOT}/etc/open4goods"
 printf 'JAVA_OPTS=-Xmx4g\nMETRIKS_AFFILIATION_AWIN_API_TOKEN=old\n' > "${FAKE_ROOT}/etc/open4goods/api.env"
-: > "${FAKE_SSH_LOG}"
-: > "${GITHUB_STEP_SUMMARY}"
-unset API_GOOGLE_API_JSON
-run metriks_env "${DEPLOY}/render-service-secrets.sh" --if-present apply api
+run render_with API_METRIKS_AWIN_PUBLISHER_ID=100000 API_METRIKS_AWIN_API_TOKEN="${AWIN_SENTINEL}" -- --if-present apply beta api
 api_env="$(cat "${FAKE_ROOT}/etc/open4goods/api.env")"
-expected_env=$'JAVA_OPTS=-Xmx4g\nMETRIKS_AFFILIATION_AWIN_PUBLISHER_ID=100000\nMETRIKS_AFFILIATION_AWIN_API_TOKEN='"${AWIN_SENTINEL}"
+expected_env=$'JAVA_OPTS=-Xmx4g\nMETRIKS_AFFILIATION_AWIN_PUBLISHER_ID=100000\nMETRIKS_AFFILIATION_AWIN_API_TOKEN='"${AWIN_SENTINEL}"$'\n'"${API_IMPORT}"
 if [[ ${status} -eq 0 ]] && [[ "${api_env}" == "${expected_env}" ]] \
   && [[ ! -e "${FAKE_ROOT}/etc/open4goods/secrets/google-indexation.json" ]]; then
-  pass "render: Metriks secrets are rendered without the Google JSON, keeping api.env's other lines"
+  pass "render: the set Metriks secrets are rendered without the Google JSON, keeping api.env's other lines"
 else
   ko "render Metriks only (status ${status}): ${out} / ${api_env}"
 fi
-for missing in API_GOOGLE_API_JSON API_METRIKS_EFFILIATION_API_KEY API_EFFILIATION_API_KEY; do
-  if [[ "${out}" == *"::warning::${missing} is not set"* ]]; then
-    pass "render: missing ${missing} is a warning"
-  else
-    ko "render: no warning for missing ${missing}: ${out}"
-  fi
+for missing in API_GOOGLE_API_JSON API_METRIKS_EFFILIATION_API_KEY API_EFFILIATION_API_KEY API_VERTEX_API_JSON; do
+  [[ "${out}" == *"::warning::${missing} is not set in the beta GitHub Environment"* ]] \
+    && pass "render: missing ${missing} is a warning" || ko "render: no warning for missing ${missing}: ${out}"
 done
-if [[ "${out}" != *"::error::"* ]] && grep -q "Not set in prod, not rendered: API_METRIKS_EFFILIATION_API_KEY API_EFFILIATION_API_KEY$" "${GITHUB_STEP_SUMMARY}"; then
-  pass "render: summary lists the optional secrets not rendered"
+if [[ "${out}" != *"::error::"* ]] \
+  && grep -q "Not set in beta, not rendered: API_GOOGLE_API_JSON API_METRIKS_EFFILIATION_API_KEY API_EFFILIATION_API_KEY API_VERTEX_API_JSON" "${GITHUB_STEP_SUMMARY}"; then
+  pass "render: summary lists the secrets not rendered"
 else
-  ko "render Metriks summary: ${out}"
+  ko "render summary of missing secrets: $(cat "${GITHUB_STEP_SUMMARY}")"
 fi
-if [[ "${out}" != *"${AWIN_SENTINEL}"* ]] \
-  && no_metriks_secret_in "${GITHUB_STEP_SUMMARY}" "${FAKE_SSH_LOG}"; then
-  pass "render: Metriks secret values absent from the output, the summary and the SSH command line"
-else
-  ko "render: a Metriks secret value leaked"
-fi
+[[ "${out}" != *"${AWIN_SENTINEL}"* ]] && no_env_secret_in "${GITHUB_STEP_SUMMARY}" "${FAKE_SSH_LOG}" \
+  && pass "render: env line values absent from the output, the summary and the SSH command line" \
+  || ko "render: an env line value leaked"
 
-# Google JSON, every Metriks secret and the Effiliation feeds key, dispatchable workflow (no --if-present):
-# one api.env with all the lines.
-rm -rf "${FAKE_ROOT:?}/etc"
-mkdir -p "${FAKE_ROOT}/etc/open4goods"
-: > "${FAKE_SSH_LOG}"
-: > "${GITHUB_STEP_SUMMARY}"
-export API_GOOGLE_API_JSON="${VALID_JSON}"
-run metriks_env API_METRIKS_EFFILIATION_API_KEY="${EFFILIATION_SENTINEL}" API_EFFILIATION_API_KEY="${FEED_SENTINEL}" \
-  "${DEPLOY}/render-service-secrets.sh" check api
-if [[ ${status} -eq 0 ]] && [[ "${out}" != *"::warning::"* ]] && [[ ! -s "${FAKE_SSH_LOG}" ]]; then
-  pass "render: check passes with API_EFFILIATION_API_KEY set"
-else
-  ko "render check with API_EFFILIATION_API_KEY (status ${status}): ${out}"
-fi
-run metriks_env API_METRIKS_EFFILIATION_API_KEY="${EFFILIATION_SENTINEL}" API_EFFILIATION_API_KEY="${FEED_SENTINEL}" \
-  "${DEPLOY}/render-service-secrets.sh" apply api
-if [[ ${status} -eq 0 ]] \
-  && grep -qx "GOOGLE_INDEXATION_SERVICE_ACCOUNT_PATH=/etc/open4goods/secrets/google-indexation.json" "${FAKE_ROOT}/etc/open4goods/api.env" \
-  && [[ "$(grep -c '^METRIKS_AFFILIATION_' "${FAKE_ROOT}/etc/open4goods/api.env")" == 3 ]] \
-  && grep -qx "AFFILIATIONCONFIG_EFFILIATIONAPIKEY=${FEED_SENTINEL}" "${FAKE_ROOT}/etc/open4goods/api.env" \
-  && [[ "$(stat -c '%a' "${FAKE_ROOT}/etc/open4goods/api.env")" == 600 ]]; then
-  pass "render: apply writes the Google path, the three Metriks lines and the Effiliation feeds key (600)"
-else
-  ko "render all (status ${status}): ${out}"
-fi
-if [[ "${out}" != *"${FEED_SENTINEL}"* ]] && [[ "${out}" == *"AFFILIATIONCONFIG_EFFILIATIONAPIKEY"* ]] \
-  && no_metriks_secret_in "${GITHUB_STEP_SUMMARY}" "${FAKE_SSH_LOG}"; then
-  pass "render: the Effiliation feeds key is named, never printed"
-else
-  ko "render: the Effiliation feeds key leaked or is not reported: ${out}"
-fi
-
-# Missing optional secrets never fail the dispatchable check.
-run "${DEPLOY}/render-service-secrets.sh" check api
-if [[ ${status} -eq 0 ]] && [[ "${out}" == *"::warning::API_METRIKS_AWIN_API_TOKEN is not set"* ]] \
-  && [[ "${out}" == *"::warning::API_EFFILIATION_API_KEY is not set"* ]]; then
-  pass "render: check passes with the Google JSON, no Metriks secret and no API_EFFILIATION_API_KEY"
-else
-  ko "render check without optional secrets (status ${status}): ${out}"
-fi
-
-# Only the Effiliation feeds key, release (--if-present): that line is rendered, api.env's other lines kept.
-rm -rf "${FAKE_ROOT:?}/etc"
-mkdir -p "${FAKE_ROOT}/etc/open4goods"
-printf 'JAVA_OPTS=-Xmx4g\nAFFILIATIONCONFIG_EFFILIATIONAPIKEY=old\n' > "${FAKE_ROOT}/etc/open4goods/api.env"
-: > "${FAKE_SSH_LOG}"
-unset API_GOOGLE_API_JSON
-run env API_EFFILIATION_API_KEY="${FEED_SENTINEL}" "${DEPLOY}/render-service-secrets.sh" --if-present apply api
-if [[ ${status} -eq 0 ]] \
-  && [[ "$(cat "${FAKE_ROOT}/etc/open4goods/api.env")" == $'JAVA_OPTS=-Xmx4g\nAFFILIATIONCONFIG_EFFILIATIONAPIKEY='"${FEED_SENTINEL}" ]] \
+run render_with API_EFFILIATION_API_KEY="${FEED_SENTINEL}" -- --if-present apply prod api
+if [[ ${status} -eq 0 ]] && grep -qx "AFFILIATIONCONFIG_EFFILIATIONAPIKEY=${FEED_SENTINEL}" "${FAKE_ROOT}/etc/open4goods/api.env" \
+  && grep -qx "METRIKS_AFFILIATION_AWIN_PUBLISHER_ID=100000" "${FAKE_ROOT}/etc/open4goods/api.env" \
+  && [[ "$(grep -c '^SPRING_CONFIG_IMPORT=' "${FAKE_ROOT}/etc/open4goods/api.env")" == 1 ]] \
   && [[ "${out}" != *"${FEED_SENTINEL}"* ]]; then
-  pass "render: API_EFFILIATION_API_KEY alone replaces its api.env line"
+  pass "render: API_EFFILIATION_API_KEY alone adds its line, keeps the previous render, one import line"
 else
-  ko "render Effiliation feeds key only (status ${status}): ${out}"
+  ko "render Effiliation feeds key (status ${status}): ${out}"
 fi
 
-# A set but malformed Metriks secret fails the check, before anything is written, without printing it.
-rm -rf "${FAKE_ROOT:?}/etc"
-: > "${FAKE_SSH_LOG}"
-unset API_GOOGLE_API_JSON
+reset_host
 case_index=0
 for bad in "API_METRIKS_AWIN_API_TOKEN=${AWIN_SENTINEL}+x" "API_METRIKS_AWIN_API_TOKEN=${AWIN_SENTINEL} x" \
   "API_METRIKS_EFFILIATION_API_KEY=${EFFILIATION_SENTINEL};x" "API_METRIKS_AWIN_PUBLISHER_ID=1/2" \
-  "API_EFFILIATION_API_KEY=${FEED_SENTINEL}\$x"; do
+  "API_EFFILIATION_API_KEY=${FEED_SENTINEL}\$x" "API_EFFILIATION_API_KEY=${FEED_SENTINEL}:x"; do
   case_index=$((case_index + 1))
-  run env "${bad}" "${DEPLOY}/render-service-secrets.sh" --if-present apply api
-  if [[ ${status} -ne 0 ]] && [[ "${out}" != *"${AWIN_SENTINEL}"* ]] && [[ "${out}" != *"${EFFILIATION_SENTINEL}"* ]] \
-    && [[ "${out}" != *"${FEED_SENTINEL}"* ]] \
-    && [[ ! -s "${FAKE_SSH_LOG}" ]] \
-    && [[ ! -e "${FAKE_ROOT}/etc" ]]; then
+  run render_with "${bad}" -- --if-present apply prod api
+  if [[ ${status} -ne 0 ]] && no_env_secret_in <(printf '%s' "${out}") \
+    && [[ ! -s "${FAKE_SSH_LOG}" ]] && [[ ! -e "${FAKE_ROOT}/etc" ]]; then
     pass "render: rejects malformed ${bad%%=*} (case ${case_index}) without writing or printing it"
   else
     ko "render malformed ${bad%%=*} (case ${case_index}, status ${status}): ${out}"
   fi
 done
+
+########################################
+# render-service-secrets.sh: config tree (GOU-1041)
+########################################
+TREE_SENTINEL="SENTINELTREEVALUE42"
+# A value no env line can carry: quotes, spaces, '$', '#', ':', '=' and a newline.
+TREE_VALUE=$'pa ss"w\'ord $HOME #x: a=b\n'"${TREE_SENTINEL}"
+
+reset_host
+mkdir -p "${FAKE_ROOT}/etc/open4goods"
+printf 'JAVA_OPTS=-Xmx512m\n' > "${FAKE_ROOT}/etc/open4goods/sbadmin.env"
+run render_with O4G_SBA_PASSWORD="${TREE_VALUE}" -- check prod admin
+if [[ ${status} -eq 0 ]] && [[ "${out}" == *"- O4G_SBA_PASSWORD -> o4g.sba.registration.password (tree)"* ]] \
+  && [[ "${out}" == *"::warning::O4G_MAIL_PASSWORD is not set"* ]] && [[ ! -s "${FAKE_SSH_LOG}" ]]; then
+  pass "render: a tree secret accepts any value in check"
+else
+  ko "render tree check (status ${status}): ${out}"
+fi
+run render_with O4G_SBA_PASSWORD="${TREE_VALUE}" -- apply prod admin
+tree="${FAKE_ROOT}/etc/open4goods/secrets/sbadmin"
+if [[ ${status} -eq 0 ]] \
+  && cmp -s "${tree}/spring.boot.admin.instance-auth.default-password" <(printf '%s' "${TREE_VALUE}") \
+  && cmp -s "${tree}/o4g.sba.registration.password" <(printf '%s' "${TREE_VALUE}") \
+  && [[ "$(stat -c '%a' "${tree}/o4g.sba.registration.password")" == 600 ]] \
+  && [[ "$(stat -c '%a' "${tree}")" == 700 ]] \
+  && [[ ! -e "${tree}/spring.mail.password" ]] \
+  && [[ "$(cat "${FAKE_ROOT}/etc/open4goods/sbadmin.env")" == $'JAVA_OPTS=-Xmx512m\nSPRING_CONFIG_IMPORT=optional:configtree:/etc/open4goods/secrets/sbadmin/' ]]; then
+  pass "render: admin (sbadmin) tree files hold the exact value (600, directory 700), sbadmin.env imports the tree"
+else
+  ko "render admin tree (status ${status}): ${out} / $(ls -la "${tree}" 2>&1)"
+fi
+if [[ "${out}" != *"${TREE_SENTINEL}"* ]] && ! grep -q "${TREE_SENTINEL}" "${GITHUB_STEP_SUMMARY}" "${FAKE_SSH_LOG}"; then
+  pass "render: tree values absent from the output, the summary and the SSH command line"
+else
+  ko "render: a tree value leaked"
+fi
+
+reset_host
+expect_fail "render: a malformed tree-sa secret fails before anything is written" \
+  render_with API_VERTEX_BATCH_JSON="{\"private_key\": \"${SENTINEL}\"" -- --if-present apply prod api
+[[ ! -e "${FAKE_ROOT}/etc" ]] && [[ ! -s "${FAKE_SSH_LOG}" ]] && pass "render: nothing written for a malformed tree-sa secret" \
+  || ko "render: something was written for a malformed tree-sa secret"
+run render_with API_VERTEX_API_JSON="${VALID_JSON}" O4G_INTERNAL_API_KEY="${TREE_VALUE}" -- --if-present apply prod api
+if [[ ${status} -eq 0 ]] \
+  && jq -e '.client_email == "indexation@nudger-test.iam.gserviceaccount.com"' \
+    "${FAKE_ROOT}/etc/open4goods/secrets/api/gen-ai-config.google-api-json" >/dev/null \
+  && cmp -s "${FAKE_ROOT}/etc/open4goods/secrets/api/admin-key" <(printf '%s' "${TREE_VALUE}") \
+  && [[ "$(cat "${FAKE_ROOT}/etc/open4goods/api.env")" == "${API_IMPORT}" ]] \
+  && grep -q "API_VERTEX_API_JSON: service account indexation@nudger-test.iam.gserviceaccount.com (private_key_id 01234567...)" "${GITHUB_STEP_SUMMARY}" \
+  && [[ "${out}" != *"${SENTINEL}"* ]] && [[ "${out}" != *"${TREE_SENTINEL}"* ]]; then
+  pass "render: api tree-sa and tree files are written, with identifiers only in the summary"
+else
+  ko "render api tree (status ${status}): ${out}"
+fi
+
+########################################
+# render-service-secrets.sh: frontend env lines and coupled secrets
+########################################
+MACHINE_SENTINEL="SENTINELMACHINETOKEN42"
+reset_host
+frontend_env="${FAKE_ROOT}/opt/open4goods/config/beta/frontend/.env"
+mkdir -p "$(dirname "${frontend_env}")"
+printf 'API_URL=https://beta.front-api.example\nMACHINE_TOKEN=old\n' > "${frontend_env}"
+run render_with GOOGLE_SSO_CLIENT_ID=client-id.apps.example GOOGLE_SSO_CLIENT_SECRET=client-secret \
+  O4G_MACHINE_TOKEN="${MACHINE_SENTINEL}" FRONT_API_JWT_SECRET="${MACHINE_SENTINEL}jwt" -- apply beta frontend
+expected_frontend=$'API_URL=https://beta.front-api.example\nNUXT_GOOGLE_OAUTH_CLIENT_ID=client-id.apps.example\nNUXT_GOOGLE_OAUTH_CLIENT_SECRET=client-secret\nNUXT_MACHINE_TOKEN='"${MACHINE_SENTINEL}"$'\nMACHINE_TOKEN='"${MACHINE_SENTINEL}"$'\nFRONT_SECURITY_JWT_SECRET='"${MACHINE_SENTINEL}jwt"
+if [[ ${status} -eq 0 ]] && [[ "$(cat "${frontend_env}")" == "${expected_frontend}" ]] \
+  && [[ "$(stat -c '%a' "${frontend_env}")" == 600 ]] && [[ "${out}" != *"${MACHINE_SENTINEL}"* ]] \
+  && ! grep -q "${MACHINE_SENTINEL}" "${GITHUB_STEP_SUMMARY}" "${FAKE_SSH_LOG}" && [[ ! -e "${FAKE_ROOT}/etc" ]]; then
+  pass "render: frontend env lines (SSO, machine token twice, JWT secret) replace the old ones, nothing else written"
+else
+  ko "render frontend (status ${status}): ${out} / $(cat "${frontend_env}")"
+fi
+
+reset_host
+run render_with GOOGLE_SSO_CLIENT_ID=client-id.apps.example O4G_MACHINE_TOKEN="${MACHINE_SENTINEL}+x" -- check prod front-api
+[[ ${status} -eq 0 ]] && pass "render: front-api takes any machine token value (tree)" \
+  || ko "render front-api machine token (status ${status}): ${out}"
+run render_with GOOGLE_SSO_CLIENT_ID=client-id.apps.example GOOGLE_SSO_CLIENT_SECRET=client-secret \
+  O4G_MACHINE_TOKEN="${MACHINE_SENTINEL}+x" -- check prod frontend
+if [[ ${status} -ne 0 ]] && [[ "${out}" == *"O4G_MACHINE_TOKEN contains characters outside [A-Za-z0-9/._-]"* ]] \
+  && [[ "${out}" != *"${MACHINE_SENTINEL}"* ]]; then
+  pass "render: the frontend rejects a machine token an env line cannot carry"
+else
+  ko "render frontend machine token (status ${status}): ${out}"
+fi
+
+########################################
+# Workflows: every secret of the table is mapped where its service is rendered
+########################################
+# Each workflow step that runs the script must map, in its env, every secret of the services it renders.
+run python3 - "${RENDER}" "${ROOT}/.github/workflows" <<'PY'
+import pathlib, re, sys
+import yaml
+
+render, workflows = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
+table = {}
+for service, secret in re.findall(r"(?m)^(api|ui|front-api|admin|b2b-api|frontend) ([A-Z0-9_]+) ", render.read_text()):
+    table.setdefault(service, set()).add(secret)
+errors, steps = [], 0
+for workflow in sorted(workflows.glob("*.yml")):
+    for job in (yaml.safe_load(workflow.read_text()).get("jobs") or {}).values():
+        for step in job.get("steps", []):
+            script = step.get("run") or ""
+            if "render-service-secrets.sh" not in script:
+                continue
+            steps += 1
+            if "${SERVICES}" in script:
+                services = set(table)
+            else:
+                loop = re.search(r"for svc in ([a-z2 -]+); do", script)
+                services = set(loop.group(1).split()) if loop else {script.split()[-1]}
+            env = step.get("env") or {}
+            for service in sorted(services):
+                for secret in sorted(table[service]):
+                    if f"secrets.{secret}" not in str(env.get(secret, "")):
+                        errors.append(f"{workflow.name} / {step.get('name')}: {secret} ({service}) not mapped")
+print("\n".join(errors) or f"{steps} steps checked")
+sys.exit(1 if errors or steps < 6 else 0)
+PY
+[[ ${status} -eq 0 ]] && pass "workflows map every secret of the services they render (${out})" \
+  || ko "workflow secret mapping: ${out}"
 
 if [[ ${failures} -gt 0 ]]; then
   echo "${failures} test(s) failed"

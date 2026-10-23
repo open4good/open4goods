@@ -93,7 +93,7 @@ jobs:
       github.ref == 'refs/heads/main'
       && (github.event_name == 'workflow_dispatch' || vars.BETA_DEPLOY_FREEZE != 'true')
     runs-on: ubuntu-latest
-    # Google SSO values come from the `beta` GitHub Environment (ADR-0006, GOU-767).
+    # Frontend secrets (Google SSO included) come from the `beta` GitHub Environment (ADR-0006, GOU-767, GOU-1041).
     environment: beta
     # One frontend deploy at a time; a running publish is never interrupted. GitHub keeps only the newest
     # pending run, so the last merge ends up deployed.
@@ -151,19 +151,21 @@ jobs:
             done
             echo "Nuxt asset preservation complete for ${staging}"
 
-      - name: Render Google SSO env on Beta
-        # Replaces only these keys in the env_file of docker-compose.frontend.yml, read when publish-frontend.sh
-        # recreates the container. open4goods-config's deploy rewrites this file: rendered before every publish.
+      - name: 🔐 Render frontend secrets on Beta
+        # Replaces only the frontend's keys in the env_file of docker-compose.frontend.yml, read when
+        # publish-frontend.sh recreates the container (scripts/deploy/render-service-secrets.sh, GOU-1041).
+        # open4goods-config's deploy rewrites this file: rendered before every publish. A secret missing from `beta`
+        # is a warning and is not rendered (previous line kept).
         if: github.ref == 'refs/heads/main'
         env:
           DEPLOY_SSH_HOST: ${{ secrets.REMOTE_BETA_HOST }}
           DEPLOY_SSH_USER: ${{ secrets.REMOTE_BETA_USER }}
           DEPLOY_SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          NUXT_GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_SSO_CLIENT_ID }}
-          NUXT_GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_SSO_CLIENT_SECRET }}
-        run: >-
-          scripts/deploy/push-remote-env.sh /opt/open4goods/config/beta/frontend/.env
-          NUXT_GOOGLE_OAUTH_CLIENT_ID NUXT_GOOGLE_OAUTH_CLIENT_SECRET
+          GOOGLE_SSO_CLIENT_ID: ${{ secrets.GOOGLE_SSO_CLIENT_ID }}
+          GOOGLE_SSO_CLIENT_SECRET: ${{ secrets.GOOGLE_SSO_CLIENT_SECRET }}
+          O4G_MACHINE_TOKEN: ${{ secrets.O4G_MACHINE_TOKEN }}
+          FRONT_API_JWT_SECRET: ${{ secrets.FRONT_API_JWT_SECRET }}
+        run: scripts/deploy/render-service-secrets.sh --if-present apply beta frontend
 
       - name: Publish frontend
         if: github.ref == 'refs/heads/main'

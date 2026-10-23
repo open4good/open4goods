@@ -52,8 +52,10 @@ Decision of 2026-10-20 (GOU-501, GOU-767, ADR-0006): on beta, the Google
 | `GOOGLE_SSO_CLIENT_SECRET`  | `NUXT_GOOGLE_OAUTH_CLIENT_SECRET`    | `/opt/open4goods/config/beta/frontend/.env`    | `frontend-ci.yml`, before `publish-frontend.sh` |
 | `GOOGLE_SSO_CLIENT_ID`      | `FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID` | `/etc/open4goods/front-api.env`               | `testAndPublishBeta.yml`, before `publish-jars.sh` |
 
-`scripts/deploy/push-remote-env.sh` replaces only these keys in the target
-file: values travel through SSH stdin (never a command line, an artifact or a
+`scripts/deploy/render-service-secrets.sh` (table of
+[Service secrets](prod-service-secrets.md), GOU-1041) renders them through
+`scripts/deploy/push-remote-env.sh`, which replaces only these keys in the
+target file: values travel through SSH stdin (never a command line, an artifact or a
 log), the file is rebuilt atomically with mode 600. These keys are no longer
 in `open4goods-config` `configs/beta/*`.
 
@@ -80,21 +82,19 @@ Google "Web" client as beta comes from the `prod` GitHub Environment of
 | `GOOGLE_SSO_CLIENT_SECRET`  | `NUXT_GOOGLE_OAUTH_CLIENT_SECRET`    | `/opt/open4goods/config/prod/frontend/.env`    | `releaseDeployProd.yml`, before `publish-frontend.sh` |
 | `GOOGLE_SSO_CLIENT_ID`      | `FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID` | `/etc/open4goods/front-api.env`               | `releaseDeployProd.yml`, before `publish-jars.sh` |
 
-The rendering steps use `scripts/deploy/push-remote-env.sh` (same guarantees
-as beta) and only run with `mode=release`. The first step of the job, "Check
-Google SSO secrets", runs in every mode, including `mode=test`: it fails when
-either secret is empty or holds characters the script would reject, without
-any SSH access and without printing a value. A `mode=test` rehearsal therefore
-proves the `prod` Environment is ready.
+The rendering steps use `scripts/deploy/render-service-secrets.sh` (same
+guarantees as beta) and only run with `mode=release`. The first step of the
+job, "Check Google SSO secrets", runs in every mode, including `mode=test`: it
+fails when either secret is empty or holds characters the script would reject,
+without any SSH access and without printing a value. A `mode=test` rehearsal
+therefore proves the `prod` Environment is ready.
 
-The rendering steps run the script of the deployed ref. A step right after
-the checkout, also run in every mode, fails when that ref has no
-`scripts/deploy/push-remote-env.sh`: deploy a ref cut after GOU-767 (tags up
-to v1.0.61 do not contain it).
+The release runs the render script of the commit the workflow runs from
+(checked out into `deploy-tools/`), not the one of the deployed ref (GOU-1041).
 
-Other production secrets, rendered by the same release and by the
-dispatchable `prodSecrets.yml`, are listed in
-[Production service secrets](prod-service-secrets.md).
+Other service secrets, rendered by the same deploys and by the dispatchable
+`serviceSecrets.yml` (beta and prod), are listed in
+[Service secrets](prod-service-secrets.md).
 
 The same caveats as beta apply: `/etc/open4goods/front-api.env` survives
 config deploys, while `config/prod/frontend/.env` is rewritten by every

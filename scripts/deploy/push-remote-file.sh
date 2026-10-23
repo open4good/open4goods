@@ -1,7 +1,7 @@
 #!/bin/sh
 # Write the value of an environment variable into a file on a deploy host (ADR-0006, GOU-933).
 #
-# Usage: push-remote-file.sh [--service-account-json] [--validate-only] <remote-file> <VAR>
+# Usage: push-remote-file.sh [--service-account-json] [--exact] [--validate-only] <remote-file> <VAR>
 #
 # VAR is read from this process' environment (a GitHub Environment secret mapped
 # through the step `env:`). The value never reaches a command line, an artifact
@@ -16,6 +16,9 @@
 #                           "client_email" and "private_key". Checked on the
 #                           runner; neither the value nor the parser message is
 #                           printed.
+#   --exact                 Write the value as is, without the trailing newline
+#                           otherwise added: a Spring Boot config tree file
+#                           (GOU-1041), whose content is the property value.
 #   --validate-only         Check the path and the value, then exit without SSH.
 #
 # Required environment (unless --validate-only): DEPLOY_SSH_HOST,
@@ -25,10 +28,12 @@ set -eu
 fail() { echo "::error::$*" >&2; exit 1; }
 
 service_account_json=false
+exact=false
 validate_only=false
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --service-account-json) service_account_json=true ;;
+    --exact) exact=true ;;
     --validate-only) validate_only=true ;;
     --) shift; break ;;
     -*) fail "Unknown option: $1" ;;
@@ -37,7 +42,7 @@ while [ "$#" -gt 0 ]; do
   shift
 done
 
-[ "$#" -eq 2 ] || fail "Usage: $0 [--service-account-json] [--validate-only] <remote-file> <VAR>"
+[ "$#" -eq 2 ] || fail "Usage: $0 [--service-account-json] [--exact] [--validate-only] <remote-file> <VAR>"
 remote_file=$1
 var=$2
 
@@ -60,7 +65,11 @@ trap 'rm -rf "$work"' EXIT
 # printf is a shell builtin: the value is not passed to a new process' command line.
 value=$(printenv "$var" || true)
 [ -n "$value" ] || fail "$var is empty or missing from the job environment"
-printf '%s\n' "$value" > "$work/content"
+if [ "$exact" = true ]; then
+  printf '%s' "$value" > "$work/content"
+else
+  printf '%s\n' "$value" > "$work/content"
+fi
 unset value
 
 if [ "$service_account_json" = true ]; then
