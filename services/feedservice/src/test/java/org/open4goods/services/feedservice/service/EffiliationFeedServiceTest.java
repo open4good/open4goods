@@ -78,6 +78,17 @@ class EffiliationFeedServiceTest {
     }
 
     @Test
+    void retrieveEffiliationFeedsShouldFailWhenPayloadHasNoFeedsArray() throws Exception {
+        RemoteFileCachingService cacheService = mock(RemoteFileCachingService.class);
+        when(cacheService.getResource(argThat(url -> url != null && url.contains("publisher/links/productfeeds")), anyInt(), anyString()))
+                .thenReturn(jsonFile("{\"pagination\":{\"lastPage\":1},\"links\":[]}"));
+
+        assertThatThrownBy(() -> buildService(true, cacheService).retrieveEffiliationFeeds(API_KEY))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("feeds");
+    }
+
+    @Test
     void getDatasourcesShouldBuildOneDatasourcePerActiveFeed() throws Exception {
         RemoteFileCachingService cacheService = programsAndFeeds();
 
@@ -158,7 +169,7 @@ class EffiliationFeedServiceTest {
     void paginationShouldStopOnRunawayLastPage() throws Exception {
         RemoteFileCachingService cacheService = mock(RemoteFileCachingService.class);
         when(cacheService.getResource(argThat(url -> url != null && url.contains("publisher/links/productfeeds")), anyInt(), anyString()))
-                .thenReturn(jsonFile("{\"pagination\":{\"lastPage\":100000},\"links\":[]}"));
+                .thenReturn(jsonFile("{\"pagination\":{\"lastPage\":100000},\"feeds\":[]}"));
 
         assertThatThrownBy(() -> buildService(true, cacheService).retrieveEffiliationFeeds(API_KEY))
                 .isInstanceOf(IllegalStateException.class)
