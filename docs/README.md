@@ -25,7 +25,7 @@ owned, and linked from this index when they become durable project knowledge.
 - [Production service secrets (render + restart)](operations/prod-service-secrets.md)
 - [Frontend asset hardening](operations/frontend-asset-hardening.md)
 - [Production log triage](operations/production-log-triage.md)
-- [Beta deployment workflows (manual dispatch on main)](operations/ci-workflows-status.md)
+- [Beta deployment workflows (auto deploy on merge, BETA_DEPLOY_FREEZE)](operations/ci-workflows-status.md)
 - [ADR index](adr/README.md)
 - [Icecat reference data](architecture/icecat-reference-data.md)
 - [Amazon PA-API completion](architecture/amazon-paapi-completion.md)

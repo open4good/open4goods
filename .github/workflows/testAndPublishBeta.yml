@@ -1,23 +1,47 @@
-# Beta deployment is voluntary: dispatch manually on `main` only (GOU-387).
-# No push trigger, so a merge on `main` never redeploys beta.
+# Beta deployment runs on every merge on `main` that touches the backend, b2b-api or b2b-frontend (GOU-1036).
+# Set the repository variable BETA_DEPLOY_FREEZE=true to freeze beta during acceptance: a push still builds and
+# tests, but the deploy job is skipped. A manual dispatch on `main` still deploys, to ship a blocking fix.
 on:
+  push:
+    branches: [main]
+    # Last matching pattern wins: everything except the Nuxt frontend and the other workflows.
+    paths:
+      - "**"
+      - "!frontend/**"
+      - "!.github/workflows/**"
+      - ".github/workflows/testAndPublishBeta.yml"
   workflow_dispatch:
 
 name: 🔘 Beta - Build, Test, and Publish
 run-name: 🔘 Beta Build by @${{ github.actor }}
 
 jobs:
-  deploy:
-    name: Beta Test, Build, and Publish
+  build:
+    name: Beta Test and Build
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    # Google SSO values come from the `beta` GitHub Environment (ADR-0006, GOU-767).
-    environment: beta
+    # A newer push supersedes an older build, so beta never receives an older commit after a newer one.
+    # Scoped by event: a push during a freeze never cancels a manual dispatch shipping a blocking fix.
     concurrency:
-      group: deploy-beta
+      group: build-beta-backend-${{ github.event_name }}
       cancel-in-progress: true
 
     steps:
+      - name: Report beta deploy freeze
+        if: vars.BETA_DEPLOY_FREEZE == 'true'
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "${EVENT_NAME}" = "workflow_dispatch" ]; then
+            message="BETA_DEPLOY_FREEZE=true: beta is frozen, but this manual dispatch deploys anyway."
+          else
+            message="BETA_DEPLOY_FREEZE=true: beta is frozen for acceptance. Build and tests run; the deploy job is skipped."
+            message="${message} Dispatch the workflow on main to ship a blocking fix."
+          fi
+          echo "::notice title=Beta deploy freeze::${message}"
+          echo "### Beta deploy freeze" >> "${GITHUB_STEP_SUMMARY}"
+          echo "${message}" >> "${GITHUB_STEP_SUMMARY}"
+
       ############################################
       # 1. Checkout the Main Repository
       ############################################
@@ -59,7 +83,7 @@ jobs:
             front-api/target/front-api-0.0.1-SNAPSHOT.jar
 
       ############################################
-      # 6. Deploy JAR Files to Qualification Environment
+      # 6. Gather JAR Files for the Qualification Environment
       ############################################
       - name: 📦 Gather JARs for Deployment
         run: |
@@ -69,16 +93,6 @@ jobs:
           cp ui/target/ui-0.0.1-SNAPSHOT.jar deploy-jars/ui-latest.jar
           cp front-api/target/front-api-0.0.1-SNAPSHOT.jar deploy-jars/front-api-latest.jar
           cp b2b-api/target/b2b-api-0.0.1-SNAPSHOT.jar deploy-jars/b2b-api-latest.jar
-
-      - name: 🚚 Deploy JARs to Qualification Server (Consolidated)
-        uses: easingthemes/ssh-deploy@2cc5b27bf3029d0455dd5e09fe02633904031447 # main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rltgoDzvO"
-          SOURCE: "deploy-jars/"
-          REMOTE_HOST: ${{ secrets.REMOTE_BETA_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
-          TARGET: "/opt/open4goods/latest/"
 
       ############################################
       # 7a. Build b2b-frontend
@@ -104,6 +118,60 @@ jobs:
           NUXT_PUBLIC_BACKEND_BASE_URL: https://beta.api.product-data-api.com
           NUXT_BACKEND_PROXY_TARGET: http://localhost:8087
 
+      - name: Package beta bundle
+        # tar keeps the permissions and symlinks of the Nuxt output, which artifacts drop.
+        run: tar -czf beta-backend-bundle.tgz deploy-jars b2b-frontend/.output
+
+      - name: Upload beta bundle
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: beta-backend-bundle
+          path: beta-backend-bundle.tgz
+          compression-level: 0
+          retention-days: 3
+          if-no-files-found: error
+
+  deploy:
+    name: Beta Publish
+    needs: build
+    # Never from a PR, a fork or another branch. During a freeze, only a manual dispatch deploys.
+    if: >-
+      github.ref == 'refs/heads/main'
+      && (github.event_name == 'workflow_dispatch' || vars.BETA_DEPLOY_FREEZE != 'true')
+    runs-on: ubuntu-latest
+    # Google SSO values come from the `beta` GitHub Environment (ADR-0006, GOU-767).
+    environment: beta
+    # One backend deploy at a time; a running restart is never interrupted. GitHub keeps only the newest
+    # pending run, so the last merge ends up deployed.
+    concurrency:
+      group: deploy-beta-backend
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Download beta bundle
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: beta-backend-bundle
+
+      - name: Unpack beta bundle
+        run: tar -xzf beta-backend-bundle.tgz
+
+      - name: 🚚 Deploy JARs to Qualification Server (Consolidated)
+        uses: easingthemes/ssh-deploy@2cc5b27bf3029d0455dd5e09fe02633904031447 # main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ARGS: "-rltgoDzvO"
+          SOURCE: "deploy-jars/"
+          REMOTE_HOST: ${{ secrets.REMOTE_BETA_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_BETA_USER }}
+          TARGET: "/opt/open4goods/latest/"
+
+      ############################################
+      # 7a. Deploy b2b-frontend output
+      ############################################
       - name: Deploy b2b-frontend output to beta server
         uses: easingthemes/ssh-deploy@2cc5b27bf3029d0455dd5e09fe02633904031447 # main
         env:
