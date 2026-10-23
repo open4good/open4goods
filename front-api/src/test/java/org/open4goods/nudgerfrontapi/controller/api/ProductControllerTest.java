@@ -199,6 +199,19 @@ class ProductControllerTest {
     }
 
     @Test
+    void globalSearchCapsTotalPagesToResultWindow() {
+        when(searchService.globalSearch(any(), any(), any(), any(), any())).thenReturn(
+                new SearchService.GlobalSearchResult(List.of(), List.of(), 5_000_000L, 250_000, 0, 20, null));
+
+        ResponseEntity<org.open4goods.nudgerfrontapi.dto.search.GlobalSearchResponseDto> response =
+                controller.globalSearch(DomainLanguage.fr, new org.open4goods.nudgerfrontapi.dto.search.GlobalSearchRequestDto(
+                        "tv", null, null, null, 0, 20));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().missingVerticalPage().totalPages()).isEqualTo(500);
+    }
+
+    @Test
     void globalSearchWithEmptyAggsShouldBeAllowed() {
         // Setup SearchCapabilities mock for Global Search
         SearchService.SearchCapabilities capabilities = new SearchService.SearchCapabilities(Collections.emptySet(), Set.of(), Set.of());

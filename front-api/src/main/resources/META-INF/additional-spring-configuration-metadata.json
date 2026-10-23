@@ -336,6 +336,12 @@
       "description": "Recipient email override for a reusable mail template."
     },
     {
+      "name": "front.max-result-window",
+      "type": "java.lang.Integer",
+      "description": "Elasticsearch index.max_result_window: pages with (pageNumber + 1) * pageSize above it are rejected with a 400.",
+      "defaultValue": 10000
+    },
+    {
       "name": "front.max-page-size",
       "type": "java.lang.Integer",
       "description": "Maximum page size accepted by paginated endpoints.",

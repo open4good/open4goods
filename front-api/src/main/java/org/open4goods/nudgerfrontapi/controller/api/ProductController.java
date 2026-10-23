@@ -449,7 +449,7 @@ public class ProductController {
                             },
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = GlobalSearchResponseDto.class))),
-                    @ApiResponse(responseCode = "400", description = "Invalid request parameters",
+                    @ApiResponse(responseCode = "400", description = "Invalid request parameters, or missing-vertical page outside the result window ((pageNumber + 1) * pageSize > 10000)",
                             content = @Content(mediaType = "application/problem+json",
                                     schema = @Schema(implementation = ProblemDetail.class))),
                     @ApiResponse(responseCode = "401", description = "Authentication required"),
@@ -512,7 +512,8 @@ public class ProductController {
                 result.missingVerticalPageNumber(),
                 result.missingVerticalPageSize(),
                 result.missingVerticalTotalElements(),
-                result.missingVerticalTotalPages());
+                (int) Math.min(result.missingVerticalTotalPages(),
+                        apiProperties.maxReachablePages(result.missingVerticalPageSize())));
 
         GlobalSearchResponseDto body = new GlobalSearchResponseDto(groups,
                 missingVerticalResults,
