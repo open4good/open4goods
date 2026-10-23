@@ -130,13 +130,19 @@ Each service has unique responsibilities and may have specific conventions beyon
 
 ### feedservice
 
-**Purpose**: RSS/Atom feed generation and management.
+**Purpose**: Loads affiliation feed definitions (Awin, Effinity, CJ, Kwanko,
+TradeTracker, Webgains) and indexes their CSV product feeds.
+
+**Security**: catalog and feed URLs carry API keys (Awin, Effinity). Never log
+them, nor put them in an exception message or a health detail: use
+`FeedIndexingWorker.loggableFeedUrl(url)`, `RemoteFileCachingService.loggableUrl(url)`
+or a provider/feed name; see the
+[module README](feedservice/README.md#secrets-in-feed-urls).
 
 **Key Responsibilities**:
-- Generate product feeds
-- Support multiple feed formats (RSS, Atom, JSON Feed)
-- Filter and customize feeds per vertical
-- Handle feed pagination
+- Load feed catalogs and datasource definitions per affiliation provider
+- Index CSV product feeds into data fragments
+- Expose programs, promotions, transactions and tracking links per provider
 
 ---
 

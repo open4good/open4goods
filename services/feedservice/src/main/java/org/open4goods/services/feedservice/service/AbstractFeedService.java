@@ -72,13 +72,16 @@ public abstract class AbstractFeedService implements AffiliationProvider {
      */
     public synchronized void load() {
         try {
-            logger.info("Loading datasource properties from catalog: {}", feedConfig.getCatalogUrl());
+            // The catalog URL can carry the API key (Awin): only its scheme and host are logged
+            logger.info("Loading datasource properties for provider {} from catalog: {}", getProviderName(),
+                    RemoteFileCachingService.loggableUrl(feedConfig.getCatalogUrl()));
             Set<DataSourceProperties> initialSources = loadDatasources();
             // Filtering the excluded datasources
             datasourceCache = initialSources.stream().filter(e-> !feedConfig.getExcludeFeedKeyContains().contains(e.getFeedKey())).collect(Collectors.toSet());
 
             if (datasourceCache == null || datasourceCache.isEmpty()) {
-                logger.warn("Datasource cache is empty after loading from catalog: {}", feedConfig.getCatalogUrl());
+                logger.warn("Datasource cache is empty after loading from catalog for provider {}: {}", getProviderName(),
+                        RemoteFileCachingService.loggableUrl(feedConfig.getCatalogUrl()));
                 // Optionally, integrate with Spring Actuator health checks here.
             }
         } catch (Exception e) {
@@ -230,7 +233,8 @@ public abstract class AbstractFeedService implements AffiliationProvider {
         volatileDs.getCsvDatasource().getDatasourceUrls().clear();
         volatileDs.getCsvDatasource().getDatasourceUrls().add(feedUrl);
 
-        logger.debug("Volatile datasource for key '{}' created with feed URL '{}'.", feedKey, feedUrl);
+        logger.debug("Volatile datasource for key '{}' created with feed URL '{}'.", feedKey,
+                RemoteFileCachingService.loggableUrl(feedUrl));
         return volatileDs;
     }
 

@@ -110,8 +110,13 @@ public class FeedIndexingService implements HealthIndicator {
         feedNoUrls.incrementAndGet();
     }
 
-    public synchronized void brokenCsv(String url) {
-        brokenCsvFiles.add(url);
+    /**
+     * Records a feed that could not be parsed, reported in the {@code invalid_csv_files} health detail.
+     *
+     * @param feedLabel loggable label of the feed, never its URL: feed URLs can carry API keys
+     */
+    public synchronized void brokenCsv(String feedLabel) {
+        brokenCsvFiles.add(feedLabel);
     }
 
     @Override

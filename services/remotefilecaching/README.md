@@ -11,8 +11,9 @@ archive extraction.
 - Names cached files after the SHA-256 of their URL (see below).
 - Logs only the scheme, host and port of a URL, followed by the cache file
   name; `getResource(url, ttl, logLabel)` logs a caller-supplied label instead.
-  Download failures are rethrown without the JDK message, which quotes the URL;
-  only the HTTP status code is kept.
+  Download failures, including those of `downloadToTmpFile`, are rethrown
+  without the JDK message, which quotes the URL; only the HTTP status code is
+  kept. `loggableUrl(url)` is public for callers that log a URL.
 
 ## Cache file names
 

@@ -291,6 +291,9 @@ public class FeedIndexingWorker implements Runnable {
 	 */
 	private FeedIndexingJobStat stats;
 
+	/** Number of SHA-256 hexadecimal characters identifying a feed URL in logs. */
+	private static final int FEED_URL_HASH_LENGTH = 12;
+
 	/**
 	 * Per-worker cache that maps config column-name → actual CSV header key for the current URL.
 	 * Cleared between URLs. Accessed only by the owning worker thread — plain HashMap is
@@ -359,7 +362,8 @@ public class FeedIndexingWorker implements Runnable {
 		String dsConfName = dsProperties.getDatasourceConfigName();
 		final CsvDataSourceProperties config = dsProperties.getCsvDatasource();
 		Set<String> urls = config.getDatasourceUrls();
-		dedicatedLogger.warn("STARTING FEED INDEXING OF {} - {} - urls={}", feedLogToken(dsProperties, urls), dsProperties, urls);
+		dedicatedLogger.warn("STARTING FEED INDEXING OF {} - {} - urls={}", feedLogToken(dsProperties, urls), dsProperties,
+				urls.stream().map(FeedIndexingWorker::loggableFeedUrl).toList());
 
 		if (urls.size() == 0) {
 			// Triggering healthcheck down in the CsvService
@@ -371,9 +375,11 @@ public class FeedIndexingWorker implements Runnable {
 		
 		for (String url : urls) {
 			resolvedKeysCache.clear();
-			dedicatedLogger.warn("STARTING FEED URL {} - {}", url, dsProperties);
+			// Feed URLs can carry API keys (Awin, Effinity): logs, stats and health details only use this label
+			String feedLabel = loggableFeedUrl(url);
+			dedicatedLogger.warn("STARTING FEED URL {} - {}", feedLabel, dsProperties);
 			// Updating status with actual feed
-			stats = new FeedIndexingJobStat(dsProperties.getDatasourceConfigName(), url, FeedIndexingJobStat.TYPE_CSV);
+			stats = new FeedIndexingJobStat(dsProperties.getDatasourceConfigName(), feedLabel, FeedIndexingJobStat.TYPE_CSV);
 
 			int okItems = 0;
 			int validationFailedItems = 0;
@@ -386,11 +392,11 @@ public class FeedIndexingWorker implements Runnable {
 				try {
 					destFile = remoteFileCachingService.downloadToTmpFile(url, safeName);
 					if (destFile ==null || !destFile.exists() || destFile.length() == 0) {
-						dedicatedLogger.error("Non existing or empty downloaded file : {}",url);
+						dedicatedLogger.error("Non existing or empty downloaded file : {}", feedLabel);
 						continue;
 					}
 				} catch (Exception e) {
-					dedicatedLogger.error("Exception while downloading feed  {}",url, e);
+					dedicatedLogger.error("Exception while downloading feed  {}", feedLabel, e);
 					continue;
 				}
 
@@ -429,7 +435,7 @@ public class FeedIndexingWorker implements Runnable {
 							        e -> e.getKey(),
 							        e -> e.getValue() == null ? "" : normalizeCsvValue(e.getValue())
 							    ));
-						DataFragment df = parseCsvLine(dsProperties, line, dsConfName, dedicatedLogger, url);
+						DataFragment df = parseCsvLine(dsProperties, line, dsConfName, dedicatedLogger, feedLabel);
 
 						// Store the feedUrl as an attribute (for debug)
 						// TODO(p3,conf) : from conf
@@ -442,11 +448,11 @@ public class FeedIndexingWorker implements Runnable {
 					} catch (ValidationException e) {
 						stats.incrementValidationFail();
 						validationFailedItems++;
-						dedicatedLogger.info("Validation exception ({}) while parsing {} (url={})", e.getMessage(), dataFragment(line), url);
+						dedicatedLogger.info("Validation exception ({}) while parsing {} (url={})", e.getMessage(), dataFragment(line), feedLabel);
 					} catch (Exception e) {
 						stats.incrementErrors();
 						errorItems++;
-						dedicatedLogger.warn("Error in {}, while parsing {} ({} cols)", dsConfName, url, line == null ? 0 : line.size(), e);
+						dedicatedLogger.warn("Error in {}, while parsing {} ({} cols)", dsConfName, feedLabel, line == null ? 0 : line.size(), e);
 					}
 				}
 
@@ -454,9 +460,9 @@ public class FeedIndexingWorker implements Runnable {
 
 			} catch (Exception e) {
 				// Triggering healthcheck down in the CsvService
-				csvService.brokenCsv(url);
-				logger.error("Critical exception while parsing CSV file: {} : {}", dsConfName, url, e);
-				dedicatedLogger.error("Critical exception while parsing CSV file:  : {} : {}", dsConfName, url, e);
+				csvService.brokenCsv(feedLabel);
+				logger.error("Critical exception while parsing CSV file: {} : {}", dsConfName, feedLabel, e);
+				dedicatedLogger.error("Critical exception while parsing CSV file:  : {} : {}", dsConfName, feedLabel, e);
 				stats.setFail(true);
 				
 			} finally {
@@ -467,7 +473,7 @@ public class FeedIndexingWorker implements Runnable {
 				deleteTemporaryFile(url, destFile, dedicatedLogger);
 			}
 
-			dedicatedLogger.info("Done: {} (imported: {}, errors: {}, not_validable: {}, excluded: {}) - {}", dsConfName, okItems, errorItems, validationFailedItems, excludedItems, url);
+			dedicatedLogger.info("Done: {} (imported: {}, errors: {}, not_validable: {}, excluded: {}) - {}", dsConfName, okItems, errorItems, validationFailedItems, excludedItems, feedLabel);
 		}
 		dedicatedLogger.info("End CSV feed indexing for {}", dsConfName);
 	}
@@ -556,18 +562,18 @@ public class FeedIndexingWorker implements Runnable {
 	 * @param item Map representing a CSV line
 	 * @param datasourceConfigName Name of the data source configuration
 	 * @param dedicatedLogger Logger for logging information
-	 * @param datasetUrl URL of the dataset being parsed
+	 * @param feedLabel loggable label of the dataset being parsed (see {@link #loggableFeedUrl(String)})
 	 * @return DataFragment object containing parsed data
 	 * @throws ValidationException if validation fails
 	 */
-	private DataFragment parseCsvLine(final DataSourceProperties config, final Map<String, String> item, final String datasourceConfigName, final Logger dedicatedLogger, String datasetUrl) throws ValidationException {
+	private DataFragment parseCsvLine(final DataSourceProperties config, final Map<String, String> item, final String datasourceConfigName, final Logger dedicatedLogger, String feedLabel) throws ValidationException {
 	    dedicatedLogger.debug("Parsing line : {}", item);
 	    
 	    DataFragment dataFragment = new DataFragment();
 	    dataFragment.setFragmentHashCode(item.hashCode());
 	    
 	    setAffiliatedUrl(dataFragment, item, config, dedicatedLogger);
-	    setUrl(dataFragment, item, config, dedicatedLogger, datasetUrl);
+	    setUrl(dataFragment, item, config, dedicatedLogger, feedLabel);
 	    trimUrlParameters(dataFragment, config);
 	    setPrice(dataFragment, item, config, dedicatedLogger);
 	    setNameAndTags(dataFragment, item, config);
@@ -596,9 +602,9 @@ public class FeedIndexingWorker implements Runnable {
 	 * @param item Map representing a CSV line
 	 * @param config DataSourceProperties for configuration settings
 	 * @param logger Logger for logging information
-	 * @param datasetUrl URL of the dataset being parsed
+	 * @param feedLabel loggable label of the dataset being parsed (see {@link #loggableFeedUrl(String)})
 	 */
-	private void setUrl(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger, String datasetUrl) {
+	private void setUrl(DataFragment dataFragment, Map<String, String> item, DataSourceProperties config, Logger logger, String feedLabel) {
 	    try {
 	        CsvDataSourceProperties csvProperties = config.getCsvDatasource();
 	        String url = !StringUtils.isEmpty(csvProperties.getExtractUrlFromParam()) ? extractUrlFromParam(item, csvProperties) : null;
@@ -610,7 +616,7 @@ public class FeedIndexingWorker implements Runnable {
 	        removeFromSource(item, candidateColumns(csvProperties.getUrl(), DEFAULT_URL_COLUMNS));
 	        
 	    } catch (Exception e) {
-	        logger.info("Error while extracting url in dataset {} ({} columns)", datasetUrl, item.size());
+	        logger.info("Error while extracting url in dataset {} ({} columns)", feedLabel, item.size());
 	    }
 	}
 
@@ -1389,9 +1395,26 @@ public class FeedIndexingWorker implements Runnable {
 			return dsProperties.getFeedKey();
 		}
 		if (urls != null && urls.size() == 1) {
-			return urls.iterator().next();
+			return loggableFeedUrl(urls.iterator().next());
 		}
 		return dsProperties.getDatasourceConfigName();
+	}
+
+	/**
+	 * Returns how a feed URL appears in logs, job stats and health details: feed URLs can carry API keys as path
+	 * segments (Awin, Effinity {@code apiv3/{key}/...}) or query values. Only the scheme, host and port of the URL are
+	 * kept (see {@link RemoteFileCachingService#loggableUrl(String)}), followed by the first characters of its SHA-256
+	 * so that two feeds of the same host stay distinguishable.
+	 *
+	 * @param url feed URL
+	 * @return text safe to log, or {@code null} when no URL was supplied
+	 */
+	static String loggableFeedUrl(String url) {
+		if (url == null) {
+			return null;
+		}
+		return RemoteFileCachingService.loggableUrl(url) + " #"
+				+ RemoteFileCachingService.cacheFileName(url).substring(0, FEED_URL_HASH_LENGTH);
 	}
 
 	private List<String> getCategoryFromCsvRows(Map<String, String> item) {

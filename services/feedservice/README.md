@@ -6,6 +6,31 @@ Provides utilities to load product feed definitions from affiliation providers s
 
 Feed parameters are supplied via `FeedConfiguration` instances in your application properties.
 
+## Secrets in feed URLs
+
+Catalog and feed URLs can carry API keys: Awin as a path segment of the catalog
+and feed URLs (`.../apikey/{key}/...`), Effinity as a path segment of every API
+v3 URL (`apiv3/{key}/...`), and some endpoints as query values (`accessToken=`,
+`key=`). Logs, exception messages, job stats and health details therefore never
+contain a full feed or catalog URL:
+
+- the catalog is logged as its scheme and host
+  (`RemoteFileCachingService.loggableUrl`), with the provider name;
+- `FeedIndexingWorker` labels each feed URL with `loggableFeedUrl(url)`: scheme,
+  host and port, then the first 12 hexadecimal characters of the SHA-256 of the
+  URL (`https://productdata.awin.com/<redacted> #4c0cf312e02d`), also used in
+  the `invalid_csv_files` health detail and `FeedIndexingJobStat.url`;
+- Awin catalog lines are logged by advertiser ID and column names, never by
+  their values;
+- API endpoints are logged with `HttpUtils.safeEndpointForLogs`, which masks
+  the `key=` and, for Awin, `accessToken=` values;
+- download failures come without the JDK message, which quotes the URL (see the
+  [remotefilecaching README](../remotefilecaching/README.md)).
+
+New logs and exceptions follow the same rule; tests capture the logs with a URL
+carrying `secret-key` and check it never appears (`FeedIndexingWorkerTest`,
+`AwinFeedServiceTest`, `EffiliationFeedServiceTest`).
+
 ## Build & Test
 
 ```bash
