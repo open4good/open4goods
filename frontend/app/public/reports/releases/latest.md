@@ -22,7 +22,7 @@ This release covers **1 day(s)** of work, from **2026-10-22T06:53:42.000Z** to *
 | [PR 3456](https://github.com/open4good/open4goods/pull/3456) | Recherche lexicale seule : abandon des embeddings texte (ADR 0012, GOU-260) | @GoulvenF |
 | [PR 3457](https://github.com/open4good/open4goods/pull/3457) | chore: retirer le dépôt Maven xwiki-releases et le bloc xwiki: mort (GOU-922) | @GoulvenF |
 | [PR 3458](https://github.com/open4good/open4goods/pull/3458) | fix(api): clean-resources ne supprime les shards vides qu'en mode DELETE (GOU-917) | @GoulvenF |
-| [PR 3460](https://github.com/open4good/open4goods/pull/3460) | feat(deploy): workflow prod " render secrets + restart " et rendu API_GOOGLE_API_JSON pour api (GOU-933) | @GoulvenF |
+| [PR 3460](https://github.com/open4good/open4goods/pull/3460) | feat(deploy): workflow prod « render secrets + restart » et rendu API_GOOGLE_API_JSON pour api (GOU-933) | @GoulvenF |
 | [PR 3461](https://github.com/open4good/open4goods/pull/3461) | fix(front-api): journaliser les refus SSO Google et détecter une allowlist mal liée (GOU-949) | @GoulvenF |
 | [PR 3462](https://github.com/open4good/open4goods/pull/3462) | feat(api): metriks seo clics, impressions, CTR, position et tops 20 Search Console (GOU-956) | @GoulvenF |
 | [PR 3463](https://github.com/open4good/open4goods/pull/3463) | feat(front): /metriks tops Search Console, euros et erreurs explicites (GOU-958) | @GoulvenF |
