@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ResponseError } from '~~/shared/api-client'
+import { FetchError, ResponseError } from '~~/shared/api-client'
 
 import { extractBackendErrorDetails } from './log-backend-error'
 
@@ -65,5 +65,50 @@ describe('extractBackendErrorDetails', () => {
       isResponseError: false,
       logMessage: 'HTTP 500 - Internal Server Error - boom',
     })
+  })
+
+  it('maps an unreachable backend (ECONNREFUSED) to 503 Service Unavailable', async () => {
+    // Shape thrown by the generated client while front-api restarts.
+    const connectError = Object.assign(
+      new Error('connect ECONNREFUSED 127.0.0.1:8086'),
+      { code: 'ECONNREFUSED' }
+    )
+    const error = new FetchError(
+      new TypeError('fetch failed', { cause: connectError }),
+      'The request failed and the interceptors did not return an alternative response'
+    )
+
+    const details = await extractBackendErrorDetails(error)
+
+    expect(details.statusCode).toBe(503)
+    expect(details.statusText).toBe('Service Unavailable')
+    expect(details.statusMessage).toBe(
+      'Backend unavailable (ECONNREFUSED): connect ECONNREFUSED 127.0.0.1:8086'
+    )
+    expect(details.isResponseError).toBe(false)
+    expect(details.logMessage).toBe(
+      'HTTP 503 - Service Unavailable - Backend unavailable (ECONNREFUSED): connect ECONNREFUSED 127.0.0.1:8086'
+    )
+  })
+
+  it.each(['ECONNRESET', 'ENOTFOUND', 'ETIMEDOUT', 'UND_ERR_CONNECT_TIMEOUT'])(
+    'maps the %s network error to 503',
+    async code => {
+      const error = new TypeError('fetch failed', {
+        cause: Object.assign(new Error(code), { code }),
+      })
+
+      const details = await extractBackendErrorDetails(error)
+
+      expect(details.statusCode).toBe(503)
+    }
+  )
+
+  it('keeps 500 for an unexpected error that is not a network failure', async () => {
+    const error = new FetchError(new TypeError('Cannot read properties'))
+
+    const details = await extractBackendErrorDetails(error)
+
+    expect(details.statusCode).toBe(500)
   })
 })
