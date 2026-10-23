@@ -1,21 +1,44 @@
 name: Frontend CI & Deploy
-# Beta deployment is voluntary: dispatch manually on `main` only (GOU-387).
-# PR checks live in frontend-pr.yml; no push trigger, so a merge on `main`
-# never redeploys beta.
+# Beta deployment runs on every merge on `main` that touches the Nuxt frontend or its content (GOU-1036).
+# PR checks live in frontend-pr.yml. Set the repository variable BETA_DEPLOY_FREEZE=true to freeze beta during
+# acceptance: a push still lints, tests and builds, but the deploy job is skipped. A manual dispatch on `main`
+# still deploys, to ship a blocking fix.
 on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      # Rendered by the docs collection of frontend/content.config.ts.
+      - "docs/**"
+      - "verticals/src/main/resources/guides/**"
+      - "scripts/deploy/**"
+      - ".github/workflows/frontend-ci.yml"
   workflow_dispatch:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   build:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    # Google SSO values come from the `beta` GitHub Environment (ADR-0006, GOU-767).
-    environment: beta
+    # A newer push supersedes an older build, so beta never receives an older commit after a newer one.
+    # Scoped by event: a push during a freeze never cancels a manual dispatch shipping a blocking fix.
+    concurrency:
+      group: build-beta-frontend-${{ github.event_name }}
+      cancel-in-progress: true
     steps:
+      - name: Report beta deploy freeze
+        if: vars.BETA_DEPLOY_FREEZE == 'true'
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "${EVENT_NAME}" = "workflow_dispatch" ]; then
+            message="BETA_DEPLOY_FREEZE=true: beta is frozen, but this manual dispatch deploys anyway."
+          else
+            message="BETA_DEPLOY_FREEZE=true: beta is frozen for acceptance. Lint, tests and build run; the deploy job is skipped."
+            message="${message} Dispatch the workflow on main to ship a blocking fix."
+          fi
+          echo "::notice title=Beta deploy freeze::${message}"
+          echo "### Beta deploy freeze" >> "${GITHUB_STEP_SUMMARY}"
+          echo "${message}" >> "${GITHUB_STEP_SUMMARY}"
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
@@ -50,8 +73,46 @@ jobs:
         working-directory: frontend
         run: scripts/check-standalone-output.sh 4105
 
+      - name: Package SSR output
+        # tar keeps the permissions and symlinks of .output (native addons, pnpm links), which artifacts drop.
+        run: tar -czf frontend-ssr-output.tgz frontend/.output
+
+      - name: Upload SSR output
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: frontend-ssr-output
+          path: frontend-ssr-output.tgz
+          compression-level: 0
+          retention-days: 3
+          if-no-files-found: error
+
+  deploy:
+    needs: build
+    # Never from a PR, a fork or another branch. During a freeze, only a manual dispatch deploys.
+    if: >-
+      github.ref == 'refs/heads/main'
+      && (github.event_name == 'workflow_dispatch' || vars.BETA_DEPLOY_FREEZE != 'true')
+    runs-on: ubuntu-latest
+    # Google SSO values come from the `beta` GitHub Environment (ADR-0006, GOU-767).
+    environment: beta
+    # One frontend deploy at a time; a running publish is never interrupted. GitHub keeps only the newest
+    # pending run, so the last merge ends up deployed.
+    concurrency:
+      group: deploy-beta-frontend
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Download SSR output
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: frontend-ssr-output
+
+      - name: Unpack SSR output
+        run: tar -xzf frontend-ssr-output.tgz
+
       - name: Deploy SSR output to Beta server
-        if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+        if: github.ref == 'refs/heads/main'
         uses: easingthemes/ssh-deploy@2cc5b27bf3029d0455dd5e09fe02633904031447 # main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -62,7 +123,7 @@ jobs:
           TARGET: "/opt/open4goods/latest/frontend-ssr"
 
       - name: Preserve previous Nuxt chunks in Beta staging
-        if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+        if: github.ref == 'refs/heads/main'
         uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.REMOTE_BETA_HOST }}
@@ -93,7 +154,7 @@ jobs:
       - name: Render Google SSO env on Beta
         # Replaces only these keys in the env_file of docker-compose.frontend.yml, read when publish-frontend.sh
         # recreates the container. open4goods-config's deploy rewrites this file: rendered before every publish.
-        if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+        if: github.ref == 'refs/heads/main'
         env:
           DEPLOY_SSH_HOST: ${{ secrets.REMOTE_BETA_HOST }}
           DEPLOY_SSH_USER: ${{ secrets.REMOTE_BETA_USER }}
@@ -105,7 +166,7 @@ jobs:
           NUXT_GOOGLE_OAUTH_CLIENT_ID NUXT_GOOGLE_OAUTH_CLIENT_SECRET
 
       - name: Publish frontend
-        if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+        if: github.ref == 'refs/heads/main'
         uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.REMOTE_BETA_HOST }}
@@ -114,7 +175,7 @@ jobs:
           script: sh /opt/open4goods/bin/publish-frontend.sh beta
 
       - name: Validate published Beta Nuxt assets
-        if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+        if: github.ref == 'refs/heads/main'
         uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.REMOTE_BETA_HOST }}
