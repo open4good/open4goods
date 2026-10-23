@@ -22,6 +22,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.open4goods.commons.config.yml.datasource.CsvDataSourceProperties;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
+import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.services.feedservice.model.FeedIndexingJobStat;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.slf4j.LoggerFactory;
@@ -162,8 +163,37 @@ class FeedIndexingWorkerTest {
         assertThat(FeedIndexingWorker.loggableFeedUrl(null)).isNull();
     }
 
+    /**
+     * No attribute of an indexed fragment carries the feed URL: {@code feed_url} holds the label.
+     */
+    @Test
+    void indexedFragmentsNeverCarryTheFeedUrl() throws Exception {
+        String url = baseUrl() + FEED_PATH;
+        when(csvService.detectSchema(any(File.class), any(Charset.class)))
+                .thenReturn(CsvSchema.emptySchema().withHeader().withColumnSeparator(';'));
+        DataFragmentIndexer indexer = mock(DataFragmentIndexer.class);
+        DataSourceProperties ds = datasource(url);
+
+        newWorker(indexer).fetch(ds);
+
+        ArgumentCaptor<DataFragment> fragments = ArgumentCaptor.forClass(DataFragment.class);
+        verify(indexer).index(fragments.capture(), anyString());
+        assertThat(fragments.getValue().getAttributes()).isNotEmpty().allSatisfy(attribute -> {
+            assertThat(String.valueOf(attribute.getName())).doesNotContain(SECRET);
+            assertThat(String.valueOf(attribute.getValue())).doesNotContain(SECRET).doesNotContain(url);
+        });
+        assertThat(fragments.getValue().getAttributes()).anySatisfy(attribute -> {
+            assertThat(attribute.getName()).isEqualToIgnoringCase("feed_url");
+            assertThat(attribute.getValue()).isEqualTo(FeedIndexingWorker.loggableFeedUrl(url));
+        });
+    }
+
     private FeedIndexingWorker newWorker() {
-        return new FeedIndexingWorker(csvService, mock(DataFragmentCompletionService.class), mock(DataFragmentIndexer.class),
+        return newWorker(mock(DataFragmentIndexer.class));
+    }
+
+    private FeedIndexingWorker newWorker(DataFragmentIndexer indexer) {
+        return new FeedIndexingWorker(csvService, mock(DataFragmentCompletionService.class), indexer,
                 10, tempDir.resolve("logs").toString(), new RemoteFileCachingService(tempDir.resolve("cache").toString()));
     }
 
