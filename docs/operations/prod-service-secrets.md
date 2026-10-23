@@ -1,65 +1,164 @@
-# Production service secrets (render + restart)
+# Service secrets, beta and prod (render + restart)
 
 Context: decision D140 (2026-10-22), ADR-0006, GOU-932 / GOU-933, GOU-957,
-GOU-1014.
-Production secrets move to the `prod` GitHub Environment of
-`open4good/open4goods` when they are rotated. A rotated secret is rendered
-onto the prod host, and its service restarted, by a `workflow_dispatch`
-workflow, without a release. The release renders the same files with the same
-definition.
+GOU-1014, GOU-1041 (credentials campaign GOU-1038).
+Service secrets move from `open4goods-config` to the `beta` and `prod` GitHub
+Environments of `open4good/open4goods` as they are rotated. A rotated secret is
+rendered onto the host, and its services restarted, by the dispatchable
+`serviceSecrets.yml`, without a deploy. The deploy workflows render the same
+files with the same definition.
 
 This document never lists secret values, key ids or fingerprints.
 
-## Secrets, files and services
+## Single definition
 
-The single definition is `scripts/deploy/render-service-secrets.sh`, used by
-both workflows:
+`scripts/deploy/render-service-secrets.sh [--if-present] <check|apply> <env> <service>`
+(`env`: `beta` or `prod`; `service`: `api`, `ui`, `front-api`, `admin`,
+`b2b-api` or `frontend`) holds one table, service -> GitHub secret -> target,
+documented at the top of the script. Every workflow that renders secrets calls
+it:
 
-| Environment secret    | File on the prod host                            | Line in `/etc/open4goods/<service>.env`                                          | Service | Consumer                                                                 | Rendered by                                               |
-| --------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------- | ------- | ------------------------------------------------------------------------ | --------------------------------------------------------- |
-| `API_GOOGLE_API_JSON` | `/etc/open4goods/secrets/google-indexation.json` | `GOOGLE_INDEXATION_SERVICE_ACCOUNT_PATH=/etc/open4goods/secrets/google-indexation.json` (`api.env`) | `api`   | Metriks `GoogleSearchConsoleService` (`google-indexation.service-account-path`) | `prodSecrets.yml`, `releaseDeployProd.yml` (`mode=release`) |
-| `API_METRIKS_AWIN_PUBLISHER_ID` | - | `METRIKS_AFFILIATION_AWIN_PUBLISHER_ID=<value>` (`api.env`) | `api` | Metriks affiliation report (`metriks.affiliation.awin.publisher-id`) | `prodSecrets.yml`, `releaseDeployProd.yml` (`mode=release`) |
-| `API_METRIKS_AWIN_API_TOKEN` | - | `METRIKS_AFFILIATION_AWIN_API_TOKEN=<value>` (`api.env`) | `api` | Metriks affiliation report (`metriks.affiliation.awin.api-token`) | `prodSecrets.yml`, `releaseDeployProd.yml` (`mode=release`) |
-| `API_METRIKS_EFFILIATION_API_KEY` | - | `METRIKS_AFFILIATION_EFFILIATION_API_KEY=<value>` (`api.env`) | `api` | Metriks affiliation report (`metriks.affiliation.effiliation.api-key`) | `prodSecrets.yml`, `releaseDeployProd.yml` (`mode=release`) |
-| `API_EFFILIATION_API_KEY` | - | `AFFILIATIONCONFIG_EFFILIATIONAPIKEY=<value>` (`api.env`) | `api` | Effiliation product feeds, `ApiConfig#effiliationFeedService` (`affiliation-config.effiliation-api-key`) | `prodSecrets.yml`, `releaseDeployProd.yml` (`mode=release`); beta: `testAndPublishBeta.yml` |
+| Workflow                 | Environment | Services                                   | Steps                                                                 |
+| ------------------------ | ----------- | ------------------------------------------ | --------------------------------------------------------------------- |
+| `serviceSecrets.yml`     | input       | input (`all` or one)                       | check, host check, then with `mode=apply`: render and restart         |
+| `testAndPublishBeta.yml` | `beta`      | admin, api, front-api, ui, b2b-api         | `--if-present apply`, before "Publish Applications"                   |
+| `frontend-ci.yml`        | `beta`      | frontend                                   | `--if-present apply`, before "Publish frontend"                       |
+| `releaseDeployProd.yml`  | `prod`      | all (check); Spring services, frontend     | `--if-present check` in every mode; `apply` in `mode=release` only    |
 
-- `API_GOOGLE_API_JSON` is the JSON key of the `nudger-indexation` Google
-  service account. Before anything is written, the runner checks that it is a
-  single JSON object with `type` `service_account` and non-empty
-  `client_email` and `private_key`; neither the value nor the parser message is
-  printed.
-- `publish-jars.sh` (open4goods-config) sources `/etc/open4goods/<service>.env`
-  before starting the service. `/etc/open4goods/` sits outside the tree that
-  open4goods-config's deploy rsyncs with `--delete`, so the rendered files
-  survive config deploys. The OS environment variable beats
-  `application-active.yml`
-  (`GoogleSearchConsoleServiceBindingTest` covers the relaxed binding of
-  `GOOGLE_INDEXATION_SERVICE_ACCOUNT_PATH` to the `@Value`).
-- In `GoogleSearchConsoleService`, `google-indexation.service-account-json`
-  wins over `service-account-path` when both are set: the prod configuration
-  must not set the JSON property.
-- The `API_METRIKS_*` secrets (GOU-957) are the report credentials of the
-  affiliation networks read by `GET /api/metriks/affiliation`
-  (`AffiliationMetriksService`): Awin publisher id and Publisher API token,
-  and Effiliation API key. Each one is **optional**: a missing secret is a
-  `::warning::`, is not rendered and does not stop the others, and the
-  network's Metriks events then report `Credential manquant :
-  metriks.affiliation.<network>.<property>` (never 0). A set secret must match
-  `[A-Za-z0-9/._-]` (digits only for the Awin publisher id), checked before anything is written. `AffiliationCredentialsBindingTest`
-  covers the relaxed binding of the `METRIKS_AFFILIATION_*` variables. None of
-  these values lives in this repository or in open4goods-config.
-- `API_EFFILIATION_API_KEY` (GOU-1014) is the Effinity API key the Effiliation
-  product feeds use (`affiliation-config.effiliation-api-key`). It is
-  **optional** like the `API_METRIKS_*` secrets: a missing secret is a
-  `::warning::` and is not rendered, so `api` keeps its previous
-  `api.env` line or, failing that, the open4goods-config value. A set secret
-  must match `[A-Za-z0-9/._-]`. `EffiliationApiKeyBindingTest` shows that
-  `AFFILIATIONCONFIG_EFFILIATIONAPIKEY` beats the YAML value. The copy in
-  open4goods-config is removed only after the switch.
+The release runs the script of the commit the workflow runs from (sparse
+checkout into `deploy-tools/`), whatever ref it deploys: the table always
+matches the secrets the workflow maps, and the rendered files only depend on
+Spring Boot, not on the JAR.
+
+### Kinds of target
+
+- **Config tree** (`tree`, `tree-sa`): one file per Spring property,
+  `/etc/open4goods/secrets/<host service>/<property>`, holding the exact value
+  (no trailing newline), mode 600, directory 700 when new. Any value works:
+  JSON, quotes, spaces, newlines. Every apply of a Spring service writes
+  `SPRING_CONFIG_IMPORT=optional:configtree:/etc/open4goods/secrets/<host service>/`
+  in `/etc/open4goods/<host service>.env`, which `publish-jars.sh` sources. The
+  import is optional: an empty or missing tree is a no-op. It is written even
+  when no tree secret is set, because `publish-jars.sh` sources every
+  service's env file in the same shell during a rolling restart: a service
+  without its own line would inherit the import of the service started before
+  it. `tree-sa` values must also be a Google service account JSON key.
+- **Env line** (`env`, `digits`): `KEY=<value>` in the service's env file.
+  The value must match `[A-Za-z0-9/._-]` (digits only for `digits`), because
+  the file is sourced by `publish-jars.sh` or read as a docker compose
+  `env_file`. Used for the existing `api.env` lines and for the frontend.
+- **File and path line** (`path-sa`): `API_GOOGLE_API_JSON` is written to
+  `/etc/open4goods/secrets/google-indexation.json`, and
+  `GOOGLE_INDEXATION_SERVICE_ACCOUNT_PATH` points `api` at it (GOU-933).
+
+Host services and files: `api`, `ui`, `front-api` and `b2b-api` keep their
+name; `admin` runs as `sbadmin` (`/etc/open4goods/sbadmin.env`,
+`/etc/open4goods/secrets/sbadmin/`); the frontend reads
+`/opt/open4goods/config/<env>/frontend/.env`, the `env_file` of
+`docker-compose.frontend.yml`, which every `open4goods-config` deploy rewrites:
+it is rendered before every publish.
+
+### Precedence
+
+`publish-jars.sh` starts the Spring services with
+`spring.config.location=classpath:/application.yml,file:<config>/application-active.yml`
+(sbadmin: the YAML file only). An import declared by `SPRING_CONFIG_IMPORT`
+takes precedence over these locations, so the config tree beats
+`application-active.yml` and `application.yml`, including its
+`${ENV_VAR:default}` placeholders. The OS environment and `-D` system
+properties still beat the tree: a property rendered in the tree must not also
+be set as an environment variable in a file `publish-jars.sh` sources
+(`config/<env>/infra/.env`, `/etc/open4goods/<service>.env`,
+`config/<env>/<service>/.env`).
+
+`RenderedSecretsConfigTreeTest`, in `api`, `ui`, `front-api`, `admin` and
+`b2b-api`, starts Spring Boot with that layout and reads every rendered
+property back through the class that consumes it: the tree value wins, the
+YAML value stays without the import or with a missing tree, and the test
+fails when a `tree` row of the script has no consumer. The `api.env` lines are
+covered by `GoogleSearchConsoleServiceBindingTest`,
+`AffiliationCredentialsBindingTest` and `EffiliationApiKeyBindingTest`; the
+frontend lines by `frontend/server/utils/rendered-secrets-env.spec.ts` (Nitro
+`NUXT_*` overrides) and `auth.spec.ts` (`FRONT_SECURITY_JWT_SECRET`).
+
+## Secrets, targets and services
+
+All secrets are optional except `GOOGLE_SSO_CLIENT_ID` / `_SECRET`: a missing
+one is a `::warning::`, is not rendered and does not stop the others; the
+service keeps its previous render or, failing that, the `open4goods-config`
+value. A set but malformed secret fails before anything is written.
+
+| Environment secret                | Service(s): target                                                                                                                                                            | Consumer                                                       |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `API_GOOGLE_API_JSON`             | api: `google-indexation.json` + `GOOGLE_INDEXATION_SERVICE_ACCOUNT_PATH`                                                                                                      | Metriks `GoogleSearchConsoleService` (`nudger-indexation`)     |
+| `API_METRIKS_AWIN_PUBLISHER_ID`   | api: `METRIKS_AFFILIATION_AWIN_PUBLISHER_ID` (digits)                                                                                                                         | Metriks affiliation report (GOU-957)                           |
+| `API_METRIKS_AWIN_API_TOKEN`      | api: `METRIKS_AFFILIATION_AWIN_API_TOKEN`                                                                                                                                     | Metriks affiliation report                                     |
+| `API_METRIKS_EFFILIATION_API_KEY` | api: `METRIKS_AFFILIATION_EFFILIATION_API_KEY`                                                                                                                                | Metriks affiliation report                                     |
+| `API_EFFILIATION_API_KEY`         | api: `AFFILIATIONCONFIG_EFFILIATIONAPIKEY`                                                                                                                                    | Effiliation product feeds (GOU-1014)                           |
+| `API_VERTEX_API_JSON`             | api: tree `gen-ai-config.google-api-json` (service account JSON)                                                                                                              | Vertex Gemini (`vertexnudgerclient`), `AiProvidersConfiguration` |
+| `API_VERTEX_BATCH_JSON`           | api: tree `vertex.batch.credentials-json` (service account JSON)                                                                                                              | Vertex batch (`VertexBatchConfig`)                             |
+| `API_GOOGLE_SEARCH_API_KEY`       | api: tree `googlesearch.api-key`                                                                                                                                              | Custom Search (`GoogleSearchConfig`)                           |
+| `API_OPENAI_API_KEY`              | api: tree `spring.ai.openai.api-key`                                                                                                                                          | Spring AI OpenAI                                               |
+| `API_AMAZON_ACCESS_KEY`           | api: tree `amazon-config.access-key`                                                                                                                                          | Amazon PA-API                                                  |
+| `API_AMAZON_SECRET_KEY`           | api: tree `amazon-config.secret-key`                                                                                                                                          | Amazon PA-API                                                  |
+| `API_AWIN_ACCESS_TOKEN`           | api: tree `affiliation-config.awin-access-token`                                                                                                                              | Awin feeds                                                     |
+| `API_KWANKO_TOKEN`                | api: tree `affiliation-config.kwanko-token`                                                                                                                                   | Kwanko feeds                                                   |
+| `API_TRADETRACKER_API_KEY`        | api: tree `affiliation-config.tradetracker-api-key`                                                                                                                           | TradeTracker feeds                                             |
+| `API_EPREL_API_KEY`               | api: tree `eprel.api-key`                                                                                                                                                     | EPREL (`EprelServiceProperties`)                               |
+| `O4G_ICECAT_PASSWORD`             | api, front-api: tree `icecat-feature-config.password`                                                                                                                         | Icecat account                                                 |
+| `O4G_SBA_PASSWORD`                | api, ui, front-api, b2b-api: tree `spring.boot.admin.client.password`; ui, front-api: tree `o4g.actuator.monitor.password`; admin: tree `spring.boot.admin.instance-auth.default-password`, `o4g.sba.registration.password` | Spring Boot Admin registration and actuator access |
+| `O4G_INTERNAL_API_KEY`            | api: tree `admin-key`; front-api: tree `front.affiliation-partners.api-key`                                                                                                   | front-api -> api calls (affiliation partners)                  |
+| `O4G_CAPTCHA_SECRET`              | ui: tree `captcha-secret`; front-api: tree `captcha.secret-key`                                                                                                               | hCaptcha                                                       |
+| `O4G_MAIL_PASSWORD`               | front-api, admin: tree `spring.mail.password`                                                                                                                                 | Gmail application password                                     |
+| `FRONT_API_JWT_SECRET`            | front-api: tree `front.security.jwt-secret`; frontend: `FRONT_SECURITY_JWT_SECRET`                                                                                            | JWT signature (front-api signs, frontend verifies admin tokens) |
+| `O4G_MACHINE_TOKEN`               | front-api: tree `front.security.shared-token`; frontend: `NUXT_MACHINE_TOKEN`, `MACHINE_TOKEN`                                                                                | `X-Shared-Token` machine calls                                 |
+| `FRONT_API_GITHUB_TOKEN`          | front-api: tree `feedback.github.access-token`                                                                                                                                | GitHub feedback issues                                         |
+| `GOOGLE_SSO_CLIENT_ID` (required) | front-api: `FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID`; frontend: `NUXT_GOOGLE_OAUTH_CLIENT_ID`                                                                                     | Google SSO ([Google SSO OAuth clients](google-sso-oauth-clients.md)) |
+| `GOOGLE_SSO_CLIENT_SECRET` (required) | frontend: `NUXT_GOOGLE_OAUTH_CLIENT_SECRET`                                                                                                                               | Google SSO                                                     |
+
+`b2b-api` registers with Spring Boot Admin only when its configuration enables
+the client (`B2B_SBA_CLIENT_ENABLED`); the tree then replaces its
+`${B2B_SBA_PASSWORD:}` default.
+
+Not rendered, on purpose:
+
+- `API_ADMIN_KEY`: api accepts only `admin-key` (or a `test-keys` entry), and
+  front-api sends `front.affiliation-partners.api-key` to api, so both must
+  hold the same value: `admin-key` reads `O4G_INTERNAL_API_KEY`.
+- `API_URLFETCHER_PROXY_PASSWORD`: no deployed service depends on the
+  `urlfetching` module that reads `urlfetcher.proxy.*`.
+- `feed.api-key` (api) and `front.review-generation.api-key` (front-api): no
+  class reads them.
+- ui: `icecat-feature-config.password`, `feedback.github.access-token` and
+  `spring.mail.password` are present in its beta configuration, but ui ships
+  neither the Icecat, feedback nor mail module.
+- Infrastructure secrets (Elasticsearch, Redis, XWiki, Kibana, MySQL,
+  Plausible): campaign wave 0b.
+
+The organisation secrets `MACHINE_TOKEN` / `BETA_MACHINE_TOKEN` are read by no
+workflow of this repository.
+
+### Coupled secrets
+
+These values must reach every consumer in the same run, otherwise the
+services stop talking to each other until the next restart: run
+`serviceSecrets.yml` with `service=all`, or a full deploy (beta: deploy the
+Spring services and the frontend one after the other, front-api first).
+
+| Secret                 | Consumers                                                                                       |
+| ---------------------- | ----------------------------------------------------------------------------------------------- |
+| `O4G_SBA_PASSWORD`     | SBA clients (api, ui, front-api, b2b-api) and admin's registration check; ui and front-api actuators and admin's instance auth |
+| `O4G_MACHINE_TOKEN`    | front-api (checks `X-Shared-Token`) and the frontend (sends it); `publish-frontend.sh` refuses to publish when front-api rejects the frontend's token |
+| `FRONT_API_JWT_SECRET` | front-api (signs) and the frontend (verifies admin access tokens)                               |
+| `O4G_INTERNAL_API_KEY` | front-api (sends) and api (`admin-key`, its only accepted key)                                  |
+
+`O4G_MACHINE_TOKEN` and `FRONT_API_JWT_SECRET` reach the frontend as env
+lines, so their value must match `[A-Za-z0-9/._-]`.
 
 ### How a file is written
 
-`scripts/deploy/push-remote-file.sh <remote-file> <VAR>` writes a whole file;
+`scripts/deploy/push-remote-file.sh <remote-file> <VAR>` writes a whole file
+(`--exact`: without a trailing newline, for config tree files);
 `scripts/deploy/push-remote-env.sh <remote-env-file> <KEY>...` replaces keys in
 an env file and keeps its other lines. Both:
 
@@ -71,92 +170,100 @@ an env file and keeps its other lines. Both:
   owner of the previous file;
 - accept only safe characters in the remote path (`push-remote-file.sh` only
   writes under `/etc/open4goods/`). `push-remote-env.sh` values are limited to
-  `[A-Za-z0-9/._-]`.
+  `[A-Za-z0-9/._:-]` (`:` for the config tree import); the render script keeps
+  secret values of env lines to `[A-Za-z0-9/._-]`.
 
 `scripts/tests/push-remote-file.test.sh` tests the three scripts against a
-fake `ssh` (run by the Lint Suite workflow).
+fake `ssh`, and checks that every workflow step calling the render script maps
+the secrets of the services it renders (run by the Lint Suite workflow).
 
-## Workflow `prodSecrets.yml`
+## Workflow `serviceSecrets.yml`
 
-Actions > "Prod secrets (render + restart)" > Run workflow, on `main`.
+Actions > "Service secrets (render + restart)" > Run workflow. It replaces
+`prodSecrets.yml`.
 
 Inputs:
 
-- `service`: `api` (extend `render-service-secrets.sh` and the choice list to
-  add a service);
-- `mode`: `test` (default) or `apply`.
+- `env`: `beta` (default) or `prod`; the job declares `environment: <env>`
+  and targets that environment's host;
+- `service`: `all` (default), `api`, `ui`, `front-api`, `admin`, `b2b-api` or
+  `frontend`;
+- `mode`: `test` (default) or `apply`. `apply` only runs on `main`; `test`
+  writes nothing and may run from a branch.
 
-The job declares `environment: prod` and shares the `deploy-prod` concurrency
-group with the release (`cancel-in-progress: false`: it never cancels a
-release; a release started while it runs may cancel it).
+The job shares the concurrency group of the deploy it would race:
+`deploy-prod` (release), `deploy-beta-backend` (`testAndPublishBeta.yml`, also
+used for `service=all`) or `deploy-beta-frontend` (`frontend-ci.yml`), with
+`cancel-in-progress: false`: it never cancels a deploy and waits for it; a
+release, which cancels in progress, may still interrupt it. Each secret is mapped only when the
+selected service uses it.
 
-| Step                                      | `test` | `apply` |
-| ----------------------------------------- | ------ | ------- |
-| Check the service's secrets (no SSH)      | yes    | yes     |
-| Check the prod host (read only, over SSH) | yes    | yes     |
-| Render the service's secrets              | no     | yes     |
-| `publish-jars.sh prod restart <service>`  | no     | yes     |
+| Step                                                | `test` | `apply` |
+| --------------------------------------------------- | ------ | ------- |
+| Check the services' secrets (no SSH)                | yes    | yes     |
+| Check the host (read only, over SSH)                | yes    | yes     |
+| Render the services' secrets                        | no     | yes     |
+| Restart (`publish-jars.sh`, `publish-frontend.sh`)  | no     | yes     |
 
-- The secret check fails when a secret is missing or malformed.
-- The host check verifies that `/etc/open4goods` (and `secrets/` if present)
-  is writable, that `/etc/open4goods/<service>.env` is readable if present,
-  that `publish-jars.sh` exists, and that
-  `/opt/open4goods/runtime/<service>.jar` is identical (`cmp -s`) to
-  `/opt/open4goods/latest/<service>-latest.jar`. `publish-jars.sh restart`
-  copies `latest` to `runtime`: when they differ, the workflow fails before
-  any rendering rather than deploy a JAR the last release did not start.
-- `publish-jars.sh prod restart <service>` restarts that service only and
-  waits for its health check (HTTP 401).
+- The secret check fails when a required secret (Google SSO) is missing or a
+  set secret is malformed; each missing optional secret is a warning. The
+  output lists the secrets that would be rendered and their target, never a
+  value.
+- The host check verifies, for each Spring service, that `/etc/open4goods`,
+  `secrets/` and `secrets/<host service>/` (if present) are writable, that its
+  env file is readable if present, that `publish-jars.sh` exists and that
+  `/opt/open4goods/runtime/<host service>.jar` is identical to
+  `/opt/open4goods/latest/<host service>-latest.jar`; for the frontend, that
+  its `.env` is writable, that `publish-frontend.sh` exists and that the
+  running bundle (`bin/frontend-ssr/.output`) has the same `nitro.json` and
+  `server/index.mjs` as `latest/frontend-ssr/.output`. A restart deploys
+  `latest`: when it differs, the workflow fails before any rendering.
+- `service=all` restarts every Spring service (`publish-jars.sh <env>
+  restart`: sbadmin, api, front-api, ui, b2b-api, each waiting for its health
+  check) then publishes the frontend. A single service restarts alone; the
+  summary then warns that coupled secrets need `service=all`.
 - The `apply` summary shows the written paths with their mode and owner, the
-  service account `client_email` and the first 8 characters of
-  `private_key_id`. No step uses `set -x`.
+  env keys replaced, the service account `client_email` and the first 8
+  characters of `private_key_id`, and the secrets not set. No step uses
+  `set -x`.
 
-## Release behaviour
+## Deploy behaviour
 
-`releaseDeployProd.yml`:
+Without any new secret in the GitHub Environment, a deploy behaves as before:
+the script writes the lines it already wrote (Google SSO, and in prod the
+`api.env` lines), no tree file, and `SPRING_CONFIG_IMPORT` (an optional import
+of a missing directory, a no-op); every other value stays the
+`open4goods-config` one.
 
-- step "Check prod service secrets (api)", every mode, right after the
-  checkout: fails when `API_GOOGLE_API_JSON`, an `API_METRIKS_*` secret or
-  `API_EFFILIATION_API_KEY` is set but malformed;
-- step "Render api secrets on Prod", `mode=release` only, before
-  "Start Applications" (which restarts every service).
-
-Until `API_GOOGLE_API_JSON` exists in `prod`, both steps emit a `::warning::`
-and do not render it: `api` keeps its current configuration (the
-open4goods-config path). The `API_METRIKS_*` and `API_EFFILIATION_API_KEY`
-secrets that are set are still rendered; each missing one is a warning. Nothing is rendered when the deployed
-ref predates `render-service-secrets.sh`; files and lines from a previous
-render are kept. The dispatchable workflow, by contrast, fails when
-`API_GOOGLE_API_JSON` is missing; a missing `API_METRIKS_*` or
-`API_EFFILIATION_API_KEY` secret is only a warning there too.
-
-## Beta
-
-`testAndPublishBeta.yml` renders `API_EFFILIATION_API_KEY` from the `beta`
-GitHub Environment as `AFFILIATIONCONFIG_EFFILIATIONAPIKEY` in
-`/etc/open4goods/api.env` on the beta host (step "Render api Effinity env on
-Beta", before "Publish Applications", through `push-remote-env.sh`). Until the
-secret exists in `beta`, the step emits a `::warning::`, writes nothing and
-does not fail: `api` keeps its previous value. A set but malformed value fails
-the step before anything is written.
+- `testAndPublishBeta.yml` (each merge on `main` touching the backend, or a
+  dispatch, GOU-1036) renders the Spring services from `beta` before "Publish
+  Applications", which restarts them; `frontend-ci.yml` renders the frontend
+  before "Publish frontend". A missing secret is a warning.
+- `releaseDeployProd.yml` checks every service in every mode, right after the
+  checkout, and fails on a set but malformed secret before any build. With
+  `mode=release`, it renders the Spring services before "Start Applications"
+  and the frontend before "Publish frontend". The "Check Google SSO secrets"
+  step still fails when an SSO secret is missing from `prod`.
 
 ## Rotation procedure
 
-1. Access creates the new key and stores it in the `prod` Environment of
-   `open4good/open4goods` (`API_GOOGLE_API_JSON`). The key is never pasted in
-   an issue, a comment or a log.
-2. Ops runs `prodSecrets.yml` with `mode=test`: every check is logged, nothing
-   is written or restarted.
+1. Access creates the new value and stores it in the `beta` or `prod`
+   Environment of `open4good/open4goods`, under the name of the table. The
+   value is never pasted in an issue, a comment or a log.
+2. Ops runs `serviceSecrets.yml` with that `env`, the service (or `all` for a
+   coupled secret) and `mode=test`: every check is logged, nothing is written
+   or restarted.
 3. Ops runs it with `mode=apply` (covered by the campaign's board approval).
 4. Proof: the run summary (paths in mode 600, `client_email`, key id prefix,
-   names of the `METRIKS_AFFILIATION_*` lines written and of the secrets not
-   set), `api` answering 401 on `:8081`, then the functional check of the
-   service (for `api`: Metriks `seo.gsc.indexed_pages` > 0, no authentication
-   error in `nohup-api.log`; for an affiliation secret:
-   `GET /api/metriks/affiliation` shows the network's events in `ok`, or an
-   explicit `error`).
-5. Access revokes the previous key, then the campaign removes the copy left in
-   open4goods-config.
+   names of the lines written and of the secrets not set), the services'
+   health checks, then the functional check of the credential listed in the
+   campaign manifest (for `API_GOOGLE_API_JSON`: Metriks
+   `seo.gsc.indexed_pages` > 0; for an affiliation secret:
+   `GET /api/metriks/affiliation` shows the network's events in `ok`).
+5. Access revokes the previous value, then the campaign removes the copy left
+   in `open4goods-config`.
 
-To roll back before revocation, put the previous key back in the
-Environment secret and run `apply` again.
+To roll back before revocation, put the previous value back in the
+Environment secret and run `apply` again. A tree file or env line whose secret
+is later deleted from the Environment stays on the host until it is removed
+by hand.

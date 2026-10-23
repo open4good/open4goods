@@ -124,7 +124,7 @@ Every code that is produced MUST me validated using :
 ## Backend API authentication and caching guidelines
 
 - Instantiate backend OpenAPI clients through `createBackendApiConfig()` from the shared API client utilities. The helper injects the `X-Shared-Token` header and fails fast when `MACHINE_TOKEN` is absent-never call `new Configuration()` directly.
-- Keep the `MACHINE_TOKEN` runtime value synchronised with the backend's `front.security.shared-token` property; drift breaks machine-to-machine authentication.
+- Keep the `MACHINE_TOKEN` runtime value synchronised with the backend's `front.security.shared-token` property; drift breaks machine-to-machine authentication. On beta and prod both come from the `O4G_MACHINE_TOKEN` GitHub Environment secret once it is set (`NUXT_MACHINE_TOKEN` and `MACHINE_TOKEN` lines of the frontend `.env`, rendered by `scripts/deploy/render-service-secrets.sh`, GOU-1041); see `docs/operations/prod-service-secrets.md`.
 - Every server route that returns backend data is domain-sensitive. Apply caching headers through `setDomainLanguageCacheHeaders(event, cacheControl)` from `server/utils/cache-headers` so both `Cache-Control` and the host-aware `Vary` header are set together. Do **not** set either header manually.
 
 ## DomainLanguage injection
@@ -162,7 +162,9 @@ Every downstream call should be wrapped in a thin service that:
   `frontend-ssr` deployment must set `FRONT_SECURITY_JWT_SECRET` in its
   runtime environment, with the same value as front-api's
   `front.security.jwt-secret`** - otherwise every admin request fails with a
-  500.
+  500. Once the `FRONT_API_JWT_SECRET` GitHub Environment secret is set,
+  `scripts/deploy/render-service-secrets.sh` renders it into both (frontend
+  `.env` line and front-api config tree, GOU-1041).
 
 ## When Unsure
 

@@ -128,6 +128,18 @@ git config core.hooksPath .githooks
   `scripts/python/text_replacements.py`. Generated release notes under
   `frontend/app/public/reports/` are excluded, as in `.yamllint`.
 
+## 6.2  Service secrets
+
+- Beta and prod secrets live in the `beta` / `prod` GitHub Environments of
+  `open4good/open4goods`, never in this repository; they leave
+  `open4goods-config` as they are rotated (D140, ADR-0006, GOU-1038).
+- `scripts/deploy/render-service-secrets.sh` is the single table of what each
+  service receives (Spring config tree file or env line). A new secret is a row
+  of that table, mapped in the workflows that render its service, plus a
+  property in the module's `RenderedSecretsConfigTreeTest` (which fails when a
+  `tree` row has no consumer). See
+  [docs/operations/prod-service-secrets.md](docs/operations/prod-service-secrets.md).
+
 ## 7  Pull-request checklist
 
 1. Clear commit & PR description (**why** and **what**).  
