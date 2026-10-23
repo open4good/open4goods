@@ -41,8 +41,8 @@ Effiliation refresh is controlled by `feed.effiliation.*` properties:
 - Every resource is paginated (`page`, `perPage=1000`) and read until
   `pagination.lastPage`, with a 50-page guard.
 - The program identifier exposed to callers is the `merchantId` (advertiser),
-  as the v2 `id_affilieur` was. A feed is named after its `linkName` and points
-  to its `trackedLink`; feeds of `frozen` or `closed` programs are skipped.
+  as the v2 `id_affilieur` was. A feed is named after its `feedName` and points
+  to its `feedUrl` (array `feeds`); feeds of `frozen` or `closed` programs are skipped.
 - Values the API v3 no longer provides (program click, sale, lead and display
   commissions, EPC, conversion rate, signup URL) stay `null`.
 - The key is a path segment, so request URLs are never logged: logs and the

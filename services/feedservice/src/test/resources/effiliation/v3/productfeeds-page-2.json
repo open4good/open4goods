@@ -2,37 +2,32 @@
   "pagination": {
     "currentPage": 2,
     "perPage": 1000,
-    "total": 4,
+    "total": 5,
     "from": 3,
-    "to": 4,
+    "to": 5,
     "lastPage": 2
   },
-  "links": [
+  "feeds": [
     {
       "linkId": 1026,
-      "linkType": "productFeed",
+      "feedUrl": "feeds.example/closing-feed.csv",
+      "feedName": "Closing Merchant - Flux produits",
       "programId": 300000202,
-      "linkName": "Closing Merchant - Flux produits",
       "merchantId": 6600000202,
-      "merchantName": "Example Closing Merchant",
-      "merchantUrl": "https://closing.example",
-      "trackedLink": "feeds.example/closing-feed.csv"
+      "merchantName": "Example Closing Merchant"
     },
     {
       "linkId": 1027,
-      "linkType": "productFeed",
-      "programId": 300000404,
-      "linkName": "Feed Without Merchant",
-      "merchantUrl": "https://unknown.example",
-      "trackedLink": "https://feeds.example/unknown-feed.csv"
+      "feedUrl": "https://feeds.example/unknown-feed.csv",
+      "feedName": "Feed Without Merchant",
+      "programId": 300000404
     },
     {
       "linkId": 1028,
-      "linkType": "productFeed",
+      "feedName": "Active Merchant - Feed Without URL",
       "programId": 300000101,
-      "linkName": "Active Merchant - Feed Without URL",
       "merchantId": 6600000101,
-      "merchantUrl": "https://active.example"
+      "merchantName": "Example Active Merchant"
     }
   ]
 }

@@ -68,9 +68,10 @@ import tools.jackson.databind.ObjectMapper;
  * <ul>
  *   <li>Program identifier exposed to callers: the {@code merchantId} (advertiser), as the {@code id_affilieur} of
  *       the API v2 was; feeds, promotions and conversions are joined on it.</li>
- *   <li>Product feed: datasource name from {@code linkName} (the v2 {@code nom}), feed URL from
- *       {@code trackedLink} (the v2 {@code code}), portal from {@code merchantUrl} (the v2 {@code url_affilieur}).
- *       A feed whose program is {@code frozen} or {@code closed} is skipped.</li>
+ *   <li>Product feed (root array {@code feeds}, not {@code links}): datasource name from {@code feedName} (the v2
+ *       {@code nom}), feed URL from {@code feedUrl} (the v2 {@code code}). The feed carries no {@code merchantUrl}:
+ *       the portal falls back on the program's {@code merchantUrl}. A feed whose program is {@code frozen} or
+ *       {@code closed} is skipped.</li>
  *   <li>Fields the API v3 no longer provides (program click, sale, lead and display commissions, EPC, conversion
  *       rate, signup URL; transaction product id) stay {@code null}: an absent value is never reported as zero.</li>
  * </ul>
@@ -183,7 +184,7 @@ public class EffiliationFeedService extends AbstractFeedService {
         // One datasource per feed name, keeping the first occurrence.
         Map<String, JsonNode> feedsByName = new LinkedHashMap<>();
         for (JsonNode feedNode : retrieveEffiliationFeeds(effiliationApiKey)) {
-            String name = textOrNull(feedNode, "linkName");
+            String name = textOrNull(feedNode, "feedName");
             if (!isBlank(name)) {
                 feedsByName.putIfAbsent(name, feedNode);
             }
@@ -198,9 +199,9 @@ public class EffiliationFeedService extends AbstractFeedService {
             JsonNode feedNode = e.getValue();
             String feedKey = e.getKey();
 
-            String feedUrl = textOrNull(feedNode, "trackedLink");
+            String feedUrl = textOrNull(feedNode, "feedUrl");
             if (isBlank(feedUrl)) {
-                LOGGER.warn("Skipping Effiliation feed '{}' due to missing feed URL field (trackedLink).", feedKey);
+                LOGGER.warn("Skipping Effiliation feed '{}' due to missing feed URL field (feedUrl).", feedKey);
                 continue;
             }
             feedUrl = HttpUtils.normalizeUrl(feedUrl);
@@ -271,7 +272,7 @@ public class EffiliationFeedService extends AbstractFeedService {
      * Retrieves the product feeds of the programs the publisher is subscribed to, all pages merged.
      *
      * @param apiKey Effinity publisher API key
-     * @return the product feed links ({@code LinkRestDto})
+     * @return the product feeds (items of the {@code feeds} array)
      * @throws IllegalStateException on missing cache file, invalid JSON or unexpected payload
      */
     List<JsonNode> retrieveEffiliationFeeds(String apiKey) {
@@ -279,7 +280,7 @@ public class EffiliationFeedService extends AbstractFeedService {
         if (isBlank(apiKey)) {
             throw new IllegalArgumentException("Effiliation API key is blank.");
         }
-        return readAllPages(apiKey, PRODUCT_FEEDS_RESOURCE, "links");
+        return readAllPages(apiKey, PRODUCT_FEEDS_RESOURCE, "feeds");
     }
 
     /**
