@@ -3,11 +3,19 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.HexFormat;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.FileUtils;
@@ -33,10 +41,11 @@ import net.lingala.zip4j.exception.ZipException;
 
 /**
  * This service is in charge of periodicaly download and make availlable remote files. It also allows to unzip / untar
+ * <p>
+ * Cached files are named after the SHA-256 of their URL (see {@link #cacheFileName(String)}): remote URLs can carry
+ * credentials (API keys as path segments or query values), which must not show up in a directory listing. Copies
+ * left under the former URL-derived name are adopted on first access (see {@link #resolveCacheFile(String, String)}).
  * @author goulven
- *
-
- * TODO(P3,test) : unit tests
  */
 public class RemoteFileCachingService {
 
@@ -46,6 +55,15 @@ public class RemoteFileCachingService {
 	private static final Logger logger = LoggerFactory.getLogger(RemoteFileCachingService.class);
 
         private static final int BUFFER_SIZE = 2048;
+
+        /** Prefix of the file a resource is downloaded to before it replaces the cached copy. */
+        private static final String TMP_PREFIX = "tmp-";
+
+        /** Replaces whatever part of a URL is not logged. */
+        private static final String REDACTED = "<redacted>";
+
+        /** HTTP status code quoted by {@link java.net.HttpURLConnection} failures. */
+        private static final Pattern HTTP_STATUS = Pattern.compile("HTTP response code: (\\d{3})");
 
         private final int connectionTimeout;
         private final int readTimeout;
@@ -85,13 +103,13 @@ public class RemoteFileCachingService {
 	 *
 	 * @param url remote resource URL
 	 * @param refreshInDays cache TTL, in days
-	 * @param logLabel label written in diagnostic logs instead of the URL, for URLs that carry a secret outside
-	 *        of their query string; {@code null} to log the URL without its query values
+	 * @param logLabel label written in diagnostic logs instead of the URL; {@code null} to log only the scheme,
+	 *        host and port of the URL. Either way the log line also carries the cache file name
 	 * @return the cached file, which may not exist when the resource could never be retrieved
 	 */
 	public File getResource(final String url, Integer refreshInDays, String logLabel) throws InvalidParameterException, IOException {
 
-		File resource = new File(resourceFolder+File.separator+IdHelper.getHashedName(url));
+		File resource = resolveCacheFile(resourceFolder, url);
 
 		CacheResourceConfig conf = configs.get(url);
 		if (null == conf) {
@@ -107,7 +125,7 @@ public class RemoteFileCachingService {
 			if (!resource.exists()) {
 				logger.info("Resource {} does not exist, will download it", loggableResource(conf));
 				resource = retrieve(conf);
-			} else if ((System.currentTimeMillis() - resource.lastModified()) > (conf.getRefreshInDays() * 24 *3600 * 1000)) {
+			} else if ((System.currentTimeMillis() - resource.lastModified()) > TimeUnit.DAYS.toMillis(conf.getRefreshInDays())) {
 				logger.warn("Resource {} is outdated, will replace it", loggableResource(conf));
 				resource = retrieve(conf);
 			}
@@ -124,8 +142,9 @@ public class RemoteFileCachingService {
 	public File retrieve(final CacheResourceConfig conf) throws TechnicalException {
 
 		try {
-			File tmpFile = new File(resourceFolder+File.separator+"tmp-"+IdHelper.getHashedName(conf.getUrl()));
-			File destFile = new File(resourceFolder+File.separator+IdHelper.getHashedName(conf.getUrl()));
+			String cacheFileName = cacheFileName(conf.getUrl());
+			File tmpFile = new File(resourceFolder+File.separator+TMP_PREFIX+cacheFileName);
+			File destFile = new File(resourceFolder+File.separator+cacheFileName);
 
 			tmpFile = download(conf.getUrl(), tmpFile, loggableResource(conf));
 
@@ -138,6 +157,8 @@ public class RemoteFileCachingService {
 			}
 
 			FileUtils.deleteQuietly(tmpFile);
+			// A fresh copy now exists under the hashed name: drop the one named after the URL, if still there.
+			deleteLegacyCacheFiles(resourceFolder, conf.getUrl());
 			
 			return destFile;
 		} catch (TechnicalException e) {
@@ -312,34 +333,132 @@ public class RemoteFileCachingService {
 			FileUtils.copyURLToFile(new URL(url), tmpFile, connectionTimeout, readTimeout);
 			return tmpFile;
 		} catch (Exception e) {
-			throw new TechnicalException("Cannot download resource", e);
+			throw new TechnicalException("Cannot download resource " + logLabel, redactedCause(e));
 		}
 	}
 
 	/**
-	 * Returns how a cached resource appears in diagnostic logs: its log label when set, otherwise its URL
-	 * without query values.
+	 * Returns the name of the file caching {@code url}: the hexadecimal SHA-256 of the full URL. No fragment of the
+	 * URL is kept, so credentials it carries never appear in the cache folder, and distinct URLs never share a file.
+	 *
+	 * @param url remote resource URL
+	 * @return 64 lowercase hexadecimal characters
+	 */
+	public static String cacheFileName(final String url) {
+		try {
+			MessageDigest digest = MessageDigest.getInstance("SHA-256");
+			return HexFormat.of().formatHex(digest.digest(url.getBytes(StandardCharsets.UTF_8)));
+		} catch (NoSuchAlgorithmException e) {
+			// SHA-256 is mandatory on every Java platform
+			throw new IllegalStateException("SHA-256 is not available", e);
+		}
+	}
+
+	/**
+	 * Returns the file caching {@code url} in {@code folder}, named by {@link #cacheFileName(String)}.
+	 * <p>
+	 * Cached files used to be named after the URL itself ({@link IdHelper#getHashedName(String)}), which
+	 * exposed API keys in the folder listing. When no hashed copy exists yet, a copy left under that former name is
+	 * moved to the hashed name, keeping its modification date so the refresh period still applies; a leftover
+	 * former temporary file is deleted.
+	 *
+	 * @param folder cache folder
+	 * @param url remote resource URL
+	 * @return the cache file, which may not exist
+	 */
+	public static File resolveCacheFile(final String folder, final String url) {
+		File cacheFile = new File(folder + File.separator + cacheFileName(url));
+		if (!cacheFile.exists()) {
+			File legacyFile = legacyCacheFile(folder, url);
+			if (legacyFile.isFile() && !legacyFile.renameTo(cacheFile)) {
+				logger.warn("Cannot move a cached copy named after its URL to {}", cacheFile.getName());
+			}
+		}
+		deleteLegacyCacheFiles(folder, url);
+		return cacheFile;
+	}
+
+	/**
+	 * Deletes the files named after {@code url} that the former naming scheme left in {@code folder}.
+	 *
+	 * @param folder cache folder
+	 * @param url remote resource URL
+	 */
+	private static void deleteLegacyCacheFiles(final String folder, final String url) {
+		File legacyFile = legacyCacheFile(folder, url);
+		File legacyTmpFile = new File(folder + File.separator + TMP_PREFIX + legacyFile.getName());
+		for (File file : new File[] {legacyFile, legacyTmpFile}) {
+			if (file.isFile()) {
+				FileUtils.deleteQuietly(file);
+			}
+		}
+	}
+
+	private static File legacyCacheFile(final String folder, final String url) {
+		return new File(folder + File.separator + IdHelper.getHashedName(url));
+	}
+
+	/**
+	 * Returns how a cached resource appears in diagnostic logs: its log label when set, otherwise the redacted URL
+	 * of {@link #loggableUrl(String)}, followed by the cache file name so that the line can be matched to the file.
 	 *
 	 * @param conf cached resource configuration
 	 * @return text safe to log
 	 */
 	static String loggableResource(CacheResourceConfig conf) {
-		return conf.getLogLabel() != null ? conf.getLogLabel() : loggableUrl(conf.getUrl());
+		String label = conf.getLogLabel() != null ? conf.getLogLabel() : loggableUrl(conf.getUrl());
+		return label + " [" + cacheFileName(conf.getUrl()) + "]";
 	}
 
 	/**
-	 * Removes URL query values before diagnostic logging because remote resource
-	 * URLs can carry credentials or signed access parameters.
+	 * Reduces a URL to its scheme, host and port before diagnostic logging: remote resource URLs can carry
+	 * credentials as path segments (Effinity, Awin), query values (MaxMind, signed URLs) or user information.
 	 *
 	 * @param url remote resource URL
-	 * @return URL without query values, or {@code null} when no URL was supplied
+	 * @return redacted URL, or {@code null} when no URL was supplied
 	 */
 	static String loggableUrl(String url) {
 		if (url == null) {
 			return null;
 		}
-		int queryStart = url.indexOf('?');
-		return queryStart < 0 ? url : url.substring(0, queryStart) + "?<redacted>";
+		URI uri;
+		try {
+			uri = URI.create(url);
+		} catch (IllegalArgumentException e) {
+			return REDACTED;
+		}
+		if (uri.getScheme() == null || uri.getHost() == null) {
+			return REDACTED;
+		}
+		StringBuilder ret = new StringBuilder(uri.getScheme()).append("://").append(uri.getHost());
+		if (uri.getPort() >= 0) {
+			ret.append(':').append(uri.getPort());
+		}
+		boolean hasPath = uri.getRawPath() != null && !uri.getRawPath().isEmpty() && !"/".equals(uri.getRawPath());
+		if (hasPath || uri.getRawQuery() != null || uri.getRawFragment() != null) {
+			ret.append('/').append(REDACTED);
+		}
+		return ret.toString();
+	}
+
+	/**
+	 * Rebuilds a download failure without its message: JDK messages quote the URL or the path it points to (for
+	 * example {@code Server returned HTTP response code: 403 for URL: ...}), and the exception ends up in caller logs.
+	 * Only the HTTP status code, when the message gives one, is kept.
+	 *
+	 * @param e download failure
+	 * @return an exception carrying the class name, the HTTP status code and the stack trace of {@code e}, without
+	 *         cause
+	 */
+	static IOException redactedCause(final Exception e) {
+		StringBuilder message = new StringBuilder(e.getClass().getName());
+		Matcher status = e.getMessage() == null ? null : HTTP_STATUS.matcher(e.getMessage());
+		if (status != null && status.find()) {
+			message.append(" (HTTP ").append(status.group(1)).append(')');
+		}
+		IOException redacted = new IOException(message.toString());
+		redacted.setStackTrace(e.getStackTrace());
+		return redacted;
 	}
 	
 	

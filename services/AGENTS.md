@@ -310,6 +310,11 @@ Each service has unique responsibilities and may have specific conventions beyon
 
 **Purpose**: Remote file fetching and caching service.
 
+**Security**: cached files are named after the SHA-256 of their URL and URLs
+are logged as scheme, host and port only, because URLs can carry API keys. Never
+name a cache file, or log a URL, from the URL itself; see the
+[module README](remotefilecaching/README.md#cache-file-names).
+
 **Key Responsibilities**:
 - Fetch remote files (images, documents, etc.)
 - Implement multi-level caching (memory, disk, CDN)
