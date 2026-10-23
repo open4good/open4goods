@@ -80,6 +80,54 @@ function buildLogMessage({
   return parts.join(' - ')
 }
 
+/**
+ * Node/undici error codes raised when the backend cannot be reached at all
+ * (for instance while front-api restarts during a deployment).
+ */
+const NETWORK_ERROR_CODES = new Set([
+  'ECONNREFUSED',
+  'ECONNRESET',
+  'EHOSTUNREACH',
+  'ENETUNREACH',
+  'ENOTFOUND',
+  'EAI_AGAIN',
+  'ETIMEDOUT',
+  'EPIPE',
+  'UND_ERR_CONNECT_TIMEOUT',
+  'UND_ERR_HEADERS_TIMEOUT',
+  'UND_ERR_SOCKET',
+])
+
+interface NetworkFailure {
+  code: string
+  message: string
+}
+
+/**
+ * Walks the `cause` chain (FetchError -> TypeError('fetch failed') -> system error)
+ * and returns the first network-level failure, if any.
+ */
+function findNetworkFailure(error: unknown): NetworkFailure | null {
+  let current: unknown = error
+
+  for (let depth = 0; depth < 5 && current instanceof Error; depth++) {
+    const code = (current as Error & { code?: unknown }).code
+
+    if (typeof code === 'string' && NETWORK_ERROR_CODES.has(code)) {
+      return { code, message: current.message }
+    }
+
+    current = current.cause
+  }
+
+  return null
+}
+
+/**
+ * Translates an error thrown by a generated backend client into the status
+ * returned by the Nitro route: the backend status for a `ResponseError`,
+ * 503 when the backend is unreachable, 500 otherwise.
+ */
 export async function extractBackendErrorDetails(
   error: unknown
 ): Promise<BackendErrorDetails> {
@@ -109,6 +157,23 @@ export async function extractBackendErrorDetails(
         statusText,
         statusMessage,
       }),
+    }
+  }
+
+  const networkFailure = findNetworkFailure(error)
+
+  if (networkFailure) {
+    const statusCode = 503
+    const statusText = 'Service Unavailable'
+    const statusMessage = `Backend unavailable (${networkFailure.code}): ${networkFailure.message}`
+
+    return {
+      statusCode,
+      statusText,
+      statusMessage,
+      bodyText: undefined,
+      isResponseError: false,
+      logMessage: buildLogMessage({ statusCode, statusText, statusMessage }),
     }
   }
 
