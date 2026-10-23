@@ -77,6 +77,19 @@ public class BackupConfig {
 	 */
 	private long maxProductsBackupAgeInHours = 1000 * 3600 * 24 * 8;
 
+	/**
+	 * Minimum age, in hours, of the last manifest before the periodic check starts a new products backup.
+	 */
+	private long productsBackupIntervalHours = 168;
+
+	public long getProductsBackupIntervalHours() {
+		return productsBackupIntervalHours;
+	}
+
+	public void setProductsBackupIntervalHours(long productsBackupIntervalHours) {
+		this.productsBackupIntervalHours = productsBackupIntervalHours;
+	}
+
 
 
 

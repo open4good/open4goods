@@ -48,3 +48,11 @@ format `sha256sum` (`<hex>  <fichier>`, écrit atomiquement, en dernier : sa pr�
 Les empreintes sont calculées pendant l'écriture (`DigestOutputStream`), jamais en relisant les fichiers. Vérification :
 `cd <dossier> && sha256sum -c products-backup.sha256`. Le health check signale `product_backup_checksum_missing` si le
 manifest déclare des empreintes mais que le `.sha256` manque ; il ne recalcule rien.
+
+Déclenchement : `checkProductsBackup()` (`@Scheduled`, `api.backup.products-backup-check-initial-delay` défaut `PT15M`,
+`api.backup.products-backup-check-interval` défaut `PT1H`) lance `backupProducts()` si aucun export ne tourne et si
+`products-backup-manifest.json` est absent, illisible ou plus ancien que `api.backup.products-backup-interval-hours`
+(défaut 168). Un redémarrage de l'api ne repousse donc plus la sauvegarde. La décision est loguée en `info`.
+`POST /backup/products/export` force toujours la sauvegarde. Le profil local ne lance rien (stub `LocalDevConfig`).
+À la première vérification, si aucun export ne tourne, `.tmp/` est vidé (volume libéré logué) ; les fichiers publiés,
+le manifest et le `.sha256` ne sont jamais touchés. Pas de reprise d'une sauvegarde interrompue.
