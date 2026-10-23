@@ -306,4 +306,99 @@ class BackupServiceTest {
             return reader.readLine();
         }
     }
+
+    private void writeManifest(long completedEpochMillis) throws IOException {
+        Files.writeString(productBackupFolder.resolve("products-backup-manifest.json"),
+                "{\"completedAt\":\"x\",\"completedEpochMillis\":" + completedEpochMillis
+                        + ",\"expectedCount\":1,\"exportedCount\":1,\"pageSize\":1000,\"files\":[]}");
+    }
+
+    private void stubExport() throws Exception {
+        when(productRepository.countMainIndex()).thenReturn(1L);
+        when(productRepository.exportAll(1000)).thenAnswer(i -> Stream.of(new Product()));
+        when(serialisationService.toJson(any(Product.class))).thenReturn("{\"id\":1}");
+    }
+
+    @Test
+    void checkSkipsBackupWhenManifestIsRecent() throws Exception {
+        stubExport();
+        writeManifest(System.currentTimeMillis() - 3_600_000L);
+
+        backupService.checkProductsBackup();
+
+        verify(productRepository, times(0)).exportAll(1000);
+    }
+
+    @Test
+    void checkLaunchesBackupWhenManifestIsOld() throws Exception {
+        stubExport();
+        writeManifest(System.currentTimeMillis() - 200L * 3_600_000L);
+
+        backupService.checkProductsBackup();
+
+        verify(productRepository, times(1)).exportAll(1000);
+    }
+
+    @Test
+    void checkLaunchesBackupWhenManifestIsAbsent() throws Exception {
+        stubExport();
+
+        backupService.checkProductsBackup();
+
+        verify(productRepository, times(1)).exportAll(1000);
+    }
+
+    @Test
+    void checkLaunchesBackupWhenManifestIsUnreadable() throws Exception {
+        stubExport();
+        Files.writeString(productBackupFolder.resolve("products-backup-manifest.json"), "not json");
+
+        backupService.checkProductsBackup();
+
+        verify(productRepository, times(1)).exportAll(1000);
+    }
+
+    @Test
+    void checkIsSkippedWhenAnExportIsAlreadyRunning() throws Exception {
+        when(productRepository.countMainIndex()).thenReturn(1L);
+        when(serialisationService.toJson(any(Product.class))).thenReturn("{\"id\":1}");
+        when(productRepository.exportAll(1000)).thenAnswer(i -> {
+            // re-entrant check while the export is running
+            backupService.checkProductsBackup();
+            return Stream.of(new Product());
+        });
+
+        backupService.backupProducts();
+
+        verify(productRepository, times(1)).exportAll(1000);
+    }
+
+    @Test
+    void firstCheckClearsOrphanTmpWithoutTouchingPublishedFiles() throws Exception {
+        stubExport();
+        writeManifest(System.currentTimeMillis());
+        Path tmp = Files.createDirectories(productBackupFolder.resolve(".tmp"));
+        Path orphan = Files.writeString(tmp.resolve("products-backup-1.gz.part"), "partial");
+        Path published = Files.writeString(productBackupFolder.resolve("products-backup-1.gz"), "published");
+        Path checksum = Files.writeString(productBackupFolder.resolve("products-backup.sha256"), "abc  products-backup-1.gz");
+        Path manifest = productBackupFolder.resolve("products-backup-manifest.json");
+
+        backupService.checkProductsBackup();
+
+        assertThat(orphan).doesNotExist();
+        assertThat(published).exists();
+        assertThat(checksum).exists();
+        assertThat(manifest).exists();
+        verify(productRepository, times(0)).exportAll(1000);
+    }
+
+    @Test
+    void manualBackupRunsEvenWithRecentManifest() throws Exception {
+        stubExport();
+        writeManifest(System.currentTimeMillis());
+
+        backupService.backupProducts();
+
+        verify(productRepository, times(1)).exportAll(1000);
+    }
 }

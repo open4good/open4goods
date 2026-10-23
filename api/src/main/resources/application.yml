@@ -29,6 +29,9 @@ api:
     copy-bulk-size: 500
     copy-threads: 4
     copy-queue-size: 50
+    products-backup-interval-hours: 168
+    products-backup-check-initial-delay: PT15M
+    products-backup-check-interval: PT1H
 
 management:
   health:

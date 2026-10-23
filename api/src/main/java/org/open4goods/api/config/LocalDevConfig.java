@@ -107,6 +107,11 @@ public class LocalDevConfig {
 			}
 
 			@Override
+			public void checkProductsBackup() {
+				// no-op for local profile
+			}
+
+			@Override
 			public void exportVertical(String vertical) {
 				// no-op for local profile
 			}

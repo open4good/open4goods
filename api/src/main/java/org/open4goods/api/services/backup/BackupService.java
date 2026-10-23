@@ -95,6 +95,7 @@ public class BackupService implements HealthIndicator {
 	// Flags to avoid conccurent export running
 	private AtomicBoolean productExportRunning = new AtomicBoolean(false);
 	private AtomicBoolean productCopyRunning = new AtomicBoolean(false);
+	private final AtomicBoolean startupTmpCleanupDone = new AtomicBoolean(false);
 
 
 
@@ -109,10 +110,73 @@ public class BackupService implements HealthIndicator {
 	}
 
 	/**
-	 * This method will periodicaly export all data in a zipped file
+	 * Periodic check deciding whether a products backup must start. The first check also removes the
+	 * leftovers of an interrupted backup from the temporary folder. A backup starts only when no export is
+	 * running and the manifest is missing, unreadable or older than {@code productsBackupIntervalHours}.
+	 * The age is read from the manifest, so an api restart does not postpone (or kill) a backup.
 	 */
-	// TODO : Schedule from conf
-	@Scheduled(initialDelay = 1000 * 3600 * 6, fixedDelay = 1000 * 3600 * 24 * 7)
+	@Scheduled(initialDelayString = "${api.backup.products-backup-check-initial-delay:PT15M}",
+			fixedDelayString = "${api.backup.products-backup-check-interval:PT1H}")
+	public void checkProductsBackup() {
+		if (productExportRunning.get()) {
+			logger.info("Products backup check - skipped, an export is already running");
+			return;
+		}
+		if (startupTmpCleanupDone.compareAndSet(false, true)) {
+			cleanupOrphanProductBackupTmpFolder();
+		}
+
+		Long ageHours = productBackupManifestAgeHours();
+		long interval = backupConfig.getProductsBackupIntervalHours();
+		if (ageHours != null && ageHours < interval) {
+			logger.info("Products backup check - skipped, last manifest is {} h old (interval {} h)", ageHours, interval);
+			return;
+		}
+		logger.info("Products backup check - launched, last manifest age: {} (interval {} h)",
+				ageHours == null ? "absent or unreadable" : ageHours + " h", interval);
+		backupProducts();
+	}
+
+	/** Age in hours of the last completed backup, or null when the manifest is absent or unreadable. */
+	private Long productBackupManifestAgeHours() {
+		String folder = backupConfig.getDataBackupFolder();
+		if (folder == null) {
+			return null;
+		}
+		Path manifestPath = Path.of(folder).resolve(PRODUCT_BACKUP_MANIFEST);
+		if (!Files.isRegularFile(manifestPath)) {
+			return null;
+		}
+		try {
+			ProductBackupManifest manifest = OBJECT_MAPPER.readValue(manifestPath.toFile(), ProductBackupManifest.class);
+			if (manifest == null || manifest.completedEpochMillis() <= 0) {
+				return null;
+			}
+			return Math.max(0L, TimeUnit.MILLISECONDS.toHours(System.currentTimeMillis() - manifest.completedEpochMillis()));
+		} catch (IOException | RuntimeException e) {
+			logger.warn("Products backup manifest unreadable: {}", e.getMessage());
+			return null;
+		}
+	}
+
+	/** Empties the temporary folder at startup (nothing is running), logging the freed volume. */
+	private void cleanupOrphanProductBackupTmpFolder() {
+		String folder = backupConfig.getDataBackupFolder();
+		if (folder == null) {
+			return;
+		}
+		Path tmpFolder = Path.of(folder).resolve(PRODUCT_BACKUP_TMP_FOLDER);
+		if (!Files.isDirectory(tmpFolder)) {
+			return;
+		}
+		long before = FileUtils.sizeOfDirectory(tmpFolder.toFile());
+		clearProductBackupTmpFolder(tmpFolder);
+		logger.info("Products backup startup cleanup - {} freed in {}", FileUtils.byteCountToDisplaySize(before), tmpFolder);
+	}
+
+	/**
+	 * Exports all data in zipped files, unconditionally (manual trigger or called by the periodic check).
+	 */
 	@Timed(value = "backup.products", description = "Backup of all products", extraTags = { "service" })
 	public void backupProducts() {
 		logger.info("Products data backup - start");
