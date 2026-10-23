@@ -339,13 +339,16 @@ const containerPaddingStyle = computed<CSSProperties>(() => ({
       <div class="parallax-widget__overlay" />
       <div v-if="enableAplats" class="parallax-widget__aplats">
         <slot name="aplats">
-          <img
-            class="parallax-widget__aplat-image"
-            :src="aplatSvg"
-            alt=""
-            loading="lazy"
-            decoding="async"
-          />
+          <!-- Decorative image resolved asynchronously (themed asset loader): client-only to avoid an SSR src mismatch -->
+          <ClientOnly>
+            <img
+              class="parallax-widget__aplat-image"
+              :src="aplatSvg"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          </ClientOnly>
         </slot>
       </div>
     </div>
