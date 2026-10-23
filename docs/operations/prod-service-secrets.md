@@ -83,10 +83,11 @@ frontend lines by `frontend/server/utils/rendered-secrets-env.spec.ts` (Nitro
 
 ## Secrets, targets and services
 
-All secrets are optional except `GOOGLE_SSO_CLIENT_ID` / `_SECRET`: a missing
-one is a `::warning::`, is not rendered and does not stop the others; the
-service keeps its previous render or, failing that, the `open4goods-config`
-value. A set but malformed secret fails before anything is written.
+All secrets are optional except `GOOGLE_SSO_CLIENT_ID` / `_SECRET` for
+front-api and the frontend: a missing one is a `::warning::`, is not rendered
+and does not stop the others; the service keeps its previous render or,
+failing that, the `open4goods-config` value. A set but malformed secret fails
+before anything is written.
 
 | Environment secret                | Service(s): target                                                                                                                                                            | Consumer                                                       |
 | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
@@ -113,8 +114,8 @@ value. A set but malformed secret fails before anything is written.
 | `FRONT_API_JWT_SECRET`            | front-api: tree `front.security.jwt-secret`; frontend: `FRONT_SECURITY_JWT_SECRET`                                                                                            | JWT signature (front-api signs, frontend verifies admin tokens) |
 | `O4G_MACHINE_TOKEN`               | front-api: tree `front.security.shared-token`; frontend: `NUXT_MACHINE_TOKEN`, `MACHINE_TOKEN`                                                                                | `X-Shared-Token` machine calls                                 |
 | `FRONT_API_GITHUB_TOKEN`          | front-api: tree `feedback.github.access-token`                                                                                                                                | GitHub feedback issues                                         |
-| `GOOGLE_SSO_CLIENT_ID` (required) | front-api: `FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID`; frontend: `NUXT_GOOGLE_OAUTH_CLIENT_ID`                                                                                     | Google SSO ([Google SSO OAuth clients](google-sso-oauth-clients.md)) |
-| `GOOGLE_SSO_CLIENT_SECRET` (required) | frontend: `NUXT_GOOGLE_OAUTH_CLIENT_SECRET`                                                                                                                               | Google SSO                                                     |
+| `GOOGLE_SSO_CLIENT_ID` (required) | front-api: `FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID`; frontend: `NUXT_GOOGLE_OAUTH_CLIENT_ID`; admin (optional, paired): tree `spring.security.oauth2.client.registration.google.client-id` | Google SSO ([Google SSO OAuth clients](google-sso-oauth-clients.md)); admin login (GOU-1091) |
+| `GOOGLE_SSO_CLIENT_SECRET` (required) | frontend: `NUXT_GOOGLE_OAUTH_CLIENT_SECRET`; admin (optional, paired): tree `spring.security.oauth2.client.registration.google.client-secret`                          | Google SSO; admin login                                        |
 
 `b2b-api` registers with Spring Boot Admin only when its configuration enables
 the client (`B2B_SBA_CLIENT_ENABLED`); the tree then replaces its
@@ -154,6 +155,18 @@ Spring services and the frontend one after the other, front-api first).
 
 `O4G_MACHINE_TOKEN` and `FRONT_API_JWT_SECRET` reach the frontend as env
 lines, so their value must match `[A-Za-z0-9/._-]`.
+
+### Paired secrets
+
+admin receives `GOOGLE_SSO_CLIENT_ID` and `GOOGLE_SSO_CLIENT_SECRET` together
+or not at all: one set without the other fails the script, even with
+`--if-present`, before anything is written, so the admin never mixes the
+site's client id with its former client's secret. Admin reuses the site's SSO
+client (decision of 2026-10-23, GOU-1038); the client must list the admin's
+redirect URIs before the first render (see
+[Google SSO OAuth clients](google-sso-oauth-clients.md#redirect-uris-to-register-on-the-web-client)).
+Access stays gated by `AdminOidcUserService` (verified e-mail in
+`admin.security.google-sso.role-allowlist`), proven by `AdminGoogleSsoAccessTest`.
 
 ### How a file is written
 

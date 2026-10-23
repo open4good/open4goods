@@ -151,6 +151,15 @@ Register all of the following on the Google Cloud Console (project
 - `http://127.0.0.1:4100/auth/google/callback` (agents' dev port range)
 - `https://beta.nudger.fr/auth/google/callback`
 - `https://nudger.fr/auth/google/callback`
+- `https://beta.sb-admin.nudger.fr/login/oauth2/code/google` (admin, beta, GOU-1091)
+- `https://sb-admin.nudger.fr/login/oauth2/code/google` (admin, prod, GOU-1091)
+
+The admin (Spring Boot Admin, `sbadmin`) reuses this client since GOU-1091:
+`render-service-secrets.sh` writes `GOOGLE_SSO_CLIENT_ID` / `_SECRET` to its
+config tree (`spring.security.oauth2.client.registration.google.*`). Its
+redirect URI is Spring Security's default `{baseUrl}/login/oauth2/code/google`
+(`server.forward-headers-strategy: FRAMEWORK`, no context path). It exchanges
+the code server-side, so no JavaScript origin is needed.
 
 A "Web" client also accepts `http://localhost` redirect URIs, so the existing
 local flow keeps working unchanged.

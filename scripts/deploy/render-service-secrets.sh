@@ -1,6 +1,6 @@
 #!/bin/sh
 # Render a service's secrets from the `beta` or `prod` GitHub Environment onto its host
-# (ADR-0006, D140, GOU-933, GOU-957, GOU-1014, GOU-1041).
+# (ADR-0006, D140, GOU-933, GOU-957, GOU-1014, GOU-1041, GOU-1091).
 #
 # Usage: render-service-secrets.sh [--if-present] <check|apply> <env> <service>
 #
@@ -80,6 +80,8 @@
 # | admin     | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.instance-auth.default-password                               | optional |
 # | admin     | O4G_SBA_PASSWORD                | tree    | o4g.sba.registration.password                                                  | optional |
 # | admin     | O4G_MAIL_PASSWORD               | tree    | spring.mail.password                                                           | optional |
+# | admin     | GOOGLE_SSO_CLIENT_ID            | tree    | spring.security.oauth2.client.registration.google.client-id                    | optional |
+# | admin     | GOOGLE_SSO_CLIENT_SECRET        | tree    | spring.security.oauth2.client.registration.google.client-secret                | optional |
 # | b2b-api   | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.client.password                                              | optional |
 # | frontend  | GOOGLE_SSO_CLIENT_ID            | env     | NUXT_GOOGLE_OAUTH_CLIENT_ID                                                    | required |
 # | frontend  | GOOGLE_SSO_CLIENT_SECRET        | env     | NUXT_GOOGLE_OAUTH_CLIENT_SECRET                                                | required |
@@ -97,6 +99,11 @@
 #   FRONT_API_JWT_SECRET  front-api (signs) <-> frontend (verifies admin tokens); same rule.
 #   O4G_INTERNAL_API_KEY  front-api (front.affiliation-partners.api-key, sent to api) <->
 #                         api (admin-key: the only key api accepts besides test-keys).
+#
+# Paired secrets: a service receives both or neither (one set without the other fails, even with
+# --if-present, before anything is written), so that it never mixes two OAuth clients:
+#   admin  GOOGLE_SSO_CLIENT_ID + GOOGLE_SSO_CLIENT_SECRET (the site's SSO client, GOU-1091; its
+#          redirect URIs must list the admin's /login/oauth2/code/google).
 #
 # Required environment for apply: DEPLOY_SSH_HOST, DEPLOY_SSH_USER, DEPLOY_SSH_KEY.
 set -eu
@@ -141,12 +148,19 @@ front-api FRONT_API_GITHUB_TOKEN tree feedback.github.access-token optional
 admin O4G_SBA_PASSWORD tree spring.boot.admin.instance-auth.default-password optional
 admin O4G_SBA_PASSWORD tree o4g.sba.registration.password optional
 admin O4G_MAIL_PASSWORD tree spring.mail.password optional
+admin GOOGLE_SSO_CLIENT_ID tree spring.security.oauth2.client.registration.google.client-id optional
+admin GOOGLE_SSO_CLIENT_SECRET tree spring.security.oauth2.client.registration.google.client-secret optional
 b2b-api O4G_SBA_PASSWORD tree spring.boot.admin.client.password optional
 frontend GOOGLE_SSO_CLIENT_ID env NUXT_GOOGLE_OAUTH_CLIENT_ID required
 frontend GOOGLE_SSO_CLIENT_SECRET env NUXT_GOOGLE_OAUTH_CLIENT_SECRET required
 frontend O4G_MACHINE_TOKEN env NUXT_MACHINE_TOKEN optional
 frontend O4G_MACHINE_TOKEN env MACHINE_TOKEN optional
 frontend FRONT_API_JWT_SECRET env FRONT_SECURITY_JWT_SECRET optional
+'
+
+# <service> <secret> <secret>: see "Paired secrets" above.
+PAIRS_TABLE='
+admin GOOGLE_SSO_CLIENT_ID GOOGLE_SSO_CLIENT_SECRET
 '
 
 if_present=false
@@ -219,6 +233,19 @@ while read -r row_service secret kind target need; do
   echo "::warning::$secret is not set in the $env_name GitHub Environment: not rendered for $service (a previous render is kept)."
 done <<EOF
 $SECRETS_TABLE
+EOF
+
+# A pair is set as a whole or not at all, whatever --if-present says.
+while read -r pair_service first second; do
+  [ "$pair_service" = "$service" ] || continue
+  first_set=false
+  second_set=false
+  is_set "$first" && first_set=true
+  is_set "$second" && second_set=true
+  [ "$first_set" = "$second_set" ] ||
+    fail "$first and $second go together for $service: set both or neither in the $env_name GitHub Environment"
+done <<EOF
+$PAIRS_TABLE
 EOF
 
 # Checks every set secret before anything is written; the value is never printed.
