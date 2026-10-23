@@ -125,7 +125,8 @@ git config core.hooksPath .githooks
 - Update the nearest durable document when code changes behavior, contracts,
   deployment, developer workflow, or AI-agent workflow.
 - Markdown and JSON must use ASCII punctuation normalized by
-  `scripts/python/text_replacements.py`.
+  `scripts/python/text_replacements.py`. Generated release notes under
+  `frontend/app/public/reports/` are excluded, as in `.yamllint`.
 
 ## 7  Pull-request checklist
 
