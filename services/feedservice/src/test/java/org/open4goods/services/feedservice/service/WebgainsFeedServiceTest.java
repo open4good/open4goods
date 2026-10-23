@@ -1,9 +1,11 @@
 package org.open4goods.services.feedservice.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.Map;
 
@@ -17,12 +19,16 @@ import org.open4goods.services.serialisation.service.SerialisationService;
 
 import tools.jackson.databind.ObjectMapper;
 
+import com.sun.net.httpserver.HttpServer;
+
 /**
  * Tests for {@link WebgainsFeedService} normalized affiliation mapping.
  */
 class WebgainsFeedServiceTest
 {
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private final FeedConfiguration feedConfig = new FeedConfiguration();
 
     @Test
     void parseWebgainsPromotionsShouldReturnMappedOffersAndVouchers() throws Exception
@@ -66,9 +72,39 @@ class WebgainsFeedServiceTest
         assertThat(promotion.getCountryCodes()).containsExactly("FR");
     }
 
+    /**
+     * A failed API call raises an exception that does not quote the key carried by the endpoint.
+     */
+    @Test
+    void failedCallNeverQuotesTheApiKey() throws Exception
+    {
+        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/", exchange -> {
+            exchange.sendResponseHeaders(500, -1);
+            exchange.close();
+        });
+        server.start();
+        try
+        {
+            WebgainsFeedService service = buildService();
+            feedConfig.getWebgains().setOffersAndVouchersEndpoint(
+                    "http://127.0.0.1:" + server.getAddress().getPort() + "/offers?key=secret-key&page=1");
+
+            Throwable thrown = catchThrowable(service::retrieveWebgainsPromotions);
+
+            assertThat(thrown).isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("HTTP status 500")
+                    .message().doesNotContain("secret-key");
+        }
+        finally
+        {
+            server.stop(0);
+        }
+    }
+
     private WebgainsFeedService buildService()
     {
-        FeedConfiguration config = new FeedConfiguration();
+        FeedConfiguration config = feedConfig;
         config.getWebgains().setEnabled(true);
         config.setDefaultCsvProperties(new CsvDataSourceProperties());
         DataSourceConfigService dataSourceConfigService = mock(DataSourceConfigService.class);

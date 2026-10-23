@@ -18,6 +18,7 @@ import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.services.feedservice.service.FeedIndexingService;
+import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -618,7 +619,8 @@ public class BatchService {
      * @param providerName optional affiliation provider name filter
      */
     public void fetchFeedsByUrl(String url, String providerName) {
-        logger.info("Fetching feeds with URL: {}", url);
+        // Feed URLs can carry API keys (Awin, Effinity): only the scheme and host are logged
+        logger.info("Fetching feeds with URL: {}", RemoteFileCachingService.loggableUrl(url));
         Set<DataSourceProperties> datasources =  feedService.getFeedsUrl(providerName);
         logger.info("Found {} feeds for processing.", datasources.size());
 

@@ -205,7 +205,8 @@ public class RemoteFileCachingService {
      * @param url      The URL of the file to download.
      * @param safeName A safe name to use as part of the temporary file name.
      * @return The temporary file where the content has been downloaded.
-     * @throws IOException If an I/O error occurs during file download or creation.
+     * @throws IOException If an I/O error occurs during file download or creation; the message never quotes
+     *         the URL (see {@link #redactedCause(Exception)}).
      */
     public File downloadToTmpFile(String url, String safeName) throws IOException {
         // Create a temporary file with a normalized safe name
@@ -233,7 +234,8 @@ public class RemoteFileCachingService {
         } catch (Exception e) {
         	// Delete the tmp file
         	FileUtils.deleteQuietly(destFile);
-            throw e;
+            // JDK messages quote the URL, which can carry the API key of the feed
+            throw redactedCause(e);
         }
 
         return destFile;
@@ -417,7 +419,7 @@ public class RemoteFileCachingService {
 	 * @param url remote resource URL
 	 * @return redacted URL, or {@code null} when no URL was supplied
 	 */
-	static String loggableUrl(String url) {
+	public static String loggableUrl(String url) {
 		if (url == null) {
 			return null;
 		}

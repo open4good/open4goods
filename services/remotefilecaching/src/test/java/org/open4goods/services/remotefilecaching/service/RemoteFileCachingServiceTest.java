@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,6 +23,8 @@ import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+
+import com.sun.net.httpserver.HttpServer;
 
 /**
  * Tests cache file naming and diagnostic URL handling for remote resource caching.
@@ -172,6 +175,32 @@ class RemoteFileCachingServiceTest {
         StringWriter trace = new StringWriter();
         thrown.printStackTrace(new PrintWriter(trace));
         assertThat(trace.toString()).doesNotContain(SECRET).contains(FileNotFoundException.class.getName());
+    }
+
+    /**
+     * Ensures a failed feed download raises an exception that quotes neither the URL nor its key: the JDK reports an
+     * HTTP 404 with a {@link FileNotFoundException} whose message is the URL.
+     */
+    @Test
+    void failedTmpDownloadsDoNotQuoteTheUrl() throws IOException {
+        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/", exchange -> {
+            exchange.sendResponseHeaders(404, -1);
+            exchange.close();
+        });
+        server.start();
+        try {
+            String url = "http://127.0.0.1:" + server.getAddress().getPort() + "/apiv3/" + SECRET + "/feed.csv";
+
+            Throwable thrown = catchThrowable(() -> newService().downloadToTmpFile(url, "feed"));
+
+            assertThat(thrown).isInstanceOf(IOException.class);
+            StringWriter trace = new StringWriter();
+            thrown.printStackTrace(new PrintWriter(trace));
+            assertThat(trace.toString()).doesNotContain(SECRET).contains(FileNotFoundException.class.getName());
+        } finally {
+            server.stop(0);
+        }
     }
 
     /**
