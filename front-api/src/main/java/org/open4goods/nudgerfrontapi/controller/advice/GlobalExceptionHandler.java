@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
 import org.open4goods.nudgerfrontapi.service.exception.InvalidAffiliationTokenException;
+import org.open4goods.nudgerfrontapi.service.exception.SearchResponseTooLargeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -82,6 +83,15 @@ public class GlobalExceptionHandler {
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         pd.setTitle("Invalid affiliation token");
         pd.setDetail(exception.getMessage() != null ? exception.getMessage() : exception.toString());
+        return pd;
+    }
+
+    @ExceptionHandler(SearchResponseTooLargeException.class)
+    public ProblemDetail handleSearchResponseTooLarge(SearchResponseTooLargeException ex) {
+        log.warn("Search response too large: {}", ex.getMessage());
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.SERVICE_UNAVAILABLE);
+        pd.setTitle("Search response too large");
+        pd.setDetail("The search response is too large, reduce the page size or the aggregations.");
         return pd;
     }
 

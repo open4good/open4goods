@@ -38,6 +38,7 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoSortableFields;
 import org.open4goods.nudgerfrontapi.dto.product.ProductFieldOptionsResponse;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationBucketDto;
+import org.open4goods.nudgerfrontapi.service.exception.SearchResponseTooLargeException;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.Agg;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.AggType;
@@ -106,6 +107,12 @@ public class SearchService {
 	private static final String MISSING_BUCKET = "ES-UNKNOWN";
 	private static final int DEFAULT_BUCKET_COUNT = 10;
 	private static final int DEFAULT_TERMS_SIZE = 50;
+	/** Maximum page size served by product searches, whatever the client asks. */
+	public static final int MAX_PAGE_SIZE = 100;
+	/** Maximum buckets returned per terms or histogram aggregation. */
+	public static final int MAX_AGG_BUCKETS = 200;
+	/** Maximum number of aggregations honoured in one search request. */
+	public static final int MAX_AGGREGATIONS = 20;
 	private static final int GLOBAL_SEARCH_LIMIT = 20;
 	private static final int SUGGEST_RESULT_LIMIT = 5;
 	private static final String[] SUGGEST_SOURCE_INCLUDES = { "attributes.referentielAttributes.MODEL",
@@ -605,6 +612,7 @@ public class SearchService {
             AggregationRequestDto aggregation, DomainLanguage domainLanguage, String verticalId, String query,
             FilterRequestDto filters) {
 
+        pageable = boundPageable(pageable);
         SearchResult result = search(pageable, verticalId, query, aggregation, filters);
         SearchHits<Product> hits = result.hits();
 
@@ -640,6 +648,7 @@ public class SearchService {
 	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
 	public SearchResult search(Pageable pageable, String verticalId, String query,
 			AggregationRequestDto aggregationQuery, FilterRequestDto filters) {
+		pageable = boundPageable(pageable);
 		String sanitizedQuery = sanitize(query);
 		String normalizedVerticalId = normalizeVerticalId(verticalId);
 
@@ -666,6 +675,11 @@ public class SearchService {
 				if (!isValidAggregation(agg)) {
 					continue;
 				}
+				if (descriptors.size() >= MAX_AGGREGATIONS) {
+					LOGGER.warn("Too many aggregations requested, ignoring '{}' and the following ones (max={})",
+							agg.name(), MAX_AGGREGATIONS);
+					break;
+				}
 				switch (agg.type()) {
 				case terms -> descriptors.add(configureTermsAggregation(nativeQueryBuilder, agg));
 				case range -> descriptors.add(configureRangeAggregation(nativeQueryBuilder, agg));
@@ -678,6 +692,15 @@ public class SearchService {
 		try {
 			hits = repository.search(nativeQueryBuilder.build(), ProductRepository.MAIN_INDEX_NAME);
 		} catch (Exception e) {
+			if (isResponseTooLarge(e)) {
+				LOGGER.warn(
+						"Elasticsearch response exceeds the client buffer: vertical={}, queryLength={}, page={}, size={}, aggregations={}",
+						normalizedVerticalId, sanitizedQuery == null ? 0 : sanitizedQuery.length(),
+						pageable.isPaged() ? pageable.getPageNumber() : null,
+						pageable.isPaged() ? pageable.getPageSize() : null,
+						descriptors.stream().map(d -> d.request.name() + ":" + d.request.field()).toList());
+				throw new SearchResponseTooLargeException("Search response too large, narrow the request", e);
+			}
 			elasticLog(e);
 			throw e;
 		}
@@ -688,6 +711,32 @@ public class SearchService {
 			aggregations = mergeAggregationOverrides(aggregations, overrides);
 		}
 		return new SearchResult(hits, List.copyOf(aggregations));
+	}
+
+	/**
+	 * Caps the page size so that a search response stays well below the HTTP client buffer.
+	 */
+	static Pageable boundPageable(Pageable pageable) {
+		if (pageable == null || pageable.isUnpaged() || pageable.getPageSize() <= MAX_PAGE_SIZE) {
+			return pageable;
+		}
+		LOGGER.warn("Requested page size {} exceeds the maximum, capped to {}", pageable.getPageSize(), MAX_PAGE_SIZE);
+		return org.springframework.data.domain.PageRequest.of(pageable.getPageNumber(), MAX_PAGE_SIZE,
+				pageable.getSort());
+	}
+
+	private static boolean isResponseTooLarge(Throwable error) {
+		for (Throwable t = error; t != null; t = t.getCause()) {
+			String message = t.getMessage();
+			if (t.getClass().getSimpleName().equals("ContentTooLongException")
+					|| (message != null && message.contains("entity content is too long"))) {
+				return true;
+			}
+			if (t.getCause() == t) {
+				break;
+			}
+		}
+		return false;
 	}
 
 	Query buildProductSearchQuery(String normalizedVerticalId, String sanitizedQuery, FilterRequestDto filters,
@@ -1311,7 +1360,8 @@ public class SearchService {
 
 	private AggregationDescriptor configureTermsAggregation(
 			org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder builder, Agg agg) {
-		int size = agg.buckets() != null && agg.buckets() > 0 ? agg.buckets() : DEFAULT_TERMS_SIZE;
+		int size = Math.min(MAX_AGG_BUCKETS,
+				agg.buckets() != null && agg.buckets() > 0 ? agg.buckets() : DEFAULT_TERMS_SIZE);
 		boolean booleanField = isBooleanAggregationField(agg.field());
 		String missingAggregationName = booleanField ? agg.name() + "_missing" : null;
 
@@ -1363,9 +1413,14 @@ public class SearchService {
 
 	private double resolveRangeInterval(Agg agg) {
 		if (agg.step() != null && agg.step() > 0d) {
-			return agg.step();
+			double step = agg.step();
+			if (agg.min() != null && agg.max() != null && agg.max() > agg.min()) {
+				step = Math.max(step, (agg.max() - agg.min()) / MAX_AGG_BUCKETS);
+			}
+			return step;
 		}
-		int buckets = agg.buckets() != null && agg.buckets() > 0 ? agg.buckets() : DEFAULT_BUCKET_COUNT;
+		int buckets = Math.min(MAX_AGG_BUCKETS,
+				agg.buckets() != null && agg.buckets() > 0 ? agg.buckets() : DEFAULT_BUCKET_COUNT);
 		return computeInterval(agg.min(), agg.max(), buckets);
 	}
 

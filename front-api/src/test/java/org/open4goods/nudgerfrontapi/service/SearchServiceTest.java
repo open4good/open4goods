@@ -344,4 +344,40 @@ class SearchServiceTest {
         assertThat(SearchService.firstNumericRangeBucketKey(buckets)).isNull();
         assertThat(SearchService.lastNumericRangeBucketTo(buckets)).isNull();
     }
+
+    @Test
+    void search_shouldBoundPageSizeAndAggregations() {
+        SearchHits<Product> emptyHits = new SearchHitsImpl<Product>(0L, TotalHitsRelation.EQUAL_TO, 0.0f,
+                java.time.Duration.ZERO, null, null, java.util.Collections.emptyList(), null, null, null);
+        when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(emptyHits);
+        java.util.List<org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.Agg> aggs = new java.util.ArrayList<>();
+        for (int i = 0; i < 40; i++) {
+            aggs.add(new org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.Agg("t" + i, "vertical",
+                    org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.AggType.terms, null, null,
+                    Integer.MAX_VALUE, null));
+        }
+
+        searchService.search(org.springframework.data.domain.PageRequest.of(2, 100000), null, null,
+                new org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto(aggs), null);
+
+        ArgumentCaptor<org.springframework.data.elasticsearch.core.query.Query> captor = ArgumentCaptor
+                .forClass(org.springframework.data.elasticsearch.core.query.Query.class);
+        verify(repository).search(captor.capture(), eq(ProductRepository.MAIN_INDEX_NAME));
+        NativeQuery nativeQuery = (NativeQuery) captor.getValue();
+        assertThat(nativeQuery.getPageable().getPageSize()).isEqualTo(SearchService.MAX_PAGE_SIZE);
+        assertThat(nativeQuery.getAggregations()).hasSize(SearchService.MAX_AGGREGATIONS);
+        nativeQuery.getAggregations().values().forEach(a -> assertThat(a.terms().size())
+                .isEqualTo(SearchService.MAX_AGG_BUCKETS));
+    }
+
+    @Test
+    void search_shouldThrowExplicitExceptionWhenElasticsearchResponseTooLarge() {
+        when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenThrow(
+                new org.springframework.dao.DataAccessResourceFailureException("failed",
+                        new java.io.IOException("entity content is too long [104862036] for the configured buffer limit [104857600]")));
+
+        org.junit.jupiter.api.Assertions.assertThrows(
+                org.open4goods.nudgerfrontapi.service.exception.SearchResponseTooLargeException.class,
+                () -> searchService.search(org.springframework.data.domain.PageRequest.of(0, 20), null, null, null, null));
+    }
 }

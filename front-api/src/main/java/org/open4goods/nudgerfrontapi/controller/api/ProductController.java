@@ -293,8 +293,8 @@ public class ProductController {
                             description = "Zero-based page index",
                             schema = @Schema(type = "integer", minimum = "0")),
                     @Parameter(name = "pageSize", in = ParameterIn.QUERY,
-                            description = "Page size",
-                            schema = @Schema(type = "integer", minimum = "0")),
+                            description = "Page size, capped server-side to 100",
+                            schema = @Schema(type = "integer", minimum = "0", maximum = "100")),
                     @Parameter(name = "verticalId", in = ParameterIn.QUERY,
                             description = "Optional vertical identifier used to scope the search.",
                             schema = @Schema(type = "string")),
@@ -324,7 +324,10 @@ public class ProductController {
                                     schema = @Schema(implementation = ProblemDetail.class))),
                     @ApiResponse(responseCode = "401", description = "Authentication required"),
                     @ApiResponse(responseCode = "403", description = "Access forbidden"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
+                    @ApiResponse(responseCode = "500", description = "Internal server error"),
+                    @ApiResponse(responseCode = "503", description = "Search response too large for the backend buffer, reduce page size or aggregations",
+                            content = @Content(mediaType = "application/problem+json",
+                                    schema = @Schema(implementation = ProblemDetail.class)))
             }
     )
     public ResponseEntity<ProductSearchResponseDto> products(
