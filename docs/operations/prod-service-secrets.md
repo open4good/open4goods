@@ -1,6 +1,7 @@
 # Production service secrets (render + restart)
 
-Context: decision D140 (2026-10-22), ADR-0006, GOU-932 / GOU-933, GOU-957.
+Context: decision D140 (2026-10-22), ADR-0006, GOU-932 / GOU-933, GOU-957,
+GOU-1014.
 Production secrets move to the `prod` GitHub Environment of
 `open4good/open4goods` when they are rotated. A rotated secret is rendered
 onto the prod host, and its service restarted, by a `workflow_dispatch`
@@ -20,6 +21,7 @@ both workflows:
 | `API_METRIKS_AWIN_PUBLISHER_ID` | - | `METRIKS_AFFILIATION_AWIN_PUBLISHER_ID=<value>` (`api.env`) | `api` | Metriks affiliation report (`metriks.affiliation.awin.publisher-id`) | `prodSecrets.yml`, `releaseDeployProd.yml` (`mode=release`) |
 | `API_METRIKS_AWIN_API_TOKEN` | - | `METRIKS_AFFILIATION_AWIN_API_TOKEN=<value>` (`api.env`) | `api` | Metriks affiliation report (`metriks.affiliation.awin.api-token`) | `prodSecrets.yml`, `releaseDeployProd.yml` (`mode=release`) |
 | `API_METRIKS_EFFILIATION_API_KEY` | - | `METRIKS_AFFILIATION_EFFILIATION_API_KEY=<value>` (`api.env`) | `api` | Metriks affiliation report (`metriks.affiliation.effiliation.api-key`) | `prodSecrets.yml`, `releaseDeployProd.yml` (`mode=release`) |
+| `API_EFFILIATION_API_KEY` | - | `AFFILIATIONCONFIG_EFFILIATIONAPIKEY=<value>` (`api.env`) | `api` | Effiliation product feeds, `ApiConfig#effiliationFeedService` (`affiliation-config.effiliation-api-key`) | `prodSecrets.yml`, `releaseDeployProd.yml` (`mode=release`); beta: `testAndPublishBeta.yml` |
 
 - `API_GOOGLE_API_JSON` is the JSON key of the `nudger-indexation` Google
   service account. Before anything is written, the runner checks that it is a
@@ -46,6 +48,14 @@ both workflows:
   `[A-Za-z0-9/._-]` (digits only for the Awin publisher id), checked before anything is written. `AffiliationCredentialsBindingTest`
   covers the relaxed binding of the `METRIKS_AFFILIATION_*` variables. None of
   these values lives in this repository or in open4goods-config.
+- `API_EFFILIATION_API_KEY` (GOU-1014) is the Effinity API key the Effiliation
+  product feeds use (`affiliation-config.effiliation-api-key`). It is
+  **optional** like the `API_METRIKS_*` secrets: a missing secret is a
+  `::warning::` and is not rendered, so `api` keeps its previous
+  `api.env` line or, failing that, the open4goods-config value. A set secret
+  must match `[A-Za-z0-9/._-]`. `EffiliationApiKeyBindingTest` shows that
+  `AFFILIATIONCONFIG_EFFILIATIONAPIKEY` beats the YAML value. The copy in
+  open4goods-config is removed only after the switch.
 
 ### How a file is written
 
@@ -106,19 +116,29 @@ release; a release started while it runs may cancel it).
 `releaseDeployProd.yml`:
 
 - step "Check prod service secrets (api)", every mode, right after the
-  checkout: fails when `API_GOOGLE_API_JSON` or an `API_METRIKS_*` secret is
-  set but malformed;
+  checkout: fails when `API_GOOGLE_API_JSON`, an `API_METRIKS_*` secret or
+  `API_EFFILIATION_API_KEY` is set but malformed;
 - step "Render api secrets on Prod", `mode=release` only, before
   "Start Applications" (which restarts every service).
 
 Until `API_GOOGLE_API_JSON` exists in `prod`, both steps emit a `::warning::`
 and do not render it: `api` keeps its current configuration (the
-open4goods-config path). The `API_METRIKS_*` secrets that are set are still
-rendered; each missing one is a warning. Nothing is rendered when the deployed
+open4goods-config path). The `API_METRIKS_*` and `API_EFFILIATION_API_KEY`
+secrets that are set are still rendered; each missing one is a warning. Nothing is rendered when the deployed
 ref predates `render-service-secrets.sh`; files and lines from a previous
 render are kept. The dispatchable workflow, by contrast, fails when
-`API_GOOGLE_API_JSON` is missing; a missing `API_METRIKS_*` secret is only a
-warning there too.
+`API_GOOGLE_API_JSON` is missing; a missing `API_METRIKS_*` or
+`API_EFFILIATION_API_KEY` secret is only a warning there too.
+
+## Beta
+
+`testAndPublishBeta.yml` renders `API_EFFILIATION_API_KEY` from the `beta`
+GitHub Environment as `AFFILIATIONCONFIG_EFFILIATIONAPIKEY` in
+`/etc/open4goods/api.env` on the beta host (step "Render api Effinity env on
+Beta", before "Publish Applications", through `push-remote-env.sh`). Until the
+secret exists in `beta`, the step emits a `::warning::`, writes nothing and
+does not fail: `api` keeps its previous value. A set but malformed value fails
+the step before anything is written.
 
 ## Rotation procedure
 
