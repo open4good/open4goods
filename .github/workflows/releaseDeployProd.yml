@@ -123,6 +123,7 @@ jobs:
           API_METRIKS_AWIN_PUBLISHER_ID: ${{ secrets.API_METRIKS_AWIN_PUBLISHER_ID }}
           API_METRIKS_AWIN_API_TOKEN: ${{ secrets.API_METRIKS_AWIN_API_TOKEN }}
           API_METRIKS_EFFILIATION_API_KEY: ${{ secrets.API_METRIKS_EFFILIATION_API_KEY }}
+          API_EFFILIATION_API_KEY: ${{ secrets.API_EFFILIATION_API_KEY }}
         run: |
           if [ ! -x scripts/deploy/render-service-secrets.sh ]; then
             echo "::warning::scripts/deploy/render-service-secrets.sh is missing from ${CHECKOUT_REF}: api secrets are not rendered"
@@ -489,7 +490,8 @@ jobs:
       - name: Render api secrets on Prod
         # Same files as prodSecrets.yml (scripts/deploy/render-service-secrets.sh, GOU-933), restarted just below.
         # A secret missing from `prod` is a warning and is not rendered (api keeps its previous value); the others
-        # still are (API_METRIKS_*: Metriks affiliation report, GOU-957).
+        # still are (API_METRIKS_*: Metriks affiliation report, GOU-957; API_EFFILIATION_API_KEY: Effiliation feeds,
+        # GOU-1014).
         if: env.MODE != 'test'
         env:
           CHECKOUT_REF: ${{ steps.meta.outputs.checkout_ref }}
@@ -500,6 +502,7 @@ jobs:
           API_METRIKS_AWIN_PUBLISHER_ID: ${{ secrets.API_METRIKS_AWIN_PUBLISHER_ID }}
           API_METRIKS_AWIN_API_TOKEN: ${{ secrets.API_METRIKS_AWIN_API_TOKEN }}
           API_METRIKS_EFFILIATION_API_KEY: ${{ secrets.API_METRIKS_EFFILIATION_API_KEY }}
+          API_EFFILIATION_API_KEY: ${{ secrets.API_EFFILIATION_API_KEY }}
         run: |
           if [ ! -x scripts/deploy/render-service-secrets.sh ]; then
             echo "::warning::scripts/deploy/render-service-secrets.sh is missing from ${CHECKOUT_REF}: api secrets are not rendered"

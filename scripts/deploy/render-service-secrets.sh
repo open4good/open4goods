@@ -1,5 +1,5 @@
 #!/bin/sh
-# Render the `prod` GitHub Environment secrets of a service onto its host (ADR-0006, D140, GOU-933, GOU-957).
+# Render the `prod` GitHub Environment secrets of a service onto its host (ADR-0006, D140, GOU-933, GOU-957, GOU-1014).
 #
 # Usage: render-service-secrets.sh [--if-present] <check|apply> <service>
 #
@@ -22,11 +22,13 @@
 # | api     | API_METRIKS_AWIN_PUBLISHER_ID     | -                                              | METRIKS_AFFILIATION_AWIN_PUBLISHER_ID=<value>      |
 # | api     | API_METRIKS_AWIN_API_TOKEN        | -                                              | METRIKS_AFFILIATION_AWIN_API_TOKEN=<value>         |
 # | api     | API_METRIKS_EFFILIATION_API_KEY   | -                                              | METRIKS_AFFILIATION_EFFILIATION_API_KEY=<value>    |
+# | api     | API_EFFILIATION_API_KEY           | -                                              | AFFILIATIONCONFIG_EFFILIATIONAPIKEY=<value>        |
 #
-# The API_METRIKS_* secrets (Metriks affiliation report, GOU-957) are optional, with
-# or without --if-present: a missing one is a ::warning::, is not rendered and does
-# not stop the others (the network's Metriks events then report the missing
-# credential). A set one must match [A-Za-z0-9/._-] (digits only for the Awin publisher id).
+# The API_METRIKS_* secrets (Metriks affiliation report, GOU-957) and API_EFFILIATION_API_KEY
+# (Effinity key of the Effiliation product feeds, affiliation-config.effiliation-api-key,
+# GOU-1014) are optional, with or without --if-present: a missing one is a ::warning::, is
+# not rendered and does not stop the others (a previous render, or the open4goods-config
+# value, is kept). A set one must match [A-Za-z0-9/._-] (digits only for the Awin publisher id).
 #
 # publish-jars.sh (open4goods-config) sources /etc/open4goods/<service>.env,
 # which sits outside the tree open4goods-config's deploy rsyncs with --delete;
@@ -82,33 +84,35 @@ summary() {
 
 ########################################
 # api: Google service account (Metriks, GoogleSearchConsoleService)
-#      and Metriks affiliation report credentials (AffiliationMetriksService, GOU-957)
+#      Metriks affiliation report credentials (AffiliationMetriksService, GOU-957)
+#      and Effiliation product feeds key (ApiConfig#effiliationFeedService, GOU-1014)
 ########################################
 API_GOOGLE_JSON_FILE=/etc/open4goods/secrets/google-indexation.json
 API_ENV_FILE=/etc/open4goods/api.env
-# <prod secret>:<line in api.env>
-API_METRIKS_SECRETS="API_METRIKS_AWIN_PUBLISHER_ID:METRIKS_AFFILIATION_AWIN_PUBLISHER_ID
+# Optional secrets rendered as lines of api.env, <prod secret>:<line in api.env>
+API_ENV_SECRETS="API_METRIKS_AWIN_PUBLISHER_ID:METRIKS_AFFILIATION_AWIN_PUBLISHER_ID
 API_METRIKS_AWIN_API_TOKEN:METRIKS_AFFILIATION_AWIN_API_TOKEN
-API_METRIKS_EFFILIATION_API_KEY:METRIKS_AFFILIATION_EFFILIATION_API_KEY"
+API_METRIKS_EFFILIATION_API_KEY:METRIKS_AFFILIATION_EFFILIATION_API_KEY
+API_EFFILIATION_API_KEY:AFFILIATIONCONFIG_EFFILIATIONAPIKEY"
 
-# Sets api_google (true when API_GOOGLE_API_JSON is set), api_metriks (the pairs of
-# API_METRIKS_SECRETS whose secret is set) and api_metriks_missing (the other secrets).
+# Sets api_google (true when API_GOOGLE_API_JSON is set), api_env (the pairs of
+# API_ENV_SECRETS whose secret is set) and api_env_missing (the other secrets).
 # Fails on a missing API_GOOGLE_API_JSON unless --if-present; returns 1 when nothing is set.
 present_api() {
   api_google=false
   if require_secret API_GOOGLE_API_JSON; then
     api_google=true
   fi
-  api_metriks=
-  api_metriks_missing=
-  for pair in $API_METRIKS_SECRETS; do
+  api_env=
+  api_env_missing=
+  for pair in $API_ENV_SECRETS; do
     if optional_secret "${pair%%:*}"; then
-      api_metriks="$api_metriks $pair"
+      api_env="$api_env $pair"
     else
-      api_metriks_missing="$api_metriks_missing ${pair%%:*}"
+      api_env_missing="$api_env_missing ${pair%%:*}"
     fi
   done
-  [ "$api_google" = true ] || [ -n "$api_metriks" ]
+  [ "$api_google" = true ] || [ -n "$api_env" ]
 }
 
 check_api() {
@@ -116,7 +120,7 @@ check_api() {
     "$script_dir/push-remote-file.sh" --service-account-json --validate-only \
       "$API_GOOGLE_JSON_FILE" API_GOOGLE_API_JSON
   fi
-  for pair in $api_metriks; do
+  for pair in $api_env; do
     secret=${pair%%:*}
     # Same character set as push-remote-env.sh, checked before anything is written; the value is never printed.
     case "$(printenv "$secret")" in
@@ -150,24 +154,24 @@ apply_api() {
     summary "- $env_result"
     summary "- Service account: $client_email (private_key_id ${key_id}...)"
   fi
-  if [ -n "$api_metriks" ]; then
+  if [ -n "$api_env" ]; then
     keys=
-    for pair in $api_metriks; do
+    for pair in $api_env; do
       keys="$keys ${pair#*:}"
     done
     # Each api.env key is mapped from its secret in a subshell (export is a builtin: no value on a command line).
     # shellcheck disable=SC2086 # $keys holds key names only, split on purpose.
-    metriks_result=$(
-      for pair in $api_metriks; do
+    env_lines_result=$(
+      for pair in $api_env; do
         export "${pair#*:}=$(printenv "${pair%%:*}")"
       done
       "$script_dir/push-remote-env.sh" "$API_ENV_FILE" $keys
     )
-    echo "$metriks_result"
-    summary "- $metriks_result"
+    echo "$env_lines_result"
+    summary "- $env_lines_result"
   fi
-  if [ -n "$api_metriks_missing" ]; then
-    summary "- Not set in prod, not rendered:$api_metriks_missing"
+  if [ -n "$api_env_missing" ]; then
+    summary "- Not set in prod, not rendered:$api_env_missing"
   fi
 }
 

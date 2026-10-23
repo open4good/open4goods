@@ -140,6 +140,23 @@ jobs:
           scripts/deploy/push-remote-env.sh /etc/open4goods/front-api.env
           FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID
 
+      - name: Render api Effinity env on Beta
+        # Effinity key of the Effiliation product feeds (affiliation-config.effiliation-api-key, GOU-1014), sourced by
+        # publish-jars.sh for api from /etc/open4goods/api.env; the OS env var beats application-active.yml.
+        # Until API_EFFILIATION_API_KEY exists in `beta`, warns only: api keeps its current value (previous render
+        # or open4goods-config).
+        env:
+          DEPLOY_SSH_HOST: ${{ secrets.REMOTE_BETA_HOST }}
+          DEPLOY_SSH_USER: ${{ secrets.REMOTE_BETA_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          AFFILIATIONCONFIG_EFFILIATIONAPIKEY: ${{ secrets.API_EFFILIATION_API_KEY }}
+        run: |
+          if [ -z "${AFFILIATIONCONFIG_EFFILIATIONAPIKEY}" ]; then
+            echo "::warning::API_EFFILIATION_API_KEY is not set in the beta GitHub Environment: not rendered for api (previous value kept)."
+            exit 0
+          fi
+          scripts/deploy/push-remote-env.sh /etc/open4goods/api.env AFFILIATIONCONFIG_EFFILIATIONAPIKEY
+
       - name: Publish Applications
         uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
