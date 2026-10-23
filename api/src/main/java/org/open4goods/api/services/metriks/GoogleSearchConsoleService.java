@@ -56,8 +56,6 @@ public class GoogleSearchConsoleService {
     private static final int ROW_LIMIT = 25000;
     /** Number of rows kept in the top queries / top pages events. */
     private static final int TOP_LIMIT = 20;
-    /** Number of rows of the previous window scanned to find the {@code previous*} values of a top row. */
-    private static final int PREVIOUS_LOOKUP_LIMIT = 1000;
     /** Maximum length of an upstream error body copied into an error message. */
     private static final int MAX_ERROR_BODY = 300;
     /** Row count at or above which we warn the caller that the real total may be higher. */
@@ -134,7 +132,14 @@ public class GoogleSearchConsoleService {
         LocalDate endDate = LocalDate.now(ZoneOffset.UTC).minusDays(lagDays);
         LocalDate startDate = endDate.minusDays(windowDays - 1L);
 
-        String token = accessToken();
+        String token;
+        try {
+            token = tokenSupplier.get();
+        } catch (IOException | RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IOException(e.getMessage(), e);
+        }
         String encodedSite = URLEncoder.encode(siteUrl, StandardCharsets.UTF_8);
         URI uri = URI.create(String.format(SEARCH_ANALYTICS_API, encodedSite));
 
@@ -143,7 +148,20 @@ public class GoogleSearchConsoleService {
         boolean truncated = total >= TRUNCATION_WARNING_THRESHOLD;
         LOGGER.debug("Search Console reported {} pages with impressions for {} between {} and {}",
                 total, siteUrl, startDate, endDate);
-        return new PagesWithImpressionsResult(total, startDate, endDate, truncated);
+
+        LocalDate previousEnd = startDate.minusDays(1L);
+        LocalDate previousStart = previousEnd.minusDays(windowDays - 1L);
+        Long previousCount = null;
+        String previousError = null;
+        try {
+            previousCount = paginate(previousStart, previousEnd,
+                    startRow -> fetchPage(uri, token, previousStart, previousEnd, startRow));
+        } catch (IOException e) {
+            LOGGER.warn("Search Console previous-window page count failed: {}", redact(e.getMessage(), token));
+            previousError = abbreviate(redact(String.valueOf(e.getMessage()), token));
+        }
+        return new PagesWithImpressionsResult(total, startDate, endDate, truncated, previousCount,
+                previousStart, previousEnd, previousError);
     }
 
     /**
@@ -242,7 +260,7 @@ public class GoogleSearchConsoleService {
         } catch (Exception e) {
             String message = "Search Console credentials unavailable: " + e.getMessage();
             return new SeoMetrics(current, previous, Outcome.failure(message), Outcome.failure(message),
-                    Outcome.failure(message), Outcome.failure(message));
+                    Outcome.failure(message), Outcome.failure(message), Outcome.failure(message));
         }
 
         URI uri = URI.create(String.format(SEARCH_ANALYTICS_API, URLEncoder.encode(siteUrl, StandardCharsets.UTF_8)));
@@ -250,7 +268,8 @@ public class GoogleSearchConsoleService {
         Outcome<Totals> previousTotals = attempt(() -> fetchTotals(uri, token, previous), token);
         Outcome<TopRows> queries = attempt(() -> fetchTop(uri, token, current, previous, "query"), token);
         Outcome<TopRows> pages = attempt(() -> fetchTop(uri, token, current, previous, "page"), token);
-        return new SeoMetrics(current, previous, currentTotals, previousTotals, queries, pages);
+        Outcome<List<DailyRow>> daily = attempt(() -> fetchDaily(uri, token, current, previous), token);
+        return new SeoMetrics(current, previous, currentTotals, previousTotals, queries, pages, daily);
     }
 
     private <T> Outcome<T> attempt(Fetch<T> fetch, String token) {
@@ -278,20 +297,69 @@ public class GoogleSearchConsoleService {
 
     private TopRows fetchTop(URI uri, String token, Window current, Window previous, String dimension)
             throws IOException, InterruptedException {
-        List<Row> currentRows = fetchRows(uri, token, current, dimension, TOP_LIMIT);
-        List<Row> previousRows = fetchRows(uri, token, previous, dimension, PREVIOUS_LOOKUP_LIMIT);
+        List<Row> currentRows = fetchRows(uri, token, current, dimension);
+        List<Row> previousRows = fetchRows(uri, token, previous, dimension);
         Map<String, Row> previousByKey = new HashMap<>();
         for (Row row : previousRows) {
             previousByKey.putIfAbsent(row.key(), row);
         }
-        return new TopRows(currentRows, previousByKey);
+        Map<String, Row> currentByKey = new HashMap<>();
+        for (Row row : currentRows) {
+            currentByKey.putIfAbsent(row.key(), row);
+        }
+        List<LossRow> losing = new ArrayList<>();
+        for (Row prev : previousByKey.values()) {
+            if (prev.clicks() <= 0) {
+                continue;
+            }
+            Row cur = currentByKey.get(prev.key());
+            long delta = (cur == null ? 0L : cur.clicks()) - prev.clicks();
+            if (delta < 0) {
+                losing.add(new LossRow(prev.key(), cur, prev, delta));
+            }
+        }
+        losing.sort(Comparator.comparingLong(LossRow::clicksDelta)
+                .thenComparing(Comparator.comparingLong((LossRow l) -> l.previous().clicks()).reversed())
+                .thenComparing(LossRow::key));
+        List<Row> top = currentRows.size() > TOP_LIMIT ? new ArrayList<>(currentRows.subList(0, TOP_LIMIT)) : currentRows;
+        List<LossRow> topLosing = losing.size() > TOP_LIMIT ? new ArrayList<>(losing.subList(0, TOP_LIMIT)) : losing;
+        boolean truncated = currentRows.size() >= ROW_LIMIT || previousRows.size() >= ROW_LIMIT;
+        return new TopRows(top, previousByKey, topLosing, truncated);
     }
 
-    private List<Row> fetchRows(URI uri, String token, Window window, String dimension, int limit)
+    /** One daily read over both windows, completed so that every day of the 56 has a row. */
+    private List<DailyRow> fetchDaily(URI uri, String token, Window current, Window previous)
+            throws IOException, InterruptedException {
+        Map<String, Object> bodyMap = new HashMap<>(baseBody(previous.start(), current.end()));
+        bodyMap.put("dimensions", List.of("date"));
+        bodyMap.put("rowLimit", ROW_LIMIT);
+        JsonNode rows = objectMapper.readTree(post(uri, token, bodyMap)).path("rows");
+        Map<String, JsonNode> byDate = new HashMap<>();
+        if (rows.isArray()) {
+            for (JsonNode row : rows) {
+                JsonNode keys = row.path("keys");
+                if (keys.isArray() && !keys.isEmpty()) {
+                    byDate.putIfAbsent(keys.get(0).asString(), row);
+                }
+            }
+        }
+        List<DailyRow> result = new ArrayList<>();
+        for (LocalDate day = previous.start(); !day.isAfter(current.end()); day = day.plusDays(1L)) {
+            String window = day.isBefore(current.start()) ? "previous" : "current";
+            JsonNode row = byDate.get(day.toString());
+            result.add(row == null
+                    ? new DailyRow(day, 0L, 0L, null, null, window)
+                    : new DailyRow(day, row.path("clicks").asLong(0L), row.path("impressions").asLong(0L),
+                            row.path("ctr").asDouble(0.0), row.path("position").asDouble(0.0), window));
+        }
+        return result;
+    }
+
+    private List<Row> fetchRows(URI uri, String token, Window window, String dimension)
             throws IOException, InterruptedException {
         Map<String, Object> bodyMap = new HashMap<>(baseBody(window.start(), window.end()));
         bodyMap.put("dimensions", List.of(dimension));
-        bodyMap.put("rowLimit", limit);
+        bodyMap.put("rowLimit", ROW_LIMIT);
         String body = post(uri, token, bodyMap);
         JsonNode rows = objectMapper.readTree(body).path("rows");
         List<Row> result = new ArrayList<>();
@@ -307,7 +375,7 @@ public class GoogleSearchConsoleService {
             }
         }
         result.sort(Comparator.comparingLong(Row::clicks).reversed());
-        return result.size() > limit ? new ArrayList<>(result.subList(0, limit)) : result;
+        return result;
     }
 
     /**
@@ -355,8 +423,17 @@ public class GoogleSearchConsoleService {
      * @param endDate    inclusive end of the Search Analytics window (UTC)
      * @param truncated  {@code true} when the row count reached {@link #TRUNCATION_WARNING_THRESHOLD},
      *                   signalling the real total may be higher than reported
+     * @param previousCount     same count over the contiguous previous window, {@code null} when it failed
+     * @param previousStartDate inclusive start of the previous window (UTC)
+     * @param previousEndDate   inclusive end of the previous window (UTC)
+     * @param previousError     redacted message when only the previous count failed, else {@code null}
      */
-    public record PagesWithImpressionsResult(long count, LocalDate startDate, LocalDate endDate, boolean truncated) {
+    public record PagesWithImpressionsResult(long count, LocalDate startDate, LocalDate endDate, boolean truncated,
+                                             Long previousCount, LocalDate previousStartDate,
+                                             LocalDate previousEndDate, String previousError) {
+        public PagesWithImpressionsResult(long count, LocalDate startDate, LocalDate endDate, boolean truncated) {
+            this(count, startDate, endDate, truncated, null, null, null, null);
+        }
     }
 
     /** Inclusive Search Analytics date range (UTC). */
@@ -371,8 +448,25 @@ public class GoogleSearchConsoleService {
     public record Row(String key, long clicks, long impressions, double ctr, double position) {
     }
 
-    /** Top rows of the current window, plus the previous window's rows indexed by key. */
-    public record TopRows(List<Row> rows, Map<String, Row> previousByKey) {
+    /**
+     * Top rows of the current window, the previous window's rows indexed by key, the top losing keys
+     * and whether one of the full reads reached the {@code rowLimit} (so the lists may be incomplete).
+     */
+    public record TopRows(List<Row> rows, Map<String, Row> previousByKey, List<LossRow> losing, boolean truncated) {
+    }
+
+    /**
+     * A key that lost clicks between the previous and the current window.
+     *
+     * @param current     current-window row, {@code null} when the key is absent (0 click)
+     * @param previous    previous-window row
+     * @param clicksDelta current clicks (0 if absent) minus previous clicks, always negative
+     */
+    public record LossRow(String key, Row current, Row previous, long clicksDelta) {
+    }
+
+    /** One day of the daily series; {@code ctr} is a fraction, {@code ctr}/{@code position} are null for a day without data. */
+    public record DailyRow(LocalDate date, long clicks, long impressions, Double ctr, Double position, String window) {
     }
 
     /** Value or error message of one metric group. */
@@ -392,7 +486,8 @@ public class GoogleSearchConsoleService {
 
     /** Result of {@link #fetchSeoMetrics()}. */
     public record SeoMetrics(Window current, Window previous, Outcome<Totals> currentTotals,
-                             Outcome<Totals> previousTotals, Outcome<TopRows> topQueries, Outcome<TopRows> topPages) {
+                             Outcome<Totals> previousTotals, Outcome<TopRows> topQueries, Outcome<TopRows> topPages,
+                             Outcome<List<DailyRow>> daily) {
     }
 
     @FunctionalInterface

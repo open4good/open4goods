@@ -36,6 +36,8 @@ describe('top rows helpers', () => {
   it('recognises the Search Console top events', () => {
     expect(isTopRowsMetrik('seo.gsc.top_queries')).toBe(true)
     expect(isTopRowsMetrik('seo.gsc.top_pages')).toBe(true)
+    expect(isTopRowsMetrik('seo.gsc.top_losing_queries')).toBe(true)
+    expect(isTopRowsMetrik('seo.gsc.top_losing_pages')).toBe(true)
     expect(isTopRowsMetrik('seo.gsc.clicks')).toBe(false)
   })
 
