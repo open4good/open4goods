@@ -135,7 +135,7 @@ class GoogleSearchConsoleServiceSeoMetricsTest {
         assertThat(top.previousByKey()).containsOnlyKeys("q24");
         assertThat(top.previousByKey().get("q24").clicks()).isEqualTo(7);
         assertThat(top.previousByKey().get("q23")).isNull();
-        assertThat(limits).contains(20, 1000);
+        assertThat(limits).containsOnly(25000);
     }
 
     @Test
@@ -150,7 +150,7 @@ class GoogleSearchConsoleServiceSeoMetricsTest {
         service.fetchSeoMetrics();
 
         assertThat(loads).hasValue(1);
-        verify(client, times(6)).send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class));
+        verify(client, times(7)).send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class));
     }
 
     @Test
@@ -179,5 +179,130 @@ class GoogleSearchConsoleServiceSeoMetricsTest {
         assertThat(metrics.topPages().isFailure()).isTrue();
         ArgumentCaptor<HttpRequest> captor = ArgumentCaptor.forClass(HttpRequest.class);
         verify(client, times(0)).send(captor.capture(), any(HttpResponse.BodyHandler.class));
+    }
+
+    private static String row(String key, long clicks) {
+        return "{\"keys\":[\"" + key + "\"],\"clicks\":" + clicks
+                + ",\"impressions\":100,\"ctr\":0.1,\"position\":3.0}";
+    }
+
+    @Test
+    void dailySeriesHas56RowsInOrder_andMissingDayIsFilledWithZero() throws Exception {
+        LocalDate end = LocalDate.now(ZoneOffset.UTC).minusDays(3);
+        LocalDate start = end.minusDays(55);
+        LocalDate missing = start.plusDays(10);
+        List<JsonNode> dailyBodies = new ArrayList<>();
+        HttpClient client = clientAnswering(b -> {
+            if (!"date".equals(b.path("dimensions").path(0).asString())) {
+                return response(200, "{}");
+            }
+            dailyBodies.add(b);
+            StringBuilder sb = new StringBuilder("{\"rows\":[");
+            boolean first = true;
+            for (int i = 55; i >= 0; i--) { // unordered on purpose
+                LocalDate day = start.plusDays(i);
+                if (day.equals(missing)) {
+                    continue;
+                }
+                sb.append(first ? "" : ",").append(row(day.toString(), 5));
+                first = false;
+            }
+            return response(200, sb.append("]}").toString());
+        });
+
+        var daily = service(client).fetchSeoMetrics().daily().value();
+
+        assertThat(dailyBodies).hasSize(1);
+        assertThat(dailyBodies.get(0).path("startDate").asString()).isEqualTo(start.toString());
+        assertThat(dailyBodies.get(0).path("endDate").asString()).isEqualTo(end.toString());
+        assertThat(daily).hasSize(56);
+        assertThat(daily.get(0).date()).isEqualTo(start);
+        assertThat(daily.get(55).date()).isEqualTo(end);
+        assertThat(daily).extracting(GoogleSearchConsoleService.DailyRow::window)
+                .containsExactlyElementsOf(java.util.stream.IntStream.range(0, 56)
+                        .mapToObj(i -> i < 28 ? "previous" : "current").toList());
+        var filled = daily.get(10);
+        assertThat(filled.clicks()).isZero();
+        assertThat(filled.impressions()).isZero();
+        assertThat(filled.ctr()).isNull();
+        assertThat(filled.position()).isNull();
+        assertThat(daily.get(11).clicks()).isEqualTo(5);
+    }
+
+    @Test
+    void losingQueriesAreComputedFilteredSortedAndShareTheTopReads() throws Exception {
+        LocalDate currentStart = LocalDate.now(ZoneOffset.UTC).minusDays(3).minusDays(27);
+        String current = "{\"rows\":[" + String.join(",",
+                row("up", 50), row("tieA", 5), row("tieB", 5), row("same", 10), row("drop", 8)) + "]}";
+        String previous = "{\"rows\":[" + String.join(",",
+                row("up", 10), row("gone", 30), row("tieA", 15), row("tieB", 20), row("same", 10),
+                row("drop", 18), row("zero", 0)) + "]}";
+        AtomicInteger dimensionCalls = new AtomicInteger();
+        HttpClient client = clientAnswering(b -> {
+            if (b.path("dimensions").path(0).asString().equals("query")) {
+                dimensionCalls.incrementAndGet();
+                return response(200, isCurrent(b, currentStart) ? current : previous);
+            }
+            return response(200, "{}");
+        });
+
+        var top = service(client).fetchSeoMetrics().topQueries().value();
+
+        assertThat(dimensionCalls).hasValue(2);
+        // gone: -30 ; tieB: -15 (prev 20) ; tieA: -10 ; drop: -10 (prev 18, ties -> prev desc keeps drop first)
+        assertThat(top.losing()).extracting(GoogleSearchConsoleService.LossRow::key)
+                .containsExactly("gone", "tieB", "drop", "tieA");
+        assertThat(top.losing().get(0).current()).isNull();
+        assertThat(top.losing().get(0).clicksDelta()).isEqualTo(-30);
+        assertThat(top.truncated()).isFalse();
+        assertThat(top.rows().get(0).key()).isEqualTo("up");
+    }
+
+    @Test
+    void oneFailingGroupDoesNotFailTheOthers() throws Exception {
+        HttpClient client = clientAnswering(b -> {
+            if ("date".equals(b.path("dimensions").path(0).asString())) {
+                return response(500, "boom " + TOKEN);
+            }
+            return response(200, "{}");
+        });
+
+        var metrics = service(client).fetchSeoMetrics();
+
+        assertThat(metrics.daily().isFailure()).isTrue();
+        assertThat(metrics.daily().error()).contains("HTTP 500").doesNotContain(TOKEN);
+        assertThat(metrics.currentTotals().isFailure()).isFalse();
+        assertThat(metrics.topQueries().isFailure()).isFalse();
+        assertThat(metrics.topPages().isFailure()).isFalse();
+    }
+
+    @Test
+    void pagesWithImpressionsCarriesPreviousCount_andIsolatesItsFailure() throws Exception {
+        LocalDate currentStart = LocalDate.now(ZoneOffset.UTC).minusDays(3).minusDays(27);
+        HttpClient ok = clientAnswering(b -> response(200, isCurrent(b, currentStart)
+                ? "{\"rows\":[" + row("a", 1) + "," + row("b", 1) + "]}"
+                : "{\"rows\":[" + row("a", 1) + "]}"));
+        var result = service(ok).countPagesWithImpressions();
+        assertThat(result.count()).isEqualTo(2);
+        assertThat(result.previousCount()).isEqualTo(1L);
+        assertThat(result.previousEndDate()).isEqualTo(currentStart.minusDays(1));
+        assertThat(result.previousStartDate()).isEqualTo(currentStart.minusDays(28));
+        assertThat(result.previousError()).isNull();
+
+        HttpClient ko = clientAnswering(b -> isCurrent(b, currentStart)
+                ? response(200, "{\"rows\":[" + row("a", 1) + "]}")
+                : response(500, "down " + TOKEN));
+        var failed = service(ko).countPagesWithImpressions();
+        assertThat(failed.count()).isEqualTo(1);
+        assertThat(failed.previousCount()).isNull();
+        assertThat(failed.previousError()).contains("HTTP 500").doesNotContain(TOKEN);
+
+        HttpClient malformed = clientAnswering(b -> isCurrent(b, currentStart)
+                ? response(200, "{\"rows\":[" + row("a", 1) + "]}")
+                : response(200, "not json"));
+        var unreadable = service(malformed).countPagesWithImpressions();
+        assertThat(unreadable.count()).isEqualTo(1);
+        assertThat(unreadable.previousCount()).isNull();
+        assertThat(unreadable.previousError()).isNotBlank();
     }
 }

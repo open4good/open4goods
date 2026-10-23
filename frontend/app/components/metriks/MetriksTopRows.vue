@@ -10,7 +10,7 @@ import type { MetrikWithTrend } from '~/types/metriks'
 import { parseTopRows, topRowClicksEvolution } from '~/composables/useMetriks'
 
 const props = defineProps<{
-  /** A `seo.gsc.top_queries` / `seo.gsc.top_pages` metric. */
+  /** A `seo.gsc.top_queries` / `top_pages` / `top_losing_*` metric. */
   metrik: MetrikWithTrend
 }>()
 
@@ -18,7 +18,7 @@ const { t, n } = useI18n()
 
 const isError = computed(() => props.metrik.status === 'error')
 const rows = computed(() => parseTopRows(props.metrik.params))
-const isPages = computed(() => props.metrik.id.endsWith('top_pages'))
+const isPages = computed(() => props.metrik.id.endsWith('_pages'))
 
 const headers = computed(() => [
   { title: t('metriks.top.rank'), key: 'rank', align: 'end' as const },
