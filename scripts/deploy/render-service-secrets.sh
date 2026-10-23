@@ -1,25 +1,32 @@
 #!/bin/sh
 # Render a service's secrets from the `beta` or `prod` GitHub Environment onto its host
-# (ADR-0006, D140, GOU-933, GOU-957, GOU-1014, GOU-1041).
+# (ADR-0006, D140, GOU-933, GOU-957, GOU-1014, GOU-1041, GOU-1092).
 #
-# Usage: render-service-secrets.sh [--if-present] <check|apply> <env> <service>
+# Usage: render-service-secrets.sh [--if-present] [--source] <check|apply> <env> <service>
 #
 #   check         Check that the service's secrets are well-formed, on the runner
 #                 only: no SSH access, no value printed.
 #   apply         Run check, then write the service's files on the host. The
 #                 service is not restarted: the caller does it.
 #   <env>         beta or prod: the GitHub Environment the caller's job declares.
-#   <service>     api, ui, front-api, admin, b2b-api or frontend.
+#   <service>     api, ui, front-api, admin, b2b-api, frontend or infra.
 #   --if-present  A missing required secret is a ::warning:: and is not rendered
 #                 (release and beta deploy); without it, it fails. A secret that
 #                 is set but malformed always fails, before anything is written.
+#   --source      Render the `source` rows only: infraSecrets.yml passes it once the
+#                 password has been changed at its source (Elasticsearch, MySQL...).
+#                 Without it, those rows are skipped silently and their previous
+#                 render stays: a deploy never renders a password that the source
+#                 does not accept yet, and infraSecrets.yml never touches the others.
 #
 # This script is the single definition of what a service receives, shared by
 # serviceSecrets.yml, testAndPublishBeta.yml, frontend-ci.yml and
-# releaseDeployProd.yml. Each secret is read from an environment variable of the
-# same name, mapped in the calling step's `env:`. Every secret is optional unless
-# marked `required`: a missing one is a ::warning::, is not rendered and does not
-# stop the others; the previous render, or the open4goods-config value, is kept.
+# releaseDeployProd.yml (and infraSecrets.yml for the `source` rows and the infra
+# service). Each secret is read from an environment variable of the same name,
+# mapped in the calling step's `env:`. Every secret is optional unless marked
+# `required`: a missing one is a ::warning::, is not rendered and does not stop the
+# others; the previous render, or the open4goods-config value, is kept. A `source`
+# secret is optional too, and only rendered with --source (which renders nothing else).
 #
 # Kinds of target:
 #   tree     A file of the service's Spring Boot config tree,
@@ -42,7 +49,11 @@
 # Host service and env file: api, ui, front-api and b2b-api are themselves;
 # admin runs as `sbadmin` (/etc/open4goods/sbadmin.env); frontend reads
 # /opt/open4goods/config/<env>/frontend/.env (env_file of docker-compose.frontend.yml,
-# rewritten by open4goods-config's deploy: rendered before every publish).
+# rewritten by open4goods-config's deploy: rendered before every publish); infra is
+# the docker compose infrastructure (Kibana, XWiki, MySQL, Plausible), which reads
+# /etc/open4goods/infra.env as a second --env-file of publish-infra.sh: no
+# open4goods-config deploy writes /etc/open4goods/, and publish-jars.sh does not
+# source that file (docs/operations/infra-secrets-rotation.md).
 #
 # | Service   | Secret                          | Kind    | Target                                                                         | Need     |
 # | --------- | ------------------------------- | ------- | ------------------------------------------------------------------------------ | -------- |
@@ -64,9 +75,11 @@
 # | api       | O4G_ICECAT_PASSWORD             | tree    | icecat-feature-config.password                                                 | optional |
 # | api       | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.client.password                                              | optional |
 # | api       | O4G_INTERNAL_API_KEY            | tree    | admin-key                                                                      | optional |
+# | api       | O4G_ELASTICSEARCH_PASSWORD      | tree    | spring.elasticsearch.password                                                  | source   |
 # | ui        | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.client.password                                              | optional |
 # | ui        | O4G_SBA_PASSWORD                | tree    | o4g.actuator.monitor.password                                                  | optional |
 # | ui        | O4G_CAPTCHA_SECRET              | tree    | captcha-secret                                                                 | optional |
+# | ui        | O4G_ELASTICSEARCH_PASSWORD      | tree    | spring.elasticsearch.password                                                  | source   |
 # | front-api | GOOGLE_SSO_CLIENT_ID            | env     | FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID (front.security.google-sso.client-id)      | required |
 # | front-api | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.client.password                                              | optional |
 # | front-api | O4G_SBA_PASSWORD                | tree    | o4g.actuator.monitor.password                                                  | optional |
@@ -77,15 +90,22 @@
 # | front-api | O4G_MAIL_PASSWORD               | tree    | spring.mail.password                                                           | optional |
 # | front-api | O4G_CAPTCHA_SECRET              | tree    | captcha.secret-key                                                             | optional |
 # | front-api | FRONT_API_GITHUB_TOKEN          | tree    | feedback.github.access-token                                                   | optional |
+# | front-api | O4G_ELASTICSEARCH_PASSWORD      | tree    | spring.elasticsearch.password                                                  | source   |
 # | admin     | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.instance-auth.default-password                               | optional |
 # | admin     | O4G_SBA_PASSWORD                | tree    | o4g.sba.registration.password                                                  | optional |
 # | admin     | O4G_MAIL_PASSWORD               | tree    | spring.mail.password                                                           | optional |
 # | b2b-api   | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.client.password                                              | optional |
+# | b2b-api   | O4G_ELASTICSEARCH_PASSWORD      | tree    | spring.elasticsearch.password                                                  | source   |
 # | frontend  | GOOGLE_SSO_CLIENT_ID            | env     | NUXT_GOOGLE_OAUTH_CLIENT_ID                                                    | required |
 # | frontend  | GOOGLE_SSO_CLIENT_SECRET        | env     | NUXT_GOOGLE_OAUTH_CLIENT_SECRET                                                | required |
 # | frontend  | O4G_MACHINE_TOKEN               | env     | NUXT_MACHINE_TOKEN (runtimeConfig.machineToken)                                | optional |
 # | frontend  | O4G_MACHINE_TOKEN               | env     | MACHINE_TOKEN (token check of publish-frontend.sh)                             | optional |
 # | frontend  | FRONT_API_JWT_SECRET            | env     | FRONT_SECURITY_JWT_SECRET (server/utils/auth.ts, read at request time)          | optional |
+# | infra     | INFRA_KIBANA_SYSTEM_PASSWORD    | env     | INFRA_KIBANA_SYSTEM_PASSWORD (kibana.yml elasticsearch.password)               | source   |
+# | infra     | INFRA_KIBANA_ENCRYPTION_KEY     | env     | INFRA_KIBANA_ENCRYPTION_KEY (xpack.encryptedSavedObjects.encryptionKey)        | source   |
+# | infra     | INFRA_XWIKI_DB_PASSWORD         | env     | INFRA_XWIKI_DB_PASSWORD (xwiki DB_PASSWORD, mysql MYSQL_PASSWORD; prod)        | source   |
+# | infra     | INFRA_MYSQL_ROOT_PASSWORD       | env     | INFRA_MYSQL_ROOT_PASSWORD (mysql MYSQL_ROOT_PASSWORD; prod)                    | source   |
+# | infra     | INFRA_PLAUSIBLE_SECRET_KEY_BASE | env     | PLAUSIBLE_SECRET_KEY_BASE (overrides config/<env>/infra/.env; beta)            | source   |
 #
 # Coupled secrets: every consumer must receive the same value in the same deployment
 # (serviceSecrets.yml service=all, or a full release), otherwise the services stop
@@ -97,6 +117,12 @@
 #   FRONT_API_JWT_SECRET  front-api (signs) <-> frontend (verifies admin tokens); same rule.
 #   O4G_INTERNAL_API_KEY  front-api (front.affiliation-partners.api-key, sent to api) <->
 #                         api (admin-key: the only key api accepts besides test-keys).
+# Coupled with their source (infraSecrets.yml changes the source, then renders and restarts
+# every consumer in the same run; never serviceSecrets.yml nor a deploy):
+#   O4G_ELASTICSEARCH_PASSWORD    Elasticsearch user `elastic` <-> api, ui, front-api, b2b-api.
+#   INFRA_KIBANA_SYSTEM_PASSWORD  Elasticsearch user `kibana_system` <-> Kibana.
+#   INFRA_XWIKI_DB_PASSWORD       MySQL user `xwiki` <-> XWiki (prod).
+#   INFRA_MYSQL_ROOT_PASSWORD     MySQL user `root` (prod).
 #
 # Required environment for apply: DEPLOY_SSH_HOST, DEPLOY_SSH_USER, DEPLOY_SSH_KEY.
 set -eu
@@ -125,9 +151,11 @@ api API_EPREL_API_KEY tree eprel.api-key optional
 api O4G_ICECAT_PASSWORD tree icecat-feature-config.password optional
 api O4G_SBA_PASSWORD tree spring.boot.admin.client.password optional
 api O4G_INTERNAL_API_KEY tree admin-key optional
+api O4G_ELASTICSEARCH_PASSWORD tree spring.elasticsearch.password source
 ui O4G_SBA_PASSWORD tree spring.boot.admin.client.password optional
 ui O4G_SBA_PASSWORD tree o4g.actuator.monitor.password optional
 ui O4G_CAPTCHA_SECRET tree captcha-secret optional
+ui O4G_ELASTICSEARCH_PASSWORD tree spring.elasticsearch.password source
 front-api GOOGLE_SSO_CLIENT_ID env FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID required
 front-api O4G_SBA_PASSWORD tree spring.boot.admin.client.password optional
 front-api O4G_SBA_PASSWORD tree o4g.actuator.monitor.password optional
@@ -138,23 +166,35 @@ front-api O4G_ICECAT_PASSWORD tree icecat-feature-config.password optional
 front-api O4G_MAIL_PASSWORD tree spring.mail.password optional
 front-api O4G_CAPTCHA_SECRET tree captcha.secret-key optional
 front-api FRONT_API_GITHUB_TOKEN tree feedback.github.access-token optional
+front-api O4G_ELASTICSEARCH_PASSWORD tree spring.elasticsearch.password source
 admin O4G_SBA_PASSWORD tree spring.boot.admin.instance-auth.default-password optional
 admin O4G_SBA_PASSWORD tree o4g.sba.registration.password optional
 admin O4G_MAIL_PASSWORD tree spring.mail.password optional
 b2b-api O4G_SBA_PASSWORD tree spring.boot.admin.client.password optional
+b2b-api O4G_ELASTICSEARCH_PASSWORD tree spring.elasticsearch.password source
 frontend GOOGLE_SSO_CLIENT_ID env NUXT_GOOGLE_OAUTH_CLIENT_ID required
 frontend GOOGLE_SSO_CLIENT_SECRET env NUXT_GOOGLE_OAUTH_CLIENT_SECRET required
 frontend O4G_MACHINE_TOKEN env NUXT_MACHINE_TOKEN optional
 frontend O4G_MACHINE_TOKEN env MACHINE_TOKEN optional
 frontend FRONT_API_JWT_SECRET env FRONT_SECURITY_JWT_SECRET optional
+infra INFRA_KIBANA_SYSTEM_PASSWORD env INFRA_KIBANA_SYSTEM_PASSWORD source
+infra INFRA_KIBANA_ENCRYPTION_KEY env INFRA_KIBANA_ENCRYPTION_KEY source
+infra INFRA_XWIKI_DB_PASSWORD env INFRA_XWIKI_DB_PASSWORD source
+infra INFRA_MYSQL_ROOT_PASSWORD env INFRA_MYSQL_ROOT_PASSWORD source
+infra INFRA_PLAUSIBLE_SECRET_KEY_BASE env PLAUSIBLE_SECRET_KEY_BASE source
 '
 
 if_present=false
-if [ "${1:-}" = "--if-present" ]; then
-  if_present=true
+with_source=false
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --if-present) if_present=true ;;
+    --source) with_source=true ;;
+    *) break ;;
+  esac
   shift
-fi
-[ "$#" -eq 3 ] || fail "Usage: $0 [--if-present] <check|apply> <beta|prod> <service>"
+done
+[ "$#" -eq 3 ] || fail "Usage: $0 [--if-present] [--source] <check|apply> <beta|prod> <service>"
 action=$1
 env_name=$2
 service=$3
@@ -169,13 +209,16 @@ esac
 case "$service" in
   api | ui | front-api | b2b-api) host_service=$service ;;
   admin) host_service=sbadmin ;;
-  frontend) host_service=frontend ;;
-  *) fail "Unknown service: $service (api, ui, front-api, admin, b2b-api or frontend)" ;;
+  frontend | infra) host_service=$service ;;
+  *) fail "Unknown service: $service (api, ui, front-api, admin, b2b-api, frontend or infra)" ;;
 esac
 
 if [ "$service" = frontend ]; then
   spring=false
   env_file=/opt/open4goods/config/$env_name/frontend/.env
+elif [ "$service" = infra ]; then
+  spring=false
+  env_file=/etc/open4goods/infra.env
 else
   spring=true
   env_file=/etc/open4goods/$host_service.env
@@ -206,6 +249,12 @@ rows=
 missing=
 while read -r row_service secret kind target need; do
   [ "$row_service" = "$service" ] || continue
+  # A `source` row is the business of infraSecrets.yml only, and only that (see --source).
+  if [ "$need" = source ]; then
+    [ "$with_source" = true ] || continue
+  else
+    [ "$with_source" = false ] || continue
+  fi
   if is_set "$secret"; then
     rows="$rows$secret $kind $target
 "
