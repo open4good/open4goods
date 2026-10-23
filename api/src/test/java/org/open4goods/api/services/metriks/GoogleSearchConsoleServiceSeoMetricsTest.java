@@ -296,5 +296,13 @@ class GoogleSearchConsoleServiceSeoMetricsTest {
         assertThat(failed.count()).isEqualTo(1);
         assertThat(failed.previousCount()).isNull();
         assertThat(failed.previousError()).contains("HTTP 500").doesNotContain(TOKEN);
+
+        HttpClient malformed = clientAnswering(b -> isCurrent(b, currentStart)
+                ? response(200, "{\"rows\":[" + row("a", 1) + "]}")
+                : response(200, "not json"));
+        var unreadable = service(malformed).countPagesWithImpressions();
+        assertThat(unreadable.count()).isEqualTo(1);
+        assertThat(unreadable.previousCount()).isNull();
+        assertThat(unreadable.previousError()).isNotBlank();
     }
 }

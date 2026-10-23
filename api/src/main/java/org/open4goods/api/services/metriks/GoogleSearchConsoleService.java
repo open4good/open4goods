@@ -156,7 +156,7 @@ public class GoogleSearchConsoleService {
         try {
             previousCount = paginate(previousStart, previousEnd,
                     startRow -> fetchPage(uri, token, previousStart, previousEnd, startRow));
-        } catch (IOException e) {
+        } catch (IOException | RuntimeException e) {
             LOGGER.warn("Search Console previous-window page count failed: {}", redact(e.getMessage(), token));
             previousError = abbreviate(redact(String.valueOf(e.getMessage()), token));
         }
