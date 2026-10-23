@@ -210,7 +210,10 @@ public class CsvDialectDetector
         double headerConsistency = (double) matchingHeader / dataLines;
         double headerPenalty = modalCount == headerColumns ? 1.0 : 0.45;
 
-        return (modalConsistency + headerConsistency) * 0.5 * Math.log1p(modalCount) * headerPenalty;
+        // Linear in the column count: a separator that splits a record into many columns with some noise
+        // (unquoted ';' in HTML entities) must beat a stray character that cleanly yields two columns
+        // (e.g. a trailing tab on every line).
+        return (modalConsistency + headerConsistency) * 0.5 * modalCount * headerPenalty;
     }
 
     private LogicalRecord countLogicalRecordFields(
