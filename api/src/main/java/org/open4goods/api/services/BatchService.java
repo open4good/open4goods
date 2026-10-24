@@ -117,6 +117,13 @@ public class BatchService {
 	 */
 	private static final int SHARD_DEPTH = 3;
 
+	/** Product fields read to compute the cache keys of {@code cleanOrphanResources} (see {@code Resource.path}). */
+	static final String[] RESOURCE_KEY_FIELDS = { "resources.cacheKey", "resources.resourceType", "resources.fileName",
+			"resources.extension" };
+
+	/** Page size of the product stream of {@code cleanOrphanResources}, far below the 100 MB ES response limit. */
+	static final int RESOURCE_KEY_PAGE_SIZE = 1000;
+
 	/**
 	 * Shard folder name used by {@link Resource#folderHashPrefix(String)} for cache keys too
 	 * short to be sharded on their three last characters.
@@ -182,13 +189,15 @@ public class BatchService {
 
 		// 2. Stream all products to extract active resource cache keys
 		Set<String> activeKeys = new HashSet<>();
-		long streamedProductCount;
+		AtomicLong streamedCounter = new AtomicLong();
 		try {
-			streamedProductCount = collectActiveKeys(activeKeys);
+			collectActiveKeys(activeKeys, streamedCounter);
 		} catch (Exception e) {
 			logger.error("Error streaming products from repository during resource cleanup", e);
-			return ResourceCleanupReport.aborted(mode, "product stream failed: " + e.getMessage(), indexedProductCount, 0);
+			return ResourceCleanupReport.aborted(mode, "product stream failed: " + e.getMessage(), indexedProductCount,
+					streamedCounter.get());
 		}
+		long streamedProductCount = streamedCounter.get();
 
 		// 3. Safety floor : a silently truncated stream must never be read as "nothing is referenced"
 		long floor = (long) Math.ceil(indexedProductCount * apiProperties.getResourceCleanupMinProductRatio());
@@ -220,18 +229,20 @@ public class BatchService {
 	/**
 	 * Streams every product and registers all cache keys reachable from its resources.
 	 *
+	 * Only the resource fields needed to compute the cache keys are fetched, in small pages, so that no
+	 * Elasticsearch response approaches the client buffer limit (GOU-1134).
+	 *
 	 * @param activeKeys set to fill with the reachable cache keys
-	 * @return the number of products actually streamed
+	 * @param streamedProductCount counter of products read so far, kept accurate if the stream fails midway
 	 */
-	private long collectActiveKeys(Set<String> activeKeys) {
+	private void collectActiveKeys(Set<String> activeKeys, AtomicLong streamedProductCount) {
 		List<Integer> allowedSuffixes = apiProperties.getAllowedImagesSizeSuffixes();
-		long streamedProductCount = 0;
 
-		try (Stream<Product> productStream = dataRepository.exportAll()) {
+		try (Stream<Product> productStream = dataRepository.exportAll(RESOURCE_KEY_FIELDS, RESOURCE_KEY_PAGE_SIZE)) {
 			Iterator<Product> iterator = productStream.iterator();
 			while (iterator.hasNext()) {
 				Product product = iterator.next();
-				streamedProductCount++;
+				streamedProductCount.incrementAndGet();
 				if (product.getResources() == null) {
 					continue;
 				}
@@ -260,7 +271,6 @@ public class BatchService {
 				}
 			}
 		}
-		return streamedProductCount;
 	}
 
 	/**
