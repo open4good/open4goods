@@ -186,6 +186,8 @@ public class BatchServiceResourceCleanupTest {
         assertEquals(2, report.streamedProductCount());
         assertEquals(1000, BatchService.RESOURCE_KEY_PAGE_SIZE);
         assertTrue(java.util.Arrays.asList(BatchService.RESOURCE_KEY_FIELDS).contains("resources.cacheKey"));
+        // Resource.hashCode() reads the url : without it the resources set cannot be deserialized
+        assertTrue(java.util.Arrays.asList(BatchService.RESOURCE_KEY_FIELDS).contains("resources.url"));
     }
 
     /**

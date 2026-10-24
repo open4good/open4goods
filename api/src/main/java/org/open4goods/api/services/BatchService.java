@@ -117,9 +117,12 @@ public class BatchService {
 	 */
 	private static final int SHARD_DEPTH = 3;
 
-	/** Product fields read to compute the cache keys of {@code cleanOrphanResources} (see {@code Resource.path}). */
-	static final String[] RESOURCE_KEY_FIELDS = { "resources.cacheKey", "resources.resourceType", "resources.fileName",
-			"resources.extension" };
+	/**
+	 * Product fields read to compute the cache keys of {@code cleanOrphanResources} (see {@code Resource.path}).
+	 * {@code resources.url} is mandatory : {@code Resource.equals/hashCode} rely on it to rebuild the resources set.
+	 */
+	static final String[] RESOURCE_KEY_FIELDS = { "resources.url", "resources.cacheKey", "resources.resourceType",
+			"resources.fileName", "resources.extension" };
 
 	/** Page size of the product stream of {@code cleanOrphanResources}, far below the 100 MB ES response limit. */
 	static final int RESOURCE_KEY_PAGE_SIZE = 1000;
