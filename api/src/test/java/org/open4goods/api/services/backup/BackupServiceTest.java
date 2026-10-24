@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.HexFormat;
@@ -21,6 +22,7 @@ import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -185,6 +187,22 @@ class BackupServiceTest {
         }
         assertThat(Files.exists(productBackupFolder.resolve("products-backup-0.gz"))).isTrue();
         assertThat(Files.exists(productBackupFolder.resolve("products-backup-1.gz"))).isTrue();
+    }
+
+    @Test
+    void publishedFilesAreWorldReadable() throws Exception {
+        Assumptions.assumeTrue(Files.getFileStore(productBackupFolder).supportsFileAttributeView("posix"));
+        when(productRepository.countMainIndex()).thenReturn(1L);
+        when(productRepository.exportAll(1000)).thenReturn(Stream.of(new Product()));
+        when(serialisationService.toJson(any(Product.class))).thenReturn("{\"id\":1}");
+
+        backupService.backupProducts();
+
+        for (String name : List.of("products-backup-0.gz", "products-backup-1.gz", "products-backup-manifest.json",
+                "products-backup.sha256")) {
+            assertThat(PosixFilePermissions.toString(Files.getPosixFilePermissions(productBackupFolder.resolve(name))))
+                    .as(name).isEqualTo("rw-r--r--");
+        }
     }
 
     @Test
