@@ -44,7 +44,7 @@ mvn --offline -pl api -am clean install
 
 `BackupService.backupProducts()` écrit `products-backup-{N}.gz` dans `api.backup.data-backup-folder`, puis
 `products-backup-manifest.json` (champ optionnel `sha256` : nom → empreinte) et enfin `products-backup.sha256` au
-format `sha256sum` (`<hex>  <fichier>`, écrit atomiquement, en dernier : sa présence signale une génération complète).
+format `sha256sum` (`<hex>  <fichier>`, écrit atomiquement, en dernier, en `rw-r--r--` comme les `.gz` et le manifest pour rester lisible par le compte de tirage `backup-pull` : sa présence signale une génération complète).
 Les empreintes sont calculées pendant l'écriture (`DigestOutputStream`), jamais en relisant les fichiers. Vérification :
 `cd <dossier> && sha256sum -c products-backup.sha256`. Le health check signale `product_backup_checksum_missing` si le
 manifest déclare des empreintes mais que le `.sha256` manque ; il ne recalcule rien.
