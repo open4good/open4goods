@@ -266,9 +266,14 @@ public class ProductRepository {
 	}
 
 	/**
-	 * Export all aggregated data
+	 * Export all aggregated data, full products, {@value #EXPORT_STREAM_PAGE_SIZE} per page.
+	 * <p>
+	 * Beware : a page of complete products can exceed the 100 MB response buffer of the Elasticsearch
+	 * client (GOU-1134). Prefer {@link #exportAll(String[], int)} or {@link #exportAll(int)}; the
+	 * remaining callers without filter (BatchService.clean, AggregationFacadeService.sanitizeAll) are
+	 * manual maintenance jobs that should be moved to a smaller page if they fail the same way.
 	 *
-	 * @return
+	 * @return stream of products
 	 */
         public Stream<Product> exportAll() {
             Query query = Query.findAll();
@@ -358,6 +363,18 @@ public class ProductRepository {
 
 
         public Stream<Product> exportAll( String[] includeFields) {
+                return exportAll(includeFields, EXPORT_STREAM_PAGE_SIZE);
+        }
+
+        /**
+         * Export all aggregated data, restricted to the given source fields, with a configurable page size.
+         * Keeps each Elasticsearch response far below the 100 MB buffer limit of the REST client.
+         *
+         * @param includeFields source fields to fetch (all fields when null or empty)
+         * @param pageSize      the page size to use when streaming products
+         * @return stream of (partial) products
+         */
+        public Stream<Product> exportAll( String[] includeFields, int pageSize) {
 
                 NativeQueryBuilder queryBuilder = new NativeQueryBuilder().withQuery(Query.findAll());
                 if (includeFields != null && includeFields.length > 0) {
@@ -365,7 +382,7 @@ public class ProductRepository {
                 }
 
                 NativeQuery query = queryBuilder
-                		.withPageable(EXPORT_STREAM_PAGE)
+                		.withPageable(PageRequest.of(0, pageSize))
                 		.build();
 
                 var iterator = elasticsearchOperations.searchForStream(query, Product.class, CURRENT_INDEX);
