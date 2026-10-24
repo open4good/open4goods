@@ -419,4 +419,19 @@ class BackupServiceTest {
 
         verify(productRepository, times(1)).exportAll(1000);
     }
+
+    @Test
+    void backupProductsTimerIsRecorded() throws Exception {
+        io.micrometer.core.instrument.simple.SimpleMeterRegistry registry = new io.micrometer.core.instrument.simple.SimpleMeterRegistry();
+        org.springframework.aop.aspectj.annotation.AspectJProxyFactory factory =
+                new org.springframework.aop.aspectj.annotation.AspectJProxyFactory(backupService);
+        factory.setProxyTargetClass(true);
+        factory.addAspect(new io.micrometer.core.aop.TimedAspect(registry));
+        BackupService proxy = factory.getProxy();
+
+        when(productRepository.exportAll(any(Integer.class))).thenReturn(Stream.<Product>empty());
+        proxy.backupProducts();
+
+        assertThat(registry.find("backup.products").tag("service", "BackupService").timer()).isNotNull();
+    }
 }

@@ -178,7 +178,7 @@ public class BackupService implements HealthIndicator {
 	/**
 	 * Exports all data in zipped files, unconditionally (manual trigger or called by the periodic check).
 	 */
-	@Timed(value = "backup.products", description = "Backup of all products", extraTags = { "service" })
+	@Timed(value = "backup.products", description = "Backup of all products", extraTags = { "service", "BackupService" })
 	public void backupProducts() {
 		logger.info("Products data backup - start");
 
