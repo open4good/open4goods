@@ -6,7 +6,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.time.Instant;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.Iterator;
@@ -133,6 +137,55 @@ public class BatchService {
 	 */
 	private static final String UNKNOWN_SHARD = "UNKNOWN";
 
+	/** Single threaded: two sweeps must never overlap, and one holds the whole key set in memory. */
+	private final ExecutorService cleanupExecutor = Executors.newSingleThreadExecutor(r -> {
+		Thread t = new Thread(r, "clean-resources");
+		t.setDaemon(true);
+		return t;
+	});
+
+	private final AtomicReference<ResourceCleanupStatus> cleanupStatus = new AtomicReference<>(ResourceCleanupStatus.idle());
+
+	/**
+	 * Starts {@link #cleanOrphanResources(ResourceCleanupMode)} in the background, a sweep of the prod cache
+	 * lasting hours (GOU-1142).
+	 *
+	 * @return the RUNNING status of the new run, or the current status unchanged when a run is already in progress
+	 */
+	public ResourceCleanupStatus startCleanOrphanResources(ResourceCleanupMode mode) {
+		ResourceCleanupStatus running = new ResourceCleanupStatus(ResourceCleanupStatus.State.RUNNING, mode, Instant.now(),
+				null, null, null);
+		while (true) {
+			ResourceCleanupStatus current = cleanupStatus.get();
+			if (current.state() == ResourceCleanupStatus.State.RUNNING) {
+				return current;
+			}
+			if (cleanupStatus.compareAndSet(current, running)) {
+				break;
+			}
+		}
+		cleanupExecutor.execute(() -> {
+			ResourceCleanupStatus done;
+			try {
+				ResourceCleanupReport report = cleanOrphanResources(mode);
+				done = new ResourceCleanupStatus(ResourceCleanupStatus.State.COMPLETED, mode, running.startedAt(),
+						Instant.now(), report, null);
+			} catch (Throwable t) {
+				logger.error("Orphan resource cleanup failed", t);
+				done = new ResourceCleanupStatus(ResourceCleanupStatus.State.FAILED, mode, running.startedAt(),
+						Instant.now(), null, String.valueOf(t));
+			}
+			cleanupStatus.set(done);
+			logger.info("Orphan resource cleanup finished: {}", done);
+		});
+		return running;
+	}
+
+	/** @return the status of the current or last background cleanup */
+	public ResourceCleanupStatus getCleanupStatus() {
+		return cleanupStatus.get();
+	}
+
 	/**
 	 * Runs the orphan resource cleanup in report-only mode.
 	 *
@@ -191,10 +244,15 @@ public class BatchService {
 		}
 
 		// 2. Stream all products to extract active resource cache keys
-		Set<String> activeKeys = new HashSet<>();
+		ActiveKeySet activeKeys = new ActiveKeySet();
 		AtomicLong streamedCounter = new AtomicLong();
 		try {
 			collectActiveKeys(activeKeys, streamedCounter);
+			activeKeys.seal();
+		} catch (ActiveKeySet.InsufficientMemoryException | OutOfMemoryError e) {
+			logger.error("Not enough heap to hold the active resource keys, aborting resource cleanup, no file touched", e);
+			return ResourceCleanupReport.aborted(mode, "insufficient memory: " + e.getMessage(), indexedProductCount,
+					streamedCounter.get());
 		} catch (Exception e) {
 			logger.error("Error streaming products from repository during resource cleanup", e);
 			return ResourceCleanupReport.aborted(mode, "product stream failed: " + e.getMessage(), indexedProductCount,
@@ -235,10 +293,10 @@ public class BatchService {
 	 * Only the resource fields needed to compute the cache keys are fetched, in small pages, so that no
 	 * Elasticsearch response approaches the client buffer limit (GOU-1134).
 	 *
-	 * @param activeKeys set to fill with the reachable cache keys
+	 * @param activeKeys set to fill with the reachable cache keys (bounded memory, see {@link ActiveKeySet})
 	 * @param streamedProductCount counter of products read so far, kept accurate if the stream fails midway
 	 */
-	private void collectActiveKeys(Set<String> activeKeys, AtomicLong streamedProductCount) {
+	private void collectActiveKeys(ActiveKeySet activeKeys, AtomicLong streamedProductCount) {
 		List<Integer> allowedSuffixes = apiProperties.getAllowedImagesSizeSuffixes();
 
 		try (Stream<Product> productStream = dataRepository.exportAll(RESOURCE_KEY_FIELDS, RESOURCE_KEY_PAGE_SIZE)) {
@@ -351,7 +409,7 @@ public class BatchService {
 
 		private final ResourceCleanupMode mode;
 		private final File cacheDir;
-		private final Set<String> activeKeys;
+		private final ActiveKeySet activeKeys;
 		private final long gracePeriodMs;
 		private final long startTime;
 
@@ -364,7 +422,7 @@ public class BatchService {
 		private long processed;
 		private long failures;
 
-		private OrphanSweep(ResourceCleanupMode mode, File cacheDir, Set<String> activeKeys, long gracePeriodMs,
+		private OrphanSweep(ResourceCleanupMode mode, File cacheDir, ActiveKeySet activeKeys, long gracePeriodMs,
 				long startTime) {
 			this.mode = mode;
 			this.cacheDir = cacheDir;

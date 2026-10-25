@@ -350,4 +350,22 @@ public class BatchServiceResourceCleanupTest {
         assertTrue(filePath.toFile().setLastModified(lastModifiedTime), "Failed to set mock file modification time");
         return filePath;
     }
+
+    @Test
+    public void testAsyncCleanupReportsStatus() throws Exception {
+        assertEquals(ResourceCleanupStatus.State.IDLE, batchService.getCleanupStatus().state());
+        when(productRepository.exportAll(BatchService.RESOURCE_KEY_FIELDS, BatchService.RESOURCE_KEY_PAGE_SIZE))
+                .thenReturn(Stream.empty());
+
+        batchService.startCleanOrphanResources(ResourceCleanupMode.DRY_RUN);
+
+        long deadline = System.currentTimeMillis() + 10000;
+        while (batchService.getCleanupStatus().state() == ResourceCleanupStatus.State.RUNNING
+                && System.currentTimeMillis() < deadline) {
+            Thread.sleep(20);
+        }
+        ResourceCleanupStatus status = batchService.getCleanupStatus();
+        assertEquals(ResourceCleanupStatus.State.COMPLETED, status.state());
+        assertTrue(status.report().aborted(), "empty stream is below the safety floor");
+    }
 }

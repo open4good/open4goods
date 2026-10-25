@@ -56,3 +56,11 @@ Déclenchement : `checkProductsBackup()` (`@Scheduled`, `api.backup.products-bac
 `POST /backup/products/export` force toujours la sauvegarde. Le profil local ne lance rien (stub `LocalDevConfig`).
 À la première vérification, si aucun export ne tourne, `.tmp/` est vidé (volume libéré logué) ; les fichiers publiés,
 le manifest et le `.sha256` ne sont jamais touchés. Pas de reprise d'une sauvegarde interrompue.
+
+## Nettoyage des ressources orphelines
+
+`POST /batch/clean-resources?mode=DRY_RUN|MOVE|DELETE` répond `202` immédiatement et exécute le balayage en tâche de
+fond (un seul à la fois ; un second appel pendant un run renvoie l'état courant). `GET /batch/clean-resources` donne
+l'état (`IDLE`, `RUNNING`, `COMPLETED` avec le rapport, `FAILED`). Les clés actives sont stockées par empreinte 64 bits
+dans un `long[]` trié (`ActiveKeySet`, ~8 o/clé) : une collision ne peut que conserver un fichier, jamais classer un
+fichier référencé comme orphelin. Si le tas ne suffit pas, le run s'abandonne (`aborted`, aucun fichier touché).
