@@ -50,8 +50,8 @@ final class ActiveKeySet {
 			throw new IllegalStateException("sealed");
 		}
 		if (lastChunkFill == CHUNK_SIZE) {
-			// Sealing needs one contiguous array on top of the chunks : reserve room for it from the start
-			requireHeap((size + CHUNK_SIZE) * Long.BYTES * 2L, "storing active cache keys");
+			// The new chunk, plus the contiguous array sealing will need on top of the chunks already held
+			requireHeap((size + 2L * CHUNK_SIZE) * Long.BYTES, "storing active cache keys");
 			if (chunkCount == chunks.length) {
 				chunks = Arrays.copyOf(chunks, chunkCount * 2);
 			}
@@ -101,12 +101,21 @@ final class ActiveKeySet {
 	}
 
 	private static void requireHeap(long neededBytes, String purpose) {
-		Runtime rt = Runtime.getRuntime();
-		long available = rt.maxMemory() - (rt.totalMemory() - rt.freeMemory());
+		long available = availableHeap();
+		if (available < neededBytes + HEAP_RESERVE_BYTES) {
+			// Used heap includes garbage not collected yet: collect once before abandoning a run of hours
+			System.gc();
+			available = availableHeap();
+		}
 		if (available < neededBytes + HEAP_RESERVE_BYTES) {
 			throw new InsufficientMemoryException("insufficient heap for " + purpose + ": " + (available >> 20)
 					+ " MB available, " + ((neededBytes + HEAP_RESERVE_BYTES) >> 20) + " MB needed");
 		}
+	}
+
+	private static long availableHeap() {
+		Runtime rt = Runtime.getRuntime();
+		return rt.maxMemory() - (rt.totalMemory() - rt.freeMemory());
 	}
 
 	/** 64 bit FNV-1a over the UTF-8 bytes, finished by the murmur3 avalanche to spread keys evenly. */
