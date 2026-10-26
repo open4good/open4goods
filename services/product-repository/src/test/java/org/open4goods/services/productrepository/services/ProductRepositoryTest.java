@@ -313,6 +313,9 @@ class ProductRepositoryTest
     @Test
     void fullProductExportsNeverExceedSafePageSize()
     {
+        // ~21 KB per complete product: 1000 per page keeps responses far below the 100 MB client buffer
+        assertThat(ProductRepository.FULL_PRODUCT_PAGE_SIZE).isLessThanOrEqualTo(1000);
+
         org.springframework.data.elasticsearch.core.SearchHitsIterator<Product> it =
                 org.mockito.Mockito.mock(org.springframework.data.elasticsearch.core.SearchHitsIterator.class);
         when(elasticsearchOperations.searchForStream(any(org.springframework.data.elasticsearch.core.query.Query.class), eq(Product.class), eq(ProductRepository.CURRENT_INDEX)))
