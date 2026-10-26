@@ -170,6 +170,15 @@ const logMissingNavigationSignal = (token: string, userAgent?: string) => {
   missingSignalLog.refusedSinceLastLog = 0
 }
 
+const PLAIN_ERROR_BODIES: Record<number, string> = {
+  400: 'Bad Request',
+  403: 'Forbidden',
+  404: 'Not Found',
+  405: 'Method Not Allowed',
+  410: 'Gone',
+  429: 'Too Many Requests',
+}
+
 /**
  * Sends a short text/plain error: /contrib/** must never render an HTML page
  * (the Plausible script it carries would count robot visits).
@@ -178,10 +187,7 @@ export const sendContribPlainError = (
   event: H3Event,
   error: unknown
 ): Promise<void> => {
-  const { statusCode, statusMessage } = (error ?? {}) as {
-    statusCode?: number
-    statusMessage?: string
-  }
+  const { statusCode } = (error ?? {}) as { statusCode?: number }
   const status = statusCode && statusCode >= 400 ? statusCode : 500
 
   setResponseStatus(event, status)
@@ -189,7 +195,12 @@ export const sendContribPlainError = (
   setResponseHeader(event, 'X-Robots-Tag', 'noindex, nofollow')
   setResponseHeader(event, 'Cache-Control', 'no-store')
 
-  return send(event, statusMessage || 'Error', 'text/plain; charset=utf-8')
+  // Short generic body: the upstream problem JSON (front-api) is not echoed.
+  return send(
+    event,
+    PLAIN_ERROR_BODIES[status] ?? 'Error',
+    'text/plain; charset=utf-8'
+  )
 }
 
 /**
