@@ -16,6 +16,7 @@ export default defineEventHandler(async event => {
     // The visitor's Referer reaches nudger.fr only: the followed redirect to the
     // network or merchant carries none, whatever policy the link used (GOU-1184).
     setHeader(event, 'Referrer-Policy', 'no-referrer')
+    setHeader(event, 'Cache-Control', 'no-store')
 
     return sendRedirect(event, redirect.location, redirect.statusCode)
   } catch (error) {

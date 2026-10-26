@@ -196,9 +196,17 @@ export const sendContribPlainError = (
   setResponseHeader(event, 'Cache-Control', 'no-store')
 
   // Short generic body: the upstream problem JSON (front-api) is not echoed.
+  // Only the missing navigation signal gets an explanation for real visitors.
+  const body =
+    status === 403 &&
+    (error as { statusMessage?: string }).statusMessage ===
+      MISSING_NAVIGATION_SIGNAL_MESSAGE
+      ? `${MISSING_NAVIGATION_SIGNAL_MESSAGE}.`
+      : (PLAIN_ERROR_BODIES[status] ?? 'Error')
+
   return send(
     event,
-    PLAIN_ERROR_BODIES[status] ?? 'Error',
+    body,
     'text/plain; charset=utf-8'
   )
 }
