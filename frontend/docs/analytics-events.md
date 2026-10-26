@@ -14,6 +14,13 @@ wraps the Plausible plugin and respects Do Not Track settings.
 
 > **Filtrage robots sur `/contrib/` (GOU-1175)** : `/contrib/<jeton>` et `/api/contrib/<jeton>` refusent (403 `text/plain`, sans appel à front-api) les UA vides ou reconnus comme robots par `isbot`, plus les motifs de `NUXT_AFFILIATION_BLOCKED_USER_AGENTS` (sous-chaînes séparées par des virgules, insensibles à la casse, vide par défaut). Aucune page HTML n'est jamais rendue sous `/contrib/**` (erreurs en `text/plain`) et Plausible est désactivé côté client sur ce chemin.
 
+> **Signal de navigation sur `/contrib/` (GOU-1184)** : après les règles de GOU-1175, `/contrib/<jeton>` et `/api/contrib/<jeton>` ne redirigent que si la requête porte **au moins un** signal de navigation sur le site ; sinon 403 `text/plain` "Ouvrez ce lien depuis la fiche produit sur nudger.fr" (`Cache-Control: no-store`, `X-Robots-Tag`), sans appel à front-api, donc sans `ContributionVote` ni clic transmis au réseau.
+>
+> 1. **`Referer`** dont l'hôte est un domaine du site (`HOST_DOMAIN_LANGUAGE_MAP` de `shared/utils/domain-language.ts` : nudger.fr, beta.nudger.fr, nudger.com...) ou l'hôte qui sert la requête. Les liens d'offre portent donc `rel="sponsored nofollow noopener"` (plus de `noreferrer`) et `referrerpolicy="same-origin"` (`AFFILIATE_LINK_REL`, `AFFILIATE_LINK_REFERRER_POLICY` dans `app/utils/_product-pricing.ts`) ; le clic sur une ligne du tableau d'offres passe par `openAffiliateLinkInNewTab` (même `rel`, même politique, ce que `window.open` ne permet pas). La 301 de `/contrib/` envoie `Referrer-Policy: no-referrer` : le réseau et le marchand ne reçoivent pas de referer nudger.
+> 2. **Cookie technique `nudger_nav=1`** : first-party, `Path=/`, `SameSite=Lax`, `Secure` en HTTPS, `Max-Age` 24 h, valeur constante sans donnée personnelle. Posé côté client par `app/plugins/navigation-signal.client.ts` au chargement de l'application et à chaque navigation (`page:finish`), jamais par le SSR (le HTML reste sans `Set-Cookie`, donc cacheable). Cookie de sécurité / lutte contre la fraude au clic d'affiliation, strictement nécessaire à ce service : exempté de consentement. Il n'est lu que par `/contrib/**`.
+>
+> Interrupteur : `NUXT_AFFILIATION_REQUIRE_NAVIGATION_SIGNAL=false` (vrai par défaut, seule une valeur explicite `false`/`0`/`off`/`no` coupe le contrôle) rétablit le comportement de GOU-1175 sans nouveau build. Journal : un `warn` agrégé au plus par minute (nombre de refus depuis le précédent, un UA tronqué et les 6 premiers caractères du jeton en exemple), jamais d'IP ni de jeton entier.
+
 ### `affiliate-click`
 
 Tracks clicks on affiliate redirect links (typically `/contrib/<token>`). Emit

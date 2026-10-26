@@ -582,6 +582,10 @@ export default defineNuxtConfig({
     // Extra user-agent substrings (comma separated, case-insensitive) refused on
     // /contrib/ in addition to isbot. Overridden by NUXT_AFFILIATION_BLOCKED_USER_AGENTS.
     affiliationBlockedUserAgents: '',
+    // /contrib/ only redirects requests carrying a site Referer or the
+    // navigation-signal cookie (GOU-1184). Kill switch, no rebuild needed:
+    // NUXT_AFFILIATION_REQUIRE_NAVIGATION_SIGNAL=false.
+    affiliationRequireNavigationSignal: true,
     staticMainPageRoutes: STATIC_MAIN_PAGE_ROUTE_NAMES,
     sitemapLocalFiles: {
       fr: [

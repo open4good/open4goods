@@ -1,6 +1,7 @@
 import { isbot } from 'isbot'
 import {
   createError,
+  getCookie,
   getRouterParam,
   send,
   setResponseHeader,
@@ -13,6 +14,11 @@ import {
   type AffiliationRedirectResponse,
 } from '~~/shared/api-client/services/affiliation.services'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
+import {
+  isSiteReferer,
+  NAVIGATION_SIGNAL_COOKIE_NAME,
+  NAVIGATION_SIGNAL_COOKIE_VALUE,
+} from '~~/shared/utils/navigation-signal'
 
 import { extractBackendErrorDetails } from './log-backend-error'
 
@@ -74,6 +80,60 @@ const isBlockedUserAgent = (event: H3Event, userAgent?: string): boolean => {
   )
 }
 
+export const MISSING_NAVIGATION_SIGNAL_MESSAGE =
+  'Ouvrez ce lien depuis la fiche produit sur nudger.fr'
+
+const NAVIGATION_SIGNAL_LOG_INTERVAL_MS = 60_000
+
+const missingSignalLog = { lastLoggedAt: 0, refusedSinceLastLog: 0 }
+
+/**
+ * Kill switch (NUXT_AFFILIATION_REQUIRE_NAVIGATION_SIGNAL): only an explicit
+ * false disables the check, so a missing or mistyped value keeps it on.
+ */
+const isNavigationSignalRequired = (event: H3Event): boolean => {
+  const { affiliationRequireNavigationSignal: value } = useRuntimeConfig(
+    event
+  ) as { affiliationRequireNavigationSignal?: unknown }
+
+  if (typeof value === 'string') {
+    return !['false', '0', 'off', 'no'].includes(value.trim().toLowerCase())
+  }
+
+  return value !== false && value !== 0
+}
+
+/**
+ * A real visitor follows /contrib/ links from a page of the site: the request
+ * carries a site Referer or the navigation-signal cookie (GOU-1184).
+ */
+const hasNavigationSignal = (
+  event: H3Event,
+  rawHost: string | string[] | undefined
+): boolean =>
+  isSiteReferer(event.node.req.headers.referer, rawHost) ||
+  getCookie(event, NAVIGATION_SIGNAL_COOKIE_NAME) ===
+    NAVIGATION_SIGNAL_COOKIE_VALUE
+
+/**
+ * Aggregated warning: at most one line per interval with the refusal count
+ * and one truncated sample, never the full token nor the client IP.
+ */
+const logMissingNavigationSignal = (token: string, userAgent?: string) => {
+  missingSignalLog.refusedSinceLastLog += 1
+  const now = Date.now()
+
+  if (now - missingSignalLog.lastLoggedAt < NAVIGATION_SIGNAL_LOG_INTERVAL_MS) {
+    return
+  }
+
+  console.warn(
+    `Affiliation redirect refused without navigation signal: ${missingSignalLog.refusedSinceLastLog} request(s) since last report (sample user agent "${(userAgent ?? '').slice(0, MAX_LOGGED_USER_AGENT_LENGTH)}" token "${token.slice(0, MAX_LOGGED_TOKEN_LENGTH)}…")`
+  )
+  missingSignalLog.lastLoggedAt = now
+  missingSignalLog.refusedSinceLastLog = 0
+}
+
 /**
  * Sends a short text/plain error: /contrib/** must never render an HTML page
  * (the Plausible script it carries would count robot visits).
@@ -122,6 +182,17 @@ export const resolveAffiliationRedirect = async (
       `Affiliation redirect refused for robot user agent "${(userAgent ?? '').slice(0, MAX_LOGGED_USER_AGENT_LENGTH)}" token "${token.slice(0, MAX_LOGGED_TOKEN_LENGTH)}…"`
     )
     throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
+  }
+
+  if (
+    isNavigationSignalRequired(event) &&
+    !hasNavigationSignal(event, rawHost)
+  ) {
+    logMissingNavigationSignal(token, userAgent)
+    throw createError({
+      statusCode: 403,
+      statusMessage: MISSING_NAVIGATION_SIGNAL_MESSAGE,
+    })
   }
 
   try {

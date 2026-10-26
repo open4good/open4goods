@@ -77,6 +77,7 @@
                   :href="resolveOfferLink(item)"
                   target="_blank"
                   :rel="AFFILIATE_LINK_REL"
+                  :referrerpolicy="AFFILIATE_LINK_REFERRER_POLICY"
                   icon
                   variant="text"
                   size="small"
@@ -189,6 +190,7 @@
                     :href="bestNewOfferLink"
                     target="_blank"
                     :rel="AFFILIATE_LINK_REL"
+                    :referrerpolicy="AFFILIATE_LINK_REFERRER_POLICY"
                     class="product-price__history-cta"
                     @click="
                       handleOfferRedirectClick(
@@ -386,6 +388,7 @@
                     :href="bestOccasionOfferLink"
                     target="_blank"
                     :rel="AFFILIATE_LINK_REL"
+                    :referrerpolicy="AFFILIATE_LINK_REFERRER_POLICY"
                     class="product-price__history-cta"
                     @click="
                       handleOfferRedirectClick(
@@ -575,8 +578,10 @@ import {
 import { useAnalytics } from '~/composables/useAnalytics'
 import {
   resolveOfferHref,
+  AFFILIATE_LINK_REFERRER_POLICY,
   AFFILIATE_LINK_REL,
   formatPrice,
+  openAffiliateLinkInNewTab,
   NEW_CONDITION_COLOR,
   OCCASION_CONDITION_COLOR,
 } from '~/utils/_product-pricing'
@@ -1098,10 +1103,10 @@ const onRowClick = (
   const link = resolveOfferLink(item)
   if (link) {
     handleOfferRedirectClick(item, 'offers-table', link)
-    // noopener/noreferrer: this is a whole-row click convenience opening the
-    // same href as the row's real `AFFILIATE_LINK_REL` anchor (item.actions
-    // slot above) - that anchor is the crawlable, rel="sponsored ..." link.
-    window.open(link, '_blank', 'noopener,noreferrer')
+    // Whole-row click convenience opening the same href as the row's real
+    // `AFFILIATE_LINK_REL` anchor (item.actions slot above), which is the
+    // crawlable rel="sponsored ..." link; same rel and referrer policy.
+    openAffiliateLinkInNewTab(link)
   }
 }
 

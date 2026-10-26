@@ -18,6 +18,7 @@
           :href="badge.url"
           target="_blank"
           :rel="AFFILIATE_LINK_REL"
+          :referrerpolicy="AFFILIATE_LINK_REFERRER_POLICY"
           variant="text"
           color="primary"
           density="compact"
@@ -95,6 +96,7 @@
               :href="alt.url"
               target="_blank"
               :rel="AFFILIATE_LINK_REL"
+              :referrerpolicy="AFFILIATE_LINK_REFERRER_POLICY"
               class="product-price-rows__menu-item"
               @click="
                 trackOfferClick(alt.offer, alt.url, 'price-row-alternative')
@@ -145,6 +147,7 @@ import type {
 import {
   formatBestPrice,
   resolveOfferHref,
+  AFFILIATE_LINK_REFERRER_POLICY,
   AFFILIATE_LINK_REL,
 } from '~/utils/_product-pricing'
 

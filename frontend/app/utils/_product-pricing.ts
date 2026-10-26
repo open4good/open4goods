@@ -53,14 +53,38 @@ export const formatOffersCount = (
   return translatePlural('category.products.offerCount', count, { count })
 }
 
-/** rel for outbound affiliate/offer links — Google requires `sponsored` for paid links. */
-export const AFFILIATE_LINK_REL = 'sponsored nofollow noopener noreferrer'
+/** rel for outbound affiliate/offer links — Google requires `sponsored` for paid links.
+ * No `noreferrer`: /contrib/ needs the nudger.fr Referer (GOU-1184), see
+ * AFFILIATE_LINK_REFERRER_POLICY. */
+export const AFFILIATE_LINK_REL = 'sponsored nofollow noopener'
+
+/** referrerpolicy for the same links: the Referer is sent to /contrib/ on
+ * nudger.fr (navigation signal) but never to a merchant or network origin. */
+export const AFFILIATE_LINK_REFERRER_POLICY = 'same-origin'
+
+/**
+ * Opens an affiliate/offer link in a new tab with the same rel and referrer
+ * policy as the anchors (window.open cannot set a referrer policy).
+ */
+export const openAffiliateLinkInNewTab = (href: string): void => {
+  const anchor = document.createElement('a')
+  anchor.href = href
+  anchor.target = '_blank'
+  anchor.rel = AFFILIATE_LINK_REL
+  anchor.referrerPolicy = AFFILIATE_LINK_REFERRER_POLICY
+  anchor.style.display = 'none'
+  document.body.appendChild(anchor)
+  anchor.click()
+  anchor.remove()
+}
 
 export const resolveOfferHref = (offer: {
   affiliationToken?: string | null
   url?: string | null
 }): string | undefined =>
-  offer.affiliationToken ? `/contrib/${offer.affiliationToken}` : (offer.url ?? undefined)
+  offer.affiliationToken
+    ? `/contrib/${offer.affiliationToken}`
+    : (offer.url ?? undefined)
 
 /** Single-sourced condition color grammar, used everywhere a "new" vs
  * "occasion" offer badge/chip renders. */
