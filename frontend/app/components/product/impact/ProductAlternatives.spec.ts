@@ -111,6 +111,11 @@ describe('ProductAlternatives', () => {
   ]
 
   it('fetches alternatives with default filters', async () => {
+    fetchMock.mockResolvedValue({
+      products: {
+        data: [1, 2, 3].map(gtin => ({ gtin, fullSlug: `/phones/${gtin}` })),
+      },
+    })
     const wrapper = await mountSuspended(ProductAlternatives, {
       props: {
         product,
@@ -223,5 +228,116 @@ describe('ProductAlternatives', () => {
     expect(wrapper.emitted('alternativesUpdated')?.at(-1)).toEqual([
       { hasAlternatives: true, hydrated: true },
     ])
+  })
+  describe('relaxation of the default filters (GOU-1215)', () => {
+    const makeProducts = (count: number, offset = 1) => ({
+      products: {
+        data: Array.from({ length: count }, (_, index) => ({
+          gtin: offset + index,
+          fullSlug: `/phones/${offset + index}-alt`,
+        })),
+      },
+    })
+
+    const filterKeysOf = (call: unknown[]): string[] => {
+      const body = (
+        call[1] as {
+          body?: { filters?: { filters?: Array<{ field: string }> } }
+        }
+      ).body
+      return (body?.filters?.filters ?? []).map(clause => clause.field)
+    }
+
+    const mountWith = (verticalId: string) =>
+      mountSuspended(ProductAlternatives, {
+        props: { product, verticalId, popularAttributes },
+        global: { plugins: [i18n] },
+      })
+
+    const ATTRIBUTE = 'attributes.indexed.POWER_CONSUMPTION.numericValue'
+
+    it('does not relax when the first search returns 3 alternatives', async () => {
+      fetchMock.mockResolvedValue(makeProducts(3))
+      await mountWith('phones-no-relax')
+      await flushPromises()
+
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+    })
+
+    it('relaxes attributes, then price, then ecoscore until 3 results', async () => {
+      fetchMock
+        .mockResolvedValueOnce(makeProducts(0))
+        .mockResolvedValueOnce(makeProducts(2))
+        .mockResolvedValueOnce(makeProducts(3))
+      const wrapper = await mountWith('phones-relax')
+      await flushPromises()
+
+      const calls = fetchMock.mock.calls
+      expect(calls).toHaveLength(3)
+      expect(filterKeysOf(calls[0]!)).toEqual([
+        'price.minPrice.price',
+        ECOSCORE_RELATIVE_FIELD,
+        ATTRIBUTE,
+      ])
+      expect(filterKeysOf(calls[1]!)).toEqual([
+        'price.minPrice.price',
+        ECOSCORE_RELATIVE_FIELD,
+      ])
+      expect(filterKeysOf(calls[2]!)).toEqual([ECOSCORE_RELATIVE_FIELD])
+
+      expect(
+        wrapper.findAll('.category-product-card-grid-stub a')
+      ).toHaveLength(3)
+      const active = wrapper
+        .findAll('.product-alternatives__chip--active')
+        .map(chip => chip.text())
+      expect(active).toEqual(['Eco-score ≥ yours'])
+    })
+
+    it('shows what exists when the category is too small', async () => {
+      fetchMock
+        .mockResolvedValueOnce(makeProducts(0))
+        .mockResolvedValueOnce(makeProducts(0))
+        .mockResolvedValueOnce(makeProducts(0))
+        .mockResolvedValueOnce(makeProducts(2))
+      const wrapper = await mountWith('phones-small')
+      await flushPromises()
+
+      expect(fetchMock).toHaveBeenCalledTimes(4)
+      expect(filterKeysOf(fetchMock.mock.calls[3]!)).toEqual([])
+      expect(
+        wrapper.findAll('.category-product-card-grid-stub a')
+      ).toHaveLength(2)
+      expect(wrapper.text()).not.toContain('Best product message.')
+    })
+
+    it('shows the best-product message only when nothing exists', async () => {
+      fetchMock.mockResolvedValue(makeProducts(0))
+      const wrapper = await mountWith('phones-empty')
+      await flushPromises()
+
+      expect(wrapper.text()).toContain('Best product message.')
+    })
+
+    it('does not relax once the user clicked a chip', async () => {
+      fetchMock.mockResolvedValue(makeProducts(3))
+      const wrapper = await mountWith('phones-interacted')
+      await flushPromises()
+      fetchMock.mockReset()
+      fetchMock.mockResolvedValue(makeProducts(0))
+
+      const priceChip = wrapper
+        .findAll('.product-alternatives__chip')
+        .find(chip => chip.text() === 'Price ≤ yours')
+      await priceChip?.trigger('click')
+      await flushPromises()
+
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+      expect(filterKeysOf(fetchMock.mock.calls[0]!)).toEqual([
+        ECOSCORE_RELATIVE_FIELD,
+        ATTRIBUTE,
+      ])
+      expect(wrapper.text()).toContain('Best product message.')
+    })
   })
 })
