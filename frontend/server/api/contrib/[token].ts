@@ -1,5 +1,14 @@
 import { defineEventHandler } from 'h3'
 
-import { resolveAffiliationRedirect } from '../../utils/affiliation-redirect'
+import {
+  resolveAffiliationRedirect,
+  sendContribPlainError,
+} from '../../utils/affiliation-redirect'
 
-export default defineEventHandler(event => resolveAffiliationRedirect(event))
+export default defineEventHandler(async event => {
+  try {
+    return await resolveAffiliationRedirect(event)
+  } catch (error) {
+    return sendContribPlainError(event, error)
+  }
+})

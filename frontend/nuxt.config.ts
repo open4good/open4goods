@@ -579,6 +579,9 @@ export default defineNuxtConfig({
     // frontend verify the access token's signature before trusting its roles
     // claim (GOU-438), instead of decoding it without verification.
     jwtSecret: process.env.FRONT_SECURITY_JWT_SECRET || '',
+    // Extra user-agent substrings (comma separated, case-insensitive) refused on
+    // /contrib/ in addition to isbot. Overridden by NUXT_AFFILIATION_BLOCKED_USER_AGENTS.
+    affiliationBlockedUserAgents: '',
     staticMainPageRoutes: STATIC_MAIN_PAGE_ROUTE_NAMES,
     sitemapLocalFiles: {
       fr: [

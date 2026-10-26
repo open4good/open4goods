@@ -21,7 +21,10 @@ export default defineNuxtPlugin({
       ])
     )
 
-    if (isDoNotTrackEnabled()) {
+    if (
+      isDoNotTrackEnabled() ||
+      window.location.pathname.startsWith('/contrib/')
+    ) {
       plausibleConfig.enabled = false
     }
 
