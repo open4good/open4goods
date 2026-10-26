@@ -47,7 +47,7 @@
       "empty": "Le contenu de cet article sera disponible bientôt.",
       "featuredImageAlt": "Image mise en avant pour {title}",
       "readingTime": "Env. {minutes} min de lecture",
-      "updated": "Mis à jour {date}"
+      "updated": "Mis à jour le {date}"
     },
     "breadcrumbs": {
       "blog": "Blog",
@@ -2885,6 +2885,7 @@
         "new": "Pas d'offres neuves actuellement",
         "occasion": "Pas d'offres d'occasion actuellement"
       },
+      "lastKnownPrice": "Dernier prix relevé : {price} le {date}",
       "headers": {
         "condition": "État",
         "offer": "Offre",

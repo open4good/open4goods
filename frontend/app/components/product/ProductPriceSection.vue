@@ -231,6 +231,7 @@
                     v-else
                     :icon="mdiTagOffOutline"
                     :label="$t('product.price.noOffers.new')"
+                    :hint="lastKnownNewPriceLabel"
                   />
 
                   <div v-if="newStats" class="product-price__metrics-summary">
@@ -429,6 +430,7 @@
                     v-else
                     :icon="mdiRecycle"
                     :label="$t('product.price.noOffers.occasion')"
+                    :hint="lastKnownOccasionPriceLabel"
                   />
                   <div
                     v-if="occasionStats"
@@ -963,6 +965,53 @@ const occasionStats = computed(() =>
 const bestNewOffer = computed(() => props.offers?.bestNewOffer ?? null)
 const bestOccasionOffer = computed(
   () => props.offers?.bestOccasionOffer ?? null
+)
+
+// Explicit UTC zone: SSR runs in UTC and an implicit zone breaks hydration.
+const lastKnownPriceDateFormatter = computed(
+  () =>
+    new Intl.DateTimeFormat(locale.value, {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    })
+)
+
+/**
+ * Dates the most recent history point when no offer is live, so the price
+ * statistics are not read as a current price next to the "no offers" notice.
+ */
+const buildLastKnownPriceLabel = (entries: HistoryEntry[]): string | null => {
+  const latest = entries.reduce<HistoryEntry | null>(
+    (acc, entry) => (!acc || entry.timestamp > acc.timestamp ? entry : acc),
+    null
+  )
+
+  if (!latest) {
+    return null
+  }
+
+  return String(
+    t('product.price.lastKnownPrice', {
+      price: formatCurrency(
+        latest.price,
+        props.offers?.bestPrice?.currency ?? 'EUR'
+      ),
+      date: lastKnownPriceDateFormatter.value.format(
+        new Date(latest.timestamp)
+      ),
+    })
+  )
+}
+
+const lastKnownNewPriceLabel = computed(() =>
+  bestNewOffer.value ? null : buildLastKnownPriceLabel(newHistory.value)
+)
+const lastKnownOccasionPriceLabel = computed(() =>
+  bestOccasionOffer.value
+    ? null
+    : buildLastKnownPriceLabel(occasionHistory.value)
 )
 
 const resolveOfferLink = (

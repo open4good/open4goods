@@ -47,6 +47,42 @@ const normalizeUserAgent = (
   return Array.isArray(rawUserAgent) ? rawUserAgent[0] : rawUserAgent
 }
 
+const MAX_ORIGIN_LENGTH = 200
+
+const firstHeader = (
+  value: string | string[] | undefined
+): string | undefined => (Array.isArray(value) ? value[0] : value)
+
+/**
+ * Returns the path (no query, no fragment, max 200 chars) of the same-site
+ * Referer, or undefined when absent, invalid or from another host.
+ */
+export const resolveAffiliationOrigin = (
+  event: H3Event
+): string | undefined => {
+  const referer = firstHeader(event.node.req.headers.referer)
+  const host = firstHeader(
+    event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
+  )
+    ?.split(',')[0]
+    ?.trim()
+    .toLowerCase()
+
+  if (!referer || !host) {
+    return undefined
+  }
+
+  try {
+    const url = new URL(referer)
+    if (url.host.toLowerCase() !== host || !url.pathname.startsWith('/')) {
+      return undefined
+    }
+    return url.pathname.slice(0, MAX_ORIGIN_LENGTH)
+  } catch {
+    return undefined
+  }
+}
+
 const MAX_LOGGED_USER_AGENT_LENGTH = 80
 const MAX_LOGGED_TOKEN_LENGTH = 6
 
@@ -200,6 +236,7 @@ export const resolveAffiliationRedirect = async (
       token,
       userAgent,
       method,
+      origin: resolveAffiliationOrigin(event),
     })
   } catch (error) {
     const backendError = await extractBackendErrorDetails(error)
