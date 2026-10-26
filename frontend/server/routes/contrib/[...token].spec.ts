@@ -43,6 +43,11 @@ describe('contrib redirect route', () => {
       'https://merchant.example/product/123',
       301
     )
+    expect(setHeaderMock).toHaveBeenCalledWith(
+      event,
+      'Referrer-Policy',
+      'no-referrer'
+    )
   })
 
   it('answers errors (403 robot, 400 token) with a plain-text response', async () => {
@@ -55,6 +60,11 @@ describe('contrib redirect route', () => {
     await handler(event)
 
     expect(sendRedirectMock).not.toHaveBeenCalled()
+    expect(setHeaderMock).not.toHaveBeenCalledWith(
+      event,
+      'Referrer-Policy',
+      expect.anything()
+    )
     expect(sendContribPlainErrorMock).toHaveBeenCalledWith(event, failure)
   })
 })

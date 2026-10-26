@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { useRuntimeConfig } from '#imports'
 
 type ContribRouteHandler =
   (typeof import('../../utils/affiliation-redirect'))['resolveAffiliationRedirect']
@@ -17,9 +18,17 @@ const getRouterParamMock = vi.hoisted(() =>
 const sendMock = vi.hoisted(() => vi.fn())
 const setResponseHeaderMock = vi.hoisted(() => vi.fn())
 const setResponseStatusMock = vi.hoisted(() => vi.fn())
-const runtimeConfig = vi.hoisted(() => ({
-  affiliationBlockedUserAgents: '',
-}))
+const getCookieMock = vi.hoisted(() =>
+  vi.fn((event: unknown, name: string) => {
+    const header = (
+      event as { node?: { req?: { headers?: { cookie?: string } } } }
+    ).node?.req?.headers?.cookie
+    return header
+      ?.split(';')
+      .map(part => part.trim().split('='))
+      .find(([key]) => key === name)?.[1]
+  })
+)
 const createErrorMock = vi.hoisted(() =>
   vi.fn(
     (input: {
@@ -35,6 +44,7 @@ const createErrorMock = vi.hoisted(() =>
 
 vi.mock('h3', () => ({
   defineEventHandler: (fn: ContribRouteHandler) => fn,
+  getCookie: getCookieMock,
   getRouterParam: getRouterParamMock,
   createError: createErrorMock,
   send: sendMock,
@@ -46,7 +56,8 @@ vi.mock('~~/shared/api-client/services/affiliation.services', () => ({
   useAffiliationService: useAffiliationServiceMock,
 }))
 
-vi.mock('~~/shared/utils/domain-language', () => ({
+vi.mock('~~/shared/utils/domain-language', async importOriginal => ({
+  ...(await importOriginal<typeof import('~~/shared/utils/domain-language')>()),
   resolveDomainLanguage: resolveDomainLanguageMock,
 }))
 
@@ -54,11 +65,19 @@ vi.mock('../../utils/log-backend-error', () => ({
   extractBackendErrorDetails: extractBackendErrorDetailsMock,
 }))
 
+const SITE_REFERER = 'https://nudger.fr/fr/produit/123'
+
 const BROWSER_UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
+type ContribRuntimeConfig = {
+  affiliationBlockedUserAgents: string
+  affiliationRequireNavigationSignal: unknown
+}
+
 describe('resolveAffiliationRedirect', () => {
   let handler: ContribRouteHandler
+  let runtimeConfig: ContribRuntimeConfig
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>
 
   beforeEach(async () => {
@@ -92,8 +111,10 @@ describe('resolveAffiliationRedirect', () => {
       .spyOn(console, 'error')
       .mockImplementation(() => undefined)
 
+    // The server util reads the real (auto-imported) Nuxt runtime config.
+    runtimeConfig = useRuntimeConfig() as unknown as ContribRuntimeConfig
     runtimeConfig.affiliationBlockedUserAgents = ''
-    vi.stubGlobal('useRuntimeConfig', () => runtimeConfig)
+    runtimeConfig.affiliationRequireNavigationSignal = true
     vi.spyOn(console, 'warn').mockImplementation(() => undefined)
 
     handler = (await import('../../utils/affiliation-redirect'))
@@ -101,6 +122,8 @@ describe('resolveAffiliationRedirect', () => {
   })
 
   afterEach(() => {
+    runtimeConfig.affiliationBlockedUserAgents = ''
+    runtimeConfig.affiliationRequireNavigationSignal = true
     consoleErrorSpy.mockRestore()
     vi.clearAllMocks()
   })
@@ -118,6 +141,7 @@ describe('resolveAffiliationRedirect', () => {
           headers: {
             host: 'nudger.example',
             'user-agent': BROWSER_UA,
+            referer: SITE_REFERER,
           },
         },
       },
@@ -152,6 +176,7 @@ describe('resolveAffiliationRedirect', () => {
           headers: {
             host: 'nudger.example',
             'user-agent': BROWSER_UA,
+            referer: SITE_REFERER,
           },
         },
       },
@@ -184,6 +209,7 @@ describe('resolveAffiliationRedirect', () => {
           headers: {
             host: 'nudger.example',
             'user-agent': BROWSER_UA,
+            referer: SITE_REFERER,
           },
         },
       },
@@ -206,7 +232,11 @@ describe('resolveAffiliationRedirect', () => {
       node: {
         req: {
           method: 'PUT',
-          headers: { host: 'nudger.example', 'user-agent': BROWSER_UA },
+          headers: {
+            host: 'nudger.example',
+            'user-agent': BROWSER_UA,
+            referer: SITE_REFERER,
+          },
         },
       },
       context: { params: { token: 'token-abc' } },
@@ -223,7 +253,11 @@ describe('resolveAffiliationRedirect', () => {
       node: {
         req: {
           method: 'GET',
-          headers: { host: 'nudger.example', 'user-agent': BROWSER_UA },
+          headers: {
+            host: 'nudger.example',
+            'user-agent': BROWSER_UA,
+            referer: SITE_REFERER,
+          },
         },
       },
       context: { params: { token: undefined } },
@@ -240,7 +274,11 @@ describe('resolveAffiliationRedirect', () => {
       node: {
         req: {
           method: 'GET',
-          headers: { host: 'nudger.example', 'user-agent': BROWSER_UA },
+          headers: {
+            host: 'nudger.example',
+            'user-agent': BROWSER_UA,
+            referer: SITE_REFERER,
+          },
         },
       },
       context: { params: { token: 'token-abc' } },
@@ -304,12 +342,139 @@ describe('resolveAffiliationRedirect', () => {
   })
 
   it('refuses user agents matching the configured patterns', async () => {
-    runtimeConfig.affiliationBlockedUserAgents = ' evilcrawler , other '
+    runtimeConfig.affiliationBlockedUserAgents = ' acmefetcher , other '
+    const event = eventWith(`${BROWSER_UA} AcmeFetcher/9`)
+    event.node.req.headers.referer = SITE_REFERER
 
-    await expect(
-      handler(eventWith(`${BROWSER_UA} EvilCrawler/9`))
-    ).rejects.toMatchObject({ statusCode: 403 })
+    await expect(handler(event)).rejects.toMatchObject({
+      statusCode: 403,
+      statusMessage: 'Forbidden',
+    })
     expect(resolveRedirectMock).not.toHaveBeenCalled()
+  })
+
+  // User agent replayed by the GOU-1168 proxy network (no referer, no cookie).
+  const ROBOT_CHROME_UA =
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36'
+
+  const navigationEvent = (headers: Record<string, string> = {}) =>
+    ({
+      node: {
+        req: {
+          method: 'GET',
+          headers: {
+            host: 'nudger.fr',
+            'user-agent': ROBOT_CHROME_UA,
+            ...headers,
+          },
+        },
+      },
+      context: { params: { token: 'token-abc-very-long-secret' } },
+    }) as unknown as Parameters<ContribRouteHandler>[0]
+
+  describe('navigation signal (GOU-1184)', () => {
+    beforeEach(() => {
+      resolveRedirectMock.mockResolvedValue({
+        statusCode: 301,
+        location: 'https://network.example/click',
+      })
+    })
+
+    it('K1: refuses a browser user agent without referer nor cookie, before calling the service', async () => {
+      await expect(handler(navigationEvent())).rejects.toMatchObject({
+        statusCode: 403,
+        statusMessage: 'Ouvrez ce lien depuis la fiche produit sur nudger.fr',
+      })
+
+      expect(useAffiliationServiceMock).not.toHaveBeenCalled()
+      expect(resolveRedirectMock).not.toHaveBeenCalled()
+    })
+
+    it.each([
+      'https://evil.example/',
+      'https://nudger.fr.evil.example/produit',
+      'not a url',
+    ])('refuses a referer outside the site (%s)', async referer => {
+      await expect(handler(navigationEvent({ referer }))).rejects.toMatchObject(
+        { statusCode: 403 }
+      )
+      expect(resolveRedirectMock).not.toHaveBeenCalled()
+    })
+
+    it('refuses an unexpected navigation cookie value', async () => {
+      await expect(
+        handler(navigationEvent({ cookie: 'nudger_nav=0' }))
+      ).rejects.toMatchObject({ statusCode: 403 })
+      expect(resolveRedirectMock).not.toHaveBeenCalled()
+    })
+
+    it.each([
+      'https://nudger.fr/fr/produit/123',
+      'https://beta.nudger.fr/produit',
+      'https://nudger.com/en/product',
+    ])('K2: redirects with a site referer (%s)', async referer => {
+      await expect(
+        handler(navigationEvent({ referer }))
+      ).resolves.toMatchObject({ statusCode: 301 })
+      expect(resolveRedirectMock).toHaveBeenCalledTimes(1)
+    })
+
+    it('K3: redirects with the navigation cookie', async () => {
+      await expect(
+        handler(navigationEvent({ cookie: 'other=x; nudger_nav=1' }))
+      ).resolves.toMatchObject({ statusCode: 301 })
+      expect(resolveRedirectMock).toHaveBeenCalledTimes(1)
+    })
+
+    it.each([false, 'false', '0'])(
+      'K5: switch %s restores the GOU-1175 behaviour',
+      async value => {
+        runtimeConfig.affiliationRequireNavigationSignal = value
+
+        await expect(handler(navigationEvent())).resolves.toMatchObject({
+          statusCode: 301,
+        })
+        expect(resolveRedirectMock).toHaveBeenCalledTimes(1)
+      }
+    )
+
+    it('keeps the GOU-1175 robot rules when a navigation signal is present', async () => {
+      await expect(
+        handler(
+          navigationEvent({
+            referer: SITE_REFERER,
+            'user-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1)',
+          })
+        )
+      ).rejects.toMatchObject({ statusCode: 403, statusMessage: 'Forbidden' })
+      expect(resolveRedirectMock).not.toHaveBeenCalled()
+    })
+
+    it('logs refusals aggregated per interval, without the full token', async () => {
+      const nowSpy = vi.spyOn(Date, 'now').mockReturnValue(1_000_000)
+
+      for (let i = 0; i < 3; i++) {
+        await expect(handler(navigationEvent())).rejects.toMatchObject({
+          statusCode: 403,
+        })
+      }
+
+      expect(console.warn).toHaveBeenCalledTimes(1)
+      expect(vi.mocked(console.warn).mock.calls[0]?.[0]).toContain(
+        '1 request(s)'
+      )
+
+      nowSpy.mockReturnValue(1_060_000)
+      await expect(handler(navigationEvent())).rejects.toMatchObject({
+        statusCode: 403,
+      })
+
+      expect(console.warn).toHaveBeenCalledTimes(2)
+      const message = vi.mocked(console.warn).mock.calls[1]?.[0] as string
+      expect(message).toContain('3 request(s)')
+      expect(message).not.toContain('token-abc-very-long-secret')
+      nowSpy.mockRestore()
+    })
   })
 
   it('sends a short text/plain error without HTML', async () => {
