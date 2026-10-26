@@ -309,4 +309,27 @@ class ProductRepositoryTest
         criteria.getCriteriaChain().forEach(child -> collectCriteriaFields(child, fields, visited));
         criteria.getSubCriteria().forEach(child -> collectCriteriaFields(child, fields, visited));
     }
+
+    @Test
+    void fullProductExportsNeverExceedSafePageSize()
+    {
+        org.springframework.data.elasticsearch.core.SearchHitsIterator<Product> it =
+                org.mockito.Mockito.mock(org.springframework.data.elasticsearch.core.SearchHitsIterator.class);
+        when(elasticsearchOperations.searchForStream(any(org.springframework.data.elasticsearch.core.query.Query.class), eq(Product.class), eq(ProductRepository.CURRENT_INDEX)))
+                .thenReturn(it);
+
+        repository.exportAll();
+        repository.exportAll("tv");
+        repository.exportAll((String[]) null);
+        repository.exportAll(new String[0]);
+
+        ArgumentCaptor<org.springframework.data.elasticsearch.core.query.Query> captor =
+                ArgumentCaptor.forClass(org.springframework.data.elasticsearch.core.query.Query.class);
+        verify(elasticsearchOperations, org.mockito.Mockito.times(4))
+                .searchForStream(captor.capture(), eq(Product.class), eq(ProductRepository.CURRENT_INDEX));
+        assertThat(captor.getAllValues()).allSatisfy(q -> {
+            assertThat(q.getPageable().isPaged()).isTrue();
+            assertThat(q.getPageable().getPageSize()).isLessThanOrEqualTo(ProductRepository.FULL_PRODUCT_PAGE_SIZE);
+        });
+    }
 }
