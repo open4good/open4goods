@@ -12,6 +12,8 @@ wraps the Plausible plugin and respects Do Not Track settings.
 
 ## Event catalog
 
+> **Filtrage robots sur `/contrib/` (GOU-1175)** : `/contrib/<jeton>` et `/api/contrib/<jeton>` refusent (403 `text/plain`, sans appel à front-api) les UA vides ou reconnus comme robots par `isbot`, plus les motifs de `NUXT_AFFILIATION_BLOCKED_USER_AGENTS` (sous-chaînes séparées par des virgules, insensibles à la casse, vide par défaut). Aucune page HTML n'est jamais rendue sous `/contrib/**` (erreurs en `text/plain`) et Plausible est désactivé côté client sur ce chemin.
+
 ### `affiliate-click`
 
 Tracks clicks on affiliate redirect links (typically `/contrib/<token>`). Emit

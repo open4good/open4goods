@@ -1,4 +1,11 @@
-import { createError, getRouterParam } from 'h3'
+import { isbot } from 'isbot'
+import {
+  createError,
+  getRouterParam,
+  send,
+  setResponseHeader,
+  setResponseStatus,
+} from 'h3'
 import type { H3Event } from 'h3'
 import {
   useAffiliationService,
@@ -34,6 +41,61 @@ const normalizeUserAgent = (
   return Array.isArray(rawUserAgent) ? rawUserAgent[0] : rawUserAgent
 }
 
+const MAX_LOGGED_USER_AGENT_LENGTH = 80
+const MAX_LOGGED_TOKEN_LENGTH = 6
+
+/**
+ * Parses the comma-separated extra user-agent patterns (case-insensitive substrings).
+ */
+const parseBlockedPatterns = (raw: unknown): string[] =>
+  typeof raw === 'string'
+    ? raw
+        .split(',')
+        .map(pattern => pattern.trim().toLowerCase())
+        .filter(Boolean)
+    : []
+
+const isBlockedUserAgent = (event: H3Event, userAgent?: string): boolean => {
+  if (!userAgent?.trim()) {
+    return true
+  }
+
+  if (isbot(userAgent)) {
+    return true
+  }
+
+  const config = useRuntimeConfig(event) as {
+    affiliationBlockedUserAgents?: string
+  }
+  const lowered = userAgent.toLowerCase()
+
+  return parseBlockedPatterns(config.affiliationBlockedUserAgents).some(
+    pattern => lowered.includes(pattern)
+  )
+}
+
+/**
+ * Sends a short text/plain error: /contrib/** must never render an HTML page
+ * (the Plausible script it carries would count robot visits).
+ */
+export const sendContribPlainError = (
+  event: H3Event,
+  error: unknown
+): Promise<void> => {
+  const { statusCode, statusMessage } = (error ?? {}) as {
+    statusCode?: number
+    statusMessage?: string
+  }
+  const status = statusCode && statusCode >= 400 ? statusCode : 500
+
+  setResponseStatus(event, status)
+  setResponseHeader(event, 'Content-Type', 'text/plain; charset=utf-8')
+  setResponseHeader(event, 'X-Robots-Tag', 'noindex, nofollow')
+  setResponseHeader(event, 'Cache-Control', 'no-store')
+
+  return send(event, statusMessage || 'Error', 'text/plain; charset=utf-8')
+}
+
 /**
  * Resolves an affiliation token while preserving the browser request context.
  */
@@ -54,6 +116,13 @@ export const resolveAffiliationRedirect = async (
   const { domainLanguage } = resolveDomainLanguage(rawHost)
   const userAgent = normalizeUserAgent(event.node.req.headers['user-agent'])
   const method = resolveMethod(event)
+
+  if (isBlockedUserAgent(event, userAgent)) {
+    console.warn(
+      `Affiliation redirect refused for robot user agent "${(userAgent ?? '').slice(0, MAX_LOGGED_USER_AGENT_LENGTH)}" token "${token.slice(0, MAX_LOGGED_TOKEN_LENGTH)}…"`
+    )
+    throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
+  }
 
   try {
     return await useAffiliationService(domainLanguage).resolveRedirect({
