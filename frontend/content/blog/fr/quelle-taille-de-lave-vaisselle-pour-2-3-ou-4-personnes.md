@@ -1,12 +1,12 @@
 ---
 title: "Quelle taille de lave-vaisselle pour 2, 3 ou 4 personnes ?"
-description: "Nudger vous révèle dans cet article quelle taille de lave-vaisselle choisir pour 2, 3 ou 4 personnes ?"
+description: "10, 12 ou 14 couverts ? Notre guide pour choisir la capacité selon votre foyer, avec consommation d'eau et modèles les mieux notés."
 author: Thomas
 language: fr
 tags:
   - "lave-vaisselles"
 date: 2026-04-24T03:48:45Z
-updatedAt: 2026-04-24T03:49:10Z
+updatedAt: 2026-10-26T09:00:00Z
 draft: false
 published: true
 image: /images/blog/quelle-taille-de-lave-vaisselle-pour-2-3-ou-4-personnes/Articles-12-.png
@@ -49,14 +49,14 @@ Si vous faites tourner votre machine tous les jours, un modèle compact suffit l
 
 ## 👨‍👩‍👧 Quelle taille pour 3 personnes ?
 
-Avec trois personnes, le volume de vaisselle augmente rapidement, surtout avec les repas à la maison. Un lave-vaisselle de 9 à 12 couverts est alors recommandé. Ce format permet de gérer plusieurs repas sans surcharger l'appareil, de laver casseroles et ustensiles en même temps ainsi que de de limiter le nombre de cycles.
+Avec trois personnes, le volume de vaisselle augmente rapidement, surtout avec les repas à la maison. Un lave-vaisselle de 9 à 12 couverts est alors recommandé : comparez-les dans notre [catégorie lave-vaisselles](https://nudger.fr/lave-vaisselles). Ce format permet de gérer plusieurs repas sans surcharger l'appareil, de laver casseroles et ustensiles en même temps ainsi que de limiter le nombre de cycles.
 
 C'est le meilleur équilibre entre capacité, encombrement et consommation.
 
 
 ## 👨‍👩‍👧‍👦 Quelle taille pour 4 personnes ?
 
-À partir de 4 personnes, un lave-vaisselle standard devient la norme. Un modèle de 12 à 14 couverts est alors recommandé. Ce type d'appareil permet de gérer une journée complète de vaisselle, de lancer un cycle par jour (ou moins) et d'optimiser l'eau et l'énergie. En dessous de 12 couverts, vous risquez de multiplier les cycles, ce qui annule les bénéfices énergétiques.
+À partir de 4 personnes, un lave-vaisselle standard devient la norme. Un modèle de 12 à 14 couverts est alors recommandé (par exemple les fiches [Proline PBI1247CSL](https://nudger.fr/lave-vaisselles/3615993795207-lave-vaisselle-proline-pbi1247csl) ou [Valberg 12S45](https://nudger.fr/lave-vaisselles/3497670050089-lave-vaisselle-valberg-97265512s45ddxad701t)). Ce type d'appareil permet de gérer une journée complète de vaisselle, de lancer un cycle par jour (ou moins) et d'optimiser l'eau et l'énergie. En dessous de 12 couverts, vous risquez de multiplier les cycles, ce qui annule les bénéfices énergétiques.
 
 
 ## ⚖️ Petit ou grand lave-vaisselle : le vrai enjeu
@@ -72,7 +72,7 @@ Trop grand = cycles à moitié vides, gaspillage d'eau et d'électricité et enc
 
 ## ⚡ Impact sur la consommation
 
-Un lave-vaisselle bien dimensionné est un vrai levier d'économie. En effet, un lave-vaisselle moderne consomme souvent moins d'eau que le lavage à la main et optimise l'énergie grâce aux programmes éco. Mais pour cela, il doit être utilisé correctement, car un appareil trop grand utilisé à moitié vide consommera plus que nécessaire, de même qu'un appareil trop petit utilisé en continu consommera aussi plus. L'équilibre est donc essentiel.
+Un lave-vaisselle bien dimensionné est un vrai levier d'économie. En effet, un lave-vaisselle moderne consomme souvent moins d'eau que le lavage à la main et optimise l'énergie grâce aux programmes éco ([source : Impact CO2, ADEME](https://impactco2.fr/outils/electromenager/lavevaisselle)). Mais pour cela, il doit être utilisé correctement, car un appareil trop grand utilisé à moitié vide consommera plus que nécessaire, de même qu'un appareil trop petit utilisé en continu consommera aussi plus. L'équilibre est donc essentiel.
 
 
 ## 🌍 Un choix aussi pour la planète
@@ -82,11 +82,7 @@ Choisir la bonne taille de lave-vaisselle, c'est aussi un geste environnemental.
 👉 Comme souvent, la solution la plus écologique n'est pas le plus grand ou le plus performant, mais le plus adapté.
 
 
-## ✅ En résumé
-
-- 2 personnes → 6 à 9 couverts
-- 3 personnes → 9 à 12 couverts
-- 4 personnes → 12 à 14 couverts
+## ✅ Pour conclure
 
 Le bon lave-vaisselle est celui qui correspond à votre usage réel, s'intègre dans votre cuisine et fonctionne avec des cycles pleins. Parce qu'au final, le meilleur appareil est celui que vous utilisez efficacement au quotidien.
 
