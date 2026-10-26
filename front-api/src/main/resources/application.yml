@@ -68,6 +68,11 @@ front:
     anonymous: 100
     authenticated: 1000
 
+  # One-shot purge of the historical ip/ua fields of the contribution-votes index (GOU-1230),
+  # run asynchronously after startup; idempotent, a no-op once the index is clean.
+  contribution-votes-purge:
+    enabled: ${FRONT_CONTRIBUTION_VOTES_PURGE_ENABLED:true}
+
   google-indexation:
     enabled: ${FRONT_GOOGLE_INDEXATION_ENABLED:false}
     realtime-enabled: ${FRONT_GOOGLE_INDEXATION_REALTIME_ENABLED:true}
