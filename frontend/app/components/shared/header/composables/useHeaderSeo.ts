@@ -33,15 +33,32 @@ export interface UseHeaderSeoOptions {
 }
 
 /**
+ * Unhead options for the header's head entries. They are fallbacks: a page
+ * that declares its own title, description or canonical keeps them, because
+ * a child component's entry would otherwise win the tag deduplication.
+ */
+export const HEADER_SEO_HEAD_OPTIONS = { tagPriority: 'low' } as const
+
+/**
+ * Removes trailing slashes from a pathname, keeping the root path as `/`.
+ */
+export const normalizeCanonicalPathname = (pathname: string): string =>
+  pathname.replace(/\/+$/u, '') || '/'
+
+/**
  * Generates SEO metadata and structured data for page headers
  */
 export function useHeaderSeo(options: UseHeaderSeoOptions) {
   const { locale } = useI18n()
   const requestURL = useRequestURL()
 
-  // Canonical URL: keep origin + pathname and drop query/hash noise by default.
+  // Canonical URL: keep origin + pathname and drop query/hash noise and the
+  // trailing slash, so `/foo/` does not declare itself as a second canonical.
   const canonicalUrl = computed(() => {
-    const url = new URL(requestURL.pathname, requestURL.origin)
+    const url = new URL(
+      normalizeCanonicalPathname(requestURL.pathname),
+      requestURL.origin
+    )
     return url.toString()
   })
 
@@ -94,40 +111,46 @@ export function useHeaderSeo(options: UseHeaderSeoOptions) {
     return baseSchema
   })
 
-  // Set SEO meta tags
-  useSeoMeta({
-    title: () => options.title,
-    description: () => metaDescription.value,
-    ogTitle: () => options.title,
-    ogDescription: () => metaDescription.value,
-    ogUrl: () => canonicalUrl.value,
-    ogType: () =>
-      options.schemaType === 'Article' ? 'article' : ('website' as const),
-    ogImage: () => options.ogImage,
-    ogLocale: () => locale.value.replace('-', '_'),
-  })
+  // Set SEO meta tags (fallbacks, see HEADER_SEO_HEAD_OPTIONS)
+  useSeoMeta(
+    {
+      title: () => options.title,
+      description: () => metaDescription.value || undefined,
+      ogTitle: () => options.title,
+      ogDescription: () => metaDescription.value || undefined,
+      ogUrl: () => canonicalUrl.value,
+      ogType: () =>
+        options.schemaType === 'Article' ? 'article' : ('website' as const),
+      ogImage: () => options.ogImage,
+      ogLocale: () => locale.value.replace('-', '_'),
+    },
+    HEADER_SEO_HEAD_OPTIONS
+  )
 
-  // Set head tags (canonical + JSON-LD)
-  useHead(() => ({
-    link: [{ rel: 'canonical', href: canonicalUrl.value }],
-    script: [
-      {
-        key: 'page-header-main-entity-jsonld',
-        type: 'application/ld+json',
-        innerHTML: JSON.stringify(mainEntityJsonLd.value),
-      },
-      // Separate breadcrumb JSON-LD only if not included in main entity
-      ...(breadcrumbJsonLd.value && !options.schemaType
-        ? [
-            {
-              key: 'page-header-breadcrumb-jsonld',
-              type: 'application/ld+json',
-              innerHTML: JSON.stringify(breadcrumbJsonLd.value),
-            },
-          ]
-        : []),
-    ],
-  }))
+  // Set head tags (canonical + JSON-LD, fallbacks as well)
+  useHead(
+    () => ({
+      link: [{ rel: 'canonical', href: canonicalUrl.value }],
+      script: [
+        {
+          key: 'page-header-main-entity-jsonld',
+          type: 'application/ld+json',
+          innerHTML: JSON.stringify(mainEntityJsonLd.value),
+        },
+        // Separate breadcrumb JSON-LD only if not included in main entity
+        ...(breadcrumbJsonLd.value && !options.schemaType
+          ? [
+              {
+                key: 'page-header-breadcrumb-jsonld',
+                type: 'application/ld+json',
+                innerHTML: JSON.stringify(breadcrumbJsonLd.value),
+              },
+            ]
+          : []),
+      ],
+    }),
+    HEADER_SEO_HEAD_OPTIONS
+  )
 
   return {
     canonicalUrl,

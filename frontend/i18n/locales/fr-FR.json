@@ -2885,6 +2885,7 @@
         "new": "Pas d'offres neuves actuellement",
         "occasion": "Pas d'offres d'occasion actuellement"
       },
+      "lastKnownPrice": "Dernier prix relevé : {price} le {date}",
       "headers": {
         "condition": "État",
         "offer": "Offre",
