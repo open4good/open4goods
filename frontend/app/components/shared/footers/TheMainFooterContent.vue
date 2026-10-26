@@ -137,10 +137,15 @@ const isRecording = computed(() =>
 </script>
 
 <template>
-  <v-container class="footer-container py-10" fluid>
-    <h2 id="footer-heading" class="sr-only">
+  <v-container
+    class="footer-container py-10"
+    fluid
+    role="group"
+    aria-labelledby="footer-heading"
+  >
+    <p id="footer-heading" class="sr-only">
       {{ t('siteIdentity.footer.accessibleTitle') }}
-    </h2>
+    </p>
 
     <v-row class="g-8 footer-upper justify-center">
       <v-col cols="12" md="3">

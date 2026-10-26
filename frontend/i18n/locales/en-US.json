@@ -47,7 +47,7 @@
       "empty": "The content of this article will be available soon.",
       "featuredImageAlt": "Featured image for {title}",
       "readingTime": "Approx. {minutes} min read",
-      "updated": "Updated {date}"
+      "updated": "Updated on {date}"
     },
     "breadcrumbs": {
       "blog": "Blog",
