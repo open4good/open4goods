@@ -10,6 +10,8 @@ import type {
  * Fetches plan, hero KPIs, and chart data from the Nuxt server routes.
  */
 export const useDataviz = (verticalId: string) => {
+  // Request-bound client, captured at setup (see frontend/AGENTS.md).
+  const { $fetch: csrfFetch } = useNuxtApp()
   const plan = useState<VerticalDatavizPlanDto | null>(
     `dataviz-plan-${verticalId}`,
     () => null
@@ -87,7 +89,7 @@ export const useDataviz = (verticalId: string) => {
     request: DatavizChartQueryRequestDto
   ): Promise<DatavizChartQueryResponseDto | null> => {
     try {
-      return await $fetch<DatavizChartQueryResponseDto>(
+      return await csrfFetch<DatavizChartQueryResponseDto>(
         '/api/stats/dataviz/chart',
         {
           method: 'POST',
