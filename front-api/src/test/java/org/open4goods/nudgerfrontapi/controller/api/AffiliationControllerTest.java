@@ -1,7 +1,7 @@
 package org.open4goods.nudgerfrontapi.controller.api;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -22,7 +22,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 /**
@@ -46,98 +45,102 @@ class AffiliationControllerTest {
     }
 
     @Test
-    void getRedirectShouldReturnMovedPermanently() throws Exception {
-        when(affiliationService.trackRedirect(anyString(), anyString(), any()))
+    void getRedirectShouldReturnANonCacheableFound() throws Exception {
+        when(affiliationService.trackRedirect(anyString(), anyString()))
                 .thenReturn("https://example.com");
 
         mockMvc.perform(get("/affiliations/redirect")
                 .param("token", "token-value")
                 .param("domainLanguage", "fr")
                 .header(HttpHeaders.USER_AGENT, "Mozilla/5.0")
-                .with(remoteAddress("203.0.113.10")))
-                .andExpect(status().isMovedPermanently())
+                .header(AffiliationController.ORIGIN_HEADER, "/fours/four-encastrable"))
+                .andExpect(status().isFound())
                 .andExpect(header().string(HttpHeaders.LOCATION, "https://example.com"))
+                .andExpect(header().string(HttpHeaders.CACHE_CONTROL, "no-store"))
                 .andExpect(header().string("X-Locale", "fr"));
 
-        verify(affiliationService).trackRedirect("token-value", "203.0.113.10", "Mozilla/5.0");
+        verify(affiliationService).trackRedirect("token-value", "/fours/four-encastrable");
     }
 
     @Test
-    void postRedirectShouldReturnMovedPermanently() throws Exception {
-        when(affiliationService.trackRedirect(anyString(), anyString(), any()))
+    void getRedirectShouldWorkWithoutOriginHeader() throws Exception {
+        when(affiliationService.trackRedirect(anyString(), isNull()))
+                .thenReturn("https://example.com");
+
+        mockMvc.perform(get("/affiliations/redirect")
+                .param("token", "token-value")
+                .param("domainLanguage", "fr"))
+                .andExpect(status().isFound())
+                .andExpect(header().string(HttpHeaders.LOCATION, "https://example.com"));
+
+        verify(affiliationService).trackRedirect("token-value", null);
+    }
+
+    @Test
+    void postRedirectShouldReturnANonCacheableFound() throws Exception {
+        when(affiliationService.trackRedirect(anyString(), isNull()))
                 .thenReturn("https://example.com/post");
 
         mockMvc.perform(post("/affiliations/redirect")
                 .param("token", "token-value")
                 .param("domainLanguage", "en")
                 .header(HttpHeaders.USER_AGENT, "Mozilla/5.0 (X11)")
-                .with(remoteAddress("198.51.100.7"))
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isMovedPermanently())
+                .andExpect(status().isFound())
                 .andExpect(header().string(HttpHeaders.LOCATION, "https://example.com/post"))
+                .andExpect(header().string(HttpHeaders.CACHE_CONTROL, "no-store"))
                 .andExpect(header().string("X-Locale", "en"));
 
-        verify(affiliationService).trackRedirect("token-value", "198.51.100.7", "Mozilla/5.0 (X11)");
+        verify(affiliationService).trackRedirect("token-value", null);
     }
 
     @Test
     void shouldReturnBadRequestWhenTokenIsInvalid() throws Exception {
-        when(affiliationService.trackRedirect(anyString(), anyString(), any()))
+        when(affiliationService.trackRedirect(anyString(), isNull()))
                 .thenThrow(new InvalidAffiliationTokenException("Invalid token"));
 
         mockMvc.perform(get("/affiliations/redirect")
                 .param("token", "broken")
-                .param("domainLanguage", "fr")
-                .with(remoteAddress("192.0.2.1")))
+                .param("domainLanguage", "fr"))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().doesNotExist(HttpHeaders.LOCATION));
     }
 
     @Test
     void redirectShouldEncodeIllegalCharactersInMerchantUrl() throws Exception {
-        when(affiliationService.trackRedirect(anyString(), anyString(), any()))
+        when(affiliationService.trackRedirect(anyString(), isNull()))
                 .thenReturn("https://track.effiliation.com/servlet/effi.redir?id_compteur=1&url=https://www.carrefour.fr/p/jeu de société|v2 {x} é?a=%20b");
 
         mockMvc.perform(get("/affiliations/redirect")
                 .param("token", "t")
-                .param("domainLanguage", "fr")
-                .with(remoteAddress("192.0.2.1")))
-                .andExpect(status().isMovedPermanently())
+                .param("domainLanguage", "fr"))
+                .andExpect(status().isFound())
                 .andExpect(header().string(HttpHeaders.LOCATION,
                         "https://track.effiliation.com/servlet/effi.redir?id_compteur=1&url=https://www.carrefour.fr/p/jeu%20de%20soci%C3%A9t%C3%A9%7Cv2%20%7Bx%7D%20%C3%A9?a=%20b"));
     }
 
     @Test
     void redirectShouldEncodeLonePercentBracketsAndExtraFragmentMarker() throws Exception {
-        when(affiliationService.trackRedirect(anyString(), anyString(), any()))
+        when(affiliationService.trackRedirect(anyString(), isNull()))
                 .thenReturn("https://www.carrefour.fr/p/promo-50%-off?f[0]=a%2Fb#top#2");
 
         mockMvc.perform(get("/affiliations/redirect")
                 .param("token", "t")
-                .param("domainLanguage", "fr")
-                .with(remoteAddress("192.0.2.1")))
-                .andExpect(status().isMovedPermanently())
+                .param("domainLanguage", "fr"))
+                .andExpect(status().isFound())
                 .andExpect(header().string(HttpHeaders.LOCATION,
                         "https://www.carrefour.fr/p/promo-50%25-off?f%5B0%5D=a%2Fb#top%232"));
     }
 
     @Test
     void redirectShouldRejectNonHttpScheme() throws Exception {
-        when(affiliationService.trackRedirect(anyString(), anyString(), any()))
+        when(affiliationService.trackRedirect(anyString(), isNull()))
                 .thenReturn("javascript:alert(1)");
 
         mockMvc.perform(get("/affiliations/redirect")
                 .param("token", "t")
-                .param("domainLanguage", "fr")
-                .with(remoteAddress("192.0.2.1")))
+                .param("domainLanguage", "fr"))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().doesNotExist(HttpHeaders.LOCATION));
-    }
-
-    private RequestPostProcessor remoteAddress(String address) {
-        return request -> {
-            request.setRemoteAddr(address);
-            return request;
-        };
     }
 }

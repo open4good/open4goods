@@ -99,4 +99,22 @@ public class LocalDevConfig {
             }
         );
     }
+
+    /**
+     * No-op click repository: the local profile has no Elasticsearch, and click tracking is fail-open anyway.
+     */
+    @Bean
+    public org.open4goods.services.contribution.repository.AffiliationClickRepository affiliationClickRepository() {
+        return (org.open4goods.services.contribution.repository.AffiliationClickRepository) Proxy.newProxyInstance(
+                org.open4goods.services.contribution.repository.AffiliationClickRepository.class.getClassLoader(),
+                new Class[] { org.open4goods.services.contribution.repository.AffiliationClickRepository.class },
+                (proxy, method, args) -> {
+                    if (method.getReturnType().equals(java.util.Optional.class)) return java.util.Optional.empty();
+                    if (method.getReturnType().equals(Iterable.class)) return java.util.Collections.emptyList();
+                    if (method.getReturnType().equals(boolean.class)) return false;
+                    if (method.getReturnType().equals(long.class)) return 0L;
+                    return null;
+                }
+        );
+    }
 }

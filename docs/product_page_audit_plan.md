@@ -43,7 +43,7 @@ Decisions already made by the product owner (do NOT re-litigate):
 | SERP/social meta builders | `seoMetaBase` / `socialMetaBase` computed in `ProductPage.vue` (~lines 2230-2360), templates in `frontend/i18n/locales/fr-FR.json` + `en-US.json` under `product.meta.*` |
 | JSON-LD builder | `frontend/app/utils/product-jsonld.ts` (`buildProductJsonLdGraph`), injected in `ProductPage.vue` (~line 2393) |
 | Canonical + hreflang | `canonicalPath`/`alternateProductLinks` in `ProductPage.vue` (~lines 944-985) |
-| Affiliate redirect | `/contrib/{token}` → `frontend/server/api/contrib/[token].ts` → front-api `AffiliationController` (301) |
+| Affiliate redirect | `/contrib/{token}` → `frontend/server/api/contrib/[token].ts` → front-api `AffiliationController` (302 since GOU-1188, see [affiliation clicks](architecture/affiliation-clicks.md)) |
 | Price format utils | `frontend/app/utils/_product-pricing.ts` (`formatPrice`, `formatBestPrice`, `formatOffersCount`) |
 | Visual tests | `frontend/tests/visual/*.spec.ts`, `frontend/playwright.config.ts` (chromium, dev server :3000) |
 | Unit tests | Vitest, colocated `*.spec.ts` next to components |

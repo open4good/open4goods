@@ -16,6 +16,10 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import org.open4goods.services.contribution.model.AffiliationClickStats;
+import org.open4goods.services.contribution.service.AffiliationClickStatsService;
 
 /**
  * Test helpers of the Metriks affiliation clients: fake HTTP exchanges and recorded, anonymised responses
@@ -27,6 +31,39 @@ final class AffiliationTestSupport {
     static final Clock CLOCK = Clock.fixed(Instant.parse("2026-10-22T08:00:00Z"), AffiliationMetriksService.ZONE);
 
     private AffiliationTestSupport() {
+    }
+
+    /**
+     * A click reader answering {@code stats} (or throwing {@code failure}) without Elasticsearch, recording the
+     * requested bounds.
+     */
+    static final class FakeClickStats extends AffiliationClickStatsService {
+        final List<long[]> calls = new ArrayList<>();
+        private final AffiliationClickStats stats;
+        private final RuntimeException failure;
+
+        FakeClickStats(AffiliationClickStats stats, RuntimeException failure) {
+            super(null);
+            this.stats = stats;
+            this.failure = failure;
+        }
+
+        @Override
+        public AffiliationClickStats read(long longStart, long shortStart, long end, int topMerchants) {
+            calls.add(new long[] {longStart, shortStart, end, topMerchants});
+            if (failure != null) {
+                throw failure;
+            }
+            return stats;
+        }
+    }
+
+    /**
+     * @return a click reader answering no click at all
+     */
+    static FakeClickStats noClicks() {
+        Map<String, Long> zero = Map.of("awin", 0L, "effiliation", 0L, "other", 0L);
+        return new FakeClickStats(new AffiliationClickStats(zero, zero, 0, 0, List.of()), null);
     }
 
     /**

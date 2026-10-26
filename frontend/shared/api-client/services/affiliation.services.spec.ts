@@ -109,7 +109,7 @@ describe('useAffiliationService.resolveRedirect', () => {
 
   it('returns redirect details for GET requests', async () => {
     redirectGetRawMock.mockRejectedValueOnce(
-      new ResponseErrorCtor(301, { Location: 'https://example.com/get' })
+      new ResponseErrorCtor(302, { Location: 'https://example.com/get' })
     )
 
     const affiliationService = useAffiliationService('en')
@@ -146,11 +146,12 @@ describe('useAffiliationService.resolveRedirect', () => {
       redirect: 'manual',
     })
     expect(response).toEqual({
-      statusCode: 301,
+      statusCode: 302,
       location: 'https://example.com/get',
     })
   })
 
+  // The previous backend contract (301) stays accepted during a rolling deployment.
   it('returns redirect details for POST requests', async () => {
     redirectPostRawMock.mockRejectedValueOnce(
       new ResponseErrorCtor(301, { Location: 'https://example.com/post' })

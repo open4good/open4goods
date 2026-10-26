@@ -17,6 +17,12 @@ export interface ResolveAffiliationRedirectOptions {
   origin?: string
 }
 
+/**
+ * Redirect statuses accepted from the backend: 302 (non-cacheable, current contract) and 301 (previous contract,
+ * kept so a frontend deployed before front-api keeps working).
+ */
+const BACKEND_REDIRECT_STATUSES = new Set([301, 302])
+
 export interface AffiliationRedirectResponse {
   statusCode: number
   location: string
@@ -98,7 +104,7 @@ export const useAffiliationService = (domainLanguage: DomainLanguage) => {
       )
     } catch (error) {
       if (error instanceof ResponseError) {
-        if (error.response.status === 301) {
+        if (BACKEND_REDIRECT_STATUSES.has(error.response.status)) {
           const location = error.response.headers.get('Location') ?? undefined
 
           if (!location) {

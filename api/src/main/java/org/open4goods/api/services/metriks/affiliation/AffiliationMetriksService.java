@@ -12,17 +12,27 @@ import java.util.List;
 import java.util.Map;
 
 import org.open4goods.api.dto.metriks.MetriksEvent;
+import org.open4goods.services.contribution.model.AffiliationClick;
+import org.open4goods.services.contribution.model.AffiliationClickStats;
+import org.open4goods.services.contribution.model.AffiliationClickStats.MerchantClicks;
+import org.open4goods.services.contribution.model.AffiliationNetwork;
+import org.open4goods.services.contribution.service.AffiliationClickStatsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.NoSuchIndexException;
 import org.springframework.stereotype.Service;
 
 /**
  * Builds the Metriks affiliation events ({@code GET /api/metriks/affiliation}): validated commissions, pending
- * commissions and sales of each network, plus their totals, over the last 7 and 28 days.
+ * commissions and sales of each network, plus their totals, over the last 7 and 28 days; then the outbound
+ * {@code /contrib/} clicks per network ({@code awin}, {@code effiliation}, {@code other}) and in total over the same
+ * windows, and the 20 most clicked merchants over 28 days.
  * <p>
  * Windows: {@code 7d} = [D-7, D-1] and {@code 28d} = [D-28, D-1], D being today in Europe/Paris, by transaction
- * date. Each network is read once, over the 28-day window; the 7-day figures are derived from it.
+ * date (commissions) or click time (clicks). Each network is read once, over the 28-day window; the 7-day figures are
+ * derived from it. Clicks are counted by a single Elasticsearch aggregation on the {@code affiliation-clicks} index
+ * written by front-api.
  * <p>
  * Error rules (a missing figure is never reported as zero):
  * <ul>
@@ -31,7 +41,9 @@ import org.springframework.stereotype.Service;
  * <li>an HTTP error, timeout, unreadable response, unknown status or non-EUR amount: only that network's events are
  * in {@code error};</li>
  * <li>a total is in {@code error} as soon as one network is, with the list of the failing networks: never a partial
- * sum.</li>
+ * sum;</li>
+ * <li>clicks: when Elasticsearch cannot answer (unreachable, missing index...), the nine click events are in
+ * {@code error}; a network without any click is a real {@code 0}.</li>
  * </ul>
  * Error messages and logs never carry a credential: client messages are built without secrets, and every message
  * is additionally scrubbed of the configured credential values.
@@ -44,6 +56,10 @@ public class AffiliationMetriksService {
     /** Only currency summed: no conversion. */
     static final String CURRENCY = "EUR";
     private static final List<String> NETWORK_ORDER = List.of("awin", "effiliation");
+    /** Click networks, in event order ({@link AffiliationNetwork#key()}). */
+    private static final List<String> CLICK_NETWORKS = List.of(AffiliationNetwork.AWIN.key(),
+            AffiliationNetwork.EFFILIATION.key(), AffiliationNetwork.OTHER.key());
+    static final String TOP_MERCHANTS_ID = "affiliation.clicks.top_merchants.28d";
     private static final List<Window> WINDOWS = List.of(new Window("7d", 7, "7 j"), new Window("28d", 28, "28 j"));
     private static final List<String> GROUPS = List.of("business", "affiliation");
     private static final String MASK = "***";
@@ -51,17 +67,21 @@ public class AffiliationMetriksService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AffiliationMetriksService.class);
 
     private final List<AffiliationReportClient> clients;
+    private final AffiliationClickStatsService clickStatsService;
     private final Clock clock;
 
     @Autowired
-    public AffiliationMetriksService(List<AffiliationReportClient> clients) {
-        this(clients, Clock.system(ZONE));
+    public AffiliationMetriksService(List<AffiliationReportClient> clients,
+                                     AffiliationClickStatsService clickStatsService) {
+        this(clients, clickStatsService, Clock.system(ZONE));
     }
 
     /**
      * Package-private constructor allowing tests to fix "today".
      */
-    AffiliationMetriksService(List<AffiliationReportClient> clients, Clock clock) {
+    AffiliationMetriksService(List<AffiliationReportClient> clients, AffiliationClickStatsService clickStatsService,
+                              Clock clock) {
+        this.clickStatsService = clickStatsService;
         this.clients = clients.stream()
                 .sorted(Comparator.comparingInt(c -> {
                     int index = NETWORK_ORDER.indexOf(c.network());
@@ -73,9 +93,10 @@ public class AffiliationMetriksService {
 
     /**
      * Reads every network and builds the events: for each network then for the totals, and for each window,
-     * {@code commission.validated}, {@code commission.pending} and {@code sales}.
+     * {@code commission.validated}, {@code commission.pending} and {@code sales}; then the click events.
      *
-     * @return the 6 events of each network followed by the 6 total events
+     * @return the 6 events of each network, the 6 total events, then the 9 click events
+     *         ({@link #clickEvents(LocalDate)})
      */
     public List<MetriksEvent> collectEvents() {
         LocalDate today = LocalDate.now(clock.withZone(ZONE));
@@ -109,6 +130,77 @@ public class AffiliationMetriksService {
             events.addAll(windowEvents("total", "tous réseaux", window, today.minusDays(window.days()), endDate,
                     totalError == null ? totals.get(window) : null, totalError));
         }
+        events.addAll(clickEvents(today));
+        return events;
+    }
+
+    /**
+     * Builds the click events: {@code affiliation.<network>.clicks.<window>} for {@code awin}, {@code effiliation},
+     * {@code other} then {@code total}, each for {@code 7d} then {@code 28d}, followed by
+     * {@value #TOP_MERCHANTS_ID}. All of them are in {@code error} when Elasticsearch cannot answer.
+     */
+    private List<MetriksEvent> clickEvents(LocalDate today) {
+        LocalDate endDate = today.minusDays(1);
+        long end = today.atStartOfDay(ZONE).toInstant().toEpochMilli();
+        Window shortWindow = WINDOWS.get(0);
+        Window longWindow = WINDOWS.get(WINDOWS.size() - 1);
+        AffiliationClickStats stats = null;
+        String error = null;
+        try {
+            stats = clickStatsService.read(
+                    today.minusDays(longWindow.days()).atStartOfDay(ZONE).toInstant().toEpochMilli(),
+                    today.minusDays(shortWindow.days()).atStartOfDay(ZONE).toInstant().toEpochMilli(),
+                    end, AffiliationClickStatsService.TOP_MERCHANTS);
+        } catch (NoSuchIndexException e) {
+            error = "Clics indisponibles : index " + AffiliationClick.INDEX_NAME + " absent";
+        } catch (RuntimeException e) {
+            // The exception message is not trusted to be secret-free (cluster address, credentials): only its type.
+            error = "Clics indisponibles : Elasticsearch en erreur (" + e.getClass().getSimpleName() + ")";
+        }
+        if (error != null) {
+            LOGGER.warn("Metriks affiliation clicks en erreur : {}", error);
+        }
+
+        List<MetriksEvent> events = new ArrayList<>();
+        List<String> networks = new ArrayList<>(CLICK_NETWORKS);
+        networks.add("total");
+        for (String network : networks) {
+            for (Window window : WINDOWS) {
+                Long value = null;
+                if (stats != null) {
+                    boolean isShort = window.equals(shortWindow);
+                    if ("total".equals(network)) {
+                        value = isShort ? stats.totalShort() : stats.totalLong();
+                    } else {
+                        value = (isShort ? stats.clicksShort() : stats.clicksLong()).getOrDefault(network, 0L);
+                    }
+                }
+                String label = "total".equals(network) ? "tous réseaux" : network;
+                events.add(event("affiliation." + network + ".clicks." + window.key(),
+                        "Clics sortants " + label + " (" + window.label() + ")", "count", network,
+                        today.minusDays(window.days()), endDate, null, value, error));
+            }
+        }
+
+        List<Map<String, Object>> rows = new ArrayList<>();
+        if (stats != null) {
+            for (MerchantClicks merchant : stats.topMerchantsLong()) {
+                Map<String, Object> row = new LinkedHashMap<>();
+                row.put("merchant", merchant.merchant());
+                row.put("network", merchant.network());
+                row.put("clicks", merchant.clicks());
+                rows.add(row);
+            }
+        }
+        MetriksEvent top = event(TOP_MERCHANTS_ID,
+                "Top " + AffiliationClickStatsService.TOP_MERCHANTS + " marchands par clics sortants ("
+                        + longWindow.label() + ")",
+                "count", "total", today.minusDays(longWindow.days()), endDate, null,
+                stats == null ? null : rows.size(), error);
+        if (stats != null) {
+            top.getParams().put("rows", rows);
+        }
+        events.add(top);
         return events;
     }
 
@@ -182,15 +274,18 @@ public class AffiliationMetriksService {
         String scope = " " + label + " (" + window.label() + ")";
         return List.of(
                 event(prefix + "commission.validated" + suffix, "Commissions validées" + scope, "currency",
-                        network, start, end, figures == null ? null : figures.validated().setScale(2, RoundingMode.HALF_UP), error),
+                        network, start, end, CURRENCY, figures == null ? null : figures.validated().setScale(2, RoundingMode.HALF_UP), error),
                 event(prefix + "commission.pending" + suffix, "Commissions en attente" + scope, "currency",
-                        network, start, end, figures == null ? null : figures.pending().setScale(2, RoundingMode.HALF_UP), error),
+                        network, start, end, CURRENCY, figures == null ? null : figures.pending().setScale(2, RoundingMode.HALF_UP), error),
                 event(prefix + "sales" + suffix, "Ventes" + scope, "count",
-                        network, start, end, figures == null ? null : figures.sales(), error));
+                        network, start, end, CURRENCY, figures == null ? null : figures.sales(), error));
     }
 
+    /**
+     * Builds one event; {@code currency} is omitted from {@code params} when {@code null} (click events).
+     */
     private MetriksEvent event(String id, String name, String unit, String network, LocalDate start, LocalDate end,
-                               Number value, String error) {
+                               String currency, Number value, String error) {
         MetriksEvent event = new MetriksEvent();
         event.setId(id);
         event.setName(name);
@@ -200,7 +295,9 @@ public class AffiliationMetriksService {
         Map<String, Object> params = new LinkedHashMap<>();
         params.put("provider", "open4goods-api");
         params.put("network", network);
-        params.put("currency", CURRENCY);
+        if (currency != null) {
+            params.put("currency", currency);
+        }
         params.put("windowStartDate", start.toString());
         params.put("windowEndDate", end.toString());
         event.setParams(params);

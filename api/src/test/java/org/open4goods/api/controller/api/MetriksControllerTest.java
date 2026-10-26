@@ -145,6 +145,36 @@ public class MetriksControllerTest {
                 .andExpect(jsonPath("$.events[1].errorMessage").value("Credential manquant : metriks.affiliation.effiliation.api-key"));
     }
 
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    public void testGetAffiliationClickMetrics() throws Exception {
+        MetriksEvent clicks = new MetriksEvent();
+        clicks.setId("affiliation.awin.clicks.28d");
+        clicks.setUnit("count");
+        clicks.setValue(12L);
+        MetriksEvent top = new MetriksEvent();
+        top.setId("affiliation.clicks.top_merchants.28d");
+        top.setUnit("count");
+        top.setValue(1);
+        top.setParams(Map.of("rows", List.of(Map.of("merchant", "darty.com", "network", "awin", "clicks", 12L))));
+        MetriksEvent down = new MetriksEvent();
+        down.setId("affiliation.total.clicks.7d");
+        down.setUnit("count");
+        down.setStatus("error");
+        down.setErrorMessage("Clics indisponibles : Elasticsearch en erreur (DataAccessResourceFailureException)");
+        when(affiliationMetriksService.collectEvents()).thenReturn(List.of(clicks, top, down));
+
+        mockMvc.perform(get("/api/metriks/affiliation"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.events[0].id").value("affiliation.awin.clicks.28d"))
+                .andExpect(jsonPath("$.events[0].value").value(12))
+                .andExpect(jsonPath("$.events[1].params.rows[0].merchant").value("darty.com"))
+                .andExpect(jsonPath("$.events[1].params.rows[0].network").value("awin"))
+                .andExpect(jsonPath("$.events[1].params.rows[0].clicks").value(12))
+                .andExpect(jsonPath("$.events[2].status").value("error"))
+                .andExpect(jsonPath("$.events[2].value").doesNotExist());
+    }
+
     private static GoogleSearchConsoleService.Outcome<GoogleSearchConsoleService.Totals> totals(
             long clicks, long impressions, double ctr, double position) {
         return new GoogleSearchConsoleService.Outcome<>(

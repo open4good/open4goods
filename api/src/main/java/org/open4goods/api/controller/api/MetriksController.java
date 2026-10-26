@@ -163,14 +163,18 @@ public class MetriksController {
 
     @GetMapping("/affiliation")
     @Operation(
-            summary = "Get affiliation revenue metrics (Awin, Effiliation)",
+            summary = "Get affiliation revenue and outbound click metrics (Awin, Effiliation)",
             description = "Returns, for each affiliation network (awin, effiliation) and for their total, "
                     + "the validated commissions, the pending commissions (EUR) and the sales count (validated + "
                     + "pending, declined excluded) over the last 7 days [D-7, D-1] and 28 days [D-28, D-1], "
                     + "Europe/Paris, by transaction date, as Metriks schema-2.0 events. A network without credentials "
                     + "or whose API fails has its events in error (never zero); the totals are then in error too. "
-                    + "Always answers 200.")
-    @ApiResponse(responseCode = "200", description = "MetriksResponse containing affiliation revenue events")
+                    + "Then the outbound /contrib/ clicks recorded by front-api (affiliation-clicks index): "
+                    + "affiliation.<awin|effiliation|other|total>.clicks.<7d|28d> (count, same windows, by click time) "
+                    + "and affiliation.clicks.top_merchants.28d (value = number of rows, 'params.rows' with merchant, "
+                    + "network and clicks, top 20). A network without click counts 0; when Elasticsearch cannot answer, "
+                    + "the click events are in error (never zero). Always answers 200.")
+    @ApiResponse(responseCode = "200", description = "MetriksResponse containing affiliation revenue and click events")
     public MetriksResponse getAffiliationMetrics() {
         MetriksResponse response = newResponse();
         response.setEvents(affiliationMetriksService.collectEvents());

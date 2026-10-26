@@ -984,11 +984,12 @@ public class ProductMappingService {
      */
     private ProductOffersDto mapOffers(Product product) {
         AggregatedPrices aggregatedPrices = product.getPrice();
-        ProductAggregatedPriceDto bestPrice = mapAggregatedPrice(product.bestPrice());
+        String gtin = product.gtin();
+        ProductAggregatedPriceDto bestPrice = mapAggregatedPrice(product.bestPrice(), gtin);
         ProductAggregatedPriceDto bestNew = aggregatedPrices == null ? null
-                : mapAggregatedPrice(aggregatedPrices.bestNewOffer());
+                : mapAggregatedPrice(aggregatedPrices.bestNewOffer(), gtin);
         ProductAggregatedPriceDto bestOccasion = aggregatedPrices == null ? null
-                : mapAggregatedPrice(aggregatedPrices.bestOccasionOffer());
+                : mapAggregatedPrice(aggregatedPrices.bestOccasionOffer(), gtin);
 
         Map<ProductCondition, List<ProductAggregatedPriceDto>> offersByCondition = Collections.emptyMap();
         ProductPriceHistoryDto newHistory = null;
@@ -1003,7 +1004,7 @@ public class ProductMappingService {
                             .collect(Collectors.toMap(
                                     condition -> condition,
                                     condition -> aggregatedPrices.sortedOffers(condition).stream()
-                                            .map(this::mapAggregatedPrice)
+                                            .map(offer -> mapAggregatedPrice(offer, gtin))
                                             .collect(Collectors.toList()),
                                     (left, right) -> right,
                                     () -> new EnumMap<>(ProductCondition.class)));
@@ -1513,16 +1514,17 @@ public class ProductMappingService {
     }
 
     /**
-     * Map aggregated price data and rebuild the affiliation link when needed.
+     * Map aggregated price data and rebuild the affiliation link when needed. The product GTIN is carried by the
+     * affiliation token so that the click is recorded with the product it comes from.
      */
-    private ProductAggregatedPriceDto mapAggregatedPrice(AggregatedPrice price) {
+    private ProductAggregatedPriceDto mapAggregatedPrice(AggregatedPrice price, String gtin) {
         if (price == null) {
             return null;
         }
         String url = price.getUrl();
         if (StringUtils.hasText(price.getDatasourceName()) && StringUtils.hasText(price.getUrl())) {
             url = AffiliationPartnerService.CONTRIB_ENDPOINT
-                    + affiliationService.encryptAffiliationLink(price.getDatasourceName(), price.getUrl());
+                    + affiliationService.encryptAffiliationLink(price.getDatasourceName(), price.getUrl(), gtin);
         }
         return new ProductAggregatedPriceDto(
                 price.getDatasourceName(),
