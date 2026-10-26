@@ -1,12 +1,12 @@
-## 🥳 Welcome to **v1.0.69**
+## 🥳 Welcome to **v1.0.70**
 
-This release covers **0 day(s)** of work, from **2026-10-25T22:32:52.000Z** to **2026-10-26T11:46:12.000Z**.
+This release covers **0 day(s)** of work, from **2026-10-26T11:46:12.000Z** to **2026-10-26T13:00:32.000Z**.
 
 ### 📦 Stats
-- Diff: [compare](https://github.com/open4good/open4goods/compare/v1.0.68...v1.0.69)
-- Changed files: **40**
+- Diff: [compare](https://github.com/open4good/open4goods/compare/v1.0.69...v1.0.70)
+- Changed files: **73**
 - Commits: **7**
-- Additions: **921** / Deletions: **128**
+- Additions: **3332** / Deletions: **382**
 
 ---
 
@@ -17,12 +17,12 @@ This release covers **0 day(s)** of work, from **2026-10-25T22:32:52.000Z** to *
 
 | PR | Title | Author |
 |---:|---|---|
-| [PR 3492](https://github.com/open4good/open4goods/pull/3492) | fix(frontend): /contrib/ refuse les robots avant l'API et ne rend jamais de HTML (GOU-1175) | @GoulvenF |
-| [PR 3494](https://github.com/open4good/open4goods/pull/3494) | fix(frontend): article TV taille salon, date de mise à jour, pied de page sans H2 (GOU-1179) | @GoulvenF |
-| [PR 3493](https://github.com/open4good/open4goods/pull/3493) | content(blog): lave-vaisselle et four, textes, liens, titres/méta (GOU-1180) | @GoulvenF |
-| [PR 3496](https://github.com/open4good/open4goods/pull/3496) | fix(front-api): liens marchands avec caractères illégaux, redirection encodée (GOU-1185) | @GoulvenF |
-| [PR 3495](https://github.com/open4good/open4goods/pull/3495) | fix(frontend): PageHeader n'écrase plus le SEO des pages, canonical sans barre finale, dernier prix daté (GOU-1182) | @GoulvenF |
-| [PR 3497](https://github.com/open4good/open4goods/pull/3497) | feat(frontend): /contrib/ transmet la page d'origine, rel sponsored nofollow noopener (GOU-1189) | @GoulvenF |
+| [PR 3498](https://github.com/open4good/open4goods/pull/3498) | fix(frontend): /contrib/ exige un signal de navigation nudger.fr (GOU-1184) | @GoulvenF |
+| [PR 3500](https://github.com/open4good/open4goods/pull/3500) | fix(product-repository): exports de produits complets en pages de 1000 max (GOU-1203) | @GoulvenF |
+| [PR 3501](https://github.com/open4good/open4goods/pull/3501) | feat(seo): fiches produit, titre ≤ 60 sans réf., méta score+prix, H1 unique, alternatives SSR (GOU-1181) | @GoulvenF |
+| [PR 3502](https://github.com/open4good/open4goods/pull/3502) | fix(frontend): titre SSR de l'accueil, 301 barre finale des catégories, corps 400 /contrib/ (GOU-1207) | @GoulvenF |
+| [PR 3503](https://github.com/open4good/open4goods/pull/3503) | fix(frontend): titres i18n tronqués au « | » (GOU-1212) | @GoulvenF |
+| [PR 3499](https://github.com/open4good/open4goods/pull/3499) | GOU-1188: count /contrib/ clicks per network without personal data | @GoulvenF |
 
 
 </details>
