@@ -46,7 +46,9 @@ single `/`, has no `?`, `#`, whitespace or control character, and is at most
 200 characters long. Otherwise it is ignored (`null`).
 
 The documents already stored in `contribution-votes` with IP and user agent
-are not touched by this change; their purge is a separate board decision.
+were not touched by this change. Their purge (board approval 2f4935d1) runs in
+front-api at startup, see `ContributionVoteIpUaPurgeService` and the front-api
+README, "Contribution votes ip/ua purge" (GOU-1230).
 
 ## Metriks events
 

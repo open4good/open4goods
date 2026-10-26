@@ -252,6 +252,12 @@
       "defaultValue": true
     },
     {
+      "name": "front.contribution-votes-purge.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Run once, asynchronously after startup, the idempotent purge of the historical ip and ua fields of the contribution-votes index.",
+      "defaultValue": true
+    },
+    {
       "name": "front.geocode.base-url",
       "type": "java.lang.String",
       "description": "Base URL of the geocode microservice.",
