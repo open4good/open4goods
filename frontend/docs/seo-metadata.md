@@ -50,6 +50,16 @@ product `<title>` and meta description; the page renders them as-is.
 their `<a href>` links are in the SSR HTML and crawlable. Toggling a filter chip
 changes the key and refetches on the client.
 
+When the initial search returns fewer than 3 alternatives (current product
+excluded), the default filters are relaxed in a fixed order, stopping as soon as
+3 are found: (1) all popular-attribute filters, (2) the price, (3) the
+ecoscore, i.e. no filter at all. The vertical is never changed and a category
+with fewer than 3 other products shows what exists; the "best product" message
+only appears when there is none. The chips show the filter set actually
+applied. After the first chip click there is no automatic relaxation. All steps
+run inside the same `useAsyncData` handler (one SSR payload, no refetch on
+hydration), so the links stay in the server HTML (GOU-1215).
+
 ## Category pages
 
 Category and sub-category pages resolve SEO metadata from backend category DTOs

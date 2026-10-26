@@ -485,7 +485,17 @@ const filterDefinitionMap = computed(
     )
 )
 
-const isFilterActive = (key: string) => activeFilterKeys.value.has(key)
+// Chips show the filter set actually applied: after an automatic relaxation
+// this is smaller than the default selection, until the user clicks a chip.
+const displayedFilterKeys = computed<Set<string>>(() => {
+  if (hasInteracted.value) {
+    return activeFilterKeys.value
+  }
+  const applied = alternativesData.value?.appliedKeys
+  return applied ? new Set(applied) : activeFilterKeys.value
+})
+
+const isFilterActive = (key: string) => displayedFilterKeys.value.has(key)
 
 const toggleFilter = (key: string) => {
   const definition = filterDefinitionMap.value.get(key)
@@ -493,8 +503,9 @@ const toggleFilter = (key: string) => {
     return
   }
 
+  const base = new Set(displayedFilterKeys.value)
   hasInteracted.value = true
-  const next = new Set(activeFilterKeys.value)
+  const next = base
   if (next.has(key)) {
     next.delete(key)
   } else {
@@ -579,54 +590,114 @@ watch(
 type AlternativesResult = {
   products: ProductDto[]
   errorMessage: string | null
+  // Filter keys of the request that produced `products` (null: not searched).
+  appliedKeys: string[] | null
+}
+
+// Below this count, the default filters are relaxed (GOU-1215).
+const MIN_ALTERNATIVES = 3
+
+const resolveClausesFor = (keys: string[]): Filter[] =>
+  keys
+    .map(key => filterDefinitionMap.value.get(key))
+    .filter(
+      (definition): definition is AlternativeFilterDefinition =>
+        Boolean(definition) && !definition.disabled
+    )
+    .map(definition => definition.resolveClause())
+    .filter((clause): clause is Filter => clause != null)
+
+// Fixed relaxation order of the default filters: popular attributes first
+// (all together), then the price, and the ecoscore last. Each step drops one
+// more group; steps that change nothing are skipped.
+const buildRelaxationSteps = (keys: string[]): string[][] => {
+  const steps: string[][] = [keys]
+  const dropGroups: Array<(key: string) => boolean> = [
+    key => key.startsWith('attribute:'),
+    key => key === 'price',
+    key => key === 'ecoscore',
+  ]
+  let current = keys
+  for (const isDropped of dropGroups) {
+    const next = current.filter(key => !isDropped(key))
+    if (next.length !== current.length) {
+      steps.push(next)
+      current = next
+    }
+  }
+  return steps
+}
+
+const searchAlternatives = async (
+  keys: string[],
+  signal?: AbortSignal
+): Promise<ProductDto[]> => {
+  const clauses = resolveClausesFor(keys)
+  // The global $fetch is the CSRF-aware client installed by
+  // plugins/csrf-fetch.ts, so this POST also passes during SSR.
+  const response = await $fetch<ProductSearchResponseDto>(
+    '/api/products/search',
+    {
+      method: 'POST',
+      signal,
+      query: {
+        verticalId: props.verticalId,
+        pageSize: props.maxResults,
+        pageNumber: 0,
+        include: [
+          ProductsIncludeEnum.Base,
+          ProductsIncludeEnum.Identity,
+          ProductsIncludeEnum.Offers,
+          ProductsIncludeEnum.Scores,
+          ProductsIncludeEnum.Resources,
+        ],
+      },
+      body: {
+        sort: {
+          field: ECOSCORE_RELATIVE_FIELD,
+          order: 'DESC',
+        },
+        filters: clauses.length ? { filters: clauses } : undefined,
+      },
+    }
+  )
+
+  const pageData = Array.isArray(response.products?.data)
+    ? response.products.data
+    : []
+  const products = pageData.filter(
+    candidate => candidate.gtin !== props.product?.gtin
+  )
+  return products.slice(0, props.maxResults)
 }
 
 const fetchAlternatives = async (
   signal?: AbortSignal
 ): Promise<AlternativesResult> => {
   if (!canSearch.value) {
-    return { products: [], errorMessage: null }
+    return { products: [], errorMessage: null, appliedKeys: null }
   }
 
-  try {
-    // The global $fetch is the CSRF-aware client installed by
-    // plugins/csrf-fetch.ts, so this POST also passes during SSR.
-    const response = await $fetch<ProductSearchResponseDto>(
-      '/api/products/search',
-      {
-        method: 'POST',
-        signal,
-        query: {
-          verticalId: props.verticalId,
-          pageSize: props.maxResults,
-          pageNumber: 0,
-          include: [
-            ProductsIncludeEnum.Base,
-            ProductsIncludeEnum.Identity,
-            ProductsIncludeEnum.Offers,
-            ProductsIncludeEnum.Scores,
-            ProductsIncludeEnum.Resources,
-          ],
-        },
-        body: {
-          sort: {
-            field: ECOSCORE_RELATIVE_FIELD,
-            order: 'DESC',
-          },
-          filters: activeClauses.value.length
-            ? { filters: activeClauses.value }
-            : undefined,
-        },
-      }
-    )
+  const requestedKeys = Array.from(activeFilterKeys.value)
+  // Once the user has clicked a chip, the selection is theirs: no relaxation.
+  const steps = hasInteracted.value
+    ? [requestedKeys]
+    : buildRelaxationSteps(requestedKeys)
 
-    const pageData = Array.isArray(response.products?.data)
-      ? response.products.data
-      : []
-    const products = pageData.filter(
-      candidate => candidate.gtin !== props.product?.gtin
-    )
-    return { products: products.slice(0, props.maxResults), errorMessage: null }
+  try {
+    let best: AlternativesResult = {
+      products: [],
+      errorMessage: null,
+      appliedKeys: requestedKeys,
+    }
+    for (const keys of steps) {
+      const products = await searchAlternatives(keys, signal)
+      best = { products, errorMessage: null, appliedKeys: keys }
+      if (products.length >= MIN_ALTERNATIVES) {
+        break
+      }
+    }
+    return best
   } catch (error) {
     const status = resolveFetchErrorStatus(error)
     const data =
@@ -644,7 +715,11 @@ const fetchAlternatives = async (
       verticalId: props.verticalId,
       productGtin: props.product?.gtin ?? null,
     })
-    return { products: [], errorMessage: resolveFetchErrorMessage(error) }
+    return {
+      products: [],
+      errorMessage: resolveFetchErrorMessage(error),
+      appliedKeys: null,
+    }
   }
 }
 
@@ -665,7 +740,7 @@ const {
   (_nuxtApp, { signal }) => fetchAlternatives(signal),
   {
     server: true,
-    default: () => ({ products: [], errorMessage: null }),
+    default: () => ({ products: [], errorMessage: null, appliedKeys: null }),
   }
 )
 
