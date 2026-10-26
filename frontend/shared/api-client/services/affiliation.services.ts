@@ -13,6 +13,8 @@ export interface ResolveAffiliationRedirectOptions {
   token: string
   userAgent?: string
   method: AffiliationRedirectHttpMethod
+  /** Same-site path the click came from, sent as `X-Affiliation-Origin`. */
+  origin?: string
 }
 
 export interface AffiliationRedirectResponse {
@@ -59,6 +61,7 @@ export const useAffiliationService = (domainLanguage: DomainLanguage) => {
     token,
     userAgent,
     method,
+    origin,
   }: ResolveAffiliationRedirectOptions): Promise<AffiliationRedirectResponse> => {
     const apiInstance = resolveApi()
     const language = buildLanguageEnum(method)
@@ -69,6 +72,10 @@ export const useAffiliationService = (domainLanguage: DomainLanguage) => {
           { token, domainLanguage: language, userAgent },
           async requestContext => ({
             ...requestContext.init,
+            headers: {
+              ...(requestContext.init.headers as Record<string, string>),
+              ...(origin ? { 'X-Affiliation-Origin': origin } : {}),
+            },
             redirect: 'manual',
           })
         )
@@ -77,6 +84,10 @@ export const useAffiliationService = (domainLanguage: DomainLanguage) => {
           { token, domainLanguage: language, userAgent },
           async requestContext => ({
             ...requestContext.init,
+            headers: {
+              ...(requestContext.init.headers as Record<string, string>),
+              ...(origin ? { 'X-Affiliation-Origin': origin } : {}),
+            },
             redirect: 'manual',
           })
         )
