@@ -93,6 +93,33 @@ class AffiliationControllerTest {
                 .andExpect(header().doesNotExist(HttpHeaders.LOCATION));
     }
 
+    @Test
+    void redirectShouldEncodeIllegalCharactersInMerchantUrl() throws Exception {
+        when(affiliationService.trackRedirect(anyString(), anyString(), any()))
+                .thenReturn("https://track.effiliation.com/servlet/effi.redir?id_compteur=1&url=https://www.carrefour.fr/p/jeu de société|v2 {x} é?a=%20b");
+
+        mockMvc.perform(get("/affiliations/redirect")
+                .param("token", "t")
+                .param("domainLanguage", "fr")
+                .with(remoteAddress("192.0.2.1")))
+                .andExpect(status().isMovedPermanently())
+                .andExpect(header().string(HttpHeaders.LOCATION,
+                        "https://track.effiliation.com/servlet/effi.redir?id_compteur=1&url=https://www.carrefour.fr/p/jeu%20de%20soci%C3%A9t%C3%A9%7Cv2%20%7Bx%7D%20%C3%A9?a=%20b"));
+    }
+
+    @Test
+    void redirectShouldRejectNonHttpScheme() throws Exception {
+        when(affiliationService.trackRedirect(anyString(), anyString(), any()))
+                .thenReturn("javascript:alert(1)");
+
+        mockMvc.perform(get("/affiliations/redirect")
+                .param("token", "t")
+                .param("domainLanguage", "fr")
+                .with(remoteAddress("192.0.2.1")))
+                .andExpect(status().isBadRequest())
+                .andExpect(header().doesNotExist(HttpHeaders.LOCATION));
+    }
+
     private RequestPostProcessor remoteAddress(String address) {
         return request -> {
             request.setRemoteAddr(address);

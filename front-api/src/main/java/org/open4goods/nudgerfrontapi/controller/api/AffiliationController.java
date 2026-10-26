@@ -1,6 +1,8 @@
 package org.open4goods.nudgerfrontapi.controller.api;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.localization.DomainLanguage;
@@ -144,7 +146,7 @@ public class AffiliationController {
         String ip = IpUtils.getIp(request);
         String url = affiliationService.trackRedirect(token, ip, userAgent);
         try {
-            URI target = URI.create(url);
+            URI target = toRedirectUri(url);
             return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
                     .cacheControl(CacheControl.noStore())
                     .header(HttpHeaders.LOCATION, target.toString())
@@ -154,5 +156,38 @@ public class AffiliationController {
         catch (IllegalArgumentException exception) {
             throw new InvalidAffiliationTokenException("Decoded URL is not a valid URI.", exception);
         }
+    }
+
+    /**
+     * Build the redirect target from a merchant URL. Merchant feeds (e.g. Carrefour marketplace) may carry
+     * characters that {@link URI} rejects (spaces, {@code |}, braces, quotes, raw non-ASCII). Those are
+     * percent-encoded; existing {@code %XX} escapes and URI delimiters are preserved. Only absolute
+     * http/https targets are accepted, to prevent open redirects to other schemes.
+     *
+     * @param url raw merchant URL
+     * @return a valid absolute http(s) URI
+     * @throws IllegalArgumentException when the URL cannot be turned into a valid http(s) URI
+     */
+    static URI toRedirectUri(String url) {
+        if (url == null || url.isBlank()) {
+            throw new IllegalArgumentException("Empty URL");
+        }
+        StringBuilder sb = new StringBuilder();
+        for (byte b : url.trim().getBytes(StandardCharsets.UTF_8)) {
+            int c = b & 0xFF;
+            if (c > 0x20 && c < 0x7F && "\"<>\\^`{|}".indexOf(c) < 0) {
+                sb.append((char) c);
+            }
+            else {
+                sb.append('%').append(String.format(Locale.ROOT, "%02X", c));
+            }
+        }
+        URI uri = URI.create(sb.toString());
+        String scheme = uri.getScheme();
+        if (scheme == null || !(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))
+                || uri.getHost() == null) {
+            throw new IllegalArgumentException("Unsupported redirect target");
+        }
+        return uri;
     }
 }
