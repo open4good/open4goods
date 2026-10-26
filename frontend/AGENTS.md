@@ -43,7 +43,7 @@
 - Type everything: rely on interfaces/types; avoid `any`. Use discriminated unions or type guards when needed.
 - Keep code SSR-friendly (guard against `window`/`document`).
 - Format dates rendered during SSR with an explicit `timeZone` (`Intl.DateTimeFormat`, `getUTC*`): the server runs in UTC and the browser in the user's zone, so an implicit zone causes hydration mismatches.
-- Unsafe calls (`POST`, …) to `/api` that may run during SSR go through the CSRF-aware client of the request, captured at setup (`const { $fetch: csrfFetch } = useNuxtApp()`), not `globalThis.$fetch`, which is swapped on every SSR request. The client (`app/plugins/csrf-fetch.ts`) keeps working after an `await`, when the ambient Nuxt context is gone (GOU-1226).
+- Unsafe calls (`POST`, etc.) to `/api` that may run during SSR go through the CSRF-aware client of the request, captured at setup (`const { $fetch: csrfFetch } = useNuxtApp()`), not `globalThis.$fetch`, which is swapped on every SSR request. The client (`app/plugins/csrf-fetch.ts`) keeps working after an `await`, when the ambient Nuxt context is gone (GOU-1226).
 - Keep composables thin; delegate heavy logic to server routes or shared utilities.
 - All static texts must be internationalised
 - Also write or update tests (component-level tests) if pertinent
