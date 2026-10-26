@@ -26,14 +26,32 @@ class AffiliationNetworkTest {
             "https://awin1.com.evil.example/cread.php, other",
             "https://notawin1.com/cread.php, other",
             "https://www.example.com/?u=https://www.awin1.com/, other",
+            "https://user@www.awin1.com:443/x, awin",
+            "https://www.awin1.com:8443?awinmid=1, awin",
+            "https://user:pw@evil.example@track.effinity.fr/r, effiliation",
+            "https://www.awin1.com.evil.example:443/x, other",
     })
     void fromUrl_deducesTheNetworkFromTheHost(String url, String expected) {
         assertThat(AffiliationNetwork.fromUrl(url).key()).isEqualTo(expected);
     }
 
+    /** Merchant URLs that {@link java.net.URI} rejects (GOU-1185) keep their network. */
+    @ParameterizedTest
+    @CsvSource(delimiter = ';', value = {
+            "https://www.awin1.com/cread.php?awinmid=1&p=https://m.fr/a b|c; awin; www.awin1.com",
+            "https://www.awin1.com/cread.php?awinmid=1&ued=https://m.fr/{x}?q=50%-off#top#2; awin; www.awin1.com",
+            "https://track.effiliation.com/servlet/effi.redir?id_compteur=1&url=https://www.carrefour.fr/p/jeu de société|v2; effiliation; track.effiliation.com",
+            "https://www.darty.com/p/promo 50%|x; other; www.darty.com",
+    })
+    void fromUrl_readsTheHostOfUrlsWithIllegalCharacters(String url, String expected, String host) {
+        assertThat(AffiliationNetwork.fromUrl(url).key()).isEqualTo(expected);
+        assertThat(AffiliationNetwork.hostOf(url)).isEqualTo(host);
+    }
+
     @ParameterizedTest
     @NullAndEmptySource
-    @ValueSource(strings = {"   ", "not a url", "http://", "/relative/path", "https://exa mple.com/"})
+    @ValueSource(strings = {"   ", "not a url", "http://", "/relative/path", "https://exa mple.com/", "https://:443/x",
+            "https://www.awin1.com:abc/x", "://www.awin1.com/x", "1https://www.awin1.com/x"})
     void fromUrl_isOtherWithoutReadableHost(String url) {
         assertThat(AffiliationNetwork.fromUrl(url)).isEqualTo(AffiliationNetwork.OTHER);
         assertThat(AffiliationNetwork.hostOf(url)).isNull();
