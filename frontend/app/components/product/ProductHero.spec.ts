@@ -183,6 +183,29 @@ const mountComponent = async () =>
   })
 
 describe('ProductHero', () => {
+  it('renders a single h1 carrying the brand and model only', async () => {
+    const wrapper = await mountSuspended(ProductHero, {
+      props: {
+        product: {
+          ...baseProduct,
+          names: { pageTitle: 'ELECTROLUX E62LB200S' },
+          identity: { brand: 'ELECTROLUX', model: 'E62LB200S' },
+        },
+        breadcrumbs: [{ title: 'Category' }],
+        popularAttributes: [],
+        hasCategory: true,
+      },
+      global: {
+        plugins: [createI18nInstance()],
+        stubs,
+      },
+    })
+
+    const headings = wrapper.findAll('h1')
+    expect(headings).toHaveLength(1)
+    expect(headings[0]?.text()).toBe('ELECTROLUX E62LB200S')
+  })
+
   it('renders correctly', async () => {
     const wrapper = await mountComponent()
 

@@ -82,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { FetchError } from 'ofetch'
@@ -128,19 +128,8 @@ const emit = defineEmits<{
 
 const { t, n } = useI18n()
 
-const alternatives = ref<ProductDto[]>([])
-const loading = ref(false)
-const errorMessage = ref<string | null>(null)
 const hasInteracted = ref(false)
 const activeFilterKeys = ref<Set<string>>(new Set())
-let requestToken = 0
-
-const emitAlternativesState = (hydrated: boolean) => {
-  emit('alternativesUpdated', {
-    hasAlternatives: alternatives.value.length > 0,
-    hydrated,
-  })
-}
 
 const normalizedPopularAttributes = computed(
   () => props.popularAttributes ?? []
@@ -574,10 +563,7 @@ watch(
   () => props.product?.gtin ?? null,
   () => {
     hasInteracted.value = false
-    alternatives.value = []
-    errorMessage.value = null
     syncActiveFilters(false)
-    emitAlternativesState(false)
   },
   { immediate: true }
 )
@@ -590,22 +576,26 @@ watch(
   { immediate: true }
 )
 
-const fetchAlternatives = async () => {
+type AlternativesResult = {
+  products: ProductDto[]
+  errorMessage: string | null
+}
+
+const fetchAlternatives = async (
+  signal?: AbortSignal
+): Promise<AlternativesResult> => {
   if (!canSearch.value) {
-    alternatives.value = []
-    emitAlternativesState(false)
-    return
+    return { products: [], errorMessage: null }
   }
 
-  const currentToken = ++requestToken
-  loading.value = true
-  errorMessage.value = null
-
   try {
+    // The global $fetch is the CSRF-aware client installed by
+    // plugins/csrf-fetch.ts, so this POST also passes during SSR.
     const response = await $fetch<ProductSearchResponseDto>(
       '/api/products/search',
       {
         method: 'POST',
+        signal,
         query: {
           verticalId: props.verticalId,
           pageSize: props.maxResults,
@@ -617,9 +607,6 @@ const fetchAlternatives = async () => {
             ProductsIncludeEnum.Scores,
             ProductsIncludeEnum.Resources,
           ],
-        },
-        headers: {
-          'X-XSRF-TOKEN': useCookie('XSRF-TOKEN').value || '',
         },
         body: {
           sort: {
@@ -633,23 +620,14 @@ const fetchAlternatives = async () => {
       }
     )
 
-    if (currentToken !== requestToken) {
-      return
-    }
-
     const pageData = Array.isArray(response.products?.data)
       ? response.products.data
       : []
     const products = pageData.filter(
       candidate => candidate.gtin !== props.product?.gtin
     )
-    alternatives.value = products.slice(0, props.maxResults)
-    emitAlternativesState(true)
+    return { products: products.slice(0, props.maxResults), errorMessage: null }
   } catch (error) {
-    if (currentToken !== requestToken) {
-      return
-    }
-
     const status = resolveFetchErrorStatus(error)
     const data =
       error instanceof FetchError
@@ -666,28 +644,53 @@ const fetchAlternatives = async () => {
       verticalId: props.verticalId,
       productGtin: props.product?.gtin ?? null,
     })
-    errorMessage.value = resolveFetchErrorMessage(error)
-    alternatives.value = []
-    emitAlternativesState(true)
-  } finally {
-    if (currentToken === requestToken) {
-      loading.value = false
-    }
+    return { products: [], errorMessage: resolveFetchErrorMessage(error) }
   }
 }
 
-watch(
-  [() => props.verticalId, () => props.product?.gtin ?? null, activeClauses],
-  () => {
-    if (canSearch.value) {
-      fetchAlternatives()
-    }
-  },
-  { immediate: true }
+// Fetched through useAsyncData so the default selection is rendered during
+// SSR: the alternative product links must be crawlable (GOU-1181). The key
+// follows the product and the active filters, so toggling a chip refetches.
+const alternativesKey = computed(
+  () =>
+    `product-alternatives:${props.verticalId}:${props.product?.gtin ?? ''}:${JSON.stringify(activeClauses.value)}`
 )
 
+const {
+  data: alternativesData,
+  status: alternativesStatus,
+  refresh: refreshAlternatives,
+} = useAsyncData<AlternativesResult>(
+  alternativesKey,
+  (_nuxtApp, { signal }) => fetchAlternatives(signal),
+  {
+    server: true,
+    default: () => ({ products: [], errorMessage: null }),
+  }
+)
+
+const alternatives = computed(() => alternativesData.value?.products ?? [])
+const errorMessage = computed(
+  () => alternativesData.value?.errorMessage ?? null
+)
+const loading = computed(() => alternativesStatus.value === 'pending')
+
+const emitAlternativesState = () => {
+  emit('alternativesUpdated', {
+    hasAlternatives: alternatives.value.length > 0,
+    hydrated: alternativesStatus.value === 'success',
+  })
+}
+
+// Emitted once mounted only: the parent navigation must render the same
+// markup on the server and during hydration.
+onMounted(() => {
+  emitAlternativesState()
+  watch([alternatives, alternativesStatus], emitAlternativesState)
+})
+
 const retryFetch = () => {
-  fetchAlternatives()
+  refreshAlternatives()
 }
 </script>
 

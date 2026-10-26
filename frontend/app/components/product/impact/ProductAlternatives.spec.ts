@@ -15,7 +15,8 @@ vi.mock('~/components/category/products/CategoryProductCardGrid.vue', () => ({
       size: String,
       variant: String,
     },
-    template: '<div class="category-product-card-grid-stub"></div>',
+    template:
+      '<div class="category-product-card-grid-stub"><a v-for="item in products" :key="item.gtin" :href="item.fullSlug">{{ item.gtin }}</a></div>',
   },
 }))
 
@@ -186,5 +187,41 @@ describe('ProductAlternatives', () => {
         expect.objectContaining({ field: 'price.minPrice.price' }),
       ])
     )
+  })
+
+  it('renders the alternatives returned by the search, without the current product', async () => {
+    fetchMock.mockResolvedValue({
+      products: {
+        data: [
+          { gtin: 1, fullSlug: '/phones/1-alt-one' },
+          { gtin: product.gtin, fullSlug: product.fullSlug },
+          { gtin: 2, fullSlug: '/phones/2-alt-two' },
+          { gtin: 3, fullSlug: '/phones/3-alt-three' },
+        ],
+      },
+    })
+
+    const wrapper = await mountSuspended(ProductAlternatives, {
+      props: {
+        product,
+        verticalId: 'phones-render',
+        popularAttributes,
+      },
+      global: {
+        plugins: [i18n],
+      },
+    })
+
+    await flushPromises()
+
+    const links = wrapper.findAll('.category-product-card-grid-stub a')
+    expect(links.map(link => link.attributes('href'))).toEqual([
+      '/phones/1-alt-one',
+      '/phones/2-alt-two',
+      '/phones/3-alt-three',
+    ])
+    expect(wrapper.emitted('alternativesUpdated')?.at(-1)).toEqual([
+      { hasAlternatives: true, hydrated: true },
+    ])
   })
 })
