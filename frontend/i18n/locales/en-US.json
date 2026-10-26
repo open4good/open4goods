@@ -2992,6 +2992,7 @@
       "viewDeal": "View deal",
       "history": "Price history",
       "noOffersBanner": "No offers available right now!",
+      "lastKnownPrice": "Last recorded price: {price} on {date}",
       "headers": {
         "condition": "Condition",
         "offer": "Offer",
