@@ -137,6 +137,7 @@ public class ProductMappingService {
     private final IcecatService icecatService;
     private final Cache referenceCache;
     private final ProductTimelineService productTimelineService;
+    private final ProductSeoMetaService productSeoMetaService;
 
     public ProductMappingService(ProductRepository repository,
             ApiProperties apiProperties,
@@ -146,7 +147,8 @@ public class ProductMappingService {
             AffiliationService affiliationService,
             IcecatService icecatService,
             CacheManager cacheManager,
-            ProductTimelineService productTimelineService) {
+            ProductTimelineService productTimelineService,
+            ProductSeoMetaService productSeoMetaService) {
         this.repository = repository;
         this.apiProperties = apiProperties;
         this.categoryMappingService = categoryMappingService;
@@ -156,6 +158,7 @@ public class ProductMappingService {
         this.icecatService = icecatService;
         this.referenceCache = cacheManager.getCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
         this.productTimelineService = productTimelineService;
+        this.productSeoMetaService = productSeoMetaService;
         if (this.referenceCache == null) {
             logger.warn("Cache {} is not configured; product reference caching disabled.",
                     CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
@@ -524,55 +527,37 @@ public class ProductMappingService {
 
     /**
      * Map the localised names and SEO metadata associated with the product.
+     * <p>
+     * {@code metaTitle} and {@code metaDescription} are computed by
+     * {@link ProductSeoMetaService}, the single source of truth for product SEO
+     * metadata; the stored meta description is only a fallback. The page title
+     * (H1) drops the manufacturer reference appended to some models.
+     * </p>
+     *
+     * @param product        product being mapped
+     * @param domainLanguage requested domain language
+     * @param locale         requested locale
+     * @param vConfig        resolved vertical configuration
+     * @return localised names or {@code null} when the product has no names
      */
     private ProductNamesDto mapNames(Product product, DomainLanguage domainLanguage, Locale locale, VerticalConfig vConfig) {
         if (product.getNames() == null) {
             return null;
         }
+        String seoName = resolveProductSeoName(product, domainLanguage, locale);
+        String metaDescription = productSeoMetaService.buildMetaDescription(product, seoName, vConfig, domainLanguage);
         return new ProductNamesDto(
                 safeCanonicalName(product, resolveLocalisedString(product.getNames().getDisplayName(), domainLanguage, locale)),
                 safeCanonicalName(product, resolveLocalisedString(product.getNames().getCardName(), domainLanguage, locale)),
-                safeCanonicalName(product, resolveLocalisedString(product.getNames().getPageTitle(), domainLanguage, locale)),
+                productSeoMetaService.stripManufacturerReference(
+                        safeCanonicalName(product, resolveLocalisedString(product.getNames().getPageTitle(), domainLanguage, locale)),
+                        product),
                 safeCanonicalName(product, resolveLocalisedString(product.getNames().getSeoName(), domainLanguage, locale)),
-                buildProductMetaTitle(product, domainLanguage, locale, vConfig),
-                resolveLocalisedString(product.getNames().getMetaDescription(), domainLanguage, locale),
+                productSeoMetaService.buildMetaTitle(product, seoName, vConfig, domainLanguage),
+                metaDescription != null ? metaDescription
+                        : resolveLocalisedString(product.getNames().getMetaDescription(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getProductMetaOpenGraphTitle(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getProductMetaOpenGraphDescription(), domainLanguage, locale));
-    }
-
-    /**
-     * Build the canonical SEO title for product pages server-side so the Nuxt
-     * application can consume it directly and keep local title logic as a
-     * resilience fallback only.
-     *
-     * @param product product being mapped
-     * @param domainLanguage requested domain language
-     * @param locale requested locale
-     * @param vConfig resolved vertical configuration
-     * @return SEO title trimmed to a SERP-safe length, or {@code null}
-     */
-    private String buildProductMetaTitle(Product product, DomainLanguage domainLanguage, Locale locale, VerticalConfig vConfig) {
-        String productName = resolveProductSeoName(product, domainLanguage, locale);
-        if (!StringUtils.hasText(productName)) {
-            return null;
-        }
-
-        String verticalTitle = resolveVerticalTitle(vConfig, domainLanguage);
-        Double impactScore = Optional.ofNullable(product.ecoscore()).map(Score::getValue).orElse(null);
-        String candidate;
-        if (impactScore != null && StringUtils.hasText(verticalTitle)) {
-            candidate = String.format(Locale.ROOT, "%s - score impact %s/20 | %s", productName,
-                    formatSeoScore(impactScore), verticalTitle);
-        } else if (impactScore != null) {
-            candidate = String.format(Locale.ROOT, "%s - score impact %s/20 | Nudger", productName,
-                    formatSeoScore(impactScore));
-        } else if (StringUtils.hasText(verticalTitle)) {
-            candidate = String.format("%s | %s", productName, verticalTitle);
-        } else {
-            candidate = String.format("%s | Nudger", productName);
-        }
-
-        return truncateAtWordBoundary(candidate, 60);
     }
 
     /**
@@ -600,81 +585,6 @@ public class ProductMappingService {
         }
 
         return safeCanonicalName(product, resolvePreferredName(names, domainLanguage, locale));
-    }
-
-    /**
-     * Resolve a localized vertical label suitable for title suffixes.
-     *
-     * @param vConfig resolved vertical configuration
-     * @param domainLanguage requested domain language
-     * @return title suffix or {@code null}
-     */
-    private String resolveVerticalTitle(VerticalConfig vConfig, DomainLanguage domainLanguage) {
-        if (vConfig == null) {
-            return null;
-        }
-        String lang = domainLanguage != null ? domainLanguage.languageTag() : null;
-        ProductI18nElements i18n = lang == null ? null : vConfig.i18n(lang);
-        if (i18n == null) {
-            return null;
-        }
-        return firstText(i18n.getVerticalMetaTitle(), i18n.getVerticalHomeTitle());
-    }
-
-    /**
-     * Pick the first non-blank text value.
-     *
-     * @param values candidate values ordered by priority
-     * @return first non-blank value or {@code null}
-     */
-    private String firstText(String... values) {
-        if (values == null) {
-            return null;
-        }
-        for (String value : values) {
-            if (StringUtils.hasText(value)) {
-                return value.trim();
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Format impact score without unnecessary trailing decimals.
-     *
-     * @param score impact score on a 20-point scale
-     * @return compact score string
-     */
-    private String formatSeoScore(double score) {
-        double rounded = Math.round(score * 10.0d) / 10.0d;
-        if (rounded == Math.rint(rounded)) {
-            return String.valueOf((int) rounded);
-        }
-        return String.format(Locale.ROOT, "%.1f", rounded);
-    }
-
-    /**
-     * Truncate text without cutting the last word when a safe boundary exists.
-     *
-     * @param value text to truncate
-     * @param maxLength maximum length including the ellipsis
-     * @return normalized and truncated text
-     */
-    private String truncateAtWordBoundary(String value, int maxLength) {
-        if (!StringUtils.hasText(value)) {
-            return null;
-        }
-        String normalized = value.trim().replaceAll("\\s+", " ");
-        if (normalized.length() <= maxLength) {
-            return normalized;
-        }
-        int safeLimit = Math.max(1, maxLength - 1);
-        String truncated = normalized.substring(0, safeLimit);
-        int lastSpace = truncated.lastIndexOf(' ');
-        if (lastSpace > Math.floor(safeLimit * 0.6d)) {
-            truncated = truncated.substring(0, lastSpace);
-        }
-        return truncated.stripTrailing() + "…";
     }
 
     /**

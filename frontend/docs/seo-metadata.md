@@ -18,6 +18,38 @@ legacy API response or partially populated product does not contain these
 fields. New product title improvements should be implemented in `front-api`, not
 in `ProductPage.vue`.
 
+### Title, description and H1 (GOU-1181)
+
+`front-api` `ProductSeoMetaService` is the single source of truth for the
+product `<title>` and meta description; the page renders them as-is.
+
+- **Title**, at most 60 characters, never cut by an ellipsis:
+  `<Brand> <Model> : <type> <key features> - avis, prix et impact` (the dash
+  before the suffix is an en dash, U+2013). The type is
+  the first alternative of the vertical URL prefix (`lave-vaisselle`), the
+  features come from the vertical `popularAttributes` that carry a unit or a
+  suffix (`8 kg`, `44 dB`). The manufacturer reference number some sources
+  append to the model (`E62LB200S 911572124`) is removed, and brands written in
+  capitals are title-cased (`ELECTROLUX` → `Electrolux`, acronyms such as `LG`
+  are kept). Degradation order when too long: second feature, long suffix
+  (`- avis et prix`), first feature, type, suffix. Examples:
+  `Electrolux E62LB200S : lave-vaisselle - avis, prix et impact`,
+  `Hisense WD3I8043BBF2 : lave-linge 8 kg - avis et prix`.
+- **Description**, at most 160 characters: impact score out of 20, two key
+  features and the price range of the current offers
+  (`prix de 454,99 à 699,99 €`). A missing score, feature or offer is omitted,
+  never invented; facts are dropped from the end when too long.
+- **H1**: `names.pageTitle` (brand and model, without manufacturer reference),
+  rendered once by `ProductHero` (`title-tag="h1"`), without the vertical plural
+  prefix, on mobile and desktop.
+
+### Alternatives
+
+`ProductAlternatives` fetches its default selection through `useAsyncData`
+(key: vertical, GTIN and active filters), so the alternative product cards and
+their `<a href>` links are in the SSR HTML and crawlable. Toggling a filter chip
+changes the key and refetches on the client.
+
 ## Category pages
 
 Category and sub-category pages resolve SEO metadata from backend category DTOs

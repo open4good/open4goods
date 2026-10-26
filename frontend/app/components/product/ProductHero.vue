@@ -62,7 +62,6 @@
                   title-tag="h1"
                   title-class="product-hero__title"
                   description-class="product-hero__short-description"
-                  :title-prefix="verticalTitle"
                 />
               </header>
 
@@ -364,10 +363,6 @@ const props = defineProps({
   hasCategory: {
     type: Boolean,
     default: false,
-  },
-  verticalTitle: {
-    type: String,
-    default: '',
   },
   hidePricingPanel: {
     type: Boolean,
