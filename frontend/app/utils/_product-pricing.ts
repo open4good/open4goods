@@ -54,7 +54,7 @@ export const formatOffersCount = (
 }
 
 /** rel for outbound affiliate/offer links — Google requires `sponsored` for paid links. */
-export const AFFILIATE_LINK_REL = 'sponsored nofollow noopener noreferrer'
+export const AFFILIATE_LINK_REL = 'sponsored nofollow noopener'
 
 export const resolveOfferHref = (offer: {
   affiliationToken?: string | null

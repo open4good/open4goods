@@ -81,6 +81,32 @@ describe('useAffiliationService.resolveRedirect', () => {
       apiModule.ResponseError as unknown as ResponseErrorConstructor
   })
 
+  it('sends X-Affiliation-Origin only when an origin is given', async () => {
+    redirectGetRawMock.mockRejectedValue(
+      new ResponseErrorCtor(301, { Location: 'https://example.com/get' })
+    )
+    const service = useAffiliationService('fr')
+
+    await service.resolveRedirect({
+      token: 't',
+      method: 'GET',
+      origin: '/fours/mon-four',
+    })
+    await service.resolveRedirect({ token: 't', method: 'GET' })
+
+    const withOrigin = await redirectGetRawMock.mock.calls[0]?.[1]({
+      init: { headers: { Accept: 'x' } },
+    })
+    const without = await redirectGetRawMock.mock.calls[1]?.[1]({
+      init: { headers: { Accept: 'x' } },
+    })
+    expect(withOrigin.headers).toEqual({
+      Accept: 'x',
+      'X-Affiliation-Origin': '/fours/mon-four',
+    })
+    expect(without.headers).toEqual({ Accept: 'x' })
+  })
+
   it('returns redirect details for GET requests', async () => {
     redirectGetRawMock.mockRejectedValueOnce(
       new ResponseErrorCtor(301, { Location: 'https://example.com/get' })

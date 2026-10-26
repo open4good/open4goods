@@ -1147,10 +1147,10 @@ const onRowClick = (
   const link = resolveOfferLink(item)
   if (link) {
     handleOfferRedirectClick(item, 'offers-table', link)
-    // noopener/noreferrer: this is a whole-row click convenience opening the
+    // noopener only, so /contrib/ still receives the Referer (origin page): this is a whole-row click convenience opening the
     // same href as the row's real `AFFILIATE_LINK_REL` anchor (item.actions
     // slot above) - that anchor is the crawlable, rel="sponsored ..." link.
-    window.open(link, '_blank', 'noopener,noreferrer')
+    window.open(link, '_blank', 'noopener')
   }
 }
 
