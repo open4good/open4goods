@@ -82,7 +82,7 @@
   },
   "home": {
     "seo": {
-      "title": "Nudger | Comparateur écologique",
+      "title": "Nudger {'|'} Comparateur écologique",
       "description": "Comparez l'impact environnemental et les prix de plus de {count} millions de produits grâce à Nudger. Faites des choix responsables pour votre budget et la planète.",
       "imageAlt": "Illustration du tableau de bord Nudger présentant des scores d'impact et des prix."
     },
@@ -1006,7 +1006,7 @@
     "seo": {
       "description": "Prendre contact avec l'équipe Nudger pour un partenariat, une question produit ou un échange sur l'impact.",
       "imageAlt": "Logotype Nudger utilisé pour l'aperçu de la page contact",
-      "title": "Nous contacter | Nudger"
+      "title": "Nous contacter {'|'} Nudger"
     },
     "prefill": {
       "title": {

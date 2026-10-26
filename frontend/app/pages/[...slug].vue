@@ -7,6 +7,7 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent } from 'vue'
 import { matchProductRouteFromSegments } from '~~/shared/utils/_product-route'
+import { resolveCategoryTrailingSlashTarget } from '~~/shared/utils/category-trailing-slash'
 import { matchLocalizedWikiRouteByPath } from '~~/shared/utils/localized-routes'
 
 defineRouteRules({
@@ -24,6 +25,17 @@ const CategoryPage = defineAsyncComponent(
 )
 
 const route = useRoute()
+
+// `/televiseurs/` is not a second URL for the category: 301 to the canonical
+// path, query string kept.
+const trailingSlashTarget = resolveCategoryTrailingSlashTarget(route.path)
+if (trailingSlashTarget) {
+  await navigateTo(
+    { path: trailingSlashTarget, query: route.query, hash: route.hash },
+    { redirectCode: 301 }
+  )
+}
+
 const slugParam = route.params.slug
 const segments = Array.isArray(slugParam)
   ? slugParam.filter((s): s is string => typeof s === 'string')

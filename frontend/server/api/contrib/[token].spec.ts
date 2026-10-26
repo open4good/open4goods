@@ -484,10 +484,16 @@ describe('resolveAffiliationRedirect', () => {
 
     await sendContribPlainError(event, {
       statusCode: 400,
-      statusMessage: 'Bad',
+      statusMessage:
+        '{"type":"about:blank","title":"Bad Request","status":400}',
     })
 
     expect(setResponseStatusMock).toHaveBeenCalledWith(event, 400)
+    expect(setResponseHeaderMock).toHaveBeenCalledWith(
+      event,
+      'Cache-Control',
+      'no-store'
+    )
     expect(setResponseHeaderMock).toHaveBeenCalledWith(
       event,
       'X-Robots-Tag',
@@ -495,7 +501,7 @@ describe('resolveAffiliationRedirect', () => {
     )
     expect(sendMock).toHaveBeenCalledWith(
       event,
-      'Bad',
+      'Bad Request',
       'text/plain; charset=utf-8'
     )
   })
