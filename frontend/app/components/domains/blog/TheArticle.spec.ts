@@ -119,6 +119,12 @@ describe('TheArticle.vue', () => {
       baseArticle.author
     )
 
+    const updated = wrapper.get('[data-test="article-updated"]')
+    expect(updated.text()).toContain('Updated')
+    expect(updated.find('time').attributes('datetime')).toBe(
+      new Date(baseArticle.modifiedMs).toISOString()
+    )
+
     const contentHtml = wrapper.get('[data-test="article-body"]').html()
     expect(contentHtml).toContain('<p>Hello <strong>world</strong>!</p>')
     expect(contentHtml).not.toContain('<script>')
