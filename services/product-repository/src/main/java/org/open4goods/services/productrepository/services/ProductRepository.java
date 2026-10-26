@@ -80,14 +80,23 @@ public class ProductRepository {
         public static final String MAIN_INDEX_NAME = Product.DEFAULT_REPO;
 
         /**
-         * Default page size used when streaming large exports.
+         * Maximum page size for any read of <b>complete</b> products (no source projection).
+         * A full product weighs about 21 KB on average in production, so 1000 per page is about 21 MB,
+         * a x5 margin under the 100 MB response buffer of the Elasticsearch client
+         * ("entity content is too long ... for the configured buffer limit", GOU-1134, GOU-1203).
+         * Do not raise it, and do not raise the client buffer instead.
          */
-        private static final int EXPORT_STREAM_PAGE_SIZE = 5000;
+        public static final int FULL_PRODUCT_PAGE_SIZE = 1000;
 
         /**
-         * Lazily created {@link PageRequest} that avoids instantiating a new object for each export.
+         * Page size used when streaming exports restricted to a few source fields (small payloads).
          */
-        private static final PageRequest EXPORT_STREAM_PAGE = PageRequest.of(0, EXPORT_STREAM_PAGE_SIZE);
+        private static final int PROJECTED_EXPORT_PAGE_SIZE = 5000;
+
+        /**
+         * Shared {@link PageRequest} for exports of complete products.
+         */
+        private static final PageRequest EXPORT_STREAM_PAGE = PageRequest.of(0, FULL_PRODUCT_PAGE_SIZE);
 
         /**
          * Fields required when building the public OpenData CSVs. Fetching only these fields keeps
@@ -266,12 +275,9 @@ public class ProductRepository {
 	}
 
 	/**
-	 * Export all aggregated data, full products, {@value #EXPORT_STREAM_PAGE_SIZE} per page.
-	 * <p>
-	 * Beware : a page of complete products can exceed the 100 MB response buffer of the Elasticsearch
-	 * client (GOU-1134). Prefer {@link #exportAll(String[], int)} or {@link #exportAll(int)}; the
-	 * remaining callers without filter (BatchService.clean, AggregationFacadeService.sanitizeAll) are
-	 * manual maintenance jobs that should be moved to a smaller page if they fail the same way.
+	 * Export all aggregated data, full products, {@value #FULL_PRODUCT_PAGE_SIZE} per page
+	 * ({@link #FULL_PRODUCT_PAGE_SIZE} keeps each Elasticsearch response far below the 100 MB buffer
+	 * of the client, GOU-1134 / GOU-1203). Use {@link #exportAll(String[])} when only a few fields are needed.
 	 *
 	 * @return stream of products
 	 */
@@ -286,7 +292,9 @@ public class ProductRepository {
         }
 
         /**
-         * Export all aggregated data with a configurable page size.
+         * Export all aggregated data (complete products) with a configurable page size.
+         * The caller is responsible for keeping the page at or below {@link #FULL_PRODUCT_PAGE_SIZE}
+         * unless the payload is known to be small.
          *
          * @param pageSize the page size to use when streaming products
          * @return stream of products
@@ -348,7 +356,9 @@ public class ProductRepository {
 		Criteria c = new Criteria("vertical").is(vertical);
 
 		final NativeQuery initialQuery = new NativeQueryBuilder()
-				.withQuery(new CriteriaQuery(c)).build();
+				.withQuery(new CriteriaQuery(c))
+				.withPageable(EXPORT_STREAM_PAGE)
+				.build();
 
 		var iterator = elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX);
 		return iterator.stream().onClose(iterator::close)
@@ -356,14 +366,15 @@ public class ProductRepository {
 	}
 
 	/**
-	 * Export all aggregated data, corresponding to the given Barcodes
-	 *
-	 * @return
+	 * Export all aggregated data restricted to the given source fields, with a page of
+	 * {@value #PROJECTED_EXPORT_PAGE_SIZE} when a projection is given (small payload), or
+	 * {@value #FULL_PRODUCT_PAGE_SIZE} when {@code includeFields} is null or empty (complete products).
 	 */
 
 
         public Stream<Product> exportAll( String[] includeFields) {
-                return exportAll(includeFields, EXPORT_STREAM_PAGE_SIZE);
+                boolean projected = includeFields != null && includeFields.length > 0;
+                return exportAll(includeFields, projected ? PROJECTED_EXPORT_PAGE_SIZE : FULL_PRODUCT_PAGE_SIZE);
         }
 
         /**
