@@ -187,6 +187,13 @@
             <version>${global.version}</version>
         </dependency>
 
+        <!-- Shared affiliation click contract (affiliation-clicks index, written by front-api) -->
+        <dependency>
+            <groupId>org.open4goods</groupId>
+            <artifactId>contribution</artifactId>
+            <version>${global.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>dev.brachtendorf</groupId>
             <artifactId>JImageHash</artifactId>

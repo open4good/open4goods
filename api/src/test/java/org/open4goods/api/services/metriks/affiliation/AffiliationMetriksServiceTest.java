@@ -33,9 +33,13 @@ class AffiliationMetriksServiceTest {
                 new FakeHttp(request -> response(200, fixture("effiliation-transactions.json"))).client);
     }
 
+    /**
+     * Commission and sales events only: the click events are covered by {@link AffiliationClickMetriksTest}.
+     */
     private static Map<String, MetriksEvent> collect(AffiliationReportClient... clients) {
-        List<MetriksEvent> events = new AffiliationMetriksService(List.of(clients), CLOCK).collectEvents();
-        return events.stream().collect(Collectors.toMap(MetriksEvent::getId, Function.identity(),
+        List<MetriksEvent> events = new AffiliationMetriksService(List.of(clients), AffiliationTestSupport.noClicks(),
+                CLOCK).collectEvents();
+        return events.stream().filter(event -> !event.getId().contains(".clicks")).collect(Collectors.toMap(MetriksEvent::getId, Function.identity(),
                 (a, b) -> { throw new IllegalStateException("duplicate id " + a.getId()); }, java.util.LinkedHashMap::new));
     }
 

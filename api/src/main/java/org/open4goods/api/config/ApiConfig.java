@@ -43,6 +43,7 @@ import org.open4goods.model.exceptions.TechnicalException;
 import org.open4goods.model.price.Currency;
 import org.open4goods.model.price.Price;
 import org.open4goods.model.vertical.LegacyPromptConfig;
+import org.open4goods.services.contribution.service.AffiliationClickStatsService;
 import org.open4goods.services.eprelservice.client.EprelApiClient;
 import org.open4goods.services.wikidataservice.client.RestWikidataApiClient;
 import org.open4goods.services.wikidataservice.client.WikidataApiClient;
@@ -132,6 +133,14 @@ public class ApiConfig {
 	@Bean EprelApiClient apiClient(@Autowired  RestTemplate restTemplate, @Autowired  EprelServiceProperties properties) {
 		return new RestEprelApiClient(restTemplate, properties);
 	}
+	/**
+	 * Reader of the outbound affiliation clicks written by front-api, used by the Metriks affiliation endpoint.
+	 */
+	@Bean
+	AffiliationClickStatsService affiliationClickStatsService(@Autowired ElasticsearchOperations elasticsearchOperations) {
+		return new AffiliationClickStatsService(elasticsearchOperations);
+	}
+
 	@Bean
 	EprelSearchService eprelSearchService(@Autowired ElasticsearchOperations elasticsearchOperations, @Autowired  EprelServiceProperties properties) {
 		return new EprelSearchService(elasticsearchOperations, properties);

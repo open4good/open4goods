@@ -13,6 +13,8 @@ import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.open4goods.services.contribution.service.AffiliationClickStatsService;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.MutablePropertySources;
@@ -85,5 +87,11 @@ class AffiliationCredentialsBindingTest {
     @Configuration(proxyBeanMethods = false)
     @Import({ AwinReportClient.class, EffiliationReportClient.class, AffiliationMetriksService.class })
     static class AffiliationConfig {
+
+        /** Click reader without Elasticsearch: only the credential binding is under test. */
+        @Bean
+        AffiliationClickStatsService affiliationClickStatsService() {
+            return AffiliationTestSupport.noClicks();
+        }
     }
 }

@@ -410,7 +410,8 @@ class ProductMappingServiceTest {
         product.setOffersCount(1);
 
         when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
-        when(affiliationService.encryptAffiliationLink("amazon", "https://example.com/product"))
+        // The product GTIN travels in the token so that the click is recorded with its product.
+        when(affiliationService.encryptAffiliationLink("amazon", "https://example.com/product", product.gtin()))
                 .thenReturn("encrypted-token");
 
         ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("offers"), DomainLanguage.en);
