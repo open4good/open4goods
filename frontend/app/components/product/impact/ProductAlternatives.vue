@@ -127,6 +127,10 @@ const emit = defineEmits<{
 }>()
 
 const { t, n } = useI18n()
+// CSRF-aware client of this request (plugins/csrf-fetch.ts). Captured at setup:
+// globalThis.$fetch is swapped on every SSR request, so it may belong to a
+// concurrent render once the relaxation loop has awaited (GOU-1226).
+const { $fetch: csrfFetch } = useNuxtApp()
 
 const hasInteracted = ref(false)
 const activeFilterKeys = ref<Set<string>>(new Set())
@@ -633,9 +637,7 @@ const searchAlternatives = async (
   signal?: AbortSignal
 ): Promise<ProductDto[]> => {
   const clauses = resolveClausesFor(keys)
-  // The global $fetch is the CSRF-aware client installed by
-  // plugins/csrf-fetch.ts, so this POST also passes during SSR.
-  const response = await $fetch<ProductSearchResponseDto>(
+  const response = await csrfFetch<ProductSearchResponseDto>(
     '/api/products/search',
     {
       method: 'POST',
@@ -671,6 +673,25 @@ const searchAlternatives = async (
   return products.slice(0, props.maxResults)
 }
 
+const logFetchError = (error: unknown) => {
+  const status = resolveFetchErrorStatus(error)
+  const data =
+    error instanceof FetchError
+      ? {
+          statusMessage: error.data?.statusMessage,
+          message: error.data?.message,
+        }
+      : null
+
+  console.error('Failed to fetch product alternatives', {
+    error,
+    status,
+    data,
+    verticalId: props.verticalId,
+    productGtin: props.product?.gtin ?? null,
+  })
+}
+
 const fetchAlternatives = async (
   signal?: AbortSignal
 ): Promise<AlternativesResult> => {
@@ -684,43 +705,34 @@ const fetchAlternatives = async (
     ? [requestedKeys]
     : buildRelaxationSteps(requestedKeys)
 
-  try {
-    let best: AlternativesResult = {
-      products: [],
-      errorMessage: null,
-      appliedKeys: requestedKeys,
-    }
-    for (const keys of steps) {
+  let best: AlternativesResult = {
+    products: [],
+    errorMessage: null,
+    appliedKeys: requestedKeys,
+  }
+  for (const keys of steps) {
+    try {
       const products = await searchAlternatives(keys, signal)
       best = { products, errorMessage: null, appliedKeys: keys }
-      if (products.length >= MIN_ALTERNATIVES) {
-        break
+    } catch (error) {
+      logFetchError(error)
+      // A failed relaxation step keeps what an earlier step already found;
+      // with nothing found yet, the error is shown rather than "no better
+      // product", which would be an unverified claim.
+      if (best.products.length > 0) {
+        return best
+      }
+      return {
+        products: [],
+        errorMessage: resolveFetchErrorMessage(error),
+        appliedKeys: null,
       }
     }
-    return best
-  } catch (error) {
-    const status = resolveFetchErrorStatus(error)
-    const data =
-      error instanceof FetchError
-        ? {
-            statusMessage: error.data?.statusMessage,
-            message: error.data?.message,
-          }
-        : null
-
-    console.error('Failed to fetch product alternatives', {
-      error,
-      status,
-      data,
-      verticalId: props.verticalId,
-      productGtin: props.product?.gtin ?? null,
-    })
-    return {
-      products: [],
-      errorMessage: resolveFetchErrorMessage(error),
-      appliedKeys: null,
+    if (best.products.length >= MIN_ALTERNATIVES) {
+      break
     }
   }
+  return best
 }
 
 // Fetched through useAsyncData so the default selection is rendered during

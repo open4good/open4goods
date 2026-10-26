@@ -1,4 +1,5 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { useNuxtApp } from '#imports'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createI18n } from 'vue-i18n'
 import type { AttributeConfigDto, ProductDto } from '~~/shared/api-client'
@@ -55,15 +56,26 @@ describe('ProductAlternatives', () => {
   })
 
   const fetchMock = vi.fn()
+  // globalThis.$fetch is swapped on every SSR request: the component must use
+  // the client of its own nuxtApp (GOU-1226).
+  const globalFetchMock = vi.fn(() =>
+    Promise.reject(new Error('globalThis.$fetch must not be used'))
+  )
+  const nuxtApp = useNuxtApp()
+  const originalFetch = nuxtApp.$fetch
 
   beforeEach(() => {
     fetchMock.mockResolvedValue({ products: [] })
-    vi.stubGlobal('$fetch', fetchMock)
+    nuxtApp.$fetch = fetchMock as unknown as typeof nuxtApp.$fetch
+    vi.stubGlobal('$fetch', globalFetchMock)
   })
 
   afterEach(() => {
     vi.unstubAllGlobals()
+    nuxtApp.$fetch = originalFetch
     fetchMock.mockReset()
+    globalFetchMock.mockClear()
+    vi.restoreAllMocks()
   })
 
   const product: ProductDto = {
@@ -317,6 +329,58 @@ describe('ProductAlternatives', () => {
       await flushPromises()
 
       expect(wrapper.text()).toContain('Best product message.')
+    })
+
+    it('keeps relaxing across awaits with the request client (GOU-1226)', async () => {
+      // Each search resolves on a later macrotask, as a real SSR request does:
+      // the Nuxt context is gone when the next relaxation step is issued.
+      const later = <T>(value: T) =>
+        new Promise<T>(resolve => setTimeout(() => resolve(value), 0))
+      fetchMock
+        .mockImplementationOnce(() => later(makeProducts(1)))
+        .mockImplementationOnce(() => later(makeProducts(3, 10)))
+      const wrapper = await mountWith('phones-ssr-relax')
+      await flushPromises()
+      await new Promise(resolve => setTimeout(resolve, 0))
+      await flushPromises()
+
+      expect(fetchMock).toHaveBeenCalledTimes(2)
+      expect(globalFetchMock).not.toHaveBeenCalled()
+      expect(
+        wrapper
+          .findAll('.category-product-card-grid-stub a')
+          .map(link => link.attributes('href'))
+      ).toEqual(['/phones/10-alt', '/phones/11-alt', '/phones/12-alt'])
+      expect(wrapper.text()).not.toContain('Error loading alternatives.')
+    })
+
+    it('keeps the alternatives already found when a relaxation step fails', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      fetchMock
+        .mockResolvedValueOnce(makeProducts(2))
+        .mockRejectedValueOnce(new Error('[nuxt] instance unavailable'))
+      const wrapper = await mountWith('phones-relax-failure')
+      await flushPromises()
+
+      expect(fetchMock).toHaveBeenCalledTimes(2)
+      expect(
+        wrapper.findAll('.category-product-card-grid-stub a')
+      ).toHaveLength(2)
+      expect(wrapper.text()).not.toContain('Error loading alternatives.')
+      expect(wrapper.text()).not.toContain('Best product message.')
+    })
+
+    it('shows the error when nothing was found before a failure', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      fetchMock
+        .mockResolvedValueOnce(makeProducts(0))
+        .mockRejectedValueOnce(new Error('[nuxt] instance unavailable'))
+      const wrapper = await mountWith('phones-relax-failure-empty')
+      await flushPromises()
+
+      expect(fetchMock).toHaveBeenCalledTimes(2)
+      expect(wrapper.text()).toContain('Error loading alternatives.')
+      expect(wrapper.text()).not.toContain('Best product message.')
     })
 
     it('does not relax once the user clicked a chip', async () => {
