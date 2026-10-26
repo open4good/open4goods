@@ -108,6 +108,20 @@ class AffiliationControllerTest {
     }
 
     @Test
+    void redirectShouldEncodeLonePercentBracketsAndExtraFragmentMarker() throws Exception {
+        when(affiliationService.trackRedirect(anyString(), anyString(), any()))
+                .thenReturn("https://www.carrefour.fr/p/promo-50%-off?f[0]=a%2Fb#top#2");
+
+        mockMvc.perform(get("/affiliations/redirect")
+                .param("token", "t")
+                .param("domainLanguage", "fr")
+                .with(remoteAddress("192.0.2.1")))
+                .andExpect(status().isMovedPermanently())
+                .andExpect(header().string(HttpHeaders.LOCATION,
+                        "https://www.carrefour.fr/p/promo-50%25-off?f%5B0%5D=a%2Fb#top%232"));
+    }
+
+    @Test
     void redirectShouldRejectNonHttpScheme() throws Exception {
         when(affiliationService.trackRedirect(anyString(), anyString(), any()))
                 .thenReturn("javascript:alert(1)");

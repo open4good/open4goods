@@ -160,9 +160,9 @@ public class AffiliationController {
 
     /**
      * Build the redirect target from a merchant URL. Merchant feeds (e.g. Carrefour marketplace) may carry
-     * characters that {@link URI} rejects (spaces, {@code |}, braces, quotes, raw non-ASCII). Those are
-     * percent-encoded; existing {@code %XX} escapes and URI delimiters are preserved. Only absolute
-     * http/https targets are accepted, to prevent open redirects to other schemes.
+     * characters that {@link URI} rejects (spaces, {@code |}, braces, brackets, quotes, raw non-ASCII, a lone
+     * {@code %}, a second {@code #}). Those are percent-encoded; existing {@code %XX} escapes and URI delimiters
+     * are preserved. Only absolute http/https targets are accepted, to prevent open redirects to other schemes.
      *
      * @param url raw merchant URL
      * @return a valid absolute http(s) URI
@@ -172,10 +172,20 @@ public class AffiliationController {
         if (url == null || url.isBlank()) {
             throw new IllegalArgumentException("Empty URL");
         }
+        byte[] bytes = url.trim().getBytes(StandardCharsets.UTF_8);
         StringBuilder sb = new StringBuilder();
-        for (byte b : url.trim().getBytes(StandardCharsets.UTF_8)) {
-            int c = b & 0xFF;
-            if (c > 0x20 && c < 0x7F && "\"<>\\^`{|}".indexOf(c) < 0) {
+        boolean fragmentStarted = false;
+        for (int i = 0; i < bytes.length; i++) {
+            int c = bytes[i] & 0xFF;
+            boolean legal = c > 0x20 && c < 0x7F && "\"<>\\^`{|}[]".indexOf(c) < 0;
+            if (c == '%' && !(i + 2 < bytes.length && isHex(bytes[i + 1]) && isHex(bytes[i + 2]))) {
+                legal = false;
+            }
+            else if (c == '#') {
+                legal = !fragmentStarted;
+                fragmentStarted = true;
+            }
+            if (legal) {
                 sb.append((char) c);
             }
             else {
@@ -189,5 +199,9 @@ public class AffiliationController {
             throw new IllegalArgumentException("Unsupported redirect target");
         }
         return uri;
+    }
+
+    private static boolean isHex(byte b) {
+        return (b >= '0' && b <= '9') || (b >= 'a' && b <= 'f') || (b >= 'A' && b <= 'F');
     }
 }
