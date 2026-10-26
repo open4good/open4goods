@@ -48,6 +48,11 @@ describe('contrib redirect route', () => {
       'Referrer-Policy',
       'no-referrer'
     )
+    expect(setHeaderMock).toHaveBeenCalledWith(
+      event,
+      'Cache-Control',
+      'no-store'
+    )
   })
 
   it('answers errors (403 robot, 400 token) with a plain-text response', async () => {
