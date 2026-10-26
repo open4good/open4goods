@@ -556,6 +556,7 @@ import { hasAdminAccess } from '~~/shared/utils/_roles'
 import { resolveCategorySeoMeta } from '~/utils/seo/category-meta'
 
 const route = useRoute()
+const { $fetch: csrfFetch } = useNuxtApp()
 const router = useRouter()
 const { locale, t } = useI18n()
 const requestURL = useRequestURL()
@@ -934,7 +935,7 @@ const { data: initialProductsData, error: initialProductsError } =
         return null
       }
 
-      return await $fetch<ProductSearchResponseDto>('/api/products/search', {
+      return await csrfFetch<ProductSearchResponseDto>('/api/products/search', {
         method: 'POST',
         query: { include: LISTING_COMPONENTS },
         body: {
@@ -2223,7 +2224,7 @@ const fetchProducts = async () => {
   productError.value = null
 
   try {
-    const response = await $fetch<ProductSearchResponseDto>(
+    const response = await csrfFetch<ProductSearchResponseDto>(
       '/api/products/search',
       {
         method: 'POST',
