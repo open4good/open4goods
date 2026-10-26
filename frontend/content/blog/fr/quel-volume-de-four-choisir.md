@@ -25,7 +25,7 @@ En pratique :
 - **50 à 70 L** → usage classique pour 2 à 4 personnes
 - **70 L et plus** → familles nombreuses ou cuisine intensive
 
-Mais le **bon volume est celui qui correspond à vos besoins réels. Un four trop grand consommera inutilement plus d'énergie à chaque utilisation.
+Mais le **bon volume** est celui qui correspond à vos besoins réels. Un four trop grand consommera inutilement plus d'énergie à chaque utilisation.
 
 
 ## 📏 Qu'est-ce que le volume d'un four exactement ?
