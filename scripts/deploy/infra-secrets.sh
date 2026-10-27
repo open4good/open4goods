@@ -14,7 +14,8 @@
 #           077 temp file: never on a command line, in an artifact or in a log. On the host it lives in a mode
 #           600 file (/dev/shm when available) for the duration of the run.
 #   <env>     beta or prod.
-#   <target>  elasticsearch (both), kibana (both), mysql (prod), plausible (beta).
+#   <target>  elasticsearch (both), kibana (both), mysql (prod), plausible (beta), plausible-postgres (beta),
+#             plausible-clickhouse (beta), b2b-postgres (both).
 #
 # Each secret is read from the environment variable of the same name (the calling step's `env:`).
 # Required environment for remote: DEPLOY_SSH_HOST, DEPLOY_SSH_USER, DEPLOY_SSH_KEY.
@@ -70,7 +71,21 @@ case "$target" in
     secrets=INFRA_PLAUSIBLE_SECRET_KEY_BASE
     services=infra
     ;;
-  *) fail "Unknown target: $target (elasticsearch, kibana, mysql or plausible)" ;;
+  plausible-postgres)
+    [ "$env_name" = beta ] || fail "plausible-postgres: only beta runs Plausible"
+    secrets=INFRA_PLAUSIBLE_PG_PASSWORD
+    services=infra
+    ;;
+  plausible-clickhouse)
+    [ "$env_name" = beta ] || fail "plausible-clickhouse: only beta runs Plausible"
+    secrets=INFRA_CLICKHOUSE_PASSWORD
+    services=infra
+    ;;
+  b2b-postgres)
+    secrets=B2B_API_POSTGRES_PASSWORD
+    services="infra b2b-api"
+    ;;
+  *) fail "Unknown target: $target (elasticsearch, kibana, mysql, plausible, plausible-postgres, plausible-clickhouse or b2b-postgres)" ;;
 esac
 
 # Every secret of the target, set and strong; the value is never printed.

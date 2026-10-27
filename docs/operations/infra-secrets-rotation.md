@@ -4,7 +4,10 @@ Context: credentials campaign GOU-1038, wave 3 (inventory entries 13 to 16 and
 26 to 31), GOU-1092. Decision of Goulven (2026-10-23): rotate the
 Elasticsearch passwords `elastic` and `kibana_system` now, despite the
 Elasticsearch pause of 2026-10-11; the Kibana encryption key and the
-Elasticsearch transport certificates with wave 3, in off-peak hours.
+Elasticsearch transport certificates with wave 3, in off-peak hours. The
+default passwords of the Plausible Postgres and ClickHouse and of the b2b
+Postgres, outside the inventory, were added by GOU-1256; their values are
+generated under an approval of their own once that path is merged.
 
 This document never lists secret values, key ids or fingerprints. Application
 secrets without a source to change (API keys, tokens) follow
@@ -20,6 +23,9 @@ secrets without a source to change (API keys, tokens) follow
 | `INFRA_XWIKI_DB_PASSWORD`           | prod         | MySQL user `xwiki` + XWiki `hibernate.cfg.xml`    | XWiki: `infra.env` -> `DB_PASSWORD` (and `MYSQL_PASSWORD` of the mysql service)           |
 | `INFRA_MYSQL_ROOT_PASSWORD`         | prod         | MySQL user `root`                                 | mysql: `infra.env` -> `MYSQL_ROOT_PASSWORD` (only read when the data directory is created) |
 | `INFRA_PLAUSIBLE_SECRET_KEY_BASE`   | beta         | none                                              | Plausible: `infra.env` -> `PLAUSIBLE_SECRET_KEY_BASE`                                     |
+| `INFRA_PLAUSIBLE_PG_PASSWORD`       | beta         | Postgres user `postgres` of `plausible_db`        | Plausible: `infra.env` -> `PLAUSIBLE_PG_PASSWORD` (`DATABASE_URL`)                        |
+| `INFRA_CLICKHOUSE_PASSWORD`         | beta         | ClickHouse user `default` of `plausible_events_db` (set from its env at every start) | ClickHouse and Plausible: `infra.env` -> `CLICKHOUSE_PASSWORD` |
+| `B2B_API_POSTGRES_PASSWORD`         | beta, prod   | Postgres user of `b2b_postgres` (`product_data_api`) | b2b-api: config tree `spring.datasource.password`; `infra.env` -> `B2B_POSTGRES_PASSWORD` |
 | Elasticsearch transport certificates | beta, prod  | regenerated on the host by Ops                    | Elasticsearch (see [Transport certificates](#transport-certificates-30))                  |
 
 Access generates every value with `secret_generate` `kind=hex32`: the workflow
@@ -75,7 +81,8 @@ Not rotated by this workflow:
 
 Actions > "Infra secrets (source + render + restart)" > Run workflow.
 Inputs: `env` (`beta`, `prod`), `target` (`elasticsearch`, `kibana`, `mysql`
-for prod, `plausible` for beta), `mode` (`test`, `apply`, `rollback`).
+for prod, `plausible`, `plausible-postgres` and `plausible-clickhouse` for
+beta, `b2b-postgres`), `mode` (`test`, `apply`, `rollback`).
 `apply` and `rollback` only run on `main`; `test` writes nothing and may run
 from a branch. The job shares the concurrency group of the deploys
 (`deploy-prod`, `deploy-beta-backend`) without cancelling them.
@@ -94,7 +101,21 @@ never by printing it. Elasticsearch `elastic`: the config trees of the four
 consumers, their `application-active.yml`, the kept previous value.
 `kibana_system` and the Kibana key: `infra.env`, `kibana.yml` of the host, the
 `kibana.yml` the running container sees. MySQL: `infra.env`, the compose file
-of the host, the environment the container was created with.
+of the host, the environment the container was created with. Plausible
+Postgres and ClickHouse: `infra.env`, `config/beta/infra/.env`, the default of
+the compose placeholder (`${VAR:-...}`), the URL the running Plausible was
+created with, the environment of the database container. b2b Postgres: the
+b2b-api config tree, `infra.env`, the three env files `publish-jars.sh`
+sources for b2b-api, the default of the placeholder in its
+`application-active.yml` and in the compose file, the environment of
+`b2b_postgres`. In every case the kept previous value comes last.
+
+The official Postgres image trusts its socket and loopback connections:
+authentication goes over TCP to the container's network address, where
+`pg_hba.conf` checks the password, and the workflow first checks that a
+random wrong password is refused (otherwise it stops: the value in service
+cannot be found that way). Same check for ClickHouse, whose client gets the
+password from a configuration file streamed into the container.
 
 Idempotence: the source step skips a change the source already accepts, never
 overwrites a kept previous value, and never turns the new Kibana key into the
@@ -127,12 +148,48 @@ What each target does:
   their second factor must be reset), renders `infra.env` (it overrides
   `config/beta/infra/.env`, read first), recreates Plausible. Every session is
   invalidated.
+- `plausible-postgres` (beta): changes `postgres` of `plausible_db`
+  (`ALTER USER`, over TCP, authenticated with the value in service), renders
+  `PLAUSIBLE_PG_PASSWORD` in `infra.env`, recreates Plausible only.
+  `plausible_db` keeps running (`POSTGRES_PASSWORD` is only read when its data
+  directory is created). Between the change and the restart, Plausible's
+  existing connections keep working; a new one fails.
+- `plausible-clickhouse` (beta): ClickHouse does not store this password:
+  the entrypoint of the image writes `CLICKHOUSE_PASSWORD` to
+  `users.d/default-user.xml` at every start. `source` only keeps the value in
+  service; `restart` recreates `plausible_events_db` (it then accepts the new
+  value), waits for it, then recreates Plausible. Events sent in between are
+  lost (a minute or two on beta).
+- `b2b-postgres` (beta, prod): changes the user of `b2b_postgres`
+  (`ALTER USER`), renders `B2B_POSTGRES_PASSWORD` in `infra.env` (for the
+  compose file) and the config tree `spring.datasource.password` of b2b-api,
+  then restarts b2b-api (`publish-jars.sh <env> restart b2b-api`).
+  `b2b_postgres` keeps running. `test` refuses an env file that sets
+  `SPRING_DATASOURCE_PASSWORD`, which would beat the tree, and a running JAR
+  that is not the latest. The tree beats the `B2B_POSTGRES_PASSWORD`
+  placeholder of `application-active.yml`, even when an env file sets it.
+  This target does not need step d-infra.
+
+If Postgres refuses an `ALTER USER`, its log may hold the statement, so the new
+value too (`log_min_error_statement`): regenerate that value before the next
+`apply`.
+
+### Where these three databases are exposed
+
+None is reachable from outside the host. `b2b_postgres` publishes its port on
+the host loopback only (`127.0.0.1:5433` in beta, `127.0.0.1:5432` in prod):
+any process on the host can try the default password. `plausible_db` and
+`plausible_events_db` publish no port: only the containers of the compose
+network `open4goods_network` reach them (Plausible, Elasticsearch, Kibana,
+b2b). The defaults are short, and every reader of `open4goods-config` has them:
+rotate them with wave 3, without an emergency window.
 
 ### Prerequisite: open4goods-config step d-infra
 
 The compose files, `kibana.yml` and `publish-infra.sh` belong to
-`open4goods-config`. Before the `kibana`, `mysql` and `plausible` targets (not
-before `elasticsearch`), a PR on `open4goods-config` (Dev, ordinary gate) makes
+`open4goods-config`. Before the `kibana`, `mysql`, `plausible`,
+`plausible-postgres` and `plausible-clickhouse` targets (not before
+`elasticsearch` nor `b2b-postgres`), a PR on `open4goods-config` (Dev, ordinary gate) makes
 them read `infra.env`, deployed with `deployConfiguration.yml` for that
 environment. The `test` mode fails with "deploy open4goods-config step d-infra
 first" until then.
@@ -166,6 +223,11 @@ first" until then.
    `MYSQL_PASSWORD` become `${INFRA_XWIKI_DB_PASSWORD:?...}`,
    `MYSQL_ROOT_PASSWORD` becomes `${INFRA_MYSQL_ROOT_PASSWORD:?...}`.
 
+Nothing else for the Plausible Postgres, ClickHouse and the b2b Postgres: the
+compose files already read `PLAUSIBLE_PG_PASSWORD`, `CLICKHOUSE_PASSWORD` and
+`B2B_POSTGRES_PASSWORD`, the names `infra.env` carries; the literal defaults
+leave at step d.
+
 Merge it inside the wave 3 window of that environment, right before the
 `kibana` (then `mysql`) apply: a beta push deploys it at once (unless
 `BETA_DEPLOY_FREEZE`), and from then on a full `publish-infra.sh` needs
@@ -189,6 +251,13 @@ with `mode=test`, then `mode=apply`.
    renders.
 6. beta: `plausible`. Proof: Plausible login, a dashboard loads; TOTP users
    reset their second factor.
+   Then, once Access wrote their values (approval of their own, GOU-1256):
+   beta `plausible-postgres`, then `plausible-clickhouse` (proof:
+   `/api/health` of Plausible, a dashboard shows today's visits);
+   `b2b-postgres` in beta, then in prod (proof: the b2b-api health check of
+   `publish-jars.sh`, a call of the Product Data API that reads the ledger).
+   Their previous values join `infra-previous.env`: step c deletes it after
+   these proofs too.
 7. Transport certificates (Ops, below), in the same window.
 8. Step c: Ops deletes `/etc/open4goods/infra-previous.env`; Access deletes
    the stale `beta` secrets with an old name. Step d (Dev, PR on
@@ -266,14 +335,20 @@ ordinary gate):
   passwords (already replaced in step d-infra).
 - `configs/beta/infra/.env`: `PLAUSIBLE_SECRET_KEY_BASE`; the compose default
   of `PLAUSIBLE_SECRET_KEY_BASE` becomes `${PLAUSIBLE_SECRET_KEY_BASE:?}`.
+- After the `plausible-postgres`, `plausible-clickhouse` and `b2b-postgres`
+  proofs: `docker-compose/beta/docker-compose.infra.yml`, the literal
+  defaults of `PLAUSIBLE_PG_PASSWORD`, `CLICKHOUSE_PASSWORD` (services
+  `plausible_db`, `plausible_events_db`, `plausible_migrate`, `plausible`) and
+  `B2B_POSTGRES_PASSWORD` become `${VAR:?rendered by infraSecrets.yml}`, and
+  the header comment loses its example values;
+  `docker-compose/prod/docker-compose.infra.yml`, `B2B_POSTGRES_PASSWORD`
+  likewise; `configs/{beta,prod}/b2b-api/application-active.yml`, the default
+  of `${B2B_POSTGRES_PASSWORD:...}` and the example value of its comment.
 - `docker-compose/{beta,prod}/elastic-certificates.p12`,
   `elastic-stack-ca.p12`, and their `copy_file` lines in `publish-infra.sh`.
 
-Outside the manifest, noticed while preparing wave 3:
-`docker-compose/beta/docker-compose.infra.yml` gives literal defaults to
-`PLAUSIBLE_PG_PASSWORD`, `CLICKHOUSE_PASSWORD` and `B2B_POSTGRES_PASSWORD`
-(`${VAR:-literal}`), which `config/beta/infra/.env` does not set: those
-defaults are the passwords in service, in clear. The prod compose has the same
-`B2B_POSTGRES_PASSWORD` pattern, and `configs/{beta,prod}/b2b-api/application-active.yml`
-give `B2B_POSTGRES_PASSWORD` a literal (weak) default as well. To add to the
-inventory.
+Outside the manifest, noticed while preparing wave 3 and rotated by the
+`plausible-postgres`, `plausible-clickhouse` and `b2b-postgres` targets
+(GOU-1256): the literal defaults of `PLAUSIBLE_PG_PASSWORD`,
+`CLICKHOUSE_PASSWORD` and `B2B_POSTGRES_PASSWORD` in the compose files and the
+b2b-api `application-active.yml`, which are the passwords in service.
