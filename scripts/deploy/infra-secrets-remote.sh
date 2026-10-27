@@ -518,8 +518,9 @@ kibana_restart() {
     sleep "${WAIT_SECONDS:-5}"
   done
   ok "Kibana is available"
+  # No query parameter: Kibana 9 rejects any unknown one with HTTP 400 (only batch_size and type exist).
   code=$(curl -s -o "$work/rotate.json" -w '%{http_code}' -K "$work/curl.cfg" -X POST -H 'kbn-xsrf: true' \
-    "$kibana_url/api/encrypted_saved_objects/_rotate_key?conflicts=abort" || echo 000)
+    "$kibana_url/api/encrypted_saved_objects/_rotate_key" || echo 000)
   [ "$code" = 200 ] || fail "re-encryption of the saved objects failed (HTTP $code)"
   # Counts only: {"total":n,"successful":n,"failed":n}.
   info "saved objects re-encryption: $(head -c 300 "$work/rotate.json")"
