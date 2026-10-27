@@ -158,8 +158,40 @@ What each target does:
   the entrypoint of the image writes `CLICKHOUSE_PASSWORD` to
   `users.d/default-user.xml` at every start. `source` only keeps the value in
   service; `restart` recreates `plausible_events_db` (it then accepts the new
-  value), waits for it, then recreates Plausible. Events sent in between are
-  lost (a minute or two on beta).
+  value), waits for it, recreates the dictionaries (below), then recreates
+  Plausible and checks that it writes.
+  - Dictionaries: Plausible's migrations create dictionaries
+    (`location_data_dict`, `acquisition_channel_*_dict`...) whose source is
+    this ClickHouse, with the password of the moment written in their DDL
+    (`SOURCE(CLICKHOUSE(... USER 'default' PASSWORD '...'))`). Insertions into
+    `events_v2` read them: after a password change they fail with
+    `Code: 516 Authentication failed` (Plausible logs
+    `Plausible.Event.WriteBuffer ... terminating` every few seconds, ClickHouse
+    `ExternalDictionariesLoader: Could not load external dictionary`), while
+    `/api/health` still answers 200. Neither a restart nor Plausible's
+    migrations update them (GOU-1268). Before Plausible is recreated, every
+    dictionary of Plausible's database (the path of its
+    `CLICKHOUSE_DATABASE_URL`) whose source is this ClickHouse as `default`
+    with a `PASSWORD` is recreated from its `SHOW CREATE DICTIONARY`
+    (ClickHouse shows the password as `[HIDDEN]`), only its `PASSWORD` literal
+    replaced, with `CREATE OR REPLACE DICTIONARY`, then
+    `SYSTEM RELOAD DICTIONARY`; each must then be `LOADED` in
+    `system.dictionaries`. The DDL goes through files of the temp directory
+    and stdin, never a command line, and is never printed. The other
+    dictionaries (another source, user or host, no password) are listed by
+    `test` and left alone. Re-running `restart` recreates them identical.
+  - Write check: after `/api/health`, no `Code: 516` line in
+    `docker logs plausible --since <its restart>` for 45 s (9 checks 5 s
+    apart, `PLAUSIBLE_WRITE_ATTEMPTS`), then the number of events written to
+    `events_v2` since the restart (for information: 0 without traffic). A
+    dictionary that is not `LOADED` (Plausible is then not recreated) or a
+    `Code: 516` line fails the run with a pointer to `mode=rollback`.
+  - `test` lists the dictionaries `restart` would recreate, by name and status
+    (`system.dictionaries`), flags one already failing, and names the others.
+  - Lost events: those sent between the recreation of `plausible_events_db`
+    and the first write of the new Plausible (a minute or two on beta).
+  - No dictionary, table or database of Plausible's ClickHouse reads Postgres
+    (Plausible CE migrations): `plausible-postgres` needs no such step.
 - `b2b-postgres` (beta, prod): changes the user of `b2b_postgres`
   (`ALTER USER`), renders `B2B_POSTGRES_PASSWORD` in `infra.env` (for the
   compose file) and the config tree `spring.datasource.password` of b2b-api,
@@ -253,7 +285,9 @@ with `mode=test`, then `mode=apply`.
    reset their second factor.
    Then, once Access wrote their values (approval of their own, GOU-1256):
    beta `plausible-postgres`, then `plausible-clickhouse` (proof:
-   `/api/health` of Plausible, a dashboard shows today's visits);
+   `/api/health` of Plausible, its dictionaries `LOADED` and no `Code: 516`
+   in the run log, new events in `events_v2`, a dashboard shows today's
+   visits);
    `b2b-postgres` in beta, then in prod (proof: the b2b-api health check of
    `publish-jars.sh`, a call of the Product Data API that reads the ledger).
    Their previous values join `infra-previous.env`: step c deletes it after
@@ -270,7 +304,9 @@ after `apply`: `mode=rollback` for that target.
 
 `mode=rollback` reads `/etc/open4goods/infra-previous.env` and puts the
 previous value back at the source (authenticated with the new one), in the
-rendered files (config trees, `infra.env`), then restarts the consumers. For
+rendered files (config trees, `infra.env`), then restarts the consumers
+(`plausible-clickhouse`: its dictionaries are recreated with the previous
+value too, and the same write check runs). For
 the Kibana key, the previous key is primary again and the new one stays
 decryption-only, so objects re-encrypted with it remain readable. The GitHub
 Environment keeps the new value: fix or regenerate it before the next `apply`.
