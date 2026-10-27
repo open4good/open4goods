@@ -65,7 +65,9 @@ case "$method $path" in
     fi
     ;;
   "GET /api/status") auth_ok && code=200 && body='{"status":{"overall":{"level":"available"}}}' ;;
-  "POST /api/encrypted_saved_objects/_rotate_key"*) auth_ok && code=200 && body='{"total":2,"successful":2,"failed":0}' ;;
+  # Kibana 9 answers 400 to an unknown query parameter (e.g. conflicts).
+  "POST /api/encrypted_saved_objects/_rotate_key") auth_ok && code=200 && body='{"total":2,"successful":2,"failed":0}' ;;
+  "POST /api/encrypted_saved_objects/_rotate_key?"*) code=400 ;;
   "GET /"*) code=200 ;;
 esac
 if [ -n "$out" ]; then printf '%s' "$body" > "$out"; else printf '%s' "$body"; fi
