@@ -50,7 +50,7 @@
 # admin runs as `sbadmin` (/etc/open4goods/sbadmin.env); frontend reads
 # /opt/open4goods/config/<env>/frontend/.env (env_file of docker-compose.frontend.yml,
 # rewritten by open4goods-config's deploy: rendered before every publish); infra is
-# the docker compose infrastructure (Kibana, XWiki, MySQL, Plausible), which reads
+# the docker compose infrastructure (Kibana, XWiki, MySQL, Plausible, b2b Postgres), which reads
 # /etc/open4goods/infra.env as a second --env-file of publish-infra.sh: no
 # open4goods-config deploy writes /etc/open4goods/, and publish-jars.sh does not
 # source that file (docs/operations/infra-secrets-rotation.md).
@@ -96,6 +96,7 @@
 # | admin     | O4G_MAIL_PASSWORD               | tree    | spring.mail.password                                                           | optional |
 # | b2b-api   | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.client.password                                              | optional |
 # | b2b-api   | O4G_ELASTICSEARCH_PASSWORD      | tree    | spring.elasticsearch.password                                                  | source   |
+# | b2b-api   | B2B_API_POSTGRES_PASSWORD       | tree    | spring.datasource.password                                                     | source   |
 # | frontend  | GOOGLE_SSO_CLIENT_ID            | env     | NUXT_GOOGLE_OAUTH_CLIENT_ID                                                    | required |
 # | frontend  | GOOGLE_SSO_CLIENT_SECRET        | env     | NUXT_GOOGLE_OAUTH_CLIENT_SECRET                                                | required |
 # | frontend  | O4G_MACHINE_TOKEN               | env     | NUXT_MACHINE_TOKEN (runtimeConfig.machineToken)                                | optional |
@@ -106,6 +107,9 @@
 # | infra     | INFRA_XWIKI_DB_PASSWORD         | env     | INFRA_XWIKI_DB_PASSWORD (xwiki DB_PASSWORD, mysql MYSQL_PASSWORD; prod)        | source   |
 # | infra     | INFRA_MYSQL_ROOT_PASSWORD       | env     | INFRA_MYSQL_ROOT_PASSWORD (mysql MYSQL_ROOT_PASSWORD; prod)                    | source   |
 # | infra     | INFRA_PLAUSIBLE_SECRET_KEY_BASE | env     | PLAUSIBLE_SECRET_KEY_BASE (overrides config/<env>/infra/.env; beta)            | source   |
+# | infra     | INFRA_PLAUSIBLE_PG_PASSWORD     | env     | PLAUSIBLE_PG_PASSWORD (plausible DATABASE_URL, plausible_db; beta)             | source   |
+# | infra     | INFRA_CLICKHOUSE_PASSWORD       | env     | CLICKHOUSE_PASSWORD (plausible_events_db, plausible; beta)                     | source   |
+# | infra     | B2B_API_POSTGRES_PASSWORD       | env     | B2B_POSTGRES_PASSWORD (b2b_postgres POSTGRES_PASSWORD)                         | source   |
 #
 # Coupled secrets: every consumer must receive the same value in the same deployment
 # (serviceSecrets.yml service=all, or a full release), otherwise the services stop
@@ -123,6 +127,9 @@
 #   INFRA_KIBANA_SYSTEM_PASSWORD  Elasticsearch user `kibana_system` <-> Kibana.
 #   INFRA_XWIKI_DB_PASSWORD       MySQL user `xwiki` <-> XWiki (prod).
 #   INFRA_MYSQL_ROOT_PASSWORD     MySQL user `root` (prod).
+#   INFRA_PLAUSIBLE_PG_PASSWORD   Postgres user `postgres` of plausible_db <-> Plausible (beta).
+#   INFRA_CLICKHOUSE_PASSWORD     ClickHouse user `default` (set from the compose env at each start) <-> Plausible (beta).
+#   B2B_API_POSTGRES_PASSWORD     Postgres user of b2b_postgres <-> b2b-api.
 #
 # Required environment for apply: DEPLOY_SSH_HOST, DEPLOY_SSH_USER, DEPLOY_SSH_KEY.
 set -eu
@@ -172,6 +179,7 @@ admin O4G_SBA_PASSWORD tree o4g.sba.registration.password optional
 admin O4G_MAIL_PASSWORD tree spring.mail.password optional
 b2b-api O4G_SBA_PASSWORD tree spring.boot.admin.client.password optional
 b2b-api O4G_ELASTICSEARCH_PASSWORD tree spring.elasticsearch.password source
+b2b-api B2B_API_POSTGRES_PASSWORD tree spring.datasource.password source
 frontend GOOGLE_SSO_CLIENT_ID env NUXT_GOOGLE_OAUTH_CLIENT_ID required
 frontend GOOGLE_SSO_CLIENT_SECRET env NUXT_GOOGLE_OAUTH_CLIENT_SECRET required
 frontend O4G_MACHINE_TOKEN env NUXT_MACHINE_TOKEN optional
@@ -182,6 +190,9 @@ infra INFRA_KIBANA_ENCRYPTION_KEY env INFRA_KIBANA_ENCRYPTION_KEY source
 infra INFRA_XWIKI_DB_PASSWORD env INFRA_XWIKI_DB_PASSWORD source
 infra INFRA_MYSQL_ROOT_PASSWORD env INFRA_MYSQL_ROOT_PASSWORD source
 infra INFRA_PLAUSIBLE_SECRET_KEY_BASE env PLAUSIBLE_SECRET_KEY_BASE source
+infra INFRA_PLAUSIBLE_PG_PASSWORD env PLAUSIBLE_PG_PASSWORD source
+infra INFRA_CLICKHOUSE_PASSWORD env CLICKHOUSE_PASSWORD source
+infra B2B_API_POSTGRES_PASSWORD env B2B_POSTGRES_PASSWORD source
 '
 
 if_present=false

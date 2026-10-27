@@ -2,16 +2,17 @@
 # Runs ON THE DEPLOY HOST, sent over SSH by infra-secrets.sh, which prepends the new values as NAME='value' lines
 # (GOU-1092, campaign GOU-1038 wave 3). Never run it by hand with values on a command line.
 #
-# Usage: sh <payload> <test|source|restart|rollback> <beta|prod> <elasticsearch|kibana|mysql|plausible>
+# Usage: sh <payload> <test|source|restart|rollback> <beta|prod> <target>
 #
 #   test      Read only: prerequisites, the credential currently in service (found by authenticating, never
 #             printed), whether the new value is already in service, what apply would do. Runs without the new
 #             values too (dry run before Access writes them).
 #   source    Changes the password at its source, authenticated with the value currently in service on this host:
 #             Elasticsearch users `elastic` / `kibana_system` (_security/user/<user>/_password), MySQL users `xwiki`
-#             and `root` (ALTER USER) plus XWiki's persisted hibernate.cfg.xml. Before any change, the value in
-#             service is kept in /etc/open4goods/infra-previous.env (mode 600) for `rollback`. Idempotent: a value
-#             already accepted by the source is not changed again.
+#             and `root` (ALTER USER) plus XWiki's persisted hibernate.cfg.xml, the Postgres users of Plausible
+#             and b2b-api (ALTER USER); ClickHouse takes its new password when restart recreates it. Before any
+#             change, the value in service is kept in /etc/open4goods/infra-previous.env (mode 600) for
+#             `rollback`. Idempotent: a value already accepted by the source is not changed again.
 #   restart   Restarts the consumers once infra-secrets.sh has rendered the new value, in the order that keeps the
 #             outage shortest, then checks them. Refuses to restart onto a render that does not hold the new value.
 #   rollback  Puts the previous value back at the source and in the rendered files, then restarts the consumers.
@@ -23,6 +24,12 @@
 #                  objects are re-encrypted (POST /api/encrypted_saved_objects/_rotate_key)
 #   mysql          INFRA_XWIKI_DB_PASSWORD (user xwiki), INFRA_MYSQL_ROOT_PASSWORD (user root) -> XWiki (prod)
 #   plausible      INFRA_PLAUSIBLE_SECRET_KEY_BASE -> Plausible, as PLAUSIBLE_SECRET_KEY_BASE (beta)
+#   plausible-postgres    INFRA_PLAUSIBLE_PG_PASSWORD (Postgres user postgres of plausible_db) -> Plausible, as
+#                         PLAUSIBLE_PG_PASSWORD (beta)
+#   plausible-clickhouse  INFRA_CLICKHOUSE_PASSWORD (ClickHouse user default of plausible_events_db) -> ClickHouse
+#                         itself and Plausible, as CLICKHOUSE_PASSWORD (beta)
+#   b2b-postgres          B2B_API_POSTGRES_PASSWORD (Postgres user of b2b_postgres) -> b2b-api (config tree
+#                         spring.datasource.password), compose as B2B_POSTGRES_PASSWORD
 #
 # Lines marked `ggignore` copy a variable to a file: GitGuardian takes them for hard-coded passwords.
 # No value is printed: values are compared and passed through files of a umask 077 temp directory, stdin, or the
@@ -49,7 +56,10 @@ esac
 case "$target" in
   elasticsearch | kibana) ;;
   mysql) [ "$env_name" = prod ] || fail "mysql: only prod runs XWiki and MySQL" ;;
-  plausible) [ "$env_name" = beta ] || fail "plausible: only beta runs Plausible" ;;
+  plausible | plausible-postgres | plausible-clickhouse)
+    [ "$env_name" = beta ] || fail "$target: only beta runs Plausible"
+    ;;
+  b2b-postgres) ;;
   *) fail "Unknown target" ;;
 esac
 
@@ -750,7 +760,402 @@ plausible_rollback() {
   wait_http "$plausible_url/api/health" 200 "${PLAUSIBLE_ATTEMPTS:-60}"
 }
 
+# --- Postgres and ClickHouse (Plausible, b2b-api) -----------------------------------------------------------------
+
+# Default of the first `${KEY:-default}` (compose) or `${KEY:default}` (Spring) placeholder of a file; empty if none.
+placeholder_default() {
+  [ -f "$1" ] || return 0
+  value=$(sed -n "s/.*\${$2:-\{0,1\}\([^}]*\)}.*/\1/p" "$1" | head -n 1)
+  case "$value" in
+    '?'*) ;;
+    *) printf '%s' "$value" ;;
+  esac
+}
+
+# Password of a scheme://user:password@host URL on stdin.
+url_password() {
+  sed -n 's#^[a-z]*://[^:/@]*:\([^@]*\)@.*#\1#p' | tr -d '\n'
+}
+
+# Environment variable $2 the container $1 was created with (empty when it is not set).
+container_env() {
+  docker exec "$1" printenv "$2" 2>/dev/null | tr -d '\n' || :
+}
+
+# A value no source can accept: authentication must refuse it, else it proves nothing.
+random_value() {
+  printf 'wrong-%s' "$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')"
+}
+
+# The first candidate file accepted by `$1 <file>`, copied to $work/current-$2 (never printed); prints its name.
+find_accepted() {
+  accepts=$1 label=$2
+  shift 2
+  for candidate in "$@"; do
+    if "$accepts" "$candidate"; then
+      cp "$candidate" "$work/current-$label"
+      echo "${candidate#"$work/"}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+# The Postgres of the official image trusts its socket and loopback connections: only a TCP connection to the
+# container's network address (pg_hba `host all all all scram-sha-256`) checks the password. pg_target sets the
+# container, user and database, and refuses a server that accepts any password.
+pg_target() {
+  pg_container=$1 pg_user=$2 pg_db=$3
+  container_running "$pg_container" || fail "the $pg_container container is not running"
+  case "$pg_user$pg_db" in
+    '' | *[!A-Za-z0-9_]*) fail "unexpected Postgres user or database name in $pg_container" ;;
+  esac
+  pg_host=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}} {{end}}' "$pg_container" 2>/dev/null \
+    | awk '{ print $1 }')
+  [ -n "$pg_host" ] || fail "no network address found for $pg_container"
+  random_value > "$work/wrong"
+  if pg_accepts "$work/wrong"; then
+    fail "$pg_container accepts any password over TCP (trust): the value in service cannot be found (runbook)"
+  fi
+}
+
+# psql as $pg_user on $pg_db over TCP, password in file $1 (environment of docker exec, never a command line); SQL
+# on stdin.
+pg_as() {
+  PGPASSWORD=$(cat "$1") docker exec -i -e PGPASSWORD "$pg_container" \
+    psql -h "$pg_host" -U "$pg_user" -d "$pg_db" -w -X -q -t -A -v ON_ERROR_STOP=1 2>/dev/null
+}
+
+pg_accepts() {
+  [ -s "$1" ] || return 1
+  [ "$(echo 'SELECT 1;' | pg_as "$1" || true)" = 1 ]
+}
+
+# Sets the password of $pg_user to the content of file $2, authenticated with the content of file $1.
+pg_set_password() {
+  # SQL string literal: quotes doubled (standard_conforming_strings: backslashes are literal).
+  value=$(sed -e "s/'/''/g" "$2")
+  printf 'ALTER USER "%s" WITH PASSWORD '\''%s'\'';\n' "$pg_user" "$value" | pg_as "$1" > /dev/null \
+    || fail "Postgres refused to change the password of $pg_user ($pg_container)"
+  pg_accepts "$2" || fail "the new password of $pg_user is not accepted after the change ($pg_container)"
+  ok "password of the Postgres user $pg_user changed ($pg_container)"
+}
+
+# ClickHouse user `default` of plausible_events_db, password in file $1: a client config file streamed into the
+# container (mode 600, removed), never a command line. The CLICKHOUSE_* variables of the container are unset so
+# that the client only uses that file.
+ch_accepts() {
+  [ -s "$1" ] || return 1
+  {
+    printf '<config><user>default</user><password><![CDATA['
+    sed 's/]]>/]]]]><![CDATA[>/g' "$1" | tr -d '\n'
+    printf ']]></password></config>\n'
+  } | docker exec -i plausible_events_db sh -c '
+    set -eu
+    umask 077
+    f=$(mktemp)
+    trap "rm -f \"$f\"" EXIT
+    cat > "$f"
+    env -u CLICKHOUSE_USER -u CLICKHOUSE_PASSWORD clickhouse-client --config-file "$f" --query "SELECT 1"' \
+    > /dev/null 2>&1
+}
+
+# Waits until ClickHouse accepts the password in file $1 (after its recreation).
+wait_ch_accepts() {
+  i=0
+  until ch_accepts "$1"; do
+    i=$((i + 1))
+    [ "$i" -lt "${CLICKHOUSE_ATTEMPTS:-60}" ] || fail "ClickHouse does not accept the expected password after its restart"
+    sleep "${WAIT_SECONDS:-5}"
+  done
+  ok "ClickHouse accepts the expected password"
+}
+
+# The new value of the target's secret ($1) to $work/new (empty when not set: test without the new value).
+new_value() {
+  eval "printf '%s' \"\${$1:-}\"" > "$work/new"
+}
+
+plausible_postgres_prerequisites() {
+  container_running plausible || fail "the plausible container is not running"
+  check_publish_infra
+  check_placeholders "$opt/latest/$env_name/docker-compose.infra.yml" PLAUSIBLE_PG_PASSWORD
+}
+
+plausible_pg_candidates() {
+  env_value "$infra_env" PLAUSIBLE_PG_PASSWORD > "$work/candidate-infra-env"
+  env_value "$opt/config/$env_name/infra/.env" PLAUSIBLE_PG_PASSWORD > "$work/candidate-config-env"
+  placeholder_default "$opt/bin/docker-compose.infra.yml" PLAUSIBLE_PG_PASSWORD > "$work/candidate-compose"
+  container_env plausible DATABASE_URL | url_password > "$work/candidate-plausible-container"
+  container_env plausible_db POSTGRES_PASSWORD > "$work/candidate-db-container"
+  raw_value "$previous_env" INFRA_PLAUSIBLE_PG_PASSWORD > "$work/candidate-previous"
+  echo "$work/candidate-infra-env $work/candidate-config-env $work/candidate-compose" \
+    "$work/candidate-plausible-container $work/candidate-db-container $work/candidate-previous"
+}
+
+# The password of postgres in service to $work/current-pg (the new one first); prints where it was found.
+working_plausible_pg() {
+  # shellcheck disable=SC2046 # file names without spaces, split on purpose.
+  find_accepted pg_accepts pg "$work/new" $(plausible_pg_candidates) \
+    || fail "no known password of the Postgres user postgres of plausible_db is accepted (infra.env, config/$env_name/infra/.env, compose, containers, previous)"
+}
+
+plausible_postgres_test() {
+  writable_etc
+  prerequisite plausible_postgres_prerequisites
+  new_value INFRA_PLAUSIBLE_PG_PASSWORD
+  pg_target plausible_db postgres plausible
+  found=$(working_plausible_pg)
+  if [ "$found" = new ]; then
+    ok "plausible_db already accepts the new password of postgres: source would skip the change"
+  else
+    ok "the password of postgres in service is found ($found) and accepted; source would change it"
+  fi
+}
+
+plausible_postgres_source() {
+  writable_etc
+  plausible_postgres_prerequisites
+  new_value INFRA_PLAUSIBLE_PG_PASSWORD
+  pg_target plausible_db postgres plausible
+  found=$(working_plausible_pg)
+  if [ "$found" = new ]; then
+    ok "plausible_db already accepts the new password of postgres: nothing to change"
+    return 0
+  fi
+  keep_previous INFRA_PLAUSIBLE_PG_PASSWORD "$work/current-pg"
+  pg_set_password "$work/current-pg" "$work/new"
+}
+
+plausible_postgres_restart() {
+  new_value INFRA_PLAUSIBLE_PG_PASSWORD
+  pg_target plausible_db postgres plausible
+  pg_accepts "$work/new" || fail "plausible_db does not accept the new password of postgres: run source first"
+  [ "$(env_value "$infra_env" PLAUSIBLE_PG_PASSWORD)" = "$(cat "$work/new")" ] \
+    || fail "$infra_env does not hold the new PLAUSIBLE_PG_PASSWORD: render it first"
+  check_publish_infra
+  # Plausible only: plausible_db keeps running (POSTGRES_PASSWORD is only read when its data directory is created).
+  INFRA_SERVICES=plausible sh "$opt/bin/publish-infra.sh" "$env_name"
+  wait_http "$plausible_url/api/health" 200 "${PLAUSIBLE_ATTEMPTS:-60}"
+}
+
+plausible_postgres_rollback() {
+  check_publish_infra
+  previous=$(raw_value "$previous_env" INFRA_PLAUSIBLE_PG_PASSWORD)
+  [ -n "$previous" ] || fail "no previous password of postgres (plausible_db) is kept in $previous_env"
+  printf '%s' "$previous" > "$work/previous"
+  new_value INFRA_PLAUSIBLE_PG_PASSWORD
+  pg_target plausible_db postgres plausible
+  if pg_accepts "$work/previous"; then
+    ok "plausible_db already accepts the previous password of postgres"
+  else
+    working_plausible_pg > /dev/null
+    pg_set_password "$work/current-pg" "$work/previous"
+  fi
+  set_infra_line PLAUSIBLE_PG_PASSWORD "$previous"
+  INFRA_SERVICES=plausible sh "$opt/bin/publish-infra.sh" "$env_name"
+  wait_http "$plausible_url/api/health" 200 "${PLAUSIBLE_ATTEMPTS:-60}"
+}
+
+plausible_clickhouse_prerequisites() {
+  container_running plausible_events_db || fail "the plausible_events_db container is not running"
+  container_running plausible || fail "the plausible container is not running"
+  check_publish_infra
+  check_placeholders "$opt/latest/$env_name/docker-compose.infra.yml" CLICKHOUSE_PASSWORD
+}
+
+# The ClickHouse password is not stored in ClickHouse: the entrypoint of the image writes it from CLICKHOUSE_PASSWORD
+# to users.d/default-user.xml at every start. The value in service is the one the running container was created with.
+plausible_ch_candidates() {
+  env_value "$infra_env" CLICKHOUSE_PASSWORD > "$work/candidate-infra-env"
+  env_value "$opt/config/$env_name/infra/.env" CLICKHOUSE_PASSWORD > "$work/candidate-config-env"
+  placeholder_default "$opt/bin/docker-compose.infra.yml" CLICKHOUSE_PASSWORD > "$work/candidate-compose"
+  container_env plausible CLICKHOUSE_DATABASE_URL | url_password > "$work/candidate-plausible-container"
+  container_env plausible_events_db CLICKHOUSE_PASSWORD > "$work/candidate-db-container"
+  raw_value "$previous_env" INFRA_CLICKHOUSE_PASSWORD > "$work/candidate-previous"
+  echo "$work/candidate-infra-env $work/candidate-config-env $work/candidate-compose" \
+    "$work/candidate-plausible-container $work/candidate-db-container $work/candidate-previous"
+}
+
+working_plausible_ch() {
+  random_value > "$work/wrong"
+  if ch_accepts "$work/wrong"; then
+    fail "plausible_events_db accepts any password: the value in service cannot be found (runbook)"
+  fi
+  # shellcheck disable=SC2046 # file names without spaces, split on purpose.
+  find_accepted ch_accepts ch "$work/new" $(plausible_ch_candidates) \
+    || fail "no known password of the ClickHouse user default is accepted (infra.env, config/$env_name/infra/.env, compose, containers, previous)"
+}
+
+plausible_clickhouse_test() {
+  writable_etc
+  prerequisite plausible_clickhouse_prerequisites
+  new_value INFRA_CLICKHOUSE_PASSWORD
+  found=$(working_plausible_ch)
+  if [ "$found" = new ]; then
+    ok "ClickHouse already accepts the new password of default"
+  else
+    ok "the password of default in service is found ($found) and accepted; source would keep it for rollback," \
+      "restart would recreate ClickHouse with the new one, then Plausible"
+  fi
+}
+
+plausible_clickhouse_source() {
+  writable_etc
+  plausible_clickhouse_prerequisites
+  new_value INFRA_CLICKHOUSE_PASSWORD
+  found=$(working_plausible_ch)
+  if [ "$found" = new ]; then
+    ok "ClickHouse already accepts the new password of default: nothing to keep"
+    return 0
+  fi
+  keep_previous INFRA_CLICKHOUSE_PASSWORD "$work/current-ch"
+  info "ClickHouse takes the new password when restart recreates it (written from CLICKHOUSE_PASSWORD at its start)"
+}
+
+plausible_clickhouse_restart() {
+  new_value INFRA_CLICKHOUSE_PASSWORD
+  [ "$(env_value "$infra_env" CLICKHOUSE_PASSWORD)" = "$(cat "$work/new")" ] \
+    || fail "$infra_env does not hold the new CLICKHOUSE_PASSWORD: render it first"
+  check_publish_infra
+  if ch_accepts "$work/new"; then
+    ok "ClickHouse already accepts the new password of default"
+  else
+    [ -n "$(raw_value "$previous_env" INFRA_CLICKHOUSE_PASSWORD)" ] \
+      || fail "the password of default in service is not kept in $previous_env: run source first"
+    # ClickHouse first (its new password), then Plausible: events sent in between are lost.
+    INFRA_SERVICES=plausible_events_db sh "$opt/bin/publish-infra.sh" "$env_name"
+    wait_ch_accepts "$work/new"
+  fi
+  INFRA_SERVICES=plausible sh "$opt/bin/publish-infra.sh" "$env_name"
+  wait_http "$plausible_url/api/health" 200 "${PLAUSIBLE_ATTEMPTS:-60}"
+}
+
+plausible_clickhouse_rollback() {
+  check_publish_infra
+  previous=$(raw_value "$previous_env" INFRA_CLICKHOUSE_PASSWORD)
+  [ -n "$previous" ] || fail "no previous password of default (ClickHouse) is kept in $previous_env"
+  printf '%s' "$previous" > "$work/previous"
+  set_infra_line CLICKHOUSE_PASSWORD "$previous"
+  INFRA_SERVICES=plausible_events_db sh "$opt/bin/publish-infra.sh" "$env_name"
+  wait_ch_accepts "$work/previous"
+  INFRA_SERVICES=plausible sh "$opt/bin/publish-infra.sh" "$env_name"
+  wait_http "$plausible_url/api/health" 200 "${PLAUSIBLE_ATTEMPTS:-60}"
+}
+
+# Files publish-jars.sh sources for b2b-api, in that order (load_service_env).
+b2b_env_files() {
+  echo "$opt/config/$env_name/infra/.env $etc/b2b-api.env $opt/config/$env_name/b2b-api/.env"
+}
+
+b2b_postgres_prerequisites() {
+  runtime=$opt/runtime/b2b-api.jar
+  latest=$opt/latest/b2b-api-latest.jar
+  [ -f "$runtime" ] && [ -f "$latest" ] || fail "$runtime or $latest is missing"
+  cmp -s "$runtime" "$latest" || fail "$runtime differs from $latest: a restart would deploy a JAR that is not running"
+  [ -f "$opt/bin/publish-jars.sh" ] || fail "$opt/bin/publish-jars.sh is missing"
+  # The OS environment beats the config tree: an env line for the property would hide the rendered password.
+  for file in $(b2b_env_files); do
+    [ -z "$(raw_value "$file" SPRING_DATASOURCE_PASSWORD)" ] \
+      || fail "$file sets SPRING_DATASOURCE_PASSWORD, which beats the config tree: remove it first (runbook)"
+  done
+  ok "b2b-api runs its latest JAR and nothing overrides spring.datasource.password"
+}
+
+# User and database of b2b_postgres: those the container was created with (not secret).
+b2b_pg_target() {
+  pg_target b2b_postgres "$(container_env b2b_postgres POSTGRES_USER)" "$(container_env b2b_postgres POSTGRES_DB)"
+}
+
+b2b_pg_candidates() {
+  tree=$etc/secrets/b2b-api/spring.datasource.password
+  : > "$work/candidate-tree"
+  [ -f "$tree" ] && cp "$tree" "$work/candidate-tree"
+  env_value "$infra_env" B2B_POSTGRES_PASSWORD > "$work/candidate-infra-env"
+  i=0
+  for file in $(b2b_env_files); do
+    i=$((i + 1))
+    env_value "$file" B2B_POSTGRES_PASSWORD > "$work/candidate-env-file-$i"
+  done
+  placeholder_default "$opt/config/$env_name/b2b-api/application-active.yml" B2B_POSTGRES_PASSWORD > "$work/candidate-yml"
+  placeholder_default "$opt/bin/docker-compose.infra.yml" B2B_POSTGRES_PASSWORD > "$work/candidate-compose"
+  container_env b2b_postgres POSTGRES_PASSWORD > "$work/candidate-db-container"
+  raw_value "$previous_env" B2B_API_POSTGRES_PASSWORD > "$work/candidate-previous"
+  echo "$work/candidate-tree $work/candidate-infra-env $work/candidate-env-file-1 $work/candidate-env-file-2" \
+    "$work/candidate-env-file-3 $work/candidate-yml $work/candidate-compose $work/candidate-db-container" \
+    "$work/candidate-previous"
+}
+
+working_b2b_pg() {
+  # shellcheck disable=SC2046 # file names without spaces, split on purpose.
+  find_accepted pg_accepts pg "$work/new" $(b2b_pg_candidates) \
+    || fail "no known password of the Postgres user of b2b_postgres is accepted (config tree, env files, application-active.yml, compose, container, previous)"
+}
+
+b2b_postgres_test() {
+  writable_etc
+  prerequisite b2b_postgres_prerequisites
+  new_value B2B_API_POSTGRES_PASSWORD
+  b2b_pg_target
+  found=$(working_b2b_pg)
+  if [ "$found" = new ]; then
+    ok "b2b_postgres already accepts the new password: source would skip the change"
+  else
+    ok "the password of $pg_user in service is found ($found) and accepted; source would change it"
+  fi
+}
+
+b2b_postgres_source() {
+  writable_etc
+  b2b_postgres_prerequisites
+  new_value B2B_API_POSTGRES_PASSWORD
+  b2b_pg_target
+  found=$(working_b2b_pg)
+  if [ "$found" = new ]; then
+    ok "b2b_postgres already accepts the new password of $pg_user: nothing to change"
+    return 0
+  fi
+  keep_previous B2B_API_POSTGRES_PASSWORD "$work/current-pg"
+  pg_set_password "$work/current-pg" "$work/new"
+}
+
+b2b_postgres_restart() {
+  new_value B2B_API_POSTGRES_PASSWORD
+  b2b_pg_target
+  pg_accepts "$work/new" || fail "b2b_postgres does not accept the new password: run source first"
+  holds "$etc/secrets/b2b-api/spring.datasource.password" "$(cat "$work/new")" \
+    || fail "the config tree of b2b-api does not hold the new password: render it first"
+  [ "$(env_value "$infra_env" B2B_POSTGRES_PASSWORD)" = "$(cat "$work/new")" ] \
+    || fail "$infra_env does not hold the new B2B_POSTGRES_PASSWORD: render it first"
+  # b2b-api only: b2b_postgres keeps running (POSTGRES_PASSWORD is only read when its data directory is created).
+  echo "----- Restarting b2b-api -----"
+  sh "$opt/bin/publish-jars.sh" "$env_name" restart b2b-api
+}
+
+b2b_postgres_rollback() {
+  previous=$(raw_value "$previous_env" B2B_API_POSTGRES_PASSWORD)
+  [ -n "$previous" ] || fail "no previous password of b2b_postgres is kept in $previous_env"
+  printf '%s' "$previous" > "$work/previous"
+  new_value B2B_API_POSTGRES_PASSWORD
+  b2b_pg_target
+  if pg_accepts "$work/previous"; then
+    ok "b2b_postgres already accepts the previous password"
+  else
+    working_b2b_pg > /dev/null
+    pg_set_password "$work/current-pg" "$work/previous"
+  fi
+  tree=$etc/secrets/b2b-api/spring.datasource.password
+  if [ -f "$tree" ]; then
+    write_exact "$tree" "$previous"
+    ok "$tree holds the previous password"
+  fi
+  set_infra_line B2B_POSTGRES_PASSWORD "$previous"
+  echo "----- Restarting b2b-api -----"
+  sh "$opt/bin/publish-jars.sh" "$env_name" restart b2b-api
+}
+
 echo "----- $target: $action ($env_name) -----"
-"${target}_${action}"
+# Function names cannot hold a dash: plausible-postgres -> plausible_postgres_<action>.
+"$(echo "$target" | tr - _)_${action}"
 [ "$blocked" = false ] || fail "$target: prerequisites missing (see the errors above); nothing was written"
 echo "----- $target: $action done -----"

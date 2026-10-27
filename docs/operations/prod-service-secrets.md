@@ -124,7 +124,8 @@ value. A set but malformed secret fails before anything is written.
 | `GOOGLE_SSO_CLIENT_ID` (required) | front-api: `FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID`; frontend: `NUXT_GOOGLE_OAUTH_CLIENT_ID`                                                                                     | Google SSO ([Google SSO OAuth clients](google-sso-oauth-clients.md)) |
 | `GOOGLE_SSO_CLIENT_SECRET` (required) | frontend: `NUXT_GOOGLE_OAUTH_CLIENT_SECRET`                                                                                                                               | Google SSO                                                     |
 | `O4G_ELASTICSEARCH_PASSWORD` (source) | api, ui, front-api, b2b-api: tree `spring.elasticsearch.password`                                                                                                        | Elasticsearch user `elastic` (`infraSecrets.yml` only)         |
-| `INFRA_*` (source)                | infra: `/etc/open4goods/infra.env` (Kibana, XWiki, MySQL, Plausible)                                                                                                          | compose infrastructure (`infraSecrets.yml` only)               |
+| `B2B_API_POSTGRES_PASSWORD` (source) | b2b-api: tree `spring.datasource.password`; infra: `B2B_POSTGRES_PASSWORD`                                                                                                 | Postgres user of `b2b_postgres` (`infraSecrets.yml` only)      |
+| `INFRA_*` (source)                | infra: `/etc/open4goods/infra.env` (Kibana, XWiki, MySQL, Plausible and its Postgres and ClickHouse)                                                                          | compose infrastructure (`infraSecrets.yml` only)               |
 
 `b2b-api` registers with Spring Boot Admin only when its configuration enables
 the client (`B2B_SBA_CLIENT_ENABLED`); the tree then replaces its
@@ -167,6 +168,8 @@ Spring services and the frontend one after the other, front-api first).
 `O4G_ELASTICSEARCH_PASSWORD` is coupled with its source: Elasticsearch
 (`elastic`) and its four consumers (api, ui, front-api, b2b-api) change in one
 run of `infraSecrets.yml` `target=elasticsearch`, never of this workflow.
+Likewise `B2B_API_POSTGRES_PASSWORD` (`b2b_postgres` and b2b-api,
+`target=b2b-postgres`).
 
 `O4G_MACHINE_TOKEN` and `FRONT_API_JWT_SECRET` reach the frontend as env
 lines, so their value must match `[A-Za-z0-9/._-]`.
