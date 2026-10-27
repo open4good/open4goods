@@ -27,7 +27,9 @@
 #   plausible-postgres    INFRA_PLAUSIBLE_PG_PASSWORD (Postgres user postgres of plausible_db) -> Plausible, as
 #                         PLAUSIBLE_PG_PASSWORD (beta)
 #   plausible-clickhouse  INFRA_CLICKHOUSE_PASSWORD (ClickHouse user default of plausible_events_db) -> ClickHouse
-#                         itself and Plausible, as CLICKHOUSE_PASSWORD (beta)
+#                         itself, the dictionaries of Plausible's database (their source holds the password) and
+#                         Plausible, as CLICKHOUSE_PASSWORD (beta); restart and rollback then check that Plausible
+#                         writes (no Code: 516 in its logs)
 #   b2b-postgres          B2B_API_POSTGRES_PASSWORD (Postgres user of b2b_postgres) -> b2b-api (config tree
 #                         spring.datasource.password), compose as B2B_POSTGRES_PASSWORD
 #
@@ -289,7 +291,7 @@ find_mysql_password() {
   return 1
 }
 
-# Waits until $1 answers one of the HTTP codes $2 (comma-separated), $3 attempts 5 s apart.
+# Waits until $1 answers one of the HTTP codes $2 (comma-separated), $3 attempts 5 s apart; $4: what to do on failure.
 wait_http() {
   i=0
   while [ "$i" -lt "$3" ]; do
@@ -300,7 +302,7 @@ wait_http() {
     i=$((i + 1))
     sleep "${WAIT_SECONDS:-5}"
   done
-  fail "$1 did not answer HTTP $2 in time (last: $code)"
+  fail "$1 did not answer HTTP $2 in time (last: $code)${4:+: $4}"
 }
 
 # publish-infra.sh must read /etc/open4goods/infra.env and recreate a single service (open4goods-config step d-infra).
@@ -842,23 +844,35 @@ pg_set_password() {
   ok "password of the Postgres user $pg_user changed ($pg_container)"
 }
 
-# ClickHouse user `default` of plausible_events_db, password in file $1: a client config file streamed into the
-# container (mode 600, removed), never a command line. The CLICKHOUSE_* variables of the container are unset so
-# that the client only uses that file.
-ch_accepts() {
+# clickhouse-client in plausible_events_db as user `default`, password in file $1, one SQL statement on stdin; its
+# output to stdout. A client config file holding the password is streamed first, as one line (mode 600 in the
+# container, removed), never a command line; the CLICKHOUSE_* variables of the container are unset so that the client
+# only uses that file. stderr goes to $work/ch.err, never printed: an error may quote the statement (ch_error).
+ch_query() {
   [ -s "$1" ] || return 1
   {
     printf '<config><user>default</user><password><![CDATA['
     sed 's/]]>/]]]]><![CDATA[>/g' "$1" | tr -d '\n'
     printf ']]></password></config>\n'
+    cat
   } | docker exec -i plausible_events_db sh -c '
     set -eu
     umask 077
     f=$(mktemp)
     trap "rm -f \"$f\"" EXIT
-    cat > "$f"
-    env -u CLICKHOUSE_USER -u CLICKHOUSE_PASSWORD clickhouse-client --config-file "$f" --query "SELECT 1"' \
-    > /dev/null 2>&1
+    IFS= read -r line
+    printf "%s\n" "$line" > "$f"
+    env -u CLICKHOUSE_USER -u CLICKHOUSE_PASSWORD clickhouse-client --config-file "$f"' 2> "$work/ch.err"
+}
+
+# Code of the ClickHouse error of the last ch_query (516 for `Code: 516`), never its message.
+ch_error() {
+  ch_code=$(sed -n 's/.*Code: \([0-9]*\).*/\1/p' "$work/ch.err" 2>/dev/null | head -n 1)
+  printf '%s' "${ch_code:-unknown}"
+}
+
+ch_accepts() {
+  [ "$(echo 'SELECT 1' | ch_query "$1" || true)" = 1 ]
 }
 
 # Waits until ClickHouse accepts the password in file $1 (after its recreation).
@@ -988,6 +1002,173 @@ working_plausible_ch() {
     || fail "no known password of the ClickHouse user default is accepted (infra.env, config/$env_name/infra/.env, compose, containers, previous)"
 }
 
+# Plausible's migrations create dictionaries whose source is this ClickHouse, with the user and password of the
+# moment in their DDL (SOURCE(CLICKHOUSE(TABLE ... DB ... USER 'default' PASSWORD '...'))): insertions into events_v2
+# read them, so they fail with Code: 516 once the password changes, until the dictionaries are recreated (GOU-1271).
+ch_rollback_hint="run infraSecrets.yml mode=rollback for plausible-clickhouse (runbook)"
+ch_rollback_failed_hint="the rollback did not restore Plausible's writes: see the runbook (plausible-clickhouse) before any other run"
+
+# Database of Plausible in ClickHouse: the path of the CLICKHOUSE_DATABASE_URL the plausible container was created
+# with (docker inspect: also when it is stopped), to $ch_db. The URL holds the password: never printed.
+plausible_ch_database() {
+  ch_db=$(docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' plausible 2>/dev/null \
+    | sed -n 's#^CLICKHOUSE_DATABASE_URL=##p' | head -n 1 \
+    | sed -n -e 's#^[a-z]*://##' -e 's#.*@##' -e 's#^[^/]*/\([^/?]*\).*#\1#p')
+  case "$ch_db" in
+    '' | *[!A-Za-z0-9_]*) fail "no database name found in the CLICKHOUSE_DATABASE_URL of the plausible container" ;;
+  esac
+}
+
+# A dictionary DDL (SHOW CREATE DICTIONARY) on stdin.
+#   classify        prints `concerned` when its source is this ClickHouse (no HOST, or a local one) as user default
+#                   (or no USER) with one PASSWORD literal; else why not: source=<TYPE>, no-password, passwords=<n>,
+#                   user=<user>, remote-host.
+#   rewrite <file>  prints it as CREATE OR REPLACE DICTIONARY, the PASSWORD literal (ClickHouse shows '[HIDDEN]')
+#                   replaced by the content of <file>, SQL-escaped; nothing else changes. Fails on an unexpected DDL.
+dict_ddl() {
+  awk -v mode="$1" -v file="${2:-}" -v q="'" '
+    BEGIN {
+      lit = q "([^" q "\\\\]|\\\\.)*" q
+      if (mode == "rewrite") {
+        getline value < file
+        escaped = ""
+        for (k = 1; k <= length(value); k++) {
+          c = substr(value, k, 1)
+          escaped = escaped ((c == "\\" || c == q) ? "\\" : "") c
+        }
+      }
+    }
+    # Position of the string literal that follows the keyword key in the upper-cased line u: RSTART, RLENGTH.
+    function literal(u, key,   start, len, s) {
+      if (!match(u, "(^|[^A-Z0-9_])" key "[ \t]+" lit)) return 0
+      start = RSTART; len = RLENGTH; s = substr(u, start, len)
+      RSTART = start + index(s, q) - 1
+      RLENGTH = len - index(s, q) + 1
+      return 1
+    }
+    {
+      u = toupper($0)
+      if (NR == 1) first = u
+      if (source == "" && match(u, /SOURCE[ \t]*\([ \t]*[A-Z_]+/)) {
+        source = substr(u, RSTART, RLENGTH); sub(/^SOURCE[ \t]*\([ \t]*/, "", source)
+      }
+      if (literal(u, "USER")) user = substr($0, RSTART + 1, RLENGTH - 2)
+      if (literal(u, "HOST")) host = substr($0, RSTART + 1, RLENGTH - 2)
+      line = $0; out = ""
+      while (literal(toupper(line), "PASSWORD")) {
+        passwords++
+        out = out substr(line, 1, RSTART - 1) q escaped q
+        line = substr(line, RSTART + RLENGTH)
+      }
+      out = out line
+      if (NR == 1 && mode == "rewrite") {
+        if (u !~ /^CREATE DICTIONARY /) exit 2
+        out = "CREATE OR REPLACE DICTIONARY " substr(out, 19)
+      }
+      if (mode == "rewrite") print out
+    }
+    END {
+      if (mode == "rewrite") exit (first ~ /^CREATE DICTIONARY / && source == "CLICKHOUSE" && passwords == 1) ? 0 : 2
+      if (source != "CLICKHOUSE") print "source=" (source == "" ? "unknown" : source)
+      else if (passwords == 0) print "no-password"
+      else if (passwords > 1) print "passwords=" passwords
+      else if (user != "" && user != "default") print "user=" user
+      else if (host != "" && host != "localhost" && host != "127.0.0.1" && host != "::1") print "remote-host"
+      else print "concerned"
+    }'
+}
+
+ch_list_dictionaries() {
+  printf "SELECT name, status FROM system.dictionaries WHERE database = '%s' ORDER BY name FORMAT TSV\n" "$ch_db" \
+    | ch_query "$1" > "$2" || fail "cannot list the dictionaries of $ch_db (ClickHouse error $(ch_error))${3:+: $3}"
+}
+
+# The dictionaries of $ch_db, read with the password in file $1: those this target recreates in
+# $work/dicts-concerned, the others in $work/dicts-other (`<name> <status> [<why>]` lines), the DDL of each in
+# $work/ddl-<name> (password hidden by ClickHouse). Never printed.
+ch_dictionaries() {
+  ch_list_dictionaries "$1" "$work/dicts" "${2:-}"
+  : > "$work/dicts-concerned"
+  : > "$work/dicts-other"
+  while read -r dict_name dict_status; do
+    case "$dict_name" in
+      '' | *[!A-Za-z0-9_]*) fail "unexpected dictionary name in $ch_db" ;;
+    esac
+    printf 'SHOW CREATE DICTIONARY %s.%s FORMAT TSVRaw\n' "$ch_db" "$dict_name" | ch_query "$1" > "$work/ddl-$dict_name" \
+      || fail "cannot read the definition of the dictionary $dict_name (ClickHouse error $(ch_error))${2:+: $2}"
+    why=$(dict_ddl classify < "$work/ddl-$dict_name")
+    if [ "$why" = concerned ]; then
+      echo "$dict_name $dict_status" >> "$work/dicts-concerned"
+    else
+      echo "$dict_name $dict_status $why" >> "$work/dicts-other"
+    fi
+  done < "$work/dicts"
+}
+
+# test: the dictionaries restart would recreate, by name and status (no value, no DDL).
+ch_report_dictionaries() {
+  ok "$(wc -l < "$work/dicts-concerned" | tr -d ' ') dictionary(ies) of $ch_db read this ClickHouse as default with a password"
+  while read -r dict_name dict_status; do
+    case "$dict_status" in
+      FAILED*) info "dictionary $dict_name: $dict_status, already failing; restart recreates it with the new password and reloads it" ;;
+      *) ok "dictionary $dict_name: $dict_status; restart would recreate it with the new password, reload it and check it is LOADED" ;;
+    esac
+  done < "$work/dicts-concerned"
+  while read -r dict_name dict_status why; do
+    info "dictionary $dict_name: $dict_status, not changed by this target ($why)"
+  done < "$work/dicts-other"
+}
+
+# Recreates each concerned dictionary of Plausible's database with the password in file $1 (CREATE OR REPLACE from its
+# SHOW CREATE, the DDL streamed on stdin), reloads it, then checks they are all LOADED; $2: what to do on failure.
+# Idempotent: a dictionary already holding that password is recreated identical.
+ch_refresh_dictionaries() {
+  plausible_ch_database
+  ch_dictionaries "$1" "$2"
+  [ -s "$work/dicts-concerned" ] || info "no dictionary of $ch_db reads this ClickHouse with a password: none to recreate"
+  while read -r dict_name _; do
+    dict_ddl rewrite "$1" < "$work/ddl-$dict_name" > "$work/create.sql" \
+      || fail "the definition of the dictionary $dict_name has an unexpected form: $2"
+    ch_query "$1" < "$work/create.sql" > /dev/null \
+      || fail "recreating the dictionary $dict_name failed (ClickHouse error $(ch_error)): $2"
+    rm -f "$work/create.sql"
+    # A failed reload shows in its status, checked below.
+    printf 'SYSTEM RELOAD DICTIONARY %s.%s\n' "$ch_db" "$dict_name" | ch_query "$1" > /dev/null || :
+  done < "$work/dicts-concerned"
+  ch_list_dictionaries "$1" "$work/dicts-after" "$2"
+  bad=false
+  while read -r dict_name _; do
+    after=$(awk -v name="$dict_name" '$1 == name { print $2 }' "$work/dicts-after")
+    case "$after" in
+      LOADED | LOADED_AND_RELOADING) ok "dictionary $dict_name recreated with the expected password and reloaded: $after" ;;
+      *) echo "ERROR: dictionary $dict_name is ${after:-missing} after its reload" >&2; bad=true ;;
+    esac
+  done < "$work/dicts-concerned"
+  [ "$bad" = false ] || fail "dictionaries of $ch_db not LOADED (Plausible's insertions read them): $2"
+}
+
+# Proof that Plausible writes, once /api/health answers: no `Code: 516` (ClickHouse authentication failed: its write
+# buffers and the dictionaries their insertions read) in `docker logs plausible --since $1`, checked
+# PLAUSIBLE_WRITE_ATTEMPTS times WAIT_SECONDS apart (45 s by default); then the count of events written since $1, for
+# information (beta may have no traffic). $2: password file, $3: what to do on failure.
+plausible_writes() {
+  i=0
+  while :; do
+    docker logs --since "$1" plausible > "$work/plausible.log" 2>&1 || fail "cannot read the logs of plausible: $3"
+    auth_failures=$(grep -c 'Code: 516' "$work/plausible.log" || :)
+    rm -f "$work/plausible.log"
+    [ "$auth_failures" -eq 0 ] \
+      || fail "plausible logged $auth_failures ClickHouse authentication failure(s) (Code: 516) since $1, it does not write: $3"
+    i=$((i + 1))
+    [ "$i" -lt "${PLAUSIBLE_WRITE_ATTEMPTS:-9}" ] || break
+    sleep "${WAIT_SECONDS:-5}"
+  done
+  ok "no ClickHouse authentication failure (Code: 516) in the logs of plausible since $1 ($i checks)"
+  events=$(printf "SELECT count() FROM %s.events_v2 WHERE timestamp >= parseDateTimeBestEffort('%s') FORMAT TSV\n" \
+    "$ch_db" "$1" | ch_query "$2" || echo unknown)
+  info "events written to $ch_db.events_v2 since $1: ${events:-unknown} (0 without traffic)"
+}
+
 plausible_clickhouse_test() {
   writable_etc
   prerequisite plausible_clickhouse_prerequisites
@@ -997,8 +1178,11 @@ plausible_clickhouse_test() {
     ok "ClickHouse already accepts the new password of default"
   else
     ok "the password of default in service is found ($found) and accepted; source would keep it for rollback," \
-      "restart would recreate ClickHouse with the new one, then Plausible"
+      "restart would recreate ClickHouse with the new one, its dictionaries, then Plausible"
   fi
+  plausible_ch_database
+  ch_dictionaries "$work/current-ch"
+  ch_report_dictionaries
 }
 
 plausible_clickhouse_source() {
@@ -1028,8 +1212,12 @@ plausible_clickhouse_restart() {
     INFRA_SERVICES=plausible_events_db sh "$opt/bin/publish-infra.sh" "$env_name"
     wait_ch_accepts "$work/new"
   fi
+  # Before Plausible: its insertions read the dictionaries.
+  ch_refresh_dictionaries "$work/new" "$ch_rollback_hint"
+  since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
   INFRA_SERVICES=plausible sh "$opt/bin/publish-infra.sh" "$env_name"
-  wait_http "$plausible_url/api/health" 200 "${PLAUSIBLE_ATTEMPTS:-60}"
+  wait_http "$plausible_url/api/health" 200 "${PLAUSIBLE_ATTEMPTS:-60}" "$ch_rollback_hint"
+  plausible_writes "$since" "$work/new" "$ch_rollback_hint"
 }
 
 plausible_clickhouse_rollback() {
@@ -1040,8 +1228,11 @@ plausible_clickhouse_rollback() {
   set_infra_line CLICKHOUSE_PASSWORD "$previous"
   INFRA_SERVICES=plausible_events_db sh "$opt/bin/publish-infra.sh" "$env_name"
   wait_ch_accepts "$work/previous"
+  ch_refresh_dictionaries "$work/previous" "$ch_rollback_failed_hint"
+  since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
   INFRA_SERVICES=plausible sh "$opt/bin/publish-infra.sh" "$env_name"
-  wait_http "$plausible_url/api/health" 200 "${PLAUSIBLE_ATTEMPTS:-60}"
+  wait_http "$plausible_url/api/health" 200 "${PLAUSIBLE_ATTEMPTS:-60}" "$ch_rollback_failed_hint"
+  plausible_writes "$since" "$work/previous" "$ch_rollback_failed_hint"
 }
 
 # Files publish-jars.sh sources for b2b-api, in that order (load_service_env).

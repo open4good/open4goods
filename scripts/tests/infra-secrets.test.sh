@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Tests scripts/deploy/infra-secrets.sh and infra-secrets-remote.sh (GOU-1092, GOU-1256) against a fake `ssh` that
-# runs the remote script locally, a fake `curl` playing Elasticsearch and Kibana, and a fake `docker` playing MySQL,
-# XWiki, Plausible, its Postgres and ClickHouse, and the b2b Postgres. /etc/open4goods/ and /opt/open4goods/ live in a temp dir. Every value is a sentinel that must never
-# appear in an output, a summary or a command line.
+# Tests scripts/deploy/infra-secrets.sh and infra-secrets-remote.sh (GOU-1092, GOU-1256, GOU-1271) against a fake
+# `ssh` that runs the remote script locally, a fake `curl` playing Elasticsearch and Kibana, and a fake `docker`
+# playing MySQL, XWiki, Plausible (its logs), its Postgres and ClickHouse (its dictionaries), and the b2b Postgres.
+# /etc/open4goods/ and /opt/open4goods/ live in a temp dir. Every value is a sentinel that must never appear in an
+# output, a summary or a command line.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -16,8 +17,10 @@ FAKE_MYSQL="${WORK}/mysql"
 FAKE_XWIKI_DATA="${WORK}/xwiki-data"
 FAKE_DB="${WORK}/db"
 FAKE_ENV="${WORK}/container-env"
+FAKE_LOGS="${WORK}/container-logs"
 CALLS="${WORK}/calls.log"
-mkdir -p "${WORK}/bin" "${FAKE_ROOT}" "${FAKE_ES}" "${FAKE_MYSQL}" "${FAKE_XWIKI_DATA}" "${FAKE_DB}" "${FAKE_ENV}"
+mkdir -p "${WORK}/bin" "${FAKE_ROOT}" "${FAKE_ES}" "${FAKE_MYSQL}" "${FAKE_XWIKI_DATA}" "${FAKE_DB}" "${FAKE_ENV}" \
+  "${FAKE_LOGS}"
 
 cat > "${WORK}/bin/ssh" <<'SH'
 #!/bin/sh
@@ -78,14 +81,24 @@ cat > "${WORK}/bin/docker" <<'SH'
 #!/bin/sh
 # Fake docker: MySQL users are files of $FAKE_MYSQL; XWiki's permanent directory is $FAKE_XWIKI_DATA; the Postgres
 # and ClickHouse passwords are files of $FAKE_DB (<container>.<user>; $FAKE_DB/trust: any password accepted); the
-# environment a container was created with is $FAKE_ENV/<container>.<NAME>.
+# environment a container was created with is $FAKE_ENV/<container>.<NAME>, its logs $FAKE_LOGS/<container>.
 printf 'docker %s\n' "$*" >> "$CALLS"
 case "$1" in
   inspect)
     case "$3" in
       *IPAddress*) echo '172.18.0.9 ' ;;
+      *Config.Env*)
+        for f in "$FAKE_ENV/$4".*; do
+          [ ! -f "$f" ] || printf '%s=%s\n' "${f##*/"$4".}" "$(cat "$f")"
+        done
+        ;;
       *) echo true ;;
     esac
+    exit 0
+    ;;
+  logs)
+    for arg; do container=$arg; done
+    cat "$FAKE_LOGS/$container" 2>/dev/null
     exit 0
     ;;
   exec) shift ;;
@@ -154,20 +167,82 @@ case "$container" in
     ;;
   plausible_db) echo 0 ;;
   plausible_events_db)
-    # ClickHouse client config on stdin: <password><![CDATA[...]]></password>.
-    given=$(sed -n 's/.*<password><!\[CDATA\[\(.*\)\]\]><\/password>.*/\1/p')
-    [ -f "$FAKE_DB/trust" ] || [ "$(cat "$FAKE_DB/plausible_events_db.default" 2>/dev/null)" = "$given" ] || exit 1
-    echo 1
+    # ClickHouse: the client config on the first line of stdin (<password><![CDATA[...]]></password>), then one
+    # statement. Dictionaries are $FAKE_DB/dicts/<name>.ddl (password in clear) and <name>.status; <name>.broken
+    # makes its reload fail.
+    IFS= read -r cfg
+    given=$(printf '%s\n' "$cfg" | sed -n 's/.*<password><!\[CDATA\[\(.*\)\]\]><\/password>.*/\1/p')
+    ch=$(cat "$FAKE_DB/plausible_events_db.default" 2>/dev/null || :)
+    if [ ! -f "$FAKE_DB/trust" ] && [ "$ch" != "$given" ]; then
+      echo 'Code: 516. DB::Exception: default: Authentication failed' >&2
+      exit 4
+    fi
+    sql=$(cat)
+    dicts=$FAKE_DB/dicts
+    case "$sql" in
+      'SELECT 1') echo 1 ;;
+      "SELECT name, status FROM system.dictionaries WHERE database = 'plausible_events_db' ORDER BY name FORMAT TSV")
+        for f in "$dicts"/*.ddl; do
+          [ -f "$f" ] || continue
+          n=$(basename "$f" .ddl)
+          printf '%s\t%s\n' "$n" "$(cat "$dicts/$n.status")"
+        done
+        ;;
+      'SHOW CREATE DICTIONARY plausible_events_db.'*' FORMAT TSVRaw')
+        n=${sql#SHOW CREATE DICTIONARY plausible_events_db.}
+        sed "s/PASSWORD '[^']*'/PASSWORD '[HIDDEN]'/" "$dicts/${n% FORMAT TSVRaw}.ddl"
+        ;;
+      'CREATE OR REPLACE DICTIONARY plausible_events_db.'*)
+        n=$(printf '%s\n' "$sql" | sed -n '1s/^CREATE OR REPLACE DICTIONARY plausible_events_db\.//p')
+        printf '%s\n' "$sql" | sed '1s/^CREATE OR REPLACE DICTIONARY/CREATE DICTIONARY/' > "$dicts/$n.ddl"
+        echo NOT_LOADED > "$dicts/$n.status"
+        ;;
+      'SYSTEM RELOAD DICTIONARY plausible_events_db.'*)
+        n=${sql#SYSTEM RELOAD DICTIONARY plausible_events_db.}
+        if [ ! -f "$dicts/$n.broken" ] && [ "$(sed -n "s/.*PASSWORD '\([^']*\)'.*/\1/p" "$dicts/$n.ddl")" = "$ch" ]; then
+          echo LOADED > "$dicts/$n.status"
+        else
+          echo FAILED > "$dicts/$n.status"
+          echo 'Code: 516. DB::Exception: default: Authentication failed' >&2
+          exit 5
+        fi
+        ;;
+      'SELECT count() FROM plausible_events_db.events_v2 WHERE '*) echo 3 ;;
+      *) echo 'unexpected query' >&2; exit 6 ;;
+    esac
     ;;
   kibana) [ "$1" = cat ] && [ -f "$FAKE_KIBANA_YML" ] && cat "$FAKE_KIBANA_YML" ;;
   *) exit 1 ;;
 esac
 SH
+cat > "${WORK}/plausible-recreate" <<'SH'
+#!/bin/sh
+# Recreating plausible ($1: infra.env): a new container (its logs start empty), created with the CLICKHOUSE_PASSWORD of
+# infra.env in its URL. Its write buffers log Code: 516 when ClickHouse refuses that password or when a dictionary
+# their insertions read holds another one ($FAKE_DB/plausible-516 forces it).
+ch=$(cat "$FAKE_DB/plausible_events_db.default" 2>/dev/null || :)
+pw=$(sed -n 's/^CLICKHOUSE_PASSWORD=//p' "$1" 2>/dev/null | sed "s/^'\(.*\)'$/\1/" | tr -d '\n')
+printf 'http://default:%s@plausible_events_db:8123/plausible_events_db' "$pw" \
+  > "$FAKE_ENV/plausible.CLICKHOUSE_DATABASE_URL"
+: > "$FAKE_LOGS/plausible"
+refused=false
+[ "$pw" = "$ch" ] || refused=true
+[ ! -f "$FAKE_DB/plausible-516" ] || refused=true
+for f in "$FAKE_DB"/dicts/*.ddl; do
+  [ -f "$f" ] && grep -q 'CLICKHOUSE(' "$f" || continue
+  p=$(sed -n "s/.*PASSWORD '\([^']*\)'.*/\1/p" "$f")
+  [ -z "$p" ] || [ "$p" = "$ch" ] || refused=true
+done
+if [ "$refused" = true ]; then
+  echo '[error] GenServer Plausible.Event.WriteBuffer terminating ** (Ch.Error) Code: 516. DB::Exception: default: Authentication failed' \
+    >> "$FAKE_LOGS/plausible"
+fi
+SH
 chmod +x "${WORK}/bin/"*
 
 export PATH="${WORK}/bin:${PATH}"
 FAKE_KIBANA_YML="${WORK}/kibana-container.yml"
-export FAKE_ROOT FAKE_ES FAKE_MYSQL FAKE_XWIKI_DATA FAKE_KIBANA_YML FAKE_DB FAKE_ENV CALLS
+export FAKE_ROOT FAKE_ES FAKE_MYSQL FAKE_XWIKI_DATA FAKE_KIBANA_YML FAKE_DB FAKE_ENV FAKE_LOGS CALLS
 export INFRA_SECRETS_ROOT="${FAKE_ROOT}" WAIT_SECONDS=0
 export DEPLOY_SSH_HOST=beta.example DEPLOY_SSH_USER=deploy DEPLOY_SSH_KEY="fake-ssh-key"
 export GITHUB_STEP_SUMMARY="${WORK}/summary.md"
@@ -190,7 +265,8 @@ OLD_PLAUSIBLE="OLDPLAUSIBLESENTINELAAAAAAAAAAAAAA"
 NEW_PLAUSIBLE="NEWPLAUSIBLESENTINELBBBBBBBBBBBBBB"
 OLD_PG="OLDPGSENTINELCCCCCCCCCCCCCCCCCCCCC"
 NEW_PG="NEWPGSENTINELDDDDDDDDDDDDDDDDDDDDD"
-OLD_CH="OLDCHSENTINELEEEEEEEEEEEEEEEEEEEEE"
+# The ClickHouse password in service holds `&` and `%`: kept literal in the DDL of the dictionaries on rollback.
+OLD_CH="OLDCH&SENTINEL%EEEEEEEEEEEEEEEEEEE"
 NEW_CH="NEWCHSENTINELFFFFFFFFFFFFFFFFFFFFF"
 # The b2b default in service holds punctuation: single-quoted in infra.env on rollback.
 OLD_B2B="OLDB2B%SENTINEL!GGGGGGGGGGGGGGGGGGG"
@@ -213,6 +289,11 @@ no_value_leaked() {
   ! printf '%s' "${out}" | grep -q "${SENTINELS}" && ! grep -q "${SENTINELS}" "${CALLS}" "${GITHUB_STEP_SUMMARY}"
 }
 
+# No dictionary DDL in the output (even with its password hidden), nor on a command line.
+no_ddl_printed() {
+  ! printf '%s' "${out}" | grep -q -e 'SOURCE(' -e 'HIDDEN' -e 'CREATE' && ! grep -q -e 'SOURCE(' -e 'CREATE' "${CALLS}"
+}
+
 check() {
   local label=$1
   shift
@@ -221,7 +302,7 @@ check() {
 
 reset_host() {
   rm -rf "${FAKE_ROOT:?}"/* "${FAKE_ES:?}"/* "${FAKE_MYSQL:?}"/* "${FAKE_XWIKI_DATA:?}"/* "${FAKE_KIBANA_YML}" \
-    "${FAKE_DB:?}"/* "${FAKE_ENV:?}"/*
+    "${FAKE_DB:?}"/* "${FAKE_ENV:?}"/* "${FAKE_LOGS:?}"/*
   : > "${CALLS}"
   : > "${GITHUB_STEP_SUMMARY}"
   mkdir -p "${ETC}" "${OPT}/bin" "${OPT}/runtime" "${OPT}/latest/beta" "${OPT}/latest/prod"
@@ -244,6 +325,9 @@ case " \$INFRA_SERVICES " in
     sed -n 's/^CLICKHOUSE_PASSWORD=//p' "${ETC}/infra.env" | sed "s/^'\\(.*\\)'\$/\\1/" | tr -d '\n' \
       > "${FAKE_DB}/plausible_events_db.default"
     ;;
+esac
+case " \$INFRA_SERVICES " in
+  *" plausible "*) sh "${WORK}/plausible-recreate" "${ETC}/infra.env" ;;
 esac
 PUBLISH
   : > "${WORK}/restarts.log"
@@ -514,21 +598,60 @@ check "plausible-postgres prints no value" no_value_leaked
 unset INFRA_PLAUSIBLE_PG_PASSWORD
 
 ########################################
-# plausible-clickhouse (beta): the password changes when ClickHouse is recreated, then Plausible
+# plausible-clickhouse (beta): the password changes when ClickHouse is recreated, then its dictionaries, then Plausible
 ########################################
 reset_host
-mkdir -p "${OPT}/config/beta/infra"
+mkdir -p "${OPT}/config/beta/infra" "${FAKE_DB}/dicts" "${WORK}/dicts"
 : > "${OPT}/config/beta/infra/.env"
 # shellcheck disable=SC2016 # literal placeholders.
 printf '      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-x}\n' > "${OPT}/bin/docker-compose.infra.yml"
 cp "${OPT}/bin/docker-compose.infra.yml" "${OPT}/latest/beta/docker-compose.infra.yml"
 # The running Plausible holds the value in service in its URL (the compose default above is not it).
-printf 'http://default:%s@plausible_events_db:8123/plausible' "${OLD_CH}" > "${FAKE_ENV}/plausible.CLICKHOUSE_DATABASE_URL"
+printf 'http://default:%s@plausible_events_db:8123/plausible_events_db' "${OLD_CH}" \
+  > "${FAKE_ENV}/plausible.CLICKHOUSE_DATABASE_URL"
 printf '%s' "${OLD_CH}" > "${FAKE_DB}/plausible_events_db.default"
+# Dictionaries of Plausible's migrations (source: this ClickHouse, with the password of their creation), one already
+# failing, and one this target leaves alone. Their DDL as created is kept in $WORK/dicts.
+seed_dictionary() {
+  printf 'CREATE DICTIONARY plausible_events_db.%s\n(\n    `referrer_source` String\n)\nPRIMARY KEY referrer_source\nSOURCE(%s)\nLIFETIME(MIN 0 MAX 0)\nLAYOUT(%s)\n' \
+    "$1" "$2" "$3" > "${WORK}/dicts/$1.ddl"
+  cp "${WORK}/dicts/$1.ddl" "${FAKE_DB}/dicts/$1.ddl"
+  echo "$4" > "${FAKE_DB}/dicts/$1.status"
+}
+ch_source="CLICKHOUSE(TABLE 'x' DB 'plausible_events_db' USER 'default' PASSWORD '${OLD_CH}')" # ggignore
+seed_dictionary location_data_dict "${ch_source/\'x\'/\'location_data\'}" 'COMPLEX_KEY_CACHE(SIZE_IN_CELLS 500000)' NOT_LOADED
+seed_dictionary acquisition_channel_paid_sources_dict "${ch_source/\'x\'/\'acquisition_channel_paid_sources\'}" 'HASHED()' LOADED
+seed_dictionary acquisition_channel_source_category_dict "${ch_source/\'x\'/\'acquisition_channel_source_category\'}" 'HASHED()' FAILED
+seed_dictionary other_http_dict "HTTP(URL 'http://example.invalid/x.csv' FORMAT 'CSVWithNames')" 'HASHED()' LOADED
+concerned_dicts="acquisition_channel_paid_sources_dict acquisition_channel_source_category_dict location_data_dict"
+# True when every concerned dictionary holds the password $1 and nothing else changed, other_http_dict untouched.
+dictionaries_hold() {
+  for d in ${concerned_dicts}; do
+    [ "$(sed "s/PASSWORD '[^']*'/PASSWORD 'P'/" "${FAKE_DB}/dicts/$d.ddl")" \
+      = "$(sed "s/PASSWORD '[^']*'/PASSWORD 'P'/" "${WORK}/dicts/$d.ddl")" ] || return 1
+    [ "$(sed -n "s/.*PASSWORD '\([^']*\)'.*/\1/p" "${FAKE_DB}/dicts/$d.ddl")" = "$1" ] || return 1
+  done
+  cmp -s "${FAKE_DB}/dicts/other_http_dict.ddl" "${WORK}/dicts/other_http_dict.ddl"
+}
+dictionaries_loaded() {
+  for d in ${concerned_dicts}; do
+    [ "$(cat "${FAKE_DB}/dicts/$d.status")" = LOADED ] || return 1
+  done
+}
+dictionaries_ok() { dictionaries_hold "$1" && dictionaries_loaded; }
 export INFRA_CLICKHOUSE_PASSWORD="${NEW_CH}"
 run "${DEPLOY}/infra-secrets.sh" remote test beta plausible-clickhouse
 check "plausible-clickhouse test finds the password in service (Plausible's URL)" \
   bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"default in service is found (candidate-plausible-container)"* ]]' "${status}" "${out}"
+check "plausible-clickhouse test lists the dictionaries restart recreates, by name and status, and flags a failing one" \
+  bash -c '[[ "$0" == *"3 dictionary(ies) of plausible_events_db read this ClickHouse as default with a password"* ]] \
+    && [[ "$0" == *"dictionary location_data_dict: NOT_LOADED; restart would recreate it with the new password"* ]] \
+    && [[ "$0" == *"dictionary acquisition_channel_paid_sources_dict: LOADED; restart would recreate it"* ]] \
+    && [[ "$0" == *"dictionary acquisition_channel_source_category_dict: FAILED, already failing"* ]] \
+    && [[ "$0" == *"dictionary other_http_dict: LOADED, not changed by this target (source=HTTP)"* ]]' "${out}"
+check "plausible-clickhouse test changes no dictionary" dictionaries_hold "${OLD_CH}"
+check "plausible-clickhouse test prints no value" no_value_leaked
+check "plausible-clickhouse test prints no DDL" no_ddl_printed
 run "${DEPLOY}/infra-secrets.sh" remote restart beta plausible-clickhouse
 check "plausible-clickhouse restart refuses before the render" \
   bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"render it first"* ]] && [ ! -s "$2" ]' "${status}" "${out}" "${WORK}/restarts.log"
@@ -538,23 +661,67 @@ check "plausible-clickhouse restart refuses before source (no previous value kep
   bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"run source first"* ]] && [ ! -s "$2" ]' "${status}" "${out}" "${WORK}/restarts.log"
 run "${DEPLOY}/infra-secrets.sh" remote source beta plausible-clickhouse
 check "plausible-clickhouse source keeps the value in service, changes nothing yet" \
-  bash -c '[ "$0" -eq 0 ] && grep -qx "INFRA_CLICKHOUSE_PASSWORD=$3" "$1" && [ "$(cat "$2")" = "$3" ]' \
+  bash -c '[ "$0" -eq 0 ] && grep -Fqx "INFRA_CLICKHOUSE_PASSWORD=$3" "$1" && [ "$(cat "$2")" = "$3" ]' \
   "${status}" "${ETC}/infra-previous.env" "${FAKE_DB}/plausible_events_db.default" "${OLD_CH}"
+check "plausible-clickhouse source changes no dictionary" dictionaries_hold "${OLD_CH}"
+# A broken dictionary: restart stops before Plausible and points to the rollback.
+touch "${FAKE_DB}/dicts/location_data_dict.broken"
 run "${DEPLOY}/infra-secrets.sh" remote restart beta plausible-clickhouse
-check "plausible-clickhouse restart recreates ClickHouse, which takes the new password, then Plausible" \
+check "plausible-clickhouse restart fails when a dictionary is not LOADED, before Plausible, pointing to the rollback" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"dictionary location_data_dict is FAILED after its reload"* ]] \
+    && [[ "$1" == *"mode=rollback"* ]] && [ "$(cat "$2")" = "publish-infra beta INFRA_SERVICES=plausible_events_db" ]' \
+  "${status}" "${out}" "${WORK}/restarts.log"
+check "plausible-clickhouse failed restart prints no value" no_value_leaked
+rm -f "${FAKE_DB}/dicts/location_data_dict.broken"
+: > "${WORK}/restarts.log"
+run "${DEPLOY}/infra-secrets.sh" remote restart beta plausible-clickhouse
+check "plausible-clickhouse restart (re-run) recreates the dictionaries with the new password, then Plausible" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "$3" ] && [ "$(cat "$2")" = "publish-infra beta INFRA_SERVICES=plausible" ]' \
+  "${status}" "${FAKE_DB}/plausible_events_db.default" "${WORK}/restarts.log" "${NEW_CH}"
+check "plausible-clickhouse restart: same DDL but the password, other dictionaries untouched" dictionaries_hold "${NEW_CH}"
+check "plausible-clickhouse restart: the dictionaries are LOADED, then Plausible writes" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"dictionary location_data_dict recreated with the expected password and reloaded: LOADED"* ]] \
+    && [[ "$1" == *"no ClickHouse authentication failure (Code: 516) in the logs of plausible since"* ]] \
+    && [[ "$1" == *"events written to plausible_events_db.events_v2 since"*": 3"* ]]' "${status}" "${out}"
+check "plausible-clickhouse restart leaves every dictionary LOADED" dictionaries_loaded
+check "plausible-clickhouse restart prints no value" no_value_leaked
+check "plausible-clickhouse restart prints no DDL" no_ddl_printed
+
+# First apply from scratch: back to the value in service, then a full restart (ClickHouse recreated first).
+printf '%s' "${OLD_CH}" > "${FAKE_DB}/plausible_events_db.default"
+for d in ${concerned_dicts}; do cp "${WORK}/dicts/$d.ddl" "${FAKE_DB}/dicts/$d.ddl"; done
+: > "${WORK}/restarts.log"
+run "${DEPLOY}/infra-secrets.sh" remote restart beta plausible-clickhouse
+check "plausible-clickhouse restart recreates ClickHouse, which takes the new password, its dictionaries, then Plausible" \
   bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "$3" ] \
     && [ "$(cat "$2")" = "$(printf "publish-infra beta INFRA_SERVICES=%s\n" plausible_events_db plausible)" ]' \
   "${status}" "${FAKE_DB}/plausible_events_db.default" "${WORK}/restarts.log" "${NEW_CH}"
+check "plausible-clickhouse restart from scratch: dictionaries hold the new password and are LOADED" \
+  dictionaries_ok "${NEW_CH}"
 : > "${WORK}/restarts.log"
 run "${DEPLOY}/infra-secrets.sh" remote restart beta plausible-clickhouse
-check "plausible-clickhouse restart is idempotent (ClickHouse not recreated again)" \
+check "plausible-clickhouse restart is idempotent (ClickHouse not recreated again, dictionaries unchanged)" \
   bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "publish-infra beta INFRA_SERVICES=plausible" ]' "${status}" "${WORK}/restarts.log"
+check "plausible-clickhouse idempotent restart keeps the dictionaries" dictionaries_hold "${NEW_CH}"
+# Plausible still fails to write (Code: 516 in its logs): restart fails, pointing to the rollback.
+touch "${FAKE_DB}/plausible-516"
+run "${DEPLOY}/infra-secrets.sh" remote restart beta plausible-clickhouse
+check "plausible-clickhouse restart fails when Plausible logs Code: 516, pointing to the rollback" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"plausible logged 1 ClickHouse authentication failure(s) (Code: 516)"* ]] \
+    && [[ "$1" == *"mode=rollback for plausible-clickhouse"* ]]' "${status}" "${out}"
+check "plausible-clickhouse failed write check prints no value" no_value_leaked
+rm -f "${FAKE_DB}/plausible-516"
 : > "${WORK}/restarts.log"
 run "${DEPLOY}/infra-secrets.sh" remote rollback beta plausible-clickhouse
 check "plausible-clickhouse rollback puts the previous password back in infra.env and ClickHouse" \
-  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "$3" ] && grep -qx "CLICKHOUSE_PASSWORD=$3" "$2"' \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "$3" ] && grep -Fqx "CLICKHOUSE_PASSWORD='"'"'$3'"'"'" "$2"' \
   "${status}" "${FAKE_DB}/plausible_events_db.default" "${ETC}/infra.env" "${OLD_CH}"
-check "plausible-clickhouse prints no value" no_value_leaked
+check "plausible-clickhouse rollback recreates the dictionaries as created (previous password), LOADED" \
+  dictionaries_ok "${OLD_CH}"
+check "plausible-clickhouse rollback checks that Plausible writes" \
+  bash -c '[[ "$0" == *"no ClickHouse authentication failure (Code: 516) in the logs of plausible since"* ]]' "${out}"
+check "plausible-clickhouse rollback prints no value" no_value_leaked
+check "plausible-clickhouse rollback prints no DDL" no_ddl_printed
 unset INFRA_CLICKHOUSE_PASSWORD
 
 ########################################
