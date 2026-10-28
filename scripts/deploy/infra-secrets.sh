@@ -7,15 +7,18 @@
 #
 #   check   On the runner only, no SSH: the target's secrets are set and strong ([A-Za-z0-9._-], 32 characters or
 #           more: Access generates them with kind=hex32), and render-service-secrets.sh --source check passes for
-#           their consumers. A missing secret is only a ::warning:: for check and remote test (a dry run before
-#           Access writes it); every other action needs all of them.
+#           their consumers. The Google OAuth client of plausible-google is issued by Google, not generated: its
+#           shape is checked instead, then Google's token endpoint must accept the pair (an invalid authorization
+#           code answers invalid_grant once the client is authenticated, invalid_client otherwise). A missing
+#           secret is only a ::warning:: for check and remote test (a dry run before Access writes it); every
+#           other action needs all of them.
 #   remote  Runs scripts/deploy/infra-secrets-remote.sh on the host with that action: the target's values are
 #           prepended to the script as NAME='value' lines and the whole is streamed over SSH stdin, from a umask
 #           077 temp file: never on a command line, in an artifact or in a log. On the host it lives in a mode
 #           600 file (/dev/shm when available) for the duration of the run.
 #   <env>     beta or prod.
 #   <target>  elasticsearch (both), kibana (both), mysql (prod), plausible (beta), plausible-postgres (beta),
-#             plausible-clickhouse (beta), b2b-postgres (both).
+#             plausible-clickhouse (beta), plausible-google (beta), b2b-postgres (both).
 #
 # Each secret is read from the environment variable of the same name (the calling step's `env:`).
 # Required environment for remote: DEPLOY_SSH_HOST, DEPLOY_SSH_USER, DEPLOY_SSH_KEY.
@@ -81,11 +84,16 @@ case "$target" in
     secrets=INFRA_CLICKHOUSE_PASSWORD
     services=infra
     ;;
+  plausible-google)
+    [ "$env_name" = beta ] || fail "plausible-google: only beta runs Plausible"
+    secrets="INFRA_GOOGLE_CLIENT_ID INFRA_GOOGLE_CLIENT_SECRET"
+    services=infra
+    ;;
   b2b-postgres)
     secrets=B2B_API_POSTGRES_PASSWORD
     services="infra b2b-api"
     ;;
-  *) fail "Unknown target: $target (elasticsearch, kibana, mysql, plausible, plausible-postgres, plausible-clickhouse or b2b-postgres)" ;;
+  *) fail "Unknown target: $target (elasticsearch, kibana, mysql, plausible, plausible-postgres, plausible-clickhouse, plausible-google or b2b-postgres)" ;;
 esac
 
 # Every secret of the target, set and strong; the value is never printed.
@@ -100,13 +108,59 @@ for secret in $secrets; do
     esac
     fail "$secret is empty or missing from the $env_name GitHub Environment (target $target)"
   fi
+  case "$secret" in
+    INFRA_GOOGLE_CLIENT_ID)
+      case "$value" in
+        *[!a-z0-9.-]*) ;;
+        [0-9]*-?*.apps.googleusercontent.com) continue ;;
+      esac
+      fail "$secret is not a Google OAuth client ID (<digits>-<id>.apps.googleusercontent.com): copy it from the Google Cloud console"
+      ;;
+    INFRA_GOOGLE_CLIENT_SECRET)
+      case "$value" in
+        *[!A-Za-z0-9_-]*) fail "$secret contains characters outside [A-Za-z0-9_-]: copy it from the Google Cloud console" ;;
+      esac
+      [ "${#value}" -ge 24 ] || fail "$secret is shorter than 24 characters: copy it from the Google Cloud console"
+      continue
+      ;;
+  esac
   case "$value" in
     *[!A-Za-z0-9._-]*) fail "$secret contains characters outside [A-Za-z0-9._-]: generate it with kind=hex32" ;;
   esac
   [ "${#value}" -ge 32 ] || fail "$secret is shorter than 32 characters: generate it with kind=hex32"
 done
 
+# Google's token endpoint authenticates the client before it reads the authorization code: a random code answers
+# invalid_grant (or redirect_uri_mismatch) for a valid pair, invalid_client or deleted_client otherwise. The request
+# body goes through a umask 077 file, never a command line; only the error code of the answer is printed.
+# GOOGLE_TOKEN_URL only exists for scripts/tests/infra-secrets.test.sh.
+google_client_check() {
+  (
+    umask 077
+    dir=$(mktemp -d)
+    trap 'rm -rf "$dir"' EXIT
+    code=wrong-$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')
+    printf 'client_id=%s&client_secret=%s&grant_type=authorization_code&code=%s&redirect_uri=%s' \
+      "$INFRA_GOOGLE_CLIENT_ID" "$INFRA_GOOGLE_CLIENT_SECRET" "$code" \
+      "https%3A%2F%2Fplausible.nudger.fr%2Fauth%2Fgoogle%2Fcallback" > "$dir/body"
+    : > "$dir/answer"
+    http=$(curl -s -o "$dir/answer" -w '%{http_code}' --data-binary "@$dir/body" \
+      "${GOOGLE_TOKEN_URL:-https://oauth2.googleapis.com/token}" || echo 000)
+    error=$(tr -d '\n' < "$dir/answer" | sed -n 's/.*"error"[[:space:]]*:[[:space:]]*"\([a-z_]*\)".*/\1/p')
+    case "$error" in
+      invalid_grant | redirect_uri_mismatch)
+        echo "Google's token endpoint accepts the OAuth client of $env_name (answer to a random code: $error)." ;;
+      invalid_client | deleted_client | unauthorized_client)
+        fail "Google refuses the OAuth client of the $env_name GitHub Environment ($error, HTTP $http): stale or deleted, copy the client in use from the Google Cloud console" ;;
+      *) fail "cannot check the OAuth client with Google's token endpoint (HTTP $http, error '${error:-none}'): run again" ;;
+    esac
+  )
+}
+
 if [ "$action" = check ]; then
+  if [ "$target" = plausible-google ] && [ -n "${INFRA_GOOGLE_CLIENT_ID:-}" ] && [ -n "${INFRA_GOOGLE_CLIENT_SECRET:-}" ]; then
+    google_client_check
+  fi
   for svc in $services; do
     "$script_dir/render-service-secrets.sh" --source check "$env_name" "$svc"
   done

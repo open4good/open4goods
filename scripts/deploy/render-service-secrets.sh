@@ -109,6 +109,8 @@
 # | infra     | INFRA_PLAUSIBLE_SECRET_KEY_BASE | env     | PLAUSIBLE_SECRET_KEY_BASE (overrides config/<env>/infra/.env; beta)            | source   |
 # | infra     | INFRA_PLAUSIBLE_PG_PASSWORD     | env     | PLAUSIBLE_PG_PASSWORD (plausible DATABASE_URL, plausible_db; beta)             | source   |
 # | infra     | INFRA_CLICKHOUSE_PASSWORD       | env     | CLICKHOUSE_PASSWORD (plausible_events_db, plausible; beta)                     | source   |
+# | infra     | INFRA_GOOGLE_CLIENT_ID          | env     | GOOGLE_CLIENT_ID (plausible Search Console; overrides config/<env>/infra/.env) | source   |
+# | infra     | INFRA_GOOGLE_CLIENT_SECRET      | env     | GOOGLE_CLIENT_SECRET (plausible Search Console; beta)                          | source   |
 # | infra     | B2B_API_POSTGRES_PASSWORD       | env     | B2B_POSTGRES_PASSWORD (b2b_postgres POSTGRES_PASSWORD)                         | source   |
 #
 # Coupled secrets: every consumer must receive the same value in the same deployment
@@ -192,6 +194,8 @@ infra INFRA_MYSQL_ROOT_PASSWORD env INFRA_MYSQL_ROOT_PASSWORD source
 infra INFRA_PLAUSIBLE_SECRET_KEY_BASE env PLAUSIBLE_SECRET_KEY_BASE source
 infra INFRA_PLAUSIBLE_PG_PASSWORD env PLAUSIBLE_PG_PASSWORD source
 infra INFRA_CLICKHOUSE_PASSWORD env CLICKHOUSE_PASSWORD source
+infra INFRA_GOOGLE_CLIENT_ID env GOOGLE_CLIENT_ID source
+infra INFRA_GOOGLE_CLIENT_SECRET env GOOGLE_CLIENT_SECRET source
 infra B2B_API_POSTGRES_PASSWORD env B2B_POSTGRES_PASSWORD source
 '
 

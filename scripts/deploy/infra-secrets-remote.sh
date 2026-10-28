@@ -30,6 +30,9 @@
 #                         itself, the dictionaries of Plausible's database (their source holds the password) and
 #                         Plausible, as CLICKHOUSE_PASSWORD (beta); restart and rollback then check that Plausible
 #                         writes (no Code: 516 in its logs)
+#   plausible-google      INFRA_GOOGLE_CLIENT_ID, INFRA_GOOGLE_CLIENT_SECRET (Google OAuth client of the Search
+#                         Console integration, nothing to change at Google) -> Plausible, as GOOGLE_CLIENT_ID and
+#                         GOOGLE_CLIENT_SECRET (beta); restart then checks the client the new Plausible runs with
 #   b2b-postgres          B2B_API_POSTGRES_PASSWORD (Postgres user of b2b_postgres) -> b2b-api (config tree
 #                         spring.datasource.password), compose as B2B_POSTGRES_PASSWORD
 #
@@ -58,7 +61,7 @@ esac
 case "$target" in
   elasticsearch | kibana) ;;
   mysql) [ "$env_name" = prod ] || fail "mysql: only prod runs XWiki and MySQL" ;;
-  plausible | plausible-postgres | plausible-clickhouse)
+  plausible | plausible-postgres | plausible-clickhouse | plausible-google)
     [ "$env_name" = beta ] || fail "$target: only beta runs Plausible"
     ;;
   b2b-postgres) ;;
@@ -759,6 +762,101 @@ plausible_rollback() {
   previous=$(raw_value "$previous_env" INFRA_PLAUSIBLE_SECRET_KEY_BASE)
   [ -n "$previous" ] || fail "no previous SECRET_KEY_BASE is kept in $previous_env"
   set_infra_line PLAUSIBLE_SECRET_KEY_BASE "$previous"
+  INFRA_SERVICES=plausible sh "$opt/bin/publish-infra.sh" "$env_name"
+  wait_http "$plausible_url/api/health" 200 "${PLAUSIBLE_ATTEMPTS:-60}"
+}
+
+# --- Google OAuth client of Plausible (Search Console) ---------------------------------------------------------------
+
+# Secret of the GitHub Environment -> line of infra.env, both values of the client.
+google_pairs="INFRA_GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID INFRA_GOOGLE_CLIENT_SECRET=GOOGLE_CLIENT_SECRET"
+
+# Value in service of the compose variable $1, to file $2: infra.env (read last by publish-infra.sh), else
+# config/<env>/infra/.env, else the environment the running plausible container was created with.
+google_in_service() {
+  value=$(env_value "$infra_env" "$1")
+  [ -n "$value" ] || value=$(env_value "$opt/config/$env_name/infra/.env" "$1")
+  [ -n "$value" ] || value=$(container_env plausible "$1")
+  printf '%s' "$value" > "$2"
+}
+
+plausible_google_prerequisites() {
+  container_running plausible || fail "the plausible container is not running"
+  check_publish_infra
+  check_placeholders "$opt/latest/$env_name/docker-compose.infra.yml" GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET
+}
+
+plausible_google_test() {
+  writable_etc
+  prerequisite plausible_google_prerequisites
+  for pair in $google_pairs; do
+    secret=${pair%%=*} var=${pair#*=}
+    new_value "$secret"
+    google_in_service "$var" "$work/current"
+    if [ ! -s "$work/current" ]; then
+      info "no $var in service (infra.env, config/$env_name/infra/.env, container): nothing to keep for rollback"
+    elif [ "$(cat "$work/current")" = "$(cat "$work/new")" ]; then
+      ok "the new $var is already in service"
+    elif [ ! -s "$work/new" ]; then
+      ok "the $var in service is found (no new value yet)"
+    else
+      ok "the $var in service is found and differs from $secret; source would keep it for rollback"
+      if [ "$var" = GOOGLE_CLIENT_ID ]; then
+        info "another OAuth client: the Search Console link of each site must be redone in Plausible after restart"
+      fi
+    fi
+  done
+}
+
+plausible_google_source() {
+  writable_etc
+  plausible_google_prerequisites
+  for pair in $google_pairs; do
+    secret=${pair%%=*} var=${pair#*=}
+    new_value "$secret"
+    google_in_service "$var" "$work/current"
+    if [ "$(cat "$work/current")" = "$(cat "$work/new")" ]; then
+      ok "the new $var is already in service: nothing to keep"
+    elif [ -s "$work/current" ]; then
+      keep_previous "$secret" "$work/current"
+    else
+      info "no $var in service: nothing to keep for rollback"
+    fi
+  done
+  ok "nothing to change at Google: restart renders the client for Plausible"
+}
+
+plausible_google_restart() {
+  for pair in $google_pairs; do
+    secret=${pair%%=*} var=${pair#*=}
+    new_value "$secret"
+    [ "$(env_value "$infra_env" "$var")" = "$(cat "$work/new")" ] \
+      || fail "$infra_env does not hold the new $var: render it first"
+  done
+  plausible_google_prerequisites
+  INFRA_SERVICES=plausible sh "$opt/bin/publish-infra.sh" "$env_name"
+  wait_http "$plausible_url/api/health" 200 "${PLAUSIBLE_ATTEMPTS:-60}"
+  for pair in $google_pairs; do
+    secret=${pair%%=*} var=${pair#*=}
+    new_value "$secret"
+    [ "$(container_env plausible "$var")" = "$(cat "$work/new")" ] \
+      || fail "the recreated plausible container does not run with the new $var (runbook)"
+  done
+  ok "plausible runs with the new Google OAuth client"
+}
+
+plausible_google_rollback() {
+  check_publish_infra
+  kept=false
+  for pair in $google_pairs; do
+    secret=${pair%%=*} var=${pair#*=}
+    previous=$(raw_value "$previous_env" "$secret")
+    [ -n "$previous" ] || continue
+    set_infra_line "$var" "$previous"
+    ok "$infra_env holds the previous $var"
+    kept=true
+  done
+  [ "$kept" = true ] || fail "no previous GOOGLE_CLIENT_ID nor GOOGLE_CLIENT_SECRET is kept in $previous_env"
   INFRA_SERVICES=plausible sh "$opt/bin/publish-infra.sh" "$env_name"
   wait_http "$plausible_url/api/health" 200 "${PLAUSIBLE_ATTEMPTS:-60}"
 }

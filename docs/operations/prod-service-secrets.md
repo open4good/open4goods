@@ -126,6 +126,7 @@ value. A set but malformed secret fails before anything is written.
 | `O4G_ELASTICSEARCH_PASSWORD` (source) | api, ui, front-api, b2b-api: tree `spring.elasticsearch.password`                                                                                                        | Elasticsearch user `elastic` (`infraSecrets.yml` only)         |
 | `B2B_API_POSTGRES_PASSWORD` (source) | b2b-api: tree `spring.datasource.password`; infra: `B2B_POSTGRES_PASSWORD`                                                                                                 | Postgres user of `b2b_postgres` (`infraSecrets.yml` only)      |
 | `INFRA_*` (source)                | infra: `/etc/open4goods/infra.env` (Kibana, XWiki, MySQL, Plausible and its Postgres and ClickHouse)                                                                          | compose infrastructure (`infraSecrets.yml` only)               |
+| `INFRA_GOOGLE_CLIENT_ID`, `INFRA_GOOGLE_CLIENT_SECRET` (source) | infra: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` in `/etc/open4goods/infra.env` (beta)                                                         | Google OAuth client of Plausible's Search Console integration (`infraSecrets.yml` `target=plausible-google` only) |
 
 `b2b-api` registers with Spring Boot Admin only when its configuration enables
 the client (`B2B_SBA_CLIENT_ENABLED`); the tree then replaces its

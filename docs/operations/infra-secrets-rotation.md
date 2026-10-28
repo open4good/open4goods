@@ -7,7 +7,10 @@ Elasticsearch pause of 2026-10-11; the Kibana encryption key and the
 Elasticsearch transport certificates with wave 3, in off-peak hours. The
 default passwords of the Plausible Postgres and ClickHouse and of the b2b
 Postgres, outside the inventory, were added by GOU-1256; their values are
-generated under an approval of their own once that path is merged.
+generated under an approval of their own once that path is merged. The Google
+OAuth client of Plausible (Search Console integration, inventory entry 27,
+wave 2b of GOU-1298) was added by GOU-1321: nothing changes at Google, the
+workflow only renders it and recreates Plausible.
 
 This document never lists secret values, key ids or fingerprints. Application
 secrets without a source to change (API keys, tokens) follow
@@ -25,6 +28,7 @@ secrets without a source to change (API keys, tokens) follow
 | `INFRA_PLAUSIBLE_SECRET_KEY_BASE`   | beta         | none                                              | Plausible: `infra.env` -> `PLAUSIBLE_SECRET_KEY_BASE`                                     |
 | `INFRA_PLAUSIBLE_PG_PASSWORD`       | beta         | Postgres user `postgres` of `plausible_db`        | Plausible: `infra.env` -> `PLAUSIBLE_PG_PASSWORD` (`DATABASE_URL`)                        |
 | `INFRA_CLICKHOUSE_PASSWORD`         | beta         | ClickHouse user `default` of `plausible_events_db` (set from its env at every start) | ClickHouse and Plausible: `infra.env` -> `CLICKHOUSE_PASSWORD` |
+| `INFRA_GOOGLE_CLIENT_ID`, `INFRA_GOOGLE_CLIENT_SECRET` | beta | none (Google OAuth client of the Search Console integration, issued by Google) | Plausible: `infra.env` -> `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
 | `B2B_API_POSTGRES_PASSWORD`         | beta, prod   | Postgres user of `b2b_postgres` (`product_data_api`) | b2b-api: config tree `spring.datasource.password`; `infra.env` -> `B2B_POSTGRES_PASSWORD` |
 | Elasticsearch transport certificates | beta, prod  | regenerated on the host by Ops                    | Elasticsearch (see [Transport certificates](#transport-certificates-30))                  |
 
@@ -34,6 +38,20 @@ travels through a JSON body, an SQL literal and a compose env file). `beta`
 and `prod` get distinct values. `beta` already holds a stale
 `INFRA_PLAUSIBLE_SECRET_KEY_BASE` (one of the 61 secrets nothing reads), which
 the check refuses: Access overwrites it (`overwrite: true`).
+
+Exception: Google issues the OAuth client of Plausible, nothing generates it.
+Access copies into `INFRA_GOOGLE_CLIENT_ID` and `INFRA_GOOGLE_CLIENT_SECRET`
+the client in service (`configs/beta/infra/.env` of `open4goods-config`), or a
+new client created in the Google Cloud console (`overwrite: true`: `beta`
+holds stale values of 2026-09-15 under these names). The check refuses a
+client ID that is not `<digits>-<id>.apps.googleusercontent.com` and a secret
+outside `[A-Za-z0-9_-]` or shorter than 24 characters, then asks Google's
+token endpoint (`https://oauth2.googleapis.com/token`) to exchange a random
+authorization code with the pair: `invalid_grant` (or
+`redirect_uri_mismatch`) means Google authenticated the client;
+`invalid_client` or `deleted_client` stops the workflow (a stale or deleted
+client), as does no answer. The request body goes through a mode 600 file,
+never a command line; only Google's error code is printed.
 
 Not rotated by this workflow:
 
@@ -81,8 +99,9 @@ Not rotated by this workflow:
 
 Actions > "Infra secrets (source + render + restart)" > Run workflow.
 Inputs: `env` (`beta`, `prod`), `target` (`elasticsearch`, `kibana`, `mysql`
-for prod, `plausible`, `plausible-postgres` and `plausible-clickhouse` for
-beta, `b2b-postgres`), `mode` (`test`, `apply`, `rollback`).
+for prod, `plausible`, `plausible-postgres`, `plausible-clickhouse` and
+`plausible-google` for beta, `b2b-postgres`), `mode` (`test`, `apply`,
+`rollback`).
 `apply` and `rollback` only run on `main`; `test` writes nothing and may run
 from a branch. The job shares the concurrency group of the deploys
 (`deploy-prod`, `deploy-beta-backend`) without cancelling them.
@@ -108,7 +127,11 @@ created with, the environment of the database container. b2b Postgres: the
 b2b-api config tree, `infra.env`, the three env files `publish-jars.sh`
 sources for b2b-api, the default of the placeholder in its
 `application-active.yml` and in the compose file, the environment of
-`b2b_postgres`. In every case the kept previous value comes last.
+`b2b_postgres`. In every case the kept previous value comes last. The Google
+OAuth client has no source to authenticate against on the host: its value in
+service is the first set of `infra.env`, `config/beta/infra/.env` and the
+environment of the running `plausible` container, compared with the new one
+and never printed (the runner check asked Google beforehand).
 
 The official Postgres image trusts its socket and loopback connections:
 authentication goes over TCP to the container's network address, where
@@ -192,6 +215,20 @@ What each target does:
     and the first write of the new Plausible (a minute or two on beta).
   - No dictionary, table or database of Plausible's ClickHouse reads Postgres
     (Plausible CE migrations): `plausible-postgres` needs no such step.
+- `plausible-google` (beta): `source` changes nothing at Google; it keeps
+  each value in service that differs from the new one
+  (`INFRA_GOOGLE_CLIENT_ID`, `INFRA_GOOGLE_CLIENT_SECRET` in
+  `infra-previous.env`). The render writes `GOOGLE_CLIENT_ID` and
+  `GOOGLE_CLIENT_SECRET` in `infra.env`, which overrides
+  `config/beta/infra/.env` (the compose file already reads
+  `${GOOGLE_CLIENT_ID:-}`: no `open4goods-config` change is needed before it).
+  `restart` recreates Plausible only, waits for `/api/health`, then checks
+  that the new container runs with both new values. Sessions and the
+  `SECRET_KEY_BASE` are untouched. With the client already in service (the
+  usual case), nothing is kept and the restart is the only effect; with
+  another client, `test` warns that the Search Console link of each site must
+  be redone in Plausible (Site settings > Integrations), as the OAuth tokens
+  Plausible holds belong to the former client.
 - `b2b-postgres` (beta, prod): changes the user of `b2b_postgres`
   (`ALTER USER`), renders `B2B_POSTGRES_PASSWORD` in `infra.env` (for the
   compose file) and the config tree `spring.datasource.password` of b2b-api,
@@ -300,13 +337,38 @@ with `mode=test`, then `mode=apply`.
 Stops: a `test` that fails means no `apply`, back to the CTO. A consumer down
 after `apply`: `mode=rollback` for that target.
 
+## Wave 2b: the Google OAuth client of Plausible (beta)
+
+GOU-1298 (#27), path added by GOU-1321. In the wave 2b window:
+
+1. Access writes `INFRA_GOOGLE_CLIENT_ID` and `INFRA_GOOGLE_CLIENT_SECRET` in
+   `beta` (`overwrite: true`), with the client in service unless a new one is
+   decided.
+2. `plausible-google`, `mode=test`: Google accepts the client, both values in
+   service are found; "already in service" for both when Access copied them.
+3. `mode=apply`. Proof: `/api/health` of Plausible in the run, then Site
+   settings > Integrations of a site shows Search Console connected and its
+   dashboard loads the search terms.
+4. Step d for this client (Dev, PR on `open4goods-config`, merged once the
+   proof is in): `configs/beta/infra/.env` loses `GOOGLE_CLIENT_ID` and
+   `GOOGLE_CLIENT_SECRET`, the header comment of
+   `docker-compose/beta/docker-compose.infra.yml` its example values; the
+   placeholders may become `${GOOGLE_CLIENT_ID:?rendered by infraSecrets.yml}`
+   (services `plausible_migrate` and `plausible`), so that a full
+   `publish-infra.sh` without the render stops instead of starting Plausible
+   without Search Console.
+
+Rollback: `mode=rollback` puts the kept client back in `infra.env` and
+recreates Plausible.
+
 ## Rollback
 
 `mode=rollback` reads `/etc/open4goods/infra-previous.env` and puts the
 previous value back at the source (authenticated with the new one), in the
 rendered files (config trees, `infra.env`), then restarts the consumers
 (`plausible-clickhouse`: its dictionaries are recreated with the previous
-value too, and the same write check runs). For
+value too, and the same write check runs; `plausible-google`: `infra.env`
+and Plausible only, nothing at Google). For
 the Kibana key, the previous key is primary again and the new one stays
 decryption-only, so objects re-encrypted with it remain readable. The GitHub
 Environment keeps the new value: fix or regenerate it before the next `apply`.
@@ -371,6 +433,9 @@ ordinary gate):
   passwords (already replaced in step d-infra).
 - `configs/beta/infra/.env`: `PLAUSIBLE_SECRET_KEY_BASE`; the compose default
   of `PLAUSIBLE_SECRET_KEY_BASE` becomes `${PLAUSIBLE_SECRET_KEY_BASE:?}`.
+- After the `plausible-google` proof (wave 2b, above): `configs/beta/infra/.env`,
+  `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, and the example values of the
+  header comment of `docker-compose/beta/docker-compose.infra.yml`.
 - After the `plausible-postgres`, `plausible-clickhouse` and `b2b-postgres`
   proofs: `docker-compose/beta/docker-compose.infra.yml`, the literal
   defaults of `PLAUSIBLE_PG_PASSWORD`, `CLICKHOUSE_PASSWORD` (services
