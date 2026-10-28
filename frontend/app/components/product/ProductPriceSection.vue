@@ -77,6 +77,7 @@
                   :href="resolveOfferLink(item)"
                   target="_blank"
                   :rel="AFFILIATE_LINK_REL"
+                  :referrerpolicy="AFFILIATE_LINK_REFERRER_POLICY"
                   icon
                   variant="text"
                   size="small"
@@ -189,6 +190,7 @@
                     :href="bestNewOfferLink"
                     target="_blank"
                     :rel="AFFILIATE_LINK_REL"
+                    :referrerpolicy="AFFILIATE_LINK_REFERRER_POLICY"
                     class="product-price__history-cta"
                     @click="
                       handleOfferRedirectClick(
@@ -229,6 +231,7 @@
                     v-else
                     :icon="mdiTagOffOutline"
                     :label="$t('product.price.noOffers.new')"
+                    :hint="lastKnownNewPriceLabel"
                   />
 
                   <div v-if="newStats" class="product-price__metrics-summary">
@@ -386,6 +389,7 @@
                     :href="bestOccasionOfferLink"
                     target="_blank"
                     :rel="AFFILIATE_LINK_REL"
+                    :referrerpolicy="AFFILIATE_LINK_REFERRER_POLICY"
                     class="product-price__history-cta"
                     @click="
                       handleOfferRedirectClick(
@@ -426,6 +430,7 @@
                     v-else
                     :icon="mdiRecycle"
                     :label="$t('product.price.noOffers.occasion')"
+                    :hint="lastKnownOccasionPriceLabel"
                   />
                   <div
                     v-if="occasionStats"
@@ -575,8 +580,10 @@ import {
 import { useAnalytics } from '~/composables/useAnalytics'
 import {
   resolveOfferHref,
+  AFFILIATE_LINK_REFERRER_POLICY,
   AFFILIATE_LINK_REL,
   formatPrice,
+  openAffiliateLinkInNewTab,
   NEW_CONDITION_COLOR,
   OCCASION_CONDITION_COLOR,
 } from '~/utils/_product-pricing'
@@ -960,6 +967,53 @@ const bestOccasionOffer = computed(
   () => props.offers?.bestOccasionOffer ?? null
 )
 
+// Explicit UTC zone: SSR runs in UTC and an implicit zone breaks hydration.
+const lastKnownPriceDateFormatter = computed(
+  () =>
+    new Intl.DateTimeFormat(locale.value, {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    })
+)
+
+/**
+ * Dates the most recent history point when no offer is live, so the price
+ * statistics are not read as a current price next to the "no offers" notice.
+ */
+const buildLastKnownPriceLabel = (entries: HistoryEntry[]): string | null => {
+  const latest = entries.reduce<HistoryEntry | null>(
+    (acc, entry) => (!acc || entry.timestamp > acc.timestamp ? entry : acc),
+    null
+  )
+
+  if (!latest) {
+    return null
+  }
+
+  return String(
+    t('product.price.lastKnownPrice', {
+      price: formatCurrency(
+        latest.price,
+        props.offers?.bestPrice?.currency ?? 'EUR'
+      ),
+      date: lastKnownPriceDateFormatter.value.format(
+        new Date(latest.timestamp)
+      ),
+    })
+  )
+}
+
+const lastKnownNewPriceLabel = computed(() =>
+  bestNewOffer.value ? null : buildLastKnownPriceLabel(newHistory.value)
+)
+const lastKnownOccasionPriceLabel = computed(() =>
+  bestOccasionOffer.value
+    ? null
+    : buildLastKnownPriceLabel(occasionHistory.value)
+)
+
 const resolveOfferLink = (
   offer: ProductAggregatedPriceDto | null | undefined
 ): string | null => {
@@ -1098,10 +1152,10 @@ const onRowClick = (
   const link = resolveOfferLink(item)
   if (link) {
     handleOfferRedirectClick(item, 'offers-table', link)
-    // noopener/noreferrer: this is a whole-row click convenience opening the
-    // same href as the row's real `AFFILIATE_LINK_REL` anchor (item.actions
-    // slot above) - that anchor is the crawlable, rel="sponsored ..." link.
-    window.open(link, '_blank', 'noopener,noreferrer')
+    // Whole-row click convenience opening the same href as the row's real
+    // `AFFILIATE_LINK_REL` anchor (item.actions slot above), which is the
+    // crawlable rel="sponsored ..." link; same rel and referrer policy.
+    openAffiliateLinkInNewTab(link)
   }
 }
 

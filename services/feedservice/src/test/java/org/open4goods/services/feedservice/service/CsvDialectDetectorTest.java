@@ -77,4 +77,16 @@ class CsvDialectDetectorTest
         }
         assertThat(detect(csv.toString()).getColumnSeparator()).isEqualTo(';');
     }
+
+    @Test
+    void semicolonHeaderWithUnusableDataRowsDoesNotFallBackToTab() throws IOException
+    {
+        // Data rows with a stray quote in a single-column shape score 0 for every dialect: the header decides.
+        StringBuilder csv = new StringBuilder("id;nom;description;prix;url\n");
+        for (int i = 0; i < 5; i++)
+        {
+            csv.append("\"seul champ ").append(i).append(" mal ferme\n");
+        }
+        assertThat(detect(csv.toString()).getColumnSeparator()).isEqualTo(';');
+    }
 }

@@ -252,6 +252,12 @@
       "defaultValue": true
     },
     {
+      "name": "front.contribution-votes-purge.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Run once, asynchronously after startup, the idempotent purge of the historical ip and ua fields of the contribution-votes index.",
+      "defaultValue": true
+    },
+    {
       "name": "front.geocode.base-url",
       "type": "java.lang.String",
       "description": "Base URL of the geocode microservice.",
@@ -334,6 +340,12 @@
       "name": "front.mail-templates.templates[].to",
       "type": "java.lang.String",
       "description": "Recipient email override for a reusable mail template."
+    },
+    {
+      "name": "front.max-result-window",
+      "type": "java.lang.Integer",
+      "description": "Elasticsearch index.max_result_window: pages with (pageNumber + 1) * pageSize above it are rejected with a 400.",
+      "defaultValue": 10000
     },
     {
       "name": "front.max-page-size",

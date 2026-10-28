@@ -1,5 +1,6 @@
 package org.open4goods.services.feedservice.service;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -473,7 +474,7 @@ public class FeedIndexingWorker implements Runnable {
 				deleteTemporaryFile(url, destFile, dedicatedLogger);
 			}
 
-			dedicatedLogger.info("Done: {} (imported: {}, errors: {}, not_validable: {}, excluded: {}) - {}", dsConfName, okItems, errorItems, validationFailedItems, excludedItems, feedLabel);
+			dedicatedLogger.warn("Done: {} (imported: {}, errors: {}, not_validable: {}, excluded: {}) - {}", dsConfName, okItems, errorItems, validationFailedItems, excludedItems, feedLabel);
 		}
 		dedicatedLogger.info("End CSV feed indexing for {}", dsConfName);
 	}
@@ -508,7 +509,26 @@ public class FeedIndexingWorker implements Runnable {
 	        schema.getColumnSeparator() == -1 ? "none" : Character.toString((char) schema.getColumnSeparator()),
 	        schema.getEscapeChar() == -1 ? "none" : Character.toString((char) schema.getEscapeChar()));
 
+	    logCsvHeader(destFile, charset, dedicatedLogger);
+
 	    return schema;
+	}
+
+	/**
+	 * Logs (WARN, so it survives production log levels) the header line of the feed: column names only, never row values.
+	 * Lets operators diagnose column-mapping gaps (e.g. GTIN column not covered by the configured aliases).
+	 */
+	private void logCsvHeader(File destFile, Charset charset, Logger dedicatedLogger)
+	{
+	    try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(destFile), charset)))
+	    {
+	        String header = reader.readLine();
+	        dedicatedLogger.warn("CSV header: {}", header == null ? "<empty>" : (header.length() > 2000 ? header.substring(0, 2000) : header));
+	    }
+	    catch (IOException e)
+	    {
+	        dedicatedLogger.warn("Unable to read CSV header of {}", destFile.getName(), e);
+	    }
 	}
 
 	static CsvSchema applyCsvSchemaOverrides(CsvSchema schema, CsvDataSourceProperties config)

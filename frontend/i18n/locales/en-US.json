@@ -47,7 +47,7 @@
       "empty": "The content of this article will be available soon.",
       "featuredImageAlt": "Featured image for {title}",
       "readingTime": "Approx. {minutes} min read",
-      "updated": "Updated {date}"
+      "updated": "Updated on {date}"
     },
     "breadcrumbs": {
       "blog": "Blog",
@@ -2992,6 +2992,7 @@
       "viewDeal": "View deal",
       "history": "Price history",
       "noOffersBanner": "No offers available right now!",
+      "lastKnownPrice": "Last recorded price: {price} on {date}",
       "headers": {
         "condition": "Condition",
         "offer": "Offer",
@@ -3038,9 +3039,9 @@
       "serp": {
         "title": {
           "withImpact": {
-            "full": "{productName}: best price, specs and reviews | ImpactScore {score}/20",
-            "fullVertical": "{verticalTitle} {productName}: best price | ImpactScore {score}/20",
-            "compact": "{productName}: best price | ImpactScore {score}/20",
+            "full": "{productName}: best price, specs and reviews {'|'} ImpactScore {score}/20",
+            "fullVertical": "{verticalTitle} {productName}: best price {'|'} ImpactScore {score}/20",
+            "compact": "{productName}: best price {'|'} ImpactScore {score}/20",
             "minimal": "{productName}: ImpactScore {score}/20"
           },
           "withoutImpact": {
@@ -3773,7 +3774,7 @@
   "dataviz": {
     "page": {
       "title": "{category} Statistics",
-      "metaTitle": "Statistics & Data - {category} | {siteName}",
+      "metaTitle": "Statistics & Data - {category} {'|'} {siteName}",
       "metaDescription": "Explore detailed statistics for {category}: prices, brands, scores and more.",
       "breadcrumbLeaf": "Statistics",
       "heroTitle": "Dashboard - {category}",
@@ -3801,7 +3802,7 @@
     "pageSubtitle": "Tracking key indicators collected automatically from multiple sources.",
     "period": "Period: {from} → {to}",
     "seo": {
-      "title": "Metriks - Dashboard | Nudger",
+      "title": "Metriks - Dashboard {'|'} Nudger",
       "description": "Visualise performance indicators gathered automatically: analytics, products, infrastructure."
     },
     "accessDenied": "Access Denied",

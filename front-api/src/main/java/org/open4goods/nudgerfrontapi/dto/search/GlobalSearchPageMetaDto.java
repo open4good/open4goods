@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * @param number        zero-based page index
  * @param size          requested page size
  * @param totalElements total number of elements across all pages
- * @param totalPages    total number of pages
+ * @param totalPages    total number of pages, capped to the pages reachable within the result window
  */
 public record GlobalSearchPageMetaDto(
         @Schema(description = "Zero-based page index", example = "0")

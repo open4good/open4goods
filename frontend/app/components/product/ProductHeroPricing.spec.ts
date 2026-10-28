@@ -4,7 +4,10 @@ import { createI18n } from 'vue-i18n'
 import { defineComponent, h } from 'vue'
 import type { ProductDto } from '~~/shared/api-client'
 import ProductHeroPricing from './ProductHeroPricing.vue'
-import { AFFILIATE_LINK_REL } from '~/utils/_product-pricing'
+import {
+  AFFILIATE_LINK_REFERRER_POLICY,
+  AFFILIATE_LINK_REL,
+} from '~/utils/_product-pricing'
 
 interface MockPriceTrend {
   trend: string
@@ -473,6 +476,10 @@ describe('ProductHeroPricing', () => {
     )
     expect(link.attributes('href')).toBe('/contrib/tok-abc')
     expect(link.attributes('rel')).toBe(AFFILIATE_LINK_REL)
+    expect(link.attributes('rel')).not.toContain('noreferrer')
+    expect(link.attributes('referrerpolicy')).toBe(
+      AFFILIATE_LINK_REFERRER_POLICY
+    )
     expect(link.attributes('target')).toBe('_blank')
 
     await wrapper.unmount()

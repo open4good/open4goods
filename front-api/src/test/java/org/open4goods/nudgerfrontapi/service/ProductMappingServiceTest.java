@@ -77,7 +77,7 @@ class ProductMappingServiceTest {
         when(cacheManager.getCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)).thenReturn(referenceCache);
         service = new ProductMappingService(repository, apiProperties, categoryMappingService,
                 verticalsConfigService, searchService, affiliationService, icecatService, cacheManager,
-                productTimelineService);
+                productTimelineService, new ProductSeoMetaService());
     }
 
     @Test
@@ -136,18 +136,21 @@ class ProductMappingServiceTest {
         long gtin = 1234567890123L;
         Product product = new Product(gtin);
         product.setVertical("phones");
-        product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Fairphone");
+        product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "FAIRPHONE");
         product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "6");
         ProductTexts names = new ProductTexts();
         Localisable<String, String> seoName = new Localisable<>();
         seoName.put("fr", "Fairphone 6");
         names.setSeoName(seoName);
+        Localisable<String, String> storedDescription = new Localisable<>();
+        storedDescription.put("fr", "Stored description");
+        names.setMetaDescription(storedDescription);
         product.setNames(names);
         product.setScores(Map.of("ECOSCORE", new Score("ECOSCORE", 14.25)));
 
         VerticalConfig verticalConfig = new VerticalConfig();
         ProductI18nElements frI18n = new ProductI18nElements();
-        frI18n.setVerticalMetaTitle("Smartphones durables");
+        frI18n.getUrl().setPrefix("|| smartphone | telephone-mobile ||");
         verticalConfig.getI18n().put("fr", frI18n);
 
         when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
@@ -157,7 +160,30 @@ class ProductMappingServiceTest {
         ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("names"), DomainLanguage.fr);
 
         assertThat(dto.names()).isNotNull();
-        assertThat(dto.names().metaTitle()).isEqualTo("Fairphone 6 - score impact 14.3/20 | Smartphones durables");
+        assertThat(dto.names().metaTitle()).isEqualTo("Fairphone 6 : smartphone – avis, prix et impact");
+        assertThat(dto.names().metaDescription())
+                .isEqualTo("Fairphone 6, smartphone : score impact 14.3/20. Comparez les offres sur Nudger.");
+    }
+
+    @Test
+    void getProductNamesDropsManufacturerReferenceFromPageTitle() throws Exception {
+        long gtin = 7333394145372L;
+        Product product = new Product(gtin);
+        product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "ELECTROLUX");
+        product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "E62LB200S 911572124");
+        ProductTexts names = new ProductTexts();
+        Localisable<String, String> pageTitle = new Localisable<>();
+        pageTitle.put("fr", "ELECTROLUX E62LB200S 911572124");
+        names.setPageTitle(pageTitle);
+        product.setNames(names);
+
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
+
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("names"), DomainLanguage.fr);
+
+        assertThat(dto.names().pageTitle()).isEqualTo("ELECTROLUX E62LB200S");
+        assertThat(dto.names().metaTitle()).isEqualTo("Electrolux E62LB200S – avis, prix et impact");
+        assertThat(dto.names().metaTitle()).doesNotContain("911572124");
     }
 
     @Test
@@ -384,7 +410,8 @@ class ProductMappingServiceTest {
         product.setOffersCount(1);
 
         when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
-        when(affiliationService.encryptAffiliationLink("amazon", "https://example.com/product"))
+        // The product GTIN travels in the token so that the click is recorded with its product.
+        when(affiliationService.encryptAffiliationLink("amazon", "https://example.com/product", product.gtin()))
                 .thenReturn("encrypted-token");
 
         ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("offers"), DomainLanguage.en);

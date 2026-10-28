@@ -21,8 +21,8 @@ public record GlobalSearchRequestDto(
         @Schema(description = "Deprecated compatibility field. Accepted but ignored; search is always lexical.",
                 example = "TEXT", deprecated = true)
         String searchType,
-        @Schema(description = "Zero-based page index for missing-vertical results.", example = "0")
+        @Schema(description = "Zero-based page index for missing-vertical results. (pageNumber + 1) * pageSize must not exceed the result window (10000), otherwise the API answers 400.", example = "0")
         Integer pageNumber,
-        @Schema(description = "Page size for missing-vertical results.", example = "20", minimum = "1", maximum = "100")
+        @Schema(description = "Page size for missing-vertical results. (pageNumber + 1) * pageSize must not exceed the result window (10000).", example = "20", minimum = "1", maximum = "100")
         Integer pageSize) {
 }

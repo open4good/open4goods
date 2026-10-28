@@ -81,9 +81,35 @@ describe('useAffiliationService.resolveRedirect', () => {
       apiModule.ResponseError as unknown as ResponseErrorConstructor
   })
 
+  it('sends X-Affiliation-Origin only when an origin is given', async () => {
+    redirectGetRawMock.mockRejectedValue(
+      new ResponseErrorCtor(301, { Location: 'https://example.com/get' })
+    )
+    const service = useAffiliationService('fr')
+
+    await service.resolveRedirect({
+      token: 't',
+      method: 'GET',
+      origin: '/fours/mon-four',
+    })
+    await service.resolveRedirect({ token: 't', method: 'GET' })
+
+    const withOrigin = await redirectGetRawMock.mock.calls[0]?.[1]({
+      init: { headers: { Accept: 'x' } },
+    })
+    const without = await redirectGetRawMock.mock.calls[1]?.[1]({
+      init: { headers: { Accept: 'x' } },
+    })
+    expect(withOrigin.headers).toEqual({
+      Accept: 'x',
+      'X-Affiliation-Origin': '/fours/mon-four',
+    })
+    expect(without.headers).toEqual({ Accept: 'x' })
+  })
+
   it('returns redirect details for GET requests', async () => {
     redirectGetRawMock.mockRejectedValueOnce(
-      new ResponseErrorCtor(301, { Location: 'https://example.com/get' })
+      new ResponseErrorCtor(302, { Location: 'https://example.com/get' })
     )
 
     const affiliationService = useAffiliationService('en')
@@ -120,11 +146,12 @@ describe('useAffiliationService.resolveRedirect', () => {
       redirect: 'manual',
     })
     expect(response).toEqual({
-      statusCode: 301,
+      statusCode: 302,
       location: 'https://example.com/get',
     })
   })
 
+  // The previous backend contract (301) stays accepted during a rolling deployment.
   it('returns redirect details for POST requests', async () => {
     redirectPostRawMock.mockRejectedValueOnce(
       new ResponseErrorCtor(301, { Location: 'https://example.com/post' })

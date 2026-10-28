@@ -130,7 +130,6 @@ import type {
   OpenDataDatasetDto,
   OpenDataOverviewDto,
 } from '~~/shared/api-client'
-import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 
 import PageHeader from '~/components/shared/header/PageHeader.vue'
 import OpendataDatasetSummary from '~/components/domains/opendata/OpendataDatasetSummary.vue'
@@ -144,7 +143,7 @@ definePageMeta({
   ssr: true,
 })
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const localePath = useLocalePath()
 const requestURL = useRequestURL()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
@@ -327,7 +326,9 @@ const faqItems = computed(() => [
 
 const canonicalUrl = computed(() =>
   new URL(
-    resolveLocalizedRoutePath('opendata-isbn', locale.value),
+    // `opendata-isbn` is a file-based route, absent from LOCALIZED_ROUTE_PATHS:
+    // resolveLocalizedRoutePath would return the 404 path `/opendata-isbn`.
+    localePath('opendata-isbn'),
     requestURL.origin
   ).toString()
 )

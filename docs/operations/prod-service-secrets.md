@@ -12,11 +12,11 @@ This document never lists secret values, key ids or fingerprints.
 
 ## Single definition
 
-`scripts/deploy/render-service-secrets.sh [--if-present] <check|apply> <env> <service>`
+`scripts/deploy/render-service-secrets.sh [--if-present] [--source] <check|apply> <env> <service>`
 (`env`: `beta` or `prod`; `service`: `api`, `ui`, `front-api`, `admin`,
-`b2b-api` or `frontend`) holds one table, service -> GitHub secret -> target,
-documented at the top of the script. Every workflow that renders secrets calls
-it:
+`b2b-api`, `frontend` or `infra`) holds one table, service -> GitHub secret ->
+target, documented at the top of the script. Every workflow that renders
+secrets calls it:
 
 | Workflow                 | Environment | Services                                   | Steps                                                                 |
 | ------------------------ | ----------- | ------------------------------------------ | --------------------------------------------------------------------- |
@@ -24,6 +24,14 @@ it:
 | `testAndPublishBeta.yml` | `beta`      | admin, api, front-api, ui, b2b-api         | `--if-present apply`, before "Publish Applications"                   |
 | `frontend-ci.yml`        | `beta`      | frontend                                   | `--if-present apply`, before "Publish frontend"                       |
 | `releaseDeployProd.yml`  | `prod`      | all (check); Spring services, frontend     | `--if-present check` in every mode; `apply` in `mode=release` only    |
+| `infraSecrets.yml`       | input       | the target's consumers                     | `--source apply`, between the change at the source and the restart    |
+
+Rows whose need is `source` hold a password that must first be changed at its
+source (Elasticsearch, MySQL) or a key of the compose infrastructure: only
+`--source` renders them, and it renders nothing else. Deploys and
+`serviceSecrets.yml` never do, so a value written in the Environment before
+the source accepts it cannot break a service at the next deploy. Procedure:
+[Infrastructure secrets](infra-secrets-rotation.md).
 
 The release runs the script of the commit the workflow runs from (sparse
 checkout into `deploy-tools/`), whatever ref it deploys: the table always
@@ -116,6 +124,10 @@ before anything is written.
 | `FRONT_API_GITHUB_TOKEN`          | front-api: tree `feedback.github.access-token`                                                                                                                                | GitHub feedback issues                                         |
 | `GOOGLE_SSO_CLIENT_ID` (required) | front-api: `FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID`; frontend: `NUXT_GOOGLE_OAUTH_CLIENT_ID`; admin (optional, paired): tree `spring.security.oauth2.client.registration.google.client-id` | Google SSO ([Google SSO OAuth clients](google-sso-oauth-clients.md)); admin login (GOU-1091) |
 | `GOOGLE_SSO_CLIENT_SECRET` (required) | frontend: `NUXT_GOOGLE_OAUTH_CLIENT_SECRET`; admin (optional, paired): tree `spring.security.oauth2.client.registration.google.client-secret`                          | Google SSO; admin login                                        |
+| `O4G_ELASTICSEARCH_PASSWORD` (source) | api, ui, front-api, b2b-api: tree `spring.elasticsearch.password`                                                                                                        | Elasticsearch user `elastic` (`infraSecrets.yml` only)         |
+| `B2B_API_POSTGRES_PASSWORD` (source) | b2b-api: tree `spring.datasource.password`; infra: `B2B_POSTGRES_PASSWORD`                                                                                                 | Postgres user of `b2b_postgres` (`infraSecrets.yml` only)      |
+| `INFRA_*` (source)                | infra: `/etc/open4goods/infra.env` (Kibana, XWiki, MySQL, Plausible and its Postgres and ClickHouse)                                                                          | compose infrastructure (`infraSecrets.yml` only)               |
+| `INFRA_GOOGLE_CLIENT_ID`, `INFRA_GOOGLE_CLIENT_SECRET` (source) | infra: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` in `/etc/open4goods/infra.env` (beta)                                                         | Google OAuth client of Plausible's Search Console integration (`infraSecrets.yml` `target=plausible-google` only) |
 
 `b2b-api` registers with Spring Boot Admin only when its configuration enables
 the client (`B2B_SBA_CLIENT_ENABLED`); the tree then replaces its
@@ -133,8 +145,10 @@ Not rendered, on purpose:
 - ui: `icecat-feature-config.password`, `feedback.github.access-token` and
   `spring.mail.password` are present in its beta configuration, but ui ships
   neither the Icecat, feedback nor mail module.
-- Infrastructure secrets (Elasticsearch, Redis, XWiki, Kibana, MySQL,
-  Plausible): campaign wave 0b.
+- Infrastructure secrets: see
+  [Infrastructure secrets](infra-secrets-rotation.md) (GOU-1092). Redis
+  (`spring.data.redis.password`) and XWiki (`xwiki.password`) are not
+  rendered: no deployed service reads them any more.
 
 The organisation secrets `MACHINE_TOKEN` / `BETA_MACHINE_TOKEN` are read by no
 workflow of this repository.
@@ -152,6 +166,12 @@ Spring services and the frontend one after the other, front-api first).
 | `O4G_MACHINE_TOKEN`    | front-api (checks `X-Shared-Token`) and the frontend (sends it); `publish-frontend.sh` refuses to publish when front-api rejects the frontend's token |
 | `FRONT_API_JWT_SECRET` | front-api (signs) and the frontend (verifies admin access tokens)                               |
 | `O4G_INTERNAL_API_KEY` | front-api (sends) and api (`admin-key`, its only accepted key)                                  |
+
+`O4G_ELASTICSEARCH_PASSWORD` is coupled with its source: Elasticsearch
+(`elastic`) and its four consumers (api, ui, front-api, b2b-api) change in one
+run of `infraSecrets.yml` `target=elasticsearch`, never of this workflow.
+Likewise `B2B_API_POSTGRES_PASSWORD` (`b2b_postgres` and b2b-api,
+`target=b2b-postgres`).
 
 `O4G_MACHINE_TOKEN` and `FRONT_API_JWT_SECRET` reach the frontend as env
 lines, so their value must match `[A-Za-z0-9/._-]`.

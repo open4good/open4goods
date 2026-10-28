@@ -57,7 +57,7 @@ class AffiliationSecretLeakTest {
     }
 
     private List<MetriksEvent> collect(AffiliationReportClient... clients) {
-        return new AffiliationMetriksService(List.of(clients), CLOCK).collectEvents();
+        return new AffiliationMetriksService(List.of(clients), AffiliationTestSupport.noClicks(), CLOCK).collectEvents();
     }
 
     private void assertNoSecret(List<MetriksEvent> events) {

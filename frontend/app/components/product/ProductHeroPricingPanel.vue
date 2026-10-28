@@ -47,6 +47,7 @@
                     class="product-hero__pricing-panel-main product-hero__pricing-panel-main--link"
                     target="_blank"
                     :rel="AFFILIATE_LINK_REL"
+                    :referrerpolicy="AFFILIATE_LINK_REFERRER_POLICY"
                     :prefetch="false"
                     @click="emitMerchantClick"
                   >
@@ -130,6 +131,7 @@
                 class="product-hero__pricing-panel-main product-hero__pricing-panel-main--link"
                 target="_blank"
                 :rel="AFFILIATE_LINK_REL"
+                :referrerpolicy="AFFILIATE_LINK_REFERRER_POLICY"
                 :prefetch="false"
                 @click="emitMerchantClick"
               >
@@ -233,6 +235,7 @@
                 :href="offer.url ?? undefined"
                 target="_blank"
                 :rel="AFFILIATE_LINK_REL"
+                :referrerpolicy="AFFILIATE_LINK_REFERRER_POLICY"
                 class="product-hero__pricing-panel-alternative-row"
                 @click="onOfferSelected(offer)"
               >
@@ -326,6 +329,9 @@
           :href="viewOffersHref ?? undefined"
           :target="viewOffersHref ? '_blank' : undefined"
           :rel="viewOffersHref ? AFFILIATE_LINK_REL : undefined"
+          :referrerpolicy="
+            viewOffersHref ? AFFILIATE_LINK_REFERRER_POLICY : undefined
+          "
           @click="emitViewOffers"
         >
           {{ viewOffersLabel }}
@@ -347,7 +353,10 @@ import {
   mdiTagOutline,
   mdiRecycleVariant,
 } from '@mdi/js'
-import { AFFILIATE_LINK_REL } from '~/utils/_product-pricing'
+import {
+  AFFILIATE_LINK_REFERRER_POLICY,
+  AFFILIATE_LINK_REL,
+} from '~/utils/_product-pricing'
 
 type OfferCondition = 'occasion' | 'new'
 

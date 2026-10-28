@@ -88,7 +88,6 @@
                 :impact-score-max="impactScoreMax"
                 :popular-attributes="heroPopularAttributes"
                 :has-category="!!categoryDetail"
-                :vertical-title="verticalTitle"
                 :hide-pricing-panel="hideHeroPricingPanel"
               />
             </div>

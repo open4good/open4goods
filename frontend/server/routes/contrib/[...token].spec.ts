@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const resolveAffiliationRedirectMock = vi.hoisted(() => vi.fn())
 const sendRedirectMock = vi.hoisted(() => vi.fn())
+const sendContribPlainErrorMock = vi.hoisted(() => vi.fn())
 const setHeaderMock = vi.hoisted(() => vi.fn())
 
 vi.mock('h3', () => ({
@@ -12,6 +13,7 @@ vi.mock('h3', () => ({
 
 vi.mock('../../utils/affiliation-redirect', () => ({
   resolveAffiliationRedirect: resolveAffiliationRedirectMock,
+  sendContribPlainError: sendContribPlainErrorMock,
 }))
 
 describe('contrib redirect route', () => {
@@ -25,7 +27,7 @@ describe('contrib redirect route', () => {
       statusCode: 301,
       location: 'https://merchant.example/product/123',
     })
-    const handler = (await import('./[token]')).default
+    const handler = (await import('./[...token]')).default
     const event = {} as Parameters<typeof handler>[0]
 
     await handler(event)
@@ -41,5 +43,33 @@ describe('contrib redirect route', () => {
       'https://merchant.example/product/123',
       301
     )
+    expect(setHeaderMock).toHaveBeenCalledWith(
+      event,
+      'Referrer-Policy',
+      'no-referrer'
+    )
+    expect(setHeaderMock).toHaveBeenCalledWith(
+      event,
+      'Cache-Control',
+      'no-store'
+    )
+  })
+
+  it('answers errors (403 robot, 400 token) with a plain-text response', async () => {
+    const failure = { statusCode: 403, statusMessage: 'Forbidden' }
+    resolveAffiliationRedirectMock.mockRejectedValue(failure)
+    sendContribPlainErrorMock.mockResolvedValue(undefined)
+    const handler = (await import('./[...token]')).default
+    const event = {} as Parameters<typeof handler>[0]
+
+    await handler(event)
+
+    expect(sendRedirectMock).not.toHaveBeenCalled()
+    expect(setHeaderMock).not.toHaveBeenCalledWith(
+      event,
+      'Referrer-Policy',
+      expect.anything()
+    )
+    expect(sendContribPlainErrorMock).toHaveBeenCalledWith(event, failure)
   })
 })

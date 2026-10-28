@@ -22,6 +22,8 @@ springdoc:
 front:
   resource-root-path: "${FRONT_RESOURCE_ROOT_PATH:https://static.nudger.fr}"
   max-page-size: 50
+  # Elasticsearch index.max_result_window: (pageNumber + 1) * pageSize above it gives a 400
+  max-result-window: 10000
   cache:
     path: ./cache
     one-minute-ttl: 1m
@@ -65,6 +67,11 @@ front:
   rate-limit:
     anonymous: 100
     authenticated: 1000
+
+  # One-shot purge of the historical ip/ua fields of the contribution-votes index (GOU-1230),
+  # run asynchronously after startup; idempotent, a no-op once the index is clean.
+  contribution-votes-purge:
+    enabled: ${FRONT_CONTRIBUTION_VOTES_PURGE_ENABLED:true}
 
   google-indexation:
     enabled: ${FRONT_GOOGLE_INDEXATION_ENABLED:false}

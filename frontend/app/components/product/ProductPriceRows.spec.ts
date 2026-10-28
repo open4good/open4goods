@@ -3,7 +3,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createI18n } from 'vue-i18n'
 import ProductPriceRows from './ProductPriceRows.vue'
 import type { ProductDto } from '~~/shared/api-client'
-import { AFFILIATE_LINK_REL } from '~/utils/_product-pricing'
+import {
+  AFFILIATE_LINK_REFERRER_POLICY,
+  AFFILIATE_LINK_REL,
+} from '~/utils/_product-pricing'
 
 const trackAffiliateClickMock = vi.hoisted(() => vi.fn())
 const trackProductRedirectMock = vi.hoisted(() => vi.fn())
@@ -135,6 +138,10 @@ describe('ProductPriceRows', () => {
 
     expect(link.attributes('href')).toBe('/contrib/tok-123')
     expect(link.attributes('rel')).toBe(AFFILIATE_LINK_REL)
+    expect(link.attributes('rel')).not.toContain('noreferrer')
+    expect(link.attributes('referrerpolicy')).toBe(
+      AFFILIATE_LINK_REFERRER_POLICY
+    )
     expect(link.attributes('target')).toBe('_blank')
   })
 

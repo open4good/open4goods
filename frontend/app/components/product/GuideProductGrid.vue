@@ -51,6 +51,8 @@ const props = withDefaults(
   }
 )
 
+const { $fetch: csrfFetch } = useNuxtApp()
+
 const { t } = useI18n()
 const guideContext = useGuideContext()
 
@@ -91,7 +93,7 @@ const { data, pending } = await useAsyncData<ProductDto[]>(
     }
 
     try {
-      const response = await $fetch<ProductSearchResponseDto>(
+      const response = await csrfFetch<ProductSearchResponseDto>(
         '/api/products/search',
         {
           method: 'POST',

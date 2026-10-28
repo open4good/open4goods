@@ -5,12 +5,13 @@ import java.io.IOException;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.ResourceCleanupMode;
-import org.open4goods.api.services.ResourceCleanupReport;
+import org.open4goods.api.services.ResourceCleanupStatus;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.services.prompt.dto.openai.BatchJobResponse;
 import org.open4goods.services.prompt.service.BatchPromptService;
 import org.open4goods.verticals.VerticalsConfigService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -71,11 +72,21 @@ public class BatchController {
                     + "(favicons, remote files, geocode, batch-ia, Icecat) are never considered. "
                     + "The run aborts without touching a single file if the product stream comes back short of the "
                     + "configured safety floor. Defaults to DRY_RUN, which only reports: run it in that mode first and "
-                    + "check the returned counters before switching to MOVE or DELETE.")
-    @ApiResponse(responseCode = "200", description = "Orphaned resource cleanup completed")
-    public ResourceCleanupReport cleanOrphanResources(
+                    + "check the report (GET /batch/clean-resources) before switching to MOVE or DELETE. The run is asynchronous: this call answers 202 immediately.")
+    @ApiResponse(responseCode = "202", description = "Cleanup started in the background (or already running: current status returned)")
+    public ResponseEntity<ResourceCleanupStatus> cleanOrphanResources(
             @RequestParam(defaultValue = "DRY_RUN") ResourceCleanupMode mode) {
-        return batchService.cleanOrphanResources(mode);
+        return ResponseEntity.accepted().body(batchService.startCleanOrphanResources(mode));
+    }
+
+    @GetMapping("/batch/clean-resources")
+    @Operation(
+            summary = "Status and report of the resource garbage collection",
+            description = "Returns IDLE, RUNNING, COMPLETED (with the report) or FAILED for the current or last "
+                    + "clean-resources run. The run itself executes in the background.")
+    @ApiResponse(responseCode = "200", description = "Current status")
+    public ResourceCleanupStatus cleanOrphanResourcesStatus() {
+        return batchService.getCleanupStatus();
     }
 
     @PostMapping("/batch/purge-resources-deletion-folder")

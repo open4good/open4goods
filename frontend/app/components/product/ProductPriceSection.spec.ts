@@ -4,7 +4,10 @@ import { defineComponent, h } from 'vue'
 import { createI18n } from 'vue-i18n'
 import type { CommercialEvent, ProductDto } from '~~/shared/api-client'
 import ProductPriceSection from './ProductPriceSection.vue'
-import { AFFILIATE_LINK_REL } from '~/utils/_product-pricing'
+import {
+  AFFILIATE_LINK_REFERRER_POLICY,
+  AFFILIATE_LINK_REL,
+} from '~/utils/_product-pricing'
 
 vi.mock('vue-echarts', () => ({
   default: defineComponent({
@@ -58,6 +61,12 @@ const i18nMessages = {
         },
         noHistory:
           "L'historique des prix n'est pas encore disponible pour ce produit.",
+        noOffersBanner: "Pas d'offres actuellement !",
+        noOffers: {
+          new: "Pas d'offres neuves actuellement",
+          occasion: "Pas d'offres d'occasion actuellement",
+        },
+        lastKnownPrice: 'Dernier prix relevé : {price} le {date}',
         competition: {
           title: 'Niveau de concurrence',
           count: '{count} offres',
@@ -348,6 +357,10 @@ describe('ProductPriceSection', () => {
     expect(hrefs).toContain('/contrib/abc123')
     links.forEach(link => {
       expect(link.attributes('rel')).toBe(AFFILIATE_LINK_REL)
+      expect(link.attributes('rel')).not.toContain('noreferrer')
+      expect(link.attributes('referrerpolicy')).toBe(
+        AFFILIATE_LINK_REFERRER_POLICY
+      )
       expect(link.attributes('target')).toBe('_blank')
     })
 
@@ -371,6 +384,44 @@ describe('ProductPriceSection', () => {
     })
 
     expect(wrapper.find('.product-price__history-cta').exists()).toBe(false)
+
+    await wrapper.unmount()
+  })
+
+  it('dates the last recorded price when no offer is live', async () => {
+    const wrapper = await mountComponent({
+      offersCount: 0,
+      hasOccasions: false,
+      bestPrice: undefined,
+      bestNewOffer: undefined,
+      bestOccasionOffer: undefined,
+      offersByCondition: {},
+      newHistory: {
+        // Unordered on purpose: the label must use the most recent point.
+        entries: [
+          { timestamp: Date.UTC(2026, 4, 8), price: 599 },
+          { timestamp: Date.UTC(2026, 8, 12, 2), price: 499 },
+          { timestamp: Date.UTC(2026, 6, 22), price: 579 },
+        ],
+      },
+      occasionHistory: { entries: [] },
+    })
+
+    expect(wrapper.text()).toContain("Pas d'offres actuellement !")
+    const emptyCard = wrapper
+      .findAll('.text-caption')
+      .find(node => node.text().startsWith('Dernier prix relevé'))
+    expect(emptyCard?.text()).toMatch(
+      /^Dernier prix relevé : 499[\s\u202f,0]*€ le 12 septembre 2026$/
+    )
+
+    await wrapper.unmount()
+  })
+
+  it('omits the last recorded price while an offer is live', async () => {
+    const wrapper = await mountComponent()
+
+    expect(wrapper.text()).not.toContain('Dernier prix relevé')
 
     await wrapper.unmount()
   })

@@ -21,6 +21,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.elasticsearch.autoconfigure.ElasticsearchProperties;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.MutablePropertySources;
@@ -33,8 +35,8 @@ import de.codecentric.boot.admin.client.config.ClientProperties;
  * Shows that the config tree {@code scripts/deploy/render-service-secrets.sh} renders for b2b-api (GOU-1041),
  * {@code /etc/open4goods/secrets/b2b-api/<property>} imported through the {@code SPRING_CONFIG_IMPORT} line of
  * {@code /etc/open4goods/b2b-api.env}, beats {@code application-active.yml} (open4goods-config) and
- * {@code application.yml} (its {@code ${B2B_SBA_PASSWORD:}} default), loaded as {@code publish-jars.sh} does
- * ({@code spring.config.location}). The import declared by {@code application.yml} itself
+ * {@code application.yml} (its {@code ${B2B_SBA_PASSWORD:}} and {@code ${B2B_POSTGRES_PASSWORD:...}} defaults), loaded
+ * as {@code publish-jars.sh} does ({@code spring.config.location}). The import declared by {@code application.yml} itself
  * ({@code optional:classpath:b2b-catalog.yml}) is still processed. Each property is read back through the class that
  * consumes it, so a misspelt file name fails here, and every {@code tree} row of the script's table for b2b-api must be
  * covered.
@@ -46,7 +48,11 @@ class RenderedSecretsConfigTreeTest {
     /** Each rendered property and how b2b-api reads it. */
     private static final Map<String, Function<Binder, String>> CONSUMERS = Map.ofEntries(
             entry("spring.boot.admin.client.password",
-                    binder -> bind(binder, "spring.boot.admin.client", ClientProperties.class).getPassword()));
+                    binder -> bind(binder, "spring.boot.admin.client", ClientProperties.class).getPassword()),
+            entry("spring.elasticsearch.password",
+                    binder -> bind(binder, "spring.elasticsearch", ElasticsearchProperties.class).getPassword()),
+            entry("spring.datasource.password",
+                    binder -> bind(binder, "spring.datasource", DataSourceProperties.class).getPassword()));
 
     @TempDir
     Path tempDir;
@@ -61,6 +67,21 @@ class RenderedSecretsConfigTreeTest {
             assertThat(context.getEnvironment().getProperty("b2b.facets[product.price].path"))
                     .as("b2b-catalog.yml, imported by application.yml")
                     .isEqualTo("/api/v1/products/{gtin}/price");
+        }
+    }
+
+    /**
+     * The b2b Postgres password of the tree (GOU-1256) also beats a {@code B2B_POSTGRES_PASSWORD} line that one of the
+     * env files {@code publish-jars.sh} sources may still hold: the placeholders only fill
+     * {@code spring.datasource.password} when the tree has none.
+     */
+    @Test
+    void configTreeBeatsAnEnvironmentB2bPostgresPassword() throws IOException {
+        Path tree = writeTree();
+        try (ConfigurableApplicationContext context = start(Map.of("SPRING_CONFIG_IMPORT", configTreeImport(tree),
+                "B2B_POSTGRES_PASSWORD", "env-b2b-postgres-password"))) {
+            assertThat(CONSUMERS.get("spring.datasource.password").apply(Binder.get(context.getEnvironment())))
+                    .isEqualTo(treeValue("spring.datasource.password"));
         }
     }
 

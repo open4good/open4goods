@@ -13,7 +13,15 @@ export interface ResolveAffiliationRedirectOptions {
   token: string
   userAgent?: string
   method: AffiliationRedirectHttpMethod
+  /** Same-site path the click came from, sent as `X-Affiliation-Origin`. */
+  origin?: string
 }
+
+/**
+ * Redirect statuses accepted from the backend: 302 (non-cacheable, current contract) and 301 (previous contract,
+ * kept so a frontend deployed before front-api keeps working).
+ */
+const BACKEND_REDIRECT_STATUSES = new Set([301, 302])
 
 export interface AffiliationRedirectResponse {
   statusCode: number
@@ -59,6 +67,7 @@ export const useAffiliationService = (domainLanguage: DomainLanguage) => {
     token,
     userAgent,
     method,
+    origin,
   }: ResolveAffiliationRedirectOptions): Promise<AffiliationRedirectResponse> => {
     const apiInstance = resolveApi()
     const language = buildLanguageEnum(method)
@@ -69,6 +78,10 @@ export const useAffiliationService = (domainLanguage: DomainLanguage) => {
           { token, domainLanguage: language, userAgent },
           async requestContext => ({
             ...requestContext.init,
+            headers: {
+              ...(requestContext.init.headers as Record<string, string>),
+              ...(origin ? { 'X-Affiliation-Origin': origin } : {}),
+            },
             redirect: 'manual',
           })
         )
@@ -77,6 +90,10 @@ export const useAffiliationService = (domainLanguage: DomainLanguage) => {
           { token, domainLanguage: language, userAgent },
           async requestContext => ({
             ...requestContext.init,
+            headers: {
+              ...(requestContext.init.headers as Record<string, string>),
+              ...(origin ? { 'X-Affiliation-Origin': origin } : {}),
+            },
             redirect: 'manual',
           })
         )
@@ -87,7 +104,7 @@ export const useAffiliationService = (domainLanguage: DomainLanguage) => {
       )
     } catch (error) {
       if (error instanceof ResponseError) {
-        if (error.response.status === 301) {
+        if (BACKEND_REDIRECT_STATUSES.has(error.response.status)) {
           const location = error.response.headers.get('Location') ?? undefined
 
           if (!location) {

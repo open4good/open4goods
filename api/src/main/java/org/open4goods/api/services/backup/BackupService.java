@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -177,7 +178,7 @@ public class BackupService implements HealthIndicator {
 	/**
 	 * Exports all data in zipped files, unconditionally (manual trigger or called by the periodic check).
 	 */
-	@Timed(value = "backup.products", description = "Backup of all products", extraTags = { "service" })
+	@Timed(value = "backup.products", description = "Backup of all products", extraTags = { "service", "BackupService" })
 	public void backupProducts() {
 		logger.info("Products data backup - start");
 
@@ -331,14 +332,16 @@ public class BackupService implements HealthIndicator {
 			Path destination = backupFolder
 					.resolve(PRODUCT_BACKUP_FILE_PREFIX + tempFile.fileNumber() + PRODUCT_BACKUP_FILE_SUFFIX);
 			Files.move(tempFile.path(), destination, StandardCopyOption.REPLACE_EXISTING);
+			makeWorldReadable(destination);
 			fileNames.add(destination.getFileName().toString());
 			checksums.put(destination.getFileName().toString(), tempFile.sha256());
 		}
 
 		ProductBackupManifest manifest = new ProductBackupManifest(Instant.now().toString(),
 				System.currentTimeMillis(), expectedProducts, exportedProducts, pageSize, fileNames, checksums);
-		OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(backupFolder.resolve(PRODUCT_BACKUP_MANIFEST).toFile(),
-				manifest);
+		Path manifestPath = backupFolder.resolve(PRODUCT_BACKUP_MANIFEST);
+		OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(manifestPath.toFile(), manifest);
+		makeWorldReadable(manifestPath);
 		writeChecksumFile(backupFolder, checksums);
 	}
 
@@ -351,9 +354,23 @@ public class BackupService implements HealthIndicator {
 		Path tmp = Files.createTempFile(backupFolder, PRODUCT_BACKUP_CHECKSUMS, ".tmp");
 		try {
 			Files.writeString(tmp, content.toString(), StandardCharsets.UTF_8);
+			// Readable before the atomic move so that the checksum file never appears with restrictive rights
+			makeWorldReadable(tmp);
 			Files.move(tmp, backupFolder.resolve(PRODUCT_BACKUP_CHECKSUMS), StandardCopyOption.ATOMIC_MOVE);
 		} finally {
 			Files.deleteIfExists(tmp);
+		}
+	}
+
+	/**
+	 * Sets {@code rw-r--r--} on a published backup file: temporary files are created as 0600, which the read-only
+	 * pull account cannot read. No-op on file systems without POSIX permissions.
+	 */
+	private void makeWorldReadable(Path path) throws IOException {
+		try {
+			Files.setPosixFilePermissions(path, PosixFilePermissions.fromString("rw-r--r--"));
+		} catch (UnsupportedOperationException e) {
+			logger.debug("POSIX permissions not supported for {}", path);
 		}
 	}
 

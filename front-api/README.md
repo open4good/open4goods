@@ -42,6 +42,28 @@ Requests are limited using an in-memory token bucket. Defaults can be changed in
 
 When limits are exceeded the API responds with HTTP `429 Too Many Requests`.
 
+## Contribution votes ip/ua purge
+
+On every startup, once the application is ready, front-api runs on a background
+thread the purge of the historical `ip` and `ua` fields of the
+`contribution-votes` Elasticsearch index (board approval 2f4935d1, GOU-1230).
+It removes only these two keys from the documents that hold one of them; no
+other field changes and no document is deleted. It is idempotent: once the
+index is clean, a run logs a single "rien à purger" line.
+
+- `front.contribution-votes-purge.enabled` - toggle (default `true`,
+  `FRONT_CONTRIBUTION_VOTES_PURGE_ENABLED`; `false` in the `local` profile).
+
+It never blocks nor fails the startup: an error (Elasticsearch unreachable,
+mapping where `exists` cannot see the fields) ends in one `ERROR` line and the
+next startup retries. Every line starts with `contribution-votes purge ip/ua`
+and holds counts only (documents before/after, with `ip` or `ua`, updated,
+version conflicts, failures), never an IP or a User-Agent:
+
+```bash
+grep 'contribution-votes purge ip/ua' front-api.log
+```
+
 ## Google Indexation
 
 The front API can notify the Google Indexing API after AI review generation

@@ -1,0 +1,948 @@
+#!/usr/bin/env bash
+# Tests scripts/deploy/infra-secrets.sh and infra-secrets-remote.sh (GOU-1092, GOU-1256, GOU-1271, GOU-1321) against a fake
+# `ssh` that runs the remote script locally, a fake `curl` playing Elasticsearch, Kibana and Google's OAuth token
+# endpoint, and a fake `docker`
+# playing MySQL, XWiki, Plausible (its logs), its Postgres and ClickHouse (its dictionaries), and the b2b Postgres.
+# /etc/open4goods/ and /opt/open4goods/ live in a temp dir. Every value is a sentinel that must never appear in an
+# output, a summary or a command line.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+DEPLOY="${ROOT}/scripts/deploy"
+WORK="$(mktemp -d)"
+trap 'rm -rf "${WORK}"' EXIT
+
+FAKE_ROOT="${WORK}/host"
+FAKE_ES="${WORK}/es"
+FAKE_MYSQL="${WORK}/mysql"
+FAKE_XWIKI_DATA="${WORK}/xwiki-data"
+FAKE_DB="${WORK}/db"
+FAKE_ENV="${WORK}/container-env"
+FAKE_LOGS="${WORK}/container-logs"
+CALLS="${WORK}/calls.log"
+mkdir -p "${WORK}/bin" "${FAKE_ROOT}" "${FAKE_ES}" "${FAKE_MYSQL}" "${FAKE_XWIKI_DATA}" "${FAKE_DB}" "${FAKE_ENV}" \
+  "${FAKE_LOGS}"
+
+cat > "${WORK}/bin/ssh" <<'SH'
+#!/bin/sh
+# Fake ssh: record the arguments, then run the last one (the remote script) locally, host paths mapped.
+printf 'ssh %s\n' "$*" >> "$CALLS"
+for arg; do last=$arg; done
+script=$(printf '%s' "$last" | sed -e "s#/etc/open4goods/#$FAKE_ROOT/etc/open4goods/#g" \
+  -e "s#/opt/open4goods/#$FAKE_ROOT/opt/open4goods/#g")
+exec sh -c "$script"
+SH
+
+cat > "${WORK}/bin/curl" <<'SH'
+#!/bin/sh
+# Fake curl: Elasticsearch users are files of $FAKE_ES (name = user, content = password); Kibana always answers.
+printf 'curl %s\n' "$*" >> "$CALLS"
+out= method=GET cfg= data= url= write=
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    -s) ;;
+    -o) out=$2; shift ;;
+    -w) write=$2; shift ;;
+    -K) cfg=$2; shift ;;
+    -X) method=$2; shift ;;
+    -H) shift ;;
+    --data-binary) data=${2#@}; shift ;;
+    *) url=$1 ;;
+  esac
+  shift
+done
+user=
+[ -n "$cfg" ] && user=$(sed -n 's/^user = "\(.*\)"$/\1/p' "$cfg")
+u=${user%%:*}
+p=${user#*:}
+path=/${url#*://*/}
+auth_ok() { [ -n "$u" ] && [ -f "$FAKE_ES/$u" ] && [ "$(cat "$FAKE_ES/$u")" = "$p" ]; }
+code=401 body=
+case "$method $path" in
+  "GET /_security/_authenticate") auth_ok && code=200 ;;
+  "POST /_security/user/"*"/_password")
+    if auth_ok && [ "$u" = elastic ]; then
+      target=${path#/_security/user/}
+      target=${target%/_password}
+      sed -n 's/^{"password":"\(.*\)"}$/\1/p' "$data" | tr -d '\n' > "$FAKE_ES/$target"
+      code=200
+    fi
+    ;;
+  "GET /api/status") auth_ok && code=200 && body='{"status":{"overall":{"level":"available"}}}' ;;
+  # Kibana 9 answers 400 to an unknown query parameter (e.g. conflicts).
+  "POST /api/encrypted_saved_objects/_rotate_key") auth_ok && code=200 && body='{"total":2,"successful":2,"failed":0}' ;;
+  "POST /api/encrypted_saved_objects/_rotate_key?"*) code=400 ;;
+  # Google's token endpoint: $FAKE_GOOGLE holds the valid `client_id client_secret`; $FAKE_GOOGLE.down: no answer.
+  *" /token")
+    if [ -f "$FAKE_GOOGLE.down" ]; then
+      code=000
+    else
+      id=$(tr '&' '\n' < "$data" | sed -n 's/^client_id=//p')
+      secret=$(tr '&' '\n' < "$data" | sed -n 's/^client_secret=//p')
+      if [ "$id $secret" = "$(cat "$FAKE_GOOGLE" 2>/dev/null)" ]; then
+        code=400 body='{
+  "error": "invalid_grant",
+  "error_description": "Malformed auth code."
+}'
+      else
+        body='{
+  "error": "invalid_client",
+  "error_description": "The OAuth client was not found."
+}'
+      fi
+    fi
+    ;;
+  "GET /"*) code=200 ;;
+esac
+if [ -n "$out" ]; then printf '%s' "$body" > "$out"; else printf '%s' "$body"; fi
+[ -z "$write" ] || printf '%s' "$code"
+SH
+
+cat > "${WORK}/bin/docker" <<'SH'
+#!/bin/sh
+# Fake docker: MySQL users are files of $FAKE_MYSQL; XWiki's permanent directory is $FAKE_XWIKI_DATA; the Postgres
+# and ClickHouse passwords are files of $FAKE_DB (<container>.<user>; $FAKE_DB/trust: any password accepted); the
+# environment a container was created with is $FAKE_ENV/<container>.<NAME>, its logs $FAKE_LOGS/<container>.
+printf 'docker %s\n' "$*" >> "$CALLS"
+case "$1" in
+  inspect)
+    case "$3" in
+      *IPAddress*) echo '172.18.0.9 ' ;;
+      *Config.Env*)
+        for f in "$FAKE_ENV/$4".*; do
+          [ ! -f "$f" ] || printf '%s=%s\n' "${f##*/"$4".}" "$(cat "$f")"
+        done
+        ;;
+      *) echo true ;;
+    esac
+    exit 0
+    ;;
+  logs)
+    for arg; do container=$arg; done
+    cat "$FAKE_LOGS/$container" 2>/dev/null
+    exit 0
+    ;;
+  exec) shift ;;
+  *) exit 1 ;;
+esac
+while :; do
+  case "$1" in
+    -i) shift ;;
+    -e) shift 2 ;;
+    *) break ;;
+  esac
+done
+container=$1
+shift
+if [ "$1" = printenv ]; then
+  [ -f "$FAKE_ENV/$container.$2" ] || exit 1
+  cat "$FAKE_ENV/$container.$2"
+  echo
+  exit 0
+fi
+# Postgres over TCP (psql -h <address> -U <user> -d <db> ...): SELECT 1 and ALTER USER.
+if [ "$1" = psql ] && [ "$2" = -h ]; then
+  user=$5
+  [ -f "$FAKE_DB/trust" ] || { [ -f "$FAKE_DB/$container.$user" ] && [ "$(cat "$FAKE_DB/$container.$user")" = "$PGPASSWORD" ]; } \
+    || exit 2
+  while IFS= read -r sql; do
+    case "$sql" in
+      'SELECT 1;') echo 1 ;;
+      'ALTER USER "'*)
+        target=$(printf '%s' "$sql" | sed -n 's/^ALTER USER "\([A-Za-z0-9_]*\)".*/\1/p')
+        printf '%s' "$sql" | sed -n "s/.* WITH PASSWORD '\(.*\)';$/\1/p" | sed "s/''/'/g" | tr -d '\n' \
+          > "$FAKE_DB/$container.$target"
+        ;;
+    esac
+  done
+  exit 0
+fi
+case "$container" in
+  mysql)
+    [ "$1" = mysql ] || exit 1
+    user=${2#-u}
+    [ -f "$FAKE_MYSQL/$user" ] && [ "$(cat "$FAKE_MYSQL/$user")" = "$MYSQL_PWD" ] || exit 1
+    while IFS= read -r sql; do
+      case "$sql" in
+        'SELECT 1;') echo 1 ;;
+        "SELECT host FROM mysql.user WHERE user = '"*)
+          echo '%'
+          if [ "${sql#*\'}" = "root';" ]; then echo localhost; fi
+          ;;
+        "ALTER USER '"*)
+          target=$(printf '%s' "$sql" | sed -n "s/^ALTER USER '\([a-z]*\)'.*/\1/p")
+          printf '%s' "$sql" | sed -n "s/.* IDENTIFIED BY '\(.*\)';$/\1/p" | tr -d '\n' > "$FAKE_MYSQL/$target"
+          ;;
+      esac
+    done
+    ;;
+  xwiki-mysql-tomcat-web)
+    if [ "$1" = printenv ]; then
+      exit 1
+    elif [ "$1" = test ]; then
+      [ -f "$FAKE_XWIKI_DATA/hibernate.cfg.xml" ]
+    else
+      script=$(printf '%s' "$3" | sed "s#/usr/local/xwiki/data#$FAKE_XWIKI_DATA#g")
+      sh -c "$script"
+    fi
+    ;;
+  plausible_db)
+    # psql: the statement on stdin. api_keys names in $FAKE_DB/api-keys (one per line); psql fails when it is missing.
+    sql=$(cat)
+    case "$sql" in
+      *api_keys*) cat "$FAKE_DB/api-keys" 2>/dev/null || exit 1 ;;
+      *) echo 0 ;;
+    esac
+    ;;
+  plausible_events_db)
+    # ClickHouse: the client config on the first line of stdin (<password><![CDATA[...]]></password>), then one
+    # statement. Dictionaries are $FAKE_DB/dicts/<name>.ddl (password in clear) and <name>.status; <name>.broken
+    # makes its reload fail.
+    IFS= read -r cfg
+    given=$(printf '%s\n' "$cfg" | sed -n 's/.*<password><!\[CDATA\[\(.*\)\]\]><\/password>.*/\1/p')
+    ch=$(cat "$FAKE_DB/plausible_events_db.default" 2>/dev/null || :)
+    if [ ! -f "$FAKE_DB/trust" ] && [ "$ch" != "$given" ]; then
+      echo 'Code: 516. DB::Exception: default: Authentication failed' >&2
+      exit 4
+    fi
+    sql=$(cat)
+    dicts=$FAKE_DB/dicts
+    case "$sql" in
+      'SELECT 1') echo 1 ;;
+      "SELECT name, status FROM system.dictionaries WHERE database = 'plausible_events_db' ORDER BY name FORMAT TSV")
+        for f in "$dicts"/*.ddl; do
+          [ -f "$f" ] || continue
+          n=$(basename "$f" .ddl)
+          printf '%s\t%s\n' "$n" "$(cat "$dicts/$n.status")"
+        done
+        ;;
+      'SHOW CREATE DICTIONARY plausible_events_db.'*' FORMAT TSVRaw')
+        n=${sql#SHOW CREATE DICTIONARY plausible_events_db.}
+        sed "s/PASSWORD '[^']*'/PASSWORD '[HIDDEN]'/" "$dicts/${n% FORMAT TSVRaw}.ddl"
+        ;;
+      'CREATE OR REPLACE DICTIONARY plausible_events_db.'*)
+        n=$(printf '%s\n' "$sql" | sed -n '1s/^CREATE OR REPLACE DICTIONARY plausible_events_db\.//p')
+        printf '%s\n' "$sql" | sed '1s/^CREATE OR REPLACE DICTIONARY/CREATE DICTIONARY/' > "$dicts/$n.ddl"
+        echo NOT_LOADED > "$dicts/$n.status"
+        ;;
+      'SYSTEM RELOAD DICTIONARY plausible_events_db.'*)
+        n=${sql#SYSTEM RELOAD DICTIONARY plausible_events_db.}
+        if [ ! -f "$dicts/$n.broken" ] && [ "$(sed -n "s/.*PASSWORD '\([^']*\)'.*/\1/p" "$dicts/$n.ddl")" = "$ch" ]; then
+          echo LOADED > "$dicts/$n.status"
+        else
+          echo FAILED > "$dicts/$n.status"
+          echo 'Code: 516. DB::Exception: default: Authentication failed' >&2
+          exit 5
+        fi
+        ;;
+      'SELECT count() FROM plausible_events_db.events_v2 WHERE '*) echo 3 ;;
+      *) echo 'unexpected query' >&2; exit 6 ;;
+    esac
+    ;;
+  kibana) [ "$1" = cat ] && [ -f "$FAKE_KIBANA_YML" ] && cat "$FAKE_KIBANA_YML" ;;
+  *) exit 1 ;;
+esac
+SH
+cat > "${WORK}/plausible-recreate" <<'SH'
+#!/bin/sh
+# Recreating plausible ($1: infra.env): a new container (its logs start empty), created with the CLICKHOUSE_PASSWORD of
+# infra.env in its URL. Its write buffers log Code: 516 when ClickHouse refuses that password or when a dictionary
+# their insertions read holds another one ($FAKE_DB/plausible-516 forces it).
+ch=$(cat "$FAKE_DB/plausible_events_db.default" 2>/dev/null || :)
+pw=$(sed -n 's/^CLICKHOUSE_PASSWORD=//p' "$1" 2>/dev/null | sed "s/^'\(.*\)'$/\1/" | tr -d '\n')
+printf 'http://default:%s@plausible_events_db:8123/plausible_events_db' "$pw" \
+  > "$FAKE_ENV/plausible.CLICKHOUSE_DATABASE_URL"
+: > "$FAKE_LOGS/plausible"
+refused=false
+[ "$pw" = "$ch" ] || refused=true
+[ ! -f "$FAKE_DB/plausible-516" ] || refused=true
+for f in "$FAKE_DB"/dicts/*.ddl; do
+  [ -f "$f" ] && grep -q 'CLICKHOUSE(' "$f" || continue
+  p=$(sed -n "s/.*PASSWORD '\([^']*\)'.*/\1/p" "$f")
+  [ -z "$p" ] || [ "$p" = "$ch" ] || refused=true
+done
+# GOOGLE_CLIENT_*: infra.env, read last by publish-infra.sh, else $2 (config/<env>/infra/.env); $FAKE_DB/plausible-no-google
+# drops them (a compose that does not pass them).
+for var in GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET; do
+  v=$(sed -n "s/^$var=//p" "$1" 2>/dev/null | tail -n 1)
+  [ -n "$v" ] || v=$(sed -n "s/^$var=//p" "$2" 2>/dev/null | tail -n 1)
+  rm -f "$FAKE_ENV/plausible.$var"
+  [ -z "$v" ] || [ -f "$FAKE_DB/plausible-no-google" ] || printf '%s' "$v" > "$FAKE_ENV/plausible.$var"
+done
+if [ "$refused" = true ]; then
+  echo '[error] GenServer Plausible.Event.WriteBuffer terminating ** (Ch.Error) Code: 516. DB::Exception: default: Authentication failed' \
+    >> "$FAKE_LOGS/plausible"
+fi
+SH
+chmod +x "${WORK}/bin/"*
+
+export PATH="${WORK}/bin:${PATH}"
+FAKE_KIBANA_YML="${WORK}/kibana-container.yml"
+FAKE_GOOGLE="${WORK}/google-client"
+export FAKE_ROOT FAKE_ES FAKE_MYSQL FAKE_XWIKI_DATA FAKE_KIBANA_YML FAKE_DB FAKE_ENV FAKE_LOGS FAKE_GOOGLE CALLS
+export GOOGLE_TOKEN_URL=https://oauth2.example/token
+export INFRA_SECRETS_ROOT="${FAKE_ROOT}" WAIT_SECONDS=0
+export DEPLOY_SSH_HOST=beta.example DEPLOY_SSH_USER=deploy DEPLOY_SSH_KEY="fake-ssh-key"
+export GITHUB_STEP_SUMMARY="${WORK}/summary.md"
+
+ETC="${FAKE_ROOT}/etc/open4goods"
+OPT="${FAKE_ROOT}/opt/open4goods"
+OLD_ELASTIC="OLDELASTICSENTINEL0000000000000000"
+NEW_ELASTIC="NEWELASTICSENTINEL1111111111111111"
+OLD_KIBANA="OLDKIBANASENTINEL22222222222222222"
+NEW_KIBANA="NEWKIBANASENTINEL33333333333333333"
+# The key in service holds '$' and punctuation, as in open4goods-config: single-quoted in infra.env.
+OLD_KEY='OLD$KEY%SENTINEL!44444444444444444'
+
+NEW_KEY="NEWKEYSENTINEL55555555555555555555"
+OLD_ROOT="OLDROOTSENTINEL6666666666666666666"
+NEW_ROOT="NEWROOTSENTINEL7777777777777777777"
+OLD_XWIKI="OLDXWIKISENTINEL888888888888888888"
+NEW_XWIKI="NEWXWIKISENTINEL999999999999999999"
+OLD_PLAUSIBLE="OLDPLAUSIBLESENTINELAAAAAAAAAAAAAA"
+NEW_PLAUSIBLE="NEWPLAUSIBLESENTINELBBBBBBBBBBBBBB"
+OLD_PG="OLDPGSENTINELCCCCCCCCCCCCCCCCCCCCC"
+NEW_PG="NEWPGSENTINELDDDDDDDDDDDDDDDDDDDDD"
+# The ClickHouse password in service holds `&` and `%`: kept literal in the DDL of the dictionaries on rollback.
+OLD_CH="OLDCH&SENTINEL%EEEEEEEEEEEEEEEEEEE"
+NEW_CH="NEWCHSENTINELFFFFFFFFFFFFFFFFFFFFF"
+# The b2b default in service holds punctuation: single-quoted in infra.env on rollback.
+OLD_B2B="OLDB2B%SENTINEL!GGGGGGGGGGGGGGGGGGG"
+NEW_B2B="NEWB2BSENTINELHHHHHHHHHHHHHHHHHHHH"
+# Google OAuth clients are lower case: the leak checks below ignore case.
+OLD_GOOGLE_ID="111111111111-oldgooglesentinel0000000000000000.apps.googleusercontent.com"
+NEW_GOOGLE_ID="222222222222-newgooglesentinel1111111111111111.apps.googleusercontent.com"
+OLD_GOOGLE_SECRET="GOCSPX-OLDGOOGLESENTINEL_iiiiiiiii"
+NEW_GOOGLE_SECRET="GOCSPX-NEWGOOGLESENTINEL-jjjjjjjjj"
+SENTINELS="SENTINEL"
+
+failures=0
+pass() { echo "ok   - $1"; }
+ko() { echo "FAIL - $1"; failures=$((failures + 1)); }
+
+run() {
+  set +e
+  out="$("$@" 2>&1)"
+  status=$?
+  set -e
+}
+
+# No value in the output, the summary or any command line (ssh, curl, docker arguments).
+no_value_leaked() {
+  ! printf '%s' "${out}" | grep -qi "${SENTINELS}" && ! grep -qi "${SENTINELS}" "${CALLS}" "${GITHUB_STEP_SUMMARY}"
+}
+
+# No dictionary DDL in the output (even with its password hidden), nor on a command line.
+no_ddl_printed() {
+  ! printf '%s' "${out}" | grep -q -e 'SOURCE(' -e 'HIDDEN' -e 'CREATE' && ! grep -q -e 'SOURCE(' -e 'CREATE' "${CALLS}"
+}
+
+check() {
+  local label=$1
+  shift
+  if "$@"; then pass "${label}"; else ko "${label}: ${out}"; fi
+}
+
+reset_host() {
+  rm -rf "${FAKE_ROOT:?}"/* "${FAKE_ES:?}"/* "${FAKE_MYSQL:?}"/* "${FAKE_XWIKI_DATA:?}"/* "${FAKE_KIBANA_YML}" \
+    "${FAKE_GOOGLE}" "${FAKE_GOOGLE}.down" \
+    "${FAKE_DB:?}"/* "${FAKE_ENV:?}"/* "${FAKE_LOGS:?}"/*
+  : > "${CALLS}"
+  : > "${GITHUB_STEP_SUMMARY}"
+  mkdir -p "${ETC}" "${OPT}/bin" "${OPT}/runtime" "${OPT}/latest/beta" "${OPT}/latest/prod"
+  for svc in front-api api ui b2b-api; do
+    echo jar > "${OPT}/runtime/${svc}.jar"
+    echo jar > "${OPT}/latest/${svc}-latest.jar"
+    mkdir -p "${OPT}/config/beta/${svc}"
+    printf 'spring:\n  elasticsearch:\n    uris: localhost:9200\n    username: elastic\n    password: "%s"\n  mail:\n    password: other\n' \
+      "${OLD_ELASTIC}" > "${OPT}/config/beta/${svc}/application-active.yml"
+  done
+  printf '#!/bin/sh\necho "publish-jars $*" >> "%s"\n' "${WORK}/restarts.log" > "${OPT}/bin/publish-jars.sh"
+  # publish-infra.sh of open4goods-config step d-infra: reads /etc/open4goods/infra.env, INFRA_SERVICES. Recreating
+  # plausible_events_db sets the ClickHouse password from CLICKHOUSE_PASSWORD, as the image's entrypoint does.
+  cat > "${OPT}/bin/publish-infra.sh" <<PUBLISH
+#!/bin/sh
+# /etc/open4goods/infra.env
+echo "publish-infra \$* INFRA_SERVICES=\$INFRA_SERVICES" >> "${WORK}/restarts.log"
+case " \$INFRA_SERVICES " in
+  *" plausible_events_db "*)
+    sed -n 's/^CLICKHOUSE_PASSWORD=//p' "${ETC}/infra.env" | sed "s/^'\\(.*\\)'\$/\\1/" | tr -d '\n' \
+      > "${FAKE_DB}/plausible_events_db.default"
+    ;;
+esac
+case " \$INFRA_SERVICES " in
+  *" plausible "*) sh "${WORK}/plausible-recreate" "${ETC}/infra.env" "${OPT}/config/\$1/infra/.env" ;;
+esac
+PUBLISH
+  : > "${WORK}/restarts.log"
+  printf '%s' "${OLD_ELASTIC}" > "${FAKE_ES}/elastic"
+  printf '%s' "${OLD_KIBANA}" > "${FAKE_ES}/kibana_system"
+}
+
+
+########################################
+# infra-secrets.sh: arguments and values (runner)
+########################################
+reset_host
+run "${DEPLOY}/infra-secrets.sh" check beta mysql
+check "mysql is prod only" [ "${status}" -ne 0 ]
+run "${DEPLOY}/infra-secrets.sh" check prod plausible
+check "plausible is beta only" [ "${status}" -ne 0 ]
+run "${DEPLOY}/infra-secrets.sh" remote apply beta elasticsearch
+check "unknown remote action" [ "${status}" -ne 0 ]
+O4G_ELASTICSEARCH_PASSWORD="SHORTSENTINEL" run "${DEPLOY}/infra-secrets.sh" check beta elasticsearch
+check "a value shorter than 32 characters fails without being printed" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"shorter than 32"* ]] && [[ "$1" != *SENTINEL* ]]' "${status}" "${out}"
+O4G_ELASTICSEARCH_PASSWORD="${NEW_ELASTIC}+x" run "${DEPLOY}/infra-secrets.sh" check beta elasticsearch
+check "a value outside [A-Za-z0-9._-] fails without being printed" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"outside [A-Za-z0-9._-]"* ]] && [[ "$1" != *SENTINEL* ]]' "${status}" "${out}"
+run env -u O4G_ELASTICSEARCH_PASSWORD "${DEPLOY}/infra-secrets.sh" check beta elasticsearch
+check "check without the new value is a dry run (warning)" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"::warning::O4G_ELASTICSEARCH_PASSWORD is not set"* ]]' "${status}" "${out}"
+run env -u O4G_ELASTICSEARCH_PASSWORD "${DEPLOY}/infra-secrets.sh" remote source beta elasticsearch
+check "source without the new value fails" [ "${status}" -ne 0 ]
+O4G_ELASTICSEARCH_PASSWORD="${NEW_ELASTIC}" run "${DEPLOY}/infra-secrets.sh" check beta elasticsearch
+check "check passes with a strong value, no SSH" \
+  bash -c '[ "$0" -eq 0 ] && [ ! -s "$1" ]' "${status}" "${CALLS}"
+
+########################################
+# elasticsearch: test, source (idempotent), render, restart, rollback
+########################################
+reset_host
+run env -u O4G_ELASTICSEARCH_PASSWORD "${DEPLOY}/infra-secrets.sh" remote test beta elasticsearch
+check "test without the new value finds the password in service (application-active.yml)" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"found (candidate-yml-front-api) and accepted (no new value yet)"* ]]' \
+  "${status}" "${out}"
+check "test writes nothing" bash -c '[ ! -e "$0/infra-previous.env" ] && [ ! -e "$0/secrets" ]' "${ETC}"
+
+export O4G_ELASTICSEARCH_PASSWORD="${NEW_ELASTIC}"
+run "${DEPLOY}/infra-secrets.sh" remote test beta elasticsearch
+check "test reports the change source would make" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"source would change it"* ]]' "${status}" "${out}"
+check "test leaves Elasticsearch unchanged" [ "$(cat "${FAKE_ES}/elastic")" = "${OLD_ELASTIC}" ]
+
+cp "${OPT}/latest/api-latest.jar" "${WORK}/api.jar" && echo other > "${OPT}/runtime/api.jar"
+run "${DEPLOY}/infra-secrets.sh" remote test beta elasticsearch
+check "test refuses a running JAR that is not the latest" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"differs from"* ]]' "${status}" "${out}"
+cp "${WORK}/api.jar" "${OPT}/runtime/api.jar"
+
+run "${DEPLOY}/infra-secrets.sh" remote restart beta elasticsearch
+check "restart refuses before source" bash -c '[ "$0" -ne 0 ] && [ ! -s "$1" ]' "${status}" "${WORK}/restarts.log"
+
+run "${DEPLOY}/infra-secrets.sh" remote source beta elasticsearch
+check "source changes the password of elastic" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "$2" ]' "${status}" "${FAKE_ES}/elastic" "${NEW_ELASTIC}"
+check "source keeps the previous value (600)" \
+  bash -c 'grep -qx "O4G_ELASTICSEARCH_PASSWORD=$1" "$0" && [ "$(stat -c %a "$0")" = 600 ]' \
+  "${ETC}/infra-previous.env" "${OLD_ELASTIC}"
+check "source prints no value" no_value_leaked
+
+run "${DEPLOY}/infra-secrets.sh" remote source beta elasticsearch
+check "source is idempotent" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"already accepts the new password of elastic: nothing to change"* ]] \
+    && grep -qx "O4G_ELASTICSEARCH_PASSWORD=$3" "$2"' "${status}" "${out}" "${ETC}/infra-previous.env" "${OLD_ELASTIC}"
+
+run "${DEPLOY}/infra-secrets.sh" remote restart beta elasticsearch
+check "restart refuses before the render" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"render it first"* ]] && [ ! -s "$2" ]' "${status}" "${out}" "${WORK}/restarts.log"
+
+for svc in front-api api ui b2b-api; do
+  run "${DEPLOY}/render-service-secrets.sh" --source apply beta "${svc}"
+  [ "${status}" -eq 0 ] || ko "render --source ${svc}: ${out}"
+done
+check "render --source writes the config tree of the 4 consumers" \
+  bash -c 'for s in front-api api ui b2b-api; do [ "$(cat "$0/secrets/$s/spring.elasticsearch.password")" = "$1" ] || exit 1; done' \
+  "${ETC}" "${NEW_ELASTIC}"
+check "render --source writes only the source rows (no other api secret, no warning about them)" \
+  bash -c '[ "$(ls "$0/secrets/api")" = spring.elasticsearch.password ]' "${ETC}"
+
+run "${DEPLOY}/infra-secrets.sh" remote restart beta elasticsearch
+check "restart restarts front-api, api, ui, b2b-api in that order" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "$(printf "publish-jars beta restart %s\n" front-api api ui b2b-api)" ]' \
+  "${status}" "${WORK}/restarts.log"
+check "restart prints no value" no_value_leaked
+
+: > "${WORK}/restarts.log"
+run "${DEPLOY}/infra-secrets.sh" remote rollback beta elasticsearch
+check "rollback puts the previous password back at the source and in the trees, then restarts" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1/elastic")" = "$3" ] && [ "$(cat "$2/secrets/api/spring.elasticsearch.password")" = "$3" ] \
+    && [ "$(wc -l < "$4")" -eq 4 ]' "${status}" "${FAKE_ES}" "${ETC}" "${OLD_ELASTIC}" "${WORK}/restarts.log"
+check "rollback prints no value" no_value_leaked
+unset O4G_ELASTICSEARCH_PASSWORD
+
+########################################
+# kibana: prerequisites, source, render, restart (re-encryption)
+########################################
+reset_host
+printf 'elasticsearch.username: kibana_system\nelasticsearch.password: %s\nxpack.encryptedSavedObjects:\n  encryptionKey: "%s"\n' \
+  "${OLD_KIBANA}" "${OLD_KEY}" > "${OPT}/bin/kibana.yml"
+cp "${OPT}/bin/kibana.yml" "${OPT}/latest/beta/kibana.yml"
+export INFRA_KIBANA_SYSTEM_PASSWORD="${NEW_KIBANA}" INFRA_KIBANA_ENCRYPTION_KEY="${NEW_KEY}"
+run "${DEPLOY}/infra-secrets.sh" remote test beta kibana
+check "kibana test fails until open4goods-config step d-infra is deployed" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"deploy open4goods-config step d-infra first"* ]]' "${status}" "${out}"
+# shellcheck disable=SC2016 # literal placeholders.
+printf 'elasticsearch.password: ${INFRA_KIBANA_SYSTEM_PASSWORD}\nencryptionKey: ${INFRA_KIBANA_ENCRYPTION_KEY}\ndecryptionOnlyKeys: ["${INFRA_KIBANA_PREVIOUS_ENCRYPTION_KEY}"]\n' \
+  > "${OPT}/latest/beta/kibana.yml"
+# shellcheck disable=SC2016 # literal placeholders.
+printf '      INFRA_KIBANA_SYSTEM_PASSWORD: ${INFRA_KIBANA_SYSTEM_PASSWORD:?}\n      INFRA_KIBANA_ENCRYPTION_KEY: ${INFRA_KIBANA_ENCRYPTION_KEY:?}\n      INFRA_KIBANA_PREVIOUS_ENCRYPTION_KEY: ${INFRA_KIBANA_PREVIOUS_ENCRYPTION_KEY:?}\n' \
+  > "${OPT}/latest/beta/docker-compose.infra.yml"
+run "${DEPLOY}/infra-secrets.sh" remote test beta kibana
+check "kibana test finds kibana_system and the key in service (kibana.yml)" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"kibana_system in service is found (candidate-kibana-yml)"* ]] \
+    && [[ "$1" == *"keep it as the decryption-only key"* ]]' "${status}" "${out}"
+# Another target's publish-infra.sh already copied the d-infra kibana.yml to bin/: the running container still has
+# the literal values in service.
+mv "${OPT}/bin/kibana.yml" "${FAKE_KIBANA_YML}"
+cp "${OPT}/latest/beta/kibana.yml" "${OPT}/bin/kibana.yml"
+run "${DEPLOY}/infra-secrets.sh" remote test beta kibana
+check "kibana test reads the values in service from the running container once bin/kibana.yml has placeholders" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"kibana_system in service is found (candidate-kibana-container)"* ]]' "${status}" "${out}"
+run "${DEPLOY}/infra-secrets.sh" remote source beta kibana
+check "kibana source changes kibana_system and makes the key in service decryption-only" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1/kibana_system")" = "$3" ] \
+    && grep -Fqx "INFRA_KIBANA_PREVIOUS_ENCRYPTION_KEY='"'"'$4'"'"'" "$2/infra.env" \
+    && grep -Fqx "INFRA_KIBANA_ENCRYPTION_KEY=$4" "$2/infra-previous.env" \
+    && grep -qx "INFRA_KIBANA_SYSTEM_PASSWORD=$5" "$2/infra-previous.env"' \
+  "${status}" "${FAKE_ES}" "${ETC}" "${NEW_KIBANA}" "${OLD_KEY}" "${OLD_KIBANA}"
+run "${DEPLOY}/render-service-secrets.sh" --source apply beta infra
+check "render --source infra writes the Kibana lines and keeps the decryption-only key" \
+  bash -c '[ "$0" -eq 0 ] && grep -qx "INFRA_KIBANA_SYSTEM_PASSWORD=$2" "$1" && grep -qx "INFRA_KIBANA_ENCRYPTION_KEY=$3" "$1" \
+    && grep -Fqx "INFRA_KIBANA_PREVIOUS_ENCRYPTION_KEY='"'"'$4'"'"'" "$1" && [ "$(stat -c %a "$1")" = 600 ]' \
+  "${status}" "${ETC}/infra.env" "${NEW_KIBANA}" "${NEW_KEY}" "${OLD_KEY}"
+run "${DEPLOY}/infra-secrets.sh" remote source beta kibana
+check "kibana source is idempotent after the render (the new key is never made decryption-only)" \
+  bash -c '[ "$0" -eq 0 ] && grep -Fqx "INFRA_KIBANA_PREVIOUS_ENCRYPTION_KEY='"'"'$2'"'"'" "$1"' "${status}" "${ETC}/infra.env" "${OLD_KEY}"
+run "${DEPLOY}/infra-secrets.sh" remote restart beta kibana
+check "kibana restart recreates Kibana only, then re-encrypts the saved objects" \
+  bash -c '[ "$0" -eq 0 ] && grep -qx "publish-infra beta INFRA_SERVICES=kibana" "$1" && [[ "$2" == *"\"successful\":2"* ]]' \
+  "${status}" "${WORK}/restarts.log" "${out}"
+run "${DEPLOY}/infra-secrets.sh" remote rollback beta kibana
+check "kibana rollback: previous kibana_system and key back, the new key decryption-only" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1/kibana_system")" = "$3" ] \
+    && grep -Fqx "INFRA_KIBANA_ENCRYPTION_KEY='"'"'$4'"'"'" "$2/infra.env" \
+    && grep -Fqx "INFRA_KIBANA_PREVIOUS_ENCRYPTION_KEY=$5" "$2/infra.env" \
+    && grep -Fqx "INFRA_KIBANA_SYSTEM_PASSWORD=$3" "$2/infra.env"' \
+  "${status}" "${FAKE_ES}" "${ETC}" "${OLD_KIBANA}" "${OLD_KEY}" "${NEW_KEY}"
+check "kibana prints no value" no_value_leaked
+unset INFRA_KIBANA_SYSTEM_PASSWORD INFRA_KIBANA_ENCRYPTION_KEY
+
+########################################
+# mysql (prod): ALTER USER, persisted hibernate.cfg.xml, restart of XWiki only
+########################################
+reset_host
+printf '%s' "${OLD_ROOT}" > "${FAKE_MYSQL}/root"
+printf '%s' "${OLD_XWIKI}" > "${FAKE_MYSQL}/xwiki"
+printf '    environment:\n      - DB_USER=xwiki\n      - DB_PASSWORD=%s\n      - MYSQL_ROOT_PASSWORD=%s\n' \
+  "${OLD_XWIKI}" "${OLD_ROOT}" > "${OPT}/bin/docker-compose.infra.yml"
+# shellcheck disable=SC2016 # literal placeholders.
+printf '      - DB_PASSWORD=${INFRA_XWIKI_DB_PASSWORD:?}\n      - MYSQL_ROOT_PASSWORD=${INFRA_MYSQL_ROOT_PASSWORD:?}\n' \
+  > "${OPT}/latest/prod/docker-compose.infra.yml"
+printf '<property name="hibernate.connection.url">jdbc:mysql://mysql/xwiki</property>\n<property name="hibernate.connection.password">%s</property>\n' \
+  "${OLD_XWIKI}" > "${FAKE_XWIKI_DATA}/hibernate.cfg.xml"
+export INFRA_XWIKI_DB_PASSWORD="${NEW_XWIKI}" INFRA_MYSQL_ROOT_PASSWORD="${NEW_ROOT}"
+run "${DEPLOY}/infra-secrets.sh" remote test prod mysql
+check "mysql test finds root and xwiki in service (compose)" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"root in service is found (candidate-root-compose)"* ]] \
+    && [[ "$1" == *"xwiki in service is found (candidate-xwiki-compose)"* ]]' "${status}" "${out}"
+run "${DEPLOY}/infra-secrets.sh" remote source prod mysql
+check "mysql source changes xwiki and root, and the persisted hibernate.cfg.xml" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1/xwiki")" = "$3" ] && [ "$(cat "$1/root")" = "$4" ] \
+    && grep -q "connection.password\">$3<" "$2" && grep -q "connection.url\">jdbc:mysql://mysql/xwiki<" "$2"' \
+  "${status}" "${FAKE_MYSQL}" "${FAKE_XWIKI_DATA}/hibernate.cfg.xml" "${NEW_XWIKI}" "${NEW_ROOT}"
+run "${DEPLOY}/infra-secrets.sh" remote source prod mysql
+check "mysql source is idempotent" bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"already accepts the new password of root"* ]]' \
+  "${status}" "${out}"
+run "${DEPLOY}/render-service-secrets.sh" --source apply prod infra
+run "${DEPLOY}/infra-secrets.sh" remote restart prod mysql
+check "mysql restart recreates XWiki only" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "publish-infra prod INFRA_SERVICES=xwiki" ]' "${status}" "${WORK}/restarts.log"
+: > "${WORK}/restarts.log"
+run "${DEPLOY}/infra-secrets.sh" remote rollback prod mysql
+check "mysql rollback restores both users, hibernate.cfg.xml and infra.env" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1/xwiki")" = "$4" ] && [ "$(cat "$1/root")" = "$5" ] \
+    && grep -q "connection.password\">$4<" "$2" && grep -qx "INFRA_XWIKI_DB_PASSWORD=$4" "$3"' \
+  "${status}" "${FAKE_MYSQL}" "${FAKE_XWIKI_DATA}/hibernate.cfg.xml" "${ETC}/infra.env" "${OLD_XWIKI}" "${OLD_ROOT}"
+check "mysql prints no value" no_value_leaked
+unset INFRA_XWIKI_DB_PASSWORD INFRA_MYSQL_ROOT_PASSWORD
+
+########################################
+# plausible (beta): key kept, render overrides config/<env>/infra/.env, restart
+########################################
+reset_host
+mkdir -p "${OPT}/config/beta/infra"
+printf 'PLAUSIBLE_BASE_URL=https://plausible.example\nPLAUSIBLE_SECRET_KEY_BASE=%s\n' "${OLD_PLAUSIBLE}" \
+  > "${OPT}/config/beta/infra/.env"
+export INFRA_PLAUSIBLE_SECRET_KEY_BASE="${NEW_PLAUSIBLE}"
+printf 'growth\nmetriks\n' > "${FAKE_DB}/api-keys"
+run "${DEPLOY}/infra-secrets.sh" remote source beta plausible
+check "plausible source reports the API keys to recreate, names only" \
+  bash -c '[[ "$0" == *"Plausible API keys: 2 (growth, metriks)"*"recreate"* ]]' "${out}"
+rm -f "${FAKE_DB}/api-keys"
+run "${DEPLOY}/infra-secrets.sh" remote test beta plausible
+check "plausible test answers unknown when the API keys query fails" \
+  bash -c '[[ "$0" == *"Plausible API keys: unknown"* ]]' "${out}"
+printf 'growth\nmetriks\n' > "${FAKE_DB}/api-keys"
+run "${DEPLOY}/infra-secrets.sh" remote source beta plausible
+check "plausible source keeps the key in service and reports TOTP users" \
+  bash -c '[ "$0" -eq 0 ] && grep -qx "INFRA_PLAUSIBLE_SECRET_KEY_BASE=$3" "$1" && [[ "$2" == *"TOTP enabled"*": 0"* ]]' \
+  "${status}" "${ETC}/infra-previous.env" "${out}" "${OLD_PLAUSIBLE}"
+run "${DEPLOY}/render-service-secrets.sh" --source apply beta infra
+run "${DEPLOY}/infra-secrets.sh" remote restart beta plausible
+check "plausible restart after the render" \
+  bash -c '[ "$0" -eq 0 ] && grep -qx "PLAUSIBLE_SECRET_KEY_BASE=$3" "$1" && grep -qx "publish-infra beta INFRA_SERVICES=plausible" "$2"' \
+  "${status}" "${ETC}/infra.env" "${WORK}/restarts.log" "${NEW_PLAUSIBLE}"
+check "plausible prints no value" no_value_leaked
+unset INFRA_PLAUSIBLE_SECRET_KEY_BASE
+
+########################################
+# plausible-postgres (beta): ALTER USER over TCP, render, restart of Plausible only
+########################################
+reset_host
+mkdir -p "${OPT}/config/beta/infra"
+printf 'PLAUSIBLE_BASE_URL=https://plausible.example\n' > "${OPT}/config/beta/infra/.env"
+# The literal default of open4goods-config is the value in service; the compose of d-infra still reads the variable.
+# shellcheck disable=SC2016 # literal placeholders.
+printf '      POSTGRES_PASSWORD: ${PLAUSIBLE_PG_PASSWORD:-%s}\n      DATABASE_URL: postgres://postgres:${PLAUSIBLE_PG_PASSWORD:-%s}@plausible_db:5432/plausible\n' \
+  "${OLD_PG}" "${OLD_PG}" > "${OPT}/bin/docker-compose.infra.yml"
+cp "${OPT}/bin/docker-compose.infra.yml" "${OPT}/latest/beta/docker-compose.infra.yml"
+printf '%s' "${OLD_PG}" > "${FAKE_DB}/plausible_db.postgres"
+export INFRA_PLAUSIBLE_PG_PASSWORD="${NEW_PG}"
+run "${DEPLOY}/infra-secrets.sh" check prod plausible-postgres
+check "plausible-postgres is beta only" [ "${status}" -ne 0 ]
+touch "${FAKE_DB}/trust"
+run "${DEPLOY}/infra-secrets.sh" remote test beta plausible-postgres
+check "plausible-postgres test refuses a Postgres that accepts any password" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"accepts any password over TCP"* ]]' "${status}" "${out}"
+rm -f "${FAKE_DB}/trust"
+run "${DEPLOY}/infra-secrets.sh" remote test beta plausible-postgres
+check "plausible-postgres test finds the password in service (compose default)" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"postgres in service is found (candidate-compose)"* ]] \
+    && [ "$(cat "$2")" = "$3" ] && [ ! -e "$4" ]' \
+  "${status}" "${out}" "${FAKE_DB}/plausible_db.postgres" "${OLD_PG}" "${ETC}/infra-previous.env"
+run "${DEPLOY}/infra-secrets.sh" remote restart beta plausible-postgres
+check "plausible-postgres restart refuses before source" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"run source first"* ]] && [ ! -s "$2" ]' "${status}" "${out}" "${WORK}/restarts.log"
+run "${DEPLOY}/infra-secrets.sh" remote source beta plausible-postgres
+check "plausible-postgres source changes postgres and keeps the previous value" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "$3" ] && grep -qx "INFRA_PLAUSIBLE_PG_PASSWORD=$4" "$2"' \
+  "${status}" "${FAKE_DB}/plausible_db.postgres" "${ETC}/infra-previous.env" "${NEW_PG}" "${OLD_PG}"
+run "${DEPLOY}/infra-secrets.sh" remote source beta plausible-postgres
+check "plausible-postgres source is idempotent" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"already accepts the new password of postgres: nothing to change"* ]]' \
+  "${status}" "${out}"
+run "${DEPLOY}/infra-secrets.sh" remote restart beta plausible-postgres
+check "plausible-postgres restart refuses before the render" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"render it first"* ]] && [ ! -s "$2" ]' "${status}" "${out}" "${WORK}/restarts.log"
+run "${DEPLOY}/render-service-secrets.sh" --source apply beta infra
+check "render --source infra writes PLAUSIBLE_PG_PASSWORD only" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "PLAUSIBLE_PG_PASSWORD=$2" ]' "${status}" "${ETC}/infra.env" "${NEW_PG}"
+run "${DEPLOY}/infra-secrets.sh" remote restart beta plausible-postgres
+check "plausible-postgres restart recreates Plausible only" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "publish-infra beta INFRA_SERVICES=plausible" ]' "${status}" "${WORK}/restarts.log"
+: > "${WORK}/restarts.log"
+run "${DEPLOY}/infra-secrets.sh" remote rollback beta plausible-postgres
+check "plausible-postgres rollback restores postgres and infra.env, recreates Plausible" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "$3" ] && grep -qx "PLAUSIBLE_PG_PASSWORD=$3" "$2" \
+    && grep -qx "publish-infra beta INFRA_SERVICES=plausible" "$4"' \
+  "${status}" "${FAKE_DB}/plausible_db.postgres" "${ETC}/infra.env" "${OLD_PG}" "${WORK}/restarts.log"
+check "plausible-postgres prints no value" no_value_leaked
+unset INFRA_PLAUSIBLE_PG_PASSWORD
+
+########################################
+# plausible-clickhouse (beta): the password changes when ClickHouse is recreated, then its dictionaries, then Plausible
+########################################
+reset_host
+mkdir -p "${OPT}/config/beta/infra" "${FAKE_DB}/dicts" "${WORK}/dicts"
+: > "${OPT}/config/beta/infra/.env"
+# shellcheck disable=SC2016 # literal placeholders.
+printf '      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-x}\n' > "${OPT}/bin/docker-compose.infra.yml"
+cp "${OPT}/bin/docker-compose.infra.yml" "${OPT}/latest/beta/docker-compose.infra.yml"
+# The running Plausible holds the value in service in its URL (the compose default above is not it).
+printf 'http://default:%s@plausible_events_db:8123/plausible_events_db' "${OLD_CH}" \
+  > "${FAKE_ENV}/plausible.CLICKHOUSE_DATABASE_URL"
+printf '%s' "${OLD_CH}" > "${FAKE_DB}/plausible_events_db.default"
+# Dictionaries of Plausible's migrations (source: this ClickHouse, with the password of their creation), one already
+# failing, and one this target leaves alone. Their DDL as created is kept in $WORK/dicts.
+seed_dictionary() {
+  printf 'CREATE DICTIONARY plausible_events_db.%s\n(\n    `referrer_source` String\n)\nPRIMARY KEY referrer_source\nSOURCE(%s)\nLIFETIME(MIN 0 MAX 0)\nLAYOUT(%s)\n' \
+    "$1" "$2" "$3" > "${WORK}/dicts/$1.ddl"
+  cp "${WORK}/dicts/$1.ddl" "${FAKE_DB}/dicts/$1.ddl"
+  echo "$4" > "${FAKE_DB}/dicts/$1.status"
+}
+ch_source="CLICKHOUSE(TABLE 'x' DB 'plausible_events_db' USER 'default' PASSWORD '${OLD_CH}')" # ggignore
+seed_dictionary location_data_dict "${ch_source/\'x\'/\'location_data\'}" 'COMPLEX_KEY_CACHE(SIZE_IN_CELLS 500000)' NOT_LOADED
+seed_dictionary acquisition_channel_paid_sources_dict "${ch_source/\'x\'/\'acquisition_channel_paid_sources\'}" 'HASHED()' LOADED
+seed_dictionary acquisition_channel_source_category_dict "${ch_source/\'x\'/\'acquisition_channel_source_category\'}" 'HASHED()' FAILED
+seed_dictionary other_http_dict "HTTP(URL 'http://example.invalid/x.csv' FORMAT 'CSVWithNames')" 'HASHED()' LOADED
+concerned_dicts="acquisition_channel_paid_sources_dict acquisition_channel_source_category_dict location_data_dict"
+# True when every concerned dictionary holds the password $1 and nothing else changed, other_http_dict untouched.
+dictionaries_hold() {
+  for d in ${concerned_dicts}; do
+    [ "$(sed "s/PASSWORD '[^']*'/PASSWORD 'P'/" "${FAKE_DB}/dicts/$d.ddl")" \
+      = "$(sed "s/PASSWORD '[^']*'/PASSWORD 'P'/" "${WORK}/dicts/$d.ddl")" ] || return 1
+    [ "$(sed -n "s/.*PASSWORD '\([^']*\)'.*/\1/p" "${FAKE_DB}/dicts/$d.ddl")" = "$1" ] || return 1
+  done
+  cmp -s "${FAKE_DB}/dicts/other_http_dict.ddl" "${WORK}/dicts/other_http_dict.ddl"
+}
+dictionaries_loaded() {
+  for d in ${concerned_dicts}; do
+    [ "$(cat "${FAKE_DB}/dicts/$d.status")" = LOADED ] || return 1
+  done
+}
+dictionaries_ok() { dictionaries_hold "$1" && dictionaries_loaded; }
+export INFRA_CLICKHOUSE_PASSWORD="${NEW_CH}"
+run "${DEPLOY}/infra-secrets.sh" remote test beta plausible-clickhouse
+check "plausible-clickhouse test finds the password in service (Plausible's URL)" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"default in service is found (candidate-plausible-container)"* ]]' "${status}" "${out}"
+check "plausible-clickhouse test lists the dictionaries restart recreates, by name and status, and flags a failing one" \
+  bash -c '[[ "$0" == *"3 dictionary(ies) of plausible_events_db read this ClickHouse as default with a password"* ]] \
+    && [[ "$0" == *"dictionary location_data_dict: NOT_LOADED; restart would recreate it with the new password"* ]] \
+    && [[ "$0" == *"dictionary acquisition_channel_paid_sources_dict: LOADED; restart would recreate it"* ]] \
+    && [[ "$0" == *"dictionary acquisition_channel_source_category_dict: FAILED, already failing"* ]] \
+    && [[ "$0" == *"dictionary other_http_dict: LOADED, not changed by this target (source=HTTP)"* ]]' "${out}"
+check "plausible-clickhouse test changes no dictionary" dictionaries_hold "${OLD_CH}"
+check "plausible-clickhouse test prints no value" no_value_leaked
+check "plausible-clickhouse test prints no DDL" no_ddl_printed
+run "${DEPLOY}/infra-secrets.sh" remote restart beta plausible-clickhouse
+check "plausible-clickhouse restart refuses before the render" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"render it first"* ]] && [ ! -s "$2" ]' "${status}" "${out}" "${WORK}/restarts.log"
+run "${DEPLOY}/render-service-secrets.sh" --source apply beta infra
+run "${DEPLOY}/infra-secrets.sh" remote restart beta plausible-clickhouse
+check "plausible-clickhouse restart refuses before source (no previous value kept)" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"run source first"* ]] && [ ! -s "$2" ]' "${status}" "${out}" "${WORK}/restarts.log"
+run "${DEPLOY}/infra-secrets.sh" remote source beta plausible-clickhouse
+check "plausible-clickhouse source keeps the value in service, changes nothing yet" \
+  bash -c '[ "$0" -eq 0 ] && grep -Fqx "INFRA_CLICKHOUSE_PASSWORD=$3" "$1" && [ "$(cat "$2")" = "$3" ]' \
+  "${status}" "${ETC}/infra-previous.env" "${FAKE_DB}/plausible_events_db.default" "${OLD_CH}"
+check "plausible-clickhouse source changes no dictionary" dictionaries_hold "${OLD_CH}"
+# A broken dictionary: restart stops before Plausible and points to the rollback.
+touch "${FAKE_DB}/dicts/location_data_dict.broken"
+run "${DEPLOY}/infra-secrets.sh" remote restart beta plausible-clickhouse
+check "plausible-clickhouse restart fails when a dictionary is not LOADED, before Plausible, pointing to the rollback" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"dictionary location_data_dict is FAILED after its reload"* ]] \
+    && [[ "$1" == *"mode=rollback"* ]] && [ "$(cat "$2")" = "publish-infra beta INFRA_SERVICES=plausible_events_db" ]' \
+  "${status}" "${out}" "${WORK}/restarts.log"
+check "plausible-clickhouse failed restart prints no value" no_value_leaked
+rm -f "${FAKE_DB}/dicts/location_data_dict.broken"
+: > "${WORK}/restarts.log"
+run "${DEPLOY}/infra-secrets.sh" remote restart beta plausible-clickhouse
+check "plausible-clickhouse restart (re-run) recreates the dictionaries with the new password, then Plausible" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "$3" ] && [ "$(cat "$2")" = "publish-infra beta INFRA_SERVICES=plausible" ]' \
+  "${status}" "${FAKE_DB}/plausible_events_db.default" "${WORK}/restarts.log" "${NEW_CH}"
+check "plausible-clickhouse restart: same DDL but the password, other dictionaries untouched" dictionaries_hold "${NEW_CH}"
+check "plausible-clickhouse restart: the dictionaries are LOADED, then Plausible writes" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"dictionary location_data_dict recreated with the expected password and reloaded: LOADED"* ]] \
+    && [[ "$1" == *"no ClickHouse authentication failure (Code: 516) in the logs of plausible since"* ]] \
+    && [[ "$1" == *"events written to plausible_events_db.events_v2 since"*": 3"* ]]' "${status}" "${out}"
+check "plausible-clickhouse restart leaves every dictionary LOADED" dictionaries_loaded
+check "plausible-clickhouse restart prints no value" no_value_leaked
+check "plausible-clickhouse restart prints no DDL" no_ddl_printed
+
+# First apply from scratch: back to the value in service, then a full restart (ClickHouse recreated first).
+printf '%s' "${OLD_CH}" > "${FAKE_DB}/plausible_events_db.default"
+for d in ${concerned_dicts}; do cp "${WORK}/dicts/$d.ddl" "${FAKE_DB}/dicts/$d.ddl"; done
+: > "${WORK}/restarts.log"
+run "${DEPLOY}/infra-secrets.sh" remote restart beta plausible-clickhouse
+check "plausible-clickhouse restart recreates ClickHouse, which takes the new password, its dictionaries, then Plausible" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "$3" ] \
+    && [ "$(cat "$2")" = "$(printf "publish-infra beta INFRA_SERVICES=%s\n" plausible_events_db plausible)" ]' \
+  "${status}" "${FAKE_DB}/plausible_events_db.default" "${WORK}/restarts.log" "${NEW_CH}"
+check "plausible-clickhouse restart from scratch: dictionaries hold the new password and are LOADED" \
+  dictionaries_ok "${NEW_CH}"
+: > "${WORK}/restarts.log"
+run "${DEPLOY}/infra-secrets.sh" remote restart beta plausible-clickhouse
+check "plausible-clickhouse restart is idempotent (ClickHouse not recreated again, dictionaries unchanged)" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "publish-infra beta INFRA_SERVICES=plausible" ]' "${status}" "${WORK}/restarts.log"
+check "plausible-clickhouse idempotent restart keeps the dictionaries" dictionaries_hold "${NEW_CH}"
+# Plausible still fails to write (Code: 516 in its logs): restart fails, pointing to the rollback.
+touch "${FAKE_DB}/plausible-516"
+run "${DEPLOY}/infra-secrets.sh" remote restart beta plausible-clickhouse
+check "plausible-clickhouse restart fails when Plausible logs Code: 516, pointing to the rollback" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"plausible logged 1 ClickHouse authentication failure(s) (Code: 516)"* ]] \
+    && [[ "$1" == *"mode=rollback for plausible-clickhouse"* ]]' "${status}" "${out}"
+check "plausible-clickhouse failed write check prints no value" no_value_leaked
+rm -f "${FAKE_DB}/plausible-516"
+: > "${WORK}/restarts.log"
+run "${DEPLOY}/infra-secrets.sh" remote rollback beta plausible-clickhouse
+check "plausible-clickhouse rollback puts the previous password back in infra.env and ClickHouse" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "$3" ] && grep -Fqx "CLICKHOUSE_PASSWORD='"'"'$3'"'"'" "$2"' \
+  "${status}" "${FAKE_DB}/plausible_events_db.default" "${ETC}/infra.env" "${OLD_CH}"
+check "plausible-clickhouse rollback recreates the dictionaries as created (previous password), LOADED" \
+  dictionaries_ok "${OLD_CH}"
+check "plausible-clickhouse rollback checks that Plausible writes" \
+  bash -c '[[ "$0" == *"no ClickHouse authentication failure (Code: 516) in the logs of plausible since"* ]]' "${out}"
+check "plausible-clickhouse rollback prints no value" no_value_leaked
+check "plausible-clickhouse rollback prints no DDL" no_ddl_printed
+unset INFRA_CLICKHOUSE_PASSWORD
+
+########################################
+# plausible-google (beta): Google OAuth client checked with Google, kept, rendered over config/<env>/infra/.env, restart
+########################################
+reset_host
+run "${DEPLOY}/infra-secrets.sh" check prod plausible-google
+check "plausible-google is beta only" [ "${status}" -ne 0 ]
+INFRA_GOOGLE_CLIENT_ID="googlesentinel.apps.googleusercontent.com" INFRA_GOOGLE_CLIENT_SECRET="${NEW_GOOGLE_SECRET}" \
+  run "${DEPLOY}/infra-secrets.sh" check beta plausible-google
+check "plausible-google check refuses a client ID without <digits>-, without printing it" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"not a Google OAuth client ID"* ]] && [[ "$1" != *sentinel* ]]' "${status}" "${out}"
+INFRA_GOOGLE_CLIENT_ID="${NEW_GOOGLE_ID}x" INFRA_GOOGLE_CLIENT_SECRET="${NEW_GOOGLE_SECRET}" \
+  run "${DEPLOY}/infra-secrets.sh" check beta plausible-google
+check "plausible-google check refuses a client ID outside .apps.googleusercontent.com" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"not a Google OAuth client ID"* ]]' "${status}" "${out}"
+INFRA_GOOGLE_CLIENT_ID="${NEW_GOOGLE_ID}" INFRA_GOOGLE_CLIENT_SECRET="GOCSPX-SENTINEL" \
+  run "${DEPLOY}/infra-secrets.sh" check beta plausible-google
+check "plausible-google check refuses a short client secret" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"shorter than 24"* ]] && [[ "$1" != *SENTINEL* ]]' "${status}" "${out}"
+INFRA_GOOGLE_CLIENT_ID="${NEW_GOOGLE_ID}" INFRA_GOOGLE_CLIENT_SECRET="${NEW_GOOGLE_SECRET}+" \
+  run "${DEPLOY}/infra-secrets.sh" check beta plausible-google
+check "plausible-google check refuses a client secret outside [A-Za-z0-9_-]" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"outside [A-Za-z0-9_-]"* ]]' "${status}" "${out}"
+run env -u INFRA_GOOGLE_CLIENT_ID -u INFRA_GOOGLE_CLIENT_SECRET "${DEPLOY}/infra-secrets.sh" check beta plausible-google
+check "plausible-google check without the values is a dry run, Google not called" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"::warning::INFRA_GOOGLE_CLIENT_ID is not set"* ]] && ! grep -q /token "$2"' \
+  "${status}" "${out}" "${CALLS}"
+export INFRA_GOOGLE_CLIENT_ID="${NEW_GOOGLE_ID}" INFRA_GOOGLE_CLIENT_SECRET="${NEW_GOOGLE_SECRET}"
+printf '%s %s' "${OLD_GOOGLE_ID}" "${OLD_GOOGLE_SECRET}" > "${FAKE_GOOGLE}"
+run "${DEPLOY}/infra-secrets.sh" check beta plausible-google
+check "plausible-google check fails when Google refuses the client (stale secret of the environment)" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"Google refuses the OAuth client"*"invalid_client"* ]]' "${status}" "${out}"
+touch "${FAKE_GOOGLE}.down"
+run "${DEPLOY}/infra-secrets.sh" check beta plausible-google
+check "plausible-google check fails when Google cannot be asked" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"cannot check the OAuth client"* ]]' "${status}" "${out}"
+rm -f "${FAKE_GOOGLE}.down"
+printf '%s %s' "${NEW_GOOGLE_ID}" "${NEW_GOOGLE_SECRET}" > "${FAKE_GOOGLE}"
+run "${DEPLOY}/infra-secrets.sh" check beta plausible-google
+check "plausible-google check passes when Google authenticates the client (invalid_grant), no SSH" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"accepts the OAuth client of beta (answer to a random code: invalid_grant)"* ]] \
+    && ! grep -q "^ssh" "$2"' "${status}" "${out}" "${CALLS}"
+check "plausible-google check sends the client in a file, never on a command line" no_value_leaked
+
+# In service: config/beta/infra/.env of open4goods-config (its last line without a newline) and the container.
+mkdir -p "${OPT}/config/beta/infra"
+printf 'ES_HEAP=2g\nGOOGLE_CLIENT_ID=%s\nGOOGLE_CLIENT_SECRET=%s' "${OLD_GOOGLE_ID}" "${OLD_GOOGLE_SECRET}" \
+  > "${OPT}/config/beta/infra/.env"
+printf '%s' "${OLD_GOOGLE_ID}" > "${FAKE_ENV}/plausible.GOOGLE_CLIENT_ID"
+printf '%s' "${OLD_GOOGLE_SECRET}" > "${FAKE_ENV}/plausible.GOOGLE_CLIENT_SECRET"
+: > "${CALLS}"
+run "${DEPLOY}/infra-secrets.sh" remote test beta plausible-google
+check "plausible-google test fails until the compose file reads GOOGLE_CLIENT_*" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"docker-compose.infra.yml is missing"* ]]' "${status}" "${out}"
+# shellcheck disable=SC2016 # literal placeholders, as in open4goods-config.
+printf '      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}\n      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}\n' \
+  > "${OPT}/latest/beta/docker-compose.infra.yml"
+run "${DEPLOY}/infra-secrets.sh" remote test beta plausible-google
+check "plausible-google test finds both values in service, says source keeps them and the link must be redone" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"GOOGLE_CLIENT_ID in service is found and differs"* ]] \
+    && [[ "$1" == *"GOOGLE_CLIENT_SECRET in service is found and differs"* ]] && [[ "$1" == *"Search Console link"* ]]' \
+  "${status}" "${out}"
+check "plausible-google test writes nothing" \
+  bash -c '[ ! -e "$0/infra-previous.env" ] && [ ! -e "$0/infra.env" ] && [ ! -s "$1" ]' "${ETC}" "${WORK}/restarts.log"
+run "${DEPLOY}/infra-secrets.sh" remote restart beta plausible-google
+check "plausible-google restart refuses before the render" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"does not hold the new GOOGLE_CLIENT_ID: render it first"* ]] && [ ! -s "$2" ]' \
+  "${status}" "${out}" "${WORK}/restarts.log"
+run "${DEPLOY}/infra-secrets.sh" remote source beta plausible-google
+check "plausible-google source keeps both values in service (600) and changes nothing else" \
+  bash -c '[ "$0" -eq 0 ] && grep -Fqx "INFRA_GOOGLE_CLIENT_ID=$2" "$1" && grep -Fqx "INFRA_GOOGLE_CLIENT_SECRET=$3" "$1" \
+    && [ "$(stat -c %a "$1")" = 600 ] && [ ! -e "$4" ] && [ ! -s "$5" ]' \
+  "${status}" "${ETC}/infra-previous.env" "${OLD_GOOGLE_ID}" "${OLD_GOOGLE_SECRET}" "${ETC}/infra.env" "${WORK}/restarts.log"
+run "${DEPLOY}/infra-secrets.sh" remote source beta plausible-google
+check "plausible-google source is idempotent" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"previous value of INFRA_GOOGLE_CLIENT_ID is already kept"* ]] \
+    && [ "$(grep -c GOOGLE "$2")" -eq 2 ]' "${status}" "${out}" "${ETC}/infra-previous.env"
+run "${DEPLOY}/render-service-secrets.sh" --source apply beta infra
+check "render --source infra writes GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET only" \
+  bash -c '[ "$0" -eq 0 ] && grep -Fqx "GOOGLE_CLIENT_ID=$2" "$1" && grep -Fqx "GOOGLE_CLIENT_SECRET=$3" "$1" \
+    && [ "$(wc -l < "$1")" -eq 2 ]' "${status}" "${ETC}/infra.env" "${NEW_GOOGLE_ID}" "${NEW_GOOGLE_SECRET}"
+touch "${FAKE_DB}/plausible-no-google"
+run "${DEPLOY}/infra-secrets.sh" remote restart beta plausible-google
+check "plausible-google restart fails when the recreated Plausible does not run with the new client" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"does not run with the new GOOGLE_CLIENT_ID"* ]]' "${status}" "${out}"
+rm -f "${FAKE_DB}/plausible-no-google"
+: > "${WORK}/restarts.log"
+run "${DEPLOY}/infra-secrets.sh" remote restart beta plausible-google
+check "plausible-google restart recreates Plausible only, which runs with the new client" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "publish-infra beta INFRA_SERVICES=plausible" ] \
+    && [ "$(cat "$2/plausible.GOOGLE_CLIENT_ID")" = "$3" ] && [ "$(cat "$2/plausible.GOOGLE_CLIENT_SECRET")" = "$4" ] \
+    && [[ "$5" == *"plausible runs with the new Google OAuth client"* ]]' \
+  "${status}" "${WORK}/restarts.log" "${FAKE_ENV}" "${NEW_GOOGLE_ID}" "${NEW_GOOGLE_SECRET}" "${out}"
+run "${DEPLOY}/infra-secrets.sh" remote test beta plausible-google
+check "plausible-google test after apply: both new values in service" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"new GOOGLE_CLIENT_ID is already in service"* ]] \
+    && [[ "$1" == *"new GOOGLE_CLIENT_SECRET is already in service"* ]]' "${status}" "${out}"
+: > "${WORK}/restarts.log"
+run "${DEPLOY}/infra-secrets.sh" remote rollback beta plausible-google
+check "plausible-google rollback puts the previous client in infra.env and recreates Plausible with it" \
+  bash -c '[ "$0" -eq 0 ] && grep -Fqx "GOOGLE_CLIENT_ID=$2" "$1" && grep -Fqx "GOOGLE_CLIENT_SECRET=$3" "$1" \
+    && [ "$(cat "$4")" = "publish-infra beta INFRA_SERVICES=plausible" ] && [ "$(cat "$5/plausible.GOOGLE_CLIENT_ID")" = "$2" ]' \
+  "${status}" "${ETC}/infra.env" "${OLD_GOOGLE_ID}" "${OLD_GOOGLE_SECRET}" "${WORK}/restarts.log" "${FAKE_ENV}"
+check "plausible-google prints no value" no_value_leaked
+
+# The GitHub Environment holds the client already in service (the usual case: nothing changes at Google).
+rm -f "${ETC}/infra.env" "${ETC}/infra-previous.env"
+export INFRA_GOOGLE_CLIENT_ID="${OLD_GOOGLE_ID}" INFRA_GOOGLE_CLIENT_SECRET="${OLD_GOOGLE_SECRET}"
+run "${DEPLOY}/infra-secrets.sh" remote source beta plausible-google
+check "plausible-google source keeps nothing when the client is already the one in service" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"new GOOGLE_CLIENT_SECRET is already in service: nothing to keep"* ]] \
+    && [ ! -e "$2" ]' "${status}" "${out}" "${ETC}/infra-previous.env"
+run "${DEPLOY}/infra-secrets.sh" remote rollback beta plausible-google
+check "plausible-google rollback refuses without a kept value" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"no previous GOOGLE_CLIENT_ID nor GOOGLE_CLIENT_SECRET is kept"* ]]' "${status}" "${out}"
+check "plausible-google prints no value (same client)" no_value_leaked
+unset INFRA_GOOGLE_CLIENT_ID INFRA_GOOGLE_CLIENT_SECRET
+
+########################################
+# b2b-postgres (beta and prod): ALTER USER, render infra.env and the b2b-api config tree, restart b2b-api
+########################################
+reset_host
+# shellcheck disable=SC2016 # literal placeholders.
+printf '      POSTGRES_PASSWORD: ${B2B_POSTGRES_PASSWORD:-%s}\n' "${OLD_B2B}" > "${OPT}/bin/docker-compose.infra.yml"
+mkdir -p "${OPT}/config/prod/b2b-api"
+# shellcheck disable=SC2016 # literal placeholders.
+printf 'spring:\n  datasource:\n    password: ${B2B_POSTGRES_PASSWORD:%s}\n' "${OLD_B2B}" \
+  > "${OPT}/config/prod/b2b-api/application-active.yml"
+printf 'product_data_api' > "${FAKE_ENV}/b2b_postgres.POSTGRES_USER"
+printf 'product_data_api' > "${FAKE_ENV}/b2b_postgres.POSTGRES_DB"
+printf '%s' "${OLD_B2B}" > "${FAKE_DB}/b2b_postgres.product_data_api"
+export B2B_API_POSTGRES_PASSWORD="${NEW_B2B}"
+printf 'SPRING_DATASOURCE_PASSWORD=x\n' > "${ETC}/b2b-api.env"
+run "${DEPLOY}/infra-secrets.sh" remote test prod b2b-postgres
+check "b2b-postgres test refuses an env line that beats the config tree" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"sets SPRING_DATASOURCE_PASSWORD"* ]]' "${status}" "${out}"
+rm -f "${ETC}/b2b-api.env"
+run "${DEPLOY}/infra-secrets.sh" remote test prod b2b-postgres
+check "b2b-postgres test finds the password in service (application-active.yml default)" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"product_data_api in service is found (candidate-yml)"* ]]' "${status}" "${out}"
+run "${DEPLOY}/infra-secrets.sh" remote source prod b2b-postgres
+check "b2b-postgres source changes the user and keeps the previous value" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "$3" ] && grep -Fqx "B2B_API_POSTGRES_PASSWORD=$4" "$2"' \
+  "${status}" "${FAKE_DB}/b2b_postgres.product_data_api" "${ETC}/infra-previous.env" "${NEW_B2B}" "${OLD_B2B}"
+run "${DEPLOY}/render-service-secrets.sh" --source apply prod infra
+run "${DEPLOY}/infra-secrets.sh" remote restart prod b2b-postgres
+check "b2b-postgres restart refuses before the b2b-api render" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"config tree of b2b-api does not hold"* ]] && [ ! -s "$2" ]' \
+  "${status}" "${out}" "${WORK}/restarts.log"
+run "${DEPLOY}/render-service-secrets.sh" --source apply prod b2b-api
+check "render --source b2b-api writes spring.datasource.password next to the Elasticsearch tree" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1/spring.datasource.password")" = "$2" ] && [ "$(ls "$1")" = spring.datasource.password ]' \
+  "${status}" "${ETC}/secrets/b2b-api" "${NEW_B2B}"
+run "${DEPLOY}/infra-secrets.sh" remote restart prod b2b-postgres
+check "b2b-postgres restart restarts b2b-api only" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "publish-jars prod restart b2b-api" ] && grep -qx "B2B_POSTGRES_PASSWORD=$3" "$2"' \
+  "${status}" "${WORK}/restarts.log" "${ETC}/infra.env" "${NEW_B2B}"
+run "${DEPLOY}/infra-secrets.sh" remote rollback prod b2b-postgres
+check "b2b-postgres rollback restores the user, the config tree and infra.env (single-quoted)" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "$4" ] && [ "$(cat "$2/secrets/b2b-api/spring.datasource.password")" = "$4" ] \
+    && grep -Fqx "B2B_POSTGRES_PASSWORD='"'"'$4'"'"'" "$2/infra.env" && [ "$(wc -l < "$3")" -eq 2 ]' \
+  "${status}" "${FAKE_DB}/b2b_postgres.product_data_api" "${ETC}" "${WORK}/restarts.log" "${OLD_B2B}"
+check "b2b-postgres prints no value" no_value_leaked
+unset B2B_API_POSTGRES_PASSWORD
+
+if [[ ${failures} -gt 0 ]]; then
+  echo "${failures} test(s) failed"
+  exit 1
+fi
+echo "infra-secrets test passed"
