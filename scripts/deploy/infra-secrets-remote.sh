@@ -715,6 +715,19 @@ plausible_totp_users() {
   info "Plausible users with TOTP enabled (their 2FA must be reset after the rotation): $count"
 }
 
+# Plausible CE hashes every API key with SECRET_KEY_BASE (Plausible.Auth.ApiKey.do_hash/1: sha256(secret_key_base <> key)):
+# after the rotation all Stats API keys answer 401. Only the count and the names are read, never key_hash/key_prefix.
+plausible_api_keys() {
+  if names=$(echo 'SELECT name FROM api_keys ORDER BY name;' \
+    | docker exec -i plausible_db psql -U postgres -d plausible -tA 2>/dev/null); then
+    count=$(printf '%s' "$names" | grep -c . || :)
+    names=$(printf '%s' "$names" | grep . | paste -sd, - | sed 's/,/, /g')
+    info "Plausible API keys: $count${names:+ ($names)}. All of them will be invalid after the rotation (hashed with SECRET_KEY_BASE): recreate them and set them again at their consumers"
+  else
+    info "Plausible API keys: unknown (all of them will be invalid after the rotation: recreate them and set them again at their consumers)"
+  fi
+}
+
 plausible_key_in_service() {
   key=$(env_value "$infra_env" PLAUSIBLE_SECRET_KEY_BASE)
   [ -n "$key" ] || key=$(env_value "$opt/config/$env_name/infra/.env" PLAUSIBLE_SECRET_KEY_BASE)
@@ -733,6 +746,7 @@ plausible_test() {
     ok "the SECRET_KEY_BASE in service is found; source would keep it for rollback"
   fi
   plausible_totp_users
+  plausible_api_keys
 }
 
 plausible_source() {
@@ -744,6 +758,7 @@ plausible_source() {
   fi
   [ -s "$work/key" ] && keep_previous INFRA_PLAUSIBLE_SECRET_KEY_BASE "$work/key"
   plausible_totp_users
+  plausible_api_keys
 }
 
 plausible_restart() {

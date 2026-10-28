@@ -147,7 +147,13 @@ What each target does:
   its TOTP vault key from `SECRET_KEY_BASE` when `TOTP_VAULT_KEY` is not set:
   their second factor must be reset), renders `infra.env` (it overrides
   `config/beta/infra/.env`, read first), recreates Plausible. Every session is
-  invalidated.
+  invalidated. It also reports the count and names of the API keys (never
+  their hash): **all Stats API keys are invalidated** (401), because Plausible
+  hashes each key with `SECRET_KEY_BASE` (`sha256(secret_key_base <> key)`).
+  Known consumers: the Paperclip connection "Plausible (Nudger)" (Paperclip
+  secret `PLAUSIBLE_STATS_API_KEY`) and Metriks (`PLAUSIBLE_STATS_API_TOKEN`).
+  After the rotation: create one key per consumer in the Plausible UI, set it
+  at each consumer, then delete the dead keys.
 - `plausible-postgres` (beta): changes `postgres` of `plausible_db`
   (`ALTER USER`, over TCP, authenticated with the value in service), renders
   `PLAUSIBLE_PG_PASSWORD` in `infra.env`, recreates Plausible only.
@@ -282,7 +288,8 @@ with `mode=test`, then `mode=apply`.
 5. prod: `mysql`. Proof: `https://wiki.nudger.fr` answers, an XWiki page
    renders.
 6. beta: `plausible`. Proof: Plausible login, a dashboard loads; TOTP users
-   reset their second factor.
+   reset their second factor; recreate the Stats API keys and set them at
+   their consumers (see `plausible` above), proof: the Growth connector answers.
    Then, once Access wrote their values (approval of their own, GOU-1256):
    beta `plausible-postgres`, then `plausible-clickhouse` (proof:
    `/api/health` of Plausible, its dictionaries `LOADED` and no `Code: 516`
