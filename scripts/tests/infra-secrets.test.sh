@@ -165,7 +165,14 @@ case "$container" in
       sh -c "$script"
     fi
     ;;
-  plausible_db) echo 0 ;;
+  plausible_db)
+    # psql: the statement on stdin. api_keys names in $FAKE_DB/api-keys (one per line); psql fails when it is missing.
+    sql=$(cat)
+    case "$sql" in
+      *api_keys*) cat "$FAKE_DB/api-keys" 2>/dev/null || exit 1 ;;
+      *) echo 0 ;;
+    esac
+    ;;
   plausible_events_db)
     # ClickHouse: the client config on the first line of stdin (<password><![CDATA[...]]></password>), then one
     # statement. Dictionaries are $FAKE_DB/dicts/<name>.ddl (password in clear) and <name>.status; <name>.broken
@@ -531,6 +538,15 @@ mkdir -p "${OPT}/config/beta/infra"
 printf 'PLAUSIBLE_BASE_URL=https://plausible.example\nPLAUSIBLE_SECRET_KEY_BASE=%s\n' "${OLD_PLAUSIBLE}" \
   > "${OPT}/config/beta/infra/.env"
 export INFRA_PLAUSIBLE_SECRET_KEY_BASE="${NEW_PLAUSIBLE}"
+printf 'growth\nmetriks\n' > "${FAKE_DB}/api-keys"
+run "${DEPLOY}/infra-secrets.sh" remote source beta plausible
+check "plausible source reports the API keys to recreate, names only" \
+  bash -c '[[ "$0" == *"Plausible API keys: 2 (growth, metriks)"*"recreate"* ]]' "${out}"
+rm -f "${FAKE_DB}/api-keys"
+run "${DEPLOY}/infra-secrets.sh" remote test beta plausible
+check "plausible test answers unknown when the API keys query fails" \
+  bash -c '[[ "$0" == *"Plausible API keys: unknown"* ]]' "${out}"
+printf 'growth\nmetriks\n' > "${FAKE_DB}/api-keys"
 run "${DEPLOY}/infra-secrets.sh" remote source beta plausible
 check "plausible source keeps the key in service and reports TOTP users" \
   bash -c '[ "$0" -eq 0 ] && grep -qx "INFRA_PLAUSIBLE_SECRET_KEY_BASE=$3" "$1" && [[ "$2" == *"TOTP enabled"*": 0"* ]]' \
