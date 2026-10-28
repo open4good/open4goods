@@ -1,6 +1,6 @@
 #!/bin/sh
 # Render a service's secrets from the `beta` or `prod` GitHub Environment onto its host
-# (ADR-0006, D140, GOU-933, GOU-957, GOU-1014, GOU-1041, GOU-1092).
+# (ADR-0006, D140, GOU-933, GOU-957, GOU-1014, GOU-1041, GOU-1091, GOU-1092).
 #
 # Usage: render-service-secrets.sh [--if-present] [--source] <check|apply> <env> <service>
 #
@@ -94,6 +94,8 @@
 # | admin     | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.instance-auth.default-password                               | optional |
 # | admin     | O4G_SBA_PASSWORD                | tree    | o4g.sba.registration.password                                                  | optional |
 # | admin     | O4G_MAIL_PASSWORD               | tree    | spring.mail.password                                                           | optional |
+# | admin     | GOOGLE_SSO_CLIENT_ID            | tree    | spring.security.oauth2.client.registration.google.client-id                    | optional |
+# | admin     | GOOGLE_SSO_CLIENT_SECRET        | tree    | spring.security.oauth2.client.registration.google.client-secret                | optional |
 # | b2b-api   | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.client.password                                              | optional |
 # | b2b-api   | O4G_ELASTICSEARCH_PASSWORD      | tree    | spring.elasticsearch.password                                                  | source   |
 # | b2b-api   | B2B_API_POSTGRES_PASSWORD       | tree    | spring.datasource.password                                                     | source   |
@@ -132,6 +134,11 @@
 #   INFRA_PLAUSIBLE_PG_PASSWORD   Postgres user `postgres` of plausible_db <-> Plausible (beta).
 #   INFRA_CLICKHOUSE_PASSWORD     ClickHouse user `default` (set from the compose env at each start) <-> Plausible (beta).
 #   B2B_API_POSTGRES_PASSWORD     Postgres user of b2b_postgres <-> b2b-api.
+#
+# Paired secrets: a service receives both or neither (one set without the other fails, even with
+# --if-present, before anything is written), so that it never mixes two OAuth clients:
+#   admin  GOOGLE_SSO_CLIENT_ID + GOOGLE_SSO_CLIENT_SECRET (the site's SSO client, GOU-1091; its
+#          redirect URIs must list the admin's /login/oauth2/code/google).
 #
 # Required environment for apply: DEPLOY_SSH_HOST, DEPLOY_SSH_USER, DEPLOY_SSH_KEY.
 set -eu
@@ -179,6 +186,8 @@ front-api O4G_ELASTICSEARCH_PASSWORD tree spring.elasticsearch.password source
 admin O4G_SBA_PASSWORD tree spring.boot.admin.instance-auth.default-password optional
 admin O4G_SBA_PASSWORD tree o4g.sba.registration.password optional
 admin O4G_MAIL_PASSWORD tree spring.mail.password optional
+admin GOOGLE_SSO_CLIENT_ID tree spring.security.oauth2.client.registration.google.client-id optional
+admin GOOGLE_SSO_CLIENT_SECRET tree spring.security.oauth2.client.registration.google.client-secret optional
 b2b-api O4G_SBA_PASSWORD tree spring.boot.admin.client.password optional
 b2b-api O4G_ELASTICSEARCH_PASSWORD tree spring.elasticsearch.password source
 b2b-api B2B_API_POSTGRES_PASSWORD tree spring.datasource.password source
@@ -197,6 +206,11 @@ infra INFRA_CLICKHOUSE_PASSWORD env CLICKHOUSE_PASSWORD source
 infra INFRA_GOOGLE_CLIENT_ID env GOOGLE_CLIENT_ID source
 infra INFRA_GOOGLE_CLIENT_SECRET env GOOGLE_CLIENT_SECRET source
 infra B2B_API_POSTGRES_PASSWORD env B2B_POSTGRES_PASSWORD source
+'
+
+# <service> <secret> <secret>: see "Paired secrets" above.
+PAIRS_TABLE='
+admin GOOGLE_SSO_CLIENT_ID GOOGLE_SSO_CLIENT_SECRET
 '
 
 if_present=false
@@ -283,6 +297,19 @@ while read -r row_service secret kind target need; do
   echo "::warning::$secret is not set in the $env_name GitHub Environment: not rendered for $service (a previous render is kept)."
 done <<EOF
 $SECRETS_TABLE
+EOF
+
+# A pair is set as a whole or not at all, whatever --if-present says.
+while read -r pair_service first second; do
+  [ "$pair_service" = "$service" ] || continue
+  first_set=false
+  second_set=false
+  is_set "$first" && first_set=true
+  is_set "$second" && second_set=true
+  [ "$first_set" = "$second_set" ] ||
+    fail "$first and $second go together for $service: set both or neither in the $env_name GitHub Environment"
+done <<EOF
+$PAIRS_TABLE
 EOF
 
 # Checks every set secret before anything is written; the value is never printed.

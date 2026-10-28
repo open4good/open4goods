@@ -22,11 +22,14 @@ import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.mail.autoconfigure.MailProperties;
+import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties;
+import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientPropertiesMapper;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.SystemEnvironmentPropertySource;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
 
 import de.codecentric.boot.admin.server.config.AdminServerProperties;
 
@@ -49,7 +52,12 @@ class RenderedSecretsConfigTreeTest {
                             .getDefaultPassword()),
             entry("o4g.sba.registration.password",
                     binder -> bind(binder, "o4g.sba.registration", SbaRegistrationCredentials.class).getPassword()),
-            entry("spring.mail.password", binder -> bind(binder, "spring.mail", MailProperties.class).getPassword()));
+            entry("spring.mail.password", binder -> bind(binder, "spring.mail", MailProperties.class).getPassword()),
+            // The site's Google SSO client (GOOGLE_SSO_*, GOU-1091), read as the oauth2Login registration.
+            entry("spring.security.oauth2.client.registration.google.client-id",
+                    binder -> googleRegistration(binder).getClientId()),
+            entry("spring.security.oauth2.client.registration.google.client-secret",
+                    binder -> googleRegistration(binder).getClientSecret()));
 
     @TempDir
     Path tempDir;
@@ -114,6 +122,12 @@ class RenderedSecretsConfigTreeTest {
     /** Binds into a new instance, as {@code @ConfigurationProperties} beans are. */
     private static <T> T bind(Binder binder, String prefix, Class<T> type) {
         return binder.bind(prefix, Bindable.ofInstance(BeanUtils.instantiateClass(type))).get();
+    }
+
+    /** The {@code google} client registration, mapped as Spring Boot builds the admin's ClientRegistrationRepository. */
+    private static ClientRegistration googleRegistration(Binder binder) {
+        OAuth2ClientProperties properties = bind(binder, "spring.security.oauth2.client", OAuth2ClientProperties.class);
+        return new OAuth2ClientPropertiesMapper(properties).asClientRegistrations().get("google");
     }
 
     /** The {@code tree} and {@code tree-sa} targets of the service in render-service-secrets.sh. */

@@ -229,6 +229,7 @@ jobs:
           O4G_MACHINE_TOKEN: ${{ secrets.O4G_MACHINE_TOKEN }}
           FRONT_API_GITHUB_TOKEN: ${{ secrets.FRONT_API_GITHUB_TOKEN }}
           GOOGLE_SSO_CLIENT_ID: ${{ secrets.GOOGLE_SSO_CLIENT_ID }}
+          GOOGLE_SSO_CLIENT_SECRET: ${{ secrets.GOOGLE_SSO_CLIENT_SECRET }}
         run: |
           set -eu
           for svc in admin api front-api ui b2b-api; do
