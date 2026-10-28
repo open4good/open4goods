@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Tests scripts/deploy/infra-secrets.sh and infra-secrets-remote.sh (GOU-1092, GOU-1256, GOU-1271) against a fake
-# `ssh` that runs the remote script locally, a fake `curl` playing Elasticsearch and Kibana, and a fake `docker`
+# Tests scripts/deploy/infra-secrets.sh and infra-secrets-remote.sh (GOU-1092, GOU-1256, GOU-1271, GOU-1321) against a fake
+# `ssh` that runs the remote script locally, a fake `curl` playing Elasticsearch, Kibana and Google's OAuth token
+# endpoint, and a fake `docker`
 # playing MySQL, XWiki, Plausible (its logs), its Postgres and ClickHouse (its dictionaries), and the b2b Postgres.
 # /etc/open4goods/ and /opt/open4goods/ live in a temp dir. Every value is a sentinel that must never appear in an
 # output, a summary or a command line.
@@ -71,6 +72,26 @@ case "$method $path" in
   # Kibana 9 answers 400 to an unknown query parameter (e.g. conflicts).
   "POST /api/encrypted_saved_objects/_rotate_key") auth_ok && code=200 && body='{"total":2,"successful":2,"failed":0}' ;;
   "POST /api/encrypted_saved_objects/_rotate_key?"*) code=400 ;;
+  # Google's token endpoint: $FAKE_GOOGLE holds the valid `client_id client_secret`; $FAKE_GOOGLE.down: no answer.
+  *" /token")
+    if [ -f "$FAKE_GOOGLE.down" ]; then
+      code=000
+    else
+      id=$(tr '&' '\n' < "$data" | sed -n 's/^client_id=//p')
+      secret=$(tr '&' '\n' < "$data" | sed -n 's/^client_secret=//p')
+      if [ "$id $secret" = "$(cat "$FAKE_GOOGLE" 2>/dev/null)" ]; then
+        code=400 body='{
+  "error": "invalid_grant",
+  "error_description": "Malformed auth code."
+}'
+      else
+        body='{
+  "error": "invalid_client",
+  "error_description": "The OAuth client was not found."
+}'
+      fi
+    fi
+    ;;
   "GET /"*) code=200 ;;
 esac
 if [ -n "$out" ]; then printf '%s' "$body" > "$out"; else printf '%s' "$body"; fi
@@ -240,6 +261,14 @@ for f in "$FAKE_DB"/dicts/*.ddl; do
   p=$(sed -n "s/.*PASSWORD '\([^']*\)'.*/\1/p" "$f")
   [ -z "$p" ] || [ "$p" = "$ch" ] || refused=true
 done
+# GOOGLE_CLIENT_*: infra.env, read last by publish-infra.sh, else $2 (config/<env>/infra/.env); $FAKE_DB/plausible-no-google
+# drops them (a compose that does not pass them).
+for var in GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET; do
+  v=$(sed -n "s/^$var=//p" "$1" 2>/dev/null | tail -n 1)
+  [ -n "$v" ] || v=$(sed -n "s/^$var=//p" "$2" 2>/dev/null | tail -n 1)
+  rm -f "$FAKE_ENV/plausible.$var"
+  [ -z "$v" ] || [ -f "$FAKE_DB/plausible-no-google" ] || printf '%s' "$v" > "$FAKE_ENV/plausible.$var"
+done
 if [ "$refused" = true ]; then
   echo '[error] GenServer Plausible.Event.WriteBuffer terminating ** (Ch.Error) Code: 516. DB::Exception: default: Authentication failed' \
     >> "$FAKE_LOGS/plausible"
@@ -249,7 +278,9 @@ chmod +x "${WORK}/bin/"*
 
 export PATH="${WORK}/bin:${PATH}"
 FAKE_KIBANA_YML="${WORK}/kibana-container.yml"
-export FAKE_ROOT FAKE_ES FAKE_MYSQL FAKE_XWIKI_DATA FAKE_KIBANA_YML FAKE_DB FAKE_ENV FAKE_LOGS CALLS
+FAKE_GOOGLE="${WORK}/google-client"
+export FAKE_ROOT FAKE_ES FAKE_MYSQL FAKE_XWIKI_DATA FAKE_KIBANA_YML FAKE_DB FAKE_ENV FAKE_LOGS FAKE_GOOGLE CALLS
+export GOOGLE_TOKEN_URL=https://oauth2.example/token
 export INFRA_SECRETS_ROOT="${FAKE_ROOT}" WAIT_SECONDS=0
 export DEPLOY_SSH_HOST=beta.example DEPLOY_SSH_USER=deploy DEPLOY_SSH_KEY="fake-ssh-key"
 export GITHUB_STEP_SUMMARY="${WORK}/summary.md"
@@ -278,6 +309,11 @@ NEW_CH="NEWCHSENTINELFFFFFFFFFFFFFFFFFFFFF"
 # The b2b default in service holds punctuation: single-quoted in infra.env on rollback.
 OLD_B2B="OLDB2B%SENTINEL!GGGGGGGGGGGGGGGGGGG"
 NEW_B2B="NEWB2BSENTINELHHHHHHHHHHHHHHHHHHHH"
+# Google OAuth clients are lower case: the leak checks below ignore case.
+OLD_GOOGLE_ID="111111111111-oldgooglesentinel0000000000000000.apps.googleusercontent.com"
+NEW_GOOGLE_ID="222222222222-newgooglesentinel1111111111111111.apps.googleusercontent.com"
+OLD_GOOGLE_SECRET="GOCSPX-OLDGOOGLESENTINEL_iiiiiiiii"
+NEW_GOOGLE_SECRET="GOCSPX-NEWGOOGLESENTINEL-jjjjjjjjj"
 SENTINELS="SENTINEL"
 
 failures=0
@@ -293,7 +329,7 @@ run() {
 
 # No value in the output, the summary or any command line (ssh, curl, docker arguments).
 no_value_leaked() {
-  ! printf '%s' "${out}" | grep -q "${SENTINELS}" && ! grep -q "${SENTINELS}" "${CALLS}" "${GITHUB_STEP_SUMMARY}"
+  ! printf '%s' "${out}" | grep -qi "${SENTINELS}" && ! grep -qi "${SENTINELS}" "${CALLS}" "${GITHUB_STEP_SUMMARY}"
 }
 
 # No dictionary DDL in the output (even with its password hidden), nor on a command line.
@@ -309,6 +345,7 @@ check() {
 
 reset_host() {
   rm -rf "${FAKE_ROOT:?}"/* "${FAKE_ES:?}"/* "${FAKE_MYSQL:?}"/* "${FAKE_XWIKI_DATA:?}"/* "${FAKE_KIBANA_YML}" \
+    "${FAKE_GOOGLE}" "${FAKE_GOOGLE}.down" \
     "${FAKE_DB:?}"/* "${FAKE_ENV:?}"/* "${FAKE_LOGS:?}"/*
   : > "${CALLS}"
   : > "${GITHUB_STEP_SUMMARY}"
@@ -334,7 +371,7 @@ case " \$INFRA_SERVICES " in
     ;;
 esac
 case " \$INFRA_SERVICES " in
-  *" plausible "*) sh "${WORK}/plausible-recreate" "${ETC}/infra.env" ;;
+  *" plausible "*) sh "${WORK}/plausible-recreate" "${ETC}/infra.env" "${OPT}/config/\$1/infra/.env" ;;
 esac
 PUBLISH
   : > "${WORK}/restarts.log"
@@ -739,6 +776,123 @@ check "plausible-clickhouse rollback checks that Plausible writes" \
 check "plausible-clickhouse rollback prints no value" no_value_leaked
 check "plausible-clickhouse rollback prints no DDL" no_ddl_printed
 unset INFRA_CLICKHOUSE_PASSWORD
+
+########################################
+# plausible-google (beta): Google OAuth client checked with Google, kept, rendered over config/<env>/infra/.env, restart
+########################################
+reset_host
+run "${DEPLOY}/infra-secrets.sh" check prod plausible-google
+check "plausible-google is beta only" [ "${status}" -ne 0 ]
+INFRA_GOOGLE_CLIENT_ID="googlesentinel.apps.googleusercontent.com" INFRA_GOOGLE_CLIENT_SECRET="${NEW_GOOGLE_SECRET}" \
+  run "${DEPLOY}/infra-secrets.sh" check beta plausible-google
+check "plausible-google check refuses a client ID without <digits>-, without printing it" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"not a Google OAuth client ID"* ]] && [[ "$1" != *sentinel* ]]' "${status}" "${out}"
+INFRA_GOOGLE_CLIENT_ID="${NEW_GOOGLE_ID}x" INFRA_GOOGLE_CLIENT_SECRET="${NEW_GOOGLE_SECRET}" \
+  run "${DEPLOY}/infra-secrets.sh" check beta plausible-google
+check "plausible-google check refuses a client ID outside .apps.googleusercontent.com" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"not a Google OAuth client ID"* ]]' "${status}" "${out}"
+INFRA_GOOGLE_CLIENT_ID="${NEW_GOOGLE_ID}" INFRA_GOOGLE_CLIENT_SECRET="GOCSPX-SENTINEL" \
+  run "${DEPLOY}/infra-secrets.sh" check beta plausible-google
+check "plausible-google check refuses a short client secret" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"shorter than 24"* ]] && [[ "$1" != *SENTINEL* ]]' "${status}" "${out}"
+INFRA_GOOGLE_CLIENT_ID="${NEW_GOOGLE_ID}" INFRA_GOOGLE_CLIENT_SECRET="${NEW_GOOGLE_SECRET}+" \
+  run "${DEPLOY}/infra-secrets.sh" check beta plausible-google
+check "plausible-google check refuses a client secret outside [A-Za-z0-9_-]" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"outside [A-Za-z0-9_-]"* ]]' "${status}" "${out}"
+run env -u INFRA_GOOGLE_CLIENT_ID -u INFRA_GOOGLE_CLIENT_SECRET "${DEPLOY}/infra-secrets.sh" check beta plausible-google
+check "plausible-google check without the values is a dry run, Google not called" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"::warning::INFRA_GOOGLE_CLIENT_ID is not set"* ]] && ! grep -q /token "$2"' \
+  "${status}" "${out}" "${CALLS}"
+export INFRA_GOOGLE_CLIENT_ID="${NEW_GOOGLE_ID}" INFRA_GOOGLE_CLIENT_SECRET="${NEW_GOOGLE_SECRET}"
+printf '%s %s' "${OLD_GOOGLE_ID}" "${OLD_GOOGLE_SECRET}" > "${FAKE_GOOGLE}"
+run "${DEPLOY}/infra-secrets.sh" check beta plausible-google
+check "plausible-google check fails when Google refuses the client (stale secret of the environment)" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"Google refuses the OAuth client"*"invalid_client"* ]]' "${status}" "${out}"
+touch "${FAKE_GOOGLE}.down"
+run "${DEPLOY}/infra-secrets.sh" check beta plausible-google
+check "plausible-google check fails when Google cannot be asked" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"cannot check the OAuth client"* ]]' "${status}" "${out}"
+rm -f "${FAKE_GOOGLE}.down"
+printf '%s %s' "${NEW_GOOGLE_ID}" "${NEW_GOOGLE_SECRET}" > "${FAKE_GOOGLE}"
+run "${DEPLOY}/infra-secrets.sh" check beta plausible-google
+check "plausible-google check passes when Google authenticates the client (invalid_grant), no SSH" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"accepts the OAuth client of beta (answer to a random code: invalid_grant)"* ]] \
+    && ! grep -q "^ssh" "$2"' "${status}" "${out}" "${CALLS}"
+check "plausible-google check sends the client in a file, never on a command line" no_value_leaked
+
+# In service: config/beta/infra/.env of open4goods-config (its last line without a newline) and the container.
+mkdir -p "${OPT}/config/beta/infra"
+printf 'ES_HEAP=2g\nGOOGLE_CLIENT_ID=%s\nGOOGLE_CLIENT_SECRET=%s' "${OLD_GOOGLE_ID}" "${OLD_GOOGLE_SECRET}" \
+  > "${OPT}/config/beta/infra/.env"
+printf '%s' "${OLD_GOOGLE_ID}" > "${FAKE_ENV}/plausible.GOOGLE_CLIENT_ID"
+printf '%s' "${OLD_GOOGLE_SECRET}" > "${FAKE_ENV}/plausible.GOOGLE_CLIENT_SECRET"
+: > "${CALLS}"
+run "${DEPLOY}/infra-secrets.sh" remote test beta plausible-google
+check "plausible-google test fails until the compose file reads GOOGLE_CLIENT_*" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"docker-compose.infra.yml is missing"* ]]' "${status}" "${out}"
+# shellcheck disable=SC2016 # literal placeholders, as in open4goods-config.
+printf '      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}\n      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}\n' \
+  > "${OPT}/latest/beta/docker-compose.infra.yml"
+run "${DEPLOY}/infra-secrets.sh" remote test beta plausible-google
+check "plausible-google test finds both values in service, says source keeps them and the link must be redone" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"GOOGLE_CLIENT_ID in service is found and differs"* ]] \
+    && [[ "$1" == *"GOOGLE_CLIENT_SECRET in service is found and differs"* ]] && [[ "$1" == *"Search Console link"* ]]' \
+  "${status}" "${out}"
+check "plausible-google test writes nothing" \
+  bash -c '[ ! -e "$0/infra-previous.env" ] && [ ! -e "$0/infra.env" ] && [ ! -s "$1" ]' "${ETC}" "${WORK}/restarts.log"
+run "${DEPLOY}/infra-secrets.sh" remote restart beta plausible-google
+check "plausible-google restart refuses before the render" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"does not hold the new GOOGLE_CLIENT_ID: render it first"* ]] && [ ! -s "$2" ]' \
+  "${status}" "${out}" "${WORK}/restarts.log"
+run "${DEPLOY}/infra-secrets.sh" remote source beta plausible-google
+check "plausible-google source keeps both values in service (600) and changes nothing else" \
+  bash -c '[ "$0" -eq 0 ] && grep -Fqx "INFRA_GOOGLE_CLIENT_ID=$2" "$1" && grep -Fqx "INFRA_GOOGLE_CLIENT_SECRET=$3" "$1" \
+    && [ "$(stat -c %a "$1")" = 600 ] && [ ! -e "$4" ] && [ ! -s "$5" ]' \
+  "${status}" "${ETC}/infra-previous.env" "${OLD_GOOGLE_ID}" "${OLD_GOOGLE_SECRET}" "${ETC}/infra.env" "${WORK}/restarts.log"
+run "${DEPLOY}/infra-secrets.sh" remote source beta plausible-google
+check "plausible-google source is idempotent" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"previous value of INFRA_GOOGLE_CLIENT_ID is already kept"* ]] \
+    && [ "$(grep -c GOOGLE "$2")" -eq 2 ]' "${status}" "${out}" "${ETC}/infra-previous.env"
+run "${DEPLOY}/render-service-secrets.sh" --source apply beta infra
+check "render --source infra writes GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET only" \
+  bash -c '[ "$0" -eq 0 ] && grep -Fqx "GOOGLE_CLIENT_ID=$2" "$1" && grep -Fqx "GOOGLE_CLIENT_SECRET=$3" "$1" \
+    && [ "$(wc -l < "$1")" -eq 2 ]' "${status}" "${ETC}/infra.env" "${NEW_GOOGLE_ID}" "${NEW_GOOGLE_SECRET}"
+touch "${FAKE_DB}/plausible-no-google"
+run "${DEPLOY}/infra-secrets.sh" remote restart beta plausible-google
+check "plausible-google restart fails when the recreated Plausible does not run with the new client" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"does not run with the new GOOGLE_CLIENT_ID"* ]]' "${status}" "${out}"
+rm -f "${FAKE_DB}/plausible-no-google"
+: > "${WORK}/restarts.log"
+run "${DEPLOY}/infra-secrets.sh" remote restart beta plausible-google
+check "plausible-google restart recreates Plausible only, which runs with the new client" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "publish-infra beta INFRA_SERVICES=plausible" ] \
+    && [ "$(cat "$2/plausible.GOOGLE_CLIENT_ID")" = "$3" ] && [ "$(cat "$2/plausible.GOOGLE_CLIENT_SECRET")" = "$4" ] \
+    && [[ "$5" == *"plausible runs with the new Google OAuth client"* ]]' \
+  "${status}" "${WORK}/restarts.log" "${FAKE_ENV}" "${NEW_GOOGLE_ID}" "${NEW_GOOGLE_SECRET}" "${out}"
+run "${DEPLOY}/infra-secrets.sh" remote test beta plausible-google
+check "plausible-google test after apply: both new values in service" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"new GOOGLE_CLIENT_ID is already in service"* ]] \
+    && [[ "$1" == *"new GOOGLE_CLIENT_SECRET is already in service"* ]]' "${status}" "${out}"
+: > "${WORK}/restarts.log"
+run "${DEPLOY}/infra-secrets.sh" remote rollback beta plausible-google
+check "plausible-google rollback puts the previous client in infra.env and recreates Plausible with it" \
+  bash -c '[ "$0" -eq 0 ] && grep -Fqx "GOOGLE_CLIENT_ID=$2" "$1" && grep -Fqx "GOOGLE_CLIENT_SECRET=$3" "$1" \
+    && [ "$(cat "$4")" = "publish-infra beta INFRA_SERVICES=plausible" ] && [ "$(cat "$5/plausible.GOOGLE_CLIENT_ID")" = "$2" ]' \
+  "${status}" "${ETC}/infra.env" "${OLD_GOOGLE_ID}" "${OLD_GOOGLE_SECRET}" "${WORK}/restarts.log" "${FAKE_ENV}"
+check "plausible-google prints no value" no_value_leaked
+
+# The GitHub Environment holds the client already in service (the usual case: nothing changes at Google).
+rm -f "${ETC}/infra.env" "${ETC}/infra-previous.env"
+export INFRA_GOOGLE_CLIENT_ID="${OLD_GOOGLE_ID}" INFRA_GOOGLE_CLIENT_SECRET="${OLD_GOOGLE_SECRET}"
+run "${DEPLOY}/infra-secrets.sh" remote source beta plausible-google
+check "plausible-google source keeps nothing when the client is already the one in service" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"new GOOGLE_CLIENT_SECRET is already in service: nothing to keep"* ]] \
+    && [ ! -e "$2" ]' "${status}" "${out}" "${ETC}/infra-previous.env"
+run "${DEPLOY}/infra-secrets.sh" remote rollback beta plausible-google
+check "plausible-google rollback refuses without a kept value" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"no previous GOOGLE_CLIENT_ID nor GOOGLE_CLIENT_SECRET is kept"* ]]' "${status}" "${out}"
+check "plausible-google prints no value (same client)" no_value_leaked
+unset INFRA_GOOGLE_CLIENT_ID INFRA_GOOGLE_CLIENT_SECRET
 
 ########################################
 # b2b-postgres (beta and prod): ALTER USER, render infra.env and the b2b-api config tree, restart b2b-api
