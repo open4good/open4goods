@@ -1,12 +1,12 @@
-## 🥳 Welcome to **v1.0.73**
+## 🥳 Welcome to **v1.0.74**
 
-This release covers **1 day(s)** of work, from **2026-10-28T17:38:24.000Z** to **2026-10-29T18:02:50.000Z**.
+This release covers **0 day(s)** of work, from **2026-10-29T18:02:50.000Z** to **2026-10-29T21:44:16.000Z**.
 
 ### 📦 Stats
-- Diff: [compare](https://github.com/open4good/open4goods/compare/v1.0.72...v1.0.73)
-- Changed files: **37**
+- Diff: [compare](https://github.com/open4good/open4goods/compare/v1.0.73...v1.0.74)
+- Changed files: **33**
 - Commits: **5**
-- Additions: **1654** / Deletions: **756**
+- Additions: **1700** / Deletions: **70**
 
 ---
 
@@ -17,10 +17,10 @@ This release covers **1 day(s)** of work, from **2026-10-28T17:38:24.000Z** to *
 
 | PR | Title | Author |
 |---:|---|---|
-| [PR 3486](https://github.com/open4good/open4goods/pull/3486) | feat(admin): l'admin lit le client OAuth du SSO (GOOGLE_SSO_*) depuis les environnements GitHub (GOU-1091) | @GoulvenF |
-| [PR 3516](https://github.com/open4good/open4goods/pull/3516) | chore(deploy): retire la cible mysql d'infraSecrets.yml (GOU-1345) | @GoulvenF |
-| [PR 3517](https://github.com/open4good/open4goods/pull/3517) | fix(seo): JSON-LD catégorie en ListItem url seul, pas d'avis inventés (GOU-1367) | @GoulvenF |
-| [PR 3518](https://github.com/open4good/open4goods/pull/3518) | fix(sitemap): sitemap produits quotidien, atomique et aligné sur fullSlug (GOU-1366) | @GoulvenF |
+| [PR 3519](https://github.com/open4good/open4goods/pull/3519) | feat(metriks): clics kwanko et tradetracker, sortis de other (GOU-1378) | @GoulvenF |
+| [PR 3520](https://github.com/open4good/open4goods/pull/3520) | feat(metriks): revenus Kwanko (KwankoReportClient) (GOU-1379) | @GoulvenF |
+| [PR 3522](https://github.com/open4good/open4goods/pull/3522) | fix(front-api): ne plus servir les offres périmées (GOU-1385) | @GoulvenF |
+| [PR 3521](https://github.com/open4good/open4goods/pull/3521) | feat(metriks): revenus TradeTracker (TradeTrackerReportClient) (GOU-1381) | @GoulvenF |
 
 
 </details>
