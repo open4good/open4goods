@@ -584,6 +584,39 @@ describe('product-jsonld', () => {
     expect(productNode?.review).toBeUndefined()
   })
 
+  it('never emits aggregateRating, with or without impactScore', () => {
+    for (const impactScore of [null, 18.5]) {
+      const graph = buildProductJsonLdGraph({
+        ...(mockInput as unknown as ProductJsonLdInput),
+        impactScore,
+      })
+      expect(JSON.stringify(graph)).not.toContain('aggregateRating')
+    }
+  })
+
+  it('omits review when impactScore is not a number', () => {
+    const graph = buildProductJsonLdGraph({
+      ...(mockInput as unknown as ProductJsonLdInput),
+      impactScore: undefined,
+    })
+    expect(JSON.stringify(graph)).not.toContain('"review"')
+  })
+
+  it('never derives sku from the model', () => {
+    const graph = buildProductJsonLdGraph({
+      ...(mockInput as unknown as ProductJsonLdInput),
+      product: {
+        ...mockProduct,
+        identity: { brand: 'Acme', model: 'MODEL-X' },
+      },
+    } as unknown as ProductJsonLdInput)
+    const productNode = (
+      graph?.['@graph'] as unknown as Array<{ '@type': string; sku?: string }>
+    )?.find(n => n['@type'] === 'Product')
+
+    expect(productNode?.sku).toBeUndefined()
+  })
+
   it('never emits two breadcrumb ListItems sharing the same item URL', () => {
     const graph = buildProductJsonLdGraph({
       ...(mockInput as unknown as ProductJsonLdInput),

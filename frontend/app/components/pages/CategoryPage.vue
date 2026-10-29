@@ -546,7 +546,7 @@ import {
   resolveFilterFieldTitle,
   resolveSortFieldTitle,
 } from '~/utils/_field-localization'
-import { resolveProductShortName } from '~/utils/_product-title-resolver'
+import { buildCategoryItemListJsonLd } from '~/utils/category-jsonld'
 import {
   deduplicateFieldMetadataList,
   normalizeFieldOptionsResponse,
@@ -1801,96 +1801,16 @@ const resultsCount = computed(
   () => productsData.value?.products?.page?.totalElements ?? 0
 )
 
-const productListJsonLd = computed(() => {
-  const products = currentProducts.value
-
-  if (!products.length) {
-    return null
-  }
-
-  const items = products.slice(0, 20).map((product, index) => {
-    const name =
-      resolveProductShortName(product, locale.value) ||
-      (product.gtin != null ? `GTIN ${product.gtin}` : undefined)
-
-    if (!name) {
-      return null
-    }
-
-    const productUrl = toAbsoluteUrl(product.fullSlug)
-    const imageUrl =
-      toAbsoluteUrl(product.resources?.coverImagePath) ??
-      toAbsoluteUrl(
-        product.resources?.externalCover ?? product.resources?.images?.[0]?.url
-      )
-
-    const offersCount = product.offers?.offersCount ?? 0
-    const bestPrice = product.offers?.bestPrice
-    const offer =
-      bestPrice?.price != null
-        ? {
-            '@type': 'Offer',
-            price: Number(bestPrice.price),
-            priceCurrency: bestPrice.currency ?? undefined,
-            url: productUrl ?? canonicalUrl.value,
-            availability:
-              offersCount > 0
-                ? 'https://schema.org/InStock'
-                : 'https://schema.org/OutOfStock',
-          }
-        : undefined
-
-    const productSchema: Record<string, unknown> = {
-      '@type': 'Product',
-      name,
-      url: productUrl,
-      image: imageUrl,
-      brand: product.identity?.brand
-        ? {
-            '@type': 'Brand',
-            name: product.identity.brand,
-          }
-        : undefined,
-      sku: product.identity?.model,
-      offers: offer,
-    }
-
-    if (product.gtin != null) {
-      const gtin = String(product.gtin)
-      productSchema.gtin = gtin
-      if (gtin.length === 13) {
-        productSchema.gtin13 = gtin
-      }
-    }
-
-    return {
-      '@type': 'ListItem',
-      position: index + 1,
-      url: productUrl,
-      item: Object.fromEntries(
-        Object.entries(productSchema).filter(([, value]) => value != null)
-      ),
-    }
-  })
-
-  const filteredItems = items.filter(
-    (item): item is Exclude<(typeof items)[number], null> => item !== null
-  )
-
-  if (!filteredItems.length) {
-    return null
-  }
-
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
+const productListJsonLd = computed(() =>
+  buildCategoryItemListJsonLd({
     name: seoTitle.value,
     numberOfItems: resultsCount.value,
-    itemListOrder: 'https://schema.org/ItemListUnordered',
     url: canonicalUrl.value,
-    itemListElement: filteredItems,
-  }
-})
+    productUrls: currentProducts.value
+      .slice(0, 20)
+      .map(product => toAbsoluteUrl(product.fullSlug)),
+  })
+)
 
 const structuredDataScripts = computed(() => {
   const scripts: StructuredDataScript[] = []
