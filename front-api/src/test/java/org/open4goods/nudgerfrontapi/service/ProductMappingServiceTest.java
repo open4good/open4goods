@@ -2,11 +2,14 @@ package org.open4goods.nudgerfrontapi.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,6 +41,7 @@ import org.open4goods.model.resource.ResourceType;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
+import org.open4goods.nudgerfrontapi.config.properties.OfferFreshnessProperties;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductScoreDto;
 import org.open4goods.model.localization.DomainLanguage;
@@ -58,6 +62,7 @@ class ProductMappingServiceTest {
     private SearchService searchService;
     private CacheManager cacheManager;
     private ProductTimelineService productTimelineService;
+    private OfferFreshnessService offerFreshnessService;
 
     @BeforeEach
     void setUp() {
@@ -73,9 +78,10 @@ class ProductMappingServiceTest {
         CaffeineCache referenceCache = new CaffeineCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME,
                 Caffeine.newBuilder().maximumSize(100).build());
         when(cacheManager.getCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)).thenReturn(referenceCache);
+        offerFreshnessService = new OfferFreshnessService(new OfferFreshnessProperties());
         service = new ProductMappingService(repository, apiProperties,
                 verticalsConfigService, searchService, affiliationService, icecatService, cacheManager,
-                productTimelineService, new ProductSeoMetaService());
+                productTimelineService, new ProductSeoMetaService(offerFreshnessService), offerFreshnessService);
     }
 
     @Test
@@ -419,7 +425,7 @@ class ProductMappingServiceTest {
         aggregatedPrice.setAffiliationToken("raw-token");
         aggregatedPrice.setPrice(199.99);
         aggregatedPrice.setCurrency(Currency.EUR);
-        aggregatedPrice.setTimeStamp(123L);
+        aggregatedPrice.setTimeStamp(System.currentTimeMillis());
         aggregatedPrice.setQuantityInStock(8);
         aggregatedPrice.setShippingCost(4.99);
         aggregatedPrice.setShippingTime(3);
@@ -448,6 +454,77 @@ class ProductMappingServiceTest {
         assertThat(dto.offers().bestPrice().quantityInStock()).isEqualTo(8);
         assertThat(dto.offers().bestPrice().shippingCost()).isEqualTo(4.99);
         assertThat(dto.offers().bestPrice().shippingTimeDays()).isEqualTo(3);
+    }
+
+    @Test
+    void staleOffersAreNotMappedNorTurnedIntoContribLinks() throws Exception {
+        long gtin = 9782070360024L;
+        long now = System.currentTimeMillis();
+        AggregatedPrice fresh = OfferFreshnessServiceTest.offer("fnac", 12.0, ProductCondition.NEW,
+                now - Duration.ofHours(1).toMillis());
+        AggregatedPrice staleNew = OfferFreshnessServiceTest.offer("rakuten", 7.0, ProductCondition.NEW,
+                now - Duration.ofDays(28).toMillis());
+        AggregatedPrice staleOccasion = OfferFreshnessServiceTest.offer("rakuten", 3.0, ProductCondition.OCCASION,
+                now - Duration.ofDays(28).toMillis());
+        Product product = productWithOffers(gtin, staleOccasion, fresh, staleNew);
+
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
+        when(affiliationService.encryptAffiliationLink("fnac", fresh.getUrl(), product.gtin()))
+                .thenReturn("fresh-token");
+
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("offers"), DomainLanguage.fr);
+
+        assertThat(dto.offers().offersCount()).isEqualTo(1);
+        assertThat(dto.offers().hasOccasions()).isFalse();
+        assertThat(dto.offers().bestPrice().datasourceName()).isEqualTo("fnac");
+        assertThat(dto.offers().bestPrice().url()).isEqualTo("/contrib/fresh-token");
+        assertThat(dto.offers().bestNewOffer().price()).isEqualTo(12.0);
+        assertThat(dto.offers().bestOccasionOffer()).isNull();
+        assertThat(dto.offers().offersByCondition()).containsOnlyKeys(ProductCondition.NEW);
+        assertThat(dto.offers().offersByCondition().get(ProductCondition.NEW))
+                .extracting(offer -> offer.datasourceName())
+                .containsExactly("fnac");
+        // No /contrib/ token is ever generated for a stale offer.
+        verify(affiliationService, never()).encryptAffiliationLink(eq("rakuten"), anyString(), anyString());
+    }
+
+    @Test
+    void productWithOnlyStaleOffersIsMappedAsProductWithoutOffer() throws Exception {
+        long gtin = 9782070360031L;
+        AggregatedPrice stale = OfferFreshnessServiceTest.offer("rakuten", 7.0, ProductCondition.NEW,
+                System.currentTimeMillis() - Duration.ofDays(28).toMillis());
+        Product product = productWithOffers(gtin, stale);
+
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
+
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("offers"), DomainLanguage.fr);
+
+        assertThat(dto.offers().offersCount()).isZero();
+        assertThat(dto.offers().bestPrice()).isNull();
+        assertThat(dto.offers().bestNewOffer()).isNull();
+        assertThat(dto.offers().bestOccasionOffer()).isNull();
+        assertThat(dto.offers().offersByCondition()).isEmpty();
+        verify(affiliationService, never()).encryptAffiliationLink(anyString(), anyString(), anyString());
+    }
+
+    private static Product productWithOffers(long gtin, AggregatedPrice... offers) {
+        Product product = new Product(gtin);
+        AggregatedPrices aggregatedPrices = new AggregatedPrices();
+        aggregatedPrices.setOffers(new HashSet<>(List.of(offers)));
+        EnumSet<ProductCondition> conditions = EnumSet.noneOf(ProductCondition.class);
+        AggregatedPrice min = null;
+        for (AggregatedPrice offer : offers) {
+            conditions.add(offer.getProductState());
+            if (min == null || offer.getPrice() < min.getPrice()) {
+                min = offer;
+            }
+        }
+        aggregatedPrices.setConditions(conditions);
+        // Precomputed at aggregation time, possibly from a stale offer.
+        aggregatedPrices.setMinPrice(min);
+        product.setPrice(aggregatedPrices);
+        product.setOffersCount(offers.length);
+        return product;
     }
 
     /**

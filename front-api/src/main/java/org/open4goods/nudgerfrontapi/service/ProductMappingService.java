@@ -137,6 +137,7 @@ public class ProductMappingService {
     private final Cache referenceCache;
     private final ProductTimelineService productTimelineService;
     private final ProductSeoMetaService productSeoMetaService;
+    private final OfferFreshnessService offerFreshnessService;
 
     public ProductMappingService(ProductRepository repository,
             ApiProperties apiProperties,
@@ -146,7 +147,8 @@ public class ProductMappingService {
             IcecatService icecatService,
             CacheManager cacheManager,
             ProductTimelineService productTimelineService,
-            ProductSeoMetaService productSeoMetaService) {
+            ProductSeoMetaService productSeoMetaService,
+            OfferFreshnessService offerFreshnessService) {
         this.repository = repository;
         this.apiProperties = apiProperties;
         this.verticalsConfigService = verticalsConfigService;
@@ -156,6 +158,7 @@ public class ProductMappingService {
         this.referenceCache = cacheManager.getCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
         this.productTimelineService = productTimelineService;
         this.productSeoMetaService = productSeoMetaService;
+        this.offerFreshnessService = offerFreshnessService;
         if (this.referenceCache == null) {
             logger.warn("Cache {} is not configured; product reference caching disabled.",
                     CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
@@ -875,11 +878,16 @@ public class ProductMappingService {
 
     /**
      * Map offers including best prices, histories and trends.
+     * <p>
+     * Only fresh offers are mapped (see {@link OfferFreshnessService}): the offer list, the best prices, the
+     * offer count and the {@code /contrib/} links are all derived from them, so a product whose offers are
+     * all stale is mapped as a product without offer. Price histories and trends are kept.
      */
     private ProductOffersDto mapOffers(Product product) {
-        AggregatedPrices aggregatedPrices = product.getPrice();
+        AggregatedPrices aggregatedPrices = offerFreshnessService.freshPrices(product);
         String gtin = product.gtin();
-        ProductAggregatedPriceDto bestPrice = mapAggregatedPrice(product.bestPrice(), gtin);
+        ProductAggregatedPriceDto bestPrice = aggregatedPrices == null ? null
+                : mapAggregatedPrice(aggregatedPrices.getMinPrice(), gtin);
         ProductAggregatedPriceDto bestNew = aggregatedPrices == null ? null
                 : mapAggregatedPrice(aggregatedPrices.bestNewOffer(), gtin);
         ProductAggregatedPriceDto bestOccasion = aggregatedPrices == null ? null
@@ -911,8 +919,8 @@ public class ProductMappingService {
         }
 
         return new ProductOffersDto(
-                product.getOffersCount(),
-                product.hasOccasions(),
+                aggregatedPrices == null ? product.getOffersCount() : aggregatedPrices.getOffers().size(),
+                aggregatedPrices != null && aggregatedPrices.getConditions().contains(ProductCondition.OCCASION),
                 bestPrice,
                 bestNew,
                 bestOccasion,

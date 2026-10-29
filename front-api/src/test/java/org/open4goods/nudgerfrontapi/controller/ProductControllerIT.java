@@ -99,7 +99,7 @@ class ProductControllerIT {
 
     @BeforeEach
     void configureSearchCapabilities() {
-        SearchService capabilityResolver = new SearchService(null, verticalsConfigService, service, null);
+        SearchService capabilityResolver = new SearchService(null, verticalsConfigService, service, null, null);
         given(searchService.buildSearchCapabilities(any(), any(), any())).willAnswer(invocation ->
                 capabilityResolver.buildSearchCapabilities(invocation.getArgument(0), invocation.getArgument(1),
                         invocation.getArgument(2)));

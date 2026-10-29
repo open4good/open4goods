@@ -354,6 +354,12 @@
       "defaultValue": 50
     },
     {
+      "name": "front.offers.max-age",
+      "type": "java.time.Duration",
+      "description": "Maximum age of a served offer, from its indexation timestamp. Older offers are hidden from the offer list, best prices, offer count, SEO price range, search suggestions and /contrib/ links. Defaults to the api rule (ProductRepository.VALID_UNTIL_DURATION).",
+      "defaultValue": "2d"
+    },
+    {
       "name": "front.partners.ecosystem.partners[].bloc-id",
       "type": "java.lang.String",
       "description": "XWiki bloc identifier for an ecosystem partner."
