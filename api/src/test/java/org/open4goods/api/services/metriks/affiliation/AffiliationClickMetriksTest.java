@@ -30,14 +30,15 @@ class AffiliationClickMetriksTest {
             "affiliation.effiliation.clicks.7d", "affiliation.effiliation.clicks.28d",
             "affiliation.kwanko.clicks.7d", "affiliation.kwanko.clicks.28d",
             "affiliation.tradetracker.clicks.7d", "affiliation.tradetracker.clicks.28d",
+            "affiliation.amazon.clicks.7d", "affiliation.amazon.clicks.28d",
             "affiliation.other.clicks.7d", "affiliation.other.clicks.28d",
             "affiliation.total.clicks.7d", "affiliation.total.clicks.28d",
             "affiliation.clicks.top_merchants.28d");
 
     private static final AffiliationClickStats STATS = new AffiliationClickStats(
-            Map.of("awin", 3L, "effiliation", 0L, "kwanko", 1L, "tradetracker", 0L, "other", 1L),
-            Map.of("awin", 10L, "effiliation", 4L, "kwanko", 5L, "tradetracker", 2L, "other", 2L),
-            5, 23,
+            Map.of("awin", 3L, "effiliation", 0L, "kwanko", 1L, "tradetracker", 0L, "amazon", 0L, "other", 1L),
+            Map.of("awin", 10L, "effiliation", 4L, "kwanko", 5L, "tradetracker", 2L, "amazon", 3L, "other", 2L),
+            5, 26,
             List.of(new MerchantClicks("darty.com", "awin", 7), new MerchantClicks("boulanger.com", "effiliation", 4)));
 
     private static List<MetriksEvent> collectAll(FakeClickStats clicks) {
@@ -54,7 +55,7 @@ class AffiliationClickMetriksTest {
     }
 
     @Test
-    void nominal_emitsTheElevenClickEventsAfterTheCommissionEvents() {
+    void nominal_emitsTheThirteenClickEventsAfterTheCommissionEvents() {
         List<MetriksEvent> all = collectAll(new FakeClickStats(STATS, null));
 
         List<String> ids = all.stream().map(MetriksEvent::getId).toList();
@@ -72,8 +73,9 @@ class AffiliationClickMetriksTest {
                 "affiliation.effiliation.clicks.7d", 0L, "affiliation.effiliation.clicks.28d", 4L,
                 "affiliation.kwanko.clicks.7d", 1L, "affiliation.kwanko.clicks.28d", 5L,
                 "affiliation.tradetracker.clicks.7d", 0L, "affiliation.tradetracker.clicks.28d", 2L,
+                "affiliation.amazon.clicks.7d", 0L, "affiliation.amazon.clicks.28d", 3L,
                 "affiliation.other.clicks.7d", 1L, "affiliation.other.clicks.28d", 2L,
-                "affiliation.total.clicks.7d", 5L, "affiliation.total.clicks.28d", 23L);
+                "affiliation.total.clicks.7d", 5L, "affiliation.total.clicks.28d", 26L);
         for (int i = 0; i < values.size(); i += 2) {
             expected.put((String) values.get(i), (Long) values.get(i + 1));
         }

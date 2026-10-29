@@ -114,10 +114,10 @@ class AffiliationClickStatsServiceIT {
                 .read(LONG_START, SHORT_START, END.toEpochMilli(), 20);
 
         assertThat(stats.clicksShort()).containsExactlyInAnyOrderEntriesOf(
-                Map.of("awin", 3L, "effiliation", 1L, "kwanko", 0L, "tradetracker", 0L, "other", 1L));
+                Map.of("awin", 3L, "effiliation", 1L, "kwanko", 0L, "tradetracker", 0L, "amazon", 0L, "other", 1L));
         assertThat(stats.totalShort()).isEqualTo(5);
         assertThat(stats.clicksLong()).containsExactlyInAnyOrderEntriesOf(
-                Map.of("awin", 4L, "effiliation", 3L, "kwanko", 0L, "tradetracker", 0L, "other", 2L));
+                Map.of("awin", 4L, "effiliation", 3L, "kwanko", 0L, "tradetracker", 0L, "amazon", 0L, "other", 2L));
         assertThat(stats.totalLong()).isEqualTo(9);
         // Most clicked first, ties ordered by key.
         assertThat(stats.topMerchantsLong()).containsExactly(
@@ -138,7 +138,7 @@ class AffiliationClickStatsServiceIT {
                 .read(LONG_START, SHORT_START, END.toEpochMilli(), 1);
 
         assertThat(stats.clicksLong()).containsExactlyInAnyOrderEntriesOf(
-                Map.of("awin", 0L, "effiliation", 0L, "kwanko", 0L, "tradetracker", 0L, "other", 1L));
+                Map.of("awin", 0L, "effiliation", 0L, "kwanko", 0L, "tradetracker", 0L, "amazon", 0L, "other", 1L));
         assertThat(stats.topMerchantsLong()).containsExactly(new MerchantClicks("shop.example", "other", 1));
     }
 

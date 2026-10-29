@@ -23,6 +23,8 @@ public enum AffiliationNetwork {
      * domain carrying the TradeTracker link signature ({@link #hasTradeTrackerSignature(String)}).
      */
     TRADETRACKER("tradetracker", "TradeTracker"),
+    /** Amazon Partenaires: {@code amazon.fr} and its sub-domains, {@code amzn.to} and {@code amzn.eu}. */
+    AMAZON("amazon", "Amazon"),
     /** Any other target (direct merchant link, unknown network, unreadable URL). Must stay the last one. */
     OTHER("other", "autres");
 
@@ -42,7 +44,7 @@ public enum AffiliationNetwork {
     }
 
     /**
-     * @return the stored and reported value of the network ({@code awin}, {@code effiliation}, {@code kwanko}, {@code tradetracker}, {@code other})
+     * @return the stored and reported value of the network ({@code awin}, {@code effiliation}, {@code kwanko}, {@code tradetracker}, {@code amazon}, {@code other})
      */
     public String key() {
         return key;
@@ -108,7 +110,7 @@ public enum AffiliationNetwork {
      * @param host the host name, case-insensitive, possibly {@code null}
      * @return {@link #AWIN} for {@code awin1.com} and its sub-domains, {@link #EFFILIATION} for
      *         {@code effiliation.com}, {@code effinity.fr} and their sub-domains, {@link #KWANKO} and {@link #TRADETRACKER} for
-     *         their hosts, {@link #OTHER} otherwise (the TradeTracker signature needs the full URL: {@link #fromUrl})
+     *         their hosts, {@link #AMAZON} for {@code amazon.fr}, {@code amzn.to} and {@code amzn.eu}, {@link #OTHER} otherwise (the TradeTracker signature needs the full URL: {@link #fromUrl})
      */
     public static AffiliationNetwork fromHost(String host) {
         String normalised = normaliseHost(host);
@@ -126,6 +128,9 @@ public enum AffiliationNetwork {
         }
         if (matches(normalised, "tradetracker.net") || matches(normalised, "tradetracker.com")) {
             return TRADETRACKER;
+        }
+        if (matches(normalised, "amazon.fr") || matches(normalised, "amzn.to") || matches(normalised, "amzn.eu")) {
+            return AMAZON;
         }
         return OTHER;
     }
