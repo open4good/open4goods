@@ -5,9 +5,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -21,18 +23,23 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.model.attribute.AttributeType;
+import org.open4goods.model.price.AggregatedPrice;
+import org.open4goods.model.price.AggregatedPrices;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductCondition;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
+import org.open4goods.nudgerfrontapi.config.properties.OfferFreshnessProperties;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationBucketDto;
 import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchResult;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.SearchHitsImpl;
 import org.springframework.data.elasticsearch.core.TotalHitsRelation;
@@ -56,7 +63,8 @@ class SearchServiceTest {
 
     @BeforeEach
     void setUp() {
-        searchService = new SearchService(repository, verticalsConfigService, productMappingService, apiProperties);
+        searchService = new SearchService(repository, verticalsConfigService, productMappingService, apiProperties,
+                new OfferFreshnessService(new OfferFreshnessProperties()));
     }
 
     @Test
@@ -144,6 +152,39 @@ class SearchServiceTest {
     }
 
 
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void suggest_shouldNotExposeStaleBestPrice() {
+        long now = System.currentTimeMillis();
+        Product freshProduct = new Product(1L);
+        freshProduct.setPrice(new AggregatedPrices());
+        freshProduct.getPrice().getOffers().add(OfferFreshnessServiceTest.offer("fnac", 12.0,
+                ProductCondition.NEW, now - Duration.ofHours(1).toMillis()));
+        Product staleProduct = new Product(2L);
+        staleProduct.setPrice(new AggregatedPrices());
+        AggregatedPrice stale = OfferFreshnessServiceTest.offer("rakuten", 7.0,
+                ProductCondition.NEW, now - Duration.ofDays(28).toMillis());
+        staleProduct.getPrice().getOffers().add(stale);
+        // Precomputed at aggregation time from the stale offer.
+        staleProduct.getPrice().setMinPrice(stale);
+
+        SearchHits<Product> hits = mock(SearchHits.class);
+        SearchHit<Product> freshHit = mock(SearchHit.class);
+        SearchHit<Product> staleHit = mock(SearchHit.class);
+        when(freshHit.getContent()).thenReturn(freshProduct);
+        when(staleHit.getContent()).thenReturn(staleProduct);
+        when(hits.isEmpty()).thenReturn(false);
+        when(hits.getSearchHits()).thenReturn(List.of(freshHit, staleHit));
+        when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(hits);
+
+        SearchService.SuggestResult result = searchService.suggest("livre", DomainLanguage.fr);
+
+        assertThat(result.productMatches()).hasSize(2);
+        assertThat(result.productMatches().get(0).bestPrice()).isEqualTo(12.0);
+        assertThat(result.productMatches().get(1).bestPrice()).isNull();
+        assertThat(result.productMatches().get(1).bestPriceCurrency()).isNull();
+    }
 
     @Test
     void suggest_shouldExecuteOneLexicalProductQuery_whenNoProductsMatch() {

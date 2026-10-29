@@ -68,6 +68,9 @@ front:
     anonymous: 100
     authenticated: 1000
 
+  # Offers older than front.offers.max-age are not served (GOU-1385). Left unset, it follows the api
+  # rule (ProductRepository.VALID_UNTIL_DURATION, 2 days); override with e.g. FRONT_OFFERS_MAX_AGE=3d.
+
   # One-shot purge of the historical ip/ua fields of the contribution-votes index (GOU-1230),
   # run asynchronously after startup; idempotent, a no-op once the index is clean.
   contribution-votes-purge:

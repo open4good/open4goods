@@ -2,6 +2,7 @@ package org.open4goods.nudgerfrontapi.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Duration;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.nudgerfrontapi.config.properties.OfferFreshnessProperties;
 
 /**
  * Unit tests for {@link ProductSeoMetaService}: SERP-safe lengths, manufacturer
@@ -28,7 +30,8 @@ import org.open4goods.model.vertical.VerticalConfig;
  */
 class ProductSeoMetaServiceTest {
 
-    private final ProductSeoMetaService service = new ProductSeoMetaService();
+    private final ProductSeoMetaService service = new ProductSeoMetaService(
+            new OfferFreshnessService(new OfferFreshnessProperties()));
 
     @Test
     void dishwasherTitleDropsReferenceAndFitsSixtyCharacters() {
@@ -136,6 +139,29 @@ class ProductSeoMetaServiceTest {
     }
 
     @Test
+    void descriptionIgnoresStaleOffers() {
+        Product product = product("ELECTROLUX", "E62LB200S");
+        offers(product, 700.0);
+        product.getPrice().getOffers().add(staleOffer(299.0));
+
+        String description = service.buildMetaDescription(product, null, null, DomainLanguage.fr);
+
+        assertThat(description).isEqualTo("Electrolux E62LB200S : prix : 700 €. Comparez les offres sur Nudger.");
+    }
+
+    @Test
+    void descriptionWithOnlyStaleOffersHasNoPrice() {
+        Product product = product("ELECTROLUX", "E62LB200S");
+        offers(product);
+        product.getPrice().getOffers().add(staleOffer(299.0));
+
+        String description = service.buildMetaDescription(product, null, null, DomainLanguage.fr);
+
+        assertThat(description).doesNotContain("prix :").doesNotContain("prix de").doesNotContain("€")
+                .doesNotContain("299");
+    }
+
+    @Test
     void descriptionWithSingleOfferAndNoCategory() {
         Product product = product("ELECTROLUX", "E62LB200S");
         offers(product, 700.0);
@@ -223,11 +249,21 @@ class ProductSeoMetaServiceTest {
             offer.setPrice(price);
             offer.setCurrency(Currency.EUR);
             offer.setDatasourceName("shop-" + price);
+            offer.setTimeStamp(System.currentTimeMillis());
             offers.add(offer);
         }
         AggregatedPrices aggregatedPrices = new AggregatedPrices();
         aggregatedPrices.setOffers(offers);
         product.setPrice(aggregatedPrices);
+    }
+
+    private static AggregatedPrice staleOffer(double price) {
+        AggregatedPrice offer = new AggregatedPrice();
+        offer.setPrice(price);
+        offer.setCurrency(Currency.EUR);
+        offer.setDatasourceName("stale-shop");
+        offer.setTimeStamp(System.currentTimeMillis() - Duration.ofDays(28).toMillis());
+        return offer;
     }
 
     private static VerticalConfig dishwasherConfig() {

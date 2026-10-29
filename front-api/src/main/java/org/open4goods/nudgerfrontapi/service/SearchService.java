@@ -155,14 +155,17 @@ public class SearchService {
 	private final VerticalsConfigService verticalsConfigService;
 	private final ProductMappingService productMappingService;
 	private final ApiProperties apiProperties;
+	private final OfferFreshnessService offerFreshnessService;
 	private volatile List<VerticalSuggestionEntry> verticalSuggestions = List.of();
 
 	public SearchService(ProductRepository repository, VerticalsConfigService verticalsConfigService,
-			@Lazy ProductMappingService productMappingService, ApiProperties apiProperties) {
+			@Lazy ProductMappingService productMappingService, ApiProperties apiProperties,
+			OfferFreshnessService offerFreshnessService) {
 		this.repository = repository;
 		this.verticalsConfigService = verticalsConfigService;
 		this.productMappingService = productMappingService;
 		this.apiProperties = apiProperties;
+		this.offerFreshnessService = offerFreshnessService;
 	}
 
 	@PostConstruct
@@ -923,7 +926,7 @@ public class SearchService {
 		String gtin = referentiel != null ? referentiel.get(ReferentielKey.GTIN) : null;
 		Score ecoscore = product.ecoscore();
 		Double ecoscoreValue = ecoscore != null ? ecoscore.getValue() : null;
-		AggregatedPrice bestPrice = product.bestPrice();
+		AggregatedPrice bestPrice = offerFreshnessService.bestPrice(product);
 		Double bestPriceValue = bestPrice != null ? bestPrice.getPrice() : null;
 		Currency bestPriceCurrency = bestPrice != null ? bestPrice.getCurrency() : null;
 		String displayName = null;
@@ -1660,10 +1663,10 @@ public class SearchService {
 		}
 		return switch (field) {
 		case SORT_FIELD_PRICE -> {
-			AggregatedPrice price = product.bestPrice();
+			AggregatedPrice price = offerFreshnessService.bestPrice(product);
 			yield price != null ? price.getPrice() : null;
 		}
-		case "offersCount" -> product.getOffersCount();
+		case "offersCount" -> offerFreshnessService.offersCount(product);
 		case SORT_FIELD_BRAND -> normalizeSortText(resolveReferentielValue(product, ReferentielKey.BRAND));
 		case SORT_FIELD_MODEL -> normalizeSortText(resolveReferentielValue(product, ReferentielKey.MODEL));
 		case SORT_FIELD_ECOSCORE -> {

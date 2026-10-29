@@ -67,6 +67,12 @@ Rate limiting is configured via `front.rate-limit.*` mapped by
 - `front.rate-limit.anonymous` - requests per minute for unauthenticated users.
 - `front.rate-limit.authenticated` - requests per minute for authenticated users.
 
+Offer freshness is configured via `front.offers.max-age` mapped by
+`OfferFreshnessProperties` (default: the api rule `ProductRepository.VALID_UNTIL_DURATION`).
+Any code exposing offers, prices or `/contrib/` links must read them through
+`OfferFreshnessService`, never `Product.bestPrice()`, `getOffersCount()` or
+`getPrice().getOffers()` directly (see README "Offer freshness").
+
 ### Local profile (offline startup)
 
 `application-local.yml` holds the offline defaults for the `local` profile (the module's

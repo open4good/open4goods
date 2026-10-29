@@ -21,6 +21,7 @@ import org.open4goods.model.Localisable;
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.model.price.AggregatedPrice;
+import org.open4goods.model.price.AggregatedPrices;
 import org.open4goods.model.price.Currency;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
@@ -78,6 +79,15 @@ public class ProductSeoMetaService {
 
     private static final int MAX_TITLE_FEATURES = 2;
     private static final int MAX_DESCRIPTION_FEATURES = 2;
+
+    private final OfferFreshnessService offerFreshnessService;
+
+    /**
+     * @param offerFreshnessService filter keeping only the offers that can be served
+     */
+    public ProductSeoMetaService(OfferFreshnessService offerFreshnessService) {
+        this.offerFreshnessService = offerFreshnessService;
+    }
 
     /**
      * Build the SEO title of a product page.
@@ -362,17 +372,19 @@ public class ProductSeoMetaService {
     }
 
     /**
-     * Format the price range of the current offers.
+     * Format the price range of the current offers. Stale offers are ignored (see
+     * {@link OfferFreshnessService}).
      *
      * @param product product being mapped
      * @param fr      French copy when {@code true}
-     * @return price fact, or {@code null} when the product has no priced offer
+     * @return price fact, or {@code null} when the product has no fresh priced offer
      */
     String formatPriceRange(Product product, boolean fr) {
-        if (product.getPrice() == null || product.getPrice().getOffers() == null) {
+        AggregatedPrices prices = offerFreshnessService.freshPrices(product);
+        if (prices == null) {
             return null;
         }
-        List<AggregatedPrice> offers = product.getPrice().getOffers().stream()
+        List<AggregatedPrice> offers = prices.getOffers().stream()
                 .filter(Objects::nonNull)
                 .filter(offer -> offer.getPrice() != null && offer.getPrice() > 0 && Double.isFinite(offer.getPrice()))
                 .toList();
