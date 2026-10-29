@@ -6,6 +6,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,7 +27,7 @@ import org.springframework.stereotype.Service;
 /**
  * Builds the Metriks affiliation events ({@code GET /api/metriks/affiliation}): validated commissions, pending
  * commissions and sales of each network, plus their totals, over the last 7 and 28 days; then the outbound
- * {@code /contrib/} clicks per network ({@code awin}, {@code effiliation}, {@code other}) and in total over the same
+ * {@code /contrib/} clicks per network ({@code awin}, {@code effiliation}, {@code kwanko}, {@code tradetracker}, {@code other}) and in total over the same
  * windows, and the 20 most clicked merchants over 28 days.
  * <p>
  * Windows: {@code 7d} = [D-7, D-1] and {@code 28d} = [D-28, D-1], D being today in Europe/Paris, by transaction
@@ -42,7 +43,7 @@ import org.springframework.stereotype.Service;
  * in {@code error};</li>
  * <li>a total is in {@code error} as soon as one network is, with the list of the failing networks: never a partial
  * sum;</li>
- * <li>clicks: when Elasticsearch cannot answer (unreachable, missing index...), the nine click events are in
+ * <li>clicks: when Elasticsearch cannot answer (unreachable, missing index...), the eleven click events are in
  * {@code error}; a network without any click is a real {@code 0}.</li>
  * </ul>
  * Error messages and logs never carry a credential: client messages are built without secrets, and every message
@@ -57,8 +58,8 @@ public class AffiliationMetriksService {
     static final String CURRENCY = "EUR";
     private static final List<String> NETWORK_ORDER = List.of("awin", "effiliation");
     /** Click networks, in event order ({@link AffiliationNetwork#key()}). */
-    private static final List<String> CLICK_NETWORKS = List.of(AffiliationNetwork.AWIN.key(),
-            AffiliationNetwork.EFFILIATION.key(), AffiliationNetwork.OTHER.key());
+    private static final List<String> CLICK_NETWORKS = Arrays.stream(AffiliationNetwork.values())
+            .map(AffiliationNetwork::key).toList();
     static final String TOP_MERCHANTS_ID = "affiliation.clicks.top_merchants.28d";
     private static final List<Window> WINDOWS = List.of(new Window("7d", 7, "7 j"), new Window("28d", 28, "28 j"));
     private static final List<String> GROUPS = List.of("business", "affiliation");
@@ -95,7 +96,7 @@ public class AffiliationMetriksService {
      * Reads every network and builds the events: for each network then for the totals, and for each window,
      * {@code commission.validated}, {@code commission.pending} and {@code sales}; then the click events.
      *
-     * @return the 6 events of each network, the 6 total events, then the 9 click events
+     * @return the 6 events of each network, the 6 total events, then the 11 click events
      *         ({@link #clickEvents(LocalDate)})
      */
     public List<MetriksEvent> collectEvents() {
@@ -135,8 +136,8 @@ public class AffiliationMetriksService {
     }
 
     /**
-     * Builds the click events: {@code affiliation.<network>.clicks.<window>} for {@code awin}, {@code effiliation},
-     * {@code other} then {@code total}, each for {@code 7d} then {@code 28d}, followed by
+     * Builds the click events: {@code affiliation.<network>.clicks.<window>} for each {@link AffiliationNetwork} (in enum order,
+     * {@code other} last) then {@code total}, each for {@code 7d} then {@code 28d}, followed by
      * {@value #TOP_MERCHANTS_ID}. All of them are in {@code error} when Elasticsearch cannot answer.
      */
     private List<MetriksEvent> clickEvents(LocalDate today) {
@@ -175,7 +176,7 @@ public class AffiliationMetriksService {
                         value = (isShort ? stats.clicksShort() : stats.clicksLong()).getOrDefault(network, 0L);
                     }
                 }
-                String label = "total".equals(network) ? "tous réseaux" : network;
+                String label = "total".equals(network) ? "tous réseaux" : labelOf(network);
                 events.add(event("affiliation." + network + ".clicks." + window.key(),
                         "Clics sortants " + label + " (" + window.label() + ")", "count", network,
                         today.minusDays(window.days()), endDate, null, value, error));
@@ -202,6 +203,11 @@ public class AffiliationMetriksService {
         }
         events.add(top);
         return events;
+    }
+
+    private static String labelOf(String key) {
+        return Arrays.stream(AffiliationNetwork.values()).filter(n -> n.key().equals(key)).findFirst()
+                .map(AffiliationNetwork::label).orElse(key);
     }
 
     /**

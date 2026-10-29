@@ -74,7 +74,7 @@ public class AffiliationClick {
         click.id = UUID.randomUUID().toString();
         click.ts = ts;
         click.targetHost = AffiliationNetwork.hostOf(targetUrl);
-        click.network = AffiliationNetwork.fromHost(click.targetHost).key();
+        click.network = AffiliationNetwork.fromUrl(targetUrl).key();
         click.merchant = merchant;
         click.gtin = gtin;
         click.originPath = originPath;
