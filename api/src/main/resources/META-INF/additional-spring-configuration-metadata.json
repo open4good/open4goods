@@ -150,6 +150,18 @@
       "type": "java.lang.String",
       "description": "Kwanko Publisher API token (bearer) read by the Metriks affiliation report. Secret. Defaults to affiliation-config.kwanko-token (API_KWANKO_TOKEN, the Kwanko feed token).",
       "defaultValue": "${affiliation-config.kwanko-token:}"
+    },
+    {
+      "name": "metriks.affiliation.tradetracker.customer-id",
+      "type": "java.lang.String",
+      "description": "TradeTracker customer ID used by the Metriks affiliation report (SOAP authenticate). Defaults to affiliation-config.tradetracker-customer-id (the TradeTracker feed).",
+      "defaultValue": "${affiliation-config.tradetracker-customer-id:}"
+    },
+    {
+      "name": "metriks.affiliation.tradetracker.passphrase",
+      "type": "java.lang.String",
+      "description": "TradeTracker passphrase used by the Metriks affiliation report (SOAP authenticate). Secret. Defaults to affiliation-config.tradetracker-api-key (API_TRADETRACKER_API_KEY, the TradeTracker feed secret).",
+      "defaultValue": "${affiliation-config.tradetracker-api-key:}"
     }
   ]
 }
