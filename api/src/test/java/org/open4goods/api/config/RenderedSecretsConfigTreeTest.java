@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.open4goods.api.config.yml.ActuatorMonitorCredentials;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.services.eprelservice.config.EprelServiceProperties;
 import org.open4goods.services.googlesearch.config.GoogleSearchConfig;
@@ -28,11 +29,14 @@ import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.elasticsearch.autoconfigure.ElasticsearchProperties;
+import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties;
+import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientPropertiesMapper;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.SystemEnvironmentPropertySource;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
 
 import de.codecentric.boot.admin.client.config.ClientProperties;
 
@@ -76,6 +80,14 @@ class RenderedSecretsConfigTreeTest {
             entry("spring.boot.admin.client.password",
                     binder -> bind(binder, "spring.boot.admin.client", ClientProperties.class).getPassword()),
             entry("admin-key", binder -> api(binder).getAdminKey()),
+            // The site's Google SSO client (GOOGLE_SSO_*), read as the oauth2Login registration (GOU-1393).
+            entry("spring.security.oauth2.client.registration.google.client-id",
+                    binder -> googleRegistration(binder).getClientId()),
+            entry("spring.security.oauth2.client.registration.google.client-secret",
+                    binder -> googleRegistration(binder).getClientSecret()),
+            // The Spring Boot Admin monitor identity on Actuator (GOU-1393).
+            entry("o4g.actuator.monitor.password",
+                    binder -> bind(binder, "o4g.actuator.monitor", ActuatorMonitorCredentials.class).getPassword()),
             entry("spring.elasticsearch.password",
                     binder -> bind(binder, "spring.elasticsearch", ElasticsearchProperties.class).getPassword()));
 
@@ -141,6 +153,11 @@ class RenderedSecretsConfigTreeTest {
 
     private static ApiProperties api(Binder binder) {
         return bind(binder, "", ApiProperties.class);
+    }
+
+    private static ClientRegistration googleRegistration(Binder binder) {
+        OAuth2ClientProperties properties = bind(binder, "spring.security.oauth2.client", OAuth2ClientProperties.class);
+        return new OAuth2ClientPropertiesMapper(properties).asClientRegistrations().get("google");
     }
 
     /** Binds into a new instance, as {@code @ConfigurationProperties} beans are. */

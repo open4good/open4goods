@@ -113,15 +113,15 @@ before anything is written.
 | `API_TRADETRACKER_API_KEY`        | api: tree `affiliation-config.tradetracker-api-key`                                                                                                                           | TradeTracker feeds, Metriks affiliation report (GOU-1381) |
 | `API_EPREL_API_KEY`               | api: tree `eprel.api-key`                                                                                                                                                     | EPREL (`EprelServiceProperties`)                               |
 | `O4G_ICECAT_PASSWORD`             | api, front-api: tree `icecat-feature-config.password`                                                                                                                         | Icecat account                                                 |
-| `O4G_SBA_PASSWORD`                | api, ui, front-api, b2b-api: tree `spring.boot.admin.client.password`; ui, front-api: tree `o4g.actuator.monitor.password`; admin: tree `spring.boot.admin.instance-auth.default-password`, `o4g.sba.registration.password` | Spring Boot Admin registration and actuator access |
+| `O4G_SBA_PASSWORD`                | api, ui, front-api, b2b-api: tree `spring.boot.admin.client.password`; api, ui, front-api: tree `o4g.actuator.monitor.password`; admin: tree `spring.boot.admin.instance-auth.default-password`, `o4g.sba.registration.password` | Spring Boot Admin registration and actuator access |
 | `O4G_INTERNAL_API_KEY`            | api: tree `admin-key`; front-api: tree `front.affiliation-partners.api-key`                                                                                                   | front-api -> api calls (affiliation partners)                  |
 | `O4G_CAPTCHA_SECRET`              | ui: tree `captcha-secret`; front-api: tree `captcha.secret-key`                                                                                                               | hCaptcha                                                       |
 | `O4G_MAIL_PASSWORD`               | front-api, admin: tree `spring.mail.password`                                                                                                                                 | Gmail application password                                     |
 | `FRONT_API_JWT_SECRET`            | front-api: tree `front.security.jwt-secret`; frontend: `FRONT_SECURITY_JWT_SECRET`                                                                                            | JWT signature (front-api signs, frontend verifies admin tokens) |
 | `O4G_MACHINE_TOKEN`               | front-api: tree `front.security.shared-token`; frontend: `NUXT_MACHINE_TOKEN`, `MACHINE_TOKEN`                                                                                | `X-Shared-Token` machine calls                                 |
 | `FRONT_API_GITHUB_TOKEN`          | front-api: tree `feedback.github.access-token`                                                                                                                                | GitHub feedback issues                                         |
-| `GOOGLE_SSO_CLIENT_ID` (required) | front-api: `FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID`; frontend: `NUXT_GOOGLE_OAUTH_CLIENT_ID`; admin (optional, paired): tree `spring.security.oauth2.client.registration.google.client-id` | Google SSO ([Google SSO OAuth clients](google-sso-oauth-clients.md)); admin login (GOU-1091) |
-| `GOOGLE_SSO_CLIENT_SECRET` (required) | frontend: `NUXT_GOOGLE_OAUTH_CLIENT_SECRET`; admin (optional, paired): tree `spring.security.oauth2.client.registration.google.client-secret`                          | Google SSO; admin login                                        |
+| `GOOGLE_SSO_CLIENT_ID` (required) | front-api: `FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID`; frontend: `NUXT_GOOGLE_OAUTH_CLIENT_ID`; admin, api (optional, paired): tree `spring.security.oauth2.client.registration.google.client-id` | Google SSO ([Google SSO OAuth clients](google-sso-oauth-clients.md)); admin login (GOU-1091), api login (GOU-1393) |
+| `GOOGLE_SSO_CLIENT_SECRET` (required) | frontend: `NUXT_GOOGLE_OAUTH_CLIENT_SECRET`; admin, api (optional, paired): tree `spring.security.oauth2.client.registration.google.client-secret`                     | Google SSO; admin and api logins                               |
 | `O4G_ELASTICSEARCH_PASSWORD` (source) | api, ui, front-api, b2b-api: tree `spring.elasticsearch.password`                                                                                                        | Elasticsearch user `elastic` (`infraSecrets.yml` only)         |
 | `B2B_API_POSTGRES_PASSWORD` (source) | b2b-api: tree `spring.datasource.password`; infra: `B2B_POSTGRES_PASSWORD`                                                                                                 | Postgres user of `b2b_postgres` (`infraSecrets.yml` only)      |
 | `INFRA_*` (source)                | infra: `/etc/open4goods/infra.env` (Kibana, Plausible and its Postgres and ClickHouse)                                                                          | compose infrastructure (`infraSecrets.yml` only)               |
@@ -160,7 +160,7 @@ Spring services and the frontend one after the other, front-api first).
 
 | Secret                 | Consumers                                                                                       |
 | ---------------------- | ----------------------------------------------------------------------------------------------- |
-| `O4G_SBA_PASSWORD`     | SBA clients (api, ui, front-api, b2b-api) and admin's registration check; ui and front-api actuators and admin's instance auth |
+| `O4G_SBA_PASSWORD`     | SBA clients (api, ui, front-api, b2b-api) and admin's registration check; api, ui and front-api actuators and admin's instance auth |
 | `O4G_MACHINE_TOKEN`    | front-api (checks `X-Shared-Token`) and the frontend (sends it); `publish-frontend.sh` refuses to publish when front-api rejects the frontend's token |
 | `FRONT_API_JWT_SECRET` | front-api (signs) and the frontend (verifies admin access tokens)                               |
 | `O4G_INTERNAL_API_KEY` | front-api (sends) and api (`admin-key`, its only accepted key)                                  |
@@ -185,6 +185,12 @@ redirect URIs before the first render (see
 [Google SSO OAuth clients](google-sso-oauth-clients.md#redirect-uris-to-register-on-the-web-client)).
 Access stays gated by `AdminOidcUserService` (verified e-mail in
 `admin.security.google-sso.role-allowlist`), proven by `AdminGoogleSsoAccessTest`.
+
+api receives the same pair under the same rule (GOU-1393): its interactive
+login is Google SSO only, gated by `ApiOidcUserService` (verified e-mail in
+`api.security.google-sso.role-allowlist`), proven by `ApiGoogleSsoAccessTest`.
+Without the pair, api has no interactive login at all (API keys and the
+Actuator monitor keep working).
 
 ### How a file is written
 

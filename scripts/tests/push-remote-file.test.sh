@@ -410,6 +410,34 @@ else
   ko "render api tree (status ${status}): ${out}"
 fi
 
+# api: Google SSO client pair and Spring Boot Admin monitor on Actuator (GOU-1393).
+for half in "GOOGLE_SSO_CLIENT_ID=client-id.apps.example" "GOOGLE_SSO_CLIENT_SECRET=${TREE_VALUE}"; do
+  reset_host
+  run render_with "${half}" -- --if-present apply prod api
+  if [[ ${status} -ne 0 ]] \
+    && [[ "${out}" == *"GOOGLE_SSO_CLIENT_ID and GOOGLE_SSO_CLIENT_SECRET go together for api"* ]] \
+    && [[ "${out}" != *"${TREE_SENTINEL}"* ]] && [[ ! -s "${FAKE_SSH_LOG}" ]] && [[ ! -e "${FAKE_ROOT}/etc" ]]; then
+    pass "render: api refuses half of the Google SSO pair (${half%%=*}) before anything is written"
+  else
+    ko "render api half SSO pair ${half%%=*} (status ${status}): ${out}"
+  fi
+done
+reset_host
+run render_with GOOGLE_SSO_CLIENT_ID=client-id.apps.example GOOGLE_SSO_CLIENT_SECRET="${TREE_VALUE}" \
+  O4G_SBA_PASSWORD="${TREE_VALUE}" -- --if-present apply prod api
+tree="${FAKE_ROOT}/etc/open4goods/secrets/api"
+if [[ ${status} -eq 0 ]] \
+  && cmp -s "${tree}/spring.security.oauth2.client.registration.google.client-id" <(printf '%s' client-id.apps.example) \
+  && cmp -s "${tree}/spring.security.oauth2.client.registration.google.client-secret" <(printf '%s' "${TREE_VALUE}") \
+  && cmp -s "${tree}/o4g.actuator.monitor.password" <(printf '%s' "${TREE_VALUE}") \
+  && cmp -s "${tree}/spring.boot.admin.client.password" <(printf '%s' "${TREE_VALUE}") \
+  && [[ "$(cat "${FAKE_ROOT}/etc/open4goods/api.env")" == "${API_IMPORT}" ]] \
+  && [[ "${out}" != *"${TREE_SENTINEL}"* ]] && ! grep -q "${TREE_SENTINEL}" "${GITHUB_STEP_SUMMARY}" "${FAKE_SSH_LOG}"; then
+  pass "render: api receives the Google SSO pair and the Actuator monitor password in its tree"
+else
+  ko "render api SSO and monitor tree (status ${status}): ${out} / $(ls -la "${tree}" 2>&1)"
+fi
+
 ########################################
 # render-service-secrets.sh: frontend env lines and coupled secrets
 ########################################
@@ -447,7 +475,7 @@ fi
 ########################################
 # Each workflow step that runs the script must map, in its env, every secret of the services it renders.
 run python3 - "${RENDER}" "${ROOT}/.github/workflows" <<'PY'
-import pathlib, re, sys
+import json, pathlib, re, sys
 import yaml
 
 render, workflows = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
@@ -475,7 +503,10 @@ for workflow in sorted(workflows.glob("*.yml")):
                 # --source renders the `source` rows only; without it, every other row.
                 needed = source.get(service, set()) if "--source" in script else table[service]
                 for secret in sorted(needed):
-                    if f"secrets.{secret}" not in str(env.get(secret, "")):
+                    value = str(env.get(secret, ""))
+                    # serviceSecrets.yml maps a secret only for the services listed in its contains(...).
+                    listed = re.search(r"contains\(fromJSON\('(\[[^']*\])'\), inputs\.service\)", value)
+                    if f"secrets.{secret}" not in value or (listed and service not in json.loads(listed.group(1))):
                         errors.append(f"{workflow.name} / {step.get('name')}: {secret} ({service}) not mapped")
 print("\n".join(errors) or f"{steps} steps checked")
 sys.exit(1 if errors or steps < 6 else 0)
