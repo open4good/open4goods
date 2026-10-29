@@ -102,7 +102,10 @@ A page canonical built with `resolveLocalizedRoutePath` must name a route of
 `/<route-name>`, a 404 path.
 
 Product pages reached through a legacy or stale URL (`/{gtin}-{slug}` without
-category, or an outdated slug) answer a 301 to the product `fullSlug`.
+category, or an outdated slug) answer a 301 to the product `fullSlug`. The
+front-api builds `fullSlug` with `ProductCanonicalUrl` (`model` module), the
+same method the ui uses for the product sitemap, see
+[sitemap-generation.md](sitemap-generation.md).
 
 ## Rules for future changes
 

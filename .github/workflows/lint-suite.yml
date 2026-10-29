@@ -46,3 +46,4 @@ jobs:
         run: |
           scripts/tests/push-remote-file.test.sh
           scripts/tests/infra-secrets.test.sh
+          python3 -m unittest scripts/tests/sample_sitemap_urls_test.py

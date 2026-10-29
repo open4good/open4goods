@@ -28,6 +28,7 @@ import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -37,6 +38,8 @@ import org.springframework.web.util.UrlPathHelper;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Ticker;
+
+import io.micrometer.core.instrument.MeterRegistry;
 
 
 
@@ -65,8 +68,9 @@ public class AppConfig {
 	}
 
 	@Bean
-	SitemapGenerationService sitemapGenerationService(ProductRepository repository, VerticalsConfigService verticalConfigService) {
-		return new SitemapGenerationService(repository, config, verticalConfigService);
+	SitemapGenerationService sitemapGenerationService(ProductRepository repository,
+			VerticalsConfigService verticalConfigService, MeterRegistry meterRegistry) {
+		return new SitemapGenerationService(repository, config, verticalConfigService, meterRegistry);
 	}
 
 	@Bean
@@ -149,9 +153,14 @@ public class AppConfig {
 
 
 
+	/**
+	 * Product repository backed by the Spring Data Elasticsearch operations.
+	 * The no-arg constructor leaves the operations {@code null}, which broke
+	 * every sitemap generation from 2026-06 (GOU-1365).
+	 */
 	@Bean
-	ProductRepository aggregatedDataRepo() {
-		return new ProductRepository();
+	ProductRepository aggregatedDataRepo(ElasticsearchOperations elasticsearchOperations) {
+		return new ProductRepository(elasticsearchOperations);
 	}
 
 
