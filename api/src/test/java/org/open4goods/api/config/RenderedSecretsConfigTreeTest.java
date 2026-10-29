@@ -66,8 +66,6 @@ class RenderedSecretsConfigTreeTest {
                     binder -> bind(binder, "googlesearch", GoogleSearchConfig.class).getApiKey()),
             entry("spring.ai.openai.api-key",
                     binder -> bind(binder, "spring.ai.openai", OpenAiCommonProperties.class).getApiKey()),
-            entry("amazon-config.access-key", binder -> api(binder).getAmazonConfig().getAccessKey()),
-            entry("amazon-config.secret-key", binder -> api(binder).getAmazonConfig().getSecretKey()),
             entry("affiliation-config.awin-access-token",
                     binder -> api(binder).getAffiliationConfig().getAwinAccessToken()),
             entry("affiliation-config.kwanko-token", binder -> api(binder).getAffiliationConfig().getKwankoToken()),

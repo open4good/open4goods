@@ -214,8 +214,6 @@ jobs:
           API_VERTEX_BATCH_JSON: ${{ secrets.API_VERTEX_BATCH_JSON }}
           API_GOOGLE_SEARCH_API_KEY: ${{ secrets.API_GOOGLE_SEARCH_API_KEY }}
           API_OPENAI_API_KEY: ${{ secrets.API_OPENAI_API_KEY }}
-          API_AMAZON_ACCESS_KEY: ${{ secrets.API_AMAZON_ACCESS_KEY }}
-          API_AMAZON_SECRET_KEY: ${{ secrets.API_AMAZON_SECRET_KEY }}
           API_AWIN_ACCESS_TOKEN: ${{ secrets.API_AWIN_ACCESS_TOKEN }}
           API_KWANKO_TOKEN: ${{ secrets.API_KWANKO_TOKEN }}
           API_TRADETRACKER_API_KEY: ${{ secrets.API_TRADETRACKER_API_KEY }}
