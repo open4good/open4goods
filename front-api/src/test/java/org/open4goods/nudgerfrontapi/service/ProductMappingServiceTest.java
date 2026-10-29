@@ -27,6 +27,7 @@ import org.open4goods.model.price.Currency;
 import org.open4goods.model.product.EcoScoreRanking;
 import org.open4goods.model.product.GtinInfo;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductCanonicalUrl;
 import org.open4goods.model.product.ProductCondition;
 import org.open4goods.model.product.ProductTexts;
 import org.open4goods.model.product.Score;
@@ -37,7 +38,6 @@ import org.open4goods.model.resource.ResourceType;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
-import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductScoreDto;
 import org.open4goods.model.localization.DomainLanguage;
@@ -52,7 +52,6 @@ class ProductMappingServiceTest {
     private ProductRepository repository;
     private ProductMappingService service;
     private ApiProperties apiProperties;
-    private CategoryMappingService categoryMappingService;
     private VerticalsConfigService verticalsConfigService;
     private AffiliationService affiliationService;
     private IcecatService icecatService;
@@ -65,7 +64,6 @@ class ProductMappingServiceTest {
         repository = mock(ProductRepository.class);
         apiProperties = new ApiProperties();
         apiProperties.setResourceRootPath("https://static.example");
-        categoryMappingService = mock(CategoryMappingService.class);
         verticalsConfigService = mock(VerticalsConfigService.class);
         affiliationService = mock(AffiliationService.class);
         icecatService = mock(IcecatService.class);
@@ -75,7 +73,7 @@ class ProductMappingServiceTest {
         CaffeineCache referenceCache = new CaffeineCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME,
                 Caffeine.newBuilder().maximumSize(100).build());
         when(cacheManager.getCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)).thenReturn(referenceCache);
-        service = new ProductMappingService(repository, apiProperties, categoryMappingService,
+        service = new ProductMappingService(repository, apiProperties,
                 verticalsConfigService, searchService, affiliationService, icecatService, cacheManager,
                 productTimelineService, new ProductSeoMetaService());
     }
@@ -234,9 +232,9 @@ class ProductMappingServiceTest {
         when(verticalsConfigService.getConfigById("phones")).thenReturn(verticalConfig);
         when(verticalsConfigService.getConfigByIdOrDefault("phones")).thenReturn(verticalConfig);
 
-        VerticalConfigDto verticalDto = new VerticalConfigDto("phones", true, true, null, null, null, null, null, null,
-                null, null, "Phones", "Phones description", "phones", List.of(), List.of(), null, null, null);
-        when(categoryMappingService.toVerticalConfigDto(verticalConfig, DomainLanguage.en)).thenReturn(verticalDto);
+        ProductI18nElements enI18n = new ProductI18nElements();
+        enI18n.setVerticalHomeUrl("phones");
+        verticalConfig.getI18n().put("en", enI18n);
 
         ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("scores"), DomainLanguage.en);
 
@@ -331,10 +329,10 @@ class ProductMappingServiceTest {
         when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
         VerticalConfig verticalConfig = new VerticalConfig();
         verticalConfig.setId("electronics");
-        VerticalConfigDto configDto = new VerticalConfigDto("electronics", true, false, null, null, 1, null, null, null,
-                null, null, null, null, "telephones-reconditionnes", List.of(), List.of(), null, null, null);
+        ProductI18nElements enI18n = new ProductI18nElements();
+        enI18n.setVerticalHomeUrl("telephones-reconditionnes");
+        verticalConfig.getI18n().put("en", enI18n);
         when(verticalsConfigService.getConfigById("electronics")).thenReturn(verticalConfig);
-        when(categoryMappingService.toVerticalConfigDto(verticalConfig, DomainLanguage.en)).thenReturn(configDto);
 
         ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("base"), DomainLanguage.en);
 
@@ -343,7 +341,7 @@ class ProductMappingServiceTest {
     }
 
     @Test
-    void getProductComputesFullSlugFromVerticalConfigWhenCategoryDtoHasNoUrl() throws Exception {
+    void getProductComputesFullSlugFromVerticalConfigWithSlashes() throws Exception {
         long gtin = 8431312260509L;
         Product product = new Product(gtin);
         product.setVertical("air-conditioners");
@@ -358,12 +356,38 @@ class ProductMappingServiceTest {
         frI18n.setVerticalHomeUrl("/climatiseurs/");
         verticalConfig.getI18n().put("fr", frI18n);
         when(verticalsConfigService.getConfigById("air-conditioners")).thenReturn(verticalConfig);
-        when(categoryMappingService.toVerticalConfigDto(verticalConfig, DomainLanguage.fr)).thenReturn(null);
 
         ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("base"), DomainLanguage.fr);
 
         assertThat(dto.slug()).isEqualTo("8431312260509-climatisation-midea-mmcs12hrn8qrd0");
         assertThat(dto.fullSlug()).isEqualTo("/climatiseurs/8431312260509-climatisation-midea-mmcs12hrn8qrd0");
+    }
+
+    @Test
+    void getProductFullSlugIgnoresRequestLocaleAndMatchesSharedCanonicalRule() throws Exception {
+        long gtin = 8806094831603L;
+        Product product = new Product(gtin);
+        product.setVertical("tv");
+        Localisable<String, String> urlLocalisable = new Localisable<>();
+        urlLocalisable.put("default", "8806094831603-smart-tv-qe32ls03cbu");
+        urlLocalisable.put("en", "8806094831603-english-slug");
+        product.getNames().setUrl(urlLocalisable);
+
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
+        VerticalConfig verticalConfig = new VerticalConfig();
+        verticalConfig.setId("tv");
+        ProductI18nElements frI18n = new ProductI18nElements();
+        frI18n.setVerticalHomeUrl("televiseurs");
+        verticalConfig.getI18n().put("fr", frI18n);
+        when(verticalsConfigService.getConfigById("tv")).thenReturn(verticalConfig);
+
+        ProductDto english = service.getProduct(gtin, Locale.ENGLISH, Set.of("base"), DomainLanguage.fr);
+        ProductDto french = service.getProduct(gtin, Locale.FRENCH, Set.of("base"), DomainLanguage.fr);
+
+        assertThat(english.fullSlug()).isEqualTo("/televiseurs/8806094831603-smart-tv-qe32ls03cbu");
+        assertThat(french.fullSlug()).isEqualTo(english.fullSlug());
+        assertThat(english.fullSlug())
+                .isEqualTo(ProductCanonicalUrl.fullSlug(product, verticalConfig, DomainLanguage.fr));
     }
 
     @Test

@@ -594,14 +594,15 @@ export default defineNuxtConfig({
         // always an empty urlset since no vertical or top-level wiki page mapping was ever
         // configured), so these proxy entries always 404'd or pointed at an empty file.
         // server/plugins/sitemap-blog-posts.ts now generates blog URLs directly from Nuxt Content.
+        // guides.xml removed (GOU-1366): ui only writes it for guides under
+        // verticals/src/main/resources/guides/default/, which holds none, so the
+        // public /sitemap/fr/guides.xml answered 404. Add it back with the first guide.
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/category-pages.xml`,
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/product-pages.xml`,
-        `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/guides.xml`,
       ],
       en: [
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/category-pages.xml`,
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/product-pages.xml`,
-        `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/guides.xml`,
       ],
     },
 

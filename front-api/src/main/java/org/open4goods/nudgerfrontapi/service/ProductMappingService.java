@@ -39,6 +39,7 @@ import org.open4goods.model.product.EcoScoreRanking;
 import org.open4goods.model.product.ExternalIds;
 import org.open4goods.model.product.GtinInfo;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductCanonicalUrl;
 import org.open4goods.model.product.ProductCondition;
 import org.open4goods.model.product.ProductNameResolver;
 import org.open4goods.model.product.ProductTexts;
@@ -53,7 +54,6 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.dto.PageMetaDto;
-import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.product.PriceTrendState;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAggregatedPriceDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAttributeDto;
@@ -130,7 +130,6 @@ public class ProductMappingService {
 
     private final ProductRepository repository;
     private final ApiProperties apiProperties;
-    private final CategoryMappingService categoryMappingService;
     private final VerticalsConfigService verticalsConfigService;
     private final SearchService searchService;
     private final AffiliationService affiliationService;
@@ -141,7 +140,6 @@ public class ProductMappingService {
 
     public ProductMappingService(ProductRepository repository,
             ApiProperties apiProperties,
-            CategoryMappingService categoryMappingService,
             VerticalsConfigService verticalsConfigService,
             SearchService searchService,
             AffiliationService affiliationService,
@@ -151,7 +149,6 @@ public class ProductMappingService {
             ProductSeoMetaService productSeoMetaService) {
         this.repository = repository;
         this.apiProperties = apiProperties;
-        this.categoryMappingService = categoryMappingService;
         this.verticalsConfigService = verticalsConfigService;
         this.searchService = searchService;
         this.affiliationService = affiliationService;
@@ -236,16 +233,10 @@ public class ProductMappingService {
                 ? productTimelineService.mapTimeline(product)
                 : null;
 
-        String slug = null;
-        if (product.getNames() != null) {
-            // Slug is derived from the vertical specific URL mapping defined in the product
-            // names block.
-            slug = resolveLocalisedString(product.getNames().getUrl(), domainLanguage, locale);
-        }
-        String fullSlug = null;
-        if (StringUtils.hasText(slug)) {
-            fullSlug = buildFullSlug(slug, product.getVertical(), domainLanguage, vConfig);
-        }
+        // Slug and canonical path follow the single rule shared with the sitemap
+        // generation (GOU-1366): they never depend on the request locale.
+        String slug = ProductCanonicalUrl.slug(product, domainLanguage);
+        String fullSlug = ProductCanonicalUrl.fullSlug(product, vConfig, domainLanguage);
 
         ProductDto dto = new ProductDto(
                 product.getId(),
@@ -376,15 +367,8 @@ public class ProductMappingService {
             return null;
         }
         String preferredName = resolvePreferredName(referencedProduct, domainLanguage, locale);
-        String slug = null;
-        if (referencedProduct.getNames() != null) {
-            slug = resolveLocalisedString(referencedProduct.getNames().getUrl(), domainLanguage, locale);
-        }
-        String fullSlug = null;
-        if (StringUtils.hasText(slug)) {
-            VerticalConfig config = resolveVerticalConfig(referencedProduct.getVertical());
-            fullSlug = buildFullSlug(slug, referencedProduct.getVertical(), domainLanguage, config);
-        }
+        String fullSlug = ProductCanonicalUrl.fullSlug(referencedProduct,
+                resolveVerticalConfig(referencedProduct.getVertical()), domainLanguage);
 
         ProductScoresDto scores = null;
         if (referencedProduct.getScores().size() > 0) {
@@ -1047,68 +1031,6 @@ public class ProductMappingService {
             config = verticalsConfigService.getConfigByIdOrDefault(verticalId);
         }
         return config;
-    }
-
-    /**
-     * Resolve the vertical home URL using localisation fallback rules.
-     */
-    private String resolveVerticalHomeUrl(String verticalId, DomainLanguage domainLanguage, VerticalConfig config) {
-        if (!StringUtils.hasText(verticalId)) {
-            return null;
-        }
-        if (config == null) {
-            return null;
-        }
-        VerticalConfigDto dto = categoryMappingService.toVerticalConfigDto(config, domainLanguage);
-        if (dto != null && StringUtils.hasText(dto.verticalHomeUrl())) {
-            return dto.verticalHomeUrl();
-        }
-        for (String languageKey : candidateLanguageKeys(domainLanguage, null)) {
-            ProductI18nElements i18n = config.i18n(languageKey);
-            if (i18n != null && StringUtils.hasText(i18n.getVerticalHomeUrl())) {
-                return i18n.getVerticalHomeUrl();
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Build the canonical product path from a product slug and vertical
-     * configuration.
-     *
-     * @param slug product slug resolved from product names
-     * @param verticalId vertical identifier attached to the product
-     * @param domainLanguage requested domain language
-     * @param config vertical configuration used to resolve the category URL
-     * @return canonical path or {@code null} when the product is not categorized
-     */
-    private String buildFullSlug(String slug, String verticalId, DomainLanguage domainLanguage, VerticalConfig config) {
-        if (!StringUtils.hasText(slug)) {
-            return null;
-        }
-        String trimmedSlug = trimSlashes(slug);
-        String verticalHomeUrl = resolveVerticalHomeUrl(verticalId, domainLanguage, config);
-        if (!StringUtils.hasText(verticalHomeUrl)) {
-            return "/" + trimmedSlug;
-        }
-        return "/" + trimSlashes(verticalHomeUrl) + "/" + trimmedSlug;
-    }
-
-    /**
-     * Trim leading and trailing slashes from a path fragment.
-     *
-     * @param value path fragment
-     * @return trimmed fragment
-     */
-    private String trimSlashes(String value) {
-        String trimmed = value.trim();
-        while (trimmed.startsWith("/")) {
-            trimmed = trimmed.substring(1);
-        }
-        while (trimmed.endsWith("/")) {
-            trimmed = trimmed.substring(0, trimmed.length() - 1);
-        }
-        return trimmed;
     }
 
     /**
