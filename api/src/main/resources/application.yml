@@ -145,3 +145,9 @@ feed:
     cron: 0 43 1 * * ?
     enabled: false
     cache-ttl-days: 1
+
+metriks:
+  affiliation:
+    kwanko:
+      # No dedicated secret: reuses the Kwanko feed token (API_KWANKO_TOKEN, GOU-1379).
+      api-token: ${affiliation-config.kwanko-token:}

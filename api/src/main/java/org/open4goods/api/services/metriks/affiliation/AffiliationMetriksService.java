@@ -56,7 +56,7 @@ public class AffiliationMetriksService {
     public static final ZoneId ZONE = ZoneId.of("Europe/Paris");
     /** Only currency summed: no conversion. */
     static final String CURRENCY = "EUR";
-    private static final List<String> NETWORK_ORDER = List.of("awin", "effiliation");
+    private static final List<String> NETWORK_ORDER = List.of("awin", "effiliation", "kwanko");
     /** Click networks, in event order ({@link AffiliationNetwork#key()}). */
     private static final List<String> CLICK_NETWORKS = Arrays.stream(AffiliationNetwork.values())
             .map(AffiliationNetwork::key).toList();

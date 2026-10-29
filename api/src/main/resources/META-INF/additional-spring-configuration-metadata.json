@@ -144,6 +144,12 @@
       "type": "java.lang.String",
       "description": "Effiliation publisher API key read by the Metriks affiliation report (sent in the query string, never logged). Secret. Production: METRIKS_AFFILIATION_EFFILIATION_API_KEY in /etc/open4goods/api.env.",
       "defaultValue": ""
+    },
+    {
+      "name": "metriks.affiliation.kwanko.api-token",
+      "type": "java.lang.String",
+      "description": "Kwanko Publisher API token (bearer) read by the Metriks affiliation report. Secret. Defaults to affiliation-config.kwanko-token (API_KWANKO_TOKEN, the Kwanko feed token).",
+      "defaultValue": "${affiliation-config.kwanko-token:}"
     }
   ]
 }

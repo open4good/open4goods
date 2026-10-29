@@ -32,7 +32,8 @@ class AffiliationCredentialsBindingTest {
     private static final Map<String, Object> RENDERED = Map.of(
             "METRIKS_AFFILIATION_AWIN_PUBLISHER_ID", "100000",
             "METRIKS_AFFILIATION_AWIN_API_TOKEN", "awin-token",
-            "METRIKS_AFFILIATION_EFFILIATION_API_KEY", "effi-key");
+            "METRIKS_AFFILIATION_EFFILIATION_API_KEY", "effi-key",
+            "METRIKS_AFFILIATION_KWANKO_API_TOKEN", "kwanko-token");
 
     @TempDir
     Path tempDir;
@@ -48,8 +49,12 @@ class AffiliationCredentialsBindingTest {
             assertThat(effiliation).extracting("apiKey").isEqualTo("effi-key");
             assertThat(effiliation.missingCredentials()).isEmpty();
 
+            KwankoReportClient kwanko = context.getBean(KwankoReportClient.class);
+            assertThat(kwanko).extracting("apiToken").isEqualTo("kwanko-token");
+            assertThat(kwanko.missingCredentials()).isEmpty();
+
             assertThat(context.getBean(AffiliationMetriksService.class)).extracting("clients")
-                    .asInstanceOf(org.assertj.core.api.InstanceOfAssertFactories.LIST).hasSize(2);
+                    .asInstanceOf(org.assertj.core.api.InstanceOfAssertFactories.LIST).hasSize(3);
         }
     }
 
@@ -60,6 +65,27 @@ class AffiliationCredentialsBindingTest {
                     "metriks.affiliation.awin.publisher-id", "metriks.affiliation.awin.api-token");
             assertThat(context.getBean(EffiliationReportClient.class).missingCredentials())
                     .containsExactly("metriks.affiliation.effiliation.api-key");
+            assertThat(context.getBean(KwankoReportClient.class).missingCredentials())
+                    .containsExactly("metriks.affiliation.kwanko.api-token");
+        }
+    }
+
+    /** The Kwanko token defaults to the feed token {@code affiliation-config.kwanko-token} (API_KWANKO_TOKEN). */
+    @Test
+    void kwankoTokenFallsBackToTheFeedToken() throws IOException {
+        try (ConfigurableApplicationContext context = start(Map.of(), "classpath:/application.yml",
+                "--affiliation-config.kwanko-token=feed-token")) {
+            KwankoReportClient kwanko = context.getBean(KwankoReportClient.class);
+            assertThat(kwanko).extracting("apiToken").isEqualTo("feed-token");
+            assertThat(kwanko.missingCredentials()).isEmpty();
+        }
+    }
+
+    @Test
+    void kwankoDedicatedTokenWinsOverTheFeedToken() throws IOException {
+        try (ConfigurableApplicationContext context = start(Map.of("METRIKS_AFFILIATION_KWANKO_API_TOKEN", "dedicated"),
+                "classpath:/application.yml", "--affiliation-config.kwanko-token=feed-token")) {
+            assertThat(context.getBean(KwankoReportClient.class)).extracting("apiToken").isEqualTo("dedicated");
         }
     }
 
@@ -68,6 +94,11 @@ class AffiliationCredentialsBindingTest {
      * environment and an empty configuration file.
      */
     private ConfigurableApplicationContext start(Map<String, Object> osEnvironment) throws IOException {
+        return start(osEnvironment, null);
+    }
+
+    private ConfigurableApplicationContext start(Map<String, Object> osEnvironment, String extraLocation,
+            String... args) throws IOException {
         Path config = Files.writeString(tempDir.resolve("application-active.yml"), "metriks:\n  gsc:\n    window-days: 28\n");
         StandardEnvironment environment = new StandardEnvironment() {
             @Override
@@ -81,11 +112,16 @@ class AffiliationCredentialsBindingTest {
         application.setBannerMode(Banner.Mode.OFF);
         application.setLogStartupInfo(false);
         application.setEnvironment(environment);
-        return application.run("--spring.config.location=file:" + config);
+        String location = "file:" + config + (extraLocation == null ? "" : "," + extraLocation);
+        String[] all = new String[args.length + 2];
+        all[args.length + 1] = "--spring.main.web-application-type=none";
+        all[0] = "--spring.config.location=" + location;
+        System.arraycopy(args, 0, all, 1, args.length);
+        return application.run(all);
     }
 
     @Configuration(proxyBeanMethods = false)
-    @Import({ AwinReportClient.class, EffiliationReportClient.class, AffiliationMetriksService.class })
+    @Import({ AwinReportClient.class, EffiliationReportClient.class, KwankoReportClient.class, AffiliationMetriksService.class })
     static class AffiliationConfig {
 
         /** Click reader without Elasticsearch: only the credential binding is under test. */
