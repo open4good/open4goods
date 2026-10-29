@@ -30,7 +30,7 @@ and api (reader, `AffiliationClickStatsService`).
 |--------------|-----------|------------------------------------------------------------|
 | `id`         | keyword   | Random UUID                                                |
 | `ts`         | date      | Click time, epoch milliseconds                             |
-| `network`    | keyword   | `awin`, `effiliation` or `other`                           |
+| `network`    | keyword   | `awin`, `effiliation`, `kwanko`, `tradetracker` or `other` |
 | `merchant`   | keyword   | Datasource name of the offer                               |
 | `gtin`       | keyword   | Product GTIN, `null` for tokens without it                 |
 | `originPath` | keyword   | Originating path, `null` when absent or invalid            |
@@ -39,7 +39,18 @@ and api (reader, `AffiliationClickStatsService`).
 No IP, no user agent, no full URL. `network` is deduced from the target host by
 `AffiliationNetwork.fromUrl`: `awin1.com` and its sub-domains are `awin`;
 `effiliation.com`, `effinity.fr` and their sub-domains are `effiliation`;
-anything else (including an unreadable URL) is `other`.
+`metaffiliation.com`, `kwanko.com` and their sub-domains are `kwanko`;
+`tradetracker.net`, `tradetracker.com` and their sub-domains are
+`tradetracker`; anything else (including an unreadable URL) is `other`.
+
+TradeTracker links on a merchant's own domain (e.g. `partner.aosom.fr`) are
+recognised by their signature, read on the full URL: query parameters `c`, `m`
+and `a` all numeric and `u` present. Only the host is stored. A direct merchant
+link without this signature stays `other`.
+
+Clicks stored before this classification (since 2026-10-26) keep `network =
+other`: they are not rewritten, so Kwanko and TradeTracker counts start at the
+deployment date.
 
 `X-Affiliation-Origin` is kept only when it is a bare path: it starts with a
 single `/`, has no `?`, `#`, whitespace or control character, and is at most
@@ -54,7 +65,7 @@ README, "Contribution votes ip/ua purge" (GOU-1230).
 
 Added after the commission events of `/api/metriks/affiliation`:
 
-- `affiliation.<awin|effiliation|other|total>.clicks.<7d|28d>`, unit `count`,
+- `affiliation.<awin|effiliation|kwanko|tradetracker|other|total>.clicks.<7d|28d>`, unit `count`,
   windows `[D-7, D-1]` and `[D-28, D-1]` in Europe/Paris by click time, with
   the same window `params` as the commission events (no `currency`);
 - `affiliation.clicks.top_merchants.28d`: `value` is the number of rows,

@@ -1,6 +1,8 @@
 package org.open4goods.services.contribution.model;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Affiliation network of an outbound {@code /contrib/} click, deduced from the host of the target URL.
@@ -11,20 +13,36 @@ import java.util.Locale;
 public enum AffiliationNetwork {
 
     /** Awin: {@code awin1.com} and its sub-domains. */
-    AWIN("awin"),
+    AWIN("awin", "Awin"),
     /** Effiliation: {@code effiliation.com}, {@code effinity.fr} and their sub-domains. */
-    EFFILIATION("effiliation"),
-    /** Any other target (direct merchant link, unknown network, unreadable URL). */
-    OTHER("other");
+    EFFILIATION("effiliation", "Effiliation"),
+    /** Kwanko (ex Metaffiliation): {@code metaffiliation.com}, {@code kwanko.com} and their sub-domains. */
+    KWANKO("kwanko", "Kwanko"),
+    /**
+     * TradeTracker: {@code tradetracker.net}, {@code tradetracker.com} and their sub-domains, or a merchant's own
+     * domain carrying the TradeTracker link signature ({@link #hasTradeTrackerSignature(String)}).
+     */
+    TRADETRACKER("tradetracker", "TradeTracker"),
+    /** Any other target (direct merchant link, unknown network, unreadable URL). Must stay the last one. */
+    OTHER("other", "autres");
 
     private final String key;
+    private final String label;
 
-    AffiliationNetwork(String key) {
+    AffiliationNetwork(String key, String label) {
         this.key = key;
+        this.label = label;
     }
 
     /**
-     * @return the stored and reported value of the network ({@code awin}, {@code effiliation}, {@code other})
+     * @return a human readable name of the network, for Metriks labels
+     */
+    public String label() {
+        return label;
+    }
+
+    /**
+     * @return the stored and reported value of the network ({@code awin}, {@code effiliation}, {@code kwanko}, {@code tradetracker}, {@code other})
      */
     public String key() {
         return key;
@@ -37,7 +55,51 @@ public enum AffiliationNetwork {
      * @return the network of its host, {@link #OTHER} when the URL has no readable host
      */
     public static AffiliationNetwork fromUrl(String url) {
-        return fromHost(hostOf(url));
+        AffiliationNetwork network = fromHost(hostOf(url));
+        if (network == OTHER && hostOf(url) != null && hasTradeTrackerSignature(url)) {
+            return TRADETRACKER;
+        }
+        return network;
+    }
+
+    /**
+     * Tells whether a URL carries the TradeTracker link signature, used by merchants' own tracking domains: query
+     * parameters {@code c}, {@code m} and {@code a} numeric, and {@code u} present.
+     *
+     * @param url the URL, possibly {@code null}
+     * @return {@code true} when the signature is present
+     */
+    static boolean hasTradeTrackerSignature(String url) {
+        if (url == null) {
+            return false;
+        }
+        int start = url.indexOf('?');
+        if (start < 0) {
+            return false;
+        }
+        int end = url.indexOf('#', start);
+        String query = url.substring(start + 1, end < 0 ? url.length() : end);
+        Map<String, String> params = new HashMap<>();
+        for (String pair : query.split("&")) {
+            int eq = pair.indexOf('=');
+            String name = eq < 0 ? pair : pair.substring(0, eq);
+            params.putIfAbsent(name, eq < 0 ? "" : pair.substring(eq + 1));
+        }
+        return isDigits(params.get("c")) && isDigits(params.get("m")) && isDigits(params.get("a"))
+                && params.containsKey("u");
+    }
+
+    private static boolean isDigits(String value) {
+        if (value == null || value.isEmpty()) {
+            return false;
+        }
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if (c < '0' || c > '9') {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -45,7 +107,8 @@ public enum AffiliationNetwork {
      *
      * @param host the host name, case-insensitive, possibly {@code null}
      * @return {@link #AWIN} for {@code awin1.com} and its sub-domains, {@link #EFFILIATION} for
-     *         {@code effiliation.com}, {@code effinity.fr} and their sub-domains, {@link #OTHER} otherwise
+     *         {@code effiliation.com}, {@code effinity.fr} and their sub-domains, {@link #KWANKO} and {@link #TRADETRACKER} for
+     *         their hosts, {@link #OTHER} otherwise (the TradeTracker signature needs the full URL: {@link #fromUrl})
      */
     public static AffiliationNetwork fromHost(String host) {
         String normalised = normaliseHost(host);
@@ -57,6 +120,12 @@ public enum AffiliationNetwork {
         }
         if (matches(normalised, "effiliation.com") || matches(normalised, "effinity.fr")) {
             return EFFILIATION;
+        }
+        if (matches(normalised, "metaffiliation.com") || matches(normalised, "kwanko.com")) {
+            return KWANKO;
+        }
+        if (matches(normalised, "tradetracker.net") || matches(normalised, "tradetracker.com")) {
+            return TRADETRACKER;
         }
         return OTHER;
     }
