@@ -70,6 +70,24 @@ api and front-api must use the same Elasticsearch cluster
 (`spring.elasticsearch.uris` in open4goods-config: `localhost:9200` on the beta
 box for both, the same production node for both).
 
+## Kwanko revenues (GOU-1379)
+
+`KwankoReportClient` (api, `services/metriks/affiliation`) reads
+`GET https://api.kwanko.com/publishers/conversions?completion_date_from=…&completion_date_to=…`
+(bearer token, dates as UTC ISO with `+00:00`) and feeds
+`affiliation.kwanko.commission.{validated,pending}.{7d,28d}` and
+`affiliation.kwanko.sales.*`, included in the totals. `state` maps to validated
+(`approved`, `validated`, `accepted`), pending (`pending`, `waiting`,
+`ongoing`) or declined (`rejected`, `declined`, `refused`, `cancelled`); any
+other value, a missing commission or a non-EUR currency is a network error.
+Further pages are read (`page=N`) only when the response announces
+`pagination.total_pages` or `last_page`.
+
+The token is `metriks.affiliation.kwanko.api-token`, which defaults to
+`${affiliation-config.kwanko-token:}` in `api/src/main/resources/application.yml`:
+the feed secret `API_KWANKO_TOKEN`, no dedicated secret. Without it the Kwanko
+events are in `error` (missing credential).
+
 ## Tests
 
 - `AffiliationNetworkTest` (network deduction) and

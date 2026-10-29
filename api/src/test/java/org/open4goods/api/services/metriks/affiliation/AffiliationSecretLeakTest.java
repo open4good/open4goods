@@ -31,7 +31,8 @@ class AffiliationSecretLeakTest {
 
     private static final String AWIN_TOKEN = "AWINSECRET0123456789";
     private static final String EFFILIATION_KEY = "EFFISECRET0123456789";
-    private static final List<String> SECRETS = List.of(AWIN_TOKEN, EFFILIATION_KEY);
+    private static final String KWANKO_TOKEN = "KWANKOSECRET0123456789";
+    private static final List<String> SECRETS = List.of(AWIN_TOKEN, EFFILIATION_KEY, KWANKO_TOKEN);
     private static final String EFFILIATION_URL =
             "https://api.effinity.fr/apiv3/" + EFFILIATION_KEY + "/publisher/conversions?start=2026-10-01";
 
@@ -124,5 +125,21 @@ class AffiliationSecretLeakTest {
 
         assertNoSecret(events);
         assertThat(events.get(0).getErrorMessage()).isEqualTo("Effiliation : statut inconnu : ***");
+    }
+
+    @Test
+    void kwankoTokenIsNeverReported() {
+        List<MetriksEvent> events = collect(
+                new KwankoReportClient(KWANKO_TOKEN, new FakeHttp(request -> response(401,
+                        "{\"error\":\"invalid token " + KWANKO_TOKEN + "\"}")).client),
+                new KwankoReportClient(KWANKO_TOKEN, new FakeHttp(request -> {
+                    throw new IOException("failure Bearer " + KWANKO_TOKEN);
+                }).client),
+                new KwankoReportClient(KWANKO_TOKEN, new FakeHttp(request -> response(200,
+                        "{\"conversions\":[{\"state\":\"" + KWANKO_TOKEN + "\","
+                                + "\"completed_at\":\"2026-10-16T09:00:00+00:00\"}]}")).client));
+
+        assertNoSecret(events);
+        assertThat(events.get(0).getErrorMessage()).isEqualTo("Kwanko : HTTP 401 (conversions)");
     }
 }
