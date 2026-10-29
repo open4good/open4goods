@@ -66,6 +66,30 @@
       "defaultValue": "votable"
     },
     {
+      "name": "front.amazon-search-link.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Expose the Amazon search link (through /contrib/) on product pages without any offer.",
+      "defaultValue": true
+    },
+    {
+      "name": "front.amazon-search-link.merchant",
+      "type": "java.lang.String",
+      "description": "Merchant name recorded with the Amazon search link clicks.",
+      "defaultValue": "amazon.fr"
+    },
+    {
+      "name": "front.amazon-search-link.tag",
+      "type": "java.lang.String",
+      "description": "Amazon Associates tag appended to the search URL (public, not a secret).",
+      "defaultValue": "nudger-21"
+    },
+    {
+      "name": "front.amazon-search-link.url-template",
+      "type": "java.lang.String",
+      "description": "Amazon search URL template with the {gtin} and {tag} placeholders.",
+      "defaultValue": "https://www.amazon.fr/s?k={gtin}&tag={tag}"
+    },
+    {
       "name": "front.affiliation-partners.api-base-url",
       "type": "java.lang.String",
       "description": "Base URL of the backend exposing affiliation partner data."

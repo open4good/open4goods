@@ -138,6 +138,7 @@ public class ProductMappingService {
     private final ProductTimelineService productTimelineService;
     private final ProductSeoMetaService productSeoMetaService;
     private final OfferFreshnessService offerFreshnessService;
+    private final AmazonSearchLinkService amazonSearchLinkService;
 
     public ProductMappingService(ProductRepository repository,
             ApiProperties apiProperties,
@@ -148,7 +149,8 @@ public class ProductMappingService {
             CacheManager cacheManager,
             ProductTimelineService productTimelineService,
             ProductSeoMetaService productSeoMetaService,
-            OfferFreshnessService offerFreshnessService) {
+            OfferFreshnessService offerFreshnessService,
+            AmazonSearchLinkService amazonSearchLinkService) {
         this.repository = repository;
         this.apiProperties = apiProperties;
         this.verticalsConfigService = verticalsConfigService;
@@ -159,6 +161,7 @@ public class ProductMappingService {
         this.productTimelineService = productTimelineService;
         this.productSeoMetaService = productSeoMetaService;
         this.offerFreshnessService = offerFreshnessService;
+        this.amazonSearchLinkService = amazonSearchLinkService;
         if (this.referenceCache == null) {
             logger.warn("Cache {} is not configured; product reference caching disabled.",
                     CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
@@ -877,11 +880,12 @@ public class ProductMappingService {
     }
 
     /**
-     * Map offers including best prices, histories and trends.
+     * Map offers including best prices, histories and trends, plus the Amazon search link of a product without offer.
      * <p>
      * Only fresh offers are mapped (see {@link OfferFreshnessService}): the offer list, the best prices, the
      * offer count and the {@code /contrib/} links are all derived from them, so a product whose offers are
-     * all stale is mapped as a product without offer. Price histories and trends are kept.
+     * all stale is mapped as a product without offer, and gets the Amazon search link. Price histories and
+     * trends are kept.
      */
     private ProductOffersDto mapOffers(Product product) {
         AggregatedPrices aggregatedPrices = offerFreshnessService.freshPrices(product);
@@ -918,8 +922,16 @@ public class ProductMappingService {
                     aggregatedPrices.bestOccasionOffer(), aggregatedPrices.getTrends(), ProductCondition.OCCASION));
         }
 
+        Integer offersCount = aggregatedPrices == null ? product.getOffersCount() : aggregatedPrices.getOffers().size();
+
+        // Amazon search link (GOU-1396): only on a product without any fresh offer, i.e. exactly when the
+        // mapped offer block is empty; never counted as an offer.
+        boolean hasOffers = (offersCount != null && offersCount > 0) || bestPrice != null
+                || offersByCondition.values().stream().anyMatch(list -> list != null && !list.isEmpty());
+        String amazonSearchLink = amazonSearchLinkService.buildContribLink(gtin, hasOffers);
+
         return new ProductOffersDto(
-                aggregatedPrices == null ? product.getOffersCount() : aggregatedPrices.getOffers().size(),
+                offersCount,
                 aggregatedPrices != null && aggregatedPrices.getConditions().contains(ProductCondition.OCCASION),
                 bestPrice,
                 bestNew,
@@ -928,7 +940,8 @@ public class ProductMappingService {
                 newHistory,
                 occasionHistory,
                 newTrend,
-                occasionTrend);
+                occasionTrend,
+                amazonSearchLink);
     }
 
     /**

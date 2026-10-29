@@ -18,6 +18,13 @@
         >
           {{ $t('product.price.noOffersBanner') }}
         </v-alert>
+        <ProductAmazonSearchLink
+          v-if="showNoOffersBanner && showAmazonSearchLink && amazonSearchLink"
+          :link="amazonSearchLink"
+          :gtin="productGtin"
+          placement="price-section-amazon-search"
+          class="product-price__amazon-search"
+        />
 
         <v-row align="center" justify="center">
           <v-col cols="12" md="8">
@@ -595,6 +602,7 @@ import type {
 import { ensureECharts } from '~/utils/echarts-loader'
 import ProductPriceEmptyCard from '~/components/product/ProductPriceEmptyCard.vue'
 import ProductPriceVerdict from '~/components/product/ProductPriceVerdict.vue'
+import ProductAmazonSearchLink from '~/components/product/ProductAmazonSearchLink.vue'
 
 let echartsRegistered = false
 
@@ -643,6 +651,14 @@ const props = defineProps({
   product: {
     type: Object as PropType<ProductDto>,
     default: undefined,
+  },
+  /**
+   * Show the Amazon search link of a product without offer here, when the
+   * hero pricing panel (its usual place) is hidden (GOU-1396).
+   */
+  showAmazonSearchLink: {
+    type: Boolean,
+    default: false,
   },
 })
 
@@ -1061,6 +1077,8 @@ const allOffers = computed(() => {
 const showNoOffersBanner = computed(
   () => !allOffers.value.length && !bestNewOffer.value
 )
+
+const amazonSearchLink = computed(() => props.offers?.amazonSearchLink ?? null)
 
 const competitionLevel = computed(() => {
   const count = allOffers.value.length
@@ -1614,6 +1632,10 @@ onBeforeUnmount(() => {
 .product-price__no-offers {
   margin-top: 1rem;
   border-radius: 16px;
+}
+
+.product-price__amazon-search {
+  margin-top: 0.75rem;
 }
 
 .product-price__competition-card {

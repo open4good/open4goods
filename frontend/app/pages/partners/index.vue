@@ -58,6 +58,12 @@
         :link-label="t('partners.affiliation.linkLabel')"
         compact
       />
+      <v-container>
+        <!-- Amazon Associates disclosure, verbatim (GOU-1396). -->
+        <p class="partners-page__amazon-disclosure">
+          {{ t('partners.affiliation.amazonDisclosure') }}
+        </p>
+      </v-container>
     </v-sheet>
 
     <v-sheet
@@ -186,6 +192,13 @@ const ogImageUrl = computed(() =>
 
   &__loader {
     margin: 0;
+  }
+
+  &__amazon-disclosure {
+    margin: 1rem 0 0;
+    text-align: center;
+    font-size: 0.875rem;
+    color: rgb(var(--v-theme-text-neutral-secondary));
   }
 }
 

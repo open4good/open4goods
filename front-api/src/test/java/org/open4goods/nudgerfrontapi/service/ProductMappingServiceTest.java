@@ -1,6 +1,7 @@
 package org.open4goods.nudgerfrontapi.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -40,6 +41,7 @@ import org.open4goods.model.resource.Resource;
 import org.open4goods.model.resource.ResourceType;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.nudgerfrontapi.config.properties.AmazonSearchLinkProperties;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.config.properties.OfferFreshnessProperties;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
@@ -81,7 +83,8 @@ class ProductMappingServiceTest {
         offerFreshnessService = new OfferFreshnessService(new OfferFreshnessProperties());
         service = new ProductMappingService(repository, apiProperties,
                 verticalsConfigService, searchService, affiliationService, icecatService, cacheManager,
-                productTimelineService, new ProductSeoMetaService(offerFreshnessService), offerFreshnessService);
+                productTimelineService, new ProductSeoMetaService(offerFreshnessService), offerFreshnessService,
+                new AmazonSearchLinkService(new AmazonSearchLinkProperties(), affiliationService));
     }
 
     @Test
@@ -504,7 +507,27 @@ class ProductMappingServiceTest {
         assertThat(dto.offers().bestNewOffer()).isNull();
         assertThat(dto.offers().bestOccasionOffer()).isNull();
         assertThat(dto.offers().offersByCondition()).isEmpty();
-        verify(affiliationService, never()).encryptAffiliationLink(anyString(), anyString(), anyString());
+        verify(affiliationService, never()).encryptAffiliationLink(eq("rakuten"), anyString(), anyString());
+    }
+
+    @Test
+    void productWithOnlyStaleOffersGetsTheAmazonSearchLink() throws Exception {
+        long gtin = 9782070360031L;
+        AggregatedPrice stale = OfferFreshnessServiceTest.offer("rakuten", 7.0, ProductCondition.NEW,
+                System.currentTimeMillis() - Duration.ofDays(28).toMillis());
+        Product product = productWithOffers(gtin, stale);
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
+        when(affiliationService.encryptAffiliationLink("amazon.fr",
+                "https://www.amazon.fr/s?k=9782070360031&tag=nudger-21", "9782070360031"))
+                .thenReturn("amazon-token");
+
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("offers"), DomainLanguage.fr);
+
+        // Same condition as the empty price block of the frontend: no fresh offer is mapped.
+        assertThat(dto.offers().offersCount()).isZero();
+        assertThat(dto.offers().bestPrice()).isNull();
+        assertThat(dto.offers().offersByCondition()).isEmpty();
+        assertThat(dto.offers().amazonSearchLink()).isEqualTo("/contrib/amazon-token");
     }
 
     private static Product productWithOffers(long gtin, AggregatedPrice... offers) {
@@ -525,6 +548,64 @@ class ProductMappingServiceTest {
         product.setPrice(aggregatedPrices);
         product.setOffersCount(offers.length);
         return product;
+    }
+
+    @Test
+    void amazonSearchLinkIsExposedOnlyForAProductWithoutOfferAndAValidGtin() throws Exception {
+        long gtin = 4006381333931L;
+        Product product = new Product(gtin);
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
+        when(affiliationService.encryptAffiliationLink("amazon.fr",
+                "https://www.amazon.fr/s?k=4006381333931&tag=nudger-21", "4006381333931"))
+                .thenReturn("amazon-token");
+
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("offers"), DomainLanguage.fr);
+
+        assertThat(dto.offers().amazonSearchLink()).isEqualTo("/contrib/amazon-token");
+        // The link is not an offer.
+        assertThat(dto.offers().offersCount()).isZero();
+        assertThat(dto.offers().bestPrice()).isNull();
+        assertThat(dto.offers().offersByCondition()).isEmpty();
+    }
+
+    @Test
+    void amazonSearchLinkIsAbsentWhenTheProductHasAnOffer() throws Exception {
+        long gtin = 4006381333931L;
+        Product product = new Product(gtin);
+        AggregatedPrice offer = new AggregatedPrice();
+        offer.setDatasourceName("darty.com");
+        offer.setUrl("https://www.darty.com/p/1");
+        offer.setProductState(ProductCondition.NEW);
+        offer.setPrice(10.0);
+        offer.setCurrency(Currency.EUR);
+        offer.setTimeStamp(System.currentTimeMillis() - Duration.ofHours(1).toMillis());
+        AggregatedPrices prices = new AggregatedPrices();
+        prices.setOffers(Set.of(offer));
+        prices.setMinPrice(offer);
+        prices.setConditions(EnumSet.of(ProductCondition.NEW));
+        product.setPrice(prices);
+        product.setOffersCount(1);
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
+        when(affiliationService.encryptAffiliationLink(eq("darty.com"), any(), any())).thenReturn("darty-token");
+
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("offers"), DomainLanguage.fr);
+
+        assertThat(dto.offers().amazonSearchLink()).isNull();
+        assertThat(dto.offers().offersCount()).isEqualTo(1);
+        verify(affiliationService, never()).encryptAffiliationLink(eq("amazon.fr"), any(), any());
+    }
+
+    @Test
+    void amazonSearchLinkIsAbsentForAnInvalidGtin() throws Exception {
+        // Bad check digit (4006381333931 is the valid one).
+        long gtin = 4006381333932L;
+        Product product = new Product(gtin);
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
+
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("offers"), DomainLanguage.fr);
+
+        assertThat(dto.offers().amazonSearchLink()).isNull();
+        verify(affiliationService, never()).encryptAffiliationLink(eq("amazon.fr"), any(), any());
     }
 
     /**

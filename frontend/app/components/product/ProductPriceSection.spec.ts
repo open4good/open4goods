@@ -30,6 +30,11 @@ vi.mock('vue-echarts', () => ({
 const i18nMessages = {
   'fr-FR': {
     product: {
+      amazonSearch: {
+        label: 'Rechercher sur Amazon',
+        disclosure:
+          'En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.',
+      },
       price: {
         title: 'Prix et évolution',
         subtitle: 'Suivez l’évolution des prix et comparez les offres.',
@@ -262,7 +267,8 @@ describe('ProductPriceSection', () => {
   })
 
   const mountComponent = async (
-    overrides?: Partial<NonNullable<ProductDto['offers']>>
+    overrides?: Partial<NonNullable<ProductDto['offers']>>,
+    extraProps: Record<string, unknown> = {}
   ) => {
     const i18n = createI18n({
       legacy: false,
@@ -278,6 +284,7 @@ describe('ProductPriceSection', () => {
       props: {
         offers,
         commercialEvents,
+        ...extraProps,
       },
       global: {
         plugins: [[i18n]],
@@ -414,6 +421,53 @@ describe('ProductPriceSection', () => {
     expect(emptyCard?.text()).toMatch(
       /^Dernier prix relevé : 499[\s\u202f,0]*€ le 12 septembre 2026$/
     )
+
+    await wrapper.unmount()
+  })
+
+  const noOffer = {
+    offersCount: 0,
+    hasOccasions: false,
+    bestPrice: undefined,
+    bestNewOffer: undefined,
+    bestOccasionOffer: undefined,
+    offersByCondition: {},
+    amazonSearchLink: '/contrib/amazon-token',
+  }
+
+  it('shows the Amazon search link when the hero pricing panel is hidden (GOU-1396)', async () => {
+    const wrapper = await mountComponent(noOffer, {
+      showAmazonSearchLink: true,
+    })
+
+    const link = wrapper.find('.product-amazon-search__link')
+    expect(link.attributes('href')).toBe('/contrib/amazon-token')
+    expect(link.attributes('rel')).toBe(AFFILIATE_LINK_REL)
+    expect(link.attributes('referrerpolicy')).toBe(
+      AFFILIATE_LINK_REFERRER_POLICY
+    )
+    expect(wrapper.text()).toContain(
+      'En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.'
+    )
+
+    await wrapper.unmount()
+  })
+
+  it('leaves the Amazon search link to the hero pricing panel by default', async () => {
+    const wrapper = await mountComponent(noOffer)
+
+    expect(wrapper.find('.product-amazon-search').exists()).toBe(false)
+
+    await wrapper.unmount()
+  })
+
+  it('never shows the Amazon search link next to offers', async () => {
+    const wrapper = await mountComponent(
+      { amazonSearchLink: '/contrib/amazon-token' },
+      { showAmazonSearchLink: true }
+    )
+
+    expect(wrapper.find('.product-amazon-search').exists()).toBe(false)
 
     await wrapper.unmount()
   })

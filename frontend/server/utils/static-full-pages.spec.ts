@@ -12,6 +12,13 @@ describe('getStaticFullPage', () => {
     expect(result?.htmlContent).toContain('<h2>1. Présentation du site et de l’éditeur</h2>')
   })
 
+  it('carries the Amazon Associates disclosure verbatim in the legal notice (GOU-1396)', () => {
+    const result = getStaticFullPage('webpages:default:legal-notice:WebHome', 'fr')
+    expect(result?.htmlContent).toContain(
+      'En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.'
+    )
+  })
+
   it('returns the real data-privacy page with its metadata', () => {
     const result = getStaticFullPage('webpages:default:data-privacy:WebHome', 'fr')
     expect(result).not.toBeNull()

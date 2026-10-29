@@ -2158,6 +2158,7 @@
   },
   "partners": {
     "affiliation": {
+      "amazonDisclosure": "As an Amazon Associate I earn from qualifying purchases.",
       "carouselAriaLabel": "Affiliation partners carousel",
       "empty": "No partners match your search yet. Try another term.",
       "linkLabel": "Visit this partner",
@@ -2463,6 +2464,10 @@
     },
     "start_impact_text": "Enjoying this?",
     "start_impact_subtext": "Support an independent, open, and impactful web by shopping through Nudger! It also works via our partner merchants",
+    "amazonSearch": {
+      "disclosure": "As an Amazon Associate I earn from qualifying purchases.",
+      "label": "Search on Amazon"
+    },
     "partners_link": "our partners",
     "attributes": {
       "title": "Technical specifications",
