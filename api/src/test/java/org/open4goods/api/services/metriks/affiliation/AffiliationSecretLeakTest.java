@@ -32,7 +32,8 @@ class AffiliationSecretLeakTest {
     private static final String AWIN_TOKEN = "AWINSECRET0123456789";
     private static final String EFFILIATION_KEY = "EFFISECRET0123456789";
     private static final String KWANKO_TOKEN = "KWANKOSECRET0123456789";
-    private static final List<String> SECRETS = List.of(AWIN_TOKEN, EFFILIATION_KEY, KWANKO_TOKEN);
+    private static final String TRADETRACKER_PASSPHRASE = "TTSECRET0123456789";
+    private static final List<String> SECRETS = List.of(AWIN_TOKEN, EFFILIATION_KEY, KWANKO_TOKEN, TRADETRACKER_PASSPHRASE);
     private static final String EFFILIATION_URL =
             "https://api.effinity.fr/apiv3/" + EFFILIATION_KEY + "/publisher/conversions?start=2026-10-01";
 
@@ -141,5 +142,22 @@ class AffiliationSecretLeakTest {
 
         assertNoSecret(events);
         assertThat(events.get(0).getErrorMessage()).isEqualTo("Kwanko : HTTP 401 (conversions)");
+    }
+
+    @Test
+    void tradeTrackerPassphraseIsNeverReported() {
+        String fault = "<Envelope><Body><Fault><faultstring>bad " + TRADETRACKER_PASSPHRASE
+                + "</faultstring></Fault></Body></Envelope>";
+        List<MetriksEvent> events = collect(
+                new TradeTrackerReportClient("4321", TRADETRACKER_PASSPHRASE, new FakeHttp(request -> response(401,
+                        "denied " + TRADETRACKER_PASSPHRASE)).client),
+                new TradeTrackerReportClient("4321", TRADETRACKER_PASSPHRASE, new FakeHttp(request -> {
+                    throw new IOException("failure " + TRADETRACKER_PASSPHRASE);
+                }).client),
+                new TradeTrackerReportClient("4321", TRADETRACKER_PASSPHRASE,
+                        new FakeHttp(request -> response(200, fault)).client));
+
+        assertNoSecret(events);
+        assertThat(events.get(0).getErrorMessage()).isEqualTo("TradeTracker : HTTP 401 (authenticate)");
     }
 }

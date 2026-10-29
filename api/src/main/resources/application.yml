@@ -151,3 +151,7 @@ metriks:
     kwanko:
       # No dedicated secret: reuses the Kwanko feed token (API_KWANKO_TOKEN, GOU-1379).
       api-token: ${affiliation-config.kwanko-token:}
+    tradetracker:
+      # No dedicated secret: reuses the TradeTracker feed credentials (API_TRADETRACKER_API_KEY, GOU-1381).
+      customer-id: ${affiliation-config.tradetracker-customer-id:}
+      passphrase: ${affiliation-config.tradetracker-api-key:}

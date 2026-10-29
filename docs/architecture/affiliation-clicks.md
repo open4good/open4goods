@@ -99,6 +99,27 @@ The token is `metriks.affiliation.kwanko.api-token`, which defaults to
 the feed secret `API_KWANKO_TOKEN`, no dedicated secret. Without it the Kwanko
 events are in `error` (missing credential).
 
+## TradeTracker revenues (GOU-1381)
+
+`TradeTrackerReportClient` (api, `services/metriks/affiliation`) calls the SOAP
+API `https://ws.tradetracker.com/soap/affiliate`: `authenticate(customerID,
+passphrase)` (the session is a cookie kept between the calls of a run),
+`getAffiliateSites`, then `getConversionTransactions` for every affiliate site
+(`registrationDate` window, `limit`/`offset` pages). It feeds
+`affiliation.tradetracker.commission.{validated,pending}.{7d,28d}` and
+`affiliation.tradetracker.sales.*`, included in the totals. `transactionStatus`
+maps to validated (`accepted`), pending (`pending`, `onhold`) or declined
+(`rejected`, `declined`); any other value, a missing commission, a SOAP fault or
+a non-EUR currency is a network error (the fault text is never quoted).
+
+The credentials are `metriks.affiliation.tradetracker.customer-id` and
+`metriks.affiliation.tradetracker.passphrase`, defaulting to
+`${affiliation-config.tradetracker-customer-id:}` and
+`${affiliation-config.tradetracker-api-key:}` in
+`api/src/main/resources/application.yml`: the feed secret
+`API_TRADETRACKER_API_KEY`, no dedicated secret. Without them the TradeTracker
+events are in `error` (missing credential).
+
 ## Tests
 
 - `AffiliationNetworkTest` (network deduction) and

@@ -33,7 +33,9 @@ class AffiliationCredentialsBindingTest {
             "METRIKS_AFFILIATION_AWIN_PUBLISHER_ID", "100000",
             "METRIKS_AFFILIATION_AWIN_API_TOKEN", "awin-token",
             "METRIKS_AFFILIATION_EFFILIATION_API_KEY", "effi-key",
-            "METRIKS_AFFILIATION_KWANKO_API_TOKEN", "kwanko-token");
+            "METRIKS_AFFILIATION_KWANKO_API_TOKEN", "kwanko-token",
+            "METRIKS_AFFILIATION_TRADETRACKER_CUSTOMER_ID", "98765",
+            "METRIKS_AFFILIATION_TRADETRACKER_PASSPHRASE", "fake-tradetracker-value");
 
     @TempDir
     Path tempDir;
@@ -53,8 +55,12 @@ class AffiliationCredentialsBindingTest {
             assertThat(kwanko).extracting("apiToken").isEqualTo("kwanko-token");
             assertThat(kwanko.missingCredentials()).isEmpty();
 
+            TradeTrackerReportClient tradeTracker = context.getBean(TradeTrackerReportClient.class);
+            assertThat(tradeTracker).extracting("customerId", "passphrase").containsExactly("98765", "fake-tradetracker-value");
+            assertThat(tradeTracker.missingCredentials()).isEmpty();
+
             assertThat(context.getBean(AffiliationMetriksService.class)).extracting("clients")
-                    .asInstanceOf(org.assertj.core.api.InstanceOfAssertFactories.LIST).hasSize(3);
+                    .asInstanceOf(org.assertj.core.api.InstanceOfAssertFactories.LIST).hasSize(4);
         }
     }
 
@@ -67,6 +73,19 @@ class AffiliationCredentialsBindingTest {
                     .containsExactly("metriks.affiliation.effiliation.api-key");
             assertThat(context.getBean(KwankoReportClient.class).missingCredentials())
                     .containsExactly("metriks.affiliation.kwanko.api-token");
+            assertThat(context.getBean(TradeTrackerReportClient.class).missingCredentials()).containsExactly(
+                    "metriks.affiliation.tradetracker.customer-id", "metriks.affiliation.tradetracker.passphrase");
+        }
+    }
+
+    /** The TradeTracker credentials default to the feed ones ({@code affiliation-config.tradetracker-*}). */
+    @Test
+    void tradeTrackerFallsBackToTheFeedCredentials() throws IOException {
+        try (ConfigurableApplicationContext context = start(Map.of(), "classpath:/application.yml",
+                "--affiliation-config.tradetracker-customer-id=4321", "--affiliation-config.tradetracker-api-key=feed-pass")) {
+            TradeTrackerReportClient client = context.getBean(TradeTrackerReportClient.class);
+            assertThat(client).extracting("customerId", "passphrase").containsExactly("4321", "feed-pass");
+            assertThat(client.missingCredentials()).isEmpty();
         }
     }
 
@@ -121,7 +140,8 @@ class AffiliationCredentialsBindingTest {
     }
 
     @Configuration(proxyBeanMethods = false)
-    @Import({ AwinReportClient.class, EffiliationReportClient.class, KwankoReportClient.class, AffiliationMetriksService.class })
+    @Import({ AwinReportClient.class, EffiliationReportClient.class, KwankoReportClient.class, TradeTrackerReportClient.class,
+            AffiliationMetriksService.class })
     static class AffiliationConfig {
 
         /** Click reader without Elasticsearch: only the credential binding is under test. */
