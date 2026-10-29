@@ -129,6 +129,7 @@
               :product="product"
               :commercial-events="commercialEvents"
               :title-params="priceTitleParams"
+              :show-amazon-search-link="hideHeroPricingPanel"
             />
           </section>
 

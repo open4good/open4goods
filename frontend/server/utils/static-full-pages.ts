@@ -52,6 +52,8 @@ Stuttgarter St. 1<br>
 <p>L’Impact Score fourni par Nudger est purement indicatif. Il peut comporter des imprécisions ou des erreurs, liées à la qualité ou à la disponibilité des données (ex. informations partielles sur la chaîne de production, codes-barres, etc.). L’utilisateur reconnaît que l’Impact Score ne peut se substituer à une analyse complète du produit, et que Nudger n’est pas responsable de l’exactitude ou de l’exhaustivité de ces informations.</p>
 <h3>Gratuité du service</h3>
 <p>Le Site est entièrement gratuit pour l’utilisateur. Nudger ne vend pas de produits directement et n’est pas responsable des éventuelles variations de prix pratiquées par des marchands tiers.</p>
+<h3>Liens d’affiliation</h3>
+<p>Les liens vers les marchands sont des liens d’affiliation : Nudger peut percevoir une commission sur les achats effectués après un clic, sans surcoût pour l’utilisateur. En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.</p>
 <h2>4. Contenu UGC et commentaires</h2>
 <p>Les utilisateurs ont la possibilité de poster des commentaires ou du contenu (UGC). En contrepartie, Nudger se réserve le droit de modérer ou de supprimer tout contenu sans avertissement préalable, notamment en cas de contenu illicite, diffamatoire, injurieux, ou contraire aux présentes CGU.</p>
 <h2>5. Limitation de responsabilité</h2>
@@ -86,7 +88,7 @@ Nudger peut être amené à interrompre l’accès au Site pour effectuer des op
 <li><a href="https://nudger.fr/compensation-ecologique">Contribution écologique</a></li>
 </ul>
 <hr>
-<p><em>« Dernière mise à jour : 6 Janvier 2025 »</em></p>`,
+<p><em>« Dernière mise à jour : 29 octobre 2026 »</em></p>`,
     },
   },
   'webpages:default:data-privacy:WebHome': {

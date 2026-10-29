@@ -55,6 +55,35 @@ describe('contrib redirect route', () => {
     )
   })
 
+  it('sends only the origin to an Amazon search target (GOU-1396)', async () => {
+    const amazon = 'https://www.amazon.fr/s?k=4006381333931&tag=nudger-21'
+    resolveAffiliationRedirectMock.mockResolvedValue({
+      statusCode: 302,
+      location: amazon,
+    })
+    const handler = (await import('./[...token]')).default
+    const event = {} as Parameters<typeof handler>[0]
+
+    await handler(event)
+
+    expect(sendRedirectMock).toHaveBeenCalledWith(event, amazon, 302)
+    expect(setHeaderMock).toHaveBeenCalledWith(
+      event,
+      'Referrer-Policy',
+      'strict-origin-when-cross-origin'
+    )
+    expect(setHeaderMock).not.toHaveBeenCalledWith(
+      event,
+      'Referrer-Policy',
+      'no-referrer'
+    )
+    expect(setHeaderMock).toHaveBeenCalledWith(
+      event,
+      'Cache-Control',
+      'no-store'
+    )
+  })
+
   it('answers errors (403 robot, 400 token) with a plain-text response', async () => {
     const failure = { statusCode: 403, statusMessage: 'Forbidden' }
     resolveAffiliationRedirectMock.mockRejectedValue(failure)

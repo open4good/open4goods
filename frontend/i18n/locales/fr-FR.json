@@ -2033,6 +2033,7 @@
   },
   "partners": {
     "affiliation": {
+      "amazonDisclosure": "En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.",
       "carouselAriaLabel": "Carrousel des partenaires affiliés",
       "empty": "Aucun partenaire ne correspond à votre recherche.",
       "linkLabel": "Visiter ce partenaire",
@@ -2348,6 +2349,10 @@
     },
     "start_impact_text": "Envie de soutenir un projet à impact ?",
     "start_impact_subtext": "Faites vos achats via Nudger ! Ça marche aussi en allant directement chez",
+    "amazonSearch": {
+      "disclosure": "En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.",
+      "label": "Rechercher sur Amazon"
+    },
     "partners_link": "nos partenaires",
     "attributes": {
       "title": "Caractéristiques techniques",

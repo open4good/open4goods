@@ -20,6 +20,48 @@ Metriks, without personal data (GOU-1188).
    an older front-api.
 5. api `GET /api/metriks/affiliation` aggregates the `affiliation-clicks` index.
 
+## Amazon search link (GOU-1396)
+
+A product page **without any offer** shows a text link "Rechercher sur Amazon"
+towards `https://www.amazon.fr/s?k={EAN}&tag=nudger-21`, through `/contrib/`
+like any offer, so the click is an `AffiliationClick` (merchant `amazon.fr`,
+target host `www.amazon.fr`). Compliance conditions come from the Amazon
+Associates review in GOU-1389.
+
+- front-api: `AmazonSearchLinkService` builds `offers.amazonSearchLink`
+  (`/contrib/<token>`) only when the product has no **fresh** offer (the
+  mapped `offersCount`, best price and `offersByCondition` all empty, see
+  `OfferFreshnessService`: a product whose offers are all stale gets the link,
+  exactly when the price block is empty) and its GTIN is digits only,
+  has at least 8 significant digits and a valid GS1 check digit (normalised to
+  GTIN-8, EAN-13 or GTIN-14). Configuration (not secret):
+  `front.amazon-search-link.{enabled,tag,url-template,merchant}` in
+  `front-api/src/main/resources/application.yml`. Amazon is never called: no
+  price, no image. The link is not an offer: `offersCount`, ranking and the
+  JSON-LD `offers` are unchanged.
+- frontend: `ProductAmazonSearchLink.vue` renders the link (text only, no
+  Amazon logo, `rel="sponsored nofollow noopener"`,
+  `referrerpolicy="same-origin"`, new tab, plain anchor without prefetch) with
+  the verbatim disclosure underneath: "En tant que Partenaire Amazon, je
+  réalise un bénéfice sur les achats remplissant les conditions requises."
+  It sits in the empty hero pricing panel, or in the price section when the
+  hero panel is hidden (uncategorised product without offer), never both. The
+  same disclosure is on the partners page (affiliation section) and in the
+  legal notice.
+- `/contrib/` (`frontend/server/routes/contrib/[...token].ts`): the redirect
+  answers `Referrer-Policy: strict-origin-when-cross-origin` when the target
+  is `https://amazon.fr` or one of its sub-domains
+  (`server/utils/contrib-referrer-policy.ts`), so Amazon receives the origin
+  `https://nudger.fr/` and never the page path. Reason: the Associates
+  agreement §6(v) forbids hiding the site a click comes from, including
+  through redirect links. Every other target keeps `no-referrer` (GOU-1184).
+  The navigation-signal and robot guards of `/contrib/` are unchanged.
+
+Prerequisite for production, outside the code: nudger.fr must be declared in
+the Associates account with the `nudger-21` tag.
+
+The `amazon` network in Metriks is handled by `AffiliationNetwork`, not here.
+
 ## `affiliation-clicks` index
 
 Document `org.open4goods.services.contribution.model.AffiliationClick`, shared
@@ -129,5 +171,9 @@ events are in `error` (missing credential).
   `services/contribution`. The IT is not run by CI (no failsafe execution);
   run it with
   `mvn -pl services/contribution test -Dtest=AffiliationClickStatsServiceIT`.
-- `AffiliationServiceTest` and `AffiliationControllerTest` in front-api.
+- `AffiliationServiceTest`, `AffiliationControllerTest` and
+  `AmazonSearchLinkServiceTest` in front-api.
+- `server/routes/contrib/[...token].spec.ts` and
+  `server/utils/contrib-referrer-policy.spec.ts` (Referrer-Policy per target)
+  in the frontend.
 - `AffiliationClickMetriksTest` and `MetriksControllerTest` in api.
