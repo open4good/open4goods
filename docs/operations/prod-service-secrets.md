@@ -27,7 +27,7 @@ secrets calls it:
 | `infraSecrets.yml`       | input       | the target's consumers                     | `--source apply`, between the change at the source and the restart    |
 
 Rows whose need is `source` hold a password that must first be changed at its
-source (Elasticsearch, MySQL) or a key of the compose infrastructure: only
+source (Elasticsearch) or a key of the compose infrastructure: only
 `--source` renders them, and it renders nothing else. Deploys and
 `serviceSecrets.yml` never do, so a value written in the Environment before
 the source accepts it cannot break a service at the next deploy. Procedure:
@@ -126,7 +126,7 @@ before anything is written.
 | `GOOGLE_SSO_CLIENT_SECRET` (required) | frontend: `NUXT_GOOGLE_OAUTH_CLIENT_SECRET`; admin (optional, paired): tree `spring.security.oauth2.client.registration.google.client-secret`                          | Google SSO; admin login                                        |
 | `O4G_ELASTICSEARCH_PASSWORD` (source) | api, ui, front-api, b2b-api: tree `spring.elasticsearch.password`                                                                                                        | Elasticsearch user `elastic` (`infraSecrets.yml` only)         |
 | `B2B_API_POSTGRES_PASSWORD` (source) | b2b-api: tree `spring.datasource.password`; infra: `B2B_POSTGRES_PASSWORD`                                                                                                 | Postgres user of `b2b_postgres` (`infraSecrets.yml` only)      |
-| `INFRA_*` (source)                | infra: `/etc/open4goods/infra.env` (Kibana, XWiki, MySQL, Plausible and its Postgres and ClickHouse)                                                                          | compose infrastructure (`infraSecrets.yml` only)               |
+| `INFRA_*` (source)                | infra: `/etc/open4goods/infra.env` (Kibana, Plausible and its Postgres and ClickHouse)                                                                          | compose infrastructure (`infraSecrets.yml` only)               |
 | `INFRA_GOOGLE_CLIENT_ID`, `INFRA_GOOGLE_CLIENT_SECRET` (source) | infra: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` in `/etc/open4goods/infra.env` (beta)                                                         | Google OAuth client of Plausible's Search Console integration (`infraSecrets.yml` `target=plausible-google` only) |
 
 `b2b-api` registers with Spring Boot Admin only when its configuration enables

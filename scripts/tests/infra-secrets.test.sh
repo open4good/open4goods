@@ -2,7 +2,7 @@
 # Tests scripts/deploy/infra-secrets.sh and infra-secrets-remote.sh (GOU-1092, GOU-1256, GOU-1271, GOU-1321) against a fake
 # `ssh` that runs the remote script locally, a fake `curl` playing Elasticsearch, Kibana and Google's OAuth token
 # endpoint, and a fake `docker`
-# playing MySQL, XWiki, Plausible (its logs), its Postgres and ClickHouse (its dictionaries), and the b2b Postgres.
+# playing Plausible (its logs), its Postgres and ClickHouse (its dictionaries), and the b2b Postgres.
 # /etc/open4goods/ and /opt/open4goods/ live in a temp dir. Every value is a sentinel that must never appear in an
 # output, a summary or a command line.
 set -euo pipefail
@@ -14,13 +14,11 @@ trap 'rm -rf "${WORK}"' EXIT
 
 FAKE_ROOT="${WORK}/host"
 FAKE_ES="${WORK}/es"
-FAKE_MYSQL="${WORK}/mysql"
-FAKE_XWIKI_DATA="${WORK}/xwiki-data"
 FAKE_DB="${WORK}/db"
 FAKE_ENV="${WORK}/container-env"
 FAKE_LOGS="${WORK}/container-logs"
 CALLS="${WORK}/calls.log"
-mkdir -p "${WORK}/bin" "${FAKE_ROOT}" "${FAKE_ES}" "${FAKE_MYSQL}" "${FAKE_XWIKI_DATA}" "${FAKE_DB}" "${FAKE_ENV}" \
+mkdir -p "${WORK}/bin" "${FAKE_ROOT}" "${FAKE_ES}" "${FAKE_DB}" "${FAKE_ENV}" \
   "${FAKE_LOGS}"
 
 cat > "${WORK}/bin/ssh" <<'SH'
@@ -100,7 +98,7 @@ SH
 
 cat > "${WORK}/bin/docker" <<'SH'
 #!/bin/sh
-# Fake docker: MySQL users are files of $FAKE_MYSQL; XWiki's permanent directory is $FAKE_XWIKI_DATA; the Postgres
+# Fake docker: the Postgres
 # and ClickHouse passwords are files of $FAKE_DB (<container>.<user>; $FAKE_DB/trust: any password accepted); the
 # environment a container was created with is $FAKE_ENV/<container>.<NAME>, its logs $FAKE_LOGS/<container>.
 printf 'docker %s\n' "$*" >> "$CALLS"
@@ -158,34 +156,6 @@ if [ "$1" = psql ] && [ "$2" = -h ]; then
   exit 0
 fi
 case "$container" in
-  mysql)
-    [ "$1" = mysql ] || exit 1
-    user=${2#-u}
-    [ -f "$FAKE_MYSQL/$user" ] && [ "$(cat "$FAKE_MYSQL/$user")" = "$MYSQL_PWD" ] || exit 1
-    while IFS= read -r sql; do
-      case "$sql" in
-        'SELECT 1;') echo 1 ;;
-        "SELECT host FROM mysql.user WHERE user = '"*)
-          echo '%'
-          if [ "${sql#*\'}" = "root';" ]; then echo localhost; fi
-          ;;
-        "ALTER USER '"*)
-          target=$(printf '%s' "$sql" | sed -n "s/^ALTER USER '\([a-z]*\)'.*/\1/p")
-          printf '%s' "$sql" | sed -n "s/.* IDENTIFIED BY '\(.*\)';$/\1/p" | tr -d '\n' > "$FAKE_MYSQL/$target"
-          ;;
-      esac
-    done
-    ;;
-  xwiki-mysql-tomcat-web)
-    if [ "$1" = printenv ]; then
-      exit 1
-    elif [ "$1" = test ]; then
-      [ -f "$FAKE_XWIKI_DATA/hibernate.cfg.xml" ]
-    else
-      script=$(printf '%s' "$3" | sed "s#/usr/local/xwiki/data#$FAKE_XWIKI_DATA#g")
-      sh -c "$script"
-    fi
-    ;;
   plausible_db)
     # psql: the statement on stdin. api_keys names in $FAKE_DB/api-keys (one per line); psql fails when it is missing.
     sql=$(cat)
@@ -279,7 +249,7 @@ chmod +x "${WORK}/bin/"*
 export PATH="${WORK}/bin:${PATH}"
 FAKE_KIBANA_YML="${WORK}/kibana-container.yml"
 FAKE_GOOGLE="${WORK}/google-client"
-export FAKE_ROOT FAKE_ES FAKE_MYSQL FAKE_XWIKI_DATA FAKE_KIBANA_YML FAKE_DB FAKE_ENV FAKE_LOGS FAKE_GOOGLE CALLS
+export FAKE_ROOT FAKE_ES FAKE_KIBANA_YML FAKE_DB FAKE_ENV FAKE_LOGS FAKE_GOOGLE CALLS
 export GOOGLE_TOKEN_URL=https://oauth2.example/token
 export INFRA_SECRETS_ROOT="${FAKE_ROOT}" WAIT_SECONDS=0
 export DEPLOY_SSH_HOST=beta.example DEPLOY_SSH_USER=deploy DEPLOY_SSH_KEY="fake-ssh-key"
@@ -295,10 +265,6 @@ NEW_KIBANA="NEWKIBANASENTINEL33333333333333333"
 OLD_KEY='OLD$KEY%SENTINEL!44444444444444444'
 
 NEW_KEY="NEWKEYSENTINEL55555555555555555555"
-OLD_ROOT="OLDROOTSENTINEL6666666666666666666"
-NEW_ROOT="NEWROOTSENTINEL7777777777777777777"
-OLD_XWIKI="OLDXWIKISENTINEL888888888888888888"
-NEW_XWIKI="NEWXWIKISENTINEL999999999999999999"
 OLD_PLAUSIBLE="OLDPLAUSIBLESENTINELAAAAAAAAAAAAAA"
 NEW_PLAUSIBLE="NEWPLAUSIBLESENTINELBBBBBBBBBBBBBB"
 OLD_PG="OLDPGSENTINELCCCCCCCCCCCCCCCCCCCCC"
@@ -344,7 +310,7 @@ check() {
 }
 
 reset_host() {
-  rm -rf "${FAKE_ROOT:?}"/* "${FAKE_ES:?}"/* "${FAKE_MYSQL:?}"/* "${FAKE_XWIKI_DATA:?}"/* "${FAKE_KIBANA_YML}" \
+  rm -rf "${FAKE_ROOT:?}"/* "${FAKE_ES:?}"/* "${FAKE_KIBANA_YML}" \
     "${FAKE_GOOGLE}" "${FAKE_GOOGLE}.down" \
     "${FAKE_DB:?}"/* "${FAKE_ENV:?}"/* "${FAKE_LOGS:?}"/*
   : > "${CALLS}"
@@ -384,8 +350,8 @@ PUBLISH
 # infra-secrets.sh: arguments and values (runner)
 ########################################
 reset_host
-run "${DEPLOY}/infra-secrets.sh" check beta mysql
-check "mysql is prod only" [ "${status}" -ne 0 ]
+run "${DEPLOY}/infra-secrets.sh" check prod mysql
+check "mysql is no longer a target" [ "${status}" -ne 0 ]
 run "${DEPLOY}/infra-secrets.sh" check prod plausible
 check "plausible is beta only" [ "${status}" -ne 0 ]
 run "${DEPLOY}/infra-secrets.sh" remote apply beta elasticsearch
@@ -527,45 +493,6 @@ check "kibana rollback: previous kibana_system and key back, the new key decrypt
   "${status}" "${FAKE_ES}" "${ETC}" "${OLD_KIBANA}" "${OLD_KEY}" "${NEW_KEY}"
 check "kibana prints no value" no_value_leaked
 unset INFRA_KIBANA_SYSTEM_PASSWORD INFRA_KIBANA_ENCRYPTION_KEY
-
-########################################
-# mysql (prod): ALTER USER, persisted hibernate.cfg.xml, restart of XWiki only
-########################################
-reset_host
-printf '%s' "${OLD_ROOT}" > "${FAKE_MYSQL}/root"
-printf '%s' "${OLD_XWIKI}" > "${FAKE_MYSQL}/xwiki"
-printf '    environment:\n      - DB_USER=xwiki\n      - DB_PASSWORD=%s\n      - MYSQL_ROOT_PASSWORD=%s\n' \
-  "${OLD_XWIKI}" "${OLD_ROOT}" > "${OPT}/bin/docker-compose.infra.yml"
-# shellcheck disable=SC2016 # literal placeholders.
-printf '      - DB_PASSWORD=${INFRA_XWIKI_DB_PASSWORD:?}\n      - MYSQL_ROOT_PASSWORD=${INFRA_MYSQL_ROOT_PASSWORD:?}\n' \
-  > "${OPT}/latest/prod/docker-compose.infra.yml"
-printf '<property name="hibernate.connection.url">jdbc:mysql://mysql/xwiki</property>\n<property name="hibernate.connection.password">%s</property>\n' \
-  "${OLD_XWIKI}" > "${FAKE_XWIKI_DATA}/hibernate.cfg.xml"
-export INFRA_XWIKI_DB_PASSWORD="${NEW_XWIKI}" INFRA_MYSQL_ROOT_PASSWORD="${NEW_ROOT}"
-run "${DEPLOY}/infra-secrets.sh" remote test prod mysql
-check "mysql test finds root and xwiki in service (compose)" \
-  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"root in service is found (candidate-root-compose)"* ]] \
-    && [[ "$1" == *"xwiki in service is found (candidate-xwiki-compose)"* ]]' "${status}" "${out}"
-run "${DEPLOY}/infra-secrets.sh" remote source prod mysql
-check "mysql source changes xwiki and root, and the persisted hibernate.cfg.xml" \
-  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1/xwiki")" = "$3" ] && [ "$(cat "$1/root")" = "$4" ] \
-    && grep -q "connection.password\">$3<" "$2" && grep -q "connection.url\">jdbc:mysql://mysql/xwiki<" "$2"' \
-  "${status}" "${FAKE_MYSQL}" "${FAKE_XWIKI_DATA}/hibernate.cfg.xml" "${NEW_XWIKI}" "${NEW_ROOT}"
-run "${DEPLOY}/infra-secrets.sh" remote source prod mysql
-check "mysql source is idempotent" bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"already accepts the new password of root"* ]]' \
-  "${status}" "${out}"
-run "${DEPLOY}/render-service-secrets.sh" --source apply prod infra
-run "${DEPLOY}/infra-secrets.sh" remote restart prod mysql
-check "mysql restart recreates XWiki only" \
-  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "publish-infra prod INFRA_SERVICES=xwiki" ]' "${status}" "${WORK}/restarts.log"
-: > "${WORK}/restarts.log"
-run "${DEPLOY}/infra-secrets.sh" remote rollback prod mysql
-check "mysql rollback restores both users, hibernate.cfg.xml and infra.env" \
-  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1/xwiki")" = "$4" ] && [ "$(cat "$1/root")" = "$5" ] \
-    && grep -q "connection.password\">$4<" "$2" && grep -qx "INFRA_XWIKI_DB_PASSWORD=$4" "$3"' \
-  "${status}" "${FAKE_MYSQL}" "${FAKE_XWIKI_DATA}/hibernate.cfg.xml" "${ETC}/infra.env" "${OLD_XWIKI}" "${OLD_ROOT}"
-check "mysql prints no value" no_value_leaked
-unset INFRA_XWIKI_DB_PASSWORD INFRA_MYSQL_ROOT_PASSWORD
 
 ########################################
 # plausible (beta): key kept, render overrides config/<env>/infra/.env, restart

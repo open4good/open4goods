@@ -8,9 +8,8 @@
 #             printed), whether the new value is already in service, what apply would do. Runs without the new
 #             values too (dry run before Access writes them).
 #   source    Changes the password at its source, authenticated with the value currently in service on this host:
-#             Elasticsearch users `elastic` / `kibana_system` (_security/user/<user>/_password), MySQL users `xwiki`
-#             and `root` (ALTER USER) plus XWiki's persisted hibernate.cfg.xml, the Postgres users of Plausible
-#             and b2b-api (ALTER USER); ClickHouse takes its new password when restart recreates it. Before any
+#             Elasticsearch users `elastic` / `kibana_system` (_security/user/<user>/_password), the Postgres
+#             users of Plausible and b2b-api (ALTER USER); ClickHouse takes its new password when restart recreates it. Before any
 #             change, the value in service is kept in /etc/open4goods/infra-previous.env (mode 600) for
 #             `rollback`. Idempotent: a value already accepted by the source is not changed again.
 #   restart   Restarts the consumers once infra-secrets.sh has rendered the new value, in the order that keeps the
@@ -22,7 +21,6 @@
 #   kibana         INFRA_KIBANA_SYSTEM_PASSWORD (user kibana_system), INFRA_KIBANA_ENCRYPTION_KEY -> Kibana; the
 #                  key in service becomes INFRA_KIBANA_PREVIOUS_ENCRYPTION_KEY (decryptionOnlyKeys), then saved
 #                  objects are re-encrypted (POST /api/encrypted_saved_objects/_rotate_key)
-#   mysql          INFRA_XWIKI_DB_PASSWORD (user xwiki), INFRA_MYSQL_ROOT_PASSWORD (user root) -> XWiki (prod)
 #   plausible      INFRA_PLAUSIBLE_SECRET_KEY_BASE -> Plausible, as PLAUSIBLE_SECRET_KEY_BASE (beta)
 #   plausible-postgres    INFRA_PLAUSIBLE_PG_PASSWORD (Postgres user postgres of plausible_db) -> Plausible, as
 #                         PLAUSIBLE_PG_PASSWORD (beta)
@@ -60,7 +58,6 @@ case "$env_name" in
 esac
 case "$target" in
   elasticsearch | kibana) ;;
-  mysql) [ "$env_name" = prod ] || fail "mysql: only prod runs XWiki and MySQL" ;;
   plausible | plausible-postgres | plausible-clickhouse | plausible-google)
     [ "$env_name" = beta ] || fail "$target: only beta runs Plausible"
     ;;
@@ -68,7 +65,7 @@ case "$target" in
   *) fail "Unknown target" ;;
 esac
 
-# INFRA_SECRETS_ROOT, ES_URL, KIBANA_URL, XWIKI_URL and PLAUSIBLE_URL only exist for scripts/tests/infra-secrets.test.sh.
+# INFRA_SECRETS_ROOT, ES_URL, KIBANA_URL and PLAUSIBLE_URL only exist for scripts/tests/infra-secrets.test.sh.
 root=${INFRA_SECRETS_ROOT:-}
 etc=$root/etc/open4goods
 opt=$root/opt/open4goods
@@ -76,7 +73,6 @@ infra_env=$etc/infra.env
 previous_env=$etc/infra-previous.env
 es_url=${ES_URL:-http://127.0.0.1:9200}
 kibana_url=${KIBANA_URL:-http://127.0.0.1:5601}
-xwiki_url=${XWIKI_URL:-http://127.0.0.1:8080}
 plausible_url=${PLAUSIBLE_URL:-http://127.0.0.1:8000}
 # Spring consumers of the elastic password, in restart order: front-api first (it answers the site; publish-jars.sh
 # only waits for the running api to answer), then api, ui and b2b-api.
@@ -269,29 +265,6 @@ container_running() {
 kibana_container_yml() {
   docker exec kibana cat /usr/share/kibana/config/kibana.yml > "$work/kibana-container.yml" 2>/dev/null \
     || : > "$work/kibana-container.yml"
-}
-
-# MySQL as user $1 with the password in file $2; SQL on stdin; output to stdout.
-mysql_as() {
-  MYSQL_PWD=$(cat "$2") docker exec -i -e MYSQL_PWD mysql mysql -u"$1" -N -B 2>/dev/null
-}
-
-mysql_accepts() {
-  [ -s "$2" ] || return 1
-  echo 'SELECT 1;' | mysql_as "$1" "$2" > /dev/null
-}
-
-find_mysql_password() {
-  user=$1
-  shift
-  for candidate in "$@"; do
-    if mysql_accepts "$user" "$candidate"; then
-      cp "$candidate" "$work/current-$user"
-      echo "${candidate#"$work/"}"
-      return 0
-    fi
-  done
-  return 1
 }
 
 # Waits until $1 answers one of the HTTP codes $2 (comma-separated), $3 attempts 5 s apart; $4: what to do on failure.
@@ -563,151 +536,6 @@ kibana_rollback() {
     ok "the previous encryption key is back in $infra_env, the new one is decryption only"
   fi
   INFRA_SERVICES=kibana sh "$opt/bin/publish-infra.sh" "$env_name"
-}
-
-mysql_prerequisites() {
-  container_running mysql || fail "the mysql container is not running"
-  container_running xwiki-mysql-tomcat-web || fail "the xwiki-mysql-tomcat-web container is not running"
-  check_publish_infra
-  check_placeholders "$opt/latest/$env_name/docker-compose.infra.yml" INFRA_XWIKI_DB_PASSWORD INFRA_MYSQL_ROOT_PASSWORD
-}
-
-# Candidates: infra.env, the literal of the host's compose file, the environment the container was created with,
-# the kept previous value.
-mysql_candidates() {
-  # $1: root or xwiki.
-  if [ "$1" = root ]; then
-    env_value "$infra_env" INFRA_MYSQL_ROOT_PASSWORD > "$work/candidate-$1-infra-env"
-    compose_value "$opt/bin/docker-compose.infra.yml" MYSQL_ROOT_PASSWORD > "$work/candidate-$1-compose"
-    docker exec mysql printenv MYSQL_ROOT_PASSWORD 2>/dev/null | tr -d '\n' > "$work/candidate-$1-container" || :
-    raw_value "$previous_env" INFRA_MYSQL_ROOT_PASSWORD > "$work/candidate-$1-previous"
-  else
-    env_value "$infra_env" INFRA_XWIKI_DB_PASSWORD > "$work/candidate-$1-infra-env"
-    compose_value "$opt/bin/docker-compose.infra.yml" DB_PASSWORD > "$work/candidate-$1-compose"
-    docker exec xwiki-mysql-tomcat-web printenv DB_PASSWORD 2>/dev/null | tr -d '\n' > "$work/candidate-$1-container" || :
-    raw_value "$previous_env" INFRA_XWIKI_DB_PASSWORD > "$work/candidate-$1-previous"
-  fi
-  echo "$work/candidate-$1-infra-env $work/candidate-$1-compose $work/candidate-$1-container $work/candidate-$1-previous"
-}
-
-# The root password in service to $work/current-root; prints where it was found.
-working_root() {
-  printf '%s' "${INFRA_MYSQL_ROOT_PASSWORD:-}" > "$work/new-root" # ggignore
-  # shellcheck disable=SC2046 # file names without spaces, split on purpose.
-  find_mysql_password root "$work/new-root" $(mysql_candidates root) \
-    || fail "no known password of the MySQL user root is accepted (infra.env, compose, previous)"
-}
-
-# ALTER USER for every host of user $1, to the content of file $2, as root.
-mysql_alter() {
-  hosts=$(printf "SELECT host FROM mysql.user WHERE user = '%s';\n" "$1" | mysql_as root "$work/current-root") \
-    || fail "cannot list the hosts of the MySQL user $1"
-  [ -n "$hosts" ] || fail "the MySQL user $1 does not exist"
-  # SQL string literals: quotes doubled, backslashes escaped (a previous value may hold them).
-  value=$(sed -e 's/\\/\\\\/g' -e "s/'/''/g" "$2")
-  for host in $hosts; do
-    printf "ALTER USER '%s'@'%s' IDENTIFIED BY '%s';\n" "$1" "$host" "$value"
-  done | mysql_as root "$work/current-root" > /dev/null || fail "ALTER USER $1 failed"
-  mysql_accepts "$1" "$2" || fail "the new password of the MySQL user $1 is not accepted after the change"
-  ok "password of the MySQL user $1 changed ($(echo "$hosts" | wc -w) host(s))"
-}
-
-# XWiki keeps hibernate.cfg.xml in its permanent directory and restores it at every start (the DB_PASSWORD of the
-# compose file is only used when that file does not exist): its connection password is rewritten there too.
-xwiki_hibernate() {
-  file=/usr/local/xwiki/data/hibernate.cfg.xml
-  if ! docker exec xwiki-mysql-tomcat-web test -f "$file"; then
-    info "no persisted $file: XWiki configures itself from DB_PASSWORD at its next start"
-    return 0
-  fi
-  if [ "$1" = test ]; then
-    ok "persisted $file found: source rewrites its connection password"
-    return 0
-  fi
-  # shellcheck disable=SC2016 # expanded in the container.
-  XWIKI_DB_PASSWORD=$(cat "$2") docker exec -e XWIKI_DB_PASSWORD xwiki-mysql-tomcat-web sh -c '
-    set -eu
-    f=/usr/local/xwiki/data/hibernate.cfg.xml
-    awk '\''{
-      while (match($0, /name="hibernate\.connection\.password">[^<]*</)) {
-        $0 = substr($0, 1, RSTART - 1) "name=\"hibernate.connection.password\">" ENVIRON["XWIKI_DB_PASSWORD"] "<" \
-          substr($0, RSTART + RLENGTH)
-        break
-      }
-      print
-    }'\'' "$f" > "$f.new"
-    cat "$f.new" > "$f"
-    rm -f "$f.new"'
-  ok "the persisted hibernate.cfg.xml of XWiki holds the new connection password"
-}
-
-mysql_test() {
-  writable_etc
-  prerequisite mysql_prerequisites
-  found=$(working_root)
-  ok "the password of root in service is found ($found) and accepted"
-  printf '%s' "${INFRA_XWIKI_DB_PASSWORD:-}" > "$work/new-xwiki" # ggignore
-  # shellcheck disable=SC2046 # file names without spaces, split on purpose.
-  found=$(find_mysql_password xwiki "$work/new-xwiki" $(mysql_candidates xwiki)) \
-    || fail "no known password of the MySQL user xwiki is accepted (infra.env, compose, previous)"
-  ok "the password of xwiki in service is found ($found) and accepted"
-  xwiki_hibernate test
-}
-
-mysql_source() {
-  writable_etc
-  mysql_prerequisites
-  working_root > /dev/null
-  printf '%s' "$INFRA_XWIKI_DB_PASSWORD" > "$work/new-xwiki" # ggignore
-  # shellcheck disable=SC2046 # file names without spaces, split on purpose.
-  found=$(find_mysql_password xwiki "$work/new-xwiki" $(mysql_candidates xwiki)) \
-    || fail "no known password of the MySQL user xwiki is accepted (infra.env, compose, previous)"
-  if [ "$found" = new-xwiki ]; then
-    ok "MySQL already accepts the new password of xwiki"
-  else
-    keep_previous INFRA_XWIKI_DB_PASSWORD "$work/current-xwiki"
-    mysql_alter xwiki "$work/new-xwiki"
-  fi
-  xwiki_hibernate apply "$work/new-xwiki"
-  if mysql_accepts root "$work/new-root"; then
-    ok "MySQL already accepts the new password of root"
-  else
-    keep_previous INFRA_MYSQL_ROOT_PASSWORD "$work/current-root"
-    mysql_alter root "$work/new-root"
-  fi
-}
-
-mysql_restart() {
-  printf '%s' "$INFRA_XWIKI_DB_PASSWORD" > "$work/new-xwiki" # ggignore
-  mysql_accepts xwiki "$work/new-xwiki" || fail "MySQL does not accept the new xwiki password: run source first"
-  [ "$(env_value "$infra_env" INFRA_XWIKI_DB_PASSWORD)" = "$INFRA_XWIKI_DB_PASSWORD" ] \
-    && [ "$(env_value "$infra_env" INFRA_MYSQL_ROOT_PASSWORD)" = "$INFRA_MYSQL_ROOT_PASSWORD" ] \
-    || fail "$infra_env does not hold the new MySQL values: render it first"
-  check_publish_infra
-  # XWiki only: the mysql container keeps running (MYSQL_* are only read when its data directory is created).
-  INFRA_SERVICES=xwiki sh "$opt/bin/publish-infra.sh" "$env_name"
-  wait_http "$xwiki_url/" 200,301,302,401 "${XWIKI_ATTEMPTS:-120}"
-}
-
-mysql_rollback() {
-  check_publish_infra
-  printf '%s' "${INFRA_MYSQL_ROOT_PASSWORD:-}" > "$work/new-root" # ggignore
-  working_root > /dev/null
-  previous=$(raw_value "$previous_env" INFRA_XWIKI_DB_PASSWORD)
-  if [ -n "$previous" ]; then
-    printf '%s' "$previous" > "$work/previous-xwiki"
-    mysql_accepts xwiki "$work/previous-xwiki" || mysql_alter xwiki "$work/previous-xwiki"
-    xwiki_hibernate apply "$work/previous-xwiki"
-    set_infra_line INFRA_XWIKI_DB_PASSWORD "$previous"
-  fi
-  previous=$(raw_value "$previous_env" INFRA_MYSQL_ROOT_PASSWORD)
-  if [ -n "$previous" ]; then
-    printf '%s' "$previous" > "$work/previous-root"
-    mysql_accepts root "$work/previous-root" || mysql_alter root "$work/previous-root"
-    set_infra_line INFRA_MYSQL_ROOT_PASSWORD "$previous"
-  fi
-  INFRA_SERVICES=xwiki sh "$opt/bin/publish-infra.sh" "$env_name"
-  wait_http "$xwiki_url/" 200,301,302,401 "${XWIKI_ATTEMPTS:-120}"
 }
 
 # Users with TOTP enabled lose their second factor: Plausible derives TOTP_VAULT_KEY from SECRET_KEY_BASE when it
