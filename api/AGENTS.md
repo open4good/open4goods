@@ -40,6 +40,25 @@ From the repository root you can also execute:
 mvn --offline -pl api -am clean install
 ```
 
+## Sécurité et accès
+
+`config/WebSecurityConfig` (GOU-1393) : api.nudger.fr est "pur SSO Google" pour les personnes.
+
+- Machines : clé API brute dans l'en-tête ou le paramètre `Authorization` (`admin-key` → `ROLE_USER` +
+  `XWIKIADMINGROUP`, `test-keys` → `ROLE_USER` + `ROLE_TESTER`). Inchangé.
+- Personnes : `oauth2Login` Google, câblé seulement si la registration `google` existe
+  (`spring.security.oauth2.client.registration.google.*`, rendue depuis `GOOGLE_SSO_CLIENT_ID/SECRET`). E-mail
+  vérifié et présent dans `api.security.google-sso.role-allowlist` (`ApiOidcUserService`), sinon 403. Pas de
+  formulaire, pas de page `/login`, pas d'utilisateur `user` généré.
+- HTTP Basic : uniquement sur `/actuator/**` (chaîne dédiée), pour l'identité moniteur Spring Boot Admin
+  `o4g.actuator.monitor.*` (`ActuatorMonitorAuthenticationProvider`, même classe que ui et front-api).
+- Anonyme : navigation navigateur (`Accept: text/html`) → redirection vers `/oauth2/authorization/google` ; tout
+  autre appel → 401 sans `WWW-Authenticate` (pas de popup, pas de session).
+
+Preuve : `ApiGoogleSsoAccessTest` (contexte complet servi par Tomcat, y compris `redirect_uri` derrière
+`X-Forwarded-Proto`/`X-Forwarded-Host` avec `forward-headers-strategy: NATIVE`). Doc :
+[Google SSO OAuth clients](../docs/operations/google-sso-oauth-clients.md#role-allowlist-api).
+
 ## Sauvegarde produits
 
 `BackupService.backupProducts()` écrit `products-backup-{N}.gz` dans `api.backup.data-backup-folder`, puis

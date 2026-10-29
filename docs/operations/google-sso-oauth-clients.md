@@ -153,6 +153,8 @@ Register all of the following on the Google Cloud Console (project
 - `https://nudger.fr/auth/google/callback`
 - `https://beta.sb-admin.nudger.fr/login/oauth2/code/google` (admin, beta, GOU-1091)
 - `https://sb-admin.nudger.fr/login/oauth2/code/google` (admin, prod, GOU-1091)
+- `https://beta.api.nudger.fr/login/oauth2/code/google` (api, beta, GOU-1393)
+- `https://api.nudger.fr/login/oauth2/code/google` (api, prod, GOU-1393)
 
 The admin (Spring Boot Admin, `sbadmin`) reuses this client since GOU-1091:
 `render-service-secrets.sh` writes `GOOGLE_SSO_CLIENT_ID` / `_SECRET` to its
@@ -161,8 +163,48 @@ redirect URI is Spring Security's default `{baseUrl}/login/oauth2/code/google`
 (`server.forward-headers-strategy: FRAMEWORK`, no context path). It exchanges
 the code server-side, so no JavaScript origin is needed.
 
+The api (`api.nudger.fr`) reuses it too since GOU-1393, with the same
+config tree keys and the same default redirect URI. api runs with
+`server.forward-headers-strategy: NATIVE` (Tomcat `RemoteIpValve`): the proxy
+must send `X-Forwarded-Proto: https` (and the public host, as `Host` or
+`X-Forwarded-Host`) from a loopback or private address, otherwise the
+redirect URI sent to Google starts with `http://` and Google refuses it.
+`ApiGoogleSsoAccessTest` proves the `https://<host>/login/oauth2/code/google`
+URI behind these headers.
+
 A "Web" client also accepts `http://localhost` redirect URIs, so the existing
 local flow keeps working unchanged.
+
+## Role allowlist (api)
+
+Context: GOU-1392, GOU-1393. api.nudger.fr is "pure Google SSO" for people:
+no password form, no generated `user`, and HTTP Basic only for the Spring
+Boot Admin monitor on `/actuator/**`. A Google login gets in only when its
+e-mail is verified and listed in `api.security.google-sso.role-allowlist`
+(deny by default, 403 otherwise). The values are api authorities, as checked
+by its `@PreAuthorize`: `ROLE_USER` (any page, Swagger UI), `XWIKIADMINGROUP`
+(admin endpoints and Actuator), `XWIKIALLGROUP`, `ROLE_TESTER`. Note that
+`XWIKIADMINGROUP` has no `ROLE_` prefix here, unlike the admin console's
+`ROLE_XWIKIADMINGROUP`.
+
+```yaml
+api:
+  security:
+    google-sso:
+      role-allowlist:
+        "[jane.roe@example.org]": [ROLE_USER, XWIKIADMINGROUP]
+```
+
+The keys need the same brackets and quotes as front-api's: at startup, api
+logs an `ERROR` for every key without `@` (masked) and a `WARN` for an empty
+allowlist. A refused login logs a `WARN` `Google SSO login refused (403)`
+without the e-mail.
+
+Anonymous access: a browser navigation (`Accept: text/html`) is redirected
+to `/oauth2/authorization/google`; any other call (curl, `Accept: */*`,
+JSON) gets a bare 401 without `WWW-Authenticate`, so `publish-jars.sh` and the
+monitoring that expect a 401 on `/` are unchanged. API keys (`Authorization`
+header or parameter) are unchanged.
 
 ## Where the secret lives
 

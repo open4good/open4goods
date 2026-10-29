@@ -1,6 +1,6 @@
 #!/bin/sh
 # Render a service's secrets from the `beta` or `prod` GitHub Environment onto its host
-# (ADR-0006, D140, GOU-933, GOU-957, GOU-1014, GOU-1041, GOU-1091, GOU-1092).
+# (ADR-0006, D140, GOU-933, GOU-957, GOU-1014, GOU-1041, GOU-1091, GOU-1092, GOU-1393).
 #
 # Usage: render-service-secrets.sh [--if-present] [--source] <check|apply> <env> <service>
 #
@@ -74,7 +74,10 @@
 # | api       | API_EPREL_API_KEY               | tree    | eprel.api-key                                                                  | optional |
 # | api       | O4G_ICECAT_PASSWORD             | tree    | icecat-feature-config.password                                                 | optional |
 # | api       | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.client.password                                              | optional |
+# | api       | O4G_SBA_PASSWORD                | tree    | o4g.actuator.monitor.password                                                  | optional |
 # | api       | O4G_INTERNAL_API_KEY            | tree    | admin-key                                                                      | optional |
+# | api       | GOOGLE_SSO_CLIENT_ID            | tree    | spring.security.oauth2.client.registration.google.client-id                    | optional |
+# | api       | GOOGLE_SSO_CLIENT_SECRET        | tree    | spring.security.oauth2.client.registration.google.client-secret                | optional |
 # | api       | O4G_ELASTICSEARCH_PASSWORD      | tree    | spring.elasticsearch.password                                                  | source   |
 # | ui        | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.client.password                                              | optional |
 # | ui        | O4G_SBA_PASSWORD                | tree    | o4g.actuator.monitor.password                                                  | optional |
@@ -117,7 +120,7 @@
 # (serviceSecrets.yml service=all, or a full release), otherwise the services stop
 # talking to each other until the next restart:
 #   O4G_SBA_PASSWORD      api, ui, front-api, b2b-api (SBA clients) <-> admin (registration
-#                         and instance-auth); ui and front-api actuators <-> admin.
+#                         and instance-auth); api, ui and front-api actuators <-> admin.
 #   O4G_MACHINE_TOKEN     front-api (X-Shared-Token check) <-> frontend (sends it); it must
 #                         match [A-Za-z0-9/._-] because the frontend reads an env line.
 #   FRONT_API_JWT_SECRET  front-api (signs) <-> frontend (verifies admin tokens); same rule.
@@ -135,6 +138,8 @@
 # --if-present, before anything is written), so that it never mixes two OAuth clients:
 #   admin  GOOGLE_SSO_CLIENT_ID + GOOGLE_SSO_CLIENT_SECRET (the site's SSO client, GOU-1091; its
 #          redirect URIs must list the admin's /login/oauth2/code/google).
+#   api    GOOGLE_SSO_CLIENT_ID + GOOGLE_SSO_CLIENT_SECRET (same client, GOU-1393; its redirect
+#          URIs must list the api's /login/oauth2/code/google).
 #
 # Required environment for apply: DEPLOY_SSH_HOST, DEPLOY_SSH_USER, DEPLOY_SSH_KEY.
 set -eu
@@ -162,7 +167,10 @@ api API_TRADETRACKER_API_KEY tree affiliation-config.tradetracker-api-key option
 api API_EPREL_API_KEY tree eprel.api-key optional
 api O4G_ICECAT_PASSWORD tree icecat-feature-config.password optional
 api O4G_SBA_PASSWORD tree spring.boot.admin.client.password optional
+api O4G_SBA_PASSWORD tree o4g.actuator.monitor.password optional
 api O4G_INTERNAL_API_KEY tree admin-key optional
+api GOOGLE_SSO_CLIENT_ID tree spring.security.oauth2.client.registration.google.client-id optional
+api GOOGLE_SSO_CLIENT_SECRET tree spring.security.oauth2.client.registration.google.client-secret optional
 api O4G_ELASTICSEARCH_PASSWORD tree spring.elasticsearch.password source
 ui O4G_SBA_PASSWORD tree spring.boot.admin.client.password optional
 ui O4G_SBA_PASSWORD tree o4g.actuator.monitor.password optional
@@ -205,6 +213,7 @@ infra B2B_API_POSTGRES_PASSWORD env B2B_POSTGRES_PASSWORD source
 # <service> <secret> <secret>: see "Paired secrets" above.
 PAIRS_TABLE='
 admin GOOGLE_SSO_CLIENT_ID GOOGLE_SSO_CLIENT_SECRET
+api GOOGLE_SSO_CLIENT_ID GOOGLE_SSO_CLIENT_SECRET
 '
 
 if_present=false
