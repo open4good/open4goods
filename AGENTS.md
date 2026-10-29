@@ -139,7 +139,7 @@ git config core.hooksPath .githooks
   property in the module's `RenderedSecretsConfigTreeTest` (which fails when a
   `tree` row has no consumer). See
   [docs/operations/prod-service-secrets.md](docs/operations/prod-service-secrets.md).
-- A password that must first change at its source (Elasticsearch, MySQL) or
+- A password that must first change at its source (Elasticsearch, Kibana) or
   a compose infrastructure key is a `source` row, rendered only by
   `infraSecrets.yml` (`scripts/deploy/infra-secrets.sh`). See
   [docs/operations/infra-secrets-rotation.md](docs/operations/infra-secrets-rotation.md).

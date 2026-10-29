@@ -14,7 +14,7 @@
 #                 (release and beta deploy); without it, it fails. A secret that
 #                 is set but malformed always fails, before anything is written.
 #   --source      Render the `source` rows only: infraSecrets.yml passes it once the
-#                 password has been changed at its source (Elasticsearch, MySQL...).
+#                 password has been changed at its source (Elasticsearch...).
 #                 Without it, those rows are skipped silently and their previous
 #                 render stays: a deploy never renders a password that the source
 #                 does not accept yet, and infraSecrets.yml never touches the others.
@@ -50,7 +50,7 @@
 # admin runs as `sbadmin` (/etc/open4goods/sbadmin.env); frontend reads
 # /opt/open4goods/config/<env>/frontend/.env (env_file of docker-compose.frontend.yml,
 # rewritten by open4goods-config's deploy: rendered before every publish); infra is
-# the docker compose infrastructure (Kibana, XWiki, MySQL, Plausible, b2b Postgres), which reads
+# the docker compose infrastructure (Kibana, Plausible, b2b Postgres), which reads
 # /etc/open4goods/infra.env as a second --env-file of publish-infra.sh: no
 # open4goods-config deploy writes /etc/open4goods/, and publish-jars.sh does not
 # source that file (docs/operations/infra-secrets-rotation.md).
@@ -106,8 +106,6 @@
 # | frontend  | FRONT_API_JWT_SECRET            | env     | FRONT_SECURITY_JWT_SECRET (server/utils/auth.ts, read at request time)          | optional |
 # | infra     | INFRA_KIBANA_SYSTEM_PASSWORD    | env     | INFRA_KIBANA_SYSTEM_PASSWORD (kibana.yml elasticsearch.password)               | source   |
 # | infra     | INFRA_KIBANA_ENCRYPTION_KEY     | env     | INFRA_KIBANA_ENCRYPTION_KEY (xpack.encryptedSavedObjects.encryptionKey)        | source   |
-# | infra     | INFRA_XWIKI_DB_PASSWORD         | env     | INFRA_XWIKI_DB_PASSWORD (xwiki DB_PASSWORD, mysql MYSQL_PASSWORD; prod)        | source   |
-# | infra     | INFRA_MYSQL_ROOT_PASSWORD       | env     | INFRA_MYSQL_ROOT_PASSWORD (mysql MYSQL_ROOT_PASSWORD; prod)                    | source   |
 # | infra     | INFRA_PLAUSIBLE_SECRET_KEY_BASE | env     | PLAUSIBLE_SECRET_KEY_BASE (overrides config/<env>/infra/.env; beta)            | source   |
 # | infra     | INFRA_PLAUSIBLE_PG_PASSWORD     | env     | PLAUSIBLE_PG_PASSWORD (plausible DATABASE_URL, plausible_db; beta)             | source   |
 # | infra     | INFRA_CLICKHOUSE_PASSWORD       | env     | CLICKHOUSE_PASSWORD (plausible_events_db, plausible; beta)                     | source   |
@@ -129,8 +127,6 @@
 # every consumer in the same run; never serviceSecrets.yml nor a deploy):
 #   O4G_ELASTICSEARCH_PASSWORD    Elasticsearch user `elastic` <-> api, ui, front-api, b2b-api.
 #   INFRA_KIBANA_SYSTEM_PASSWORD  Elasticsearch user `kibana_system` <-> Kibana.
-#   INFRA_XWIKI_DB_PASSWORD       MySQL user `xwiki` <-> XWiki (prod).
-#   INFRA_MYSQL_ROOT_PASSWORD     MySQL user `root` (prod).
 #   INFRA_PLAUSIBLE_PG_PASSWORD   Postgres user `postgres` of plausible_db <-> Plausible (beta).
 #   INFRA_CLICKHOUSE_PASSWORD     ClickHouse user `default` (set from the compose env at each start) <-> Plausible (beta).
 #   B2B_API_POSTGRES_PASSWORD     Postgres user of b2b_postgres <-> b2b-api.
@@ -198,8 +194,6 @@ frontend O4G_MACHINE_TOKEN env MACHINE_TOKEN optional
 frontend FRONT_API_JWT_SECRET env FRONT_SECURITY_JWT_SECRET optional
 infra INFRA_KIBANA_SYSTEM_PASSWORD env INFRA_KIBANA_SYSTEM_PASSWORD source
 infra INFRA_KIBANA_ENCRYPTION_KEY env INFRA_KIBANA_ENCRYPTION_KEY source
-infra INFRA_XWIKI_DB_PASSWORD env INFRA_XWIKI_DB_PASSWORD source
-infra INFRA_MYSQL_ROOT_PASSWORD env INFRA_MYSQL_ROOT_PASSWORD source
 infra INFRA_PLAUSIBLE_SECRET_KEY_BASE env PLAUSIBLE_SECRET_KEY_BASE source
 infra INFRA_PLAUSIBLE_PG_PASSWORD env PLAUSIBLE_PG_PASSWORD source
 infra INFRA_CLICKHOUSE_PASSWORD env CLICKHOUSE_PASSWORD source

@@ -17,7 +17,7 @@
 #           077 temp file: never on a command line, in an artifact or in a log. On the host it lives in a mode
 #           600 file (/dev/shm when available) for the duration of the run.
 #   <env>     beta or prod.
-#   <target>  elasticsearch (both), kibana (both), mysql (prod), plausible (beta), plausible-postgres (beta),
+#   <target>  elasticsearch (both), kibana (both), plausible (beta), plausible-postgres (beta),
 #             plausible-clickhouse (beta), plausible-google (beta), b2b-postgres (both).
 #
 # Each secret is read from the environment variable of the same name (the calling step's `env:`).
@@ -64,11 +64,6 @@ case "$target" in
     secrets="INFRA_KIBANA_SYSTEM_PASSWORD INFRA_KIBANA_ENCRYPTION_KEY"
     services=infra
     ;;
-  mysql)
-    [ "$env_name" = prod ] || fail "mysql: only prod runs XWiki and MySQL"
-    secrets="INFRA_XWIKI_DB_PASSWORD INFRA_MYSQL_ROOT_PASSWORD"
-    services=infra
-    ;;
   plausible)
     [ "$env_name" = beta ] || fail "plausible: only beta runs Plausible"
     secrets=INFRA_PLAUSIBLE_SECRET_KEY_BASE
@@ -93,7 +88,7 @@ case "$target" in
     secrets=B2B_API_POSTGRES_PASSWORD
     services="infra b2b-api"
     ;;
-  *) fail "Unknown target: $target (elasticsearch, kibana, mysql, plausible, plausible-postgres, plausible-clickhouse, plausible-google or b2b-postgres)" ;;
+  *) fail "Unknown target: $target (elasticsearch, kibana, plausible, plausible-postgres, plausible-clickhouse, plausible-google or b2b-postgres)" ;;
 esac
 
 # Every secret of the target, set and strong; the value is never printed.

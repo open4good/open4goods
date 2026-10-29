@@ -23,8 +23,6 @@ secrets without a source to change (API keys, tokens) follow
 | `O4G_ELASTICSEARCH_PASSWORD`        | beta, prod   | Elasticsearch user `elastic`                      | api, ui, front-api, b2b-api: config tree `spring.elasticsearch.password`                  |
 | `INFRA_KIBANA_SYSTEM_PASSWORD`      | beta, prod   | Elasticsearch user `kibana_system`                | Kibana: `/etc/open4goods/infra.env` -> `kibana.yml` `elasticsearch.password`              |
 | `INFRA_KIBANA_ENCRYPTION_KEY`       | beta, prod   | none (the key in service becomes decryption-only) | Kibana: `infra.env` -> `xpack.encryptedSavedObjects.encryptionKey`                        |
-| `INFRA_XWIKI_DB_PASSWORD`           | prod         | MySQL user `xwiki` + XWiki `hibernate.cfg.xml`    | XWiki: `infra.env` -> `DB_PASSWORD` (and `MYSQL_PASSWORD` of the mysql service)           |
-| `INFRA_MYSQL_ROOT_PASSWORD`         | prod         | MySQL user `root`                                 | mysql: `infra.env` -> `MYSQL_ROOT_PASSWORD` (only read when the data directory is created) |
 | `INFRA_PLAUSIBLE_SECRET_KEY_BASE`   | beta         | none                                              | Plausible: `infra.env` -> `PLAUSIBLE_SECRET_KEY_BASE`                                     |
 | `INFRA_PLAUSIBLE_PG_PASSWORD`       | beta         | Postgres user `postgres` of `plausible_db`        | Plausible: `infra.env` -> `PLAUSIBLE_PG_PASSWORD` (`DATABASE_URL`)                        |
 | `INFRA_CLICKHOUSE_PASSWORD`         | beta         | ClickHouse user `default` of `plausible_events_db` (set from its env at every start) | ClickHouse and Plausible: `infra.env` -> `CLICKHOUSE_PASSWORD` |
@@ -67,10 +65,9 @@ Not rotated by this workflow:
   `spring.data.redis.password` from the api and ui configurations.
 - `O4G_XWIKI_PASSWORD` (#15, user `o4g`) and `ADMIN_XWIKI_PASSWORD` (#16,
   user `nudger`): no class reads `xwiki.*` since the XWiki decommission
-  (GOU-56, GOU-922), so nothing is rendered. An XWiki administrator sets a
-  random password on both accounts (or disables them) in XWiki itself; step d
-  removes the `xwiki:` blocks. One XWiki instance (`wiki.nudger.fr`) serves
-  beta and prod.
+  (GOU-56, GOU-922), so nothing is rendered. XWiki itself is dismantled in
+  prod (GOU-916, GOU-1334): there is no step to do in XWiki any more; step d
+  only removes the `xwiki:` blocks.
 
 ## Single definition and files on the host
 
@@ -98,8 +95,8 @@ Not rotated by this workflow:
 ## Workflow `infraSecrets.yml`
 
 Actions > "Infra secrets (source + render + restart)" > Run workflow.
-Inputs: `env` (`beta`, `prod`), `target` (`elasticsearch`, `kibana`, `mysql`
-for prod, `plausible`, `plausible-postgres`, `plausible-clickhouse` and
+Inputs: `env` (`beta`, `prod`), `target` (`elasticsearch`, `kibana`,
+`plausible`, `plausible-postgres`, `plausible-clickhouse` and
 `plausible-google` for beta, `b2b-postgres`), `mode` (`test`, `apply`,
 `rollback`).
 `apply` and `rollback` only run on `main`; `test` writes nothing and may run
@@ -119,8 +116,7 @@ How the value in service is found: by authenticating with each candidate,
 never by printing it. Elasticsearch `elastic`: the config trees of the four
 consumers, their `application-active.yml`, the kept previous value.
 `kibana_system` and the Kibana key: `infra.env`, `kibana.yml` of the host, the
-`kibana.yml` the running container sees. MySQL: `infra.env`, the compose file
-of the host, the environment the container was created with. Plausible
+`kibana.yml` the running container sees. Plausible
 Postgres and ClickHouse: `infra.env`, `config/beta/infra/.env`, the default of
 the compose placeholder (`${VAR:-...}`), the URL the running Plausible was
 created with, the environment of the database container. b2b Postgres: the
@@ -160,12 +156,6 @@ What each target does:
   waits for it, then calls
   `POST /api/encrypted_saved_objects/_rotate_key` (counts only in the log).
   Kibana is down between the password change and its restart.
-- `mysql` (prod): changes `xwiki` (`ALTER USER` for each of its hosts), the
-  connection password of XWiki's persisted
-  `/usr/local/xwiki/data/hibernate.cfg.xml` (restored at every start: the
-  `DB_PASSWORD` of the compose file only counts when that file does not
-  exist), then `root`; renders `infra.env`, recreates XWiki only. The mysql
-  container keeps running (`MYSQL_*` are only read at initialisation).
 - `plausible` (beta): reports the users with TOTP enabled (Plausible derives
   its TOTP vault key from `SECRET_KEY_BASE` when `TOTP_VAULT_KEY` is not set:
   their second factor must be reset), renders `infra.env` (it overrides
@@ -262,7 +252,7 @@ rotate them with wave 3, without an emergency window.
 ### Prerequisite: open4goods-config step d-infra
 
 The compose files, `kibana.yml` and `publish-infra.sh` belong to
-`open4goods-config`. Before the `kibana`, `mysql`, `plausible`,
+`open4goods-config`. Before the `kibana`, `plausible`,
 `plausible-postgres` and `plausible-clickhouse` targets (not before
 `elasticsearch` nor `b2b-postgres`), a PR on `open4goods-config` (Dev, ordinary gate) makes
 them read `infra.env`, deployed with `deployConfiguration.yml` for that
@@ -294,17 +284,13 @@ first" until then.
        decryptionOnlyKeys: ["${INFRA_KIBANA_PREVIOUS_ENCRYPTION_KEY}"]
    ```
 
-4. `docker-compose/prod/docker-compose.infra.yml`: `DB_PASSWORD` and
-   `MYSQL_PASSWORD` become `${INFRA_XWIKI_DB_PASSWORD:?...}`,
-   `MYSQL_ROOT_PASSWORD` becomes `${INFRA_MYSQL_ROOT_PASSWORD:?...}`.
-
 Nothing else for the Plausible Postgres, ClickHouse and the b2b Postgres: the
 compose files already read `PLAUSIBLE_PG_PASSWORD`, `CLICKHOUSE_PASSWORD` and
 `B2B_POSTGRES_PASSWORD`, the names `infra.env` carries; the literal defaults
 leave at step d.
 
 Merge it inside the wave 3 window of that environment, right before the
-`kibana` (then `mysql`) apply: a beta push deploys it at once (unless
+`kibana` apply: a beta push deploys it at once (unless
 `BETA_DEPLOY_FREEZE`), and from then on a full `publish-infra.sh` needs
 `infra.env` (the `config -q` check refuses to stop the infrastructure without
 it). Once deployed, the literal values are no longer used: steps 3 and 4
@@ -322,9 +308,7 @@ with `mode=test`, then `mode=apply`.
 4. `kibana`. Proof: Kibana login page and `/api/status` available, the
    re-encryption counts (`failed` = 0), an existing saved object (dashboard,
    connector) opens.
-5. prod: `mysql`. Proof: `https://wiki.nudger.fr` answers, an XWiki page
-   renders.
-6. beta: `plausible`. Proof: Plausible login, a dashboard loads; TOTP users
+5. beta: `plausible`. Proof: Plausible login, a dashboard loads; TOTP users
    reset their second factor; recreate the Stats API keys and set them at
    their consumers (see `plausible` above), proof: the Growth connector answers.
    Then, once Access wrote their values (approval of their own, GOU-1256):
@@ -336,8 +320,8 @@ with `mode=test`, then `mode=apply`.
    `publish-jars.sh`, a call of the Product Data API that reads the ledger).
    Their previous values join `infra-previous.env`: step c deletes it after
    these proofs too.
-7. Transport certificates (Ops, below), in the same window.
-8. Step c: Ops deletes `/etc/open4goods/infra-previous.env`; Access deletes
+6. Transport certificates (Ops, below), in the same window.
+7. Step c: Ops deletes `/etc/open4goods/infra-previous.env`; Access deletes
    the stale `beta` secrets with an old name. Step d (Dev, PR on
    `open4goods-config`): see below.
 
@@ -436,8 +420,6 @@ ordinary gate):
   `xwiki:` blocks (`o4g`, `nudger`).
 - `docker-compose/{beta,prod}/kibana.yml`: the literal password and key
   (already replaced by `${...}` in step d-infra).
-- `docker-compose/prod/docker-compose.infra.yml`: the literal MySQL and XWiki
-  passwords (already replaced in step d-infra).
 - `configs/beta/infra/.env`: `PLAUSIBLE_SECRET_KEY_BASE`; the compose default
   of `PLAUSIBLE_SECRET_KEY_BASE` becomes `${PLAUSIBLE_SECRET_KEY_BASE:?}`.
 - After the `plausible-google` proof (wave 2b, above): `configs/beta/infra/.env`,
