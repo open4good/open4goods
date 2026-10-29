@@ -73,7 +73,7 @@ box for both, the same production node for both).
 ## Kwanko revenues (GOU-1379)
 
 `KwankoReportClient` (api, `services/metriks/affiliation`) reads
-`GET https://api.kwanko.com/publishers/conversions?completion_date_from=…&completion_date_to=…`
+`GET https://api.kwanko.com/publishers/conversions?completion_date_from=...&completion_date_to=...`
 (bearer token, dates as UTC ISO with `+00:00`) and feeds
 `affiliation.kwanko.commission.{validated,pending}.{7d,28d}` and
 `affiliation.kwanko.sales.*`, included in the totals. `state` maps to validated
