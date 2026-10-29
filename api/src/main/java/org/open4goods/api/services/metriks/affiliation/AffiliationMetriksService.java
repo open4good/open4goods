@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 /**
  * Builds the Metriks affiliation events ({@code GET /api/metriks/affiliation}): validated commissions, pending
  * commissions and sales of each network, plus their totals, over the last 7 and 28 days; then the outbound
- * {@code /contrib/} clicks per network ({@code awin}, {@code effiliation}, {@code kwanko}, {@code tradetracker}, {@code other}) and in total over the same
+ * {@code /contrib/} clicks per network ({@code awin}, {@code effiliation}, {@code kwanko}, {@code tradetracker}, {@code amazon}, {@code other}) and in total over the same
  * windows, and the 20 most clicked merchants over 28 days.
  * <p>
  * Windows: {@code 7d} = [D-7, D-1] and {@code 28d} = [D-28, D-1], D being today in Europe/Paris, by transaction
@@ -43,7 +43,7 @@ import org.springframework.stereotype.Service;
  * in {@code error};</li>
  * <li>a total is in {@code error} as soon as one network is, with the list of the failing networks: never a partial
  * sum;</li>
- * <li>clicks: when Elasticsearch cannot answer (unreachable, missing index...), the eleven click events are in
+ * <li>clicks: when Elasticsearch cannot answer (unreachable, missing index...), the thirteen click events are in
  * {@code error}; a network without any click is a real {@code 0}.</li>
  * </ul>
  * Error messages and logs never carry a credential: client messages are built without secrets, and every message
@@ -96,7 +96,7 @@ public class AffiliationMetriksService {
      * Reads every network and builds the events: for each network then for the totals, and for each window,
      * {@code commission.validated}, {@code commission.pending} and {@code sales}; then the click events.
      *
-     * @return the 6 events of each network, the 6 total events, then the 11 click events
+     * @return the 6 events of each network, the 6 total events, then the 13 click events
      *         ({@link #clickEvents(LocalDate)})
      */
     public List<MetriksEvent> collectEvents() {
