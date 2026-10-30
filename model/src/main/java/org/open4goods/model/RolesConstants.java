@@ -15,6 +15,8 @@ public class RolesConstants {
 	public static final String ROLE_ANONYMOUS = "ROLE_ANONYMOUS";
 	public static final String ROLE_FRONTEND = "ROLE_FRONTEND";
 	public static final String ROLE_EDITOR = "ROLE_SITEEDITOR";
+	/** The dedicated Metriks key of api: {@code /api/metriks/**} only, nothing else (GOU-1412). */
+	public static final String ROLE_METRIKS = "ROLE_METRIKS";
 
 
 

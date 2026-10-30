@@ -99,6 +99,12 @@ public class ApiProperties {
 	private String adminKey;
 
 	/**
+	 * The dedicated key of the Metriks workflow (GOU-1412): it opens {@code /api/metriks/**} only. Absent or blank,
+	 * no Metriks key is accepted.
+	 */
+	private String metriksKey;
+
+	/**
 	 * The buffer size for AggregatedDatas indexation
 	 */
 	private Integer aggregatedDataElasticBuffer = 200;
@@ -426,6 +432,14 @@ public class ApiProperties {
 
 	public void setAdminKey(final String adminKey) {
 		this.adminKey = adminKey;
+	}
+
+	public String getMetriksKey() {
+		return metriksKey;
+	}
+
+	public void setMetriksKey(final String metriksKey) {
+		this.metriksKey = metriksKey;
 	}
 
 	public String getDatafragmentsBackupFolder() {

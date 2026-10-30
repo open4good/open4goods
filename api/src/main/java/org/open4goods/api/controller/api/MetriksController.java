@@ -39,11 +39,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 /**
  * Exposes the metrics consumed by the weekly Metriks report (the {@code open4goods-api} provider in
  * open4goods-config calls these endpoints). Each metric is emitted as a schema 2.0 event so it can
- * flow unchanged into the report pipeline and the {@code /metriks} dashboard.
+ * flow unchanged into the report pipeline and the {@code /metriks} dashboard. Open to the admin key and to the
+ * dedicated Metriks key ({@code metriks-key}, {@code ROLE_METRIKS}, GOU-1412).
  */
 @RestController
 @RequestMapping("/api/metriks")
-@PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
+@PreAuthorize("hasAnyAuthority('" + RolesConstants.ROLE_ADMIN + "', '" + RolesConstants.ROLE_METRIKS + "')")
 @Tag(name = "Metriks", description = "Structured metric endpoints consumed by the weekly Metriks report pipeline. "
         + "Each endpoint emits schema-2.0 events covering system health, business KPIs and SEO signals.")
 public class MetriksController {

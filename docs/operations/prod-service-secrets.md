@@ -1,7 +1,7 @@
 # Service secrets, beta and prod (render + restart)
 
 Context: decision D140 (2026-10-22), ADR-0006, GOU-932 / GOU-933, GOU-957,
-GOU-1014, GOU-1041 (credentials campaign GOU-1038).
+GOU-1014, GOU-1041, GOU-1412 (credentials campaign GOU-1038).
 Service secrets move from `open4goods-config` to the `beta` and `prod` GitHub
 Environments of `open4good/open4goods` as they are rotated. A rotated secret is
 rendered onto the host, and its services restarted, by the dispatchable
@@ -115,6 +115,7 @@ before anything is written.
 | `O4G_ICECAT_PASSWORD`             | api, front-api: tree `icecat-feature-config.password`                                                                                                                         | Icecat account                                                 |
 | `O4G_SBA_PASSWORD`                | api, ui, front-api, b2b-api: tree `spring.boot.admin.client.password`; api, ui, front-api: tree `o4g.actuator.monitor.password`; admin: tree `spring.boot.admin.instance-auth.default-password`, `o4g.sba.registration.password` | Spring Boot Admin registration and actuator access |
 | `O4G_INTERNAL_API_KEY`            | api: tree `admin-key`; front-api: tree `front.affiliation-partners.api-key`                                                                                                   | front-api -> api calls (affiliation partners)                  |
+| `API_METRIKS_KEY`                 | api: tree `metriks-key` (opens `/api/metriks/**` only, `ROLE_METRIKS`, GOU-1412)                                                                                              | Metriks workflow of open4goods-config, which sends it from its `prod/PROD_API_TOKEN` environment secret |
 | `O4G_CAPTCHA_SECRET`              | ui: tree `captcha-secret`; front-api: tree `captcha.secret-key`                                                                                                               | hCaptcha                                                       |
 | `O4G_MAIL_PASSWORD`               | front-api, admin: tree `spring.mail.password`                                                                                                                                 | Gmail application password                                     |
 | `FRONT_API_JWT_SECRET`            | front-api: tree `front.security.jwt-secret`; frontend: `FRONT_SECURITY_JWT_SECRET`                                                                                            | JWT signature (front-api signs, frontend verifies admin tokens) |
@@ -133,9 +134,13 @@ the client (`B2B_SBA_CLIENT_ENABLED`); the tree then replaces its
 
 Not rendered, on purpose:
 
-- `API_ADMIN_KEY`: api accepts only `admin-key` (or a `test-keys` entry), and
-  front-api sends `front.affiliation-partners.api-key` to api, so both must
-  hold the same value: `admin-key` reads `O4G_INTERNAL_API_KEY`.
+- `API_ADMIN_KEY`: api's only full-access key is `admin-key` (besides a
+  `test-keys` entry), and front-api sends `front.affiliation-partners.api-key`
+  to api, so both must hold the same value: `admin-key` reads
+  `O4G_INTERNAL_API_KEY`. The Metriks workflow does not use it: it has its own
+  key, `API_METRIKS_KEY` (`metriks-key`), which opens `/api/metriks/**` only
+  and nothing else (GOU-1412). While `API_METRIKS_KEY` is not set, api accepts
+  no Metriks key and the admin key keeps opening `/api/metriks/**`.
 - `API_URLFETCHER_PROXY_PASSWORD`: no deployed service depends on the
   `urlfetching` module that reads `urlfetcher.proxy.*`.
 - `feed.api-key` (api) and `front.review-generation.api-key` (front-api): no
@@ -163,7 +168,7 @@ Spring services and the frontend one after the other, front-api first).
 | `O4G_SBA_PASSWORD`     | SBA clients (api, ui, front-api, b2b-api) and admin's registration check; api, ui and front-api actuators and admin's instance auth |
 | `O4G_MACHINE_TOKEN`    | front-api (checks `X-Shared-Token`) and the frontend (sends it); `publish-frontend.sh` refuses to publish when front-api rejects the frontend's token |
 | `FRONT_API_JWT_SECRET` | front-api (signs) and the frontend (verifies admin access tokens)                               |
-| `O4G_INTERNAL_API_KEY` | front-api (sends) and api (`admin-key`, its only accepted key)                                  |
+| `O4G_INTERNAL_API_KEY` | front-api (sends) and api (`admin-key`, its only full-access key)                               |
 
 `O4G_ELASTICSEARCH_PASSWORD` is coupled with its source: Elasticsearch
 (`elastic`) and its four consumers (api, ui, front-api, b2b-api) change in one

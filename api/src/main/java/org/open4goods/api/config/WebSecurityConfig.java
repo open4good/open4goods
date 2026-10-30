@@ -3,11 +3,13 @@ package org.open4goods.api.config;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.open4goods.api.config.yml.ActuatorMonitorCredentials;
 import org.open4goods.api.config.yml.ApiGoogleSsoProperties;
@@ -66,8 +68,11 @@ import jakarta.servlet.http.HttpServletResponse;
  * HTTP security of api (GOU-1392, GOU-1393).
  * <ul>
  * <li>Machines authenticate with an API key ({@code Authorization} header or parameter holding the raw
- * key): {@code admin-key} grants {@code ROLE_USER} and {@code XWIKIADMINGROUP}, a test key
- * {@code ROLE_USER} and {@code ROLE_TESTER}.</li>
+ * key, compared in constant time): {@code admin-key} grants {@code ROLE_USER} and {@code XWIKIADMINGROUP}, a test
+ * key {@code ROLE_USER} and {@code ROLE_TESTER}. The Metriks key ({@code metriks-key}, GOU-1412) grants
+ * {@code ROLE_METRIKS} alone, and only on a {@code /api/metriks/<segment>} path (relative to the context path,
+ * literal segments only): anywhere else it authenticates nothing and the call stays anonymous (401). Without
+ * {@code metriks-key}, no Metriks key is accepted.</li>
  * <li>People log in interactively with Google SSO only ({@code oauth2Login}, wired when a {@code google}
  * client registration exists): verified email, deny-by-default allowlist
  * {@code api.security.google-sso.role-allowlist} ({@link ApiOidcUserService}). There is no login page,
@@ -91,6 +96,12 @@ public class WebSecurityConfig {
 	/** Authorities of an API key or an allowlisted Google identity: one of them is required outside Actuator. */
 	private static final String[] API_AUTHORITIES = { RolesConstants.ROLE_USER, RolesConstants.ROLE_ADMIN,
 			RolesConstants.ROLE_TESTER, RolesConstants.ROLE_XWIKI_ALL };
+
+	/** The Metriks endpoints (GOU-1412): the API authorities or the Metriks key, narrowed by {@code MetriksController}. */
+	static final String METRIKS_PATHS = "/api/metriks/**";
+
+	private static final String[] METRIKS_AUTHORITIES = { RolesConstants.ROLE_USER, RolesConstants.ROLE_ADMIN,
+			RolesConstants.ROLE_TESTER, RolesConstants.ROLE_XWIKI_ALL, RolesConstants.ROLE_METRIKS };
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(WebSecurityConfig.class);
 
@@ -145,6 +156,7 @@ public class WebSecurityConfig {
 				.authorizeHttpRequests(requests -> requests
 						// The error page of a refused request must not trigger a new login (redirect loop).
 						.dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+						.requestMatchers(METRIKS_PATHS).hasAnyAuthority(METRIKS_AUTHORITIES)
 						.anyRequest().hasAnyAuthority(API_AUTHORITIES))
 				.logout(logout -> logout.permitAll());
 
@@ -232,9 +244,17 @@ public class WebSecurityConfig {
 	}
 
 	/**
-	 * This filter allows token-based API authentication.
+	 * This filter allows token-based API authentication: the admin key, a test key, or the Metriks key on a Metriks
+	 * path only.
 	 */
 	static final class TokenAuthenticationFilter extends GenericFilterBean {
+
+		/**
+		 * The paths, relative to the context path, where the Metriks key authenticates: {@code /api/metriks/} then
+		 * literal segments. No dot segment, encoded character, matrix parameter or empty segment, so the path checked
+		 * here is the one Spring MVC routes ({@code /api/metriksX}, {@code /api/metriks/../admin} do not match).
+		 */
+		private static final Pattern METRIKS_KEY_PATH = Pattern.compile("/api/metriks(?:/[A-Za-z0-9_-]+)+");
 
 		private final ApiProperties apiProperties;
 
@@ -252,7 +272,7 @@ public class WebSecurityConfig {
 
 			if (null != accessToken) {
 
-				final List<SimpleGrantedAuthority> authorities = resolveAuthorities(accessToken);
+				final List<SimpleGrantedAuthority> authorities = resolveAuthorities(accessToken, httpRequest);
 
 				if (!authorities.isEmpty()) {
 					// Populate SecurityContextHolder with a new context, never the one of a Google session.
@@ -282,10 +302,11 @@ public class WebSecurityConfig {
 			return accessToken.trim();
 		}
 
-		private List<SimpleGrantedAuthority> resolveAuthorities(String accessToken) {
+		private List<SimpleGrantedAuthority> resolveAuthorities(String accessToken, HttpServletRequest httpRequest) {
 			final List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-			final boolean adminKey = Objects.equals(accessToken, apiProperties.getAdminKey());
-			final boolean testKey = apiProperties.getTestKeys() != null && apiProperties.getTestKeys().contains(accessToken);
+			final boolean adminKey = matches(accessToken, apiProperties.getAdminKey());
+			final boolean testKey = apiProperties.getTestKeys() != null
+					&& apiProperties.getTestKeys().stream().anyMatch(key -> matches(accessToken, key));
 
 			if (adminKey || testKey) {
 				authorities.add(new SimpleGrantedAuthority(RolesConstants.ROLE_USER));
@@ -296,8 +317,31 @@ public class WebSecurityConfig {
 			if (testKey) {
 				authorities.add(new SimpleGrantedAuthority(RolesConstants.ROLE_TESTER));
 			}
+			// The Metriks key alone, on a Metriks path only: anywhere else it authenticates nothing.
+			if (authorities.isEmpty() && isMetriksPath(httpRequest)
+					&& matches(accessToken, apiProperties.getMetriksKey())) {
+				authorities.add(new SimpleGrantedAuthority(RolesConstants.ROLE_METRIKS));
+			}
 
 			return authorities;
+		}
+
+		/** Constant-time comparison of a presented token with a configured key; an absent or blank key matches nothing. */
+		private static boolean matches(String accessToken, String key) {
+			if (key == null || key.isBlank()) {
+				return false;
+			}
+			return MessageDigest.isEqual(accessToken.getBytes(StandardCharsets.UTF_8), key.getBytes(StandardCharsets.UTF_8));
+		}
+
+		/** Whether the request path, without the context path, is a Metriks endpoint path ({@link #METRIKS_KEY_PATH}). */
+		private static boolean isMetriksPath(HttpServletRequest httpRequest) {
+			final String requestUri = httpRequest.getRequestURI();
+			final String contextPath = httpRequest.getContextPath();
+			if (requestUri == null || contextPath == null || !requestUri.startsWith(contextPath)) {
+				return false;
+			}
+			return METRIKS_KEY_PATH.matcher(requestUri.substring(contextPath.length())).matches();
 		}
 	}
 

@@ -60,7 +60,8 @@ import org.springframework.web.context.WebApplicationContext;
  * Shows, on the whole api context served by Tomcat, that api is "pure Google SSO" for people (GOU-1392, GOU-1393):
  * no password form and no generated user, an anonymous browser goes to Google, an anonymous call gets a 401 without
  * Basic challenge, only allowlisted Google identities get in, while the machine accesses keep working (API keys,
- * Spring Boot Admin monitor through HTTP Basic on Actuator only). Real HTTP requests go through Tomcat, so the
+ * Spring Boot Admin monitor through HTTP Basic on Actuator only, Metriks key on {@code /api/metriks/**} only). Real
+ * HTTP requests go through Tomcat, so the
  * {@code NATIVE} forwarded headers strategy is the production one.
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, properties = {
@@ -78,6 +79,7 @@ import org.springframework.web.context.WebApplicationContext;
         "api.security.google-sso.role-allowlist[owner@example.com][0]=" + RolesConstants.ROLE_USER,
         "api.security.google-sso.role-allowlist[owner@example.com][1]=" + RolesConstants.ROLE_ADMIN,
         "admin-key=" + ApiGoogleSsoAccessTest.ADMIN_KEY,
+        "metriks-key=" + ApiGoogleSsoAccessTest.METRIKS_KEY,
         "test-keys[0]=" + ApiGoogleSsoAccessTest.TEST_KEY,
         "o4g.actuator.monitor.username=" + ApiGoogleSsoAccessTest.MONITOR_USER,
         "o4g.actuator.monitor.password=" + ApiGoogleSsoAccessTest.MONITOR_PASSWORD,
@@ -87,6 +89,7 @@ import org.springframework.web.context.WebApplicationContext;
 class ApiGoogleSsoAccessTest {
 
     static final String ADMIN_KEY = "admin-key-for-tests";
+    static final String METRIKS_KEY = "metriks-key-for-tests";
     static final String TEST_KEY = "test-key-for-tests";
     static final String MONITOR_USER = "o4g";
     static final String MONITOR_PASSWORD = "monitor-password-for-tests";
@@ -94,6 +97,7 @@ class ApiGoogleSsoAccessTest {
     private static final String BROWSER_ACCEPT = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
     private static final String ADMIN_ENDPOINT = "/batch/clean-resources";
     private static final String SWAGGER_UI = "/swagger-ui/index.html";
+    private static final String METRIKS_ENDPOINT = "/api/metriks/system";
 
     @MockitoBean private BrandService brandService;
     @MockitoBean private ElasticProductRepository elasticProductRepository;
@@ -232,6 +236,46 @@ class ApiGoogleSsoAccessTest {
     void aTestKeyKeepsItsAccessesWithoutTheAdminOnes() throws Exception {
         assertThat(send(request("/v3/api-docs").header("Authorization", TEST_KEY)).statusCode()).isEqualTo(200);
         assertThat(send(request(ADMIN_ENDPOINT).header("Authorization", TEST_KEY)).statusCode()).isEqualTo(403);
+    }
+
+    @Test
+    void theMetriksKeyOpensTheMetriksEndpoints() throws Exception {
+        assertThat(send(request(METRIKS_ENDPOINT).header("Authorization", METRIKS_KEY)).statusCode()).isEqualTo(200);
+        assertThat(send(request(METRIKS_ENDPOINT + "?Authorization=" + METRIKS_KEY)).statusCode()).isEqualTo(200);
+    }
+
+    @Test
+    void theMetriksKeyOpensNothingElse() throws Exception {
+        for (String path : List.of(ADMIN_ENDPOINT, "/actuator/health", "/actuator/info", "/", SWAGGER_UI,
+                "/v3/api-docs", "/api/metriksX", "/api/metriks")) {
+            HttpResponse<String> response = send(request(path).header("Authorization", METRIKS_KEY));
+
+            assertThat(response.statusCode()).as(path).isEqualTo(401);
+            assertThat(response.headers().firstValue("WWW-Authenticate")).as(path).isEmpty();
+        }
+    }
+
+    @Test
+    void theMetriksKeyCannotLeaveTheMetriksPathsThroughDotSegments() throws Exception {
+        for (String path : List.of("/api/metriks/../batch/clean-resources", "/api/metriks/%2e%2e/batch/clean-resources",
+                "/api/metriks/..;/batch/clean-resources", "/api/metriks/system/../../../actuator/health")) {
+            int status = send(request(path).header("Authorization", METRIKS_KEY)).statusCode();
+
+            assertThat(status).as(path).isIn(400, 401);
+        }
+    }
+
+    @Test
+    void theAdminKeyStillOpensTheMetriksEndpoints() throws Exception {
+        assertThat(send(request(METRIKS_ENDPOINT).header("Authorization", ADMIN_KEY)).statusCode()).isEqualTo(200);
+    }
+
+    @Test
+    void theMetriksEndpointsNeedAKey() throws Exception {
+        assertThat(send(request(METRIKS_ENDPOINT)).statusCode()).isEqualTo(401);
+        assertThat(send(request(METRIKS_ENDPOINT).header("Authorization", "unknown-key")).statusCode()).isEqualTo(401);
+        // A test key passes the chain but not MetriksController, as before (GOU-1412).
+        assertThat(send(request(METRIKS_ENDPOINT).header("Authorization", TEST_KEY)).statusCode()).isEqualTo(403);
     }
 
     @Test

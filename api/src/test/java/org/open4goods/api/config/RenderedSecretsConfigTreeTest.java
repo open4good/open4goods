@@ -80,6 +80,8 @@ class RenderedSecretsConfigTreeTest {
             entry("spring.boot.admin.client.password",
                     binder -> bind(binder, "spring.boot.admin.client", ClientProperties.class).getPassword()),
             entry("admin-key", binder -> api(binder).getAdminKey()),
+            // The dedicated Metriks key, /api/metriks/** only (GOU-1412).
+            entry("metriks-key", binder -> api(binder).getMetriksKey()),
             // The site's Google SSO client (GOOGLE_SSO_*), read as the oauth2Login registration (GOU-1393).
             entry("spring.security.oauth2.client.registration.google.client-id",
                     binder -> googleRegistration(binder).getClientId()),
