@@ -1,6 +1,6 @@
 #!/bin/sh
 # Render a service's secrets from the `beta` or `prod` GitHub Environment onto its host
-# (ADR-0006, D140, GOU-933, GOU-957, GOU-1014, GOU-1041, GOU-1091, GOU-1092, GOU-1393).
+# (ADR-0006, D140, GOU-933, GOU-957, GOU-1014, GOU-1041, GOU-1091, GOU-1092, GOU-1393, GOU-1412).
 #
 # Usage: render-service-secrets.sh [--if-present] [--source] <check|apply> <env> <service>
 #
@@ -74,6 +74,7 @@
 # | api       | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.client.password                                              | optional |
 # | api       | O4G_SBA_PASSWORD                | tree    | o4g.actuator.monitor.password                                                  | optional |
 # | api       | O4G_INTERNAL_API_KEY            | tree    | admin-key                                                                      | optional |
+# | api       | API_METRIKS_KEY                 | tree    | metriks-key (opens /api/metriks/** only, Metriks workflow)                     | optional |
 # | api       | GOOGLE_SSO_CLIENT_ID            | tree    | spring.security.oauth2.client.registration.google.client-id                    | optional |
 # | api       | GOOGLE_SSO_CLIENT_SECRET        | tree    | spring.security.oauth2.client.registration.google.client-secret                | optional |
 # | api       | O4G_ELASTICSEARCH_PASSWORD      | tree    | spring.elasticsearch.password                                                  | source   |
@@ -123,7 +124,8 @@
 #                         match [A-Za-z0-9/._-] because the frontend reads an env line.
 #   FRONT_API_JWT_SECRET  front-api (signs) <-> frontend (verifies admin tokens); same rule.
 #   O4G_INTERNAL_API_KEY  front-api (front.affiliation-partners.api-key, sent to api) <->
-#                         api (admin-key: the only key api accepts besides test-keys).
+#                         api (admin-key: api's only full-access key besides test-keys; metriks-key,
+#                         API_METRIKS_KEY, opens /api/metriks/** only).
 # Coupled with their source (infraSecrets.yml changes the source, then renders and restarts
 # every consumer in the same run; never serviceSecrets.yml nor a deploy):
 #   O4G_ELASTICSEARCH_PASSWORD    Elasticsearch user `elastic` <-> api, ui, front-api, b2b-api.
@@ -165,6 +167,7 @@ api O4G_ICECAT_PASSWORD tree icecat-feature-config.password optional
 api O4G_SBA_PASSWORD tree spring.boot.admin.client.password optional
 api O4G_SBA_PASSWORD tree o4g.actuator.monitor.password optional
 api O4G_INTERNAL_API_KEY tree admin-key optional
+api API_METRIKS_KEY tree metriks-key optional
 api GOOGLE_SSO_CLIENT_ID tree spring.security.oauth2.client.registration.google.client-id optional
 api GOOGLE_SSO_CLIENT_SECRET tree spring.security.oauth2.client.registration.google.client-secret optional
 api O4G_ELASTICSEARCH_PASSWORD tree spring.elasticsearch.password source

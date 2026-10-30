@@ -134,6 +134,7 @@ jobs:
           O4G_ICECAT_PASSWORD: ${{ secrets.O4G_ICECAT_PASSWORD }}
           O4G_SBA_PASSWORD: ${{ secrets.O4G_SBA_PASSWORD }}
           O4G_INTERNAL_API_KEY: ${{ secrets.O4G_INTERNAL_API_KEY }}
+          API_METRIKS_KEY: ${{ secrets.API_METRIKS_KEY }}
           O4G_CAPTCHA_SECRET: ${{ secrets.O4G_CAPTCHA_SECRET }}
           O4G_MAIL_PASSWORD: ${{ secrets.O4G_MAIL_PASSWORD }}
           FRONT_API_JWT_SECRET: ${{ secrets.FRONT_API_JWT_SECRET }}
@@ -516,6 +517,7 @@ jobs:
           O4G_ICECAT_PASSWORD: ${{ secrets.O4G_ICECAT_PASSWORD }}
           O4G_SBA_PASSWORD: ${{ secrets.O4G_SBA_PASSWORD }}
           O4G_INTERNAL_API_KEY: ${{ secrets.O4G_INTERNAL_API_KEY }}
+          API_METRIKS_KEY: ${{ secrets.API_METRIKS_KEY }}
           O4G_CAPTCHA_SECRET: ${{ secrets.O4G_CAPTCHA_SECRET }}
           O4G_MAIL_PASSWORD: ${{ secrets.O4G_MAIL_PASSWORD }}
           FRONT_API_JWT_SECRET: ${{ secrets.FRONT_API_JWT_SECRET }}

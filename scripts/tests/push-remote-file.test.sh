@@ -397,11 +397,14 @@ expect_fail "render: a malformed tree-sa secret fails before anything is written
   render_with API_VERTEX_BATCH_JSON="{\"private_key\": \"${SENTINEL}\"" -- --if-present apply prod api
 [[ ! -e "${FAKE_ROOT}/etc" ]] && [[ ! -s "${FAKE_SSH_LOG}" ]] && pass "render: nothing written for a malformed tree-sa secret" \
   || ko "render: something was written for a malformed tree-sa secret"
-run render_with API_VERTEX_API_JSON="${VALID_JSON}" O4G_INTERNAL_API_KEY="${TREE_VALUE}" -- --if-present apply prod api
+run render_with API_VERTEX_API_JSON="${VALID_JSON}" O4G_INTERNAL_API_KEY="${TREE_VALUE}" API_METRIKS_KEY="${TREE_VALUE}" \
+  -- --if-present apply prod api
 if [[ ${status} -eq 0 ]] \
   && jq -e '.client_email == "indexation@nudger-test.iam.gserviceaccount.com"' \
     "${FAKE_ROOT}/etc/open4goods/secrets/api/gen-ai-config.google-api-json" >/dev/null \
   && cmp -s "${FAKE_ROOT}/etc/open4goods/secrets/api/admin-key" <(printf '%s' "${TREE_VALUE}") \
+  && cmp -s "${FAKE_ROOT}/etc/open4goods/secrets/api/metriks-key" <(printf '%s' "${TREE_VALUE}") \
+  && [[ "$(stat -c '%a' "${FAKE_ROOT}/etc/open4goods/secrets/api/metriks-key")" == 600 ]] \
   && [[ "$(cat "${FAKE_ROOT}/etc/open4goods/api.env")" == "${API_IMPORT}" ]] \
   && grep -q "API_VERTEX_API_JSON: service account indexation@nudger-test.iam.gserviceaccount.com (private_key_id 01234567...)" "${GITHUB_STEP_SUMMARY}" \
   && [[ "${out}" != *"${SENTINEL}"* ]] && [[ "${out}" != *"${TREE_SENTINEL}"* ]]; then

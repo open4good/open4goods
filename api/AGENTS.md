@@ -44,8 +44,11 @@ mvn --offline -pl api -am clean install
 
 `config/WebSecurityConfig` (GOU-1393) : api.nudger.fr est "pur SSO Google" pour les personnes.
 
-- Machines : clé API brute dans l'en-tête ou le paramètre `Authorization` (`admin-key` → `ROLE_USER` +
-  `XWIKIADMINGROUP`, `test-keys` → `ROLE_USER` + `ROLE_TESTER`). Inchangé.
+- Machines : clé API brute dans l'en-tête ou le paramètre `Authorization`, comparée en temps constant
+  (`admin-key` → `ROLE_USER` + `XWIKIADMINGROUP`, `test-keys` → `ROLE_USER` + `ROLE_TESTER`). La clé Metriks
+  (`metriks-key`, secret `API_METRIKS_KEY`, GOU-1412) → `ROLE_METRIKS` seul, et seulement sur un chemin
+  `/api/metriks/<segment>` (hors context path, segments littéraux) : ailleurs elle n'authentifie rien (401).
+  `MetriksController` accepte `XWIKIADMINGROUP` ou `ROLE_METRIKS`. Sans `metriks-key`, aucune clé Metriks.
 - Personnes : `oauth2Login` Google, câblé seulement si la registration `google` existe
   (`spring.security.oauth2.client.registration.google.*`, rendue depuis `GOOGLE_SSO_CLIENT_ID/SECRET`). E-mail
   vérifié et présent dans `api.security.google-sso.role-allowlist` (`ApiOidcUserService`), sinon 403. Pas de
