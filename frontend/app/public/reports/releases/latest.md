@@ -1,26 +1,27 @@
-## 🥳 Welcome to **v1.0.74**
+## 🥳 Welcome to **v1.0.75**
 
-This release covers **0 day(s)** of work, from **2026-10-29T18:02:50.000Z** to **2026-10-29T21:44:16.000Z**.
+This release covers **3 day(s)** of work, from **2026-10-29T21:44:16.000Z** to **2026-11-01T22:31:02.000Z**.
 
 ### 📦 Stats
-- Diff: [compare](https://github.com/open4good/open4goods/compare/v1.0.73...v1.0.74)
-- Changed files: **33**
-- Commits: **5**
-- Additions: **1700** / Deletions: **70**
+- Diff: [compare](https://github.com/open4good/open4goods/compare/v1.0.74...v1.0.75)
+- Changed files: **56**
+- Commits: **6**
+- Additions: **2232** / Deletions: **118**
 
 ---
 
 
 
 <details>
-<summary>🙈 Other changes (4)</summary>
+<summary>🙈 Other changes (5)</summary>
 
 | PR | Title | Author |
 |---:|---|---|
-| [PR 3519](https://github.com/open4good/open4goods/pull/3519) | feat(metriks): clics kwanko et tradetracker, sortis de other (GOU-1378) | @GoulvenF |
-| [PR 3520](https://github.com/open4good/open4goods/pull/3520) | feat(metriks): revenus Kwanko (KwankoReportClient) (GOU-1379) | @GoulvenF |
-| [PR 3522](https://github.com/open4good/open4goods/pull/3522) | fix(front-api): ne plus servir les offres périmées (GOU-1385) | @GoulvenF |
-| [PR 3521](https://github.com/open4good/open4goods/pull/3521) | feat(metriks): revenus TradeTracker (TradeTrackerReportClient) (GOU-1381) | @GoulvenF |
+| [PR 3524](https://github.com/open4good/open4goods/pull/3524) | chore(deploy): retirer l'injection des secrets PA-API (GOU-1397) | @GoulvenF |
+| [PR 3523](https://github.com/open4good/open4goods/pull/3523) | feat(metriks): réseau amazon dans AffiliationNetwork (GOU-1395) | @GoulvenF |
+| [PR 3526](https://github.com/open4good/open4goods/pull/3526) | feat(api): Google SSO interactif, sans formLogin, Basic limité au moniteur SBA (GOU-1393) | @GoulvenF |
+| [PR 3525](https://github.com/open4good/open4goods/pull/3525) | feat(affiliation): lien « Rechercher sur Amazon » via /contrib/ sur les fiches sans offre (GOU-1396) | @GoulvenF |
+| [PR 3527](https://github.com/open4good/open4goods/pull/3527) | feat(api): clé Metriks dédiée API_METRIKS_KEY, limitée à /api/metriks/** (GOU-1412) | @GoulvenF |
 
 
 </details>
