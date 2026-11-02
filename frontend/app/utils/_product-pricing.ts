@@ -54,12 +54,12 @@ export const formatOffersCount = (
 }
 
 /** rel for outbound affiliate/offer links — Google requires `sponsored` for paid links.
- * No `noreferrer`: /contrib/ needs the nudger.fr Referer (GOU-1184), see
- * AFFILIATE_LINK_REFERRER_POLICY. */
+ * No `noreferrer`: /contrib/ reads the nudger.fr Referer for the click origin
+ * path, see AFFILIATE_LINK_REFERRER_POLICY. */
 export const AFFILIATE_LINK_REL = 'sponsored nofollow noopener'
 
 /** referrerpolicy for the same links: the Referer is sent to /contrib/ on
- * nudger.fr (navigation signal) but never to a merchant or network origin. */
+ * nudger.fr (click origin path) but never to a merchant or network origin. */
 export const AFFILIATE_LINK_REFERRER_POLICY = 'same-origin'
 
 /**

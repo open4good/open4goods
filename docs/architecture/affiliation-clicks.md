@@ -9,8 +9,11 @@ Metriks, without personal data (GOU-1188).
    JSON of a `ContributionVote`: merchant (`datasourceName`), target URL and,
    since GOU-1188, the product `gtin` (tokens without `gtin` stay valid).
 2. The Nuxt route (`frontend/server/routes/contrib/[...token].ts`) refuses
-   robots, then calls front-api `GET /affiliations/redirect`, forwarding the
-   optional `X-Affiliation-Origin` header (path of the originating page).
+   robots and requests without the `nudger_nav` navigation cookie (a site
+   `Referer` alone is refused since GOU-1520), then calls front-api
+   `GET /affiliations/redirect`, forwarding the optional
+   `X-Affiliation-Origin` header (path of the originating page, read from the
+   same-site `Referer`).
 3. front-api `AffiliationService.trackRedirect` writes one `AffiliationClick`
    document and the legacy `ContributionVote` (without IP nor user agent), both
    fail-open: a persistence failure never blocks the redirect.
