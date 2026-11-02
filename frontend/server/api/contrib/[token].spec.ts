@@ -66,6 +66,7 @@ vi.mock('../../utils/log-backend-error', () => ({
 }))
 
 const SITE_REFERER = 'https://nudger.fr/fr/produit/123'
+const NAVIGATION_COOKIE = 'nudger_nav=1'
 
 const BROWSER_UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
@@ -142,6 +143,7 @@ describe('resolveAffiliationRedirect', () => {
             host: 'nudger.example',
             'user-agent': BROWSER_UA,
             referer: SITE_REFERER,
+            cookie: NAVIGATION_COOKIE,
           },
         },
       },
@@ -177,6 +179,7 @@ describe('resolveAffiliationRedirect', () => {
             host: 'nudger.example',
             'user-agent': BROWSER_UA,
             referer: SITE_REFERER,
+            cookie: NAVIGATION_COOKIE,
           },
         },
       },
@@ -210,6 +213,7 @@ describe('resolveAffiliationRedirect', () => {
             host: 'nudger.example',
             'user-agent': BROWSER_UA,
             referer: SITE_REFERER,
+            cookie: NAVIGATION_COOKIE,
           },
         },
       },
@@ -236,6 +240,7 @@ describe('resolveAffiliationRedirect', () => {
             host: 'nudger.example',
             'user-agent': BROWSER_UA,
             referer: SITE_REFERER,
+            cookie: NAVIGATION_COOKIE,
           },
         },
       },
@@ -257,6 +262,7 @@ describe('resolveAffiliationRedirect', () => {
             host: 'nudger.example',
             'user-agent': BROWSER_UA,
             referer: SITE_REFERER,
+            cookie: NAVIGATION_COOKIE,
           },
         },
       },
@@ -278,6 +284,7 @@ describe('resolveAffiliationRedirect', () => {
             host: 'nudger.example',
             'user-agent': BROWSER_UA,
             referer: SITE_REFERER,
+            cookie: NAVIGATION_COOKIE,
           },
         },
       },
@@ -345,6 +352,7 @@ describe('resolveAffiliationRedirect', () => {
     runtimeConfig.affiliationBlockedUserAgents = ' acmefetcher , other '
     const event = eventWith(`${BROWSER_UA} AcmeFetcher/9`)
     event.node.req.headers.referer = SITE_REFERER
+    event.node.req.headers.cookie = NAVIGATION_COOKIE
 
     await expect(handler(event)).rejects.toMatchObject({
       statusCode: 403,
@@ -372,10 +380,10 @@ describe('resolveAffiliationRedirect', () => {
       context: { params: { token: 'token-abc-very-long-secret' } },
     }) as unknown as Parameters<ContribRouteHandler>[0]
 
-  describe('navigation signal (GOU-1184)', () => {
+  describe('navigation signal (GOU-1184, cookie required since GOU-1520)', () => {
     beforeEach(() => {
       resolveRedirectMock.mockResolvedValue({
-        statusCode: 301,
+        statusCode: 302,
         location: 'https://network.example/click',
       })
     })
@@ -408,23 +416,45 @@ describe('resolveAffiliationRedirect', () => {
       expect(resolveRedirectMock).not.toHaveBeenCalled()
     })
 
+    // GOU-1520: the proxy network forges `Referer: https://nudger.fr/` without
+    // loading any page, so a site Referer without the cookie is refused.
     it.each([
+      'https://nudger.fr/',
       'https://nudger.fr/fr/produit/123',
       'https://beta.nudger.fr/produit',
       'https://nudger.com/en/product',
-    ])('K2: redirects with a site referer (%s)', async referer => {
-      await expect(
-        handler(navigationEvent({ referer }))
-      ).resolves.toMatchObject({ statusCode: 301 })
-      expect(resolveRedirectMock).toHaveBeenCalledTimes(1)
-    })
+    ])(
+      'K2: refuses a site referer without the navigation cookie (%s)',
+      async referer => {
+        await expect(
+          handler(navigationEvent({ referer }))
+        ).rejects.toMatchObject({
+          statusCode: 403,
+          statusMessage: 'Ouvrez ce lien depuis la fiche produit sur nudger.fr',
+        })
+        expect(useAffiliationServiceMock).not.toHaveBeenCalled()
+        expect(resolveRedirectMock).not.toHaveBeenCalled()
+      }
+    )
 
-    it('K3: redirects with the navigation cookie', async () => {
-      await expect(
-        handler(navigationEvent({ cookie: 'other=x; nudger_nav=1' }))
-      ).resolves.toMatchObject({ statusCode: 301 })
-      expect(resolveRedirectMock).toHaveBeenCalledTimes(1)
-    })
+    it.each([
+      ['without referer', {}],
+      ['with a site referer', { referer: SITE_REFERER }],
+      ['with a foreign referer', { referer: 'https://evil.example/' }],
+    ])(
+      'K3: redirects with the navigation cookie %s',
+      async (_name, headers: Record<string, string>) => {
+        await expect(
+          handler(
+            navigationEvent({ ...headers, cookie: 'other=x; nudger_nav=1' })
+          )
+        ).resolves.toEqual({
+          statusCode: 302,
+          location: 'https://network.example/click',
+        })
+        expect(resolveRedirectMock).toHaveBeenCalledTimes(1)
+      }
+    )
 
     it.each([false, 'false', '0'])(
       'K5: switch %s restores the GOU-1175 behaviour',
@@ -432,7 +462,7 @@ describe('resolveAffiliationRedirect', () => {
         runtimeConfig.affiliationRequireNavigationSignal = value
 
         await expect(handler(navigationEvent())).resolves.toMatchObject({
-          statusCode: 301,
+          statusCode: 302,
         })
         expect(resolveRedirectMock).toHaveBeenCalledTimes(1)
       }
@@ -443,6 +473,7 @@ describe('resolveAffiliationRedirect', () => {
         handler(
           navigationEvent({
             referer: SITE_REFERER,
+            cookie: NAVIGATION_COOKIE,
             'user-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1)',
           })
         )

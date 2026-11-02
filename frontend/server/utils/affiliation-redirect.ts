@@ -15,7 +15,6 @@ import {
 } from '~~/shared/api-client/services/affiliation.services'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 import {
-  isSiteReferer,
   NAVIGATION_SIGNAL_COOKIE_NAME,
   NAVIGATION_SIGNAL_COOKIE_VALUE,
 } from '~~/shared/utils/navigation-signal'
@@ -140,16 +139,13 @@ const isNavigationSignalRequired = (event: H3Event): boolean => {
 }
 
 /**
- * A real visitor follows /contrib/ links from a page of the site: the request
- * carries a site Referer or the navigation-signal cookie (GOU-1184).
+ * A real visitor follows /contrib/ links from a page of the site, which set
+ * the navigation-signal cookie (GOU-1184). The Referer alone is not enough:
+ * a proxy network forged `Referer: https://nudger.fr/` (GOU-1520).
  */
-const hasNavigationSignal = (
-  event: H3Event,
-  rawHost: string | string[] | undefined
-): boolean =>
-  isSiteReferer(event.node.req.headers.referer, rawHost) ||
+const hasNavigationSignal = (event: H3Event): boolean =>
   getCookie(event, NAVIGATION_SIGNAL_COOKIE_NAME) ===
-    NAVIGATION_SIGNAL_COOKIE_VALUE
+  NAVIGATION_SIGNAL_COOKIE_VALUE
 
 /**
  * Aggregated warning: at most one line per interval with the refusal count
@@ -204,11 +200,7 @@ export const sendContribPlainError = (
       ? `${MISSING_NAVIGATION_SIGNAL_MESSAGE}.`
       : (PLAIN_ERROR_BODIES[status] ?? 'Error')
 
-  return send(
-    event,
-    body,
-    'text/plain; charset=utf-8'
-  )
+  return send(event, body, 'text/plain; charset=utf-8')
 }
 
 /**
@@ -239,10 +231,7 @@ export const resolveAffiliationRedirect = async (
     throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
   }
 
-  if (
-    isNavigationSignalRequired(event) &&
-    !hasNavigationSignal(event, rawHost)
-  ) {
+  if (isNavigationSignalRequired(event) && !hasNavigationSignal(event)) {
     logMissingNavigationSignal(token, userAgent)
     throw createError({
       statusCode: 403,

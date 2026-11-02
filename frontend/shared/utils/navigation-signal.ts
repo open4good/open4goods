@@ -1,5 +1,3 @@
-import { HOST_DOMAIN_LANGUAGE_MAP, normalizeHost } from './domain-language'
-
 /**
  * First-party technical cookie proving that a page of the site was loaded in
  * this browser before an affiliate link (/contrib/<token>) is followed
@@ -21,38 +19,3 @@ export const buildNavigationSignalCookie = (secure: boolean): string =>
     'SameSite=Lax',
     ...(secure ? ['Secure'] : []),
   ].join('; ')
-
-/**
- * Whether a raw `Referer` header points to a page of the site: one of the
- * hosts known by `resolveDomainLanguage`, or the host serving the request.
- */
-export const isSiteReferer = (
-  rawReferer: string | string[] | undefined,
-  requestHost?: string | string[] | null
-): boolean => {
-  const referer = Array.isArray(rawReferer) ? rawReferer[0] : rawReferer
-
-  if (!referer) {
-    return false
-  }
-
-  let refererHost: string
-
-  try {
-    const url = new URL(referer)
-
-    if (url.protocol !== 'https:' && url.protocol !== 'http:') {
-      return false
-    }
-
-    refererHost = url.hostname.toLowerCase()
-  } catch {
-    return false
-  }
-
-  if (Object.hasOwn(HOST_DOMAIN_LANGUAGE_MAP, refererHost)) {
-    return true
-  }
-
-  return refererHost === normalizeHost(requestHost)
-}
