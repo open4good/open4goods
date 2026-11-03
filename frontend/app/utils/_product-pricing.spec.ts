@@ -1,11 +1,15 @@
-import { describe, expect, it } from 'vitest'
-import { formatBestPrice, formatPrice, resolveOfferHref } from './_product-pricing'
+import { describe, expect, it, vi } from 'vitest'
+import {
+  AFFILIATE_LINK_REL,
+  formatBestPrice,
+  formatPrice,
+  openAffiliateLinkInNewTab,
+  resolveOfferHref,
+} from './_product-pricing'
 import type { ProductDto } from '~~/shared/api-client'
 
-const frNumberFormatter = (
-  value: number,
-  options?: Intl.NumberFormatOptions
-) => new Intl.NumberFormat('fr-FR', options).format(value)
+const frNumberFormatter = (value: number, options?: Intl.NumberFormatOptions) =>
+  new Intl.NumberFormat('fr-FR', options).format(value)
 
 describe('formatPrice', () => {
   it('formats a EUR price using French locale conventions (comma decimal, no dot)', () => {
@@ -55,7 +59,10 @@ describe('formatBestPrice', () => {
 describe('resolveOfferHref', () => {
   it('prefers the affiliation contrib redirect over the raw merchant url', () => {
     expect(
-      resolveOfferHref({ affiliationToken: 'abc123', url: 'https://merchant.example' })
+      resolveOfferHref({
+        affiliationToken: 'abc123',
+        url: 'https://merchant.example',
+      })
     ).toBe('/contrib/abc123')
   })
 
@@ -63,5 +70,31 @@ describe('resolveOfferHref', () => {
     expect(resolveOfferHref({ url: 'https://merchant.example' })).toBe(
       'https://merchant.example'
     )
+  })
+})
+
+describe('affiliate link referrer handling (GOU-1184)', () => {
+  it('keeps sponsored nofollow noopener but drops noreferrer', () => {
+    expect(AFFILIATE_LINK_REL).toBe('sponsored nofollow noopener')
+  })
+
+  it('opens a new tab through a same-origin referrer anchor, then removes it', () => {
+    const clicked: HTMLAnchorElement[] = []
+    const clickSpy = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(function (this: HTMLAnchorElement) {
+        clicked.push(this)
+      })
+
+    openAffiliateLinkInNewTab('/contrib/abc123')
+
+    expect(clicked).toHaveLength(1)
+    const [anchor] = clicked
+    expect(anchor?.getAttribute('href')).toBe('/contrib/abc123')
+    expect(anchor?.target).toBe('_blank')
+    expect(anchor?.rel).toBe(AFFILIATE_LINK_REL)
+    expect(anchor?.referrerPolicy).toBe('same-origin')
+    expect(anchor?.isConnected).toBe(false)
+    clickSpy.mockRestore()
   })
 })

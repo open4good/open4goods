@@ -130,13 +130,19 @@ Each service has unique responsibilities and may have specific conventions beyon
 
 ### feedservice
 
-**Purpose**: RSS/Atom feed generation and management.
+**Purpose**: Loads affiliation feed definitions (Awin, Effinity, CJ, Kwanko,
+TradeTracker, Webgains) and indexes their CSV product feeds.
+
+**Security**: catalog and feed URLs carry API keys (Awin, Effinity). Never log
+them, nor put them in an exception message or a health detail: use
+`FeedIndexingWorker.loggableFeedUrl(url)`, `RemoteFileCachingService.loggableUrl(url)`
+or a provider/feed name; see the
+[module README](feedservice/README.md#secrets-in-feed-urls).
 
 **Key Responsibilities**:
-- Generate product feeds
-- Support multiple feed formats (RSS, Atom, JSON Feed)
-- Filter and customize feeds per vertical
-- Handle feed pagination
+- Load feed catalogs and datasource definitions per affiliation provider
+- Index CSV product feeds into data fragments
+- Expose programs, promotions, transactions and tracking links per provider
 
 ---
 
@@ -309,6 +315,11 @@ Each service has unique responsibilities and may have specific conventions beyon
 ### remotefilecaching
 
 **Purpose**: Remote file fetching and caching service.
+
+**Security**: cached files are named after the SHA-256 of their URL and URLs
+are logged as scheme, host and port only, because URLs can carry API keys. Never
+name a cache file, or log a URL, from the URL itself; see the
+[module README](remotefilecaching/README.md#cache-file-names).
 
 **Key Responsibilities**:
 - Fetch remote files (images, documents, etc.)

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.dto.PageMetaDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
@@ -30,6 +31,12 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestControllerAdvice
 public class PaginationLinkAdvice implements ResponseBodyAdvice<Object> {
 
+    private final ApiProperties apiProperties;
+
+    public PaginationLinkAdvice(ApiProperties apiProperties) {
+        this.apiProperties = apiProperties;
+    }
+
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
         return true;
@@ -40,17 +47,34 @@ public class PaginationLinkAdvice implements ResponseBodyAdvice<Object> {
             Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request,
             ServerHttpResponse response) {
         if (body instanceof ProductSearchResponseDto searchResponse) {
-            addPaginationHeaders(searchResponse.products().page(), request, response);
-            return body;
+            PageMetaDto meta = capToResultWindow(searchResponse.products().page());
+            addPaginationHeaders(meta, request, response);
+            if (meta.equals(searchResponse.products().page())) {
+                return body;
+            }
+            return new ProductSearchResponseDto(new PageDto<>(meta, searchResponse.products().data()),
+                    searchResponse.aggregations());
         }
 
         if (!(body instanceof Page<?> page)) {
             return body;
         }
 
-        PageMetaDto meta = new PageMetaDto(page.getNumber(), page.getSize(), page.getTotalElements(), page.getTotalPages());
+        PageMetaDto meta = capToResultWindow(
+                new PageMetaDto(page.getNumber(), page.getSize(), page.getTotalElements(), page.getTotalPages()));
         addPaginationHeaders(meta, request, response);
         return new PageDto<>(meta, page.getContent());
+    }
+
+    /**
+     * Never advertises pages beyond the Elasticsearch result window.
+     */
+    private PageMetaDto capToResultWindow(PageMetaDto meta) {
+        long reachable = apiProperties.maxReachablePages(meta.size());
+        if (meta.totalPages() <= reachable) {
+            return meta;
+        }
+        return new PageMetaDto(meta.number(), meta.size(), meta.totalElements(), reachable);
     }
 
     private void addPaginationHeaders(PageMetaDto meta, ServerHttpRequest request, ServerHttpResponse response) {

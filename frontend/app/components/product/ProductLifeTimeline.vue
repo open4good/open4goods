@@ -260,8 +260,15 @@ const sourceOverrideByType: Record<string, string> = {
   EPREL_IMPORTED: 'PRICE_HISTORY',
 }
 
+// Fixed time zone: SSR (UTC) and browser must group and label events on the
+// same day, month and year to hydrate.
+const TIMELINE_TIME_ZONE = 'UTC'
 const monthFormatter = computed(
-  () => new Intl.DateTimeFormat(locale.value, { month: 'long' })
+  () =>
+    new Intl.DateTimeFormat(locale.value, {
+      month: 'long',
+      timeZone: TIMELINE_TIME_ZONE,
+    })
 )
 const fullDateFormatter = computed(
   () =>
@@ -269,6 +276,7 @@ const fullDateFormatter = computed(
       day: 'numeric',
       month: 'long',
       year: 'numeric',
+      timeZone: TIMELINE_TIME_ZONE,
     })
 )
 const eventDescriptionKeys: Record<string, string> = {
@@ -354,8 +362,8 @@ const groupedEvents = computed<TimelineYearGroup[]>(() => {
               'product.attributes.timeline.sources.generic'
           )
         : null
-      const year = date.getFullYear()
-      const monthIndex = date.getMonth()
+      const year = date.getUTCFullYear()
+      const monthIndex = date.getUTCMonth()
       const monthKey = `${year}-${monthIndex}`
       const ariaLabel = t('product.attributes.timeline.tooltip.ariaLabel', {
         label,

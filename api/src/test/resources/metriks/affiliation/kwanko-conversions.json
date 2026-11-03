@@ -1,0 +1,12 @@
+{
+  "conversions": [
+    {"unique_conversion_id": "c-1", "state": "approved", "completed_at": "2026-10-21T10:00:00+00:00",
+     "campaign": {"id": 1, "currency": "EUR"}, "websites_per_language": [{"earnings": {"value": "6.00"}}]},
+    {"unique_conversion_id": "c-2", "state": "pending", "completed_at": "2026-10-16T09:00:00+00:00",
+     "campaign": {"id": 1, "currency": "EUR"}, "earnings": {"value": 1.4}},
+    {"unique_conversion_id": "c-3", "state": "rejected", "completed_at": "2026-10-19T09:00:00+00:00",
+     "campaign": {"id": 1, "currency": "EUR"}, "earnings": {"value": "5.0"}},
+    {"unique_conversion_id": "c-4", "state": "approved", "completed_at": "2026-10-21T23:30:00+00:00",
+     "campaign": {"id": 2}, "countervalue_currency": "EUR", "spending": {"countervalue": "2.5"}}
+  ]
+}

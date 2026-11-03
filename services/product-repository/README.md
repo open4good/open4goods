@@ -54,9 +54,19 @@ ProductRepository repo = new ProductRepository(config);
 // index a product
 repo.save(product);
 
-// export all indexed products as a stream
+// export all indexed products as a stream (complete products, 1000 per page)
 Stream<Product> all = repo.exportAll();
+
+// export only a few fields (projection): larger pages (5000) are safe
+Stream<Product> keys = repo.exportAll(new String[] {"gtinInfos"});
 ```
+
+## Export page sizes
+
+A complete product weighs about 21 KB on average in production, and the Elasticsearch client rejects
+responses above 100 MB (GOU-1134, GOU-1203). Reads of complete products therefore use pages of
+`ProductRepository.FULL_PRODUCT_PAGE_SIZE` (1000) at most; only exports with a source projection use 5000.
+A unit test fails if an export of complete products exceeds that constant.
 
 ## How to Build
 

@@ -5,7 +5,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.DigestOutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 import java.util.concurrent.Callable;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -34,10 +39,11 @@ public class ProductBackupThread implements Callable<ProductBackupThread.Product
     
     private BufferedWriter writer;
     private File tmpFile;
+    private MessageDigest digest;
     private long writtenProducts;
 
     public ProductBackupThread(LinkedBlockingQueue<Product> queue, SerialisationService serialisationService, int fileNumber,
-            AtomicBoolean producerDone, AtomicReference<Throwable> failure) throws Exception {
+            AtomicBoolean producerDone, AtomicReference<Throwable> failure, Path tmpFolder) throws Exception {
         this.queue = queue;
         this.serialisationService = serialisationService;
         this.fileNumber = fileNumber;
@@ -47,12 +53,15 @@ public class ProductBackupThread implements Callable<ProductBackupThread.Product
         logger.info("Starting product backup thread {}", fileNumber);
         try {
 
-            // Create temporary file for backup
-            tmpFile = File.createTempFile("product-backup-" + fileNumber, ".gz");
+            // Temporary file lives on the destination filesystem (not java.io.tmpdir) so the final move is an atomic rename
+            Files.createDirectories(tmpFolder);
+            tmpFile = Files.createTempFile(tmpFolder, "product-backup-" + fileNumber + "-", ".gz").toFile();
             
             // Streams and writers
+            // SHA-256 is computed on the compressed bytes while they are written, to avoid re-reading the file
+            digest = MessageDigest.getInstance("SHA-256");
             FileOutputStream fos = new FileOutputStream(tmpFile);
-            GZIPOutputStream gzipOutputStream = new GZIPOutputStream(fos);
+            GZIPOutputStream gzipOutputStream = new GZIPOutputStream(new DigestOutputStream(fos, digest));
             writer = new BufferedWriter(new OutputStreamWriter(gzipOutputStream, StandardCharsets.UTF_8));
             
         } catch (Exception e) {
@@ -118,7 +127,8 @@ public class ProductBackupThread implements Callable<ProductBackupThread.Product
         }
 
         logger.info("Backup temporary file successfully created: {}", tmpFile.getAbsolutePath());
-        return new ProductBackupFile(fileNumber, tmpFile.toPath(), writtenProducts);
+        // The writer chain is closed (gzip trailer flushed), so the digest now covers the whole file
+        return new ProductBackupFile(fileNumber, tmpFile.toPath(), writtenProducts, HexFormat.of().formatHex(digest.digest()));
     }
 
     /**
@@ -127,8 +137,9 @@ public class ProductBackupThread implements Callable<ProductBackupThread.Product
      * @param fileNumber the final backup file number
      * @param path the temporary file path
      * @param productCount number of products written by this worker
+     * @param sha256 lowercase hex SHA-256 of the compressed file content
      */
-    public record ProductBackupFile(int fileNumber, Path path, long productCount) {
+    public record ProductBackupFile(int fileNumber, Path path, long productCount, String sha256) {
     }
 
 }

@@ -21,9 +21,10 @@ public class ApiProperties {
     private Integer maxPageSize = 50;
 
     /**
-     * Enable semantic score diagnostics in global search responses.
+     * Elasticsearch {@code index.max_result_window}: deep pagination requires
+     * {@code (pageNumber + 1) * pageSize <= maxResultWindow}.
      */
-    private boolean semanticDiagnosticsEnabled;
+    private int maxResultWindow = 10_000;
 
     public String getResourceRootPath() {
         return resourceRootPath;
@@ -41,12 +42,33 @@ public class ApiProperties {
         this.maxPageSize = maxPageSize;
     }
 
-    public boolean isSemanticDiagnosticsEnabled() {
-        return semanticDiagnosticsEnabled;
+    public int getMaxResultWindow() {
+        return maxResultWindow;
     }
 
-    public void setSemanticDiagnosticsEnabled(boolean semanticDiagnosticsEnabled) {
-        this.semanticDiagnosticsEnabled = semanticDiagnosticsEnabled;
+    public void setMaxResultWindow(int maxResultWindow) {
+        this.maxResultWindow = maxResultWindow;
+    }
+
+    /**
+     * Tells whether a page lies inside the Elasticsearch result window.
+     *
+     * @param pageNumber zero-based page index
+     * @param pageSize   page size
+     * @return {@code true} when {@code (pageNumber + 1) * pageSize <= maxResultWindow}
+     */
+    public boolean isWithinResultWindow(long pageNumber, long pageSize) {
+        return pageNumber >= 0 && pageSize >= 0 && (pageNumber + 1) * pageSize <= maxResultWindow;
+    }
+
+    /**
+     * Number of pages reachable for a page size without leaving the result window.
+     *
+     * @param pageSize page size
+     * @return reachable page count, {@code Long.MAX_VALUE} when the size is not positive
+     */
+    public long maxReachablePages(long pageSize) {
+        return pageSize <= 0 ? Long.MAX_VALUE : maxResultWindow / pageSize;
     }
 
 }

@@ -30,10 +30,6 @@ public class IdHelper {
 
 	private static final Pattern DIACRITICS_PATTERN = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
 
-	private static final int TARGET_DIMS = 512;
-
-
-
 	/***
 	 * The key used for simple encryptions. Mabe a need one day to handle it from
 	 * conf
@@ -318,26 +314,6 @@ public class IdHelper {
 
 	public static String brandName(String name) {
 		return (StringUtils.normalizeSpace(stripAccents(name))).toUpperCase();
-	}
-
-
-
-
-	public static float[] to512(float[] embedding) {
-	    if (embedding.length > TARGET_DIMS) {
-	        throw new IllegalArgumentException(
-	            "Embedding has more than 512 dims: " + embedding.length
-	        );
-	    }
-
-	    if (embedding.length == TARGET_DIMS) {
-	        return embedding;
-	    }
-
-	    float[] padded = new float[TARGET_DIMS];
-	    System.arraycopy(embedding, 0, padded, 0, embedding.length);
-	    // remaining values default to 0.0f
-	    return padded;
 	}
 
 	/**

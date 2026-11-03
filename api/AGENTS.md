@@ -39,3 +39,79 @@ From the repository root you can also execute:
 ```bash
 mvn --offline -pl api -am clean install
 ```
+
+## Sécurité et accès
+
+`config/WebSecurityConfig` (GOU-1393) : api.nudger.fr est "pur SSO Google" pour les personnes.
+
+- Machines : clé API brute dans l'en-tête ou le paramètre `Authorization`, comparée en temps constant
+  (`admin-key` → `ROLE_USER` + `XWIKIADMINGROUP`, `test-keys` → `ROLE_USER` + `ROLE_TESTER`). La clé Metriks
+  (`metriks-key`, secret `API_METRIKS_KEY`, GOU-1412) → `ROLE_METRIKS` seul, et seulement sur un chemin
+  `/api/metriks/<segment>` (hors context path, segments littéraux) : ailleurs elle n'authentifie rien (401).
+  `MetriksController` accepte `XWIKIADMINGROUP` ou `ROLE_METRIKS`. Sans `metriks-key`, aucune clé Metriks.
+- Personnes : `oauth2Login` Google, câblé seulement si la registration `google` existe
+  (`spring.security.oauth2.client.registration.google.*`, rendue depuis `GOOGLE_SSO_CLIENT_ID/SECRET`). E-mail
+  vérifié et présent dans `api.security.google-sso.role-allowlist` (`ApiOidcUserService`), sinon 403. Pas de
+  formulaire, pas de page `/login`, pas d'utilisateur `user` généré.
+- HTTP Basic : uniquement sur `/actuator/**` (chaîne dédiée), pour l'identité moniteur Spring Boot Admin
+  `o4g.actuator.monitor.*` (`ActuatorMonitorAuthenticationProvider`, même classe que ui et front-api).
+- Anonyme : navigation navigateur (`Accept: text/html`) → redirection vers `/oauth2/authorization/google` ; tout
+  autre appel → 401 sans `WWW-Authenticate` (pas de popup, pas de session).
+
+Preuve : `ApiGoogleSsoAccessTest` (contexte complet servi par Tomcat, y compris `redirect_uri` derrière
+`X-Forwarded-Proto`/`X-Forwarded-Host` avec `forward-headers-strategy: NATIVE`). Doc :
+[Google SSO OAuth clients](../docs/operations/google-sso-oauth-clients.md#role-allowlist-api).
+
+## Sauvegarde produits
+
+`BackupService.backupProducts()` écrit `products-backup-{N}.gz` dans `api.backup.data-backup-folder`, puis
+`products-backup-manifest.json` (champ optionnel `sha256` : nom → empreinte) et enfin `products-backup.sha256` au
+format `sha256sum` (`<hex>  <fichier>`, écrit atomiquement, en dernier, en `rw-r--r--` comme les `.gz` et le manifest pour rester lisible par le compte de tirage `backup-pull` : sa présence signale une génération complète).
+Les empreintes sont calculées pendant l'écriture (`DigestOutputStream`), jamais en relisant les fichiers. Vérification :
+`cd <dossier> && sha256sum -c products-backup.sha256`. Le health check signale `product_backup_checksum_missing` si le
+manifest déclare des empreintes mais que le `.sha256` manque ; il ne recalcule rien.
+
+Déclenchement : `checkProductsBackup()` (`@Scheduled`, `api.backup.products-backup-check-initial-delay` défaut `PT15M`,
+`api.backup.products-backup-check-interval` défaut `PT1H`) lance `backupProducts()` si aucun export ne tourne et si
+`products-backup-manifest.json` est absent, illisible ou plus ancien que `api.backup.products-backup-interval-hours`
+(défaut 168). Un redémarrage de l'api ne repousse donc plus la sauvegarde. La décision est loguée en `info`.
+`POST /backup/products/export` force toujours la sauvegarde. Le profil local ne lance rien (stub `LocalDevConfig`).
+À la première vérification, si aucun export ne tourne, `.tmp/` est vidé (volume libéré logué) ; les fichiers publiés,
+le manifest et le `.sha256` ne sont jamais touchés. Pas de reprise d'une sauvegarde interrompue.
+
+## Nettoyage des ressources orphelines
+
+`POST /batch/clean-resources?mode=DRY_RUN|MOVE|DELETE` répond `202` immédiatement et exécute le balayage en tâche de
+fond (un seul à la fois ; un second appel pendant un run renvoie l'état courant). `GET /batch/clean-resources` donne
+l'état (`IDLE`, `RUNNING`, `COMPLETED` avec le rapport, `FAILED`). Les clés actives sont stockées par empreinte 64 bits
+dans un `long[]` trié (`ActiveKeySet`, ~8 o/clé) : une collision ne peut que conserver un fichier, jamais classer un
+fichier référencé comme orphelin. Si le tas ne suffit pas, le run s'abandonne (`aborted`, aucun fichier touché).
+
+## Purge d'une datasource retirée
+
+`POST /batch/purge-datasource?datasource=<nom>&dryRun=true|false` (GOU-1592, `DatasourcePurgeService`) retire de
+l'index produit toutes les données d'une datasource : offres `price.offers` dont `datasourceName` vaut `<nom>`,
+puis `Product.removeDatasourceData` (clé de `datasourceCodes`, alias de marque, catégorie, description, sources
+d'attributs ; une catégorie encore portée par une autre datasource reste). Meilleure offre (`price.minPrice`),
+`offersCount` et `price.conditions` sont recalculés sur les offres restantes, sans filtre de fraîcheur : les offres
+des autres datasources ne sont jamais retirées. Historique et tendances de prix ne sont pas touchés.
+
+- `<nom>` est le `name` du YAML de la datasource (valeur exacte de `datasourceName` et des clés de
+  `datasourceCodes`), pas le nom du fichier : `rakuten.com` pour `rakuten.com-csv.yml`. `Rakuten FR` est une autre
+  datasource.
+- `dryRun=true` par défaut : compte produits et offres touchés, donne jusqu'à 20 GTIN d'exemple, n'écrit rien.
+- Parcours complet par scroll (pages de `FULL_PRODUCT_PAGE_SIZE`, produits complets, embeddings compris), écriture
+  par bulks de 200, progression loguée tous les 50 000 produits. Un produit sans donnée de la datasource n'est
+  jamais réécrit : un second passage ne touche rien. À lancer hors de la fenêtre du batch nocturne.
+- Asynchrone (un seul run à la fois) : réponse `202` ; `GET /batch/purge-datasource` donne l'état (`IDLE`,
+  `RUNNING`, `COMPLETED` avec le rapport `scannedProducts`, `touchedProducts`, `removedOffers`, `savedProducts`,
+  `failedProducts`, `sampleGtins`, ou `FAILED`).
+
+Appel Ops (clé `admin-key`, secret `O4G_INTERNAL_API_KEY`, brute dans l'en-tête `Authorization`), dry run, état, puis
+run réel une fois le rapport du dry run vérifié :
+
+```bash
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/purge-datasource?datasource=rakuten.com"
+curl -H "Authorization: $O4G_INTERNAL_API_KEY" https://api.nudger.fr/batch/purge-datasource
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/purge-datasource?datasource=rakuten.com&dryRun=false"
+```

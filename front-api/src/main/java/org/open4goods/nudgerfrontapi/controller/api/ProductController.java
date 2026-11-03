@@ -16,6 +16,7 @@ import org.open4goods.model.vertical.AggregationConfiguration;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
+import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.product.FieldMetadataDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
@@ -97,6 +98,7 @@ public class ProductController {
     private final ProductMappingService service;
     private final VerticalsConfigService verticalsConfigService;
     private final SearchService searchService;
+    private final ApiProperties apiProperties;
 
     private static final String VALUE_TYPE_NUMERIC = "numeric";
     private static final String VALUE_TYPE_TEXT = "text";
@@ -113,10 +115,13 @@ public class ProductController {
      * @param service product mapping service
      * @param verticalsConfigService vertical configuration service
      * @param searchService search service
+     * @param apiProperties front API settings (Elasticsearch result window)
      */
     public ProductController(ProductMappingService service,
                              VerticalsConfigService verticalsConfigService,
-                             SearchService searchService) {
+                             SearchService searchService,
+                             ApiProperties apiProperties) {
+        this.apiProperties = apiProperties;
         this.service = service;
         this.verticalsConfigService = verticalsConfigService;
         this.searchService = searchService;
@@ -293,8 +298,8 @@ public class ProductController {
                             description = "Zero-based page index",
                             schema = @Schema(type = "integer", minimum = "0")),
                     @Parameter(name = "pageSize", in = ParameterIn.QUERY,
-                            description = "Page size",
-                            schema = @Schema(type = "integer", minimum = "0")),
+                            description = "Page size, capped server-side to 100. (pageNumber + 1) * pageSize must not exceed 10000 (400 otherwise).",
+                            schema = @Schema(type = "integer", minimum = "0", maximum = "100")),
                     @Parameter(name = "verticalId", in = ParameterIn.QUERY,
                             description = "Optional vertical identifier used to scope the search.",
                             schema = @Schema(type = "string")),
@@ -319,12 +324,15 @@ public class ProductController {
                                             schema = @Schema(type = "string", example = "fr-FR"))
                             },
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProductSearchResponseDto.class))),
-                    @ApiResponse(responseCode = "400", description = "Invalid request parameters",
+                    @ApiResponse(responseCode = "400", description = "Invalid request parameters, or page outside the result window ((pageNumber + 1) * pageSize > 10000)",
                             content = @Content(mediaType = "application/problem+json",
                                     schema = @Schema(implementation = ProblemDetail.class))),
                     @ApiResponse(responseCode = "401", description = "Authentication required"),
                     @ApiResponse(responseCode = "403", description = "Access forbidden"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
+                    @ApiResponse(responseCode = "500", description = "Internal server error"),
+                    @ApiResponse(responseCode = "503", description = "Search response too large for the backend buffer, reduce page size or aggregations",
+                            content = @Content(mediaType = "application/problem+json",
+                                    schema = @Schema(implementation = ProblemDetail.class)))
             }
     )
     public ResponseEntity<ProductSearchResponseDto> products(
@@ -339,6 +347,11 @@ public class ProductController {
         LOGGER.info(
                 "Entering products(page={}, include={}, verticalId={}, query={}, domainLanguage={}, locale={}, hasSearchPayload={})",
                 page, include, verticalId, query, domainLanguage, locale, searchPayload != null);
+
+        ResponseEntity<?> windowError = checkResultWindow(page.getPageNumber(), page.getPageSize());
+        if (windowError != null) {
+            return castError(windowError);
+        }
 
         String normalizedVerticalId = StringUtils.hasText(verticalId) ? verticalId.trim() : null;
 
@@ -355,7 +368,7 @@ public class ProductController {
         SearchService.SearchCapabilities capabilities = searchService.buildSearchCapabilities(normalizedVerticalId, domainLanguage, List.of());
         Set<String> allowedSortMappings = capabilities.allowedSorts();
 
-        // TODO : HEre we add a big micmac. We used the logic of duplicated search (verticals and global)
+        // Preserve the legacy query-parameter and JSON sort inputs during the hotfix.
         Pageable effectivePageable = page;
         SortRequestDto sortDto = searchPayload == null ? null : searchPayload.sort();
         Validation<Pageable> sortValidation = sanitizeSort(page, sortDto, allowedSortMappings);
@@ -394,18 +407,16 @@ public class ProductController {
         filterDto = filterValidation.value();
 
         String normalizedQuery = StringUtils.hasText(query) ? query.trim() : null;
-        boolean semanticSearch = StringUtils.hasText(normalizedQuery);
         Set<String> requestedComponents = include == null ? Set.of() : include;
-        String searchType = searchPayload == null ? null : searchPayload.searchType();
 
         ProductSearchResponseDto body = searchService.searchProducts(effectivePageable, locale, requestedComponents, aggDto,
-                domainLanguage, normalizedVerticalId, normalizedQuery, filterDto, semanticSearch, searchType);
+                domainLanguage, normalizedVerticalId, normalizedQuery, filterDto);
 
         return ResponseEntity.ok().cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE).body(body);
     }
 
     /**
-     * Execute a semantic-only global search with optional filters and sort rules.
+     * Execute a lexical global search with optional filters and sort rules.
      *
      * <p>Error codes:</p>
      * <ul>
@@ -417,7 +428,7 @@ public class ProductController {
     @PostMapping("/search")
     @Operation(
             summary = "Execute a global search",
-            description = "Runs an embeddings-only search strategy with optional filters and sorting.",
+            description = "Runs a lexical Elasticsearch search with optional filters and sorting.",
             security = @SecurityRequirement(name = "bearer-jwt"),
             parameters = {
                     @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
@@ -438,7 +449,7 @@ public class ProductController {
                             },
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = GlobalSearchResponseDto.class))),
-                    @ApiResponse(responseCode = "400", description = "Invalid request parameters",
+                    @ApiResponse(responseCode = "400", description = "Invalid request parameters, or missing-vertical page outside the result window ((pageNumber + 1) * pageSize > 10000)",
                             content = @Content(mediaType = "application/problem+json",
                                     schema = @Schema(implementation = ProblemDetail.class))),
                     @ApiResponse(responseCode = "401", description = "Authentication required"),
@@ -453,7 +464,6 @@ public class ProductController {
         String query = request != null ? request.query() : null;
         FilterRequestDto filterDto = request != null ? request.filters() : null;
         SortRequestDto sortDto = request != null ? request.sort() : null;
-        String searchType = request != null ? request.searchType() : null;
 
         Validation<FilterRequestDto> filterValidation = sanitizeFilters(filterDto);
         if (filterValidation.hasError()) {
@@ -476,10 +486,14 @@ public class ProductController {
         int pageNumber = request != null && request.pageNumber() != null ? request.pageNumber() : 0;
         int pageSize = request != null && request.pageSize() != null ? request.pageSize() : 20;
         pageSize = Math.max(1, Math.min(pageSize, 100)); // Clamp between 1 and 100
+        ResponseEntity<?> windowError = checkResultWindow(pageNumber, pageSize);
+        if (windowError != null) {
+            return castError(windowError);
+        }
         Pageable missingVerticalPageable = PageRequest.of(pageNumber, pageSize);
 
         SearchService.GlobalSearchResult result = searchService.globalSearch(query, domainLanguage, filterDto,
-                sortValidation.value().getSort(), searchType, missingVerticalPageable);
+                sortValidation.value().getSort(), missingVerticalPageable);
 
         List<GlobalSearchVerticalGroupDto> groups = result.verticalGroups().stream()
                 .map(group -> new GlobalSearchVerticalGroupDto(
@@ -498,13 +512,13 @@ public class ProductController {
                 result.missingVerticalPageNumber(),
                 result.missingVerticalPageSize(),
                 result.missingVerticalTotalElements(),
-                result.missingVerticalTotalPages());
+                (int) Math.min(result.missingVerticalTotalPages(),
+                        apiProperties.maxReachablePages(result.missingVerticalPageSize())));
 
         GlobalSearchResponseDto body = new GlobalSearchResponseDto(groups,
                 missingVerticalResults,
                 pageMetaDto,
-                toCategoryDto(result.verticalCta()),
-                result.diagnostics());
+                toCategoryDto(result.verticalCta()));
         return ResponseEntity.ok()
                 .cacheControl(CacheControlConstants.FIVE_MINUTES_PUBLIC_CACHE)
                 .header("X-Locale", domainLanguage.languageTag())
@@ -566,6 +580,21 @@ public class ProductController {
         }
         return new SearchSuggestCategoryDto(suggestion.verticalId(), suggestion.imageSmall(),
                 suggestion.verticalHomeTitle(), suggestion.verticalHomeUrl());
+    }
+
+    /**
+     * Rejects pages outside the Elasticsearch result window before any search is issued.
+     *
+     * @return a 400 response, or {@code null} when the page is reachable
+     */
+    private ResponseEntity<?> checkResultWindow(int pageNumber, int pageSize) {
+        if (apiProperties.isWithinResultWindow(pageNumber, pageSize)) {
+            return null;
+        }
+        LOGGER.warn("Page outside the result window rejected: pageNumber={}, pageSize={}, maxResultWindow={}",
+                pageNumber, pageSize, apiProperties.getMaxResultWindow());
+        return badRequest("Page out of range", "pageNumber and pageSize must satisfy (pageNumber + 1) * pageSize <= "
+                + apiProperties.getMaxResultWindow());
     }
 
     private ResponseEntity<?> badRequest(String title, String detail) {

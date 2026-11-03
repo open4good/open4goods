@@ -17,6 +17,12 @@
       <p class="product-hero__pricing-empty-title">
         {{ t('product.hero.noOffersUnified') }}
       </p>
+      <ProductAmazonSearchLink
+        v-if="amazonSearchLink"
+        :link="amazonSearchLink"
+        :gtin="productGtin"
+        placement="product-hero-amazon-search"
+      />
     </div>
 
     <v-tabs
@@ -132,6 +138,7 @@ import { useProductPriceTrend } from '~/composables/useProductPriceTrend'
 import { resolveOfferHref } from '~/utils/_product-pricing'
 import type { ProductDto } from '~~/shared/api-client'
 import ProductHeroPricingPanel from '~/components/product/ProductHeroPricingPanel.vue'
+import ProductAmazonSearchLink from '~/components/product/ProductAmazonSearchLink.vue'
 
 type OfferCondition = 'occasion' | 'new'
 
@@ -283,6 +290,10 @@ const isSingleOffer = computed(() => offersCount.value === 1)
 
 const productGtin = computed(
   () => props.product.gtin ?? props.product.base?.gtin
+)
+// Amazon search link (GOU-1396): only in the empty state, never an offer.
+const amazonSearchLink = computed(
+  () => props.product.offers?.amazonSearchLink ?? null
 )
 const productVertical = computed(() => props.product.base?.vertical ?? null)
 const productCategorySlug = computed(() => {

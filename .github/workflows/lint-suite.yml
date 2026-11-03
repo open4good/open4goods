@@ -41,3 +41,9 @@ jobs:
 
       - name: Run lint suite
         run: ./scripts/lint.sh
+
+      - name: Deploy script tests
+        run: |
+          scripts/tests/push-remote-file.test.sh
+          scripts/tests/infra-secrets.test.sh
+          python3 -m unittest scripts/tests/sample_sitemap_urls_test.py

@@ -42,6 +42,11 @@ EXCLUDED_FILES = {
     Path("frontend/config/lint-forbidden.json"),
 }
 
+# Generated content committed by CI (release notes built from PR titles).
+EXCLUDED_PATHS = {
+    Path("frontend/app/public/reports"),
+}
+
 TEXT_SUFFIXES = {".json", ".md"}
 
 
@@ -61,6 +66,7 @@ def iter_files(root: Path) -> list[Path]:
         and path.suffix.lower() in TEXT_SUFFIXES
         and not is_excluded(path.relative_to(root))
         and path.relative_to(root) not in EXCLUDED_FILES
+        and not any(path.relative_to(root).is_relative_to(prefix) for prefix in EXCLUDED_PATHS)
     )
 
 

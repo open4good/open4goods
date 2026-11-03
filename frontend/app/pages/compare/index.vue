@@ -1111,7 +1111,11 @@ const router = useRouter()
 const route = useRoute()
 // const heroId = useId()
 
-const canonicalUrl = useCanonicalUrl()
+// Path only: the compared GTINs live in the query and must not mint one
+// canonical per comparison.
+const canonicalUrl = useCanonicalUrl(() =>
+  resolveLocalizedRoutePath('compare', locale.value)
+)
 
 useHead(() => ({
   link: canonicalUrl.value

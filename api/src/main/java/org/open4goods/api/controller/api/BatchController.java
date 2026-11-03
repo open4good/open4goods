@@ -4,13 +4,16 @@ import java.io.IOException;
 
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.BatchService;
+import org.open4goods.api.services.DatasourcePurgeService;
+import org.open4goods.api.services.DatasourcePurgeStatus;
 import org.open4goods.api.services.ResourceCleanupMode;
-import org.open4goods.api.services.ResourceCleanupReport;
+import org.open4goods.api.services.ResourceCleanupStatus;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.services.prompt.dto.openai.BatchJobResponse;
 import org.open4goods.services.prompt.service.BatchPromptService;
 import org.open4goods.verticals.VerticalsConfigService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,15 +43,18 @@ public class BatchController {
     private final AggregationFacadeService aggregationFacadeService;
     private final BatchService batchService;
     private final BatchPromptService batchPromptService;
+    private final DatasourcePurgeService datasourcePurgeService;
 
     public BatchController(BatchService batchService,
                            AggregationFacadeService aggregationFacadeService,
                            VerticalsConfigService verticalsConfigService,
-                           BatchPromptService batchPromptService) {
+                           BatchPromptService batchPromptService,
+                           DatasourcePurgeService datasourcePurgeService) {
         this.verticalConfigService = verticalsConfigService;
         this.aggregationFacadeService = aggregationFacadeService;
         this.batchService = batchService;
         this.batchPromptService = batchPromptService;
+        this.datasourcePurgeService = datasourcePurgeService;
     }
 
     @PostMapping("/batch/tweak")
@@ -71,11 +77,21 @@ public class BatchController {
                     + "(favicons, remote files, geocode, batch-ia, Icecat) are never considered. "
                     + "The run aborts without touching a single file if the product stream comes back short of the "
                     + "configured safety floor. Defaults to DRY_RUN, which only reports: run it in that mode first and "
-                    + "check the returned counters before switching to MOVE or DELETE.")
-    @ApiResponse(responseCode = "200", description = "Orphaned resource cleanup completed")
-    public ResourceCleanupReport cleanOrphanResources(
+                    + "check the report (GET /batch/clean-resources) before switching to MOVE or DELETE. The run is asynchronous: this call answers 202 immediately.")
+    @ApiResponse(responseCode = "202", description = "Cleanup started in the background (or already running: current status returned)")
+    public ResponseEntity<ResourceCleanupStatus> cleanOrphanResources(
             @RequestParam(defaultValue = "DRY_RUN") ResourceCleanupMode mode) {
-        return batchService.cleanOrphanResources(mode);
+        return ResponseEntity.accepted().body(batchService.startCleanOrphanResources(mode));
+    }
+
+    @GetMapping("/batch/clean-resources")
+    @Operation(
+            summary = "Status and report of the resource garbage collection",
+            description = "Returns IDLE, RUNNING, COMPLETED (with the report) or FAILED for the current or last "
+                    + "clean-resources run. The run itself executes in the background.")
+    @ApiResponse(responseCode = "200", description = "Current status")
+    public ResourceCleanupStatus cleanOrphanResourcesStatus() {
+        return batchService.getCleanupStatus();
     }
 
     @PostMapping("/batch/purge-resources-deletion-folder")
@@ -87,6 +103,41 @@ public class BatchController {
     @ApiResponse(responseCode = "200", description = "Deletion folder purged, returns the number of bytes reclaimed")
     public long purgeResourcesDeletionFolder() {
         return batchService.purgeDeletionFolder();
+    }
+
+    @PostMapping("/batch/purge-datasource")
+    @Operation(
+            summary = "Purge the data of a retired datasource from the product index",
+            description = "Scans the whole product index by pages and removes, from every product holding data of the "
+                    + "datasource, its offers (price.offers), datasource code, brand alias, categories, description and "
+                    + "attribute sources, then recomputes the best offer, the offers count and the offer conditions from "
+                    + "the remaining offers. Data of other datasources is never removed, and a product without data of "
+                    + "the datasource is never written, so a second run touches nothing. Defaults to dryRun=true, which "
+                    + "only counts the products and offers concerned and returns example GTINs: run it first and check "
+                    + "the report (GET /batch/purge-datasource) before running with dryRun=false. The run is "
+                    + "asynchronous: this call answers 202 immediately.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "202", description = "Purge started in the background (or already running: current status returned)"),
+            @ApiResponse(responseCode = "400", description = "Missing or blank datasource")
+    })
+    public ResponseEntity<DatasourcePurgeStatus> purgeDatasource(
+            @Parameter(description = "Exact datasource name, as stored in price.offers[].datasourceName and in the "
+                    + "datasourceCodes keys (the 'name' of the datasource YAML, e.g. 'rakuten.com'), not the YAML file name",
+                    required = true)
+            @RequestParam @NotBlank final String datasource,
+            @Parameter(description = "When true (default), nothing is written")
+            @RequestParam(defaultValue = "true") final boolean dryRun) {
+        return ResponseEntity.accepted().body(datasourcePurgeService.start(datasource, dryRun));
+    }
+
+    @GetMapping("/batch/purge-datasource")
+    @Operation(
+            summary = "Status and report of the datasource purge",
+            description = "Returns IDLE, RUNNING, COMPLETED (with the report: scanned, touched and saved products, "
+                    + "removed offers, example GTINs) or FAILED for the current or last purge-datasource run.")
+    @ApiResponse(responseCode = "200", description = "Current status")
+    public DatasourcePurgeStatus purgeDatasourceStatus() {
+        return datasourcePurgeService.getStatus();
     }
 
     @PostMapping("/batch")

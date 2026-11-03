@@ -1,22 +1,42 @@
 package org.open4goods.services.feedservice.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockito.ArgumentCaptor;
 import org.open4goods.commons.config.yml.datasource.CsvDataSourceProperties;
+import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.commons.services.DataSourceConfigService;
+import org.open4goods.model.affiliation.AffiliationProgram;
 import org.open4goods.model.affiliation.AffiliationPromotion;
 import org.open4goods.model.affiliation.AffiliationTransaction;
 import org.open4goods.services.feedservice.config.FeedConfiguration;
+import org.open4goods.services.remotefilecaching.config.CacheResourceConfig;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.services.serialisation.service.SerialisationService;
+import org.slf4j.LoggerFactory;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.IThrowableProxy;
+import ch.qos.logback.core.read.ListAppender;
 import tools.jackson.databind.ObjectMapper;
 
 /**
@@ -24,7 +44,83 @@ import tools.jackson.databind.ObjectMapper;
  */
 class AwinFeedServiceTest
 {
+    private static final String SECRET = "secret-key";
+
+    private static final String CATALOG_URL = "https://productdata.awin.com/datafeed/list/apikey/" + SECRET;
+
+    private static final String FEED_URL = "https://productdata.awin.com/datafeed/download/apikey/" + SECRET
+            + "/fid/42/format/csv";
+
+    private static final String CATALOG_HEADER = "Advertiser ID,Advertiser Name,Membership Status,URL\n";
+
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @TempDir
+    Path tempDir;
+
+    /**
+     * Loading a catalog whose URL, feed URLs and API endpoint carry the Awin key never writes the key in logs, while
+     * the datasource keeps its real feed URL.
+     */
+    @Test
+    void loadingTheCatalogNeverLogsTheApiKey() throws Exception
+    {
+        RemoteFileCachingService cacheService = catalogService(CATALOG_HEADER
+                + "42,Shop,Active," + FEED_URL + "\n"
+                + "43,,Active," + FEED_URL + "\n");
+        AwinFeedService service = buildOfflineService(cacheService);
+
+        ListAppender<ILoggingEvent> appender = captureLogs();
+        Set<DataSourceProperties> datasources;
+        try
+        {
+            datasources = service.getDatasources();
+        }
+        finally
+        {
+            releaseLogs(appender);
+        }
+
+        assertThat(datasources).singleElement()
+                .satisfies(ds -> assertThat(ds.getCsvDatasource().getDatasourceUrls()).containsExactly(FEED_URL));
+        assertThat(appender.list).anySatisfy(event -> assertThat(event.getFormattedMessage())
+                .startsWith("Loading datasource properties for provider Awin from catalog: https://productdata.awin.com/"));
+        assertThat(appender.list).anySatisfy(event -> assertThat(event.getFormattedMessage())
+                .startsWith("Skipping Awin catalog line of advertiser '43'"));
+        assertThat(appender.list).anySatisfy(event -> assertThat(event.getFormattedMessage())
+                .startsWith("Retrieving Awin merchant metadata"));
+        assertThat(appender.list).anySatisfy(event -> assertThat(event.getFormattedMessage())
+                .startsWith("Volatile datasource for key 'Shop'"));
+        assertNoSecretLogged(appender);
+
+        ArgumentCaptor<CacheResourceConfig> catalog = ArgumentCaptor.forClass(CacheResourceConfig.class);
+        verify(cacheService).retrieve(catalog.capture());
+        assertThat(catalog.getValue().getUrl()).isEqualTo(CATALOG_URL);
+        assertThat(catalog.getValue().getLogLabel()).isEqualTo("Awin catalog");
+    }
+
+    /**
+     * An empty catalog is reported without its URL.
+     */
+    @Test
+    void emptyCatalogWarningNeverLogsTheApiKey() throws Exception
+    {
+        AwinFeedService service = buildOfflineService(catalogService(CATALOG_HEADER + "43,,Active," + FEED_URL + "\n"));
+
+        ListAppender<ILoggingEvent> appender = captureLogs();
+        try
+        {
+            assertThat(service.getDatasources()).isEmpty();
+        }
+        finally
+        {
+            releaseLogs(appender);
+        }
+
+        assertThat(appender.list).anySatisfy(event -> assertThat(event.getFormattedMessage())
+                .startsWith("Datasource cache is empty after loading from catalog for provider Awin"));
+        assertNoSecretLogged(appender);
+    }
 
     @Test
     void parseAwinPromotionsShouldReturnMappedPromotions() throws Exception
@@ -104,16 +200,90 @@ class AwinFeedServiceTest
 
     private AwinFeedService buildService()
     {
+        return new AwinFeedService(feedConfiguration(), mock(RemoteFileCachingService.class), dataSourceConfigService(),
+                new SerialisationService(), "123456", SECRET);
+    }
+
+    /**
+     * Returns a service whose program and promotion loads, which call the Awin API, are disabled.
+     */
+    private AwinFeedService buildOfflineService(RemoteFileCachingService cacheService)
+    {
+        return new AwinFeedService(feedConfiguration(), cacheService, dataSourceConfigService(),
+                new SerialisationService(), "123456", SECRET)
+        {
+            @Override
+            protected Collection<AffiliationProgram> loadProgramsInternal()
+            {
+                return List.of();
+            }
+
+            @Override
+            protected Collection<AffiliationPromotion> loadPromotionsInternal()
+            {
+                return List.of();
+            }
+        };
+    }
+
+    private static FeedConfiguration feedConfiguration()
+    {
         FeedConfiguration config = new FeedConfiguration();
         config.setDefaultCsvProperties(new CsvDataSourceProperties());
+        config.setCatalogUrl(CATALOG_URL);
+        config.setDatasourceKeyAttribute("Advertiser Name");
+        config.setDatasourceUrlAttribute("URL");
+        return config;
+    }
+
+    private static DataSourceConfigService dataSourceConfigService()
+    {
         DataSourceConfigService dataSourceConfigService = mock(DataSourceConfigService.class);
         when(dataSourceConfigService.datasourceConfigs()).thenReturn(Map.of());
-        return new AwinFeedService(
-                config,
-                mock(RemoteFileCachingService.class),
-                dataSourceConfigService,
-                new SerialisationService(),
-                "123456",
-                "token");
+        return dataSourceConfigService;
+    }
+
+    /**
+     * Returns a cache service serving {@code catalog} as the Awin catalog and one joined merchant as the programmes.
+     */
+    private RemoteFileCachingService catalogService(String catalog) throws Exception
+    {
+        Path catalogFile = Files.writeString(tempDir.resolve("catalog.csv"), catalog, StandardCharsets.UTF_8);
+        Path merchantsFile = Files.writeString(tempDir.resolve("merchants.json"), "[{\"id\":42,\"name\":\"Shop\",\"displayUrl\":\"https://www.shop.example\"}]",
+                StandardCharsets.UTF_8);
+        RemoteFileCachingService cacheService = mock(RemoteFileCachingService.class);
+        when(cacheService.retrieve(any(CacheResourceConfig.class))).thenReturn(catalogFile.toFile());
+        when(cacheService.getResource(anyString(), anyInt())).thenReturn(merchantsFile.toFile());
+        return cacheService;
+    }
+
+    private static ListAppender<ILoggingEvent> captureLogs()
+    {
+        // AbstractFeedService logs under the runtime class name, AwinFeedService under its own
+        Logger logger = (Logger) LoggerFactory.getLogger(AwinFeedService.class.getPackageName());
+        logger.setLevel(Level.DEBUG);
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        return appender;
+    }
+
+    private static void releaseLogs(ListAppender<ILoggingEvent> appender)
+    {
+        Logger logger = (Logger) LoggerFactory.getLogger(AwinFeedService.class.getPackageName());
+        logger.detachAppender(appender);
+        logger.setLevel(null);
+    }
+
+    private static void assertNoSecretLogged(ListAppender<ILoggingEvent> appender)
+    {
+        assertThat(appender.list).isNotEmpty();
+        assertThat(appender.list).allSatisfy(event -> {
+            assertThat(event.getFormattedMessage()).doesNotContain(SECRET);
+            for (IThrowableProxy proxy = event.getThrowableProxy(); proxy != null; proxy = proxy.getCause())
+            {
+                assertThat(String.valueOf(proxy.getMessage())).doesNotContain(SECRET);
+            }
+        });
     }
 }

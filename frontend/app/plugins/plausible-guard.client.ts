@@ -1,5 +1,6 @@
 import { defineNuxtPlugin, useRuntimeConfig } from '#imports'
 import { isDoNotTrackEnabled } from '~/utils/do-not-track'
+import { isLocalReferrer } from '~/utils/local-referrer'
 
 export default defineNuxtPlugin({
   name: 'plausible-privacy-guard',
@@ -21,7 +22,11 @@ export default defineNuxtPlugin({
       ])
     )
 
-    if (isDoNotTrackEnabled()) {
+    if (
+      isDoNotTrackEnabled() ||
+      window.location.pathname.startsWith('/contrib/') ||
+      isLocalReferrer(document.referrer)
+    ) {
       plausibleConfig.enabled = false
     }
 

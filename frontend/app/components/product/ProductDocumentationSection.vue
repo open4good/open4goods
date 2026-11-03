@@ -499,8 +499,10 @@ const formatDate = (pdf: ProductPdfDto) => {
   }
 
   try {
+    // Fixed time zone: SSR (UTC) and browser must render the same day to hydrate.
     return new Intl.DateTimeFormat(locale.value, {
       dateStyle: 'medium',
+      timeZone: 'UTC',
     }).format(new Date(timestamp))
   } catch {
     return null

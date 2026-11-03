@@ -6,7 +6,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.time.Instant;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.Iterator;
@@ -18,6 +22,7 @@ import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.services.feedservice.service.FeedIndexingService;
+import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -117,10 +122,69 @@ public class BatchService {
 	private static final int SHARD_DEPTH = 3;
 
 	/**
+	 * Product fields read to compute the cache keys of {@code cleanOrphanResources} (see {@code Resource.path}).
+	 * {@code resources.url} is mandatory : {@code Resource.equals/hashCode} rely on it to rebuild the resources set.
+	 */
+	static final String[] RESOURCE_KEY_FIELDS = { "resources.url", "resources.cacheKey", "resources.resourceType",
+			"resources.fileName", "resources.extension" };
+
+	/** Page size of the product stream of {@code cleanOrphanResources}, far below the 100 MB ES response limit. */
+	static final int RESOURCE_KEY_PAGE_SIZE = 1000;
+
+	/**
 	 * Shard folder name used by {@link Resource#folderHashPrefix(String)} for cache keys too
 	 * short to be sharded on their three last characters.
 	 */
 	private static final String UNKNOWN_SHARD = "UNKNOWN";
+
+	/** Single threaded: two sweeps must never overlap, and one holds the whole key set in memory. */
+	private final ExecutorService cleanupExecutor = Executors.newSingleThreadExecutor(r -> {
+		Thread t = new Thread(r, "clean-resources");
+		t.setDaemon(true);
+		return t;
+	});
+
+	private final AtomicReference<ResourceCleanupStatus> cleanupStatus = new AtomicReference<>(ResourceCleanupStatus.idle());
+
+	/**
+	 * Starts {@link #cleanOrphanResources(ResourceCleanupMode)} in the background, a sweep of the prod cache
+	 * lasting hours (GOU-1142).
+	 *
+	 * @return the RUNNING status of the new run, or the current status unchanged when a run is already in progress
+	 */
+	public ResourceCleanupStatus startCleanOrphanResources(ResourceCleanupMode mode) {
+		ResourceCleanupStatus running = new ResourceCleanupStatus(ResourceCleanupStatus.State.RUNNING, mode, Instant.now(),
+				null, null, null);
+		while (true) {
+			ResourceCleanupStatus current = cleanupStatus.get();
+			if (current.state() == ResourceCleanupStatus.State.RUNNING) {
+				return current;
+			}
+			if (cleanupStatus.compareAndSet(current, running)) {
+				break;
+			}
+		}
+		cleanupExecutor.execute(() -> {
+			ResourceCleanupStatus done;
+			try {
+				ResourceCleanupReport report = cleanOrphanResources(mode);
+				done = new ResourceCleanupStatus(ResourceCleanupStatus.State.COMPLETED, mode, running.startedAt(),
+						Instant.now(), report, null);
+			} catch (Throwable t) {
+				logger.error("Orphan resource cleanup failed", t);
+				done = new ResourceCleanupStatus(ResourceCleanupStatus.State.FAILED, mode, running.startedAt(),
+						Instant.now(), null, String.valueOf(t));
+			}
+			cleanupStatus.set(done);
+			logger.info("Orphan resource cleanup finished: {}", done);
+		});
+		return running;
+	}
+
+	/** @return the status of the current or last background cleanup */
+	public ResourceCleanupStatus getCleanupStatus() {
+		return cleanupStatus.get();
+	}
 
 	/**
 	 * Runs the orphan resource cleanup in report-only mode.
@@ -180,14 +244,21 @@ public class BatchService {
 		}
 
 		// 2. Stream all products to extract active resource cache keys
-		Set<String> activeKeys = new HashSet<>();
-		long streamedProductCount;
+		ActiveKeySet activeKeys = new ActiveKeySet();
+		AtomicLong streamedCounter = new AtomicLong();
 		try {
-			streamedProductCount = collectActiveKeys(activeKeys);
+			collectActiveKeys(activeKeys, streamedCounter);
+			activeKeys.seal();
+		} catch (ActiveKeySet.InsufficientMemoryException | OutOfMemoryError e) {
+			logger.error("Not enough heap to hold the active resource keys, aborting resource cleanup, no file touched", e);
+			return ResourceCleanupReport.aborted(mode, "insufficient memory: " + e.getMessage(), indexedProductCount,
+					streamedCounter.get());
 		} catch (Exception e) {
 			logger.error("Error streaming products from repository during resource cleanup", e);
-			return ResourceCleanupReport.aborted(mode, "product stream failed: " + e.getMessage(), indexedProductCount, 0);
+			return ResourceCleanupReport.aborted(mode, "product stream failed: " + e.getMessage(), indexedProductCount,
+					streamedCounter.get());
 		}
+		long streamedProductCount = streamedCounter.get();
 
 		// 3. Safety floor : a silently truncated stream must never be read as "nothing is referenced"
 		long floor = (long) Math.ceil(indexedProductCount * apiProperties.getResourceCleanupMinProductRatio());
@@ -219,18 +290,20 @@ public class BatchService {
 	/**
 	 * Streams every product and registers all cache keys reachable from its resources.
 	 *
-	 * @param activeKeys set to fill with the reachable cache keys
-	 * @return the number of products actually streamed
+	 * Only the resource fields needed to compute the cache keys are fetched, in small pages, so that no
+	 * Elasticsearch response approaches the client buffer limit (GOU-1134).
+	 *
+	 * @param activeKeys set to fill with the reachable cache keys (bounded memory, see {@link ActiveKeySet})
+	 * @param streamedProductCount counter of products read so far, kept accurate if the stream fails midway
 	 */
-	private long collectActiveKeys(Set<String> activeKeys) {
+	private void collectActiveKeys(ActiveKeySet activeKeys, AtomicLong streamedProductCount) {
 		List<Integer> allowedSuffixes = apiProperties.getAllowedImagesSizeSuffixes();
-		long streamedProductCount = 0;
 
-		try (Stream<Product> productStream = dataRepository.exportAll()) {
+		try (Stream<Product> productStream = dataRepository.exportAll(RESOURCE_KEY_FIELDS, RESOURCE_KEY_PAGE_SIZE)) {
 			Iterator<Product> iterator = productStream.iterator();
 			while (iterator.hasNext()) {
 				Product product = iterator.next();
-				streamedProductCount++;
+				streamedProductCount.incrementAndGet();
 				if (product.getResources() == null) {
 					continue;
 				}
@@ -259,7 +332,6 @@ public class BatchService {
 				}
 			}
 		}
-		return streamedProductCount;
 	}
 
 	/**
@@ -281,23 +353,33 @@ public class BatchService {
 		}
 	}
 
-	private void sweepShards(File folder, OrphanSweep sweep, int depth) {
+	/**
+	 * Sweeps one shard folder and its sub shards.
+	 *
+	 * @return true when the folder held at least one entry before the sweep
+	 */
+	private boolean sweepShards(File folder, OrphanSweep sweep, int depth) {
 		File[] children = folder.listFiles();
 		if (children == null) {
-			return;
+			return false;
 		}
 		for (File child : children) {
 			if (child.isDirectory()) {
+				boolean hadEntries;
 				if (depth < SHARD_DEPTH && isShardFolder(child.getName())) {
-					sweepShards(child, sweep, depth + 1);
+					hadEntries = sweepShards(child, sweep, depth + 1);
 				} else {
 					sweep.outOfScope();
 					continue;
 				}
-				// Drop shards emptied by a DELETE run, list() returning an empty array
-				String[] remaining = child.list();
-				if (remaining != null && remaining.length == 0) {
-					child.delete();
+				// Drop only the shards a DELETE run has just emptied. DRY_RUN and MOVE never touch
+				// folders, and a shard already empty before the sweep may be one that
+				// ResourceService.getCacheFile has just created for a download in flight.
+				if (sweep.mode == ResourceCleanupMode.DELETE && hadEntries) {
+					String[] remaining = child.list();
+					if (remaining != null && remaining.length == 0) {
+						child.delete();
+					}
 				}
 			} else if (child.isFile()) {
 				if (depth == SHARD_DEPTH) {
@@ -307,6 +389,7 @@ public class BatchService {
 				}
 			}
 		}
+		return children.length > 0;
 	}
 
 	/**
@@ -326,7 +409,7 @@ public class BatchService {
 
 		private final ResourceCleanupMode mode;
 		private final File cacheDir;
-		private final Set<String> activeKeys;
+		private final ActiveKeySet activeKeys;
 		private final long gracePeriodMs;
 		private final long startTime;
 
@@ -339,7 +422,7 @@ public class BatchService {
 		private long processed;
 		private long failures;
 
-		private OrphanSweep(ResourceCleanupMode mode, File cacheDir, Set<String> activeKeys, long gracePeriodMs,
+		private OrphanSweep(ResourceCleanupMode mode, File cacheDir, ActiveKeySet activeKeys, long gracePeriodMs,
 				long startTime) {
 			this.mode = mode;
 			this.cacheDir = cacheDir;
@@ -607,7 +690,8 @@ public class BatchService {
      * @param providerName optional affiliation provider name filter
      */
     public void fetchFeedsByUrl(String url, String providerName) {
-        logger.info("Fetching feeds with URL: {}", url);
+        // Feed URLs can carry API keys (Awin, Effinity): only the scheme and host are logged
+        logger.info("Fetching feeds with URL: {}", RemoteFileCachingService.loggableUrl(url));
         Set<DataSourceProperties> datasources =  feedService.getFeedsUrl(providerName);
         logger.info("Found {} feeds for processing.", datasources.size());
 

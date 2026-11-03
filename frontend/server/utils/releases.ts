@@ -24,6 +24,36 @@ let cachedReleasesDirectory: string | null = null
 
 let cachedReleaseNotes: ReleaseNote[] | null = null
 
+const parseVersion = (name: string): number[] | null => {
+  const match = /^v?(\d+(?:\.\d+)*)/i.exec(name)
+  return match?.[1] ? match[1].split('.').map(Number) : null
+}
+
+export const compareReleasesDescending = (
+  left: ReleaseNote,
+  right: ReleaseNote
+): number => {
+  const leftParts = parseVersion(left.name)
+  const rightParts = parseVersion(right.name)
+
+  if (leftParts && rightParts) {
+    const length = Math.max(leftParts.length, rightParts.length)
+    for (let index = 0; index < length; index += 1) {
+      const diff = (rightParts[index] ?? 0) - (leftParts[index] ?? 0)
+      if (diff !== 0) {
+        return diff
+      }
+    }
+  } else if (leftParts || rightParts) {
+    return leftParts ? -1 : 1
+  }
+
+  return (
+    new Date(right.publishedAt).getTime() -
+    new Date(left.publishedAt).getTime()
+  )
+}
+
 const getCreationDateFromGit = async (
   filePath: string
 ): Promise<string | null> => {
@@ -127,11 +157,7 @@ export const getReleaseNotes = async (): Promise<ReleaseNote[]> => {
       )
     ).filter(Boolean) as ReleaseNote[]
 
-    cachedReleaseNotes = releases.sort(
-      (left, right) =>
-        new Date(right.publishedAt).getTime() -
-        new Date(left.publishedAt).getTime()
-    )
+    cachedReleaseNotes = releases.sort(compareReleasesDescending)
 
     return cachedReleaseNotes
   } catch (error: unknown) {

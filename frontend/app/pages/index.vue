@@ -352,8 +352,9 @@ const { execute: _executeBlogFetch } = await useAsyncData(
     return true
   },
   {
-    lazy: true,
-    server: false,
+    // Fetched during SSR so the blog section hydrates with the same state
+    // (a client-only fetch flipped `loading` before hydration).
+    server: true,
   }
 )
 
@@ -522,7 +523,10 @@ const normalizeVerticalHomeUrl = (
 }
 
 const blogDateFormatter = computed(
-  () => new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium' })
+  () => new Intl.DateTimeFormat(locale.value, {
+      dateStyle: 'medium',
+      timeZone: 'UTC',
+    })
 )
 
 const blogListItems = computed<HomeBlogItem[]>(() => {

@@ -1,0 +1,31 @@
+{
+  "pagination": {
+    "currentPage": 1,
+    "perPage": 1000,
+    "total": 5,
+    "from": 1,
+    "to": 2,
+    "lastPage": 2
+  },
+  "feeds": [
+    {
+      "lastUpdateDate": "2026-10-21T04:00:00Z",
+      "linkId": 1024,
+      "nbProducts": 1200,
+      "feedUrl": "https://feeds.example/active-feed.csv",
+      "feedName": "Active Merchant - Flux produits",
+      "programId": 300000101,
+      "sessionId": 3001,
+      "merchantId": 6600000101,
+      "merchantName": "Example Active Merchant"
+    },
+    {
+      "linkId": 1025,
+      "feedUrl": "https://feeds.example/frozen-feed.csv",
+      "feedName": "Frozen Merchant - Flux produits",
+      "programId": 300000303,
+      "merchantId": 6600000303,
+      "merchantName": "Example Frozen Merchant"
+    }
+  ]
+}

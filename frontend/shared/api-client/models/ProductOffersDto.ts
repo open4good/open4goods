@@ -101,6 +101,12 @@ export interface ProductOffersDto {
    * @memberof ProductOffersDto
    */
   occasionTrend?: ProductPriceTrendDto
+  /**
+   * Link to an Amazon search by EAN, through /contrib/ so the click is recorded. Only set when the product has no offer and a valid GTIN. Not an offer: no price, never counted in offersCount.
+   * @type {string}
+   * @memberof ProductOffersDto
+   */
+  amazonSearchLink?: string
 }
 
 /**
@@ -157,6 +163,8 @@ export function ProductOffersDtoFromJSONTyped(
       json['occasionTrend'] == null
         ? undefined
         : ProductPriceTrendDtoFromJSON(json['occasionTrend']),
+    amazonSearchLink:
+      json['amazonSearchLink'] == null ? undefined : json['amazonSearchLink'],
   }
 }
 
@@ -185,5 +193,6 @@ export function ProductOffersDtoToJSONTyped(
     occasionHistory: ProductPriceHistoryDtoToJSON(value['occasionHistory']),
     newTrend: ProductPriceTrendDtoToJSON(value['newTrend']),
     occasionTrend: ProductPriceTrendDtoToJSON(value['occasionTrend']),
+    amazonSearchLink: value['amazonSearchLink'],
   }
 }

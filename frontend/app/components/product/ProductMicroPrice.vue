@@ -6,6 +6,7 @@
       :href="bestOffer.url || undefined"
       target="_blank"
       :rel="AFFILIATE_LINK_REL"
+      :referrerpolicy="AFFILIATE_LINK_REFERRER_POLICY"
       class="product-micro-price__main-btn"
       color="primary"
       variant="flat"
@@ -61,6 +62,7 @@
           :href="offer.url || undefined"
           target="_blank"
           :rel="AFFILIATE_LINK_REL"
+          :referrerpolicy="AFFILIATE_LINK_REFERRER_POLICY"
           class="product-micro-price__list-item"
           rounded="lg"
         >
@@ -101,6 +103,7 @@ import { mdiTag, mdiRecycle, mdiChevronDown, mdiStore } from '@mdi/js'
 import type { ProductDto } from '~~/shared/api-client'
 import {
   resolveOfferHref,
+  AFFILIATE_LINK_REFERRER_POLICY,
   AFFILIATE_LINK_REL,
   NEW_CONDITION_COLOR,
   OCCASION_CONDITION_COLOR,

@@ -88,11 +88,7 @@ const isGlobalSearchPayload = (
   typeof payload === 'object' &&
   payload !== null &&
   'query' in payload &&
-  !(
-    'verticalId' in payload ||
-    'semanticSearch' in payload ||
-    'include' in payload
-  )
+  !('verticalId' in payload || 'include' in payload || 'aggs' in payload)
 
 const hasProductSearchRouteQuery = (routeQuery: Record<string, unknown>) =>
   routeQuery.verticalId != null || routeQuery.include != null
@@ -128,7 +124,6 @@ export default defineEventHandler(
           query: payload.query ?? '',
           filters: payload.filters,
           sort: payload.sort,
-          searchType: payload.searchType,
           pageNumber: payload.pageNumber,
           pageSize: payload.pageSize,
         })
@@ -166,11 +161,6 @@ export default defineEventHandler(
 
       if (input.filters) {
         body.filters = input.filters
-        hasContent = true
-      }
-
-      if (typeof input.semanticSearch === 'boolean') {
-        body.semanticSearch = input.semanticSearch
         hasContent = true
       }
 

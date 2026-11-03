@@ -15,6 +15,7 @@ import org.open4goods.icecat.repository.IcecatCategoryRepository;
 import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
 import org.open4goods.icecat.repository.IcecatFeatureRepository;
 import org.open4goods.icecat.repository.IcecatSupplierRepository;
+import org.open4goods.services.contribution.repository.AffiliationClickRepository;
 import org.open4goods.services.contribution.repository.ContributionVoteRepository;
 import org.open4goods.services.geocode.service.IpGeolocationService;
 import org.open4goods.nudgerfrontapi.dto.auth.GoogleSsoLoginRequest;
@@ -73,6 +74,9 @@ class AuthControllerIT {
 
     @MockitoBean
     private ContributionVoteRepository contributionVoteRepository;
+
+    @MockitoBean
+    private AffiliationClickRepository affiliationClickRepository;
 
     @Autowired
     private JwtService jwtService;

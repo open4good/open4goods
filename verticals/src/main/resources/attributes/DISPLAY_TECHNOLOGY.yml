@@ -33,8 +33,6 @@ synonyms:
   all:
     - "DISPLAY_TECHNOLOGY"
     - "PANELTECHNOLOGY"
-  rakuten.com:
-    - "TYPE DE PRODUIT"
   eprel:
     - "PANELTECHNOLOGY"
 parser:

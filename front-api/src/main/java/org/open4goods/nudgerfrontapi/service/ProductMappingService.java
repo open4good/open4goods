@@ -39,6 +39,7 @@ import org.open4goods.model.product.EcoScoreRanking;
 import org.open4goods.model.product.ExternalIds;
 import org.open4goods.model.product.GtinInfo;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductCanonicalUrl;
 import org.open4goods.model.product.ProductCondition;
 import org.open4goods.model.product.ProductNameResolver;
 import org.open4goods.model.product.ProductTexts;
@@ -53,7 +54,6 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.dto.PageMetaDto;
-import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
 import org.open4goods.nudgerfrontapi.dto.product.PriceTrendState;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAggregatedPriceDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductAttributeDto;
@@ -130,32 +130,38 @@ public class ProductMappingService {
 
     private final ProductRepository repository;
     private final ApiProperties apiProperties;
-    private final CategoryMappingService categoryMappingService;
     private final VerticalsConfigService verticalsConfigService;
     private final SearchService searchService;
     private final AffiliationService affiliationService;
     private final IcecatService icecatService;
     private final Cache referenceCache;
     private final ProductTimelineService productTimelineService;
+    private final ProductSeoMetaService productSeoMetaService;
+    private final OfferFreshnessService offerFreshnessService;
+    private final AmazonSearchLinkService amazonSearchLinkService;
 
     public ProductMappingService(ProductRepository repository,
             ApiProperties apiProperties,
-            CategoryMappingService categoryMappingService,
             VerticalsConfigService verticalsConfigService,
             SearchService searchService,
             AffiliationService affiliationService,
             IcecatService icecatService,
             CacheManager cacheManager,
-            ProductTimelineService productTimelineService) {
+            ProductTimelineService productTimelineService,
+            ProductSeoMetaService productSeoMetaService,
+            OfferFreshnessService offerFreshnessService,
+            AmazonSearchLinkService amazonSearchLinkService) {
         this.repository = repository;
         this.apiProperties = apiProperties;
-        this.categoryMappingService = categoryMappingService;
         this.verticalsConfigService = verticalsConfigService;
         this.searchService = searchService;
         this.affiliationService = affiliationService;
         this.icecatService = icecatService;
         this.referenceCache = cacheManager.getCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
         this.productTimelineService = productTimelineService;
+        this.productSeoMetaService = productSeoMetaService;
+        this.offerFreshnessService = offerFreshnessService;
+        this.amazonSearchLinkService = amazonSearchLinkService;
         if (this.referenceCache == null) {
             logger.warn("Cache {} is not configured; product reference caching disabled.",
                     CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
@@ -233,16 +239,10 @@ public class ProductMappingService {
                 ? productTimelineService.mapTimeline(product)
                 : null;
 
-        String slug = null;
-        if (product.getNames() != null) {
-            // Slug is derived from the vertical specific URL mapping defined in the product
-            // names block.
-            slug = resolveLocalisedString(product.getNames().getUrl(), domainLanguage, locale);
-        }
-        String fullSlug = null;
-        if (StringUtils.hasText(slug)) {
-            fullSlug = buildFullSlug(slug, product.getVertical(), domainLanguage, vConfig);
-        }
+        // Slug and canonical path follow the single rule shared with the sitemap
+        // generation (GOU-1366): they never depend on the request locale.
+        String slug = ProductCanonicalUrl.slug(product, domainLanguage);
+        String fullSlug = ProductCanonicalUrl.fullSlug(product, vConfig, domainLanguage);
 
         ProductDto dto = new ProductDto(
                 product.getId(),
@@ -373,15 +373,8 @@ public class ProductMappingService {
             return null;
         }
         String preferredName = resolvePreferredName(referencedProduct, domainLanguage, locale);
-        String slug = null;
-        if (referencedProduct.getNames() != null) {
-            slug = resolveLocalisedString(referencedProduct.getNames().getUrl(), domainLanguage, locale);
-        }
-        String fullSlug = null;
-        if (StringUtils.hasText(slug)) {
-            VerticalConfig config = resolveVerticalConfig(referencedProduct.getVertical());
-            fullSlug = buildFullSlug(slug, referencedProduct.getVertical(), domainLanguage, config);
-        }
+        String fullSlug = ProductCanonicalUrl.fullSlug(referencedProduct,
+                resolveVerticalConfig(referencedProduct.getVertical()), domainLanguage);
 
         ProductScoresDto scores = null;
         if (referencedProduct.getScores().size() > 0) {
@@ -524,55 +517,37 @@ public class ProductMappingService {
 
     /**
      * Map the localised names and SEO metadata associated with the product.
+     * <p>
+     * {@code metaTitle} and {@code metaDescription} are computed by
+     * {@link ProductSeoMetaService}, the single source of truth for product SEO
+     * metadata; the stored meta description is only a fallback. The page title
+     * (H1) drops the manufacturer reference appended to some models.
+     * </p>
+     *
+     * @param product        product being mapped
+     * @param domainLanguage requested domain language
+     * @param locale         requested locale
+     * @param vConfig        resolved vertical configuration
+     * @return localised names or {@code null} when the product has no names
      */
     private ProductNamesDto mapNames(Product product, DomainLanguage domainLanguage, Locale locale, VerticalConfig vConfig) {
         if (product.getNames() == null) {
             return null;
         }
+        String seoName = resolveProductSeoName(product, domainLanguage, locale);
+        String metaDescription = productSeoMetaService.buildMetaDescription(product, seoName, vConfig, domainLanguage);
         return new ProductNamesDto(
                 safeCanonicalName(product, resolveLocalisedString(product.getNames().getDisplayName(), domainLanguage, locale)),
                 safeCanonicalName(product, resolveLocalisedString(product.getNames().getCardName(), domainLanguage, locale)),
-                safeCanonicalName(product, resolveLocalisedString(product.getNames().getPageTitle(), domainLanguage, locale)),
+                productSeoMetaService.stripManufacturerReference(
+                        safeCanonicalName(product, resolveLocalisedString(product.getNames().getPageTitle(), domainLanguage, locale)),
+                        product),
                 safeCanonicalName(product, resolveLocalisedString(product.getNames().getSeoName(), domainLanguage, locale)),
-                buildProductMetaTitle(product, domainLanguage, locale, vConfig),
-                resolveLocalisedString(product.getNames().getMetaDescription(), domainLanguage, locale),
+                productSeoMetaService.buildMetaTitle(product, seoName, vConfig, domainLanguage),
+                metaDescription != null ? metaDescription
+                        : resolveLocalisedString(product.getNames().getMetaDescription(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getProductMetaOpenGraphTitle(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getProductMetaOpenGraphDescription(), domainLanguage, locale));
-    }
-
-    /**
-     * Build the canonical SEO title for product pages server-side so the Nuxt
-     * application can consume it directly and keep local title logic as a
-     * resilience fallback only.
-     *
-     * @param product product being mapped
-     * @param domainLanguage requested domain language
-     * @param locale requested locale
-     * @param vConfig resolved vertical configuration
-     * @return SEO title trimmed to a SERP-safe length, or {@code null}
-     */
-    private String buildProductMetaTitle(Product product, DomainLanguage domainLanguage, Locale locale, VerticalConfig vConfig) {
-        String productName = resolveProductSeoName(product, domainLanguage, locale);
-        if (!StringUtils.hasText(productName)) {
-            return null;
-        }
-
-        String verticalTitle = resolveVerticalTitle(vConfig, domainLanguage);
-        Double impactScore = Optional.ofNullable(product.ecoscore()).map(Score::getValue).orElse(null);
-        String candidate;
-        if (impactScore != null && StringUtils.hasText(verticalTitle)) {
-            candidate = String.format(Locale.ROOT, "%s - score impact %s/20 | %s", productName,
-                    formatSeoScore(impactScore), verticalTitle);
-        } else if (impactScore != null) {
-            candidate = String.format(Locale.ROOT, "%s - score impact %s/20 | Nudger", productName,
-                    formatSeoScore(impactScore));
-        } else if (StringUtils.hasText(verticalTitle)) {
-            candidate = String.format("%s | %s", productName, verticalTitle);
-        } else {
-            candidate = String.format("%s | Nudger", productName);
-        }
-
-        return truncateAtWordBoundary(candidate, 60);
     }
 
     /**
@@ -600,81 +575,6 @@ public class ProductMappingService {
         }
 
         return safeCanonicalName(product, resolvePreferredName(names, domainLanguage, locale));
-    }
-
-    /**
-     * Resolve a localized vertical label suitable for title suffixes.
-     *
-     * @param vConfig resolved vertical configuration
-     * @param domainLanguage requested domain language
-     * @return title suffix or {@code null}
-     */
-    private String resolveVerticalTitle(VerticalConfig vConfig, DomainLanguage domainLanguage) {
-        if (vConfig == null) {
-            return null;
-        }
-        String lang = domainLanguage != null ? domainLanguage.languageTag() : null;
-        ProductI18nElements i18n = lang == null ? null : vConfig.i18n(lang);
-        if (i18n == null) {
-            return null;
-        }
-        return firstText(i18n.getVerticalMetaTitle(), i18n.getVerticalHomeTitle());
-    }
-
-    /**
-     * Pick the first non-blank text value.
-     *
-     * @param values candidate values ordered by priority
-     * @return first non-blank value or {@code null}
-     */
-    private String firstText(String... values) {
-        if (values == null) {
-            return null;
-        }
-        for (String value : values) {
-            if (StringUtils.hasText(value)) {
-                return value.trim();
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Format impact score without unnecessary trailing decimals.
-     *
-     * @param score impact score on a 20-point scale
-     * @return compact score string
-     */
-    private String formatSeoScore(double score) {
-        double rounded = Math.round(score * 10.0d) / 10.0d;
-        if (rounded == Math.rint(rounded)) {
-            return String.valueOf((int) rounded);
-        }
-        return String.format(Locale.ROOT, "%.1f", rounded);
-    }
-
-    /**
-     * Truncate text without cutting the last word when a safe boundary exists.
-     *
-     * @param value text to truncate
-     * @param maxLength maximum length including the ellipsis
-     * @return normalized and truncated text
-     */
-    private String truncateAtWordBoundary(String value, int maxLength) {
-        if (!StringUtils.hasText(value)) {
-            return null;
-        }
-        String normalized = value.trim().replaceAll("\\s+", " ");
-        if (normalized.length() <= maxLength) {
-            return normalized;
-        }
-        int safeLimit = Math.max(1, maxLength - 1);
-        String truncated = normalized.substring(0, safeLimit);
-        int lastSpace = truncated.lastIndexOf(' ');
-        if (lastSpace > Math.floor(safeLimit * 0.6d)) {
-            truncated = truncated.substring(0, lastSpace);
-        }
-        return truncated.stripTrailing() + "…";
     }
 
     /**
@@ -980,15 +880,22 @@ public class ProductMappingService {
     }
 
     /**
-     * Map offers including best prices, histories and trends.
+     * Map offers including best prices, histories and trends, plus the Amazon search link of a product without offer.
+     * <p>
+     * Only fresh offers are mapped (see {@link OfferFreshnessService}): the offer list, the best prices, the
+     * offer count and the {@code /contrib/} links are all derived from them, so a product whose offers are
+     * all stale is mapped as a product without offer, and gets the Amazon search link. Price histories and
+     * trends are kept.
      */
     private ProductOffersDto mapOffers(Product product) {
-        AggregatedPrices aggregatedPrices = product.getPrice();
-        ProductAggregatedPriceDto bestPrice = mapAggregatedPrice(product.bestPrice());
+        AggregatedPrices aggregatedPrices = offerFreshnessService.freshPrices(product);
+        String gtin = product.gtin();
+        ProductAggregatedPriceDto bestPrice = aggregatedPrices == null ? null
+                : mapAggregatedPrice(aggregatedPrices.getMinPrice(), gtin);
         ProductAggregatedPriceDto bestNew = aggregatedPrices == null ? null
-                : mapAggregatedPrice(aggregatedPrices.bestNewOffer());
+                : mapAggregatedPrice(aggregatedPrices.bestNewOffer(), gtin);
         ProductAggregatedPriceDto bestOccasion = aggregatedPrices == null ? null
-                : mapAggregatedPrice(aggregatedPrices.bestOccasionOffer());
+                : mapAggregatedPrice(aggregatedPrices.bestOccasionOffer(), gtin);
 
         Map<ProductCondition, List<ProductAggregatedPriceDto>> offersByCondition = Collections.emptyMap();
         ProductPriceHistoryDto newHistory = null;
@@ -1003,7 +910,7 @@ public class ProductMappingService {
                             .collect(Collectors.toMap(
                                     condition -> condition,
                                     condition -> aggregatedPrices.sortedOffers(condition).stream()
-                                            .map(this::mapAggregatedPrice)
+                                            .map(offer -> mapAggregatedPrice(offer, gtin))
                                             .collect(Collectors.toList()),
                                     (left, right) -> right,
                                     () -> new EnumMap<>(ProductCondition.class)));
@@ -1015,9 +922,17 @@ public class ProductMappingService {
                     aggregatedPrices.bestOccasionOffer(), aggregatedPrices.getTrends(), ProductCondition.OCCASION));
         }
 
+        Integer offersCount = aggregatedPrices == null ? product.getOffersCount() : aggregatedPrices.getOffers().size();
+
+        // Amazon search link (GOU-1396): only on a product without any fresh offer, i.e. exactly when the
+        // mapped offer block is empty; never counted as an offer.
+        boolean hasOffers = (offersCount != null && offersCount > 0) || bestPrice != null
+                || offersByCondition.values().stream().anyMatch(list -> list != null && !list.isEmpty());
+        String amazonSearchLink = amazonSearchLinkService.buildContribLink(gtin, hasOffers);
+
         return new ProductOffersDto(
-                product.getOffersCount(),
-                product.hasOccasions(),
+                offersCount,
+                aggregatedPrices != null && aggregatedPrices.getConditions().contains(ProductCondition.OCCASION),
                 bestPrice,
                 bestNew,
                 bestOccasion,
@@ -1025,7 +940,8 @@ public class ProductMappingService {
                 newHistory,
                 occasionHistory,
                 newTrend,
-                occasionTrend);
+                occasionTrend,
+                amazonSearchLink);
     }
 
     /**
@@ -1052,16 +968,13 @@ public class ProductMappingService {
      * @param query          optional free text query
      * @param filters        optional search filters applied on the Elasticsearch
      *                       query
-     * @param semanticSearch whether semantic search should replace lexical
-     *                       matching when a query is provided
      * @return response payload containing paginated products and aggregations
      */
     public ProductSearchResponseDto searchProducts(Pageable pageable, Locale locale, Set<String> includes,
             AggregationRequestDto aggregation, DomainLanguage domainLanguage, String verticalId, String query,
-            FilterRequestDto filters, boolean semanticSearch, String searchType) {
+            FilterRequestDto filters) {
 
-        SearchService.SearchResult result = searchService.search(pageable, verticalId, query, aggregation, filters,
-                 semanticSearch, searchType);
+        SearchService.SearchResult result = searchService.search(pageable, verticalId, query, aggregation, filters);
         SearchHits<Product> hits = result.hits();
 
         List<ProductDto> items = hits.getSearchHits().stream()
@@ -1139,68 +1052,6 @@ public class ProductMappingService {
             config = verticalsConfigService.getConfigByIdOrDefault(verticalId);
         }
         return config;
-    }
-
-    /**
-     * Resolve the vertical home URL using localisation fallback rules.
-     */
-    private String resolveVerticalHomeUrl(String verticalId, DomainLanguage domainLanguage, VerticalConfig config) {
-        if (!StringUtils.hasText(verticalId)) {
-            return null;
-        }
-        if (config == null) {
-            return null;
-        }
-        VerticalConfigDto dto = categoryMappingService.toVerticalConfigDto(config, domainLanguage);
-        if (dto != null && StringUtils.hasText(dto.verticalHomeUrl())) {
-            return dto.verticalHomeUrl();
-        }
-        for (String languageKey : candidateLanguageKeys(domainLanguage, null)) {
-            ProductI18nElements i18n = config.i18n(languageKey);
-            if (i18n != null && StringUtils.hasText(i18n.getVerticalHomeUrl())) {
-                return i18n.getVerticalHomeUrl();
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Build the canonical product path from a product slug and vertical
-     * configuration.
-     *
-     * @param slug product slug resolved from product names
-     * @param verticalId vertical identifier attached to the product
-     * @param domainLanguage requested domain language
-     * @param config vertical configuration used to resolve the category URL
-     * @return canonical path or {@code null} when the product is not categorized
-     */
-    private String buildFullSlug(String slug, String verticalId, DomainLanguage domainLanguage, VerticalConfig config) {
-        if (!StringUtils.hasText(slug)) {
-            return null;
-        }
-        String trimmedSlug = trimSlashes(slug);
-        String verticalHomeUrl = resolveVerticalHomeUrl(verticalId, domainLanguage, config);
-        if (!StringUtils.hasText(verticalHomeUrl)) {
-            return "/" + trimmedSlug;
-        }
-        return "/" + trimSlashes(verticalHomeUrl) + "/" + trimmedSlug;
-    }
-
-    /**
-     * Trim leading and trailing slashes from a path fragment.
-     *
-     * @param value path fragment
-     * @return trimmed fragment
-     */
-    private String trimSlashes(String value) {
-        String trimmed = value.trim();
-        while (trimmed.startsWith("/")) {
-            trimmed = trimmed.substring(1);
-        }
-        while (trimmed.endsWith("/")) {
-            trimmed = trimmed.substring(0, trimmed.length() - 1);
-        }
-        return trimmed;
     }
 
     /**
@@ -1516,16 +1367,17 @@ public class ProductMappingService {
     }
 
     /**
-     * Map aggregated price data and rebuild the affiliation link when needed.
+     * Map aggregated price data and rebuild the affiliation link when needed. The product GTIN is carried by the
+     * affiliation token so that the click is recorded with the product it comes from.
      */
-    private ProductAggregatedPriceDto mapAggregatedPrice(AggregatedPrice price) {
+    private ProductAggregatedPriceDto mapAggregatedPrice(AggregatedPrice price, String gtin) {
         if (price == null) {
             return null;
         }
         String url = price.getUrl();
         if (StringUtils.hasText(price.getDatasourceName()) && StringUtils.hasText(price.getUrl())) {
             url = AffiliationPartnerService.CONTRIB_ENDPOINT
-                    + affiliationService.encryptAffiliationLink(price.getDatasourceName(), price.getUrl());
+                    + affiliationService.encryptAffiliationLink(price.getDatasourceName(), price.getUrl(), gtin);
         }
         return new ProductAggregatedPriceDto(
                 price.getDatasourceName(),

@@ -63,7 +63,7 @@ export default (nitroApp: import('nitro/app').NitroApp) => {
     const seen = new Set(ctx.sitemaps.map(entry => entry.sitemap))
 
     for (const descriptor of descriptors) {
-      // Skip sitemaps whose backing file doesn't exist yet (e.g. guides.xml before first generation run)
+      // Skip sitemaps whose backing file doesn't exist yet (e.g. before the first ui generation run)
       try {
         await access(descriptor.filePath)
       } catch {

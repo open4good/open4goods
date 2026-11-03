@@ -579,6 +579,13 @@ export default defineNuxtConfig({
     // frontend verify the access token's signature before trusting its roles
     // claim (GOU-438), instead of decoding it without verification.
     jwtSecret: process.env.FRONT_SECURITY_JWT_SECRET || '',
+    // Extra user-agent substrings (comma separated, case-insensitive) refused on
+    // /contrib/ in addition to isbot. Overridden by NUXT_AFFILIATION_BLOCKED_USER_AGENTS.
+    affiliationBlockedUserAgents: '',
+    // /contrib/ only redirects requests carrying the navigation-signal cookie
+    // (GOU-1184); a site Referer alone is refused (GOU-1520). Kill switch, no
+    // rebuild needed: NUXT_AFFILIATION_REQUIRE_NAVIGATION_SIGNAL=false.
+    affiliationRequireNavigationSignal: true,
     staticMainPageRoutes: STATIC_MAIN_PAGE_ROUTE_NAMES,
     sitemapLocalFiles: {
       fr: [
@@ -587,14 +594,15 @@ export default defineNuxtConfig({
         // always an empty urlset since no vertical or top-level wiki page mapping was ever
         // configured), so these proxy entries always 404'd or pointed at an empty file.
         // server/plugins/sitemap-blog-posts.ts now generates blog URLs directly from Nuxt Content.
+        // guides.xml removed (GOU-1366): ui only writes it for guides under
+        // verticals/src/main/resources/guides/default/, which holds none, so the
+        // public /sitemap/fr/guides.xml answered 404. Add it back with the first guide.
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/category-pages.xml`,
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/product-pages.xml`,
-        `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/guides.xml`,
       ],
       en: [
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/category-pages.xml`,
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/product-pages.xml`,
-        `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/guides.xml`,
       ],
     },
 

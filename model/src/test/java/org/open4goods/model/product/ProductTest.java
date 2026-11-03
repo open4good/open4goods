@@ -62,6 +62,32 @@ class ProductTest
                                 .allMatch(source -> "other".equalsIgnoreCase(source.getDataSourcename())));
         }
 
+        @Test
+        void removeDatasourceDataKeepsOtherDatasourcesAndReportsChanges()
+        {
+                Product product = new Product(2L);
+                product.getDatasourceCodes().put("rakuten.com", 1L);
+                product.getDatasourceCodes().put("Rakuten FR", 2L);
+                product.getCategoriesByDatasources().put("rakuten.com", "LIVRES");
+                product.getCategoriesByDatasources().put("fnac.com", "LIVRES");
+                product.getDatasourceCategories().add("LIVRES");
+                product.getDescriptionsByDatasource().put("rakuten.com", "desc");
+                product.getDescriptionsByDatasource().put("fnac.com", "other desc");
+                product.getAkaBrands().put("rakuten.com", "FOLIO");
+
+                assertTrue(product.removeDatasourceData("rakuten.com"));
+
+                assertEquals(Set.of("Rakuten FR"), product.getDatasourceCodes().keySet());
+                assertEquals(Set.of("fnac.com"), product.getCategoriesByDatasources().keySet());
+                // Still mapped by fnac.com
+                assertTrue(product.getDatasourceCategories().contains("LIVRES"));
+                assertEquals(Set.of("fnac.com"), product.getDescriptionsByDatasource().keySet());
+                assertTrue(product.getAkaBrands().isEmpty());
+
+                assertFalse(product.removeDatasourceData("rakuten.com"));
+                assertFalse(product.removeDatasourceData(" "));
+        }
+
         private SourcedAttribute source(String datasource, String value)
         {
                 SourcedAttribute sourcedAttribute = new SourcedAttribute();

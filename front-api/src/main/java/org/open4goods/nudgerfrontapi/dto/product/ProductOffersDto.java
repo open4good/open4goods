@@ -30,6 +30,10 @@ public record ProductOffersDto(
         @Schema(description = "Trend computed from brand new offers", nullable = true)
         ProductPriceTrendDto newTrend,
         @Schema(description = "Trend computed from occasion offers", nullable = true)
-        ProductPriceTrendDto occasionTrend
+        ProductPriceTrendDto occasionTrend,
+        @Schema(description = "Link to an Amazon search by EAN, through /contrib/ so the click is recorded. Only set "
+                + "when the product has no offer and a valid GTIN. Not an offer: no price, never counted in "
+                + "offersCount.", nullable = true, example = "/contrib/H4sIAAAAAAAA")
+        String amazonSearchLink
 ) {
 }

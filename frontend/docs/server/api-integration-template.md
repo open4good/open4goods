@@ -196,7 +196,9 @@ export default defineEventHandler(
 - Appropriate cache headers
 - Resolve `domainLanguage` from headers
 - Parse and validate query params
-- Standardized error handling with `extractBackendErrorDetails()`
+- Standardized error handling with `extractBackendErrorDetails()`: it keeps the
+  backend status of a `ResponseError`, returns 503 when the backend is
+  unreachable (`ECONNREFUSED`, `ETIMEDOUT`, etc.) and 500 otherwise
 
 ### 3. Create the composable
 

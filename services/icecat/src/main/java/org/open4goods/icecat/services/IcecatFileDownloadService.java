@@ -5,15 +5,15 @@ import java.io.File;
 import org.apache.commons.io.FileUtils;
 import org.open4goods.icecat.config.yml.IcecatConfiguration;
 import org.open4goods.model.exceptions.TechnicalException;
-import org.open4goods.model.helper.IdHelper;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
  * Handles downloading and decompressing Icecat bulk XML export files.
  *
- * <p>Caches files locally: if the target file already exists it is returned without
- * re-downloading (no refresh policy yet). Credentials are read from {@link IcecatConfiguration}.
+ * <p>Caches files locally, named like {@link RemoteFileCachingService} names its own
+ * ({@link RemoteFileCachingService#resolveCacheFile(String, String)}): if the target file already
+ * exists it is returned without re-downloading (no refresh policy yet). Credentials are read from {@link IcecatConfiguration}.
  *
  * <p>Extracted from the duplicate {@code getCachedFile()} methods that existed in
  * {@code FeatureLoader}, {@code CategoryLoader}, and {@code IcecatService}.
@@ -45,12 +45,12 @@ public class IcecatFileDownloadService {
      */
     public File getOrDownload(String url) throws TechnicalException {
         LOGGER.info("Retrieving file : {}", url);
-        File destFile = new File(remoteCachingFolder + File.separator + IdHelper.getHashedName(url));
+        File destFile = RemoteFileCachingService.resolveCacheFile(remoteCachingFolder, url);
         if (destFile.exists()) {
             LOGGER.info("File {} already cached", url);
             return destFile;
         }
-        File tmpFile = new File(remoteCachingFolder + File.separator + "tmp-" + IdHelper.getHashedName(url));
+        File tmpFile = new File(remoteCachingFolder + File.separator + "tmp-" + destFile.getName());
         try {
             LOGGER.info("Starting download : {}", url);
             fileCachingService.downloadTo(iceCatConfig.getUser(), iceCatConfig.getPassword(), url, tmpFile);

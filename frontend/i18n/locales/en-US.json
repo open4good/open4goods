@@ -47,7 +47,7 @@
       "empty": "The content of this article will be available soon.",
       "featuredImageAlt": "Featured image for {title}",
       "readingTime": "Approx. {minutes} min read",
-      "updated": "Updated {date}"
+      "updated": "Updated on {date}"
     },
     "breadcrumbs": {
       "blog": "Blog",
@@ -90,9 +90,7 @@
       "eyebrow": "Responsible shopping",
       "title": "Nudger: The eco-friendly comparator",
       "animatedSubtitle": "",
-      "titleSubtitle": [
-        "Buy better. Spend smarter."
-      ],
+      "titleSubtitle": ["Buy better. Spend smarter."],
       "subtitles": [
         "Save time, stay true to your values. Compare effortlessly, choose freely.",
         "Shop smarter without compromise. Nudger balances planet and price.",
@@ -157,9 +155,7 @@
         ],
         "partnerLinkLabel": "{formattedCount} partner | {formattedCount} partners",
         "partnerLinkFallback": "our partners",
-        "placeholders": [
-          "Search a product (e.g. television, smartphone...)"
-        ]
+        "placeholders": ["Search a product (e.g. television, smartphone...)"]
       },
       "highlights": [
         {
@@ -831,10 +827,6 @@
         "low": "Low",
         "medium": "Medium",
         "high": "High"
-      },
-      "searchMode": {
-        "semantic": "Semantic search",
-        "text": "Text search"
       },
       "showMoreImpact": "Show more impact filters",
       "showMoreTechnical": "Show more technical filters",
@@ -1654,7 +1646,9 @@
         "summary": {
           "records": "Total records",
           "size": "Compressed size",
-          "updated": "Last updated"
+          "updated": "Last updated",
+          "format": "Format",
+          "formatValue": "Compressed CSV (ZIP)"
         }
       },
       "creator": {
@@ -1980,6 +1974,45 @@
         "description": "Total compressed footprint of weekly exports.",
         "label": "Combined size"
       }
+    },
+    "explore": {
+      "title": "Explore products",
+      "subtitle": "Browse Nudger categories and open product pages identified by their GTIN.",
+      "categoryAriaLabel": "View the {category} category",
+      "gtinLabel": "GTIN",
+      "categories": {
+        "tv": "TVs",
+        "washing-machine": "Washing machines",
+        "dishwasher": "Dishwashers",
+        "oven": "Ovens",
+        "air-conditioner": "Air conditioners"
+      }
+    },
+    "mirrors": {
+      "title": "Also available on",
+      "referenceLicense": "The reference version, on nudger.fr, is under ODbL. The mirrors below state their own license.",
+      "linkAriaLabel": "Open the dataset on {name} (new tab)",
+      "items": {
+        "datagouv": {
+          "name": "data.gouv.fr",
+          "license": "License: ODbL"
+        },
+        "zenodo": {
+          "name": "Zenodo",
+          "license": "License: CC BY 4.0"
+        },
+        "kaggle": {
+          "name": "Kaggle",
+          "license": "License: CC BY 4.0"
+        },
+        "figshare": {
+          "name": "Figshare",
+          "license": "License: CC BY 4.0"
+        }
+      }
+    },
+    "summary": {
+      "title": "The datasets at a glance"
     }
   },
   "opensource": {
@@ -2125,6 +2158,7 @@
   },
   "partners": {
     "affiliation": {
+      "amazonDisclosure": "As an Amazon Associate I earn from qualifying purchases.",
       "carouselAriaLabel": "Affiliation partners carousel",
       "empty": "No partners match your search yet. Try another term.",
       "linkLabel": "Visit this partner",
@@ -2199,14 +2233,14 @@
     },
     "columns": {
       "verticals": {
-        "title": "Semantic categories ({count})",
+        "title": "Categories ({count})",
         "emptyTitle": "No category matches for “{query}”",
         "emptyDescription": "Try a different keyword or broaden your query.",
         "unknownTitle": "Other categories"
       },
       "products": {
         "title": "Uncategorised products ({count})",
-        "subtitle": "Products matched semantically without an assigned category.",
+        "subtitle": "Products matched without an assigned category.",
         "emptyTitle": "No uncategorised products for “{query}”",
         "emptyDescription": "Try another keyword or adjust your filters."
       }
@@ -2250,10 +2284,6 @@
       "title": "Product search",
       "description": "Search Nudger's responsible shopping catalogue to discover products, brands and categories.",
       "imageAlt": "Illustration of the Nudger product search experience"
-    },
-    "modes": {
-      "exact_vertical": "Exact (category)",
-      "semantic": "Semantic"
     }
   },
   "compare": {
@@ -2434,6 +2464,10 @@
     },
     "start_impact_text": "Enjoying this?",
     "start_impact_subtext": "Support an independent, open, and impactful web by shopping through Nudger! It also works via our partner merchants",
+    "amazonSearch": {
+      "disclosure": "As an Amazon Associate I earn from qualifying purchases.",
+      "label": "Search on Amazon"
+    },
     "partners_link": "our partners",
     "attributes": {
       "title": "Technical specifications",
@@ -2963,6 +2997,7 @@
       "viewDeal": "View deal",
       "history": "Price history",
       "noOffersBanner": "No offers available right now!",
+      "lastKnownPrice": "Last recorded price: {price} on {date}",
       "headers": {
         "condition": "Condition",
         "offer": "Offer",
@@ -3009,9 +3044,9 @@
       "serp": {
         "title": {
           "withImpact": {
-            "full": "{productName}: best price, specs and reviews | ImpactScore {score}/20",
-            "fullVertical": "{verticalTitle} {productName}: best price | ImpactScore {score}/20",
-            "compact": "{productName}: best price | ImpactScore {score}/20",
+            "full": "{productName}: best price, specs and reviews {'|'} ImpactScore {score}/20",
+            "fullVertical": "{verticalTitle} {productName}: best price {'|'} ImpactScore {score}/20",
+            "compact": "{productName}: best price {'|'} ImpactScore {score}/20",
             "minimal": "{productName}: ImpactScore {score}/20"
           },
           "withoutImpact": {
@@ -3744,7 +3779,7 @@
   "dataviz": {
     "page": {
       "title": "{category} Statistics",
-      "metaTitle": "Statistics & Data - {category} | {siteName}",
+      "metaTitle": "Statistics & Data - {category} {'|'} {siteName}",
       "metaDescription": "Explore detailed statistics for {category}: prices, brands, scores and more.",
       "breadcrumbLeaf": "Statistics",
       "heroTitle": "Dashboard - {category}",
@@ -3772,7 +3807,7 @@
     "pageSubtitle": "Tracking key indicators collected automatically from multiple sources.",
     "period": "Period: {from} → {to}",
     "seo": {
-      "title": "Metriks - Dashboard | Nudger",
+      "title": "Metriks - Dashboard {'|'} Nudger",
       "description": "Visualise performance indicators gathered automatically: analytics, products, infrastructure."
     },
     "accessDenied": "Access Denied",
@@ -3820,6 +3855,22 @@
       },
       "providers": "Providers",
       "drilldown": "See details"
+    },
+    "previousWindow": "Previous 28 d: {value}",
+    "error": {
+      "label": "Error",
+      "unknown": "Measure unavailable (error without message)"
+    },
+    "top": {
+      "rank": "#",
+      "query": "Query",
+      "page": "Page",
+      "clicks": "Clicks",
+      "impressions": "Impressions",
+      "ctr": "CTR",
+      "position": "Position",
+      "evolution": "Clicks vs previous window",
+      "new": "new"
     }
   }
 }

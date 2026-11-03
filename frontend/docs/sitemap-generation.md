@@ -65,17 +65,19 @@ runtimeConfig: {
     fr: [
       '/opt/open4goods/sitemap/fr/category-pages.xml',
       '/opt/open4goods/sitemap/fr/product-pages.xml',
-      '/opt/open4goods/sitemap/fr/guides.xml',
     ],
     en: [
-      '/opt/open4goods/sitemap/en/category-pages.xml',
-      '/opt/open4goods/sitemap/en/product-pages.xml',
-      '/opt/open4goods/sitemap/en/guides.xml',
+      '/opt/open4goods/sitemap/default/category-pages.xml',
+      '/opt/open4goods/sitemap/default/product-pages.xml',
     ],
   },
   // ...
 }
 ```
+
+`guides.xml` is not listed: the ui only writes it for non-vertical guides
+under `verticals/src/main/resources/guides/default/`, which holds none, so the
+entry pointed to a 404 (GOU-1366). Add it back with the first default guide.
 
 To add or override entries for another language, extend this map with the new
 domain language key and provide the list of file paths. Because the configuration
@@ -83,6 +85,61 @@ is server-only, the paths remain private while still being appended to the
 rendered sitemap index. Requests for these entries are served through the Nitro
 route at `/sitemap/<domainLanguage>/<fileName>.xml`, which streams the matching
 local file without exposing the underlying filesystem path.
+
+## Product and category files (ui generation)
+
+The XML files listed in `sitemapLocalFiles` are written by
+`SitemapGenerationService` in the `ui` module, under
+`<rootFolder>/sitemap/<language>/` (one folder per `namings.base-urls` key;
+prod only configures `fr`).
+
+- **Canonical rule.** Each product URL is the language base URL followed by
+  `ProductCanonicalUrl.fullSlug(product, vertical, domainLanguage)` from the
+  `model` module: `/<verticalHomeUrl>/<names.url>`, or `/<names.url>` for a
+  product without vertical. The front-api `ProductDto.fullSlug` calls the same
+  method, and `ProductPage.vue` 301-redirects every other path to it and uses
+  it as `rel=canonical`, so a listed URL answers 200 without redirect. The
+  rule never depends on the request locale.
+- **Selection.** Products of enabled verticals only (pages of a disabled
+  vertical are `noindex`, products without vertical are not listed), not
+  `excluded`, with a recent price and an impact score.
+- **`lastmod`** is the product `lastChange` (last real data change), omitted
+  when unknown. Category pages carry no `lastmod`.
+- **Frequency.** Five minutes after the ui starts, then every 24 hours. An
+  admin can also trigger it with `GET /sitemap` on the ui.
+- **Atomic write.** Each file is written to `.<name>.tmp` in the same folder,
+  then moved over the previous file, so Nitro never streams a partial file. A
+  file whose generation fails keeps its previous version.
+- **Monitoring.** A failure is logged at ERROR (ui log and
+  `logs/stats-sitemap.log`) and counted in the `sitemap.generation` metric with
+  `result=failure`. `sitemap.generation.last.success` gives the epoch second of
+  the last fully successful run and `sitemap.product.urls{language}` the number
+  of product URLs written. Read them on the ui actuator, for example
+  `/actuator/metrics/sitemap.generation.last.success`.
+
+## Checking a published sitemap
+
+`scripts/sample_sitemap_urls.py` samples URLs from a sitemap. With `--check`
+it requests each sampled URL without following redirects and fails unless it
+answers 200 with a `rel=canonical` equal to the URL; `--max-lastmod-age-hours`
+also requires a recent `lastmod`. Requests are sequential (`--delay`, 1 s by
+default) and a 403 or 429 stops the run.
+
+```bash
+python3 scripts/sample_sitemap_urls.py \
+  --sitemap https://beta.nudger.fr/sitemap/fr/product-pages.xml \
+  --n 200 --check --max-lastmod-age-hours 48
+```
+
+Beta is behind HTTP basic auth: export
+`SITEMAP_SAMPLER_BASIC_AUTH=user:password` before running the script (the
+value is sent on every request and never printed). The URLs of a sitemap come
+from the ui `namings.base-urls`, so on beta they must start with
+`https://beta.nudger.fr/` for the check to test beta.
+
+The exit code is 0 when every URL passes, 1 when one fails (each failure is
+printed with its reason), 2 when the site refused the requests. Without
+`--check`, `--out <file>` only writes the sample, as before.
 
 ## Testing changes
 

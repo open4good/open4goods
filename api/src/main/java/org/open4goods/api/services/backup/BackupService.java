@@ -13,11 +13,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -67,7 +69,11 @@ public class BackupService implements HealthIndicator {
 
 	private static final String PRODUCT_BACKUP_FILE_PREFIX = "products-backup-";
 	private static final String PRODUCT_BACKUP_FILE_SUFFIX = ".gz";
+	/** Sub-folder of the backup folder holding in-progress files. */
+	static final String PRODUCT_BACKUP_TMP_FOLDER = ".tmp";
 	private static final String PRODUCT_BACKUP_MANIFEST = "products-backup-manifest.json";
+	/** sha256sum-format checksum file, written last: its presence marks a complete generation. */
+	static final String PRODUCT_BACKUP_CHECKSUMS = "products-backup.sha256";
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
 
@@ -90,6 +96,7 @@ public class BackupService implements HealthIndicator {
 	// Flags to avoid conccurent export running
 	private AtomicBoolean productExportRunning = new AtomicBoolean(false);
 	private AtomicBoolean productCopyRunning = new AtomicBoolean(false);
+	private final AtomicBoolean startupTmpCleanupDone = new AtomicBoolean(false);
 
 
 
@@ -104,11 +111,74 @@ public class BackupService implements HealthIndicator {
 	}
 
 	/**
-	 * This method will periodicaly export all data in a zipped file
+	 * Periodic check deciding whether a products backup must start. The first check also removes the
+	 * leftovers of an interrupted backup from the temporary folder. A backup starts only when no export is
+	 * running and the manifest is missing, unreadable or older than {@code productsBackupIntervalHours}.
+	 * The age is read from the manifest, so an api restart does not postpone (or kill) a backup.
 	 */
-	// TODO : Schedule from conf
-	@Scheduled(initialDelay = 1000 * 3600 * 6, fixedDelay = 1000 * 3600 * 24 * 7)
-	@Timed(value = "backup.products", description = "Backup of all products", extraTags = { "service" })
+	@Scheduled(initialDelayString = "${api.backup.products-backup-check-initial-delay:PT15M}",
+			fixedDelayString = "${api.backup.products-backup-check-interval:PT1H}")
+	public void checkProductsBackup() {
+		if (productExportRunning.get()) {
+			logger.info("Products backup check - skipped, an export is already running");
+			return;
+		}
+		if (startupTmpCleanupDone.compareAndSet(false, true)) {
+			cleanupOrphanProductBackupTmpFolder();
+		}
+
+		Long ageHours = productBackupManifestAgeHours();
+		long interval = backupConfig.getProductsBackupIntervalHours();
+		if (ageHours != null && ageHours < interval) {
+			logger.info("Products backup check - skipped, last manifest is {} h old (interval {} h)", ageHours, interval);
+			return;
+		}
+		logger.info("Products backup check - launched, last manifest age: {} (interval {} h)",
+				ageHours == null ? "absent or unreadable" : ageHours + " h", interval);
+		backupProducts();
+	}
+
+	/** Age in hours of the last completed backup, or null when the manifest is absent or unreadable. */
+	private Long productBackupManifestAgeHours() {
+		String folder = backupConfig.getDataBackupFolder();
+		if (folder == null) {
+			return null;
+		}
+		Path manifestPath = Path.of(folder).resolve(PRODUCT_BACKUP_MANIFEST);
+		if (!Files.isRegularFile(manifestPath)) {
+			return null;
+		}
+		try {
+			ProductBackupManifest manifest = OBJECT_MAPPER.readValue(manifestPath.toFile(), ProductBackupManifest.class);
+			if (manifest == null || manifest.completedEpochMillis() <= 0) {
+				return null;
+			}
+			return Math.max(0L, TimeUnit.MILLISECONDS.toHours(System.currentTimeMillis() - manifest.completedEpochMillis()));
+		} catch (IOException | RuntimeException e) {
+			logger.warn("Products backup manifest unreadable: {}", e.getMessage());
+			return null;
+		}
+	}
+
+	/** Empties the temporary folder at startup (nothing is running), logging the freed volume. */
+	private void cleanupOrphanProductBackupTmpFolder() {
+		String folder = backupConfig.getDataBackupFolder();
+		if (folder == null) {
+			return;
+		}
+		Path tmpFolder = Path.of(folder).resolve(PRODUCT_BACKUP_TMP_FOLDER);
+		if (!Files.isDirectory(tmpFolder)) {
+			return;
+		}
+		long before = FileUtils.sizeOfDirectory(tmpFolder.toFile());
+		clearProductBackupTmpFolder(tmpFolder);
+		logger.info("Products backup startup cleanup - {} freed in {}", FileUtils.byteCountToDisplaySize(before), tmpFolder);
+	}
+
+	/**
+	 * Exports all data in zipped files, unconditionally (manual trigger or called by the periodic check).
+	 */
+	@Timed(value = "backup.products", description = "Backup of all products", extraTags = { "service", "BackupService" })
 	public void backupProducts() {
 		logger.info("Products data backup - start");
 
@@ -118,6 +188,7 @@ public class BackupService implements HealthIndicator {
 		}
 
 		List<ProductBackupFile> tempFiles = new ArrayList<>();
+		Path tmpFolder = null;
 		ExecutorService executorService = null;
 		AtomicBoolean producerDone = new AtomicBoolean(false);
 		AtomicReference<Throwable> workerFailure = new AtomicReference<>();
@@ -129,11 +200,12 @@ public class BackupService implements HealthIndicator {
 			expordedProductsCounter.set(0L);
 
 			File backupFolder = ensureProductBackupFolder();
+			tmpFolder = prepareProductBackupTmpFolder(backupFolder.toPath());
 			executorService = Executors.newFixedThreadPool(exportThreads);
 			List<Future<ProductBackupFile>> futures = new ArrayList<>();
 			for (int i = 0; i < exportThreads; i++) {
 				futures.add(executorService.submit(
-						new ProductBackupThread(blockingQueue, serialisationService, i, producerDone, workerFailure)));
+						new ProductBackupThread(blockingQueue, serialisationService, i, producerDone, workerFailure, tmpFolder)));
 			}
 
 			expectedBackupedProducts.set(productRepo.countMainIndex());
@@ -189,6 +261,9 @@ public class BackupService implements HealthIndicator {
 					executorService.shutdownNow();
 				}
 			}
+			if (tmpFolder != null) {
+				clearProductBackupTmpFolder(tmpFolder);
+			}
 			productExportRunning.set(false);
 		}
 
@@ -205,6 +280,30 @@ public class BackupService implements HealthIndicator {
 			throw new IOException("Failed to create parent directories: " + backupFolder.getAbsolutePath());
 		}
 		return backupFolder;
+	}
+
+	/**
+	 * Creates the temporary folder of the backup (same filesystem as the destination) and removes
+	 * the leftovers of an interrupted backup.
+	 */
+	private Path prepareProductBackupTmpFolder(Path backupFolder) throws IOException {
+		Path tmpFolder = backupFolder.resolve(PRODUCT_BACKUP_TMP_FOLDER);
+		Files.createDirectories(tmpFolder);
+		clearProductBackupTmpFolder(tmpFolder);
+		return tmpFolder;
+	}
+
+	/** Deletes the regular files left in the temporary folder (interrupted or failed backup). */
+	private void clearProductBackupTmpFolder(Path tmpFolder) {
+		try (Stream<Path> leftovers = Files.list(tmpFolder)) {
+			for (Path leftover : leftovers.toList()) {
+				if (Files.isRegularFile(leftover)) {
+					Files.deleteIfExists(leftover);
+				}
+			}
+		} catch (IOException e) {
+			logger.warn("Could not clean product backup temporary folder {}", tmpFolder, e);
+		}
 	}
 
 	private void queueProductForBackup(LinkedBlockingQueue<Product> blockingQueue, AtomicReference<Throwable> workerFailure,
@@ -226,17 +325,53 @@ public class BackupService implements HealthIndicator {
 	private void publishProductBackupFiles(Path backupFolder, List<ProductBackupFile> tempFiles, long expectedProducts,
 			long exportedProducts, int pageSize) throws IOException {
 		List<String> fileNames = new ArrayList<>();
+		Map<String, String> checksums = new LinkedHashMap<>();
+		// The previous checksum file no longer describes the folder once files start being replaced
+		Files.deleteIfExists(backupFolder.resolve(PRODUCT_BACKUP_CHECKSUMS));
 		for (ProductBackupFile tempFile : tempFiles) {
 			Path destination = backupFolder
 					.resolve(PRODUCT_BACKUP_FILE_PREFIX + tempFile.fileNumber() + PRODUCT_BACKUP_FILE_SUFFIX);
 			Files.move(tempFile.path(), destination, StandardCopyOption.REPLACE_EXISTING);
+			makeWorldReadable(destination);
 			fileNames.add(destination.getFileName().toString());
+			checksums.put(destination.getFileName().toString(), tempFile.sha256());
 		}
 
 		ProductBackupManifest manifest = new ProductBackupManifest(Instant.now().toString(),
-				System.currentTimeMillis(), expectedProducts, exportedProducts, pageSize, fileNames);
-		OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(backupFolder.resolve(PRODUCT_BACKUP_MANIFEST).toFile(),
-				manifest);
+				System.currentTimeMillis(), expectedProducts, exportedProducts, pageSize, fileNames, checksums);
+		Path manifestPath = backupFolder.resolve(PRODUCT_BACKUP_MANIFEST);
+		OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(manifestPath.toFile(), manifest);
+		makeWorldReadable(manifestPath);
+		writeChecksumFile(backupFolder, checksums);
+	}
+
+	/**
+	 * Writes the sha256sum-compatible checksum file atomically (temporary file in the same folder, then atomic move).
+	 */
+	private void writeChecksumFile(Path backupFolder, Map<String, String> checksums) throws IOException {
+		StringBuilder content = new StringBuilder();
+		checksums.forEach((name, hash) -> content.append(hash).append("  ").append(name).append('\n'));
+		Path tmp = Files.createTempFile(backupFolder, PRODUCT_BACKUP_CHECKSUMS, ".tmp");
+		try {
+			Files.writeString(tmp, content.toString(), StandardCharsets.UTF_8);
+			// Readable before the atomic move so that the checksum file never appears with restrictive rights
+			makeWorldReadable(tmp);
+			Files.move(tmp, backupFolder.resolve(PRODUCT_BACKUP_CHECKSUMS), StandardCopyOption.ATOMIC_MOVE);
+		} finally {
+			Files.deleteIfExists(tmp);
+		}
+	}
+
+	/**
+	 * Sets {@code rw-r--r--} on a published backup file: temporary files are created as 0600, which the read-only
+	 * pull account cannot read. No-op on file systems without POSIX permissions.
+	 */
+	private void makeWorldReadable(Path path) throws IOException {
+		try {
+			Files.setPosixFilePermissions(path, PosixFilePermissions.fromString("rw-r--r--"));
+		} catch (UnsupportedOperationException e) {
+			logger.debug("POSIX permissions not supported for {}", path);
+		}
 	}
 
 	private void cleanupTempFiles(List<ProductBackupFile> tempFiles) {
@@ -317,7 +452,7 @@ public class BackupService implements HealthIndicator {
 	    AtomicLong counter = new AtomicLong(0);
 	    ExecutorService executorService = Executors.newFixedThreadPool(backupConfig.getProductImportThreads());
 
-	    for (File importFile : importFolder.listFiles()) {
+	    for (File importFile : importFolder.listFiles(File::isFile)) {
 	        executorService.submit(() -> {
 	            logger.info("Importing file started : {}", importFile.getAbsolutePath());
 	            try (InputStream inputStream = new FileInputStream(importFile);
@@ -595,7 +730,7 @@ public class BackupService implements HealthIndicator {
 
 	private File[] listProductBackupFiles(File productFolder) {
 		File[] files = productFolder.listFiles((dir, name) -> name.startsWith(PRODUCT_BACKUP_FILE_PREFIX)
-				&& name.endsWith(PRODUCT_BACKUP_FILE_SUFFIX));
+				&& name.endsWith(PRODUCT_BACKUP_FILE_SUFFIX) && new File(dir, name).isFile());
 		if (files == null) {
 			return new File[0];
 		}
@@ -636,6 +771,12 @@ public class BackupService implements HealthIndicator {
 					actualFiles + " <> " + Objects.toString(manifest.files(), List.of().toString()));
 		}
 
+		if (manifest.sha256() != null && !manifest.sha256().isEmpty()
+				&& !Files.exists(productFolder.toPath().resolve(PRODUCT_BACKUP_CHECKSUMS))) {
+			errorMessages.put("product_backup_checksum_missing",
+					productFolder.toPath().resolve(PRODUCT_BACKUP_CHECKSUMS).toString());
+		}
+
 		if (manifest.files() != null) {
 			for (String file : manifest.files()) {
 				Path filePath = productFolder.toPath().resolve(file);
@@ -655,9 +796,10 @@ public class BackupService implements HealthIndicator {
 	 * @param exportedCount successfully serialized product count
 	 * @param pageSize Elasticsearch export page size
 	 * @param files final backup files published by the export
+	 * @param sha256 file name to lowercase hex SHA-256 of the file; optional, absent in older manifests
 	 */
 	public record ProductBackupManifest(String completedAt, long completedEpochMillis, long expectedCount,
-			long exportedCount, int pageSize, List<String> files) {
+			long exportedCount, int pageSize, List<String> files, Map<String, String> sha256) {
 	}
 
 }

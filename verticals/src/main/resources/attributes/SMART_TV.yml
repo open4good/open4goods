@@ -9,8 +9,6 @@ synonyms:
   all:
   icecat.biz:
     - "SMART TV"
-  rakuten.com:
-    - "SMART TV"
 parser:
   normalize: true
   trim: true

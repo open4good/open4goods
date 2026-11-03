@@ -47,7 +47,7 @@
       "empty": "Le contenu de cet article sera disponible bientôt.",
       "featuredImageAlt": "Image mise en avant pour {title}",
       "readingTime": "Env. {minutes} min de lecture",
-      "updated": "Mis à jour {date}"
+      "updated": "Mis à jour le {date}"
     },
     "breadcrumbs": {
       "blog": "Blog",
@@ -82,7 +82,7 @@
   },
   "home": {
     "seo": {
-      "title": "Nudger | Comparateur écologique",
+      "title": "Nudger {'|'} Comparateur écologique",
       "description": "Comparez l'impact environnemental et les prix de plus de {count} millions de produits grâce à Nudger. Faites des choix responsables pour votre budget et la planète.",
       "imageAlt": "Illustration du tableau de bord Nudger présentant des scores d'impact et des prix."
     },
@@ -90,9 +90,7 @@
       "eyebrow": "Comparateur responsable",
       "title": "Acheter mieux. Sans dépenser plus.",
       "animatedSubtitle": "",
-      "titleSubtitle": [
-        "Nudger : le comparateur écologique tech & électro"
-      ],
+      "titleSubtitle": ["Nudger : le comparateur écologique tech & électro"],
       "subtitles": [
         "Gagnez du temps. Choisissez librement.",
         "Consommez mieux sans payer plus. Nudger équilibre planète et budget.",
@@ -709,10 +707,6 @@
         "medium": "Moyenne",
         "high": "Élevée"
       },
-      "searchMode": {
-        "semantic": "Recherche sémantique",
-        "text": "Recherche textuelle"
-      },
       "showMoreImpact": "Plus de filtres",
       "showMoreTechnical": "Plus de filtres",
       "technicalTitle": "La technique",
@@ -1012,7 +1006,7 @@
     "seo": {
       "description": "Prendre contact avec l'équipe Nudger pour un partenariat, une question produit ou un échange sur l'impact.",
       "imageAlt": "Logotype Nudger utilisé pour l'aperçu de la page contact",
-      "title": "Nous contacter | Nudger"
+      "title": "Nous contacter {'|'} Nudger"
     },
     "prefill": {
       "title": {
@@ -1527,7 +1521,9 @@
         "summary": {
           "records": "Nombre total d'enregistrements",
           "size": "Taille compressée",
-          "updated": "Dernière mise à jour"
+          "updated": "Dernière mise à jour",
+          "format": "Format",
+          "formatValue": "CSV compressé (ZIP)"
         }
       },
       "creator": {
@@ -1853,6 +1849,45 @@
         "description": "On est pas des petits joueurs.",
         "label": "Taille cumulée des fichiers"
       }
+    },
+    "explore": {
+      "title": "Explorer les produits",
+      "subtitle": "Parcourez les catégories de Nudger et ouvrez des fiches produits identifiées par leur GTIN.",
+      "categoryAriaLabel": "Voir la catégorie {category}",
+      "gtinLabel": "GTIN",
+      "categories": {
+        "tv": "Téléviseurs",
+        "washing-machine": "Lave-linges",
+        "dishwasher": "Lave-vaisselles",
+        "oven": "Fours",
+        "air-conditioner": "Climatiseurs"
+      }
+    },
+    "mirrors": {
+      "title": "Aussi disponible sur",
+      "referenceLicense": "La version de référence, sur nudger.fr, est sous ODbL. Les miroirs ci-dessous indiquent leur propre licence.",
+      "linkAriaLabel": "Ouvrir le jeu de données sur {name} (nouvel onglet)",
+      "items": {
+        "datagouv": {
+          "name": "data.gouv.fr",
+          "license": "Licence : ODbL"
+        },
+        "zenodo": {
+          "name": "Zenodo",
+          "license": "Licence : CC BY 4.0"
+        },
+        "kaggle": {
+          "name": "Kaggle",
+          "license": "Licence : CC BY 4.0"
+        },
+        "figshare": {
+          "name": "Figshare",
+          "license": "Licence : CC BY 4.0"
+        }
+      }
+    },
+    "summary": {
+      "title": "Les jeux de données en bref"
     }
   },
   "opensource": {
@@ -1998,6 +2033,7 @@
   },
   "partners": {
     "affiliation": {
+      "amazonDisclosure": "En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.",
       "carouselAriaLabel": "Carrousel des partenaires affiliés",
       "empty": "Aucun partenaire ne correspond à votre recherche.",
       "linkLabel": "Visiter ce partenaire",
@@ -2123,10 +2159,6 @@
       "title": "Recherche de produits",
       "description": "Recherchez dans le catalogue de consommation responsable de Nudger pour découvrir produits, marques et verticales.",
       "imageAlt": "Illustration de l'expérience de recherche Nudger"
-    },
-    "modes": {
-      "exact_vertical": "Exact (catégories)",
-      "semantic": "Sémantique"
     }
   },
   "compare": {
@@ -2317,6 +2349,10 @@
     },
     "start_impact_text": "Envie de soutenir un projet à impact ?",
     "start_impact_subtext": "Faites vos achats via Nudger ! Ça marche aussi en allant directement chez",
+    "amazonSearch": {
+      "disclosure": "En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.",
+      "label": "Rechercher sur Amazon"
+    },
     "partners_link": "nos partenaires",
     "attributes": {
       "title": "Caractéristiques techniques",
@@ -2854,6 +2890,7 @@
         "new": "Pas d'offres neuves actuellement",
         "occasion": "Pas d'offres d'occasion actuellement"
       },
+      "lastKnownPrice": "Dernier prix relevé : {price} le {date}",
       "headers": {
         "condition": "État",
         "offer": "Offre",
@@ -2900,9 +2937,9 @@
       "serp": {
         "title": {
           "withImpact": {
-            "full": "{productName} : meilleur prix, caractéristiques et avis | ImpactScore {score}/20",
-            "fullVertical": "{verticalTitle} {productName} : meilleur prix | ImpactScore {score}/20",
-            "compact": "{productName} : meilleur prix | ImpactScore {score}/20",
+            "full": "{productName} : meilleur prix, caractéristiques et avis {'|'} ImpactScore {score}/20",
+            "fullVertical": "{verticalTitle} {productName} : meilleur prix {'|'} ImpactScore {score}/20",
+            "compact": "{productName} : meilleur prix {'|'} ImpactScore {score}/20",
             "minimal": "{productName} : ImpactScore {score}/20"
           },
           "withoutImpact": {
@@ -3648,7 +3685,7 @@
   "dataviz": {
     "page": {
       "title": "Statistiques {category}",
-      "metaTitle": "Statistiques et données - {category} | {siteName}",
+      "metaTitle": "Statistiques et données - {category} {'|'} {siteName}",
       "metaDescription": "Explorez les statistiques détaillées pour {category} : prix, marques, scores et plus encore.",
       "breadcrumbLeaf": "Statistiques",
       "heroTitle": "Tableau de bord - {category}",
@@ -3676,7 +3713,7 @@
     "pageSubtitle": "Suivi des indicateurs clés collectés automatiquement depuis différentes sources.",
     "period": "Période : {from} → {to}",
     "seo": {
-      "title": "Metriks - Tableau de bord | Nudger",
+      "title": "Metriks - Tableau de bord {'|'} Nudger",
       "description": "Visualisez les indicateurs de performance collectés automatiquement : analytics, produits, infrastructure."
     },
     "accessDenied": "Accès refusé",
@@ -3724,6 +3761,22 @@
       },
       "providers": "Sources",
       "drilldown": "Voir le détail"
+    },
+    "previousWindow": "28 j précédents : {value}",
+    "error": {
+      "label": "Erreur",
+      "unknown": "Mesure indisponible (erreur sans message)"
+    },
+    "top": {
+      "rank": "#",
+      "query": "Requête",
+      "page": "Page",
+      "clicks": "Clics",
+      "impressions": "Impressions",
+      "ctr": "CTR",
+      "position": "Position",
+      "evolution": "Clics vs fenêtre précédente",
+      "new": "nouveau"
     }
   }
 }

@@ -934,9 +934,11 @@ const formatIdentityDate = (timestamp?: number | null) => {
     return null
   }
 
-  return new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium' }).format(
-    new Date(timestamp)
-  )
+  // Fixed time zone: SSR (UTC) and browser must render the same day to hydrate.
+  return new Intl.DateTimeFormat(locale.value, {
+    dateStyle: 'medium',
+    timeZone: 'UTC',
+  }).format(new Date(timestamp))
 }
 
 const knownSince = computed(() =>

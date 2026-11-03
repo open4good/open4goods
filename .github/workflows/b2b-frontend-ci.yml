@@ -1,13 +1,16 @@
 name: B2B Frontend CI
+# Checks only, no deployment: the b2b-frontend beta deploy runs with b2b-api in testAndPublishBeta.yml (GOU-1036).
 
 on:
   push:
     paths:
       - "b2b-frontend/**"
+      - ".github/workflows/b2b-frontend-ci.yml"
     branches: [main]
   pull_request:
     paths:
       - "b2b-frontend/**"
+      - ".github/workflows/b2b-frontend-ci.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

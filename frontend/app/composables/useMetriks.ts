@@ -41,7 +41,11 @@ function parseNdjson(text: string): MetrikNdjsonRecord[] {
 /**
  * Format a metric value for display based on its unit.
  */
-export function formatMetrikValue(value: number | null, unit: string): string {
+export function formatMetrikValue(
+  value: number | null,
+  unit: string,
+  locale?: string
+): string {
   if (value === null) return '—'
 
   switch (unit) {
@@ -56,7 +60,10 @@ export function formatMetrikValue(value: number | null, unit: string): string {
       if (value >= 1024) return `${(value / 1024).toFixed(1)} KB`
       return `${value} B`
     case 'currency':
-      return `${value.toLocaleString()} €`
+      return new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: 'EUR',
+      }).format(value)
     case 'ratio':
       return value.toFixed(2)
     case 'count':
@@ -66,10 +73,75 @@ export function formatMetrikValue(value: number | null, unit: string): string {
   }
 }
 
+/** One row of a `seo.gsc.top_*` event (`params.rows`). */
+export interface MetrikTopRow {
+  rank: number
+  key: string
+  clicks: number
+  impressions: number
+  ctr: number
+  position: number
+  previousClicks: number | null
+  previousImpressions: number | null
+  previousPosition: number | null
+}
+
+const toNumber = (v: unknown): number | null =>
+  typeof v === 'number' && Number.isFinite(v) ? v : null
+
+/** True for the events whose `params.rows` hold a Search Console top list. */
+export function isTopRowsMetrik(id: string): boolean {
+  return id.startsWith('seo.gsc.top_')
+}
+
+/**
+ * Parse `params.rows` defensively: malformed rows are dropped, missing
+ * `previous*` stay `null` (absence is not zero).
+ */
+export function parseTopRows(params: Record<string, unknown>): MetrikTopRow[] {
+  const raw = params?.rows
+  if (!Array.isArray(raw)) return []
+  const rows: MetrikTopRow[] = []
+  raw.forEach((r: unknown, index) => {
+    if (!r || typeof r !== 'object') return
+    const o = r as Record<string, unknown>
+    if (typeof o.key !== 'string') return
+    rows.push({
+      rank: toNumber(o.rank) ?? index + 1,
+      key: o.key,
+      clicks: toNumber(o.clicks) ?? 0,
+      impressions: toNumber(o.impressions) ?? 0,
+      ctr: toNumber(o.ctr) ?? 0,
+      position: toNumber(o.position) ?? 0,
+      previousClicks: toNumber(o.previousClicks),
+      previousImpressions: toNumber(o.previousImpressions),
+      previousPosition: toNumber(o.previousPosition),
+    })
+  })
+  return rows
+}
+
+/** Clicks evolution vs the previous window; `null` previous ⇒ new entry. */
+export function topRowClicksEvolution(
+  row: MetrikTopRow
+): { kind: 'new' } | { kind: 'change'; delta: number } {
+  if (row.previousClicks === null) return { kind: 'new' }
+  return { kind: 'change', delta: row.clicks - row.previousClicks }
+}
+
+/** `params.previousValue` of GSC totals (previous 28-day window), if numeric. */
+export function getParamsPreviousValue(
+  params: Record<string, unknown>
+): number | null {
+  return toNumber(params?.previousValue)
+}
+
 /**
  * Get an MDI icon name based on the metric group or id.
  */
 export function getMetrikIcon(groups: string[], id: string): string {
+  if (groups.includes('affiliation')) return 'mdi-handshake-outline'
+  if (groups.includes('seo')) return 'mdi-google'
   if (groups.includes('analytics')) return 'mdi-chart-line'
   if (groups.includes('goals') && groups.includes('sources'))
     return 'mdi-source-branch'

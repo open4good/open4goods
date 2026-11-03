@@ -64,6 +64,11 @@
       }}</v-btn>
     </v-container>
 
+    <OpendataDatasetSummary
+      :title="t('opendata.summary.title')"
+      :items="summaryItems"
+    />
+
     <OpendataDatasetHighlights
       id="datasets"
       :title="t('opendata.datasets.title')"
@@ -83,6 +88,10 @@
         </div>
       </template>
     </OpendataDatasetHighlights>
+
+    <OpendataExploreProducts page="opendata" />
+
+    <OpendataMirrors page="opendata" />
 
     <OpendataLicenseSection
       :title="t('opendata.license.title')"
@@ -112,14 +121,20 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { OpenDataOverviewDto } from '~~/shared/api-client'
+import type {
+  OpenDataDatasetDto,
+  OpenDataOverviewDto,
+} from '~~/shared/api-client'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 
 import PageHeader from '~/components/shared/header/PageHeader.vue'
 import HeroEducationCard from '~/components/shared/ui/HeroEducationCard.vue'
 import OpendataStatsStrip from '~/components/domains/opendata/OpendataStatsStrip.vue'
+import OpendataDatasetSummary from '~/components/domains/opendata/OpendataDatasetSummary.vue'
 import OpendataDatasetHighlights from '~/components/domains/opendata/OpendataDatasetHighlights.vue'
 import OpendataLicenseSection from '~/components/domains/opendata/OpendataLicenseSection.vue'
+import OpendataExploreProducts from '~/components/domains/opendata/OpendataExploreProducts.vue'
+import OpendataMirrors from '~/components/domains/opendata/OpendataMirrors.vue'
 import OpendataFaqSection from '~/components/domains/opendata/OpendataFaqSection.vue'
 import OpendataOpenSourceStrip from '~/components/domains/opendata/OpendataOpenSourceStrip.vue'
 
@@ -133,12 +148,26 @@ const requestURL = useRequestURL()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 const licenseSectionId = 'opendata-odbl-license'
 
-const { data, pending, error, refresh } = useAsyncData<OpenDataOverviewDto>(
+interface OverviewPayload {
+  overview: OpenDataOverviewDto
+  gtinDataset: OpenDataDatasetDto | null
+}
+
+const { data, pending, error, refresh } = useAsyncData<OverviewPayload>(
   'opendata-overview',
-  () =>
-    $fetch<OpenDataOverviewDto>('/api/opendata', {
-      headers: requestHeaders,
-    }),
+  async () => {
+    const [overview, gtinDataset] = await Promise.all([
+      $fetch<OpenDataOverviewDto>('/api/opendata', {
+        headers: requestHeaders,
+      }),
+      // The update date is optional: do not fail the page without it.
+      $fetch<OpenDataDatasetDto>('/api/opendata/gtin', {
+        headers: requestHeaders,
+      }).catch(() => null),
+    ])
+
+    return { overview, gtinDataset }
+  },
   {
     lazy: true,
   }
@@ -169,7 +198,7 @@ const formatProductCount = (count?: string | number | null) => {
 }
 
 const stats = computed(() => {
-  const overview = data.value
+  const overview = data.value?.overview
 
   return [
     {
@@ -192,6 +221,28 @@ const stats = computed(() => {
     },
   ]
 })
+
+const summaryItems = computed(() => [
+  {
+    label: String(t('opendata.datasets.common.summary.format')),
+    value: String(t('opendata.datasets.common.summary.formatValue')),
+    icon: 'mdi-folder-zip-outline',
+  },
+  {
+    label: String(t('opendata.datasets.common.summary.updated')),
+    value:
+      data.value?.gtinDataset?.lastUpdated ??
+      String(t('opendata.stats.placeholder')),
+    icon: 'mdi-calendar-clock',
+  },
+  {
+    label: String(t('opendata.datasets.common.summary.size')),
+    value:
+      data.value?.overview?.totalDatasetSize ??
+      String(t('opendata.stats.placeholder')),
+    icon: 'mdi-package-down',
+  },
+])
 
 const datasetCards = computed(() => [
   {

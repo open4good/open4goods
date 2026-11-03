@@ -6,7 +6,10 @@
  * Supports provider, group, and tag filtering.
  */
 import type { MetrikWithTrend } from '~/types/metriks'
-import { formatMetrikValue } from '~/composables/useMetriks'
+import {
+  formatMetrikValue,
+  getParamsPreviousValue,
+} from '~/composables/useMetriks'
 
 const props = withDefaults(
   defineProps<{
@@ -36,7 +39,7 @@ const emit = defineEmits<{
   select: [metrik: MetrikWithTrend]
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const search = ref('')
 
@@ -174,18 +177,40 @@ function trendColor(m: MetrikWithTrend): string {
                 >
                   <td class="pr-2">{{ point.date }}</td>
                   <td class="text-right">
-                    {{ formatMetrikValue(point.value, item.unit) }}
+                    {{ formatMetrikValue(point.value, item.unit, locale) }}
                   </td>
                 </tr>
               </tbody>
             </table>
           </v-tooltip>
-          <span :class="{ 'text-error': item.status === 'error' }">
-            {{ formatMetrikValue(item.value, item.unit) }}
+          <span
+            v-if="item.status === 'error'"
+            class="text-error metrik-error"
+            data-testid="metrik-error"
+          >
+            {{ t('metriks.error.label') }} —
+            {{ item.errorMessage || t('metriks.error.unknown') }}
           </span>
-          <span class="text-caption text-medium-emphasis ml-1">{{
-            item.unit
-          }}</span>
+          <template v-else>
+            <span>{{ formatMetrikValue(item.value, item.unit, locale) }}</span>
+            <span class="text-caption text-medium-emphasis ml-1">{{
+              item.unit
+            }}</span>
+            <div
+              v-if="getParamsPreviousValue(item.params) !== null"
+              class="text-caption text-medium-emphasis font-weight-normal"
+            >
+              {{
+                t('metriks.previousWindow', {
+                  value: formatMetrikValue(
+                    getParamsPreviousValue(item.params),
+                    item.unit,
+                    locale
+                  ),
+                })
+              }}
+            </div>
+          </template>
         </div>
       </template>
 

@@ -47,6 +47,7 @@
     "date-fns": "^4.4.0",
     "echarts": "^6.1.0",
     "highlight.js": "^11.11.1",
+    "isbot": "^5.2.2",
     "isomorphic-dompurify": "^3.18.0",
     "jsdom": "^29.1.1",
     "jwt-decode": "^4.0.0",

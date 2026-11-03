@@ -103,6 +103,10 @@
       :options="downloadOptions"
     />
 
+    <OpendataExploreProducts page="isbn" />
+
+    <OpendataMirrors page="isbn" />
+
     <OpendataLicenseSection
       :title="t('opendata.license.title')"
       :description="t('opendata.license.description')"
@@ -126,11 +130,12 @@ import type {
   OpenDataDatasetDto,
   OpenDataOverviewDto,
 } from '~~/shared/api-client'
-import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 
 import PageHeader from '~/components/shared/header/PageHeader.vue'
 import OpendataDatasetSummary from '~/components/domains/opendata/OpendataDatasetSummary.vue'
 import OpendataDownloadComparison from '~/components/domains/opendata/OpendataDownloadComparison.vue'
+import OpendataExploreProducts from '~/components/domains/opendata/OpendataExploreProducts.vue'
+import OpendataMirrors from '~/components/domains/opendata/OpendataMirrors.vue'
 import OpendataFaqSection from '~/components/domains/opendata/OpendataFaqSection.vue'
 import OpendataLicenseSection from '~/components/domains/opendata/OpendataLicenseSection.vue'
 
@@ -138,7 +143,7 @@ definePageMeta({
   ssr: true,
 })
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const localePath = useLocalePath()
 const requestURL = useRequestURL()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
@@ -174,6 +179,11 @@ const placeholder = computed(() =>
 )
 
 const summaryItems = computed(() => [
+  {
+    label: String(t('opendata.datasets.common.summary.format')),
+    value: String(t('opendata.datasets.common.summary.formatValue')),
+    icon: 'mdi-folder-zip-outline',
+  },
   {
     label: String(t('opendata.datasets.common.summary.records')),
     value: dataset.value?.recordCount ?? placeholder.value,
@@ -316,7 +326,9 @@ const faqItems = computed(() => [
 
 const canonicalUrl = computed(() =>
   new URL(
-    resolveLocalizedRoutePath('opendata-isbn', locale.value),
+    // `opendata-isbn` is a file-based route, absent from LOCALIZED_ROUTE_PATHS:
+    // resolveLocalizedRoutePath would return the 404 path `/opendata-isbn`.
+    localePath('opendata-isbn'),
     requestURL.origin
   ).toString()
 )

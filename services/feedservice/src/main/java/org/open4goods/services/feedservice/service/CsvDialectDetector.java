@@ -81,12 +81,41 @@ public class CsvDialectDetector
             }
         }
 
+        if (bestScore <= 0.0)
+        {
+            // No candidate produced a usable record shape (e.g. every data row is malformed for every dialect).
+            // Do not let the first candidate (tab) win by default: rely on the header, the only line that
+            // reliably carries the delimiter.
+            bestSep = separatorFromHeader(sampleLines.getFirst());
+            bestQuote = '"';
+            bestEscape = null;
+        }
+
         CsvSchema schema = buildSchema(sampleLines.getFirst(), bestSep, bestQuote);
         if (bestEscape != null)
         {
             schema = schema.withEscapeChar(bestEscape);
         }
         return schema;
+    }
+
+    /**
+     * Picks the candidate separator that splits the header into the most columns, comma when none splits it.
+     */
+    private char separatorFromHeader(String header)
+    {
+        char best = ',';
+        int bestColumns = 1;
+        for (char sep : SEPARATOR_CANDIDATES)
+        {
+            int columns = countFieldsOutsideQuotes(header, sep, '"', null);
+            if (columns > bestColumns)
+            {
+                bestColumns = columns;
+                best = sep;
+            }
+        }
+        return best;
     }
 
     private List<String> readSample(File file, Charset charset) throws IOException
@@ -210,7 +239,10 @@ public class CsvDialectDetector
         double headerConsistency = (double) matchingHeader / dataLines;
         double headerPenalty = modalCount == headerColumns ? 1.0 : 0.45;
 
-        return (modalConsistency + headerConsistency) * 0.5 * Math.log1p(modalCount) * headerPenalty;
+        // Linear in the column count: a separator that splits a record into many columns with some noise
+        // (unquoted ';' in HTML entities) must beat a stray character that cleanly yields two columns
+        // (e.g. a trailing tab on every line).
+        return (modalConsistency + headerConsistency) * 0.5 * modalCount * headerPenalty;
     }
 
     private LogicalRecord countLogicalRecordFields(

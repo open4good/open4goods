@@ -4,7 +4,10 @@ import { defineComponent, h } from 'vue'
 import { createI18n } from 'vue-i18n'
 import type { CommercialEvent, ProductDto } from '~~/shared/api-client'
 import ProductPriceSection from './ProductPriceSection.vue'
-import { AFFILIATE_LINK_REL } from '~/utils/_product-pricing'
+import {
+  AFFILIATE_LINK_REFERRER_POLICY,
+  AFFILIATE_LINK_REL,
+} from '~/utils/_product-pricing'
 
 vi.mock('vue-echarts', () => ({
   default: defineComponent({
@@ -27,6 +30,11 @@ vi.mock('vue-echarts', () => ({
 const i18nMessages = {
   'fr-FR': {
     product: {
+      amazonSearch: {
+        label: 'Rechercher sur Amazon',
+        disclosure:
+          'En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.',
+      },
       price: {
         title: 'Prix et évolution',
         subtitle: 'Suivez l’évolution des prix et comparez les offres.',
@@ -58,6 +66,12 @@ const i18nMessages = {
         },
         noHistory:
           "L'historique des prix n'est pas encore disponible pour ce produit.",
+        noOffersBanner: "Pas d'offres actuellement !",
+        noOffers: {
+          new: "Pas d'offres neuves actuellement",
+          occasion: "Pas d'offres d'occasion actuellement",
+        },
+        lastKnownPrice: 'Dernier prix relevé : {price} le {date}',
         competition: {
           title: 'Niveau de concurrence',
           count: '{count} offres',
@@ -253,7 +267,8 @@ describe('ProductPriceSection', () => {
   })
 
   const mountComponent = async (
-    overrides?: Partial<NonNullable<ProductDto['offers']>>
+    overrides?: Partial<NonNullable<ProductDto['offers']>>,
+    extraProps: Record<string, unknown> = {}
   ) => {
     const i18n = createI18n({
       legacy: false,
@@ -269,6 +284,7 @@ describe('ProductPriceSection', () => {
       props: {
         offers,
         commercialEvents,
+        ...extraProps,
       },
       global: {
         plugins: [[i18n]],
@@ -348,6 +364,10 @@ describe('ProductPriceSection', () => {
     expect(hrefs).toContain('/contrib/abc123')
     links.forEach(link => {
       expect(link.attributes('rel')).toBe(AFFILIATE_LINK_REL)
+      expect(link.attributes('rel')).not.toContain('noreferrer')
+      expect(link.attributes('referrerpolicy')).toBe(
+        AFFILIATE_LINK_REFERRER_POLICY
+      )
       expect(link.attributes('target')).toBe('_blank')
     })
 
@@ -371,6 +391,91 @@ describe('ProductPriceSection', () => {
     })
 
     expect(wrapper.find('.product-price__history-cta').exists()).toBe(false)
+
+    await wrapper.unmount()
+  })
+
+  it('dates the last recorded price when no offer is live', async () => {
+    const wrapper = await mountComponent({
+      offersCount: 0,
+      hasOccasions: false,
+      bestPrice: undefined,
+      bestNewOffer: undefined,
+      bestOccasionOffer: undefined,
+      offersByCondition: {},
+      newHistory: {
+        // Unordered on purpose: the label must use the most recent point.
+        entries: [
+          { timestamp: Date.UTC(2026, 4, 8), price: 599 },
+          { timestamp: Date.UTC(2026, 8, 12, 2), price: 499 },
+          { timestamp: Date.UTC(2026, 6, 22), price: 579 },
+        ],
+      },
+      occasionHistory: { entries: [] },
+    })
+
+    expect(wrapper.text()).toContain("Pas d'offres actuellement !")
+    const emptyCard = wrapper
+      .findAll('.text-caption')
+      .find(node => node.text().startsWith('Dernier prix relevé'))
+    expect(emptyCard?.text()).toMatch(
+      /^Dernier prix relevé : 499[\s\u202f,0]*€ le 12 septembre 2026$/
+    )
+
+    await wrapper.unmount()
+  })
+
+  const noOffer = {
+    offersCount: 0,
+    hasOccasions: false,
+    bestPrice: undefined,
+    bestNewOffer: undefined,
+    bestOccasionOffer: undefined,
+    offersByCondition: {},
+    amazonSearchLink: '/contrib/amazon-token',
+  }
+
+  it('shows the Amazon search link when the hero pricing panel is hidden (GOU-1396)', async () => {
+    const wrapper = await mountComponent(noOffer, {
+      showAmazonSearchLink: true,
+    })
+
+    const link = wrapper.find('.product-amazon-search__link')
+    expect(link.attributes('href')).toBe('/contrib/amazon-token')
+    expect(link.attributes('rel')).toBe(AFFILIATE_LINK_REL)
+    expect(link.attributes('referrerpolicy')).toBe(
+      AFFILIATE_LINK_REFERRER_POLICY
+    )
+    expect(wrapper.text()).toContain(
+      'En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.'
+    )
+
+    await wrapper.unmount()
+  })
+
+  it('leaves the Amazon search link to the hero pricing panel by default', async () => {
+    const wrapper = await mountComponent(noOffer)
+
+    expect(wrapper.find('.product-amazon-search').exists()).toBe(false)
+
+    await wrapper.unmount()
+  })
+
+  it('never shows the Amazon search link next to offers', async () => {
+    const wrapper = await mountComponent(
+      { amazonSearchLink: '/contrib/amazon-token' },
+      { showAmazonSearchLink: true }
+    )
+
+    expect(wrapper.find('.product-amazon-search').exists()).toBe(false)
+
+    await wrapper.unmount()
+  })
+
+  it('omits the last recorded price while an offer is live', async () => {
+    const wrapper = await mountComponent()
+
+    expect(wrapper.text()).not.toContain('Dernier prix relevé')
 
     await wrapper.unmount()
   })
