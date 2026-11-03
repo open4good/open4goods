@@ -1,3 +1,6 @@
+import { setHeader } from 'h3'
+import type { H3Event } from 'h3'
+
 /**
  * Referrer-Policy of the /contrib/ redirect, chosen by target host.
  *
@@ -36,4 +39,17 @@ export const resolveContribReferrerPolicy = (location: string): string => {
   }
 
   return CONTRIB_DEFAULT_REFERRER_POLICY
+}
+
+/**
+ * Headers of a successful /contrib/ resolution, shared by the page route and
+ * /api/contrib/: never cached nor indexed, Referer policy chosen by target.
+ */
+export const setContribRedirectHeaders = (
+  event: H3Event,
+  location: string
+): void => {
+  setHeader(event, 'X-Robots-Tag', 'noindex, nofollow')
+  setHeader(event, 'Referrer-Policy', resolveContribReferrerPolicy(location))
+  setHeader(event, 'Cache-Control', 'no-store')
 }

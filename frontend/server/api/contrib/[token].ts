@@ -4,10 +4,13 @@ import {
   resolveAffiliationRedirect,
   sendContribPlainError,
 } from '../../utils/affiliation-redirect'
+import { setContribRedirectHeaders } from '../../utils/contrib-referrer-policy'
 
 export default defineEventHandler(async event => {
   try {
-    return await resolveAffiliationRedirect(event)
+    const redirect = await resolveAffiliationRedirect(event)
+    setContribRedirectHeaders(event, redirect.location)
+    return redirect
   } catch (error) {
     return sendContribPlainError(event, error)
   }
