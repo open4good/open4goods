@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.services.remotefilecaching.config.CacheResourceConfig;
+import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Logger;
@@ -253,8 +254,81 @@ class RemoteFileCachingServiceTest {
                 .contains(RemoteFileCachingService.cacheFileName(url)));
     }
 
+    /**
+     * Ensures a gzip feed is decompressed into the work folder and its download deleted.
+     */
+    @Test
+    void decompressesGzipFeedsIntoTheWorkFolder() throws IOException {
+        Path gzip = gzip(tempDir.resolve("feed.csv.gz"), "ean;name\n1;tv\n");
+
+        File csv = newService().decompressGzipAndDeleteSource(gzip.toFile());
+
+        assertThat(csv.toPath().getParent()).isEqualTo(workFolder());
+        assertThat(Files.readString(csv.toPath())).isEqualTo("ean;name\n1;tv\n");
+        assertThat(gzip).doesNotExist();
+    }
+
+    /**
+     * Ensures a truncated gzip feed fails loudly and leaves no partial output behind (GOU-1155: the error was
+     * logged only, the truncated output parsed, and gzip work files piled up in /tmp).
+     */
+    @Test
+    void truncatedGzipFeedsFailAndLeaveNoWorkFile() throws IOException {
+        Path gzip = gzip(tempDir.resolve("feed.csv.gz"), "ean;name\n".repeat(10_000));
+        byte[] bytes = Files.readAllBytes(gzip);
+        Files.write(gzip, java.util.Arrays.copyOf(bytes, bytes.length / 2));
+        RemoteFileCachingService service = newService();
+
+        Throwable thrown = catchThrowable(() -> service.decompressGzipAndDeleteSource(gzip.toFile()));
+
+        assertThat(thrown).isInstanceOf(IOException.class);
+        assertThat(workFolder()).isEmptyDirectory();
+        // Left to the caller, which deletes its download in any case
+        assertThat(gzip).exists();
+    }
+
+    /**
+     * Ensures startup removes the work files a stopped JVM left behind, but not those of a feed still running.
+     */
+    @Test
+    void startupSweepsStaleWorkFilesOnly() throws IOException {
+        Files.createDirectories(workFolder());
+        Path stale = Files.writeString(workFolder().resolve("gzip123.csv"), "left by a stopped JVM");
+        Path young = Files.writeString(workFolder().resolve("gzip456.csv"), "feed in progress");
+        stale.toFile().setLastModified(System.currentTimeMillis()
+                - RemoteFileCachingService.STALE_TMP_FILE_AGE.toMillis() - TimeUnit.HOURS.toMillis(1));
+
+        newService();
+
+        assertThat(stale).doesNotExist();
+        assertThat(young).exists();
+    }
+
+    /**
+     * Ensures a local feed path is read in place, without creating a work file.
+     */
+    @Test
+    void localFeedsAreReadInPlace() throws IOException {
+        Path local = writeRemote("local.csv", "ean;name");
+        RemoteFileCachingService service = newService();
+
+        assertThat(service.downloadToTmpFile(local.toString(), "local")).isEqualTo(local.toFile());
+        assertThat(workFolder()).isEmptyDirectory();
+    }
+
     private RemoteFileCachingService newService() {
-        return new RemoteFileCachingService(cacheFolder().toString());
+        return new RemoteFileCachingService(cacheFolder().toString(), new RemoteFileCachingProperties(), workFolder().toFile());
+    }
+
+    private Path workFolder() {
+        return tempDir.resolve("work");
+    }
+
+    private static Path gzip(Path target, String content) throws IOException {
+        try (var out = new java.util.zip.GZIPOutputStream(Files.newOutputStream(target))) {
+            out.write(content.getBytes(StandardCharsets.UTF_8));
+        }
+        return target;
     }
 
     private Path cacheFolder() {

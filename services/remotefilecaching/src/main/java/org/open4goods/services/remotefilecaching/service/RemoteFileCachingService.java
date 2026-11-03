@@ -8,6 +8,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.MessageDigest;
+import java.time.Duration;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.HashMap;
@@ -69,6 +70,16 @@ public class RemoteFileCachingService {
         private final int readTimeout;
 
 	private final String resourceFolder;
+
+	/**
+	 * Folder of the feed work files ({@link #downloadToTmpFile}, {@link #decompressGzipAndDeleteSource}).
+	 * A JVM stopped while a feed is parsed never runs the caller's cleanup, so files older than
+	 * {@link #STALE_TMP_FILE_AGE} are swept here at startup.
+	 */
+	private final File tmpFolder;
+
+	/** Age above which a feed work file is considered left over by a stopped JVM. */
+	static final Duration STALE_TMP_FILE_AGE = Duration.ofDays(2);
 	
 	// TODO(p3,design) : Inject
 	private RestTemplate restTemplate = new RestTemplate();
@@ -79,12 +90,49 @@ public class RemoteFileCachingService {
         }
 
         public RemoteFileCachingService(final String resourceFolder, RemoteFileCachingProperties properties) {
+                this(resourceFolder, properties, new File(System.getProperty("java.io.tmpdir"), "open4goods-feeds"));
+        }
+
+        RemoteFileCachingService(final String resourceFolder, RemoteFileCachingProperties properties, File tmpFolder) {
                 super();
                 this.resourceFolder = resourceFolder;
                 this.connectionTimeout = properties.getConnectionTimeout();
                 this.readTimeout = properties.getReadTimeout();
+                this.tmpFolder = tmpFolder;
                 final File rFolder = new File(resourceFolder);
                 rFolder.mkdirs();
+                tmpFolder.mkdirs();
+                sweepStaleTmpFiles(tmpFolder, STALE_TMP_FILE_AGE);
+        }
+
+        /**
+         * Deletes the regular files of {@code folder} last modified more than {@code maxAge} ago.
+         * Several JVMs of a host share the folder: a younger file may belong to a running feed and is kept.
+         *
+         * @param folder the feed work folder
+         * @param maxAge age above which a file is deleted
+         * @return the number of deleted files
+         */
+        static int sweepStaleTmpFiles(File folder, Duration maxAge) {
+                File[] files = folder.listFiles(File::isFile);
+                if (files == null) {
+                        return 0;
+                }
+                long threshold = System.currentTimeMillis() - maxAge.toMillis();
+                int deleted = 0;
+                long bytes = 0;
+                for (File file : files) {
+                        long length = file.length();
+                        if (file.lastModified() < threshold && file.delete()) {
+                                deleted++;
+                                bytes += length;
+                        }
+                }
+                if (deleted > 0) {
+                        logger.warn("Deleted {} stale feed work files ({}) from {}", deleted,
+                                        FileUtils.byteCountToDisplaySize(bytes), folder.getAbsolutePath());
+                }
+                return deleted;
         }
 
 
@@ -173,11 +221,15 @@ public class RemoteFileCachingService {
 	 /**
      * Decompresses a GZIP file to the specified output file.
      * Utilizes a buffer for efficient reading and writing.
+     * <p>
+     * On failure (truncated or not gzip input, full disk), the partial output is deleted and the error
+     * is thrown: it used to be logged only, so callers parsed a truncated feed or cached a truncated file.
      *
      * @param gzipFile The GZIP file to decompress.
      * @param newFile  The file to write the decompressed data to.
+     * @throws IOException if the decompression fails; {@code newFile} is deleted
      */
-    public void decompressGzipFile(File gzipFile, File newFile) {
+    public void decompressGzipFile(File gzipFile, File newFile) throws IOException {
         // Using try-with-resources to ensure streams are closed automatically
         try (FileInputStream fis = new FileInputStream(gzipFile);
              GZIPInputStream gis = new GZIPInputStream(fis);
@@ -193,9 +245,8 @@ public class RemoteFileCachingService {
             logger.info("Successfully decompressed {} to {}", gzipFile.getAbsolutePath(), newFile.getAbsolutePath());
 
         } catch (IOException e) {
-            // Log the error with specific details about the input/output files
-            logger.error("Error occurred while decompressing GZIP file '{}' to '{}'.", 
-                         gzipFile.getAbsolutePath(), newFile.getAbsolutePath(), e);
+            FileUtils.deleteQuietly(newFile);
+            throw new IOException("Error while decompressing GZIP file " + gzipFile.getName(), e);
         }
     }
 
@@ -209,27 +260,19 @@ public class RemoteFileCachingService {
      *         the URL (see {@link #redactedCause(Exception)}).
      */
     public File downloadToTmpFile(String url, String safeName) throws IOException {
+        // Local files (used for debug) are read in place
+        if (!url.startsWith("http")) {
+            return new File(url);
+        }
         // Create a temporary file with a normalized safe name
-        File destFile = File.createTempFile("csv", IdHelper.normalizeFileName(safeName) + ".csv");
+        // Recreated if removed while the JVM runs (manual or tmpfiles cleanup)
+        tmpFolder.mkdirs();
+        File destFile = File.createTempFile("csv", IdHelper.normalizeFileName(safeName) + ".csv", tmpFolder);
 
         logger.info("Downloading CSV for '{}' from '{}' to '{}'", safeName, loggableUrl(url), destFile.getAbsolutePath());
 
         try {
-            // Handle HTTP/HTTPS URLs
-            if (url.startsWith("http")) {
-                FileUtils.copyURLToFile(new URL(url), destFile, connectionTimeout, readTimeout);
-                
-            }
-            // Handle classpath resources if necessary (currently commented out)
-            // else if (url.startsWith(CLASSPATH_PREFIX)) {
-            //     ClassPathResource res = new ClassPathResource(url.substring(CLASSPATH_PREFIX.length()));
-            //     FileUtils.copyInputStreamToFile(res.getInputStream(), destFile);
-            // }
-            // Handle local file paths
-            else {
-                destFile = new File(url);
-            }
-
+            FileUtils.copyURLToFile(new URL(url), destFile, connectionTimeout, readTimeout);
             logger.info("File successfully downloaded to '{}'", destFile.getAbsolutePath());
         } catch (Exception e) {
         	// Delete the tmp file
@@ -244,11 +287,25 @@ public class RemoteFileCachingService {
     
     
 
+	/**
+	 * Decompresses a downloaded gzip feed into a new work file of the feed work folder, then deletes the source.
+	 *
+	 * @param destFile the downloaded gzip file
+	 * @return the decompressed file, to be deleted by the caller
+	 * @throws IOException if the decompression fails; the source is then left to the caller and no output remains
+	 */
 	public File decompressGzipAndDeleteSource(File destFile) throws IOException {
-		File tmpFile = File.createTempFile("gzip", "gzip");
+		// Recreated if removed while the JVM runs (manual or tmpfiles cleanup)
+		tmpFolder.mkdirs();
+		File tmpFile = File.createTempFile("gzip", ".csv", tmpFolder);
 		decompressGzipFile(destFile, tmpFile);
-		Files.delete(destFile.toPath());
-		return new File(tmpFile.getAbsolutePath());
+		try {
+			Files.delete(destFile.toPath());
+		} catch (IOException e) {
+			FileUtils.deleteQuietly(tmpFile);
+			throw e;
+		}
+		return tmpFile;
 	}
 
 	public File unzipFileAndDeleteSource(File sourceFile) throws IOException {
