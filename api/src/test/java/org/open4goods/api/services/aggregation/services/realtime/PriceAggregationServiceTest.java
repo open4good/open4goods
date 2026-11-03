@@ -47,12 +47,62 @@ class PriceAggregationServiceTest {
         assertThat(product.getOffersCount()).isEqualTo(2);
     }
 
+    /**
+     * Verifies out-of-stock placeholder prices (Back Market publishes 1 EUR on
+     * out-of-stock rows) never become offers nor the occasion minimum price.
+     *
+     * @throws Exception when aggregation fails
+     */
+    @Test
+    void ignoresOutOfStockOffers() throws Exception {
+        PriceAggregationService service = new PriceAggregationService(LOGGER);
+        Product product = new Product(123L);
+
+        DataFragment outOfStock = offer("backmarket.fr", "https://example.com/oos", 1.0, 0.0, 2, 10,
+                ProductCondition.OCCASION, InStock.OUTOFSTOCK);
+        DataFragment inStock = offer("certideal.fr", "https://example.com/ok", 249.0, 0.0, 2, 3,
+                ProductCondition.OCCASION, InStock.INSTOCK);
+
+        service.onDataFragment(outOfStock, product, new VerticalConfig());
+        assertThat(product.getPrice().getOffers()).isEmpty();
+        assertThat(product.getPrice().getMinPrice()).isNull();
+        assertThat(product.getPrice().getOccasionPricehistory()).isEmpty();
+
+        service.onDataFragment(inStock, product, new VerticalConfig());
+
+        assertThat(product.getOffersCount()).isEqualTo(1);
+        assertThat(product.bestPrice().getDatasourceName()).isEqualTo("certideal.fr");
+        assertThat(product.bestPrice().getPrice()).isEqualTo(249.0);
+    }
+
+    /**
+     * Verifies fragments without explicit stock information are still aggregated.
+     *
+     * @throws Exception when aggregation fails
+     */
+    @Test
+    void keepsOffersWithUnknownStock() throws Exception {
+        PriceAggregationService service = new PriceAggregationService(LOGGER);
+        Product product = new Product(123L);
+
+        service.onDataFragment(offer("merchant-a", "https://example.com/a", 100.0, 0.0, 2, 4,
+                ProductCondition.NEW, null), product, new VerticalConfig());
+
+        assertThat(product.getOffersCount()).isEqualTo(1);
+    }
+
     private static DataFragment offer(String datasource, String url, double priceValue, double shippingCost,
             int shippingTime, int quantityInStock) {
+        return offer(datasource, url, priceValue, shippingCost, shippingTime, quantityInStock,
+                ProductCondition.NEW, InStock.INSTOCK);
+    }
+
+    private static DataFragment offer(String datasource, String url, double priceValue, double shippingCost,
+            int shippingTime, int quantityInStock, ProductCondition condition, InStock stock) {
         DataFragment fragment = DataFragment.newOffer(url, datasource);
         fragment.addName("Offer " + datasource);
-        fragment.setProductState(ProductCondition.NEW);
-        fragment.setInStock(InStock.INSTOCK);
+        fragment.setProductState(condition);
+        fragment.setInStock(stock);
         fragment.setShippingCost(shippingCost);
         fragment.setShippingTime(shippingTime);
         fragment.setQuantityInStock(quantityInStock);

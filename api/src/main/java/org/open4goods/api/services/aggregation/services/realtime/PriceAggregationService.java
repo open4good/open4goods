@@ -19,6 +19,7 @@ import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.AggregatedPrices;
 import org.open4goods.model.price.PriceHistory;
+import org.open4goods.model.product.InStock;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductCondition;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -33,7 +34,9 @@ import com.google.common.collect.Sets;
  *
  * <p>Processing steps:
  * <ol>
- *   <li>Add the fragment's price to the product's offer set.</li>
+ *   <li>Add the fragment's price to the product's offer set, unless the
+ *       fragment is explicitly out of stock (merchants such as Back Market
+ *       publish placeholder prices, e.g. 1 EUR, on out-of-stock rows).</li>
  *   <li>Filter out offers older than {@code ProductRepository.VALID_UNTIL_DURATION}.</li>
  *   <li>Deduplicate by keeping only the lowest price per
  *       (datasource, product-state) pair.</li>
@@ -69,6 +72,8 @@ public class PriceAggregationService extends AbstractAggregationService {
 			dedicatedLogger.debug("No price for data fragment {}, skipping", fragment);
 		} else if (fragment.getPrice().getPrice() == 0.0) {
 			dedicatedLogger.info("Price is 0 for datafragment {}, skipping", fragment);
+		} else if (fragment.getInStock() == InStock.OUTOFSTOCK) {
+			dedicatedLogger.debug("Out of stock data fragment {}, skipping its price", fragment);
 		} else {
 			AggregatedPrice aggPrice = new AggregatedPrice(fragment);
 			aggregatedData.getPrice().getOffers().add(aggPrice);
