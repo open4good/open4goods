@@ -9,6 +9,7 @@ import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.CompletionFacadeService;
+import org.open4goods.api.services.DatasourcePurgeService;
 import org.open4goods.api.services.VerticalsGenerationService;
 import org.open4goods.api.services.completion.AmazonCompletionService;
 import org.open4goods.api.services.completion.EprelCompletionService;
@@ -224,6 +225,11 @@ public class ApiConfig {
 	@Bean
 	BatchService batchService(AggregationFacadeService aggregationFacadeService, CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository, FeedIndexingService feedIndexingService, FeedService feedService, SerialisationService serialisationService, ResourceService resourceService) {
 		return new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService, productRepository,  feedIndexingService, feedService, serialisationService, resourceService, apiProperties);
+	}
+
+	@Bean
+	DatasourcePurgeService datasourcePurgeService(ProductRepository productRepository) {
+		return new DatasourcePurgeService(productRepository);
 	}
 
 	@Bean

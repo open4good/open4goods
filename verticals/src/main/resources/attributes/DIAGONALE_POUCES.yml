@@ -64,8 +64,6 @@ synonyms:
     - "DIAGONALE"
     - "DIAGONALINCH"
     - "CALCULATEDDIAGONALINCH"
-  rakuten.com:
-    - "DIAGONALE"
   eprel:
     - "DIAGONALINCH"
 parser:

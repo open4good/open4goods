@@ -86,3 +86,32 @@ fond (un seul à la fois ; un second appel pendant un run renvoie l'état couran
 l'état (`IDLE`, `RUNNING`, `COMPLETED` avec le rapport, `FAILED`). Les clés actives sont stockées par empreinte 64 bits
 dans un `long[]` trié (`ActiveKeySet`, ~8 o/clé) : une collision ne peut que conserver un fichier, jamais classer un
 fichier référencé comme orphelin. Si le tas ne suffit pas, le run s'abandonne (`aborted`, aucun fichier touché).
+
+## Purge d'une datasource retirée
+
+`POST /batch/purge-datasource?datasource=<nom>&dryRun=true|false` (GOU-1592, `DatasourcePurgeService`) retire de
+l'index produit toutes les données d'une datasource : offres `price.offers` dont `datasourceName` vaut `<nom>`,
+puis `Product.removeDatasourceData` (clé de `datasourceCodes`, alias de marque, catégorie, description, sources
+d'attributs ; une catégorie encore portée par une autre datasource reste). Meilleure offre (`price.minPrice`),
+`offersCount` et `price.conditions` sont recalculés sur les offres restantes, sans filtre de fraîcheur : les offres
+des autres datasources ne sont jamais retirées. Historique et tendances de prix ne sont pas touchés.
+
+- `<nom>` est le `name` du YAML de la datasource (valeur exacte de `datasourceName` et des clés de
+  `datasourceCodes`), pas le nom du fichier : `rakuten.com` pour `rakuten.com-csv.yml`. `Rakuten FR` est une autre
+  datasource.
+- `dryRun=true` par défaut : compte produits et offres touchés, donne jusqu'à 20 GTIN d'exemple, n'écrit rien.
+- Parcours complet par scroll (pages de `FULL_PRODUCT_PAGE_SIZE`, produits complets, embeddings compris), écriture
+  par bulks de 200, progression loguée tous les 50 000 produits. Un produit sans donnée de la datasource n'est
+  jamais réécrit : un second passage ne touche rien. À lancer hors de la fenêtre du batch nocturne.
+- Asynchrone (un seul run à la fois) : réponse `202` ; `GET /batch/purge-datasource` donne l'état (`IDLE`,
+  `RUNNING`, `COMPLETED` avec le rapport `scannedProducts`, `touchedProducts`, `removedOffers`, `savedProducts`,
+  `failedProducts`, `sampleGtins`, ou `FAILED`).
+
+Appel Ops (clé `admin-key`, secret `O4G_INTERNAL_API_KEY`, brute dans l'en-tête `Authorization`), dry run, état, puis
+run réel une fois le rapport du dry run vérifié :
+
+```bash
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/purge-datasource?datasource=rakuten.com"
+curl -H "Authorization: $O4G_INTERNAL_API_KEY" https://api.nudger.fr/batch/purge-datasource
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/purge-datasource?datasource=rakuten.com&dryRun=false"
+```

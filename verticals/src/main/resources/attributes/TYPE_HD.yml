@@ -9,8 +9,6 @@ synonyms:
   all:
   icecat.biz:
     - "TYPE HD"
-  rakuten.com:
-    - "TYPE HD"
 parser:
   normalize: true
   trim: true

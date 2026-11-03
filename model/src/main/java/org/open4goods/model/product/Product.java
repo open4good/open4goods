@@ -360,37 +360,53 @@ public class Product implements Standardisable {
 
 	/**
 	 * Removes all data coming from the given datasource. This includes datasource
-	 * bookkeeping, category markers and attribute sources. Datasource-specific
-	 * payloads (such as EPREL external ids and cached product data) are also
-	 * cleared when the datasource matches.
+	 * bookkeeping, brand aliases, category markers, descriptions and attribute
+	 * sources. Datasource-specific payloads (such as EPREL external ids and cached
+	 * product data) are also cleared when the datasource matches. Offers are not
+	 * touched: see {@code DatasourcePurgeService} in the api module.
 	 *
-	 * @param datasourceName the datasource identifier (case-insensitive)
+	 * <p>A category is only removed from {@link #datasourceCategories} when no other
+	 * datasource still maps to it.
+	 *
+	 * @param datasourceName the datasource identifier (exact for keyed maps,
+	 *                       case-insensitive for attribute sources)
+	 * @return true when at least one piece of data was removed
 	 */
-	public void removeDatasourceData(String datasourceName) {
+	public boolean removeDatasourceData(String datasourceName) {
 		if (StringUtils.isBlank(datasourceName)) {
-			return;
+			return false;
 		}
 
-		akaBrands.remove(datasourceName);
+		boolean changed = akaBrands.remove(datasourceName) != null;
 
-		removeDatasourceFromIndexedAttributes(attributes.getIndexed(), datasourceName);
-		removeDatasourceFromProductAttributes(attributes.getAll(), datasourceName);
+		changed |= removeDatasourceFromIndexedAttributes(attributes.getIndexed(), datasourceName);
+		changed |= removeDatasourceFromProductAttributes(attributes.getAll(), datasourceName);
 
-		datasourceCodes.remove(datasourceName);
+		changed |= datasourceCodes.remove(datasourceName) != null;
+
+		if (descriptionsByDatasource != null) {
+			changed |= descriptionsByDatasource.remove(datasourceName) != null;
+		}
 
 		String removedCategory = categoriesByDatasources.remove(datasourceName);
 		if (removedCategory != null) {
-			datasourceCategories.remove(removedCategory);
+			changed = true;
+			if (!categoriesByDatasources.containsValue(removedCategory)) {
+				datasourceCategories.remove(removedCategory);
+			}
 		}
-		datasourceCategories.remove(datasourceName);
+		changed |= datasourceCategories.remove(datasourceName);
 
 		if ("eprel".equalsIgnoreCase(datasourceName)) {
+			changed |= externalIds.getEprel() != null || eprelDatas != null;
 			externalIds.setEprel(null);
 			eprelDatas = null;
 		}
+		return changed;
 	}
 
-	private void removeDatasourceFromIndexedAttributes(Map<String, IndexedAttribute> attributesByKey, String datasourceName) {
+	private boolean removeDatasourceFromIndexedAttributes(Map<String, IndexedAttribute> attributesByKey, String datasourceName) {
+		boolean changed = false;
 		Iterator<Entry<String, IndexedAttribute>> iterator = attributesByKey.entrySet().iterator();
 		while (iterator.hasNext()) {
 			Entry<String, IndexedAttribute> entry = iterator.next();
@@ -401,6 +417,7 @@ public class Product implements Standardisable {
 			if (!removed) {
 				continue;
 			}
+			changed = true;
 
 			if (attribute.getSource().isEmpty()) {
 				iterator.remove();
@@ -411,9 +428,11 @@ public class Product implements Standardisable {
 			attribute.setValue(bestValue);
 			attribute.setNumericValue(parseNumericOrNull(bestValue));
 		}
+		return changed;
 	}
 
-	private void removeDatasourceFromProductAttributes(Map<String, ProductAttribute> attributesByKey, String datasourceName) {
+	private boolean removeDatasourceFromProductAttributes(Map<String, ProductAttribute> attributesByKey, String datasourceName) {
+		boolean changed = false;
 		Iterator<Entry<String, ProductAttribute>> iterator = attributesByKey.entrySet().iterator();
 		while (iterator.hasNext()) {
 			Entry<String, ProductAttribute> entry = iterator.next();
@@ -424,6 +443,7 @@ public class Product implements Standardisable {
 			if (!removed) {
 				continue;
 			}
+			changed = true;
 
 			if (attribute.getSource().isEmpty()) {
 				iterator.remove();
@@ -433,6 +453,7 @@ public class Product implements Standardisable {
 			String bestValue = attribute.bestValue();
 			attribute.setValue(bestValue);
 		}
+		return changed;
 	}
 
 	private Double parseNumericOrNull(String rawValue) {
