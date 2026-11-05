@@ -1057,6 +1057,56 @@ public class ProductRepository {
 
 
 	/**
+	 * Products read before a realtime aggregation, keyed by their numeric id.
+	 *
+	 * @param found     products present in the index, keyed by {@link Product#getId()}
+	 * @param failedIds ids whose lookup failed on Elasticsearch side: the product
+	 *                  may exist, so it must not be treated as a new one
+	 */
+	public record AggregationLookup(Map<Long, Product> found, Set<Long> failedIds) {
+	}
+
+	/**
+	 * Reads the products targeted by a realtime aggregation batch.
+	 *
+	 * <p>Unlike {@link #multiGetById(Collection)}, results are keyed by the
+	 * Elasticsearch document id ({@link Product#getId()}), not by
+	 * {@link Product#gtin()}: the referential GTIN string can differ from the id
+	 * (leading zeros of a GTIN-14 or of a padded UPC-12), and a key mismatch made
+	 * an existing product look new, so it was recreated from a single fragment
+	 * (GOU-1700). Ids whose lookup failed are reported apart from absent ones.
+	 *
+	 * @param ids product ids (numeric GTIN)
+	 * @return found products and failed ids
+	 */
+	public AggregationLookup multiGetForAggregation(final Collection<Long> ids) {
+		Map<Long, Product> found = new HashMap<>();
+		Set<Long> failedIds = new HashSet<>();
+		if (ids.isEmpty()) {
+			return new AggregationLookup(found, failedIds);
+		}
+
+		Set<String> stringIds = ids.stream().map(String::valueOf).collect(Collectors.toSet());
+		NativeQuery query = new NativeQueryBuilder().withIds(stringIds).build();
+
+		for (MultiGetItem<Product> item : elasticsearchOperations.multiGet(query, Product.class, CURRENT_INDEX)) {
+			if (item.isFailed()) {
+				MultiGetItem.Failure failure = item.getFailure();
+				logger.error("Product lookup failed for id {} : {}", failure.getId(),
+						failure.getElasticsearchErrorCause() != null ? failure.getElasticsearchErrorCause().getReason()
+								: failure.getException());
+				if (failure.getId() != null && !failure.getId().isEmpty()
+						&& failure.getId().chars().allMatch(Character::isDigit)) {
+					failedIds.add(Long.valueOf(failure.getId()));
+				}
+			} else if (item.hasItem() && item.getItem().getId() != null) {
+				found.put(item.getItem().getId(), item.getItem());
+			}
+		}
+		return new AggregationLookup(found, failedIds);
+	}
+
+	/**
 	 * Get multiple data from ids
 	 * @param ids
 	 * @return

@@ -21,12 +21,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductPartialUpdateHolder;
 import org.open4goods.model.vertical.SubsetCriteriaOperator;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.MultiGetItem;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
@@ -65,6 +67,23 @@ class ProductRepositoryTest
         Set<String> missingIds = ProductRepository.computeMissingIds(List.of(123L, 456L), cachedResults);
 
         assertThat(missingIds).containsExactlyInAnyOrder("456");
+    }
+
+    @Test
+    void multiGetForAggregationKeysByIdAndReportsFailedLookups()
+    {
+        // GOU-1700: the referential GTIN string ("07333394145372") is not the id
+        Product leadingZero = new Product();
+        leadingZero.setId(7333394145372L);
+        leadingZero.getAttributes().getReferentielAttributes().put(ReferentielKey.GTIN, "07333394145372");
+        MultiGetItem.Failure failure = MultiGetItem.Failure.of(ProductRepository.MAIN_INDEX_NAME, null, "8690842629433", null, null);
+        when(elasticsearchOperations.multiGet(any(org.springframework.data.elasticsearch.core.query.Query.class), eq(Product.class), eq(ProductRepository.CURRENT_INDEX)))
+                .thenReturn(List.of(MultiGetItem.of(leadingZero, null), MultiGetItem.of(null, failure), MultiGetItem.of(null, null)));
+
+        ProductRepository.AggregationLookup lookup = repository.multiGetForAggregation(List.of(7333394145372L, 8690842629433L, 1L));
+
+        assertThat(lookup.found()).containsOnlyKeys(7333394145372L);
+        assertThat(lookup.failedIds()).containsExactly(8690842629433L);
     }
 
     @Test

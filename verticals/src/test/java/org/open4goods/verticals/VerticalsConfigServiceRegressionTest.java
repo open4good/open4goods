@@ -3,6 +3,8 @@ package org.open4goods.verticals;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -141,5 +143,45 @@ class VerticalsConfigServiceRegressionTest {
                             .isEqualTo("Comparer les lave-vaisselles pose libre");
                     assertThat(subCategory.getActivatedFilters()).hasSize(1);
                 });
+    }
+    /**
+     * GOU-1700, Hoover HLP610BL10UH47 (8059019130255): an aosom.fr row carrying
+     * the GTIN is categorised as a shoe-care accessory. The ACCESSOIRE excluding
+     * token used to drop the washing-machine vertical matched by darty.com, even
+     * though the product EPREL group is washingmachines2019.
+     */
+    @Test
+    void excludingTokenDoesNotDropAVerticalConfirmedByEprel() {
+        Map<String, String> categories = new LinkedHashMap<>();
+        categories.put("darty.com",
+                "GROS ELECTROMENAGER | GROS ELECTROMENAGER>LAVE-LINGE>LAVE-LINGE HUBLOT | LAVE-LINGE | GROS ELECTROMENAGER");
+        categories.put("aosom.fr",
+                "MAISON ET JARDIN > PRODUITS MENAGERS > ENTRETIEN ET ACCESSOIRES POUR CHAUSSURES > KITS D'ENTRETIEN DE CHAUSSURES");
+
+        assertThat(verticalsConfigService.getVerticalForCategories(categories))
+                .as("without EPREL evidence the excluding token still applies")
+                .isNull();
+        assertThat(verticalsConfigService.getVerticalForCategories(categories, "ovens"))
+                .as("an EPREL group of another vertical does not lift the exclusion")
+                .isNull();
+
+        VerticalConfig vertical = verticalsConfigService.getVerticalForCategories(categories, "washingmachines2019");
+        assertThat(vertical).isNotNull();
+        assertThat(vertical.getId()).isEqualTo("washing-machine");
+    }
+
+    @Test
+    void eprelGroupAloneNeverAssignsAVertical() {
+        Map<String, String> categories = new LinkedHashMap<>();
+        categories.put("aosom.fr", "MAISON ET JARDIN > MEUBLES");
+
+        assertThat(verticalsConfigService.getVerticalForCategories(categories, "washingmachines2019")).isNull();
+        assertThat(verticalsConfigService.isConfirmedByEprel(
+                verticalsConfigService.getConfigById("washing-machine"), "washingmachines2019")).isTrue();
+        assertThat(verticalsConfigService.isConfirmedByEprel(
+                verticalsConfigService.getConfigById("oven"), "washingmachines2019")).isFalse();
+        assertThat(verticalsConfigService.isConfirmedByEprel(null, "washingmachines2019")).isFalse();
+        assertThat(verticalsConfigService.isConfirmedByEprel(
+                verticalsConfigService.getConfigById("washing-machine"), null)).isFalse();
     }
 }
