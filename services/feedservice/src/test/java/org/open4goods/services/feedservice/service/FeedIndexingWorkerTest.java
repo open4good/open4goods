@@ -14,6 +14,9 @@ import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,13 +52,15 @@ class FeedIndexingWorkerTest {
     @TempDir
     Path tempDir;
 
+    private static final List<String> CAPTURED_LOGGERS = List.of("org.open4goods", "feed-indexing-worker-test");
+
     private HttpServer server;
 
     private FeedIndexingService csvService;
 
     private ListAppender<ILoggingEvent> appender;
 
-    private Level rootLevel;
+    private final Map<Logger, Level> previousLevels = new LinkedHashMap<>();
 
     @BeforeEach
     void setUp() throws IOException {
@@ -78,19 +83,24 @@ class FeedIndexingWorkerTest {
         Logger dedicatedLogger = (Logger) LoggerFactory.getLogger("feed-indexing-worker-test");
         when(csvService.createDatasourceLogger(anyString(), any(), anyString())).thenReturn(dedicatedLogger);
 
-        Logger root = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-        rootLevel = root.getLevel();
-        root.setLevel(Level.ALL);
         appender = new ListAppender<>();
         appender.start();
-        root.addAppender(appender);
+        // Only the tested code's loggers: the root logger would also capture the JDK HTTP client traces (sun.*, jdk.*).
+        for (String name : CAPTURED_LOGGERS) {
+            Logger captured = (Logger) LoggerFactory.getLogger(name);
+            previousLevels.put(captured, captured.getLevel());
+            captured.setLevel(Level.ALL);
+            captured.addAppender(appender);
+        }
     }
 
     @AfterEach
     void tearDown() {
-        Logger root = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-        root.detachAppender(appender);
-        root.setLevel(rootLevel);
+        previousLevels.forEach((captured, level) -> {
+            captured.detachAppender(appender);
+            captured.setLevel(level);
+        });
+        previousLevels.clear();
         server.stop(0);
     }
 
