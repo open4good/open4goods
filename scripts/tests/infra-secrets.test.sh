@@ -57,7 +57,17 @@ path=/${url#*://*/}
 auth_ok() { [ -n "$u" ] && [ -f "$FAKE_ES/$u" ] && [ "$(cat "$FAKE_ES/$u")" = "$p" ]; }
 code=401 body=
 case "$method $path" in
-  "GET /_security/_authenticate") auth_ok && code=200 ;;
+  "GET /_security/_authenticate") auth_ok && code=200 && body="{\"username\":\"$u\"}" ;;
+  "GET /_security/role/ops_readonly") auth_ok && { [ -f "$FAKE_ES.role" ] && code=200 || code=404; } ;;
+  "PUT /_security/role/ops_readonly")
+    if auth_ok && [ "$u" = elastic ]; then cp "$data" "$FAKE_ES.role"; code=200; fi
+    ;;
+  "PUT /_security/user/ops_readonly")
+    if auth_ok && [ "$u" = elastic ]; then
+      sed -n 's/^{"password":"\(.*\)","roles".*$/\1/p' "$data" | tr -d '\n' > "$FAKE_ES/ops_readonly"
+      code=200
+    fi
+    ;;
   "POST /_security/user/"*"/_password")
     if auth_ok && [ "$u" = elastic ]; then
       target=${path#/_security/user/}
@@ -310,7 +320,7 @@ check() {
 }
 
 reset_host() {
-  rm -rf "${FAKE_ROOT:?}"/* "${FAKE_ES:?}"/* "${FAKE_KIBANA_YML}" \
+  rm -rf "${FAKE_ROOT:?}"/* "${FAKE_ES:?}"/* "${FAKE_ES}.role" "${FAKE_KIBANA_YML}" \
     "${FAKE_GOOGLE}" "${FAKE_GOOGLE}.down" \
     "${FAKE_DB:?}"/* "${FAKE_ENV:?}"/* "${FAKE_LOGS:?}"/*
   : > "${CALLS}"
@@ -867,6 +877,41 @@ check "b2b-postgres rollback restores the user, the config tree and infra.env (s
   "${status}" "${FAKE_DB}/b2b_postgres.product_data_api" "${ETC}" "${WORK}/restarts.log" "${OLD_B2B}"
 check "b2b-postgres prints no value" no_value_leaked
 unset B2B_API_POSTGRES_PASSWORD
+
+########################################
+# es-ops-readonly: role, user, 600 file, no rollback
+########################################
+reset_host
+OPS_PASS="OPSREADONLYSENTINEL66666666666666666"
+run env -u INFRA_ES_OPS_READONLY_PASSWORD "${DEPLOY}/infra-secrets.sh" remote test beta es-ops-readonly
+check "es-ops-readonly test fails cleanly while the secret is missing, even as a dry run" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"INFRA_ES_OPS_READONLY_PASSWORD is empty or missing"* ]] && [ ! -e "$2/ops-es-readonly.pass" ]' \
+  "${status}" "${out}" "${ETC}"
+export INFRA_ES_OPS_READONLY_PASSWORD="${OPS_PASS}"
+run "${DEPLOY}/infra-secrets.sh" remote test beta es-ops-readonly
+check "es-ops-readonly test checks everything and writes nothing" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"role ops_readonly does not exist: source would create it"* ]] \
+    && [ ! -e "$2/ops-es-readonly.pass" ] && [ ! -e "$3" ] && [ ! -e "$4/ops_readonly" ]' \
+  "${status}" "${out}" "${ETC}" "${FAKE_ES}.role" "${FAKE_ES}"
+run "${DEPLOY}/infra-secrets.sh" remote source beta es-ops-readonly
+check "es-ops-readonly source creates the role (monitor; read on the products index only) and the user" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1/ops_readonly")" = "$2" ] \
+    && [ "$(cat "$3")" = "{\"cluster\":[\"monitor\"],\"indices\":[{\"names\":[\"products-moustik\"],\"privileges\":[\"read\",\"view_index_metadata\"]}]}" ]' \
+  "${status}" "${FAKE_ES}" "${OPS_PASS}" "${FAKE_ES}.role"
+check "es-ops-readonly source renders the password in a 600 file without newline, and authenticates" \
+  bash -c '[ "$(cat "$0")" = "$1" ] && [ "$(stat -c %a "$0")" = 600 ] && [ "$(wc -c < "$0")" -eq "${#1}" ] && [[ "$2" == *"answers as ops_readonly"* ]]' \
+  "${ETC}/ops-es-readonly.pass" "${OPS_PASS}" "${out}"
+check "es-ops-readonly source leaves the elastic password alone and prints no value" \
+  bash -c '[ "$(cat "$0/elastic")" = "$1" ]' "${FAKE_ES}" "${OLD_ELASTIC}"
+check "es-ops-readonly prints no value" no_value_leaked
+run "${DEPLOY}/infra-secrets.sh" remote source beta es-ops-readonly
+check "es-ops-readonly source is idempotent" [ "${status}" -eq 0 ]
+run "${DEPLOY}/infra-secrets.sh" remote test beta es-ops-readonly
+check "es-ops-readonly test after apply reports the account already in place" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"ops_readonly already accepts"* ]] && [[ "$1" == *"already holds the new password"* ]]' "${status}" "${out}"
+run "${DEPLOY}/infra-secrets.sh" remote rollback beta es-ops-readonly
+check "es-ops-readonly has no rollback" bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"no rollback"* ]]' "${status}" "${out}"
+unset INFRA_ES_OPS_READONLY_PASSWORD
 
 if [[ ${failures} -gt 0 ]]; then
   echo "${failures} test(s) failed"
