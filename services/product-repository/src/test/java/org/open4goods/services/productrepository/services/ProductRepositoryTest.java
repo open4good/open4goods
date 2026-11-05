@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import co.elastic.clients.elasticsearch._types.KnnSearch;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.IdsQuery;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductPartialUpdateHolder;
 import org.open4goods.model.vertical.SubsetCriteriaOperator;
+import org.open4goods.services.productrepository.config.IndexationConfig;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -353,5 +355,50 @@ class ProductRepositoryTest
             assertThat(q.getPageable().isPaged()).isTrue();
             assertThat(q.getPageable().getPageSize()).isLessThanOrEqualTo(ProductRepository.FULL_PRODUCT_PAGE_SIZE);
         });
+    }
+
+    @Test
+    void applyNewerOfferStatesReadsOnlyOfferFieldsChangedSinceTheOldestProduct()
+    {
+        // GOU-1709: one index read per batch page, restricted to its ids and to documents changed since
+        IndexationConfig indexationConfig = new IndexationConfig();
+        indexationConfig.setProductWorkers(0);
+        indexationConfig.setPartialProductWorkers(0);
+        ProductRepository batchRepository = new ProductRepository(indexationConfig, elasticsearchOperations);
+        Product older = new Product();
+        older.setId(7333394145372L);
+        older.setLastChange(1_000L);
+        Product newer = new Product();
+        newer.setId(8690842629433L);
+        newer.setLastChange(2_000L);
+        Product indexed = new Product();
+        indexed.setId(8690842629433L);
+        indexed.setLastChange(1_500L);
+        indexed.setOffersCount(3);
+        org.springframework.data.elasticsearch.core.SearchHit<Product> hit =
+                org.mockito.Mockito.mock(org.springframework.data.elasticsearch.core.SearchHit.class);
+        when(hit.getContent()).thenReturn(indexed);
+        when(searchHits.getSearchHits()).thenReturn(List.of(hit));
+        when(elasticsearchOperations.search(any(org.springframework.data.elasticsearch.core.query.Query.class), eq(Product.class), eq(ProductRepository.CURRENT_INDEX)))
+                .thenReturn(searchHits);
+
+        // The indexed state is newer than the oldest product of the page, not than this product
+        assertThat(batchRepository.applyNewerOfferStates(List.of(older, newer))).isZero();
+        assertThat(newer.getOffersCount()).isZero();
+        assertThat(newer.getLastChange()).isEqualTo(2_000L);
+
+        ArgumentCaptor<NativeQuery> captor = ArgumentCaptor.forClass(NativeQuery.class);
+        verify(elasticsearchOperations).search(captor.capture(), eq(Product.class), eq(ProductRepository.CURRENT_INDEX));
+        NativeQuery submitted = captor.getValue();
+        BoolQuery bool = submitted.getQuery().bool();
+        assertThat(bool.filter()).filteredOn(f -> f.isIds()).singleElement()
+                .satisfies(f -> assertThat(f.ids().values()).containsExactlyInAnyOrder("7333394145372", "8690842629433"));
+        assertThat(bool.filter()).filteredOn(f -> f.isRange()).singleElement().satisfies(f -> {
+            assertThat(f.range().date().field()).isEqualTo("lastChange");
+            assertThat(f.range().date().gt()).isEqualTo("1000");
+        });
+        assertThat(submitted.getSourceFilter().getIncludes())
+                .containsExactlyInAnyOrder("id", "lastChange", "price", "offersCount");
+        assertThat(submitted.getPageable().getPageSize()).isEqualTo(2);
     }
 }

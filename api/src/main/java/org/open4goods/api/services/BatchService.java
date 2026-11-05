@@ -132,6 +132,12 @@ public class BatchService {
 	static final int RESOURCE_KEY_PAGE_SIZE = 1000;
 
 	/**
+	 * Products given the newest realtime offers, then queued, at once by {@link #batch(VerticalConfig)}: one index
+	 * read per page, and a page waits in the full queue for at most the time the queue takes to drain.
+	 */
+	static final int INDEXATION_PAGE_SIZE = 500;
+
+	/**
 	 * Shard folder name used by {@link Resource#folderHashPrefix(String)} for cache keys too
 	 * short to be sharded on their three last characters.
 	 */
@@ -560,8 +566,15 @@ public class BatchService {
 	}
 
 	/**
-	 * Batch a specific vertical
-	 * @param vertical
+	 * Batch a specific vertical: loads its products, classifies, completes, aggregates and scores them, then
+	 * queues them for full indexation.
+	 *
+	 * <p>The realtime indexation keeps running meanwhile. The full queue is not flushed, and each page of
+	 * products gets the newest realtime offers ({@link ProductRepository#applyNewerOfferStates}) just before
+	 * being queued: an offer update indexed or queued during the batch is never overwritten by the offers
+	 * loaded at its start (GOU-1709).
+	 *
+	 * @param vertical the vertical to batch
 	 */
 	public void batch(VerticalConfig vertical) {
 		Set<Product> allProducts = new HashSet<>();
@@ -621,9 +634,16 @@ public class BatchService {
 		////////////////////
 
 		logger.info("Adding {} ({} completed) products to indexation",allProducts.size(), products.size());
-		// We flush the queue, no matter the previous fragments, we want to be sure there are no erasure on completed items
-		dataRepository.getFullProductQueue().clear();
-		dataRepository.addToFullindexationQueue(allProducts);
+		// The queue is never flushed: realtime updates queued during the batch are indexed before the batch
+		// products, which get the newest realtime offers just before being queued (GOU-1709)
+		List<Product> toIndex = new ArrayList<>(allProducts);
+		int refreshed = 0;
+		for (int from = 0; from < toIndex.size(); from += INDEXATION_PAGE_SIZE) {
+			List<Product> page = toIndex.subList(from, Math.min(from + INDEXATION_PAGE_SIZE, toIndex.size()));
+			refreshed += dataRepository.applyNewerOfferStates(page);
+			dataRepository.addToFullindexationQueue(page);
+		}
+		logger.info("{} products of vertical {} got offers updated in realtime during the batch", refreshed, vertical.getId());
 	}
 
 
