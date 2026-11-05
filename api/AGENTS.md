@@ -149,3 +149,20 @@ génération (`_none` pour un slug généré sans verticale). Un changement de n
 (slug antérieur à GOU-1708) = inconnu : le slug existant est figé et la verticale courante est mémorisée au passage
 suivant, sans migration. Un produit qui perd sa verticale garde son slug ; la lui rendre ne change pas l'URL. Les
 anciennes URL continuent de rediriger en 301 par GTIN vers le slug canonique.
+
+## Batch des verticales et indexation temps réel
+
+`BatchService.batch(vertical)` (13 h) charge les produits de la verticale, les complète, les agrège et les note, puis
+les met en file d'indexation complète. L'indexation temps réel continue pendant ce temps (GOU-1709) :
+
+- La file complète n'est jamais vidée : une mise à jour temps réel en file avant les produits du batch est indexée
+  avant eux (les workers gardent l'ordre de la file dans un bulk).
+- Par pages de `INDEXATION_PAGE_SIZE` (500), juste avant la mise en file, `ProductRepository.applyNewerOfferStates`
+  reprend `price`, `offersCount` et `lastChange` de l'état temps réel le plus récent (index, file complète, file
+  partielle) quand son `lastChange` est plus récent que celui du produit chargé. Le batch ne touche jamais
+  `lastChange`. Un état plus ancien ou égal ne remplace rien.
+- Les empreintes `datasourceCodes` restent celles du chargement : un fragment dont le contenu a changé pendant le batch
+  sera réagrégé en entier à sa prochaine ingestion.
+- Fenêtre restante : une mise à jour temps réel écrite entre la mise en file d'une page et son indexation (le temps de
+  vider la file, 5 000 produits au plus) peut encore être recouverte, et une mise à jour complète lue avant
+  l'indexation de la page peut recouvrir les champs calculés par le batch.

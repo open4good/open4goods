@@ -17,8 +17,10 @@ import java.util.stream.Stream;
 
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.price.AggregatedPrices;
 import org.open4goods.model.product.BarcodeType;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductPartialUpdateField;
 import org.open4goods.model.product.ProductPartialUpdateHolder;
 import org.open4goods.model.vertical.ScoreRange;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -878,6 +880,124 @@ public class ProductRepository {
 			}
 
 		});
+	}
+
+	/**
+	 * Offer state written by the realtime aggregation: the fields of a realtime
+	 * {@link ProductPartialUpdateHolder}, also carried by a realtime full update.
+	 */
+	private record OfferState(long lastChange, AggregatedPrices price, Integer offersCount) {
+	}
+
+	/** Fields read back from the index by {@link #applyNewerOfferStates(Collection)}. */
+	private static final String[] OFFER_STATE_FIELDS = { "id", "lastChange", "price", "offersCount" };
+
+	/**
+	 * Gives products about to be rewritten in full the newest realtime offer state
+	 * (GOU-1709).
+	 *
+	 * <p>A batch rewrites products it loaded long before. Meanwhile the realtime
+	 * aggregation may have indexed, or queued, a newer price for some of them, always
+	 * with a newer {@code lastChange} (the batch never moves it). For each product, the
+	 * newest state among the index, the full queue and the partial queue replaces
+	 * {@code price}, {@code offersCount} and {@code lastChange} when it is newer than
+	 * the product; an older or equal state never does. Other fields stay those of the
+	 * product: the datasource hashes are kept, so a fragment whose content changed
+	 * during the batch is aggregated again in full at its next ingestion.
+	 *
+	 * <p>Call it just before queueing the products, in pages of a few hundred: a full
+	 * update queued before them is indexed before them, and the gap left to a
+	 * concurrent update is the time the queue takes to index them.
+	 *
+	 * @param products products about to be queued for full indexation
+	 * @return number of products whose offers were replaced
+	 */
+	public int applyNewerOfferStates(Collection<Product> products) {
+		Map<Long, Product> byId = new HashMap<>();
+		long oldest = Long.MAX_VALUE;
+		for (Product product : products) {
+			if (product != null && product.getId() != null) {
+				byId.put(product.getId(), product);
+				oldest = Math.min(oldest, product.getLastChange());
+			}
+		}
+		if (byId.isEmpty()) {
+			return 0;
+		}
+
+		// Index first, queues next: an update leaving a queue meanwhile is then read from the index
+		Map<Long, OfferState> newest = new HashMap<>();
+		List<Product> changed;
+		try {
+			changed = searchChangedSince(byId.keySet(), oldest);
+		} catch (RuntimeException e) {
+			// The batch result is still written: losing it would cost more than an offer the next feed restores
+			logger.error("Cannot read offers changed since {} for {} products, only queued updates are kept", oldest,
+					byId.size(), e);
+			changed = List.of();
+		}
+		for (Product indexed : changed) {
+			if (indexed != null && indexed.getId() != null) {
+				keepNewest(newest, indexed.getId(),
+						new OfferState(indexed.getLastChange(), indexed.getPrice(), indexed.getOffersCount()));
+			}
+		}
+		for (Product queued : fullProductQueue) {
+			if (queued.getId() != null && byId.containsKey(queued.getId()) && byId.get(queued.getId()) != queued) {
+				keepNewest(newest, queued.getId(),
+						new OfferState(queued.getLastChange(), queued.getPrice(), queued.getOffersCount()));
+			}
+		}
+		for (ProductPartialUpdateHolder partial : partialProductQueue) {
+			Map<String, Object> changes = partial.getChanges();
+			if (partial.getProductId() != null && byId.containsKey(partial.getProductId())
+					&& changes.get(ProductPartialUpdateField.LAST_CHANGE.path()) instanceof Long lastChange
+					&& changes.get(ProductPartialUpdateField.PRICE.path()) instanceof AggregatedPrices price
+					&& changes.get(ProductPartialUpdateField.OFFERS_COUNT.path()) instanceof Integer offersCount) {
+				keepNewest(newest, partial.getProductId(), new OfferState(lastChange, price, offersCount));
+			}
+		}
+
+		int replaced = 0;
+		for (Map.Entry<Long, OfferState> entry : newest.entrySet()) {
+			Product product = byId.get(entry.getKey());
+			OfferState state = entry.getValue();
+			if (state.lastChange() > product.getLastChange() && state.price() != null) {
+				product.setPrice(state.price());
+				product.setOffersCount(state.offersCount());
+				product.setLastChange(state.lastChange());
+				replaced++;
+			}
+		}
+		return replaced;
+	}
+
+	/** Keeps the newest state per product; on a tie, the one read last (queues after index). */
+	private static void keepNewest(Map<Long, OfferState> newest, Long id, OfferState state) {
+		newest.merge(id, state, (current, candidate) -> candidate.lastChange() >= current.lastChange() ? candidate : current);
+	}
+
+	/**
+	 * Offer fields of the given products changed in the index after {@code since}.
+	 *
+	 * @param ids   product ids
+	 * @param since epoch millis, exclusive
+	 * @return the changed products, projected on {@link #OFFER_STATE_FIELDS}
+	 */
+	private List<Product> searchChangedSince(Set<Long> ids, long since) {
+		List<String> stringIds = ids.stream().map(String::valueOf).toList();
+		co.elastic.clients.elasticsearch._types.query_dsl.Query changedQuery =
+				co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
+						.filter(f -> f.ids(i -> i.values(stringIds)))
+						.filter(f -> f.range(r -> r.date(d -> d.field("lastChange").gt(String.valueOf(since)))))));
+		NativeQuery query = new NativeQueryBuilder()
+				.withQuery(changedQuery)
+				.withSourceFilter(customSourceFilter(OFFER_STATE_FIELDS, null))
+				.withPageable(PageRequest.of(0, stringIds.size()))
+				.build();
+		return elasticsearchOperations.search(query, Product.class, CURRENT_INDEX).getSearchHits().stream()
+				.map(SearchHit::getContent)
+				.toList();
 	}
 
 	public void store(Collection<Product> data) {

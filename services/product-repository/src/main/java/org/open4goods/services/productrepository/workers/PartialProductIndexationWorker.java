@@ -1,7 +1,7 @@
 package org.open4goods.services.productrepository.workers;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.open4goods.model.product.ProductPartialUpdateHolder;
@@ -52,7 +52,8 @@ public class PartialProductIndexationWorker implements Runnable {
 			try {
 				ProductPartialUpdateHolder firstItem = service.getPartialProductQueue().poll(pauseDuration, TimeUnit.MILLISECONDS);
 				if (firstItem != null) {
-					final Set<ProductPartialUpdateHolder> buffer = new HashSet<>();	
+					// A list keeps the queue order: two updates of a product in one bulk apply in the order they were queued
+					final List<ProductPartialUpdateHolder> buffer = new ArrayList<>();
 					buffer.add(firstItem);
 					service.getPartialProductQueue().drainTo(buffer, dequeuePageSize - 1);
 					
