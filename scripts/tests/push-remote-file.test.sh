@@ -445,20 +445,55 @@ fi
 # render-service-secrets.sh: frontend env lines and coupled secrets
 ########################################
 MACHINE_SENTINEL="SENTINELMACHINETOKEN42"
-reset_host
-frontend_env="${FAKE_ROOT}/opt/open4goods/config/beta/frontend/.env"
-mkdir -p "$(dirname "${frontend_env}")"
-printf 'API_URL=https://beta.front-api.example\nMACHINE_TOKEN=old\n' > "${frontend_env}"
-run render_with GOOGLE_SSO_CLIENT_ID=client-id.apps.example GOOGLE_SSO_CLIENT_SECRET=client-secret \
-  O4G_MACHINE_TOKEN="${MACHINE_SENTINEL}" FRONT_API_JWT_SECRET="${MACHINE_SENTINEL}jwt" -- apply beta frontend
-expected_frontend=$'API_URL=https://beta.front-api.example\nNUXT_GOOGLE_OAUTH_CLIENT_ID=client-id.apps.example\nNUXT_GOOGLE_OAUTH_CLIENT_SECRET=client-secret\nNUXT_MACHINE_TOKEN='"${MACHINE_SENTINEL}"$'\nMACHINE_TOKEN='"${MACHINE_SENTINEL}"$'\nFRONT_SECURITY_JWT_SECRET='"${MACHINE_SENTINEL}jwt"
+FRONTEND_SECRETS=(GOOGLE_SSO_CLIENT_ID=client-id.apps.example GOOGLE_SSO_CLIENT_SECRET=client-secret
+  O4G_MACHINE_TOKEN="${MACHINE_SENTINEL}" FRONT_API_JWT_SECRET="${MACHINE_SENTINEL}jwt")
+# The host as open4goods-config leaves it: its frontend .env, and the compose file that publish-frontend.sh copies.
+frontend_host() {
+  reset_host
+  mkdir -p "$(dirname "${config_env}")" "$(dirname "${frontend_compose}")"
+  printf 'API_URL=https://beta.front-api.example\nMACHINE_TOKEN=old\n' > "${config_env}"
+  printf '    env_file:\n      - /opt/open4goods/config/beta/frontend/.env\n%s' "$1" > "${frontend_compose}"
+}
+config_env="${FAKE_ROOT}/opt/open4goods/config/beta/frontend/.env"
+frontend_compose="${FAKE_ROOT}/opt/open4goods/latest/beta/docker-compose.frontend.yml"
+frontend_env="${FAKE_ROOT}/etc/open4goods/frontend.env"
+
+# GOU-1694: outside config/<env>/frontend/.env, which every open4goods-config deploy rewrites.
+frontend_host $'      - path: /etc/open4goods/frontend.env\n        required: false\n'
+run render_with "${FRONTEND_SECRETS[@]}" -- apply beta frontend
+expected_frontend=$'NUXT_GOOGLE_OAUTH_CLIENT_ID=client-id.apps.example\nNUXT_GOOGLE_OAUTH_CLIENT_SECRET=client-secret\nNUXT_MACHINE_TOKEN='"${MACHINE_SENTINEL}"$'\nMACHINE_TOKEN='"${MACHINE_SENTINEL}"$'\nFRONT_SECURITY_JWT_SECRET='"${MACHINE_SENTINEL}jwt"
 if [[ ${status} -eq 0 ]] && [[ "$(cat "${frontend_env}")" == "${expected_frontend}" ]] \
   && [[ "$(stat -c '%a' "${frontend_env}")" == 600 ]] && [[ "${out}" != *"${MACHINE_SENTINEL}"* ]] \
-  && ! grep -q "${MACHINE_SENTINEL}" "${GITHUB_STEP_SUMMARY}" "${FAKE_SSH_LOG}" && [[ ! -e "${FAKE_ROOT}/etc" ]]; then
-  pass "render: frontend env lines (SSO, machine token twice, JWT secret) replace the old ones, nothing else written"
+  && [[ "$(cat "${config_env}")" == $'API_URL=https://beta.front-api.example\nMACHINE_TOKEN=old' ]] \
+  && ! grep -q "${MACHINE_SENTINEL}" "${GITHUB_STEP_SUMMARY}" "${FAKE_SSH_LOG}" \
+  && [[ "$(find "${FAKE_ROOT}/etc" -type f)" == "${frontend_env}" ]]; then
+  pass "render: frontend env lines (SSO, machine token twice, JWT secret) go to /etc/open4goods/frontend.env, config .env untouched"
 else
-  ko "render frontend (status ${status}): ${out} / $(cat "${frontend_env}")"
+  ko "render frontend (status ${status}): ${out} / $(cat "${frontend_env}" 2>&1)"
 fi
+# A second render replaces its own lines and keeps the others.
+printf 'KEPT=1\nMACHINE_TOKEN=old\n' > "${frontend_env}"
+run render_with "${FRONTEND_SECRETS[@]}" -- apply beta frontend
+if [[ ${status} -eq 0 ]] && [[ "$(cat "${frontend_env}")" == $'KEPT=1\n'"${expected_frontend}" ]]; then
+  pass "render: frontend re-render replaces its lines in /etc/open4goods/frontend.env and keeps the others"
+else
+  ko "render frontend re-render (status ${status}): ${out}"
+fi
+
+# Before open4goods-config's compose reads the file, nothing is rendered: the next publish would drop the secrets.
+for compose in "" missing; do
+  frontend_host ""
+  [[ "${compose}" == missing ]] && rm "${frontend_compose}"
+  run render_with "${FRONTEND_SECRETS[@]}" -- apply beta frontend
+  if [[ ${status} -ne 0 ]] && [[ "${out}" == *"docker-compose.frontend.yml does not read /etc/open4goods/frontend.env"* ]] \
+    && [[ "${out}" == *"deploy open4goods-config to beta first"* ]] && [[ ! -e "${frontend_env}" ]] \
+    && [[ "$(cat "${config_env}")" == $'API_URL=https://beta.front-api.example\nMACHINE_TOKEN=old' ]] \
+    && [[ "${out}" != *"${MACHINE_SENTINEL}"* ]]; then
+    pass "render: frontend apply refuses a compose file that does not read the secrets file (${compose:-old compose}), writes nothing"
+  else
+    ko "render frontend without the compose env_file (${compose:-old compose}, status ${status}): ${out}"
+  fi
+done
 
 reset_host
 run render_with GOOGLE_SSO_CLIENT_ID=client-id.apps.example O4G_MACHINE_TOKEN="${MACHINE_SENTINEL}+x" -- check prod front-api

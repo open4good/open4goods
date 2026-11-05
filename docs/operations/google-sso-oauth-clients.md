@@ -48,8 +48,8 @@ Decision of 2026-10-20 (GOU-501, GOU-767, ADR-0006): on beta, the Google
 
 | Environment secret          | Rendered as                          | File on the beta host                          | Rendered by                                  |
 | --------------------------- | ------------------------------------ | ---------------------------------------------- | -------------------------------------------- |
-| `GOOGLE_SSO_CLIENT_ID`      | `NUXT_GOOGLE_OAUTH_CLIENT_ID`        | `/opt/open4goods/config/beta/frontend/.env`    | `frontend-ci.yml`, before `publish-frontend.sh` |
-| `GOOGLE_SSO_CLIENT_SECRET`  | `NUXT_GOOGLE_OAUTH_CLIENT_SECRET`    | `/opt/open4goods/config/beta/frontend/.env`    | `frontend-ci.yml`, before `publish-frontend.sh` |
+| `GOOGLE_SSO_CLIENT_ID`      | `NUXT_GOOGLE_OAUTH_CLIENT_ID`        | `/etc/open4goods/frontend.env`                 | `frontend-ci.yml`, before `publish-frontend.sh` |
+| `GOOGLE_SSO_CLIENT_SECRET`  | `NUXT_GOOGLE_OAUTH_CLIENT_SECRET`    | `/etc/open4goods/frontend.env`                 | `frontend-ci.yml`, before `publish-frontend.sh` |
 | `GOOGLE_SSO_CLIENT_ID`      | `FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID` | `/etc/open4goods/front-api.env`               | `testAndPublishBeta.yml`, before `publish-jars.sh` |
 
 `scripts/deploy/render-service-secrets.sh` (table of
@@ -63,11 +63,14 @@ in `open4goods-config` `configs/beta/*`.
   sits outside the tree that `open4goods-config`'s deploy rsyncs with
   `--delete`, so it survives config deploys and `publishJars.yml` restarts.
   The OS environment variable also beats `application-active.yml`.
-- frontend: the compose file (owned by `open4goods-config`) only reads
-  `config/beta/frontend/.env`, which every config deploy rewrites without
-  these keys. Running containers keep their environment; recreating them
-  outside `frontend-ci.yml` (manual `publish-frontend.sh`) after a config
-  deploy starts them without the client. Redeploy through `frontend-ci.yml`.
+- frontend: the compose file (owned by `open4goods-config`) reads
+  `config/beta/frontend/.env`, rewritten by every config deploy, then
+  `/etc/open4goods/frontend.env`, whose values win (GOU-1694). That file sits
+  outside the rsynced tree too, so the client survives config deploys and a
+  manual `publish-frontend.sh` recreates the containers with it. Before
+  `open4goods-config` reads this file on a host, the render refuses to run
+  there (migration order:
+  [Frontend env file](prod-service-secrets.md#frontend-env-file)).
 
 ## Production source: GitHub Environment
 
@@ -78,8 +81,8 @@ Google "Web" client as beta comes from the `prod` GitHub Environment of
 
 | Environment secret          | Rendered as                          | File on the prod host                          | Rendered by                                  |
 | --------------------------- | ------------------------------------ | ---------------------------------------------- | -------------------------------------------- |
-| `GOOGLE_SSO_CLIENT_ID`      | `NUXT_GOOGLE_OAUTH_CLIENT_ID`        | `/opt/open4goods/config/prod/frontend/.env`    | `releaseDeployProd.yml`, before `publish-frontend.sh` |
-| `GOOGLE_SSO_CLIENT_SECRET`  | `NUXT_GOOGLE_OAUTH_CLIENT_SECRET`    | `/opt/open4goods/config/prod/frontend/.env`    | `releaseDeployProd.yml`, before `publish-frontend.sh` |
+| `GOOGLE_SSO_CLIENT_ID`      | `NUXT_GOOGLE_OAUTH_CLIENT_ID`        | `/etc/open4goods/frontend.env`                 | `releaseDeployProd.yml`, before `publish-frontend.sh` |
+| `GOOGLE_SSO_CLIENT_SECRET`  | `NUXT_GOOGLE_OAUTH_CLIENT_SECRET`    | `/etc/open4goods/frontend.env`                 | `releaseDeployProd.yml`, before `publish-frontend.sh` |
 | `GOOGLE_SSO_CLIENT_ID`      | `FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID` | `/etc/open4goods/front-api.env`               | `releaseDeployProd.yml`, before `publish-jars.sh` |
 
 The rendering steps use `scripts/deploy/render-service-secrets.sh` (same
@@ -96,10 +99,10 @@ Other service secrets, rendered by the same deploys and by the dispatchable
 `serviceSecrets.yml` (beta and prod), are listed in
 [Service secrets](prod-service-secrets.md).
 
-The same caveats as beta apply: `/etc/open4goods/front-api.env` survives
-config deploys, while `config/prod/frontend/.env` is rewritten by every
-`open4goods-config` deploy, so recreate the frontend containers through
-`releaseDeployProd.yml` rather than a manual `publish-frontend.sh`.
+As on beta, `/etc/open4goods/front-api.env` and
+`/etc/open4goods/frontend.env` survive config deploys, whenever they run: an
+`open4goods-config` deploy after the release no longer drops the frontend's
+client (GOU-1689, GOU-1694), and a manual `publish-frontend.sh` keeps it.
 
 ## Client id consistency
 
