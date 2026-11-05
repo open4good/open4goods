@@ -28,6 +28,7 @@ secrets without a source to change (API keys, tokens) follow
 | `INFRA_CLICKHOUSE_PASSWORD`         | beta         | ClickHouse user `default` of `plausible_events_db` (set from its env at every start) | ClickHouse and Plausible: `infra.env` -> `CLICKHOUSE_PASSWORD` |
 | `INFRA_GOOGLE_CLIENT_ID`, `INFRA_GOOGLE_CLIENT_SECRET` | beta | none (Google OAuth client of the Search Console integration, issued by Google) | Plausible: `infra.env` -> `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
 | `B2B_API_POSTGRES_PASSWORD`         | beta, prod   | Postgres user of `b2b_postgres` (`product_data_api`) | b2b-api: config tree `spring.datasource.password`; `infra.env` -> `B2B_POSTGRES_PASSWORD` |
+| `INFRA_ES_OPS_READONLY_PASSWORD`    | beta, prod   | Elasticsearch user and role `ops_readonly` (created or updated: cluster `monitor`; `read`, `view_index_metadata` on the products index `products-moustik` only) | none: curl config `/etc/open4goods/ops-es-readonly.curlrc` (600, one `user = "ops_readonly:<value>"` line), read by Ops with `curl -s -K /etc/open4goods/ops-es-readonly.curlrc http://<es>:9200/...` (never `-u`: the value would show in `ps`) |
 | Elasticsearch transport certificates | beta, prod  | regenerated on the host by Ops                    | Elasticsearch (see [Transport certificates](#transport-certificates-30))                  |
 
 Access generates every value with `secret_generate` `kind=hex32`: the workflow
@@ -97,7 +98,7 @@ Not rotated by this workflow:
 Actions > "Infra secrets (source + render + restart)" > Run workflow.
 Inputs: `env` (`beta`, `prod`), `target` (`elasticsearch`, `kibana`,
 `plausible`, `plausible-postgres`, `plausible-clickhouse` and
-`plausible-google` for beta, `b2b-postgres`), `mode` (`test`, `apply`,
+`plausible-google` for beta, `b2b-postgres`, `es-ops-readonly`), `mode` (`test`, `apply`,
 `rollback`).
 `apply` and `rollback` only run on `main`; `test` writes nothing and may run
 from a branch. The job shares the concurrency group of the deploys
@@ -234,6 +235,27 @@ What each target does:
   that is not the latest. The tree beats the `B2B_POSTGRES_PASSWORD`
   placeholder of `application-active.yml`, even when an env file sets it.
   This target does not need step d-infra.
+- `es-ops-readonly` (beta, prod): read-only Elasticsearch account for Ops
+  (campaign GOU-1716). Authenticated with the `elastic` password in service,
+  `source` sets the role `ops_readonly` (`PUT _security/role`) and the user
+  (`PUT _security/user`, which also changes the password of an existing
+  user), writes a curl config file `/etc/open4goods/ops-es-readonly.curlrc`
+  (mode 600, root when the deploy user is root, one `user = "ops_readonly:<value>"`
+  line, `\` and `"` escaped) and checks `GET _security/_authenticate` with
+  `curl -K` on that file. Ops reads Elasticsearch with
+  `curl -s -K /etc/open4goods/ops-es-readonly.curlrc http://<es>:9200/<path>`
+  (runbook for GOU-1720); the value never appears in an argument. The file is
+  owned by the deploy user (`REMOTE_USER` for prod, root when it is root):
+  whether the user of Ops' `server_exec` on `nudger-prod` can read it (same
+  user, root or sudo) is not verifiable from the code or the docs; Ops must
+  confirm it at the rendering step. No consumer is
+  restarted. Unlike the other targets, a missing `INFRA_ES_OPS_READONLY_PASSWORD`
+  stops `check` and `test` too (Access must write it first). `test` reads
+  the role, tries the account and compares the file, and writes nothing.
+  There is no `rollback`: delete the user, the role and the file by hand.
+  The index name is `Product.DEFAULT_REPO` (no alias is defined in the code);
+  proof: the `_authenticate` line of `source` and the `es-ops-readonly` checks of
+  `scripts/tests/infra-secrets.test.sh`.
 
 If Postgres refuses an `ALTER USER`, its log may hold the statement, so the new
 value too (`log_min_error_statement`): regenerate that value before the next
