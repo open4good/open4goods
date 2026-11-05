@@ -32,11 +32,13 @@ const ovenBlocks = (blocks: BlogOfferBlock[]): BlogOfferBlocksConfig => ({
   blocks,
 })
 
+// The API `range` filter is inclusive on both bounds and capacities can be
+// decimal: adjacent blocks use a 0.01 L gap so no product falls in two blocks.
 const OVEN_VOLUME_BLOCKS: BlogOfferBlock[] = [
   {
     id: 'compact',
     titleKey: 'blog.offerBlocks.oven.compact',
-    filters: [range(OVEN_CAPACITY, undefined, 60)],
+    filters: [range(OVEN_CAPACITY, undefined, 59.99)],
   },
   {
     id: 'standard',
@@ -46,7 +48,7 @@ const OVEN_VOLUME_BLOCKS: BlogOfferBlock[] = [
   {
     id: 'large',
     titleKey: 'blog.offerBlocks.oven.large',
-    filters: [range(OVEN_CAPACITY, 72)],
+    filters: [range(OVEN_CAPACITY, 72.01)],
   },
 ]
 

@@ -32,4 +32,26 @@ describe('blog-offer-blocks config', () => {
       config.blocks.forEach(b => expect(b.filters.length).toBeGreaterThan(0))
     }
   })
+
+  it('never lets a value fall in two range blocks of the same article', () => {
+    for (const config of Object.values(blogOfferBlocksBySlug)) {
+      const ranges = config.blocks.flatMap(b =>
+        b.filters
+          .filter(f => f.operator === 'range')
+          .map(f => ({
+            min: f.min ?? -Infinity,
+            max: f.max ?? Infinity,
+          }))
+      )
+      for (let i = 0; i < ranges.length; i++) {
+        for (let j = i + 1; j < ranges.length; j++) {
+          const a = ranges[i]!
+          const b = ranges[j]!
+          expect(Math.max(a.min, b.min)).toBeGreaterThan(
+            Math.min(a.max, b.max)
+          )
+        }
+      }
+    }
+  })
 })
