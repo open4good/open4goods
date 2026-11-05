@@ -2,9 +2,25 @@ package org.open4goods.model.product;
 
 import org.open4goods.model.Localisable;
 
+/**
+ * Localised naming elements of a product: public URL slug, titles and meta.
+ *
+ * <p>The slug ({@link #getUrl()}) is frozen once generated: it is only regenerated when it is
+ * missing for a language or when the product vertical differs from {@link #getUrlVertical()}
+ * (GOU-1708).</p>
+ */
 public class ProductTexts {
 
+	/** Value of {@link #urlVertical} for a slug generated while the product had no vertical. */
+	public static final String URL_WITHOUT_VERTICAL = "_none";
+
 	private Localisable<String,String> url = new Localisable<>();
+
+	/**
+	 * Vertical of the product when its slug was generated, {@link #URL_WITHOUT_VERTICAL} when it had
+	 * none, {@code null} when unknown (slug generated before GOU-1708, kept as is).
+	 */
+	private String urlVertical;
 
 	private Localisable<String,String> displayName = new Localisable<>();
 
@@ -27,6 +43,18 @@ public class ProductTexts {
 
 	public void setUrl(Localisable<String, String> url) {
 		this.url = url;
+	}
+
+	/**
+	 * @return vertical of the product when its slug was generated, {@link #URL_WITHOUT_VERTICAL}
+	 *         when it had none, {@code null} when unknown
+	 */
+	public String getUrlVertical() {
+		return urlVertical;
+	}
+
+	public void setUrlVertical(String urlVertical) {
+		this.urlVertical = urlVertical;
 	}
 
 	public Localisable<String, String> getDisplayName() {

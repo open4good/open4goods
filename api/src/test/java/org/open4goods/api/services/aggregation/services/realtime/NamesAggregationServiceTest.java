@@ -18,6 +18,7 @@ import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductTexts;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.PrefixedAttrText;
@@ -176,6 +177,159 @@ class NamesAggregationServiceTest {
 
 		assertThat(product.getEmbedding()).isSameAs(legacyEmbedding);
 		assertThat(product.getEmbeddingTextHash()).isEqualTo(123L);
+	}
+
+	@Test
+	void onProduct_shouldKeepFrozenSlugWhenNameOrAttributesChange()
+			throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig config = buildSlugConfig("tv");
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
+
+		Product product = new Product(8431312260509L);
+		product.setVertical("tv");
+		product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Midea");
+		product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "MB55");
+		product.getNames().getUrl().put("fr", "8431312260509-tv-midea-55");
+		product.getNames().setUrlVertical("tv");
+		product.getNames().getDisplayName().put("fr", "Ancien nom");
+		putAttribute(product, "DIAGONALE_POUCES", "65");
+
+		service.onProduct(product, config);
+
+		assertThat(product.getNames().getUrl().get("fr")).isEqualTo("8431312260509-tv-midea-55");
+		assertThat(product.getNames().getUrlVertical()).isEqualTo("tv");
+		// forceNameGeneration still rewrites titles and meta
+		assertThat(product.getNames().getDisplayName().get("fr")).isEqualTo("Midea MB55");
+	}
+
+	@Test
+	void onProduct_shouldFreezeLegacySlugAndRecordItsVertical()
+			throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig config = buildSlugConfig("tv");
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
+
+		Product product = new Product(123456789L);
+		product.setVertical("tv");
+		product.getNames().getUrl().put("fr", "123456789-ancien-slug");
+		putAttribute(product, "DIAGONALE_POUCES", "55");
+
+		service.onProduct(product, config);
+
+		assertThat(product.getNames().getUrl().get("fr")).isEqualTo("123456789-ancien-slug");
+		assertThat(product.getNames().getUrlVertical()).isEqualTo("tv");
+	}
+
+	@Test
+	void onProduct_shouldRegenerateSlugWhenVerticalChanged()
+			throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig config = buildSlugConfig("tv");
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
+		when(blablaService.generateBlabla(anyString(), any())).thenReturn("TV");
+
+		Product product = new Product(123456789L);
+		product.setVertical("tv");
+		product.getNames().getUrl().put("fr", "123456789-ecran-pc-55");
+		product.getNames().setUrlVertical("monitor");
+		putAttribute(product, "DIAGONALE_POUCES", "55");
+
+		service.onProduct(product, config);
+
+		assertThat(product.getNames().getUrl().get("fr")).isEqualTo("123456789-tv-55");
+		assertThat(product.getNames().getUrlVertical()).isEqualTo("tv");
+	}
+
+	@Test
+	void onProduct_shouldRegenerateSlugWhenProductGainsVertical()
+			throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig config = buildSlugConfig("tv");
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
+		when(blablaService.generateBlabla(anyString(), any())).thenReturn("TV");
+
+		Product product = new Product(123456789L);
+		product.setVertical("tv");
+		product.getNames().getUrl().put("fr", "123456789-nom-offre");
+		product.getNames().setUrlVertical(ProductTexts.URL_WITHOUT_VERTICAL);
+		putAttribute(product, "DIAGONALE_POUCES", "55");
+
+		service.onProduct(product, config);
+
+		assertThat(product.getNames().getUrl().get("fr")).isEqualTo("123456789-tv-55");
+		assertThat(product.getNames().getUrlVertical()).isEqualTo("tv");
+	}
+
+	@Test
+	void onProduct_shouldGenerateMissingSlugAndRecordVertical()
+			throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig config = buildSlugConfig("tv");
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
+		when(blablaService.generateBlabla(anyString(), any())).thenReturn("TV");
+
+		Product product = new Product(123456789L);
+		product.setVertical("tv");
+		putAttribute(product, "DIAGONALE_POUCES", "55");
+
+		service.onProduct(product, config);
+
+		assertThat(product.getNames().getUrl().get("fr")).isEqualTo("123456789-tv-55");
+		assertThat(product.getNames().getUrlVertical()).isEqualTo("tv");
+	}
+
+	@Test
+	void onProduct_shouldKeepSlugWhenVerticalIsLostThenRestored()
+			throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig defaultConfig = buildSlugConfig(null);
+		VerticalConfig tvConfig = buildSlugConfig("tv");
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(defaultConfig, tvConfig);
+
+		Product product = new Product(123456789L);
+		product.getNames().getUrl().put("fr", "123456789-tv-55");
+		product.getNames().setUrlVertical("tv");
+		product.getOfferNames().add("Offre");
+
+		service.onProduct(product, defaultConfig);
+
+		assertThat(product.getNames().getUrl().get("fr")).isEqualTo("123456789-tv-55");
+		assertThat(product.getNames().getUrlVertical()).isEqualTo("tv");
+
+		product.setVertical("tv");
+		service.onProduct(product, tvConfig);
+
+		assertThat(product.getNames().getUrl().get("fr")).isEqualTo("123456789-tv-55");
+		assertThat(product.getNames().getUrlVertical()).isEqualTo("tv");
+	}
+
+	@Test
+	void onProduct_shouldRecordMissingVerticalForSlugGeneratedWithoutVertical()
+			throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig defaultConfig = buildSlugConfig(null);
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(defaultConfig);
+
+		Product product = new Product(123456789L);
+		product.getOfferNames().add("Offre courte");
+
+		service.onProduct(product, defaultConfig);
+
+		assertThat(product.getNames().getUrl().get("fr")).isEqualTo("123456789-offre-courte");
+		assertThat(product.getNames().getUrlVertical()).isEqualTo(ProductTexts.URL_WITHOUT_VERTICAL);
+	}
+
+	private VerticalConfig buildSlugConfig(String verticalId) {
+		VerticalConfig config = buildVerticalConfig();
+		config.setId(verticalId);
+		config.setForceNameGeneration(true);
+		config.getI18n().get("fr").setDisplayName("{BRAND} {MODEL} {DIAGONALE_POUCES}");
+		PrefixedAttrText urlConfig = new PrefixedAttrText();
+		urlConfig.setPrefix("TV");
+		urlConfig.setAttrs(java.util.List.of("DIAGONALE_POUCES"));
+		config.getI18n().get("fr").setUrl(urlConfig);
+		return config;
+	}
+
+	private void putAttribute(Product product, String key, String value) {
+		org.open4goods.model.attribute.ProductAttribute attr = new org.open4goods.model.attribute.ProductAttribute();
+		attr.setName(key);
+		attr.setValue(value);
+		product.getAttributes().getAll().put(key, attr);
 	}
 
 }
