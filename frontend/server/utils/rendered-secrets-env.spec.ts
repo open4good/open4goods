@@ -10,8 +10,8 @@ import nuxtConfig from '../../nuxt.config'
 
 /**
  * Env lines that scripts/deploy/render-service-secrets.sh writes into the
- * frontend-ssr env_file (/opt/open4goods/config/<env>/frontend/.env, GOU-1041),
- * read from the script's table, with the consumer each one must reach.
+ * frontend-ssr secrets env_file (/etc/open4goods/frontend.env, GOU-1041,
+ * GOU-1694), read from the script's table, with the consumer each one must reach.
  */
 const script = readFileSync(
   new URL('../../../scripts/deploy/render-service-secrets.sh', import.meta.url),

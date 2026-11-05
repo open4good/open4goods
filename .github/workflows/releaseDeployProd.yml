@@ -597,9 +597,10 @@ jobs:
             echo "Nuxt asset preservation complete for ${staging}"
 
       - name: 🔐 Render frontend secrets on Prod
-        # Replaces only the frontend's keys in the env_file of docker-compose.frontend.yml, read when
-        # publish-frontend.sh recreates the container (scripts/deploy/render-service-secrets.sh, GOU-1041).
-        # open4goods-config's deploy rewrites this file: rendered before every publish.
+        # Replaces only the frontend's keys in /etc/open4goods/frontend.env, the second env_file of
+        # docker-compose.frontend.yml, read when publish-frontend.sh recreates the container
+        # (scripts/deploy/render-service-secrets.sh, GOU-1041). No open4goods-config deploy writes it (GOU-1694); the
+        # script refuses to render while the host's compose file does not read it.
         if: env.MODE != 'test'
         env:
           DEPLOY_SSH_HOST: ${{ secrets.REMOTE_HOST }}

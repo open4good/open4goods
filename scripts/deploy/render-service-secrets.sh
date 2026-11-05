@@ -1,6 +1,6 @@
 #!/bin/sh
 # Render a service's secrets from the `beta` or `prod` GitHub Environment onto its host
-# (ADR-0006, D140, GOU-933, GOU-957, GOU-1014, GOU-1041, GOU-1091, GOU-1092, GOU-1393, GOU-1412).
+# (ADR-0006, D140, GOU-933, GOU-957, GOU-1014, GOU-1041, GOU-1091, GOU-1092, GOU-1393, GOU-1412, GOU-1694).
 #
 # Usage: render-service-secrets.sh [--if-present] [--source] <check|apply> <env> <service>
 #
@@ -48,8 +48,12 @@
 #
 # Host service and env file: api, ui, front-api and b2b-api are themselves;
 # admin runs as `sbadmin` (/etc/open4goods/sbadmin.env); frontend reads
-# /opt/open4goods/config/<env>/frontend/.env (env_file of docker-compose.frontend.yml,
-# rewritten by open4goods-config's deploy: rendered before every publish); infra is
+# /etc/open4goods/frontend.env, the second env_file of open4goods-config's
+# docker-compose.frontend.yml: it beats config/<env>/frontend/.env, which every
+# open4goods-config deploy rewrites, and no such deploy writes /etc/open4goods/
+# (GOU-1694). apply refuses to render it while the host's compose file does not read
+# it (/opt/open4goods/latest/<env>/docker-compose.frontend.yml, copied by
+# publish-frontend.sh): deploy open4goods-config first. infra is
 # the docker compose infrastructure (Kibana, Plausible, b2b Postgres), which reads
 # /etc/open4goods/infra.env as a second --env-file of publish-infra.sh: no
 # open4goods-config deploy writes /etc/open4goods/, and publish-jars.sh does not
@@ -246,7 +250,7 @@ esac
 
 if [ "$service" = frontend ]; then
   spring=false
-  env_file=/opt/open4goods/config/$env_name/frontend/.env
+  env_file=/etc/open4goods/frontend.env
 elif [ "$service" = infra ]; then
   spring=false
   env_file=/etc/open4goods/infra.env
@@ -403,7 +407,28 @@ if [ "$spring" = true ]; then
   env_pairs="$env_pairs SPRING_CONFIG_IMPORT=@optional:configtree:$tree_dir/"
 fi
 
+# The frontend's env file is only read through the compose file deployed by open4goods-config (GOU-1694):
+# never render secrets that the next publish-frontend.sh would leave out of the container.
+frontend_compose_check() {
+  : "${DEPLOY_SSH_HOST:?DEPLOY_SSH_HOST is required}"
+  : "${DEPLOY_SSH_USER:?DEPLOY_SSH_USER is required}"
+  : "${DEPLOY_SSH_KEY:?DEPLOY_SSH_KEY is required}"
+  compose_file=/opt/open4goods/latest/$env_name/docker-compose.frontend.yml
+  check_dir=$(mktemp -d)
+  (umask 077 && printf '%s\n' "$DEPLOY_SSH_KEY" > "$check_dir/id")
+  # The pattern has no leading slash: the path is matched, not rewritten (scripts/tests/push-remote-file.test.sh).
+  reads=$(ssh -i "$check_dir/id" -o BatchMode=yes -o StrictHostKeyChecking=accept-new \
+    -o UserKnownHostsFile="$check_dir/known_hosts" "$DEPLOY_SSH_USER@$DEPLOY_SSH_HOST" \
+    "if grep -q 'etc/open4goods/frontend\\.env' '$compose_file'; then echo reads; fi" || true)
+  rm -rf "$check_dir"
+  [ "$reads" = reads ] ||
+    fail "$compose_file does not read $env_file (or the host is unreachable): deploy open4goods-config to $env_name first (GOU-1694)"
+}
+
 if [ -n "$env_pairs" ]; then
+  if [ "$service" = frontend ]; then
+    frontend_compose_check
+  fi
   keys=
   for pair in $env_pairs; do
     keys="$keys ${pair%%=*}"

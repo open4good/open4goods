@@ -1,7 +1,7 @@
 # Service secrets, beta and prod (render + restart)
 
 Context: decision D140 (2026-10-22), ADR-0006, GOU-932 / GOU-933, GOU-957,
-GOU-1014, GOU-1041, GOU-1412 (credentials campaign GOU-1038).
+GOU-1014, GOU-1041, GOU-1412, GOU-1694 (credentials campaign GOU-1038).
 Service secrets move from `open4goods-config` to the `beta` and `prod` GitHub
 Environments of `open4good/open4goods` as they are rotated. A rotated secret is
 rendered onto the host, and its services restarted, by the dispatchable
@@ -62,9 +62,42 @@ Spring Boot, not on the JAR.
 Host services and files: `api`, `ui`, `front-api` and `b2b-api` keep their
 name; `admin` runs as `sbadmin` (`/etc/open4goods/sbadmin.env`,
 `/etc/open4goods/secrets/sbadmin/`); the frontend reads
-`/opt/open4goods/config/<env>/frontend/.env`, the `env_file` of
-`docker-compose.frontend.yml`, which every `open4goods-config` deploy rewrites:
-it is rendered before every publish.
+`/etc/open4goods/frontend.env` (GOU-1694). Every rendered file lives under
+`/etc/open4goods/`, which no `open4goods-config` deploy writes, so a config
+deploy, whenever it runs, keeps them.
+
+### Frontend env file
+
+`docker-compose.frontend.yml` (owned by `open4goods-config`) gives
+`frontend-ssr-blue` and `frontend-ssr-green` two `env_file`s:
+`/opt/open4goods/config/<env>/frontend/.env` (from `configs/<env>/frontend/`,
+rewritten by every config deploy), then `/etc/open4goods/frontend.env` (this
+script, mode 600). The second one is read last, so its values win, and it is
+optional (`required: false`, docker compose 2.24 or later) until its first
+render. `publish-frontend.sh` checks front-api against the machine token of
+that file when it holds one, otherwise against the `.env` one.
+
+`apply` for the frontend first checks over SSH that
+`/opt/open4goods/latest/<env>/docker-compose.frontend.yml`, the compose file
+`publish-frontend.sh` copies, reads `/etc/open4goods/frontend.env`. Otherwise
+it fails before writing anything: the next publish would start the container
+without the secrets.
+
+Migration order, without downtime (GOU-1694):
+
+1. `open4goods-config` adds the optional second `env_file` and the
+   `publish-frontend.sh` token check, then is deployed (beta: on merge; prod:
+   a `Deploy Configuration` dispatch). Nothing changes yet: the file does
+   not exist, the container keeps the `.env` values.
+2. `open4goods` renders into `/etc/open4goods/frontend.env` from its next
+   frontend deploy (`frontend-ci.yml` on beta, the release on prod, or
+   `serviceSecrets.yml service=frontend`). Deploy step 1 on an environment
+   before this step runs there: the script refuses to render otherwise.
+3. The `NUXT_GOOGLE_OAUTH_CLIENT_*`, `NUXT_MACHINE_TOKEN`, `MACHINE_TOKEN`
+   and `FRONT_SECURITY_JWT_SECRET` lines left in
+   `config/<env>/frontend/.env` by earlier renders are overridden, and the
+   next config deploy removes them. They must not be added to
+   `configs/<env>/frontend/.env` in `open4goods-config`.
 
 ### Precedence
 
@@ -256,7 +289,9 @@ selected service uses it.
   env file is readable if present, that `publish-jars.sh` exists and that
   `/opt/open4goods/runtime/<host service>.jar` is identical to
   `/opt/open4goods/latest/<host service>-latest.jar`; for the frontend, that
-  its `.env` is writable, that `publish-frontend.sh` exists and that the
+  `/etc/open4goods` is writable, that `/etc/open4goods/frontend.env` is
+  readable if present, that `latest/<env>/docker-compose.frontend.yml` reads
+  it, that `publish-frontend.sh` exists and that the
   running bundle (`bin/frontend-ssr/.output`) has the same `nitro.json` and
   `server/index.mjs` as `latest/frontend-ssr/.output`. A restart deploys
   `latest`: when it differs, the workflow fails before any rendering.
