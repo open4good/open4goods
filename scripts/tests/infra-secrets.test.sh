@@ -885,22 +885,23 @@ reset_host
 OPS_PASS="OPSREADONLYSENTINEL66666666666666666"
 run env -u INFRA_ES_OPS_READONLY_PASSWORD "${DEPLOY}/infra-secrets.sh" remote test beta es-ops-readonly
 check "es-ops-readonly test fails cleanly while the secret is missing, even as a dry run" \
-  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"INFRA_ES_OPS_READONLY_PASSWORD is empty or missing"* ]] && [ ! -e "$2/ops-es-readonly.pass" ]' \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"INFRA_ES_OPS_READONLY_PASSWORD is empty or missing"* ]] && [ ! -e "$2/ops-es-readonly.curlrc" ]' \
   "${status}" "${out}" "${ETC}"
 export INFRA_ES_OPS_READONLY_PASSWORD="${OPS_PASS}"
 run "${DEPLOY}/infra-secrets.sh" remote test beta es-ops-readonly
 check "es-ops-readonly test checks everything and writes nothing" \
   bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"role ops_readonly does not exist: source would create it"* ]] \
-    && [ ! -e "$2/ops-es-readonly.pass" ] && [ ! -e "$3" ] && [ ! -e "$4/ops_readonly" ]' \
+    && [ ! -e "$2/ops-es-readonly.curlrc" ] && [ ! -e "$3" ] && [ ! -e "$4/ops_readonly" ]' \
   "${status}" "${out}" "${ETC}" "${FAKE_ES}.role" "${FAKE_ES}"
 run "${DEPLOY}/infra-secrets.sh" remote source beta es-ops-readonly
 check "es-ops-readonly source creates the role (monitor; read on the products index only) and the user" \
   bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1/ops_readonly")" = "$2" ] \
     && [ "$(cat "$3")" = "{\"cluster\":[\"monitor\"],\"indices\":[{\"names\":[\"products-moustik\"],\"privileges\":[\"read\",\"view_index_metadata\"]}]}" ]' \
   "${status}" "${FAKE_ES}" "${OPS_PASS}" "${FAKE_ES}.role"
-check "es-ops-readonly source renders the password in a 600 file without newline, and authenticates" \
-  bash -c '[ "$(cat "$0")" = "$1" ] && [ "$(stat -c %a "$0")" = 600 ] && [ "$(wc -c < "$0")" -eq "${#1}" ] && [[ "$2" == *"answers as ops_readonly"* ]]' \
-  "${ETC}/ops-es-readonly.pass" "${OPS_PASS}" "${out}"
+check "es-ops-readonly source renders a 600 curl config (one user line), and authenticates with curl -K" \
+  bash -c '[ "$(cat "$0")" = "user = \"ops_readonly:$1\"" ] && [ "$(stat -c %a "$0")" = 600 ] && [ "$(wc -l < "$0")" -eq 1 ] \
+    && [[ "$2" == *"answers as ops_readonly"* ]] && ! grep -q "ops_readonly:" "$3"' \
+  "${ETC}/ops-es-readonly.curlrc" "${OPS_PASS}" "${out}" "${CALLS}"
 check "es-ops-readonly source leaves the elastic password alone and prints no value" \
   bash -c '[ "$(cat "$0/elastic")" = "$1" ]' "${FAKE_ES}" "${OLD_ELASTIC}"
 check "es-ops-readonly prints no value" no_value_leaked

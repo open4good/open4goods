@@ -35,7 +35,8 @@
 #                         spring.datasource.password), compose as B2B_POSTGRES_PASSWORD
 #   es-ops-readonly       INFRA_ES_OPS_READONLY_PASSWORD (Elasticsearch user ops_readonly, role ops_readonly: cluster
 #                         monitor, read + view_index_metadata on the products index only) -> the file
-#                         /etc/open4goods/ops-es-readonly.pass (600, no newline) for Ops; no consumer to restart;
+#                         /etc/open4goods/ops-es-readonly.curlrc (600, one `user = \"ops_readonly:<value>\"` line, for
+#                         `curl -K`: never in an argument) for Ops; no consumer to restart;
 #                         the secret is required by test too; no rollback (delete the user by hand, runbook)
 #
 # Lines marked `ggignore` copy a variable to a file: GitGuardian takes them for hard-coded passwords.
@@ -1295,7 +1296,7 @@ b2b_postgres_rollback() {
 
 # Product index of the api (Product.DEFAULT_REPO); no alias is defined in the code.
 ops_index=${OPS_ES_INDEX:-products-moustik}
-ops_file=$etc/ops-es-readonly.pass
+ops_file=$etc/ops-es-readonly.curlrc
 
 ops_role_body() {
   printf '{"cluster":["monitor"],"indices":[{"names":["%s"],"privileges":["read","view_index_metadata"]}]}' "$ops_index" \
@@ -1305,6 +1306,12 @@ ops_role_body() {
 ops_user_body() {
   printf '{"password":"%s","roles":["ops_readonly"],"enabled":true}' \
     "$(printf '%s' "$INFRA_ES_OPS_READONLY_PASSWORD" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')" > "$work/user.json"
+}
+
+# The exact content of the curl config file for Ops: curl_auth's line, as `curl -K` reads it.
+ops_curlrc_line() {
+  curl_auth ops_readonly "$INFRA_ES_OPS_READONLY_PASSWORD"
+  cat "$work/curl.cfg"
 }
 
 ops_require_secret() {
@@ -1328,7 +1335,7 @@ es_ops_readonly_test() {
   else
     ok "ops_readonly does not accept the new password yet: source would set it"
   fi
-  if holds "$ops_file" "$INFRA_ES_OPS_READONLY_PASSWORD"; then
+  if [ -f "$ops_file" ] && [ "$(cat "$ops_file")" = "$(ops_curlrc_line)" ]; then
     ok "$ops_file already holds the new password"
   else
     ok "$ops_file would be written (mode 600)"
@@ -1350,12 +1357,13 @@ es_ops_readonly_source() {
   case "$code" in 200 | 201) ;; *) fail "Elasticsearch refused the user ops_readonly (HTTP $code)" ;; esac
   ok "user ops_readonly set"
   tmp=$(mktemp "$ops_file.XXXXXX")
-  printf '%s' "$INFRA_ES_OPS_READONLY_PASSWORD" > "$tmp"
   chmod 600 "$tmp"
+  ops_curlrc_line > "$tmp"
   [ "$(id -u)" -ne 0 ] || chown root:root "$tmp"
   mv "$tmp" "$ops_file"
   ok "$ops_file written (mode $(stat -c '%a' "$ops_file"), owner $(stat -c '%U' "$ops_file"))"
-  es_accepts ops_readonly "$(cat "$ops_file")" || fail "ops_readonly is not authenticated with the password in $ops_file"
+  code=$(curl -s -o "$work/es.out" -w '%{http_code}' -K "$ops_file" "$es_url/_security/_authenticate" || echo 000)
+  [ "$code" = 200 ] || fail "ops_readonly is not authenticated with curl -K $ops_file (HTTP $code)"
   grep -q '"username":"ops_readonly"' "$work/es.out" || fail "_security/_authenticate does not answer as ops_readonly"
   ok "GET _security/_authenticate answers as ops_readonly"
 }
