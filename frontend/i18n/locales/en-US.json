@@ -78,6 +78,21 @@
       "pageTitle": "{title} - Page {page}",
       "tagDescription": "Browse {tag} articles on Nudger's blog for sustainable, energy-efficient advice.",
       "tagTitle": "{tag} articles - Nudger Blog"
+    },
+    "offerBlocks": {
+      "tv": {
+        "small": "Our top-rated 43 to 50 inch TVs",
+        "medium": "Our top-rated 55 inch TVs",
+        "large": "Our top-rated 65 inch and larger TVs"
+      },
+      "oven": {
+        "compact": "Our top-rated compact ovens (under 60 L)",
+        "standard": "Our top-rated 60 to 72 L ovens",
+        "large": "Our top-rated large ovens (over 72 L)",
+        "pyrolysis": "Our top-rated pyrolytic ovens",
+        "catalysis": "Our top-rated catalytic ovens"
+      },
+      "seeAll": "See all products"
     }
   },
   "home": {

@@ -78,6 +78,21 @@
       "pageTitle": "{title} - Page {page}",
       "tagDescription": "Parcourez les articles {tag} du blog Nudger.",
       "tagTitle": "Articles {tag} - Blog Nudger"
+    },
+    "offerBlocks": {
+      "tv": {
+        "small": "Nos téléviseurs 43 à 50 pouces les mieux notés",
+        "medium": "Nos téléviseurs 55 pouces les mieux notés",
+        "large": "Nos téléviseurs 65 pouces et plus les mieux notés"
+      },
+      "oven": {
+        "compact": "Nos fours compacts (moins de 60 L) les mieux notés",
+        "standard": "Nos fours de 60 à 72 L les mieux notés",
+        "large": "Nos grands fours (plus de 72 L) les mieux notés",
+        "pyrolysis": "Nos fours pyrolyse les mieux notés",
+        "catalysis": "Nos fours catalyse les mieux notés"
+      },
+      "seeAll": "Voir tous les produits"
     }
   },
   "home": {
