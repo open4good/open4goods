@@ -19,6 +19,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
+import org.apache.commons.lang3.StringUtils;
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.vertical.AttributeComparisonRule;
 
@@ -805,14 +806,33 @@ public class VerticalsConfigService {
 	}
 
 	/**
-	 * Instanciate a vertical config for a given categories bag
+	 * Resolves the vertical of a categories bag, without EPREL evidence.
 	 *
-	 * @param inputStream
-	 * @param existing
-	 * @return
-	 * @throws IOException
+	 * @param productCategoriessByDatasource product categories keyed by datasource
+	 * @return the matching vertical, or null
+	 * @see #getVerticalForCategories(Map, String)
 	 */
 	public VerticalConfig getVerticalForCategories(Map<String, String> productCategoriessByDatasource) {
+		return getVerticalForCategories(productCategoriessByDatasource, null);
+	}
+
+	/**
+	 * Resolves the vertical of a categories bag.
+	 *
+	 * <p>The first category matching a vertical wins. The vertical is then dropped
+	 * when any category of any datasource contains one of its
+	 * {@code excludingTokensFromCategoriesMatching}, unless the product EPREL group
+	 * belongs to that vertical: an EPREL registration proves the product is the
+	 * appliance, so a single marketplace row categorised as an accessory or a
+	 * piece of furniture cannot remove it from its vertical (GOU-1700). EPREL never
+	 * assigns a vertical on its own.
+	 *
+	 * @param productCategoriessByDatasource product categories keyed by datasource
+	 * @param eprelProductGroup              EPREL product group of the product, or null
+	 * @return the matching vertical, or null
+	 */
+	public VerticalConfig getVerticalForCategories(Map<String, String> productCategoriessByDatasource,
+			String eprelProductGroup) {
 
 		VerticalConfig vc = null;
 
@@ -836,7 +856,8 @@ public class VerticalsConfigService {
 		}
 
 		// Looking for words exclusions in categories
-		if (null != vc && null != vc.getExcludingTokensFromCategoriesMatching()) {
+		if (null != vc && null != vc.getExcludingTokensFromCategoriesMatching()
+				&& !isConfirmedByEprel(vc, eprelProductGroup)) {
 			for (String token : vc.getExcludingTokensFromCategoriesMatching()) {
 				for (String category : productCategoriessByDatasource.values()) {
 					if (category.contains(token)) {
@@ -850,6 +871,19 @@ public class VerticalsConfigService {
 		}
 
 		return vc;
+	}
+
+	/**
+	 * Tells whether an EPREL product group belongs to a vertical.
+	 *
+	 * @param vertical          the vertical, may be null
+	 * @param eprelProductGroup the EPREL product group, may be null
+	 * @return true when the group is one of the vertical {@code eprelGroupNames}
+	 */
+	public boolean isConfirmedByEprel(VerticalConfig vertical, String eprelProductGroup) {
+		return vertical != null && StringUtils.isNotBlank(eprelProductGroup)
+				&& vertical.getEprelGroupNames() != null
+				&& vertical.getEprelGroupNames().contains(eprelProductGroup);
 	}
 
 	/**

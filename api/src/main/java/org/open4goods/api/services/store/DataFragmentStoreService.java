@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.AggregationFacadeService;
@@ -21,6 +22,7 @@ import org.open4goods.model.product.ProductPartialUpdateField;
 import org.open4goods.model.product.ProductPartialUpdateHolder;
 import org.open4goods.services.productrepository.config.IndexationConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
+import org.open4goods.services.productrepository.services.ProductRepository.AggregationLookup;
 import org.open4goods.services.productrepository.workers.FullProductIndexationWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -181,16 +183,25 @@ public class DataFragmentStoreService {
 
 
 	/**
-	 * Aggregates datafragments to already known aggregatedDatas, then store the results
+	 * Aggregates datafragments to already known aggregatedDatas, then store the results.
+	 *
+	 * <p>Existing products are looked up by numeric id ({@code Long.valueOf(gtin)}),
+	 * never by the raw GTIN string of the fragment: a feed GTIN with leading zeros
+	 * ({@code 07333394145372}) and the product referential GTIN
+	 * ({@code 7333394145372}) designate the same document. A product is only created
+	 * when Elasticsearch reports it absent; a fragment whose lookup failed is
+	 * skipped, so that an existing product is never rewritten from a single
+	 * fragment (GOU-1700).
 	 */
 	public void aggregateAndstore(Collection<DataFragment> buffer) {
 		
 		try {
 			// Retrieving datafragments
-			Map<String, Product> aggDatas = aggregatedDataRepository.multiGetById(
+			AggregationLookup lookup = aggregatedDataRepository.multiGetForAggregation(
 					buffer.stream()
 					.map(e -> Long.valueOf(e.gtin()))
-					.toList());
+					.collect(Collectors.toSet()));
+			Map<Long, Product> aggDatas = lookup.found();
 
 
 			// Storing for partial updates
@@ -200,11 +211,19 @@ public class DataFragmentStoreService {
 			
 			
 			for (DataFragment df : buffer) {
-				Product data = aggDatas.get(df.gtin());
+				Long id = Long.valueOf(df.gtin());
+				if (lookup.failedIds().contains(id)) {
+					logger.error("Skipping datafragment {} from {} : product lookup failed, it may exist", df.gtin(), df.getDatasourceName());
+					continue;
+				}
+				Product data = aggDatas.get(id);
 				if (null == data) {
 					// This is a first product
+					logger.info("Creating product {} from {}", id, df.getDatasourceName());
 					data = new Product();
 					data.setCreationDate(System.currentTimeMillis());
+					// Next fragments of this buffer must enrich it, not recreate it
+					aggDatas.put(id, data);
 				}
 
 				/////////////////////////////

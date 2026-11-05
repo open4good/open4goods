@@ -17,18 +17,21 @@ import org.slf4j.Logger;
  *
  * <p>The vertical association is a deterministic function of the product's
  * accumulated categories: it is resolved through
- * {@link VerticalsConfigService#getVerticalForCategories(Map)} and nothing else.
- * Keeping it purely category-driven matters for SEO — an unstable vertical changes
- * the canonical product URL and triggers 301 redirects.
+ * {@link VerticalsConfigService#getVerticalForCategories(Map, String)}. Keeping it
+ * stable matters for SEO — an unstable vertical changes the canonical product URL
+ * and triggers 301 redirects. The product EPREL group never assigns a vertical,
+ * but it protects a vertical it confirms from category noise (GOU-1700).
  *
  * <p>Processing steps ({@link #onProduct(Product, VerticalConfig)}):
  * <ol>
  *   <li>Refresh the product's flat {@code datasourceCategories} set from its
  *       {@code categoriesByDatasources} map.</li>
  *   <li>Resolve the best-matching vertical from those categories.</li>
- *   <li>When a vertical matches, set it and propagate its Google taxonomy ID;
- *       otherwise clear both. Generated names are left untouched — the URL slug is
- *       (re)generated downstream by {@code NamesAggregationService}.</li>
+ *   <li>When a vertical matches, set it and propagate its Google taxonomy ID.</li>
+ *   <li>Otherwise keep the current vertical when the product EPREL group belongs
+ *       to it, and clear both in every other case. Generated names are left
+ *       untouched — the URL slug is (re)generated downstream by
+ *       {@code NamesAggregationService}.</li>
  * </ol>
  *
  * <p>The {@link #onDataFragment(DataFragment, Product, VerticalConfig)} hook stores
@@ -70,14 +73,19 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 	}
 
 	/**
-	 * Resolves or clears the product's vertical based solely on its accumulated
+	 * Resolves or clears the product's vertical based on its accumulated
 	 * categories.
 	 *
-	 * <p>The vertical is set when {@link VerticalsConfigService#getVerticalForCategories(Map)}
+	 * <p>The vertical is set when {@link VerticalsConfigService#getVerticalForCategories(Map, String)}
 	 * returns a match, and cleared only when it does not (no categories, no matching
 	 * category, or an excluding token). It is never unset on the basis of transient
 	 * data such as offer names, so a correctly-categorized product keeps a stable
 	 * vertical (and therefore a stable URL) across re-aggregations.
+	 *
+	 * <p>A product whose EPREL group belongs to its current vertical keeps it: an
+	 * excluding token found in another datasource category (a marketplace row
+	 * categorised as a shoe-care accessory) or a feed category that no longer
+	 * matches cannot clear it (GOU-1700).
 	 */
 	@Override
 	public void onProduct(final Product data, final VerticalConfig vConf) throws AggregationSkipException {
@@ -87,7 +95,8 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 		data.getDatasourceCategories().addAll(data.getCategoriesByDatasources().values());
 
 		// Resolve the vertical deterministically from the accumulated categories
-		VerticalConfig vertical = verticalService.getVerticalForCategories(data.getCategoriesByDatasources());
+		String eprelGroup = data.getEprelDatas() == null ? null : data.getEprelDatas().getProductGroup();
+		VerticalConfig vertical = verticalService.getVerticalForCategories(data.getCategoriesByDatasources(), eprelGroup);
 
 		if (vertical != null) {
 			if (data.getVertical() != null && !vertical.getId().equals(data.getVertical())) {
@@ -96,6 +105,10 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 			}
 			data.setVertical(vertical.getId());
 			data.setGoogleTaxonomyId(vertical.getGoogleTaxonomyId());
+		} else if (verticalService.isConfirmedByEprel(verticalService.getConfigById(data.getVertical()), eprelGroup)) {
+			// EPREL confirms the current vertical: category noise must not remove it
+			dedicatedLogger.warn("Keeping vertical {} for product {}: no category matches it, but EPREL group {} does",
+					data.getVertical(), data.getId(), eprelGroup);
 		} else {
 			// No category matched a vertical: clear the association. Generated names
 			// are left intact; NamesAggregationService regenerates the URL slug.
