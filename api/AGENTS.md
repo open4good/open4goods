@@ -139,3 +139,13 @@ fragment dont la lecture a échoué est ignoré (log `error`), il ne recrée jam
 porté par une autre datasource, ni une catégorie qui ne correspond plus ne la retirent. EPREL n'attribue jamais seul
 une verticale. Dénombrement et reprise des produits touchés :
 [runbook](../docs/operations/product-recreation-recovery.md).
+
+### Slug produit figé
+
+`NamesAggregationService` (GOU-1708) ne génère le slug (`names.url`, base du `fullSlug` de front-api) que s'il
+manque pour une langue, ou si la verticale du produit diffère de `names.urlVertical`, la verticale mémorisée à sa
+génération (`_none` pour un slug généré sans verticale). Un changement de nom ou d'attributs, ou
+`forceNameGeneration`, ne change plus l'URL publique : ce flag ne régénère que titres et méta. `urlVertical` absent
+(slug antérieur à GOU-1708) = inconnu : le slug existant est figé et la verticale courante est mémorisée au passage
+suivant, sans migration. Un produit qui perd sa verticale garde son slug ; la lui rendre ne change pas l'URL. Les
+anciennes URL continuent de rediriger en 301 par GTIN vers le slug canonique.

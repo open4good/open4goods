@@ -14,6 +14,7 @@ import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductNameResolver;
+import org.open4goods.model.product.ProductTexts;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.PrefixedAttrText;
 import org.open4goods.model.vertical.ProductI18nElements;
@@ -28,6 +29,10 @@ import org.slf4j.LoggerFactory;
  *   <li>Collecting and normalizing raw offer names from {@link DataFragment}s</li>
  *   <li>Generating localized product naming elements (URL, H1, etc.) from templates/config</li>
  * </ul>
+ *
+ * <p>The URL slug is frozen once generated: it is only regenerated when missing or when the product
+ * vertical differs from {@link ProductTexts#getUrlVertical()}. {@code forceNameGeneration} regenerates
+ * titles only (GOU-1708).</p>
  *
  * <p>External contract preserved: same class name, same method signatures, same return types.</p>
  */
@@ -108,6 +113,13 @@ public class NamesAggregationService extends AbstractAggregationService {
 		// If no i18n config exists, skip name generation safely.
 		if (i18nConfs != null && !i18nConfs.isEmpty()) {
 
+			// A published slug is frozen: it is only regenerated when the vertical changed since its
+			// generation, never because the name, the attributes or forceNameGeneration changed (GOU-1708).
+			final boolean regenerateUrls = urlVerticalChanged(data);
+			boolean urlsUpToDate = true;
+			boolean urlGenerated = false;
+			boolean urlKept = false;
+
 			for (Map.Entry<String, ProductI18nElements> entry : i18nConfs.entrySet()) {
 				final String lang = entry.getKey();
 				final ProductI18nElements tConf = entry.getValue();
@@ -117,11 +129,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 
 				try {
 
-
-
-
 					// ---- URL ----
-					// High cognitive load note:
 					// data.getNames().getUrl() is assumed existing by domain model, but we still guard nulls
 					// to avoid unexpected NPEs if upstream product object is partially initialized.
 					final boolean urlMissing =
@@ -129,17 +137,25 @@ public class NamesAggregationService extends AbstractAggregationService {
 							|| data.getNames().getUrl() == null
 							|| data.getNames().getUrl().get(lang) == null;
 
-					if (urlMissing || (vConf != null && vConf.isForceNameGeneration())) {
+					if (urlMissing || regenerateUrls) {
 						logger.debug("Generating product url for productId={} lang={}", data.getId(), lang);
 
 						final PrefixedAttrText urlPrefix = tConf.getUrl();
-						final String url = generateUrl(data, urlPrefix, vConf);
+						final String url;
+						try {
+							url = generateUrl(data, urlPrefix, vConf);
+						} catch (InvalidParameterException | RuntimeException ex) {
+							urlsUpToDate = false;
+							throw ex;
+						}
 
 						if (data.getNames() != null && data.getNames().getUrl() != null) {
 							data.getNames().getUrl().put(lang, url);
+							urlGenerated = true;
 						}
 					} else {
-						logger.debug("Skipping URL generation for productId={} lang={}", data.getId(), lang);
+						urlKept = true;
+						logger.debug("Keeping frozen URL for productId={} lang={}", data.getId(), lang);
 					}
 
 
@@ -165,8 +181,56 @@ public class NamesAggregationService extends AbstractAggregationService {
 					logger.error("Unexpected error while computing names for product {}", data.getId(), ex);
 				}
 			}
+
+			if (urlsUpToDate) {
+				recordUrlVertical(data, urlGenerated, urlKept);
+			}
 		}
 
+	}
+
+	/**
+	 * Tells whether the product slugs must be regenerated because the product vertical changed since
+	 * they were generated.
+	 *
+	 * <p>Slugs are kept when the generation vertical is unknown (slug generated before GOU-1708) and
+	 * when the product has lost its vertical: a vertical removed by mistake then restored gives back
+	 * the same public URL.</p>
+	 *
+	 * @param data product being aggregated
+	 * @return {@code true} when the slugs must be regenerated
+	 */
+	private boolean urlVerticalChanged(final Product data) {
+		if (data.getNames() == null || StringUtils.isBlank(data.getVertical())) {
+			return false;
+		}
+		final String generationVertical = data.getNames().getUrlVertical();
+		return generationVertical != null && !generationVertical.equals(data.getVertical());
+	}
+
+	/**
+	 * Records the vertical the slugs now correspond to.
+	 *
+	 * <p>With a vertical, it is recorded when a slug was generated in this pass or when the generation
+	 * vertical was unknown. Without a vertical, {@link ProductTexts#URL_WITHOUT_VERTICAL} is recorded
+	 * only when every slug was generated in this pass: a slug kept while the vertical is missing keeps
+	 * its recorded (or unknown) vertical, so that restoring the vertical does not change the public URL.</p>
+	 *
+	 * @param data product being aggregated
+	 * @param generated whether at least one slug was generated in this pass
+	 * @param kept whether at least one existing slug was kept in this pass
+	 */
+	private void recordUrlVertical(final Product data, final boolean generated, final boolean kept) {
+		if (data.getNames() == null) {
+			return;
+		}
+		if (StringUtils.isNotBlank(data.getVertical())) {
+			if (generated || data.getNames().getUrlVertical() == null) {
+				data.getNames().setUrlVertical(data.getVertical());
+			}
+		} else if (generated && !kept) {
+			data.getNames().setUrlVertical(ProductTexts.URL_WITHOUT_VERTICAL);
+		}
 	}
 
 	/**

@@ -13,7 +13,8 @@ parsers:
     minYears: 0.0
     maxYears: 20.0
 
-# If true, products url will be regenerated on each batch. Should not move too much, but...
+# If true, product titles and meta are regenerated on each batch. The URL slug is frozen once
+# generated and only changes with the product vertical (GOU-1708).
 forceNameGeneration: true
 
 # Average electricity cost per kilowatt-hour (EUR).
