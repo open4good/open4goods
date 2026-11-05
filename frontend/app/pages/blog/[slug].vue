@@ -4,6 +4,7 @@ import { computed, defineAsyncComponent } from 'vue'
 import { useAsyncData } from '#imports'
 import { useBlog } from '~/composables/blog/useBlog'
 import type { BlogPostDto } from '~~/shared/api-client'
+import { isBlogArticlePath } from '~/utils/blog-route'
 import { matchLocalizedWikiRouteByPath } from '~~/shared/utils/localized-routes'
 
 interface BlogArticle extends BlogPostDto {
@@ -23,6 +24,12 @@ const assistantCategoryMappings: Record<string, string> = {
 }
 
 const slug = computed(() => {
+  // The route is global: once navigation leaves /blog (e.g. to a product page
+  // handled by the catch-all), params.slug belongs to another page.
+  if (!isBlogArticlePath(route.path)) {
+    return null
+  }
+
   const rawSlug = route.params.slug
 
   if (Array.isArray(rawSlug)) {
