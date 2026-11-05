@@ -8,6 +8,7 @@ import { _sanitizeHtml } from '~~/shared/utils/sanitizer'
 import { useAuth } from '~/composables/useAuth'
 import { buildBlogArticleJsonLd } from '~/utils/blog-jsonld'
 
+import BlogOfferBlocks from '~/components/domains/blog/BlogOfferBlocks.vue'
 import NudgeToolAssistantWizard from '~/components/nudge-tool/NudgeToolAssistantWizard.vue'
 
 interface BlogArticle extends BlogPostDto {
@@ -23,6 +24,7 @@ const props = defineProps<{
   article: BlogArticle
   assistantId?: string | null
   assistantCategoryId?: string | null
+  offerBlocksSlug?: string | null
 }>()
 
 const article = computed(() => props.article)
@@ -455,6 +457,7 @@ useHead(() => ({
           />
         </div>
       </template>
+      <BlogOfferBlocks :slug="offerBlocksSlug" />
     </section>
     <section
       v-else
