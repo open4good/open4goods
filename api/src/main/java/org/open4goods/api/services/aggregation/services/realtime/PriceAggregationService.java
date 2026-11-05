@@ -37,9 +37,11 @@ import com.google.common.collect.Sets;
  *   <li>Add the fragment's price to the product's offer set, unless the
  *       fragment is explicitly out of stock (merchants such as Back Market
  *       publish placeholder prices, e.g. 1 EUR, on out-of-stock rows).</li>
+ *   <li>Record per condition when an offer was last seen
+ *       ({@link AggregatedPrices#getLastOfferSeen()}), kept after the offers expire.</li>
  *   <li>Filter out offers older than {@code ProductRepository.VALID_UNTIL_DURATION}.</li>
  *   <li>Deduplicate by keeping only the lowest price per
- *       (datasource, product-state) pair.</li>
+ *       (datasource, product-state) pair, the most recent one on equal prices.</li>
  *   <li>Compute the estimated nudger contribution for each offer.</li>
  *   <li>Update min-price, offer count, and available product conditions.</li>
  *   <li>Maintain and trim a per-condition price history (max 2 years,
@@ -90,6 +92,9 @@ public class PriceAggregationService extends AbstractAggregationService {
 		// Filtering :
 		//////////////////
 
+		// Remembering when an offer of each condition was last seen, before outdated offers are dropped
+		recordLastOfferSeen(data.getPrice());
+
 		// Key is providerName + name
 		final Map<String, AggregatedPrice> reducedPrices = new HashMap<>();
 
@@ -105,8 +110,7 @@ public class PriceAggregationService extends AbstractAggregationService {
 
 				final String key = pricMerchanteKey(df);
 				// Keep only the lowest price per (provider, condition) pair
-				reducedPrices.merge(key, df, (existing, incoming) ->
-						incoming.getPrice() < existing.getPrice() ? incoming : existing);
+				reducedPrices.merge(key, df, PriceAggregationService::preferredOffer);
 			}
 		}
 
@@ -148,6 +152,47 @@ public class PriceAggregationService extends AbstractAggregationService {
 		// Setting if has an occasion offer
 	}
 
+
+	/**
+	 * Records, per condition, the most recent timestamp among the product's offers (expired ones included) into
+	 * {@link AggregatedPrices#getLastOfferSeen()}. The value only moves forward, so it survives the removal of
+	 * the offers and dates the last offer of a product that has none left.
+	 *
+	 * @param prices the product prices, updated in place
+	 */
+	static void recordLastOfferSeen(AggregatedPrices prices) {
+		if (prices.getLastOfferSeen() == null) {
+			prices.setLastOfferSeen(new HashMap<>());
+		}
+		for (AggregatedPrice offer : prices.getOffers()) {
+			if (offer.getProductState() != null && offer.getTimeStamp() != null) {
+				prices.getLastOfferSeen().merge(offer.getProductState(), offer.getTimeStamp(), Math::max);
+			}
+		}
+	}
+
+	/**
+	 * Chooses between two offers of the same (datasource, condition) pair: the lowest price wins, and on equal
+	 * prices the most recently seen offer wins.
+	 *
+	 * <p>The stored offer and a re-sent one at the same price are both in the offer set ({@code Price} equality
+	 * ignores the timestamp and has no matching {@code hashCode}), in no defined order. Keeping the stored one
+	 * made the offer expire {@code VALID_UNTIL_DURATION} after it was first seen, although the merchant kept
+	 * listing it (GOU-1699).
+	 *
+	 * @param existing offer already retained for the pair
+	 * @param incoming other offer of the pair
+	 * @return the offer to keep
+	 */
+	static AggregatedPrice preferredOffer(AggregatedPrice existing, AggregatedPrice incoming) {
+		int byPrice = Double.compare(incoming.getPrice(), existing.getPrice());
+		if (byPrice != 0) {
+			return byPrice < 0 ? incoming : existing;
+		}
+		long incomingSeen = incoming.getTimeStamp() == null ? 0L : incoming.getTimeStamp();
+		long existingSeen = existing.getTimeStamp() == null ? 0L : existing.getTimeStamp();
+		return incomingSeen > existingSeen ? incoming : existing;
+	}
 
 	/**
 	 * Compute the estimated contribution for the given price

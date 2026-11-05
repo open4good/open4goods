@@ -79,6 +79,17 @@ Déclenchement : `checkProductsBackup()` (`@Scheduled`, `api.backup.products-bac
 À la première vérification, si aucun export ne tourne, `.tmp/` est vidé (volume libéré logué) ; les fichiers publiés,
 le manifest et le `.sha256` ne sont jamais touchés. Pas de reprise d'une sauvegarde interrompue.
 
+## Agrégation des prix
+
+`PriceAggregationService` : un fragment `InStock.OUTOFSTOCK` n'ajoute pas d'offre (#3468) ; une offre expire
+`ProductRepository.VALID_UNTIL_DURATION` (2 jours) après l'indexation de son fragment. Par couple (datasource, état),
+on garde le prix le plus bas, et à prix égal l'offre la plus récente : une offre renvoyée au même prix rafraîchit sa
+date (GOU-1699). Avant de retirer les offres expirées, on enregistre par état la date de la dernière offre vue
+(`price.lastOfferSeen`, qui ne recule jamais). front-api s'en sert pour dater le dernier prix d'une fiche sans offre.
+
+Diagnostic en lecture seule des fiches qui ont perdu leurs offres : `scripts/diagnostics/stale_offers_report.py`
+(`product <gtin>`, `lost --days N`).
+
 ## Nettoyage des ressources orphelines
 
 `POST /batch/clean-resources?mode=DRY_RUN|MOVE|DELETE` répond `202` immédiatement et exécute le balayage en tâche de

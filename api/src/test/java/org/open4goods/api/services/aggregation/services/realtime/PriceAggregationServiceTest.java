@@ -2,6 +2,8 @@ package org.open4goods.api.services.aggregation.services.realtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Duration;
+
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.price.AggregatedPrice;
@@ -89,6 +91,84 @@ class PriceAggregationServiceTest {
                 ProductCondition.NEW, null), product, new VerticalConfig());
 
         assertThat(product.getOffersCount()).isEqualTo(1);
+    }
+
+    /**
+     * Verifies a merchant re-sending an offer at the same price refreshes its timestamp (GOU-1699). Offers are
+     * kept in a {@code HashSet} and {@code Price} defines equality on price and currency only, so the stored and
+     * the incoming offer used to tie and the stored one could survive, expiring 2 days after it was first seen
+     * although the merchant kept listing it. Repeated because the tie depended on hash-set iteration order.
+     *
+     * @throws Exception when aggregation fails
+     */
+    @Test
+    void sameDatasourceSamePriceKeepsMostRecentOffer() throws Exception {
+        PriceAggregationService service = new PriceAggregationService(LOGGER);
+        long now = System.currentTimeMillis();
+        long seenBefore = now - Duration.ofHours(36).toMillis();
+
+        for (int i = 0; i < 50; i++) {
+            Product product = new Product(123L);
+            DataFragment first = offer("darty.com", "https://example.com/darty", 849.99, 0.0, 2, 4);
+            first.setLastIndexationDate(seenBefore);
+            service.onDataFragment(first, product, new VerticalConfig());
+
+            DataFragment again = offer("darty.com", "https://example.com/darty", 849.99, 0.0, 2, 4);
+            again.setLastIndexationDate(now);
+            service.onDataFragment(again, product, new VerticalConfig());
+
+            assertThat(product.getPrice().getOffers()).singleElement()
+                    .extracting(AggregatedPrice::getTimeStamp).isEqualTo(now);
+            assertThat(product.getOffersCount()).isEqualTo(1);
+        }
+    }
+
+    /**
+     * Verifies the date an offer was last seen survives the expiry of the offer, per condition, and never moves
+     * backwards (GOU-1699).
+     *
+     * @throws Exception when aggregation fails
+     */
+    @Test
+    void keepsLastOfferSeenAfterOffersExpire() throws Exception {
+        PriceAggregationService service = new PriceAggregationService(LOGGER);
+        Product product = new Product(123L);
+        long seen = System.currentTimeMillis() - Duration.ofDays(3).toMillis();
+
+        DataFragment darty = offer("darty.com", "https://example.com/darty", 849.99, 0.0, 2, 4);
+        darty.setLastIndexationDate(seen);
+        product.getPrice().getOffers().add(new AggregatedPrice(darty));
+        product.getPrice().getLastOfferSeen().put(ProductCondition.NEW, seen - 1000);
+        product.getPrice().getLastOfferSeen().put(ProductCondition.OCCASION, seen + 1000);
+
+        // Any later fragment of the product triggers the re-aggregation that drops the expired offer
+        service.onDataFragment(offer("fnac.com", "https://example.com/fnac", 0.0, 0.0, 2, 4), product,
+                new VerticalConfig());
+
+        assertThat(product.getPrice().getOffers()).isEmpty();
+        assertThat(product.getOffersCount()).isZero();
+        assertThat(product.getPrice().getLastOfferSeen())
+                .containsEntry(ProductCondition.NEW, seen)
+                .containsEntry(ProductCondition.OCCASION, seen + 1000);
+    }
+
+    /**
+     * Verifies a lower price from the same merchant and condition still wins over a more recent higher one.
+     *
+     * @throws Exception when aggregation fails
+     */
+    @Test
+    void sameDatasourceKeepsLowestPrice() throws Exception {
+        PriceAggregationService service = new PriceAggregationService(LOGGER);
+        Product product = new Product(123L);
+
+        service.onDataFragment(offer("darty.com", "https://example.com/a", 799.0, 0.0, 2, 4), product,
+                new VerticalConfig());
+        service.onDataFragment(offer("darty.com", "https://example.com/b", 849.99, 0.0, 2, 4), product,
+                new VerticalConfig());
+
+        assertThat(product.getPrice().getOffers()).singleElement()
+                .extracting(AggregatedPrice::getPrice).isEqualTo(799.0);
     }
 
     private static DataFragment offer(String datasource, String url, double priceValue, double shippingCost,

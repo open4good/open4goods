@@ -508,6 +508,9 @@ class ProductMappingServiceTest {
         assertThat(dto.offers().bestOccasionOffer()).isNull();
         assertThat(dto.offers().offersByCondition()).isEmpty();
         verify(affiliationService, never()).encryptAffiliationLink(eq("rakuten"), anyString(), anyString());
+        // The stale offer still dates the last known price (GOU-1699).
+        assertThat(dto.offers().newLastOfferSeen()).isEqualTo(stale.getTimeStamp());
+        assertThat(dto.offers().occasionLastOfferSeen()).isNull();
     }
 
     @Test

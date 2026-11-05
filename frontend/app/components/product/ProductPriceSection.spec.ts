@@ -425,6 +425,36 @@ describe('ProductPriceSection', () => {
     await wrapper.unmount()
   })
 
+  it('dates the last known price with the last offer seen, not the last price change (GOU-1699)', async () => {
+    const wrapper = await mountComponent({
+      offersCount: 0,
+      hasOccasions: false,
+      bestPrice: undefined,
+      bestNewOffer: undefined,
+      bestOccasionOffer: undefined,
+      offersByCondition: {},
+      newHistory: {
+        entries: [
+          { timestamp: Date.UTC(2026, 9, 5, 0, 46), price: 449 },
+          { timestamp: Date.UTC(2026, 9, 6, 22, 27), price: 449.99 },
+          { timestamp: Date.UTC(2026, 10, 1, 4, 54), price: 849.99 },
+        ],
+      },
+      occasionHistory: { entries: [] },
+      // The price stayed at 849.99 until the offer was last seen on 3 November.
+      newLastOfferSeen: Date.UTC(2026, 10, 3, 5, 29),
+    })
+
+    const emptyCard = wrapper
+      .findAll('.text-caption')
+      .find(node => node.text().startsWith('Dernier prix relevé'))
+    expect(emptyCard?.text()).toMatch(
+      /^Dernier prix relevé : 849,99[\s\u202f]*€ le 3 novembre 2026$/
+    )
+
+    await wrapper.unmount()
+  })
+
   const noOffer = {
     offersCount: 0,
     hasOccasions: false,

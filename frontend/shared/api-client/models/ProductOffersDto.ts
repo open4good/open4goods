@@ -107,6 +107,18 @@ export interface ProductOffersDto {
    * @memberof ProductOffersDto
    */
   amazonSearchLink?: string
+  /**
+   * When a brand new offer was last seen (epoch millis), even if no offer is current. Dates the last known price of a product without offer: the price history only records price changes.
+   * @type {number}
+   * @memberof ProductOffersDto
+   */
+  newLastOfferSeen?: number
+  /**
+   * When an occasion offer was last seen (epoch millis), even if no offer is current.
+   * @type {number}
+   * @memberof ProductOffersDto
+   */
+  occasionLastOfferSeen?: number
 }
 
 /**
@@ -165,6 +177,12 @@ export function ProductOffersDtoFromJSONTyped(
         : ProductPriceTrendDtoFromJSON(json['occasionTrend']),
     amazonSearchLink:
       json['amazonSearchLink'] == null ? undefined : json['amazonSearchLink'],
+    newLastOfferSeen:
+      json['newLastOfferSeen'] == null ? undefined : json['newLastOfferSeen'],
+    occasionLastOfferSeen:
+      json['occasionLastOfferSeen'] == null
+        ? undefined
+        : json['occasionLastOfferSeen'],
   }
 }
 
@@ -194,5 +212,7 @@ export function ProductOffersDtoToJSONTyped(
     newTrend: ProductPriceTrendDtoToJSON(value['newTrend']),
     occasionTrend: ProductPriceTrendDtoToJSON(value['occasionTrend']),
     amazonSearchLink: value['amazonSearchLink'],
+    newLastOfferSeen: value['newLastOfferSeen'],
+    occasionLastOfferSeen: value['occasionLastOfferSeen'],
   }
 }

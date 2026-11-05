@@ -995,10 +995,15 @@ const lastKnownPriceDateFormatter = computed(
 )
 
 /**
- * Dates the most recent history point when no offer is live, so the price
- * statistics are not read as a current price next to the "no offers" notice.
+ * Dates the last known price when no offer is live, so the price statistics
+ * are not read as a current price next to the "no offers" notice. The price is
+ * the most recent history point; the date is when an offer was last seen
+ * (`lastOfferSeen`), since the history only records price changes (GOU-1699).
  */
-const buildLastKnownPriceLabel = (entries: HistoryEntry[]): string | null => {
+const buildLastKnownPriceLabel = (
+  entries: HistoryEntry[],
+  lastOfferSeen: number | null | undefined
+): string | null => {
   const latest = entries.reduce<HistoryEntry | null>(
     (acc, entry) => (!acc || entry.timestamp > acc.timestamp ? entry : acc),
     null
@@ -1008,26 +1013,37 @@ const buildLastKnownPriceLabel = (entries: HistoryEntry[]): string | null => {
     return null
   }
 
+  const lastSeen =
+    typeof lastOfferSeen === 'number' && lastOfferSeen > latest.timestamp
+      ? lastOfferSeen
+      : latest.timestamp
+
   return String(
     t('product.price.lastKnownPrice', {
       price: formatCurrency(
         latest.price,
         props.offers?.bestPrice?.currency ?? 'EUR'
       ),
-      date: lastKnownPriceDateFormatter.value.format(
-        new Date(latest.timestamp)
-      ),
+      date: lastKnownPriceDateFormatter.value.format(new Date(lastSeen)),
     })
   )
 }
 
 const lastKnownNewPriceLabel = computed(() =>
-  bestNewOffer.value ? null : buildLastKnownPriceLabel(newHistory.value)
+  bestNewOffer.value
+    ? null
+    : buildLastKnownPriceLabel(
+        newHistory.value,
+        props.offers?.newLastOfferSeen
+      )
 )
 const lastKnownOccasionPriceLabel = computed(() =>
   bestOccasionOffer.value
     ? null
-    : buildLastKnownPriceLabel(occasionHistory.value)
+    : buildLastKnownPriceLabel(
+        occasionHistory.value,
+        props.offers?.occasionLastOfferSeen
+      )
 )
 
 const resolveOfferLink = (

@@ -34,6 +34,13 @@ public record ProductOffersDto(
         @Schema(description = "Link to an Amazon search by EAN, through /contrib/ so the click is recorded. Only set "
                 + "when the product has no offer and a valid GTIN. Not an offer: no price, never counted in "
                 + "offersCount.", nullable = true, example = "/contrib/H4sIAAAAAAAA")
-        String amazonSearchLink
+        String amazonSearchLink,
+        @Schema(description = "When a brand new offer was last seen (epoch millis), even if no offer is current. "
+                + "Dates the last known price of a product without offer: the price history only records price "
+                + "changes.", nullable = true, example = "1793683753986")
+        Long newLastOfferSeen,
+        @Schema(description = "When an occasion offer was last seen (epoch millis), even if no offer is current.",
+                nullable = true, example = "1793683753986")
+        Long occasionLastOfferSeen
 ) {
 }

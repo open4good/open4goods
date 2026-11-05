@@ -97,6 +97,7 @@ public class OfferFreshnessService {
         fresh.setNewPricehistory(prices.getNewPricehistory());
         fresh.setOccasionPricehistory(prices.getOccasionPricehistory());
         fresh.setTrends(prices.getTrends());
+        fresh.setLastOfferSeen(prices.getLastOfferSeen());
         return fresh;
     }
 
@@ -132,6 +133,37 @@ public class OfferFreshnessService {
     public int offersCount(Product product) {
         AggregatedPrices fresh = freshPrices(product);
         return fresh == null ? 0 : fresh.getOffers().size();
+    }
+
+    /**
+     * Date an offer of a condition was last seen, fresh or stale, so a product without offer can tell when it
+     * last had one (GOU-1699).
+     * <p>
+     * The latest of the date recorded by the api ({@link AggregatedPrices#getLastOfferSeen()}, kept after the
+     * offers expire) and the timestamps of the indexed offers, stale ones included: products aggregated before
+     * the api recorded that date still hold their expired offers until their next aggregation.
+     *
+     * @param prices    indexed prices, may be {@code null}
+     * @param condition product condition
+     * @return epoch millis, or {@code null} when no offer of that condition was ever recorded
+     */
+    public Long lastOfferSeen(AggregatedPrices prices, ProductCondition condition) {
+        if (prices == null || condition == null) {
+            return null;
+        }
+        Long recorded = prices.getLastOfferSeen() == null ? null : prices.getLastOfferSeen().get(condition);
+        Long fromOffers = prices.getOffers() == null ? null
+                : prices.getOffers().stream()
+                        .filter(Objects::nonNull)
+                        .filter(offer -> condition == offer.getProductState())
+                        .map(AggregatedPrice::getTimeStamp)
+                        .filter(Objects::nonNull)
+                        .max(Long::compare)
+                        .orElse(null);
+        if (recorded == null) {
+            return fromOffers;
+        }
+        return fromOffers == null ? recorded : Math.max(recorded, fromOffers);
     }
 
     /**
