@@ -60,11 +60,11 @@ the GTINs of Search Console and of a `sitemap/fr/product-pages.xml` taken before
 2026-11-04.
 
 ```bash
-# 1. Ids created since 2026-11-04, with offers
+# 1. Ids created since 2026-11-04 (creationDate is epoch millis, mapped as long), with offers
 curl -s "$ES/products-moustik/_search?scroll=2m" -H 'Content-Type: application/json' -d '{
   "size": 5000, "_source": false,
   "query": { "bool": { "filter": [
-    { "range": { "creationDate": { "gte": "2026-11-04T00:00:00Z" } } },
+    { "range": { "creationDate": { "gte": 1793750400000 } } },
     { "range": { "offersCount": { "gt": 0 } } }
   ] } }
 }' > created-page-1.json
