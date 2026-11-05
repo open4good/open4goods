@@ -885,7 +885,8 @@ public class ProductMappingService {
      * Only fresh offers are mapped (see {@link OfferFreshnessService}): the offer list, the best prices, the
      * offer count and the {@code /contrib/} links are all derived from them, so a product whose offers are
      * all stale is mapped as a product without offer, and gets the Amazon search link. Price histories and
-     * trends are kept.
+     * trends are kept, and the date an offer was last seen per condition is read from the indexed prices,
+     * stale offers included.
      */
     private ProductOffersDto mapOffers(Product product) {
         AggregatedPrices aggregatedPrices = offerFreshnessService.freshPrices(product);
@@ -941,7 +942,9 @@ public class ProductMappingService {
                 occasionHistory,
                 newTrend,
                 occasionTrend,
-                amazonSearchLink);
+                amazonSearchLink,
+                offerFreshnessService.lastOfferSeen(product.getPrice(), ProductCondition.NEW),
+                offerFreshnessService.lastOfferSeen(product.getPrice(), ProductCondition.OCCASION));
     }
 
     /**

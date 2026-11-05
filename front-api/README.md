@@ -60,6 +60,14 @@ frontend JSON-LD `Offer`/`AggregateOffer` is built from the offer list and
 count, so it follows. A product whose offers are all stale is served as a
 product without offer. Price histories and trends are kept.
 
+`offers.newLastOfferSeen` / `offers.occasionLastOfferSeen` date the last offer
+of each condition, stale ones included (GOU-1699): the latest of
+`price.lastOfferSeen`, recorded by the api before it drops expired offers, and
+the indexed offer timestamps. The frontend dates the "last known price" of a
+product without offer with it; the price history only records price changes.
+The `PRICE_LAST_SEEN_*` timeline events use the same date once the offers are
+dropped.
+
 Elasticsearch filters and aggregations on `offersCount` and `price.minPrice`
 still read the indexed values.
 

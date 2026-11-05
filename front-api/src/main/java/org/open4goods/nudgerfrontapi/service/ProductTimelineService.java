@@ -92,7 +92,15 @@ public class ProductTimelineService {
         if (fromOffers != null) {
             return fromOffers;
         }
-        return latestFromHistory(prices.getHistory(condition));
+        TimelinePriceCandidate fromHistory = latestFromHistory(prices.getHistory(condition));
+        // Offers already dropped: the history only records price changes, the api keeps when an offer was last
+        // seen (GOU-1699).
+        Long lastSeen = normaliseTimestamp(prices.getLastOfferSeen() == null ? null
+                : prices.getLastOfferSeen().get(condition));
+        if (fromHistory != null && lastSeen != null && lastSeen > fromHistory.timestamp()) {
+            return new TimelinePriceCandidate(lastSeen, fromHistory.price());
+        }
+        return fromHistory;
     }
 
     private TimelinePriceCandidate earliestFromHistory(List<PriceHistory> history) {

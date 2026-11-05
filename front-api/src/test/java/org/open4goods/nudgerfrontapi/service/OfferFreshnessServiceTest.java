@@ -107,6 +107,35 @@ class OfferFreshnessServiceTest {
     }
 
     @Test
+    void lastOfferSeenIsTheLatestOfRecordedDateAndIndexedOffersStaleIncluded() {
+        long now = NOW.toEpochMilli();
+        AggregatedPrice staleNew = offer("darty", 849.99, ProductCondition.NEW, now - THREE_DAYS);
+        AggregatedPrice staleOccasion = offer("rakuten", 500.0, ProductCondition.OCCASION, now - THREE_DAYS);
+        Product product = product(staleNew, staleOccasion);
+        // Recorded by the api: older than the stale NEW offer, more recent than the stale OCCASION one.
+        product.getPrice().getLastOfferSeen().put(ProductCondition.NEW, now - THREE_DAYS - ONE_HOUR);
+        product.getPrice().getLastOfferSeen().put(ProductCondition.OCCASION, now - ONE_HOUR);
+
+        assertThat(service.lastOfferSeen(product.getPrice(), ProductCondition.NEW)).isEqualTo(now - THREE_DAYS);
+        assertThat(service.lastOfferSeen(product.getPrice(), ProductCondition.OCCASION)).isEqualTo(now - ONE_HOUR);
+        assertThat(service.freshPrices(product).getLastOfferSeen())
+                .containsEntry(ProductCondition.OCCASION, now - ONE_HOUR);
+    }
+
+    @Test
+    void lastOfferSeenAfterTheOffersWereDroppedComesFromTheRecordedDate() {
+        long recorded = NOW.toEpochMilli() - THREE_DAYS;
+        AggregatedPrices prices = new AggregatedPrices();
+        prices.getLastOfferSeen().put(ProductCondition.NEW, recorded);
+
+        assertThat(service.lastOfferSeen(prices, ProductCondition.NEW)).isEqualTo(recorded);
+        assertThat(service.lastOfferSeen(prices, ProductCondition.OCCASION)).isNull();
+        assertThat(service.lastOfferSeen(null, ProductCondition.NEW)).isNull();
+        prices.setLastOfferSeen(null);
+        assertThat(service.lastOfferSeen(prices, ProductCondition.NEW)).isNull();
+    }
+
+    @Test
     void productWithoutPricesStaysWithoutPrices() {
         Product product = new Product(1L);
         product.setPrice(null);
