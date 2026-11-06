@@ -76,7 +76,7 @@ class SitemapGenerationServiceTest {
 		Product withoutSlug = new Product(4L);
 		withoutSlug.setVertical("tv");
 		Product duplicate = product(1L, "tv", "1-smart-tv-qe32ls03cbu-32-pouces");
-		when(repository.exportVerticalWithValidDateOrderByEcoscore("tv", false))
+		when(repository.exportVerticalForSitemap("tv"))
 				.thenReturn(Stream.of(renamed, other, movedToDishwashers, withoutSlug, duplicate));
 
 		assertThat(service.generate()).isTrue();
@@ -104,7 +104,7 @@ class SitemapGenerationServiceTest {
 		Path productPages = rootFolder.resolve("sitemap/fr/product-pages.xml");
 		Files.createDirectories(productPages.getParent());
 		Files.writeString(productPages, "previous complete sitemap");
-		when(repository.exportVerticalWithValidDateOrderByEcoscore("tv", false))
+		when(repository.exportVerticalForSitemap("tv"))
 				.thenThrow(new NullPointerException("elasticsearchOperations is null"));
 
 		assertThat(service.generate()).isFalse();

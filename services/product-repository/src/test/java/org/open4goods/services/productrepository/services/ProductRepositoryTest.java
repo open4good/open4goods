@@ -401,4 +401,25 @@ class ProductRepositoryTest
                 .containsExactlyInAnyOrder("id", "lastChange", "price", "offersCount");
         assertThat(submitted.getPageable().getPageSize()).isEqualTo(2);
     }
+
+    @Test
+    void exportVerticalForSitemapSelectsRecentOfferOrImpactScoreAmongNonExcluded() throws Exception
+    {
+        // GOU-1744: a product without offer but with an impact score stays in the sitemap
+        org.springframework.data.elasticsearch.core.SearchHitsIterator<Product> iterator =
+                org.mockito.Mockito.mock(org.springframework.data.elasticsearch.core.SearchHitsIterator.class);
+        when(iterator.stream()).thenReturn(java.util.stream.Stream.empty());
+        when(elasticsearchOperations.searchForStream(any(org.springframework.data.elasticsearch.core.query.Query.class),
+                eq(Product.class), any(org.springframework.data.elasticsearch.core.mapping.IndexCoordinates.class)))
+                .thenReturn(iterator);
+
+        repository.exportVerticalForSitemap("tv").close();
+
+        ArgumentCaptor<org.springframework.data.elasticsearch.core.query.Query> captor =
+                ArgumentCaptor.forClass(org.springframework.data.elasticsearch.core.query.Query.class);
+        verify(elasticsearchOperations).searchForStream(captor.capture(), eq(Product.class),
+                any(org.springframework.data.elasticsearch.core.mapping.IndexCoordinates.class));
+        String criteria = String.valueOf(((NativeQuery) captor.getValue()).getQuery());
+        assertThat(criteria).contains("vertical", "excluded", "scores.ECOSCORE.value", "offersCount", "lastChange");
+    }
 }
