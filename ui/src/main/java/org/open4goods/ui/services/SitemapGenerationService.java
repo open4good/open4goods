@@ -213,7 +213,7 @@ public class SitemapGenerationService {
 	 * Writes the product sitemap of one language.
 	 *
 	 * <p>Only products of enabled verticals, not excluded and with a recent
-	 * price and an impact score are listed (pages of disabled verticals are
+	 * offer or an impact score are listed (pages of disabled verticals are
 	 * {@code noindex}, uncategorised products are not listed). Each URL is the
 	 * base URL followed by {@link ProductCanonicalUrl#fullSlug}, the value the
 	 * front-api exposes as {@code fullSlug}. {@code lastmod} is the product
@@ -237,7 +237,7 @@ public class SitemapGenerationService {
 
 		for (VerticalConfig vertical : verticalsConfigService.getConfigsWithoutDefault(true)) {
 			try (Stream<Product> products = aggregatedDataRepository
-					.exportVerticalWithValidDateOrderByEcoscore(vertical.getId(), false)) {
+					.exportVerticalForSitemap(vertical.getId())) {
 				for (Product product : (Iterable<Product>) products::iterator) {
 					String path = productPath(product, vertical, domainLanguage);
 					if (path == null || !paths.add(path)) {

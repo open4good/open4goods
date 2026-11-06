@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -565,6 +566,34 @@ public class ProductRepository {
             // Ensure scores.ECOSCORE.relativ.value is present
             criteria = criteria.and(new Criteria("scores.ECOSCORE.value").exists());
 
+	    final Criteria exportCriteria = criteria;
+	    return streamOrderedByEcoscore(builder -> builder.withQuery(new CriteriaQuery(exportCriteria)), max);
+	}
+
+	/**
+	 * Export the non excluded products of a vertical that belong in the sitemap: a recent
+	 * offer <b>or</b> an impact score (a product without offer but with an impact score
+	 * stays listed, GOU-1744). Ordered by impact score descending, products without score last.
+	 *
+	 * @param vertical vertical id
+	 * @return streaming export, to be closed by the caller
+	 */
+	public Stream<Product> exportVerticalForSitemap(String vertical) {
+	    // Native bool query: Criteria cannot express (A AND B) OR C without dropping the AND part.
+	    var recentOffer = co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
+	        .must(m -> m.range(r -> r.date(d -> d.field("lastChange").gt(String.valueOf(expirationClause())))))
+	        .must(m -> m.range(r -> r.number(n -> n.field("offersCount").gt(0.0))))));
+	    var hasScore = co.elastic.clients.elasticsearch._types.query_dsl.Query
+	        .of(q -> q.exists(e -> e.field("scores.ECOSCORE.value")));
+	    var query = co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
+	        .must(m -> m.term(t -> t.field("vertical").value(vertical)))
+	        .must(m -> m.term(t -> t.field("excluded").value(false)))
+	        .must(m -> m.bool(or -> or.should(recentOffer).should(hasScore).minimumShouldMatch("1")))));
+	    return streamOrderedByEcoscore(builder -> builder.withQuery(query), null);
+	}
+
+	private Stream<Product> streamOrderedByEcoscore(UnaryOperator<NativeQueryBuilder> filter, Integer max) {
+
 	    // Build sort with unmapped_type to avoid shard-level mapping issues
 	    SortOptions ecoscoreSort = new SortOptions.Builder()
 	        .field(new FieldSort.Builder()
@@ -575,8 +604,7 @@ public class ProductRepository {
 	            .build())
 	        .build();
 
-	    NativeQueryBuilder queryBuilder = new NativeQueryBuilder()
-	        .withQuery(new CriteriaQuery(criteria))
+	    NativeQueryBuilder queryBuilder = filter.apply(new NativeQueryBuilder())
 	        .withSort(ecoscoreSort);
 
 	    if (max != null) {

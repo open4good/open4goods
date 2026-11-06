@@ -102,7 +102,9 @@ prod only configures `fr`).
   rule never depends on the request locale.
 - **Selection.** Products of enabled verticals only (pages of a disabled
   vertical are `noindex`, products without vertical are not listed), not
-  `excluded`, with a recent price and an impact score.
+  `excluded`, with a recent offer **or** an impact score (a product without
+  offer but with an impact score stays listed; it leaves the sitemap only with
+  neither).
 - **`lastmod`** is the product `lastChange` (last real data change), omitted
   when unknown. Category pages carry no `lastmod`.
 - **Frequency.** Five minutes after the ui starts, then every 24 hours. An
