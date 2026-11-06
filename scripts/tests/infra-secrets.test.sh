@@ -912,6 +912,11 @@ check "es-ops-readonly test after apply reports the account already in place" \
   bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"ops_readonly already accepts"* ]] && [[ "$1" == *"already holds the new password"* ]]' "${status}" "${out}"
 run "${DEPLOY}/infra-secrets.sh" remote rollback beta es-ops-readonly
 check "es-ops-readonly has no rollback" bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"no rollback"* ]]' "${status}" "${out}"
+# The workflow must run the source step in apply mode for every target: es-ops-readonly renders nothing elsewhere
+# (GOU-1720: an apply that skipped it wrote nothing and still reported success).
+check "infraSecrets.yml runs the source step for every target in apply mode" \
+  bash -c 'grep -A4 "name: 🔑 Change the password at its source" "$0" | grep -qx "        if: env.MODE == '"'"'apply'"'"'"' \
+  "${ROOT}/.github/workflows/infraSecrets.yml"
 unset INFRA_ES_OPS_READONLY_PASSWORD
 
 if [[ ${failures} -gt 0 ]]; then
