@@ -419,7 +419,21 @@ class ProductRepositoryTest
                 ArgumentCaptor.forClass(org.springframework.data.elasticsearch.core.query.Query.class);
         verify(elasticsearchOperations).searchForStream(captor.capture(), eq(Product.class),
                 any(org.springframework.data.elasticsearch.core.mapping.IndexCoordinates.class));
-        String criteria = String.valueOf(((NativeQuery) captor.getValue()).getQuery());
-        assertThat(criteria).contains("vertical", "excluded", "scores.ECOSCORE.value", "offersCount", "lastChange");
+        BoolQuery root = ((NativeQuery) captor.getValue()).getQuery().bool();
+        assertThat(root.must()).hasSize(3);
+        assertThat(root.must().get(0).term().field()).isEqualTo("vertical");
+        assertThat(root.must().get(0).term().value().stringValue()).isEqualTo("tv");
+        assertThat(root.must().get(1).term().field()).isEqualTo("excluded");
+        assertThat(root.must().get(1).term().value().booleanValue()).isFalse();
+
+        // (recent offer AND offersCount > 0) OR score present, at least one clause
+        BoolQuery or = root.must().get(2).bool();
+        assertThat(or.minimumShouldMatch()).isEqualTo("1");
+        assertThat(or.should()).hasSize(2);
+        BoolQuery recentOffer = or.should().get(0).bool();
+        assertThat(recentOffer.must()).hasSize(2);
+        assertThat(recentOffer.must().get(0).range().date().field()).isEqualTo("lastChange");
+        assertThat(recentOffer.must().get(1).range().number().field()).isEqualTo("offersCount");
+        assertThat(or.should().get(1).exists().field()).isEqualTo("scores.ECOSCORE.value");
     }
 }

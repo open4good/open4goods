@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -579,19 +580,19 @@ public class ProductRepository {
 	 */
 	public Stream<Product> exportVerticalForSitemap(String vertical) {
 	    // Native bool query: Criteria cannot express (A AND B) OR C without dropping the AND part.
-	    co.elastic.clients.elasticsearch._types.query_dsl.Query recentOffer = co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
-	        .must(m -> m.range(r -> r.number(n -> n.field("lastChange").gt((double) expirationClause()))))
+	    var recentOffer = co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
+	        .must(m -> m.range(r -> r.date(d -> d.field("lastChange").gt(String.valueOf(expirationClause())))))
 	        .must(m -> m.range(r -> r.number(n -> n.field("offersCount").gt(0.0))))));
-	    co.elastic.clients.elasticsearch._types.query_dsl.Query hasScore = co.elastic.clients.elasticsearch._types.query_dsl.Query
+	    var hasScore = co.elastic.clients.elasticsearch._types.query_dsl.Query
 	        .of(q -> q.exists(e -> e.field("scores.ECOSCORE.value")));
-	    co.elastic.clients.elasticsearch._types.query_dsl.Query query = co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
+	    var query = co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
 	        .must(m -> m.term(t -> t.field("vertical").value(vertical)))
 	        .must(m -> m.term(t -> t.field("excluded").value(false)))
 	        .must(m -> m.bool(or -> or.should(recentOffer).should(hasScore).minimumShouldMatch("1")))));
 	    return streamOrderedByEcoscore(builder -> builder.withQuery(query), null);
 	}
 
-	private Stream<Product> streamOrderedByEcoscore(java.util.function.UnaryOperator<NativeQueryBuilder> filter, Integer max) {
+	private Stream<Product> streamOrderedByEcoscore(UnaryOperator<NativeQueryBuilder> filter, Integer max) {
 
 	    // Build sort with unmapped_type to avoid shard-level mapping issues
 	    SortOptions ecoscoreSort = new SortOptions.Builder()
