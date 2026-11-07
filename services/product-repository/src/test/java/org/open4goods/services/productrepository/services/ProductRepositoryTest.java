@@ -243,10 +243,12 @@ class ProductRepositoryTest
         List<UpdateQuery> updates = updateCaptor.getValue();
         assertThat(updates).hasSize(1);
         assertThat(updates.getFirst().getId()).isEqualTo("42");
-        assertThat(updates.getFirst().getDocument())
-                .containsEntry("lastChange", 1L)
-                .containsEntry("offersCount", 2)
-                .containsEntry("price", "updated");
+        // A script replaces the fields: a doc merge would keep the indexed sub-fields the update leaves null (GOU-1784)
+        assertThat(updates.getFirst().getDocument()).isNull();
+        assertThat(updates.getFirst().getScript()).isEqualTo(ProductRepository.PARTIAL_UPDATE_SCRIPT);
+        assertThat(updates.getFirst().getLang()).isEqualTo("painless");
+        assertThat(updates.getFirst().getParams().get("changes"))
+                .isEqualTo(Map.of("lastChange", 1L, "offersCount", 2, "price", "updated"));
     }
 
     @Test

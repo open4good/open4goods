@@ -1671,18 +1671,26 @@ public class ProductRepository {
 	}
 
 	/**
-	 * Bulk update, using Document
+	 * Painless script of a partial update: each changed field replaces the indexed one.
+	 * A {@code doc} update would merge objects instead: the client serializer omits null
+	 * properties, so a {@code price.minPrice} recomputed to null kept the expired offer
+	 * in the index (GOU-1784), and so would a sub-field or a trend that disappeared.
+	 */
+	static final String PARTIAL_UPDATE_SCRIPT = "for (def change : params.changes.entrySet()) { ctx._source[change.getKey()] = change.getValue(); }";
+
+	/**
+	 * Bulk partial update: replaces the changed top-level fields of each product, such
+	 * as {@code price}, as a full indexation would (GOU-1784).
 	 * @param partialItemsResults
 	 */
 	public void bulkUpdateDocument(Collection<ProductPartialUpdateHolder> partialItemsResults) {
 	    List<UpdateQuery> updateQueries = mergePartialUpdates(partialItemsResults).stream()
-	        .map(product -> {
-	            Map<String, Object> fieldsToUpdate = product.getChanges();
-	            return UpdateQuery.builder(String.valueOf(product.getProductId()))
-	                .withDocument(Document.from(fieldsToUpdate))
+	        .map(product -> UpdateQuery.builder(String.valueOf(product.getProductId()))
+	                .withScript(PARTIAL_UPDATE_SCRIPT)
+	                .withLang("painless")
+	                .withParams(Map.of("changes", product.getChanges()))
 	                .withIndex(CURRENT_INDEX.getIndexName())
-	                .build();
-	        })
+	                .build())
 	        .collect(Collectors.toList());
 
 	    // Perform the bulk update
