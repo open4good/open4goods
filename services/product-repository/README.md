@@ -61,6 +61,15 @@ Stream<Product> all = repo.exportAll();
 Stream<Product> keys = repo.exportAll(new String[] {"gtinInfos"});
 ```
 
+## Partial updates
+
+The realtime aggregation queues a `ProductPartialUpdateHolder` (`lastChange`, `price`, `offersCount`) when a
+fragment did not change. `ProductRepository.bulkUpdateDocument` writes it with a painless script
+(`PARTIAL_UPDATE_SCRIPT`) that replaces each changed top-level field, as a full indexation would. A `doc` update
+merged objects instead: the client serializer omits null properties, so a `price.minPrice` recomputed to null kept
+the expired offer in the index, and a sub-field or a trend that disappeared stayed too (GOU-1784).
+`ProductRepositoryPartialUpdateIT` checks it against a real Elasticsearch (not run by the PR CI).
+
 ## Export page sizes
 
 A complete product weighs about 21 KB on average in production, and the Elasticsearch client rejects
