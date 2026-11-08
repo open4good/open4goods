@@ -68,6 +68,16 @@ case "$method $path" in
       code=200
     fi
     ;;
+  "GET /_security/role/agents_readonly") auth_ok && { [ -f "$FAKE_ES.agents.role" ] && code=200 || code=404; } ;;
+  "PUT /_security/role/agents_readonly")
+    if auth_ok && [ "$u" = elastic ]; then cp "$data" "$FAKE_ES.agents.role"; code=200; fi
+    ;;
+  "PUT /_security/user/agents_readonly")
+    if auth_ok && [ "$u" = elastic ]; then
+      sed -n 's/^{"password":"\(.*\)","roles":\["agents_readonly"\].*$/\1/p' "$data" | tr -d '\n' > "$FAKE_ES/agents_readonly"
+      code=200
+    fi
+    ;;
   "POST /_security/user/"*"/_password")
     if auth_ok && [ "$u" = elastic ]; then
       target=${path#/_security/user/}
@@ -320,7 +330,7 @@ check() {
 }
 
 reset_host() {
-  rm -rf "${FAKE_ROOT:?}"/* "${FAKE_ES:?}"/* "${FAKE_ES}.role" "${FAKE_KIBANA_YML}" \
+  rm -rf "${FAKE_ROOT:?}"/* "${FAKE_ES:?}"/* "${FAKE_ES}.role" "${FAKE_ES}.agents.role" "${FAKE_KIBANA_YML}" \
     "${FAKE_GOOGLE}" "${FAKE_GOOGLE}.down" \
     "${FAKE_DB:?}"/* "${FAKE_ENV:?}"/* "${FAKE_LOGS:?}"/*
   : > "${CALLS}"
@@ -913,6 +923,49 @@ check "es-ops-readonly test after apply reports the account already in place" \
 run "${DEPLOY}/infra-secrets.sh" remote rollback beta es-ops-readonly
 check "es-ops-readonly has no rollback" bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"no rollback"* ]]' "${status}" "${out}"
 unset INFRA_ES_OPS_READONLY_PASSWORD
+
+########################################
+# es-agents-readonly: prod only, role without cluster privilege, user, nothing left on the host, no rollback
+########################################
+reset_host
+AGENTS_PASS="AGENTSREADONLYSENTINEL7777777777777777"
+for svc in front-api api ui b2b-api; do
+  mkdir -p "${OPT}/config/prod/${svc}"
+  cp "${OPT}/config/beta/${svc}/application-active.yml" "${OPT}/config/prod/${svc}/application-active.yml"
+done
+run env -u INFRA_ES_AGENTS_READONLY_PASSWORD "${DEPLOY}/infra-secrets.sh" remote test prod es-agents-readonly
+check "es-agents-readonly test fails cleanly while the secret is missing, even as a dry run" \
+  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"INFRA_ES_AGENTS_READONLY_PASSWORD is empty or missing"* ]] && [ ! -e "$2" ]' \
+  "${status}" "${out}" "${FAKE_ES}.agents.role"
+export INFRA_ES_AGENTS_READONLY_PASSWORD="${AGENTS_PASS}"
+run "${DEPLOY}/infra-secrets.sh" remote test beta es-agents-readonly
+check "es-agents-readonly refuses beta" bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"prod only"* ]]' "${status}" "${out}"
+run "${DEPLOY}/infra-secrets.sh" remote test prod es-agents-readonly
+check "es-agents-readonly test checks everything and writes nothing" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"role agents_readonly does not exist: source would create it"* ]] \
+    && [ ! -e "$2" ] && [ ! -e "$3/agents_readonly" ] && ! grep -q "PUT\|POST" "$4"' \
+  "${status}" "${out}" "${FAKE_ES}.agents.role" "${FAKE_ES}" "${CALLS}"
+run "${DEPLOY}/infra-secrets.sh" remote source prod es-agents-readonly
+check "es-agents-readonly source creates exactly the role (no cluster; read + view_index_metadata on three indices) and the user" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1/agents_readonly")" = "$2" ] \
+    && [ "$(cat "$3")" = "{\"cluster\":[],\"indices\":[{\"names\":[\"products-moustik\",\"eprel-products\",\"affiliation-clicks\"],\"privileges\":[\"read\",\"view_index_metadata\"]}]}" ]' \
+  "${status}" "${FAKE_ES}" "${AGENTS_PASS}" "${FAKE_ES}.agents.role"
+check "es-agents-readonly role has no write, index, create, delete, manage or all privilege and no system index" \
+  bash -c '! grep -Eq "\"(write|index|create|delete|manage|all|monitor)\"|\.security|\.kibana|\*" "$0" && grep -q "\"cluster\":\[\]" "$0"' "${FAKE_ES}.agents.role"
+check "es-agents-readonly source checks _authenticate and leaves no file on the host" \
+  bash -c '[[ "$0" == *"answers as agents_readonly"* ]] && [ -z "$(find "$1" -name "*agents*" -o -name "*.curlrc" | grep -v ops-es-readonly)" ] \
+    && ! grep -q "agents_readonly:" "$2"' "${out}" "${FAKE_ROOT}" "${CALLS}"
+check "es-agents-readonly source leaves the elastic password alone" \
+  bash -c '[ "$(cat "$0/elastic")" = "$1" ]' "${FAKE_ES}" "${OLD_ELASTIC}"
+check "es-agents-readonly prints no value" no_value_leaked
+run "${DEPLOY}/infra-secrets.sh" remote source prod es-agents-readonly
+check "es-agents-readonly source is idempotent" [ "${status}" -eq 0 ]
+run "${DEPLOY}/infra-secrets.sh" remote test prod es-agents-readonly
+check "es-agents-readonly test after apply reports the account already in place" \
+  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"agents_readonly already accepts"* ]]' "${status}" "${out}"
+run "${DEPLOY}/infra-secrets.sh" remote rollback prod es-agents-readonly
+check "es-agents-readonly has no rollback" bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"no rollback"* ]]' "${status}" "${out}"
+unset INFRA_ES_AGENTS_READONLY_PASSWORD
 
 if [[ ${failures} -gt 0 ]]; then
   echo "${failures} test(s) failed"
