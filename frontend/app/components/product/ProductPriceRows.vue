@@ -164,9 +164,11 @@ const {
   trackProductRedirect,
 } = useAnalytics()
 
+const affiliationContentPath = useAffiliationContentPath()
+
 const resolveUrl = (offer: ProductAggregatedPriceDto | undefined) => {
   if (!offer) return undefined
-  return resolveOfferHref(offer)
+  return resolveOfferHref(offer, affiliationContentPath.value)
 }
 
 const NBSP = '\u00A0'

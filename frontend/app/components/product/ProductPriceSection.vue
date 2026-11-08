@@ -1032,10 +1032,7 @@ const buildLastKnownPriceLabel = (
 const lastKnownNewPriceLabel = computed(() =>
   bestNewOffer.value
     ? null
-    : buildLastKnownPriceLabel(
-        newHistory.value,
-        props.offers?.newLastOfferSeen
-      )
+    : buildLastKnownPriceLabel(newHistory.value, props.offers?.newLastOfferSeen)
 )
 const lastKnownOccasionPriceLabel = computed(() =>
   bestOccasionOffer.value
@@ -1046,6 +1043,8 @@ const lastKnownOccasionPriceLabel = computed(() =>
       )
 )
 
+const affiliationContentPath = useAffiliationContentPath()
+
 const resolveOfferLink = (
   offer: ProductAggregatedPriceDto | null | undefined
 ): string | null => {
@@ -1053,7 +1052,7 @@ const resolveOfferLink = (
     return null
   }
 
-  return resolveOfferHref(offer) ?? null
+  return resolveOfferHref(offer, affiliationContentPath.value) ?? null
 }
 
 const bestNewOfferLink = computed(() => resolveOfferLink(bestNewOffer.value))
