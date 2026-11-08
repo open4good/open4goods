@@ -344,3 +344,28 @@ To roll back before revocation, put the previous value back in the
 Environment secret and run `apply` again. A tree file or env line whose secret
 is later deleted from the Environment stays on the host until it is removed
 by hand.
+
+### Awin API token
+
+One Awin token feeds two secrets that carry the same value, in `prod` and in
+`beta`: `API_METRIKS_AWIN_API_TOKEN` (Metriks, api
+`METRIKS_AFFILIATION_AWIN_API_TOKEN`) and `API_AWIN_ACCESS_TOKEN` (feeds and
+promotions, tree `affiliation-config.awin-access-token`). Renewing one without
+the other breaks the other consumer.
+
+1. The Awin page only offers "Revoke my API key" (GOU-1429 described a
+   "generate" action that does not exist). Revoking creates the new key and
+   invalidates the old one. The old key stays displayed until the page is
+   reloaded, and it still answers 200 for a few minutes.
+2. **After the revocation, reload the page before copying the key.**
+   Unproven hypothesis about the 2026-11-03 failure (GOU-1823, GOU-1816): the
+   stored key was the one left on screen, so it was already revoked, with a
+   delayed effect.
+3. A revocation breaks the feeds and Metriks that still use the old key
+   immediately. Render the new value the same day, in `prod` and in `beta`
+   (`serviceSecrets.yml`, service=`api`), following the rotation procedure
+   above. The value is never pasted in an issue, a comment or a log.
+4. Verify twice: right after the render, then again about 24 h later.
+   - The Awin `accounts` call answers 200 with the `publisherId` in the list.
+   - `GET /api/metriks/affiliation` shows no `error` on `affiliation.awin.*`
+     nor `affiliation.total.*`.
