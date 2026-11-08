@@ -51,6 +51,16 @@
       "labels": ["squad:ux", "dependencies:npm"]
     },
     {
+      "description": "Move the frontend Nuxt test toolchain out of the frontend npm group: nuxt, @nuxt/test-utils and vitest must be upgraded together (Nuxt 4.5 needs @nuxt/test-utils 4 and vitest 5)",
+      "matchFileNames": ["frontend/**"],
+      "matchManagers": ["npm"],
+      "matchPackageNames": ["nuxt", "@nuxt/test-utils", "vitest", "@vitest/**"],
+      "matchUpdateTypes": ["minor", "patch", "digest", "pin", "pinDigest", "replacement", "rollback", "bump"],
+      "groupName": "frontend nuxt toolchain",
+      "groupSlug": "frontend-nuxt-toolchain",
+      "labels": ["squad:ux", "dependencies:npm"]
+    },
+    {
       "description": "Keep frontend lock-file maintenance in its own reviewable pull request",
       "matchFileNames": ["frontend/**", "b2b-frontend/**"],
       "matchManagers": ["npm"],
