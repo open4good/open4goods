@@ -49,8 +49,11 @@ public class IdentityAggregationService extends AbstractAggregationService {
 	 * Validates the incoming GTIN, registers alternate model IDs, timestamps the
 	 * product, and delegates to {@link #onProduct}.
 	 *
-	 * @throws AggregationSkipException if the GTIN is blank or mismatches the
-	 *                                  product's existing GTIN
+	 * <p>A fragment GTIN matches the product when its
+	 * {@link BarcodeValidationService#toProductId(String) product id} equals the
+	 * product id; a mismatch is only logged.
+	 *
+	 * @throws AggregationSkipException if the GTIN is blank or invalid
 	 */
 	@Override
 	public void onDataFragment(final DataFragment input, final Product output, final VerticalConfig vConf) throws AggregationSkipException {
@@ -67,8 +70,10 @@ public class IdentityAggregationService extends AbstractAggregationService {
 		if (output.getId() == null) {
 			output.setId(Long.valueOf(input.gtin()));
 		} else {
-			if (!output.gtin().equals(input.gtin())) {
-				dedicatedLogger.error("GTIN Mismatch : product {}, dataFragment {}", output.gtin(), input.gtin());
+			// Same key as DataFragmentStoreService: an ISBN-10 or a zero-padded GTIN of the product is not a mismatch
+			Long fragmentId = validationService.toProductId(input.gtin());
+			if (!output.getId().equals(fragmentId)) {
+				dedicatedLogger.error("GTIN Mismatch : product {}, dataFragment {}", output.getId(), input.gtin());
 			}
 		}
 
@@ -90,6 +95,11 @@ public class IdentityAggregationService extends AbstractAggregationService {
 	/**
 	 * Validates the product's GTIN, resolves GS1 prefix metadata, and detects
 	 * whether the barcode may be a faked placeholder generated upstream.
+	 *
+	 * <p>The product id and referential GTIN are replaced by the sanitised barcode
+	 * (an ISBN-10 becomes its ISBN-13, leading zeros are dropped from the id). This is
+	 * the id {@link BarcodeValidationService#toProductId(String)} returns, under which
+	 * {@code DataFragmentStoreService} looks the product up (GOU-1841).
 	 *
 	 * @throws AggregationSkipException when the GTIN is empty or invalid
 	 */

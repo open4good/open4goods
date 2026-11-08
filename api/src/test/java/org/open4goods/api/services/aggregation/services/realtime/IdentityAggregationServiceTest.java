@@ -54,4 +54,35 @@ class IdentityAggregationServiceTest
                 .containsExactly("0123456789012");
         assertThat(product.gtin()).isEqualTo("123456789012");
     }
+
+    /**
+     * GOU-1841: an ISBN-10 fragment aggregated on the ISBN-13 product keeps the
+     * ISBN-13 id and referential GTIN.
+     */
+    @Test
+    void isbn10FragmentKeepsTheIsbn13IdentityOfTheProduct() throws Exception
+    {
+        BarcodeValidationService validationService = new BarcodeValidationService();
+        BarcodeForensicsService forensicsService = Mockito.mock(BarcodeForensicsService.class);
+        Mockito.when(forensicsService.analyze(Mockito.anyString()))
+                .thenReturn(new BarcodeForensics(false, BarcodeType.UNKNOWN, null, null, null, null, null, null, null, 0));
+        IdentityAggregationService service = new IdentityAggregationService(
+                LoggerFactory.getLogger(IdentityAggregationServiceTest.class),
+                Mockito.mock(Gs1PrefixService.class),
+                validationService,
+                forensicsService
+        );
+
+        Product product = new Product(9782726862216L);
+        product.getAttributes().getReferentielAttributes().put(ReferentielKey.GTIN, "9782726862216");
+        DataFragment fragment = new DataFragment();
+        fragment.getReferentielAttributes().put(ReferentielKey.GTIN, "2726862217");
+
+        service.onDataFragment(fragment, product, new VerticalConfig());
+
+        assertThat(product.getId()).isEqualTo(9782726862216L);
+        assertThat(product.gtin()).isEqualTo("9782726862216");
+        assertThat(product.getGtinInfos().getUpcType()).isEqualTo(BarcodeType.ISBN_13);
+        assertThat(validationService.toProductId(fragment.gtin())).isEqualTo(product.getId());
+    }
 }

@@ -511,8 +511,8 @@ public class ApiConfig {
         }
 
 	@Bean
-	DataFragmentStoreService dataFragmentStoreService(final ApiProperties config, @Autowired StandardiserService standardiserService, @Autowired AggregationFacadeService generationService, @Autowired ProductRepository aggregatedDataRepository) {
-		return new DataFragmentStoreService(standardiserService, generationService, aggregatedDataRepository, config.getIndexationConfig());
+	DataFragmentStoreService dataFragmentStoreService(final ApiProperties config, @Autowired StandardiserService standardiserService, @Autowired AggregationFacadeService generationService, @Autowired ProductRepository aggregatedDataRepository, @Autowired BarcodeValidationService barcodeValidationService) {
+		return new DataFragmentStoreService(standardiserService, generationService, aggregatedDataRepository, barcodeValidationService, config.getIndexationConfig());
 	}
 
 	/**

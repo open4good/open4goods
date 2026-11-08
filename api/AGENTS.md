@@ -152,9 +152,14 @@ curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/ba
 ## Agrégation temps réel des fragments
 
 `DataFragmentStoreService.aggregateAndstore` (GOU-1700) lit les produits du lot par identifiant numérique
-(`ProductRepository.multiGetForAggregation`, `Long.valueOf(gtin)`), jamais par la chaîne GTIN brute : `07333394145372`
-et `7333394145372` désignent le même document. Un produit n'est créé que si Elasticsearch le déclare absent ; un
-fragment dont la lecture a échoué est ignoré (log `error`), il ne recrée jamais le produit.
+(`ProductRepository.multiGetForAggregation`), jamais par la chaîne GTIN brute. Cet identifiant est
+`BarcodeValidationService.toProductId(gtin)`, la valeur du GTIN assaini, celle sous laquelle
+`IdentityAggregationService` indexe le produit (GOU-1841) : `07333394145372` et `7333394145372`, un UPC-A avec ou sans
+zéros de tête, un ISBN-10 (`2726862217`) et son ISBN-13 (`9782726862216`) désignent le même document. Un fragment au
+code-barres invalide est ignoré. Un produit n'est créé que si Elasticsearch le déclare absent ; un fragment dont la
+lecture a échoué est ignoré (log `error`), il ne recrée jamais le produit. Le GTIN référentiel du produit reste le
+GTIN assaini : `AttributeRealtimeAggregationService` ne l'écrase plus avec la forme brute d'un fragment (ISBN-10), qui
+reste seulement dans `gtinInfos`.
 
 `TaxonomyRealTimeAggregationService` garde la verticale courante quand le groupe EPREL du produit
 (`eprelDatas.productGroup`) figure dans ses `eprelGroupNames` : ni un jeton `excludingTokensFromCategoriesMatching`
