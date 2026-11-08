@@ -12,7 +12,6 @@ type CompareProductEntryLike = {
   model: string | null
   coverImage: string | null
   impactScore: number | null
-  review: { description: string | null; pros: string[]; cons: string[] }
   country: { name: string; flag?: string } | null
 }
 
@@ -86,9 +85,6 @@ const messages: Record<string, string> = {
   'compare.a11y.featureColumn': 'Critères',
   'compare.a11y.viewProduct': 'Voir {name}',
   'compare.a11y.bestValue': 'Meilleure valeur',
-  'compare.textual.description': 'Description',
-  'compare.textual.pros': 'Atouts',
-  'compare.textual.cons': 'Limites',
   'compare.textual.empty': '—',
   'compare.pricing.newPrice': 'Prix neuf',
   'compare.pricing.occasionPrice': 'Prix occasion',
@@ -309,7 +305,6 @@ const createEntry = (
   model: 'Model',
   coverImage: null,
   impactScore: 4,
-  review: { description: null, pros: [], cons: [] },
   country: null,
   ...overrides,
 })

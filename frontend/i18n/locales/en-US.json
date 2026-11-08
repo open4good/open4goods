@@ -2341,9 +2341,6 @@
       "removeShort": "Remove"
     },
     "textual": {
-      "description": "Description",
-      "pros": "Pros",
-      "cons": "Cons",
       "empty": "Not available"
     },
     "pricing": {
