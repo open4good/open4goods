@@ -114,9 +114,9 @@
           density="compact"
           size="x-small"
           rounded="pill"
-          :to="'./ecoscore'"
+          :to="methodologyHref"
         >
-          Méthodologie
+          {{ t('product.impact.methodologyShort') }}
         </v-btn>
       </div>
     </div>
@@ -178,6 +178,7 @@ import { mdiLeaf } from '@mdi/js'
 import { computed } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 import CtaCard from '~/components/shared/CtaCard.vue'
 import { getImpactLevel } from '~/utils/_product-verdict'
 
@@ -207,6 +208,10 @@ const props = defineProps({
   showMethodology: {
     type: Boolean,
     default: true,
+  },
+  verticalHomeUrl: {
+    type: String,
+    default: null,
   },
   showRange: {
     type: Boolean,
@@ -276,7 +281,14 @@ const percentile = computed(() => {
   return Math.max(0, Math.min(pct, 100))
 })
 
-const { t, n, d } = useI18n()
+const { t, n, d, locale } = useI18n()
+
+const methodologyHref = computed(() => {
+  const slug = props.verticalHomeUrl?.trim().replace(/^\/+|\/+$/g, '')
+  return slug
+    ? `/${slug}/ecoscore`
+    : resolveLocalizedRoutePath('impact-score', locale.value)
+})
 
 const sanitizeNumber = (value: number, fallback: number) =>
   Number.isFinite(value) ? value : fallback

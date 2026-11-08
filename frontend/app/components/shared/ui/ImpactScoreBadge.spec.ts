@@ -10,6 +10,7 @@ const i18n = createI18n({
     en: {
       'components.impactScore.tooltip': 'Score: {value} / {max}',
       'components.impactScore.svgAriaLabel': 'Score {score} out of 20',
+      'product.impact.methodologyShort': 'Méthodologie',
     },
   },
 })
