@@ -896,7 +896,7 @@ check "es-ops-readonly test checks everything and writes nothing" \
 run "${DEPLOY}/infra-secrets.sh" remote source beta es-ops-readonly
 check "es-ops-readonly source creates the role (monitor; read on the products index only) and the user" \
   bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1/ops_readonly")" = "$2" ] \
-    && [ "$(cat "$3")" = "{\"cluster\":[\"monitor\"],\"indices\":[{\"names\":[\"products-moustik\"],\"privileges\":[\"read\",\"view_index_metadata\"]}]}" ]' \
+    && [ "$(cat "$3")" = "{\"cluster\":[\"monitor\"],\"indices\":[{\"names\":[\"products-moustik\",\"affiliation-clicks\"],\"privileges\":[\"read\",\"view_index_metadata\"]}]}" ]' \
   "${status}" "${FAKE_ES}" "${OPS_PASS}" "${FAKE_ES}.role"
 check "es-ops-readonly source renders a 600 curl config (one user line), and authenticates with curl -K" \
   bash -c '[ "$(cat "$0")" = "user = \"ops_readonly:$1\"" ] && [ "$(stat -c %a "$0")" = 600 ] && [ "$(wc -l < "$0")" -eq 1 ] \
