@@ -251,6 +251,7 @@ import type {
 } from '~~/shared/api-client'
 import { AggTypeEnum } from '~~/shared/api-client/models/Agg'
 import { normalizeTimestamp } from '~/utils/date-parsing'
+import { isDataQualityBelowCategoryAverage } from '~/utils/_product-verdict'
 import type { ProductRouteMatch } from '~~/shared/utils/_product-route'
 import { isBackendNotFoundError } from '~~/shared/utils/_product-route'
 import { buildProductHreflangLinks } from '~~/shared/utils/domain-language'
@@ -1694,12 +1695,7 @@ const showVigilanceSection = computed(() => {
   if (hasConflicts) return true
 
   // Check Data Quality
-  const dqScore = product.value.scores?.scores?.['DATA_QUALITY']
-  if (dqScore) {
-    const val = dqScore.value ?? 0
-    const avg = dqScore.relativ?.avg ?? dqScore.absolute?.avg ?? 0
-    if (val < avg) return true
-  }
+  if (isDataQualityBelowCategoryAverage(product.value)) return true
 
   return false
 })

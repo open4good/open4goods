@@ -96,7 +96,7 @@ Un lave-vaisselle se mesure en décibels (dB). Au-delà de **45 dB**, il devient
 
 C'est l'angle différenciant de ce guide. Un lave-vaisselle à 400 € qui tombe en panne après 5 ans revient au même prix qu'un modèle à 700 € qui dure 12 ans - sauf que vous avez généré deux fois plus de déchets électroniques.
 
-Le **score d'impact nudger** agrège : classe énergie, indice de réparabilité officiel (noté sur 10), garantie contractuelle, disponibilité des pièces détachées et empreinte fabrication estimée. Plus le score est haut, moins l'appareil pèse sur la planète sur toute sa durée de vie.
+Le **score d'impact nudger** agrège : consommation d'énergie pour 100 cycles, consommation d'eau, indice de réparabilité officiel (noté sur 10), garantie, classe énergie, niveau sonore et poids. Il ne mesure pas encore la disponibilité des pièces détachées ni l'impact de la fabrication. Plus le score est haut, mieux l'appareil se classe dans sa catégorie sur ces critères.
 
 L'**indice de réparabilité** (obligatoire en France depuis janvier 2021) est noté de 0 à 10. Au-dessus de 7, les pièces sont accessibles et la documentation disponible. En dessous de 5, préparez-vous à jeter plutôt qu'à réparer.
 

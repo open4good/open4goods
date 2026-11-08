@@ -323,6 +323,16 @@ class VerticalYamlValidationTest {
     }
 
     private static void assertParticipatingScoresAreWeighted(VerticalConfig config, String sourceName, Set<String> weights) {
+        List<String> targetingImpactScore = config.getAttributesConfig().getConfigs().stream()
+            .filter(attribute -> attribute.getParticipateInScores() != null
+                && attribute.getParticipateInScores().contains("ECOSCORE"))
+            .map(AttributeConfig::getKey)
+            .toList();
+
+        assertThat(targetingImpactScore)
+            .as("ECOSCORE is computed from criteriasPonderation and cannot be a composite (%s)", sourceName)
+            .isEmpty();
+
         Collection<String> availableImpactScoreCriterias = config.getAvailableImpactScoreCriterias();
         if (availableImpactScoreCriterias == null || availableImpactScoreCriterias.isEmpty()) {
             return;

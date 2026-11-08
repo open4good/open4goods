@@ -1330,8 +1330,8 @@
       "description": "See how the Impact Score rates a product's environmental footprint with 5 clear criteria and real-world examples."
     },
     "methodologyExplanation": {
-      "title": "Sigma, percentile.... What???",
-      "content": "To ensure a fair score across all products, we use a statistical approach called **Sigma Scoring**.<br><br>Unlike a simple average, this method takes into account the **dispersion** of the data (standard deviation).<br><ul><li><strong>Sigma Scoring:</strong> Most products fall within the average range. Exceptional products (good or bad) don't skew the score for everyone else.</li><li><strong>Percentile (Fallback):</strong> If there are too few distinct values (e.g., only 3 possible warranty options), Sigma Scoring becomes less effective. We then switch to **Percentile** scoring to rank products from best to worst, while keeping a score out of 5.</li></ul><br>This allows us to give you a truly useful score, regardless of the product category!"
+      "title": "How each criterion is scored",
+      "content": "Each criterion is first brought to the same scale, from 0 (the lowest) to 20 (the best), with one of three methods:<ul><li><strong>Fixed scale:</strong> the energy class follows its official scale (A = 20, G = 0).</li><li><strong>Observed values:</strong> for most criteria, the lowest performer of the category gets 0 and the best gets 20. When a lower value is better (consumption, noise, weight), the scale is reversed.</li><li><strong>Distance to the average (sigma):</strong> for the warranty and the water or energy use per cycle, the score depends on the distance to the category average, so that a few extreme values do not crush the others. A product at the average gets 10.</li></ul>These criterion scores are then weighted and added up to form the Impact Score."
     },
     "docs": {
       "title": "Impact Score documentation",
@@ -1345,7 +1345,7 @@
         "title": "A clear, accessible definition",
         "description": "Impact Score turns technical data into understandable indicators with no jargon.",
         "items": {
-          "scale": "Rating from 0 to 5: 5 means exemplary impact",
+          "scale": "Score from 0 to 20, a weighted sum of the criterion scores. It compares products within one category: 20 does not mean no impact, and the best product of a category usually stays well below 20.",
           "data": "Built on verified data (spec sheets, eco-organisations, public studies)",
           "update": "Updated as soon as new information is published"
         }
@@ -1358,9 +1358,9 @@
       "cards": {
         "weighting": {
           "title": "Weighted criteria combined",
-          "description": "Our eco-score is a rating from 0 to 100. It sums the scores of each criterion, adapted to every product category.",
+          "description": "The Impact Score is a score from 0 to 20. It is the weighted sum of the criterion scores, and each product category has its own criteria and weights.",
           "bullets": {
-            "scale": "0 = very poor, 100 = outstanding",
+            "scale": "0 = the lowest on every criterion, 20 = the best on every criterion",
             "sum": "The overall rating adds the score of each criterion",
             "weights": "Weightings (0 to 1) are defined by an AI system"
           }
@@ -1376,14 +1376,14 @@
         },
         "relativisation": {
           "title": "Relative scoring principle",
-          "description": "A repairability index of 7.7 only makes sense when compared to other products. We assign 0 to the lowest performer and 100 to the best to make comparisons easier. The Impact Score itself is not normalized: it remains a weighted sum, so 100/100 is rare.",
+          "description": "A repairability index of 7.7 only makes sense when you know the best and the lowest value. On each criterion, we therefore give 0 to the lowest performer of the category and 20 to the best (the energy class follows its official scale). The final Impact Score is not normalized: it is a weighted sum. A product only gets 20/20 if it is the best on every criterion, and even then it does not mean it has no impact on the planet.",
           "bullets": {
             "ranking": "A clear ranking to position each product within its category"
           }
         },
         "dataQuality": {
           "title": "Data quality matters most",
-          "description": "When data is missing, we apply a category average so a product is neither penalized nor favored. This data availability is then reflected through a dedicated penalty in the final score.",
+          "description": "When data is missing, we apply the category average, so that the product is neither penalized nor favored. These values are flagged as virtual in the criteria details. A less documented product also gets a lower score on the data quality criterion, which counts in the Impact Score.",
           "bullets": {
             "average": "Virtual score based on the category average",
             "malus": "A penalty reflects missing product information"
@@ -1572,7 +1572,7 @@
       "methodology": {
         "empty": "Categories will be published soon.",
         "eyebrow": "Methodology",
-        "intro": "The ecoscore calculation rules are detailed on every product (see the “environmental balance” section). Each product category has its own criteria and weights. These categories are currently covered:",
+        "intro": "The calculation rules are detailed on every product page, in the Environmental impact section. Each product category has its own criteria and weights. These categories are currently covered:",
         "title": "How is the Impact Score calculated?",
         "verticalCarouselAria": "Browse the ecoscore categories carousel",
         "verticalCardAria": "Open the {vertical} category",

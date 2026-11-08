@@ -24,8 +24,6 @@ scoreDescription:
 scoreUtility:
   fr: "Les fuites de fluide frigorigene peuvent fortement peser sur l'impact climatique; un PRG plus bas limite ce risque."
   en: "Refrigerant leaks can materially increase climate impact; a lower GWP limits that risk."
-participateInScores:
-  - ECOSCORE
 participateInACV:
   - USE
 synonyms:

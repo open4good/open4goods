@@ -59,6 +59,11 @@ We define a "Normal Range" of **$\pm 2\sigma$** around the Mean ($\mu$).
 
 #### Low-entropy fallback: Percentile Scoring
 
+> **Inactive today.** This fallback only applies to attributes without
+> `scoring.normalization.method`. Every scored attribute configures one
+> (`SIGMA`, `MINMAX_FIXED` or `MINMAX_OBSERVED`), and no vertical sets
+> `minDistinctValuesForSigma`.
+
 When a criterion has too few distinct values (e.g., power standby reported as only 0 W / 0.5 W / 2 W), sigma scoring collapses values near the mean. In that case, the system switches to **percentile scoring** to restore ranking separation.
 
 **Rule (configurable)**:
@@ -92,16 +97,40 @@ $$ ImpactScore = \sum (SubScore_i \times Weight_i) $$
 
 #### Scale of the Impact Score
 
-Important: The **Impact Score is NOT relativized** again. Its scale depends entirely on the sum of the weights.
+The **Impact Score is NOT relativized** again. Weights are normalized so that
+they sum to 4 (`w * 4 / sum(w)`), so the Impact Score is always on a **0-20**
+scale, whatever the configured weights. `ECOSCORE.relativ.value` is the same
+score on 0-5 (`absolute / 4`).
 
-- If $\sum Weights = 1$, the Impact Score is on a **0-5** scale.
-- If $\sum Weights = 4$, the Impact Score is on a **0-20** scale.
-- If $\sum Weights = 20$, the Impact Score is on a **0-100** scale.
+`ECOSCORE` is a reserved name: an attribute cannot declare it in
+`participateInScores`. A composite with that name would replace the weighted
+0-20 score with a 0-5 sub-score (this happened to air conditioners through
+`REFRIGERANT_GWP`). `ParticipatingScoreHelper` rejects it and
+`VerticalYamlValidationTest` checks every vertical.
 
-_Example Observation_: Scores between **6.5 and 14** suggest a configuration where the weights sum to approximately **4**, targeting a **0-20 scale**.
+### 4. Ranking
 
-- Average product: $2.5 \times 4 = 10$.
-- Range $6.5 \dots 14$ represents products within roughly $\pm 1 \sigma$ of the mean.
+`Score.ranking` is the ascending position of a **real** score in the scored
+batch: 0 is the lowest score and `absolute.count - 1` the highest. Virtual
+(imputed) scores are not ranked, so `ranking` and `absolute.count` describe the
+same population. The frontend shows:
+
+- for the Impact Score, "better than X %" with `X = ranking / (count - 1)`;
+- for a criterion, a position from the best product, `count - ranking`.
+
+`EcoScoreRanking.globalPosition` already counts from the best product (1 = best).
+
+### 5. Persistence after a batch
+
+`BatchService.batch(vertical)` re-indexes every product of the vertical but only
+scores the products that have offers and are not excluded. After scoring:
+
+- excluded products and products unmatched from the vertical lose all their
+  scores and their ranking;
+- products without offers keep their last score (they stay in the sitemap,
+  GOU-1744), unless their Impact Score is a composite, which only the defect
+  above produces;
+- if scoring throws, nothing is indexed for that vertical.
 
 ## Source Code pointers
 
@@ -121,5 +150,4 @@ _Example Observation_: Scores between **6.5 and 14** suggest a configuration whe
 
 ## Potential Improvements / Methodology Notes
 
-1. **Implicit Scale**: The final score range varies if weights are changed. Normalizing weights to a fixed sum (e.g., 20) is recommended to ensure consistent scoring ranges.
-2. **Dependency Order**: This computation assumes sub-scores are available and can be relativized. The `EcoScoreAggregationService` runs these logic steps generally in the `onProduct` (summation) and `done` (relativization) phases.
+1. **Dependency Order**: This computation assumes sub-scores are available and can be relativized. The `EcoScoreAggregationService` runs these logic steps generally in the `onProduct` (summation) and `done` (relativization) phases.

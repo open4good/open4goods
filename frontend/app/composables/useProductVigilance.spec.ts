@@ -39,8 +39,9 @@ describe('useProductVigilance', () => {
       scores: {
         scores: {
           DATA_QUALITY: {
-            value: 2.0,
+            value: 12,
             relativ: {
+              value: 2.0,
               avg: 3.0,
             },
           },
@@ -51,6 +52,25 @@ describe('useProductVigilance', () => {
     const { isLowDataQuality, alerts } = useProductVigilance(product)
     expect(isLowDataQuality.value).toBe(true)
     expect(alerts.value.some(a => a.key === 'quality')).toBe(true)
+  })
+
+  it('compares data quality with the category, not the raw criteria count', () => {
+    const product = ref<ProductDto>({
+      scores: {
+        scores: {
+          DATA_QUALITY: {
+            value: 2,
+            relativ: {
+              value: 4.5,
+              avg: 3.0,
+            },
+          },
+        },
+      },
+    } as ProductDto)
+
+    const { isLowDataQuality } = useProductVigilance(product)
+    expect(isLowDataQuality.value).toBe(false)
   })
 
   it('identifies low competition warning', () => {

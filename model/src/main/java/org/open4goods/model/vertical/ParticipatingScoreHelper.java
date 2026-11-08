@@ -15,6 +15,12 @@ import java.util.stream.Collectors;
  */
 public final class ParticipatingScoreHelper {
 
+    /**
+     * Name of the ImpactScore, computed from {@code criteriasPonderation}. A
+     * composite using this name would replace the weighted 0-20 score.
+     */
+    private static final String RESERVED_IMPACT_SCORE_NAME = "ECOSCORE";
+
     private ParticipatingScoreHelper() {
     }
 
@@ -29,7 +35,8 @@ public final class ParticipatingScoreHelper {
      * @return a map keyed by aggregate name containing normalised ponderations of
      *         participating scores
      * @throws IllegalStateException if a participating score has no ponderation
-     *                               defined in {@code impactScoreConfig}
+     *                               defined in {@code impactScoreConfig}, or
+     *                               targets the reserved ImpactScore name
      */
     public static Map<String, Map<String, Double>> buildNormalizedParticipatingScores(VerticalConfig verticalConfig) {
         Objects.requireNonNull(verticalConfig, "verticalConfig is required");
@@ -60,6 +67,10 @@ public final class ParticipatingScoreHelper {
             }
 
             for (String aggregateName : participateInScores) {
+                if (RESERVED_IMPACT_SCORE_NAME.equals(aggregateName)) {
+                    throw new IllegalStateException("Attribute " + attribute.getKey()
+                            + " cannot participate in the reserved score " + RESERVED_IMPACT_SCORE_NAME);
+                }
                 aggregates.computeIfAbsent(aggregateName, key -> new HashMap<>())
                         .merge(attribute.getKey(), ponderation, Double::sum);
             }

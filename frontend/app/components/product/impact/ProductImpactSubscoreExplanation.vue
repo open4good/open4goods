@@ -154,10 +154,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { mdiCheckCircleOutline, mdiChartBellCurve } from '@mdi/js'
+import { impactMethodologyHrefKey } from './impact-types'
 import type { ScoreView } from './impact-types'
+import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 
 const props = defineProps<{
   score: ScoreView
@@ -391,13 +393,24 @@ const mappingItems = computed(() => {
     }))
 })
 
+// The backend ranks real values only, in ascending order (0 = lowest score),
+// against absolute.count. Displayed as a position where 1 is the best product.
+// Imputed (virtual) criteria are not ranked.
 const rankingValue = computed(() => {
+  if (props.score.virtual || props.score.ranking == null) {
+    return null
+  }
   const ranking = Number(props.score.ranking)
-  if (!Number.isFinite(ranking)) {
+  const count = Number(props.score.absolute?.count)
+  if (!Number.isFinite(ranking) || !Number.isFinite(count)) {
+    return null
+  }
+  const position = count - ranking
+  if (position < 1 || position > count) {
     return null
   }
 
-  return n(ranking, { maximumFractionDigits: 0, minimumFractionDigits: 0 })
+  return n(position, { maximumFractionDigits: 0, minimumFractionDigits: 0 })
 })
 
 const populationValue = computed(() => {
@@ -638,7 +651,12 @@ const hasEducationalPanels = computed(
   () => hasReadIndicatorContent.value || statisticalMethodItems.value.length > 0
 )
 
-const methodologyUrl = 'https://nudger.fr/frigos/ecoscore'
+const injectedMethodologyHref = inject(impactMethodologyHrefKey, null)
+const methodologyUrl = computed(
+  () =>
+    injectedMethodologyHref?.value ??
+    resolveLocalizedRoutePath('impact-score', locale.value)
+)
 
 const readIndicatorHighlights = computed(() => {
   const items: Array<{ id: string; text: string }> = []

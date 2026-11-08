@@ -47,8 +47,10 @@ public class EprelCatalogueService
     }
 
     /**
-     * Downloads the latest catalogues and re-indexes the EPREL data set.
-     * @throws IOException
+     * Downloads the latest catalogues and re-indexes the EPREL data set. A group that
+     * fails does not prevent the following ones from being refreshed.
+     *
+     * @throws IOException if at least one group could not be refreshed
      */
     public void refreshCatalogue() throws IOException
     {
@@ -60,6 +62,7 @@ public class EprelCatalogueService
         }
 
         List<String> groupsToIndex = properties.getGroupsToIndex();
+        List<String> failedGroups = new ArrayList<>();
         for (EprelProductGroup group : groups)
         {
             if (groupsToIndex != null && !groupsToIndex.isEmpty() && !groupsToIndex.contains(group.urlCode()))
@@ -71,11 +74,15 @@ public class EprelCatalogueService
             {
                 processGroup(group);
             }
-            catch (IOException e)
+            catch (IOException | RuntimeException e)
             {
                 LOGGER.error("Failed to process EPREL catalogue for group {} : {}", group.urlCode(), e.getMessage());
-                throw e;
+                failedGroups.add(group.urlCode());
             }
+        }
+        if (!failedGroups.isEmpty())
+        {
+            throw new IOException("EPREL catalogue refresh failed for groups " + failedGroups);
         }
     }
 

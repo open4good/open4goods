@@ -63,6 +63,27 @@ class ParticipatingScoreHelperTest {
     }
 
     @Test
+    void shouldRejectCompositeUsingTheImpactScoreName() {
+        AttributeConfig attributeConfig = new AttributeConfig();
+        attributeConfig.setKey("REFRIGERANT_GWP");
+        attributeConfig.setAsScore(true);
+        attributeConfig.setParticipateInScores(Set.of("ECOSCORE"));
+
+        ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
+        impactScoreConfig.setCriteriasPonderation(Map.of("REFRIGERANT_GWP", 0.1));
+
+        VerticalConfig verticalConfig = new VerticalConfig();
+        verticalConfig.setImpactScoreConfig(impactScoreConfig);
+        verticalConfig.setAttributesConfig(new AttributesConfig(List.of(attributeConfig)));
+        verticalConfig.setAvailableImpactScoreCriterias(List.of("REFRIGERANT_GWP"));
+
+        assertThatThrownBy(() -> ParticipatingScoreHelper.buildNormalizedParticipatingScores(verticalConfig))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("REFRIGERANT_GWP")
+                .hasMessageContaining("ECOSCORE");
+    }
+
+    @Test
     void shouldIgnoreParticipatingScoreNotDeclaredInAvailableImpactScoreCriterias() {
         AttributeConfig attributeConfig = new AttributeConfig();
         attributeConfig.setKey("IGNORED");

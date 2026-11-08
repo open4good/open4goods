@@ -134,10 +134,41 @@ export const getReliabilityLevel = (score: number): VerdictLevel => {
   return 'insufficient'
 }
 
+/** Ratio between the 0-20 display scale and the 0-5 relative score scale. */
+const RELATIVE_TO_TWENTY = 4
+
+/**
+ * Data quality of the product compared with its category, on a 0-20 scale.
+ *
+ * DATA_QUALITY.value is the raw number of filled criteria, which depends on
+ * the category: only its relative value can be compared with a fixed scale.
+ */
+export const getDataQualityOn20 = (product: ProductDto): number | null => {
+  const relative = product.scores?.scores?.['DATA_QUALITY']?.relativ?.value
+  if (typeof relative !== 'number' || !Number.isFinite(relative)) {
+    return null
+  }
+  return relative * RELATIVE_TO_TWENTY
+}
+
+/** Whether the product has less filled data than the average of its category. */
+export const isDataQualityBelowCategoryAverage = (
+  product: ProductDto
+): boolean => {
+  const relative = product.scores?.scores?.['DATA_QUALITY']?.relativ
+  if (
+    typeof relative?.value !== 'number' ||
+    typeof relative?.avg !== 'number'
+  ) {
+    return false
+  }
+  return relative.value < relative.avg
+}
+
 export const getReliabilityVerdict = (
   product: ProductDto
 ): VerdictDimension => {
-  const dqScore = product.scores?.scores?.['DATA_QUALITY']?.value ?? null
+  const dqScore = getDataQualityOn20(product)
 
   if (dqScore === null) {
     return {
