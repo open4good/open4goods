@@ -17,6 +17,12 @@ maintenance.
 - Non-major updates are grouped into four review domains: frontend npm, backend
   Maven, Python workers, and build/infrastructure (Dockerfiles, Compose, and
   GitHub Actions).
+- The `frontend/` Nuxt test toolchain (`nuxt`, `@nuxt/test-utils`, `vitest`,
+  `@vitest/*`) has its own "frontend nuxt toolchain" group. These packages
+  must move together: Nuxt 4.5 breaks the Vitest suite unless
+  `@nuxt/test-utils` 4 and vitest 5 land with it. The separate group keeps a
+  toolchain bump from turning the whole frontend npm group red. It counts
+  toward the four-PR limit like the other groups.
 - Frontend lock-file maintenance is a separate, labelled maintenance PR. Its
   frontend npm rule uses `npmInstallTwice` so generated npm lock files remain
   compatible with `npm ci`.
