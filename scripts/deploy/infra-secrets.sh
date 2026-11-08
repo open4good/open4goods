@@ -19,7 +19,8 @@
 #   <env>     beta or prod.
 #   <target>  elasticsearch (both), kibana (both), plausible (beta), plausible-postgres (beta),
 #             plausible-clickhouse (beta), plausible-google (beta), b2b-postgres (both), es-ops-readonly (both:
-#             read-only Elasticsearch account for Ops, secret required even by check and test).
+#             read-only Elasticsearch account for Ops, secret required even by check and test), es-agents-readonly (prod
+#             only: read-only Elasticsearch account of the agents' MCP connector, same rules).
 #
 # Each secret is read from the environment variable of the same name (the calling step's `env:`).
 # Required environment for remote: DEPLOY_SSH_HOST, DEPLOY_SSH_USER, DEPLOY_SSH_KEY.
@@ -93,7 +94,12 @@ case "$target" in
     secrets=INFRA_ES_OPS_READONLY_PASSWORD
     services=
     ;;
-  *) fail "Unknown target: $target (elasticsearch, kibana, plausible, plausible-postgres, plausible-clickhouse, plausible-google, b2b-postgres or es-ops-readonly)" ;;
+  es-agents-readonly)
+    [ "$env_name" = prod ] || fail "es-agents-readonly: prod only"
+    secrets=INFRA_ES_AGENTS_READONLY_PASSWORD
+    services=
+    ;;
+  *) fail "Unknown target: $target (elasticsearch, kibana, plausible, plausible-postgres, plausible-clickhouse, plausible-google, b2b-postgres, es-ops-readonly or es-agents-readonly)" ;;
 esac
 
 # Every secret of the target, set and strong; the value is never printed.
@@ -103,7 +109,7 @@ for secret in $secrets; do
     case "$action" in
       check | test)
         # es-ops-readonly has no dry run without its secret: it must fail until Access has written it.
-        [ "$target" != es-ops-readonly ] || fail "$secret is empty or missing from the $env_name GitHub Environment (target $target)"
+        { [ "$target" != es-ops-readonly ] && [ "$target" != es-agents-readonly ]; } || fail "$secret is empty or missing from the $env_name GitHub Environment (target $target)"
         echo "::warning::$secret is not set in the $env_name GitHub Environment: dry run without the new value."
         continue
         ;;

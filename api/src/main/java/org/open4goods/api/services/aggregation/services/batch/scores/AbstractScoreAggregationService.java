@@ -1,6 +1,7 @@
 package org.open4goods.api.services.aggregation.services.batch.scores;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -136,9 +137,7 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 					return s != null && !Boolean.TRUE.equals(s.getVirtual())
 							&& s.getRelativ() != null && s.getRelativ().getValue() != null;
 				})
-				.sorted(java.util.Comparator.<Product>comparingDouble(p -> p.getScores().get(sn).getRelativ().getValue())
-						// stable tie-break on the GTIN: same score, same position from one batch to the next
-						.thenComparing(Product::getId, java.util.Comparator.nullsFirst(java.util.Comparator.naturalOrder())))
+				.sorted(rankingOrder(sn, vConf))
 				.toList();
 
 			if (sorted.isEmpty()) {
@@ -216,6 +215,34 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 
 		score.setRelativ(ret);
 		
+	}
+
+	/**
+	 * Order used to rank a score, from the worst product (index 0) to the best one. The relativ value comes first,
+	 * but normalization clamps it to the scale bounds (beyond k standard deviations, or outside fixed bounds), so
+	 * every clamped product shares the same relativ value. Ties are broken on the raw value, in the direction of the
+	 * attribute's {@code impactBetterIs}, then on the GTIN so that the order never depends on the batch input order.
+	 *
+	 * @param scoreName the score to rank
+	 * @param vConf the vertical configuration, which carries the attribute direction
+	 * @return the worst-to-best comparator
+	 */
+	private Comparator<Product> rankingOrder(String scoreName, VerticalConfig vConf) {
+		Comparator<Product> byRawValue = Comparator.comparingDouble(p -> rawValue(p.getScores().get(scoreName)));
+		AttributeConfig attributeConfig = resolveAttributeConfig(scoreName, vConf);
+		if (attributeConfig != null && AttributeComparisonRule.LOWER.equals(attributeConfig.getImpactBetterIs())) {
+			byRawValue = byRawValue.reversed();
+		}
+		return Comparator.<Product>comparingDouble(p -> p.getScores().get(scoreName).getRelativ().getValue())
+				.thenComparing(byRawValue)
+				.thenComparing(Product::getId, Comparator.nullsFirst(Comparator.naturalOrder()));
+	}
+
+	private static double rawValue(Score score) {
+		if (score.getAbsolute() != null && score.getAbsolute().getValue() != null) {
+			return score.getAbsolute().getValue();
+		}
+		return score.getValue() != null ? score.getValue() : 0.0;
 	}
 
 	protected Double relativizeScoreValue(String scoreName, Double value, Cardinality abs, VerticalConfig vConf)

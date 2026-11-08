@@ -38,6 +38,10 @@
 #                         /etc/open4goods/ops-es-readonly.curlrc (600, one `user = \"ops_readonly:<value>\"` line, for
 #                         `curl -K`: never in an argument) for Ops; no consumer to restart;
 #                         the secret is required by test too; no rollback (delete the user by hand, runbook)
+#   es-agents-readonly    INFRA_ES_AGENTS_READONLY_PASSWORD (prod only; Elasticsearch user agents_readonly, role
+#                         agents_readonly: no cluster privilege, read + view_index_metadata on products-moustik,
+#                         eprel-products and affiliation-clicks only) for the MCP connector of the agents; no file
+#                         left on the host, no consumer to restart, no rollback
 #
 # Lines marked `ggignore` copy a variable to a file: GitGuardian takes them for hard-coded passwords.
 # No value is printed: values are compared and passed through files of a umask 077 temp directory, stdin, or the
@@ -67,6 +71,9 @@ case "$target" in
     [ "$env_name" = beta ] || fail "$target: only beta runs Plausible"
     ;;
   b2b-postgres | es-ops-readonly) ;;
+  es-agents-readonly)
+    [ "$env_name" = prod ] || fail "$target: prod only"
+    ;;
   *) fail "Unknown target" ;;
 esac
 
@@ -1377,6 +1384,71 @@ es_ops_readonly_restart() {
 
 es_ops_readonly_rollback() {
   fail "es-ops-readonly has no rollback: delete the user ops_readonly and the file $ops_file by hand (runbook)"
+}
+
+# --- es-agents-readonly -------------------------------------------------------------------------------------------
+
+# Exact index names, no wildcard, no system index (prod only, see the case above).
+agents_indices='"products-moustik","eprel-products","affiliation-clicks"'
+
+agents_role_body() {
+  printf '{"cluster":[],"indices":[{"names":[%s],"privileges":["read","view_index_metadata"]}]}' \
+    "$agents_indices" > "$work/role.json"
+}
+
+agents_user_body() {
+  printf '{"password":"%s","roles":["agents_readonly"],"enabled":true}' \
+    "$(printf '%s' "$INFRA_ES_AGENTS_READONLY_PASSWORD" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')" > "$work/user.json"
+}
+
+agents_require_secret() {
+  [ -n "${INFRA_ES_AGENTS_READONLY_PASSWORD:-}" ] \
+    || fail "INFRA_ES_AGENTS_READONLY_PASSWORD is missing: Access must write it to the GitHub Environment first"
+}
+
+es_agents_readonly_test() {
+  agents_require_secret
+  found=$(working_elastic)
+  ok "the password of elastic in service is found ($found) and accepted (used to manage agents_readonly)"
+  code=$(es_call elastic "$(cat "$work/elastic")" GET /_security/role/agents_readonly)
+  case "$code" in
+    200) ok "role agents_readonly exists: source would update it" ;;
+    404) ok "role agents_readonly does not exist: source would create it" ;;
+    *) fail "cannot read the role agents_readonly (HTTP $code)" ;;
+  esac
+  if es_accepts agents_readonly "$INFRA_ES_AGENTS_READONLY_PASSWORD"; then
+    ok "agents_readonly already accepts the new password"
+  else
+    ok "agents_readonly does not accept the new password yet: source would set it"
+  fi
+}
+
+es_agents_readonly_source() {
+  agents_require_secret
+  working_elastic > /dev/null
+  elastic_pw=$(cat "$work/elastic")
+  agents_role_body
+  code=$(es_call elastic "$elastic_pw" PUT /_security/role/agents_readonly "$work/role.json")
+  case "$code" in 200 | 201) ;; *) fail "Elasticsearch refused the role agents_readonly (HTTP $code)" ;; esac
+  ok "role agents_readonly set (no cluster privilege; read, view_index_metadata on products-moustik, eprel-products, affiliation-clicks)"
+  agents_user_body
+  code=$(es_call elastic "$elastic_pw" PUT /_security/user/agents_readonly "$work/user.json")
+  rm -f "$work/user.json"
+  case "$code" in 200 | 201) ;; *) fail "Elasticsearch refused the user agents_readonly (HTTP $code)" ;; esac
+  ok "user agents_readonly set"
+  # The temporary curl config ($work, mode 600) is removed with $work on exit; nothing stays on the host.
+  code=$(es_call agents_readonly "$INFRA_ES_AGENTS_READONLY_PASSWORD" GET /_security/_authenticate)
+  [ "$code" = 200 ] || fail "agents_readonly is not authenticated (HTTP $code)"
+  grep -q '"username":"agents_readonly"' "$work/es.out" || fail "_security/_authenticate does not answer as agents_readonly"
+  ok "GET _security/_authenticate answers as agents_readonly"
+}
+
+es_agents_readonly_restart() {
+  ok "es-agents-readonly has no consumer to restart"
+}
+
+es_agents_readonly_rollback() {
+  fail "es-agents-readonly has no rollback: delete the user agents_readonly and the role agents_readonly by hand (runbook)"
 }
 
 echo "----- $target: $action ($env_name) -----"

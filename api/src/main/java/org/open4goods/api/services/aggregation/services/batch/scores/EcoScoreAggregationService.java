@@ -187,8 +187,8 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 			// EcoScore ranking and "best alternativ" reach
 			///////////////////////
 			List<Product> sorted = new ArrayList<>(productsWithRealEcoScore);
-			// Ties are broken by GTIN so that two products with the same ImpactScore keep the same position
-			// whatever the order in which the batch received them (GOU-1897)
+			// Ties are broken by GTIN, so that two products with the same ImpactScore keep their position whatever the
+			// order in which the batch received them.
 			sorted.sort(Comparator.<Product>comparingDouble(p -> p.ecoscore().getRelativ().getValue())
 					.thenComparing(Product::getId, Comparator.nullsFirst(Comparator.naturalOrder())));
 	
@@ -201,6 +201,13 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 				ranking.setGlobalCount(count);
 				ranking.setGlobalPosition(count - i);
 				ranking.setGlobalBest(bestProductId);
+
+				// The ImpactScore rank follows the same order as globalPosition. The rank set by the parent class was
+				// computed on the normalized value, where clamped extreme products tie (GOU-1894).
+				Score impactScore = product.ecoscore();
+				impactScore.setRanking(i);
+				impactScore.getAbsolute().setCount(count);
+				impactScore.getRelativ().setCount(count);
 	
 				if (i < count - 1) {
 					ranking.setGlobalBetter(sorted.get(i + 1).getId());
