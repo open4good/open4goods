@@ -244,123 +244,6 @@
               </article>
             </div>
           </div>
-
-          <div
-            v-for="row in textualRows"
-            :key="row.key"
-            class="compare-grid__row"
-            role="row"
-          >
-            <div class="compare-grid__feature" role="rowheader">
-              <v-icon
-                :icon="row.icon"
-                size="20"
-                class="compare-grid__feature-icon"
-              />
-              <span class="compare-grid__feature-label">{{ row.label }}</span>
-            </div>
-            <div class="compare-grid__values" role="cell">
-              <div
-                v-for="(product, columnIndex) in products"
-                :key="`${row.key}-${product.gtin}`"
-                :class="[
-                  'compare-grid__value',
-                  { 'compare-grid__value--has-list': row.type === 'list' },
-                ]"
-              >
-                <div v-if="product" class="compare-grid__value-mobile">
-                  <ClientOnly>
-                    <NuxtLink
-                      v-if="productLink(product)"
-                      :to="productLink(product)"
-                      class="compare-grid__value-mobile-media compare-grid__value-mobile-media--link"
-                      :aria-label="
-                        t('compare.a11y.viewProduct', { name: product.title })
-                      "
-                    >
-                      <NuxtImg
-                        v-if="product.coverImage"
-                        :src="product.coverImage"
-                        :alt="product.title"
-                        width="88"
-                        height="88"
-                        format="webp"
-                        class="compare-grid__value-mobile-image"
-                      />
-                      <div
-                        v-else
-                        class="compare-grid__value-mobile-placeholder"
-                        aria-hidden="true"
-                      >
-                        {{ productInitials(product.title) }}
-                      </div>
-                    </NuxtLink>
-                    <div v-else class="compare-grid__value-mobile-media">
-                      <NuxtImg
-                        v-if="product.coverImage"
-                        :src="product.coverImage"
-                        :alt="product.title"
-                        width="88"
-                        height="88"
-                        format="webp"
-                        class="compare-grid__value-mobile-image"
-                      />
-                      <div
-                        v-else
-                        class="compare-grid__value-mobile-placeholder"
-                        aria-hidden="true"
-                      >
-                        {{ productInitials(product.title) }}
-                      </div>
-                    </div>
-                  </ClientOnly>
-                  <div class="compare-grid__value-mobile-details">
-                    <p class="compare-grid__value-mobile-brand">
-                      {{ product.brand ?? '—' }}
-                    </p>
-                    <p class="compare-grid__value-mobile-model">
-                      {{ productModelLabel(product) }}
-                    </p>
-                  </div>
-                </div>
-
-                <div class="compare-grid__value-content">
-                  <template v-if="row.type === 'text'">
-                    <!-- eslint-disable vue/no-v-html -->
-                    <p
-                      v-if="row.values[columnIndex]"
-                      class="compare-grid__value-text"
-                      v-html="row.values[columnIndex]"
-                    />
-                    <!-- eslint-enable vue/no-v-html -->
-                    <p v-else class="compare-grid__value-text">
-                      {{ t('compare.textual.empty') }}
-                    </p>
-                  </template>
-                  <template v-else>
-                    <!-- eslint-disable vue/no-v-html -->
-                    <ul
-                      v-if="hasListValues(row.values[columnIndex])"
-                      class="compare-grid__list compare-grid__list--pros-cons"
-                      role="list"
-                    >
-                      <li
-                        v-for="item in getListValues(row.values[columnIndex])"
-                        :key="item"
-                        class="compare-grid__list-item"
-                        role="listitem"
-                        v-html="item"
-                      />
-                    </ul>
-                    <!-- eslint-enable vue/no-v-html -->
-                    <p v-else class="compare-grid__value-text">
-                      {{ t('compare.textual.empty') }}
-                    </p>
-                  </template>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -1080,14 +963,6 @@ import type {
   VerticalConfigFullDto,
 } from '~~/shared/api-client'
 
-interface TextualRow {
-  key: string
-  icon: string
-  label: string
-  type: 'text' | 'list'
-  values: Array<string | string[] | null>
-}
-
 interface AttributeRow {
   key: string
   icon: string
@@ -1362,18 +1237,6 @@ const hasMeaningfulCellValue = (value: unknown): boolean => {
   return true
 }
 
-const hasListValues = (value: TextualRow['values'][number]): boolean => {
-  return Array.isArray(value) && value.length > 0
-}
-
-const getListValues = (value: TextualRow['values'][number]): string[] => {
-  return Array.isArray(value) ? value : []
-}
-
-const computeAvailabilityFromValues = (values: unknown[]): boolean[] => {
-  return values.map(value => hasMeaningfulCellValue(value))
-}
-
 const hasEnoughAvailability = (availability: boolean[]): boolean => {
   const missing = availability.filter(value => !value).length
   return missing < 2
@@ -1532,36 +1395,6 @@ watch(
     await syncHash(next)
   }
 )
-
-const textualRows = computed<TextualRow[]>(() => {
-  const rows: TextualRow[] = [
-    {
-      key: 'description',
-      icon: 'mdi-text-box-outline',
-      label: t('compare.textual.description'),
-      type: 'text',
-      values: productEntries.value.map(entry => entry.review.description),
-    },
-    {
-      key: 'pros',
-      icon: 'mdi-thumb-up-outline',
-      label: t('compare.textual.pros'),
-      type: 'list',
-      values: productEntries.value.map(entry => entry.review.pros),
-    },
-    {
-      key: 'cons',
-      icon: 'mdi-thumb-down-outline',
-      label: t('compare.textual.cons'),
-      type: 'list',
-      values: productEntries.value.map(entry => entry.review.cons),
-    },
-  ]
-
-  return rows.filter(row =>
-    hasEnoughAvailability(computeAvailabilityFromValues(row.values))
-  )
-})
 
 const priceRows = computed<AttributeRow[]>(() => {
   const newPrices = productEntries.value.map(
@@ -2229,44 +2062,9 @@ const productInitials = (title: string) => {
   border: 2px solid rgba(var(--v-theme-accent-supporting), 0.6)
   box-shadow: 0 0 0 2px rgba(var(--v-theme-accent-supporting), 0.2)
 
-.compare-grid__value--has-list
-  align-items: stretch
-  text-align: left
-
-.compare-grid__value--has-list .compare-grid__value-content
-  align-items: stretch
-  text-align: left
-
-.compare-grid__value--has-list .compare-grid__list
-  align-items: flex-start
-
 .compare-grid__value-text
   margin: 0
   color: rgb(var(--v-theme-text-neutral-secondary))
-
-.compare-grid__list
-  list-style: none
-  margin: 0
-  padding: 0
-  display: flex
-  flex-direction: column
-  gap: 0.5rem
-  width: 100%
-
-.compare-grid__list-item
-  position: relative
-  padding-inline-start: 1.5rem
-  color: rgb(var(--v-theme-text-neutral-secondary))
-
-.compare-grid__list-item::before
-  content: ''
-  position: absolute
-  inset-inline-start: 0
-  inset-block-start: 0.4rem
-  width: 0.75rem
-  height: 0.75rem
-  border-radius: 50%
-  background: rgba(var(--v-theme-accent-supporting), 0.7)
 
 .compare-grid__values > .compare-grid__value
   min-height: 120px
