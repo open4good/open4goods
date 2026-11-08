@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.DatasourcePurgeService;
+import org.open4goods.api.services.ProductIndexMappingRunner;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
@@ -25,7 +26,7 @@ import ch.qos.logback.classic.LoggerContext;
  * The beta and prod config set {@code org.open4goods} to warn, which hid every INFO line of the datasource purge
  * (GOU-1815). Boots Spring with the same config locations and profiles as {@code publish-jars.sh}
  * ({@code classpath:/application.yml}, then the environment file) and checks that the purge logger still logs INFO
- * while the rest of {@code org.open4goods} stays at warn.
+ * while the rest of {@code org.open4goods} stays at warn. Same for the products index mapping result line (GOU-1835).
  */
 class DatasourcePurgeLoggingConfigTest {
 
@@ -56,10 +57,13 @@ class DatasourcePurgeLoggingConfigTest {
 				"--spring.docker.compose.enabled=false",
 				"--logging.register-shutdown-hook=false")) {
 			Logger purge = (Logger) LoggerFactory.getLogger(DatasourcePurgeService.class);
+			Logger mapping = (Logger) LoggerFactory.getLogger(ProductIndexMappingRunner.class);
 			Logger batch = (Logger) LoggerFactory.getLogger(BatchService.class);
 
 			assertThat(purge.getEffectiveLevel()).isEqualTo(Level.INFO);
 			assertThat(purge.isInfoEnabled()).isTrue();
+			// GOU-1835: the products index mapping result line too
+			assertThat(mapping.getEffectiveLevel()).isEqualTo(Level.INFO);
 			// The prod override is really applied: other services of the package stay at warn
 			assertThat(batch.getEffectiveLevel()).isEqualTo(Level.WARN);
 		}

@@ -38,6 +38,8 @@ last successful startup are missing from the mapping until the next restart.
 
 All lines come from `org.open4goods.api.services.ProductIndexMappingRunner` in
 the `api` log and start with `Products index mapping: index products-moustik`.
+Beta and prod set `org.open4goods` to `warn`; `api/src/main/resources/application.yml`
+keeps this logger at `INFO` so the result line stays visible.
 
 | Level | Message | Meaning |
 | --- | --- | --- |
@@ -48,7 +50,7 @@ the `api` log and start with `Products index mapping: index products-moustik`.
 | ERROR | `interrupted after n attempt(s)` | The JVM was stopping during a retry wait. |
 
 ```bash
-grep -A60 'Products index mapping' /opt/open4goods/logs/<api log file>
+grep -A60 'Products index mapping' /opt/open4goods/logs/nohup-api.log
 ```
 
 ## After an ERROR
