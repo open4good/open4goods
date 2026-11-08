@@ -2,6 +2,10 @@
 
 This document details the computation of the **Impact Score** (often referred to as `ECOSCORE` in the codebase), explaining the steps from raw attribute data to the final aggregated score.
 
+> This page describes the current method (V1). The versioned V2 method
+> (real coverage, no imputation, per-vertical switch) is designed in
+> [impactscore/v2-design.md](impactscore/v2-design.md).
+
 ## Overview
 
 The Impact Score is a **Weighted Sum** of **Relativized Sub-scores**.
