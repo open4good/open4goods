@@ -14,6 +14,9 @@ server:
 logging:
   level:
     org.apache.fontbox.ttf.PostScriptTable: ERROR
+    # GOU-1815: beta and prod (open4goods-config application-active.yml) set org.open4goods to warn. This more
+    # specific key is merged with theirs and keeps the purge progress and report in nohup-api.log.
+    org.open4goods.api.services.DatasourcePurgeService: INFO
   file:
     max-history: 5
     max-size: 200MB

@@ -1,5 +1,12 @@
 package org.open4goods.api.services;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -11,6 +18,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +29,11 @@ import org.open4goods.model.product.ProductCondition;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Removes from the product index every piece of data contributed by a retired datasource (GOU-1592, Rakuten
@@ -42,6 +55,11 @@ import org.slf4j.LoggerFactory;
  * <p>Complete products (embeddings included) are read and written back, so nothing else is lost. A product updated
  * by the ingestion while the purge runs may be overwritten with the version read by the scroll: run it outside the
  * nightly batch window.
+ *
+ * <p>Progress (counters and sample GTINs) is logged every {@code progressInterval} scanned products, and at least
+ * every {@link #PROGRESS_MAX_DELAY}. The background run ({@link #start(String, boolean)}) also writes its status to a
+ * JSON file at the start, at each progress step and at the end (GOU-1815). At startup the file is read back: a run
+ * left RUNNING by a stopped api becomes INTERRUPTED, with its last counters. It is never resumed.
  */
 public class DatasourcePurgeService {
 
@@ -53,10 +71,21 @@ public class DatasourcePurgeService {
 	/** Number of GTINs reported as examples. */
 	static final int SAMPLE_GTINS_SIZE = 20;
 
-	/** A progress line is logged every this many scanned products. */
-	static final long PROGRESS_LOG_INTERVAL = 50_000;
+	/** A progress step is also taken when the last one is older than this, whatever the number of products. */
+	static final Duration PROGRESS_MAX_DELAY = Duration.ofMinutes(5);
+
+	private static final JsonMapper JSON = JsonMapper.builder()
+			.enable(SerializationFeature.INDENT_OUTPUT)
+			.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+			.build();
 
 	private final ProductRepository productRepository;
+
+	/** JSON file holding the status of the current or last background run. */
+	private final Path statusFile;
+
+	/** Number of scanned products between two progress steps. */
+	private final long progressInterval;
 
 	/** Single threaded: two purges must never overlap. */
 	private final ExecutorService executor = Executors.newSingleThreadExecutor(r -> {
@@ -67,8 +96,23 @@ public class DatasourcePurgeService {
 
 	private final AtomicReference<DatasourcePurgeStatus> status = new AtomicReference<>(DatasourcePurgeStatus.idle());
 
-	public DatasourcePurgeService(ProductRepository productRepository) {
+	/**
+	 * Creates the service and reads back the status file: a run left RUNNING is reported (and rewritten) as
+	 * INTERRUPTED.
+	 *
+	 * @param productRepository product index
+	 * @param statusFile        JSON file of the status, its folder is created when missing
+	 * @param progressInterval  number of scanned products between two progress steps
+	 * @throws IllegalArgumentException when the progress interval is not positive
+	 */
+	public DatasourcePurgeService(ProductRepository productRepository, Path statusFile, long progressInterval) {
+		if (progressInterval < 1) {
+			throw new IllegalArgumentException("progressInterval must be positive");
+		}
 		this.productRepository = productRepository;
+		this.statusFile = Objects.requireNonNull(statusFile, "statusFile");
+		this.progressInterval = progressInterval;
+		status.set(readPersistedStatus());
 	}
 
 	/**
@@ -81,8 +125,9 @@ public class DatasourcePurgeService {
 	 */
 	public DatasourcePurgeStatus start(String datasourceName, boolean dryRun) {
 		String datasource = requireDatasource(datasourceName);
+		Instant startedAt = Instant.now();
 		DatasourcePurgeStatus running = new DatasourcePurgeStatus(DatasourcePurgeStatus.State.RUNNING, datasource,
-				dryRun, Instant.now(), null, null, null);
+				dryRun, startedAt, startedAt, null, emptyReport(datasource, dryRun), null);
 		while (true) {
 			DatasourcePurgeStatus current = status.get();
 			if (current.state() == DatasourcePurgeStatus.State.RUNNING) {
@@ -92,18 +137,23 @@ public class DatasourcePurgeService {
 				break;
 			}
 		}
+		persist(running);
 		executor.execute(() -> {
 			DatasourcePurgeStatus done;
 			try {
-				DatasourcePurgeReport report = purge(datasource, dryRun);
-				done = new DatasourcePurgeStatus(DatasourcePurgeStatus.State.COMPLETED, datasource, dryRun,
-						running.startedAt(), Instant.now(), report, null);
+				DatasourcePurgeReport report = purge(datasource, dryRun, progress -> {
+					DatasourcePurgeStatus step = status.get().withProgress(progress, Instant.now());
+					status.set(step);
+					persist(step);
+				});
+				done = status.get().finish(DatasourcePurgeStatus.State.COMPLETED, report, Instant.now(), null);
 			} catch (Throwable t) {
 				logger.error("Purge of datasource {} failed", datasource, t);
-				done = new DatasourcePurgeStatus(DatasourcePurgeStatus.State.FAILED, datasource, dryRun,
-						running.startedAt(), Instant.now(), null, String.valueOf(t));
+				DatasourcePurgeStatus last = status.get();
+				done = last.finish(DatasourcePurgeStatus.State.FAILED, last.report(), Instant.now(), String.valueOf(t));
 			}
 			status.set(done);
+			persist(done);
 			logger.info("Purge of datasource finished: {}", done);
 		});
 		return running;
@@ -123,8 +173,17 @@ public class DatasourcePurgeService {
 	 * @throws IllegalArgumentException when the datasource name is blank
 	 */
 	public DatasourcePurgeReport purge(String datasourceName, boolean dryRun) {
-		String datasource = requireDatasource(datasourceName);
+		return purge(requireDatasource(datasourceName), dryRun, progress -> { });
+	}
+
+	/**
+	 * Scan of {@link #purge(String, boolean)}, reporting each progress step.
+	 *
+	 * @param onProgress receives the counters of each progress step, after its log line
+	 */
+	private DatasourcePurgeReport purge(String datasource, boolean dryRun, Consumer<DatasourcePurgeReport> onProgress) {
 		long start = System.currentTimeMillis();
+		long lastProgress = start;
 		logger.info("Purge of datasource {} started (dryRun={})", datasource, dryRun);
 
 		long scanned = 0;
@@ -159,9 +218,14 @@ public class DatasourcePurgeService {
 					failed++;
 					logger.error("Cannot purge datasource {} from product {}", datasource, product.getId(), e);
 				}
-				if (scanned % PROGRESS_LOG_INTERVAL == 0) {
+				long now = System.currentTimeMillis();
+				if (scanned % progressInterval == 0 || now - lastProgress >= PROGRESS_MAX_DELAY.toMillis()) {
+					lastProgress = now;
 					logger.info("Purge of datasource {} (dryRun={}): {} products scanned, {} touched, {} offers removed, "
-							+ "{} saved, {} failed", datasource, dryRun, scanned, touched, removedOffers, saved, failed);
+							+ "{} saved, {} failed, sample GTINs {}", datasource, dryRun, scanned, touched,
+							removedOffers, saved, failed, samples);
+					onProgress.accept(new DatasourcePurgeReport(datasource, dryRun, scanned, touched, removedOffers,
+							saved, failed, List.copyOf(samples), now - start));
 				}
 			}
 		}
@@ -219,6 +283,55 @@ public class DatasourcePurgeService {
 		Set<ProductCondition> conditions = new HashSet<>();
 		offers.stream().map(AggregatedPrice::getProductState).filter(Objects::nonNull).forEach(conditions::add);
 		prices.setConditions(conditions);
+	}
+
+	/**
+	 * Writes the status to {@link #statusFile} through a temporary file renamed over it, so a reader (or a restart)
+	 * never sees a partial file. A write failure is logged and never stops the purge.
+	 */
+	private synchronized void persist(DatasourcePurgeStatus snapshot) {
+		Path tmp = statusFile.resolveSibling(statusFile.getFileName() + ".tmp");
+		try {
+			Path folder = statusFile.toAbsolutePath().getParent();
+			if (folder != null) {
+				Files.createDirectories(folder);
+			}
+			Files.writeString(tmp, JSON.writeValueAsString(snapshot), StandardCharsets.UTF_8);
+			Files.move(tmp, statusFile, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException | JacksonException e) {
+			logger.error("Cannot write the datasource purge status to {}", statusFile, e);
+		}
+	}
+
+	/**
+	 * Reads back the status file at startup. A run still RUNNING was stopped with the api: it becomes INTERRUPTED,
+	 * and the file is rewritten so. A missing or unreadable file gives IDLE.
+	 */
+	private DatasourcePurgeStatus readPersistedStatus() {
+		DatasourcePurgeStatus persisted;
+		try {
+			persisted = JSON.readValue(Files.readString(statusFile, StandardCharsets.UTF_8), DatasourcePurgeStatus.class);
+		} catch (NoSuchFileException e) {
+			return DatasourcePurgeStatus.idle();
+		} catch (IOException | JacksonException e) {
+			logger.warn("Cannot read the datasource purge status from {}, starting IDLE", statusFile, e);
+			return DatasourcePurgeStatus.idle();
+		}
+		if (persisted == null || persisted.state() == null) {
+			return DatasourcePurgeStatus.idle();
+		}
+		if (persisted.state() == DatasourcePurgeStatus.State.RUNNING) {
+			DatasourcePurgeStatus interrupted = persisted.interrupted();
+			logger.warn("Purge of datasource {} was interrupted by a restart: {}", interrupted.datasourceName(), interrupted);
+			persist(interrupted);
+			return interrupted;
+		}
+		logger.info("Last purge of datasource read back from {}: {}", statusFile, persisted);
+		return persisted;
+	}
+
+	private static DatasourcePurgeReport emptyReport(String datasource, boolean dryRun) {
+		return new DatasourcePurgeReport(datasource, dryRun, 0, 0, 0, 0, 0, List.of(), 0);
 	}
 
 	private long flush(List<Product> pending) {

@@ -1,6 +1,7 @@
 package org.open4goods.api.config;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -229,7 +230,8 @@ public class ApiConfig {
 
 	@Bean
 	DatasourcePurgeService datasourcePurgeService(ProductRepository productRepository) {
-		return new DatasourcePurgeService(productRepository);
+		return new DatasourcePurgeService(productRepository, Path.of(apiProperties.getDatasourcePurgeStatusFile()),
+				apiProperties.getDatasourcePurgeProgressInterval());
 	}
 
 	@Bean

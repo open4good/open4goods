@@ -12,18 +12,29 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Spliterators;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.SourcedAttribute;
@@ -34,11 +45,18 @@ import org.open4goods.model.price.PriceHistory;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductCondition;
 import org.open4goods.services.productrepository.services.ProductRepository;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 
 /**
  * Unit tests of {@link DatasourcePurgeService} (GOU-1592): offers and data of the purged datasource are removed,
  * other datasources are left intact, aggregated prices are recomputed, a second run touches nothing and a dry run
- * writes nothing.
+ * writes nothing. Progress lines and the persisted status (COMPLETED, FAILED, INTERRUPTED after a restart) are
+ * covered too (GOU-1815).
  */
 class DatasourcePurgeServiceTest {
 
@@ -47,14 +65,21 @@ class DatasourcePurgeServiceTest {
 	/** Another Rakuten-like datasource name, which must never be mistaken for the purged one. */
 	private static final String RAKUTEN_FR = "Rakuten FR";
 
+	private static final long PROGRESS_INTERVAL = 50_000;
+
+	@TempDir
+	Path tempDir;
+
 	private ProductRepository repository;
 	private DatasourcePurgeService service;
 	private List<Product> index;
+	private Path statusFile;
 
 	@BeforeEach
 	void setUp() {
 		repository = mock(ProductRepository.class);
-		service = new DatasourcePurgeService(repository);
+		statusFile = tempDir.resolve("reports").resolve("datasource-purge-status.json");
+		service = new DatasourcePurgeService(repository, statusFile, PROGRESS_INTERVAL);
 		index = new ArrayList<>();
 		// A new stream on each call, over the same (in-memory) documents, as a scroll on the index would be
 		when(repository.exportAll()).thenAnswer(invocation -> index.stream());
@@ -192,6 +217,154 @@ class DatasourcePurgeServiceTest {
 		assertThat(done.dryRun()).isTrue();
 		assertThat(done.report().touchedProducts()).isEqualTo(1);
 		verify(repository, never()).store(anyCollection());
+	}
+
+	@Test
+	void progressLineHoldsCountersAndSampleGtins() {
+		DatasourcePurgeService everyTwo = new DatasourcePurgeService(repository, statusFile, 2);
+		index.addAll(List.of(product(1L, offer(RAKUTEN, 1.0, ProductCondition.NEW)),
+				product(2L, offer(RAKUTEN, 2.0, ProductCondition.NEW)),
+				product(3L, offer(OTHER, 3.0, ProductCondition.NEW))));
+
+		Logger logger = (Logger) LoggerFactory.getLogger(DatasourcePurgeService.class);
+		Level level = logger.getLevel();
+		logger.setLevel(Level.INFO);
+		ListAppender<ILoggingEvent> appender = new ListAppender<>();
+		appender.start();
+		logger.addAppender(appender);
+		try {
+			everyTwo.purge(RAKUTEN, true);
+		} finally {
+			logger.detachAppender(appender);
+			logger.setLevel(level);
+		}
+
+		List<String> progress = appender.list.stream().map(ILoggingEvent::getFormattedMessage)
+				.filter(message -> message.contains("products scanned")).toList();
+		assertThat(progress).containsExactly("Purge of datasource rakuten.com (dryRun=true): 2 products scanned, "
+				+ "2 touched, 2 offers removed, 0 saved, 0 failed, sample GTINs [" + new Product(1L).gtin() + ", "
+				+ new Product(2L).gtin() + "]");
+	}
+
+	@Test
+	void completedRunIsWrittenToTheStatusFile() throws Exception {
+		index.add(mixedProduct(1L));
+
+		service.start(RAKUTEN, true);
+		DatasourcePurgeStatus done = awaitStatus(service, s -> s.state() != DatasourcePurgeStatus.State.RUNNING);
+
+		assertThat(done.state()).isEqualTo(DatasourcePurgeStatus.State.COMPLETED);
+		assertThat(Files.readString(statusFile, StandardCharsets.UTF_8)).contains("\"COMPLETED\"");
+		assertThat(statusFile.resolveSibling(statusFile.getFileName() + ".tmp")).doesNotExist();
+
+		// Read back by a restarted api: the last report is still there
+		DatasourcePurgeStatus readBack = new DatasourcePurgeService(repository, statusFile, PROGRESS_INTERVAL).getStatus();
+		assertThat(readBack).isEqualTo(done);
+		assertThat(readBack.report().touchedProducts()).isEqualTo(1);
+		assertThat(readBack.report().removedOffers()).isEqualTo(2);
+		assertThat(readBack.report().sampleGtins()).containsExactly(new Product(1L).gtin());
+		assertThat(readBack.finishedAt()).isNotNull();
+	}
+
+	@Test
+	void failedRunIsWrittenToTheStatusFile() throws Exception {
+		when(repository.exportAll()).thenThrow(new IllegalStateException("index unavailable"));
+
+		service.start(RAKUTEN, true);
+		DatasourcePurgeStatus done = awaitStatus(service, s -> s.state() != DatasourcePurgeStatus.State.RUNNING);
+
+		assertThat(done.state()).isEqualTo(DatasourcePurgeStatus.State.FAILED);
+		assertThat(done.error()).contains("index unavailable");
+		assertThat(Files.readString(statusFile, StandardCharsets.UTF_8)).contains("\"FAILED\"");
+		DatasourcePurgeStatus readBack = new DatasourcePurgeService(repository, statusFile, PROGRESS_INTERVAL).getStatus();
+		assertThat(readBack.state()).isEqualTo(DatasourcePurgeStatus.State.FAILED);
+		assertThat(readBack.error()).contains("index unavailable");
+	}
+
+	@Test
+	void runningStatusReadAtStartupBecomesInterruptedAndANewRunIsAccepted() throws Exception {
+		List<Product> products = List.of(product(1L, offer(RAKUTEN, 1.0, ProductCondition.NEW)),
+				product(2L, offer(RAKUTEN, 2.0, ProductCondition.NEW)),
+				product(3L, offer(RAKUTEN, 3.0, ProductCondition.NEW)));
+		CountDownLatch blocked = new CountDownLatch(1);
+		CountDownLatch release = new CountDownLatch(1);
+		// The scroll stalls after 2 products, once the progress step of the second one is written
+		when(repository.exportAll()).thenReturn(stallingStream(products, 2, blocked, release));
+		DatasourcePurgeService stopped = new DatasourcePurgeService(repository, statusFile, 2);
+		stopped.start(RAKUTEN, true);
+		assertThat(blocked.await(10, TimeUnit.SECONDS)).isTrue();
+
+		DatasourcePurgeService restarted = new DatasourcePurgeService(repository, statusFile, 2);
+
+		DatasourcePurgeStatus interrupted = restarted.getStatus();
+		assertThat(interrupted.state()).isEqualTo(DatasourcePurgeStatus.State.INTERRUPTED);
+		assertThat(interrupted.datasourceName()).isEqualTo(RAKUTEN);
+		assertThat(interrupted.finishedAt()).isNull();
+		assertThat(interrupted.lastProgressAt()).isAfterOrEqualTo(interrupted.startedAt());
+		assertThat(interrupted.report().scannedProducts()).isEqualTo(2);
+		assertThat(interrupted.report().touchedProducts()).isEqualTo(2);
+		assertThat(interrupted.report().removedOffers()).isEqualTo(2);
+		assertThat(interrupted.report().sampleGtins()).containsExactly(new Product(1L).gtin(), new Product(2L).gtin());
+		assertThat(Files.readString(statusFile, StandardCharsets.UTF_8)).contains("\"INTERRUPTED\"");
+
+		// The old run ends before the new one starts, as the old api would be gone
+		release.countDown();
+		awaitStatus(stopped, s -> s.state() != DatasourcePurgeStatus.State.RUNNING);
+
+		// A new run is accepted after INTERRUPTED: it starts over, it does not resume
+		when(repository.exportAll()).thenAnswer(invocation -> products.stream());
+		DatasourcePurgeStatus running = restarted.start(RAKUTEN, true);
+		assertThat(running.state()).isEqualTo(DatasourcePurgeStatus.State.RUNNING);
+		assertThat(running.startedAt()).isAfter(interrupted.startedAt());
+		DatasourcePurgeStatus done = awaitStatus(restarted, s -> s.state() != DatasourcePurgeStatus.State.RUNNING);
+		assertThat(done.state()).isEqualTo(DatasourcePurgeStatus.State.COMPLETED);
+		assertThat(done.report().scannedProducts()).isEqualTo(3);
+		assertThat(new DatasourcePurgeService(repository, statusFile, 2).getStatus()).isEqualTo(done);
+	}
+
+	@Test
+	void unreadableStatusFileStartsIdle() throws Exception {
+		Files.createDirectories(statusFile.getParent());
+		Files.writeString(statusFile, "{not json", StandardCharsets.UTF_8);
+
+		assertThat(new DatasourcePurgeService(repository, statusFile, PROGRESS_INTERVAL).getStatus())
+				.isEqualTo(DatasourcePurgeStatus.idle());
+	}
+
+	private static DatasourcePurgeStatus awaitStatus(DatasourcePurgeService purgeService,
+			Predicate<DatasourcePurgeStatus> condition) throws InterruptedException {
+		Instant deadline = Instant.now().plus(Duration.ofSeconds(10));
+		while (!condition.test(purgeService.getStatus()) && Instant.now().isBefore(deadline)) {
+			Thread.sleep(20);
+		}
+		return purgeService.getStatus();
+	}
+
+	/** Stream over the products which blocks, before the product of index {@code stallAt}, until released. */
+	private static Stream<Product> stallingStream(List<Product> products, int stallAt, CountDownLatch blocked,
+			CountDownLatch release) {
+		Iterator<Product> iterator = new Iterator<>() {
+			private int next;
+
+			@Override
+			public boolean hasNext() {
+				if (next == stallAt) {
+					blocked.countDown();
+					try {
+						release.await(10, TimeUnit.SECONDS);
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
+				}
+				return next < products.size();
+			}
+
+			@Override
+			public Product next() {
+				return products.get(next++);
+			}
+		};
+		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false);
 	}
 
 	@SuppressWarnings("unchecked")

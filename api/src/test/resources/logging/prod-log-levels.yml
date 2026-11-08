@@ -1,0 +1,7 @@
+# Log levels of the beta and prod api config (open4goods-config, configs/<env>/api/application-active.yml),
+# loaded after classpath:/application.yml as in publish-jars.sh (GOU-1815).
+logging:
+  level:
+    ROOT: warn
+    org.open4goods: warn
+    GENERIC_LOGGER: warn
