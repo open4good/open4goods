@@ -247,6 +247,8 @@ public class UnitAwareNumericParser extends AttributeParser
         s = s.replace(' ', ' ');
         s = s.replace(' ', ' ');
         s = s.replaceAll("(?<=\\d)\\s*\\.\\s*(?=\\d)", ".");
+        // thousands grouped by spaces: "1 200 W" is 1200 W
+        s = s.replaceAll("(?<=\\d)\\s(?=\\d{3}(?!\\d))", "");
         return s.trim();
     }
 

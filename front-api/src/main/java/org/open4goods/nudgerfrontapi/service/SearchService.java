@@ -651,7 +651,7 @@ public class SearchService {
 	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
 	public SearchResult search(Pageable pageable, String verticalId, String query,
 			AggregationRequestDto aggregationQuery, FilterRequestDto filters) {
-		pageable = boundPageable(pageable);
+		pageable = withStableTieBreak(boundPageable(pageable));
 		String sanitizedQuery = sanitize(query);
 		String normalizedVerticalId = normalizeVerticalId(verticalId);
 
@@ -714,6 +714,23 @@ public class SearchService {
 			aggregations = mergeAggregationOverrides(aggregations, overrides);
 		}
 		return new SearchResult(hits, List.copyOf(aggregations));
+	}
+
+	/**
+	 * Appends the product id (the GTIN) as last sort criterion of an explicitly sorted page, so that products with
+	 * the same sort value (typically the same ImpactScore) keep the same position from one request to the next
+	 * and never move between two pages.
+	 *
+	 * @param pageable bounded pageable, possibly unsorted or unpaged
+	 * @return the same pageable when it has no sort or already sorts on the id, otherwise a copy with the tie-break
+	 */
+	static Pageable withStableTieBreak(Pageable pageable) {
+		if (pageable == null || pageable.isUnpaged() || pageable.getSort().isUnsorted()
+				|| pageable.getSort().getOrderFor("id") != null) {
+			return pageable;
+		}
+		return org.springframework.data.domain.PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+				pageable.getSort().and(Sort.by(Sort.Order.asc("id"))));
 	}
 
 	/**
@@ -1647,7 +1664,9 @@ public class SearchService {
 		}
 		return comparator == null
 				? Comparator.comparingDouble(SearchHit<Product>::getScore).reversed()
-				: comparator.thenComparing(Comparator.comparingDouble(SearchHit<Product>::getScore).reversed());
+				: comparator.thenComparing(Comparator.comparingDouble(SearchHit<Product>::getScore).reversed())
+						.thenComparing(hit -> hit != null && hit.getContent() != null ? hit.getContent().getId() : null,
+								Comparator.nullsLast(Comparator.naturalOrder()));
 	}
 
 	/**

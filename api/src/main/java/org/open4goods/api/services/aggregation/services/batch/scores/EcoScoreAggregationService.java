@@ -187,7 +187,10 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 			// EcoScore ranking and "best alternativ" reach
 			///////////////////////
 			List<Product> sorted = new ArrayList<>(productsWithRealEcoScore);
-			sorted.sort(Comparator.comparingDouble(p -> p.ecoscore().getRelativ().getValue()));
+			// Ties are broken by GTIN so that two products with the same ImpactScore keep the same position
+			// whatever the order in which the batch received them (GOU-1897)
+			sorted.sort(Comparator.<Product>comparingDouble(p -> p.ecoscore().getRelativ().getValue())
+					.thenComparing(Product::getId, Comparator.nullsFirst(Comparator.naturalOrder())));
 	
 			int count = sorted.size();
 			Long bestProductId = sorted.get(count - 1).getId();

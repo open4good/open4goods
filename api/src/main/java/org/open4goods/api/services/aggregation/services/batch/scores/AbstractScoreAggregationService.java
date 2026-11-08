@@ -136,7 +136,9 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 					return s != null && !Boolean.TRUE.equals(s.getVirtual())
 							&& s.getRelativ() != null && s.getRelativ().getValue() != null;
 				})
-				.sorted(java.util.Comparator.comparingDouble(p -> p.getScores().get(sn).getRelativ().getValue()))
+				.sorted(java.util.Comparator.<Product>comparingDouble(p -> p.getScores().get(sn).getRelativ().getValue())
+						// stable tie-break on the GTIN: same score, same position from one batch to the next
+						.thenComparing(Product::getId, java.util.Comparator.nullsFirst(java.util.Comparator.naturalOrder())))
 				.toList();
 
 			if (sorted.isEmpty()) {
