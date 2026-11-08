@@ -11,16 +11,16 @@
 	<url>https://github.com/open4good/open4goods</url>
         <properties>
                 <github.global.server>github</github.global.server>
-                <springboot.version>4.1.1</springboot.version>
-                <spring-boot-admin.version>4.1.2</spring-boot-admin.version>
-                <spring-ai.version>2.0.1</spring-ai.version>
+                <springboot.version>4.1.2</springboot.version>
+                <spring-boot-admin.version>4.1.5</spring-boot-admin.version>
+                <spring-ai.version>2.0.2</spring-ai.version>
                 <java.version>21</java.version>
                 <maven.compiler.source>21</maven.compiler.source>
                 <maven.compiler.target>21</maven.compiler.target>
                 <global.version>0.0.1-SNAPSHOT</global.version>
                 <swagger.version>2.9.2</swagger.version>
                 <swagger.core.v3.version>2.2.55</swagger.core.v3.version>
-                <jacoco.version>0.8.15</jacoco.version>
+                <jacoco.version>0.8.16</jacoco.version>
                 <barcode4j.version>2.1</barcode4j.version>
                 <sleepycat-je.version>18.3.12</sleepycat-je.version>
                 <commons-io.version>2.22.0</commons-io.version>
@@ -32,23 +32,23 @@
                      jar. That crashes SimpleElasticsearchRepository construction with a
                      NoClassDefFoundError at boot. Pin the version elasticsearch-java itself asks
                      for; see elasticsearch-java-9.4.5.pom. -->
-                <opentelemetry-semconv.version>1.41.1</opentelemetry-semconv.version>
+                <opentelemetry-semconv.version>1.45.0</opentelemetry-semconv.version>
                 <maven-compiler-plugin.version>3.16.0</maven-compiler-plugin.version>
-                <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
+                <maven-enforcer-plugin.version>3.7.0</maven-enforcer-plugin.version>
                 <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
-                <maven-surefire-plugin.version>3.6.0</maven-surefire-plugin.version>
+                <maven-surefire-plugin.version>3.6.1</maven-surefire-plugin.version>
                 <junit-jupiter.version>6.1.3</junit-jupiter.version>
-                <maven-failsafe-plugin.version>3.6.0</maven-failsafe-plugin.version>
+                <maven-failsafe-plugin.version>3.6.1</maven-failsafe-plugin.version>
                 <maven-site-plugin.version>3.22.0</maven-site-plugin.version>
                 <maven-project-info-reports-plugin.version>3.9.0</maven-project-info-reports-plugin.version>
                 <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
                 <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
                 <maven-jar-plugin.version>3.5.1</maven-jar-plugin.version>
-                <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
-                <maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>
+                <maven-install-plugin.version>3.2.0</maven-install-plugin.version>
+                <maven-deploy-plugin.version>3.2.0</maven-deploy-plugin.version>
                 <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
-                <versions-maven-plugin.version>2.21.0</versions-maven-plugin.version>
-                <taglist-maven-plugin.version>3.2.2</taglist-maven-plugin.version>
+                <versions-maven-plugin.version>2.24.0</versions-maven-plugin.version>
+                <taglist-maven-plugin.version>3.3.0</taglist-maven-plugin.version>
 
                 <processDependencyManagement>true</processDependencyManagement>
                 <processPluginDependenciesInPluginManagement>true</processPluginDependenciesInPluginManagement>
@@ -659,7 +659,7 @@
                  <DynamicDependency>
                    <groupId>org.apache.maven.surefire</groupId>
                     <artifactId>surefire-junit-platform</artifactId>
-                    <version>3.6.0</version>
+                    <version>3.6.1</version>
                     <repositoryType>PLUGIN</repositoryType>
                 </DynamicDependency>
                  <DynamicDependency>

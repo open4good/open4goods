@@ -67,7 +67,7 @@
         <dependency>
             <groupId>ai.djl.pytorch</groupId>
             <artifactId>pytorch-engine</artifactId>
-            <version>0.36.0</version>
+            <version>0.40.0</version>
         </dependency>
 
         <dependency>
@@ -79,7 +79,7 @@
         <dependency>
             <groupId>ai.djl.huggingface</groupId>
             <artifactId>tokenizers</artifactId>
-            <version>0.36.0</version>
+            <version>0.40.0</version>
         </dependency>
 
         <!-- web -->
@@ -97,13 +97,13 @@
         <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-core</artifactId>
-            <version>3.3.2</version>
+            <version>3.3.3</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-langdetect-optimaize</artifactId>
-            <version>3.3.2</version>
+            <version>3.3.3</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.google.guava</groupId>
@@ -151,7 +151,7 @@
         <dependency>
             <groupId>org.elasticsearch.client</groupId>
             <artifactId>elasticsearch-rest-client</artifactId>
-            <version>8.18.8</version>
+            <version>8.19.24</version>
             <scope>test</scope>
         </dependency>
 
@@ -230,7 +230,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>3.1.1</version>
+            <version>3.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.open4goods</groupId>
@@ -248,7 +248,7 @@
         <dependency>
             <groupId>com.google.auth</groupId>
             <artifactId>google-auth-library-oauth2-http</artifactId>
-            <version>1.52.0</version>
+            <version>1.57.0</version>
         </dependency>
     </dependencies>
 
