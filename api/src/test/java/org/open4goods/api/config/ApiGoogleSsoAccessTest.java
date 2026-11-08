@@ -73,6 +73,8 @@ import org.springframework.web.context.WebApplicationContext;
                 "org.springframework.ai.model.openai.autoconfigure.OpenAiImageAutoConfiguration," +
                 "org.springframework.ai.model.openai.autoconfigure.OpenAiModerationAutoConfiguration," +
                 "org.springframework.ai.model.google.genai.autoconfigure.chat.GoogleGenAiChatAutoConfiguration",
+        // ElasticsearchOperations is a mock: ProductIndexMappingRunner fails and must not hold the startup.
+        "api.product-index-mapping.retry-delay=PT0S",
         "server.address=127.0.0.1",
         "spring.security.oauth2.client.registration.google.client-id=api-sso-client-id",
         "spring.security.oauth2.client.registration.google.client-secret=api-sso-client-secret",

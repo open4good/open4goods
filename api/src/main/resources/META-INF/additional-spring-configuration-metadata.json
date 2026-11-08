@@ -1,6 +1,12 @@
 {
   "properties": [
     {
+      "name": "api.product-index-mapping.retry-delay",
+      "type": "java.time.Duration",
+      "description": "Delay before the second attempt to create the products index or put its mapping at api startup, doubled before the third and last one (ProductIndexMappingRunner).",
+      "defaultValue": "2s"
+    },
+    {
       "name": "api.backup.product-export-page-size",
       "type": "java.lang.Integer",
       "description": "Page size used while streaming products for full backup exports.",
