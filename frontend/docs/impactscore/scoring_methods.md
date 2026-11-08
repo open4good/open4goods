@@ -223,6 +223,9 @@ Cela permet d'utiliser la même normalisation (ex: MINMAX_FIXED) tout en indiqua
 - `CLASSE_ENERGY_SDR` : `FIXED_MAPPING` avec barème A-G.
 - `CLASSE_ENERGY_HDR` : `FIXED_MAPPING` avec barème A-G.
 
+Les anciennes étiquettes (A+++, A++, A+), antérieures à l'échelle A-G de 2021, ne sont pas notées : elles ne sont pas
+comparables à un A de la nouvelle échelle et restent une valeur manquante (politique `NEUTRAL`).
+
 **Pourquoi** : les classes énergétiques sont des paliers réglementaires.
 
 ### Indice de réparabilité (0-10)

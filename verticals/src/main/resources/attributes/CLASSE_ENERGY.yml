@@ -113,24 +113,13 @@ mappings:
   AP: "A+"
   "A ++": "A++"
   "A-40%": "A"
+# Scale in force since 2021 (A to G). The pre-2021 labels (A+++, A++, A+) belong to another scale: an A+++ fridge
+# is not an A of the new scale, so they carry no score (missing value, NEUTRAL policy) instead of 100. GOU-1897.
 numericMapping:
-  A+++: 100.0
-  A++: 100.0
-  A+: 100.0
   A: 100.0
-  B++: 85.0
-  B+: 85.0
   B: 85.0
-  C++: 70.0
-  C+: 70.0
   C: 70.0
-  D++: 55.0
-  D+: 55.0
   D: 55.0
-  E++: 40.0
-  E+: 40.0
   E: 40.0
-  F++: 25.0
-  F+: 25.0
   F: 25.0
   G: 10.0

@@ -421,4 +421,20 @@ class SearchServiceTest {
                 org.open4goods.nudgerfrontapi.service.exception.SearchResponseTooLargeException.class,
                 () -> searchService.search(org.springframework.data.domain.PageRequest.of(0, 20), null, null, null, null));
     }
+
+    /** GOU-1897 point 5: the GTIN closes every explicit sort so that ties never swap between requests or pages. */
+    @Test
+    void stableTieBreakAppendsTheIdToAnExplicitSort() {
+        org.springframework.data.domain.Pageable sorted = org.springframework.data.domain.PageRequest.of(2, 20,
+                org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Order.desc("scores.ECOSCORE.value")));
+
+        org.springframework.data.domain.Pageable result = SearchService.withStableTieBreak(sorted);
+
+        assertThat(result.getSort().stream().map(o -> o.getProperty() + ":" + o.getDirection()).toList())
+                .containsExactly("scores.ECOSCORE.value:DESC", "id:ASC");
+        assertThat(result.getPageNumber()).isEqualTo(2);
+        assertThat(SearchService.withStableTieBreak(result)).isSameAs(result);
+        org.springframework.data.domain.Pageable relevance = org.springframework.data.domain.PageRequest.of(0, 20);
+        assertThat(SearchService.withStableTieBreak(relevance)).isSameAs(relevance);
+    }
 }

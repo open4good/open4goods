@@ -90,6 +90,47 @@ class ImpactScoreRealVerticalsTest {
         assertThat(best.getRanking().getGlobalPosition()).isEqualTo(1);
     }
 
+    /**
+     * GOU-1897 point 5: products with the same ImpactScore must keep the same position whatever the order in which
+     * the batch received them. Ties are broken by GTIN.
+     */
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("realVerticals")
+    void tiedProductsKeepTheSamePositionWhateverTheBatchOrder(VerticalConfig vertical, @TempDir Path logs)
+            throws Exception {
+        List<Product> forward = tiedProducts(vertical);
+        List<Product> backward = tiedProducts(vertical);
+        java.util.Collections.reverse(backward);
+
+        aggregationFacadeService(logs).getScoringAggregator().score(forward, vertical);
+        aggregationFacadeService(logs).getScoringAggregator().score(backward, vertical);
+
+        for (Product product : forward) {
+            Product twin = backward.stream().filter(p -> p.getId().equals(product.getId())).findFirst().orElseThrow();
+            assertThat(twin.getRanking().getGlobalPosition()).as("position of %s", product.getId())
+                    .isEqualTo(product.getRanking().getGlobalPosition());
+            assertThat(twin.ecoscore().getRanking()).isEqualTo(product.ecoscore().getRanking());
+        }
+        assertThat(forward.stream().map(p -> p.getRanking().getGlobalPosition()).distinct().count())
+                .as("every tied product gets its own position").isEqualTo(PRODUCT_COUNT);
+    }
+
+    /** Builds products that all carry the very same attribute values, hence the same ImpactScore. */
+    private static List<Product> tiedProducts(VerticalConfig vertical) {
+        List<Product> products = new ArrayList<>();
+        for (int i = 0; i < PRODUCT_COUNT; i++) {
+            Product product = new Product(1000L + i);
+            for (AttributeConfig attribute : vertical.getAttributesConfig().getConfigs()) {
+                if (attribute.isAsScore() && hasParseableValue(attribute)) {
+                    product.getAttributes().getIndexed().put(attribute.getKey(),
+                            new IndexedAttribute(attribute.getKey(), value(attribute, 0)));
+                }
+            }
+            products.add(product);
+        }
+        return products;
+    }
+
     /** Builds products carrying a distinct, parseable value for every attribute scored by the vertical. */
     private static List<Product> products(VerticalConfig vertical) {
         List<Product> products = new ArrayList<>();
