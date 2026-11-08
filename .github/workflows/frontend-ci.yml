@@ -45,9 +45,9 @@ jobs:
           # Same major as the beta frontend-ssr container (node:24, ABI 137):
           # native modules such as better-sqlite3 are compiled at install time.
           node-version: "24"
-      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
         with:
-          version: 10.34.6
+          version: 10.34.9
       - run: pnpm install --frozen-lockfile
         working-directory: frontend
       - run: pnpm lint
@@ -78,7 +78,7 @@ jobs:
         run: tar -czf frontend-ssr-output.tgz frontend/.output
 
       - name: Upload SSR output
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: frontend-ssr-output
           path: frontend-ssr-output.tgz
