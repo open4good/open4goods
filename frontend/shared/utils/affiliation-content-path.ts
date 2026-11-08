@@ -14,8 +14,15 @@ const hasControlCharacter = (value: string): boolean =>
 /** Content (article or guide) the visitor read before the product page. */
 const CONTENT_PREFIXES = ['/blog/', '/guides/']
 
+/** True when the path is a blog article page (`/blog/<slug>`), not another route reusing `params.slug`. */
+export const isBlogArticlePath = (path: string): boolean =>
+  /^\/blog\/[^/]+/.test(path)
+
+export const isGuideArticlePath = (path: string): boolean =>
+  /^\/guides\/[^/]+/.test(path)
+
 export const isBlogOrGuideArticlePath = (path: string): boolean =>
-  /^\/(blog|guides)\/[^/?#]+/.test(path)
+  isBlogArticlePath(path) || isGuideArticlePath(path)
 
 /**
  * Returns the path when it can be sent as `X-Affiliation-Content`

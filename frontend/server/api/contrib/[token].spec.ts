@@ -45,6 +45,8 @@ const createErrorMock = vi.hoisted(() =>
 vi.mock('h3', () => ({
   defineEventHandler: (fn: ContribRouteHandler) => fn,
   getCookie: getCookieMock,
+  getQuery: (event: { query?: Record<string, unknown> }) =>
+    event.query ?? {},
   getRouterParam: getRouterParamMock,
   createError: createErrorMock,
   send: sendMock,
