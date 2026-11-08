@@ -126,13 +126,15 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 		////////////////////////
 
 		for (String scoreName : batchDatas.keySet()) {
-			// Only rank products that have a fully relativized score; products missing
-			// the score (e.g. EcoScore skipped due to insufficient data) are excluded.
+			// Only rank real, fully relativized scores. Virtual scores are imputed values: ranking them
+			// would compare a product with the batch mean, and mix their positions with absolute.count,
+			// which only counts real values (rank 0 = lowest, count - 1 = highest).
 			final String sn = scoreName;
 			List<Product> sorted = datas.stream()
 				.filter(p -> {
 					Score s = p.getScores().get(sn);
-					return s != null && s.getRelativ() != null && s.getRelativ().getValue() != null;
+					return s != null && !Boolean.TRUE.equals(s.getVirtual())
+							&& s.getRelativ() != null && s.getRelativ().getValue() != null;
 				})
 				.sorted(java.util.Comparator.comparingDouble(p -> p.getScores().get(sn).getRelativ().getValue()))
 				.toList();

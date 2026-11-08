@@ -3,6 +3,7 @@ package org.open4goods.api.services;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,7 +25,10 @@ import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.services.feedservice.service.FeedIndexingService;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.model.helper.IdHelper;
+import org.open4goods.api.services.aggregation.services.batch.scores.EcoScoreAggregationService;
+import org.open4goods.model.product.EcoScoreRanking;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.Score;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.serialisation.exception.SerialisationException;
@@ -624,8 +628,11 @@ public class BatchService {
 			Set<Product> scorable = products.stream().filter(e-> !e.isExcluded()).collect(Collectors.toSet());
 			logger.info("Will score {} products on a total of {}", scorable.size(), products.size());
 			aggregationFacadeService.score(vertical, scorable);
+			clearObsoleteScores(allProducts, vertical);
 		} catch (Exception e) {
-			logger.error("Error in batch : scoring fail", e);
+			// Scores are cleared before being rebuilt: indexing now would persist partial results
+			logger.error("Scoring failed for vertical {} : nothing is indexed for this run", vertical.getId(), e);
+			return;
 		}
 
 
@@ -644,6 +651,41 @@ public class BatchService {
 			dataRepository.addToFullindexationQueue(page);
 		}
 		logger.info("{} products of vertical {} got offers updated in realtime during the batch", refreshed, vertical.getId());
+	}
+
+	/**
+	 * Removes the scores a scoring run cannot have refreshed and that must not stay published.
+	 *
+	 * <p>Excluded products and products unmatched from the vertical no longer belong to the scored cohort, so
+	 * all their scores and their ranking are removed. Products without offers keep their last score (they stay
+	 * in the sitemap, GOU-1744). If that ImpactScore was overwritten by a composite (only that defect sets
+	 * aggregates on it), it is recomputed from the sub-scores the product holds, since the batch does not rescore
+	 * products without offers; it is removed when it cannot be recomputed.
+	 *
+	 * @param products every product of the vertical, after scoring
+	 * @param vertical the vertical configuration, for the ImpactScore weights
+	 */
+	static void clearObsoleteScores(Collection<Product> products, VerticalConfig vertical) {
+		EcoScoreAggregationService impactScore = new EcoScoreAggregationService(logger);
+		for (Product product : products) {
+			if (product.isExcluded() || product.getVertical() == null) {
+				product.getScores().clear();
+				product.setRanking(new EcoScoreRanking());
+			} else if (hasCompositeImpactScore(product)) {
+				Score recomputed = impactScore.recomputeFromStoredSubScores(product, vertical);
+				if (recomputed == null) {
+					product.getScores().remove(product.ecoscore().getName());
+					product.setRanking(new EcoScoreRanking());
+				} else {
+					product.getScores().put(recomputed.getName(), recomputed);
+				}
+			}
+		}
+	}
+
+	private static boolean hasCompositeImpactScore(Product product) {
+		Score impactScore = product.ecoscore();
+		return impactScore != null && impactScore.getAggregates() != null && !impactScore.getAggregates().isEmpty();
 	}
 
 

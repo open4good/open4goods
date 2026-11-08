@@ -175,7 +175,7 @@
                 <ImpactScore
                   v-if="product.impactScore !== null"
                   :score="product.impactScore"
-                  :max="5"
+                  :max="20"
                   size="medium"
                   class="compare-grid__product-impact"
                   flat

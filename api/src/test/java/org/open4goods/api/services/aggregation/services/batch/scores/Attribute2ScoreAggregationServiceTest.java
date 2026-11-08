@@ -75,6 +75,28 @@ class Attribute2ScoreAggregationServiceTest {
     }
 
     @Test
+    void onlyRealScoresAreRankedAgainstTheRealValueCount() {
+        VerticalConfig verticalConfig = buildVerticalConfig(false);
+
+        Product low = productWithAttribute(1L, "REPAIR", "4.0");
+        Product high = productWithAttribute(2L, "REPAIR", "8.0");
+        Product missing = new Product(3L);
+        List<Product> products = List.of(low, high, missing);
+
+        aggregate(products, verticalConfig);
+
+        Score highScore = high.getScores().get("REPAIR");
+        Score missingScore = missing.getScores().get("REPAIR");
+        assertThat(highScore.getAbsolute().getCount()).isEqualTo(2);
+        assertThat(highScore.getRanking()).isEqualTo(1);
+        assertThat(low.getScores().get("REPAIR").getRanking()).isZero();
+        assertThat(highScore.getHighestScoreId()).isEqualTo(2L);
+        assertThat(missingScore.getVirtual()).isTrue();
+        assertThat(missingScore.getRanking()).isNull();
+        assertThat(missingScore.getHighestScoreId()).isNull();
+    }
+
+    @Test
     void lowerScoresUseCanonicalKeyForSynonyms() {
         String canonicalKey = "POWER_CONSUMPTION_TYPICAL";
         String synonymKey = "CONSO_PLEINE_PUISSANCE";

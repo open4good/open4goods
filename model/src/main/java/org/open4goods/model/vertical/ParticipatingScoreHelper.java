@@ -7,6 +7,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Utility methods to derive aggregated score definitions from vertical
  * configuration. The helper groups attributes that declare
@@ -14,6 +17,14 @@ import java.util.stream.Collectors;
  * for each aggregated score key.
  */
 public final class ParticipatingScoreHelper {
+
+    /**
+     * Name of the ImpactScore, computed from {@code criteriasPonderation}. A
+     * composite using this name would replace the weighted 0-20 score.
+     */
+    private static final String RESERVED_IMPACT_SCORE_NAME = "ECOSCORE";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ParticipatingScoreHelper.class);
 
     private ParticipatingScoreHelper() {
     }
@@ -60,6 +71,13 @@ public final class ParticipatingScoreHelper {
             }
 
             for (String aggregateName : participateInScores) {
+                if (RESERVED_IMPACT_SCORE_NAME.equals(aggregateName)) {
+                    // Skipped rather than thrown: a configuration override must not stop a whole vertical
+                    // from being scored. VerticalYamlValidationTest rejects it in the repository.
+                    LOGGER.error("Attribute {} of vertical {} cannot participate in the reserved score {}: ignored",
+                            attribute.getKey(), verticalConfig.getId(), RESERVED_IMPACT_SCORE_NAME);
+                    continue;
+                }
                 aggregates.computeIfAbsent(aggregateName, key -> new HashMap<>())
                         .merge(attribute.getKey(), ponderation, Double::sum);
             }

@@ -13,10 +13,10 @@
       "defaultValue": "DUMMY KEY"
     },
     {
-      "name": "eprel.scheduling-frequency-days",
-      "type": "java.lang.Integer",
-      "description": "Number of days between two catalogue synchronisations.",
-      "defaultValue": 2
+      "name": "eprel.refresh-cron",
+      "type": "java.lang.String",
+      "description": "Cron expression of the catalogue synchronisation.",
+      "defaultValue": "0 0 3 */2 * *"
     },
     {
       "name": "eprel.index-bulk-size",

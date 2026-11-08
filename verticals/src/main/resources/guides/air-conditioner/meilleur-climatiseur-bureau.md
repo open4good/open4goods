@@ -70,7 +70,7 @@ Surdimensionner une clim, c'est surconsommer et créer des cycles on/off inconfo
 
 Le SEER (efficacité frigorifique saisonnière) et l'étiquette énergie donnent une idée de la consommation, mais ils ignorent l'impact de la fabrication, la disponibilité des pièces détachées et la durée de vie réelle de l'appareil.
 
-Les climatiseurs ne sont pas encore soumis à l'indice de réparabilité officiel - cette obligation est prévue pour la troisième vague réglementaire en 2027[^reparabilite]. En attendant, **le score d'impact nudger est le seul indicateur disponible aujourd'hui** pour comparer l'empreinte globale des modèles. Il agrège consommation réelle, durabilité et réparabilité dans un chiffre unique. La grille des modèles les plus durables est plus bas dans ce guide.
+Les climatiseurs ne sont pas encore soumis à l'indice de réparabilité officiel - cette obligation est prévue pour la troisième vague réglementaire en 2027[^reparabilite]. En attendant, **le score d'impact nudger complète l'étiquette énergie** pour comparer les modèles. Il combine classe énergie, puissance consommée, potentiel de réchauffement du fluide frigorigène, garantie et, quand il est connu, l'indice de réparabilité. La grille des modèles les plus durables est plus bas dans ce guide.
 
 ### 4. Le mode de pose - sans travaux ou installation pro
 
@@ -106,7 +106,7 @@ Un split réversible est une pompe à chaleur air/air. Pour 1 kWh d'électricit�
 
 **Les valeurs sûres :** Daikin reste la référence incontestée sur le marché français, plébiscitée par les installateurs pour sa fiabilité et son réseau SAV. Mitsubishi Electric et Fujitsu offrent un niveau de qualité comparable avec souvent un léger avantage silence en unité intérieure. LG et Samsung proposent d'excellents rapports qualité/prix avec une connectivité avancée. Atlantic est la valeur française, avec un réseau de techniciens dense sur tout le territoire[^marques].
 
-**Vigilance :** certaines marques discount (souvent rebrandings d'usines OEM asiatiques) affichent des prix très attractifs, mais les pièces détachées deviennent introuvables en France dès la troisième année. Une panne hors garantie = appareil irréparable = déchet électronique. C'est exactement le type de bilan que le score d'impact nudger pénalise.
+**Vigilance :** certaines marques discount (souvent rebrandings d'usines OEM asiatiques) affichent des prix très attractifs, mais les pièces détachées deviennent introuvables en France dès la troisième année. Une panne hors garantie = appareil irréparable = déchet électronique. Le score d'impact nudger ne mesure pas encore la disponibilité des pièces détachées : vérifiez-la auprès du vendeur avant l'achat.
 
 ---
 
@@ -126,7 +126,7 @@ Un split réversible est une pompe à chaleur air/air. Pour 1 kWh d'électricit�
 
 ## Les modèles les plus durables - top score d'impact nudger
 
-Notre score d'impact agrège consommation réelle (SEER/SCOP), durabilité, disponibilité des pièces et réparabilité. Voici les meilleurs du vertical climatiseurs dans notre index :
+Notre score d'impact combine classe énergie, puissance consommée, fluide frigorigène, garantie et réparabilité quand elle est connue. Voici les meilleurs du vertical climatiseurs dans notre index :
 
 ::guide-product-grid{top="5" sort="ecoscore"}
 ::
@@ -158,7 +158,7 @@ Vous êtes propriétaire ou votre bailleur autorise l'installation fixe : le spl
 
 Pour un bureau, la climatisation n'est plus un luxe en 2026 : les canicules se multiplient et le Code du travail impose des conditions thermiques convenables[^codtravail]. Mais climatiser intelligemment, c'est choisir **le silence d'abord** (votre productivité en dépend), **dimensionner juste** (votre facture aussi), et **viser réversible** dès que l'installation est possible.
 
-Le score d'impact nudger fait le reste - il intègre tout ce que l'étiquette énergie ne vous dit pas, et classe les modèles sur leur bilan global, pas seulement leur consommation en mode refroidissement.
+Le score d'impact nudger fait le reste - il complète l'étiquette énergie avec la puissance consommée, le fluide frigorigène et la garantie, et classe les modèles sur l'ensemble de ces critères.
 
 ---
 
@@ -217,4 +217,4 @@ Le décret tertiaire impose aux bâtiments tertiaires de plus de 1 000 m² de r�
 
 ### À propos du score d'impact nudger
 
-Le score d'impact nudger agrège plusieurs dimensions absentes des comparatifs classiques : efficacité énergétique saisonnière (SEER/SCOP), impact estimé de la fabrication, durée de vie attendue, disponibilité des pièces détachées et facilité de maintenance. Ce score est calculé automatiquement à partir des données fabricants et de nos sources de référence, et mis à jour en continu dans notre index. Il ne remplace pas les indices officiels de réparabilité ou de durabilité - il les anticipe, en attendant leur extension aux climatiseurs prévue pour 2027.
+Pour les climatiseurs, le score d'impact nudger combine la classe énergie, la puissance consommée en fonctionnement et à l'arrêt, le potentiel de réchauffement global du fluide frigorigène, l'indice de réparabilité quand il est connu, la garantie, le poids et la qualité des données disponibles. Il ne mesure pas l'impact de la fabrication, la durée de vie réelle ni la disponibilité des pièces détachées. Il est recalculé chaque jour à partir des données fabricants, notamment la base européenne EPREL, et les pondérations sont publiées sur la page méthode de la catégorie. Il ne remplace pas les indices officiels de réparabilité ou de durabilité - il les anticipe, en attendant leur extension aux climatiseurs prévue pour 2027.

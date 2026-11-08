@@ -1,6 +1,7 @@
 package org.open4goods.eprelservice.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
@@ -65,6 +66,24 @@ class EprelCatalogueServiceTest
     }
 
 
+
+    @Test
+    @DisplayName("A failing group does not prevent the next ones from being refreshed")
+    void failingGroupDoesNotBlockNextGroups() throws IOException
+    {
+        when(apiClient.fetchProductGroups()).thenReturn(List.of(
+                new EprelProductGroup("A", "unavailable", "Unavailable", "r1"),
+                new EprelProductGroup("B", "televisions", "Televisions", "r2")));
+        when(apiClient.downloadCatalogueZip("unavailable")).thenThrow(new IllegalStateException("HTTP 503"));
+        when(apiClient.downloadCatalogueZip("televisions")).thenReturn(tempZip);
+
+        assertThatThrownBy(() -> service.refreshCatalogue())
+                .isInstanceOf(IOException.class)
+                .hasMessageContaining("unavailable")
+                .hasMessageNotContaining("televisions");
+
+        verify(parser, times(1)).parse(any(), any());
+    }
 
     private EprelProduct product(String registration)
     {

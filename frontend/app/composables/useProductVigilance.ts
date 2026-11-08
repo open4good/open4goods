@@ -8,6 +8,7 @@ import {
 } from '@mdi/js'
 import type { ProductDto } from '~~/shared/api-client'
 import { normalizeTimestamp } from '~/utils/date-parsing'
+import { isDataQualityBelowCategoryAverage } from '~/utils/_product-verdict'
 
 export interface VigilanceAlert {
   key: 'eol' | 'conflicts' | 'quality' | 'competition'
@@ -43,11 +44,7 @@ export function useProductVigilance(
   const isLowDataQuality = computed(() => {
     const product = productRef.value
     if (!product) return false
-    const dqScore = product.scores?.scores?.['DATA_QUALITY']
-    if (!dqScore) return false
-    const val = (dqScore.value ?? 0) * 4
-    const avg = (dqScore.relativ?.avg ?? dqScore.absolute?.avg ?? 0) * 4
-    return val < avg
+    return isDataQualityBelowCategoryAverage(product)
   })
 
   const isLowCompetition = computed(() => {

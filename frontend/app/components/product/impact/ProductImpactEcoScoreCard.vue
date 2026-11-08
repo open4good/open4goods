@@ -62,12 +62,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, provide } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { mdiRobot, mdiArrowTopRight } from '@mdi/js'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import ProductImpactDetailsTable from './ProductImpactDetailsTable.vue'
 import ProductImpactRadarChart from './ProductImpactRadarChart.vue'
+import { impactMethodologyHrefKey } from './impact-types'
 import type { ScoreView } from './impact-types'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 
@@ -165,6 +166,8 @@ const methodologyHref = computed(() => {
 
   return resolveLocalizedRoutePath('impact-score', locale.value)
 })
+
+provide(impactMethodologyHrefKey, methodologyHref)
 
 defineExpose({})
 </script>

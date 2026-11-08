@@ -63,6 +63,28 @@ class ParticipatingScoreHelperTest {
     }
 
     @Test
+    void shouldIgnoreCompositeUsingTheImpactScoreName() {
+        AttributeConfig attributeConfig = new AttributeConfig();
+        attributeConfig.setKey("REFRIGERANT_GWP");
+        attributeConfig.setAsScore(true);
+        attributeConfig.setParticipateInScores(Set.of("ECOSCORE", "CLIMATE"));
+
+        ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
+        impactScoreConfig.setCriteriasPonderation(Map.of("REFRIGERANT_GWP", 0.1));
+
+        VerticalConfig verticalConfig = new VerticalConfig();
+        verticalConfig.setImpactScoreConfig(impactScoreConfig);
+        verticalConfig.setAttributesConfig(new AttributesConfig(List.of(attributeConfig)));
+        verticalConfig.setAvailableImpactScoreCriterias(List.of("REFRIGERANT_GWP"));
+
+        Map<String, Map<String, Double>> aggregates = ParticipatingScoreHelper
+                .buildNormalizedParticipatingScores(verticalConfig);
+
+        assertThat(aggregates).doesNotContainKey("ECOSCORE");
+        assertThat(aggregates.get("CLIMATE")).containsEntry("REFRIGERANT_GWP", 1.0);
+    }
+
+    @Test
     void shouldIgnoreParticipatingScoreNotDeclaredInAvailableImpactScoreCriterias() {
         AttributeConfig attributeConfig = new AttributeConfig();
         attributeConfig.setKey("IGNORED");
