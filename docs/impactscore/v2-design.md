@@ -436,7 +436,7 @@ filter); `ProductRepositorySitemapExportIT` (query per version); Vitest
 | Issue | Scope | Blocked by |
 |---|---|---|
 | GOU-1882 | Foundation: `ImpactScoreConfig` (version, `v2` block, accessors, environment override, validation), `impactScoreMeta` (model, mapping, written in V1), DTO and version rule, sitemap per version | GOU-1878 |
-| GOU-1879 | V2 computation: no virtual scores, C, threshold, redistribution, ranking, composites | GOU-1882 |
+| GOU-1879 | V2 computation: no virtual scores, C, threshold, redistribution, ranking, composites | GOU-1880, GOU-1882 |
 | GOU-1880 | `v2` matrices of the 7 verticals without `DATA_QUALITY`, V2 count, generation prompt | GOU-1882 |
 | GOU-1881 | `eprelRequired`, `ExclusionRules`, catalogue effects | GOU-1882 |
 | GOU-1883 | `criteriaScoring`, `effectiveScoring`, robust bounds | GOU-1876, GOU-1879, GOU-1882 |
