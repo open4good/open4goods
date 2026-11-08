@@ -422,19 +422,45 @@ class SearchServiceTest {
                 () -> searchService.search(org.springframework.data.domain.PageRequest.of(0, 20), null, null, null, null));
     }
 
-    /** GOU-1897 point 5: the GTIN closes every explicit sort so that ties never swap between requests or pages. */
+    /**
+     * GOU-1897 point 5: the GTIN closes every explicit sort so that ties never swap between requests or pages.
+     * GOU-1940: the tie-break must never be {@code id} (no doc values, Elasticsearch rejects the search with a 500).
+     */
     @Test
-    void stableTieBreakAppendsTheIdToAnExplicitSort() {
+    void stableTieBreakAppendsTheNormalizedGtinToAnExplicitSort() {
         org.springframework.data.domain.Pageable sorted = org.springframework.data.domain.PageRequest.of(2, 20,
                 org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Order.desc("scores.ECOSCORE.value")));
 
         org.springframework.data.domain.Pageable result = SearchService.withStableTieBreak(sorted);
 
         assertThat(result.getSort().stream().map(o -> o.getProperty() + ":" + o.getDirection()).toList())
-                .containsExactly("scores.ECOSCORE.value:DESC", "id:ASC");
+                .containsExactly("scores.ECOSCORE.value:DESC", "gtinInfos.normalizedGtin14:ASC");
+        assertThat(result.getSort().getOrderFor("id")).isNull();
+        org.springframework.data.elasticsearch.core.query.Order tieBreak = (org.springframework.data.elasticsearch.core.query.Order) result
+                .getSort().getOrderFor(ProductRepository.STABLE_SORT_TIE_BREAK_FIELD);
+        assertThat(tieBreak.getUnmappedType()).isEqualTo("keyword");
+        assertThat(tieBreak.getMissing()).isEqualTo("_last");
         assertThat(result.getPageNumber()).isEqualTo(2);
         assertThat(SearchService.withStableTieBreak(result)).isSameAs(result);
         org.springframework.data.domain.Pageable relevance = org.springframework.data.domain.PageRequest.of(0, 20);
         assertThat(SearchService.withStableTieBreak(relevance)).isSameAs(relevance);
+    }
+
+    /** GOU-1940: the query sent to Elasticsearch for an ImpactScore listing ends on the GTIN, never on {@code id}. */
+    @Test
+    void search_sortedByImpactScoreSendsTheGtinTieBreakToElasticsearch() {
+        SearchHits<Product> emptyHits = new SearchHitsImpl<Product>(0L, TotalHitsRelation.EQUAL_TO, 0.0f,
+                java.time.Duration.ZERO, null, null, java.util.Collections.emptyList(), null, null, null);
+        when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(emptyHits);
+
+        searchService.search(org.springframework.data.domain.PageRequest.of(0, 20,
+                org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Order.desc("scores.ECOSCORE.value"))),
+                "airconditioner", null, null, null);
+
+        ArgumentCaptor<org.springframework.data.elasticsearch.core.query.Query> captor = ArgumentCaptor
+                .forClass(org.springframework.data.elasticsearch.core.query.Query.class);
+        verify(repository).search(captor.capture(), eq(ProductRepository.MAIN_INDEX_NAME));
+        assertThat(captor.getValue().getSort().stream().map(org.springframework.data.domain.Sort.Order::getProperty).toList())
+                .containsExactly("scores.ECOSCORE.value", ProductRepository.STABLE_SORT_TIE_BREAK_FIELD);
     }
 }

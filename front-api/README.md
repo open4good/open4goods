@@ -42,6 +42,22 @@ Requests are limited using an in-memory token bucket. Defaults can be changed in
 
 When limits are exceeded the API responds with HTTP `429 Too Many Requests`.
 
+## Search sort tie-break
+
+An explicitly sorted `/products/search` page ends on
+`ProductRepository.stableSortTieBreak()`: `gtinInfos.normalizedGtin14`
+ascending (the GTIN zero-padded to 14 digits, a keyword with doc values),
+missing values last, so ties such as equal ImpactScores keep their position
+between requests and pages. Never sort on `id`: it is mapped without doc values
+and Elasticsearch rejects the whole search, which made every sorted listing
+return a 500 (GOU-1940). `ProductRepositorySortTieBreakIT` checks both against
+the production mapping.
+
+The category page server-renders its listing with the default sort
+(ImpactScore descending) and reuses it after hydration only while that sort is
+still applied. A failed search shows an error with a retry action instead of
+the previous listing.
+
 ## Offer freshness
 
 front-api never serves an offer older than `front.offers.max-age` (default: the

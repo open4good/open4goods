@@ -304,6 +304,15 @@
             class="mb-4"
           >
             {{ productError }}
+            <template #append>
+              <v-btn
+                variant="text"
+                prepend-icon="mdi-refresh"
+                @click="fetchProducts"
+              >
+                {{ $t('common.actions.retry') }}
+              </v-btn>
+            </template>
           </v-alert>
 
           <template v-if="loadingProducts">
@@ -339,7 +348,12 @@
             </template>
           </template>
 
-          <template v-else>
+          <!--
+            A failed search shows only the error above: the previous listing is
+            not kept underneath, it may carry another sort or other filters
+            than the ones displayed in the toolbar (GOU-1940).
+          -->
+          <template v-else-if="!productError">
             <v-fade-transition hide-on-leave>
               <component
                 :is="viewComponent"
@@ -552,6 +566,10 @@ import {
   normalizeFieldOptionsResponse,
 } from '~/utils/_field-options-normalizer'
 import { deduplicateSortItemsByTitle } from '~/utils/_sort-options-normalizer'
+import {
+  CATEGORY_INITIAL_SORT,
+  matchesCategoryInitialSort,
+} from '~/utils/_category-initial-sort'
 import { hasAdminAccess } from '~~/shared/utils/_roles'
 import { resolveCategorySeoMeta } from '~/utils/seo/category-meta'
 
@@ -942,6 +960,7 @@ const { data: initialProductsData, error: initialProductsError } =
           verticalId: verticalId.value,
           pageNumber: 0,
           pageSize: CATEGORY_PAGE_SIZES[CATEGORY_DEFAULT_VIEW_MODE],
+          sort: CATEGORY_INITIAL_SORT,
           filters: subCategoryBaseFilters.value,
         },
       })
@@ -959,10 +978,7 @@ if (initialProductsError.value) {
       initialProductsError.value
     )
   }
-  productError.value =
-    initialProductsError.value instanceof Error
-      ? initialProductsError.value.message
-      : t('category.products.fetchError')
+  productError.value = t('category.products.fetchError')
 }
 
 const productsData = ref<ProductSearchResponseDto | null>(
@@ -2064,7 +2080,8 @@ const isUsingInitialProductsData = computed(() => {
 
   return (
     productsData.value === initialProductsData.value &&
-    isDefaultQueryState.value
+    isDefaultQueryState.value &&
+    matchesCategoryInitialSort(sortField.value, sortOrder.value)
   )
 })
 
@@ -2168,8 +2185,12 @@ const fetchProducts = async () => {
 
     productsData.value = response
   } catch (error) {
-    productError.value =
-      error instanceof Error ? error.message : t('category.products.fetchError')
+    console.error(
+      `[CategoryPage] Failed to search products for vertical "${verticalId.value}":`,
+      error
+    )
+    productsData.value = null
+    productError.value = t('category.products.fetchError')
   } finally {
     loadingProducts.value = false
   }
