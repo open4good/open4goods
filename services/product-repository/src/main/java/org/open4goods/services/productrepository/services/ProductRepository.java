@@ -116,6 +116,13 @@ public class ProductRepository {
                         "lastChange"
         };
 
+        /**
+         * Field closing an explicit sort so that ties keep a stable order between requests and pages. It holds the
+         * GTIN zero-padded to 14 digits (lexical order = numeric order) and is a keyword with doc values. Never use
+         * {@code id}: it is mapped without doc values and Elasticsearch rejects any sort on it (GOU-1940).
+         */
+        public static final String STABLE_SORT_TIE_BREAK_FIELD = "gtinInfos.normalizedGtin14";
+
         private static final String PRODUCT_EMBEDDING_FIELD = "embedding";
         private static final String IMAGE_EMBEDDING_FIELD = "resources.imageInfo.embedding";
 
@@ -145,6 +152,17 @@ public class ProductRepository {
          */
         public static FetchSourceFilter productFieldsWithoutEmbeddingSourceFilter() {
                 return sourceFilter(ProductProjection.WITHOUT_VECTORS);
+        }
+
+        /**
+         * Builds the ascending tie-break order on {@link #STABLE_SORT_TIE_BREAK_FIELD}. Products without the field
+         * come last, and an index that does not map it yet still answers instead of failing.
+         *
+         * @return the tie-break order to append as last criterion of an explicit sort
+         */
+        public static Sort.Order stableSortTieBreak() {
+                return new org.springframework.data.elasticsearch.core.query.Order(Sort.Direction.ASC,
+                                STABLE_SORT_TIE_BREAK_FIELD).withUnmappedType("keyword").withMissing("_last");
         }
 
         /**

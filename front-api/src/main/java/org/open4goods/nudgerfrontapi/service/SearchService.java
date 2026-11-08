@@ -717,20 +717,21 @@ public class SearchService {
 	}
 
 	/**
-	 * Appends the product id (the GTIN) as last sort criterion of an explicitly sorted page, so that products with
-	 * the same sort value (typically the same ImpactScore) keep the same position from one request to the next
-	 * and never move between two pages.
+	 * Appends the GTIN ({@link ProductRepository#stableSortTieBreak()}) as last sort criterion of an explicitly
+	 * sorted page, so that products with the same sort value (typically the same ImpactScore) keep the same position
+	 * from one request to the next and never move between two pages. The tie-break must not use {@code id}: it has no
+	 * doc values and Elasticsearch then rejects the whole search (500 on every sorted listing, GOU-1940).
 	 *
 	 * @param pageable bounded pageable, possibly unsorted or unpaged
-	 * @return the same pageable when it has no sort or already sorts on the id, otherwise a copy with the tie-break
+	 * @return the same pageable when it has no sort or already ends on the GTIN, otherwise a copy with the tie-break
 	 */
 	static Pageable withStableTieBreak(Pageable pageable) {
 		if (pageable == null || pageable.isUnpaged() || pageable.getSort().isUnsorted()
-				|| pageable.getSort().getOrderFor("id") != null) {
+				|| pageable.getSort().getOrderFor(ProductRepository.STABLE_SORT_TIE_BREAK_FIELD) != null) {
 			return pageable;
 		}
 		return org.springframework.data.domain.PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-				pageable.getSort().and(Sort.by(Sort.Order.asc("id"))));
+				pageable.getSort().and(Sort.by(ProductRepository.stableSortTieBreak())));
 	}
 
 	/**
