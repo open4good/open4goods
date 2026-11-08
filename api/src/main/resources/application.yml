@@ -17,6 +17,8 @@ logging:
     # GOU-1815: beta and prod (open4goods-config application-active.yml) set org.open4goods to warn. This more
     # specific key is merged with theirs and keeps the purge progress and report in nohup-api.log.
     org.open4goods.api.services.DatasourcePurgeService: INFO
+    # GOU-1835: same for the INFO line giving the products index mapping result at startup.
+    org.open4goods.api.services.ProductIndexMappingRunner: INFO
   file:
     max-history: 5
     max-size: 200MB

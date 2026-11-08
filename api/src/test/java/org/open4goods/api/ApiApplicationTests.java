@@ -33,7 +33,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
         "org.springframework.ai.model.openai.autoconfigure.OpenAiEmbeddingAutoConfiguration," +
         "org.springframework.ai.model.openai.autoconfigure.OpenAiImageAutoConfiguration," +
         "org.springframework.ai.model.openai.autoconfigure.OpenAiModerationAutoConfiguration," +
-        "org.springframework.ai.model.google.genai.autoconfigure.chat.GoogleGenAiChatAutoConfiguration"
+        "org.springframework.ai.model.google.genai.autoconfigure.chat.GoogleGenAiChatAutoConfiguration",
+    // ElasticsearchOperations is a mock: ProductIndexMappingRunner fails and must not hold the startup.
+    "api.product-index-mapping.retry-delay=PT0S"
 })
 class ApiApplicationTests {
 

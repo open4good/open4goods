@@ -62,6 +62,15 @@ Preuve : `ApiGoogleSsoAccessTest` (contexte complet servi par Tomcat, y compris 
 `X-Forwarded-Proto`/`X-Forwarded-Host` avec `forward-headers-strategy: NATIVE`). Doc :
 [Google SSO OAuth clients](../docs/operations/google-sso-oauth-clients.md#role-allowlist-api).
 
+## Mapping de l'index produits
+
+`ProductIndexMappingRunner` (GOU-1835, `ApplicationRunner`) est la seule écriture du mapping de `products-moustik` :
+index absent → création avec settings et mapping, présent → `putMapping` de `product-mappings.json`. 3 tentatives
+(`api.product-index-mapping.retry-delay`, défaut `2s`, doublé), un WARN à pile complète par échec, puis un ERROR et
+l'api continue de démarrer. `Product` garde `createIndex = false` et `alwaysWriteMapping = false` : ne les remets pas à
+`true`, le constructeur du repository ferait de nouveau tomber `ui` et `api` sur une panne ES passagère. Doc :
+[products index mapping](../docs/operations/product-index-mapping.md).
+
 ## Sauvegarde produits
 
 `BackupService.backupProducts()` écrit `products-backup-{N}.gz` dans `api.backup.data-backup-folder`, puis

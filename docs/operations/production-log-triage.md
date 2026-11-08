@@ -13,6 +13,7 @@ SSR container logs.
 | Remote resource URL exposes query values | Any occurrence | Security and service owner | Treat credentials as disclosed, rotate them with approval, and redact the logging call before redeploying. |
 | EPREL no-match volume | More than 10 per minute after refresh throttling | API data pipeline | Check datasource refresh timestamps and upstream coverage; do not repeatedly query unchanged negative results. |
 | Image decode/hash failures | More than 10 per minute | API data pipeline | Check source format and ImageMagick fallback; preserve a terminal resource status instead of retrying unchanged files. |
+| `Products index mapping: ... failed after 3 attempts` (ERROR, api) | Any occurrence | API | The api runs with the mapping already in the index. Read the `Caused by` of the three WARN lines before it, then follow [products index mapping](product-index-mapping.md#after-an-error). |
 
 ## Source and retention policy
 

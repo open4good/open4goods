@@ -50,7 +50,13 @@ import org.springframework.data.elasticsearch.annotations.WriteTypeHint;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-@Document(indexName = Product.DEFAULT_REPO, alwaysWriteMapping = true, createIndex = true, writeTypeHint = WriteTypeHint.FALSE, dynamic = Dynamic.FALSE)
+/*
+ * createIndex/alwaysWriteMapping stay false: the repository constructor must never write to Elasticsearch, a transient
+ * failure there failed the ui and api startups (GOU-1812). The api alone creates the index or puts this mapping, after
+ * its context is created (ProductIndexMappingRunner, GOU-1835). @Setting and @Mapping are still read by createIndex(),
+ * createWithMapping() and putMapping().
+ */
+@Document(indexName = Product.DEFAULT_REPO, alwaysWriteMapping = false, createIndex = false, writeTypeHint = WriteTypeHint.FALSE, dynamic = Dynamic.FALSE)
 @Setting(settingPath = "/product-settings.json")
 @Mapping(mappingPath = "/product-mappings.json")
 public class Product implements Standardisable {
