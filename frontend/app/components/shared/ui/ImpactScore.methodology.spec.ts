@@ -8,7 +8,11 @@ const i18n = createI18n({
   locale: 'en-US',
   missingWarn: false,
   messages: {
-    'en-US': { product: { impact: { methodologyShort: 'Methodology' } } },
+    'en-US': {
+      product: {
+        impact: { methodologyShort: 'Methodology', scoreName: 'Impact Score' },
+      },
+    },
   },
 })
 
@@ -20,7 +24,10 @@ const mountScore = (props: Record<string, unknown> = {}) =>
       stubs: {
         'v-icon': true,
         CtaCard: true,
-        NuxtLink: true,
+        NuxtLink: {
+          props: ['to'],
+          template: '<a class="nl" :href="to"><slot /></a>',
+        },
         'v-btn': { props: ['to'], template: '<a :href="to"><slot /></a>' },
       },
     },
@@ -35,5 +42,16 @@ describe('ImpactScore methodology link', () => {
   it('falls back to impact-score when the vertical is unknown', () => {
     const w = mountScore({ verticalHomeUrl: '' })
     expect(w.find('a').attributes('href')).toBe('/impact-score')
+  })
+
+  it('links the banner footer to the vertical ecoscore page', () => {
+    const w = mountScore({ banner: true, verticalHomeUrl: 'climatiseurs' })
+    expect(w.find('a.nl').attributes('href')).toBe('/climatiseurs/ecoscore')
+    expect(w.find('a.nl').text()).toContain('Impact Score')
+  })
+
+  it('falls back to impact-score in the banner without vertical', () => {
+    const w = mountScore({ banner: true })
+    expect(w.find('a.nl').attributes('href')).toBe('/impact-score')
   })
 })

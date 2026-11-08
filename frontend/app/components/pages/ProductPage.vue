@@ -83,6 +83,7 @@
               <ProductHero
                 :product="product"
                 :breadcrumbs="productBreadcrumbs"
+                :vertical-home-url="verticalHomeUrl"
                 :impact-score="impactScoreOutOf20"
                 :impact-score-min="impactScoreMin"
                 :impact-score-max="impactScoreMax"

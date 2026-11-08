@@ -2759,6 +2759,7 @@
       "noDetailsAvailable": "No details are available for this assessment yet.",
       "methodologyLink": "Access the methodology",
       "methodologyShort": "Methodology",
+      "scoreName": "Impact Score",
       "methodologyLinkAria": "Open the Impact Score methodology",
       "energyLabelAlt": "Energy label {value}",
       "percentile": "Percentile",

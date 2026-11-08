@@ -143,8 +143,10 @@
           size="16"
           class="impact-score-panel__footer-icon"
         />
-        <NuxtLink to="/ecoscore" class="impact-score-panel__footer-link">
-          <div class="impact-score-panel__footer-title">Impact Score</div>
+        <NuxtLink :to="methodologyHref" class="impact-score-panel__footer-link">
+          <div class="impact-score-panel__footer-title">
+            {{ t('product.impact.scoreName') }}
+          </div>
           <div v-if="category" class="impact-score-panel__footer-category">
             {{ category }}
           </div>
