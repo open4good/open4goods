@@ -165,17 +165,43 @@ describe('ImpactScore', () => {
     ).toBe('excellent')
   })
 
-  it('renders percentile ranking when ranking and count are provided', () => {
+  it('reads the ranking as the number of products with a lower score', () => {
     const wrapper = mount(ImpactScore, {
       props: {
         score: 15,
-        ranking: 10,
-        count: 100,
+        ranking: 90,
+        count: 101,
       },
       global: globalOptions,
     })
 
     expect(wrapper.text()).toContain('Better than 90%')
+  })
+
+  it('shows the highest ranking as better than all other products', () => {
+    const wrapper = mount(ImpactScore, {
+      props: {
+        score: 14.8,
+        ranking: 1362,
+        count: 1363,
+      },
+      global: globalOptions,
+    })
+
+    expect(wrapper.text()).toContain('Better than 100%')
+  })
+
+  it('shows the lowest ranking as better than no product', () => {
+    const wrapper = mount(ImpactScore, {
+      props: {
+        score: 10.8,
+        ranking: 0,
+        count: 1363,
+      },
+      global: globalOptions,
+    })
+
+    expect(wrapper.text()).toContain('Better than 0%')
   })
 
   it('hides the Min/Max scale while keeping the percentile when showMinMax is false', () => {
@@ -184,8 +210,8 @@ describe('ImpactScore', () => {
         score: 15,
         min: 0,
         max: 20,
-        ranking: 10,
-        count: 100,
+        ranking: 90,
+        count: 101,
         showMinMax: false,
       },
       global: globalOptions,

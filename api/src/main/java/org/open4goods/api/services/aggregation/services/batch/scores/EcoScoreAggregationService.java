@@ -187,7 +187,10 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 			// EcoScore ranking and "best alternativ" reach
 			///////////////////////
 			List<Product> sorted = new ArrayList<>(productsWithRealEcoScore);
-			sorted.sort(Comparator.comparingDouble(p -> p.ecoscore().getRelativ().getValue()));
+			// Ties are broken by GTIN, so that two products with the same ImpactScore keep their position whatever the
+			// order in which the batch received them.
+			sorted.sort(Comparator.<Product>comparingDouble(p -> p.ecoscore().getRelativ().getValue())
+					.thenComparing(Product::getId, Comparator.nullsFirst(Comparator.naturalOrder())));
 	
 			int count = sorted.size();
 			Long bestProductId = sorted.get(count - 1).getId();
@@ -198,6 +201,13 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 				ranking.setGlobalCount(count);
 				ranking.setGlobalPosition(count - i);
 				ranking.setGlobalBest(bestProductId);
+
+				// The ImpactScore rank follows the same order as globalPosition. The rank set by the parent class was
+				// computed on the normalized value, where clamped extreme products tie (GOU-1894).
+				Score impactScore = product.ecoscore();
+				impactScore.setRanking(i);
+				impactScore.getAbsolute().setCount(count);
+				impactScore.getRelativ().setCount(count);
 	
 				if (i < count - 1) {
 					ranking.setGlobalBetter(sorted.get(i + 1).getId());
@@ -212,6 +222,55 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 		}
 		LOGGER.info("EcoScore done() finished.");
 
+	}
+
+	/**
+	 * Recomputes the ImpactScore of a product from the sub-scores it already holds, outside a batch.
+	 *
+	 * <p>Used for products a batch does not rescore (no offers) whose stored ImpactScore is wrong. Their
+	 * sub-scores keep the relative values of the batch that produced them, so the result is the score that batch
+	 * should have stored. The ranking is restored from {@link EcoScoreRanking}, which that batch computed on the
+	 * weighted score.
+	 *
+	 * @param product the product holding the sub-scores
+	 * @param vConf   the vertical configuration defining the weights
+	 * @return the ImpactScore, or {@code null} when the vertical has no weights or a sub-score cannot be read
+	 */
+	public Score recomputeFromStoredSubScores(Product product, VerticalConfig vConf) {
+		if (vConf == null || vConf.getImpactScoreConfig() == null) {
+			return null;
+		}
+		Map<String, Double> normalizedWeights = normalizeWeights(vConf);
+		if (normalizedWeights.isEmpty()) {
+			return null;
+		}
+		Double value;
+		try {
+			value = generateEcoScore(product, vConf, normalizedWeights);
+		} catch (ValidationException e) {
+			LOGGER.warn("ImpactScore recomputation failed for {} : {}", product.getId(), e.getMessage());
+			return null;
+		}
+		if (value == null) {
+			return null;
+		}
+
+		Score score = new Score(ECOSCORE_SCORENAME, value);
+		Cardinality absolute = new Cardinality();
+		absolute.setValue(value);
+		Cardinality relativ = new Cardinality();
+		relativ.setValue(value * StandardiserService.DEFAULT_MAX_RATING / ECOSCORE_TARGET_SCALE);
+
+		EcoScoreRanking ranking = product.getRanking();
+		if (ranking != null && ranking.getGlobalCount() > 0 && ranking.getGlobalPosition() > 0
+				&& ranking.getGlobalPosition() <= ranking.getGlobalCount()) {
+			absolute.setCount((int) ranking.getGlobalCount());
+			relativ.setCount((int) ranking.getGlobalCount());
+			score.setRanking((int) (ranking.getGlobalCount() - ranking.getGlobalPosition()));
+		}
+		score.setAbsolute(absolute);
+		score.setRelativ(relativ);
+		return score;
 	}
 
 	private Map<String, Double> normalizeWeights(VerticalConfig vConf) {

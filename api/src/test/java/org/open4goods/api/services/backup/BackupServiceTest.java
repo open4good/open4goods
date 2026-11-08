@@ -13,12 +13,16 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.security.MessageDigest;
 import java.time.Instant;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -156,6 +160,128 @@ class BackupServiceTest {
         assertThat(backupService.health().getDetails()).containsKey("product_export_exception");
     }
 
+    @Test
+    void backupUsesTmpSubfolderCleansLeftoversAndPublishesByRename() throws Exception {
+        Path tmpFolder = productBackupFolder.resolve(".tmp");
+        Files.createDirectories(tmpFolder);
+        Path leftover = tmpFolder.resolve("product-backup-9-leftover.gz");
+        Files.writeString(leftover, "stale");
+        when(productRepository.countMainIndex()).thenReturn(1L);
+        when(productRepository.exportAll(1000)).thenReturn(Stream.of(new Product()));
+        when(serialisationService.toJson(any(Product.class))).thenAnswer(inv -> {
+            try (Stream<Path> files = Files.list(tmpFolder)) {
+                assertThat(files.map(f -> f.getFileName().toString()))
+                        .allMatch(n -> n.startsWith("product-backup-") && n.endsWith(".gz"))
+                        .hasSize(2)
+                        .doesNotContain(leftover.getFileName().toString());
+            }
+            return "{\"id\":1}";
+        });
+
+        backupService.backupProducts();
+
+        assertThat(backupService.health().getDetails()).doesNotContainKey("product_export_exception");
+        assertThat(Files.exists(leftover)).isFalse();
+        try (Stream<Path> files = Files.list(tmpFolder)) {
+            assertThat(files).isEmpty();
+        }
+        assertThat(Files.exists(productBackupFolder.resolve("products-backup-0.gz"))).isTrue();
+        assertThat(Files.exists(productBackupFolder.resolve("products-backup-1.gz"))).isTrue();
+    }
+
+    @Test
+    void publishedFilesAreWorldReadable() throws Exception {
+        Assumptions.assumeTrue(Files.getFileStore(productBackupFolder).supportsFileAttributeView("posix"));
+        when(productRepository.countMainIndex()).thenReturn(1L);
+        when(productRepository.exportAll(1000)).thenReturn(Stream.of(new Product()));
+        when(serialisationService.toJson(any(Product.class))).thenReturn("{\"id\":1}");
+
+        backupService.backupProducts();
+
+        for (String name : List.of("products-backup-0.gz", "products-backup-1.gz", "products-backup-manifest.json",
+                "products-backup.sha256")) {
+            assertThat(PosixFilePermissions.toString(Files.getPosixFilePermissions(productBackupFolder.resolve(name))))
+                    .as(name).isEqualTo("rw-r--r--");
+        }
+    }
+
+    @Test
+    void backupWritesSha256FileVerifiableBySha256sum() throws Exception {
+        when(productRepository.countMainIndex()).thenReturn(1L);
+        when(productRepository.exportAll(1000)).thenReturn(Stream.of(new Product()));
+        when(serialisationService.toJson(any(Product.class))).thenReturn("{\"id\":1}");
+
+        backupService.backupProducts();
+
+        Path checksums = productBackupFolder.resolve("products-backup.sha256");
+        List<String> lines = Files.readAllLines(checksums);
+        assertThat(lines).hasSize(2);
+        for (String line : lines) {
+            String[] parts = line.split("  ", 2);
+            byte[] digest = MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(productBackupFolder.resolve(parts[1])));
+            assertThat(parts[0]).isEqualTo(HexFormat.of().formatHex(digest));
+        }
+        assertThat(lines.get(0)).endsWith("  products-backup-0.gz");
+        assertThat(lines.get(1)).endsWith("  products-backup-1.gz");
+
+        String manifest = Files.readString(productBackupFolder.resolve("products-backup-manifest.json"));
+        for (String line : lines) {
+            assertThat(manifest).contains(line.split("  ", 2)[0]);
+        }
+        assertThat(backupService.health().getDetails()).doesNotContainKey("product_backup_checksum_missing");
+
+        try (Stream<Path> files = Files.list(productBackupFolder)) {
+            assertThat(files.map(f -> f.getFileName().toString())).noneMatch(n -> n.endsWith(".tmp") && !n.equals(".tmp"));
+        }
+    }
+
+    @Test
+    void healthFailsWhenManifestDeclaresSha256ButFileIsMissing() throws Exception {
+        when(productRepository.countMainIndex()).thenReturn(1L);
+        when(productRepository.exportAll(1000)).thenReturn(Stream.of(new Product()));
+        when(serialisationService.toJson(any(Product.class))).thenReturn("{\"id\":1}");
+        backupService.backupProducts();
+        Files.delete(productBackupFolder.resolve("products-backup.sha256"));
+
+        assertThat(backupService.health().getDetails()).containsKey("product_backup_checksum_missing");
+    }
+
+    @Test
+    void oldManifestWithoutSha256IsStillValid() throws IOException {
+        writeExistingBackup();
+
+        Health health = backupService.health();
+
+        assertThat(health.getStatus()).isEqualTo(Status.UP);
+        assertThat(health.getDetails()).doesNotContainKey("product_backup_checksum_missing");
+        assertThat(health.getDetails()).doesNotContainKey("product_backup_manifest_invalid");
+    }
+
+    @Test
+    void failedBackupRemovesTmpFiles() throws Exception {
+        when(productRepository.countMainIndex()).thenReturn(1L);
+        when(productRepository.exportAll(1000)).thenReturn(Stream.of(new Product()));
+        when(serialisationService.toJson(any(Product.class))).thenThrow(new IllegalStateException("json failed"));
+
+        backupService.backupProducts();
+
+        try (Stream<Path> files = Files.list(productBackupFolder.resolve(".tmp"))) {
+            assertThat(files).isEmpty();
+        }
+    }
+
+    @Test
+    void healthIgnoresTmpSubfolderAndItsFiles() throws IOException {
+        writeExistingBackup();
+        Path tmpFolder = Files.createDirectories(productBackupFolder.resolve(".tmp"));
+        writeGzip(tmpFolder.resolve("products-backup-7.gz"), "partial");
+
+        Health health = backupService.health();
+
+        assertThat(health.getStatus()).isEqualTo(Status.UP);
+        assertThat(health.getDetails()).doesNotContainKey("product_backup_file_count");
+    }
+
     private void writeExistingBackup() throws IOException {
         writeGzip(productBackupFolder.resolve("products-backup-0.gz"), "old-0");
         writeGzip(productBackupFolder.resolve("products-backup-1.gz"), "old-1");
@@ -197,5 +323,115 @@ class BackupServiceTest {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             return reader.readLine();
         }
+    }
+
+    private void writeManifest(long completedEpochMillis) throws IOException {
+        Files.writeString(productBackupFolder.resolve("products-backup-manifest.json"),
+                "{\"completedAt\":\"x\",\"completedEpochMillis\":" + completedEpochMillis
+                        + ",\"expectedCount\":1,\"exportedCount\":1,\"pageSize\":1000,\"files\":[]}");
+    }
+
+    private void stubExport() throws Exception {
+        when(productRepository.countMainIndex()).thenReturn(1L);
+        when(productRepository.exportAll(1000)).thenAnswer(i -> Stream.of(new Product()));
+        when(serialisationService.toJson(any(Product.class))).thenReturn("{\"id\":1}");
+    }
+
+    @Test
+    void checkSkipsBackupWhenManifestIsRecent() throws Exception {
+        stubExport();
+        writeManifest(System.currentTimeMillis() - 3_600_000L);
+
+        backupService.checkProductsBackup();
+
+        verify(productRepository, times(0)).exportAll(1000);
+    }
+
+    @Test
+    void checkLaunchesBackupWhenManifestIsOld() throws Exception {
+        stubExport();
+        writeManifest(System.currentTimeMillis() - 200L * 3_600_000L);
+
+        backupService.checkProductsBackup();
+
+        verify(productRepository, times(1)).exportAll(1000);
+    }
+
+    @Test
+    void checkLaunchesBackupWhenManifestIsAbsent() throws Exception {
+        stubExport();
+
+        backupService.checkProductsBackup();
+
+        verify(productRepository, times(1)).exportAll(1000);
+    }
+
+    @Test
+    void checkLaunchesBackupWhenManifestIsUnreadable() throws Exception {
+        stubExport();
+        Files.writeString(productBackupFolder.resolve("products-backup-manifest.json"), "not json");
+
+        backupService.checkProductsBackup();
+
+        verify(productRepository, times(1)).exportAll(1000);
+    }
+
+    @Test
+    void checkIsSkippedWhenAnExportIsAlreadyRunning() throws Exception {
+        when(productRepository.countMainIndex()).thenReturn(1L);
+        when(serialisationService.toJson(any(Product.class))).thenReturn("{\"id\":1}");
+        when(productRepository.exportAll(1000)).thenAnswer(i -> {
+            // re-entrant check while the export is running
+            backupService.checkProductsBackup();
+            return Stream.of(new Product());
+        });
+
+        backupService.backupProducts();
+
+        verify(productRepository, times(1)).exportAll(1000);
+    }
+
+    @Test
+    void firstCheckClearsOrphanTmpWithoutTouchingPublishedFiles() throws Exception {
+        stubExport();
+        writeManifest(System.currentTimeMillis());
+        Path tmp = Files.createDirectories(productBackupFolder.resolve(".tmp"));
+        Path orphan = Files.writeString(tmp.resolve("products-backup-1.gz.part"), "partial");
+        Path published = Files.writeString(productBackupFolder.resolve("products-backup-1.gz"), "published");
+        Path checksum = Files.writeString(productBackupFolder.resolve("products-backup.sha256"), "abc  products-backup-1.gz");
+        Path manifest = productBackupFolder.resolve("products-backup-manifest.json");
+
+        backupService.checkProductsBackup();
+
+        assertThat(orphan).doesNotExist();
+        assertThat(published).exists();
+        assertThat(checksum).exists();
+        assertThat(manifest).exists();
+        verify(productRepository, times(0)).exportAll(1000);
+    }
+
+    @Test
+    void manualBackupRunsEvenWithRecentManifest() throws Exception {
+        stubExport();
+        writeManifest(System.currentTimeMillis());
+
+        backupService.backupProducts();
+
+        verify(productRepository, times(1)).exportAll(1000);
+    }
+
+    @Test
+    void backupProductsTimerIsRecorded() throws Exception {
+        io.micrometer.core.instrument.simple.SimpleMeterRegistry registry = new io.micrometer.core.instrument.simple.SimpleMeterRegistry();
+        org.springframework.aop.aspectj.annotation.AspectJProxyFactory factory =
+                new org.springframework.aop.aspectj.annotation.AspectJProxyFactory(backupService);
+        factory.setProxyTargetClass(true);
+        factory.addAspect(new io.micrometer.core.aop.TimedAspect(registry));
+        BackupService proxy = factory.getProxy();
+
+        when(productRepository.exportAll(any(Integer.class))).thenReturn(Stream.<Product>empty());
+        proxy.backupProducts();
+
+        assertThat(registry.find("backup.products").tag("service", "BackupService").timer()).isNotNull();
     }
 }

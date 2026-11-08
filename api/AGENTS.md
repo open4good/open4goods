@@ -39,3 +39,157 @@ From the repository root you can also execute:
 ```bash
 mvn --offline -pl api -am clean install
 ```
+
+## Sécurité et accès
+
+`config/WebSecurityConfig` (GOU-1393) : api.nudger.fr est "pur SSO Google" pour les personnes.
+
+- Machines : clé API brute dans l'en-tête ou le paramètre `Authorization`, comparée en temps constant
+  (`admin-key` → `ROLE_USER` + `XWIKIADMINGROUP`, `test-keys` → `ROLE_USER` + `ROLE_TESTER`). La clé Metriks
+  (`metriks-key`, secret `API_METRIKS_KEY`, GOU-1412) → `ROLE_METRIKS` seul, et seulement sur un chemin
+  `/api/metriks/<segment>` (hors context path, segments littéraux) : ailleurs elle n'authentifie rien (401).
+  `MetriksController` accepte `XWIKIADMINGROUP` ou `ROLE_METRIKS`. Sans `metriks-key`, aucune clé Metriks.
+- Personnes : `oauth2Login` Google, câblé seulement si la registration `google` existe
+  (`spring.security.oauth2.client.registration.google.*`, rendue depuis `GOOGLE_SSO_CLIENT_ID/SECRET`). E-mail
+  vérifié et présent dans `api.security.google-sso.role-allowlist` (`ApiOidcUserService`), sinon 403. Pas de
+  formulaire, pas de page `/login`, pas d'utilisateur `user` généré.
+- HTTP Basic : uniquement sur `/actuator/**` (chaîne dédiée), pour l'identité moniteur Spring Boot Admin
+  `o4g.actuator.monitor.*` (`ActuatorMonitorAuthenticationProvider`, même classe que ui et front-api).
+- Anonyme : navigation navigateur (`Accept: text/html`) → redirection vers `/oauth2/authorization/google` ; tout
+  autre appel → 401 sans `WWW-Authenticate` (pas de popup, pas de session).
+
+Preuve : `ApiGoogleSsoAccessTest` (contexte complet servi par Tomcat, y compris `redirect_uri` derrière
+`X-Forwarded-Proto`/`X-Forwarded-Host` avec `forward-headers-strategy: NATIVE`). Doc :
+[Google SSO OAuth clients](../docs/operations/google-sso-oauth-clients.md#role-allowlist-api).
+
+## Mapping de l'index produits
+
+`ProductIndexMappingRunner` (GOU-1835, `ApplicationRunner`) est la seule écriture du mapping de `products-moustik` :
+index absent → création avec settings et mapping, présent → `putMapping` de `product-mappings.json`. 3 tentatives
+(`api.product-index-mapping.retry-delay`, défaut `2s`, doublé), un WARN à pile complète par échec, puis un ERROR et
+l'api continue de démarrer. `Product` garde `createIndex = false` et `alwaysWriteMapping = false` : ne les remets pas à
+`true`, le constructeur du repository ferait de nouveau tomber `ui` et `api` sur une panne ES passagère. Doc :
+[products index mapping](../docs/operations/product-index-mapping.md).
+
+## Sauvegarde produits
+
+`BackupService.backupProducts()` écrit `products-backup-{N}.gz` dans `api.backup.data-backup-folder`, puis
+`products-backup-manifest.json` (champ optionnel `sha256` : nom → empreinte) et enfin `products-backup.sha256` au
+format `sha256sum` (`<hex>  <fichier>`, écrit atomiquement, en dernier, en `rw-r--r--` comme les `.gz` et le manifest pour rester lisible par le compte de tirage `backup-pull` : sa présence signale une génération complète).
+Les empreintes sont calculées pendant l'écriture (`DigestOutputStream`), jamais en relisant les fichiers. Vérification :
+`cd <dossier> && sha256sum -c products-backup.sha256`. Le health check signale `product_backup_checksum_missing` si le
+manifest déclare des empreintes mais que le `.sha256` manque ; il ne recalcule rien.
+
+Déclenchement : `checkProductsBackup()` (`@Scheduled`, `api.backup.products-backup-check-initial-delay` défaut `PT15M`,
+`api.backup.products-backup-check-interval` défaut `PT1H`) lance `backupProducts()` si aucun export ne tourne et si
+`products-backup-manifest.json` est absent, illisible ou plus ancien que `api.backup.products-backup-interval-hours`
+(défaut 168). Un redémarrage de l'api ne repousse donc plus la sauvegarde. La décision est loguée en `info`.
+`POST /backup/products/export` force toujours la sauvegarde. Le profil local ne lance rien (stub `LocalDevConfig`).
+À la première vérification, si aucun export ne tourne, `.tmp/` est vidé (volume libéré logué) ; les fichiers publiés,
+le manifest et le `.sha256` ne sont jamais touchés. Pas de reprise d'une sauvegarde interrompue.
+
+## Agrégation des prix
+
+`PriceAggregationService` : un fragment `InStock.OUTOFSTOCK` n'ajoute pas d'offre (#3468) ; une offre expire
+`ProductRepository.VALID_UNTIL_DURATION` (2 jours) après l'indexation de son fragment. Par couple (datasource, état),
+on garde le prix le plus bas, et à prix égal l'offre la plus récente : une offre renvoyée au même prix rafraîchit sa
+date (GOU-1699). Avant de retirer les offres expirées, on enregistre par état la date de la dernière offre vue
+(`price.lastOfferSeen`, qui ne recule jamais). front-api s'en sert pour dater le dernier prix d'une fiche sans offre.
+
+Diagnostic en lecture seule des fiches qui ont perdu leurs offres : `scripts/diagnostics/stale_offers_report.py`
+(`product <gtin>`, `lost --days N`).
+
+## Nettoyage des ressources orphelines
+
+`POST /batch/clean-resources?mode=DRY_RUN|MOVE|DELETE` répond `202` immédiatement et exécute le balayage en tâche de
+fond (un seul à la fois ; un second appel pendant un run renvoie l'état courant). `GET /batch/clean-resources` donne
+l'état (`IDLE`, `RUNNING`, `COMPLETED` avec le rapport, `FAILED`). Les clés actives sont stockées par empreinte 64 bits
+dans un `long[]` trié (`ActiveKeySet`, ~8 o/clé) : une collision ne peut que conserver un fichier, jamais classer un
+fichier référencé comme orphelin. Si le tas ne suffit pas, le run s'abandonne (`aborted`, aucun fichier touché).
+
+## Purge d'une datasource retirée
+
+`POST /batch/purge-datasource?datasource=<nom>&dryRun=true|false` (GOU-1592, `DatasourcePurgeService`) retire de
+l'index produit toutes les données d'une datasource : offres `price.offers` dont `datasourceName` vaut `<nom>`,
+puis `Product.removeDatasourceData` (clé de `datasourceCodes`, alias de marque, catégorie, description, sources
+d'attributs ; une catégorie encore portée par une autre datasource reste). Meilleure offre (`price.minPrice`),
+`offersCount` et `price.conditions` sont recalculés sur les offres restantes, sans filtre de fraîcheur : les offres
+des autres datasources ne sont jamais retirées. Historique et tendances de prix ne sont pas touchés.
+
+- `<nom>` est le `name` du YAML de la datasource (valeur exacte de `datasourceName` et des clés de
+  `datasourceCodes`), pas le nom du fichier : `rakuten.com` pour `rakuten.com-csv.yml`. `Rakuten FR` est une autre
+  datasource.
+- `dryRun=true` par défaut : compte produits et offres touchés, donne jusqu'à 20 GTIN d'exemple, n'écrit rien.
+- Parcours complet par scroll (pages de `FULL_PRODUCT_PAGE_SIZE`, produits complets, embeddings compris), écriture
+  par bulks de 200. Un produit sans donnée de la datasource n'est jamais réécrit : un second passage ne touche
+  rien. À lancer hors de la fenêtre du batch nocturne.
+- Asynchrone (un seul run à la fois) : réponse `202` ; `GET /batch/purge-datasource` donne l'état (`IDLE`,
+  `RUNNING` avec les compteurs du dernier palier, `COMPLETED` avec le rapport `scannedProducts`, `touchedProducts`,
+  `removedOffers`, `savedProducts`, `failedProducts`, `sampleGtins`, `FAILED` avec `error`, ou `INTERRUPTED`).
+- Progression (GOU-1815) : un palier tous les `datasource-purge-progress-interval` produits lus (défaut 50 000) et au
+  moins toutes les 5 minutes. Chaque palier écrit une ligne `Purge of datasource <nom> (dryRun=...): N products
+  scanned, ... touched, ... offers removed, ... saved, ... failed, sample GTINs [...]` dans `nohup-api.log` (le
+  `application.yml` du jar garde `DatasourcePurgeService` en `INFO` alors que la config bêta/prod met
+  `org.open4goods` en `warn`).
+- Rapport persistant : l'état est écrit en JSON au lancement, à chaque palier puis à la fin, dans
+  `datasource-purge-status-file` (défaut `<root-folder>/batch-reports/datasource-purge-status.json`, soit
+  `/opt/open4goods/batch-reports/datasource-purge-status.json` en bêta et en prod), par fichier temporaire
+  `.tmp` renommé. Il se lit sans l'api : `cat` du fichier.
+- `INTERRUPTED` : au démarrage, l'api relit ce fichier ; un run resté `RUNNING` (api arrêtée ou redéployée pendant
+  le run) devient `INTERRUPTED`, avec les compteurs et `sampleGtins` de son dernier palier (`lastProgressAt`) et sans
+  `finishedAt`. Le run n'est pas repris : un nouveau `POST` relance un run complet depuis le début. `COMPLETED` et
+  `FAILED` restent lisibles après redémarrage.
+
+Appel Ops (clé `admin-key`, secret `O4G_INTERNAL_API_KEY`, brute dans l'en-tête `Authorization`), dry run, état, puis
+run réel une fois le rapport du dry run vérifié :
+
+```bash
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/purge-datasource?datasource=rakuten.com"
+curl -H "Authorization: $O4G_INTERNAL_API_KEY" https://api.nudger.fr/batch/purge-datasource
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/purge-datasource?datasource=rakuten.com&dryRun=false"
+```
+
+## Agrégation temps réel des fragments
+
+`DataFragmentStoreService.aggregateAndstore` (GOU-1700) lit les produits du lot par identifiant numérique
+(`ProductRepository.multiGetForAggregation`), jamais par la chaîne GTIN brute. Cet identifiant est
+`BarcodeValidationService.toProductId(gtin)`, la valeur du GTIN assaini, celle sous laquelle
+`IdentityAggregationService` indexe le produit (GOU-1841) : `07333394145372` et `7333394145372`, un UPC-A avec ou sans
+zéros de tête, un ISBN-10 (`2726862217`) et son ISBN-13 (`9782726862216`) désignent le même document. Un fragment au
+code-barres invalide est ignoré. Un produit n'est créé que si Elasticsearch le déclare absent ; un fragment dont la
+lecture a échoué est ignoré (log `error`), il ne recrée jamais le produit. Le GTIN référentiel du produit reste le
+GTIN assaini : `AttributeRealtimeAggregationService` ne l'écrase plus avec la forme brute d'un fragment (ISBN-10), qui
+reste seulement dans `gtinInfos`.
+
+`TaxonomyRealTimeAggregationService` garde la verticale courante quand le groupe EPREL du produit
+(`eprelDatas.productGroup`) figure dans ses `eprelGroupNames` : ni un jeton `excludingTokensFromCategoriesMatching`
+porté par une autre datasource, ni une catégorie qui ne correspond plus ne la retirent. EPREL n'attribue jamais seul
+une verticale. Dénombrement et reprise des produits touchés :
+[runbook](../docs/operations/product-recreation-recovery.md).
+
+### Slug produit figé
+
+`NamesAggregationService` (GOU-1708) ne génère le slug (`names.url`, base du `fullSlug` de front-api) que s'il
+manque pour une langue, ou si la verticale du produit diffère de `names.urlVertical`, la verticale mémorisée à sa
+génération (`_none` pour un slug généré sans verticale). Un changement de nom ou d'attributs, ou
+`forceNameGeneration`, ne change plus l'URL publique : ce flag ne régénère que titres et méta. `urlVertical` absent
+(slug antérieur à GOU-1708) = inconnu : le slug existant est figé et la verticale courante est mémorisée au passage
+suivant, sans migration. Un produit qui perd sa verticale garde son slug ; la lui rendre ne change pas l'URL. Les
+anciennes URL continuent de rediriger en 301 par GTIN vers le slug canonique.
+
+## Batch des verticales et indexation temps réel
+
+`BatchService.batch(vertical)` (13 h) charge les produits de la verticale, les complète, les agrège et les note, puis
+les met en file d'indexation complète. L'indexation temps réel continue pendant ce temps (GOU-1709) :
+
+- La file complète n'est jamais vidée : une mise à jour temps réel en file avant les produits du batch est indexée
+  avant eux (les workers gardent l'ordre de la file dans un bulk).
+- Par pages de `INDEXATION_PAGE_SIZE` (500), juste avant la mise en file, `ProductRepository.applyNewerOfferStates`
+  reprend `price`, `offersCount` et `lastChange` de l'état temps réel le plus récent (index, file complète, file
+  partielle) quand son `lastChange` est plus récent que celui du produit chargé. Le batch ne touche jamais
+  `lastChange`. Un état plus ancien ou égal ne remplace rien.
+- Les empreintes `datasourceCodes` restent celles du chargement : un fragment dont le contenu a changé pendant le batch
+  sera réagrégé en entier à sa prochaine ingestion.
+- Fenêtre restante : une mise à jour temps réel écrite entre la mise en file d'une page et son indexation (le temps de
+  vider la file, 5 000 produits au plus) peut encore être recouverte, et une mise à jour complète lue avant
+  l'indexation de la page peut recouvrir les champs calculés par le batch.

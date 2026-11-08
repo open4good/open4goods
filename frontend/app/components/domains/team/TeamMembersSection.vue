@@ -101,7 +101,7 @@ const { t } = useI18n()
   &__intro :deep(.text-content)
     padding: 0
 
-  &__intro :deep(.xwiki-sandbox)
+  &__intro :deep(.cms-sandbox)
     font-size: 1.05rem
     line-height: 1.7
 

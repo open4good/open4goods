@@ -7,7 +7,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.WritableRaster;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.ByteArrayOutputStream;
@@ -20,11 +25,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.model.resource.Resource;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -169,6 +178,43 @@ class ImageResizeInterceptorTest {
 
         assertThat(saved).isFalse();
         assertThat(cachedFile.exists()).isFalse();
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("imagesTheWebpWriterRejects")
+    void saveToCacheConvertsImagesTheWebpWriterRejects(String label, BufferedImage source) throws IOException {
+        // GOU-1155: unresized originals of these kinds answered 404 in prod
+        File cachedFile = new File(java.nio.file.Files.createTempDirectory("image-cache-test").toFile(), "C/H/E/key.cache.webp");
+        ImageResizeInterceptor interceptor = new ImageResizeInterceptor(resourceService, allowedResize, "http://example.com");
+
+        assertThat(interceptor.saveToCache(source, cachedFile)).isTrue();
+        BufferedImage written = ImageIO.read(cachedFile);
+        assertThat(written.getWidth()).isEqualTo(source.getWidth());
+        assertThat(written.getHeight()).isEqualTo(source.getHeight());
+    }
+
+    static Stream<Arguments> imagesTheWebpWriterRejects() {
+        return Stream.of(
+                Arguments.of("8-bit grayscale JPEG", new BufferedImage(7, 3, BufferedImage.TYPE_BYTE_GRAY)),
+                Arguments.of("16-bit grayscale PNG", new BufferedImage(7, 3, BufferedImage.TYPE_USHORT_GRAY)),
+                Arguments.of("16-bit RGB PNG", rgb48Image(7, 3)));
+    }
+
+    @Test
+    void saveToCacheWritesUsualJpegLayoutWithoutConversion() throws IOException {
+        // Layout ImageIO decodes a colour JPEG into, which the WebP writer accepts as is
+        File cachedFile = new File(java.nio.file.Files.createTempDirectory("image-cache-test").toFile(), "key.cache.webp");
+        ImageResizeInterceptor interceptor = new ImageResizeInterceptor(resourceService, allowedResize, "http://example.com");
+
+        assertThat(interceptor.saveToCache(new BufferedImage(7, 3, BufferedImage.TYPE_3BYTE_BGR), cachedFile)).isTrue();
+    }
+
+    /** Same layout as ImageIO decodes a 16 bits per channel RGB PNG into (custom type, 48 bits per pixel). */
+    private static BufferedImage rgb48Image(int width, int height) {
+        ComponentColorModel colorModel = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB),
+                new int[] { 16, 16, 16 }, false, false, Transparency.OPAQUE, DataBuffer.TYPE_USHORT);
+        WritableRaster raster = colorModel.createCompatibleWritableRaster(width, height);
+        return new BufferedImage(colorModel, raster, false, null);
     }
 
     @Test

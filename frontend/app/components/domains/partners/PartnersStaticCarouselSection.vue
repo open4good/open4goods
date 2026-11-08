@@ -28,6 +28,7 @@
           <v-carousel-item
             v-for="(slide, slideIndex) in slides"
             :key="`static-slide-${slideIndex}`"
+            eager
           >
             <div class="partners-static__slide">
               <article
@@ -61,6 +62,8 @@
                       v-if="partner.blocId"
                       :bloc-id="partner.blocId"
                       :ipsum-length="160"
+                      :allow-generated-placeholder="false"
+                      :fallback-text="fallbackDescription"
                     />
                     <p v-else class="text-body-2 text-neutral-secondary">
                       {{ fallbackDescription }}

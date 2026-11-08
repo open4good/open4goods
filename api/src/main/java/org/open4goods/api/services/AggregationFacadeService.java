@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.open4goods.api.config.yml.ApiProperties;
-import org.open4goods.embedding.config.DjlEmbeddingProperties;
-import org.open4goods.embedding.service.TextEmbeddingService;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.api.services.aggregation.aggregator.ScoringBatchedAggregator;
 import org.open4goods.api.services.aggregation.aggregator.StandardAggregator;
@@ -87,8 +85,6 @@ public class AggregationFacadeService {
 	private final BlablaService blablaService;
 	private final IcecatService icecatFeatureService;
 	private final IcecatFeatureResolver icecatFeatureResolver;
-	private final TextEmbeddingService embeddingService;
-	private final DjlEmbeddingProperties embeddingProperties;
 	private final SerialisationService serialisationService;
 
 	/** Shared realtime aggregator — assembled once and reused across all DataFragment ingestion calls. */
@@ -108,8 +104,6 @@ public class AggregationFacadeService {
 			final IcecatService icecatFeatureService,
 			final IcecatFeatureResolver icecatFeatureResolver,
 			final SerialisationService serialisationService,
-			final TextEmbeddingService embeddingService,
-			final DjlEmbeddingProperties embeddingProperties,
 			final BarcodeForensicsService barcodeForensicsService) {
 		this.evaluationService = evaluationService;
 		this.standardiserService = standardiserService;
@@ -124,8 +118,6 @@ public class AggregationFacadeService {
 		this.blablaService = blablaService;
 		this.icecatFeatureService = icecatFeatureService;
 		this.icecatFeatureResolver = icecatFeatureResolver;
-		this.embeddingService = embeddingService;
-		this.embeddingProperties = embeddingProperties;
 		this.serialisationService = serialisationService;
 		this.barcodeForensicsService = barcodeForensicsService;
 		this.realtimeAggregator = getStandardAggregator("realtime");
@@ -328,8 +320,7 @@ public class AggregationFacadeService {
 		services.add(new TaxonomyRealTimeAggregationService(aggLogger, verticalConfigService));
 		services.add(new AttributeRealtimeAggregationService(verticalConfigService, brandService, aggLogger, icecatFeatureResolver));
 		services.add(new UsageCostAggregationService(aggLogger));
-		services.add(new NamesAggregationService(aggLogger, verticalConfigService, blablaService,
-				embeddingService, embeddingProperties));
+		services.add(new NamesAggregationService(aggLogger, verticalConfigService, blablaService));
 		services.add(new PriceAggregationService(aggLogger));
 		services.add(new MediaAggregationService(aggLogger));
 

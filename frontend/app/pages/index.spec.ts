@@ -197,18 +197,6 @@ const messages: Record<string, unknown> = {
   'home.blog.readMore': 'Read article',
   'home.blog.emptyState': 'No blog posts yet.',
   'home.blog.carouselAriaLabel': 'Featured blog posts carousel',
-  'home.blog.items.first.title': 'How we keep our AI frugal',
-  'home.blog.items.first.date': '15 Jan 2025',
-  'home.blog.items.first.excerpt':
-    'The technical choices that keep Nudger’s computations low-carbon.',
-  'home.blog.items.second.title': 'Prioritising durability and repairability',
-  'home.blog.items.second.date': '8 Jan 2025',
-  'home.blog.items.second.excerpt':
-    'Why repairability weighs more in the Impact Score.',
-  'home.blog.items.third.title': 'Balancing price and impact, step by step',
-  'home.blog.items.third.date': '20 Dec 2024',
-  'home.blog.items.third.excerpt':
-    'Nudger’s method to align ecology and budget.',
   'home.objections.title': 'Straight questions, clear answers',
   'home.objections.subtitle': 'The topics we hear about the most.',
   'home.objections.items.aiEnergy.question': 'Does AI burn too much energy?',

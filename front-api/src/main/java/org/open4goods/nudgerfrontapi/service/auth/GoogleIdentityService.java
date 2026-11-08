@@ -7,11 +7,16 @@ import java.util.List;
 import org.open4goods.nudgerfrontapi.config.properties.GoogleSsoProperties;
 import org.open4goods.nudgerfrontapi.service.exception.GoogleIdentityVerificationException;
 import org.open4goods.nudgerfrontapi.service.exception.GoogleSsoDisabledException;
+import org.open4goods.nudgerfrontapi.utils.EmailMaskUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import jakarta.annotation.PostConstruct;
 
 /**
  * Verifies Google OIDC ID tokens forwarded by the Nuxt BFF and resolves the
@@ -22,9 +27,15 @@ import org.springframework.util.StringUtils;
  * allowlist is deny-by-default - an unverified or unlisted email never
  * receives a role.
  * </p>
+ * <p>
+ * At startup, {@link #checkAllowlistConfiguration()} reports an allowlist
+ * that cannot match any login (empty, or keys that lost their {@code @}).
+ * </p>
  */
 @Service
 public class GoogleIdentityService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GoogleIdentityService.class);
 
     private final GoogleSsoProperties properties;
     private volatile NimbusJwtDecoder decoder;
@@ -32,6 +43,38 @@ public class GoogleIdentityService {
 
     public GoogleIdentityService(GoogleSsoProperties properties) {
         this.properties = properties;
+    }
+
+    /**
+     * Report, without failing the startup, an enabled Google SSO whose allowlist
+     * cannot match any login.
+     * <p>
+     * A key without {@code @} is logged at ERROR: it almost always comes from a
+     * YAML map key written without brackets, whose {@code @} Spring Boot drops
+     * on binding, so every login of that user is refused with a 401. Keys are
+     * masked in the log. The application keeps starting so that the rest of
+     * front-api stays available; the log is the operator's signal.
+     * </p>
+     */
+    @PostConstruct
+    public void checkAllowlistConfiguration() {
+        if (!properties.isEnabled()) {
+            return;
+        }
+        if (properties.getRoleAllowlist().isEmpty()) {
+            LOGGER.warn("Google SSO is enabled but front.security.google-sso.role-allowlist is empty: "
+                    + "every Google login will be refused.");
+            return;
+        }
+        List<String> malformed = properties.malformedAllowlistKeys();
+        if (!malformed.isEmpty()) {
+            LOGGER.error("Google SSO role allowlist has {} key(s) that are not e-mail addresses ({}): "
+                    + "these entries never match a login. Spring Boot drops the '@' of an unbracketed map key; "
+                    + "write each key of front.security.google-sso.role-allowlist with brackets and quotes, "
+                    + "e.g. \"[adresse@domaine]\": [ROLE_SITEEDITOR].",
+                    malformed.size(),
+                    malformed.stream().map(EmailMaskUtils::mask).sorted().toList());
+        }
     }
 
     /**
@@ -86,7 +129,9 @@ public class GoogleIdentityService {
 
         List<String> roles = properties.rolesFor(email);
         if (roles.isEmpty()) {
-            throw new GoogleIdentityVerificationException("Email is not present in the environment role allowlist");
+            throw new GoogleIdentityVerificationException("Email " + EmailMaskUtils.mask(email)
+                    + " is not present in the environment role allowlist ("
+                    + properties.getRoleAllowlist().size() + " entries)");
         }
         return new GoogleIdentity(email, roles);
     }

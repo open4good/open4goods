@@ -3,62 +3,20 @@
     {
       "name": "embedding.enabled",
       "type": "java.lang.Boolean",
-      "description": "Enable or disable text embedding auto-configuration.",
+      "description": "Enable or disable image embedding auto-configuration.",
       "defaultValue": true
-    },
-    {
-      "name": "embedding.provider",
-      "type": "org.open4goods.embedding.config.DjlEmbeddingProperties$Provider",
-      "description": "Text embedding provider. Use djl for local inference or openai-compatible for a delegated /v1/embeddings endpoint.",
-      "defaultValue": "DJL"
-    },
-    {
-      "name": "embedding.text-model-url",
-      "type": "java.lang.String",
-      "description": "Remote identifier or URL for the text embedding model.",
-      "defaultValue": "djl://ai.djl.huggingface.pytorch/intfloat/multilingual-e5-small"
     },
     {
       "name": "embedding.fail-on-missing-model",
       "type": "java.lang.Boolean",
-      "description": "Fail application startup when no embedding model can be loaded.",
+      "description": "Fail application startup when the image embedding model cannot be loaded.",
       "defaultValue": true
-    },
-    {
-      "name": "embedding.embedding-dimension",
-      "type": "java.lang.Integer",
-      "description": "Expected embedding dimension for diagnostic logging.",
-      "defaultValue": 512
     },
     {
       "name": "embedding.image-input-size",
       "type": "java.lang.Integer",
-      "description": "Target input size (pixels) for vision models.",
+      "description": "Target input size in pixels for the vision model.",
       "defaultValue": 224
-    },
-    {
-      "name": "embedding.pooling-mode",
-      "type": "java.lang.String",
-      "description": "Pooling strategy for the DJL text translator.",
-      "defaultValue": "mean"
-    },
-    {
-      "name": "embedding.query-prefix",
-      "type": "java.lang.String",
-      "description": "Prefix added to query text when generating embeddings.",
-      "defaultValue": "query:"
-    },
-    {
-      "name": "embedding.passage-prefix",
-      "type": "java.lang.String",
-      "description": "Prefix added to passage text when generating embeddings.",
-      "defaultValue": "passage:"
-    },
-    {
-      "name": "embedding.engine",
-      "type": "java.lang.String",
-      "description": "Engine name supplied to DJL when loading models.",
-      "defaultValue": "PyTorch"
     },
     {
       "name": "embedding.vision-model-url",
@@ -67,28 +25,15 @@
       "defaultValue": "djl://ai.djl.pytorch/resnet18_embedding/0.0.1"
     },
     {
-      "name": "embedding.openai.base-url",
-      "type": "java.lang.String",
-      "description": "Base URL for an OpenAI-compatible embeddings API, without the /embeddings suffix.",
-      "defaultValue": "http://localhost:8080/v1"
+      "name": "embedding.predictor-pool-size",
+      "type": "java.lang.Integer",
+      "description": "Number of image predictors kept in the bounded pool."
     },
     {
-      "name": "embedding.openai.api-key",
-      "type": "java.lang.String",
-      "description": "Bearer token sent to the OpenAI-compatible embeddings API.",
-      "defaultValue": "localai"
-    },
-    {
-      "name": "embedding.openai.model",
-      "type": "java.lang.String",
-      "description": "Embedding model name exposed by the OpenAI-compatible embeddings API.",
-      "defaultValue": "text-embedding-model"
-    },
-    {
-      "name": "embedding.openai.timeout",
-      "type": "java.time.Duration",
-      "description": "Timeout for OpenAI-compatible embeddings API requests.",
-      "defaultValue": "60s"
+      "name": "embedding.async-loading",
+      "type": "java.lang.Boolean",
+      "description": "Load the image embedding model asynchronously at startup.",
+      "defaultValue": true
     }
   ]
 }

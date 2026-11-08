@@ -149,7 +149,7 @@ const hasLinkedIn = computed(() => Boolean(props.member.linkedInUrl))
     margin-top: 0.25rem
     color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity))
 
-  &__title :deep(.xwiki-sandbox)
+  &__title :deep(.cms-sandbox)
     font-size: 0.95rem
 
   &__bio
@@ -158,7 +158,7 @@ const hasLinkedIn = computed(() => Boolean(props.member.linkedInUrl))
   &__bio :deep(.text-content)
     padding: 0
 
-  &__bio :deep(.xwiki-sandbox)
+  &__bio :deep(.cms-sandbox)
     font-size: 0.95rem
     line-height: 1.6
 

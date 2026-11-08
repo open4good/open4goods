@@ -546,7 +546,7 @@ import {
   resolveFilterFieldTitle,
   resolveSortFieldTitle,
 } from '~/utils/_field-localization'
-import { resolveProductShortName } from '~/utils/_product-title-resolver'
+import { buildCategoryItemListJsonLd } from '~/utils/category-jsonld'
 import {
   deduplicateFieldMetadataList,
   normalizeFieldOptionsResponse,
@@ -556,6 +556,7 @@ import { hasAdminAccess } from '~~/shared/utils/_roles'
 import { resolveCategorySeoMeta } from '~/utils/seo/category-meta'
 
 const route = useRoute()
+const { $fetch: csrfFetch } = useNuxtApp()
 const router = useRouter()
 const { locale, t } = useI18n()
 const requestURL = useRequestURL()
@@ -924,26 +925,45 @@ useHead(() => ({
 
 const verticalId = computed(() => category.value?.id ?? null)
 
-const { data: initialProductsData } = await useAsyncData(
-  `category-products-${slug}-${subCategorySlug ?? 'base'}`,
-  async () => {
-    if (!verticalId.value) {
-      return null
-    }
+const productError = ref<string | null>(null)
 
-    return await $fetch<ProductSearchResponseDto>('/api/products/search', {
-      method: 'POST',
-      query: { include: LISTING_COMPONENTS },
-      body: {
-        verticalId: verticalId.value,
-        pageNumber: 0,
-        pageSize: CATEGORY_PAGE_SIZES[CATEGORY_DEFAULT_VIEW_MODE],
-        filters: subCategoryBaseFilters.value,
-      },
-    })
-  },
-  { server: true, immediate: true }
-)
+const { data: initialProductsData, error: initialProductsError } =
+  await useAsyncData(
+    `category-products-${slug}-${subCategorySlug ?? 'base'}`,
+    async () => {
+      if (!verticalId.value) {
+        return null
+      }
+
+      return await csrfFetch<ProductSearchResponseDto>('/api/products/search', {
+        method: 'POST',
+        query: { include: LISTING_COMPONENTS },
+        body: {
+          verticalId: verticalId.value,
+          pageNumber: 0,
+          pageSize: CATEGORY_PAGE_SIZES[CATEGORY_DEFAULT_VIEW_MODE],
+          filters: subCategoryBaseFilters.value,
+        },
+      })
+    },
+    { server: true, immediate: true }
+  )
+
+if (initialProductsError.value) {
+  // Surface the failure instead of silently rendering an empty "0 produits"
+  // page: without this, a backend/CSRF error during SSR looks identical to a
+  // category that genuinely has no matching products.
+  if (import.meta.server) {
+    console.error(
+      `[CategoryPage] Failed to load products for vertical "${verticalId.value}" (slug: ${slug}):`,
+      initialProductsError.value
+    )
+  }
+  productError.value =
+    initialProductsError.value instanceof Error
+      ? initialProductsError.value.message
+      : t('category.products.fetchError')
+}
 
 const productsData = ref<ProductSearchResponseDto | null>(
   initialProductsData.value ?? null
@@ -1272,7 +1292,6 @@ const normalizedSearchTerm = computed(() => (searchTerm.value ?? '').trim())
 const hasMinimumSearchLength = computed(
   () => normalizedSearchTerm.value.length >= MIN_QUERY_LENGTH
 )
-const shouldUseSemanticSearch = computed(() => hasMinimumSearchLength.value)
 const sortField = ref<string | null>(null)
 const sortOrder = ref<'asc' | 'desc'>('desc')
 const activeSubsetIds = ref<string[]>([])
@@ -1782,96 +1801,16 @@ const resultsCount = computed(
   () => productsData.value?.products?.page?.totalElements ?? 0
 )
 
-const productListJsonLd = computed(() => {
-  const products = currentProducts.value
-
-  if (!products.length) {
-    return null
-  }
-
-  const items = products.slice(0, 20).map((product, index) => {
-    const name =
-      resolveProductShortName(product, locale.value) ||
-      (product.gtin != null ? `GTIN ${product.gtin}` : undefined)
-
-    if (!name) {
-      return null
-    }
-
-    const productUrl = toAbsoluteUrl(product.fullSlug)
-    const imageUrl =
-      toAbsoluteUrl(product.resources?.coverImagePath) ??
-      toAbsoluteUrl(
-        product.resources?.externalCover ?? product.resources?.images?.[0]?.url
-      )
-
-    const offersCount = product.offers?.offersCount ?? 0
-    const bestPrice = product.offers?.bestPrice
-    const offer =
-      bestPrice?.price != null
-        ? {
-            '@type': 'Offer',
-            price: Number(bestPrice.price),
-            priceCurrency: bestPrice.currency ?? undefined,
-            url: productUrl ?? canonicalUrl.value,
-            availability:
-              offersCount > 0
-                ? 'https://schema.org/InStock'
-                : 'https://schema.org/OutOfStock',
-          }
-        : undefined
-
-    const productSchema: Record<string, unknown> = {
-      '@type': 'Product',
-      name,
-      url: productUrl,
-      image: imageUrl,
-      brand: product.identity?.brand
-        ? {
-            '@type': 'Brand',
-            name: product.identity.brand,
-          }
-        : undefined,
-      sku: product.identity?.model,
-      offers: offer,
-    }
-
-    if (product.gtin != null) {
-      const gtin = String(product.gtin)
-      productSchema.gtin = gtin
-      if (gtin.length === 13) {
-        productSchema.gtin13 = gtin
-      }
-    }
-
-    return {
-      '@type': 'ListItem',
-      position: index + 1,
-      url: productUrl,
-      item: Object.fromEntries(
-        Object.entries(productSchema).filter(([, value]) => value != null)
-      ),
-    }
-  })
-
-  const filteredItems = items.filter(
-    (item): item is Exclude<(typeof items)[number], null> => item !== null
-  )
-
-  if (!filteredItems.length) {
-    return null
-  }
-
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
+const productListJsonLd = computed(() =>
+  buildCategoryItemListJsonLd({
     name: seoTitle.value,
     numberOfItems: resultsCount.value,
-    itemListOrder: 'https://schema.org/ItemListUnordered',
     url: canonicalUrl.value,
-    itemListElement: filteredItems,
-  }
-})
+    productUrls: currentProducts.value
+      .slice(0, 20)
+      .map(product => toAbsoluteUrl(product.fullSlug)),
+  })
+)
 
 const structuredDataScripts = computed(() => {
   const scripts: StructuredDataScript[] = []
@@ -2094,7 +2033,6 @@ const viewComponentProps = computed(() => {
 })
 
 const loadingProducts = ref(false)
-const productError = ref<string | null>(null)
 const hasHydrated = ref(false)
 
 const skeletonCardCount = computed(() => (isDesktop.value ? 9 : 4))
@@ -2206,7 +2144,7 @@ const fetchProducts = async () => {
   productError.value = null
 
   try {
-    const response = await $fetch<ProductSearchResponseDto>(
+    const response = await csrfFetch<ProductSearchResponseDto>(
       '/api/products/search',
       {
         method: 'POST',
@@ -2218,7 +2156,6 @@ const fetchProducts = async () => {
           query: hasMinimumSearchLength.value
             ? normalizedSearchTerm.value
             : undefined,
-          semanticSearch: shouldUseSemanticSearch.value ? true : undefined,
           sort: sortRequest.value,
           filters: combinedFilters.value,
           aggs: buildAggregationRequest(

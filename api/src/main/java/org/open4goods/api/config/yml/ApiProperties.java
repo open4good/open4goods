@@ -99,6 +99,12 @@ public class ApiProperties {
 	private String adminKey;
 
 	/**
+	 * The dedicated key of the Metriks workflow (GOU-1412): it opens {@code /api/metriks/**} only. Absent or blank,
+	 * no Metriks key is accepted.
+	 */
+	private String metriksKey;
+
+	/**
 	 * The buffer size for AggregatedDatas indexation
 	 */
 	private Integer aggregatedDataElasticBuffer = 200;
@@ -296,6 +302,19 @@ public class ApiProperties {
 	private long resourceDeletionFolderRetentionMs = 604800000L;
 
 	/**
+	 * JSON file where the datasource purge (GOU-1815) writes its status at each progress step and at the end, and
+	 * which it reads back at startup. Defaults to {@code <rootFolder>/batch-reports/datasource-purge-status.json}.
+	 */
+	private String datasourcePurgeStatusFile;
+
+	/**
+	 * The datasource purge logs and persists its progress every this many scanned products (and at least every
+	 * {@code DatasourcePurgeService.PROGRESS_MAX_DELAY}).
+	 */
+	@Min(1)
+	private long datasourcePurgeProgressInterval = 50_000;
+
+	/**
 	 * Concurrency level for product completion tasks.
 	 */
 	private int completionConcurrency = 10;
@@ -337,6 +356,28 @@ public class ApiProperties {
 
 	public void setResourceDeletionFolderRetentionMs(long resourceDeletionFolderRetentionMs) {
 		this.resourceDeletionFolderRetentionMs = resourceDeletionFolderRetentionMs;
+	}
+
+	/**
+	 * @return the configured datasource purge status file, or {@code <rootFolder>/batch-reports/datasource-purge-status.json}
+	 */
+	public String getDatasourcePurgeStatusFile() {
+		if (datasourcePurgeStatusFile == null || datasourcePurgeStatusFile.isBlank()) {
+			return rootFolder + File.separator + "batch-reports" + File.separator + "datasource-purge-status.json";
+		}
+		return datasourcePurgeStatusFile;
+	}
+
+	public void setDatasourcePurgeStatusFile(String datasourcePurgeStatusFile) {
+		this.datasourcePurgeStatusFile = datasourcePurgeStatusFile;
+	}
+
+	public long getDatasourcePurgeProgressInterval() {
+		return datasourcePurgeProgressInterval;
+	}
+
+	public void setDatasourcePurgeProgressInterval(long datasourcePurgeProgressInterval) {
+		this.datasourcePurgeProgressInterval = datasourcePurgeProgressInterval;
 	}
 
 	public int getCompletionConcurrency() {
@@ -426,6 +467,14 @@ public class ApiProperties {
 
 	public void setAdminKey(final String adminKey) {
 		this.adminKey = adminKey;
+	}
+
+	public String getMetriksKey() {
+		return metriksKey;
+	}
+
+	public void setMetriksKey(final String metriksKey) {
+		this.metriksKey = metriksKey;
 	}
 
 	public String getDatafragmentsBackupFolder() {

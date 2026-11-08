@@ -1,0 +1,41 @@
+{
+  "pagination": {
+    "currentPage": 1,
+    "perPage": 1000,
+    "total": 1,
+    "from": 1,
+    "to": 1,
+    "lastPage": 1
+  },
+  "links": [
+    {
+      "linkId": 2048,
+      "linkType": "voucherOrDeal",
+      "programId": 300000101,
+      "sessionId": 3001,
+      "programName": "PRG-ACTIVE",
+      "linkName": "Promo Title",
+      "text": "<b>-20 % on appliances</b>",
+      "merchantId": 6600000101,
+      "merchantName": "Example Active Merchant",
+      "merchantUrl": "https://active.example",
+      "urlRedir": "https://active.example/promo",
+      "startDate": "2025-12-15",
+      "endDate": "2027-01-31",
+      "trackedLink": "https://track.example/promo",
+      "promo": {
+        "code": "PROMO20",
+        "voucher": "PROMO20",
+        "valueType": "percent",
+        "value": "20",
+        "promoType": "voucher",
+        "cumulativeWithPromo": false,
+        "onlyNewCustomer": true,
+        "description": "20% off",
+        "validityType": "dates",
+        "validityStartDate": "2026-01-01",
+        "validityEndDate": "2026-12-31"
+      }
+    }
+  ]
+}

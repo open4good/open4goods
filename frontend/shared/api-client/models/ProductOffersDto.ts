@@ -101,6 +101,24 @@ export interface ProductOffersDto {
    * @memberof ProductOffersDto
    */
   occasionTrend?: ProductPriceTrendDto
+  /**
+   * Link to an Amazon search by EAN, through /contrib/ so the click is recorded. Only set when the product has no offer and a valid GTIN. Not an offer: no price, never counted in offersCount.
+   * @type {string}
+   * @memberof ProductOffersDto
+   */
+  amazonSearchLink?: string
+  /**
+   * When a brand new offer was last seen (epoch millis), even if no offer is current. Dates the last known price of a product without offer: the price history only records price changes.
+   * @type {number}
+   * @memberof ProductOffersDto
+   */
+  newLastOfferSeen?: number
+  /**
+   * When an occasion offer was last seen (epoch millis), even if no offer is current.
+   * @type {number}
+   * @memberof ProductOffersDto
+   */
+  occasionLastOfferSeen?: number
 }
 
 /**
@@ -157,6 +175,14 @@ export function ProductOffersDtoFromJSONTyped(
       json['occasionTrend'] == null
         ? undefined
         : ProductPriceTrendDtoFromJSON(json['occasionTrend']),
+    amazonSearchLink:
+      json['amazonSearchLink'] == null ? undefined : json['amazonSearchLink'],
+    newLastOfferSeen:
+      json['newLastOfferSeen'] == null ? undefined : json['newLastOfferSeen'],
+    occasionLastOfferSeen:
+      json['occasionLastOfferSeen'] == null
+        ? undefined
+        : json['occasionLastOfferSeen'],
   }
 }
 
@@ -185,5 +211,8 @@ export function ProductOffersDtoToJSONTyped(
     occasionHistory: ProductPriceHistoryDtoToJSON(value['occasionHistory']),
     newTrend: ProductPriceTrendDtoToJSON(value['newTrend']),
     occasionTrend: ProductPriceTrendDtoToJSON(value['occasionTrend']),
+    amazonSearchLink: value['amazonSearchLink'],
+    newLastOfferSeen: value['newLastOfferSeen'],
+    occasionLastOfferSeen: value['occasionLastOfferSeen'],
   }
 }

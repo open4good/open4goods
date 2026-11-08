@@ -1,4 +1,13 @@
+import type { InjectionKey, Ref } from 'vue'
 import type { ProductAttributeSourceDto } from '~~/shared/api-client'
+
+/**
+ * Methodology page of the product's category, provided by the ImpactScore card
+ * to the criterion explanations it renders several levels below.
+ */
+export const impactMethodologyHrefKey: InjectionKey<Ref<string>> = Symbol(
+  'impactMethodologyHref'
+)
 
 export type DistributionBucket = {
   label: string

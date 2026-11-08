@@ -90,6 +90,22 @@
       </v-col>
     </v-row>
 
+    <v-alert
+      v-if="service.source === 'eprel'"
+      type="info"
+      variant="tonal"
+      density="compact"
+      icon="mdi-information-outline"
+      class="mt-4"
+    >
+      <p class="mb-1">
+        <strong>{{ t('services.attribution.eprel.label') }}:</strong>
+        {{ t('services.attribution.eprel.text') }}
+        <a href="https://eprel.ec.europa.eu" target="_blank" rel="noopener noreferrer">{{ t('services.attribution.eprel.linkText') }}</a>
+      </p>
+      <p class="mb-0">{{ t('services.attribution.eprel.free') }}</p>
+    </v-alert>
+
     <v-divider class="my-6" />
 
     <div class="mt-6">

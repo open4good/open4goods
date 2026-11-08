@@ -1,0 +1,33 @@
+{
+  "pagination": {
+    "currentPage": 2,
+    "perPage": 1000,
+    "total": 5,
+    "from": 3,
+    "to": 5,
+    "lastPage": 2
+  },
+  "feeds": [
+    {
+      "linkId": 1026,
+      "feedUrl": "feeds.example/closing-feed.csv",
+      "feedName": "Closing Merchant - Flux produits",
+      "programId": 300000202,
+      "merchantId": 6600000202,
+      "merchantName": "Example Closing Merchant"
+    },
+    {
+      "linkId": 1027,
+      "feedUrl": "https://feeds.example/unknown-feed.csv",
+      "feedName": "Feed Without Merchant",
+      "programId": 300000404
+    },
+    {
+      "linkId": 1028,
+      "feedName": "Active Merchant - Feed Without URL",
+      "programId": 300000101,
+      "merchantId": 6600000101,
+      "merchantName": "Example Active Merchant"
+    }
+  ]
+}

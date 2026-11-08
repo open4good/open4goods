@@ -4,14 +4,15 @@ import { computed, defineAsyncComponent } from 'vue'
 import { useAsyncData } from '#imports'
 import { useBlog } from '~/composables/blog/useBlog'
 import type { BlogPostDto } from '~~/shared/api-client'
+import { isBlogArticlePath } from '~/utils/blog-route'
 import { matchLocalizedWikiRouteByPath } from '~~/shared/utils/localized-routes'
 
 interface BlogArticle extends BlogPostDto {
   content?: string
 }
 
-const XwikiFullPageRenderer = defineAsyncComponent(
-  () => import('~/components/cms/XwikiFullPageRenderer.vue')
+const CmsFullPageRenderer = defineAsyncComponent(
+  () => import('~/components/cms/CmsFullPageRenderer.vue')
 )
 
 const route = useRoute()
@@ -23,6 +24,12 @@ const assistantCategoryMappings: Record<string, string> = {
 }
 
 const slug = computed(() => {
+  // The route is global: once navigation leaves /blog (e.g. to a product page
+  // handled by the catch-all), params.slug belongs to another page.
+  if (!isBlogArticlePath(route.path)) {
+    return null
+  }
+
   const rawSlug = route.params.slug
 
   if (Array.isArray(rawSlug)) {
@@ -58,6 +65,14 @@ await useAsyncData(
   }
 )
 
+if (!wikiRoute.value && !currentArticle.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Article not found',
+    fatal: true,
+  })
+}
+
 const article = computed(() => currentArticle.value as BlogArticle | null)
 
 const assistantConfigId = computed(() => slug.value)
@@ -67,7 +82,7 @@ const assistantCategoryId = computed(() =>
 </script>
 
 <template>
-  <XwikiFullPageRenderer v-if="wikiRoute" :page-id="wikiRoute.pageId" />
+  <CmsFullPageRenderer v-if="wikiRoute" :page-id="wikiRoute.pageId" />
   <v-container v-else class="py-10 px-4 mx-auto" max-width="xl">
     <v-row>
       <v-col cols="12">
@@ -90,6 +105,7 @@ const assistantCategoryId = computed(() =>
           :article="article"
           :assistant-id="assistantConfigId"
           :assistant-category-id="assistantCategoryId"
+          :offer-blocks-slug="slug"
         />
       </v-col>
     </v-row>

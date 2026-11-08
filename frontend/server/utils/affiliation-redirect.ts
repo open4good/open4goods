@@ -1,11 +1,25 @@
-import { createError, getRouterParam } from 'h3'
+import { isbot } from 'isbot'
+import {
+  createError,
+  getCookie,
+  getQuery,
+  getRouterParam,
+  send,
+  setResponseHeader,
+  setResponseStatus,
+} from 'h3'
 import type { H3Event } from 'h3'
 import {
   useAffiliationService,
   type AffiliationRedirectHttpMethod,
   type AffiliationRedirectResponse,
 } from '~~/shared/api-client/services/affiliation.services'
+import { sanitizeAffiliationContentPath } from '~~/shared/utils/affiliation-content-path'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
+import {
+  NAVIGATION_SIGNAL_COOKIE_NAME,
+  NAVIGATION_SIGNAL_COOKIE_VALUE,
+} from '~~/shared/utils/navigation-signal'
 
 import { extractBackendErrorDetails } from './log-backend-error'
 
@@ -34,6 +48,177 @@ const normalizeUserAgent = (
   return Array.isArray(rawUserAgent) ? rawUserAgent[0] : rawUserAgent
 }
 
+const MAX_ORIGIN_LENGTH = 200
+
+const firstHeader = (
+  value: string | string[] | undefined
+): string | undefined => (Array.isArray(value) ? value[0] : value)
+
+/**
+ * Returns the path (no query, no fragment, max 200 chars) of the same-site
+ * Referer, or undefined when absent, invalid or from another host.
+ */
+export const resolveAffiliationOrigin = (
+  event: H3Event
+): string | undefined => {
+  const referer = firstHeader(event.node.req.headers.referer)
+  const host = firstHeader(
+    event.node.req.headers['x-forwarded-host'] ?? event.node.req.headers.host
+  )
+    ?.split(',')[0]
+    ?.trim()
+    .toLowerCase()
+
+  if (!referer || !host) {
+    return undefined
+  }
+
+  try {
+    const url = new URL(referer)
+    if (url.host.toLowerCase() !== host || !url.pathname.startsWith('/')) {
+      return undefined
+    }
+    return url.pathname.slice(0, MAX_ORIGIN_LENGTH)
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * Article (blog/guide) the visitor read before the product page, from the
+ * `from` query set client-side (GOU-1829). Invalid values are ignored.
+ */
+export const resolveAffiliationContent = (
+  event: H3Event
+): string | undefined => {
+  const raw = getQuery(event).from
+  return (
+    sanitizeAffiliationContentPath(Array.isArray(raw) ? raw[0] : raw) ??
+    undefined
+  )
+}
+
+const MAX_LOGGED_USER_AGENT_LENGTH = 80
+const MAX_LOGGED_TOKEN_LENGTH = 6
+
+/**
+ * Parses the comma-separated extra user-agent patterns (case-insensitive substrings).
+ */
+const parseBlockedPatterns = (raw: unknown): string[] =>
+  typeof raw === 'string'
+    ? raw
+        .split(',')
+        .map(pattern => pattern.trim().toLowerCase())
+        .filter(Boolean)
+    : []
+
+const isBlockedUserAgent = (event: H3Event, userAgent?: string): boolean => {
+  if (!userAgent?.trim()) {
+    return true
+  }
+
+  if (isbot(userAgent)) {
+    return true
+  }
+
+  const config = useRuntimeConfig(event) as {
+    affiliationBlockedUserAgents?: string
+  }
+  const lowered = userAgent.toLowerCase()
+
+  return parseBlockedPatterns(config.affiliationBlockedUserAgents).some(
+    pattern => lowered.includes(pattern)
+  )
+}
+
+export const MISSING_NAVIGATION_SIGNAL_MESSAGE =
+  'Ouvrez ce lien depuis la fiche produit sur nudger.fr'
+
+const NAVIGATION_SIGNAL_LOG_INTERVAL_MS = 60_000
+
+const missingSignalLog = { lastLoggedAt: 0, refusedSinceLastLog: 0 }
+
+/**
+ * Kill switch (NUXT_AFFILIATION_REQUIRE_NAVIGATION_SIGNAL): only an explicit
+ * false disables the check, so a missing or mistyped value keeps it on.
+ */
+const isNavigationSignalRequired = (event: H3Event): boolean => {
+  const { affiliationRequireNavigationSignal: value } = useRuntimeConfig(
+    event
+  ) as { affiliationRequireNavigationSignal?: unknown }
+
+  if (typeof value === 'string') {
+    return !['false', '0', 'off', 'no'].includes(value.trim().toLowerCase())
+  }
+
+  return value !== false && value !== 0
+}
+
+/**
+ * A real visitor follows /contrib/ links from a page of the site, which set
+ * the navigation-signal cookie (GOU-1184). The Referer alone is not enough:
+ * a proxy network forged `Referer: https://nudger.fr/` (GOU-1520).
+ */
+const hasNavigationSignal = (event: H3Event): boolean =>
+  getCookie(event, NAVIGATION_SIGNAL_COOKIE_NAME) ===
+  NAVIGATION_SIGNAL_COOKIE_VALUE
+
+/**
+ * Aggregated warning: at most one line per interval with the refusal count
+ * and one truncated sample, never the full token nor the client IP.
+ */
+const logMissingNavigationSignal = (token: string, userAgent?: string) => {
+  missingSignalLog.refusedSinceLastLog += 1
+  const now = Date.now()
+
+  if (now - missingSignalLog.lastLoggedAt < NAVIGATION_SIGNAL_LOG_INTERVAL_MS) {
+    return
+  }
+
+  console.warn(
+    `Affiliation redirect refused without navigation signal: ${missingSignalLog.refusedSinceLastLog} request(s) since last report (sample user agent "${(userAgent ?? '').slice(0, MAX_LOGGED_USER_AGENT_LENGTH)}" token "${token.slice(0, MAX_LOGGED_TOKEN_LENGTH)}…")`
+  )
+  missingSignalLog.lastLoggedAt = now
+  missingSignalLog.refusedSinceLastLog = 0
+}
+
+const PLAIN_ERROR_BODIES: Record<number, string> = {
+  400: 'Bad Request',
+  403: 'Forbidden',
+  404: 'Not Found',
+  405: 'Method Not Allowed',
+  410: 'Gone',
+  429: 'Too Many Requests',
+}
+
+/**
+ * Sends a short text/plain error: /contrib/** must never render an HTML page
+ * (the Plausible script it carries would count robot visits).
+ */
+export const sendContribPlainError = (
+  event: H3Event,
+  error: unknown
+): Promise<void> => {
+  const { statusCode } = (error ?? {}) as { statusCode?: number }
+  const status = statusCode && statusCode >= 400 ? statusCode : 500
+
+  setResponseStatus(event, status)
+  setResponseHeader(event, 'Content-Type', 'text/plain; charset=utf-8')
+  setResponseHeader(event, 'X-Robots-Tag', 'noindex, nofollow')
+  setResponseHeader(event, 'Cache-Control', 'no-store')
+
+  // Short generic body: the upstream problem JSON (front-api) is not echoed.
+  // Only the missing navigation signal gets an explanation for real visitors.
+  const body =
+    status === 403 &&
+    (error as { statusMessage?: string }).statusMessage ===
+      MISSING_NAVIGATION_SIGNAL_MESSAGE
+      ? `${MISSING_NAVIGATION_SIGNAL_MESSAGE}.`
+      : (PLAIN_ERROR_BODIES[status] ?? 'Error')
+
+  return send(event, body, 'text/plain; charset=utf-8')
+}
+
 /**
  * Resolves an affiliation token while preserving the browser request context.
  */
@@ -55,11 +240,28 @@ export const resolveAffiliationRedirect = async (
   const userAgent = normalizeUserAgent(event.node.req.headers['user-agent'])
   const method = resolveMethod(event)
 
+  if (isBlockedUserAgent(event, userAgent)) {
+    console.warn(
+      `Affiliation redirect refused for robot user agent "${(userAgent ?? '').slice(0, MAX_LOGGED_USER_AGENT_LENGTH)}" token "${token.slice(0, MAX_LOGGED_TOKEN_LENGTH)}…"`
+    )
+    throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
+  }
+
+  if (isNavigationSignalRequired(event) && !hasNavigationSignal(event)) {
+    logMissingNavigationSignal(token, userAgent)
+    throw createError({
+      statusCode: 403,
+      statusMessage: MISSING_NAVIGATION_SIGNAL_MESSAGE,
+    })
+  }
+
   try {
     return await useAffiliationService(domainLanguage).resolveRedirect({
       token,
       userAgent,
       method,
+      origin: resolveAffiliationOrigin(event),
+      content: resolveAffiliationContent(event),
     })
   } catch (error) {
     const backendError = await extractBackendErrorDetails(error)

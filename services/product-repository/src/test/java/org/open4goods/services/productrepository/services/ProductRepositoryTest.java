@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import co.elastic.clients.elasticsearch._types.KnnSearch;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.IdsQuery;
 import java.util.Collection;
 import java.util.HashMap;
@@ -21,12 +22,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductPartialUpdateHolder;
 import org.open4goods.model.vertical.SubsetCriteriaOperator;
+import org.open4goods.services.productrepository.config.IndexationConfig;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.MultiGetItem;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
@@ -65,6 +69,23 @@ class ProductRepositoryTest
         Set<String> missingIds = ProductRepository.computeMissingIds(List.of(123L, 456L), cachedResults);
 
         assertThat(missingIds).containsExactlyInAnyOrder("456");
+    }
+
+    @Test
+    void multiGetForAggregationKeysByIdAndReportsFailedLookups()
+    {
+        // GOU-1700: the referential GTIN string ("07333394145372") is not the id
+        Product leadingZero = new Product();
+        leadingZero.setId(7333394145372L);
+        leadingZero.getAttributes().getReferentielAttributes().put(ReferentielKey.GTIN, "07333394145372");
+        MultiGetItem.Failure failure = MultiGetItem.Failure.of(ProductRepository.MAIN_INDEX_NAME, null, "8690842629433", null, null);
+        when(elasticsearchOperations.multiGet(any(org.springframework.data.elasticsearch.core.query.Query.class), eq(Product.class), eq(ProductRepository.CURRENT_INDEX)))
+                .thenReturn(List.of(MultiGetItem.of(leadingZero, null), MultiGetItem.of(null, failure), MultiGetItem.of(null, null)));
+
+        ProductRepository.AggregationLookup lookup = repository.multiGetForAggregation(List.of(7333394145372L, 8690842629433L, 1L));
+
+        assertThat(lookup.found()).containsOnlyKeys(7333394145372L);
+        assertThat(lookup.failedIds()).containsExactly(8690842629433L);
     }
 
     @Test
@@ -171,7 +192,7 @@ class ProductRepositoryTest
     }
 
     @Test
-    void countMainIndexHavingImpactScoreUsesImpactScoreField()
+    void countMainIndexHavingImpactScoreUsesEcoscoreField()
     {
         when(elasticsearchOperations.count(any(CriteriaQuery.class), eq(ProductRepository.CURRENT_INDEX))).thenReturn(4L);
 
@@ -179,8 +200,29 @@ class ProductRepositoryTest
 
         ArgumentCaptor<CriteriaQuery> queryCaptor = ArgumentCaptor.forClass(CriteriaQuery.class);
         verify(elasticsearchOperations).count(queryCaptor.capture(), eq(ProductRepository.CURRENT_INDEX));
-        assertThat(criteriaFields(queryCaptor.getValue().getCriteria())).contains("scores.IMPACTSCORE.value");
-        assertThat(criteriaFields(queryCaptor.getValue().getCriteria())).doesNotContain("scores.ECOSCORE.value");
+        assertThat(criteriaFields(queryCaptor.getValue().getCriteria())).contains("scores.ECOSCORE.value");
+        assertThat(criteriaFields(queryCaptor.getValue().getCriteria())).doesNotContain("scores.IMPACTSCORE.value");
+    }
+
+    @Test
+    void exportVerticalWithValidDateOrderByImpactScoreSortsByEcoscore()
+    {
+        org.springframework.data.elasticsearch.core.SearchHitsIterator<Product> emptyIterator =
+                org.mockito.Mockito.mock(org.springframework.data.elasticsearch.core.SearchHitsIterator.class);
+        when(elasticsearchOperations.searchForStream(any(NativeQuery.class), eq(Product.class), eq(ProductRepository.CURRENT_INDEX)))
+                .thenReturn(emptyIterator);
+
+        repository.exportVerticalWithValidDateOrderByImpactScore("tv", false);
+
+        ArgumentCaptor<NativeQuery> queryCaptor = ArgumentCaptor.forClass(NativeQuery.class);
+        verify(elasticsearchOperations).searchForStream(queryCaptor.capture(), eq(Product.class), eq(ProductRepository.CURRENT_INDEX));
+
+        NativeQuery submittedQuery = queryCaptor.getValue();
+        CriteriaQuery springDataQuery = (CriteriaQuery) submittedQuery.getSpringDataQuery();
+        assertThat(criteriaFields(springDataQuery.getCriteria())).contains("scores.ECOSCORE.value");
+        assertThat(criteriaFields(springDataQuery.getCriteria())).doesNotContain("scores.IMPACTSCORE.value");
+        assertThat(submittedQuery.getSortOptions()).hasSize(1);
+        assertThat(submittedQuery.getSortOptions().getFirst().field().field()).isEqualTo("scores.ECOSCORE.value");
     }
 
     @Test
@@ -201,10 +243,12 @@ class ProductRepositoryTest
         List<UpdateQuery> updates = updateCaptor.getValue();
         assertThat(updates).hasSize(1);
         assertThat(updates.getFirst().getId()).isEqualTo("42");
-        assertThat(updates.getFirst().getDocument())
-                .containsEntry("lastChange", 1L)
-                .containsEntry("offersCount", 2)
-                .containsEntry("price", "updated");
+        // A script replaces the fields: a doc merge would keep the indexed sub-fields the update leaves null (GOU-1784)
+        assertThat(updates.getFirst().getDocument()).isNull();
+        assertThat(updates.getFirst().getScript()).isEqualTo(ProductRepository.PARTIAL_UPDATE_SCRIPT);
+        assertThat(updates.getFirst().getLang()).isEqualTo("painless");
+        assertThat(updates.getFirst().getParams().get("changes"))
+                .isEqualTo(Map.of("lastChange", 1L, "offersCount", 2, "price", "updated"));
     }
 
     @Test
@@ -287,5 +331,111 @@ class ProductRepositoryTest
         }
         criteria.getCriteriaChain().forEach(child -> collectCriteriaFields(child, fields, visited));
         criteria.getSubCriteria().forEach(child -> collectCriteriaFields(child, fields, visited));
+    }
+
+    @Test
+    void fullProductExportsNeverExceedSafePageSize()
+    {
+        // ~21 KB per complete product: 1000 per page keeps responses far below the 100 MB client buffer
+        assertThat(ProductRepository.FULL_PRODUCT_PAGE_SIZE).isLessThanOrEqualTo(1000);
+
+        org.springframework.data.elasticsearch.core.SearchHitsIterator<Product> it =
+                org.mockito.Mockito.mock(org.springframework.data.elasticsearch.core.SearchHitsIterator.class);
+        when(elasticsearchOperations.searchForStream(any(org.springframework.data.elasticsearch.core.query.Query.class), eq(Product.class), eq(ProductRepository.CURRENT_INDEX)))
+                .thenReturn(it);
+
+        repository.exportAll();
+        repository.exportAll("tv");
+        repository.exportAll((String[]) null);
+        repository.exportAll(new String[0]);
+
+        ArgumentCaptor<org.springframework.data.elasticsearch.core.query.Query> captor =
+                ArgumentCaptor.forClass(org.springframework.data.elasticsearch.core.query.Query.class);
+        verify(elasticsearchOperations, org.mockito.Mockito.times(4))
+                .searchForStream(captor.capture(), eq(Product.class), eq(ProductRepository.CURRENT_INDEX));
+        assertThat(captor.getAllValues()).allSatisfy(q -> {
+            assertThat(q.getPageable().isPaged()).isTrue();
+            assertThat(q.getPageable().getPageSize()).isLessThanOrEqualTo(ProductRepository.FULL_PRODUCT_PAGE_SIZE);
+        });
+    }
+
+    @Test
+    void applyNewerOfferStatesReadsOnlyOfferFieldsChangedSinceTheOldestProduct()
+    {
+        // GOU-1709: one index read per batch page, restricted to its ids and to documents changed since
+        IndexationConfig indexationConfig = new IndexationConfig();
+        indexationConfig.setProductWorkers(0);
+        indexationConfig.setPartialProductWorkers(0);
+        ProductRepository batchRepository = new ProductRepository(indexationConfig, elasticsearchOperations);
+        Product older = new Product();
+        older.setId(7333394145372L);
+        older.setLastChange(1_000L);
+        Product newer = new Product();
+        newer.setId(8690842629433L);
+        newer.setLastChange(2_000L);
+        Product indexed = new Product();
+        indexed.setId(8690842629433L);
+        indexed.setLastChange(1_500L);
+        indexed.setOffersCount(3);
+        org.springframework.data.elasticsearch.core.SearchHit<Product> hit =
+                org.mockito.Mockito.mock(org.springframework.data.elasticsearch.core.SearchHit.class);
+        when(hit.getContent()).thenReturn(indexed);
+        when(searchHits.getSearchHits()).thenReturn(List.of(hit));
+        when(elasticsearchOperations.search(any(org.springframework.data.elasticsearch.core.query.Query.class), eq(Product.class), eq(ProductRepository.CURRENT_INDEX)))
+                .thenReturn(searchHits);
+
+        // The indexed state is newer than the oldest product of the page, not than this product
+        assertThat(batchRepository.applyNewerOfferStates(List.of(older, newer))).isZero();
+        assertThat(newer.getOffersCount()).isZero();
+        assertThat(newer.getLastChange()).isEqualTo(2_000L);
+
+        ArgumentCaptor<NativeQuery> captor = ArgumentCaptor.forClass(NativeQuery.class);
+        verify(elasticsearchOperations).search(captor.capture(), eq(Product.class), eq(ProductRepository.CURRENT_INDEX));
+        NativeQuery submitted = captor.getValue();
+        BoolQuery bool = submitted.getQuery().bool();
+        assertThat(bool.filter()).filteredOn(f -> f.isIds()).singleElement()
+                .satisfies(f -> assertThat(f.ids().values()).containsExactlyInAnyOrder("7333394145372", "8690842629433"));
+        assertThat(bool.filter()).filteredOn(f -> f.isRange()).singleElement().satisfies(f -> {
+            assertThat(f.range().date().field()).isEqualTo("lastChange");
+            assertThat(f.range().date().gt()).isEqualTo("1000");
+        });
+        assertThat(submitted.getSourceFilter().getIncludes())
+                .containsExactlyInAnyOrder("id", "lastChange", "price", "offersCount");
+        assertThat(submitted.getPageable().getPageSize()).isEqualTo(2);
+    }
+
+    @Test
+    void exportVerticalForSitemapSelectsRecentOfferOrImpactScoreAmongNonExcluded() throws Exception
+    {
+        // GOU-1744: a product without offer but with an impact score stays in the sitemap
+        org.springframework.data.elasticsearch.core.SearchHitsIterator<Product> iterator =
+                org.mockito.Mockito.mock(org.springframework.data.elasticsearch.core.SearchHitsIterator.class);
+        when(iterator.stream()).thenReturn(java.util.stream.Stream.empty());
+        when(elasticsearchOperations.searchForStream(any(org.springframework.data.elasticsearch.core.query.Query.class),
+                eq(Product.class), any(org.springframework.data.elasticsearch.core.mapping.IndexCoordinates.class)))
+                .thenReturn(iterator);
+
+        repository.exportVerticalForSitemap("tv").close();
+
+        ArgumentCaptor<org.springframework.data.elasticsearch.core.query.Query> captor =
+                ArgumentCaptor.forClass(org.springframework.data.elasticsearch.core.query.Query.class);
+        verify(elasticsearchOperations).searchForStream(captor.capture(), eq(Product.class),
+                any(org.springframework.data.elasticsearch.core.mapping.IndexCoordinates.class));
+        BoolQuery root = ((NativeQuery) captor.getValue()).getQuery().bool();
+        assertThat(root.must()).hasSize(3);
+        assertThat(root.must().get(0).term().field()).isEqualTo("vertical");
+        assertThat(root.must().get(0).term().value().stringValue()).isEqualTo("tv");
+        assertThat(root.must().get(1).term().field()).isEqualTo("excluded");
+        assertThat(root.must().get(1).term().value().booleanValue()).isFalse();
+
+        // (recent offer AND offersCount > 0) OR score present, at least one clause
+        BoolQuery or = root.must().get(2).bool();
+        assertThat(or.minimumShouldMatch()).isEqualTo("1");
+        assertThat(or.should()).hasSize(2);
+        BoolQuery recentOffer = or.should().get(0).bool();
+        assertThat(recentOffer.must()).hasSize(2);
+        assertThat(recentOffer.must().get(0).range().date().field()).isEqualTo("lastChange");
+        assertThat(recentOffer.must().get(1).range().number().field()).isEqualTo("offersCount");
+        assertThat(or.should().get(1).exists().field()).isEqualTo("scores.ECOSCORE.value");
     }
 }

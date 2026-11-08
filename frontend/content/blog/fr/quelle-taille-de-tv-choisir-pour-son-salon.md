@@ -1,18 +1,18 @@
 ---
-title: "Quelle taille de TV choisir pour son salon ?"
-description: "Vous vous demandez quelle taille de TV choisir pour votre salon ? Réponse dans cet article par Nudger !"
+title: "Quelle taille de TV pour un salon ? Tableau selon la distance"
+description: "Taille de TV selon la distance de recul : tableau 43 à 85 pouces, résolution et pièce, avec les modèles les mieux notés pour leur impact."
 author: o4g
 language: fr
 tags:
   - "tv"
 date: 2025-08-01T02:50:05Z
-updatedAt: 2026-01-13T22:25:56Z
+updatedAt: 2026-10-26T08:36:15Z
 draft: false
 published: true
 image: /images/blog/quelle-taille-de-tv-choisir-pour-son-salon/Articles-4-.png
 ---
 
-Choisir une télé, ce n'est pas qu'une affaire de pixels et de prix. C'est aussi une question de **taille**. Et quand on parle de taille d'écran, les doutes commencent : _est-ce qu'un 55 pouces, ce n'est pas trop grand ? Est-ce qu'un 43 pouces, ce n'est pas trop petit ? Et 75 pouces, c'est pas carrément une salle de ciné ? _Pas de panique. Nudger vous explique tout, avec des **conseils simples**, des exemples concrets, et surtout **des repères clairs** pour ne plus se tromper. Objectif : trouver la **taille idéale** de TV pour **votre salon**, pas celui de vos voisins !
+Choisir une télé, ce n'est pas qu'une affaire de pixels et de prix. C'est aussi une question de **taille**. Et quand on parle de taille d'écran, les doutes commencent : _est-ce qu'un 55 pouces, ce n'est pas trop grand ? Est-ce qu'un 43 pouces, ce n'est pas trop petit ? Et 75 pouces, c'est pas carrément une salle de ciné ?_ Pas de panique. Nudger vous explique tout, avec des **conseils simples**, des exemples concrets, et surtout **des repères clairs** pour ne plus se tromper. Objectif : trouver la **taille idéale** de TV pour **votre salon**, pas celui de vos voisins !
 
 
 ## La taille d'écran de sa TV : de quoi parle-t-on exactement ?
@@ -30,17 +30,18 @@ La question à vous poser n'est pas “Quelle taille me plaît ?”, mais plutô
 
 La **distance de recul** est en fait l'espace entre votre canapé et votre téléviseur. Elle détermine **le confort visuel** (ni trop proche, ni trop loin). Trop près, l'image devient pixelisée et fatigante. Trop loin, vous perdez les détails et l'immersion.
 
-💡 **Voici une règle simple :** Pour une télé en 4K UHD, multipliez la taille de l'écran (en pouces) par 1,2 pour obtenir la **distance idéale en centimètres**.
+💡 **Voici une règle simple :** Pour une télé en 4K UHD, convertissez la diagonale en centimètres (**pouces x 2,54**), puis multipliez-la par **1,2 à 1,5** pour obtenir la **distance de recul idéale**. Exemple : 55 pouces ≈ 140 cm, soit un recul de 1,70 m à 2,10 m.
 
 | **Taille de TV** | **Distance conseillée (4K UHD)** |
 | --- | --- |
-| 43 pouces | ~~1,30 m à 1,60 m |
-| 50 pouces | ~~1,50 m à 1,80 m |
-| 55 pouces | ~~1,70 m à 2,10 m |
-| 65 pouces | ~~2,00 m à 2,40 m |
-| 75 pouces | ~~2,30 m à 2,80 m |
+| 43 pouces | 1,30 m à 1,60 m |
+| 50 pouces | 1,50 m à 1,90 m |
+| 55 pouces | 1,70 m à 2,10 m |
+| 65 pouces | 2,00 m à 2,50 m |
+| 75 pouces | 2,30 m à 2,90 m |
+| 85 pouces | 2,60 m à 3,20 m |
 
-👉 Si votre canapé est à **2 mètres** du mur, une télé entre **50 et 65 pouces** est idéale.
+👉 Si votre canapé est à **2 mètres** du mur, une télé entre **50 et 65 pouces** est idéale. Vous cherchez un modèle ? Parcourez toutes les [télévisions comparées par Nudger](/televiseurs) et leur Impact Score.
 
 
 ## Autres critères à prendre en compte
@@ -61,7 +62,7 @@ En clair : vous pouvez opter pour un écran plus grand dans un petit salon, **si
 
 Plus l'écran est grand, plus il consomme. Un écran de 75 pouces en classe F peut consommer **deux à trois fois plus qu'un écran de 50 pouces en classe B**.
 
-👉 Chez Nudger, on vous recommande toujours de vérifier la **classe énergétique** avant d'acheter. Parce que la taille, c'est bien. Mais **le bon équilibre entre confort et impact énergétique**, c'est mieux. Et pour vous aider à bien vous y prendre, vous pouvez utiliser notre Impact Score qui tient notamment compte de la classe énergétique des téléviseurs !
+👉 Chez Nudger, on vous recommande toujours de vérifier la **classe énergétique** avant d'acheter. Parce que la taille, c'est bien. Mais **le bon équilibre entre confort et impact énergétique**, c'est mieux. Et pour vous aider à bien vous y prendre, vous pouvez utiliser notre Impact Score qui tient notamment compte de la classe énergétique des téléviseurs ! Par exemple, découvrez la fiche du [LG 55QNED86A6A](/televiseurs/8806096309667-tv-lg-55qned86a6a-2025) ou celle du [Samsung QE65QN70HAU](/televiseurs/8806099122744-tv-samsung-qe65qn70hau).
 
 
 ## Alors, comment bien choisir la taille de TV pour son salon ?

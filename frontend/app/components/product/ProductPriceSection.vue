@@ -18,6 +18,13 @@
         >
           {{ $t('product.price.noOffersBanner') }}
         </v-alert>
+        <ProductAmazonSearchLink
+          v-if="showNoOffersBanner && showAmazonSearchLink && amazonSearchLink"
+          :link="amazonSearchLink"
+          :gtin="productGtin"
+          placement="price-section-amazon-search"
+          class="product-price__amazon-search"
+        />
 
         <v-row align="center" justify="center">
           <v-col cols="12" md="8">
@@ -77,6 +84,7 @@
                   :href="resolveOfferLink(item)"
                   target="_blank"
                   :rel="AFFILIATE_LINK_REL"
+                  :referrerpolicy="AFFILIATE_LINK_REFERRER_POLICY"
                   icon
                   variant="text"
                   size="small"
@@ -189,6 +197,7 @@
                     :href="bestNewOfferLink"
                     target="_blank"
                     :rel="AFFILIATE_LINK_REL"
+                    :referrerpolicy="AFFILIATE_LINK_REFERRER_POLICY"
                     class="product-price__history-cta"
                     @click="
                       handleOfferRedirectClick(
@@ -229,6 +238,7 @@
                     v-else
                     :icon="mdiTagOffOutline"
                     :label="$t('product.price.noOffers.new')"
+                    :hint="lastKnownNewPriceLabel"
                   />
 
                   <div v-if="newStats" class="product-price__metrics-summary">
@@ -386,6 +396,7 @@
                     :href="bestOccasionOfferLink"
                     target="_blank"
                     :rel="AFFILIATE_LINK_REL"
+                    :referrerpolicy="AFFILIATE_LINK_REFERRER_POLICY"
                     class="product-price__history-cta"
                     @click="
                       handleOfferRedirectClick(
@@ -426,6 +437,7 @@
                     v-else
                     :icon="mdiRecycle"
                     :label="$t('product.price.noOffers.occasion')"
+                    :hint="lastKnownOccasionPriceLabel"
                   />
                   <div
                     v-if="occasionStats"
@@ -575,8 +587,10 @@ import {
 import { useAnalytics } from '~/composables/useAnalytics'
 import {
   resolveOfferHref,
+  AFFILIATE_LINK_REFERRER_POLICY,
   AFFILIATE_LINK_REL,
   formatPrice,
+  openAffiliateLinkInNewTab,
   NEW_CONDITION_COLOR,
   OCCASION_CONDITION_COLOR,
 } from '~/utils/_product-pricing'
@@ -588,6 +602,7 @@ import type {
 import { ensureECharts } from '~/utils/echarts-loader'
 import ProductPriceEmptyCard from '~/components/product/ProductPriceEmptyCard.vue'
 import ProductPriceVerdict from '~/components/product/ProductPriceVerdict.vue'
+import ProductAmazonSearchLink from '~/components/product/ProductAmazonSearchLink.vue'
 
 let echartsRegistered = false
 
@@ -636,6 +651,14 @@ const props = defineProps({
   product: {
     type: Object as PropType<ProductDto>,
     default: undefined,
+  },
+  /**
+   * Show the Amazon search link of a product without offer here, when the
+   * hero pricing panel (its usual place) is hidden (GOU-1396).
+   */
+  showAmazonSearchLink: {
+    type: Boolean,
+    default: false,
   },
 })
 
@@ -960,6 +983,68 @@ const bestOccasionOffer = computed(
   () => props.offers?.bestOccasionOffer ?? null
 )
 
+// Explicit UTC zone: SSR runs in UTC and an implicit zone breaks hydration.
+const lastKnownPriceDateFormatter = computed(
+  () =>
+    new Intl.DateTimeFormat(locale.value, {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    })
+)
+
+/**
+ * Dates the last known price when no offer is live, so the price statistics
+ * are not read as a current price next to the "no offers" notice. The price is
+ * the most recent history point; the date is when an offer was last seen
+ * (`lastOfferSeen`), since the history only records price changes (GOU-1699).
+ */
+const buildLastKnownPriceLabel = (
+  entries: HistoryEntry[],
+  lastOfferSeen: number | null | undefined
+): string | null => {
+  const latest = entries.reduce<HistoryEntry | null>(
+    (acc, entry) => (!acc || entry.timestamp > acc.timestamp ? entry : acc),
+    null
+  )
+
+  if (!latest) {
+    return null
+  }
+
+  const lastSeen =
+    typeof lastOfferSeen === 'number' && lastOfferSeen > latest.timestamp
+      ? lastOfferSeen
+      : latest.timestamp
+
+  return String(
+    t('product.price.lastKnownPrice', {
+      price: formatCurrency(
+        latest.price,
+        props.offers?.bestPrice?.currency ?? 'EUR'
+      ),
+      date: lastKnownPriceDateFormatter.value.format(new Date(lastSeen)),
+    })
+  )
+}
+
+const lastKnownNewPriceLabel = computed(() =>
+  bestNewOffer.value
+    ? null
+    : buildLastKnownPriceLabel(newHistory.value, props.offers?.newLastOfferSeen)
+)
+const lastKnownOccasionPriceLabel = computed(() =>
+  bestOccasionOffer.value
+    ? null
+    : buildLastKnownPriceLabel(
+        occasionHistory.value,
+        props.offers?.occasionLastOfferSeen
+      )
+)
+
+const affiliationContentPath = useAffiliationContentPath()
+
 const resolveOfferLink = (
   offer: ProductAggregatedPriceDto | null | undefined
 ): string | null => {
@@ -967,7 +1052,7 @@ const resolveOfferLink = (
     return null
   }
 
-  return resolveOfferHref(offer) ?? null
+  return resolveOfferHref(offer, affiliationContentPath.value) ?? null
 }
 
 const bestNewOfferLink = computed(() => resolveOfferLink(bestNewOffer.value))
@@ -1007,6 +1092,8 @@ const allOffers = computed(() => {
 const showNoOffersBanner = computed(
   () => !allOffers.value.length && !bestNewOffer.value
 )
+
+const amazonSearchLink = computed(() => props.offers?.amazonSearchLink ?? null)
 
 const competitionLevel = computed(() => {
   const count = allOffers.value.length
@@ -1098,10 +1185,10 @@ const onRowClick = (
   const link = resolveOfferLink(item)
   if (link) {
     handleOfferRedirectClick(item, 'offers-table', link)
-    // noopener/noreferrer: this is a whole-row click convenience opening the
-    // same href as the row's real `AFFILIATE_LINK_REL` anchor (item.actions
-    // slot above) - that anchor is the crawlable, rel="sponsored ..." link.
-    window.open(link, '_blank', 'noopener,noreferrer')
+    // Whole-row click convenience opening the same href as the row's real
+    // `AFFILIATE_LINK_REL` anchor (item.actions slot above), which is the
+    // crawlable rel="sponsored ..." link; same rel and referrer policy.
+    openAffiliateLinkInNewTab(link)
   }
 }
 
@@ -1560,6 +1647,10 @@ onBeforeUnmount(() => {
 .product-price__no-offers {
   margin-top: 1rem;
   border-radius: 16px;
+}
+
+.product-price__amazon-search {
+  margin-top: 0.75rem;
 }
 
 .product-price__competition-card {

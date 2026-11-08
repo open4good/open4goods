@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * Request wrapper for search aggregations.
  */
 public record AggregationRequestDto(
-        @Schema(description = "List of aggregations to compute")
+        @Schema(description = "List of aggregations to compute (at most 20 are honoured)")
         List<Agg> aggs) {
 
     /** Aggregation definition. */
@@ -22,7 +22,7 @@ public record AggregationRequestDto(
             Double min,
             @Schema(description = "Maximum value for range aggregations")
             Double max,
-            @Schema(description = "Maximum number of buckets to return. For range aggregations this represents the desired bucket count.", defaultValue = "10")
+            @Schema(description = "Maximum number of buckets to return, capped server-side to 200. For range aggregations this represents the desired bucket count.", defaultValue = "10", maximum = "200")
             Integer buckets,
             @Schema(description = "Interval size for range aggregations. When provided it overrides the automatic bucket interval computation.")
             Double step) {

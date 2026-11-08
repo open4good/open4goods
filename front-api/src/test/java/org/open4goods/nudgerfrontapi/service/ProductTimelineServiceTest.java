@@ -65,6 +65,29 @@ class ProductTimelineServiceTest {
     }
 
     @Test
+    void lastSeenEventUsesTheRecordedLastOfferDateOnceOffersAreDropped() {
+        Product product = new Product(6L);
+        AggregatedPrices prices = new AggregatedPrices();
+        long priceChanged = 1_793_508_857_451L;
+        long lastOfferSeen = 1_793_683_753_986L;
+        prices.setNewPricehistory(List.of(
+                new PriceHistory(1_791_325_627_079L, 449.99),
+                new PriceHistory(priceChanged, 849.99)));
+        prices.getLastOfferSeen().put(ProductCondition.NEW, lastOfferSeen);
+        product.setPrice(prices);
+
+        ProductTimelineDto dto = service.mapTimeline(product);
+
+        assertThat(dto.events())
+                .filteredOn(event -> ProductTimelineEventType.PRICE_LAST_SEEN_NEW.equals(event.type()))
+                .singleElement()
+                .satisfies(event -> {
+                    assertThat(event.timestamp()).isEqualTo(lastOfferSeen);
+                    assertThat(event.price()).isEqualTo(849.99);
+                });
+    }
+
+    @Test
     void mapTimelineIncludesEprelEvents() {
         Product product = new Product(3L);
         EprelProduct eprel = new EprelProduct();

@@ -6,6 +6,7 @@
       :href="bestOffer.url || undefined"
       target="_blank"
       :rel="AFFILIATE_LINK_REL"
+      :referrerpolicy="AFFILIATE_LINK_REFERRER_POLICY"
       class="product-micro-price__main-btn"
       color="primary"
       variant="flat"
@@ -45,7 +46,9 @@
         <v-btn
           v-bind="activatorProps"
           class="product-micro-price__more-btn"
-          :color="condition === 'new' ? NEW_CONDITION_COLOR : OCCASION_CONDITION_COLOR"
+          :color="
+            condition === 'new' ? NEW_CONDITION_COLOR : OCCASION_CONDITION_COLOR
+          "
           variant="tonal"
           size="small"
           height="32"
@@ -61,6 +64,7 @@
           :href="offer.url || undefined"
           target="_blank"
           :rel="AFFILIATE_LINK_REL"
+          :referrerpolicy="AFFILIATE_LINK_REFERRER_POLICY"
           class="product-micro-price__list-item"
           rounded="lg"
         >
@@ -97,10 +101,12 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useAffiliationContentPath } from '~/composables/useAffiliationContentPath'
 import { mdiTag, mdiRecycle, mdiChevronDown, mdiStore } from '@mdi/js'
 import type { ProductDto } from '~~/shared/api-client'
 import {
   resolveOfferHref,
+  AFFILIATE_LINK_REFERRER_POLICY,
   AFFILIATE_LINK_REL,
   NEW_CONDITION_COLOR,
   OCCASION_CONDITION_COLOR,
@@ -140,6 +146,8 @@ type MicroPriceOffer = {
   url?: string
 }
 
+const affiliationContentPath = useAffiliationContentPath()
+
 // Normalized Best Offer
 const bestOffer = computed<MicroPriceOffer | null>(() => {
   const raw = resolveBestOffer()
@@ -150,7 +158,7 @@ const bestOffer = computed<MicroPriceOffer | null>(() => {
     label: raw.merchantName || 'Unknown',
     priceLabel: raw.priceLabel || 'N/A',
     favicon: raw.merchantFavicon,
-    url: resolveOfferHref(raw),
+    url: resolveOfferHref(raw, affiliationContentPath.value),
   }
 })
 
@@ -174,7 +182,7 @@ const alternatives = computed<MicroPriceOffer[]>(() => {
       label: o.merchantName || 'Unknown',
       priceLabel: o.priceLabel || 'N/A',
       favicon: o.merchantFavicon,
-      url: resolveOfferHref(o),
+      url: resolveOfferHref(o, affiliationContentPath.value),
     }))
 })
 

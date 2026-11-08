@@ -7,6 +7,7 @@ import java.util.List;
 import org.open4goods.nudgerfrontapi.config.properties.GoogleSsoProperties;
 import org.open4goods.nudgerfrontapi.config.properties.SecurityProperties;
 import org.open4goods.nudgerfrontapi.service.exception.GoogleIdentityVerificationException;
+import org.open4goods.nudgerfrontapi.utils.EmailMaskUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -125,7 +126,8 @@ public class JwtService {
             List<String> allowlisted = googleSsoProperties.rolesFor(subject);
             if (allowlisted.isEmpty()) {
                 throw new GoogleIdentityVerificationException(
-                        "Email no longer present in the Google SSO role allowlist: " + subject);
+                        "Email no longer present in the Google SSO role allowlist: "
+                                + EmailMaskUtils.mask(subject));
             }
             effectiveRoles = tokenRoles.stream().filter(allowlisted::contains).toList();
         }

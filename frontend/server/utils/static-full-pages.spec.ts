@@ -9,8 +9,14 @@ describe('getStaticFullPage', () => {
     expect(result?.pageTitle).toBe('Les mentions légales et les CGU de Nudger')
     expect(result?.metaTitle).toBe('Mentions légales | Nudger')
     expect(result?.width).toBe('container-semi-fluid')
-    expect(result?.editLink).toBeNull()
     expect(result?.htmlContent).toContain('<h2>1. Présentation du site et de l’éditeur</h2>')
+  })
+
+  it('carries the Amazon Associates disclosure verbatim in the legal notice (GOU-1396)', () => {
+    const result = getStaticFullPage('webpages:default:legal-notice:WebHome', 'fr')
+    expect(result?.htmlContent).toContain(
+      'En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.'
+    )
   })
 
   it('returns the real data-privacy page with its metadata', () => {

@@ -1,11 +1,8 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -15,14 +12,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.open4goods.embedding.service.DjlTextEmbeddingService;
-import org.open4goods.embedding.config.DjlEmbeddingProperties;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.services.textgen.BlablaService;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.Localisable;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductTexts;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.PrefixedAttrText;
@@ -40,58 +36,14 @@ class NamesAggregationServiceTest {
 	@Mock
 	private BlablaService blablaService;
 
-	@Mock
-	private DjlTextEmbeddingService embeddingService;
-
-	private DjlEmbeddingProperties embeddingProperties;
-
 	private NamesAggregationService service;
 
 	@BeforeEach
 	void setUp() {
-		embeddingProperties = new DjlEmbeddingProperties();
 		service = new NamesAggregationService(
 				LoggerFactory.getLogger(NamesAggregationService.class),
 				verticalsConfigService,
-				blablaService,
-				embeddingService,
-				embeddingProperties);
-	}
-
-	@Test
-	void buildEmbeddingText_shouldBlendBrandModelOffersAndVertical() {
-		VerticalConfig config = buildVerticalConfig();
-		Product product = new Product(42L);
-		product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Marque");
-		product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "Modele");
-		product.getOfferNames().add("premiere offre");
-		product.getOfferNames().add("seconde offre");
-
-		String combined = service.buildEmbeddingText(product, config);
-
-		assertThat(combined)
-				.contains("Marque")
-				.contains("Modele")
-				.contains("premiere offre")
-				.contains("Cuisine");
-		assertThat(combined.length()).isLessThanOrEqualTo(1000);
-	}
-
-	@Test
-	void onProduct_shouldStoreEmbeddingWhenTextPresent() throws AggregationSkipException, InvalidParameterException {
-		VerticalConfig config = buildVerticalConfig();
-		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
-		when(embeddingService.embed(anyString())).thenReturn(new float[] { 0.1f, 0.2f });
-
-		Product product = new Product(7L);
-		product.setVertical("vertical-id");
-		product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Marque");
-		product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "Modele");
-		product.getOfferNames().add("offre");
-
-		service.onProduct(product, config);
-
-		assertNotNull(product.getEmbedding());
+				blablaService);
 	}
 
 	@Test
@@ -116,7 +68,6 @@ class NamesAggregationServiceTest {
 
 	private VerticalConfig buildVerticalConfig() {
 		VerticalConfig config = new VerticalConfig();
-		config.setComputeTextEmbeddings(true);
 		ProductI18nElements productI18nElements = new ProductI18nElements();
 		productI18nElements.setPageTitle("Cuisine");
 
@@ -209,95 +160,176 @@ class NamesAggregationServiceTest {
 		assertThat(product.getNames().getDisplayName().get("fr")).isEqualTo("101");
 	}
 	@Test
-	void onProduct_shouldRecomputeEmbeddingWhenBrandChanges() throws AggregationSkipException, InvalidParameterException {
-		VerticalConfig config = buildVerticalConfig();
-		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
-		when(embeddingService.embed(anyString())).thenReturn(new float[] { 0.1f, 0.2f });
-
-		Product product = new Product(10L);
-		product.setVertical("vertical-id");
-		product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Marque");
-		product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "Modele");
-		product.getOfferNames().add("offre");
-
-		// First call: computes embedding
-		service.onProduct(product, config);
-		assertNotNull(product.getEmbedding());
-
-		// Change brand → matrix slot 0 stays 1 but preferredName hash changes → triggers re-embed
-		product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "AutreMarque");
-		service.onProduct(product, config);
-
-		// Embed should have been called twice (once per distinct cache key)
-		verify(embeddingService, times(2)).embed(anyString());
-	}
-
-	@Test
-	void onProduct_shouldRecomputeEmbeddingWhenOfferCountChanges() throws AggregationSkipException, InvalidParameterException {
-		VerticalConfig config = buildVerticalConfig();
-		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
-		when(embeddingService.embed(anyString())).thenReturn(new float[] { 0.3f, 0.4f });
-
-		Product product = new Product(11L);
-		product.setVertical("vertical-id");
-		product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Marque");
-		product.getOfferNames().add("offre1");
-
-		// First call
-		service.onProduct(product, config);
-		assertNotNull(product.getEmbedding());
-
-		// Add a new offer → matrix slot 4 increments → triggers re-embed
-		product.getOfferNames().add("offre2");
-		service.onProduct(product, config);
-
-		verify(embeddingService, times(2)).embed(anyString());
-	}
-
-	@Test
-	void onProduct_shouldRecomputeEmbeddingWhenOfferTextChangesWithSameCount()
+	void onProduct_shouldLeaveLegacyTextEmbeddingUntouched()
 			throws AggregationSkipException, InvalidParameterException {
 		VerticalConfig config = buildVerticalConfig();
 		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
-		when(embeddingService.embed(anyString())).thenReturn(new float[] { 0.3f, 0.4f });
-
-		Product product = new Product(12L);
-		product.setVertical("vertical-id");
-		product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Marque");
-		product.getOfferNames().add("offre1");
-
-		service.onProduct(product, config);
-		product.getOfferNames().clear();
-		product.getOfferNames().add("offre2");
-		service.onProduct(product, config);
-
-		verify(embeddingService, times(2)).embed(anyString());
-	}
-
-	@Test
-	void onProduct_shouldSkipEmbeddingWhenTextUnchanged() throws AggregationSkipException, InvalidParameterException {
-		VerticalConfig config = buildVerticalConfig();
-		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
-		when(embeddingService.embed(anyString())).thenReturn(new float[] { 0.1f, 0.2f });
 
 		Product product = new Product(8L);
 		product.setVertical("vertical-id");
 		product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Marque");
 		product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "Modele");
-		product.getOfferNames().add("offre");
+		float[] legacyEmbedding = new float[] { 0.1f, 0.2f };
+		product.setEmbedding(legacyEmbedding);
+		product.setEmbeddingTextHash(123L);
 
-		// First call: Should compute embedding
 		service.onProduct(product, config);
 
-		assertNotNull(product.getEmbedding());
-		long hashAfterFirstCall = product.getEmbeddingTextHash();
-		
-		// Second call: Input hasn't changed, should skip embeddingService.embed()
+		assertThat(product.getEmbedding()).isSameAs(legacyEmbedding);
+		assertThat(product.getEmbeddingTextHash()).isEqualTo(123L);
+	}
+
+	@Test
+	void onProduct_shouldKeepFrozenSlugWhenNameOrAttributesChange()
+			throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig config = buildSlugConfig("tv");
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
+
+		Product product = new Product(8431312260509L);
+		product.setVertical("tv");
+		product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Midea");
+		product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "MB55");
+		product.getNames().getUrl().put("fr", "8431312260509-tv-midea-55");
+		product.getNames().setUrlVertical("tv");
+		product.getNames().getDisplayName().put("fr", "Ancien nom");
+		putAttribute(product, "DIAGONALE_POUCES", "65");
+
 		service.onProduct(product, config);
 
-		// Verify embed() was only called once, not twice
-		verify(embeddingService, times(1)).embed(anyString());
-		assertThat(product.getEmbeddingTextHash()).isEqualTo(hashAfterFirstCall);
+		assertThat(product.getNames().getUrl().get("fr")).isEqualTo("8431312260509-tv-midea-55");
+		assertThat(product.getNames().getUrlVertical()).isEqualTo("tv");
+		// forceNameGeneration still rewrites titles and meta
+		assertThat(product.getNames().getDisplayName().get("fr")).isEqualTo("Midea MB55");
+	}
+
+	@Test
+	void onProduct_shouldFreezeLegacySlugAndRecordItsVertical()
+			throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig config = buildSlugConfig("tv");
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
+
+		Product product = new Product(123456789L);
+		product.setVertical("tv");
+		product.getNames().getUrl().put("fr", "123456789-ancien-slug");
+		putAttribute(product, "DIAGONALE_POUCES", "55");
+
+		service.onProduct(product, config);
+
+		assertThat(product.getNames().getUrl().get("fr")).isEqualTo("123456789-ancien-slug");
+		assertThat(product.getNames().getUrlVertical()).isEqualTo("tv");
+	}
+
+	@Test
+	void onProduct_shouldRegenerateSlugWhenVerticalChanged()
+			throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig config = buildSlugConfig("tv");
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
+		when(blablaService.generateBlabla(anyString(), any())).thenReturn("TV");
+
+		Product product = new Product(123456789L);
+		product.setVertical("tv");
+		product.getNames().getUrl().put("fr", "123456789-ecran-pc-55");
+		product.getNames().setUrlVertical("monitor");
+		putAttribute(product, "DIAGONALE_POUCES", "55");
+
+		service.onProduct(product, config);
+
+		assertThat(product.getNames().getUrl().get("fr")).isEqualTo("123456789-tv-55");
+		assertThat(product.getNames().getUrlVertical()).isEqualTo("tv");
+	}
+
+	@Test
+	void onProduct_shouldRegenerateSlugWhenProductGainsVertical()
+			throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig config = buildSlugConfig("tv");
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
+		when(blablaService.generateBlabla(anyString(), any())).thenReturn("TV");
+
+		Product product = new Product(123456789L);
+		product.setVertical("tv");
+		product.getNames().getUrl().put("fr", "123456789-nom-offre");
+		product.getNames().setUrlVertical(ProductTexts.URL_WITHOUT_VERTICAL);
+		putAttribute(product, "DIAGONALE_POUCES", "55");
+
+		service.onProduct(product, config);
+
+		assertThat(product.getNames().getUrl().get("fr")).isEqualTo("123456789-tv-55");
+		assertThat(product.getNames().getUrlVertical()).isEqualTo("tv");
+	}
+
+	@Test
+	void onProduct_shouldGenerateMissingSlugAndRecordVertical()
+			throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig config = buildSlugConfig("tv");
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
+		when(blablaService.generateBlabla(anyString(), any())).thenReturn("TV");
+
+		Product product = new Product(123456789L);
+		product.setVertical("tv");
+		putAttribute(product, "DIAGONALE_POUCES", "55");
+
+		service.onProduct(product, config);
+
+		assertThat(product.getNames().getUrl().get("fr")).isEqualTo("123456789-tv-55");
+		assertThat(product.getNames().getUrlVertical()).isEqualTo("tv");
+	}
+
+	@Test
+	void onProduct_shouldKeepSlugWhenVerticalIsLostThenRestored()
+			throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig defaultConfig = buildSlugConfig(null);
+		VerticalConfig tvConfig = buildSlugConfig("tv");
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(defaultConfig, tvConfig);
+
+		Product product = new Product(123456789L);
+		product.getNames().getUrl().put("fr", "123456789-tv-55");
+		product.getNames().setUrlVertical("tv");
+		product.getOfferNames().add("Offre");
+
+		service.onProduct(product, defaultConfig);
+
+		assertThat(product.getNames().getUrl().get("fr")).isEqualTo("123456789-tv-55");
+		assertThat(product.getNames().getUrlVertical()).isEqualTo("tv");
+
+		product.setVertical("tv");
+		service.onProduct(product, tvConfig);
+
+		assertThat(product.getNames().getUrl().get("fr")).isEqualTo("123456789-tv-55");
+		assertThat(product.getNames().getUrlVertical()).isEqualTo("tv");
+	}
+
+	@Test
+	void onProduct_shouldRecordMissingVerticalForSlugGeneratedWithoutVertical()
+			throws AggregationSkipException, InvalidParameterException {
+		VerticalConfig defaultConfig = buildSlugConfig(null);
+		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(defaultConfig);
+
+		Product product = new Product(123456789L);
+		product.getOfferNames().add("Offre courte");
+
+		service.onProduct(product, defaultConfig);
+
+		assertThat(product.getNames().getUrl().get("fr")).isEqualTo("123456789-offre-courte");
+		assertThat(product.getNames().getUrlVertical()).isEqualTo(ProductTexts.URL_WITHOUT_VERTICAL);
+	}
+
+	private VerticalConfig buildSlugConfig(String verticalId) {
+		VerticalConfig config = buildVerticalConfig();
+		config.setId(verticalId);
+		config.setForceNameGeneration(true);
+		config.getI18n().get("fr").setDisplayName("{BRAND} {MODEL} {DIAGONALE_POUCES}");
+		PrefixedAttrText urlConfig = new PrefixedAttrText();
+		urlConfig.setPrefix("TV");
+		urlConfig.setAttrs(java.util.List.of("DIAGONALE_POUCES"));
+		config.getI18n().get("fr").setUrl(urlConfig);
+		return config;
+	}
+
+	private void putAttribute(Product product, String key, String value) {
+		org.open4goods.model.attribute.ProductAttribute attr = new org.open4goods.model.attribute.ProductAttribute();
+		attr.setName(key);
+		attr.setValue(value);
+		product.getAttributes().getAll().put(key, attr);
 	}
 
 }

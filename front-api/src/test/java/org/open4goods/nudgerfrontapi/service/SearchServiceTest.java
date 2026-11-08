@@ -4,9 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -20,19 +23,23 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.model.attribute.AttributeType;
+import org.open4goods.model.price.AggregatedPrice;
+import org.open4goods.model.price.AggregatedPrices;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductCondition;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
-import org.open4goods.nudgerfrontapi.config.properties.SearchProperties;
+import org.open4goods.nudgerfrontapi.config.properties.OfferFreshnessProperties;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationBucketDto;
 import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchResult;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.SearchHitsImpl;
 import org.springframework.data.elasticsearch.core.TotalHitsRelation;
@@ -52,18 +59,12 @@ class SearchServiceTest {
     private ProductMappingService productMappingService;
     @Mock
     private ApiProperties apiProperties;
-    private SearchProperties searchProperties;
-    @Mock
-    private EmbeddingProxyService textEmbeddingService;
-
-    // Use a partial mock or spy if needed, but here we can stick to standard mocks
     private SearchService searchService;
 
     @BeforeEach
     void setUp() {
-        searchProperties = new SearchProperties();
         searchService = new SearchService(repository, verticalsConfigService, productMappingService, apiProperties,
-                searchProperties, textEmbeddingService);
+                new OfferFreshnessService(new OfferFreshnessProperties()));
     }
 
     @Test
@@ -91,7 +92,7 @@ class SearchServiceTest {
 
 
         GlobalSearchResult result = searchService.globalSearch("téléviseurs", DomainLanguage.fr, null,
-                org.springframework.data.domain.Sort.unsorted(), null, null);
+                org.springframework.data.domain.Sort.unsorted(), null);
 
         // THEN
         assertThat(result).isNotNull();
@@ -118,14 +119,14 @@ class SearchServiceTest {
 
 
         GlobalSearchResult result = searchService.globalSearch("something else", DomainLanguage.fr, null,
-                org.springframework.data.domain.Sort.unsorted(), null, null);
+                org.springframework.data.domain.Sort.unsorted(), null);
 
         // THEN
         assertThat(result.verticalCta()).isNull();
     }
 
     @Test
-    void globalSearch_shouldNeverPerformSemantic_evenWhenNoVerticalCandidates() {
+    void globalSearch_shouldBuildOnlyLexicalQueries_whenNoVerticalCandidates() {
         // GIVEN initial setup
         when(verticalsConfigService.getConfigsWithoutDefault()).thenReturn(Collections.emptyList());
         searchService.initializeSuggestIndex();
@@ -136,19 +137,57 @@ class SearchServiceTest {
         when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(emptyHits);
 
         // WHEN
-        GlobalSearchResult result = searchService.globalSearch("iphone", DomainLanguage.fr, null,
-                org.springframework.data.domain.Sort.unsorted(), null, null);
+        searchService.globalSearch("iphone", DomainLanguage.fr, null,
+                org.springframework.data.domain.Sort.unsorted(), null);
 
         // THEN
-        // We verify that semantic embeddings were NEVER requested
-        verify(textEmbeddingService, times(0)).embed(any());
+        ArgumentCaptor<org.springframework.data.elasticsearch.core.query.Query> queryCaptor = ArgumentCaptor
+                .forClass(org.springframework.data.elasticsearch.core.query.Query.class);
+        verify(repository, atLeastOnce()).search(queryCaptor.capture(), eq(ProductRepository.MAIN_INDEX_NAME));
+        assertThat(queryCaptor.getAllValues()).allSatisfy(query -> {
+            NativeQuery nativeQuery = (NativeQuery) query;
+            assertThat(nativeQuery.getKnnSearches()).isEmpty();
+            assertThat(nativeQuery.getQuery().isBool()).isTrue();
+        });
     }
 
 
 
     @Test
-    void suggest_shouldSkipSemanticFallback_whenDisabled() {
-        searchProperties.getSuggest().setSemanticFallbackEnabled(false);
+    @SuppressWarnings("unchecked")
+    void suggest_shouldNotExposeStaleBestPrice() {
+        long now = System.currentTimeMillis();
+        Product freshProduct = new Product(1L);
+        freshProduct.setPrice(new AggregatedPrices());
+        freshProduct.getPrice().getOffers().add(OfferFreshnessServiceTest.offer("fnac", 12.0,
+                ProductCondition.NEW, now - Duration.ofHours(1).toMillis()));
+        Product staleProduct = new Product(2L);
+        staleProduct.setPrice(new AggregatedPrices());
+        AggregatedPrice stale = OfferFreshnessServiceTest.offer("rakuten", 7.0,
+                ProductCondition.NEW, now - Duration.ofDays(28).toMillis());
+        staleProduct.getPrice().getOffers().add(stale);
+        // Precomputed at aggregation time from the stale offer.
+        staleProduct.getPrice().setMinPrice(stale);
+
+        SearchHits<Product> hits = mock(SearchHits.class);
+        SearchHit<Product> freshHit = mock(SearchHit.class);
+        SearchHit<Product> staleHit = mock(SearchHit.class);
+        when(freshHit.getContent()).thenReturn(freshProduct);
+        when(staleHit.getContent()).thenReturn(staleProduct);
+        when(hits.isEmpty()).thenReturn(false);
+        when(hits.getSearchHits()).thenReturn(List.of(freshHit, staleHit));
+        when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(hits);
+
+        SearchService.SuggestResult result = searchService.suggest("livre", DomainLanguage.fr);
+
+        assertThat(result.productMatches()).hasSize(2);
+        assertThat(result.productMatches().get(0).bestPrice()).isEqualTo(12.0);
+        assertThat(result.productMatches().get(1).bestPrice()).isNull();
+        assertThat(result.productMatches().get(1).bestPriceCurrency()).isNull();
+    }
+
+    @Test
+    void suggest_shouldExecuteOneLexicalProductQuery_whenNoProductsMatch() {
         SearchHits<Product> emptyHits = new SearchHitsImpl<Product>(0L, TotalHitsRelation.EQUAL_TO, 0.0f,
                 java.time.Duration.ZERO, null, null, java.util.Collections.emptyList(), null, null, null);
 
@@ -156,7 +195,11 @@ class SearchServiceTest {
 
         searchService.suggest("iphone", DomainLanguage.fr);
 
-        verify(textEmbeddingService, times(0)).embed(any());
+        ArgumentCaptor<org.springframework.data.elasticsearch.core.query.Query> queryCaptor = ArgumentCaptor
+                .forClass(org.springframework.data.elasticsearch.core.query.Query.class);
+        verify(repository, times(1)).search(queryCaptor.capture(), eq(ProductRepository.MAIN_INDEX_NAME));
+        NativeQuery nativeQuery = (NativeQuery) queryCaptor.getValue();
+        assertThat(nativeQuery.getKnnSearches()).isEmpty();
     }
     @Test
     void search_shouldUseFilterQuery_whenQueryIsEmpty() {
@@ -166,7 +209,7 @@ class SearchServiceTest {
         when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(emptyHits);
 
         // WHEN
-        searchService.search(org.springframework.data.domain.Pageable.unpaged(), null, null, null, null, false, null);
+        searchService.search(org.springframework.data.domain.Pageable.unpaged(), null, null, null, null);
 
         // THEN
         ArgumentCaptor<org.springframework.data.elasticsearch.core.query.Query> queryCaptor = ArgumentCaptor.forClass(org.springframework.data.elasticsearch.core.query.Query.class);
@@ -180,6 +223,7 @@ class SearchServiceTest {
         // After fix, it should NOT use FunctionScore query for empty input, but a BoolQuery directly
         assertThat(esQuery.isFunctionScore()).isFalse();
         assertThat(esQuery.isBool()).isTrue();
+        assertThat(nativeQuery.getKnnSearches()).isEmpty();
         assertSearchUsesProductProjection(nativeQuery);
     }
 
@@ -191,7 +235,7 @@ class SearchServiceTest {
         when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(emptyHits);
 
         // WHEN
-        searchService.search(org.springframework.data.domain.Pageable.unpaged(), null, "some query", null, null, false, null);
+        searchService.search(org.springframework.data.domain.Pageable.unpaged(), null, "some query", null, null);
 
         // THEN
         ArgumentCaptor<org.springframework.data.elasticsearch.core.query.Query> queryCaptor = ArgumentCaptor.forClass(org.springframework.data.elasticsearch.core.query.Query.class);
@@ -206,6 +250,7 @@ class SearchServiceTest {
         assertThat(esQuery.bool().must()).isNotEmpty();
         boolean hasMultiMatch = esQuery.bool().must().stream().anyMatch(Query::isMultiMatch);
         assertThat(hasMultiMatch).isTrue();
+        assertThat(nativeQuery.getKnnSearches()).isEmpty();
         assertSearchUsesProductProjection(nativeQuery);
     }
 
@@ -339,5 +384,57 @@ class SearchServiceTest {
 
         assertThat(SearchService.firstNumericRangeBucketKey(buckets)).isNull();
         assertThat(SearchService.lastNumericRangeBucketTo(buckets)).isNull();
+    }
+
+    @Test
+    void search_shouldBoundPageSizeAndAggregations() {
+        SearchHits<Product> emptyHits = new SearchHitsImpl<Product>(0L, TotalHitsRelation.EQUAL_TO, 0.0f,
+                java.time.Duration.ZERO, null, null, java.util.Collections.emptyList(), null, null, null);
+        when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(emptyHits);
+        java.util.List<org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.Agg> aggs = new java.util.ArrayList<>();
+        for (int i = 0; i < 40; i++) {
+            aggs.add(new org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.Agg("t" + i, "vertical",
+                    org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto.AggType.terms, null, null,
+                    Integer.MAX_VALUE, null));
+        }
+
+        searchService.search(org.springframework.data.domain.PageRequest.of(2, 100000), null, null,
+                new org.open4goods.nudgerfrontapi.dto.search.AggregationRequestDto(aggs), null);
+
+        ArgumentCaptor<org.springframework.data.elasticsearch.core.query.Query> captor = ArgumentCaptor
+                .forClass(org.springframework.data.elasticsearch.core.query.Query.class);
+        verify(repository).search(captor.capture(), eq(ProductRepository.MAIN_INDEX_NAME));
+        NativeQuery nativeQuery = (NativeQuery) captor.getValue();
+        assertThat(nativeQuery.getPageable().getPageSize()).isEqualTo(SearchService.MAX_PAGE_SIZE);
+        assertThat(nativeQuery.getAggregations()).hasSize(SearchService.MAX_AGGREGATIONS);
+        nativeQuery.getAggregations().values().forEach(a -> assertThat(a.terms().size())
+                .isEqualTo(SearchService.MAX_AGG_BUCKETS));
+    }
+
+    @Test
+    void search_shouldThrowExplicitExceptionWhenElasticsearchResponseTooLarge() {
+        when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenThrow(
+                new org.springframework.dao.DataAccessResourceFailureException("failed",
+                        new java.io.IOException("entity content is too long [104862036] for the configured buffer limit [104857600]")));
+
+        org.junit.jupiter.api.Assertions.assertThrows(
+                org.open4goods.nudgerfrontapi.service.exception.SearchResponseTooLargeException.class,
+                () -> searchService.search(org.springframework.data.domain.PageRequest.of(0, 20), null, null, null, null));
+    }
+
+    /** GOU-1897 point 5: the GTIN closes every explicit sort so that ties never swap between requests or pages. */
+    @Test
+    void stableTieBreakAppendsTheIdToAnExplicitSort() {
+        org.springframework.data.domain.Pageable sorted = org.springframework.data.domain.PageRequest.of(2, 20,
+                org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Order.desc("scores.ECOSCORE.value")));
+
+        org.springframework.data.domain.Pageable result = SearchService.withStableTieBreak(sorted);
+
+        assertThat(result.getSort().stream().map(o -> o.getProperty() + ":" + o.getDirection()).toList())
+                .containsExactly("scores.ECOSCORE.value:DESC", "id:ASC");
+        assertThat(result.getPageNumber()).isEqualTo(2);
+        assertThat(SearchService.withStableTieBreak(result)).isSameAs(result);
+        org.springframework.data.domain.Pageable relevance = org.springframework.data.domain.PageRequest.of(0, 20);
+        assertThat(SearchService.withStableTieBreak(relevance)).isSameAs(relevance);
     }
 }

@@ -175,7 +175,9 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 		}
 
 		try {
-			if (!ImageIO.write(sourceImage, "webp", cachedFile)) {
+			// The WebP writer refuses grayscale and 16 bits per channel images: redraw those in ARGB
+			if (!ImageIO.write(sourceImage, "webp", cachedFile)
+					&& !ImageIO.write(toArgb(sourceImage), "webp", cachedFile)) {
 				logger.error("Could not write file: {}", cachedFile.getAbsolutePath());
 				return false;
 			}
@@ -191,6 +193,29 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 
 		logger.info("Cached image saved: {}", cachedFile.getAbsolutePath());
 		return true;
+	}
+
+	/**
+	 * Redraws an image into a {@link BufferedImage#TYPE_INT_ARGB} copy.
+	 *
+	 * <p>
+	 * The {@code webp-imageio} writer returns {@code false} for grayscale or 16 bits per
+	 * channel sources (e.g. a 16-bit RGB PNG or a grayscale JPEG), which made those
+	 * unresized originals answer 404 (GOU-1155). It accepts this copy.
+	 * </p>
+	 *
+	 * @param image the decoded source image
+	 * @return an ARGB copy of {@code image}
+	 */
+	static BufferedImage toArgb(BufferedImage image) {
+		BufferedImage converted = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		Graphics2D graphics = converted.createGraphics();
+		try {
+			graphics.drawImage(image, 0, 0, null);
+		} finally {
+			graphics.dispose();
+		}
+		return converted;
 	}
 
 	/**

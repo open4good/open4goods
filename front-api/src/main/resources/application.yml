@@ -22,6 +22,8 @@ springdoc:
 front:
   resource-root-path: "${FRONT_RESOURCE_ROOT_PATH:https://static.nudger.fr}"
   max-page-size: 50
+  # Elasticsearch index.max_result_window: (pageNumber + 1) * pageSize above it gives a 400
+  max-result-window: 10000
   cache:
     path: ./cache
     one-minute-ttl: 1m
@@ -43,6 +45,10 @@ front:
       client-id: ${FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID:}
       issuer: ${FRONT_SECURITY_GOOGLE_SSO_ISSUER:https://accounts.google.com}
       jwks-uri: ${FRONT_SECURITY_GOOGLE_SSO_JWKS_URI:https://www.googleapis.com/oauth2/v3/certs}
+      # E-mail keys MUST be quoted and bracketed, otherwise Spring Boot drops the '@'
+      # and the entry never matches (see docs/operations/google-sso-oauth-clients.md):
+      #   role-allowlist:
+      #     "[john.doe@example.com]": [ROLE_SITEEDITOR]
       role-allowlist: {}
   exposed-docs:
     base-url: ${FRONT_EXPOSED_DOCS_BASE_URL:http://localhost:8086}
@@ -54,9 +60,12 @@ front:
     api-base-url: ${FRONT_AFFILIATION_PARTNERS_API_BASE_URL:http://localhost:8080}
     api-key: ${FRONT_AFFILIATION_PARTNERS_API_KEY:CHANGE_ME_AFFILIATION_PARTNER_API_KEY}
 
-  embedding:
-    api-base-url: ${FRONT_EMBEDDING_API_BASE_URL:http://localhost:8080}
-
+  # "Rechercher sur Amazon" link on product pages without any offer, through /contrib/ (GOU-1396).
+  # Not a secret: the Associates tag is part of every link.
+  amazon-search-link:
+    enabled: true
+    tag: nudger-21
+    url-template: "https://www.amazon.fr/s?k={gtin}&tag={tag}"
 
   google-taxonomy:
     french-taxonomy-url: "https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt"
@@ -66,6 +75,19 @@ front:
     anonymous: 100
     authenticated: 1000
 
+  # Offers older than front.offers.max-age are not served (GOU-1385). Left unset, it follows the api
+  # rule (ProductRepository.VALID_UNTIL_DURATION, 2 days); override with e.g. FRONT_OFFERS_MAX_AGE=3d.
+
+  # One-shot purge of the historical ip/ua fields of the contribution-votes index (GOU-1230),
+  # run asynchronously after startup; idempotent, a no-op once the index is clean.
+  contribution-votes-purge:
+    enabled: ${FRONT_CONTRIBUTION_VOTES_PURGE_ENABLED:true}
+
+  # Additive mapping update of the existing affiliation-clicks index (GOU-1828: contentPath keyword),
+  # run asynchronously after startup; idempotent and fail-open.
+  affiliation-clicks-mapping:
+    enabled: ${FRONT_AFFILIATION_CLICKS_MAPPING_ENABLED:true}
+
   google-indexation:
     enabled: ${FRONT_GOOGLE_INDEXATION_ENABLED:false}
     realtime-enabled: ${FRONT_GOOGLE_INDEXATION_REALTIME_ENABLED:true}
@@ -74,10 +96,6 @@ front:
     batch-size: ${FRONT_GOOGLE_INDEXATION_BATCH_SIZE:50}
     max-attempts: ${FRONT_GOOGLE_INDEXATION_MAX_ATTEMPTS:5}
     site-base-url: ${FRONT_GOOGLE_INDEXATION_SITE_BASE_URL:https://nudger.fr}
-  search:
-    suggest:
-      semantic-fallback-enabled: true
-
   partners:
     ecosystem:
       partners:
@@ -130,7 +148,9 @@ feedback:
 management:
   health:
     diskspace:
-      threshold: 100GB  
+      # Minimum free space on the data disk before health turns DOWN (GOU-795):
+      # 100GB tripped on the ~860 GB prod root disk while ~85 GB were still free.
+      threshold: 20GB
   endpoints:
     web:
       exposure:

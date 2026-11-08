@@ -1,6 +1,7 @@
 package org.open4goods.api.config;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -9,6 +10,7 @@ import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.CompletionFacadeService;
+import org.open4goods.api.services.DatasourcePurgeService;
 import org.open4goods.api.services.VerticalsGenerationService;
 import org.open4goods.api.services.completion.AmazonCompletionService;
 import org.open4goods.api.services.completion.EprelCompletionService;
@@ -25,8 +27,6 @@ import org.open4goods.commons.services.Gs1PrefixService;
 import org.open4goods.commons.services.ProductNameSelectionService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.commons.services.textgen.BlablaService;
-import org.open4goods.embedding.config.DjlEmbeddingProperties;
-import org.open4goods.embedding.service.TextEmbeddingService;
 import org.open4goods.embedding.service.image.DjlImageEmbeddingService;
 import org.open4goods.icecat.repository.IcecatCategoryRepository;
 import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
@@ -45,6 +45,7 @@ import org.open4goods.model.exceptions.TechnicalException;
 import org.open4goods.model.price.Currency;
 import org.open4goods.model.price.Price;
 import org.open4goods.model.vertical.LegacyPromptConfig;
+import org.open4goods.services.contribution.service.AffiliationClickStatsService;
 import org.open4goods.services.eprelservice.client.EprelApiClient;
 import org.open4goods.services.wikidataservice.client.RestWikidataApiClient;
 import org.open4goods.services.wikidataservice.client.WikidataApiClient;
@@ -134,6 +135,14 @@ public class ApiConfig {
 	@Bean EprelApiClient apiClient(@Autowired  RestTemplate restTemplate, @Autowired  EprelServiceProperties properties) {
 		return new RestEprelApiClient(restTemplate, properties);
 	}
+	/**
+	 * Reader of the outbound affiliation clicks written by front-api, used by the Metriks affiliation endpoint.
+	 */
+	@Bean
+	AffiliationClickStatsService affiliationClickStatsService(@Autowired ElasticsearchOperations elasticsearchOperations) {
+		return new AffiliationClickStatsService(elasticsearchOperations);
+	}
+
 	@Bean
 	EprelSearchService eprelSearchService(@Autowired ElasticsearchOperations elasticsearchOperations, @Autowired  EprelServiceProperties properties) {
 		return new EprelSearchService(elasticsearchOperations, properties);
@@ -217,6 +226,12 @@ public class ApiConfig {
 	@Bean
 	BatchService batchService(AggregationFacadeService aggregationFacadeService, CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository, FeedIndexingService feedIndexingService, FeedService feedService, SerialisationService serialisationService, ResourceService resourceService) {
 		return new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService, productRepository,  feedIndexingService, feedService, serialisationService, resourceService, apiProperties);
+	}
+
+	@Bean
+	DatasourcePurgeService datasourcePurgeService(ProductRepository productRepository) {
+		return new DatasourcePurgeService(productRepository, Path.of(apiProperties.getDatasourcePurgeStatusFile()),
+				apiProperties.getDatasourcePurgeProgressInterval());
 	}
 
 	@Bean
@@ -392,10 +407,10 @@ public class ApiConfig {
 	@Bean
 	AggregationFacadeService realtimeAggregationService(@Autowired EvaluationService evaluationService, StandardiserService standardiserService, AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository, ApiProperties apiProperties,
 			@Autowired Gs1PrefixService gs1prefixService, DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, BarcodeValidationService barcodeValidationService, BrandService brandservice, BlablaService blablaService,
-			IcecatService icecatFeatureService, IcecatFeatureResolver icecatFeatureResolver, SerialisationService serialisationService, ObjectProvider<TextEmbeddingService> embeddingServiceProvider,
-			ObjectProvider<DjlEmbeddingProperties> embeddingPropertiesProvider, BarcodeForensicsService barcodeForensicsService) {
+			IcecatService icecatFeatureService, IcecatFeatureResolver icecatFeatureResolver, SerialisationService serialisationService,
+			BarcodeForensicsService barcodeForensicsService) {
 		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService, barcodeValidationService, brandservice, blablaService, icecatFeatureService,
-				icecatFeatureResolver, serialisationService, embeddingServiceProvider.getIfAvailable(), embeddingPropertiesProvider.getIfAvailable(), barcodeForensicsService);
+				icecatFeatureResolver, serialisationService, barcodeForensicsService);
 	}
 
 	//////////////////////////////////////////////////////////
@@ -496,8 +511,8 @@ public class ApiConfig {
         }
 
 	@Bean
-	DataFragmentStoreService dataFragmentStoreService(final ApiProperties config, @Autowired StandardiserService standardiserService, @Autowired AggregationFacadeService generationService, @Autowired ProductRepository aggregatedDataRepository) {
-		return new DataFragmentStoreService(standardiserService, generationService, aggregatedDataRepository, config.getIndexationConfig());
+	DataFragmentStoreService dataFragmentStoreService(final ApiProperties config, @Autowired StandardiserService standardiserService, @Autowired AggregationFacadeService generationService, @Autowired ProductRepository aggregatedDataRepository, @Autowired BarcodeValidationService barcodeValidationService) {
+		return new DataFragmentStoreService(standardiserService, generationService, aggregatedDataRepository, barcodeValidationService, config.getIndexationConfig());
 	}
 
 	/**

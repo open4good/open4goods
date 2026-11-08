@@ -8,6 +8,7 @@ import { _sanitizeHtml } from '~~/shared/utils/sanitizer'
 import { useAuth } from '~/composables/useAuth'
 import { buildBlogArticleJsonLd } from '~/utils/blog-jsonld'
 
+import BlogOfferBlocks from '~/components/domains/blog/BlogOfferBlocks.vue'
 import NudgeToolAssistantWizard from '~/components/nudge-tool/NudgeToolAssistantWizard.vue'
 
 interface BlogArticle extends BlogPostDto {
@@ -23,6 +24,7 @@ const props = defineProps<{
   article: BlogArticle
   assistantId?: string | null
   assistantCategoryId?: string | null
+  offerBlocksSlug?: string | null
 }>()
 
 const article = computed(() => props.article)
@@ -200,6 +202,19 @@ try {
 
 const canonicalUrl = computed(() => requestUrl?.href)
 
+const absoluteImageUrl = computed(() => {
+  const image = article.value.image
+  if (!image || !requestUrl) {
+    return undefined
+  }
+
+  try {
+    return new URL(image, requestUrl.origin).toString()
+  } catch {
+    return undefined
+  }
+})
+
 const toTrimmedString = (value: unknown): string | undefined => {
   if (typeof value !== 'string') {
     return undefined
@@ -256,7 +271,7 @@ useSeoMeta({
   description: computed(() => metaDescription.value || undefined),
   ogDescription: computed(() => metaDescription.value || undefined),
   ogType: 'article',
-  ogImage: computed(() => article.value.image || undefined),
+  ogImage: absoluteImageUrl,
   articlePublishedTime: computed(() => publishedDate.value?.iso),
   articleModifiedTime: computed(
     () => updatedDate.value?.iso ?? publishedDate.value?.iso
@@ -379,6 +394,17 @@ useHead(() => ({
         </li>
 
         <li
+          v-if="updatedDate"
+          class="article-meta__item"
+          data-test="article-updated"
+        >
+          <v-icon icon="mdi-update" size="small" aria-hidden="true" />
+          <time :datetime="updatedDate.iso" itemprop="dateModified">
+            {{ t('blog.article.updated', { date: updatedDate.label }) }}
+          </time>
+        </li>
+
+        <li
           v-if="readingTimeLabel"
           class="article-meta__item"
           data-test="article-reading-time"
@@ -431,6 +457,7 @@ useHead(() => ({
           />
         </div>
       </template>
+      <BlogOfferBlocks :slug="offerBlocksSlug" />
     </section>
     <section
       v-else
@@ -442,21 +469,6 @@ useHead(() => ({
         t('blog.article.empty')
       }}</v-alert>
     </section>
-
-    <footer class="article-footer">
-      <v-btn
-        v-if="isLoggedIn && article.editLink"
-        :href="article.editLink"
-        target="_blank"
-        rel="noopener noreferrer"
-        prepend-icon="mdi-open-in-new"
-        variant="text"
-        size="small"
-        data-test="article-edit-link"
-      >
-        {{ t('blog.article.edit') }}
-      </v-btn>
-    </footer>
   </v-sheet>
 </template>
 
@@ -574,11 +586,6 @@ useHead(() => ({
   border-radius: 12px
   margin: 1.5rem 0
 
-.article-footer
-  display: flex
-  justify-content: flex-end
-
-
 @media (max-width: 960px)
   .blog-article
     padding: 1.5rem
@@ -590,7 +597,4 @@ useHead(() => ({
   .article-meta
     flex-direction: column
     align-items: flex-start
-
-  .article-footer
-    justify-content: flex-start
 </style>

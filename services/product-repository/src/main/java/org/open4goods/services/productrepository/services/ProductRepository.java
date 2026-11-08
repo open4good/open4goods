@@ -12,13 +12,16 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.price.AggregatedPrices;
 import org.open4goods.model.product.BarcodeType;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductPartialUpdateField;
 import org.open4goods.model.product.ProductPartialUpdateHolder;
 import org.open4goods.model.vertical.ScoreRange;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -80,14 +83,23 @@ public class ProductRepository {
         public static final String MAIN_INDEX_NAME = Product.DEFAULT_REPO;
 
         /**
-         * Default page size used when streaming large exports.
+         * Maximum page size for any read of <b>complete</b> products (no source projection).
+         * A full product weighs about 21 KB on average in production, so 1000 per page is about 21 MB,
+         * a x5 margin under the 100 MB response buffer of the Elasticsearch client
+         * ("entity content is too long ... for the configured buffer limit", GOU-1134, GOU-1203).
+         * Do not raise it, and do not raise the client buffer instead.
          */
-        private static final int EXPORT_STREAM_PAGE_SIZE = 5000;
+        public static final int FULL_PRODUCT_PAGE_SIZE = 1000;
 
         /**
-         * Lazily created {@link PageRequest} that avoids instantiating a new object for each export.
+         * Page size used when streaming exports restricted to a few source fields (small payloads).
          */
-        private static final PageRequest EXPORT_STREAM_PAGE = PageRequest.of(0, EXPORT_STREAM_PAGE_SIZE);
+        private static final int PROJECTED_EXPORT_PAGE_SIZE = 5000;
+
+        /**
+         * Shared {@link PageRequest} for exports of complete products.
+         */
+        private static final PageRequest EXPORT_STREAM_PAGE = PageRequest.of(0, FULL_PRODUCT_PAGE_SIZE);
 
         /**
          * Fields required when building the public OpenData CSVs. Fetching only these fields keeps
@@ -266,9 +278,11 @@ public class ProductRepository {
 	}
 
 	/**
-	 * Export all aggregated data
+	 * Export all aggregated data, full products, {@value #FULL_PRODUCT_PAGE_SIZE} per page
+	 * ({@link #FULL_PRODUCT_PAGE_SIZE} keeps each Elasticsearch response far below the 100 MB buffer
+	 * of the client, GOU-1134 / GOU-1203). Use {@link #exportAll(String[])} when only a few fields are needed.
 	 *
-	 * @return
+	 * @return stream of products
 	 */
         public Stream<Product> exportAll() {
             Query query = Query.findAll();
@@ -281,7 +295,9 @@ public class ProductRepository {
         }
 
         /**
-         * Export all aggregated data with a configurable page size.
+         * Export all aggregated data (complete products) with a configurable page size.
+         * The caller is responsible for keeping the page at or below {@link #FULL_PRODUCT_PAGE_SIZE}
+         * unless the payload is known to be small.
          *
          * @param pageSize the page size to use when streaming products
          * @return stream of products
@@ -343,7 +359,9 @@ public class ProductRepository {
 		Criteria c = new Criteria("vertical").is(vertical);
 
 		final NativeQuery initialQuery = new NativeQueryBuilder()
-				.withQuery(new CriteriaQuery(c)).build();
+				.withQuery(new CriteriaQuery(c))
+				.withPageable(EXPORT_STREAM_PAGE)
+				.build();
 
 		var iterator = elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX);
 		return iterator.stream().onClose(iterator::close)
@@ -351,13 +369,26 @@ public class ProductRepository {
 	}
 
 	/**
-	 * Export all aggregated data, corresponding to the given Barcodes
-	 *
-	 * @return
+	 * Export all aggregated data restricted to the given source fields, with a page of
+	 * {@value #PROJECTED_EXPORT_PAGE_SIZE} when a projection is given (small payload), or
+	 * {@value #FULL_PRODUCT_PAGE_SIZE} when {@code includeFields} is null or empty (complete products).
 	 */
 
 
         public Stream<Product> exportAll( String[] includeFields) {
+                boolean projected = includeFields != null && includeFields.length > 0;
+                return exportAll(includeFields, projected ? PROJECTED_EXPORT_PAGE_SIZE : FULL_PRODUCT_PAGE_SIZE);
+        }
+
+        /**
+         * Export all aggregated data, restricted to the given source fields, with a configurable page size.
+         * Keeps each Elasticsearch response far below the 100 MB buffer limit of the REST client.
+         *
+         * @param includeFields source fields to fetch (all fields when null or empty)
+         * @param pageSize      the page size to use when streaming products
+         * @return stream of (partial) products
+         */
+        public Stream<Product> exportAll( String[] includeFields, int pageSize) {
 
                 NativeQueryBuilder queryBuilder = new NativeQueryBuilder().withQuery(Query.findAll());
                 if (includeFields != null && includeFields.length > 0) {
@@ -365,7 +396,7 @@ public class ProductRepository {
                 }
 
                 NativeQuery query = queryBuilder
-                		.withPageable(EXPORT_STREAM_PAGE)
+                		.withPageable(PageRequest.of(0, pageSize))
                 		.build();
 
                 var iterator = elasticsearchOperations.searchForStream(query, Product.class, CURRENT_INDEX);
@@ -535,6 +566,34 @@ public class ProductRepository {
             // Ensure scores.ECOSCORE.relativ.value is present
             criteria = criteria.and(new Criteria("scores.ECOSCORE.value").exists());
 
+	    final Criteria exportCriteria = criteria;
+	    return streamOrderedByEcoscore(builder -> builder.withQuery(new CriteriaQuery(exportCriteria)), max);
+	}
+
+	/**
+	 * Export the non excluded products of a vertical that belong in the sitemap: a recent
+	 * offer <b>or</b> an impact score (a product without offer but with an impact score
+	 * stays listed, GOU-1744). Ordered by impact score descending, products without score last.
+	 *
+	 * @param vertical vertical id
+	 * @return streaming export, to be closed by the caller
+	 */
+	public Stream<Product> exportVerticalForSitemap(String vertical) {
+	    // Native bool query: Criteria cannot express (A AND B) OR C without dropping the AND part.
+	    var recentOffer = co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
+	        .must(m -> m.range(r -> r.date(d -> d.field("lastChange").gt(String.valueOf(expirationClause())))))
+	        .must(m -> m.range(r -> r.number(n -> n.field("offersCount").gt(0.0))))));
+	    var hasScore = co.elastic.clients.elasticsearch._types.query_dsl.Query
+	        .of(q -> q.exists(e -> e.field("scores.ECOSCORE.value")));
+	    var query = co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
+	        .must(m -> m.term(t -> t.field("vertical").value(vertical)))
+	        .must(m -> m.term(t -> t.field("excluded").value(false)))
+	        .must(m -> m.bool(or -> or.should(recentOffer).should(hasScore).minimumShouldMatch("1")))));
+	    return streamOrderedByEcoscore(builder -> builder.withQuery(query), null);
+	}
+
+	private Stream<Product> streamOrderedByEcoscore(UnaryOperator<NativeQueryBuilder> filter, Integer max) {
+
 	    // Build sort with unmapped_type to avoid shard-level mapping issues
 	    SortOptions ecoscoreSort = new SortOptions.Builder()
 	        .field(new FieldSort.Builder()
@@ -545,8 +604,7 @@ public class ProductRepository {
 	            .build())
 	        .build();
 
-	    NativeQueryBuilder queryBuilder = new NativeQueryBuilder()
-	        .withQuery(new CriteriaQuery(criteria))
+	    NativeQueryBuilder queryBuilder = filter.apply(new NativeQueryBuilder())
 	        .withSort(ecoscoreSort);
 
 	    if (max != null) {
@@ -627,11 +685,11 @@ public class ProductRepository {
             criteria = criteria.and(new Criteria("excluded").is(false));
         }
 
-        criteria = criteria.and(new Criteria("scores.IMPACTSCORE.value").exists());
+        criteria = criteria.and(new Criteria("scores.ECOSCORE.value").exists());
 
         SortOptions impactScoreSort = new SortOptions.Builder()
                 .field(new FieldSort.Builder()
-                        .field("scores.IMPACTSCORE.value")
+                        .field("scores.ECOSCORE.value")
                         .order(SortOrder.Desc)
                         .unmappedType(FieldType.Float)
                         .missing("_last")
@@ -852,6 +910,124 @@ public class ProductRepository {
 		});
 	}
 
+	/**
+	 * Offer state written by the realtime aggregation: the fields of a realtime
+	 * {@link ProductPartialUpdateHolder}, also carried by a realtime full update.
+	 */
+	private record OfferState(long lastChange, AggregatedPrices price, Integer offersCount) {
+	}
+
+	/** Fields read back from the index by {@link #applyNewerOfferStates(Collection)}. */
+	private static final String[] OFFER_STATE_FIELDS = { "id", "lastChange", "price", "offersCount" };
+
+	/**
+	 * Gives products about to be rewritten in full the newest realtime offer state
+	 * (GOU-1709).
+	 *
+	 * <p>A batch rewrites products it loaded long before. Meanwhile the realtime
+	 * aggregation may have indexed, or queued, a newer price for some of them, always
+	 * with a newer {@code lastChange} (the batch never moves it). For each product, the
+	 * newest state among the index, the full queue and the partial queue replaces
+	 * {@code price}, {@code offersCount} and {@code lastChange} when it is newer than
+	 * the product; an older or equal state never does. Other fields stay those of the
+	 * product: the datasource hashes are kept, so a fragment whose content changed
+	 * during the batch is aggregated again in full at its next ingestion.
+	 *
+	 * <p>Call it just before queueing the products, in pages of a few hundred: a full
+	 * update queued before them is indexed before them, and the gap left to a
+	 * concurrent update is the time the queue takes to index them.
+	 *
+	 * @param products products about to be queued for full indexation
+	 * @return number of products whose offers were replaced
+	 */
+	public int applyNewerOfferStates(Collection<Product> products) {
+		Map<Long, Product> byId = new HashMap<>();
+		long oldest = Long.MAX_VALUE;
+		for (Product product : products) {
+			if (product != null && product.getId() != null) {
+				byId.put(product.getId(), product);
+				oldest = Math.min(oldest, product.getLastChange());
+			}
+		}
+		if (byId.isEmpty()) {
+			return 0;
+		}
+
+		// Index first, queues next: an update leaving a queue meanwhile is then read from the index
+		Map<Long, OfferState> newest = new HashMap<>();
+		List<Product> changed;
+		try {
+			changed = searchChangedSince(byId.keySet(), oldest);
+		} catch (RuntimeException e) {
+			// The batch result is still written: losing it would cost more than an offer the next feed restores
+			logger.error("Cannot read offers changed since {} for {} products, only queued updates are kept", oldest,
+					byId.size(), e);
+			changed = List.of();
+		}
+		for (Product indexed : changed) {
+			if (indexed != null && indexed.getId() != null) {
+				keepNewest(newest, indexed.getId(),
+						new OfferState(indexed.getLastChange(), indexed.getPrice(), indexed.getOffersCount()));
+			}
+		}
+		for (Product queued : fullProductQueue) {
+			if (queued.getId() != null && byId.containsKey(queued.getId()) && byId.get(queued.getId()) != queued) {
+				keepNewest(newest, queued.getId(),
+						new OfferState(queued.getLastChange(), queued.getPrice(), queued.getOffersCount()));
+			}
+		}
+		for (ProductPartialUpdateHolder partial : partialProductQueue) {
+			Map<String, Object> changes = partial.getChanges();
+			if (partial.getProductId() != null && byId.containsKey(partial.getProductId())
+					&& changes.get(ProductPartialUpdateField.LAST_CHANGE.path()) instanceof Long lastChange
+					&& changes.get(ProductPartialUpdateField.PRICE.path()) instanceof AggregatedPrices price
+					&& changes.get(ProductPartialUpdateField.OFFERS_COUNT.path()) instanceof Integer offersCount) {
+				keepNewest(newest, partial.getProductId(), new OfferState(lastChange, price, offersCount));
+			}
+		}
+
+		int replaced = 0;
+		for (Map.Entry<Long, OfferState> entry : newest.entrySet()) {
+			Product product = byId.get(entry.getKey());
+			OfferState state = entry.getValue();
+			if (state.lastChange() > product.getLastChange() && state.price() != null) {
+				product.setPrice(state.price());
+				product.setOffersCount(state.offersCount());
+				product.setLastChange(state.lastChange());
+				replaced++;
+			}
+		}
+		return replaced;
+	}
+
+	/** Keeps the newest state per product; on a tie, the one read last (queues after index). */
+	private static void keepNewest(Map<Long, OfferState> newest, Long id, OfferState state) {
+		newest.merge(id, state, (current, candidate) -> candidate.lastChange() >= current.lastChange() ? candidate : current);
+	}
+
+	/**
+	 * Offer fields of the given products changed in the index after {@code since}.
+	 *
+	 * @param ids   product ids
+	 * @param since epoch millis, exclusive
+	 * @return the changed products, projected on {@link #OFFER_STATE_FIELDS}
+	 */
+	private List<Product> searchChangedSince(Set<Long> ids, long since) {
+		List<String> stringIds = ids.stream().map(String::valueOf).toList();
+		co.elastic.clients.elasticsearch._types.query_dsl.Query changedQuery =
+				co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
+						.filter(f -> f.ids(i -> i.values(stringIds)))
+						.filter(f -> f.range(r -> r.date(d -> d.field("lastChange").gt(String.valueOf(since)))))));
+		NativeQuery query = new NativeQueryBuilder()
+				.withQuery(changedQuery)
+				.withSourceFilter(customSourceFilter(OFFER_STATE_FIELDS, null))
+				.withPageable(PageRequest.of(0, stringIds.size()))
+				.build();
+		return elasticsearchOperations.search(query, Product.class, CURRENT_INDEX).getSearchHits().stream()
+				.map(SearchHit::getContent)
+				.toList();
+	}
+
 	public void store(Collection<Product> data) {
 	    logger.info("Indexing {} products", data.size());
 
@@ -1029,6 +1205,56 @@ public class ProductRepository {
 
 
 	/**
+	 * Products read before a realtime aggregation, keyed by their numeric id.
+	 *
+	 * @param found     products present in the index, keyed by {@link Product#getId()}
+	 * @param failedIds ids whose lookup failed on Elasticsearch side: the product
+	 *                  may exist, so it must not be treated as a new one
+	 */
+	public record AggregationLookup(Map<Long, Product> found, Set<Long> failedIds) {
+	}
+
+	/**
+	 * Reads the products targeted by a realtime aggregation batch.
+	 *
+	 * <p>Unlike {@link #multiGetById(Collection)}, results are keyed by the
+	 * Elasticsearch document id ({@link Product#getId()}), not by
+	 * {@link Product#gtin()}: the referential GTIN string can differ from the id
+	 * (leading zeros of a GTIN-14 or of a padded UPC-12), and a key mismatch made
+	 * an existing product look new, so it was recreated from a single fragment
+	 * (GOU-1700). Ids whose lookup failed are reported apart from absent ones.
+	 *
+	 * @param ids product ids (numeric GTIN)
+	 * @return found products and failed ids
+	 */
+	public AggregationLookup multiGetForAggregation(final Collection<Long> ids) {
+		Map<Long, Product> found = new HashMap<>();
+		Set<Long> failedIds = new HashSet<>();
+		if (ids.isEmpty()) {
+			return new AggregationLookup(found, failedIds);
+		}
+
+		Set<String> stringIds = ids.stream().map(String::valueOf).collect(Collectors.toSet());
+		NativeQuery query = new NativeQueryBuilder().withIds(stringIds).build();
+
+		for (MultiGetItem<Product> item : elasticsearchOperations.multiGet(query, Product.class, CURRENT_INDEX)) {
+			if (item.isFailed()) {
+				MultiGetItem.Failure failure = item.getFailure();
+				logger.error("Product lookup failed for id {} : {}", failure.getId(),
+						failure.getElasticsearchErrorCause() != null ? failure.getElasticsearchErrorCause().getReason()
+								: failure.getException());
+				if (failure.getId() != null && !failure.getId().isEmpty()
+						&& failure.getId().chars().allMatch(Character::isDigit)) {
+					failedIds.add(Long.valueOf(failure.getId()));
+				}
+			} else if (item.hasItem() && item.getItem().getId() != null) {
+				found.put(item.getItem().getId(), item.getItem());
+			}
+		}
+		return new AggregationLookup(found, failedIds);
+	}
+
+	/**
 	 * Get multiple data from ids
 	 * @param ids
 	 * @return
@@ -1149,7 +1375,7 @@ public class ProductRepository {
         public Long countMainIndexHavingImpactScore() {
                 Criteria criteria = getRecentPriceQuery()
                         .and(new Criteria("excluded").is(false))
-                        .and(new Criteria("scores.IMPACTSCORE.value").exists());
+                        .and(new Criteria("scores.ECOSCORE.value").exists());
                 CriteriaQuery query = new CriteriaQuery(criteria);
                 return elasticsearchOperations.count(query, CURRENT_INDEX);
         }
@@ -1445,18 +1671,26 @@ public class ProductRepository {
 	}
 
 	/**
-	 * Bulk update, using Document
+	 * Painless script of a partial update: each changed field replaces the indexed one.
+	 * A {@code doc} update would merge objects instead: the client serializer omits null
+	 * properties, so a {@code price.minPrice} recomputed to null kept the expired offer
+	 * in the index (GOU-1784), and so would a sub-field or a trend that disappeared.
+	 */
+	static final String PARTIAL_UPDATE_SCRIPT = "for (def change : params.changes.entrySet()) { ctx._source[change.getKey()] = change.getValue(); }";
+
+	/**
+	 * Bulk partial update: replaces the changed top-level fields of each product, such
+	 * as {@code price}, as a full indexation would (GOU-1784).
 	 * @param partialItemsResults
 	 */
 	public void bulkUpdateDocument(Collection<ProductPartialUpdateHolder> partialItemsResults) {
 	    List<UpdateQuery> updateQueries = mergePartialUpdates(partialItemsResults).stream()
-	        .map(product -> {
-	            Map<String, Object> fieldsToUpdate = product.getChanges();
-	            return UpdateQuery.builder(String.valueOf(product.getProductId()))
-	                .withDocument(Document.from(fieldsToUpdate))
+	        .map(product -> UpdateQuery.builder(String.valueOf(product.getProductId()))
+	                .withScript(PARTIAL_UPDATE_SCRIPT)
+	                .withLang("painless")
+	                .withParams(Map.of("changes", product.getChanges()))
 	                .withIndex(CURRENT_INDEX.getIndexName())
-	                .build();
-	        })
+	                .build())
 	        .collect(Collectors.toList());
 
 	    // Perform the bulk update

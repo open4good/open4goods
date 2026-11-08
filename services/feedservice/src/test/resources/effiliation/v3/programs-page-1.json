@@ -1,0 +1,56 @@
+{
+  "pagination": {
+    "currentPage": 1,
+    "perPage": 1000,
+    "total": 3,
+    "from": 1,
+    "to": 2,
+    "lastPage": 2,
+    "nextPageLink": "https://api.effinity.fr/apiv3/anon-key-in-payload/publisher/programs?status=active&status=inactive&page=2&perPage=1000"
+  },
+  "programs": [
+    {
+      "merchantId": 6600000101,
+      "programId": 300000101,
+      "startDate": "2025-01-01",
+      "merchantName": "Example Active Merchant",
+      "merchantUrl": "https://active.example",
+      "merchantDescription": "Example merchant selling appliances.",
+      "sessionId": 3001,
+      "programType": "CPS",
+      "programName": "PRG-ACTIVE",
+      "programLogoUrl": "https://cdn.example/active-logo.png",
+      "status": "active",
+      "defaultTrackedLink": "https://track.example/active",
+      "remunerationDescription": "CA Nouveau client : 6 %",
+      "programCategories": ["High-tech", "Home appliances"],
+      "merchantTypologies": ["Voucher", "Cashback"],
+      "state": "active",
+      "cookieDurationPostClick": "30 days",
+      "cookieDurationPostView": "3 days",
+      "coverageCountries": ["FR", "BE"],
+      "hasAnalyticsTag": true,
+      "links": {
+        "remunerations": {
+          "href": "https://api.effinity.fr/apiv3/anon-key-in-payload/publisher/programs/300000101/remunerations",
+          "method": "GET",
+          "type": "application/json"
+        }
+      }
+    },
+    {
+      "merchantId": 6600000303,
+      "programId": 300000303,
+      "merchantName": "Example Frozen Merchant",
+      "merchantUrl": "https://frozen.example",
+      "programName": "PRG-FROZEN",
+      "programLogoUrl": "https://cdn.example/frozen-logo.png",
+      "status": "inactive",
+      "defaultTrackedLink": "https://track.example/frozen",
+      "programCategories": ["Garden"],
+      "state": "frozen",
+      "cookieDurationPostClick": "15 days",
+      "coverageCountries": ["FR"]
+    }
+  ]
+}

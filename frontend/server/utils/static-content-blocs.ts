@@ -186,8 +186,7 @@ const escapeHtml = (value: string): string =>
  * Looks up real static content for a bloc id, HTML-escaped and paragraph-wrapped the way
  * `TextContent.vue` expects `htmlContent` to already be (it renders the value with `v-html`
  * unmodified). Falls back from the requested language to French, then returns `null` when the
- * bloc id has no static entry at all -- callers should fall through to the live XWiki fetch in
- * that case.
+ * bloc id has no static entry at all.
  */
 export function getStaticContentBloc(
   blocId: string,

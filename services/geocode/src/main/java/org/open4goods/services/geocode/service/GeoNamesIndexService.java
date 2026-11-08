@@ -36,19 +36,28 @@ public class GeoNamesIndexService
     }
 
     /**
-     * Loads the dataset at startup.
+     * Loads the dataset at startup. Failures are logged and leave the index
+     * unloaded instead of failing application startup, mirroring
+     * {@link MaxMindIpGeolocationService#initialize()}.
      */
     @PostConstruct
     public void initialize()
     {
-        Path datasetPath = datasetProvider.getDatasetPath();
-        CityIndex index = loader.load(datasetPath);
-        if (index.getIndexSize() == 0)
+        try
         {
-            throw new IllegalStateException("GeoNames index is empty after loading");
+            Path datasetPath = datasetProvider.getDatasetPath();
+            CityIndex index = loader.load(datasetPath);
+            if (index.getIndexSize() == 0)
+            {
+                throw new IllegalStateException("GeoNames index is empty after loading");
+            }
+            indexRef.set(index);
+            LOGGER.info("GeoNames index ready: {} records", index.getRecordCount());
         }
-        indexRef.set(index);
-        LOGGER.info("GeoNames index ready: {} records", index.getRecordCount());
+        catch (Exception ex)
+        {
+            LOGGER.warn("Failed to initialize GeoNames index on startup. Geolocation lookups will be unavailable.", ex);
+        }
     }
 
     /**

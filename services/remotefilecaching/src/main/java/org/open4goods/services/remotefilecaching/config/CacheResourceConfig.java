@@ -15,6 +15,12 @@ public class CacheResourceConfig {
 	 */
 	private String extractedFileName;
 
+	/**
+	 * If set, used instead of the URL in diagnostic logs, for URLs that carry a secret outside of their query
+	 * string (for example an API key as a path segment).
+	 */
+	private String logLabel;
+
 
 
 	//	public String getId() {
@@ -56,6 +62,16 @@ public class CacheResourceConfig {
 
 	public void setExtractedFileName(final String extractedFileName) {
 		this.extractedFileName = extractedFileName;
+	}
+
+
+	public String getLogLabel() {
+		return logLabel;
+	}
+
+
+	public void setLogLabel(final String logLabel) {
+		this.logLabel = logLabel;
 	}
 
 

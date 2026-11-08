@@ -125,7 +125,24 @@ git config core.hooksPath .githooks
 - Update the nearest durable document when code changes behavior, contracts,
   deployment, developer workflow, or AI-agent workflow.
 - Markdown and JSON must use ASCII punctuation normalized by
-  `scripts/python/text_replacements.py`.
+  `scripts/python/text_replacements.py`. Generated release notes under
+  `frontend/app/public/reports/` are excluded, as in `.yamllint`.
+
+## 6.2  Service secrets
+
+- Beta and prod secrets live in the `beta` / `prod` GitHub Environments of
+  `open4good/open4goods`, never in this repository; they leave
+  `open4goods-config` as they are rotated (D140, ADR-0006, GOU-1038).
+- `scripts/deploy/render-service-secrets.sh` is the single table of what each
+  service receives (Spring config tree file or env line). A new secret is a row
+  of that table, mapped in the workflows that render its service, plus a
+  property in the module's `RenderedSecretsConfigTreeTest` (which fails when a
+  `tree` row has no consumer). See
+  [docs/operations/prod-service-secrets.md](docs/operations/prod-service-secrets.md).
+- A password that must first change at its source (Elasticsearch, Kibana) or
+  a compose infrastructure key is a `source` row, rendered only by
+  `infraSecrets.yml` (`scripts/deploy/infra-secrets.sh`). See
+  [docs/operations/infra-secrets-rotation.md](docs/operations/infra-secrets-rotation.md).
 
 ## 7  Pull-request checklist
 
@@ -162,6 +179,22 @@ For detailed module-specific conventions, see:
 ---
 
 ## 11  AI Search & Navigation (Java MCP Servers)
+
+### Project MCP capabilities
+
+For Nudger work, use Context7 for current library documentation, Nuxt and Vuetify for frontend
+APIs, JavaLens for Java semantics, and the **Nudger** Plausible statistics connection for
+traffic questions. The Maven CLI remains the build authority; no Maven MCP is required.
+JavaLens on `main` helps initial orientation. For references affected by an issue, open the
+issue worktree in the on-demand Java semantic connection, wait for indexing, then query that
+workspace. If it is unavailable, state that a `main` result may miss the issue branch.
+
+These are project guidelines for Paperclip agents and local coding assistants. Paperclip
+connections, credentials and agent grants are managed in Paperclip, not by this file.
+`.mcp.json` configures local assistants only and does not install tools in Paperclip. Agent
+grants can span projects, so choose the connection for the issue's project. A future SEO
+agent may carry DataForSEO as a role-specific connection; it is not part of every agent's
+baseline. Ops uses its existing Remote ops connections for Java profiling on beta/prod.
 
 To stop AI agents from trying to `grep` a massive Java project (which results in endless false positives for overloaded methods, interface implementations, or generic names), use system prompts or explicit triggering to force the use of compiler-level tools.
 

@@ -7,7 +7,7 @@ package org.open4goods.api.services;
 public enum ResourceCleanupMode {
 
 	/**
-	 * Classify and report only. No file is touched. This is the default, and the only
+	 * Classify and report only. No file or folder is touched. This is the default, and the only
 	 * mode that should be used to validate a classification change against production data.
 	 */
 	DRY_RUN,
@@ -20,7 +20,8 @@ public enum ResourceCleanupMode {
 	MOVE,
 
 	/**
-	 * Delete orphans in place. Reclaims space immediately, with no way back.
+	 * Delete orphans in place, then drop the shard folders this run has emptied. Reclaims
+	 * space immediately, with no way back.
 	 */
 	DELETE
 }

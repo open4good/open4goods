@@ -213,4 +213,19 @@ class UnitAwareNumericParserTest
 
         assertThat(result).isEqualTo("0.6");
     }
+
+    /** GOU-1897 point 3: powers written with a kilo prefix, a decimal comma or grouped thousands. */
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource(delimiter = '|', value = {
+            "1,2 KW|1200", "1.2kW|1200", "1 200 W|1200", "1200 W|1200", "2,5 kW|2500" })
+    void parsePowerInWatts(String raw, String expected) throws ParseException
+    {
+        AttributeParserConfig parserCfg = new AttributeParserConfig();
+        parserCfg.setDimension("POWER");
+        parserCfg.setDefaultUnitHint("W");
+        AttributeConfig powerConfig = new AttributeConfig();
+        powerConfig.setParser(parserCfg);
+
+        assertThat(parser.parse(raw, powerConfig, verticalConfig)).isEqualTo(expected);
+    }
 }

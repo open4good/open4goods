@@ -50,7 +50,6 @@ export const useFullPage = async (
   const metaTitle = computed(() => page.value?.metaTitle ?? pageTitle.value)
   const metaDescription = computed(() => page.value?.metaDescription ?? '')
   const htmlContent = computed(() => page.value?.htmlContent ?? '')
-  const editLink = computed(() => page.value?.editLink ?? null)
 
   return {
     page,
@@ -59,7 +58,6 @@ export const useFullPage = async (
     metaTitle,
     metaDescription,
     htmlContent,
-    editLink,
     pending: asyncState.pending,
     error: asyncState.error,
     refresh: asyncState.refresh,

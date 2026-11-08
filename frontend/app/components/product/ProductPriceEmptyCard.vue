@@ -7,6 +7,9 @@
     <span class="text-caption font-weight-bold text-uppercase text-grey ls-1">
       {{ label }}
     </span>
+    <span v-if="hint" class="text-caption text-grey-darken-1 mt-1">
+      {{ hint }}
+    </span>
   </div>
 </template>
 
@@ -14,5 +17,7 @@
 defineProps<{
   icon: string
   label: string
+  /** Optional secondary line, e.g. the last recorded price and its date. */
+  hint?: string | null
 }>()
 </script>

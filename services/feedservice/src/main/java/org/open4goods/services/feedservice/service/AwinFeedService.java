@@ -114,6 +114,8 @@ public class AwinFeedService extends AbstractFeedService {
         CacheResourceConfig cacheConfig = new CacheResourceConfig();
         cacheConfig.setUrl(feedConfig.getCatalogUrl());
         cacheConfig.setRefreshInDays(1);
+        // The catalog URL carries the Awin API key
+        cacheConfig.setLogLabel("Awin catalog");
         File cachedCatalog = remoteFileCachingService.retrieve(cacheConfig);
 
         // Define CSV schema based on the feed configuration (header, comma separator, quoted values).
@@ -154,7 +156,9 @@ public class AwinFeedService extends AbstractFeedService {
             }
 
             if (feedKey == null || feedKey.trim().isEmpty()) {
-                logger.warn("Skipping CSV line due to missing feed key: {}", line);
+                // The line holds the feed URL, which carries the Awin API key: never log its values
+                logger.warn("Skipping Awin catalog line of advertiser '{}' due to missing feed key (columns: {}).",
+                        line.get("Advertiser ID"), line.keySet());
                 continue;
             }
 
@@ -215,7 +219,7 @@ public class AwinFeedService extends AbstractFeedService {
     public List<AwinMerchant> retrieveAwinMerchantMetadata(String accessToken, String advertiserId) throws Exception {
         String endpoint = "https://api.awin.com/publishers/" + advertiserId
                 + "/programmes?relationship=joined&accessToken=" + accessToken;
-        logger.info("Retrieving Awin merchant metadata from endpoint: {}", endpoint);
+        logger.info("Retrieving Awin merchant metadata from endpoint: {}", safeEndpointForLogs(endpoint));
 
         int cacheTtl = feedConfig.getAwin().getCacheTtlDays();
         File cachedResponse = remoteFileCachingService.getResource(endpoint, cacheTtl);

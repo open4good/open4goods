@@ -83,7 +83,10 @@ mvn --offline -pl services/geocode spring-boot:run
 
 `GET /actuator/health`
 
-The service reports `UP` only when the GeoNames index is loaded and non-empty.
+The service reports `UP` only when the GeoNames index is loaded and non-empty. If the dataset
+cannot be downloaded or loaded at startup (no network, unreachable source), the service still
+starts - the failure is logged as a `WARN` and the health indicator reports `DOWN` instead of
+aborting startup, matching MaxMind's existing behaviour.
 
 ### IP geolocation
 

@@ -7,6 +7,8 @@
 import type { MetrikWithTrend } from '~/types/metriks'
 import { formatMetrikValue } from '~/composables/useMetriks'
 
+const { locale } = useI18n()
+
 const props = withDefaults(
   defineProps<{
     /** The enriched metric whose history to render. */
@@ -44,7 +46,7 @@ const chartOption = computed(() => {
       ) => {
         if (!Array.isArray(params) || params.length === 0) return ''
         const p = params[0]!
-        return `<strong>${p.axisValueLabel}</strong><br/>${formatMetrikValue(p.value, unit)}`
+        return `<strong>${p.axisValueLabel}</strong><br/>${formatMetrikValue(p.value, unit, locale.value)}`
       },
     },
     grid: {

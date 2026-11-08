@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { computed, unref, toRef } from 'vue'
 import { useContentBloc } from '~/composables/content/useContentBloc'
-import { useAuth } from '~/composables/useAuth'
-import { useRuntimeConfig } from '#app'
 import {
   DEFAULT_LOREM_LENGTH,
   _generateLoremIpsum,
@@ -16,27 +14,20 @@ const props = withDefaults(
     defaultLength?: number
     ipsumLength?: number
     fallbackText?: string
+    allowGeneratedPlaceholder?: boolean
   }>(),
   {
     defaultLength: DEFAULT_LOREM_LENGTH,
     ipsumLength: undefined,
     fallbackText: undefined,
+    allowGeneratedPlaceholder: true,
   }
 )
 
 // Composables
 const blocId = toRef(props, 'blocId')
 const fallbackText = toRef(props, 'fallbackText')
-const { htmlContent, editLink, pending, error } = await useContentBloc(blocId)
-const { isLoggedIn, hasRole } = useAuth()
-const config = useRuntimeConfig()
-
-// Roles & auth
-const canEdit = computed(() => {
-  const link = unref(editLink)
-  const roles = (config.public.editRoles as string[]) || []
-  return isLoggedIn.value && !!link && roles.some(role => hasRole(role))
-})
+const { htmlContent, pending, error } = await useContentBloc(blocId)
 
 const fallbackLoremLength = computed(
   () => props.ipsumLength ?? props.defaultLength ?? DEFAULT_LOREM_LENGTH
@@ -70,31 +61,24 @@ const displayHtml = computed(() => {
     return fallbackHtml.value
   }
 
+  if (!props.allowGeneratedPlaceholder) {
+    return null
+  }
+
   return _generateLoremIpsum(fallbackLoremLength.value)
 })
 </script>
 
 <template>
-  <div class="text-content" :class="{ editable: canEdit }">
+  <div v-if="pending || error || displayHtml" class="text-content">
     <v-progress-circular v-if="pending" indeterminate />
     <v-alert v-else-if="error" type="error" variant="tonal">{{
       error
     }}</v-alert>
 
-    <!-- Encapsulated XWiki content -->
+    <!-- Encapsulated content bloc -->
     <!-- eslint-disable-next-line vue/no-v-html -->
-    <div v-else class="xwiki-sandbox" v-html="displayHtml" />
-
-    <!-- Edit link -->
-    <a
-      v-if="canEdit"
-      :href="editLink"
-      target="_blank"
-      rel="noopener"
-      class="edit-link"
-    >
-      Edit
-    </a>
+    <div v-else class="cms-sandbox" v-html="displayHtml" />
   </div>
 </template>
 
@@ -104,24 +88,13 @@ const displayHtml = computed(() => {
   position: relative;
 }
 
-.text-content.editable {
-  border: 1px solid #ccc;
-}
-
-.edit-link {
-  position: absolute;
-  bottom: 0.25rem;
-  right: 0.25rem;
-  font-size: 0.875rem;
-}
-
-/* Scoped sandbox to contain Bootstrap + XWiki styles */
-.xwiki-sandbox {
+/* Scoped sandbox to contain inherited rich-text styles */
+.cms-sandbox {
   display: block;
   font-family: inherit;
 }
 
-.xwiki-sandbox * {
+.cms-sandbox * {
   box-sizing: border-box;
   font-family: inherit;
 }

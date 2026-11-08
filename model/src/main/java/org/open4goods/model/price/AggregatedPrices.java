@@ -41,6 +41,12 @@ public class AggregatedPrices implements Standardisable {
 	// Contains the conditions for this product. Shortcut for elastic queryng
 	private Set<ProductCondition> conditions = new HashSet<>();
 
+	/**
+	 * Epoch millis at which an offer of each condition was last seen, kept after the offers expire, so a product
+	 * without offer can tell when it last had one. The price history only records price changes (GOU-1699).
+	 */
+	private Map<ProductCondition, Long> lastOfferSeen = new HashMap<>();
+
 	public List<AggregatedPrice> newOffers() {
 		return sortedOffers(ProductCondition.NEW);
 	}
@@ -225,6 +231,14 @@ public class AggregatedPrices implements Standardisable {
 
 	public void setOccasionPricehistory(List<PriceHistory> occasionPricehistory) {
 		this.occasionPricehistory = occasionPricehistory;
+	}
+
+	public Map<ProductCondition, Long> getLastOfferSeen() {
+		return lastOfferSeen;
+	}
+
+	public void setLastOfferSeen(Map<ProductCondition, Long> lastOfferSeen) {
+		this.lastOfferSeen = lastOfferSeen;
 	}
 
 

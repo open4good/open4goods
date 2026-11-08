@@ -100,7 +100,7 @@ public class BatchServiceResourceCleanupTest {
         activeResource.setCacheKey("hash123");
         product.setResources(new HashSet<>(Collections.singletonList(activeResource)));
 
-        when(productRepository.exportAll()).thenReturn(Stream.of(product));
+        when(productRepository.exportAll(BatchService.RESOURCE_KEY_FIELDS, BatchService.RESOURCE_KEY_PAGE_SIZE)).thenReturn(Stream.of(product));
 
         // Create cache files
         // 1. Active resource original file (should NOT be moved)
@@ -156,7 +156,7 @@ public class BatchServiceResourceCleanupTest {
     public void testTruncatedProductStreamAbortsWithoutTouchingAnyFile() throws Exception {
         // The index claims 100 products, but the stream only yields one
         when(productRepository.countMainIndex()).thenReturn(100L);
-        when(productRepository.exportAll()).thenReturn(Stream.of(productWithResource()));
+        when(productRepository.exportAll(BatchService.RESOURCE_KEY_FIELDS, BatchService.RESOURCE_KEY_PAGE_SIZE)).thenReturn(Stream.of(productWithResource()));
 
         String orphanKey = "orphan_stale_key";
         Path orphan = createFileInCache(Resource.folderHashPrefix(orphanKey) + "/" + orphanKey, "content",
@@ -167,6 +167,27 @@ public class BatchServiceResourceCleanupTest {
         assertTrue(report.aborted(), "Run must abort when the product stream is truncated");
         assertEquals(0, report.processedCount(), "No file may be processed on an aborted run");
         assertTrue(Files.exists(orphan), "Orphan must survive an aborted run");
+    }
+
+    /**
+     * A stream failing midway (e.g. ES response too large) aborts the run and reports the products really read.
+     */
+    @Test
+    public void testStreamFailureAbortsAndReportsStreamedCount() throws Exception {
+        when(productRepository.countMainIndex()).thenReturn(100L);
+        Product ok = productWithResource();
+        when(productRepository.exportAll(BatchService.RESOURCE_KEY_FIELDS, BatchService.RESOURCE_KEY_PAGE_SIZE))
+                .thenReturn(Stream.concat(Stream.of(ok, ok),
+                        Stream.generate(() -> { throw new IllegalStateException("entity content is too long"); })));
+
+        ResourceCleanupReport report = batchService.cleanOrphanResources(ResourceCleanupMode.DRY_RUN);
+
+        assertTrue(report.aborted());
+        assertEquals(2, report.streamedProductCount());
+        assertEquals(1000, BatchService.RESOURCE_KEY_PAGE_SIZE);
+        assertTrue(java.util.Arrays.asList(BatchService.RESOURCE_KEY_FIELDS).contains("resources.cacheKey"));
+        // Resource.hashCode() reads the url : without it the resources set cannot be deserialized
+        assertTrue(java.util.Arrays.asList(BatchService.RESOURCE_KEY_FIELDS).contains("resources.url"));
     }
 
     /**
@@ -192,7 +213,7 @@ public class BatchServiceResourceCleanupTest {
      */
     @Test
     public void testForeignCachesOutsideShardsAreNeverSwept() throws Exception {
-        when(productRepository.exportAll()).thenReturn(Stream.of(productWithResource()));
+        when(productRepository.exportAll(BatchService.RESOURCE_KEY_FIELDS, BatchService.RESOURCE_KEY_PAGE_SIZE)).thenReturn(Stream.of(productWithResource()));
 
         long stale = System.currentTimeMillis() - 10000;
         // Flat files written at the cache root by RemoteFileCachingService and IcecatFileDownloadService
@@ -218,7 +239,7 @@ public class BatchServiceResourceCleanupTest {
      */
     @Test
     public void testDryRunReportsOrphansWithoutTouchingThem() throws Exception {
-        when(productRepository.exportAll()).thenReturn(Stream.of(productWithResource()));
+        when(productRepository.exportAll(BatchService.RESOURCE_KEY_FIELDS, BatchService.RESOURCE_KEY_PAGE_SIZE)).thenReturn(Stream.of(productWithResource()));
 
         String orphanKey = "orphan_stale_key";
         Path orphan = createFileInCache(Resource.folderHashPrefix(orphanKey) + "/" + orphanKey, "0123456789",
@@ -234,11 +255,48 @@ public class BatchServiceResourceCleanupTest {
     }
 
     /**
+     * DRY_RUN and MOVE must never remove shard folders, even empty ones : an empty shard may have
+     * just been created by ResourceService.getCacheFile for a download still in flight.
+     */
+    @Test
+    public void testNonDeleteModesLeaveEmptyShardFoldersInPlace() throws Exception {
+        for (ResourceCleanupMode mode : List.of(ResourceCleanupMode.DRY_RUN, ResourceCleanupMode.MOVE)) {
+            when(productRepository.exportAll(BatchService.RESOURCE_KEY_FIELDS, BatchService.RESOURCE_KEY_PAGE_SIZE)).thenReturn(Stream.of(productWithResource()));
+            Path emptyShard = Files.createDirectories(tempCacheDir.resolve("E/M/P"));
+            String orphanKey = "orphan_stale_key";
+            String orphanShard = Resource.folderHashPrefix(orphanKey);
+            createFileInCache(orphanShard + "/" + orphanKey, "content", System.currentTimeMillis() - 10000);
+
+            batchService.cleanOrphanResources(mode);
+
+            assertTrue(Files.isDirectory(emptyShard), mode + " must leave an empty shard folder in place");
+            assertTrue(Files.isDirectory(tempCacheDir.resolve(orphanShard)), mode + " must leave the orphan shard folder in place");
+        }
+    }
+
+    /**
+     * DELETE drops the shards it has emptied, but not those already empty before the run.
+     */
+    @Test
+    public void testDeleteModeDropsOnlyShardsItEmptied() throws Exception {
+        when(productRepository.exportAll(BatchService.RESOURCE_KEY_FIELDS, BatchService.RESOURCE_KEY_PAGE_SIZE)).thenReturn(Stream.of(productWithResource()));
+        Path preExistingEmptyShard = Files.createDirectories(tempCacheDir.resolve("E/M/P"));
+        String orphanKey = "orphan_stale_key";
+        String orphanShard = Resource.folderHashPrefix(orphanKey);
+        createFileInCache(orphanShard + "/" + orphanKey, "content", System.currentTimeMillis() - 10000);
+
+        batchService.cleanOrphanResources(ResourceCleanupMode.DELETE);
+
+        assertFalse(Files.exists(tempCacheDir.resolve(orphanShard)), "Shard emptied by DELETE should be dropped");
+        assertTrue(Files.isDirectory(preExistingEmptyShard), "Shard already empty before the run must be kept");
+    }
+
+    /**
      * DELETE reclaims the space in place, where MOVE only parks the file on the same filesystem.
      */
     @Test
     public void testDeleteModeRemovesOrphanInPlace() throws Exception {
-        when(productRepository.exportAll()).thenReturn(Stream.of(productWithResource()));
+        when(productRepository.exportAll(BatchService.RESOURCE_KEY_FIELDS, BatchService.RESOURCE_KEY_PAGE_SIZE)).thenReturn(Stream.of(productWithResource()));
 
         String orphanKey = "orphan_stale_key";
         String relative = Resource.folderHashPrefix(orphanKey) + "/" + orphanKey;
@@ -291,5 +349,23 @@ public class BatchServiceResourceCleanupTest {
         Files.writeString(filePath, content, StandardCharsets.UTF_8);
         assertTrue(filePath.toFile().setLastModified(lastModifiedTime), "Failed to set mock file modification time");
         return filePath;
+    }
+
+    @Test
+    public void testAsyncCleanupReportsStatus() throws Exception {
+        assertEquals(ResourceCleanupStatus.State.IDLE, batchService.getCleanupStatus().state());
+        when(productRepository.exportAll(BatchService.RESOURCE_KEY_FIELDS, BatchService.RESOURCE_KEY_PAGE_SIZE))
+                .thenReturn(Stream.empty());
+
+        batchService.startCleanOrphanResources(ResourceCleanupMode.DRY_RUN);
+
+        long deadline = System.currentTimeMillis() + 10000;
+        while (batchService.getCleanupStatus().state() == ResourceCleanupStatus.State.RUNNING
+                && System.currentTimeMillis() < deadline) {
+            Thread.sleep(20);
+        }
+        ResourceCleanupStatus status = batchService.getCleanupStatus();
+        assertEquals(ResourceCleanupStatus.State.COMPLETED, status.state());
+        assertTrue(status.report().aborted(), "empty stream is below the safety floor");
     }
 }

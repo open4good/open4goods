@@ -1,13 +1,16 @@
 name: B2B Frontend CI
+# Checks only, no deployment: the b2b-frontend beta deploy runs with b2b-api in testAndPublishBeta.yml (GOU-1036).
 
 on:
   push:
     paths:
       - "b2b-frontend/**"
+      - ".github/workflows/b2b-frontend-ci.yml"
     branches: [main]
   pull_request:
     paths:
       - "b2b-frontend/**"
+      - ".github/workflows/b2b-frontend-ci.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,7 +24,7 @@ jobs:
 
       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
         with:
-          version: 11.21.0
+          version: 11.28.3
 
       - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4

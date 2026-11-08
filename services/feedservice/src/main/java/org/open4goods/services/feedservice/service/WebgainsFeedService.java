@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
+import org.open4goods.commons.util.HttpUtils;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.model.affiliation.AffiliationCapability;
 import org.open4goods.model.affiliation.AffiliationPromotion;
@@ -108,7 +109,7 @@ public class WebgainsFeedService extends AbstractFeedService
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         if (response.statusCode() < 200 || response.statusCode() >= 300)
         {
-            throw new IllegalStateException("Webgains API call failed for " + endpoint
+            throw new IllegalStateException("Webgains API call failed for " + HttpUtils.safeEndpointForLogs(endpoint)
                     + " with HTTP status " + response.statusCode());
         }
         return objectMapper.readTree(response.body());

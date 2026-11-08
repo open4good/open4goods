@@ -2,6 +2,7 @@ package org.open4goods.api.services.store;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -12,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.aggregation.services.realtime.PriceAggregationService;
 import org.open4goods.commons.exceptions.AggregationSkipException;
+import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.model.Standardisable;
 import org.open4goods.model.StandardiserService;
 import org.open4goods.model.datafragment.DataFragment;
@@ -21,6 +23,7 @@ import org.open4goods.model.product.ProductPartialUpdateField;
 import org.open4goods.model.product.ProductPartialUpdateHolder;
 import org.open4goods.services.productrepository.config.IndexationConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
+import org.open4goods.services.productrepository.services.ProductRepository.AggregationLookup;
 import org.open4goods.services.productrepository.workers.FullProductIndexationWorker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,20 +63,23 @@ public class DataFragmentStoreService {
 
 	private AggregationFacadeService generationService;
 
+	private final BarcodeValidationService barcodeValidationService;
+
 	PriceAggregationService priceService = new PriceAggregationService(logger);
 
 
 	/**
 	 * 
+	 * @param barcodeValidationService computes the product id of a fragment GTIN, the same one the identity aggregation indexes it under
 	 * @param indexationConfig 
-	 * @param queueFolder The folder where indexation queued datas will be stored
 	 */
-	public DataFragmentStoreService(StandardiserService standardiserService, AggregationFacadeService generationService, ProductRepository aggregatedDataRepository, IndexationConfig indexationConfig) {
+	public DataFragmentStoreService(StandardiserService standardiserService, AggregationFacadeService generationService, ProductRepository aggregatedDataRepository, BarcodeValidationService barcodeValidationService, IndexationConfig indexationConfig) {
 
 
 		this.standardiserService = standardiserService;
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.generationService=generationService;
+		this.barcodeValidationService = barcodeValidationService;
 		
 		this.queue =  new LinkedBlockingQueue<>(indexationConfig.getDatafragmentQueueMaxSize());
 		
@@ -181,16 +187,36 @@ public class DataFragmentStoreService {
 
 
 	/**
-	 * Aggregates datafragments to already known aggregatedDatas, then store the results
+	 * Aggregates datafragments to already known aggregatedDatas, then store the results.
+	 *
+	 * <p>Existing products are looked up by the same key the aggregation indexes them
+	 * under: {@link BarcodeValidationService#toProductId(String)}, the numeric value of
+	 * the sanitised GTIN, never the raw GTIN string of the fragment. A feed GTIN with
+	 * leading zeros ({@code 07333394145372}) and the product referential GTIN
+	 * ({@code 7333394145372}) designate the same document (GOU-1700), and so do an
+	 * ISBN-10 ({@code 2726862217}) and its ISBN-13 ({@code 9782726862216}, GOU-1841).
+	 * A fragment whose GTIN is not a valid barcode is skipped, as the identity
+	 * aggregation would reject it. A product is only created when Elasticsearch
+	 * reports it absent; a fragment whose lookup failed is skipped, so that an
+	 * existing product is never rewritten from a single fragment (GOU-1700).
 	 */
 	public void aggregateAndstore(Collection<DataFragment> buffer) {
 		
 		try {
+			// Keying fragments by the id the aggregation will index them under
+			Map<DataFragment, Long> ids = new IdentityHashMap<>();
+			for (DataFragment df : buffer) {
+				Long id = barcodeValidationService.toProductId(df.gtin());
+				if (null == id) {
+					logger.info("Skipping datafragment {} from {} : not a valid GTIN/ISBN barcode", df.gtin(), df.getDatasourceName());
+				} else {
+					ids.put(df, id);
+				}
+			}
+
 			// Retrieving datafragments
-			Map<String, Product> aggDatas = aggregatedDataRepository.multiGetById(
-					buffer.stream()
-					.map(e -> Long.valueOf(e.gtin()))
-					.toList());
+			AggregationLookup lookup = aggregatedDataRepository.multiGetForAggregation(new HashSet<>(ids.values()));
+			Map<Long, Product> aggDatas = lookup.found();
 
 
 			// Storing for partial updates
@@ -200,11 +226,22 @@ public class DataFragmentStoreService {
 			
 			
 			for (DataFragment df : buffer) {
-				Product data = aggDatas.get(df.gtin());
+				Long id = ids.get(df);
+				if (null == id) {
+					continue;
+				}
+				if (lookup.failedIds().contains(id)) {
+					logger.error("Skipping datafragment {} from {} : product lookup failed, it may exist", df.gtin(), df.getDatasourceName());
+					continue;
+				}
+				Product data = aggDatas.get(id);
 				if (null == data) {
 					// This is a first product
+					logger.info("Creating product {} from {}", id, df.getDatasourceName());
 					data = new Product();
 					data.setCreationDate(System.currentTimeMillis());
+					// Next fragments of this buffer must enrich it, not recreate it
+					aggDatas.put(id, data);
 				}
 
 				/////////////////////////////

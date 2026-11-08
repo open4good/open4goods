@@ -3,6 +3,10 @@ package org.open4goods.api.controller.api;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +14,11 @@ import org.open4goods.api.dto.metriks.MetriksEvent;
 import org.open4goods.api.dto.metriks.MetriksPeriod;
 import org.open4goods.api.dto.metriks.MetriksResponse;
 import org.open4goods.api.services.metriks.GoogleSearchConsoleService;
+import org.open4goods.api.services.metriks.GoogleSearchConsoleService.Outcome;
+import org.open4goods.api.services.metriks.GoogleSearchConsoleService.Row;
+import org.open4goods.api.services.metriks.GoogleSearchConsoleService.TopRows;
+import org.open4goods.api.services.metriks.GoogleSearchConsoleService.Totals;
+import org.open4goods.api.services.metriks.affiliation.AffiliationMetriksService;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -30,30 +39,40 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 /**
  * Exposes the metrics consumed by the weekly Metriks report (the {@code open4goods-api} provider in
  * open4goods-config calls these endpoints). Each metric is emitted as a schema 2.0 event so it can
- * flow unchanged into the report pipeline and the {@code /metriks} dashboard.
+ * flow unchanged into the report pipeline and the {@code /metriks} dashboard. Open to the admin key and to the
+ * dedicated Metriks key ({@code metriks-key}, {@code ROLE_METRIKS}, GOU-1412).
  */
 @RestController
 @RequestMapping("/api/metriks")
-@PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
+@PreAuthorize("hasAnyAuthority('" + RolesConstants.ROLE_ADMIN + "', '" + RolesConstants.ROLE_METRIKS + "')")
 @Tag(name = "Metriks", description = "Structured metric endpoints consumed by the weekly Metriks report pipeline. "
         + "Each endpoint emits schema-2.0 events covering system health, business KPIs and SEO signals.")
 public class MetriksController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetriksController.class);
+    private static final List<String> GSC_GROUPS = List.of("seo");
+    private static final String ID_DAILY = "seo.gsc.daily";
+    private static final String NAME_DAILY = "Clics et impressions par jour (Search Console, 56 j)";
+    private static final String NAME_LOSING_QUERIES = "Top 20 requêtes en recul (Search Console, 28 j)";
+    private static final String NAME_LOSING_PAGES = "Top 20 pages en recul (Search Console, 28 j)";
+    private static final List<String> GSC_TAGS = List.of("gsc", "google", "search-analytics");
     /** Default locale used when counting products that carry an AI review. */
     private final FeedService feedService;
     private final ElasticsearchOperations elasticsearchOperations;
     private final ProductRepository productRepository;
     private final GoogleSearchConsoleService searchConsoleService;
+    private final AffiliationMetriksService affiliationMetriksService;
 
     public MetriksController(FeedService feedService,
                              ElasticsearchOperations elasticsearchOperations,
                              ProductRepository productRepository,
-                             GoogleSearchConsoleService searchConsoleService) {
+                             GoogleSearchConsoleService searchConsoleService,
+                             AffiliationMetriksService affiliationMetriksService) {
         this.feedService = feedService;
         this.elasticsearchOperations = elasticsearchOperations;
         this.productRepository = productRepository;
         this.searchConsoleService = searchConsoleService;
+        this.affiliationMetriksService = affiliationMetriksService;
     }
 
     @GetMapping("/system")
@@ -115,19 +134,257 @@ public class MetriksController {
     @GetMapping("/seo")
     @Operation(
             summary = "Get SEO metrics from Google Search Console",
-            description = "Returns the number of pages indexed by Google Search Console as a Metriks schema-2.0 event. "
-                    + "Requires a valid Google Search Console credential to be configured.")
+            description = "Returns the number of distinct pages that received at least one impression in Search "
+                    + "Console's Search Analytics report over a rolling 28-day window, as a Metriks schema-2.0 "
+                    + "event. This is a proxy for indexation, not an exact measure: a page that Google has indexed "
+                    + "but which received no impression in the window is not counted. Requires a valid Google "
+                    + "Search Console credential to be configured. It also returns, for the last 28 days ending "
+                    + "'metriks.gsc.lag-days' days ago (UTC) compared with the 28 contiguous days before: clicks, "
+                    + "impressions, CTR (percent), average position (seo.gsc.clicks, impressions, ctr, position, each "
+                    + "with 'previousValue' in params) and the top 20 queries and pages by clicks "
+                    + "(seo.gsc.top_queries, seo.gsc.top_pages, 'params.rows' with previous-window values, null when "
+                    + "the key is absent from the previous window), the top 20 queries and pages losing clicks "
+                    + "(seo.gsc.top_losing_queries, seo.gsc.top_losing_pages, 'clicksDelta' = current minus previous "
+                    + "clicks, negative only) and the daily clicks/impressions series over the 56 days of both windows "
+                    + "(seo.gsc.daily, 'params.rows', a day without data counts 0 with null ctr/position). The pages "
+                    + "count also carries 'previousValue' for the previous 28 days ('previousError' if only that count "
+                    + "failed). A failing metric is reported as an "
+                    + "event with status 'error'; the endpoint still answers 200.")
     @ApiResponse(responseCode = "200", description = "MetriksResponse containing SEO metric events")
     public MetriksResponse getSeoMetrics() {
         MetriksResponse response = newResponse();
         List<MetriksEvent> events = new ArrayList<>();
 
-        events.add(measure("seo.gsc.indexed_pages", "Pages indexées (Search Console)", "count",
-                List.of("seo"), List.of("gsc", "google", "indexation"),
-                searchConsoleService::countIndexedPages));
+        events.add(measurePagesWithImpressions());
+        events.addAll(measureSearchAnalytics());
 
         response.setEvents(events);
         return response;
+    }
+
+    @GetMapping("/affiliation")
+    @Operation(
+            summary = "Get affiliation revenue and outbound click metrics (Awin, Effiliation)",
+            description = "Returns, for each affiliation network (awin, effiliation) and for their total, "
+                    + "the validated commissions, the pending commissions (EUR) and the sales count (validated + "
+                    + "pending, declined excluded) over the last 7 days [D-7, D-1] and 28 days [D-28, D-1], "
+                    + "Europe/Paris, by transaction date, as Metriks schema-2.0 events. A network without credentials "
+                    + "or whose API fails has its events in error (never zero); the totals are then in error too. "
+                    + "Then the outbound /contrib/ clicks recorded by front-api (affiliation-clicks index): "
+                    + "affiliation.<awin|effiliation|other|total>.clicks.<7d|28d> (count, same windows, by click time) "
+                    + "and affiliation.clicks.top_merchants.28d (value = number of rows, 'params.rows' with merchant, "
+                    + "network and clicks, top 20) and affiliation.clicks.top_origins.28d (value = number of rows, "
+                    + "'params.rows' with origin and clicks, top 50, most clicked first, ties by origin; origin = the "
+                    + "article or guide path (contentPath) when the click has one, otherwise the originating page "
+                    + "path, otherwise '(none)'). A network without click counts 0; when Elasticsearch cannot answer, "
+                    + "the click events are in error (never zero). Always answers 200.")
+    @ApiResponse(responseCode = "200", description = "MetriksResponse containing affiliation revenue and click events")
+    public MetriksResponse getAffiliationMetrics() {
+        MetriksResponse response = newResponse();
+        response.setEvents(affiliationMetriksService.collectEvents());
+        return response;
+    }
+
+    /**
+     * Builds the {@code seo.gsc.pages_with_impressions} event, exposing the Search Analytics window
+     * bounds and an optional truncation warning in {@code params}.
+     */
+    private MetriksEvent measurePagesWithImpressions() {
+        String id = "seo.gsc.pages_with_impressions";
+        String name = "Pages avec impressions (Search Console, 28 j)";
+        String unit = "count";
+        List<String> groups = List.of("seo");
+        List<String> tags = List.of("gsc", "google", "search-analytics");
+
+        try {
+            GoogleSearchConsoleService.PagesWithImpressionsResult result = searchConsoleService.countPagesWithImpressions();
+            MetriksEvent event = event(id, name, result.count(), unit, groups, tags);
+            Map<String, Object> params = new HashMap<>(event.getParams());
+            params.put("windowStartDate", result.startDate().toString());
+            params.put("windowEndDate", result.endDate().toString());
+            if (result.truncated()) {
+                params.put("truncated", "true");
+            }
+            params.put("previousWindowStartDate", String.valueOf(result.previousStartDate()));
+            params.put("previousWindowEndDate", String.valueOf(result.previousEndDate()));
+            if (result.previousCount() != null) {
+                params.put("previousValue", result.previousCount());
+            } else if (result.previousError() != null) {
+                params.put("previousError", result.previousError());
+            }
+            event.setParams(params);
+            return event;
+        } catch (Exception e) {
+            LOGGER.warn("Metriks measure failed for {}: {}", id, e.getMessage());
+            MetriksEvent error = event(id, name, null, unit, groups, tags);
+            error.setStatus("error");
+            error.setErrorMessage(e.getMessage());
+            return error;
+        }
+    }
+
+    /**
+     * Builds the Search Analytics totals and top-20 events. A failure of the whole call or of one
+     * metric group turns the affected events into {@code error} events.
+     */
+    private List<MetriksEvent> measureSearchAnalytics() {
+        GoogleSearchConsoleService.SeoMetrics metrics;
+        try {
+            metrics = searchConsoleService.fetchSeoMetrics();
+        } catch (Exception e) {
+            LOGGER.warn("Metriks Search Console fetch failed: {}", e.getMessage());
+            String message = String.valueOf(e.getMessage());
+            return List.of(
+                    gscError("seo.gsc.clicks", "Clics (Search Console, 28 j)", "count", message),
+                    gscError("seo.gsc.impressions", "Impressions (Search Console, 28 j)", "count", message),
+                    gscError("seo.gsc.ctr", "CTR (Search Console, 28 j)", "percent", message),
+                    gscError("seo.gsc.position", "Position moyenne (Search Console, 28 j)", "ratio", message),
+                    gscError("seo.gsc.top_queries", "Top 20 requêtes (Search Console, 28 j)", "count", message),
+                    gscError("seo.gsc.top_pages", "Top 20 pages (Search Console, 28 j)", "count", message),
+                    gscError(ID_DAILY, NAME_DAILY, "count", message),
+                    gscError("seo.gsc.top_losing_queries", NAME_LOSING_QUERIES, "count", message),
+                    gscError("seo.gsc.top_losing_pages", NAME_LOSING_PAGES, "count", message));
+        }
+
+        Outcome<Totals> cur = metrics.currentTotals();
+        Outcome<Totals> prev = metrics.previousTotals();
+        List<MetriksEvent> events = new ArrayList<>();
+        events.add(totalsEvent("seo.gsc.clicks", "Clics (Search Console, 28 j)", "count", metrics, cur, prev,
+                t -> BigDecimal.valueOf(t.clicks())));
+        events.add(totalsEvent("seo.gsc.impressions", "Impressions (Search Console, 28 j)", "count", metrics, cur, prev,
+                t -> BigDecimal.valueOf(t.impressions())));
+        events.add(totalsEvent("seo.gsc.ctr", "CTR (Search Console, 28 j)", "percent", metrics, cur, prev,
+                t -> round2(t.ctr() * 100)));
+        events.add(totalsEvent("seo.gsc.position", "Position moyenne (Search Console, 28 j)", "ratio", metrics, cur, prev,
+                t -> round2(t.position())));
+        events.add(topEvent("seo.gsc.top_queries", "Top 20 requêtes (Search Console, 28 j)", metrics, metrics.topQueries()));
+        events.add(topEvent("seo.gsc.top_pages", "Top 20 pages (Search Console, 28 j)", metrics, metrics.topPages()));
+        events.add(dailyEvent(metrics));
+        events.add(losingEvent("seo.gsc.top_losing_queries", NAME_LOSING_QUERIES, metrics, metrics.topQueries()));
+        events.add(losingEvent("seo.gsc.top_losing_pages", NAME_LOSING_PAGES, metrics, metrics.topPages()));
+        return events;
+    }
+
+    private MetriksEvent totalsEvent(String id, String name, String unit, GoogleSearchConsoleService.SeoMetrics metrics,
+                                     Outcome<Totals> cur, Outcome<Totals> prev, java.util.function.Function<Totals, BigDecimal> extractor) {
+        if (cur.isFailure() || prev.isFailure()) {
+            return gscError(id, name, unit, cur.isFailure() ? cur.error() : prev.error());
+        }
+        BigDecimal value = extractor.apply(cur.value());
+        MetriksEvent event = event(id, name, value, unit, GSC_GROUPS, GSC_TAGS);
+        Map<String, Object> params = windowParams(event.getParams(), metrics);
+        params.put("previousValue", extractor.apply(prev.value()));
+        event.setParams(params);
+        return event;
+    }
+
+    private MetriksEvent topEvent(String id, String name, GoogleSearchConsoleService.SeoMetrics metrics,
+                                  Outcome<TopRows> outcome) {
+        if (outcome.isFailure()) {
+            return gscError(id, name, "count", outcome.error());
+        }
+        TopRows top = outcome.value();
+        List<Map<String, Object>> rows = new ArrayList<>();
+        int rank = 1;
+        for (Row row : top.rows()) {
+            Row previous = top.previousByKey().get(row.key());
+            Map<String, Object> entry = new LinkedHashMap<>();
+            entry.put("rank", rank++);
+            entry.put("key", row.key());
+            entry.put("clicks", row.clicks());
+            entry.put("impressions", row.impressions());
+            entry.put("ctr", round2(row.ctr() * 100));
+            entry.put("position", round2(row.position()));
+            entry.put("previousClicks", previous == null ? null : previous.clicks());
+            entry.put("previousImpressions", previous == null ? null : previous.impressions());
+            entry.put("previousPosition", previous == null ? null : round2(previous.position()));
+            rows.add(entry);
+        }
+        MetriksEvent event = event(id, name, rows.size(), "count", GSC_GROUPS, GSC_TAGS);
+        Map<String, Object> params = windowParams(event.getParams(), metrics);
+        params.put("rows", rows);
+        if (top.truncated()) {
+            params.put("truncated", "true");
+        }
+        event.setParams(params);
+        return event;
+    }
+
+    private MetriksEvent dailyEvent(GoogleSearchConsoleService.SeoMetrics metrics) {
+        Outcome<List<GoogleSearchConsoleService.DailyRow>> outcome = metrics.daily();
+        if (outcome.isFailure()) {
+            return gscError(ID_DAILY, NAME_DAILY, "count", outcome.error());
+        }
+        List<Map<String, Object>> rows = new ArrayList<>();
+        for (GoogleSearchConsoleService.DailyRow day : outcome.value()) {
+            Map<String, Object> entry = new LinkedHashMap<>();
+            entry.put("date", day.date().toString());
+            entry.put("clicks", day.clicks());
+            entry.put("impressions", day.impressions());
+            entry.put("ctr", day.ctr() == null ? null : round2(day.ctr() * 100));
+            entry.put("position", day.position() == null ? null : round2(day.position()));
+            entry.put("window", day.window());
+            rows.add(entry);
+        }
+        MetriksEvent event = event(ID_DAILY, NAME_DAILY, rows.size(), "count", GSC_GROUPS, GSC_TAGS);
+        Map<String, Object> params = windowParams(event.getParams(), metrics);
+        params.put("rows", rows);
+        event.setParams(params);
+        return event;
+    }
+
+    private MetriksEvent losingEvent(String id, String name, GoogleSearchConsoleService.SeoMetrics metrics,
+                                     Outcome<TopRows> outcome) {
+        if (outcome.isFailure()) {
+            return gscError(id, name, "count", outcome.error());
+        }
+        TopRows top = outcome.value();
+        List<Map<String, Object>> rows = new ArrayList<>();
+        int rank = 1;
+        for (GoogleSearchConsoleService.LossRow loss : top.losing()) {
+            Row current = loss.current();
+            Row previous = loss.previous();
+            Map<String, Object> entry = new LinkedHashMap<>();
+            entry.put("rank", rank++);
+            entry.put("key", loss.key());
+            entry.put("clicks", current == null ? 0L : current.clicks());
+            entry.put("impressions", current == null ? 0L : current.impressions());
+            entry.put("ctr", current == null ? null : round2(current.ctr() * 100));
+            entry.put("position", current == null ? null : round2(current.position()));
+            entry.put("previousClicks", previous.clicks());
+            entry.put("previousImpressions", previous.impressions());
+            entry.put("previousPosition", round2(previous.position()));
+            entry.put("clicksDelta", loss.clicksDelta());
+            rows.add(entry);
+        }
+        MetriksEvent event = event(id, name, rows.size(), "count", GSC_GROUPS, GSC_TAGS);
+        Map<String, Object> params = windowParams(event.getParams(), metrics);
+        params.put("rows", rows);
+        if (top.truncated()) {
+            params.put("truncated", "true");
+        }
+        event.setParams(params);
+        return event;
+    }
+
+    private Map<String, Object> windowParams(Map<String, Object> base, GoogleSearchConsoleService.SeoMetrics metrics) {
+        Map<String, Object> params = new HashMap<>(base);
+        params.put("windowStartDate", metrics.current().start().toString());
+        params.put("windowEndDate", metrics.current().end().toString());
+        params.put("previousWindowStartDate", metrics.previous().start().toString());
+        params.put("previousWindowEndDate", metrics.previous().end().toString());
+        return params;
+    }
+
+    private MetriksEvent gscError(String id, String name, String unit, String message) {
+        MetriksEvent error = event(id, name, null, unit, GSC_GROUPS, GSC_TAGS);
+        error.setStatus("error");
+        error.setErrorMessage(message);
+        return error;
+    }
+
+    private static BigDecimal round2(double value) {
+        return BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP);
     }
 
     // ------------------------------------------------------------------

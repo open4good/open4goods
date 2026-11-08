@@ -42,6 +42,73 @@ Requests are limited using an in-memory token bucket. Defaults can be changed in
 
 When limits are exceeded the API responds with HTTP `429 Too Many Requests`.
 
+## Offer freshness
+
+front-api never serves an offer older than `front.offers.max-age` (default: the
+api rule `ProductRepository.VALID_UNTIL_DURATION`, 2 days), measured from the
+offer `timeStamp`; an offer without timestamp is treated as stale. The api drops
+such offers only when it re-aggregates a product, and the daily batch only
+re-aggregates vertical products: products outside verticals (books, DVDs...)
+keep their old offers in Elasticsearch (GOU-1385).
+
+`OfferFreshnessService` is the single filter. It applies to the offer list of
+the product page, the best prices (overall, new, occasion: recomputed, the
+precomputed `minPrice` is ignored), the offer count and occasion flag, the
+`/contrib/` links (built only for fresh offers), the SEO meta description price
+range, and the search suggestion and in-memory global search price sorts. The
+frontend JSON-LD `Offer`/`AggregateOffer` is built from the offer list and
+count, so it follows. A product whose offers are all stale is served as a
+product without offer. Price histories and trends are kept.
+
+`offers.newLastOfferSeen` / `offers.occasionLastOfferSeen` date the last offer
+of each condition, stale ones included (GOU-1699): the latest of
+`price.lastOfferSeen`, recorded by the api before it drops expired offers, and
+the indexed offer timestamps. The frontend dates the "last known price" of a
+product without offer with it; the price history only records price changes.
+The `PRICE_LAST_SEEN_*` timeline events use the same date once the offers are
+dropped.
+
+Elasticsearch filters and aggregations on `offersCount` and `price.minPrice`
+still read the indexed values.
+
+- `front.offers.max-age` - maximum offer age (Spring `Duration`, e.g. `3d`;
+  env `FRONT_OFFERS_MAX_AGE`).
+
+## Contribution votes ip/ua purge
+
+On every startup, once the application is ready, front-api runs on a background
+thread the purge of the historical `ip` and `ua` fields of the
+`contribution-votes` Elasticsearch index (board approval 2f4935d1, GOU-1230).
+It removes only these two keys from the documents that hold one of them; no
+other field changes and no document is deleted. It is idempotent: once the
+index is clean, a run logs a single "rien à purger" line.
+
+- `front.contribution-votes-purge.enabled` - toggle (default `true`,
+  `FRONT_CONTRIBUTION_VOTES_PURGE_ENABLED`; `false` in the `local` profile).
+
+It never blocks nor fails the startup: an error (Elasticsearch unreachable,
+mapping where `exists` cannot see the fields) ends in one `ERROR` line and the
+next startup retries. Every line starts with `contribution-votes purge ip/ua`
+and holds counts only (documents before/after, with `ip` or `ua`, updated,
+version conflicts, failures), never an IP or a User-Agent:
+
+```bash
+grep 'contribution-votes purge ip/ua' front-api.log
+```
+
+## Affiliation clicks mapping update
+
+On every startup, once the application is ready, front-api writes on a
+background thread the `AffiliationClick` mapping onto the existing
+`affiliation-clicks` index (GOU-1828: `contentPath` as `keyword`). It is
+additive and idempotent; no document is rewritten. An error ends in one
+`ERROR` line starting with `affiliation-clicks mapping` and the next startup
+retries; neither the startup nor the redirects are affected. See
+[docs/architecture/affiliation-clicks.md](../docs/architecture/affiliation-clicks.md).
+
+- `front.affiliation-clicks-mapping.enabled` - toggle (default `true`,
+  `FRONT_AFFILIATION_CLICKS_MAPPING_ENABLED`; `false` in the `local` profile).
+
 ## Google Indexation
 
 The front API can notify the Google Indexing API after AI review generation

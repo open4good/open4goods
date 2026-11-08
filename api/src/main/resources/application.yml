@@ -14,6 +14,11 @@ server:
 logging:
   level:
     org.apache.fontbox.ttf.PostScriptTable: ERROR
+    # GOU-1815: beta and prod (open4goods-config application-active.yml) set org.open4goods to warn. This more
+    # specific key is merged with theirs and keeps the purge progress and report in nohup-api.log.
+    org.open4goods.api.services.DatasourcePurgeService: INFO
+    # GOU-1835: same for the INFO line giving the products index mapping result at startup.
+    org.open4goods.api.services.ProductIndexMappingRunner: INFO
   file:
     max-history: 5
     max-size: 200MB
@@ -22,18 +27,23 @@ aggregationLogLevel: warn
 
 api:
   backup:
-    data-backup-folder: /opt/open4goods/backup/products
+    data-backup-folder: /diskb/open4goods/backup/products
     import-product-path: /opt/open4goods/backup/import
     product-export-page-size: 1000
     copy-page-size: 5000
     copy-bulk-size: 500
     copy-threads: 4
     copy-queue-size: 50
+    products-backup-interval-hours: 168
+    products-backup-check-initial-delay: PT15M
+    products-backup-check-interval: PT1H
 
 management:
   health:
     diskspace:
-      threshold: 100GB
+      # Minimum free space on the data disk before health turns DOWN (GOU-795):
+      # 100GB tripped on the ~860 GB prod root disk while ~85 GB were still free.
+      threshold: 20GB
   endpoints:
     web:
       exposure:
@@ -102,23 +112,9 @@ remote-file-caching:
 
 embedding:
   enabled: true
-  #provider: djl
-  text-model-url: djl://ai.djl.huggingface.pytorch/intfloat/multilingual-e5-small
   vision-model-url: djl://ai.djl.pytorch/resnet18_embedding/0.0.1
   async-loading: true
   predictor-pool-size: ${EMBEDDING_PREDICTOR_POOL_SIZE:2}
-  embedding-dimension: 512
-  query-prefix: "query:"
-  passage-prefix: "passage:"
-  # Delegated OpenAI-compatible embedding computation sample.
-  # Keep provider=djl for local inference. To delegate to LocalAI, switch provider
-  # and configure the endpoint below.
-  provider: openai-compatible
-  openai:
-     base-url: ${EMBEDDING_OPENAI_BASE_URL:http://localhost:8080/v1}
-     api-key: ${EMBEDDING_OPENAI_API_KEY:localai}
-     model: ${EMBEDDING_OPENAI_MODEL:text-embedding-model}
-  #   timeout: 60s
 
 google-taxonomy:
   fr: https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt
@@ -154,3 +150,13 @@ feed:
     cron: 0 43 1 * * ?
     enabled: false
     cache-ttl-days: 1
+
+metriks:
+  affiliation:
+    kwanko:
+      # No dedicated secret: reuses the Kwanko feed token (API_KWANKO_TOKEN, GOU-1379).
+      api-token: ${affiliation-config.kwanko-token:}
+    tradetracker:
+      # No dedicated secret: reuses the TradeTracker feed credentials (API_TRADETRACKER_API_KEY, GOU-1381).
+      customer-id: ${affiliation-config.tradetracker-customer-id:}
+      passphrase: ${affiliation-config.tradetracker-api-key:}

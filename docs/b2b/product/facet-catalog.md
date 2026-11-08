@@ -20,7 +20,7 @@
 | 5 | `product.documents` | `/products/{gtin}/documents` | `resources` PDF | <125 K | 3 | interne ES | datasheets/manuels |
 | 6 | `product.price-history` | `/products/{gtin}/price/history` | `price` history/trends | ⊂ 34 M | 8 | interne (persisté) | série temporelle |
 | 7 | `product.impact` ⭐⭐ | `/products/{gtin}/impact` | `scores` (ECOSCORE, réparabilité, durabilité, ranking) | ~45-50 K | **15** | **interne EXCLUSIF** | **éco / réparabilité / CO₂** |
-| 8 | `product.energy` ⭐⭐ | `/products/{gtin}/energy` | `eprelDatas` + `CLASSE_ENERGY` | ~47 K | 10 | **interne EXCLUSIF** | **étiquette énergie UE** |
+| 8 | `product.energy` ⭐⭐ | `/products/{gtin}/energy` | `eprelDatas` + `CLASSE_ENERGY` | ~47 K | **0** ([ADR 0017](../../adr/0017-eprel-sourced-facets-are-zero-rated.md)) | **interne EXCLUSIF** | **étiquette énergie UE** |
 | 9 | `product.taxonomy` | `/products/{gtin}/taxonomy` | référentiels Google/ICECAT/ETIM/Wikidata | curé | 15 | **interne EXCLUSIF** | mapping multi-taxonomies |
 | 10 | _exp._ `product.alternatives` | `/products/{gtin}/alternatives` | embedding KNN / ranking | curé | 20 | interne (KNN) | reco mieux notés |
 
@@ -33,7 +33,9 @@
   `ProductScoresDto`. Chaque score porte `value`, `absolute`/`relativ` (cardinalités), `letter()` (A-E).
   → **Aucun concurrent du panel n'a cette donnée.**
 - **`product.energy`** - `eprelDatas` (EPREL UE) + score `CLASSE_ENERGY` (et HDR/SDR pour TV). DTO :
-  `ProductEprelDto`. Vendable sur électroménager + TV.
+  `ProductEprelDto`. Vendable sur électroménager + TV. Gratuit et jamais facturable
+  ([ADR 0017](../../adr/0017-eprel-sourced-facets-are-zero-rated.md)) : son contenu vient d'EPREL,
+  dont les CGU interdisent la revente en tant que telle (4§2(a)).
 ---
 
 ## 2. Facettes " marché " non couvertes par nudger
@@ -95,7 +97,7 @@ Chaque nouvelle facette suit le **cycle de vie** décrit dans [`facets/README.md
 
 ### Vague 2 - différenciation propriétaire (le vrai pitch, marge)
 - **`product.impact`** (15 cr.) - DTO `ProductScoresDto` déjà existant, données indexées ES ✅.
-- **`product.energy`** (10 cr.) - `ProductEprelDto`, vendable électroménager + TV.
+- **`product.energy`** (0 cr., [ADR 0017](../../adr/0017-eprel-sourced-facets-are-zero-rated.md)) - `ProductEprelDto`, vendable électroménager + TV.
 - `product.taxonomy` (15 cr.) - mapping multi-référentiels.
 
 ### Vague 3 - expérimental / roadmap

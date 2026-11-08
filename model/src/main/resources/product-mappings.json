@@ -240,6 +240,10 @@
                 "conditions": {
                     "type": "keyword"
                 },
+                "lastOfferSeen": {
+                    "type": "object",
+                    "enabled": false
+                },
                 "minPrice": {
                     "properties": {
                         "compensation": {

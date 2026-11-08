@@ -3,10 +3,15 @@ package org.open4goods.api.services;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.time.Instant;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.Iterator;
@@ -18,8 +23,12 @@ import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.services.feedservice.service.FeedIndexingService;
+import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.model.helper.IdHelper;
+import org.open4goods.api.services.aggregation.services.batch.scores.EcoScoreAggregationService;
+import org.open4goods.model.product.EcoScoreRanking;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.Score;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.serialisation.exception.SerialisationException;
@@ -117,10 +126,75 @@ public class BatchService {
 	private static final int SHARD_DEPTH = 3;
 
 	/**
+	 * Product fields read to compute the cache keys of {@code cleanOrphanResources} (see {@code Resource.path}).
+	 * {@code resources.url} is mandatory : {@code Resource.equals/hashCode} rely on it to rebuild the resources set.
+	 */
+	static final String[] RESOURCE_KEY_FIELDS = { "resources.url", "resources.cacheKey", "resources.resourceType",
+			"resources.fileName", "resources.extension" };
+
+	/** Page size of the product stream of {@code cleanOrphanResources}, far below the 100 MB ES response limit. */
+	static final int RESOURCE_KEY_PAGE_SIZE = 1000;
+
+	/**
+	 * Products given the newest realtime offers, then queued, at once by {@link #batch(VerticalConfig)}: one index
+	 * read per page, and a page waits in the full queue for at most the time the queue takes to drain.
+	 */
+	static final int INDEXATION_PAGE_SIZE = 500;
+
+	/**
 	 * Shard folder name used by {@link Resource#folderHashPrefix(String)} for cache keys too
 	 * short to be sharded on their three last characters.
 	 */
 	private static final String UNKNOWN_SHARD = "UNKNOWN";
+
+	/** Single threaded: two sweeps must never overlap, and one holds the whole key set in memory. */
+	private final ExecutorService cleanupExecutor = Executors.newSingleThreadExecutor(r -> {
+		Thread t = new Thread(r, "clean-resources");
+		t.setDaemon(true);
+		return t;
+	});
+
+	private final AtomicReference<ResourceCleanupStatus> cleanupStatus = new AtomicReference<>(ResourceCleanupStatus.idle());
+
+	/**
+	 * Starts {@link #cleanOrphanResources(ResourceCleanupMode)} in the background, a sweep of the prod cache
+	 * lasting hours (GOU-1142).
+	 *
+	 * @return the RUNNING status of the new run, or the current status unchanged when a run is already in progress
+	 */
+	public ResourceCleanupStatus startCleanOrphanResources(ResourceCleanupMode mode) {
+		ResourceCleanupStatus running = new ResourceCleanupStatus(ResourceCleanupStatus.State.RUNNING, mode, Instant.now(),
+				null, null, null);
+		while (true) {
+			ResourceCleanupStatus current = cleanupStatus.get();
+			if (current.state() == ResourceCleanupStatus.State.RUNNING) {
+				return current;
+			}
+			if (cleanupStatus.compareAndSet(current, running)) {
+				break;
+			}
+		}
+		cleanupExecutor.execute(() -> {
+			ResourceCleanupStatus done;
+			try {
+				ResourceCleanupReport report = cleanOrphanResources(mode);
+				done = new ResourceCleanupStatus(ResourceCleanupStatus.State.COMPLETED, mode, running.startedAt(),
+						Instant.now(), report, null);
+			} catch (Throwable t) {
+				logger.error("Orphan resource cleanup failed", t);
+				done = new ResourceCleanupStatus(ResourceCleanupStatus.State.FAILED, mode, running.startedAt(),
+						Instant.now(), null, String.valueOf(t));
+			}
+			cleanupStatus.set(done);
+			logger.info("Orphan resource cleanup finished: {}", done);
+		});
+		return running;
+	}
+
+	/** @return the status of the current or last background cleanup */
+	public ResourceCleanupStatus getCleanupStatus() {
+		return cleanupStatus.get();
+	}
 
 	/**
 	 * Runs the orphan resource cleanup in report-only mode.
@@ -180,14 +254,21 @@ public class BatchService {
 		}
 
 		// 2. Stream all products to extract active resource cache keys
-		Set<String> activeKeys = new HashSet<>();
-		long streamedProductCount;
+		ActiveKeySet activeKeys = new ActiveKeySet();
+		AtomicLong streamedCounter = new AtomicLong();
 		try {
-			streamedProductCount = collectActiveKeys(activeKeys);
+			collectActiveKeys(activeKeys, streamedCounter);
+			activeKeys.seal();
+		} catch (ActiveKeySet.InsufficientMemoryException | OutOfMemoryError e) {
+			logger.error("Not enough heap to hold the active resource keys, aborting resource cleanup, no file touched", e);
+			return ResourceCleanupReport.aborted(mode, "insufficient memory: " + e.getMessage(), indexedProductCount,
+					streamedCounter.get());
 		} catch (Exception e) {
 			logger.error("Error streaming products from repository during resource cleanup", e);
-			return ResourceCleanupReport.aborted(mode, "product stream failed: " + e.getMessage(), indexedProductCount, 0);
+			return ResourceCleanupReport.aborted(mode, "product stream failed: " + e.getMessage(), indexedProductCount,
+					streamedCounter.get());
 		}
+		long streamedProductCount = streamedCounter.get();
 
 		// 3. Safety floor : a silently truncated stream must never be read as "nothing is referenced"
 		long floor = (long) Math.ceil(indexedProductCount * apiProperties.getResourceCleanupMinProductRatio());
@@ -219,18 +300,20 @@ public class BatchService {
 	/**
 	 * Streams every product and registers all cache keys reachable from its resources.
 	 *
-	 * @param activeKeys set to fill with the reachable cache keys
-	 * @return the number of products actually streamed
+	 * Only the resource fields needed to compute the cache keys are fetched, in small pages, so that no
+	 * Elasticsearch response approaches the client buffer limit (GOU-1134).
+	 *
+	 * @param activeKeys set to fill with the reachable cache keys (bounded memory, see {@link ActiveKeySet})
+	 * @param streamedProductCount counter of products read so far, kept accurate if the stream fails midway
 	 */
-	private long collectActiveKeys(Set<String> activeKeys) {
+	private void collectActiveKeys(ActiveKeySet activeKeys, AtomicLong streamedProductCount) {
 		List<Integer> allowedSuffixes = apiProperties.getAllowedImagesSizeSuffixes();
-		long streamedProductCount = 0;
 
-		try (Stream<Product> productStream = dataRepository.exportAll()) {
+		try (Stream<Product> productStream = dataRepository.exportAll(RESOURCE_KEY_FIELDS, RESOURCE_KEY_PAGE_SIZE)) {
 			Iterator<Product> iterator = productStream.iterator();
 			while (iterator.hasNext()) {
 				Product product = iterator.next();
-				streamedProductCount++;
+				streamedProductCount.incrementAndGet();
 				if (product.getResources() == null) {
 					continue;
 				}
@@ -259,7 +342,6 @@ public class BatchService {
 				}
 			}
 		}
-		return streamedProductCount;
 	}
 
 	/**
@@ -281,23 +363,33 @@ public class BatchService {
 		}
 	}
 
-	private void sweepShards(File folder, OrphanSweep sweep, int depth) {
+	/**
+	 * Sweeps one shard folder and its sub shards.
+	 *
+	 * @return true when the folder held at least one entry before the sweep
+	 */
+	private boolean sweepShards(File folder, OrphanSweep sweep, int depth) {
 		File[] children = folder.listFiles();
 		if (children == null) {
-			return;
+			return false;
 		}
 		for (File child : children) {
 			if (child.isDirectory()) {
+				boolean hadEntries;
 				if (depth < SHARD_DEPTH && isShardFolder(child.getName())) {
-					sweepShards(child, sweep, depth + 1);
+					hadEntries = sweepShards(child, sweep, depth + 1);
 				} else {
 					sweep.outOfScope();
 					continue;
 				}
-				// Drop shards emptied by a DELETE run, list() returning an empty array
-				String[] remaining = child.list();
-				if (remaining != null && remaining.length == 0) {
-					child.delete();
+				// Drop only the shards a DELETE run has just emptied. DRY_RUN and MOVE never touch
+				// folders, and a shard already empty before the sweep may be one that
+				// ResourceService.getCacheFile has just created for a download in flight.
+				if (sweep.mode == ResourceCleanupMode.DELETE && hadEntries) {
+					String[] remaining = child.list();
+					if (remaining != null && remaining.length == 0) {
+						child.delete();
+					}
 				}
 			} else if (child.isFile()) {
 				if (depth == SHARD_DEPTH) {
@@ -307,6 +399,7 @@ public class BatchService {
 				}
 			}
 		}
+		return children.length > 0;
 	}
 
 	/**
@@ -326,7 +419,7 @@ public class BatchService {
 
 		private final ResourceCleanupMode mode;
 		private final File cacheDir;
-		private final Set<String> activeKeys;
+		private final ActiveKeySet activeKeys;
 		private final long gracePeriodMs;
 		private final long startTime;
 
@@ -339,7 +432,7 @@ public class BatchService {
 		private long processed;
 		private long failures;
 
-		private OrphanSweep(ResourceCleanupMode mode, File cacheDir, Set<String> activeKeys, long gracePeriodMs,
+		private OrphanSweep(ResourceCleanupMode mode, File cacheDir, ActiveKeySet activeKeys, long gracePeriodMs,
 				long startTime) {
 			this.mode = mode;
 			this.cacheDir = cacheDir;
@@ -477,8 +570,15 @@ public class BatchService {
 	}
 
 	/**
-	 * Batch a specific vertical
-	 * @param vertical
+	 * Batch a specific vertical: loads its products, classifies, completes, aggregates and scores them, then
+	 * queues them for full indexation.
+	 *
+	 * <p>The realtime indexation keeps running meanwhile. The full queue is not flushed, and each page of
+	 * products gets the newest realtime offers ({@link ProductRepository#applyNewerOfferStates}) just before
+	 * being queued: an offer update indexed or queued during the batch is never overwritten by the offers
+	 * loaded at its start (GOU-1709).
+	 *
+	 * @param vertical the vertical to batch
 	 */
 	public void batch(VerticalConfig vertical) {
 		Set<Product> allProducts = new HashSet<>();
@@ -528,8 +628,11 @@ public class BatchService {
 			Set<Product> scorable = products.stream().filter(e-> !e.isExcluded()).collect(Collectors.toSet());
 			logger.info("Will score {} products on a total of {}", scorable.size(), products.size());
 			aggregationFacadeService.score(vertical, scorable);
+			clearObsoleteScores(allProducts, vertical);
 		} catch (Exception e) {
-			logger.error("Error in batch : scoring fail", e);
+			// Scores are cleared before being rebuilt: indexing now would persist partial results
+			logger.error("Scoring failed for vertical {} : nothing is indexed for this run", vertical.getId(), e);
+			return;
 		}
 
 
@@ -538,9 +641,51 @@ public class BatchService {
 		////////////////////
 
 		logger.info("Adding {} ({} completed) products to indexation",allProducts.size(), products.size());
-		// We flush the queue, no matter the previous fragments, we want to be sure there are no erasure on completed items
-		dataRepository.getFullProductQueue().clear();
-		dataRepository.addToFullindexationQueue(allProducts);
+		// The queue is never flushed: realtime updates queued during the batch are indexed before the batch
+		// products, which get the newest realtime offers just before being queued (GOU-1709)
+		List<Product> toIndex = new ArrayList<>(allProducts);
+		int refreshed = 0;
+		for (int from = 0; from < toIndex.size(); from += INDEXATION_PAGE_SIZE) {
+			List<Product> page = toIndex.subList(from, Math.min(from + INDEXATION_PAGE_SIZE, toIndex.size()));
+			refreshed += dataRepository.applyNewerOfferStates(page);
+			dataRepository.addToFullindexationQueue(page);
+		}
+		logger.info("{} products of vertical {} got offers updated in realtime during the batch", refreshed, vertical.getId());
+	}
+
+	/**
+	 * Removes the scores a scoring run cannot have refreshed and that must not stay published.
+	 *
+	 * <p>Excluded products and products unmatched from the vertical no longer belong to the scored cohort, so
+	 * all their scores and their ranking are removed. Products without offers keep their last score (they stay
+	 * in the sitemap, GOU-1744). If that ImpactScore was overwritten by a composite (only that defect sets
+	 * aggregates on it), it is recomputed from the sub-scores the product holds, since the batch does not rescore
+	 * products without offers; it is removed when it cannot be recomputed.
+	 *
+	 * @param products every product of the vertical, after scoring
+	 * @param vertical the vertical configuration, for the ImpactScore weights
+	 */
+	static void clearObsoleteScores(Collection<Product> products, VerticalConfig vertical) {
+		EcoScoreAggregationService impactScore = new EcoScoreAggregationService(logger);
+		for (Product product : products) {
+			if (product.isExcluded() || product.getVertical() == null) {
+				product.getScores().clear();
+				product.setRanking(new EcoScoreRanking());
+			} else if (hasCompositeImpactScore(product)) {
+				Score recomputed = impactScore.recomputeFromStoredSubScores(product, vertical);
+				if (recomputed == null) {
+					product.getScores().remove(product.ecoscore().getName());
+					product.setRanking(new EcoScoreRanking());
+				} else {
+					product.getScores().put(recomputed.getName(), recomputed);
+				}
+			}
+		}
+	}
+
+	private static boolean hasCompositeImpactScore(Product product) {
+		Score impactScore = product.ecoscore();
+		return impactScore != null && impactScore.getAggregates() != null && !impactScore.getAggregates().isEmpty();
 	}
 
 
@@ -607,7 +752,8 @@ public class BatchService {
      * @param providerName optional affiliation provider name filter
      */
     public void fetchFeedsByUrl(String url, String providerName) {
-        logger.info("Fetching feeds with URL: {}", url);
+        // Feed URLs can carry API keys (Awin, Effinity): only the scheme and host are logged
+        logger.info("Fetching feeds with URL: {}", RemoteFileCachingService.loggableUrl(url));
         Set<DataSourceProperties> datasources =  feedService.getFeedsUrl(providerName);
         logger.info("Found {} feeds for processing.", datasources.size());
 

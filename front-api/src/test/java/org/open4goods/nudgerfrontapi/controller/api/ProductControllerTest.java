@@ -2,7 +2,6 @@ package org.open4goods.nudgerfrontapi.controller.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -57,7 +56,8 @@ class ProductControllerTest {
 
     @BeforeEach
     void setUp() {
-        controller = new ProductController(productMappingService, verticalsConfigService, searchService);
+        controller = new ProductController(productMappingService, verticalsConfigService, searchService,
+                new org.open4goods.nudgerfrontapi.config.properties.ApiProperties());
         // Default lenient mock for vertical existence check
         org.mockito.Mockito.lenient().when(verticalsConfigService.getConfigById(any())).thenReturn(new VerticalConfig());
     }
@@ -74,8 +74,7 @@ class ProductControllerTest {
 
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of());
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
-        when(searchService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(), any(),
-                anyBoolean(), any()))
+        when(searchService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(), any()))
                 .thenReturn(responseDto);
 
         ResponseEntity<ProductSearchResponseDto> response = controller.products(PageRequest.of(0, 20), Set.of(),
@@ -85,10 +84,33 @@ class ProductControllerTest {
 
         ArgumentCaptor<FilterRequestDto> filterCaptor = ArgumentCaptor.forClass(FilterRequestDto.class);
         verify(searchService).searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(),
-                filterCaptor.capture(), anyBoolean(), any());
+                filterCaptor.capture());
 
         assertThat(filterCaptor.getValue().filters()).extracting(Filter::field)
                 .contains("scores.ENERGY_CONSUMPTION.value");
+    }
+
+    @Test
+    void lastPageInsideResultWindowIsServed() {
+        SearchService.SearchCapabilities capabilities = new SearchService.SearchCapabilities(Set.of(), Set.of(), Set.of());
+        when(searchService.buildSearchCapabilities(any(), any(), any())).thenReturn(capabilities);
+        PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(99, 100, 1, 1), List.of());
+        when(searchService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(), any()))
+                .thenReturn(new ProductSearchResponseDto(page, List.of()));
+
+        ResponseEntity<ProductSearchResponseDto> response = controller.products(PageRequest.of(99, 100), Set.of(),
+                "electronics", null, DomainLanguage.fr, Locale.FRANCE, null);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void firstPageOutsideResultWindowIsRejectedWithoutCallingSearch() {
+        ResponseEntity<ProductSearchResponseDto> response = controller.products(PageRequest.of(100, 100), Set.of(),
+                "electronics", null, DomainLanguage.fr, Locale.FRANCE, null);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        org.mockito.Mockito.verifyNoInteractions(searchService);
     }
 
     @Test
@@ -104,8 +126,7 @@ class ProductControllerTest {
 
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of());
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
-        when(searchService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(),
-                any(), anyBoolean(), any()))
+        when(searchService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(), any()))
                 .thenReturn(responseDto);
 
         ResponseEntity<ProductSearchResponseDto> response = controller.products(PageRequest.of(0, 20), Set.of(),
@@ -115,7 +136,7 @@ class ProductControllerTest {
 
         ArgumentCaptor<FilterRequestDto> filterCaptor = ArgumentCaptor.forClass(FilterRequestDto.class);
         verify(searchService).searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(),
-                filterCaptor.capture(), anyBoolean(), any());
+                filterCaptor.capture());
 
         assertThat(filterCaptor.getValue().filters()).extracting(Filter::field)
                 .contains("attributes.indexed.DATA_QUALITY.value");
@@ -133,8 +154,7 @@ class ProductControllerTest {
 
         PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of());
         ProductSearchResponseDto responseDto = new ProductSearchResponseDto(page, List.of());
-        when(searchService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(), any(),
-                anyBoolean(), any()))
+        when(searchService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(), any()))
                 .thenReturn(responseDto);
 
         ResponseEntity<ProductSearchResponseDto> response = controller.products(PageRequest.of(0, 20), Set.of(),
@@ -163,8 +183,6 @@ class ProductControllerTest {
                 any(),
                 any(),
                 any(),
-                any(), 
-                anyBoolean(), 
                 any()))
                 .thenReturn(responseDto);
 
@@ -178,6 +196,19 @@ class ProductControllerTest {
                 searchRequest);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void globalSearchCapsTotalPagesToResultWindow() {
+        when(searchService.globalSearch(any(), any(), any(), any(), any())).thenReturn(
+                new SearchService.GlobalSearchResult(List.of(), List.of(), 5_000_000L, 250_000, 0, 20, null));
+
+        ResponseEntity<org.open4goods.nudgerfrontapi.dto.search.GlobalSearchResponseDto> response =
+                controller.globalSearch(DomainLanguage.fr, new org.open4goods.nudgerfrontapi.dto.search.GlobalSearchRequestDto(
+                        "tv", null, null, null, 0, 20));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().missingVerticalPage().totalPages()).isEqualTo(500);
     }
 
     @Test
@@ -203,9 +234,7 @@ class ProductControllerTest {
                 any(),    // domainLanguage
                 any(),    // verticalId
                 any(),    // query
-                any(),    // filter
-                anyBoolean(), 
-                any()))
+                any()))   // filter
                 .thenReturn(responseDto);
 
         ResponseEntity<ProductSearchResponseDto> response = controller.products(
@@ -218,5 +247,28 @@ class ProductControllerTest {
                 searchRequest);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    /**
+     * Verifies legacy semantic flags remain deserializable without reaching the
+     * search service contract.
+     */
+    @Test
+    @SuppressWarnings("removal")
+    void legacySemanticFlagsAreAcceptedAndIgnored() {
+        SearchService.SearchCapabilities capabilities = new SearchService.SearchCapabilities(Set.of(), Set.of(), Set.of());
+        when(searchService.buildSearchCapabilities(any(), any(), any())).thenReturn(capabilities);
+
+        ProductSearchRequestDto request = new ProductSearchRequestDto(null, null, null, true, "SEMANTIC");
+        PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 0, 0), List.of());
+        when(searchService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(), any(), any()))
+                .thenReturn(new ProductSearchResponseDto(page, List.of()));
+
+        ResponseEntity<ProductSearchResponseDto> response = controller.products(PageRequest.of(0, 20), Set.of(),
+                null, "television", DomainLanguage.fr, Locale.FRANCE, request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        verify(searchService).searchProducts(any(Pageable.class), any(Locale.class), anySet(), any(), any(), any(),
+                org.mockito.ArgumentMatchers.eq("television"), any());
     }
 }

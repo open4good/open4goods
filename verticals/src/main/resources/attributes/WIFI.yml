@@ -9,8 +9,6 @@ synonyms:
   all:
   icecat.biz:
     - "WIFI"
-  rakuten.com:
-    - "WIFI"
 parser:
   normalize: true
   trim: true

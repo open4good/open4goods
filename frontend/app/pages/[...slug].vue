@@ -1,20 +1,21 @@
 <template>
   <ProductPage v-if="productRoute" :product-route="productRoute" />
-  <XwikiFullPageRenderer v-else-if="wikiRoute" :page-id="wikiRoute.pageId" />
+  <CmsFullPageRenderer v-else-if="wikiRoute" :page-id="wikiRoute.pageId" />
   <CategoryPage v-else-if="categorySlug" :slug="categorySlug" />
 </template>
 
 <script setup lang="ts">
 import { computed, defineAsyncComponent } from 'vue'
 import { matchProductRouteFromSegments } from '~~/shared/utils/_product-route'
+import { resolveCategoryTrailingSlashTarget } from '~~/shared/utils/category-trailing-slash'
 import { matchLocalizedWikiRouteByPath } from '~~/shared/utils/localized-routes'
 
 defineRouteRules({
   isr: 3600, // Cache products, categories and wiki pages for 1 hour
 })
 
-const XwikiFullPageRenderer = defineAsyncComponent(
-  () => import('~/components/cms/XwikiFullPageRenderer.vue')
+const CmsFullPageRenderer = defineAsyncComponent(
+  () => import('~/components/cms/CmsFullPageRenderer.vue')
 )
 const ProductPage = defineAsyncComponent(
   () => import('~/components/pages/ProductPage.vue')
@@ -24,6 +25,17 @@ const CategoryPage = defineAsyncComponent(
 )
 
 const route = useRoute()
+
+// `/televiseurs/` is not a second URL for the category: 301 to the canonical
+// path, query string kept.
+const trailingSlashTarget = resolveCategoryTrailingSlashTarget(route.path)
+if (trailingSlashTarget) {
+  await navigateTo(
+    { path: trailingSlashTarget, query: route.query, hash: route.hash },
+    { redirectCode: 301 }
+  )
+}
+
 const slugParam = route.params.slug
 const segments = Array.isArray(slugParam)
   ? slugParam.filter((s): s is string => typeof s === 'string')

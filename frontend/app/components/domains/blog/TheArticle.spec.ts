@@ -1,19 +1,15 @@
-import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
 import { ref } from 'vue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock('#imports', () => {
-  const useHeadMock = vi.fn()
-  const useSeoMetaMock = vi.fn()
-  const useRequestURLMock = () =>
-    new URL('https://example.com/blog/test-article')
+const seoMetaSpy = vi.fn()
 
-  return {
-    useHead: useHeadMock,
-    useSeoMeta: useSeoMetaMock,
-    useRequestURL: useRequestURLMock,
-  }
-})
+mockNuxtImport('useHead', () => vi.fn())
+mockNuxtImport('useSeoMeta', () => (input: unknown) => seoMetaSpy(input))
+mockNuxtImport(
+  'useRequestURL',
+  () => () => new URL('https://example.com/blog/test-article')
+)
 
 vi.mock('#i18n', () => ({
   useLocalePath: () => (input: unknown) =>
@@ -48,8 +44,6 @@ vi.mock('vue-i18n', () => ({
           return `Featured image for ${params.title}`
         case 'blog.article.empty':
           return 'The content of this article will be available soon.'
-        case 'blog.article.edit':
-          return 'Edit this article'
         case 'blog.breadcrumbs.home':
           return 'Home'
         case 'blog.breadcrumbs.blog':
@@ -82,7 +76,6 @@ describe('TheArticle.vue', () => {
     body: '<p>Hello <strong>world</strong>!</p>',
     createdMs: Date.UTC(2024, 0, 10),
     modifiedMs: Date.UTC(2024, 0, 12),
-    editLink: 'https://cms.example.com/edit',
   }
 
   const mountComponent = async (overrides: Record<string, unknown> = {}) => {
@@ -104,10 +97,6 @@ describe('TheArticle.vue', () => {
           VDivider: {
             template: '<hr />',
           },
-          VBtn: {
-            template: '<button><slot /></button>',
-            props: ['href', 'target', 'rel', 'prependIcon', 'variant', 'size'],
-          },
           VAlert: {
             template: '<div class="v-alert"><slot /></div>',
             props: ['type', 'variant'],
@@ -128,6 +117,12 @@ describe('TheArticle.vue', () => {
     )
     expect(wrapper.get('[data-test="article-author"]').text()).toContain(
       baseArticle.author
+    )
+
+    const updated = wrapper.get('[data-test="article-updated"]')
+    expect(updated.text()).toContain('Updated')
+    expect(updated.find('time').attributes('datetime')).toBe(
+      new Date(baseArticle.modifiedMs).toISOString()
     )
 
     const contentHtml = wrapper.get('[data-test="article-body"]').html()
@@ -155,11 +150,16 @@ describe('TheArticle.vue', () => {
     expect(readingTime).toContain('Approx. ')
   })
 
-  test('hides the edit link when the user is not authenticated', async () => {
-    isLoggedInRef.value = false
+  test('resolves a root-relative article image into an absolute og:image', async () => {
+    await mountComponent({
+      image: '/images/blog/test-article/cover.png',
+    })
 
-    const wrapper = await mountComponent()
-
-    expect(wrapper.find('[data-test="article-edit-link"]').exists()).toBe(false)
+    const seoMetaCall = seoMetaSpy.mock.calls[0]?.[0] as {
+      ogImage: { value: string }
+    }
+    expect(seoMetaCall.ogImage.value).toBe(
+      'https://example.com/images/blog/test-article/cover.png'
+    )
   })
 })

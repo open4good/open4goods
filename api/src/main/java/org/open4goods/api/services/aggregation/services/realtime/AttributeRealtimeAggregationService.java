@@ -72,6 +72,12 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 	private static final Pattern NUMERIC_EXTRACT_PATTERN =
 			Pattern.compile("[-+]?\\d+(?:[.,]\\d+)?");
+	/**
+	 * A power written with its unit: number (space-grouped thousands such as "1 200", comma or point decimal,
+	 * optionally spaced as in "0, 3") followed by W, kW or mW.
+	 */
+	private static final Pattern POWER_PATTERN = Pattern.compile(
+			"(?i)([-+]?\\d+(?:[\\s\u00a0\u202f]\\d{3}(?!\\d))*(?:\\s*[.,]\\s*\\d+)?)\\s*(kilowatts?|kw|milliwatts?|mw|watts?|w)(?![\\p{L}\\d])");
 	private static final Pattern EMPTY_VALUE_SEPARATOR_PATTERN =
 			Pattern.compile("[()_./-]+");
 	private static final Pattern PARENTHESIS_CONTENT_PATTERN =
@@ -535,8 +541,10 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		}
 
 		///////////////////////
-		// Handling gtin (NOTE : useless since gtin is used as ID, so coupling is done
-		/////////////////////// previously
+		// Handling gtin. The referential GTIN is owned by IdentityAggregationService, which
+		// sets it to the sanitised barcode the product id derives from. A fragment may carry
+		// another form of the same code (ISBN-10, leading zeros) : it is kept in gtinInfos,
+		// never written over the sanitised one (GOU-1841).
 		///////////////////////
 		String gtin = fragment.gtin();
 		if (!StringUtils.isEmpty(gtin)) {
@@ -546,16 +554,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			if (StringUtils.isBlank(existing)) {
 				output.getAttributes().getReferentielAttributes().put(ReferentielKey.GTIN, gtin);
 			} else if (!existing.equals(gtin)) {
-				try {
-					long existingGtin = Long.parseLong(existing);
-					long newGtin = Long.parseLong(gtin);
-					if (existingGtin != newGtin) {
-						dedicatedLogger.error("Overriding GTIN from {} to {}", existing, newGtin);
-						output.getAttributes().getReferentielAttributes().put(ReferentielKey.GTIN, gtin);
-					}
-				} catch (NumberFormatException e) {
-					dedicatedLogger.error("Invalid GTIN format: existing = {}, new = {}", existing, gtin, e);
-				}
+				dedicatedLogger.debug("Keeping referential GTIN {}, dataFragment publishes {}", existing, gtin);
 			}
 
 		}
@@ -614,7 +613,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			throw new ValidationException("Null rawValue in attribute " + attrConf.getKey());
 		}
 
-		String string = rawValue;
+		String string = isWattAttribute(attrConf) ? powerToWatts(rawValue) : rawValue;
 		///////////////////
 		// To upperCase / lowerCase
 		///////////////////
@@ -726,6 +725,37 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 		return string;
 
+	}
+
+	/**
+	 * Tells whether the attribute is a power expressed in watts, whose values must be converted to W.
+	 */
+	private static boolean isWattAttribute(AttributeConfig attrConf) {
+		return AttributeType.NUMERIC.equals(attrConf.getFilteringType()) && attrConf.getSuffix() != null
+				&& "W".equals(attrConf.getSuffix().get("default"));
+	}
+
+	/**
+	 * Rewrites a power with an explicit unit into plain watts: "1,2 KW" gives "1200", "1 200 W" gives "1200" and
+	 * "0, 3 W" gives "0.3". A value without a unit, or that does not look like a power, is returned unchanged.
+	 *
+	 * @param raw raw datasource value
+	 * @return the value in watts, or {@code raw} when no unit is recognised
+	 */
+	static String powerToWatts(String raw) {
+		Matcher matcher = POWER_PATTERN.matcher(raw);
+		if (!matcher.find()) {
+			return raw;
+		}
+		String number = matcher.group(1).replaceAll("[\\s\u00a0\u202f]", "").replace(',', '.');
+		String unit = matcher.group(2).toLowerCase(java.util.Locale.ROOT);
+		java.math.BigDecimal watts = new java.math.BigDecimal(number);
+		if (unit.startsWith("k")) {
+			watts = watts.multiply(java.math.BigDecimal.valueOf(1000));
+		} else if (unit.startsWith("m")) {
+			watts = watts.movePointLeft(3);
+		}
+		return watts.stripTrailingZeros().toPlainString();
 	}
 
 	/**

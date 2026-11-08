@@ -155,6 +155,9 @@ export const useBlog = () => {
       error.value =
         err instanceof Error ? err.message : 'Failed to fetch article'
       console.error('Error in fetchArticle:', err)
+      // Clear any article left over from a previous slug so a failed client-side navigation
+      // cannot be mistaken for a still-displayed, previously fetched article.
+      currentArticle.value = null
       return null
     } finally {
       loading.value = false

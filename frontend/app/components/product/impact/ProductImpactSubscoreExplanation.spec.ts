@@ -1,9 +1,11 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 import { createI18n } from 'vue-i18n'
-import { defineComponent, h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import ProductImpactSubscoreExplanation from './ProductImpactSubscoreExplanation.vue'
+import { impactMethodologyHrefKey } from './impact-types'
 import type { ScoreView } from './impact-types'
+import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 import enUS from '../../../../i18n/locales/en-US.json'
 
 describe('ProductImpactSubscoreExplanation', () => {
@@ -227,5 +229,66 @@ describe('ProductImpactSubscoreExplanation', () => {
 
     const text = wrapper.text()
     expect(text).toContain('Standard deviation (1.5W)')
+  })
+
+  it('shows the highest real value as the first position', () => {
+    const wrapper = mount(ProductImpactSubscoreExplanation, {
+      props: { ...defaultProps, score: { ...baseScore, ranking: 99 } },
+      global: globalOptions,
+    })
+
+    expect(wrapper.text()).toContain('Rank 1/100')
+  })
+
+  it('shows the lowest real value as the last position', () => {
+    const wrapper = mount(ProductImpactSubscoreExplanation, {
+      props: { ...defaultProps, score: { ...baseScore, ranking: 0 } },
+      global: globalOptions,
+    })
+
+    expect(wrapper.text()).toContain('Rank 100/100')
+  })
+
+  it('does not rank an imputed criterion', () => {
+    const wrapper = mount(ProductImpactSubscoreExplanation, {
+      props: {
+        ...defaultProps,
+        score: { ...baseScore, ranking: 633, virtual: true },
+      },
+      global: globalOptions,
+    })
+
+    expect(wrapper.text()).not.toContain('Rank ')
+  })
+
+  it('links to the methodology of the product category', () => {
+    const wrapper = mount(ProductImpactSubscoreExplanation, {
+      props: defaultProps,
+      global: {
+        ...globalOptions,
+        provide: {
+          [impactMethodologyHrefKey as symbol]: ref('/fours/ecoscore'),
+        },
+      },
+    })
+
+    expect(
+      wrapper
+        .find('.impact-subscore-explanation__method-link')
+        .attributes('href')
+    ).toBe('/fours/ecoscore')
+  })
+
+  it('links to the generic methodology without a category', () => {
+    const wrapper = mount(ProductImpactSubscoreExplanation, {
+      props: defaultProps,
+      global: globalOptions,
+    })
+
+    const href = wrapper
+      .find('.impact-subscore-explanation__method-link')
+      .attributes('href')
+    expect(href).toBe(resolveLocalizedRoutePath('impact-score', 'en-US'))
+    expect(href).not.toContain('frigos')
   })
 })

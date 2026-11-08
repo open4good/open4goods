@@ -26,12 +26,6 @@ public class EprelServiceProperties
     private String apiKey = "DUMMY KEY";
 
     /**
-     * Number of days between two catalogue synchronisations.
-     */
-    @Min(1)
-    private int schedulingFrequencyDays = 2;
-
-    /**
      * Number of products sent to Elasticsearch in a single bulk request.
      */
     @Min(1)
@@ -80,16 +74,6 @@ public class EprelServiceProperties
     public void setApiKey(String apiKey)
     {
         this.apiKey = apiKey;
-    }
-
-    public int getSchedulingFrequencyDays()
-    {
-        return schedulingFrequencyDays;
-    }
-
-    public void setSchedulingFrequencyDays(int schedulingFrequencyDays)
-    {
-        this.schedulingFrequencyDays = schedulingFrequencyDays;
     }
 
     public int getIndexBulkSize()

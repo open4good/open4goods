@@ -121,6 +121,31 @@ describe('release utilities', () => {
     expect(latestRelease?.slug).toBe('newer')
   })
 
+  it('sorts releases by semantic version descending, not lexically or by date', async () => {
+    const { compareReleasesDescending } =
+      await import('~~/server/utils/releases')
+    const sameDate = '2026-10-22T00:00:00.000Z'
+    const note = (name: string) => ({
+      name,
+      slug: name,
+      contentHtml: '',
+      publishedAt: sameDate,
+    })
+
+    const sorted = ['v1.0.9', 'v1.0.41', 'v1.0.62', 'v1.0.100', 'v1.1.0']
+      .map(note)
+      .sort(compareReleasesDescending)
+      .map(release => release.name)
+
+    expect(sorted).toEqual([
+      'v1.1.0',
+      'v1.0.100',
+      'v1.0.62',
+      'v1.0.41',
+      'v1.0.9',
+    ])
+  })
+
   it('falls back to app public releases when the build output is missing', async () => {
     await fs.rm(path.join(tempRoot, '.output'), {
       recursive: true,

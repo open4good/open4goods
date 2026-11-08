@@ -344,6 +344,11 @@ export default defineNuxtConfig({
     '/blog/impact-score-ia': { redirect: { to: '/blog', statusCode: 301 } },
     '/blog/prioriser-durabilite': { redirect: { to: '/blog', statusCode: 301 } },
     '/blog/equilibrer-prix-impact': { redirect: { to: '/blog', statusCode: 301 } },
+    // Historical URL indexed from the XWiki-era blog (triple-dash slug, served 200
+    // in prod): redirect to the current Markdown post's slug (GOU-386).
+    '/blog/v-0-0-1---premiere-iteration': {
+      redirect: { to: '/blog/v-0-0-1-premiere-iteration', statusCode: 301 },
+    },
     // Fix SWR handler error by disabling cache for assistant configs (conflicts with cookie setting)
     '/assistant-configs/**': { cache: false },
     '/api/assistant-configs/**': { cache: false },
@@ -555,15 +560,32 @@ export default defineNuxtConfig({
     // NUXT_MACHINE_TOKEN is the canonical path on prod, but we keep MACHINE_TOKEN as fallback
     machineToken: process.env.NUXT_MACHINE_TOKEN || process.env.MACHINE_TOKEN || 'CHANGE_ME_SHARED_TOKEN',
     apiUrl: process.env.API_URL || 'http://localhost:8082',
-    // Google OAuth client id for the loopback-local SSO flow (GOU-167). Not a secret:
-    // the BFF uses Authorization Code + PKCE, so no client_secret is ever required.
-    googleOAuthClientId: process.env.GOOGLE_OAUTH_CLIENT_ID || '',
-    // Redirect URI registered with Google for the loopback OAuth client. Must match
+    // Google OAuth client id for the confidential "Web" client (GOU-317): the code
+    // exchange happens server-side with client_secret, PKCE is kept as defense in
+    // depth. The client id itself is not a secret, but must match front-api's
+    // front.security.google-sso.client-id (ID token audience check).
+    googleOauthClientId: process.env.GOOGLE_OAUTH_CLIENT_ID || '',
+    // Redirect URI registered with Google for the OAuth client. Must match
     // exactly what's configured on Google's side (e.g. http://127.0.0.1:4100/auth/google/callback).
-    googleOAuthRedirectUri: process.env.GOOGLE_OAUTH_REDIRECT_URI || '',
+    googleOauthRedirectUri: process.env.GOOGLE_OAUTH_REDIRECT_URI || '',
+    // Client secret for the confidential "Web" OAuth client (GOU-317). Server-only:
+    // never expose this under `public`.
+    googleOauthClientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET || '',
     // Runtime directory holding the weekly Metriks reports (deployed by open4goods-config).
     // Falls back to the bundled public dir during local dev when unset.
     metriksDataDir: process.env.METRIKS_DATA_DIR || '',
+    // Shared secret used by front-api to sign JWTs (front.security.jwt-secret /
+    // FRONT_SECURITY_JWT_SECRET, same .env as front-api). Server-only: lets the
+    // frontend verify the access token's signature before trusting its roles
+    // claim (GOU-438), instead of decoding it without verification.
+    jwtSecret: process.env.FRONT_SECURITY_JWT_SECRET || '',
+    // Extra user-agent substrings (comma separated, case-insensitive) refused on
+    // /contrib/ in addition to isbot. Overridden by NUXT_AFFILIATION_BLOCKED_USER_AGENTS.
+    affiliationBlockedUserAgents: '',
+    // /contrib/ only redirects requests carrying the navigation-signal cookie
+    // (GOU-1184); a site Referer alone is refused (GOU-1520). Kill switch, no
+    // rebuild needed: NUXT_AFFILIATION_REQUIRE_NAVIGATION_SIGNAL=false.
+    affiliationRequireNavigationSignal: true,
     staticMainPageRoutes: STATIC_MAIN_PAGE_ROUTE_NAMES,
     sitemapLocalFiles: {
       fr: [
@@ -572,14 +594,15 @@ export default defineNuxtConfig({
         // always an empty urlset since no vertical or top-level wiki page mapping was ever
         // configured), so these proxy entries always 404'd or pointed at an empty file.
         // server/plugins/sitemap-blog-posts.ts now generates blog URLs directly from Nuxt Content.
+        // guides.xml removed (GOU-1366): ui only writes it for guides under
+        // verticals/src/main/resources/guides/default/, which holds none, so the
+        // public /sitemap/fr/guides.xml answered 404. Add it back with the first guide.
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/category-pages.xml`,
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/product-pages.xml`,
-        `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/guides.xml`,
       ],
       en: [
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/category-pages.xml`,
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/product-pages.xml`,
-        `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/guides.xml`,
       ],
     },
 
@@ -631,7 +654,7 @@ export default defineNuxtConfig({
       }
 
       const wikiSourcePage = pages.find(page =>
-        normalizePath(page.file)?.includes('/app/pages/xwiki-fullpage.vue')
+        normalizePath(page.file)?.includes('/app/pages/cms-fullpage.vue')
       )
 
       if (!wikiSourcePage) {

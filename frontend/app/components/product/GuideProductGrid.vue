@@ -12,13 +12,13 @@
       </v-col>
     </v-row>
 
-    <CategoryProductCardGrid
-      v-else-if="products.length"
-      :products="products"
-      size="small"
-    />
+    <template v-else-if="products.length">
+      <slot name="header" :products="products" />
+      <CategoryProductCardGrid :products="products" size="small" />
+      <slot name="footer" :products="products" />
+    </template>
 
-    <p v-else class="guide-product-grid__empty">
+    <p v-else-if="!hideWhenEmpty" class="guide-product-grid__empty">
       {{ t('buyingGuide.widget.empty') }}
     </p>
   </div>
@@ -28,6 +28,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type {
+  Filter,
   ProductDto,
   ProductSearchResponseDto,
   SortRequestDto,
@@ -43,13 +44,24 @@ const props = withDefaults(
     vertical?: string
     top?: string | number
     sort?: string
+    /** Extra filters combined (AND) with the vertical. */
+    filters?: Filter[]
+    /** Only keep products with at least one active offer. */
+    requireOffers?: boolean
+    /** Render nothing (no empty message) when there is no product. */
+    hideWhenEmpty?: boolean
   }>(),
   {
     vertical: undefined,
     top: 3,
     sort: 'ecoscore',
+    filters: undefined,
+    requireOffers: false,
+    hideWhenEmpty: false,
   }
 )
+
+const { $fetch: csrfFetch } = useNuxtApp()
 
 const { t } = useI18n()
 const guideContext = useGuideContext()
@@ -82,16 +94,24 @@ const sortRequest = computed<SortRequestDto>(() => {
   }
 })
 
+// Mirrors the competition filter of the category page (`offersCount` range).
+const requestFilters = computed<Filter[]>(() => [
+  ...(props.filters ?? []),
+  ...(props.requireOffers
+    ? [{ field: 'offersCount', operator: 'range' as const, min: 1 }]
+    : []),
+])
+
 const { data, pending } = await useAsyncData<ProductDto[]>(
   () =>
-    `guide-product-grid:${normalizedVertical.value}:${topCount.value}:${props.sort}`,
+    `guide-product-grid:${normalizedVertical.value}:${topCount.value}:${props.sort}:${JSON.stringify(requestFilters.value)}`,
   async () => {
     if (!normalizedVertical.value) {
       return []
     }
 
     try {
-      const response = await $fetch<ProductSearchResponseDto>(
+      const response = await csrfFetch<ProductSearchResponseDto>(
         '/api/products/search',
         {
           method: 'POST',
@@ -101,6 +121,9 @@ const { data, pending } = await useAsyncData<ProductDto[]>(
             pageNumber: 0,
             pageSize: topCount.value,
             sort: sortRequest.value,
+            ...(requestFilters.value.length
+              ? { filters: { filters: requestFilters.value } }
+              : {}),
           },
         }
       )
@@ -112,7 +135,7 @@ const { data, pending } = await useAsyncData<ProductDto[]>(
     }
   },
   {
-    watch: [normalizedVertical, topCount, () => props.sort],
+    watch: [normalizedVertical, topCount, () => props.sort, requestFilters],
   }
 )
 

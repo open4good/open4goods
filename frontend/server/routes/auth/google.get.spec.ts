@@ -10,8 +10,9 @@ const runtimeConfig = vi.hoisted(() => ({
     tokenCookieName: 'access_token',
     refreshCookieName: 'refresh_token',
   },
-  googleOAuthClientId: 'client-123',
-  googleOAuthRedirectUri: 'http://127.0.0.1:4100/auth/google/callback',
+  googleOauthClientId: 'client-123',
+  googleOauthRedirectUri: 'http://127.0.0.1:4100/auth/google/callback',
+  googleOauthClientSecret: 'client-secret-xyz',
   apiUrl: 'http://localhost:8082',
 }))
 
@@ -47,9 +48,10 @@ describe('GET /auth/google', () => {
     setCookieMock.mockReset()
     sendRedirectMock.mockReset()
     runtimeConfig.public.googleSsoEnabled = true
-    runtimeConfig.googleOAuthClientId = 'client-123'
-    runtimeConfig.googleOAuthRedirectUri =
+    runtimeConfig.googleOauthClientId = 'client-123'
+    runtimeConfig.googleOauthRedirectUri =
       'http://127.0.0.1:4100/auth/google/callback'
+    runtimeConfig.googleOauthClientSecret = 'client-secret-xyz'
     vi.stubGlobal('defineEventHandler', (fn: GoogleGetHandler) => fn)
     vi.stubGlobal('useRuntimeConfig', () => runtimeConfig)
     vi.stubGlobal('getQuery', getQueryMock)
@@ -74,7 +76,7 @@ describe('GET /auth/google', () => {
   })
 
   it('returns 404 when the OAuth client is not configured', () => {
-    runtimeConfig.googleOAuthClientId = ''
+    runtimeConfig.googleOauthClientId = ''
 
     expect.assertions(2)
     try {
@@ -83,6 +85,25 @@ describe('GET /auth/google', () => {
       expect(err).toMatchObject({ statusCode: 404 })
     }
     expect(sendRedirectMock).not.toHaveBeenCalled()
+  })
+
+  it('returns 500 when the client secret is not configured', () => {
+    runtimeConfig.googleOauthClientSecret = ''
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    expect.assertions(4)
+    try {
+      handler(fakeEvent)
+    } catch (err) {
+      expect(err).toMatchObject({ statusCode: 500 })
+    }
+    expect(sendRedirectMock).not.toHaveBeenCalled()
+    expect(setCookieMock).not.toHaveBeenCalled()
+    expect(consoleErrorSpy.mock.calls.flat().join(' ')).not.toContain(
+      'client-secret-xyz'
+    )
+
+    consoleErrorSpy.mockRestore()
   })
 
   it('stores the pending state and redirects to Google with state, nonce and PKCE challenge', async () => {

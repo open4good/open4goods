@@ -54,9 +54,28 @@ ProductRepository repo = new ProductRepository(config);
 // index a product
 repo.save(product);
 
-// export all indexed products as a stream
+// export all indexed products as a stream (complete products, 1000 per page)
 Stream<Product> all = repo.exportAll();
+
+// export only a few fields (projection): larger pages (5000) are safe
+Stream<Product> keys = repo.exportAll(new String[] {"gtinInfos"});
 ```
+
+## Partial updates
+
+The realtime aggregation queues a `ProductPartialUpdateHolder` (`lastChange`, `price`, `offersCount`) when a
+fragment did not change. `ProductRepository.bulkUpdateDocument` writes it with a painless script
+(`PARTIAL_UPDATE_SCRIPT`) that replaces each changed top-level field, as a full indexation would. A `doc` update
+merged objects instead: the client serializer omits null properties, so a `price.minPrice` recomputed to null kept
+the expired offer in the index, and a sub-field or a trend that disappeared stayed too (GOU-1784).
+`ProductRepositoryPartialUpdateIT` checks it against a real Elasticsearch (not run by the PR CI).
+
+## Export page sizes
+
+A complete product weighs about 21 KB on average in production, and the Elasticsearch client rejects
+responses above 100 MB (GOU-1134, GOU-1203). Reads of complete products therefore use pages of
+`ProductRepository.FULL_PRODUCT_PAGE_SIZE` (1000) at most; only exports with a source projection use 5000.
+A unit test fails if an export of complete products exceeds that constant.
 
 ## How to Build
 

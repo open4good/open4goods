@@ -12,6 +12,17 @@ wraps the Plausible plugin and respects Do Not Track settings.
 
 ## Event catalog
 
+> **Filtrage robots sur `/contrib/` (GOU-1175)** : `/contrib/<jeton>` et `/api/contrib/<jeton>` refusent (403 `text/plain`, sans appel à front-api) les UA vides ou reconnus comme robots par `isbot`, plus les motifs de `NUXT_AFFILIATION_BLOCKED_USER_AGENTS` (sous-chaînes séparées par des virgules, insensibles à la casse, vide par défaut). Aucune page HTML n'est jamais rendue sous `/contrib/**` (erreurs en `text/plain`) et Plausible est désactivé côté client sur ce chemin.
+
+> **Signal de navigation sur `/contrib/` (GOU-1184, durci par GOU-1520)** : après les règles de GOU-1175, `/contrib/<jeton>` et `/api/contrib/<jeton>` ne redirigent que si la requête porte le **cookie de navigation** `nudger_nav=1` ; sinon 403 `text/plain` "Ouvrez ce lien depuis la fiche produit sur nudger.fr" (`Cache-Control: no-store`, `X-Robots-Tag`), sans appel à front-api, donc sans `ContributionVote` ni clic transmis au réseau. Le visiteur réel sans cookie (JS désactivé, cookies bloqués) reçoit ce même message ; aucune redirection n'est faite sans cookie.
+>
+> **Article d'origine du clic (GOU-1829)** : un article ne contient pas de lien `/contrib/` ; le clic est attribué au dernier article `/blog/<slug>` ou `/guides/...` affiché dans le même onglet pendant la même session SPA. `app/plugins/affiliation-content.client.ts` mémorise son chemin (sans query ni hash) dans `useState('affiliation-content-path')` (`useAffiliationContentPath`) : **mémoire seulement**, aucun cookie, `localStorage` ni `sessionStorage`, donc rien à déclarer en consentement ; perdu au rechargement ou dans un nouvel onglet (sous-estimation assumée, pas de fausse attribution inter-session). Les liens d'offre des fiches deviennent `/contrib/<jeton>?from=<chemin encodé>` côté client uniquement (`withAffiliationContent` dans `app/utils/_product-pricing.ts`) ; le SSR n'émet jamais `from`. `server/utils/affiliation-redirect.ts` valide `from` (`shared/utils/affiliation-content-path.ts` : chemin nu, `/blog/` ou `/guides/`, 200 caractères max, sinon ignoré) et le transmet en `X-Affiliation-Content` après les gardes robot et cookie, inchangées. La query de `/contrib/` n'est jamais transmise à la cible. Voir `docs/architecture/affiliation-clicks.md`.
+>
+> 1. **Cookie technique `nudger_nav=1`** (obligatoire) : first-party, `Path=/`, `SameSite=Lax`, `Secure` en HTTPS, `Max-Age` 24 h, valeur constante sans donnée personnelle. Posé côté client par `app/plugins/navigation-signal.client.ts` au chargement de l'application et à chaque navigation (`page:finish`), jamais par le SSR (le HTML reste sans `Set-Cookie`, donc cacheable). Cookie de sécurité / lutte contre la fraude au clic d'affiliation, strictement nécessaire à ce service : exempté de consentement. Il n'est lu que par `/contrib/**`.
+> 2. **`Referer`** : il ne suffit plus (GOU-1520). De GOU-1184 à GOU-1520, un `Referer` d'un domaine du site suffisait ; un robot à proxys résidentiels l'a forgé (`Referer: https://nudger.fr/`, sans cookie, sans page chargée) et a produit 206 redirections d'affiliation en quatre jours, alors que tous les clics humains observés portaient le cookie. Le `Referer` same-site ne sert plus qu'au chemin d'origine du clic (`X-Affiliation-Origin`, voir `docs/architecture/affiliation-clicks.md`). Les liens d'offre gardent donc `rel="sponsored nofollow noopener"` (sans `noreferrer`) et `referrerpolicy="same-origin"` (`AFFILIATE_LINK_REL`, `AFFILIATE_LINK_REFERRER_POLICY` dans `app/utils/_product-pricing.ts`) ; le clic sur une ligne du tableau d'offres passe par `openAffiliateLinkInNewTab` (même `rel`, même politique, ce que `window.open` ne permet pas). La redirection de `/contrib/` envoie `Referrer-Policy: no-referrer` : le réseau et le marchand ne reçoivent pas de referer nudger. Seule exception, une cible `amazon.fr` reçoit `strict-origin-when-cross-origin`, donc l'origine `https://nudger.fr/` sans le chemin (accord Partenaires Amazon §6(v), GOU-1396 ; voir `docs/architecture/affiliation-clicks.md`).
+>
+> Interrupteur : `NUXT_AFFILIATION_REQUIRE_NAVIGATION_SIGNAL=false` (vrai par défaut, seule une valeur explicite `false`/`0`/`off`/`no` coupe le contrôle) rétablit le comportement de GOU-1175 (aucun contrôle de cookie) sans nouveau build. Journal : un `warn` agrégé au plus par minute (nombre de refus depuis le précédent, un UA tronqué et les 6 premiers caractères du jeton en exemple), jamais d'IP ni de jeton entier.
+
 ### `affiliate-click`
 
 Tracks clicks on affiliate redirect links (typically `/contrib/<token>`). Emit
@@ -106,6 +117,19 @@ Tracks open data download actions.
 Props:
 
 - `dataset`, `method`, `href`
+
+### `open-data-link`
+
+Tracks clicks on the `/opendata`, `/opendata/gtin` and `/opendata/isbn` pages blocks "Explore products" and "Also available on" (emitted by `trackOpenDataOutboundClick`). Respects Do Not Track like every other event.
+
+Props (low cardinality, no GTIN):
+
+- `block`: `explore-products` | `mirrors`
+- `target`: `category` | `product` | `datagouv` | `zenodo` | `kaggle` | `figshare`
+- `page`: `opendata` | `gtin` | `isbn`
+- `category`: category slug (`verticalId`, e.g. `tv`), only for `category` and `product` targets
+
+Plausible setup: create a custom event goal named `open-data-link` (Settings > Goals > Add goal > Custom event), then register the custom properties `block`, `target`, `page` and `category` (Settings > Custom properties) to break the goal down.
 
 ### `file-download`
 

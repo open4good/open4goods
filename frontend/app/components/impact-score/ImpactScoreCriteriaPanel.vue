@@ -110,7 +110,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   useImpactScoreCriteria,
@@ -201,9 +201,9 @@ const loadCriteria = async () => {
   await loadAllCriteria()
 }
 
-onMounted(() => {
-  loadCriteria()
-})
+// Loaded during setup (not in onMounted) so that the server-side render already carries the criteria: a client-only
+// load made the SSR HTML, the one crawlers read, always show the "no criteria" message (GOU-1897).
+await loadCriteria()
 
 watch(
   () => props.verticalId,

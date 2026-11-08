@@ -1,4 +1,8 @@
 import type { ProductDto } from '~~/shared/api-client'
+import {
+  AFFILIATION_CONTENT_QUERY_PARAM,
+  sanitizeAffiliationContentPath,
+} from '~~/shared/utils/affiliation-content-path'
 
 type NumberFormatFn = (
   value: number,
@@ -53,14 +57,59 @@ export const formatOffersCount = (
   return translatePlural('category.products.offerCount', count, { count })
 }
 
-/** rel for outbound affiliate/offer links — Google requires `sponsored` for paid links. */
-export const AFFILIATE_LINK_REL = 'sponsored nofollow noopener noreferrer'
+/** rel for outbound affiliate/offer links — Google requires `sponsored` for paid links.
+ * No `noreferrer`: /contrib/ reads the nudger.fr Referer for the click origin
+ * path, see AFFILIATE_LINK_REFERRER_POLICY. */
+export const AFFILIATE_LINK_REL = 'sponsored nofollow noopener'
 
-export const resolveOfferHref = (offer: {
-  affiliationToken?: string | null
-  url?: string | null
-}): string | undefined =>
-  offer.affiliationToken ? `/contrib/${offer.affiliationToken}` : (offer.url ?? undefined)
+/** referrerpolicy for the same links: the Referer is sent to /contrib/ on
+ * nudger.fr (click origin path) but never to a merchant or network origin. */
+export const AFFILIATE_LINK_REFERRER_POLICY = 'same-origin'
+
+/**
+ * Opens an affiliate/offer link in a new tab with the same rel and referrer
+ * policy as the anchors (window.open cannot set a referrer policy).
+ */
+export const openAffiliateLinkInNewTab = (href: string): void => {
+  const anchor = document.createElement('a')
+  anchor.href = href
+  anchor.target = '_blank'
+  anchor.rel = AFFILIATE_LINK_REL
+  anchor.referrerPolicy = AFFILIATE_LINK_REFERRER_POLICY
+  anchor.style.display = 'none'
+  document.body.appendChild(anchor)
+  anchor.click()
+  anchor.remove()
+}
+
+/**
+ * Adds `?from=<article path>` to a `/contrib/<token>` link when the visitor
+ * read a blog article or guide earlier in this tab (GOU-1829). Other links
+ * (merchant URLs) are returned untouched.
+ */
+export const withAffiliationContent = <T extends string | null | undefined>(
+  href: T,
+  contentPath?: string | null
+): T => {
+  if (!href || !href.startsWith('/contrib/') || href.includes('?')) {
+    return href
+  }
+  const path = sanitizeAffiliationContentPath(contentPath)
+  return path
+    ? (`${href}?${AFFILIATION_CONTENT_QUERY_PARAM}=${encodeURIComponent(path)}` as T)
+    : href
+}
+
+export const resolveOfferHref = (
+  offer: {
+    affiliationToken?: string | null
+    url?: string | null
+  },
+  contentPath?: string | null
+): string | undefined =>
+  offer.affiliationToken
+    ? withAffiliationContent(`/contrib/${offer.affiliationToken}`, contentPath)
+    : (offer.url ?? undefined)
 
 /** Single-sourced condition color grammar, used everywhere a "new" vs
  * "occasion" offer badge/chip renders. */

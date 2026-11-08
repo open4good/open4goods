@@ -571,6 +571,33 @@ describe('ProductAttributesSection', () => {
     expect(richValue.text()).toContain('2 kg')
   })
 
+  it('formats identity dates in UTC whatever the runtime time zone (SSR/client hydration)', async () => {
+    const originalTimeZone = process.env.TZ
+    // Browser time zone ahead of the UTC server: 23:30 UTC is already the next day.
+    process.env.TZ = 'Europe/Paris'
+
+    try {
+      const product = buildProduct()
+      product.base = {
+        ...product.base,
+        creationDate: Date.UTC(2026, 5, 13, 23, 30),
+        lastChange: Date.UTC(2026, 9, 21, 22, 15),
+      }
+
+      const wrapper = await mountComponent(product)
+      const identityValues = wrapper
+        .findAll('.product-attributes__identity-value')
+        .map(node => node.text())
+
+      expect(identityValues).toContain('Jun 13, 2026')
+      expect(identityValues).toContain('Oct 21, 2026')
+      expect(identityValues).not.toContain('Jun 14, 2026')
+      expect(identityValues).not.toContain('Oct 22, 2026')
+    } finally {
+      process.env.TZ = originalTimeZone
+    }
+  })
+
   it('filters out GTIN-prefixed internal codes from the alternate names list', async () => {
     const product = buildProduct()
     product.identity = {

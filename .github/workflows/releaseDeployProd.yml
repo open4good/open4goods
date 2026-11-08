@@ -26,6 +26,8 @@ jobs:
   release:
     if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
+    # Service secrets (Google SSO included) come from the `prod` GitHub Environment (ADR-0006, GOU-826, GOU-1041).
+    environment: prod
 
     env:
       MODE: ${{ inputs.mode || 'release' }}
@@ -35,6 +37,32 @@ jobs:
       cancel-in-progress: true
 
     steps:
+      ############################################
+      # 🔐 Google SSO secrets (prod Environment)
+      ############################################
+      - name: 🔐 Check Google SSO secrets
+        # Runs in MODE=test too, so a rehearsal proves the `prod` Environment is ready.
+        # No SSH access, no value printed; same character set as scripts/deploy/push-remote-env.sh.
+        shell: bash
+        env:
+          GOOGLE_SSO_CLIENT_ID: ${{ secrets.GOOGLE_SSO_CLIENT_ID }}
+          GOOGLE_SSO_CLIENT_SECRET: ${{ secrets.GOOGLE_SSO_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          failed=0
+          for key in GOOGLE_SSO_CLIENT_ID GOOGLE_SSO_CLIENT_SECRET; do
+            value="${!key:-}"
+            if [ -z "${value}" ]; then
+              echo "::error::${key} is empty or missing from the prod GitHub Environment"
+              failed=1
+            elif [[ "${value}" =~ [^A-Za-z0-9/._-] ]]; then
+              echo "::error::${key} contains characters outside [A-Za-z0-9/._-]"
+              failed=1
+            fi
+          done
+          [ "${failed}" -eq 0 ]
+          echo "Google SSO secrets are set in the prod GitHub Environment."
+
       ############################################
       # 🧭 Resolve ref & versioning
       ############################################
@@ -75,6 +103,51 @@ jobs:
           fetch-depth: 0
           ref: ${{ steps.meta.outputs.checkout_ref }}
 
+      - name: 🔐 Checkout the deploy scripts (this workflow's commit)
+        # The secrets are rendered by the definition of the commit this workflow runs from, whatever ref is
+        # deployed: the table of scripts/deploy/render-service-secrets.sh matches the secrets this file maps, and a
+        # ref cut before GOU-1041 has an older interface. Rendered files only depend on Spring Boot, not on the JAR.
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          path: deploy-tools
+          sparse-checkout: scripts/deploy
+          persist-credentials: false
+
+      - name: 🔐 Check prod service secrets
+        # Runs in MODE=test too. Same definition as serviceSecrets.yml (GOU-1041): a set but malformed secret fails
+        # here, before any build; a missing one is a warning.
+        env:
+          API_GOOGLE_API_JSON: ${{ secrets.API_GOOGLE_API_JSON }}
+          API_METRIKS_AWIN_PUBLISHER_ID: ${{ secrets.API_METRIKS_AWIN_PUBLISHER_ID }}
+          API_METRIKS_AWIN_API_TOKEN: ${{ secrets.API_METRIKS_AWIN_API_TOKEN }}
+          API_METRIKS_EFFILIATION_API_KEY: ${{ secrets.API_METRIKS_EFFILIATION_API_KEY }}
+          API_EFFILIATION_API_KEY: ${{ secrets.API_EFFILIATION_API_KEY }}
+          API_VERTEX_API_JSON: ${{ secrets.API_VERTEX_API_JSON }}
+          API_VERTEX_BATCH_JSON: ${{ secrets.API_VERTEX_BATCH_JSON }}
+          API_GOOGLE_SEARCH_API_KEY: ${{ secrets.API_GOOGLE_SEARCH_API_KEY }}
+          API_OPENAI_API_KEY: ${{ secrets.API_OPENAI_API_KEY }}
+          API_AWIN_ACCESS_TOKEN: ${{ secrets.API_AWIN_ACCESS_TOKEN }}
+          API_KWANKO_TOKEN: ${{ secrets.API_KWANKO_TOKEN }}
+          API_TRADETRACKER_API_KEY: ${{ secrets.API_TRADETRACKER_API_KEY }}
+          API_EPREL_API_KEY: ${{ secrets.API_EPREL_API_KEY }}
+          O4G_ICECAT_PASSWORD: ${{ secrets.O4G_ICECAT_PASSWORD }}
+          O4G_SBA_PASSWORD: ${{ secrets.O4G_SBA_PASSWORD }}
+          O4G_INTERNAL_API_KEY: ${{ secrets.O4G_INTERNAL_API_KEY }}
+          API_METRIKS_KEY: ${{ secrets.API_METRIKS_KEY }}
+          O4G_CAPTCHA_SECRET: ${{ secrets.O4G_CAPTCHA_SECRET }}
+          O4G_MAIL_PASSWORD: ${{ secrets.O4G_MAIL_PASSWORD }}
+          FRONT_API_JWT_SECRET: ${{ secrets.FRONT_API_JWT_SECRET }}
+          O4G_MACHINE_TOKEN: ${{ secrets.O4G_MACHINE_TOKEN }}
+          FRONT_API_GITHUB_TOKEN: ${{ secrets.FRONT_API_GITHUB_TOKEN }}
+          GOOGLE_SSO_CLIENT_ID: ${{ secrets.GOOGLE_SSO_CLIENT_ID }}
+          GOOGLE_SSO_CLIENT_SECRET: ${{ secrets.GOOGLE_SSO_CLIENT_SECRET }}
+        run: |
+          set -eu
+          for svc in admin api front-api ui b2b-api frontend; do
+            deploy-tools/scripts/deploy/render-service-secrets.sh --if-present check prod "${svc}"
+          done
+
       ############################################
       # 🗂️ Prepare reports directories (target)
       ############################################
@@ -93,7 +166,7 @@ jobs:
       - name: 📝 Build Release Notes (tag)
         id: build_changelog
         if: steps.meta.outputs.is_tag == 'true'
-        uses: mikepenz/release-changelog-builder-action@c9bcd8238b6f41e05561348339429d360b1c0247 # v6.2.3
+        uses: mikepenz/release-changelog-builder-action@aa013739bbc8e7067dbbecd4525ff11aeb51a84b # v6.4.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -177,7 +250,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
         with:
-          version: 10.34.5
+          version: 10.34.6
 
       - name: Configure frontend pnpm store
         shell: bash
@@ -221,19 +294,6 @@ jobs:
           distribution: "temurin"
           java-version: "21"
           cache: "maven"
-
-      - name: Set up Maven Repositories
-        uses: s4u/maven-settings-action@894661b3ddae382f1ae8edbeab60987e08cf0788 # v4.0.0
-        with:
-          repositories: |
-            [
-              {
-                "id": "xwiki-releases",
-                "name": "xwiki-releases",
-                "url": "https://maven.xwiki.org/releases/",
-                "snapshots": { "enabled": false }
-              }
-            ]
 
       - name: 🧱 Build & Test (Maven)
         shell: bash
@@ -431,6 +491,46 @@ jobs:
       ############################################
       # Restart Applications
       ############################################
+      - name: 🔐 Render service secrets on Prod
+        # Same files as serviceSecrets.yml (scripts/deploy/render-service-secrets.sh, GOU-1041), restarted just below:
+        # config tree files and env lines sourced by publish-jars.sh, outside the tree open4goods-config's deploy
+        # rsyncs with --delete. A secret missing from `prod` is a warning and is not rendered (the service keeps its
+        # previous value); the others still are.
+        if: env.MODE != 'test'
+        env:
+          DEPLOY_SSH_HOST: ${{ secrets.REMOTE_HOST }}
+          DEPLOY_SSH_USER: ${{ secrets.REMOTE_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          API_GOOGLE_API_JSON: ${{ secrets.API_GOOGLE_API_JSON }}
+          API_METRIKS_AWIN_PUBLISHER_ID: ${{ secrets.API_METRIKS_AWIN_PUBLISHER_ID }}
+          API_METRIKS_AWIN_API_TOKEN: ${{ secrets.API_METRIKS_AWIN_API_TOKEN }}
+          API_METRIKS_EFFILIATION_API_KEY: ${{ secrets.API_METRIKS_EFFILIATION_API_KEY }}
+          API_EFFILIATION_API_KEY: ${{ secrets.API_EFFILIATION_API_KEY }}
+          API_VERTEX_API_JSON: ${{ secrets.API_VERTEX_API_JSON }}
+          API_VERTEX_BATCH_JSON: ${{ secrets.API_VERTEX_BATCH_JSON }}
+          API_GOOGLE_SEARCH_API_KEY: ${{ secrets.API_GOOGLE_SEARCH_API_KEY }}
+          API_OPENAI_API_KEY: ${{ secrets.API_OPENAI_API_KEY }}
+          API_AWIN_ACCESS_TOKEN: ${{ secrets.API_AWIN_ACCESS_TOKEN }}
+          API_KWANKO_TOKEN: ${{ secrets.API_KWANKO_TOKEN }}
+          API_TRADETRACKER_API_KEY: ${{ secrets.API_TRADETRACKER_API_KEY }}
+          API_EPREL_API_KEY: ${{ secrets.API_EPREL_API_KEY }}
+          O4G_ICECAT_PASSWORD: ${{ secrets.O4G_ICECAT_PASSWORD }}
+          O4G_SBA_PASSWORD: ${{ secrets.O4G_SBA_PASSWORD }}
+          O4G_INTERNAL_API_KEY: ${{ secrets.O4G_INTERNAL_API_KEY }}
+          API_METRIKS_KEY: ${{ secrets.API_METRIKS_KEY }}
+          O4G_CAPTCHA_SECRET: ${{ secrets.O4G_CAPTCHA_SECRET }}
+          O4G_MAIL_PASSWORD: ${{ secrets.O4G_MAIL_PASSWORD }}
+          FRONT_API_JWT_SECRET: ${{ secrets.FRONT_API_JWT_SECRET }}
+          O4G_MACHINE_TOKEN: ${{ secrets.O4G_MACHINE_TOKEN }}
+          FRONT_API_GITHUB_TOKEN: ${{ secrets.FRONT_API_GITHUB_TOKEN }}
+          GOOGLE_SSO_CLIENT_ID: ${{ secrets.GOOGLE_SSO_CLIENT_ID }}
+          GOOGLE_SSO_CLIENT_SECRET: ${{ secrets.GOOGLE_SSO_CLIENT_SECRET }}
+        run: |
+          set -eu
+          for svc in admin api front-api ui b2b-api; do
+            deploy-tools/scripts/deploy/render-service-secrets.sh --if-present apply prod "${svc}"
+          done
+
       - name: 🔁 Start Applications
         if: env.MODE != 'test'
         uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
@@ -455,6 +555,7 @@ jobs:
           TARGET: "/opt/open4goods/latest/frontend-ssr"
 
       - name: Deploy reports (forced) to server
+        if: env.MODE != 'test'
         uses: easingthemes/ssh-deploy@2cc5b27bf3029d0455dd5e09fe02633904031447 # main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -494,6 +595,22 @@ jobs:
               done
             done
             echo "Nuxt asset preservation complete for ${staging}"
+
+      - name: 🔐 Render frontend secrets on Prod
+        # Replaces only the frontend's keys in /etc/open4goods/frontend.env, the second env_file of
+        # docker-compose.frontend.yml, read when publish-frontend.sh recreates the container
+        # (scripts/deploy/render-service-secrets.sh, GOU-1041). No open4goods-config deploy writes it (GOU-1694); the
+        # script refuses to render while the host's compose file does not read it.
+        if: env.MODE != 'test'
+        env:
+          DEPLOY_SSH_HOST: ${{ secrets.REMOTE_HOST }}
+          DEPLOY_SSH_USER: ${{ secrets.REMOTE_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          GOOGLE_SSO_CLIENT_ID: ${{ secrets.GOOGLE_SSO_CLIENT_ID }}
+          GOOGLE_SSO_CLIENT_SECRET: ${{ secrets.GOOGLE_SSO_CLIENT_SECRET }}
+          O4G_MACHINE_TOKEN: ${{ secrets.O4G_MACHINE_TOKEN }}
+          FRONT_API_JWT_SECRET: ${{ secrets.FRONT_API_JWT_SECRET }}
+        run: deploy-tools/scripts/deploy/render-service-secrets.sh --if-present apply prod frontend
 
       - name: Publish frontend
         if: env.MODE != 'test'
@@ -616,7 +733,7 @@ jobs:
         if: env.MODE != 'test'
         uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
         with:
-          version: 11.21.0
+          version: 11.28.3
           standalone: true
 
       - name: Configure b2b-frontend pnpm store

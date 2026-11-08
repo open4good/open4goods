@@ -266,11 +266,13 @@ const qualitativeLabel = computed(() => {
   return t(`product.verdict.levels.${qualitativeLevel.value}`)
 })
 
+// The backend ranks scores in ascending order: 0 is the lowest score and
+// count - 1 the highest, so the ranking is the number of products below.
 const percentile = computed(() => {
   if (props.ranking === null || props.count === null || props.count <= 1) {
     return null
   }
-  const pct = Math.round(((props.count - props.ranking) / props.count) * 100)
+  const pct = Math.round((props.ranking / (props.count - 1)) * 100)
   return Math.max(0, Math.min(pct, 100))
 })
 

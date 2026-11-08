@@ -20,7 +20,12 @@ const BLOG_POSTS_SITEMAP_FILENAME = `${BLOG_POSTS_SITEMAP_KEY}.xml`
  */
 export default (nitroApp: import('nitro/app').NitroApp) => {
   nitroApp.hooks.hook('sitemap:sources', async ctx => {
-    if (ctx.sitemapName !== BLOG_POSTS_SITEMAP_FILENAME) {
+    // @nuxtjs/sitemap passes the sitemap key ('blog-posts', '.xml' stripped from the route);
+    // the filename form is kept for parity with sitemap-main-pages.ts.
+    if (
+      ctx.sitemapName !== BLOG_POSTS_SITEMAP_KEY &&
+      ctx.sitemapName !== BLOG_POSTS_SITEMAP_FILENAME
+    ) {
       return
     }
 

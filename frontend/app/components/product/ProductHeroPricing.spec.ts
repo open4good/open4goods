@@ -4,7 +4,10 @@ import { createI18n } from 'vue-i18n'
 import { defineComponent, h } from 'vue'
 import type { ProductDto } from '~~/shared/api-client'
 import ProductHeroPricing from './ProductHeroPricing.vue'
-import { AFFILIATE_LINK_REL } from '~/utils/_product-pricing'
+import {
+  AFFILIATE_LINK_REFERRER_POLICY,
+  AFFILIATE_LINK_REL,
+} from '~/utils/_product-pricing'
 
 interface MockPriceTrend {
   trend: string
@@ -58,6 +61,11 @@ describe('ProductHeroPricing', () => {
     messages: {
       'en-US': {
         product: {
+          amazonSearch: {
+            label: 'Search on Amazon',
+            disclosure:
+              'As an Amazon Associate I earn from qualifying purchases.',
+          },
           hero: {
             bestPriceTitle: 'Best price',
             viewSingleOffer: 'View the offer',
@@ -96,6 +104,11 @@ describe('ProductHeroPricing', () => {
       },
       'fr-FR': {
         product: {
+          amazonSearch: {
+            label: 'Rechercher sur Amazon',
+            disclosure:
+              'En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.',
+          },
           hero: {
             bestPriceTitle: 'Meilleur prix',
             viewSingleOffer: "Voir l'offre",
@@ -412,6 +425,68 @@ describe('ProductHeroPricing', () => {
     await wrapper.unmount()
   })
 
+  it('shows the Amazon search link and its disclosure when there is no offer (GOU-1396)', async () => {
+    const wrapper = await createWrapper(
+      {
+        offersCount: 0,
+        amazonSearchLink: '/contrib/amazon-token',
+      },
+      'fr-FR'
+    )
+
+    const link = wrapper.find('.product-amazon-search__link')
+    expect(link.exists()).toBe(true)
+    expect(link.text()).toBe('Rechercher sur Amazon')
+    expect(link.attributes('href')).toBe('/contrib/amazon-token')
+    expect(link.attributes('target')).toBe('_blank')
+    expect(link.attributes('rel')).toBe(AFFILIATE_LINK_REL)
+    expect(link.attributes('rel')).toContain('sponsored nofollow')
+    expect(link.attributes('referrerpolicy')).toBe(
+      AFFILIATE_LINK_REFERRER_POLICY
+    )
+    expect(link.find('img').exists()).toBe(false)
+    expect(wrapper.find('.product-amazon-search__disclosure').text()).toBe(
+      'En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.'
+    )
+
+    await wrapper.unmount()
+  })
+
+  it('never shows the Amazon search link next to an offer', async () => {
+    const wrapper = await createWrapper({
+      offersCount: 1,
+      amazonSearchLink: '/contrib/amazon-token',
+      bestPrice: {
+        price: 799,
+        currency: 'EUR',
+        datasourceName: 'Shop',
+        url: 'https://shop.example',
+        condition: 'NEW',
+      },
+      bestNewOffer: {
+        price: 799,
+        currency: 'EUR',
+        datasourceName: 'Shop',
+        url: 'https://shop.example',
+        condition: 'NEW',
+      },
+    })
+
+    expect(wrapper.findAll('.product-hero__pricing-panel')).toHaveLength(1)
+    expect(wrapper.find('.product-amazon-search').exists()).toBe(false)
+
+    await wrapper.unmount()
+  })
+
+  it('shows no Amazon search link without one from the API', async () => {
+    const wrapper = await createWrapper({ offersCount: 0 })
+
+    expect(wrapper.find('.product-hero__pricing-empty').exists()).toBe(true)
+    expect(wrapper.find('.product-amazon-search').exists()).toBe(false)
+
+    await wrapper.unmount()
+  })
+
   it('formats prices with the active Nuxt locale during hydration', async () => {
     const wrapper = await createWrapper(
       {
@@ -473,6 +548,10 @@ describe('ProductHeroPricing', () => {
     )
     expect(link.attributes('href')).toBe('/contrib/tok-abc')
     expect(link.attributes('rel')).toBe(AFFILIATE_LINK_REL)
+    expect(link.attributes('rel')).not.toContain('noreferrer')
+    expect(link.attributes('referrerpolicy')).toBe(
+      AFFILIATE_LINK_REFERRER_POLICY
+    )
     expect(link.attributes('target')).toBe('_blank')
 
     await wrapper.unmount()

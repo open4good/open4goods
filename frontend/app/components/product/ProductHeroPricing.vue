@@ -17,6 +17,12 @@
       <p class="product-hero__pricing-empty-title">
         {{ t('product.hero.noOffersUnified') }}
       </p>
+      <ProductAmazonSearchLink
+        v-if="amazonSearchLink"
+        :link="amazonSearchLink"
+        :gtin="productGtin"
+        placement="product-hero-amazon-search"
+      />
     </div>
 
     <v-tabs
@@ -81,7 +87,7 @@
           :trend-tone-class="panel.trendToneClass"
           :trend-icon="panel.trendIcon"
           :view-offers-label="panel.viewOffersLabel"
-        :view-offers-href="panel.viewOffersHref"
+          :view-offers-href="panel.viewOffersHref"
           :hide-header="true"
           @merchant-click="handleMerchantClick"
           @trend-click="scrollToSelector('#price-history')"
@@ -129,9 +135,14 @@ import { useDisplay } from 'vuetify'
 import { mdiBasketOffOutline, mdiTagOutline, mdiRecycleVariant } from '@mdi/js'
 import { useAnalytics } from '~/composables/useAnalytics'
 import { useProductPriceTrend } from '~/composables/useProductPriceTrend'
-import { resolveOfferHref } from '~/utils/_product-pricing'
+import {
+  resolveOfferHref,
+  withAffiliationContent,
+} from '~/utils/_product-pricing'
+import { useAffiliationContentPath } from '~/composables/useAffiliationContentPath'
 import type { ProductDto } from '~~/shared/api-client'
 import ProductHeroPricingPanel from '~/components/product/ProductHeroPricingPanel.vue'
+import ProductAmazonSearchLink from '~/components/product/ProductAmazonSearchLink.vue'
 
 type OfferCondition = 'occasion' | 'new'
 
@@ -265,7 +276,7 @@ const buildOffersList = (condition: OfferCondition): OfferOption[] => {
       offerName: offer.offerName ?? null,
       priceLabel,
       favicon: offer.favicon ?? null,
-      url: resolveOfferHref(offer) ?? null,
+      url: resolveOfferHref(offer, affiliationContentPath.value) ?? null,
     }
   })
 }
@@ -284,6 +295,10 @@ const isSingleOffer = computed(() => offersCount.value === 1)
 const productGtin = computed(
   () => props.product.gtin ?? props.product.base?.gtin
 )
+// Amazon search link (GOU-1396): only in the empty state, never an offer.
+const amazonSearchLink = computed(
+  () => props.product.offers?.amazonSearchLink ?? null
+)
 const productVertical = computed(() => props.product.base?.vertical ?? null)
 const productCategorySlug = computed(() => {
   const fullSlug = props.product.fullSlug?.trim()
@@ -294,13 +309,18 @@ const productCategorySlug = computed(() => {
   return fullSlug.split('/').filter(Boolean)[0] ?? null
 })
 
+const affiliationContentPath = useAffiliationContentPath()
+
 const createMerchant = (offer: AggregatedOffer | null) => {
   if (!offer?.datasourceName) {
     return null
   }
 
   const affiliationLink = offer.affiliationToken
-    ? `/contrib/${offer.affiliationToken}`
+    ? withAffiliationContent(
+        `/contrib/${offer.affiliationToken}`,
+        affiliationContentPath.value
+      )
     : null
   const url = affiliationLink ?? offer.url ?? null
 

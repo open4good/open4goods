@@ -1,17 +1,8 @@
-import { readFile } from 'node:fs/promises'
-import { resolve } from 'node:path'
-
 import type { H3Event } from 'h3'
 import MarkdownIt from 'markdown-it'
 import { queryCollection } from '@nuxt/content/server'
 
 import type { BlogPostDto, BlogTagDto } from '~~/shared/api-client'
-
-// scripts/migrate/xwiki_blog_export.py writes here; kept in sync with frontend/content.config.ts's
-// BLOG_DIR so the raw Markdown body can be read directly (see renderBody for why). Resolved from
-// process.cwd() rather than import.meta.url: both Nitro and Vitest run with the frontend/ package
-// root as cwd, and import.meta.url isn't a file:// URL under Vitest's transform pipeline.
-const BLOG_CONTENT_DIR = resolve(process.cwd(), 'content', 'blog')
 
 const markdown = new MarkdownIt({ html: false, linkify: true })
 
@@ -27,6 +18,7 @@ export interface BlogContentDoc {
   draft: boolean
   published: boolean
   image?: string
+  rawbody: string
 }
 
 export const slugFromPath = (path: string): string => path.split('/').filter(Boolean).pop() ?? path
@@ -40,18 +32,41 @@ const toEpochMs = (value: string | null): number | null => {
 }
 
 /**
- * Renders a post's Markdown body to the sanitizer-ready HTML string BlogPostDto.body has always
- * carried. Read from the raw file rather than the collection's parsed AST -- the AST is shaped for
- * <ContentRenderer>, not for producing a plain HTML string, and the exported Markdown has no macros
- * or components that would need MDC's renderer over a plain CommonMark one. A stray `[assistant]`
- * marker (see quelle-taille-de-tv-choisir-pour-son-salon.md) is unwrapped from the `<p>` markdown-it
- * puts around it, so TheArticle.vue's `content.split('[assistant]')` still finds a clean split point.
+ * Markdown source files reference their inline images by filename only (e.g. `![](tv-planet.jpeg)`),
+ * relative to the image folder exported alongside the post rather than to the rendered `/blog/<slug>`
+ * route. Left as-is, the browser resolves them against the page URL and requests `/blog/<file>`,
+ * which hits the `[slug].vue` catch-all instead of the image. Absolute URLs, already-rooted paths
+ * (starting with a single `/`), other URI schemes (`data:`, `mailto:`, …) and fragment-only
+ * references (`#…`) are left untouched.
  */
-async function renderBody(language: string, slug: string): Promise<string> {
-  const filePath = `${BLOG_CONTENT_DIR}/${language}/${slug}.md`
-  const raw = await readFile(filePath, 'utf-8')
+export function resolveRelativeImageSrc(html: string, slug: string): string {
+  return html.replace(
+    /(<img[^>]*\ssrc=")([^"]+)(")/g,
+    (match, prefix: string, src: string, suffix: string) => {
+      if (src.startsWith('/') || src.startsWith('#') || /^[a-z][a-z0-9+.-]*:/i.test(src)) {
+        return match
+      }
+      return `${prefix}/images/blog/${slug}/${src}${suffix}`
+    }
+  )
+}
+
+/**
+ * Renders a post's Markdown body to the sanitizer-ready HTML string BlogPostDto.body has always
+ * carried. Rendered from the collection's `rawbody` (the source file as stored in the content
+ * database) rather than its parsed AST -- the AST is shaped for <ContentRenderer>, not for producing
+ * a plain HTML string, and the exported Markdown has no macros or components that would need MDC's
+ * renderer over a plain CommonMark one. Never read content/ from disk: the deployed .output bundle
+ * ships without it. A stray `[assistant]` marker (see quelle-taille-de-tv-choisir-pour-son-salon.md)
+ * is unwrapped from the `<p>` markdown-it puts around it, so TheArticle.vue's
+ * `content.split('[assistant]')` still finds a clean split point.
+ */
+function renderBody(raw: string, slug: string): string {
   const body = raw.replace(/^---\n[\s\S]*?\n---\n/, '')
-  return markdown.render(body).replace('<p>[assistant]</p>', '[assistant]')
+  const rendered = markdown
+    .render(body)
+    .replace('<p>[assistant]</p>', '[assistant]')
+  return resolveRelativeImageSrc(rendered, slug)
 }
 
 /**
@@ -82,10 +97,9 @@ export async function toBlogPostDto(doc: BlogContentDoc): Promise<BlogPostDto> {
     title: doc.title,
     author: doc.author,
     summary: doc.description,
-    body: await renderBody(doc.language, slug),
+    body: renderBody(doc.rawbody, slug),
     category: doc.tags,
     image: doc.image,
-    editLink: undefined,
     createdMs: toEpochMs(doc.date) ?? undefined,
     modifiedMs: toEpochMs(doc.updatedAt) ?? undefined,
   }

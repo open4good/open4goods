@@ -42,6 +42,8 @@
 - Prefer `ref`, `computed`, `watch`, `useState`, `useFetch`, `useAsyncData`, etc. via Nuxt auto-imports.
 - Type everything: rely on interfaces/types; avoid `any`. Use discriminated unions or type guards when needed.
 - Keep code SSR-friendly (guard against `window`/`document`).
+- Format dates rendered during SSR with an explicit `timeZone` (`Intl.DateTimeFormat`, `getUTC*`): the server runs in UTC and the browser in the user's zone, so an implicit zone causes hydration mismatches.
+- Unsafe calls (`POST`, etc.) to `/api` that may run during SSR go through the CSRF-aware client of the request, captured at setup (`const { $fetch: csrfFetch } = useNuxtApp()`), not `globalThis.$fetch`, which is swapped on every SSR request. The client (`app/plugins/csrf-fetch.ts`) keeps working after an `await`, when the ambient Nuxt context is gone (GOU-1226).
 - Keep composables thin; delegate heavy logic to server routes or shared utilities.
 - All static texts must be internationalised
 - Also write or update tests (component-level tests) if pertinent
@@ -54,7 +56,6 @@
 - Scoped SASS/CSS is allowed when Vuetify tokens alone cannot express the design (hero layouts, animations, etc.). Use BEM-style class names and keep selectors minimal.
 - Global styles belong in `app/assets`. Avoid inline styles except for trivial tweaks.
 - Always mutualize styles when possible
-- When integrating CMS/XWiki content, ensure the preprocess step (`pnpm preprocess:css`) stays current.
 
 ### components mutualisation
 
@@ -124,7 +125,7 @@ Every code that is produced MUST me validated using :
 ## Backend API authentication and caching guidelines
 
 - Instantiate backend OpenAPI clients through `createBackendApiConfig()` from the shared API client utilities. The helper injects the `X-Shared-Token` header and fails fast when `MACHINE_TOKEN` is absent-never call `new Configuration()` directly.
-- Keep the `MACHINE_TOKEN` runtime value synchronised with the backend's `front.security.shared-token` property; drift breaks machine-to-machine authentication.
+- Keep the `MACHINE_TOKEN` runtime value synchronised with the backend's `front.security.shared-token` property; drift breaks machine-to-machine authentication. On beta and prod both come from the `O4G_MACHINE_TOKEN` GitHub Environment secret once it is set (`NUXT_MACHINE_TOKEN` and `MACHINE_TOKEN` lines of `/etc/open4goods/frontend.env`, rendered by `scripts/deploy/render-service-secrets.sh`, GOU-1041, GOU-1694); see `docs/operations/prod-service-secrets.md`.
 - Every server route that returns backend data is domain-sensitive. Apply caching headers through `setDomainLanguageCacheHeaders(event, cacheControl)` from `server/utils/cache-headers` so both `Cache-Control` and the host-aware `Vary` header are set together. Do **not** set either header manually.
 
 ## DomainLanguage injection
@@ -148,6 +149,24 @@ Every downstream call should be wrapped in a thin service that:
   `config.public.editRoles` (defaults to `ROLE_SITEEDITOR,XWIKIADMINGROUP`).
 - Update the `EDITOR_ROLES` environment variable if new roles must be allowed;
   avoid hardcoding role names anywhere else.
+- Server-side admin routes (e.g. `/api/metriks/**`) must call
+  `requireAdminAccess(event)` from `server/utils/auth.ts` instead of trusting
+  an unverified JWT: it checks the cookie named by
+  `config.public.tokenCookieName`, verifies its HS256 signature, and checks
+  `hasAdminAccess` on the `roles` claim, throwing 401/403 without a body
+  otherwise.
+- `requireAdminAccess` needs the HS256 signing secret shared with front-api
+  (`front.security.jwt-secret`). It reads `config.jwtSecret` (baked in at
+  build time from `FRONT_SECURITY_JWT_SECRET`) and falls back to
+  `process.env.FRONT_SECURITY_JWT_SECRET` read at request time, since Nuxt
+  only overrides `jwtSecret` at runtime via `NUXT_JWT_SECRET`. **The
+  `frontend-ssr` deployment must set `FRONT_SECURITY_JWT_SECRET` in its
+  runtime environment, with the same value as front-api's
+  `front.security.jwt-secret`** - otherwise every admin request fails with a
+  500. Once the `FRONT_API_JWT_SECRET` GitHub Environment secret is set,
+  `scripts/deploy/render-service-secrets.sh` renders it into both
+  (`/etc/open4goods/frontend.env` line and front-api config tree, GOU-1041,
+  GOU-1694).
 
 ## When Unsure
 

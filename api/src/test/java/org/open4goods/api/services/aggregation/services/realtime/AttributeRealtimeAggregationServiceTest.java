@@ -9,6 +9,8 @@ import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
 import org.open4goods.api.services.completion.EprelCompletionService;
 import org.open4goods.brand.model.Brand;
@@ -82,6 +84,25 @@ class AttributeRealtimeAggregationServiceTest {
                 method.invoke(service, fragment, product, verticalConfig);
 
                 assertThat(product.getGtinInfos().getGtinStrings()).containsExactly("0123456789012");
+        }
+
+        /**
+         * GOU-1841: "Overriding GTIN from 9781609202415 to 1609202414" replaced the
+         * sanitised ISBN-13 by the raw ISBN-10 of the fragment.
+         */
+        @Test
+        void handleReferentielAttributesKeepsTheSanitisedGtin() throws Exception {
+                Product product = new Product(9781609202415L);
+                product.getAttributes().getReferentielAttributes().put(ReferentielKey.GTIN, "9781609202415");
+                DataFragment fragment = new DataFragment();
+                fragment.getReferentielAttributes().put(ReferentielKey.GTIN, "1609202414");
+
+                Method method = AttributeRealtimeAggregationService.class.getDeclaredMethod("handleReferentielAttributes", DataFragment.class, Product.class, VerticalConfig.class);
+                method.setAccessible(true);
+                method.invoke(service, fragment, product, verticalConfig);
+
+                assertThat(product.gtin()).isEqualTo("9781609202415");
+                assertThat(product.getGtinInfos().getGtinStrings()).containsExactly("1609202414");
         }
 
         @Test
@@ -336,6 +357,33 @@ class AttributeRealtimeAggregationServiceTest {
 		String result = service.parseValue("0.5 W", attrConfig, verticalConfig);
 		// Assert
 		assertThat(result).isEqualTo("0.5");
+	}
+
+	/**
+	 * GOU-1897 point 3: the "W" token was stripped after upper-casing, so "1,2 KW" read 1.2 W and "1 200 W" read 1 W.
+	 */
+	@ParameterizedTest
+	@CsvSource(delimiter = '|', value = {
+			"1,2 KW|1200", "1.2kW|1200", "1 200 W|1200", "1\u00a0200 W|1200", "1200 W|1200", "2,5 kW|2500",
+			"0,3 W|0.3", "0, 3 W|0.3", "0.5 W|0.5", "500 mW|0.5", "1,2 kilowatts|1200", "900 Watts|900", "1500|1500" })
+	void powerIsConvertedToWatts(String raw, String expected) throws Exception {
+		AttributeConfig attrConfig = wattAttribute();
+
+		assertThat(service.parseValue(raw, attrConfig, verticalConfig)).isEqualTo(expected);
+	}
+
+	private static AttributeConfig wattAttribute() {
+		AttributeConfig attrConfig = new AttributeConfig();
+		attrConfig.setKey("OVEN_POWER");
+		attrConfig.setFilteringType(org.open4goods.model.attribute.AttributeType.NUMERIC);
+		org.open4goods.model.Localisable<String, String> suffix = new org.open4goods.model.Localisable<>();
+		suffix.put("default", "W");
+		attrConfig.setSuffix(suffix);
+		attrConfig.getParser().setUpperCase(true);
+		attrConfig.getParser().setNormalize(true);
+		attrConfig.getParser().setTrim(true);
+		attrConfig.getParser().setDeleteTokens(java.util.List.of("W", "WATT", "WATTS"));
+		return attrConfig;
 	}
 
 	@Test

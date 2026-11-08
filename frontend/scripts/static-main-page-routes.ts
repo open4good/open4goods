@@ -6,7 +6,7 @@ const DYNAMIC_SEGMENT_PATTERN = /(^|\/)\[[^/]+?\](?=\/|$)/u
 const EXCLUDED_ROUTE_SEGMENTS = new Set(['auth', 'contrib'])
 const EXCLUDED_ROUTE_PATHS = new Set([
   'index-v1',
-  'xwiki-fullpage',
+  'cms-fullpage',
   'blog/test-images',
 ])
 

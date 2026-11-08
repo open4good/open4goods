@@ -163,6 +163,28 @@ describe('ProductDocumentationSection', () => {
     expect(metas[1]).toContain('Open4Goods')
   })
 
+  it('formats document dates in UTC whatever the runtime time zone (SSR/client hydration)', async () => {
+    const originalTimeZone = process.env.TZ
+    // Browser time zone ahead of the UTC server: 23:30 UTC is already the next day.
+    process.env.TZ = 'Europe/Paris'
+
+    try {
+      const wrapper = mountComponent({
+        pdfs: [basePdf({ modificationDate: Date.UTC(2024, 4, 2, 23, 30) })],
+      })
+      await flushPromises()
+
+      const tabMetas = wrapper
+        .findAll('.product-docs__tab-meta')
+        .map(node => node.text())
+
+      expect(tabMetas).toContain('May 2, 2024')
+      expect(tabMetas).not.toContain('May 3, 2024')
+    } finally {
+      process.env.TZ = originalTimeZone
+    }
+  })
+
   it('switches the active PDF when selecting a different tab', async () => {
     const pdfs = [
       basePdf(),

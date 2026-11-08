@@ -1,12 +1,16 @@
 package org.open4goods.nudgerfrontapi.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,6 +31,7 @@ import org.open4goods.model.price.Currency;
 import org.open4goods.model.product.EcoScoreRanking;
 import org.open4goods.model.product.GtinInfo;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.product.ProductCanonicalUrl;
 import org.open4goods.model.product.ProductCondition;
 import org.open4goods.model.product.ProductTexts;
 import org.open4goods.model.product.Score;
@@ -36,8 +41,9 @@ import org.open4goods.model.resource.Resource;
 import org.open4goods.model.resource.ResourceType;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.nudgerfrontapi.config.properties.AmazonSearchLinkProperties;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
-import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigDto;
+import org.open4goods.nudgerfrontapi.config.properties.OfferFreshnessProperties;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductScoreDto;
 import org.open4goods.model.localization.DomainLanguage;
@@ -52,20 +58,19 @@ class ProductMappingServiceTest {
     private ProductRepository repository;
     private ProductMappingService service;
     private ApiProperties apiProperties;
-    private CategoryMappingService categoryMappingService;
     private VerticalsConfigService verticalsConfigService;
     private AffiliationService affiliationService;
     private IcecatService icecatService;
     private SearchService searchService;
     private CacheManager cacheManager;
     private ProductTimelineService productTimelineService;
+    private OfferFreshnessService offerFreshnessService;
 
     @BeforeEach
     void setUp() {
         repository = mock(ProductRepository.class);
         apiProperties = new ApiProperties();
         apiProperties.setResourceRootPath("https://static.example");
-        categoryMappingService = mock(CategoryMappingService.class);
         verticalsConfigService = mock(VerticalsConfigService.class);
         affiliationService = mock(AffiliationService.class);
         icecatService = mock(IcecatService.class);
@@ -75,9 +80,11 @@ class ProductMappingServiceTest {
         CaffeineCache referenceCache = new CaffeineCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME,
                 Caffeine.newBuilder().maximumSize(100).build());
         when(cacheManager.getCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)).thenReturn(referenceCache);
-        service = new ProductMappingService(repository, apiProperties, categoryMappingService,
+        offerFreshnessService = new OfferFreshnessService(new OfferFreshnessProperties());
+        service = new ProductMappingService(repository, apiProperties,
                 verticalsConfigService, searchService, affiliationService, icecatService, cacheManager,
-                productTimelineService);
+                productTimelineService, new ProductSeoMetaService(offerFreshnessService), offerFreshnessService,
+                new AmazonSearchLinkService(new AmazonSearchLinkProperties(), affiliationService));
     }
 
     @Test
@@ -136,18 +143,21 @@ class ProductMappingServiceTest {
         long gtin = 1234567890123L;
         Product product = new Product(gtin);
         product.setVertical("phones");
-        product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Fairphone");
+        product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "FAIRPHONE");
         product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "6");
         ProductTexts names = new ProductTexts();
         Localisable<String, String> seoName = new Localisable<>();
         seoName.put("fr", "Fairphone 6");
         names.setSeoName(seoName);
+        Localisable<String, String> storedDescription = new Localisable<>();
+        storedDescription.put("fr", "Stored description");
+        names.setMetaDescription(storedDescription);
         product.setNames(names);
         product.setScores(Map.of("ECOSCORE", new Score("ECOSCORE", 14.25)));
 
         VerticalConfig verticalConfig = new VerticalConfig();
         ProductI18nElements frI18n = new ProductI18nElements();
-        frI18n.setVerticalMetaTitle("Smartphones durables");
+        frI18n.getUrl().setPrefix("|| smartphone | telephone-mobile ||");
         verticalConfig.getI18n().put("fr", frI18n);
 
         when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
@@ -157,7 +167,30 @@ class ProductMappingServiceTest {
         ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("names"), DomainLanguage.fr);
 
         assertThat(dto.names()).isNotNull();
-        assertThat(dto.names().metaTitle()).isEqualTo("Fairphone 6 - score impact 14.3/20 | Smartphones durables");
+        assertThat(dto.names().metaTitle()).isEqualTo("Fairphone 6 : smartphone – avis, prix et impact");
+        assertThat(dto.names().metaDescription())
+                .isEqualTo("Fairphone 6, smartphone : score impact 14.3/20. Comparez les offres sur Nudger.");
+    }
+
+    @Test
+    void getProductNamesDropsManufacturerReferenceFromPageTitle() throws Exception {
+        long gtin = 7333394145372L;
+        Product product = new Product(gtin);
+        product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "ELECTROLUX");
+        product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "E62LB200S 911572124");
+        ProductTexts names = new ProductTexts();
+        Localisable<String, String> pageTitle = new Localisable<>();
+        pageTitle.put("fr", "ELECTROLUX E62LB200S 911572124");
+        names.setPageTitle(pageTitle);
+        product.setNames(names);
+
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
+
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("names"), DomainLanguage.fr);
+
+        assertThat(dto.names().pageTitle()).isEqualTo("ELECTROLUX E62LB200S");
+        assertThat(dto.names().metaTitle()).isEqualTo("Electrolux E62LB200S – avis, prix et impact");
+        assertThat(dto.names().metaTitle()).doesNotContain("911572124");
     }
 
     @Test
@@ -208,9 +241,9 @@ class ProductMappingServiceTest {
         when(verticalsConfigService.getConfigById("phones")).thenReturn(verticalConfig);
         when(verticalsConfigService.getConfigByIdOrDefault("phones")).thenReturn(verticalConfig);
 
-        VerticalConfigDto verticalDto = new VerticalConfigDto("phones", true, true, null, null, null, null, null, null,
-                null, null, "Phones", "Phones description", "phones", List.of(), List.of(), null, null, null);
-        when(categoryMappingService.toVerticalConfigDto(verticalConfig, DomainLanguage.en)).thenReturn(verticalDto);
+        ProductI18nElements enI18n = new ProductI18nElements();
+        enI18n.setVerticalHomeUrl("phones");
+        verticalConfig.getI18n().put("en", enI18n);
 
         ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("scores"), DomainLanguage.en);
 
@@ -305,10 +338,10 @@ class ProductMappingServiceTest {
         when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
         VerticalConfig verticalConfig = new VerticalConfig();
         verticalConfig.setId("electronics");
-        VerticalConfigDto configDto = new VerticalConfigDto("electronics", true, false, null, null, 1, null, null, null,
-                null, null, null, null, "telephones-reconditionnes", List.of(), List.of(), null, null, null);
+        ProductI18nElements enI18n = new ProductI18nElements();
+        enI18n.setVerticalHomeUrl("telephones-reconditionnes");
+        verticalConfig.getI18n().put("en", enI18n);
         when(verticalsConfigService.getConfigById("electronics")).thenReturn(verticalConfig);
-        when(categoryMappingService.toVerticalConfigDto(verticalConfig, DomainLanguage.en)).thenReturn(configDto);
 
         ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("base"), DomainLanguage.en);
 
@@ -317,7 +350,7 @@ class ProductMappingServiceTest {
     }
 
     @Test
-    void getProductComputesFullSlugFromVerticalConfigWhenCategoryDtoHasNoUrl() throws Exception {
+    void getProductComputesFullSlugFromVerticalConfigWithSlashes() throws Exception {
         long gtin = 8431312260509L;
         Product product = new Product(gtin);
         product.setVertical("air-conditioners");
@@ -332,12 +365,38 @@ class ProductMappingServiceTest {
         frI18n.setVerticalHomeUrl("/climatiseurs/");
         verticalConfig.getI18n().put("fr", frI18n);
         when(verticalsConfigService.getConfigById("air-conditioners")).thenReturn(verticalConfig);
-        when(categoryMappingService.toVerticalConfigDto(verticalConfig, DomainLanguage.fr)).thenReturn(null);
 
         ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("base"), DomainLanguage.fr);
 
         assertThat(dto.slug()).isEqualTo("8431312260509-climatisation-midea-mmcs12hrn8qrd0");
         assertThat(dto.fullSlug()).isEqualTo("/climatiseurs/8431312260509-climatisation-midea-mmcs12hrn8qrd0");
+    }
+
+    @Test
+    void getProductFullSlugIgnoresRequestLocaleAndMatchesSharedCanonicalRule() throws Exception {
+        long gtin = 8806094831603L;
+        Product product = new Product(gtin);
+        product.setVertical("tv");
+        Localisable<String, String> urlLocalisable = new Localisable<>();
+        urlLocalisable.put("default", "8806094831603-smart-tv-qe32ls03cbu");
+        urlLocalisable.put("en", "8806094831603-english-slug");
+        product.getNames().setUrl(urlLocalisable);
+
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
+        VerticalConfig verticalConfig = new VerticalConfig();
+        verticalConfig.setId("tv");
+        ProductI18nElements frI18n = new ProductI18nElements();
+        frI18n.setVerticalHomeUrl("televiseurs");
+        verticalConfig.getI18n().put("fr", frI18n);
+        when(verticalsConfigService.getConfigById("tv")).thenReturn(verticalConfig);
+
+        ProductDto english = service.getProduct(gtin, Locale.ENGLISH, Set.of("base"), DomainLanguage.fr);
+        ProductDto french = service.getProduct(gtin, Locale.FRENCH, Set.of("base"), DomainLanguage.fr);
+
+        assertThat(english.fullSlug()).isEqualTo("/televiseurs/8806094831603-smart-tv-qe32ls03cbu");
+        assertThat(french.fullSlug()).isEqualTo(english.fullSlug());
+        assertThat(english.fullSlug())
+                .isEqualTo(ProductCanonicalUrl.fullSlug(product, verticalConfig, DomainLanguage.fr));
     }
 
     @Test
@@ -369,7 +428,7 @@ class ProductMappingServiceTest {
         aggregatedPrice.setAffiliationToken("raw-token");
         aggregatedPrice.setPrice(199.99);
         aggregatedPrice.setCurrency(Currency.EUR);
-        aggregatedPrice.setTimeStamp(123L);
+        aggregatedPrice.setTimeStamp(System.currentTimeMillis());
         aggregatedPrice.setQuantityInStock(8);
         aggregatedPrice.setShippingCost(4.99);
         aggregatedPrice.setShippingTime(3);
@@ -384,7 +443,8 @@ class ProductMappingServiceTest {
         product.setOffersCount(1);
 
         when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
-        when(affiliationService.encryptAffiliationLink("amazon", "https://example.com/product"))
+        // The product GTIN travels in the token so that the click is recorded with its product.
+        when(affiliationService.encryptAffiliationLink("amazon", "https://example.com/product", product.gtin()))
                 .thenReturn("encrypted-token");
 
         ProductDto dto = service.getProduct(gtin, Locale.ENGLISH, Set.of("offers"), DomainLanguage.en);
@@ -397,6 +457,158 @@ class ProductMappingServiceTest {
         assertThat(dto.offers().bestPrice().quantityInStock()).isEqualTo(8);
         assertThat(dto.offers().bestPrice().shippingCost()).isEqualTo(4.99);
         assertThat(dto.offers().bestPrice().shippingTimeDays()).isEqualTo(3);
+    }
+
+    @Test
+    void staleOffersAreNotMappedNorTurnedIntoContribLinks() throws Exception {
+        long gtin = 9782070360024L;
+        long now = System.currentTimeMillis();
+        AggregatedPrice fresh = OfferFreshnessServiceTest.offer("fnac", 12.0, ProductCondition.NEW,
+                now - Duration.ofHours(1).toMillis());
+        AggregatedPrice staleNew = OfferFreshnessServiceTest.offer("rakuten", 7.0, ProductCondition.NEW,
+                now - Duration.ofDays(28).toMillis());
+        AggregatedPrice staleOccasion = OfferFreshnessServiceTest.offer("rakuten", 3.0, ProductCondition.OCCASION,
+                now - Duration.ofDays(28).toMillis());
+        Product product = productWithOffers(gtin, staleOccasion, fresh, staleNew);
+
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
+        when(affiliationService.encryptAffiliationLink("fnac", fresh.getUrl(), product.gtin()))
+                .thenReturn("fresh-token");
+
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("offers"), DomainLanguage.fr);
+
+        assertThat(dto.offers().offersCount()).isEqualTo(1);
+        assertThat(dto.offers().hasOccasions()).isFalse();
+        assertThat(dto.offers().bestPrice().datasourceName()).isEqualTo("fnac");
+        assertThat(dto.offers().bestPrice().url()).isEqualTo("/contrib/fresh-token");
+        assertThat(dto.offers().bestNewOffer().price()).isEqualTo(12.0);
+        assertThat(dto.offers().bestOccasionOffer()).isNull();
+        assertThat(dto.offers().offersByCondition()).containsOnlyKeys(ProductCondition.NEW);
+        assertThat(dto.offers().offersByCondition().get(ProductCondition.NEW))
+                .extracting(offer -> offer.datasourceName())
+                .containsExactly("fnac");
+        // No /contrib/ token is ever generated for a stale offer.
+        verify(affiliationService, never()).encryptAffiliationLink(eq("rakuten"), anyString(), anyString());
+    }
+
+    @Test
+    void productWithOnlyStaleOffersIsMappedAsProductWithoutOffer() throws Exception {
+        long gtin = 9782070360031L;
+        AggregatedPrice stale = OfferFreshnessServiceTest.offer("rakuten", 7.0, ProductCondition.NEW,
+                System.currentTimeMillis() - Duration.ofDays(28).toMillis());
+        Product product = productWithOffers(gtin, stale);
+
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
+
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("offers"), DomainLanguage.fr);
+
+        assertThat(dto.offers().offersCount()).isZero();
+        assertThat(dto.offers().bestPrice()).isNull();
+        assertThat(dto.offers().bestNewOffer()).isNull();
+        assertThat(dto.offers().bestOccasionOffer()).isNull();
+        assertThat(dto.offers().offersByCondition()).isEmpty();
+        verify(affiliationService, never()).encryptAffiliationLink(eq("rakuten"), anyString(), anyString());
+        // The stale offer still dates the last known price (GOU-1699).
+        assertThat(dto.offers().newLastOfferSeen()).isEqualTo(stale.getTimeStamp());
+        assertThat(dto.offers().occasionLastOfferSeen()).isNull();
+    }
+
+    @Test
+    void productWithOnlyStaleOffersGetsTheAmazonSearchLink() throws Exception {
+        long gtin = 9782070360031L;
+        AggregatedPrice stale = OfferFreshnessServiceTest.offer("rakuten", 7.0, ProductCondition.NEW,
+                System.currentTimeMillis() - Duration.ofDays(28).toMillis());
+        Product product = productWithOffers(gtin, stale);
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
+        when(affiliationService.encryptAffiliationLink("amazon.fr",
+                "https://www.amazon.fr/s?k=9782070360031&tag=nudger-21", "9782070360031"))
+                .thenReturn("amazon-token");
+
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("offers"), DomainLanguage.fr);
+
+        // Same condition as the empty price block of the frontend: no fresh offer is mapped.
+        assertThat(dto.offers().offersCount()).isZero();
+        assertThat(dto.offers().bestPrice()).isNull();
+        assertThat(dto.offers().offersByCondition()).isEmpty();
+        assertThat(dto.offers().amazonSearchLink()).isEqualTo("/contrib/amazon-token");
+    }
+
+    private static Product productWithOffers(long gtin, AggregatedPrice... offers) {
+        Product product = new Product(gtin);
+        AggregatedPrices aggregatedPrices = new AggregatedPrices();
+        aggregatedPrices.setOffers(new HashSet<>(List.of(offers)));
+        EnumSet<ProductCondition> conditions = EnumSet.noneOf(ProductCondition.class);
+        AggregatedPrice min = null;
+        for (AggregatedPrice offer : offers) {
+            conditions.add(offer.getProductState());
+            if (min == null || offer.getPrice() < min.getPrice()) {
+                min = offer;
+            }
+        }
+        aggregatedPrices.setConditions(conditions);
+        // Precomputed at aggregation time, possibly from a stale offer.
+        aggregatedPrices.setMinPrice(min);
+        product.setPrice(aggregatedPrices);
+        product.setOffersCount(offers.length);
+        return product;
+    }
+
+    @Test
+    void amazonSearchLinkIsExposedOnlyForAProductWithoutOfferAndAValidGtin() throws Exception {
+        long gtin = 4006381333931L;
+        Product product = new Product(gtin);
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
+        when(affiliationService.encryptAffiliationLink("amazon.fr",
+                "https://www.amazon.fr/s?k=4006381333931&tag=nudger-21", "4006381333931"))
+                .thenReturn("amazon-token");
+
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("offers"), DomainLanguage.fr);
+
+        assertThat(dto.offers().amazonSearchLink()).isEqualTo("/contrib/amazon-token");
+        // The link is not an offer.
+        assertThat(dto.offers().offersCount()).isZero();
+        assertThat(dto.offers().bestPrice()).isNull();
+        assertThat(dto.offers().offersByCondition()).isEmpty();
+    }
+
+    @Test
+    void amazonSearchLinkIsAbsentWhenTheProductHasAnOffer() throws Exception {
+        long gtin = 4006381333931L;
+        Product product = new Product(gtin);
+        AggregatedPrice offer = new AggregatedPrice();
+        offer.setDatasourceName("darty.com");
+        offer.setUrl("https://www.darty.com/p/1");
+        offer.setProductState(ProductCondition.NEW);
+        offer.setPrice(10.0);
+        offer.setCurrency(Currency.EUR);
+        offer.setTimeStamp(System.currentTimeMillis() - Duration.ofHours(1).toMillis());
+        AggregatedPrices prices = new AggregatedPrices();
+        prices.setOffers(Set.of(offer));
+        prices.setMinPrice(offer);
+        prices.setConditions(EnumSet.of(ProductCondition.NEW));
+        product.setPrice(prices);
+        product.setOffersCount(1);
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
+        when(affiliationService.encryptAffiliationLink(eq("darty.com"), any(), any())).thenReturn("darty-token");
+
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("offers"), DomainLanguage.fr);
+
+        assertThat(dto.offers().amazonSearchLink()).isNull();
+        assertThat(dto.offers().offersCount()).isEqualTo(1);
+        verify(affiliationService, never()).encryptAffiliationLink(eq("amazon.fr"), any(), any());
+    }
+
+    @Test
+    void amazonSearchLinkIsAbsentForAnInvalidGtin() throws Exception {
+        // Bad check digit (4006381333931 is the valid one).
+        long gtin = 4006381333932L;
+        Product product = new Product(gtin);
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
+
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("offers"), DomainLanguage.fr);
+
+        assertThat(dto.offers().amazonSearchLink()).isNull();
+        verify(affiliationService, never()).encryptAffiliationLink(eq("amazon.fr"), any(), any());
     }
 
     /**

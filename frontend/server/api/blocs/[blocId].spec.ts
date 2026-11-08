@@ -48,7 +48,6 @@ describe('server/api/blocs/[blocId]', () => {
     expect(response).toEqual({
       blocId: 'pages:team:goulven-furet-title:',
       htmlContent: '<p>CEO / CTO</p>',
-      editLink: null,
     })
   })
 

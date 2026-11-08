@@ -1,6 +1,12 @@
 {
   "properties": [
     {
+      "name": "api.product-index-mapping.retry-delay",
+      "type": "java.time.Duration",
+      "description": "Delay before the second attempt to create the products index or put its mapping at api startup, doubled before the third and last one (ProductIndexMappingRunner).",
+      "defaultValue": "2s"
+    },
+    {
       "name": "api.backup.product-export-page-size",
       "type": "java.lang.Integer",
       "description": "Page size used while streaming products for full backup exports.",
@@ -126,6 +132,42 @@
       "name": "feed.providers.*.default-csv-properties",
       "type": "org.open4goods.commons.config.yml.datasource.CsvDataSourceProperties",
       "description": "Default CSV mapping applied to generated datasource definitions."
+    },
+    {
+      "name": "metriks.affiliation.awin.publisher-id",
+      "type": "java.lang.String",
+      "description": "Awin publisher id (numeric) read by the Metriks affiliation report. Empty: the Awin events are in error (missing credential). Production: METRIKS_AFFILIATION_AWIN_PUBLISHER_ID in /etc/open4goods/api.env.",
+      "defaultValue": ""
+    },
+    {
+      "name": "metriks.affiliation.awin.api-token",
+      "type": "java.lang.String",
+      "description": "Awin Publisher API token (OAuth2 bearer) read by the Metriks affiliation report. Secret. Production: METRIKS_AFFILIATION_AWIN_API_TOKEN in /etc/open4goods/api.env.",
+      "defaultValue": ""
+    },
+    {
+      "name": "metriks.affiliation.effiliation.api-key",
+      "type": "java.lang.String",
+      "description": "Effiliation publisher API key read by the Metriks affiliation report (sent in the query string, never logged). Secret. Production: METRIKS_AFFILIATION_EFFILIATION_API_KEY in /etc/open4goods/api.env.",
+      "defaultValue": ""
+    },
+    {
+      "name": "metriks.affiliation.kwanko.api-token",
+      "type": "java.lang.String",
+      "description": "Kwanko Publisher API token (bearer) read by the Metriks affiliation report. Secret. Defaults to affiliation-config.kwanko-token (API_KWANKO_TOKEN, the Kwanko feed token).",
+      "defaultValue": "${affiliation-config.kwanko-token:}"
+    },
+    {
+      "name": "metriks.affiliation.tradetracker.customer-id",
+      "type": "java.lang.String",
+      "description": "TradeTracker customer ID used by the Metriks affiliation report (SOAP authenticate). Defaults to affiliation-config.tradetracker-customer-id (the TradeTracker feed).",
+      "defaultValue": "${affiliation-config.tradetracker-customer-id:}"
+    },
+    {
+      "name": "metriks.affiliation.tradetracker.passphrase",
+      "type": "java.lang.String",
+      "description": "TradeTracker passphrase used by the Metriks affiliation report (SOAP authenticate). Secret. Defaults to affiliation-config.tradetracker-api-key (API_TRADETRACKER_API_KEY, the TradeTracker feed secret).",
+      "defaultValue": "${affiliation-config.tradetracker-api-key:}"
     }
   ]
 }

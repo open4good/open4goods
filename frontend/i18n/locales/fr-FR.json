@@ -44,11 +44,10 @@
   "blog": {
     "article": {
       "back": "Retour",
-      "edit": "Modifier cet article",
       "empty": "Le contenu de cet article sera disponible bientôt.",
       "featuredImageAlt": "Image mise en avant pour {title}",
       "readingTime": "Env. {minutes} min de lecture",
-      "updated": "Mis à jour {date}"
+      "updated": "Mis à jour le {date}"
     },
     "breadcrumbs": {
       "blog": "Blog",
@@ -79,11 +78,26 @@
       "pageTitle": "{title} - Page {page}",
       "tagDescription": "Parcourez les articles {tag} du blog Nudger.",
       "tagTitle": "Articles {tag} - Blog Nudger"
+    },
+    "offerBlocks": {
+      "tv": {
+        "small": "Nos téléviseurs 43 à 50 pouces les mieux notés",
+        "medium": "Nos téléviseurs 55 pouces les mieux notés",
+        "large": "Nos téléviseurs 65 pouces et plus les mieux notés"
+      },
+      "oven": {
+        "compact": "Nos fours compacts (moins de 60 L) les mieux notés",
+        "standard": "Nos fours de 60 à 72 L les mieux notés",
+        "large": "Nos grands fours (plus de 72 L) les mieux notés",
+        "pyrolysis": "Nos fours pyrolyse les mieux notés",
+        "catalysis": "Nos fours catalyse les mieux notés"
+      },
+      "seeAll": "Voir tous les produits"
     }
   },
   "home": {
     "seo": {
-      "title": "Nudger | Comparateur écologique",
+      "title": "Nudger {'|'} Comparateur écologique",
       "description": "Comparez l'impact environnemental et les prix de plus de {count} millions de produits grâce à Nudger. Faites des choix responsables pour votre budget et la planète.",
       "imageAlt": "Illustration du tableau de bord Nudger présentant des scores d'impact et des prix."
     },
@@ -91,9 +105,7 @@
       "eyebrow": "Comparateur responsable",
       "title": "Acheter mieux. Sans dépenser plus.",
       "animatedSubtitle": "",
-      "titleSubtitle": [
-        "Nudger : le comparateur écologique tech & électro"
-      ],
+      "titleSubtitle": ["Nudger : le comparateur écologique tech & électro"],
       "subtitles": [
         "Gagnez du temps. Choisissez librement.",
         "Consommez mieux sans payer plus. Nudger équilibre planète et budget.",
@@ -310,24 +322,7 @@
       "cta": "Voir tous les articles",
       "readMore": "Lire l'article",
       "emptyState": "Les nouveaux articles seront affichés ici très bientôt.",
-      "carouselAriaLabel": "Carrousel des articles du blog",
-      "items": {
-        "first": {
-          "title": "Comment nous gardons une IA frugale",
-          "date": "15 janv. 2025",
-          "excerpt": "Nos choix techniques pour limiter l'empreinte carbone des calculs Nudger."
-        },
-        "second": {
-          "title": "Prioriser durabilité et réparabilité",
-          "date": "8 janv. 2025",
-          "excerpt": "Pourquoi les critères de réparabilité ont plus de poids dans l'Impact Score."
-        },
-        "third": {
-          "title": "Comparer prix et impact, mode d'emploi",
-          "date": "20 déc. 2024",
-          "excerpt": "La méthode Nudger pour confronter écologie et budget sans compromis."
-        }
-      }
+      "carouselAriaLabel": "Carrousel des articles du blog"
     },
     "objections": {
       "title": "On va nous dire...",
@@ -727,10 +722,6 @@
         "medium": "Moyenne",
         "high": "Élevée"
       },
-      "searchMode": {
-        "semantic": "Recherche sémantique",
-        "text": "Recherche textuelle"
-      },
       "showMoreImpact": "Plus de filtres",
       "showMoreTechnical": "Plus de filtres",
       "technicalTitle": "La technique",
@@ -895,7 +886,6 @@
   },
   "cms": {
     "page": {
-      "edit": "Modifier cette page",
       "error": "Nous n'avons pas pu charger cette page. Merci de réessayer plus tard.",
       "loading": "Chargement de la page..."
     }
@@ -1031,7 +1021,7 @@
     "seo": {
       "description": "Prendre contact avec l'équipe Nudger pour un partenariat, une question produit ou un échange sur l'impact.",
       "imageAlt": "Logotype Nudger utilisé pour l'aperçu de la page contact",
-      "title": "Nous contacter | Nudger"
+      "title": "Nous contacter {'|'} Nudger"
     },
     "prefill": {
       "title": {
@@ -1215,8 +1205,8 @@
       "description": "Découvrez comment l'Impact Score évalue l'impact environnemental d'un produit grâce à méthode transparente et ouverte."
     },
     "methodologyExplanation": {
-      "title": "Sigma, percentile... c'est quoi ?",
-      "content": "Pour garantir un score équitable entre tous les produits, nous utilisons une approche statistique appelée **Sigma Scoring**.<br><br>Contrairement à une simple moyenne, cette méthode prend en compte la **dispersion** des données (écart-type).<br><ul><li><strong>Sigma Scoring :</strong> La plupart des produits se situent dans la moyenne. Les produits exceptionnels (en bien ou en mal) n'écrasent pas le score des autres.</li><li><strong>Percentile (Secours) :</strong> Si trop peu de valeurs différentes existent (ex: seulement 3 options de garantie possibles), le Sigma Scoring ne fonctionne plus bien. Nous passons alors en mode **Percentile** pour classer les produits du meilleur au moins bon, tout en gardant une note sur 5.</li></ul><br>C'est ce qui nous permet de vous donner une note vraiment utile, quelle que soit la catégorie de produit !"
+      "title": "Comment chaque critère est noté",
+      "content": "Chaque critère est d'abord ramené sur une même échelle, de 0 (le moins bon) à 20 (le meilleur), avec l'une de ces trois méthodes :<ul><li><strong>Barème fixe :</strong> la classe énergie suit son échelle officielle (A = 20, G = 0).</li><li><strong>Valeurs observées :</strong> pour la plupart des critères, le produit le moins performant de la catégorie obtient 0 et le meilleur 20. Quand une valeur basse est meilleure (consommation, bruit, poids), l'échelle est inversée.</li><li><strong>Écart à la moyenne (sigma) :</strong> pour la garantie et les consommations d'eau ou d'énergie par cycle, la note dépend de l'écart à la moyenne de la catégorie, pour que quelques valeurs extrêmes n'écrasent pas les autres. Un produit dans la moyenne obtient 10.</li></ul>Ces notes par critère sont ensuite pondérées et additionnées pour former l'Impact Score."
     },
     "docs": {
       "title": "Documentation Impact Score",
@@ -1230,7 +1220,7 @@
         "title": "Une définition claire et accessible",
         "description": "L'Impact Score traduit des données techniques en indicateurs compréhensibles et comparables, sans jargon.",
         "items": {
-          "scale": "Note de 0 à 20 : 20 ne signifie pas une absence d'impact ou un produit bon pour la planète, mais que ce produit est le mieux classé par rapport à tous les autres",
+          "scale": "Note de 0 à 20, somme pondérée des notes par critère. Elle compare les produits d'une même catégorie : 20 ne signifie pas une absence d'impact, et le meilleur produit d'une catégorie reste en général loin de 20.",
           "data": "Appuyé sur des données vérifiées (fiches techniques, éco-organismes, référentiels publiques)",
           "update": "Mis à jour dès que de nouvelles informations sont publiées"
         }
@@ -1243,9 +1233,9 @@
       "cards": {
         "weighting": {
           "title": "Une pondération de plusieurs critères",
-          "description": "Notre éco-score est une note de 0 à 20. Elle résulte de la somme des scores par critère, adaptés à chaque typologie de produit. Chaque critère a une pondération dans la note globale.",
+          "description": "L'Impact Score est une note de 0 à 20. C'est la somme pondérée des notes par critère, et chaque catégorie de produits a ses propres critères et pondérations.",
           "bullets": {
-            "scale": "0 = très mauvais, 20 = le moins pire",
+            "scale": "0 = le moins bon sur tous les critères, 20 = le meilleur sur tous les critères",
             "sum": "La note globale additionne les scores de chaque critère",
             "weights": "Les pondérations (0 à 1) sont définies par un système d'IA, dont les prompts et les réponses sont transparentes."
           }
@@ -1261,14 +1251,14 @@
         },
         "relativisation": {
           "title": "Principe de relativisation",
-          "description": "Un indice de réparabilité à 7,7 n'est lisible que quand on connait la meilleure et la pire note. Nous attribuons sur chaque critère 0 au produit le moins performant et 20 au meilleur pour faciliter la comparaison. Par choix, l'Impact Score final, lui, n'est pas relativisé : il est une somme de scores pondérés, ne laissant ainsi pas groupe avec des produits ayant 20/20 qu'ils sont sans impact sur la planète !",
+          "description": "Un indice de réparabilité de 7,7 n'est lisible que si l'on connaît la meilleure et la moins bonne valeur. Sur chaque critère, nous donnons donc 0 au produit le moins performant de la catégorie et 20 au meilleur (la classe énergie suit son barème officiel). L'Impact Score final, lui, n'est pas relativisé : c'est une somme pondérée. Un produit n'obtient 20/20 que s'il est le meilleur sur tous les critères, et même dans ce cas, cela ne veut pas dire qu'il est sans impact sur la planète.",
           "bullets": {
             "ranking": "Un classement clair pour situer chaque produit dans sa catégorie"
           }
         },
         "dataQuality": {
           "title": "La qualité de la donnée, enjeu majeur",
-          "description": "Quand une information manque, nous appliquons une valeur moyenne de la catégorie afin de ne ni pénaliser ni avantager un produit. Cette moindre disponibilité des données est pénalisée au travers de l'application d'un malus sur le score de qualité de la donnée.",
+          "description": "Quand une information manque, nous appliquons la valeur moyenne de la catégorie, afin de ne ni pénaliser ni avantager le produit. Ces valeurs sont signalées comme virtuelles dans le détail des critères. Un produit moins documenté obtient aussi une note plus basse sur le critère qualité de la donnée, qui compte dans l'Impact Score.",
           "bullets": {
             "average": "Score virtuel basé sur la moyenne de la catégorie",
             "malus": "Un malus reflète le manque d'information produit"
@@ -1457,7 +1447,7 @@
       "methodology": {
         "empty": "Les catégories seront bientôt disponibles.",
         "eyebrow": "Méthodologie",
-        "intro": "Les règles de calcul de l'ecoscore sont détaillées sur chaque produit (section 'bilan écologique'). Chaque catégorie de produit possède ses propres critères et pondérations. Voici les catégories couvertes :",
+        "intro": "Les règles de calcul sont détaillées sur chaque fiche produit, dans la section Impact Score. Chaque catégorie de produits a ses propres critères et pondérations. Voici les catégories couvertes :",
         "title": "Comment est calculé l'Impact Score ?",
         "verticalCarouselAria": "Parcourir le carrousel des catégories ecoscore",
         "verticalCardAria": "Accéder à la catégorie {vertical}",
@@ -1546,7 +1536,9 @@
         "summary": {
           "records": "Nombre total d'enregistrements",
           "size": "Taille compressée",
-          "updated": "Dernière mise à jour"
+          "updated": "Dernière mise à jour",
+          "format": "Format",
+          "formatValue": "CSV compressé (ZIP)"
         }
       },
       "creator": {
@@ -1872,6 +1864,45 @@
         "description": "On est pas des petits joueurs.",
         "label": "Taille cumulée des fichiers"
       }
+    },
+    "explore": {
+      "title": "Explorer les produits",
+      "subtitle": "Parcourez les catégories de Nudger et ouvrez des fiches produits identifiées par leur GTIN.",
+      "categoryAriaLabel": "Voir la catégorie {category}",
+      "gtinLabel": "GTIN",
+      "categories": {
+        "tv": "Téléviseurs",
+        "washing-machine": "Lave-linges",
+        "dishwasher": "Lave-vaisselles",
+        "oven": "Fours",
+        "air-conditioner": "Climatiseurs"
+      }
+    },
+    "mirrors": {
+      "title": "Aussi disponible sur",
+      "referenceLicense": "La version de référence, sur nudger.fr, est sous ODbL. Les miroirs ci-dessous indiquent leur propre licence.",
+      "linkAriaLabel": "Ouvrir le jeu de données sur {name} (nouvel onglet)",
+      "items": {
+        "datagouv": {
+          "name": "data.gouv.fr",
+          "license": "Licence : ODbL"
+        },
+        "zenodo": {
+          "name": "Zenodo",
+          "license": "Licence : CC BY 4.0"
+        },
+        "kaggle": {
+          "name": "Kaggle",
+          "license": "Licence : CC BY 4.0"
+        },
+        "figshare": {
+          "name": "Figshare",
+          "license": "Licence : CC BY 4.0"
+        }
+      }
+    },
+    "summary": {
+      "title": "Les jeux de données en bref"
     }
   },
   "opensource": {
@@ -2017,6 +2048,7 @@
   },
   "partners": {
     "affiliation": {
+      "amazonDisclosure": "En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.",
       "carouselAriaLabel": "Carrousel des partenaires affiliés",
       "empty": "Aucun partenaire ne correspond à votre recherche.",
       "linkLabel": "Visiter ce partenaire",
@@ -2142,10 +2174,6 @@
       "title": "Recherche de produits",
       "description": "Recherchez dans le catalogue de consommation responsable de Nudger pour découvrir produits, marques et verticales.",
       "imageAlt": "Illustration de l'expérience de recherche Nudger"
-    },
-    "modes": {
-      "exact_vertical": "Exact (catégories)",
-      "semantic": "Sémantique"
     }
   },
   "compare": {
@@ -2336,6 +2364,10 @@
     },
     "start_impact_text": "Envie de soutenir un projet à impact ?",
     "start_impact_subtext": "Faites vos achats via Nudger ! Ça marche aussi en allant directement chez",
+    "amazonSearch": {
+      "disclosure": "En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.",
+      "label": "Rechercher sur Amazon"
+    },
     "partners_link": "nos partenaires",
     "attributes": {
       "title": "Caractéristiques techniques",
@@ -2873,6 +2905,7 @@
         "new": "Pas d'offres neuves actuellement",
         "occasion": "Pas d'offres d'occasion actuellement"
       },
+      "lastKnownPrice": "Dernier prix relevé : {price} le {date}",
       "headers": {
         "condition": "État",
         "offer": "Offre",
@@ -2919,9 +2952,9 @@
       "serp": {
         "title": {
           "withImpact": {
-            "full": "{productName} : meilleur prix, caractéristiques et avis | ImpactScore {score}/20",
-            "fullVertical": "{verticalTitle} {productName} : meilleur prix | ImpactScore {score}/20",
-            "compact": "{productName} : meilleur prix | ImpactScore {score}/20",
+            "full": "{productName} : meilleur prix, caractéristiques et avis {'|'} ImpactScore {score}/20",
+            "fullVertical": "{verticalTitle} {productName} : meilleur prix {'|'} ImpactScore {score}/20",
+            "compact": "{productName} : meilleur prix {'|'} ImpactScore {score}/20",
             "minimal": "{productName} : ImpactScore {score}/20"
           },
           "withoutImpact": {
@@ -3667,7 +3700,7 @@
   "dataviz": {
     "page": {
       "title": "Statistiques {category}",
-      "metaTitle": "Statistiques et données - {category} | {siteName}",
+      "metaTitle": "Statistiques et données - {category} {'|'} {siteName}",
       "metaDescription": "Explorez les statistiques détaillées pour {category} : prix, marques, scores et plus encore.",
       "breadcrumbLeaf": "Statistiques",
       "heroTitle": "Tableau de bord - {category}",
@@ -3695,7 +3728,7 @@
     "pageSubtitle": "Suivi des indicateurs clés collectés automatiquement depuis différentes sources.",
     "period": "Période : {from} → {to}",
     "seo": {
-      "title": "Metriks - Tableau de bord | Nudger",
+      "title": "Metriks - Tableau de bord {'|'} Nudger",
       "description": "Visualisez les indicateurs de performance collectés automatiquement : analytics, produits, infrastructure."
     },
     "accessDenied": "Accès refusé",
@@ -3743,6 +3776,22 @@
       },
       "providers": "Sources",
       "drilldown": "Voir le détail"
+    },
+    "previousWindow": "28 j précédents : {value}",
+    "error": {
+      "label": "Erreur",
+      "unknown": "Mesure indisponible (erreur sans message)"
+    },
+    "top": {
+      "rank": "#",
+      "query": "Requête",
+      "page": "Page",
+      "clicks": "Clics",
+      "impressions": "Impressions",
+      "ctr": "CTR",
+      "position": "Position",
+      "evolution": "Clics vs fenêtre précédente",
+      "new": "nouveau"
     }
   }
 }

@@ -3,12 +3,17 @@ package org.open4goods.api.services.aggregation.services.realtime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.open4goods.model.eprel.EprelProduct;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductTexts;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -43,7 +48,7 @@ class TaxonomyRealTimeAggregationServiceTest {
 	void assignsVerticalAndTaxonomyFromCategories() throws Exception {
 		final Product p = new Product();
 		p.getCategoriesByDatasources().put("fnac.com", "TV & Home cinema");
-		when(verticalService.getVerticalForCategories(anyMap())).thenReturn(vertical("tv", 404));
+		when(verticalService.getVerticalForCategories(anyMap(), any())).thenReturn(vertical("tv", 404));
 
 		service.onProduct(p, mock(VerticalConfig.class));
 
@@ -59,7 +64,7 @@ class TaxonomyRealTimeAggregationServiceTest {
 		p.setVertical("tv");
 		p.getOfferNames().add("Samsung QE55 neo qled");
 		p.getCategoriesByDatasources().put("fnac.com", "TV & Home cinema");
-		when(verticalService.getVerticalForCategories(anyMap())).thenReturn(vertical("tv", 404));
+		when(verticalService.getVerticalForCategories(anyMap(), any())).thenReturn(vertical("tv", 404));
 
 		service.onProduct(p, mock(VerticalConfig.class));
 
@@ -73,7 +78,7 @@ class TaxonomyRealTimeAggregationServiceTest {
 		p.setGoogleTaxonomyId(404);
 		final ProductTexts names = new ProductTexts();
 		p.setNames(names);
-		when(verticalService.getVerticalForCategories(anyMap())).thenReturn(null);
+		when(verticalService.getVerticalForCategories(anyMap(), any())).thenReturn(null);
 
 		service.onProduct(p, mock(VerticalConfig.class));
 
@@ -90,10 +95,65 @@ class TaxonomyRealTimeAggregationServiceTest {
 		p.setVertical("washing-machine");
 		p.getOfferNames().add("some product");
 		p.getCategoriesByDatasources().put("fnac.com", "TV & Home cinema");
-		when(verticalService.getVerticalForCategories(anyMap())).thenReturn(vertical("tv", 404));
+		when(verticalService.getVerticalForCategories(anyMap(), any())).thenReturn(vertical("tv", 404));
 
 		service.onProduct(p, mock(VerticalConfig.class));
 
 		assertEquals("tv", p.getVertical());
+	}
+	private static EprelProduct eprel(final String productGroup) {
+		final EprelProduct eprel = new EprelProduct();
+		eprel.setProductGroup(productGroup);
+		return eprel;
+	}
+
+	@Test
+	void keepsEprelConfirmedVerticalWhenNoCategoryMatchesAnyMore() throws Exception {
+		// GOU-1700, Leisure PR90F560K (8690842382758): EPREL "ovens", categories that
+		// no longer resolve to a vertical; the product fell back to a root URL.
+		final VerticalConfig oven = vertical("oven", 683);
+		oven.setEprelGroupNames(List.of("ovens"));
+		final Product p = new Product();
+		p.setVertical("oven");
+		p.setGoogleTaxonomyId(683);
+		p.setEprelDatas(eprel("ovens"));
+		p.getCategoriesByDatasources().put("cdiscount.com", "ELECTROMENAGER | CUISINIERE");
+		when(verticalService.getVerticalForCategories(anyMap(), any())).thenReturn(null);
+		when(verticalService.getConfigById("oven")).thenReturn(oven);
+		when(verticalService.isConfirmedByEprel(any(), any())).thenCallRealMethod();
+
+		service.onProduct(p, mock(VerticalConfig.class));
+
+		assertEquals("oven", p.getVertical());
+		assertEquals(Integer.valueOf(683), p.getGoogleTaxonomyId());
+	}
+
+	@Test
+	void clearsVerticalWhenEprelGroupBelongsToAnotherVertical() throws Exception {
+		final VerticalConfig oven = vertical("oven", 683);
+		oven.setEprelGroupNames(List.of("ovens"));
+		final Product p = new Product();
+		p.setVertical("oven");
+		p.setEprelDatas(eprel("washingmachines2019"));
+		when(verticalService.getVerticalForCategories(anyMap(), any())).thenReturn(null);
+		when(verticalService.getConfigById("oven")).thenReturn(oven);
+		when(verticalService.isConfirmedByEprel(any(), any())).thenCallRealMethod();
+
+		service.onProduct(p, mock(VerticalConfig.class));
+
+		assertNull(p.getVertical());
+	}
+
+	@Test
+	void passesEprelGroupToCategoryResolution() throws Exception {
+		final Product p = new Product();
+		p.setEprelDatas(eprel("washingmachines2019"));
+		p.getCategoriesByDatasources().put("darty.com", "GROS ELECTROMENAGER | LAVE-LINGE");
+		when(verticalService.getVerticalForCategories(anyMap(), any())).thenReturn(vertical("washing-machine", 2549));
+
+		service.onProduct(p, mock(VerticalConfig.class));
+
+		verify(verticalService).getVerticalForCategories(p.getCategoriesByDatasources(), "washingmachines2019");
+		assertEquals("washing-machine", p.getVertical());
 	}
 }

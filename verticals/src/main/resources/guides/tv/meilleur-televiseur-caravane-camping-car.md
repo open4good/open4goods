@@ -193,4 +193,4 @@ Un tuner DVB-S2 intégré simplifie l'installation et économise de la place. Un
 - [Fiche Antarion TV LED 22" Android + DVD - Satenco](https://www.satenco.com/fr/television-22-pouces/176248-antarion-tv-led-22-dvd-50cm-smart-connect-android-90-12v220v-3665476967706.html) - EAN 3665476967706, 20 W réels, score réparabilité 6/10
 
 **Méthodologie du score d'impact nudger :**
-Le score d'impact nudger agrège la classe énergétique officielle, l'indice de réparabilité (déclaré par le fabricant selon le décret français), la disponibilité des pièces détachées et les données environnementales produit. Il est mis à jour en temps réel depuis les sources fabricants et l'index Elasticsearch nudger. Détail complet : `/docs/fr/impact-score/methodology`.
+Le score d'impact nudger agrège la classe énergétique officielle, l'indice de réparabilité (déclaré par le fabricant selon le décret français), la disponibilité des pièces détachées et les données environnementales produit. Il est recalculé chaque jour à partir des données fabricants, notamment la base européenne EPREL. Détail complet : `/docs/fr/impact-score/methodology`.

@@ -88,7 +88,6 @@
                 :impact-score-max="impactScoreMax"
                 :popular-attributes="heroPopularAttributes"
                 :has-category="!!categoryDetail"
-                :vertical-title="verticalTitle"
                 :hide-pricing-panel="hideHeroPricingPanel"
               />
             </div>
@@ -130,6 +129,7 @@
               :product="product"
               :commercial-events="commercialEvents"
               :title-params="priceTitleParams"
+              :show-amazon-search-link="hideHeroPricingPanel"
             />
           </section>
 
@@ -251,6 +251,7 @@ import type {
 } from '~~/shared/api-client'
 import { AggTypeEnum } from '~~/shared/api-client/models/Agg'
 import { normalizeTimestamp } from '~/utils/date-parsing'
+import { isDataQualityBelowCategoryAverage } from '~/utils/_product-verdict'
 import type { ProductRouteMatch } from '~~/shared/utils/_product-route'
 import { isBackendNotFoundError } from '~~/shared/utils/_product-route'
 import { buildProductHreflangLinks } from '~~/shared/utils/domain-language'
@@ -302,6 +303,8 @@ const ProductVigilanceSection = defineAsyncComponent(
 
 const route = useRoute()
 const requestURL = useRequestURL()
+const requestFetch = useRequestFetch()
+const domainHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 const runtimeConfig = useRuntimeConfig()
 const { $fetch: csrfFetch } = useNuxtApp()
 const { t, locale } = useI18n()
@@ -375,9 +378,9 @@ const {
   async () => {
     productLoadError.value = null
     try {
-      const baseUrl = import.meta.server ? requestURL.origin : ''
-      return await $fetch<ProductDto>(`${baseUrl}/api/products/${gtin}`, {
+      return await requestFetch<ProductDto>(`/api/products/${gtin}`, {
         query: { include: PRODUCT_COMPONENTS },
+        headers: domainHeaders,
       })
     } catch (fetchError) {
       if (isBackendNotFoundError(fetchError)) {
@@ -407,6 +410,17 @@ const {
   },
   { server: true, immediate: true }
 )
+
+// useAsyncData only stores the handler's error in `error.value`; it does not
+// propagate it to the SSR response. An unknown GTIN must bubble up as a real
+// 404 (not a 200 "soft 404" with a fallback title), so rethrow it here.
+if (error.value?.statusCode === 404) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Product not found',
+    fatal: true,
+  })
+}
 
 const product = computed(() => productData.value)
 
@@ -1681,12 +1695,7 @@ const showVigilanceSection = computed(() => {
   if (hasConflicts) return true
 
   // Check Data Quality
-  const dqScore = product.value.scores?.scores?.['DATA_QUALITY']
-  if (dqScore) {
-    const val = dqScore.value ?? 0
-    const avg = dqScore.relativ?.avg ?? dqScore.absolute?.avg ?? 0
-    if (val < avg) return true
-  }
+  if (isDataQualityBelowCategoryAverage(product.value)) return true
 
   return false
 })

@@ -67,6 +67,22 @@ Rate limiting is configured via `front.rate-limit.*` mapped by
 - `front.rate-limit.anonymous` - requests per minute for unauthenticated users.
 - `front.rate-limit.authenticated` - requests per minute for authenticated users.
 
+Offer freshness is configured via `front.offers.max-age` mapped by
+`OfferFreshnessProperties` (default: the api rule `ProductRepository.VALID_UNTIL_DURATION`).
+Any code exposing offers, prices or `/contrib/` links must read them through
+`OfferFreshnessService`, never `Product.bestPrice()`, `getOffersCount()` or
+`getPrice().getOffers()` directly (see README "Offer freshness").
+
+### Local profile (offline startup)
+
+`application-local.yml` holds the offline defaults for the `local` profile (the module's
+default profile, see root `README.md`, "Running Locally (Offline Mode)"). It must start with no
+network, no token and no pre-existing cache file; `LocalProfileOfflineStartupTest` enforces
+this. When adding an integration with an external system, give it a `*.enabled` flag defaulting
+to `true` (so `default`/`devsec` are unaffected) and set it to `false` here, or make its startup
+fail-soft (log + degraded health, see `GeoNamesIndexService`/`MaxMindIpGeolocationService`) -
+never require a network call or a token to reach `Started NudgerFrontApiApplication`.
+
 ---
 
 ## 6. SpringDoc Rules

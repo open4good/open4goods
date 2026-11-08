@@ -1,30 +1,20 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
-import org.open4goods.embedding.config.DjlEmbeddingProperties;
-import org.open4goods.embedding.service.TextEmbeddingService;
-import org.open4goods.embedding.util.EmbeddingVectorUtils;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.services.textgen.BlablaService;
 import org.open4goods.model.Localisable;
-import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductNameResolver;
+import org.open4goods.model.product.ProductTexts;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.PrefixedAttrText;
 import org.open4goods.model.vertical.ProductI18nElements;
@@ -38,8 +28,11 @@ import org.slf4j.LoggerFactory;
  * <ul>
  *   <li>Collecting and normalizing raw offer names from {@link DataFragment}s</li>
  *   <li>Generating localized product naming elements (URL, H1, etc.) from templates/config</li>
- *   <li>Computing an embedding vector used for downstream similarity/search (DistilCamemBERT)</li>
  * </ul>
+ *
+ * <p>The URL slug is frozen once generated: it is only regenerated when missing or when the product
+ * vertical differs from {@link ProductTexts#getUrlVertical()}. {@code forceNameGeneration} regenerates
+ * titles only (GOU-1708).</p>
  *
  * <p>External contract preserved: same class name, same method signatures, same return types.</p>
  */
@@ -50,30 +43,15 @@ public class NamesAggregationService extends AbstractAggregationService {
 	/** Pattern for template placeholders like {@code {BRAND}}, {@code {DIAGONALE_POUCES}}. */
 	private static final Pattern TEMPLATE_PLACEHOLDER = Pattern.compile("\\{([A-Z0-9_]+)\\}");
 
-	/** Thread-local SHA-256 digest to avoid per-call allocation in embedding cache-key computation. */
-	private static final ThreadLocal<MessageDigest> SHA256 = ThreadLocal.withInitial(() -> {
-		try {
-			return MessageDigest.getInstance("SHA-256");
-		} catch (NoSuchAlgorithmException e) {
-			throw new IllegalStateException("SHA-256 not available", e);
-		}
-	});
-
 	private final VerticalsConfigService verticalService;
 	private final BlablaService blablaService;
-	private final TextEmbeddingService embeddingService;
-	private final DjlEmbeddingProperties embeddingProperties;
 
 	public NamesAggregationService(final Logger logger,
 			final VerticalsConfigService verticalService,
-			final BlablaService blablaService,
-			final TextEmbeddingService embeddingService,
-			final DjlEmbeddingProperties embeddingProperties) {
+			final BlablaService blablaService) {
 		super(logger);
 		this.verticalService = verticalService;
 		this.blablaService = blablaService;
-		this.embeddingService = embeddingService;
-		this.embeddingProperties = embeddingProperties;
 	}
 
 	/**
@@ -102,7 +80,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 	}
 
 	/**
-	 * Generates localized naming fields (URL, H1, etc.) and computes embeddings.
+	 * Generates localized naming fields (URL, H1, etc.).
 	 *
 	 * @param data product to enrich
 	 * @param vConf vertical configuration for this run
@@ -132,8 +110,15 @@ public class NamesAggregationService extends AbstractAggregationService {
 		final Map<String, ProductI18nElements> i18nConfs =
 				(resolvedVertical != null) ? resolvedVertical.getI18n() : null;
 
-		// If no i18n config exists, we can still compute embedding later; skip name generation safely.
+		// If no i18n config exists, skip name generation safely.
 		if (i18nConfs != null && !i18nConfs.isEmpty()) {
+
+			// A published slug is frozen: it is only regenerated when the vertical changed since its
+			// generation, never because the name, the attributes or forceNameGeneration changed (GOU-1708).
+			final boolean regenerateUrls = urlVerticalChanged(data);
+			boolean urlsUpToDate = true;
+			boolean urlGenerated = false;
+			boolean urlKept = false;
 
 			for (Map.Entry<String, ProductI18nElements> entry : i18nConfs.entrySet()) {
 				final String lang = entry.getKey();
@@ -144,11 +129,7 @@ public class NamesAggregationService extends AbstractAggregationService {
 
 				try {
 
-
-
-
 					// ---- URL ----
-					// High cognitive load note:
 					// data.getNames().getUrl() is assumed existing by domain model, but we still guard nulls
 					// to avoid unexpected NPEs if upstream product object is partially initialized.
 					final boolean urlMissing =
@@ -156,17 +137,25 @@ public class NamesAggregationService extends AbstractAggregationService {
 							|| data.getNames().getUrl() == null
 							|| data.getNames().getUrl().get(lang) == null;
 
-					if (urlMissing || (vConf != null && vConf.isForceNameGeneration())) {
+					if (urlMissing || regenerateUrls) {
 						logger.debug("Generating product url for productId={} lang={}", data.getId(), lang);
 
 						final PrefixedAttrText urlPrefix = tConf.getUrl();
-						final String url = generateUrl(data, urlPrefix, vConf);
+						final String url;
+						try {
+							url = generateUrl(data, urlPrefix, vConf);
+						} catch (InvalidParameterException | RuntimeException ex) {
+							urlsUpToDate = false;
+							throw ex;
+						}
 
 						if (data.getNames() != null && data.getNames().getUrl() != null) {
 							data.getNames().getUrl().put(lang, url);
+							urlGenerated = true;
 						}
 					} else {
-						logger.debug("Skipping URL generation for productId={} lang={}", data.getId(), lang);
+						urlKept = true;
+						logger.debug("Keeping frozen URL for productId={} lang={}", data.getId(), lang);
 					}
 
 
@@ -192,39 +181,55 @@ public class NamesAggregationService extends AbstractAggregationService {
 					logger.error("Unexpected error while computing names for product {}", data.getId(), ex);
 				}
 			}
+
+			if (urlsUpToDate) {
+				recordUrlVertical(data, urlGenerated, urlKept);
+			}
 		}
 
-		// ---- Embedding computation  ----
-		// Compute embeddings whenever enough descriptive text is available.
-		// Uses a structured matrix-based cache key to skip redundant computations.
-		try {
+	}
 
-			if (null != vConf && vConf.isComputeTextEmbeddings()) {
+	/**
+	 * Tells whether the product slugs must be regenerated because the product vertical changed since
+	 * they were generated.
+	 *
+	 * <p>Slugs are kept when the generation vertical is unknown (slug generated before GOU-1708) and
+	 * when the product has lost its vertical: a vertical removed by mistake then restored gives back
+	 * the same public URL.</p>
+	 *
+	 * @param data product being aggregated
+	 * @return {@code true} when the slugs must be regenerated
+	 */
+	private boolean urlVerticalChanged(final Product data) {
+		if (data.getNames() == null || StringUtils.isBlank(data.getVertical())) {
+			return false;
+		}
+		final String generationVertical = data.getNames().getUrlVertical();
+		return generationVertical != null && !generationVertical.equals(data.getVertical());
+	}
 
-				String textToEmbed = buildEmbeddingText(data, resolvedVertical);
-				String prefixedText = applyEmbeddingPrefix(textToEmbed);
-
-				if (StringUtils.isNotBlank(prefixedText)) {
-
-					long cacheKey = computeEmbeddingCacheKey(prefixedText);
-					boolean forceRecomputing = resolvedVertical != null && resolvedVertical.isForceEmbeddingRecomputing();
-					boolean hasEmbedding = data.getEmbedding() != null && data.getEmbedding().length > 0;
-
-					if (!forceRecomputing && hasEmbedding && cacheKey == data.getEmbeddingTextHash()) {
-						logger.debug("Embedding cache key unchanged for product {}, skipping", data.getId());
-					} else if (embeddingService != null) {
-						final float[] embedding = embeddingService.embed(prefixedText);
-						if (embedding != null) {
-							// Forcing to a 512 dims vector
-							float[] padded = IdHelper.to512(embedding);
-							data.setEmbedding(EmbeddingVectorUtils.normalizeL2(padded));
-							data.setEmbeddingTextHash(cacheKey);
-						}
-					}
-				}
+	/**
+	 * Records the vertical the slugs now correspond to.
+	 *
+	 * <p>With a vertical, it is recorded when a slug was generated in this pass or when the generation
+	 * vertical was unknown. Without a vertical, {@link ProductTexts#URL_WITHOUT_VERTICAL} is recorded
+	 * only when every slug was generated in this pass: a slug kept while the vertical is missing keeps
+	 * its recorded (or unknown) vertical, so that restoring the vertical does not change the public URL.</p>
+	 *
+	 * @param data product being aggregated
+	 * @param generated whether at least one slug was generated in this pass
+	 * @param kept whether at least one existing slug was kept in this pass
+	 */
+	private void recordUrlVertical(final Product data, final boolean generated, final boolean kept) {
+		if (data.getNames() == null) {
+			return;
+		}
+		if (StringUtils.isNotBlank(data.getVertical())) {
+			if (generated || data.getNames().getUrlVertical() == null) {
+				data.getNames().setUrlVertical(data.getVertical());
 			}
-		} catch (Exception ex) {
-			logger.error("Error computing embedding for product {}", data.getId(), ex);
+		} else if (generated && !kept) {
+			data.getNames().setUrlVertical(ProductTexts.URL_WITHOUT_VERTICAL);
 		}
 	}
 
@@ -375,147 +380,6 @@ public class NamesAggregationService extends AbstractAggregationService {
 		}
 		final String trimmed = name.trim();
 		return trimmed.isEmpty() ? null : trimmed;
-	}
-
-	/**
-	 * Prefixes the provided text with the configured passage prefix.
-	 *
-	 * @param textToEmbed text describing the product
-	 * @return prefixed text suitable for embedding, or an empty string if no input is provided
-	 */
-	private String applyEmbeddingPrefix(final String textToEmbed) {
-		if (StringUtils.isBlank(textToEmbed)) {
-			return "";
-		}
-
-		final String prefix = embeddingProperties != null ? embeddingProperties.getPassagePrefix() : "";
-		if (StringUtils.isBlank(prefix)) {
-			return textToEmbed;
-		}
-
-		return prefix.trim() + " " + textToEmbed;
-	}
-
-	/**
-	 * Builds a concatenated text payload for multimodal embedding:
-	 * <ul>
-	 *     <li>brand and model (referential attributes)</li>
-	 *     <li>best computed name</li>
-	 *     <li>top offer names (deduplicated)</li>
-	 *     <li>popular attribute name/value pairs (vertical whitelists)</li>
-	 *     <li>vertical-localized prefixes (if configured)</li>
-	 * </ul>
-	 * The resulting text is length-limited to prevent tokenizer overload.
-	 *
-	 * @param data  product to describe
-	 * @param vConf resolved vertical configuration (may be null)
-	 * @return concatenated text ready for embedding
-	 */
-	String buildEmbeddingText(final Product data, final VerticalConfig vConf) {
-		if (data == null) {
-			return "";
-		}
-
-		final Set<String> chunks = new LinkedHashSet<>();
-
-		// Brand / model first to anchor identity
-		if (data.getAttributes() != null && data.getAttributes().getReferentielAttributes() != null) {
-			String brand = data.getAttributes().getReferentielAttributes().get(ReferentielKey.BRAND);
-			String model = data.getAttributes().getReferentielAttributes().get(ReferentielKey.MODEL);
-			if (StringUtils.isNotBlank(brand)) {
-				chunks.add(brand);
-			}
-			if (StringUtils.isNotBlank(model)) {
-				chunks.add(model);
-			}
-		}
-
-		// Localized vertical product naming hints.
-		if (vConf != null && vConf.getI18n() != null) {
-			vConf.getI18n().values().stream()
-					.flatMap(i18n -> java.util.stream.Stream.of(
-							i18n.getDisplayName(),
-							i18n.getCardName(),
-							i18n.getPageTitle(),
-							i18n.getSeoName()))
-					.filter(StringUtils::isNotBlank)
-					.forEach(chunks::add);
-		}
-
-		// Best computed name
-		String bestName = data.preferredName(null);
-		if (StringUtils.isNotBlank(bestName)) {
-			chunks.add(bestName);
-		}
-
-		// Offer names (deduped, limited to avoid runaway payloads)
-		if (data.getOfferNames() != null) {
-			List<String> offers = data.getOfferNames().stream()
-					.filter(StringUtils::isNotBlank)
-					.sorted()
-					.limit(5)
-					.toList();
-			chunks.addAll(offers);
-		}
-
-		// Popular attribute name/value pairs (whitelisted per vertical)
-		List<String> popularAttributeKeys = vConf != null ? vConf.getPopularAttributes() : List.of();
-		if (!popularAttributeKeys.isEmpty() && data.getAttributes() != null) {
-			for (String key : popularAttributeKeys.stream().filter(StringUtils::isNotBlank).limit(10).toList()) {
-				String value = data.getAttributes().val(key);
-				if (StringUtils.isBlank(value)) {
-					continue;
-				}
-
-				String label = key;
-				if (vConf != null && vConf.getAttributesConfig() != null) {
-					AttributeConfig attributeConfig = vConf.getAttributesConfig().getAttributeConfigByKey(key);
-					if (attributeConfig != null && attributeConfig.getName() != null) {
-						String localized = attributeConfig.getName().i18n("default");
-						if (StringUtils.isNotBlank(localized)) {
-							label = localized;
-						}
-					}
-				}
-
-				chunks.add(label + " " + value);
-			}
-		}
-
-		// Flatten and bound length
-		String combined = chunks.stream()
-				.map(String::trim)
-				.filter(StringUtils::isNotBlank)
-				.collect(Collectors.joining(" "));
-
-		if (combined.length() > 1000) {
-			return combined.substring(0, 1000);
-		}
-		return combined;
-	}
-
-	/**
-	 * Computes a stable cache key from the exact embedding payload and model identity.
-	 * <p>
-	 * This avoids false cache hits where product text changes but coarse structural features
-	 * such as offer count or attribute count stay identical. The model identity is included so
-	 * switching embedding backends invalidates stale vectors automatically.
-	 * </p>
-	 * @param prefixedText final text sent to the embedding model
-	 * @return cache key as a long
-	 */
-	long computeEmbeddingCacheKey(final String prefixedText) {
-		if (StringUtils.isBlank(prefixedText)) {
-			return 0L;
-		}
-
-		String modelIdentity = embeddingProperties != null ? embeddingProperties.cacheModelIdentity() : "";
-		String cachePayload = modelIdentity + "\n" + prefixedText;
-		MessageDigest md = SHA256.get();
-		md.reset();
-		byte[] digest = md.digest(cachePayload.getBytes(StandardCharsets.UTF_8));
-		long key = ByteBuffer.wrap(digest).getLong();
-		return key == 0L ? 1L : key;
 	}
 
 	/**

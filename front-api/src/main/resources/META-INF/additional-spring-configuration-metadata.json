@@ -22,6 +22,12 @@
       "defaultValue": "ROLE_HUMAN"
     },
     {
+      "name": "feedback.github.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enables the GitHub-backed feedback beans (GHRepository, GitHubIssueService). Disabled by the \"local\" profile so startup needs no GitHub token or network access; LocalMockConfig.mockIssueService then serves the IssueService contract.",
+      "defaultValue": true
+    },
+    {
       "name": "feedback.github.access-token",
       "type": "java.lang.String",
       "description": "GitHub token used to create and update feedback issues."
@@ -58,6 +64,30 @@
       "type": "java.lang.String",
       "description": "GitHub issue label required before an issue can receive votes.",
       "defaultValue": "votable"
+    },
+    {
+      "name": "front.amazon-search-link.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Expose the Amazon search link (through /contrib/) on product pages without any offer.",
+      "defaultValue": true
+    },
+    {
+      "name": "front.amazon-search-link.merchant",
+      "type": "java.lang.String",
+      "description": "Merchant name recorded with the Amazon search link clicks.",
+      "defaultValue": "amazon.fr"
+    },
+    {
+      "name": "front.amazon-search-link.tag",
+      "type": "java.lang.String",
+      "description": "Amazon Associates tag appended to the search URL (public, not a secret).",
+      "defaultValue": "nudger-21"
+    },
+    {
+      "name": "front.amazon-search-link.url-template",
+      "type": "java.lang.String",
+      "description": "Amazon search URL template with the {gtin} and {tag} placeholders.",
+      "defaultValue": "https://www.amazon.fr/s?k={gtin}&tag={tag}"
     },
     {
       "name": "front.affiliation-partners.api-base-url",
@@ -234,11 +264,6 @@
       "description": "Recipient email address for contact form submissions."
     },
     {
-      "name": "front.embedding.api-base-url",
-      "type": "java.lang.String",
-      "description": "Base URL of the embedding service."
-    },
-    {
       "name": "front.exposed-docs.base-url",
       "type": "java.lang.String",
       "description": "Base URL of the exposed docs microservice.",
@@ -248,6 +273,12 @@
       "name": "front.exposed-docs.public-access",
       "type": "java.lang.Boolean",
       "description": "Allow anonymous access to exposed docs endpoints when security is enabled.",
+      "defaultValue": true
+    },
+    {
+      "name": "front.contribution-votes-purge.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Run once, asynchronously after startup, the idempotent purge of the historical ip and ua fields of the contribution-votes index.",
       "defaultValue": true
     },
     {
@@ -335,10 +366,22 @@
       "description": "Recipient email override for a reusable mail template."
     },
     {
+      "name": "front.max-result-window",
+      "type": "java.lang.Integer",
+      "description": "Elasticsearch index.max_result_window: pages with (pageNumber + 1) * pageSize above it are rejected with a 400.",
+      "defaultValue": 10000
+    },
+    {
       "name": "front.max-page-size",
       "type": "java.lang.Integer",
       "description": "Maximum page size accepted by paginated endpoints.",
       "defaultValue": 50
+    },
+    {
+      "name": "front.offers.max-age",
+      "type": "java.time.Duration",
+      "description": "Maximum age of a served offer, from its indexation timestamp. Older offers are hidden from the offer list, best prices, offer count, SEO price range, search suggestions and /contrib/ links. Defaults to the api rule (ProductRepository.VALID_UNTIL_DURATION).",
+      "defaultValue": "2d"
     },
     {
       "name": "front.partners.ecosystem.partners[].bloc-id",
@@ -404,18 +447,6 @@
       "description": "Absolute root URL used to expose downloadable static resources."
     },
     {
-      "name": "front.search.semantic-min-score",
-      "type": "java.lang.Float",
-      "description": "Minimum semantic score required to keep a semantic search result.",
-      "defaultValue": 0.7
-    },
-    {
-      "name": "front.search.suggest.semantic-fallback-enabled",
-      "type": "java.lang.Boolean",
-      "description": "Enable semantic fallback for product suggestions when prefix search yields no results.",
-      "defaultValue": true
-    },
-    {
       "name": "front.security.access-token-expiry",
       "type": "java.time.Duration",
       "description": "Validity duration of generated access tokens.",
@@ -447,12 +478,6 @@
       "name": "front.security.shared-token",
       "type": "java.lang.String",
       "description": "Shared secret accepted in the X-Shared-Token header."
-    },
-    {
-      "name": "front.semantic-diagnostics-enabled",
-      "type": "java.lang.Boolean",
-      "description": "Enable semantic score diagnostics in global search responses.",
-      "defaultValue": false
     },
     {
       "name": "front.share.url-fetch-extraction-enabled",
@@ -725,7 +750,7 @@
     {
       "name": "front.security.google-sso.role-allowlist",
       "type": "java.util.Map<java.lang.String,java.util.List<java.lang.String>>",
-      "description": "Deny-by-default email to role list allowlist. Keys are lower-cased emails; values are granted authorities (e.g. ROLE_SITEEDITOR, XWIKIADMINGROUP). An email missing from this map is refused.",
+      "description": "Deny-by-default email to role list allowlist. Keys are emails, lower-cased on binding; in YAML each key must be quoted and bracketed (\"[john.doe@example.com]\") or Spring Boot drops the @ and the entry never matches. Values are granted authorities (e.g. ROLE_SITEEDITOR, XWIKIADMINGROUP). An email missing from this map is refused.",
       "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GoogleSsoProperties"
     }
   ]

@@ -16,8 +16,8 @@ import type {
 } from '~~/shared/api-client'
 import { matchProductRouteFromSegments } from '~~/shared/utils/_product-route'
 
-const XwikiFullPageRenderer = defineAsyncComponent(
-  () => import('~/components/cms/XwikiFullPageRenderer.vue')
+const CmsFullPageRenderer = defineAsyncComponent(
+  () => import('~/components/cms/CmsFullPageRenderer.vue')
 )
 const CategoryPage = defineAsyncComponent(
   () => import('~/components/pages/CategoryPage.vue')
@@ -370,7 +370,7 @@ if (markdownGuide) {
     :guide-context="guideContext"
     :breadcrumbs="markdownBreadcrumbs"
   />
-  <XwikiFullPageRenderer
+  <CmsFullPageRenderer
     v-else-if="pageId"
     :page-id="pageId"
     :fallback-title="fallbackTitle"
@@ -386,5 +386,5 @@ if (markdownGuide) {
         :guides="otherGuideLinks"
       />
     </template>
-  </XwikiFullPageRenderer>
+  </CmsFullPageRenderer>
 </template>
