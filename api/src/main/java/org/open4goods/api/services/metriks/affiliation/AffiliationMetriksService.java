@@ -16,6 +16,7 @@ import org.open4goods.api.dto.metriks.MetriksEvent;
 import org.open4goods.services.contribution.model.AffiliationClick;
 import org.open4goods.services.contribution.model.AffiliationClickStats;
 import org.open4goods.services.contribution.model.AffiliationClickStats.MerchantClicks;
+import org.open4goods.services.contribution.model.AffiliationClickStats.OriginClicks;
 import org.open4goods.services.contribution.model.AffiliationNetwork;
 import org.open4goods.services.contribution.service.AffiliationClickStatsService;
 import org.slf4j.Logger;
@@ -28,7 +29,8 @@ import org.springframework.stereotype.Service;
  * Builds the Metriks affiliation events ({@code GET /api/metriks/affiliation}): validated commissions, pending
  * commissions and sales of each network, plus their totals, over the last 7 and 28 days; then the outbound
  * {@code /contrib/} clicks per network ({@code awin}, {@code effiliation}, {@code kwanko}, {@code tradetracker}, {@code amazon}, {@code other}) and in total over the same
- * windows, and the 20 most clicked merchants over 28 days.
+ * windows, the 20 most clicked merchants and the 50 most clicked origins (article or guide, otherwise originating
+ * page) over 28 days.
  * <p>
  * Windows: {@code 7d} = [D-7, D-1] and {@code 28d} = [D-28, D-1], D being today in Europe/Paris, by transaction
  * date (commissions) or click time (clicks). Each network is read once, over the 28-day window; the 7-day figures are
@@ -43,7 +45,7 @@ import org.springframework.stereotype.Service;
  * in {@code error};</li>
  * <li>a total is in {@code error} as soon as one network is, with the list of the failing networks: never a partial
  * sum;</li>
- * <li>clicks: when Elasticsearch cannot answer (unreachable, missing index...), the thirteen click events are in
+ * <li>clicks: when Elasticsearch cannot answer (unreachable, missing index...), the sixteen click events are in
  * {@code error}; a network without any click is a real {@code 0}.</li>
  * </ul>
  * Error messages and logs never carry a credential: client messages are built without secrets, and every message
@@ -61,6 +63,7 @@ public class AffiliationMetriksService {
     private static final List<String> CLICK_NETWORKS = Arrays.stream(AffiliationNetwork.values())
             .map(AffiliationNetwork::key).toList();
     static final String TOP_MERCHANTS_ID = "affiliation.clicks.top_merchants.28d";
+    static final String TOP_ORIGINS_ID = "affiliation.clicks.top_origins.28d";
     private static final List<Window> WINDOWS = List.of(new Window("7d", 7, "7 j"), new Window("28d", 28, "28 j"));
     private static final List<String> GROUPS = List.of("business", "affiliation");
     private static final String MASK = "***";
@@ -96,7 +99,7 @@ public class AffiliationMetriksService {
      * Reads every network and builds the events: for each network then for the totals, and for each window,
      * {@code commission.validated}, {@code commission.pending} and {@code sales}; then the click events.
      *
-     * @return the 6 events of each network, the 6 total events, then the 13 click events
+     * @return the 6 events of each network, the 6 total events, then the 16 click events
      *         ({@link #clickEvents(LocalDate)})
      */
     public List<MetriksEvent> collectEvents() {
@@ -151,7 +154,7 @@ public class AffiliationMetriksService {
             stats = clickStatsService.read(
                     today.minusDays(longWindow.days()).atStartOfDay(ZONE).toInstant().toEpochMilli(),
                     today.minusDays(shortWindow.days()).atStartOfDay(ZONE).toInstant().toEpochMilli(),
-                    end, AffiliationClickStatsService.TOP_MERCHANTS);
+                    end, AffiliationClickStatsService.TOP_MERCHANTS, AffiliationClickStatsService.TOP_ORIGINS);
         } catch (NoSuchIndexException e) {
             error = "Clics indisponibles : index " + AffiliationClick.INDEX_NAME + " absent";
         } catch (RuntimeException e) {
@@ -202,6 +205,25 @@ public class AffiliationMetriksService {
             top.getParams().put("rows", rows);
         }
         events.add(top);
+
+        List<Map<String, Object>> originRows = new ArrayList<>();
+        if (stats != null) {
+            for (OriginClicks origin : stats.topOriginsLong()) {
+                Map<String, Object> row = new LinkedHashMap<>();
+                row.put("origin", origin.origin());
+                row.put("clicks", origin.clicks());
+                originRows.add(row);
+            }
+        }
+        MetriksEvent origins = event(TOP_ORIGINS_ID,
+                "Top " + AffiliationClickStatsService.TOP_ORIGINS + " pages d'origine par clics sortants ("
+                        + longWindow.label() + ")",
+                "count", "total", today.minusDays(longWindow.days()), endDate, null,
+                stats == null ? null : originRows.size(), error);
+        if (stats != null) {
+            origins.getParams().put("rows", originRows);
+        }
+        events.add(origins);
         return events;
     }
 

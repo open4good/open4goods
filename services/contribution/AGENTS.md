@@ -6,8 +6,9 @@
 
 **Affiliation clicks**: `AffiliationClick` (index `affiliation-clicks`, no
 personal data), `AffiliationNetwork`, `AffiliationClickRepository` (writer,
-front-api) and `AffiliationClickStatsService` (aggregated reader, api) form the
-contract shared by front-api and api. See
+front-api), `AffiliationClickMappingService` (additive mapping update run by
+front-api at startup, GOU-1828) and `AffiliationClickStatsService` (aggregated
+reader, api) form the contract shared by front-api and api. See
 [docs/architecture/affiliation-clicks.md](../../docs/architecture/affiliation-clicks.md).
 
 **ip/ua purge**: `ContributionVoteIpUaPurgeService` removes the historical

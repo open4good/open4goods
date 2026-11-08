@@ -83,6 +83,11 @@ front:
   contribution-votes-purge:
     enabled: ${FRONT_CONTRIBUTION_VOTES_PURGE_ENABLED:true}
 
+  # Additive mapping update of the existing affiliation-clicks index (GOU-1828: contentPath keyword),
+  # run asynchronously after startup; idempotent and fail-open.
+  affiliation-clicks-mapping:
+    enabled: ${FRONT_AFFILIATION_CLICKS_MAPPING_ENABLED:true}
+
   google-indexation:
     enabled: ${FRONT_GOOGLE_INDEXATION_ENABLED:false}
     realtime-enabled: ${FRONT_GOOGLE_INDEXATION_REALTIME_ENABLED:true}

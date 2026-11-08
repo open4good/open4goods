@@ -173,7 +173,10 @@ public class MetriksController {
                     + "Then the outbound /contrib/ clicks recorded by front-api (affiliation-clicks index): "
                     + "affiliation.<awin|effiliation|other|total>.clicks.<7d|28d> (count, same windows, by click time) "
                     + "and affiliation.clicks.top_merchants.28d (value = number of rows, 'params.rows' with merchant, "
-                    + "network and clicks, top 20). A network without click counts 0; when Elasticsearch cannot answer, "
+                    + "network and clicks, top 20) and affiliation.clicks.top_origins.28d (value = number of rows, "
+                    + "'params.rows' with origin and clicks, top 50, most clicked first, ties by origin; origin = the "
+                    + "article or guide path (contentPath) when the click has one, otherwise the originating page "
+                    + "path, otherwise '(none)'). A network without click counts 0; when Elasticsearch cannot answer, "
                     + "the click events are in error (never zero). Always answers 200.")
     @ApiResponse(responseCode = "200", description = "MetriksResponse containing affiliation revenue and click events")
     public MetriksResponse getAffiliationMetrics() {

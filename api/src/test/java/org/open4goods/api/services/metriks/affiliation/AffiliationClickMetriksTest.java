@@ -16,12 +16,13 @@ import org.open4goods.api.dto.metriks.MetriksEvent;
 import org.open4goods.api.services.metriks.affiliation.AffiliationTestSupport.FakeClickStats;
 import org.open4goods.services.contribution.model.AffiliationClickStats;
 import org.open4goods.services.contribution.model.AffiliationClickStats.MerchantClicks;
+import org.open4goods.services.contribution.model.AffiliationClickStats.OriginClicks;
 import org.springframework.data.elasticsearch.NoSuchIndexException;
 import org.springframework.dao.DataAccessResourceFailureException;
 
 /**
  * Tests the click events of {@link AffiliationMetriksService}: ids and order, values per network and window, window
- * bounds sent to Elasticsearch (Europe/Paris days), top merchants, and errors (never zero).
+ * bounds sent to Elasticsearch (Europe/Paris days), top merchants, top origins, and errors (never zero).
  */
 class AffiliationClickMetriksTest {
 
@@ -33,13 +34,16 @@ class AffiliationClickMetriksTest {
             "affiliation.amazon.clicks.7d", "affiliation.amazon.clicks.28d",
             "affiliation.other.clicks.7d", "affiliation.other.clicks.28d",
             "affiliation.total.clicks.7d", "affiliation.total.clicks.28d",
-            "affiliation.clicks.top_merchants.28d");
+            "affiliation.clicks.top_merchants.28d",
+            "affiliation.clicks.top_origins.28d");
 
     private static final AffiliationClickStats STATS = new AffiliationClickStats(
             Map.of("awin", 3L, "effiliation", 0L, "kwanko", 1L, "tradetracker", 0L, "amazon", 0L, "other", 1L),
             Map.of("awin", 10L, "effiliation", 4L, "kwanko", 5L, "tradetracker", 2L, "amazon", 3L, "other", 2L),
             5, 26,
-            List.of(new MerchantClicks("darty.com", "awin", 7), new MerchantClicks("boulanger.com", "effiliation", 4)));
+            List.of(new MerchantClicks("darty.com", "awin", 7), new MerchantClicks("boulanger.com", "effiliation", 4)),
+            List.of(new OriginClicks("/blog/choisir-un-four", 9), new OriginClicks("(none)", 5),
+                    new OriginClicks("/fours/foo", 5)));
 
     private static List<MetriksEvent> collectAll(FakeClickStats clicks) {
         // No commission network: only the 6 (error-free, zero) totals precede the click events.
@@ -55,7 +59,7 @@ class AffiliationClickMetriksTest {
     }
 
     @Test
-    void nominal_emitsTheThirteenClickEventsAfterTheCommissionEvents() {
+    void nominal_emitsTheClickEventsAfterTheCommissionEvents() {
         List<MetriksEvent> all = collectAll(new FakeClickStats(STATS, null));
 
         List<String> ids = all.stream().map(MetriksEvent::getId).toList();
@@ -104,13 +108,15 @@ class AffiliationClickMetriksTest {
                 .doesNotContainKey("currency");
         assertThat(events.get("affiliation.other.clicks.28d").getTags()).containsExactly("affiliation", "other");
 
-        // One aggregation request, bounded by Paris midnights: [D-28, D) and [D-7, D), top 20.
+        // One aggregation request, bounded by Paris midnights: [D-28, D) and [D-7, D), top 20 merchants, top 50
+        // origins.
         assertThat(clicks.calls).hasSize(1);
         long[] call = clicks.calls.get(0);
         assertThat(Instant.ofEpochMilli(call[0])).isEqualTo(Instant.parse("2026-09-23T22:00:00Z"));
         assertThat(Instant.ofEpochMilli(call[1])).isEqualTo(Instant.parse("2026-10-14T22:00:00Z"));
         assertThat(Instant.ofEpochMilli(call[2])).isEqualTo(Instant.parse("2026-10-21T22:00:00Z"));
         assertThat(call[3]).isEqualTo(20);
+        assertThat(call[4]).isEqualTo(50);
     }
 
     @Test
@@ -126,6 +132,41 @@ class AffiliationClickMetriksTest {
     }
 
     @Test
+    void nominal_reportsTheTopOriginsAsRowsInTheReadOrder() {
+        MetriksEvent top = clickEvents(new FakeClickStats(STATS, null)).get("affiliation.clicks.top_origins.28d");
+
+        assertThat(top.getStatus()).isEqualTo("ok");
+        assertThat(top.getName()).isEqualTo("Top 50 pages d'origine par clics sortants (28 j)");
+        assertThat(top.getUnit()).isEqualTo("count");
+        assertThat(top.getValue()).isEqualTo(3);
+        assertThat(top.getParams()).containsEntry("network", "total")
+                .containsEntry("windowStartDate", "2026-09-24").containsEntry("windowEndDate", "2026-10-21");
+        assertThat(top.getParams().get("rows")).isEqualTo(List.of(
+                Map.of("origin", "/blog/choisir-un-four", "clicks", 9L),
+                Map.of("origin", "(none)", "clicks", 5L),
+                Map.of("origin", "/fours/foo", "clicks", 5L)));
+    }
+
+    @Test
+    void topOrigins_valueIsTheNumberOfRowsUpToFifty() {
+        List<OriginClicks> fifty = new ArrayList<>();
+        for (int i = 0; i < 50; i++) {
+            fifty.add(new OriginClicks("/blog/article-%02d".formatted(i), 100 - i));
+        }
+        AffiliationClickStats stats = new AffiliationClickStats(STATS.clicksShort(), STATS.clicksLong(),
+                STATS.totalShort(), STATS.totalLong(), STATS.topMerchantsLong(), fifty);
+
+        MetriksEvent top = clickEvents(new FakeClickStats(stats, null)).get("affiliation.clicks.top_origins.28d");
+
+        assertThat(top.getValue()).isEqualTo(50);
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> rows = (List<Map<String, Object>>) top.getParams().get("rows");
+        assertThat(rows).hasSize(50);
+        assertThat(rows.get(0)).containsExactly(Map.entry("origin", "/blog/article-00"), Map.entry("clicks", 100L));
+        assertThat(rows.get(49)).containsExactly(Map.entry("origin", "/blog/article-49"), Map.entry("clicks", 51L));
+    }
+
+    @Test
     void noClick_isZeroNotError() {
         Map<String, MetriksEvent> events = clickEvents(AffiliationTestSupport.noClicks());
 
@@ -133,6 +174,8 @@ class AffiliationClickMetriksTest {
         assertThat(events.get("affiliation.total.clicks.28d").getValue()).isEqualTo(0L);
         assertThat(events.get("affiliation.clicks.top_merchants.28d").getValue()).isEqualTo(0);
         assertThat(events.get("affiliation.clicks.top_merchants.28d").getParams().get("rows")).isEqualTo(List.of());
+        assertThat(events.get("affiliation.clicks.top_origins.28d").getValue()).isEqualTo(0);
+        assertThat(events.get("affiliation.clicks.top_origins.28d").getParams().get("rows")).isEqualTo(List.of());
     }
 
     @Test
@@ -150,6 +193,7 @@ class AffiliationClickMetriksTest {
         assertThat(messages).containsOnly(
                 "Clics indisponibles : Elasticsearch en erreur (DataAccessResourceFailureException)");
         assertThat(events.get("affiliation.clicks.top_merchants.28d").getParams()).doesNotContainKey("rows");
+        assertThat(events.get("affiliation.clicks.top_origins.28d").getParams()).doesNotContainKey("rows");
     }
 
     @Test

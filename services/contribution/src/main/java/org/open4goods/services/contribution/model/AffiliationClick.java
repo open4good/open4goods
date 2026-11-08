@@ -26,6 +26,8 @@ public class AffiliationClick {
     public static final String FIELD_TS = "ts";
     public static final String FIELD_NETWORK = "network";
     public static final String FIELD_MERCHANT = "merchant";
+    public static final String FIELD_ORIGIN_PATH = "originPath";
+    public static final String FIELD_CONTENT_PATH = "contentPath";
 
     @Id
     @Field(type = FieldType.Keyword)
@@ -51,6 +53,14 @@ public class AffiliationClick {
     @Field(type = FieldType.Keyword)
     private String originPath;
 
+    /**
+     * Path of the article or guide ({@code /blog/...}, {@code /guides/...}) the offer was reached from, sent by the
+     * frontend in {@code X-Affiliation-Content}; {@code null} when absent or invalid. Added by GOU-1828: older
+     * documents do not have it.
+     */
+    @Field(type = FieldType.Keyword)
+    private String contentPath;
+
     /** Host of the target URL, {@code null} when the URL has no readable host. */
     @Field(type = FieldType.Keyword)
     private String targetHost;
@@ -67,9 +77,26 @@ public class AffiliationClick {
      * @param gtin       product GTIN, or {@code null}
      * @param originPath path of the originating page, or {@code null}
      * @param ts         click time, epoch milliseconds
-     * @return a new click with a random id
+     * @return a new click with a random id, without {@code contentPath}
      */
     public static AffiliationClick of(String merchant, String targetUrl, String gtin, String originPath, long ts) {
+        return of(merchant, targetUrl, gtin, originPath, null, ts);
+    }
+
+    /**
+     * Builds a click towards {@code targetUrl}: the network and the target host are deduced from the URL, which is
+     * itself not stored.
+     *
+     * @param merchant    datasource name of the offer
+     * @param targetUrl   affiliation target URL (only its host is kept)
+     * @param gtin        product GTIN, or {@code null}
+     * @param originPath  path of the originating page, or {@code null}
+     * @param contentPath path of the article or guide the offer was reached from, or {@code null}
+     * @param ts          click time, epoch milliseconds
+     * @return a new click with a random id
+     */
+    public static AffiliationClick of(String merchant, String targetUrl, String gtin, String originPath,
+            String contentPath, long ts) {
         AffiliationClick click = new AffiliationClick();
         click.id = UUID.randomUUID().toString();
         click.ts = ts;
@@ -78,6 +105,7 @@ public class AffiliationClick {
         click.merchant = merchant;
         click.gtin = gtin;
         click.originPath = originPath;
+        click.contentPath = contentPath;
         return click;
     }
 
@@ -127,6 +155,14 @@ public class AffiliationClick {
 
     public void setOriginPath(String originPath) {
         this.originPath = originPath;
+    }
+
+    public String getContentPath() {
+        return contentPath;
+    }
+
+    public void setContentPath(String contentPath) {
+        this.contentPath = contentPath;
     }
 
     public String getTargetHost() {

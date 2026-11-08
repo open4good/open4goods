@@ -33,6 +33,8 @@ public class AffiliationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AffiliationService.class);
     /** Maximum length of the originating path sent in {@code X-Affiliation-Origin}. */
     public static final int MAX_ORIGIN_PATH_LENGTH = 200;
+    /** Prefixes accepted for the article or guide path sent in {@code X-Affiliation-Content}. */
+    private static final String[] CONTENT_PATH_PREFIXES = {"/blog/", "/guides/"};
 
     private final SerialisationService serialisationService;
     private final ContributionVoteRepository contributionVoteRepository;
@@ -110,17 +112,20 @@ public class AffiliationService {
      * Two documents are written, each fail-open (a persistence failure never prevents the redirect):
      * <ul>
      * <li>an {@link AffiliationClick} ({@code affiliation-clicks} index), aggregated by the Metriks endpoint: network,
-     * merchant, product GTIN, originating path and target host, without any personal data;</li>
+     * merchant, product GTIN, originating path, article or guide path and target host, without any personal
+     * data;</li>
      * <li>the legacy {@link ContributionVote} ({@code contribution-votes} index), kept for compatibility, without IP
      * nor user agent.</li>
      * </ul>
      *
      * @param token      the encrypted contribution vote token
-     * @param originPath raw value of the {@code X-Affiliation-Origin} header, validated by
-     *                   {@link #sanitiseOriginPath(String)}; {@code null} when absent
+     * @param originPath  raw value of the {@code X-Affiliation-Origin} header, validated by
+     *                    {@link #sanitiseOriginPath(String)}; {@code null} when absent
+     * @param contentPath raw value of the {@code X-Affiliation-Content} header, validated by
+     *                    {@link #sanitiseContentPath(String)}; {@code null} when absent
      * @return the destination URL extracted from the token
      */
-    public String trackRedirect(String token, String originPath) {
+    public String trackRedirect(String token, String originPath, String contentPath) {
         ContributionVote vote = decryptAffiliationLink(token);
         long now = System.currentTimeMillis();
         vote.setId(UUID.randomUUID().toString());
@@ -130,7 +135,7 @@ public class AffiliationService {
         vote.setVote(ContributionService.DEFAULT_VOTE);
 
         AffiliationClick click = AffiliationClick.of(vote.getDatasourceName(), vote.getUrl(), vote.getGtin(),
-                sanitiseOriginPath(originPath), now);
+                sanitiseOriginPath(originPath), sanitiseContentPath(contentPath), now);
         try {
             affiliationClickRepository.save(click);
             LOGGER.info("Tracked affiliation click for datasource '{}' through network '{}' towards host '{}'",
@@ -173,5 +178,26 @@ public class AffiliationService {
             }
         }
         return originPath;
+    }
+
+    /**
+     * Validates the article or guide path sent by the frontend in the {@code X-Affiliation-Content} header (the
+     * {@code from} parameter of a {@code /contrib/} link).
+     *
+     * @param contentPath raw header value, possibly {@code null}
+     * @return the value when {@link #sanitiseOriginPath(String)} keeps it and it starts with {@code /blog/} or
+     *         {@code /guides/}, {@code null} otherwise
+     */
+    public static String sanitiseContentPath(String contentPath) {
+        String path = sanitiseOriginPath(contentPath);
+        if (path == null) {
+            return null;
+        }
+        for (String prefix : CONTENT_PATH_PREFIXES) {
+            if (path.startsWith(prefix)) {
+                return path;
+            }
+        }
+        return null;
     }
 }

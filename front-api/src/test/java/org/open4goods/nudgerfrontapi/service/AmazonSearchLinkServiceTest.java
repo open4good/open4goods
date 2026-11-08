@@ -56,7 +56,7 @@ class AmazonSearchLinkServiceTest {
         String link = service.buildContribLink(VALID_EAN, false);
 
         String target = affiliationService.trackRedirect(
-                link.substring(AffiliationPartnerService.CONTRIB_ENDPOINT.length()), "/fours/four-x");
+                link.substring(AffiliationPartnerService.CONTRIB_ENDPOINT.length()), "/fours/four-x", null);
 
         assertThat(target).isEqualTo("https://www.amazon.fr/s?k=4006381333931&tag=nudger-21");
         ArgumentCaptor<AffiliationClick> captor = ArgumentCaptor.forClass(AffiliationClick.class);

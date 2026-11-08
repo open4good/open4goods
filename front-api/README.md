@@ -96,6 +96,19 @@ version conflicts, failures), never an IP or a User-Agent:
 grep 'contribution-votes purge ip/ua' front-api.log
 ```
 
+## Affiliation clicks mapping update
+
+On every startup, once the application is ready, front-api writes on a
+background thread the `AffiliationClick` mapping onto the existing
+`affiliation-clicks` index (GOU-1828: `contentPath` as `keyword`). It is
+additive and idempotent; no document is rewritten. An error ends in one
+`ERROR` line starting with `affiliation-clicks mapping` and the next startup
+retries; neither the startup nor the redirects are affected. See
+[docs/architecture/affiliation-clicks.md](../docs/architecture/affiliation-clicks.md).
+
+- `front.affiliation-clicks-mapping.enabled` - toggle (default `true`,
+  `FRONT_AFFILIATION_CLICKS_MAPPING_ENABLED`; `false` in the `local` profile).
+
 ## Google Indexation
 
 The front API can notify the Google Indexing API after AI review generation
