@@ -20,6 +20,8 @@ import org.open4goods.commons.services.ResourceService;
 import org.open4goods.model.product.EcoScoreRanking;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
+import org.open4goods.model.rating.Cardinality;
+import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.feedservice.service.FeedIndexingService;
 import org.open4goods.services.feedservice.service.FeedService;
@@ -37,7 +39,7 @@ class BatchServiceScoringPersistenceTest {
 		Product product = scoredProduct();
 		product.setExcluded(true);
 
-		BatchService.clearObsoleteScores(List.of(product));
+		BatchService.clearObsoleteScores(List.of(product), vertical());
 
 		assertThat(product.getScores()).isEmpty();
 		assertThat(product.getRanking().getGlobalPosition()).isZero();
@@ -48,7 +50,7 @@ class BatchServiceScoringPersistenceTest {
 		Product product = scoredProduct();
 		product.setVertical(null);
 
-		BatchService.clearObsoleteScores(List.of(product));
+		BatchService.clearObsoleteScores(List.of(product), vertical());
 
 		assertThat(product.getScores()).isEmpty();
 	}
@@ -58,19 +60,39 @@ class BatchServiceScoringPersistenceTest {
 		Product product = scoredProduct();
 		product.setOffersCount(0);
 
-		BatchService.clearObsoleteScores(List.of(product));
+		BatchService.clearObsoleteScores(List.of(product), vertical());
 
-		assertThat(product.ecoscore()).isNotNull();
+		assertThat(product.ecoscore().getValue()).isEqualTo(12.0);
 		assertThat(product.getRanking().getGlobalPosition()).isEqualTo(3);
 	}
 
 	@Test
-	void productWithoutOffersLosesAnImpactScoreOverwrittenByAComposite() {
+	void compositeImpactScoreIsRecomputedFromTheStoredSubScores() {
+		Product product = scoredProduct();
+		product.setOffersCount(0);
+		product.ecoscore().setAggregates(Map.of("REFRIGERANT_GWP", 1.0));
+		product.ecoscore().setValue(1.2);
+
+		BatchService.clearObsoleteScores(List.of(product), vertical());
+
+		Score impactScore = product.ecoscore();
+		// WARRANTY relative 3.0 / 5, single criterion: 3.0 * 4 = 12 / 20
+		assertThat(impactScore.getValue()).isEqualTo(12.0);
+		assertThat(impactScore.getAggregates()).isEmpty();
+		assertThat(impactScore.getRelativ().getValue()).isEqualTo(3.0);
+		// position 3 of 10 from the best product, as computed on the weighted score
+		assertThat(impactScore.getRanking()).isEqualTo(7);
+		assertThat(impactScore.getAbsolute().getCount()).isEqualTo(10);
+		assertThat(product.getRanking().getGlobalPosition()).isEqualTo(3);
+	}
+
+	@Test
+	void compositeImpactScoreIsRemovedWhenItCannotBeRecomputed() {
 		Product product = scoredProduct();
 		product.setOffersCount(0);
 		product.ecoscore().setAggregates(Map.of("REFRIGERANT_GWP", 1.0));
 
-		BatchService.clearObsoleteScores(List.of(product));
+		BatchService.clearObsoleteScores(List.of(product), new VerticalConfig());
 
 		assertThat(product.ecoscore()).isNull();
 		assertThat(product.getScores()).containsKey("WARRANTY");
@@ -79,8 +101,7 @@ class BatchServiceScoringPersistenceTest {
 
 	@Test
 	void nothingIsIndexedWhenScoringFails() {
-		VerticalConfig vertical = new VerticalConfig();
-		vertical.setId("tv");
+		VerticalConfig vertical = vertical();
 		Product product = scoredProduct();
 
 		ProductRepository repository = mock(ProductRepository.class);
@@ -96,14 +117,28 @@ class BatchServiceScoringPersistenceTest {
 		verify(repository, never()).addToFullindexationQueue(anyCollection());
 	}
 
+	private static VerticalConfig vertical() {
+		ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
+		impactScoreConfig.setCriteriasPonderation(Map.of("WARRANTY", 1.0));
+		VerticalConfig vertical = new VerticalConfig();
+		vertical.setId("tv");
+		vertical.setImpactScoreConfig(impactScoreConfig);
+		return vertical;
+	}
+
 	private static Product scoredProduct() {
 		Product product = new Product(1234567890123L);
 		product.setVertical("tv");
 		product.setOffersCount(1);
 		product.getScores().put("ECOSCORE", new Score("ECOSCORE", 12.0));
-		product.getScores().put("WARRANTY", new Score("WARRANTY", 3.0));
+		Score warranty = new Score("WARRANTY", 2.0);
+		Cardinality relativ = new Cardinality();
+		relativ.setValue(3.0);
+		warranty.setRelativ(relativ);
+		product.getScores().put("WARRANTY", warranty);
 		EcoScoreRanking ranking = new EcoScoreRanking();
 		ranking.setGlobalPosition(3);
+		ranking.setGlobalCount(10);
 		product.setRanking(ranking);
 		return product;
 	}

@@ -214,6 +214,55 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 
 	}
 
+	/**
+	 * Recomputes the ImpactScore of a product from the sub-scores it already holds, outside a batch.
+	 *
+	 * <p>Used for products a batch does not rescore (no offers) whose stored ImpactScore is wrong. Their
+	 * sub-scores keep the relative values of the batch that produced them, so the result is the score that batch
+	 * should have stored. The ranking is restored from {@link EcoScoreRanking}, which that batch computed on the
+	 * weighted score.
+	 *
+	 * @param product the product holding the sub-scores
+	 * @param vConf   the vertical configuration defining the weights
+	 * @return the ImpactScore, or {@code null} when the vertical has no weights or a sub-score cannot be read
+	 */
+	public Score recomputeFromStoredSubScores(Product product, VerticalConfig vConf) {
+		if (vConf == null || vConf.getImpactScoreConfig() == null) {
+			return null;
+		}
+		Map<String, Double> normalizedWeights = normalizeWeights(vConf);
+		if (normalizedWeights.isEmpty()) {
+			return null;
+		}
+		Double value;
+		try {
+			value = generateEcoScore(product, vConf, normalizedWeights);
+		} catch (ValidationException e) {
+			LOGGER.warn("ImpactScore recomputation failed for {} : {}", product.getId(), e.getMessage());
+			return null;
+		}
+		if (value == null) {
+			return null;
+		}
+
+		Score score = new Score(ECOSCORE_SCORENAME, value);
+		Cardinality absolute = new Cardinality();
+		absolute.setValue(value);
+		Cardinality relativ = new Cardinality();
+		relativ.setValue(value * StandardiserService.DEFAULT_MAX_RATING / ECOSCORE_TARGET_SCALE);
+
+		EcoScoreRanking ranking = product.getRanking();
+		if (ranking != null && ranking.getGlobalCount() > 0 && ranking.getGlobalPosition() > 0
+				&& ranking.getGlobalPosition() <= ranking.getGlobalCount()) {
+			absolute.setCount((int) ranking.getGlobalCount());
+			relativ.setCount((int) ranking.getGlobalCount());
+			score.setRanking((int) (ranking.getGlobalCount() - ranking.getGlobalPosition()));
+		}
+		score.setAbsolute(absolute);
+		score.setRelativ(relativ);
+		return score;
+	}
+
 	private Map<String, Double> normalizeWeights(VerticalConfig vConf) {
 		Map<String, Double> weights = vConf.getImpactScoreConfig().getCriteriasPonderation();
 		if (weights == null || weights.isEmpty()) {

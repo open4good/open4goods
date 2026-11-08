@@ -25,6 +25,7 @@ import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.services.feedservice.service.FeedIndexingService;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.open4goods.model.helper.IdHelper;
+import org.open4goods.api.services.aggregation.services.batch.scores.EcoScoreAggregationService;
 import org.open4goods.model.product.EcoScoreRanking;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
@@ -627,7 +628,7 @@ public class BatchService {
 			Set<Product> scorable = products.stream().filter(e-> !e.isExcluded()).collect(Collectors.toSet());
 			logger.info("Will score {} products on a total of {}", scorable.size(), products.size());
 			aggregationFacadeService.score(vertical, scorable);
-			clearObsoleteScores(allProducts);
+			clearObsoleteScores(allProducts, vertical);
 		} catch (Exception e) {
 			// Scores are cleared before being rebuilt: indexing now would persist partial results
 			logger.error("Scoring failed for vertical {} : nothing is indexed for this run", vertical.getId(), e);
@@ -657,19 +658,27 @@ public class BatchService {
 	 *
 	 * <p>Excluded products and products unmatched from the vertical no longer belong to the scored cohort, so
 	 * all their scores and their ranking are removed. Products without offers keep their last score (they stay
-	 * in the sitemap, GOU-1744), unless that ImpactScore was overwritten by a composite: only that defect sets
-	 * aggregates on it, and such a product would otherwise never be corrected since it is not rescored.
+	 * in the sitemap, GOU-1744). If that ImpactScore was overwritten by a composite (only that defect sets
+	 * aggregates on it), it is recomputed from the sub-scores the product holds, since the batch does not rescore
+	 * products without offers; it is removed when it cannot be recomputed.
 	 *
 	 * @param products every product of the vertical, after scoring
+	 * @param vertical the vertical configuration, for the ImpactScore weights
 	 */
-	static void clearObsoleteScores(Collection<Product> products) {
+	static void clearObsoleteScores(Collection<Product> products, VerticalConfig vertical) {
+		EcoScoreAggregationService impactScore = new EcoScoreAggregationService(logger);
 		for (Product product : products) {
 			if (product.isExcluded() || product.getVertical() == null) {
 				product.getScores().clear();
 				product.setRanking(new EcoScoreRanking());
 			} else if (hasCompositeImpactScore(product)) {
-				product.getScores().remove(product.ecoscore().getName());
-				product.setRanking(new EcoScoreRanking());
+				Score recomputed = impactScore.recomputeFromStoredSubScores(product, vertical);
+				if (recomputed == null) {
+					product.getScores().remove(product.ecoscore().getName());
+					product.setRanking(new EcoScoreRanking());
+				} else {
+					product.getScores().put(recomputed.getName(), recomputed);
+				}
 			}
 		}
 	}

@@ -7,6 +7,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Utility methods to derive aggregated score definitions from vertical
  * configuration. The helper groups attributes that declare
@@ -20,6 +23,8 @@ public final class ParticipatingScoreHelper {
      * composite using this name would replace the weighted 0-20 score.
      */
     private static final String RESERVED_IMPACT_SCORE_NAME = "ECOSCORE";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ParticipatingScoreHelper.class);
 
     private ParticipatingScoreHelper() {
     }
@@ -35,8 +40,7 @@ public final class ParticipatingScoreHelper {
      * @return a map keyed by aggregate name containing normalised ponderations of
      *         participating scores
      * @throws IllegalStateException if a participating score has no ponderation
-     *                               defined in {@code impactScoreConfig}, or
-     *                               targets the reserved ImpactScore name
+     *                               defined in {@code impactScoreConfig}
      */
     public static Map<String, Map<String, Double>> buildNormalizedParticipatingScores(VerticalConfig verticalConfig) {
         Objects.requireNonNull(verticalConfig, "verticalConfig is required");
@@ -68,8 +72,11 @@ public final class ParticipatingScoreHelper {
 
             for (String aggregateName : participateInScores) {
                 if (RESERVED_IMPACT_SCORE_NAME.equals(aggregateName)) {
-                    throw new IllegalStateException("Attribute " + attribute.getKey()
-                            + " cannot participate in the reserved score " + RESERVED_IMPACT_SCORE_NAME);
+                    // Skipped rather than thrown: a configuration override must not stop a whole vertical
+                    // from being scored. VerticalYamlValidationTest rejects it in the repository.
+                    LOGGER.error("Attribute {} of vertical {} cannot participate in the reserved score {}: ignored",
+                            attribute.getKey(), verticalConfig.getId(), RESERVED_IMPACT_SCORE_NAME);
+                    continue;
                 }
                 aggregates.computeIfAbsent(aggregateName, key -> new HashMap<>())
                         .merge(attribute.getKey(), ponderation, Double::sum);
