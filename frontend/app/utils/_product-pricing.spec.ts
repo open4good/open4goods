@@ -5,6 +5,7 @@ import {
   formatPrice,
   openAffiliateLinkInNewTab,
   resolveOfferHref,
+  withAffiliationContent,
 } from './_product-pricing'
 import type { ProductDto } from '~~/shared/api-client'
 
@@ -96,5 +97,30 @@ describe('affiliate link referrer handling (GOU-1184)', () => {
     expect(anchor?.referrerPolicy).toBe('same-origin')
     expect(anchor?.isConnected).toBe(false)
     clickSpy.mockRestore()
+  })
+})
+
+describe('withAffiliationContent (GOU-1829)', () => {
+  it('adds the encoded article path to a contrib link', () => {
+    expect(withAffiliationContent('/contrib/tok', '/blog/slug')).toBe(
+      '/contrib/tok?from=%2Fblog%2Fslug'
+    )
+    expect(resolveOfferHref({ affiliationToken: 'tok' }, '/guides/four')).toBe(
+      '/contrib/tok?from=%2Fguides%2Ffour'
+    )
+  })
+
+  it('adds nothing without article context or for invalid paths', () => {
+    expect(withAffiliationContent('/contrib/tok', null)).toBe('/contrib/tok')
+    expect(withAffiliationContent('/contrib/tok', '/fours/x')).toBe(
+      '/contrib/tok'
+    )
+    expect(resolveOfferHref({ affiliationToken: 'tok' })).toBe('/contrib/tok')
+  })
+
+  it('leaves merchant urls untouched', () => {
+    expect(
+      resolveOfferHref({ url: 'https://shop.example/p' }, '/blog/slug')
+    ).toBe('https://shop.example/p')
   })
 })

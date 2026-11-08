@@ -117,7 +117,7 @@ const isClientContribLink = (link?: string | null): link is string =>
 
 const extractTokenFromLink = (link?: string | null) =>
   isClientContribLink(link)
-    ? (link.split('/').filter(Boolean).pop() ?? null)
+    ? (link.split(/[?#]/)[0]?.split('/').filter(Boolean).pop() ?? null)
     : null
 
 const compactProps = (props: Record<string, unknown>) =>

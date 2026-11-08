@@ -3,7 +3,7 @@
     <!-- Text only, no Amazon logo; plain anchor (no prefetch), same rel,
          target and referrer policy as the other offer links (GOU-1396). -->
     <a
-      :href="link"
+      :href="href"
       target="_blank"
       :rel="AFFILIATE_LINK_REL"
       :referrerpolicy="AFFILIATE_LINK_REFERRER_POLICY"
@@ -20,11 +20,14 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useAffiliationContentPath } from '~/composables/useAffiliationContentPath'
 import { useAnalytics } from '~/composables/useAnalytics'
 import {
   AFFILIATE_LINK_REFERRER_POLICY,
   AFFILIATE_LINK_REL,
+  withAffiliationContent,
 } from '~/utils/_product-pricing'
 
 /** Merchant name of the Amazon search clicks, as recorded by front-api. */
@@ -40,6 +43,10 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
+const affiliationContentPath = useAffiliationContentPath()
+const href = computed(() =>
+  withAffiliationContent(props.link, affiliationContentPath.value)
+)
 const { trackAffiliateClick, trackProductRedirect, extractTokenFromLink } =
   useAnalytics()
 
@@ -50,12 +57,12 @@ const handleClick = () => {
     token,
     placement: props.placement,
     source: AMAZON_MERCHANT,
-    url: props.link,
+    url: href.value,
   })
 
   trackAffiliateClick({
     token,
-    url: props.link,
+    url: href.value,
     merchantName: AMAZON_MERCHANT,
     placement: props.placement,
     productId: props.gtin ?? null,

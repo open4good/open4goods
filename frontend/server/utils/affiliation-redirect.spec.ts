@@ -1,9 +1,11 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import type { H3Event } from 'h3'
 
 import {
   MISSING_NAVIGATION_SIGNAL_MESSAGE,
+  resolveAffiliationContent,
   resolveAffiliationOrigin,
+  resolveAffiliationRedirect,
   sendContribPlainError,
 } from './affiliation-redirect'
 
@@ -87,5 +89,82 @@ describe('sendContribPlainError', () => {
     const { res } = await run({ statusCode: 403, statusMessage: 'Forbidden' })
 
     expect(res.body).toBe('Forbidden')
+  })
+})
+
+describe('resolveAffiliationContent', () => {
+  const withUrl = (url: string) =>
+    ({ node: { req: { url, headers: {} } }, path: url }) as unknown as H3Event
+
+  it('accepts an article or guide path', () => {
+    expect(
+      resolveAffiliationContent(withUrl('/contrib/tok?from=%2Fblog%2Fmon-slug'))
+    ).toBe('/blog/mon-slug')
+    expect(
+      resolveAffiliationContent(withUrl('/contrib/tok?from=/guides/a/b'))
+    ).toBe('/guides/a/b')
+  })
+
+  it.each([
+    ['other section', '/fours/x'],
+    ['absolute url', 'https://nudger.fr/blog/x'],
+    ['protocol-relative', '//blog/x'],
+    ['too long', `/blog/${'a'.repeat(200)}`],
+    ['query', '/blog/x?y=1'],
+    ['fragment', '/blog/x#y'],
+    ['space', '/blog/x y'],
+    ['index only', '/blog/'],
+  ])('ignores %s', (_label, value) => {
+    expect(
+      resolveAffiliationContent(
+        withUrl(`/contrib/tok?from=${encodeURIComponent(value)}`)
+      )
+    ).toBeUndefined()
+  })
+
+  it('ignores a missing from', () => {
+    expect(resolveAffiliationContent(withUrl('/contrib/tok'))).toBeUndefined()
+  })
+})
+
+describe('resolveAffiliationRedirect guards with from', () => {
+  it('still refuses robots even with a valid from', async () => {
+    const event = {
+      node: {
+        req: {
+          url: '/contrib/tok?from=%2Fblog%2Fx',
+          method: 'GET',
+          headers: { host: 'nudger.fr', 'user-agent': 'Googlebot/2.1' },
+        },
+      },
+      path: '/contrib/tok?from=%2Fblog%2Fx',
+      context: { params: { token: 'tok' } },
+    } as unknown as H3Event
+    await expect(resolveAffiliationRedirect(event)).rejects.toMatchObject({
+      statusCode: 403,
+    })
+  })
+
+  it('still refuses a missing navigation cookie even with a valid from', async () => {
+    vi.stubGlobal('useRuntimeConfig', () => ({}))
+    const event = {
+      node: {
+        req: {
+          url: '/contrib/tok?from=%2Fblog%2Fx',
+          method: 'GET',
+          headers: {
+            host: 'nudger.fr',
+            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) Firefox/130.0',
+          },
+        },
+      },
+      path: '/contrib/tok?from=%2Fblog%2Fx',
+      context: { params: { token: 'tok' } },
+    } as unknown as H3Event
+    await expect(resolveAffiliationRedirect(event)).rejects.toMatchObject({
+      statusCode: 403,
+      statusMessage: MISSING_NAVIGATION_SIGNAL_MESSAGE,
+    })
+    vi.unstubAllGlobals()
   })
 })

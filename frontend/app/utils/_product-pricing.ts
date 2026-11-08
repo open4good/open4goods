@@ -1,4 +1,8 @@
 import type { ProductDto } from '~~/shared/api-client'
+import {
+  AFFILIATION_CONTENT_QUERY_PARAM,
+  sanitizeAffiliationContentPath,
+} from '~~/shared/utils/affiliation-content-path'
 
 type NumberFormatFn = (
   value: number,
@@ -78,12 +82,33 @@ export const openAffiliateLinkInNewTab = (href: string): void => {
   anchor.remove()
 }
 
-export const resolveOfferHref = (offer: {
-  affiliationToken?: string | null
-  url?: string | null
-}): string | undefined =>
+/**
+ * Adds `?from=<article path>` to a `/contrib/<token>` link when the visitor
+ * read a blog article or guide earlier in this tab (GOU-1829). Other links
+ * (merchant URLs) are returned untouched.
+ */
+export const withAffiliationContent = <T extends string | null | undefined>(
+  href: T,
+  contentPath?: string | null
+): T => {
+  if (!href || !href.startsWith('/contrib/') || href.includes('?')) {
+    return href
+  }
+  const path = sanitizeAffiliationContentPath(contentPath)
+  return path
+    ? (`${href}?${AFFILIATION_CONTENT_QUERY_PARAM}=${encodeURIComponent(path)}` as T)
+    : href
+}
+
+export const resolveOfferHref = (
+  offer: {
+    affiliationToken?: string | null
+    url?: string | null
+  },
+  contentPath?: string | null
+): string | undefined =>
   offer.affiliationToken
-    ? `/contrib/${offer.affiliationToken}`
+    ? withAffiliationContent(`/contrib/${offer.affiliationToken}`, contentPath)
     : (offer.url ?? undefined)
 
 /** Single-sourced condition color grammar, used everywhere a "new" vs

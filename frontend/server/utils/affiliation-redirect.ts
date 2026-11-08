@@ -2,6 +2,7 @@ import { isbot } from 'isbot'
 import {
   createError,
   getCookie,
+  getQuery,
   getRouterParam,
   send,
   setResponseHeader,
@@ -13,6 +14,7 @@ import {
   type AffiliationRedirectHttpMethod,
   type AffiliationRedirectResponse,
 } from '~~/shared/api-client/services/affiliation.services'
+import { sanitizeAffiliationContentPath } from '~~/shared/utils/affiliation-content-path'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 import {
   NAVIGATION_SIGNAL_COOKIE_NAME,
@@ -80,6 +82,20 @@ export const resolveAffiliationOrigin = (
   } catch {
     return undefined
   }
+}
+
+/**
+ * Article (blog/guide) the visitor read before the product page, from the
+ * `from` query set client-side (GOU-1829). Invalid values are ignored.
+ */
+export const resolveAffiliationContent = (
+  event: H3Event
+): string | undefined => {
+  const raw = getQuery(event).from
+  return (
+    sanitizeAffiliationContentPath(Array.isArray(raw) ? raw[0] : raw) ??
+    undefined
+  )
 }
 
 const MAX_LOGGED_USER_AGENT_LENGTH = 80
@@ -245,6 +261,7 @@ export const resolveAffiliationRedirect = async (
       userAgent,
       method,
       origin: resolveAffiliationOrigin(event),
+      content: resolveAffiliationContent(event),
     })
   } catch (error) {
     const backendError = await extractBackendErrorDetails(error)
