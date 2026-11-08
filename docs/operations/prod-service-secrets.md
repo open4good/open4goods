@@ -45,15 +45,17 @@ Spring Boot, not on the JAR.
   (no trailing newline), mode 600, directory 700 when new. Any value works:
   JSON, quotes, spaces, newlines. Every apply of a Spring service writes
   `SPRING_CONFIG_IMPORT=optional:configtree:/etc/open4goods/secrets/<host service>/`
-  in `/etc/open4goods/<host service>.env`, which `publish-jars.sh` sources. The
-  import is optional: an empty or missing tree is a no-op. It is written even
-  when no tree secret is set, because `publish-jars.sh` sources every
-  service's env file in the same shell during a rolling restart: a service
-  without its own line would inherit the import of the service started before
-  it. `tree-sa` values must also be a Google service account JSON key.
+  in `/etc/open4goods/<host service>.env`, which `jvm-launch.sh` sources
+  before it starts the JVM. The import is optional: an empty or missing tree
+  is a no-op. It is written even when no tree secret is set: each JVM now
+  gets the environment of its own launcher (a systemd unit, or a
+  `jvm-launch.sh` process started by `publish-jars.sh`), but before GOU-1912
+  `publish-jars.sh` sourced every service's env file in the same shell during
+  a rolling restart, and a service without its own line inherited the import
+  of the service started before it. `tree-sa` values must also be a Google service account JSON key.
 - **Env line** (`env`, `digits`): `KEY=<value>` in the service's env file.
   The value must match `[A-Za-z0-9/._-]` (digits only for `digits`), because
-  the file is sourced by `publish-jars.sh` or read as a docker compose
+  the file is sourced by `jvm-launch.sh` or read as a docker compose
   `env_file`. Used for the existing `api.env` lines and for the frontend.
 - **File and path line** (`path-sa`): `API_GOOGLE_API_JSON` is written to
   `/etc/open4goods/secrets/google-indexation.json`, and
@@ -101,14 +103,15 @@ Migration order, without downtime (GOU-1694):
 
 ### Precedence
 
-`publish-jars.sh` starts the Spring services with
+`jvm-launch.sh`, started by `publish-jars.sh` or by the `nudger-jvm@<service>`
+systemd unit, starts the Spring services with
 `spring.config.location=classpath:/application.yml,file:<config>/application-active.yml`
 (sbadmin: the YAML file only). An import declared by `SPRING_CONFIG_IMPORT`
 takes precedence over these locations, so the config tree beats
 `application-active.yml` and `application.yml`, including its
 `${ENV_VAR:default}` placeholders. The OS environment and `-D` system
 properties still beat the tree: a property rendered in the tree must not also
-be set as an environment variable in a file `publish-jars.sh` sources
+be set as an environment variable in a file `jvm-launch.sh` sources
 (`config/<env>/infra/.env`, `/etc/open4goods/<service>.env`,
 `config/<env>/<service>/.env`).
 

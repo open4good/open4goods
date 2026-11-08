@@ -59,7 +59,7 @@ target file: values travel through SSH stdin (never a command line, an artifact 
 log), the file is rebuilt atomically with mode 600. These keys are no longer
 in `open4goods-config` `configs/beta/*`.
 
-- front-api: `publish-jars.sh` sources `/etc/open4goods/front-api.env`, which
+- front-api: `jvm-launch.sh` sources `/etc/open4goods/front-api.env`, which
   sits outside the tree that `open4goods-config`'s deploy rsyncs with
   `--delete`, so it survives config deploys and `publishJars.yml` restarts.
   The OS environment variable also beats `application-active.yml`.

@@ -81,7 +81,7 @@ Not rotated by this workflow:
   `/etc/open4goods/infra.env` (mode 600).
 - `/etc/open4goods/infra.env` is outside every path that an
   `open4goods-config` deploy writes (`/opt/open4goods/bin/`, `latest/`,
-  `config/`), and `publish-jars.sh` does not source it: the Java services
+  `config/`), and `jvm-launch.sh` does not source it: the Java services
   never see the infrastructure secrets. Next to the compose file
   (`/opt/open4goods/bin/`) it would be deleted by the `rsync --delete` of
   `deployConfiguration.yml`; in `config/<env>/infra/.env` it would be
@@ -122,7 +122,7 @@ consumers, their `application-active.yml`, the kept previous value.
 Postgres and ClickHouse: `infra.env`, `config/beta/infra/.env`, the default of
 the compose placeholder (`${VAR:-...}`), the URL the running Plausible was
 created with, the environment of the database container. b2b Postgres: the
-b2b-api config tree, `infra.env`, the three env files `publish-jars.sh`
+b2b-api config tree, `infra.env`, the three env files `jvm-launch.sh`
 sources for b2b-api, the default of the placeholder in its
 `application-active.yml` and in the compose file, the environment of
 `b2b_postgres`. In every case the kept previous value comes last. The Google
