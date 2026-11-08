@@ -133,8 +133,11 @@ public class BatchController {
     @GetMapping("/batch/purge-datasource")
     @Operation(
             summary = "Status and report of the datasource purge",
-            description = "Returns IDLE, RUNNING, COMPLETED (with the report: scanned, touched and saved products, "
-                    + "removed offers, example GTINs) or FAILED for the current or last purge-datasource run.")
+            description = "Returns IDLE, RUNNING (with the counters of the last progress step), COMPLETED (with the "
+                    + "report: scanned, touched and saved products, removed offers, example GTINs), FAILED or INTERRUPTED "
+                    + "for the current or last purge-datasource run. The status is persisted in a JSON file and read back "
+                    + "at startup: a run still RUNNING when the api stopped is reported INTERRUPTED with its last counters "
+                    + "(lastProgressAt). It is never resumed; a new POST starts a new run.")
     @ApiResponse(responseCode = "200", description = "Current status")
     public DatasourcePurgeStatus purgeDatasourceStatus() {
         return datasourcePurgeService.getStatus();

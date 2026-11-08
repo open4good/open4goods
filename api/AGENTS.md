@@ -112,11 +112,24 @@ des autres datasources ne sont jamais retirées. Historique et tendances de prix
   datasource.
 - `dryRun=true` par défaut : compte produits et offres touchés, donne jusqu'à 20 GTIN d'exemple, n'écrit rien.
 - Parcours complet par scroll (pages de `FULL_PRODUCT_PAGE_SIZE`, produits complets, embeddings compris), écriture
-  par bulks de 200, progression loguée tous les 50 000 produits. Un produit sans donnée de la datasource n'est
-  jamais réécrit : un second passage ne touche rien. À lancer hors de la fenêtre du batch nocturne.
+  par bulks de 200. Un produit sans donnée de la datasource n'est jamais réécrit : un second passage ne touche
+  rien. À lancer hors de la fenêtre du batch nocturne.
 - Asynchrone (un seul run à la fois) : réponse `202` ; `GET /batch/purge-datasource` donne l'état (`IDLE`,
-  `RUNNING`, `COMPLETED` avec le rapport `scannedProducts`, `touchedProducts`, `removedOffers`, `savedProducts`,
-  `failedProducts`, `sampleGtins`, ou `FAILED`).
+  `RUNNING` avec les compteurs du dernier palier, `COMPLETED` avec le rapport `scannedProducts`, `touchedProducts`,
+  `removedOffers`, `savedProducts`, `failedProducts`, `sampleGtins`, `FAILED` avec `error`, ou `INTERRUPTED`).
+- Progression (GOU-1815) : un palier tous les `datasource-purge-progress-interval` produits lus (défaut 50 000) et au
+  moins toutes les 5 minutes. Chaque palier écrit une ligne `Purge of datasource <nom> (dryRun=...): N products
+  scanned, ... touched, ... offers removed, ... saved, ... failed, sample GTINs [...]` dans `nohup-api.log` (le
+  `application.yml` du jar garde `DatasourcePurgeService` en `INFO` alors que la config bêta/prod met
+  `org.open4goods` en `warn`).
+- Rapport persistant : l'état est écrit en JSON au lancement, à chaque palier puis à la fin, dans
+  `datasource-purge-status-file` (défaut `<root-folder>/batch-reports/datasource-purge-status.json`, soit
+  `/opt/open4goods/batch-reports/datasource-purge-status.json` en bêta et en prod), par fichier temporaire
+  `.tmp` renommé. Il se lit sans l'api : `cat` du fichier.
+- `INTERRUPTED` : au démarrage, l'api relit ce fichier ; un run resté `RUNNING` (api arrêtée ou redéployée pendant
+  le run) devient `INTERRUPTED`, avec les compteurs et `sampleGtins` de son dernier palier (`lastProgressAt`) et sans
+  `finishedAt`. Le run n'est pas repris : un nouveau `POST` relance un run complet depuis le début. `COMPLETED` et
+  `FAILED` restent lisibles après redémarrage.
 
 Appel Ops (clé `admin-key`, secret `O4G_INTERNAL_API_KEY`, brute dans l'en-tête `Authorization`), dry run, état, puis
 run réel une fois le rapport du dry run vérifié :
