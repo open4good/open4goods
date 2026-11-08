@@ -29,6 +29,7 @@ secrets without a source to change (API keys, tokens) follow
 | `INFRA_GOOGLE_CLIENT_ID`, `INFRA_GOOGLE_CLIENT_SECRET` | beta | none (Google OAuth client of the Search Console integration, issued by Google) | Plausible: `infra.env` -> `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
 | `B2B_API_POSTGRES_PASSWORD`         | beta, prod   | Postgres user of `b2b_postgres` (`product_data_api`) | b2b-api: config tree `spring.datasource.password`; `infra.env` -> `B2B_POSTGRES_PASSWORD` |
 | `INFRA_ES_OPS_READONLY_PASSWORD`    | beta, prod   | Elasticsearch user and role `ops_readonly` (created or updated: cluster `monitor`; `read`, `view_index_metadata` on the products index `products-moustik` and on the clicks index `affiliation-clicks` only, no wildcard, no write or `manage` privilege) | none: curl config `/etc/open4goods/ops-es-readonly.curlrc` (600, one `user = "ops_readonly:<value>"` line), read by Ops with `curl -s -K /etc/open4goods/ops-es-readonly.curlrc http://<es>:9200/...` (never `-u`: the value would show in `ps`) |
+| `INFRA_ES_AGENTS_READONLY_PASSWORD` | prod         | Elasticsearch user and role `agents_readonly` (created or updated: no cluster privilege, not even `monitor`; `read`, `view_index_metadata` on `products-moustik`, `eprel-products` and `affiliation-clicks` only, no wildcard, no system index, no write or `manage` privilege) | none on the host: the consumer is the `paperclip-es-readonly` service of 1box (MCP connector of the agents); no file is left on the host |
 | Elasticsearch transport certificates | beta, prod  | regenerated on the host by Ops                    | Elasticsearch (see [Transport certificates](#transport-certificates-30))                  |
 
 Access generates every value with `secret_generate` `kind=hex32`: the workflow
@@ -98,7 +99,7 @@ Not rotated by this workflow:
 Actions > "Infra secrets (source + render + restart)" > Run workflow.
 Inputs: `env` (`beta`, `prod`), `target` (`elasticsearch`, `kibana`,
 `plausible`, `plausible-postgres`, `plausible-clickhouse` and
-`plausible-google` for beta, `b2b-postgres`, `es-ops-readonly`), `mode` (`test`, `apply`,
+`plausible-google` for beta, `b2b-postgres`, `es-ops-readonly`, `es-agents-readonly` for prod only), `mode` (`test`, `apply`,
 `rollback`).
 `apply` and `rollback` only run on `main`; `test` writes nothing and may run
 from a branch. The job shares the concurrency group of the deploys
@@ -257,6 +258,27 @@ What each target does:
   There is no `rollback`: delete the user, the role and the file by hand.
   The index name is `Product.DEFAULT_REPO` (no alias is defined in the code);
   proof: the `_authenticate` line of `source` and the `es-ops-readonly` checks of
+  `scripts/tests/infra-secrets.test.sh`.
+
+- `es-agents-readonly` (prod only): read-only Elasticsearch identity of the agents'
+  MCP connector (GOU-1864, design GOU-1869 D160). Same model as `es-ops-readonly`,
+  authenticated with the `elastic` password in service. `source` sets the role
+  `agents_readonly` (`PUT _security/role`: `cluster: []`, no privilege at all, not even
+  `monitor`; `read` and `view_index_metadata` on `products-moustik`, `eprel-products` and
+  `affiliation-clicks` only, exact names, no wildcard, no system index), the user
+  `agents_readonly` (`PUT _security/user`, which also changes the password of an existing
+  user) and checks `GET _security/_authenticate` with the new credentials. The credentials
+  only go through a mode 600 temporary file of the remote run, deleted on exit: no curlrc,
+  no file left on the host, no value in an argument or a log. The consumer is the
+  `paperclip-es-readonly` service of 1box, not `nudger-prod`. Secret:
+  `INFRA_ES_AGENTS_READONLY_PASSWORD` in the GitHub Environment `prod` (Access generates it
+  with `kind=hex32`); missing, it stops `check` and `test` too. `beta` is refused. No
+  consumer is restarted. `test` reads the role, tries the account and writes nothing.
+  Apply (Ops, after Goulven's approval, GOU-1872):
+  `gh workflow run infraSecrets.yml -f env=prod -f target=es-agents-readonly -f mode=apply`.
+  There is no `rollback`: delete the user and the role by hand
+  (`DELETE _security/user/agents_readonly`, `DELETE _security/role/agents_readonly`).
+  Proof: the `_authenticate` line of `source` and the `es-agents-readonly` checks of
   `scripts/tests/infra-secrets.test.sh`.
 
 If Postgres refuses an `ALTER USER`, its log may hold the statement, so the new
