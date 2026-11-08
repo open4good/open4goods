@@ -105,8 +105,10 @@ score on 0-5 (`absolute / 4`).
 `ECOSCORE` is a reserved name: an attribute cannot declare it in
 `participateInScores`. A composite with that name would replace the weighted
 0-20 score with a 0-5 sub-score (this happened to air conditioners through
-`REFRIGERANT_GWP`). `ParticipatingScoreHelper` rejects it and
-`VerticalYamlValidationTest` checks every vertical.
+`REFRIGERANT_GWP`). `VerticalYamlValidationTest` rejects it in every vertical
+of the repository; at runtime `ParticipatingScoreHelper` ignores it with an
+error log, so that a configuration override cannot stop a vertical from being
+scored.
 
 ### 4. Ranking
 
@@ -128,8 +130,9 @@ scores the products that have offers and are not excluded. After scoring:
 - excluded products and products unmatched from the vertical lose all their
   scores and their ranking;
 - products without offers keep their last score (they stay in the sitemap,
-  GOU-1744), unless their Impact Score is a composite, which only the defect
-  above produces;
+  GOU-1744). If their Impact Score is a composite, which only the defect above
+  produces, it is recomputed from the sub-scores they hold, with the ranking of
+  `EcoScoreRanking`; it is removed only when it cannot be recomputed;
 - if scoring throws, nothing is indexed for that vertical.
 
 ## Source Code pointers
