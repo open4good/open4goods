@@ -24,6 +24,9 @@ front:
     # The ip/ua purge of contribution-votes (ContributionVotesIpUaPurgeRunner) needs a real
     # Elasticsearch; LocalDevConfig only provides a stub.
     enabled: false
+  affiliation-clicks-mapping:
+    # Same for the affiliation-clicks mapping update (AffiliationClicksMappingRunner).
+    enabled: false
 
 favicon:
   # Default is /opt/open4goods/.cached/, a path outside this workspace that `local` has no

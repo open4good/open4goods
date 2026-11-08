@@ -71,7 +71,7 @@ class AffiliationServiceTest {
         String token = affiliationService.encryptAffiliationLink("darty.com", AWIN_URL, "0123456789012");
         long before = System.currentTimeMillis();
 
-        String url = affiliationService.trackRedirect(token, "/fours/four-encastrable");
+        String url = affiliationService.trackRedirect(token, "/fours/four-encastrable", null);
 
         assertEquals(AWIN_URL, url);
         ArgumentCaptor<AffiliationClick> clickCaptor = ArgumentCaptor.forClass(AffiliationClick.class);
@@ -89,7 +89,8 @@ class AffiliationServiceTest {
         ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writeValueAsString(click);
         assertThat(mapper.readValue(json, java.util.Map.class).keySet())
-                .containsExactlyInAnyOrder("id", "ts", "network", "merchant", "gtin", "originPath", "targetHost");
+                .containsExactlyInAnyOrder("id", "ts", "network", "merchant", "gtin", "originPath", "contentPath",
+                        "targetHost");
         assertThat(json).doesNotContain("cread.php", "clickref");
     }
 
@@ -97,12 +98,13 @@ class AffiliationServiceTest {
     void trackRedirectShouldAcceptLegacyTokensWithoutGtinNorOrigin() {
         String token = affiliationService.encryptAffiliationLink("shop", "https://shop.example/p/1");
 
-        affiliationService.trackRedirect(token, null);
+        affiliationService.trackRedirect(token, null, null);
 
         ArgumentCaptor<AffiliationClick> clickCaptor = ArgumentCaptor.forClass(AffiliationClick.class);
         verify(affiliationClickRepository).save(clickCaptor.capture());
         assertThat(clickCaptor.getValue().getGtin()).isNull();
         assertThat(clickCaptor.getValue().getOriginPath()).isNull();
+        assertThat(clickCaptor.getValue().getContentPath()).isNull();
         assertThat(clickCaptor.getValue().getNetwork()).isEqualTo("other");
     }
 
@@ -115,7 +117,7 @@ class AffiliationServiceTest {
         String token = encode(forged);
         ContributionVote original = affiliationService.decryptAffiliationLink(token);
 
-        String url = affiliationService.trackRedirect(token, null);
+        String url = affiliationService.trackRedirect(token, null, null);
 
         ArgumentCaptor<ContributionVote> voteCaptor = ArgumentCaptor.forClass(ContributionVote.class);
         verify(contributionVoteRepository).save(voteCaptor.capture());
@@ -139,7 +141,7 @@ class AffiliationServiceTest {
         doThrow(new RuntimeException("Elasticsearch unavailable")).when(affiliationClickRepository).save(any());
         doThrow(new RuntimeException("Elasticsearch unavailable")).when(contributionVoteRepository).save(any());
 
-        String url = affiliationService.trackRedirect(token, "/fours/foo");
+        String url = affiliationService.trackRedirect(token, "/fours/foo", null);
 
         assertEquals("https://example.com", url);
     }
@@ -149,7 +151,7 @@ class AffiliationServiceTest {
         String token = affiliationService.encryptAffiliationLink("datasource", "https://example.com");
         doThrow(new RuntimeException("Elasticsearch unavailable")).when(affiliationClickRepository).save(any());
 
-        affiliationService.trackRedirect(token, null);
+        affiliationService.trackRedirect(token, null, null);
 
         verify(contributionVoteRepository).save(any(ContributionVote.class));
     }
@@ -174,6 +176,45 @@ class AffiliationServiceTest {
 
         assertThat(AffiliationService.sanitiseOriginPath(max)).isEqualTo(max);
         assertThat(AffiliationService.sanitiseOriginPath(max + "a")).isNull();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/blog/x", "/guides/x", "/blog/choisir-un-four", "/guides/lave-linge/bien-choisir"})
+    void trackRedirectShouldStoreAValidContentPath(String contentPath) {
+        String token = affiliationService.encryptAffiliationLink("darty.com", AWIN_URL, "0123456789012");
+
+        String url = affiliationService.trackRedirect(token, "/fours/four-encastrable", contentPath);
+
+        assertEquals(AWIN_URL, url);
+        ArgumentCaptor<AffiliationClick> clickCaptor = ArgumentCaptor.forClass(AffiliationClick.class);
+        verify(affiliationClickRepository).save(clickCaptor.capture());
+        assertThat(clickCaptor.getValue().getContentPath()).isEqualTo(contentPath);
+        assertThat(clickCaptor.getValue().getOriginPath()).isEqualTo("/fours/four-encastrable");
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {"/fours/x", "https://nudger.fr/blog/x", "//nudger.fr/blog/x", "/blog/x?y", "/blog/x#y",
+            "/blog/x y", "/guides/\u0000x", "blog/x", "/blog", "/guides", "/blogs/x", "/fr-FR/blog/x"})
+    void trackRedirectShouldIgnoreAnInvalidContentPathAndStillRedirect(String contentPath) {
+        String token = affiliationService.encryptAffiliationLink("darty.com", AWIN_URL);
+
+        String url = affiliationService.trackRedirect(token, "/fours/four-encastrable", contentPath);
+
+        assertEquals(AWIN_URL, url);
+        ArgumentCaptor<AffiliationClick> clickCaptor = ArgumentCaptor.forClass(AffiliationClick.class);
+        verify(affiliationClickRepository).save(clickCaptor.capture());
+        assertThat(clickCaptor.getValue().getContentPath()).isNull();
+        assertThat(clickCaptor.getValue().getOriginPath()).isEqualTo("/fours/four-encastrable");
+    }
+
+    @Test
+    void sanitiseContentPathShouldCapTheLength() {
+        String max = "/blog/" + "a".repeat(AffiliationService.MAX_ORIGIN_PATH_LENGTH - "/blog/".length());
+
+        assertThat(max).hasSize(200);
+        assertThat(AffiliationService.sanitiseContentPath(max)).isEqualTo(max);
+        assertThat(AffiliationService.sanitiseContentPath(max + "a")).isNull();
     }
 
     private static String encode(ContributionVote vote) {

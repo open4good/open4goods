@@ -49,8 +49,9 @@ final class AffiliationTestSupport {
         }
 
         @Override
-        public AffiliationClickStats read(long longStart, long shortStart, long end, int topMerchants) {
-            calls.add(new long[] {longStart, shortStart, end, topMerchants});
+        public AffiliationClickStats read(long longStart, long shortStart, long end, int topMerchants,
+                int topOrigins) {
+            calls.add(new long[] {longStart, shortStart, end, topMerchants, topOrigins});
             if (failure != null) {
                 throw failure;
             }
@@ -63,7 +64,7 @@ final class AffiliationTestSupport {
      */
     static FakeClickStats noClicks() {
         Map<String, Long> zero = Map.of("awin", 0L, "effiliation", 0L, "other", 0L);
-        return new FakeClickStats(new AffiliationClickStats(zero, zero, 0, 0, List.of()), null);
+        return new FakeClickStats(new AffiliationClickStats(zero, zero, 0, 0, List.of(), List.of()), null);
     }
 
     /**

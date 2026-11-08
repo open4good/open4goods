@@ -13,7 +13,9 @@ Metriks, without personal data (GOU-1188).
    `Referer` alone is refused since GOU-1520), then calls front-api
    `GET /affiliations/redirect`, forwarding the optional
    `X-Affiliation-Origin` header (path of the originating page, read from the
-   same-site `Referer`).
+   same-site `Referer`) and, since GOU-1828, the optional
+   `X-Affiliation-Content` header (article or guide the offer was reached from,
+   read from the `from` query parameter of the link, see below).
 3. front-api `AffiliationService.trackRedirect` writes one `AffiliationClick`
    document and the legacy `ContributionVote` (without IP nor user agent), both
    fail-open: a persistence failure never blocks the redirect.
@@ -79,6 +81,7 @@ and api (reader, `AffiliationClickStatsService`).
 | `merchant`   | keyword   | Datasource name of the offer                               |
 | `gtin`       | keyword   | Product GTIN, `null` for tokens without it                 |
 | `originPath` | keyword   | Originating path, `null` when absent or invalid            |
+| `contentPath`| keyword   | Article or guide path (`/blog/...`, `/guides/...`), `null` when absent or invalid (GOU-1828) |
 | `targetHost` | keyword   | Host of the target URL (never the full URL)                |
 
 No IP, no user agent, no full URL. `network` is deduced from the target host by
@@ -102,6 +105,43 @@ deployment date.
 single `/`, has no `?`, `#`, whitespace or control character, and is at most
 200 characters long. Otherwise it is ignored (`null`).
 
+### Article or guide of the click (GOU-1828)
+
+`/contrib/` links only exist on product pages, so a visit coming from an
+article (`/blog/...`) or a guide (`/guides/...`) is recorded with the product page
+as `originPath`. The frontend therefore adds the article of context to the
+offer link, and only when there is one: `/contrib/<token>?from=<path>`. The
+Nuxt route forwards it to front-api as `X-Affiliation-Content: <path>`
+(`X-Affiliation-Origin` is unchanged).
+
+front-api (`AffiliationService.sanitiseContentPath`) keeps the value only when
+it follows the `X-Affiliation-Origin` rules above **and** starts with `/blog/`
+or `/guides/`; anything else is ignored (`null`) and never blocks the
+redirect, which stays a `302`.
+
+The field was added to an existing index: `createIndex = true` only maps a new
+index, and the dynamic mapping would turn the first value into `text` plus
+`.keyword`. front-api therefore runs `AffiliationClickMappingService` at
+startup (`AffiliationClicksMappingRunner`, background thread after
+`ApplicationReadyEvent`): it writes the `AffiliationClick` mapping onto the
+existing index (additive, idempotent; creates the index when it is missing)
+and checks that `contentPath` is a `keyword`. It is fail-open: an error (for
+example Elasticsearch unreachable, or `contentPath` already mapped with
+another type) is one `ERROR` line starting with `affiliation-clicks mapping`
+and the next startup retries; neither the startup nor the redirects are
+affected. Toggle: `front.affiliation-clicks-mapping.enabled` (default `true`,
+`FRONT_AFFILIATION_CLICKS_MAPPING_ENABLED`; `false` in the `local` profile).
+Existing documents are not rewritten: clicks stored before have no
+`contentPath`.
+
+```bash
+grep 'affiliation-clicks mapping' front-api.log
+```
+
+If `contentPath` was ever mapped dynamically (a click with the header written
+before the update ran), the update keeps failing: the index must then be
+reindexed with the right mapping, which is a separate, approved operation.
+
 The documents already stored in `contribution-votes` with IP and user agent
 were not touched by this change. Their purge (board approval 2f4935d1) runs in
 front-api at startup, see `ContributionVoteIpUaPurgeService` and the front-api
@@ -116,10 +156,23 @@ Added after the commission events of `/api/metriks/affiliation`:
   the same window `params` as the commission events (no `currency`);
 - `affiliation.clicks.top_merchants.28d`: `value` is the number of rows,
   `params.rows` lists `merchant`, `network` and `clicks`, top 20, most clicked
-  first (ties ordered by merchant).
+  first (ties ordered by merchant);
+- `affiliation.clicks.top_origins.28d` (GOU-1828), window `[D-28, D-1]`:
+  `value` is the number of rows, `params.rows` lists `origin` and `clicks`,
+  top 50, most clicked first (ties ordered by `origin`).
 
-A single Elasticsearch request (date range query, `terms` and `multi_terms`
-aggregations, no document fetched) feeds all of them. A network without click
+Attribution rule of `top_origins`: the `origin` of a click is its
+`contentPath` when it has one, otherwise its `originPath`, otherwise
+`(none)`. It is read without script, by a `terms` aggregation on
+`contentPath` (size 50) and a `filter` aggregation (`must_not exists
+contentPath`) holding a `terms` aggregation on `originPath` (size 50,
+`missing: "(none)"`), merged in Java. Both sets of clicks are disjoint, so the
+top 50 of their union is exact; a path present in both (a `/blog/` page as the
+`originPath` of a click without `contentPath`) is summed. On an index whose
+mapping does not hold `contentPath` yet, every click counts by `originPath`.
+
+A single Elasticsearch request (date range query, `terms`, `multi_terms` and
+`filter` aggregations, no document fetched) feeds all of them. A network without click
 reports `0`. When Elasticsearch cannot answer (unreachable, missing index), all
 click events are in `error`, never `0`; the commission events are unaffected.
 
@@ -168,14 +221,17 @@ events are in `error` (missing credential).
 
 ## Tests
 
-- `AffiliationNetworkTest` (network deduction) and
+- `AffiliationNetworkTest` (network deduction),
   `AffiliationClickStatsServiceIT` (real Elasticsearch through Testcontainers:
-  mapping, window bounds, counts, top merchants, missing index) in
-  `services/contribution`. The IT is not run by CI (no failsafe execution);
-  run it with
-  `mvn -pl services/contribution test -Dtest=AffiliationClickStatsServiceIT`.
-- `AffiliationServiceTest`, `AffiliationControllerTest` and
-  `AmazonSearchLinkServiceTest` in front-api.
+  mapping, window bounds, counts, top merchants, top origins, missing index)
+  and `AffiliationClickMappingServiceIT` (`contentPath` added as `keyword` to
+  an index created without it, idempotence, conflict) in
+  `services/contribution`. The ITs are not run by CI (no failsafe execution);
+  run them with
+  `mvn -pl services/contribution test -Dtest='AffiliationClick*IT'`.
+- `AffiliationServiceTest`, `AffiliationControllerTest`,
+  `AffiliationClicksMappingRunnerTest` and `AmazonSearchLinkServiceTest` in
+  front-api.
 - `server/routes/contrib/[...token].spec.ts` and
   `server/utils/contrib-referrer-policy.spec.ts` (Referrer-Policy per target)
   in the frontend.
