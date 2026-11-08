@@ -41,6 +41,30 @@ public class BarcodeValidationService {
 
 	}
 
+	/**
+	 * Returns the numeric product id of a barcode, i.e. {@code Long.valueOf} of its
+	 * {@link #sanitize(String) sanitised} form. It is the single key used both to look
+	 * up an existing product and to index it, so that every form of the same code
+	 * designates the same document: an ISBN-10 and its ISBN-13 ({@code 2726862217} and
+	 * {@code 9782726862216}), a UPC-A, EAN-13 or GTIN-14 with or without leading zeros
+	 * ({@code 07333394145372} and {@code 7333394145372}).
+	 *
+	 * @param barcode raw barcode, as published by a datasource
+	 * @return the product id, or {@code null} when the barcode is not a valid GTIN or ISBN
+	 */
+	public Long toProductId(String barcode) {
+		SimpleEntry<BarcodeType, String> sanitized = sanitize(barcode);
+		if (sanitized == null || BarcodeType.UNKNOWN.equals(sanitized.getKey()) || !StringUtils.isNumeric(sanitized.getValue())) {
+			return null;
+		}
+		try {
+			return Long.valueOf(sanitized.getValue());
+		} catch (NumberFormatException e) {
+			logger.debug("Sanitised barcode {} of {} is not a product id", sanitized.getValue(), barcode);
+			return null;
+		}
+	}
+
 
 	private SimpleEntry<BarcodeType, String> test(String barcode) {
 		//		String barcode = Long.valueOf(code).toString();

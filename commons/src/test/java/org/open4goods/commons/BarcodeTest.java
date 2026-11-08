@@ -1,6 +1,7 @@
 package org.open4goods.commons;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.commons.services.BarcodeValidationService;
@@ -68,6 +69,34 @@ public class BarcodeTest {
 		assertEquals(BarcodeType.GTIN_13, service.sanitize("790310044").getKey());
 		
 
+	}
+
+	/**
+	 * GOU-1841: every form of a code gives the id the product is indexed under.
+	 */
+	@Test
+	public void toProductIdGivesTheSameIdForEveryFormOfACode() {
+		BarcodeValidationService service = new BarcodeValidationService();
+
+		// ISBN-10 and its ISBN-13
+		assertEquals(9782726862216L, service.toProductId("2726862217"));
+		assertEquals(9782726862216L, service.toProductId("9782726862216"));
+		assertEquals(9781609202415L, service.toProductId("1609202414"));
+		assertEquals(9781609202415L, service.toProductId("9781609202415"));
+
+		// UPC-A, EAN-13 and GTIN-14 with leading zeros
+		assertEquals(36000291452L, service.toProductId("036000291452"));
+		assertEquals(36000291452L, service.toProductId("0036000291452"));
+		assertEquals(36000291452L, service.toProductId("00036000291452"));
+		assertEquals(36000291452L, service.toProductId("36000291452"));
+		assertEquals(7333394145372L, service.toProductId("07333394145372"));
+
+		// EAN-8
+		assertEquals(40170725L, service.toProductId("40170725"));
+
+		// Invalid
+		assertNull(service.toProductId("7333394145373"));
+		assertNull(service.toProductId(null));
 	}
 	//
 

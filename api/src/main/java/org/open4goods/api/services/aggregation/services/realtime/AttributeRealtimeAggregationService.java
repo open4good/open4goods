@@ -535,8 +535,10 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		}
 
 		///////////////////////
-		// Handling gtin (NOTE : useless since gtin is used as ID, so coupling is done
-		/////////////////////// previously
+		// Handling gtin. The referential GTIN is owned by IdentityAggregationService, which
+		// sets it to the sanitised barcode the product id derives from. A fragment may carry
+		// another form of the same code (ISBN-10, leading zeros) : it is kept in gtinInfos,
+		// never written over the sanitised one (GOU-1841).
 		///////////////////////
 		String gtin = fragment.gtin();
 		if (!StringUtils.isEmpty(gtin)) {
@@ -546,16 +548,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			if (StringUtils.isBlank(existing)) {
 				output.getAttributes().getReferentielAttributes().put(ReferentielKey.GTIN, gtin);
 			} else if (!existing.equals(gtin)) {
-				try {
-					long existingGtin = Long.parseLong(existing);
-					long newGtin = Long.parseLong(gtin);
-					if (existingGtin != newGtin) {
-						dedicatedLogger.error("Overriding GTIN from {} to {}", existing, newGtin);
-						output.getAttributes().getReferentielAttributes().put(ReferentielKey.GTIN, gtin);
-					}
-				} catch (NumberFormatException e) {
-					dedicatedLogger.error("Invalid GTIN format: existing = {}, new = {}", existing, gtin, e);
-				}
+				dedicatedLogger.debug("Keeping referential GTIN {}, dataFragment publishes {}", existing, gtin);
 			}
 
 		}

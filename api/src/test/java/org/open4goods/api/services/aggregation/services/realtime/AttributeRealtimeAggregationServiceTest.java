@@ -84,6 +84,25 @@ class AttributeRealtimeAggregationServiceTest {
                 assertThat(product.getGtinInfos().getGtinStrings()).containsExactly("0123456789012");
         }
 
+        /**
+         * GOU-1841: "Overriding GTIN from 9781609202415 to 1609202414" replaced the
+         * sanitised ISBN-13 by the raw ISBN-10 of the fragment.
+         */
+        @Test
+        void handleReferentielAttributesKeepsTheSanitisedGtin() throws Exception {
+                Product product = new Product(9781609202415L);
+                product.getAttributes().getReferentielAttributes().put(ReferentielKey.GTIN, "9781609202415");
+                DataFragment fragment = new DataFragment();
+                fragment.getReferentielAttributes().put(ReferentielKey.GTIN, "1609202414");
+
+                Method method = AttributeRealtimeAggregationService.class.getDeclaredMethod("handleReferentielAttributes", DataFragment.class, Product.class, VerticalConfig.class);
+                method.setAccessible(true);
+                method.invoke(service, fragment, product, verticalConfig);
+
+                assertThat(product.gtin()).isEqualTo("9781609202415");
+                assertThat(product.getGtinInfos().getGtinStrings()).containsExactly("1609202414");
+        }
+
         @Test
         void onProductAssignsIcecatTaxonomyIdsFromResolver() throws Exception {
                 Product product = buildBaseProduct();
