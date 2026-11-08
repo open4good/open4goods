@@ -34,7 +34,7 @@
 #   b2b-postgres          B2B_API_POSTGRES_PASSWORD (Postgres user of b2b_postgres) -> b2b-api (config tree
 #                         spring.datasource.password), compose as B2B_POSTGRES_PASSWORD
 #   es-ops-readonly       INFRA_ES_OPS_READONLY_PASSWORD (Elasticsearch user ops_readonly, role ops_readonly: cluster
-#                         monitor, read + view_index_metadata on the products index only) -> the file
+#                         monitor, read + view_index_metadata on the products index and affiliation-clicks only) -> the file
 #                         /etc/open4goods/ops-es-readonly.curlrc (600, one `user = \"ops_readonly:<value>\"` line, for
 #                         `curl -K`: never in an argument) for Ops; no consumer to restart;
 #                         the secret is required by test too; no rollback (delete the user by hand, runbook)
@@ -1296,10 +1296,13 @@ b2b_postgres_rollback() {
 
 # Product index of the api (Product.DEFAULT_REPO); no alias is defined in the code.
 ops_index=${OPS_ES_INDEX:-products-moustik}
+# Affiliation clicks index (read for Growth's content routine): exact name, no wildcard.
+ops_clicks_index=affiliation-clicks
 ops_file=$etc/ops-es-readonly.curlrc
 
 ops_role_body() {
-  printf '{"cluster":["monitor"],"indices":[{"names":["%s"],"privileges":["read","view_index_metadata"]}]}' "$ops_index" \
+  printf '{"cluster":["monitor"],"indices":[{"names":["%s","%s"],"privileges":["read","view_index_metadata"]}]}' \
+    "$ops_index" "$ops_clicks_index" \
     > "$work/role.json"
 }
 
@@ -1350,7 +1353,7 @@ es_ops_readonly_source() {
   ops_role_body
   code=$(es_call elastic "$elastic_pw" PUT /_security/role/ops_readonly "$work/role.json")
   case "$code" in 200 | 201) ;; *) fail "Elasticsearch refused the role ops_readonly (HTTP $code)" ;; esac
-  ok "role ops_readonly set (cluster monitor; read, view_index_metadata on $ops_index)"
+  ok "role ops_readonly set (cluster monitor; read, view_index_metadata on $ops_index and $ops_clicks_index)"
   ops_user_body
   code=$(es_call elastic "$elastic_pw" PUT /_security/user/ops_readonly "$work/user.json")
   rm -f "$work/user.json"
