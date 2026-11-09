@@ -1,6 +1,6 @@
 ---
 title: "Impact écologique des téléviseurs"
-description: "Les téléviseurs, compagnons devenus essentiels mais polluants, impactent notre environnement à chaque étape de leur cycle de vie. De l'extraction des métaux rares à la fin de vie difficilement maîtrisée, leur empreinte écologique est considérable. Nudger propose une solution innovante pour atténuer cet impact. Grâce à son éco-score, Nudger permet de comparer les téléviseurs en termes d'impact environnemental et de prix, aidant les consommateurs à faire des choix plus écologiques, tout en offrant gratuitement une compensation environnementale pour amoindrir l'impact écologique de votre achat."
+description: "Les téléviseurs, compagnons devenus essentiels mais polluants, impactent notre environnement à chaque étape de leur cycle de vie. De l'extraction des métaux rares à la fin de vie difficilement maîtrisée, leur empreinte écologique est considérable. Nudger compare les téléviseurs par prix et par Impact Score (sur 20), une note qui situe chaque modèle par rapport à ceux de sa catégorie."
 author: o4g
 language: fr
 tags:
@@ -46,9 +46,9 @@ Un paradoxe intéressant se pose avec les téléviseurs modernes : bien que les 
 
 ### Nudger : une solution pour réduire votre impact écologique
 
-Nudger se positionne comme une solution innovante pour aider les consommateurs à faire des choix plus écologiques. Grâce à son [éco-score](https://nudger.fr/ecoscore), Nudger permet de comparer les tv non seulement en termes de prix, mais aussi d'impact environnemental. Cette approche permet aux consommateurs de choisir des téléviseurs qui sont non seulement efficaces énergétiquement, mais aussi moins nuisibles pour l'environnement sur l'ensemble de leur cycle de vie.
+Nudger compare les téléviseurs par prix et par Impact Score (sur 20). La note repose sur plusieurs critères, dont la classe énergétique ; elle situe un modèle par rapport à ceux de sa catégorie. [Voir la méthode](https://nudger.fr/impact-score).
 
-De plus, Nudger [reverse 10% de ses bénéfices](https://nudger.fr/compensation-ecologique) à des organisations environnementales, soutenant ainsi des initiatives qui contribuent à la préservation de notre planète. En adoptant une approche transparente et en s'appuyant sur des données open-source, Nudger encourage une consommation plus responsable et informée.
+Les données utilisées sont ouvertes : vous pouvez vérifier le calcul.
 
 ### Conclusion
 

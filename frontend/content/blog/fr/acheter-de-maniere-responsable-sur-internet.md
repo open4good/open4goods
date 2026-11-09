@@ -1,5 +1,5 @@
 ---
-title: "Acheter de manière responsable sur internet"
+title: "Acheter en ligne en connaissance de cause"
 description: "Découvre dans cet article deux grandes pistes pour acheter de manière plus responsable en ligne."
 author: o4g
 language: fr
@@ -30,7 +30,7 @@ Mais se tourner vers de l'occasion ou du reconditionné n'est pas le seul moyen 
 
 En effet, si acheter un ordinateur aura forcément un impact négatif en raison des matières premières et de la fabrication, certaines marques sont plus respectueuses que d'autres et on peut ainsi trouver des modèles dont l'impact est moins fort. **Mais alors, comment trouver ces modèles ?**
 
-Tout simplement, grâce à Nudger. Nous avons mis au point un système gratuit capable de comparer les produits sur certaines plateformes de vente en ligne pour en définir un** score d'impact environnemental**. Grâce à notre outil de recherche, vous pouvez alors sélectionner le modèle au meilleur score.
+Tout simplement, grâce à Nudger. Nous avons mis au point un système gratuit qui compare les produits de plusieurs plateformes de vente en ligne et leur attribue un **Impact Score sur 20**. Avec notre outil de recherche, vous pouvez classer les modèles selon cette note.
 
 
 Et le mieux dans tout ça ? Cette fonctionnalité de recherche s'accompagne également d'un système de comparaison de prix pour vous permettre d'acheter de manière responsable sur internet tout en limitant les frais.
