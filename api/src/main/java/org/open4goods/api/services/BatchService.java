@@ -73,6 +73,9 @@ public class BatchService {
 
 	private ApiProperties apiProperties;
 
+	/** Post-scoring ImpactScore checks (GOU-1895). */
+	private ImpactScoreBatchGuard impactScoreGuard;
+
 
 	public BatchService(AggregationFacadeService aggregationFacadeService,
 			CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository dataRepository, FeedIndexingService feedIndexingService, FeedService feedService, SerialisationService serialisationService, ResourceService resourceService, ApiProperties apiProperties) {
@@ -86,6 +89,16 @@ public class BatchService {
 		this.serialisationService = serialisationService;
 		this.resourceService = resourceService;
 		this.apiProperties = apiProperties;
+		this.impactScoreGuard = new ImpactScoreBatchGuard(apiProperties == null ? null : apiProperties.getImpactScoreGuard(), null, null);
+	}
+
+	/**
+	 * Replaces the ImpactScore guard (shared with the health indicator and metrics in the application context).
+	 *
+	 * @param impactScoreGuard the guard to run after each vertical scoring
+	 */
+	public void setImpactScoreGuard(ImpactScoreBatchGuard impactScoreGuard) {
+		this.impactScoreGuard = impactScoreGuard;
 	}
 
 	/**
@@ -629,6 +642,9 @@ public class BatchService {
 			logger.info("Will score {} products on a total of {}", scorable.size(), products.size());
 			aggregationFacadeService.score(vertical, scorable);
 			clearObsoleteScores(allProducts, vertical);
+			if (!impactScoreChecksPass(vertical, scorable)) {
+				return;
+			}
 		} catch (Exception e) {
 			// Scores are cleared before being rebuilt: indexing now would persist partial results
 			logger.error("Scoring failed for vertical {} : nothing is indexed for this run", vertical.getId(), e);
@@ -651,6 +667,27 @@ public class BatchService {
 			dataRepository.addToFullindexationQueue(page);
 		}
 		logger.info("{} products of vertical {} got offers updated in realtime during the batch", refreshed, vertical.getId());
+	}
+
+	/**
+	 * Runs the ImpactScore checks (GOU-1895). A blocking violation forbids the indexation, like a scoring failure.
+	 * A failure of the guard itself never blocks: the alert would then hide the data it is meant to protect.
+	 *
+	 * @param vertical the vertical being batched
+	 * @param scorable the products just scored
+	 * @return false when the indexation must not happen
+	 */
+	private boolean impactScoreChecksPass(VerticalConfig vertical, Collection<Product> scorable) {
+		try {
+			ImpactScoreBatchGuard.Report report = impactScoreGuard.verify(vertical.getId(), scorable);
+			if (report.blocking()) {
+				logger.error("ImpactScore checks failed for vertical {} : nothing is indexed for this run", vertical.getId());
+				return false;
+			}
+		} catch (RuntimeException e) {
+			logger.error("ImpactScore checks could not run for vertical {}", vertical.getId(), e);
+		}
+		return true;
 	}
 
 	/**
