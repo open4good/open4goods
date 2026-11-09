@@ -54,4 +54,18 @@ describe('ImpactScore methodology link', () => {
     const w = mountScore({ banner: true })
     expect(w.find('a.nl').attributes('href')).toBe('/impact-score')
   })
+
+  it('links the CTA card to the vertical ecoscore page', () => {
+    const w = mountScore({ verticalHomeUrl: 'climatiseurs' })
+    expect(w.find('.impact-score-panel__cta-card').attributes('to')).toBe(
+      '/climatiseurs/ecoscore'
+    )
+  })
+
+  it('falls back to impact-score on the CTA card without vertical', () => {
+    const w = mountScore()
+    expect(w.find('.impact-score-panel__cta-card').attributes('to')).toBe(
+      '/impact-score'
+    )
+  })
 })
