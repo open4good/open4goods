@@ -33,7 +33,7 @@ Une TV 55 pouces a une diagonale de 140 cm, pour un écran d'environ 122 cm de l
 | 77 | 196 | 171 | 96 |
 | 85 | 216 | 188 | 106 |
 
-Ces valeurs sont les dimensions de la dalle seule, hors cadre et pied : prévoyez quelques centimètres de plus pour le meuble. Calcul : diagonale = pouces × 2,54 ; largeur = diagonale × 0,8716 ; hauteur = diagonale × 0,4903 (arrondis au cm).
+Ces valeurs sont les dimensions de la dalle seule, hors cadre et pied : prévoyez quelques centimètres de plus pour le meuble. Calcul : diagonale = pouces x 2,54 ; largeur = diagonale x 0,8716 ; hauteur = diagonale x 0,4903 (arrondis au cm).
 
 
 ## La taille d'écran de sa TV : de quoi parle-t-on exactement ?
