@@ -295,6 +295,11 @@ public class ApiProperties {
 	private double resourceCleanupMinProductRatio = 0.9d;
 
 	/**
+	 * Thresholds of the automatic ImpactScore checks run after each vertical batch (GOU-1895).
+	 */
+	private ImpactScoreGuardProperties impactScoreGuard = new ImpactScoreGuardProperties();
+
+	/**
 	 * Retention, in milliseconds, of files parked in the deletion folder by the
 	 * {@link org.open4goods.api.services.ResourceCleanupMode#MOVE} mode. Files older than
 	 * this are purged for real, which is what actually reclaims disk space.
@@ -340,6 +345,14 @@ public class ApiProperties {
 
 	public void setResourceCleanupGracePeriodMs(long resourceCleanupGracePeriodMs) {
 		this.resourceCleanupGracePeriodMs = resourceCleanupGracePeriodMs;
+	}
+
+	public ImpactScoreGuardProperties getImpactScoreGuard() {
+		return impactScoreGuard;
+	}
+
+	public void setImpactScoreGuard(ImpactScoreGuardProperties impactScoreGuard) {
+		this.impactScoreGuard = impactScoreGuard;
 	}
 
 	public double getResourceCleanupMinProductRatio() {
