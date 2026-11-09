@@ -72,6 +72,8 @@ class RenderedSecretsConfigTreeTest {
                     binder -> bind(binder, "spring.ai.openai", OpenAiCommonProperties.class).getApiKey()),
             entry("affiliation-config.awin-access-token",
                     binder -> api(binder).getAffiliationConfig().getAwinAccessToken()),
+            entry("affiliation-config.awin-datafeed-key",
+                    binder -> binder.bind("affiliation-config.awin-datafeed-key", String.class).get()),
             entry("affiliation-config.kwanko-token", binder -> api(binder).getAffiliationConfig().getKwankoToken()),
             entry("affiliation-config.tradetracker-api-key",
                     binder -> api(binder).getAffiliationConfig().getTradetrackerApiKey()),
@@ -125,6 +127,31 @@ class RenderedSecretsConfigTreeTest {
     @Test
     void everyTreeRowOfTheRenderScriptIsCovered() throws IOException {
         assertThat(treeProperties(SERVICE)).isEqualTo(new TreeSet<>(CONSUMERS.keySet()));
+    }
+
+    /** The catalog URL of open4goods-config carries the key as a placeholder (GOU-1958). */
+    private static final String CATALOG_URL_YAML = "https://productdata.awin.com/datafeed/list/apikey/"
+            + "${affiliation-config.awin-datafeed-key:}";
+
+    @Test
+    void renderedDatafeedKeyResolvesTheCatalogUrlPlaceholder() throws IOException {
+        Path tree = writeTree();
+        Files.writeString(tree.resolve("affiliation-config.awin-datafeed-key"), "fake-datafeed-key");
+        try (ConfigurableApplicationContext context = start(Map.of("SPRING_CONFIG_IMPORT", configTreeImport(tree)),
+                "feed.providers.awin.catalog-url: " + CATALOG_URL_YAML + "\n")) {
+            assertThat(context.getEnvironment().getProperty("feed.providers.awin.catalog-url"))
+                    .isEqualTo("https://productdata.awin.com/datafeed/list/apikey/fake-datafeed-key");
+        }
+    }
+
+    @Test
+    void catalogUrlPlaceholderResolvesToAnEmptyKeyWithoutTheSecret() throws IOException {
+        writeTree();
+        try (ConfigurableApplicationContext context = start(Map.of(),
+                "feed.providers.awin.catalog-url: " + CATALOG_URL_YAML + "\n")) {
+            assertThat(context.getEnvironment().getProperty("feed.providers.awin.catalog-url"))
+                    .isEqualTo("https://productdata.awin.com/datafeed/list/apikey/");
+        }
     }
 
     private void assertYamlValues(Binder binder) {
@@ -184,9 +211,17 @@ class RenderedSecretsConfigTreeTest {
      * {@code publish-jars.sh} does.
      */
     private ConfigurableApplicationContext start(Map<String, Object> osEnvironment) throws IOException {
+        return start(osEnvironment, "");
+    }
+
+    private ConfigurableApplicationContext start(Map<String, Object> osEnvironment, String extraYaml)
+            throws IOException {
         StringBuilder yaml = new StringBuilder();
+        // The key is a secret with no yaml value when a test gives the catalog URL placeholder.
         CONSUMERS.keySet().stream().sorted()
+                .filter(property -> extraYaml.isEmpty() || !property.equals("affiliation-config.awin-datafeed-key"))
                 .forEach(property -> yaml.append(property).append(": ").append(yamlValue(property)).append('\n'));
+        yaml.append(extraYaml);
         Path config = Files.writeString(tempDir.resolve("application-active.yml"), yaml);
         StandardEnvironment environment = new StandardEnvironment() {
             @Override
