@@ -150,8 +150,9 @@ public class AffiliationMetriksService {
 
     /**
      * Builds the click events: {@code affiliation.<network>.clicks.<window>} for each {@link AffiliationNetwork} (in enum order,
-     * {@code other} last) then {@code total}, each for {@code 7d} then {@code 28d}, followed by
-     * {@value #TOP_MERCHANTS_ID}. All of them are in {@code error} when Elasticsearch cannot answer.
+     * {@code other} last) then {@code total}, each for {@code 7d}, {@code 28d}, {@code prev7d} then {@code prev28d},
+     * followed by {@value #TOP_MERCHANTS_ID} and {@value #TOP_ORIGINS_ID}. All of them are in {@code error} when
+     * Elasticsearch cannot answer one of the three requests.
      */
     private List<MetriksEvent> clickEvents(LocalDate today) {
         LocalDate endDate = today.minusDays(1);
@@ -176,6 +177,8 @@ public class AffiliationMetriksService {
             error = "Clics indisponibles : Elasticsearch en erreur (" + e.getClass().getSimpleName() + ")";
         }
         if (error != null) {
+            // A failure after the first read (previous windows) must not leave current figures next to the error.
+            stats = null;
             LOGGER.warn("Metriks affiliation clicks en erreur : {}", error);
         }
 

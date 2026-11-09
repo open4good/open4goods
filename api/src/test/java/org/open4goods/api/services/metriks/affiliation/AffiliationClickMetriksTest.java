@@ -233,6 +233,21 @@ class AffiliationClickMetriksTest {
     }
 
     @Test
+    void previousWindowFailure_putsEveryClickEventInErrorNotOnlyThePreviousOnes() {
+        Map<String, MetriksEvent> events = clickEvents(new FakeClickStats(STATS, null,
+                new DataAccessResourceFailureException("timeout")));
+
+        assertThat(events.keySet()).containsExactlyElementsOf(CLICK_IDS);
+        events.values().forEach(event -> {
+            assertThat(event.getStatus()).as(event.getId()).isEqualTo("error");
+            assertThat(event.getValue()).as(event.getId()).isNull();
+            assertThat(event.getErrorMessage()).as(event.getId())
+                    .isEqualTo("Clics indisponibles : Elasticsearch en erreur (DataAccessResourceFailureException)");
+        });
+        assertThat(events.get("affiliation.clicks.top_merchants.28d").getParams()).doesNotContainKey("rows");
+    }
+
+    @Test
     void clickFailure_doesNotTouchTheCommissionEvents() {
         List<MetriksEvent> all = collectAll(new FakeClickStats(null, new IllegalStateException("boom")));
 

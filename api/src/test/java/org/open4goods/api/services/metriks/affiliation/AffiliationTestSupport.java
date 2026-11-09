@@ -44,11 +44,20 @@ final class AffiliationTestSupport {
         final List<long[]> countCalls = new ArrayList<>();
         private final AffiliationClickStats stats;
         private final RuntimeException failure;
+        private final RuntimeException countFailure;
 
         FakeClickStats(AffiliationClickStats stats, RuntimeException failure) {
+            this(stats, failure, failure);
+        }
+
+        /**
+         * @param countFailure thrown by {@link #count} only, {@link #read} answering {@code stats}
+         */
+        FakeClickStats(AffiliationClickStats stats, RuntimeException failure, RuntimeException countFailure) {
             super(null);
             this.stats = stats;
             this.failure = failure;
+            this.countFailure = countFailure;
         }
 
         @Override
@@ -64,8 +73,8 @@ final class AffiliationTestSupport {
         @Override
         public ClickCounts count(long start, long end) {
             countCalls.add(new long[] {start, end});
-            if (failure != null) {
-                throw failure;
+            if (countFailure != null) {
+                throw countFailure;
             }
             // Previous windows: half of the current short / long figures, to tell them apart.
             boolean isShort = end - start < 10L * 24 * 3600 * 1000;
