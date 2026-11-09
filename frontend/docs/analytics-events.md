@@ -10,6 +10,29 @@ wraps the Plausible plugin and respects Do Not Track settings.
 - **Plugin guard**: `app/plugins/plausible-guard.client.ts`
 - **Nuxt config**: `nuxt.config.ts` (plausible module configuration)
 
+## Navigateurs automatisés (GOU-1979)
+
+`plausible-guard.client.ts` désactive Plausible (`enabled = false`, comme pour
+le DNT et le référent local) quand `isLikelyAutomatedBrowser`
+(`app/utils/automated-browser.ts`) répond vrai :
+
+1. `navigator.webdriver === true` ;
+2. UA contenant `HeadlessChrome` ou `Lightpanda` ;
+3. **Chrome de bureau seulement** (UA `Chrome/<majeure>` + Windows, Macintosh ou
+   X11/Linux hors Android, contexte sécurisé) : `navigator.userAgentData` absent,
+   ou aucune marque `Chromium`/`Google Chrome` dont la version égale la majeure
+   de l'UA. Edge, Opera, Brave, Vivaldi exposent `Chromium` et restent comptés ;
+   les marques GREASE sont ignorées.
+
+Tout le reste (Android/WebView, iOS `CriOS`, Firefox, Safari, contexte non
+sécurisé) est compté : pas d'extension de la règle 3, risque de faux positifs.
+
+Raison (GOU-1973) : un robot Tencent (AS132203) et une vague de proxys
+résidentiels exécutent le JS avec un UA « Chrome Windows » ancien sans
+`Sec-CH-UA`, et gonflent les visiteurs Plausible. Limite : le robot charge
+toujours les pages ; ce filtre ne nettoie que Plausible. `/contrib/` et le
+cookie `nudger_nav` ne changent pas.
+
 ## Event catalog
 
 > **Filtrage robots sur `/contrib/` (GOU-1175)** : `/contrib/<jeton>` et `/api/contrib/<jeton>` refusent (403 `text/plain`, sans appel à front-api) les UA vides ou reconnus comme robots par `isbot`, plus les motifs de `NUXT_AFFILIATION_BLOCKED_USER_AGENTS` (sous-chaînes séparées par des virgules, insensibles à la casse, vide par défaut). Aucune page HTML n'est jamais rendue sous `/contrib/**` (erreurs en `text/plain`) et Plausible est désactivé côté client sur ce chemin.
