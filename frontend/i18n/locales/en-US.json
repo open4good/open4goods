@@ -105,7 +105,9 @@
       "eyebrow": "Compare price and Impact Score",
       "title": "Buy better. Spend smarter.",
       "animatedSubtitle": "",
-      "titleSubtitle": ["The comparator that rates the environmental impact of appliances and tech"],
+      "titleSubtitle": [
+        "The comparator that rates the environmental impact of appliances and tech"
+      ],
       "subtitles": [
         "Save time, stay true to your values. Compare effortlessly, choose freely.",
         "Compare prices and Impact Scores in one place.",
@@ -329,7 +331,7 @@
       "background": "hero-background.webp"
     },
     "promises": {
-      "ariaLabel": "Our promises and commitments to compare responsibly"
+      "ariaLabel": "Our promises and commitments to compare with full information"
     },
     "parallax": {
       "essentials": {
@@ -692,7 +694,8 @@
         "criteria": "Criteria",
         "overview": "Overview",
         "purpose": "Purpose & data",
-        "transparency": "Transparency"
+        "transparency": "Transparency",
+        "method": "Method"
       },
       "sections": {
         "aiAudit": {
@@ -703,7 +706,8 @@
           "responseHelper": "JSON output from the AI used as the basis of the configuration.",
           "responseTitle": "Model response",
           "title": "Impact Score generation audit",
-          "yamlUnavailable": "Prompt unavailable."
+          "yamlUnavailable": "Prompt unavailable.",
+          "toggle": "AI audit: prompt and raw response"
         },
         "criteria": {
           "empty": "Criteria will be published soon.",
@@ -790,7 +794,67 @@
         "description": "Explore how Nudger computes the Impact Score for {category}: criteria, weights and AI generation audit.",
         "title": "{category} - Impact Score breakdown"
       },
-      "title": "{category} - {label}"
+      "title": "{category} - {label}",
+      "method": {
+        "title": "Impact Score method for {category}",
+        "meaning": {
+          "title": "What the score means",
+          "fallback": "The Impact Score ranks {category} against each other using measurable environmental impact criteria."
+        },
+        "limits": {
+          "title": "What the score does not measure",
+          "static": "The Impact Score is relative to the Nudger catalogue, which is not exhaustive: it does not cover every product or brand on the market."
+        },
+        "method": {
+          "title": "Method: criteria and weights",
+          "version": "Method version {version}, last calculation: {date}.",
+          "dateUnknown": "date not available",
+          "threshold": "A product is rated only if the criteria filled in make up at least {percent}% of the total weight.",
+          "redistribution": "When a criterion is not filled in, its weight is not invented: the score relies on the available criteria.",
+          "tableCaption": "Criteria, weights, direction and rationale",
+          "criterion": "Criterion",
+          "weight": "Weight",
+          "direction": "Direction",
+          "why": "Why",
+          "higher": "Higher is better",
+          "lower": "Lower is better",
+          "categorical": "Depends on the value"
+        },
+        "products": {
+          "title": "Compared products",
+          "scope": "Compared products are those of the {category} category in the Nudger catalogue with at least one offer.",
+          "rated": "{count} products rated.",
+          "notRated": "{count} products not rated (insufficient data: {lowCoverage}; no criterion filled in: {noCriteria}).",
+          "outdated": "{count} products waiting to be recalculated with the current method.",
+          "unavailable": "Product counts for this category are not available at the moment."
+        },
+        "coverage": {
+          "title": "Coverage by criterion",
+          "helper": "Share of rated products for which the criterion is actually filled in.",
+          "unavailable": "Coverage by criterion is not measured yet.",
+          "aria": "{criterion}: filled in for {percent}% of rated products"
+        },
+        "distribution": {
+          "title": "Score distribution (out of 20)",
+          "unavailable": "No product is rated yet.",
+          "aria": "Scores {band}: {count} products",
+          "summary": "Lowest score {min}, median {median}, highest {max}."
+        },
+        "sources": {
+          "title": "Suppliers and sources",
+          "data": "Data comes from EPREL (European energy label), manufacturers, partner merchants and, for some characteristics, AI extraction.",
+          "partners": "See our partners and merchants"
+        },
+        "update": {
+          "title": "Update",
+          "body": "A product's score is recalculated when its data or the method changes. The category's last calculation date is shown above.",
+          "report": "Report an error"
+        },
+        "independence": {
+          "title": "Independence",
+          "body": "The Impact Score calculation does not use affiliate commissions: no merchant can influence a score."
+        }
+      }
     },
     "fastFilters": {
       "activeClauses": "Applied subset filters",
@@ -799,7 +863,7 @@
         "default": "Other quick filters",
         "price": "Price",
         "screen_size": "Screen size",
-        "impactscore": "Ecological impact"
+        "impactscore": "Impact Score"
       },
       "navigation": {
         "next": "Scroll next quick filters",
@@ -819,7 +883,7 @@
         "country": "GTIN country code",
         "creationDate": "Creation date",
         "datasource": "Data sources",
-        "ecoscore": "Impact score",
+        "ecoscore": "Impact Score",
         "ecoscoreRanking": "Impact Score Ranking",
         "googleTaxonomyId": "Google product category",
         "lastChange": "Last updated",
@@ -871,7 +935,7 @@
         "title": "Discover the Impact Score",
         "description": "Understand how the Impact Score is calculated for {category}",
         "cta": "Methodology {category}",
-        "ariaLabel": "Open the Eco-score guide"
+        "ariaLabel": "Open the Impact Score guide"
       },
       "assistant": {
         "title": "Our assistant",
@@ -939,13 +1003,13 @@
         "other": "{condition}",
         "unknown": "Unspecified"
       },
-      "ecoscoreLabel": "Eco score {letter}",
+      "ecoscoreLabel": "Impact Score {letter}",
       "fetchError": "Unable to load products. Please try again.",
       "headers": {
         "bestPrice": "Best price",
         "brand": "Brand",
         "compare": "Compare",
-        "ecoscore": "Eco score",
+        "ecoscore": "Impact Score",
         "impactScore": "Impact score",
         "model": "Model",
         "offers": "Offers",
@@ -989,6 +1053,7 @@
           "impactScore": "{score} / {max}"
         }
       },
+      "rankingPolicyLink": "How we rank",
       "sortLabel": "Sort by",
       "sortOrderAsc": "Ascending order",
       "sortOrderDesc": "Descending order",
@@ -1037,7 +1102,60 @@
       "tooltipBadge": "Impact quality rated at {value} out of 20",
       "outOf20": "/20",
       "scale": "Scale: {min}-{max}",
-      "svgAriaLabel": "Score {score} out of 20"
+      "svgAriaLabel": "Score {score} out of 20",
+      "v2": {
+        "notRated": "Not rated",
+        "notRatedCoverage": "Not enough verifiable data to rate this product ({count} of {total} criteria filled in).",
+        "notRatedRecalculating": "Score being recomputed with method v2.",
+        "positionLevels": {
+          "excellent": "Among the best ranked",
+          "good": "Above the median",
+          "fair": "Below the median",
+          "poor": "Among the lowest ranked"
+        },
+        "betterThan": "Ranked better than {percent}% of the {count} {items} rated by Nudger",
+        "productsFallback": "products",
+        "onlyRated": "Only rated product in its category",
+        "criteria": "{count} of {total} criterion filled in | {count} of {total} criteria filled in",
+        "scoredAt": "computed on {date}",
+        "method": "method v{version}",
+        "howCalculated": "How is this score calculated?",
+        "disclaimer": "The Impact Score is a comparative rating by Nudger. It is neither a label, nor a certification, nor a measure of the absolute footprint.",
+        "notRatedAfterRated": "Products that are not rated are shown after rated products.",
+        "criterionNotFilled": "Not filled in",
+        "methodPage": "Method v{version}. A product is rated only if its filled-in criteria weigh at least {coverage}% of the matrix. A criterion that is not filled in stays not filled in: it is never replaced by an average value.",
+        "contextAria": "Score details"
+      },
+      "why": {
+        "title": "Why this score?",
+        "headline": "{score}/20: this product ranks above {percent}% of the {count} {items} rated by Nudger.",
+        "headlineBottom": "{score}/20: this product ranks ahead of {percent}% of the {count} {items} rated by Nudger.",
+        "onlyRated": "{score}/20: the only rated product in its category, so no position comparison is possible.",
+        "criterion": "{label} ({value})",
+        "criterionVsAverage": "{label} ({value}, versus {average} on average in the category)",
+        "strengths": "Favourable points: {criteria}.",
+        "strengthsTop": "Strongest points in its favour: {criteria}.",
+        "strengthsBottomLow": "Its favourable points: {criteria}.",
+        "weaknesses": "Points that limit the score: {criteria}.",
+        "weaknessesTop": "What keeps it from a 20/20: {criteria}.",
+        "weaknessesBottom": "What weighs most on the score: {criteria}.",
+        "missing": "Criteria not provided: {criteria}; their weight is spread over the other criteria.",
+        "basis": "Score based on {count} of {total} criteria, calculated on {date}, method v{version}.",
+        "basisComplete": "All criteria of the method are provided for this product (calculated on {date}, method v{version}).",
+        "basisShort": "Score based on {count} of {total} criteria.",
+        "caveat": {
+          "top": "A high score does not mean no impact: it puts this product at the top of its category, on these criteria.",
+          "bottom": "This score compares this product with the others in its category. On its own it does not measure its real impact."
+        },
+        "notRated": {
+          "LOW_COVERAGE": "We do not have enough data to rate this product: {count} of {total} criteria are provided, and the method requires a minimum share.",
+          "NO_REAL_CRITERIA": "No usable data is available to rate this product.",
+          "OUTDATED_METHOD": "This product's score is being recalculated with method v{version}.",
+          "NOT_SCORED": "This product has not been evaluated yet."
+        },
+        "missingData": "Missing data: {criteria}.",
+        "notRatedNotLower": "This product is not rated lower: it is not rated. It appears after rated products in lists sorted by Impact Score."
+      }
     },
     "pageLoadingOverlay": {
       "label": "Loading page content"
@@ -1331,6 +1449,76 @@
       "voteCompleted": "Done"
     }
   },
+  "impactScoreVersionsPage": {
+    "seo": {
+      "title": "Impact Score method version history",
+      "description": "Every version of the Impact Score method is dated: changes, reasons and scope. A score is only compared with scores of the same version."
+    },
+    "title": "Method version history",
+    "intro": "The Impact Score evolves. Each method version is dated; a score is only compared with scores of the same version.",
+    "backLink": "← The Impact Score",
+    "noDate": "Since the beginning",
+    "planned": "Announced, not yet in force",
+    "scopeLabel": "Categories concerned:",
+    "changeLabel": "Change:",
+    "reasonLabel": "Reason:",
+    "howToRead": {
+      "title": "How to read this page",
+      "body": "The current method's detail is on each category's page. General principles are on the Impact Score page."
+    },
+    "entries": {
+      "v2": {
+        "title": "Version 2",
+        "scope": "Categories switch one by one; none is concerned until version 2 is announced as in force.",
+        "changes": [
+          {
+            "change": "A score is computed only from criteria that are actually provided; the weight of missing criteria is spread over the provided criteria.",
+            "reason": "With version 1, a product could receive a score on data that did not exist."
+          },
+          {
+            "change": "A minimum criteria coverage is required; below it, the product shows \"Not rated\" with the reason.",
+            "reason": "A score based on too little data is not comparable."
+          },
+          {
+            "change": "Position is shown with the number of rated products, the number of criteria provided, the calculation date and the version.",
+            "reason": "Let readers judge a score's reliability."
+          },
+          {
+            "change": "A score from an older version is not displayed: the product is \"Not rated\" until recalculated.",
+            "reason": "Do not compare scores computed with different methods."
+          }
+        ]
+      },
+      "v1Fixes": {
+        "title": "Version 1, fixes",
+        "scope": "All rated categories. The scores themselves do not change.",
+        "changes": [
+          {
+            "change": "A single definition of the maximum score (20/20).",
+            "reason": "Two contradictory definitions coexisted on the site."
+          },
+          {
+            "change": "Average values assigned to missing criteria no longer count in rankings.",
+            "reason": "They distorted products' relative position."
+          },
+          {
+            "change": "A product without a score is no longer shown as \"Low\".",
+            "reason": "\"No score\" and \"bad score\" are two different things."
+          }
+        ]
+      },
+      "v1": {
+        "title": "Version 1",
+        "scope": "All rated categories.",
+        "changes": [
+          {
+            "change": "First method: score out of 20, weighted average of criteria per category, normalised against the category's products; an average value is assigned to missing criteria.",
+            "reason": "Provide a comparative ranking of products within one category."
+          }
+        ]
+      }
+    }
+  },
   "impactScorePage": {
     "seo": {
       "title": "Impact Score: a simple, transparent eco rating",
@@ -1347,7 +1535,7 @@
     "hero": {
       "eyebrow": "Impact Score",
       "title": "Environmental impact assessment of your products",
-      "subtitle": "An EcoScore-inspired compass for every purchase",
+      "subtitle": "A compass for every purchase",
       "definition": {
         "title": "A clear, accessible definition",
         "description": "Impact Score turns technical data into understandable indicators with no jargon.",
@@ -1438,7 +1626,7 @@
     "principles": {
       "eyebrow": "Our principles",
       "title": "Measuring impact without compromise",
-      "subtitle": "The method follows the EcoScore spirit: transparency, context and pedagogy.",
+      "subtitle": "The method rests on transparency, context and pedagogy.",
       "items": {
         "transparency": {
           "title": "Full transparency",
@@ -1514,7 +1702,7 @@
       "title": "Impact Score in a nutshell",
       "subtitle": "What to remember when reading the grade.",
       "items": {
-        "method": "One common method, inspired by the EcoScore, for every category.",
+        "method": "One common method for every category.",
         "criteria": "5 weighted criteria to quickly compare similar products.",
         "data": "Verified, up-to-date data linked to their sources.",
         "usage": "A 0-to-20 score that is readable at a glance to guide responsible purchases."
@@ -1522,8 +1710,8 @@
     },
     "approach": {
       "eyebrow": "Our approach",
-      "title": "Our ecoscore: transparent, innovative and effective",
-      "subtitle": "We explain the ecoscore clearly with verifiable sources and criteria tailored to each product category.",
+      "title": "Our Impact Score: transparent, innovative and effective",
+      "subtitle": "We explain the Impact Score clearly with verifiable sources and criteria tailored to each product category.",
       "pillars": {
         "transparent": {
           "title": "Transparent",
@@ -1531,7 +1719,7 @@
         },
         "innovant": {
           "title": "Innovative",
-          "description": "We recognise existing labelling initiatives and provide a versatile ecoscore for manufactured products."
+          "description": "We recognise existing labelling initiatives and provide a versatile Impact Score for manufactured products."
         },
         "performant": {
           "title": "Effective",
@@ -1573,15 +1761,15 @@
       },
       "approach": {
         "eyebrow": "Our approach",
-        "imageAlt": "Illustration of our ecoscore approach",
-        "title": "Our ecoscore: transparent, innovative and effective"
+        "imageAlt": "Illustration of our Impact Score approach",
+        "title": "Our Impact Score: transparent, innovative and effective"
       },
       "methodology": {
         "empty": "Categories will be published soon.",
         "eyebrow": "Methodology",
         "intro": "The calculation rules are detailed on every product page, in the Environmental impact section. Each product category has its own criteria and weights. These categories are currently covered:",
         "title": "How is the Impact Score calculated?",
-        "verticalCarouselAria": "Browse the ecoscore categories carousel",
+        "verticalCarouselAria": "Browse the Impact Score categories carousel",
         "verticalCardAria": "Open the {vertical} category",
         "verticalCta": "Explore products",
         "verticalCtaAria": "Explore products in the {vertical} category",
@@ -2310,11 +2498,11 @@
   },
   "compare": {
     "title": "Product comparison",
-    "subtitle": "Contrast specifications, pricing and ecological indicators across the products you selected.",
+    "subtitle": "Contrast specifications, pricing and Impact Score across the products you selected.",
     "hero": {
       "eyebrow": "Comparison",
       "title": "Comparing {verticalTitle}",
-      "subtitle": "Contrast specifications, pricing and ecological indicators across the selected {verticalTitle}.",
+      "subtitle": "Contrast specifications, pricing and Impact Score across the selected {verticalTitle}.",
       "backToCategory": "Back to {verticalTitle}",
       "backAria": "Go back to the {verticalTitle} category",
       "backFallback": "Back to the category",
@@ -2333,7 +2521,7 @@
     "sections": {
       "overview": "Overview",
       "pricing": "Pricing",
-      "ecological": "Ecological impact",
+      "ecological": "Impact Score",
       "technical": "Technical attributes",
       "technicalGroupFallback": "Additional specifications",
       "explicitTitle": "Comparing {count} selected products"
@@ -2356,7 +2544,7 @@
       "offersCount": "Offer count"
     },
     "ecological": {
-      "ecoscore": "Ecoscore",
+      "ecoscore": "Impact Score",
       "brandSustainability": "Brand sustainability",
       "dataQuality": "Data quality"
     },
@@ -2969,7 +3157,7 @@
       "docs": "Documentation",
       "expand": "Expand navigation",
       "expandSubmenu": "Expand {section} submenu",
-      "impact": "Environmental impact",
+      "impact": "Impact Score",
       "label": "Product detail navigation",
       "overview": "Overview",
       "alternatives": "Alternatives",
@@ -3163,6 +3351,7 @@
           "legal": "Legal notice",
           "openData": "Open data",
           "openSource": "Open source",
+          "rankingPolicy": "Ranking and listing",
           "privacy": "Privacy policy"
         },
         "title": "Resources"
@@ -3178,9 +3367,9 @@
         "title": "Get involved"
       },
       "highlightLinks": {
-        "title": "Impact score",
+        "title": "Impact Score",
         "allProducts": "All products",
-        "ecoscore": "Environmental assessment"
+        "ecoscore": "Impact Score"
       },
       "timeSaver": {
         "badge": "Open source & ad-free",
@@ -3480,7 +3669,7 @@
   "pwa": {
     "install": {
       "title": "Install Nudger",
-      "description": "Install Nudger as an app to keep eco-scores and price alerts one tap away.",
+      "description": "Install Nudger as an app to keep Impact Scores and price alerts one tap away.",
       "cta": "Install app",
       "dismiss": "Not now",
       "updateTitle": "Update available",
@@ -3528,7 +3717,7 @@
         },
         "wizard": {
           "title": "AI wizard",
-          "description": "Answer a few questions and get tailored eco picks.",
+          "description": "Answer a few questions and get product picks that match your needs.",
           "badge": "New"
         },
         "search": {
@@ -3812,7 +4001,7 @@
       "totalOffers": "Active offers",
       "averagePrice": "Average price",
       "medianPrice": "Median price",
-      "averageEcoscore": "Average ecoscore",
+      "averageEcoscore": "Average Impact Score",
       "topBrand": "Top brand",
       "newPercent": "New products",
       "countriesCount": "Countries"
@@ -3891,6 +4080,74 @@
       "position": "Position",
       "evolution": "Clicks vs previous window",
       "new": "new"
+    }
+  },
+  "rankingPolicy": {
+    "seo": {
+      "title": "How products and offers are ranked and listed {'|'} Nudger",
+      "description": "How Nudger ranks products and offers, which merchants are listed and how Nudger is paid (article D111-6 of the French consumer code)."
+    },
+    "hero": {
+      "eyebrow": "Transparency",
+      "title": "Ranking and listing",
+      "subtitle": "How Nudger orders products and offers, which merchants appear and how Nudger is paid."
+    },
+    "intro": "This page meets article D111-6 of the French consumer code. It describes how the site works on the update date shown below.",
+    "updatedAt": "Last updated: {date}",
+    "summary": {
+      "title": "In short",
+      "items": {
+        "defaultSort": "By default, the products of a category are ranked by their Impact Score, from highest to lowest.",
+        "offers": "The offers of a product are ranked by ascending price.",
+        "remuneration": "Nudger can earn a commission from merchants, but no ranking takes it into account.",
+        "noPaidPlacement": "No placement is paid or sponsored."
+      }
+    },
+    "sections": {
+      "referencing": {
+        "title": "Listed merchants and offers",
+        "p1": "The offers shown come from merchants whose affiliate programme Nudger has joined, through affiliate networks (for example Awin or Effiliation) or the Amazon Associates programme. A merchant without an affiliate programme, or whose programme Nudger has not joined, does not appear in price comparisons: they therefore do not cover the whole market.",
+        "p2": "Offers are shown as the merchant publishes them in its feed. An offer is shown only if it was seen in that feed less than two days ago. Offers with a zero price or out of stock are left out.",
+        "p3": "Product lists and search only show products offered by at least one listed merchant. Product characteristics can also come from public databases or manufacturers (for example EPREL, Icecat or Wikidata): these sources do not create offers."
+      },
+      "remuneration": {
+        "title": "How Nudger is paid",
+        "p1": "Links to merchants are affiliate links. When you buy after clicking one of these links, the merchant can pay Nudger a commission, under the terms of its programme. This does not change the price you pay.",
+        "p2": "No ranking on the site uses this payment: neither the amount of a commission, nor the merchant, nor the affiliate network changes the order of products, the order of offers or the calculation of the Impact Score. There is no paid or sponsored placement.",
+        "p3": "When a product has no offer, its page can show a search link to Amazon. It is also an affiliate link: as an Amazon Associate, Nudger earns from qualifying purchases. This link appears only when there is no offer and is not part of any ranking."
+      },
+      "defaultSort": {
+        "title": "Default product ranking",
+        "p1": "In a category, products are ranked by default by their Impact Score, from highest to lowest. This is the sort marked as default in the sort list. The product selections highlighted on category pages follow the same criterion.",
+        "p2": "The Impact Score is calculated from the characteristics of the product, data about its brand and how complete the available information is. It uses neither the price, nor the merchant, nor any commission.",
+        "p3": "Products that do not have an Impact Score yet come after rated products. When two products have the same Impact Score, their barcode (GTIN) breaks the tie, so the order stays the same from one page to the next.",
+        "methodLink": "Read the Impact Score method"
+      },
+      "otherSorts": {
+        "title": "Other sorts",
+        "p1": "You can choose another criterion, in ascending or descending order: price, number of offers, brand, model, date added or updated, Impact Score and its detailed criteria, or a technical characteristic of the category (for example screen size or energy use).",
+        "p2": "The price used for sorting is the lowest price among the offers for the product, new and used together. The number of offers counts the offers of listed merchants: it does not measure sales.",
+        "p3": "Products for which the chosen criterion is not known are placed at the end of the list."
+      },
+      "search": {
+        "title": "Search",
+        "p1": "Search results are ranked by relevance: all the words you type must appear in the name of an offer, the brand or the model of the product, and the products that match them best come first. Results are grouped by category. You can also sort them by price or by number of offers.",
+        "p2": "The suggestions shown while you type favour products whose offer names contain the most words you typed. Without a search, the page first shows the products with the most offers."
+      },
+      "offers": {
+        "title": "Offers for a product",
+        "p1": "On a product page, the highlighted offer is the cheapest of the current offers, new and used together. The page also shows the best new offer and the best used offer, that is the cheapest of each condition. When a used offer exists, it is shown first.",
+        "p2": "The full list of offers is ranked by ascending price. You can sort it by merchant, price or condition."
+      },
+      "alternatives": {
+        "title": "Alternatives and choice assistant",
+        "p1": "The alternatives suggested on a product page are products of the same category, ranked by Impact Score from highest to lowest, whose price is lower or equal and whose Impact Score is higher or equal to those of the product you are viewing. If fewer than three products meet these conditions, the filters are relaxed in this order: characteristics, price, then Impact Score.",
+        "p2": "The choice assistant suggests the three products with the best Impact Score among those that match your answers."
+      }
+    },
+    "contact": {
+      "text": "A question about these rules?",
+      "link": "Contact us"
     }
   }
 }

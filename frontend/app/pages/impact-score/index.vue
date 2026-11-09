@@ -30,6 +30,12 @@
 
       <ImpactScoreDetails class="impact-score-page__section" />
       <ImpactScoreDocsPanel class="impact-score-page__section" />
+
+      <p class="text-body-1 text-center">
+        <NuxtLink :to="localePath('/impact-score/versions')">
+          {{ t('impactScoreVersionsPage.title') }}
+        </NuxtLink>
+      </p>
     </v-container>
   </div>
 </template>
@@ -45,7 +51,15 @@ import ImpactScorePrinciples from '~/components/impact-score/ImpactScorePrincipl
 import ImpactScoreSummary from '~/components/impact-score/ImpactScoreSummary.vue'
 import ImpactScoreDocsPanel from '~/components/impact-score/ImpactScoreDocsPanel.vue'
 
-const { t } = useI18n()
+import {
+  IMPACT_SCORE_CURRENT_METHOD_VERSION,
+  IMPACT_SCORE_VERSIONS_LAST_MODIFIED,
+} from '~~/shared/utils/impact-score-versions'
+import { buildImpactScoreMethodJsonLd } from '~/utils/impact-score-jsonld'
+
+const { t, locale } = useI18n()
+const localePath = useLocalePath()
+const canonicalUrl = useCanonicalUrl()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
 const { data: verticalsData } = await useAsyncData<VerticalConfigDto[]>(
@@ -65,6 +79,27 @@ useSeoMeta({
   ogTitle: t('impactScorePage.seo.title'),
   ogDescription: t('impactScorePage.seo.description'),
 })
+
+useHead(() => ({
+  script: [
+    {
+      key: 'impact-score-jsonld',
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify(
+        buildImpactScoreMethodJsonLd({
+          type: 'TechArticle',
+          name: String(t('impactScorePage.seo.title')),
+          description: String(t('impactScorePage.seo.description')),
+          url: canonicalUrl.value,
+          dateModified: IMPACT_SCORE_VERSIONS_LAST_MODIFIED,
+          version: IMPACT_SCORE_CURRENT_METHOD_VERSION,
+          inLanguage: locale.value,
+          aboutName: 'Impact Score',
+        })
+      ),
+    },
+  ],
+}))
 </script>
 
 <style scoped>

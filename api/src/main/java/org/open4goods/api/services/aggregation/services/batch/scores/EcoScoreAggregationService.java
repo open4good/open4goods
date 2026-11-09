@@ -49,8 +49,10 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 	 * @param realCount           number of real criteria
 	 * @param totalCount          number of criteria
 	 * @param weightedRelativeSum sum of {@code weight x relative value} over the real criteria (0-5 scale)
+	 * @param realCriteria        keys of the real criteria, in the order of the matrix
 	 */
-	record Coverage(double realWeight, double totalWeight, int realCount, int totalCount, double weightedRelativeSum) {
+	record Coverage(double realWeight, double totalWeight, int realCount, int totalCount, double weightedRelativeSum,
+			List<String> realCriteria) {
 
 		/**
 		 * The coverage C.
@@ -413,6 +415,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 		meta.setRealWeightCoverage(coverage.ratio());
 		meta.setRealCriteriaCount(coverage.realCount());
 		meta.setTotalCriteriaCount(coverage.totalCount());
+		meta.setRealCriteria(coverage.realCriteria());
 		if (hasRealEcoScore(product)) {
 			meta.setStatus(ImpactScoreMeta.Status.RATED.name());
 		} else {
@@ -442,6 +445,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 		double weightedRelativeSum = 0.0;
 		int totalCount = 0;
 		int realCount = 0;
+		List<String> realCriteria = new ArrayList<>();
 		for (Map.Entry<String, Double> weight : impactScoreConfig.activeCriteriasPonderation().entrySet()) {
 			if (weight.getValue() == null || weight.getValue() <= 0.0) {
 				continue;
@@ -452,10 +456,11 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 			if (isRealScore(weight.getKey(), score)) {
 				realWeight += weight.getValue();
 				realCount++;
+				realCriteria.add(weight.getKey());
 				weightedRelativeSum += weight.getValue() * resolveRelativeValue(weight.getKey(), score);
 			}
 		}
-		return new Coverage(realWeight, totalWeight, realCount, totalCount, weightedRelativeSum);
+		return new Coverage(realWeight, totalWeight, realCount, totalCount, weightedRelativeSum, List.copyOf(realCriteria));
 	}
 
 	/**

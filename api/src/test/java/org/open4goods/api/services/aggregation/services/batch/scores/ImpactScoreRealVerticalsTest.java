@@ -365,6 +365,8 @@ class ImpactScoreRealVerticalsTest {
                 assertThat(meta.getRealWeightCoverage()).as("C of product %s", product.getId())
                         .isCloseTo(realWeight / totalWeight, within(1e-9));
                 assertThat(meta.getRealCriteriaCount()).isEqualTo(real.size());
+                assertThat(meta.getRealCriteria()).as("real criteria of product %s, even not rated", product.getId())
+                        .containsExactlyInAnyOrderElementsOf(real);
                 assertThat(meta.getTotalCriteriaCount()).isEqualTo(weights.size());
 
                 Score impactScore = product.ecoscore();

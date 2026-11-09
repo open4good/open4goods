@@ -19,6 +19,13 @@ describe('getStaticFullPage', () => {
     )
   })
 
+  it('links the affiliate-links paragraph to the ranking and listing page (GOU-1995)', () => {
+    const result = getStaticFullPage('webpages:default:legal-notice:WebHome', 'fr')
+    expect(result?.htmlContent).toContain(
+      '<a href="https://nudger.fr/classement-et-referencement">Classement et référencement</a>'
+    )
+  })
+
   it('returns the real data-privacy page with its metadata', () => {
     const result = getStaticFullPage('webpages:default:data-privacy:WebHome', 'fr')
     expect(result).not.toBeNull()

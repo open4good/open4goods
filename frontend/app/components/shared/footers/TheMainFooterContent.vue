@@ -13,6 +13,7 @@ import {
   mdiRecordCircleOutline,
   mdiScaleBalance,
   mdiShieldLockOutline,
+  mdiSortVariant,
   mdiStar,
 } from '@mdi/js'
 import type { RouteLocationRaw } from 'vue-router'
@@ -80,6 +81,11 @@ const resourceLinks = computed<FooterLink[]>(() => [
     label: t('siteIdentity.footer.comparator.links.openSource'),
     to: '/opensource',
     icon: mdiGithub,
+  },
+  {
+    label: t('siteIdentity.footer.comparator.links.rankingPolicy'),
+    to: resolveLocalizedRoutePath('ranking-and-listing', currentLocale.value),
+    icon: mdiSortVariant,
   },
   {
     label: t('siteIdentity.footer.comparator.links.privacy'),

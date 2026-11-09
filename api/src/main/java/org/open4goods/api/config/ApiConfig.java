@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.BatchService;
+import org.open4goods.api.services.ImpactScoreBatchGuard;
 import org.open4goods.api.services.CompletionFacadeService;
 import org.open4goods.api.services.DatasourcePurgeService;
 import org.open4goods.api.services.VerticalsGenerationService;
@@ -225,8 +226,19 @@ public class ApiConfig {
 	}
 
 	@Bean
-	BatchService batchService(AggregationFacadeService aggregationFacadeService, CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository, FeedIndexingService feedIndexingService, FeedService feedService, SerialisationService serialisationService, ResourceService resourceService) {
-		return new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService, productRepository,  feedIndexingService, feedService, serialisationService, resourceService, apiProperties);
+	BatchService batchService(ImpactScoreBatchGuard impactScoreBatchGuard, AggregationFacadeService aggregationFacadeService, CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository, FeedIndexingService feedIndexingService, FeedService feedService, SerialisationService serialisationService, ResourceService resourceService) {
+		BatchService batchService = new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService, productRepository,  feedIndexingService, feedService, serialisationService, resourceService, apiProperties);
+		batchService.setImpactScoreGuard(impactScoreBatchGuard);
+		return batchService;
+	}
+
+	/**
+	 * Post-batch ImpactScore checks, also exposed as the {@code impactScoreGuard} health component (GOU-1895).
+	 */
+	@Bean
+	ImpactScoreBatchGuard impactScoreGuard(MeterRegistry meterRegistry) {
+		return new ImpactScoreBatchGuard(apiProperties.getImpactScoreGuard(), meterRegistry,
+				java.nio.file.Path.of(apiProperties.getRootFolder(), "impactscore-guard"));
 	}
 
 	@Bean

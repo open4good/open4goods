@@ -1,12 +1,13 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
-import { defineComponent, h } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 
 import CategoryResultsToolbar from './CategoryResultsToolbar.vue'
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
     t: (key: string) => key,
+    locale: ref('fr-FR'),
   }),
 }))
 
@@ -154,6 +155,16 @@ const VProgressLinearStub = defineComponent({
   },
 })
 
+const NuxtLinkStub = defineComponent({
+  name: 'NuxtLink',
+  props: {
+    to: { type: String, default: '' },
+  },
+  setup(props, { attrs, slots }) {
+    return () => h('a', { ...attrs, href: props.to }, slots.default?.())
+  },
+})
+
 const CategoryResultsCountStub = defineComponent({
   name: 'CategoryResultsCount',
   props: {
@@ -195,6 +206,7 @@ describe('CategoryResultsToolbar', () => {
           VChip: VChipStub,
           VProgressLinear: VProgressLinearStub,
           CategoryResultsCount: CategoryResultsCountStub,
+          NuxtLink: NuxtLinkStub,
         },
       },
     })
@@ -233,6 +245,21 @@ describe('CategoryResultsToolbar', () => {
     )
     sortToggle?.vm.$emit('update:modelValue', 'asc')
     expect(wrapper.emitted('update:sortOrder')?.[0]).toEqual(['asc'])
+  })
+
+  it('links the sort control to the ranking and listing page (GOU-1995)', async () => {
+    const wrapper = mountComponent()
+    const link = wrapper.find('[data-testid="results-toolbar-ranking-link"]')
+
+    expect(link.exists()).toBe(true)
+    expect(link.attributes('href')).toBe('/classement-et-referencement')
+    expect(link.text()).toContain('category.products.rankingPolicyLink')
+
+    await wrapper.setProps({ showSort: false })
+
+    expect(
+      wrapper.find('[data-testid="results-toolbar-ranking-link"]').exists()
+    ).toBe(false)
   })
 
   it('renders active filter count and loading state', async () => {

@@ -341,6 +341,9 @@ public class SitemapGenerationService {
 			// Vertical home page
 			sitemap = sitemap.addPage(getWebPage(baseUrl + i18n.getVerticalHomeUrl(), ChangeFreq.WEEKLY, 1.0));
 
+			// Impact Score method page of the vertical (rendered by app/pages/[categorySlug]/ecoscore.vue)
+			sitemap = sitemap.addPage(getWebPage(baseUrl + i18n.getVerticalHomeUrl() + "/ecoscore", ChangeFreq.MONTHLY, 0.7));
+
 			// Sub-category pages (inline + auto-generated from categories/*.yml)
 			for (VerticalSubCategory subCategory : v.getSubCategories()) {
 				String subCategorySlug = subCategory.getSlug() == null ? null : subCategory.getSlug().i18n(language);

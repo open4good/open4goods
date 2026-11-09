@@ -139,7 +139,35 @@ scores the products that have offers and are not excluded. After scoring:
   GOU-1744). If their Impact Score is a composite, which only the defect above
   produces, it is recomputed from the sub-scores they hold, with the ranking of
   `EcoScoreRanking`; it is removed only when it cannot be recomputed;
-- if scoring throws, nothing is indexed for that vertical.
+- if scoring throws, nothing is indexed for that vertical;
+- if an automatic check below is blocking, nothing is indexed for that vertical either.
+
+### 6. Automatic checks after each batch (GOU-1895)
+
+`ImpactScoreBatchGuard` runs after scoring and before indexation, per vertical, and compares with the previous
+accepted batch of the same vertical (the accepted snapshot is persisted as `<rootFolder>/impactscore-guard/<verticalId>.json`, written atomically and
+reloaded after a restart; a missing or unreadable file means no reference, so only the absolute checks run; a blocked batch never becomes the baseline). Thresholds live under `impactScoreGuard` in
+`application.yml` (`ApiProperties`), with `defaults` and per-vertical overrides in `verticals.<id>`.
+
+| Rule | Severity | Condition | Property (default) |
+|------|----------|-----------|--------------------|
+| `BOUNDS` | blocking | ImpactScore outside [0, 20] | fixed |
+| `RELATIV` | blocking | `relativ` != `value / 4` | fixed |
+| `COMPOSITE` | blocking | `aggregates` not empty (cannot happen since lot 0) | fixed |
+| `SPREAD` | blocking | p95 - p5 under the floor (compressed scale, defect B1), if at least `minProductsForDistribution` rated | `minSpread` (1.0 point) |
+| `MEDIAN_SHIFT` | warning | median moves by more than X points | `maxMedianShift` (2.0) |
+| `COVERAGE_SHIFT` | warning | mean real-weight coverage (`1 - imputed share`, V1 and V2) moves by more than Y | `maxCoverageShift` (0.10) |
+| `RATED_DROP` / `SCORED_DROP` | warning | rated or scored count drops by more than Z | `maxCountDrop` (0.20) |
+| `EPREL_DROP` | warning | EPREL-matched count drops by more than Z | `maxEprelDrop` (0.20) |
+
+Starting values are conservative and to be tuned per vertical from the GOU-1876 distributions;
+`impactScoreGuard.enabled=false` switches the checks off.
+
+Alert: one structured `ERROR` log line per violation (`impactscore_guard vertical=... severity=... rule=... message=...
+action=indexation_blocked|none`), Micrometer gauge `impactscore.guard.violations{vertical,severity}`, and the
+`impactScoreGuard` health component (`/actuator/health/impactScoreGuard`, status `ALERT` when blocking, `WARN`
+otherwise, never `DOWN`, so the aggregate health and the probes are unchanged). A failure of the guard itself is
+logged and does not block the indexation.
 
 ## Source Code pointers
 

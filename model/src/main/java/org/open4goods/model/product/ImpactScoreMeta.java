@@ -51,6 +51,9 @@ public class ImpactScoreMeta {
 	/** Criteria with a weight above 0 in the active matrix. */
 	private Integer totalCriteriaCount;
 
+	/** Keys of the criteria of the active matrix actually filled in for the product (not imputed); lets the site publish the real coverage per criterion. */
+	private java.util.List<String> realCriteria;
+
 	public Integer getMethodologyVersion() {
 		return methodologyVersion;
 	}
@@ -113,5 +116,13 @@ public class ImpactScoreMeta {
 
 	public void setTotalCriteriaCount(Integer totalCriteriaCount) {
 		this.totalCriteriaCount = totalCriteriaCount;
+	}
+
+	public java.util.List<String> getRealCriteria() {
+		return realCriteria;
+	}
+
+	public void setRealCriteria(java.util.List<String> realCriteria) {
+		this.realCriteria = realCriteria;
 	}
 }

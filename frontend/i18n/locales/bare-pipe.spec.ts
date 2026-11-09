@@ -10,6 +10,7 @@ import frFR from './fr-FR.json'
 const PLURAL_KEYS = new Set([
   'common.count.months',
   'common.count.years',
+  'components.impactScore.v2.criteria',
   'home.hero.search.partnerLinkLabel',
   'product.banner.offersCount',
   'product.docs.pageCount',

@@ -36,8 +36,10 @@ class EcoScoreAggregationServiceV2Test {
 
         // 4 x (0.5 x 4 + 0.3 x 2 + 0.2 x 1) / 1
         assertRated(complete, 11.2, 1.0, 3);
+        assertThat(complete.getImpactScoreMeta().getRealCriteria()).as("matrix order").containsExactly("A", "B", "C");
         // A alone: its weight is the whole real weight
         assertRated(heavyOnly, 12.0, 0.5, 1);
+        assertThat(heavyOnly.getImpactScoreMeta().getRealCriteria()).containsExactly("A");
     }
 
     @Test
@@ -70,6 +72,7 @@ class EcoScoreAggregationServiceV2Test {
         assertThat(meta.getNotRatedReason()).isEqualTo(ImpactScoreMeta.NotRatedReason.LOW_COVERAGE.name());
         assertThat(meta.getRealWeightCoverage()).isCloseTo(0.3, within(1e-9));
         assertThat(meta.getRealCriteriaCount()).isEqualTo(1);
+        assertThat(meta.getRealCriteria()).as("real criteria, even not rated").containsExactly("B");
         assertThat(meta.getTotalCriteriaCount()).isEqualTo(3);
         assertThat(rated.getRanking().getGlobalCount()).isEqualTo(1);
     }
@@ -91,6 +94,7 @@ class EcoScoreAggregationServiceV2Test {
         assertThat(meta.getNotRatedReason()).isEqualTo(ImpactScoreMeta.NotRatedReason.NO_REAL_CRITERIA.name());
         assertThat(meta.getRealWeightCoverage()).isZero();
         assertThat(meta.getRealCriteriaCount()).isZero();
+        assertThat(meta.getRealCriteria()).isEmpty();
         // D, weighted 0, is not a criterion
         assertThat(meta.getTotalCriteriaCount()).isEqualTo(3);
     }
@@ -130,16 +134,16 @@ class EcoScoreAggregationServiceV2Test {
     @Test
     void coverageReasonOnTheThresholdBounds() {
         // Rounding below an inclusive threshold stays rated
-        assertThat(EcoScoreAggregationService.v2NotRatedReason(new Coverage(0.3 - 1e-12, 1.0, 1, 3, 1.0), 0.3))
+        assertThat(EcoScoreAggregationService.v2NotRatedReason(new Coverage(0.3 - 1e-12, 1.0, 1, 3, 1.0, List.of()), 0.3))
                 .isNull();
-        assertThat(EcoScoreAggregationService.v2NotRatedReason(new Coverage(0.3 - 1e-6, 1.0, 1, 3, 1.0), 0.3))
+        assertThat(EcoScoreAggregationService.v2NotRatedReason(new Coverage(0.3 - 1e-6, 1.0, 1, 3, 1.0, List.of()), 0.3))
                 .isEqualTo(ImpactScoreMeta.NotRatedReason.LOW_COVERAGE);
-        assertThat(EcoScoreAggregationService.v2NotRatedReason(new Coverage(1.0, 1.0, 3, 3, 1.0), 1.0)).isNull();
-        assertThat(EcoScoreAggregationService.v2NotRatedReason(new Coverage(0.0, 1.0, 0, 3, 0.0), 0.3))
+        assertThat(EcoScoreAggregationService.v2NotRatedReason(new Coverage(1.0, 1.0, 3, 3, 1.0, List.of()), 1.0)).isNull();
+        assertThat(EcoScoreAggregationService.v2NotRatedReason(new Coverage(0.0, 1.0, 0, 3, 0.0, List.of()), 0.3))
                 .isEqualTo(ImpactScoreMeta.NotRatedReason.NO_REAL_CRITERIA);
         // No threshold: only C = 0 is not rated
-        assertThat(EcoScoreAggregationService.v2NotRatedReason(new Coverage(0.01, 1.0, 1, 3, 1.0), null)).isNull();
-        assertThat(EcoScoreAggregationService.v2NotRatedReason(new Coverage(0.0, 1.0, 0, 3, 0.0), null))
+        assertThat(EcoScoreAggregationService.v2NotRatedReason(new Coverage(0.01, 1.0, 1, 3, 1.0, List.of()), null)).isNull();
+        assertThat(EcoScoreAggregationService.v2NotRatedReason(new Coverage(0.0, 1.0, 0, 3, 0.0, List.of()), null))
                 .isEqualTo(ImpactScoreMeta.NotRatedReason.NO_REAL_CRITERIA);
     }
 
@@ -157,6 +161,7 @@ class EcoScoreAggregationServiceV2Test {
         assertThat(meta.getNotRatedReason()).isNull();
         assertThat(meta.getRealWeightCoverage()).isCloseTo(coverage, within(1e-9));
         assertThat(meta.getRealCriteriaCount()).isEqualTo(realCount);
+        assertThat(meta.getRealCriteria()).hasSize(realCount);
         assertThat(meta.getTotalCriteriaCount()).isEqualTo(3);
     }
 
