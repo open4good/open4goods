@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.Query;
 import org.open4goods.model.impactscore.ImpactScoreSnapshot;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
@@ -50,5 +53,23 @@ class ImpactScoreSnapshotRepositoryTest {
 		assertThat(repository.find("tv", null, null)).isEmpty();
 		assertThat(repository.exists("tv_2026-11")).isFalse();
 		verify(operations, never()).exists(any(String.class), any(Class.class));
+	}
+
+	@Test
+	void readsAPageLargeEnoughForAllVerticalsOverSeveralYears() {
+		ElasticsearchOperations operations = mock(ElasticsearchOperations.class);
+		IndexOperations index = mock(IndexOperations.class);
+		when(operations.indexOps(ImpactScoreSnapshot.class)).thenReturn(index);
+		when(index.exists()).thenReturn(true);
+		SearchHits<ImpactScoreSnapshot> hits = mock(SearchHits.class);
+		when(hits.stream()).thenAnswer(i -> java.util.stream.Stream.empty());
+		when(operations.search(any(Query.class), org.mockito.ArgumentMatchers.eq(ImpactScoreSnapshot.class))).thenReturn(hits);
+
+		new ImpactScoreSnapshotRepository(operations).find(null, null, null);
+
+		ArgumentCaptor<Query> query = ArgumentCaptor.forClass(Query.class);
+		verify(operations).search(query.capture(), org.mockito.ArgumentMatchers.eq(ImpactScoreSnapshot.class));
+		// 15 verticals x 24 months must not be truncated
+		assertThat(query.getValue().getPageable().getPageSize()).isEqualTo(10_000).isGreaterThan(15 * 24);
 	}
 }

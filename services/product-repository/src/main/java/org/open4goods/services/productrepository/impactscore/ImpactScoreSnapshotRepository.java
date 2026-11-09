@@ -20,8 +20,8 @@ import org.springframework.data.elasticsearch.core.query.Query;
  */
 public class ImpactScoreSnapshotRepository {
 
-	/** Upper bound of the rows returned: 30 years of monthly snapshots of one vertical. */
-	static final int MAX_ROWS = 360;
+	/** Upper bound of the rows returned: the default Elasticsearch result window, far above all verticals over decades. */
+	static final int MAX_ROWS = 10_000;
 
 	private final ElasticsearchOperations operations;
 

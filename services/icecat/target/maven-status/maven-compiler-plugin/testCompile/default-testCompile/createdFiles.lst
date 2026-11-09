@@ -1,0 +1,8 @@
+org/open4goods/commons/services/IcecatIndexServiceTest.class
+org/open4goods/icecat/services/IcecatIndexVersionManagerIT.class
+org/open4goods/icecat/services/IcecatLiveClientTest.class
+org/open4goods/icecat/services/loader/CategoryLoaderTest.class
+org/open4goods/icecat/services/loader/FeatureLoaderTest.class
+org/open4goods/commons/services/IcecatServiceTest.class
+org/open4goods/icecat/model/IcecatLiveApiResponseTest.class
+org/open4goods/icecat/services/IcecatFeatureResolverTest.class

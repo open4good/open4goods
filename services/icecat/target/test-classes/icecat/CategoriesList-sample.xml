@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ICECAT-interface>
+  <Response Status="OK" Request_ID="1" ID="1" Date="2026-01-01">
+    <CategoriesList>
+      <Category ID="100" Searchable="true" Visible="true" Score="10" Updated="2026-01-01">
+        <Name ID="1" langid="1">Washing Machines</Name>
+        <Name ID="2" langid="3">Lave-linge</Name>
+      </Category>
+    </CategoriesList>
+  </Response>
+</ICECAT-interface>
