@@ -95,6 +95,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.open4goods.services.productrepository.impactscore.ImpactScoreSnapshotRepository;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -225,10 +226,17 @@ public class ApiConfig {
 				dataSourceConfigService, aggregationFacade);
 	}
 
+	/** Storage of the monthly ImpactScore snapshots written by the batch (GOU-1896). */
 	@Bean
-	BatchService batchService(ImpactScoreBatchGuard impactScoreBatchGuard, AggregationFacadeService aggregationFacadeService, CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository, FeedIndexingService feedIndexingService, FeedService feedService, SerialisationService serialisationService, ResourceService resourceService) {
+	ImpactScoreSnapshotRepository impactScoreSnapshotRepository(ElasticsearchOperations elasticsearchOperations) {
+		return new ImpactScoreSnapshotRepository(elasticsearchOperations);
+	}
+
+	@Bean
+	BatchService batchService(ImpactScoreBatchGuard impactScoreBatchGuard, AggregationFacadeService aggregationFacadeService, CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository, FeedIndexingService feedIndexingService, FeedService feedService, SerialisationService serialisationService, ResourceService resourceService, ImpactScoreSnapshotRepository impactScoreSnapshotRepository) {
 		BatchService batchService = new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService, productRepository,  feedIndexingService, feedService, serialisationService, resourceService, apiProperties);
 		batchService.setImpactScoreGuard(impactScoreBatchGuard);
+		batchService.setImpactScoreSnapshotRepository(impactScoreSnapshotRepository);
 		return batchService;
 	}
 
