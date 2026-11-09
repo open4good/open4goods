@@ -31,6 +31,7 @@
             :max="scoreMax"
             :show-methodology="false"
             :show-min-max="false"
+            :vertical-home-url="verticalHomeUrl ?? ''"
             size="lg"
             class="align-self-center w-100"
             :v2="impactStatus ?? null"

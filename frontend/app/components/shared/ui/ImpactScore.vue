@@ -45,7 +45,7 @@
           "
           :icon="mdiLeaf"
           size="small"
-          :to="'/impact-score'"
+          :to="methodologyHref"
           flat
           class="impact-score-panel__cta-card"
         />
