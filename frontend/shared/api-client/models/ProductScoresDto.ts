@@ -20,6 +20,13 @@ import {
   ProductRankingDtoToJSON,
   ProductRankingDtoToJSONTyped,
 } from './ProductRankingDto'
+import type { ProductImpactScoreStatusDto } from './ProductImpactScoreStatusDto'
+import {
+  ProductImpactScoreStatusDtoFromJSON,
+  ProductImpactScoreStatusDtoFromJSONTyped,
+  ProductImpactScoreStatusDtoToJSON,
+  ProductImpactScoreStatusDtoToJSONTyped,
+} from './ProductImpactScoreStatusDto'
 import type { ProductScoreDto } from './ProductScoreDto'
 import {
   ProductScoreDtoFromJSON,
@@ -52,6 +59,12 @@ export interface ProductScoresDto {
    * @memberof ProductScoresDto
    */
   ranking?: ProductRankingDto
+  /**
+   * ImpactScore status under the vertical's current methodology; null for a product without vertical. When the product's score belongs to another methodology version, ecoscore, scores.ECOSCORE and ranking are not exposed.
+   * @type {ProductImpactScoreStatusDto}
+   * @memberof ProductScoresDto
+   */
+  impactScore?: ProductImpactScoreStatusDto
 }
 
 /**
@@ -87,6 +100,10 @@ export function ProductScoresDtoFromJSONTyped(
       json['ranking'] == null
         ? undefined
         : ProductRankingDtoFromJSON(json['ranking']),
+    impactScore:
+      json['impactScore'] == null
+        ? undefined
+        : ProductImpactScoreStatusDtoFromJSON(json['impactScore']),
   }
 }
 
@@ -109,5 +126,6 @@ export function ProductScoresDtoToJSONTyped(
         : mapValues(value['scores'], ProductScoreDtoToJSON),
     ecoscore: ProductScoreDtoToJSON(value['ecoscore']),
     ranking: ProductRankingDtoToJSON(value['ranking']),
+    impactScore: ProductImpactScoreStatusDtoToJSON(value['impactScore']),
   }
 }

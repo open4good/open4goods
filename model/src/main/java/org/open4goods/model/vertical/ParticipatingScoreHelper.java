@@ -47,7 +47,7 @@ public final class ParticipatingScoreHelper {
         Objects.requireNonNull(verticalConfig.getAttributesConfig(), "attributesConfig is required");
         Objects.requireNonNull(verticalConfig.getImpactScoreConfig(), "impactScoreConfig is required");
 
-        Map<String, Double> criteriasPonderation = verticalConfig.getImpactScoreConfig().getCriteriasPonderation();
+        Map<String, Double> criteriasPonderation = verticalConfig.getImpactScoreConfig().activeCriteriasPonderation();
         Set<String> availableImpactScoreCriterias = resolveAvailableImpactScoreCriterias(verticalConfig);
         Map<String, Map<String, Double>> aggregates = new HashMap<>();
 

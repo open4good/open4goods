@@ -9,8 +9,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -19,6 +22,9 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.ImpactScoreConfig;
+import org.open4goods.model.vertical.ImpactScorePositionLabel;
+import org.open4goods.model.vertical.ImpactScoreV2Config;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.springframework.core.io.Resource;
@@ -237,6 +243,142 @@ class VerticalYamlValidationTest {
         assertImpactScoreCriterias(attributeConfigByKey, tvConfig.getAvailableImpactScoreCriterias());
     }
 
+    @Test
+    void noVerticalIsSwitchedToTheV2Methodology() {
+        // GOU-1882: the v2 blocks and the switch come with GOU-1880 and GOU-1888
+        assertThat(verticalsConfigService.getConfigsWithoutDefault())
+            .allSatisfy(config -> assertThat(config.getImpactScoreConfig().effectiveMethodologyVersion())
+                .as("methodology version of %s", config.getId())
+                .isEqualTo(ImpactScoreConfig.METHODOLOGY_V1));
+    }
+
+    @Test
+    void validV2BlockIsAccepted() {
+        VerticalConfig tv = verticalsConfigService.getConfigById("tv");
+        assertThat(ImpactScoreMethodology.validate(impactScoreWithV2(tv, v2 -> { }), tv)).isEmpty();
+
+        ImpactScoreConfig active = impactScoreWithV2(tv, v2 -> { });
+        active.setMethodologyVersion(2);
+        assertThat(ImpactScoreMethodology.blockingErrors(active, tv)).isEmpty();
+    }
+
+    @Test
+    void methodologyVersionOutsideOneAndTwoIsRefused() {
+        VerticalConfig tv = verticalsConfigService.getConfigById("tv");
+        ImpactScoreConfig config = impactScoreWithV2(tv, v2 -> { });
+        config.setMethodologyVersion(3);
+        assertThat(ImpactScoreMethodology.blockingErrors(config, tv)).anyMatch(error -> error.contains("methodologyVersion 3"));
+    }
+
+    @Test
+    void versionTwoWithoutV2BlockIsRefused() {
+        VerticalConfig tv = verticalsConfigService.getConfigById("tv");
+        ImpactScoreConfig config = new ImpactScoreConfig();
+        config.setCriteriasPonderation(tv.getImpactScoreConfig().getCriteriasPonderation());
+        config.setMethodologyVersion(2);
+        assertThat(ImpactScoreMethodology.blockingErrors(config, tv)).containsExactly("methodology version 2 requires a v2 block");
+        assertThat(config.activeCriteriasPonderation()).as("no fallback to the V1 matrix").isEmpty();
+    }
+
+    @Test
+    void v2MatrixNotSummingToOneIsRefused() {
+        assertV2Refused(v2 -> v2.getCriteriasPonderation().replaceAll((key, weight) -> weight / 2), "sums to");
+    }
+
+    @Test
+    void v2MatrixWeightingDataQualityIsRefused() {
+        assertV2Refused(v2 -> moveWeight(v2, "DATA_QUALITY"), "cannot weight DATA_QUALITY");
+    }
+
+    @Test
+    void v2MatrixWeightingEcoscoreIsRefused() {
+        assertV2Refused(v2 -> moveWeight(v2, "ECOSCORE"), "cannot weight ECOSCORE");
+    }
+
+    @Test
+    void v2MatrixWeightingAnUnknownCriterionIsRefused() {
+        assertV2Refused(v2 -> moveWeight(v2, "NOT_AN_ATTRIBUTE"), "not an asScore attribute");
+    }
+
+    @Test
+    void v2CoverageThresholdOutsideZeroOneIsRefused() {
+        assertV2Refused(v2 -> v2.setMinRealWeightCoverage(0.0), "minRealWeightCoverage");
+        assertV2Refused(v2 -> v2.setMinRealWeightCoverage(1.2), "minRealWeightCoverage");
+        assertV2Refused(v2 -> v2.setMinRealWeightCoverage(null), "minRealWeightCoverage");
+    }
+
+    @Test
+    void v2PositionLabelsNotStrictlyDecreasingAreRefused() {
+        assertV2Refused(v2 -> v2.setPositionLabels(List.of(
+            new ImpactScorePositionLabel("excellent", 0.5),
+            new ImpactScorePositionLabel("good", 0.5),
+            new ImpactScorePositionLabel("poor", 0.0))), "strictly decrease");
+    }
+
+    @Test
+    void v2PositionLabelsNotEndingAtZeroAreRefused() {
+        assertV2Refused(v2 -> v2.setPositionLabels(List.of(
+            new ImpactScorePositionLabel("excellent", 0.9),
+            new ImpactScorePositionLabel("good", 0.5))), "last threshold must be 0");
+    }
+
+    @Test
+    void invalidV2BlockFailsOnlyOnceActive() {
+        VerticalConfig tv = verticalsConfigService.getConfigById("tv");
+        ImpactScoreConfig config = impactScoreWithV2(tv, v2 -> v2.setMinRealWeightCoverage(null));
+        // Merged dark: refused by this test, not blocking at startup while V1 is active
+        assertThat(ImpactScoreMethodology.validate(config, tv)).isNotEmpty();
+        assertThat(ImpactScoreMethodology.blockingErrors(config, tv)).isEmpty();
+
+        config.setMethodologyVersionOverride(2);
+        assertThat(ImpactScoreMethodology.blockingErrors(config, tv)).isNotEmpty();
+    }
+
+    private static void assertV2Refused(Consumer<ImpactScoreV2Config> breaker, String expectedError) {
+        VerticalConfig tv = verticalsConfigService.getConfigById("tv");
+        ImpactScoreConfig config = impactScoreWithV2(tv, breaker);
+        assertThat(ImpactScoreMethodology.validate(config, tv))
+            .as("v2 block broken by the case expecting '%s'", expectedError)
+            .anyMatch(error -> error.contains(expectedError));
+    }
+
+    /**
+     * A V1 configuration of the vertical with a valid {@code v2} block (V1 matrix without DATA_QUALITY, normalised),
+     * then changed by {@code customizer}.
+     */
+    private static ImpactScoreConfig impactScoreWithV2(VerticalConfig vertical, Consumer<ImpactScoreV2Config> customizer) {
+        Map<String, Double> v1 = vertical.getImpactScoreConfig().getCriteriasPonderation();
+        Map<String, Double> v2Weights = new LinkedHashMap<>();
+        v1.forEach((key, weight) -> {
+            if (!"DATA_QUALITY".equals(key)) {
+                v2Weights.put(key, weight);
+            }
+        });
+        double sum = v2Weights.values().stream().mapToDouble(Double::doubleValue).sum();
+        v2Weights.replaceAll((key, weight) -> weight / sum);
+
+        ImpactScoreV2Config v2 = new ImpactScoreV2Config();
+        v2.setCriteriasPonderation(v2Weights);
+        v2.setMinRealWeightCoverage(0.6);
+        v2.setPositionLabels(new ArrayList<>(List.of(
+            new ImpactScorePositionLabel("excellent", 0.9),
+            new ImpactScorePositionLabel("good", 0.67),
+            new ImpactScorePositionLabel("fair", 0.33),
+            new ImpactScorePositionLabel("poor", 0.0))));
+        customizer.accept(v2);
+
+        ImpactScoreConfig config = new ImpactScoreConfig();
+        config.setCriteriasPonderation(new HashMap<>(v1));
+        config.setV2(v2);
+        return config;
+    }
+
+    /** Moves the weight of the first criterion of the v2 matrix to {@code key}, keeping the sum at 1. */
+    private static void moveWeight(ImpactScoreV2Config v2, String key) {
+        String first = v2.getCriteriasPonderation().keySet().iterator().next();
+        v2.getCriteriasPonderation().put(key, v2.getCriteriasPonderation().remove(first));
+    }
+
     private static void assertAttributeReferences(Collection<String> attributes, Set<String> definedKeys, String section) {
         List<String> missing = attributes == null ? List.of() : attributes.stream()
             .filter(key -> !definedKeys.contains(key))
@@ -299,6 +441,13 @@ class VerticalYamlValidationTest {
             .isCloseTo(1.0d, within(1e-6));
 
         assertParticipatingScoresAreWeighted(config, sourceName, weights.keySet());
+
+        assertThat(ImpactScoreMethodology.validate(config.getImpactScoreConfig(), config))
+            .as("ImpactScore methodology version and v2 block must be valid (%s)", sourceName)
+            .isEmpty();
+        assertThat(config.getImpactScoreConfig().getMethodologyRevision())
+            .as("Methodology revision is computed at load time (%s)", sourceName)
+            .matches("[0-9a-f]{8}");
     }
 
     @SuppressWarnings("unchecked")

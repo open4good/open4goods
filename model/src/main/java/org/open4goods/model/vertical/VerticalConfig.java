@@ -457,7 +457,7 @@ public class VerticalConfig {
 	 */
 	public Integer ecoscorePercentOf(String scoreName) {
 
-		Double ponderation = impactScoreConfig.getCriteriasPonderation().get(scoreName);
+		Double ponderation = impactScoreConfig.activeCriteriasPonderation().get(scoreName);
 		if (null == ponderation) {
 			return -1;
 		} else {
@@ -557,7 +557,7 @@ public class VerticalConfig {
 	 * @return the sum of the coefficient applyed to this ecoscore
 	 */
 	public Double getEcoscoreCriteriasSum() {
-		return impactScoreConfig.getCriteriasPonderation().values().stream().mapToDouble(Double::doubleValue).sum();
+		return impactScoreConfig.activeCriteriasPonderation().values().stream().mapToDouble(Double::doubleValue).sum();
 	}
 
 	public String getBaseUrl(final String siteLocale) {
@@ -660,7 +660,7 @@ public class VerticalConfig {
 
 		List<Score> ret = new ArrayList<Score>();
 
-		impactScoreConfig.getCriteriasPonderation().keySet().forEach(ecoConfig -> {
+		impactScoreConfig.activeCriteriasPonderation().keySet().forEach(ecoConfig -> {
 			existing.forEach(exisiting -> {
 				if (exisiting.getName().equals(ecoConfig)) {
 					ret.add(exisiting);

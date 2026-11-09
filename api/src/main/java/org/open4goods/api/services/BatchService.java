@@ -657,7 +657,7 @@ public class BatchService {
 	 * Removes the scores a scoring run cannot have refreshed and that must not stay published.
 	 *
 	 * <p>Excluded products and products unmatched from the vertical no longer belong to the scored cohort, so
-	 * all their scores and their ranking are removed. Products without offers keep their last score (they stay
+	 * all their scores, their ranking and their ImpactScore assessment metadata are removed. Products without offers keep their last score (they stay
 	 * in the sitemap, GOU-1744). If that ImpactScore was overwritten by a composite (only that defect sets
 	 * aggregates on it), it is recomputed from the sub-scores the product holds, since the batch does not rescore
 	 * products without offers; it is removed when it cannot be recomputed.
@@ -671,6 +671,7 @@ public class BatchService {
 			if (product.isExcluded() || product.getVertical() == null) {
 				product.getScores().clear();
 				product.setRanking(new EcoScoreRanking());
+				product.setImpactScoreMeta(null);
 			} else if (hasCompositeImpactScore(product)) {
 				Score recomputed = impactScore.recomputeFromStoredSubScores(product, vertical);
 				if (recomputed == null) {

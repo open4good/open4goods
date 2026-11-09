@@ -22,6 +22,7 @@ import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -126,8 +127,10 @@ public class AppConfig {
     @Bean
     VerticalsConfigService verticalsConfigService(ResourcePatternResolver resourceResolver,
             SerialisationService serialisationService,
-            GoogleTaxonomyService googleTaxonomyService) {
-        return new VerticalsConfigService(serialisationService, googleTaxonomyService, resourceResolver);
+            GoogleTaxonomyService googleTaxonomyService,
+            @Value("${" + VerticalsConfigService.METHODOLOGY_VERSION_OVERRIDES_PROPERTY + ":}") String methodologyVersionOverrides) {
+        return new VerticalsConfigService(serialisationService, googleTaxonomyService, resourceResolver,
+                methodologyVersionOverrides);
     }
 
 }

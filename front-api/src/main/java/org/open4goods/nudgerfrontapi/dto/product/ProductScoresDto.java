@@ -14,6 +14,9 @@ public record ProductScoresDto(
         @Schema(description = "Ecoscore when available", nullable = true)
         ProductScoreDto ecoscore,
         @Schema(description = "Ecoscore derived rankings", nullable = true)
-        ProductRankingDto ranking
+        ProductRankingDto ranking,
+        @Schema(description = "ImpactScore status under the vertical's current methodology; null for a product without vertical. When the product's score belongs to another methodology version, ecoscore, scores.ECOSCORE and ranking are not exposed.",
+                nullable = true)
+        ProductImpactScoreStatusDto impactScore
 ) {
 }

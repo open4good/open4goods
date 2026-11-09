@@ -57,6 +57,13 @@ public class VerticalsConfigService {
 
 	public static final Logger logger = LoggerFactory.getLogger(VerticalsConfigService.class);
 
+	/**
+	 * Property forcing the ImpactScore methodology version per vertical, for example {@code tv:2} (beta pilot) or
+	 * {@code tv:1} (production rollback). Rendered from the GitHub Environment variable
+	 * {@code IMPACTSCORE_METHODOLOGY_OVERRIDES} for api, front-api and ui together.
+	 */
+	public static final String METHODOLOGY_VERSION_OVERRIDES_PROPERTY = "impactscore.methodology-version-overrides";
+
 	private static final String DEFAULT_CONFIG_FILENAME = "_default.yml";
 
 	private final List<String> configPaths = new ArrayList<>();
@@ -101,12 +108,34 @@ public class VerticalsConfigService {
 	// The default config
 	private VerticalConfig defaultConfig;
 
+	/** ImpactScore methodology version forced per vertical id (impactscore.methodology-version-overrides). */
+	private final Map<String, Integer> methodologyVersionOverrides;
+
 	public VerticalsConfigService(SerialisationService serialisationService,
 			GoogleTaxonomyService googleTaxonomyService, ResourcePatternResolver resourceResolver) {
+		this(serialisationService, googleTaxonomyService, resourceResolver, null);
+	}
+
+	/**
+	 * Builds the service and loads the configurations.
+	 *
+	 * @param serialisationService        YAML reader
+	 * @param googleTaxonomyService       taxonomy updated with the loaded verticals
+	 * @param resourceResolver            classpath resolver
+	 * @param methodologyVersionOverrides value of {@code impactscore.methodology-version-overrides}, for example
+	 *                                    {@code tv:2}; blank or {@code none} forces nothing. api, front-api and ui
+	 *                                    must receive the same value.
+	 * @throws IllegalStateException when the override is malformed or a vertical's effective ImpactScore
+	 *                               methodology is unusable: the service does not start
+	 */
+	public VerticalsConfigService(SerialisationService serialisationService,
+			GoogleTaxonomyService googleTaxonomyService, ResourcePatternResolver resourceResolver,
+			String methodologyVersionOverrides) {
 		super();
 		this.serialisationService = serialisationService;
 		this.googleTaxonomyService = googleTaxonomyService;
 		this.resourceResolver = resourceResolver;
+		this.methodologyVersionOverrides = ImpactScoreMethodology.parseOverrides(methodologyVersionOverrides);
 
 		// Default paths
 		this.configPaths.add("classpath:/verticals/*.yml");
@@ -165,6 +194,7 @@ public class VerticalsConfigService {
 			logger.info("Adding config {} from classpath", uc.getId());
 			vConfs.put(uc.getId(), uc);
 		}
+		applyImpactScoreMethodologies(vConfs);
 		// Switching confs
 		synchronized (configs) {
 			configs.clear();
@@ -204,6 +234,49 @@ public class VerticalsConfigService {
 			}
 		}));
 
+	}
+
+	/**
+	 * Applies the environment override of the ImpactScore methodology version, checks that every vertical's
+	 * effective methodology is usable and computes the methodology revisions. Outside {@code try}: an error fails
+	 * the startup instead of leaving a vertical on another methodology than the one requested.
+	 *
+	 * @param vConfs the loaded verticals, by id
+	 * @throws IllegalStateException when an override names an unknown vertical or a vertical without ImpactScore,
+	 *                               or when an effective methodology is unusable
+	 */
+	private void applyImpactScoreMethodologies(Map<String, VerticalConfig> vConfs) {
+		for (Entry<String, Integer> override : methodologyVersionOverrides.entrySet()) {
+			VerticalConfig vertical = vConfs.get(override.getKey());
+			if (vertical == null || vertical.getImpactScoreConfig() == null) {
+				throw new IllegalStateException("impactscore.methodology-version-overrides: " + override.getKey()
+						+ " is not a vertical with an ImpactScore configuration");
+			}
+		}
+		for (VerticalConfig vertical : vConfs.values()) {
+			ImpactScoreConfig impactScoreConfig = vertical.getImpactScoreConfig();
+			if (impactScoreConfig == null) {
+				continue;
+			}
+			impactScoreConfig.setMethodologyVersionOverride(methodologyVersionOverrides.get(vertical.getId()));
+			List<String> errors = ImpactScoreMethodology.blockingErrors(impactScoreConfig, vertical);
+			if (!errors.isEmpty()) {
+				throw new IllegalStateException("ImpactScore methodology of vertical " + vertical.getId()
+						+ " is unusable: " + String.join("; ", errors));
+			}
+			List<String> warnings = ImpactScoreMethodology.validate(impactScoreConfig, vertical);
+			if (!warnings.isEmpty()) {
+				logger.warn("ImpactScore v2 block of vertical {} is invalid (not active): {}", vertical.getId(),
+						String.join("; ", warnings));
+			}
+			impactScoreConfig.refreshMethodologyRevision();
+			if (impactScoreConfig.getMethodologyVersionOverride() != null) {
+				logger.warn("ImpactScore methodology of vertical {} forced to version {} by the environment",
+						vertical.getId(), impactScoreConfig.getMethodologyVersionOverride());
+			}
+			logger.info("ImpactScore methodology of vertical {}: version {}, revision {}", vertical.getId(),
+					impactScoreConfig.effectiveMethodologyVersion(), impactScoreConfig.getMethodologyRevision());
+		}
 	}
 
 	/**

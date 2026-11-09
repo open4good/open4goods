@@ -415,7 +415,7 @@ class ProductRepositoryTest
                 eq(Product.class), any(org.springframework.data.elasticsearch.core.mapping.IndexCoordinates.class)))
                 .thenReturn(iterator);
 
-        repository.exportVerticalForSitemap("tv").close();
+        repository.exportVerticalForSitemap("tv", 1).close();
 
         ArgumentCaptor<org.springframework.data.elasticsearch.core.query.Query> captor =
                 ArgumentCaptor.forClass(org.springframework.data.elasticsearch.core.query.Query.class);
@@ -436,6 +436,27 @@ class ProductRepositoryTest
         assertThat(recentOffer.must()).hasSize(2);
         assertThat(recentOffer.must().get(0).range().date().field()).isEqualTo("lastChange");
         assertThat(recentOffer.must().get(1).range().number().field()).isEqualTo("offersCount");
-        assertThat(or.should().get(1).exists().field()).isEqualTo("scores.ECOSCORE.value");
+        // score present AND of the current methodology: version 1, or no recorded version (legacy score)
+        BoolQuery currentScore = or.should().get(1).bool();
+        assertThat(currentScore.must()).hasSize(2);
+        assertThat(currentScore.must().get(0).exists().field()).isEqualTo("scores.ECOSCORE.value");
+        BoolQuery v1 = currentScore.must().get(1).bool();
+        assertThat(v1.minimumShouldMatch()).isEqualTo("1");
+        assertThat(v1.should()).hasSize(2);
+        assertThat(v1.should().get(0).term().field()).isEqualTo("impactScoreMeta.methodologyVersion");
+        assertThat(v1.should().get(0).term().value().longValue()).isEqualTo(1L);
+        assertThat(v1.should().get(1).bool().mustNot().get(0).exists().field())
+                .isEqualTo("impactScoreMeta.methodologyVersion");
+    }
+
+    @Test
+    void currentImpactScoreQueryKeepsOnlyScoresOfTheVersionFromV2()
+    {
+        // GOU-1882: in V2 a legacy score (no recorded version) or a V1 score does not keep a product in the sitemap
+        BoolQuery currentScore = ProductRepository.currentImpactScoreQuery(2).bool();
+        assertThat(currentScore.must()).hasSize(2);
+        assertThat(currentScore.must().get(0).exists().field()).isEqualTo("scores.ECOSCORE.value");
+        assertThat(currentScore.must().get(1).term().field()).isEqualTo("impactScoreMeta.methodologyVersion");
+        assertThat(currentScore.must().get(1).term().value().longValue()).isEqualTo(2L);
     }
 }

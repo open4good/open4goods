@@ -26,6 +26,25 @@ that proxy and never wrote this mapping.
 A new field of `product-mappings.json` therefore reaches the production index
 when the `api` restarts, not when `ui` restarts.
 
+### Deploy order for a new field (GOU-1882, `impactScoreMeta`)
+
+The root of the mapping is `strict`: a document carrying a field the index
+mapping does not know yet is **rejected**. When a release adds a field that
+the batch writes (for example `impactScoreMeta`, ImpactScore V2 design 1.3):
+
+1. Deploy and restart the `api` first (a full release does), so the mapping
+   is put before the first batch writes the field.
+2. Check the `api` log: `action MAPPING_UPDATED` (or `CREATED`), not
+   `failed after 3 attempts`.
+3. Check the mapping, read only, with the Ops account:
+   `GET products-moustik/_mapping/field/impactScoreMeta.*` must list the new
+   properties.
+4. Only then let the batch run. On beta first, then production.
+
+If step 2 fails, the batch rejects every product it scores until the next
+successful `api` restart: restart the `api` (see "After an ERROR") before the
+next batch.
+
 ## Retries and startup
 
 At most 3 attempts. The delay before the second one is

@@ -30,6 +30,7 @@ import org.open4goods.model.Localisable;
 import org.open4goods.model.price.Currency;
 import org.open4goods.model.product.EcoScoreRanking;
 import org.open4goods.model.product.GtinInfo;
+import org.open4goods.model.product.ImpactScoreMeta;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductCanonicalUrl;
 import org.open4goods.model.product.ProductCondition;
@@ -39,12 +40,16 @@ import org.open4goods.model.resource.ImageInfo;
 import org.open4goods.model.resource.PdfInfo;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.resource.ResourceType;
+import org.open4goods.model.vertical.ImpactScoreConfig;
+import org.open4goods.model.vertical.ImpactScorePositionLabel;
+import org.open4goods.model.vertical.ImpactScoreV2Config;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.AmazonSearchLinkProperties;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.config.properties.OfferFreshnessProperties;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductImpactScoreStatusDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductScoreDto;
 import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -759,5 +764,167 @@ class ProductMappingServiceTest {
         assertThat(dto.attributes().indexedAttributes()).containsKey("BRAND");
         assertThat(dto.attributes().indexedAttributes().get("BRAND").name())
                 .isEqualTo("BRAND"); // Fallback to attribute key itself
+    }
+
+    // GOU-1882: only an ImpactScore of the vertical's current methodology is exposed (v2-design.md, 4.2)
+
+    @Test
+    void v1VerticalShowsALegacyScoreWithoutVersion() throws Exception {
+        Product product = scoredProduct(null);
+        ProductDto dto = mapScoredProduct(product, verticalWithMethodology(1));
+
+        assertThat(dto.scores().ecoscore()).isNotNull();
+        assertThat(dto.scores().scores()).containsKey("ECOSCORE");
+        assertThat(dto.scores().ranking()).isNotNull();
+        assertThat(dto.base().ecoscoreValue()).isEqualTo(12.0);
+        ProductImpactScoreStatusDto impactScore = dto.scores().impactScore();
+        assertThat(impactScore.status()).isEqualTo("RATED");
+        assertThat(impactScore.notRatedReason()).isNull();
+        assertThat(impactScore.methodologyVersion()).isNull();
+        assertThat(impactScore.currentMethodologyVersion()).isEqualTo(1);
+        assertThat(impactScore.position()).isEqualTo(2L);
+        assertThat(impactScore.ratedCount()).isEqualTo(5L);
+        assertThat(impactScore.betterThanPercent()).isEqualTo(75);
+        assertThat(impactScore.level()).as("no label in V1").isNull();
+    }
+
+    @Test
+    void v1VerticalShowsAV1ScoreWithItsAssessment() throws Exception {
+        Product product = scoredProduct(1);
+        ProductImpactScoreStatusDto impactScore = mapScoredProduct(product, verticalWithMethodology(1)).scores()
+                .impactScore();
+
+        assertThat(impactScore.status()).isEqualTo("RATED");
+        assertThat(impactScore.methodologyVersion()).isEqualTo(1);
+        assertThat(impactScore.methodologyRevision()).isEqualTo("0123abcd");
+        assertThat(impactScore.scoredAt()).isEqualTo(1_794_163_200_000L);
+        assertThat(impactScore.realWeightCoverage()).isEqualTo(0.8);
+        assertThat(impactScore.realCriteriaCount()).isEqualTo(4);
+        assertThat(impactScore.totalCriteriaCount()).isEqualTo(5);
+    }
+
+    @Test
+    void v2VerticalShowsAV2ScoreWithItsPositionLabel() throws Exception {
+        ProductDto dto = mapScoredProduct(scoredProduct(2), verticalWithMethodology(2));
+
+        assertThat(dto.scores().ecoscore()).isNotNull();
+        ProductImpactScoreStatusDto impactScore = dto.scores().impactScore();
+        assertThat(impactScore.status()).isEqualTo("RATED");
+        assertThat(impactScore.currentMethodologyVersion()).isEqualTo(2);
+        assertThat(impactScore.betterThanPercent()).isEqualTo(75);
+        assertThat(impactScore.level()).isEqualTo("good");
+    }
+
+    @Test
+    void v2VerticalHidesALegacyScore() throws Exception {
+        ProductDto dto = mapScoredProduct(scoredProduct(null), verticalWithMethodology(2));
+
+        assertNotRated(dto, "OUTDATED_METHOD");
+        assertThat(dto.scores().scores()).as("sub-scores stay").containsKey("ENERGY");
+    }
+
+    @Test
+    void v2VerticalHidesAV1Score() throws Exception {
+        assertNotRated(mapScoredProduct(scoredProduct(1), verticalWithMethodology(2)), "OUTDATED_METHOD");
+    }
+
+    @Test
+    void v1VerticalHidesAV2ScoreAfterARollback() throws Exception {
+        assertNotRated(mapScoredProduct(scoredProduct(2), verticalWithMethodology(1)), "OUTDATED_METHOD");
+    }
+
+    @Test
+    void productNeverScoredIsNotScored() throws Exception {
+        Product product = scoredProduct(null);
+        product.getScores().remove("ECOSCORE");
+        product.setRanking(new EcoScoreRanking());
+
+        assertNotRated(mapScoredProduct(product, verticalWithMethodology(2)), "NOT_SCORED");
+
+        // V1 output unchanged (empty ranking still mapped), only the status is added
+        ProductDto v1 = mapScoredProduct(product, verticalWithMethodology(1));
+        assertThat(v1.scores().ecoscore()).isNull();
+        assertThat(v1.scores().impactScore().status()).isEqualTo("NOT_RATED");
+        assertThat(v1.scores().impactScore().notRatedReason()).isEqualTo("NOT_SCORED");
+    }
+
+    @Test
+    void notRatedReasonOfTheBatchIsExposed() throws Exception {
+        Product product = scoredProduct(2);
+        product.getScores().remove("ECOSCORE");
+        product.setRanking(new EcoScoreRanking());
+        product.getImpactScoreMeta().setStatus("NOT_RATED");
+        product.getImpactScoreMeta().setNotRatedReason("LOW_COVERAGE");
+
+        ProductImpactScoreStatusDto impactScore = mapScoredProduct(product, verticalWithMethodology(2)).scores()
+                .impactScore();
+        assertThat(impactScore.status()).isEqualTo("NOT_RATED");
+        assertThat(impactScore.notRatedReason()).isEqualTo("LOW_COVERAGE");
+        assertThat(impactScore.realWeightCoverage()).isEqualTo(0.8);
+        assertThat(impactScore.position()).isNull();
+        assertThat(impactScore.level()).isNull();
+    }
+
+    private static void assertNotRated(ProductDto dto, String reason) {
+        assertThat(dto.scores().ecoscore()).isNull();
+        assertThat(dto.scores().scores()).doesNotContainKey("ECOSCORE");
+        assertThat(dto.scores().ranking()).isNull();
+        assertThat(dto.base().ecoscoreValue()).isNull();
+        ProductImpactScoreStatusDto impactScore = dto.scores().impactScore();
+        assertThat(impactScore.status()).isEqualTo("NOT_RATED");
+        assertThat(impactScore.notRatedReason()).isEqualTo(reason);
+        assertThat(impactScore.position()).isNull();
+        assertThat(impactScore.betterThanPercent()).isNull();
+        assertThat(impactScore.level()).isNull();
+    }
+
+    private ProductDto mapScoredProduct(Product product, VerticalConfig verticalConfig) {
+        when(verticalsConfigService.getConfigById("tv")).thenReturn(verticalConfig);
+        when(verticalsConfigService.getConfigByIdOrDefault("tv")).thenReturn(verticalConfig);
+        return service.mapProduct(product, Locale.ENGLISH, Set.of("base", "scores"), DomainLanguage.en, false);
+    }
+
+    /** A product with an ImpactScore 12/20, rank 3 of 5 (position 2), assessed with {@code version} (null: legacy). */
+    private static Product scoredProduct(Integer version) {
+        Product product = new Product(777L);
+        product.setVertical("tv");
+        Score ecoscore = new Score("ECOSCORE", 12.0);
+        ecoscore.setRanking(3);
+        HashMap<String, Score> scores = new HashMap<>();
+        scores.put("ECOSCORE", ecoscore);
+        scores.put("ENERGY", new Score("ENERGY", 3.0));
+        product.setScores(scores);
+        EcoScoreRanking ranking = new EcoScoreRanking();
+        ranking.setGlobalPosition(2);
+        ranking.setGlobalCount(5);
+        product.setRanking(ranking);
+        if (version != null) {
+            ImpactScoreMeta meta = new ImpactScoreMeta();
+            meta.setMethodologyVersion(version);
+            meta.setMethodologyRevision("0123abcd");
+            meta.setScoredAt(1_794_163_200_000L);
+            meta.setStatus("RATED");
+            meta.setRealWeightCoverage(0.8);
+            meta.setRealCriteriaCount(4);
+            meta.setTotalCriteriaCount(5);
+            product.setImpactScoreMeta(meta);
+        }
+        return product;
+    }
+
+    private static VerticalConfig verticalWithMethodology(int version) {
+        ImpactScoreV2Config v2 = new ImpactScoreV2Config();
+        v2.setCriteriasPonderation(new HashMap<>(Map.of("ENERGY", 1.0)));
+        v2.setMinRealWeightCoverage(0.6);
+        v2.setPositionLabels(List.of(new ImpactScorePositionLabel("excellent", 0.9),
+                new ImpactScorePositionLabel("good", 0.67), new ImpactScorePositionLabel("poor", 0.0)));
+        ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
+        impactScoreConfig.setCriteriasPonderation(new HashMap<>(Map.of("ENERGY", 1.0)));
+        impactScoreConfig.setV2(v2);
+        impactScoreConfig.setMethodologyVersionOverride(version);
+        VerticalConfig verticalConfig = new VerticalConfig();
+        verticalConfig.setId("tv");
+        verticalConfig.setImpactScoreConfig(impactScoreConfig);
+        return verticalConfig;
     }
 }

@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.open4goods.api.config.yml.ActuatorMonitorCredentials;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.services.eprelservice.config.EprelServiceProperties;
@@ -90,6 +91,10 @@ class RenderedSecretsConfigTreeTest {
             // The Spring Boot Admin monitor identity on Actuator (GOU-1393).
             entry("o4g.actuator.monitor.password",
                     binder -> bind(binder, "o4g.actuator.monitor", ActuatorMonitorCredentials.class).getPassword()),
+            // ImpactScore methodology version forced per vertical, read by the VerticalsConfigService bean (GOU-1882).
+            entry(VerticalsConfigService.METHODOLOGY_VERSION_OVERRIDES_PROPERTY,
+                    binder -> binder.bind(VerticalsConfigService.METHODOLOGY_VERSION_OVERRIDES_PROPERTY, String.class)
+                            .orElse(null)),
             entry("spring.elasticsearch.password",
                     binder -> bind(binder, "spring.elasticsearch", ElasticsearchProperties.class).getPassword()));
 

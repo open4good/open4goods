@@ -82,10 +82,12 @@
 # | api       | GOOGLE_SSO_CLIENT_ID            | tree    | spring.security.oauth2.client.registration.google.client-id                    | optional |
 # | api       | GOOGLE_SSO_CLIENT_SECRET        | tree    | spring.security.oauth2.client.registration.google.client-secret                | optional |
 # | api       | O4G_ELASTICSEARCH_PASSWORD      | tree    | spring.elasticsearch.password                                                  | source   |
+# | api       | IMPACTSCORE_METHODOLOGY_OVERRIDES | tree  | impactscore.methodology-version-overrides (GitHub variable, not a secret)      | optional |
 # | ui        | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.client.password                                              | optional |
 # | ui        | O4G_SBA_PASSWORD                | tree    | o4g.actuator.monitor.password                                                  | optional |
 # | ui        | O4G_CAPTCHA_SECRET              | tree    | captcha-secret                                                                 | optional |
 # | ui        | O4G_ELASTICSEARCH_PASSWORD      | tree    | spring.elasticsearch.password                                                  | source   |
+# | ui        | IMPACTSCORE_METHODOLOGY_OVERRIDES | tree  | impactscore.methodology-version-overrides (GitHub variable, not a secret)      | optional |
 # | front-api | GOOGLE_SSO_CLIENT_ID            | env     | FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID (front.security.google-sso.client-id)      | required |
 # | front-api | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.client.password                                              | optional |
 # | front-api | O4G_SBA_PASSWORD                | tree    | o4g.actuator.monitor.password                                                  | optional |
@@ -97,6 +99,7 @@
 # | front-api | O4G_CAPTCHA_SECRET              | tree    | captcha.secret-key                                                             | optional |
 # | front-api | FRONT_API_GITHUB_TOKEN          | tree    | feedback.github.access-token                                                   | optional |
 # | front-api | O4G_ELASTICSEARCH_PASSWORD      | tree    | spring.elasticsearch.password                                                  | source   |
+# | front-api | IMPACTSCORE_METHODOLOGY_OVERRIDES | tree  | impactscore.methodology-version-overrides (GitHub variable, not a secret)      | optional |
 # | admin     | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.instance-auth.default-password                               | optional |
 # | admin     | O4G_SBA_PASSWORD                | tree    | o4g.sba.registration.password                                                  | optional |
 # | admin     | O4G_MAIL_PASSWORD               | tree    | spring.mail.password                                                           | optional |
@@ -130,6 +133,10 @@
 #   O4G_INTERNAL_API_KEY  front-api (front.affiliation-partners.api-key, sent to api) <->
 #                         api (admin-key: api's only full-access key besides test-keys; metriks-key,
 #                         API_METRIKS_KEY, opens /api/metriks/** only).
+#   IMPACTSCORE_METHODOLOGY_OVERRIDES  api (batch) <-> front-api (display) <-> ui (sitemap): the
+#                         ImpactScore methodology version forced per vertical (tv:2), a GitHub Environment
+#                         variable, not a secret (docs/impactscore/v2-design.md, 5.2). Empty: not rendered,
+#                         the previous render stays; set it to `none` to clear a rendered override.
 # Coupled with their source (infraSecrets.yml changes the source, then renders and restarts
 # every consumer in the same run; never serviceSecrets.yml nor a deploy):
 #   O4G_ELASTICSEARCH_PASSWORD    Elasticsearch user `elastic` <-> api, ui, front-api, b2b-api.
@@ -175,10 +182,12 @@ api API_METRIKS_KEY tree metriks-key optional
 api GOOGLE_SSO_CLIENT_ID tree spring.security.oauth2.client.registration.google.client-id optional
 api GOOGLE_SSO_CLIENT_SECRET tree spring.security.oauth2.client.registration.google.client-secret optional
 api O4G_ELASTICSEARCH_PASSWORD tree spring.elasticsearch.password source
+api IMPACTSCORE_METHODOLOGY_OVERRIDES tree impactscore.methodology-version-overrides optional
 ui O4G_SBA_PASSWORD tree spring.boot.admin.client.password optional
 ui O4G_SBA_PASSWORD tree o4g.actuator.monitor.password optional
 ui O4G_CAPTCHA_SECRET tree captcha-secret optional
 ui O4G_ELASTICSEARCH_PASSWORD tree spring.elasticsearch.password source
+ui IMPACTSCORE_METHODOLOGY_OVERRIDES tree impactscore.methodology-version-overrides optional
 front-api GOOGLE_SSO_CLIENT_ID env FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID required
 front-api O4G_SBA_PASSWORD tree spring.boot.admin.client.password optional
 front-api O4G_SBA_PASSWORD tree o4g.actuator.monitor.password optional
@@ -190,6 +199,7 @@ front-api O4G_MAIL_PASSWORD tree spring.mail.password optional
 front-api O4G_CAPTCHA_SECRET tree captcha.secret-key optional
 front-api FRONT_API_GITHUB_TOKEN tree feedback.github.access-token optional
 front-api O4G_ELASTICSEARCH_PASSWORD tree spring.elasticsearch.password source
+front-api IMPACTSCORE_METHODOLOGY_OVERRIDES tree impactscore.methodology-version-overrides optional
 admin O4G_SBA_PASSWORD tree spring.boot.admin.instance-auth.default-password optional
 admin O4G_SBA_PASSWORD tree o4g.sba.registration.password optional
 admin O4G_MAIL_PASSWORD tree spring.mail.password optional

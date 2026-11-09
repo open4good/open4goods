@@ -24,6 +24,7 @@ import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductCanonicalUrl;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.SiteNaming;
+import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.ui.config.yml.UiConfig;
@@ -76,7 +77,7 @@ class SitemapGenerationServiceTest {
 		Product withoutSlug = new Product(4L);
 		withoutSlug.setVertical("tv");
 		Product duplicate = product(1L, "tv", "1-smart-tv-qe32ls03cbu-32-pouces");
-		when(repository.exportVerticalForSitemap("tv"))
+		when(repository.exportVerticalForSitemap("tv", 1))
 				.thenReturn(Stream.of(renamed, other, movedToDishwashers, withoutSlug, duplicate));
 
 		assertThat(service.generate()).isTrue();
@@ -104,7 +105,7 @@ class SitemapGenerationServiceTest {
 		Path productPages = rootFolder.resolve("sitemap/fr/product-pages.xml");
 		Files.createDirectories(productPages.getParent());
 		Files.writeString(productPages, "previous complete sitemap");
-		when(repository.exportVerticalForSitemap("tv"))
+		when(repository.exportVerticalForSitemap("tv", 1))
 				.thenThrow(new NullPointerException("elasticsearchOperations is null"));
 
 		assertThat(service.generate()).isFalse();
@@ -115,6 +116,19 @@ class SitemapGenerationServiceTest {
 		// The other files of the language are still refreshed.
 		assertThat(Files.exists(rootFolder.resolve("sitemap/fr/category-pages.xml"))).isTrue();
 		assertThat(leftoverTemporaryFiles()).isEmpty();
+	}
+
+	@Test
+	void productExportFollowsTheEffectiveImpactScoreMethodology() {
+		assertThat(SitemapGenerationService.currentMethodologyVersion(vertical("oven", "fours"))).isEqualTo(1);
+
+		VerticalConfig piloted = vertical("tv", "televiseurs");
+		ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
+		piloted.setImpactScoreConfig(impactScoreConfig);
+		assertThat(SitemapGenerationService.currentMethodologyVersion(piloted)).isEqualTo(1);
+
+		impactScoreConfig.setMethodologyVersionOverride(2);
+		assertThat(SitemapGenerationService.currentMethodologyVersion(piloted)).isEqualTo(2);
 	}
 
 	@Test

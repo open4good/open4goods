@@ -101,6 +101,7 @@ models/GoogleCategoryDto.ts
 models/GoogleIndexationMetricsDto.ts
 models/IcecatFeatureReferential.ts
 models/ImpactScoreConfigDto.ts
+models/ImpactScorePositionLabelDto.ts
 models/IpGeolocationResponse.ts
 models/IpQuotaCategory.ts
 models/IpQuotaStatusDto.ts
@@ -140,6 +141,7 @@ models/ProductFieldOptionsResponse.ts
 models/ProductGtinInfoDto.ts
 models/ProductIdentityDto.ts
 models/ProductImageDto.ts
+models/ProductImpactScoreStatusDto.ts
 models/ProductIndexedAttributeDto.ts
 models/ProductNamesDto.ts
 models/ProductOffersDto.ts
