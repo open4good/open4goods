@@ -704,6 +704,7 @@
           "rated": "{count} produits notés.",
           "notRated": "{count} produits non notés (données insuffisantes : {lowCoverage} ; aucun critère renseigné : {noCriteria}).",
           "outdated": "{count} produits en attente de recalcul avec la méthode actuelle.",
+          "excluded": "{count} produits exclus de la comparaison. Sont exclus les produits sans marque, sans modèle, sans fiche EPREL associée (selon la catégorie) ou auxquels il manque un attribut requis par la catégorie.",
           "unavailable": "Les effectifs de cette catégorie ne sont pas disponibles pour le moment."
         },
         "coverage": {
@@ -721,11 +722,13 @@
         "sources": {
           "title": "Fournisseurs et sources",
           "data": "Les données viennent d'EPREL (étiquette énergie européenne), des fabricants, des marchands partenaires et, pour certaines caractéristiques, d'une extraction par IA.",
+          "brands": "{count} marques couvertes parmi les produits notés.",
           "partners": "Voir nos partenaires et marchands"
         },
         "update": {
           "title": "Mise à jour",
-          "body": "La note d'un produit est recalculée lorsque ses données ou la méthode changent. La date du dernier calcul de la catégorie figure ci-dessus.",
+          "body": "Les notes sont recalculées chaque jour pour toutes les catégories. Le catalogue EPREL est rafraîchi tous les deux jours environ et rattaché aux produits lors du recalcul quotidien. La date du dernier calcul de la catégorie figure ci-dessus.",
+          "outdated": "Un produit dont la note a été calculée avec une ancienne version de la méthode garde sa note actuelle jusqu'au prochain recalcul quotidien, qui la remplace.",
           "report": "Signaler une erreur"
         },
         "independence": {

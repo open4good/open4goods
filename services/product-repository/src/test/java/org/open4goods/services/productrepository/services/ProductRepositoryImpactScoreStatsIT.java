@@ -28,6 +28,10 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
  * GOU-1901: runs {@link ProductRepository#impactScoreVerticalStats(String, int)} against a real Elasticsearch with the
  * production {@code product-mappings.json}. Not part of the PR CI (IT suffix); run it like
  * {@link ProductRepositorySitemapExportIT} (rootless Docker required).
+ *
+ * <p>It needs {@code -DargLine="--add-opens java.base/java.math=ALL-UNNAMED"}, otherwise Spring Data fails with
+ * {@code Cannot create PersistentEntity ... BigDecimal}: {@code mvn -pl services/product-repository test
+ * -Dtest=ProductRepositoryImpactScoreStatsIT -DargLine="--add-opens java.base/java.math=ALL-UNNAMED"}.
  */
 @Testcontainers
 class ProductRepositoryImpactScoreStatsIT {

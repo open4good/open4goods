@@ -144,6 +144,13 @@
               })
             }}
           </li>
+          <li v-if="stats.excludedCount" data-test="excluded">
+            {{
+              t('category.ecoscorePage.method.products.excluded', {
+                count: fmt(stats.excludedCount),
+              })
+            }}
+          </li>
         </ul>
 
         <h4 class="impact-method__subtitle">
@@ -220,8 +227,15 @@
       <p class="impact-method__text">
         {{ t('category.ecoscorePage.method.sources.data') }}
       </p>
+      <p v-if="stats?.brandCount" class="impact-method__text" data-test="brands">
+        {{
+          t('category.ecoscorePage.method.sources.brands', {
+            count: fmt(stats.brandCount),
+          })
+        }}
+      </p>
       <p class="impact-method__text">
-        <NuxtLink :to="localePath('/partners')">
+        <NuxtLink :to="partnersPath">
           {{ t('category.ecoscorePage.method.sources.partners') }}
         </NuxtLink>
       </p>
@@ -251,8 +265,11 @@
       <p class="impact-method__text">
         {{ t('category.ecoscorePage.method.update.body') }}
       </p>
+      <p v-if="stats?.outdatedCount" class="impact-method__text" data-test="outdated-fate">
+        {{ t('category.ecoscorePage.method.update.outdated') }}
+      </p>
       <p class="impact-method__text">
-        <NuxtLink :to="localePath('/contact')">
+        <NuxtLink :to="contactPath">
           {{ t('category.ecoscorePage.method.update.report') }}
         </NuxtLink>
       </p>
@@ -281,6 +298,7 @@ import type {
   ImpactScoreConfigDto,
   ImpactScoreStatsDto,
 } from '~~/shared/api-client'
+import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 
 const props = defineProps<{
   config: ImpactScoreConfigDto | null
@@ -292,7 +310,12 @@ const props = defineProps<{
 }>()
 
 const { t, locale } = useI18n()
-const localePath = useLocalePath()
+const partnersPath = computed(() =>
+  resolveLocalizedRoutePath('partners', locale.value)
+)
+const contactPath = computed(() =>
+  resolveLocalizedRoutePath('contact', locale.value)
+)
 
 const audit = computed(() => props.config?.audit ?? null)
 

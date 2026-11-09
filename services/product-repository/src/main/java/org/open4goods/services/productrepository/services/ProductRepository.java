@@ -680,7 +680,8 @@ public class ProductRepository {
 	        .withAggregation("reasons", Aggregation.of(a -> a.terms(t -> t.field("impactScoreMeta.notRatedReason").size(10))))
 	        .withAggregation("lastScoredAt", Aggregation.of(a -> a.max(m -> m.field("impactScoreMeta.scoredAt"))))
 	        .withAggregation("rated", Aggregation.of(a -> a.filter(rated)
-	            .aggregations("coverage", Aggregation.of(c -> c.terms(t -> t.field("impactScoreMeta.realCriteria").size(200))))
+	            .aggregations("brands", Aggregation.of(c -> c.cardinality(t -> t.field("attributes.referentielAttributes.BRAND"))))
+            .aggregations("coverage", Aggregation.of(c -> c.terms(t -> t.field("impactScoreMeta.realCriteria").size(200))))
 	            .aggregations("criteriaCount", Aggregation.of(c -> c.terms(t -> t.field("impactScoreMeta.realCriteriaCount").size(200))))
 	            .aggregations("histogram", Aggregation.of(c -> c.histogram(h -> h.field(scoreField).interval((double) SCORE_BAND_WIDTH / SCORE_ON_20_FACTOR)
 	                .minDocCount(0).extendedBounds(eb -> eb.min(0.0).max((20.0 - SCORE_BAND_WIDTH) / SCORE_ON_20_FACTOR)))))
@@ -702,7 +703,7 @@ public class ProductRepository {
 
 	    SearchHits<Product> results = search(queryBuilder.build(), ProductRepository.MAIN_INDEX_NAME);
 	    if (results == null || !(results.getAggregations() instanceof ElasticsearchAggregations aggregations)) {
-	        return new org.open4goods.model.rating.ImpactScoreVerticalStats(0, 0, 0, outdated, excluded, Map.of(), Map.of(),
+	        return new org.open4goods.model.rating.ImpactScoreVerticalStats(0, 0, 0, outdated, excluded, 0, Map.of(), Map.of(),
 	            List.of(), SCORE_BAND_WIDTH, null, null, null, null, null, null);
 	    }
 
@@ -720,7 +721,8 @@ public class ProductRepository {
 
 	    var ratedAgg = aggregations.get("rated").aggregation().getAggregate().filter();
 	    long ratedCount = ratedAgg.docCount();
-	    Map<String, Long> coverage = new java.util.TreeMap<>();
+	    long brandCount = ratedAgg.aggregations().get("brands").cardinality().value();
+    Map<String, Long> coverage = new java.util.TreeMap<>();
 	    for (var bucket : ratedAgg.aggregations().get("coverage").sterms().buckets().array()) {
 	        coverage.put(bucket.key().stringValue(), bucket.docCount());
 	    }
@@ -744,7 +746,7 @@ public class ProductRepository {
 	        p50 = on20(percentile(values, "50.0"));
 	        p95 = on20(percentile(values, "95.0"));
 	    }
-	    return new org.open4goods.model.rating.ImpactScoreVerticalStats(ratedCount, lowCoverage, noCriteria, outdated, excluded,
+	    return new org.open4goods.model.rating.ImpactScoreVerticalStats(ratedCount, lowCoverage, noCriteria, outdated, excluded, brandCount,
 	        coverage, criteriaCount, histogram, SCORE_BAND_WIDTH, min, p5, p50, p95, max, lastScoredAt);
 	}
 

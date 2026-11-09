@@ -30,7 +30,7 @@ class ImpactScoreStatsServiceTest {
         config.setImpactScoreConfig(new ImpactScoreConfig());
         when(verticals.getConfigById("tv")).thenReturn(config);
         when(repository.impactScoreVerticalStats("tv", 1)).thenReturn(new ImpactScoreVerticalStats(
-                100, 20, 5, 2, 1, Map.of("ENERGY", 90L), Map.of(1, 100L), List.of(0L, 100L), 2,
+                100, 20, 5, 2, 1, 12, Map.of("ENERGY", 90L), Map.of(1, 100L), List.of(0L, 100L), 2,
                 1.0, 2.0, 6.0, 9.0, 10.0, 1700000000000L));
 
         ImpactScoreStatsDto dto = service.stats("tv").orElseThrow();
@@ -40,6 +40,7 @@ class ImpactScoreStatsServiceTest {
         assertThat(dto.ratedCount()).isEqualTo(100);
         assertThat(dto.notRatedLowCoverageCount()).isEqualTo(20);
         assertThat(dto.notRatedNoCriteriaCount()).isEqualTo(5);
+        assertThat(dto.brandCount()).isEqualTo(12);
         assertThat(dto.coverageByCriterion()).containsEntry("ENERGY", 90L);
         assertThat(dto.scoreHistogram()).containsExactly(0L, 100L);
         assertThat(dto.scoreMedian()).isEqualTo(6.0);
