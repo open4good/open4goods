@@ -18,7 +18,9 @@ lang: fr
 > vérifiées dans le code.
 >
 > **Décisions du 2026-11-09** (section 6) : la projection crée les produits inconnus (`CREATE`
-> par défaut), et les données livres sont intégrées (plans 09 et 10 en P2).
+> par défaut) ; ADR 0010 est remplacé par [ADR 0021](../../adr/0021-reference-datasets-and-projection.md) ;
+> les livres sont en attente ; l'ordre de priorité de Q4 est validé ; pas de carte Paperclip par
+> plan.
 
 ## 1. Sommaire des plans
 
@@ -32,8 +34,8 @@ lang: fr
 | 06 | [EU Ecolabel](06-eu-ecolabel.md) | GTIN valide sur 30,6 % des lignes, pas de marque ni de modèle | R + bloc `labels` | 0 ligne dans les verticales | P3 | S |
 | 07 | [Open Products Facts](07-open-products-facts.md) | GTIN (44 056 exploitables sur 48 924) | R | masse ; 155 smartphones, 4 TV, 4 lave-linge | P3 | M (S sans les images) |
 | 08 | [Open Prices](08-open-prices.md) | GTIN (87 % de prix alimentaires) | R (observations, jamais des offres) | 2 398 produits non alimentaires | non recommandé en l'état | S (import) à M |
-| 09 | [data.bnf.fr](09-data-bnf.md) | ISBN (3,4 M distincts ; 19,6 % de nos ISBN, 50 % des ISBN français) | R+ par moisson SPARQL + complément SRU | livres | P2 (Q2 décidée) | M ; +L pour une verticale |
-| 10 | [Open Library](10-open-library.md) | ISBN (50 % de nos ISBN ; 61 % en union avec la BnF) | R+ (dump mensuel de 12,6 Go filtré) | livres | P2, après 09 | M |
+| 09 | [data.bnf.fr](09-data-bnf.md) | ISBN (3,4 M distincts ; 19,6 % de nos ISBN, 50 % des ISBN français) | R+ par moisson SPARQL + complément SRU | livres | en attente (Q2) | M ; +L pour une verticale |
+| 10 | [Open Library](10-open-library.md) | ISBN (50 % de nos ISBN ; 61 % en union avec la BnF) | R+ (dump mensuel de 12,6 Go filtré) | livres | en attente (Q2), après 09 | M |
 | 11 | [eBay Browse API](11-ebay-browse.md) | GTIN/ePID partiel | C + offres éphémères (P0-8) | smartphones (occasion) ; environ 1 250 produits frais au quota par défaut | P3 (P2 si alertes occasion) | M |
 | 12 | [Reconditionné via affiliation](12-reconditionne-affiliation.md) | GTIN 14 % | F + état `REFURBISHED` (P0-8) | smartphones | P2, après mesure état x stock x GTIN | M |
 | 13 | [Verified by GS1](13-verified-by-gs1.md) | GTIN | C (contrôle) | toutes ; 30 requêtes par jour en accès public | non recommandé | S |
@@ -448,10 +450,10 @@ enrichi ? Ou rien pour l'instant ? Mesuré, le scénario minimal (export ISBN et
 existantes enrichis) coûte déjà M par plan. Une verticale livres ajoute L. Notons que l'export
 ISBN public est figé au 2026-06-04 alors qu'il devrait être hebdomadaire.
 
-**Décidé le 2026-11-09 : les données livres sont intégrées** (plans 09 puis 10, en P2). Restent
-ouverts : une verticale livres (surcoût L, plan 09 section 5.8), et le périmètre de la création
-pour Open Library (38 M éditions à ISBN ; le plan 10 n'indexe aujourd'hui que les éditions
-appariées).
+**En attente depuis le 2026-11-09.** Les plans 09 et 10 restent valables mais ne démarrent pas
+avant une décision sur une verticale livres (surcoût L, plan 09 section 5.8) et sur le
+périmètre de la création pour Open Library (38 M éditions à ISBN ; le plan 10 n'indexe
+aujourd'hui que les éditions appariées).
 
 **Q3. ADR 0010 et `data-reference`.** ADR 0010 (statut `accepted`) attribue l'ingestion à
 `services/data-reference`, dont le code a été écarté lors du reset d'octobre 2026 : il ne reste
@@ -460,7 +462,10 @@ que des branches distantes non fusionnées. Le document candidat raisonne pourta
 agrégation, completion). Proposition : passer ADR 0010 en `superseded` et écrire un ADR court
 "sources de référence : index `ref-<id>` et projection".
 
-**Q4. Ordre de priorité.** Proposition :
+**Décidé le 2026-11-09 :** ADR 0010 passe en `superseded`, remplacé par
+[ADR 0021](../../adr/0021-reference-datasets-and-projection.md).
+
+**Q4. Ordre de priorité.** Validé le 2026-11-09 :
 
 1. P0-1, P0-2, P0-3, P0-9, puis P0-4 et P0-5, livrés avec le plan 01. Le plan 01 complète la
    carte Paperclip GOU-1892 (attribut `DURABILITY_INDEX` lu dans les flux marchands).
@@ -469,13 +474,13 @@ agrégation, completion). Proposition : passer ADR 0010 en `superseded` et écri
    l'hypothèse `productGroup` (plan 05, section 3.3). Ce plan sert de spécification à la carte
    GOU-1891 ; GOU-1875 et GOU-1893 mesurent l'appariement EPREL.
 3. Plan 02.
-4. Ticket de mesure du plan 03 (go/no-go), et mesure état x stock x GTIN du plan 12.
-5. Plans 09 puis 10 (livres, Q2), puis le reste, avec P0-11 avant la première création.
+4. Mesure go/no-go du plan 03, et mesure état x stock x GTIN du plan 12.
+5. Le reste, avec P0-11 avant la première création. Les plans 09 et 10 attendent la décision
+   sur les livres (Q2).
 
-Faut-il remonter un sujet, par exemple la sécurité produit avant tout ?
-
-**Q5. Suivi.** Faut-il transformer chaque plan en ticket Paperclip (un ticket P0 par prérequis,
-un par plan), ou garder ces documents comme seule source ?
+**Q5. Suivi.** Décidé le 2026-11-09 : pas de carte Paperclip par plan ni par prérequis. Ces
+documents restent la source ; le travail est découpé au moment où un lot démarre, pour ce lot
+seulement.
 
 ## 7. Constats qui corrigent le document candidat
 

@@ -126,8 +126,8 @@ Règles :
 
 1. `gtins = {code}` si le code est un GTIN exploitable, normalisé par
    `BarcodeValidationService`.
-2. Les ISBN restent dans `ref-open-products-facts`, marqués comme tels, projetés comme les
-   autres depuis la décision du 2026-11-09 (Q2 du README : données livres intégrées). Les codes de circulation restreinte et les codes
+2. Les ISBN restent dans `ref-open-products-facts`, marqués comme tels, sans projection tant
+   que les livres sont en attente (Q2 du README). Les codes de circulation restreinte et les codes
    invalides sont rejetés et comptés dans le rapport d'import.
 3. `GTIN_ONLY` : OPF n'a pas de champ modèle fiable. Le nom commercial ("Ordinateur portable -
    STRIX-G16-G614PM-RV066W") contient parfois la référence, mais seulement sur les fiches

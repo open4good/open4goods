@@ -24,7 +24,7 @@ lang: fr
 |---|---|
 | Identifiant | `data-bnf` |
 | Mode | R+, mais acquisition par **moisson SPARQL paginée** plutôt que par dump (section 2.4), complétée par le SRU du catalogue général pour les ISBN récents |
-| Priorité | P2 (décision du 2026-11-09 : données livres intégrées, Q2 du README). À faire **avant** le plan 10, parce qu'il est moins cher et livre la chaîne ISBN commune |
+| Priorité | en attente (Q2 du README, 2026-11-09). Au déblocage, à faire **avant** le plan 10, parce qu'il est moins cher et livre la chaîne ISBN commune |
 | Effort | Scénario minimal : M, 5 à 7 jours, chaîne ISBN commune comprise (section 5.1), socle P0-3 à P0-5 supposé livré par le plan 01. Surcoût verticale livres : L, 10 à 15 jours partagés avec le plan 10 (section 5.8) |
 | Périmètre | produits dont `gtinInfos.upcType = ISBN_13`, hors verticale : 10 000 891 ISBN dans l'index le 2026-11-08, 8 703 397 dans l'export du 2026-06-04 |
 | Volume source | 4 703 410 valeurs `bnf-onto:isbn` sur 4 033 190 manifestations, plus 585 544 manifestations qui n'ont qu'un `bnf-onto:ean` ; 3 424 324 ISBN-13 distincts et valides |
@@ -479,8 +479,8 @@ Ce qui change si Q2 répond "verticale livres" (partagé avec le plan 10) :
 
 Questions au propriétaire :
 
-1. **Q2** : tranchée le 2026-11-09, les données livres sont intégrées. Reste à décider s'il faut
-   une verticale livres : seul le surcoût de la section 5.8 en dépend.
+1. **Q2** : en attente depuis le 2026-11-09 (verticale livres, périmètre de la création). Seul
+   le surcoût de la section 5.8 dépend de la verticale.
 2. **Complément SRU** : accepte-t-on environ 50 000 requêtes de rattrapage (14 h étalées) puis
    un flux quotidien, avec une prise de contact préalable avec la BnF ? Il fait passer la
    couverture des livres français avec offre d'environ 52 % à environ 57 %, et c'est la seule

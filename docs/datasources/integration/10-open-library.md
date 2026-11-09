@@ -24,7 +24,7 @@ lang: fr
 |---|---|
 | Identifiant | `open-library` |
 | Mode | R+ : dump `editions` lu en flux et filtré contre notre ensemble d'ISBN, puis jointure avec le dump `authors` ; API `/api/books` pour les nouveaux ISBN entre deux dumps |
-| Priorité | P2 (décision du 2026-11-09 : données livres intégrées, Q2 du README), juste après le plan 09 ; c'est la source qui couvre le plus de nos ISBN (50 %) |
+| Priorité | en attente (Q2 du README, 2026-11-09) ; au déblocage, juste après le plan 09 ; c'est la source qui couvre le plus de nos ISBN (50 %) |
 | Effort | Scénario minimal : M, 4 à 6 jours si le plan 09 a livré la chaîne ISBN commune et les attributs ; 6 à 8 jours sinon. Surcoût verticale livres : partagé avec le plan 09 (section 5.7 de ce plan, section 5.8 du plan 09) |
 | Périmètre | produits `ISBN_13` hors verticale : 10 000 891 ISBN dans l'index le 2026-11-08, 8 703 397 dans l'export du 2026-06-04 |
 | Volume source | dump `editions` de 12,6 Go compressés, environ 60 M éditions dont environ 38 M avec ISBN (extrapolation de l'échantillon, **non vérifié**) |
