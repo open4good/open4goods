@@ -574,7 +574,8 @@
         "criteria": "Critères retenus",
         "overview": "Présentation",
         "purpose": "Objectif & données",
-        "transparency": "Transparence"
+        "transparency": "Transparence",
+        "method": "Méthode"
       },
       "sections": {
         "aiAudit": {
@@ -586,7 +587,8 @@
           "responseTitle": "Réponse du modèle",
           "title": "Audit de génération IA",
           "auditTitle": "Données structurées",
-          "yamlUnavailable": "Prompt indisponible."
+          "yamlUnavailable": "Prompt indisponible.",
+          "toggle": "Audit IA : prompt et réponse brute"
         },
         "criteria": {
           "empty": "Les critères seront publiés prochainement.",
@@ -670,7 +672,67 @@
         "description": "Découvre comment Nudger calcule l'Impact Score des {category} : critères, pondérations et audit de génération IA.",
         "title": "{category} - Impact Score détaillé"
       },
-      "title": "{category} - {label}"
+      "title": "{category} - {label}",
+      "method": {
+        "title": "Méthode de l'Impact Score {category}",
+        "meaning": {
+          "title": "Ce que la note signifie",
+          "fallback": "L'Impact Score classe les {category} les uns par rapport aux autres selon des critères d'impact environnemental mesurables."
+        },
+        "limits": {
+          "title": "Ce que la note ne mesure pas",
+          "static": "L'Impact Score est une note relative au catalogue Nudger, qui n'est pas exhaustif : il ne couvre pas tous les produits du marché ni toutes les marques."
+        },
+        "method": {
+          "title": "Méthode : critères et poids",
+          "version": "Version {version} de la méthode, dernier calcul : {date}.",
+          "dateUnknown": "date non disponible",
+          "threshold": "Un produit n'est noté que si les critères renseignés représentent au moins {percent}% du poids total.",
+          "redistribution": "Quand un critère n'est pas renseigné, son poids n'est pas inventé : la note repose sur les critères disponibles.",
+          "tableCaption": "Critères, poids, sens et justification",
+          "criterion": "Critère",
+          "weight": "Poids",
+          "direction": "Sens",
+          "why": "Pourquoi",
+          "higher": "Plus c'est élevé, mieux c'est",
+          "lower": "Plus c'est bas, mieux c'est",
+          "categorical": "Selon la modalité"
+        },
+        "products": {
+          "title": "Produits comparés",
+          "scope": "Sont comparés les produits de la catégorie {category} présents dans le catalogue Nudger avec au moins une offre.",
+          "rated": "{count} produits notés.",
+          "notRated": "{count} produits non notés (données insuffisantes : {lowCoverage} ; aucun critère renseigné : {noCriteria}).",
+          "outdated": "{count} produits en attente de recalcul avec la méthode actuelle.",
+          "unavailable": "Les effectifs de cette catégorie ne sont pas disponibles pour le moment."
+        },
+        "coverage": {
+          "title": "Couverture par critère",
+          "helper": "Part des produits notés pour lesquels le critère est réellement renseigné.",
+          "unavailable": "La couverture par critère n'est pas encore mesurée.",
+          "aria": "{criterion} : renseigné pour {percent}% des produits notés"
+        },
+        "distribution": {
+          "title": "Répartition des notes (sur 20)",
+          "unavailable": "Aucun produit noté pour le moment.",
+          "aria": "Notes de {band} : {count} produits",
+          "summary": "Note minimale {min}, médiane {median}, maximale {max}."
+        },
+        "sources": {
+          "title": "Fournisseurs et sources",
+          "data": "Les données viennent d'EPREL (étiquette énergie européenne), des fabricants, des marchands partenaires et, pour certaines caractéristiques, d'une extraction par IA.",
+          "partners": "Voir nos partenaires et marchands"
+        },
+        "update": {
+          "title": "Mise à jour",
+          "body": "La note d'un produit est recalculée lorsque ses données ou la méthode changent. La date du dernier calcul de la catégorie figure ci-dessus.",
+          "report": "Signaler une erreur"
+        },
+        "independence": {
+          "title": "Indépendance",
+          "body": "Le calcul de l'Impact Score n'utilise pas les commissions d'affiliation : aucun marchand ne peut influencer une note."
+        }
+      }
     },
     "fastFilters": {
       "activeClauses": "Filtres de sous-ensemble appliqués",

@@ -1,6 +1,7 @@
 import { CategoriesApi } from '..'
 import type {
   CategoryNavigationDto,
+  ImpactScoreStatsDto,
   VerticalConfigDto,
   VerticalConfigFullDto,
 } from '..'
@@ -60,6 +61,22 @@ export const useCategoriesService = (domainLanguage: DomainLanguage) => {
   }
 
   /**
+   * Fetch the measured ImpactScore figures of a category (counts, coverage, distribution).
+   * @param categoryId - Identifier of the category
+   * @returns Promise<ImpactScoreStatsDto>
+   */
+  const getImpactScoreStats = async (
+    categoryId: string
+  ): Promise<ImpactScoreStatsDto> => {
+    try {
+      return await resolveApi().impactScoreStats({ categoryId, domainLanguage })
+    } catch (error) {
+      console.error('Error fetching ImpactScore stats:', error)
+      throw error
+    }
+  }
+
+  /**
    * Fetch the navigation tree for the provided Google taxonomy node.
    * @param params - Optional parameters to identify the taxonomy node.
    * @returns Promise<CategoryNavigationDto>
@@ -83,5 +100,10 @@ export const useCategoriesService = (domainLanguage: DomainLanguage) => {
     }
   }
 
-  return { getCategories, getCategoryById, getNavigation }
+  return {
+    getCategories,
+    getCategoryById,
+    getImpactScoreStats,
+    getNavigation,
+  }
 }

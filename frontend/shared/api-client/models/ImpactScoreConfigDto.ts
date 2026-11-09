@@ -13,6 +13,11 @@
  */
 
 import { mapValues } from '../runtime'
+import type { ImpactScoreAuditDto } from './ImpactScoreAuditDto'
+import {
+  ImpactScoreAuditDtoFromJSON,
+  ImpactScoreAuditDtoToJSON,
+} from './ImpactScoreAuditDto'
 import type { ImpactScorePositionLabelDto } from './ImpactScorePositionLabelDto'
 import {
   ImpactScorePositionLabelDtoFromJSON,
@@ -51,6 +56,18 @@ export interface ImpactScoreConfigDto {
    * @memberof ImpactScoreConfigDto
    */
   positionLabels?: Array<ImpactScorePositionLabelDto>
+  /**
+   * Fingerprint of the active matrix (weights, sense, bounds).
+   * @type {string}
+   * @memberof ImpactScoreConfigDto
+   */
+  methodologyRevision?: string | null
+  /**
+   * Useful texts of the stored AI audit; null when the vertical has no audit.
+   * @type {ImpactScoreAuditDto}
+   * @memberof ImpactScoreConfigDto
+   */
+  audit?: ImpactScoreAuditDto | null
   /**
    * Prompt used to produce the YAML configuration.
    * @type {string}
@@ -104,6 +121,14 @@ export function ImpactScoreConfigDtoFromJSONTyped(
         : (json['positionLabels'] as Array<any>).map(
             ImpactScorePositionLabelDtoFromJSON
           ),
+    methodologyRevision:
+      json['methodologyRevision'] == null
+        ? undefined
+        : json['methodologyRevision'],
+    audit:
+      json['audit'] == null
+        ? undefined
+        : ImpactScoreAuditDtoFromJSON(json['audit']),
     yamlPrompt: json['yamlPrompt'] == null ? undefined : json['yamlPrompt'],
     aiJsonResponse:
       json['aiJsonResponse'] == null ? undefined : json['aiJsonResponse'],
@@ -132,6 +157,8 @@ export function ImpactScoreConfigDtoToJSONTyped(
         : (value['positionLabels'] as Array<any>).map(
             ImpactScorePositionLabelDtoToJSON
           ),
+    methodologyRevision: value['methodologyRevision'],
+    audit: ImpactScoreAuditDtoToJSON(value['audit']),
     yamlPrompt: value['yamlPrompt'],
     aiJsonResponse: value['aiJsonResponse'],
   }

@@ -27,6 +27,8 @@ import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterField;
 import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto.FilterOperator;
 import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.CategoryMappingService;
+import org.open4goods.nudgerfrontapi.service.ImpactScoreStatsService;
+import org.open4goods.nudgerfrontapi.dto.category.ImpactScoreStatsDto;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.open4goods.nudgerfrontapi.service.SearchService;
 import org.open4goods.verticals.GoogleTaxonomyService;
@@ -75,17 +77,20 @@ public class CategoriesController {
     private final GoogleTaxonomyService googleTaxonomyService;
     private final SearchService searchService;
     private final ProductMappingService productMappingService;
+    private final ImpactScoreStatsService impactScoreStatsService;
 
     public CategoriesController(VerticalsConfigService verticalsConfigService,
                                 CategoryMappingService categoryMappingService,
                                 GoogleTaxonomyService googleTaxonomyService,
                                 SearchService searchService,
-                                ProductMappingService productMappingService) {
+                                ProductMappingService productMappingService,
+                                ImpactScoreStatsService impactScoreStatsService) {
         this.verticalsConfigService = verticalsConfigService;
         this.categoryMappingService = categoryMappingService;
         this.googleTaxonomyService = googleTaxonomyService;
         this.searchService = searchService;
         this.productMappingService = productMappingService;
+        this.impactScoreStatsService = impactScoreStatsService;
     }
 
     @GetMapping
@@ -155,6 +160,37 @@ public class CategoriesController {
         return ResponseEntity.ok()
                 .cacheControl(CacheControlConstants.FIFTEEN_MINUTES_PUBLIC_CACHE)
                 .body(body);
+    }
+
+    @GetMapping("/{categoryId}/impact-score-stats")
+    @Operation(
+            summary = "Get the measured ImpactScore figures of a category",
+            description = "Return, for the vertical's current methodology, the rated and not rated counts, the real coverage "
+                    + "per criterion and the distribution of the scores. Computed from the batch's assessment of each "
+                    + "product and cached; a figure that is not measured is null or empty.",
+            parameters = {
+                    @Parameter(name = "categoryId", in = ParameterIn.PATH, required = true,
+                            description = "Identifier of the vertical.",
+                            schema = @Schema(type = "string", example = "tv")),
+                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
+                            description = "Language driving localisation of textual fields (future use).",
+                            schema = @Schema(implementation = DomainLanguage.class))
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Figures returned",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ImpactScoreStatsDto.class))),
+                    @ApiResponse(responseCode = "404", description = "Category unknown or without ImpactScore"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<ImpactScoreStatsDto> impactScoreStats(@PathVariable("categoryId") String categoryId,
+                                                                @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage) {
+        return impactScoreStatsService.stats(categoryId)
+                .map(body -> ResponseEntity.ok()
+                        .cacheControl(CacheControlConstants.FIFTEEN_MINUTES_PUBLIC_CACHE)
+                        .body(body))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/navigation")

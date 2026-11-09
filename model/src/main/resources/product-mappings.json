@@ -248,6 +248,9 @@
                 "realCriteriaCount": {
                     "type": "integer"
                 },
+                "realCriteria": {
+                    "type": "keyword"
+                },
                 "totalCriteriaCount": {
                     "type": "integer"
                 }

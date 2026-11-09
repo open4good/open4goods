@@ -636,6 +636,131 @@ public class ProductRepository {
 	        .must(version)));
 	}
 
+	/** Width, on the 0 to 20 scale, of a band of the ImpactScore histogram. */
+	private static final int SCORE_BAND_WIDTH = 2;
+
+	/** Factor from the stored relative score (0 to 5) to the score out of 20. */
+	private static final double SCORE_ON_20_FACTOR = 4.0;
+
+	/**
+	 * Measured figures of the ImpactScore of a vertical (counts by outcome, coverage per criterion, distribution of
+	 * the scores), computed in one aggregated query over the products of the vertical's current methodology.
+	 *
+	 * <p>Cached one hour: the figures only change with the batch.
+	 *
+	 * @param vertical           vertical id
+	 * @param methodologyVersion the vertical's effective ImpactScore methodology version
+	 * @return the figures, never {@code null}; empty counts when the index cannot be read
+	 */
+	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	public org.open4goods.model.rating.ImpactScoreVerticalStats impactScoreVerticalStats(String vertical, int methodologyVersion) {
+	    var versionField = "impactScoreMeta.methodologyVersion";
+	    var sameVersion = co.elastic.clients.elasticsearch._types.query_dsl.Query
+	        .of(q -> q.term(t -> t.field(versionField).value(methodologyVersion)));
+	    var current = methodologyVersion == 1
+	        ? co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
+	            .should(sameVersion)
+	            .should(s -> s.bool(none -> none.mustNot(m -> m.exists(e -> e.field(versionField)))))
+	            .minimumShouldMatch("1")))
+	        : sameVersion;
+	    var recentOffer = co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
+	        .must(m -> m.range(r -> r.date(d -> d.field("lastChange").gt(String.valueOf(expirationClause())))))
+	        .must(m -> m.range(r -> r.number(n -> n.field("offersCount").gt(0.0))))));
+	    var cohort = co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
+	        .must(m -> m.term(t -> t.field("vertical").value(vertical)))
+	        .must(m -> m.term(t -> t.field("excluded").value(false)))
+	        .must(recentOffer)));
+	    var rated = co.elastic.clients.elasticsearch._types.query_dsl.Query
+	        .of(q -> q.term(t -> t.field("impactScoreMeta.status").value("RATED")));
+	    // scores.ECOSCORE.value is the relative score on 0 to 5 (the site shows it out of 20: x 4)
+	    var scoreField = "scores.ECOSCORE.value";
+
+	    NativeQueryBuilder queryBuilder = new NativeQueryBuilder()
+	        .withQuery(co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b.must(cohort).must(current))))
+	        .withAggregation("reasons", Aggregation.of(a -> a.terms(t -> t.field("impactScoreMeta.notRatedReason").size(10))))
+	        .withAggregation("lastScoredAt", Aggregation.of(a -> a.max(m -> m.field("impactScoreMeta.scoredAt"))))
+	        .withAggregation("rated", Aggregation.of(a -> a.filter(rated)
+	            .aggregations("coverage", Aggregation.of(c -> c.terms(t -> t.field("impactScoreMeta.realCriteria").size(200))))
+	            .aggregations("criteriaCount", Aggregation.of(c -> c.terms(t -> t.field("impactScoreMeta.realCriteriaCount").size(200))))
+	            .aggregations("histogram", Aggregation.of(c -> c.histogram(h -> h.field(scoreField).interval((double) SCORE_BAND_WIDTH / SCORE_ON_20_FACTOR)
+	                .minDocCount(0).extendedBounds(eb -> eb.min(0.0).max((20.0 - SCORE_BAND_WIDTH) / SCORE_ON_20_FACTOR)))))
+	            .aggregations("stats", Aggregation.of(c -> c.stats(st -> st.field(scoreField))))
+	            .aggregations("percentiles", Aggregation.of(c -> c.percentiles(p -> p.field(scoreField).percents(5.0, 50.0, 95.0))))))
+	        .withPageable(PageRequest.of(0, 1))
+	        .withSourceFilter(noSourceFilter());
+
+	    long outdated = 0;
+	    long excluded = 0;
+	    try {
+	        var outdatedQuery = co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
+	            .must(cohort).mustNot(current)));
+	        outdated = elasticsearchOperations.count(new NativeQueryBuilder().withQuery(outdatedQuery).build(), CURRENT_INDEX);
+	        excluded = countMainIndexExcluded(vertical);
+	    } catch (RuntimeException e) {
+	        logger.warn("Cannot count the outdated or excluded products of vertical {}", vertical, e);
+	    }
+
+	    SearchHits<Product> results = search(queryBuilder.build(), ProductRepository.MAIN_INDEX_NAME);
+	    if (results == null || !(results.getAggregations() instanceof ElasticsearchAggregations aggregations)) {
+	        return new org.open4goods.model.rating.ImpactScoreVerticalStats(0, 0, 0, outdated, excluded, Map.of(), Map.of(),
+	            List.of(), SCORE_BAND_WIDTH, null, null, null, null, null, null);
+	    }
+
+	    long lowCoverage = 0;
+	    long noCriteria = 0;
+	    for (var bucket : aggregations.get("reasons").aggregation().getAggregate().sterms().buckets().array()) {
+	        if ("LOW_COVERAGE".equals(bucket.key().stringValue())) {
+	            lowCoverage = bucket.docCount();
+	        } else if ("NO_REAL_CRITERIA".equals(bucket.key().stringValue())) {
+	            noCriteria = bucket.docCount();
+	        }
+	    }
+	    var maxScoredAt = aggregations.get("lastScoredAt").aggregation().getAggregate().max().value();
+	    Long lastScoredAt = maxScoredAt != null && Double.isFinite(maxScoredAt) ? Long.valueOf(maxScoredAt.longValue()) : null;
+
+	    var ratedAgg = aggregations.get("rated").aggregation().getAggregate().filter();
+	    long ratedCount = ratedAgg.docCount();
+	    Map<String, Long> coverage = new java.util.TreeMap<>();
+	    for (var bucket : ratedAgg.aggregations().get("coverage").sterms().buckets().array()) {
+	        coverage.put(bucket.key().stringValue(), bucket.docCount());
+	    }
+	    Map<Integer, Long> criteriaCount = new java.util.TreeMap<>();
+	    for (LongTermsBucket bucket : ratedAgg.aggregations().get("criteriaCount").lterms().buckets().array()) {
+	        criteriaCount.put((int) bucket.key(), bucket.docCount());
+	    }
+	    List<Long> histogram = ratedCount == 0 ? List.of() : ratedAgg.aggregations().get("histogram").histogram().buckets().array().stream()
+	        .map(b -> b.docCount()).toList();
+	    Double min = null;
+	    Double max = null;
+	    Double p5 = null;
+	    Double p50 = null;
+	    Double p95 = null;
+	    if (ratedCount > 0) {
+	        var stats = ratedAgg.aggregations().get("stats").stats();
+	        min = on20(stats.min());
+	        max = on20(stats.max());
+	        var values = ratedAgg.aggregations().get("percentiles").tdigestPercentiles().values().keyed();
+	        p5 = on20(percentile(values, "5.0"));
+	        p50 = on20(percentile(values, "50.0"));
+	        p95 = on20(percentile(values, "95.0"));
+	    }
+	    return new org.open4goods.model.rating.ImpactScoreVerticalStats(ratedCount, lowCoverage, noCriteria, outdated, excluded,
+	        coverage, criteriaCount, histogram, SCORE_BAND_WIDTH, min, p5, p50, p95, max, lastScoredAt);
+	}
+
+	private static Double on20(Double value) {
+	    return value == null ? null : Math.round(value * SCORE_ON_20_FACTOR * 100.0) / 100.0;
+	}
+
+	private static Double percentile(Map<String, String> values, String key) {
+	    String value = values.get(key);
+	    try {
+	        return value == null ? null : Double.valueOf(value);
+	    } catch (NumberFormatException e) {
+	        return null;
+	    }
+	}
+
 	private Stream<Product> streamOrderedByEcoscore(UnaryOperator<NativeQueryBuilder> filter, Integer max) {
 
 	    // Build sort with unmapped_type to avoid shard-level mapping issues
