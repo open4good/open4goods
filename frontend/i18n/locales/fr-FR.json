@@ -210,7 +210,7 @@
     },
     "promises": {
       "title": "Nos engagements",
-      "ariaLabel": "Nos promesses et engagements pour comparer responsablement"
+      "ariaLabel": "Nos promesses et engagements pour comparer en connaissance de cause"
     },
     "parallax": {
       "essentials": {
@@ -2185,11 +2185,11 @@
   },
   "compare": {
     "title": "Comparateur de produits",
-    "subtitle": "Analysez les fiches techniques, les prix et les indicateurs écologiques des produits sélectionnés.",
+    "subtitle": "Analysez les fiches techniques, les prix et les Impact Score des produits sélectionnés.",
     "hero": {
       "eyebrow": "Comparaison",
       "title": "Comparateur de {verticalTitle}",
-      "subtitle": "Analysez les fiches techniques, les prix et les indicateurs écologiques des {verticalTitle} sélectionnés.",
+      "subtitle": "Analysez les fiches techniques, les prix et les Impact Score des {verticalTitle} sélectionnés.",
       "backToCategory": "Retour aux {verticalTitle}",
       "backAria": "Retourner à la catégorie {verticalTitle}",
       "backFallback": "Retour à la catégorie",
@@ -2208,7 +2208,7 @@
     "sections": {
       "overview": "Vue d'ensemble",
       "pricing": "Tarifs",
-      "ecological": "Impact écologique",
+      "ecological": "Impact Score",
       "technical": "Caractéristiques techniques",
       "technicalGroupFallback": "Autres caractéristiques",
       "explicitTitle": "Comparaison de {count} produits sélectionnés"
@@ -2857,7 +2857,7 @@
       "docs": "Documentation",
       "expand": "Développer la navigation",
       "expandSubmenu": "Développer le sous-menu {section}",
-      "impact": "Impact écologique",
+      "impact": "Impact Score",
       "label": "Navigation de la fiche produit",
       "overview": "Aperçu",
       "alternatives": "Alternatives",
@@ -3433,7 +3433,7 @@
         },
         "wizard": {
           "title": "Assistant",
-          "description": "Quelques questions pour des choix plus responsables.",
+          "description": "Quelques questions pour trouver les produits qui correspondent à votre besoin.",
           "badge": "Nouveau"
         },
         "search": {

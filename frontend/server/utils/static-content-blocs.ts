@@ -84,7 +84,7 @@ const STATIC_CONTENT_BLOCS: Record<string, Partial<Record<DomainLanguage, string
     en: 'Big up !',
   },
   'pages:team:partenaires:': {
-    fr: 'Ce comparateur écologique de bien commun ne serait pas non plus possible sans nos nombreux partenaires. Merci à nos mentors et aux plateformes marchandes qui ont accepté de jouer le jeu de Nudger !',
+    fr: 'Ce comparateur de prix et d’Impact Score de bien commun ne serait pas non plus possible sans nos nombreux partenaires. Merci à nos mentors et aux plateformes marchandes qui ont accepté de jouer le jeu de Nudger !',
   },
 
   // Mentor and ecosystem partners (front.partners.{mentors,ecosystem}[].bloc-id)

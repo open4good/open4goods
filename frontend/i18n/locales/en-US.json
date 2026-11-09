@@ -329,7 +329,7 @@
       "background": "hero-background.webp"
     },
     "promises": {
-      "ariaLabel": "Our promises and commitments to compare responsibly"
+      "ariaLabel": "Our promises and commitments to compare with full information"
     },
     "parallax": {
       "essentials": {
@@ -799,7 +799,7 @@
         "default": "Other quick filters",
         "price": "Price",
         "screen_size": "Screen size",
-        "impactscore": "Ecological impact"
+        "impactscore": "Impact Score"
       },
       "navigation": {
         "next": "Scroll next quick filters",
@@ -2310,11 +2310,11 @@
   },
   "compare": {
     "title": "Product comparison",
-    "subtitle": "Contrast specifications, pricing and ecological indicators across the products you selected.",
+    "subtitle": "Contrast specifications, pricing and Impact Score across the products you selected.",
     "hero": {
       "eyebrow": "Comparison",
       "title": "Comparing {verticalTitle}",
-      "subtitle": "Contrast specifications, pricing and ecological indicators across the selected {verticalTitle}.",
+      "subtitle": "Contrast specifications, pricing and Impact Score across the selected {verticalTitle}.",
       "backToCategory": "Back to {verticalTitle}",
       "backAria": "Go back to the {verticalTitle} category",
       "backFallback": "Back to the category",
@@ -2333,7 +2333,7 @@
     "sections": {
       "overview": "Overview",
       "pricing": "Pricing",
-      "ecological": "Ecological impact",
+      "ecological": "Impact Score",
       "technical": "Technical attributes",
       "technicalGroupFallback": "Additional specifications",
       "explicitTitle": "Comparing {count} selected products"
@@ -2969,7 +2969,7 @@
       "docs": "Documentation",
       "expand": "Expand navigation",
       "expandSubmenu": "Expand {section} submenu",
-      "impact": "Environmental impact",
+      "impact": "Impact Score",
       "label": "Product detail navigation",
       "overview": "Overview",
       "alternatives": "Alternatives",
@@ -3528,7 +3528,7 @@
         },
         "wizard": {
           "title": "AI wizard",
-          "description": "Answer a few questions and get tailored eco picks.",
+          "description": "Answer a few questions and get product picks that match your needs.",
           "badge": "New"
         },
         "search": {
