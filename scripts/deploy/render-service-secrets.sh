@@ -71,6 +71,7 @@
 # | api       | API_GOOGLE_SEARCH_API_KEY       | tree    | googlesearch.api-key                                                           | optional |
 # | api       | API_OPENAI_API_KEY              | tree    | spring.ai.openai.api-key                                                       | optional |
 # | api       | API_AWIN_ACCESS_TOKEN           | tree    | affiliation-config.awin-access-token                                           | optional |
+# | api       | API_AWIN_DATAFEED_KEY           | tree    | affiliation-config.awin-datafeed-key                                           | optional |
 # | api       | API_KWANKO_TOKEN                | tree    | affiliation-config.kwanko-token                                                | optional |
 # | api       | API_TRADETRACKER_API_KEY        | tree    | affiliation-config.tradetracker-api-key                                        | optional |
 # | api       | API_EPREL_API_KEY               | tree    | eprel.api-key                                                                  | optional |
@@ -164,6 +165,7 @@ api API_VERTEX_BATCH_JSON tree-sa vertex.batch.credentials-json optional
 api API_GOOGLE_SEARCH_API_KEY tree googlesearch.api-key optional
 api API_OPENAI_API_KEY tree spring.ai.openai.api-key optional
 api API_AWIN_ACCESS_TOKEN tree affiliation-config.awin-access-token optional
+api API_AWIN_DATAFEED_KEY tree affiliation-config.awin-datafeed-key optional
 api API_KWANKO_TOKEN tree affiliation-config.kwanko-token optional
 api API_TRADETRACKER_API_KEY tree affiliation-config.tradetracker-api-key optional
 api API_EPREL_API_KEY tree eprel.api-key optional

@@ -145,6 +145,7 @@ before anything is written.
 | `API_GOOGLE_SEARCH_API_KEY`       | api: tree `googlesearch.api-key`                                                                                                                                              | Custom Search (`GoogleSearchConfig`)                           |
 | `API_OPENAI_API_KEY`              | api: tree `spring.ai.openai.api-key`                                                                                                                                          | Spring AI OpenAI                                               |
 | `API_AWIN_ACCESS_TOKEN`           | api: tree `affiliation-config.awin-access-token`                                                                                                                              | Awin feeds                                                     |
+| `API_AWIN_DATAFEED_KEY`           | api: tree `affiliation-config.awin-datafeed-key` (key of the catalog URL `feed.providers.awin.catalog-url`)                                                                   | Awin catalog (`${affiliation-config.awin-datafeed-key:}`)       |
 | `API_KWANKO_TOKEN`                | api: tree `affiliation-config.kwanko-token`                                                                                                                                   | Kwanko feeds, Metriks affiliation report (GOU-1379)            |
 | `API_TRADETRACKER_API_KEY`        | api: tree `affiliation-config.tradetracker-api-key`                                                                                                                           | TradeTracker feeds, Metriks affiliation report (GOU-1381) |
 | `API_EPREL_API_KEY`               | api: tree `eprel.api-key`                                                                                                                                                     | EPREL (`EprelServiceProperties`)                               |
@@ -347,6 +348,19 @@ To roll back before revocation, put the previous value back in the
 Environment secret and run `apply` again. A tree file or env line whose secret
 is later deleted from the Environment stays on the host until it is removed
 by hand.
+
+### Awin datafeed key
+
+`API_AWIN_DATAFEED_KEY` is the key of the Awin catalog URL, not the API token.
+`feed.providers.awin.catalog-url` (open4goods-config) holds
+`https://productdata.awin.com/datafeed/list/apikey/${affiliation-config.awin-datafeed-key:}`;
+the key comes from the config tree file `affiliation-config.awin-datafeed-key`.
+Without the secret the placeholder resolves to an empty key: the api starts and
+the Awin catalog call fails, with no key in the logs.
+
+Regenerate it in the Awin console, Toolbox > Create-a-Feed (the key is the
+segment after `apikey/` of the feed list URL). The Vaultwarden note "Nudger Awin
+API" keeps it in the field `datafeed_key`.
 
 ### Awin API token
 

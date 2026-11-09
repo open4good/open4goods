@@ -8,6 +8,12 @@ Feed parameters are supplied via `FeedConfiguration` instances in your applicati
 
 ## Secrets in feed URLs
 
+The Awin catalog key is a secret, not configuration:
+`feed.providers.awin.catalog-url` ends with
+`apikey/${affiliation-config.awin-datafeed-key:}` and the key is rendered in the
+api config tree from `API_AWIN_DATAFEED_KEY` (see
+`docs/operations/prod-service-secrets.md`).
+
 Catalog and feed URLs can carry API keys: Awin as a path segment of the catalog
 and feed URLs (`.../apikey/{key}/...`), Effinity as a path segment of every API
 v3 URL (`apiv3/{key}/...`), and some endpoints as query values (`accessToken=`,
