@@ -85,7 +85,6 @@ Nudger peut être amené à interrompre l’accès au Site pour effectuer des op
 <ul>
 <li><a href="https://nudger.fr/contact">Contact</a></li>
 <li><a href="https://nudger.fr/politique-confidentialite">Politique de Confidentialité</a></li>
-<li><a href="https://nudger.fr/compensation-ecologique">Contribution écologique</a></li>
 </ul>
 <hr>
 <p><em>« Dernière mise à jour : 29 octobre 2026 »</em></p>`,

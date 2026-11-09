@@ -338,6 +338,8 @@ export default defineNuxtConfig({
     '/offline': { prerender: true },
     '/ecoscore': { redirect: { to: '/impact-score', statusCode: 301 } },
     '/eco-score': { redirect: { to: '/impact-score', statusCode: 301 } },
+    // Page withdrawn: the donation claim is not substantiated (GOU-1993)
+    '/compensation-ecologique': { redirect: { to: '/impact-score', statusCode: 301 } },
     // The 3 remaining XWiki-backed /blog/* full pages: absent from the XWiki export archive and
     // live XWiki access has been down since 2026-09-09 (incident_xwiki_blog_locked_down_sept2026)
     // -- no recoverable source, dropped rather than left broken (xwiki-editorial-content-to-nuxt-content AC2).
