@@ -173,4 +173,18 @@ describe('ProductImpactEcoScoreCard', () => {
     // Component uses normalizedScore which clamps value to [0, 20]: 14.4 -> 14.4
     expect(wrapper.text()).toContain('score:14.4')
   })
+
+  it('links the methodology to the vertical ecoscore page', () => {
+    const wrapper = mount(ProductImpactEcoScoreCard, {
+      props: { score: null, verticalHomeUrl: 'climatiseurs' },
+      global: {
+        plugins: [i18n, vuetify],
+        stubs: { NuxtLink: NuxtLinkStub },
+      },
+    })
+
+    expect(wrapper.find('.nuxt-link-stub').attributes('href')).toBe(
+      '/climatiseurs/ecoscore'
+    )
+  })
 })

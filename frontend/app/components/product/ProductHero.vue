@@ -89,6 +89,7 @@
                       :max="impactScoreMax"
                       :show-methodology="false"
                       :show-min-max="false"
+                      :vertical-home-url="verticalHomeUrl"
                       size="lg"
                       :banner="true"
                       :brand="productBrandName"
@@ -335,6 +336,10 @@ const props = defineProps({
   product: {
     type: Object as PropType<ProductDto>,
     required: true,
+  },
+  verticalHomeUrl: {
+    type: String,
+    default: '',
   },
   breadcrumbs: {
     type: Array as PropType<ProductHeroBreadcrumb[]>,

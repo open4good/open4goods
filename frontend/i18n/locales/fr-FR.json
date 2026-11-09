@@ -2636,6 +2636,8 @@
       "noPrimaryScore": "Score indisponible",
       "noDetailsAvailable": "Les détails de cette évaluation ne sont pas disponibles.",
       "methodologyLink": "Accéder à la méthodologie",
+      "methodologyShort": "Méthodologie",
+      "scoreName": "Impact Score",
       "methodologyLinkAria": "Ouvrir la méthodologie de l'Impact Score",
       "notRated": {
         "title": "Non encore évalué",

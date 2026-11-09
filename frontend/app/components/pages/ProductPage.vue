@@ -83,6 +83,7 @@
               <ProductHero
                 :product="product"
                 :breadcrumbs="productBreadcrumbs"
+                :vertical-home-url="verticalHomeUrl"
                 :impact-score="impactScoreOutOf20"
                 :impact-score-min="impactScoreMin"
                 :impact-score-max="impactScoreMax"
@@ -619,8 +620,13 @@ const productTitle = computed(() => {
 const heroPopularAttributes = computed(
   () => categoryDetail.value?.popularAttributes ?? []
 )
+// The route slug is the vertical home URL (matched in selectCategoryBySlug),
+// so it backs up a detail payload that omits verticalHomeUrl.
 const verticalHomeUrl = computed(
-  () => categoryDetail.value?.verticalHomeUrl?.trim() ?? ''
+  () =>
+    categoryDetail.value?.verticalHomeUrl?.trim() ||
+    (typeof categorySlug === 'string' ? categorySlug.trim() : '') ||
+    ''
 )
 const verticalTitle = computed(() => {
   const candidates = [
