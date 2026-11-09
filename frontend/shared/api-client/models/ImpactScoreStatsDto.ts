@@ -62,6 +62,12 @@ export interface ImpactScoreStatsDto {
    */
   excludedCount?: number
   /**
+   * Distinct brands among the rated products
+   * @type {number}
+   * @memberof ImpactScoreStatsDto
+   */
+  brandCount?: number
+  /**
    * Rated products having each criterion filled in, by criterion key; empty when not measured yet
    * @type {{ [key: string]: number; }}
    * @memberof ImpactScoreStatsDto
@@ -151,6 +157,7 @@ export function ImpactScoreStatsDtoFromJSONTyped(
     notRatedNoCriteriaCount: json['notRatedNoCriteriaCount'] == null ? undefined : json['notRatedNoCriteriaCount'],
     outdatedCount: json['outdatedCount'] == null ? undefined : json['outdatedCount'],
     excludedCount: json['excludedCount'] == null ? undefined : json['excludedCount'],
+    brandCount: json['brandCount'] == null ? undefined : json['brandCount'],
     coverageByCriterion: json['coverageByCriterion'] == null ? undefined : json['coverageByCriterion'],
     realCriteriaCountDistribution: json['realCriteriaCountDistribution'] == null ? undefined : json['realCriteriaCountDistribution'],
     scoreHistogram: json['scoreHistogram'] == null ? undefined : json['scoreHistogram'],
@@ -184,6 +191,7 @@ export function ImpactScoreStatsDtoToJSONTyped(
     notRatedNoCriteriaCount: value['notRatedNoCriteriaCount'],
     outdatedCount: value['outdatedCount'],
     excludedCount: value['excludedCount'],
+    brandCount: value['brandCount'],
     coverageByCriterion: value['coverageByCriterion'],
     realCriteriaCountDistribution: value['realCriteriaCountDistribution'],
     scoreHistogram: value['scoreHistogram'],

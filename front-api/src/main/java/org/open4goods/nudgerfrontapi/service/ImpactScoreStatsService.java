@@ -48,6 +48,7 @@ public class ImpactScoreStatsService {
                 stats.notRatedNoCriteriaCount(),
                 stats.outdatedCount(),
                 stats.excludedCount(),
+                stats.brandCount(),
                 stats.coverageByCriterion(),
                 stats.realCriteriaCountDistribution(),
                 stats.scoreHistogram(),

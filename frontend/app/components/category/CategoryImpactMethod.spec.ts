@@ -16,7 +16,6 @@ vi.mock('vue-i18n', () => ({
   }),
 }))
 
-vi.stubGlobal('useLocalePath', () => (path: string) => path)
 
 const config: ImpactScoreConfigDto = {
   methodologyVersion: 2,
@@ -55,8 +54,9 @@ const stats: ImpactScoreStatsDto = {
   ratedCount: 100,
   notRatedLowCoverageCount: 20,
   notRatedNoCriteriaCount: 5,
-  outdatedCount: 0,
-  excludedCount: 0,
+  outdatedCount: 3,
+  excludedCount: 7,
+  brandCount: 12,
   coverageByCriterion: { POWER: 90, REPAIRABILITY: 40 },
   realCriteriaCountDistribution: { 1: 60, 2: 40 },
   scoreHistogram: [0, 5, 20, 50, 25],
@@ -79,8 +79,9 @@ const mountMethod = (statsValue: ImpactScoreStatsDto | null) =>
     global: {
       stubs: {
         NuxtLink: defineComponent({
-          setup(_p, { slots }) {
-            return () => h('a', slots.default?.())
+          props: { to: { type: String, default: '' } },
+          setup(props, { slots }) {
+            return () => h('a', { href: props.to }, slots.default?.())
           },
         }),
         'v-alert': { template: '<div class="alert"><slot /></div>' },
@@ -125,6 +126,21 @@ describe('CategoryImpactMethod', () => {
     ).toContain('90')
     expect(wrapper.findAll('[data-test="distribution"] li')).toHaveLength(5)
     expect(wrapper.get('[data-test="counts"]').text()).toContain('"count":"25"')
+  })
+
+  it('shows covered brands, excluded products and the update fate', () => {
+    const wrapper = mountMethod(stats)
+    expect(wrapper.get('[data-test="brands"]').text()).toContain('"count":"12"')
+    expect(wrapper.get('[data-test="excluded"]').text()).toContain('"count":"7"')
+    expect(wrapper.find('[data-test="outdated-fate"]').exists()).toBe(true)
+  })
+
+  it('links to localized partners and contact pages', () => {
+    const hrefs = mountMethod(stats)
+      .findAll('a')
+      .map(a => a.attributes('href'))
+    expect(hrefs).toContain('/partners')
+    expect(hrefs).toContain('/contact')
   })
 
   it('does not invent figures when stats are missing', () => {

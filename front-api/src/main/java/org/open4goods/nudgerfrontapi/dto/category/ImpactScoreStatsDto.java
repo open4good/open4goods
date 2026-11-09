@@ -25,6 +25,8 @@ public record ImpactScoreStatsDto(
         long outdatedCount,
         @Schema(description = "Products of the vertical excluded from the catalogue")
         long excludedCount,
+        @Schema(description = "Distinct brands among the rated products")
+        long brandCount,
         @Schema(description = "Rated products having each criterion filled in, by criterion key; empty when not measured yet")
         Map<String, Long> coverageByCriterion,
         @Schema(description = "Rated products by number of criteria filled in; empty when not measured yet")

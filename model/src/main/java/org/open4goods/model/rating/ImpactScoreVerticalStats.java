@@ -15,6 +15,7 @@ import java.util.Map;
  * @param notRatedNoCriteriaCount    products not rated because no criterion is filled in
  * @param outdatedCount              products with offers still assessed with another methodology version, waiting for the next recalculation
  * @param excludedCount              products of the vertical excluded from the catalogue
+ * @param brandCount                brands of the rated products (distinct, as reported by the datasources)
  * @param coverageByCriterion        rated products having each criterion filled in (not imputed), by criterion key
  * @param realCriteriaCountDistribution rated products by number of criteria filled in
  * @param scoreHistogram             rated products per score band of {@link #scoreBandWidth()} out of 20, from 0
@@ -32,6 +33,7 @@ public record ImpactScoreVerticalStats(
 		long notRatedNoCriteriaCount,
 		long outdatedCount,
 		long excludedCount,
+		long brandCount,
 		Map<String, Long> coverageByCriterion,
 		Map<Integer, Long> realCriteriaCountDistribution,
 		List<Long> scoreHistogram,

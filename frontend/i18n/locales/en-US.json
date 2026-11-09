@@ -826,6 +826,7 @@
           "rated": "{count} products rated.",
           "notRated": "{count} products not rated (insufficient data: {lowCoverage}; no criterion filled in: {noCriteria}).",
           "outdated": "{count} products waiting to be recalculated with the current method.",
+          "excluded": "{count} products excluded from the comparison. Products are excluded when they have no brand, no model, no associated EPREL record (depending on the category) or lack an attribute required by the category.",
           "unavailable": "Product counts for this category are not available at the moment."
         },
         "coverage": {
@@ -843,11 +844,13 @@
         "sources": {
           "title": "Suppliers and sources",
           "data": "Data comes from EPREL (European energy label), manufacturers, partner merchants and, for some characteristics, AI extraction.",
+          "brands": "{count} brands covered among the rated products.",
           "partners": "See our partners and merchants"
         },
         "update": {
           "title": "Update",
-          "body": "A product's score is recalculated when its data or the method changes. The category's last calculation date is shown above.",
+          "body": "Scores are recalculated every day for all categories. The EPREL catalogue is refreshed about every two days and attached to products during the daily recalculation. The category's last calculation date is shown above.",
+          "outdated": "A product whose score was calculated with an older version of the method keeps its current score until the next daily recalculation, which replaces it.",
           "report": "Report an error"
         },
         "independence": {
