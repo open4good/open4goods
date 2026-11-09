@@ -177,4 +177,22 @@ describe('CategoryProductListView', () => {
     expect(wrapper.find('[data-test="impact-score"]').exists()).toBe(false)
     expect(wrapper.text()).toContain('category.products.notRated')
   })
+
+  it('renders "not rated" for a V2 NOT_RATED product even when a score is present', async () => {
+    const wrapper = await mountList([
+      buildProduct({
+        scores: {
+          scores: { ECOSCORE: { value: 12, absolute: { value: 12 } } },
+          impactScore: {
+            status: 'NOT_RATED',
+            notRatedReason: 'LOW_COVERAGE',
+            currentMethodologyVersion: 2,
+          },
+        } as ProductDto['scores'],
+      }),
+    ])
+
+    expect(wrapper.find('[data-test="impact-score"]').exists()).toBe(false)
+    expect(wrapper.text()).toContain('category.products.notRated')
+  })
 })

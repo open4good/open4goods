@@ -88,11 +88,12 @@
 
         <div class="category-product-list__score">
           <ImpactScore
-            v-if="impactScoreValue(product) != null"
+            v-if="hasImpactScore(product)"
             :score="impactScoreValue(product) ?? 0"
             :max="20"
             size="xs"
             flat
+            :v2="resolveImpactScoreV2(product.scores)"
           />
           <span v-else class="category-product-list__score-fallback">
             {{ $t('category.products.notRated') }}
@@ -129,6 +130,7 @@ import {
   resolvePopularAttributes,
 } from '~/utils/_product-attributes'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
+import { isImpactScoreNotRated, resolveImpactScoreV2 } from '~/utils/_impact-score-v2'
 import { resolveProductShortName } from '~/utils/_product-title-resolver'
 import { resolveSortedFieldDisplay } from '~/utils/_sort-attribute-display'
 
@@ -160,6 +162,11 @@ const productLink = (product: ProductDto) => product.fullSlug ?? undefined
 
 const impactScoreValue = (product: ProductDto) =>
   resolvePrimaryImpactScore(product)
+
+// A V2 "not rated" product shows the fallback even when a score is present.
+const hasImpactScore = (product: ProductDto) =>
+  impactScoreValue(product) != null &&
+  !isImpactScoreNotRated(resolveImpactScoreV2(product.scores))
 
 type DisplayedAttribute = {
   key: string

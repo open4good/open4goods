@@ -78,14 +78,18 @@ const { impactVerdict, priceVerdict, reliabilityVerdict, hasVerdict } =
 // Impact label & tooltip helper
 const impactValueLabel = computed(() => {
   if (!impactVerdict.value || impactVerdict.value.score === null) {
-    return t('product.verdict.levels.unrated')
+    return t(
+      impactVerdict.value?.labelKey ?? 'product.verdict.levels.unrated'
+    )
   }
   return t(impactVerdict.value.labelKey)
 })
 
 const impactTooltip = computed(() => {
   if (!impactVerdict.value || impactVerdict.value.score === null) {
-    return t('product.verdict.levels.unrated')
+    return t(
+      impactVerdict.value?.labelKey ?? 'product.verdict.levels.unrated'
+    )
   }
   return `${impactVerdict.value.score}/${impactVerdict.value.scoreOutOf} - ${t(impactVerdict.value.labelKey)}`
 })

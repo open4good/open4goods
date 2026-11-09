@@ -1037,7 +1037,30 @@
       "tooltipBadge": "Impact quality rated at {value} out of 20",
       "outOf20": "/20",
       "scale": "Scale: {min}-{max}",
-      "svgAriaLabel": "Score {score} out of 20"
+      "svgAriaLabel": "Score {score} out of 20",
+      "v2": {
+        "notRated": "Not rated",
+        "notRatedCoverage": "Not enough verifiable data to rate this product ({count} of {total} criteria filled in).",
+        "notRatedRecalculating": "Score being recomputed with method v2.",
+        "positionLevels": {
+          "excellent": "Among the best ranked",
+          "good": "Above the median",
+          "fair": "Below the median",
+          "poor": "Among the lowest ranked"
+        },
+        "betterThan": "Ranked better than {percent}% of the {count} {items} rated by Nudger",
+        "productsFallback": "products",
+        "onlyRated": "Only rated product in its category",
+        "criteria": "{count} of {total} criterion filled in | {count} of {total} criteria filled in",
+        "scoredAt": "computed on {date}",
+        "method": "method v{version}",
+        "howCalculated": "How is this score calculated?",
+        "disclaimer": "The Impact Score is a comparative rating by Nudger. It is neither a label, nor a certification, nor a measure of the absolute footprint.",
+        "notRatedAfterRated": "Products that are not rated are shown after rated products.",
+        "criterionNotFilled": "Not filled in",
+        "methodPage": "Method v{version}. A product is rated only if its filled-in criteria weigh at least {coverage}% of the matrix. A criterion that is not filled in stays not filled in: it is never replaced by an average value.",
+        "contextAria": "Score details"
+      }
     },
     "pageLoadingOverlay": {
       "label": "Loading page content"

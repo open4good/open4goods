@@ -79,7 +79,16 @@
               >
                 <div class="product-hero__details-section">
                   <div
-                    v-if="impactScore != null"
+                    v-if="impactScoreV2NotRated"
+                    class="product-hero__impact-card"
+                  >
+                    <ImpactScoreNotRated
+                      :status="impactScoreV2!"
+                      :methodology-href="impactMethodologyHref"
+                    />
+                  </div>
+                  <div
+                    v-else-if="impactScore != null"
                     class="product-hero__impact-card cursor-pointer"
                     @click="handleImpactScoreClick"
                   >
@@ -90,13 +99,15 @@
                       :show-methodology="false"
                       :show-min-max="false"
                       :vertical-home-url="verticalHomeUrl"
+                      :vertical-plural-name="verticalPluralName"
                       size="lg"
                       :banner="true"
                       :brand="productBrandName"
                       :model="productModelName"
                       :category="productVerticalName"
-                      :ranking="ecoscoreRanking"
-                      :count="ecoscoreCount"
+                      :ranking="impactScoreV2 ? null : ecoscoreRanking"
+                      :count="impactScoreV2 ? null : ecoscoreCount"
+                      :v2="impactScoreV2"
                     />
                   </div>
 
@@ -297,6 +308,7 @@ import CategoryNavigationBreadcrumbs from '~/components/category/navigation/Cate
 import ProductHeroPricing from '~/components/product/ProductHeroPricing.vue'
 import ProductDesignation from '~/components/product/ProductDesignation.vue'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
+import ImpactScoreNotRated from '~/components/shared/ui/ImpactScoreNotRated.vue'
 import {
   MAX_COMPARE_ITEMS,
   useProductCompareStore,
@@ -311,6 +323,10 @@ import {
   resolveProductLongName,
   resolveProductShortName,
 } from '~/utils/_product-title-resolver'
+import {
+  isImpactScoreNotRated,
+  resolveImpactScoreV2,
+} from '~/utils/_impact-score-v2'
 import { useThemedAsset } from '~/composables/useThemedAsset'
 import { useProductGallery } from '~/composables/useProductGallery'
 
@@ -338,6 +354,11 @@ const props = defineProps({
     required: true,
   },
   verticalHomeUrl: {
+    type: String,
+    default: '',
+  },
+  /** Plural name of the vertical, used in the V2 position sentence. */
+  verticalPluralName: {
     type: String,
     default: '',
   },
@@ -453,6 +474,15 @@ const productBrandName = computed(() =>
 const productModelName = computed(() =>
   normalizeString(props.product.identity?.model)
 )
+
+const impactScoreV2 = computed(() => resolveImpactScoreV2(props.product.scores))
+const impactScoreV2NotRated = computed(() =>
+  isImpactScoreNotRated(impactScoreV2.value)
+)
+const impactMethodologyHref = computed(() => {
+  const slug = props.verticalHomeUrl.trim().replace(/^\/+|\/+$/g, '')
+  return slug ? `/${slug}/ecoscore` : ''
+})
 
 const ecoscoreRanking = computed(
   () => props.product.scores?.scores?.ECOSCORE?.ranking ?? null
