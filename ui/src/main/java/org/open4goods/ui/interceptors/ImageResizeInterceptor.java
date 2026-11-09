@@ -5,13 +5,21 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.Duration;
+import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.open4goods.commons.services.ResourceService;
@@ -21,6 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+
+import com.luciad.imageio.webp.WebPReadParam;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -42,6 +52,15 @@ import jakarta.servlet.http.HttpServletResponse;
  * caching.</li>
  * </ul>
  *
+ * <p>
+ * Memory is bounded on a cache miss (GOU-1952): a source image is decoded at
+ * most {@value #MAX_DECODED_PIXELS} pixels (larger sources are subsampled while
+ * decoding, so their full raster is never allocated), and at most
+ * {@value #MAX_CONCURRENT_CONVERSIONS} conversions run at the same time. A
+ * request that waits more than {@value #CONVERSION_WAIT_SECONDS} seconds for a
+ * conversion slot gets a 503.
+ * </p>
+ *
  * This class is a Spring {@link Component} and implements
  */
 public class ImageResizeInterceptor implements HandlerInterceptor {
@@ -62,20 +81,65 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 	/** Regex pattern for parsing dimensions from the request URI. */
 	private static final Pattern DIMENSION_PATTERN = Pattern.compile("^(?:.*-)?(\\d+)(?:x(\\d+))?\\.webp$");
 
+	/**
+	 * Largest number of pixels decoded from a source image: 4096 x 4096, i.e.
+	 * 64 MB per ARGB copy. A full-size decode of a ~9000 x 9000 product image
+	 * took ~333 MB per copy, and a few concurrent cache misses exhausted the 2 GB
+	 * heap of {@code ui} (OOM of 2026-11-06, GOU-1952).
+	 */
+	static final long MAX_DECODED_PIXELS = 4096L * 4096L;
+
+	/** Largest width or height the WebP encoder accepts. */
+	static final int WEBP_MAX_DIMENSION = 16383;
+
+	/** Cache misses decoded and encoded at the same time. */
+	static final int MAX_CONCURRENT_CONVERSIONS = 2;
+
+	/** Time a cache miss waits for a conversion slot before a 503. */
+	static final long CONVERSION_WAIT_SECONDS = 30;
+
 	private final ResourceService resourceService;
 
 	private final Set<String> allowedResize;
 
+	private final long maxDecodedPixels;
+
+	private final Semaphore conversions;
+
+	private final Duration conversionWait;
+
 	/**
-	 * Constructs an {@code ImageResizeInterceptor} with the specified resource
-	 * service.
+	 * Constructs an {@code ImageResizeInterceptor} with the default memory
+	 * bounds ({@value #MAX_DECODED_PIXELS} decoded pixels,
+	 * {@value #MAX_CONCURRENT_CONVERSIONS} concurrent conversions).
 	 *
 	 * @param resourceService the service for managing cached resources
+	 * @param allowedResize   allowed size suffixes
+	 * @param imageBaseUrl    base URL of the source images
 	 */
 	public ImageResizeInterceptor(ResourceService resourceService, Set<String> allowedResize, String imageBaseUrl) {
+		this(resourceService, allowedResize, imageBaseUrl, MAX_DECODED_PIXELS, MAX_CONCURRENT_CONVERSIONS,
+				Duration.ofSeconds(CONVERSION_WAIT_SECONDS));
+	}
+
+	/**
+	 * Constructs an {@code ImageResizeInterceptor} with explicit memory bounds.
+	 *
+	 * @param resourceService          the service for managing cached resources
+	 * @param allowedResize            allowed size suffixes
+	 * @param imageBaseUrl             base URL of the source images
+	 * @param maxDecodedPixels         largest number of pixels decoded from a source image
+	 * @param maxConcurrentConversions cache misses converted at the same time
+	 * @param conversionWait           time a cache miss waits for a conversion slot
+	 */
+	ImageResizeInterceptor(ResourceService resourceService, Set<String> allowedResize, String imageBaseUrl,
+			long maxDecodedPixels, int maxConcurrentConversions, Duration conversionWait) {
 		this.resourceService = resourceService;
 		this.allowedResize = allowedResize;
 		this.imageBaseUrl = imageBaseUrl;
+		this.maxDecodedPixels = maxDecodedPixels;
+		this.conversions = new Semaphore(maxConcurrentConversions, true);
+		this.conversionWait = conversionWait;
 	}
 
 	/**
@@ -110,33 +174,7 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 			File cachedFile = resourceService.getCacheFile(resource);
 			if (!cachedFile.exists()) {
 				logger.info("Cache miss for file: {}", requestURI);
-
-				int[] dimensions = parseDimensions(requestURI);
-
-				BufferedImage sourceImage = findSourceImage(requestURI, dimensions != null);
-
-				if (sourceImage == null) {
-					logger.warn("Source image not found for URI: {}", requestURI);
-					response.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found");
-					return false;
-				}
-
-				// Resize the image if dimensions are provided
-				if (dimensions != null) {
-
-					// Wheck this is a valid requested size
-					if (!allowedResize.contains(requestURI.substring(requestURI.lastIndexOf("-") + 1, requestURI.lastIndexOf(".")))) {
-						logger.error("Image resizing suffix invalid for : {}", requestURI);
-						response.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found");
-						return false;
-					}
-
-					sourceImage = resizeImage(sourceImage, dimensions[0], dimensions[1]);
-					logger.info("Image resized to {}x{}", dimensions[0], dimensions[1]);
-				}
-
-				if (!saveToCache(sourceImage, cachedFile)) {
-					response.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found");
+				if (!generateWithinConversionSlot(requestURI, cachedFile, response)) {
 					return false;
 				}
 			} else {
@@ -156,6 +194,87 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 			return false; // Prevent further request processing
 		}
 
+		return true;
+	}
+
+	/**
+	 * Generates the cached image while holding one of the conversion slots, so
+	 * that only a bounded number of decoded images live in memory at once.
+	 *
+	 * @param requestURI the requested image URI
+	 * @param cachedFile the cache file to generate
+	 * @param response   the HTTP response, used for error statuses
+	 * @return {@code true} when the cached file is ready to serve, {@code false}
+	 *         when an error status has been sent
+	 * @throws IOException if an error occurs while sending an error status
+	 */
+	private boolean generateWithinConversionSlot(String requestURI, File cachedFile, HttpServletResponse response)
+			throws IOException {
+		boolean acquired;
+		try {
+			acquired = conversions.tryAcquire(conversionWait.toMillis(), TimeUnit.MILLISECONDS);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			acquired = false;
+		}
+		if (!acquired) {
+			logger.warn("No image conversion slot within {}, refusing {}", conversionWait, requestURI);
+			response.setHeader("Retry-After", String.valueOf(conversionWait.toSeconds()));
+			response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "Image conversion busy");
+			return false;
+		}
+		try {
+			// Another request may have generated the same file while this one waited
+			if (cachedFile.exists()) {
+				logger.info("Cache filled while waiting for file: {}", cachedFile.getAbsolutePath());
+				return true;
+			}
+			return generateCachedImage(requestURI, cachedFile, response);
+		} finally {
+			conversions.release();
+		}
+	}
+
+	/**
+	 * Fetches, optionally resizes, and caches the source image of a request.
+	 *
+	 * @param requestURI the requested image URI
+	 * @param cachedFile the cache file to generate
+	 * @param response   the HTTP response, used for error statuses
+	 * @return {@code true} when the cached file was written, {@code false} when
+	 *         an error status has been sent
+	 * @throws IOException if an error occurs during image fetching
+	 */
+	private boolean generateCachedImage(String requestURI, File cachedFile, HttpServletResponse response)
+			throws IOException {
+		int[] dimensions = parseDimensions(requestURI);
+
+		BufferedImage sourceImage = findSourceImage(requestURI, dimensions != null);
+
+		if (sourceImage == null) {
+			logger.warn("Source image not found for URI: {}", requestURI);
+			response.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found");
+			return false;
+		}
+
+		// Resize the image if dimensions are provided
+		if (dimensions != null) {
+
+			// Wheck this is a valid requested size
+			if (!allowedResize.contains(requestURI.substring(requestURI.lastIndexOf("-") + 1, requestURI.lastIndexOf(".")))) {
+				logger.error("Image resizing suffix invalid for : {}", requestURI);
+				response.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found");
+				return false;
+			}
+
+			sourceImage = resizeImage(sourceImage, dimensions[0], dimensions[1]);
+			logger.info("Image resized to {}x{}", dimensions[0], dimensions[1]);
+		}
+
+		if (!saveToCache(sourceImage, cachedFile)) {
+			response.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found");
+			return false;
+		}
 		return true;
 	}
 
@@ -314,7 +433,7 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 			if (responseCode == HttpURLConnection.HTTP_OK) {
 				logger.info("Successfully fetched image from URL: {}", urlString);
 				try (var inputStream = connection.getInputStream()) {
-					return ImageIO.read(inputStream);
+					return decodeBounded(inputStream);
 				}
 			}
 			logger.info("Unexpected HTTP {} fetching image from {}", responseCode, urlString);
@@ -326,6 +445,77 @@ public class ImageResizeInterceptor implements HandlerInterceptor {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Decodes an image without allocating more than the configured number of
+	 * pixels.
+	 *
+	 * <p>
+	 * The dimensions are read from the image header first. When the image is
+	 * larger than the bound (or than the WebP limit of
+	 * {@value #WEBP_MAX_DIMENSION} pixels per side), it is subsampled while
+	 * decoding, so the full-size raster is never allocated. An unresized
+	 * original larger than the bound is therefore cached at a lower resolution.
+	 * </p>
+	 *
+	 * @param inputStream the encoded image, left open
+	 * @return the decoded image, or {@code null} if no reader supports the format
+	 * @throws IOException if the image cannot be decoded
+	 */
+	BufferedImage decodeBounded(InputStream inputStream) throws IOException {
+		try (ImageInputStream imageInput = ImageIO.createImageInputStream(inputStream)) {
+			if (imageInput == null) {
+				return null;
+			}
+			Iterator<ImageReader> readers = ImageIO.getImageReaders(imageInput);
+			if (!readers.hasNext()) {
+				return null;
+			}
+			ImageReader reader = readers.next();
+			try {
+				reader.setInput(imageInput, true, true);
+				int width = reader.getWidth(0);
+				int height = reader.getHeight(0);
+				int step = subsamplingStep(width, height, maxDecodedPixels);
+				ImageReadParam param = reader.getDefaultReadParam();
+				if (step > 1) {
+					logger.warn("Source image of {}x{} pixels decoded at 1/{} to stay under {} pixels", width, height,
+							step, maxDecodedPixels);
+					if (param instanceof WebPReadParam webpParam) {
+						// The WebP reader ignores source subsampling, it scales natively
+						webpParam.setUseScaling(true);
+						webpParam.setScaledWidth(Math.ceilDiv(width, step));
+						webpParam.setScaledHeight(Math.ceilDiv(height, step));
+					} else {
+						param.setSourceSubsampling(step, step, 0, 0);
+					}
+				}
+				return reader.read(0, param);
+			} finally {
+				reader.dispose();
+			}
+		}
+	}
+
+	/**
+	 * Smallest subsampling step that keeps a decoded image under
+	 * {@code maxPixels} pixels and under {@value #WEBP_MAX_DIMENSION} pixels per
+	 * side. A step of {@code n} keeps one pixel out of {@code n} in each
+	 * direction.
+	 *
+	 * @param width     source width
+	 * @param height    source height
+	 * @param maxPixels largest number of decoded pixels
+	 * @return the subsampling step, {@code 1} when the image already fits
+	 */
+	static int subsamplingStep(int width, int height, long maxPixels) {
+		int step = Math.max(1, (int) Math.ceil(Math.sqrt((double) width * height / maxPixels)));
+		while ((long) Math.ceilDiv(width, step) * Math.ceilDiv(height, step) > maxPixels
+				|| Math.max(Math.ceilDiv(width, step), Math.ceilDiv(height, step)) > WEBP_MAX_DIMENSION) {
+			step++;
+		}
+		return step;
 	}
 
 	HttpURLConnection openConnection(String urlString) throws IOException {
