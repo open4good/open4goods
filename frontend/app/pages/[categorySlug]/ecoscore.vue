@@ -555,7 +555,18 @@
 </template>
 
 <script setup lang="ts">
-import { createError, useRequestURL, useRoute, useSeoMeta } from '#imports'
+import {
+  createError,
+  useHead,
+  useRequestURL,
+  useRoute,
+  useSeoMeta,
+} from '#imports'
+import {
+  IMPACT_SCORE_CURRENT_METHOD_VERSION,
+  IMPACT_SCORE_VERSIONS_LAST_MODIFIED,
+} from '~~/shared/utils/impact-score-versions'
+import { buildImpactScoreMethodJsonLd } from '~/utils/impact-score-jsonld'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useDisplay } from 'vuetify'
@@ -1109,6 +1120,27 @@ const ogImage = computed(() => {
 })
 
 const ogLocale = computed(() => locale.value.replace('-', '_'))
+
+useHead(() => ({
+  script: [
+    {
+      key: 'impact-score-method-jsonld',
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify(
+        buildImpactScoreMethodJsonLd({
+          type: 'TechArticle',
+          name: seoTitle.value,
+          description: seoDescription.value,
+          url: canonicalUrl.value,
+          dateModified: IMPACT_SCORE_VERSIONS_LAST_MODIFIED,
+          version: IMPACT_SCORE_CURRENT_METHOD_VERSION,
+          inLanguage: locale.value,
+          aboutName: categoryLabel.value,
+        })
+      ),
+    },
+  ],
+}))
 
 useSeoMeta({
   title: () => seoTitle.value,

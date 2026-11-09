@@ -46,7 +46,7 @@ Stuttgarter St. 1<br>
 <p>Nudger propose un comparateur de produits permettant :</p>
 <ul>
 <li>La comparaison des prix auprès de divers marchands (B2C).</li>
-<li>L’affichage d’un <strong>Impact Score</strong> ou « éco-score » indicatif, concernant l’empreinte environnementale potentielle d’un produit.</li>
+<li>L’affichage d’un <strong>Impact Score</strong> indicatif, concernant l’empreinte environnementale potentielle d’un produit.</li>
 </ul>
 <h3>Avertissement sur l’Impact Score</h3>
 <p>L’Impact Score fourni par Nudger est purement indicatif. Il peut comporter des imprécisions ou des erreurs, liées à la qualité ou à la disponibilité des données (ex. informations partielles sur la chaîne de production, codes-barres, etc.). L’utilisateur reconnaît que l’Impact Score ne peut se substituer à une analyse complète du produit, et que Nudger n’est pas responsable de l’exactitude ou de l’exhaustivité de ces informations.</p>

@@ -95,6 +95,8 @@ class SitemapGenerationServiceTest {
 		assertThat(meterRegistry.get("sitemap.generation.last.success").gauge().value()).isPositive();
 		assertThat(meterRegistry.get("sitemap.product.urls").tag("language", "fr").gauge().value()).isEqualTo(2);
 		assertThat(Files.exists(rootFolder.resolve("sitemap/fr/category-pages.xml"))).isTrue();
+		assertThat(texts(parse(rootFolder.resolve("sitemap/fr/category-pages.xml")), "loc"))
+				.contains("https://nudger.fr/televiseurs/ecoscore");
 		assertThat(Files.exists(rootFolder.resolve("sitemap/fr/sitemap.xml"))).isTrue();
 		assertThat(Files.exists(rootFolder.resolve("sitemap/fr/guides.xml"))).isFalse();
 		assertThat(leftoverTemporaryFiles()).isEmpty();
