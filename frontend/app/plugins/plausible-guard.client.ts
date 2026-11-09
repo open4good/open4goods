@@ -1,4 +1,5 @@
 import { defineNuxtPlugin, useRuntimeConfig } from '#imports'
+import { detectAutomatedBrowser } from '~/utils/automated-browser'
 import { isDoNotTrackEnabled } from '~/utils/do-not-track'
 import { isLocalReferrer } from '~/utils/local-referrer'
 
@@ -25,7 +26,8 @@ export default defineNuxtPlugin({
     if (
       isDoNotTrackEnabled() ||
       window.location.pathname.startsWith('/contrib/') ||
-      isLocalReferrer(document.referrer)
+      isLocalReferrer(document.referrer) ||
+      detectAutomatedBrowser()
     ) {
       plausibleConfig.enabled = false
     }
