@@ -872,6 +872,7 @@
           "impactScore": "{score} / {max}"
         }
       },
+      "rankingPolicyLink": "Comment nous classons",
       "sortLabel": "Trier par",
       "sortOrderAsc": "Ordre croissant",
       "sortOrderDesc": "Ordre décroissant",
@@ -3064,6 +3065,7 @@
           "legal": "Mentions légales",
           "openData": "Open data",
           "openSource": "Open Source",
+          "rankingPolicy": "Classement et référencement",
           "privacy": "Politique de confidentialité"
         },
         "title": "Ressources"
@@ -3798,6 +3800,74 @@
       "position": "Position",
       "evolution": "Clics vs fenêtre précédente",
       "new": "nouveau"
+    }
+  },
+  "rankingPolicy": {
+    "seo": {
+      "title": "Classement et référencement des produits et des offres {'|'} Nudger",
+      "description": "Comment Nudger classe les produits et les offres, quels marchands sont référencés et comment Nudger est rémunéré (article D111-6 du Code de la consommation)."
+    },
+    "hero": {
+      "eyebrow": "Transparence",
+      "title": "Classement et référencement",
+      "subtitle": "Comment Nudger ordonne les produits et les offres, quels marchands y figurent et comment Nudger est rémunéré."
+    },
+    "intro": "Cette rubrique répond à l'article D111-6 du Code de la consommation. Elle décrit le fonctionnement du site à la date de mise à jour indiquée ci-dessous.",
+    "updatedAt": "Dernière mise à jour : {date}",
+    "summary": {
+      "title": "En bref",
+      "items": {
+        "defaultSort": "Par défaut, les produits d'une catégorie sont classés selon leur Impact Score, du plus élevé au plus bas.",
+        "offers": "Les offres d'un produit sont classées par prix croissant.",
+        "remuneration": "Nudger peut percevoir une commission des marchands, mais aucun classement n'en tient compte.",
+        "noPaidPlacement": "Aucun emplacement n'est payant ou sponsorisé."
+      }
+    },
+    "sections": {
+      "referencing": {
+        "title": "Marchands et offres référencés",
+        "p1": "Les offres affichées proviennent des marchands dont Nudger a rejoint le programme d'affiliation, par l'intermédiaire de plateformes d'affiliation (par exemple Awin ou Effiliation) ou du programme Partenaires d'Amazon. Un marchand sans programme d'affiliation, ou dont Nudger n'a pas rejoint le programme, n'apparaît pas dans les comparaisons de prix : elles ne couvrent donc pas l'ensemble du marché.",
+        "p2": "Les offres sont reprises telles que le marchand les publie dans son flux. Une offre n'est affichée que si elle a été vue dans ce flux depuis moins de deux jours. Les offres à prix nul ou en rupture de stock sont écartées.",
+        "p3": "Les listes de produits et la recherche ne montrent que les produits proposés par au moins un marchand référencé. Les caractéristiques des produits peuvent aussi venir de bases publiques ou de fabricants (par exemple EPREL, Icecat ou Wikidata) : ces sources ne créent pas d'offre."
+      },
+      "remuneration": {
+        "title": "Rémunération de Nudger",
+        "p1": "Les liens vers les marchands sont des liens d'affiliation. Quand vous achetez après un clic sur l'un de ces liens, le marchand peut verser une commission à Nudger, selon les conditions de son programme. Cela ne change pas le prix que vous payez.",
+        "p2": "Aucun classement du site n'utilise cette rémunération : ni le montant d'une commission, ni le marchand, ni la plateforme d'affiliation ne modifient l'ordre des produits, l'ordre des offres ou le calcul de l'Impact Score. Il n'existe pas d'emplacement payant ou sponsorisé.",
+        "p3": "Quand un produit n'a aucune offre, sa fiche peut proposer un lien de recherche sur Amazon. C'est aussi un lien d'affiliation : en tant que Partenaire Amazon, Nudger réalise un bénéfice sur les achats remplissant les conditions requises. Ce lien n'apparaît qu'en l'absence d'offre et n'entre dans aucun classement."
+      },
+      "defaultSort": {
+        "title": "Classement par défaut des produits",
+        "p1": "Dans une catégorie, les produits sont classés par défaut selon leur Impact Score, du plus élevé au plus bas. C'est le tri marqué (par défaut) dans la liste des tris. Les sélections de produits mises en avant sur les pages de catégories suivent le même critère.",
+        "p2": "L'Impact Score est calculé à partir des caractéristiques du produit, de données sur sa marque et de la complétude des informations disponibles. Il n'utilise ni le prix, ni le marchand, ni une commission.",
+        "p3": "Les produits qui n'ont pas encore d'Impact Score sont placés après les produits notés. À Impact Score égal, l'ordre est départagé par le code-barres (GTIN) du produit, pour rester le même d'une page à l'autre.",
+        "methodLink": "Lire la méthode de l'Impact Score"
+      },
+      "otherSorts": {
+        "title": "Autres tris",
+        "p1": "Vous pouvez choisir un autre critère, dans l'ordre croissant ou décroissant : prix, nombre d'offres, marque, modèle, date d'ajout ou de mise à jour, Impact Score et ses critères détaillés, ou une caractéristique technique de la catégorie (par exemple la taille d'écran ou la consommation).",
+        "p2": "Le prix utilisé pour le tri est le prix le plus bas parmi les offres du produit, neuves et d'occasion confondues. Le nombre d'offres compte les offres des marchands référencés : il ne mesure pas les ventes.",
+        "p3": "Les produits pour lesquels le critère choisi n'est pas renseigné sont placés en fin de liste."
+      },
+      "search": {
+        "title": "Recherche",
+        "p1": "Les résultats d'une recherche sont classés par pertinence : tous les mots saisis doivent se retrouver dans le nom d'une offre, la marque ou le modèle du produit, et les produits qui y correspondent le mieux passent en premier. Les résultats sont regroupés par catégorie. Vous pouvez aussi les trier par prix ou par nombre d'offres.",
+        "p2": "Les suggestions proposées pendant la saisie privilégient les produits dont les noms d'offres contiennent le plus de mots saisis. Sans recherche, la page présente d'abord les produits qui ont le plus d'offres."
+      },
+      "offers": {
+        "title": "Offres d'un produit",
+        "p1": "Sur la fiche d'un produit, l'offre mise en avant est la moins chère des offres à jour, neuves et d'occasion confondues. La fiche présente aussi la meilleure offre neuve et la meilleure offre d'occasion, c'est-à-dire la moins chère de chaque état. Quand une offre d'occasion existe, elle est présentée en premier.",
+        "p2": "La liste complète des offres est classée par prix croissant. Vous pouvez la trier par marchand, par prix ou par état."
+      },
+      "alternatives": {
+        "title": "Alternatives et assistant de choix",
+        "p1": "Les alternatives proposées sur une fiche sont des produits de la même catégorie, classés par Impact Score du plus élevé au plus bas, dont le prix est inférieur ou égal et l'Impact Score supérieur ou égal à ceux du produit consulté. Si moins de trois produits remplissent ces conditions, les filtres sont assouplis dans cet ordre : caractéristiques, prix, puis Impact Score.",
+        "p2": "L'assistant de choix propose les trois produits qui ont le meilleur Impact Score parmi ceux qui correspondent à vos réponses."
+      }
+    },
+    "contact": {
+      "text": "Une question sur ces règles ?",
+      "link": "Contactez-nous"
     }
   }
 }

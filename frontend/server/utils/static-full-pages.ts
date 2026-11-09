@@ -53,7 +53,7 @@ Stuttgarter St. 1<br>
 <h3>Gratuité du service</h3>
 <p>Le Site est entièrement gratuit pour l’utilisateur. Nudger ne vend pas de produits directement et n’est pas responsable des éventuelles variations de prix pratiquées par des marchands tiers.</p>
 <h3>Liens d’affiliation</h3>
-<p>Les liens vers les marchands sont des liens d’affiliation : Nudger peut percevoir une commission sur les achats effectués après un clic, sans surcoût pour l’utilisateur. En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.</p>
+<p>Les liens vers les marchands sont des liens d’affiliation : Nudger peut percevoir une commission sur les achats effectués après un clic, sans surcoût pour l’utilisateur. En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises. Cette rémunération n’influence aucun classement : les critères de classement des produits et des offres, et les conditions de référencement des marchands, sont décrits dans la rubrique <a href="https://nudger.fr/classement-et-referencement">Classement et référencement</a>.</p>
 <h2>4. Contenu UGC et commentaires</h2>
 <p>Les utilisateurs ont la possibilité de poster des commentaires ou du contenu (UGC). En contrepartie, Nudger se réserve le droit de modérer ou de supprimer tout contenu sans avertissement préalable, notamment en cas de contenu illicite, diffamatoire, injurieux, ou contraire aux présentes CGU.</p>
 <h2>5. Limitation de responsabilité</h2>
