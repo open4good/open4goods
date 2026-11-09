@@ -1399,249 +1399,72 @@
   },
   "impactScorePage": {
     "seo": {
-      "title": "Impact Score : méthode, critères et pondérations",
-      "description": "Découvrez comment l'Impact Score évalue l'impact environnemental d'un produit grâce à méthode transparente et ouverte."
+      "title": "Impact Score : comment nous notons l'impact environnemental des produits",
+      "description": "Ce que mesure l'Impact Score de Nudger, ce qu'il ne mesure pas, comment lire la note sur 20 et quelles sont ses limites. Méthode publiée, historique des versions."
     },
-    "methodologyExplanation": {
-      "title": "Comment chaque critère est noté",
-      "content": "Chaque critère est d'abord ramené sur une même échelle, de 0 (le moins bon) à 20 (le meilleur), avec l'une de ces trois méthodes :<ul><li><strong>Barème fixe :</strong> la classe énergie suit son échelle officielle (A = 20, G = 0).</li><li><strong>Valeurs observées :</strong> pour la plupart des critères, le produit le moins performant de la catégorie obtient 0 et le meilleur 20. Quand une valeur basse est meilleure (consommation, bruit, poids), l'échelle est inversée.</li><li><strong>Écart à la moyenne (sigma) :</strong> pour la garantie et les consommations d'eau ou d'énergie par cycle, la note dépend de l'écart à la moyenne de la catégorie, pour que quelques valeurs extrêmes n'écrasent pas les autres. Un produit dans la moyenne obtient 10.</li></ul>Ces notes par critère sont ensuite pondérées et additionnées pour former l'Impact Score."
+    "hero": {
+      "eyebrow": "Impact Score",
+      "title": "L'Impact Score",
+      "intro": "Une note sur 20 pour comparer des produits d'une même catégorie, à partir de données publiques, de fabricants et de marchands. La méthode est publiée, versionnée et datée."
+    },
+    "what": {
+      "title": "Ce que c'est",
+      "scope": "L'Impact Score est une note de comparaison <strong>à l'intérieur d'une catégorie</strong> (téléviseurs, lave-linge, smartphones...). Il classe les produits d'une même catégorie entre eux. Il ne compare jamais un téléviseur à un lave-linge.",
+      "criteria": "La note repose sur des critères mesurables : consommation d'énergie, classe énergétique, indice de réparabilité, durée de disponibilité des pièces et des mises à jour, garantie... Selon la catégorie, la liste et le poids de chaque critère changent. Ils sont détaillés sur la page méthode de chaque catégorie.",
+      "data": "Les données viennent de sources publiques (base EPREL de l'Union européenne), des fabricants et des marchands. Les sources sont citées sur chaque page méthode. Quand une information est absente, nous ne l'inventons pas et nous ne la remplaçons pas par une moyenne : le critère est signalé \"non renseigné\".",
+      "rating": "L'Impact Score est une notation comparative réalisée par Nudger."
+    },
+    "not": {
+      "title": "Ce que ce n'est pas",
+      "items": {
+        "lca": "<strong>Ce n'est pas une analyse de cycle de vie (ACV).</strong> Nous sommes experts en données et en IA, pas en ACV. Nous ne mesurons pas ce qu'un produit a causé de la fabrication à la fin de vie.",
+        "footprint": "<strong>Ce n'est pas une empreinte carbone</strong>, ni une mesure d'empreinte absolue.",
+        "label": "<strong>Ce n'est ni un label, ni une certification.</strong> Aucun organisme extérieur n'attribue ni ne contrôle la note.",
+        "perfect": "<strong>Une note de 20/20 ne signifie pas une absence d'impact.</strong> Elle signifie que, sur les critères retenus, ce produit est le mieux placé de sa catégorie.",
+        "advice": "<strong>Ce n'est pas un conseil d'achat universel.</strong> Un produit bien noté n'est utile que si vous en avez besoin."
+      }
+    },
+    "read": {
+      "title": "Comment lire la note",
+      "intro": "Sous chaque note, une ligne de contexte donne tout ce qu'il faut pour l'interpréter. Exemple illustratif :",
+      "exampleCaption": "Exemple illustratif, pas un produit réel.",
+      "exampleCategory": "téléviseurs",
+      "items": {
+        "score": "<strong>La note sur 20</strong> résume les critères renseignés pour ce produit. Les poids des critères non renseignés sont répartis sur les critères renseignés.",
+        "position": "<strong>La position</strong> dit où se place le produit parmi les produits notés de sa catégorie. Elle n'a de sens que dans cette catégorie.",
+        "criteria": "<strong>Les critères renseignés</strong> (\"11 critères sur 13\") indiquent la part des données réellement disponibles. Plus elle est faible, plus la note est fragile. Les critères manquants sont listés dans le détail.",
+        "version": "<strong>La date et la version</strong> indiquent quand la note a été calculée et avec quelle version de la méthode. Nous ne comparons que des notes de la même version.",
+        "notRated": "<strong>\"Non noté\"</strong> : le produit n'a pas assez de données pour être noté (nous exigeons une part minimale des critères, pondérés), ou sa note date d'une ancienne version de la méthode et est en cours de recalcul. \"Non noté\" n'est pas une mauvaise note : il n'y a pas de jauge, et la raison est écrite. Dans les listes triées par Impact Score, les produits non notés sont affichés après les produits notés."
+      }
+    },
+    "limits": {
+      "title": "Limites",
+      "items": {
+        "declared": "<strong>Données déclarées.</strong> Les valeurs viennent de déclarations (EPREL, fabricants, marchands). Nous citons nos sources mais nous ne mesurons pas les produits nous-mêmes et aucun tiers ne contrôle ces données pour nous.",
+        "manufacturing": "<strong>La fabrication est peu couverte.</strong> Peu de données publiques existent sur l'extraction des matières, la fabrication et le transport. La note pèse surtout l'usage (énergie), la durée de vie (réparabilité, pièces, mises à jour, garantie) et la documentation disponible.",
+        "cohort": "<strong>La cohorte bouge.</strong> La position dépend des produits notés à la date du calcul. Quand de nouveaux produits entrent au catalogue ou en sortent, la position d'un produit peut changer sans que le produit change.",
+        "catalog": "<strong>Le catalogue n'est pas le marché.</strong> Seuls les produits référencés par Nudger, avec au moins une offre, sont notés.",
+        "quality": "<strong>Une note n'est pas une preuve de qualité</strong> d'usage : image, bruit, performances ne sont pas notés."
+      },
+      "error": "Une erreur dans une donnée ? Contactez-nous.",
+      "errorLink": "Page contact"
+    },
+    "history": {
+      "title": "Historique de la méthode",
+      "intro": "La méthode est versionnée. Chaque version a une date, un changement et une raison.",
+      "link": "Historique des versions de la méthode",
+      "why": "<em>Pourquoi V2 ?</em> Avec la V1, un critère absent recevait la moyenne de la catégorie : un produit pouvait être noté sur des données qui n'existaient pas. La V2 note ce qui est connu, dit ce qui manque, et s'abstient sinon."
     },
     "docs": {
       "title": "Documentation Impact Score",
       "description": "Explorez les documents de référence, notes méthodologiques et sources de données de l'Impact Score."
-    },
-    "hero": {
-      "eyebrow": "Impact Score",
-      "title": "évaluation de l'impact environnemental de vos produits",
-      "subtitle": "Une boussole pour guider chaque achat",
-      "definition": {
-        "title": "Une définition claire et accessible",
-        "description": "L'Impact Score traduit des données techniques en indicateurs compréhensibles et comparables, sans jargon.",
-        "items": {
-          "scale": "Note de 0 à 20, somme pondérée des notes par critère. Elle compare les produits d'une même catégorie : 20 ne signifie pas une absence d'impact, et le meilleur produit d'une catégorie reste en général loin de 20.",
-          "data": "Appuyé sur des données vérifiées (fiches techniques, éco-organismes, référentiels publiques)",
-          "update": "Mis à jour dès que de nouvelles informations sont publiées"
-        }
-      }
-    },
-    "details": {
-      "eyebrow": "Analyse approfondie",
-      "title": "L'Impact Score en détail",
-      "subtitle": "Une lecture transparente des critères, des pondérations et de la qualité des données.",
-      "cards": {
-        "weighting": {
-          "title": "Une pondération de plusieurs critères",
-          "description": "L'Impact Score est une note de 0 à 20. C'est la somme pondérée des notes par critère, et chaque catégorie de produits a ses propres critères et pondérations.",
-          "bullets": {
-            "scale": "0 = le moins bon sur tous les critères, 20 = le meilleur sur tous les critères",
-            "sum": "La note globale additionne les scores de chaque critère",
-            "weights": "Les pondérations (0 à 1) sont définies par un système d'IA, dont les prompts et les réponses sont transparentes."
-          }
-        },
-        "ai": {
-          "title": "Une démarche IA, ouverte au débat",
-          "description": "Nous sommes experts en données et en IA, pas en analyse du cycle de vie. Nous testons une approche alternative pour accélérer l'évaluation environnementale des produits électriques et électroniques.",
-          "bullets": {
-            "verticals": "Chaque catégorie dispose d'une page dédiée pour comprendre son Impact Score",
-            "opensource": "Les configurations et coefficients sont disponibles en open-source",
-            "discussion": "Proposez vos idées et ouvrez la discussion sur notre dépôt GitHub"
-          }
-        },
-        "relativisation": {
-          "title": "Principe de relativisation",
-          "description": "Un indice de réparabilité de 7,7 n'est lisible que si l'on connaît la meilleure et la moins bonne valeur. Sur chaque critère, nous donnons donc 0 au produit le moins performant de la catégorie et 20 au meilleur (la classe énergie suit son barème officiel). L'Impact Score final, lui, n'est pas relativisé : c'est une somme pondérée. Un produit n'obtient 20/20 que s'il est le meilleur sur tous les critères, et même dans ce cas, cela ne veut pas dire qu'il est sans impact sur la planète.",
-          "bullets": {
-            "ranking": "Un classement clair pour situer chaque produit dans sa catégorie"
-          }
-        },
-        "dataQuality": {
-          "title": "La qualité de la donnée, enjeu majeur",
-          "description": "Quand une information manque, nous appliquons la valeur moyenne de la catégorie, afin de ne ni pénaliser ni avantager le produit. Ces valeurs sont signalées comme virtuelles dans le détail des critères. Un produit moins documenté obtient aussi une note plus basse sur le critère qualité de la donnée, qui compte dans l'Impact Score.",
-          "bullets": {
-            "average": "Score virtuel basé sur la moyenne de la catégorie",
-            "malus": "Un malus reflète le manque d'information produit"
-          }
-        }
-      }
-    },
-    "criteria": {
-      "eyebrow": "Exemple de critères",
-      "title": "Notre Impact Score en bref",
-      "subtitle": "Chaque critère pèse dans la note finale et permet la comparaison entre produits d'une même catégorie. La liste précise des critères est disponible dans la page Impact Score de chaque catégorie. Par exemple : ",
-      "items": {
-        "circularity": {
-          "title": "Réparabilité",
-          "description": "Durabilité, disponibilité des pièces, facilité de réparation et garantie constructeur.",
-          "weight": "35 %"
-        },
-        "energy": {
-          "title": "Performance énergétique",
-          "description": "Consommation réelle, étiquette énergie et sobriété à l'usage.",
-          "weight": "25 %"
-        },
-        "materials": {
-          "title": "Matériaux et chimie",
-          "description": "Présence de substances à risque, recyclabilité des composants et usage de matières recyclées.",
-          "weight": "15 %"
-        },
-        "logistics": {
-          "title": "Packaging et logistique",
-          "description": "Emballage, distance parcourue, mode de transport et mutualisation des livraisons.",
-          "weight": "15 %"
-        },
-        "transparency": {
-          "title": "Transparence des données",
-          "description": "Sources ouvertes, traçabilité et preuves documentées par les fabricants ou organismes tiers.",
-          "weight": "10 %"
-        }
-      }
     },
     "availableCriteria": {
       "eyebrow": "Critères",
       "title": "Critères disponibles",
       "subtitle": "Explorez les critères utilisés selon chaque catégorie."
     },
-    "principles": {
-      "eyebrow": "Nos principes",
-      "title": "Les meilleurs choix dans le possible des achats",
-      "subtitle": "La méthode repose sur la transparence, la contextualisation et la pédagogie.",
-      "items": {
-        "transparency": {
-          "title": "Transparence totale",
-          "description": "Chaque note est liée à des sources vérifiées et consultables par les utilisateurs."
-        },
-        "category": {
-          "title": "Contextualisé par catégorie",
-          "description": "Les pondérations sont adaptées à chaque famille de produits pour rester pertinentes."
-        },
-        "data": {
-          "title": "Données vérifiables",
-          "description": "Nous privilégions les données mesurables issues de labels, tests et déclarations contrôlées."
-        },
-        "pedagogy": {
-          "title": "Pédagogie et accessibilité",
-          "description": "Une lecture simple : des capsules courtes, des exemples concrets et des visuels compréhensibles."
-        }
-      }
-    },
-    "examples": {
-      "eyebrow": "Exemples de calcul",
-      "title": "Exemples réels",
-      "subtitle": "Des extraits d'Impact Score issus de fiches produits d'électroménager et d'électronique du quotidien.",
-      "samsungTv": {
-        "eyebrow": "Exemple 1",
-        "title": "Téléviseur Samsung Crystal UHD 55\" UE55CU7092",
-        "description": "Indice de réparabilité, énergie et suivi logiciel selon les sources produits.",
-        "breakdown": {
-          "repairability": {
-            "label": "Indice de réparabilité",
-            "value": "7,3 / 10"
-          },
-          "consumption": {
-            "label": "Consommation électrique",
-            "value": "90 kWh/1000h"
-          },
-          "energyClass": {
-            "label": "Classe énergétique",
-            "value": "G (EPREL)"
-          },
-          "softwareUpdates": {
-            "label": "Mises à jour logicielles",
-            "value": "7 ans"
-          }
-        }
-      },
-      "fairphone": {
-        "eyebrow": "Exemple 2",
-        "title": "Smartphone Fairphone 5 5G 256 Go",
-        "description": "Un modèle durable avec un indice de réparabilité élevé et des mises à jour garanties.",
-        "breakdown": {
-          "repairability": {
-            "label": "Indice de réparabilité",
-            "value": "9,3 / 10"
-          },
-          "softwareUpdates": {
-            "label": "Mises à jour logicielles",
-            "value": "8 ans"
-          },
-          "warranty": {
-            "label": "Garantie constructeur",
-            "value": "5 ans"
-          },
-          "materials": {
-            "label": "Matériaux recyclés",
-            "value": "70 %"
-          }
-        }
-      }
-    },
-    "summary": {
-      "eyebrow": "À retenir",
-      "title": "Le condensé de l'Impact Score",
-      "subtitle": "Ce qu'il faut garder en tête pour comprendre la note.",
-      "items": {
-        "method": "Une méthode unique, commune à toutes les catégories.",
-        "criteria": "De multiples critères pondérés pour comparer rapidement des produits similaires.",
-        "data": "Des données vérifiées, mises à jour et reliées à leurs sources.",
-        "usage": "Une note sur 20, lisible en un coup d'œil pour guider vos achats responsables."
-      }
-    },
-    "approach": {
-      "eyebrow": "Notre démarche",
-      "title": "Notre Impact Score : transparent, innovant et performant",
-      "subtitle": "Notre Impact Score est expliqué simplement, avec des sources vérifiables et des critères adaptés à chaque catégorie de produit.",
-      "pillars": {
-        "transparent": {
-          "title": "Transparent",
-          "description": "Nudger est open-source : vous pouvez vérifier le calcul. Chaque fiche produit explique la note de façon simple et complète."
-        },
-        "innovant": {
-          "title": "Innovant",
-          "description": "Nous valorisons les initiatives existantes et proposons un Impact Score polyvalent pour les produits manufacturés."
-        },
-        "performant": {
-          "title": "Performant",
-          "description": "Nos critères combinent des sources fiables et une pondération pertinente pour comparer les produits d'une même catégorie."
-        }
-      },
-      "data": {
-        "title": "Données prises en compte",
-        "items": {
-          "regulatory": "Données réglementaires : indice de réparabilité, fiche énergie, durée de garantie...",
-          "esg": "Évaluations extra-financières des fabricants (ESG/RSE).",
-          "information": "Niveau d'information disponible sur le produit : quantité, qualité et ouverture des données.",
-          "categorySpecific": "Données spécifiques à chaque catégorie (ex. niveau sonore, consommation d'eau, etc.)."
-        }
-      }
-    },
-    "aria": {
-      "navigation": "Navigation des sections Impact Score",
-      "pageOutline": "Plan de la page Impact Score"
-    },
-    "navigation": {
-      "analysis": "Analyse approfondie",
-      "approach": "Notre démarche",
-      "methodology": "Méthodologie",
-      "overview": "Présentation"
-    },
     "sections": {
-      "analysis": {
-        "dataQuality": {
-          "imageAlt": "Illustration sur la qualité de la donnée",
-          "title": "La qualité de la donnée, enjeu majeur"
-        },
-        "eyebrow": "Analyse approfondie",
-        "relativisation": {
-          "imageAlt": "Illustration du principe de relativisation",
-          "title": "Principe de relativisation"
-        },
-        "title": "Relativisation et qualité de la donnée"
-      },
-      "approach": {
-        "eyebrow": "Notre démarche",
-        "imageAlt": "Illustration de notre démarche Impact Score",
-        "title": "Notre Impact Score : transparent, innovant et performant"
-      },
       "methodology": {
         "empty": "Les catégories seront bientôt disponibles.",
         "eyebrow": "Méthodologie",
@@ -1653,14 +1476,6 @@
         "verticalCtaAria": "Explorer les produits de la catégorie {vertical}",
         "verticalImageAlt": "Illustration de la catégorie {vertical}",
         "verticalLabel": "Catégorie"
-      },
-      "overview": {
-        "eyebrow": "Présentation",
-        "sample": {
-          "caption": "Évaluation indicative basée sur notre méthodologie",
-          "title": "Évaluation indicative"
-        },
-        "title": "Qu'est-ce que l'Impact Score ?"
       }
     }
   },
