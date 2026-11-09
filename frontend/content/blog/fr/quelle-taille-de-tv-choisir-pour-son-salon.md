@@ -1,12 +1,12 @@
 ---
-title: "Quelle taille de TV pour un salon ? Tableau selon la distance"
-description: "Taille de TV selon la distance de recul : tableau 43 à 85 pouces, résolution et pièce, avec les modèles les mieux notés pour leur impact."
+title: "Taille de TV : tableau pouces en cm et distance de recul"
+description: "55 pouces = 140 cm (122 x 69 cm). Tableau 32 à 85 pouces en cm, et la taille idéale selon la distance de recul."
 author: o4g
 language: fr
 tags:
   - "tv"
 date: 2025-08-01T02:50:05Z
-updatedAt: 2026-10-26T08:36:15Z
+updatedAt: 2026-11-09T09:00:00Z
 draft: false
 published: true
 image: /images/blog/quelle-taille-de-tv-choisir-pour-son-salon/Articles-4-.png
@@ -15,12 +15,33 @@ image: /images/blog/quelle-taille-de-tv-choisir-pour-son-salon/Articles-4-.png
 Choisir une télé, ce n'est pas qu'une affaire de pixels et de prix. C'est aussi une question de **taille**. Et quand on parle de taille d'écran, les doutes commencent : _est-ce qu'un 55 pouces, ce n'est pas trop grand ? Est-ce qu'un 43 pouces, ce n'est pas trop petit ? Et 75 pouces, c'est pas carrément une salle de ciné ?_ Pas de panique. Nudger vous explique tout, avec des **conseils simples**, des exemples concrets, et surtout **des repères clairs** pour ne plus se tromper. Objectif : trouver la **taille idéale** de TV pour **votre salon**, pas celui de vos voisins !
 
 
+## 55 pouces en cm : dimensions de la diagonale, largeur et hauteur
+
+Une TV 55 pouces a une diagonale de 140 cm, pour un écran d'environ 122 cm de large et 69 cm de haut. Le tableau ci-dessous donne les dimensions de la dalle pour les tailles courantes (format 16:9).
+
+| Taille (pouces) | Diagonale (cm) | Largeur (cm) | Hauteur (cm) |
+|---|---|---|---|
+| 32 | 81 | 71 | 40 |
+| 40 | 102 | 89 | 50 |
+| 43 | 109 | 95 | 53 |
+| 50 | 127 | 111 | 62 |
+| 55 | 140 | 122 | 69 |
+| 58 | 147 | 128 | 72 |
+| 65 | 165 | 144 | 81 |
+| 70 | 178 | 155 | 87 |
+| 75 | 190 | 166 | 93 |
+| 77 | 196 | 171 | 96 |
+| 85 | 216 | 188 | 106 |
+
+Ces valeurs sont les dimensions de la dalle seule, hors cadre et pied : prévoyez quelques centimètres de plus pour le meuble. Calcul : diagonale = pouces × 2,54 ; largeur = diagonale × 0,8716 ; hauteur = diagonale × 0,4903 (arrondis au cm).
+
+
 ## La taille d'écran de sa TV : de quoi parle-t-on exactement ?
 
 Commençons par le commencement. Quand on parle d'une télé “55 pouces”, on ne parle **ni de sa largeur ni de sa hauteur**, mais de la **diagonale de l'écran**, mesurée en **pouces** (inches, en anglais).
 1 pouce = 2,54 cm. Donc un écran de 55 pouces a une diagonale d'environ **140 cm**. Mais attention : la diagonale ne vous donne **pas les dimensions réelles de la télé**, surtout si vous comptez l'encadrement. Il ne s'agit en clair que de l'écran.
 
-👉 Bon à savoir : un écran de 55 pouces mesure environ **123 cm de large** et **71 cm de haut**.
+👉 Bon à savoir : un écran de 55 pouces mesure environ **122 cm de large** et **69 cm de haut**.
 
 
 ## Distance de recul : la vraie clé du choix

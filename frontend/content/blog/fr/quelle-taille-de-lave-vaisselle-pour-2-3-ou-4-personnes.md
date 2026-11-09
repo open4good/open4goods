@@ -1,12 +1,12 @@
 ---
 title: "Quelle taille de lave-vaisselle pour 2, 3 ou 4 personnes ?"
-description: "10, 12 ou 14 couverts ? Notre guide pour choisir la capacité selon votre foyer, avec consommation d'eau et modèles les mieux notés."
+description: "6 à 9 couverts pour 2 personnes, 9 à 12 pour 3, 12 à 14 pour 4. Largeur 45 ou 60 cm, consommation d'eau et modèles les mieux notés."
 author: Thomas
 language: fr
 tags:
   - "lave-vaisselles"
 date: 2026-04-24T03:48:45Z
-updatedAt: 2026-10-26T09:00:00Z
+updatedAt: 2026-11-09T09:00:00Z
 draft: false
 published: true
 image: /images/blog/quelle-taille-de-lave-vaisselle-pour-2-3-ou-4-personnes/Articles-12-.png
@@ -26,6 +26,8 @@ Dans les faits, voici ce que vous pouvez retenir :
 - 2 personnes → 6 à 9 couverts
 - 3 personnes → 9 à 12 couverts
 - 4 personnes → 12 à 14 couverts
+
+Côté encombrement, deux largeurs existent : 45 cm (6 à 10 couverts, pour les petites cuisines) et 60 cm (11 à 16 couverts, le format standard).
 
 Le bon choix dépend aussi de votre fréquence de lavage, de votre espace disponible ainsi que de vos habitudes de cuisine. L'objectif : utiliser des cycles pleins et optimisés, pour éviter le gaspillage.
 
