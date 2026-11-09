@@ -130,7 +130,10 @@ import {
   resolvePopularAttributes,
 } from '~/utils/_product-attributes'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
-import { isImpactScoreNotRated, resolveImpactScoreV2 } from '~/utils/_impact-score-v2'
+import {
+  isImpactScoreNotRated,
+  resolveImpactScoreV2,
+} from '~/utils/_impact-score-v2'
 import { resolveProductShortName } from '~/utils/_product-title-resolver'
 import { resolveSortedFieldDisplay } from '~/utils/_sort-attribute-display'
 
