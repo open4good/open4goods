@@ -349,6 +349,13 @@ export default defineNuxtConfig({
     '/blog/v-0-0-1---premiere-iteration': {
       redirect: { to: '/blog/v-0-0-1-premiere-iteration', statusCode: 301 },
     },
+    // Articles depublished for unsubstantiated environmental claims (compensation, GOU-1985)
+    '/blog/comment-compenser-l-impact-environnemental-de-ses-achats-effectues-en-ligne': {
+      redirect: { to: '/blog/comparer-l-impact-environnemental-des-produits', statusCode: 301 },
+    },
+    '/blog/qu-est-ce-que-la-contribution-ecologique': {
+      redirect: { to: '/blog/comparer-l-impact-environnemental-des-produits', statusCode: 301 },
+    },
     // Fix SWR handler error by disabling cache for assistant configs (conflicts with cookie setting)
     '/assistant-configs/**': { cache: false },
     '/api/assistant-configs/**': { cache: false },

@@ -19,7 +19,7 @@ En ce mois de mai 2026, Goulven de la Team Nudger devait renouveler son lave-vai
 
 Pas le temps de tout lire ? Voici la sélection directe de Goulven.
 
-**Meilleur lave-vaisselle 2026 - éco #1, classe A, 14 couverts, pose libre :**
+**Meilleur lave-vaisselle 2026 - Impact Score #1, classe A, 14 couverts, pose libre :**
 
 ::product-card-embed{gtin="8806096304952" size="medium"}
 ::
@@ -134,7 +134,7 @@ L'**indice de réparabilité** (obligatoire en France depuis janvier 2021) est n
 
 **Négliger le bruit en cuisine ouverte.** Un lave-vaisselle à 46 dB lancé le soir pendant que vous regardez la TV, c'est une source de friction quotidienne. Les 50 € supplémentaires pour passer à 42 dB se rentabilisent en qualité de vie.
 
-## Les lave-vaisselles les plus durables et écolo
+## Les lave-vaisselles les mieux classés à l'Impact Score
 
 Le classement live des lave-vaisselles les mieux notés sur nudger.fr, triés par score d'impact :
 
@@ -164,7 +164,7 @@ Le Bosch SPV4EMX17E est notre référence 45 cm : encastrable, 10 couverts, clas
 ::product-card-embed{gtin="4242005540037" size="medium"}
 ::
 
-### Le meilleur premium éco - Bosch haut de gamme
+### Le mieux classé des modèles premium : Bosch
 
 ::product-card-embed{gtin="4242005438044" size="medium"}
 ::

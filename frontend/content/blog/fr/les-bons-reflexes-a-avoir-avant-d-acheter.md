@@ -84,4 +84,4 @@ Une règle simple : 1 objet qui rentre = 1 objet qui sort.
 Avant de craquer pour une nouvelle veste, vérifiez si vous n'en avez pas déjà trois qui dorment dans votre dressing. Ça aide à éviter la surconsommation et à garder un espace de vie plus agréable.
 
 
-Avec tous ces réflexes à avoir avant d'acheter, vous devriez déjà être en mesure de réaliser un shopping plus conscient et plus respectueux de l'environnement ! Envie d'aller plus loin ? Découvrez dès maintenant le système de Nudger pour comparer l'impact environnemental de différents produits du marché.
+Avec ces réflexes, vous achèterez en connaissance de cause. Envie d'aller plus loin ? Sur Nudger, comparez l'Impact Score (sur 20) des produits d'une même catégorie.
