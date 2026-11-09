@@ -151,9 +151,10 @@ README, "Contribution votes ip/ua purge" (GOU-1230).
 
 Added after the commission events of `/api/metriks/affiliation`:
 
-- `affiliation.<awin|effiliation|kwanko|tradetracker|amazon|other|total>.clicks.<7d|28d>`, unit `count`,
-  windows `[D-7, D-1]` and `[D-28, D-1]` in Europe/Paris by click time, with
-  the same window `params` as the commission events (no `currency`);
+- `affiliation.<awin|effiliation|kwanko|tradetracker|amazon|other|total>.clicks.<7d|28d|prev7d|prev28d>`, unit `count`,
+  windows `[D-7, D-1]`, `[D-28, D-1]`, `[D-14, D-8]` (`prev7d`) and `[D-56, D-29]` (`prev28d`) in Europe/Paris by
+  click time, with the same window `params` as the commission events (no `currency`) and names suffixed
+  " (7 j préc.) " / " (28 j préc.) " for the previous windows (GOU-1975);
 - `affiliation.clicks.top_merchants.28d`: `value` is the number of rows,
   `params.rows` lists `merchant`, `network` and `clicks`, top 20, most clicked
   first (ties ordered by merchant);
@@ -171,14 +172,37 @@ top 50 of their union is exact; a path present in both (a `/blog/` page as the
 `originPath` of a click without `contentPath`) is summed. On an index whose
 mapping does not hold `contentPath` yet, every click counts by `originPath`.
 
-A single Elasticsearch request (date range query, `terms`, `multi_terms` and
-`filter` aggregations, no document fetched) feeds all of them. A network without click
+One Elasticsearch request (date range query, `terms`, `multi_terms` and
+`filter` aggregations, no document fetched) feeds the `7d` and `28d` events and the tops; one more request
+(`AffiliationClickStatsService.count`, a `terms` aggregation) feeds each previous window. A network without click
 reports `0`. When Elasticsearch cannot answer (unreachable, missing index), all
 click events are in `error`, never `0`; the commission events are unaffected.
 
 api and front-api must use the same Elasticsearch cluster
 (`spring.elasticsearch.uris` in open4goods-config: `localhost:9200` on the beta
 box for both, the same production node for both).
+
+### Event contract of `/api/metriks/affiliation` (GOU-1975)
+
+Windows (D = today, Europe/Paris): `7d` = `[D-7, D-1]`, `28d` = `[D-28, D-1]`,
+`prev7d` = `[D-14, D-8]`, `prev28d` = `[D-56, D-29]`. The previous windows are
+read fresh at each call, never from an old run: statuses (pending, validated,
+declined) change with time.
+
+| Events | Ids | Count |
+|---|---|---|
+| Commissions and sales | `affiliation.<awin\|effiliation\|kwanko\|tradetracker\|total>.<commission.validated\|commission.pending\|sales>.<7d\|28d\|prev7d\|prev28d>` | 5 x 3 x 4 = 60 |
+| Clicks | `affiliation.<awin\|effiliation\|kwanko\|tradetracker\|amazon\|other\|total>.clicks.<window>` | 7 x 4 = 28 |
+| Tops | `affiliation.clicks.top_merchants.28d`, `affiliation.clicks.top_origins.28d` | 2 |
+
+Each commission network is read once, over the 56 days `[D-56, D-1]`, and the
+four windows are derived from that single read. The Awin transactions API
+accepts 31 days at most per request: `AwinReportClient` splits the range into
+consecutive chunks of 31 days (each chunk ends one second before the next
+starts: no gap, no duplicate at the bounds). Effiliation (90 days), Kwanko and
+TradeTracker (paginated) read 56 days in one go. Error rules are unchanged: a
+failing network (or a failing chunk) puts all its windows in `error`, a total
+is in `error` as soon as one network is, a missing figure is never `0`.
 
 ## Kwanko revenues (GOU-1379)
 

@@ -15,6 +15,7 @@ import java.util.Map;
 import org.open4goods.api.dto.metriks.MetriksEvent;
 import org.open4goods.services.contribution.model.AffiliationClick;
 import org.open4goods.services.contribution.model.AffiliationClickStats;
+import org.open4goods.services.contribution.model.AffiliationClickStats.ClickCounts;
 import org.open4goods.services.contribution.model.AffiliationClickStats.MerchantClicks;
 import org.open4goods.services.contribution.model.AffiliationClickStats.OriginClicks;
 import org.open4goods.services.contribution.model.AffiliationNetwork;
@@ -27,25 +28,30 @@ import org.springframework.stereotype.Service;
 
 /**
  * Builds the Metriks affiliation events ({@code GET /api/metriks/affiliation}): validated commissions, pending
- * commissions and sales of each network, plus their totals, over the last 7 and 28 days; then the outbound
+ * commissions and sales of each network, plus their totals, over the last 7 and 28 days and over the 7 and 28 days
+ * before them ({@code prev7d}, {@code prev28d}); then the outbound
  * {@code /contrib/} clicks per network ({@code awin}, {@code effiliation}, {@code kwanko}, {@code tradetracker}, {@code amazon}, {@code other}) and in total over the same
  * windows, the 20 most clicked merchants and the 50 most clicked origins (article or guide, otherwise originating
  * page) over 28 days.
  * <p>
- * Windows: {@code 7d} = [D-7, D-1] and {@code 28d} = [D-28, D-1], D being today in Europe/Paris, by transaction
- * date (commissions) or click time (clicks). Each network is read once, over the 28-day window; the 7-day figures are
- * derived from it. Clicks are counted by a single Elasticsearch aggregation on the {@code affiliation-clicks} index
- * written by front-api.
+ * Windows: {@code 7d} = [D-7, D-1], {@code 28d} = [D-28, D-1], {@code prev7d} = [D-14, D-8] and {@code prev28d} =
+ * [D-56, D-29], D being today in Europe/Paris, by transaction date (commissions) or click time (clicks). Each network
+ * is read once, over the 56 days [D-56, D-1] (the client splits the request when its API limits the range, e.g.
+ * Awin: 31 days); the four windows are derived from it. Clicks are counted on the {@code affiliation-clicks} index
+ * written by front-api: one aggregation for the current windows and the tops, one per previous window.
+ * <p>
+ * Events: 12 per network (3 metrics x 4 windows) and 12 totals, then 28 click events (7 scopes x 4 windows) and the
+ * 2 tops.
  * <p>
  * Error rules (a missing figure is never reported as zero):
  * <ul>
- * <li>a network without credentials: its six events are in {@code error}, with
+ * <li>a network without credentials: its twelve events are in {@code error}, with
  * {@code Credential manquant : metriks.affiliation.<network>.<property>};</li>
  * <li>an HTTP error, timeout, unreadable response, unknown status or non-EUR amount: only that network's events are
  * in {@code error};</li>
  * <li>a total is in {@code error} as soon as one network is, with the list of the failing networks: never a partial
  * sum;</li>
- * <li>clicks: when Elasticsearch cannot answer (unreachable, missing index...), the sixteen click events are in
+ * <li>clicks: when Elasticsearch cannot answer (unreachable, missing index...), the thirty click events (tops included) are in
  * {@code error}; a network without any click is a real {@code 0}.</li>
  * </ul>
  * Error messages and logs never carry a credential: client messages are built without secrets, and every message
@@ -64,7 +70,11 @@ public class AffiliationMetriksService {
             .map(AffiliationNetwork::key).toList();
     static final String TOP_MERCHANTS_ID = "affiliation.clicks.top_merchants.28d";
     static final String TOP_ORIGINS_ID = "affiliation.clicks.top_origins.28d";
-    private static final List<Window> WINDOWS = List.of(new Window("7d", 7, "7 j"), new Window("28d", 28, "28 j"));
+    private static final Window SHORT = new Window("7d", 7, 0, "7 j");
+    private static final Window LONG = new Window("28d", 28, 0, "28 j");
+    private static final Window PREV_SHORT = new Window("prev7d", 7, 7, "7 j préc.");
+    private static final Window PREV_LONG = new Window("prev28d", 28, 28, "28 j préc.");
+    private static final List<Window> WINDOWS = List.of(SHORT, LONG, PREV_SHORT, PREV_LONG);
     private static final List<String> GROUPS = List.of("business", "affiliation");
     private static final String MASK = "***";
 
@@ -105,7 +115,8 @@ public class AffiliationMetriksService {
     public List<MetriksEvent> collectEvents() {
         LocalDate today = LocalDate.now(clock.withZone(ZONE));
         LocalDate endDate = today.minusDays(1);
-        LocalDate startDate = today.minusDays(WINDOWS.stream().mapToInt(Window::days).max().orElseThrow());
+        LocalDate startDate = WINDOWS.stream().map(window -> window.start(today)).min(Comparator.naturalOrder())
+                .orElseThrow();
 
         List<MetriksEvent> events = new ArrayList<>();
         Map<Window, Figures> totals = new LinkedHashMap<>();
@@ -113,12 +124,11 @@ public class AffiliationMetriksService {
         List<String> failedNetworks = new ArrayList<>();
 
         for (AffiliationReportClient client : clients) {
-            NetworkResult result = read(client, startDate, endDate);
+            NetworkResult result = read(client, today, startDate, endDate);
             for (Window window : WINDOWS) {
-                LocalDate windowStart = today.minusDays(window.days());
                 Figures figures = result.error() == null ? result.figures().get(window) : null;
-                events.addAll(windowEvents(client.network(), client.displayName(), window, windowStart, endDate,
-                        figures, result.error()));
+                events.addAll(windowEvents(client.network(), client.displayName(), window, window.start(today),
+                        window.end(today), figures, result.error()));
                 if (figures != null) {
                     totals.put(window, totals.get(window).plus(figures));
                 }
@@ -131,7 +141,7 @@ public class AffiliationMetriksService {
         String totalError = failedNetworks.isEmpty() ? null
                 : "Total indisponible : réseau(x) en erreur : " + String.join(", ", failedNetworks);
         for (Window window : WINDOWS) {
-            events.addAll(windowEvents("total", "tous réseaux", window, today.minusDays(window.days()), endDate,
+            events.addAll(windowEvents("total", "tous réseaux", window, window.start(today), window.end(today),
                     totalError == null ? totals.get(window) : null, totalError));
         }
         events.addAll(clickEvents(today));
@@ -146,15 +156,19 @@ public class AffiliationMetriksService {
     private List<MetriksEvent> clickEvents(LocalDate today) {
         LocalDate endDate = today.minusDays(1);
         long end = today.atStartOfDay(ZONE).toInstant().toEpochMilli();
-        Window shortWindow = WINDOWS.get(0);
-        Window longWindow = WINDOWS.get(WINDOWS.size() - 1);
+        Window shortWindow = SHORT;
+        Window longWindow = LONG;
         AffiliationClickStats stats = null;
+        ClickCounts prevShort = null;
+        ClickCounts prevLong = null;
         String error = null;
         try {
             stats = clickStatsService.read(
                     today.minusDays(longWindow.days()).atStartOfDay(ZONE).toInstant().toEpochMilli(),
                     today.minusDays(shortWindow.days()).atStartOfDay(ZONE).toInstant().toEpochMilli(),
                     end, AffiliationClickStatsService.TOP_MERCHANTS, AffiliationClickStatsService.TOP_ORIGINS);
+            prevShort = clickStatsService.count(startMillis(PREV_SHORT, today), endMillis(PREV_SHORT, today));
+            prevLong = clickStatsService.count(startMillis(PREV_LONG, today), endMillis(PREV_LONG, today));
         } catch (NoSuchIndexException e) {
             error = "Clics indisponibles : index " + AffiliationClick.INDEX_NAME + " absent";
         } catch (RuntimeException e) {
@@ -172,17 +186,25 @@ public class AffiliationMetriksService {
             for (Window window : WINDOWS) {
                 Long value = null;
                 if (stats != null) {
-                    boolean isShort = window.equals(shortWindow);
-                    if ("total".equals(network)) {
-                        value = isShort ? stats.totalShort() : stats.totalLong();
+                    Map<String, Long> perNetwork;
+                    long total;
+                    if (window.equals(SHORT)) {
+                        perNetwork = stats.clicksShort();
+                        total = stats.totalShort();
+                    } else if (window.equals(LONG)) {
+                        perNetwork = stats.clicksLong();
+                        total = stats.totalLong();
                     } else {
-                        value = (isShort ? stats.clicksShort() : stats.clicksLong()).getOrDefault(network, 0L);
+                        ClickCounts counts = window.equals(PREV_SHORT) ? prevShort : prevLong;
+                        perNetwork = counts.clicks();
+                        total = counts.total();
                     }
+                    value = "total".equals(network) ? total : perNetwork.getOrDefault(network, 0L);
                 }
                 String label = "total".equals(network) ? "tous réseaux" : labelOf(network);
                 events.add(event("affiliation." + network + ".clicks." + window.key(),
                         "Clics sortants " + label + " (" + window.label() + ")", "count", network,
-                        today.minusDays(window.days()), endDate, null, value, error));
+                        window.start(today), window.end(today), null, value, error));
             }
         }
 
@@ -227,6 +249,15 @@ public class AffiliationMetriksService {
         return events;
     }
 
+    private static long startMillis(Window window, LocalDate today) {
+        return window.start(today).atStartOfDay(ZONE).toInstant().toEpochMilli();
+    }
+
+    /** Exclusive end of the window: midnight following its last day. */
+    private static long endMillis(Window window, LocalDate today) {
+        return window.end(today).plusDays(1).atStartOfDay(ZONE).toInstant().toEpochMilli();
+    }
+
     private static String labelOf(String key) {
         return Arrays.stream(AffiliationNetwork.values()).filter(n -> n.key().equals(key)).findFirst()
                 .map(AffiliationNetwork::label).orElse(key);
@@ -235,7 +266,8 @@ public class AffiliationMetriksService {
     /**
      * Reads one network over {@code [startDate, endDate]} and aggregates it per window, or returns its error.
      */
-    private NetworkResult read(AffiliationReportClient client, LocalDate startDate, LocalDate endDate) {
+    private NetworkResult read(AffiliationReportClient client, LocalDate today, LocalDate startDate,
+                               LocalDate endDate) {
         List<String> missing = client.missingCredentials();
         if (!missing.isEmpty()) {
             String message = "Credential manquant : " + String.join(", ", missing);
@@ -246,7 +278,7 @@ public class AffiliationMetriksService {
             List<AffiliationReportTransaction> transactions = client.fetchTransactions(startDate, endDate, ZONE);
             Map<Window, Figures> figures = new LinkedHashMap<>();
             for (Window window : WINDOWS) {
-                figures.put(window, aggregate(client, transactions, endDate.plusDays(1).minusDays(window.days()), endDate));
+                figures.put(window, aggregate(client, transactions, window.start(today), window.end(today)));
             }
             return new NetworkResult(figures, null);
         } catch (AffiliationReportException e) {
@@ -359,11 +391,21 @@ public class AffiliationMetriksService {
     /**
      * A report window.
      *
-     * @param key   suffix of the event ids ({@code 7d}, {@code 28d})
-     * @param days  number of days, ending yesterday
-     * @param label suffix of the event names
+     * @param key        suffix of the event ids ({@code 7d}, {@code 28d}, {@code prev7d}, {@code prev28d})
+     * @param days       number of days
+     * @param offsetDays number of days between the end of the window and yesterday (0 for the current windows)
+     * @param label      suffix of the event names
      */
-    private record Window(String key, int days, String label) {
+    private record Window(String key, int days, int offsetDays, String label) {
+        /** First day: D-offset-days, D being today. */
+        LocalDate start(LocalDate today) {
+            return today.minusDays(offsetDays + days);
+        }
+
+        /** Last day, inclusive: D-offset-1. */
+        LocalDate end(LocalDate today) {
+            return today.minusDays(offsetDays + 1L);
+        }
     }
 
     /**

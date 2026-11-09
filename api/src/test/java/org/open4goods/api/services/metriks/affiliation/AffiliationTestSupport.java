@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.open4goods.services.contribution.model.AffiliationClickStats;
+import org.open4goods.services.contribution.model.AffiliationClickStats.ClickCounts;
 import org.open4goods.services.contribution.service.AffiliationClickStatsService;
 
 /**
@@ -39,6 +40,8 @@ final class AffiliationTestSupport {
      */
     static final class FakeClickStats extends AffiliationClickStatsService {
         final List<long[]> calls = new ArrayList<>();
+        /** Bounds {start, end} of every {@link #count} call. */
+        final List<long[]> countCalls = new ArrayList<>();
         private final AffiliationClickStats stats;
         private final RuntimeException failure;
 
@@ -56,6 +59,20 @@ final class AffiliationTestSupport {
                 throw failure;
             }
             return stats;
+        }
+
+        @Override
+        public ClickCounts count(long start, long end) {
+            countCalls.add(new long[] {start, end});
+            if (failure != null) {
+                throw failure;
+            }
+            // Previous windows: half of the current short / long figures, to tell them apart.
+            boolean isShort = end - start < 10L * 24 * 3600 * 1000;
+            Map<String, Long> source = isShort ? stats.clicksShort() : stats.clicksLong();
+            Map<String, Long> half = new java.util.LinkedHashMap<>();
+            source.forEach((key, value) -> half.put(key, value / 2));
+            return new ClickCounts(half, (isShort ? stats.totalShort() : stats.totalLong()) / 2);
         }
     }
 
