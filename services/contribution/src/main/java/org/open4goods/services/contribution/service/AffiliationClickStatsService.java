@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.open4goods.services.contribution.model.AffiliationClick;
 import org.open4goods.services.contribution.model.AffiliationClickStats;
+import org.open4goods.services.contribution.model.AffiliationClickStats.ClickCounts;
 import org.open4goods.services.contribution.model.AffiliationClickStats.MerchantClicks;
 import org.open4goods.services.contribution.model.AffiliationClickStats.OriginClicks;
 import org.open4goods.services.contribution.model.AffiliationNetwork;
@@ -122,6 +123,30 @@ public class AffiliationClickStatsService {
                 List.copyOf(top),
                 topOrigins(aggregate(aggregations, AGG_CONTENT),
                         aggregate(aggregations, AGG_NO_CONTENT).filter().aggregations().get(AGG_ORIGIN), topOrigins));
+    }
+
+    /**
+     * Counts the clicks of {@code [start, end)}, per network and in total, with a single aggregation request.
+     *
+     * @param start start of the window, epoch milliseconds, inclusive
+     * @param end   end of the window, epoch milliseconds, exclusive
+     * @return the clicks of the window
+     * @throws RuntimeException when Elasticsearch cannot answer (unreachable, missing index...)
+     */
+    public ClickCounts count(long start, long end) {
+        NativeQuery query = NativeQuery.builder()
+                .withQuery(tsRange(start, end))
+                .withAggregation(AGG_NETWORKS, networksAggregation())
+                .withMaxResults(0)
+                .withTrackTotalHits(true)
+                .build();
+        SearchHits<AffiliationClick> hits = elasticsearchOperations.search(query, AffiliationClick.class,
+                IndexCoordinates.of(AffiliationClick.INDEX_NAME));
+        ElasticsearchAggregations aggregations = (ElasticsearchAggregations) hits.getAggregations();
+        if (aggregations == null) {
+            throw new IllegalStateException("Elasticsearch returned no aggregation for " + AffiliationClick.INDEX_NAME);
+        }
+        return new ClickCounts(perNetwork(aggregate(aggregations, AGG_NETWORKS)), hits.getTotalHits());
     }
 
     /**
