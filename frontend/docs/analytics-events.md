@@ -28,7 +28,7 @@ Tout le reste (Android/WebView, iOS `CriOS`, Firefox, Safari, contexte non
 sécurisé) est compté : pas d'extension de la règle 3, risque de faux positifs.
 
 Raison (GOU-1973) : un robot Tencent (AS132203) et une vague de proxys
-résidentiels exécutent le JS avec un UA « Chrome Windows » ancien sans
+résidentiels exécutent le JS avec un UA " Chrome Windows " ancien sans
 `Sec-CH-UA`, et gonflent les visiteurs Plausible. Limite : le robot charge
 toujours les pages ; ce filtre ne nettoie que Plausible. `/contrib/` et le
 cookie `nudger_nav` ne changent pas.
