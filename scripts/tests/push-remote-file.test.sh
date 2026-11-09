@@ -215,7 +215,7 @@ expect_fail "render: missing environment (old interface)" render check api
 ########################################
 # render-service-secrets.sh: nothing set
 ########################################
-for service in api ui front-api admin b2b-api frontend; do
+for service in api ui front-api admin frontend; do
   for env_name in beta prod; do
     run render --if-present check "${env_name}" "${service}"
     if [[ ${status} -eq 0 ]] && [[ "${out}" == *"::warning::"*"is not set in the ${env_name} GitHub Environment: not rendered for ${service}"* ]] \
@@ -227,7 +227,7 @@ for service in api ui front-api admin b2b-api frontend; do
     fi
   done
 done
-for service in api ui admin b2b-api; do
+for service in api ui admin; do
   run render check prod "${service}"
   [[ ${status} -eq 0 ]] && pass "render: check prod ${service} passes with every optional secret missing" \
     || ko "render check prod ${service} (status ${status}): ${out}"
@@ -519,7 +519,7 @@ import yaml
 render, workflows = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
 table, source = {}, {}
 for service, secret, need in re.findall(
-        r"(?m)^(api|ui|front-api|admin|b2b-api|frontend|infra) ([A-Z0-9_]+) \S+ \S+ (\S+)$", render.read_text()):
+        r"(?m)^(api|ui|front-api|admin|frontend|infra) ([A-Z0-9_]+) \S+ \S+ (\S+)$", render.read_text()):
     # `source` rows are only rendered with --source (infraSecrets.yml), which renders nothing else.
     (source if need == "source" else table).setdefault(service, set()).add(secret)
     table.setdefault(service, set())

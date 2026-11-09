@@ -18,9 +18,9 @@
 #           600 file (/dev/shm when available) for the duration of the run.
 #   <env>     beta or prod.
 #   <target>  elasticsearch (both), kibana (both), plausible (beta), plausible-postgres (beta),
-#             plausible-clickhouse (beta), plausible-google (beta), b2b-postgres (both), es-ops-readonly (both:
-#             read-only Elasticsearch account for Ops, secret required even by check and test), es-agents-readonly (prod
-#             only: read-only Elasticsearch account of the agents' MCP connector, same rules).
+#             plausible-clickhouse (beta), plausible-google (beta), es-ops-readonly (both: read-only Elasticsearch
+#             account for Ops, secret required even by check and test), es-agents-readonly (prod only: read-only
+#             Elasticsearch account of the agents' MCP connector, same rules).
 #
 # Each secret is read from the environment variable of the same name (the calling step's `env:`).
 # Required environment for remote: DEPLOY_SSH_HOST, DEPLOY_SSH_USER, DEPLOY_SSH_KEY.
@@ -60,7 +60,7 @@ esac
 case "$target" in
   elasticsearch)
     secrets=O4G_ELASTICSEARCH_PASSWORD
-    services="front-api api ui b2b-api"
+    services="front-api api ui"
     ;;
   kibana)
     secrets="INFRA_KIBANA_SYSTEM_PASSWORD INFRA_KIBANA_ENCRYPTION_KEY"
@@ -86,10 +86,6 @@ case "$target" in
     secrets="INFRA_GOOGLE_CLIENT_ID INFRA_GOOGLE_CLIENT_SECRET"
     services=infra
     ;;
-  b2b-postgres)
-    secrets=B2B_API_POSTGRES_PASSWORD
-    services="infra b2b-api"
-    ;;
   es-ops-readonly)
     secrets=INFRA_ES_OPS_READONLY_PASSWORD
     services=
@@ -99,7 +95,7 @@ case "$target" in
     secrets=INFRA_ES_AGENTS_READONLY_PASSWORD
     services=
     ;;
-  *) fail "Unknown target: $target (elasticsearch, kibana, plausible, plausible-postgres, plausible-clickhouse, plausible-google, b2b-postgres, es-ops-readonly or es-agents-readonly)" ;;
+  *) fail "Unknown target: $target (elasticsearch, kibana, plausible, plausible-postgres, plausible-clickhouse, plausible-google, es-ops-readonly or es-agents-readonly)" ;;
 esac
 
 # Every secret of the target, set and strong; the value is never printed.

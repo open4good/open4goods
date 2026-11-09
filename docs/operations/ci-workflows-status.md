@@ -10,12 +10,12 @@ automatiques sans bloquer un correctif livré à la main.
 
 | Workflow                           | Fichier                                    | Id        | Déploie sur beta                          |
 | ---------------------------------- | ------------------------------------------ | --------- | ----------------------------------------- |
-| `🔘 Beta - Build, Test, and Publish` | `.github/workflows/testAndPublishBeta.yml` | 81022703  | JARs `admin`, `api`, `ui`, `front-api`, `b2b-api` et `b2b-frontend`. |
+| `🔘 Beta - Build, Test, and Publish` | `.github/workflows/testAndPublishBeta.yml` | 81022703  | JARs `admin`, `api`, `ui` et `front-api`. |
 | `Frontend CI & Deploy`               | `.github/workflows/frontend-ci.yml`        | 171671519 | Frontend Nuxt SSR (`frontend-ssr`).       |
 
 Les deux workflows sont `active`. Chacun a deux jobs :
 
-1. `build` : build et tests (Maven et build `b2b-frontend` ; ou lint,
+1. `build` : build et tests (Maven ; ou lint,
    generate, tests et build Nuxt avec les contrôles ABI et `.output`). Il ne
    lit aucun secret. Il publie le livrable en artefact (archive tar, gardée
    3 jours).
@@ -29,18 +29,13 @@ lance les deux workflows, indépendamment.
 
 | Workflow                 | Chemins déclencheurs                                                                 |
 | ------------------------ | ------------------------------------------------------------------------------------ |
-| `testAndPublishBeta.yml` | Tout le dépôt sauf `frontend/**` et sauf les autres fichiers de `.github/workflows/` ; son propre fichier déclenche. Inclut donc les modules Maven, `b2b-frontend/**`, `docs/**` (les `.md` sont embarqués dans les JARs), `scripts/**`, `.github/actions/**`. |
+| `testAndPublishBeta.yml` | Tout le dépôt sauf `frontend/**` et sauf les autres fichiers de `.github/workflows/` ; son propre fichier déclenche. Inclut donc les modules Maven, `docs/**` (les `.md` sont embarqués dans les JARs), `scripts/**`, `.github/actions/**`. |
 | `frontend-ci.yml`        | `frontend/**`, `docs/**` et `verticals/src/main/resources/guides/**` (collection `docs` de `frontend/content.config.ts`), `scripts/deploy/**`, `.github/workflows/frontend-ci.yml`. |
 
 Un changement purement frontend (`frontend/**`) ne redéploie pas le backend,
 et un changement purement backend ne redéploie pas le frontend. Les `.md` de
 `frontend/` sont aussi embarqués dans les JARs : ils y arrivent au prochain
 déploiement backend.
-
-`.github/workflows/b2b-frontend-ci.yml` (`B2B Frontend CI`) ne déploie rien :
-lint, typecheck, tests et build sur `b2b-frontend/**` et sur son propre
-fichier, en PR et en push sur `main`. Le déploiement beta de `b2b-frontend`
-reste dans `testAndPublishBeta.yml`, avec `b2b-api`.
 
 ### Gardes
 
@@ -88,7 +83,7 @@ l'état de `main`.
 
 ## Déployer `main` à la main (dispatch)
 
-1. `gh workflow run testAndPublishBeta.yml --ref main` (backend, b2b) et/ou
+1. `gh workflow run testAndPublishBeta.yml --ref main` (backend) et/ou
    `gh workflow run frontend-ci.yml --ref main` (frontend).
 2. Suivre le run jusqu'à son résultat (`gh run watch`) et reporter un échec
    sur l'issue.
@@ -109,4 +104,3 @@ l'état de `main`.
   n'exporte pas `node_register_module_v137`, avant tout déploiement.
 - `.github/workflows/ci-pr.yml` ignore `frontend/**` (`paths-ignore`) ; il
   couvre le build Maven sur toute autre modification de PR.
-- `.github/workflows/b2b-frontend-ci.yml` couvre `b2b-frontend/**` en PR.

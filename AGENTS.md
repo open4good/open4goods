@@ -169,9 +169,7 @@ and before 5am) with major Maven upgrades disabled.
 For detailed module-specific conventions, see:
 
 - **Frontend**: [frontend/AGENTS.md](frontend/AGENTS.md) - Nuxt 4 / Vue 3 / Vuetify
-- **B2B Frontend**: [b2b-frontend/AGENTS.md](b2b-frontend/AGENTS.md) - Nuxt 4 / Vue 3 / Vuetify 4 / TypeScript
 - **Front API**: [front-api/AGENTS.md](front-api/AGENTS.md) - SpringDoc / OpenAPI
-- **B2B API**: [b2b-api/AGENTS.md](b2b-api/AGENTS.md) - Spring Boot 4 / Java 21
 - **Services**: [services/AGENTS.md](services/AGENTS.md) - Microservices (19 services)
 - **Core Modules**: [admin](admin/AGENTS.md), [api](api/AGENTS.md), [commons](commons/AGENTS.md), [model](model/AGENTS.md), [verticals](verticals/AGENTS.md)
 - **UI (deprecated)**: [ui/AGENTS.md](ui/AGENTS.md) - Being replaced by frontend

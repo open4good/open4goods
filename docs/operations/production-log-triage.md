@@ -8,7 +8,6 @@ SSR container logs.
 
 | Signal | Threshold | Owner | Response |
 | --- | --- | --- | --- |
-| B2B API 5xx | Any sustained occurrence | B2B API | Correlate Nginx access log with `nohup-b2b-api.log`; verify auth routes return 401, not 500, for unauthenticated requests. |
 | Frontend 502/504 | Any deployment burst or more than 5 in 5 minutes | Frontend and operations | Keep the active color running, inspect container restart count and Nginx upstream errors, then roll back the handover if the new color is not stable. |
 | Remote resource URL exposes query values | Any occurrence | Security and service owner | Treat credentials as disclosed, rotate them with approval, and redact the logging call before redeploying. |
 | EPREL no-match volume | More than 10 per minute after refresh throttling | API data pipeline | Check datasource refresh timestamps and upstream coverage; do not repeatedly query unchanged negative results. |

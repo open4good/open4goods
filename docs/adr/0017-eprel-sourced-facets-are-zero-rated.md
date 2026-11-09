@@ -1,12 +1,15 @@
 ---
 title: "ADR 0017: EPREL-sourced facets are zero-rated"
-status: accepted
+status: withdrawn
 normative: true
 audience: PROJECT_SCOPED
 decisions: []
 ---
 
 # ADR 0017: EPREL-sourced facets are zero-rated
+
+Withdrawn on 2026-11-08: the B2B Product Data API (b2b-api, b2b-frontend) was
+removed from the repository.
 
 ## Context
 

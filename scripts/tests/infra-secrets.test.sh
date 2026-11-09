@@ -2,7 +2,7 @@
 # Tests scripts/deploy/infra-secrets.sh and infra-secrets-remote.sh (GOU-1092, GOU-1256, GOU-1271, GOU-1321) against a fake
 # `ssh` that runs the remote script locally, a fake `curl` playing Elasticsearch, Kibana and Google's OAuth token
 # endpoint, and a fake `docker`
-# playing Plausible (its logs), its Postgres and ClickHouse (its dictionaries), and the b2b Postgres.
+# playing Plausible (its logs), its Postgres and ClickHouse (its dictionaries).
 # /etc/open4goods/ and /opt/open4goods/ live in a temp dir. Every value is a sentinel that must never appear in an
 # output, a summary or a command line.
 set -euo pipefail
@@ -292,9 +292,6 @@ NEW_PG="NEWPGSENTINELDDDDDDDDDDDDDDDDDDDDD"
 # The ClickHouse password in service holds `&` and `%`: kept literal in the DDL of the dictionaries on rollback.
 OLD_CH="OLDCH&SENTINEL%EEEEEEEEEEEEEEEEEEE"
 NEW_CH="NEWCHSENTINELFFFFFFFFFFFFFFFFFFFFF"
-# The b2b default in service holds punctuation: single-quoted in infra.env on rollback.
-OLD_B2B="OLDB2B%SENTINEL!GGGGGGGGGGGGGGGGGGG"
-NEW_B2B="NEWB2BSENTINELHHHHHHHHHHHHHHHHHHHH"
 # Google OAuth clients are lower case: the leak checks below ignore case.
 OLD_GOOGLE_ID="111111111111-oldgooglesentinel0000000000000000.apps.googleusercontent.com"
 NEW_GOOGLE_ID="222222222222-newgooglesentinel1111111111111111.apps.googleusercontent.com"
@@ -336,7 +333,7 @@ reset_host() {
   : > "${CALLS}"
   : > "${GITHUB_STEP_SUMMARY}"
   mkdir -p "${ETC}" "${OPT}/bin" "${OPT}/runtime" "${OPT}/latest/beta" "${OPT}/latest/prod"
-  for svc in front-api api ui b2b-api; do
+  for svc in front-api api ui; do
     echo jar > "${OPT}/runtime/${svc}.jar"
     echo jar > "${OPT}/latest/${svc}-latest.jar"
     mkdir -p "${OPT}/config/beta/${svc}"
@@ -433,19 +430,19 @@ run "${DEPLOY}/infra-secrets.sh" remote restart beta elasticsearch
 check "restart refuses before the render" \
   bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"render it first"* ]] && [ ! -s "$2" ]' "${status}" "${out}" "${WORK}/restarts.log"
 
-for svc in front-api api ui b2b-api; do
+for svc in front-api api ui; do
   run "${DEPLOY}/render-service-secrets.sh" --source apply beta "${svc}"
   [ "${status}" -eq 0 ] || ko "render --source ${svc}: ${out}"
 done
-check "render --source writes the config tree of the 4 consumers" \
-  bash -c 'for s in front-api api ui b2b-api; do [ "$(cat "$0/secrets/$s/spring.elasticsearch.password")" = "$1" ] || exit 1; done' \
+check "render --source writes the config tree of the 3 consumers" \
+  bash -c 'for s in front-api api ui; do [ "$(cat "$0/secrets/$s/spring.elasticsearch.password")" = "$1" ] || exit 1; done' \
   "${ETC}" "${NEW_ELASTIC}"
 check "render --source writes only the source rows (no other api secret, no warning about them)" \
   bash -c '[ "$(ls "$0/secrets/api")" = spring.elasticsearch.password ]' "${ETC}"
 
 run "${DEPLOY}/infra-secrets.sh" remote restart beta elasticsearch
-check "restart restarts front-api, api, ui, b2b-api in that order" \
-  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "$(printf "publish-jars beta restart %s\n" front-api api ui b2b-api)" ]' \
+check "restart restarts front-api, api, ui in that order" \
+  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "$(printf "publish-jars beta restart %s\n" front-api api ui)" ]' \
   "${status}" "${WORK}/restarts.log"
 check "restart prints no value" no_value_leaked
 
@@ -453,7 +450,7 @@ check "restart prints no value" no_value_leaked
 run "${DEPLOY}/infra-secrets.sh" remote rollback beta elasticsearch
 check "rollback puts the previous password back at the source and in the trees, then restarts" \
   bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1/elastic")" = "$3" ] && [ "$(cat "$2/secrets/api/spring.elasticsearch.password")" = "$3" ] \
-    && [ "$(wc -l < "$4")" -eq 4 ]' "${status}" "${FAKE_ES}" "${ETC}" "${OLD_ELASTIC}" "${WORK}/restarts.log"
+    && [ "$(wc -l < "$4")" -eq 3 ]' "${status}" "${FAKE_ES}" "${ETC}" "${OLD_ELASTIC}" "${WORK}/restarts.log"
 check "rollback prints no value" no_value_leaked
 unset O4G_ELASTICSEARCH_PASSWORD
 
@@ -842,53 +839,6 @@ check "plausible-google prints no value (same client)" no_value_leaked
 unset INFRA_GOOGLE_CLIENT_ID INFRA_GOOGLE_CLIENT_SECRET
 
 ########################################
-# b2b-postgres (beta and prod): ALTER USER, render infra.env and the b2b-api config tree, restart b2b-api
-########################################
-reset_host
-# shellcheck disable=SC2016 # literal placeholders.
-printf '      POSTGRES_PASSWORD: ${B2B_POSTGRES_PASSWORD:-%s}\n' "${OLD_B2B}" > "${OPT}/bin/docker-compose.infra.yml"
-mkdir -p "${OPT}/config/prod/b2b-api"
-# shellcheck disable=SC2016 # literal placeholders.
-printf 'spring:\n  datasource:\n    password: ${B2B_POSTGRES_PASSWORD:%s}\n' "${OLD_B2B}" \
-  > "${OPT}/config/prod/b2b-api/application-active.yml"
-printf 'product_data_api' > "${FAKE_ENV}/b2b_postgres.POSTGRES_USER"
-printf 'product_data_api' > "${FAKE_ENV}/b2b_postgres.POSTGRES_DB"
-printf '%s' "${OLD_B2B}" > "${FAKE_DB}/b2b_postgres.product_data_api"
-export B2B_API_POSTGRES_PASSWORD="${NEW_B2B}"
-printf 'SPRING_DATASOURCE_PASSWORD=x\n' > "${ETC}/b2b-api.env"
-run "${DEPLOY}/infra-secrets.sh" remote test prod b2b-postgres
-check "b2b-postgres test refuses an env line that beats the config tree" \
-  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"sets SPRING_DATASOURCE_PASSWORD"* ]]' "${status}" "${out}"
-rm -f "${ETC}/b2b-api.env"
-run "${DEPLOY}/infra-secrets.sh" remote test prod b2b-postgres
-check "b2b-postgres test finds the password in service (application-active.yml default)" \
-  bash -c '[ "$0" -eq 0 ] && [[ "$1" == *"product_data_api in service is found (candidate-yml)"* ]]' "${status}" "${out}"
-run "${DEPLOY}/infra-secrets.sh" remote source prod b2b-postgres
-check "b2b-postgres source changes the user and keeps the previous value" \
-  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "$3" ] && grep -Fqx "B2B_API_POSTGRES_PASSWORD=$4" "$2"' \
-  "${status}" "${FAKE_DB}/b2b_postgres.product_data_api" "${ETC}/infra-previous.env" "${NEW_B2B}" "${OLD_B2B}"
-run "${DEPLOY}/render-service-secrets.sh" --source apply prod infra
-run "${DEPLOY}/infra-secrets.sh" remote restart prod b2b-postgres
-check "b2b-postgres restart refuses before the b2b-api render" \
-  bash -c '[ "$0" -ne 0 ] && [[ "$1" == *"config tree of b2b-api does not hold"* ]] && [ ! -s "$2" ]' \
-  "${status}" "${out}" "${WORK}/restarts.log"
-run "${DEPLOY}/render-service-secrets.sh" --source apply prod b2b-api
-check "render --source b2b-api writes spring.datasource.password next to the Elasticsearch tree" \
-  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1/spring.datasource.password")" = "$2" ] && [ "$(ls "$1")" = spring.datasource.password ]' \
-  "${status}" "${ETC}/secrets/b2b-api" "${NEW_B2B}"
-run "${DEPLOY}/infra-secrets.sh" remote restart prod b2b-postgres
-check "b2b-postgres restart restarts b2b-api only" \
-  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "publish-jars prod restart b2b-api" ] && grep -qx "B2B_POSTGRES_PASSWORD=$3" "$2"' \
-  "${status}" "${WORK}/restarts.log" "${ETC}/infra.env" "${NEW_B2B}"
-run "${DEPLOY}/infra-secrets.sh" remote rollback prod b2b-postgres
-check "b2b-postgres rollback restores the user, the config tree and infra.env (single-quoted)" \
-  bash -c '[ "$0" -eq 0 ] && [ "$(cat "$1")" = "$4" ] && [ "$(cat "$2/secrets/b2b-api/spring.datasource.password")" = "$4" ] \
-    && grep -Fqx "B2B_POSTGRES_PASSWORD='"'"'$4'"'"'" "$2/infra.env" && [ "$(wc -l < "$3")" -eq 2 ]' \
-  "${status}" "${FAKE_DB}/b2b_postgres.product_data_api" "${ETC}" "${WORK}/restarts.log" "${OLD_B2B}"
-check "b2b-postgres prints no value" no_value_leaked
-unset B2B_API_POSTGRES_PASSWORD
-
-########################################
 # es-ops-readonly: role, user, 600 file, no rollback
 ########################################
 reset_host
@@ -929,7 +879,7 @@ unset INFRA_ES_OPS_READONLY_PASSWORD
 ########################################
 reset_host
 AGENTS_PASS="AGENTSREADONLYSENTINEL7777777777777777"
-for svc in front-api api ui b2b-api; do
+for svc in front-api api ui; do
   mkdir -p "${OPT}/config/prod/${svc}"
   cp "${OPT}/config/beta/${svc}/application-active.yml" "${OPT}/config/prod/${svc}/application-active.yml"
 done
