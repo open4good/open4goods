@@ -29,7 +29,7 @@ const STATIC_FULL_PAGES: Record<string, StaticFullPageEntry> = {
     html: {
       fr: `<h2>1. Présentation du site et de l’éditeur</h2>
 <p><strong>Nom du site :</strong> <a href="https://nudger.fr">https://nudger.fr</a><br>
-<strong>Activité :</strong> Comparateur écologique (B2C), en cours d’immatriculation.</p>
+<strong>Activité :</strong> Comparateur de prix et d’Impact Score (B2C), en cours d’immatriculation.</p>
 <p><strong>Éditeur (ci-après « Nudger ») :</strong><br>
 Goulven FURET<br>
 Adresse : 8 Venelle de Keralloche, 29200 Brest, France<br>
@@ -42,7 +42,7 @@ Stuttgarter St. 1<br>
 <h2>2. Objet et acceptation des présentes conditions</h2>
 <p>Le présent document a pour objet de définir les conditions générales d’utilisation (CGU) du site <a href="https://nudger.fr">https://nudger.fr</a> (ci-après « le Site »). Toute connexion et navigation sur le Site implique l’acceptation pleine et entière des présentes CGU.</p>
 <p>L’éditeur (Nudger) se réserve le droit de modifier à tout moment ces CGU. Les utilisateurs sont invités à les consulter régulièrement.</p>
-<h2>3. Services fournis - Comparateur écologique</h2>
+<h2>3. Services fournis - Comparateur de prix et d’Impact Score</h2>
 <p>Nudger propose un comparateur de produits permettant :</p>
 <ul>
 <li>La comparaison des prix auprès de divers marchands (B2C).</li>
