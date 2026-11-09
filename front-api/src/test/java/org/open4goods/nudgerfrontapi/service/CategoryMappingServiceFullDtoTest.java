@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.open4goods.model.ai.ImpactScoreAiResult;
 import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.ImpactScorePositionLabel;
 import org.open4goods.model.vertical.ImpactScoreV2Config;
@@ -18,6 +19,7 @@ import org.open4goods.model.vertical.ProductCategory;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.category.CategoryBreadcrumbItemDto;
+import org.open4goods.nudgerfrontapi.dto.category.ImpactScoreAuditDto;
 import org.open4goods.nudgerfrontapi.dto.category.ImpactScoreConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.ImpactScorePositionLabelDto;
 import org.open4goods.nudgerfrontapi.dto.category.VerticalConfigFullDto;
@@ -96,5 +98,54 @@ class CategoryMappingServiceFullDtoTest {
         assertThat(v2Dto.minRealWeightCoverage()).isEqualTo(0.6);
         assertThat(v2Dto.positionLabels()).containsExactly(new ImpactScorePositionLabelDto("excellent", 0.9),
                 new ImpactScorePositionLabelDto("poor", 0.0));
+    }
+
+    /** GOU-1901: the useful texts of the stored AI audit reach the method page, without the raw prompt. */
+    @Test
+    void impactScoreConfigExposesTheUsefulTextsOfTheAudit() {
+        ImpactScoreAiResult aiResult = new ImpactScoreAiResult();
+        ImpactScoreAiResult.Positioning positioning = new ImpactScoreAiResult.Positioning();
+        positioning.whatItMeansForUsers = "Compare within the category.";
+        positioning.notAnAbsoluteFootprint = true;
+        aiResult.setPositioning(positioning);
+        ImpactScoreAiResult.GapAnalysis gap = new ImpactScoreAiResult.GapAnalysis();
+        gap.whatIsMissingVsFullLca = "Manufacturing is not measured.";
+        gap.mitigations = List.of("Stay within the category.");
+        aiResult.setGapAnalysis(gap);
+        ImpactScoreAiResult.CriteriaWeight criterion = new ImpactScoreAiResult.CriteriaWeight();
+        criterion.criterion = "ENERGY";
+        criterion.weight = 0.8;
+        criterion.directionality = "lower_is_better";
+        criterion.rationale = "Use phase dominates.";
+        aiResult.setCriteriaWeights(List.of(criterion));
+        ImpactScoreAiResult.Source used = new ImpactScoreAiResult.Source();
+        used.id = "S1";
+        used.title = "Energy label";
+        used.used = true;
+        ImpactScoreAiResult.Source unused = new ImpactScoreAiResult.Source();
+        unused.id = "S2";
+        unused.used = false;
+        aiResult.setSources(List.of(used, unused));
+        ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
+        impactScoreConfig.setCriteriasPonderation(new HashMap<>(Map.of("ENERGY", 1.0)));
+        impactScoreConfig.setAiResult(aiResult);
+        VerticalConfig config = new VerticalConfig();
+        config.setId("tv");
+        config.setImpactScoreConfig(impactScoreConfig);
+
+        ImpactScoreAuditDto audit = service.toVerticalConfigFullDto(config, DomainLanguage.fr).impactScoreConfig().audit();
+
+        assertThat(audit.whatItMeansForUsers()).isEqualTo("Compare within the category.");
+        assertThat(audit.notAnAbsoluteFootprint()).isTrue();
+        assertThat(audit.whatIsMissingVsFullLca()).isEqualTo("Manufacturing is not measured.");
+        assertThat(audit.mitigations()).containsExactly("Stay within the category.");
+        assertThat(audit.criteria()).singleElement().satisfies(c -> {
+            assertThat(c.key()).isEqualTo("ENERGY");
+            assertThat(c.rationale()).isEqualTo("Use phase dominates.");
+        });
+        assertThat(audit.sources()).extracting("id").containsExactly("S1");
+
+        impactScoreConfig.setAiResult(null);
+        assertThat(service.toVerticalConfigFullDto(config, DomainLanguage.fr).impactScoreConfig().audit()).isNull();
     }
 }

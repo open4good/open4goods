@@ -302,6 +302,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 		double realWeight = 0.0;
 		int totalCount = 0;
 		int realCount = 0;
+		List<String> realCriteria = new ArrayList<>();
 		for (Map.Entry<String, Double> weight : impactScoreConfig.activeCriteriasPonderation().entrySet()) {
 			if (weight.getValue() == null || weight.getValue() <= 0.0) {
 				continue;
@@ -311,6 +312,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 			if (isRealCriterion(weight.getKey(), product.getScores().get(weight.getKey()))) {
 				realWeight += weight.getValue();
 				realCount++;
+				realCriteria.add(weight.getKey());
 			}
 		}
 
@@ -321,6 +323,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 		meta.setRealWeightCoverage(totalWeight > 0.0 ? realWeight / totalWeight : null);
 		meta.setRealCriteriaCount(realCount);
 		meta.setTotalCriteriaCount(totalCount);
+		meta.setRealCriteria(realCriteria);
 		if (hasRealEcoScore(product)) {
 			meta.setStatus(ImpactScoreMeta.Status.RATED.name());
 		} else {

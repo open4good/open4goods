@@ -5,6 +5,7 @@ import { flushPromises } from '@vue/test-utils'
 import type { VerticalConfigFullDto } from '~~/shared/api-client'
 
 const selectCategoryBySlugMock = vi.fn()
+const impactScoreStatsMock = vi.fn()
 const useSeoMetaMock = vi.hoisted(() => vi.fn())
 const mdAndDown = ref(false)
 const localeRef = ref('en-US')
@@ -18,6 +19,7 @@ const messages: Record<string, string> = {
   'category.ecoscorePage.navigation.overview': 'Overview',
   'category.ecoscorePage.navigation.purpose': 'Purpose & data',
   'category.ecoscorePage.navigation.criteria': 'Criteria',
+  'category.ecoscorePage.navigation.method': 'Method',
   'category.ecoscorePage.navigation.transparency': 'Transparency',
   'category.ecoscorePage.navigation.aiAudit': 'AI audit',
   'category.ecoscorePage.sections.availableCriteria.title':
@@ -162,6 +164,7 @@ mockNuxtImport(
   () => () => new URL(`https://example.com${route.fullPath}`)
 )
 mockNuxtImport('useSeoMeta', () => useSeoMetaMock)
+mockNuxtImport('useRequestFetch', () => () => impactScoreStatsMock)
 mockNuxtImport(
   'createError',
   () => (input: { statusMessage?: string } & Record<string, unknown>) => {
@@ -402,6 +405,20 @@ beforeEach(() => {
   route.fullPath = '/televisions/ecoscore'
   mdAndDown.value = false
   localeRef.value = 'en-US'
+  impactScoreStatsMock.mockReset()
+  impactScoreStatsMock.mockResolvedValue({
+    verticalId: 'tv',
+    methodologyVersion: 2,
+    ratedCount: 100,
+    notRatedLowCoverageCount: 20,
+    notRatedNoCriteriaCount: 5,
+    outdatedCount: 0,
+    excludedCount: 0,
+    coverageByCriterion: { POWER: 90, REPAIRABILITY: 40 },
+    realCriteriaCountDistribution: {},
+    scoreHistogram: [0, 5, 20, 50, 25],
+    scoreBandWidth: 2,
+  })
   selectCategoryBySlugMock.mockClear()
   selectCategoryBySlugMock.mockImplementation(async () => categoryFixture)
   useSeoMetaMock.mockClear()
@@ -420,9 +437,10 @@ describe('Category ecosystem Impact Score page', () => {
     expect(breadcrumbText).toContain('impactscore')
 
     const navItems = wrapper.findAll('.sticky-nav-stub__item')
-    expect(navItems).toHaveLength(3)
+    expect(navItems).toHaveLength(4)
     expect(navItems.map(item => item.text())).toEqual([
       'Available criteria',
+      'Method',
       'Transparency',
       'AI audit',
     ])
@@ -446,6 +464,15 @@ describe('Category ecosystem Impact Score page', () => {
     expect(utilityButtons[0]?.attributes('aria-label')).toBe(
       'Display criterion utility'
     )
+
+    expect(impactScoreStatsMock).toHaveBeenCalledWith(
+      '/api/categories/tv/impact-score-stats'
+    )
+    expect(wrapper.find('[data-test="impact-method"]').exists()).toBe(true)
+    expect(wrapper.findAll('[data-test="coverage"] li')).toHaveLength(3)
+    expect(wrapper.findAll('[data-test="distribution"] li')).toHaveLength(5)
+    expect(wrapper.find('[data-test="ai-audit-panels"]').exists()).toBe(true)
+    expect(wrapper.text()).not.toContain('not yet available')
 
     const yamlBlock = wrapper.get('[data-test="ai-yaml"]').text()
     expect(yamlBlock).toContain('key: value')

@@ -20,6 +20,10 @@ public record ImpactScoreConfigDto(
         Double minRealWeightCoverage,
         @Schema(description = "Position labels, best first; empty in methodology version 1.")
         List<ImpactScorePositionLabelDto> positionLabels,
+        @Schema(description = "Fingerprint of the active matrix (weights, sense, bounds).", example = "0123abcd", nullable = true)
+        String methodologyRevision,
+        @Schema(description = "Useful texts of the stored AI audit; null when the vertical has no audit.", nullable = true)
+        ImpactScoreAuditDto audit,
         @Schema(description = "Prompt used to produce the YAML configuration.")
         String yamlPrompt,
         @Schema(description = "AI response that generated the configuration.")

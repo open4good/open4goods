@@ -685,7 +685,8 @@
         "criteria": "Criteria",
         "overview": "Overview",
         "purpose": "Purpose & data",
-        "transparency": "Transparency"
+        "transparency": "Transparency",
+        "method": "Method"
       },
       "sections": {
         "aiAudit": {
@@ -696,7 +697,8 @@
           "responseHelper": "JSON output from the AI used as the basis of the configuration.",
           "responseTitle": "Model response",
           "title": "Impact Score generation audit",
-          "yamlUnavailable": "Prompt unavailable."
+          "yamlUnavailable": "Prompt unavailable.",
+          "toggle": "AI audit: prompt and raw response"
         },
         "criteria": {
           "empty": "Criteria will be published soon.",
@@ -783,7 +785,67 @@
         "description": "Explore how Nudger computes the Impact Score for {category}: criteria, weights and AI generation audit.",
         "title": "{category} - Impact Score breakdown"
       },
-      "title": "{category} - {label}"
+      "title": "{category} - {label}",
+      "method": {
+        "title": "Impact Score method for {category}",
+        "meaning": {
+          "title": "What the score means",
+          "fallback": "The Impact Score ranks {category} against each other using measurable environmental impact criteria."
+        },
+        "limits": {
+          "title": "What the score does not measure",
+          "static": "The Impact Score is relative to the Nudger catalogue, which is not exhaustive: it does not cover every product or brand on the market."
+        },
+        "method": {
+          "title": "Method: criteria and weights",
+          "version": "Method version {version}, last calculation: {date}.",
+          "dateUnknown": "date not available",
+          "threshold": "A product is rated only if the criteria filled in make up at least {percent}% of the total weight.",
+          "redistribution": "When a criterion is not filled in, its weight is not invented: the score relies on the available criteria.",
+          "tableCaption": "Criteria, weights, direction and rationale",
+          "criterion": "Criterion",
+          "weight": "Weight",
+          "direction": "Direction",
+          "why": "Why",
+          "higher": "Higher is better",
+          "lower": "Lower is better",
+          "categorical": "Depends on the value"
+        },
+        "products": {
+          "title": "Compared products",
+          "scope": "Compared products are those of the {category} category in the Nudger catalogue with at least one offer.",
+          "rated": "{count} products rated.",
+          "notRated": "{count} products not rated (insufficient data: {lowCoverage}; no criterion filled in: {noCriteria}).",
+          "outdated": "{count} products waiting to be recalculated with the current method.",
+          "unavailable": "Product counts for this category are not available at the moment."
+        },
+        "coverage": {
+          "title": "Coverage by criterion",
+          "helper": "Share of rated products for which the criterion is actually filled in.",
+          "unavailable": "Coverage by criterion is not measured yet.",
+          "aria": "{criterion}: filled in for {percent}% of rated products"
+        },
+        "distribution": {
+          "title": "Score distribution (out of 20)",
+          "unavailable": "No product is rated yet.",
+          "aria": "Scores {band}: {count} products",
+          "summary": "Lowest score {min}, median {median}, highest {max}."
+        },
+        "sources": {
+          "title": "Suppliers and sources",
+          "data": "Data comes from EPREL (European energy label), manufacturers, partner merchants and, for some characteristics, AI extraction.",
+          "partners": "See our partners and merchants"
+        },
+        "update": {
+          "title": "Update",
+          "body": "A product's score is recalculated when its data or the method changes. The category's last calculation date is shown above.",
+          "report": "Report an error"
+        },
+        "independence": {
+          "title": "Independence",
+          "body": "The Impact Score calculation does not use affiliate commissions: no merchant can influence a score."
+        }
+      }
     },
     "fastFilters": {
       "activeClauses": "Applied subset filters",
