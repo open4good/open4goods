@@ -941,6 +941,36 @@
         "criterionNotFilled": "Non renseigné",
         "methodPage": "Méthode v{version}. Un produit n'est noté que si ses critères renseignés pèsent au moins {coverage} % de la matrice. Un critère non renseigné reste non renseigné : il n'est jamais remplacé par une valeur moyenne.",
         "contextAria": "Détails de la note"
+      },
+      "why": {
+        "title": "Pourquoi cette note ?",
+        "headline": "{score}/20 : ce produit est mieux classé que {percent} % des {count} {items} notés par Nudger.",
+        "headlineBottom": "{score}/20 : ce produit est classé devant {percent} % des {count} {items} notés par Nudger.",
+        "onlyRated": "{score}/20 : seul produit noté de sa catégorie, aucune comparaison de position n'est possible.",
+        "criterion": "{label} ({value})",
+        "criterionVsAverage": "{label} ({value}, contre {average} en moyenne dans la catégorie)",
+        "strengths": "Points favorables : {criteria}.",
+        "strengthsTop": "Ce qui pèse le plus en sa faveur : {criteria}.",
+        "strengthsBottomLow": "Ses points favorables : {criteria}.",
+        "weaknesses": "Points qui limitent la note : {criteria}.",
+        "weaknessesTop": "Ce qui l'éloigne d'un 20/20 : {criteria}.",
+        "weaknessesBottom": "Ce qui pèse le plus sur la note : {criteria}.",
+        "missing": "Critères non renseignés : {criteria} ; leur poids est réparti sur les autres critères.",
+        "basis": "Note calculée sur {count} critères sur {total}, le {date}, méthode v{version}.",
+        "basisComplete": "Tous les critères de la méthode sont renseignés pour ce produit (calculé le {date}, méthode v{version}).",
+        "basisShort": "Note calculée sur {count} critères sur {total}.",
+        "caveat": {
+          "top": "Une note élevée ne veut pas dire une absence d'impact : elle place ce produit en haut de sa catégorie, sur ces critères.",
+          "bottom": "Cette note compare ce produit aux autres produits de sa catégorie. Elle ne mesure pas à elle seule son impact réel."
+        },
+        "notRated": {
+          "LOW_COVERAGE": "Nous n'avons pas assez de données pour noter ce produit : {count} critères sur {total} sont renseignés, la méthode en exige une part minimale.",
+          "NO_REAL_CRITERIA": "Aucune donnée exploitable n'est disponible pour noter ce produit.",
+          "OUTDATED_METHOD": "La note de ce produit est en cours de recalcul avec la méthode v{version}.",
+          "NOT_SCORED": "Ce produit n'a pas encore été évalué."
+        },
+        "missingData": "Données manquantes : {criteria}.",
+        "notRatedNotLower": "Ce produit n'est pas moins bien noté : il n'est pas noté. Il apparaît après les produits notés dans les listes triées par Impact Score."
       }
     },
     "pageLoadingOverlay": {

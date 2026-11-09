@@ -25,6 +25,16 @@
       />
     </div>
 
+    <ProductImpactWhyThisScore
+      v-if="impactStatus"
+      class="mt-6"
+      :status="impactStatus"
+      :scores="scores"
+      :score="whyScore"
+      :items-label="verticalTitle"
+      :methodology-href="whyMethodologyHref"
+    />
+
     <!-- EPREL Details Table -->
     <EprelDetailsTable
       v-if="hasEprelData"
@@ -38,7 +48,9 @@
 import { computed, toRef } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
+import ProductImpactWhyThisScore from './impact/ProductImpactWhyThisScore.vue'
 import type { ScoreView } from './impact/impact-types'
+import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 import type {
   ProductEprelDto,
   ProductImpactScoreStatusDto,
@@ -157,12 +169,24 @@ const verticalTitle = toRef(props, 'verticalTitle')
 const subtitleParams = toRef(props, 'subtitleParams')
 const expandedScoreId = toRef(props, 'expandedScoreId')
 const productEprelData = toRef(props, 'eprelData')
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const primaryScore = computed(
   () =>
     props.scores.find(score => score.id?.toUpperCase() === 'ECOSCORE') ?? null
 )
+const whyScore = computed(() => {
+  const value = primaryScore.value?.value
+  return typeof value === 'number' && Number.isFinite(value)
+    ? Math.max(0, Math.min(value, 20))
+    : null
+})
+const whyMethodologyHref = computed(() => {
+  const home = props.verticalHomeUrl.trim().replace(/^\/+|\/+$/g, '')
+  return home
+    ? `/${home}/ecoscore`
+    : resolveLocalizedRoutePath('impact-score', locale.value)
+})
 const detailScores = computed(() =>
   props.scores.filter(score => score.id?.toUpperCase() !== 'ECOSCORE')
 )
