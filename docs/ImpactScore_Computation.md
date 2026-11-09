@@ -4,7 +4,9 @@ This document details the computation of the **Impact Score** (often referred to
 
 > This page describes the current method (V1). The versioned V2 method
 > (real coverage, no imputation, per-vertical switch) is designed in
-> [impactscore/v2-design.md](impactscore/v2-design.md).
+> [impactscore/v2-design.md](impactscore/v2-design.md). Its computation is in
+> the code but applies only to a vertical whose effective methodology version
+> is 2 (none yet).
 
 ## Overview
 

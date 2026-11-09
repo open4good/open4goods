@@ -16,6 +16,7 @@ import org.open4goods.model.product.Score;
 import org.open4goods.model.rating.Cardinality;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributeComparisonRule;
+import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.vertical.scoring.ScoreNormalizationMethod;
 import org.open4goods.model.vertical.scoring.ScoreScoringConfig;
@@ -33,9 +34,10 @@ import org.open4goods.api.services.aggregation.services.batch.scores.normalizati
  * <ol>
  *   <li>{@link #init} — clears per-batch cardinality and frequency maps.</li>
  *   <li>{@link #onProduct} — subclass hook; called once per product.</li>
- *   <li>{@link #done} — generates virtual scores for products missing a score,
- *       relativises all scores to the configured scale, ranks products, and
- *       records the best/worst product ids per score.</li>
+ *   <li>{@link #done} — generates virtual scores for products missing a score
+ *       (methodology V1 only, none in V2), relativises all scores to the
+ *       configured scale, ranks products, and records the best/worst product
+ *       ids per score.</li>
  * </ol>
  *
  * <p>Subclasses are responsible for calling {@link #incrementCardinality} for
@@ -79,14 +81,18 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
                 //////////////////////////
                 // Virtual scores computing
                 // Operated on absolute values
+                // In methodology V2 a missing score stays absent: no imputation (design GOU-1878, 2.1)
                 //////////////////////////
+                boolean imputeMissingScores = !isMethodologyV2(vConf);
                 for (Product p : datas) {
                         for (String scoreName : absoluteCardinalities.keySet()) {
                                 Score s = p.getScores().get(scoreName);
                                 Cardinality source = absoluteCardinalities.get(scoreName);
                                 Cardinality virtual = new Cardinality(source);
                                 if (s == null) {
-
+                                        if (!imputeMissingScores) {
+                                                continue;
+                                        }
 
                                         // Need a virtual score
                                         s = new Score(scoreName, source.getAvg());
@@ -159,6 +165,29 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 		
 	}
 	
+	/**
+	 * Whether the vertical applies ImpactScore methodology V2 ({@link ImpactScoreConfig#isV2Active()}). V2 imputes
+	 * no missing score and redistributes the weights over the real ones; V1 stays unchanged.
+	 *
+	 * @param vConf the vertical configuration, may be {@code null}
+	 * @return {@code true} when the effective methodology version is 2
+	 */
+	protected static boolean isMethodologyV2(VerticalConfig vConf) {
+		return vConf != null && vConf.getImpactScoreConfig() != null && vConf.getImpactScoreConfig().isV2Active();
+	}
+
+	/**
+	 * Whether a score holds a real value: present, not virtual, with a readable relative value
+	 * ({@link #resolveRelativeValue(String, Score)}).
+	 *
+	 * @param scoreName the score identifier
+	 * @param score     the score, may be {@code null}
+	 * @return {@code true} for a real score
+	 */
+	protected boolean isRealScore(String scoreName, Score score) {
+		return score != null && !Boolean.TRUE.equals(score.getVirtual()) && resolveRelativeValue(scoreName, score) != null;
+	}
+
 	/////////////////////////////////////////
 	// Private methods
 	/////////////////////////////////////////

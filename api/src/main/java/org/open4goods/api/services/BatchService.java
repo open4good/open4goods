@@ -742,19 +742,23 @@ public class BatchService {
 	 * all their scores, their ranking and their ImpactScore assessment metadata are removed. Products without offers keep their last score (they stay
 	 * in the sitemap, GOU-1744). If that ImpactScore was overwritten by a composite (only that defect sets
 	 * aggregates on it), it is recomputed from the sub-scores the product holds, since the batch does not rescore
-	 * products without offers; it is removed when it cannot be recomputed.
+	 * products without offers; it is removed when it cannot be recomputed. That recomputation fixes a methodology V1
+	 * defect only: in V2 a product without offers is neither recomputed nor cleared, the front-api shows it as not
+	 * rated when its score is of another version (design GOU-1878, 2.5).
 	 *
 	 * @param products every product of the vertical, after scoring
 	 * @param vertical the vertical configuration, for the ImpactScore weights
 	 */
 	static void clearObsoleteScores(Collection<Product> products, VerticalConfig vertical) {
 		EcoScoreAggregationService impactScore = new EcoScoreAggregationService(logger);
+		boolean v2 = vertical != null && vertical.getImpactScoreConfig() != null
+				&& vertical.getImpactScoreConfig().isV2Active();
 		for (Product product : products) {
 			if (product.isExcluded() || product.getVertical() == null) {
 				product.getScores().clear();
 				product.setRanking(new EcoScoreRanking());
 				product.setImpactScoreMeta(null);
-			} else if (hasCompositeImpactScore(product)) {
+			} else if (!v2 && hasCompositeImpactScore(product)) {
 				Score recomputed = impactScore.recomputeFromStoredSubScores(product, vertical);
 				if (recomputed == null) {
 					product.getScores().remove(product.ecoscore().getName());

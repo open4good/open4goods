@@ -135,7 +135,8 @@ public class AggregationFacadeService {
 	/**
 	 * Scores a single vertical: loads all products with a valid date, runs the
 	 * {@link ScoringBatchedAggregator}, then queues the full product set for
-	 * Elasticsearch re-indexation.
+	 * Elasticsearch re-indexation. In ImpactScore methodology V2, only the batch
+	 * cohort (with offers, not excluded) is scored and queued.
 	 *
 	 * @param vertical vertical configuration to score
 	 */
@@ -143,8 +144,17 @@ public class AggregationFacadeService {
 		logger.info("Score batching for {}", vertical.getId());
 
 		ScoringBatchedAggregator batchAgg = getScoringAggregator();
+		VerticalConfig config = verticalConfigService.getConfigByIdOrDefault(vertical.getId());
 		List<Product> productBag = dataRepository.exportVerticalWithValidDate(vertical, false).toList();
-		batchAgg.score(productBag, verticalConfigService.getConfigByIdOrDefault(vertical.getId()));
+		if (config.getImpactScoreConfig() != null && config.getImpactScoreConfig().isV2Active()) {
+			// Methodology V2 scores the batch cohort only: a product without offers or excluded is not recomputed
+			// (design GOU-1878, 2.5)
+			productBag = productBag.stream()
+					.filter(product -> product.getOffersCount() != null && product.getOffersCount() > 0)
+					.filter(product -> !product.isExcluded())
+					.toList();
+		}
+		batchAgg.score(productBag, config);
 		logger.info("Score batching : indexing {} products", productBag.size());
 		dataRepository.addToFullindexationQueue(productBag);
 	}

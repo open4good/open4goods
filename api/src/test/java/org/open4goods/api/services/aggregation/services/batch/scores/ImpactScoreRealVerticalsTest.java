@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
@@ -14,16 +15,20 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
@@ -71,6 +76,14 @@ class ImpactScoreRealVerticalsTest {
     private static final int PRODUCT_COUNT = 5;
 
     private static final String DATA_QUALITY = "DATA_QUALITY";
+
+    /** Coverage threshold of a V2 test while the vertical has none yet (design, section 7). */
+    private static final double DEFAULT_V2_THRESHOLD = 0.5;
+
+    /** Ids of the designed V2 products: two tied products, then the one just below and just above the threshold. */
+    private static final long TIED = 1000L;
+    private static final long JUST_BELOW = 2003L;
+    private static final long JUST_ABOVE = 2004L;
 
     /**
      * ImpactScore, rank and position of {@link #products(VerticalConfig)} on every real vertical, recorded with the
@@ -308,6 +321,304 @@ class ImpactScoreRealVerticalsTest {
         }
     }
 
+    /**
+     * GOU-1879, invariants 1 to 3 of the design (section 7): in V2, no score is imputed, C is exact, the score is
+     * {@code 4 x sum(w x rel) / sum(w)} over the real criteria and a product below the threshold has no ImpactScore,
+     * with the right reason.
+     */
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("realVerticals")
+    void v2ScoresTheRealCriteriaAboveTheCoverageThreshold(VerticalConfig vertical, @TempDir Path logs)
+            throws Exception {
+        withV2(vertical, threshold -> {
+            Map<Long, Set<String>> designed = new TreeMap<>();
+            List<Product> products = v2Products(vertical, threshold, designed);
+            long before = System.currentTimeMillis();
+
+            aggregationFacadeService(logs).getScoringAggregator().score(products, vertical);
+
+            Map<String, Double> weights = v2Weights(vertical);
+            double totalWeight = weights.values().stream().mapToDouble(Double::doubleValue).sum();
+            for (Product product : products) {
+                assertThat(product.getScores().values()).as("scores of product %s", product.getId())
+                        .noneMatch(score -> Boolean.TRUE.equals(score.getVirtual()));
+
+                Set<String> real = new TreeSet<>();
+                double realWeight = 0;
+                double weightedSum = 0;
+                for (Map.Entry<String, Double> weight : weights.entrySet()) {
+                    Score score = product.getScores().get(weight.getKey());
+                    if (score != null && score.getRelativ() != null && score.getRelativ().getValue() != null) {
+                        real.add(weight.getKey());
+                        realWeight += weight.getValue();
+                        weightedSum += weight.getValue() * score.getRelativ().getValue();
+                    }
+                }
+                assertThat(real).as("real criteria of product %s", product.getId())
+                        .isEqualTo(designed.get(product.getId()));
+
+                ImpactScoreMeta meta = product.getImpactScoreMeta();
+                assertThat(meta.getMethodologyVersion()).isEqualTo(2);
+                assertThat(meta.getMethodologyRevision())
+                        .isEqualTo(vertical.getImpactScoreConfig().getMethodologyRevision());
+                assertThat(meta.getScoredAt()).isBetween(before, System.currentTimeMillis());
+                assertThat(meta.getRealWeightCoverage()).as("C of product %s", product.getId())
+                        .isCloseTo(realWeight / totalWeight, within(1e-9));
+                assertThat(meta.getRealCriteriaCount()).isEqualTo(real.size());
+                assertThat(meta.getRealCriteria()).as("real criteria of product %s, even not rated", product.getId())
+                        .containsExactlyInAnyOrderElementsOf(real);
+                assertThat(meta.getTotalCriteriaCount()).isEqualTo(weights.size());
+
+                Score impactScore = product.ecoscore();
+                if (real.isEmpty()) {
+                    assertNotRated(product, ImpactScoreMeta.NotRatedReason.NO_REAL_CRITERIA);
+                } else if (realWeight / totalWeight < threshold - EcoScoreAggregationService.COVERAGE_TOLERANCE) {
+                    assertNotRated(product, ImpactScoreMeta.NotRatedReason.LOW_COVERAGE);
+                } else {
+                    assertThat(meta.getStatus()).isEqualTo(ImpactScoreMeta.Status.RATED.name());
+                    assertThat(meta.getNotRatedReason()).isNull();
+                    assertThat(impactScore).as("ImpactScore of product %s", product.getId()).isNotNull();
+                    assertThat(impactScore.getValue()).as("ImpactScore of product %s", product.getId())
+                            .isCloseTo(4.0 * weightedSum / realWeight, within(1e-9));
+                    assertThat(impactScore.getValue()).isBetween(0.0, 20.0);
+                    assertThat(impactScore.getAbsolute().getValue()).isEqualTo(impactScore.getValue());
+                    assertThat(impactScore.getRelativ().getValue()).isCloseTo(impactScore.getValue() / 4.0,
+                            within(1e-9));
+                }
+            }
+
+            // The designed cohort reaches every outcome
+            assertThat(products).extracting(product -> product.getImpactScoreMeta().getStatus() + "/"
+                    + product.getImpactScoreMeta().getNotRatedReason())
+                    .contains("RATED/null", "NOT_RATED/NO_REAL_CRITERIA", "NOT_RATED/LOW_COVERAGE");
+            assertThat(status(products, JUST_BELOW)).isEqualTo("NOT_RATED");
+            assertThat(status(products, JUST_ABOVE)).isEqualTo("RATED");
+        });
+    }
+
+    /**
+     * GOU-1879, invariant 3 of the design: the threshold is inclusive. With the threshold set to the coverage of a
+     * product, that product is rated.
+     */
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("realVerticals")
+    void v2CoverageThresholdIsInclusive(VerticalConfig vertical, @TempDir Path logs) throws Exception {
+        withV2(vertical, threshold -> {
+            Map<Long, Set<String>> designed = new TreeMap<>();
+            List<Product> products = v2Products(vertical, threshold, designed);
+            Map<String, Double> weights = v2Weights(vertical);
+            double total = weights.values().stream().mapToDouble(Double::doubleValue).sum();
+            double atThreshold = designed.get(JUST_ABOVE).stream().mapToDouble(weights::get).sum() / total;
+
+            vertical.getImpactScoreConfig().getV2().setMinRealWeightCoverage(atThreshold);
+            aggregationFacadeService(logs).getScoringAggregator().score(products, vertical);
+
+            Product product = products.stream().filter(p -> p.getId() == JUST_ABOVE).findFirst().orElseThrow();
+            assertThat(product.getImpactScoreMeta().getStatus()).as("C %s at threshold %s",
+                    product.getImpactScoreMeta().getRealWeightCoverage(), atThreshold)
+                    .isEqualTo(ImpactScoreMeta.Status.RATED.name());
+            assertThat(product.ecoscore()).isNotNull();
+        });
+    }
+
+    /**
+     * GOU-1879, invariant 4 of the design: only rated products are ranked; {@code count} is their number, the best one
+     * has {@code ranking = count - 1} and position 1, and tied products share a rank.
+     */
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("realVerticals")
+    void v2RanksOnlyRatedProductsAndTiesShareARank(VerticalConfig vertical, @TempDir Path logs) throws Exception {
+        withV2(vertical, threshold -> {
+            List<Product> products = v2Products(vertical, threshold, new TreeMap<>());
+
+            aggregationFacadeService(logs).getScoringAggregator().score(products, vertical);
+
+            List<Product> rated = products.stream().filter(product -> product.ecoscore() != null).toList();
+            int count = rated.size();
+            assertThat(count).isGreaterThan(2).isLessThan(products.size());
+            for (Product product : rated) {
+                double value = product.ecoscore().getValue();
+                long worse = rated.stream().filter(other -> other.ecoscore().getValue() < value).count();
+                long better = rated.stream().filter(other -> other.ecoscore().getValue() > value).count();
+                assertThat(product.ecoscore().getRanking()).as("ranking of %s", product.getId()).isEqualTo((int) worse);
+                assertThat(product.getRanking().getGlobalPosition()).as("position of %s", product.getId())
+                        .isEqualTo(1 + better);
+                assertThat(product.getRanking().getGlobalCount()).isEqualTo(count);
+                assertThat(product.ecoscore().getAbsolute().getCount()).isEqualTo(count);
+            }
+            Product best = rated.stream().max(Comparator.comparingDouble(p -> p.ecoscore().getValue())).orElseThrow();
+            // count - 1 when the best product is alone at the top; products tied with it share its rank
+            long tiedWithBest = rated.stream()
+                    .filter(other -> other.ecoscore().getValue().equals(best.ecoscore().getValue())).count();
+            assertThat(best.ecoscore().getRanking()).isEqualTo((int) (count - tiedWithBest));
+            assertThat(best.getRanking().getGlobalPosition()).isEqualTo(1);
+
+            Product tie = products.stream().filter(p -> p.getId() == TIED).findFirst().orElseThrow();
+            Product twin = products.stream().filter(p -> p.getId() == TIED + 1).findFirst().orElseThrow();
+            assertThat(twin.ecoscore().getRanking()).isEqualTo(tie.ecoscore().getRanking());
+            assertThat(twin.getRanking().getGlobalPosition()).isEqualTo(tie.getRanking().getGlobalPosition());
+
+            products.stream().filter(product -> product.ecoscore() == null).forEach(product -> {
+                assertThat(product.getRanking().getGlobalPosition()).as("position of %s", product.getId()).isZero();
+                assertThat(product.getRanking().getGlobalCount()).isZero();
+            });
+        });
+    }
+
+    /**
+     * GOU-1879: {@code POST /score/{vertical}} follows the batch rules in V2: a product without offers is not
+     * recomputed, it keeps its stored score and is not indexed again.
+     */
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("realVerticals")
+    void v2ScoreEndpointScoresOnlyProductsWithOffers(VerticalConfig vertical, @TempDir Path logs) throws Exception {
+        withV2(vertical, threshold -> {
+            List<Product> products = products(vertical);
+            products.forEach(product -> product.setOffersCount(1));
+            Product withoutOffers = products.getFirst();
+            withoutOffers.setOffersCount(0);
+            withoutOffers.getScores().put("ECOSCORE", new Score("ECOSCORE", 12.0));
+
+            ProductRepository repository = mock(ProductRepository.class);
+            when(repository.exportVerticalWithValidDate(vertical, false)).thenReturn(products.stream());
+            VerticalsConfigService verticalsConfigService = mock(VerticalsConfigService.class);
+            when(verticalsConfigService.getConfigByIdOrDefault(vertical.getId())).thenReturn(vertical);
+
+            aggregationFacadeService(logs, mock(BrandService.class), repository, verticalsConfigService).score(vertical);
+
+            assertThat(withoutOffers.ecoscore().getValue()).isEqualTo(12.0);
+            assertThat(withoutOffers.getImpactScoreMeta()).isNull();
+            products.subList(1, products.size()).forEach(product -> {
+                assertThat(product.getImpactScoreMeta().getMethodologyVersion()).isEqualTo(2);
+                assertThat(product.ecoscore().getRanking()).isNotNull();
+            });
+            @SuppressWarnings("unchecked")
+            ArgumentCaptor<Collection<Product>> indexed = ArgumentCaptor.forClass(Collection.class);
+            verify(repository).addToFullindexationQueue(indexed.capture());
+            assertThat(indexed.getValue()).hasSize(products.size() - 1).doesNotContain(withoutOffers);
+        });
+    }
+
+    private static void assertNotRated(Product product, ImpactScoreMeta.NotRatedReason reason) {
+        assertThat(product.ecoscore()).as("ImpactScore of not rated product %s", product.getId()).isNull();
+        assertThat(product.getImpactScoreMeta().getStatus()).isEqualTo(ImpactScoreMeta.Status.NOT_RATED.name());
+        assertThat(product.getImpactScoreMeta().getNotRatedReason()).as("reason of product %s", product.getId())
+                .isEqualTo(reason.name());
+        assertThat(product.getRanking().getGlobalPosition()).isZero();
+        assertThat(product.getRanking().getGlobalCount()).isZero();
+    }
+
+    private static String status(List<Product> products, long id) {
+        return products.stream().filter(p -> p.getId() == id).findFirst().orElseThrow().getImpactScoreMeta()
+                .getStatus();
+    }
+
+    /** Body run with the methodology version forced to 2, given the coverage threshold. */
+    @FunctionalInterface
+    private interface V2Body {
+        void run(double threshold) throws Exception;
+    }
+
+    /**
+     * Runs {@code body} with the version forced to 2 by the override, and the configured threshold, or
+     * {@link #DEFAULT_V2_THRESHOLD} while it is not set; both are restored afterwards.
+     */
+    private static void withV2(VerticalConfig vertical, V2Body body) throws Exception {
+        ImpactScoreConfig config = vertical.getImpactScoreConfig();
+        assertThat(config.getV2()).as("v2 block of %s", vertical.getId()).isNotNull();
+        Double configured = config.getV2().getMinRealWeightCoverage();
+        try {
+            config.setMethodologyVersionOverride(ImpactScoreConfig.METHODOLOGY_V2);
+            if (configured == null) {
+                config.getV2().setMinRealWeightCoverage(DEFAULT_V2_THRESHOLD);
+            }
+            body.run(config.minRealWeightCoverage());
+        } finally {
+            config.getV2().setMinRealWeightCoverage(configured);
+            config.setMethodologyVersionOverride(null);
+        }
+    }
+
+    /** The V2 matrix of the vertical, criteria weighted above 0. */
+    private static Map<String, Double> v2Weights(VerticalConfig vertical) {
+        Map<String, Double> weights = new TreeMap<>();
+        vertical.getImpactScoreConfig().getV2().getCriteriasPonderation().forEach((key, weight) -> {
+            if (weight != null && weight > 0) {
+                weights.put(key, weight);
+            }
+        });
+        return weights;
+    }
+
+    /**
+     * Products with a designed coverage of the V2 matrix: every criterion (two of them tied), none, just below and
+     * just above the threshold, heavy criteria only, light criteria only.
+     *
+     * @param designed filled with the criteria given to each product, by id
+     */
+    private static List<Product> v2Products(VerticalConfig vertical, double threshold, Map<Long, Set<String>> designed) {
+        Map<String, Double> weights = v2Weights(vertical);
+        for (String criterion : weights.keySet()) {
+            AttributeConfig attribute = vertical.getAttributesConfig().getAttributeConfigByKey(criterion);
+            assertThat(attribute).as("attribute of V2 criterion %s", criterion).isNotNull();
+            assertThat(attribute.isAsScore() && hasParseableValue(attribute)).as("V2 criterion %s", criterion).isTrue();
+        }
+        List<String> criteria = new ArrayList<>(weights.keySet());
+        double total = weights.values().stream().mapToDouble(Double::doubleValue).sum();
+
+        // Designed subsets: the largest coverage below the threshold, the smallest at or above it
+        Set<String> justBelow = Set.of();
+        Set<String> justAbove = Set.copyOf(criteria);
+        double below = -1;
+        double above = 2;
+        for (int mask = 1; mask < (1 << criteria.size()); mask++) {
+            Set<String> subset = new TreeSet<>();
+            for (int bit = 0; bit < criteria.size(); bit++) {
+                if ((mask & (1 << bit)) != 0) {
+                    subset.add(criteria.get(bit));
+                }
+            }
+            double coverage = subset.stream().mapToDouble(weights::get).sum() / total;
+            if (coverage < threshold - 1e-6 && coverage > below) {
+                below = coverage;
+                justBelow = subset;
+            } else if (coverage >= threshold && coverage < above) {
+                above = coverage;
+                justAbove = subset;
+            }
+        }
+        List<String> byWeight = criteria.stream().sorted(Comparator.comparing(weights::get).reversed()).toList();
+        int half = (byWeight.size() + 1) / 2;
+
+        Map<Long, Set<String>> cohort = new java.util.LinkedHashMap<>();
+        cohort.put(TIED, Set.copyOf(criteria));
+        cohort.put(TIED + 1, Set.copyOf(criteria));
+        cohort.put(2000L, Set.copyOf(criteria));
+        cohort.put(2001L, Set.copyOf(criteria));
+        cohort.put(2002L, Set.of());
+        cohort.put(JUST_BELOW, justBelow);
+        cohort.put(JUST_ABOVE, justAbove);
+        cohort.put(2005L, Set.copyOf(byWeight.subList(0, half)));
+        cohort.put(2006L, Set.copyOf(byWeight.subList(half, byWeight.size())));
+
+        List<Product> products = new ArrayList<>();
+        int index = 0;
+        for (Map.Entry<Long, Set<String>> entry : cohort.entrySet()) {
+            // The two tied products carry the same values
+            int valueIndex = entry.getKey() == TIED + 1 ? 0 : index;
+            Product product = new Product(entry.getKey());
+            for (String criterion : entry.getValue()) {
+                AttributeConfig attribute = vertical.getAttributesConfig().getAttributeConfigByKey(criterion);
+                product.getAttributes().getIndexed().put(criterion,
+                        new IndexedAttribute(criterion, value(attribute, valueIndex)));
+            }
+            products.add(product);
+            designed.put(entry.getKey(), new TreeSet<>(entry.getValue()));
+            index++;
+        }
+        return products;
+    }
+
     /** A criterion counted by the V2 {@code DATA_QUALITY}, read from the configuration (design 2.3). */
     private static boolean isV2DataQualityCriterion(VerticalConfig vertical, String name) {
         if (DATA_QUALITY.equals(name) || name.startsWith("BRAND_") || vertical.getCompositeScores().contains(name)
@@ -423,6 +734,12 @@ class ImpactScoreRealVerticalsTest {
     }
 
     private static AggregationFacadeService aggregationFacadeService(Path logs, BrandService brandService) {
+        return aggregationFacadeService(logs, brandService, mock(ProductRepository.class),
+                mock(VerticalsConfigService.class));
+    }
+
+    private static AggregationFacadeService aggregationFacadeService(Path logs, BrandService brandService,
+            ProductRepository repository, VerticalsConfigService verticalsConfigService) {
         ApiProperties apiProperties = new ApiProperties();
         apiProperties.setRootFolder(logs + "/");
 
@@ -433,11 +750,11 @@ class ImpactScoreRealVerticalsTest {
                 mock(EvaluationService.class),
                 mock(org.open4goods.model.StandardiserService.class),
                 beanFactory,
-                mock(ProductRepository.class),
+                repository,
                 apiProperties,
                 mock(Gs1PrefixService.class),
                 mock(DataSourceConfigService.class),
-                mock(VerticalsConfigService.class),
+                verticalsConfigService,
                 mock(BarcodeValidationService.class),
                 brandService,
                 mock(BlablaService.class),

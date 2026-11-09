@@ -1,6 +1,6 @@
 # ImpactScore V2 design
 
-Status: design, nothing implemented yet. Owner: CTO. Tracking: GOU-1878, under the
+Status: design, being implemented (GOU-1882, GOU-1880, GOU-1879). Owner: CTO. Tracking: GOU-1878, under the
 ImpactScore improvement programme GOU-1864 (audit of 2026-11-08).
 
 This page turns the owner decisions of 2026-11-08 into a data contract, the
@@ -238,6 +238,18 @@ ECOSCORE):
   shows as "Not rated" (decision 5, 4.2). It is not deleted from the index, so
   rollback stays complete.
 - `POST /score/{vertical}` follows the same rules (same aggregator).
+
+Implementation (GOU-1879): sections 2.1, 2.2, 2.4 and 2.5 apply when
+`ImpactScoreConfig.isV2Active()`. `AbstractScoreAggregationService.done()`
+skips virtual scores; `EcoScoreAggregationService` computes C and the score
+from one `Coverage` (criteria weighted above 0), compares C with the threshold
+within 1e-9 and treats a missing `minRealWeightCoverage` as no threshold
+(only `NO_REAL_CRITERIA`). A not rated product loses any `ECOSCORE` and gets a
+new `EcoScoreRanking`. `globalBetter` is the lowest strictly better product;
+`globalBest` the best product, ties broken by GTIN. `BatchService.clearObsoleteScores`
+does not recompute composite ImpactScores in V2 and
+`recomputeFromStoredSubScores` returns null. `POST /score/{vertical}` scores
+and reindexes only products with offers that are not excluded in V2.
 
 ### 2.6 Robust bounds
 
