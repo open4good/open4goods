@@ -57,12 +57,15 @@ class ImpactScoreMethodologyOverrideTest {
     }
 
     @Test
-    void versionTwoWithoutV2BlockFailsTheStartup() {
-        // No vertical has a v2 block yet (GOU-1880): forcing V2 must not fall back to the V1 matrix
-        assertThatThrownBy(() -> load("tv:2"))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("tv")
-                .hasMessageContaining("requires a v2 block");
+    void versionTwoOverrideSelectsTheV2Block() {
+        // Since GOU-1880 every vertical has a v2 block; without one, forcing V2 is refused
+        // (VerticalYamlValidationTest.versionTwoWithoutV2BlockIsRefused)
+        var impactScore = load("tv:2").getConfigById("tv").getImpactScoreConfig();
+        assertThat(impactScore.effectiveMethodologyVersion()).isEqualTo(2);
+        assertThat(impactScore.activeCriteriasPonderation()).isEqualTo(impactScore.getV2().getCriteriasPonderation())
+                .doesNotContainKey("DATA_QUALITY");
+        assertThat(impactScore.getMethodologyRevision()).isNotEqualTo(
+                load(null).getConfigById("tv").getImpactScoreConfig().getMethodologyRevision());
     }
 
     @Test

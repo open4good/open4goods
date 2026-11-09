@@ -4,6 +4,27 @@ criteriasPonderation:
   WEIGHT: 0.1
   DATA_QUALITY: 0.15
   CLASSE_ENERGY: 0.2
+# ImpactScore V2 (GOU-1880), inactive while methodologyVersion is 1. Design: docs/impactscore/v2-design.md,
+# sections 1.2 and 2.3. V1 matrix above without DATA_QUALITY (now the confidence indicator), renormalised to
+# 1 pro rata. The stored AI audit (aiResult, yamlPrompt) is the V1 one and was not rerun.
+v2:
+  criteriasPonderation:
+    OVEN_ENERGY_CONSUMPTION_CYCLE: 0.4117647
+    WARRANTY: 0.2352941
+    WEIGHT: 0.1176471
+    CLASSE_ENERGY: 0.2352941
+  minRealWeightCoverage: 0.5  # provisoire, valeur de GOU-1877
+  eprelRequired: true  # provisoire, valeur de GOU-1877
+  positionLabels:  # provisoire, valeur de GOU-1877
+    - level: excellent
+      minBetterThan: 0.90
+    - level: good
+      minBetterThan: 0.67
+    - level: fair
+      minBetterThan: 0.33
+    - level: poor
+      minBetterThan: 0.0
+  criteriaScoring: {}  # provisoire, valeur de GOU-1877 (bornes robustes : GOU-1883)
 yamlPrompt: "---\nkey: \"impactscore-generation\"\naiService: \"GEMINI\"\nsystemPrompt: \"Tu es un agent expert en évaluation\
   \ environnementale des produits électriques et electroniques.\\nAdopte une démarche d'expert en analyse du cycle de vie\
   \ des produits.\\nNous allons travailler sur des Fours\\nNe fournir en réponse que du JSON, conformément à la structure\

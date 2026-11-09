@@ -245,11 +245,37 @@ class VerticalYamlValidationTest {
 
     @Test
     void noVerticalIsSwitchedToTheV2Methodology() {
-        // GOU-1882: the v2 blocks and the switch come with GOU-1880 and GOU-1888
+        // GOU-1880 adds the v2 blocks; the switch comes with GOU-1888
         assertThat(verticalsConfigService.getConfigsWithoutDefault())
             .allSatisfy(config -> assertThat(config.getImpactScoreConfig().effectiveMethodologyVersion())
                 .as("methodology version of %s", config.getId())
                 .isEqualTo(ImpactScoreConfig.METHODOLOGY_V1));
+    }
+
+    /**
+     * GOU-1880: every real vertical carries a valid {@code v2} block whose matrix is the V1 matrix without
+     * {@code DATA_QUALITY}, renormalised to 1 pro rata (design {@code docs/impactscore/v2-design.md}, 1.2 and 2.3).
+     */
+    @Test
+    void everyRealVerticalHasAV2MatrixWithoutDataQuality() {
+        assertThat(verticalsConfigService.getConfigsWithoutDefault()).allSatisfy(config -> {
+            ImpactScoreConfig impactScore = config.getImpactScoreConfig();
+            assertThat(impactScore.getV2()).as("v2 block of %s", config.getId()).isNotNull();
+            assertThat(ImpactScoreMethodology.validate(impactScore, config)).as("v2 errors of %s", config.getId()).isEmpty();
+
+            Map<String, Double> v1 = impactScore.getCriteriasPonderation();
+            Map<String, Double> v2 = impactScore.getV2().getCriteriasPonderation();
+            assertThat(v2).as("v2 matrix of %s", config.getId()).doesNotContainKey("DATA_QUALITY");
+            assertThat(v2.values().stream().mapToDouble(Double::doubleValue).sum())
+                .as("sum of the v2 weights of %s", config.getId()).isCloseTo(1.0, within(1e-6));
+
+            double withoutDataQuality = v1.entrySet().stream().filter(entry -> !"DATA_QUALITY".equals(entry.getKey()))
+                .mapToDouble(Map.Entry::getValue).sum();
+            assertThat(v2.keySet()).as("v2 criteria of %s", config.getId())
+                .containsExactlyInAnyOrderElementsOf(v1.keySet().stream().filter(key -> !"DATA_QUALITY".equals(key)).toList());
+            v2.forEach((key, weight) -> assertThat(weight).as("v2 weight of %s.%s", config.getId(), key)
+                .isCloseTo(v1.get(key) / withoutDataQuality, within(1e-6)));
+        });
     }
 
     @Test

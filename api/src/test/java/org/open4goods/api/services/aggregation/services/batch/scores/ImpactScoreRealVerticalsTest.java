@@ -3,8 +3,10 @@ package org.open4goods.api.services.aggregation.services.batch.scores;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
 import java.io.Writer;
@@ -24,6 +26,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
+import org.open4goods.api.services.aggregation.AbstractAggregationService;
+import org.open4goods.api.services.aggregation.aggregator.ScoringBatchedAggregator;
+import org.open4goods.brand.model.Brand;
+import org.open4goods.brand.model.Company;
+import org.open4goods.brand.model.CompanyScore;
+import org.open4goods.brand.model.ScoreScale;
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.commons.services.BarcodeForensicsService;
 import org.open4goods.commons.services.BarcodeValidationService;
@@ -34,10 +42,12 @@ import org.open4goods.icecat.services.IcecatFeatureResolver;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.attribute.IndexedAttribute;
+import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.product.ImpactScoreMeta;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -45,6 +55,8 @@ import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.verticals.GoogleTaxonomyService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 /**
@@ -57,6 +69,8 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 class ImpactScoreRealVerticalsTest {
 
     private static final int PRODUCT_COUNT = 5;
+
+    private static final String DATA_QUALITY = "DATA_QUALITY";
 
     /**
      * ImpactScore, rank and position of {@link #products(VerticalConfig)} on every real vertical, recorded with the
@@ -223,6 +237,143 @@ class ImpactScoreRealVerticalsTest {
                 .as("every tied product gets its own position").isEqualTo(PRODUCT_COUNT);
     }
 
+    /**
+     * GOU-1880: in V2, {@code DATA_QUALITY} is out of the ImpactScore (design {@code docs/impactscore/v2-design.md},
+     * 2.3). Forcing every product's {@code DATA_QUALITY} to the worst value between its computation and the
+     * ImpactScore leaves the V2 score unchanged, while it does change the V1 score (proof that the change bites).
+     */
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("realVerticals")
+    void v2DataQualityDoesNotChangeTheImpactScore(VerticalConfig vertical) {
+        assertThat(vertical.getImpactScoreConfig().getV2()).as("v2 block of %s", vertical.getId()).isNotNull();
+        assertThat(vertical.getImpactScoreConfig().getV2().getCriteriasPonderation()).doesNotContainKey(DATA_QUALITY);
+
+        try {
+            vertical.getImpactScoreConfig().setMethodologyVersionOverride(ImpactScoreConfig.METHODOLOGY_V2);
+            assertThat(impactScores(vertical, false)).as("V2 ImpactScores of %s with DATA_QUALITY at worst", vertical.getId())
+                    .isEqualTo(impactScores(vertical, true));
+        } finally {
+            vertical.getImpactScoreConfig().setMethodologyVersionOverride(null);
+        }
+        assertThat(impactScores(vertical, false)).as("V1 ImpactScores of %s with DATA_QUALITY at worst", vertical.getId())
+                .isNotEqualTo(impactScores(vertical, true));
+    }
+
+    /**
+     * GOU-1880: in V2, {@code DATA_QUALITY} counts only the real scores of the ImpactScore criteria
+     * ({@code availableImpactScoreCriterias}, {@code asScore}), without the brand scores, itself or composites. V1
+     * keeps counting every real score, brand scores included.
+     */
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("realVerticals")
+    void v2DataQualityDoesNotCountBrandScores(VerticalConfig vertical, @TempDir Path logs) throws Exception {
+        BrandService brandService = brandServiceWithTwoScores();
+
+        List<Product> v2Products = brandedProducts(vertical);
+        try {
+            vertical.getImpactScoreConfig().setMethodologyVersionOverride(ImpactScoreConfig.METHODOLOGY_V2);
+            aggregationFacadeService(logs, brandService).getScoringAggregator().score(v2Products, vertical);
+        } finally {
+            vertical.getImpactScoreConfig().setMethodologyVersionOverride(null);
+        }
+        List<Product> v1Products = brandedProducts(vertical);
+        aggregationFacadeService(logs, brandService).getScoringAggregator().score(v1Products, vertical);
+
+        for (int i = 0; i < PRODUCT_COUNT; i++) {
+            Product v2 = v2Products.get(i);
+            long brandScores = v2.getScores().values().stream()
+                    .filter(score -> !Boolean.TRUE.equals(score.getVirtual()))
+                    .filter(score -> score.getName().startsWith("BRAND_"))
+                    .count();
+            // The two company scores, plus those built from the BRAND_* attributes of the test products
+            assertThat(v2.getScores()).containsKeys("BRAND_CDP_SCORING", "BRAND_GOOD_ON_YOU_SCORING");
+            assertThat(brandScores).as("real brand scores of product %s", v2.getId()).isGreaterThanOrEqualTo(2);
+
+            long criteria = v2.getScores().values().stream()
+                    .filter(score -> !Boolean.TRUE.equals(score.getVirtual()))
+                    .filter(score -> isV2DataQualityCriterion(vertical, score.getName()))
+                    .count();
+            assertThat(v2.getScores().get(DATA_QUALITY).getAbsolute().getValue())
+                    .as("V2 DATA_QUALITY count of product %s", v2.getId()).isEqualTo((double) criteria);
+
+            Product v1 = v1Products.get(i);
+            // ECOSCORE and the other composites are computed after DATA_QUALITY
+            long everyRealScore = v1.getScores().values().stream()
+                    .filter(score -> !Boolean.TRUE.equals(score.getVirtual()))
+                    .filter(score -> !DATA_QUALITY.equals(score.getName()))
+                    .filter(score -> !vertical.getCompositeScores().contains(score.getName()))
+                    .count();
+            assertThat(v1.getScores().get(DATA_QUALITY).getAbsolute().getValue())
+                    .as("V1 DATA_QUALITY count of product %s", v1.getId()).isEqualTo((double) everyRealScore);
+        }
+    }
+
+    /** A criterion counted by the V2 {@code DATA_QUALITY}, read from the configuration (design 2.3). */
+    private static boolean isV2DataQualityCriterion(VerticalConfig vertical, String name) {
+        if (DATA_QUALITY.equals(name) || name.startsWith("BRAND_") || vertical.getCompositeScores().contains(name)
+                || !vertical.getAvailableImpactScoreCriterias().contains(name)) {
+            return false;
+        }
+        AttributeConfig attribute = vertical.getAttributesConfig().getAttributeConfigByKey(name);
+        return attribute != null && attribute.isAsScore();
+    }
+
+    /**
+     * ImpactScore of each product of {@link #products(VerticalConfig)}, scored in production order. With
+     * {@code worstDataQuality}, every {@code DATA_QUALITY} is set to 0 once computed, before the ImpactScore.
+     */
+    private static Map<Long, Double> impactScores(VerticalConfig vertical, boolean worstDataQuality) {
+        Logger logger = LoggerFactory.getLogger(ImpactScoreRealVerticalsTest.class);
+        List<AbstractAggregationService> services = new ArrayList<>();
+        services.add(new CleanScoreAggregationService(logger));
+        services.add(new Attribute2ScoreAggregationService(logger));
+        services.add(new BrandScoresAggregationService(logger, mock(BrandService.class)));
+        services.add(new DataCompletion2ScoreAggregationService(logger));
+        if (worstDataQuality) {
+            services.add(new AbstractAggregationService(logger) {
+                @Override
+                public void onProduct(Product data, VerticalConfig vConf) {
+                    Score dataQuality = data.getScores().get(DATA_QUALITY);
+                    assertThat(dataQuality).as("DATA_QUALITY of product %s", data.getId()).isNotNull();
+                    dataQuality.getRelativ().setValue(0.0);
+                }
+            });
+        }
+        services.add(new EcoScoreAggregationService(logger));
+        services.add(new ParticipatingScoresAggregationService(logger));
+
+        List<Product> products = products(vertical);
+        new ScoringBatchedAggregator(services).score(products, vertical);
+
+        Map<Long, Double> scores = new TreeMap<>();
+        products.forEach(product -> scores.put(product.getId(), product.ecoscore().getValue()));
+        return scores;
+    }
+
+    /** {@link #products(VerticalConfig)} with a brand, resolved to a company carrying two scores (CDP, Good On You). */
+    private static List<Product> brandedProducts(VerticalConfig vertical) {
+        List<Product> products = products(vertical);
+        products.forEach(product -> product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, "ACME"));
+        return products;
+    }
+
+    private static BrandService brandServiceWithTwoScores() {
+        Company company = new Company("acme", "Acme");
+        for (String provider : List.of("cdp", "good-on-you")) {
+            CompanyScore score = new CompanyScore();
+            score.setValue(60.0);
+            score.setScale(new ScoreScale(0.0, 100.0, true));
+            company.getScores().put(provider, score);
+        }
+        Brand brand = new Brand("ACME");
+        brand.setCompanyName("Acme");
+        brand.setCompany(company);
+
+        BrandService brandService = mock(BrandService.class);
+        when(brandService.resolve(anyString())).thenReturn(brand);
+        return brandService;
+    }
+
     /** Builds products that all carry the very same attribute values, hence the same ImpactScore. */
     private static List<Product> tiedProducts(VerticalConfig vertical) {
         List<Product> products = new ArrayList<>();
@@ -268,6 +419,10 @@ class ImpactScoreRealVerticalsTest {
     }
 
     private static AggregationFacadeService aggregationFacadeService(Path logs) {
+        return aggregationFacadeService(logs, mock(BrandService.class));
+    }
+
+    private static AggregationFacadeService aggregationFacadeService(Path logs, BrandService brandService) {
         ApiProperties apiProperties = new ApiProperties();
         apiProperties.setRootFolder(logs + "/");
 
@@ -284,7 +439,7 @@ class ImpactScoreRealVerticalsTest {
                 mock(DataSourceConfigService.class),
                 mock(VerticalsConfigService.class),
                 mock(BarcodeValidationService.class),
-                mock(BrandService.class),
+                brandService,
                 mock(BlablaService.class),
                 mock(IcecatService.class),
                 mock(IcecatFeatureResolver.class),
