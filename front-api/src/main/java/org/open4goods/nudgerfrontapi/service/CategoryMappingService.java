@@ -35,6 +35,7 @@ import org.open4goods.nudgerfrontapi.dto.category.CategoryNavigationDto;
 import org.open4goods.nudgerfrontapi.dto.category.FeatureGroupDto;
 import org.open4goods.nudgerfrontapi.dto.category.GoogleCategoryDto;
 import org.open4goods.nudgerfrontapi.dto.category.ImpactScoreConfigDto;
+import org.open4goods.nudgerfrontapi.dto.category.ImpactScorePositionLabelDto;
 import org.open4goods.nudgerfrontapi.dto.category.NudgeToolConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.NudgeToolScoreDto;
 import org.open4goods.nudgerfrontapi.dto.category.NudgeToolSubsetGroupDto;
@@ -511,14 +512,22 @@ public class CategoryMappingService {
     }
 
     /**
-     * Map the impact score configuration (weights and prompts).
+     * Map the impact score configuration of the vertical's current methodology (weights, threshold, position
+     * labels) and the generation prompts.
      */
     private ImpactScoreConfigDto mapImpactScoreConfig(ImpactScoreConfig impactScoreConfig, DomainLanguage domainLanguage) {
         if (impactScoreConfig == null) {
             return null;
         }
+        List<ImpactScorePositionLabelDto> positionLabels = impactScoreConfig.positionLabels().stream()
+                .filter(Objects::nonNull)
+                .map(label -> new ImpactScorePositionLabelDto(label.getLevel(), label.getMinBetterThan()))
+                .toList();
         return new ImpactScoreConfigDto(
-                defaultMap(impactScoreConfig.getCriteriasPonderation()),
+                defaultMap(impactScoreConfig.activeCriteriasPonderation()),
+                impactScoreConfig.effectiveMethodologyVersion(),
+                impactScoreConfig.minRealWeightCoverage(),
+                positionLabels,
                 impactScoreConfig.getYamlPrompt(),
                 impactScoreConfig.getAiJsonResponse());
     }

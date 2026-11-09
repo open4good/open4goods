@@ -593,21 +593,47 @@ public class ProductRepository {
 	 * offer <b>or</b> an impact score (a product without offer but with an impact score
 	 * stays listed, GOU-1744). Ordered by impact score descending, products without score last.
 	 *
-	 * @param vertical vertical id
+	 * <p>Only an impact score of the vertical's current methodology counts (design
+	 * {@code docs/impactscore/v2-design.md}, section 4.2), so that the sitemap keeps no product the site shows as
+	 * not rated: in version 1, a score without {@code impactScoreMeta.methodologyVersion} (legacy) or of version 1;
+	 * from version 2, a score of that version only.
+	 *
+	 * @param vertical                  vertical id
+	 * @param currentMethodologyVersion the vertical's effective ImpactScore methodology version
 	 * @return streaming export, to be closed by the caller
 	 */
-	public Stream<Product> exportVerticalForSitemap(String vertical) {
+	public Stream<Product> exportVerticalForSitemap(String vertical, int currentMethodologyVersion) {
 	    // Native bool query: Criteria cannot express (A AND B) OR C without dropping the AND part.
 	    var recentOffer = co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
 	        .must(m -> m.range(r -> r.date(d -> d.field("lastChange").gt(String.valueOf(expirationClause())))))
 	        .must(m -> m.range(r -> r.number(n -> n.field("offersCount").gt(0.0))))));
-	    var hasScore = co.elastic.clients.elasticsearch._types.query_dsl.Query
-	        .of(q -> q.exists(e -> e.field("scores.ECOSCORE.value")));
+	    var hasScore = currentImpactScoreQuery(currentMethodologyVersion);
 	    var query = co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
 	        .must(m -> m.term(t -> t.field("vertical").value(vertical)))
 	        .must(m -> m.term(t -> t.field("excluded").value(false)))
 	        .must(m -> m.bool(or -> or.should(recentOffer).should(hasScore).minimumShouldMatch("1")))));
 	    return streamOrderedByEcoscore(builder -> builder.withQuery(query), null);
+	}
+
+	/**
+	 * Products holding an impact score of the given methodology version (design section 4.2).
+	 *
+	 * @param methodologyVersion the vertical's effective ImpactScore methodology version
+	 * @return version 1: a score and no recorded version or version 1; otherwise a score of that version
+	 */
+	static co.elastic.clients.elasticsearch._types.query_dsl.Query currentImpactScoreQuery(int methodologyVersion) {
+	    var versionField = "impactScoreMeta.methodologyVersion";
+	    var sameVersion = co.elastic.clients.elasticsearch._types.query_dsl.Query
+	        .of(q -> q.term(t -> t.field(versionField).value(methodologyVersion)));
+	    var version = methodologyVersion == 1
+	        ? co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
+	            .should(sameVersion)
+	            .should(s -> s.bool(none -> none.mustNot(m -> m.exists(e -> e.field(versionField)))))
+	            .minimumShouldMatch("1")))
+	        : sameVersion;
+	    return co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
+	        .must(m -> m.exists(e -> e.field("scores.ECOSCORE.value")))
+	        .must(version)));
 	}
 
 	private Stream<Product> streamOrderedByEcoscore(UnaryOperator<NativeQueryBuilder> filter, Integer max) {

@@ -544,7 +544,9 @@ for workflow in sorted(workflows.glob("*.yml")):
                     value = str(env.get(secret, ""))
                     # serviceSecrets.yml maps a secret only for the services listed in its contains(...).
                     listed = re.search(r"contains\(fromJSON\('(\[[^']*\])'\), inputs\.service\)", value)
-                    if f"secrets.{secret}" not in value or (listed and service not in json.loads(listed.group(1))):
+                    # A non-secret setting (IMPACTSCORE_METHODOLOGY_OVERRIDES) is a GitHub variable, vars.<NAME>.
+                    mapped = f"secrets.{secret}" in value or f"vars.{secret}" in value
+                    if not mapped or (listed and service not in json.loads(listed.group(1))):
                         errors.append(f"{workflow.name} / {step.get('name')}: {secret} ({service}) not mapped")
 print("\n".join(errors) or f"{steps} steps checked")
 sys.exit(1 if errors or steps < 6 else 0)

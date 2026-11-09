@@ -71,7 +71,7 @@ public class Product implements Standardisable {
 	/**
 	 * Name of the ecoscore
 	 */
-	private static final String ECOSCORE_NAME = "ECOSCORE";
+	public static final String ECOSCORE_NAME = "ECOSCORE";
 	private static final int GTIN_PAD_LENGTH = Integer.getInteger("open4goods.product.gtin.pad-length", 0);
 	private static final int MODEL_MIN_LENGTH = Integer.getInteger("open4goods.product.model.min-length", 3);
 	private static final String MODEL_SPLITTER_REGEX = System
@@ -196,6 +196,11 @@ public class Product implements Standardisable {
 	private ProductSourceUrls sourceUrls = new ProductSourceUrls();
 
 	private EcoScoreRanking ranking = new EcoScoreRanking();
+
+	/**
+	 * How the last batch assessed the ImpactScore (methodology, date, coverage), {@code null} when never assessed.
+	 */
+	private ImpactScoreMeta impactScoreMeta;
 
 	/**
 	 * Legacy text embedding retained until the legacy index is replaced. Public
@@ -520,6 +525,17 @@ public class Product implements Standardisable {
 	 */
 	public Score ecoscore() {
 		return scores.get(ECOSCORE_NAME);
+	}
+
+	/**
+	 * The ImpactScore methodology version the product was last assessed with.
+	 *
+	 * @return {@code impactScoreMeta.methodologyVersion}, or 1 when missing (legacy score, design
+	 *         {@code docs/impactscore/v2-design.md}, 4.2)
+	 */
+	public int impactScoreMethodologyVersion() {
+		return impactScoreMeta == null || impactScoreMeta.getMethodologyVersion() == null ? 1
+				: impactScoreMeta.getMethodologyVersion();
 	}
 
 	public String caracteristics() {
@@ -1192,6 +1208,14 @@ public class Product implements Standardisable {
 
 	public void setRanking(EcoScoreRanking ranking) {
 		this.ranking = ranking;
+	}
+
+	public ImpactScoreMeta getImpactScoreMeta() {
+		return impactScoreMeta;
+	}
+
+	public void setImpactScoreMeta(ImpactScoreMeta impactScoreMeta) {
+		this.impactScoreMeta = impactScoreMeta;
 	}
 
 	public GtinInfo getGtinInfos() {

@@ -38,6 +38,7 @@ import org.open4goods.model.product.BarcodeType;
 import org.open4goods.model.product.EcoScoreRanking;
 import org.open4goods.model.product.ExternalIds;
 import org.open4goods.model.product.GtinInfo;
+import org.open4goods.model.product.ImpactScoreMeta;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductCanonicalUrl;
 import org.open4goods.model.product.ProductCondition;
@@ -49,6 +50,8 @@ import org.open4goods.model.resource.ImageInfo;
 import org.open4goods.model.resource.PdfInfo;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.ImpactScoreConfig;
+import org.open4goods.model.vertical.ImpactScorePositionLabel;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
@@ -70,6 +73,7 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductExternalIdsDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductGtinInfoDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductIdentityDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductImageDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductImpactScoreStatusDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductIndexedAttributeDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductNamesDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductOffersDto;
@@ -127,6 +131,10 @@ public class ProductMappingService {
     private static final String FAVICON_ENDPOINT = "/api/favicon?url=";
     private static final String IMAGE_WEBP_MEDIATYPE = "image/webp";
     private static final String PRODUCT_REFERENCE_CACHE_PREFIX = "product-ref";
+    /** Not rated: the product's ImpactScore belongs to another methodology version than the vertical's current one. */
+    private static final String OUTDATED_METHOD = "OUTDATED_METHOD";
+    /** Not rated: the product was never assessed. */
+    private static final String NOT_SCORED = "NOT_SCORED";
 
     private final ProductRepository repository;
     private final ApiProperties apiProperties;
@@ -208,7 +216,8 @@ public class ProductMappingService {
         VerticalConfig vConfig = resolveVerticalConfig(product.getVertical());
         EnumSet<ProductDtoComponent> components = resolveComponents(includes);
 
-        ProductBaseDto base = components.contains(ProductDtoComponent.base) ? mapBase(product, domainLanguage, locale)
+        ProductBaseDto base = components.contains(ProductDtoComponent.base)
+                ? mapBase(product, vConfig, domainLanguage, locale)
                 : null;
         ProductIdentityDto identity = components.contains(ProductDtoComponent.identity)
                 ? mapIdentity(product, domainLanguage, locale)
@@ -463,8 +472,9 @@ public class ProductMappingService {
      * Map immutable product fields describing core metadata (creation timestamps,
      * vertical etc.).
      */
-    private ProductBaseDto mapBase(Product product, DomainLanguage domainLanguage, Locale locale) {
-        Score ecoscore = product.ecoscore();
+    private ProductBaseDto mapBase(Product product, VerticalConfig vConfig, DomainLanguage domainLanguage,
+            Locale locale) {
+        Score ecoscore = currentEcoscore(product, vConfig);
         String preferredName = resolvePreferredName(product, domainLanguage, locale);
         return new ProductBaseDto(
                 product.getId(),
@@ -843,21 +853,123 @@ public class ProductMappingService {
 
     /**
      * Map eco score and other computed scores into DTO representations.
+     * <p>
+     * Only an ImpactScore of the vertical's current methodology is exposed (design
+     * {@code docs/impactscore/v2-design.md}, section 4.2): the product's version is
+     * {@code impactScoreMeta.methodologyVersion}, or 1 for a legacy score without metadata. When it differs from the
+     * vertical's effective version, {@code ecoscore}, {@code scores.ECOSCORE} and {@code ranking} are left out and
+     * {@code impactScore} says {@code NOT_RATED}. In methodology version 1 a legacy score is still shown, so nothing
+     * changes before a switch.
      */
     private ProductScoresDto mapScores(Product product, DomainLanguage domainLanguage, VerticalConfig vConf,
             Map<Long, ProductReferenceDto> referencedProducts) {
+        ImpactScoreConfig impactScoreConfig = vConf == null ? null : vConf.getImpactScoreConfig();
+        boolean currentMethodology = ImpactScoreConfig.isCurrentMethodology(impactScoreConfig,
+                product.impactScoreMethodologyVersion());
         Map<String, ProductScoreDto> scores = product.getScores() == null
                 ? Collections.emptyMap()
                 : product.getScores().entrySet().stream()
+                        .filter(entry -> currentMethodology || !Product.ECOSCORE_NAME.equals(entry.getKey()))
                         .collect(Collectors.toMap(Entry::getKey,
                                 entry -> mapScore(entry.getValue(), domainLanguage, vConf, referencedProducts),
                                 (left, right) -> right,
                                 LinkedHashMap::new));
-        ProductScoreDto ecoscore = product.ecoscore() == null
+        ProductScoreDto ecoscore = !currentMethodology || product.ecoscore() == null
                 ? null
                 : mapScore(product.ecoscore(), domainLanguage, vConf, referencedProducts);
-        ProductRankingDto ranking = mapRanking(product, referencedProducts);
-        return new ProductScoresDto(scores, ecoscore, ranking);
+        ProductRankingDto ranking = currentMethodology ? mapRanking(product, referencedProducts) : null;
+        ProductImpactScoreStatusDto impactScore = impactScoreConfig == null ? null
+                : mapImpactScoreStatus(product, impactScoreConfig, currentMethodology);
+        return new ProductScoresDto(scores, ecoscore, ranking, impactScore);
+    }
+
+    /**
+     * The product's ImpactScore when it may be shown, that is when it belongs to the vertical's current methodology
+     * (design {@code docs/impactscore/v2-design.md}, 4.2).
+     *
+     * @param product the product
+     * @param vConf   the product's vertical, {@code null} when unknown
+     * @return the ECOSCORE score, or {@code null} when absent or of another methodology version
+     */
+    static Score currentEcoscore(Product product, VerticalConfig vConf) {
+        ImpactScoreConfig impactScoreConfig = vConf == null ? null : vConf.getImpactScoreConfig();
+        return ImpactScoreConfig.isCurrentMethodology(impactScoreConfig, product.impactScoreMethodologyVersion())
+                ? product.ecoscore()
+                : null;
+    }
+
+    /**
+     * Map the ImpactScore status of a product under the vertical's current methodology (design section 4.1).
+     *
+     * @param product            the product
+     * @param impactScoreConfig  the vertical's ImpactScore configuration
+     * @param currentMethodology whether the product was assessed with the vertical's current methodology
+     * @return the status, never {@code null}
+     */
+    private ProductImpactScoreStatusDto mapImpactScoreStatus(Product product, ImpactScoreConfig impactScoreConfig,
+            boolean currentMethodology) {
+        ImpactScoreMeta meta = product.getImpactScoreMeta();
+        Score ecoscore = product.ecoscore();
+        String status;
+        String notRatedReason;
+        if (!currentMethodology) {
+            status = ImpactScoreMeta.Status.NOT_RATED.name();
+            notRatedReason = meta == null && ecoscore == null ? NOT_SCORED : OUTDATED_METHOD;
+        } else if (ecoscore != null) {
+            status = ImpactScoreMeta.Status.RATED.name();
+            notRatedReason = null;
+        } else {
+            status = ImpactScoreMeta.Status.NOT_RATED.name();
+            notRatedReason = meta == null ? NOT_SCORED : meta.getNotRatedReason();
+        }
+
+        boolean rated = ecoscore != null && currentMethodology;
+        EcoScoreRanking ranking = product.getRanking();
+        Long position = null;
+        Long ratedCount = null;
+        Integer betterThanPercent = null;
+        String level = null;
+        if (rated && ranking != null && ranking.getGlobalCount() > 0) {
+            position = ranking.getGlobalPosition();
+            ratedCount = ranking.getGlobalCount();
+            if (ranking.getGlobalCount() > 1 && ecoscore.getRanking() != null) {
+                double betterThan = Math.max(0.0,
+                        Math.min(1.0, ecoscore.getRanking() / (double) (ranking.getGlobalCount() - 1)));
+                betterThanPercent = (int) Math.round(betterThan * 100);
+                level = positionLevel(impactScoreConfig, betterThan);
+            }
+        }
+
+        return new ProductImpactScoreStatusDto(
+                status,
+                notRatedReason,
+                meta == null ? null : meta.getMethodologyVersion(),
+                meta == null ? null : meta.getMethodologyRevision(),
+                meta == null ? null : meta.getScoredAt(),
+                impactScoreConfig.effectiveMethodologyVersion(),
+                meta == null ? null : meta.getRealWeightCoverage(),
+                meta == null ? null : meta.getRealCriteriaCount(),
+                meta == null ? null : meta.getTotalCriteriaCount(),
+                position,
+                ratedCount,
+                betterThanPercent,
+                level);
+    }
+
+    /**
+     * The position label of a rated product: the first label, best first, whose threshold the product reaches.
+     *
+     * @param impactScoreConfig the vertical's ImpactScore configuration
+     * @param betterThan        share of rated products ranked below the product, between 0 and 1
+     * @return the label key, {@code null} in methodology version 1 (no label)
+     */
+    private static String positionLevel(ImpactScoreConfig impactScoreConfig, double betterThan) {
+        for (ImpactScorePositionLabel label : impactScoreConfig.positionLabels()) {
+            if (label != null && label.getMinBetterThan() != null && label.getMinBetterThan() <= betterThan) {
+                return label.getLevel();
+            }
+        }
+        return null;
     }
 
     /**

@@ -23,6 +23,7 @@ import org.open4goods.commons.helper.GenericFileLogger;
 import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductCanonicalUrl;
+import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.vertical.VerticalSubCategory;
@@ -237,7 +238,7 @@ public class SitemapGenerationService {
 
 		for (VerticalConfig vertical : verticalsConfigService.getConfigsWithoutDefault(true)) {
 			try (Stream<Product> products = aggregatedDataRepository
-					.exportVerticalForSitemap(vertical.getId())) {
+					.exportVerticalForSitemap(vertical.getId(), currentMethodologyVersion(vertical))) {
 				for (Product product : (Iterable<Product>) products::iterator) {
 					String path = productPath(product, vertical, domainLanguage);
 					if (path == null || !paths.add(path)) {
@@ -256,6 +257,19 @@ public class SitemapGenerationService {
 		productUrlCounts.computeIfAbsent(language, this::registerProductUrlsGauge).set(paths.size());
 		statsLogger.info("{} product URLs written for language {}", paths.size(), language);
 		return true;
+	}
+
+	/**
+	 * The vertical's effective ImpactScore methodology version, environment override included: the sitemap keeps the
+	 * impact scores the site shows, those of that version only (design {@code docs/impactscore/v2-design.md}, 4.2).
+	 *
+	 * @param vertical enabled vertical
+	 * @return the effective version, 1 without ImpactScore configuration
+	 */
+	static int currentMethodologyVersion(VerticalConfig vertical) {
+		ImpactScoreConfig impactScoreConfig = vertical.getImpactScoreConfig();
+		return impactScoreConfig == null ? ImpactScoreConfig.METHODOLOGY_V1
+				: impactScoreConfig.effectiveMethodologyVersion();
 	}
 
 	/**

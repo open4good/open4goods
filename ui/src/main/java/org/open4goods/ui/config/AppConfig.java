@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -208,8 +209,9 @@ public class AppConfig {
 
 
 	@Bean
-	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resourceResolver, SerialisationService serialisationService,  GoogleTaxonomyService googleTaxonomyService) throws IOException {
-		return new VerticalsConfigService( serialisationService, googleTaxonomyService, resourceResolver);
+	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resourceResolver, SerialisationService serialisationService,  GoogleTaxonomyService googleTaxonomyService,
+			@Value("${" + VerticalsConfigService.METHODOLOGY_VERSION_OVERRIDES_PROPERTY + ":}") String methodologyVersionOverrides) throws IOException {
+		return new VerticalsConfigService( serialisationService, googleTaxonomyService, resourceResolver, methodologyVersionOverrides);
 	}
 
 

@@ -168,6 +168,12 @@
       "type": "java.lang.String",
       "description": "TradeTracker passphrase used by the Metriks affiliation report (SOAP authenticate). Secret. Defaults to affiliation-config.tradetracker-api-key (API_TRADETRACKER_API_KEY, the TradeTracker feed secret).",
       "defaultValue": "${affiliation-config.tradetracker-api-key:}"
+    },
+    {
+      "name": "impactscore.methodology-version-overrides",
+      "type": "java.lang.String",
+      "description": "ImpactScore methodology version forced per vertical, comma-separated <vertical>:<version> pairs (for example tv:2), versions 1 or 2. Blank or none forces nothing. Rendered from the GitHub Environment variable IMPACTSCORE_METHODOLOGY_OVERRIDES; api, front-api and ui must receive the same value. An invalid value fails the startup (docs/impactscore/v2-design.md, section 5.2).",
+      "defaultValue": ""
     }
   ]
 }

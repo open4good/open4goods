@@ -163,6 +163,7 @@ before anything is written.
 | `O4G_ELASTICSEARCH_PASSWORD` (source) | api, ui, front-api, b2b-api: tree `spring.elasticsearch.password`                                                                                                        | Elasticsearch user `elastic` (`infraSecrets.yml` only)         |
 | `B2B_API_POSTGRES_PASSWORD` (source) | b2b-api: tree `spring.datasource.password`; infra: `B2B_POSTGRES_PASSWORD`                                                                                                 | Postgres user of `b2b_postgres` (`infraSecrets.yml` only)      |
 | `INFRA_*` (source)                | infra: `/etc/open4goods/infra.env` (Kibana, Plausible and its Postgres and ClickHouse)                                                                          | compose infrastructure (`infraSecrets.yml` only)               |
+| `IMPACTSCORE_METHODOLOGY_OVERRIDES` (GitHub Environment **variable**, not a secret) | api, ui, front-api: tree `impactscore.methodology-version-overrides`                                                                              | ImpactScore methodology version forced per vertical (`tv:2`), read by `VerticalsConfigService` ([ImpactScore V2 design](../impactscore/v2-design.md), 5.2) |
 | `INFRA_GOOGLE_CLIENT_ID`, `INFRA_GOOGLE_CLIENT_SECRET` (source) | infra: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` in `/etc/open4goods/infra.env` (beta)                                                         | Google OAuth client of Plausible's Search Console integration (`infraSecrets.yml` `target=plausible-google` only) |
 
 `b2b-api` registers with Spring Boot Admin only when its configuration enables
@@ -206,6 +207,7 @@ Spring services and the frontend one after the other, front-api first).
 | `O4G_MACHINE_TOKEN`    | front-api (checks `X-Shared-Token`) and the frontend (sends it); `publish-frontend.sh` refuses to publish when front-api rejects the frontend's token |
 | `FRONT_API_JWT_SECRET` | front-api (signs) and the frontend (verifies admin access tokens)                               |
 | `O4G_INTERNAL_API_KEY` | front-api (sends) and api (`admin-key`, its only full-access key)                               |
+| `IMPACTSCORE_METHODOLOGY_OVERRIDES` | api (batch), front-api (display) and ui (sitemap) must see the same ImpactScore methodology version |
 
 `O4G_ELASTICSEARCH_PASSWORD` is coupled with its source: Elasticsearch
 (`elastic`) and its four consumers (api, ui, front-api, b2b-api) change in one
@@ -215,6 +217,16 @@ Likewise `B2B_API_POSTGRES_PASSWORD` (`b2b_postgres` and b2b-api,
 
 `O4G_MACHINE_TOKEN` and `FRONT_API_JWT_SECRET` reach the frontend as env
 lines, so their value must match `[A-Za-z0-9/._-]`.
+
+`IMPACTSCORE_METHODOLOGY_OVERRIDES` is a GitHub Environment variable
+(`vars.`), mapped like a secret and rendered as a config tree file. It is
+empty in `beta` and `prod`: an empty value is not rendered (warning, the
+previous render stays), and the property defaults to empty, so every vertical
+follows its `methodologyVersion`. To force a version: `tv:2` (beta pilot) or
+`tv:1` (production rollback), comma-separated pairs, versions 1 or 2. To clear
+a rendered override, set it to `none`, render, then it may be emptied. A
+malformed value, an unknown vertical, or version 2 on a vertical without `v2`
+block fails the startup of the three services.
 
 ### Paired secrets
 

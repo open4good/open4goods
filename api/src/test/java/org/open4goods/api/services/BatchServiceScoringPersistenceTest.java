@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.model.product.EcoScoreRanking;
+import org.open4goods.model.product.ImpactScoreMeta;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.rating.Cardinality;
@@ -43,6 +44,7 @@ class BatchServiceScoringPersistenceTest {
 
 		assertThat(product.getScores()).isEmpty();
 		assertThat(product.getRanking().getGlobalPosition()).isZero();
+		assertThat(product.getImpactScoreMeta()).isNull();
 	}
 
 	@Test
@@ -53,6 +55,7 @@ class BatchServiceScoringPersistenceTest {
 		BatchService.clearObsoleteScores(List.of(product), vertical());
 
 		assertThat(product.getScores()).isEmpty();
+		assertThat(product.getImpactScoreMeta()).isNull();
 	}
 
 	@Test
@@ -64,6 +67,7 @@ class BatchServiceScoringPersistenceTest {
 
 		assertThat(product.ecoscore().getValue()).isEqualTo(12.0);
 		assertThat(product.getRanking().getGlobalPosition()).isEqualTo(3);
+		assertThat(product.getImpactScoreMeta().getMethodologyVersion()).isEqualTo(1);
 	}
 
 	@Test
@@ -140,6 +144,10 @@ class BatchServiceScoringPersistenceTest {
 		ranking.setGlobalPosition(3);
 		ranking.setGlobalCount(10);
 		product.setRanking(ranking);
+		ImpactScoreMeta meta = new ImpactScoreMeta();
+		meta.setMethodologyVersion(1);
+		meta.setStatus(ImpactScoreMeta.Status.RATED.name());
+		product.setImpactScoreMeta(meta);
 		return product;
 	}
 }

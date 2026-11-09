@@ -308,6 +308,14 @@ every client:
   rescored) is "Not rated", as decided. After a rollback to V1, a V2 score is
   "Not rated" the same way.
 
+Implementation (GOU-1882): the rule also covers `base.ecoscoreValue` and the
+score in the product meta description (`ProductSeoMetaService`), through
+`ImpactScoreConfig.isCurrentMethodology` and
+`Product.impactScoreMethodologyVersion()`. In version 1 the scores output is
+unchanged; only `impactScore` is added. `betterThanPercent` uses the lot 0
+formula (`scores.ECOSCORE.ranking / (globalCount - 1)`), `position` and
+`ratedCount` come from `EcoScoreRanking`.
+
 The same rule applies to queries, so the sitemap keeps no "Not rated" product
 on the strength of its score. `exportVerticalForSitemap(vertical,
 currentVersion)` replaces `exists scores.ECOSCORE.value` with:
@@ -361,6 +369,14 @@ version). Uses:
 
 Empty by default. A value outside {1, 2}, or V2 without a `v2` block, fails
 startup.
+
+Implementation (GOU-1882): rendered by `scripts/deploy/render-service-secrets.sh`
+as the config tree file `impactscore.methodology-version-overrides` of api, ui
+and front-api (comma-separated `<vertical>:<version>` pairs). An empty GitHub
+variable is not rendered and keeps the previous render, so `none` clears an
+override; an unknown vertical also fails startup. An invalid `v2` block that is
+not active only logs a warning at startup; `VerticalYamlValidationTest` refuses
+it. See [prod-service-secrets.md](../operations/prod-service-secrets.md).
 
 ### 5.3 Rollback
 

@@ -14,9 +14,11 @@ import org.open4goods.model.StandardiserService;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.EcoScoreRanking;
+import org.open4goods.model.product.ImpactScoreMeta;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.rating.Cardinality;
 import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.vertical.scoring.ScoreMissingValuePolicy;
 import org.slf4j.Logger;
@@ -66,7 +68,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 		double ecoscoreVal = 0.0;
 		Map<String, Score> scores = product.getScores();
 		
-		for (String config : vConf.getImpactScoreConfig().getCriteriasPonderation().keySet()) {
+		for (String config : vConf.getImpactScoreConfig().activeCriteriasPonderation().keySet()) {
 			Score score = scores.get(config);
 
 			if (score == null) {
@@ -114,7 +116,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 
 		LOGGER.info("EcoScore done() start. Products: {}", datas.size());
 
-		if (vConf.getImpactScoreConfig() == null || vConf.getImpactScoreConfig().getCriteriasPonderation().isEmpty()) {
+		if (vConf.getImpactScoreConfig() == null || vConf.getImpactScoreConfig().activeCriteriasPonderation().isEmpty()) {
 			LOGGER.error("No ImpactScore defined for vertical {}", vConf.getId());
 			return;
 		}
@@ -159,6 +161,12 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 		LOGGER.info("EcoScore computed. Calling super.done()");
 		super.done(datas, vConf);
 		LOGGER.info("super.done() finished. Products with real ecoscore calculation...");
+
+		// Assessment metadata, on every product of the cohort, rated or not (design GOU-1878, 1.1)
+		long scoredAt = System.currentTimeMillis();
+		for (Product data : datas) {
+			data.setImpactScoreMeta(assess(data, vConf, scoredAt));
+		}
 
 		List<Product> productsWithRealEcoScore = datas.stream().filter(this::hasRealEcoScore).toList();
 		LOGGER.info("Products with real EcoScore: {}", productsWithRealEcoScore.size());
@@ -273,8 +281,61 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 		return score;
 	}
 
+	/**
+	 * Builds the assessment metadata of a product of the scored cohort: version and revision of the active
+	 * methodology, batch instant, coverage C of the active matrix and outcome.
+	 *
+	 * <p>A criterion is real when the product holds its score, not virtual, with a readable relative value. C is the
+	 * weight of the real criteria over the weight of the criteria weighted above 0. In V1 C is informative: missing
+	 * criteria are imputed and the product is {@code RATED} whenever it holds a real ImpactScore; otherwise it is
+	 * {@code NOT_RATED}, with {@code NO_REAL_CRITERIA} when no criterion is real and no reason else (V1 has no
+	 * threshold).
+	 *
+	 * @param product  a product of the cohort, after the ImpactScore computation
+	 * @param vConf    the vertical configuration
+	 * @param scoredAt instant of the batch, epoch milliseconds
+	 * @return the metadata to store on the product
+	 */
+	ImpactScoreMeta assess(Product product, VerticalConfig vConf, long scoredAt) {
+		ImpactScoreConfig impactScoreConfig = vConf.getImpactScoreConfig();
+		double totalWeight = 0.0;
+		double realWeight = 0.0;
+		int totalCount = 0;
+		int realCount = 0;
+		for (Map.Entry<String, Double> weight : impactScoreConfig.activeCriteriasPonderation().entrySet()) {
+			if (weight.getValue() == null || weight.getValue() <= 0.0) {
+				continue;
+			}
+			totalWeight += weight.getValue();
+			totalCount++;
+			if (isRealCriterion(weight.getKey(), product.getScores().get(weight.getKey()))) {
+				realWeight += weight.getValue();
+				realCount++;
+			}
+		}
+
+		ImpactScoreMeta meta = new ImpactScoreMeta();
+		meta.setMethodologyVersion(impactScoreConfig.effectiveMethodologyVersion());
+		meta.setMethodologyRevision(impactScoreConfig.getMethodologyRevision());
+		meta.setScoredAt(scoredAt);
+		meta.setRealWeightCoverage(totalWeight > 0.0 ? realWeight / totalWeight : null);
+		meta.setRealCriteriaCount(realCount);
+		meta.setTotalCriteriaCount(totalCount);
+		if (hasRealEcoScore(product)) {
+			meta.setStatus(ImpactScoreMeta.Status.RATED.name());
+		} else {
+			meta.setStatus(ImpactScoreMeta.Status.NOT_RATED.name());
+			meta.setNotRatedReason(realCount == 0 ? ImpactScoreMeta.NotRatedReason.NO_REAL_CRITERIA.name() : null);
+		}
+		return meta;
+	}
+
+	private boolean isRealCriterion(String scoreName, Score score) {
+		return score != null && !Boolean.TRUE.equals(score.getVirtual()) && resolveRelativeValue(scoreName, score) != null;
+	}
+
 	private Map<String, Double> normalizeWeights(VerticalConfig vConf) {
-		Map<String, Double> weights = vConf.getImpactScoreConfig().getCriteriasPonderation();
+		Map<String, Double> weights = vConf.getImpactScoreConfig().activeCriteriasPonderation();
 		if (weights == null || weights.isEmpty()) {
 			return Map.of();
 		}
@@ -299,7 +360,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 		if (vConf == null || vConf.getImpactScoreConfig() == null || datas == null) {
 			return Set.of();
 		}
-		return vConf.getImpactScoreConfig().getCriteriasPonderation().keySet().stream()
+		return vConf.getImpactScoreConfig().activeCriteriasPonderation().keySet().stream()
 				.filter(scoreName -> datas.stream().noneMatch(product -> product.getScores().containsKey(scoreName)))
 				.collect(java.util.stream.Collectors.toSet());
 	}

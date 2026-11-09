@@ -6,10 +6,17 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
+import java.io.InputStream;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.io.TempDir;
@@ -27,6 +34,7 @@ import org.open4goods.icecat.services.IcecatFeatureResolver;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.attribute.IndexedAttribute;
+import org.open4goods.model.product.ImpactScoreMeta;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.vertical.AttributeConfig;
@@ -49,6 +57,13 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 class ImpactScoreRealVerticalsTest {
 
     private static final int PRODUCT_COUNT = 5;
+
+    /**
+     * ImpactScore, rank and position of {@link #products(VerticalConfig)} on every real vertical, recorded with the
+     * code before GOU-1882. Record again with {@code -Dimpactscore.snapshot.record=true} only for an intended V1
+     * change.
+     */
+    private static final String V1_SNAPSHOT = "impactscore/v1-snapshot.properties";
 
     static Stream<VerticalConfig> realVerticals() throws Exception {
         VerticalsConfigService service = new VerticalsConfigService(new SerialisationService(),
@@ -77,6 +92,51 @@ class ImpactScoreRealVerticalsTest {
         }
     }
 
+    /**
+     * GOU-1882: in methodology version 1 too, the batch records how it assessed each product (design
+     * {@code docs/impactscore/v2-design.md}, 1.1): version 1, revision of the matrix, date and coverage C of the V1
+     * matrix, for information.
+     */
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("realVerticals")
+    void v1AssessmentMetadataIsRecorded(VerticalConfig vertical, @TempDir Path logs) throws Exception {
+        List<Product> products = products(vertical);
+        long before = System.currentTimeMillis();
+
+        aggregationFacadeService(logs).getScoringAggregator().score(products, vertical);
+
+        Map<String, Double> weights = vertical.getImpactScoreConfig().activeCriteriasPonderation();
+        long weighted = weights.values().stream().filter(weight -> weight != null && weight > 0).count();
+        for (Product product : products) {
+            ImpactScoreMeta meta = product.getImpactScoreMeta();
+            assertThat(meta).as("impactScoreMeta of product %s", product.getId()).isNotNull();
+            assertThat(meta.getMethodologyVersion()).isEqualTo(1);
+            assertThat(meta.getMethodologyRevision()).isEqualTo(vertical.getImpactScoreConfig().getMethodologyRevision())
+                    .matches("[0-9a-f]{8}");
+            assertThat(meta.getScoredAt()).isBetween(before, System.currentTimeMillis());
+            assertThat(meta.getStatus()).isEqualTo(ImpactScoreMeta.Status.RATED.name());
+            assertThat(meta.getNotRatedReason()).isNull();
+            assertThat(meta.getTotalCriteriaCount()).isEqualTo((int) weighted);
+            assertThat(meta.getRealCriteriaCount()).isBetween(1, meta.getTotalCriteriaCount());
+
+            double total = 0;
+            double real = 0;
+            for (Map.Entry<String, Double> weight : weights.entrySet()) {
+                if (weight.getValue() == null || weight.getValue() <= 0) {
+                    continue;
+                }
+                total += weight.getValue();
+                Score score = product.getScores().get(weight.getKey());
+                if (score != null && !Boolean.TRUE.equals(score.getVirtual()) && score.getRelativ() != null
+                        && score.getRelativ().getValue() != null) {
+                    real += weight.getValue();
+                }
+            }
+            assertThat(meta.getRealWeightCoverage()).as("C of product %s", product.getId())
+                    .isCloseTo(real / total, within(1e-9));
+        }
+    }
+
     @ParameterizedTest(name = "{0}")
     @MethodSource("realVerticals")
     void bestProductHasTheHighestRankAndTheFirstPosition(VerticalConfig vertical, @TempDir Path logs)
@@ -88,6 +148,54 @@ class ImpactScoreRealVerticalsTest {
         Product best = products.stream().max(Comparator.comparingDouble(p -> p.ecoscore().getValue())).orElseThrow();
         assertThat(best.ecoscore().getRanking()).isEqualTo(PRODUCT_COUNT - 1);
         assertThat(best.getRanking().getGlobalPosition()).isEqualTo(1);
+    }
+
+    /**
+     * GOU-1882: in methodology version 1, the scores are those of the code before the V2 foundation.
+     */
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("realVerticals")
+    void v1ScoresMatchTheSnapshot(VerticalConfig vertical, @TempDir Path logs) throws Exception {
+        List<Product> products = products(vertical);
+
+        aggregationFacadeService(logs).getScoringAggregator().score(products, vertical);
+
+        Map<String, String> actual = new TreeMap<>();
+        for (Product product : products) {
+            Score impactScore = product.ecoscore();
+            actual.put(vertical.getId() + "." + product.getId(), impactScore.getValue() + "|" + impactScore.getRanking()
+                    + "|" + product.getRanking().getGlobalPosition() + "|" + product.getRanking().getGlobalCount());
+        }
+
+        if (Boolean.getBoolean("impactscore.snapshot.record")) {
+            Path file = Path.of("src/test/resources", V1_SNAPSHOT);
+            Properties recorded = new Properties();
+            if (Files.exists(file)) {
+                try (InputStream in = Files.newInputStream(file)) {
+                    recorded.load(in);
+                }
+            }
+            recorded.putAll(actual);
+            Files.createDirectories(file.getParent());
+            try (Writer out = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
+                new TreeMap<>(recorded).forEach((key, value) -> {
+                    try {
+                        out.write(key + "=" + value + "\n");
+                    } catch (java.io.IOException e) {
+                        throw new java.io.UncheckedIOException(e);
+                    }
+                });
+            }
+            return;
+        }
+
+        Properties expected = new Properties();
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream(V1_SNAPSHOT)) {
+            assertThat(in).as("snapshot %s", V1_SNAPSHOT).isNotNull();
+            expected.load(in);
+        }
+        actual.forEach((key, value) -> assertThat(value).as("ImpactScore|rank|position|count of %s", key)
+                .isEqualTo(expected.getProperty(key)));
     }
 
     /**

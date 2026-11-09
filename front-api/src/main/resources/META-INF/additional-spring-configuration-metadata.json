@@ -752,6 +752,12 @@
       "type": "java.util.Map<java.lang.String,java.util.List<java.lang.String>>",
       "description": "Deny-by-default email to role list allowlist. Keys are emails, lower-cased on binding; in YAML each key must be quoted and bracketed (\"[john.doe@example.com]\") or Spring Boot drops the @ and the entry never matches. Values are granted authorities (e.g. ROLE_SITEEDITOR, XWIKIADMINGROUP). An email missing from this map is refused.",
       "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GoogleSsoProperties"
+    },
+    {
+      "name": "impactscore.methodology-version-overrides",
+      "type": "java.lang.String",
+      "description": "ImpactScore methodology version forced per vertical, comma-separated <vertical>:<version> pairs (for example tv:2), versions 1 or 2. Blank or none forces nothing. Rendered from the GitHub Environment variable IMPACTSCORE_METHODOLOGY_OVERRIDES; api, front-api and ui must receive the same value. An invalid value fails the startup (docs/impactscore/v2-design.md, section 5.2).",
+      "defaultValue": ""
     }
   ]
 }
