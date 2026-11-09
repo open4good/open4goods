@@ -23,6 +23,7 @@ import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.rating.Cardinality;
 import org.open4goods.model.vertical.ImpactScoreConfig;
+import org.open4goods.model.vertical.ImpactScoreV2Config;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.feedservice.service.FeedIndexingService;
 import org.open4goods.services.feedservice.service.FeedService;
@@ -103,6 +104,36 @@ class BatchServiceScoringPersistenceTest {
 		assertThat(product.getRanking().getGlobalPosition()).isZero();
 	}
 
+	/**
+	 * GOU-1879: in methodology V2, a product without offers is neither recomputed nor cleared, even when its stored
+	 * ImpactScore is the lot 0 composite defect. The front-api hides a score of another version.
+	 */
+	@Test
+	void v2ProductWithoutOffersIsNeitherRecomputedNorCleared() {
+		Product product = scoredProduct();
+		product.setOffersCount(0);
+		product.ecoscore().setAggregates(Map.of("REFRIGERANT_GWP", 1.0));
+		product.ecoscore().setValue(1.2);
+
+		BatchService.clearObsoleteScores(List.of(product), v2Vertical());
+
+		assertThat(product.ecoscore().getValue()).isEqualTo(1.2);
+		assertThat(product.ecoscore().getAggregates()).containsKey("REFRIGERANT_GWP");
+		assertThat(product.getRanking().getGlobalPosition()).isEqualTo(3);
+		assertThat(product.getImpactScoreMeta().getMethodologyVersion()).isEqualTo(1);
+	}
+
+	@Test
+	void v2ExcludedProductLosesItsScores() {
+		Product product = scoredProduct();
+		product.setExcluded(true);
+
+		BatchService.clearObsoleteScores(List.of(product), v2Vertical());
+
+		assertThat(product.getScores()).isEmpty();
+		assertThat(product.getImpactScoreMeta()).isNull();
+	}
+
 	@Test
 	void nothingIsIndexedWhenScoringFails() {
 		VerticalConfig vertical = vertical();
@@ -127,6 +158,16 @@ class BatchServiceScoringPersistenceTest {
 		VerticalConfig vertical = new VerticalConfig();
 		vertical.setId("tv");
 		vertical.setImpactScoreConfig(impactScoreConfig);
+		return vertical;
+	}
+
+	private static VerticalConfig v2Vertical() {
+		VerticalConfig vertical = vertical();
+		ImpactScoreV2Config v2 = new ImpactScoreV2Config();
+		v2.setCriteriasPonderation(Map.of("WARRANTY", 1.0));
+		v2.setMinRealWeightCoverage(0.5);
+		vertical.getImpactScoreConfig().setV2(v2);
+		vertical.getImpactScoreConfig().setMethodologyVersion(ImpactScoreConfig.METHODOLOGY_V2);
 		return vertical;
 	}
 
