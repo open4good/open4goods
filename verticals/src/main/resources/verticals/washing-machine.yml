@@ -726,7 +726,7 @@ dataviz:
       unit: "kg"
       aggregation: "avg"
     - field: "scores.ECOSCORE.value"
-      label: "Eco-score moyen"
+      label: "Impact Score moyen"
       aggregation: "avg"
 
 ####################################################################################

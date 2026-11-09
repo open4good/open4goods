@@ -590,7 +590,7 @@ dataviz:
       unit: "kW"
       aggregation: "avg"
     - field: "scores.ECOSCORE.value"
-      label: "Eco-score moyen"
+      label: "Impact Score moyen"
       aggregation: "avg"
     - field: "price.minPrice.price"
       label: "Prix moyen"

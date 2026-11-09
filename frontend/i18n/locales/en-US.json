@@ -883,7 +883,7 @@
         "country": "GTIN country code",
         "creationDate": "Creation date",
         "datasource": "Data sources",
-        "ecoscore": "Impact score",
+        "ecoscore": "Impact Score",
         "ecoscoreRanking": "Impact Score Ranking",
         "googleTaxonomyId": "Google product category",
         "lastChange": "Last updated",
@@ -935,7 +935,7 @@
         "title": "Discover the Impact Score",
         "description": "Understand how the Impact Score is calculated for {category}",
         "cta": "Methodology {category}",
-        "ariaLabel": "Open the Eco-score guide"
+        "ariaLabel": "Open the Impact Score guide"
       },
       "assistant": {
         "title": "Our assistant",
@@ -1003,13 +1003,13 @@
         "other": "{condition}",
         "unknown": "Unspecified"
       },
-      "ecoscoreLabel": "Eco score {letter}",
+      "ecoscoreLabel": "Impact Score {letter}",
       "fetchError": "Unable to load products. Please try again.",
       "headers": {
         "bestPrice": "Best price",
         "brand": "Brand",
         "compare": "Compare",
-        "ecoscore": "Eco score",
+        "ecoscore": "Impact Score",
         "impactScore": "Impact score",
         "model": "Model",
         "offers": "Offers",
@@ -1419,6 +1419,76 @@
       "voteCompleted": "Done"
     }
   },
+  "impactScoreVersionsPage": {
+    "seo": {
+      "title": "Impact Score method version history",
+      "description": "Every version of the Impact Score method is dated: changes, reasons and scope. A score is only compared with scores of the same version."
+    },
+    "title": "Method version history",
+    "intro": "The Impact Score evolves. Each method version is dated; a score is only compared with scores of the same version.",
+    "backLink": "← The Impact Score",
+    "noDate": "Since the beginning",
+    "planned": "Announced, not yet in force",
+    "scopeLabel": "Categories concerned:",
+    "changeLabel": "Change:",
+    "reasonLabel": "Reason:",
+    "howToRead": {
+      "title": "How to read this page",
+      "body": "The current method's detail is on each category's page. General principles are on the Impact Score page."
+    },
+    "entries": {
+      "v2": {
+        "title": "Version 2",
+        "scope": "Categories switch one by one; none is concerned until version 2 is announced as in force.",
+        "changes": [
+          {
+            "change": "A score is computed only from criteria that are actually provided; the weight of missing criteria is spread over the provided criteria.",
+            "reason": "With version 1, a product could receive a score on data that did not exist."
+          },
+          {
+            "change": "A minimum criteria coverage is required; below it, the product shows \"Not rated\" with the reason.",
+            "reason": "A score based on too little data is not comparable."
+          },
+          {
+            "change": "Position is shown with the number of rated products, the number of criteria provided, the calculation date and the version.",
+            "reason": "Let readers judge a score's reliability."
+          },
+          {
+            "change": "A score from an older version is not displayed: the product is \"Not rated\" until recalculated.",
+            "reason": "Do not compare scores computed with different methods."
+          }
+        ]
+      },
+      "v1Fixes": {
+        "title": "Version 1, fixes",
+        "scope": "All rated categories. The scores themselves do not change.",
+        "changes": [
+          {
+            "change": "A single definition of the maximum score (20/20).",
+            "reason": "Two contradictory definitions coexisted on the site."
+          },
+          {
+            "change": "Average values assigned to missing criteria no longer count in rankings.",
+            "reason": "They distorted products' relative position."
+          },
+          {
+            "change": "A product without a score is no longer shown as \"Low\".",
+            "reason": "\"No score\" and \"bad score\" are two different things."
+          }
+        ]
+      },
+      "v1": {
+        "title": "Version 1",
+        "scope": "All rated categories.",
+        "changes": [
+          {
+            "change": "First method: score out of 20, weighted average of criteria per category, normalised against the category's products; an average value is assigned to missing criteria.",
+            "reason": "Provide a comparative ranking of products within one category."
+          }
+        ]
+      }
+    }
+  },
   "impactScorePage": {
     "seo": {
       "title": "Impact Score: a simple, transparent eco rating",
@@ -1435,7 +1505,7 @@
     "hero": {
       "eyebrow": "Impact Score",
       "title": "Environmental impact assessment of your products",
-      "subtitle": "An EcoScore-inspired compass for every purchase",
+      "subtitle": "A compass for every purchase",
       "definition": {
         "title": "A clear, accessible definition",
         "description": "Impact Score turns technical data into understandable indicators with no jargon.",
@@ -1526,7 +1596,7 @@
     "principles": {
       "eyebrow": "Our principles",
       "title": "Measuring impact without compromise",
-      "subtitle": "The method follows the EcoScore spirit: transparency, context and pedagogy.",
+      "subtitle": "The method rests on transparency, context and pedagogy.",
       "items": {
         "transparency": {
           "title": "Full transparency",
@@ -1602,7 +1672,7 @@
       "title": "Impact Score in a nutshell",
       "subtitle": "What to remember when reading the grade.",
       "items": {
-        "method": "One common method, inspired by the EcoScore, for every category.",
+        "method": "One common method for every category.",
         "criteria": "5 weighted criteria to quickly compare similar products.",
         "data": "Verified, up-to-date data linked to their sources.",
         "usage": "A 0-to-20 score that is readable at a glance to guide responsible purchases."
@@ -1610,8 +1680,8 @@
     },
     "approach": {
       "eyebrow": "Our approach",
-      "title": "Our ecoscore: transparent, innovative and effective",
-      "subtitle": "We explain the ecoscore clearly with verifiable sources and criteria tailored to each product category.",
+      "title": "Our Impact Score: transparent, innovative and effective",
+      "subtitle": "We explain the Impact Score clearly with verifiable sources and criteria tailored to each product category.",
       "pillars": {
         "transparent": {
           "title": "Transparent",
@@ -1619,7 +1689,7 @@
         },
         "innovant": {
           "title": "Innovative",
-          "description": "We recognise existing labelling initiatives and provide a versatile ecoscore for manufactured products."
+          "description": "We recognise existing labelling initiatives and provide a versatile Impact Score for manufactured products."
         },
         "performant": {
           "title": "Effective",
@@ -1661,15 +1731,15 @@
       },
       "approach": {
         "eyebrow": "Our approach",
-        "imageAlt": "Illustration of our ecoscore approach",
-        "title": "Our ecoscore: transparent, innovative and effective"
+        "imageAlt": "Illustration of our Impact Score approach",
+        "title": "Our Impact Score: transparent, innovative and effective"
       },
       "methodology": {
         "empty": "Categories will be published soon.",
         "eyebrow": "Methodology",
         "intro": "The calculation rules are detailed on every product page, in the Environmental impact section. Each product category has its own criteria and weights. These categories are currently covered:",
         "title": "How is the Impact Score calculated?",
-        "verticalCarouselAria": "Browse the ecoscore categories carousel",
+        "verticalCarouselAria": "Browse the Impact Score categories carousel",
         "verticalCardAria": "Open the {vertical} category",
         "verticalCta": "Explore products",
         "verticalCtaAria": "Explore products in the {vertical} category",
@@ -2444,7 +2514,7 @@
       "offersCount": "Offer count"
     },
     "ecological": {
-      "ecoscore": "Ecoscore",
+      "ecoscore": "Impact Score",
       "brandSustainability": "Brand sustainability",
       "dataQuality": "Data quality"
     },
@@ -3267,9 +3337,9 @@
         "title": "Get involved"
       },
       "highlightLinks": {
-        "title": "Impact score",
+        "title": "Impact Score",
         "allProducts": "All products",
-        "ecoscore": "Environmental assessment"
+        "ecoscore": "Impact Score"
       },
       "timeSaver": {
         "badge": "Open source & ad-free",
@@ -3569,7 +3639,7 @@
   "pwa": {
     "install": {
       "title": "Install Nudger",
-      "description": "Install Nudger as an app to keep eco-scores and price alerts one tap away.",
+      "description": "Install Nudger as an app to keep Impact Scores and price alerts one tap away.",
       "cta": "Install app",
       "dismiss": "Not now",
       "updateTitle": "Update available",
@@ -3901,7 +3971,7 @@
       "totalOffers": "Active offers",
       "averagePrice": "Average price",
       "medianPrice": "Median price",
-      "averageEcoscore": "Average ecoscore",
+      "averageEcoscore": "Average Impact Score",
       "topBrand": "Top brand",
       "newPercent": "New products",
       "countriesCount": "Countries"

@@ -741,7 +741,7 @@
         "default": "Autres filtres rapides",
         "price": "Prix",
         "screen_size": "Taille d'écran",
-        "impactscore": "Impact environnemental"
+        "impactscore": "Impact Score"
       },
       "navigation": {
         "next": "Défiler vers les filtres rapides suivants",
@@ -773,7 +773,7 @@
       "globalTitle": "Les sous",
       "hideImpact": "Masquer les filtres d'impact",
       "hideTechnical": "Masquer les filtres techniques",
-      "impactTitle": "La planète",
+      "impactTitle": "Impact Score",
       "activeTitle": "Filtres actifs",
       "clearAllTooltip": "Effacer tous les filtres",
       "missingLabel": "Option sans libellé",
@@ -814,7 +814,7 @@
         "title": "Impact Score",
         "description": "Comprendre comment est calculé l'Impact Score des {category}",
         "cta": "Méthodologie {category}",
-        "ariaLabel": "Ouvrir le guide Eco-score"
+        "ariaLabel": "Ouvrir le guide Impact Score"
       },
       "assistant": {
         "title": "Notre assistant",
@@ -886,13 +886,13 @@
         "other": "Autre ({condition})",
         "unknown": "Non précisée"
       },
-      "ecoscoreLabel": "Score éco {letter}",
+      "ecoscoreLabel": "Impact Score {letter}",
       "fetchError": "Impossible de charger les produits. Merci de réessayer plus tard.",
       "headers": {
         "bestPrice": "Meilleur prix",
         "brand": "Marque",
         "compare": "Comparer",
-        "ecoscore": "Score éco",
+        "ecoscore": "Impact Score",
         "impactScore": "Score d'impact",
         "model": "Modèle",
         "offers": "Offres",
@@ -1294,9 +1294,79 @@
       "voteCompleted": "Fait"
     }
   },
+  "impactScoreVersionsPage": {
+    "seo": {
+      "title": "Historique des versions de la méthode Impact Score",
+      "description": "Chaque version de la méthode Impact Score est datée : changements, raisons et périmètre. Une note n'est comparée qu'à des notes de la même version."
+    },
+    "title": "Historique des versions de la méthode",
+    "intro": "L'Impact Score évolue. Chaque version de la méthode est datée ; une note n'est comparée qu'à des notes de la même version.",
+    "backLink": "← L'Impact Score",
+    "noDate": "Depuis l'origine",
+    "planned": "Annoncée, pas encore en vigueur",
+    "scopeLabel": "Catégories concernées :",
+    "changeLabel": "Changement :",
+    "reasonLabel": "Raison :",
+    "howToRead": {
+      "title": "Comment lire cette page",
+      "body": "Le détail de la méthode actuelle est sur la page de chaque catégorie. Les principes généraux sont sur la page Impact Score."
+    },
+    "entries": {
+      "v2": {
+        "title": "Version 2",
+        "scope": "Catégories basculées une à une ; aucune n'est concernée tant que la version 2 n'est pas annoncée comme en vigueur.",
+        "changes": [
+          {
+            "change": "Une note n'est calculée qu'à partir des critères réellement renseignés ; le poids des critères absents est réparti sur les critères renseignés.",
+            "reason": "Avec la version 1, un produit pouvait recevoir une note sur des données qui n'existaient pas."
+          },
+          {
+            "change": "Une couverture minimale des critères est exigée ; en dessous, le produit est affiché \"Non noté\" avec le motif.",
+            "reason": "Une note calculée sur trop peu de données n'est pas comparable."
+          },
+          {
+            "change": "La position est affichée avec le nombre de produits notés, le nombre de critères renseignés, la date de calcul et la version.",
+            "reason": "Permettre de juger la fiabilité d'une note."
+          },
+          {
+            "change": "Une note d'une ancienne version n'est pas affichée : le produit est \"Non noté\" jusqu'à son recalcul.",
+            "reason": "Ne pas comparer des notes calculées avec des méthodes différentes."
+          }
+        ]
+      },
+      "v1Fixes": {
+        "title": "Version 1, correctifs",
+        "scope": "Toutes les catégories notées. Les notes elles-mêmes ne changent pas.",
+        "changes": [
+          {
+            "change": "Une seule définition de la note maximale (20/20).",
+            "reason": "Deux définitions contradictoires coexistaient sur le site."
+          },
+          {
+            "change": "Les valeurs moyennes attribuées aux critères absents ne comptent plus dans les classements.",
+            "reason": "Elles faussaient la position relative des produits."
+          },
+          {
+            "change": "Un produit sans note n'est plus affiché \"Faible\".",
+            "reason": "\"Pas de note\" et \"mauvaise note\" sont deux choses différentes."
+          }
+        ]
+      },
+      "v1": {
+        "title": "Version 1",
+        "scope": "Toutes les catégories notées.",
+        "changes": [
+          {
+            "change": "Première méthode : note sur 20, moyenne pondérée de critères par catégorie, normalisés par rapport aux produits de la catégorie ; une valeur moyenne est attribuée aux critères absents.",
+            "reason": "Disposer d'un classement comparatif des produits d'une même catégorie."
+          }
+        ]
+      }
+    }
+  },
   "impactScorePage": {
     "seo": {
-      "title": "Impact Score : un éco-score alternatif",
+      "title": "Impact Score : méthode, critères et pondérations",
       "description": "Découvrez comment l'Impact Score évalue l'impact environnemental d'un produit grâce à méthode transparente et ouverte."
     },
     "methodologyExplanation": {
@@ -1310,7 +1380,7 @@
     "hero": {
       "eyebrow": "Impact Score",
       "title": "évaluation de l'impact environnemental de vos produits",
-      "subtitle": "La boussole éco-responsable inspirée de l'Écoscore",
+      "subtitle": "Une boussole pour guider chaque achat",
       "definition": {
         "title": "Une définition claire et accessible",
         "description": "L'Impact Score traduit des données techniques en indicateurs compréhensibles et comparables, sans jargon.",
@@ -1401,7 +1471,7 @@
     "principles": {
       "eyebrow": "Nos principes",
       "title": "Les meilleurs choix dans le possible des achats",
-      "subtitle": "La méthode reprend les fondamentaux de l'Écoscore : transparence, contextualisation et pédagogie.",
+      "subtitle": "La méthode repose sur la transparence, la contextualisation et la pédagogie.",
       "items": {
         "transparency": {
           "title": "Transparence totale",
@@ -1477,7 +1547,7 @@
       "title": "Le condensé de l'Impact Score",
       "subtitle": "Ce qu'il faut garder en tête pour comprendre la note.",
       "items": {
-        "method": "Une méthode unique, inspirée de l'Écoscore et commune à toutes les catégories.",
+        "method": "Une méthode unique, commune à toutes les catégories.",
         "criteria": "De multiples critères pondérés pour comparer rapidement des produits similaires.",
         "data": "Des données vérifiées, mises à jour et reliées à leurs sources.",
         "usage": "Une note sur 20, lisible en un coup d'œil pour guider vos achats responsables."
@@ -1485,8 +1555,8 @@
     },
     "approach": {
       "eyebrow": "Notre démarche",
-      "title": "Notre ecoscore : transparent, innovant et performant",
-      "subtitle": "Notre éco-score est expliqué simplement, avec des sources vérifiables et des critères adaptés à chaque catégorie de produit.",
+      "title": "Notre Impact Score : transparent, innovant et performant",
+      "subtitle": "Notre Impact Score est expliqué simplement, avec des sources vérifiables et des critères adaptés à chaque catégorie de produit.",
       "pillars": {
         "transparent": {
           "title": "Transparent",
@@ -1494,7 +1564,7 @@
         },
         "innovant": {
           "title": "Innovant",
-          "description": "Nous valorisons les initiatives existantes et proposons un éco-score polyvalent pour les produits manufacturés."
+          "description": "Nous valorisons les initiatives existantes et proposons un Impact Score polyvalent pour les produits manufacturés."
         },
         "performant": {
           "title": "Performant",
@@ -1536,15 +1606,15 @@
       },
       "approach": {
         "eyebrow": "Notre démarche",
-        "imageAlt": "Illustration de notre démarche ecoscore",
-        "title": "Notre ecoscore : transparent, innovant et performant"
+        "imageAlt": "Illustration de notre démarche Impact Score",
+        "title": "Notre Impact Score : transparent, innovant et performant"
       },
       "methodology": {
         "empty": "Les catégories seront bientôt disponibles.",
         "eyebrow": "Méthodologie",
         "intro": "Les règles de calcul sont détaillées sur chaque fiche produit, dans la section Impact Score. Chaque catégorie de produits a ses propres critères et pondérations. Voici les catégories couvertes :",
         "title": "Comment est calculé l'Impact Score ?",
-        "verticalCarouselAria": "Parcourir le carrousel des catégories ecoscore",
+        "verticalCarouselAria": "Parcourir le carrousel des catégories Impact Score",
         "verticalCardAria": "Accéder à la catégorie {vertical}",
         "verticalCta": "Explorer les produits",
         "verticalCtaAria": "Explorer les produits de la catégorie {vertical}",
@@ -2319,7 +2389,7 @@
       "offersCount": "Nombre d'offres"
     },
     "ecological": {
-      "ecoscore": "Ecoscore",
+      "ecoscore": "Impact Score",
       "brandSustainability": "Durabilité de la marque",
       "dataQuality": "Qualité des données"
     },
@@ -3474,7 +3544,7 @@
   "pwa": {
     "install": {
       "title": "Installer Nudger",
-      "description": "Ajoutez Nudger à votre écran d'accueil pour garder éco-scores et alertes prix sous la main.",
+      "description": "Ajoutez Nudger à votre écran d'accueil pour garder Impact Scores et alertes prix sous la main.",
       "cta": "Installer l'app",
       "dismiss": "Plus tard",
       "updateTitle": "Mise à jour disponible",
@@ -3808,7 +3878,7 @@
       "totalOffers": "Offres actives",
       "averagePrice": "Prix moyen",
       "medianPrice": "Prix médian",
-      "averageEcoscore": "Éco-score moyen",
+      "averageEcoscore": "Impact Score moyen",
       "topBrand": "Marque n°1",
       "newPercent": "Produits neufs",
       "countriesCount": "Pays"
