@@ -1,12 +1,15 @@
 ---
 title: "ADR 0010: Source-neutral product reference"
-status: accepted
+status: superseded
 normative: true
 audience: PROJECT_SCOPED
 decisions: [10, 12]
 ---
 
 # ADR 0010: Source-neutral product reference
+
+Superseded by ADR-0021: `services/data-reference` was discarded at the October 2026 reset,
+and reference datasets go through `ref-<id>` indexes projected onto `Product`.
 
 ## Context
 

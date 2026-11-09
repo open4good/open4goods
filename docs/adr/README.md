@@ -25,7 +25,7 @@ developer workflow.
 - [ADR 0007: Icecat module and data boundaries](0007-icecat-module-and-data-boundaries.md)
 - [ADR 0008: Portable project MCP tooling](0008-portable-project-mcp-tooling.md)
 - [ADR 0009: XWiki content and identity retirement](0009-xwiki-content-and-identity-retirement.md)
-- [ADR 0010: Source-neutral product reference](0010-source-neutral-product-reference.md)
+- [ADR 0010: Source-neutral product reference](0010-source-neutral-product-reference.md) (superseded by ADR 0021)
 - [ADR 0011: Price observation time series](0011-price-observation-time-series.md)
 - [ADR 0012: Consumer product search](0012-consumer-product-search.md)
 - [ADR 0013: Beta-first development and production promotion](0013-beta-first-development-and-production-promotion.md) (superseded by ADR 0014)
@@ -36,3 +36,4 @@ developer workflow.
 - [ADR 0018: Local promotion readiness gate](0018-promotion-readiness-gate.md)
 - [ADR 0019: Dependency maintenance and release policy](0019-dependency-maintenance-policy.md)
 - [ADR 0020: Legacy backup import contract](0020-legacy-backup-import-contract.md)
+- [ADR 0021: Reference datasets and projection onto products](0021-reference-datasets-and-projection.md)
