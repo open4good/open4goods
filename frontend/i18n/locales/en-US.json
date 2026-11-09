@@ -97,36 +97,43 @@
   },
   "home": {
     "seo": {
-      "title": "Nudger - Responsible shopping made easy",
-      "description": "Compare the environmental impact and prices of over 50 million products with Nudger.",
+      "title": "Nudger - Price and Impact Score comparator",
+      "description": "Compare prices and Impact Scores for over 50 million products: a score out of 20, published methodology.",
       "imageAlt": "Illustration of the Nudger dashboard showing impact scores and price comparisons."
     },
     "hero": {
-      "eyebrow": "Responsible shopping",
-      "title": "Nudger: The eco-friendly comparator",
+      "eyebrow": "Compare price and Impact Score",
+      "title": "Buy better. Spend smarter.",
       "animatedSubtitle": "",
-      "titleSubtitle": ["Buy better. Spend smarter."],
+      "titleSubtitle": ["The comparator that rates the environmental impact of appliances and tech"],
       "subtitles": [
         "Save time, stay true to your values. Compare effortlessly, choose freely.",
-        "Shop smarter without compromise. Nudger balances planet and price.",
-        "Find the responsible choice faster. Trusted data, transparent insights."
+        "Compare prices and Impact Scores in one place.",
+        "Find products that match your needs faster, with transparent data."
       ],
+      "impactHighlight": {
+        "lead": "Spot the best-ranked products in their category on the Impact Score.",
+        "link": "Environmental rating",
+        "forProducts": "for",
+        "inCategories": "products in",
+        "categories": "categories"
+      },
       "iconAlt": "Nudger PWA launcher icon",
       "imageAlt": "Illustration of the Nudger comparison experience with product cards and impact charts.",
       "search": {
         "label": "Search for a product",
         "placeholder": "Search a product (e.g. television, smartphone...)",
-        "ariaLabel": "Search for a responsible product",
+        "ariaLabel": "Search for a product",
         "cta": "NUDGER",
         "helper": "Independent comparator powered by open data.",
         "helpersTitle": "Shop with intention. Compare for impact.",
         "helpers": [
           {
             "icon": "🌿",
-            "label": "A unique ecological and environmental assessment for {products} across {categories} categories",
+            "label": "A unique environmental assessment for {products} across {categories} categories",
             "segments": [
               {
-                "text": "A unique ecological assessment",
+                "text": "A unique environmental assessment",
                 "to": "/impact-score"
               },
               {
@@ -177,7 +184,7 @@
           "title": "🌿 ImpactScore: guiding your purchases",
           "segments": [
             {
-              "text": "Buy less harmful for the planet, thanks to our"
+              "text": "Spot the best-ranked products in their category, thanks to our"
             },
             {
               "text": "environmental assessment",
@@ -265,7 +272,7 @@
           "title": "🌿 ImpactScore",
           "segments": [
             {
-              "text": "A clear score to buy more responsibly."
+              "text": "A score out of 20, published methodology."
             }
           ]
         },
@@ -340,20 +347,20 @@
     },
     "split": {
       "painAlt": "Illustration of a shopper feeling overwhelmed by product choices.",
-      "gainAlt": "Illustration of a shopper relieved after finding a responsible choice."
+      "gainAlt": "Illustration of a shopper relieved after comparing products."
     },
     "problems": {
       "title": "Too many labels, not enough clarity?",
       "description": "Comparing impact, price and trust sources across dozens of tabs is exhausting. Nudger brings it back to one place.",
       "items": {
         "labelsOverload": "Lost in the jungle of labels? Hard to truly compare.",
-        "budgetVsEcology": "Ecology versus budget? Tired of choosing between the two.",
+        "budgetVsEcology": "Impact versus budget? Tired of choosing between the two.",
         "tooManyTabs": "Eight tabs open? One place is enough."
       }
     },
     "solution": {
-      "title": "Responsible shopping, minus the headache",
-      "description": "Nudger combines environmental, technical and pricing insights to simplify every decision.",
+      "title": "Buy better, without paying more",
+      "description": "Nudger combines published impact data, technical data and prices to simplify every decision.",
       "benefits": {
         "time": {
           "title": "Save time",
@@ -365,7 +372,7 @@
         },
         "planet": {
           "title": "Shop better",
-          "description": "Spot the most responsible products."
+          "description": "Spot the best-ranked products in their category on the Impact Score."
         },
         "trust": {
           "title": "Trustworthy",
@@ -380,7 +387,7 @@
       "cards": {
         "impactScore": {
           "title": "AI Impact Score",
-          "description": "A clear ecological score (5 criteria, AI used with restraint)."
+          "description": "A score out of 20, published methodology."
         },
         "priceComparison": {
           "title": "Price comparison + history",
@@ -448,8 +455,8 @@
       "subtitle": "The topics we hear about the most.",
       "items": {
         "aiEnergy": {
-          "question": "Does AI burn too much energy?",
-          "answer": "Frugal AI, optimised computations, net positive impact."
+          "question": "What is AI used for in Nudger?",
+          "answer": "AI is used once per product page, and the result is cached."
         },
         "reuse": {
           "question": "Is true frugality all about reuse?",
@@ -479,7 +486,7 @@
         },
         "impactScore": {
           "question": "How do you calculate the Impact Score?",
-          "answer": "Five weighted criteria + lean AI, fully open methodology.",
+          "answer": "Several weighted criteria, published methodology.",
           "cta": "Learn more",
           "ctaAria": "Open the detailed Impact Score page"
         },
@@ -495,7 +502,7 @@
       "agent": {
         "eyebrow": "Your AI result here 😉",
         "title": "Ask your question, we'll pin it to the FAQ",
-        "subtitle": "Share your request, we'll answer with frugal AI and surface it below for everyone.",
+        "subtitle": "Share your request, we'll answer with AI and surface it below for everyone.",
         "dynamicAnswerWithLink": "See the detailed AI answer: {link}",
         "dynamicAnswerWithState": "We're crafting the answer ({state}).",
         "dynamicAnswerPending": "Thanks! Your question is in the queue.",
@@ -862,7 +869,7 @@
       },
       "ecoscore": {
         "title": "Discover the Impact Score",
-        "description": "Understand how the eco-score is calculated for {category}",
+        "description": "Understand how the Impact Score is calculated for {category}",
         "cta": "Methodology {category}",
         "ariaLabel": "Open the Eco-score guide"
       },
@@ -2370,7 +2377,7 @@
       "summary": "Our evaluation across three dimensions.",
       "vsMedian": "vs median",
       "dimensions": {
-        "impact": "Eco Impact",
+        "impact": "Impact Score",
         "price": "Price Position",
         "reliability": "Data Reliability"
       },
@@ -2379,7 +2386,8 @@
         "good": "Good",
         "fair": "Fair",
         "poor": "Poor",
-        "insufficient": "Weak"
+        "insufficient": "Weak",
+        "unrated": "Not rated"
       },
       "priceLevels": {
         "good": "Good Price",
@@ -2641,11 +2649,10 @@
     "hero": {
       "aiSummary": {
         "community": "Experts say",
-        "ecological": "Environmentally",
+        "ecological": "Impact Score",
         "technical": "Technically"
       },
       "bestPriceTitle": "Best price",
-      "responsibleChoice": "Responsible choice",
       "breadcrumbAriaLabel": "Product breadcrumb",
       "compare": {
         "add": "Add to compare",
@@ -2724,23 +2731,23 @@
       "endOfLifeSupportRemaining": "Legal support remaining",
       "endOfLifeSupportExpired": "Legal support ended",
       "alternatives": {
-        "title": "Greener alternatives",
+        "title": "Cheaper and better ranked on the Impact Score?",
         "subtitle": "Discover similar products with a better impact score or price.",
-        "bestProduct": "Voted best product for your criteria!",
+        "bestProduct": "Best ranked for your criteria",
         "error": "We couldn't load alternative products. Please try again.",
         "retry": "Retry",
         "untitled": "Unnamed product",
         "viewProduct": "View product {name}",
         "filters": {
           "price": "Price lower or equal to current product",
-          "ecoscore": "Eco-score higher or equal to current product",
+          "ecoscore": "Impact Score higher or equal to current product",
           "attributeGreater": "{label} higher or equal to this product",
           "attributeLower": "{label} lower or equal to this product",
           "attributeEqual": "{label} same as this product"
         },
         "tooltips": {
           "price": "Show products priced at or below {value}.",
-          "ecoscore": "Show products with an eco-score equal or higher than {value}.",
+          "ecoscore": "Show products with an Impact Score equal or higher than {value}.",
           "attributeBetter": "Show products with {label} equal or higher than your product.",
           "attributeLower": "Show products with {label} equal or lower than your product.",
           "attributeEqual": "Show products where {label} matches your product."
@@ -3186,14 +3193,14 @@
         },
         "learnMoreCta": "Explore categories",
         "primaryCta": "Start searching",
-        "secondaryCta": "Browse responsibly",
+        "secondaryCta": "Products rated on the Impact Score",
         "subtitle": "Compare impact, price and trust signals in a single place.",
         "title": "Choose freely.",
         "titleFull": "Save time. Choose freely.",
         "badgeAlt": "Independent comparator"
       },
       "logoAlt": "Nudger orange logo icon",
-      "mission": "nudger.fr is an open approach to assess the environmental impact of consumer goods and partially offset the impact of your online purchases.",
+      "mission": "nudger.fr is an open approach to assess the environmental impact of products.",
       "rightsReserved": "All Rights Reserved"
     },
     "hero": {
@@ -3201,7 +3208,7 @@
       "defaultSubtitle": "Video demo hero to show a clean integration in a Vue 3 application.",
       "defaultTitle": "Default Title",
       "mainSubtitle": "Buy better without spending more",
-      "mainTitle": "Nudger: The eco-friendly comparator"
+      "mainTitle": "Nudger: price and Impact Score comparator"
     },
     "links": {
       "linkedin": "https://www.linkedin.com/company/comparateur-nudger/"
@@ -3279,7 +3286,7 @@
       },
       "productsMenu": {
         "title": "Our products",
-        "subtitle": "Each universe comes with an environmental assessment.",
+        "subtitle": "These products are rated on the Impact Score.",
         "untitledCategory": "Popular category",
         "popular": {
           "title": "Popular categories",
@@ -3589,7 +3596,7 @@
         }
       },
       "scores": {
-        "title": "Your ecological priorities",
+        "title": "Impact Score criteria",
         "subtitle": ""
       },
       "recommendations": {

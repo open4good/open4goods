@@ -130,7 +130,7 @@ i18n:
     # Vertical page elements
     verticalHomeUrl: "frigos"
     verticalHomeTitle: "Réfrigérateurs"
-    verticalHomeDescription: "Comparez les réfrigérateurs selon leur impact environnemental, leur volume utile, leur classe énergétique et leur prix. Repérez les modèles les plus sobres pour conserver vos aliments avec moins d'électricité au quotidien."
+    verticalHomeDescription: "Comparez les réfrigérateurs selon leur impact environnemental, leur volume utile, leur classe énergétique et leur prix. Repérez les modèles les moins énergivores (kWh/an, étiquette énergie) pour conserver vos aliments."
 
     # A mapping beetween custom page names behind this vertical and wiki pages (sample)
   #    wikiPages:
@@ -194,7 +194,7 @@ nudgeToolConfig:
     ################
     # Impact Score
     ################
-    - id: "impact_high" # Worst 33% (high environmental impact)
+    - id: "impact_high" # Worst 33% (see Impact Score ranking)
       group: "impactscore"
       criterias:
         - field: "scores.ECOSCORE.ranking"
@@ -202,17 +202,17 @@ nudgeToolConfig:
           toPercent: 33
       image: "example-image.png"
       url:
-        en: "high-impact"
-        fr: "fort-impact"
+        en: "lower-ranked"
+        fr: "moins-bien-classes"
       caption:
-        en: "High"
-        fr: "Élevé"
+        en: "Lower "
+        fr: "Moins bien "
       title:
-        en: "High impact"
-        fr: "Impact élevé"
+        en: "Lower ranked"
+        fr: "Moins bien classés"
       description:
-        en: "Refrigerators in the highest environmental-impact tier"
-        fr: "Réfrigérateurs dans le tiers d'impact environnemental le plus élevé"
+        en: "Products in the bottom third of their category on the Impact Score"
+        fr: "Produits du dernier tiers de leur catégorie à l'Impact Score"
 
     - id: "impact_medium" # Middle 34%
       group: "impactscore"
@@ -222,19 +222,19 @@ nudgeToolConfig:
           toPercent: 67
       image: "example-image.png"
       url:
-        en: "medium-impact"
-        fr: "impact-moyen"
+        en: "mid-ranked"
+        fr: "milieu-de-classement"
       caption:
-        en: "Medium"
-        fr: "Moyen"
+        en: "Mid "
+        fr: "Milieu "
       title:
-        en: "Medium impact"
-        fr: "Impact moyen"
+        en: "Mid-ranked"
+        fr: "Milieu de classement"
       description:
-        en: "Refrigerators in the middle environmental-impact tier"
-        fr: "Réfrigérateurs dans le tiers d'impact environnemental intermédiaire"
+        en: "Products in the middle third of their category on the Impact Score"
+        fr: "Produits du tiers intermédiaire de leur catégorie à l'Impact Score"
 
-    - id: "impact_low" # Best 33% (low environmental impact)
+    - id: "impact_low" # Best 33% (see Impact Score ranking)
       group: "impactscore"
       criterias:
         - field: "scores.ECOSCORE.ranking"
@@ -242,17 +242,17 @@ nudgeToolConfig:
           toPercent: 100
       image: "example-image.png"
       url:
-        en: "low-impact"
-        fr: "faible-impact"
+        en: "best-ranked"
+        fr: "mieux-classes"
       caption:
-        en: "Low"
-        fr: "Faible"
+        en: "Best "
+        fr: "Mieux "
       title:
-        en: "Low impact"
-        fr: "Impact faible"
+        en: "Best ranked (top third by Impact Score)"
+        fr: "Mieux classés (premier tiers Impact Score)"
       description:
-        en: "Refrigerators in the lowest environmental-impact tier"
-        fr: "Réfrigérateurs dans le tiers d'impact environnemental le plus faible"
+        en: "Products in the top third of their category on the Impact Score"
+        fr: "Produits du premier tiers de leur catégorie à l'Impact Score"
 
     # Price Subsets
     - id: "price_lower_500"
@@ -390,7 +390,7 @@ subsets:
 ################
 # Impact Score
 ################
-- id: "impact_high" # Worst 33% (high environmental impact)
+- id: "impact_high" # Worst 33% (see Impact Score ranking)
   group: "impactscore"
   criterias:
     - field: "scores.ECOSCORE.ranking"
@@ -398,17 +398,17 @@ subsets:
       toPercent: 33
   image: "example-image.png"
   url:
-    en: "high-impact"
-    fr: "fort-impact"
+    en: "lower-ranked"
+    fr: "moins-bien-classes"
   caption:
-    en: "High"
-    fr: "Élevé"
+    en: "Lower "
+    fr: "Moins bien "
   title:
-    en: "High impact"
-    fr: "Impact élevé"
+    en: "Lower ranked"
+    fr: "Moins bien classés"
   description:
-    en: "Refrigerators in the highest environmental-impact tier"
-    fr: "Réfrigérateurs dans le tiers d'impact environnemental le plus élevé"
+    en: "Products in the bottom third of their category on the Impact Score"
+    fr: "Produits du dernier tiers de leur catégorie à l'Impact Score"
 
 - id: "impact_medium" # Middle 34%
   group: "impactscore"
@@ -418,19 +418,19 @@ subsets:
       toPercent: 67
   image: "example-image.png"
   url:
-    en: "medium-impact"
-    fr: "impact-moyen"
+    en: "mid-ranked"
+    fr: "milieu-de-classement"
   caption:
-    en: "Medium"
-    fr: "Moyen"
+    en: "Mid "
+    fr: "Milieu "
   title:
-    en: "Medium impact"
-    fr: "Impact moyen"
+    en: "Mid-ranked"
+    fr: "Milieu de classement"
   description:
-    en: "Refrigerators in the middle environmental-impact tier"
-    fr: "Réfrigérateurs dans le tiers d'impact environnemental intermédiaire"
+    en: "Products in the middle third of their category on the Impact Score"
+    fr: "Produits du tiers intermédiaire de leur catégorie à l'Impact Score"
 
-- id: "impact_low" # Best 33% (low environmental impact)
+- id: "impact_low" # Best 33% (see Impact Score ranking)
   group: "impactscore"
   criterias:
     - field: "scores.ECOSCORE.ranking"
@@ -438,17 +438,17 @@ subsets:
       toPercent: 100
   image: "example-image.png"
   url:
-    en: "low-impact"
-    fr: "faible-impact"
+    en: "best-ranked"
+    fr: "mieux-classes"
   caption:
-    en: "Low"
-    fr: "Faible"
+    en: "Best "
+    fr: "Mieux "
   title:
-    en: "Low impact"
-    fr: "Impact faible"
+    en: "Best ranked (top third by Impact Score)"
+    fr: "Mieux classés (premier tiers Impact Score)"
   description:
-    en: "Refrigerators in the lowest environmental-impact tier"
-    fr: "Réfrigérateurs dans le tiers d'impact environnemental le plus faible"
+    en: "Products in the top third of their category on the Impact Score"
+    fr: "Produits du premier tiers de leur catégorie à l'Impact Score"
 
 # Price Subsets
 - id: "price_lower_500"

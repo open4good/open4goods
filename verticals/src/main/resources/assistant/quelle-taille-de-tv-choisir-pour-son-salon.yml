@@ -144,7 +144,7 @@ subsets:
   ################
   # Impact Score
   ################
-  - id: "impact_high" # Unique identifier for the subset - Worst 33% (high environmental impact)
+  - id: "impact_high" # Unique identifier for the subset - Worst 33% (see Impact Score ranking)
     group: "impactscore"
     criterias:
       - field: "scores.ECOSCORE.ranking"
@@ -152,17 +152,17 @@ subsets:
         toPercent: 33
     image: "example-image.png"
     url:
-      en: "high-impact"
-      fr: "fort-impact"
+      en: "lower-ranked"
+      fr: "moins-bien-classes"
     caption:
-      en: "High "
-      fr: "Élevé "
+      en: "Lower "
+      fr: "Moins bien "
     title:
-      en: "High Impact"
-      fr: "Impact Élevé"
+      en: "Lower ranked"
+      fr: "Moins bien classés"
     description:
-      en: "Products with a high environmental impact"
-      fr: "Produits ayant un fort impact environnemental"
+      en: "Products in the bottom third of their category on the Impact Score"
+      fr: "Produits du dernier tiers de leur catégorie à l'Impact Score"
 
   - id: "impact_medium" # Middle 34%
     group: "impactscore"
@@ -172,19 +172,19 @@ subsets:
         toPercent: 67
     image: "example-image.png"
     url:
-      en: "medium-impact"
-      fr: "impact-moyen"
+      en: "mid-ranked"
+      fr: "milieu-de-classement"
     caption:
-      en: "Medium"
-      fr: "Moyen "
+      en: "Mid "
+      fr: "Milieu "
     title:
-      en: "Medium Impact"
-      fr: "Impact Moyen"
+      en: "Mid-ranked"
+      fr: "Milieu de classement"
     description:
-      en: "Products with a medium environmental impact"
-      fr: "Produits ayant un impact environnemental moyen"
+      en: "Products in the middle third of their category on the Impact Score"
+      fr: "Produits du tiers intermédiaire de leur catégorie à l'Impact Score"
 
-  - id: "impact_low" # Best 33% (low environmental impact)
+  - id: "impact_low" # Best 33% (see Impact Score ranking)
     group: "impactscore"
     criterias:
       - field: "scores.ECOSCORE.ranking"
@@ -192,17 +192,17 @@ subsets:
         toPercent: 100
     image: "example-image.png"
     url:
-      en: "low-impact"
-      fr: "faible-impact"
+      en: "best-ranked"
+      fr: "mieux-classes"
     caption:
-      en: "Low "
-      fr: "Faible "
+      en: "Best "
+      fr: "Mieux "
     title:
-      en: "Low Impact"
-      fr: "Impact Faible"
+      en: "Best ranked (top third by Impact Score)"
+      fr: "Mieux classés (premier tiers Impact Score)"
     description:
-      en: "Products with a low environmental impact"
-      fr: "Produits ayant un faible impact environnemental"
+      en: "Products in the top third of their category on the Impact Score"
+      fr: "Produits du premier tiers de leur catégorie à l'Impact Score"
 
   ################
   # Price

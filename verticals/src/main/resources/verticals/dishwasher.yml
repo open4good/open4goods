@@ -109,7 +109,7 @@ i18n:
     # Vertical page elements
     verticalHomeUrl: "lave-vaisselles"
     verticalHomeTitle: "Lave-vaisselles"
-    verticalHomeDescription: "Comparez les lave-vaisselles (pose libre, encastrables, 45/60 cm, nombre de couverts, niveau sonore…) selon l’éco-score et le prix."
+    verticalHomeDescription: "Comparez les lave-vaisselles (pose libre, encastrables, 45/60 cm, nombre de couverts, niveau sonore…) selon l’Impact Score et le prix."
 
     # A mapping beetween custom page names behind this vertical and wiki pages (sample)
   #    wikiPages:
@@ -137,7 +137,7 @@ i18n:
 
     verticalHomeUrl: "dishwashers"
     verticalHomeTitle: "Dishwashers"
-    verticalHomeDescription: "Compare dishwashers (built-in or freestanding, 45/60 cm, capacity, noise level) by eco-score and price."
+    verticalHomeDescription: "Compare dishwashers (built-in or freestanding, 45/60 cm, capacity, noise level) by Impact Score and price."
 
 #####################################################################################################################################
 # NUDGE TOOL CONFIGURATION

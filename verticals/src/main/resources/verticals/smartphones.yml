@@ -73,7 +73,7 @@ i18n:
 
     verticalHomeUrl: "smartphones"
     verticalHomeTitle: "Smartphones"
-    verticalHomeDescription: "Découvrez notre sélection de smartphones. Fabrication, métaux critiques, durée de vie et réparabilité font du smartphone l'un des appareils électroniques au plus fort impact environnemental. Nudger vous aide à choisir le modèle le plus responsable, sans renoncer à vos usages."
+    verticalHomeDescription: "Découvrez notre sélection de smartphones. Fabrication, métaux critiques, durée de vie et réparabilité font du smartphone l'un des appareils électroniques au plus fort impact environnemental. Nudger affiche leur Impact Score pour comparer les modèles, sans renoncer à vos usages."
 
   en:
     url:
@@ -92,7 +92,7 @@ i18n:
 
     verticalHomeUrl: "smartphones"
     verticalHomeTitle: "Smartphones"
-    verticalHomeDescription: "Explore our selection of smartphones. Manufacturing, critical metals, lifespan and repairability make the smartphone one of the most environmentally impactful electronic devices. Nudger helps you pick the most responsible model without giving up the features you need."
+    verticalHomeDescription: "Explore our selection of smartphones. Manufacturing, critical metals, lifespan and repairability make the smartphone one of the most environmentally impactful electronic devices. Nudger shows their Impact Score so you can compare models without giving up the features you need."
 
 availableImpactScoreCriterias:
   - REPAIRABILITY_INDEX
@@ -135,7 +135,7 @@ nudgeToolConfig:
         en: "Energy consumption"
         fr: "Consommation d'énergie"
       description:
-        en: "Products with low energy consumption"
+        en: "Lowest energy consumption"
         fr: "Produits avec faible consommation énergétique"
     - scoreName: DURABILITY
       fromPercent: 50
@@ -144,8 +144,8 @@ nudgeToolConfig:
         en: "Durability"
         fr: "Durabilité"
       description:
-        en: "Products with good durability"
-        fr: "Produits durables"
+        en: "Durability (index and warranty)"
+        fr: "Durabilité (indice et garanties)"
     - scoreName: REPARABILITY
       fromPercent: 50
       mdiIcon: "mdi-tools"
@@ -174,17 +174,17 @@ nudgeToolConfig:
           value: "10.88"
       image: "example-image.png"
       url:
-        en: "high-impact"
-        fr: "fort-impact"
+        en: "lower-ranked"
+        fr: "moins-bien-classes"
       caption:
-        en: "High"
-        fr: "Élevé"
+        en: "Lower "
+        fr: "Moins bien "
       title:
-        en: "High impact"
-        fr: "Impact élevé"
+        en: "Lower ranked"
+        fr: "Moins bien classés"
       description:
-        en: "Smartphones with a high environmental impact."
-        fr: "Smartphones ayant un fort impact environnemental."
+        en: "Products in the bottom third of their category on the Impact Score"
+        fr: "Produits du dernier tiers de leur catégorie à l'Impact Score"
     - id: "impact_medium"
       group: "impactscore"
       criterias:
@@ -196,17 +196,17 @@ nudgeToolConfig:
           value: "11.54"
       image: "example-image.png"
       url:
-        en: "medium-impact"
-        fr: "impact-moyen"
+        en: "mid-ranked"
+        fr: "milieu-de-classement"
       caption:
-        en: "Medium"
-        fr: "Moyen"
+        en: "Mid "
+        fr: "Milieu "
       title:
-        en: "Medium impact"
-        fr: "Impact moyen"
+        en: "Mid-ranked"
+        fr: "Milieu de classement"
       description:
-        en: "Smartphones with a medium environmental impact."
-        fr: "Smartphones ayant un impact environnemental moyen."
+        en: "Products in the middle third of their category on the Impact Score"
+        fr: "Produits du tiers intermédiaire de leur catégorie à l'Impact Score"
     - id: "impact_low"
       group: "impactscore"
       criterias:
@@ -215,17 +215,17 @@ nudgeToolConfig:
           value: "11.54"
       image: "example-image.png"
       url:
-        en: "low-impact"
-        fr: "faible-impact"
+        en: "best-ranked"
+        fr: "mieux-classes"
       caption:
-        en: "Low"
-        fr: "Faible"
+        en: "Best "
+        fr: "Mieux "
       title:
-        en: "Low impact"
-        fr: "Impact faible"
+        en: "Best ranked (top third by Impact Score)"
+        fr: "Mieux classés (premier tiers Impact Score)"
       description:
-        en: "Smartphones with a lower environmental impact."
-        fr: "Smartphones ayant un impact environnemental plus faible."
+        en: "Products in the top third of their category on the Impact Score"
+        fr: "Produits du premier tiers de leur catégorie à l'Impact Score"
     - id: "price_entry"
       group: "price"
       criterias:
@@ -356,17 +356,17 @@ subsets:
         value: "10.88"
     image: "example-image.png"
     url:
-      en: "high-impact"
-      fr: "fort-impact"
+      en: "lower-ranked"
+      fr: "moins-bien-classes"
     caption:
-      en: "High"
-      fr: "Élevé"
+      en: "Lower "
+      fr: "Moins bien "
     title:
-      en: "High impact"
-      fr: "Impact élevé"
+      en: "Lower ranked"
+      fr: "Moins bien classés"
     description:
-      en: "Smartphones with a high environmental impact."
-      fr: "Smartphones ayant un fort impact environnemental."
+      en: "Products in the bottom third of their category on the Impact Score"
+      fr: "Produits du dernier tiers de leur catégorie à l'Impact Score"
   - id: "impact_medium"
     group: "impactscore"
     criterias:
@@ -378,17 +378,17 @@ subsets:
         value: "11.54"
     image: "example-image.png"
     url:
-      en: "medium-impact"
-      fr: "impact-moyen"
+      en: "mid-ranked"
+      fr: "milieu-de-classement"
     caption:
-      en: "Medium"
-      fr: "Moyen"
+      en: "Mid "
+      fr: "Milieu "
     title:
-      en: "Medium impact"
-      fr: "Impact moyen"
+      en: "Mid-ranked"
+      fr: "Milieu de classement"
     description:
-      en: "Smartphones with a medium environmental impact."
-      fr: "Smartphones ayant un impact environnemental moyen."
+      en: "Products in the middle third of their category on the Impact Score"
+      fr: "Produits du tiers intermédiaire de leur catégorie à l'Impact Score"
   - id: "impact_low"
     group: "impactscore"
     criterias:
@@ -397,17 +397,17 @@ subsets:
         value: "11.54"
     image: "example-image.png"
     url:
-      en: "low-impact"
-      fr: "faible-impact"
+      en: "best-ranked"
+      fr: "mieux-classes"
     caption:
-      en: "Low"
-      fr: "Faible"
+      en: "Best "
+      fr: "Mieux "
     title:
-      en: "Low impact"
-      fr: "Impact faible"
+      en: "Best ranked (top third by Impact Score)"
+      fr: "Mieux classés (premier tiers Impact Score)"
     description:
-      en: "Smartphones with a lower environmental impact."
-      fr: "Smartphones ayant un impact environnemental plus faible."
+      en: "Products in the top third of their category on the Impact Score"
+      fr: "Produits du premier tiers de leur catégorie à l'Impact Score"
   - id: "price_entry"
     group: "price"
     criterias:

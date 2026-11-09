@@ -8,7 +8,7 @@ import frFR from './fr-FR.json'
 // first form ("Nudger"): the separator must be written as a literal.
 describe('home SEO title', () => {
   it.each([
-    ['fr-FR', 'Nudger | Comparateur écologique'],
+    ['fr-FR', "Nudger | Comparateur de prix et d'Impact Score"],
     ['en-US', enUS.home.seo.title],
   ])('keeps the whole title in %s', (locale, expected) => {
     const i18n = createI18n({

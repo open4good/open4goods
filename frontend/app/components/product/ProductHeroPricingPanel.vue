@@ -19,21 +19,6 @@
 
     <div class="product-hero__pricing-panel-body">
       <template v-if="hasOffer">
-        <div
-          v-if="condition === 'occasion'"
-          class="product-hero__responsible-badge-wrapper mb-1"
-        >
-          <v-chip
-            color="success"
-            variant="flat"
-            size="small"
-            class="font-weight-bold"
-            :prepend-icon="mdiLeaf"
-          >
-            {{ $t('product.hero.responsibleChoice') }}
-          </v-chip>
-        </div>
-
         <v-tooltip v-if="offerName" :text="offerName" location="bottom">
           <template #activator="{ props: tooltipProps }">
             <div
@@ -344,7 +329,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import {
-  mdiLeaf,
   mdiShoppingSearchOutline,
   mdiStorefrontOutline,
   mdiChevronRight,
@@ -560,11 +544,6 @@ const onOfferSelected = (item: OfferOption) => {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-}
-
-.product-hero__responsible-badge-wrapper {
-  display: flex;
-  align-items: center;
 }
 
 .product-hero__pricing-panel-main-wrapper {

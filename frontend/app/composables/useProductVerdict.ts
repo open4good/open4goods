@@ -25,7 +25,7 @@ export function useProductVerdict(
         level: 'insufficient',
         score: null,
         scoreOutOf: 20,
-        labelKey: 'product.verdict.levels.insufficient',
+        labelKey: 'product.verdict.levels.unrated',
         color: 'grey',
         icon: mdiLeaf,
       }
