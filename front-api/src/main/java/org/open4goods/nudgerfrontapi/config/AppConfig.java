@@ -13,6 +13,7 @@ import org.open4goods.icecat.services.loader.CategoryLoader;
 import org.open4goods.icecat.services.loader.FeatureLoader;
 import org.open4goods.nudgerfrontapi.config.properties.CacheProperties;
 import org.open4goods.nudgerfrontapi.config.properties.GoogleTaxonomyProperties;
+import org.open4goods.services.productrepository.impactscore.ImpactScoreSnapshotRepository;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
@@ -50,6 +51,11 @@ public class AppConfig {
     @Profile("!local")
     ProductRepository productRepository(ElasticsearchOperations elasticsearchOperations) {
         return new ProductRepository(elasticsearchOperations);
+    }
+
+    @Bean
+    ImpactScoreSnapshotRepository impactScoreSnapshotRepository(ElasticsearchOperations elasticsearchOperations) {
+        return new ImpactScoreSnapshotRepository(elasticsearchOperations);
     }
 
     @Bean

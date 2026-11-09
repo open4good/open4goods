@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.time.Instant;
+import java.time.YearMonth;
+import java.time.ZoneOffset;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -36,6 +38,9 @@ import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.open4goods.model.impactscore.ImpactScoreSnapshot;
+import org.open4goods.model.impactscore.ImpactScoreSnapshotBuilder;
+import org.open4goods.services.productrepository.impactscore.ImpactScoreSnapshotRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import org.open4goods.api.config.yml.ApiProperties;
@@ -76,6 +81,9 @@ public class BatchService {
 	/** Post-scoring ImpactScore checks (GOU-1895). */
 	private ImpactScoreBatchGuard impactScoreGuard;
 
+	/** Storage of the monthly ImpactScore snapshots; {@code null} disables them. */
+	private ImpactScoreSnapshotRepository impactScoreSnapshotRepository;
+
 
 	public BatchService(AggregationFacadeService aggregationFacadeService,
 			CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository dataRepository, FeedIndexingService feedIndexingService, FeedService feedService, SerialisationService serialisationService, ResourceService resourceService, ApiProperties apiProperties) {
@@ -99,6 +107,42 @@ public class BatchService {
 	 */
 	public void setImpactScoreGuard(ImpactScoreBatchGuard impactScoreGuard) {
 		this.impactScoreGuard = impactScoreGuard;
+	}
+
+	/**
+	 * Enables the monthly ImpactScore snapshots (GOU-1896).
+	 *
+	 * @param impactScoreSnapshotRepository the snapshot storage
+	 */
+	public void setImpactScoreSnapshotRepository(ImpactScoreSnapshotRepository impactScoreSnapshotRepository) {
+		this.impactScoreSnapshotRepository = impactScoreSnapshotRepository;
+	}
+
+	/**
+	 * Stores the ImpactScore snapshot of the vertical for the current month: on the 1st of the month, or when the
+	 * month has none yet (batch missed on the 1st). The document id is the vertical and the month, so running it
+	 * again never duplicates. A failure is logged and never stops the batch.
+	 *
+	 * @param vertical the vertical, already scored
+	 * @param cohort   its products having offers, excluded ones included
+	 */
+	void snapshotImpactScore(VerticalConfig vertical, Collection<Product> cohort) {
+		if (impactScoreSnapshotRepository == null) {
+			return;
+		}
+		try {
+			Instant now = Instant.now();
+			YearMonth month = ImpactScoreSnapshotBuilder.monthOf(now);
+			String id = ImpactScoreSnapshot.idOf(vertical.getId(), month.toString());
+			boolean firstOfMonth = now.atZone(ZoneOffset.UTC).getDayOfMonth() == 1;
+			if (!firstOfMonth && impactScoreSnapshotRepository.exists(id)) {
+				return;
+			}
+			impactScoreSnapshotRepository.save(ImpactScoreSnapshotBuilder.build(vertical, cohort, month, now));
+			logger.info("ImpactScore snapshot {} stored", id);
+		} catch (Exception e) {
+			logger.error("ImpactScore snapshot failed for vertical {}", vertical.getId(), e);
+		}
 	}
 
 	/**
@@ -645,6 +689,7 @@ public class BatchService {
 			if (!impactScoreChecksPass(vertical, scorable)) {
 				return;
 			}
+			snapshotImpactScore(vertical, products);
 		} catch (Exception e) {
 			// Scores are cleared before being rebuilt: indexing now would persist partial results
 			logger.error("Scoring failed for vertical {} : nothing is indexed for this run", vertical.getId(), e);
