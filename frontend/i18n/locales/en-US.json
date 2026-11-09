@@ -1125,6 +1125,36 @@
         "criterionNotFilled": "Not filled in",
         "methodPage": "Method v{version}. A product is rated only if its filled-in criteria weigh at least {coverage}% of the matrix. A criterion that is not filled in stays not filled in: it is never replaced by an average value.",
         "contextAria": "Score details"
+      },
+      "why": {
+        "title": "Why this score?",
+        "headline": "{score}/20: this product ranks above {percent}% of the {count} {items} rated by Nudger.",
+        "headlineBottom": "{score}/20: this product ranks ahead of {percent}% of the {count} {items} rated by Nudger.",
+        "onlyRated": "{score}/20: the only rated product in its category, so no position comparison is possible.",
+        "criterion": "{label} ({value})",
+        "criterionVsAverage": "{label} ({value}, versus {average} on average in the category)",
+        "strengths": "Favourable points: {criteria}.",
+        "strengthsTop": "Strongest points in its favour: {criteria}.",
+        "strengthsBottomLow": "Its favourable points: {criteria}.",
+        "weaknesses": "Points that limit the score: {criteria}.",
+        "weaknessesTop": "What keeps it from a 20/20: {criteria}.",
+        "weaknessesBottom": "What weighs most on the score: {criteria}.",
+        "missing": "Criteria not provided: {criteria}; their weight is spread over the other criteria.",
+        "basis": "Score based on {count} of {total} criteria, calculated on {date}, method v{version}.",
+        "basisComplete": "All criteria of the method are provided for this product (calculated on {date}, method v{version}).",
+        "basisShort": "Score based on {count} of {total} criteria.",
+        "caveat": {
+          "top": "A high score does not mean no impact: it puts this product at the top of its category, on these criteria.",
+          "bottom": "This score compares this product with the others in its category. On its own it does not measure its real impact."
+        },
+        "notRated": {
+          "LOW_COVERAGE": "We do not have enough data to rate this product: {count} of {total} criteria are provided, and the method requires a minimum share.",
+          "NO_REAL_CRITERIA": "No usable data is available to rate this product.",
+          "OUTDATED_METHOD": "This product's score is being recalculated with method v{version}.",
+          "NOT_SCORED": "This product has not been evaluated yet."
+        },
+        "missingData": "Missing data: {criteria}.",
+        "notRatedNotLower": "This product is not rated lower: it is not rated. It appears after rated products in lists sorted by Impact Score."
       }
     },
     "pageLoadingOverlay": {
