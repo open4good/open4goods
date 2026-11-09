@@ -39,7 +39,7 @@
         />
       </div>
       <div class="impact-score-panel__col-left">
-        <div class="impact-score-panel__score justify-center">
+        <div v-if="!isUnrated" class="impact-score-panel__score justify-center">
           <span class="impact-score-panel__score-value">{{
             formattedScoreValue
           }}</span>
@@ -48,8 +48,7 @@
         <div
           v-if="
             qualitativeLabel &&
-            normalizedSize !== 'xxs' &&
-            normalizedSize !== 'xs'
+            (isUnrated || (normalizedSize !== 'xxs' && normalizedSize !== 'xs'))
           "
           class="impact-score-panel__qualitative text-center font-weight-bold mt-1"
           style="
@@ -264,8 +263,13 @@ const props = defineProps({
   },
 })
 
+// A product without a score is "not rated", never "weak".
+const isUnrated = computed(
+  () => props.score === null || props.score === undefined
+)
+
 const qualitativeLevel = computed(() => {
-  if (props.score === null) return 'insufficient'
+  if (isUnrated.value) return 'unrated'
   return getImpactLevel(props.score)
 })
 
@@ -300,6 +304,7 @@ const rangeMax = computed(() => sanitizeNumber(props.max, 20))
 const displayScore = computed(() => sanitizeNumber(props.score, 0))
 
 const progress = computed(() => {
+  if (isUnrated.value) return 0
   const min = rangeMin.value
   const max = rangeMax.value
 
@@ -313,6 +318,7 @@ const progress = computed(() => {
 
 // Accent step based on progress for color theming (low/mid/high)
 const accentStep = computed(() => {
+  if (isUnrated.value) return 'unrated'
   if (progress.value < 1 / 3) return 'low'
   if (progress.value < 2 / 3) return 'mid'
   return 'high'
@@ -349,7 +355,11 @@ const formattedScoreValue = computed(() =>
 )
 
 const ariaLabel = computed(() =>
-  t('components.impactScore.svgAriaLabel', { score: formattedScoreValue.value })
+  isUnrated.value
+    ? t('product.verdict.levels.unrated')
+    : t('components.impactScore.svgAriaLabel', {
+        score: formattedScoreValue.value,
+      })
 )
 
 const hasMeta = computed(() => props.showMethodology || props.showRange)
@@ -358,7 +368,9 @@ const shouldShowMeta = computed(
   () => normalizedVariant.value === 'default' && hasMeta.value && !props.flat
 )
 
-const shouldShowBar = computed(() => normalizedVariant.value === 'default')
+const shouldShowBar = computed(
+  () => normalizedVariant.value === 'default' && !isUnrated.value
+)
 
 const formattedDate = computed(() => {
   if (!props.date) return ''
@@ -400,6 +412,9 @@ const formattedDate = computed(() => {
 }
 
 /* Accent color variants */
+.impact-score-panel--unrated {
+  --impact-accent: rgb(var(--v-theme-on-surface-variant, 117, 117, 117));
+}
 .impact-score-panel--low {
   --impact-accent: rgb(var(--v-theme-error));
 }

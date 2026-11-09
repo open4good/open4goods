@@ -132,7 +132,7 @@ i18n:
     # Vertical page elements
     verticalHomeUrl: "fours"
     verticalHomeTitle: "Fours"
-    verticalHomeDescription: "Comparez les fours encastrables ou posables selon leur volume, leur mode de nettoyage, leur consommation par cycle, leur éco-score et leur prix pour limiter le coût d'usage et l'impact environnemental."
+    verticalHomeDescription: "Comparez les fours encastrables ou posables selon leur volume, leur mode de nettoyage, leur consommation par cycle, leur Impact Score et leur prix pour limiter le coût d'usage et l'impact environnemental."
 
     # A mapping beetween custom page names behind this vertical and wiki pages
   #    wikiPages:
@@ -159,7 +159,7 @@ i18n:
 
     verticalHomeUrl: "ovens"
     verticalHomeTitle: "Ovens"
-    verticalHomeDescription: "Compare built-in and freestanding ovens by capacity, cleaning mode, cycle energy use, eco-score and price so running cost and environmental impact stay visible."
+    verticalHomeDescription: "Compare built-in and freestanding ovens by capacity, cleaning mode, cycle energy use, Impact Score and price so running cost and environmental impact stay visible."
 
 #####################################################################################################################################
 # NUDGE TOOL CONFIGURATION
@@ -217,17 +217,17 @@ nudgeToolConfig:
           toPercent: 33
       image: "example-image.png"
       url:
-        en: "high-impact"
-        fr: "fort-impact"
+        en: "lower-ranked"
+        fr: "moins-bien-classes"
       caption:
-        en: "High"
-        fr: "Élevé"
+        en: "Lower "
+        fr: "Moins bien "
       title:
-        en: "High impact"
-        fr: "Impact élevé"
+        en: "Lower ranked"
+        fr: "Moins bien classés"
       description:
-        en: "Products in the highest impact third of the category."
-        fr: "Produits dans le tiers le plus impactant de la catégorie."
+        en: "Products in the bottom third of their category on the Impact Score"
+        fr: "Produits du dernier tiers de leur catégorie à l'Impact Score"
 
     - id: "impact_medium"
       group: "impactscore"
@@ -237,17 +237,17 @@ nudgeToolConfig:
           toPercent: 67
       image: "example-image.png"
       url:
-        en: "medium-impact"
-        fr: "impact-moyen"
+        en: "mid-ranked"
+        fr: "milieu-de-classement"
       caption:
-        en: "Medium"
-        fr: "Moyen"
+        en: "Mid "
+        fr: "Milieu "
       title:
-        en: "Medium impact"
-        fr: "Impact moyen"
+        en: "Mid-ranked"
+        fr: "Milieu de classement"
       description:
-        en: "Products in the middle impact third of the category."
-        fr: "Produits dans le tiers intermédiaire de la catégorie."
+        en: "Products in the middle third of their category on the Impact Score"
+        fr: "Produits du tiers intermédiaire de leur catégorie à l'Impact Score"
 
     - id: "impact_low"
       group: "impactscore"
@@ -257,17 +257,17 @@ nudgeToolConfig:
           toPercent: 100
       image: "example-image.png"
       url:
-        en: "low-impact"
-        fr: "faible-impact"
+        en: "best-ranked"
+        fr: "mieux-classes"
       caption:
-        en: "Low"
-        fr: "Faible"
+        en: "Best "
+        fr: "Mieux "
       title:
-        en: "Low impact"
-        fr: "Impact faible"
+        en: "Best ranked (top third by Impact Score)"
+        fr: "Mieux classés (premier tiers Impact Score)"
       description:
-        en: "Products in the lowest impact third of the category."
-        fr: "Produits dans le tiers le moins impactant de la catégorie."
+        en: "Products in the top third of their category on the Impact Score"
+        fr: "Produits du premier tiers de leur catégorie à l'Impact Score"
 
     ################
     # Price
@@ -419,17 +419,17 @@ subsets:
       toPercent: 33
   image: "example-image.png"
   url:
-    en: "high-impact"
-    fr: "fort-impact"
+    en: "lower-ranked"
+    fr: "moins-bien-classes"
   caption:
-    en: "High"
-    fr: "Élevé"
+    en: "Lower "
+    fr: "Moins bien "
   title:
-    en: "High impact"
-    fr: "Impact élevé"
+    en: "Lower ranked"
+    fr: "Moins bien classés"
   description:
-    en: "Products in the highest impact third of the category."
-    fr: "Produits dans le tiers le plus impactant de la catégorie."
+    en: "Products in the bottom third of their category on the Impact Score"
+    fr: "Produits du dernier tiers de leur catégorie à l'Impact Score"
 
 - id: "impact_medium"
   group: "impactscore"
@@ -439,17 +439,17 @@ subsets:
       toPercent: 67
   image: "example-image.png"
   url:
-    en: "medium-impact"
-    fr: "impact-moyen"
+    en: "mid-ranked"
+    fr: "milieu-de-classement"
   caption:
-    en: "Medium"
-    fr: "Moyen"
+    en: "Mid "
+    fr: "Milieu "
   title:
-    en: "Medium impact"
-    fr: "Impact moyen"
+    en: "Mid-ranked"
+    fr: "Milieu de classement"
   description:
-    en: "Products in the middle impact third of the category."
-    fr: "Produits dans le tiers intermédiaire de la catégorie."
+    en: "Products in the middle third of their category on the Impact Score"
+    fr: "Produits du tiers intermédiaire de leur catégorie à l'Impact Score"
 
 - id: "impact_low"
   group: "impactscore"
@@ -459,17 +459,17 @@ subsets:
       toPercent: 100
   image: "example-image.png"
   url:
-    en: "low-impact"
-    fr: "faible-impact"
+    en: "best-ranked"
+    fr: "mieux-classes"
   caption:
-    en: "Low"
-    fr: "Faible"
+    en: "Best "
+    fr: "Mieux "
   title:
-    en: "Low impact"
-    fr: "Impact faible"
+    en: "Best ranked (top third by Impact Score)"
+    fr: "Mieux classés (premier tiers Impact Score)"
   description:
-    en: "Products in the lowest impact third of the category."
-    fr: "Produits dans le tiers le moins impactant de la catégorie."
+    en: "Products in the top third of their category on the Impact Score"
+    fr: "Produits du premier tiers de leur catégorie à l'Impact Score"
 
 ################
 # Price

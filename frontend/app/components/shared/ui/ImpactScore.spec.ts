@@ -15,6 +15,7 @@ const i18n = createI18n({
       'product.verdict.levels.fair': 'Fair',
       'product.verdict.levels.poor': 'Poor',
       'product.verdict.levels.insufficient': 'Weak',
+      'product.verdict.levels.unrated': 'Not rated',
       'product.verdict.percentileLabel': 'Ranking',
       'product.verdict.percentileValue': 'Better than {percentile}%',
       'product.verdict.percentileTooltip':
@@ -220,5 +221,30 @@ describe('ImpactScore', () => {
     expect(wrapper.text()).not.toContain('Min :')
     expect(wrapper.text()).not.toContain('Max :')
     expect(wrapper.text()).toContain('Better than 90%')
+  })
+
+  it('shows "Not rated" without a gauge when the product has no score', () => {
+    const wrapper = mount(ImpactScore, {
+      props: {
+        score: null as unknown as number,
+      },
+      global: globalOptions,
+    })
+
+    expect(wrapper.text()).toContain('Not rated')
+    expect(wrapper.text()).not.toContain('Weak')
+    expect(wrapper.text()).not.toContain('/ 20')
+    expect(wrapper.find('.impact-score-panel__bar').exists()).toBe(false)
+    expect(wrapper.find('.impact-score-panel--unrated').exists()).toBe(true)
+  })
+
+  it('keeps "Weak" for a low score that exists', () => {
+    const wrapper = mount(ImpactScore, {
+      props: { score: 3 },
+      global: globalOptions,
+    })
+
+    expect(wrapper.text()).toContain('Weak')
+    expect(wrapper.text()).not.toContain('Not rated')
   })
 })
