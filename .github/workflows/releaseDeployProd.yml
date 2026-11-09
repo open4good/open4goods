@@ -146,7 +146,7 @@ jobs:
           IMPACTSCORE_METHODOLOGY_OVERRIDES: ${{ vars.IMPACTSCORE_METHODOLOGY_OVERRIDES }}
         run: |
           set -eu
-          for svc in admin api front-api ui b2b-api frontend; do
+          for svc in admin api front-api ui frontend; do
             deploy-tools/scripts/deploy/render-service-secrets.sh --if-present check prod "${svc}"
           done
 
@@ -311,7 +311,6 @@ jobs:
             api/target/api-0.0.1-SNAPSHOT.jar
             ui/target/ui-0.0.1-SNAPSHOT.jar
             front-api/target/front-api-0.0.1-SNAPSHOT.jar
-            b2b-api/target/b2b-api-0.0.1-SNAPSHOT.jar
 
       - name: 🌐 Generate Maven Site (minimal)
         shell: bash
@@ -477,7 +476,6 @@ jobs:
           cp api/target/api-0.0.1-SNAPSHOT.jar deploy-jars/api-latest.jar
           cp ui/target/ui-0.0.1-SNAPSHOT.jar deploy-jars/ui-latest.jar
           cp front-api/target/front-api-0.0.1-SNAPSHOT.jar deploy-jars/front-api-latest.jar
-          cp b2b-api/target/b2b-api-0.0.1-SNAPSHOT.jar deploy-jars/b2b-api-latest.jar
 
       - name: 🚚 Deploy JARs to Server (Consolidated)
         if: env.MODE != 'test'
@@ -531,7 +529,7 @@ jobs:
           IMPACTSCORE_METHODOLOGY_OVERRIDES: ${{ vars.IMPACTSCORE_METHODOLOGY_OVERRIDES }}
         run: |
           set -eu
-          for svc in admin api front-api ui b2b-api; do
+          for svc in admin api front-api ui; do
             deploy-tools/scripts/deploy/render-service-secrets.sh --if-present apply prod "${svc}"
           done
 
@@ -729,65 +727,6 @@ jobs:
 
             print(f"Validated {checked} Nuxt asset(s) from {len(pages)} page(s).")
             PY
-
-      ############################################
-      # Build + Deploy b2b-frontend (prod)
-      ############################################
-      - name: Set up pnpm for b2b-frontend
-        if: env.MODE != 'test'
-        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
-        with:
-          version: 11.28.3
-          standalone: true
-
-      - name: Configure b2b-frontend pnpm store
-        if: env.MODE != 'test'
-        shell: bash
-        run: |
-          set -euo pipefail
-          pnpm config set store-dir "${RUNNER_TEMP}/pnpm-store/b2b-frontend"
-          mkdir -p "${RUNNER_TEMP}/pnpm-store/b2b-frontend"
-
-      - name: Set up Node.js for b2b-frontend
-        if: env.MODE != 'test'
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: "24"
-          cache: "pnpm"
-          cache-dependency-path: b2b-frontend/pnpm-lock.yaml
-
-      - name: Install b2b-frontend dependencies
-        if: env.MODE != 'test'
-        run: pnpm install --frozen-lockfile
-        working-directory: b2b-frontend
-
-      - name: Build b2b-frontend
-        if: env.MODE != 'test'
-        run: pnpm build
-        working-directory: b2b-frontend
-        env:
-          NUXT_PUBLIC_BACKEND_BASE_URL: https://api.product-data-api.com
-          NUXT_BACKEND_PROXY_TARGET: http://localhost:8087
-
-      - name: Deploy b2b-frontend output to prod server
-        if: env.MODE != 'test'
-        uses: easingthemes/ssh-deploy@2cc5b27bf3029d0455dd5e09fe02633904031447 # main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rltgoDzvO --delete"
-          SOURCE: "b2b-frontend/.output"
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: "/opt/open4goods/latest/b2b-frontend"
-
-      - name: Publish b2b-frontend container
-        if: env.MODE != 'test'
-        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
-        with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: sh /opt/open4goods/bin/publish-b2b-frontend.sh prod
 
       ############################################
       # GitHub Release (tag only) + attach reports archive

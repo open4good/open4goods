@@ -37,13 +37,13 @@
     },
     {
       "description": "Use npmInstallTwice only when updating frontend npm lock files",
-      "matchFileNames": ["frontend/**", "b2b-frontend/**"],
+      "matchFileNames": ["frontend/**"],
       "matchManagers": ["npm"],
       "postUpdateOptions": ["npmInstallTwice"]
     },
     {
       "description": "Group non-major frontend npm updates",
-      "matchFileNames": ["frontend/**", "b2b-frontend/**"],
+      "matchFileNames": ["frontend/**"],
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["minor", "patch", "digest", "pin", "pinDigest", "replacement", "rollback", "bump"],
       "groupName": "frontend npm updates",
@@ -52,7 +52,7 @@
     },
     {
       "description": "Keep frontend lock-file maintenance in its own reviewable pull request",
-      "matchFileNames": ["frontend/**", "b2b-frontend/**"],
+      "matchFileNames": ["frontend/**"],
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["lockFileMaintenance"],
       "groupName": "frontend lock file maintenance",

@@ -14,14 +14,14 @@ This document never lists secret values, key ids or fingerprints.
 
 `scripts/deploy/render-service-secrets.sh [--if-present] [--source] <check|apply> <env> <service>`
 (`env`: `beta` or `prod`; `service`: `api`, `ui`, `front-api`, `admin`,
-`b2b-api`, `frontend` or `infra`) holds one table, service -> GitHub secret ->
+`frontend` or `infra`) holds one table, service -> GitHub secret ->
 target, documented at the top of the script. Every workflow that renders
 secrets calls it:
 
 | Workflow                 | Environment | Services                                   | Steps                                                                 |
 | ------------------------ | ----------- | ------------------------------------------ | --------------------------------------------------------------------- |
 | `serviceSecrets.yml`     | input       | input (`all` or one)                       | check, host check, then with `mode=apply`: render and restart         |
-| `testAndPublishBeta.yml` | `beta`      | admin, api, front-api, ui, b2b-api         | `--if-present apply`, before "Publish Applications"                   |
+| `testAndPublishBeta.yml` | `beta`      | admin, api, front-api, ui                  | `--if-present apply`, before "Publish Applications"                   |
 | `frontend-ci.yml`        | `beta`      | frontend                                   | `--if-present apply`, before "Publish frontend"                       |
 | `releaseDeployProd.yml`  | `prod`      | all (check); Spring services, frontend     | `--if-present check` in every mode; `apply` in `mode=release` only    |
 | `infraSecrets.yml`       | input       | the target's consumers                     | `--source apply`, between the change at the source and the restart    |
@@ -61,7 +61,7 @@ Spring Boot, not on the JAR.
   `/etc/open4goods/secrets/google-indexation.json`, and
   `GOOGLE_INDEXATION_SERVICE_ACCOUNT_PATH` points `api` at it (GOU-933).
 
-Host services and files: `api`, `ui`, `front-api` and `b2b-api` keep their
+Host services and files: `api`, `ui` and `front-api` keep their
 name; `admin` runs as `sbadmin` (`/etc/open4goods/sbadmin.env`,
 `/etc/open4goods/secrets/sbadmin/`); the frontend reads
 `/etc/open4goods/frontend.env` (GOU-1694). Every rendered file lives under
@@ -115,8 +115,8 @@ be set as an environment variable in a file `jvm-launch.sh` sources
 (`config/<env>/infra/.env`, `/etc/open4goods/<service>.env`,
 `config/<env>/<service>/.env`).
 
-`RenderedSecretsConfigTreeTest`, in `api`, `ui`, `front-api`, `admin` and
-`b2b-api`, starts Spring Boot with that layout and reads every rendered
+`RenderedSecretsConfigTreeTest`, in `api`, `ui`, `front-api` and `admin`,
+starts Spring Boot with that layout and reads every rendered
 property back through the class that consumes it: the tree value wins, the
 YAML value stays without the import or with a missing tree, and the test
 fails when a `tree` row of the script has no consumer. The `api.env` lines are
@@ -150,7 +150,7 @@ before anything is written.
 | `API_TRADETRACKER_API_KEY`        | api: tree `affiliation-config.tradetracker-api-key`                                                                                                                           | TradeTracker feeds, Metriks affiliation report (GOU-1381) |
 | `API_EPREL_API_KEY`               | api: tree `eprel.api-key`                                                                                                                                                     | EPREL (`EprelServiceProperties`)                               |
 | `O4G_ICECAT_PASSWORD`             | api, front-api: tree `icecat-feature-config.password`                                                                                                                         | Icecat account                                                 |
-| `O4G_SBA_PASSWORD`                | api, ui, front-api, b2b-api: tree `spring.boot.admin.client.password`; api, ui, front-api: tree `o4g.actuator.monitor.password`; admin: tree `spring.boot.admin.instance-auth.default-password`, `o4g.sba.registration.password` | Spring Boot Admin registration and actuator access |
+| `O4G_SBA_PASSWORD`                | api, ui, front-api: tree `spring.boot.admin.client.password`; api, ui, front-api: tree `o4g.actuator.monitor.password`; admin: tree `spring.boot.admin.instance-auth.default-password`, `o4g.sba.registration.password` | Spring Boot Admin registration and actuator access |
 | `O4G_INTERNAL_API_KEY`            | api: tree `admin-key`; front-api: tree `front.affiliation-partners.api-key`                                                                                                   | front-api -> api calls (affiliation partners)                  |
 | `API_METRIKS_KEY`                 | api: tree `metriks-key` (opens `/api/metriks/**` only, `ROLE_METRIKS`, GOU-1412)                                                                                              | Metriks workflow of open4goods-config, which sends it from its `prod/PROD_API_TOKEN` environment secret |
 | `O4G_CAPTCHA_SECRET`              | ui: tree `captcha-secret`; front-api: tree `captcha.secret-key`                                                                                                               | hCaptcha                                                       |
@@ -160,15 +160,10 @@ before anything is written.
 | `FRONT_API_GITHUB_TOKEN`          | front-api: tree `feedback.github.access-token`                                                                                                                                | GitHub feedback issues                                         |
 | `GOOGLE_SSO_CLIENT_ID` (required) | front-api: `FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID`; frontend: `NUXT_GOOGLE_OAUTH_CLIENT_ID`; admin, api (optional, paired): tree `spring.security.oauth2.client.registration.google.client-id` | Google SSO ([Google SSO OAuth clients](google-sso-oauth-clients.md)); admin login (GOU-1091), api login (GOU-1393) |
 | `GOOGLE_SSO_CLIENT_SECRET` (required) | frontend: `NUXT_GOOGLE_OAUTH_CLIENT_SECRET`; admin, api (optional, paired): tree `spring.security.oauth2.client.registration.google.client-secret`                     | Google SSO; admin and api logins                               |
-| `O4G_ELASTICSEARCH_PASSWORD` (source) | api, ui, front-api, b2b-api: tree `spring.elasticsearch.password`                                                                                                        | Elasticsearch user `elastic` (`infraSecrets.yml` only)         |
-| `B2B_API_POSTGRES_PASSWORD` (source) | b2b-api: tree `spring.datasource.password`; infra: `B2B_POSTGRES_PASSWORD`                                                                                                 | Postgres user of `b2b_postgres` (`infraSecrets.yml` only)      |
+| `O4G_ELASTICSEARCH_PASSWORD` (source) | api, ui, front-api: tree `spring.elasticsearch.password`                                                                                                                 | Elasticsearch user `elastic` (`infraSecrets.yml` only)         |
 | `INFRA_*` (source)                | infra: `/etc/open4goods/infra.env` (Kibana, Plausible and its Postgres and ClickHouse)                                                                          | compose infrastructure (`infraSecrets.yml` only)               |
 | `IMPACTSCORE_METHODOLOGY_OVERRIDES` (GitHub Environment **variable**, not a secret) | api, ui, front-api: tree `impactscore.methodology-version-overrides`                                                                              | ImpactScore methodology version forced per vertical (`tv:2`), read by `VerticalsConfigService` ([ImpactScore V2 design](../impactscore/v2-design.md), 5.2) |
 | `INFRA_GOOGLE_CLIENT_ID`, `INFRA_GOOGLE_CLIENT_SECRET` (source) | infra: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` in `/etc/open4goods/infra.env` (beta)                                                         | Google OAuth client of Plausible's Search Console integration (`infraSecrets.yml` `target=plausible-google` only) |
-
-`b2b-api` registers with Spring Boot Admin only when its configuration enables
-the client (`B2B_SBA_CLIENT_ENABLED`); the tree then replaces its
-`${B2B_SBA_PASSWORD:}` default.
 
 Not rendered, on purpose:
 
@@ -203,17 +198,15 @@ Spring services and the frontend one after the other, front-api first).
 
 | Secret                 | Consumers                                                                                       |
 | ---------------------- | ----------------------------------------------------------------------------------------------- |
-| `O4G_SBA_PASSWORD`     | SBA clients (api, ui, front-api, b2b-api) and admin's registration check; api, ui and front-api actuators and admin's instance auth |
+| `O4G_SBA_PASSWORD`     | SBA clients (api, ui, front-api) and admin's registration check; api, ui and front-api actuators and admin's instance auth |
 | `O4G_MACHINE_TOKEN`    | front-api (checks `X-Shared-Token`) and the frontend (sends it); `publish-frontend.sh` refuses to publish when front-api rejects the frontend's token |
 | `FRONT_API_JWT_SECRET` | front-api (signs) and the frontend (verifies admin access tokens)                               |
 | `O4G_INTERNAL_API_KEY` | front-api (sends) and api (`admin-key`, its only full-access key)                               |
 | `IMPACTSCORE_METHODOLOGY_OVERRIDES` | api (batch), front-api (display) and ui (sitemap) must see the same ImpactScore methodology version |
 
 `O4G_ELASTICSEARCH_PASSWORD` is coupled with its source: Elasticsearch
-(`elastic`) and its four consumers (api, ui, front-api, b2b-api) change in one
+(`elastic`) and its three consumers (api, ui, front-api) change in one
 run of `infraSecrets.yml` `target=elasticsearch`, never of this workflow.
-Likewise `B2B_API_POSTGRES_PASSWORD` (`b2b_postgres` and b2b-api,
-`target=b2b-postgres`).
 
 `O4G_MACHINE_TOKEN` and `FRONT_API_JWT_SECRET` reach the frontend as env
 lines, so their value must match `[A-Za-z0-9/._-]`.
@@ -277,7 +270,7 @@ Inputs:
 
 - `env`: `beta` (default) or `prod`; the job declares `environment: <env>`
   and targets that environment's host;
-- `service`: `all` (default), `api`, `ui`, `front-api`, `admin`, `b2b-api` or
+- `service`: `all` (default), `api`, `ui`, `front-api`, `admin` or
   `frontend`;
 - `mode`: `test` (default) or `apply`. `apply` only runs on `main`; `test`
   writes nothing and may run from a branch.
@@ -312,7 +305,7 @@ selected service uses it.
   `server/index.mjs` as `latest/frontend-ssr/.output`. A restart deploys
   `latest`: when it differs, the workflow fails before any rendering.
 - `service=all` restarts every Spring service (`publish-jars.sh <env>
-  restart`: sbadmin, api, front-api, ui, b2b-api, each waiting for its health
+  restart`: sbadmin, api, front-api, ui, each waiting for its health
   check) then publishes the frontend. A single service restarts alone; the
   summary then warns that coupled secrets need `service=all`.
 - The `apply` summary shows the written paths with their mode and owner, the
