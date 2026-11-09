@@ -7,3 +7,27 @@ criteriasPonderation:
   WARRANTY: 0.0722
   WEIGHT: 0.0412
   DATA_QUALITY: 0.0619
+# ImpactScore V2 (GOU-1880), inactive while methodologyVersion is 1. Design: docs/impactscore/v2-design.md,
+# sections 1.2 and 2.3. V1 matrix above without DATA_QUALITY (now the confidence indicator), renormalised to
+# 1 pro rata. No stored AI audit for this vertical.
+v2:
+  criteriasPonderation:
+    CLASSE_ENERGY: 0.3626479
+    POWER_CONSUMPTION_TYPICAL: 0.2747042
+    REFRIGERANT_GWP: 0.1099030
+    POWER_CONSUMPTION_OFF: 0.0439186
+    REPAIRABILITY_INDEX: 0.0879437
+    WARRANTY: 0.0769641
+    WEIGHT: 0.0439186
+  minRealWeightCoverage: 0.5  # provisoire, valeur de GOU-1877
+  eprelRequired: true  # provisoire, valeur de GOU-1877
+  positionLabels:  # provisoire, valeur de GOU-1877
+    - level: excellent
+      minBetterThan: 0.90
+    - level: good
+      minBetterThan: 0.67
+    - level: fair
+      minBetterThan: 0.33
+    - level: poor
+      minBetterThan: 0.0
+  criteriaScoring: {}  # provisoire, valeur de GOU-1877 (bornes robustes : GOU-1883)

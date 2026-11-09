@@ -9,6 +9,32 @@ criteriasPonderation:
   WEIGHT: 0.03
   POWER_CONSUMPTION_OFF: 0.01
   CLASSE_ENERGY: 0.06
+# ImpactScore V2 (GOU-1880), inactive while methodologyVersion is 1. Design: docs/impactscore/v2-design.md,
+# sections 1.2 and 2.3. V1 matrix above without DATA_QUALITY (now the confidence indicator), renormalised to
+# 1 pro rata. The stored AI audit (aiResult, yamlPrompt) is the V1 one and was not rerun.
+v2:
+  criteriasPonderation:
+    WATER_CONSUMPTION: 0.1818182
+    ENERGY_CONSUMPTION_100_CYCLES: 0.3863636
+    POWER_CONSUMPTION_STANDBY: 0.0113636
+    WARRANTY: 0.1136364
+    NOISE_LEVEL: 0.0568182
+    REPAIRABILITY_INDEX: 0.1363636
+    WEIGHT: 0.0340909
+    POWER_CONSUMPTION_OFF: 0.0113636
+    CLASSE_ENERGY: 0.0681818
+  minRealWeightCoverage: 0.5  # provisoire, valeur de GOU-1877
+  eprelRequired: true  # provisoire, valeur de GOU-1877
+  positionLabels:  # provisoire, valeur de GOU-1877
+    - level: excellent
+      minBetterThan: 0.90
+    - level: good
+      minBetterThan: 0.67
+    - level: fair
+      minBetterThan: 0.33
+    - level: poor
+      minBetterThan: 0.0
+  criteriaScoring: {}  # provisoire, valeur de GOU-1877 (bornes robustes : GOU-1883)
 yamlPrompt: "---\nkey: \"impactscore-generation\"\naiService: \"GEMINI\"\nsystemPrompt: \"Tu es un agent expert en évaluation\
   \ environnementale des produits électriques et electroniques.\\nAdopte une démarche d'expert en analyse du cycle de vie\
   \ des produits.\\nNous allons travailler sur des Lave-vaisselles\\nNe fournir en réponse que du JSON, conformément à la\
