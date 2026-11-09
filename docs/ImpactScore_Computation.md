@@ -161,7 +161,7 @@ checks; a blocked batch never becomes the baseline). Thresholds live under `impa
 Starting values are conservative and to be tuned per vertical from the GOU-1876 distributions;
 `impactScoreGuard.enabled=false` switches the checks off.
 
-Alert: one structured `ERROR` log line per violation (`impactscore_guard vertical=… severity=… rule=… message=…
+Alert: one structured `ERROR` log line per violation (`impactscore_guard vertical=... severity=... rule=... message=...
 action=indexation_blocked|none`), Micrometer gauge `impactscore.guard.violations{vertical,severity}`, and the
 `impactScoreGuard` health component (`/actuator/health/impactScoreGuard`, status `ALERT` when blocking, `WARN`
 otherwise, never `DOWN`, so the aggregate health and the probes are unchanged). A failure of the guard itself is
