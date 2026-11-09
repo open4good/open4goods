@@ -34,6 +34,7 @@ owned, and linked from this index when they become durable project knowledge.
 - [Amazon PA-API completion](architecture/amazon-paapi-completion.md)
 - [ETIM integration and cross-referential design](architecture/etim_integration_design.md)
 - [Outbound affiliation clicks](architecture/affiliation-clicks.md)
+- [Ranking and listing disclosure, art. D111-6 C. conso (GOU-1995)](business/ranking-and-listing-disclosure.md)
 - [External GTIN/ISBN datasources: integration plans](datasources/integration/README.md)
 - [ImpactScore V2 design (versioned methodology, coverage, switch, simulation)](impactscore/v2-design.md)
 - [ADR 0001: EPREL matching logic scoring](adr/0001-eprel-matching-logic-scoring.md)

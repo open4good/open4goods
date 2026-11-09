@@ -989,6 +989,7 @@
           "impactScore": "{score} / {max}"
         }
       },
+      "rankingPolicyLink": "How we rank",
       "sortLabel": "Sort by",
       "sortOrderAsc": "Ascending order",
       "sortOrderDesc": "Descending order",
@@ -3163,6 +3164,7 @@
           "legal": "Legal notice",
           "openData": "Open data",
           "openSource": "Open source",
+          "rankingPolicy": "Ranking and listing",
           "privacy": "Privacy policy"
         },
         "title": "Resources"
@@ -3891,6 +3893,74 @@
       "position": "Position",
       "evolution": "Clicks vs previous window",
       "new": "new"
+    }
+  },
+  "rankingPolicy": {
+    "seo": {
+      "title": "How products and offers are ranked and listed {'|'} Nudger",
+      "description": "How Nudger ranks products and offers, which merchants are listed and how Nudger is paid (article D111-6 of the French consumer code)."
+    },
+    "hero": {
+      "eyebrow": "Transparency",
+      "title": "Ranking and listing",
+      "subtitle": "How Nudger orders products and offers, which merchants appear and how Nudger is paid."
+    },
+    "intro": "This page meets article D111-6 of the French consumer code. It describes how the site works on the update date shown below.",
+    "updatedAt": "Last updated: {date}",
+    "summary": {
+      "title": "In short",
+      "items": {
+        "defaultSort": "By default, the products of a category are ranked by their Impact Score, from highest to lowest.",
+        "offers": "The offers of a product are ranked by ascending price.",
+        "remuneration": "Nudger can earn a commission from merchants, but no ranking takes it into account.",
+        "noPaidPlacement": "No placement is paid or sponsored."
+      }
+    },
+    "sections": {
+      "referencing": {
+        "title": "Listed merchants and offers",
+        "p1": "The offers shown come from merchants whose affiliate programme Nudger has joined, through affiliate networks (for example Awin or Effiliation) or the Amazon Associates programme. A merchant without an affiliate programme, or whose programme Nudger has not joined, does not appear in price comparisons: they therefore do not cover the whole market.",
+        "p2": "Offers are shown as the merchant publishes them in its feed. An offer is shown only if it was seen in that feed less than two days ago. Offers with a zero price or out of stock are left out.",
+        "p3": "Product lists and search only show products offered by at least one listed merchant. Product characteristics can also come from public databases or manufacturers (for example EPREL, Icecat or Wikidata): these sources do not create offers."
+      },
+      "remuneration": {
+        "title": "How Nudger is paid",
+        "p1": "Links to merchants are affiliate links. When you buy after clicking one of these links, the merchant can pay Nudger a commission, under the terms of its programme. This does not change the price you pay.",
+        "p2": "No ranking on the site uses this payment: neither the amount of a commission, nor the merchant, nor the affiliate network changes the order of products, the order of offers or the calculation of the Impact Score. There is no paid or sponsored placement.",
+        "p3": "When a product has no offer, its page can show a search link to Amazon. It is also an affiliate link: as an Amazon Associate, Nudger earns from qualifying purchases. This link appears only when there is no offer and is not part of any ranking."
+      },
+      "defaultSort": {
+        "title": "Default product ranking",
+        "p1": "In a category, products are ranked by default by their Impact Score, from highest to lowest. This is the sort marked as default in the sort list. The product selections highlighted on category pages follow the same criterion.",
+        "p2": "The Impact Score is calculated from the characteristics of the product, data about its brand and how complete the available information is. It uses neither the price, nor the merchant, nor any commission.",
+        "p3": "Products that do not have an Impact Score yet come after rated products. When two products have the same Impact Score, their barcode (GTIN) breaks the tie, so the order stays the same from one page to the next.",
+        "methodLink": "Read the Impact Score method"
+      },
+      "otherSorts": {
+        "title": "Other sorts",
+        "p1": "You can choose another criterion, in ascending or descending order: price, number of offers, brand, model, date added or updated, Impact Score and its detailed criteria, or a technical characteristic of the category (for example screen size or energy use).",
+        "p2": "The price used for sorting is the lowest price among the offers for the product, new and used together. The number of offers counts the offers of listed merchants: it does not measure sales.",
+        "p3": "Products for which the chosen criterion is not known are placed at the end of the list."
+      },
+      "search": {
+        "title": "Search",
+        "p1": "Search results are ranked by relevance: all the words you type must appear in the name of an offer, the brand or the model of the product, and the products that match them best come first. Results are grouped by category. You can also sort them by price or by number of offers.",
+        "p2": "The suggestions shown while you type favour products whose offer names contain the most words you typed. Without a search, the page first shows the products with the most offers."
+      },
+      "offers": {
+        "title": "Offers for a product",
+        "p1": "On a product page, the highlighted offer is the cheapest of the current offers, new and used together. The page also shows the best new offer and the best used offer, that is the cheapest of each condition. When a used offer exists, it is shown first.",
+        "p2": "The full list of offers is ranked by ascending price. You can sort it by merchant, price or condition."
+      },
+      "alternatives": {
+        "title": "Alternatives and choice assistant",
+        "p1": "The alternatives suggested on a product page are products of the same category, ranked by Impact Score from highest to lowest, whose price is lower or equal and whose Impact Score is higher or equal to those of the product you are viewing. If fewer than three products meet these conditions, the filters are relaxed in this order: characteristics, price, then Impact Score.",
+        "p2": "The choice assistant suggests the three products with the best Impact Score among those that match your answers."
+      }
+    },
+    "contact": {
+      "text": "A question about these rules?",
+      "link": "Contact us"
     }
   }
 }
