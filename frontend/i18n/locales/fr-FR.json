@@ -235,7 +235,7 @@
       "description": "Comparer l'impact, le prix et la fiabilité est compliqué. Nudger centralise cela.",
       "items": {
         "labelsOverload": "Trop d'infos, mais pas celle qu'il faut ? Comparer impact, prix, fiabilité... Pas toujours facile !",
-        "budgetVsEcology": "Écologie vs pouvoir d'achat ? Marre de choisir entre les deux.",
+        "budgetVsEcology": "Impact ou pouvoir d'achat ? Marre de choisir entre les deux.",
         "tooManyTabs": "8 sites ouverts ? Un seul endroit suffit. "
       }
     },
@@ -337,7 +337,7 @@
       "items": {
         "aiEnergy": {
           "question": "Quelle place pour l'IA dans Nudger ?",
-          "answer": "Oui, et c'est une vraie question. L'IA peut consommer des ressources, donc on limite volontairement les appels et on utilise des modèles plus légers. Une seule génération IA par fiche produit, mise en cache."
+          "answer": "L'IA rédige la synthèse des fiches produits. Elle consomme des ressources : nous limitons volontairement les appels et utilisons des modèles plus légers. Une seule génération IA par fiche produit, mise en cache."
         },
         "reuse": {
           "question": "La vraie frugalité c'est le réemploi ?",
@@ -355,7 +355,7 @@
       "items": {
         "free": {
           "question": "Quelle place pour l'IA dans Nudger ?",
-          "answer": "Oui, et c'est une vraie question. L'IA peut consommer des ressources, donc on limite volontairement les appels et on utilise des modèles plus légers. Une seule génération IA par fiche produit, mise en cache."
+          "answer": "L'IA rédige la synthèse des fiches produits. Elle consomme des ressources : nous limitons volontairement les appels et utilisons des modèles plus légers. Une seule génération IA par fiche produit, mise en cache."
         },
         "account": {
           "question": "La vraie frugalité, c'est pas le réemploi ?",
