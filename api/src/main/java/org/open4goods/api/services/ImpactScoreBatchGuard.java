@@ -1,10 +1,15 @@
 package org.open4goods.api.services;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -19,13 +24,16 @@ import org.springframework.boot.health.contributor.Health;
 import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.boot.health.contributor.Status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tags;
 
 /**
  * Automatic checks of the ImpactScore data after each vertical batch (GOU-1895).
  *
  * <p>The guard computes a {@link Snapshot} of the scored products of a vertical and compares it with the one of
- * the previous accepted batch (kept in memory: after a restart the first batch only gets the absolute checks).
+ * the previous accepted batch (persisted as JSON per vertical, so the reference survives a restart; without a readable file the batch only gets the absolute checks).
  * Violations are either {@link Severity#BLOCKING} (the caller must not index) or {@link Severity#WARNING}.
  *
  * <ul>
@@ -89,6 +97,8 @@ public class ImpactScoreBatchGuard implements HealthIndicator {
 
 	private final ImpactScoreGuardProperties properties;
 	private final MeterRegistry meterRegistry;
+	private final Path stateFolder;
+	private final ObjectMapper mapper = new ObjectMapper();
 	private final Map<String, Snapshot> previous = new ConcurrentHashMap<>();
 	private final Map<String, Report> lastReports = new ConcurrentHashMap<>();
 	private final Map<String, AtomicInteger> gauges = new ConcurrentHashMap<>();
@@ -98,6 +108,17 @@ public class ImpactScoreBatchGuard implements HealthIndicator {
 	 * @param meterRegistry optional metrics registry
 	 */
 	public ImpactScoreBatchGuard(ImpactScoreGuardProperties properties, MeterRegistry meterRegistry) {
+		this(properties, meterRegistry, null);
+	}
+
+	/**
+	 * @param properties thresholds, defaults are used when null
+	 * @param meterRegistry optional metrics registry
+	 * @param stateFolder folder holding the accepted snapshot of each vertical ({@code <verticalId>.json}), null to
+	 *        keep the reference in memory only
+	 */
+	public ImpactScoreBatchGuard(ImpactScoreGuardProperties properties, MeterRegistry meterRegistry, Path stateFolder) {
+		this.stateFolder = stateFolder;
 		this.properties = properties == null ? new ImpactScoreGuardProperties() : properties;
 		this.meterRegistry = meterRegistry;
 	}
@@ -119,7 +140,7 @@ public class ImpactScoreBatchGuard implements HealthIndicator {
 		Thresholds t = properties.forVertical(verticalId);
 		Snapshot snapshot = snapshot(scored);
 		List<Violation> violations = new ArrayList<>(checkAbsolute(scored, snapshot, t));
-		Snapshot before = previous.get(verticalId);
+		Snapshot before = previous.computeIfAbsent(verticalId, this::load);
 		if (before != null) {
 			violations.addAll(checkTrend(before, snapshot, t));
 		}
@@ -128,8 +149,50 @@ public class ImpactScoreBatchGuard implements HealthIndicator {
 		publish(report);
 		if (!report.blocking()) {
 			previous.put(verticalId, snapshot);
+			save(verticalId, snapshot);
 		}
 		return report;
+	}
+
+	private Path stateFile(String verticalId) {
+		return stateFolder.resolve(verticalId.replaceAll("[^A-Za-z0-9._-]", "_") + ".json");
+	}
+
+	/** Reads the persisted reference; a missing or unreadable file means no reference, never a failure. */
+	private Snapshot load(String verticalId) {
+		if (stateFolder == null) {
+			return null;
+		}
+		Path file = stateFile(verticalId);
+		if (!Files.exists(file)) {
+			return null;
+		}
+		try {
+			return mapper.readValue(file.toFile(), Snapshot.class);
+		} catch (IOException | RuntimeException e) {
+			logger.warn("impactscore_guard vertical={} unreadable reference {}: {}", verticalId, file, e.toString());
+			return null;
+		}
+	}
+
+	/** Writes the reference atomically (temporary file, then move); a failure is logged, never blocking. */
+	private void save(String verticalId, Snapshot snapshot) {
+		if (stateFolder == null) {
+			return;
+		}
+		try {
+			Files.createDirectories(stateFolder);
+			Path file = stateFile(verticalId);
+			Path tmp = Files.createTempFile(stateFolder, verticalId.replaceAll("[^A-Za-z0-9._-]", "_"), ".tmp");
+			mapper.writeValue(tmp.toFile(), snapshot);
+			try {
+				Files.move(tmp, file, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+			} catch (java.nio.file.AtomicMoveNotSupportedException e) {
+				Files.move(tmp, file, StandardCopyOption.REPLACE_EXISTING);
+			}
+		} catch (IOException | RuntimeException e) {
+			logger.warn("impactscore_guard vertical={} cannot persist the reference: {}", verticalId, e.toString());
+		}
 	}
 
 	private List<Violation> checkAbsolute(Collection<Product> scored, Snapshot s, Thresholds t) {
@@ -142,14 +205,15 @@ public class ImpactScoreBatchGuard implements HealthIndicator {
 			if (score == null) {
 				continue;
 			}
+			boolean virtual = Boolean.TRUE.equals(score.getVirtual());
 			if (score.getAggregates() != null && !score.getAggregates().isEmpty()) {
 				composites.add(String.valueOf(p.getId()));
 			}
 			Double value = score.getValue();
 			if (value == null || value.isNaN() || value < MIN_SCORE - EPSILON || value > MAX_SCORE + EPSILON) {
 				outOfBounds.add(p.getId() + "=" + value);
-			} else if (score.getRelativ() == null || score.getRelativ().getValue() == null
-					|| Math.abs(score.getRelativ().getValue() - value / RELATIV_DIVISOR) > EPSILON) {
+			} else if (!virtual && (score.getRelativ() == null || score.getRelativ().getValue() == null
+					|| Math.abs(score.getRelativ().getValue() - value / RELATIV_DIVISOR) > EPSILON)) {
 				badRelativ.add(p.getId() + "=" + value + "/"
 						+ (score.getRelativ() == null ? null : score.getRelativ().getValue()));
 			}
@@ -191,12 +255,12 @@ public class ImpactScoreBatchGuard implements HealthIndicator {
 		return out;
 	}
 
-	private static java.util.Optional<Violation> dropped(String rule, String what, int before, int now, double max) {
+	private static Optional<Violation> dropped(String rule, String what, int before, int now, double max) {
 		if (before > 0 && (before - now) / (double) before > max) {
-			return java.util.Optional.of(warning(rule, what + " " + before + " -> " + now + " (max drop "
+			return Optional.of(warning(rule, what + " " + before + " -> " + now + " (max drop "
 					+ Math.round(max * 100) + " %)"));
 		}
-		return java.util.Optional.empty();
+		return Optional.empty();
 	}
 
 	/**
@@ -215,7 +279,8 @@ public class ImpactScoreBatchGuard implements HealthIndicator {
 				eprel++;
 			}
 			Score score = p.ecoscore();
-			if (score != null && score.getValue() != null && !score.getValue().isNaN()) {
+			if (score != null && !Boolean.TRUE.equals(score.getVirtual()) && score.getValue() != null
+					&& !score.getValue().isNaN()) {
 				values.add(score.getValue());
 			}
 			ImpactScoreMeta meta = p.getImpactScoreMeta();
@@ -256,7 +321,7 @@ public class ImpactScoreBatchGuard implements HealthIndicator {
 				gauges.computeIfAbsent(r.vertical() + "|" + sev, k -> {
 					AtomicInteger g = new AtomicInteger();
 					meterRegistry.gauge("impactscore.guard.violations",
-							io.micrometer.core.instrument.Tags.of("vertical", r.vertical(), "severity",
+							Tags.of("vertical", r.vertical(), "severity",
 									sev.name().toLowerCase()),
 							g);
 					return g;

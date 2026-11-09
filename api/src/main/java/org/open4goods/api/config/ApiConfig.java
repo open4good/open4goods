@@ -237,7 +237,8 @@ public class ApiConfig {
 	 */
 	@Bean
 	ImpactScoreBatchGuard impactScoreGuard(MeterRegistry meterRegistry) {
-		return new ImpactScoreBatchGuard(apiProperties.getImpactScoreGuard(), meterRegistry);
+		return new ImpactScoreBatchGuard(apiProperties.getImpactScoreGuard(), meterRegistry,
+				java.nio.file.Path.of(apiProperties.getRootFolder(), "impactscore-guard"));
 	}
 
 	@Bean

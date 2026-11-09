@@ -89,7 +89,7 @@ public class BatchService {
 		this.serialisationService = serialisationService;
 		this.resourceService = resourceService;
 		this.apiProperties = apiProperties;
-		this.impactScoreGuard = new ImpactScoreBatchGuard(apiProperties == null ? null : apiProperties.getImpactScoreGuard(), null);
+		this.impactScoreGuard = new ImpactScoreBatchGuard(apiProperties == null ? null : apiProperties.getImpactScoreGuard(), null, null);
 	}
 
 	/**

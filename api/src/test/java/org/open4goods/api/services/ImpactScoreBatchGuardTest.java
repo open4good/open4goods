@@ -7,12 +7,14 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.IntToDoubleFunction;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.config.yml.ImpactScoreGuardProperties;
 import org.open4goods.api.services.ImpactScoreBatchGuard.Report;
@@ -129,6 +131,32 @@ class ImpactScoreBatchGuardTest {
 		guard.verify("tv", cohort(100, i -> i * 0.19, 0.8));
 		guard.verify("tv", cohort(100, i -> 4.0, 0.8)); // blocked
 		assertThat(guard.verify("tv", cohort(100, i -> i * 0.19, 0.8)).violations()).isEmpty();
+	}
+
+	@Test
+	void virtualImpactScoreDoesNotBlock() {
+		List<Product> cohort = cohort(100, i -> i * 0.19, 0.8);
+		Product virtual = cohort.get(7);
+		virtual.ecoscore().setVirtual(true);
+		virtual.ecoscore().getRelativ().setValue(2.5); // sigma-relativised, not value / 4
+		Report report = guard.verify("tv", cohort);
+		assertThat(report.violations()).isEmpty();
+		assertThat(report.snapshot().rated()).isEqualTo(99);
+	}
+
+	@Test
+	void referenceSurvivesARestart(@TempDir Path folder) {
+		new ImpactScoreBatchGuard(new ImpactScoreGuardProperties(), null, folder).verify("tv",
+				cohort(100, i -> i * 0.1, 0.8));
+		ImpactScoreBatchGuard restarted = new ImpactScoreBatchGuard(new ImpactScoreGuardProperties(), null, folder);
+		assertThat(rules(restarted.verify("tv", cohort(100, i -> 5.0 + i * 0.1, 0.8)))).containsExactly("MEDIAN_SHIFT");
+	}
+
+	@Test
+	void unreadableReferenceIsIgnored(@TempDir Path folder) throws Exception {
+		java.nio.file.Files.writeString(folder.resolve("tv.json"), "{not json");
+		ImpactScoreBatchGuard g = new ImpactScoreBatchGuard(new ImpactScoreGuardProperties(), null, folder);
+		assertThat(g.verify("tv", cohort(100, i -> i * 0.19, 0.8)).violations()).isEmpty();
 	}
 
 	@Test

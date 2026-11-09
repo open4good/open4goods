@@ -143,8 +143,8 @@ scores the products that have offers and are not excluded. After scoring:
 ### 6. Automatic checks after each batch (GOU-1895)
 
 `ImpactScoreBatchGuard` runs after scoring and before indexation, per vertical, and compares with the previous
-accepted batch of the same vertical (kept in memory: after a restart the first batch only gets the absolute
-checks; a blocked batch never becomes the baseline). Thresholds live under `impactScoreGuard` in
+accepted batch of the same vertical (the accepted snapshot is persisted as `<rootFolder>/impactscore-guard/<verticalId>.json`, written atomically and
+reloaded after a restart; a missing or unreadable file means no reference, so only the absolute checks run; a blocked batch never becomes the baseline). Thresholds live under `impactScoreGuard` in
 `application.yml` (`ApiProperties`), with `defaults` and per-vertical overrides in `verticals.<id>`.
 
 | Rule | Severity | Condition | Property (default) |
