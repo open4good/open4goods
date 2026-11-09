@@ -220,6 +220,34 @@ class AttributeRealtimeAggregationServiceTest {
                 assertThat(product.model()).isEqualTo(product.model() == null ? null : product.model().toUpperCase());
         }
 
+        /**
+         * GOU-1881: the batch runs updateExcludeStatus on every product of the vertical, so a product excluded for
+         * missing_eprel is re-evaluated: listed once the vertical goes V2 with eprelRequired=false, excluded again on
+         * return to V1.
+         */
+        @Test
+        void updateExcludeStatusReevaluatesExcludedProductsWhenEprelRequirementChanges() throws Exception {
+                Product product = buildBaseProduct();
+                addAttribute(product, "required_attr");
+                product.setEprelDatas(null);
+
+                invokeUpdateExcludeStatus(product);
+                assertThat(product.getExcludedCauses()).containsExactly("missing_eprel");
+
+                org.open4goods.model.vertical.ImpactScoreV2Config v2 = new org.open4goods.model.vertical.ImpactScoreV2Config();
+                v2.setEprelRequired(false);
+                verticalConfig.getImpactScoreConfig().setV2(v2);
+                verticalConfig.getImpactScoreConfig().setMethodologyVersion(2);
+                invokeUpdateExcludeStatus(product);
+                assertThat(product.isExcluded()).isFalse();
+                assertThat(product.getExcludedCauses()).isEmpty();
+
+                verticalConfig.getImpactScoreConfig().setMethodologyVersion(1);
+                invokeUpdateExcludeStatus(product);
+                assertThat(product.isExcluded()).isTrue();
+                assertThat(product.getExcludedCauses()).containsExactly("missing_eprel");
+        }
+
         private Product buildBaseProduct() {
                 Product product = new Product(123L);
                 product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, "Brand");
