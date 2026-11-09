@@ -1,6 +1,6 @@
 ---
 title: "La classe énergétique d'un réfrigérateur, c'est quoi ?"
-description: "Du A au G : ce que signifie la classe énergétique d'un frigo (D, E, F…), consommation annuelle et écart de facture"
+description: "Du A au G : ce que signifie la classe énergétique d'un frigo (D, E, F...), consommation annuelle et écart de facture"
 author: o4g
 language: fr
 tags:
