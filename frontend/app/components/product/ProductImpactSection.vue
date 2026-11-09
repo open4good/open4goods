@@ -21,6 +21,7 @@
         :expanded-score-id="expandedScoreId"
         :score-min="scoreMin"
         :score-max="scoreMax"
+        :impact-status="impactStatus"
       />
     </div>
 
@@ -38,7 +39,10 @@ import { computed, toRef } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { ScoreView } from './impact/impact-types'
-import type { ProductEprelDto } from '~~/shared/api-client'
+import type {
+  ProductEprelDto,
+  ProductImpactScoreStatusDto,
+} from '~~/shared/api-client'
 
 interface EprelDataWrapper {
   eprelDatas?: ProductEprelDto
@@ -76,6 +80,11 @@ interface ChartSeriesEntry {
 }
 
 const props = defineProps({
+  /** V2 `scores.impactScore` block; null keeps the V1 rendering. */
+  impactStatus: {
+    type: Object as PropType<ProductImpactScoreStatusDto | null>,
+    default: null,
+  },
   sectionId: {
     type: String,
     default: 'impact',

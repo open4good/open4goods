@@ -59,6 +59,12 @@
                       })
                     }}
                   </p>
+                  <p
+                    v-if="methodologyV2Note"
+                    class="category-ecoscore__subtitle"
+                  >
+                    {{ methodologyV2Note }}
+                  </p>
                 </header>
 
                 <v-row
@@ -654,6 +660,19 @@ const impactScoreConfig = computed<ImpactScoreConfigDto | null>(
 )
 
 const impactScoreTexts = computed(() => impactScoreConfig.value?.texts ?? {})
+
+// V2: version of the method, coverage threshold and "not filled in" rule.
+// The weights listed below already come from the active matrix.
+const methodologyV2Note = computed(() => {
+  const config = impactScoreConfig.value
+  const version = config?.methodologyVersion ?? 1
+  const coverage = config?.minRealWeightCoverage
+  if (version < 2 || typeof coverage !== 'number') return null
+  return t('components.impactScore.v2.methodPage', {
+    version,
+    coverage: typeof coverage === 'number' ? Math.round(coverage * 100) : null,
+  })
+})
 
 const purposeText = computed(
   () => impactScoreTexts.value?.purpose?.trim() || null

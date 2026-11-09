@@ -105,7 +105,9 @@
       "eyebrow": "Comparez le prix et l'Impact Score",
       "title": "Acheter mieux. Sans dépenser plus.",
       "animatedSubtitle": "",
-      "titleSubtitle": ["Le comparateur qui note l'impact environnemental de l'électroménager et de la tech"],
+      "titleSubtitle": [
+        "Le comparateur qui note l'impact environnemental de l'électroménager et de la tech"
+      ],
       "subtitles": [
         "Gagnez du temps. Choisissez librement.",
         "Comparez les prix et l'Impact Score en un seul endroit.",
@@ -916,7 +918,30 @@
       "tooltipBadge": "Qualité de l'impact évalué à {value} sur 20",
       "outOf20": "/20",
       "scale": "Échelle : {min}-{max}",
-      "svgAriaLabel": "Score {score} sur 20"
+      "svgAriaLabel": "Score {score} sur 20",
+      "v2": {
+        "notRated": "Non noté",
+        "notRatedCoverage": "Pas assez de données vérifiables pour noter ce produit ({count} sur {total} critères renseignés).",
+        "notRatedRecalculating": "Note en cours de recalcul avec la méthode v2.",
+        "positionLevels": {
+          "excellent": "Parmi les mieux classés",
+          "good": "Au-dessus de la médiane",
+          "fair": "En dessous de la médiane",
+          "poor": "Parmi les moins bien classés"
+        },
+        "betterThan": "Mieux classé que {percent} % des {count} {items} notés par Nudger",
+        "productsFallback": "produits",
+        "onlyRated": "Seul produit noté de sa catégorie",
+        "criteria": "{count} critère sur {total} renseigné | {count} critères sur {total} renseignés",
+        "scoredAt": "calculé le {date}",
+        "method": "méthode v{version}",
+        "howCalculated": "Comment est calculée cette note ?",
+        "disclaimer": "L'Impact Score est une notation comparative de Nudger. Ce n'est ni un label, ni une certification, ni une mesure de l'empreinte absolue.",
+        "notRatedAfterRated": "Les produits non notés sont affichés après les produits notés.",
+        "criterionNotFilled": "Non renseigné",
+        "methodPage": "Méthode v{version}. Un produit n'est noté que si ses critères renseignés pèsent au moins {coverage} % de la matrice. Un critère non renseigné reste non renseigné : il n'est jamais remplacé par une valeur moyenne.",
+        "contextAria": "Détails de la note"
+      }
     },
     "pageLoadingOverlay": {
       "label": "Chargement du contenu"
