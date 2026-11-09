@@ -463,4 +463,33 @@ class SearchServiceTest {
         assertThat(captor.getValue().getSort().stream().map(org.springframework.data.domain.Sort.Order::getProperty).toList())
                 .containsExactly("scores.ECOSCORE.value", ProductRepository.STABLE_SORT_TIE_BREAK_FIELD);
     }
+
+    /**
+     * GOU-1881: a listed product without ECOSCORE (EPREL filter lifted, below the coverage threshold) is sorted last
+     * in both directions.
+     */
+    @Test
+    void globalSortPutsProductsWithoutImpactScoreLast() throws Exception {
+        Product rated = new Product(1L);
+        org.open4goods.model.product.Score score = new org.open4goods.model.product.Score();
+        score.setName("ECOSCORE");
+        score.setValue(12.0);
+        rated.getScores().put("ECOSCORE", score);
+        Product unrated = new Product(2L);
+
+        java.lang.reflect.Method method = SearchService.class.getDeclaredMethod("buildGlobalSortComparator",
+                org.springframework.data.domain.Sort.class);
+        method.setAccessible(true);
+        for (org.springframework.data.domain.Sort.Direction direction : org.springframework.data.domain.Sort.Direction.values()) {
+            @SuppressWarnings("unchecked")
+            java.util.Comparator<SearchHit<Product>> comparator = (java.util.Comparator<SearchHit<Product>>) method
+                    .invoke(searchService, org.springframework.data.domain.Sort.by(direction, "scores.ECOSCORE.value"));
+            SearchHit<Product> ratedHit = org.mockito.Mockito.mock(SearchHit.class);
+            when(ratedHit.getContent()).thenReturn(rated);
+            SearchHit<Product> unratedHit = org.mockito.Mockito.mock(SearchHit.class);
+            when(unratedHit.getContent()).thenReturn(unrated);
+            assertThat(java.util.stream.Stream.of(unratedHit, ratedHit).sorted(comparator).toList())
+                    .containsExactly(ratedHit, unratedHit);
+        }
+    }
 }

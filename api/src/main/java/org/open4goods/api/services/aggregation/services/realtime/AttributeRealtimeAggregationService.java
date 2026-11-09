@@ -379,48 +379,13 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	 * @param data
 	 */
 	private void updateExcludeStatus(Product data, VerticalConfig vConf) {
+		ExclusionRules.Result result = ExclusionRules.evaluate(data, vConf);
 		data.getExcludedCauses().clear();
-		boolean ret = false;
-		// On brand
-		if (StringUtils.isEmpty(data.brand())) {
-			dedicatedLogger.info("Excluded because brand is missing : {}", data);
-			ret = true;
-			data.getExcludedCauses().add("missing_brand");
+		data.getExcludedCauses().addAll(result.excludedCauses());
+		if (result.excluded()) {
+			dedicatedLogger.info("Excluded because {} : {}", result.excludedCauses(), data);
 		}
-
-		// On model
-		if (StringUtils.isEmpty(data.model())) {
-			dedicatedLogger.info("Excluded because model is missing : {}", data);
-			ret = true;
-			data.getExcludedCauses().add("missing_model");
-		}
-
-		// On eprel
-		if (data.getEprelDatas() == null) {
-			dedicatedLogger.info("Excluded because no EPREL association : {}", data);
-			ret = true;
-			data.getExcludedCauses().add("missing_eprel");
-		}
-
-		Set<String> attrKeys = data.getAttributes().getattributesAsStringKeys();
-		if (vConf.getRequiredAttributes() != null) {
-
-			Set<String> missing = new HashSet<>(vConf.getRequiredAttributes());
-			missing.removeAll(attrKeys);
-
-			if (!missing.isEmpty()) {
-				missing.forEach(e -> {
-					data.getExcludedCauses().add("missing_attr_" + e);
-				});
-
-				dedicatedLogger.info("Excluded because required attributes are missing : {}", data);
-				ret = true;
-			}
-
-		}
-
-		data.setExcluded(ret);
-
+		data.setExcluded(result.excluded());
 	}
 
 	/**
