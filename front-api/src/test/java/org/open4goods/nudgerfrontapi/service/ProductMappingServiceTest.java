@@ -177,6 +177,75 @@ class ProductMappingServiceTest {
                 .isEqualTo("Fairphone 6, smartphone : score impact 14.3/20. Comparez les offres sur Nudger.");
     }
 
+    private Product brandModelProduct(long gtin, String vertical, String... offers) {
+        Product product = new Product(gtin);
+        product.setVertical(vertical);
+        product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "SAMSUNG");
+        product.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "BN5901247A-1");
+        ProductTexts names = new ProductTexts();
+        Localisable<String, String> displayName = new Localisable<>();
+        displayName.put("fr", "SAMSUNG BN5901247A-1");
+        names.setDisplayName(displayName);
+        product.setNames(names);
+        if (offers.length > 0) {
+            AggregatedPrices prices = new AggregatedPrices();
+            Set<AggregatedPrice> set = new HashSet<>();
+            double amount = 10;
+            for (String offer : offers) {
+                AggregatedPrice price = new AggregatedPrice();
+                price.setOfferName(offer);
+                price.setPrice(amount++);
+                set.add(price);
+            }
+            prices.setOffers(set);
+            product.setPrice(prices);
+        }
+        return product;
+    }
+
+    @Test
+    void displayNameUsesBestOfferNameWithoutVertical() throws Exception {
+        long gtin = 5901247000001L;
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(
+                brandModelProduct(gtin, null, "Batterie  \"\"Samsung\"\" 3000 mAh", "Autre"));
+
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("names"), DomainLanguage.fr);
+
+        assertThat(dto.names().displayName()).isEqualTo("Batterie \"Samsung\" 3000 mAh");
+    }
+
+    @Test
+    void displayNameTruncatesLongOfferName() throws Exception {
+        long gtin = 5901247000002L;
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(
+                brandModelProduct(gtin, null, "mot ".repeat(60)));
+
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("names"), DomainLanguage.fr);
+
+        assertThat(dto.names().displayName().length()).isLessThanOrEqualTo(121);
+        assertThat(dto.names().displayName()).endsWith("…");
+    }
+
+    @Test
+    void displayNameUnchangedWithVertical() throws Exception {
+        long gtin = 5901247000003L;
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(brandModelProduct(gtin, "tv", "Offre TV"));
+
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("names"), DomainLanguage.fr);
+
+        assertThat(dto.names().displayName()).isEqualTo("SAMSUNG BN5901247A-1");
+    }
+
+    @Test
+    void displayNameUnchangedWithoutNamedOffer() throws Exception {
+        long gtin = 5901247000004L;
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(brandModelProduct(gtin, null));
+
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("names"), DomainLanguage.fr);
+
+        assertThat(dto.names().displayName()).isEqualTo("SAMSUNG BN5901247A-1");
+    }
+
     @Test
     void getProductNamesDropsManufacturerReferenceFromPageTitle() throws Exception {
         long gtin = 7333394145372L;

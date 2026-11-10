@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
@@ -547,7 +548,7 @@ public class ProductMappingService {
         String seoName = resolveProductSeoName(product, domainLanguage, locale);
         String metaDescription = productSeoMetaService.buildMetaDescription(product, seoName, vConfig, domainLanguage);
         return new ProductNamesDto(
-                safeCanonicalName(product, resolveLocalisedString(product.getNames().getDisplayName(), domainLanguage, locale)),
+                resolveDisplayName(product, domainLanguage, locale),
                 safeCanonicalName(product, resolveLocalisedString(product.getNames().getCardName(), domainLanguage, locale)),
                 productSeoMetaService.stripManufacturerReference(
                         safeCanonicalName(product, resolveLocalisedString(product.getNames().getPageTitle(), domainLanguage, locale)),
@@ -558,6 +559,63 @@ public class ProductMappingService {
                         : resolveLocalisedString(product.getNames().getMetaDescription(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getProductMetaOpenGraphTitle(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getProductMetaOpenGraphDescription(), domainLanguage, locale));
+    }
+
+    /**
+     * Resolve the display name. A product without vertical whose name falls back to brand and model (or the GTIN)
+     * takes the name of its best offer instead, cleaned and truncated; otherwise the name is unchanged.
+     */
+    private String resolveDisplayName(Product product, DomainLanguage domainLanguage, Locale locale) {
+        String name = safeCanonicalName(product, resolveLocalisedString(product.getNames().getDisplayName(), domainLanguage, locale));
+        if (StringUtils.hasText(product.getVertical())) {
+            return name;
+        }
+        String fallback = (product.brand() == null ? "" : product.brand().trim()) + " "
+                + (product.model() == null ? "" : product.model().trim());
+        String normalizedName = name == null ? "" : name.trim().replaceAll("\\s+", " ");
+        boolean properName = StringUtils.hasText(normalizedName)
+                && !normalizedName.equalsIgnoreCase(fallback.trim().replaceAll("\\s+", " "))
+                && !normalizedName.equals(String.valueOf(product.getId()));
+        if (properName) {
+            return name;
+        }
+        String offerName = cleanOfferName(bestOfferName(product));
+        return offerName != null ? offerName : name;
+    }
+
+    private String bestOfferName(Product product) {
+        AggregatedPrices prices = product.getPrice();
+        if (prices != null) {
+            AggregatedPrice best = prices.getMinPrice();
+            if (best != null && StringUtils.hasText(best.getOfferName())) {
+                return best.getOfferName();
+            }
+            if (prices.getOffers() != null) {
+                String named = prices.getOffers().stream()
+                        .filter(o -> o != null && StringUtils.hasText(o.getOfferName()))
+                        .min(Comparator.comparing((AggregatedPrice o) -> o.getPrice() == null ? Double.MAX_VALUE : o.getPrice()))
+                        .map(AggregatedPrice::getOfferName).orElse(null);
+                if (named != null) {
+                    return named;
+                }
+            }
+        }
+        return product.getOfferNames() == null ? null : product.getOfferNames().stream()
+                .filter(StringUtils::hasText).max(Comparator.comparingInt(String::length)).orElse(null);
+    }
+
+    private static final int MAX_DISPLAY_NAME_LENGTH = 120;
+
+    private String cleanOfferName(String raw) {
+        if (!StringUtils.hasText(raw)) {
+            return null;
+        }
+        String cleaned = raw.replace("\"\"", "\"").replaceAll("\\s+", " ").trim();
+        if (cleaned.length() > MAX_DISPLAY_NAME_LENGTH) {
+            int cut = cleaned.lastIndexOf(' ', MAX_DISPLAY_NAME_LENGTH - 1);
+            cleaned = cleaned.substring(0, cut > MAX_DISPLAY_NAME_LENGTH / 2 ? cut : MAX_DISPLAY_NAME_LENGTH - 1).trim() + "…";
+        }
+        return StringUtils.hasText(cleaned) ? cleaned : null;
     }
 
     /**
