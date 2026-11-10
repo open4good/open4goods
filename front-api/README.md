@@ -58,6 +58,47 @@ The category page server-renders its listing with the default sort
 still applied. A failed search shows an error with a retry action instead of
 the previous listing.
 
+## Global search relevance
+
+`SearchService.globalSearch` (`POST /products/search/global`, page
+`/rechercher`) applies relevance rules held by `GlobalSearchRelevance` and
+configured under `front.global-search` (GOU-2029). They never reach
+`SearchService.search` (category pages, `/products/search`):
+`SearchServiceTest` pins the query it sends.
+
+- **Ranking** of both levels (category groups and long tail): text score, plus
+  a `match_phrase` bonus on `offerNames` (`phrase-boost`, `phrase-slop`), plus
+  `offers-count-weight` x `log1p(offersCount)` (`function_score`, `boost_mode`
+  `sum`), so that at comparable relevance the product sold by more merchants
+  comes first. Freshness stays a filter (`lastChange`), not a score.
+- **Accessories**: a product is an accessory when one of `accessory-terms`
+  (or its plural with `s`) starts its offer name, within
+  `accessory-head-words` words. Elasticsearch checks it with an `intervals`
+  query filtered on `interval.start`: the field analyzer folds accents and
+  case, and a term further in the name ("lave-linge avec filtre
+  anti-calcaire") does not count. Positions of the multi-valued `offerNames`
+  run on from one value to the next, so only the first indexed offer name is
+  checked. When the normalized query contains one of the terms, nothing
+  changes. Otherwise accessories are demoted in the category groups
+  (`boosting`, `accessory-negative-boost`) and leave the long tail for the
+  additive `accessoryResults` field (at most `accessory-results-limit`).
+- **Long tail** (`missingVerticalResults`, products without a vertical): only
+  products with a fresh offer (`OfferFreshnessService`), an image and a
+  readable title. The index holds neither `coverImagePath` nor an indexed
+  image URL for these products, so the check runs in Java: the service reads
+  the first `(page + 1) x pageSize x long-tail-over-read` candidates with a
+  light source, keeps the displayable ones in order, serves the requested
+  slice and fetches only that slice in full. An image is a cover or a merchant
+  image that is not a placeholder (`noimage`). A readable title is an offer
+  name of at least `min-title-words` words, one of them alphabetic, at least
+  `min-title-word-length` letters long and other than the brand.
+- **Post-filter limits**: `missingVerticalPage.totalElements` is exact when
+  every candidate was read; otherwise it is the Elasticsearch total scaled by
+  the share of displayable candidates read, so the last pages announced may be
+  shorter or empty. At most `long-tail-max-candidates` candidates are read:
+  `totalPages` is capped at `long-tail-max-candidates / (pageSize x
+  long-tail-over-read)` (20 pages of 20).
+
 ## Offer freshness
 
 front-api never serves an offer older than `front.offers.max-age` (default: the

@@ -758,6 +758,82 @@
       "type": "java.lang.String",
       "description": "ImpactScore methodology version forced per vertical, comma-separated <vertical>:<version> pairs (for example tv:2), versions 1 or 2. Blank or none forces nothing. Rendered from the GitHub Environment variable IMPACTSCORE_METHODOLOGY_OVERRIDES; api, front-api and ui must receive the same value. An invalid value fails the startup (docs/impactscore/v2-design.md, section 5.2).",
       "defaultValue": ""
+    },
+    {
+      "name": "front.global-search.accessory-terms",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Words or expressions naming an accessory or a spare part. A global search result is an accessory when one of them starts its first offer name (within accessory-head-words words); plural (+s) and unaccented forms are matched too. Ignored when the query itself contains one of them."
+    },
+    {
+      "name": "front.global-search.accessory-head-words",
+      "type": "java.lang.Integer",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Number of leading words of the offer name searched for an accessory term.",
+      "defaultValue": 3
+    },
+    {
+      "name": "front.global-search.accessory-negative-boost",
+      "type": "java.lang.Double",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Score factor of an accessory in the global search vertical groups (Elasticsearch boosting negative_boost).",
+      "defaultValue": 0.1
+    },
+    {
+      "name": "front.global-search.accessory-results-limit",
+      "type": "java.lang.Integer",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Maximum number of accessories without a vertical returned apart in accessoryResults.",
+      "defaultValue": 8
+    },
+    {
+      "name": "front.global-search.offers-count-weight",
+      "type": "java.lang.Double",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Weight of log1p(offersCount) added to the global search text score. 0 disables it.",
+      "defaultValue": 1.0
+    },
+    {
+      "name": "front.global-search.phrase-boost",
+      "type": "java.lang.Double",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Boost of the exact expression (match_phrase on offerNames) added to the global search text score. 0 disables it.",
+      "defaultValue": 2.0
+    },
+    {
+      "name": "front.global-search.phrase-slop",
+      "type": "java.lang.Integer",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Slop of the exact expression bonus.",
+      "defaultValue": 1
+    },
+    {
+      "name": "front.global-search.long-tail-over-read",
+      "type": "java.lang.Integer",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Long tail candidates read from Elasticsearch per displayed product, before the image and title filter done in Java.",
+      "defaultValue": 3
+    },
+    {
+      "name": "front.global-search.long-tail-max-candidates",
+      "type": "java.lang.Integer",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Maximum number of long tail candidates read for one request; deeper pages are not reachable.",
+      "defaultValue": 1200
+    },
+    {
+      "name": "front.global-search.min-title-words",
+      "type": "java.lang.Integer",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Minimum number of words of a readable offer name (long tail filter).",
+      "defaultValue": 3
+    },
+    {
+      "name": "front.global-search.min-title-word-length",
+      "type": "java.lang.Integer",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Minimum length of the alphabetic word, other than the brand, that a readable offer name must hold.",
+      "defaultValue": 3
     }
   ]
 }

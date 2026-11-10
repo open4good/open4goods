@@ -428,7 +428,10 @@ public class ProductController {
     @PostMapping("/search")
     @Operation(
             summary = "Execute a global search",
-            description = "Runs a lexical Elasticsearch search with optional filters and sorting.",
+            description = "Runs a lexical Elasticsearch search with optional filters and sorting. Results are ranked "
+                    + "by text relevance, exact expression and number of offers. Unless the query names an accessory, "
+                    + "accessories are demoted in the vertical groups and returned apart in accessoryResults; "
+                    + "missing-vertical results only hold products with a fresh offer, an image and a readable title.",
             security = @SecurityRequirement(name = "bearer-jwt"),
             parameters = {
                     @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
@@ -515,10 +518,15 @@ public class ProductController {
                 (int) Math.min(result.missingVerticalTotalPages(),
                         apiProperties.maxReachablePages(result.missingVerticalPageSize())));
 
+        List<GlobalSearchResultDto> accessoryResults = result.accessoryResults().stream()
+                .map(this::toDto)
+                .toList();
+
         GlobalSearchResponseDto body = new GlobalSearchResponseDto(groups,
                 missingVerticalResults,
                 pageMetaDto,
-                toCategoryDto(result.verticalCta()));
+                toCategoryDto(result.verticalCta()),
+                accessoryResults);
         return ResponseEntity.ok()
                 .cacheControl(CacheControlConstants.FIVE_MINUTES_PUBLIC_CACHE)
                 .header("X-Locale", domainLanguage.languageTag())

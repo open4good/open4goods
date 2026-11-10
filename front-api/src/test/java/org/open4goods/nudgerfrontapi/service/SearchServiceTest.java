@@ -2,6 +2,8 @@ package org.open4goods.nudgerfrontapi.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.atLeastOnce;
@@ -32,7 +34,9 @@ import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
+import org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties;
 import org.open4goods.nudgerfrontapi.config.properties.OfferFreshnessProperties;
+import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationBucketDto;
 import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchResult;
@@ -64,7 +68,7 @@ class SearchServiceTest {
     @BeforeEach
     void setUp() {
         searchService = new SearchService(repository, verticalsConfigService, productMappingService, apiProperties,
-                new OfferFreshnessService(new OfferFreshnessProperties()));
+                new OfferFreshnessService(new OfferFreshnessProperties()), new GlobalSearchProperties());
     }
 
     @Test
@@ -147,7 +151,9 @@ class SearchServiceTest {
         assertThat(queryCaptor.getAllValues()).allSatisfy(query -> {
             NativeQuery nativeQuery = (NativeQuery) query;
             assertThat(nativeQuery.getKnnSearches()).isEmpty();
-            assertThat(nativeQuery.getQuery().isBool()).isTrue();
+            // GOU-2029: the lexical query is ranked (exact expression, offers count) by a function_score.
+            assertThat(nativeQuery.getQuery().isFunctionScore()).isTrue();
+            assertThat(nativeQuery.getQuery().functionScore().query().isBool()).isTrue();
         });
     }
 
@@ -491,5 +497,209 @@ class SearchServiceTest {
             assertThat(java.util.stream.Stream.of(unratedHit, ratedHit).sorted(comparator).toList())
                     .containsExactly(ratedHit, unratedHit);
         }
+    }
+
+    /**
+     * Query sent by {@code search()} (category pages, /api/products) for a text query, recorded before GOU-2029. The
+     * global search relevance rules must never reach it.
+     */
+    private static final String SEARCH_QUERY_BEFORE_GOU_2029 = "Query: {\"bool\":{\"filter\":[{\"range\":{\"lastChange\":{\"gt\":\"0\"}}},"
+            + "{\"range\":{\"offersCount\":{\"gt\":0.0}}},{\"term\":{\"excluded\":{\"value\":false}}}],"
+            + "\"must\":[{\"multi_match\":{\"fields\":[\"offerNames\",\"attributes.referentielAttributes.BRAND.keyword\","
+            + "\"attributes.referentielAttributes.MODEL.keyword\"],\"operator\":\"and\",\"query\":\"machine a cafe\","
+            + "\"type\":\"best_fields\"}}]}}";
+
+    @Test
+    void search_queryIsUnchangedByTheGlobalSearchRules() {
+        SearchService withAccessoryTerms = new SearchService(repository, verticalsConfigService, productMappingService,
+                apiProperties, new OfferFreshnessService(new OfferFreshnessProperties()),
+                GlobalSearchRelevanceTest.properties(List.of("filtre", "diffuseur")));
+        SearchHits<Product> emptyHits = new SearchHitsImpl<Product>(0L, TotalHitsRelation.EQUAL_TO, 0.0f,
+                java.time.Duration.ZERO, null, null, java.util.Collections.emptyList(), null, null, null);
+        when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(emptyHits);
+
+        withAccessoryTerms.search(org.springframework.data.domain.PageRequest.of(0, 20), null, "machine a cafe", null,
+                null);
+
+        ArgumentCaptor<org.springframework.data.elasticsearch.core.query.Query> queryCaptor = ArgumentCaptor
+                .forClass(org.springframework.data.elasticsearch.core.query.Query.class);
+        verify(repository).search(queryCaptor.capture(), eq(ProductRepository.MAIN_INDEX_NAME));
+        Query esQuery = ((NativeQuery) queryCaptor.getValue()).getQuery();
+        assertThat(esQuery.toString()).isEqualTo(SEARCH_QUERY_BEFORE_GOU_2029)
+                .doesNotContain("intervals", "function_score", "boosting", "match_phrase");
+    }
+
+    @Test
+    void globalSearch_setsAccessoriesApartFromTheLongTailAndDemotesThemInGroups() throws Exception {
+        Product tv = GlobalSearchRelevanceTest.displayable(10, "Machine à café Philips grain", now());
+        tv.setVertical("coffee-machine");
+        Product machine = GlobalSearchRelevanceTest.displayable(1, "Machine à café Delonghi Magnifica", now());
+        Product diffuser = GlobalSearchRelevanceTest.displayable(2, "Diffuseur pour machine à café", now());
+        List<NativeQuery> queries = stubGlobalSearch(List.of(tv), List.of(machine), List.of(diffuser));
+
+        GlobalSearchResult result = serviceWithAccessoryTerms().globalSearch("machine a cafe", DomainLanguage.fr, null,
+                org.springframework.data.domain.Sort.unsorted(), null);
+
+        assertThat(gtins(result.missingVerticalResults())).containsExactly(1L);
+        assertThat(gtins(result.accessoryResults())).containsExactly(2L);
+        assertThat(result.verticalGroups()).hasSize(1);
+        assertThat(gtins(result.verticalGroups().get(0).results())).containsExactly(10L);
+        NativeQuery verticalQuery = queries.stream().filter(q -> isVerticalQuery(q)).findFirst().orElseThrow();
+        assertThat(verticalQuery.getQuery().isBoosting()).isTrue();
+        assertThat(verticalQuery.getQuery().boosting().negative().isIntervals()).isTrue();
+        assertThat(verticalQuery.getQuery().boosting().positive().isFunctionScore()).isTrue();
+        assertThat(queries.stream().filter(SearchServiceTest::isLongTailQuery)).hasSize(1);
+        assertThat(queries.stream().filter(SearchServiceTest::isAccessoryQuery)).hasSize(1);
+    }
+
+    @Test
+    void globalSearch_keepsAccessoriesInPlaceWhenTheQueryNamesOne() throws Exception {
+        Product filter = GlobalSearchRelevanceTest.displayable(2, "Filtre à eau pour machine à café", now());
+        List<NativeQuery> queries = stubGlobalSearch(List.of(), List.of(filter), List.of());
+
+        GlobalSearchResult result = serviceWithAccessoryTerms().globalSearch("filtre machine a cafe",
+                DomainLanguage.fr, null, org.springframework.data.domain.Sort.unsorted(), null);
+
+        assertThat(gtins(result.missingVerticalResults())).containsExactly(2L);
+        assertThat(result.accessoryResults()).isEmpty();
+        assertThat(queries).allSatisfy(query -> assertThat(query.getQuery().toString()).doesNotContain("intervals"));
+        assertThat(queries.stream().filter(SearchServiceTest::isVerticalQuery).findFirst().orElseThrow().getQuery()
+                .isFunctionScore()).isTrue();
+    }
+
+    @Test
+    void globalSearch_longTailKeepsOnlyProductsWithAFreshOfferAnImageAndAReadableTitle() throws Exception {
+        Product ok = GlobalSearchRelevanceTest.displayable(1, "Perceuse visseuse Makita 18V", now());
+        Product noImage = GlobalSearchRelevanceTest.displayable(2, "Perceuse visseuse Bosch 18V", now());
+        noImage.setResources(new java.util.HashSet<>());
+        Product brandAndCode = GlobalSearchRelevanceTest.displayable(3, "DELONGHI ECAM22110", now());
+        Product stale = GlobalSearchRelevanceTest.displayable(4, "Perceuse visseuse Ryobi 18V",
+                now() - Duration.ofDays(20).toMillis());
+        Product other = GlobalSearchRelevanceTest.displayable(5, "Perceuse visseuse Dewalt 18V", now());
+        List<NativeQuery> queries = stubGlobalSearch(List.of(), List.of(ok, noImage, brandAndCode, stale, other),
+                List.of());
+
+        GlobalSearchResult result = serviceWithAccessoryTerms().globalSearch("perceuse visseuse", DomainLanguage.fr,
+                null, org.springframework.data.domain.Sort.unsorted(), null);
+
+        assertThat(gtins(result.missingVerticalResults())).containsExactly(1L, 5L);
+        // Every candidate was read (5 < 60): the total is exact.
+        assertThat(result.missingVerticalTotalElements()).isEqualTo(2);
+        assertThat(result.missingVerticalTotalPages()).isEqualTo(1);
+        NativeQuery longTail = queries.stream().filter(SearchServiceTest::isLongTailQuery).findFirst().orElseThrow();
+        assertThat(longTail.getPageable().getPageSize()).isEqualTo(60);
+        assertThat(longTail.getSourceFilter().getIncludes()).contains("offerNames", "resources.url", "price.offers");
+        NativeQuery fetch = queries.stream().filter(q -> q.getQuery().isIds()).findFirst().orElseThrow();
+        assertThat(fetch.getQuery().ids().values()).containsExactly("1", "5");
+    }
+
+    @Test
+    void globalSearch_longTailPagesTheDisplayableProducts() throws Exception {
+        List<Product> longTail = new java.util.ArrayList<>();
+        for (long id = 1; id <= 5; id++) {
+            longTail.add(GlobalSearchRelevanceTest.displayable(id, "Perceuse visseuse modele " + id, now()));
+        }
+        stubGlobalSearch(List.of(), longTail, List.of());
+
+        GlobalSearchResult result = serviceWithAccessoryTerms().globalSearch("perceuse visseuse", DomainLanguage.fr,
+                null, org.springframework.data.domain.Sort.unsorted(), org.springframework.data.domain.PageRequest.of(1, 2));
+
+        assertThat(gtins(result.missingVerticalResults())).containsExactly(3L, 4L);
+        assertThat(result.missingVerticalTotalElements()).isEqualTo(5);
+        assertThat(result.missingVerticalTotalPages()).isEqualTo(3);
+        assertThat(result.missingVerticalPageNumber()).isEqualTo(1);
+    }
+
+    @Test
+    void globalSearch_accessoryResultsAreBounded() throws Exception {
+        List<Product> accessories = new java.util.ArrayList<>();
+        for (long id = 100; id < 112; id++) {
+            accessories.add(GlobalSearchRelevanceTest.displayable(id, "Filtre pour machine à café modele " + id, now()));
+        }
+        List<NativeQuery> queries = stubGlobalSearch(List.of(), List.of(), accessories);
+
+        GlobalSearchResult result = serviceWithAccessoryTerms().globalSearch("machine a cafe", DomainLanguage.fr,
+                null, org.springframework.data.domain.Sort.unsorted(), null);
+
+        assertThat(result.accessoryResults()).hasSize(8);
+        assertThat(gtins(result.accessoryResults())).startsWith(100L, 101L);
+        NativeQuery accessoryQuery = queries.stream().filter(SearchServiceTest::isAccessoryQuery).findFirst()
+                .orElseThrow();
+        assertThat(accessoryQuery.getPageable().getPageSize()).isEqualTo(24);
+    }
+
+    private SearchService serviceWithAccessoryTerms() {
+        return new SearchService(repository, verticalsConfigService, productMappingService, apiProperties,
+                new OfferFreshnessService(new OfferFreshnessProperties()),
+                GlobalSearchRelevanceTest.properties(List.of("filtre", "diffuseur")));
+    }
+
+    /**
+     * Answers the global search queries: the vertical search, the long tail candidates, the accessory candidates
+     * and the fetch of complete products by id. Every query is recorded.
+     */
+    private List<NativeQuery> stubGlobalSearch(List<Product> vertical, List<Product> longTail,
+            List<Product> accessories) {
+        Map<String, Product> byId = new java.util.HashMap<>();
+        java.util.stream.Stream.of(vertical, longTail, accessories).flatMap(List::stream)
+                .forEach(product -> byId.put(String.valueOf(product.getId()), product));
+        List<NativeQuery> queries = new java.util.ArrayList<>();
+        when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenAnswer(invocation -> {
+            NativeQuery query = invocation.getArgument(0);
+            queries.add(query);
+            if (query.getQuery().isIds()) {
+                return hits(query.getQuery().ids().values().stream().map(byId::get).toList());
+            }
+            if (isVerticalQuery(query)) {
+                return hits(vertical);
+            }
+            if (isAccessoryQuery(query)) {
+                return hits(accessories);
+            }
+            return hits(longTail);
+        });
+        lenient().when(productMappingService.mapProduct(any(), any(), any(), any(), anyBoolean()))
+                .thenAnswer(invocation -> {
+                    Product product = invocation.getArgument(0);
+                    ProductDto dto = mock(ProductDto.class);
+                    lenient().when(dto.gtin()).thenReturn(product.getId());
+                    return dto;
+                });
+        return queries;
+    }
+
+    private static boolean isVerticalQuery(NativeQuery query) {
+        String json = query.getQuery().toString();
+        return !query.getQuery().isIds() && !json.contains("\"must_not\":[{\"exists\":{\"field\":\"vertical\"}}]");
+    }
+
+    private static boolean isAccessoryQuery(NativeQuery query) {
+        return !isVerticalQuery(query) && query.getQuery().toString().contains("\"filter\":[{\"intervals\"");
+    }
+
+    private static boolean isLongTailQuery(NativeQuery query) {
+        return !query.getQuery().isIds() && !isVerticalQuery(query) && !isAccessoryQuery(query);
+    }
+
+    private static SearchHits<Product> hits(List<Product> products) {
+        List<SearchHit<Product>> hits = new java.util.ArrayList<>();
+        float score = products.size();
+        for (Product product : products) {
+            if (product == null) {
+                continue;
+            }
+            hits.add(new SearchHit<>(ProductRepository.MAIN_INDEX_NAME, String.valueOf(product.getId()), null,
+                    score--, null, null, null, null, null, null, product));
+        }
+        return new SearchHitsImpl<>(hits.size(), TotalHitsRelation.EQUAL_TO, products.size(), Duration.ZERO, null,
+                null, hits, null, null, null);
+    }
+
+    private static List<Long> gtins(List<SearchService.GlobalSearchHit> hits) {
+        return hits.stream().map(hit -> hit.product().gtin()).toList();
+    }
+
+    private static long now() {
+        return System.currentTimeMillis();
     }
 }
