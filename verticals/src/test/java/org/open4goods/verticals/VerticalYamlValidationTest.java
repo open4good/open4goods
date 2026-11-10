@@ -253,8 +253,16 @@ class VerticalYamlValidationTest {
     }
 
     /**
+     * V2 criteria that replace a V1 criterion with its weight, by vertical (GOU-2041): V1 criterion to V2 criterion.
+     */
+    private static final Map<String, Map<String, String>> V2_REPLACED_CRITERIA = Map.of(
+        "tv", Map.of("REPAIRABILITY_INDEX", "REPAIRABILITY_OR_DURABILITY_INDEX"),
+        "washing-machine", Map.of("REPAIRABILITY_INDEX", "REPAIRABILITY_OR_DURABILITY_INDEX"));
+
+    /**
      * GOU-1880: every real vertical carries a valid {@code v2} block whose matrix is the V1 matrix without
-     * {@code DATA_QUALITY}, renormalised to 1 pro rata (design {@code docs/impactscore/v2-design.md}, 1.2 and 2.3).
+     * {@code DATA_QUALITY}, renormalised to 1 pro rata (design {@code docs/impactscore/v2-design.md}, 1.2 and 2.3),
+     * except the criteria {@link #V2_REPLACED_CRITERIA} replaces, weight unchanged.
      */
     @Test
     void everyRealVerticalHasAV2MatrixWithoutDataQuality() {
@@ -263,7 +271,9 @@ class VerticalYamlValidationTest {
             assertThat(impactScore.getV2()).as("v2 block of %s", config.getId()).isNotNull();
             assertThat(ImpactScoreMethodology.validate(impactScore, config)).as("v2 errors of %s", config.getId()).isEmpty();
 
-            Map<String, Double> v1 = impactScore.getCriteriasPonderation();
+            Map<String, String> replaced = V2_REPLACED_CRITERIA.getOrDefault(config.getId(), Map.of());
+            Map<String, Double> v1 = new HashMap<>();
+            impactScore.getCriteriasPonderation().forEach((key, weight) -> v1.put(replaced.getOrDefault(key, key), weight));
             Map<String, Double> v2 = impactScore.getV2().getCriteriasPonderation();
             assertThat(v2).as("v2 matrix of %s", config.getId()).doesNotContainKey("DATA_QUALITY");
             assertThat(v2.values().stream().mapToDouble(Double::doubleValue).sum())
@@ -324,6 +334,54 @@ class VerticalYamlValidationTest {
     @Test
     void v2MatrixWeightingAnUnknownCriterionIsRefused() {
         assertV2Refused(v2 -> moveWeight(v2, "NOT_AN_ATTRIBUTE"), "not an asScore attribute");
+    }
+
+    @Test
+    void v2DerivedCriterionWeightedWithItsSourceIsRefused() {
+        assertV2Refused(v2 -> {
+            moveWeight(v2, "REPAIRABILITY_OR_DURABILITY_INDEX");
+            v2.getCriteriasPonderation().put("REPAIRABILITY_OR_DURABILITY_INDEX",
+                v2.getCriteriasPonderation().get("REPAIRABILITY_OR_DURABILITY_INDEX") - 0.01);
+            v2.getCriteriasPonderation().put("DURABILITY_INDEX", 0.01);
+        }, "weights both REPAIRABILITY_OR_DURABILITY_INDEX and its source DURABILITY_INDEX");
+    }
+
+    @Test
+    void v2DerivedCriterionReadingAnUnknownSourceIsRefused() {
+        VerticalConfig tv = verticalsConfigService.getConfigById("tv");
+        AttributeConfig derived = tv.getAttributesConfig().getAttributeConfigByKey("REPAIRABILITY_OR_DURABILITY_INDEX");
+        List<String> sources = derived.getScoreSources();
+        try {
+            derived.setScoreSources(List.of("NOT_AN_ATTRIBUTE"));
+            assertThat(ImpactScoreMethodology.validate(tv.getImpactScoreConfig(), tv))
+                .anyMatch(error -> error.contains("reads NOT_AN_ATTRIBUTE, which is not an attribute"));
+        } finally {
+            derived.setScoreSources(sources);
+        }
+    }
+
+    /** GOU-2041: the derived criterion reads the durability index first, never from merchant data itself. */
+    @Test
+    void repairabilityOrDurabilityCriterionReadsDurabilityFirst() {
+        for (String id : List.of("tv", "washing-machine")) {
+            VerticalConfig vertical = verticalsConfigService.getConfigById(id);
+            AttributeConfig derived = vertical.getAttributesConfig()
+                .getAttributeConfigByKey("REPAIRABILITY_OR_DURABILITY_INDEX");
+            assertThat(derived).as("derived criterion of %s", id).isNotNull();
+            assertThat(derived.isAsScore()).isTrue();
+            assertThat(derived.getScoreSources()).containsExactly("DURABILITY_INDEX", "REPAIRABILITY_INDEX");
+            assertThat(derived.getSynonyms()).as("never read from merchant data").isEmpty();
+            assertThat(derived.getScoring().getNormalization().getMethod().name()).isEqualTo("MINMAX_FIXED");
+            assertThat(derived.getScoring().getNormalization().getParams().getFixedMin()).isEqualTo(0.0);
+            assertThat(derived.getScoring().getNormalization().getParams().getFixedMax()).isEqualTo(10.0);
+            assertThat(vertical.getImpactScoreConfig().getCriteriasPonderation())
+                .as("V1 matrix of %s unchanged", id).containsKey("REPAIRABILITY_INDEX")
+                .doesNotContainKey("REPAIRABILITY_OR_DURABILITY_INDEX");
+            assertThat(vertical.getAvailableImpactScoreCriterias()).as("V1 DATA_QUALITY of %s unchanged", id)
+                .doesNotContain("REPAIRABILITY_OR_DURABILITY_INDEX");
+            assertThat(vertical.getAttributesConfig().getAttributeConfigByKey("REPAIRABILITY_INDEX").getScoring()
+                .getNormalization().getMethod().name()).as("V1 REPAIRABILITY_INDEX scale").isEqualTo("MINMAX_OBSERVED");
+        }
     }
 
     @Test

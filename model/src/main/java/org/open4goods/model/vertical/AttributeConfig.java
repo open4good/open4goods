@@ -2,10 +2,12 @@
 package org.open4goods.model.vertical;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -104,6 +106,14 @@ public class AttributeConfig {
          * Names of the composite scores this attribute participates in.
          */
         private Set<String> participateInScores = new HashSet<>();
+
+        /**
+         * Ordered attribute keys a derived score is read from (GOU-2041). When set, the score of this attribute
+         * is never read from its own value: it takes the raw value of the first source holding a parseable value,
+         * without average, normalised with this attribute's own {@link #scoring}. It is computed only while this
+         * attribute is weighted by the active ImpactScore matrix.
+         */
+        private List<String> scoreSources = new ArrayList<>();
 
         /**
          * Lifecycle stages (ACV) represented by this attribute when used as a score.
@@ -448,6 +458,34 @@ public class AttributeConfig {
          */
         public void setParticipateInScores(Set<String> participateInScores) {
                 this.participateInScores = participateInScores;
+        }
+
+        /**
+         * Ordered attribute keys a derived score is read from, first parseable value wins.
+         *
+         * @return the source attribute keys, empty for an attribute scored from its own value
+         */
+        public List<String> getScoreSources() {
+                return scoreSources;
+        }
+
+        /**
+         * Sets the ordered attribute keys a derived score is read from.
+         *
+         * @param scoreSources source attribute keys, {@code null} for none
+         */
+        public void setScoreSources(List<String> scoreSources) {
+                this.scoreSources = scoreSources == null ? new ArrayList<>() : scoreSources;
+        }
+
+        /**
+         * Whether the score of this attribute is derived from other attributes ({@link #getScoreSources()}).
+         *
+         * @return {@code true} when at least one score source is declared
+         */
+        @JsonIgnore
+        public boolean isDerivedScore() {
+                return scoreSources != null && !scoreSources.isEmpty();
         }
 
         /**

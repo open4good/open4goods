@@ -6,8 +6,9 @@
 # Reads the merchant values only ("7,2/10", "7.2", "7,2 sur 10"). The official
 # values (data.gouv.fr, plan 01) must win over the merchant ones: they depend on
 # preferredSources per attribute (README P0-3).
-# Not wired to any ImpactScore matrix yet: the relation with REPAIRABILITY_INDEX
-# is a CTO decision (GOU-1892).
+# Not weighted by any matrix itself: the V2 matrices of tv and washing-machine
+# read it through REPAIRABILITY_OR_DURABILITY_INDEX, before REPAIRABILITY_INDEX
+# (CTO decision, GOU-2041).
 # Coverage snapshot (GOU-1875 annex): no merchant key found yet in products-moustik.
 # ============================================================================
 

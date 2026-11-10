@@ -852,6 +852,7 @@ public class VerticalsConfigService {
 				&& AttributeComparisonRule.GREATER.equals(attributeConfig.getUserBetterIs())
 				&& AttributeComparisonRule.GREATER.equals(attributeConfig.getImpactBetterIs())
 				&& attributeConfig.getScoring() == null
+				&& !attributeConfig.isDerivedScore()
 				&& (attributeConfig.getFilteringType() == null
 						|| AttributeType.TEXT.equals(attributeConfig.getFilteringType()))
 				&& !attributeConfig.isAsScore()

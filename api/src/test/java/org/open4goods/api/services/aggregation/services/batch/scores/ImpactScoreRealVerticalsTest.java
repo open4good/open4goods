@@ -609,8 +609,10 @@ class ImpactScoreRealVerticalsTest {
             Product product = new Product(entry.getKey());
             for (String criterion : entry.getValue()) {
                 AttributeConfig attribute = vertical.getAttributesConfig().getAttributeConfigByKey(criterion);
-                product.getAttributes().getIndexed().put(criterion,
-                        new IndexedAttribute(criterion, value(attribute, valueIndex)));
+                // A derived criterion is read from its sources only (GOU-2041): fill in the first one
+                String key = attribute.isDerivedScore() ? attribute.getScoreSources().getFirst() : criterion;
+                AttributeConfig valued = vertical.getAttributesConfig().getAttributeConfigByKey(key);
+                product.getAttributes().getIndexed().put(key, new IndexedAttribute(key, value(valued, valueIndex)));
             }
             products.add(product);
             designed.put(entry.getKey(), new TreeSet<>(entry.getValue()));

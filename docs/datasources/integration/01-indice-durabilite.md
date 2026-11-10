@@ -140,8 +140,9 @@ Verticales :
 - `tv.yml` et `washing-machine.yml` : ajouter `- key: DURABILITY_INDEX` (et les trois autres) à
   `attributesConfig.configs`, à `availableImpactScoreCriterias` et à `commonAttributes`.
 - `washing-machine.yml` : garder `REPAIRABILITY_INDEX` pour les modèles antérieurs à
-  avril 2025, mais pondérer `DURABILITY_INDEX` en priorité dans `impactscores/washing-machine.yml`
-  (à arbitrer avec le chantier ImpactScore V2).
+  avril 2025. Arbitré (GOU-2041) : les matrices V2 TV et lave-linge pondèrent un seul critère,
+  `REPAIRABILITY_OR_DURABILITY_INDEX`, qui lit `DURABILITY_INDEX` puis `REPAIRABILITY_INDEX`
+  (`docs/impactscore/v2-design.md`, 2.7).
 - `REPAIRABILITY_INDEX.yml` normalise en `MINMAX_OBSERVED` une valeur sur 10 : même défaut,
   traité dans le plan 02.
 
@@ -230,5 +231,5 @@ Champs `Product` : aucun nouveau, hors `sourceAttributions` (P0-4).
 - **Indice de réparabilité pour les modèles plus anciens** : faut-il afficher les deux indices
   côte à côte, ou masquer `REPAIRABILITY_INDEX` dès qu'un `DURABILITY_INDEX` existe ? Proposition :
   masquer, puisque c'est la même logique que l'étiquette en magasin.
-- **ImpactScore V2** (design `dd6d4a893`) : la pondération de `DURABILITY_INDEX` doit être
-  décidée dans ce chantier, pas ici.
+- **ImpactScore V2** : décidé dans GOU-2041, `DURABILITY_INDEX` passe avant `REPAIRABILITY_INDEX`
+  dans le critère V2 `REPAIRABILITY_OR_DURABILITY_INDEX` (`docs/impactscore/v2-design.md`, 2.7).
