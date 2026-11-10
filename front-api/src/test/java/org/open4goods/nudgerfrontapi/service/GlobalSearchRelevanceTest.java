@@ -13,7 +13,13 @@ import org.open4goods.model.product.ProductCondition;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties;
 import org.open4goods.nudgerfrontapi.config.properties.OfferFreshnessProperties;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.context.properties.source.ConfigurationPropertySources;
+import org.springframework.boot.env.YamlPropertySourceLoader;
+import org.springframework.core.env.PropertySource;
+import org.springframework.core.io.ClassPathResource;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.MatchPhraseQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 
 /**
@@ -70,6 +76,38 @@ class GlobalSearchRelevanceTest {
         String json = ranked.toString();
         assertThat(json).contains("\"match_phrase\"", "\"machine a cafe\"", "\"offersCount\"", "\"log1p\"",
                 "\"boost_mode\":\"sum\"");
+    }
+
+    /**
+     * Measured case (prod v1.0.80): {@code sèche-linge} has no vertical and brought back washing machines matching
+     * only on « linge ». The exact expression bonus ranks the offer names holding « sèche-linge » first, and the
+     * query is not read as an accessory request, so real accessories stay demoted.
+     */
+    @Test
+    void secheLingeGetsTheExactExpressionBonusAndIsNotAnAccessoryRequest() throws Exception {
+        GlobalSearchProperties configured = configuredProperties();
+        GlobalSearchRelevance configuredRelevance = new GlobalSearchRelevance(configured,
+                new OfferFreshnessService(new OfferFreshnessProperties()));
+        Query base = Query.of(q -> q.matchAll(m -> m));
+
+        Query ranked = configuredRelevance.rank(base, "sèche-linge");
+
+        assertThat(ranked.isFunctionScore()).isTrue();
+        Query scored = ranked.functionScore().query();
+        assertThat(scored.isBool()).isTrue();
+        assertThat(scored.bool().must()).containsExactly(base);
+        assertThat(scored.bool().should()).hasSize(1);
+        MatchPhraseQuery phrase = scored.bool().should().get(0).matchPhrase();
+        assertThat(phrase.field()).isEqualTo("offerNames");
+        assertThat(phrase.query()).isEqualTo("sèche-linge");
+        assertThat(configured.getPhraseBoost()).isPositive();
+        assertThat(phrase.boost()).isEqualTo((float) configured.getPhraseBoost());
+        assertThat(phrase.slop()).isEqualTo(configured.getPhraseSlop());
+
+        assertThat(configured.getAccessoryTerms()).isNotEmpty();
+        assertThat(configuredRelevance.queryMentionsAccessory("sèche-linge")).isFalse();
+        assertThat(configuredRelevance.queryMentionsAccessory("seche linge")).isFalse();
+        assertThat(configuredRelevance.accessoryQuery("sèche-linge")).isNotNull();
     }
 
     @Test
@@ -130,6 +168,17 @@ class GlobalSearchRelevanceTest {
         assertThat(relevance.longTailCandidates(100, 20)).isEqualTo(1200);
         assertThat(relevance.longTailReachablePages(20)).isEqualTo(20);
         assertThat(relevance.longTailReachablePages(100)).isEqualTo(4);
+    }
+
+    /**
+     * Global search properties bound from the shipped {@code application.yml}.
+     */
+    static GlobalSearchProperties configuredProperties() throws Exception {
+        List<PropertySource<?>> sources = new YamlPropertySourceLoader().load("application.yml",
+                new ClassPathResource("application.yml"));
+        return new Binder(ConfigurationPropertySources.from(sources.get(0)))
+                .bind("front.global-search", GlobalSearchProperties.class)
+                .orElseThrow(() -> new IllegalStateException("front.global-search missing from application.yml"));
     }
 
     static GlobalSearchProperties properties(List<String> accessoryTerms) {
