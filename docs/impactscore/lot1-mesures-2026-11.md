@@ -20,8 +20,8 @@ Définitions : " population A " = produits `excluded=true`, `excludedCauses` con
 
 | Verticale | Pop. A | C ≥ 50 % (pop. A) | Fiches qui entreraient à C ≥ 50 % | " Vrais produits " (échantillon de 30) | Recommandation |
 |---|---:|---:|---:|---:|---|
-| smartphones | 8 661 | 11,6 % | **1 005** (pop. B : 928) | 80 % (24/30) | **Conditionnel** : seuil 0,50, après relecture ciblée des fiches C ≥ 0,5 (non couvertes par l'échantillon) |
-| oven | 6 819 | 1,2 % | 82 | **0 %** (0/30 ; 13 % avec " limite ") | **Non** : le catalogue exclu est du petit électroménager (raclettes, planchas, woks) |
+| smartphones | 8 661 | 11,6 % | **1 002** (pop. B : 928) | 80 % (24/30) | **Conditionnel** : seuil 0,50, après relecture ciblée des fiches C ≥ 0,5 (non couvertes par l'échantillon) |
+| oven | 6 819 | 1,2 % | 84 | **0 %** (0/30 ; 13 % avec " limite ") | **Non** : le catalogue exclu est du petit électroménager (raclettes, planchas, woks) |
 | refrigerator | 128 | 100 % | **128** (pop. B : 2 350) | 93 % (28/30) | **Oui**, seuil 0,50 (C ≥ 0,76 sur toute la population) |
 | dishwasher | 305 | 16,7 % | **51** (pop. B : 1 025) | 63 % (87 % avec " limite ") | **Oui, avec réserve**, seuil 0,60 ; écarter les modèles professionnels |
 | washing-machine | 779 | 6,4 à 9,9 % | 50 à 77 (pop. B : 1 466) | 47 % (80 % avec " limite ") | **Non** pour l'instant : peu de fiches, pollution forte (sèche-linge, fers à repasser) |
@@ -37,7 +37,7 @@ Lecture :
    (claviers, jumelles, luminaires), les lave-linge à 17 % (fers à repasser, lave-vaisselle) avec en plus 33 % de cas
    limites (sèche-linge, séchants, professionnels).
 3. **Gain réel seulement sur 3 verticales** : réfrigérateurs (128 fiches, qualité bonne), lave-vaisselle (51) et, sous
-   condition, smartphones (environ 1 005 fiches, soit 2,1 fois la liste actuelle de 928).
+   condition, smartphones (environ 1 002 fiches, soit 2,1 fois la liste actuelle de 928).
 4. **Les réfrigérateurs exclus sont surtout exclus pour `missing_attr_CLASSE_ENERGY`** (2 143 des 2 297 exclus avec offre),
    pas pour EPREL : lever le filtre EPREL ne les fait pas entrer. Même constat pour les TV (`missing_attr_DIAGONALE_POUCES`).
 5. **Le seuil provisoire 0,50 de `minRealWeightCoverage`** convient aux 3 verticales où l'on lève le filtre. Pour les
@@ -239,8 +239,8 @@ alors que 85 % des exclus sont à C = 0 : les notés actuels sont donc les fiche
 
 **Lecture du seuil `minRealWeightCoverage` :**
 
-- 0,50 laisse entrer 1 005 smartphones, 128 réfrigérateurs, 51 lave-vaisselle, 13 climatiseurs, 50 à 77 lave-linge et 0 TV.
-- 0,30 ajouterait surtout des fiches très pauvres : 784 fours (11,5 %), 1 533 smartphones, des lave-linge sans
+- 0,50 laisse entrer 1 002 smartphones, 128 réfrigérateurs, 51 lave-vaisselle, 13 climatiseurs, 50 à 77 lave-linge et 0 TV.
+- 0,30 ajouterait surtout des fiches très pauvres : 783 fours (11,5 %), 1 532 smartphones, des lave-linge sans
   consommation. À proscrire sans relecture.
 - Les seuils sont des choix de score ; la sensibilité au seuil est forte pour smartphones (17,7 % à 0,3, 11,6 % à 0,5,
   6,9 % à 0,6) et nulle pour réfrigérateurs.
