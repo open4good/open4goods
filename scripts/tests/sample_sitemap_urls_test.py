@@ -115,6 +115,13 @@ class SampleSitemapUrlsCheckTest(unittest.TestCase):
         with unittest.mock.patch.dict("os.environ", {}, clear=True):
             self.assertNotIn("Authorization", sampler.request_headers())
 
+    def test_beta_basic_auth_is_a_fallback(self) -> None:
+        with unittest.mock.patch.dict("os.environ", {sampler.BETA_BASIC_AUTH_ENV: "qa:secret"}, clear=True):
+            self.assertEqual(sampler.request_headers()["Authorization"], "Basic cWE6c2VjcmV0")
+        env = {sampler.BASIC_AUTH_ENV: "a:b", sampler.BETA_BASIC_AUTH_ENV: "qa:secret"}
+        with unittest.mock.patch.dict("os.environ", env, clear=True):
+            self.assertEqual(sampler.request_headers()["Authorization"], "Basic YTpi")
+
 
 if __name__ == "__main__":
     unittest.main()

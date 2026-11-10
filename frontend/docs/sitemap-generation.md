@@ -135,7 +135,9 @@ python3 scripts/sample_sitemap_urls.py \
 
 Beta is behind HTTP basic auth: export
 `SITEMAP_SAMPLER_BASIC_AUTH=user:password` before running the script (the
-value is sent on every request and never printed). The URLs of a sitemap come
+value is sent on every request and never printed). `BETA_BASIC_AUTH` (the
+shared beta secret, same format) is used when it is unset; the CSS search
+check `scripts/diagnostics/css_search_check.py` reads that one too. The URLs of a sitemap come
 from the ui `namings.base-urls`, so on beta they must start with
 `https://beta.nudger.fr/` for the check to test beta.
 
