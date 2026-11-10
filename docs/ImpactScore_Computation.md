@@ -135,10 +135,13 @@ scores the products that have offers and are not excluded. After scoring:
 
 - excluded products and products unmatched from the vertical lose all their
   scores and their ranking;
-- products without offers keep their last score (they stay in the sitemap,
-  GOU-1744). If their Impact Score is a composite, which only the defect above
-  produces, it is recomputed from the sub-scores they hold, with the ranking of
-  `EcoScoreRanking`; it is removed only when it cannot be recomputed;
+- products without offers keep their last score, without rank (they stay in the
+  sitemap, GOU-1744). Their `EcoScoreRanking` is reset and every score's
+  `ranking`, `lowestScoreId` and `highestScoreId` are cleared (GOU-2071): the
+  ranks of an earlier cohort would contradict today's cohort. If their Impact
+  Score is a composite, which only the defect above produces, it is recomputed
+  from the sub-scores they hold, then its rank is cleared too; it is removed only
+  when it cannot be recomputed;
 - if scoring throws, nothing is indexed for that vertical;
 - if an automatic check below is blocking, nothing is indexed for that vertical either.
 
