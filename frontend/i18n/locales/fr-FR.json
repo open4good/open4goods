@@ -1156,7 +1156,8 @@
       "title": {
         "question": "Une question ?"
       }
-    }
+    },
+    "directEmail": "Vous préférez l'e-mail ? Écrivez-nous à {email}."
   },
   "error": {
     "page": {
@@ -3077,7 +3078,7 @@
         },
         "title": "Ressources"
       },
-      "copyright": "Copyright ©{year} open4goods. Produit de bien commun.",
+      "copyright": "Copyright ©{year} Nudger, un projet open4goods. Produit de bien commun.",
       "feedback": {
         "cta": "Contribuer",
         "links": {

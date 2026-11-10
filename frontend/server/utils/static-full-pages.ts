@@ -29,12 +29,14 @@ const STATIC_FULL_PAGES: Record<string, StaticFullPageEntry> = {
     html: {
       fr: `<h2>1. Présentation du site et de l’éditeur</h2>
 <p><strong>Nom du site :</strong> <a href="https://nudger.fr">https://nudger.fr</a><br>
-<strong>Activité :</strong> Comparateur de prix et d’Impact Score (B2C), en cours d’immatriculation.</p>
+<strong>Activité :</strong> Comparateur de prix et d’Impact Score (B2C).</p>
 <p><strong>Éditeur (ci-après « Nudger ») :</strong><br>
-Goulven FURET<br>
+Goulven FURET, entrepreneur individuel (micro-entreprise), exploitant le Site sous le nom « Nudger »<br>
 Adresse : 8 Venelle de Keralloche, 29200 Brest, France<br>
-Statut : Activité en cours d’immatriculation (micro-entrepreneur / SAS à venir)<br>
-Responsable de la publication : Goulven FURET (contact : goulven.furet(at)gmail.com)</p>
+SIRET : 945 307 593 00018 – Code APE : 6202A<br>
+TVA : franchise en base, TVA non applicable (art. 293 B du CGI)<br>
+Contact : <a href="mailto:goulven@nudger.fr">goulven@nudger.fr</a><br>
+Responsable de la publication : Goulven FURET</p>
 <p><strong>Hébergement :</strong><br>
 Hetzner Online GmbH,<br>
 Stuttgarter St. 1<br>
@@ -102,7 +104,8 @@ Nudger peut être amené à interrompre l’accès au Site pour effectuer des op
 <p><strong>Responsable du traitement :</strong><br>
 <a href="https://www.linkedin.com/in/goulven-furet-b448b582/">Goulven FURET</a><br>
 8 Venelle de Keralloche, 29200 Brest, France<br>
-« Activité en cours d’immatriculation »</p>
+SIRET : 945 307 593 00018<br>
+Contact : <a href="mailto:goulven@nudger.fr">goulven@nudger.fr</a></p>
 <p><strong>Délégué à la Protection des Données (DPO) :</strong><br>
 Goulven FURET (contact identique)</p>
 <h2>3. Données collectées et finalités</h2>
