@@ -114,6 +114,7 @@ describe('slimGlobalSearchResponse', () => {
       ],
       missingVerticalResults: [{ product: buildProduct(2), score: 1 }],
       missingVerticalPage: { totalElements: 1, totalPages: 1 },
+      accessoryResults: [{ product: buildProduct(3), score: 1 }],
     }
 
     const slim = slimGlobalSearchResponse(response)
@@ -126,6 +127,9 @@ describe('slimGlobalSearchResponse', () => {
     expect(
       slim?.missingVerticalResults?.[0]?.product?.offers
     ).not.toHaveProperty('newHistory')
+    expect(slim?.accessoryResults?.[0]?.product?.offers).not.toHaveProperty(
+      'newHistory'
+    )
     expect(slim?.missingVerticalPage).toEqual({
       totalElements: 1,
       totalPages: 1,

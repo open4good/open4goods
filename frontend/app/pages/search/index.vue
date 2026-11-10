@@ -379,6 +379,24 @@
               />
             </section>
           </v-col>
+
+          <v-col v-if="hasAccessoryResults" cols="12">
+            <SearchResultGroup
+              class="search-page__accessories"
+              data-test="search-accessories"
+              :title="t('search.accessories.title')"
+              :products="accessoryProducts"
+              :count-label="
+                translatePlural(
+                  'search.accessories.count',
+                  accessoryProducts.length,
+                  {
+                    count: accessoryProducts.length,
+                  }
+                )
+              "
+            />
+          </v-col>
         </v-row>
       </template>
     </v-container>
@@ -405,6 +423,7 @@ import type {
   SortRequestDto,
 } from '~~/shared/api-client'
 import { AggTypeEnum } from '~~/shared/api-client/models/Agg'
+import SearchResultGroup from '~/components/search/SearchResultGroup.vue'
 import SearchSuggestField, {
   type CategorySuggestionItem,
   type ProductSuggestionItem,
@@ -432,8 +451,11 @@ import {
   slimProductSearchResponse,
 } from '~/utils/_search-result-payload'
 
-const MIN_QUERY_LENGTH = 3
+const MIN_QUERY_LENGTH = 2
 const VERTICAL_RESULTS_LIMIT = 4
+// Requête désignant une catégorie (verticalCta ou un seul groupe) : on montre
+// plus de produits avant la longue traîne.
+const SINGLE_VERTICAL_RESULTS_LIMIT = 8
 const isDev = process.env.NODE_ENV === 'development'
 
 const { t, locale, availableLocales } = useI18n()
@@ -1033,9 +1055,15 @@ const primaryGroups = computed(() => {
 })
 
 const limitedGroups = computed(() => {
+  const isCategoryQuery =
+    Boolean(data.value?.verticalCta) || primaryGroups.value.length === 1
+  const limit = isCategoryQuery
+    ? SINGLE_VERTICAL_RESULTS_LIMIT
+    : VERTICAL_RESULTS_LIMIT
+
   return primaryGroups.value
     .map(group => {
-      const limitedProducts = group.products.slice(0, VERTICAL_RESULTS_LIMIT)
+      const limitedProducts = group.products.slice(0, limit)
       if (!limitedProducts.length) {
         return null
       }
@@ -1189,12 +1217,18 @@ const pageCount = computed(() => {
   )
 })
 
+const accessoryProducts = computed(() =>
+  extractProducts(data.value?.accessoryResults ?? [])
+)
+const hasAccessoryResults = computed(() => accessoryProducts.value.length > 0)
+
 const hasVerticalResults = computed(() => limitedGroups.value.length > 0)
 const hasGlobalResults = computed(() => rightColumnProducts.value.length > 0)
 const showNoResultsHero = computed(
   () =>
     !hasVerticalResults.value &&
     !hasGlobalResults.value &&
+    !hasAccessoryResults.value &&
     !pending.value &&
     !rightColumnPending.value
 )
