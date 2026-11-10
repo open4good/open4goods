@@ -5,151 +5,407 @@
       "q": "lave-linge",
       "scope": "vertical",
       "expect_vertical": "washing-machine",
-      "reject_tokens": ["courroie", "joint", "filtre", "amortisseur", "moteur", "pompe", "tambour", "resistance", "poignee", "cuve", "piece"]
+      "reject_tokens": [
+        "courroie",
+        "joint",
+        "filtre",
+        "amortisseur",
+        "moteur",
+        "pompe",
+        "tambour",
+        "resistance",
+        "poignee",
+        "cuve",
+        "piece"
+      ]
     },
     {
       "q": "machine a laver",
       "scope": "vertical",
       "expect_vertical": "washing-machine",
-      "reject_tokens": ["courroie", "joint", "filtre", "amortisseur", "moteur", "pompe", "tambour", "poignee", "cuve", "piece"]
+      "reject_tokens": [
+        "courroie",
+        "joint",
+        "filtre",
+        "amortisseur",
+        "moteur",
+        "pompe",
+        "tambour",
+        "poignee",
+        "cuve",
+        "piece"
+      ]
     },
     {
       "q": "televiseur",
       "scope": "vertical",
       "expect_vertical": "tv",
-      "reject_tokens": ["telecommande", "support", "cable", "carte", "alimentation"]
+      "reject_tokens": [
+        "telecommande",
+        "support",
+        "cable",
+        "carte",
+        "alimentation"
+      ]
     },
     {
       "q": "tv 55 pouces",
       "scope": "vertical",
       "expect_vertical": "tv",
-      "reject_tokens": ["telecommande", "support", "cable", "carte"]
+      "reject_tokens": [
+        "telecommande",
+        "support",
+        "cable",
+        "carte"
+      ]
     },
     {
       "q": "refrigerateur",
       "scope": "vertical",
       "expect_vertical": "refrigerator",
-      "reject_tokens": ["joint", "thermostat", "clayette", "filtre", "balconnet", "poignee"]
+      "reject_tokens": [
+        "joint",
+        "thermostat",
+        "clayette",
+        "filtre",
+        "balconnet",
+        "poignee"
+      ]
     },
     {
       "q": "frigo americain",
       "scope": "vertical",
       "expect_vertical": "refrigerator",
-      "reject_tokens": ["joint", "filtre", "balconnet"]
+      "reject_tokens": [
+        "joint",
+        "filtre",
+        "balconnet"
+      ]
     },
     {
       "q": "lave-vaisselle",
       "scope": "vertical",
       "expect_vertical": "dishwasher",
-      "reject_tokens": ["panier", "joint", "filtre", "pompe", "bras", "piece"]
+      "reject_tokens": [
+        "panier",
+        "joint",
+        "filtre",
+        "pompe",
+        "bras",
+        "piece"
+      ]
     },
     {
       "q": "four encastrable",
       "scope": "vertical",
       "expect_vertical": "oven",
-      "reject_tokens": ["joint", "resistance", "grille", "lampe", "thermostat"]
+      "reject_tokens": [
+        "joint",
+        "resistance",
+        "grille",
+        "lampe",
+        "thermostat"
+      ]
     },
     {
       "q": "climatiseur",
       "scope": "vertical",
       "expect_vertical": "air-conditioner",
-      "reject_tokens": ["telecommande", "gaine", "kit", "support"]
+      "reject_tokens": [
+        "telecommande",
+        "gaine",
+        "kit",
+        "support"
+      ]
     },
     {
       "q": "climatiseur mobile",
       "scope": "vertical",
       "expect_vertical": "air-conditioner",
-      "reject_tokens": ["telecommande", "gaine", "kit"]
+      "reject_tokens": [
+        "telecommande",
+        "gaine",
+        "kit"
+      ]
     },
     {
       "q": "smartphone",
       "scope": "vertical",
       "expect_vertical": "smartphones",
-      "reject_tokens": ["coque", "verre", "protection", "chargeur", "cable", "adaptateur", "support"]
+      "reject_tokens": [
+        "coque",
+        "verre",
+        "protection",
+        "chargeur",
+        "cable",
+        "adaptateur",
+        "support"
+      ]
     },
     {
       "q": "iphone 15",
       "scope": "vertical",
       "expect_vertical": "smartphones",
-      "expect_tokens": ["iphone 15"],
-      "reject_tokens": ["coque", "verre", "protection", "chargeur", "cable", "adaptateur"]
+      "expect_tokens": [
+        "iphone 15"
+      ],
+      "reject_tokens": [
+        "coque",
+        "verre",
+        "protection",
+        "chargeur",
+        "cable",
+        "adaptateur"
+      ]
     },
     {
       "q": "lave-linge bosch",
       "scope": "brand",
       "expect_vertical": "washing-machine",
-      "expect_tokens": ["bosch"]
+      "expect_tokens": [
+        "bosch"
+      ]
     },
     {
       "q": "televiseur samsung",
       "scope": "brand",
       "expect_vertical": "tv",
-      "expect_tokens": ["samsung"]
+      "expect_tokens": [
+        "samsung"
+      ]
     },
     {
       "q": "refrigerateur samsung",
       "scope": "brand",
       "expect_vertical": "refrigerator",
-      "expect_tokens": ["samsung"]
+      "expect_tokens": [
+        "samsung"
+      ]
+    },
+    {
+      "q": "samsung",
+      "scope": "brand-only",
+      "expect_tokens": [
+        "samsung"
+      ],
+      "reject_tokens": [
+        "telecommande",
+        "coque",
+        "verre",
+        "chargeur",
+        "cable",
+        "joint",
+        "filtre"
+      ]
+    },
+    {
+      "q": "bosch",
+      "scope": "brand-only",
+      "expect_tokens": [
+        "bosch"
+      ],
+      "reject_tokens": [
+        "joint",
+        "filtre",
+        "panier",
+        "courroie",
+        "foret",
+        "batterie"
+      ]
+    },
+    {
+      "q": "lg",
+      "scope": "brand-only",
+      "expect_tokens": [
+        "lg"
+      ],
+      "reject_tokens": [
+        "telecommande",
+        "joint",
+        "filtre",
+        "tambour"
+      ]
     },
     {
       "q": "LG OLED55C3",
       "scope": "model",
       "expect_vertical": "tv",
-      "expect_tokens": ["oled55c3"]
+      "expect_tokens": [
+        "oled55c3"
+      ]
     },
     {
       "q": "Bosch SMS4ETI14E",
       "scope": "model",
       "expect_vertical": "dishwasher",
-      "expect_tokens": ["sms4eti14e"]
+      "expect_tokens": [
+        "sms4eti14e"
+      ]
     },
     {
       "q": "aspirateur dyson",
       "scope": "catalogue",
-      "expect_tokens": ["dyson"],
-      "reject_tokens": ["filtre", "batterie", "brosse", "piece", "chargeur", "tube"]
+      "expect_tokens": [
+        "dyson"
+      ],
+      "reject_tokens": [
+        "filtre",
+        "batterie",
+        "brosse",
+        "piece",
+        "chargeur",
+        "tube"
+      ]
     },
     {
       "q": "machine a cafe",
       "scope": "catalogue",
-      "expect_tokens": ["cafe", "expresso", "espresso", "cafetiere"],
-      "reject_tokens": ["detartrant", "filtre", "joint", "capsule", "dosette"]
+      "expect_tokens": [
+        "cafe",
+        "expresso",
+        "espresso",
+        "cafetiere"
+      ],
+      "reject_tokens": [
+        "detartrant",
+        "filtre",
+        "joint",
+        "capsule",
+        "dosette"
+      ]
     },
     {
       "q": "casque bluetooth",
       "scope": "catalogue",
-      "expect_tokens": ["casque", "headphone", "ecouteur"],
-      "reject_tokens": ["coussinet", "cable", "support"]
+      "expect_tokens": [
+        "casque",
+        "headphone",
+        "ecouteur"
+      ],
+      "reject_tokens": [
+        "coussinet",
+        "cable",
+        "support"
+      ]
     },
     {
       "q": "tondeuse a gazon",
       "scope": "catalogue",
-      "expect_tokens": ["tondeuse"],
-      "reject_tokens": ["lame", "cheveux", "barbe", "courroie", "bougie"]
+      "expect_tokens": [
+        "tondeuse"
+      ],
+      "reject_tokens": [
+        "lame",
+        "cheveux",
+        "barbe",
+        "courroie",
+        "bougie"
+      ]
     },
     {
       "q": "perceuse visseuse",
       "scope": "catalogue",
-      "expect_tokens": ["perceuse", "visseuse"],
-      "reject_tokens": ["foret", "embout", "batterie", "chargeur"]
+      "expect_tokens": [
+        "perceuse",
+        "visseuse"
+      ],
+      "reject_tokens": [
+        "foret",
+        "embout",
+        "batterie",
+        "chargeur"
+      ]
     },
     {
       "q": "trottinette electrique",
       "scope": "catalogue",
-      "expect_tokens": ["trottinette"],
-      "reject_tokens": ["pneu", "chambre", "garde-boue", "frein"]
+      "expect_tokens": [
+        "trottinette"
+      ],
+      "reject_tokens": [
+        "pneu",
+        "chambre",
+        "garde-boue",
+        "frein"
+      ]
     },
     {
       "q": "pneu 205 55 r16",
       "scope": "catalogue",
-      "expect_tokens": ["205"]
+      "expect_tokens": [
+        "205"
+      ]
     },
     {
       "q": "friteuse sans huile",
       "scope": "catalogue",
-      "expect_tokens": ["friteuse", "air fryer", "airfryer"],
-      "reject_tokens": ["papier", "moule", "panier"]
+      "expect_tokens": [
+        "friteuse",
+        "air fryer",
+        "airfryer"
+      ],
+      "reject_tokens": [
+        "papier",
+        "moule",
+        "panier"
+      ]
+    },
+    {
+      "q": "téléviseur",
+      "scope": "accented",
+      "expect_vertical": "tv",
+      "reject_tokens": [
+        "telecommande",
+        "support",
+        "cable",
+        "carte",
+        "alimentation"
+      ]
+    },
+    {
+      "q": "réfrigérateur",
+      "scope": "accented",
+      "expect_vertical": "refrigerator",
+      "reject_tokens": [
+        "joint",
+        "thermostat",
+        "clayette",
+        "filtre",
+        "balconnet",
+        "poignee"
+      ]
+    },
+    {
+      "q": "sèche-linge",
+      "scope": "accented",
+      "expect_tokens": [
+        "seche linge",
+        "seche-linge",
+        "sechant"
+      ],
+      "reject_tokens": [
+        "courroie",
+        "filtre",
+        "joint",
+        "resistance"
+      ]
+    },
+    {
+      "q": "machine à café",
+      "scope": "accented",
+      "expect_tokens": [
+        "cafe",
+        "expresso",
+        "espresso",
+        "cafetiere"
+      ],
+      "reject_tokens": [
+        "detartrant",
+        "filtre",
+        "joint",
+        "capsule",
+        "dosette"
+      ]
     },
     {
       "q": "washing machine",

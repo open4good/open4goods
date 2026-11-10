@@ -1045,14 +1045,13 @@ const limitedGroups = computed(() => {
     .filter((group): group is SearchGroup => Boolean(group))
 })
 
+// Every category group starts open: a closed v-expansion-panel renders no
+// content, so brand queries spanning several categories ("samsung", "bosch")
+// showed collapsed headers and left the evaluated products out of the HTML.
 watch(
   limitedGroups,
   groups => {
-    if (groups.length === 1) {
-      openPanels.value = [0]
-    } else {
-      openPanels.value = []
-    }
+    openPanels.value = groups.map((_, index) => index)
   },
   { immediate: true }
 )

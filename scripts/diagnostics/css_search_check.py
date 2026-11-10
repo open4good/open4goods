@@ -7,8 +7,9 @@ offers relevant to the user's query". This script replays a fixed query set
 (`css-search-queries.json`) against a running site and reports, per query:
 
 - **SSR**: the HTML that `/rechercher?q=<query>` sends before any JavaScript
-  runs lists product links and prices, and does not say "Aucun resultat".
-  Crawlers and Google's review tooling read that HTML.
+  runs contains the links of the first results the API returns, shows
+  prices, and does not say "Aucun resultat". Crawlers and Google's review
+  tooling read that HTML.
 - **Relevance**: the first results, in display order (each vertical group
   capped at 4 products, then products without a vertical), are the product
   type asked for: right vertical (`expect_vertical`) or a wanted word in the
@@ -17,7 +18,8 @@ offers relevant to the user's query". This script replays a fixed query set
   merchant; the share with 2+ offers (a real comparison) is reported.
 
 A query passes when SSR is OK, at least 80% of the first results are on
-target, at least 80% have an image and all have a price and a merchant.
+target with no accessory among them, at least 80% have an image and all have
+a price and a merchant.
 
     # Production, markdown report on stdout
     python3 scripts/diagnostics/css_search_check.py
@@ -87,6 +89,7 @@ class QueryReport:
     ssr_no_result_message: bool = False
     ssr_product_links: int = 0
     ssr_prices: int = 0
+    ssr_top_links_present: float = 0.0
     api_error: str | None = None
     results: list[ResultLine] = field(default_factory=list)
     relevant_share: float = 0.0
@@ -102,6 +105,7 @@ class QueryReport:
             and not self.ssr_no_result_message
             and self.ssr_product_links > 0
             and self.ssr_prices > 0
+            and self.ssr_top_links_present == 1.0
         )
 
 
@@ -146,8 +150,8 @@ def csrf_token(jar: http.cookiejar.CookieJar) -> str | None:
     return None
 
 
-def check_ssr(opener, base_url: str, report: QueryReport, timeout: float) -> None:
-    """Fetch the server-rendered search page and inspect its HTML."""
+def check_ssr(opener, base_url: str, report: QueryReport, timeout: float) -> str:
+    """Fetch the server-rendered search page, inspect its HTML, return it."""
     url = f"{base_url}{SEARCH_PATH}?{urllib.parse.urlencode({'q': report.query})}"
     try:
         with opener.open(url, timeout=timeout) as response:
@@ -155,11 +159,12 @@ def check_ssr(opener, base_url: str, report: QueryReport, timeout: float) -> Non
             page = response.read().decode("utf-8", errors="replace")
     except urllib.error.HTTPError as error:
         report.ssr_status = error.code
-        return
+        return ""
     text = visible_text(page)
     report.ssr_no_result_message = any(m in text for m in NO_RESULT_MARKERS)
     report.ssr_product_links = len(set(PRODUCT_LINK_RE.findall(page)))
     report.ssr_prices = len(PRICE_RE.findall(text))
+    return page
 
 
 def fetch_results(opener, jar, base_url: str, query: str, timeout: float) -> dict:
@@ -254,6 +259,7 @@ def score(report: QueryReport, top: int) -> None:
     report.passed = (
         report.ssr_ok
         and report.relevant_share >= RELEVANT_SHARE_MIN
+        and not any(line.rejected for line in lines)
         and report.image_share >= IMAGE_SHARE_MIN
         and report.priced_share == 1.0
     )
@@ -265,11 +271,18 @@ def run(base_url: str, specs: list[dict], top: int, timeout: float, pause: float
         opener, jar = build_opener()
         report = QueryReport(query=spec["q"], scope=spec.get("scope", ""))
         try:
-            check_ssr(opener, base_url, report, timeout)
+            page = check_ssr(opener, base_url, report, timeout)
             payload = fetch_results(opener, jar, base_url, spec["q"], timeout)
             report.results = [to_line(p, spec) for p in displayed_products(payload)][
                 : max(top, 10)
             ]
+            # The first results must be in the served HTML, not only "some"
+            # product: closed category panels left them out (brand queries).
+            top_slugs = [line.slug for line in report.results[:top] if line.slug]
+            if top_slugs:
+                report.ssr_top_links_present = sum(
+                    f'href="{slug}"' in page for slug in top_slugs
+                ) / len(top_slugs)
         except Exception as error:  # report and keep going: one query must not stop the run
             report.api_error = f"{type(error).__name__}: {error}"
         score(report, top)
@@ -296,9 +309,14 @@ def markdown(reports: list[QueryReport], base_url: str, top: int) -> str:
         "|---|---|---|---|---|---|---|---|",
     ]
     for r in reports:
-        ssr = "OK" if r.ssr_ok else (
-            "no result" if r.ssr_no_result_message else f"KO ({r.ssr_status})"
-        )
+        if r.ssr_ok:
+            ssr = "OK"
+        elif r.ssr_no_result_message:
+            ssr = "no result"
+        elif r.ssr_status == 200:
+            ssr = f"top {pct(r.ssr_top_links_present)} in HTML"
+        else:
+            ssr = f"KO ({r.ssr_status})"
         if r.api_error:
             ssr += " / API error"
         out.append(
