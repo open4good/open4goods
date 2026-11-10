@@ -152,8 +152,9 @@ public class DatasourcePurgeService {
 				DatasourcePurgeStatus last = status.get();
 				done = last.finish(DatasourcePurgeStatus.State.FAILED, last.report(), Instant.now(), String.valueOf(t));
 			}
-			status.set(done);
+			// Written before it is published: whoever sees the final state can read it back from the file
 			persist(done);
+			status.set(done);
 			logger.info("Purge of datasource finished: {}", done);
 		});
 		return running;
