@@ -55,6 +55,10 @@
         </SearchSuggestField>
       </form>
 
+      <p class="search-hero__hint mt-2 text-body-2">
+        {{ t('search.form.hint') }}
+      </p>
+
       <p
         v-if="showInitialState"
         class="search-hero__helper mt-4 text-medium-emphasis"
