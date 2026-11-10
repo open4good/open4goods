@@ -67,8 +67,38 @@ class BatchServiceScoringPersistenceTest {
 		BatchService.clearObsoleteScores(List.of(product), vertical());
 
 		assertThat(product.ecoscore().getValue()).isEqualTo(12.0);
-		assertThat(product.getRanking().getGlobalPosition()).isEqualTo(3);
 		assertThat(product.getImpactScoreMeta().getMethodologyVersion()).isEqualTo(1);
+		assertThat(product.getRanking().getGlobalCount()).isZero();
+		assertThat(product.getRanking().getGlobalPosition()).isZero();
+		assertThat(product.getScores().values()).allSatisfy(score -> {
+			assertThat(score.getRanking()).isNull();
+			assertThat(score.getLowestScoreId()).isNull();
+			assertThat(score.getHighestScoreId()).isNull();
+		});
+		assertThat(product.getScores().get("WARRANTY").getValue()).isEqualTo(2.0);
+	}
+
+	@Test
+	void productWithNullOffersCountIsTreatedAsWithoutOffers() {
+		Product product = scoredProduct();
+		product.setOffersCount(null);
+
+		BatchService.clearObsoleteScores(List.of(product), vertical());
+
+		assertThat(product.getRanking().getGlobalCount()).isZero();
+		assertThat(product.ecoscore().getRanking()).isNull();
+	}
+
+	@Test
+	void productWithOffersKeepsItsRanks() {
+		Product product = scoredProduct();
+		product.ecoscore().setRanking(4);
+
+		BatchService.clearObsoleteScores(List.of(product), vertical());
+
+		assertThat(product.getRanking().getGlobalPosition()).isEqualTo(3);
+		assertThat(product.getRanking().getGlobalCount()).isEqualTo(10);
+		assertThat(product.ecoscore().getRanking()).isEqualTo(4);
 	}
 
 	@Test
@@ -85,10 +115,10 @@ class BatchServiceScoringPersistenceTest {
 		assertThat(impactScore.getValue()).isEqualTo(12.0);
 		assertThat(impactScore.getAggregates()).isEmpty();
 		assertThat(impactScore.getRelativ().getValue()).isEqualTo(3.0);
-		// position 3 of 10 from the best product, as computed on the weighted score
-		assertThat(impactScore.getRanking()).isEqualTo(7);
-		assertThat(impactScore.getAbsolute().getCount()).isEqualTo(10);
-		assertThat(product.getRanking().getGlobalPosition()).isEqualTo(3);
+		// no offers: the rank of the earlier cohort is cleared after the recomputation
+		assertThat(impactScore.getRanking()).isNull();
+		assertThat(product.getRanking().getGlobalPosition()).isZero();
+		assertThat(product.getRanking().getGlobalCount()).isZero();
 	}
 
 	@Test
@@ -119,7 +149,7 @@ class BatchServiceScoringPersistenceTest {
 
 		assertThat(product.ecoscore().getValue()).isEqualTo(1.2);
 		assertThat(product.ecoscore().getAggregates()).containsKey("REFRIGERANT_GWP");
-		assertThat(product.getRanking().getGlobalPosition()).isEqualTo(3);
+		assertThat(product.getRanking().getGlobalPosition()).isZero();
 		assertThat(product.getImpactScoreMeta().getMethodologyVersion()).isEqualTo(1);
 	}
 

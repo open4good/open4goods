@@ -754,8 +754,8 @@ public class BatchService {
 	 * Removes the scores a scoring run cannot have refreshed and that must not stay published.
 	 *
 	 * <p>Excluded products and products unmatched from the vertical no longer belong to the scored cohort, so
-	 * all their scores, their ranking and their ImpactScore assessment metadata are removed. Products without offers keep their last score (they stay
-	 * in the sitemap, GOU-1744). If that ImpactScore was overwritten by a composite (only that defect sets
+	 * all their scores, their ranking and their ImpactScore assessment metadata are removed. Products without offers keep their last score and its assessment
+	 * metadata (they stay in the sitemap, GOU-1744) but lose their ranks, which belong to an earlier cohort (GOU-2071). If that ImpactScore was overwritten by a composite (only that defect sets
 	 * aggregates on it), it is recomputed from the sub-scores the product holds, since the batch does not rescore
 	 * products without offers; it is removed when it cannot be recomputed. That recomputation fixes a methodology V1
 	 * defect only: in V2 a product without offers is neither recomputed nor cleared, the front-api shows it as not
@@ -782,6 +782,23 @@ public class BatchService {
 					product.getScores().put(recomputed.getName(), recomputed);
 				}
 			}
+			if (!product.isExcluded() && product.getVertical() != null
+					&& (product.getOffersCount() == null || product.getOffersCount() == 0)) {
+				clearRanks(product);
+			}
+		}
+	}
+
+	/**
+	 * Clears the ranks a product without offers holds from an earlier cohort, keeping score values and assessment
+	 * metadata (GOU-2071).
+	 */
+	private static void clearRanks(Product product) {
+		product.setRanking(new EcoScoreRanking());
+		for (Score score : product.getScores().values()) {
+			score.setRanking(null);
+			score.setLowestScoreId(null);
+			score.setHighestScoreId(null);
 		}
 	}
 
