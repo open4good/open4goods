@@ -18,6 +18,8 @@ synonyms:
     - "FAMILLE DE SYSTÈME D'EXPLOITATION"
     - "FAMILLE DE SYST?ME D'EXPLOITATION"
     - "OS"
+  eprel:
+    - "OPERATINGSYSTEM"
 parser:
   normalize: true
   trim: true

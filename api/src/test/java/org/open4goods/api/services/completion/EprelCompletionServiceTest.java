@@ -319,4 +319,41 @@ class EprelCompletionServiceTest {
                     assertThat(attribute.getIcecatFeatureId()).isNull();
                 });
     }
+
+    /**
+     * GOU-1891: real shape of a smartphone EPREL document (Samsung SM-S936B/DS, 2339793). Cycles are published
+     * in hundreds and converted; the minutes key stays raw; a missing value is not turned into zero.
+     */
+    @Test
+    void smartphoneBatteryEnduranceIsConvertedFromHundredsOfCycles() throws Exception {
+        EprelProduct eprelProduct = new EprelProduct();
+        eprelProduct.setCategorySpecificAttributes(new java.util.LinkedHashMap<>(java.util.Map.of(
+                "repairabilityClass", "C", "repairabilityIndex", 3.23, "batteryEnduranceInCycles", 20,
+                "batteryEndurancePerCycleInHours", 43.63, "minYearsSoftwareUpdates", 5)));
+        Product data = new Product(1234567890123L);
+        data.setEprelDatas(eprelProduct);
+
+        java.lang.reflect.Method method = EprelCompletionService.class
+                .getDeclaredMethod("getEprelAttributesFragments", Product.class, VerticalConfig.class);
+        method.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        java.util.Set<org.open4goods.model.datafragment.DataFragment> fragments =
+                (java.util.Set<org.open4goods.model.datafragment.DataFragment>) method.invoke(service, data, vertical);
+        org.open4goods.model.datafragment.DataFragment fragment = fragments.iterator().next();
+
+        assertThat(valueOf(fragment, "batteryEnduranceCycles")).isEqualTo("2000");
+        assertThat(valueOf(fragment, "repairabilityClass")).isEqualTo("C");
+        assertThat(valueOf(fragment, "repairabilityIndex")).isEqualTo("3.23");
+
+        java.util.Map<String, Object> missing = new java.util.HashMap<>();
+        missing.put("batteryEnduranceInCycles", null);
+        eprelProduct.setCategorySpecificAttributes(missing);
+        fragments = (java.util.Set<org.open4goods.model.datafragment.DataFragment>) method.invoke(service, data, vertical);
+        assertThat(valueOf(fragments.iterator().next(), "batteryEnduranceCycles")).isNull();
+    }
+
+    private static String valueOf(org.open4goods.model.datafragment.DataFragment fragment, String name) {
+        return fragment.getAttributes().stream().filter(a -> name.equalsIgnoreCase(a.getName()))
+                .map(org.open4goods.model.attribute.Attribute::getValue).findFirst().orElse(null);
+    }
 }
