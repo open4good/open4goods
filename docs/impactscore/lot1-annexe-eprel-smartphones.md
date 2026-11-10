@@ -92,4 +92,4 @@ Toutes les clés ci-dessous sont dans `categorySpecificAttributes.`.
 - Résistance à l'eau et à la poussière : `ingressProtectionRating`, `ingressProtectionRatingWater` / `ingressProtectionRatingWaterNumber`, `ingressProtectionRatingSolid` / `ingressProtectionRatingSolidNumber`, `immersionDepthWater` (profondeur en m, renseignée sur 123 fiches).
 - Capacité de la batterie : `ratedBatteryCapacity` (entier, 2 790 à 11 740, vraisemblablement en mAh).
 - Classe d'efficacité énergétique : `energyClass` au premier niveau du document (A à G) ; dans `categorySpecificAttributes`, seulement `energyClassRange` (`A_G`) et `energyClassImageWithScale` (nom du fichier image, ex. `B-Left-MediumGreen-WithAGScale.svg`).
-- Type d'appareil : `deviceType` (`SMARTPHONE` 192, `TABLET` 108 ; pas de valeur « téléphone mobile » observée).
+- Type d'appareil : `deviceType` (`SMARTPHONE` 192, `TABLET` 108 ; pas de valeur " téléphone mobile " observée).

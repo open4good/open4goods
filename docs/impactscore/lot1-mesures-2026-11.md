@@ -1,7 +1,7 @@
 # ImpactScore lot 1a : mesures en production (2026-11-10)
 
 Issue GOU-1875, sous-issue de GOU-1864. Mesures **en lecture seule** sur Elasticsearch de production via la connexion
-« Elasticsearch lecture (Dev) ». Aucune écriture.
+" Elasticsearch lecture (Dev) ". Aucune écriture.
 
 - **Date des mesures :** 2026-11-10, entre 08:05 et 08:25 (heure serveur), hors du batch de 13:00 à 15:00.
 - **Index :** `products-moustik` (124 729 378 documents au total, dont 142 374 pour les 7 verticales) et `eprel-products` (2 353 842).
@@ -14,19 +14,19 @@ Issue GOU-1875, sous-issue de GOU-1864. Mesures **en lecture seule** sur Elastic
 
 ## 0. Résumé et recommandations
 
-Définitions : « population A » = produits `excluded=true`, `excludedCauses` contenant `missing_eprel` et aucune autre cause
-(`missing_brand`, `missing_model`, `missing_attr_*`), avec `offersCount > 0`. « Population B » = produits notés
+Définitions : " population A " = produits `excluded=true`, `excludedCauses` contenant `missing_eprel` et aucune autre cause
+(`missing_brand`, `missing_model`, `missing_attr_*`), avec `offersCount > 0`. " Population B " = produits notés
 (`excluded=false`, `offersCount > 0`). C = couverture réelle pondérée (poids présents / somme des poids).
 
-| Verticale | Pop. A | C ≥ 50 % (pop. A) | Fiches qui entreraient à C ≥ 50 % | « Vrais produits » (échantillon de 30) | Recommandation |
+| Verticale | Pop. A | C ≥ 50 % (pop. A) | Fiches qui entreraient à C ≥ 50 % | " Vrais produits " (échantillon de 30) | Recommandation |
 |---|---:|---:|---:|---:|---|
 | smartphones | 8 661 | 11,6 % | **1 005** (pop. B : 928) | 80 % (24/30) | **Conditionnel** : seuil 0,50, après relecture ciblée des fiches C ≥ 0,5 (non couvertes par l'échantillon) |
-| oven | 6 819 | 1,2 % | 82 | **0 %** (0/30 ; 13 % avec « limite ») | **Non** : le catalogue exclu est du petit électroménager (raclettes, planchas, woks) |
+| oven | 6 819 | 1,2 % | 82 | **0 %** (0/30 ; 13 % avec " limite ") | **Non** : le catalogue exclu est du petit électroménager (raclettes, planchas, woks) |
 | refrigerator | 128 | 100 % | **128** (pop. B : 2 350) | 93 % (28/30) | **Oui**, seuil 0,50 (C ≥ 0,76 sur toute la population) |
-| dishwasher | 305 | 16,7 % | **51** (pop. B : 1 025) | 63 % (87 % avec « limite ») | **Oui, avec réserve**, seuil 0,60 ; écarter les modèles professionnels |
-| washing-machine | 779 | 6,4 à 9,9 % | 50 à 77 (pop. B : 1 466) | 47 % (80 % avec « limite ») | **Non** pour l'instant : peu de fiches, pollution forte (sèche-linge, fers à repasser) |
-| tv | 176 | 0 % (C max 0,437) | 0 | 70 % (90 % avec « limite ») | **Non** : aucune fiche n'atteint 0,5 |
-| air-conditioner | 211 | 6,2 % | 13 (pop. B : 76) | 77 % (87 % avec « limite ») | **Non** : 13 fiches, aucun gain |
+| dishwasher | 305 | 16,7 % | **51** (pop. B : 1 025) | 63 % (87 % avec " limite ") | **Oui, avec réserve**, seuil 0,60 ; écarter les modèles professionnels |
+| washing-machine | 779 | 6,4 à 9,9 % | 50 à 77 (pop. B : 1 466) | 47 % (80 % avec " limite ") | **Non** pour l'instant : peu de fiches, pollution forte (sèche-linge, fers à repasser) |
+| tv | 176 | 0 % (C max 0,437) | 0 | 70 % (90 % avec " limite ") | **Non** : aucune fiche n'atteint 0,5 |
+| air-conditioner | 211 | 6,2 % | 13 (pop. B : 76) | 77 % (87 % avec " limite ") | **Non** : 13 fiches, aucun gain |
 
 Lecture :
 
@@ -70,7 +70,7 @@ aggs  {"v":{"terms":{"field":"vertical","size":20},"aggs":{"excl":{"terms":{"fie
 | air-conditioner | 1 420 | 322 | 76 | 1 183 | 246 | 937 |
 
 Exclus sans offre = exclus total − exclus avec offre (mesuré séparément avec `must_not offersCount > 0` : mêmes totaux).
-Exclus avec offre = exclus parmi « avec offre » (colonne 3 − colonne 4).
+Exclus avec offre = exclus parmi " avec offre " (colonne 3 − colonne 4).
 
 ## 2. Causes d'exclusion
 
@@ -133,7 +133,7 @@ avec agrégation `range` sur `offersCount` (`< 1` / `≥ 1`) :
 `MINGUARANTEEDSUPPORTYEARS`, `DIAGONALE_POUCES`. Aucun `DATA_QUALITY` ni indice de durabilité dans `attributes.indexed`.
 
 **Critères calculés (traités à part) :** `DATA_QUALITY` est un score (`scores.DATA_QUALITY`), pas un attribut : il ne
-peut pas être « présent » par `attributes.indexed`. Le batch ne le calcule que pour `offersCount > 0 && !excluded`.
+peut pas être " présent " par `attributes.indexed`. Le batch ne le calcule que pour `offersCount > 0 && !excluded`.
 Parmi la pop. A, il n'existe que sur un résidu de valeurs anciennes (smartphones 8/8 661, oven 95/6 819, washing-machine
 74/779, dishwasher 20/305, tv 34/176, refrigerator 21/128, air-conditioner 0/211). Les notes de marque (`BRAND_*`) ne
 figurent dans aucun `criteriasPonderation` de ces verticales.
@@ -219,7 +219,7 @@ Déciles (P10 à P90) :
 - washing-machine, dishwasher, tv : déciles non mesurés (voir ci-dessus).
 
 **Avec `DATA_QUALITY` au dénominateur** (absent pour la pop. A) : multiplier C par `(1 − w_DQ)` (§3.1). Sur les
-seuils, cela décale « ≥ 0,5 » vers C_sans ≥ 0,667 (smartphones : 6,9 %, soit 601 fiches ; oven : 1,2 %, soit 84 fiches, le seuil
+seuils, cela décale " ≥ 0,5 " vers C_sans ≥ 0,667 (smartphones : 6,9 %, soit 601 fiches ; oven : 1,2 %, soit 84 fiches, le seuil
 évalué à 0,588 étant le maximum possible ; refrigerator : 100 % ; washing-machine : < 4 %). Les chiffres des seuils ≥ 0,6 et ≥ 0,7 du tableau donnent donc l'ordre de grandeur.
 
 **Pop. B (notés) : même calcul.**
@@ -235,7 +235,7 @@ seuils, cela décale « ≥ 0,5 » vers C_sans ≥ 0,667 (smartphones : 6,9 %, s
 | air-conditioner | 76 | 0,529 | non mesuré | non mesuré | moyenne seule |
 
 Pour les smartphones notés, C ≥ 0,4 est atteint par 100 % des fiches (base 0,417 : garantie et classe énergie présentes),
-alors que 85 % des exclus sont à C = 0 : les notés actuels sont donc les fiches avec EPREL, pas des fiches « moyennes ».
+alors que 85 % des exclus sont à C = 0 : les notés actuels sont donc les fiches avec EPREL, pas des fiches " moyennes ".
 
 **Lecture du seuil `minRealWeightCoverage` :**
 
@@ -252,7 +252,7 @@ alors que 85 % des exclus sont à C = 0 : les notés actuels sont donc les fiche
 `01000000000000`, `03300000000000`, `04000000000000`, `05500000000000`, `08000000000000`), tri croissant, 6 produits
 par ancre, soit 30. Il est reproductible mais regroupe des GTIN voisins (donc des marques voisines) : les taux ci-dessous
 sont indicatifs. Population : pop. A. Chaque produit a été jugé sur pièce (nom, marque, modèle, catégories des
-sources) ; les définitions de « vrai produit » et de « limite » figurent ci-dessous. Fichiers : `lot1-echantillon-<verticale>.csv`
+sources) ; les définitions de " vrai produit " et de " limite " figurent ci-dessous. Fichiers : `lot1-echantillon-<verticale>.csv`
 (colonnes : GTIN, marque, modèle, nom affiché, catégories des sources, `offersCount`, C, jugement, motif ; les catégories
 sont limitées à 3 sources par produit).
 
@@ -266,24 +266,24 @@ sont limitées à 3 sources par produit).
 | tv | 21 | 6 | 2 | 0 | 1 | **70 %** | 90 % | 0,154 |
 | air-conditioner | 23 | 3 | 1 | 1 | 2 | **77 %** | 87 % | 0,068 |
 
-Définitions de « limite » : four = mini-four ou four à pizza de table ; smartphone = tablette, téléphone fixe, lot ;
+Définitions de " limite " : four = mini-four ou four à pizza de table ; smartphone = tablette, téléphone fixe, lot ;
 lave-linge = séchant, sèche-linge, mini ou professionnel ; lave-vaisselle = professionnel, mini ; TV = moniteur, écran
 de projection, TV de camping ; réfrigérateur = cave à vin, mini-bar ; climatiseur = rafraîchisseur, déshumidificateur.
 
 Observations par verticale :
 
 - **oven :** 26 produits sur 30 sont des appareils de table sans rapport avec un four (raclettes 6, planchas 4, cuiseurs,
-  woks, cafetières 4, machines à pâtes 3, théières). C'est le cas d'école du « four contre bouilloire » signalé en octobre.
+  woks, cafetières 4, machines à pâtes 3, théières). C'est le cas d'école du " four contre bouilloire " signalé en octobre.
 - **smartphones :** les 6 mal classés sont des claviers (3 Lenovo), des jumelles, un équipement Honeywell et un luminaire probable, tous classés
-  « smartphone » par une seule source. 25 produits sur 30 ont C = 0 : mêmes fiches vraies mais sans donnée. La marque
-  « CDISCOUNT FR » apparaît.
+  " smartphone " par une seule source. 25 produits sur 30 ont C = 0 : mêmes fiches vraies mais sans donnée. La marque
+  " CDISCOUNT FR " apparaît.
 - **washing-machine :** mal classés = lave-vaisselle et fers à repasser ; limites = 4 sèche-linge, 3 séchants, 2 mini,
   1 professionnel. Aucune fiche de l'échantillon n'a `POWER_CONSUMPTION_TYPICAL`.
-- **dishwasher :** 6 des 7 « limite » sont des modèles professionnels CASSELIN ; un désodorisant et un nettoyeur
+- **dishwasher :** 6 des 7 " limite " sont des modèles professionnels CASSELIN ; un désodorisant et un nettoyeur
   haute pression sont mal classés.
 - **tv :** moniteurs PC, écrans de projection, TV 12 V de camping ; peu de couverture (C moyen 0,154, maximum 0,437).
 - **refrigerator :** 100 % de produits plausibles ; C moyen 0,921.
-- **air-conditioner :** 14 produits n'ont qu'une catégorie ManoMano et un nom réduit au GTIN, classés « vrai » par défaut :
+- **air-conditioner :** 14 produits n'ont qu'une catégorie ManoMano et un nom réduit au GTIN, classés " vrai " par défaut :
   le taux est probablement optimiste.
 
 Pour les smartphones, la relecture ne couvre pas les fiches à C ≥ 0,5 (aucune dans l'échantillon, qui comptait 5 produits
@@ -351,7 +351,7 @@ Requête : `query {"bool":{"filter":[{"terms":{"vertical":V}},{"range":{"offersC
 | smartphones | 9 589 | 928 | **9,7 %** |
 
 Les taux bas (fours, smartphones) coïncident avec la pollution mesurée au §4 : une grande partie des fiches
-« sans EPREL » ne sont pas des produits couverts par EPREL.
+" sans EPREL " ne sont pas des produits couverts par EPREL.
 
 ### 5.3 Smartphones : champs d'un document EPREL
 
@@ -376,7 +376,7 @@ Réserves : l'échantillon de 300 fiches est le début de l'index trié (pas al�
 ## 6. Indice de durabilité
 
 Détail dans `lot1-annexe-durabilite-cles.md` (échantillons de 150 fiches par cellule : TV et lave-linge, notés et
-exclus faute d'EPREL, tri par GTIN croissant, bornes `01…` et `055…`).
+exclus faute d'EPREL, tri par GTIN croissant, bornes `01...` et `055...`).
 
 - **Aucun indice de durabilité** (nouvel indice français) n'a été trouvé dans les attributs de ces deux verticales :
   `DURABILITY_INDEX`, `DURABILITYINDEX`, `DURABILITY`, `DURABILITE`, `REPARABILITE` absents des 600 fiches lues, et aucun
@@ -403,7 +403,7 @@ exclus faute d'EPREL, tri par GTIN croissant, bornes `01…` et `055…`).
 | Distribution de C des notés : TV, lave-linge, lave-vaisselle, climatiseurs | non mesuré (moyenne seule) |
 | Échantillon aléatoire à graine fixe (`random_score`) | impossible avec ce connecteur ; remplacé par 5 ancres de GTIN |
 | Parcours `_source` complet par pages de 500 | remplacé par comptage de motifs (exact) ; il aurait consommé 25 000 documents |
-| Taux de « vrai produit » des fiches smartphones à C ≥ 0,5 | non mesuré (échantillon ciblé à faire) |
+| Taux de " vrai produit " des fiches smartphones à C ≥ 0,5 | non mesuré (échantillon ciblé à faire) |
 | Exclus sans cause hors des 7 verticales | non mesuré |
 | Liste exhaustive des clés brutes d'attributs | non mesurée (§6) |
 | Plan GOU-1864 §4 (limites du mapping) | non relu par cet auteur ; à rapprocher par le CTO |
