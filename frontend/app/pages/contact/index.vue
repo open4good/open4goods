@@ -94,6 +94,19 @@
       :items="contactDetailItems"
     />
 
+    <v-container class="contact-page__direct-email py-6">
+      <i18n-t
+        keypath="contact.directEmail"
+        tag="p"
+        class="text-body-1 text-center mb-0"
+        data-test="contact-direct-email"
+      >
+        <template #email>
+          <a :href="`mailto:${CONTACT_EMAIL}`">{{ CONTACT_EMAIL }}</a>
+        </template>
+      </i18n-t>
+    </v-container>
+
     <ContactFormCard
       :site-key="siteKey"
       :submitting="submitting"
@@ -114,6 +127,7 @@ import { FetchError } from 'ofetch'
 import type { ContactResponseDto } from '~~/shared/api-client'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 import PageHeader from '~/components/shared/header/PageHeader.vue'
+import { CONTACT_EMAIL } from '~/constants/contact'
 import type { ContactFormPayload } from '~/components/domains/contact/ContactFormCard.vue'
 import type { ContactDetailItem } from '~/components/domains/contact/ContactDetailsSection.vue'
 

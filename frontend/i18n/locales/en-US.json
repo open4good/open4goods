@@ -1281,7 +1281,8 @@
       "title": {
         "question": "A question?"
       }
-    }
+    },
+    "directEmail": "Prefer email? Write to us at {email}."
   },
   "error": {
     "page": {
@@ -3176,7 +3177,7 @@
         },
         "title": "Resources"
       },
-      "copyright": "Copyright ©{year} open4goods. Common good product.",
+      "copyright": "Copyright ©{year} Nudger, an open4goods project. Common good product.",
       "feedback": {
         "cta": "Share your feedback",
         "links": {
