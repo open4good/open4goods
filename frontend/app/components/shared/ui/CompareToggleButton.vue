@@ -201,15 +201,18 @@ const toggle = async () => {
     min-width: 0
     padding: 0
     box-shadow: 0 4px 12px rgba(21, 46, 73, 0.12)
-    background-color: rgba(var(--v-theme-surface-default), 0.92)
+    background-color: rgb(var(--v-theme-surface-alt)) !important
+    color: rgb(var(--v-theme-on-surface)) !important
+    border: 2px solid rgba(var(--v-theme-on-surface), 0.7)
 
     &:hover
       transform: translateY(-2px)
       box-shadow: 0 8px 16px rgba(21, 46, 73, 0.16)
 
     &.compare-toggle-button--active
-      background-color: rgba(var(--v-theme-primary), 0.16)
-      color: rgb(var(--v-theme-primary))
+      background-color: rgb(var(--v-theme-primary)) !important
+      color: rgb(var(--v-theme-on-primary)) !important
+      border-color: rgb(var(--v-theme-on-primary))
       box-shadow: none
 
   &--appearance-plain
@@ -240,19 +243,24 @@ const toggle = async () => {
     border-radius: 99px
     box-shadow: 0 2px 8px rgba(0,0,0, 0.08)
 
+    &.compare-toggle-button--inactive
+      background-color: rgb(var(--v-theme-surface-alt)) !important
+      color: rgb(var(--v-theme-on-surface)) !important
+      border: 2px solid rgba(var(--v-theme-on-surface), 0.7)
+
     &:hover
-      background-color: rgb(var(--v-theme-surface-default))
       box-shadow: 0 4px 12px rgba(0,0,0, 0.12)
 
     &.compare-toggle-button--active
-      background-color: rgb(var(--v-theme-primary))
-      color: white !important
+      background-color: rgb(var(--v-theme-primary)) !important
+      color: rgb(var(--v-theme-on-primary)) !important
 
   &--inactive
-    opacity: 0.85
+    opacity: 1
 
   &:disabled
-    opacity: 0.5
+    opacity: 0.45
+    border-style: dashed
     cursor: not-allowed
     box-shadow: none !important
     transform: none !important
