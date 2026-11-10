@@ -378,6 +378,27 @@
       "defaultValue": 50
     },
     {
+      "name": "front.merchant-domains.activity-path",
+      "type": "java.lang.String",
+      "description": "Path appended to front.affiliation-partners.api-base-url to read the last offer date of each datasource (GOU-2037).",
+      "defaultValue": "/merchants/offer-activity"
+    },
+    {
+      "name": "front.merchant-domains.datasource-domains[].datasource",
+      "type": "java.lang.String",
+      "description": "Datasource name, as in the offers (compared trimmed, case insensitive)."
+    },
+    {
+      "name": "front.merchant-domains.datasource-domains[].domain",
+      "type": "java.lang.String",
+      "description": "Merchant domain of the datasource, used before the partner portal URL and the datasource name."
+    },
+    {
+      "name": "front.merchant-domains.excluded-domains",
+      "type": "java.util.Set<java.lang.String>",
+      "description": "Affiliation network domains: a datasource resolved to one of them, or to one of their subdomains, is not counted as a merchant. Defaults to the known networks (Awin, TradeTracker, Effiliation, Kwanko, CJ, Webgains...)."
+    },
+    {
       "name": "front.offers.max-age",
       "type": "java.time.Duration",
       "description": "Maximum age of a served offer, from its indexation timestamp. Older offers are hidden from the offer list, best prices, offer count, SEO price range, search suggestions and /contrib/ links. Defaults to the api rule (ProductRepository.VALID_UNTIL_DURATION).",

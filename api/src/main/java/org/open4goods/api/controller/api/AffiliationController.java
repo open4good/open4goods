@@ -5,11 +5,13 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import org.open4goods.api.services.DatasourceOfferActivityService;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.affiliation.AffiliationPartner;
 import org.open4goods.model.affiliation.AffiliationProgram;
 import org.open4goods.model.affiliation.AffiliationPromotion;
 import org.open4goods.model.affiliation.AffiliationTransaction;
+import org.open4goods.model.price.DatasourceOfferActivityReport;
 import org.open4goods.services.feedservice.service.FeedService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,8 +27,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 /**
  * Admin endpoints for querying affiliation partners, programs, promotions and transactions.
  * <p>
- * The {@code GET /partners} path is also consumed by {@code front-api} via
- * {@code AffiliationPartnerService} — do not rename it without updating that client.
+ * The {@code GET /partners} and {@code GET /merchants/offer-activity} paths are also consumed by {@code front-api}
+ * via {@code AffiliationPartnerService} and {@code MerchantDomainsService} — do not rename them without updating
+ * those clients.
  * </p>
  */
 @RestController
@@ -37,8 +40,11 @@ public class AffiliationController {
 
     private final FeedService feedService;
 
-    public AffiliationController(FeedService feedService) {
+    private final DatasourceOfferActivityService offerActivityService;
+
+    public AffiliationController(FeedService feedService, DatasourceOfferActivityService offerActivityService) {
         this.feedService = feedService;
+        this.offerActivityService = offerActivityService;
     }
 
     @GetMapping("/partners")
@@ -53,6 +59,18 @@ public class AffiliationController {
                     + "When omitted, results from all active providers are merged.")
             @RequestParam(required = false) final String provider) {
         return feedService.getPartners(provider);
+    }
+
+    @GetMapping("/merchants/offer-activity")
+    @Operation(
+            summary = "Date of the last offer of each datasource",
+            description = "Returns, for every datasource that brought an offer (non-zero price, not out of stock) to a "
+                    + "product since trackedSince, the timestamp of its most recent offer. Recorded as data fragments "
+                    + "are aggregated, never computed by scanning the product index. Called by the front-api "
+                    + "MerchantDomainsService to count the merchants with an active offer (GOU-2037).")
+    @ApiResponse(responseCode = "200", description = "Last offer date per datasource")
+    public DatasourceOfferActivityReport offerActivity() {
+        return offerActivityService.report();
     }
 
     @GetMapping("/affiliation/programs")

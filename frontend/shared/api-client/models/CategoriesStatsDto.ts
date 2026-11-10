@@ -13,6 +13,13 @@
  */
 
 import { mapValues } from '../runtime'
+import type { ActiveMerchantDomainsDto } from './ActiveMerchantDomainsDto'
+import {
+  ActiveMerchantDomainsDtoFromJSON,
+  ActiveMerchantDomainsDtoFromJSONTyped,
+  ActiveMerchantDomainsDtoToJSON,
+  ActiveMerchantDomainsDtoToJSONTyped,
+} from './ActiveMerchantDomainsDto'
 import type { VerticalStatsDto } from './VerticalStatsDto'
 import {
   VerticalStatsDtoFromJSON,
@@ -39,6 +46,12 @@ export interface CategoriesStatsDto {
    * @memberof CategoriesStatsDto
    */
   affiliationPartnersCount?: number
+  /**
+   * Distinct merchant domains with at least one active offer (GOU-2037). Null while it has never been computed since the front-api started.
+   * @type {ActiveMerchantDomainsDto}
+   * @memberof CategoriesStatsDto
+   */
+  activeMerchantDomains?: ActiveMerchantDomainsDto
   /**
    * Total number of GTIN items available in the OpenData exports.
    * @type {number}
@@ -130,6 +143,10 @@ export function CategoriesStatsDtoFromJSONTyped(
       json['affiliationPartnersCount'] == null
         ? undefined
         : json['affiliationPartnersCount'],
+    activeMerchantDomains:
+      json['activeMerchantDomains'] == null
+        ? undefined
+        : ActiveMerchantDomainsDtoFromJSON(json['activeMerchantDomains']),
     gtinOpenDataItemsCount:
       json['gtinOpenDataItemsCount'] == null
         ? undefined
@@ -186,6 +203,9 @@ export function CategoriesStatsDtoToJSONTyped(
   return {
     enabledVerticalConfigs: value['enabledVerticalConfigs'],
     affiliationPartnersCount: value['affiliationPartnersCount'],
+    activeMerchantDomains: ActiveMerchantDomainsDtoToJSON(
+      value['activeMerchantDomains']
+    ),
     gtinOpenDataItemsCount: value['gtinOpenDataItemsCount'],
     isbnOpenDataItemsCount: value['isbnOpenDataItemsCount'],
     impactScoreProductsCount: value['impactScoreProductsCount'],
