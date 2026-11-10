@@ -453,6 +453,9 @@ import {
 
 const MIN_QUERY_LENGTH = 2
 const VERTICAL_RESULTS_LIMIT = 4
+// Requête désignant une catégorie (verticalCta ou un seul groupe) : on montre
+// plus de produits avant la longue traîne.
+const SINGLE_VERTICAL_RESULTS_LIMIT = 8
 const isDev = process.env.NODE_ENV === 'development'
 
 const { t, locale, availableLocales } = useI18n()
@@ -1052,9 +1055,15 @@ const primaryGroups = computed(() => {
 })
 
 const limitedGroups = computed(() => {
+  const isCategoryQuery =
+    Boolean(data.value?.verticalCta) || primaryGroups.value.length === 1
+  const limit = isCategoryQuery
+    ? SINGLE_VERTICAL_RESULTS_LIMIT
+    : VERTICAL_RESULTS_LIMIT
+
   return primaryGroups.value
     .map(group => {
-      const limitedProducts = group.products.slice(0, VERTICAL_RESULTS_LIMIT)
+      const limitedProducts = group.products.slice(0, limit)
       if (!limitedProducts.length) {
         return null
       }

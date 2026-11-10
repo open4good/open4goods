@@ -7,21 +7,25 @@ const product = (gtin: number, name: string) => ({
   names: { h1Title: name, pageTitle: name },
 })
 
-const respond = (accessories: unknown[]) => ({
-  verticalGroups: [],
+const respond = (accessories: unknown[], verticalGroups: unknown[] = []) => ({
+  verticalGroups,
   missingVerticalResults: [{ product: product(1, 'Téléviseur LG'), score: 1 }],
   missingVerticalPage: { totalElements: 1, totalPages: 1 },
   accessoryResults: accessories,
 })
 
-const mountWith = async (query: string, accessories: unknown[]) => {
+const mountWith = async (
+  query: string,
+  accessories: unknown[],
+  verticalGroups: unknown[] = []
+) => {
   const calls: unknown[] = []
   registerEndpoint('/api/products/search', {
     method: 'POST',
     handler: async event => {
       const { readBody } = await import('h3')
       calls.push(await readBody(event))
-      return respond(accessories)
+      return respond(accessories, verticalGroups)
     },
   })
   registerEndpoint('/api/stats/categories', () => ({}))
@@ -63,5 +67,32 @@ describe('search page', () => {
     expect(block.exists()).toBe(true)
     expect(block.text()).toContain('Accessoires et pièces détachées')
     expect(block.text()).toContain('1 produit')
+  })
+
+  const group = (count: number, id = 'washing-machine') => ({
+    verticalId: id,
+    results: Array.from({ length: count }, (_, i) => ({
+      product: product(100 + i, `Lave-linge ${id} ${i}`),
+      score: 1,
+    })),
+  })
+
+  it('affiche 8 produits pour un seul groupe de verticale', async () => {
+    const { wrapper } = await mountWith('lave-linge', [], [group(8)])
+    const html = wrapper.html()
+    for (let i = 0; i < 8; i++) {
+      expect(html).toContain(`GTIN: ${100 + i}`)
+    }
+  })
+
+  it('garde 4 produits par groupe pour une requête multi-catégories', async () => {
+    const { wrapper } = await mountWith(
+      'samsung',
+      [],
+      [group(8, 'tv'), group(8, 'phone')]
+    )
+    const html = wrapper.html()
+    expect(html).toContain('GTIN: 103')
+    expect(html).not.toContain('GTIN: 104')
   })
 })
