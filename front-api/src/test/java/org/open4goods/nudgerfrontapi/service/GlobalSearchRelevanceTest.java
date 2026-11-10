@@ -67,6 +67,58 @@ class GlobalSearchRelevanceTest {
     }
 
     @Test
+    void realLongTailAccessoriesAreDetectedFromTheRequestedObject() {
+        GlobalSearchRelevance configured = configured();
+
+        assertThat(configured.isAccessoryName("lave-linge", "Beko moteur de lave-linge compatible")).isTrue();
+        assertThat(configured.isAccessoryName("refrigerateur",
+                "Thermostat refrigerateur pour réfrigérateur gorenje")).isTrue();
+        assertThat(configured.isAccessoryName("televiseur", "Module T-CON pour televiseur lg")).isTrue();
+        assertThat(configured.isAccessoryName("lg", "Meuble Tv Bas Blanc LG")).isTrue();
+        assertThat(configured.isAccessoryName("lave-vaisselle bosch", "INSERTION POUR LAVE VAISSELLE BOSCH"))
+                .isTrue();
+        assertThat(configured.isAccessoryName("lave linge", "Joint de hublot pour LAVE-LINGE")).isTrue();
+        assertThat(configured.isAccessoryName("lave-linge", "Moteur de la lave-linge Bosch")).isTrue();
+    }
+
+    @Test
+    void realProductsStayProducts() {
+        GlobalSearchRelevance configured = configured();
+
+        assertThat(configured.isAccessoryName("aspirateur", "Aspirateur pour animaux Dyson")).isFalse();
+        assertThat(configured.isAccessoryName("lave-linge", "Lave-linge pour petits espaces Candy")).isFalse();
+        assertThat(configured.isAccessoryName("thermostat", "Thermostat connecté Netatmo")).isFalse();
+        assertThat(configured.isAccessoryName("refrigerateur", "Réfrigérateur combiné Samsung")).isFalse();
+    }
+
+    @Test
+    void noAccessoryWhenTheQueryAsksForIt() {
+        GlobalSearchRelevance configured = configured();
+
+        assertThat(configured.isAccessoryName("moteur lave-linge", "Beko moteur de lave-linge compatible")).isFalse();
+        assertThat(configured.accessoryQuery("moteur lave-linge")).isNull();
+        assertThat(configured.isAccessoryName("lave-linge compatible", "Lave linge compatible Bosch")).isFalse();
+        assertThat(configured.isAccessoryName("pour lave-linge", "Tuyau pour lave-linge")).isFalse();
+    }
+
+    @Test
+    void accessoryQueryHoldsTheObjectClauses() {
+        String json = configured().accessoryQuery("lave-linge").toString();
+
+        assertThat(json).contains("\"pour lave linge\"", "\"pour linge\"", "\"compatible\"", "\"du\"",
+                "\"max_gaps\":1");
+        assertThat(configured().accessoryQuery("tuyau pour lave-linge compatible").toString())
+                .doesNotContain("\"pour lave linge\"", "\"compatible\"");
+    }
+
+    private static GlobalSearchRelevance configured() {
+        return new GlobalSearchRelevance(
+                properties(List.of("moteur", "module", "insertion", "meuble tv", "thermostat pour",
+                        "thermostat réfrigérateur", "joint", "support")),
+                new OfferFreshnessService(new OfferFreshnessProperties()));
+    }
+
+    @Test
     void rankAddsThePhraseBonusAndTheOffersCountToTheTextScore() {
         Query base = Query.of(q -> q.matchAll(m -> m));
 

@@ -28,7 +28,11 @@ front:
   global-search:
     # A product is an accessory when one of these terms starts its offer name (first 3 words).
     # Plural (+s) and unaccented forms are matched too. Ambiguous words (lampe, pompe, carte,
-    # thermostat, brosse...) are left out or narrowed so that a real product is never set apart.
+    # thermostat, brosse...) are left out or narrowed so that a real product is never set apart:
+    # "thermostat" only counts followed by "pour" or an appliance name ("thermostat connecté" is a
+    # real product). Besides these head terms, when the query does not use the words itself, a name
+    # is an accessory with "pour <query term>", "<term above> de <query term>" or "compatible"
+    # (GOU-2077); "Lave-linge pour petits espaces" stays a product.
     accessory-terms:
       - accessoire
       - adaptateur
@@ -56,8 +60,12 @@ front:
       - gaine
       - garde-boue
       - housse
+      - insertion
       - joint
       - lame
+      - meuble tv
+      - module
+      - moteur
       - papier cuisson
       - pièce
       - pneu
@@ -68,6 +76,14 @@ front:
       - sac aspirateur
       - support
       - télécommande
+      - thermostat pour
+      - thermostat réfrigérateur
+      - thermostat frigo
+      - thermostat congélateur
+      - thermostat lave-linge
+      - thermostat lave-vaisselle
+      - thermostat four
+      - thermostat sèche-linge
       - tube
       - verre trempé
     accessory-head-words: 3
