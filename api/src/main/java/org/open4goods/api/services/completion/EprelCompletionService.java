@@ -1,6 +1,7 @@
 package org.open4goods.api.services.completion;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -595,6 +596,27 @@ public class EprelCompletionService extends AbstractCompletionService {
 	private void addCoreEprelAttributes(DataFragment dataFragment, EprelProduct eprelProduct) {
 		addAttributeValue(dataFragment, "energyClass", eprelProduct.getEnergyClass());
 		addAttributeValue(dataFragment, "energyClassImage", eprelProduct.getEnergyClassImage());
+		addBatteryEnduranceCycles(dataFragment, eprelProduct.getCategorySpecificAttributes());
+	}
+
+	/**
+	 * EPREL publishes {@code batteryEnduranceInCycles} in hundreds of cycles (20 stands for the 2,000 cycles of
+	 * the information sheet). Emits the real number of cycles under {@code batteryEnduranceCycles}; the raw key
+	 * stays unmapped. An absent or unreadable value emits nothing (absence is not zero).
+	 */
+	void addBatteryEnduranceCycles(DataFragment dataFragment, Map<String, Object> attributes) {
+		if (attributes == null || attributes.get("batteryEnduranceInCycles") == null) {
+			return;
+		}
+		try {
+			BigDecimal hundreds = new BigDecimal(attributes.get("batteryEnduranceInCycles").toString().trim());
+			if (hundreds.signum() > 0) {
+				addAttributeValue(dataFragment, "batteryEnduranceCycles",
+						hundreds.multiply(BigDecimal.valueOf(100)).stripTrailingZeros().toPlainString());
+			}
+		} catch (NumberFormatException e) {
+			// unreadable value: left missing
+		}
 	}
 
 	private DataFragment initDataFragment(Product data) {

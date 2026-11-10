@@ -1,0 +1,56 @@
+# ============================================================================
+# FREE_FALL_RELIABILITY_CLASS — Free-fall reliability class (GOU-1891)
+# Source: EPREL, group smartphonestablets20231669 (Reg. (EU) 2023/1669), key "repeatedFreeFallReliabilityClass".
+# Not mapped to the French REPAIRABILITY_INDEX (scale of 10): different scale and law.
+# Not wired into the V1 impact score matrix; V2 wiring is a CTO decision.
+# ============================================================================
+key: "FREE_FALL_RELIABILITY_CLASS"
+userBetterIs: "GREATER"
+impactBetterIs: "GREATER"
+faIcon: "mdi-cellphone-arrow-down"
+name:
+  default: "Free-fall reliability class"
+  fr: "Classe de fiabilité aux chutes"
+filteringType: "TEXT"
+asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "MINMAX_FIXED"
+    params:
+      fixedMin: 20.0
+      fixedMax: 100.0
+  missingValuePolicy: "NEUTRAL"
+  degenerateDistributionPolicy: "FALLBACK"
+scoreTitle:
+  fr: "Classe de fiabilité aux chutes"
+  en: "Free-fall reliability class"
+scoreDescription:
+  fr: "Résistance aux chutes répétées, classe A à E de l'étiquette énergie européenne"
+  en: "Repeated free-fall reliability class A to E of the EU energy label"
+participateInScores:
+  - DURABILITY
+attributeValuesOrdering: "MAPPED"
+synonyms:
+  eprel:
+    - "REPEATEDFREEFALLRELIABILITYCLASS"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+  tokenMatch:
+    - "A"
+    - "B"
+    - "C"
+    - "D"
+    - "E"
+numericMapping:
+  A: 100.0
+  B: 80.0
+  C: 60.0
+  D: 40.0
+  E: 20.0
