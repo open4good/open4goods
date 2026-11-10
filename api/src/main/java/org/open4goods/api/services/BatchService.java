@@ -80,6 +80,7 @@ public class BatchService {
 
 	/** Post-scoring ImpactScore checks (GOU-1895). */
 	private ImpactScoreBatchGuard impactScoreGuard;
+	private EprelMatchMetrics eprelMatchMetrics = new EprelMatchMetrics(null);
 
 	/** Storage of the monthly ImpactScore snapshots; {@code null} disables them. */
 	private ImpactScoreSnapshotRepository impactScoreSnapshotRepository;
@@ -105,6 +106,15 @@ public class BatchService {
 	 *
 	 * @param impactScoreGuard the guard to run after each vertical scoring
 	 */
+	/**
+	 * Replaces the EPREL match metrics (shared with the metrics registry of the application context).
+	 *
+	 * @param eprelMatchMetrics the metrics recorded after each vertical scoring
+	 */
+	public void setEprelMatchMetrics(EprelMatchMetrics eprelMatchMetrics) {
+		this.eprelMatchMetrics = eprelMatchMetrics;
+	}
+
 	public void setImpactScoreGuard(ImpactScoreBatchGuard impactScoreGuard) {
 		this.impactScoreGuard = impactScoreGuard;
 	}
@@ -723,6 +733,11 @@ public class BatchService {
 	 * @return false when the indexation must not happen
 	 */
 	private boolean impactScoreChecksPass(VerticalConfig vertical, Collection<Product> scorable) {
+		try {
+			eprelMatchMetrics.record(vertical.getId(), scorable);
+		} catch (RuntimeException e) {
+			logger.error("EPREL match metrics could not be recorded for vertical {}", vertical.getId(), e);
+		}
 		try {
 			ImpactScoreBatchGuard.Report report = impactScoreGuard.verify(vertical.getId(), scorable);
 			if (report.blocking()) {
