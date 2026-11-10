@@ -2237,12 +2237,13 @@
   "search": {
     "hero": {
       "eyebrow": "Discover the catalogue",
-      "title": "Search responsible products",
+      "title": "Search for a product, compare partner merchants' prices",
       "subtitle": "Find products, brands and references curated by Nudger across every vertical."
     },
     "form": {
       "label": "Search the catalogue",
       "placeholder": "Type a product, brand or GTIN",
+      "hint": "Type a product or a brand: Nudger compares offers from partner merchants.",
       "ariaLabel": "Search for a product, brand or GTIN",
       "submit": "Search"
     },
@@ -3206,15 +3207,15 @@
         "badgeAlt": "Independent comparator"
       },
       "logoAlt": "Nudger orange logo icon",
-      "mission": "nudger.fr is an open approach to assess the environmental impact of products.",
+      "mission": "Nudger.fr is a price comparison site: it gathers offers from partner merchants and shows the ImpactScore to help you choose.",
       "rightsReserved": "All Rights Reserved"
     },
     "hero": {
       "defaultCtaText": "Call to Action",
       "defaultSubtitle": "Video demo hero to show a clean integration in a Vue 3 application.",
       "defaultTitle": "Default Title",
-      "mainSubtitle": "Buy better without spending more",
-      "mainTitle": "Nudger: price and Impact Score comparator"
+      "mainSubtitle": "Nudger gathers offers from its partner merchants to show you where to buy at the best price.",
+      "mainTitle": "Compare partner merchants' prices"
     },
     "links": {
       "linkedin": "https://www.linkedin.com/company/comparateur-nudger/"

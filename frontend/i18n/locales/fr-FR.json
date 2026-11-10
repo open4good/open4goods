@@ -2112,12 +2112,13 @@
   "search": {
     "hero": {
       "eyebrow": "Explorer le catalogue",
-      "title": "Les produits disponibles",
+      "title": "Recherchez un produit, comparez les prix des marchands partenaires",
       "subtitle": "Recherchez parmi {reviewed} produits évalués... et {others} autres !"
     },
     "form": {
       "label": "Rechercher dans le catalogue",
       "placeholder": "Saisissez un produit, une marque ou un GTIN",
+      "hint": "Tapez un produit ou une marque : Nudger compare les offres des marchands partenaires.",
       "ariaLabel": "Rechercher un produit, une marque ou un GTIN",
       "submit": "Rechercher"
     },
@@ -3107,15 +3108,15 @@
         "badgeAlt": "Comparateur indépendant"
       },
       "logoAlt": "Icône Nudger orange",
-      "mission": "Nudger.fr est une approche ouverte pour évaluer l'impact environnemental des produits.",
+      "mission": "Nudger.fr est un comparateur de prix : il rassemble les offres de marchands partenaires et affiche l'ImpactScore pour aider à choisir.",
       "rightsReserved": "Tous droits réservés"
     },
     "hero": {
       "defaultCtaText": "Appel à l'action",
       "defaultSubtitle": "(Pack dev/demo) Démo vidéo hero...",
       "defaultTitle": "Titre par défaut",
-      "mainSubtitle": "Acheter Mieux sans dépenser plus",
-      "mainTitle": "Nudger : le comparateur de prix et d'Impact Score"
+      "mainSubtitle": "Nudger rassemble les offres de ses marchands partenaires pour vous montrer où acheter au meilleur prix.",
+      "mainTitle": "Comparez les prix des marchands partenaires"
     },
     "links": {
       "linkedin": "https://www.linkedin.com/company/comparateur-nudger/"
