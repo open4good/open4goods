@@ -74,7 +74,8 @@ Any code exposing offers, prices or `/contrib/` links must read them through
 `getPrice().getOffers()` directly (see README "Offer freshness").
 
 Google CSS preparation is configured via `front.css.*` mapped by `CssProperties` (disabled by default; dry run
-only, no call to Google, never instantiate a CSS client without a dedicated issue). The eligibility reads offers
+by default; the Google client exists only with `front.css.sync.enabled=true` (GOU-2081, README "Google CSS
+synchronisation"), never in CI/beta: use `SimulatedCssProductsClient`). The eligibility reads offers
 through `OfferFreshnessService` and merchant domains through `MerchantDomainsService.domainResolver()` (see README
 "Google CSS dry run"); never send `rating`/`reviewCount`.
 

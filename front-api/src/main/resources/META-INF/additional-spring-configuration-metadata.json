@@ -926,6 +926,100 @@
       "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
       "description": "Maximum number of product details per input.",
       "defaultValue": 30
+    },
+    {
+      "name": "front.css.sync.enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Enables the CSS synchronisation job and client (also needs front.css.enabled=true).",
+      "defaultValue": false
+    },
+    {
+      "name": "front.css.sync.simulated",
+      "type": "java.lang.Boolean",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Uses the simulated client: no network call.",
+      "defaultValue": false
+    },
+    {
+      "name": "front.css.sync.account-id",
+      "type": "java.lang.String",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "CSS account (domain or group) identifier: requests target accounts/<id>."
+    },
+    {
+      "name": "front.css.sync.service-account-path",
+      "type": "java.lang.String",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Path of the service account JSON file (never in the repository)."
+    },
+    {
+      "name": "front.css.sync.service-account-json",
+      "type": "java.lang.String",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Raw service account JSON, alternative to the path (environment variable)."
+    },
+    {
+      "name": "front.css.sync.scope",
+      "type": "java.lang.String",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "OAuth scope of the CSS API.",
+      "defaultValue": "https://www.googleapis.com/auth/content"
+    },
+    {
+      "name": "front.css.sync.interval",
+      "type": "java.time.Duration",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Delay between two runs.",
+      "defaultValue": "PT6H"
+    },
+    {
+      "name": "front.css.sync.initial-delay",
+      "type": "java.time.Duration",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Delay before the first run after startup.",
+      "defaultValue": "PT5M"
+    },
+    {
+      "name": "front.css.sync.state-file",
+      "type": "java.lang.String",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "JSON state file of the last successful send.",
+      "defaultValue": "/tmp/nudger-css-sync-state.json"
+    },
+    {
+      "name": "front.css.sync.resend-before",
+      "type": "java.time.Duration",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "An unchanged product is sent again when its expiration is closer than this.",
+      "defaultValue": "PT24H"
+    },
+    {
+      "name": "front.css.sync.max-products-per-run",
+      "type": "java.lang.Integer",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Maximum calls (inserts and deletes) per run, 0 for no limit.",
+      "defaultValue": 0
+    },
+    {
+      "name": "front.css.sync.max-requests-per-second",
+      "type": "java.lang.Double",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Maximum calls per second, 0 for no limit.",
+      "defaultValue": 2.0
+    },
+    {
+      "name": "front.css.sync.verticals",
+      "type": "java.util.Set<java.lang.String>",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Verticals synchronised, empty for all."
+    },
+    {
+      "name": "front.css.sync.max-consecutive-failures",
+      "type": "java.lang.Integer",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Consecutive failed calls aborting a run.",
+      "defaultValue": 10
     }
   ]
 }
