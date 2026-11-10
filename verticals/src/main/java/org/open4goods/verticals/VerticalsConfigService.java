@@ -21,6 +21,7 @@ import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.model.attribute.AttributeType;
+import org.open4goods.model.eprel.EprelModelAliasTable;
 import org.open4goods.model.vertical.AttributeComparisonRule;
 
 import org.open4goods.model.vertical.AttributeConfig;
@@ -73,6 +74,7 @@ public class VerticalsConfigService {
 	private static final String CLASSPATH_ATTRIBUTES = "classpath*:attributes/*.yml";
 	private static final String CLASSPATH_CATEGORIES = "classpath*:categories/*/*.yml";
 	private static final String CLASSPATH_GUIDES = "classpath*:guides/*/*.md";
+	private static final String CLASSPATH_EPREL_MODEL_ALIASES = "classpath*:eprel-model-aliases/*/*.yml";
 	private static final String CLASSPATH_IMPACT_SCORES_DEFAULT = "classpath:/verticals/impactscores/_default.yml";
 	private static final String CLASSPATH_ASSISTANTS = "classpath:/assistant/*.yml";
 
@@ -386,7 +388,54 @@ public class VerticalsConfigService {
 		}
 		mergeExternalSubCategories(ret);
 		mergeGuides(ret);
+		mergeEprelModelAliases(ret);
 		return ret;
+	}
+
+	/**
+	 * Attaches the EPREL model alias tables found under {@code classpath*:eprel-model-aliases/{vertical-id}/*.yml}
+	 * to their vertical (for example the Apple table of the smartphones vertical).
+	 *
+	 * @param verticalConfigs vertical configurations already loaded from YAML
+	 */
+	private void mergeEprelModelAliases(List<VerticalConfig> verticalConfigs) {
+		Map<String, VerticalConfig> verticalsById = verticalConfigs.stream()
+				.filter(Objects::nonNull)
+				.filter(config -> config.getId() != null)
+				.collect(java.util.stream.Collectors.toMap(
+						VerticalConfig::getId,
+						Function.identity(),
+						(first, ignored) -> first));
+
+		Resource[] resources;
+		try {
+			resources = resourceResolver.getResources(CLASSPATH_EPREL_MODEL_ALIASES);
+		} catch (IOException e) {
+			logger.error("Cannot load EPREL model aliases from {} : {}", CLASSPATH_EPREL_MODEL_ALIASES, e.getMessage());
+			return;
+		}
+
+		for (Resource resource : resources) {
+			String filename = resource.getFilename();
+			String verticalId = verticalIdFromPathSegment(resource, "/eprel-model-aliases/");
+			VerticalConfig target = verticalId == null ? null : verticalsById.get(verticalId);
+			if (target == null) {
+				logger.warn("EPREL model alias file {} targets unknown vertical id {}. Skipping.", filename, verticalId);
+				continue;
+			}
+			try (InputStream inputStream = resource.getInputStream()) {
+				EprelModelAliasTable table = serialisationService.fromYaml(inputStream, EprelModelAliasTable.class);
+				if (table == null || table.getModels().isEmpty()) {
+					logger.warn("Empty EPREL model alias table in {}", filename);
+					continue;
+				}
+				target.getEprelModelAliases().add(table);
+				logger.info("Loaded {} EPREL model aliases ({}) for {}", table.getModels().size(), table.getBrand(),
+						verticalId);
+			} catch (Exception e) {
+				logger.error("Cannot load EPREL model alias table : {}", filename, e);
+			}
+		}
 	}
 
 	/**

@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import org.open4goods.model.StandardiserService;
 import org.open4goods.model.constants.CacheConstants;
+import org.open4goods.model.eprel.EprelModelAliasTable;
 import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Score;
@@ -71,6 +72,12 @@ public class VerticalConfig {
 	 * The corresponding EPREL taxonomy IDs.
 	 */
 	private List<String> eprelGroupNames = new ArrayList<>();
+
+	/**
+	 * Brand tables mapping commercial names and part numbers to the model registered in EPREL, discovered from
+	 * classpath eprel-model-aliases/{vertical-id}/*.yml files.
+	 */
+	private List<EprelModelAliasTable> eprelModelAliases = new ArrayList<>();
 
 	/**
 	 * If true, then the vertical is handled through batch processing, but is not
@@ -1096,6 +1103,14 @@ public class VerticalConfig {
 
 	public void setGuides(List<String> guides) {
 		this.guides = guides;
+	}
+
+	public List<EprelModelAliasTable> getEprelModelAliases() {
+		return eprelModelAliases;
+	}
+
+	public void setEprelModelAliases(List<EprelModelAliasTable> eprelModelAliases) {
+		this.eprelModelAliases = eprelModelAliases == null ? new ArrayList<>() : eprelModelAliases;
 	}
 
 	public NudgeToolConfig getNudgeToolConfig() {
