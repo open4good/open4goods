@@ -883,7 +883,7 @@
       "fields": {
         "brand": "Brand",
         "condition": "Offer condition",
-        "country": "GTIN country code",
+        "country": "Barcode country (GS1)",
         "creationDate": "Creation date",
         "datasource": "Data sources",
         "ecoscore": "Impact Score",
@@ -907,6 +907,7 @@
       "rangeAriaSuffix": "range selection",
       "searchLabel": "Search filters",
       "searchOptions": "Search options",
+      "countryHelp": "Country code derived from the GS1 prefix.",
       "condition": {
         "new": "New",
         "used": "Used"

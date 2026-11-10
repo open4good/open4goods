@@ -158,7 +158,9 @@ const toggle = () => {
 .category-product-compare-toggle
   border-radius: 50%
   transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease
-  background-color: rgba(var(--v-theme-surface-default), 0.92)
+  background-color: rgb(var(--v-theme-surface-alt)) !important
+  color: rgb(var(--v-theme-on-surface)) !important
+  border: 2px solid rgba(var(--v-theme-on-surface), 0.7)
   box-shadow: 0 6px 16px rgba(21, 46, 73, 0.12)
   display: inline-flex
   align-items: center
@@ -185,16 +187,22 @@ const toggle = () => {
     :deep(.v-icon)
       font-size: 2.25rem
 
-  &:hover
-    opacity: 0.9
+  &:hover:not(:disabled)
+    box-shadow: 0 8px 20px rgba(21, 46, 73, 0.2)
 
   &--inactive
-    opacity: 0.6
+    opacity: 1
 
   &--active
     opacity: 1
-    background-color: rgba(var(--v-theme-primary), 0.16)
-    color: rgb(var(--v-theme-primary))
+    background-color: rgb(var(--v-theme-primary)) !important
+    color: rgb(var(--v-theme-on-primary)) !important
+    border-color: rgb(var(--v-theme-on-primary))
+
+  &:disabled
+    opacity: 0.45
+    border-style: dashed
+    box-shadow: none
 
   :deep(.v-icon)
     transition: transform 0.2s ease

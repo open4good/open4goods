@@ -761,7 +761,7 @@
       "fields": {
         "brand": "Marque",
         "condition": "État des offres",
-        "country": "Code pays",
+        "country": "Pays du code-barres (GS1)",
         "creationDate": "Date de création",
         "datasource": "Sources de données",
         "ecoscore": "Impact Score",
@@ -786,6 +786,7 @@
       "rangeAriaSuffix": "sélection d'intervalle",
       "searchLabel": "Rechercher des filtres",
       "searchOptions": "Rechercher dans les options",
+      "countryHelp": "Code pays issu du préfixe GS1.",
       "condition": {
         "new": "Neuf",
         "used": "Occasion"
