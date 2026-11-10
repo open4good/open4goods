@@ -559,7 +559,7 @@ public class EprelSearchService
         }
         NativeQuery nativeQuery = NativeQuery.builder().withQuery(finalQuery).withMaxResults(properties.getMaxSearchResults()).build();
         SearchHits<EprelProduct> hits = elasticsearchOperations.search(nativeQuery, EprelProduct.class);
-        return hits.stream().map(SearchHit::getContent).toList();
+        return hits.stream().map(SearchHit::getContent).filter(p -> !p.isWithdrawn()).toList();
     }
 
     private String normalize(String value)

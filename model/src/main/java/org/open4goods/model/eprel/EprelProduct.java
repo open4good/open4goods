@@ -51,6 +51,19 @@ public class EprelProduct implements Serializable
     private String eprelRegistrationNumber;
 
     /**
+     * True when the entry is no longer in the EPREL catalogue of its group (GOU-1893). Set by the catalogue refresh,
+     * cleared when the entry is indexed again.
+     */
+    @Field(type = FieldType.Boolean)
+    private Boolean withdrawn;
+
+    /**
+     * Epoch milliseconds of the refresh that found the entry missing from the catalogue.
+     */
+    @Field(type = FieldType.Long, index = false)
+    private Long withdrawnAt;
+
+    /**
      * Product group code as defined by EPREL.
      */
     @Field(type = FieldType.Keyword, index = false)
@@ -350,6 +363,30 @@ public class EprelProduct implements Serializable
 
 	public void setConstructedEUID(String constructedEUID) {
 		this.constructedEUID = constructedEUID;
+	}
+
+	public Boolean getWithdrawn() {
+		return withdrawn;
+	}
+
+	public void setWithdrawn(Boolean withdrawn) {
+		this.withdrawn = withdrawn;
+	}
+
+	public Long getWithdrawnAt() {
+		return withdrawnAt;
+	}
+
+	public void setWithdrawnAt(Long withdrawnAt) {
+		this.withdrawnAt = withdrawnAt;
+	}
+
+	/**
+	 * @return true when the entry vanished from the EPREL catalogue (GOU-1893): it must no longer be matched
+	 */
+	@com.fasterxml.jackson.annotation.JsonIgnore
+	public boolean isWithdrawn() {
+		return Boolean.TRUE.equals(withdrawn);
 	}
 
 	/**

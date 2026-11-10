@@ -169,6 +169,28 @@ action=indexation_blocked|none`), Micrometer gauge `impactscore.guard.violations
 otherwise, never `DOWN`, so the aggregate health and the probes are unchanged). A failure of the guard itself is
 logged and does not block the indexation.
 
+### 7. EPREL match metrics and update cycle (GOU-1893)
+
+**Metrics.** After scoring, `EprelMatchMetrics` measures each vertical on the products with a brand, a model and at
+least one offer: how many carry EPREL data, split into matched by GTIN (EPREL GTIN = product GTIN) and matched by
+brand and model, the rate, and its variation since the previous batch of the same vertical (kept in memory: the first
+batch after a restart has no variation). One log line per vertical:
+`eprel_match vertical=... eligible=... matched=... byGtin=... byModel=... rate=...% variationPts=...`, and gauges
+`eprel.match.{eligible,matched,matched.gtin,matched.model,rate.bp,rate.variation.bp}{vertical}` on
+`/actuator/metrics` (rates in basis points, 1 % = 100).
+
+**Withdrawn entries.** At the end of a group refresh that succeeded (download, parse and indexing without error),
+`EprelCatalogueService` flags `withdrawn=true` and `withdrawnAt` on the documents of that group absent from the new
+catalogue. They are flagged, not deleted, so the withdrawal is dated and reversible (indexing the entry again clears
+the flag). A failed group, or an empty catalogue, marks nothing. `EprelSearchService` ignores withdrawn documents:
+at the next EPREL completion of a product (throttled by `api.eprelRefreshDays`) its `eprelDatas` and
+`externalIds.eprel` are cleared.
+
+**Cycle.** EPREL refresh at 03:00 every odd day (`eprel.refresh-cron`, `0 0 3 */2 * *`), batch at 13:00 every day
+(`BatchService`). A new or changed EPREL entry is in the index from 03:00 and reaches the score at the 13:00 batch of
+the same day if the product is completed in this batch; the maximum delay is the refresh period plus the completion
+throttle: 2 days for the EPREL index plus `api.eprelRefreshDays` for the product.
+
 ## Source Code pointers
 
 - **Base Logic**: `api/src/main/java/org/.../AbstractScoreAggregationService.java`
