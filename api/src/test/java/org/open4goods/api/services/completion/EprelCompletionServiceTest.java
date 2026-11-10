@@ -4,11 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +20,8 @@ import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.aggregation.aggregator.StandardAggregator;
 import org.open4goods.model.attribute.ReferentielKey;
+import org.open4goods.model.eprel.EprelModelAlias;
+import org.open4goods.model.eprel.EprelModelAliasTable;
 import org.open4goods.model.eprel.EprelProduct;
 import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.product.Product;
@@ -227,6 +232,65 @@ class EprelCompletionServiceTest {
         long twoDaysAgo = System.currentTimeMillis() - 2L * 24 * 3600 * 1000;
         product.getDatasourceCodes().put(EprelCompletionService.EPREL_DS_NAME, twoDaysAgo);
         assertThat(service.shouldProcess(vertical, product)).isTrue();
+    }
+
+    /**
+     * GOU-2042: an iPhone sold under its commercial name and part number reaches the EPREL record registered
+     * under Apple's regulatory number, through the vertical's model alias table.
+     */
+    @Test
+    void processProductMatchesAppleRegulatoryModelThroughAliasTable()
+    {
+        Product iphone = appleIphone15Plus();
+        vertical.setEprelModelAliases(List.of(appleTable()));
+        EprelProduct a3094 = appleEprelRecord();
+        when(eprelSearchService.search(anyString(), argThat((List<String> models) -> models.contains("A3094")),
+                anyCollection())).thenReturn(List.of(a3094));
+
+        service.processProduct(vertical, iphone);
+
+        assertThat(iphone.getEprelDatas()).isEqualTo(a3094);
+        assertThat(iphone.getExternalIds().getEprel()).isEqualTo("2251145");
+    }
+
+    @Test
+    void processProductLeavesAppleUnmatchedWithoutAliasTable()
+    {
+        Product iphone = appleIphone15Plus();
+        when(eprelSearchService.search(anyString(), argThat((List<String> models) -> models.contains("A3094")),
+                anyCollection())).thenReturn(List.of(appleEprelRecord()));
+
+        service.processProduct(vertical, iphone);
+
+        assertThat(iphone.getEprelDatas()).isNull();
+    }
+
+    private static Product appleIphone15Plus()
+    {
+        Product iphone = new Product(195949041273L);
+        iphone.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "APPLE");
+        iphone.getAttributes().addReferentielAttribute(ReferentielKey.MODEL, "MU163ZD/A");
+        iphone.setOfferNames(new HashSet<>(Set.of("Apple iPhone 15 Plus 128 Go Bleu", "iPhone 15 Plus 128Go Bleu 5G")));
+        return iphone;
+    }
+
+    private static EprelModelAliasTable appleTable()
+    {
+        EprelModelAliasTable table = new EprelModelAliasTable();
+        table.setBrand("APPLE");
+        table.setModels(List.of(new EprelModelAlias("A3090", null, List.of("iPhone 15"), null),
+                new EprelModelAlias("A3094", null, List.of("iPhone 15 Plus"), List.of("MU163"))));
+        return table;
+    }
+
+    private static EprelProduct appleEprelRecord()
+    {
+        EprelProduct a3094 = new EprelProduct();
+        a3094.setEprelRegistrationNumber("2251145");
+        a3094.setModelIdentifier("A3094");
+        a3094.setSupplierOrTrademark("APPLE");
+        a3094.setLastVersion(true);
+        return a3094;
     }
 
     @Test

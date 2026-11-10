@@ -2,6 +2,7 @@ package org.open4goods.api.services.completion;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -19,6 +20,7 @@ import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.datafragment.DataFragment;
+import org.open4goods.model.eprel.EprelModelAliasTable;
 import org.open4goods.model.eprel.EprelProduct;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.util.ProductModelCandidateHelper;
@@ -95,7 +97,7 @@ public class EprelCompletionService extends AbstractCompletionService {
 	@Override
 	public void processProduct(VerticalConfig vertical, Product data) {
 
-		List<String> models = modelCandidates(data);
+		List<String> models = withEprelModelAlias(vertical, data, modelCandidates(data));
 
 		List<EprelProduct> results = eprelSearchService.search(data.gtin(), models, vertical.getEprelGroupNames());
 
@@ -375,6 +377,52 @@ public class EprelCompletionService extends AbstractCompletionService {
     private List<String> modelCandidates(Product product)
     {
         return ProductModelCandidateHelper.expandedCandidates(product);
+    }
+
+    /**
+     * Appends the EPREL model resolved by the vertical's model alias tables (Apple: "iPhone 15 Plus" gives
+     * {@code A3094}) to the model candidates.
+     *
+     * <p>The resolved model goes last, so a model code supplied by a feed keeps priority; the EPREL search still
+     * tries every exact candidate before any prefix or contains strategy.
+     *
+     * @param vertical vertical holding the alias tables
+     * @param product product being completed
+     * @param models product model candidates
+     * @return the candidates, with the resolved EPREL model appended when it is new
+     */
+    private List<String> withEprelModelAlias(VerticalConfig vertical, Product product, List<String> models)
+    {
+        if (vertical == null || vertical.getEprelModelAliases().isEmpty())
+        {
+            return models;
+        }
+        List<String> labels = new ArrayList<>(product.getOfferNames() == null ? Set.of() : product.getOfferNames());
+        labels.add(product.model());
+        labels.addAll(product.getAkaModels() == null ? Set.of() : product.getAkaModels());
+        if (product.getExternalIds() != null && product.getExternalIds().getMpn() != null)
+        {
+            labels.addAll(product.getExternalIds().getMpn());
+        }
+        for (EprelModelAliasTable table : vertical.getEprelModelAliases())
+        {
+            Optional<String> resolved = table.resolveEprelModel(product.brand(), labels);
+            if (resolved.isEmpty())
+            {
+                continue;
+            }
+            String compactResolved = ProductModelCandidateHelper.compactModel(resolved.get());
+            if (models.stream()
+                    .anyMatch(model -> Objects.equals(ProductModelCandidateHelper.compactModel(model), compactResolved)))
+            {
+                return models;
+            }
+            logger.info("EPREL model alias {} ({}) resolved for {}", resolved.get(), table.getBrand(), product);
+            List<String> extended = new ArrayList<>(models);
+            extended.add(resolved.get());
+            return extended;
+        }
+        return models;
     }
 
     /**

@@ -138,6 +138,14 @@ smartphones resterait sans EPREL, donc exclue de l'ImpactScore V1.
 
 ### 3.3 Hypothèse à vérifier en premier : `productGroup`
 
+> **Tranché le 2026-11-10 (GOU-2042) : hypothèse infirmée, aucun correctif.** Sur `eprel-products`
+> (prod, rôle en lecture seule), l'agrégation `terms` sur `productGroup` renvoie
+> `smartphonestablets20231669` pour 2 815 fiches (2 804 d'acte `EU_2023_1669`, dont 77 avec GTIN), et
+> l'agrégation `missing` sur `productGroup` renvoie 0 fiche, tous groupes confondus. Le mapping réel pose
+> `productGroup` en `keyword` cherchable ; un filtre `terms` `{"productGroup": ["smartphonestablets20231669"]}`
+> renvoie bien les 2 815 fiches. Le faible taux d'appariement vient donc des identifiants (section 3.4),
+> pas du filtre. Le texte ci-dessous est conservé pour mémoire.
+
 `EprelSearchService.execute` filtre sur `productGroup` avec les valeurs de
 `vertical.getEprelGroupNames()` (ici `smartphonestablets20231669`).
 `EprelCatalogueService.processGroup` n'écrit jamais `group.urlCode()` dans les produits lus : il
@@ -169,14 +177,30 @@ pas seulement les smartphones.
 2. Samsung : comparer les racines de modèle. Côté EPREL, retirer `/DS`, `/DSN` ; côté produit,
    réduire `SM-XNNNNx` suivi de trois lettres de couleur et de région à `SM-XNNNNx`. À mesurer
    avant d'élargir à d'autres marques.
-3. Apple : table de correspondance "nom commercial vers numéro A" (environ une centaine de
-   lignes), maintenue dans `verticals` à côté de `smartphones.yml` **(à créer)**, puis
-   `promoteModel(..., ModelCandidateSource.EPREL)` comme aujourd'hui. Source de la table : page
-   d'identification des modèles d'Apple (**non vérifié**).
+3. Apple : table de correspondance "nom commercial vers numéro A", puis
+   `promoteModel(..., ModelCandidateSource.EPREL)` comme aujourd'hui. **Faite (GOU-2042)** :
+   `verticals/src/main/resources/eprel-model-aliases/smartphones/apple.yml`, chargée dans
+   `VerticalConfig.eprelModelAliases` (`EprelModelAliasTable`). Source : page Apple
+   <https://support.apple.com/en-us/108044> (publiée le 2026-10-22) ; le numéro enregistré dans EPREL
+   est celui des "autres pays et régions". Les 15 smartphones Apple d'EPREL (A3090 à A3720) y sont,
+   ainsi que les iPhone 15 Pro et 15 Pro Max (sans fiche EPREL) pour que leur nom ne retombe pas sur
+   l'iPhone 15. Chaque libellé du produit (titres d'offres, modèle, modèles alternatifs, MPN) vote :
+   numéro A exact, base de référence Apple (`MU163` pour `MU163ZD/A`), ou nom commercial le plus long
+   trouvé en mots entiers, sauf après "pour", "for", "compatible"... Il faut une majorité stricte des
+   votes. `EprelCompletionService` ajoute le numéro trouvé en dernier candidat de modèle : un code
+   fourni par un flux reste prioritaire. Maintenance annuelle décrite en tête du fichier.
 4. Garder le rejet des ambiguïtés : un faux rattachement donnerait une classe de réparabilité
    fausse à un produit.
 
 ### 3.5 Mesures à faire lancer sur la prod (pas d'accès ES ici)
+
+> **Mesure avant la table Apple (2026-11-10, GOU-2042)**, `products-moustik`, verticale `smartphones`,
+> `offersCount > 0` : 14 767 produits, dont 928 appariés à EPREL (6,3 %, sans `missing_eprel`), tous notés.
+> Réparabilité réelle (`REPAIRABILITY_INDEX` ou `EU_REPAIRABILITY_CLASS` dans `attributes.indexed`) : 126
+> des 928 notés (13,6 %), dont 0 avec la classe européenne. Apple : 11 appariés sur 1 730, tous par un flux
+> qui donnait déjà le numéro A comme modèle ; Samsung : 391 sur 3 750. Environ 420 smartphones Apple avec
+> offres nomment dans leurs titres un modèle présent dans EPREL (`match_phrase` sur `offerNames`). La mesure
+> après le premier batch bêta suivant le déploiement est publiée sur GOU-2042 et GOU-1891.
 
 À lancer avec le rôle en lecture seule `agents_readonly` (GOU-1870) ou par un humain.
 
