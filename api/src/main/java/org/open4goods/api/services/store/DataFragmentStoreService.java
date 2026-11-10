@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.AggregationFacadeService;
+import org.open4goods.api.services.DatasourceOfferActivityService;
 import org.open4goods.api.services.aggregation.services.realtime.PriceAggregationService;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.services.BarcodeValidationService;
@@ -67,19 +68,23 @@ public class DataFragmentStoreService {
 
 	PriceAggregationService priceService = new PriceAggregationService(logger);
 
+	/** Dates the last offer of each datasource (GOU-2037). */
+	private final DatasourceOfferActivityService offerActivityService;
+
 
 	/**
 	 * 
 	 * @param barcodeValidationService computes the product id of a fragment GTIN, the same one the identity aggregation indexes it under
 	 * @param indexationConfig 
 	 */
-	public DataFragmentStoreService(StandardiserService standardiserService, AggregationFacadeService generationService, ProductRepository aggregatedDataRepository, BarcodeValidationService barcodeValidationService, IndexationConfig indexationConfig) {
+	public DataFragmentStoreService(StandardiserService standardiserService, AggregationFacadeService generationService, ProductRepository aggregatedDataRepository, BarcodeValidationService barcodeValidationService, IndexationConfig indexationConfig, DatasourceOfferActivityService offerActivityService) {
 
 
 		this.standardiserService = standardiserService;
 		this.aggregatedDataRepository = aggregatedDataRepository;
 		this.generationService=generationService;
 		this.barcodeValidationService = barcodeValidationService;
+		this.offerActivityService = offerActivityService;
 		
 		this.queue =  new LinkedBlockingQueue<>(indexationConfig.getDatafragmentQueueMaxSize());
 		
@@ -264,6 +269,7 @@ public class DataFragmentStoreService {
 					partial.addChange(ProductPartialUpdateField.OFFERS_COUNT, data.getOffersCount());
 					
 					partialItemsResults.add(partial);
+					recordOfferActivity(df);
 					
 				} else {
 					// Item has changed, we proceed to full update
@@ -276,6 +282,7 @@ public class DataFragmentStoreService {
 						Product newP = generationService.updateOne(df,data);
 						
 						fullItemsResults.add(newP);
+						recordOfferActivity(df);
 					} catch (AggregationSkipException e1) {
 						logger.warn("Aggregation skipped for {} : {}",df,e1.getMessage());
 					}
@@ -300,6 +307,18 @@ public class DataFragmentStoreService {
 		} catch (final Exception e) {
 			logger.error("Error while dequeing DataFragments",e);
 		}	
+	}
+
+
+	/**
+	 * Dates the datasource's last offer once the fragment's offer has been aggregated into its product.
+	 *
+	 * @param df the aggregated fragment, ignored when it carries no offer
+	 */
+	private void recordOfferActivity(DataFragment df) {
+		if (PriceAggregationService.isOffer(df)) {
+			offerActivityService.record(df.getDatasourceName(), df.getLastIndexationDate());
+		}
 	}
 
 

@@ -313,6 +313,12 @@ public class ApiProperties {
 	private String datasourcePurgeStatusFile;
 
 	/**
+	 * JSON file where the api keeps the date of the last offer of each datasource (GOU-2037), served on
+	 * {@code GET /merchants/offer-activity}. Defaults to {@code <rootFolder>/batch-reports/datasource-offer-activity.json}.
+	 */
+	private String datasourceOfferActivityFile;
+
+	/**
 	 * The datasource purge logs and persists its progress every this many scanned products (and at least every
 	 * {@code DatasourcePurgeService.PROGRESS_MAX_DELAY}).
 	 */
@@ -383,6 +389,20 @@ public class ApiProperties {
 
 	public void setDatasourcePurgeStatusFile(String datasourcePurgeStatusFile) {
 		this.datasourcePurgeStatusFile = datasourcePurgeStatusFile;
+	}
+
+	/**
+	 * @return the configured datasource offer activity file, or {@code <rootFolder>/batch-reports/datasource-offer-activity.json}
+	 */
+	public String getDatasourceOfferActivityFile() {
+		if (datasourceOfferActivityFile == null || datasourceOfferActivityFile.isBlank()) {
+			return rootFolder + File.separator + "batch-reports" + File.separator + "datasource-offer-activity.json";
+		}
+		return datasourceOfferActivityFile;
+	}
+
+	public void setDatasourceOfferActivityFile(String datasourceOfferActivityFile) {
+		this.datasourceOfferActivityFile = datasourceOfferActivityFile;
 	}
 
 	public long getDatasourcePurgeProgressInterval() {

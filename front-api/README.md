@@ -90,6 +90,44 @@ still read the indexed values.
 - `front.offers.max-age` - maximum offer age (Spring `Duration`, e.g. `3d`;
   env `FRONT_OFFERS_MAX_AGE`).
 
+## Merchant domains count
+
+`GET /stats/categories` returns `activeMerchantDomains` = `{ count, computedAt,
+franceOnly }` (GOU-2037): the number of distinct merchant domains with at least
+one active offer. It backs the "compare prices from N merchants" claim and the
+Google CSS 50-domain threshold, so it is conservative. Unlike
+`affiliationPartnersCount` (every configured partner), it leaves out affiliation
+networks, merchants without an active offer and duplicate domains.
+
+- **Source**: `price.offers` is not indexed in Elasticsearch, so the api records
+  the date of the last offer of each datasource as fragments are aggregated
+  (`DatasourceOfferActivityService`, `GET /merchants/offer-activity`, see
+  `api/AGENTS.md`). Nothing scans the product index.
+- **Active**: the datasource's last offer is fresh under `front.offers.max-age`
+  (same rule as `OfferFreshnessService`).
+- **Merchant domain**, in this order: the
+  `front.merchant-domains.datasource-domains` entry of the datasource, the portal
+  URL of its affiliation partner, its name when the name is a domain
+  (`darty.com`). Offer URLs are never used: they are affiliation links
+  (`awin1.com`...). A datasource without domain is not counted (logged).
+- **Normalisation**: host only, lower case, without `www.`, reduced to the
+  registrable domain of the public suffix list (Guava `InternetDomainName`):
+  `https://fr.aliexpress.com` and `www.aliexpress.com` both count as
+  `aliexpress.com`.
+- **Not a merchant**: domains of `front.merchant-domains.excluded-domains`
+  (Awin, TradeTracker, Effiliation, Kwanko, CJ, Webgains...) and their
+  subdomains.
+- **France**: a partner whose `countryCodes` do not include `FR` is left out.
+  `franceOnly` is true only when every counted domain states its countries; the
+  feeds give none today, so it is `false` (delivery to France is not filtered).
+- **When**: `MerchantDomainsService.refresh()`, 30 s after startup then hourly,
+  never in a user request. `computedAt` dates it; on failure the previous count
+  is kept. `activeMerchantDomains` is `null` until the first success. Each
+  refresh logs the counted domains, and the datasources not counted.
+- **Warm-up**: the api starts recording at its first deployment with this
+  feature (`trackedSince`); until `front.offers.max-age` has elapsed, merchants
+  whose last offer predates it are missing and a warning is logged.
+
 ## Contribution votes ip/ua purge
 
 On every startup, once the application is ready, front-api runs on a background

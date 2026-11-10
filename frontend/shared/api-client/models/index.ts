@@ -1,5 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
+export * from './ActiveMerchantDomainsDto'
 export * from './AdditionalDetails'
 export * from './AffiliationPartnerDto'
 export * from './AgentActivityDto'

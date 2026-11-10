@@ -149,6 +149,21 @@ curl -H "Authorization: $O4G_INTERNAL_API_KEY" https://api.nudger.fr/batch/purge
 curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/purge-datasource?datasource=rakuten.com&dryRun=false"
 ```
 
+## Date de la dernière offre par datasource
+
+GOU-2037. `price.offers` n'est pas indexé : pour savoir quels marchands ont encore une offre active sans parcourir
+l'index produits, `DataFragmentStoreService` appelle `DatasourceOfferActivityService.record` pour chaque fragment
+agrégé qui devient une offre (`PriceAggregationService.isOffer` : prix non nul, pas en rupture), dans les deux
+chemins (mise à jour partielle et agrégation complète ; rien si l'agrégation est sautée).
+
+- État : date de la dernière offre (timestamp du fragment) par nom de datasource, en mémoire, écrit toutes les
+  5 minutes s'il a bougé et à l'arrêt dans `datasource-offer-activity-file` (défaut
+  `<root-folder>/batch-reports/datasource-offer-activity.json`), par fichier `.tmp` renommé, relu au démarrage.
+- `trackedSince` : début de l'enregistrement qui a écrit le fichier (écrit à la première offre agrégée). Une datasource dont la dernière offre est antérieure n'y figure pas.
+- `GET /merchants/offer-activity` (rôle admin, comme `/partners`) renvoie `{ trackedSince, datasources: [{
+  datasourceName, lastOfferSeen }] }`. front-api le lit toutes les heures pour compter les domaines marchands actifs
+  (`MerchantDomainsService`, voir `front-api/README.md`). Ne pas renommer ce chemin sans mettre à jour ce client.
+
 ## Agrégation temps réel des fragments
 
 `DataFragmentStoreService.aggregateAndstore` (GOU-1700) lit les produits du lot par identifiant numérique

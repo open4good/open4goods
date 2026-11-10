@@ -70,18 +70,28 @@ public class PriceAggregationService extends AbstractAggregationService {
 	@Override
 	public void onDataFragment(final DataFragment fragment, final Product aggregatedData, final VerticalConfig vConf) throws AggregationSkipException {
 
-		if (!fragment.hasPrice()) {
-			dedicatedLogger.debug("No price for data fragment {}, skipping", fragment);
-		} else if (fragment.getPrice().getPrice() == 0.0) {
-			dedicatedLogger.info("Price is 0 for datafragment {}, skipping", fragment);
-		} else if (fragment.getInStock() == InStock.OUTOFSTOCK) {
-			dedicatedLogger.debug("Out of stock data fragment {}, skipping its price", fragment);
-		} else {
+		if (isOffer(fragment)) {
 			AggregatedPrice aggPrice = new AggregatedPrice(fragment);
 			aggregatedData.getPrice().getOffers().add(aggPrice);
+		} else {
+			dedicatedLogger.debug("Data fragment {} carries no offer (no price, price 0 or out of stock), skipping its price", fragment);
 		}
 
 		onProduct(aggregatedData, vConf);
+	}
+
+	/**
+	 * Tells whether a fragment becomes an offer of its product: it has a non-zero price and is not explicitly out
+	 * of stock. Also used to date the last offer of each datasource ({@code DatasourceOfferActivityService}).
+	 *
+	 * @param fragment the incoming data fragment
+	 * @return true when {@link #onDataFragment} adds the fragment's price to the product offers
+	 */
+	public static boolean isOffer(final DataFragment fragment) {
+		return fragment != null
+				&& fragment.hasPrice()
+				&& fragment.getPrice().getPrice() != 0.0
+				&& fragment.getInStock() != InStock.OUTOFSTOCK;
 	}
 
 

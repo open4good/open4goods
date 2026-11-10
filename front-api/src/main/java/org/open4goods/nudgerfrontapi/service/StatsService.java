@@ -13,6 +13,7 @@ import org.open4goods.model.affiliation.AffiliationPartner;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
+import org.open4goods.nudgerfrontapi.dto.stats.ActiveMerchantDomainsDto;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesScoreStatsDto;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesStatsDto;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesScoresStatsDto;
@@ -20,6 +21,7 @@ import org.open4goods.nudgerfrontapi.dto.stats.CategoryScoreCardinalitiesDto;
 import org.open4goods.nudgerfrontapi.dto.stats.ScoreCardinalityDto;
 import org.open4goods.nudgerfrontapi.dto.stats.VerticalStatsDto;
 import org.open4goods.model.localization.DomainLanguage;
+import org.open4goods.nudgerfrontapi.model.stats.ActiveMerchantDomains;
 import org.open4goods.nudgerfrontapi.model.stats.AffiliationPartnersStats;
 import org.open4goods.services.opendata.service.OpenDataService;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -52,19 +54,22 @@ public class StatsService {
     private final OpenDataService openDataService;
     private final ProductRepository productRepository;
     private final ProductMappingService productMappingService;
+    private final MerchantDomainsService merchantDomainsService;
 
     public StatsService(SerialisationService serialisationService,
                         ResourcePatternResolver resourceResolver,
                         AffiliationPartnerService affiliationPartnerService,
                         OpenDataService openDataService,
                         ProductRepository productRepository,
-                        ProductMappingService productMappingService) {
+                        ProductMappingService productMappingService,
+                        MerchantDomainsService merchantDomainsService) {
         this.serialisationService = serialisationService;
         this.resourceResolver = resourceResolver;
         this.affiliationPartnerService = affiliationPartnerService;
         this.openDataService = openDataService;
         this.productRepository = productRepository;
         this.productMappingService = productMappingService;
+        this.merchantDomainsService = merchantDomainsService;
     }
 
     /**
@@ -72,7 +77,8 @@ public class StatsService {
      *
      * @param domainLanguage currently unused but retained for future localisation of statistics labels
      * @return DTO describing the category statistics used by the frontend including affiliation partners,
-     * OpenData counts, rated product counts, and per-category product counts for recent products with offers.
+     * the distinct merchant domains with an active offer, OpenData counts, rated product counts, and per-category
+     * product counts for recent products with offers.
      */
     @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
     public CategoriesStatsDto categories(DomainLanguage domainLanguage) {
@@ -109,6 +115,7 @@ public class StatsService {
         return new CategoriesStatsDto(
                 Math.toIntExact(enabledVerticals.size()),
                 partnersStats.count(),
+                computeActiveMerchantDomains(),
                 gtinItemsCount,
                 isbnItemsCount,
                 impactScoreProductsCount,
@@ -207,6 +214,18 @@ public class StatsService {
         int partnersCount = partners == null ? 0 : partners.size();
 
         return new AffiliationPartnersStats(partnersCount);
+    }
+
+    /**
+     * Read the distinct merchant domains count precomputed by {@link MerchantDomainsService}, next to the partners
+     * count: unlike it, affiliation networks, merchants without an active offer and duplicate domains are left out.
+     *
+     * @return the dated count, or null when it has never been computed
+     */
+    private ActiveMerchantDomainsDto computeActiveMerchantDomains() {
+        ActiveMerchantDomains merchants = merchantDomainsService.current();
+        return merchants == null ? null
+                : new ActiveMerchantDomainsDto(merchants.count(), merchants.computedAt(), merchants.franceOnly());
     }
 
     /**

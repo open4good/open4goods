@@ -5,12 +5,17 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.affiliation.AffiliationPartner;
+import org.open4goods.nudgerfrontapi.dto.stats.ActiveMerchantDomainsDto;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesStatsDto;
+import org.open4goods.nudgerfrontapi.model.stats.ActiveMerchantDomains;
 import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.serialisation.service.SerialisationService;
@@ -49,12 +54,20 @@ class StatsServiceTest {
         given(productRepository.countMainIndexValidAndRated()).willReturn(9_876L);
         given(partnerService.getPartners()).willReturn(List.of(mock(AffiliationPartner.class), mock(AffiliationPartner.class)));
 
-        StatsService service = new StatsService(serialisationService, resolver, partnerService, openDataService, productRepository, productMappingService);
+        MerchantDomainsService merchantDomainsService = mock(MerchantDomainsService.class);
+        Instant computedAt = Instant.parse("2026-11-10T08:00:00Z");
+        SortedMap<String, List<String>> domains = new TreeMap<>(Map.of(
+                "darty.com", List.of("darty.com"), "carrefour.fr", List.of("Carrefour - marketplace")));
+        given(merchantDomainsService.current()).willReturn(new ActiveMerchantDomains(domains, computedAt, false,
+                computedAt.minusSeconds(864_000), List.of(), Map.of()));
+
+        StatsService service = new StatsService(serialisationService, resolver, partnerService, openDataService, productRepository, productMappingService, merchantDomainsService);
 
         CategoriesStatsDto dto = service.categories(DomainLanguage.fr);
 
         assertThat(dto.enabledVerticalConfigs()).isEqualTo(1);
         assertThat(dto.affiliationPartnersCount()).isEqualTo(2);
+        assertThat(dto.activeMerchantDomains()).isEqualTo(new ActiveMerchantDomainsDto(2, computedAt, false));
         assertThat(dto.gtinOpenDataItemsCount()).isEqualTo(1_234L);
         assertThat(dto.isbnOpenDataItemsCount()).isEqualTo(567L);
         assertThat(dto.impactScoreProductsCount()).isEqualTo(5_925L);
@@ -75,7 +88,7 @@ class StatsServiceTest {
     @Test
     void randomPassesVerticalId() {
         ProductRepository productRepository = mock(ProductRepository.class);
-        StatsService service = new StatsService(mock(SerialisationService.class), mock(ResourcePatternResolver.class), mock(AffiliationPartnerService.class), mock(OpenDataService.class), productRepository, mock(ProductMappingService.class));
+        StatsService service = new StatsService(mock(SerialisationService.class), mock(ResourcePatternResolver.class), mock(AffiliationPartnerService.class), mock(OpenDataService.class), productRepository, mock(ProductMappingService.class), mock(MerchantDomainsService.class));
         
         service.random(5, 2, "my-vertical", DomainLanguage.fr);
         

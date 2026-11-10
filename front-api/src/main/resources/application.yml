@@ -75,6 +75,21 @@ front:
     anonymous: 100
     authenticated: 1000
 
+  # Distinct merchant domains with an active offer (GOU-2037), computed hourly from the api
+  # GET /merchants/offer-activity (same base URL and key as affiliation-partners). Affiliation
+  # networks (excluded-domains, see MerchantDomainsProperties) are never counted. datasource-domains
+  # gives the domain of a datasource whose partner has no portal URL and whose name is not a domain.
+  merchant-domains:
+    datasource-domains:
+      - datasource: "Carrefour - marketplace"
+        domain: carrefour.fr
+      - datasource: "Carrefour - non alimentaire"
+        domain: carrefour.fr
+      - datasource: "Oscaro FR"
+        domain: oscaro.com
+      - datasource: "Vevor FR"
+        domain: vevor.fr
+
   # Offers older than front.offers.max-age are not served (GOU-1385). Left unset, it follows the api
   # rule (ProductRepository.VALID_UNTIL_DURATION, 2 days); override with e.g. FRONT_OFFERS_MAX_AGE=3d.
 

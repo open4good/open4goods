@@ -2,6 +2,7 @@ package org.open4goods.api.config;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.Clock;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -12,6 +13,7 @@ import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.EprelMatchMetrics;
 import org.open4goods.api.services.ImpactScoreBatchGuard;
 import org.open4goods.api.services.CompletionFacadeService;
+import org.open4goods.api.services.DatasourceOfferActivityService;
 import org.open4goods.api.services.DatasourcePurgeService;
 import org.open4goods.api.services.VerticalsGenerationService;
 import org.open4goods.api.services.completion.AmazonCompletionService;
@@ -543,8 +545,13 @@ public class ApiConfig {
         }
 
 	@Bean
-	DataFragmentStoreService dataFragmentStoreService(final ApiProperties config, @Autowired StandardiserService standardiserService, @Autowired AggregationFacadeService generationService, @Autowired ProductRepository aggregatedDataRepository, @Autowired BarcodeValidationService barcodeValidationService) {
-		return new DataFragmentStoreService(standardiserService, generationService, aggregatedDataRepository, barcodeValidationService, config.getIndexationConfig());
+	DatasourceOfferActivityService datasourceOfferActivityService() {
+		return new DatasourceOfferActivityService(Path.of(apiProperties.getDatasourceOfferActivityFile()), Clock.systemUTC());
+	}
+
+	@Bean
+	DataFragmentStoreService dataFragmentStoreService(final ApiProperties config, @Autowired StandardiserService standardiserService, @Autowired AggregationFacadeService generationService, @Autowired ProductRepository aggregatedDataRepository, @Autowired BarcodeValidationService barcodeValidationService, DatasourceOfferActivityService datasourceOfferActivityService) {
+		return new DataFragmentStoreService(standardiserService, generationService, aggregatedDataRepository, barcodeValidationService, config.getIndexationConfig(), datasourceOfferActivityService);
 	}
 
 	/**

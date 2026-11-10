@@ -19,11 +19,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.open4goods.api.services.AggregationFacadeService;
+import org.open4goods.api.services.DatasourceOfferActivityService;
+import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.model.StandardiserService;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.eprel.EprelProduct;
+import org.open4goods.model.price.Currency;
+import org.open4goods.model.price.Price;
+import org.open4goods.model.product.InStock;
+import org.open4goods.model.product.ProductCondition;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.productrepository.config.IndexationConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -57,6 +63,7 @@ class DataFragmentStoreServiceTest {
 	private AggregationFacadeService generationService;
 	private ProductRepository repository;
 	private DataFragmentStoreService service;
+	private DatasourceOfferActivityService offerActivity;
 
 	@BeforeEach
 	void setUp() throws Exception {
@@ -70,8 +77,9 @@ class DataFragmentStoreServiceTest {
 		indexationConfig.setDataFragmentworkers(0);
 
 		repository = new ProductRepository(indexationConfig, elasticsearchOperations);
+		offerActivity = mock(DatasourceOfferActivityService.class);
 		service = new DataFragmentStoreService(mock(StandardiserService.class), generationService, repository,
-				new BarcodeValidationService(), indexationConfig);
+				new BarcodeValidationService(), indexationConfig, offerActivity);
 	}
 
 	private static Product existingProduct() {
@@ -263,5 +271,59 @@ class DataFragmentStoreServiceTest {
 		verify(elasticsearchOperations, never()).multiGet(any(Query.class), eq(Product.class),
 				eq(ProductRepository.CURRENT_INDEX));
 		assertThat(queuedFullProducts()).isEmpty();
+	}
+
+	private static DataFragment pricedOffer(String gtin, long indexedAt) {
+		DataFragment fragment = offer(gtin);
+		fragment.setPrice(new Price(199.99, Currency.EUR));
+		fragment.setLastIndexationDate(indexedAt);
+		fragment.setProductState(ProductCondition.NEW);
+		return fragment;
+	}
+
+	/** GOU-2037: an aggregated offer dates the last offer of its datasource. */
+	@Test
+	void aggregatedOfferRecordsDatasourceActivity() throws Exception {
+		elasticReturns(MultiGetItem.of(existingProduct(), null));
+
+		service.aggregateAndstore(List.of(pricedOffer(String.valueOf(GTIN), 1_800_000_000_000L)));
+
+		verify(offerActivity).record("manomano.fr", 1_800_000_000_000L);
+	}
+
+	/** GOU-2037: the partial update path (same fragment hash) dates the offer as well. */
+	@Test
+	void partialUpdateRecordsDatasourceActivity() throws Exception {
+		Product existing = existingProduct();
+		existing.getDatasourceCodes().put("manomano.fr", 42L);
+		elasticReturns(MultiGetItem.of(existing, null));
+
+		service.aggregateAndstore(List.of(pricedOffer(String.valueOf(GTIN), 1_800_000_000_000L)));
+
+		verify(generationService, never()).updateOne(any(), any());
+		verify(offerActivity).record("manomano.fr", 1_800_000_000_000L);
+	}
+
+	/** GOU-2037: a fragment without price or out of stock is not an offer. */
+	@Test
+	void fragmentWithoutOfferDoesNotRecordActivity() throws Exception {
+		elasticReturns(MultiGetItem.of(existingProduct(), null));
+		DataFragment outOfStock = pricedOffer(String.valueOf(GTIN), 1_800_000_000_000L);
+		outOfStock.setInStock(InStock.OUTOFSTOCK);
+
+		service.aggregateAndstore(List.of(offer(String.valueOf(GTIN)), outOfStock));
+
+		verify(offerActivity, never()).record(any(), any());
+	}
+
+	/** GOU-2037: a skipped aggregation stores nothing, so it dates nothing. */
+	@Test
+	void skippedAggregationDoesNotRecordActivity() throws Exception {
+		elasticReturns(MultiGetItem.of(existingProduct(), null));
+		when(generationService.updateOne(any(), any())).thenThrow(new AggregationSkipException("excluded"));
+
+		service.aggregateAndstore(List.of(pricedOffer(String.valueOf(GTIN), 1_800_000_000_000L)));
+
+		verify(offerActivity, never()).record(any(), any());
 	}
 }
