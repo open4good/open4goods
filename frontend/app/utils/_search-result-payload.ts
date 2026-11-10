@@ -100,6 +100,7 @@ export const slimGlobalSearchResponse = (
       results: slimResults(group.results),
     })),
     missingVerticalResults: slimResults(response.missingVerticalResults),
+    accessoryResults: slimResults(response.accessoryResults),
   }
 }
 

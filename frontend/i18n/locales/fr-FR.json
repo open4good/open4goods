@@ -2178,6 +2178,13 @@
         "error": "Nous n'avons pas compris votre voix. Réessayez ou saisissez votre requête."
       }
     },
+    "accessories": {
+      "title": "Accessoires et pièces détachées",
+      "count": {
+        "one": "{count} produit",
+        "other": "{count} produits"
+      }
+    },
     "groups": {
       "count": {
         "one": "{count} produit",

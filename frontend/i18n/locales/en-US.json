@@ -2303,6 +2303,13 @@
         "error": "We couldn't capture your voice. Try again or type your query."
       }
     },
+    "accessories": {
+      "title": "Accessories and spare parts",
+      "count": {
+        "one": "{count} product",
+        "other": "{count} products"
+      }
+    },
     "groups": {
       "count": {
         "one": "{count} product",
