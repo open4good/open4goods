@@ -28,6 +28,11 @@ a price and a merchant.
     python3 scripts/diagnostics/css_search_check.py \\
         --base-url https://beta.nudger.fr --json-out /tmp/css-search.json
 
+The protected beta is reached by exporting ``BETA_BASIC_AUTH=user:password``:
+every request then carries ``Authorization: Basic ...``. The value is read from
+the environment only (no command-line option) and is never printed or written
+to ``--json-out``.
+
 Read-only: one GET of the search page and one POST to the public search API
 per query, as a browser does. Standard library only.
 """
@@ -36,8 +41,10 @@ from __future__ import annotations
 
 import argparse
 import html
+import base64
 import http.cookiejar
 import json
+import os
 import re
 import sys
 import time
@@ -55,6 +62,7 @@ API_PATH = "/api/products/search"
 CSRF_COOKIE = "csrf_token"
 CSRF_HEADER = "x-csrf-token"
 USER_AGENT = "Mozilla/5.0 (compatible; nudger-css-search-check/1.0)"
+BASIC_AUTH_ENV = "BETA_BASIC_AUTH"
 VERTICAL_RESULTS_LIMIT = 4  # frontend/app/pages/search/index.vue
 NO_RESULT_MARKERS = ("Aucun résultat pour", "No results for")
 PRODUCT_LINK_RE = re.compile(r'href="(/(?:[a-z0-9-]+/)?\d{8,14}-[^"]*)"')
@@ -140,6 +148,10 @@ def build_opener() -> tuple[urllib.request.OpenerDirector, http.cookiejar.Cookie
     jar = http.cookiejar.CookieJar()
     opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
     opener.addheaders = [("User-Agent", USER_AGENT)]
+    credentials = os.environ.get(BASIC_AUTH_ENV)
+    if credentials:
+        token = base64.b64encode(credentials.encode("utf-8")).decode("ascii")
+        opener.addheaders.append(("Authorization", f"Basic {token}"))
     return opener, jar
 
 
