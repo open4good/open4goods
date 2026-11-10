@@ -73,6 +73,11 @@ Any code exposing offers, prices or `/contrib/` links must read them through
 `OfferFreshnessService`, never `Product.bestPrice()`, `getOffersCount()` or
 `getPrice().getOffers()` directly (see README "Offer freshness").
 
+Global search relevance is configured via `front.global-search.*` mapped by
+`GlobalSearchProperties` (accessory terms, ranking weights, long tail filter).
+It only applies to `SearchService.globalSearch`; never route `search()` through
+`GlobalSearchRelevance` (see README "Global search relevance").
+
 ### Local profile (offline startup)
 
 `application-local.yml` holds the offline defaults for the `local` profile (the module's

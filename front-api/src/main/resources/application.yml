@@ -24,6 +24,62 @@ front:
   max-page-size: 50
   # Elasticsearch index.max_result_window: (pageNumber + 1) * pageSize above it gives a 400
   max-result-window: 10000
+  # Global search relevance (/rechercher), see README "Global search relevance" (GOU-2029).
+  global-search:
+    # A product is an accessory when one of these terms starts its offer name (first 3 words).
+    # Plural (+s) and unaccented forms are matched too. Ambiguous words (lampe, pompe, carte,
+    # thermostat, brosse...) are left out or narrowed so that a real product is never set apart.
+    accessory-terms:
+      - accessoire
+      - adaptateur
+      - amortisseur
+      - balconnet
+      - batterie
+      - brosse pour
+      - câble
+      - capsule
+      - chambre à air
+      - chargeur
+      - clayette
+      - coque
+      - courroie
+      - coussinet
+      - détartrant
+      - diffuseur
+      - dosette
+      - embout
+      - étui
+      - filtre
+      - fixation
+      - foret
+      - frein
+      - gaine
+      - garde-boue
+      - housse
+      - joint
+      - lame
+      - papier cuisson
+      - pièce
+      - pneu
+      - poignée
+      - protection d'écran
+      - protège écran
+      - résistance
+      - sac aspirateur
+      - support
+      - télécommande
+      - tube
+      - verre trempé
+    accessory-head-words: 3
+    accessory-negative-boost: 0.1
+    accessory-results-limit: 8
+    offers-count-weight: 1.0
+    phrase-boost: 2.0
+    phrase-slop: 1
+    long-tail-over-read: 3
+    long-tail-max-candidates: 1200
+    min-title-words: 3
+    min-title-word-length: 3
   cache:
     path: ./cache
     one-minute-ttl: 1m

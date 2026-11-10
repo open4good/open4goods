@@ -31,6 +31,7 @@ import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
+import org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
 import org.open4goods.nudgerfrontapi.dto.PageMetaDto;
 import org.open4goods.nudgerfrontapi.dto.product.FieldMetadataDto;
@@ -156,16 +157,18 @@ public class SearchService {
 	private final ProductMappingService productMappingService;
 	private final ApiProperties apiProperties;
 	private final OfferFreshnessService offerFreshnessService;
+	private final GlobalSearchRelevance globalSearchRelevance;
 	private volatile List<VerticalSuggestionEntry> verticalSuggestions = List.of();
 
 	public SearchService(ProductRepository repository, VerticalsConfigService verticalsConfigService,
 			@Lazy ProductMappingService productMappingService, ApiProperties apiProperties,
-			OfferFreshnessService offerFreshnessService) {
+			OfferFreshnessService offerFreshnessService, GlobalSearchProperties globalSearchProperties) {
 		this.repository = repository;
 		this.verticalsConfigService = verticalsConfigService;
 		this.productMappingService = productMappingService;
 		this.apiProperties = apiProperties;
 		this.offerFreshnessService = offerFreshnessService;
+		this.globalSearchRelevance = new GlobalSearchRelevance(globalSearchProperties, offerFreshnessService);
 	}
 
 	@PostConstruct
@@ -837,6 +840,12 @@ public class SearchService {
 
 	/**
 	 * Execute a lexical global search for categorized and uncategorized products.
+	 * <p>
+	 * Relevance rules (GOU-2029, see {@link GlobalSearchRelevance}): both levels are ranked by text score, exact
+	 * expression bonus and {@code log1p(offersCount)}. Unless the query asks for an accessory, accessories are demoted
+	 * in the category groups and set apart from the long tail into {@code accessoryResults}. Long tail products are
+	 * kept only with a fresh offer, an image and a readable title.
+	 * </p>
 	 *
 	 * @param query                    raw user query
 	 * @param domainLanguage           localisation hint (currently unused but kept for future
@@ -844,7 +853,7 @@ public class SearchService {
 	 * @param filters                  optional filter criteria scoped to the global search
 	 * @param sort                     optional sort definition for global search results
 	 * @param missingVerticalPageable  pagination for missing-vertical results
-	 * @return grouped search results and unassigned hits when necessary
+	 * @return grouped search results, unassigned hits and accessories set apart
 	 */
 	@io.micrometer.core.annotation.Timed(value = "search.global", description = "Time taken to execute global search", extraTags = {"service", "search"})
 	@Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
@@ -859,10 +868,12 @@ public class SearchService {
 				? missingVerticalPageable
 				: PageRequest.of(0, GLOBAL_SEARCH_LIMIT);
 
+		Query accessoryQuery = globalSearchRelevance.accessoryQuery(sanitizedQuery);
 		MissingVerticalPagedResult missingVerticalResult = executeMissingVerticalLexicalSearchPaged(sanitizedQuery, domainLanguage,
-				normalizedFilters, sort, effectivePageable);
+				normalizedFilters, sort, effectivePageable, accessoryQuery);
 
-		List<GlobalSearchHit> lexicalVerticalHits = executeVerticalLexicalSearch(sanitizedQuery, domainLanguage, normalizedFilters, sort);
+		List<GlobalSearchHit> lexicalVerticalHits = executeVerticalLexicalSearch(sanitizedQuery, domainLanguage,
+				normalizedFilters, sort, accessoryQuery);
 		List<GlobalSearchVerticalGroup> verticalGroups = groupHitsByVertical(lexicalVerticalHits, sort);
 
 		return new GlobalSearchResult(verticalGroups,
@@ -871,7 +882,8 @@ public class SearchService {
 				missingVerticalResult.totalPages(),
 					effectivePageable.getPageNumber(),
 					effectivePageable.getPageSize(),
-					verticalCta);
+					verticalCta,
+					missingVerticalResult.accessoryHits());
 	}
 
 	/**
@@ -1522,35 +1534,134 @@ public class SearchService {
 	 * Paginated result for missing-vertical search.
 	 *
 	 * @param hits          product hits for the current page
-	 * @param totalElements total number of matching elements
+	 * @param totalElements number of displayable elements, estimated when the candidates were not all read
 	 * @param totalPages    total number of pages
+	 * @param accessoryHits accessories set apart from the long tail
 	 */
-	private record MissingVerticalPagedResult(List<GlobalSearchHit> hits, long totalElements, int totalPages) {
+	private record MissingVerticalPagedResult(List<GlobalSearchHit> hits, long totalElements, int totalPages,
+			List<GlobalSearchHit> accessoryHits) {
 		MissingVerticalPagedResult {
 			hits = List.copyOf(hits);
+			accessoryHits = List.copyOf(accessoryHits);
 		}
 	}
 
 	/**
 	 * Executes a paginated lexical search scoped to products without a vertical
-	 * assignment.
+	 * assignment (the long tail).
+	 * <p>
+	 * Image and title cannot be filtered in Elasticsearch (not indexed for these products), so the search reads
+	 * the first {@code (page + 1) * pageSize * overRead} candidates with a light source, keeps the displayable ones
+	 * in order and serves the requested slice; only that slice is then fetched in full. {@code totalElements} is
+	 * exact when every candidate was read, otherwise it is the Elasticsearch total scaled by the share of
+	 * displayable candidates read. Pages beyond {@code longTailMaxCandidates} candidates are not reachable.
+	 * </p>
 	 *
 	 * @param sanitizedQuery sanitized query string
 	 * @param domainLanguage localisation hint for result mapping
 	 * @param filters        optional filters to apply
 	 * @param sort           optional sort definition
 	 * @param pageable       pagination parameters
-	 * @return paged result with hits and pagination metadata
+	 * @param accessoryQuery accessory query, {@code null} when accessories are not set apart
+	 * @return paged result with hits, pagination metadata and accessories set apart
 	 */
 	private MissingVerticalPagedResult executeMissingVerticalLexicalSearchPaged(String sanitizedQuery,
-			DomainLanguage domainLanguage, FilterRequestDto filters, Sort sort, Pageable pageable) {
+			DomainLanguage domainLanguage, FilterRequestDto filters, Sort sort, Pageable pageable,
+			Query accessoryQuery) {
 
-		Query query = buildMissingVerticalSearchQuery(sanitizedQuery, filters, false);
+		Query base = buildMissingVerticalSearchQuery(sanitizedQuery, filters, false);
+		Query longTailQuery = accessoryQuery == null ? base
+				: Query.of(q -> q.bool(b -> b.must(base).mustNot(accessoryQuery)));
+		int pageSize = Math.max(1, pageable.getPageSize());
+		int pageNumber = Math.max(0, pageable.getPageNumber());
+		int candidatesToRead = globalSearchRelevance.longTailCandidates(pageNumber, pageSize);
+		SearchHits<Product> candidates = searchCandidates(globalSearchRelevance.rank(longTailQuery, sanitizedQuery),
+				candidatesToRead);
+		List<SearchHit<Product>> displayable = displayableCandidates(candidates);
+
+		int from = pageNumber * pageSize;
+		List<SearchHit<Product>> pageCandidates = from >= displayable.size() ? List.of()
+				: displayable.subList(from, Math.min(displayable.size(), from + pageSize));
+
+		List<SearchHit<Product>> accessoryCandidates = List.of();
+		int accessoryLimit = globalSearchRelevance.accessoryResultsLimit();
+		if (accessoryQuery != null && accessoryLimit > 0) {
+			Query accessories = Query.of(q -> q.bool(b -> b.must(base).filter(accessoryQuery)));
+			List<SearchHit<Product>> displayableAccessories = displayableCandidates(searchCandidates(
+					globalSearchRelevance.rank(accessories, sanitizedQuery),
+					accessoryLimit * globalSearchRelevance.overRead()));
+			accessoryCandidates = displayableAccessories.subList(0,
+					Math.min(accessoryLimit, displayableAccessories.size()));
+		}
+
+		Map<String, SearchHit<Product>> products = fetchProducts(Stream
+				.concat(pageCandidates.stream(), accessoryCandidates.stream()).map(SearchHit::getId).toList());
+		List<GlobalSearchHit> hits = mapCandidates(pageCandidates, products, domainLanguage, sort);
+		List<GlobalSearchHit> accessoryHits = mapCandidates(accessoryCandidates, products, domainLanguage, sort);
+
+		int read = candidates == null ? 0 : candidates.getSearchHits().size();
+		long totalElements = displayable.size();
+		if (read >= candidatesToRead && read > 0) {
+			// Not every candidate was read: scale the Elasticsearch total by the displayable share.
+			totalElements = Math.max(totalElements,
+					Math.round((double) candidates.getTotalHits() * displayable.size() / read));
+		}
+		int totalPages = (int) Math.min((totalElements + pageSize - 1) / pageSize,
+				globalSearchRelevance.longTailReachablePages(pageSize));
+
+		return new MissingVerticalPagedResult(hits, totalElements, totalPages, accessoryHits);
+	}
+
+	/**
+	 * Reads global search candidates with the light source of {@link GlobalSearchRelevance#candidateSourceFilter()}.
+	 *
+	 * @param query ranked query
+	 * @param size  number of candidates to read from the first one
+	 * @return candidate hits, possibly {@code null} when the repository returns nothing
+	 */
+	private SearchHits<Product> searchCandidates(Query query, int size) {
 		NativeQueryBuilder builder = new NativeQueryBuilder()
 				.withQuery(query)
-				.withPageable(pageable)
-				.withSourceFilter(ProductRepository.productFieldsWithoutEmbeddingSourceFilter());
+				.withPageable(PageRequest.of(0, Math.max(1, size)))
+				.withSourceFilter(GlobalSearchRelevance.candidateSourceFilter());
+		try {
+			return repository.search(builder.build(), ProductRepository.MAIN_INDEX_NAME);
+		} catch (Exception e) {
+			elasticLog(e);
+			throw e;
+		}
+	}
 
+	/**
+	 * Keeps the candidates that the long tail may display, in their ranking order.
+	 *
+	 * @param candidates candidate hits, may be {@code null}
+	 * @return displayable candidates
+	 */
+	private List<SearchHit<Product>> displayableCandidates(SearchHits<Product> candidates) {
+		if (candidates == null || candidates.isEmpty()) {
+			return List.of();
+		}
+		return candidates.getSearchHits().stream()
+				.filter(hit -> hit != null && hit.getId() != null
+						&& globalSearchRelevance.isDisplayable(hit.getContent()))
+				.toList();
+	}
+
+	/**
+	 * Fetches the complete products of the displayed candidates.
+	 *
+	 * @param ids Elasticsearch identifiers
+	 * @return complete hits by identifier
+	 */
+	private Map<String, SearchHit<Product>> fetchProducts(List<String> ids) {
+		if (ids.isEmpty()) {
+			return Map.of();
+		}
+		NativeQueryBuilder builder = new NativeQueryBuilder()
+				.withQuery(Query.of(q -> q.ids(i -> i.values(ids))))
+				.withPageable(PageRequest.of(0, ids.size()))
+				.withSourceFilter(ProductRepository.productFieldsWithoutEmbeddingSourceFilter());
 		SearchHits<Product> hits;
 		try {
 			hits = repository.search(builder.build(), ProductRepository.MAIN_INDEX_NAME);
@@ -1558,14 +1669,40 @@ public class SearchService {
 			elasticLog(e);
 			throw e;
 		}
+		if (hits == null || hits.isEmpty()) {
+			return Map.of();
+		}
+		Map<String, SearchHit<Product>> byId = new LinkedHashMap<>();
+		hits.getSearchHits().stream().filter(hit -> hit.getId() != null)
+				.forEach(hit -> byId.putIfAbsent(hit.getId(), hit));
+		return byId;
+	}
 
-		List<GlobalSearchHit> mappedHits = mapHits(hits, domainLanguage, sort);
-		long totalElements = hits.getTotalHits();
-		int totalPages = pageable.getPageSize() > 0
-				? (int) Math.ceil((double) totalElements / pageable.getPageSize())
-				: 1;
-
-		return new MissingVerticalPagedResult(mappedHits, totalElements, totalPages);
+	/**
+	 * Maps the displayed candidates to global search hits, keeping the candidate score and order (or the requested
+	 * sort).
+	 *
+	 * @param candidates     displayed candidates, in ranking order
+	 * @param products       complete products by identifier
+	 * @param domainLanguage localisation hint for result mapping
+	 * @param sort           optional sort definition
+	 * @return mapped hits
+	 */
+	private List<GlobalSearchHit> mapCandidates(List<SearchHit<Product>> candidates,
+			Map<String, SearchHit<Product>> products, DomainLanguage domainLanguage, Sort sort) {
+		if (candidates.isEmpty()) {
+			return List.of();
+		}
+		Map<String, Float> scores = new LinkedHashMap<>();
+		candidates.forEach(candidate -> scores.put(candidate.getId(), candidate.getScore()));
+		List<SearchHit<Product>> complete = candidates.stream().map(candidate -> products.get(candidate.getId()))
+				.filter(Objects::nonNull).toList();
+		List<SearchHit<Product>> ordered = sort == null || sort.isUnsorted() ? complete
+				: sortGlobalHits(complete, sort);
+		return ordered.stream()
+				.map(hit -> mapHit(hit, domainLanguage, scores.get(hit.getId())))
+				.filter(Objects::nonNull)
+				.toList();
 	}
 
 	/**
@@ -1575,16 +1712,18 @@ public class SearchService {
 	 * @param domainLanguage localisation hint for result mapping
 	 * @param filters        optional filters to apply
 	 * @param sort           optional sort definition
+	 * @param accessoryQuery accessory query demoted in the groups, {@code null} when accessories are not demoted
 	 * @return list of mapped hits with a vertical assignment
 	 */
 	private List<GlobalSearchHit> executeVerticalLexicalSearch(String sanitizedQuery,
-			DomainLanguage domainLanguage, FilterRequestDto filters, Sort sort) {
+			DomainLanguage domainLanguage, FilterRequestDto filters, Sort sort, Query accessoryQuery) {
 
 
 		Pageable pageable = PageRequest.of(0, GLOBAL_SEARCH_LIMIT);
 
-		// Build a query similar to buildProductSearchQuery but ensuring vertical exists
-		Query query = buildLexicalQuery(null, sanitizedQuery, filters, true, true, false);
+		// Build a query similar to buildProductSearchQuery but ensuring vertical exists, then rank it
+		Query query = globalSearchRelevance.demoteAccessories(globalSearchRelevance.rank(
+				buildLexicalQuery(null, sanitizedQuery, filters, true, true, false), sanitizedQuery), accessoryQuery);
 
 		NativeQueryBuilder builder = new NativeQueryBuilder()
 				.withQuery(query)
@@ -1989,6 +2128,8 @@ public class SearchService {
 	 * @param missingVerticalPageNumber    current page number (zero-based)
 	 * @param missingVerticalPageSize      page size used
 	 * @param verticalCta                category suggestion if found
+	 * @param accessoryResults           accessories without a vertical set apart from the long tail, empty when
+	 *                                   the query asks for an accessory
 	 */
 	public record GlobalSearchResult(List<GlobalSearchVerticalGroup> verticalGroups,
 			List<GlobalSearchHit> missingVerticalResults,
@@ -1996,11 +2137,24 @@ public class SearchService {
 			int missingVerticalTotalPages,
 			int missingVerticalPageNumber,
 			int missingVerticalPageSize,
-			CategorySuggestion verticalCta) {
+			CategorySuggestion verticalCta,
+			List<GlobalSearchHit> accessoryResults) {
 
 		public GlobalSearchResult {
 			verticalGroups = List.copyOf(verticalGroups);
 			missingVerticalResults = List.copyOf(missingVerticalResults);
+			accessoryResults = accessoryResults == null ? List.of() : List.copyOf(accessoryResults);
+		}
+
+		/**
+		 * Result without accessories set apart.
+		 */
+		public GlobalSearchResult(List<GlobalSearchVerticalGroup> verticalGroups,
+				List<GlobalSearchHit> missingVerticalResults, long missingVerticalTotalElements,
+				int missingVerticalTotalPages, int missingVerticalPageNumber, int missingVerticalPageSize,
+				CategorySuggestion verticalCta) {
+			this(verticalGroups, missingVerticalResults, missingVerticalTotalElements, missingVerticalTotalPages,
+					missingVerticalPageNumber, missingVerticalPageSize, verticalCta, List.of());
 		}
 	}
 
