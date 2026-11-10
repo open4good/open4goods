@@ -79,7 +79,14 @@ configured under `front.global-search` (GOU-2029). They never reach
   anti-calcaire") does not count. Positions of the multi-valued `offerNames`
   run on from one value to the next, so only the first indexed offer name is
   checked. When the normalized query contains one of the terms, nothing
-  changes. Otherwise accessories are demoted in the category groups
+  changes. Besides these head terms, when the query does not use the words
+  itself, a name is also an accessory of the requested object with
+  `pour <query term>`, `<accessory term> de/du/des <query term>` (one word
+  tolerated in between) or the word `compatible` (GOU-2077); query terms are
+  the whole query and each word of 4 letters or more, accents, case and
+  hyphens ignored (`lave-linge` = `lave linge`). `thermostat` only counts
+  followed by `pour` or an appliance name, and "Lave-linge pour petits
+  espaces" stays a product. Otherwise accessories are demoted in the category groups
   (`boosting`, `accessory-negative-boost`) and leave the long tail for the
   additive `accessoryResults` field (at most `accessory-results-limit`).
 - **Long tail** (`missingVerticalResults`, products without a vertical): only

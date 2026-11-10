@@ -35,6 +35,15 @@ final class GlobalSearchRelevance {
 	static final String OFFER_NAMES_FIELD = "offerNames";
 	private static final String OFFERS_COUNT_FIELD = "offersCount";
 	private static final Pattern NON_ALPHANUMERIC = Pattern.compile("[^\\p{IsAlphabetic}\\p{IsDigit}]+");
+	/** Words that open the "of the requested object" clause: {@code de}, {@code du}, {@code des}, {@code d'}. */
+	private static final List<String> OF_WORDS = List.of("de", "du", "des", "d");
+	/** Words of the query that do not designate an object. */
+	private static final Set<String> QUERY_STOP_WORDS = Set.of("pour", "de", "du", "des", "la", "le", "les", "et", "avec",
+			"sans", "un", "une", "compatible", "compatibles");
+	/** Minimum length of a single query word taken as an object term. */
+	private static final int MIN_QUERY_TERM_LENGTH = 4;
+	/** Gap tolerated between a part name, {@code de} and the object ({@code moteur de la lave-linge}). */
+	private static final int OF_MAX_GAPS = 1;
 	private static final Pattern DIACRITICS = Pattern.compile("\\p{M}+");
 	/** Placeholder images served by some feeds instead of a product picture. */
 	private static final List<String> PLACEHOLDER_IMAGE_MARKERS = List.of("noimage", "no-image", "no_image");
@@ -112,12 +121,145 @@ final class GlobalSearchRelevance {
 		if (accessoryVariants.isEmpty() || queryMentionsAccessory(query)) {
 			return null;
 		}
-		List<Intervals> matches = accessoryVariants.stream()
-				.map(variant -> Intervals.of(i -> i.match(m -> m.query(variant).maxGaps(0).ordered(true))))
-				.toList();
+		List<Intervals> matches = accessoryVariants.stream().map(GlobalSearchRelevance::phrase).toList();
 		String headFilter = "interval.start < " + Math.max(1, properties.getAccessoryHeadWords());
-		return Query.of(q -> q.intervals(iq -> iq.field(OFFER_NAMES_FIELD)
-				.anyOf(a -> a.intervals(matches).filter(f -> f.script(s -> s.source(src -> src.scriptString(headFilter)))))));
+		Intervals head = Intervals.of(i -> i.anyOf(a -> a.intervals(matches)
+				.filter(f -> f.script(s -> s.source(src -> src.scriptString(headFilter))))));
+		List<Intervals> clauses = new ArrayList<>();
+		clauses.add(head);
+		List<String> queryWords = words(query);
+		List<String> objectTerms = objectTerms(queryWords);
+		if (!queryWords.contains("pour")) {
+			objectTerms.forEach(term -> clauses.add(phrase("pour " + term)));
+		}
+		if (!queryWords.contains("de") && !queryWords.contains("du") && !queryWords.contains("des")) {
+			Intervals partNames = Intervals.of(i -> i.anyOf(a -> a.intervals(matches)));
+			Intervals ofWords = Intervals.of(i -> i.anyOf(a -> a.intervals(OF_WORDS.stream()
+					.map(GlobalSearchRelevance::phrase).toList())));
+			for (String term : objectTerms) {
+				clauses.add(Intervals.of(i -> i.allOf(a -> a.ordered(true).maxGaps(OF_MAX_GAPS)
+						.intervals(List.of(partNames, ofWords, phrase(term))))));
+			}
+		}
+		if (!queryWords.contains("compatible") && !queryWords.contains("compatibles")) {
+			clauses.add(phrase("compatible"));
+			clauses.add(phrase("compatibles"));
+		}
+		return Query.of(q -> q.intervals(iq -> iq.field(OFFER_NAMES_FIELD).anyOf(a -> a.intervals(clauses))));
+	}
+
+	/**
+	 * Java statement of the accessory rules held by {@link #accessoryQuery(String)}, applied to one offer name:
+	 * an accessory term at the head of the name, {@code pour <object>}, {@code <part> de <object>} or the word
+	 * {@code compatible}, the last two only when the query does not use those words itself. Accents, case and
+	 * hyphens are ignored ({@code lave-linge} = {@code lave linge}).
+	 *
+	 * @param query     sanitized user query
+	 * @param offerName offer name of the product
+	 * @return {@code true} when the name reads as an accessory of the requested object
+	 */
+	boolean isAccessoryName(String query, String offerName) {
+		List<String> name = words(offerName);
+		List<String> queryWords = words(query);
+		if (name.isEmpty() || queryMentionsAccessory(query)) {
+			return false;
+		}
+		int headLimit = Math.max(1, properties.getAccessoryHeadWords());
+		for (List<String> term : accessoryTerms) {
+			for (int start = 0; start < Math.min(headLimit, name.size()); start++) {
+				if (matchesAt(name, start, term, true)) {
+					return true;
+				}
+			}
+		}
+		if (!queryWords.contains("compatible") && !queryWords.contains("compatibles")
+				&& (name.contains("compatible") || name.contains("compatibles"))) {
+			return true;
+		}
+		for (List<String> object : objectTerms(queryWords).stream().map(GlobalSearchRelevance::words).toList()) {
+			if (!queryWords.contains("pour") && indexOfPour(name, object)) {
+				return true;
+			}
+			if (!queryWords.contains("de") && !queryWords.contains("du") && !queryWords.contains("des")
+					&& partNameOfObject(name, object)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean partNameOfObject(List<String> name, List<String> object) {
+		for (List<String> term : accessoryTerms) {
+			for (int start = 0; start < name.size(); start++) {
+				if (!matchesAt(name, start, term, true)) {
+					continue;
+				}
+				int end = start + term.size();
+				for (int ofIndex = end; ofIndex <= end + OF_MAX_GAPS && ofIndex < name.size(); ofIndex++) {
+					if (!OF_WORDS.contains(name.get(ofIndex))) {
+						continue;
+					}
+					int gaps = ofIndex - end;
+					for (int objectStart = ofIndex + 1; objectStart <= ofIndex + 1 + OF_MAX_GAPS - gaps
+							&& objectStart < name.size(); objectStart++) {
+						if (matchesAt(name, objectStart, object, false)) {
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	private static boolean indexOfPour(List<String> name, List<String> object) {
+		int from = 0;
+		int found;
+		while ((found = indexOf(name, object, from, false)) >= 0) {
+			if (found > 0 && "pour".equals(name.get(found - 1))) {
+				return true;
+			}
+			from = found + 1;
+		}
+		return false;
+	}
+
+	private static int indexOf(List<String> name, List<String> object, int from, boolean pluralAware) {
+		for (int start = from; start + object.size() <= name.size(); start++) {
+			if (matchesAt(name, start, object, pluralAware)) {
+				return start;
+			}
+		}
+		return -1;
+	}
+
+	private static boolean matchesAt(List<String> name, int start, List<String> term, boolean pluralAware) {
+		if (start + term.size() > name.size()) {
+			return false;
+		}
+		for (int i = 0; i < term.size(); i++) {
+			String word = name.get(start + i);
+			boolean same = pluralAware && i == 0 ? sameWordOrPlural(word, term.get(i)) : word.equals(term.get(i));
+			if (!same) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** Terms designating the requested object: the whole query, then each of its words of 4 letters or more. */
+	private static List<String> objectTerms(List<String> queryWords) {
+		Set<String> terms = new LinkedHashSet<>();
+		if (!queryWords.isEmpty()) {
+			terms.add(String.join(" ", queryWords));
+		}
+		queryWords.stream().filter(w -> w.length() >= MIN_QUERY_TERM_LENGTH && !QUERY_STOP_WORDS.contains(w))
+				.forEach(terms::add);
+		return new ArrayList<>(terms);
+	}
+
+	private static Intervals phrase(String text) {
+		return Intervals.of(i -> i.match(m -> m.query(text).maxGaps(0).ordered(true)));
 	}
 
 	/**
