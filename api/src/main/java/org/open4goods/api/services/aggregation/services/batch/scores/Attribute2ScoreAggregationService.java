@@ -18,8 +18,18 @@ import org.slf4j.Logger;
 /**
  * Aggregates product attributes into {@link Score} instances and prepares the
  * statistics required for relativisation.
+ *
+ * <p>A derived attribute ({@link AttributeConfig#getScoreSources()}) is never
+ * scored from its own value: while it is weighted by the active ImpactScore
+ * matrix, its score takes the raw value of the first source holding a
+ * parseable value (no average), normalised with its own scoring, and records
+ * that source in {@link #SCORE_SOURCE_METADATA}. Without any such source the
+ * score stays absent (GOU-2041).
  */
 public class Attribute2ScoreAggregationService extends AbstractScoreAggregationService {
+
+        /** Metadata of a derived score: the key of the source attribute its value was read from. */
+        public static final String SCORE_SOURCE_METADATA = "source";
 
         private final Map<Long, Map<String, Double>> absoluteValuesOverrides = new HashMap<>();
 
@@ -37,6 +47,8 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 	public void onProduct(Product data, VerticalConfig vConf) {
 
 		Collection<IndexedAttribute> aggattrs = data.getAttributes().getIndexed().values();
+		// Attributes of the product by configured key, read by the derived scores
+		Map<String, IndexedAttribute> attributesByKey = new HashMap<>();
 		for (IndexedAttribute aga : aggattrs) {
 			// Scoring from attribute
 			try {
@@ -52,6 +64,11 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 				AttributeConfig attrConfig = attributesConfig.getConfigFor(attributeKey);
 				if (attrConfig == null) {
 					dedicatedLogger.error("No attribute config for {}", aga);
+					continue;
+				}
+				attributesByKey.put(attrConfig.getKey(), aga);
+				if (attrConfig.isDerivedScore()) {
+					// Scored from its sources only, see scoreDerivedAttributes()
 					continue;
 				}
 
@@ -76,6 +93,59 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 				}
 			} catch (Exception e) {
 				dedicatedLogger.error("Error while processing attribute {}", aga);
+			}
+		}
+		scoreDerivedAttributes(data, vConf, attributesByKey);
+	}
+
+	/**
+	 * Scores the derived attributes weighted by the active ImpactScore matrix: the raw value of the first source
+	 * holding a parseable value, normalised with the derived attribute's own scoring. A derived attribute without
+	 * any parseable source gets no score, never a default one.
+	 *
+	 * @param data            the product
+	 * @param vConf           the vertical configuration
+	 * @param attributesByKey the product attributes, by configured key
+	 */
+	private void scoreDerivedAttributes(Product data, VerticalConfig vConf, Map<String, IndexedAttribute> attributesByKey) {
+		if (vConf.getAttributesConfig() == null || vConf.getImpactScoreConfig() == null) {
+			return;
+		}
+		Map<String, Double> weights = vConf.getImpactScoreConfig().activeCriteriasPonderation();
+		for (AttributeConfig derived : vConf.getAttributesConfig().getConfigs()) {
+			if (!derived.isAsScore() || !derived.isDerivedScore()) {
+				continue;
+			}
+			Double weight = weights.get(derived.getKey());
+			if (weight == null || weight <= 0.0) {
+				continue;
+			}
+			for (String source : derived.getScoreSources()) {
+				IndexedAttribute aga = attributesByKey.get(source);
+				if (aga == null) {
+					continue;
+				}
+				Double rawScore;
+				try {
+					rawScore = generateScoresFromAttribute(source, aga, vConf.getAttributesConfig());
+				} catch (ValidationException e) {
+					dedicatedLogger.debug("Source {} of derived score {} not parseable for {}", source, derived.getKey(),
+							data.getId());
+					continue;
+				}
+				try {
+					Double score = applyTransform(rawScore, derived);
+					storeAbsoluteOverride(data, derived.getKey(), rawScore, score);
+					incrementCardinality(derived.getKey(), score, vConf);
+					Score s = new Score(derived.getKey(), score);
+					s.setAbsolute(new Cardinality());
+					s.getAbsolute().setValue(score);
+					s.getMetadatas().put(SCORE_SOURCE_METADATA, source);
+					data.getScores().put(s.getName(), s);
+				} catch (ValidationException e) {
+					dedicatedLogger.warn("Derived score {} failed for {} from {}", derived.getKey(), data.getId(), source, e);
+				}
+				break;
 			}
 		}
 	}

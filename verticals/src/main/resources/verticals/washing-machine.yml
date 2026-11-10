@@ -753,6 +753,7 @@ attributesConfig:
     - key: PROGRAM_COUNT
     - key: REPAIRABILITY_INDEX
     - key: DURABILITY_INDEX
+    - key: REPAIRABILITY_OR_DURABILITY_INDEX
     - key: WARRANTY
     - key: HEIGHT
     - key: WIDTH

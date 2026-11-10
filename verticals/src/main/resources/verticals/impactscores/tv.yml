@@ -15,6 +15,8 @@ criteriasPonderation:
 # ImpactScore V2 (GOU-1880), inactive while methodologyVersion is 1. Design: docs/impactscore/v2-design.md,
 # sections 1.2 and 2.3. V1 matrix above without DATA_QUALITY (now the confidence indicator), renormalised to
 # 1 pro rata. The stored AI audit (aiResult, yamlPrompt) is the V1 one and was not rerun.
+# GOU-2041: REPAIRABILITY_INDEX is replaced, with its weight, by REPAIRABILITY_OR_DURABILITY_INDEX
+# (DURABILITY_INDEX when filled in, else REPAIRABILITY_INDEX, fixed 0-10 scale).
 v2:
   criteriasPonderation:
     MINAVAILABILITYSPAREPARTSYEARS: 0.0919540
@@ -25,7 +27,7 @@ v2:
     CLASSE_ENERGY_SDR: 0.0689655
     WARRANTY: 0.0804598
     POWER_CONSUMPTION_STANDBY_NETWORKD: 0.0574713
-    REPAIRABILITY_INDEX: 0.1609195
+    REPAIRABILITY_OR_DURABILITY_INDEX: 0.1609195
     CLASSE_ENERGY_HDR: 0.0459770
     DIAGONALE_POUCES: 0.0459770
     POWER_CONSUMPTION_SDR: 0.1839080

@@ -231,6 +231,9 @@ comparables à un A de la nouvelle échelle et restent une valeur manquante (pol
 ### Indice de réparabilité (0-10)
 
 - `REPAIRABILITY_INDEX` : `MINMAX_OBSERVED` pour refléter le marché actuel.
+- `REPAIRABILITY_OR_DURABILITY_INDEX` (V2 TV et lave-linge, GOU-2041) : `MINMAX_FIXED` 0-10. Valeur de
+  `DURABILITY_INDEX` si elle est renseignée, sinon de `REPAIRABILITY_INDEX` ; un 7/10 vaut 3,5/5 quelle que soit la
+  source. Voir `docs/impactscore/v2-design.md`, 2.7.
 
 ### Taille / poids
 

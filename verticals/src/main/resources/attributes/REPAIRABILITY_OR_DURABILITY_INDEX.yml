@@ -1,0 +1,53 @@
+# ============================================================================
+# REPAIRABILITY_OR_DURABILITY_INDEX - derived ImpactScore V2 criterion, 0 to 10
+# Created: GOU-2041 (ImpactScore lot 3)
+# The French durability index replaced the repairability index on 2025-01-08
+# for televisions and on 2025-04-08 for washing machines: a product holds one
+# of them. This criterion takes DURABILITY_INDEX when it is filled in, else
+# REPAIRABILITY_INDEX (first parseable source, never an average), on the same
+# fixed 0-10 scale, so that 7/10 gives the same score whatever the source.
+# It is never read from merchant data (no synonym) and is computed only while
+# a matrix weights it: the V2 matrices of tv and washing-machine. V1 keeps
+# REPAIRABILITY_INDEX (MINMAX_OBSERVED).
+# ============================================================================
+
+key: "REPAIRABILITY_OR_DURABILITY_INDEX"
+userBetterIs: "GREATER"
+impactBetterIs: "GREATER"
+faIcon: "mdi-tools"
+name:
+  default: "Repairability or durability index (official score out of 10)"
+  fr: "Indice de réparabilité ou de durabilité (note officielle sur 10)"
+filteringType: "NUMERIC"
+asScore: true
+scoreSources:
+  - "DURABILITY_INDEX"
+  - "REPAIRABILITY_INDEX"
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "MINMAX_FIXED"
+    params:
+      fixedMin: 0.0
+      fixedMax: 10.0
+  missingValuePolicy: "NEUTRAL"
+  degenerateDistributionPolicy: "FALLBACK"
+scoreTitle:
+  fr: "Indice de réparabilité ou de durabilité (note officielle sur 10)"
+  en: "Repairability or durability index (official score out of 10)"
+scoreDescription:
+  fr: "L'indice de durabilité de l'objet s'il est connu, sinon son indice de réparabilité, note officielle sur 10"
+  en: "The durability index of the product when known, else its repairability index, official score out of 10"
+scoreUtility:
+  fr: "Un indice élevé prolonge la durée de vie, limite les remplacements et réduit les impacts de fabrication et de fin de vie."
+  en: "A higher index extends product life, reduces replacements, and cuts manufacturing and waste impacts."
+participateInScores:
+  - REPARABILITY
+participateInACV:
+  - MANUFACTURING
+  - USE
+  - END_OF_LIFE
+
+attributeValuesOrdering: "MAPPED"

@@ -261,6 +261,40 @@ frequencies `MINMAX_QUANTILE` needs are tracked). Strategy: the existing
 (out-of-bounds values get 0 or 5 depending on `impactBetterIs`). No new
 mechanism.
 
+### 2.7 Derived criteria: "repairability or durability" (GOU-2041)
+
+The French durability index replaced the repairability index (TV on
+2025-01-08, washing machines on 2025-04-08): a product holds one or the other.
+Two criteria, one always missing, would lower every product's C. The V2
+matrices of `tv` and `washing-machine` therefore weight a single derived
+criterion, `REPAIRABILITY_OR_DURABILITY_INDEX`, with the former weight of
+`REPAIRABILITY_INDEX`:
+
+| Vertical | V2 weight | V1 |
+|---|---|---|
+| `tv` | 0.1609195 | `REPAIRABILITY_INDEX` 0.14, unchanged |
+| `washing-machine` | 0.1363636 | `REPAIRABILITY_INDEX` 0.12, unchanged |
+
+- **Mechanism.** An attribute declaring `scoreSources` (ordered keys) is a
+  derived score: `Attribute2ScoreAggregationService` never reads its own
+  value, takes the raw value of the first source holding a parseable value
+  (`DURABILITY_INDEX`, else `REPAIRABILITY_INDEX`, never an average), and
+  records it in `scores.<key>.metadatas.source`. Without a parseable source the
+  criterion is absent and its weight is redistributed (2.2). It is computed
+  only while the active matrix weights it, so V1 products never hold it.
+- **Scale.** Its own `MINMAX_FIXED` 0-10 to 0-5: 7/10 gives 3.5 from either
+  source. `REPAIRABILITY_INDEX` keeps `MINMAX_OBSERVED` for V1.
+- **Label.** `scoreTitle` "Indice de réparabilité ou de durabilité (note
+  officielle sur 10)", read by the methodology page and "Why this score?".
+- **Composites.** In V2, `ParticipatingScoreHelper` treats a derived criterion
+  as available through its sources and skips a participating attribute the V2
+  matrix does not weight: `REPARABILITY` uses the derived criterion instead of
+  `REPAIRABILITY_INDEX`. V1 is unchanged.
+- **Validation.** `ImpactScoreMethodology` refuses a derived V2 criterion
+  reading an unknown or derived source, or weighted next to one of its
+  sources. `availableImpactScoreCriterias` is unchanged, so `DATA_QUALITY` is
+  unchanged in V1 and V2.
+
 ## 3. Exclusion
 
 - `updateExcludeStatus` adds `missing_eprel` only when

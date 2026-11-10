@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.model.vertical.AttributeConfig;
@@ -151,6 +152,8 @@ public final class ImpactScoreMethodology {
 						: vertical.getAttributesConfig().getAttributeConfigByKey(key);
 				if (attribute == null || !attribute.isAsScore()) {
 					errors.add("v2.criteriasPonderation weights " + key + ", which is not an asScore attribute");
+				} else if (attribute.isDerivedScore()) {
+					errors.addAll(derivedCriterionErrors(attribute, weights.keySet(), vertical));
 				}
 			}
 		}
@@ -184,6 +187,27 @@ public final class ImpactScoreMethodology {
 			ImpactScorePositionLabel last = labels.get(labels.size() - 1);
 			if (last == null || last.getMinBetterThan() == null || last.getMinBetterThan() != 0.0) {
 				errors.add("v2.positionLabels: the last threshold must be 0");
+			}
+		}
+		return errors;
+	}
+
+	/**
+	 * Errors of a derived criterion of the V2 matrix (GOU-2041): each source is an attribute of the vertical, not
+	 * itself derived, and not weighted next to the criterion, which would count it twice.
+	 */
+	private static List<String> derivedCriterionErrors(AttributeConfig derived, Set<String> weighted,
+			VerticalConfig vertical) {
+		List<String> errors = new ArrayList<>();
+		for (String source : derived.getScoreSources()) {
+			AttributeConfig attribute = vertical.getAttributesConfig().getAttributeConfigByKey(source);
+			if (attribute == null) {
+				errors.add("v2 criterion " + derived.getKey() + " reads " + source + ", which is not an attribute");
+			} else if (attribute.isDerivedScore()) {
+				errors.add("v2 criterion " + derived.getKey() + " reads " + source + ", which is itself derived");
+			}
+			if (weighted.contains(source)) {
+				errors.add("v2.criteriasPonderation weights both " + derived.getKey() + " and its source " + source);
 			}
 		}
 		return errors;

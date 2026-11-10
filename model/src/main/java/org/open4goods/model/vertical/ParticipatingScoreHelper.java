@@ -39,8 +39,12 @@ public final class ParticipatingScoreHelper {
      *                       impact score ponderations
      * @return a map keyed by aggregate name containing normalised ponderations of
      *         participating scores
-     * @throws IllegalStateException if a participating score has no ponderation
-     *                               defined in {@code impactScoreConfig}
+     * <p>In V2 a derived criterion is available through its sources
+     * ({@link AttributeConfig#getScoreSources()}), and a participating
+     * attribute the V2 matrix does not weight is skipped (GOU-2041).
+     *
+     * @throws IllegalStateException in V1, if a participating score has no
+     *                               ponderation defined in {@code impactScoreConfig}
      */
     public static Map<String, Map<String, Double>> buildNormalizedParticipatingScores(VerticalConfig verticalConfig) {
         Objects.requireNonNull(verticalConfig, "verticalConfig is required");
@@ -48,6 +52,7 @@ public final class ParticipatingScoreHelper {
         Objects.requireNonNull(verticalConfig.getImpactScoreConfig(), "impactScoreConfig is required");
 
         Map<String, Double> criteriasPonderation = verticalConfig.getImpactScoreConfig().activeCriteriasPonderation();
+        boolean v2 = verticalConfig.getImpactScoreConfig().isV2Active();
         Set<String> availableImpactScoreCriterias = resolveAvailableImpactScoreCriterias(verticalConfig);
         Map<String, Map<String, Double>> aggregates = new HashMap<>();
 
@@ -56,7 +61,7 @@ public final class ParticipatingScoreHelper {
                 continue;
             }
 
-            if (!availableImpactScoreCriterias.contains(attribute.getKey())) {
+            if (!isAvailable(attribute, availableImpactScoreCriterias, v2)) {
                 continue;
             }
 
@@ -67,6 +72,11 @@ public final class ParticipatingScoreHelper {
 
             Double ponderation = criteriasPonderation.get(attribute.getKey());
             if (ponderation == null) {
+                if (v2) {
+                    // Not a criterion of the V2 matrix, which ImpactScoreMethodology validates: for instance a
+                    // source replaced by a derived criterion
+                    continue;
+                }
                 throw new IllegalStateException("Missing ponderation for participating score " + attribute.getKey());
             }
 
@@ -90,6 +100,18 @@ public final class ParticipatingScoreHelper {
 
         aggregates.replaceAll((aggregate, weights) -> normalize(aggregate, weights));
         return aggregates;
+    }
+
+    /**
+     * Whether an attribute is an available ImpactScore criterion: listed in {@code availableImpactScoreCriterias},
+     * or, in V2 only, derived from a listed source.
+     */
+    private static boolean isAvailable(AttributeConfig attribute, Set<String> availableImpactScoreCriterias, boolean v2) {
+        if (availableImpactScoreCriterias.contains(attribute.getKey())) {
+            return true;
+        }
+        return v2 && attribute.isDerivedScore()
+                && attribute.getScoreSources().stream().anyMatch(availableImpactScoreCriterias::contains);
     }
 
     private static Set<String> resolveAvailableImpactScoreCriterias(VerticalConfig verticalConfig) {
