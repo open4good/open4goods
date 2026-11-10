@@ -16,6 +16,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.open4goods.model.affiliation.AffiliationPartner;
@@ -145,16 +146,8 @@ public class MerchantDomainsService {
     ActiveMerchantDomains compute(DatasourceOfferActivityReport report, Collection<AffiliationPartner> partners) {
         Instant now = clock.instant();
         long maxAgeMillis = offerFreshnessService.getMaxAge().toMillis();
-        Map<String, AffiliationPartner> partnersByName = partners == null ? Map.of()
-                : partners.stream()
-                        .filter(p -> p != null && p.getName() != null)
-                        .collect(Collectors.toMap(p -> key(p.getName()), p -> p, (a, b) -> a));
-        Map<String, String> configuredDomains = new HashMap<>();
-        for (MerchantDomainsProperties.DatasourceDomain entry : properties.getDatasourceDomains()) {
-            if (entry != null && entry.getDatasource() != null && entry.getDomain() != null) {
-                configuredDomains.put(key(entry.getDatasource()), entry.getDomain());
-            }
-        }
+        Map<String, AffiliationPartner> partnersByName = partnersByName(partners);
+        Map<String, String> configuredDomains = configuredDomains();
 
         SortedMap<String, Set<String>> domains = new TreeMap<>();
         Set<String> domainsWithUnknownCountry = new TreeSet<>();
@@ -195,6 +188,60 @@ public class MerchantDomainsService {
         boolean franceOnly = !result.isEmpty() && domainsWithUnknownCountry.isEmpty();
         return new ActiveMerchantDomains(result, now, franceOnly, Instant.ofEpochMilli(report.trackedSince()),
                 new ArrayList<>(unresolved), excluded);
+    }
+
+    /**
+     * @param partners affiliation partners, may be null
+     * @return the partners by matching key ({@link #key(String)})
+     */
+    private static Map<String, AffiliationPartner> partnersByName(Collection<AffiliationPartner> partners) {
+        return partners == null ? Map.of()
+                : partners.stream()
+                        .filter(p -> p != null && p.getName() != null)
+                        .collect(Collectors.toMap(p -> key(p.getName()), p -> p, (a, b) -> a));
+    }
+
+    /**
+     * @return the configured merchant domain of the datasources by matching key ({@link #key(String)})
+     */
+    private Map<String, String> configuredDomains() {
+        Map<String, String> configuredDomains = new HashMap<>();
+        for (MerchantDomainsProperties.DatasourceDomain entry : properties.getDatasourceDomains()) {
+            if (entry != null && entry.getDatasource() != null && entry.getDomain() != null) {
+                configuredDomains.put(key(entry.getDatasource()), entry.getDomain());
+            }
+        }
+        return configuredDomains;
+    }
+
+    /**
+     * Merchant domain of a datasource, resolved by the same rules as the active domains count (GOU-2080: the
+     * Google CSS eligibility counts the distinct merchants of a product with the rules of the 50 domains
+     * threshold, it does not copy them).
+     *
+     * @param domain  the registrable merchant domain, null when the datasource has none
+     * @param network true when the domain is an affiliation network ({@code front.merchant-domains.excluded-domains}),
+     *                which is not a merchant
+     */
+    public record MerchantDomain(String domain, boolean network) {
+    }
+
+    /**
+     * Builds a resolver of datasource names to merchant domains from the current affiliation partners. The partners
+     * and the configuration are read once, so the resolver is meant for a batch (one per run).
+     *
+     * @return a function giving the merchant domain of a datasource name; its domain is null when unresolved
+     */
+    public Function<String, MerchantDomain> domainResolver() {
+        Map<String, AffiliationPartner> partnersByName = partnersByName(affiliationPartnerService.getPartners());
+        Map<String, String> configuredDomains = configuredDomains();
+        return name -> {
+            if (!StringUtils.hasText(name)) {
+                return new MerchantDomain(null, false);
+            }
+            String domain = resolveDomain(name, partnersByName.get(key(name)), configuredDomains);
+            return new MerchantDomain(domain, domain != null && isExcludedDomain(domain));
+        };
     }
 
     /**

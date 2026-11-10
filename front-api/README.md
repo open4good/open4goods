@@ -176,6 +176,27 @@ networks, merchants without an active offer and duplicate domains.
   feature (`trackedSince`); until `front.offers.max-age` has elapsed, merchants
   whose last offer predates it are missing and a warning is logged.
 
+## Google CSS dry run
+
+`front.css.*` (`CssProperties`, disabled by default) prepares the product pages sent to Google by the CSS API
+(GOU-2079, lot GOU-2080). **Nothing is sent to Google**: no CSS client is instantiated, the module only depends on
+`com.google.shopping:google-shopping-css` for the `CssProductInput` type.
+
+- Eligibility (`CssEligibilityService`, one `CssExclusionReason` per failed rule): at least
+  `front.css.min-merchant-domains` (2) distinct merchant domains with a fresh offer, an image, a real title (not the
+  GTIN, not a generic title), a valid GTIN, a canonical URL. Offers are read through `OfferFreshnessService` and the
+  domains through `MerchantDomainsService.domainResolver()` (registrable domain, affiliation networks excluded).
+- Mapping (`CssProductInputMapper`): `rawProvidedId` = GTIN, `contentLanguage`/`feedLabel` from the properties,
+  `cppLink` = `ProductCanonicalUrl.fullSlug` on `front.css.site-base-url`, `lowPrice`/`highPrice`/`numberOfOffers`/headline
+  offer from the same fresh prices as the product page (amounts in micros, decimal arithmetic),
+  `includedDestinations`, short `expirationDate`. `rating`, `reviewCount` and the ImpactScore are never sent.
+  `productHighlights` is not filled: the index holds no such data.
+- Dry run (`front.css.enabled=true`): `POST /admin/css/dry-run` (site editor role, like `/admin/cache/reset`) starts
+  a background run (409 if one is running); `GET /admin/css/dry-run` returns the last report. Files written in
+  `front.css.output-directory`: one `<vertical>.ndjson` per vertical (one `CssProductInput` per line) and
+  `report.json` / `report.md` (per vertical: examined, eligible, count by exclusion reason; a product failing several
+  rules counts once per reason).
+
 ## Contribution votes ip/ua purge
 
 On every startup, once the application is ready, front-api runs on a background

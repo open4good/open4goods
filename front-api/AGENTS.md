@@ -73,6 +73,11 @@ Any code exposing offers, prices or `/contrib/` links must read them through
 `OfferFreshnessService`, never `Product.bestPrice()`, `getOffersCount()` or
 `getPrice().getOffers()` directly (see README "Offer freshness").
 
+Google CSS preparation is configured via `front.css.*` mapped by `CssProperties` (disabled by default; dry run
+only, no call to Google, never instantiate a CSS client without a dedicated issue). The eligibility reads offers
+through `OfferFreshnessService` and merchant domains through `MerchantDomainsService.domainResolver()` (see README
+"Google CSS dry run"); never send `rating`/`reviewCount`.
+
 Global search relevance is configured via `front.global-search.*` mapped by
 `GlobalSearchProperties` (accessory terms, ranking weights, long tail filter).
 It only applies to `SearchService.globalSearch`; never route `search()` through
