@@ -1,0 +1,64 @@
+# ============================================================================
+# DURABILITY_INDEX — French durability index (Indice de durabilité), 0 to 10
+# Created: GOU-1892 (ImpactScore lot 3)
+# Replaced the repairability index on 2025-01-08 for televisions and on
+# 2025-04-08 for washing machines.
+# Reads the merchant values only ("7,2/10", "7.2", "7,2 sur 10"). The official
+# values (data.gouv.fr, plan 01) must win over the merchant ones: they depend on
+# preferredSources per attribute (README P0-3).
+# Not wired to any ImpactScore matrix yet: the relation with REPAIRABILITY_INDEX
+# is a CTO decision (GOU-1892).
+# Coverage snapshot (GOU-1875 annex): no merchant key found yet in products-moustik.
+# ============================================================================
+
+key: "DURABILITY_INDEX"
+userBetterIs: "GREATER"
+impactBetterIs: "GREATER"
+faIcon: "mdi-shield-check"
+name:
+  default: "Durability index"
+  fr: "Indice de durabilité"
+filteringType: "NUMERIC"
+asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "MINMAX_FIXED"
+    params:
+      fixedMin: 0.0
+      fixedMax: 10.0
+  missingValuePolicy: "NEUTRAL"
+  degenerateDistributionPolicy: "FALLBACK"
+scoreTitle:
+  fr: "Indice de durabilité"
+  en: "Durability index"
+scoreDescription:
+  fr: "L'indice de durabilité de l'objet, note officielle sur 10"
+scoreUtility:
+  fr: "Un indice élevé indique un produit plus durable : moins de remplacements, donc moins d'impacts de fabrication et de fin de vie."
+  en: "A higher index means a more durable product: fewer replacements, so lower manufacturing and end-of-life impacts."
+
+attributeValuesOrdering: "MAPPED"
+
+synonyms:
+  all:
+  - "DURABILITY INDEX"
+  - "DURABILITY_INDEX"
+  - "FRENCH DURABILITY INDEX"
+  - "INDICE DE DURABILITÉ"
+  - "INDICE DE DURABILITÉ (NOTE SUR 10)"
+  - "L’INDICE DE DURABILITÉ"
+  - "INDICE DE DURABILITE"
+  - "INDICE DURABILITÉ"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+  deleteTokens:
+  - "/10"
+  - "/ 10"
+  - "SUR 10"

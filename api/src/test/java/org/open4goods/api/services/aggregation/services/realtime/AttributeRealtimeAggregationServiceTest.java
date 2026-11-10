@@ -400,6 +400,23 @@ class AttributeRealtimeAggregationServiceTest {
 		assertThat(service.parseValue(raw, attrConfig, verticalConfig)).isEqualTo(expected);
 	}
 
+	/**
+	 * GOU-1892: merchant formats of the French durability index all read as a plain 0-10 number.
+	 */
+	@ParameterizedTest
+	@CsvSource(delimiter = '|', value = { "7,2/10|7.2", "7.2|7.2", "7,2 sur 10|7.2", "7,2 / 10|7.2", "8/10|8", "6,5 SUR 10|6.5" })
+	void durabilityIndexFormatsAreParsed(String raw, String expected) throws Exception {
+		AttributeConfig attrConfig = new AttributeConfig();
+		attrConfig.setKey("DURABILITY_INDEX");
+		attrConfig.setFilteringType(org.open4goods.model.attribute.AttributeType.NUMERIC);
+		attrConfig.getParser().setUpperCase(true);
+		attrConfig.getParser().setNormalize(true);
+		attrConfig.getParser().setTrim(true);
+		attrConfig.getParser().setDeleteTokens(java.util.List.of("/10", "/ 10", "SUR 10"));
+
+		assertThat(service.parseValue(raw, attrConfig, verticalConfig)).isEqualTo(expected);
+	}
+
 	private static AttributeConfig wattAttribute() {
 		AttributeConfig attrConfig = new AttributeConfig();
 		attrConfig.setKey("OVEN_POWER");

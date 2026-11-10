@@ -752,6 +752,7 @@ attributesConfig:
     - key: NOISE_CLASS
     - key: PROGRAM_COUNT
     - key: REPAIRABILITY_INDEX
+    - key: DURABILITY_INDEX
     - key: WARRANTY
     - key: HEIGHT
     - key: WIDTH
