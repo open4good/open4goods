@@ -103,10 +103,10 @@
     },
     "hero": {
       "eyebrow": "Comparez le prix et l'Impact Score",
-      "title": "Acheter mieux. Sans dépenser plus.",
+      "title": "Comparez les prix des marchands partenaires",
       "animatedSubtitle": "",
       "titleSubtitle": [
-        "Le comparateur qui note l'impact environnemental de l'électroménager et de la tech"
+        "Nudger rassemble les offres de ses marchands partenaires pour vous montrer où acheter au meilleur prix."
       ],
       "subtitles": [
         "Gagnez du temps. Choisissez librement.",
@@ -3424,7 +3424,7 @@
       "hero": {
         "eyebrow": "PWA",
         "title": "Votre compagnon éco sur mobile",
-        "subtitle": "Scannez, comparez et trouvez les meilleurs produits en quelques gestes.",
+        "subtitle": "Nudger rassemble les offres de ses marchands partenaires pour vous montrer où acheter au meilleur prix.",
         "meta": {
           "title": "Nudger - Compagnon mobile de l'impact",
           "description": "Découvrez Nudger en version mobile-first : scanner de codes-barres, assistant IA et partage d'éco-guides.",
