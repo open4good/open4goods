@@ -26,20 +26,22 @@ const VListStub = defineComponent({
 
 const VListItemStub = defineComponent({
   name: 'VListItem',
+  setup(_, { attrs, slots }) {
+    return () =>
+      h('div', { ...attrs, 'data-test': 'product-row' }, [
+        slots.prepend?.(),
+        slots.default?.(),
+      ])
+  },
+})
+
+const NuxtLinkStub = defineComponent({
+  name: 'NuxtLink',
   props: {
     to: { type: String, default: undefined },
   },
   setup(props, { attrs, slots }) {
-    return () =>
-      h(
-        'a',
-        {
-          ...attrs,
-          href: props.to,
-          'data-test': 'product-row',
-        },
-        [slots.prepend?.(), slots.default?.()]
-      )
+    return () => h('a', { ...attrs, href: props.to }, slots.default?.())
   },
 })
 
@@ -94,6 +96,7 @@ const mountList = async (products: ProductDto[]) => {
       stubs: {
         VList: VListStub,
         VListItem: VListItemStub,
+        NuxtLink: NuxtLinkStub,
         VAvatar: VAvatarStub,
         VImg: VImgStub,
         VSkeletonLoader: true,
@@ -157,9 +160,9 @@ describe('CategoryProductListView', () => {
   it('renders dense product rows with link, image alt, sorted attribute, and compare toggle', async () => {
     const wrapper = await mountList([buildProduct()])
 
-    expect(wrapper.get('[data-test="product-row"]').attributes('href')).toBe(
-      '/products/example'
-    )
+    expect(
+      wrapper.get('[data-test="product-row-link"]').attributes('href')
+    ).toBe('/products/example')
     expect(wrapper.get('[data-test="product-image"]').attributes('alt')).toBe(
       'Example TV'
     )
@@ -169,6 +172,26 @@ describe('CategoryProductListView', () => {
     expect(wrapper.find('[data-test="product-compare-toggle"]').exists()).toBe(
       true
     )
+  })
+
+  it('keeps the price rows outside the product link', async () => {
+    const wrapper = await mountList([buildProduct()])
+
+    // The price rows render affiliate <a> elements: inside the product <a>
+    // they would form invalid nested links that break SSR hydration.
+    expect(wrapper.get('[data-test="product-row"]').element.tagName).toBe('DIV')
+    expect(
+      wrapper.get('[data-test="price-rows"]').element.closest('a')
+    ).toBeNull()
+    expect(
+      wrapper.get('[data-test="product-row-link"]').element.children
+    ).toHaveLength(0)
+  })
+
+  it('renders no product link when the product has no page', async () => {
+    const wrapper = await mountList([buildProduct({ fullSlug: '' })])
+
+    expect(wrapper.find('[data-test="product-row-link"]').exists()).toBe(false)
   })
 
   it('renders the not-rated fallback when a product has no impact score', async () => {

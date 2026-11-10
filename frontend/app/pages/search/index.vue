@@ -103,7 +103,10 @@
     </v-navigation-drawer>
 
     <v-progress-linear
-      v-if="pending || productsPending || baselinePending || aggsPending"
+      v-if="
+        isMounted &&
+        (pending || productsPending || baselinePending || aggsPending)
+      "
       class="search-page__loader"
       indeterminate
       color="primary"
@@ -177,11 +180,12 @@
           align="start"
           justify="center"
         >
-          <v-col
-            v-if="hasVerticalResults"
-            cols="12"
-            :lg="hasGlobalResults ? 5 : 12"
-          >
+          <!--
+            Full-width stacked columns: the list rows need about 740 px to show
+            the price, merchant and score next to the title; a 5/12 column
+            clipped them on desktop.
+          -->
+          <v-col v-if="hasVerticalResults" cols="12">
             <section class="search-page__column">
               <div class="search-page__column-header d-flex justify-center">
                 <div class="search-page__column-heading text-center">
@@ -270,11 +274,7 @@
             </section>
           </v-col>
 
-          <v-col
-            v-if="hasGlobalResults"
-            cols="12"
-            :lg="hasVerticalResults ? 7 : 12"
-          >
+          <v-col v-if="hasGlobalResults" cols="12">
             <section class="search-page__column">
               <div
                 class="search-page__column-header search-page__column-header--with-actions d-flex justify-center"
@@ -382,7 +382,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { useDisplay } from 'vuetify'
@@ -423,14 +423,14 @@ import {
   resolveSortFieldTitle,
   SORT_FIELD_PRIORITIES,
 } from '~/utils/_field-localization'
+import {
+  slimGlobalSearchResponse,
+  slimProductSearchResponse,
+} from '~/utils/_search-result-payload'
 
 const MIN_QUERY_LENGTH = 3
 const VERTICAL_RESULTS_LIMIT = 4
 const isDev = process.env.NODE_ENV === 'development'
-
-definePageMeta({
-  ssr: false,
-})
 
 const { t, locale, availableLocales } = useI18n()
 const { mdAndUp } = useDisplay()
@@ -468,6 +468,13 @@ const countOthers = computed(
   () => stats.value?.productsWithoutVerticalCount ?? 0
 )
 const filtersOpen = ref(false)
+// Client-only fetches (aggregations, filtered search) report pending while the
+// page hydrates; showing the loader only once mounted keeps the hydrated DOM
+// identical to the server render.
+const isMounted = ref(false)
+onMounted(() => {
+  isMounted.value = true
+})
 const filterRequest = ref<FilterRequestDto>({ filters: [], filterGroups: [] })
 const openPanels = ref<number[]>([])
 
@@ -687,7 +694,10 @@ const { data, pending, error, refresh } =
       ],
       immediate: true,
       lazy: true,
-      server: false,
+      // Server-rendered so the HTML of /rechercher?q=... already lists the
+      // results: crawlers and Google's CSS review read that HTML, and a
+      // client-only fetch rendered "Aucun resultat" there for every query.
+      transform: slimGlobalSearchResponse,
     }
   )
 
@@ -745,7 +755,7 @@ const {
     ],
     immediate: true,
     lazy: true,
-    server: false,
+    transform: slimProductSearchResponse,
   }
 )
 
@@ -1035,14 +1045,13 @@ const limitedGroups = computed(() => {
     .filter((group): group is SearchGroup => Boolean(group))
 })
 
+// Every category group starts open: a closed v-expansion-panel renders no
+// content, so brand queries spanning several categories ("samsung", "bosch")
+// showed collapsed headers and left the evaluated products out of the HTML.
 watch(
   limitedGroups,
   groups => {
-    if (groups.length === 1) {
-      openPanels.value = [0]
-    } else {
-      openPanels.value = []
-    }
+    openPanels.value = groups.map((_, index) => index)
   },
   { immediate: true }
 )
