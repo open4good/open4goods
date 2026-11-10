@@ -197,6 +197,31 @@ networks, merchants without an active offer and duplicate domains.
   `report.json` / `report.md` (per vertical: examined, eligible, count by exclusion reason; a product failing several
   rules counts once per reason).
 
+### Google CSS synchronisation (GOU-2081)
+
+`front.css.sync.*` sends the eligible products to Google (CSS API `CssProductInputsService`). **Disabled by default**
+(`front.css.sync.enabled=false`): no client bean, no scheduled job, no credential needed to start. It also requires
+`front.css.enabled=true`. No real call in CI or beta: tests use `SimulatedCssProductsClient`.
+
+- Each run (`interval`, 6 h; `CssSyncService`) compares the products with the state of the last successful send
+  (fingerprint of the `CssProductInput` without `expirationDate`, per `rawProvidedId`) and sends: an insert (upsert) for
+  a new or modified product, a delete for a product no longer eligible or gone from a fully scanned vertical, and an
+  insert again when an unchanged product expires in less than `resend-before` (24 h). A product that loses its fresh
+  offers is not sent again and expires by itself.
+- State: JSON file `front.css.sync.state-file`, written atomically and protected by a file lock (`.lock`), so it survives
+  a restart and two instances sharing the file never run together. front-api is one jar per environment (beta, prod):
+  a local file is enough; with several hosts, enable the sync on one instance only or share the volume.
+- Safeguards: `max-requests-per-second` (2), `max-products-per-run` (0 = no limit; 100 for the lot-3 sample),
+  `verticals` filter, a failed call leaves the state of that product untouched (retried next run, the rest is not
+  resent), run aborted after `max-consecutive-failures` consecutive failures.
+- Metrics: `css.products.sent{type=insert|renewal}`, `css.products.rejected{reason}`, `css.products.deleted`,
+  `css.products.expired`, timer `css.products.sync.duration`.
+- `front.css.sync.simulated=true`: whole job with the client that only logs (dry run).
+- **Activation (lot 3 provides)**: a CSS account (`account-id`), a service account authorised on it with scope
+  `https://www.googleapis.com/auth/content` (`service-account-path` or `service-account-json` from the secret store,
+  never in Git), then `front.css.enabled=true`, `front.css.sync.enabled=true`, `max-products-per-run=100` and a
+  `verticals` filter for the first sample, and the opt-in of the CSS programme on the Google side.
+
 ## Contribution votes ip/ua purge
 
 On every startup, once the application is ready, front-api runs on a background
