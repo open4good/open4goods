@@ -85,6 +85,19 @@ class MerchantDomainsServiceTest {
     }
 
     @Test
+    void domainResolverAppliesTheSameRulesAsTheCount() {
+        given(partnerService.getPartners()).willReturn(List.of());
+        var resolver = service.domainResolver();
+
+        assertThat(resolver.apply("fr.aliexpress.com")).isEqualTo(new MerchantDomainsService.MerchantDomain("aliexpress.com", false));
+        assertThat(resolver.apply("aliexpress.com").domain()).isEqualTo("aliexpress.com");
+        assertThat(resolver.apply("awin1.com")).isEqualTo(new MerchantDomainsService.MerchantDomain("awin1.com", true));
+        assertThat(resolver.apply("Carrefour - marketplace").domain()).isEqualTo("carrefour.fr");
+        assertThat(resolver.apply("Standard").domain()).isNull();
+        assertThat(resolver.apply(null).domain()).isNull();
+    }
+
+    @Test
     void countsDistinctDomainsOfDatasourcesWithAFreshOffer() {
         List<AffiliationPartner> partners = List.of(
                 partner("darty.com", "https://www.darty.com"),

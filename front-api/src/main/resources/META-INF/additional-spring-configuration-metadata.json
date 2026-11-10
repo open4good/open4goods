@@ -855,6 +855,77 @@
       "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
       "description": "Minimum length of the alphabetic word, other than the brand, that a readable offer name must hold.",
       "defaultValue": 3
+    },
+    {
+      "name": "front.css.enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Enables the Google CSS dry run (service and /admin/css/dry-run endpoint). Nothing is sent to Google.",
+      "defaultValue": false
+    },
+    {
+      "name": "front.css.output-directory",
+      "type": "java.lang.String",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Directory receiving the NDJSON files (one per vertical) and the report.",
+      "defaultValue": "/tmp/nudger-css-dry-run"
+    },
+    {
+      "name": "front.css.site-base-url",
+      "type": "java.lang.String",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Public base URL used for cppLink, the headline offer link and relative image URLs.",
+      "defaultValue": "https://nudger.fr"
+    },
+    {
+      "name": "front.css.content-language",
+      "type": "java.lang.String",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "contentLanguage of the inputs.",
+      "defaultValue": "fr"
+    },
+    {
+      "name": "front.css.feed-label",
+      "type": "java.lang.String",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "feedLabel of the inputs.",
+      "defaultValue": "FR"
+    },
+    {
+      "name": "front.css.min-merchant-domains",
+      "type": "java.lang.Integer",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Minimum distinct merchant domains with a fresh offer for a product to be eligible.",
+      "defaultValue": 2
+    },
+    {
+      "name": "front.css.expiration",
+      "type": "java.time.Duration",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Validity of an input from its generation (expirationDate).",
+      "defaultValue": "3d"
+    },
+    {
+      "name": "front.css.included-destinations",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "includedDestinations of the inputs.",
+      "defaultValue": [
+        "css_organic_experiences"
+      ]
+    },
+    {
+      "name": "front.css.generic-titles",
+      "type": "java.util.Set<java.lang.String>",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Titles (trimmed, case insensitive) that are not a real product title."
+    },
+    {
+      "name": "front.css.max-product-details",
+      "type": "java.lang.Integer",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Maximum number of product details per input.",
+      "defaultValue": 30
     }
   ]
 }

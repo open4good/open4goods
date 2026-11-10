@@ -108,6 +108,10 @@
       <artifactId>google-indexation</artifactId>
       <version>${global.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.google.shopping</groupId>
+      <artifactId>google-shopping-css</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>com.ibm.icu</groupId>
