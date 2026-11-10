@@ -21,6 +21,7 @@ const PLURAL_KEYS = new Set([
   'product.hero.trendPeriodMinutes',
   'product.hero.viewOffersNew',
   'product.hero.viewOffersOccasion',
+  'product.price.shipping.delay',
   'product.vigilance.teaser.alertCount',
   'siteIdentity.menu.account.privacy.compare.count',
 ])

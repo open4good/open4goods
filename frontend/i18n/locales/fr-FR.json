@@ -2910,7 +2910,13 @@
       "table": {
         "merchant": "Marchand",
         "price": "Prix",
-        "condition": "État"
+        "condition": "État",
+        "shipping": "Livraison"
+      },
+      "shipping": {
+        "cost": "Livraison {amount}",
+        "free": "Livraison offerte",
+        "delay": "Livrée sous {count} jour | Livrée sous {count} jours"
       },
       "newOffersOnly": "Toutes les offres",
       "viewDeal": "Voir l'offre",

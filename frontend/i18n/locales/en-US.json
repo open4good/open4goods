@@ -3020,7 +3020,13 @@
       "table": {
         "merchant": "Merchant",
         "price": "Price",
-        "condition": "Condition"
+        "condition": "Condition",
+        "shipping": "Delivery"
+      },
+      "shipping": {
+        "cost": "Shipping {amount}",
+        "free": "Free shipping",
+        "delay": "Delivered within {count} day | Delivered within {count} days"
       },
       "newOffersOnly": "Show new offers only",
       "bestOffers": "Best offers",

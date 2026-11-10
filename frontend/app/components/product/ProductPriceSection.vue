@@ -60,6 +60,24 @@
                   formatCurrency(item.price, item.currency)
                 }}</span>
               </template>
+              <template #[`item.shipping`]="{ item }">
+                <div
+                  v-if="
+                    resolveShipping(item).cost || resolveShipping(item).delay
+                  "
+                  class="product-price__shipping text-body-2"
+                >
+                  <div v-if="resolveShipping(item).cost">
+                    {{ resolveShipping(item).cost }}
+                  </div>
+                  <div
+                    v-if="resolveShipping(item).delay"
+                    class="text-medium-emphasis"
+                  >
+                    {{ resolveShipping(item).delay }}
+                  </div>
+                </div>
+              </template>
               <template #[`item.condition`]="{ item }">
                 <v-chip
                   size="small"
@@ -560,6 +578,7 @@
 </template>
 
 <script setup lang="ts">
+import { resolveOfferShippingLabels } from '~/utils/_offer-shipping'
 import {
   computed,
   defineAsyncComponent,
@@ -1166,6 +1185,11 @@ const offersHeaders = [
     sortable: true,
   },
   {
+    title: t('product.price.table.shipping', 'Livraison'),
+    key: 'shipping',
+    sortable: false,
+  },
+  {
     title: t('product.price.table.condition', 'Etat'),
     key: 'condition',
     sortable: true,
@@ -1592,6 +1616,9 @@ const handleNewChartClick = (params: {
   const eventId = String(params.value?.[5] ?? '')
   selectedCommercialEventId.value = eventId || null
 }
+
+const resolveShipping = (offer: ProductAggregatedPriceDto) =>
+  resolveOfferShippingLabels(offer, t, n)
 
 const formatCurrency = (value?: number | null, currency: string = 'EUR') => {
   if (value == null || Number.isNaN(value)) {
