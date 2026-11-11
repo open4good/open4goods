@@ -70,7 +70,7 @@ smartphones mis sur le marché depuis juin 2025.
 | Étiquette | `GET /api/products/smartphonestablets20231669/{numéro}/labels?format=SVG` : SVG sans clé, environ 830 000 caractères | vérifié (2339793) |
 | Fiche d'information PDF | `https://eprel.ec.europa.eu/fiches/smartphonestablets20231669/Fiche_{numéro}_{LANGUE}.pdf` | vérifié (2339793, EN) |
 | Lien QR | `https://eprel.ec.europa.eu/qr/{numéro}`, présent dans la fiche PDF | vérifié |
-| Fréquence chez nous | catalogue : `EprelCatalogueScheduler`, cron `${eprel.refresh-cron:0 0 3 */2 * *}` ; rattachement : batch de 13 h, `api.eprelRefreshDays` = 1 jour | vérifié (code) |
+| Fréquence chez nous | catalogue : `EprelCatalogueScheduler`, cron `${eprel.refresh-cron:0 0 3 */2 * *}` ; rattachement : batch de 13 h, `api.eprelRefreshDays` = 1 jour (7 jours sans fiche, `api.eprelMissRefreshDays`) | vérifié (code) |
 | Filtre de groupes en prod | bloc `eprel:` de `open4goods-config/configs/prod/api/application-active.yml` sans `groups-to-index`, donc tous les groupes | vérifié (lecture) |
 | Filtre de groupes en devsec | `api/src/main/resources/application-devsec.yml` : `televisions`, `electronicdisplays`, `ovens`, `washingmachines2019`, `washerdriers2019`. Fichier **non suivi par git** et exclu du jar | vérifié |
 
@@ -324,7 +324,8 @@ Champs `Product` : aucun nouveau, hors `sourceAttributions` (P0-4). `eprelDatas`
 ## 6. Planification et volumétrie
 
 - Aucune nouvelle tâche planifiée : catalogue tous les deux jours à 3 h, rattachement au batch
-  de 13 h (`api.eprelRefreshDays` = 1).
+  de 13 h (`api.eprelRefreshDays` = 1 jour pour un produit rattaché ; `api.eprelMissRefreshDays`
+  = 7 jours pour un produit sans fiche, sauf changement de GTIN ou de modèles, GOU-2099).
 - Rattachement : environ 49 000 produits, jusqu'à six stratégies de recherche ES par produit
   (`EprelSearchService.search`), comme pour les autres verticales. Seuls les produits avec offres
   sont visités (`exportVerticalWithValidDate`).

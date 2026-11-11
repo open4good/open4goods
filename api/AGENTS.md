@@ -208,3 +208,10 @@ les met en file d'indexation complète. L'indexation temps réel continue pendan
 - Fenêtre restante : une mise à jour temps réel écrite entre la mise en file d'une page et son indexation (le temps de
   vider la file, 5 000 produits au plus) peut encore être recouverte, et une mise à jour complète lue avant
   l'indexation de la page peut recouvrir les champs calculés par le batch.
+
+Durées (GOU-2099) : le logger `org.open4goods.api.services.BatchService.timings`, à INFO dans `application.yml` malgré
+le `warn` de la bêta et de la prod, journalise le début et la fin de chaque verticale avec la durée de chaque phase
+(chargement et classification, complétion, agrégation, notation, mise en file), et pour la complétion, tous les
+1 000 produits puis à la fin, le nombre de produits traités et sautés et le temps passé par service de complétion.
+Une complétion qui ne trouve rien a sa propre fenêtre : `api.eprelMissRefreshDays` (7 jours, ou recherche immédiate
+si le GTIN ou les modèles changent) pour EPREL, `wikidata.miss-refresh-in-days` (7 jours) pour Wikidata.

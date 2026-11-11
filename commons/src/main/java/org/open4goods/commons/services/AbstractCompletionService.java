@@ -104,14 +104,16 @@ public abstract class AbstractCompletionService {
      *
      * @param vertical the vertical context
      * @param data     the product to conditionally process
+     * @return {@code true} when the product was processed, {@code false} when it was skipped
      */
-    public void process(VerticalConfig vertical, Product data) {
+    public boolean process(VerticalConfig vertical, Product data) {
         if (shouldProcess(vertical, data)) {
             logger.info("Completing {} with {}", data, this.getClass().getSimpleName());
             processProduct(vertical, data);
-        } else {
-            logger.info("Skipping completion of {} with {}", data, this.getClass().getSimpleName());
+            return true;
         }
+        logger.info("Skipping completion of {} with {}", data, this.getClass().getSimpleName());
+        return false;
     }
 
     /**

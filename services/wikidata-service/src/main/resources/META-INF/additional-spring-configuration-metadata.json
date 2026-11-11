@@ -28,6 +28,12 @@
       "defaultValue": 30
     },
     {
+      "name": "wikidata.miss-refresh-in-days",
+      "type": "java.lang.Integer",
+      "description": "Number of days before a product for which no Wikidata entity was found is searched again (GOU-2099).",
+      "defaultValue": 7
+    },
+    {
       "name": "wikidata.brand-model-fallback-enabled",
       "type": "java.lang.Boolean",
       "description": "Whether to attempt brand+model SPARQL search when GTIN lookup finds nothing.",

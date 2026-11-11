@@ -131,6 +131,12 @@ public class ProductMappingService {
     private static final String ICON_PATH = "/icon/";
     private static final String FAVICON_ENDPOINT = "/api/favicon?url=";
     private static final String IMAGE_WEBP_MEDIATYPE = "image/webp";
+    /**
+     * Technical keys of {@code Product.datasourceCodes} written by the api completions, which are not datasources:
+     * {@code EprelCompletionService.EPREL_SEARCH_SIGNATURE_CODE} and {@code WikidataCompletionService.MISS_CODE}
+     * (GOU-2099). Hidden from the datasources facet, the compare page lists its keys as sources.
+     */
+    static final Set<String> TECHNICAL_DATASOURCE_CODES = Set.of("eprel.searchSignature", "wikidata.miss");
     private static final String PRODUCT_REFERENCE_CACHE_PREFIX = "product-ref";
     /** Not rated: the product's ImpactScore belongs to another methodology version than the vertical's current one. */
     private static final String OUTDATED_METHOD = "OUTDATED_METHOD";
@@ -876,9 +882,14 @@ public class ProductMappingService {
      * Map datasource statistics associated with the product.
      */
     private ProductDatasourcesDto mapDatasources(Product product) {
-        Map<String, Long> datasourceCodes = product.getDatasourceCodes() == null
-                ? Collections.emptyMap()
-                : new LinkedHashMap<>(product.getDatasourceCodes());
+        Map<String, Long> datasourceCodes = new LinkedHashMap<>();
+        if (product.getDatasourceCodes() != null) {
+            product.getDatasourceCodes().forEach((name, code) -> {
+                if (!TECHNICAL_DATASOURCE_CODES.contains(name)) {
+                    datasourceCodes.put(name, code);
+                }
+            });
+        }
 
         return new ProductDatasourcesDto(datasourceCodes, product.getDescriptionsByDatasource(), resolveFavicons(product));
     }
