@@ -125,6 +125,23 @@ class ProductMappingServiceTest {
     }
 
     @Test
+    void datasourcesFacetHidesTechnicalCompletionMarkers() throws Exception {
+        long gtin = 322L;
+        Product product = new Product(gtin);
+        product.getDatasourceCodes().put("eprel", 10L);
+        product.getDatasourceCodes().put("eprel.searchSignature", -42L);
+        product.getDatasourceCodes().put("wikidata.miss", 20L);
+        product.getDatasourceCodes().put("rakuten.com", 30L);
+
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
+
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("datasources"), DomainLanguage.fr);
+
+        assertThat(dto.datasources().datasourceCodes()).containsOnlyKeys("eprel", "rakuten.com");
+        assertThat(product.getDatasourceCodes()).containsKey("eprel.searchSignature");
+    }
+
+    @Test
     void getProductUsesLocalizedDisplayNameForPreferredName() throws Exception {
         long gtin = 777L;
         Product product = new Product(gtin);
