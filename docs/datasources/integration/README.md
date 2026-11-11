@@ -87,7 +87,8 @@ est donc accepté par cette voie. Le socle ci-dessous s'appuie sur ce fait.
   Identity, Taxonomy, Attribute, UsageCost, Names, Price et Media.
 - Provenance des attributs : `SourcableAttribute` et `SourcedAttribute` (`model/.../attribute/`).
   `AttributeRealtimeAggregationService` enregistre le `datasourceName` du fragment comme source.
-- Retrait d'une source : `Product.removeDatasourceData(name)` et `POST /batch/purge-datasource`.
+- Retrait d'une source : `POST /batch/purge-datasource` (offres seules par défaut, `scope=ALL` pour appeler aussi
+  `Product.removeDatasourceData(name)`).
 - Export ouvert : `OpenDataService` (`services/opendata`), `GTIN_HEADER` et `ISBN_HEADER`.
 
 ## 3. Socle proposé : un mécanisme unique, plusieurs modes

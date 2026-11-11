@@ -4,8 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -44,8 +46,10 @@ import org.open4goods.model.price.Currency;
 import org.open4goods.model.price.PriceHistory;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductCondition;
+import org.open4goods.model.product.ProductPartialUpdateHolder;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.elasticsearch.BulkFailureException;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -56,7 +60,7 @@ import ch.qos.logback.core.read.ListAppender;
  * Unit tests of {@link DatasourcePurgeService} (GOU-1592): offers and data of the purged datasource are removed,
  * other datasources are left intact, aggregated prices are recomputed, a second run touches nothing and a dry run
  * writes nothing. Progress lines and the persisted status (COMPLETED, FAILED, INTERRUPTED after a restart) are
- * covered too (GOU-1815).
+ * covered too (GOU-1815). Scope OFFERS (GOU-2101) removes only the offers, by partial updates of the prices.
  */
 class DatasourcePurgeServiceTest {
 
@@ -83,6 +87,7 @@ class DatasourcePurgeServiceTest {
 		index = new ArrayList<>();
 		// A new stream on each call, over the same (in-memory) documents, as a scroll on the index would be
 		when(repository.exportAll()).thenAnswer(invocation -> index.stream());
+		when(repository.exportAll(any(String[].class), anyInt())).thenAnswer(invocation -> index.stream());
 	}
 
 	@Test
@@ -97,7 +102,7 @@ class DatasourcePurgeServiceTest {
 		untouched.getDatasourceCodes().put(RAKUTEN_FR, 4L);
 		index.addAll(List.of(mixed, rakutenOnly, untouched));
 
-		DatasourcePurgeReport report = service.purge(RAKUTEN, false);
+		DatasourcePurgeReport report = service.purge(RAKUTEN, DatasourcePurgeScope.ALL, false);
 
 		assertThat(report.dryRun()).isFalse();
 		assertThat(report.scannedProducts()).isEqualTo(3);
@@ -108,6 +113,9 @@ class DatasourcePurgeServiceTest {
 		assertThat(report.sampleGtins()).containsExactlyInAnyOrder(mixed.gtin(), rakutenOnly.gtin());
 
 		assertThat(stored()).extracting(Product::getId).containsExactlyInAnyOrder(1L, 2L);
+		// ALL keeps its GOU-1592 behaviour: complete products stored, no partial update
+		assertThat(report.scope()).isEqualTo(DatasourcePurgeScope.ALL);
+		verify(repository, never()).bulkUpdateDocument(anyCollection());
 
 		// Mixed product: only the other datasources remain, best offer and counters recomputed
 		assertThat(mixed.getPrice().getOffers()).extracting(AggregatedPrice::getDatasourceName)
@@ -143,8 +151,8 @@ class DatasourcePurgeServiceTest {
 	void secondRunTouchesNoProduct() {
 		index.addAll(List.of(mixedProduct(1L), product(2L, offer(OTHER, 5.0, ProductCondition.NEW))));
 
-		service.purge(RAKUTEN, false);
-		DatasourcePurgeReport second = service.purge(RAKUTEN, false);
+		service.purge(RAKUTEN, DatasourcePurgeScope.ALL, false);
+		DatasourcePurgeReport second = service.purge(RAKUTEN, DatasourcePurgeScope.ALL, false);
 
 		assertThat(second.scannedProducts()).isEqualTo(2);
 		assertThat(second.touchedProducts()).isZero();
@@ -159,7 +167,7 @@ class DatasourcePurgeServiceTest {
 	void dryRunReportsWithoutWriting() {
 		index.addAll(List.of(mixedProduct(1L), product(2L, offer(OTHER, 5.0, ProductCondition.NEW))));
 
-		DatasourcePurgeReport report = service.purge(RAKUTEN, true);
+		DatasourcePurgeReport report = service.purge(RAKUTEN, DatasourcePurgeScope.ALL, true);
 
 		assertThat(report.dryRun()).isTrue();
 		assertThat(report.scannedProducts()).isEqualTo(2);
@@ -184,7 +192,7 @@ class DatasourcePurgeServiceTest {
 			index.add(p);
 		}
 
-		DatasourcePurgeReport report = service.purge(RAKUTEN, false);
+		DatasourcePurgeReport report = service.purge(RAKUTEN, DatasourcePurgeScope.ALL, false);
 
 		assertThat(report.touchedProducts()).isEqualTo(count);
 		assertThat(report.savedProducts()).isEqualTo(count);
@@ -194,16 +202,17 @@ class DatasourcePurgeServiceTest {
 
 	@Test
 	void blankDatasourceIsRejected() {
-		assertThatThrownBy(() -> service.purge(" ", true)).isInstanceOf(IllegalArgumentException.class);
-		assertThatThrownBy(() -> service.start(null, true)).isInstanceOf(IllegalArgumentException.class);
+		assertThatThrownBy(() -> service.purge(" ", DatasourcePurgeScope.OFFERS, true)).isInstanceOf(IllegalArgumentException.class);
+		assertThatThrownBy(() -> service.start(null, DatasourcePurgeScope.OFFERS, true)).isInstanceOf(IllegalArgumentException.class);
 		verify(repository, never()).exportAll();
+		verify(repository, never()).exportAll(any(String[].class), anyInt());
 	}
 
 	@Test
 	void backgroundRunReportsCompletion() throws InterruptedException {
 		index.add(mixedProduct(1L));
 
-		DatasourcePurgeStatus running = service.start(RAKUTEN, true);
+		DatasourcePurgeStatus running = service.start(RAKUTEN, DatasourcePurgeScope.ALL, true);
 		assertThat(running.state()).isIn(DatasourcePurgeStatus.State.RUNNING, DatasourcePurgeStatus.State.COMPLETED);
 
 		Instant deadline = Instant.now().plus(Duration.ofSeconds(10));
@@ -233,7 +242,7 @@ class DatasourcePurgeServiceTest {
 		appender.start();
 		logger.addAppender(appender);
 		try {
-			everyTwo.purge(RAKUTEN, true);
+			everyTwo.purge(RAKUTEN, DatasourcePurgeScope.ALL, true);
 		} finally {
 			logger.detachAppender(appender);
 			logger.setLevel(level);
@@ -241,7 +250,7 @@ class DatasourcePurgeServiceTest {
 
 		List<String> progress = appender.list.stream().map(ILoggingEvent::getFormattedMessage)
 				.filter(message -> message.contains("products scanned")).toList();
-		assertThat(progress).containsExactly("Purge of datasource rakuten.com (dryRun=true): 2 products scanned, "
+		assertThat(progress).containsExactly("Purge of datasource rakuten.com (scope=ALL, dryRun=true): 2 products scanned, "
 				+ "2 touched, 2 offers removed, 0 saved, 0 failed, sample GTINs [" + new Product(1L).gtin() + ", "
 				+ new Product(2L).gtin() + "]");
 	}
@@ -250,7 +259,7 @@ class DatasourcePurgeServiceTest {
 	void completedRunIsWrittenToTheStatusFile() throws Exception {
 		index.add(mixedProduct(1L));
 
-		service.start(RAKUTEN, true);
+		service.start(RAKUTEN, DatasourcePurgeScope.ALL, true);
 		DatasourcePurgeStatus done = awaitStatus(service, s -> s.state() != DatasourcePurgeStatus.State.RUNNING);
 
 		assertThat(done.state()).isEqualTo(DatasourcePurgeStatus.State.COMPLETED);
@@ -270,7 +279,7 @@ class DatasourcePurgeServiceTest {
 	void failedRunIsWrittenToTheStatusFile() throws Exception {
 		when(repository.exportAll()).thenThrow(new IllegalStateException("index unavailable"));
 
-		service.start(RAKUTEN, true);
+		service.start(RAKUTEN, DatasourcePurgeScope.ALL, true);
 		DatasourcePurgeStatus done = awaitStatus(service, s -> s.state() != DatasourcePurgeStatus.State.RUNNING);
 
 		assertThat(done.state()).isEqualTo(DatasourcePurgeStatus.State.FAILED);
@@ -291,7 +300,7 @@ class DatasourcePurgeServiceTest {
 		// The scroll stalls after 2 products, once the progress step of the second one is written
 		when(repository.exportAll()).thenReturn(stallingStream(products, 2, blocked, release));
 		DatasourcePurgeService stopped = new DatasourcePurgeService(repository, statusFile, 2);
-		stopped.start(RAKUTEN, true);
+		stopped.start(RAKUTEN, DatasourcePurgeScope.ALL, true);
 		assertThat(blocked.await(10, TimeUnit.SECONDS)).isTrue();
 
 		DatasourcePurgeService restarted = new DatasourcePurgeService(repository, statusFile, 2);
@@ -313,7 +322,7 @@ class DatasourcePurgeServiceTest {
 
 		// A new run is accepted after INTERRUPTED: it starts over, it does not resume
 		when(repository.exportAll()).thenAnswer(invocation -> products.stream());
-		DatasourcePurgeStatus running = restarted.start(RAKUTEN, true);
+		DatasourcePurgeStatus running = restarted.start(RAKUTEN, DatasourcePurgeScope.ALL, true);
 		assertThat(running.state()).isEqualTo(DatasourcePurgeStatus.State.RUNNING);
 		assertThat(running.startedAt()).isAfter(interrupted.startedAt());
 		DatasourcePurgeStatus done = awaitStatus(restarted, s -> s.state() != DatasourcePurgeStatus.State.RUNNING);
@@ -329,6 +338,185 @@ class DatasourcePurgeServiceTest {
 
 		assertThat(new DatasourcePurgeService(repository, statusFile, PROGRESS_INTERVAL).getStatus())
 				.isEqualTo(DatasourcePurgeStatus.idle());
+	}
+
+	@Test
+	void offersScopeRemovesOnlyOffersAndWritesPricesByPartialUpdate() {
+		Product mixed = mixedProduct(1L);
+		Product untouched = product(3L, offer(OTHER, 30.0, ProductCondition.NEW));
+		untouched.getDatasourceCodes().put(OTHER, 3L);
+		index.addAll(List.of(mixed, untouched));
+
+		DatasourcePurgeReport report = service.purge(RAKUTEN, DatasourcePurgeScope.OFFERS, false);
+
+		assertThat(report.scope()).isEqualTo(DatasourcePurgeScope.OFFERS);
+		assertThat(report.scannedProducts()).isEqualTo(2);
+		assertThat(report.touchedProducts()).isEqualTo(1);
+		assertThat(report.removedOffers()).isEqualTo(2);
+		assertThat(report.savedProducts()).isEqualTo(1);
+		assertThat(report.failedProducts()).isZero();
+		assertThat(report.sampleGtins()).containsExactly(mixed.gtin());
+
+		// Only the prices are read, and written by partial update: never a complete product
+		verify(repository).exportAll(DatasourcePurgeService.OFFERS_FIELDS, ProductRepository.FULL_PRODUCT_PAGE_SIZE);
+		verify(repository, never()).exportAll();
+		verify(repository, never()).store(anyCollection());
+		List<ProductPartialUpdateHolder> updates = partialUpdates();
+		assertThat(updates).singleElement().satisfies(update -> {
+			assertThat(update.getProductId()).isEqualTo(1L);
+			assertThat(update.getChanges()).containsOnlyKeys("price", "offersCount");
+			assertThat(update.getChanges().get("price")).isSameAs(mixed.getPrice());
+			assertThat(update.getChanges().get("offersCount")).isEqualTo(2);
+		});
+
+		// Offers of the other datasources remain, best offer and counters recomputed
+		assertThat(mixed.getPrice().getOffers()).extracting(AggregatedPrice::getDatasourceName)
+				.containsExactlyInAnyOrder(OTHER, RAKUTEN_FR);
+		assertThat(mixed.getPrice().getMinPrice().getDatasourceName()).isEqualTo(OTHER);
+		assertThat(mixed.getPrice().getMinPrice().getPrice()).isEqualTo(20.0);
+		assertThat(mixed.getOffersCount()).isEqualTo(2);
+		assertThat(mixed.getPrice().getConditions()).containsExactly(ProductCondition.NEW);
+		assertThat(mixed.getPrice().getNewPricehistory()).hasSize(1);
+
+		// The product sheet data of the datasource stays
+		assertThat(mixed.getDatasourceCodes()).containsOnlyKeys(RAKUTEN, OTHER, RAKUTEN_FR);
+		assertThat(mixed.getCategoriesByDatasources()).containsOnlyKeys(RAKUTEN, OTHER, RAKUTEN_FR);
+		assertThat(mixed.getDescriptionsByDatasource()).containsOnlyKeys(RAKUTEN, OTHER);
+		assertThat(mixed.getAkaBrands()).containsOnlyKeys(RAKUTEN, OTHER);
+		assertThat(mixed.getAttributes().getAll()).containsOnlyKeys("AUTHOR", "TYPE DE PRODUIT");
+		assertThat(mixed.getAttributes().getAll().get("AUTHOR").getSource())
+				.extracting(SourcedAttribute::getDataSourcename).containsExactlyInAnyOrder(RAKUTEN, OTHER);
+	}
+
+	@Test
+	void offersScopeIgnoresProductsWithOnlySheetDataOfTheDatasource() {
+		Product sheetOnly = mixedProduct(1L);
+		// Same Rakuten sheet data (codes, attributes, categories, description, brand alias), but no Rakuten offer
+		sheetOnly.getPrice().getOffers().removeIf(offer -> RAKUTEN.equals(offer.getDatasourceName()));
+		sheetOnly.getPrice().setMinPrice(sheetOnly.getPrice().getOffers().stream()
+				.filter(offer -> OTHER.equals(offer.getDatasourceName())).findFirst().orElseThrow());
+		Product codesOnly = new Product(2L);
+		codesOnly.getDatasourceCodes().put(RAKUTEN, 2L);
+		index.addAll(List.of(sheetOnly, codesOnly));
+
+		DatasourcePurgeReport report = service.purge(RAKUTEN, DatasourcePurgeScope.OFFERS, false);
+
+		assertThat(report.scannedProducts()).isEqualTo(2);
+		assertThat(report.touchedProducts()).isZero();
+		assertThat(report.savedProducts()).isZero();
+		assertThat(report.sampleGtins()).isEmpty();
+		verify(repository, never()).bulkUpdateDocument(anyCollection());
+		verify(repository, never()).store(anyCollection());
+		assertThat(sheetOnly.getDatasourceCodes()).containsKey(RAKUTEN);
+		assertThat(sheetOnly.getAttributes().getAll()).containsKey("TYPE DE PRODUIT");
+		assertThat(codesOnly.getDatasourceCodes()).containsOnlyKeys(RAKUTEN);
+	}
+
+	@Test
+	void offersScopeClearsAStaleBestOfferOfTheDatasource() {
+		Product stale = product(1L, offer(OTHER, 12.0, ProductCondition.NEW));
+		// Best offer still pointing to an offer of the datasource no longer in price.offers
+		stale.getPrice().setMinPrice(offer(RAKUTEN, 8.0, ProductCondition.NEW));
+		index.add(stale);
+
+		DatasourcePurgeReport report = service.purge(RAKUTEN, DatasourcePurgeScope.OFFERS, false);
+
+		assertThat(report.touchedProducts()).isEqualTo(1);
+		assertThat(report.removedOffers()).isZero();
+		assertThat(report.savedProducts()).isEqualTo(1);
+		assertThat(stale.getPrice().getMinPrice().getDatasourceName()).isEqualTo(OTHER);
+		assertThat(stale.getOffersCount()).isEqualTo(1);
+		assertThat(partialUpdates()).extracting(ProductPartialUpdateHolder::getProductId).containsExactly(1L);
+	}
+
+	@Test
+	void secondOffersRunTouchesNoProduct() {
+		index.addAll(List.of(mixedProduct(1L), product(2L, offer(OTHER, 5.0, ProductCondition.NEW))));
+
+		service.purge(RAKUTEN, DatasourcePurgeScope.OFFERS, false);
+		DatasourcePurgeReport second = service.purge(RAKUTEN, DatasourcePurgeScope.OFFERS, false);
+
+		assertThat(second.scannedProducts()).isEqualTo(2);
+		assertThat(second.touchedProducts()).isZero();
+		assertThat(second.removedOffers()).isZero();
+		assertThat(second.savedProducts()).isZero();
+		verify(repository, times(1)).bulkUpdateDocument(anyCollection());
+	}
+
+	@Test
+	void offersDryRunWritesNothing() {
+		index.add(mixedProduct(1L));
+
+		DatasourcePurgeReport report = service.purge(RAKUTEN, DatasourcePurgeScope.OFFERS, true);
+
+		assertThat(report.touchedProducts()).isEqualTo(1);
+		assertThat(report.removedOffers()).isEqualTo(2);
+		assertThat(report.savedProducts()).isZero();
+		verify(repository, never()).bulkUpdateDocument(anyCollection());
+		verify(repository, never()).store(anyCollection());
+	}
+
+	@Test
+	void failedDocumentsOfABulkAreCountedAndNotRetried() {
+		int count = DatasourcePurgeService.SAVE_BATCH_SIZE + 1;
+		for (long id = 1; id <= count; id++) {
+			index.add(product(id, offer(RAKUTEN, 10.0 + id, ProductCondition.NEW)));
+		}
+		// The first bulk loses one document (deleted since the scroll read it), the second one succeeds
+		doThrow(new BulkFailureException("1 failed", Map.of("7",
+				new BulkFailureException.FailureDetails(404, "document_missing_exception"))))
+				.doNothing()
+				.when(repository).bulkUpdateDocument(anyCollection());
+
+		DatasourcePurgeReport report = service.purge(RAKUTEN, DatasourcePurgeScope.OFFERS, false);
+
+		assertThat(report.touchedProducts()).isEqualTo(count);
+		assertThat(report.savedProducts()).isEqualTo(count - 1);
+		assertThat(report.failedProducts()).isEqualTo(1);
+		assertThat(partialUpdates()).hasSize(count);
+	}
+
+	@Test
+	void backgroundRunReportsItsScope() throws InterruptedException {
+		index.add(mixedProduct(1L));
+
+		DatasourcePurgeStatus running = service.start(RAKUTEN, DatasourcePurgeScope.OFFERS, true);
+		assertThat(running.scope()).isEqualTo(DatasourcePurgeScope.OFFERS);
+		assertThat(running.report().scope()).isEqualTo(DatasourcePurgeScope.OFFERS);
+
+		DatasourcePurgeStatus done = awaitStatus(service, s -> s.state() != DatasourcePurgeStatus.State.RUNNING);
+		assertThat(done.state()).isEqualTo(DatasourcePurgeStatus.State.COMPLETED);
+		assertThat(done.scope()).isEqualTo(DatasourcePurgeScope.OFFERS);
+		assertThat(done.report().scope()).isEqualTo(DatasourcePurgeScope.OFFERS);
+		assertThat(new DatasourcePurgeService(repository, statusFile, PROGRESS_INTERVAL).getStatus()).isEqualTo(done);
+	}
+
+	@Test
+	void statusWrittenBeforeTheScopeIsReadBackAsAll() throws Exception {
+		Files.createDirectories(statusFile.getParent());
+		// Status file of the GOU-1593 dry run, written before GOU-2101
+		Files.writeString(statusFile, """
+				{"state":"COMPLETED","datasourceName":"rakuten.com","dryRun":true,
+				 "startedAt":"2026-11-10T08:00:00Z","lastProgressAt":"2026-11-10T09:00:00Z",
+				 "finishedAt":"2026-11-10T09:00:00Z",
+				 "report":{"datasourceName":"rakuten.com","dryRun":true,"scannedProducts":3,"touchedProducts":2,
+				  "removedOffers":1,"savedProducts":0,"failedProducts":0,"sampleGtins":["1"],"durationMs":5},
+				 "error":null}
+				""", StandardCharsets.UTF_8);
+
+		DatasourcePurgeStatus readBack = new DatasourcePurgeService(repository, statusFile, PROGRESS_INTERVAL).getStatus();
+
+		assertThat(readBack.state()).isEqualTo(DatasourcePurgeStatus.State.COMPLETED);
+		assertThat(readBack.scope()).isEqualTo(DatasourcePurgeScope.ALL);
+		assertThat(readBack.report().scope()).isEqualTo(DatasourcePurgeScope.ALL);
+		assertThat(readBack.report().touchedProducts()).isEqualTo(2);
+		assertThat(DatasourcePurgeStatus.idle().withLegacyScope().scope()).isNull();
+	}
+
+	@Test
+	void nullScopeIsRejected() {
+		assertThatThrownBy(() -> service.purge(RAKUTEN, null, true)).isInstanceOf(NullPointerException.class);
+		assertThatThrownBy(() -> service.start(RAKUTEN, null, true)).isInstanceOf(NullPointerException.class);
 	}
 
 	private static DatasourcePurgeStatus awaitStatus(DatasourcePurgeService purgeService,
@@ -365,6 +553,13 @@ class DatasourcePurgeServiceTest {
 			}
 		};
 		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false);
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<ProductPartialUpdateHolder> partialUpdates() {
+		ArgumentCaptor<Collection<ProductPartialUpdateHolder>> captor = ArgumentCaptor.forClass(Collection.class);
+		verify(repository, atLeastOnce()).bulkUpdateDocument(captor.capture());
+		return captor.getAllValues().stream().flatMap(Collection::stream).collect(Collectors.toList());
 	}
 
 	@SuppressWarnings("unchecked")

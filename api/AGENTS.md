@@ -109,27 +109,40 @@ fichier référencé comme orphelin. Si le tas ne suffit pas, le run s'abandonne
 
 ## Purge d'une datasource retirée
 
-`POST /batch/purge-datasource?datasource=<nom>&dryRun=true|false` (GOU-1592, `DatasourcePurgeService`) retire de
-l'index produit toutes les données d'une datasource : offres `price.offers` dont `datasourceName` vaut `<nom>`,
-puis `Product.removeDatasourceData` (clé de `datasourceCodes`, alias de marque, catégorie, description, sources
-d'attributs ; une catégorie encore portée par une autre datasource reste). Meilleure offre (`price.minPrice`),
-`offersCount` et `price.conditions` sont recalculés sur les offres restantes, sans filtre de fraîcheur : les offres
-des autres datasources ne sont jamais retirées. Historique et tendances de prix ne sont pas touchés.
+`POST /batch/purge-datasource?datasource=<nom>&scope=OFFERS|ALL&dryRun=true|false` (GOU-1592, GOU-2101,
+`DatasourcePurgeService`) retire de l'index produit les données d'une datasource, selon le `scope` :
+
+- `OFFERS` (défaut, le moins destructif, GOU-2101) : seulement les offres `price.offers` dont `datasourceName` vaut
+  `<nom>`. Les données de fiche de la datasource (sources d'attributs, description, catégories, alias de marque,
+  clé de `datasourceCodes`) restent : elles sont vraies, et les retirer ferait perdre attributs et verticales. Lecture
+  limitée à `price`, `offersCount` et au GTIN référentiel ; écriture par mise à jour partielle
+  (`ProductRepository#bulkUpdateDocument`, champs `price` et `offersCount`) : ni les embeddings ni les autres champs
+  ne sont relus ou réécrits.
+- `ALL` (comportement GOU-1592) : les offres, puis `Product.removeDatasourceData` (clé de `datasourceCodes`, alias de
+  marque, catégorie, description, sources d'attributs ; une catégorie encore portée par une autre datasource reste).
+  Lecture et écriture (`store`) du produit complet, embeddings compris.
+
+Dans les deux cas, meilleure offre (`price.minPrice`), `offersCount` et `price.conditions` sont recalculés sur les
+offres restantes, sans filtre de fraîcheur, y compris quand seul `minPrice` pointait encore vers la datasource : les
+offres des autres datasources ne sont jamais retirées. Historique et tendances de prix ne sont pas touchés.
 
 - `<nom>` est le `name` du YAML de la datasource (valeur exacte de `datasourceName` et des clés de
   `datasourceCodes`), pas le nom du fichier : `rakuten.com` pour `rakuten.com-csv.yml`. `Rakuten FR` est une autre
   datasource.
 - `dryRun=true` par défaut : compte produits et offres touchés, donne jusqu'à 20 GTIN d'exemple, n'écrit rien.
-- Parcours complet par scroll (pages de `FULL_PRODUCT_PAGE_SIZE`, produits complets, embeddings compris), écriture
-  par bulks de 200. Un produit sans donnée de la datasource n'est jamais réécrit : un second passage ne touche
-  rien. À lancer hors de la fenêtre du batch nocturne.
+- Parcours complet par scroll (pages de `FULL_PRODUCT_PAGE_SIZE`), écriture par bulks de 200. Un produit sans donnée
+  de la datasource dans le `scope` n'est jamais réécrit : un second passage ne touche rien. Un bulk en échec est
+  compté dans `failedProducts` (documents en échec seulement, par exemple un produit supprimé depuis sa lecture) et
+  n'est pas rejoué. À lancer hors de la fenêtre du batch nocturne : un prix mis à jour pendant le run peut être
+  recouvert par la version lue par le scroll.
 - Asynchrone (un seul run à la fois) : réponse `202` ; `GET /batch/purge-datasource` donne l'état (`IDLE`,
-  `RUNNING` avec les compteurs du dernier palier, `COMPLETED` avec le rapport `scannedProducts`, `touchedProducts`,
-  `removedOffers`, `savedProducts`, `failedProducts`, `sampleGtins`, `FAILED` avec `error`, ou `INTERRUPTED`).
+  `RUNNING` avec les compteurs du dernier palier, `COMPLETED` avec le rapport `scope`, `scannedProducts`,
+  `touchedProducts`, `removedOffers`, `savedProducts`, `failedProducts`, `sampleGtins`, `FAILED` avec `error`, ou
+  `INTERRUPTED`). Statut et rapport portent le `scope` ; un fichier d'état écrit avant GOU-2101 est relu en `ALL`.
 - Progression (GOU-1815) : un palier tous les `datasource-purge-progress-interval` produits lus (défaut 50 000) et au
-  moins toutes les 5 minutes. Chaque palier écrit une ligne `Purge of datasource <nom> (dryRun=...): N products
-  scanned, ... touched, ... offers removed, ... saved, ... failed, sample GTINs [...]` dans `nohup-api.log` (le
-  `application.yml` du jar garde `DatasourcePurgeService` en `INFO` alors que la config bêta/prod met
+  moins toutes les 5 minutes. Chaque palier écrit une ligne `Purge of datasource <nom> (scope=..., dryRun=...): N
+  products scanned, ... touched, ... offers removed, ... saved, ... failed, sample GTINs [...]` dans `nohup-api.log`
+  (le `application.yml` du jar garde `DatasourcePurgeService` en `INFO` alors que la config bêta/prod met
   `org.open4goods` en `warn`).
 - Rapport persistant : l'état est écrit en JSON au lancement, à chaque palier puis à la fin, dans
   `datasource-purge-status-file` (défaut `<root-folder>/batch-reports/datasource-purge-status.json`, soit
@@ -140,13 +153,13 @@ des autres datasources ne sont jamais retirées. Historique et tendances de prix
   `finishedAt`. Le run n'est pas repris : un nouveau `POST` relance un run complet depuis le début. `COMPLETED` et
   `FAILED` restent lisibles après redémarrage.
 
-Appel Ops (clé `admin-key`, secret `O4G_INTERNAL_API_KEY`, brute dans l'en-tête `Authorization`), dry run, état, puis
-run réel une fois le rapport du dry run vérifié :
+Appel Ops (clé `admin-key`, secret `O4G_INTERNAL_API_KEY`, brute dans l'en-tête `Authorization`), dry run (scope
+`OFFERS` par défaut), état, puis run réel une fois le rapport du dry run vérifié :
 
 ```bash
 curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/purge-datasource?datasource=rakuten.com"
 curl -H "Authorization: $O4G_INTERNAL_API_KEY" https://api.nudger.fr/batch/purge-datasource
-curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/purge-datasource?datasource=rakuten.com&dryRun=false"
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/purge-datasource?datasource=rakuten.com&scope=OFFERS&dryRun=false"
 ```
 
 ## Date de la dernière offre par datasource

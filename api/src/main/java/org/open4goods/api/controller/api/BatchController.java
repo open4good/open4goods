@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.BatchService;
+import org.open4goods.api.services.DatasourcePurgeScope;
 import org.open4goods.api.services.DatasourcePurgeService;
 import org.open4goods.api.services.DatasourcePurgeStatus;
 import org.open4goods.api.services.ResourceCleanupMode;
@@ -109,25 +110,32 @@ public class BatchController {
     @Operation(
             summary = "Purge the data of a retired datasource from the product index",
             description = "Scans the whole product index by pages and removes, from every product holding data of the "
-                    + "datasource, its offers (price.offers), datasource code, brand alias, categories, description and "
-                    + "attribute sources, then recomputes the best offer, the offers count and the offer conditions from "
-                    + "the remaining offers. Data of other datasources is never removed, and a product without data of "
-                    + "the datasource is never written, so a second run touches nothing. Defaults to dryRun=true, which "
-                    + "only counts the products and offers concerned and returns example GTINs: run it first and check "
-                    + "the report (GET /batch/purge-datasource) before running with dryRun=false. The run is "
-                    + "asynchronous: this call answers 202 immediately.")
+                    + "datasource in the scope, its offers (price.offers), then recomputes the best offer, the offers "
+                    + "count and the offer conditions from the remaining offers. scope=OFFERS (default, the least "
+                    + "destructive) removes only the offers: it reads only the prices, writes only price and "
+                    + "offersCount by partial updates, and keeps the attribute sources, descriptions, categories, brand "
+                    + "aliases and datasource codes of the datasource. scope=ALL also removes the datasource code, brand "
+                    + "alias, categories, description and attribute sources, and stores the complete product. Data of "
+                    + "other datasources is never removed, and a product without data of the datasource in the scope is "
+                    + "never written, so a second run touches nothing. Defaults to dryRun=true, which only counts the "
+                    + "products and offers concerned and returns example GTINs: run it first and check the report "
+                    + "(GET /batch/purge-datasource) before running with dryRun=false. The run is asynchronous: this "
+                    + "call answers 202 immediately.")
     @ApiResponses({
             @ApiResponse(responseCode = "202", description = "Purge started in the background (or already running: current status returned)"),
-            @ApiResponse(responseCode = "400", description = "Missing or blank datasource")
+            @ApiResponse(responseCode = "400", description = "Missing or blank datasource, or unknown scope")
     })
     public ResponseEntity<DatasourcePurgeStatus> purgeDatasource(
             @Parameter(description = "Exact datasource name, as stored in price.offers[].datasourceName and in the "
                     + "datasourceCodes keys (the 'name' of the datasource YAML, e.g. 'rakuten.com'), not the YAML file name",
                     required = true)
             @RequestParam @NotBlank final String datasource,
+            @Parameter(description = "OFFERS (default): only the offers of the datasource. ALL: also every other piece "
+                    + "of data of the datasource (product sheet data)")
+            @RequestParam(defaultValue = "OFFERS") final DatasourcePurgeScope scope,
             @Parameter(description = "When true (default), nothing is written")
             @RequestParam(defaultValue = "true") final boolean dryRun) {
-        return ResponseEntity.accepted().body(datasourcePurgeService.start(datasource, dryRun));
+        return ResponseEntity.accepted().body(datasourcePurgeService.start(datasource, scope, dryRun));
     }
 
     @GetMapping("/batch/purge-datasource")
@@ -135,7 +143,7 @@ public class BatchController {
             summary = "Status and report of the datasource purge",
             description = "Returns IDLE, RUNNING (with the counters of the last progress step), COMPLETED (with the "
                     + "report: scanned, touched and saved products, removed offers, example GTINs), FAILED or INTERRUPTED "
-                    + "for the current or last purge-datasource run. The status is persisted in a JSON file and read back "
+                    + "for the current or last purge-datasource run, with its datasource, scope and dryRun. The status is persisted in a JSON file and read back "
                     + "at startup: a run still RUNNING when the api stopped is reported INTERRUPTED with its last counters "
                     + "(lastProgressAt). It is never resumed; a new POST starts a new run.")
     @ApiResponse(responseCode = "200", description = "Current status")
