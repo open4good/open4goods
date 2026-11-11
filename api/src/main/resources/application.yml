@@ -19,6 +19,8 @@ logging:
     org.open4goods.api.services.DatasourcePurgeService: INFO
     # GOU-1835: same for the INFO line giving the products index mapping result at startup.
     org.open4goods.api.services.ProductIndexMappingRunner: INFO
+    # GOU-2099: same for the batch durations, per vertical, per phase and per completion service.
+    org.open4goods.api.services.BatchService.timings: INFO
   file:
     max-history: 5
     max-size: 200MB

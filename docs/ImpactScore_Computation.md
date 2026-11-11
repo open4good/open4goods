@@ -189,10 +189,18 @@ the flag). A failed group, or an empty catalogue, marks nothing. `EprelSearchSer
 at the next EPREL completion of a product (throttled by `api.eprelRefreshDays`) its `eprelDatas` and
 `externalIds.eprel` are cleared.
 
+**Completion throttle (GOU-2099).** A product associated with an EPREL record is searched again after
+`api.eprelRefreshDays` (1 day). A product left without association is searched again after
+`api.eprelMissRefreshDays` (7 days), or at the next batch when its GTIN, its model candidates or the EPREL groups of
+its vertical changed (signature `datasourceCodes."eprel.searchSignature"`). An unsuccessful search runs every model
+strategy on every candidate; most smartphones and ovens have no EPREL record, and searching them again every day made
+the batch last about 12 hours. Excluded products follow the same rule: `missing_eprel` depends on that search.
+
 **Cycle.** EPREL refresh at 03:00 every odd day (`eprel.refresh-cron`, `0 0 3 */2 * *`), batch at 13:00 every day
 (`BatchService`). A new or changed EPREL entry is in the index from 03:00 and reaches the score at the 13:00 batch of
 the same day if the product is completed in this batch; the maximum delay is the refresh period plus the completion
-throttle: 2 days for the EPREL index plus `api.eprelRefreshDays` for the product.
+throttle: 2 days for the EPREL index plus `api.eprelRefreshDays` for an associated product, or
+`api.eprelMissRefreshDays` for a product without association whose identifiers did not change.
 
 ## Source Code pointers
 

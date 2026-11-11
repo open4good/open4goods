@@ -60,6 +60,15 @@ public class BatchService {
 
 	protected static final Logger logger = LoggerFactory.getLogger(BatchService.class);
 
+	/**
+	 * Logger of the batch durations (per vertical, per phase and per completion service). Set to INFO in
+	 * {@code application.yml}: beta and prod set {@code org.open4goods} to warn, which hid every INFO line of the
+	 * batch (GOU-2099).
+	 */
+	public static final String TIMINGS_LOGGER = "org.open4goods.api.services.BatchService.timings";
+
+	private static final Logger timings = LoggerFactory.getLogger(TIMINGS_LOGGER);
+
 	private VerticalsConfigService verticalsConfigService;
 
 	private CompletionFacadeService completionFacadeService;
@@ -624,6 +633,8 @@ public class BatchService {
 	// TODO(p3,conf) : schedule from conf
 	@Scheduled(cron = "0 0 13 * * ?")
 	public void batch() {
+		long start = System.nanoTime();
+		timings.info("Start of batch");
 
 		/////////////////////////////////////////////
 		// On each vertical, products are in memory loaded
@@ -633,7 +644,11 @@ public class BatchService {
 		}
 
 
-		logger.info("End of batch");
+		timings.info("End of batch in {} s", seconds(start));
+	}
+
+	private static long seconds(long startNanos) {
+		return (System.nanoTime() - startNanos) / 1_000_000_000L;
 	}
 
 	/**
@@ -649,6 +664,8 @@ public class BatchService {
 	 */
 	public void batch(VerticalConfig vertical) {
 		Set<Product> allProducts = new HashSet<>();
+		long start = System.nanoTime();
+		timings.info("Batch of vertical {} : start", vertical.getId());
 
 		logger.info("Loading products in memory for vertical {}", vertical);
 
@@ -663,6 +680,7 @@ public class BatchService {
 		// We apply simple classification to unmatch products from verticals if needed
 		////////////////////
 		aggregationFacadeService.classificationAggregator(vertical, allProducts);
+		long loaded = System.nanoTime();
 
 		// We filter the products into the "living one" (that have not been unmatched from caegories matching, and that have a valid price
 		Set<Product> products = allProducts.stream()
@@ -676,12 +694,14 @@ public class BatchService {
 		//  Launch completion on this products
 		////////////////////
 		completionFacadeService.processAll(products, vertical);
+		long completed = System.nanoTime();
 
 		logger.info("Will aggregate {} products", products.size());
 		//////////////////////////////////
 		// Launch aggregation, (now will complete on more Datas (eg API ones)
 		/////////////////////////////////
 		aggregationFacadeService.aggregateProducts(vertical, allProducts);
+		long aggregated = System.nanoTime();
 
 
 		////////////////////
@@ -697,14 +717,17 @@ public class BatchService {
 			aggregationFacadeService.score(vertical, scorable);
 			clearObsoleteScores(allProducts, vertical);
 			if (!impactScoreChecksPass(vertical, scorable)) {
+				timings.info("Batch of vertical {} : not indexed, ImpactScore checks failed, {} s", vertical.getId(), seconds(start));
 				return;
 			}
 			snapshotImpactScore(vertical, products);
 		} catch (Exception e) {
 			// Scores are cleared before being rebuilt: indexing now would persist partial results
 			logger.error("Scoring failed for vertical {} : nothing is indexed for this run", vertical.getId(), e);
+			timings.info("Batch of vertical {} : not indexed, scoring failed, {} s", vertical.getId(), seconds(start));
 			return;
 		}
+		long scored = System.nanoTime();
 
 
 		////////////////////
@@ -722,6 +745,12 @@ public class BatchService {
 			dataRepository.addToFullindexationQueue(page);
 		}
 		logger.info("{} products of vertical {} got offers updated in realtime during the batch", refreshed, vertical.getId());
+		long end = System.nanoTime();
+		timings.info("Batch of vertical {} : end in {} s ({} products, {} completed) ; load and classification {} s, "
+				+ "completion {} s, aggregation {} s, scoring {} s, indexation queue {} s", vertical.getId(),
+				(end - start) / 1_000_000_000L, allProducts.size(), products.size(), (loaded - start) / 1_000_000_000L,
+				(completed - loaded) / 1_000_000_000L, (aggregated - completed) / 1_000_000_000L,
+				(scored - aggregated) / 1_000_000_000L, (end - scored) / 1_000_000_000L);
 	}
 
 	/**

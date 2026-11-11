@@ -331,11 +331,19 @@ public class ApiProperties {
 	private int completionConcurrency = 10;
 
 	/**
-	 * Number of days before an EPREL-completed product is re-processed.
+	 * Number of days before a product associated with an EPREL record is searched again.
 	 * A product completed within this window is skipped to avoid redundant searches.
 	 */
 	@Min(1)
 	private int eprelRefreshDays = 1;
+
+	/**
+	 * Number of days before a product that got no EPREL association is searched again, as long as its GTIN and
+	 * model candidates did not change (a change triggers a new search at the next batch). Such a search runs every
+	 * model strategy, so repeating it every day made the batch last hours (GOU-2099).
+	 */
+	@Min(1)
+	private int eprelMissRefreshDays = 7;
 
 	public List<Integer> getAllowedImagesSizeSuffixes() {
 		return allowedImagesSizeSuffixes;
@@ -427,6 +435,14 @@ public class ApiProperties {
 
 	public void setEprelRefreshDays(int eprelRefreshDays) {
 		this.eprelRefreshDays = eprelRefreshDays;
+	}
+
+	public int getEprelMissRefreshDays() {
+		return eprelMissRefreshDays;
+	}
+
+	public void setEprelMissRefreshDays(int eprelMissRefreshDays) {
+		this.eprelMissRefreshDays = eprelMissRefreshDays;
 	}
 
 	public Integer getAggregatedDataElasticBuffer() {

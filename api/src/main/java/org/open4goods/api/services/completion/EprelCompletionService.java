@@ -40,8 +40,11 @@ import org.slf4j.Logger;
  * positives. A wrong EPREL match would corrupt energy-class and category attributes,
  * so the selection deliberately rejects ambiguous results rather than guessing.
  *
- * <p>Re-processing is throttled via {@code getDatasourceCodes()} timestamps; the
- * window is controlled by {@code api.eprelRefreshDays} (default 1 day).
+ * <p>Re-processing is throttled via {@code getDatasourceCodes()} timestamps: a product
+ * associated with an EPREL record is searched again after {@code api.eprelRefreshDays}
+ * (default 1 day), a product without association after {@code api.eprelMissRefreshDays}
+ * (default 7 days) or as soon as its search inputs change (GOU-2099), see
+ * {@link #shouldProcess(VerticalConfig, Product)}.
  *
  * <p>Known debt: EPREL category attributes are applied without per-vertical
  * filtering — see the inline TODO for details.
@@ -49,6 +52,14 @@ import org.slf4j.Logger;
 public class EprelCompletionService extends AbstractCompletionService {
 
 	public static final String EPREL_DS_NAME = "eprel";
+
+	/**
+	 * Key of {@code datasourceCodes} holding the {@link #searchSignature signature} of the inputs of the last
+	 * EPREL search (GOU-2099). Not a datasource: {@link Product#removeDatasourceData(String)} keeps it.
+	 */
+	public static final String EPREL_SEARCH_SIGNATURE_CODE = "eprel.searchSignature";
+
+	private static final long DAY_MS = 24L * 3600 * 1000;
 	private static final int MIN_COMPACT_MODEL_CONTAINMENT_LENGTH = 7;
 
 	private final EprelSearchService eprelSearchService;
@@ -67,8 +78,24 @@ public class EprelCompletionService extends AbstractCompletionService {
 	}
 
 	/**
-	 * Returns {@code false} when the product was completed within the configured refresh
-	 * window ({@code api.eprelRefreshDays}), {@code true} otherwise (or when never processed).
+	 * Decides whether the product is searched in EPREL again (GOU-2099).
+	 *
+	 * <ul>
+	 * <li>never searched: {@code true};</li>
+	 * <li>associated with an EPREL record at the last search: {@code true} once {@code api.eprelRefreshDays} have
+	 * elapsed, to follow the new label versions;</li>
+	 * <li>left without association at the last search: {@code true} as soon as its GTIN, its model candidates or
+	 * the EPREL groups of the vertical changed since that search (new identifiers can match), otherwise once
+	 * {@code api.eprelMissRefreshDays} have elapsed (records added to the catalogue). Such a search runs every
+	 * model strategy on every candidate, contains and regular expression queries included, and most products of
+	 * some verticals have no EPREL record (smartphones sold before the 2025 regulation): searching them again on
+	 * each daily batch made it last hours.</li>
+	 * </ul>
+	 *
+	 * <p>Excluded products follow the same rule: the exclusion depends on the EPREL association
+	 * ({@code missing_eprel}), so their search is what can bring them back.
+	 *
+	 * <p>A product searched before the signature was recorded has none: its inputs are deemed unchanged.
 	 */
 	@Override
 	public boolean shouldProcess(VerticalConfig vertical, Product data) {
@@ -76,8 +103,33 @@ public class EprelCompletionService extends AbstractCompletionService {
 		if (lastProcessed == null) {
 			return true;
 		}
-		long windowMs = (long) apiProperties.getEprelRefreshDays() * 1000L * 3600 * 24;
-		return windowMs < System.currentTimeMillis() - lastProcessed;
+		long age = System.currentTimeMillis() - lastProcessed;
+		if (data.getEprelDatas() != null) {
+			return age > apiProperties.getEprelRefreshDays() * DAY_MS;
+		}
+		Long signature = data.getDatasourceCodes().get(EPREL_SEARCH_SIGNATURE_CODE);
+		if (signature != null && signature.longValue() != searchSignature(vertical, data)) {
+			return true;
+		}
+		return age > apiProperties.getEprelMissRefreshDays() * DAY_MS;
+	}
+
+	/**
+	 * Signature of the inputs of an EPREL search: GTIN, model candidates (in priority order, alias table
+	 * resolution included) and EPREL groups of the vertical. Stable between JVMs ({@link List#hashCode()} and
+	 * {@link String#hashCode()} are specified).
+	 *
+	 * @param vertical the vertical, giving the EPREL groups and the model alias tables
+	 * @param data     the product
+	 * @return the signature
+	 */
+	long searchSignature(VerticalConfig vertical, Product data) {
+		List<String> models = withEprelModelAlias(vertical, data, modelCandidates(data));
+		return searchSignature(data.gtin(), models, vertical == null ? null : vertical.getEprelGroupNames());
+	}
+
+	private static long searchSignature(String gtin, List<String> models, Collection<String> groups) {
+		return Objects.hash(gtin, models, groups == null ? null : List.copyOf(groups));
 	}
 
 	@Override
@@ -98,6 +150,8 @@ public class EprelCompletionService extends AbstractCompletionService {
 	public void processProduct(VerticalConfig vertical, Product data) {
 
 		List<String> models = withEprelModelAlias(vertical, data, modelCandidates(data));
+		data.getDatasourceCodes().put(EPREL_SEARCH_SIGNATURE_CODE,
+				searchSignature(data.gtin(), models, vertical.getEprelGroupNames()));
 
 		List<EprelProduct> results = eprelSearchService.search(data.gtin(), models, vertical.getEprelGroupNames());
 

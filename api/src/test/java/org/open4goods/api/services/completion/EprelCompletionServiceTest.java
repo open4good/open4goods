@@ -51,6 +51,7 @@ class EprelCompletionServiceTest {
         when(apiProperties.logsFolder()).thenReturn("/tmp/logs");
         when(apiProperties.aggLogLevel()).thenReturn(Level.INFO);
         when(apiProperties.getEprelRefreshDays()).thenReturn(1);
+        when(apiProperties.getEprelMissRefreshDays()).thenReturn(7);
         when(aggregationFacadeService.getStandardAggregator("eprel-aggregation")).thenReturn(aggregator);
 
         service = new EprelCompletionService(verticalConfigService, productRepository, apiProperties,
@@ -222,6 +223,7 @@ class EprelCompletionServiceTest {
     @Test
     void shouldProcessReturnsFalseWhenCompletedWithinRefreshWindow()
     {
+        product.setEprelDatas(new EprelProduct());
         product.getDatasourceCodes().put(EprelCompletionService.EPREL_DS_NAME, System.currentTimeMillis());
         assertThat(service.shouldProcess(vertical, product)).isFalse();
     }
@@ -229,9 +231,109 @@ class EprelCompletionServiceTest {
     @Test
     void shouldProcessReturnsTrueWhenCompletionIsStale()
     {
-        long twoDaysAgo = System.currentTimeMillis() - 2L * 24 * 3600 * 1000;
-        product.getDatasourceCodes().put(EprelCompletionService.EPREL_DS_NAME, twoDaysAgo);
+        product.setEprelDatas(new EprelProduct());
+        product.getDatasourceCodes().put(EprelCompletionService.EPREL_DS_NAME, daysAgo(2));
         assertThat(service.shouldProcess(vertical, product)).isTrue();
+    }
+
+    /**
+     * GOU-2099: a product left without EPREL association is not searched again on the next daily batch, its
+     * search would run every model strategy for the same result.
+     */
+    @Test
+    void shouldProcessSkipsUnmatchedProductWithinMissWindow()
+    {
+        product.getDatasourceCodes().put(EprelCompletionService.EPREL_DS_NAME, daysAgo(2));
+        product.getDatasourceCodes().put(EprelCompletionService.EPREL_SEARCH_SIGNATURE_CODE,
+                service.searchSignature(vertical, product));
+
+        assertThat(service.shouldProcess(vertical, product)).isFalse();
+    }
+
+    @Test
+    void shouldProcessSearchesUnmatchedProductAgainAfterMissWindow()
+    {
+        product.getDatasourceCodes().put(EprelCompletionService.EPREL_DS_NAME, daysAgo(8));
+        product.getDatasourceCodes().put(EprelCompletionService.EPREL_SEARCH_SIGNATURE_CODE,
+                service.searchSignature(vertical, product));
+
+        assertThat(service.shouldProcess(vertical, product)).isTrue();
+    }
+
+    /** A product searched before the signature existed keeps the miss window: its inputs are deemed unchanged. */
+    @Test
+    void shouldProcessSkipsUnmatchedProductWithoutSignatureWithinMissWindow()
+    {
+        product.getDatasourceCodes().put(EprelCompletionService.EPREL_DS_NAME, daysAgo(2));
+
+        assertThat(service.shouldProcess(vertical, product)).isFalse();
+    }
+
+    /** The exclusion does not change the rule: an excluded product is searched again like the others. */
+    @Test
+    void shouldProcessAppliesTheSameRuleToExcludedProducts()
+    {
+        product.setExcluded(true);
+        product.getDatasourceCodes().put(EprelCompletionService.EPREL_DS_NAME, daysAgo(2));
+
+        assertThat(service.shouldProcess(vertical, product)).isFalse();
+
+        product.getDatasourceCodes().put(EprelCompletionService.EPREL_DS_NAME, daysAgo(8));
+
+        assertThat(service.shouldProcess(vertical, product)).isTrue();
+    }
+
+    /**
+     * GOU-2099: the miss window must not delay a match. A product whose model candidates changed since its last
+     * unsuccessful search (new offer, new model name) is searched again at once.
+     */
+    @Test
+    void unmatchedProductIsSearchedAgainAsSoonAsItsModelCandidatesChange()
+    {
+        when(eprelSearchService.search(anyString(), anyList(), anyCollection())).thenReturn(List.of());
+        service.processProduct(vertical, product);
+
+        assertThat(product.getDatasourceCodes()).containsKey(EprelCompletionService.EPREL_SEARCH_SIGNATURE_CODE);
+        assertThat(service.shouldProcess(vertical, product)).isFalse();
+
+        product.getAkaModels().add("MODEL-A1-NEW");
+
+        assertThat(service.shouldProcess(vertical, product)).isTrue();
+    }
+
+    @Test
+    void unmatchedProductIsSearchedAgainWhenTheVerticalEprelGroupsChange()
+    {
+        when(eprelSearchService.search(anyString(), anyList(), anyCollection())).thenReturn(List.of());
+        service.processProduct(vertical, product);
+
+        vertical.setEprelGroupNames(List.of("TELEVISION", "ELECTRONIC_DISPLAYS"));
+
+        assertThat(service.shouldProcess(vertical, product)).isTrue();
+    }
+
+    /** The miss window does not apply to a matched product, refreshed after the shorter refresh window. */
+    @Test
+    void matchedProductKeepsTheRefreshWindow()
+    {
+        EprelProduct match = new EprelProduct();
+        match.setEprelRegistrationNumber("match");
+        match.setModelIdentifier("MODEL-A1");
+        match.setLastVersion(true);
+        product.getAttributes().addReferentielAttribute(ReferentielKey.BRAND, "Candy");
+        match.setSupplierOrTrademark("Candy");
+        when(eprelSearchService.search(anyString(), anyList(), anyCollection())).thenReturn(List.of(match));
+        service.processProduct(vertical, product);
+        assertThat(product.getEprelDatas()).isNotNull();
+
+        product.getDatasourceCodes().put(EprelCompletionService.EPREL_DS_NAME, daysAgo(2));
+
+        assertThat(service.shouldProcess(vertical, product)).isTrue();
+    }
+
+    private static long daysAgo(int days)
+    {
+        return System.currentTimeMillis() - days * 24L * 3600 * 1000;
     }
 
     /**
