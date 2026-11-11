@@ -158,6 +158,16 @@
               </div>
             </div>
           </div>
+          <v-alert
+            v-if="criteriaSetsDiffer"
+            type="warning"
+            variant="tonal"
+            density="compact"
+            class="compare-grid__criteria-warning"
+            role="status"
+          >
+            {{ t('components.impactScore.v2.differentCriteria') }}
+          </v-alert>
           <div class="compare-grid__header" role="row">
             <div
               class="compare-grid__feature compare-grid__feature--header"
@@ -172,14 +182,25 @@
                 class="compare-grid__product"
                 role="columnheader"
               >
+                <ImpactScoreNotRated
+                  v-if="isNotRated(product)"
+                  :status="impactStatusOf(product)!"
+                  class="compare-grid__product-impact"
+                />
                 <ImpactScore
-                  v-if="product.impactScore !== null"
+                  v-else-if="product.impactScore !== null"
                   :score="product.impactScore"
                   :max="20"
                   size="medium"
                   class="compare-grid__product-impact"
                   flat
                 />
+                <p
+                  v-if="criteriaCountLabel(product)"
+                  class="compare-grid__product-criteria"
+                >
+                  {{ criteriaCountLabel(product) }}
+                </p>
                 <NuxtLink
                   v-if="productLink(product)"
                   :to="productLink(product)"
@@ -940,6 +961,13 @@ import { useI18n } from 'vue-i18n'
 
 import PageHeader from '~/components/shared/header/PageHeader.vue'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
+import ImpactScoreNotRated from '~/components/shared/ui/ImpactScoreNotRated.vue'
+import {
+  haveDifferentCriteriaSets,
+  isImpactScoreNotRated,
+  resolveCriteriaCount,
+  resolveImpactScoreV2,
+} from '~/utils/_impact-score-v2'
 import {
   createCompareService,
   type CompareProductEntry,
@@ -1144,6 +1172,34 @@ const hasMixedVerticals = computed(() =>
 )
 
 const productEntries = computed(() => products.value)
+
+// V1 products have no V2 status: every helper below then returns nothing.
+const impactStatusOf = (entry: { product: ProductDto }) =>
+  resolveImpactScoreV2(entry.product.scores)
+
+const isNotRated = (entry: { product: ProductDto }) =>
+  isImpactScoreNotRated(impactStatusOf(entry))
+
+const criteriaCountLabel = (entry: { product: ProductDto }): string | null => {
+  // A not rated product already states its counter in its reason.
+  if (isNotRated(entry)) return null
+  const counts = resolveCriteriaCount(impactStatusOf(entry))
+  return counts
+    ? t(
+        'components.impactScore.v2.criteria',
+        { count: counts.count, total: counts.total },
+        counts.count
+      )
+    : null
+}
+
+const criteriaSetsDiffer = computed(() =>
+  haveDifferentCriteriaSets(
+    productEntries.value
+      .filter(entry => !isNotRated(entry))
+      .map(entry => impactStatusOf(entry))
+  )
+)
 
 const attributeConfigs = computed(
   () => verticalConfig.value?.attributesConfig?.configs ?? []
@@ -1907,6 +1963,14 @@ const productInitials = (title: string) => {
 
 .compare-grid__product-impact
   margin-top: 0.25rem
+
+.compare-grid__product-criteria
+  margin: 0.25rem 0 0
+  font-size: 0.75rem
+  color: rgba(var(--v-theme-text-neutral-soft), 0.9)
+
+.compare-grid__criteria-warning
+  margin-bottom: 0.75rem
 
 .compare-grid__product-model
   font-weight: 600

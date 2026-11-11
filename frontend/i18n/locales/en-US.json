@@ -1126,6 +1126,8 @@
         "howCalculated": "How is this score calculated?",
         "disclaimer": "The Impact Score is a comparative rating by Nudger. It is neither a label, nor a certification, nor a measure of the absolute footprint.",
         "notRatedAfterRated": "Products that are not rated are shown after rated products.",
+        "differentCriteria": "These scores are not based on the same criteria",
+        "reliabilityCriteria": "{score}/{max} - {label} ({criteria})",
         "criterionNotFilled": "Not filled in",
         "methodPage": "Method v{version}. A product is rated only if its filled-in criteria weigh at least {coverage}% of the matrix. A criterion that is not filled in stays not filled in: it is never replaced by an average value.",
         "contextAria": "Score details"
