@@ -10,9 +10,8 @@ import { matchProductRouteFromSegments } from '~~/shared/utils/_product-route'
 import { resolveCategoryTrailingSlashTarget } from '~~/shared/utils/category-trailing-slash'
 import { matchLocalizedWikiRouteByPath } from '~~/shared/utils/localized-routes'
 
-defineRouteRules({
-  isr: 3600, // Cache products, categories and wiki pages for 1 hour
-})
+// No isr/swr route rule: on the node-server preset it caches no HTML but keeps
+// every rendered payload in the in-memory storage, without bound (GOU-2093).
 
 const CmsFullPageRenderer = defineAsyncComponent(
   () => import('~/components/cms/CmsFullPageRenderer.vue')

@@ -38,9 +38,8 @@ const PwaMobileLanding = defineAsyncComponent(
   () => import('~/components/pwa/PwaMobileLanding.vue')
 )
 
-defineRouteRules({
-  isr: 3600, // Cache home page for 1 hour
-})
+// No isr/swr route rule: on the node-server preset it caches no HTML but keeps
+// every rendered payload in the in-memory storage, without bound (GOU-2093).
 
 definePageMeta({
   ssr: true,

@@ -538,6 +538,15 @@ export default defineNuxtConfig({
   nitro: {
     preset: 'node-server',
     publicAssets: [{ dir: 'app/public' }],
+    // Cached handlers live in the `cache` mount, which is an unbounded Map in
+    // memory by default: bound it so caches can never fill the heap (GOU-2093).
+    storage: {
+      cache: {
+        driver: 'lru-cache',
+        max: 1000,
+        maxSize: 128 * 1024 * 1024,
+      },
+    },
     experimental: {
       wasm: true,
     },
