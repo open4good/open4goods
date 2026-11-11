@@ -1004,6 +1004,8 @@
         "howCalculated": "Comment est calculée cette note ?",
         "disclaimer": "L'Impact Score est une notation comparative de Nudger. Ce n'est ni un label, ni une certification, ni une mesure de l'empreinte absolue.",
         "notRatedAfterRated": "Les produits non notés sont affichés après les produits notés.",
+        "differentCriteria": "Ces notes ne reposent pas sur les mêmes critères",
+        "reliabilityCriteria": "{score}/{max} - {label} ({criteria})",
         "criterionNotFilled": "Non renseigné",
         "methodPage": "Méthode v{version}. Un produit n'est noté que si ses critères renseignés pèsent au moins {coverage} % de la matrice. Un critère non renseigné reste non renseigné : il n'est jamais remplacé par une valeur moyenne.",
         "contextAria": "Détails de la note"

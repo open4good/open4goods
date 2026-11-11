@@ -1,4 +1,6 @@
+import { ECOSCORE_RELATIVE_FIELD } from '~/constants/scores'
 import type {
+  ProductDto,
   ProductImpactScoreStatusDto,
   ProductScoresDto,
 } from '~~/shared/api-client'
@@ -59,3 +61,45 @@ export const resolveBetterThanPercent = (
   if ((status.ratedCount ?? 0) <= 1) return null
   return Math.max(0, Math.min(Math.round(percent), 100))
 }
+
+export interface ImpactScoreCriteriaCount {
+  count: number
+  total: number
+}
+
+/** "x criteria out of y filled in", only when both counts are known. */
+export const resolveCriteriaCount = (
+  status: ProductImpactScoreStatusDto | null | undefined
+): ImpactScoreCriteriaCount | null => {
+  const count = status?.realCriteriaCount
+  const total = status?.totalCriteriaCount
+  if (typeof count !== 'number' || typeof total !== 'number') return null
+  return { count, total }
+}
+
+/**
+ * Whether the compared V2 products rest on different criteria. The API only
+ * exposes counts, so two products differ when their counts or totals differ.
+ * Products without a V2 block (V1) or without counts are ignored.
+ */
+export const haveDifferentCriteriaSets = (
+  statuses: ReadonlyArray<ProductImpactScoreStatusDto | null | undefined>
+): boolean => {
+  const counts = statuses
+    .map(resolveCriteriaCount)
+    .filter((c): c is ImpactScoreCriteriaCount => c !== null)
+  if (counts.length < 2) return false
+  const [first] = counts
+  return counts.some(c => c.count !== first!.count || c.total !== first!.total)
+}
+
+/**
+ * The front-api already lists the not rated products last: the page only
+ * says so when the active sort is the Impact Score on a V2 vertical.
+ */
+export const shouldShowNotRatedAfterRatedNotice = (
+  sortField: string | null | undefined,
+  products: ReadonlyArray<ProductDto>
+): boolean =>
+  sortField === ECOSCORE_RELATIVE_FIELD &&
+  products.some(product => resolveImpactScoreV2(product.scores) !== null)

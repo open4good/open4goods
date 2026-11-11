@@ -61,6 +61,10 @@ import { useI18n } from '#imports'
 import { mdiScaleBalance } from '@mdi/js'
 import type { ProductDto } from '~~/shared/api-client'
 import { useProductVerdict } from '../../composables/useProductVerdict'
+import {
+  resolveCriteriaCount,
+  resolveImpactScoreV2,
+} from '../../utils/_impact-score-v2'
 import ProductVerdictDimensionChip from './ProductVerdictDimensionChip.vue'
 
 const props = defineProps<{
@@ -131,7 +135,23 @@ const reliabilityTooltip = computed(() => {
   if (!reliabilityVerdict.value || reliabilityVerdict.value.score === null) {
     return t('product.verdict.reliabilityLevels.insufficient')
   }
-  return `${reliabilityVerdict.value.score}/${reliabilityVerdict.value.scoreOutOf} - ${t(reliabilityVerdict.value.labelKey)}`
+  const base = `${reliabilityVerdict.value.score}/${reliabilityVerdict.value.scoreOutOf} - ${t(reliabilityVerdict.value.labelKey)}`
+  // V2: the same "x criteria out of y" counter as the Impact Score, so the two
+  // never contradict each other. The level itself stays on DATA_QUALITY.
+  const counts = resolveCriteriaCount(
+    resolveImpactScoreV2(props.product.scores)
+  )
+  if (!counts) return base
+  return t('components.impactScore.v2.reliabilityCriteria', {
+    score: reliabilityVerdict.value.score,
+    max: reliabilityVerdict.value.scoreOutOf,
+    label: t(reliabilityVerdict.value.labelKey),
+    criteria: t(
+      'components.impactScore.v2.criteria',
+      { count: counts.count, total: counts.total },
+      counts.count
+    ),
+  })
 })
 </script>
 

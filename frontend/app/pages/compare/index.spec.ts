@@ -92,6 +92,11 @@ const messages: Record<string, string> = {
   'compare.ecological.ecoscore': 'Écoscore',
   'compare.ecological.brandSustainability': 'Durabilité marque',
   'compare.ecological.dataQuality': 'Qualité des données',
+  'components.impactScore.v2.differentCriteria':
+    'Ces notes ne reposent pas sur les mêmes critères',
+  'components.impactScore.v2.criteria': '{count} critères sur {total}',
+  'components.impactScore.v2.notRated': 'Non noté',
+  'components.impactScore.v2.notRatedCoverage': 'Pas assez de données',
   'compare.sections.pricing': 'Tarifs',
   'compare.sections.ecological': 'Impact écologique',
   'compare.sections.technical': 'Fiche technique',
@@ -547,5 +552,96 @@ describe('Comparison integrity states', () => {
       'La comparaison nécessite au moins deux produits différents.'
     )
     expect(wrapper.find('.compare-grid').exists()).toBe(false)
+  })
+})
+
+describe('Impact Score V2 criteria', () => {
+  beforeEach(() => {
+    loadProductsMock.mockReset()
+    loadVerticalMock.mockReset()
+    hasMixedVerticalsMock.mockReset()
+    routerReplace.mockReset()
+    route.hash = '#compare=1234567890123,1234567890124'
+    localeRef.value = 'fr-FR'
+    hasMixedVerticalsMock.mockReturnValue(false)
+    loadVerticalMock.mockResolvedValue(null)
+  })
+
+  const v2Entry = (
+    gtin: string,
+    impactScore: Record<string, unknown> | undefined,
+    score: number | null = 12
+  ) =>
+    createEntry({
+      gtin,
+      title: gtin,
+      impactScore: score,
+      product: {
+        identity: { brand: 'Brand', model: gtin },
+        base: {},
+        offers: {},
+        attributes: {},
+        scores: { impactScore },
+      },
+    })
+
+  const status = (real: number, total: number, extra = {}) => ({
+    status: 'RATED',
+    currentMethodologyVersion: 2,
+    realCriteriaCount: real,
+    totalCriteriaCount: total,
+    ...extra,
+  })
+
+  const run = async (entries: CompareProductEntryLike[]) => {
+    loadProductsMock.mockResolvedValue(entries)
+    const wrapper = await mountPage()
+    await flushPromises()
+    await flushPromises()
+    return wrapper
+  }
+
+  it('shows the counter, without warning, when the criteria are the same', async () => {
+    const wrapper = await run([
+      v2Entry('1234567890123', status(3, 5)),
+      v2Entry('1234567890124', status(3, 5)),
+    ])
+    expect(wrapper.findAll('.compare-grid__product-criteria')).toHaveLength(2)
+    expect(wrapper.text()).toContain('3 critères sur 5')
+    expect(wrapper.text()).not.toContain('pas sur les mêmes critères')
+  })
+
+  it('warns when the criteria differ', async () => {
+    const wrapper = await run([
+      v2Entry('1234567890123', status(3, 5)),
+      v2Entry('1234567890124', status(4, 5)),
+    ])
+    expect(wrapper.text()).toContain(
+      'Ces notes ne reposent pas sur les mêmes critères'
+    )
+  })
+
+  it('shows "Non noté" with its reason, never a score', async () => {
+    const wrapper = await run([
+      v2Entry('1234567890123', status(3, 5)),
+      v2Entry(
+        '1234567890124',
+        status(1, 5, { status: 'NOT_RATED', notRatedReason: 'LOW_COVERAGE' }),
+        null
+      ),
+    ])
+    expect(wrapper.text()).toContain('Non noté')
+    expect(wrapper.text()).toContain('Pas assez de données')
+    expect(wrapper.findAll('.impact-score-stub')).toHaveLength(1)
+  })
+
+  it('leaves V1 products unchanged', async () => {
+    const wrapper = await run([
+      v2Entry('1234567890123', status(3, 5, { currentMethodologyVersion: 1 })),
+      v2Entry('1234567890124', undefined),
+    ])
+    expect(wrapper.find('.compare-grid__product-criteria').exists()).toBe(false)
+    expect(wrapper.text()).not.toContain('pas sur les mêmes critères')
+    expect(wrapper.findAll('.impact-score-stub')).toHaveLength(2)
   })
 })
