@@ -95,6 +95,9 @@ public class BatchService {
 	/** Storage of the monthly ImpactScore snapshots; {@code null} disables them. */
 	private ImpactScoreSnapshotRepository impactScoreSnapshotRepository;
 
+	/** File present while a full batch runs, read by the beta deployment (GOU-2106). */
+	private final BatchRunningMarker batchRunningMarker;
+
 
 	public BatchService(AggregationFacadeService aggregationFacadeService,
 			CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository dataRepository, FeedIndexingService feedIndexingService, FeedService feedService, SerialisationService serialisationService, ResourceService resourceService, ApiProperties apiProperties) {
@@ -109,6 +112,7 @@ public class BatchService {
 		this.resourceService = resourceService;
 		this.apiProperties = apiProperties;
 		this.impactScoreGuard = new ImpactScoreBatchGuard(apiProperties == null ? null : apiProperties.getImpactScoreGuard(), null, null);
+		this.batchRunningMarker = new BatchRunningMarker(apiProperties == null ? null : apiProperties.getBatchRunningMarker());
 	}
 
 	/**
@@ -636,15 +640,20 @@ public class BatchService {
 	public void batch() {
 		long start = System.nanoTime();
 		timings.info("Start of batch");
+		// Deleted in finally: a failed batch must not hold the beta deployments until the marker gets stale.
+		batchRunningMarker.begin();
+		try {
+			/////////////////////////////////////////////
+			// On each vertical, products are in memory loaded
+			/////////////////////////////////////////////
+			for (VerticalConfig vertical : verticalsConfigService.getConfigsWithoutDefault()) {
+				batch(vertical);
+			}
 
-		/////////////////////////////////////////////
-		// On each vertical, products are in memory loaded
-		/////////////////////////////////////////////
-		for (VerticalConfig vertical : verticalsConfigService.getConfigsWithoutDefault()) {
-			batch(vertical);
+			clearScoresOutsideVerticals();
+		} finally {
+			batchRunningMarker.end();
 		}
-
-		clearScoresOutsideVerticals();
 
 		timings.info("End of batch in {} s", seconds(start));
 	}

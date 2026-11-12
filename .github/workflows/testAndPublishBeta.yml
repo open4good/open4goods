@@ -1,6 +1,9 @@
 # Beta deployment runs on every merge on `main` that touches the backend (GOU-1036).
 # Set the repository variable BETA_DEPLOY_FREEZE=true to freeze beta during acceptance: a push still builds and
 # tests, but the deploy job is skipped. A manual dispatch on `main` still deploys, to ship a blocking fix.
+# A running full batch of the api is never killed (GOU-2106): the JARs are published and the other services restart,
+# but the api restarts on the server after `End of batch` (nudger-api-deferred-restart.service, publish-jars.sh of
+# open4goods-config). A manual dispatch with `restart_api_now` restarts it at once and the batch is lost.
 on:
   push:
     branches: [main]
@@ -11,6 +14,11 @@ on:
       - "!.github/workflows/**"
       - ".github/workflows/testAndPublishBeta.yml"
   workflow_dispatch:
+    inputs:
+      restart_api_now:
+        description: "Restart the api now even if a batch runs (the batch is lost)"
+        type: boolean
+        default: false
 
 name: 🔘 Beta - Build, Test, and Publish
 run-name: 🔘 Beta Build by @${{ github.actor }}
@@ -189,9 +197,11 @@ jobs:
           done
 
       - name: Publish Applications
+        # During a full batch the api restart is deferred on the server until `End of batch` (at most 20 h): the log
+        # shows "DEFERRED: api restart deferred, batch in progress" and a notice (GOU-2106).
         uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: ${{ secrets.REMOTE_BETA_HOST }}
           username: ${{ secrets.REMOTE_BETA_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: sh /opt/open4goods/bin/publish-jars.sh beta
+          script: DEFER_API_RESTART_DURING_BATCH=${{ inputs.restart_api_now && '0' || '1' }} sh /opt/open4goods/bin/publish-jars.sh beta

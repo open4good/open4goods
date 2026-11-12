@@ -324,6 +324,12 @@ public class ApiProperties {
 	private String datasourceOfferActivityFile;
 
 	/**
+	 * File present while a full batch runs (GOU-2106), read by the beta deployment to postpone the api restart until
+	 * the end of the batch. Absent or blank, no marker is written.
+	 */
+	private String batchRunningMarker;
+
+	/**
 	 * The datasource purge logs and persists its progress every this many scanned products (and at least every
 	 * {@code DatasourcePurgeService.PROGRESS_MAX_DELAY}).
 	 */
@@ -424,6 +430,14 @@ public class ApiProperties {
 
 	public void setDatasourceOfferActivityFile(String datasourceOfferActivityFile) {
 		this.datasourceOfferActivityFile = datasourceOfferActivityFile;
+	}
+
+	public String getBatchRunningMarker() {
+		return batchRunningMarker;
+	}
+
+	public void setBatchRunningMarker(String batchRunningMarker) {
+		this.batchRunningMarker = batchRunningMarker;
 	}
 
 	public long getDatasourcePurgeProgressInterval() {
