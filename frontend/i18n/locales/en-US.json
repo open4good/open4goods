@@ -103,10 +103,10 @@
     },
     "hero": {
       "eyebrow": "Compare price and Impact Score",
-      "title": "Compare partner merchants' prices",
+      "title": "Buy better. Spend smarter.",
       "animatedSubtitle": "",
       "titleSubtitle": [
-        "Nudger gathers offers from its partner merchants to show you where to buy at the best price."
+        "The comparator that rates the environmental impact of appliances and tech"
       ],
       "subtitles": [
         "Save time, stay true to your values. Compare effortlessly, choose freely.",
@@ -3528,7 +3528,7 @@
       "hero": {
         "eyebrow": "PWA",
         "title": "Your eco-companion, right on mobile",
-        "subtitle": "Nudger gathers offers from its partner merchants to show you where to buy at the best price.",
+        "subtitle": "Scan, compare, and nudge in a few taps. Designed for quick, on-the-go decisions.",
         "meta": {
           "title": "Nudger - Mobile impact companion",
           "description": "Experience Nudger as a mobile-first PWA: scan barcodes, launch the AI wizard, and share eco-guides instantly.",
