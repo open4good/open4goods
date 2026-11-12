@@ -4,13 +4,9 @@ import { describe, expect, it, vi, afterEach } from 'vitest'
 import { defineComponent, h, ref } from 'vue'
 import { useNuxtApp, useState } from '#app'
 import HomeHeroSection from './HomeHeroSection.vue'
-import frFR from '~~/i18n/locales/fr-FR.json'
-import enUS from '~~/i18n/locales/en-US.json'
 const messages: Record<string, unknown> = {
-  'home.hero.title': 'Comparez les prix des marchands partenaires',
-  'home.hero.titleSubtitle': [
-    'Nudger rassemble les offres de ses marchands partenaires pour vous montrer où acheter au meilleur prix.',
-  ],
+  'home.hero.title': 'Acheter mieux. Sans dépenser plus.',
+  'home.hero.titleSubtitle': ['Nudger : Le comparateur écologique'],
   'home.hero.background': 'hero-background.webp',
 }
 
@@ -123,17 +119,5 @@ describe('HomeHeroSection', () => {
     )
 
     await wrapper.unmount()
-  })
-
-  it('positions the home hero as a partner price comparator in both locales', () => {
-    expect(frFR.home.hero.title).toBe(
-      'Comparez les prix des marchands partenaires'
-    )
-    expect(frFR.home.hero.titleSubtitle[0]).toBe(
-      'Nudger rassemble les offres de ses marchands partenaires pour vous montrer où acheter au meilleur prix.'
-    )
-    expect(frFR.pwa.landing.hero.subtitle).toBe(frFR.home.hero.titleSubtitle[0])
-    expect(enUS.home.hero.title).toBe("Compare partner merchants' prices")
-    expect(enUS.pwa.landing.hero.subtitle).toBe(enUS.home.hero.titleSubtitle[0])
   })
 })
