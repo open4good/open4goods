@@ -1,29 +1,27 @@
-## 🥳 Welcome to **v1.0.82**
+## 🥳 Welcome to **v1.0.83**
 
-This release covers **1 day(s)** of work, from **2026-11-10T14:01:59.000Z** to **2026-11-11T16:48:55.000Z**.
+This release covers **0 day(s)** of work, from **2026-11-11T16:48:55.000Z** to **2026-11-12T08:33:13.000Z**.
 
 ### 📦 Stats
-- Diff: [compare](https://github.com/open4good/open4goods/compare/v1.0.81...v1.0.82)
-- Changed files: **49**
-- Commits: **13**
-- Additions: **3452** / Deletions: **220**
+- Diff: [compare](https://github.com/open4good/open4goods/compare/v1.0.82...v1.0.83)
+- Changed files: **47**
+- Commits: **6**
+- Additions: **2086** / Deletions: **251**
 
 ---
 
 
 
 <details>
-<summary>🙈 Other changes (7)</summary>
+<summary>🙈 Other changes (5)</summary>
 
 | PR | Title | Author |
 |---:|---|---|
-| [PR 3610](https://github.com/open4good/open4goods/pull/3610) | fix(impactscore): efface les rangs périmés des fiches sans offre (GOU-2071) | @GoulvenF |
-| [PR 3611](https://github.com/open4good/open4goods/pull/3611) | feat(frontend): accroche « comparez les prix » dans le hero réel de l'accueil (GOU-2070) | @GoulvenF |
-| [PR 3612](https://github.com/open4good/open4goods/pull/3612) | refactor(frontend): supprime ContactDetailsSection sans template (GOU-2045) | @GoulvenF |
-| [PR 3614](https://github.com/open4good/open4goods/pull/3614) | feat(front-api): accessoires « pour/de <requête> », compatible, 5 termes (GOU-2077) | @GoulvenF |
-| [PR 3615](https://github.com/open4good/open4goods/pull/3615) | feat(front-api): éligibilité et mapping CssProductInput en mode à blanc (GOU-2080) | @GoulvenF |
-| [PR 3613](https://github.com/open4good/open4goods/pull/3613) | feat(frontend): recherche dès 2 caractères et bloc accessoires (GOU-2032) | @GoulvenF |
-| [PR 3616](https://github.com/open4good/open4goods/pull/3616) | feat(front-api): client et synchronisation CSS désactivés par configuration (GOU-2081) | @GoulvenF |
+| [PR 3617](https://github.com/open4good/open4goods/pull/3617) | fix(frontend): fuite mémoire du SSR, payload de chaque page gardé en mémoire (GOU-2093) | @GoulvenF |
+| [PR 3618](https://github.com/open4good/open4goods/pull/3618) | feat(frontend): ImpactScore V2 : /compare, notice des non notés, fiabilité (GOU-2002) | @GoulvenF |
+| [PR 3619](https://github.com/open4good/open4goods/pull/3619) | perf(batch): mesure des durées du batch, cache négatif EPREL et Wikidata (GOU-2099) | @GoulvenF |
+| [PR 3620](https://github.com/open4good/open4goods/pull/3620) | feat(api): purge de datasource limitée aux offres par défaut (GOU-2101) | @GoulvenF |
+| [PR 3621](https://github.com/open4good/open4goods/pull/3621) | revert(frontend): textes du hero de l'accueil d'avant GOU-2070 | @GoulvenF |
 
 
 </details>
