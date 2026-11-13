@@ -68,6 +68,18 @@ class ImpactScoreConfigTest {
     }
 
     @Test
+    void excludedEprelCategoriesApplyOnlyInV2() {
+        ImpactScoreConfig config = config();
+        config.getV2().setExcludedEprelCategories(List.of("MONITOR"));
+        assertThat(config.excludedEprelCategories()).as("none in V1").isEmpty();
+        config.setMethodologyVersion(2);
+        assertThat(config.excludedEprelCategories()).containsExactly("MONITOR");
+        config.getV2().setExcludedEprelCategories(null);
+        assertThat(config.excludedEprelCategories()).isEmpty();
+        assertThat(new ImpactScoreV2Config().getExcludedEprelCategories()).isEmpty();
+    }
+
+    @Test
     void environmentOverrideWinsOverTheFile() {
         ImpactScoreConfig config = config();
         config.setMethodologyVersion(2);

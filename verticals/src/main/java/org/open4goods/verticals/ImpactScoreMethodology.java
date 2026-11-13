@@ -165,6 +165,11 @@ public final class ImpactScoreMethodology {
 			errors.add("v2.minRealWeightCoverage must be in ]0, 1], got " + threshold);
 		}
 
+		List<String> excludedCategories = v2.getExcludedEprelCategories();
+		if (excludedCategories != null && excludedCategories.stream().anyMatch(StringUtils::isBlank)) {
+			errors.add("v2.excludedEprelCategories has a blank category");
+		}
+
 		Integer minRated = v2.getMinRatedForPositionLabel();
 		if (minRated != null && minRated < 1) {
 			errors.add("v2.minRatedForPositionLabel must be at least 1, got " + minRated);

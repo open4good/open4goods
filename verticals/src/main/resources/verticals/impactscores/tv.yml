@@ -37,6 +37,7 @@ v2:
     POWER_DENSITY_SDR: 0.1927711
   minRealWeightCoverage: 0.5
   eprelRequired: true
+  excludedEprelCategories: [MONITOR, PROFESSIONAL_DISPLAY, SIGNAGE]  # hors sujet, pas de verticale moniteur (GOU-2165)
   minRatedForPositionLabel: 100
   positionLabels:
     - level: excellent

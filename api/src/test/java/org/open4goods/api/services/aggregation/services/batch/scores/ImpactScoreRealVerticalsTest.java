@@ -323,6 +323,32 @@ class ImpactScoreRealVerticalsTest {
     }
 
     /**
+     * GOU-2165: the exclusion reads C from the attributes ({@link ImpactScoreCoverage}), before any score exists. On
+     * the designed cohort it predicts the batch outcome of every product: rated, or not rated with the same reason.
+     */
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("realVerticals")
+    void v2CoverageFromAttributesPredictsTheBatchOutcome(VerticalConfig vertical, @TempDir Path logs)
+            throws Exception {
+        withV2(vertical, threshold -> {
+            List<Product> products = v2Products(vertical, threshold, new TreeMap<>());
+            Map<Long, String> predicted = new TreeMap<>();
+            for (Product product : products) {
+                ImpactScoreMeta.NotRatedReason reason = ImpactScoreCoverage.notRatedReasonFromAttributes(product, vertical);
+                predicted.put(product.getId(), reason == null ? "RATED/null" : "NOT_RATED/" + reason.name());
+            }
+
+            aggregationFacadeService(logs).getScoringAggregator().score(products, vertical);
+
+            for (Product product : products) {
+                assertThat(product.getImpactScoreMeta().getStatus() + "/" + product.getImpactScoreMeta().getNotRatedReason())
+                        .as("outcome of product %s", product.getId()).isEqualTo(predicted.get(product.getId()));
+            }
+            assertThat(predicted.values()).contains("RATED/null", "NOT_RATED/NO_REAL_CRITERIA", "NOT_RATED/LOW_COVERAGE");
+        });
+    }
+
+    /**
      * GOU-1879, invariants 1 to 3 of the design (section 7): in V2, no score is imputed, C is exact, the score is
      * {@code 4 x sum(w x rel) / sum(w)} over the real criteria and a product below the threshold has no ImpactScore,
      * with the right reason.

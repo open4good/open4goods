@@ -24,7 +24,8 @@ Harnais : `ImpactScoreSimulationTest` (module `api`, ignoré en CI faute de
 1. Lecture de `<verticale>.jsonl.gz`. `SerialisationService.fromJson` ne relit pas un `Product` (Jackson 3 construit
    `SourcedAttribute` et `IndexedAttribute` par leur constructeur de copie, qui échoue) : le harnais utilise les mêmes
    réglages, sans détection des noms de paramètres.
-2. **V1** : cohorte `offersCount > 0 && !excluded` (exclusion stockée), version 1.
+2. **V1** : cohorte `offersCount > 0 && !excluded` (exclusion stockée), version 1. L'exclusion recalculée en V1
+   est écrite à côté (`v1_excluded`, `v1_causes`) pour vérifier qu'un changement de règle laisse la V1 intacte.
 3. **V2** : exclusion recalculée par `ExclusionRules.evaluate` avec la configuration V2 (`eprelRequired`), même règle
    de cohorte, version 2. Paramètres candidats : `-Dimpactscore.simulation.params=<fichier.yml>`, par verticale les
    champs qui remplacent ceux du bloc `v2` (exemple plus bas).
@@ -107,6 +108,7 @@ dernier batch.
    offre ; 65 sont notées (estimation de la porte n° 2 : 51), **262 restent "Non noté"** sous le seuil 0,60 mais
    entrent dans les pages catégories et, avec leur offre récente, dans le sitemap (323). Réfrigérateurs : 134
    entrants, 133 notés (estimation : 128). Liste pour QA : [dishwasher-entrants.csv](simulation/dishwasher-entrants.csv).
+   Corrigé par GOU-2165 : seules les fiches notées entrent (voir [Relance GOU-2165](#relance-gou-2165)).
 6. **Sitemap.** À la bascule, les fiches non exclues sans offre récente qui gardent un ECOSCORE V1 en sortent
    (design 4.2). Export du 13/11 06 h UTC, puis connexion "Elasticsearch lecture" (prod) le 13/11 vers 12 h 30 UTC
    (`count` : verticale, `excluded=false`, `exists scores.ECOSCORE.value`, sans `offersCount > 0` et
@@ -125,6 +127,32 @@ dernier batch.
    Aucune autre fiche ne sort du sitemap : les notés V1 qui passent en Non noté ont tous une offre récente.
 7. **Distributions.** L'étendue p5-p95 s'élargit partout où la V1 était tassée par les moyennes imputées (TV 2,6 à
    5,1 points). Les libellés suivent les bornes 0,90 / 0,50 / 0,10 : environ 10 / 40 / 40 / 10 %.
+
+## Relance GOU-2165
+
+Même export, même commande, avec les deux règles d'exclusion V2 de GOU-2165 (design § 3) : sans EPREL, entrée
+seulement si C atteint `v2.minRealWeightCoverage` (`missing_eprel_low_coverage`) ; TV, exclusion des catégories EPREL
+`MONITOR`, `PROFESSIONAL_DISPLAY` et `SIGNAGE` (`eprel_category_<CATÉGORIE>`). Fiches avec offre ; "entrant" = exclu
+dans l'export, gardé en V2 ; "sortant" = gardé dans l'export, exclu en V2.
+
+| Verticale | Entrants | dont notés V2 | Exclus par `missing_eprel_low_coverage` | Sortants | Sortants par cause |
+|---|---:|---:|---:|---:|---|
+| Lave-vaisselle | 65 (327 avant) | 65 | 399 | 0 | |
+| Réfrigérateurs | 133 (134 avant) | 133 | 2 132 | 0 | |
+| TV | 0 | 0 | 0 (`eprelRequired: true`) | 75 | `eprel_category_MONITOR` 42, `eprel_category_SIGNAGE` 31, `eprel_category_PROFESSIONAL_DISPLAY` 2 |
+
+- Lave-vaisselle : les 65 notés de la première passe entrent et restent notés ; les 262 non notés restent exclus.
+  Réfrigérateurs : le seul entrant non noté (3527570079139) reste exclu. Les 399 lave-vaisselle et 2 132
+  réfrigérateurs exclus par la nouvelle cause l'étaient déjà (`missing_eprel`, souvent avec d'autres causes).
+- TV : les 4 moniteurs relevés par QA sortent (8806094355796, 8806097691679, 8806096527979 : `MONITOR` ;
+  4719331862657 : `PROFESSIONAL_DISPLAY`). Les 75 sortants ont tous un ECOSCORE V1 stocké : liste
+  [tv-sortants-categorie-eprel.csv](simulation/tv-sortants-categorie-eprel.csv). Notés V2 : 1 965 au lieu de 2 037 ;
+  notés V1 passés en Non noté : 111 au lieu de 114.
+- Lave-vaisselle, même nombre de notés V2 (1 065) : la médiane V2 passe de 9,92 à 9,85, les bornes robustes étant
+  calculées sur une cohorte sans les 262 fiches non notées.
+- **V1 inchangée** : l'exclusion recalculée avec la configuration V1 (colonnes `v1_excluded`, `v1_causes` du
+  harnais) est identique à l'exclusion stockée sur les 36 828 fiches avec offre des 7 verticales (même état, mêmes
+  causes à l'ordre près) ; contrôle de fidélité identique à la première passe.
 
 ## Relecture QA
 

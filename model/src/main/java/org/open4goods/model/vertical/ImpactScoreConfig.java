@@ -152,6 +152,18 @@ public class ImpactScoreConfig {
 	}
 
 	/**
+	 * The EPREL categories excluded from the vertical in the effective version (GOU-2165).
+	 *
+	 * @return {@code v2.excludedEprelCategories} in V2, an empty list in V1 (no category excluded)
+	 */
+	public List<String> excludedEprelCategories() {
+		if (!isV2Active() || v2 == null || v2.getExcludedEprelCategories() == null) {
+			return List.of();
+		}
+		return v2.getExcludedEprelCategories();
+	}
+
+	/**
 	 * The coverage threshold of the effective version.
 	 *
 	 * @return {@code v2.minRealWeightCoverage} in V2, {@code null} in V1 (no threshold)
