@@ -81,6 +81,32 @@ gh variable delete BETA_DEPLOY_FREEZE --repo open4good/open4goods
 Lever le gel ne redéploie rien : le prochain merge, ou un dispatch, déploie
 l'état de `main`.
 
+## Batch en cours : redémarrage de l'api différé (GOU-2106)
+
+Un déploiement bêta ne coupe plus un batch complet de l'api (`BatchService.batch()`,
+plus de 12 h) :
+
+- l'api écrit `/opt/open4goods/run/api-batch.marker` (`pid=`, `started=`) au
+  début du batch et le supprime à la fin, échec compris (propriété
+  `batch-running-marker`, posée dans la configuration bêta d'open4goods-config) ;
+- le job `deploy` appelle `publish-jars.sh beta` avec
+  `DEFER_API_RESTART_DURING_BATCH=1`. Si le marqueur désigne une api vivante,
+  les JARs sont publiés et `sbadmin`, `front-api` et `ui` redémarrent, mais pas
+  l'api : le log du step `Publish Applications` affiche
+  `DEFERRED: api restart deferred, batch in progress ...` et une annotation
+  "Beta api restart deferred" ;
+- l'unité transitoire `nudger-api-deferred-restart.service` attend la
+  disparition du marqueur sur le serveur, puis redémarre l'api sur le dernier
+  JAR (`journalctl -u nudger-api-deferred-restart.service`). Un merge suivant la
+  trouve en attente et n'en lance pas une seconde ;
+- garde-fous : processus mort, marqueur de plus de 20 h ou 20 h d'attente →
+  redémarrage quand même, avec une ligne `WARNING` ;
+- un dispatch avec `restart_api_now` coché redémarre l'api tout de suite
+  (le batch est perdu). La prod (`releaseDeployProd.yml`) et
+  `serviceSecrets.yml` ne sont pas concernés.
+
+Le détail est dans `doc/DEPLOYMENT.md` d'open4goods-config.
+
 ## Déployer `main` à la main (dispatch)
 
 1. `gh workflow run testAndPublishBeta.yml --ref main` (backend) et/ou
