@@ -52,7 +52,6 @@ import org.open4goods.model.resource.PdfInfo;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.ImpactScoreConfig;
-import org.open4goods.model.vertical.ImpactScorePositionLabel;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
@@ -1005,7 +1004,7 @@ public class ProductMappingService {
                 double betterThan = Math.max(0.0,
                         Math.min(1.0, ecoscore.getRanking() / (double) (ranking.getGlobalCount() - 1)));
                 betterThanPercent = (int) Math.round(betterThan * 100);
-                level = positionLevel(impactScoreConfig, betterThan);
+                level = impactScoreConfig.positionLevel(betterThan, ratedCount);
             }
         }
 
@@ -1023,22 +1022,6 @@ public class ProductMappingService {
                 ratedCount,
                 betterThanPercent,
                 level);
-    }
-
-    /**
-     * The position label of a rated product: the first label, best first, whose threshold the product reaches.
-     *
-     * @param impactScoreConfig the vertical's ImpactScore configuration
-     * @param betterThan        share of rated products ranked below the product, between 0 and 1
-     * @return the label key, {@code null} in methodology version 1 (no label)
-     */
-    private static String positionLevel(ImpactScoreConfig impactScoreConfig, double betterThan) {
-        for (ImpactScorePositionLabel label : impactScoreConfig.positionLabels()) {
-            if (label != null && label.getMinBetterThan() != null && label.getMinBetterThan() <= betterThan) {
-                return label.getLevel();
-            }
-        }
-        return null;
     }
 
     /**

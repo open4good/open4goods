@@ -378,18 +378,19 @@ v2:
     NOISE_LEVEL: 0.1176471
     WEIGHT: 0.0941176
     CLASSE_ENERGY: 0.6470588
-  minRealWeightCoverage: 0.5  # provisoire, valeur de GOU-1877
-  eprelRequired: true  # provisoire, valeur de GOU-1877
-  positionLabels:  # provisoire, valeur de GOU-1877
+  minRealWeightCoverage: 0.5
+  eprelRequired: false
+  minRatedForPositionLabel: 100
+  positionLabels:
     - level: excellent
       minBetterThan: 0.90
     - level: good
-      minBetterThan: 0.67
+      minBetterThan: 0.50
     - level: fair
-      minBetterThan: 0.33
+      minBetterThan: 0.10
     - level: poor
       minBetterThan: 0.0
-  criteriaScoring: {}  # provisoire, valeur de GOU-1877 (bornes robustes : GOU-1883)
+  criteriaScoring: {}
 yamlPrompt: "---\naiService: \"GEMINI\"\njsonSchema: \"{\\n  \\\"$schema\\\" : \\\"https://json-schema.org/draft/2020-12/schema\\\
   \",\\n  \\\"type\\\" : \\\"object\\\",\\n  \\\"properties\\\" : {\\n    \\\"available_criterias\\\" : {\\n      \\\"type\\\
   \" : \\\"array\\\",\\n      \\\"items\\\" : {\\n        \\\"type\\\" : \\\"string\\\"\\n      }\\n    },\\n    \\\"criteria_weights\\\

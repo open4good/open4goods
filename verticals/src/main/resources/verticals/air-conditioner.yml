@@ -599,7 +599,116 @@ dataviz:
 
 attributesConfig:
   configs:
+    # Air conditioners keep the A+++ to D scale of Delegated Regulation (EU) 626/2011 (no A to G rescaling yet):
+    # A+++ is their best class, D their worst. Full copy of attributes/CLASSE_ENERGY.yml (a vertical entry
+    # replaces the catalogue one), only numericMapping differs. Gate 2 (GOU-1877), GOU-2137.
     - key: "CLASSE_ENERGY"
+      userBetterIs: "GREATER"
+      impactBetterIs: "GREATER"
+      faIcon: "mdi-flash"
+      name:
+        default: "Energy class"
+        fr: "Classe énergétique"
+      filteringType: "TEXT"
+      asScore: true
+      referentials:
+        icecat:
+          - featureId: 2705
+            name: "Energy efficiency class"
+        eprel:
+          - featureName: "cavities[0].energyClass"
+            productGroup: "ovens"
+            name: "Energy efficiency class (oven cavity)"
+          - featureName: "energyClass"
+            productGroup: "dishwashers"
+            name: "Energy class"
+          - featureName: "energyClass"
+            productGroup: "washing-machines"
+            name: "Energy class"
+          - featureName: "energyClass"
+            productGroup: "washer-dryers"
+            name: "Energy class"
+          - featureName: "energyClass"
+            productGroup: "refrigerators"
+            name: "Energy class"
+          - featureName: "energyClass"
+            productGroup: "televisions"
+            name: "Energy class"
+      scoring:
+        scale:
+          min: 0.0
+          max: 5.0
+        normalization:
+          method: "MINMAX_FIXED"
+          params:
+            fixedMin: 10.0
+            fixedMax: 100.0
+        missingValuePolicy: "NEUTRAL"
+        degenerateDistributionPolicy: "FALLBACK"
+      scoreTitle:
+        fr: "Classe énergétique"
+        en: "Energy class"
+      scoreDescription:
+        fr: "La classe énergétique"
+        en: "Energy efficiency class"
+      scoreUtility:
+        fr: "Offre un repère immédiat sur l'efficacité globale de l'appareil pendant son utilisation quotidienne."
+        en: "Provides a quick signal of overall energy efficiency during daily use."
+      participateInScores:
+        - ENERGY_CONSUMPTION
+      participateInACV:
+        - USE
+      attributeValuesOrdering: "MAPPED"
+      synonyms:
+        all:
+          - "CLASSE ÉNERGÉTIQUE"
+          - "CLASSE ECO"
+          - "CLASSE ENERGÉTIQUE"
+          - "CLASSE D'EFFICACITÉ ÉNERGÉTIQUE"
+          - "CLASSE D'EFFICACITE ENERGETIQUE"
+          - "ENERGYCLASS"
+          - "COOLINGENERGYCLASS"
+          - "COOLINGCHARACTERISTICS-ENERGYCLASS"
+          - "CAVITIES[0]-ENERGYCLASS"
+          - "ENERGY EFFICIENCY CLASS"
+          - "CLASSE_ENERGY"
+      parser:
+        normalize: true
+        trim: true
+        lowerCase: false
+        upperCase: true
+        removeParenthesis: false
+        deleteTokens:
+          - "CLASSE"
+          - "(ÉCHELLE A++ À E)"
+          - "NOT AVAILABLE"
+          - "N/A"
+          - "CLASS 3"
+        tokenMatch:
+          - "A+++"
+          - "A++"
+          - "A+"
+          - "A"
+          - "B"
+          - "C"
+          - "D"
+          - "E"
+          - "F"
+          - "G"
+      mappings:
+        APPP: "A+++"
+        APP: "A++"
+        AP: "A+"
+        "A ++": "A++"
+        "A-40%": "A"
+      numericMapping:
+        A+++: 100.0
+        A++: 85.0
+        A+: 70.0
+        A: 55.0
+        B: 40.0
+        C: 25.0
+        D: 10.0
     - key: "PRODUCT_TYPE"
     - key: "AIR_CONDITIONER_FUNCTION_TYPE"
     - key: "COOLING_CAPACITY"

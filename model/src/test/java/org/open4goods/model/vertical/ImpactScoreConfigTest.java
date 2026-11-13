@@ -117,4 +117,50 @@ class ImpactScoreConfigTest {
         config.setMethodologyVersionOverride(2);
         assertThat(config.getMethodologyRevision()).isNotEqualTo(v1);
     }
+
+    /** Gate 2 (GOU-1877) position labels: 0.90 / 0.50 / 0.10 / 0, no label below 100 rated products. */
+    private static ImpactScoreConfig gateTwoLabels() {
+        ImpactScoreConfig config = config();
+        config.getV2().setPositionLabels(List.of(new ImpactScorePositionLabel("excellent", 0.90),
+                new ImpactScorePositionLabel("good", 0.50), new ImpactScorePositionLabel("fair", 0.10),
+                new ImpactScorePositionLabel("poor", 0.0)));
+        config.setMethodologyVersion(2);
+        return config;
+    }
+
+    @Test
+    void positionLevelFollowsTheGateTwoThresholds() {
+        ImpactScoreConfig config = gateTwoLabels();
+
+        assertThat(config.minRatedForPositionLabel()).isEqualTo(100);
+        assertThat(config.positionLevel(0.60, 100)).as("better than 60 percent: above the median").isEqualTo("good");
+        assertThat(config.positionLevel(0.50, 100)).as("threshold inclusive").isEqualTo("good");
+        assertThat(config.positionLevel(0.95, 2_151)).isEqualTo("excellent");
+        assertThat(config.positionLevel(0.30, 2_151)).isEqualTo("fair");
+        assertThat(config.positionLevel(0.05, 2_151)).isEqualTo("poor");
+    }
+
+    @Test
+    void noPositionLevelBelowTheMinimumRatedCohort() {
+        ImpactScoreConfig config = gateTwoLabels();
+
+        assertThat(config.positionLevel(0.60, 99)).as("99 rated products").isNull();
+        assertThat(config.positionLevel(0.95, 81)).as("air conditioners, 81 rated products").isNull();
+
+        config.getV2().setMinRatedForPositionLabel(null);
+        assertThat(config.positionLevel(0.60, 99)).as("default threshold").isNull();
+        assertThat(config.positionLevel(0.60, 100)).isEqualTo("good");
+
+        config.getV2().setMinRatedForPositionLabel(50);
+        assertThat(config.positionLevel(0.95, 81)).isEqualTo("excellent");
+    }
+
+    @Test
+    void noPositionLevelInV1() {
+        ImpactScoreConfig config = gateTwoLabels();
+        config.setMethodologyVersion(1);
+
+        assertThat(config.minRatedForPositionLabel()).isNull();
+        assertThat(config.positionLevel(0.95, 2_151)).isNull();
+    }
 }

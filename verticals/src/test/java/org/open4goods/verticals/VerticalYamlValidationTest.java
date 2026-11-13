@@ -2,6 +2,7 @@ package org.open4goods.verticals;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.assertj.core.api.Assertions.within;
 
 import java.lang.reflect.Field;
@@ -26,6 +27,8 @@ import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.ImpactScorePositionLabel;
 import org.open4goods.model.vertical.ImpactScoreV2Config;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.scoring.ScoreNormalizationMethod;
+import org.open4goods.model.vertical.scoring.ScoreNormalizationParams;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -253,16 +256,24 @@ class VerticalYamlValidationTest {
     }
 
     /**
-     * V2 criteria that replace a V1 criterion with its weight, by vertical (GOU-2041): V1 criterion to V2 criterion.
+     * V2 criteria that replace a V1 criterion with its weight, by vertical (GOU-2041, gate 2 of GOU-1877): V1
+     * criterion to V2 criterion.
      */
     private static final Map<String, Map<String, String>> V2_REPLACED_CRITERIA = Map.of(
         "tv", Map.of("REPAIRABILITY_INDEX", "REPAIRABILITY_OR_DURABILITY_INDEX"),
-        "washing-machine", Map.of("REPAIRABILITY_INDEX", "REPAIRABILITY_OR_DURABILITY_INDEX"));
+        "washing-machine", Map.of("REPAIRABILITY_INDEX", "REPAIRABILITY_OR_DURABILITY_INDEX",
+            "POWER_CONSUMPTION_TYPICAL", "ENERGY_CONSUMPTION_100_CYCLES"),
+        "smartphones", Map.of("REPAIRABILITY_INDEX", "EU_REPAIRABILITY_CLASS"));
+
+    /** V1 criteria removed from the V2 matrix, their weight spread pro rata, by vertical (gate 2 of GOU-1877). */
+    private static final Map<String, Set<String>> V2_REMOVED_CRITERIA = Map.of(
+        "air-conditioner", Set.of("REPAIRABILITY_INDEX"));
 
     /**
      * GOU-1880: every real vertical carries a valid {@code v2} block whose matrix is the V1 matrix without
      * {@code DATA_QUALITY}, renormalised to 1 pro rata (design {@code docs/impactscore/v2-design.md}, 1.2 and 2.3),
-     * except the criteria {@link #V2_REPLACED_CRITERIA} replaces, weight unchanged.
+     * except the criteria {@link #V2_REPLACED_CRITERIA} replaces, weight unchanged, and the criteria
+     * {@link #V2_REMOVED_CRITERIA} removes.
      */
     @Test
     void everyRealVerticalHasAV2MatrixWithoutDataQuality() {
@@ -273,7 +284,12 @@ class VerticalYamlValidationTest {
 
             Map<String, String> replaced = V2_REPLACED_CRITERIA.getOrDefault(config.getId(), Map.of());
             Map<String, Double> v1 = new HashMap<>();
-            impactScore.getCriteriasPonderation().forEach((key, weight) -> v1.put(replaced.getOrDefault(key, key), weight));
+            Set<String> removed = V2_REMOVED_CRITERIA.getOrDefault(config.getId(), Set.of());
+            impactScore.getCriteriasPonderation().forEach((key, weight) -> {
+                if (!removed.contains(key)) {
+                    v1.put(replaced.getOrDefault(key, key), weight);
+                }
+            });
             Map<String, Double> v2 = impactScore.getV2().getCriteriasPonderation();
             assertThat(v2).as("v2 matrix of %s", config.getId()).doesNotContainKey("DATA_QUALITY");
             assertThat(v2.values().stream().mapToDouble(Double::doubleValue).sum())
@@ -286,6 +302,68 @@ class VerticalYamlValidationTest {
             v2.forEach((key, weight) -> assertThat(weight).as("v2 weight of %s.%s", config.getId(), key)
                 .isCloseTo(v1.get(key) / withoutDataQuality, within(1e-6)));
         });
+    }
+
+    /** Gate 2 (GOU-1877, approval c81ef147): EPREL filter and coverage threshold by vertical. */
+    private static final Map<String, Object[]> GATE_TWO_FILTER = Map.of(
+        "refrigerator", new Object[] { false, 0.50 },
+        "dishwasher", new Object[] { false, 0.60 },
+        "smartphones", new Object[] { true, 0.50 },
+        "oven", new Object[] { true, 0.50 },
+        "tv", new Object[] { true, 0.50 },
+        "washing-machine", new Object[] { true, 0.50 },
+        "air-conditioner", new Object[] { true, 0.50 });
+
+    /** Gate 2 fixed bounds, by vertical: criterion to upper bound in W (lower bound 0). */
+    private static final Map<String, Map<String, Double>> GATE_TWO_FIXED_BOUNDS = Map.of(
+        "dishwasher", Map.of("POWER_CONSUMPTION_STANDBY", 1.0, "POWER_CONSUMPTION_OFF", 1.0),
+        "tv", Map.of("POWER_CONSUMPTION_OFF", 1.0, "POWER_CONSUMPTION_STANDBY_NETWORKD", 2.0),
+        "washing-machine", Map.of("POWER_CONSUMPTION_OFF", 1.0));
+
+    /**
+     * GOU-2137: the v2 blocks carry the values of gate 2 (document {@code decision} of GOU-1877,
+     * {@code docs/impactscore/decisions.md}).
+     */
+    @Test
+    void v2BlocksCarryTheGateTwoValues() {
+        assertThat(verticalsConfigService.getConfigsWithoutDefault()).extracting(VerticalConfig::getId)
+            .containsExactlyInAnyOrderElementsOf(GATE_TWO_FILTER.keySet());
+        assertThat(verticalsConfigService.getConfigsWithoutDefault()).allSatisfy(config -> {
+            ImpactScoreV2Config v2 = config.getImpactScoreConfig().getV2();
+            Object[] filter = GATE_TWO_FILTER.get(config.getId());
+            assertThat(v2.getEprelRequired()).as("eprelRequired of %s", config.getId()).isEqualTo(filter[0]);
+            assertThat(v2.getMinRealWeightCoverage()).as("minRealWeightCoverage of %s", config.getId())
+                .isEqualTo((Double) filter[1]);
+            assertThat(v2.getMinRatedForPositionLabel()).as("minRatedForPositionLabel of %s", config.getId())
+                .isEqualTo(100);
+            assertThat(v2.getPositionLabels()).as("positionLabels of %s", config.getId())
+                .extracting(ImpactScorePositionLabel::getLevel, ImpactScorePositionLabel::getMinBetterThan)
+                .containsExactly(tuple("excellent", 0.90), tuple("good", 0.50), tuple("fair", 0.10), tuple("poor", 0.0));
+
+            Map<String, Double> fixedBounds = GATE_TWO_FIXED_BOUNDS.getOrDefault(config.getId(), Map.of());
+            v2.getCriteriaScoring().forEach((key, scoring) -> {
+                assertThat(v2.getCriteriasPonderation()).as("override of %s.%s on a weighted criterion", config.getId(), key)
+                    .containsKey(key);
+                ScoreNormalizationParams params = scoring.getNormalization().getParams();
+                if (fixedBounds.containsKey(key)) {
+                    assertThat(scoring.getNormalization().getMethod()).isEqualTo(ScoreNormalizationMethod.MINMAX_FIXED);
+                    assertThat(params.getFixedMin()).as("lower bound of %s.%s", config.getId(), key).isEqualTo(0.0);
+                    assertThat(params.getFixedMax()).as("upper bound of %s.%s", config.getId(), key)
+                        .isEqualTo(fixedBounds.get(key));
+                } else {
+                    assertThat(scoring.getNormalization().getMethod()).as("method of %s.%s", config.getId(), key)
+                        .isEqualTo(ScoreNormalizationMethod.MINMAX_QUANTILE);
+                    assertThat(params.getQuantileLow()).isEqualTo(0.02);
+                    assertThat(params.getQuantileHigh()).isEqualTo(0.98);
+                }
+            });
+            assertThat(v2.getCriteriaScoring().keySet()).as("fixed bounds of %s", config.getId())
+                .containsAll(fixedBounds.keySet());
+        });
+        assertThat(verticalsConfigService.getConfigById("washing-machine").getImpactScoreConfig().getV2()
+            .getCriteriaScoring()).containsKey("ENERGY_CONSUMPTION_100_CYCLES");
+        assertThat(verticalsConfigService.getConfigById("air-conditioner").getImpactScoreConfig().getV2()
+            .getCriteriaScoring()).as("air conditioners: bounds unchanged").isEmpty();
     }
 
     @Test
@@ -389,6 +467,11 @@ class VerticalYamlValidationTest {
         assertV2Refused(v2 -> v2.setMinRealWeightCoverage(0.0), "minRealWeightCoverage");
         assertV2Refused(v2 -> v2.setMinRealWeightCoverage(1.2), "minRealWeightCoverage");
         assertV2Refused(v2 -> v2.setMinRealWeightCoverage(null), "minRealWeightCoverage");
+    }
+
+    @Test
+    void v2MinRatedForPositionLabelBelowOneIsRefused() {
+        assertV2Refused(v2 -> v2.setMinRatedForPositionLabel(0), "minRatedForPositionLabel");
     }
 
     @Test

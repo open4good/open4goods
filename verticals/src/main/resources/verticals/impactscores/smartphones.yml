@@ -13,21 +13,24 @@ criteriasPonderation:
 # ImpactScore V2 (GOU-1880), inactive while methodologyVersion is 1. Design: docs/impactscore/v2-design.md,
 # sections 1.2 and 2.3. V1 matrix above without DATA_QUALITY (now the confidence indicator), renormalised to
 # 1 pro rata. No stored AI audit for this vertical.
+# Gate 2 (GOU-1877): REPAIRABILITY_INDEX (French index, repealed for phones) is replaced, with its weight, by
+# EU_REPAIRABILITY_CLASS (EU class, filled in on every rated product).
 v2:
   criteriasPonderation:
-    REPAIRABILITY_INDEX: 0.5000000
+    EU_REPAIRABILITY_CLASS: 0.5000000
     WARRANTY: 0.2500000
     CLASSE_ENERGY: 0.1666667
     WEIGHT: 0.0833333
-  minRealWeightCoverage: 0.5  # provisoire, valeur de GOU-1877
-  eprelRequired: true  # provisoire, valeur de GOU-1877
-  positionLabels:  # provisoire, valeur de GOU-1877
+  minRealWeightCoverage: 0.5
+  eprelRequired: true
+  minRatedForPositionLabel: 100
+  positionLabels:
     - level: excellent
       minBetterThan: 0.90
     - level: good
-      minBetterThan: 0.67
+      minBetterThan: 0.50
     - level: fair
-      minBetterThan: 0.33
+      minBetterThan: 0.10
     - level: poor
       minBetterThan: 0.0
-  criteriaScoring: {}  # provisoire, valeur de GOU-1877 (bornes robustes : GOU-1883)
+  criteriaScoring: {}

@@ -173,6 +173,41 @@ public class ImpactScoreConfig {
 	}
 
 	/**
+	 * The smallest rated cohort for which a position label is exposed, in the effective version.
+	 *
+	 * @return {@code v2.minRatedForPositionLabel} in V2 (default
+	 *         {@value ImpactScoreV2Config#DEFAULT_MIN_RATED_FOR_POSITION_LABEL}), {@code null} in V1 (no label)
+	 */
+	public Integer minRatedForPositionLabel() {
+		if (!isV2Active() || v2 == null) {
+			return null;
+		}
+		return v2.getMinRatedForPositionLabel() == null ? ImpactScoreV2Config.DEFAULT_MIN_RATED_FOR_POSITION_LABEL
+				: v2.getMinRatedForPositionLabel();
+	}
+
+	/**
+	 * The position label of a rated product (design section 2.4): the first label, best first, whose threshold the
+	 * product reaches, provided the rated cohort reaches {@link #minRatedForPositionLabel()}.
+	 *
+	 * @param betterThan share of rated products ranked below the product, between 0 and 1
+	 * @param ratedCount number of rated products of the vertical
+	 * @return the label key, {@code null} in V1 or when the rated cohort is too small
+	 */
+	public String positionLevel(double betterThan, long ratedCount) {
+		Integer minRated = minRatedForPositionLabel();
+		if (minRated == null || ratedCount < minRated) {
+			return null;
+		}
+		for (ImpactScorePositionLabel label : positionLabels()) {
+			if (label != null && label.getMinBetterThan() != null && label.getMinBetterThan() <= betterThan) {
+				return label.getLevel();
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * The scoring override of a criterion in the effective version.
 	 *
 	 * @param key the criterion
