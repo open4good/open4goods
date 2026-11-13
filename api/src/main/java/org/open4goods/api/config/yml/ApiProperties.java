@@ -300,6 +300,11 @@ public class ApiProperties {
 	private ImpactScoreGuardProperties impactScoreGuard = new ImpactScoreGuardProperties();
 
 	/**
+	 * Clearing of the scores held by products outside the batched verticals, at the end of the batch (GOU-2133).
+	 */
+	private ScoreCleanupProperties scoreCleanup = new ScoreCleanupProperties();
+
+	/**
 	 * Retention, in milliseconds, of files parked in the deletion folder by the
 	 * {@link org.open4goods.api.services.ResourceCleanupMode#MOVE} mode. Files older than
 	 * this are purged for real, which is what actually reclaims disk space.
@@ -367,6 +372,14 @@ public class ApiProperties {
 
 	public void setImpactScoreGuard(ImpactScoreGuardProperties impactScoreGuard) {
 		this.impactScoreGuard = impactScoreGuard;
+	}
+
+	public ScoreCleanupProperties getScoreCleanup() {
+		return scoreCleanup;
+	}
+
+	public void setScoreCleanup(ScoreCleanupProperties scoreCleanup) {
+		this.scoreCleanup = scoreCleanup;
 	}
 
 	public double getResourceCleanupMinProductRatio() {
