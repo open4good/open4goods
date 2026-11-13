@@ -20,8 +20,8 @@ import org.slf4j.Logger;
  * composition (e.g. EcoScore) always receives a data-quality subscore.
  *
  * <p>In ImpactScore V2 ({@link ImpactScoreConfig#isV2Active()}), {@code DATA_QUALITY} is out of the ImpactScore and
- * becomes its confidence indicator: it counts only the real scores of the {@code asScore} criteria listed in
- * {@code availableImpactScoreCriterias}, without {@code BRAND_*} scores, itself or composites (design
+ * becomes its confidence indicator: it counts only the real scores of the {@code asScore} criteria of the V2 matrix
+ * ({@code v2.criteriasPonderation}, through {@link ImpactScoreConfig#activeCriteriasPonderation()}), without {@code BRAND_*} scores, itself or composites (design
  * {@code docs/impactscore/v2-design.md}, 2.3). V1 counts every real score.
  */
 public class DataCompletion2ScoreAggregationService extends AbstractScoreAggregationService {
@@ -88,16 +88,16 @@ public class DataCompletion2ScoreAggregationService extends AbstractScoreAggrega
 
         /**
          * The criteria {@code DATA_QUALITY} counts in V2: the {@code asScore} attributes of
-         * {@code availableImpactScoreCriterias}, without {@code BRAND_*}, {@code DATA_QUALITY} and composites.
+         * the V2 matrix ({@code v2.criteriasPonderation}; {@code availableImpactScoreCriterias} is not read), without {@code BRAND_*}, {@code DATA_QUALITY} and composites.
          * @param vConf the vertical configuration
          * @return the names of the counted scores
          */
         static Set<String> v2CountedCriterias(VerticalConfig vConf) {
                 Set<String> criterias = new HashSet<>();
-                if (vConf.getAvailableImpactScoreCriterias() == null || vConf.getAttributesConfig() == null) {
+                if (vConf.getImpactScoreConfig() == null || vConf.getAttributesConfig() == null) {
                         return criterias;
                 }
-                for (String key : vConf.getAvailableImpactScoreCriterias()) {
+                for (String key : vConf.getImpactScoreConfig().activeCriteriasPonderation().keySet()) {
                         if (key == null || DATA_QUALITY_SCORENAME.equals(key) || key.startsWith(BRAND_SCORE_PREFIX)
                                         || (vConf.getCompositeScores() != null && vConf.getCompositeScores().contains(key))) {
                                 continue;

@@ -274,7 +274,7 @@ class ImpactScoreRealVerticalsTest {
 
     /**
      * GOU-1880: in V2, {@code DATA_QUALITY} counts only the real scores of the ImpactScore criteria
-     * ({@code availableImpactScoreCriterias}, {@code asScore}), without the brand scores, itself or composites. V1
+     * (keys of the V2 matrix, {@code asScore}), without the brand scores, itself or composites. V1
      * keeps counting every real score, brand scores included.
      */
     @ParameterizedTest(name = "{0}")
@@ -624,7 +624,7 @@ class ImpactScoreRealVerticalsTest {
     /** A criterion counted by the V2 {@code DATA_QUALITY}, read from the configuration (design 2.3). */
     private static boolean isV2DataQualityCriterion(VerticalConfig vertical, String name) {
         if (DATA_QUALITY.equals(name) || name.startsWith("BRAND_") || vertical.getCompositeScores().contains(name)
-                || !vertical.getAvailableImpactScoreCriterias().contains(name)) {
+                || !vertical.getImpactScoreConfig().getV2().getCriteriasPonderation().containsKey(name)) {
             return false;
         }
         AttributeConfig attribute = vertical.getAttributesConfig().getAttributeConfigByKey(name);
