@@ -639,8 +639,9 @@ public class ProductRepository {
 	/** Width, on the 0 to 20 scale, of a band of the ImpactScore histogram. */
 	private static final int SCORE_BAND_WIDTH = 2;
 
-	/** Factor from the stored relative score (0 to 5) to the score out of 20. */
-	private static final double SCORE_ON_20_FACTOR = 4.0;
+	/** Maximum of the ImpactScore scale, and number of histogram bands (maximum / band width). */
+	private static final double SCORE_MAX = 20.0;
+	private static final int SCORE_BAND_COUNT = (int) SCORE_MAX / SCORE_BAND_WIDTH;
 
 	/**
 	 * Measured figures of the ImpactScore of a vertical (counts by outcome, coverage per criterion, distribution of
@@ -672,7 +673,7 @@ public class ProductRepository {
 	        .must(recentOffer)));
 	    var rated = co.elastic.clients.elasticsearch._types.query_dsl.Query
 	        .of(q -> q.term(t -> t.field("impactScoreMeta.status").value("RATED")));
-	    // scores.ECOSCORE.value is the relative score on 0 to 5 (the site shows it out of 20: x 4)
+	    // scores.ECOSCORE.value is the absolute score on 0 to 20 (relativ.value is the 0 to 5 one): no conversion
 	    var scoreField = "scores.ECOSCORE.value";
 
 	    NativeQueryBuilder queryBuilder = new NativeQueryBuilder()
@@ -683,8 +684,8 @@ public class ProductRepository {
 	            .aggregations("brands", Aggregation.of(c -> c.cardinality(t -> t.field("attributes.referentielAttributes.BRAND"))))
             .aggregations("coverage", Aggregation.of(c -> c.terms(t -> t.field("impactScoreMeta.realCriteria").size(200))))
 	            .aggregations("criteriaCount", Aggregation.of(c -> c.terms(t -> t.field("impactScoreMeta.realCriteriaCount").size(200))))
-	            .aggregations("histogram", Aggregation.of(c -> c.histogram(h -> h.field(scoreField).interval((double) SCORE_BAND_WIDTH / SCORE_ON_20_FACTOR)
-	                .minDocCount(0).extendedBounds(eb -> eb.min(0.0).max((20.0 - SCORE_BAND_WIDTH) / SCORE_ON_20_FACTOR)))))
+	            .aggregations("histogram", Aggregation.of(c -> c.histogram(h -> h.field(scoreField).interval((double) SCORE_BAND_WIDTH)
+	                .minDocCount(0).extendedBounds(eb -> eb.min(0.0).max(SCORE_MAX - SCORE_BAND_WIDTH)))))
 	            .aggregations("stats", Aggregation.of(c -> c.stats(st -> st.field(scoreField))))
 	            .aggregations("percentiles", Aggregation.of(c -> c.percentiles(p -> p.field(scoreField).percents(5.0, 50.0, 95.0))))))
 	        .withPageable(PageRequest.of(0, 1))
@@ -730,8 +731,16 @@ public class ProductRepository {
 	    for (LongTermsBucket bucket : ratedAgg.aggregations().get("criteriaCount").lterms().buckets().array()) {
 	        criteriaCount.put((int) bucket.key(), bucket.docCount());
 	    }
-	    List<Long> histogram = ratedCount == 0 ? List.of() : ratedAgg.aggregations().get("histogram").histogram().buckets().array().stream()
-	        .map(b -> b.docCount()).toList();
+	    List<Long> histogram = List.of();
+	    if (ratedCount > 0) {
+	        // a score of exactly 20 opens a band above the scale: it belongs to the last band
+	        long[] bands = new long[SCORE_BAND_COUNT];
+	        for (var bucket : ratedAgg.aggregations().get("histogram").histogram().buckets().array()) {
+	            int index = (int) Math.min(Math.max(Math.floor(bucket.key() / SCORE_BAND_WIDTH), 0), SCORE_BAND_COUNT - 1);
+	            bands[index] += bucket.docCount();
+	        }
+	        histogram = java.util.Arrays.stream(bands).boxed().toList();
+	    }
 	    Double min = null;
 	    Double max = null;
 	    Double p5 = null;
@@ -739,19 +748,19 @@ public class ProductRepository {
 	    Double p95 = null;
 	    if (ratedCount > 0) {
 	        var stats = ratedAgg.aggregations().get("stats").stats();
-	        min = on20(stats.min());
-	        max = on20(stats.max());
+	        min = round2(stats.min());
+	        max = round2(stats.max());
 	        var values = ratedAgg.aggregations().get("percentiles").tdigestPercentiles().values().keyed();
-	        p5 = on20(percentile(values, "5.0"));
-	        p50 = on20(percentile(values, "50.0"));
-	        p95 = on20(percentile(values, "95.0"));
+	        p5 = round2(percentile(values, "5.0"));
+	        p50 = round2(percentile(values, "50.0"));
+	        p95 = round2(percentile(values, "95.0"));
 	    }
 	    return new org.open4goods.model.rating.ImpactScoreVerticalStats(ratedCount, lowCoverage, noCriteria, outdated, excluded, brandCount,
 	        coverage, criteriaCount, histogram, SCORE_BAND_WIDTH, min, p5, p50, p95, max, lastScoredAt);
 	}
 
-	private static Double on20(Double value) {
-	    return value == null ? null : Math.round(value * SCORE_ON_20_FACTOR * 100.0) / 100.0;
+	private static Double round2(Double value) {
+	    return value == null ? null : Math.round(value * 100.0) / 100.0;
 	}
 
 	private static Double percentile(Map<String, String> values, String key) {

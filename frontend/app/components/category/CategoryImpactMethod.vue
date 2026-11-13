@@ -204,9 +204,9 @@
         <p v-if="stats.scoreMedian != null" class="impact-method__text">
           {{
             t('category.ecoscorePage.method.distribution.summary', {
-              min: stats.scoreMin,
-              median: stats.scoreMedian,
-              max: stats.scoreMax,
+              min: scoreFormat.format(stats.scoreMin ?? 0),
+              median: scoreFormat.format(stats.scoreMedian),
+              max: scoreFormat.format(stats.scoreMax ?? 0),
             })
           }}
         </p>
@@ -320,6 +320,9 @@ const contactPath = computed(() =>
 const audit = computed(() => props.config?.audit ?? null)
 
 const numberFormat = computed(() => new Intl.NumberFormat(locale.value))
+const scoreFormat = computed(
+  () => new Intl.NumberFormat(locale.value, { maximumFractionDigits: 1 }),
+)
 const fmt = (value: number | undefined) => numberFormat.value.format(value ?? 0)
 
 const notRatedCount = computed(

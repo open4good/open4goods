@@ -87,14 +87,14 @@ class ProductRepositoryImpactScoreStatsIT {
         ImpactScoreMeta.Status rated = ImpactScoreMeta.Status.RATED;
         ImpactScoreMeta.Status notRated = ImpactScoreMeta.Status.NOT_RATED;
         operations.save(List.of(
-                product(1, "tv", false, 2, rated, null, 1.0, List.of("A", "B", "C")),
-                product(2, "tv", false, 2, rated, null, 2.75, List.of("A", "B")),
-                product(3, "tv", false, 2, rated, null, 4.75, List.of("A")),
+                product(1, "tv", false, 2, rated, null, 4.0, List.of("A", "B", "C")),
+                product(2, "tv", false, 2, rated, null, 11.0, List.of("A", "B")),
+                product(3, "tv", false, 2, rated, null, 19.0, List.of("A")),
                 product(4, "tv", false, 2, notRated, ImpactScoreMeta.NotRatedReason.LOW_COVERAGE, null, List.of("C")),
                 product(5, "tv", false, 2, notRated, ImpactScoreMeta.NotRatedReason.NO_REAL_CRITERIA, null, List.of()),
-                product(6, "tv", false, 1, rated, null, 2.25, List.of("A")),   // previous version: waiting for recalculation
-                product(7, "tv", true, 2, rated, null, 3.75, List.of("A")),   // excluded: not counted as rated
-                product(8, "oven", false, 2, rated, null, 2.5, List.of("A"))), // other vertical
+                product(6, "tv", false, 1, rated, null, 9.0, List.of("A")),   // previous version: waiting for recalculation
+                product(7, "tv", true, 2, rated, null, 15.0, List.of("A")),   // excluded: not counted as rated
+                product(8, "oven", false, 2, rated, null, 10.0, List.of("A"))), // other vertical
                 ProductRepository.CURRENT_INDEX);
         operations.indexOps(ProductRepository.CURRENT_INDEX).refresh();
 
