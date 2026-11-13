@@ -53,4 +53,19 @@ describe('SSR memory guards (GOU-2093)', () => {
     expect(storageBlock?.[1]).toMatch(/driver:\s*'lru-cache'/)
     expect(storageBlock?.[1]).toMatch(/maxSize:/)
   })
+
+  // GOU-2152: the default heap limit follows the visible RAM, so the SSR
+  // process held 1.1-1.9 GB of RSS in production. See
+  // scripts/diagnostics/README.md before changing the value.
+  it('sets an explicit heap limit on the SSR container', () => {
+    const compose = readFileSync(
+      join(FRONTEND_DIR, '../docker-compose.yml'),
+      'utf-8'
+    )
+    const service = compose.match(
+      /\n {2}frontend-ssr:\n([\s\S]*?)(?=\n {0,2}\S)/
+    )
+
+    expect(service?.[1]).toMatch(/NODE_OPTIONS=--max-old-space-size=512\b/)
+  })
 })

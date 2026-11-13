@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
- * SSR heap load test (GOU-2093).
+ * SSR heap load test (GOU-2093, GOU-2152).
  *
- * Replays a mix of real routes against a production build (`.output`) and
- * reports the heap after GC sampled by `heap-probe.cjs`, so a leak shows up as
- * a heap that keeps growing instead of reaching a plateau.
+ * Replays a mix of real routes against a production build (`.output`),
+ * reports response times and the memory sampled by `heap-probe.cjs`, so a leak
+ * shows up as a heap that keeps growing instead of reaching a plateau.
  *
  * 1. pnpm build
  * 2. HEAP_PROBE_FILE=/tmp/heap.ndjson PORT=4101 HOST=127.0.0.1 \
@@ -21,6 +21,7 @@
  *   --concurrency <n>     parallel requests (default 8)
  *   --probe <file>        NDJSON written by heap-probe.cjs, summarised at the end
  *   --max-heap-mb <n>     exit 1 when the last heap after GC exceeds it
+ *   --max-rss-mb <n>      exit 1 when the highest sampled RSS exceeds it
  *
  * Every request gets unique tracking parameters (utm_*, gclid, fbclid), as
  * crawlers and ad clicks do in production.
@@ -37,6 +38,7 @@ const { values } = parseArgs({
     concurrency: { type: 'string', default: '8' },
     probe: { type: 'string' },
     'max-heap-mb': { type: 'string' },
+    'max-rss-mb': { type: 'string' },
   },
 })
 
@@ -79,6 +81,7 @@ const withTracking = (route, i) => {
 }
 
 const statuses = new Map()
+const durations = []
 let sent = 0
 let bytes = 0
 const startedAt = Date.now()
@@ -87,6 +90,7 @@ const worker = async () => {
   while (sent < total) {
     const i = sent++
     const path = withTracking(routes[i % routes.length], i)
+    const requestStartedAt = performance.now()
     try {
       const response = await fetch(`${values.base}${path}`, {
         headers: {
@@ -99,6 +103,7 @@ const worker = async () => {
       })
       const body = await response.arrayBuffer()
       bytes += body.byteLength
+      durations.push(performance.now() - requestStartedAt)
       statuses.set(response.status, (statuses.get(response.status) ?? 0) + 1)
     } catch (error) {
       const key = `error:${error.cause?.code ?? error.name}`
@@ -120,6 +125,15 @@ console.log(
 )
 console.log('statuses:', Object.fromEntries(statuses))
 
+durations.sort((a, b) => a - b)
+const percentile = p =>
+  durations[Math.min(durations.length - 1, Math.floor(durations.length * p))]
+if (durations.length) {
+  console.log(
+    `response time: p50=${percentile(0.5).toFixed(0)} ms p95=${percentile(0.95).toFixed(0)} ms p99=${percentile(0.99).toFixed(0)} ms max=${durations.at(-1).toFixed(0)} ms`
+  )
+}
+
 if (values.probe) {
   // Let the probe take a post-load sample.
   await new Promise(resolve => setTimeout(resolve, 7000))
@@ -133,16 +147,32 @@ if (values.probe) {
   for (let i = 0; i < samples.length; i += step) {
     const s = samples[i]
     console.log(
-      `t=${(s.t / 1000).toFixed(0)}s heapUsed(after GC)=${mb(s.heapUsed)} MB rss=${mb(s.rss)} MB`
+      `t=${(s.t / 1000).toFixed(0)}s heapUsed(${s.phase ?? 'after-gc'})=${mb(s.heapUsed)} MB heapTotal=${mb(s.heapTotal)} MB external=${mb(s.external)} MB rss=${mb(s.rss)} MB`
     )
   }
   const last = samples.at(-1)
-  console.log(`last heapUsed after GC: ${mb(last.heapUsed)} MB`)
+  const max = key => Math.max(...samples.map(s => s[key]))
+  console.log(
+    `max: rss=${mb(max('rss'))} MB heapTotal=${mb(max('heapTotal'))} MB heapUsed=${mb(max('heapUsed'))} MB external=${mb(max('external'))} MB arrayBuffers=${mb(max('arrayBuffers'))} MB`
+  )
+  if (last.limit) {
+    console.log(`heap_size_limit: ${mb(last.limit)} MB`)
+  }
+  console.log(
+    `last heapUsed (${last.phase ?? 'after-gc'}): ${mb(last.heapUsed)} MB`
+  )
   if (
     values['max-heap-mb'] &&
     last.heapUsed / 1048576 > Number(values['max-heap-mb'])
   ) {
     console.error(`heap above ${values['max-heap-mb']} MB`)
+    process.exitCode = 1
+  }
+  if (
+    values['max-rss-mb'] &&
+    max('rss') / 1048576 > Number(values['max-rss-mb'])
+  ) {
+    console.error(`RSS above ${values['max-rss-mb']} MB`)
     process.exitCode = 1
   }
 }
