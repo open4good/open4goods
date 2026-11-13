@@ -211,8 +211,10 @@ but keeps its real sub-scores and its `impactScoreMeta`.
 
 Out of the sum in V2 (absent from `v2.criteriasPonderation`, rejected by
 validation). It is still computed, as the confidence indicator. In V2 it
-counts only real scores of `asScore` criteria listed in
-`availableImpactScoreCriterias`, without `BRAND_*`, itself or composites.
+counts only real scores of the `asScore` criteria of the V2 matrix (keys of
+`v2.criteriasPonderation`), without `BRAND_*`, itself or composites. It thus
+matches the displayed "real criteria / total" count. It does not read
+`availableImpactScoreCriterias` (still used by AI generation and front-api).
 Normalisation is unchanged (`MINMAX_OBSERVED` within the category), so the lot
 0 badge (`isDataQualityBelowCategoryAverage`) keeps its meaning. V1 unchanged.
 
