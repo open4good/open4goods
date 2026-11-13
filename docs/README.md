@@ -37,6 +37,7 @@ owned, and linked from this index when they become durable project knowledge.
 - [Ranking and listing disclosure, art. D111-6 C. conso (GOU-1995)](business/ranking-and-listing-disclosure.md)
 - [External GTIN/ISBN datasources: integration plans](datasources/integration/README.md)
 - [ImpactScore V2 design (versioned methodology, coverage, switch, simulation)](impactscore/v2-design.md)
+- [ImpactScore V1/V2 simulation of 2026-11-13 (GOU-1887)](impactscore/v2-simulation-2026-11-13.md)
 - [ADR 0001: EPREL matching logic scoring](adr/0001-eprel-matching-logic-scoring.md)
 - [ADR 0002: Product model identity confidence](adr/0002-product-model-identity-confidence.md)
 - [ADR 0003: EPREL dry-run and logging redirection](adr/0003-eprel-dry-run-and-logging-redirection.md)
