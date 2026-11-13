@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { blogOfferBlocksBySlug, getBlogOfferBlocks } from './blog-offer-blocks'
 
 describe('blog-offer-blocks config', () => {
-  it('declares the three targeted articles', () => {
+  it('declares the four targeted articles', () => {
     expect(Object.keys(blogOfferBlocksBySlug).sort()).toEqual([
+      'black-friday-tv-reperer-fausses-promotions',
       'quel-systeme-choisir-entre-four-pyrolyse-et-catalyse',
       'quel-volume-de-four-choisir',
       'quelle-taille-de-tv-choisir-pour-son-salon',
@@ -14,6 +15,9 @@ describe('blog-offer-blocks config', () => {
     expect(
       getBlogOfferBlocks('quelle-taille-de-tv-choisir-pour-son-salon')
     ).toMatchObject({ vertical: 'tv', categoryPath: '/televiseurs' })
+    expect(
+      getBlogOfferBlocks('black-friday-tv-reperer-fausses-promotions')
+    ).toEqual(getBlogOfferBlocks('quelle-taille-de-tv-choisir-pour-son-salon'))
     expect(getBlogOfferBlocks('quel-volume-de-four-choisir')).toMatchObject({
       vertical: 'oven',
       categoryPath: '/fours',
@@ -47,9 +51,7 @@ describe('blog-offer-blocks config', () => {
         for (let j = i + 1; j < ranges.length; j++) {
           const a = ranges[i]!
           const b = ranges[j]!
-          expect(Math.max(a.min, b.min)).toBeGreaterThan(
-            Math.min(a.max, b.max)
-          )
+          expect(Math.max(a.min, b.min)).toBeGreaterThan(Math.min(a.max, b.max))
         }
       }
     }
