@@ -224,6 +224,7 @@
                   :stats="impactScoreStats"
                   :category-label="categoryLabel"
                   :criteria-labels="criteriaLabels"
+                  :criteria-attributes="criteriaAttributes"
                   :id-prefix="sectionIds.method"
                 />
               </v-sheet>
@@ -347,9 +348,14 @@
                     class="category-ecoscore__table-helper"
                   >
                     {{
-                      t(
-                        'category.ecoscorePage.sections.transparency.tableHelper'
-                      )
+                      isV2
+                        ? t(
+                            'category.ecoscorePage.sections.transparency.tableHelperV2',
+                            { version: methodologyVersion }
+                          )
+                        : t(
+                            'category.ecoscorePage.sections.transparency.tableHelper'
+                          )
                     }}
                   </p>
 
@@ -369,7 +375,7 @@
                             )
                           }}
                         </th>
-                        <th scope="col" class="text-left">
+                        <th v-if="!isV2" scope="col" class="text-left">
                           {{
                             t(
                               'category.ecoscorePage.sections.transparency.tableHeaders.proposed'
@@ -388,7 +394,7 @@
                     <tbody>
                       <tr v-for="row in coefficientComparison" :key="row.key">
                         <th scope="row">{{ row.label }}</th>
-                        <td>{{ formatDecimal(row.proposed) }}</td>
+                        <td v-if="!isV2">{{ formatDecimal(row.proposed) }}</td>
                         <td>{{ formatDecimal(row.applied) }}</td>
                       </tr>
                     </tbody>
@@ -488,7 +494,33 @@
                   </h2>
                 </header>
 
+                <div v-if="isV2" data-test="ai-audit-v1-history">
+                  <p class="category-ecoscore__ai-helper">
+                    {{
+                      t('category.ecoscorePage.sections.aiAudit.v1History', {
+                        category: categoryLabel,
+                        version: methodologyVersion,
+                      })
+                    }}
+                  </p>
+                  <v-btn
+                    v-if="githubImpactScoreUrl"
+                    color="primary"
+                    variant="tonal"
+                    :href="githubImpactScoreUrl"
+                    rel="noopener"
+                    target="_blank"
+                  >
+                    <v-icon class="me-2" icon="mdi-github" size="18" />
+                    {{
+                      t(
+                        'category.ecoscorePage.sections.transparency.communityCta'
+                      )
+                    }}
+                  </v-btn>
+                </div>
                 <v-expansion-panels
+                  v-else
                   variant="accordion"
                   data-test="ai-audit-panels"
                 >
@@ -714,6 +746,13 @@ const impactScoreConfig = computed<ImpactScoreConfigDto | null>(
 
 const impactScoreTexts = computed(() => impactScoreConfig.value?.texts ?? {})
 
+const methodologyVersion = computed(
+  () => impactScoreConfig.value?.methodologyVersion ?? 1
+)
+// From V2 on, the stored AI audit (V1 matrix, not rerun) never describes the
+// current method: criteria come from the active matrix and their attributes.
+const isV2 = computed(() => methodologyVersion.value >= 2)
+
 // V2: version of the method, coverage threshold and "not filled in" rule.
 // The weights listed below already come from the active matrix.
 const methodologyV2Note = computed(() => {
@@ -786,9 +825,32 @@ const availableCriteriaMap = computed(() => {
   }, new Map<string, { key: string; label: string; description: string; utility: string | null }>())
 })
 
+// Keys of the active matrix and of the available criteria: a V2 matrix weighs
+// derived criteria that are not listed in availableImpactScoreCriterias.
+const criteriaKeys = computed(
+  () =>
+    new Set<string>([
+      ...availableImpactScoreCriterias.value,
+      ...Object.keys(impactScoreConfig.value?.criteriasPonderation ?? {}),
+    ])
+)
+
 const criteriaLabels = computed<Record<string, string>>(() =>
   Object.fromEntries(
-    availableCriteria.value.map(criterion => [criterion.key, criterion.label])
+    Array.from(criteriaKeys.value).map(key => {
+      const attribute = attributeMap.value.get(key)
+      return [key, attribute?.scoreTitle ?? attribute?.name ?? key]
+    })
+  )
+)
+
+const criteriaAttributes = computed<Record<string, AttributeConfigDto>>(() =>
+  Object.fromEntries(
+    Array.from(criteriaKeys.value)
+      .map(key => [key, attributeMap.value.get(key)] as const)
+      .filter((entry): entry is readonly [string, AttributeConfigDto] =>
+        Boolean(entry[1])
+      )
   )
 )
 
@@ -802,11 +864,12 @@ const criteriaCards = computed(() => {
   const weights = impactScoreConfig.value?.criteriasPonderation ?? {}
   const analysis = impactScoreTexts.value?.criteriasAnalysis ?? {}
   const available = availableImpactScoreCriterias.value
-  const keys = new Set<string>([
-    ...Object.keys(weights),
-    ...Object.keys(analysis),
-    ...available,
-  ])
+  // V2: only the criteria of the active matrix, without the V1 ones it dropped.
+  const keys = new Set<string>(
+    isV2.value
+      ? Object.keys(weights)
+      : [...Object.keys(weights), ...Object.keys(analysis), ...available]
+  )
 
   return Array.from(keys).map(key => {
     const attribute = attributeMap.value.get(key)
@@ -950,7 +1013,8 @@ const aiCoefficients = computed<Record<string, number>>(() => {
 
 const coefficientComparison = computed(() => {
   const applied = impactScoreConfig.value?.criteriasPonderation ?? {}
-  const proposed = aiCoefficients.value ?? {}
+  // V2: the AI proposal covered the V1 matrix, so only applied weights show.
+  const proposed = isV2.value ? {} : (aiCoefficients.value ?? {})
   const available = availableImpactScoreCriterias.value
   const keys = new Set<string>([
     ...Object.keys(applied ?? {}),
@@ -1116,6 +1180,12 @@ const scrollToSection = (sectionId: string) => {
 const githubConfigUrl = computed(() =>
   category.value?.id
     ? `https://github.com/open4good/open4goods/blob/main/verticals/src/main/resources/verticals/${category.value.id}.yml`
+    : null
+)
+
+const githubImpactScoreUrl = computed(() =>
+  category.value?.id
+    ? `https://github.com/open4good/open4goods/blob/main/verticals/src/main/resources/verticals/impactscores/${category.value.id}.yml`
     : null
 )
 

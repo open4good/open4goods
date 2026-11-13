@@ -551,4 +551,63 @@ describe('Category ecosystem Impact Score page', () => {
     expect(secondSeoPayload.title()).toBe('Impact Score for Vacuum cleaners')
     expect(secondSeoPayload.title()).not.toBe(firstSeoPayload.title())
   })
+
+  it('presents a V2 matrix without the stored V1 audit', async () => {
+    const v2Category = {
+      ...categoryFixture,
+      impactScoreConfig: {
+        ...categoryFixture.impactScoreConfig,
+        methodologyVersion: 2,
+        criteriasPonderation: { POWER_DENSITY: 0.6, REPAIRABILITY: 0.4 },
+        aiJsonResponse: JSON.stringify({
+          criteriasPonderation: { POWER: 0.35, DATA_QUALITY: 0.13 },
+          mitigations: [
+            'Raise DATA_QUALITY because missing criteria are imputed to the mean.',
+          ],
+        }),
+      },
+      attributesConfig: {
+        configs: [
+          ...(categoryFixture.attributesConfig?.configs ?? []),
+          {
+            key: 'POWER_DENSITY',
+            name: 'Power per screen area',
+            scoreTitle: 'Power per screen area (SDR)',
+            impactBetterIs: 'LOWER',
+            scoreUtility: 'Compares a 32-inch and a 75-inch television.',
+          },
+        ],
+      },
+    } as unknown as VerticalConfigFullDto
+    selectCategoryBySlugMock.mockResolvedValueOnce(v2Category)
+
+    const wrapper = await mountPage()
+    await flushPromises()
+
+    const cards = wrapper.findAll('[data-test="impact-criteria-card"]')
+    expect(cards.map(card => card.text())).toHaveLength(2)
+    expect(wrapper.text()).not.toContain('Data quality')
+
+    const rows = wrapper.findAll('[data-test="criteria-table"] tbody tr')
+    expect(rows).toHaveLength(2)
+    expect(rows[0]!.text()).toContain('Power per screen area (SDR)')
+    expect(rows[0]!.text()).toContain(
+      'Compares a 32-inch and a 75-inch television.'
+    )
+
+    const table = wrapper.get('[data-test="comparison-table"]')
+    expect(table.findAll('thead th')).toHaveLength(2)
+    expect(table.text()).not.toContain('0.35')
+
+    expect(wrapper.find('[data-test="ai-audit-panels"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="ai-json"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="ai-audit-v1-history"]').exists()).toBe(
+      true
+    )
+
+    const text = wrapper.text()
+    for (const forbidden of ['POWER_DENSITY', 'DATA_QUALITY', 'imputed']) {
+      expect(text).not.toContain(forbidden)
+    }
+  })
 })

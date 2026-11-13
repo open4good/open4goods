@@ -4,6 +4,7 @@ import { defineComponent, h } from 'vue'
 
 import CategoryImpactMethod from './CategoryImpactMethod.vue'
 import type {
+  AttributeConfigDto,
   ImpactScoreConfigDto,
   ImpactScoreStatsDto,
 } from '~~/shared/api-client'
@@ -16,9 +17,8 @@ vi.mock('vue-i18n', () => ({
   }),
 }))
 
-
 const config: ImpactScoreConfigDto = {
-  methodologyVersion: 2,
+  methodologyVersion: 1,
   minRealWeightCoverage: 0.6,
   criteriasPonderation: { REPAIRABILITY: 0.3, POWER: 0.7 },
   audit: {
@@ -67,13 +67,57 @@ const stats: ImpactScoreStatsDto = {
   lastScoredAt: Date.UTC(2026, 10, 8),
 }
 
-const mountMethod = (statsValue: ImpactScoreStatsDto | null) =>
+// V2 matrix: a derived criterion absent from the stored V1 audit, which keeps
+// its V1 texts (mitigations, rationales) and must not describe the V2 method.
+const v2Config: ImpactScoreConfigDto = {
+  ...config,
+  methodologyVersion: 2,
+  criteriasPonderation: { POWER_DENSITY: 0.7, REPAIRABILITY: 0.3 },
+  audit: {
+    ...config.audit,
+    mitigations: [
+      'Raise DATA_QUALITY because missing criteria are imputed to the mean.',
+    ],
+    criteria: [
+      {
+        key: 'REPAIRABILITY',
+        weight: 0.14,
+        directionality: 'categorical',
+        rationale: 'V1 rationale of the repairability index.',
+      },
+    ],
+  },
+}
+
+const criteriaAttributes: Record<string, AttributeConfigDto> = {
+  POWER_DENSITY: {
+    key: 'POWER_DENSITY',
+    impactBetterIs: 'LOWER',
+    scoreDescription: 'Power divided by screen area.',
+    scoreUtility: 'Compares a 32-inch and a 75-inch television.',
+  },
+  REPAIRABILITY: {
+    key: 'REPAIRABILITY',
+    impactBetterIs: 'GREATER',
+    scoreDescription: 'Official index out of 10.',
+  },
+}
+
+const mountMethod = (
+  statsValue: ImpactScoreStatsDto | null,
+  configValue: ImpactScoreConfigDto = config
+) =>
   mount(CategoryImpactMethod, {
     props: {
-      config,
+      config: configValue,
       stats: statsValue,
       categoryLabel: 'Televisions',
-      criteriaLabels: { POWER: 'Energy', REPAIRABILITY: 'Repairability' },
+      criteriaLabels: {
+        POWER: 'Energy',
+        POWER_DENSITY: 'Energy per screen area',
+        REPAIRABILITY: 'Repairability',
+      },
+      criteriaAttributes,
       idPrefix: 'method',
     },
     global: {
@@ -131,7 +175,9 @@ describe('CategoryImpactMethod', () => {
   it('shows covered brands, excluded products and the update fate', () => {
     const wrapper = mountMethod(stats)
     expect(wrapper.get('[data-test="brands"]').text()).toContain('"count":"12"')
-    expect(wrapper.get('[data-test="excluded"]').text()).toContain('"count":"7"')
+    expect(wrapper.get('[data-test="excluded"]').text()).toContain(
+      '"count":"7"'
+    )
     expect(wrapper.find('[data-test="outdated-fate"]').exists()).toBe(true)
   })
 
@@ -148,5 +194,87 @@ describe('CategoryImpactMethod', () => {
     expect(wrapper.find('[data-test="stats-unavailable"]').exists()).toBe(true)
     expect(wrapper.find('[data-test="coverage"]').exists()).toBe(false)
     expect(wrapper.find('[data-test="distribution"]').exists()).toBe(false)
+  })
+
+  it('keeps the V1 audit texts and adds the disclaimer in V1', () => {
+    const wrapper = mountMethod(stats)
+    expect(wrapper.get('[data-test="mitigations"]').text()).toContain(
+      'Compare within the category only.'
+    )
+    expect(wrapper.find('[data-test="disclaimer"]').text()).toBe(
+      'components.impactScore.v2.disclaimer'
+    )
+    expect(wrapper.find('[data-test="rated-count"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="sources-v1"]').exists()).toBe(false)
+  })
+})
+
+describe('CategoryImpactMethod with a V2 matrix', () => {
+  it('describes criteria from their attributes, not from the V1 audit', () => {
+    const rows = mountMethod(stats, v2Config).findAll(
+      '[data-test="criteria-table"] tbody tr'
+    )
+    expect(rows).toHaveLength(2)
+    expect(rows[0]!.text()).toContain('Energy per screen area')
+    expect(rows[0]!.text()).toContain(
+      'category.ecoscorePage.method.method.lower'
+    )
+    expect(rows[0]!.text()).toContain(
+      'Compares a 32-inch and a 75-inch television.'
+    )
+    expect(rows[1]!.text()).toContain('Repairability')
+    expect(rows[1]!.text()).toContain(
+      'category.ecoscorePage.method.method.higher'
+    )
+    expect(rows[1]!.text()).toContain('Official index out of 10.')
+    expect(rows[1]!.text()).not.toContain('V1 rationale')
+    rows.forEach(row => expect(row.text()).not.toContain('—'))
+  })
+
+  it('hides the V1 audit texts and shows the disclaimer', () => {
+    const wrapper = mountMethod(stats, v2Config)
+    expect(wrapper.find('[data-test="mitigations"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="not-absolute"]').exists()).toBe(false)
+    expect(wrapper.get('[data-test="what-it-means"]').text()).toContain(
+      'category.ecoscorePage.method.meaning.fallback'
+    )
+    expect(wrapper.find('[data-test="disclaimer"]').exists()).toBe(true)
+    const text = wrapper.text()
+    for (const v1Text of [
+      'imputed',
+      'Raise',
+      'Manufacturing emissions are not measured.',
+      'Ranking is still useful.',
+    ]) {
+      expect(text).not.toContain(v1Text)
+    }
+  })
+
+  it('states the number of rated and compared products', () => {
+    const wrapper = mountMethod(stats, v2Config)
+    expect(wrapper.get('[data-test="rated-count"]').text()).toBe(
+      'category.ecoscorePage.method.products.ratedCompared {"count":"100","items":"televisions"}'
+    )
+    expect(wrapper.get('[data-test="counts"]').text()).not.toContain(
+      'products.rated '
+    )
+  })
+
+  it('labels the stored audit sources as the historical V1 ones', () => {
+    const wrapper = mountMethod(stats, v2Config)
+    expect(wrapper.find('[data-test="sources-v1"]').exists()).toBe(true)
+    expect(wrapper.text()).toContain('EU energy label')
+  })
+
+  it('uses the labels of the criteria for the coverage', () => {
+    const coverage = mountMethod(
+      {
+        ...stats,
+        coverageByCriterion: { POWER_DENSITY: 80, REPAIRABILITY: 40 },
+      },
+      v2Config
+    ).findAll('[data-test="coverage"] li')
+    expect(coverage[0]!.text()).toContain('Energy per screen area')
+    expect(coverage[0]!.text()).toContain('80%')
   })
 })

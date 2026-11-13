@@ -10,7 +10,7 @@
       </h3>
       <p class="impact-method__text" data-test="what-it-means">
         {{
-          audit?.whatItMeansForUsers ||
+          meaningAudit?.whatItMeansForUsers ||
           t('category.ecoscorePage.method.meaning.fallback', {
             category: categoryLabel,
           })
@@ -20,7 +20,7 @@
         {{ t('category.ecoscorePage.method.limits.title') }}
       </h4>
       <v-alert
-        v-if="audit?.notAnAbsoluteFootprint"
+        v-if="meaningAudit?.notAnAbsoluteFootprint"
         class="impact-method__alert"
         type="warning"
         variant="tonal"
@@ -29,15 +29,30 @@
       >
         {{ t('aiAudit.positioning.notAbsoluteWarning') }}
       </v-alert>
-      <p v-if="audit?.whatIsMissingVsFullLca" class="impact-method__text">
-        {{ audit.whatIsMissingVsFullLca }}
+      <p
+        v-if="meaningAudit?.whatIsMissingVsFullLca"
+        class="impact-method__text"
+      >
+        {{ meaningAudit.whatIsMissingVsFullLca }}
       </p>
-      <p v-if="audit?.whyRelativeIsStillUseful" class="impact-method__text">
-        {{ audit.whyRelativeIsStillUseful }}
+      <p
+        v-if="meaningAudit?.whyRelativeIsStillUseful"
+        class="impact-method__text"
+      >
+        {{ meaningAudit.whyRelativeIsStillUseful }}
       </p>
-      <ul v-if="audit?.mitigations?.length" class="impact-method__list">
-        <li v-for="item in audit.mitigations" :key="item">{{ item }}</li>
+      <ul
+        v-if="meaningAudit?.mitigations?.length"
+        class="impact-method__list"
+        data-test="mitigations"
+      >
+        <li v-for="item in meaningAudit.mitigations" :key="item">
+          {{ item }}
+        </li>
       </ul>
+      <p class="impact-method__text" data-test="disclaimer">
+        {{ t('components.impactScore.v2.disclaimer') }}
+      </p>
       <p class="impact-method__text">
         {{ t('category.ecoscorePage.method.limits.static') }}
       </p>
@@ -120,8 +135,21 @@
         }}
       </p>
       <template v-if="stats">
+        <p
+          v-if="isV2"
+          class="impact-method__text impact-method__count"
+          data-test="rated-count"
+        >
+          {{
+            t(
+              'category.ecoscorePage.method.products.ratedCompared',
+              { count: fmt(stats.ratedCount), items: itemsLabel },
+              stats.ratedCount ?? 0
+            )
+          }}
+        </p>
         <ul class="impact-method__list" data-test="counts">
-          <li>
+          <li v-if="!isV2">
             {{
               t('category.ecoscorePage.method.products.rated', {
                 count: fmt(stats.ratedCount),
@@ -227,7 +255,11 @@
       <p class="impact-method__text">
         {{ t('category.ecoscorePage.method.sources.data') }}
       </p>
-      <p v-if="stats?.brandCount" class="impact-method__text" data-test="brands">
+      <p
+        v-if="stats?.brandCount"
+        class="impact-method__text"
+        data-test="brands"
+      >
         {{
           t('category.ecoscorePage.method.sources.brands', {
             count: fmt(stats.brandCount),
@@ -238,6 +270,13 @@
         <NuxtLink :to="partnersPath">
           {{ t('category.ecoscorePage.method.sources.partners') }}
         </NuxtLink>
+      </p>
+      <p
+        v-if="isV2 && audit?.sources?.length"
+        class="impact-method__text"
+        data-test="sources-v1"
+      >
+        {{ t('category.ecoscorePage.method.sources.auditV1') }}
       </p>
       <ul v-if="audit?.sources?.length" class="impact-method__list">
         <li v-for="source in audit.sources" :key="source.id ?? source.title">
@@ -265,7 +304,11 @@
       <p class="impact-method__text">
         {{ t('category.ecoscorePage.method.update.body') }}
       </p>
-      <p v-if="stats?.outdatedCount" class="impact-method__text" data-test="outdated-fate">
+      <p
+        v-if="stats?.outdatedCount"
+        class="impact-method__text"
+        data-test="outdated-fate"
+      >
         {{ t('category.ecoscorePage.method.update.outdated') }}
       </p>
       <p class="impact-method__text">
@@ -294,6 +337,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type {
+  AttributeConfigDto,
   ImpactScoreAuditSourceDto,
   ImpactScoreConfigDto,
   ImpactScoreStatsDto,
@@ -306,6 +350,8 @@ const props = defineProps<{
   categoryLabel: string
   /** Display label of each criterion key. */
   criteriaLabels: Record<string, string>
+  /** Attribute configuration of each criterion key (direction, texts). */
+  criteriaAttributes?: Record<string, AttributeConfigDto>
   idPrefix: string
 }>()
 
@@ -318,6 +364,20 @@ const contactPath = computed(() =>
 )
 
 const audit = computed(() => props.config?.audit ?? null)
+
+// The stored AI audit was produced for the V1 matrix and was not rerun for V2:
+// from V2 on, its texts never describe the current method.
+const isV2 = computed(() => (props.config?.methodologyVersion ?? 1) >= 2)
+const meaningAudit = computed(() => (isV2.value ? null : audit.value))
+
+const itemsLabel = computed(() => {
+  const label = props.categoryLabel.trim()
+  try {
+    return label.toLocaleLowerCase(locale.value)
+  } catch {
+    return label.toLowerCase()
+  }
+})
 
 const numberFormat = computed(() => new Intl.NumberFormat(locale.value))
 const scoreFormat = computed(
@@ -360,6 +420,17 @@ const directionLabel = (direction: string | null | undefined) => {
   }
 }
 
+const attributeDirection = (attribute: AttributeConfigDto | undefined) => {
+  switch (attribute?.impactBetterIs) {
+    case 'GREATER':
+      return 'higher_is_better'
+    case 'LOWER':
+      return 'lower_is_better'
+    default:
+      return null
+  }
+}
+
 const criteriaRows = computed(() => {
   const weights = props.config?.criteriasPonderation ?? {}
   const auditByKey = new Map(
@@ -369,11 +440,26 @@ const criteriaRows = computed(() => {
     .filter(([, weight]) => (weight ?? 0) > 0)
     .sort((a, b) => (b[1] ?? 0) - (a[1] ?? 0))
     .map(([key, weight]) => {
+      const label = props.criteriaLabels[key] ?? key
+      const weightLabel = `${Math.round((weight ?? 0) * 100)}%`
+      if (isV2.value) {
+        const attribute = props.criteriaAttributes?.[key]
+        return {
+          key,
+          label,
+          weightLabel,
+          directionLabel: directionLabel(attributeDirection(attribute)),
+          rationale:
+            attribute?.scoreUtility?.trim() ||
+            attribute?.scoreDescription?.trim() ||
+            '—',
+        }
+      }
       const reasoned = auditByKey.get(key)
       return {
         key,
-        label: props.criteriaLabels[key] ?? key,
-        weightLabel: `${Math.round((weight ?? 0) * 100)}%`,
+        label,
+        weightLabel,
         directionLabel: directionLabel(reasoned?.directionality),
         rationale: reasoned?.rationale || '—',
       }
@@ -452,6 +538,10 @@ const sourceLabel = (source: ImpactScoreAuditSourceDto) =>
 
 .impact-method__alert
   margin-bottom: 0.75rem
+
+.impact-method__count
+  font-size: 1.1rem
+  font-weight: 600
 
 .impact-method__table-wrap
   overflow-x: auto
