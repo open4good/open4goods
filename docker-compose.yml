@@ -102,6 +102,11 @@ services:
       - ./frontend/.output:/usr/src/app/.output
       - ./frontend/package.json:/usr/src/app/package.json
     command: ["node", ".output/server/index.mjs"]
+    # Explicit V8 heap limit: without it V8 sizes the heap from the visible RAM
+    # and lets it grow to 1.3-1.9 GB of RSS before collecting (GOU-2152, see
+    # frontend/scripts/diagnostics/README.md).
+    environment:
+      - NODE_OPTIONS=--max-old-space-size=512
     restart: unless-stopped
     networks:
       - o4g-network
