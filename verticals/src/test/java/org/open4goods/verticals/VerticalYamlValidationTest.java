@@ -529,6 +529,28 @@ class VerticalYamlValidationTest {
     }
 
     @Test
+    void v2BlankExcludedEprelCategoryIsRefused() {
+        assertV2Refused(v2 -> v2.setExcludedEprelCategories(Arrays.asList("MONITOR", " ")),
+            "excludedEprelCategories");
+    }
+
+    /**
+     * GOU-2165: only the tv vertical excludes EPREL categories, the monitors and professional displays EPREL files
+     * apart from televisions.
+     */
+    @Test
+    void onlyTvExcludesEprelCategories() {
+        assertThat(verticalsConfigService.getConfigsWithoutDefault()).allSatisfy(config -> {
+            List<String> excluded = config.getImpactScoreConfig().getV2().getExcludedEprelCategories();
+            if ("tv".equals(config.getId())) {
+                assertThat(excluded).containsExactly("MONITOR", "PROFESSIONAL_DISPLAY", "SIGNAGE");
+            } else {
+                assertThat(excluded).as("excludedEprelCategories of %s", config.getId()).isEmpty();
+            }
+        });
+    }
+
+    @Test
     void v2MinRatedForPositionLabelBelowOneIsRefused() {
         assertV2Refused(v2 -> v2.setMinRatedForPositionLabel(0), "minRatedForPositionLabel");
     }

@@ -24,6 +24,8 @@ C = part du poids V2 des critères réellement renseignés (`v2.minRealWeightCov
 
 Les verticales qui gardent le filtre sont en "V2 sans levée du filtre" : leurs exclus sont surtout hors sujet (fours : petit électroménager ; smartphones : 20 % de claviers ou jumelles ; TV : aucune fiche n'atteint C = 0,50). Pour les smartphones, la voie retenue est l'appariement EPREL (GOU-2042).
 
+**Périmètre des fiches ajoutées (décision CTO, GOU-2163, 13/11/2026, exécution du mandat de la porte n° 2 ; GOU-2165)** : quand `v2.eprelRequired` vaut `false`, une fiche sans EPREL entre seulement si sa couverture C atteint `v2.minRealWeightCoverage` (cause sinon : `missing_eprel_low_coverage`) : "fiches ajoutées" = fiches notées. TV : `v2.excludedEprelCategories: [MONITOR, PROFESSIONAL_DISPLAY, SIGNAGE]` (cause `eprel_category_<CATÉGORIE>`). Simulation du 13/11 : 65 lave-vaisselle et 133 réfrigérateurs entrent, tous notés ; 75 TV sortent. Chiffres : [`v2-simulation-2026-11-13.md`](v2-simulation-2026-11-13.md#relance-gou-2165).
+
 **Garde-fou** : si la simulation fait passer plus de 10 % des notés actuels d'une verticale en "Non noté", le seuil de cette verticale revient à Goulven avant la porte n° 3. QA relit dans la simulation la liste des 51 lave-vaisselle entrants (modèles professionnels).
 
 ### Libellés de position

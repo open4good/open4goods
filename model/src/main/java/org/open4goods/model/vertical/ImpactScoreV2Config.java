@@ -27,8 +27,17 @@ public class ImpactScoreV2Config {
 	 */
 	private Double minRealWeightCoverage;
 
-	/** Whether a product without EPREL data is excluded. Defaults to {@code true}. */
+	/**
+	 * Whether a product without EPREL data is excluded. Defaults to {@code true}. When {@code false}, a product
+	 * without EPREL data stays only if its coverage reaches {@link #minRealWeightCoverage} (GOU-2165).
+	 */
 	private Boolean eprelRequired = Boolean.TRUE;
+
+	/**
+	 * EPREL categories ({@code eprelDatas.eprelCategory}, compared ignoring case) of products that do not belong to
+	 * the vertical and are excluded, for example monitors in the tv vertical (GOU-2165). Empty by default.
+	 */
+	private List<String> excludedEprelCategories = new ArrayList<>();
 
 	/**
 	 * Smallest rated cohort of the vertical for which a position label is exposed; below it, the score and the
@@ -64,6 +73,14 @@ public class ImpactScoreV2Config {
 
 	public void setEprelRequired(Boolean eprelRequired) {
 		this.eprelRequired = eprelRequired;
+	}
+
+	public List<String> getExcludedEprelCategories() {
+		return excludedEprelCategories;
+	}
+
+	public void setExcludedEprelCategories(List<String> excludedEprelCategories) {
+		this.excludedEprelCategories = excludedEprelCategories;
 	}
 
 	public Integer getMinRatedForPositionLabel() {

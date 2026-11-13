@@ -78,6 +78,8 @@ import tools.jackson.databind.json.JsonMapper;
  * <ul>
  * <li>V1: cohort {@code offersCount > 0 && !excluded}, with the stored exclusion;</li>
  * <li>V2: exclusion recomputed by {@link ExclusionRules#evaluate} with the V2 configuration, same cohort rule;</li>
+ * <li>V1 exclusion also recomputed with the V1 configuration ({@code v1_excluded}, {@code v1_causes}), to check that a
+ * rule change leaves V1 as stored;</li>
  * <li>brand scores: a stub {@link BrandService} returns the real {@code BRAND_*} scores read from the export;</li>
  * <li>each version scores its own copy of the products.</li>
  * </ul>
@@ -195,7 +197,7 @@ class ImpactScoreSimulationTest {
 					continue;
 				}
 				ExclusionRules.Result exclusion = ExclusionRules.evaluate(product, v2Conf);
-				stored.put(product.getId(), Stored.of(product, keys, exclusion));
+				stored.put(product.getId(), Stored.of(product, keys, exclusion, ExclusionRules.evaluate(product, v1Conf)));
 				collectBrandScores(product, brandScores);
 				if (product.getImpactScoreMeta() != null && product.getImpactScoreMeta().getScoredAt() > 0) {
 					assessed.add(EXPORT_READER.readValue(line, Product.class));
@@ -270,7 +272,7 @@ class ImpactScoreSimulationTest {
 			Map<Long, Product> v1ById, Map<Long, Product> v2ById, VerticalConfig v2Conf) throws IOException {
 		List<String> header = new ArrayList<>(List.of("id", "brand", "model", "name", "offers_count", "last_change",
 				"stored_excluded", "stored_causes", "stored_value", "stored_version", "stored_scored_at", "stored_ranked",
-				"v2_excluded", "v2_causes", "v1_batch_value", "v1_value", "v1_ranking", "v1_position", "v1_count", "v2_status",
+				"v2_excluded", "v2_causes", "v1_excluded", "v1_causes", "v1_batch_value", "v1_value", "v1_ranking", "v1_position", "v1_count", "v2_status",
 				"v2_reason", "v2_coverage", "v2_real", "v2_total", "v2_value", "v2_ranking", "v2_position", "v2_count",
 				"v2_level"));
 		for (String key : keys) {
@@ -287,7 +289,8 @@ class ImpactScoreSimulationTest {
 				Product v2 = v2ById.get(s.id);
 				List<Object> row = new ArrayList<>(List.of(s.id, csv(s.brand), csv(s.model), csv(s.name), s.offersCount,
 						s.lastChange, s.excluded, csv(String.join("|", s.causes)), str(s.storedValue), str(s.version),
-						s.scoredAt, s.ranked, s.v2Excluded, csv(String.join("|", s.v2Causes))));
+						s.scoredAt, s.ranked, s.v2Excluded, csv(String.join("|", s.v2Causes)), s.v1Excluded,
+						csv(String.join("|", s.v1Causes))));
 				Product batch = batchById.get(s.id);
 				row.add(str(batch == null || batch.ecoscore() == null ? null : batch.ecoscore().getValue()));
 				Score v1Score = v1 == null ? null : v1.ecoscore();
@@ -505,9 +508,10 @@ class ImpactScoreSimulationTest {
 	/** What the export holds for a product, read before any scoring. */
 	private record Stored(long id, String brand, String model, String name, int offersCount, long lastChange,
 			boolean excluded, Set<String> causes, Double storedValue, Integer version, long scoredAt, boolean ranked,
-			boolean v2Excluded, Set<String> v2Causes, Map<String, String> raw) {
+			boolean v2Excluded, Set<String> v2Causes, boolean v1Excluded, Set<String> v1Causes, Map<String, String> raw) {
 
-		static Stored of(Product product, Set<String> keys, ExclusionRules.Result v2Exclusion) {
+		static Stored of(Product product, Set<String> keys, ExclusionRules.Result v2Exclusion,
+				ExclusionRules.Result v1Exclusion) {
 			Score ecoscore = product.getScores().get(ECOSCORE);
 			ImpactScoreMeta meta = product.getImpactScoreMeta();
 			Map<String, String> raw = new HashMap<>();
@@ -523,7 +527,7 @@ class ImpactScoreSimulationTest {
 					ecoscore == null ? null : ecoscore.getValue(), meta == null ? null : meta.getMethodologyVersion(),
 					meta == null ? 0 : meta.getScoredAt(),
 					product.getRanking() != null && product.getRanking().getGlobalCount() > 0, v2Exclusion.excluded(),
-					v2Exclusion.excludedCauses(), raw);
+					v2Exclusion.excludedCauses(), v1Exclusion.excluded(), v1Exclusion.excludedCauses(), raw);
 		}
 	}
 }

@@ -38,7 +38,7 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 	private static final double ECOSCORE_TARGET_SCALE = 20.0;
 
 	/** Tolerance of the V2 coverage threshold: a coverage C is rated when {@code C >= threshold - 1e-9}. */
-	static final double COVERAGE_TOLERANCE = 1e-9;
+	static final double COVERAGE_TOLERANCE = ImpactScoreCoverage.TOLERANCE;
 
 	/**
 	 * Coverage of the active matrix by the real criteria of a product (design GOU-1878, 2.2), over the criteria
@@ -464,7 +464,8 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 	}
 
 	/**
-	 * Why a product is not rated in V2 (design GOU-1878, 2.2). The threshold is inclusive, within
+	 * Why a product is not rated in V2 (design GOU-1878, 2.2), by the rule the exclusion shares
+	 * ({@link ImpactScoreCoverage#notRatedReason(double, double, Double)}). The threshold is inclusive, within
 	 * {@link #COVERAGE_TOLERANCE}.
 	 *
 	 * @param coverage  the coverage of the product
@@ -473,13 +474,10 @@ public class EcoScoreAggregationService extends AbstractScoreAggregationService 
 	 *         when the product is rated
 	 */
 	static ImpactScoreMeta.NotRatedReason v2NotRatedReason(Coverage coverage, Double threshold) {
-		if (coverage.realCount() == 0 || coverage.realWeight() <= 0.0) {
+		if (coverage.realCount() == 0) {
 			return ImpactScoreMeta.NotRatedReason.NO_REAL_CRITERIA;
 		}
-		if (threshold != null && coverage.ratio() < threshold - COVERAGE_TOLERANCE) {
-			return ImpactScoreMeta.NotRatedReason.LOW_COVERAGE;
-		}
-		return null;
+		return ImpactScoreCoverage.notRatedReason(coverage.realWeight(), coverage.totalWeight(), threshold);
 	}
 
 	private Map<String, Double> normalizeWeights(VerticalConfig vConf) {

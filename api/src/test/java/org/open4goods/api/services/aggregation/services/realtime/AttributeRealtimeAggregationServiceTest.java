@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +20,8 @@ import org.open4goods.brand.service.BrandService;
 import org.open4goods.icecat.services.IcecatFeatureResolver;
 import org.open4goods.icecat.util.IcecatConstants;
 import org.open4goods.model.attribute.Attribute;
+import org.open4goods.model.attribute.AttributeType;
+import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.attribute.SourcedAttribute;
@@ -26,6 +30,8 @@ import org.open4goods.model.eprel.EprelProduct;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.AttributesConfig;
+import org.open4goods.model.vertical.ImpactScoreV2Config;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
@@ -222,8 +228,8 @@ class AttributeRealtimeAggregationServiceTest {
 
         /**
          * GOU-1881: the batch runs updateExcludeStatus on every product of the vertical, so a product excluded for
-         * missing_eprel is re-evaluated: listed once the vertical goes V2 with eprelRequired=false, excluded again on
-         * return to V1.
+         * missing_eprel is re-evaluated: listed once the vertical goes V2 with eprelRequired=false and its coverage
+         * reaches the threshold (GOU-2165), excluded again on return to V1.
          */
         @Test
         void updateExcludeStatusReevaluatesExcludedProductsWhenEprelRequirementChanges() throws Exception {
@@ -234,10 +240,23 @@ class AttributeRealtimeAggregationServiceTest {
                 invokeUpdateExcludeStatus(product);
                 assertThat(product.getExcludedCauses()).containsExactly("missing_eprel");
 
-                org.open4goods.model.vertical.ImpactScoreV2Config v2 = new org.open4goods.model.vertical.ImpactScoreV2Config();
+                AttributeConfig criterion = new AttributeConfig();
+                criterion.setKey("NOISE");
+                criterion.setAsScore(true);
+                criterion.setFilteringType(AttributeType.NUMERIC);
+                AttributesConfig attributesConfig = new AttributesConfig();
+                attributesConfig.setConfigs(List.of(criterion));
+                verticalConfig.setAttributesConfig(attributesConfig);
+                ImpactScoreV2Config v2 = new ImpactScoreV2Config();
                 v2.setEprelRequired(false);
+                v2.setMinRealWeightCoverage(0.5);
+                v2.setCriteriasPonderation(Map.of("NOISE", 1.0));
                 verticalConfig.getImpactScoreConfig().setV2(v2);
                 verticalConfig.getImpactScoreConfig().setMethodologyVersion(2);
+                invokeUpdateExcludeStatus(product);
+                assertThat(product.getExcludedCauses()).containsExactly("missing_eprel_low_coverage");
+
+                product.getAttributes().getIndexed().put("NOISE", new IndexedAttribute("NOISE", "42"));
                 invokeUpdateExcludeStatus(product);
                 assertThat(product.isExcluded()).isFalse();
                 assertThat(product.getExcludedCauses()).isEmpty();
@@ -313,10 +332,10 @@ class AttributeRealtimeAggregationServiceTest {
 		attr.addSourceAttribute(source1);
 		attr.addSourceAttribute(source2);
 		
-		org.open4goods.model.attribute.IndexedAttribute indexedAttr = new org.open4goods.model.attribute.IndexedAttribute("ENERGY_CLASS", "F");
+		IndexedAttribute indexedAttr = new IndexedAttribute("ENERGY_CLASS", "F");
 
 		// Act
-		Method method = AttributeRealtimeAggregationService.class.getDeclaredMethod("mergeSourcesAndRefreshValue", org.open4goods.model.attribute.IndexedAttribute.class, ProductAttribute.class, AttributeConfig.class, VerticalConfig.class);
+		Method method = AttributeRealtimeAggregationService.class.getDeclaredMethod("mergeSourcesAndRefreshValue", IndexedAttribute.class, ProductAttribute.class, AttributeConfig.class, VerticalConfig.class);
 		method.setAccessible(true);
 		method.invoke(service, indexedAttr, attr, attrConfig, verticalConfig);
 
@@ -408,7 +427,7 @@ class AttributeRealtimeAggregationServiceTest {
 	void durabilityIndexFormatsAreParsed(String raw, String expected) throws Exception {
 		AttributeConfig attrConfig = new AttributeConfig();
 		attrConfig.setKey("DURABILITY_INDEX");
-		attrConfig.setFilteringType(org.open4goods.model.attribute.AttributeType.NUMERIC);
+		attrConfig.setFilteringType(AttributeType.NUMERIC);
 		attrConfig.getParser().setUpperCase(true);
 		attrConfig.getParser().setNormalize(true);
 		attrConfig.getParser().setTrim(true);
@@ -420,7 +439,7 @@ class AttributeRealtimeAggregationServiceTest {
 	private static AttributeConfig wattAttribute() {
 		AttributeConfig attrConfig = new AttributeConfig();
 		attrConfig.setKey("OVEN_POWER");
-		attrConfig.setFilteringType(org.open4goods.model.attribute.AttributeType.NUMERIC);
+		attrConfig.setFilteringType(AttributeType.NUMERIC);
 		org.open4goods.model.Localisable<String, String> suffix = new org.open4goods.model.Localisable<>();
 		suffix.put("default", "W");
 		attrConfig.setSuffix(suffix);
@@ -492,7 +511,7 @@ class AttributeRealtimeAggregationServiceTest {
 	void parseValueTreatsFalsePlaceholderAsEmpty() throws Exception {
 		AttributeConfig attrConfig = new AttributeConfig();
 		attrConfig.setKey("DIAGONALE_POUCES");
-		attrConfig.setFilteringType(org.open4goods.model.attribute.AttributeType.NUMERIC);
+		attrConfig.setFilteringType(AttributeType.NUMERIC);
 		attrConfig.getParser().setUpperCase(true);
 		attrConfig.getParser().setNormalize(true);
 		attrConfig.getParser().setTrim(true);

@@ -104,6 +104,7 @@ v2:
     ...
   minRealWeightCoverage: 0.5   # value from GOU-1877
   eprelRequired: true          # false only where GOU-1877 lifts the filter
+  excludedEprelCategories: [MONITOR, PROFESSIONAL_DISPLAY, SIGNAGE]  # tv only (GOU-2165), empty by default
   minRatedForPositionLabel: 100  # no label below this rated cohort (default 100)
   positionLabels:              # best first; values from GOU-1877
     - level: excellent
@@ -131,6 +132,7 @@ Accessors on `ImpactScoreConfig` (all code goes through them; no direct
   `true`). The filter cannot be lifted without V2, and going back to V1
   restores it;
 - `minRealWeightCoverage()`, `positionLabels()`, `criteriaScoring(key)`;
+- `excludedEprelCategories()`: empty in V1, `v2.excludedEprelCategories` in V2 (3);
 - `minRatedForPositionLabel()` (`null` in V1) and `positionLevel(betterThan, ratedCount)`, the label rule of 2.4.
 
 Current matrix readers to move to `activeCriteriasPonderation()`:
@@ -146,7 +148,8 @@ Validation (`VerticalYamlValidationTest`, and at load time for the override):
 - a `v2` block, when present, is complete: matrix sums to 1 (± 1e-6), no
   `DATA_QUALITY` and no `ECOSCORE`, existing `asScore` criteria;
   `0 < minRealWeightCoverage <= 1`; `minRatedForPositionLabel >= 1` when set;
-  `positionLabels` thresholds strictly decreasing, the last one 0;
+  `positionLabels` thresholds strictly decreasing, the last one 0; no blank
+  `excludedEprelCategories` entry;
 - `methodologyVersion: 2` requires a `v2` block.
 
 ### 1.3 Elasticsearch mapping
@@ -386,6 +389,33 @@ ranks in the V1 top 5 %. The V2 matrix compares TVs per unit of screen area.
   `vConf.getImpactScoreConfig().isEprelRequired()`. `missing_brand`,
   `missing_model`, `missing_attr_*` unchanged. A product without a vertical
   uses the default configuration, so the filter stays.
+- **Without EPREL, entry only when the product can be rated** (GOU-2165, CTO
+  decision on GOU-2163). When `isEprelRequired()` is `false`, a product
+  without EPREL data stays only if its coverage C reaches
+  `minRealWeightCoverage()` (inclusive, rule of 2.2); otherwise it is excluded
+  with `missing_eprel_low_coverage`. The lifted filter thus adds the rated
+  products only: the dishwashers without EPREL and without enough criteria are
+  mostly off topic (RAM, detergent) or professional models. A product with
+  EPREL data is not concerned.
+- **C of the exclusion is read from the attributes, never from the scores.**
+  The batch clears the scores of an excluded product (`clearObsoleteScores`)
+  and scores only non-excluded ones: a rule on the stored scores would keep a
+  product excluded for good, or switch it at every realtime and batch pass.
+  `ImpactScoreCoverage.criteriaWithValue` counts a criterion of the active
+  matrix as real when the scoring can read its value from the indexed
+  attributes, with the very functions of `Attribute2ScoreAggregationService`
+  (`rawValue`, `applyTransform`, `derivedValue`); `notRatedReason` is the
+  threshold rule shared with the batch. The indexed attributes are rebuilt
+  identically by every realtime pass and by the batch aggregation, so the
+  decision is stable. `ImpactScoreRealVerticalsTest` checks that it predicts
+  the batch outcome (rated, `NO_REAL_CRITERIA`, `LOW_COVERAGE`) on every real
+  vertical.
+- **EPREL categories off topic** (GOU-2165): `v2.excludedEprelCategories`,
+  empty by default, compared to `eprelDatas.eprelCategory` ignoring case.
+  `tv`: `[MONITOR, PROFESSIONAL_DISPLAY, SIGNAGE]`, cause
+  `eprel_category_<CATEGORY>`. A blank category, `TELEVISION` or `OTHER`
+  stays. No reclassification: there is no monitor vertical.
+- Both rules apply only when V2 is active (accessors of 1.2); V1 is unchanged.
 - The rule moves into a pure function (`ExclusionRules.evaluate(product,
   vConf)`) called by `updateExcludeStatus` and by the simulation.
 - **Re-evaluation of excluded products:** automatic at the first 13:00 batch
