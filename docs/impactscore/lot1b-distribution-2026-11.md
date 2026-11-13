@@ -2,11 +2,11 @@
 
 Issue GOU-1876, sous-issue de GOU-1864 (§4 du plan). Mesures **en lecture seule** sur Elasticsearch de production via la connexion " Elasticsearch lecture (Dev) ". Aucune écriture. Complète `lot1-mesures-2026-11.md` (lot 1a).
 
-- **Date des mesures :** 2026-11-13, de 07:05 à 07:40 (heure serveur), hors du batch de 13:00 à 15:00. Prérequis GOU-1868 (lot 0 en prod, contrôlé après un batch de 13:00) et GOU-1874 levés au réveil de l'issue ; la date du dernier batch n'a pas été relue par cet auteur.
+- **Date des mesures :** 2026-11-13, entre 07:05 et 07:16 heure de Paris (le commit du document date de 07:16), hors du batch de 13:00 à 15:00. Prérequis GOU-1868 (lot 0 en prod, contrôlé après un batch de 13:00) et GOU-1874 levés au réveil de l'issue ; la date du dernier batch n'a pas été relue par cet auteur.
 - **Index :** `products-moustik`. **Population :** `vertical` ∈ 7 verticales, `excluded=false`, `offersCount > 0`, soit **9 475 produits** (TV 2 151, réfrigérateurs 2 354, lave-linge 1 480, fours 1 446, lave-vaisselle 1 011, smartphones 952, climatiseurs 81). Tous ont un `scores.ECOSCORE.value` (agrégat `missing` = 0).
 - **Charge :** 140 documents lus (extrêmes, annexe CSV), le reste en agrégations. Plafond de 20 000 par heure respecté. Une requête à la fois.
 - **Méthode V1.** La production calcule encore en `methodologyVersion` 1 : les critères et poids sont ceux du bloc racine `criteriasPonderation` de `verticals/src/main/resources/verticals/impactscores/<verticale>.yml` (avec `DATA_QUALITY`). Les `scores.<CRITERE>.value` sont les **valeurs brutes** (W, kWh, années...), la sous-note 0-5 est dans `scores.<CRITERE>.relativ.value` (`_source` seulement).
-- **Nettoyage du lot 0 :** produits `excluded=true` portant encore `scores.ECOSCORE.value`, 7 verticales : **1** (requête `count`, `excluded=true` + `exists scores.ECOSCORE.value`). Le 10/11 : 1 942 pour les seules TV.
+- **Nettoyage du lot 0 :** produits `excluded=true` portant encore `scores.ECOSCORE.value`, 7 verticales : **1** (une TV ; agrégat `terms vertical` sous `excluded=true` + `exists scores.ECOSCORE.value`). Le 10/11 : 1 942 pour les seules TV. Sans filtre de verticale, le même `count` donne **30 458** documents, dont **30 457 sans `vertical`** (agrégat `missing`, relevé par le CTO en revue le 2026-11-13) : hors des 7 verticales mesurées ici, ils ne faussent aucune distribution de ce document mais restent un reliquat de nettoyage pour le lot 0.
 
 ## 0. Résumé
 
