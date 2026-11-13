@@ -588,7 +588,8 @@
           "title": "Audit de génération IA",
           "auditTitle": "Données structurées",
           "yamlUnavailable": "Prompt indisponible.",
-          "toggle": "Audit IA : prompt et réponse brute"
+          "toggle": "Audit IA : prompt et réponse brute",
+          "v1History": "Cet audit IA a servi à configurer la matrice V1 de l'Impact Score {category}. Il n'a pas été refait pour la méthode v{version}, dont les critères et les poids sont présentés plus haut. Le prompt et la réponse brute de la V1 restent consultables dans la configuration publiée sur GitHub."
         },
         "criteria": {
           "empty": "Les critères seront publiés prochainement.",
@@ -642,6 +643,7 @@
             "proposed": "Coef. proposé"
           },
           "tableHelper": "Comparaison entre la proposition générée par l'IA et les coefficients actuellement appliqués.",
+          "tableHelperV2": "Coefficients appliqués par la méthode v{version}. La proposition de l'IA portait sur la matrice V1 (historique) et n'a pas été refaite pour la méthode actuelle.",
           "tableTitle": "Synthèse des coefficients",
           "title": "Transparence et traçabilité",
           "cardsTitle": "Ressources ouvertes",
@@ -702,6 +704,7 @@
           "title": "Produits comparés",
           "scope": "Sont comparés les produits de la catégorie {category} présents dans le catalogue Nudger avec au moins une offre.",
           "rated": "{count} produits notés.",
+          "ratedCompared": "{count} {items} noté et comparé. | {count} {items} notés et comparés.",
           "notRated": "{count} produits non notés (données insuffisantes : {lowCoverage} ; aucun critère renseigné : {noCriteria}).",
           "outdated": "{count} produits en attente de recalcul avec la méthode actuelle.",
           "excluded": "{count} produits exclus de la comparaison. Sont exclus les produits sans marque, sans modèle, sans fiche EPREL associée (selon la catégorie) ou auxquels il manque un attribut requis par la catégorie.",
@@ -723,7 +726,8 @@
           "title": "Fournisseurs et sources",
           "data": "Les données viennent d'EPREL (étiquette énergie européenne), des fabricants, des marchands partenaires et, pour certaines caractéristiques, d'une extraction par IA.",
           "brands": "{count} marques couvertes parmi les produits notés.",
-          "partners": "Voir nos partenaires et marchands"
+          "partners": "Voir nos partenaires et marchands",
+          "auditV1": "Sources consultées par l'audit IA de la matrice V1 (historique, non refait pour la méthode actuelle) :"
         },
         "update": {
           "title": "Mise à jour",

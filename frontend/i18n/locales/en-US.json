@@ -707,7 +707,8 @@
           "responseTitle": "Model response",
           "title": "Impact Score generation audit",
           "yamlUnavailable": "Prompt unavailable.",
-          "toggle": "AI audit: prompt and raw response"
+          "toggle": "AI audit: prompt and raw response",
+          "v1History": "This AI audit was used to configure the V1 matrix of the {category} Impact Score. It was not rerun for method v{version}, whose criteria and weights are shown above. The V1 prompt and raw response remain available in the configuration published on GitHub."
         },
         "criteria": {
           "empty": "Criteria will be published soon.",
@@ -764,6 +765,7 @@
             "proposed": "Proposed coef."
           },
           "tableHelper": "Comparison between the AI-generated proposal and the coefficients currently applied.",
+          "tableHelperV2": "Coefficients applied by method v{version}. The AI proposal covered the V1 matrix (historical) and was not rerun for the current method.",
           "tableTitle": "Coefficient summary",
           "title": "Transparency and traceability",
           "cardsTitle": "Open methodology resources",
@@ -824,6 +826,7 @@
           "title": "Compared products",
           "scope": "Compared products are those of the {category} category in the Nudger catalogue with at least one offer.",
           "rated": "{count} products rated.",
+          "ratedCompared": "{count} {items} rated and compared. | {count} {items} rated and compared.",
           "notRated": "{count} products not rated (insufficient data: {lowCoverage}; no criterion filled in: {noCriteria}).",
           "outdated": "{count} products waiting to be recalculated with the current method.",
           "excluded": "{count} products excluded from the comparison. Products are excluded when they have no brand, no model, no associated EPREL record (depending on the category) or lack an attribute required by the category.",
@@ -845,7 +848,8 @@
           "title": "Suppliers and sources",
           "data": "Data comes from EPREL (European energy label), manufacturers, partner merchants and, for some characteristics, AI extraction.",
           "brands": "{count} brands covered among the rated products.",
-          "partners": "See our partners and merchants"
+          "partners": "See our partners and merchants",
+          "auditV1": "Sources consulted by the AI audit of the V1 matrix (historical, not rerun for the current method):"
         },
         "update": {
           "title": "Update",

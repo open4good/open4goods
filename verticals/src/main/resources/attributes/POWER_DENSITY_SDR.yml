@@ -45,8 +45,8 @@ scoreDescription:
   fr: "La consommation électrique du téléviseur en mode SDR, divisée par la surface de son écran (watts par décimètre carré, format 16:9)"
   en: "The SDR on-mode power of the television divided by its screen area (watts per square decimetre, 16:9 format)"
 scoreUtility:
-  fr: "Compare l'efficacité énergétique des téléviseurs à taille d'écran égale : un grand écran n'est plus pénalisé pour sa seule taille."
-  en: "Compares the energy efficiency of televisions per unit of screen area, so a large screen is no longer penalised for its size alone."
+  fr: "Rapporte la consommation à la surface d'écran, pour comparer un 32 pouces et un 75 pouces sur la même base : un grand écran n'est plus pénalisé pour sa seule taille."
+  en: "Relates power to screen area, so that a 32-inch and a 75-inch television compare on the same basis: a large screen is no longer penalised for its size alone."
 participateInScores:
   - ENERGY_CONSUMPTION
 participateInACV:

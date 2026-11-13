@@ -41,8 +41,8 @@ scoreDescription:
   fr: "L'indice de durabilité de l'objet s'il est connu, sinon son indice de réparabilité, note officielle sur 10"
   en: "The durability index of the product when known, else its repairability index, official score out of 10"
 scoreUtility:
-  fr: "Un indice élevé prolonge la durée de vie, limite les remplacements et réduit les impacts de fabrication et de fin de vie."
-  en: "A higher index extends product life, reduces replacements, and cuts manufacturing and waste impacts."
+  fr: "Reprend l'indice de durabilité s'il est publié, sinon l'indice de réparabilité, sur la même échelle de 0 à 10. Un indice élevé prolonge la durée de vie et réduit les impacts de fabrication et de fin de vie."
+  en: "Uses the durability index when published, else the repairability index, on the same 0 to 10 scale. A higher index extends product life and cuts manufacturing and end-of-life impacts."
 participateInScores:
   - REPARABILITY
 participateInACV:
