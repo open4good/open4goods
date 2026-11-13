@@ -261,6 +261,16 @@ frequencies `MINMAX_QUANTILE` needs are tracked). Strategy: the existing
 (out-of-bounds values get 0 or 5 depending on `impactBetterIs`). No new
 mechanism.
 
+Delivered (GOU-1883): `effectiveScoring` (`AbstractScoreAggregationService`) replaces the attribute's
+`normalization` block (method and params; scale, transform and policies stay the attribute's) by
+`v2.criteriaScoring.<key>.normalization` in V2 only; V1 never reads the override. The quantiles are
+provisional (0.02 / 0.98, to confirm with GOU-1877). Configured criteria, following the measures of
+`lot1b-distribution-2026-11.md` section 6.2: `tv` `POWER_CONSUMPTION_SDR` and `_HDR`, `oven`
+`OVEN_ENERGY_CONSUMPTION_CYCLE`, `dishwasher` `WATER_CONSUMPTION` and `ENERGY_CONSUMPTION_100_CYCLES`,
+`washing-machine` `WATER_CONSUMPTION`. Not configured on purpose: `POWER_CONSUMPTION_OFF` and `_STANDBY*`
+(near-constant values, degenerate quantile range) and `POWER_CONSUMPTION_TYPICAL` (unreliable raw values, 19 and 13
+products).
+
 ### 2.7 Derived criteria: "repairability or durability" (GOU-2041)
 
 The French durability index replaced the repairability index (TV on

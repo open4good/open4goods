@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.beans.BeanUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.model.StandardiserService;
 import org.open4goods.model.exceptions.ValidationException;
@@ -276,7 +277,7 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 
 	protected Double relativizeScoreValue(String scoreName, Double value, Cardinality abs, VerticalConfig vConf)
 			throws ValidationException {
-		AttributeConfig attributeConfig = resolveAttributeConfig(scoreName, vConf);
+		AttributeConfig attributeConfig = effectiveScoring(scoreName, vConf);
 		ScoreNormalizationMethod method = resolveNormalizationMethod(attributeConfig);
 		if (method == null) {
 			if (shouldUsePercentileScoring(scoreName, vConf)) {
@@ -441,7 +442,7 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
         }
 
         private boolean shouldTrackFrequencies(String scoreName, VerticalConfig vConf) {
-                AttributeConfig attributeConfig = resolveAttributeConfig(scoreName, vConf);
+                AttributeConfig attributeConfig = effectiveScoring(scoreName, vConf);
                 ScoreNormalizationMethod method = resolveNormalizationMethod(attributeConfig);
                 if (method == null) {
                         if (vConf == null || vConf.getImpactScoreConfig() == null) {
@@ -452,6 +453,41 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
                 }
                 return ScoreNormalizationMethod.PERCENTILE.equals(method)
                         || ScoreNormalizationMethod.MINMAX_QUANTILE.equals(method);
+        }
+
+        /**
+         * Single resolver of the attribute configuration used to normalise a score (design GOU-1878, 2.6). It is the
+         * attribute's own config; in methodology V2 only, a {@code v2.criteriaScoring.<key>} override with a
+         * normalization method replaces the attribute's normalization block (method and params), the scale, the
+         * transform and the policies staying those of the attribute. Used by both {@link #relativizeScoreValue} and
+         * {@link #incrementCardinality}, so that the value frequencies a {@code MINMAX_QUANTILE} needs are tracked.
+         *
+         * @param scoreName the score (criterion) key
+         * @param vConf the vertical configuration
+         * @return the attribute config, a merged copy when a V2 override applies; {@code null} without attribute
+         */
+        protected AttributeConfig effectiveScoring(String scoreName, VerticalConfig vConf) {
+                AttributeConfig attributeConfig = resolveAttributeConfig(scoreName, vConf);
+                if (attributeConfig == null || !isMethodologyV2(vConf)) {
+                        return attributeConfig;
+                }
+                ScoreScoringConfig override = vConf.getImpactScoreConfig().criteriaScoring(scoreName);
+                if (override == null || override.getNormalization() == null || override.getNormalization().getMethod() == null) {
+                        return attributeConfig;
+                }
+                ScoreScoringConfig base = attributeConfig.getScoring();
+                ScoreScoringConfig merged = new ScoreScoringConfig();
+                if (base != null) {
+                        merged.setScale(base.getScale());
+                        merged.setTransform(base.getTransform());
+                        merged.setMissingValuePolicy(base.getMissingValuePolicy());
+                        merged.setDegenerateDistributionPolicy(base.getDegenerateDistributionPolicy());
+                }
+                merged.setNormalization(override.getNormalization());
+                AttributeConfig copy = new AttributeConfig();
+                BeanUtils.copyProperties(attributeConfig, copy);
+                copy.setScoring(merged);
+                return copy;
         }
 
         private AttributeConfig resolveAttributeConfig(String scoreName, VerticalConfig vConf) {
