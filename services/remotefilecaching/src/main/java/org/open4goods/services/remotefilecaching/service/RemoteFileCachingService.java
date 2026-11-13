@@ -93,7 +93,12 @@ public class RemoteFileCachingService {
                 this(resourceFolder, properties, new File(System.getProperty("java.io.tmpdir"), "open4goods-feeds"));
         }
 
-        RemoteFileCachingService(final String resourceFolder, RemoteFileCachingProperties properties, File tmpFolder) {
+        /**
+         * @param resourceFolder folder of the cached remote files
+         * @param properties timeouts
+         * @param tmpFolder feed work folder, writable by the caller (tests use a temporary folder, not the shared system one)
+         */
+        public RemoteFileCachingService(final String resourceFolder, RemoteFileCachingProperties properties, File tmpFolder) {
                 super();
                 this.resourceFolder = resourceFolder;
                 this.connectionTimeout = properties.getConnectionTimeout();
