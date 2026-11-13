@@ -1,17 +1,17 @@
 # ImpactScore lot 1b : distribution des notes après le lot 0 (2026-11-13)
 
-Issue GOU-1876, sous-issue de GOU-1864 (§4 du plan). Mesures **en lecture seule** sur Elasticsearch de production via la connexion « Elasticsearch lecture (Dev) ». Aucune écriture. Complète `lot1-mesures-2026-11.md` (lot 1a).
+Issue GOU-1876, sous-issue de GOU-1864 (§4 du plan). Mesures **en lecture seule** sur Elasticsearch de production via la connexion " Elasticsearch lecture (Dev) ". Aucune écriture. Complète `lot1-mesures-2026-11.md` (lot 1a).
 
 - **Date des mesures :** 2026-11-13, de 07:05 à 07:40 (heure serveur), hors du batch de 13:00 à 15:00. Prérequis GOU-1868 (lot 0 en prod, contrôlé après un batch de 13:00) et GOU-1874 levés au réveil de l'issue ; la date du dernier batch n'a pas été relue par cet auteur.
 - **Index :** `products-moustik`. **Population :** `vertical` ∈ 7 verticales, `excluded=false`, `offersCount > 0`, soit **9 475 produits** (TV 2 151, réfrigérateurs 2 354, lave-linge 1 480, fours 1 446, lave-vaisselle 1 011, smartphones 952, climatiseurs 81). Tous ont un `scores.ECOSCORE.value` (agrégat `missing` = 0).
 - **Charge :** 140 documents lus (extrêmes, annexe CSV), le reste en agrégations. Plafond de 20 000 par heure respecté. Une requête à la fois.
-- **Méthode V1.** La production calcule encore en `methodologyVersion` 1 : les critères et poids sont ceux du bloc racine `criteriasPonderation` de `verticals/src/main/resources/verticals/impactscores/<verticale>.yml` (avec `DATA_QUALITY`). Les `scores.<CRITERE>.value` sont les **valeurs brutes** (W, kWh, années…), la sous-note 0-5 est dans `scores.<CRITERE>.relativ.value` (`_source` seulement).
+- **Méthode V1.** La production calcule encore en `methodologyVersion` 1 : les critères et poids sont ceux du bloc racine `criteriasPonderation` de `verticals/src/main/resources/verticals/impactscores/<verticale>.yml` (avec `DATA_QUALITY`). Les `scores.<CRITERE>.value` sont les **valeurs brutes** (W, kWh, années...), la sous-note 0-5 est dans `scores.<CRITERE>.relativ.value` (`_source` seulement).
 - **Nettoyage du lot 0 :** produits `excluded=true` portant encore `scores.ECOSCORE.value`, 7 verticales : **1** (requête `count`, `excluded=true` + `exists scores.ECOSCORE.value`). Le 10/11 : 1 942 pour les seules TV.
 
 ## 0. Résumé
 
-1. **La compression d'échelle persiste.** Écart p5–p95 (points sur 20) : TV 2,7, Smartphones 5,8, Fours 2,3, Réfrigérateurs 5,7, Lave-linge 3,8, Lave-vaisselle 7,5, Climatiseurs 1,8. TV : 10,8 à 14,6 pour 98 % des produits ; min 9,17, max 15,53.
-2. **Les libellés actuels (seuils 17/14/11/8 de `getImpactLevel`) ne séparent rien** : « Excellent » (≥ 17) concerne 0 TV, 0 lave-linge, 0 lave-vaisselle, 3 réfrigérateurs, 2 fours, 4 smartphones, 1 climatiseur ; 92 % des TV sont « Correct » ; 91 % des fours sont « Bon ».
+1. **La compression d'échelle persiste.** Écart p5-p95 (points sur 20) : TV 2,7, Smartphones 5,8, Fours 2,3, Réfrigérateurs 5,7, Lave-linge 3,8, Lave-vaisselle 7,5, Climatiseurs 1,8. TV : 10,8 à 14,6 pour 98 % des produits ; min 9,17, max 15,53.
+2. **Les libellés actuels (seuils 17/14/11/8 de `getImpactLevel`) ne séparent rien** : " Excellent " (≥ 17) concerne 0 TV, 0 lave-linge, 0 lave-vaisselle, 3 réfrigérateurs, 2 fours, 4 smartphones, 1 climatiseur ; 92 % des TV sont " Correct " ; 91 % des fours sont " Bon ".
 3. **L'imputation par la moyenne est massive sur quelques critères** : réparabilité (TV 87 %, lave-linge 79 %, lave-vaisselle 74 %, smartphones 87 %), consommation typique du lave-linge (99 %), poids (28 % à 54 %, 90 % pour les climatiseurs). Part de poids imputée moyenne : voir §2.
 4. **`DATA_QUALITY` et note** : corrélation de rang ≈ 0,90 (smartphones) et ≈ 0,88 (fours), ≈ 0,54 (lave-linge), mais ≈ 0,06 (réfrigérateurs) et ≈ −0,04 (lave-vaisselle). Elle est en partie mécanique (§3).
 5. **Bornes min-max sensibles aux valeurs aberrantes** : TV SDR max 360 W pour p99 = 194 W ; lave-linge eau max 180 l pour p99 = 89 l ; four 9,1 kWh pour p99 = 1,6 kWh. Les percentiles 2-98 resserrent la plage de 2 à 10 fois (§4,2).
@@ -37,7 +37,7 @@ Données en `float` ES, arrondies à 2 décimales ; les percentiles sont des est
 
 ### 1,2 Part des produits par libellé actuel
 
-Seuils de `frontend/app/utils/_product-verdict.ts` (`getImpactLevel`) : Excellent ≥ 17, Bon ≥ 14, Correct ≥ 11, Moyen ≥ 8, Faible < 8 (libellés `product.verdict.levels` : « Excellent », « Bon », « Correct », « Moyen », « Faible »).
+Seuils de `frontend/app/utils/_product-verdict.ts` (`getImpactLevel`) : Excellent ≥ 17, Bon ≥ 14, Correct ≥ 11, Moyen ≥ 8, Faible < 8 (libellés `product.verdict.levels` : " Excellent ", " Bon ", " Correct ", " Moyen ", " Faible ").
 
 | Verticale | Excellent (≥17) | Bon [14;17[ | Correct [11;14[ | Moyen [8;11[ | Faible (<8) |
 |---|---|---|---|---|---|
@@ -201,7 +201,7 @@ Corrélation de rang de Spearman entre `scores.DATA_QUALITY.value` et `scores.EC
 | Lave-vaisselle | 1011 | **-0,04** | 1 / 7,4 / 10 | 0,12 |
 | Climatiseurs | 81 | **0,37** | 2 / 2,5 / 7 | 0,0619 |
 
-Lecture : « plus de données » rend « plus vert » nettement pour smartphones et fours, modérément pour les lave-linge, faiblement à modérément pour les TV (≈ 0,25) et climatiseurs (≈ 0,37, 81 produits), pas du tout pour réfrigérateurs et lave-vaisselle. **La corrélation est en partie mécanique** : `DATA_QUALITY` est lui-même un critère de la note V1 (poids de 0,25 pour les smartphones, 0,15 pour les fours) et un produit sans donnée reçoit la moyenne. Elle ne prouve donc pas qu'un produit mieux documenté soit meilleur ; elle justifie de sortir `DATA_QUALITY` de la note (V2) et de l'afficher comme indicateur de fiabilité.
+Lecture : " plus de données " rend " plus vert " nettement pour smartphones et fours, modérément pour les lave-linge, faiblement à modérément pour les TV (≈ 0,25) et climatiseurs (≈ 0,37, 81 produits), pas du tout pour réfrigérateurs et lave-vaisselle. **La corrélation est en partie mécanique** : `DATA_QUALITY` est lui-même un critère de la note V1 (poids de 0,25 pour les smartphones, 0,15 pour les fours) et un produit sans donnée reçoit la moyenne. Elle ne prouve donc pas qu'un produit mieux documenté soit meilleur ; elle justifie de sortir `DATA_QUALITY` de la note (V2) et de l'afficher comme indicateur de fiabilité.
 
 ## 4. Extrêmes
 
@@ -285,7 +285,7 @@ La note moyenne baisse de 13,4-13,5 (20 à 40 pouces) à 10,3 (110 pouces et plu
 
 ### 6,1 Libellés par position
 
-Le bloc provisoire `v2.positionLabels` des `.yml` (excellent ≥ 0,90, good ≥ 0,67, fair ≥ 0,33, poor sinon : « mieux que » la part indiquée de la cohorte) donne, avec les percentiles mesurés du §1 (note à partir de laquelle un produit est dans le libellé) :
+Le bloc provisoire `v2.positionLabels` des `.yml` (excellent ≥ 0,90, good ≥ 0,67, fair ≥ 0,33, poor sinon : " mieux que " la part indiquée de la cohorte) donne, avec les percentiles mesurés du §1 (note à partir de laquelle un produit est dans le libellé) :
 
 | Verticale | Excellent (top 10 % : note ≥ p90) | Bon (≥ p66,7) | Correct (≥ p33,3) | Poor (en dessous) | Seuils actuels pour mémoire |
 |---|---|---|---|---|---|
@@ -297,7 +297,7 @@ Le bloc provisoire `v2.positionLabels` des `.yml` (excellent ≥ 0,90, good ≥ 
 | Lave-vaisselle | ≥ 14,47 | ≥ 12,55 | ≥ 10,12 | < 10,12 | 17 / 14 / 11 / 8 |
 | Climatiseurs | ≥ 14,38 | ≥ 13,66 | ≥ 13,66 | < 13,66 | 17 / 14 / 11 / 8 |
 
-Lecture : le libellé par position remplace des seuils fixes qui, aujourd'hui, mettent 92 % des TV en « Correct » et 91 % des fours en « Bon ». Réserves mesurées : (1) **ex-æquo** : climatiseurs p33 = p50 = p67 = 13,66 (plus de 80 % des produits à 13,5-14) : une règle de position stricte (« mieux que x % ») classerait tous ces produits « poor » ou tous « fair » ; il faut un départage ou une cohorte minimale ; (2) **cohorte de 81** pour les climatiseurs : un top 10 % = 8 produits ; (3) la position est relative à la cohorte du jour : elle bouge avec le catalogue, donc le libellé devrait s'accompagner de la date et de la taille de cohorte. **Recommandation :** conserver 0,90 / 0,67 / 0,33 pour les verticales de plus de 300 produits, avec départage des ex-æquo par la note brute puis le GTIN, et ne pas afficher de libellé en dessous de 100 produits notés (climatiseurs : « non classé »). À valider par le CTO.
+Lecture : le libellé par position remplace des seuils fixes qui, aujourd'hui, mettent 92 % des TV en " Correct " et 91 % des fours en " Bon ". Réserves mesurées : (1) **ex-æquo** : climatiseurs p33 = p50 = p67 = 13,66 (plus de 80 % des produits à 13,5-14) : une règle de position stricte (" mieux que x % ") classerait tous ces produits " poor " ou tous " fair " ; il faut un départage ou une cohorte minimale ; (2) **cohorte de 81** pour les climatiseurs : un top 10 % = 8 produits ; (3) la position est relative à la cohorte du jour : elle bouge avec le catalogue, donc le libellé devrait s'accompagner de la date et de la taille de cohorte. **Recommandation :** conserver 0,90 / 0,67 / 0,33 pour les verticales de plus de 300 produits, avec départage des ex-æquo par la note brute puis le GTIN, et ne pas afficher de libellé en dessous de 100 produits notés (climatiseurs : " non classé "). À valider par le CTO.
 
 ### 6,2 Bornes robustes par critère d'énergie
 
