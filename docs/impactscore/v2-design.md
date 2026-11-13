@@ -552,6 +552,13 @@ repairability, air conditioners). Report
 `docs/impactscore/v2-simulation-<date>.md` with CSV of the changes; the export
 is never committed.
 
+Delivered (GOU-1887): `ImpactScoreSimulationTest` (api) and `scripts/impactscore/simulation_report.py`; run of
+2026-11-13 in [v2-simulation-2026-11-13.md](v2-simulation-2026-11-13.md). Two differences from the plan above: the
+export is read with the `SerialisationService` settings minus parameter-name detection (`fromJson` cannot read a
+`Product` back), and the fidelity check replays the exact cohort of the last batch (products whose
+`impactScoreMeta.scoredAt` belongs to it), since min-max scales move with the cohort. The brand stub returns the
+`BRAND_*` scores of each brand's most recently assessed product.
+
 ## 7. Tests
 
 `ImpactScoreRealVerticalsTest`, extended to V2 on the 7 real configurations,
