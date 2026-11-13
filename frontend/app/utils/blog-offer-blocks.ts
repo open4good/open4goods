@@ -26,6 +26,28 @@ const range = (field: string, min?: number, max?: number): Filter => ({
   ...(max === undefined ? {} : { max }),
 })
 
+const tvBlocks = (): BlogOfferBlocksConfig => ({
+  vertical: 'tv',
+  categoryPath: '/televiseurs',
+  blocks: [
+    {
+      id: 'tv-43-50',
+      titleKey: 'blog.offerBlocks.tv.small',
+      filters: [range(DIAGONAL, 43, 50)],
+    },
+    {
+      id: 'tv-55',
+      titleKey: 'blog.offerBlocks.tv.medium',
+      filters: [range(DIAGONAL, 55, 55)],
+    },
+    {
+      id: 'tv-65-plus',
+      titleKey: 'blog.offerBlocks.tv.large',
+      filters: [range(DIAGONAL, 65)],
+    },
+  ],
+})
+
 const ovenBlocks = (blocks: BlogOfferBlock[]): BlogOfferBlocksConfig => ({
   vertical: 'oven',
   categoryPath: '/fours',
@@ -54,27 +76,8 @@ const OVEN_VOLUME_BLOCKS: BlogOfferBlock[] = [
 
 /** Top-rated-with-offers blocks, indexed by blog article slug. */
 export const blogOfferBlocksBySlug: Record<string, BlogOfferBlocksConfig> = {
-  'quelle-taille-de-tv-choisir-pour-son-salon': {
-    vertical: 'tv',
-    categoryPath: '/televiseurs',
-    blocks: [
-      {
-        id: 'tv-43-50',
-        titleKey: 'blog.offerBlocks.tv.small',
-        filters: [range(DIAGONAL, 43, 50)],
-      },
-      {
-        id: 'tv-55',
-        titleKey: 'blog.offerBlocks.tv.medium',
-        filters: [range(DIAGONAL, 55, 55)],
-      },
-      {
-        id: 'tv-65-plus',
-        titleKey: 'blog.offerBlocks.tv.large',
-        filters: [range(DIAGONAL, 65)],
-      },
-    ],
-  },
+  'quelle-taille-de-tv-choisir-pour-son-salon': tvBlocks(),
+  'black-friday-tv-reperer-fausses-promotions': tvBlocks(),
   'quel-volume-de-four-choisir': ovenBlocks(OVEN_VOLUME_BLOCKS),
   'quel-systeme-choisir-entre-four-pyrolyse-et-catalyse': ovenBlocks([
     {
