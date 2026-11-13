@@ -170,6 +170,24 @@
       "defaultValue": "${affiliation-config.tradetracker-api-key:}"
     },
     {
+      "name": "score-cleanup.enabled",
+      "type": "java.lang.Boolean",
+      "description": "GOU-2133. When true, the end of the batch clears the scores, ranking and ImpactScore assessment metadata of the products outside the batched verticals (no vertical, or a vertical the batch does not run). When false, it only counts and logs them, without writing.",
+      "defaultValue": false
+    },
+    {
+      "name": "score-cleanup.max-products",
+      "type": "java.lang.Integer",
+      "description": "GOU-2133. Maximum number of products cleared by one batch run; the rest waits for the next run.",
+      "defaultValue": 100000
+    },
+    {
+      "name": "score-cleanup.bulk-size",
+      "type": "java.lang.Integer",
+      "description": "GOU-2133. Number of products per bulk update of the score cleanup.",
+      "defaultValue": 500
+    },
+    {
       "name": "impactscore.methodology-version-overrides",
       "type": "java.lang.String",
       "description": "ImpactScore methodology version forced per vertical, comma-separated <vertical>:<version> pairs (for example tv:2), versions 1 or 2. Blank or none forces nothing. Rendered from the GitHub Environment variable IMPACTSCORE_METHODOLOGY_OVERRIDES; api, front-api and ui must receive the same value. An invalid value fails the startup (docs/impactscore/v2-design.md, section 5.2).",

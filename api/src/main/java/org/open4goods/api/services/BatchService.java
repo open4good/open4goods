@@ -44,6 +44,7 @@ import org.open4goods.services.productrepository.impactscore.ImpactScoreSnapshot
 import org.springframework.scheduling.annotation.Scheduled;
 
 import org.open4goods.api.config.yml.ApiProperties;
+import org.open4goods.api.config.yml.ScoreCleanupProperties;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.resource.ResourceType;
@@ -643,8 +644,68 @@ public class BatchService {
 			batch(vertical);
 		}
 
+		clearScoresOutsideVerticals();
 
 		timings.info("End of batch in {} s", seconds(start));
+	}
+
+	/**
+	 * Clears the scores, ranking and ImpactScore assessment metadata of the products outside the batched verticals
+	 * (GOU-2133): without a vertical, or of a vertical the batch does not run. The vertical batches never load them,
+	 * so {@link #clearObsoleteScores} cannot reach them, and their old ImpactScore stayed on the product page, the
+	 * global search and the comparator. Same rule as {@link #clearObsoleteScores} for a product leaving its vertical.
+	 *
+	 * <p>Disabled by default ({@code score-cleanup.enabled}): it then only counts the products it would clear. When
+	 * enabled, it clears at most {@code score-cleanup.max-products} products per run, by partial bulk updates of
+	 * those three fields only. A cleared product no longer matches, so a second run touches nothing. Both outcomes
+	 * are logged in INFO by the {@link #TIMINGS_LOGGER}, with the duration. A failure is logged and never stops the
+	 * batch.
+	 */
+	void clearScoresOutsideVerticals() {
+		ScoreCleanupProperties conf = apiProperties == null ? null : apiProperties.getScoreCleanup();
+		if (conf == null) {
+			return;
+		}
+		long start = System.nanoTime();
+		Set<String> batchedVerticals = verticalsConfigService.getConfigsWithoutDefault().stream()
+				.map(VerticalConfig::getId)
+				.collect(Collectors.toSet());
+		if (batchedVerticals.isEmpty()) {
+			// Every scored product would be outside the verticals: never clear the whole index on a missing config
+			logger.error("Score cleanup skipped: no batched vertical");
+			return;
+		}
+		try {
+			long targeted = dataRepository.countScoredOutsideVerticals(batchedVerticals);
+			if (!conf.isEnabled()) {
+				timings.info("Score cleanup outside verticals : disabled, {} products would be cleared", targeted);
+				return;
+			}
+			int bulkSize = Math.max(1, conf.getBulkSize());
+			List<Long> page = new ArrayList<>(bulkSize);
+			long cleared = 0;
+			long failed = 0;
+			try (Stream<Long> ids = dataRepository.exportIdsScoredOutsideVerticals(batchedVerticals)) {
+				Iterator<Long> iterator = ids.limit(Math.max(0, conf.getMaxProducts())).iterator();
+				while (iterator.hasNext()) {
+					page.add(iterator.next());
+					if (page.size() == bulkSize || !iterator.hasNext()) {
+						try {
+							dataRepository.clearScores(page, batchedVerticals);
+							cleared += page.size();
+						} catch (RuntimeException e) {
+							failed += page.size();
+							logger.error("Score cleanup: bulk of {} products failed", page.size(), e);
+						}
+						page.clear();
+					}
+				}
+			}
+			timings.info("Score cleanup outside verticals : {} products cleared, {} failed, of {} targeted, in {} s",
+					cleared, failed, targeted, seconds(start));
+		} catch (RuntimeException e) {
+			logger.error("Score cleanup outside verticals failed", e);
+		}
 	}
 
 	private static long seconds(long startNanos) {

@@ -145,6 +145,32 @@ scores the products that have offers and are not excluded. After scoring:
 - if scoring throws, nothing is indexed for that vertical;
 - if an automatic check below is blocking, nothing is indexed for that vertical either.
 
+Products outside the batched verticals (no `vertical`, or a vertical id the
+batch does not run) are never loaded by `batch(vertical)`, so the rule above
+cannot reach them: in November 2026, about 31,000 such products, most of them
+excluded, still showed an old Impact Score on their page, in the global search
+and in the comparator (GOU-2133). After the last vertical, `BatchService.batch()`
+runs `clearScoresOutsideVerticals()`:
+
+- it targets the products holding `scores` or `impactScoreMeta` whose `vertical`
+  is not a batched vertical (`ProductRepository.countScoredOutsideVerticals`);
+- `score-cleanup.enabled` is `false` by default: the batch then only logs
+  `Score cleanup outside verticals : disabled, N products would be cleared`;
+- when enabled, it clears, by partial bulk updates of `score-cleanup.bulk-size`
+  products (default 500), at most `score-cleanup.max-products` products per run
+  (default 100,000): `scores` and `ranking` become empty objects and
+  `impactScoreMeta` is removed, the same result as above for an excluded product.
+  The script leaves a product that joined a batched vertical since it was read.
+  It logs `Score cleanup outside verticals : X products cleared, Y failed, of N
+  targeted, in S s`;
+- a cleared product no longer matches, so the next run touches nothing; a
+  failure is logged and never stops the batch. Both lines go to the
+  `BatchService.timings` logger, which stays at INFO in beta and prod.
+
+Check after a run (should be 0):
+`{"bool":{"filter":[{"term":{"excluded":true}},{"exists":{"field":"scores.ECOSCORE.value"}}]}}`
+on `products-moustik` (`_count`).
+
 ### 6. Automatic checks after each batch (GOU-1895)
 
 `ImpactScoreBatchGuard` runs after scoring and before indexation, per vertical, and compares with the previous

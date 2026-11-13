@@ -1842,6 +1842,81 @@ public class ProductRepository {
 	}
 
 	/**
+	 * Painless script clearing the scores of a product outside the batched verticals (GOU-2133), as
+	 * {@code BatchService.clearObsoleteScores} does for a product leaving its vertical: no score, an empty ranking,
+	 * no ImpactScore assessment metadata. A product that got one of {@code params.verticals} since it was read is
+	 * left untouched: the vertical batch owns its scores.
+	 */
+	static final String CLEAR_SCORES_SCRIPT = "if (ctx._source.vertical != null && params.verticals.contains(ctx._source.vertical)) { ctx.op = 'noop'; } "
+			+ "else { ctx._source.scores = [:]; ctx._source.ranking = [:]; ctx._source.remove('impactScoreMeta'); }";
+
+	/**
+	 * Products holding scores, a ranking or an ImpactScore assessment while out of the batched verticals: without a
+	 * vertical or of a vertical the batch does not run. The batch never loads them, so it cannot clear their scores
+	 * (GOU-2133). A cleared product holds an empty {@code scores} object, which does not match.
+	 *
+	 * @param batchedVerticals ids of the verticals the batch runs
+	 * @return the query
+	 */
+	static co.elastic.clients.elasticsearch._types.query_dsl.Query scoredOutsideVerticalsQuery(Collection<String> batchedVerticals) {
+		List<co.elastic.clients.elasticsearch._types.FieldValue> verticals = batchedVerticals.stream()
+				.map(co.elastic.clients.elasticsearch._types.FieldValue::of)
+				.toList();
+		return co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
+				.should(s -> s.exists(e -> e.field("scores")))
+				.should(s -> s.exists(e -> e.field("impactScoreMeta")))
+				.minimumShouldMatch("1")
+				.mustNot(m -> m.terms(t -> t.field("vertical").terms(v -> v.value(verticals))))));
+	}
+
+	/**
+	 * Counts the products holding scores outside the batched verticals (GOU-2133).
+	 *
+	 * @param batchedVerticals ids of the verticals the batch runs
+	 * @return the number of products whose scores the batch cannot clear
+	 */
+	public long countScoredOutsideVerticals(Collection<String> batchedVerticals) {
+		NativeQuery query = new NativeQueryBuilder().withQuery(scoredOutsideVerticalsQuery(batchedVerticals)).build();
+		return elasticsearchOperations.count(query, CURRENT_INDEX);
+	}
+
+	/**
+	 * Streams the ids of the products holding scores outside the batched verticals (GOU-2133), without their source.
+	 *
+	 * @param batchedVerticals ids of the verticals the batch runs
+	 * @return streaming export of product ids, to be closed by the caller
+	 */
+	public Stream<Long> exportIdsScoredOutsideVerticals(Collection<String> batchedVerticals) {
+		NativeQuery query = new NativeQueryBuilder()
+				.withQuery(scoredOutsideVerticalsQuery(batchedVerticals))
+				.withSourceFilter(noSourceFilter())
+				.withPageable(PageRequest.of(0, FULL_PRODUCT_PAGE_SIZE))
+				.build();
+		var iterator = elasticsearchOperations.searchForStream(query, Product.class, CURRENT_INDEX);
+		return iterator.stream().onClose(iterator::close).map(hit -> Long.valueOf(hit.getId()));
+	}
+
+	/**
+	 * Clears, in one bulk, the scores, ranking and ImpactScore assessment metadata of the given products, unless they
+	 * belong to a batched vertical (see {@link #CLEAR_SCORES_SCRIPT}). Only those three fields are written.
+	 *
+	 * @param productIds       ids of the products to clear
+	 * @param batchedVerticals ids of the verticals the batch runs
+	 */
+	public void clearScores(Collection<Long> productIds, Collection<String> batchedVerticals) {
+		Map<String, Object> params = Map.of("verticals", List.copyOf(batchedVerticals));
+		List<UpdateQuery> updateQueries = productIds.stream()
+				.map(id -> UpdateQuery.builder(String.valueOf(id))
+						.withScript(CLEAR_SCORES_SCRIPT)
+						.withLang("painless")
+						.withParams(params)
+						.withIndex(CURRENT_INDEX.getIndexName())
+						.build())
+				.toList();
+		elasticsearchOperations.bulkUpdate(updateQueries, CURRENT_INDEX);
+	}
+
+	/**
 	 * Painless script of a partial update: each changed field replaces the indexed one.
 	 * A {@code doc} update would merge objects instead: the client serializer omits null
 	 * properties, so a {@code price.minPrice} recomputed to null kept the expired offer
