@@ -214,6 +214,9 @@ Cela permet d'utiliser la même normalisation (ex: MINMAX_FIXED) tout en indiqua
 - `POWER_CONSUMPTION_STANDBY` : `MINMAX_OBSERVED`.
 - `POWER_CONSUMPTION_STANDBY_NETWORKD` : `MINMAX_OBSERVED`.
 - `POWER_CONSUMPTION_OFF` : `MINMAX_OBSERVED`.
+- `POWER_DENSITY_SDR` (V2 TV, GOU-1884) : W/dm², puissance SDR divisée par la surface d'écran (diagonale, format
+  16:9). `MINMAX_QUANTILE` 0,02 / 0,98 dans `v2.criteriaScoring` de `tv.yml`. Absente sans watts SDR ou sans
+  diagonale réels. Voir `docs/impactscore/v2-design.md`, 2.8.
 
 **Pourquoi** : on cherche une sobriété relative à l'offre actuelle ; la méthode reste ajustable par attribut si la distribution devient instable.
 
@@ -237,7 +240,7 @@ comparables à un A de la nouvelle échelle et restent une valeur manquante (pol
 
 ### Taille / poids
 
-- `DIAGONALE_POUCES` : `MINMAX_OBSERVED`.
+- `DIAGONALE_POUCES` : `MINMAX_OBSERVED`. Hors de la matrice V2 des TV (GOU-1884) : affichée, non notée.
 - `WEIGHT` : `MINMAX_OBSERVED`.
 
 - `ESG` : `MINMAX_OBSERVED` avec **plus haut = mieux**.

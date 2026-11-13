@@ -22,11 +22,13 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.open4goods.model.vertical.AttributeComparisonRule;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.ImpactScorePositionLabel;
 import org.open4goods.model.vertical.ImpactScoreV2Config;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.scoring.ScoreDerivationMethod;
 import org.open4goods.model.vertical.scoring.ScoreNormalizationMethod;
 import org.open4goods.model.vertical.scoring.ScoreNormalizationParams;
 import org.open4goods.services.serialisation.service.SerialisationService;
@@ -257,17 +259,21 @@ class VerticalYamlValidationTest {
 
     /**
      * V2 criteria that replace a V1 criterion with its weight, by vertical (GOU-2041, gate 2 of GOU-1877): V1
-     * criterion to V2 criterion.
+     * criterion to V2 criterion. Several V1 criteria replaced by the same V2 criterion add their weights: tv
+     * functional unit (GOU-1884), the SDR watts become the screen area density, the HDR watts go to the SDR class.
      */
     private static final Map<String, Map<String, String>> V2_REPLACED_CRITERIA = Map.of(
-        "tv", Map.of("REPAIRABILITY_INDEX", "REPAIRABILITY_OR_DURABILITY_INDEX"),
+        "tv", Map.of("REPAIRABILITY_INDEX", "REPAIRABILITY_OR_DURABILITY_INDEX",
+            "POWER_CONSUMPTION_SDR", "POWER_DENSITY_SDR",
+            "POWER_CONSUMPTION_HDR", "CLASSE_ENERGY_SDR"),
         "washing-machine", Map.of("REPAIRABILITY_INDEX", "REPAIRABILITY_OR_DURABILITY_INDEX",
             "POWER_CONSUMPTION_TYPICAL", "ENERGY_CONSUMPTION_100_CYCLES"),
         "smartphones", Map.of("REPAIRABILITY_INDEX", "EU_REPAIRABILITY_CLASS"));
 
     /** V1 criteria removed from the V2 matrix, their weight spread pro rata, by vertical (gate 2 of GOU-1877). */
     private static final Map<String, Set<String>> V2_REMOVED_CRITERIA = Map.of(
-        "air-conditioner", Set.of("REPAIRABILITY_INDEX"));
+        "air-conditioner", Set.of("REPAIRABILITY_INDEX"),
+        "tv", Set.of("DIAGONALE_POUCES"));
 
     /**
      * GOU-1880: every real vertical carries a valid {@code v2} block whose matrix is the V1 matrix without
@@ -281,13 +287,12 @@ class VerticalYamlValidationTest {
             ImpactScoreConfig impactScore = config.getImpactScoreConfig();
             assertThat(impactScore.getV2()).as("v2 block of %s", config.getId()).isNotNull();
             assertThat(ImpactScoreMethodology.validate(impactScore, config)).as("v2 errors of %s", config.getId()).isEmpty();
-
             Map<String, String> replaced = V2_REPLACED_CRITERIA.getOrDefault(config.getId(), Map.of());
             Map<String, Double> v1 = new HashMap<>();
             Set<String> removed = V2_REMOVED_CRITERIA.getOrDefault(config.getId(), Set.of());
             impactScore.getCriteriasPonderation().forEach((key, weight) -> {
                 if (!removed.contains(key)) {
-                    v1.put(replaced.getOrDefault(key, key), weight);
+                    v1.merge(replaced.getOrDefault(key, key), weight, Double::sum);
                 }
             });
             Map<String, Double> v2 = impactScore.getV2().getCriteriasPonderation();
@@ -364,6 +369,60 @@ class VerticalYamlValidationTest {
             .getCriteriaScoring()).containsKey("ENERGY_CONSUMPTION_100_CYCLES");
         assertThat(verticalsConfigService.getConfigById("air-conditioner").getImpactScoreConfig().getV2()
             .getCriteriaScoring()).as("air conditioners: bounds unchanged").isEmpty();
+    }
+
+    /**
+     * GOU-1884: the tv V2 matrix rates energy per screen area. {@code DIAGONALE_POUCES} and the raw watts leave it
+     * (weights checked by {@link #everyRealVerticalHasAV2MatrixWithoutDataQuality()}); the energy block keeps its V1
+     * weight, before renormalisation.
+     */
+    @Test
+    void tvV2MatrixRatesEnergyPerScreenArea() {
+        ImpactScoreConfig impactScore = verticalsConfigService.getConfigById("tv").getImpactScoreConfig();
+        Map<String, Double> v1 = impactScore.getCriteriasPonderation();
+        Map<String, Double> v2 = impactScore.getV2().getCriteriasPonderation();
+        assertThat(v2).doesNotContainKeys("DIAGONALE_POUCES", "POWER_CONSUMPTION_SDR", "POWER_CONSUMPTION_HDR");
+
+        double renormalisation = 1.0 - v1.get("DATA_QUALITY") - v1.get("DIAGONALE_POUCES");
+        double v1Energy = v1.get("POWER_CONSUMPTION_SDR") + v1.get("POWER_CONSUMPTION_HDR")
+            + v1.get("CLASSE_ENERGY_SDR") + v1.get("CLASSE_ENERGY_HDR");
+        double v2Energy = v2.get("POWER_DENSITY_SDR") + v2.get("CLASSE_ENERGY_SDR") + v2.get("CLASSE_ENERGY_HDR");
+        assertThat(v2Energy * renormalisation).as("energy block, V1 units").isCloseTo(v1Energy, within(1e-6));
+        assertThat(impactScore.getV2().getCriteriaScoring()).containsKey("POWER_DENSITY_SDR")
+            .doesNotContainKeys("POWER_CONSUMPTION_SDR", "POWER_CONSUMPTION_HDR");
+    }
+
+    /** GOU-1884: the density reads the SDR watts and the diagonal, 16:9, and is never read from merchant data. */
+    @Test
+    void powerDensityCriterionReadsSdrWattsPerScreenArea() {
+        VerticalConfig tv = verticalsConfigService.getConfigById("tv");
+        AttributeConfig density = tv.getAttributesConfig().getAttributeConfigByKey("POWER_DENSITY_SDR");
+        assertThat(density).isNotNull();
+        assertThat(density.isAsScore()).isTrue();
+        assertThat(density.getImpactBetterIs()).isEqualTo(AttributeComparisonRule.LOWER);
+        assertThat(density.getScoreSources()).containsExactly("POWER_CONSUMPTION_SDR", "DIAGONALE_POUCES");
+        assertThat(density.scoreDerivationMethod()).isEqualTo(ScoreDerivationMethod.SCREEN_AREA_DENSITY);
+        assertThat(density.getScoreDerivation().getAspectRatioWidth()).isEqualTo(16.0);
+        assertThat(density.getScoreDerivation().getAspectRatioHeight()).isEqualTo(9.0);
+        assertThat(density.getSynonyms()).as("never read from merchant data").isEmpty();
+        assertThat(tv.getImpactScoreConfig().getCriteriasPonderation()).as("V1 matrix unchanged")
+            .containsKeys("DIAGONALE_POUCES", "POWER_CONSUMPTION_SDR").doesNotContainKey("POWER_DENSITY_SDR");
+        assertThat(tv.getAvailableImpactScoreCriterias()).as("V1 DATA_QUALITY unchanged")
+            .doesNotContain("POWER_DENSITY_SDR");
+    }
+
+    @Test
+    void v2ScreenAreaDensityWithoutTwoSourcesIsRefused() {
+        VerticalConfig tv = verticalsConfigService.getConfigById("tv");
+        AttributeConfig density = tv.getAttributesConfig().getAttributeConfigByKey("POWER_DENSITY_SDR");
+        List<String> sources = density.getScoreSources();
+        try {
+            density.setScoreSources(List.of("POWER_CONSUMPTION_SDR"));
+            assertThat(ImpactScoreMethodology.validate(tv.getImpactScoreConfig(), tv))
+                .anyMatch(error -> error.contains("POWER_DENSITY_SDR is a screen area density"));
+        } finally {
+            density.setScoreSources(sources);
+        }
     }
 
     @Test

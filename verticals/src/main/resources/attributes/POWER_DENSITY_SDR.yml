@@ -1,0 +1,53 @@
+# ============================================================================
+# POWER_DENSITY_SDR - derived ImpactScore V2 criterion, W per dm2 of screen
+# Created: GOU-1884 (ImpactScore V2, TV functional unit)
+# The SDR on-mode power divided by the screen area, so that a 32" and a 75"
+# television compare on the same functional unit instead of the larger one
+# being penalised for its size. Screen area from the diagonal and a 16:9
+# aspect ratio: d2 x 144 / 337 square inches, 1 square inch = 0.064516 dm2.
+# Computed only when both POWER_CONSUMPTION_SDR and DIAGONALE_POUCES are real
+# and positive, otherwise absent (no imputation). Never read from merchant data
+# (no synonym), computed only while a matrix weights it: the V2 matrix of tv.
+# V2 bounds: tv.yml v2.criteriaScoring (MINMAX_QUANTILE 0.02 / 0.98).
+# ============================================================================
+
+key: "POWER_DENSITY_SDR"
+userBetterIs: "LOWER"
+impactBetterIs: "LOWER"
+faIcon: "mdi-power-plug-off"
+name:
+  default: "Power consumption per screen area (SDR)"
+  fr: "Consommation électrique par surface d'écran (SDR)"
+suffix:
+  default: "W/dm²"
+  fr: "W/dm²"
+filteringType: "NUMERIC"
+asScore: true
+scoreSources:
+  - "POWER_CONSUMPTION_SDR"
+  - "DIAGONALE_POUCES"
+scoreDerivation:
+  method: "SCREEN_AREA_DENSITY"
+  aspectRatioWidth: 16.0
+  aspectRatioHeight: 9.0
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "MINMAX_OBSERVED"
+  missingValuePolicy: "NEUTRAL"
+  degenerateDistributionPolicy: "FALLBACK"
+scoreTitle:
+  fr: "Consommation électrique par surface d'écran (SDR)"
+  en: "Power consumption per screen area (SDR)"
+scoreDescription:
+  fr: "La consommation électrique du téléviseur en mode SDR, divisée par la surface de son écran (watts par décimètre carré, format 16:9)"
+  en: "The SDR on-mode power of the television divided by its screen area (watts per square decimetre, 16:9 format)"
+scoreUtility:
+  fr: "Compare l'efficacité énergétique des téléviseurs à taille d'écran égale : un grand écran n'est plus pénalisé pour sa seule taille."
+  en: "Compares the energy efficiency of televisions per unit of screen area, so a large screen is no longer penalised for its size alone."
+participateInScores:
+  - ENERGY_CONSUMPTION
+participateInACV:
+  - USE

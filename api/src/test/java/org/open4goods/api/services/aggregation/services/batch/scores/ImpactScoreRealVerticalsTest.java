@@ -54,6 +54,7 @@ import org.open4goods.model.product.Score;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.scoring.ScoreDerivationMethod;
 import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.serialisation.service.SerialisationService;
@@ -609,10 +610,16 @@ class ImpactScoreRealVerticalsTest {
             Product product = new Product(entry.getKey());
             for (String criterion : entry.getValue()) {
                 AttributeConfig attribute = vertical.getAttributesConfig().getAttributeConfigByKey(criterion);
-                // A derived criterion is read from its sources only (GOU-2041): fill in the first one
-                String key = attribute.isDerivedScore() ? attribute.getScoreSources().getFirst() : criterion;
-                AttributeConfig valued = vertical.getAttributesConfig().getAttributeConfigByKey(key);
-                product.getAttributes().getIndexed().put(key, new IndexedAttribute(key, value(valued, valueIndex)));
+                // A derived criterion is read from its sources only: the first one (GOU-2041), or all of them for a
+                // screen area density (GOU-1884)
+                List<String> keys = !attribute.isDerivedScore() ? List.of(criterion)
+                        : attribute.scoreDerivationMethod() == ScoreDerivationMethod.SCREEN_AREA_DENSITY
+                                ? attribute.getScoreSources()
+                                : List.of(attribute.getScoreSources().getFirst());
+                for (String key : keys) {
+                    AttributeConfig valued = vertical.getAttributesConfig().getAttributeConfigByKey(key);
+                    product.getAttributes().getIndexed().put(key, new IndexedAttribute(key, value(valued, valueIndex)));
+                }
             }
             products.add(product);
             designed.put(entry.getKey(), new TreeSet<>(entry.getValue()));
