@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.beans.BeanUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.model.StandardiserService;
 import org.open4goods.model.exceptions.ValidationException;
@@ -22,6 +21,7 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.vertical.scoring.ScoreNormalizationMethod;
 import org.open4goods.model.vertical.scoring.ScoreScoringConfig;
 import org.slf4j.Logger;
+import org.springframework.beans.BeanUtils;
 
 import org.open4goods.api.services.aggregation.services.batch.scores.normalization.NormalizationContext;
 import org.open4goods.api.services.aggregation.services.batch.scores.normalization.NormalizationResult;
