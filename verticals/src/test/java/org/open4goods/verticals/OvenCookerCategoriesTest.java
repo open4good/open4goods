@@ -49,11 +49,14 @@ class OvenCookerCategoriesTest {
         assertThat(classify("rakuten.com-csv.yml", RAKUTEN_CATEGORY)).isEqualTo("oven");
     }
 
-    /** The lookup is an exact (datasource config name, category) match: the Fnac entry only applies under its key. */
+    /** The lookup is an exact (datasource config name, category) match, no normalisation: each Fnac format has its own entry. */
     @Test
-    void fnacCategoryOnlyMatchesUnderItsConfiguredDatasourceKey() {
+    void fnacCategoriesClassifyAsOven() {
+        String prefixed = "362 | COOKING | " + FNAC_CATEGORY;
         assertThat(classify("Fnac FR", FNAC_CATEGORY)).isEqualTo("oven");
-        assertThat(classify("fnac.com", FNAC_CATEGORY)).isNull();
+        assertThat(classify("Fnac FR", prefixed)).isEqualTo("oven");
+        assertThat(classify("fnac.com", FNAC_CATEGORY)).isEqualTo("oven");
+        assertThat(classify("fnac.com", prefixed)).isNull();
     }
 
     @Test
