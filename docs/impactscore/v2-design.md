@@ -276,7 +276,8 @@ Delivered (GOU-1883): `effectiveScoring` (`AbstractScoreAggregationService`) rep
 `v2.criteriaScoring.<key>.normalization` in V2 only; V1 never reads the override. Values of gate 2
 (GOU-1877, applied by GOU-2137), following the measures of `lot1b-distribution-2026-11.md` section 6.2:
 
-- `MINMAX_QUANTILE` 0.02 / 0.98: `tv` `POWER_CONSUMPTION_SDR` and `_HDR`, `oven`
+- `MINMAX_QUANTILE` 0.02 / 0.98: `tv` `POWER_DENSITY_SDR` (GOU-1884, which replaced the
+  `POWER_CONSUMPTION_SDR` and `_HDR` overrides with the raw watts, section 2.8), `oven`
   `OVEN_ENERGY_CONSUMPTION_CYCLE`, `dishwasher` `WATER_CONSUMPTION` and `ENERGY_CONSUMPTION_100_CYCLES`,
   `washing-machine` `WATER_CONSUMPTION` and `ENERGY_CONSUMPTION_100_CYCLES`;
 - `MINMAX_FIXED` 0 to 1 W: `POWER_CONSUMPTION_OFF` (`tv`, `dishwasher`, `washing-machine`) and
@@ -295,7 +296,7 @@ criterion, `REPAIRABILITY_OR_DURABILITY_INDEX`, with the former weight of
 
 | Vertical | V2 weight | V1 |
 |---|---|---|
-| `tv` | 0.1609195 | `REPAIRABILITY_INDEX` 0.14, unchanged |
+| `tv` | 0.1686747 (GOU-1884 renormalisation) | `REPAIRABILITY_INDEX` 0.14, unchanged |
 | `washing-machine` | 0.1363636 | `REPAIRABILITY_INDEX` 0.12, unchanged |
 
 - **Mechanism.** An attribute declaring `scoreSources` (ordered keys) is a
@@ -317,6 +318,67 @@ criterion, `REPAIRABILITY_OR_DURABILITY_INDEX`, with the former weight of
   reading an unknown or derived source, or weighted next to one of its
   sources. `availableImpactScoreCriterias` is unchanged, so `DATA_QUALITY` is
   unchanged in V1 and V2.
+
+### 2.8 TV functional unit: power per screen area (GOU-1884)
+
+The V1 tv matrix rates the size (`DIAGONALE_POUCES`, 0.04) and the raw watts
+(`POWER_CONSUMPTION_SDR` 0.16, `_HDR` 0.08): watts grow with the screen
+(Spearman watts/diagonal +0.94 on the 2 151 rated TVs of 2026-11-13), so a
+large screen is penalised twice and a 27" of classes E (SDR) and G (HDR)
+ranks in the V1 top 5 %. The V2 matrix compares TVs per unit of screen area.
+
+- **Criterion.** `POWER_DENSITY_SDR` (W/dm²) = `POWER_CONSUMPTION_SDR` /
+  screen area. Area from the diagonal `d` in inches and the aspect ratio
+  `w:h` (default 16:9): `d² × w × h / (w² + h²)` square inches, that is
+  `d² × 144 / 337`; 1 square inch = 0.064516 dm². A 50" TV of 53 W: 68.9 dm²,
+  0.77 W/dm². `impactBetterIs: LOWER`.
+- **Mechanism.** A derived criterion (2.7) with `scoreDerivation.method:
+  SCREEN_AREA_DENSITY`: `scoreSources` are the value then the diagonal, both
+  required, real and strictly positive, otherwise the criterion is absent (no
+  imputation, a 0 W or 0" is not a measure). The aspect ratio is configurable
+  (`scoreDerivation.aspectRatioWidth` / `aspectRatioHeight`).
+  `metadatas.source` holds both keys. `ImpactScoreMethodology` refuses a
+  density without exactly two sources or with a non-positive aspect ratio.
+- **Bounds.** `MINMAX_QUANTILE` 0.02 / 0.98 on the real values (porte n° 2,
+  GOU-1877): 0.515 to 1.427 W/dm² on 2026-11-13 (min 0.361, median 0.890,
+  max 3.011). Computable for 2 068 of 2 151 TVs; the 83 others lack SDR watts.
+- **Matrix.** `DIAGONALE_POUCES` leaves it (still displayed, not rated), its
+  weight redistributed pro rata. The raw watts leave it. The energy block
+  keeps its V1 weight, 0.34 before renormalisation:
+
+| Criterion | V1 | V2, V1 units | V2 |
+|---|---:|---:|---:|
+| `POWER_CONSUMPTION_SDR` | 0.16 | - | - |
+| `POWER_CONSUMPTION_HDR` | 0.08 | - | - |
+| `POWER_DENSITY_SDR` | - | 0.16 | 0.1927711 |
+| `CLASSE_ENERGY_SDR` | 0.06 | 0.14 | 0.1686747 |
+| `CLASSE_ENERGY_HDR` | 0.04 | 0.04 | 0.0481928 |
+| `DIAGONALE_POUCES` | 0.04 | - | - |
+| `DATA_QUALITY` | 0.13 | - | - |
+| Other criteria | 0.49 | 0.49 | / 0.83 |
+
+- **Why this split.** The density favours large screens (Spearman
+  density/diagonal -0.65: 1.08 W/dm² median at 20-29", 0.65 at 80-89"). The
+  SDR class comes from the EEI of regulation (EU) 2019/2013, whose reference
+  power already accounts for the area: it is the size-neutral counterweight,
+  so it takes the 0.08 of the HDR watts. The HDR class stays at 0.04: 92 % of
+  rated TVs are in G, it barely separates them. Simulation of the energy
+  block on the 2 151 TVs (density on its 2-98 bounds, classes A=1 to G=0;
+  percentile of the ten 27" E/G TVs, 0 = best; V1 ImpactScore: 4.1):
+
+| Split (density / SDR class / HDR class) | 27" E/G percentile | Spearman block/diagonal |
+|---|---:|---:|
+| A 0.24 / 0.06 / 0.04 (density takes all the watts) | 79 | +0.53 |
+| C 0.20 / 0.08 / 0.06 | 76 | +0.46 |
+| **D 0.16 / 0.14 / 0.04 (retained)** | **61** | **+0.39** |
+| F 0.12 / 0.18 / 0.04 | 48 | +0.32 |
+
+  Final weights are checked by the V1/V2 simulation (GOU-1887) and the
+  publication approval (GOU-1888).
+- **Double count.** Classes and density both read the efficiency per area;
+  this is accepted and bounded by the unchanged weight of the block.
+- **Composites.** `POWER_DENSITY_SDR` joins `ENERGY_CONSUMPTION` in V2, where
+  the raw watts no longer count (2.7). V1 is unchanged.
 
 ## 3. Exclusion
 

@@ -2,6 +2,7 @@ package org.open4goods.api.services.aggregation.services.batch.scores;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.open4goods.model.attribute.AttributeType;
@@ -13,6 +14,7 @@ import org.open4goods.model.rating.Cardinality;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.scoring.ScoreDerivationMethod;
 import org.slf4j.Logger;
 
 /**
@@ -25,10 +27,16 @@ import org.slf4j.Logger;
  * parseable value (no average), normalised with its own scoring, and records
  * that source in {@link #SCORE_SOURCE_METADATA}. Without any such source the
  * score stays absent (GOU-2041).
+ *
+ * <p>A {@link ScoreDerivationMethod#SCREEN_AREA_DENSITY} derived attribute
+ * divides its first source by the screen area of its second source, a
+ * diagonal in inches (GOU-1884): both must be real and positive, otherwise
+ * the score stays absent.
  */
 public class Attribute2ScoreAggregationService extends AbstractScoreAggregationService {
 
-        /** Metadata of a derived score: the key of the source attribute its value was read from. */
+        /** Metadata of a derived score: the key of the source attribute its value was read from, or the keys of the
+         * sources it combines, comma separated. */
         public static final String SCORE_SOURCE_METADATA = "source";
 
         private final Map<Long, Map<String, Double>> absoluteValuesOverrides = new HashMap<>();
@@ -99,9 +107,9 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 	}
 
 	/**
-	 * Scores the derived attributes weighted by the active ImpactScore matrix: the raw value of the first source
-	 * holding a parseable value, normalised with the derived attribute's own scoring. A derived attribute without
-	 * any parseable source gets no score, never a default one.
+	 * Scores the derived attributes weighted by the active ImpactScore matrix, normalised with the derived
+	 * attribute's own scoring. A derived attribute without the source values its method needs gets no score, never
+	 * a default one.
 	 *
 	 * @param data            the product
 	 * @param vConf           the vertical configuration
@@ -120,33 +128,100 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 			if (weight == null || weight <= 0.0) {
 				continue;
 			}
-			for (String source : derived.getScoreSources()) {
-				IndexedAttribute aga = attributesByKey.get(source);
-				if (aga == null) {
-					continue;
-				}
-				Double rawScore;
-				try {
-					rawScore = generateScoresFromAttribute(source, aga, vConf.getAttributesConfig());
-				} catch (ValidationException e) {
-					dedicatedLogger.debug("Source {} of derived score {} not parseable for {}", source, derived.getKey(),
-							data.getId());
-					continue;
-				}
-				try {
-					Double score = applyTransform(rawScore, derived);
-					storeAbsoluteOverride(data, derived.getKey(), rawScore, score);
-					incrementCardinality(derived.getKey(), score, vConf);
-					Score s = new Score(derived.getKey(), score);
-					s.setAbsolute(new Cardinality());
-					s.getAbsolute().setValue(score);
-					s.getMetadatas().put(SCORE_SOURCE_METADATA, source);
-					data.getScores().put(s.getName(), s);
-				} catch (ValidationException e) {
-					dedicatedLogger.warn("Derived score {} failed for {} from {}", derived.getKey(), data.getId(), source, e);
-				}
-				break;
+			if (derived.scoreDerivationMethod() == ScoreDerivationMethod.SCREEN_AREA_DENSITY) {
+				scoreScreenAreaDensity(data, vConf, derived, attributesByKey);
+			} else {
+				scoreFirstAvailableSource(data, vConf, derived, attributesByKey);
 			}
+		}
+	}
+
+	/**
+	 * {@link ScoreDerivationMethod#FIRST_AVAILABLE}: the raw value of the first source holding a parseable value,
+	 * never an average (GOU-2041).
+	 */
+	private void scoreFirstAvailableSource(Product data, VerticalConfig vConf, AttributeConfig derived,
+			Map<String, IndexedAttribute> attributesByKey) {
+		for (String source : derived.getScoreSources()) {
+			IndexedAttribute aga = attributesByKey.get(source);
+			if (aga == null) {
+				continue;
+			}
+			Double rawScore;
+			try {
+				rawScore = generateScoresFromAttribute(source, aga, vConf.getAttributesConfig());
+			} catch (ValidationException e) {
+				dedicatedLogger.debug("Source {} of derived score {} not parseable for {}", source, derived.getKey(),
+						data.getId());
+				continue;
+			}
+			storeDerivedScore(data, vConf, derived, rawScore, source);
+			break;
+		}
+	}
+
+	/**
+	 * {@link ScoreDerivationMethod#SCREEN_AREA_DENSITY}: the first source divided by the screen area, in square
+	 * decimetres, of the second source, a diagonal in inches (GOU-1884). Both values must be real and positive: a zero
+	 * power or diagonal is not a measure, and nothing is imputed.
+	 */
+	private void scoreScreenAreaDensity(Product data, VerticalConfig vConf, AttributeConfig derived,
+			Map<String, IndexedAttribute> attributesByKey) {
+		List<String> sources = derived.getScoreSources();
+		if (sources.size() != 2) {
+			dedicatedLogger.error("Derived score {} needs a value and a diagonal source, got {}", derived.getKey(), sources);
+			return;
+		}
+		Double value = positiveSourceValue(data, vConf, derived, sources.get(0), attributesByKey);
+		Double diagonal = positiveSourceValue(data, vConf, derived, sources.get(1), attributesByKey);
+		if (value == null || diagonal == null) {
+			return;
+		}
+		double density = value / derived.getScoreDerivation().screenAreaSquareDecimetres(diagonal);
+		storeDerivedScore(data, vConf, derived, density, String.join(",", sources));
+	}
+
+	/**
+	 * The parsed value of a source of a derived score, or {@code null} when it is missing, not parseable or not
+	 * strictly positive.
+	 */
+	private Double positiveSourceValue(Product data, VerticalConfig vConf, AttributeConfig derived, String source,
+			Map<String, IndexedAttribute> attributesByKey) {
+		IndexedAttribute aga = attributesByKey.get(source);
+		if (aga == null) {
+			return null;
+		}
+		try {
+			Double value = generateScoresFromAttribute(source, aga, vConf.getAttributesConfig());
+			if (value == null || value.isNaN() || value.isInfinite() || value <= 0.0) {
+				dedicatedLogger.debug("Source {} of derived score {} not positive for {}: {}", source,
+						derived.getKey(), data.getId(), value);
+				return null;
+			}
+			return value;
+		} catch (ValidationException e) {
+			dedicatedLogger.debug("Source {} of derived score {} not parseable for {}", source, derived.getKey(),
+					data.getId());
+			return null;
+		}
+	}
+
+	/**
+	 * Stores a derived score computed from a raw value, recording the source attributes it was read from.
+	 */
+	private void storeDerivedScore(Product data, VerticalConfig vConf, AttributeConfig derived, Double rawScore,
+			String source) {
+		try {
+			Double score = applyTransform(rawScore, derived);
+			storeAbsoluteOverride(data, derived.getKey(), rawScore, score);
+			incrementCardinality(derived.getKey(), score, vConf);
+			Score s = new Score(derived.getKey(), score);
+			s.setAbsolute(new Cardinality());
+			s.getAbsolute().setValue(score);
+			s.getMetadatas().put(SCORE_SOURCE_METADATA, source);
+			data.getScores().put(s.getName(), s);
+		} catch (ValidationException e) {
+			dedicatedLogger.warn("Derived score {} failed for {} from {}", derived.getKey(), data.getId(), source, e);
 		}
 	}
 

@@ -13,6 +13,8 @@ import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.ImpactScorePositionLabel;
 import org.open4goods.model.vertical.ImpactScoreV2Config;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.scoring.ScoreDerivationConfig;
+import org.open4goods.model.vertical.scoring.ScoreDerivationMethod;
 
 /**
  * Rules of the ImpactScore methodology version of a vertical: parsing of the environment override
@@ -199,11 +201,23 @@ public final class ImpactScoreMethodology {
 
 	/**
 	 * Errors of a derived criterion of the V2 matrix (GOU-2041): each source is an attribute of the vertical, not
-	 * itself derived, and not weighted next to the criterion, which would count it twice.
+	 * itself derived, and not weighted next to the criterion, which would count it twice. A screen area density
+	 * (GOU-1884) reads exactly a value and a diagonal, with a positive aspect ratio.
 	 */
 	private static List<String> derivedCriterionErrors(AttributeConfig derived, Set<String> weighted,
 			VerticalConfig vertical) {
 		List<String> errors = new ArrayList<>();
+		if (derived.scoreDerivationMethod() == ScoreDerivationMethod.SCREEN_AREA_DENSITY) {
+			ScoreDerivationConfig derivation = derived.getScoreDerivation();
+			if (derived.getScoreSources().size() != 2) {
+				errors.add("v2 criterion " + derived.getKey() + " is a screen area density and must read a value and a"
+						+ " diagonal, got " + derived.getScoreSources());
+			}
+			if (derivation.getAspectRatioWidth() <= 0.0 || derivation.getAspectRatioHeight() <= 0.0) {
+				errors.add("v2 criterion " + derived.getKey() + " needs a positive aspect ratio, got "
+						+ derivation.getAspectRatioWidth() + ":" + derivation.getAspectRatioHeight());
+			}
+		}
 		for (String source : derived.getScoreSources()) {
 			AttributeConfig attribute = vertical.getAttributesConfig().getAttributeConfigByKey(source);
 			if (attribute == null) {

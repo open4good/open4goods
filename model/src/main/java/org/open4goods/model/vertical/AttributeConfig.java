@@ -20,6 +20,8 @@ import org.open4goods.model.vertical.lifecycle.LifecycleStage;
 import org.open4goods.model.vertical.referential.AttributeReferentials;
 import org.open4goods.model.vertical.referential.EprelFeatureReferential;
 import org.open4goods.model.vertical.referential.IcecatFeatureReferential;
+import org.open4goods.model.vertical.scoring.ScoreDerivationConfig;
+import org.open4goods.model.vertical.scoring.ScoreDerivationMethod;
 import org.open4goods.model.vertical.scoring.ScoreScoringConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,10 +112,18 @@ public class AttributeConfig {
         /**
          * Ordered attribute keys a derived score is read from (GOU-2041). When set, the score of this attribute
          * is never read from its own value: it takes the raw value of the first source holding a parseable value,
-         * without average, normalised with this attribute's own {@link #scoring}. It is computed only while this
+         * without average, or combines the sources as {@link #scoreDerivation} says, normalised with this
+         * attribute's own {@link #scoring}. It is computed only while this
          * attribute is weighted by the active ImpactScore matrix.
          */
         private List<String> scoreSources = new ArrayList<>();
+
+        /**
+         * How a derived score combines its {@link #scoreSources}; {@code null} for
+         * {@link ScoreDerivationMethod#FIRST_AVAILABLE}. {@link ScoreDerivationMethod#SCREEN_AREA_DENSITY} divides
+         * the first source by the screen area of the second, a diagonal in inches (GOU-1884).
+         */
+        private ScoreDerivationConfig scoreDerivation;
 
         /**
          * Lifecycle stages (ACV) represented by this attribute when used as a score.
@@ -486,6 +496,34 @@ public class AttributeConfig {
         @JsonIgnore
         public boolean isDerivedScore() {
                 return scoreSources != null && !scoreSources.isEmpty();
+        }
+
+        /**
+         * Gets how a derived score combines its sources.
+         *
+         * @return the derivation block, {@code null} for {@link ScoreDerivationMethod#FIRST_AVAILABLE}
+         */
+        public ScoreDerivationConfig getScoreDerivation() {
+                return scoreDerivation;
+        }
+
+        /**
+         * Sets how a derived score combines its sources.
+         *
+         * @param scoreDerivation the derivation block, {@code null} for {@link ScoreDerivationMethod#FIRST_AVAILABLE}
+         */
+        public void setScoreDerivation(ScoreDerivationConfig scoreDerivation) {
+                this.scoreDerivation = scoreDerivation;
+        }
+
+        /**
+         * The derivation method of a derived score.
+         *
+         * @return the configured method, {@link ScoreDerivationMethod#FIRST_AVAILABLE} without derivation block
+         */
+        @JsonIgnore
+        public ScoreDerivationMethod scoreDerivationMethod() {
+                return scoreDerivation == null ? ScoreDerivationMethod.FIRST_AVAILABLE : scoreDerivation.getMethod();
         }
 
         /**
