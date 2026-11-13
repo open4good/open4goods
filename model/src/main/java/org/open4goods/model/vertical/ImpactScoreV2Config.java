@@ -15,6 +15,9 @@ import org.open4goods.model.vertical.scoring.ScoreScoringConfig;
  */
 public class ImpactScoreV2Config {
 
+	/** Default of {@link #getMinRatedForPositionLabel()}: below 100 rated products, a position label is not shown. */
+	public static final int DEFAULT_MIN_RATED_FOR_POSITION_LABEL = 100;
+
 	/** V2 matrix: sums to 1, without {@code DATA_QUALITY} nor {@code ECOSCORE}. */
 	private Map<String, Double> criteriasPonderation = new HashMap<>();
 
@@ -26,6 +29,12 @@ public class ImpactScoreV2Config {
 
 	/** Whether a product without EPREL data is excluded. Defaults to {@code true}. */
 	private Boolean eprelRequired = Boolean.TRUE;
+
+	/**
+	 * Smallest rated cohort of the vertical for which a position label is exposed; below it, the score and the
+	 * position stay, without label. Defaults to {@value #DEFAULT_MIN_RATED_FOR_POSITION_LABEL} (gate 2, GOU-1877).
+	 */
+	private Integer minRatedForPositionLabel = DEFAULT_MIN_RATED_FOR_POSITION_LABEL;
 
 	/** Position labels, best first, thresholds strictly decreasing, the last one at 0. */
 	private List<ImpactScorePositionLabel> positionLabels = new ArrayList<>();
@@ -55,6 +64,14 @@ public class ImpactScoreV2Config {
 
 	public void setEprelRequired(Boolean eprelRequired) {
 		this.eprelRequired = eprelRequired;
+	}
+
+	public Integer getMinRatedForPositionLabel() {
+		return minRatedForPositionLabel;
+	}
+
+	public void setMinRatedForPositionLabel(Integer minRatedForPositionLabel) {
+		this.minRatedForPositionLabel = minRatedForPositionLabel;
 	}
 
 	public List<ImpactScorePositionLabel> getPositionLabels() {

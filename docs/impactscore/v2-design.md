@@ -102,15 +102,16 @@ v2:
   criteriasPonderation:        # sums to 1, no DATA_QUALITY, no ECOSCORE
     REPAIRABILITY_INDEX: 0.16
     ...
-  minRealWeightCoverage: 0.6   # value from GOU-1877
+  minRealWeightCoverage: 0.5   # value from GOU-1877
   eprelRequired: true          # false only where GOU-1877 lifts the filter
+  minRatedForPositionLabel: 100  # no label below this rated cohort (default 100)
   positionLabels:              # best first; values from GOU-1877
     - level: excellent
       minBetterThan: 0.90
     - level: good
-      minBetterThan: 0.67
+      minBetterThan: 0.50
     - level: fair
-      minBetterThan: 0.33
+      minBetterThan: 0.10
     - level: poor
       minBetterThan: 0.0
   criteriaScoring:             # per-criterion overrides, V2 only (robust bounds, 2.6)
@@ -129,7 +130,8 @@ Accessors on `ImpactScoreConfig` (all code goes through them; no direct
 - `isEprelRequired()`: `true` in V1, `v2.eprelRequired` in V2 (default
   `true`). The filter cannot be lifted without V2, and going back to V1
   restores it;
-- `minRealWeightCoverage()`, `positionLabels()`, `criteriaScoring(key)`.
+- `minRealWeightCoverage()`, `positionLabels()`, `criteriaScoring(key)`;
+- `minRatedForPositionLabel()` (`null` in V1) and `positionLevel(betterThan, ratedCount)`, the label rule of 2.4.
 
 Current matrix readers to move to `activeCriteriasPonderation()`:
 `EcoScoreAggregationService`, `AbstractScoreAggregationService`,
@@ -143,8 +145,8 @@ Validation (`VerticalYamlValidationTest`, and at load time for the override):
 - `methodologyVersion` in {1, 2};
 - a `v2` block, when present, is complete: matrix sums to 1 (± 1e-6), no
   `DATA_QUALITY` and no `ECOSCORE`, existing `asScore` criteria;
-  `0 < minRealWeightCoverage <= 1`; `positionLabels` thresholds strictly
-  decreasing, the last one 0;
+  `0 < minRealWeightCoverage <= 1`; `minRatedForPositionLabel >= 1` when set;
+  `positionLabels` thresholds strictly decreasing, the last one 0;
 - `methodologyVersion: 2` requires a `v2` block.
 
 ### 1.3 Elasticsearch mapping
@@ -226,6 +228,12 @@ ECOSCORE):
 - displayed position: `betterThan = ranking / (count - 1)` (lot 0 formula);
   label = first `positionLabels` entry with `minBetterThan <= betterThan`.
   With `count == 1`: no percentage and no label.
+- no label when `count < minRatedForPositionLabel` (100 by default, gate 2
+  of GOU-1877): the score, the position and the percentage stay. Applied at
+  read time by the front-api (`ProductMappingService`, through
+  `ImpactScoreConfig.positionLevel`), where `level` is computed from the
+  stored ranking: the label is never stored, so the rule follows the cohort
+  of the last batch without recomputation (GOU-2137).
 
 ### 2.5 Composites and out-of-batch recomputation
 
@@ -263,13 +271,16 @@ mechanism.
 
 Delivered (GOU-1883): `effectiveScoring` (`AbstractScoreAggregationService`) replaces the attribute's
 `normalization` block (method and params; scale, transform and policies stay the attribute's) by
-`v2.criteriaScoring.<key>.normalization` in V2 only; V1 never reads the override. The quantiles are
-provisional (0.02 / 0.98, to confirm with GOU-1877). Configured criteria, following the measures of
-`lot1b-distribution-2026-11.md` section 6.2: `tv` `POWER_CONSUMPTION_SDR` and `_HDR`, `oven`
-`OVEN_ENERGY_CONSUMPTION_CYCLE`, `dishwasher` `WATER_CONSUMPTION` and `ENERGY_CONSUMPTION_100_CYCLES`,
-`washing-machine` `WATER_CONSUMPTION`. Not configured on purpose: `POWER_CONSUMPTION_OFF` and `_STANDBY*`
-(near-constant values, degenerate quantile range) and `POWER_CONSUMPTION_TYPICAL` (unreliable raw values, 19 and 13
-products).
+`v2.criteriaScoring.<key>.normalization` in V2 only; V1 never reads the override. Values of gate 2
+(GOU-1877, applied by GOU-2137), following the measures of `lot1b-distribution-2026-11.md` section 6.2:
+
+- `MINMAX_QUANTILE` 0.02 / 0.98: `tv` `POWER_CONSUMPTION_SDR` and `_HDR`, `oven`
+  `OVEN_ENERGY_CONSUMPTION_CYCLE`, `dishwasher` `WATER_CONSUMPTION` and `ENERGY_CONSUMPTION_100_CYCLES`,
+  `washing-machine` `WATER_CONSUMPTION` and `ENERGY_CONSUMPTION_100_CYCLES`;
+- `MINMAX_FIXED` 0 to 1 W: `POWER_CONSUMPTION_OFF` (`tv`, `dishwasher`, `washing-machine`) and
+  `POWER_CONSUMPTION_STANDBY` (`dishwasher`); 0 to 2 W: `tv` `POWER_CONSUMPTION_STANDBY_NETWORKD` (its 98th
+  percentile equals its median, so a quantile range would be degenerate);
+- air conditioners: no override (13 and 2 real values).
 
 ### 2.7 Derived criteria: "repairability or durability" (GOU-2041)
 
@@ -341,7 +352,7 @@ set for a product of a vertical:
 | `currentMethodologyVersion` | the vertical's effective version |
 | `realWeightCoverage`, `realCriteriaCount`, `totalCriteriaCount` | `impactScoreMeta` |
 | `position`, `ratedCount`, `betterThanPercent` | `EcoScoreRanking` and `scores.ECOSCORE` |
-| `level` | label computed from the position (2.4); **null in V1** |
+| `level` | label computed from the position (2.4); **null in V1** and below `minRatedForPositionLabel` rated products |
 
 `ImpactScoreConfigDto` (category) gains `methodologyVersion`,
 `minRealWeightCoverage` and `positionLabels`; its `criteriasPonderation`

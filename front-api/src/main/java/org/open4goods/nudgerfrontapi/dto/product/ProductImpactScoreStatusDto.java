@@ -38,7 +38,7 @@ public record ProductImpactScoreStatusDto(
         @Schema(description = "Share of rated products ranked below this product, percent 0-100; null when not rated or alone",
                 example = "97", minimum = "0", maximum = "100", nullable = true)
         Integer betterThanPercent,
-        @Schema(description = "Position label key (for example excellent) from the vertical's position labels; null in methodology version 1 or when not rated",
+        @Schema(description = "Position label key (for example excellent) from the vertical's position labels; null in methodology version 1, when not rated, or when the vertical has fewer rated products than its minRatedForPositionLabel (100 by default)",
                 example = "excellent", nullable = true)
         String level
 ) {

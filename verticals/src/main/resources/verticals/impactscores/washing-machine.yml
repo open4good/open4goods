@@ -13,34 +13,49 @@ criteriasPonderation:
 # 1 pro rata. The stored AI audit (aiResult, yamlPrompt) is the V1 one and was not rerun.
 # GOU-2041: REPAIRABILITY_INDEX is replaced, with its weight, by REPAIRABILITY_OR_DURABILITY_INDEX
 # (DURABILITY_INDEX when filled in, else REPAIRABILITY_INDEX, fixed 0-10 scale).
+# Gate 2 (GOU-1877): POWER_CONSUMPTION_TYPICAL (19 raw values, mixed units) is replaced, with its weight, by
+# ENERGY_CONSUMPTION_100_CYCLES (EPREL kWh per 100 cycles).
 v2:
   criteriasPonderation:
     WATER_CONSUMPTION: 0.2045455
     WARRANTY: 0.1136364
-    POWER_CONSUMPTION_TYPICAL: 0.2500000
+    ENERGY_CONSUMPTION_100_CYCLES: 0.2500000
     NOISE_LEVEL: 0.0340909
     POWER_CONSUMPTION_OFF: 0.0227273
     WEIGHT: 0.0340909
     REPAIRABILITY_OR_DURABILITY_INDEX: 0.1363636
     CLASSE_ENERGY: 0.2045455
-  minRealWeightCoverage: 0.5  # provisoire, valeur de GOU-1877
-  eprelRequired: true  # provisoire, valeur de GOU-1877
-  positionLabels:  # provisoire, valeur de GOU-1877
+  minRealWeightCoverage: 0.5
+  eprelRequired: true
+  minRatedForPositionLabel: 100
+  positionLabels:
     - level: excellent
       minBetterThan: 0.90
     - level: good
-      minBetterThan: 0.67
+      minBetterThan: 0.50
     - level: fair
-      minBetterThan: 0.33
+      minBetterThan: 0.10
     - level: poor
       minBetterThan: 0.0
-  criteriaScoring:  # bornes robustes V2 (GOU-1883)
+  criteriaScoring:  # bornes robustes V2 (GOU-1883, valeurs de GOU-1877)
     WATER_CONSUMPTION:
       normalization:
         method: MINMAX_QUANTILE
         params:
-          quantileLow: 0.02  # provisoire, valeur de GOU-1877
-          quantileHigh: 0.98  # provisoire, valeur de GOU-1877
+          quantileLow: 0.02
+          quantileHigh: 0.98
+    ENERGY_CONSUMPTION_100_CYCLES:
+      normalization:
+        method: MINMAX_QUANTILE
+        params:
+          quantileLow: 0.02
+          quantileHigh: 0.98
+    POWER_CONSUMPTION_OFF:
+      normalization:
+        method: MINMAX_FIXED
+        params:
+          fixedMin: 0.0
+          fixedMax: 1.0
 yamlPrompt: "---\nkey: \"impactscore-generation\"\naiService: \"GEMINI\"\nsystemPrompt: \"Tu es un agent expert en évaluation\
   \ environnementale des produits électriques et electroniques.\\nAdopte une démarche d'expert en analyse du cycle de vie\
   \ des produits.\\nNous allons travailler sur des Machines à laver\\nNe fournir en réponse que du JSON, conformément à la\

@@ -31,30 +31,43 @@ v2:
     CLASSE_ENERGY_HDR: 0.0459770
     DIAGONALE_POUCES: 0.0459770
     POWER_CONSUMPTION_SDR: 0.1839080
-  minRealWeightCoverage: 0.5  # provisoire, valeur de GOU-1877
-  eprelRequired: true  # provisoire, valeur de GOU-1877
-  positionLabels:  # provisoire, valeur de GOU-1877
+  minRealWeightCoverage: 0.5
+  eprelRequired: true
+  minRatedForPositionLabel: 100
+  positionLabels:
     - level: excellent
       minBetterThan: 0.90
     - level: good
-      minBetterThan: 0.67
+      minBetterThan: 0.50
     - level: fair
-      minBetterThan: 0.33
+      minBetterThan: 0.10
     - level: poor
       minBetterThan: 0.0
-  criteriaScoring:  # bornes robustes V2 (GOU-1883)
+  criteriaScoring:  # bornes robustes V2 (GOU-1883, valeurs de GOU-1877)
     POWER_CONSUMPTION_SDR:
       normalization:
         method: MINMAX_QUANTILE
         params:
-          quantileLow: 0.02  # provisoire, valeur de GOU-1877
-          quantileHigh: 0.98  # provisoire, valeur de GOU-1877
+          quantileLow: 0.02
+          quantileHigh: 0.98
     POWER_CONSUMPTION_HDR:
       normalization:
         method: MINMAX_QUANTILE
         params:
-          quantileLow: 0.02  # provisoire, valeur de GOU-1877
-          quantileHigh: 0.98  # provisoire, valeur de GOU-1877
+          quantileLow: 0.02
+          quantileHigh: 0.98
+    POWER_CONSUMPTION_OFF:
+      normalization:
+        method: MINMAX_FIXED
+        params:
+          fixedMin: 0.0
+          fixedMax: 1.0
+    POWER_CONSUMPTION_STANDBY_NETWORKD:
+      normalization:
+        method: MINMAX_FIXED
+        params:
+          fixedMin: 0.0
+          fixedMax: 2.0
 yamlPrompt: "---\nkey: \"impactscore-generation\"\naiService: \"GEMINI\"\nsystemPrompt: \"Tu es un agent expert en évaluation\
   \ environnementale des produits électriques et electroniques.\\nAdopte une démarche d'expert en analyse du cycle de vie\
   \ des produits.\\nNous allons travailler sur des Téléviseurs\\nNe fournir en réponse que du JSON, conformément à la structure\

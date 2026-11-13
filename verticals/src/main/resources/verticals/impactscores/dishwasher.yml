@@ -23,30 +23,43 @@ v2:
     WEIGHT: 0.0340909
     POWER_CONSUMPTION_OFF: 0.0113636
     CLASSE_ENERGY: 0.0681818
-  minRealWeightCoverage: 0.5  # provisoire, valeur de GOU-1877
-  eprelRequired: true  # provisoire, valeur de GOU-1877
-  positionLabels:  # provisoire, valeur de GOU-1877
+  minRealWeightCoverage: 0.6
+  eprelRequired: false
+  minRatedForPositionLabel: 100
+  positionLabels:
     - level: excellent
       minBetterThan: 0.90
     - level: good
-      minBetterThan: 0.67
+      minBetterThan: 0.50
     - level: fair
-      minBetterThan: 0.33
+      minBetterThan: 0.10
     - level: poor
       minBetterThan: 0.0
-  criteriaScoring:  # bornes robustes V2 (GOU-1883)
+  criteriaScoring:  # bornes robustes V2 (GOU-1883, valeurs de GOU-1877)
     WATER_CONSUMPTION:
       normalization:
         method: MINMAX_QUANTILE
         params:
-          quantileLow: 0.02  # provisoire, valeur de GOU-1877
-          quantileHigh: 0.98  # provisoire, valeur de GOU-1877
+          quantileLow: 0.02
+          quantileHigh: 0.98
     ENERGY_CONSUMPTION_100_CYCLES:
       normalization:
         method: MINMAX_QUANTILE
         params:
-          quantileLow: 0.02  # provisoire, valeur de GOU-1877
-          quantileHigh: 0.98  # provisoire, valeur de GOU-1877
+          quantileLow: 0.02
+          quantileHigh: 0.98
+    POWER_CONSUMPTION_STANDBY:
+      normalization:
+        method: MINMAX_FIXED
+        params:
+          fixedMin: 0.0
+          fixedMax: 1.0
+    POWER_CONSUMPTION_OFF:
+      normalization:
+        method: MINMAX_FIXED
+        params:
+          fixedMin: 0.0
+          fixedMax: 1.0
 yamlPrompt: "---\nkey: \"impactscore-generation\"\naiService: \"GEMINI\"\nsystemPrompt: \"Tu es un agent expert en évaluation\
   \ environnementale des produits électriques et electroniques.\\nAdopte une démarche d'expert en analyse du cycle de vie\
   \ des produits.\\nNous allons travailler sur des Lave-vaisselles\\nNe fournir en réponse que du JSON, conformément à la\

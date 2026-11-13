@@ -163,6 +163,11 @@ public final class ImpactScoreMethodology {
 			errors.add("v2.minRealWeightCoverage must be in ]0, 1], got " + threshold);
 		}
 
+		Integer minRated = v2.getMinRatedForPositionLabel();
+		if (minRated != null && minRated < 1) {
+			errors.add("v2.minRatedForPositionLabel must be at least 1, got " + minRated);
+		}
+
 		List<ImpactScorePositionLabel> labels = v2.getPositionLabels();
 		if (labels == null || labels.isEmpty()) {
 			errors.add("v2.positionLabels is empty");

@@ -902,6 +902,20 @@ class ProductMappingServiceTest {
     }
 
     @Test
+    void v2VerticalShowsNoPositionLabelBelowTheMinimumRatedCohort() throws Exception {
+        VerticalConfig vertical = verticalWithMethodology(2);
+        vertical.getImpactScoreConfig().getV2().setMinRatedForPositionLabel(6);
+
+        ProductImpactScoreStatusDto impactScore = mapScoredProduct(scoredProduct(2), vertical).scores().impactScore();
+
+        assertThat(impactScore.status()).isEqualTo("RATED");
+        assertThat(impactScore.position()).as("the position stays").isEqualTo(2L);
+        assertThat(impactScore.ratedCount()).isEqualTo(5L);
+        assertThat(impactScore.betterThanPercent()).isEqualTo(75);
+        assertThat(impactScore.level()).as("5 rated products, 6 needed for a label").isNull();
+    }
+
+    @Test
     void v2VerticalHidesALegacyScore() throws Exception {
         ProductDto dto = mapScoredProduct(scoredProduct(null), verticalWithMethodology(2));
 
@@ -1003,7 +1017,10 @@ class ProductMappingServiceTest {
         v2.setCriteriasPonderation(new HashMap<>(Map.of("ENERGY", 1.0)));
         v2.setMinRealWeightCoverage(0.6);
         v2.setPositionLabels(List.of(new ImpactScorePositionLabel("excellent", 0.9),
-                new ImpactScorePositionLabel("good", 0.67), new ImpactScorePositionLabel("poor", 0.0)));
+                new ImpactScorePositionLabel("good", 0.5), new ImpactScorePositionLabel("fair", 0.1),
+                new ImpactScorePositionLabel("poor", 0.0)));
+        // the cohort of scoredProduct(): 5 rated products
+        v2.setMinRatedForPositionLabel(5);
         ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
         impactScoreConfig.setCriteriasPonderation(new HashMap<>(Map.of("ENERGY", 1.0)));
         impactScoreConfig.setV2(v2);

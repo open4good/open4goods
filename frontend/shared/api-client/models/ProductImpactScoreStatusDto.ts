@@ -92,7 +92,7 @@ export interface ProductImpactScoreStatusDto {
    */
   betterThanPercent?: number | null
   /**
-   * Position label key (for example excellent) from the vertical's position labels; null in methodology version 1 or when not rated
+   * Position label key (for example excellent) from the vertical's position labels; null in methodology version 1, when not rated, or when the vertical has fewer rated products than its minRatedForPositionLabel (100 by default)
    * @type {string}
    * @memberof ProductImpactScoreStatusDto
    */
