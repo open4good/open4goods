@@ -226,7 +226,7 @@ Durées (GOU-2099) : le logger `org.open4goods.api.services.BatchService.timings
 le `warn` de la bêta et de la prod, journalise le début et la fin de chaque verticale avec la durée de chaque phase
 (chargement et classification, complétion, agrégation, notation, mise en file), et pour la complétion, tous les
 1 000 produits puis à la fin, le nombre de produits traités et sautés et le temps passé par service de complétion.
-Fichier dédié (GOU-2174) : ces lignes (`Start of batch`, `End of batch in … s`) sont aussi écrites en ajout dans
+Fichier dédié (GOU-2174) : ces lignes (`Start of batch`, `End of batch in N s`) sont aussi écrites en ajout dans
 `batch-timings.log` (`BatchTimingsLogFile`, appender Logback ajouté au logger, la sortie standard et la configuration
 de logging existante restent inchangées). Chemin : propriété `api.batch.timings-log-file`, sinon `logging.file.path`
 ou le dossier de `logging.file.name`, sinon `/opt/open4goods/logs` s'il existe (bêta/prod) ; absent en dev et tests.
