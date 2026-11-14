@@ -249,12 +249,13 @@ class VerticalYamlValidationTest {
     }
 
     @Test
-    void noVerticalIsSwitchedToTheV2Methodology() {
-        // GOU-1880 adds the v2 blocks; the switch comes with GOU-1888
+    void onlyWaveOneVerticalsAreSwitchedToTheV2Methodology() {
+        // GOU-1889 wave 1: refrigerators and dishwashers; the other verticals stay in V1 (waves 2 and 3: GOU-2186)
         assertThat(verticalsConfigService.getConfigsWithoutDefault())
             .allSatisfy(config -> assertThat(config.getImpactScoreConfig().effectiveMethodologyVersion())
                 .as("methodology version of %s", config.getId())
-                .isEqualTo(ImpactScoreConfig.METHODOLOGY_V1));
+                .isEqualTo(java.util.Set.of("refrigerator", "dishwasher").contains(config.getId()) ? 2
+                    : ImpactScoreConfig.METHODOLOGY_V1));
     }
 
     /**
@@ -309,10 +310,13 @@ class VerticalYamlValidationTest {
         });
     }
 
-    /** Gate 2 (GOU-1877, approval c81ef147): EPREL filter and coverage threshold by vertical. */
+    /**
+     * Gate 2 (GOU-1877, approval c81ef147): EPREL filter and coverage threshold by vertical. Gate 3 (GOU-2191):
+     * the dishwasher keeps the EPREL filter.
+     */
     private static final Map<String, Object[]> GATE_TWO_FILTER = Map.of(
         "refrigerator", new Object[] { false, 0.50 },
-        "dishwasher", new Object[] { false, 0.60 },
+        "dishwasher", new Object[] { true, 0.60 },
         "smartphones", new Object[] { true, 0.50 },
         "oven", new Object[] { true, 0.50 },
         "tv", new Object[] { true, 0.50 },

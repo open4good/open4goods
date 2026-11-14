@@ -369,9 +369,10 @@ criteriasPonderation:
   DATA_QUALITY: 0.15
   WEIGHT: 0.08
   CLASSE_ENERGY: 0.55
-# ImpactScore V2 (GOU-1880), inactive while methodologyVersion is 1. Design: docs/impactscore/v2-design.md,
+# ImpactScore V2 (GOU-1880), active since wave 1 (methodologyVersion 2, GOU-1889). Design: docs/impactscore/v2-design.md,
 # sections 1.2 and 2.3. V1 matrix above without DATA_QUALITY (now the confidence indicator), renormalised to
 # 1 pro rata. The stored AI audit (aiResult, yamlPrompt) is the V1 one and was not rerun.
+methodologyVersion: 2
 v2:
   criteriasPonderation:
     WARRANTY: 0.1411765

@@ -9,9 +9,10 @@ criteriasPonderation:
   WEIGHT: 0.03
   POWER_CONSUMPTION_OFF: 0.01
   CLASSE_ENERGY: 0.06
-# ImpactScore V2 (GOU-1880), inactive while methodologyVersion is 1. Design: docs/impactscore/v2-design.md,
+# ImpactScore V2 (GOU-1880), active since wave 1 (methodologyVersion 2, GOU-1889). Design: docs/impactscore/v2-design.md,
 # sections 1.2 and 2.3. V1 matrix above without DATA_QUALITY (now the confidence indicator), renormalised to
 # 1 pro rata. The stored AI audit (aiResult, yamlPrompt) is the V1 one and was not rerun.
+methodologyVersion: 2
 v2:
   criteriasPonderation:
     WATER_CONSUMPTION: 0.1818182
@@ -24,7 +25,7 @@ v2:
     POWER_CONSUMPTION_OFF: 0.0113636
     CLASSE_ENERGY: 0.0681818
   minRealWeightCoverage: 0.6
-  eprelRequired: false
+  eprelRequired: true
   minRatedForPositionLabel: 100
   positionLabels:
     - level: excellent

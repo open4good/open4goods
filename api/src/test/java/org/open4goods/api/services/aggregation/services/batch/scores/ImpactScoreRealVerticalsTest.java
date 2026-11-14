@@ -98,6 +98,9 @@ class ImpactScoreRealVerticalsTest {
                 mock(GoogleTaxonomyService.class), new PathMatchingResourcePatternResolver());
         List<VerticalConfig> verticals = new ArrayList<>(service.getConfigsWithoutDefault());
         assertThat(verticals).isNotEmpty();
+        // The V1 tests (snapshot, metadata) run every vertical in V1, including those switched to V2 by the
+        // configuration (GOU-1889 wave 1); the V2 tests force version 2 and restore this override.
+        verticals.forEach(v -> v.getImpactScoreConfig().setMethodologyVersionOverride(ImpactScoreConfig.METHODOLOGY_V1));
         return verticals.stream();
     }
 
@@ -267,7 +270,7 @@ class ImpactScoreRealVerticalsTest {
             assertThat(impactScores(vertical, false)).as("V2 ImpactScores of %s with DATA_QUALITY at worst", vertical.getId())
                     .isEqualTo(impactScores(vertical, true));
         } finally {
-            vertical.getImpactScoreConfig().setMethodologyVersionOverride(null);
+            vertical.getImpactScoreConfig().setMethodologyVersionOverride(ImpactScoreConfig.METHODOLOGY_V1);
         }
         assertThat(impactScores(vertical, false)).as("V1 ImpactScores of %s with DATA_QUALITY at worst", vertical.getId())
                 .isNotEqualTo(impactScores(vertical, true));
@@ -288,7 +291,7 @@ class ImpactScoreRealVerticalsTest {
             vertical.getImpactScoreConfig().setMethodologyVersionOverride(ImpactScoreConfig.METHODOLOGY_V2);
             aggregationFacadeService(logs, brandService).getScoringAggregator().score(v2Products, vertical);
         } finally {
-            vertical.getImpactScoreConfig().setMethodologyVersionOverride(null);
+            vertical.getImpactScoreConfig().setMethodologyVersionOverride(ImpactScoreConfig.METHODOLOGY_V1);
         }
         List<Product> v1Products = brandedProducts(vertical);
         aggregationFacadeService(logs, brandService).getScoringAggregator().score(v1Products, vertical);
@@ -562,7 +565,7 @@ class ImpactScoreRealVerticalsTest {
             body.run(config.minRealWeightCoverage());
         } finally {
             config.getV2().setMinRealWeightCoverage(configured);
-            config.setMethodologyVersionOverride(null);
+            config.setMethodologyVersionOverride(ImpactScoreConfig.METHODOLOGY_V1);
         }
     }
 
