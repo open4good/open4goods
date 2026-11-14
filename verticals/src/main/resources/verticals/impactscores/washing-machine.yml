@@ -25,7 +25,7 @@ v2:
     WEIGHT: 0.0340909
     REPAIRABILITY_OR_DURABILITY_INDEX: 0.1363636
     CLASSE_ENERGY: 0.2045455
-  minRealWeightCoverage: 0.5
+  minRealWeightCoverage: 0.4
   eprelRequired: true
   minRatedForPositionLabel: 100
   positionLabels:

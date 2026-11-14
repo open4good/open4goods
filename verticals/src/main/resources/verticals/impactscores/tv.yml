@@ -18,10 +18,12 @@ criteriasPonderation:
 # GOU-2041: REPAIRABILITY_INDEX is replaced, with its weight, by REPAIRABILITY_OR_DURABILITY_INDEX
 # (DURABILITY_INDEX when filled in, else REPAIRABILITY_INDEX, fixed 0-10 scale).
 # GOU-1884: functional unit. DIAGONALE_POUCES leaves the matrix (displayed, not rated) and its weight is
-# redistributed pro rata. The raw watts POWER_CONSUMPTION_SDR and _HDR leave it too; the energy block keeps its V1
-# weight, 0.34 before renormalisation: POWER_DENSITY_SDR (SDR watts per dm2 of screen) 0.16, the former SDR watts
-# weight; CLASSE_ENERGY_SDR 0.14, its 0.06 plus the 0.08 of the HDR watts (the regulatory class, size-neutral,
-# offsets the density's advantage to large screens); CLASSE_ENERGY_HDR 0.04, unchanged (92 % of TVs in G).
+# redistributed pro rata. The energy block keeps its V1 weight, 0.34 before renormalisation (gate no. 3, GOU-2186):
+# POWER_DENSITY_SDR (SDR watts per dm2 of screen) 0.08 and POWER_CONSUMPTION_SDR (raw SDR watts, back in the matrix)
+# 0.08, the former SDR watts weight split in two; with the density alone, 15 of the top 20 TVs are 65" or larger.
+# CLASSE_ENERGY_SDR 0.14, its 0.06 plus the 0.08 of the HDR watts (the regulatory class, size-neutral, offsets the
+# density's advantage to large screens); CLASSE_ENERGY_HDR 0.04, unchanged (92 % of TVs in G). POWER_CONSUMPTION_HDR
+# leaves the matrix.
 # Weights below = V1 weights / 0.83 (V1 without DATA_QUALITY and DIAGONALE_POUCES).
 v2:
   criteriasPonderation:
@@ -34,7 +36,8 @@ v2:
     POWER_CONSUMPTION_STANDBY_NETWORKD: 0.0602410
     REPAIRABILITY_OR_DURABILITY_INDEX: 0.1686747
     CLASSE_ENERGY_HDR: 0.0481928
-    POWER_DENSITY_SDR: 0.1927711
+    POWER_DENSITY_SDR: 0.0963855
+    POWER_CONSUMPTION_SDR: 0.0963855
   minRealWeightCoverage: 0.5
   eprelRequired: true
   excludedEprelCategories: [MONITOR, PROFESSIONAL_DISPLAY, SIGNAGE]  # hors sujet, pas de verticale moniteur (GOU-2165)
@@ -49,6 +52,12 @@ v2:
     - level: poor
       minBetterThan: 0.0
   criteriaScoring:  # bornes robustes V2 (GOU-1883), valeurs de la porte n° 2 (GOU-1877, 13/11)
+    POWER_CONSUMPTION_SDR:
+      normalization:
+        method: MINMAX_QUANTILE
+        params:
+          quantileLow: 0.02
+          quantileHigh: 0.98
     POWER_DENSITY_SDR:
       normalization:
         method: MINMAX_QUANTILE
