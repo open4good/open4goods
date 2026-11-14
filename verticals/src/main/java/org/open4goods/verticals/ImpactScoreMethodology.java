@@ -207,7 +207,8 @@ public final class ImpactScoreMethodology {
 	/**
 	 * Errors of a derived criterion of the V2 matrix (GOU-2041): each source is an attribute of the vertical, not
 	 * itself derived, and not weighted next to the criterion, which would count it twice. A screen area density
-	 * (GOU-1884) reads exactly a value and a diagonal, with a positive aspect ratio.
+	 * (GOU-1884) reads exactly a value and a diagonal, with a positive aspect ratio; it measures watts per unit of
+	 * area, a different quantity from its watts source, so both may be weighted (gate no. 3, GOU-2186).
 	 */
 	private static List<String> derivedCriterionErrors(AttributeConfig derived, Set<String> weighted,
 			VerticalConfig vertical) {
@@ -230,7 +231,7 @@ public final class ImpactScoreMethodology {
 			} else if (attribute.isDerivedScore()) {
 				errors.add("v2 criterion " + derived.getKey() + " reads " + source + ", which is itself derived");
 			}
-			if (weighted.contains(source)) {
+			if (weighted.contains(source) && derived.scoreDerivationMethod() != ScoreDerivationMethod.SCREEN_AREA_DENSITY) {
 				errors.add("v2.criteriasPonderation weights both " + derived.getKey() + " and its source " + source);
 			}
 		}

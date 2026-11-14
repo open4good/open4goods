@@ -154,6 +154,33 @@ dans l'export, gardé en V2 ; "sortant" = gardé dans l'export, exclu en V2.
   harnais) est identique à l'exclusion stockée sur les 36 828 fiches avec offre des 7 verticales (même état, mêmes
   causes à l'ordre près) ; contrôle de fidélité identique à la première passe.
 
+## Relance porte n° 3 (GOU-2186)
+
+Même export, mêmes commandes (`-Dimpactscore.simulation.verticals=tv,washing-machine`), règles GOU-2165 comprises, avec les
+deux décisions de la porte n° 3 (14/11, [GOU-1888](decisions.md)) lues dans les blocs `v2` : lave-linge
+`minRealWeightCoverage` 0,40 ; TV, bloc énergie option B (`POWER_DENSITY_SDR` et `POWER_CONSUMPTION_SDR`, 0,0963855
+chacun, ce dernier en `MINMAX_QUANTILE` 0,02 / 0,98). `methodologyVersion` reste à 1. Contrôle de fidélité V1 inchangé
+(TV 100 %, lave-linge 100 %). CSV régénérés : `tv-ecarts`, `tv-non-notes`, `washing-machine-ecarts`,
+`washing-machine-non-notes`. Les tableaux des sections par verticale plus bas restent ceux de la relance GOU-2165.
+
+| | Avant | Après |
+|---|---:|---:|
+| **TV** notés V2 | 1 965 | 1 965 |
+| TV "Non noté" : couverture faible / aucun critère réel | 98 / 13 | 98 / 13 (111 notés V1, 5,2 %) |
+| TV, Spearman V1/V2 | 0,218 (2 037 produits, avant GOU-2165) | **0,577** (1 965 produits) |
+| TV, écrans de 65" ou plus dans les 20 premiers | 15/20 | **4/20** (65", 75", 85", 86") |
+| TV, diagonale médiane du top 5 % | 75" | 40" |
+| TV, Spearman note/diagonale en V2 | 0,36 | -0,14 |
+| TV, 115" à 750 W en HDR (TCL-115C7K) | centile 97,7, "Parmi les mieux classés" | rang 373/1 965, centile 81, V2 10,31, libellé "good" |
+| TV, p5 / p50 / p95 V2 | 6,69 / 9,10 / 11,76 | 6,98 / 9,07 / 11,39 |
+| **Lave-linge** notés V2 | 1 246 | 1 339 |
+| Lave-linge "Non noté" : couverture faible / aucun critère réel | 224 / 10 | 131 / 10 |
+| Lave-linge, notés V1 passés en Non noté | 234 (15,8 %) | **141 (9,5 %)** |
+| Lave-linge, Spearman V1/V2 | 0,874 | 0,892 |
+
+Le garde-fou des 10 % n'est dépassé ni en TV (5,2 %) ni en lave-linge (9,5 %). Le top 20 TV de la relance se lit dans le
+rapport régénéré ; les écrans de petite diagonale y reprennent la tête (24 à 43" pour 13 des 20).
+
 ## Relecture QA
 
 - Les 20 plus gros écarts de rang de chaque verticale sont dans les tableaux ci-dessous (200 par verticale dans

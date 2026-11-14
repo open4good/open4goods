@@ -88,9 +88,10 @@ class PowerDensityCriterionTest {
         assertThat(density.getAbsolute().getValue()).isCloseTo(53.0 / (2500.0 * 144.0 / 337.0 * 0.064516), within(1e-9));
         assertThat(density.getMetadatas()).containsEntry(Attribute2ScoreAggregationService.SCORE_SOURCE_METADATA,
                 WATTS + "," + DIAGONAL);
-        assertThat(real.getImpactScoreMeta().getRealCriteria()).contains(CRITERION)
-                .doesNotContain(WATTS, "POWER_CONSUMPTION_HDR", DIAGONAL);
-        assertThat(real.getScores().get(COMPOSITE).getAggregates()).containsKey(CRITERION).doesNotContainKey(WATTS);
+        assertThat(real.getImpactScoreMeta().getRealCriteria()).contains(CRITERION, WATTS)
+                .doesNotContain("POWER_CONSUMPTION_HDR", DIAGONAL);
+        // GOU-2186 (option B): the raw SDR watts are back next to the density
+        assertThat(real.getScores().get(COMPOSITE).getAggregates()).containsKeys(CRITERION, WATTS);
 
         // Without a real diagonal or real watts: absent, never imputed
         for (long id : List.of(NO_DIAGONAL, NO_WATTS, ZERO_WATTS)) {
@@ -124,7 +125,7 @@ class PowerDensityCriterionTest {
 
     /**
      * Real energy values, every other criterion equal: the 27" E/G television of the audit is in the top 5 % in V1
-     * (small screen, few watts) and leaves the top half in V2.
+     * (small screen, few watts) and loses ground in V2 (density and watts at equal weight).
      */
     @Test
     void auditTelevisionLeavesTheTopOfTheV2Ranking() throws Exception {
@@ -135,7 +136,10 @@ class PowerDensityCriterionTest {
         List<Product> v2 = sample();
         withV2(() -> score(v2));
         assertThat(product(v2, AUDIT_27_INCHES).getScores().get(CRITERION)).isNotNull();
-        assertThat(betterThan(v2, AUDIT_27_INCHES)).as("V2 share of the cohort the 27\" beats").isLessThan(0.5);
+        // GOU-2186 (option B): the raw watts, back at the same weight as the density, keep part of the small screen's edge
+        double v2Share = betterThan(v2, AUDIT_27_INCHES);
+        assertThat(v2Share).as("V2 share of the cohort the 27\" beats").isLessThan(0.8);
+        assertThat(v2Share).isLessThan(betterThan(v1, AUDIT_27_INCHES) - 0.15);
     }
 
     /**
