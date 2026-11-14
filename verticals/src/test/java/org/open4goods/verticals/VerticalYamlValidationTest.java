@@ -260,15 +260,22 @@ class VerticalYamlValidationTest {
     /**
      * V2 criteria that replace a V1 criterion with its weight, by vertical (GOU-2041, gate 2 of GOU-1877): V1
      * criterion to V2 criterion. Several V1 criteria replaced by the same V2 criterion add their weights: tv
-     * functional unit (GOU-1884), the SDR watts become the screen area density, the HDR watts go to the SDR class.
+     * functional unit (GOU-1884), the HDR watts go to the SDR class; the SDR watts weight is split in two by
+     * {@link #V2_SPLIT_CRITERIA}.
      */
     private static final Map<String, Map<String, String>> V2_REPLACED_CRITERIA = Map.of(
         "tv", Map.of("REPAIRABILITY_INDEX", "REPAIRABILITY_OR_DURABILITY_INDEX",
-            "POWER_CONSUMPTION_SDR", "POWER_DENSITY_SDR",
             "POWER_CONSUMPTION_HDR", "CLASSE_ENERGY_SDR"),
         "washing-machine", Map.of("REPAIRABILITY_INDEX", "REPAIRABILITY_OR_DURABILITY_INDEX",
             "POWER_CONSUMPTION_TYPICAL", "ENERGY_CONSUMPTION_100_CYCLES"),
         "smartphones", Map.of("REPAIRABILITY_INDEX", "EU_REPAIRABILITY_CLASS"));
+
+    /**
+     * V1 criteria whose weight V2 splits in two equal halves, by vertical: V1 criterion to the V2 criterion that takes
+     * the other half (gate 3 of GOU-1888, GOU-2186): the tv SDR watts keep half and give half to the screen area density.
+     */
+    private static final Map<String, Map<String, String>> V2_SPLIT_CRITERIA = Map.of(
+        "tv", Map.of("POWER_CONSUMPTION_SDR", "POWER_DENSITY_SDR"));
 
     /** V1 criteria removed from the V2 matrix, their weight spread pro rata, by vertical (gate 2 of GOU-1877). */
     private static final Map<String, Set<String>> V2_REMOVED_CRITERIA = Map.of(
@@ -291,7 +298,14 @@ class VerticalYamlValidationTest {
             Map<String, Double> v1 = new HashMap<>();
             Set<String> removed = V2_REMOVED_CRITERIA.getOrDefault(config.getId(), Set.of());
             impactScore.getCriteriasPonderation().forEach((key, weight) -> {
-                if (!removed.contains(key)) {
+                if (removed.contains(key)) {
+                    return;
+                }
+                String split = V2_SPLIT_CRITERIA.getOrDefault(config.getId(), Map.of()).get(key);
+                if (split != null) {
+                    v1.merge(key, weight / 2, Double::sum);
+                    v1.merge(split, weight / 2, Double::sum);
+                } else {
                     v1.merge(replaced.getOrDefault(key, key), weight, Double::sum);
                 }
             });
@@ -316,7 +330,7 @@ class VerticalYamlValidationTest {
         "smartphones", new Object[] { true, 0.50 },
         "oven", new Object[] { true, 0.50 },
         "tv", new Object[] { true, 0.50 },
-        "washing-machine", new Object[] { true, 0.50 },
+        "washing-machine", new Object[] { true, 0.40 },
         "air-conditioner", new Object[] { true, 0.50 });
 
     /** Gate 2 fixed bounds, by vertical: criterion to upper bound in W (lower bound 0). */
@@ -327,7 +341,7 @@ class VerticalYamlValidationTest {
 
     /**
      * GOU-2137: the v2 blocks carry the values of gate 2 (document {@code decision} of GOU-1877,
-     * {@code docs/impactscore/decisions.md}).
+     * {@code docs/impactscore/decisions.md}), but the washing machine threshold, 0.40 since gate 3 (GOU-2186).
      */
     @Test
     void v2BlocksCarryTheGateTwoValues() {
@@ -372,8 +386,8 @@ class VerticalYamlValidationTest {
     }
 
     /**
-     * GOU-1884: the tv V2 matrix rates energy per screen area. {@code DIAGONALE_POUCES} and the raw watts leave it
-     * (weights checked by {@link #everyRealVerticalHasAV2MatrixWithoutDataQuality()}); the energy block keeps its V1
+     * GOU-1884, gate 3 (GOU-2186): the tv V2 matrix rates energy per screen area and in raw SDR watts.
+     * {@code DIAGONALE_POUCES} and the HDR watts leave it (weights checked by {@link #everyRealVerticalHasAV2MatrixWithoutDataQuality()}); the energy block keeps its V1
      * weight, before renormalisation.
      */
     @Test
@@ -381,15 +395,16 @@ class VerticalYamlValidationTest {
         ImpactScoreConfig impactScore = verticalsConfigService.getConfigById("tv").getImpactScoreConfig();
         Map<String, Double> v1 = impactScore.getCriteriasPonderation();
         Map<String, Double> v2 = impactScore.getV2().getCriteriasPonderation();
-        assertThat(v2).doesNotContainKeys("DIAGONALE_POUCES", "POWER_CONSUMPTION_SDR", "POWER_CONSUMPTION_HDR");
+        assertThat(v2).doesNotContainKeys("DIAGONALE_POUCES", "POWER_CONSUMPTION_HDR");
 
         double renormalisation = 1.0 - v1.get("DATA_QUALITY") - v1.get("DIAGONALE_POUCES");
         double v1Energy = v1.get("POWER_CONSUMPTION_SDR") + v1.get("POWER_CONSUMPTION_HDR")
             + v1.get("CLASSE_ENERGY_SDR") + v1.get("CLASSE_ENERGY_HDR");
-        double v2Energy = v2.get("POWER_DENSITY_SDR") + v2.get("CLASSE_ENERGY_SDR") + v2.get("CLASSE_ENERGY_HDR");
+        double v2Energy = v2.get("POWER_DENSITY_SDR") + v2.get("POWER_CONSUMPTION_SDR") + v2.get("CLASSE_ENERGY_SDR") + v2.get("CLASSE_ENERGY_HDR");
         assertThat(v2Energy * renormalisation).as("energy block, V1 units").isCloseTo(v1Energy, within(1e-6));
-        assertThat(impactScore.getV2().getCriteriaScoring()).containsKey("POWER_DENSITY_SDR")
-            .doesNotContainKeys("POWER_CONSUMPTION_SDR", "POWER_CONSUMPTION_HDR");
+        assertThat(v2.get("POWER_DENSITY_SDR")).isCloseTo(v2.get("POWER_CONSUMPTION_SDR"), within(1e-9));
+        assertThat(impactScore.getV2().getCriteriaScoring()).containsKeys("POWER_DENSITY_SDR", "POWER_CONSUMPTION_SDR")
+            .doesNotContainKey("POWER_CONSUMPTION_HDR");
     }
 
     /** GOU-1884: the density reads the SDR watts and the diagonal, 16:9, and is never read from merchant data. */
