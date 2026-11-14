@@ -55,3 +55,30 @@ Remplace les bornes provisoires 0,90 / 0,67 / 0,33 : avec 0,67, un produit mieux
 | Lave-linge | `POWER_CONSUMPTION_TYPICAL` → `ENERGY_CONSUMPTION_100_CYCLES`, même poids | 19/1 480 valeurs aux unités mélangées, contre 1 169/1 480 kWh/100 cycles d'EPREL |
 | Climatiseurs | `REPAIRABILITY_INDEX` retiré, poids redistribué au prorata ; `CLASSE_ENERGY` lu sur l'échelle A+++ à D | réparabilité absente de tous les documents ; A+ à A+++ ignorés aujourd'hui (70/81 imputés) et "A" noté au maximum |
 | TV | `DIAGONALE_POUCES` retirée, consommation rapportée à la surface | GOU-1884 |
+
+## Porte n° 3 : publication de la V2 (14/11/2026)
+
+- **Décision** : approuvée sans note, donc selon les six recommandations du dossier (approbation board `5f2236b6`, 14/11/2026 ; GOU-1888).
+- **Sources** : simulation sur l'export prod du 13/11 ([`v2-simulation-2026-11-13.md`](v2-simulation-2026-11-13.md), GOU-1887) relue par QA (GOU-2162) ; analyse juridique GOU-1886 ; rendu bêta de la TV en V2 (GOU-2166, page méthode corrigée et recontrôlée dans GOU-2167).
+- **Portée** : chaque vague passe `methodologyVersion: 2` par sa propre PR, livrée par le train de release (GOU-1889). Retour arrière sans release : surcharge `IMPACTSCORE_METHODOLOGY_OVERRIDES=<verticale>:1` de l'environnement de prod.
+
+### Vagues
+
+| Vague | Verticales | Préalable |
+|---|---|---|
+| 1 | Réfrigérateurs, lave-vaisselle | conseil juridique (décision 6, GOU-2187) |
+| 2 | Lave-linge, fours, smartphones | une semaine après la vague 1, suivi SEO sans alerte ; seuil lave-linge appliqué (GOU-2186) |
+| 3 | TV, climatiseurs | bloc énergie TV et nouvelle simulation TV (GOU-2186) |
+
+### Décisions
+
+| # | Objet | Décision |
+|---|---|---|
+| 1 | Lave-linge, seuil de couverture | `v2.minRealWeightCoverage` 0,50 → **0,40** : 9,5 % des notés passent en "Non noté" au lieu de 15,8 % (garde-fou de 10 %). |
+| 2 | TV, bloc énergie | **Option B** : `POWER_DENSITY_SDR` 0,08 et `POWER_CONSUMPTION_SDR` (watts bruts) 0,08 au lieu de la densité seule à 0,16 ; classes SDR 0,14 et HDR 0,04 inchangées. Avec la densité seule, 15 des 20 premiers TV font 65" ou plus. Nouvelle simulation TV avant la vague 3 ; au-delà de 10 % en "Non noté", retour à Goulven. |
+| 3 | Climatiseurs | V2 au seuil 0,50, sans libellé de position (moins de 100 notés) ; la note affiche "x critères sur y". |
+| 4 | Lave-vaisselle, filtre EPREL | **Gardé** (`v2.eprelRequired: true`), contrairement à la porte n° 2. Sa levée reviendra à Goulven après le tri des fiches hors périmètre (GOU-2163, GOU-2165). |
+| 5 | Niveaux affichés | Option A, formulés sur la position (section "Libellés de position" ci-dessus). |
+| 6 | Conseil juridique | Consultation d'un conseil externe avant la vague 1 sur les questions 1 ("label de développement durable" ?) et 4 (méthode et hypothèses communes) du § 6 de l'analyse GOU-1886 (GOU-2187). |
+
+**Sitemap** : 7 265 fiches sans offre récente sortent du sitemap sur les sept verticales ; elles reviennent dès qu'elles ont une offre (design § 4.2). Suivi Search Console avant chaque vague puis à J+2, J+7 et J+14 ; une baisse nette des clics imputable à la bascule déclenche le retour arrière.
