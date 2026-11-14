@@ -161,7 +161,8 @@ runs `clearScoresOutsideVerticals()`:
 
 - it targets the products holding `scores` or `impactScoreMeta` whose `vertical`
   is not a batched vertical (`ProductRepository.countScoredOutsideVerticals`);
-- `score-cleanup.enabled` is `false` by default: the batch then only logs
+- `score-cleanup.enabled` is `false` in the code and `true` in the API
+  `application.yml` since GOU-2134; when it is `false`, the batch only logs
   `Score cleanup outside verticals : disabled, N products would be cleared`;
 - when enabled, it clears, by partial bulk updates of `score-cleanup.bulk-size`
   products (default 500), at most `score-cleanup.max-products` products per run
