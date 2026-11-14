@@ -79,4 +79,18 @@ class ImpactScoreMethodologyOverrideTest {
     void outOfRangeVersionFailsTheStartup() {
         assertThatThrownBy(() -> load("tv:3")).isInstanceOf(IllegalStateException.class);
     }
+
+    @Test
+    void waveOneVerticalsAreInVersionTwo() {
+        VerticalsConfigService service = load(null);
+        var fridge = service.getConfigById("refrigerator").getImpactScoreConfig();
+        var dishwasher = service.getConfigById("dishwasher").getImpactScoreConfig();
+        assertThat(fridge.effectiveMethodologyVersion()).isEqualTo(2);
+        assertThat(dishwasher.effectiveMethodologyVersion()).isEqualTo(2);
+        assertThat(fridge.isEprelRequired()).isFalse();
+        assertThat(dishwasher.isEprelRequired()).isTrue();
+        assertThat(service.getConfigById("tv").getImpactScoreConfig().effectiveMethodologyVersion()).isEqualTo(1);
+        assertThat(load("dishwasher:1").getConfigById("dishwasher").getImpactScoreConfig()
+                .effectiveMethodologyVersion()).isEqualTo(1);
+    }
 }

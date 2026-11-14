@@ -2,11 +2,18 @@
 
 This document details the computation of the **Impact Score** (often referred to as `ECOSCORE` in the codebase), explaining the steps from raw attribute data to the final aggregated score.
 
-> This page describes the current method (V1). The versioned V2 method
+> This page describes the V1 method. The versioned V2 method
 > (real coverage, no imputation, per-vertical switch) is designed in
-> [impactscore/v2-design.md](impactscore/v2-design.md). Its computation is in
-> the code but applies only to a vertical whose effective methodology version
-> is 2 (none yet).
+> [impactscore/v2-design.md](impactscore/v2-design.md).
+>
+> **V2 coverage (wave 1, GOU-1889, gate no. 3):** refrigerators and
+> dishwashers use `methodologyVersion: 2` (merge date 2026-11-14; production
+> follows with the next release train). All other verticals stay in V1.
+> EPREL filter per vertical: `v2.eprelRequired: false` for refrigerators,
+> `true` for dishwashers (kept; lifting it needs a separate decision).
+> Rollback: set `IMPACTSCORE_METHODOLOGY_OVERRIDES=<vertical>:1`
+> (for example `dishwasher:1`). Re-evaluation happens in the 13:00 batch after
+> the release. Waves 2 and 3: GOU-2186.
 
 ## Overview
 
