@@ -166,15 +166,15 @@ chacun, ce dernier en `MINMAX_QUANTILE` 0,02 / 0,98). `methodologyVersion` reste
 | | Avant | Après |
 |---|---:|---:|
 | **TV** notés V2 | 1 965 | 1 965 |
-| TV « Non noté » : couverture faible / aucun critère réel | 98 / 13 | 98 / 13 (111 notés V1, 5,2 %) |
+| TV "Non noté" : couverture faible / aucun critère réel | 98 / 13 | 98 / 13 (111 notés V1, 5,2 %) |
 | TV, Spearman V1/V2 | 0,218 (2 037 produits, avant GOU-2165) | **0,577** (1 965 produits) |
 | TV, écrans de 65" ou plus dans les 20 premiers | 15/20 | **4/20** (65", 75", 85", 86") |
 | TV, diagonale médiane du top 5 % | 75" | 40" |
 | TV, Spearman note/diagonale en V2 | 0,36 | -0,14 |
-| TV, 115" à 750 W en HDR (TCL-115C7K) | centile 97,7, « Parmi les mieux classés » | rang 373/1 965, centile 81, V2 10,31, libellé « good » |
+| TV, 115" à 750 W en HDR (TCL-115C7K) | centile 97,7, "Parmi les mieux classés" | rang 373/1 965, centile 81, V2 10,31, libellé "good" |
 | TV, p5 / p50 / p95 V2 | 6,69 / 9,10 / 11,76 | 6,98 / 9,07 / 11,39 |
 | **Lave-linge** notés V2 | 1 246 | 1 339 |
-| Lave-linge « Non noté » : couverture faible / aucun critère réel | 224 / 10 | 131 / 10 |
+| Lave-linge "Non noté" : couverture faible / aucun critère réel | 224 / 10 | 131 / 10 |
 | Lave-linge, notés V1 passés en Non noté | 234 (15,8 %) | **141 (9,5 %)** |
 | Lave-linge, Spearman V1/V2 | 0,874 | 0,892 |
 
