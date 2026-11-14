@@ -66,7 +66,7 @@ Remplace les bornes provisoires 0,90 / 0,67 / 0,33 : avec 0,67, un produit mieux
 
 | Vague | Verticales | Préalable |
 |---|---|---|
-| 1 | Réfrigérateurs, lave-vaisselle | conseil juridique (décision 6, GOU-2187) |
+| 1 | Réfrigérateurs, lave-vaisselle | aucun : conseil juridique abandonné (décision 6 modifiée, GOU-2187) |
 | 2 | Lave-linge, fours, smartphones | une semaine après la vague 1, suivi SEO sans alerte ; seuil lave-linge appliqué (GOU-2186) |
 | 3 | TV, climatiseurs | bloc énergie TV et nouvelle simulation TV (GOU-2186) |
 
@@ -79,6 +79,6 @@ Remplace les bornes provisoires 0,90 / 0,67 / 0,33 : avec 0,67, un produit mieux
 | 3 | Climatiseurs | V2 au seuil 0,50, sans libellé de position (moins de 100 notés) ; la note affiche "x critères sur y". |
 | 4 | Lave-vaisselle, filtre EPREL | **Gardé** (`v2.eprelRequired: true`), contrairement à la porte n° 2. Sa levée reviendra à Goulven après le tri des fiches hors périmètre (GOU-2163, GOU-2165). |
 | 5 | Niveaux affichés | Option A, formulés sur la position (section "Libellés de position" ci-dessus). |
-| 6 | Conseil juridique | Consultation d'un conseil externe avant la vague 1 sur les questions 1 ("label de développement durable" ?) et 4 (méthode et hypothèses communes) du § 6 de l'analyse GOU-1886 (GOU-2187). |
+| 6 | Conseil juridique | ~~Consultation d'un conseil externe avant la vague 1 sur les questions 1 ("label de développement durable" ?) et 4 (méthode et hypothèses communes) du § 6 de l'analyse GOU-1886.~~ **Modifiée le 14/11/2026** : Goulven renonce à la consultation et lance la vague 1 sans avis externe (réponse à la demande de GOU-2187 ; brief non transmis, aucune réponse de conseil). Les mesures de l'analyse GOU-1886 restent appliquées : niveaux formulés sur la position, sans pictogramme ; "x critères sur y" et date près de la note ; seuil de couverture ; mention "ni label ni certification" ; page méthode publique par catégorie. |
 
 **Sitemap** : 7 265 fiches sans offre récente sortent du sitemap sur les sept verticales ; elles reviennent dès qu'elles ont une offre (design § 4.2). Suivi Search Console avant chaque vague puis à J+2, J+7 et J+14 ; une baisse nette des clics imputable à la bascule déclenche le retour arrière.
