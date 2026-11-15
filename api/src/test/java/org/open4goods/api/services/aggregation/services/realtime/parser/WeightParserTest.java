@@ -145,6 +145,22 @@ class WeightParserTest {
         assertThat(parser.parse("10 - 12 kg", null, vc)).isNull();
         assertThat(parser.parse("10\u201312 kg", null, vc)).isNull();
         assertThat(parser.parse("10-12", null, vc)).isNull();
+        // A dash between digits anywhere rejects the whole value, even next to a valid weight.
+        assertThat(parser.parse("45 kg, 60-85-60 cm", null, vc)).isNull();
+        assertThat(parser.parse("45 kg (réf. WM-1234)", null, vc)).isNull();
+    }
+
+    @Test
+    void writtenRangeKeepsValueWithUnit() throws ParseException {
+        // TV bounds from tv.yml; "TRANCHE DE POIDS" values look like "15 à 30 kg".
+        VerticalConfig tvConfig = new VerticalConfig();
+        tvConfig.setParsers(new ParsersConfig());
+        tvConfig.getParsers().getWeight().setMinKg(1.0);
+        tvConfig.getParsers().getWeight().setMaxKg(100.0);
+
+        assertThat(parser.parse("15 à 30 kg", null, tvConfig)).isEqualTo("30");
+        assertThat(parser.parse("3 à 10 kg", null, tvConfig)).isEqualTo("10");
+        assertThat(parser.parse("+ de 100 kg", null, tvConfig)).isEqualTo("100");
     }
 
     @Test

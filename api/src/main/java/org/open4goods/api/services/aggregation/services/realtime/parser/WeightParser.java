@@ -54,9 +54,13 @@ import org.slf4j.LoggerFactory;
  * <ul>
  *   <li>Thousands groups are joined before extraction: "1 200 g" and "1 200,5 g" (space, no-break
  *       space or thin space between groups of 3 digits) read as 1200 g and 1200.5 g.</li>
- *   <li>A range ("10-12 kg", "10 - 12 kg") is <b>rejected</b>: it is not one measured weight, and
- *       picking a bound would invent a precision the source does not give. Another source of the
- *       same attribute may still provide a value.</li>
+ *   <li>A dash between two digits, or glued in front of a digit, <b>anywhere</b> in the value
+ *       rejects the whole value: "10-12 kg" and "10 - 12 kg" are ranges, not one measured weight,
+ *       and "45 kg, 60-85-60 cm" or "45 kg (ref. WM-1234)" give {@code null} too. Another source of
+ *       the same attribute may still provide a value.</li>
+ *   <li>A range written in words keeps the value that carries the unit, through the explicit unit
+ *       rule: "15 à 30 kg" gives 30, "+ de 100 kg" gives 100. This is the common
+ *       format of the "TRANCHE DE POIDS" synonym, so it is deliberately not rejected.</li>
  *   <li>A negative value ("-5 kg") is rejected, and so is any result that is not strictly positive
  *       once rounded to the output scale ("0 kg"), on every parsing path.</li>
  * </ul>
