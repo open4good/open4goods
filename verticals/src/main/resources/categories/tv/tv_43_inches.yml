@@ -1,0 +1,96 @@
+# Search-intent subcategory for the tv vertical.
+# Maintained: 2026-11-15 from the GOU-2224 spec (Growth).
+# Intent: comparison of 43-inch (109 cm) TVs - small living rooms, bedrooms
+# and studios.
+# Evidence:
+#   - GSC (sc-domain:nudger.fr, 2026-08-17 -> 2026-11-14): about 2,400
+#     impressions on 43-inch queries ("43 pouces en cm" 1294 impr;
+#     "dimension tv 43 pouces longueur et largeur" 1039 impr). Mostly
+#     informational: the inch/cm question is answered in copy.
+#   - Google Autocomplete: not measured.
+# Feasibility:
+#   - Matching products: 777 in the vertical, 281 with an active offer
+#     (Elasticsearch products-moustik, 2026-11-15, DIAGONALE_POUCES.value
+#     term "43" and offersCount >= 1).
+# Rationale:
+#   - Smallest size of the blog "quelle taille de TV" widgets (43 / 55 / 65);
+#     the exact-size filter mirrors tv_55_inches.
+id: "tv_43_inches"
+slug:
+  en: "43-inch-tv"
+  fr: "televiseur-43-pouces"
+h1Title:
+  en: "43-inch TVs (109 cm)"
+  fr: "Téléviseurs 43 pouces (109 cm)"
+description:
+  en: |-
+    Compare **43-inch TVs (109 cm)**, the size for small living rooms,
+    bedrooms and studios, with energy use, repairability and Impact Score data
+    to compare models.
+  fr: |-
+    Comparez les **téléviseurs 43 pouces (109 cm)**, la taille des petits
+    salons, chambres et studios, avec la consommation, la réparabilité et
+    l'Impact Score pour comparer les modèles.
+metaTitle:
+  en: "43-inch TVs (109 cm): compare models | Nudger"
+  fr: "Téléviseur 43 pouces (109 cm) : comparer | Nudger"
+metaDescription:
+  en: "Compare 43-inch (109 cm) TVs by panel type, energy use, refresh rate and impact before choosing the right model for your room."
+  fr: >-
+    Comparez les téléviseurs 43 pouces (109 cm) selon la dalle, la
+    consommation, la fréquence et l'impact avant de choisir le bon modèle.
+metaOpenGraphTitle:
+  en: "Compare 43-inch TVs"
+  fr: "Comparer les téléviseurs 43 pouces"
+metaOpenGraphDescription:
+  en: "A focused selection of 43-inch (109 cm) TVs with practical comparison data."
+  fr: "Une sélection ciblée de téléviseurs 43 pouces (109 cm) avec les données utiles pour comparer."
+heroBlock:
+  mdiIcon: "mdi-television"
+  title:
+    en: "The compact size"
+    fr: "La taille compacte"
+  body:
+    en: |-
+      43 inches equals 109 cm diagonal. It suits a viewing distance of roughly
+      1.5 to 2 m, ideal for a bedroom, a studio or a small living room.
+    fr: |-
+      43 pouces correspond à 109 cm de diagonale. Cette taille convient à un
+      recul d'environ 1,5 à 2 m, idéale pour une chambre, un studio ou un petit
+      salon.
+readMore:
+  title:
+    en: "43 inches: how big is it, and is it the right size for you?"
+    fr: "43 pouces : quelle taille, et est-ce le bon format pour vous ?"
+  shortText:
+    en: |-
+      A 43-inch screen measures 109 cm on the diagonal, about 95 cm wide and
+      54 cm high. As a rule of thumb, sit 1.5 to 2 m away. This page lists only
+      43-inch models so you compare like for like.
+    fr: |-
+      Un écran 43 pouces mesure 109 cm de diagonale, environ 95 cm de large et
+      54 cm de haut. En pratique, prévoyez un recul de 1,5 à 2 m. Cette page ne
+      liste que des modèles 43 pouces, pour comparer à format égal.
+  longText:
+    en: |-
+      Once the size is fixed, the real differences are panel technology (OLED,
+      QLED or LED), energy consumption and refresh rate. A 43-inch set is often
+      a second TV: a frugal model keeps the yearly running cost low.
+
+      Nudger keeps this page focused on filterable 43-inch models so each TV
+      stays comparable on price, environmental impact score and key technical
+      attributes, instead of mixing in other sizes.
+    fr: |-
+      Une fois la taille fixée, les vraies différences se jouent sur la
+      technologie de dalle (OLED, QLED ou LED), la consommation et la fréquence
+      d'affichage. Un 43 pouces est souvent une télé secondaire : un modèle
+      économe garde un coût annuel bas.
+
+      Nudger garde cette page centrée sur des modèles 43 pouces filtrables,
+      afin que chaque téléviseur reste comparable sur le prix, le score d'impact
+      environnemental et les caractéristiques techniques, sans mélanger les
+      autres tailles.
+activatedFilters:
+  - field: "attributes.indexed.DIAGONALE_POUCES.value"
+    operator: "EQUALS"
+    value: "43"
