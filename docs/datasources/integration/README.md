@@ -449,6 +449,10 @@ Correctif, dans `BarcodeValidationService` :
 5. Test qui échoue d'abord : `"0"`, `"00000000"`, `"17"`, `1234567890128`, un code 2xx, un
    GTIN-8 valide ; garder les tests UPC-A et ISBN-10 existants.
 
+**Livré (GOU-2294).** Seuil N = 8 chiffres significatifs, retenu d'après la mesure GOU-2293 :
+seuls 1 514 produits ont moins de 8 chiffres significatifs, alors que les codes à 8-10 chiffres
+sont presque tous des codes à offres actives. Les produits existants ne sont pas touchés.
+
 Hors de ce lot : front-api a deux autres contrôles de somme (`CssEligibilityService.isValidGtin`,
 `AmazonSearchLinkService.hasValidCheckDigit`), faute de dépendre de `commons`. À unifier plus
 tard.
