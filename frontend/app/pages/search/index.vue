@@ -73,38 +73,45 @@
       </p>
     </PageHeader>
 
-    <v-navigation-drawer
-      v-model="filtersOpen"
-      location="right"
-      width="320"
-      temporary
-      class="search-page__filters-drawer"
-    >
-      <div class="pa-4 d-flex align-center justify-space-between">
-        <h3 class="text-h6 font-weight-bold mb-0">
-          {{ t('category.filters.title') }}
-        </h3>
-        <v-btn
-          icon="mdi-close"
-          variant="text"
-          density="comfortable"
-          @click="filtersOpen = false"
-        />
-      </div>
+    <!--
+      Client-only, like the category filters drawer: rendered on the server, the
+      closed temporary drawer sat in the page flow until hydration moved it
+      off-screen (CLS 0.62 on desktop).
+    -->
+    <ClientOnly>
+      <v-navigation-drawer
+        v-model="filtersOpen"
+        location="right"
+        width="320"
+        temporary
+        class="search-page__filters-drawer"
+      >
+        <div class="pa-4 d-flex align-center justify-space-between">
+          <h3 class="text-h6 font-weight-bold mb-0">
+            {{ t('category.filters.title') }}
+          </h3>
+          <v-btn
+            icon="mdi-close"
+            variant="text"
+            density="comfortable"
+            @click="filtersOpen = false"
+          />
+        </div>
 
-      <v-divider />
+        <v-divider />
 
-      <div class="pa-4">
-        <CategoryFilterList
-          :fields="filterFields"
-          :aggregations="productAggregations"
-          :baseline-aggregations="baselineAggregations"
-          :active-filters="activeFilters"
-          @update-range="updateRangeFilter"
-          @update-terms="updateTermsFilter"
-        />
-      </div>
-    </v-navigation-drawer>
+        <div class="pa-4">
+          <CategoryFilterList
+            :fields="filterFields"
+            :aggregations="productAggregations"
+            :baseline-aggregations="baselineAggregations"
+            :active-filters="activeFilters"
+            @update-range="updateRangeFilter"
+            @update-terms="updateTermsFilter"
+          />
+        </div>
+      </v-navigation-drawer>
+    </ClientOnly>
 
     <v-progress-linear
       v-if="
