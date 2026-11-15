@@ -66,6 +66,15 @@ public class BackfillEngine {
 	/** Number of product ids reported as examples. */
 	static final int SAMPLE_SIZE = 20;
 
+	/**
+	 * A bulk fails the run when at least this many of its updates failed, and more than half of them: a single conflict
+	 * in a small bulk is not a systematic failure.
+	 */
+	static final int MIN_FAILURES_TO_STOP = 10;
+
+	/** Failed updates logged one by one per bulk; the others are only counted by status and type. */
+	static final int LOGGED_FAILURES_PER_BULK = 5;
+
 	/** Conflicts with a concurrent update of the same product (ingestion) are retried this many times. */
 	static final int RETRY_ON_CONFLICT = 3;
 
@@ -91,7 +100,8 @@ public class BackfillEngine {
 	 *
 	 * @param operation  what to change
 	 * @param options    mode, batch size and rate cap
-	 * @param backupFile JSONL backup file, appended to; required outside dry run, ignored in dry run
+	 * @param backupFile JSONL backup file, appended to; required outside dry run when the operation can be restored,
+	 *                   ignored otherwise
 	 * @param resumeFrom cursor of a stopped run to continue, null to start from the beginning
 	 * @param stop       polled between two pages: true stops the run cleanly
 	 * @param onBatch    receives the counters after each page
@@ -100,7 +110,8 @@ public class BackfillEngine {
 	 */
 	public BackfillReport run(BackfillOperation operation, BackfillOptions options, Path backupFile,
 			BackfillCursor resumeFrom, BooleanSupplier stop, Consumer<BackfillReport> onBatch) throws IOException {
-		if (!options.dryRun()) {
+		boolean backedUp = !options.dryRun() && operation.restoreScript() != null;
+		if (backedUp) {
 			Objects.requireNonNull(backupFile, "backupFile is required outside dry run");
 		}
 		requirePaceWithinKeepAlive(options.batchSize(), options.maxProductsPerSecond());
@@ -114,9 +125,9 @@ public class BackfillEngine {
 		long batch = 0;
 		logger.info("Backfill {} started (dryRun={}, batchSize={}, maxProductsPerSecond={}, resumeFrom={}, backup={})",
 				operation.name(), options.dryRun(), options.batchSize(), options.maxProductsPerSecond(), resumeFrom,
-				options.dryRun() ? null : backupFile);
+				backedUp ? backupFile : null);
 
-		try (BackupWriter backup = options.dryRun() ? null : new BackupWriter(backupFile)) {
+		try (BackupWriter backup = backedUp ? new BackupWriter(backupFile) : null) {
 			while (true) {
 				if (stop.getAsBoolean()) {
 					stopReason = BackfillReport.STOP_REQUESTED;
@@ -172,8 +183,10 @@ public class BackfillEngine {
 				}
 
 				boolean rejected = false;
-				if (backup != null && !changes.isEmpty()) {
-					backup.append(ids, changes);
+				if (!options.dryRun() && !changes.isEmpty()) {
+					if (backup != null) {
+						backup.append(ids, changes);
+					}
 					rejected = write(operation, ids, changes, counters);
 				}
 				if (rejected) {
@@ -182,7 +195,7 @@ public class BackfillEngine {
 				}
 
 				after = hits.getLast().sort();
-				BackfillReport progress = counters.report(operation, options.dryRun(), backupFile,
+				BackfillReport progress = counters.report(operation, options.dryRun(), backedUp ? backupFile : null,
 						new BackfillCursor(pitId, toLongs(after)), null, start);
 				logger.info("Backfill {} (dryRun={}) batch {}: {} scanned, {} matched, {} written, {} unchanged, {} failed, "
 						+ "labels {}", operation.name(), options.dryRun(), batch, counters.scanned, counters.matched,
@@ -196,7 +209,7 @@ public class BackfillEngine {
 			}
 		}
 
-		BackfillReport report = counters.report(operation, options.dryRun(), backupFile,
+		BackfillReport report = counters.report(operation, options.dryRun(), backedUp ? backupFile : null,
 				new BackfillCursor(pitId, toLongs(after)), stopReason, start);
 		logger.info("Backfill {} {}: {}", operation.name(), completed ? "done" : "stopped", report);
 		return report;
@@ -317,6 +330,8 @@ public class BackfillEngine {
 			throw e;
 		}
 		boolean backpressure = false;
+		int failures = 0;
+		Map<String, Integer> failuresByType = new LinkedHashMap<>();
 		for (BulkResponseItem item : response.items()) {
 			if (item.error() == null) {
 				if ("noop".equals(item.result())) {
@@ -324,17 +339,34 @@ public class BackfillEngine {
 				} else {
 					counters.written++;
 				}
+			} else if (item.status() == 404) {
+				// Product deleted since the snapshot read it: nothing left to change
+				counters.unchanged++;
 			} else {
 				counters.failed++;
+				failures++;
 				backpressure |= item.status() == 429;
-				logger.error("Backfill {}: update of product {} failed ({}): {}", operation.name(), item.id(),
-						item.status(), item.error().reason());
+				failuresByType.merge(item.status() + " " + item.error().type(), 1, Integer::sum);
+				if (failures <= LOGGED_FAILURES_PER_BULK) {
+					logger.error("Backfill {}: update of product {} failed ({}): {}", operation.name(), item.id(),
+							item.status(), item.error().reason());
+				}
 			}
+		}
+		if (failures > 0) {
+			logger.error("Backfill {}: {} of {} updates failed in this bulk, by status and type: {}", operation.name(),
+					failures, changes.size(), failuresByType);
 		}
 		if (backpressure) {
 			logger.warn("Backfill {}: Elasticsearch rejected updates with a 429, stopping", operation.name());
+			return true;
 		}
-		return backpressure;
+		if (failures >= MIN_FAILURES_TO_STOP && failures * 2 > changes.size()) {
+			// Systematic failure (missing mapping, script error...): stop before failing millions of updates
+			throw new IllegalStateException("Backfill " + operation.name() + ": " + failures + " of " + changes.size()
+					+ " updates failed, stopping: " + failuresByType);
+		}
+		return false;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -548,13 +580,13 @@ public class BackfillEngine {
 			return new BackfillReport(operation.name(), dryRun, false, scanned, matched, written, unchanged, failed,
 					Map.copyOf(labels), List.copyOf(samples),
 					dryRun || backupFile == null ? null : backupFile.toString(), cursor, stopReason,
-					System.currentTimeMillis() - start);
+					System.currentTimeMillis() - start, Map.copyOf(operation.details()));
 		}
 
 		BackfillReport restoreReport(BackfillOperation operation, Path backupFile, String stopReason, long start) {
 			return new BackfillReport(operation.name(), false, true, scanned, matched, written, unchanged, failed,
 					Map.copyOf(labels), List.copyOf(samples), backupFile.toString(), null, stopReason,
-					System.currentTimeMillis() - start);
+					System.currentTimeMillis() - start, Map.of());
 		}
 	}
 }

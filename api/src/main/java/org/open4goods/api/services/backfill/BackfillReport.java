@@ -13,8 +13,8 @@ import java.util.Map;
  * @param matchedProducts products that needed the change (would be or were written); equals the scanned lines in a
  *                        restore
  * @param writtenProducts updates applied by Elasticsearch, always 0 in dry run
- * @param unchangedProducts updates Elasticsearch found already done ({@code noop}: the product changed since it was
- *                        read)
+ * @param unchangedProducts updates with nothing left to do: {@code noop} (the product changed since it was read) or
+ *                        404 (the product was deleted since)
  * @param failedProducts  updates rejected by Elasticsearch, see the logs
  * @param labelCounts     occurrences of each {@link BackfillChange#labels() label} among the matched products, for
  *                        instance the removed keys
@@ -24,6 +24,7 @@ import java.util.Map;
  * @param stopReason      null when the scan reached its end, {@code STOP_REQUESTED} or {@code BACKPRESSURE}
  *                        (Elasticsearch answered 429 to a search, a shard or a bulk item) otherwise
  * @param durationMs      duration of the run
+ * @param details         operation-specific counters ({@link BackfillOperation#details()}), empty when none
  */
 public record BackfillReport(
 		String operation,
@@ -39,7 +40,8 @@ public record BackfillReport(
 		String backupFile,
 		BackfillCursor cursor,
 		String stopReason,
-		long durationMs) {
+		long durationMs,
+		Map<String, Object> details) {
 
 	/** Stop asked through {@link BackfillService#requestStop()}. */
 	public static final String STOP_REQUESTED = "STOP_REQUESTED";
