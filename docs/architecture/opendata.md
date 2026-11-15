@@ -41,7 +41,7 @@ flowchart LR
 
 `OpenDataPublisher`, appelé par `api` après un passage réussi, publie les fichiers locaux sur le bucket R2 par son API
 S3 (`S3OpenDataStorage`, AWS SDK for Java v2, client synchrone Apache). Désactivée par défaut et en bêta
-(`open-data-config.publication.enabled: false`) ; l'activation en prod passe par une PR dédiée. Un passage en échec
+(`open-data-config.publication.enabled: false`) ; activée en prod par `application-prod.yml` (GOU-2300). Un passage en échec
 ne publie rien.
 
 Les clés publiques sont les mêmes à chaque passage. Un zip n'est donc jamais écrit sur sa clé publique : il passe
@@ -54,7 +54,7 @@ par une clé temporaire, comme dans l'envoi manuel de GOU-2285. Ordre :
    pendant quelques heures : l'effet sur les Go-mois facturés est négligeable.
 3. **Envoi multipart** de chaque zip vers `staging-prefix` + clé (`.staging/gtin-open-data.zip`), en parts de
    `part-size` (64 Mo), débit limité à `upload-bandwidth` (2 Mo/s). En-têtes : `Content-Type: application/zip`,
-   `Content-Disposition: attachment`, `Cache-Control` de `zip-cache-control`, métadonnée `sha256`. Un envoi en échec est
+   `Content-Disposition: attachment`, `Cache-Control` de `zip-cache-control` (`public, max-age=300`, comme les manifests : avec des clés fixes, un cache long ferait servir l'ancien zip alors que `manifest.json` annonce déjà le nouveau sha256), métadonnée `sha256`. Un envoi en échec est
    abandonné (`AbortMultipartUpload`).
 4. **Relecture** : chaque objet temporaire est relu en entier ; son sha256 et sa taille sont comparés au manifest.
    L'ETag d'un envoi multipart n'est pas un condensé du fichier : seule la relecture prouve le contenu.
