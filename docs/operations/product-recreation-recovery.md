@@ -95,10 +95,11 @@ Expected among them: `7333394145372` (Electrolux E62LB200S) and
    slug. It neither completes nor scores (step 4). Products are queued by
    pages of 500, each page taking the newest realtime offers first, so offers
    updated during the run are kept (GOU-2274). The call returns once the
-   products are queued. Check `8059019130255` (Hoover) and `8690842382758`
+   products are queued, not once they are indexed: wait for the indexation
+   queue (below) before checking `8059019130255` (Hoover) and `8690842382758`
    (Leisure).
-2. A product still without vertical after step 1 has no category matching its
-   vertical any more. Read its categories with
+2. After the queue has drained, a product still without vertical has no
+   category matching its vertical any more. Read its categories with
    `curl "$ES/products-moustik/_doc/{gtin}?_source_includes=categoriesByDatasources"`
    and ask the CTO to add the category to the vertical `matchingCategories`
    (no manual write of `vertical`).
@@ -109,10 +110,39 @@ Expected among them: `7333394145372` (Electrolux E62LB200S) and
    `POST $API/aggregate/gtin/{gtin}` (recomputes `excluded` and the slug).
    Run them sequentially, with a pause between products.
 4. Scores are rebuilt by the 13:00 batch of the vertical, or on request with
-   `POST $API/batch/{vertical}`. Do not run it while the nightly batch runs.
+   `POST $API/batch/{vertical}`. Do not run it while the nightly batch runs,
+   nor before the queue of step 1 has drained: it loads the products by their
+   `vertical` field in the index, so a product still queued is not scored.
 5. Check on `/api/products/{gtin}`: `vertical` set, `eprel` and `scores`
    present, `excluded: false`, then the presence of the URL in
    `sitemap/fr/product-pages.xml` after the next sitemap generation.
+
+### Waiting for the indexation queue
+
+When `/aggregate/verticals/{vertical}` returns, at most a full indexation
+queue of its products is still waiting to be indexed: 3000 products in prod
+(`products-queue-max-size`), indexed by 1 worker in bulks of 100. Order of
+magnitude, not measured: a few minutes. Realtime full updates use the same
+queue.
+
+No metric exposes the queue size. The only signal is the INFO line
+`full-products-worker-0 has indexed N products. M Remaining in queue` of
+`FullProductIndexationWorker` in `nohup-api.log`, hidden in beta and prod
+(`org.open4goods: warn`). To see it, switch that logger to INFO for the
+time of the repair, then back. The queue has drained when `M` falls to 0, or
+back to its level before the call.
+
+```bash
+LOGGER="$API/actuator/loggers/org.open4goods.services.productrepository.workers.FullProductIndexationWorker"
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" -H "Content-Type: application/json" \
+  -d '{"configuredLevel":"INFO"}' "$LOGGER"
+grep "Remaining in queue" nohup-api.log | tail -1
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" -H "Content-Type: application/json" \
+  -d '{"configuredLevel":null}' "$LOGGER"
+```
+
+Without that logger there is no signal: wait a few minutes, more while the
+realtime ingestion is busy, and check one of the products before going on.
 
 Old URLs keep their 301 by GTIN; the slug may differ from the one Google
 indexed, see the slug stability rule proposed in GOU-1700.

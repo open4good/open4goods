@@ -360,6 +360,32 @@ class ProductRepositoryTest
     }
 
     @Test
+    void categoryMatchScrollOutlivesASlowIndexationQueue()
+    {
+        // GOU-2274: the caller queues pages of products between two scroll requests; the 1 minute default could expire
+        org.springframework.data.elasticsearch.core.SearchHitsIterator<Product> it =
+                org.mockito.Mockito.mock(org.springframework.data.elasticsearch.core.SearchHitsIterator.class);
+        when(elasticsearchOperations.searchForStream(any(org.springframework.data.elasticsearch.core.query.Query.class), eq(Product.class), eq(ProductRepository.CURRENT_INDEX)))
+                .thenReturn(it);
+        org.open4goods.model.vertical.VerticalConfig vertical = new org.open4goods.model.vertical.VerticalConfig();
+        vertical.setId("washing-machine");
+        vertical.setMatchingCategories(Map.of("fnac.com", Set.of("LAVE-LINGE")));
+
+        repository.getProductsMatchingCategoriesOrVerticalId(vertical).close();
+
+        ArgumentCaptor<org.springframework.data.elasticsearch.core.query.Query> captor =
+                ArgumentCaptor.forClass(org.springframework.data.elasticsearch.core.query.Query.class);
+        verify(elasticsearchOperations).searchForStream(captor.capture(), eq(Product.class), eq(ProductRepository.CURRENT_INDEX));
+        assertThat(captor.getValue().getScrollTime()).isEqualTo(java.time.Duration.ofMinutes(5))
+                .isEqualTo(ProductRepository.CATEGORY_MATCH_SCROLL_KEEP_ALIVE);
+        assertThat(captor.getValue().getPageable().getPageSize()).isEqualTo(ProductRepository.CATEGORY_MATCH_SCROLL_PAGE_SIZE)
+                .isGreaterThan(10)
+                .isLessThanOrEqualTo(ProductRepository.FULL_PRODUCT_PAGE_SIZE);
+        // Closing the stream releases the scroll
+        verify(it).close();
+    }
+
+    @Test
     void applyNewerOfferStatesReadsOnlyOfferFieldsChangedSinceTheOldestProduct()
     {
         // GOU-1709: one index read per batch page, restricted to its ids and to documents changed since

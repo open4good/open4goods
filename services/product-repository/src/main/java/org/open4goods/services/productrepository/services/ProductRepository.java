@@ -1,5 +1,6 @@
 package org.open4goods.services.productrepository.services;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -95,6 +96,21 @@ public class ProductRepository {
          * Page size used when streaming exports restricted to a few source fields (small payloads).
          */
         private static final int PROJECTED_EXPORT_PAGE_SIZE = 5000;
+
+        /**
+         * Scroll keep-alive of {@link #getProductsMatchingCategoriesOrVerticalId(VerticalConfig)}, the time allowed
+         * between two scroll requests (GOU-2274). Its caller aggregates the products while they stream and queues
+         * them by pages into the full indexation queue, whose {@code put} blocks while the queue is full: with the
+         * 1 minute default of Spring Data Elasticsearch, a slow queue could let the scroll expire and fail the run.
+         */
+        static final Duration CATEGORY_MATCH_SCROLL_KEEP_ALIVE = Duration.ofMinutes(5);
+
+        /**
+         * Complete products per scroll request of {@link #getProductsMatchingCategoriesOrVerticalId(VerticalConfig)}
+         * (about 2 MB): ten times fewer requests than the default of 10, while the time between two requests stays
+         * that of aggregating at most 100 products and queueing at most one page.
+         */
+        static final int CATEGORY_MATCH_SCROLL_PAGE_SIZE = 100;
 
         /**
          * Shared {@link PageRequest} for exports of complete products.
@@ -1813,10 +1829,13 @@ public class ProductRepository {
 
 	/**
 	 * Return all products matching the vertical in the config or already having a
-	 * vertical defined
+	 * vertical defined.
 	 *
-	 * @param v
-	 * @return
+	 * <p>Scroll of {@value #CATEGORY_MATCH_SCROLL_PAGE_SIZE} products per request, kept alive
+	 * {@link #CATEGORY_MATCH_SCROLL_KEEP_ALIVE} between two requests. Close the stream to release the scroll.
+	 *
+	 * @param v the vertical
+	 * @return the products, streamed
 	 */
 	// TODO : Could add datasourcename in a virtual "all", then apply the logic filter to batch get all categories matching....
 	public Stream<Product> getProductsMatchingCategoriesOrVerticalId(VerticalConfig v) {
@@ -1832,7 +1851,10 @@ public class ProductRepository {
 		Criteria c = new Criteria("datasourceCategories").in(datasources)
 				.or(new Criteria("vertical").is(v.getId()));
 
-		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c)).build();
+		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c))
+				.withPageable(PageRequest.of(0, CATEGORY_MATCH_SCROLL_PAGE_SIZE))
+				.withScrollTime(CATEGORY_MATCH_SCROLL_KEEP_ALIVE)
+				.build();
 
 		var iterator = getElasticsearchOperations()
 				.searchForStream(initialQuery, Product.class, ProductRepository.CURRENT_INDEX);

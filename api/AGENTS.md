@@ -400,7 +400,10 @@ appellent `AggregationFacadeService.sanitizeVertical` (GOU-2274). Le runbook
 à des produits qui l'ont perdue.
 
 - **Chargement** (scroll) : les produits dont une `datasourceCategories` figure dans les `matchingCategories` de la
-  verticale, ou dont la verticale est déjà celle-ci. `BatchService.batch(vertical)` ne charge que les seconds.
+  verticale, ou dont la verticale est déjà celle-ci. `BatchService.batch(vertical)` ne charge que les seconds. Le
+  scroll lit 100 produits par requête et reste ouvert 5 minutes entre deux requêtes
+  (`ProductRepository.CATEGORY_MATCH_SCROLL_*`) : la mise en file d'une page bloque tant que la file complète est
+  pleine, et le défaut d'une minute pouvait expirer.
 - **Traitement** : la chaîne d'agrégation standard seule (`StandardAggregator.onProduct`), qui rattache ou détache la
   verticale. Ni complétion ni notation : les scores sont recalculés par le batch de 13 h ou par `POST /batch/{vertical}`,
   seule notation à la demande.
@@ -409,6 +412,7 @@ appellent `AggregationFacadeService.sanitizeVertical` (GOU-2274). Le runbook
   n'est donc pas recouverte par celle lue au départ. Cela suppose que `onProduct` ne touche jamais `lastChange` (seul
   un fragment le fait). La fenêtre restante est celle du batch.
 - Un produit qui lève `AggregationSkipException` est journalisé et n'est pas réécrit.
-- L'appel rend la main une fois les produits mis en file, pas une fois indexés. À lancer hors du batch de 13 h.
+- L'appel rend la main une fois les produits mis en file, pas une fois indexés : attendre que la file se vide avant
+  de vérifier ou d'enchaîner sur `POST /batch/{vertical}` (voir le runbook). À lancer hors du batch de 13 h.
 
 Preuve : `AggregationFacadeServiceSanitizeVerticalTest`.

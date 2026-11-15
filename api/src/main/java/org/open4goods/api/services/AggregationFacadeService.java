@@ -164,7 +164,9 @@ public class AggregationFacadeService {
 	 * read with. This holds because the standard chain never moves {@code lastChange} on
 	 * {@link StandardAggregator#onProduct(Product)}: only a data fragment does.
 	 *
-	 * <p>The method returns once the products are queued, not once they are indexed.
+	 * <p>Queueing a page blocks while the full indexation queue is full; the scroll is kept
+	 * alive long enough between two requests ({@code ProductRepository.CATEGORY_MATCH_SCROLL_KEEP_ALIVE}).
+	 * The method returns once the products are queued, not once they are indexed.
 	 *
 	 * @param vertical vertical configuration to process
 	 */
