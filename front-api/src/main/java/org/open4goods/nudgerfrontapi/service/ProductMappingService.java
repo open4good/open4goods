@@ -777,13 +777,17 @@ public class ProductMappingService {
         if (attributes == null) {
             return new ProductAttributesDto(Collections.emptyMap(), Collections.emptyMap(), classifiedAttributes, Collections.emptyMap());
         }
+        Set<String> excluded = resolveExcludedAttributes(vConfig);
         Map<String, ProductIndexedAttributeDto> indexed;
         if (attributes.getIndexed() == null) {
             indexed = Collections.emptyMap();
         } else {
             indexed = new LinkedHashMap<>();
-            attributes.getIndexed()
-                    .forEach((key, value) -> indexed.put(key, mapIndexedAttribute(value, vConfig, domainLanguage)));
+            attributes.getIndexed().forEach((key, value) -> {
+                if (!excluded.contains(key)) {
+                    indexed.put(key, mapIndexedAttribute(value, vConfig, domainLanguage));
+                }
+            });
         }
         Map<String, String> referential;
         if (attributes.getReferentielAttributes() == null) {
@@ -798,10 +802,27 @@ public class ProductMappingService {
             allAttributes = Collections.emptyMap();
         } else {
             allAttributes = new LinkedHashMap<>();
-            attributes.getAll().forEach((key, value) -> allAttributes.put(key, mapProductAttribute(value)));
+            attributes.getAll().forEach((key, value) -> {
+                if (!excluded.contains(key)) {
+                    allAttributes.put(key, mapProductAttribute(value));
+                }
+            });
         }
 
         return new ProductAttributesDto(referential, indexed, classifiedAttributes, allAttributes);
+    }
+
+    /**
+     * Attribute keys excluded by the applicable configuration (the vertical one, or the default one for a product
+     * outside any vertical). Exact key match: stale indexed documents must not leak excluded attributes.
+     */
+    private Set<String> resolveExcludedAttributes(VerticalConfig vConfig) {
+        VerticalConfig config = vConfig != null ? vConfig : verticalsConfigService.getDefaultConfig();
+        if (config == null || config.getAttributesConfig() == null
+                || config.getAttributesConfig().getExclusions() == null) {
+            return Collections.emptySet();
+        }
+        return config.getAttributesConfig().getExclusions();
     }
 
     private List<ProductClassifiedAttributeGroupDto> mapClassifiedAttributes(Product product, VerticalConfig vConfig,
