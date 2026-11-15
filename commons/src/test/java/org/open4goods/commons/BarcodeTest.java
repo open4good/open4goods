@@ -98,6 +98,36 @@ public class BarcodeTest {
 		assertNull(service.toProductId("7333394145373"));
 		assertNull(service.toProductId(null));
 	}
+	@Test
+	public void degenerateCodesAreRejected() {
+		BarcodeValidationService service = new BarcodeValidationService();
+
+		for (String code : new String[] { "0", "00000000", "17", "1234567890128", "01234567890128", "11111111", "5555555555555", "1234565" }) {
+			assertEquals(BarcodeType.UNKNOWN, service.sanitize(code).getKey(), code);
+			assertNull(service.toProductId(code), code);
+			assertEquals(BarcodeValidationService.Verdict.INVALID, service.verdict(code), code);
+		}
+		assertEquals(BarcodeType.GTIN_13, service.sanitize("40170725").getKey());
+		assertEquals(BarcodeValidationService.Verdict.ACCEPTED, service.verdict("40170725"));
+	}
+
+	@Test
+	public void fakeCodesAreConfigurable() {
+		BarcodeValidationService service = new BarcodeValidationService(java.util.List.of("8436542858045"));
+		assertNull(service.toProductId("8436542858045"));
+		assertEquals(1234567890128L, service.toProductId("1234567890128"));
+	}
+
+	@Test
+	public void restrictedClassesAreValidButRestricted() {
+		BarcodeValidationService service = new BarcodeValidationService();
+		assertEquals(BarcodeValidationService.Verdict.RESTRICTED, service.verdict("2001234567893"));
+		assertEquals(BarcodeValidationService.Verdict.RESTRICTED, service.verdict("9801234567892"));
+		assertEquals(org.open4goods.model.product.Gs1Class.RESTRICTED_INTERNAL, service.classifyGs1Class("2001234567893"));
+		assertEquals(org.open4goods.model.product.Gs1Class.GTIN, service.classifyGs1Class("8436542858045"));
+		assertEquals(BarcodeValidationService.Verdict.ACCEPTED, service.verdict("8436542858045"));
+		assertEquals(BarcodeValidationService.Verdict.ACCEPTED, service.verdict("9781845924539"));
+	}
 	//
 
 
