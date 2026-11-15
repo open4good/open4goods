@@ -174,4 +174,39 @@ describe('GuideProductGrid', () => {
       })
     })
   })
+
+  describe('seeAllCategory', () => {
+    it('links "Voir tout" to the category page without subcategory', async () => {
+      fetchCategoryByIdMock.mockResolvedValue({ verticalHomeUrl: '/fours/' })
+      fetchMock.mockResolvedValue({
+        products: { data: [{ gtin: 1, identity: {} }] },
+      })
+      const wrapper = await mountSuspended(GuideProductGrid, {
+        props: { vertical: 'oven-see-all', seeAllCategory: true },
+      })
+      await flushPromises()
+
+      expect(fetchCategoryByIdMock).toHaveBeenCalledWith('oven-see-all')
+      expect(
+        wrapper.find('a[data-widget-target="see-all"]').attributes('href')
+      ).toBe('/fours')
+    })
+
+    it('renders no see-all link when the category fails to load', async () => {
+      fetchCategoryByIdMock.mockRejectedValue(new Error('down'))
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+      fetchMock.mockResolvedValue({
+        products: { data: [{ gtin: 1, identity: {} }] },
+      })
+      const wrapper = await mountSuspended(GuideProductGrid, {
+        props: { vertical: 'oven-see-all-down', seeAllCategory: true },
+      })
+      await flushPromises()
+
+      expect(wrapper.find('a[data-widget-target="see-all"]').exists()).toBe(
+        false
+      )
+      errorSpy.mockRestore()
+    })
+  })
 })

@@ -1,0 +1,93 @@
+# Search-intent subcategory for the tv vertical.
+# Maintained: 2026-11-15 from the GOU-2224 spec (Growth).
+# Intent: comparison of 65-inch (165 cm) TVs - large living rooms and home
+# cinema.
+# Evidence:
+#   - GSC (sc-domain:nudger.fr, 2026-08-17 -> 2026-11-14): weak direct demand
+#     (< 100 impressions measured, "tv 55 ou 65 pouces" 82 impr).
+#   - Google Autocomplete: not measured.
+# Feasibility:
+#   - Matching products: 1011 in the vertical, 352 with an active offer
+#     (Elasticsearch products-moustik, 2026-11-15, DIAGONALE_POUCES.value
+#     term "65" and offersCount >= 1).
+# Rationale:
+#   - Second size of the catalogue and the large size of the blog "quelle
+#     taille de TV" widgets (43 / 55 / 65); content close to tv_55_inches.
+id: "tv_65_inches"
+slug:
+  en: "65-inch-tv"
+  fr: "televiseur-65-pouces"
+h1Title:
+  en: "65-inch TVs (165 cm)"
+  fr: "Téléviseurs 65 pouces (165 cm)"
+description:
+  en: |-
+    Compare **65-inch TVs (165 cm)**, the large living-room and home-cinema
+    size, with energy use, repairability and Impact Score data.
+  fr: |-
+    Comparez les **téléviseurs 65 pouces (165 cm)**, le format grand salon et
+    home-cinéma, avec la consommation, la réparabilité et l'Impact Score.
+metaTitle:
+  en: "65-inch TVs (165 cm): compare models | Nudger"
+  fr: "Téléviseur 65 pouces (165 cm) : comparer | Nudger"
+metaDescription:
+  en: "Compare 65-inch (165 cm) TVs by panel type, energy use and impact, and check whether this size suits your room."
+  fr: >-
+    Comparez les téléviseurs 65 pouces (165 cm) selon la dalle, la
+    consommation et l'impact, et vérifiez si ce format convient à votre pièce.
+metaOpenGraphTitle:
+  en: "Compare 65-inch TVs"
+  fr: "Comparer les téléviseurs 65 pouces"
+metaOpenGraphDescription:
+  en: "A focused selection of 65-inch (165 cm) TVs with practical comparison data."
+  fr: "Une sélection ciblée de téléviseurs 65 pouces (165 cm) avec les données utiles pour comparer."
+heroBlock:
+  mdiIcon: "mdi-television"
+  title:
+    en: "The home-cinema size"
+    fr: "La taille home-cinéma"
+  body:
+    en: |-
+      65 inches equals 165 cm diagonal. It suits a viewing distance of roughly
+      2.5 to 3 m, for a large living room.
+    fr: |-
+      65 pouces correspond à 165 cm de diagonale. Cette taille convient à un
+      recul d'environ 2,5 à 3 m, pour un grand salon.
+readMore:
+  title:
+    en: "65 inches: how big is it, and is it the right size for you?"
+    fr: "65 pouces : quelle taille, et est-ce le bon format pour vous ?"
+  shortText:
+    en: |-
+      A 65-inch screen measures 165 cm on the diagonal, about 144 cm wide and
+      81 cm high. As a rule of thumb, sit 2.5 to 3 m away. This page lists only
+      65-inch models so you compare like for like.
+    fr: |-
+      Un écran 65 pouces mesure 165 cm de diagonale, environ 144 cm de large et
+      81 cm de haut. En pratique, prévoyez un recul de 2,5 à 3 m. Cette page ne
+      liste que des modèles 65 pouces, pour comparer à format égal.
+  longText:
+    en: |-
+      Once the size is fixed, the real differences are panel technology (OLED,
+      QLED or LED), energy consumption and refresh rate. At 65 inches the energy
+      label weighs more: a larger panel draws more power, so the yearly running
+      cost varies widely between models.
+
+      Nudger keeps this page focused on filterable 65-inch models so each TV
+      stays comparable on price, environmental impact score and key technical
+      attributes, instead of mixing in other sizes.
+    fr: |-
+      Une fois la taille fixée, les vraies différences se jouent sur la
+      technologie de dalle (OLED, QLED ou LED), la consommation et la fréquence
+      d'affichage. En 65 pouces, l'étiquette énergie pèse davantage : une
+      grande dalle consomme plus, et le coût annuel varie fortement d'un modèle
+      à l'autre.
+
+      Nudger garde cette page centrée sur des modèles 65 pouces filtrables,
+      afin que chaque téléviseur reste comparable sur le prix, le score d'impact
+      environnemental et les caractéristiques techniques, sans mélanger les
+      autres tailles.
+activatedFilters:
+  - field: "attributes.indexed.DIAGONALE_POUCES.value"
+    operator: "EQUALS"
+    value: "65"

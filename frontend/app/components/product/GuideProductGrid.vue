@@ -68,6 +68,8 @@ const props = withDefaults(
     requireOffers?: boolean
     /** Render nothing (no empty message) when there is no product. */
     hideWhenEmpty?: boolean
+    /** Without `subcategory`, link "Voir tout" to the vertical category page. */
+    seeAllCategory?: boolean
   }>(),
   {
     vertical: undefined,
@@ -77,6 +79,7 @@ const props = withDefaults(
     filters: undefined,
     requireOffers: false,
     hideWhenEmpty: false,
+    seeAllCategory: false,
   }
 )
 
@@ -132,6 +135,9 @@ type SubcategoryResolution = {
   url: string
 } | null
 
+const categoryHome = (verticalHomeUrl?: string) =>
+  verticalHomeUrl?.replace(/^\/+|\/+$/g, '') ?? ''
+
 // Same source as CategoryPage.vue: the category detail served by front-api.
 const resolveSubcategory = async (): Promise<SubcategoryResolution> => {
   try {
@@ -144,7 +150,7 @@ const resolveSubcategory = async (): Promise<SubcategoryResolution> => {
       return null
     }
 
-    const home = category.verticalHomeUrl?.replace(/^\/+|\/+$/g, '')
+    const home = categoryHome(category.verticalHomeUrl)
     return {
       filters:
         buildFilterRequestFromCriteria(subCategory.activatedFilters ?? [])
@@ -157,6 +163,17 @@ const resolveSubcategory = async (): Promise<SubcategoryResolution> => {
   }
 }
 
+const resolveCategoryUrl = async (): Promise<string | null> => {
+  try {
+    const category = await fetchCategoryById(normalizedVertical.value)
+    const home = categoryHome(category.verticalHomeUrl)
+    return home ? `/${home}` : null
+  } catch (error) {
+    console.error('Failed to load guide product grid category', error)
+    return null
+  }
+}
+
 type GridData = {
   products: ProductDto[]
   seeAllUrl: string | null
@@ -165,7 +182,7 @@ type GridData = {
 
 const { data, pending } = await useAsyncData<GridData>(
   () =>
-    `guide-product-grid:${normalizedVertical.value}:${normalizedSubcategory.value}:${topCount.value}:${props.sort}:${JSON.stringify(requestFilters.value)}`,
+    `guide-product-grid:${normalizedVertical.value}:${normalizedSubcategory.value}:${topCount.value}:${props.sort}:${props.seeAllCategory}:${JSON.stringify(requestFilters.value)}`,
   async () => {
     const empty: GridData = {
       products: [],
@@ -188,6 +205,8 @@ const { data, pending } = await useAsyncData<GridData>(
       }
       subFilters = resolved.filters
       seeAllUrl = resolved.url
+    } else if (props.seeAllCategory) {
+      seeAllUrl = await resolveCategoryUrl()
     }
     const searchFilters = [...subFilters, ...requestFilters.value]
 
@@ -221,6 +240,7 @@ const { data, pending } = await useAsyncData<GridData>(
       normalizedSubcategory,
       topCount,
       () => props.sort,
+      () => props.seeAllCategory,
       requestFilters,
     ],
   }

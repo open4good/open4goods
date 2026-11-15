@@ -24,6 +24,22 @@ vi.mock('~/components/shared/images/RobustImage.vue', () => ({
   },
 }))
 
+vi.mock('~/components/product/GuideProductGrid.vue', () => ({
+  default: {
+    name: 'GuideProductGridStub',
+    props: {
+      vertical: String,
+      subcategory: String,
+      top: Number,
+      requireOffers: Boolean,
+      hideWhenEmpty: Boolean,
+      seeAllCategory: Boolean,
+    },
+    template:
+      '<div class="guide-product-grid-stub" :data-vertical="vertical" :data-subcategory="subcategory" :data-top="top" :data-offers="String(requireOffers)" :data-see-all="String(seeAllCategory)" />',
+  },
+}))
+
 const isLoggedInRef = ref(true)
 
 vi.mock('~/composables/useAuth', () => ({
@@ -161,5 +177,35 @@ describe('TheArticle.vue', () => {
     expect(seoMetaCall.ogImage.value).toBe(
       'https://example.com/images/blog/test-article/cover.png'
     )
+  })
+
+  test('renders product widgets in place of their body markers', async () => {
+    const wrapper = await mountComponent({
+      body: '<p>Intro</p><div data-product-widget="tv|tv_55_inches|3"></div><p>Middle</p><div data-product-widget="oven||4"></div><p>End</p>',
+    })
+
+    const html = wrapper.get('[data-test="article-body"]').element
+      .parentElement!.innerHTML
+    const widgets = wrapper.findAll('.guide-product-grid-stub')
+    expect(widgets).toHaveLength(2)
+    expect(widgets[0]!.attributes()).toMatchObject({
+      'data-vertical': 'tv',
+      'data-subcategory': 'tv_55_inches',
+      'data-top': '3',
+      'data-offers': 'true',
+      'data-see-all': 'true',
+    })
+    expect(widgets[1]!.attributes('data-vertical')).toBe('oven')
+    expect(widgets[1]!.attributes('data-subcategory')).toBeUndefined()
+    expect(html.indexOf('Intro')).toBeLessThan(html.indexOf('tv_55_inches'))
+    expect(html.indexOf('tv_55_inches')).toBeLessThan(html.indexOf('Middle'))
+    expect(html).not.toContain('data-product-widget')
+  })
+
+  test('renders a body without widget marker as a single HTML part', async () => {
+    const wrapper = await mountComponent()
+
+    expect(wrapper.findAll('[data-test="article-body"]')).toHaveLength(1)
+    expect(wrapper.find('.guide-product-grid-stub').exists()).toBe(false)
   })
 })
