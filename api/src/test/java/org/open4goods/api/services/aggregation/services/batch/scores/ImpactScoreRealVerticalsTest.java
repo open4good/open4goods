@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
@@ -15,7 +14,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +26,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.ArgumentCaptor;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
@@ -492,40 +489,6 @@ class ImpactScoreRealVerticalsTest {
                 assertThat(product.getRanking().getGlobalPosition()).as("position of %s", product.getId()).isZero();
                 assertThat(product.getRanking().getGlobalCount()).isZero();
             });
-        });
-    }
-
-    /**
-     * GOU-1879: {@code POST /score/{vertical}} follows the batch rules in V2: a product without offers is not
-     * recomputed, it keeps its stored score and is not indexed again.
-     */
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("realVerticals")
-    void v2ScoreEndpointScoresOnlyProductsWithOffers(VerticalConfig vertical, @TempDir Path logs) throws Exception {
-        withV2(vertical, threshold -> {
-            List<Product> products = products(vertical);
-            products.forEach(product -> product.setOffersCount(1));
-            Product withoutOffers = products.getFirst();
-            withoutOffers.setOffersCount(0);
-            withoutOffers.getScores().put("ECOSCORE", new Score("ECOSCORE", 12.0));
-
-            ProductRepository repository = mock(ProductRepository.class);
-            when(repository.exportVerticalWithValidDate(vertical, false)).thenReturn(products.stream());
-            VerticalsConfigService verticalsConfigService = mock(VerticalsConfigService.class);
-            when(verticalsConfigService.getConfigByIdOrDefault(vertical.getId())).thenReturn(vertical);
-
-            aggregationFacadeService(logs, mock(BrandService.class), repository, verticalsConfigService).score(vertical);
-
-            assertThat(withoutOffers.ecoscore().getValue()).isEqualTo(12.0);
-            assertThat(withoutOffers.getImpactScoreMeta()).isNull();
-            products.subList(1, products.size()).forEach(product -> {
-                assertThat(product.getImpactScoreMeta().getMethodologyVersion()).isEqualTo(2);
-                assertThat(product.ecoscore().getRanking()).isNotNull();
-            });
-            @SuppressWarnings("unchecked")
-            ArgumentCaptor<Collection<Product>> indexed = ArgumentCaptor.forClass(Collection.class);
-            verify(repository).addToFullindexationQueue(indexed.capture());
-            assertThat(indexed.getValue()).hasSize(products.size() - 1).doesNotContain(withoutOffers);
         });
     }
 

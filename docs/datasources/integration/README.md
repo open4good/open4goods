@@ -194,7 +194,7 @@ reste dans `ref-<id>` et sera projeté dès qu'un flux marchand créera le produ
 quotidienne le rattrape.
 
 Les scores ne sont pas recalculés par la projection. Le batch quotidien
-(`BatchService.batch()`, 13 h) les recalcule, ou `POST /score/{vertical}` à la demande.
+(`BatchService.batch()`, 13 h) les recalcule, ou `POST /batch/{vertical}` à la demande.
 
 ### 3.3 Configuration
 
