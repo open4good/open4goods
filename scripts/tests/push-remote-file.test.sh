@@ -441,6 +441,33 @@ else
   ko "render api SSO and monitor tree (status ${status}): ${out} / $(ls -la "${tree}" 2>&1)"
 fi
 
+# api: R2 account and token of the open data publication (GOU-2289).
+for half in "R2_ACCESS_KEY_ID=r2-access-key-id" "R2_SECRET_ACCESS_KEY=${TREE_VALUE}"; do
+  reset_host
+  run render_with "${half}" -- --if-present apply prod api
+  if [[ ${status} -ne 0 ]] \
+    && [[ "${out}" == *"R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY go together for api"* ]] \
+    && [[ "${out}" != *"${TREE_SENTINEL}"* ]] && [[ ! -s "${FAKE_SSH_LOG}" ]] && [[ ! -e "${FAKE_ROOT}/etc" ]]; then
+    pass "render: api refuses half of the R2 token (${half%%=*}) before anything is written"
+  else
+    ko "render api half R2 token ${half%%=*} (status ${status}): ${out}"
+  fi
+done
+reset_host
+run render_with R2_ACCOUNT_ID=0123456789abcdef0123456789abcdef R2_ACCESS_KEY_ID=r2-access-key-id \
+  R2_SECRET_ACCESS_KEY="${TREE_VALUE}" -- --if-present apply prod api
+tree="${FAKE_ROOT}/etc/open4goods/secrets/api"
+if [[ ${status} -eq 0 ]] \
+  && cmp -s "${tree}/open-data-config.publication.account-id" <(printf '%s' 0123456789abcdef0123456789abcdef) \
+  && cmp -s "${tree}/open-data-config.publication.access-key-id" <(printf '%s' r2-access-key-id) \
+  && cmp -s "${tree}/open-data-config.publication.secret-access-key" <(printf '%s' "${TREE_VALUE}") \
+  && [[ "$(stat -c '%a' "${tree}/open-data-config.publication.secret-access-key")" == 600 ]] \
+  && [[ "${out}" != *"${TREE_SENTINEL}"* ]] && ! grep -q "${TREE_SENTINEL}" "${GITHUB_STEP_SUMMARY}" "${FAKE_SSH_LOG}"; then
+  pass "render: api receives the R2 account and token in its tree"
+else
+  ko "render api R2 tree (status ${status}): ${out} / $(ls -la "${tree}" 2>&1)"
+fi
+
 ########################################
 # render-service-secrets.sh: frontend env lines and coupled secrets
 ########################################
