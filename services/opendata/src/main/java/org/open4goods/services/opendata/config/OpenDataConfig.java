@@ -80,6 +80,11 @@ public class OpenDataConfig {
     /**
      * Public object names of the zips (R2 keys, {@code data.nudger.fr/{name}}), written in the manifests.
      */
+    /**
+     * Public site the product URLs of the impact datasets point to (canonical path appended).
+     */
+    private String siteBaseUrl = "https://nudger.fr";
+
     private String gtinPublicFilename = "gtin-open-data.zip";
     private String isbnPublicFilename = "isbn-open-data.zip";
 
@@ -367,6 +372,46 @@ public class OpenDataConfig {
 
     public File manifestFile() {
         return openDataDirectory().resolve(manifestFilename).toFile();
+    }
+
+    /**
+     * @param vertical vertical identifier
+     * @return published zip of the impact dataset of this vertical
+     */
+    public File impactZipFile(String vertical) {
+        return openDataDirectory().resolve(impactPublicFilename(vertical)).toFile();
+    }
+
+    /**
+     * @param vertical vertical identifier
+     * @return zip of the impact dataset of this vertical while a pass writes it
+     */
+    public File tmpImpactZipFile(String vertical) {
+        return tmpDirectory().resolve(impactPublicFilename(vertical)).toFile();
+    }
+
+    /**
+     * @param vertical vertical identifier
+     * @return published manifest of the impact dataset of this vertical
+     */
+    public File impactManifestFile(String vertical) {
+        return openDataDirectory().resolve("impact-" + vertical + "-manifest.json").toFile();
+    }
+
+    /**
+     * @param vertical vertical identifier
+     * @return public object name of the impact zip of this vertical ({@code impact-{vertical}.zip})
+     */
+    public String impactPublicFilename(String vertical) {
+        return "impact-" + vertical + ".zip";
+    }
+
+    public String getSiteBaseUrl() {
+        return siteBaseUrl;
+    }
+
+    public void setSiteBaseUrl(String siteBaseUrl) {
+        this.siteBaseUrl = siteBaseUrl;
     }
 
     public File gtinManifestFile() {

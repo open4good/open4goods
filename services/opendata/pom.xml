@@ -40,6 +40,11 @@
       <artifactId>product-repository</artifactId>
       <version>${global.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.open4goods</groupId>
+      <artifactId>verticals</artifactId>
+      <version>${global.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>org.apache.commons</groupId>

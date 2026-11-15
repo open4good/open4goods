@@ -58,6 +58,12 @@ import org.open4goods.services.opendata.model.DatasetManifest;
 import org.open4goods.services.opendata.model.OpenDataGenerationStatus.State;
 import org.open4goods.services.opendata.model.OpenDataManifest;
 import org.open4goods.services.productrepository.services.ProductRepository;
+import org.open4goods.verticals.VerticalsConfigService;
+import org.open4goods.model.Localisable;
+import org.open4goods.model.attribute.SourcedAttribute;
+import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.AttributesConfig;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.springframework.boot.health.contributor.Status;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -70,6 +76,9 @@ class OpenDataServiceTest {
 
     @Mock
     private ProductRepository productRepository;
+
+    @Mock
+    private VerticalsConfigService verticalsConfigService;
 
     @TempDir
     Path tempDir;
@@ -90,9 +99,10 @@ class OpenDataServiceTest {
         openDataConfig.setConcurrentDownloads(2);
 
         lenient().when(productRepository.countItemsByBarcodeType(any(BarcodeType[].class))).thenReturn(1L);
+        lenient().when(verticalsConfigService.getConfigsWithoutDefault(true)).thenReturn(List.of());
 
         meterRegistry = new SimpleMeterRegistry();
-        service = new OpenDataService(productRepository, openDataConfig, meterRegistry);
+        service = new OpenDataService(productRepository, openDataConfig, meterRegistry, verticalsConfigService);
     }
 
     @Test
@@ -260,7 +270,7 @@ class OpenDataServiceTest {
         Files.writeString(openDataConfig.isbnZipFile().toPath(), "existing");
         Snapshot published = snapshot();
 
-        OpenDataService fullDisk = new OpenDataService(productRepository, openDataConfig, meterRegistry) {
+        OpenDataService fullDisk = new OpenDataService(productRepository, openDataConfig, meterRegistry, verticalsConfigService) {
             @Override
             long usableSpace(Path directory) {
                 return 161;
@@ -309,7 +319,7 @@ class OpenDataServiceTest {
     @Test
     void disabledGenerationShouldNotReadTheIndex() {
         openDataConfig.setGenerationEnabled(Boolean.FALSE);
-        OpenDataService disabled = new OpenDataService(productRepository, openDataConfig, meterRegistry);
+        OpenDataService disabled = new OpenDataService(productRepository, openDataConfig, meterRegistry, verticalsConfigService);
 
         assertThat(disabled.generateOpendata()).isFalse();
         assertThat(disabled.launchGeneration()).isFalse();
@@ -339,6 +349,131 @@ class OpenDataServiceTest {
 
         assertThat(gtinEntry).doesNotContainNull();
         assertThat(isbnEntry).doesNotContainNull();
+    }
+
+    @Test
+    void impactDatasetsShouldPublishRawCriteriaWithoutAnyScore() throws Exception {
+        VerticalConfig oven = verticalConfig("oven", "CLASSE_ENERGY", "WARRANTY", "DATA_QUALITY");
+        VerticalConfig tv = verticalConfig("tv", "REPAIRABILITY_INDEX", "DATA_QUALITY");
+        when(verticalsConfigService.getConfigsWithoutDefault(true)).thenReturn(List.of(oven, tv));
+        when(productRepository.countItemsByVertical("oven")).thenReturn(2L);
+        when(productRepository.countItemsByBarcodeType(any(BarcodeType[].class))).thenReturn(0L);
+        when(productRepository.countItemsByVertical("tv")).thenReturn(1L);
+
+        Product withWarranty = impactProduct("1234567890123", "oven", "WARRANTY", "2", "eprel");
+        Product withoutValue = impactProduct("1234567890128", "oven", null, null, null);
+        Product television = impactProduct("1234567890135", "tv", "REPAIRABILITY_INDEX", "7.1", "icecat.biz");
+        exportReturns(withWarranty, withoutValue, television);
+
+        assertThat(service.generateOpendata()).isTrue();
+
+        List<String> oven_lines = readZipLines(openDataConfig.impactZipFile("oven"), "impact-oven.csv");
+        assertThat(oven_lines).hasSize(3);
+        assertThat(oven_lines.get(0)).isEqualTo("\"gtin\",\"brand\",\"model\",\"name\",\"vertical\",\"nudger_url\","
+                + "\"eprel_registration_number\",\"offers_count\",\"last_updated\",\"classe_energy\",\"classe_energy_source\","
+                + "\"warranty_year\",\"warranty_source\"");
+        assertThat(oven_lines.get(1)).isEqualTo("\"1234567890123\",\"TestBrand\",\"ModelX\",\"short name\",\"oven\","
+                + "\"https://nudger.fr/slug-1234567890123\",\"\",\"3\",\"2024-01-01T00:00:00Z\",\"\",\"\",\"2\",\"eprel\"");
+        // Absence is not zero: no value, no source, no default.
+        assertThat(oven_lines.get(2)).endsWith(",\"\",\"\",\"\",\"\"");
+
+        DatasetManifest ovenManifest = manifestStore.readDataset(openDataConfig.impactManifestFile("oven")).orElseThrow();
+        assertThat(ovenManifest.id()).isEqualTo("impact-oven");
+        assertThat(ovenManifest.file()).isEqualTo("impact-oven.zip");
+        assertThat(ovenManifest.rows()).isEqualTo(2).isEqualTo(ovenManifest.indexCount());
+        assertThat(ovenManifest.sha256()).isEqualTo(sha256(openDataConfig.impactZipFile("oven")));
+        assertThat(ovenManifest.columns()).filteredOn(column -> column.name().equals("warranty_year"))
+                .singleElement().satisfies(column -> {
+                    assertThat(column.fillRate()).isEqualTo(0.5);
+                    assertThat(column.unit()).isEqualTo("Year(s)");
+                    assertThat(column.description()).isEqualTo("Durée de garantie");
+                });
+
+        OpenDataManifest all = manifestStore.readAll(openDataConfig.manifestFile()).orElseThrow();
+        assertThat(all.datasets()).extracting(DatasetManifest::id)
+                .containsExactly("gtin", "isbn", "impact-oven", "impact-tv");
+        assertThat(all.datasets().get(3).rows()).isEqualTo(1);
+
+        // No aggregated score, no sub-score, no percentile, no rank, no DATA_QUALITY in any impact file.
+        for (String vertical : List.of("oven", "tv")) {
+            String header = readZipLines(openDataConfig.impactZipFile(vertical), "impact-" + vertical + ".csv").get(0)
+                    .toLowerCase(Locale.ROOT);
+            assertThat(header).doesNotContain("data_quality", "score", "ecoscore", "rank", "percentile", "ranking");
+        }
+    }
+
+    @Test
+    void impactDatasetsShouldNotContainDecitre() throws Exception {
+        // GOU-2262: the impact files, their manifests and the pass projection never carry a Decitre key.
+        when(verticalsConfigService.getConfigsWithoutDefault(true))
+                .thenReturn(List.of(verticalConfig("oven", "CLASSE_ENERGY", "WARRANTY")));
+        when(productRepository.countItemsByVertical("oven")).thenReturn(1L);
+        when(productRepository.countItemsByBarcodeType(any(BarcodeType[].class))).thenReturn(0L);
+        Product oven = impactProduct("1234567890123", "oven", "WARRANTY", "2", "eprel");
+        for (String key : List.of("CLASSIFICATION DECITRE 1", "CLASSIFICATION DECITRE 2", "CLASSIFICATION DECITRE 3",
+                "ATTRIBUTS", "LIVRES ORIGINE", "PROPRIETAIRE")) {
+            addIndexedAttribute(oven.getAttributes(), key, "Decitre " + key);
+            ProductAttribute attribute = new ProductAttribute();
+            attribute.setName(key);
+            attribute.setValue("decitre.fr");
+            oven.getAttributes().getAll().put(key, attribute);
+        }
+        exportReturns(oven);
+
+        assertThat(service.generateOpendata()).isTrue();
+
+        List<String> produced = new ArrayList<>(readZipLines(openDataConfig.impactZipFile("oven"), "impact-oven.csv"));
+        produced.add(Files.readString(openDataConfig.impactManifestFile("oven").toPath()));
+        produced.add(Files.readString(openDataConfig.manifestFile().toPath()));
+        assertThat(produced).allSatisfy(content -> assertThat(content.toLowerCase(Locale.ROOT)).doesNotContain("decitre"));
+        ArgumentCaptor<String[]> fields = ArgumentCaptor.forClass(String[].class);
+        verify(productRepository).exportAll(fields.capture(), anyInt());
+        assertThat(fields.getValue()).contains("attributes.indexed.WARRANTY")
+                .noneMatch(field -> field.toLowerCase(Locale.ROOT).contains("decitre"))
+                .noneMatch(field -> field.contains("ATTRIBUTS") || field.contains("LIVRES ORIGINE") || field.contains("PROPRIETAIRE"));
+    }
+
+    @Test
+    void impactColumnNamesShouldCarryTheUnitAndStayUnique() {
+        assertThat(ImpactDataset.slug("Year(s)")).isEqualTo("year");
+        assertThat(ImpactDataset.slug("kWh/cycle")).isEqualTo("kwh_cycle");
+        assertThat(ImpactDataset.slug("%")).isEqualTo("percent");
+        assertThat(ImpactDataset.slug("°")).isEmpty();
+    }
+
+    private VerticalConfig verticalConfig(String id, String... criteria) {
+        VerticalConfig config = new VerticalConfig();
+        config.setId(id);
+        config.setAvailableImpactScoreCriterias(new ArrayList<>(List.of(criteria)));
+        List<AttributeConfig> attributes = new ArrayList<>();
+        AttributeConfig warranty = new AttributeConfig();
+        warranty.setKey("WARRANTY");
+        Localisable<String, String> suffix = new Localisable<>();
+        suffix.put("default", "Year(s)");
+        warranty.setSuffix(suffix);
+        Localisable<String, String> name = new Localisable<>();
+        name.put("fr", "Durée de garantie");
+        warranty.setName(name);
+        attributes.add(warranty);
+        config.setAttributesConfig(new AttributesConfig(attributes));
+        return config;
+    }
+
+    private Product impactProduct(String gtin, String vertical, String key, String value, String datasource) {
+        Product product = buildProduct(gtin, BarcodeType.GTIN_13);
+        product.setVertical(vertical);
+        Localisable<String, String> url = new Localisable<>();
+        url.put("fr", "slug-" + gtin);
+        product.getNames().setUrl(url);
+        if (key != null) {
+            IndexedAttribute attribute = new IndexedAttribute(key, value);
+            SourcedAttribute source = new SourcedAttribute();
+            source.setDataSourcename(datasource);
+            source.setValue(value);
+            attribute.getSource().add(source);
+            product.getAttributes().getIndexed().put(key, attribute);
+        }
+        return product;
     }
 
     private void assertFailureVisible(String error) {
