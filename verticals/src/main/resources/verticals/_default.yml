@@ -264,6 +264,16 @@ attributesConfig:
     # Comment the feed url if you need to debug the CSV datasources (get the CSV that provides a product)
     - "FEED_URL"
 
+    # Decitre (décision du 15/11, GOU-2262) : classification et attributs internes du vendeur, sans valeur utilisateur.
+    # ATTRIBUTS est un blob brut dont tout le contenu existe déjà en clés éclatées.
+    - "CLASSIFICATION DECITRE 1"
+    - "CLASSIFICATION DECITRE 2"
+    - "CLASSIFICATION DECITRE 3"
+    - "ATTRIBUTS"
+    - "LIVRES ORIGINE"
+    - "PROPRIETAIRE"
+    - "PROPRIÉTAIRE"
+
     - "PRODUCT_MODEL"
     - "PRODUCT_TYPE"
     - "IDPRODUIT"
