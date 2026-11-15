@@ -48,7 +48,7 @@ public class AggregationController {
             description = "Runs /aggregate/verticals/{vertical} for every active vertical, one after the other. "
                     + "Same behaviour and same precautions as the single-vertical run. A vertical that fails is "
                     + "logged (ERROR) and the next ones still run.")
-    @ApiResponse(responseCode = "200", description = "Products of every vertical aggregated and queued for indexation")
+    @ApiResponse(responseCode = "200", description = "Run finished; products of the verticals that succeeded are queued for indexation (a failed vertical is only logged)")
     public void aggregateAllVerticals() throws InvalidParameterException, IOException {
         aggregationFacadeService.sanitizeAllVerticals();
     }
