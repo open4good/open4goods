@@ -318,6 +318,18 @@ public class ApiProperties {
 	private String datasourcePurgeStatusFile;
 
 	/**
+	 * JSON file where the backfill of the product index (GOU-2266) writes its status after each batch, read back at
+	 * startup. Defaults to {@code <rootFolder>/batch-reports/backfill-status.json}.
+	 */
+	private String backfillStatusFile;
+
+	/**
+	 * Folder of the JSONL backup files written by the backfill before each update (GOU-2266), read by its restore.
+	 * Defaults to {@code <rootFolder>/batch-reports/backfill}.
+	 */
+	private String backfillBackupFolder;
+
+	/**
 	 * JSON file where the api keeps the date of the last offer of each datasource (GOU-2037), served on
 	 * {@code GET /merchants/offer-activity}. Defaults to {@code <rootFolder>/batch-reports/datasource-offer-activity.json}.
 	 */
@@ -416,6 +428,34 @@ public class ApiProperties {
 
 	public void setDatasourcePurgeStatusFile(String datasourcePurgeStatusFile) {
 		this.datasourcePurgeStatusFile = datasourcePurgeStatusFile;
+	}
+
+	/**
+	 * @return the configured backfill status file, or {@code <rootFolder>/batch-reports/backfill-status.json}
+	 */
+	public String getBackfillStatusFile() {
+		if (backfillStatusFile == null || backfillStatusFile.isBlank()) {
+			return rootFolder + File.separator + "batch-reports" + File.separator + "backfill-status.json";
+		}
+		return backfillStatusFile;
+	}
+
+	public void setBackfillStatusFile(String backfillStatusFile) {
+		this.backfillStatusFile = backfillStatusFile;
+	}
+
+	/**
+	 * @return the configured backfill backup folder, or {@code <rootFolder>/batch-reports/backfill}
+	 */
+	public String getBackfillBackupFolder() {
+		if (backfillBackupFolder == null || backfillBackupFolder.isBlank()) {
+			return rootFolder + File.separator + "batch-reports" + File.separator + "backfill";
+		}
+		return backfillBackupFolder;
+	}
+
+	public void setBackfillBackupFolder(String backfillBackupFolder) {
+		this.backfillBackupFolder = backfillBackupFolder;
 	}
 
 	/**

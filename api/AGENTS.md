@@ -162,6 +162,81 @@ curl -H "Authorization: $O4G_INTERNAL_API_KEY" https://api.nudger.fr/batch/purge
 curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/purge-datasource?datasource=rakuten.com&scope=OFFERS&dryRun=false"
 ```
 
+## Reprises de l'index produits par lots (backfill)
+
+GOU-2266. Le paquet `services/backfill` réécrit quelques champs de beaucoup de produits sans relire ni réécrire les
+documents complets. Il sert à la purge Decitre (GOU-2266) et servira à la reprise de `nature` (GOU-2234).
+`BackfillEngine` exécute une `BackfillOperation`, qui fournit :
+
+- la requête des produits ;
+- les champs `_source` à lire ;
+- pour chaque produit, le changement à faire : un script painless, ses paramètres, la sauvegarde et les libellés
+  comptés.
+
+Une opération doit être idempotente : un produit déjà traité ne reçoit plus de changement.
+
+- **Parcours** : point in time (PIT), puis `search_after` sur `_shard_doc`, par pages de `batchSize` (1 à 5 000). Seuls
+  les champs de l'opération sont lus. Le débit est plafonné par `maxProductsPerSecond` (produits lus par seconde,
+  0 = sans plafond).
+- **Écriture** (`dryRun=false`) :
+  - la ligne de sauvegarde de chaque changement (`{"id":...,"data":...}`) est ajoutée au fichier JSONL et forcée sur
+    disque **avant** l'envoi du bulk ;
+  - le bulk envoie un script par produit, avec `retry_on_conflict` 3 et sans refresh ;
+  - un produit qui n'a plus besoin du changement donne un `noop`.
+- **`dryRun=true`** (défaut) : n'écrit rien, pas même la sauvegarde. Il compte les produits lus (`scannedProducts`),
+  les produits concernés (`matchedProducts`) et chaque libellé (`labelCounts`, par exemple les occurrences de chaque
+  clé), et donne 20 ids d'exemple.
+- **Arrêt propre** : il a lieu entre deux pages, sur `POST /batch/backfill/stop` (`stopReason=STOP_REQUESTED`) ou dès
+  qu'Elasticsearch répond 429 (`BACKPRESSURE`), en recherche comme sur un élément de bulk. L'état passe à `STOPPED`,
+  avec le `cursor` de la dernière page entièrement traitée. Le PIT reste ouvert 30 minutes après la dernière page
+  (`ApiConfig.BACKFILL_KEEP_ALIVE`).
+- **Reprise** (`resume=true`) : elle continue le dernier run `STOPPED`, `INTERRUPTED` ou `FAILED` de la même
+  opération et du même mode, depuis son curseur et avec le même fichier de sauvegarde.
+  - Si le PIT a expiré, le parcours repart du début. Les produits déjà traités ne sont pas réécrits, mais ils sont
+    relus.
+  - Une page dont un élément a été rejeté est relue.
+- **Statut** : `GET /batch/backfill`. Il est écrit en JSON au lancement, après chaque page et à la fin, dans
+  `backfill-status-file` (défaut `<root-folder>/batch-reports/backfill-status.json`). Il est relu au démarrage : un run
+  resté `RUNNING` devient `INTERRUPTED`, avec son curseur.
+- **Journal** : une ligne `INFO` par page dans `nohup-api.log`, de la forme `Backfill <op> (dryRun=...) batch N: ...
+  scanned, ... matched, ... written, ... failed, labels {...}`, puis le rapport final. Le paquet reste en `INFO` dans
+  le `application.yml` du jar.
+- **Sauvegardes** : `backfill-backup-folder` (défaut `<root-folder>/batch-reports/backfill`), un fichier
+  `<opération>-<horodatage UTC>.jsonl` par run d'écriture. Son chemin est dans `report.backupFile`.
+- **Retour arrière** : `POST /batch/backfill/<opération>/restore?backupFile=<nom du fichier>`. Le nom est relatif au
+  dossier des sauvegardes, aucun autre chemin n'est accepté. Le script de restauration de l'opération remet le
+  contenu de `data` de chaque ligne.
+
+### Purge Decitre (GOU-2266)
+
+`POST /batch/backfill/decitre-purge` parcourt les produits dont `gtinInfos.upcType` vaut `ISBN_13` (environ
+10 M). Pour chacun, il retire de `attributes.all` les clés suivantes, et seulement celles-là :
+`CLASSIFICATION DECITRE 1`, `2`, `3`, `ATTRIBUTS`, `LIVRES ORIGINE`, `PROPRIETAIRE`, `PROPRIÉTAIRE`.
+
+- Ces 7 clés sont celles que GOU-2264 exclut à l'ingestion. `DecitrePurgeOperationTest` vérifie qu'elles figurent dans
+  `attributesConfig.exclusions` de `_default.yml`. Le paramètre `keys` permet d'en donner d'autres.
+- `attributes.all` est `enabled:false` : aucune requête ne compte ces clés, c'est le dry-run qui sert de comptage
+  " avant " et " après " (après = 0 `matchedProducts`).
+- Seules les clés visées sont lues (`attributes.all.<clé>`).
+- Le script ne touche à aucun autre champ, `lastChange` compris : aucun autre traitement ne se déclenche.
+- Chaque attribut retiré est sauvegardé entier. La restauration le remet dans `attributes.all`.
+
+Appel Ops, hors de la fenêtre du batch : dry-run, état, écriture une fois le dry-run vérifié, arrêt, reprise et
+retour arrière.
+
+```bash
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/backfill/decitre-purge"
+curl -H "Authorization: $O4G_INTERNAL_API_KEY" https://api.nudger.fr/batch/backfill
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/backfill/decitre-purge?dryRun=false&batchSize=1000&maxProductsPerSecond=2000"
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" https://api.nudger.fr/batch/backfill/stop
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/backfill/decitre-purge?dryRun=false&resume=true"
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/backfill/decitre-purge/restore?backupFile=decitre-purge-20261116T220000Z.jsonl"
+```
+
+Le test d'intégration `BackfillEngineIT` (Testcontainers, hors CI) se lance avec `mvn -pl api test
+-Dtest=BackfillEngineIT -Dsurefire.failIfNoSpecifiedTests=false`. Il couvre le dry-run, l'écriture (le reste du
+`_source` est identique), la restauration, l'arrêt suivi de la reprise et le PIT expiré.
+
 ## Date de la dernière offre par datasource
 
 GOU-2037. `price.offers` n'est pas indexé : pour savoir quels marchands ont encore une offre active sans parcourir

@@ -3,6 +3,7 @@ package org.open4goods.api.config;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Clock;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -15,6 +16,8 @@ import org.open4goods.api.services.ImpactScoreBatchGuard;
 import org.open4goods.api.services.CompletionFacadeService;
 import org.open4goods.api.services.DatasourceOfferActivityService;
 import org.open4goods.api.services.DatasourcePurgeService;
+import org.open4goods.api.services.backfill.BackfillEngine;
+import org.open4goods.api.services.backfill.BackfillService;
 import org.open4goods.api.services.VerticalsGenerationService;
 import org.open4goods.api.services.completion.AmazonCompletionService;
 import org.open4goods.api.services.completion.EprelCompletionService;
@@ -115,12 +118,16 @@ import org.springframework.beans.factory.ObjectProvider;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
 
 @Configuration
 public class ApiConfig {
 
 	private final ApiProperties apiProperties;
 	private static final Logger logger = LoggerFactory.getLogger(ApiConfig.class);
+
+	/** How long the point in time of a backfill stays open after each page, and so after a stop (GOU-2266). */
+	static final Duration BACKFILL_KEEP_ALIVE = Duration.ofMinutes(30);
 
 	public ApiConfig(ApiProperties apiProperties) {
 		this.apiProperties = apiProperties;
@@ -259,6 +266,17 @@ public class ApiConfig {
 	@Bean
 	EprelMatchMetrics eprelMatchMetrics(MeterRegistry meterRegistry) {
 		return new EprelMatchMetrics(meterRegistry);
+	}
+
+	/**
+	 * Batched, resumable updates of a few fields of many products (GOU-2266). The point in time of a stopped run
+	 * stays open for {@link #BACKFILL_KEEP_ALIVE}, so it can be resumed within that time.
+	 */
+	@Bean
+	BackfillService backfillService(ElasticsearchClient elasticsearchClient) {
+		return new BackfillService(
+				new BackfillEngine(elasticsearchClient, ProductRepository.MAIN_INDEX_NAME, BACKFILL_KEEP_ALIVE),
+				Path.of(apiProperties.getBackfillStatusFile()), Path.of(apiProperties.getBackfillBackupFolder()));
 	}
 
 	@Bean
