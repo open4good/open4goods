@@ -16,7 +16,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public abstract class SourcableAttribute {
 
-	private static List<String> DEFAULT_TRUSTED_SOURCE_PRIORITY = List.of("eprel", "icecat.biz");
+	private static final List<String> DEFAULT_TRUSTED_SOURCE_PRIORITY = List.of("eprel", "icecat.biz");
 
 	protected Set<SourcedAttribute> source = new HashSet<>();
 
@@ -36,6 +36,19 @@ public abstract class SourcableAttribute {
 	 *         non-blank value
 	 */
 	public String bestValue() {
+		return bestValue(DEFAULT_TRUSTED_SOURCE_PRIORITY);
+	}
+
+	/**
+	 * Same election as {@link #bestValue()}, with an explicit ordered list of trusted datasources.
+	 * Callers without the attribute configuration (for instance {@code Product.removeDatasourceData},
+	 * {@code BatchService.cleanAiData} and {@code ProductAttribute}) use {@link #bestValue()} and so keep the
+	 * default order.
+	 *
+	 * @param priority ordered datasource names, most trusted first; {@code null} or empty falls back to the default
+	 * @return the elected value, or {@code null} when no source provided a non-blank value
+	 */
+	public String bestValue(List<String> priority) {
 
 		if (source.isEmpty()) {
 			return null;
@@ -50,7 +63,7 @@ public abstract class SourcableAttribute {
 			}
 
 			String normalizedValue = normalizeValue(valueToUse);
-			int priorityIndex = trustedSourcePriorityIndex(sourcedAttribute.getDataSourcename());
+			int priorityIndex = trustedSourcePriority(sourcedAttribute.getDataSourcename(), priority);
 
 			valueCounter.computeIfAbsent(normalizedValue, ignored -> new ValueStats()).accept(priorityIndex, valueToUse);
 		}
@@ -132,15 +145,23 @@ public abstract class SourcableAttribute {
 	 *         datasource is unknown or absent
 	 */
 	public static int trustedSourcePriority(String datasource) {
+		return trustedSourcePriority(datasource, DEFAULT_TRUSTED_SOURCE_PRIORITY);
+	}
+
+	/**
+	 * Rank of a datasource in an explicit trusted order, lowest first.
+	 *
+	 * @param datasource contributing datasource name, possibly {@code null}
+	 * @param priority   ordered datasource names, most trusted first; {@code null} or empty falls back to the default
+	 * @return its index in the order, or {@link Integer#MAX_VALUE} when the datasource is unknown or absent
+	 */
+	public static int trustedSourcePriority(String datasource, List<String> priority) {
 		if (datasource == null) {
 			return Integer.MAX_VALUE;
 		}
-		Optional<Integer> index = java.util.stream.IntStream.range(0, DEFAULT_TRUSTED_SOURCE_PRIORITY.size()).filter(i -> datasource.equalsIgnoreCase(DEFAULT_TRUSTED_SOURCE_PRIORITY.get(i))).boxed().findFirst();
+		List<String> order = (priority == null || priority.isEmpty()) ? DEFAULT_TRUSTED_SOURCE_PRIORITY : priority;
+		Optional<Integer> index = java.util.stream.IntStream.range(0, order.size()).filter(i -> datasource.equalsIgnoreCase(order.get(i))).boxed().findFirst();
 		return index.orElse(Integer.MAX_VALUE);
-	}
-
-	private int trustedSourcePriorityIndex(String datasource) {
-		return trustedSourcePriority(datasource);
 	}
 
 	private String normalizeValue(String value) {
