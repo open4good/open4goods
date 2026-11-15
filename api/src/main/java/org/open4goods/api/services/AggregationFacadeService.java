@@ -134,13 +134,13 @@ public class AggregationFacadeService {
 	}
 
 	/**
-	 * Re-sanitises all products in all verticals, one vertical after the other. Delegates to
+	 * Re-sanitises all products in all enabled verticals, one vertical after the other. Delegates to
 	 * {@link #sanitizeVertical(VerticalConfig)} per vertical. A vertical that fails is logged (ERROR) and the next
 	 * ones still run, as in {@link BatchService#batch()} (GOU-2280).
 	 */
 	public void sanitizeAllVerticals() {
 		List<String> failed = new ArrayList<>();
-		for (VerticalConfig vertical : verticalConfigService.getConfigsWithoutDefault()) {
+		for (VerticalConfig vertical : verticalConfigService.getConfigsWithoutDefault(true)) {
 			try {
 				sanitizeVertical(vertical);
 			} catch (RuntimeException e) {

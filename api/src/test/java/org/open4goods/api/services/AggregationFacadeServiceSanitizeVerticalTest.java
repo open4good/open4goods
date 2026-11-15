@@ -281,12 +281,28 @@ class AggregationFacadeServiceSanitizeVerticalTest {
 		failing.setId("tv");
 		VerticalConfig next = new VerticalConfig();
 		next.setId("oven");
-		when(verticalsConfigService.getConfigsWithoutDefault()).thenReturn(List.of(failing, next));
+		when(verticalsConfigService.getConfigsWithoutDefault(true)).thenReturn(List.of(failing, next));
 		doThrow(new IllegalStateException("Elasticsearch timeout")).when(facade).sanitizeVertical(failing);
 		doNothing().when(facade).sanitizeVertical(next);
 
 		facade.sanitizeAllVerticals();
 
 		verify(facade).sanitizeVertical(next);
+	}
+
+	@Test
+	void allVerticalsRunSkipsTheDisabledOnes() {
+		VerticalConfig enabled = new VerticalConfig();
+		enabled.setId("tv");
+		VerticalConfig disabled = new VerticalConfig();
+		disabled.setId("oven");
+		disabled.setEnabled(false);
+		when(verticalsConfigService.getConfigsWithoutDefault(true)).thenReturn(List.of(enabled));
+		doNothing().when(facade).sanitizeVertical(enabled);
+
+		facade.sanitizeAllVerticals();
+
+		verify(facade).sanitizeVertical(enabled);
+		verify(facade, never()).sanitizeVertical(disabled);
 	}
 }
