@@ -6,6 +6,7 @@
   },
   "buyingGuide": {
     "widget": {
+      "seeAll": "See all products",
       "empty": "No product to display right now.",
       "loadError": "Unable to load this content. Please try again later."
     },

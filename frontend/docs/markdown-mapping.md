@@ -163,9 +163,36 @@ wraps `CategoryProductCardGrid`. Rendered server-side (good for guide SEO).
 | `top`      | number | `3`           | Number of products.                                                                                                           |
 | `sort`     | string | `ecoscore`    | `ecoscore`/`impact` → `scores.ECOSCORE.value` desc. A raw field mapping with optional `:asc`/`:desc` suffix is also accepted. |
 
+| `subcategory` | string | - | Sub-category id (see below). Lists the same products as the sub-category page. |
+
+With `subcategory`, the grid reads the sub-category from the category served by
+front-api (`subCategories`, same source as `CategoryPage.vue`) and applies its
+`activatedFilters` (same conversion as the category page), so it lists the same
+products as the sub-category page. Active offers are always required
+(`offersCount >= 1`), the default sort is the impact score (`sort` can still be
+overridden), and a "Voir tout" link to the sub-category page is rendered. An
+unknown sub-category (or one missing from the vertical) renders nothing and logs
+a `console.warn` server-side. Without `subcategory` nothing changes.
+
+Sub-category ids: `id` field of
+`verticals/src/main/resources/categories/{vertical}/*.yml` (e.g. `dishwasher_45`,
+`tv_55_inches`).
+
+Plausible: a click on a product or on "Voir tout" sends `product-widget-click`
+with props `page` (path of the page), `vertical`, `subcategory` (empty without
+sub-category) and `target` (`product` or `see-all`). These custom properties must
+be declared in the Plausible site settings.
+
 ```vue
 <GuideProductGrid vertical="aspirateurs-robots" top="3" sort="ecoscore" />
 <GuideProductGrid top="3" sort="ecoscore" />
+```
+
+In a guide Markdown file:
+
+```md
+::guide-product-grid{subcategory="dishwasher_45" top="3"}
+::
 ```
 
 Inside `BuyingGuideRenderer`, `BrandShareChart` and `GuideProductGrid` can omit

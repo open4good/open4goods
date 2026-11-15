@@ -164,6 +164,9 @@ Le Bosch SPV4EMX17E est notre référence 45 cm : encastrable, 10 couverts, clas
 ::product-card-embed{gtin="4242005540037" size="medium"}
 ::
 
+::guide-product-grid{subcategory="dishwasher_45" top="3"}
+::
+
 ### Le mieux classé des modèles premium : Bosch
 
 ::product-card-embed{gtin="4242005438044" size="medium"}
