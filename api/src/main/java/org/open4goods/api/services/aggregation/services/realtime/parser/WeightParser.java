@@ -63,6 +63,10 @@ import org.slf4j.LoggerFactory;
  *       format of the "TRANCHE DE POIDS" synonym, so it is deliberately not rejected.</li>
  *   <li>A negative value ("-5 kg") is rejected, and so is any result that is not strictly positive
  *       once rounded to the output scale ("0 kg"), on every parsing path.</li>
+ *   <li>Lower plausibility bound: a weight under {@code minKg / 5} of the vertical is rejected,
+ *       symmetric to the 5x max check. It catches misreads such as "1.200 g" (thousands dot read as
+ *       a decimal, 0.0012 kg) or "0 à 100 g" (0.1 kg) on a TV (minKg 1, floor 0.2 kg), while a
+ *       0.1 kg smartphone (minKg 0.08, floor 0.016 kg) stays accepted.</li>
  * </ul>
  *
  * <p>
@@ -394,6 +398,9 @@ public class WeightParser extends AttributeParser {
         private static final Pattern THOUSANDS_PATTERN = Pattern.compile("(?<![\\d.,])\\d{1,3}(?: \\d{3})+(?!\\d)");
 
         // A range ("10-12", "10 - 12", any dash) or a number with a dash or minus sign (U+2212) glued to it ("-5").
+        // A weight below minKg / LOWER_BOUND_DIVISOR is rejected (mirror of the 5x max check).
+        private static final double LOWER_BOUND_DIVISOR = 5.0;
+
         private static final Pattern RANGE_OR_SIGNED_PATTERN = Pattern.compile("\\d\\s*[\\p{Pd}\\u2212]\\s*\\d|[\\p{Pd}\\u2212]\\d");
 
         /**
@@ -403,6 +410,13 @@ public class WeightParser extends AttributeParser {
         private ParsedWeight parseInternal(String rawValue, VerticalConfig verticalConfig, String datasource) {
                 final ParsedWeight weight = parseCandidate(rawValue, verticalConfig, datasource);
                 if (weight == null || !isStrictlyPositive(weight.kilograms())) {
+                        return null;
+                }
+                // Lower plausibility bound, symmetric to the 5x max check: below minKg / 5 the value is a misread.
+                final WeightRangeKg range = resolveEffectiveRange(verticalConfig);
+                if (weight.kilograms() < range.getMinKg() / LOWER_BOUND_DIVISOR) {
+                        LOGGER.debug("Rejected weight '{}' (datasource={}): {}kg is below min/{} ({}kg)", rawValue, datasource,
+                                        formatKg(weight.kilograms()), LOWER_BOUND_DIVISOR, range.getMinKg());
                         return null;
                 }
                 return weight;
