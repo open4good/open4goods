@@ -1120,41 +1120,6 @@ public class BatchService {
     }
 
 
-    // TODO(p3,design) : remove
-	public void clean() {
-
-		// Cleaning data
-		cleanAiData();
-
-
-
-
-		AtomicInteger counter = new AtomicInteger();
-		try (java.util.stream.Stream<Product> stream = dataRepository.exportAll()) {
-			stream.forEach(p -> {
-				int i = counter.incrementAndGet();
-				if (i % 1000 == 0) {
-					logger.warn("Batched items : {}", i);
-				}
-				String textVersion = null;
-				try {
-					textVersion = serialisationService.toJson(p);
-					if (textVersion.contains("openfoodfacts")) {
-						logger.error("Will remove {}", p);
-						dataRepository.delete(p);
-					}
-
-
-				} catch (SerialisationException e) {
-					e.printStackTrace();
-				}
-
-			});
-		}
-
-
-	}
-
 	/**
 	 * Clean AI data from all verticals
 	 */
