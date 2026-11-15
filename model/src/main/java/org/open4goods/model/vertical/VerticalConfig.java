@@ -180,6 +180,13 @@ public class VerticalConfig {
 	private Set<String> natureNeutralCategoryFragments = new HashSet<String>();
 
 	/**
+	 * Minimum share (0 to 1) of a product's distinct normalised merchant
+	 * categories that must carry a nature marker for the nature to be set
+	 * (GOU-2233, measure 7 of GOU-2226). 0 means one marked category is enough.
+	 */
+	private double natureMinMarkedCategoryShare = 0d;
+
+	/**
 	 * The set of datasourcenames that will be excluded in generation of categories
 	 * matching
 	 */
@@ -1093,6 +1100,14 @@ public class VerticalConfig {
 
 	public void setNatureNeutralCategoryFragments(Set<String> natureNeutralCategoryFragments) {
 		this.natureNeutralCategoryFragments = natureNeutralCategoryFragments;
+	}
+
+	public double getNatureMinMarkedCategoryShare() {
+		return natureMinMarkedCategoryShare;
+	}
+
+	public void setNatureMinMarkedCategoryShare(double natureMinMarkedCategoryShare) {
+		this.natureMinMarkedCategoryShare = natureMinMarkedCategoryShare;
 	}
 
 	public Set<String> getGenerationExcludedFromAttributesMatching() {
