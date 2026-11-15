@@ -614,11 +614,28 @@ class AttributeRealtimeAggregationServiceTest {
 	 */
 	@ParameterizedTest
 	@CsvSource(delimiter = '|', value = { "1 400 tr/min|1400", "1\u00a0400 tr/min|1400", "1\u202f400 TR/MIN|1400",
-			"1400 tr/min|1400", "1 200,5|1200.5", "12 345 678|12345678", "7,2|7.2", "12 34|12" })
+			"1\u2009400 tr/min|1400", "1400 tr/min|1400", "1 200,5|1200.5", "12 345 678|12345678", "2 088|2088",
+			"7,2|7.2", "12 34|12", "1400 120|1400" })
 	void numericValuesKeepSpaceGroupedThousands(String raw, String expected) throws Exception {
 		AttributeConfig spinSpeed = realAttribute("washing-machine", "SPIN_SPEED");
 
 		assertThat(service.parseValue(raw, spinSpeed, verticalConfig)).isEqualTo(expected);
+	}
+
+	/**
+	 * GOU-2276: thousands are only joined across a space of the received value. A space left behind by a removed
+	 * quote mark or unit token never joins two numbers: "55\" 140 cm" must not read 55140.
+	 */
+	@ParameterizedTest
+	@CsvSource(delimiter = '|', value = { "tv|DIAGONALE_POUCES|55\" 140 cm|55",
+			"tv|DIAGONALE_POUCES|55\u2019\u2019 139 cm|55", "tv|DIAGONALE_POUCES|6\" 152 mm|6",
+			"washing-machine|ENERGY_CONSUMPTION_100_CYCLES|52 kWh 100 cycles|52",
+			"washing-machine|SPIN_SPEED|1 400 tr/min|1400" })
+	void thousandsAreNotJoinedAcrossRemovedTokens(String vertical, String key, String raw, String expected)
+			throws Exception {
+		AttributeConfig attribute = realAttribute(vertical, key);
+
+		assertThat(service.parseValue(raw, attribute, verticalConfig)).isEqualTo(expected);
 	}
 
 	@Test

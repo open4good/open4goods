@@ -74,13 +74,16 @@ import org.slf4j.Logger;
  */
 public class AttributeRealtimeAggregationService extends AbstractAggregationService {
 
-	/**
-	 * A number with optional space-grouped thousands ("1 400", also with a no-break or narrow no-break space) and
-	 * an optional comma or point decimal part.
-	 */
 	private static final Pattern NUMERIC_EXTRACT_PATTERN =
-			Pattern.compile("[-+]?\\d+(?:[\\s\u00a0\u202f]\\d{3}(?!\\d))*(?:[.,]\\d+)?");
-	private static final Pattern THOUSANDS_SEPARATOR_PATTERN = Pattern.compile("[\\s\u00a0\u202f]");
+			Pattern.compile("[-+]?\\d+(?:[.,]\\d+)?");
+	/**
+	 * Space-grouped thousands as written in the raw value: a group of 1 to 3 digits, not preceded by a digit or a
+	 * decimal separator, followed by groups of exactly 3 digits, each after a space, a no-break space, a thin space
+	 * or a narrow no-break space. Same rule as {@code WeightParser}.
+	 */
+	private static final Pattern THOUSANDS_PATTERN =
+			Pattern.compile("(?<![\\d.,])\\d{1,3}(?:[ \u00a0\u2009\u202f]\\d{3})+(?!\\d)");
+	private static final Pattern THOUSANDS_SEPARATOR_PATTERN = Pattern.compile("[ \u00a0\u2009\u202f]");
 	/**
 	 * Order in which merged sources are handed to a custom parser: trusted datasources first, as in
 	 * {@link SourcableAttribute#bestValue()}, then by datasource name and value, so that a parser breaking ties by
@@ -625,7 +628,14 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			throw new ValidationException("Null rawValue in attribute " + attrConf.getKey());
 		}
 
-		String string = isWattAttribute(attrConf) ? powerToWatts(rawValue) : rawValue;
+		String string = rawValue;
+		// Thousands are joined on the value as received, before tokens, quote marks or spaces are removed: only a
+		// space that really sits between two digit groups is dropped ("1 400 tr/min" gives 1400, while 55" 140 cm
+		// stays 55).
+		if (AttributeType.NUMERIC.equals(attrConf.getFilteringType())) {
+			string = joinThousands(string);
+		}
+		string = isWattAttribute(attrConf) ? powerToWatts(string) : string;
 		///////////////////
 		// To upperCase / lowerCase
 		///////////////////
@@ -678,7 +688,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		/////////////////////////////////
 		// FIXED TEXT MAPPING
 		// Applied before the empty-placeholder test, so that a mapping such as "FALSE": "NON" wins over the
-		// placeholder list, which also holds "false", "nc" or "-".
+		// placeholder list, which also holds "false", "nc" or "na".
 		/////////////////////////////////
 		if (!attrConf.getMappings().isEmpty() && attrConf.getMappings().containsKey(string)) {
 
@@ -769,9 +779,22 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	}
 
 	/**
+	 * Joins the space-grouped thousands of a raw value: "1 400 tr/min" gives
+	 * "1400 tr/min" and "1 200,5" gives "1200,5". A space that does not sit
+	 * between a group of 1 to 3 digits and a group of exactly 3 digits is kept, so
+	 * "1400 120" and "52 kWh 100 cycles" are unchanged.
+	 *
+	 * @param value raw datasource value
+	 * @return the value without its thousands separators
+	 */
+	static String joinThousands(String value) {
+		return THOUSANDS_PATTERN.matcher(value)
+				.replaceAll(match -> THOUSANDS_SEPARATOR_PATTERN.matcher(match.group()).replaceAll(""));
+	}
+
+	/**
 	 * Extracts the first decimal-compatible number from a value and normalizes the
-	 * decimal separator. Space-grouped thousands are joined: "1 400 tr/min" gives
-	 * "1400" and "1 200,5" gives "1200.5".
+	 * decimal separator.
 	 *
 	 * @param value parsed numeric candidate
 	 * @return Java-compatible decimal string
@@ -791,7 +814,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			throw new ValidationException("Attribute is expected to be numeric : " + value);
 		}
 
-		String numericCandidate = THOUSANDS_SEPARATOR_PATTERN.matcher(matcher.group()).replaceAll("").replace(",", ".");
+		String numericCandidate = matcher.group().replace(",", ".");
 
 		try {
 			Double.parseDouble(numericCandidate);
