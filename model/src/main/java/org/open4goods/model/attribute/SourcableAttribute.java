@@ -143,6 +143,24 @@ public abstract class SourcableAttribute {
 		return trustedSourcePriority(datasource);
 	}
 
+	/**
+	 * The datasources that provided the given value, compared as {@link #bestValue()} does (trimmed, whitespace
+	 * condensed, lowercased). Used to record the source of the value an attribute score was computed from.
+	 *
+	 * @param value the retained value
+	 * @return the distinct datasource names, sorted; empty when the value is blank or no source holds it
+	 */
+	public List<String> sourcesOfValue(String value) {
+		if (StringUtils.isBlank(value)) {
+			return List.of();
+		}
+		String expected = normalizeValue(value);
+		return source.stream().filter(s -> s.getDataSourcename() != null).filter(s -> {
+			String candidate = s.getCleanedValue() != null ? s.getCleanedValue() : s.getValue();
+			return StringUtils.isNotBlank(candidate) && normalizeValue(candidate).equals(expected);
+		}).map(SourcedAttribute::getDataSourcename).distinct().sorted().toList();
+	}
+
 	private String normalizeValue(String value) {
 		return StringUtils.normalizeSpace(value).trim().toLowerCase(Locale.ROOT);
 	}

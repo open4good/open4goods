@@ -79,6 +79,21 @@ public class DataSourceProperties {
 
 	private String affiliatedPortalUrl;
 
+	/**
+	 * Licence under which the data of this source is reused, in its usual name (for example "Licence Ouverte 2.0").
+	 * Empty by default: each source states it at its integration, never guessed.
+	 */
+	private String license;
+
+	/** URL of the full text of the {@link #license}. Empty by default. */
+	private String licenseUrl;
+
+	/**
+	 * Text displayed to credit the source, for example "Producteurs, via data.gouv.fr". Empty by default: each source
+	 * states it at its integration.
+	 */
+	private String attribution;
+
 
 	/**
 	 * Scheduling of this datasource Can be TimeConstants.CRON_DAY
@@ -522,6 +537,33 @@ public class DataSourceProperties {
 
 	public void setLogo(String logo) {
 		this.logo = logo;
+	}
+
+	/** @return the licence name of this source, or {@code null} when not stated */
+	public String getLicense() {
+		return license;
+	}
+
+	public void setLicense(String license) {
+		this.license = license;
+	}
+
+	/** @return the URL of the licence text, or {@code null} when not stated */
+	public String getLicenseUrl() {
+		return licenseUrl;
+	}
+
+	public void setLicenseUrl(String licenseUrl) {
+		this.licenseUrl = licenseUrl;
+	}
+
+	/** @return the text crediting this source, or {@code null} when not stated */
+	public String getAttribution() {
+		return attribution;
+	}
+
+	public void setAttribution(String attribution) {
+		this.attribution = attribution;
 	}
 
 	public String getPortalUrl() {

@@ -35,8 +35,9 @@ import org.slf4j.Logger;
  */
 public class Attribute2ScoreAggregationService extends AbstractScoreAggregationService {
 
-        /** Metadata of a derived score: the key of the source attribute its value was read from, or the keys of the
-         * sources it combines, comma separated. */
+        /** Metadata of a score: for an attribute score, the datasources of the retained value (GOU-2301); for a
+         * derived score, the key of the source attribute its value was read from, or the keys of the sources it
+         * combines. Comma separated. */
         public static final String SCORE_SOURCE_METADATA = "source";
 
         private final Map<Long, Map<String, Double>> absoluteValuesOverrides = new HashMap<>();
@@ -84,6 +85,11 @@ public class Attribute2ScoreAggregationService extends AbstractScoreAggregationS
 						Score s = new Score(attrConfig.getKey(), score);
 						s.setAbsolute(new Cardinality());
 						s.getAbsolute().setValue(score);
+						// The datasources of the retained value (GOU-2301)
+						List<String> valueSources = aga.sourcesOfValue(aga.getValue());
+						if (!valueSources.isEmpty()) {
+							s.getMetadatas().put(SCORE_SOURCE_METADATA, String.join(",", valueSources));
+						}
 						// Saving in product
 						data.getScores().put(s.getName(), s);
 					} catch (ValidationException e) {

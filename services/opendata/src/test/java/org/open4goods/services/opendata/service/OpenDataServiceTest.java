@@ -127,13 +127,13 @@ class OpenDataServiceTest {
         // Row conversion: format unchanged in this lot (epoch milliseconds, https://nudger.fr/{gtin}).
         assertThat(gtinLines).containsExactly(
                 "\"gtin\",\"brand\",\"model\",\"name\",\"last_updated\",\"gs1_country\",\"gtinType\",\"offers_count\","
-                        + "\"min_price\",\"currency\",\"categories\",\"url\"",
+                        + "\"min_price\",\"currency\",\"categories\",\"url\",\"sources\"",
                 "\"1234567890123\",\"TestBrand\",\"ModelX\",\"short name\",\"1704067200000\",\"FR\",\"GTIN_13\",\"3\","
-                        + "\"42.42\",\"EUR\",\"" + gtinLines.get(1).split("\",\"")[10] + "\",\"https://nudger.fr/1234567890123\"");
+                        + "\"42.42\",\"EUR\",\"" + gtinLines.get(1).split("\",\"")[10] + "\",\"https://nudger.fr/1234567890123\",\"eprel|rakuten.com\"");
         assertThat(gtinLines.get(1)).contains("electronics").contains("gaming");
         assertThat(isbnLines).hasSize(2);
         assertThat(isbnLines.get(1)).isEqualTo("\"9781234567890\",\"short name\",\"1704067200000\",\"3\",\"42.42\",\"EUR\","
-                + "\"https://nudger.fr/9781234567890\",\"Test Editor\",\"Broché\",\"320\",\"SousCat1\",\"SousCat2\"");
+                + "\"https://nudger.fr/9781234567890\",\"Test Editor\",\"Broché\",\"320\",\"SousCat1\",\"SousCat2\",\"eprel|rakuten.com\"");
 
         DatasetManifest gtin = manifestStore.readDataset(openDataConfig.gtinManifestFile()).orElseThrow();
         assertThat(gtin.schemaVersion()).isEqualTo(OpenDataManifest.SCHEMA_VERSION);
@@ -448,6 +448,7 @@ class OpenDataServiceTest {
         product.setLastChange(Instant.parse("2024-01-01T00:00:00Z").toEpochMilli());
         product.setOfferNames(new HashSet<>(Set.of("short name", "a longer offer name")));
         product.setDatasourceCategories(new HashSet<>(Set.of("electronics", "gaming")));
+        product.setSources(new java.util.TreeSet<>(Set.of("rakuten.com", "eprel")));
 
         ProductAttributes attributes = new ProductAttributes();
         attributes.addReferentielAttribute(ReferentielKey.BRAND, "TestBrand");

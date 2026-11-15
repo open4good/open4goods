@@ -18,6 +18,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -147,6 +148,26 @@ public class Product implements Standardisable {
 	 * fastening data processing (by skipping already processed items)
 	 */
 	private Map<String, Long> datasourceCodes = new HashMap<>();
+
+	/** Key of {@link #datasourceCodes} holding the signature of the inputs of the last EPREL search (GOU-2099). */
+	public static final String EPREL_SEARCH_SIGNATURE_CODE = "eprel.searchSignature";
+
+	/** Key of {@link #datasourceCodes} dating the last Wikidata search that found no entity (GOU-2099). */
+	public static final String WIKIDATA_MISS_CODE = "wikidata.org.miss";
+
+	/**
+	 * Technical keys written in {@link #datasourceCodes} by the api completions, which are not datasources:
+	 * the EPREL search signature and the Wikidata negative cache (GOU-2099). Single list, shared by the completions,
+	 * {@link #refreshSources()} and the front-api.
+	 */
+	public static final Set<String> TECHNICAL_DATASOURCE_CODES = Set.of(EPREL_SEARCH_SIGNATURE_CODE, WIKIDATA_MISS_CODE);
+
+	/**
+	 * The sources contributing to this product: the keys of {@link #datasourceCodes} minus
+	 * {@link #TECHNICAL_DATASOURCE_CODES}. Searchable ({@code keyword}), unlike {@code datasourceCodes} which is not
+	 * indexed. Derived: written by {@link #refreshSources()} before each full indexation (GOU-2301).
+	 */
+	private Set<String> sources = new TreeSet<>();
 
 	/**
 	 * The media resources for this data
@@ -1340,6 +1361,27 @@ public class Product implements Standardisable {
 
 	public void setCategoriesByDatasources(Map<String, String> categoriesByDatasources) {
 		this.categoriesByDatasources = categoriesByDatasources;
+	}
+
+	/**
+	 * Recompute {@link #sources} from {@link #datasourceCodes}, without the {@link #TECHNICAL_DATASOURCE_CODES}.
+	 * Called by the product repository before each full write.
+	 */
+	public void refreshSources() {
+		Set<String> computed = new TreeSet<>();
+		if (datasourceCodes != null) {
+			datasourceCodes.keySet().stream().filter(k -> k != null && !TECHNICAL_DATASOURCE_CODES.contains(k))
+					.forEach(computed::add);
+		}
+		this.sources = computed;
+	}
+
+	public Set<String> getSources() {
+		return sources;
+	}
+
+	public void setSources(Set<String> sources) {
+		this.sources = sources;
 	}
 
 	public Map<String, Long> getDatasourceCodes() {

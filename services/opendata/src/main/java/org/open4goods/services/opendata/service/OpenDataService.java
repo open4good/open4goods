@@ -100,7 +100,8 @@ public class OpenDataService implements HealthIndicator {
             "min_price",
             "currency",
             "categories",
-            "url"
+            "url",
+            "sources"
     };
 
     public static final String[] ISBN_HEADER = {
@@ -115,7 +116,8 @@ public class OpenDataService implements HealthIndicator {
             "format",
             "nb_page",
             "souscategorie",
-            "souscategorie2"
+            "souscategorie2",
+            "sources"
     };
 
     private static final List<String> ISBN_ATTRIBUTE_KEYS = List.of(
@@ -197,6 +199,7 @@ public class OpenDataService implements HealthIndicator {
                 "offersCount",
                 "offerNames",
                 "datasourceCategories",
+                "sources",
                 "gtinInfos.upcType",
                 "gtinInfos.country",
                 "price.minPrice.price",
@@ -762,8 +765,14 @@ public class OpenDataService implements HealthIndicator {
         } catch (Exception e) {
             LOGGER.error("Error while extracting URL for GTIN {}", data.getId(), e);
         }
+        line[12] = exportSources(data);
 
         return line;
+    }
+
+    /** The contributing sources of a product, identifiers separated by {@code |} (GOU-2301). */
+    private static String exportSources(Product data) {
+        return data.getSources() == null ? "" : StringUtils.join(data.getSources(), "|");
     }
 
     /**
@@ -803,6 +812,7 @@ public class OpenDataService implements HealthIndicator {
         line[9] = StringUtils.defaultString(isbnAttributes.get("NB DE PAGES"));
         line[10] = StringUtils.defaultString(isbnAttributes.get("SOUSCATEGORIE"));
         line[11] = StringUtils.defaultString(isbnAttributes.get("SOUSCATEGORIE2"));
+        line[12] = exportSources(data);
 
         return line;
     }
