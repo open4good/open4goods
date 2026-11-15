@@ -35,6 +35,11 @@ Une TV 55 pouces a une diagonale de 140 cm, pour un écran d'environ 122 cm de l
 
 Ces valeurs sont les dimensions de la dalle seule, hors cadre et pied : prévoyez quelques centimètres de plus pour le meuble. Calcul : diagonale = pouces x 2,54 ; largeur = diagonale x 0,8716 ; hauteur = diagonale x 0,4903 (arrondis au cm).
 
+Les téléviseurs 55 pouces les mieux notés par l'Impact Score, avec une offre en ligne :
+
+::guide-product-grid{vertical="tv" subcategory="tv_55_inches" top="3"}
+::
+
 
 ## La taille d'écran de sa TV : de quoi parle-t-on exactement ?
 
@@ -63,6 +68,16 @@ La **distance de recul** est en fait l'espace entre votre canapé et votre tél�
 | 85 pouces | 2,60 m à 3,20 m |
 
 👉 Si votre canapé est à **2 mètres** du mur, une télé entre **50 et 65 pouces** est idéale. Vous cherchez un modèle ? Parcourez toutes les [télévisions comparées par Nudger](/televiseurs) et leur Impact Score.
+
+Pour un recul court (1,30 m à 1,60 m), les téléviseurs 43 pouces les mieux notés :
+
+::guide-product-grid{vertical="tv" subcategory="tv_43_inches" top="3"}
+::
+
+Pour un grand salon (2,00 m à 2,50 m de recul), les téléviseurs 65 pouces les mieux notés :
+
+::guide-product-grid{vertical="tv" subcategory="tv_65_inches" top="3"}
+::
 
 
 ## Autres critères à prendre en compte

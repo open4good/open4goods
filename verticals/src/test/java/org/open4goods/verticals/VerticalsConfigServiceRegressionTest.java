@@ -144,6 +144,32 @@ class VerticalsConfigServiceRegressionTest {
                     assertThat(subCategory.getActivatedFilters()).hasSize(1);
                 });
     }
+
+    /**
+     * GOU-2225: sub-categories targeted by the product widgets of the blog
+     * articles (spec GOU-2224) load from categories/{vertical}/*.yml.
+     */
+    @Test
+    void shouldLoadBlogWidgetSubCategories() {
+        assertSubCategory("tv", "tv_43_inches", "televiseur-43-pouces", "attributes.indexed.DIAGONALE_POUCES.value", "43");
+        assertSubCategory("tv", "tv_65_inches", "televiseur-65-pouces", "attributes.indexed.DIAGONALE_POUCES.value", "65");
+        assertSubCategory("oven", "oven_pyrolysis", "four-pyrolyse", "attributes.indexed.OVEN_CLEANING_MODE.value", "PYROLYSE");
+    }
+
+    private void assertSubCategory(String verticalId, String id, String frSlug, String field, String value) {
+        VerticalConfig config = verticalsConfigService.getConfigById(verticalId);
+        assertThat(config).isNotNull();
+        assertThat(config.getSubCategories())
+                .as("categories/" + verticalId + "/" + id + ".yml should be loaded")
+                .anySatisfy(subCategory -> {
+                    assertThat(subCategory.getId()).isEqualTo(id);
+                    assertThat(subCategory.getSlug().i18n("fr")).isEqualTo(frSlug);
+                    assertThat(subCategory.getActivatedFilters()).singleElement().satisfies(filter -> {
+                        assertThat(filter.getField()).isEqualTo(field);
+                        assertThat(filter.getValue()).isEqualTo(value);
+                    });
+                });
+    }
     /**
      * GOU-1700, Hoover HLP610BL10UH47 (8059019130255): an aosom.fr row carrying
      * the GTIN is categorised as a shoe-care accessory. The ACCESSOIRE excluding

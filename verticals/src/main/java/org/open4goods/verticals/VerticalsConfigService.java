@@ -22,6 +22,8 @@ import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.eprel.EprelModelAliasTable;
+import org.open4goods.model.helper.IdHelper;
+import org.open4goods.model.product.ProductNature;
 import org.open4goods.model.vertical.AttributeComparisonRule;
 
 import org.open4goods.model.vertical.AttributeConfig;
@@ -994,6 +996,92 @@ public class VerticalsConfigService {
 		}
 
 		return vc;
+	}
+
+	/**
+	 * Reads the nature of a product from its merchant categories (GOU-2233), with
+	 * the {@code natureMinMarkedCategoryShare} of {@code _default.yml}.
+	 *
+	 * @param categories merchant categories of the product, may be null
+	 * @return {@link ProductNature#SPARE_PART}, {@link ProductNature#ACCESSORY}, or
+	 *         null when no category carries a marker or too few do
+	 * @see #getNatureForCategories(Collection, double)
+	 */
+	public ProductNature getNatureForCategories(Collection<String> categories) {
+		return getNatureForCategories(categories,
+				defaultConfig == null ? 0d : defaultConfig.getNatureMinMarkedCategoryShare());
+	}
+
+	/**
+	 * Reads the nature of a product from its merchant categories (GOU-2233).
+	 *
+	 * <p>Each category is normalised ({@link IdHelper#getCategoryName(String)}), the
+	 * {@code natureNeutralCategoryFragments} of {@code _default.yml} are removed from
+	 * it, then the remainder is searched for the {@code sparePartCategoryMarkers} and
+	 * {@code accessoryCategoryMarkers}. A category carrying either is "marked".
+	 *
+	 * <p>The nature is set only when at least one distinct normalised category is
+	 * marked and the marked share of the distinct categories reaches
+	 * {@code minMarkedShare}. It is then {@link ProductNature#SPARE_PART} when a
+	 * category carries a spare part marker, {@link ProductNature#ACCESSORY}
+	 * otherwise. The caller only applies it to a product without vertical.
+	 *
+	 * @param categories     merchant categories of the product, may be null
+	 * @param minMarkedShare minimum share (0 to 1) of the distinct categories that
+	 *                       must carry a marker; 0 means one marked category is enough
+	 * @return {@link ProductNature#SPARE_PART}, {@link ProductNature#ACCESSORY}, or
+	 *         null when no category carries a marker or too few do
+	 */
+	public ProductNature getNatureForCategories(Collection<String> categories, double minMarkedShare) {
+		if (categories == null || categories.isEmpty() || defaultConfig == null) {
+			return null;
+		}
+
+		List<String> neutralFragments = defaultConfig.getNatureNeutralCategoryFragments() == null ? List.of()
+				: defaultConfig.getNatureNeutralCategoryFragments().stream()
+						.filter(StringUtils::isNotBlank)
+						// Longest first, so that a fragment containing another one is removed whole
+						.sorted(Comparator.comparingInt(String::length).reversed())
+						.toList();
+
+		Set<String> distinctCategories = new LinkedHashSet<>();
+		for (String rawCategory : categories) {
+			String category = IdHelper.getCategoryName(rawCategory);
+			if (category != null) {
+				distinctCategories.add(category);
+			}
+		}
+
+		int marked = 0;
+		boolean sparePart = false;
+		for (String normalised : distinctCategories) {
+			String category = normalised;
+			for (String fragment : neutralFragments) {
+				category = category.replace(fragment, " ");
+			}
+			boolean spare = containsAny(category, defaultConfig.getSparePartCategoryMarkers());
+			if (spare || containsAny(category, defaultConfig.getAccessoryCategoryMarkers())) {
+				marked++;
+				sparePart |= spare;
+			}
+		}
+
+		if (marked == 0 || (double) marked / distinctCategories.size() < minMarkedShare) {
+			return null;
+		}
+		return sparePart ? ProductNature.SPARE_PART : ProductNature.ACCESSORY;
+	}
+
+	private static boolean containsAny(String category, Set<String> markers) {
+		if (markers == null) {
+			return false;
+		}
+		for (String marker : markers) {
+			if (StringUtils.isNotBlank(marker) && category.contains(marker)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

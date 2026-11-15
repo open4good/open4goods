@@ -67,4 +67,40 @@ class OvenCookerCategoriesTest {
         assertThat(classify("Cdiscount FR", "ELECTROMENAGER | ELECTROMENAGER > GROS APPAREIL DE CUISSON > "
                 + "HOTTE | GROS APPAREIL DE CUISSON | HOTTE")).isNotEqualTo("oven");
     }
+
+    /** PEM (small appliances: kettles, coffee makers...) is too broad for ovens (GOU-2255). */
+    @Test
+    void fnacPemCategoriesDoNotClassifyAsOven() {
+        assertThat(classify("Fnac FR", "362 | COOKING | PETIT MENAGER & CUISINE - CUISSON PEM")).isNull();
+        assertThat(classify("Fnac FR", "PETIT MENAGER & CUISINE - CUISSON PEM")).isNull();
+        assertThat(classify("fnac.com", "PETIT MENAGER & CUISINE CUISSON PEM")).isNull();
+        assertThat(classify("rakuten.com-csv.yml", "ELECTROMENAGER | PETIT-APPAREIL-CUISSON")).isNull();
+    }
+
+    @Test
+    void fnacGemOvenStaysOven() {
+        assertThat(classify("Fnac FR", "PETIT MENAGER & CUISINE - CUISSON GEM")).isEqualTo("oven");
+    }
+
+    @Test
+    void fnacGemHoodsAndHobsAreExcluded() {
+        Map<String, String> hood = new LinkedHashMap<>();
+        hood.put("Fnac FR", "PETIT MENAGER & CUISINE - CUISSON GEM");
+        hood.put("Darty FR", "GROS ELECTROMENAGER / HOTTE / HOTTE CASQUETTE | GROS ELECTROMENAGER>HOTTE>HOTTE CASQUETTE");
+        assertThat(service.getVerticalForCategories(hood)).isNull();
+
+        Map<String, String> hob = new LinkedHashMap<>();
+        hob.put("Fnac FR", "PETIT MENAGER & CUISINE - CUISSON GEM");
+        hob.put("Cdiscount FR", "ELECTROMENAGER | ELECTROMENAGER > GROS APPAREIL DE CUISSON > TABLE DE CUISSON INDUCTION"
+                + " - PLAQUE DE CUISSON INDUCTION | TABLE DE CUISSON");
+        assertThat(service.getVerticalForCategories(hob)).isNull();
+        // EPREL-confirmed ovens stay protected (GOU-1700)
+        assertThat(service.getVerticalForCategories(hood, "ovens")).isNotNull();
+    }
+
+    @Test
+    void dartyBuiltInOvenStaysOven() {
+        assertThat(classify("Darty FR", "GROS ELECTROMENAGER / FOUR / FOUR ENCASTRABLE | "
+                + "GROS ELECTROMENAGER>FOUR>FOUR ENCASTRABLE | FOUR | FOUR ENCASTRABLE")).isEqualTo("oven");
+    }
 }

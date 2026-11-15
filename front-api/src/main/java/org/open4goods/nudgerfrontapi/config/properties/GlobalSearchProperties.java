@@ -21,6 +21,12 @@ public class GlobalSearchProperties {
      */
     private List<String> accessoryTerms = new ArrayList<>();
 
+    /**
+     * Expressions naming an accessory wherever they appear in the offer name, for names whose object comes after
+     * the head limit ("The Living Store Meuble Tv ...").
+     */
+    private List<String> accessoryPhrases = new ArrayList<>();
+
     /** Number of leading words of the offer name searched for an accessory term. */
     private int accessoryHeadWords = 3;
 
@@ -63,6 +69,14 @@ public class GlobalSearchProperties {
 
     public void setAccessoryTerms(List<String> accessoryTerms) {
         this.accessoryTerms = accessoryTerms == null ? new ArrayList<>() : accessoryTerms;
+    }
+
+    public List<String> getAccessoryPhrases() {
+        return accessoryPhrases;
+    }
+
+    public void setAccessoryPhrases(List<String> accessoryPhrases) {
+        this.accessoryPhrases = accessoryPhrases == null ? new ArrayList<>() : accessoryPhrases;
     }
 
     public int getAccessoryHeadWords() {

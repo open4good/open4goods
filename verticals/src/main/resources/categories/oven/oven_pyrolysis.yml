@@ -1,0 +1,95 @@
+# Search-intent subcategory for the oven vertical.
+# Maintained: 2026-11-15 from the GOU-2224 spec (Growth).
+# Intent: comparison of pyrolytic (self-cleaning) ovens.
+# Evidence:
+#   - GSC (sc-domain:nudger.fr, 2026-08-17 -> 2026-11-14): comparative
+#     queries only ("four pyrolyse ou catalyse" 397 impr, "catalyse ou
+#     pyrolyse pour un four" 87 impr); no commercial "four pyrolyse" query
+#     measured. Re-check GSC 8 weeks after publication.
+#   - Google Autocomplete: not measured.
+# Feasibility:
+#   - Matching products: 644 in the vertical, 234 with an active offer
+#     (Elasticsearch products-moustik, 2026-11-15, OVEN_CLEANING_MODE.value
+#     term "PYROLYSE" and offersCount >= 1).
+# Rationale:
+#   - Largest cleaning mode of the catalogue, linked from the blog article
+#     "quel système choisir entre four pyrolyse et catalyse".
+id: "oven_pyrolysis"
+slug:
+  en: "pyrolytic-oven"
+  fr: "four-pyrolyse"
+h1Title:
+  en: "Pyrolytic ovens"
+  fr: "Fours pyrolyse"
+description:
+  en: |-
+    Compare **pyrolytic ovens**, which clean themselves at high temperature,
+    with energy use, repairability and Impact Score data.
+  fr: |-
+    Comparez les **fours à pyrolyse**, qui se nettoient seuls à haute
+    température, avec la consommation, la réparabilité et l'Impact Score.
+metaTitle:
+  en: "Pyrolytic ovens: compare models | Nudger"
+  fr: "Four pyrolyse : comparer les modèles | Nudger"
+metaDescription:
+  en: "Compare pyrolytic ovens by capacity, energy use and impact before choosing. Pyrolysis or catalysis: read the guide."
+  fr: >-
+    Comparez les fours à pyrolyse selon la capacité, la consommation d'énergie
+    et l'impact avant de choisir. Pyrolyse ou catalyse : le guide.
+metaOpenGraphTitle:
+  en: "Compare pyrolytic ovens"
+  fr: "Comparer les fours à pyrolyse"
+metaOpenGraphDescription:
+  en: "A focused selection of pyrolytic ovens with practical comparison data."
+  fr: "Une sélection ciblée de fours à pyrolyse avec les données utiles pour comparer."
+heroBlock:
+  mdiIcon: "mdi-stove"
+  title:
+    en: "Self-cleaning at high temperature"
+    fr: "Le nettoyage à haute température"
+  body:
+    en: |-
+      A pyrolysis cycle heats the empty oven to about 500 °C and turns grease
+      into ash, wiped off with a damp cloth.
+    fr: |-
+      Un cycle de pyrolyse chauffe le four vide à environ 500 °C et transforme
+      les graisses en cendres, à retirer d'un coup d'éponge.
+readMore:
+  title:
+    en: "Pyrolytic oven: when is it worth it?"
+    fr: "Four à pyrolyse : quand se justifie-t-il ?"
+  shortText:
+    en: |-
+      Pyrolysis cleans the whole cavity without detergent, but each cycle uses
+      electricity for one to two hours. This page lists only pyrolytic models
+      so you compare like for like.
+    fr: |-
+      La pyrolyse nettoie toute la cavité sans détergent, mais chaque cycle
+      consomme de l'électricité pendant une à deux heures. Cette page ne liste
+      que des fours à pyrolyse, pour comparer à système égal.
+  longText:
+    en: |-
+      Pyrolysis is worth it when you cook often and dirty the oven quickly:
+      a few cycles a year replace scrubbing and cleaning products. For an
+      occasional use, a catalytic or manual oven can be enough. Compare
+      both systems in our article
+      [pyrolysis or catalysis](/blog/quel-systeme-choisir-entre-four-pyrolyse-et-catalyse).
+
+      Nudger keeps this page focused on pyrolytic ovens so each model stays
+      comparable on price, environmental impact score and key technical
+      attributes such as capacity and energy class.
+    fr: |-
+      La pyrolyse se justifie si vous cuisinez souvent et salissez vite le
+      four : quelques cycles par an remplacent le récurage et les produits
+      d'entretien. Pour un usage occasionnel, un four à catalyse ou à nettoyage
+      manuel peut suffire. Comparez les deux systèmes dans notre article
+      [pyrolyse ou catalyse](/blog/quel-systeme-choisir-entre-four-pyrolyse-et-catalyse).
+
+      Nudger garde cette page centrée sur les fours à pyrolyse, afin que chaque
+      modèle reste comparable sur le prix, le score d'impact environnemental et
+      les caractéristiques techniques comme la capacité et la classe
+      énergétique.
+activatedFilters:
+  - field: "attributes.indexed.OVEN_CLEANING_MODE.value"
+    operator: "EQUALS"
+    value: "PYROLYSE"

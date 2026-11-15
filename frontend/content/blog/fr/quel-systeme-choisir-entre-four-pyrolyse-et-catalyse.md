@@ -50,6 +50,11 @@ Le principal défaut de la pyrolyse, c'est sa **consommation d'énergie**. Un cy
 
 Résultat : la consommation électrique est importante, et l'impact environnemental aussi, surtout si le cycle est utilisé fréquemment.
 
+Les fours à pyrolyse les mieux notés par l'Impact Score, avec une offre en ligne :
+
+::guide-product-grid{vertical="oven" subcategory="oven_pyrolysis" top="3"}
+::
+
 
 ## **🌡️ Comment fonctionne un four à catalyse ?**
 
@@ -70,6 +75,11 @@ La catalyse est moins efficace que la pyrolyse pour les salissures importantes.
 Certaines zones du four (porte, sole, grilles) doivent être nettoyées manuellement.
 
 De plus, les parois catalytiques ont une durée de vie limitée. Elles doivent parfois être **remplacées après quelques années** d'utilisation.
+
+Pour comparer avec les autres systèmes de nettoyage, les fours les mieux notés tous systèmes confondus :
+
+::guide-product-grid{vertical="oven" top="3"}
+::
 
 
 ## **⚡ Pyrolyse vs catalyse : la question de l'énergie**

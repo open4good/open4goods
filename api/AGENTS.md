@@ -162,6 +162,153 @@ curl -H "Authorization: $O4G_INTERNAL_API_KEY" https://api.nudger.fr/batch/purge
 curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/purge-datasource?datasource=rakuten.com&scope=OFFERS&dryRun=false"
 ```
 
+## Reprises de l'index produits par lots (backfill)
+
+GOU-2266. Le paquet `services/backfill` réécrit quelques champs de beaucoup de produits sans relire ni réécrire les
+documents complets. Il sert à la purge Decitre (GOU-2266) et servira à la reprise de `nature` (GOU-2234).
+`BackfillEngine` exécute une `BackfillOperation`, qui fournit :
+
+- la requête des produits ;
+- les champs `_source` à lire ;
+- pour chaque produit, le changement à faire : un script painless, ses paramètres, la sauvegarde et les libellés
+  comptés.
+
+Une opération doit être idempotente : un produit déjà traité ne reçoit plus de changement.
+
+- **Parcours** : point in time (PIT), puis `search_after` sur `_shard_doc`, par pages de `batchSize` (1 à 5 000). Seuls
+  les champs de l'opération sont lus.
+  - Les résultats partiels sont refusés : un shard en échec fait échouer la page au lieu de laisser ses produits de
+    côté.
+  - Le débit est plafonné par `maxProductsPerSecond` (produits lus par seconde, 0 = sans plafond). Chaque page dure au
+    moins `taille / débit`, ce qui évite qu'un retard accumulé ne se rattrape à pleine vitesse. Une page ne peut pas
+    durer plus de la moitié de la durée de vie du PIT : au-delà, le run est refusé (400).
+- **Écriture** (`dryRun=false`) :
+  - la ligne de sauvegarde de chaque changement (`{"id":...,"data":...}`) est ajoutée au fichier JSONL et forcée sur
+    disque **avant** l'envoi du bulk ;
+  - le bulk envoie un script par produit, avec `retry_on_conflict` 3 et sans refresh ;
+  - un produit qui n'a plus besoin du changement donne un `noop`, compté dans `unchangedProducts` et non dans
+    `writtenProducts`. Un produit supprimé depuis la lecture (404) compte aussi dans `unchangedProducts`.
+- **`dryRun=true`** (défaut) : n'écrit rien, pas même la sauvegarde. Il compte les produits lus (`scannedProducts`),
+  les produits concernés (`matchedProducts`) et chaque libellé (`labelCounts`, par exemple les occurrences de chaque
+  clé), et donne 20 ids d'exemple.
+- **Arrêt propre** : il a lieu entre deux pages, sur `POST /batch/backfill/stop` (`stopReason=STOP_REQUESTED`) ou dès
+  qu'Elasticsearch répond 429 (`BACKPRESSURE`), sur la recherche, sur un shard ou sur un élément de bulk. L'état passe à `STOPPED`,
+  avec le `cursor` de la dernière page entièrement traitée. Le PIT reste ouvert 30 minutes après la dernière page
+  (`ApiConfig.BACKFILL_KEEP_ALIVE`). À l'arrêt de l'api (déploiement), le run en cours est arrêté entre deux pages,
+  avec un délai d'attente maximal de 20 s.
+- **Reprise** (`resume=true`) : elle continue le dernier run `STOPPED`, `INTERRUPTED` ou `FAILED` de la même
+  opération, du même mode et des mêmes paramètres (`status.parameters`, par exemple `keys`), depuis son curseur et avec le
+  même fichier de sauvegarde. Les compteurs du statut ne couvrent alors que la partie reprise.
+  - Si le PIT a expiré, le parcours repart du début. Les produits déjà traités ne sont pas réécrits, mais ils sont
+    relus.
+  - Une page dont un élément a été rejeté est relue.
+- **Statut** : `GET /batch/backfill`. Il est écrit en JSON au lancement, après chaque page et à la fin, dans
+  `backfill-status-file` (défaut `<root-folder>/batch-reports/backfill-status.json`). Il est relu au démarrage : un run
+  resté `RUNNING` devient `INTERRUPTED`, avec son curseur.
+- **Journal** : une ligne `INFO` par page dans `nohup-api.log`, de la forme `Backfill <op> (dryRun=...) batch N: ...
+  scanned, ... matched, ... written, ... failed, labels {...}`, puis le rapport final. Le paquet reste en `INFO` dans
+  le `application.yml` du jar.
+- **Sauvegardes** : `backfill-backup-folder` (défaut `<root-folder>/batch-reports/backfill`), un fichier
+  `<opération>-<horodatage UTC>.jsonl` par run d'écriture. Son chemin est dans `report.backupFile`.
+- **Retour arrière** : `POST /batch/backfill/<opération>/restore?backupFile=<nom du fichier>`.
+  - Le nom est relatif au dossier des sauvegardes et doit être une sauvegarde de cette opération
+    (`<opération>-...jsonl`) ; aucun autre chemin n'est accepté.
+  - Le script de restauration de l'opération remet le contenu de `data` de chaque ligne.
+  - Le débit est plafonné par `maxProductsPerSecond`.
+  - Une ligne illisible est sautée et comptée dans `failedProducts` ; les autres sont restaurées.
+  - Une ligne partielle, laissée par un run tué pendant l'écriture, est retirée avant qu'une reprise n'ajoute la
+    suite.
+
+### Purge Decitre (GOU-2266)
+
+`POST /batch/backfill/decitre-purge` parcourt les produits dont `gtinInfos.upcType` vaut `ISBN_13` (environ
+10 M). Pour chacun, il retire de `attributes.all` les clés suivantes, et seulement celles-là :
+`CLASSIFICATION DECITRE 1`, `2`, `3`, `ATTRIBUTS`, `LIVRES ORIGINE`, `PROPRIETAIRE`, `PROPRIÉTAIRE`.
+
+- Ces 7 clés sont celles que GOU-2264 exclut à l'ingestion. `DecitrePurgeOperationTest` vérifie qu'elles figurent dans
+  `attributesConfig.exclusions` de `_default.yml`. Le paramètre `keys` permet d'en donner d'autres.
+- `attributes.all` est `enabled:false` : aucune requête ne compte ces clés, c'est le dry-run qui sert de comptage
+  " avant " et " après " (après = 0 `matchedProducts`).
+- Seules les clés visées sont lues (`attributes.all.<clé>`).
+- Le script ne touche à aucun autre champ, `lastChange` compris : aucun autre traitement ne se déclenche.
+- Chaque attribut retiré est sauvegardé entier. La restauration le remet dans `attributes.all`.
+- Une restauration ne tient que si l'exclusion de GOU-2264 est aussi retirée de `_default.yml`. Sinon, l'ingestion
+  retire de nouveau ces clés au passage suivant, et front-api les masque de toute façon.
+
+Appel Ops, hors de la fenêtre du batch : dry-run, état, écriture une fois le dry-run vérifié, arrêt, reprise et
+retour arrière.
+
+```bash
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/backfill/decitre-purge"
+curl -H "Authorization: $O4G_INTERNAL_API_KEY" https://api.nudger.fr/batch/backfill
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/backfill/decitre-purge?dryRun=false&batchSize=1000&maxProductsPerSecond=2000"
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" https://api.nudger.fr/batch/backfill/stop
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/backfill/decitre-purge?dryRun=false&resume=true"
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/backfill/decitre-purge/restore?backupFile=decitre-purge-20261116T220000Z.jsonl"
+```
+
+Le test d'intégration `BackfillEngineIT` (Testcontainers, hors CI) se lance avec `mvn -pl api test
+-Dtest=BackfillEngineIT -Dsurefire.failIfNoSpecifiedTests=false`. Il couvre le dry-run, l'écriture (le reste du
+`_source` est identique), la restauration, l'arrêt suivi de la reprise et le PIT expiré.
+
+### Reprise de `nature` (GOU-2234)
+
+`POST /batch/backfill/nature` pose ou retire `nature` (lot CSS 4e.2 de GOU-2226) sur les produits vivants sans
+verticale.
+
+**Pourquoi.** Une ligne de flux inchangée ne fait qu'une mise à jour partielle, et le batch ne charge que les produits
+des verticales. Sans cette reprise, les produits sans verticale n'auraient jamais la `nature` calculée par
+l'agrégation (GOU-2233).
+
+**Périmètre.** Pas de `vertical`, `lastChange` dans les `lastChangeDays` derniers jours (défaut 2), `offersCount` > 0,
+et `datasourceCategories` présent. La borne de `lastChange` est fixée au lancement et sert à tout le run ; une reprise
+la recalcule. Le parcours ne lit que `datasourceCategories`, `nature` et `offerNames`.
+
+**Calcul.** C'est celui de l'agrégation, `VerticalsConfigService.getNatureForCategories(categories, threshold)`, sans
+copie. `threshold` est le `natureMinMarkedCategoryShare` ; sa valeur par défaut est celle de `_default.yml`.
+- Un autre seuil n'est accepté qu'en dry-run.
+- En écriture, il est refusé (400) : l'agrégation recalcule la nature avec la valeur de `_default.yml`, et les natures
+  écrites avec un autre seuil changeraient de nouveau à l'agrégation suivante.
+
+**Écriture.**
+- Seul `nature` est écrit, et seulement quand il diffère : la reprise peut se relancer.
+- Le script ne touche pas un produit qui a reçu une verticale entre-temps, ni un produit dont les
+  `datasourceCategories` ont changé depuis la lecture : l'agrégation a alors calculé sa nature sur les nouvelles.
+- Si au moins 10 mises à jour d'un bulk échouent sans 429, et plus de la moitié du bulk (mapping absent, erreur de
+  script), le run passe à `FAILED` avec son curseur. Un produit supprimé depuis la lecture (404) n'est pas un échec :
+  il compte dans `unchangedProducts`. Seules les 5 premières erreurs d'un bulk sont journalisées une à une, les autres sont comptées par type.
+- La valeur précédente se recalcule : il n'y a ni sauvegarde ni restauration.
+- `sanitizeAll()` n'est pas utilisé.
+
+**Rapport du dry-run** (mesure 7.4 de GOU-2226). `report.labelCounts` donne les écritures prévues par valeur
+(`nature=SPARE_PART`, `nature=ACCESSORY`, `nature=absent`). `report.details` donne :
+- `markedByThreshold` : les produits marqués par valeur, pour chaque seuil de `reportThresholds` (défaut 0 et 0,5) ;
+- `examplesMarkedOnlyAtLowestThreshold` : 20 exemples (GTIN, nom, `datasourceCategories`) marqués au seuil le plus
+  bas mais pas au plus haut.
+
+Après une reprise du run, ces compteurs ne couvrent que la partie reprise.
+
+**Exécution en prod** (Ops), dans l'ordre :
+
+1. Vérifier que le champ existe dans l'index : `GET products-moustik/_mapping/field/nature` doit renvoyer `keyword`.
+2. Lancer le dry-run et publier son résultat sur GOU-2234.
+3. Le CTO fixe `natureMinMarkedCategoryShare` dans `_default.yml`, puis le changement est mergé et déployé.
+4. Lancer l'écriture, sans `threshold`, après le premier batch de 13 h qui suit le déploiement de #3649, hors des
+   fenêtres de 13 h et de 23 h.
+
+```bash
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/backfill/nature"
+curl -H "Authorization: $O4G_INTERNAL_API_KEY" https://api.nudger.fr/batch/backfill
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/backfill/nature?dryRun=false"
+```
+
+`NatureBackfillIT` (Testcontainers, hors CI) couvre :
+- le dry-run (comptes par seuil et exemple) ;
+- l'écriture (seul `nature` change, et seulement sur les produits du périmètre) ;
+- le second passage, qui n'écrit rien ;
+- le seuil 0,5 ;
+- les gardes du script (verticale reçue, catégories changées).
+
 ## Date de la dernière offre par datasource
 
 GOU-2037. `price.offers` n'est pas indexé : pour savoir quels marchands ont encore une offre active sans parcourir
@@ -194,6 +341,17 @@ reste seulement dans `gtinInfos`.
 porté par une autre datasource, ni une catégorie qui ne correspond plus ne la retirent. EPREL n'attribue jamais seul
 une verticale. Dénombrement et reprise des produits touchés :
 [runbook](../docs/operations/product-recreation-recovery.md).
+
+Après la verticale, `onProduct` calcule `nature` (`ProductNature`, GOU-2233) avec
+`VerticalsConfigService.getNatureForCategories`, à partir des `datasourceCategories` normalisées. Clés de
+`verticals/_default.yml` : `natureNeutralCategoryFragments`, fragments retirés de chaque catégorie avant la recherche ;
+`sparePartCategoryMarkers` donne `SPARE_PART`, qui l'emporte ; `accessoryCategoryMarkers` donne `ACCESSORY`. Aucun
+marqueur : champ absent. `natureMinMarkedCategoryShare` (0 par défaut) est la part minimale des catégories distinctes
+normalisées qui doivent porter un marqueur ; en dessous, champ absent. Il sera fixé d'après le dry-run de la reprise
+(GOU-2234), qui le passe en paramètre de `getNatureForCategories(categories, minMarkedShare)`. Un produit qui a une verticale n'a jamais de `nature`, même si EPREL l'y garde malgré une
+catégorie "accessoire". La nature est recalculée, donc effacée au besoin, à chaque agrégation complète. La mise à
+jour partielle d'une ligne de flux inchangée n'envoie que `lastChange`, `price` et `offersCount` : elle ne touche pas
+à `nature`. Ce champ ne change ni la verticale ni le score.
 
 ### Slug produit figé
 

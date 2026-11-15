@@ -86,6 +86,14 @@ front:
       - thermostat sèche-linge
       - tube
       - verre trempé
+    # Expressions that mark an accessory anywhere in the name (GOU-2235), for names without a category
+    # whose object comes after the 3rd word.
+    accessory-phrases:
+      - meuble tv
+      - kit calfeutrage
+      - kit d'étanchéité
+      - panneau de lave-vaisselle
+      - pour pièces
     accessory-head-words: 3
     accessory-negative-boost: 0.1
     accessory-results-limit: 8

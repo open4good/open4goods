@@ -111,6 +111,34 @@ class GlobalSearchRelevanceTest {
                 .doesNotContain("\"pour lave linge\"", "\"compatible\"");
     }
 
+    @Test
+    void longTailAccessoryQueryAddsTheNatureClauseWhichTheGroupQueryDoesNotHold() {
+        assertThat(configured().accessoryQuery("lave-linge").toString()).doesNotContain("nature");
+        String json = configured().longTailAccessoryQuery("lave-linge").toString();
+        assertThat(json).contains("\"nature\"", "ACCESSORY", "SPARE_PART", "\"pour lave linge\"");
+        assertThat(configured().longTailAccessoryQuery("joint lave-vaisselle")).isNull();
+        GlobalSearchRelevance withoutTerms = new GlobalSearchRelevance(properties(List.of()),
+                new OfferFreshnessService(new OfferFreshnessProperties()));
+        assertThat(withoutTerms.longTailAccessoryQuery("lave-linge").toString()).contains("\"nature\"")
+                .doesNotContain("intervals");
+    }
+
+    @Test
+    void accessoryPhrasesMatchAnywhereInTheName() {
+        GlobalSearchProperties props = properties(List.of("moteur"));
+        props.setAccessoryPhrases(List.of("meuble tv", "kit d'étanchéité", "pour pièces"));
+        GlobalSearchRelevance withPhrases = new GlobalSearchRelevance(props,
+                new OfferFreshnessService(new OfferFreshnessProperties()));
+
+        assertThat(withPhrases.isAccessoryName("tv",
+                "The Living Store Meuble Tv Rose 99x39x44 Cm Acier - Meubles Tv")).isTrue();
+        assertThat(withPhrases.isAccessoryName("climatiseur", "Kit D'Étanchéité Pour Climatiseur Portable")).isTrue();
+        assertThat(withPhrases.isAccessoryName("televiseur", "Platine Principale Lg Pour Pieces Televiseur")).isTrue();
+        assertThat(withPhrases.isAccessoryName("tv", "Samsung Smart Tv 55 pouces")).isFalse();
+        assertThat(withPhrases.isAccessoryName("meuble tv", "The Living Store Meuble Tv Rose")).isFalse();
+        assertThat(withPhrases.accessoryQuery("tv").toString()).contains("meuble tv");
+    }
+
     private static GlobalSearchRelevance configured() {
         return new GlobalSearchRelevance(
                 properties(List.of("moteur", "module", "insertion", "meuble tv", "thermostat pour",

@@ -3,8 +3,61 @@ import MarkdownIt from 'markdown-it'
 import { queryCollection } from '@nuxt/content/server'
 
 import type { BlogPostDto, BlogTagDto } from '~~/shared/api-client'
+import {
+  PRODUCT_WIDGET_DIRECTIVE,
+  parseProductWidgetAttributes,
+  renderProductWidgetMarker,
+  type BlogProductWidget,
+} from '~~/shared/utils/blog-product-widget'
 
-const markdown = new MarkdownIt({ html: false, linkify: true })
+/**
+ * Block rule for the `::guide-product-grid{…}` directive (same syntax as the guides, see
+ * docs/markdown-mapping.md). It takes the directive line and its optional closing `::` line, and
+ * emits a `product_widget` token holding the validated values (null when invalid: nothing is
+ * rendered). Any other line, including a malformed directive, stays ordinary Markdown.
+ */
+function productWidgetPlugin(md: MarkdownIt): void {
+  md.block.ruler.before(
+    'paragraph',
+    'product_widget',
+    (state, startLine, endLine, silent) => {
+      if (state.sCount[startLine]! - state.blkIndent >= 4) {
+        return false
+      }
+      const lineText = (line: number) =>
+        state.src.slice(
+          state.bMarks[line]! + state.tShift[line]!,
+          state.eMarks[line]
+        )
+      const match = PRODUCT_WIDGET_DIRECTIVE.exec(lineText(startLine))
+      if (!match) {
+        return false
+      }
+      if (silent) {
+        return true
+      }
+      let nextLine = startLine + 1
+      if (nextLine < endLine && /^::\s*$/.test(lineText(nextLine))) {
+        nextLine += 1
+      }
+      const token = state.push('product_widget', '', 0)
+      token.block = true
+      token.map = [startLine, nextLine]
+      token.meta = parseProductWidgetAttributes(match[1] ?? '')
+      state.line = nextLine
+      return true
+    },
+    { alt: ['paragraph', 'reference', 'blockquote', 'list'] }
+  )
+  md.renderer.rules.product_widget = (tokens, idx) => {
+    const widget = tokens[idx]?.meta as BlogProductWidget | null
+    return widget ? `${renderProductWidgetMarker(widget)}\n` : ''
+  }
+}
+
+const markdown = new MarkdownIt({ html: false, linkify: true }).use(
+  productWidgetPlugin
+)
 
 export interface BlogContentDoc {
   path: string
@@ -55,8 +108,8 @@ export function resolveRelativeImageSrc(html: string, slug: string): string {
  * Renders a post's Markdown body to the sanitizer-ready HTML string BlogPostDto.body has always
  * carried. Rendered from the collection's `rawbody` (the source file as stored in the content
  * database) rather than its parsed AST -- the AST is shaped for <ContentRenderer>, not for producing
- * a plain HTML string, and the exported Markdown has no macros or components that would need MDC's
- * renderer over a plain CommonMark one. Never read content/ from disk: the deployed .output bundle
+ * a plain HTML string. The only component a post can hold is the product widget directive, handled
+ * by productWidgetPlugin above, so MDC's renderer is not needed. Never read content/ from disk: the deployed .output bundle
  * ships without it. A stray `[assistant]` marker (see quelle-taille-de-tv-choisir-pour-son-salon.md)
  * is unwrapped from the `<p>` markdown-it puts around it, so TheArticle.vue's
  * `content.split('[assistant]')` still finds a clean split point.

@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { resolve } from 'node:path'
 
+import MarkdownIt from 'markdown-it'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
@@ -106,6 +107,54 @@ describe('blog-content', () => {
     })
   })
 
+  describe('product widget directive', () => {
+    const render = async (body: string) =>
+      (await toBlogPostDto(doc({ rawbody: `---\ntitle: x\n---\n${body}` }))).body
+
+    it('renders the directive and its closing line as a validated marker', async () => {
+      const body = await render(
+        'Before\n\n::guide-product-grid{vertical="tv" subcategory="tv_55_inches" top="3"}\n::\n\nAfter'
+      )
+
+      expect(body).toBe(
+        '<p>Before</p>\n<div data-product-widget="tv|tv_55_inches|3"></div>\n<p>After</p>\n'
+      )
+    })
+
+    it('accepts a directive without closing line, right after a paragraph', async () => {
+      const body = await render(
+        'Before\n::guide-product-grid{vertical="oven"}\nAfter'
+      )
+
+      expect(body).toBe(
+        '<p>Before</p>\n<div data-product-widget="oven||3"></div>\n<p>After</p>\n'
+      )
+    })
+
+    it('renders nothing for invalid attributes, without breaking the body', async () => {
+      const body = await render(
+        'Before\n\n::guide-product-grid{vertical="<img src=x onerror=alert(1)>"}\n::\n\nAfter'
+      )
+
+      expect(body).toBe('<p>Before</p>\n<p>After</p>\n')
+    })
+
+    it('leaves a malformed directive as escaped text', async () => {
+      const body = await render('::guide-product-grid{vertical="tv"')
+
+      expect(body).not.toContain('data-product-widget')
+      expect(body).toContain('::guide-product-grid{vertical=&quot;tv&quot;')
+    })
+
+    it('keeps the directive literal inside a code block', async () => {
+      const body = await render(
+        '```md\n::guide-product-grid{vertical="tv"}\n```'
+      )
+
+      expect(body).not.toContain('data-product-widget')
+    })
+  })
+
   describe('blogDocToSitemapUrl', () => {
     it('builds a /blog/<slug> loc regardless of the path prefix depth', () => {
       const url = blogDocToSitemapUrl(
@@ -137,6 +186,35 @@ describe('blog-content', () => {
         ])
       )
     })
+  })
+})
+
+/**
+ * GOU-2225: the product widget rule must not change the HTML of posts that do not use it.
+ */
+describe('blog content without product widget', () => {
+  const contentDir = resolve(process.cwd(), 'content/blog/fr')
+  const plain = new MarkdownIt({ html: false, linkify: true })
+  const files = readdirSync(contentDir).filter(
+    name =>
+      name.endsWith('.md') &&
+      !readFileSync(resolve(contentDir, name), 'utf-8').includes(
+        '::guide-product-grid'
+      )
+  )
+
+  it.each(files)('%s renders as plain markdown-it', async fileName => {
+    const rawbody = readFileSync(resolve(contentDir, fileName), 'utf-8')
+    const slug = fileName.replace(/\.md$/, '')
+    const dto = await toBlogPostDto(doc({ path: `/blog/fr/${slug}`, rawbody }))
+    const expected = resolveRelativeImageSrc(
+      plain
+        .render(rawbody.replace(/^---\n[\s\S]*?\n---\n/, ''))
+        .replace('<p>[assistant]</p>', '[assistant]'),
+      slug
+    )
+
+    expect(dto.body).toBe(expected)
   })
 })
 

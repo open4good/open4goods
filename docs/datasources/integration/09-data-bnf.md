@@ -34,7 +34,7 @@ lang: fr
 ## 1. Apport
 
 Aujourd'hui, une fiche livre de nudger ne contient que ce que disent les marchands (flux Rakuten
-`BOOKS_*`, données Decitre dans la colonne `attributs`). Mesure sur l'export ISBN :
+`BOOKS_*`, attributs marchands bruts). Mesure sur l'export ISBN :
 
 | Colonne de l'export | Remplie (toutes lignes) | Remplie (lignes avec offre) | Origine |
 |---|---|---|---|

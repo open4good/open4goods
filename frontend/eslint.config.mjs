@@ -28,6 +28,31 @@ const sharedOverrides = [
     ignores: ['shared/api-client/**', 'src/api/**'],
   },
   {
+    files: ['app/**/*.vue'],
+    rules: {
+      // Vue SSR wraps an `appear` transition in an inert <template>: its
+      // content is invisible until hydration, then pushes the page down (CLS).
+      'vue/no-restricted-static-attribute': [
+        'error',
+        {
+          key: 'appear',
+          element: '/^[Tt]ransition$/',
+          message:
+            'No appear transition: Vue SSR hides its content in an inert <template> until hydration (CLS). Animate with CSS instead.',
+        },
+      ],
+      'vue/no-restricted-v-bind': [
+        'error',
+        {
+          argument: 'appear',
+          element: '/^[Tt]ransition$/',
+          message:
+            'No appear transition: Vue SSR hides its content in an inert <template> until hydration (CLS). Animate with CSS instead.',
+        },
+      ],
+    },
+  },
+  {
     files: [
       'app/**/*.{ts,vue}',
       'app.config.ts',

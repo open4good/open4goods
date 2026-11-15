@@ -697,6 +697,14 @@ attributesConfig:
 # Product classification from categories (samples, will be overridden post-generation)
 ####################################################################################
 
+# Merged with the _default.yml tokens. Fnac GEM categories also hold hoods and hobs (GOU-2255).
+# Tokens are searched as substrings in every category of the product: none may appear in an oven category.
+excludingTokensFromCategoriesMatching:
+  - HOTTE
+  - TABLE DE CUISSON
+  - PLAQUE DE CUISSON
+  - PLAQUES DE CUISSON
+
 matchingCategories:
   darty.com:
     - "GROS ELECTROMENAGER / CUISINIERES / PIANO DE CUISSON | GROS ELECTROMENAGER>CUISINIERES>PIANO DE CUISSON | CUISINIERES | PIANO DE CUISSON"
@@ -718,12 +726,9 @@ matchingCategories:
     - "PETIT ELECTROMENAGER CUISINE | MINI-FOUR / RECHAUD / FOUR POSABLE"
   Fnac FR:
     - "PETIT MENAGER & CUISINE - CUISSON GEM"
-    - "PETIT MENAGER & CUISINE - CUISSON PEM"
     - "PETIT MENAGER & CUISINE CUISSON GEM"
     - "362 | COOKING | PETIT MENAGER & CUISINE - CUISSON GEM"
-    - "362 | COOKING | PETIT MENAGER & CUISINE - CUISSON PEM"
     - "362 | COOKING | PETIT MENAGER & CUISINE CUISSON GEM"
-    - "362 | COOKING | PETIT MENAGER & CUISINE CUISSON PEM"
   fnac.com:
     - "PETIT MENAGER & CUISINE CUISSON GEM"
   Cdiscount FR:
@@ -769,7 +774,6 @@ matchingCategories:
     - "ELECTROMENAGER"
     - "ELECTROMENAGER | FOUR"
     - "ELECTROMENAGER | CUISINIERE"
-    - "ELECTROMENAGER | PETIT-APPAREIL-CUISSON"
   Ubaldi:
     - "ELECTROMENAGER > CUISSON > FOUR ENCASTRABLE"
   UNDERDOG FR:

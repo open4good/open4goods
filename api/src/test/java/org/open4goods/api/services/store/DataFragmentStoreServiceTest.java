@@ -30,6 +30,7 @@ import org.open4goods.model.price.Currency;
 import org.open4goods.model.price.Price;
 import org.open4goods.model.product.InStock;
 import org.open4goods.model.product.ProductCondition;
+import org.open4goods.model.product.ProductNature;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.productrepository.config.IndexationConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
@@ -302,6 +303,26 @@ class DataFragmentStoreServiceTest {
 
 		verify(generationService, never()).updateOne(any(), any());
 		verify(offerActivity).record("manomano.fr", 1_800_000_000_000L);
+	}
+
+	/**
+	 * GOU-2233: an unchanged feed row only sends lastChange, price and offersCount,
+	 * so it never clears the nature computed by the full aggregation.
+	 */
+	@Test
+	void partialUpdateDoesNotTouchTheNature() throws Exception {
+		Product existing = existingProduct();
+		existing.setVertical(null);
+		existing.setNature(ProductNature.SPARE_PART);
+		existing.getDatasourceCodes().put("manomano.fr", 42L);
+		elasticReturns(MultiGetItem.of(existing, null));
+
+		service.aggregateAndstore(List.of(pricedOffer(String.valueOf(GTIN), 1_800_000_000_000L)));
+
+		assertThat(queuedFullProducts()).isEmpty();
+		assertThat(repository.getPartialProductQueue()).singleElement()
+				.satisfies(partial -> assertThat(partial.getChanges().keySet())
+						.containsExactlyInAnyOrder("lastChange", "price", "offersCount"));
 	}
 
 	/** GOU-2037: a fragment without price or out of stock is not an offer. */

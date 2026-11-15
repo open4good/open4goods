@@ -869,8 +869,9 @@ public class SearchService {
 				: PageRequest.of(0, GLOBAL_SEARCH_LIMIT);
 
 		Query accessoryQuery = globalSearchRelevance.accessoryQuery(sanitizedQuery);
+		Query longTailAccessoryQuery = globalSearchRelevance.longTailAccessoryQuery(sanitizedQuery);
 		MissingVerticalPagedResult missingVerticalResult = executeMissingVerticalLexicalSearchPaged(sanitizedQuery, domainLanguage,
-				normalizedFilters, sort, effectivePageable, accessoryQuery);
+				normalizedFilters, sort, effectivePageable, longTailAccessoryQuery);
 
 		List<GlobalSearchHit> lexicalVerticalHits = executeVerticalLexicalSearch(sanitizedQuery, domainLanguage,
 				normalizedFilters, sort, accessoryQuery);
