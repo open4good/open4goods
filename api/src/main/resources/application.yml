@@ -17,6 +17,8 @@ logging:
     # GOU-1815: beta and prod (open4goods-config application-active.yml) set org.open4goods to warn. This more
     # specific key is merged with theirs and keeps the purge progress and report in nohup-api.log.
     org.open4goods.api.services.DatasourcePurgeService: INFO
+    # GOU-2266: batch counters and the final report of the product index backfill (Decitre purge...).
+    org.open4goods.api.services.backfill: INFO
     # GOU-1835: same for the INFO line giving the products index mapping result at startup.
     org.open4goods.api.services.ProductIndexMappingRunner: INFO
     # GOU-2099: same for the batch durations, per vertical, per phase and per completion service.
