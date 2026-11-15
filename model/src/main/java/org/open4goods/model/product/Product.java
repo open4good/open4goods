@@ -110,6 +110,12 @@ public class Product implements Standardisable {
 	private String vertical;
 
 	/**
+	 * Accessory or spare part, read from the merchant categories of a product
+	 * without vertical. Absent for an ordinary product (GOU-2233).
+	 */
+	private ProductNature nature;
+
+	/**
 	 * If true, means the item is excluded from vertical representation (because not
 	 * enough data, ....)
 	 **/
@@ -1151,6 +1157,14 @@ public class Product implements Standardisable {
 
 	public void setVertical(String vertical) {
 		this.vertical = vertical;
+	}
+
+	public ProductNature getNature() {
+		return nature;
+	}
+
+	public void setNature(ProductNature nature) {
+		this.nature = nature;
 	}
 
 	public long getCreationDate() {

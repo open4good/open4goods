@@ -22,6 +22,8 @@ import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.eprel.EprelModelAliasTable;
+import org.open4goods.model.helper.IdHelper;
+import org.open4goods.model.product.ProductNature;
 import org.open4goods.model.vertical.AttributeComparisonRule;
 
 import org.open4goods.model.vertical.AttributeConfig;
@@ -994,6 +996,63 @@ public class VerticalsConfigService {
 		}
 
 		return vc;
+	}
+
+	/**
+	 * Reads the nature of a product from its merchant categories (GOU-2233).
+	 *
+	 * <p>Each category is normalised ({@link IdHelper#getCategoryName(String)}), the
+	 * {@code natureNeutralCategoryFragments} of {@code _default.yml} are removed from
+	 * it, then the remainder is searched for the {@code sparePartCategoryMarkers} and
+	 * {@code accessoryCategoryMarkers}. A spare part marker in any category wins
+	 * over an accessory marker. The caller only applies it to a product without
+	 * vertical.
+	 *
+	 * @param categories merchant categories of the product, may be null
+	 * @return {@link ProductNature#SPARE_PART}, {@link ProductNature#ACCESSORY}, or
+	 *         null when no category carries a marker
+	 */
+	public ProductNature getNatureForCategories(Collection<String> categories) {
+		if (categories == null || categories.isEmpty() || defaultConfig == null) {
+			return null;
+		}
+
+		List<String> neutralFragments = defaultConfig.getNatureNeutralCategoryFragments() == null ? List.of()
+				: defaultConfig.getNatureNeutralCategoryFragments().stream()
+						.filter(StringUtils::isNotBlank)
+						// Longest first, so that a fragment containing another one is removed whole
+						.sorted(Comparator.comparingInt(String::length).reversed())
+						.toList();
+
+		ProductNature nature = null;
+		for (String rawCategory : categories) {
+			String category = IdHelper.getCategoryName(rawCategory);
+			if (category == null) {
+				continue;
+			}
+			for (String fragment : neutralFragments) {
+				category = category.replace(fragment, " ");
+			}
+			if (containsAny(category, defaultConfig.getSparePartCategoryMarkers())) {
+				return ProductNature.SPARE_PART;
+			}
+			if (containsAny(category, defaultConfig.getAccessoryCategoryMarkers())) {
+				nature = ProductNature.ACCESSORY;
+			}
+		}
+		return nature;
+	}
+
+	private static boolean containsAny(String category, Set<String> markers) {
+		if (markers == null) {
+			return false;
+		}
+		for (String marker : markers) {
+			if (StringUtils.isNotBlank(marker) && category.contains(marker)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

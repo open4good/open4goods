@@ -156,6 +156,30 @@ public class VerticalConfig {
 	private Set<String> excludingTokensFromCategoriesMatching = new HashSet<String>();
 
 	/**
+	 * Tokens that mark a product as a spare part when one of its normalised
+	 * merchant categories contains one of them (GOU-2233). Read from
+	 * {@code _default.yml}, for products without vertical.
+	 */
+	@JsonMerge
+	private Set<String> sparePartCategoryMarkers = new HashSet<String>();
+
+	/**
+	 * Tokens that mark a product as an accessory when one of its normalised
+	 * merchant categories contains one of them (GOU-2233). A spare part marker
+	 * wins over an accessory marker.
+	 */
+	@JsonMerge
+	private Set<String> accessoryCategoryMarkers = new HashSet<String>();
+
+	/**
+	 * Fragments removed from each normalised merchant category before the nature
+	 * markers are searched (GOU-2233), e.g. {@code ET ACCESSOIRES} in
+	 * {@code PACK TV LED ET ACCESSOIRES}.
+	 */
+	@JsonMerge
+	private Set<String> natureNeutralCategoryFragments = new HashSet<String>();
+
+	/**
 	 * The set of datasourcenames that will be excluded in generation of categories
 	 * matching
 	 */
@@ -1045,6 +1069,30 @@ public class VerticalConfig {
 
 	public void setExcludingTokensFromCategoriesMatching(Set<String> excludingTokens) {
 		this.excludingTokensFromCategoriesMatching = excludingTokens;
+	}
+
+	public Set<String> getSparePartCategoryMarkers() {
+		return sparePartCategoryMarkers;
+	}
+
+	public void setSparePartCategoryMarkers(Set<String> sparePartCategoryMarkers) {
+		this.sparePartCategoryMarkers = sparePartCategoryMarkers;
+	}
+
+	public Set<String> getAccessoryCategoryMarkers() {
+		return accessoryCategoryMarkers;
+	}
+
+	public void setAccessoryCategoryMarkers(Set<String> accessoryCategoryMarkers) {
+		this.accessoryCategoryMarkers = accessoryCategoryMarkers;
+	}
+
+	public Set<String> getNatureNeutralCategoryFragments() {
+		return natureNeutralCategoryFragments;
+	}
+
+	public void setNatureNeutralCategoryFragments(Set<String> natureNeutralCategoryFragments) {
+		this.natureNeutralCategoryFragments = natureNeutralCategoryFragments;
 	}
 
 	public Set<String> getGenerationExcludedFromAttributesMatching() {
