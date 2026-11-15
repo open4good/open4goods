@@ -61,6 +61,28 @@ excludingTokensFromCategoriesMatching:
   - CABLE
   - MEUBLE
 
+# Nature of a product without vertical, read from its normalised merchant categories (GOU-2233,
+# measure 4e.0 of GOU-2226). A category containing a spare part marker gives SPARE_PART, which wins
+# over an accessory marker (ACCESSORY). No marker: no nature. A product with a vertical gets no nature.
+# ENTRETIEN alone and MATERIEL D'ENTRETIEN are not markers (real air conditioners, brooms).
+sparePartCategoryMarkers:
+  - PIECES DETACHEE
+  - PIECE DETACHEE
+
+accessoryCategoryMarkers:
+  - ACCESSOIRE
+  - HOUSSE
+  - "PRODUIT D'ENTRETIEN"
+  - "PRODUITS D'ENTRETIEN"
+  - PRODUIT ENTRETIEN
+
+# Removed from each normalised category before the nature markers are searched.
+natureNeutralCategoryFragments:
+  - COMPOSANT - PIECE DETACHEE
+  - ACCESSOIRES VIDEO > ACCESSOIRES POUR TELEVISEURS
+  - ET ACCESSOIRES
+  - ACCESSOIRES ENFANT
+
 # The global scores that are available to build the impact score
 availableImpactScoreCriterias:
   #  - ESG

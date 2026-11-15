@@ -195,6 +195,15 @@ porté par une autre datasource, ni une catégorie qui ne correspond plus ne la 
 une verticale. Dénombrement et reprise des produits touchés :
 [runbook](../docs/operations/product-recreation-recovery.md).
 
+Après la verticale, `onProduct` calcule `nature` (`ProductNature`, GOU-2233) avec
+`VerticalsConfigService.getNatureForCategories`, à partir des `datasourceCategories` normalisées. Clés de
+`verticals/_default.yml` : `natureNeutralCategoryFragments`, fragments retirés de chaque catégorie avant la recherche ;
+`sparePartCategoryMarkers` donne `SPARE_PART`, qui l'emporte ; `accessoryCategoryMarkers` donne `ACCESSORY`. Aucun
+marqueur : champ absent. Un produit qui a une verticale n'a jamais de `nature`, même si EPREL l'y garde malgré une
+catégorie "accessoire". La nature est recalculée, donc effacée au besoin, à chaque agrégation complète. La mise à
+jour partielle d'une ligne de flux inchangée n'envoie que `lastChange`, `price` et `offersCount` : elle ne touche pas
+à `nature`. Ce champ ne change ni la verticale ni le score.
+
 ### Slug produit figé
 
 `NamesAggregationService` (GOU-1708) ne génère le slug (`names.url`, base du `fullSlug` de front-api) que s'il
