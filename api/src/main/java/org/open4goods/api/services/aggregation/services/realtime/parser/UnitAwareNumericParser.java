@@ -23,8 +23,6 @@ import org.open4goods.model.vertical.AttributeParser;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Generic numeric parser that converts raw attribute values to a dimension's base unit
@@ -52,7 +50,6 @@ import org.springframework.stereotype.Component;
  *       of them ever asserted.</li>
  * </ol>
  */
-@Component
 public class UnitAwareNumericParser extends AttributeParser
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(UnitAwareNumericParser.class);
@@ -68,17 +65,19 @@ public class UnitAwareNumericParser extends AttributeParser
 
     private final UUDCRegistry uudcRegistry;
 
-    @Autowired
-    public UnitAwareNumericParser(UUDCRegistry uudcRegistry)
+    /**
+     * Builds the parser on a given registry, without a Spring context. Used by the unit tests.
+     *
+     * @param uudcRegistry unit registry used to resolve and convert units
+     */
+    UnitAwareNumericParser(UUDCRegistry uudcRegistry)
     {
         this.uudcRegistry = uudcRegistry;
     }
 
     /**
-     * No-arg constructor for reflective instantiation via
-     * {@link AttributeConfig#getParserInstance()}.
-     * The registry is injected via Spring after construction when this class is used as
-     * a Spring bean; for reflective use, the static singleton is used via the context.
+     * Constructor used in production: {@link AttributeConfig#getParserInstance()} instantiates the
+     * parser reflectively, and the registry is the Spring bean read through {@link SpringContextHolder}.
      */
     public UnitAwareNumericParser()
     {
