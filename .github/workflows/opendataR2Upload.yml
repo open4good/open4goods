@@ -1,0 +1,113 @@
+name: 📤 Open data → R2
+
+run-name: 📤 Open data → R2 (${{ inputs.dataset }}, ${{ inputs.mode }}) by @${{ github.actor }}
+
+# Sends the open data zips from the prod host to the Cloudflare R2 bucket served as data.nudger.fr (GOU-2245).
+# Procedure: docs/operations/opendata-r2-upload.md
+
+on:
+  workflow_dispatch:
+    inputs:
+      dataset:
+        description: "Jeu de données à envoyer"
+        required: true
+        default: all
+        type: choice
+        options: [gtin, isbn, all]
+      mode:
+        description: "test = liste et sommes, rien n'est écrit ; apply = envoi et vérification"
+        required: true
+        default: test
+        type: choice
+        options: [test, apply]
+      upload_limit:
+        description: "Débit montant maximal (rclone --bwlimit, ex. 2M = 2 Mio/s)"
+        required: false
+        default: 2M
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    environment: prod
+    timeout-minutes: 180
+    concurrency:
+      group: opendata-r2-upload
+      cancel-in-progress: false
+    env:
+      DATASET: ${{ inputs.dataset }}
+      MODE: ${{ inputs.mode }}
+      UPLOAD_LIMIT: ${{ inputs.upload_limit }}
+      R2_ACCOUNT_ID: ${{ vars.R2_ACCOUNT_ID }}
+    steps:
+      - name: 🔎 Validate inputs
+        shell: bash
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: |
+          set -euo pipefail
+          [[ "${UPLOAD_LIMIT}" =~ ^[0-9]+[kKMG]?$ ]] || { echo "::error::upload_limit invalide"; exit 1; }
+          [[ "${R2_ACCOUNT_ID}" =~ ^[0-9a-f]{32}$ ]] || { echo "::error::variable R2_ACCOUNT_ID absente ou invalide dans l'environnement prod"; exit 1; }
+          [ -n "${R2_ACCESS_KEY_ID}" ] && [ -n "${R2_SECRET_ACCESS_KEY}" ] || { echo "::error::secrets R2 absents de l'environnement prod"; exit 1; }
+
+      - name: 📤 Upload on the prod host
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
+        env:
+          RCLONE_CONFIG_R2_TYPE: s3
+          RCLONE_CONFIG_R2_PROVIDER: Cloudflare
+          RCLONE_CONFIG_R2_ENDPOINT: https://${{ vars.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+          RCLONE_CONFIG_R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          RCLONE_CONFIG_R2_NO_CHECK_BUCKET: "true"
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # Credentials travel as environment variables only: rclone reads them, nothing is written to disk.
+          envs: DATASET,MODE,UPLOAD_LIMIT,RCLONE_CONFIG_R2_TYPE,RCLONE_CONFIG_R2_PROVIDER,RCLONE_CONFIG_R2_ENDPOINT,RCLONE_CONFIG_R2_ACCESS_KEY_ID,RCLONE_CONFIG_R2_SECRET_ACCESS_KEY,RCLONE_CONFIG_R2_NO_CHECK_BUCKET
+          command_timeout: 170m
+          script: |
+            set -eu
+            SRC_DIR=/opt/open4goods/opendata
+            BUCKET=nudger-opendata
+            RCLONE="$HOME/bin/rclone"
+            if [ ! -x "${RCLONE}" ]; then
+              echo "rclone introuvable: ${RCLONE} (binaire local, voir docs/operations/opendata-r2-upload.md)"
+              exit 1
+            fi
+            case "${DATASET}" in
+              gtin) names="gtin" ;;
+              isbn) names="isbn" ;;
+              all)  names="gtin isbn" ;;
+              *) echo "dataset invalide"; exit 1 ;;
+            esac
+            for n in ${names}; do
+              src="${SRC_DIR}/${n}.zip"
+              key="${n}-open-data.zip"
+              if [ ! -f "${src}" ]; then echo "fichier absent: ${src}"; exit 1; fi
+              local_sha="$(nice -n 19 ionice -c3 sha256sum "${src}" | cut -d' ' -f1)"
+              echo "[${n}] ${src} $(stat -c %s "${src}") octets sha256=${local_sha}"
+              if [ "${MODE}" != "apply" ]; then
+                echo "[${n}] mode test: rien n'est écrit. Objet distant actuel:"
+                nice -n 19 ionice -c3 "${RCLONE}" lsl "R2:${BUCKET}/${key}" || echo "(absent)"
+                continue
+              fi
+              nice -n 19 ionice -c3 "${RCLONE}" copyto "${src}" "R2:${BUCKET}/${key}" \
+                --bwlimit "${UPLOAD_LIMIT}" --transfers 1 --s3-upload-concurrency 2 \
+                --header-upload "Content-Type: application/zip" \
+                --header-upload "Content-Disposition: attachment; filename=\"${key}\"" \
+                --header-upload "Cache-Control: public, max-age=86400" \
+                --metadata --metadata-set "sha256=${local_sha}" \
+                --no-update-modtime
+              # Read the object back (not the metadata) and compare with the local sum.
+              remote_sha="$(nice -n 19 ionice -c3 "${RCLONE}" cat "R2:${BUCKET}/${key}" | sha256sum | cut -d' ' -f1)"
+              if [ "${remote_sha}" != "${local_sha}" ]; then
+                echo "::error::[${n}] sha256 distant ${remote_sha} différent du local ${local_sha}"
+                exit 1
+              fi
+              echo "[${n}] OK sha256 vérifié: ${remote_sha}"
+            done
