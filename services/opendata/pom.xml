@@ -11,6 +11,11 @@
 
   <artifactId>opendata</artifactId>
 
+  <properties>
+    <!-- S3 API of Cloudflare R2 (GOU-2289). Checked on Maven Central, 15/11/2026. -->
+    <awssdk.version>2.59.1</awssdk.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -68,6 +73,24 @@
       <groupId>com.opencsv</groupId>
       <artifactId>opencsv</artifactId>
       <version>5.12.0</version>
+    </dependency>
+
+    <!-- Synchronous client only: the async Netty client would bring a Netty that Spring Boot also manages. -->
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>s3</artifactId>
+      <version>${awssdk.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>software.amazon.awssdk</groupId>
+          <artifactId>netty-nio-client</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>apache-client</artifactId>
+      <version>${awssdk.version}</version>
     </dependency>
 
     <dependency>

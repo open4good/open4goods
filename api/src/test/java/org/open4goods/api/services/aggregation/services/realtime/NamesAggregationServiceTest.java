@@ -49,7 +49,6 @@ class NamesAggregationServiceTest {
 	@Test
 	void onProduct_shouldGenerateCanonicalNames() throws AggregationSkipException, InvalidParameterException {
 		VerticalConfig config = buildVerticalConfig();
-		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
 
 		Product product = new Product(9L);
 		product.setVertical("tv");
@@ -94,7 +93,6 @@ class NamesAggregationServiceTest {
 	void generateUrl_shouldIncludeGtinInUrl() throws AggregationSkipException, InvalidParameterException {
 		VerticalConfig config = buildVerticalConfig();
 		config.setId("tv");
-		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
 		when(blablaService.generateBlabla(anyString(), any())).thenReturn("TV");
 
 		Product product = new Product(123456789L);
@@ -126,7 +124,6 @@ class NamesAggregationServiceTest {
 		config.getI18n().get("fr").setDisplayName("{BRAND}");
 		config.getI18n().get("fr").setPageTitle("{BRAND} {MODEL} - {DIAGONALE_POUCES} {ATTRIBUTE_NOT_EXIST}");
 
-		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
 
 		Product product = new Product(100L);
 		product.setVertical("tv");
@@ -150,7 +147,6 @@ class NamesAggregationServiceTest {
 		VerticalConfig config = buildVerticalConfig();
 		config.getI18n().get("fr").setDisplayName("[(${p.brand()})] [(${p.model()})]");
 
-		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
 
 		Product product = new Product(101L);
 		product.setVertical("tv");
@@ -163,7 +159,6 @@ class NamesAggregationServiceTest {
 	void onProduct_shouldLeaveLegacyTextEmbeddingUntouched()
 			throws AggregationSkipException, InvalidParameterException {
 		VerticalConfig config = buildVerticalConfig();
-		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
 
 		Product product = new Product(8L);
 		product.setVertical("vertical-id");
@@ -183,7 +178,6 @@ class NamesAggregationServiceTest {
 	void onProduct_shouldKeepFrozenSlugWhenNameOrAttributesChange()
 			throws AggregationSkipException, InvalidParameterException {
 		VerticalConfig config = buildSlugConfig("tv");
-		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
 
 		Product product = new Product(8431312260509L);
 		product.setVertical("tv");
@@ -206,7 +200,6 @@ class NamesAggregationServiceTest {
 	void onProduct_shouldFreezeLegacySlugAndRecordItsVertical()
 			throws AggregationSkipException, InvalidParameterException {
 		VerticalConfig config = buildSlugConfig("tv");
-		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
 
 		Product product = new Product(123456789L);
 		product.setVertical("tv");
@@ -223,7 +216,6 @@ class NamesAggregationServiceTest {
 	void onProduct_shouldRegenerateSlugWhenVerticalChanged()
 			throws AggregationSkipException, InvalidParameterException {
 		VerticalConfig config = buildSlugConfig("tv");
-		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
 		when(blablaService.generateBlabla(anyString(), any())).thenReturn("TV");
 
 		Product product = new Product(123456789L);
@@ -242,7 +234,6 @@ class NamesAggregationServiceTest {
 	void onProduct_shouldRegenerateSlugWhenProductGainsVertical()
 			throws AggregationSkipException, InvalidParameterException {
 		VerticalConfig config = buildSlugConfig("tv");
-		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
 		when(blablaService.generateBlabla(anyString(), any())).thenReturn("TV");
 
 		Product product = new Product(123456789L);
@@ -261,7 +252,6 @@ class NamesAggregationServiceTest {
 	void onProduct_shouldGenerateMissingSlugAndRecordVertical()
 			throws AggregationSkipException, InvalidParameterException {
 		VerticalConfig config = buildSlugConfig("tv");
-		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(config);
 		when(blablaService.generateBlabla(anyString(), any())).thenReturn("TV");
 
 		Product product = new Product(123456789L);
@@ -279,7 +269,6 @@ class NamesAggregationServiceTest {
 			throws AggregationSkipException, InvalidParameterException {
 		VerticalConfig defaultConfig = buildSlugConfig(null);
 		VerticalConfig tvConfig = buildSlugConfig("tv");
-		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(defaultConfig, tvConfig);
 
 		Product product = new Product(123456789L);
 		product.getNames().getUrl().put("fr", "123456789-tv-55");
@@ -302,7 +291,6 @@ class NamesAggregationServiceTest {
 	void onProduct_shouldRecordMissingVerticalForSlugGeneratedWithoutVertical()
 			throws AggregationSkipException, InvalidParameterException {
 		VerticalConfig defaultConfig = buildSlugConfig(null);
-		when(verticalsConfigService.getConfigByIdOrDefault(any())).thenReturn(defaultConfig);
 
 		Product product = new Product(123456789L);
 		product.getOfferNames().add("Offre courte");

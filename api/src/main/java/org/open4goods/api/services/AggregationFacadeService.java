@@ -2,8 +2,10 @@
 package org.open4goods.api.services;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
@@ -52,11 +54,11 @@ import jakarta.annotation.PreDestroy;
  * <p>Assembles and invokes two kinds of aggregators:
  * <ul>
  *   <li><strong>StandardAggregator</strong> — used in realtime mode
- *       ({@link #updateOne(DataFragment, Product)}) and during batch sanitisation
- *       ({@link #sanitizeAll()}, {@link #sanitizeVertical(VerticalConfig)},
- *       {@link #aggregateProducts(VerticalConfig, Set)}).</li>
- *   <li><strong>ScoringBatchedAggregator</strong> — used for scoring
- *       ({@link #score(VerticalConfig)}, {@link #scoreAll()}).</li>
+ *       ({@link #updateOne(DataFragment, Product)}), by the batch
+ *       ({@link #aggregateProducts(VerticalConfig, Set)}) and by the on-demand sanitisation of a vertical
+ *       ({@link #sanitizeVertical(VerticalConfig)}).</li>
+ *   <li><strong>ScoringBatchedAggregator</strong> — used by the batch for scoring
+ *       ({@link #score(VerticalConfig, Set)}).</li>
  * </ul>
  *
  * <p>A single {@link StandardAggregator} instance ({@code realtimeAggregator}) is
@@ -124,44 +126,9 @@ public class AggregationFacadeService {
 	}
 
 	/**
-	 * Scores all enabled verticals in sequence using the batch scoring aggregator.
-	 */
-	public void scoreAll() {
-		for (VerticalConfig vertical : verticalConfigService.getConfigsWithoutDefault()) {
-			score(vertical);
-		}
-	}
-
-	/**
-	 * Scores a single vertical: loads all products with a valid date, runs the
-	 * {@link ScoringBatchedAggregator}, then queues the full product set for
-	 * Elasticsearch re-indexation. In ImpactScore methodology V2, only the batch
-	 * cohort (with offers, not excluded) is scored and queued.
-	 *
-	 * @param vertical vertical configuration to score
-	 */
-	public void score(final VerticalConfig vertical) {
-		logger.info("Score batching for {}", vertical.getId());
-
-		ScoringBatchedAggregator batchAgg = getScoringAggregator();
-		VerticalConfig config = verticalConfigService.getConfigByIdOrDefault(vertical.getId());
-		List<Product> productBag = dataRepository.exportVerticalWithValidDate(vertical, false).toList();
-		if (config.getImpactScoreConfig() != null && config.getImpactScoreConfig().isV2Active()) {
-			// Methodology V2 scores the batch cohort only: a product without offers or excluded is not recomputed
-			// (design GOU-1878, 2.5)
-			productBag = productBag.stream()
-					.filter(product -> product.getOffersCount() != null && product.getOffersCount() > 0)
-					.filter(product -> !product.isExcluded())
-					.toList();
-		}
-		batchAgg.score(productBag, config);
-		logger.info("Score batching : indexing {} products", productBag.size());
-		dataRepository.addToFullindexationQueue(productBag);
-	}
-
-	/**
 	 * Scores a pre-filtered set of products within the given vertical, without
-	 * persisting results. Useful for triggered re-scoring of a subset.
+	 * persisting results. Called by {@link BatchService#batch(VerticalConfig)}, which
+	 * applies the ImpactScore checks and persists the products.
 	 *
 	 * @param vertical vertical configuration
 	 * @param products products to score; modified in-place
@@ -171,25 +138,6 @@ public class AggregationFacadeService {
 
 		ScoringBatchedAggregator batchAgg = getScoringAggregator();
 		batchAgg.score(products, verticalConfigService.getConfigByIdOrDefault(vertical.getId()));
-	}
-
-	/**
-	 * Re-sanitises every product in the repository and persists the result.
-	 * Products that raise {@link AggregationSkipException} are logged and skipped.
-	 */
-	public void sanitizeAll() {
-		logger.info("started : Sanitisation batching for all items");
-		StandardAggregator batchAgg = getStandardAggregator();
-
-		dataRepository.exportAll().forEach(p -> {
-			try {
-				batchAgg.onProduct(p);
-				dataRepository.index(p);
-			} catch (AggregationSkipException e) {
-				logger.error("Skipping product during batched sanitisation : ", e);
-			}
-		});
-		logger.info("done: Sanitisation batching for all items");
 	}
 
 	/**
@@ -204,25 +152,66 @@ public class AggregationFacadeService {
 
 	/**
 	 * Re-sanitises all products matching the given vertical's categories, then
-	 * persists the results. This relies on category matching rather than the
-	 * pre-assigned vertical field, so products that have drifted from their
-	 * vertical assignment are also corrected.
+	 * queues them for full indexation. This relies on category matching rather than the
+	 * pre-assigned vertical field, so products that have drifted from their vertical
+	 * assignment are also corrected (runbook {@code docs/operations/product-recreation-recovery.md}).
+	 *
+	 * <p>Only the standard aggregation chain runs: no completion, no scoring. The products
+	 * are streamed and written like the batch does (GOU-1709, GOU-2274): by pages of
+	 * {@link BatchService#INDEXATION_PAGE_SIZE}, each page gets the newest realtime offers
+	 * ({@link ProductRepository#applyNewerOfferStates}) just before being queued, so an offer
+	 * indexed or queued since the product was read is never overwritten by the one it was
+	 * read with. This holds because the standard chain never moves {@code lastChange} on
+	 * {@link StandardAggregator#onProduct(Product)}: only a data fragment does.
+	 *
+	 * <p>Queueing a page blocks while the full indexation queue is full; the scroll is kept
+	 * alive long enough between two requests ({@code ProductRepository.CATEGORY_MATCH_SCROLL_KEEP_ALIVE}).
+	 * The method returns once the products are queued, not once they are indexed.
 	 *
 	 * @param vertical vertical configuration to process
 	 */
 	public void sanitizeVertical(final VerticalConfig vertical) {
-		logger.info("started : Sanitisation batching for vertical : {}", vertical);
+		logger.info("started : Sanitisation batching for vertical : {}", vertical.getId());
 		StandardAggregator batchAgg = getStandardAggregator();
 
-		dataRepository.getProductsMatchingCategoriesOrVerticalId(vertical).forEach(p -> {
-			try {
-				batchAgg.onProduct(p);
-				dataRepository.index(p);
-			} catch (AggregationSkipException e) {
-				logger.error("Skipping product during batched sanitisation : ", e);
+		long queued = 0;
+		long refreshed = 0;
+		List<Product> page = new ArrayList<>(BatchService.INDEXATION_PAGE_SIZE);
+		try (Stream<Product> products = dataRepository.getProductsMatchingCategoriesOrVerticalId(vertical)) {
+			Iterator<Product> iterator = products.iterator();
+			while (iterator.hasNext()) {
+				Product p = iterator.next();
+				try {
+					batchAgg.onProduct(p);
+					page.add(p);
+				} catch (AggregationSkipException e) {
+					logger.error("Skipping product during batched sanitisation : ", e);
+				}
+				if (page.size() == BatchService.INDEXATION_PAGE_SIZE) {
+					refreshed += queueWithNewestOffers(page);
+					queued += page.size();
+					page = new ArrayList<>(BatchService.INDEXATION_PAGE_SIZE);
+				}
 			}
-		});
-		logger.info("done: Sanitisation batching for all items");
+		}
+		if (!page.isEmpty()) {
+			refreshed += queueWithNewestOffers(page);
+			queued += page.size();
+		}
+		logger.info("done: Sanitisation batching for vertical {} : {} products queued, {} got offers updated in realtime during the run",
+				vertical.getId(), queued, refreshed);
+	}
+
+	/**
+	 * Gives a page of products the newest realtime offers, then queues it for full indexation.
+	 *
+	 * @param page products about to be written
+	 * @return number of products whose offers were replaced
+	 */
+	private int queueWithNewestOffers(final List<Product> page) {
+		int refreshed = dataRepository.applyNewerOfferStates(page);
+		dataRepository.addToFullindexationQueue(page);
+		return refreshed;
 	}
 
 	/**

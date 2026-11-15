@@ -47,6 +47,10 @@ Les identifiants passent en variables d'environnement (configuration rclone `RCL
 standard SSH (`bash -s`, script `scripts/deploy/opendata-r2-upload.sh`) : ils n'apparaissent dans aucune ligne de
 commande (ni runner ni hôte), ne sont pas écrits sur disque et sont masqués dans les logs par GitHub.
 
+Depuis GOU-2289, `api` publie lui-même zips et manifests après chaque passage quand
+`open-data-config.publication.enabled` est vrai ([opendata-generation.md](opendata-generation.md#publication-sur-r2)).
+Ce workflow reste un secours manuel pour les seuls zips.
+
 ## Coût
 
 R2 : 10 Go-mois de stockage et 1 M d'opérations de classe A / 10 M de classe B gratuits par mois, sortie réseau

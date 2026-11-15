@@ -36,4 +36,4 @@ developer workflow.
 - [ADR 0018: Local promotion readiness gate](0018-promotion-readiness-gate.md)
 - [ADR 0019: Dependency maintenance and release policy](0019-dependency-maintenance-policy.md)
 - [ADR 0020: Legacy backup import contract](0020-legacy-backup-import-contract.md)
-- [ADR 0021: Reference datasets and projection onto products](0021-reference-datasets-and-projection.md)
+- [ADR 0021: Reference datasets and projection onto products](0021-reference-datasets-and-projection.md) (amended 2026-11-15)

@@ -63,6 +63,7 @@ import org.open4goods.services.opendata.model.DatasetManifest;
 import org.open4goods.services.opendata.model.OpenDataGenerationStatus;
 import org.open4goods.services.opendata.model.OpenDataGenerationStatus.State;
 import org.open4goods.services.opendata.model.OpenDataManifest;
+import org.open4goods.services.opendata.model.OpenDataPublicationStatus;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
@@ -86,7 +87,8 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
  * Service responsible for generating and managing the CSV OpenData files.
  * Handles the creation of GTIN and ISBN datasets, their compression into ZIP files, their manifests, and the management
  * of download limits and rates. Generation runs in the api only (GOU-2248, {@code generation-enabled}); the schedule
- * lives in the api, this bean has none.
+ * lives in the api, this bean has none. After a successful pass, {@link OpenDataPublisher} publishes the files on R2
+ * when {@code open-data-config.publication.enabled} is set (GOU-2289).
  */
 @Service
 public class OpenDataService implements HealthIndicator {
@@ -157,6 +159,7 @@ public class OpenDataService implements HealthIndicator {
     private final boolean generationEnabled;
     private final OpenDataManifestStore manifestStore = new OpenDataManifestStore();
     private final MeterRegistry meterRegistry;
+    private final OpenDataPublisher publisher;
 
     private final AtomicBoolean exportRunning = new AtomicBoolean(false);
     private final AtomicInteger concurrentDownloadsCounter = new AtomicInteger(0);
@@ -167,8 +170,9 @@ public class OpenDataService implements HealthIndicator {
     public OpenDataService(ProductRepository aggregatedDataRepository,
                            OpenDataConfig openDataConfig,
                            ObjectProvider<MeterRegistry> meterRegistry,
+                           OpenDataPublisher publisher,
                            ObjectProvider<VerticalsConfigService> verticalsConfigService) {
-        this(aggregatedDataRepository, openDataConfig, meterRegistry.getIfAvailable(SimpleMeterRegistry::new),
+        this(aggregatedDataRepository, openDataConfig, meterRegistry.getIfAvailable(SimpleMeterRegistry::new), publisher,
                 verticalsConfigService.getIfAvailable());
     }
 
@@ -179,16 +183,27 @@ public class OpenDataService implements HealthIndicator {
                     OpenDataConfig openDataConfig,
                     MeterRegistry meterRegistry,
                     VerticalsConfigService verticalsConfigService) {
+        this(aggregatedDataRepository, openDataConfig, meterRegistry,
+                new OpenDataPublisher(openDataConfig, meterRegistry, S3OpenDataStorage::new), verticalsConfigService);
+    }
+
+    OpenDataService(ProductRepository aggregatedDataRepository,
+                    OpenDataConfig openDataConfig,
+                    MeterRegistry meterRegistry,
+                    OpenDataPublisher publisher,
+                    VerticalsConfigService verticalsConfigService) {
         Assert.notNull(aggregatedDataRepository, "aggregatedDataRepository must not be null");
         Assert.notNull(openDataConfig, "openDataConfig must not be null");
         Assert.notNull(openDataConfig.getGenerationEnabled(), "openDataConfig.generationEnabled must be configured");
         Assert.notNull(meterRegistry, "meterRegistry must not be null");
+        Assert.notNull(publisher, "publisher must not be null");
 
         this.aggregatedDataRepository = aggregatedDataRepository;
         this.openDataConfig = openDataConfig;
         this.verticalsConfigService = verticalsConfigService;
         this.generationEnabled = openDataConfig.isGenerationEnabled();
         this.meterRegistry = meterRegistry;
+        this.publisher = publisher;
         registerGauges();
 
         LOGGER.info("OpenDataService generation is {}", generationEnabled ? "enabled" : "disabled");
@@ -252,8 +267,8 @@ public class OpenDataService implements HealthIndicator {
     }
 
     /**
-     * DOWN when the last generation pass of this process failed (the previous files stay published), UNKNOWN when a
-     * published zip is missing and no pass failed, UP otherwise.
+     * DOWN when the last generation pass or the last R2 publication of this process failed (the previous files stay
+     * published), UNKNOWN when a published zip is missing and nothing failed, UP otherwise.
      */
     @Override
     public Health health() {
@@ -261,6 +276,12 @@ public class OpenDataService implements HealthIndicator {
         if (current.state() == State.FAILED) {
             return withStatusDetails(Health.down(), current)
                     .withDetail("error", StringUtils.defaultString(current.error()))
+                    .build();
+        }
+        OpenDataPublicationStatus publication = publisher.status();
+        if (publication.state() == State.FAILED) {
+            return withStatusDetails(Health.down(), current)
+                    .withDetail("publicationError", StringUtils.defaultString(publication.error()))
                     .build();
         }
         if (!openDataConfig.isbnZipFile().exists() || !openDataConfig.gtinZipFile().exists()) {
@@ -281,6 +302,11 @@ public class OpenDataService implements HealthIndicator {
         }
         if (current.lastSuccessAt() != null) {
             builder.withDetail("lastSuccessAt", current.lastSuccessAt().toString());
+        }
+        OpenDataPublicationStatus publication = publisher.status();
+        builder.withDetail("publication", publisher.isEnabled() ? publication.state().name() : "DISABLED");
+        if (publication.lastSuccessAt() != null) {
+            builder.withDetail("publicationLastSuccessAt", publication.lastSuccessAt().toString());
         }
         return builder;
     }
@@ -373,8 +399,9 @@ public class OpenDataService implements HealthIndicator {
     }
 
     /**
-     * Runs one pass. Any failure is logged at ERROR, counted, and exposed by {@link #health()} and {@link #status()};
-     * the published files and manifests are then unchanged.
+     * Runs one pass, then the R2 publication when enabled. Any failure of the pass is logged at ERROR, counted, and
+     * exposed by {@link #health()} and {@link #status()}; the published files and manifests are then unchanged and
+     * nothing is sent. A failure of the publication has its own status and metrics ({@link OpenDataPublisher}).
      */
     private boolean runPass() {
         Instant startedAt = Instant.now();
@@ -382,14 +409,16 @@ public class OpenDataService implements HealthIndicator {
         status = new OpenDataGenerationStatus(State.RUNNING, startedAt, null, previous.lastSuccessAt(), null, previous.rows());
         Timer.Sample sample = Timer.start(meterRegistry);
         String outcome = "failure";
+        List<DatasetManifest> published;
         try {
-            Map<String, Long> rows = generate();
+            published = generate();
+            Map<String, Long> rows = new LinkedHashMap<>();
+            published.forEach(manifest -> rows.put(manifest.id(), manifest.rows()));
             Instant finishedAt = Instant.now();
             rows.forEach((dataset, count) -> exportedRowsGauge(dataset).set(count));
             status = new OpenDataGenerationStatus(State.SUCCEEDED, startedAt, finishedAt, finishedAt, null, rows);
             outcome = "success";
             LOGGER.info("Open data generation succeeded in {}: {}", Duration.between(startedAt, finishedAt), rows);
-            return true;
         } catch (Exception e) {
             LOGGER.error("Open data generation failed, the published files and manifests are unchanged", e);
             status = new OpenDataGenerationStatus(State.FAILED, startedAt, Instant.now(), previous.lastSuccessAt(),
@@ -403,13 +432,37 @@ public class OpenDataService implements HealthIndicator {
             sample.stop(meterRegistry.timer("opendata.generation.duration", OUTCOME_TAG, outcome));
             meterRegistry.counter("opendata.generation.runs", OUTCOME_TAG, outcome).increment();
         }
+        if (publisher.isEnabled()) {
+            publisher.publish(publicationDatasets(published), openDataConfig.manifestFile().toPath());
+        }
+        return true;
+    }
+
+    /**
+     * @return the datasets just published locally, in the order of the manifests (the global impact zip comes last)
+     */
+    private List<OpenDataPublisher.Dataset> publicationDatasets(List<DatasetManifest> manifests) {
+        List<DatasetDefinition> definitions = datasetDefinitions();
+        List<OpenDataPublisher.Dataset> datasets = new ArrayList<>();
+        for (DatasetManifest manifest : manifests) {
+            DatasetDefinition definition = definitions.stream().filter(d -> d.id().equals(manifest.id())).findFirst()
+                    .orElse(null);
+            datasets.add(definition != null
+                    ? new OpenDataPublisher.Dataset(manifest, definition.finalZipFile().toPath(),
+                            definition.manifestFile().toPath())
+                    : new OpenDataPublisher.Dataset(manifest, openDataConfig.impactZipFile("all").toPath(),
+                            openDataConfig.impactManifestFile("all").toPath()));
+        }
+        return datasets;
     }
 
     /**
      * Writes both datasets in the temporary folder, checks them, then publishes them: zips first, per-dataset
      * manifests next, {@code manifest.json} last.
+     *
+     * @return the published manifests, in the order of {@link #datasetDefinitions()}
      */
-    Map<String, Long> generate() throws IOException, OpenDataGenerationException, InterruptedException {
+    List<DatasetManifest> generate() throws IOException, OpenDataGenerationException, InterruptedException {
         List<DatasetDefinition> datasets = datasetDefinitions();
         prepareTmpDirectory();
         checkFreeSpace(datasets);
@@ -432,10 +485,7 @@ public class OpenDataService implements HealthIndicator {
         datasets = new ArrayList<>(datasets);
         addGlobalImpactDataset(datasets, manifests);
         publish(datasets, manifests);
-
-        Map<String, Long> rows = new LinkedHashMap<>();
-        manifests.forEach(manifest -> rows.put(manifest.id(), manifest.rows()));
-        return rows;
+        return manifests;
     }
 
     /**
@@ -785,6 +835,21 @@ public class OpenDataService implements HealthIndicator {
     }
 
     /**
+     * Picks the shortest offer name that is not corrupted by an encoding loss ({@code ¿} or {@code �}). Returns an
+     * empty string when every name is corrupted: a missing name is better than a wrong one.
+     */
+    static String exportName(Product data) {
+        Set<String> names = data.getOfferNames();
+        if (names == null) {
+            return "";
+        }
+        return names.stream()
+                .filter(n -> n != null && n.indexOf('\u00BF') < 0 && n.indexOf('\uFFFD') < 0)
+                .min(java.util.Comparator.comparingInt(String::length))
+                .orElse("");
+    }
+
+    /**
      * Converts a Product object into a CSV row for GTIN.
      */
     private String[] toGtinEntry(Product data) {
@@ -794,7 +859,7 @@ public class OpenDataService implements HealthIndicator {
         line[0] = StringUtils.defaultString(data.gtin());
         line[1] = StringUtils.defaultString(data.brand());
         line[2] = StringUtils.defaultString(data.model());
-        line[3] = StringUtils.defaultString(data.shortestOfferName());
+        line[3] = exportName(data);
 
         line[4] = String.valueOf(data.getLastChange());
 
@@ -842,7 +907,7 @@ public class OpenDataService implements HealthIndicator {
         Arrays.fill(line, "");
 
         line[0] = StringUtils.defaultString(data.gtin());
-        line[1] = StringUtils.defaultString(data.shortestOfferName());
+        line[1] = exportName(data);
         line[2] = String.valueOf(data.getLastChange());
         if (data.getOffersCount() != null) {
             line[3] = String.valueOf(data.getOffersCount());
