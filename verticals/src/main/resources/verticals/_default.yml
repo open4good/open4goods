@@ -56,7 +56,7 @@ descriptionAttributes:
 
 # If product categories contains one of this token, this will be unmatched
 # Categories are compared upper-cased and without accents (IdHelper.getCategoryName), as substrings:
-# "PIECES DETACHEE" covers "PIECES DETACHEES", "PIECE DETACHEE" covers "PIECE DETACHEES" (GOU-2231).
+# "PIECES DETACHEE" covers "PIECES DETACHEES", "PIECE DETACHEE" covers "PIECE DETACHEES" (GOU-2236).
 excludingTokensFromCategoriesMatching:
   - ACCESSOIRE
   - QUINCAILLERIE

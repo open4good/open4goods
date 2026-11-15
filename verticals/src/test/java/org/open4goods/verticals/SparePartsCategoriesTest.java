@@ -13,7 +13,7 @@ import org.open4goods.services.serialisation.service.SerialisationService;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 /**
- * Spare parts stay out of the verticals (GOU-2231): a merchant category naming "pièces détachées" is an
+ * Spare parts stay out of the verticals (GOU-2236): a merchant category naming "pièces détachées" is an
  * excluding token, as "accessoire" already is. Categories reach the matching upper-cased and without accents
  * ({@code IdHelper.getCategoryName}).
  */

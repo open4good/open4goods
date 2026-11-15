@@ -293,8 +293,8 @@ Champs `Product` : `sourceAttributions` (P0-4). Attribution par image : nouveau 
   `VerticalsConfigService.getVerticalForCategories` applique ensuite
   `excludingTokensFromCategoriesMatching` aux catégories **de toutes les sources** : `ACCESSOIRE`,
   `QUINCAILLERIE`, `CABLE`, `MEUBLE` dans `_default.yml`, plus `PIECE DETACHEE` et
-  `PIECES DETACHEE` depuis GOU-2231, comparés après passage en majuscules
-  par `IdHelper.getCategoryName`. Mesure, faite avant GOU-2231 sur les quatre premiers jetons :
+  `PIECES DETACHEE` depuis GOU-2236, comparés après passage en majuscules
+  par `IdHelper.getCategoryName`. Mesure, faite avant GOU-2236 sur les quatre premiers jetons :
   65 fiches OPF portent une étiquette qui contient l'un de ces jetons (52 `CABLE`, par exemple `en:cables` ou `en:USB-A to Lightning Cables` ; 12
   `ACCESSOIRE`, par exemple `fr:accessoire-xbox` ; 1 `QUINCAILLERIE`). Une seule suffirait à
   retirer un produit de sa verticale. Son URL changerait alors, avec une redirection 301 (voir
