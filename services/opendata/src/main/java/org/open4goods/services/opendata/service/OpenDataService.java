@@ -8,19 +8,29 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
@@ -36,26 +46,37 @@ import org.open4goods.model.product.Product;
 import org.open4goods.services.opendata.DatasetDefinition;
 import org.open4goods.services.opendata.DatasetWriter;
 import org.open4goods.services.opendata.DatasetWriterManager;
+import org.open4goods.services.opendata.OpenDataGenerationException;
 import org.open4goods.services.opendata.ThrottlingInputStream;
 import org.open4goods.services.opendata.config.OpenDataConfig;
+import org.open4goods.services.opendata.model.ColumnManifest;
+import org.open4goods.services.opendata.model.DatasetManifest;
+import org.open4goods.services.opendata.model.OpenDataGenerationStatus;
+import org.open4goods.services.opendata.model.OpenDataGenerationStatus.State;
+import org.open4goods.services.opendata.model.OpenDataManifest;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.health.contributor.Health;
 import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import com.google.common.util.concurrent.RateLimiter;
 
-import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 /**
  * Service responsible for generating and managing the CSV OpenData files.
- * Handles the creation of GTIN and ISBN datasets, their compression into ZIP files,
- * and the management of download limits and rates.
+ * Handles the creation of GTIN and ISBN datasets, their compression into ZIP files, their manifests, and the management
+ * of download limits and rates. Generation runs in the api only (GOU-2248, {@code generation-enabled}); the schedule
+ * lives in the api, this bean has none.
  */
 @Service
 public class OpenDataService implements HealthIndicator {
@@ -95,27 +116,6 @@ public class OpenDataService implements HealthIndicator {
             "souscategorie2"
     };
 
-    private static final Set<String> ISBN_REQUIRED_FIELDS = Set.of(
-            "id",
-            "attributes",
-            "gtinInfos",
-            "offersCount",
-            "price",
-            "offerNames",
-            "lastChange"
-    );
-
-    private static final Set<String> GTIN_REQUIRED_FIELDS = Set.of(
-            "id",
-            "attributes",
-            "gtinInfos",
-            "offersCount",
-            "price",
-            "offerNames",
-            "lastChange",
-            "datasourceCategories"
-    );
-
     private static final List<String> ISBN_ATTRIBUTE_KEYS = List.of(
             "EDITEUR",
             "FORMAT",
@@ -124,39 +124,141 @@ public class OpenDataService implements HealthIndicator {
             "SOUSCATEGORIE2"
     );
 
+    /**
+     * Only {@code _source} fields read by the export (GOU-2248): about 0.7 KB per product instead of about 21 KB for
+     * a complete product, whose {@code attributes} and offers made a page of 5000 exceed the 100 MB response buffer of
+     * the Elasticsearch client (GOU-2249). No other attribute key is read, in particular no Decitre key (GOU-2262).
+     */
+    static final String[] EXPORT_SOURCE_FIELDS = exportSourceFields();
+
+    private static final Set<BarcodeType> GTIN_BARCODE_TYPES =
+            Set.of(BarcodeType.GTIN_8, BarcodeType.GTIN_12, BarcodeType.GTIN_13, BarcodeType.GTIN_14);
+    private static final Set<BarcodeType> ISBN_BARCODE_TYPES = Set.of(BarcodeType.ISBN_13);
+
+    /** Longest pause allowed between two pages: well below the one-minute scroll keep-alive of Spring Data. */
+    private static final Duration MAX_PAGE_PAUSE = Duration.ofSeconds(30);
+
+    private static final String DATASET_TAG = "dataset";
+    private static final String OUTCOME_TAG = "outcome";
+
     private final ProductRepository aggregatedDataRepository;
     private final OpenDataConfig openDataConfig;
     private final boolean generationEnabled;
+    private final OpenDataManifestStore manifestStore = new OpenDataManifestStore();
+    private final MeterRegistry meterRegistry;
 
     private final AtomicBoolean exportRunning = new AtomicBoolean(false);
     private final AtomicInteger concurrentDownloadsCounter = new AtomicInteger(0);
+    private volatile OpenDataGenerationStatus status = OpenDataGenerationStatus.idle();
+    private final Map<String, AtomicLong> exportedRows = new ConcurrentHashMap<>();
 
+    @Autowired
     public OpenDataService(ProductRepository aggregatedDataRepository,
-                           OpenDataConfig openDataConfig) {
+                           OpenDataConfig openDataConfig,
+                           ObjectProvider<MeterRegistry> meterRegistry) {
+        this(aggregatedDataRepository, openDataConfig, meterRegistry.getIfAvailable(SimpleMeterRegistry::new));
+    }
+
+    OpenDataService(ProductRepository aggregatedDataRepository,
+                    OpenDataConfig openDataConfig,
+                    MeterRegistry meterRegistry) {
         Assert.notNull(aggregatedDataRepository, "aggregatedDataRepository must not be null");
         Assert.notNull(openDataConfig, "openDataConfig must not be null");
         Assert.notNull(openDataConfig.getGenerationEnabled(), "openDataConfig.generationEnabled must be configured");
+        Assert.notNull(meterRegistry, "meterRegistry must not be null");
 
         this.aggregatedDataRepository = aggregatedDataRepository;
         this.openDataConfig = openDataConfig;
         this.generationEnabled = openDataConfig.isGenerationEnabled();
+        this.meterRegistry = meterRegistry;
+        registerGauges();
 
-        LOGGER.info("OpenDataService scheduled generation is {}", generationEnabled ? "enabled" : "disabled");
+        LOGGER.info("OpenDataService generation is {}", generationEnabled ? "enabled" : "disabled");
+    }
+
+    private static String[] exportSourceFields() {
+        List<String> fields = new ArrayList<>(List.of(
+                "id",
+                "lastChange",
+                "offersCount",
+                "offerNames",
+                "datasourceCategories",
+                "gtinInfos.upcType",
+                "gtinInfos.country",
+                "price.minPrice.price",
+                "price.minPrice.currency",
+                "attributes.referentielAttributes"));
+        for (String key : ISBN_ATTRIBUTE_KEYS) {
+            fields.add("attributes.indexed." + key);
+            fields.add("attributes.all." + key);
+        }
+        return fields.toArray(new String[0]);
+    }
+
+    private void registerGauges() {
+        Gauge.builder("opendata.generation.running", exportRunning, running -> running.get() ? 1 : 0)
+                .description("1 while an open data generation pass runs")
+                .register(meterRegistry);
+        Gauge.builder("opendata.generation.failed", this, service -> service.status.state() == State.FAILED ? 1 : 0)
+                .description("1 when the last open data generation pass of this process failed")
+                .register(meterRegistry);
+        Gauge.builder("opendata.generation.last.success.timestamp", this, OpenDataService::lastSuccessEpochSeconds)
+                .description("End of the last successful open data generation pass of this process (NaN if none)")
+                .baseUnit("seconds")
+                .register(meterRegistry);
+        for (String dataset : List.of("gtin", "isbn")) {
+            AtomicLong rows = exportedRows.computeIfAbsent(dataset, key -> new AtomicLong());
+            Gauge.builder("opendata.dataset.rows", rows, AtomicLong::get)
+                    .description("Rows of the last open data file published by this process")
+                    .tag(DATASET_TAG, dataset)
+                    .register(meterRegistry);
+        }
+    }
+
+    private double lastSuccessEpochSeconds() {
+        Instant lastSuccess = status.lastSuccessAt();
+        return lastSuccess == null ? Double.NaN : lastSuccess.getEpochSecond();
     }
 
     /**
-     * This method checks the health status of the OpenDataService.
-     * It verifies if the required ZIP files (ISBN and GTIN) exist.
+     * DOWN when the last generation pass of this process failed (the previous files stay published), UNKNOWN when a
+     * published zip is missing and no pass failed, UP otherwise.
      */
     @Override
     public Health health() {
-        if (!openDataConfig.isbnZipFile().exists()) {
-            return Health.down().withDetail("ISBN Zip File", "Le fichier ZIP ISBN est manquant.").build();
+        OpenDataGenerationStatus current = status;
+        if (current.state() == State.FAILED) {
+            return withStatusDetails(Health.down(), current)
+                    .withDetail("error", StringUtils.defaultString(current.error()))
+                    .build();
         }
-        if (!openDataConfig.gtinZipFile().exists()) {
-            return Health.down().withDetail("GTIN Zip File", "Le fichier ZIP GTIN est manquant.").build();
+        if (!openDataConfig.isbnZipFile().exists() || !openDataConfig.gtinZipFile().exists()) {
+            return withStatusDetails(Health.unknown(), current)
+                    .withDetail("files", "Le fichier ZIP GTIN ou ISBN est manquant.")
+                    .build();
         }
-        return Health.up().withDetail("OpenDataService", "Tous les fichiers ZIP sont présents.").build();
+        return withStatusDetails(Health.up(), current).build();
+    }
+
+    private Health.Builder withStatusDetails(Health.Builder builder, OpenDataGenerationStatus current) {
+        builder.withDetail("state", current.state().name());
+        if (current.startedAt() != null) {
+            builder.withDetail("startedAt", current.startedAt().toString());
+        }
+        if (current.finishedAt() != null) {
+            builder.withDetail("finishedAt", current.finishedAt().toString());
+        }
+        if (current.lastSuccessAt() != null) {
+            builder.withDetail("lastSuccessAt", current.lastSuccessAt().toString());
+        }
+        return builder;
+    }
+
+    /**
+     * @return the generation state of this process
+     */
+    public OpenDataGenerationStatus status() {
+        return status;
     }
 
     /**
@@ -193,125 +295,309 @@ public class OpenDataService implements HealthIndicator {
     }
 
     /**
-     * Generates the opendata CSV files and compresses them into ZIP files.
-     * This method is scheduled to run periodically.
+     * Starts a generation pass on a dedicated thread (a pass lasts hours: it must not hold a scheduler thread).
+     *
+     * @return false when generation is disabled by configuration or a pass already runs
      */
-    @Scheduled(initialDelay = 1000L * 3600 * 8, fixedDelay = 1000L * 3600 * 24 * 7)
-    @Timed(value = "OpenDataService.generateOpendata.time", description = "Time taken to generate the OpenData ZIP files", extraTags = {"service", "OpenDataService"})
-    public void generateOpendata() {
-
-        if (!generationEnabled) {
-            LOGGER.debug("Skipping OpenData generation because it is disabled by configuration");
-            return;
+    public boolean launchGeneration() {
+        if (!acquire()) {
+            return false;
         }
+        Thread.ofPlatform().name("opendata-generation").daemon(true).start(() -> {
+            try {
+                runPass();
+            } finally {
+                exportRunning.set(false);
+            }
+        });
+        return true;
+    }
 
-        if (exportRunning.getAndSet(true)) {
-            LOGGER.error("Opendata export is already running");
-            return;
+    /**
+     * Runs a generation pass in the calling thread.
+     *
+     * @return true when new files and manifests were published, false when the pass was skipped or failed
+     */
+    public boolean generateOpendata() {
+        if (!acquire()) {
+            return false;
         }
-
         try {
-            prepareDirectories();
-            processDataFiles();
-            moveTmpFilesToFinalDestination();
-            LOGGER.info("Opendata CSV files generated and zipped successfully.");
-        } catch (Exception e) {
-            LOGGER.error("Error while generating opendata set", e);
+            return runPass();
         } finally {
             exportRunning.set(false);
         }
     }
 
-    /**
-     * Prepares the necessary directories for storing temporary files.
-     */
-    private void prepareDirectories() throws IOException {
-        File isbnFolder = openDataConfig.tmpIsbnZipFile().getParentFile();
-        if (isbnFolder != null) {
-            isbnFolder.mkdirs();
+    private boolean acquire() {
+        if (!generationEnabled) {
+            LOGGER.warn("Open data generation skipped: open-data-config.generation-enabled is false");
+            return false;
         }
-        File gtinFolder = openDataConfig.tmpGtinZipFile().getParentFile();
-        if (gtinFolder != null) {
-            gtinFolder.mkdirs();
+        if (exportRunning.getAndSet(true)) {
+            LOGGER.warn("Open data generation skipped: a pass is already running");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Runs one pass. Any failure is logged at ERROR, counted, and exposed by {@link #health()} and {@link #status()};
+     * the published files and manifests are then unchanged.
+     */
+    private boolean runPass() {
+        Instant startedAt = Instant.now();
+        OpenDataGenerationStatus previous = status;
+        status = new OpenDataGenerationStatus(State.RUNNING, startedAt, null, previous.lastSuccessAt(), null, previous.rows());
+        Timer.Sample sample = Timer.start(meterRegistry);
+        String outcome = "failure";
+        try {
+            Map<String, Long> rows = generate();
+            Instant finishedAt = Instant.now();
+            rows.forEach((dataset, count) -> exportedRows.computeIfAbsent(dataset, key -> new AtomicLong()).set(count));
+            status = new OpenDataGenerationStatus(State.SUCCEEDED, startedAt, finishedAt, finishedAt, null, rows);
+            outcome = "success";
+            LOGGER.info("Open data generation succeeded in {}: {}", Duration.between(startedAt, finishedAt), rows);
+            return true;
+        } catch (Exception e) {
+            LOGGER.error("Open data generation failed, the published files and manifests are unchanged", e);
+            status = new OpenDataGenerationStatus(State.FAILED, startedAt, Instant.now(), previous.lastSuccessAt(),
+                    e.getClass().getSimpleName() + ": " + e.getMessage(), previous.rows());
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            return false;
+        } finally {
+            deleteTmpDirectory();
+            sample.stop(meterRegistry.timer("opendata.generation.duration", OUTCOME_TAG, outcome));
+            meterRegistry.counter("opendata.generation.runs", OUTCOME_TAG, outcome).increment();
         }
     }
 
     /**
-     * Processes and creates the ZIP files for the opendata.
-     * ISBN and GTIN generations are executed in parallel to minimize overall runtime.
+     * Writes both datasets in the temporary folder, checks them, then publishes them: zips first, per-dataset
+     * manifests next, {@code manifest.json} last.
      */
-    void processDataFiles() throws IOException {
-        DatasetDefinition isbnDataset = new DatasetDefinition(
-                ISBN_DATASET_FILENAME,
-                openDataConfig.tmpIsbnZipFile(),
-                ISBN_HEADER,
-                Set.of(BarcodeType.ISBN_13),
-                ISBN_REQUIRED_FIELDS,
-                this::toIsbnEntry
-        );
+    Map<String, Long> generate() throws IOException, OpenDataGenerationException, InterruptedException {
+        List<DatasetDefinition> datasets = datasetDefinitions();
+        prepareTmpDirectory();
+        checkFreeSpace(datasets);
 
+        Map<String, Long> indexCounts = new LinkedHashMap<>();
+        for (DatasetDefinition dataset : datasets) {
+            indexCounts.put(dataset.id(), aggregatedDataRepository.countItemsByBarcodeType(
+                    dataset.barcodeTypes().toArray(new BarcodeType[0])));
+        }
+
+        List<DatasetWriter> writers = writeDatasets(datasets);
+
+        List<DatasetManifest> manifests = new ArrayList<>();
+        for (DatasetWriter writer : writers) {
+            manifests.add(buildManifest(writer, indexCounts.getOrDefault(writer.definition().id(), 0L)));
+        }
+        for (int i = 0; i < manifests.size(); i++) {
+            checkRows(manifests.get(i), datasets.get(i));
+        }
+
+        publish(datasets, manifests);
+
+        Map<String, Long> rows = new LinkedHashMap<>();
+        manifests.forEach(manifest -> rows.put(manifest.id(), manifest.rows()));
+        return rows;
+    }
+
+    /**
+     * @return the GTIN then ISBN datasets
+     */
+    List<DatasetDefinition> datasetDefinitions() {
         DatasetDefinition gtinDataset = new DatasetDefinition(
+                "gtin",
                 GTIN_DATASET_FILENAME,
                 openDataConfig.tmpGtinZipFile(),
+                openDataConfig.gtinZipFile(),
+                openDataConfig.gtinManifestFile(),
+                openDataConfig.getGtinPublicFilename(),
                 GTIN_HEADER,
-                Set.of(BarcodeType.GTIN_8, BarcodeType.GTIN_12, BarcodeType.GTIN_13, BarcodeType.GTIN_14),
-                GTIN_REQUIRED_FIELDS,
+                GTIN_BARCODE_TYPES,
                 this::toGtinEntry
         );
 
-        processDatasets(List.of(isbnDataset, gtinDataset));
+        DatasetDefinition isbnDataset = new DatasetDefinition(
+                "isbn",
+                ISBN_DATASET_FILENAME,
+                openDataConfig.tmpIsbnZipFile(),
+                openDataConfig.isbnZipFile(),
+                openDataConfig.isbnManifestFile(),
+                openDataConfig.getIsbnPublicFilename(),
+                ISBN_HEADER,
+                ISBN_BARCODE_TYPES,
+                this::toIsbnEntry
+        );
+
+        return List.of(gtinDataset, isbnDataset);
     }
 
-    /**
-     * Moves the temporary files to their final destination.
-     */
-    private void moveTmpFilesToFinalDestination() throws IOException {
-        moveFile(openDataConfig.tmpIsbnZipFile(), openDataConfig.isbnZipFile());
-        moveFile(openDataConfig.tmpGtinZipFile(), openDataConfig.gtinZipFile());
-    }
-
-    /**
-     * Moves a file from the source to the destination.
-     */
-    private void moveFile(File src, File dest) throws IOException {
-        if (dest.exists()) {
-            FileUtils.deleteQuietly(dest);
+    private void prepareTmpDirectory() throws IOException {
+        File tmpDirectory = openDataConfig.tmpDirectory().toFile();
+        if (tmpDirectory.exists()) {
+            LOGGER.warn("Removing the open data temporary folder left by a previous pass: {}", tmpDirectory);
+            FileUtils.deleteDirectory(tmpDirectory);
         }
-        FileUtils.moveFile(src, dest);
+        Files.createDirectories(openDataConfig.tmpDirectory());
     }
 
-    private void processDatasets(List<DatasetDefinition> datasetDefinitions) throws IOException {
+    private void deleteTmpDirectory() {
+        File tmpDirectory = openDataConfig.tmpDirectory().toFile();
+        if (tmpDirectory.exists() && !FileUtils.deleteQuietly(tmpDirectory)) {
+            LOGGER.error("Unable to delete the open data temporary folder {}", tmpDirectory);
+        }
+    }
+
+    /**
+     * Fails before any read when the free space is below {@code min-free-space-ratio} times the published files.
+     */
+    private void checkFreeSpace(List<DatasetDefinition> datasets) throws IOException, OpenDataGenerationException {
+        long published = datasets.stream()
+                .map(DatasetDefinition::finalZipFile)
+                .filter(File::isFile)
+                .mapToLong(File::length)
+                .sum();
+        long required = (long) Math.ceil(published * openDataConfig.getMinFreeSpaceRatio());
+        long usable = usableSpace(openDataConfig.tmpDirectory());
+        if (usable < required) {
+            throw new OpenDataGenerationException(String.format(Locale.ROOT,
+                    "Not enough free disk space in %s: %d bytes usable, %d required (%.2f x the %d bytes published)",
+                    openDataConfig.tmpDirectory(), usable, required, openDataConfig.getMinFreeSpaceRatio(), published));
+        }
+    }
+
+    /**
+     * @return usable bytes on the file store of {@code directory}
+     */
+    long usableSpace(Path directory) throws IOException {
+        return Files.getFileStore(directory).getUsableSpace();
+    }
+
+    /**
+     * Streams the projected products page by page into the dataset writers, pausing between pages.
+     *
+     * @return the closed writers, in the order of {@code datasetDefinitions}
+     */
+    List<DatasetWriter> writeDatasets(List<DatasetDefinition> datasetDefinitions) throws IOException, InterruptedException {
+        int pageSize = Math.max(1, openDataConfig.getExportPageSize());
+        Duration pause = openDataConfig.getPagePause() == null ? Duration.ZERO : openDataConfig.getPagePause();
+        if (pause.compareTo(MAX_PAGE_PAUSE) > 0) {
+            throw new IllegalArgumentException("open-data-config.page-pause must not exceed " + MAX_PAGE_PAUSE);
+        }
+
         try (DatasetWriterManager manager = new DatasetWriterManager(datasetDefinitions)) {
-            writeDatasets(manager.writers(), datasetDefinitions);
+            EnumMap<BarcodeType, DatasetWriter> writerByType = mapWritersByType(manager.writers());
+            long read = 0;
+            try (Stream<Product> stream = aggregatedDataRepository.exportAll(EXPORT_SOURCE_FIELDS, pageSize)) {
+                Iterator<Product> products = stream.iterator();
+                while (products.hasNext()) {
+                    Product product = products.next();
+                    read++;
+                    BarcodeType barcodeType = resolveBarcodeType(product);
+                    DatasetWriter writer = barcodeType == null ? null : writerByType.get(barcodeType);
+                    if (writer != null) {
+                        writer.write(product);
+                    }
+                    if (read % pageSize == 0) {
+                        if (!pause.isZero()) {
+                            Thread.sleep(pause);
+                        }
+                        if (read % (pageSize * 500L) == 0) {
+                            LOGGER.info("Open data generation: {} products read", read);
+                        }
+                    }
+                }
+            }
+            LOGGER.info("Open data generation: {} products read", read);
+            manager.close();
             manager.writers().forEach(writer ->
                     LOGGER.info("{} rows exported in {}.", writer.count(), writer.definition().filename()));
-        } catch (Exception e) {
-            datasetDefinitions.forEach(definition -> FileUtils.deleteQuietly(definition.zipFile()));
-            LOGGER.error("Error during processing of OpenData exports", e);
-            if (e instanceof IOException ioException) {
-                throw ioException;
-            }
-            throw new IOException("Unexpected error while generating OpenData exports", e);
+            return manager.writers();
         }
     }
 
-    private void writeDatasets(List<DatasetWriter> writers, List<DatasetDefinition> datasetDefinitions) throws IOException {
-
-        String[] includeFields = resolveIncludeFields(datasetDefinitions);
-        EnumMap<BarcodeType, DatasetWriter> writerByType = mapWritersByType(writers);
-
-        try (Stream<Product> stream = aggregatedDataRepository.exportAll(includeFields)) {
-            stream.forEach(product -> {
-                BarcodeType barcodeType = resolveBarcodeType(product);
-                if (barcodeType == null) {
-                    return;
-                }
-                DatasetWriter writer = writerByType.get(barcodeType);
-                if (writer != null) {
-                    writer.write(product);
-                }
-            });
+    private DatasetManifest buildManifest(DatasetWriter writer, long indexCount) throws IOException {
+        DatasetDefinition definition = writer.definition();
+        long rows = writer.count();
+        List<ColumnManifest> columns = new ArrayList<>();
+        for (int i = 0; i < definition.header().length; i++) {
+            double fillRate = rows == 0 ? 0 : Math.round(writer.filledCells(i) * 10_000d / rows) / 10_000d;
+            columns.add(new ColumnManifest(definition.header()[i], fillRate));
         }
+        return new DatasetManifest(
+                OpenDataManifest.SCHEMA_VERSION,
+                definition.id(),
+                definition.publicFilename(),
+                publicUrl(definition.publicFilename()),
+                DatasetManifest.FORMAT,
+                OpenDataManifest.LICENSE,
+                Files.size(definition.zipFile().toPath()),
+                writer.sha256(),
+                rows,
+                indexCount,
+                now(),
+                columns);
+    }
+
+    private String publicUrl(String publicFilename) {
+        String base = openDataConfig.getPublicBaseUrl();
+        if (StringUtils.isBlank(base)) {
+            return null;
+        }
+        return StringUtils.removeEnd(base.trim(), "/") + "/" + publicFilename;
+    }
+
+    /**
+     * Row guard: refuses a dataset that lost more than {@code 1 - min-rows-ratio} of the rows of the published manifest,
+     * or of the products counted in the index at the start of the pass (an export that stopped early).
+     */
+    private void checkRows(DatasetManifest manifest, DatasetDefinition definition) throws OpenDataGenerationException {
+        double ratio = openDataConfig.getMinRowsRatio();
+        Optional<DatasetManifest> published = manifestStore.readDataset(definition.manifestFile());
+        if (published.isPresent() && published.get().rows() > 0 && manifest.rows() < published.get().rows() * ratio) {
+            throw new OpenDataGenerationException(String.format(Locale.ROOT,
+                    "Dataset %s refused: %d rows, the published manifest has %d (minimum ratio %.2f)",
+                    manifest.id(), manifest.rows(), published.get().rows(), ratio));
+        }
+        if (manifest.indexCount() > 0 && manifest.rows() < manifest.indexCount() * ratio) {
+            throw new OpenDataGenerationException(String.format(Locale.ROOT,
+                    "Dataset %s refused: %d rows, the index counted %d products (minimum ratio %.2f)",
+                    manifest.id(), manifest.rows(), manifest.indexCount(), ratio));
+        }
+    }
+
+    /**
+     * Writes the manifests in the temporary folder, then renames atomically the zips, the per-dataset manifests and
+     * {@code manifest.json}, in that order.
+     */
+    private void publish(List<DatasetDefinition> datasets, List<DatasetManifest> manifests) throws IOException {
+        Path tmpDirectory = openDataConfig.tmpDirectory();
+        for (int i = 0; i < datasets.size(); i++) {
+            manifestStore.write(manifests.get(i), tmpDirectory.resolve(datasets.get(i).manifestFile().getName()).toFile());
+        }
+        File tmpManifest = tmpDirectory.resolve(openDataConfig.manifestFile().getName()).toFile();
+        manifestStore.write(new OpenDataManifest(OpenDataManifest.SCHEMA_VERSION, now(), OpenDataManifest.LICENSE,
+                manifests), tmpManifest);
+
+        for (DatasetDefinition dataset : datasets) {
+            OpenDataManifestStore.moveAtomically(dataset.zipFile().toPath(), dataset.finalZipFile().toPath());
+        }
+        for (DatasetDefinition dataset : datasets) {
+            OpenDataManifestStore.moveAtomically(tmpDirectory.resolve(dataset.manifestFile().getName()),
+                    dataset.manifestFile().toPath());
+        }
+        OpenDataManifestStore.moveAtomically(tmpManifest.toPath(), openDataConfig.manifestFile().toPath());
+        manifests.forEach(manifest -> LOGGER.info("Open data {} published: {} rows, {} bytes, sha256 {}",
+                manifest.id(), manifest.rows(), manifest.bytes(), manifest.sha256()));
+    }
+
+    private static String now() {
+        return Instant.now().truncatedTo(ChronoUnit.SECONDS).toString();
     }
 
     private EnumMap<BarcodeType, DatasetWriter> mapWritersByType(List<DatasetWriter> writers) {
@@ -325,12 +611,6 @@ public class OpenDataService implements HealthIndicator {
             }
         }
         return writerByType;
-    }
-
-    private String[] resolveIncludeFields(List<DatasetDefinition> datasetDefinitions) {
-        LinkedHashSet<String> includes = new LinkedHashSet<>();
-        datasetDefinitions.forEach(definition -> includes.addAll(definition.requiredFields()));
-        return includes.toArray(new String[0]);
     }
 
     private BarcodeType resolveBarcodeType(Product product) {

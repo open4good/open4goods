@@ -52,6 +52,10 @@ public class BackfillService implements AutoCloseable {
 			.disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
 			.build();
 
+	private static final JsonMapper COMPARISON_JSON = JsonMapper.builder()
+			.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS)
+			.build();
+
 	private final BackfillEngine engine;
 	private final Path statusFile;
 	private final Path backupFolder;
@@ -111,7 +115,7 @@ public class BackfillService implements AutoCloseable {
 			resumeFrom = last.report().cursor();
 			backupFile = last.report().backupFile() == null ? null : Path.of(last.report().backupFile());
 		}
-		if (!options.dryRun() && backupFile == null) {
+		if (!options.dryRun() && backupFile == null && operation.restoreScript() != null) {
 			backupFile = backupFolder.resolve(operation.name() + "-" + BACKUP_TIMESTAMP.format(Instant.now()) + ".jsonl");
 		}
 		BackfillCursor cursor = resumeFrom;
@@ -142,11 +146,13 @@ public class BackfillService implements AutoCloseable {
 	public BackfillStatus startRestore(BackfillOperation operation, String backupName, int batchSize,
 			int maxProductsPerSecond) {
 		Objects.requireNonNull(operation, "operation");
-		if (backupName == null || !backupName.startsWith(operation.name() + "-")) {
-			throw new IllegalArgumentException("backupFile must be a backup of " + operation.name() + " ("
-					+ operation.name() + "-...jsonl)");
-		}
 		Path backupFile = resolveBackup(backupName);
+		// Checked on the resolved name, so that no path segment can lead to the backup of another operation
+		if (!backupFile.getFileName().toString()
+				.matches(java.util.regex.Pattern.quote(operation.name()) + "-\\d{8}T\\d{6}Z\\.jsonl")) {
+			throw new IllegalArgumentException("backupFile must be a backup of " + operation.name() + " ("
+					+ operation.name() + "-<yyyyMMdd'T'HHmmss'Z'>.jsonl)");
+		}
 		BackfillStatus running = BackfillStatus.running(operation.name(), false, true, operation.parameters(),
 				Instant.now(), emptyReport(operation, false, true, backupFile, null));
 		if (!claim(running)) {
@@ -189,6 +195,9 @@ public class BackfillService implements AutoCloseable {
 		if (name == null || name.isBlank()) {
 			throw new IllegalArgumentException("backupFile is required");
 		}
+		if (name.contains("/") || name.contains("\\")) {
+			throw new IllegalArgumentException("backupFile must be a file name, without folder");
+		}
 		Path file = backupFolder.resolve(name).normalize();
 		if (!file.getParent().equals(backupFolder)) {
 			throw new IllegalArgumentException("backupFile must be a file name of " + backupFolder);
@@ -208,10 +217,13 @@ public class BackfillService implements AutoCloseable {
 				&& last.report() != null && last.report().cursor() != null;
 	}
 
-	/** Parameters compared through their JSON form: a status read back holds lists and numbers of other classes. */
+	/**
+	 * Parameters compared through their JSON form, map entries sorted at every level: a status read back holds lists,
+	 * maps and numbers of other classes, and {@code Map.of} iterates in a per-JVM order.
+	 */
 	private static String normalised(Map<String, Object> parameters) {
 		try {
-			return JSON.writeValueAsString(parameters == null ? Map.of() : new java.util.TreeMap<>(parameters));
+			return COMPARISON_JSON.writeValueAsString(parameters == null ? Map.of() : parameters);
 		} catch (JacksonException e) {
 			return String.valueOf(parameters);
 		}
@@ -278,7 +290,7 @@ public class BackfillService implements AutoCloseable {
 	private static BackfillReport emptyReport(BackfillOperation operation, boolean dryRun, boolean restore,
 			Path backupFile, BackfillCursor cursor) {
 		return new BackfillReport(operation.name(), dryRun, restore, 0, 0, 0, 0, 0, Map.of(), List.of(),
-				backupFile == null ? null : backupFile.toString(), cursor, null, 0);
+				backupFile == null ? null : backupFile.toString(), cursor, null, 0, Map.of());
 	}
 
 	/**

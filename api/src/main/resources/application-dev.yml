@@ -38,3 +38,6 @@ spring:
 elasticsearch.password:
 elasticsearch.host: 127.0.0.1
 
+# Open data generation stays off on a developer machine (GOU-2248).
+open-data-config:
+  generation-enabled: false

@@ -3,10 +3,9 @@ package org.open4goods.services.opendata.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,31 +17,35 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.HexFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.model.attribute.IndexedAttribute;
+import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.ProductAttributes;
 import org.open4goods.model.attribute.ReferentielKey;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.open4goods.model.exceptions.TechnicalException;
 import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.AggregatedPrices;
@@ -51,44 +54,45 @@ import org.open4goods.model.product.BarcodeType;
 import org.open4goods.model.product.GtinInfo;
 import org.open4goods.model.product.Product;
 import org.open4goods.services.opendata.config.OpenDataConfig;
+import org.open4goods.services.opendata.model.DatasetManifest;
+import org.open4goods.services.opendata.model.OpenDataGenerationStatus.State;
+import org.open4goods.services.opendata.model.OpenDataManifest;
 import org.open4goods.services.productrepository.services.ProductRepository;
+import org.springframework.boot.health.contributor.Status;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 @ExtendWith(MockitoExtension.class)
 class OpenDataServiceTest {
 
-    @Mock
-    private ProductRepository productRepository;
+    private static final String GTIN_CSV = "open4goods-gtin-dataset.csv";
+    private static final String ISBN_CSV = "open4goods-isbn-dataset.csv";
 
     @Mock
-    private OpenDataConfig openDataConfig;
+    private ProductRepository productRepository;
 
     @TempDir
     Path tempDir;
 
+    private OpenDataConfig openDataConfig;
+    private SimpleMeterRegistry meterRegistry;
     private OpenDataService service;
-
-    private File tmpIsbn;
-    private File tmpGtin;
-    private File finalIsbn;
-    private File finalGtin;
+    private final OpenDataManifestStore manifestStore = new OpenDataManifestStore();
 
     @BeforeEach
     void setUp() {
-        tmpIsbn = tempDir.resolve("isbn-tmp.zip").toFile();
-        tmpGtin = tempDir.resolve("gtin-tmp.zip").toFile();
-        finalIsbn = tempDir.resolve("isbn.zip").toFile();
-        finalGtin = tempDir.resolve("gtin.zip").toFile();
+        openDataConfig = new OpenDataConfig();
+        openDataConfig.setRootFolder(tempDir.toString());
+        openDataConfig.setGenerationEnabled(Boolean.TRUE);
+        openDataConfig.setPagePause(Duration.ZERO);
+        openDataConfig.setExportPageSize(2);
+        openDataConfig.setPublicBaseUrl("https://data.nudger.fr/");
+        openDataConfig.setConcurrentDownloads(2);
 
-        lenient().when(openDataConfig.tmpIsbnZipFile()).thenReturn(tmpIsbn);
-        lenient().when(openDataConfig.tmpGtinZipFile()).thenReturn(tmpGtin);
-        lenient().when(openDataConfig.isbnZipFile()).thenReturn(finalIsbn);
-        lenient().when(openDataConfig.gtinZipFile()).thenReturn(finalGtin);
-        lenient().when(openDataConfig.getGenerationEnabled()).thenReturn(Boolean.TRUE);
-        lenient().when(openDataConfig.isGenerationEnabled()).thenReturn(true);
-        lenient().when(openDataConfig.getDownloadSpeedKb()).thenReturn(256);
-        lenient().when(openDataConfig.getConcurrentDownloads()).thenReturn(2);
+        lenient().when(productRepository.countItemsByBarcodeType(any(BarcodeType[].class))).thenReturn(1L);
 
-        service = new OpenDataService(productRepository, openDataConfig);
+        meterRegistry = new SimpleMeterRegistry();
+        service = new OpenDataService(productRepository, openDataConfig, meterRegistry);
     }
 
     @Test
@@ -98,7 +102,7 @@ class OpenDataServiceTest {
             outputStream.write("test".getBytes(StandardCharsets.UTF_8));
         }
 
-        when(openDataConfig.getConcurrentDownloads()).thenReturn(1);
+        openDataConfig.setConcurrentDownloads(1);
 
         InputStream firstDownload = service.limitedRateStream(dataset.getAbsolutePath());
         assertThatThrownBy(() -> service.limitedRateStream(dataset.getAbsolutePath()))
@@ -112,62 +116,211 @@ class OpenDataServiceTest {
     }
 
     @Test
-    void processDataFilesShouldCloseRepositoryStream() throws Exception {
-        @SuppressWarnings("unchecked")
-        Stream<Product> stream = mock(Stream.class);
-        doAnswer(invocation -> null).when(stream).forEach(Mockito.any());
-        CountDownLatch latch = new CountDownLatch(1);
-        doAnswer(invocation -> {
-            latch.countDown();
-            return null;
-        }).when(stream).close();
+    void generationShouldPublishZipsThenManifests() throws Exception {
+        exportReturns(buildProduct("9781234567890", BarcodeType.ISBN_13), buildProduct("1234567890123", BarcodeType.GTIN_13));
 
-        lenient().when(productRepository.exportAll(any(String[].class))).thenReturn(stream);
+        assertThat(service.generateOpendata()).isTrue();
 
-        service.processDataFiles();
-
-        assertThat(latch.await(1, TimeUnit.SECONDS)).isTrue();
-        verify(stream).close();
-    }
-
-    @Test
-    void processDataFilesShouldWriteCsvRows() throws Exception {
-        Product isbnProduct = buildProduct("9781234567890", BarcodeType.ISBN_13);
-        Product gtinProduct = buildProduct("1234567890123", BarcodeType.GTIN_13);
-
-        when(productRepository.exportAll(any(String[].class))).thenReturn(Stream.of(isbnProduct, gtinProduct));
-
-        service.processDataFiles();
-
-        List<String> isbnLines = readZipLines(tmpIsbn, "open4goods-isbn-dataset.csv");
-        List<String> gtinLines = readZipLines(tmpGtin, "open4goods-gtin-dataset.csv");
-
-        assertThat(isbnLines).hasSize(2);
-        assertThat(isbnLines.get(0))
-                .doesNotContain("classification_decitre_1")
-                .doesNotContain("classification_decitre_2")
-                .doesNotContain("classification_decitre_3");
-        assertThat(isbnLines.get(1)).contains("Test Editor", "https://nudger.fr/9781234567890");
-        assertThat(gtinLines).hasSize(2);
-        assertThat(gtinLines.get(1)).contains("TestBrand", "https://nudger.fr/1234567890123");
+        List<String> gtinLines = readZipLines(openDataConfig.gtinZipFile(), GTIN_CSV);
+        List<String> isbnLines = readZipLines(openDataConfig.isbnZipFile(), ISBN_CSV);
+        // Row conversion: format unchanged in this lot (epoch milliseconds, https://nudger.fr/{gtin}).
+        assertThat(gtinLines).containsExactly(
+                "\"gtin\",\"brand\",\"model\",\"name\",\"last_updated\",\"gs1_country\",\"gtinType\",\"offers_count\","
+                        + "\"min_price\",\"currency\",\"categories\",\"url\"",
+                "\"1234567890123\",\"TestBrand\",\"ModelX\",\"short name\",\"1704067200000\",\"FR\",\"GTIN_13\",\"3\","
+                        + "\"42.42\",\"EUR\",\"" + gtinLines.get(1).split("\",\"")[10] + "\",\"https://nudger.fr/1234567890123\"");
         assertThat(gtinLines.get(1)).contains("electronics").contains("gaming");
+        assertThat(isbnLines).hasSize(2);
+        assertThat(isbnLines.get(1)).isEqualTo("\"9781234567890\",\"short name\",\"1704067200000\",\"3\",\"42.42\",\"EUR\","
+                + "\"https://nudger.fr/9781234567890\",\"Test Editor\",\"Broché\",\"320\",\"SousCat1\",\"SousCat2\"");
 
-        verify(productRepository).exportAll( any(String[].class));
+        DatasetManifest gtin = manifestStore.readDataset(openDataConfig.gtinManifestFile()).orElseThrow();
+        assertThat(gtin.schemaVersion()).isEqualTo(OpenDataManifest.SCHEMA_VERSION);
+        assertThat(gtin.id()).isEqualTo("gtin");
+        assertThat(gtin.file()).isEqualTo("gtin-open-data.zip");
+        assertThat(gtin.url()).isEqualTo("https://data.nudger.fr/gtin-open-data.zip");
+        assertThat(gtin.format()).isEqualTo("text/csv+zip");
+        assertThat(gtin.license()).isEqualTo("ODbL-1.0");
+        assertThat(gtin.rows()).isEqualTo(1);
+        assertThat(gtin.indexCount()).isEqualTo(1);
+        assertThat(gtin.bytes()).isEqualTo(openDataConfig.gtinZipFile().length());
+        assertThat(gtin.sha256()).isEqualTo(sha256(openDataConfig.gtinZipFile()));
+        assertThat(Instant.parse(gtin.generatedAt())).isNotNull();
+        assertThat(gtin.columns()).extracting(column -> column.name()).containsExactly(OpenDataService.GTIN_HEADER);
+        assertThat(gtin.columns()).allSatisfy(column -> assertThat(column.fillRate()).isEqualTo(1.0));
+
+        DatasetManifest isbn = manifestStore.readDataset(openDataConfig.isbnManifestFile()).orElseThrow();
+        assertThat(isbn.sha256()).isEqualTo(sha256(openDataConfig.isbnZipFile()));
+
+        OpenDataManifest all = manifestStore.readAll(openDataConfig.manifestFile()).orElseThrow();
+        assertThat(all.license()).isEqualTo("ODbL-1.0");
+        assertThat(all.datasets()).containsExactly(gtin, isbn);
+
+        assertThat(openDataConfig.tmpDirectory()).doesNotExist();
+        assertThat(service.status().state()).isEqualTo(State.SUCCEEDED);
+        assertThat(service.status().rows()).containsEntry("gtin", 1L).containsEntry("isbn", 1L);
+        assertThat(service.health().getStatus()).isEqualTo(Status.UP);
+        assertThat(meterRegistry.get("opendata.generation.runs").tag("outcome", "success").counter().count()).isEqualTo(1);
+        assertThat(meterRegistry.get("opendata.dataset.rows").tag("dataset", "gtin").gauge().value()).isEqualTo(1);
+        assertThat(meterRegistry.get("opendata.generation.failed").gauge().value()).isZero();
     }
 
     @Test
-    void generateOpendataShouldNotMoveFilesWhenProcessingFails() throws Exception {
-        FileUtils.writeStringToFile(finalIsbn, "existing", StandardCharsets.UTF_8);
-        FileUtils.writeStringToFile(finalGtin, "existing", StandardCharsets.UTF_8);
+    void fillRateShouldCountEmptyCells() throws Exception {
+        Product withoutPrice = buildProduct("1234567890128", BarcodeType.GTIN_13);
+        withoutPrice.setPrice(new AggregatedPrices());
+        exportReturns(buildProduct("1234567890123", BarcodeType.GTIN_13), withoutPrice);
+        when(productRepository.countItemsByBarcodeType(any(BarcodeType[].class))).thenReturn(0L);
 
-        lenient().when(productRepository.exportAll(any(String[].class)))
-                .thenThrow(new RuntimeException("boom"));
+        assertThat(service.generateOpendata()).isTrue();
+
+        DatasetManifest gtin = manifestStore.readDataset(openDataConfig.gtinManifestFile()).orElseThrow();
+        assertThat(gtin.rows()).isEqualTo(2);
+        assertThat(gtin.columns()).filteredOn(column -> column.name().equals("min_price"))
+                .singleElement().satisfies(column -> assertThat(column.fillRate()).isEqualTo(0.5));
+        assertThat(gtin.columns()).filteredOn(column -> column.name().equals("gtin"))
+                .singleElement().satisfies(column -> assertThat(column.fillRate()).isEqualTo(1.0));
+    }
+
+    @Test
+    void noFileShouldContainDecitre() throws Exception {
+        // GOU-2262: a product carrying the purged Decitre keys must not leak them into any produced file.
+        Product book = buildProduct("9781234567890", BarcodeType.ISBN_13);
+        Product gtinProduct = buildProduct("1234567890123", BarcodeType.GTIN_13);
+        for (Product product : List.of(book, gtinProduct)) {
+            for (String key : List.of("CLASSIFICATION DECITRE 1", "CLASSIFICATION DECITRE 2", "CLASSIFICATION DECITRE 3",
+                    "ATTRIBUTS", "LIVRES ORIGINE", "PROPRIETAIRE")) {
+                addIndexedAttribute(product.getAttributes(), key, "Decitre " + key);
+                ProductAttribute attribute = new ProductAttribute();
+                attribute.setName(key);
+                attribute.setValue("decitre.fr");
+                product.getAttributes().getAll().put(key, attribute);
+            }
+        }
+        exportReturns(book, gtinProduct);
+
+        assertThat(service.generateOpendata()).isTrue();
+
+        List<String> produced = new ArrayList<>();
+        produced.addAll(readZipLines(openDataConfig.gtinZipFile(), GTIN_CSV));
+        produced.addAll(readZipLines(openDataConfig.isbnZipFile(), ISBN_CSV));
+        for (File manifest : List.of(openDataConfig.manifestFile(), openDataConfig.gtinManifestFile(),
+                openDataConfig.isbnManifestFile())) {
+            produced.add(Files.readString(manifest.toPath()));
+        }
+        assertThat(produced).hasSize(7)
+                .allSatisfy(content -> assertThat(content.toLowerCase(Locale.ROOT)).doesNotContain("decitre"));
+        assertThat(OpenDataService.EXPORT_SOURCE_FIELDS)
+                .noneMatch(field -> field.toLowerCase(Locale.ROOT).contains("decitre"))
+                .noneMatch(field -> field.contains("ATTRIBUTS") || field.contains("LIVRES ORIGINE") || field.contains("PROPRIETAIRE"));
+    }
+
+    @Test
+    void exportShouldReadAMinimalProjectionWithBoundedPages() throws Exception {
+        openDataConfig.setExportPageSize(1500);
+        exportReturns();
+        when(productRepository.countItemsByBarcodeType(any(BarcodeType[].class))).thenReturn(0L);
 
         service.generateOpendata();
 
-        assertThat(FileUtils.readFileToString(finalIsbn, StandardCharsets.UTF_8)).isEqualTo("existing");
-        assertThat(FileUtils.readFileToString(finalGtin, StandardCharsets.UTF_8)).isEqualTo("existing");
-        assertThat(tmpIsbn).doesNotExist();
+        ArgumentCaptor<String[]> fields = ArgumentCaptor.forClass(String[].class);
+        verify(productRepository).exportAll(fields.capture(), Mockito.eq(1500));
+        assertThat(fields.getValue())
+                .contains("id", "offerNames", "attributes.referentielAttributes", "price.minPrice.price",
+                        "attributes.indexed.EDITEUR", "attributes.all.NB DE PAGES")
+                .doesNotContain("attributes", "price", "offers");
+    }
+
+    @Test
+    void elasticsearchFailureShouldKeepPublishedFilesAndBeVisible() throws Exception {
+        exportReturns(buildProduct("1234567890123", BarcodeType.GTIN_13), buildProduct("9781234567890", BarcodeType.ISBN_13));
+        assertThat(service.generateOpendata()).isTrue();
+        Snapshot published = snapshot();
+
+        AtomicBoolean closed = new AtomicBoolean();
+        Stream<Product> failing = Stream.concat(Stream.of(buildProduct("1234567890128", BarcodeType.GTIN_13)),
+                Stream.<Product>generate(() -> {
+                    throw new IllegalStateException("entity content is too long [104859155]");
+                })).onClose(() -> closed.set(true));
+        when(productRepository.exportAll(any(String[].class), anyInt())).thenReturn(failing);
+
+        assertThat(service.generateOpendata()).isFalse();
+
+        assertThat(snapshot()).isEqualTo(published);
+        assertThat(closed).isTrue();
+        assertThat(openDataConfig.tmpDirectory()).doesNotExist();
+        assertFailureVisible("entity content is too long");
+        assertThat(service.status().lastSuccessAt()).isNotNull();
+    }
+
+    @Test
+    void lowDiskSpaceShouldRefuseThePassBeforeReading() throws Exception {
+        Files.createDirectories(openDataConfig.openDataDirectory());
+        Files.writeString(openDataConfig.gtinZipFile().toPath(), "x".repeat(100));
+        Files.writeString(openDataConfig.isbnZipFile().toPath(), "existing");
+        Snapshot published = snapshot();
+
+        OpenDataService fullDisk = new OpenDataService(productRepository, openDataConfig, meterRegistry) {
+            @Override
+            long usableSpace(Path directory) {
+                return 161;
+            }
+        };
+
+        assertThat(fullDisk.generateOpendata()).isFalse();
+
+        verify(productRepository, never()).exportAll(any(String[].class), anyInt());
+        assertThat(snapshot()).isEqualTo(published);
+        assertThat(openDataConfig.tmpDirectory()).doesNotExist();
+        assertThat(fullDisk.health().getStatus()).isEqualTo(Status.DOWN);
+        assertThat(fullDisk.status().error()).contains("Not enough free disk space", "162 required");
+    }
+
+    @Test
+    void rowGuardShouldRefuseADatasetThatLostRowsComparedWithTheManifest() throws Exception {
+        when(productRepository.countItemsByBarcodeType(any(BarcodeType[].class))).thenReturn(0L);
+        exportReturns(IntStream.range(0, 10).mapToObj(i -> buildProduct("123456789012" + i, BarcodeType.GTIN_13))
+                .toArray(Product[]::new));
+        assertThat(service.generateOpendata()).isTrue();
+        Snapshot published = snapshot();
+
+        exportReturns(IntStream.range(0, 8).mapToObj(i -> buildProduct("123456789012" + i, BarcodeType.GTIN_13))
+                .toArray(Product[]::new));
+
+        assertThat(service.generateOpendata()).isFalse();
+
+        assertThat(snapshot()).isEqualTo(published);
+        assertThat(manifestStore.readDataset(openDataConfig.gtinManifestFile()).orElseThrow().rows()).isEqualTo(10);
+        assertFailureVisible("the published manifest has 10");
+    }
+
+    @Test
+    void rowGuardShouldRefuseAnExportThatStoppedEarly() throws Exception {
+        when(productRepository.countItemsByBarcodeType(any(BarcodeType[].class))).thenReturn(100L);
+        exportReturns(buildProduct("1234567890123", BarcodeType.GTIN_13));
+
+        assertThat(service.generateOpendata()).isFalse();
+
+        assertThat(openDataConfig.gtinZipFile()).doesNotExist();
+        assertThat(openDataConfig.manifestFile()).doesNotExist();
+        assertFailureVisible("the index counted 100 products");
+    }
+
+    @Test
+    void disabledGenerationShouldNotReadTheIndex() {
+        openDataConfig.setGenerationEnabled(Boolean.FALSE);
+        OpenDataService disabled = new OpenDataService(productRepository, openDataConfig, meterRegistry);
+
+        assertThat(disabled.generateOpendata()).isFalse();
+        assertThat(disabled.launchGeneration()).isFalse();
+
+        verify(productRepository, never()).exportAll(any(String[].class), anyInt());
+        assertThat(disabled.status().state()).isEqualTo(State.IDLE);
+    }
+
+    @Test
+    void healthShouldBeUnknownWhenNoFileWasPublished() {
+        assertThat(service.health().getStatus()).isEqualTo(Status.UNKNOWN);
     }
 
     @Test
@@ -178,7 +331,7 @@ class OpenDataServiceTest {
 
     @Test
     void csvMappersShouldHandleMissingData() throws Exception {
-        Product product = mock(Product.class);
+        Product product = Mockito.mock(Product.class);
         when(product.getAttributes()).thenReturn(null);
 
         String[] gtinEntry = invokeMapper("toGtinEntry", product);
@@ -186,6 +339,36 @@ class OpenDataServiceTest {
 
         assertThat(gtinEntry).doesNotContainNull();
         assertThat(isbnEntry).doesNotContainNull();
+    }
+
+    private void assertFailureVisible(String error) {
+        assertThat(service.status().state()).isEqualTo(State.FAILED);
+        assertThat(service.status().error()).contains(error);
+        assertThat(service.health().getStatus()).isEqualTo(Status.DOWN);
+        assertThat(service.health().getDetails()).containsEntry("state", "FAILED");
+        assertThat(meterRegistry.get("opendata.generation.runs").tag("outcome", "failure").counter().count()).isEqualTo(1);
+        assertThat(meterRegistry.get("opendata.generation.failed").gauge().value()).isEqualTo(1);
+    }
+
+    private void exportReturns(Product... products) {
+        when(productRepository.exportAll(any(String[].class), anyInt())).thenReturn(Stream.of(products));
+    }
+
+    private Snapshot snapshot() throws Exception {
+        return new Snapshot(read(openDataConfig.gtinZipFile()), read(openDataConfig.isbnZipFile()),
+                read(openDataConfig.gtinManifestFile()), read(openDataConfig.isbnManifestFile()),
+                read(openDataConfig.manifestFile()));
+    }
+
+    private static String read(File file) throws Exception {
+        return file.exists() ? HexFormat.of().formatHex(Files.readAllBytes(file.toPath())) : null;
+    }
+
+    private record Snapshot(String gtinZip, String isbnZip, String gtinManifest, String isbnManifest, String manifest) {
+    }
+
+    private static String sha256(File file) throws Exception {
+        return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(file.toPath())));
     }
 
     private String[] invokeMapper(String methodName, Product product) throws Exception {

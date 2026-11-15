@@ -258,6 +258,8 @@ management:
 
 open-data-config:
   generation-enabled: false
+  # Public base URL of the dataset downloads (lot 0c: https://data.nudger.fr). Empty keeps api.resource-root-path.
+  public-base-url: ${OPEN_DATA_PUBLIC_BASE_URL:}
 
 google-indexation:
   enabled: ${GOOGLE_INDEXATION_ENABLED:false}

@@ -41,7 +41,7 @@ public class CompletionTimings {
 	}
 
 	/**
-	 * Records a completion service call that threw: the following services of the product do not run.
+	 * Records a completion service call that threw: the following services of the product still run (GOU-2273).
 	 *
 	 * @param service the completion service name
 	 * @param nanos   the duration of the call until the failure

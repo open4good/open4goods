@@ -248,6 +248,13 @@ public class OpenDataMappingService {
      * @return absolute URL accessible by the frontend
      */
     private String buildDownloadUrl(String relativePath) {
+        String publicBase = openDataConfig.getPublicBaseUrl();
+        if (StringUtils.hasText(publicBase)) {
+            String fileName = relativePath.substring(relativePath.lastIndexOf('/') + 1);
+            String base = publicBase.endsWith("/") ? publicBase.substring(0, publicBase.length() - 1) : publicBase;
+            return base + "/" + fileName;
+        }
+
         String root = apiProperties.getResourceRootPath();
 
         if (!StringUtils.hasText(root)) {

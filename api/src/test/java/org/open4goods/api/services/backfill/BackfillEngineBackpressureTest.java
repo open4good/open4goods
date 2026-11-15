@@ -149,6 +149,48 @@ class BackfillEngineBackpressureTest {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
+	void systematicItemFailuresFailTheRun() throws IOException {
+		List<Hit<Object>> hits = new java.util.ArrayList<>();
+		List<BulkResponseItem> items = new java.util.ArrayList<>();
+		for (int i = 0; i < 12; i++) {
+			String id = String.valueOf(i);
+			hits.add(hit(id, i));
+			items.add(BulkResponseItem.of(it -> it.operationType(OperationType.Update).index("products").id(id)
+					.status(400).error(e -> e.type("strict_dynamic_mapping_exception").reason("nature not allowed"))));
+		}
+		when(client.search(any(Function.class), eq(Map.class))).thenReturn(SearchResponse.of(r -> r.took(1)
+				.timedOut(false).pitId("pit-1").shards(s -> s.total(1).successful(1).failed(0))
+				.hits(h -> h.hits(hits))));
+		when(client.bulk(any(Function.class))).thenReturn(BulkResponse.of(b -> b.took(1).errors(true).items(items)));
+
+		assertThatThrownBy(() -> engine().run(new DecitrePurgeOperation(), new BackfillOptions(false, 12, 0, false),
+				tmp.resolve("backup.jsonl"), null, () -> false, r -> { }))
+				.isInstanceOf(IllegalStateException.class).hasMessageContaining("strict_dynamic_mapping_exception");
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void deletedProductOrFewFailuresDoNotFailTheRun() throws IOException {
+		when(client.search(any(Function.class), eq(Map.class))).thenReturn(page(hit("1", 10L)), page(hit("2", 11L)),
+				emptyPage());
+		when(client.bulk(any(Function.class)))
+				.thenReturn(BulkResponse.of(b -> b.took(1).errors(true).items(BulkResponseItem.of(i -> i
+						.operationType(OperationType.Update).index("products").id("1").status(404)
+						.error(e -> e.type("document_missing_exception").reason("gone"))))))
+				.thenReturn(BulkResponse.of(b -> b.took(1).errors(true).items(BulkResponseItem.of(i -> i
+						.operationType(OperationType.Update).index("products").id("2").status(409)
+						.error(e -> e.type("version_conflict_engine_exception").reason("conflict"))))));
+
+		BackfillReport report = engine().run(new DecitrePurgeOperation(), new BackfillOptions(false, 1, 0, false),
+				tmp.resolve("backup.jsonl"), null, () -> false, r -> { });
+
+		assertThat(report.stopReason()).isNull();
+		assertThat(report.unchangedProducts()).as("deleted product").isEqualTo(1);
+		assertThat(report.failedProducts()).as("single conflict").isEqualTo(1);
+	}
+
+	@Test
 	void paceThatOutlivesThePointInTimeIsRefused() {
 		assertThatThrownBy(() -> engine().requirePaceWithinKeepAlive(5000, 1))
 				.isInstanceOf(IllegalArgumentException.class);

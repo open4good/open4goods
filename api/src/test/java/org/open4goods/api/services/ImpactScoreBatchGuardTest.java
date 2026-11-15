@@ -172,6 +172,8 @@ class ImpactScoreBatchGuardTest {
 		VerticalConfig vertical = new VerticalConfig();
 		vertical.setId("air-conditioners");
 		List<Product> capped = cohort(100, i -> 4.9 + i * 0.0005, 0.8);
+		// The batch scores the products of the vertical only (GOU-2273)
+		capped.forEach(p -> p.setVertical(vertical.getId()));
 		ProductRepository repository = mock(ProductRepository.class);
 		when(repository.getProductsMatchingVerticalId(vertical)).thenAnswer(i -> capped.stream());
 		AggregationFacadeService aggregation = mock(AggregationFacadeService.class);

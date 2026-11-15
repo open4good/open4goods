@@ -22,7 +22,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Parses warranty strings into a standardized duration in YEARS (Double).
- * Supports explicit years ("2 ans", "2 years"), months ("24 months"), and implicit numeric values.
+ * Supports explicit years ("2 ans", "2 years", "1.5 ans", "2,5 ans"), months ("24 months"), and implicit numeric values.
+ * Decimals are kept in the output ("18 mois" gives "1.5", at most 2 decimals).
  * <p>
  * Configuration (bounds) is managed via {@link VerticalConfig.WarrantyParserConfig}.
  */
@@ -186,13 +187,17 @@ public class WarrantyParser extends AttributeParser {
         return new Range(min, max);
     }
 
+    /**
+     * Lower-cases, strips accents and turns punctuation into spaces ("n/a" becomes "n a"). A point
+     * between two digits is a decimal point and is kept: "1.5 ans" stays 1.5 years.
+     */
     private String normalize(String s) {
         if (s == null) return "";
         s = s.trim();
         s = Normalizer.normalize(s, Normalizer.Form.NFKC);
         s = s.toLowerCase(Locale.ROOT);
         s = Normalizer.normalize(s, Normalizer.Form.NFKD).replaceAll("\\p{M}", "");
-        s = s.replaceAll("[()_./]+", " ");
+        s = s.replaceAll("[()_/]+|(?<!\\d)\\.|\\.(?!\\d)", " ");
         s = s.replaceAll("\\s+", " ").trim();
         return s;
     }

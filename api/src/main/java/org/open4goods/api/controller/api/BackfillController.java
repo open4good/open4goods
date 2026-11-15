@@ -6,7 +6,9 @@ import org.open4goods.api.services.backfill.BackfillOptions;
 import org.open4goods.api.services.backfill.BackfillService;
 import org.open4goods.api.services.backfill.BackfillStatus;
 import org.open4goods.api.services.backfill.DecitrePurgeOperation;
+import org.open4goods.api.services.backfill.NatureBackfillOperation;
 import org.open4goods.model.RolesConstants;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,9 +35,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class BackfillController {
 
 	private final BackfillService backfillService;
+	private final VerticalsConfigService verticalsConfigService;
 
-	public BackfillController(BackfillService backfillService) {
+	public BackfillController(BackfillService backfillService, VerticalsConfigService verticalsConfigService) {
 		this.backfillService = backfillService;
+		this.verticalsConfigService = verticalsConfigService;
 	}
 
 	@PostMapping("/batch/backfill/decitre-purge")
@@ -67,6 +71,57 @@ public class BackfillController {
 		try {
 			DecitrePurgeOperation operation = keys == null || keys.isEmpty() ? new DecitrePurgeOperation()
 					: new DecitrePurgeOperation(keys);
+			BackfillOptions options = new BackfillOptions(dryRun, batchSize, maxProductsPerSecond, resume);
+			return ResponseEntity.accepted().body(backfillService.start(operation, options));
+		} catch (IllegalArgumentException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+		} catch (IllegalStateException e) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
+		}
+	}
+
+	@PostMapping("/batch/backfill/nature")
+	@Operation(summary = "Set the nature (accessory, spare part) of the live products without vertical",
+			description = "Scans the products without vertical whose lastChange is within lastChangeDays, with offers and "
+					+ "merchant categories, and sets or removes their nature as the aggregation computes it (GOU-2233), "
+					+ "with the given natureMinMarkedCategoryShare threshold. Only the nature field is written, and only "
+					+ "when it differs; a product that got a vertical meanwhile is left untouched. dryRun=true (default) "
+					+ "writes nothing and reports, for each report threshold, the products marked per nature value, and "
+					+ "20 examples marked at the lowest report threshold but not at the highest (details of the report). "
+					+ "No backup and no restore: the previous value is recomputable. Stop and resume as the other "
+					+ "backfills. The run is asynchronous: this call answers 202.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "202", description = "Run started (or already running: current status returned)"),
+			@ApiResponse(responseCode = "400", description = "Invalid batch size, rate, threshold or window"),
+			@ApiResponse(responseCode = "409", description = "resume=true but nothing to resume")
+	})
+	public ResponseEntity<BackfillStatus> backfillNature(
+			@Parameter(description = "When true (default), nothing is written")
+			@RequestParam(defaultValue = "true") boolean dryRun,
+			@Parameter(description = "Products read per page and updated per bulk (1 to 5000)")
+			@RequestParam(defaultValue = "1000") int batchSize,
+			@Parameter(description = "Reading rate cap, in scanned products per second; 0 means no cap")
+			@RequestParam(defaultValue = "2000") int maxProductsPerSecond,
+			@Parameter(description = "Continue the last stopped, interrupted or failed run of the same mode from its cursor")
+			@RequestParam(defaultValue = "false") boolean resume,
+			@Parameter(description = "natureMinMarkedCategoryShare (0 to 1) of the nature; defaults to the value of "
+					+ "_default.yml, the only one accepted with dryRun=false (the aggregation uses it too)")
+			@RequestParam(required = false) Double threshold,
+			@Parameter(description = "Thresholds counted in the report (0 to 1), default 0 and 0.5")
+			@RequestParam(required = false) List<Double> reportThresholds,
+			@Parameter(description = "lastChange window, in days: the live products")
+			@RequestParam(defaultValue = "2") int lastChangeDays) {
+		try {
+			double configured = verticalsConfigService.getConfigByIdOrDefault(null).getNatureMinMarkedCategoryShare();
+			if (!dryRun && threshold != null && Double.compare(threshold, configured) != 0) {
+				// The aggregation recomputes the nature with the configured threshold: writing with another one would
+				// make natures flip back on the next aggregation of each product
+				throw new IllegalArgumentException("threshold " + threshold + " differs from natureMinMarkedCategoryShare "
+						+ configured + " of _default.yml: set it there and deploy before writing");
+			}
+			double share = threshold != null ? threshold : configured;
+			NatureBackfillOperation operation = new NatureBackfillOperation(verticalsConfigService, share,
+					reportThresholds, lastChangeDays);
 			BackfillOptions options = new BackfillOptions(dryRun, batchSize, maxProductsPerSecond, resume);
 			return ResponseEntity.accepted().body(backfillService.start(operation, options));
 		} catch (IllegalArgumentException e) {

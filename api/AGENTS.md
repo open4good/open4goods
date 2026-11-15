@@ -187,7 +187,7 @@ Une opération doit être idempotente : un produit déjà traité ne reçoit plu
     disque **avant** l'envoi du bulk ;
   - le bulk envoie un script par produit, avec `retry_on_conflict` 3 et sans refresh ;
   - un produit qui n'a plus besoin du changement donne un `noop`, compté dans `unchangedProducts` et non dans
-    `writtenProducts`.
+    `writtenProducts`. Un produit supprimé depuis la lecture (404) compte aussi dans `unchangedProducts`.
 - **`dryRun=true`** (défaut) : n'écrit rien, pas même la sauvegarde. Il compte les produits lus (`scannedProducts`),
   les produits concernés (`matchedProducts`) et chaque libellé (`labelCounts`, par exemple les occurrences de chaque
   clé), et donne 20 ids d'exemple.
@@ -250,6 +250,81 @@ curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/ba
 Le test d'intégration `BackfillEngineIT` (Testcontainers, hors CI) se lance avec `mvn -pl api test
 -Dtest=BackfillEngineIT -Dsurefire.failIfNoSpecifiedTests=false`. Il couvre le dry-run, l'écriture (le reste du
 `_source` est identique), la restauration, l'arrêt suivi de la reprise et le PIT expiré.
+
+### Reprise de `nature` (GOU-2234)
+
+`POST /batch/backfill/nature` pose ou retire `nature` (lot CSS 4e.2 de GOU-2226) sur les produits vivants sans
+verticale.
+
+**Pourquoi.** Une ligne de flux inchangée ne fait qu'une mise à jour partielle, et le batch ne charge que les produits
+des verticales. Sans cette reprise, les produits sans verticale n'auraient jamais la `nature` calculée par
+l'agrégation (GOU-2233).
+
+**Périmètre.** Pas de `vertical`, `lastChange` dans les `lastChangeDays` derniers jours (défaut 2), `offersCount` > 0,
+et `datasourceCategories` présent. La borne de `lastChange` est fixée au lancement et sert à tout le run ; une reprise
+la recalcule. Le parcours ne lit que `datasourceCategories`, `nature` et `offerNames`.
+
+**Calcul.** C'est celui de l'agrégation, `VerticalsConfigService.getNatureForCategories(categories, threshold)`, sans
+copie. `threshold` est le `natureMinMarkedCategoryShare` ; sa valeur par défaut est celle de `_default.yml`.
+- Un autre seuil n'est accepté qu'en dry-run.
+- En écriture, il est refusé (400) : l'agrégation recalcule la nature avec la valeur de `_default.yml`, et les natures
+  écrites avec un autre seuil changeraient de nouveau à l'agrégation suivante.
+
+**Écriture.**
+- Seul `nature` est écrit, et seulement quand il diffère : la reprise peut se relancer.
+- Le script ne touche pas un produit qui a reçu une verticale entre-temps, ni un produit dont les
+  `datasourceCategories` ont changé depuis la lecture : l'agrégation a alors calculé sa nature sur les nouvelles.
+- Si au moins 10 mises à jour d'un bulk échouent sans 429, et plus de la moitié du bulk (mapping absent, erreur de
+  script), le run passe à `FAILED` avec son curseur. Un produit supprimé depuis la lecture (404) n'est pas un échec :
+  il compte dans `unchangedProducts`. Seules les 5 premières erreurs d'un bulk sont journalisées une à une, les autres sont comptées par type.
+- La valeur précédente se recalcule : il n'y a ni sauvegarde ni restauration.
+- `sanitizeAll()` n'est pas utilisé.
+
+**Rapport du dry-run** (mesure 7.4 de GOU-2226). `report.labelCounts` donne les écritures prévues par valeur
+(`nature=SPARE_PART`, `nature=ACCESSORY`, `nature=absent`). `report.details` donne :
+- `markedByThreshold` : les produits marqués par valeur, pour chaque seuil de `reportThresholds` (défaut 0 et 0,5) ;
+- `examplesMarkedOnlyAtLowestThreshold` : 20 exemples (GTIN, nom, `datasourceCategories`) marqués au seuil le plus
+  bas mais pas au plus haut.
+
+Après une reprise du run, ces compteurs ne couvrent que la partie reprise.
+
+**Exécution en prod** (Ops), dans l'ordre :
+
+1. Vérifier que le champ existe dans l'index : `GET products-moustik/_mapping/field/nature` doit renvoyer `keyword`.
+2. Lancer le dry-run et publier son résultat sur GOU-2234.
+3. Le CTO fixe `natureMinMarkedCategoryShare` dans `_default.yml`, puis le changement est mergé et déployé.
+4. Lancer l'écriture, sans `threshold`, après le premier batch de 13 h qui suit le déploiement de #3649, hors des
+   fenêtres de 13 h et de 23 h.
+
+```bash
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/backfill/nature"
+curl -H "Authorization: $O4G_INTERNAL_API_KEY" https://api.nudger.fr/batch/backfill
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/backfill/nature?dryRun=false"
+```
+
+`NatureBackfillIT` (Testcontainers, hors CI) couvre :
+- le dry-run (comptes par seuil et exemple) ;
+- l'écriture (seul `nature` change, et seulement sur les produits du périmètre) ;
+- le second passage, qui n'écrit rien ;
+- le seuil 0,5 ;
+- les gardes du script (verticale reçue, catégories changées).
+
+## Génération open data
+
+GOU-2248. `api` est le seul module qui génère les jeux GTIN et ISBN (`services/opendata`) : `ui` et `front-api` gardent
+`open-data-config.generation-enabled: false`, et `OpenDataService` n'a pas de `@Scheduled`.
+
+- `OpenDataGenerationScheduler` : cron `open-data-config.generation-cron` (dimanche 01:30 Europe/Paris par défaut). Ne
+  le place pas dans la fenêtre batch (à partir de 12:30) ni dans la fenêtre de release.
+- `OpenDataController` (rôle admin) : `POST /opendata/generate` (202, ou 409 si un passage tourne ou si la génération
+  est désactivée) et `GET /opendata/generation` (état du processus, non persisté).
+- Lecture ES projetée (`OpenDataService.EXPORT_SOURCE_FIELDS`) par pages de `export-page-size`, avec `page-pause`.
+  N'ajoute pas l'objet `attributes` complet ni une clé Decitre à la projection, et ne relève pas le buffer du client
+  ES (GOU-2249).
+- Un échec ne touche pas aux fichiers publiés et se voit : log `ERROR`, health `openData` DOWN, métrique
+  `opendata_generation_failed`.
+
+Doc : [architecture](../docs/architecture/opendata.md), [exploitation](../docs/operations/opendata-generation.md).
 
 ## Date de la dernière offre par datasource
 
@@ -321,6 +396,18 @@ les met en file d'indexation complète. L'indexation temps réel continue pendan
 - Fenêtre restante : une mise à jour temps réel écrite entre la mise en file d'une page et son indexation (le temps de
   vider la file, 5 000 produits au plus) peut encore être recouverte, et une mise à jour complète lue avant
   l'indexation de la page peut recouvrir les champs calculés par le batch.
+
+Cohorte et isolation (GOU-2273) :
+
+- Seuls les produits avec offres encore dans la verticale après la classification sont complétés, et seuls ceux qui y
+  sont encore après l'agrégation (qui rejoue la taxonomie après EPREL) sont notés avec sa configuration et sa cohorte.
+  Un produit reclassé ailleurs est indexé sans être noté ni nettoyé : le batch de sa nouvelle verticale le notera.
+- Une verticale qui lève une exception (chargement, complétion, agrégation) est journalisée en `ERROR` et par une
+  ligne `Batch of vertical <id> : failed` ; les verticales suivantes et `clearScoresOutsideVerticals()` passent
+  quand même.
+- Une exception de notation sur un produit arrête la notation de toute la verticale (rien n'est indexé, les scores
+  ont été vidés au début) ; le log donne le produit et le service. En complétion, un service qui échoue n'empêche
+  plus les suivants pour ce produit.
 
 Durées (GOU-2099) : le logger `org.open4goods.api.services.BatchService.timings`, à INFO dans `application.yml` malgré
 le `warn` de la bêta et de la prod, journalise le début et la fin de chaque verticale avec la durée de chaque phase
