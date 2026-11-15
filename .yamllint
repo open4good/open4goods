@@ -4,6 +4,7 @@ extends: default
 ignore: |
   .git/
   **/.claude/
+  .playwright-mcp/
   **/node_modules/
   **/target/
   **/.nuxt/

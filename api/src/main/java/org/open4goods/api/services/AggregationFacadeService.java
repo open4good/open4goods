@@ -2,6 +2,7 @@
 package org.open4goods.api.services;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -12,11 +13,11 @@ import org.open4goods.api.services.aggregation.AbstractAggregationService;
 import org.open4goods.api.services.aggregation.aggregator.ScoringBatchedAggregator;
 import org.open4goods.api.services.aggregation.aggregator.StandardAggregator;
 import org.open4goods.api.services.aggregation.services.batch.scores.Attribute2ScoreAggregationService;
+import org.open4goods.api.services.aggregation.services.batch.scores.BrandScoresAggregationService;
 import org.open4goods.api.services.aggregation.services.batch.scores.CleanScoreAggregationService;
 import org.open4goods.api.services.aggregation.services.batch.scores.DataCompletion2ScoreAggregationService;
 import org.open4goods.api.services.aggregation.services.batch.scores.EcoScoreAggregationService;
 import org.open4goods.api.services.aggregation.services.batch.scores.ParticipatingScoresAggregationService;
-import org.open4goods.api.services.aggregation.services.batch.scores.BrandScoresAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.AttributeRealtimeAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.IdentityAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.MediaAggregationService;
@@ -24,47 +25,41 @@ import org.open4goods.api.services.aggregation.services.realtime.NamesAggregatio
 import org.open4goods.api.services.aggregation.services.realtime.PriceAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.TaxonomyRealTimeAggregationService;
 import org.open4goods.api.services.aggregation.services.realtime.UsageCostAggregationService;
+import org.open4goods.brand.service.BrandService;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.helper.GenericFileLogger;
-import org.open4goods.brand.service.BrandService;
 import org.open4goods.commons.services.BarcodeForensicsService;
 import org.open4goods.commons.services.BarcodeValidationService;
-import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.Gs1PrefixService;
 import org.open4goods.commons.services.textgen.BlablaService;
 import org.open4goods.icecat.services.IcecatFeatureResolver;
-import org.open4goods.icecat.services.IcecatService;
-import org.open4goods.model.StandardiserService;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.productrepository.services.ProductRepository;
-import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-
-import jakarta.annotation.PreDestroy;
 
 /**
  * Central factory and orchestrator for the product aggregation pipeline.
  *
  * <p>Assembles and invokes two kinds of aggregators:
  * <ul>
- *   <li><strong>StandardAggregator</strong> — used in realtime mode
- *       ({@link #updateOne(DataFragment, Product)}), by the batch
- *       ({@link #aggregateProducts(VerticalConfig, Set)}) and by the on-demand sanitisation of a vertical
- *       ({@link #sanitizeVertical(VerticalConfig)}).</li>
+ *   <li><strong>StandardAggregator</strong> — the full chain of the 7 realtime services, built once and shared
+ *       ({@link #getStandardAggregator()}) by the realtime ingestion ({@link #updateOne(DataFragment, Product)}),
+ *       the completion services (Icecat, EPREL, Wikidata, Amazon), the batch
+ *       ({@link #aggregateProducts(VerticalConfig, Set)}) and the on-demand sanitisation
+ *       ({@link #sanitizeVertical(VerticalConfig)}). A second instance, also built once, runs the identity and
+ *       taxonomy services only ({@link #classificationAggregator(VerticalConfig, Set)}).</li>
  *   <li><strong>ScoringBatchedAggregator</strong> — used by the batch for scoring
- *       ({@link #score(VerticalConfig, Set)}).</li>
+ *       ({@link #score(VerticalConfig, Set)}), built again for each run because the scoring services hold
+ *       run-scoped state.</li>
  * </ul>
  *
- * <p>A single {@link StandardAggregator} instance ({@code realtimeAggregator}) is
- * kept alive for the lifetime of this service to handle incoming DataFragments
- * without re-building the service chain on every request. All batch methods
- * create a fresh aggregator per invocation to avoid cross-run state leakage.
+ * <p>The standard chain is shared between threads (the fragment worker, up to {@code api.completion-concurrency}
+ * completion threads, the batch): it and its services hold no mutable state (GOU-2280). Its services write to the
+ * {@code realtime} aggregation log, whatever the caller.
  *
  * <p>TODO: Maintain a state machine to prevent concurrent batch launches on the
  * same vertical. See docs/adr/ for the proposed design.
@@ -73,56 +68,54 @@ public class AggregationFacadeService {
 
 	protected static final Logger logger = LoggerFactory.getLogger(AggregationFacadeService.class);
 
-	private final EvaluationService evaluationService;
-	private final StandardiserService standardiserService;
-	private final AutowireCapableBeanFactory autowireBeanFactory;
+	/** Aggregation log of the standard chain ({@code <logs>/aggregation/realtime.log}). */
+	private static final String STANDARD_LOG = "realtime";
+
+	/** Aggregation log of the classification-only chain. */
+	private static final String CLASSIFICATION_LOG = "categores_classif";
+
+	/** Aggregation log of the scoring chain, read by the release routine ({@code aggregation/score.log}). */
+	private static final String SCORING_LOG = "score";
+
 	private final ProductRepository dataRepository;
 	private final ApiProperties apiProperties;
-	private final Gs1PrefixService gs1prefixService;
-	private final DataSourceConfigService dataSourceConfigService;
 	private final VerticalsConfigService verticalConfigService;
-	private final BarcodeValidationService barcodeValidationService;
-	private final BarcodeForensicsService barcodeForensicsService;
 	private final BrandService brandService;
-	private final BlablaService blablaService;
-	private final IcecatService icecatFeatureService;
-	private final IcecatFeatureResolver icecatFeatureResolver;
-	private final SerialisationService serialisationService;
 
-	/** Shared realtime aggregator — assembled once and reused across all DataFragment ingestion calls. */
-	private final StandardAggregator realtimeAggregator;
+	/** The full chain of the 7 realtime services, shared by every caller (GOU-2280). */
+	private final StandardAggregator standardAggregator;
 
-	public AggregationFacadeService(final EvaluationService evaluationService,
-			final StandardiserService standardiserService,
-			final AutowireCapableBeanFactory autowireBeanFactory,
-			final ProductRepository aggregatedDataRepository,
+	/** Identity and taxonomy services only, to (re-)classify products. */
+	private final StandardAggregator classificationOnlyAggregator;
+
+	public AggregationFacadeService(final ProductRepository aggregatedDataRepository,
 			final ApiProperties apiProperties,
 			final Gs1PrefixService gs1prefixService,
-			final DataSourceConfigService dataSourceConfigService,
 			final VerticalsConfigService configService,
 			final BarcodeValidationService barcodeValidationService,
 			final BrandService brandService,
 			final BlablaService blablaService,
-			final IcecatService icecatFeatureService,
 			final IcecatFeatureResolver icecatFeatureResolver,
-			final SerialisationService serialisationService,
 			final BarcodeForensicsService barcodeForensicsService) {
-		this.evaluationService = evaluationService;
-		this.standardiserService = standardiserService;
-		this.autowireBeanFactory = autowireBeanFactory;
 		this.dataRepository = aggregatedDataRepository;
 		this.apiProperties = apiProperties;
-		this.gs1prefixService = gs1prefixService;
-		this.dataSourceConfigService = dataSourceConfigService;
 		this.verticalConfigService = configService;
 		this.brandService = brandService;
-		this.barcodeValidationService = barcodeValidationService;
-		this.blablaService = blablaService;
-		this.icecatFeatureService = icecatFeatureService;
-		this.icecatFeatureResolver = icecatFeatureResolver;
-		this.serialisationService = serialisationService;
-		this.barcodeForensicsService = barcodeForensicsService;
-		this.realtimeAggregator = getStandardAggregator("realtime");
+
+		Logger standardLog = aggregationLogger(STANDARD_LOG);
+		this.standardAggregator = new StandardAggregator(List.of(
+				new IdentityAggregationService(standardLog, gs1prefixService, barcodeValidationService, barcodeForensicsService),
+				new TaxonomyRealTimeAggregationService(standardLog, configService),
+				new AttributeRealtimeAggregationService(brandService, standardLog, icecatFeatureResolver),
+				new UsageCostAggregationService(standardLog),
+				new NamesAggregationService(standardLog, blablaService),
+				new PriceAggregationService(standardLog),
+				new MediaAggregationService(standardLog)), configService);
+
+		Logger classificationLog = aggregationLogger(CLASSIFICATION_LOG);
+		this.classificationOnlyAggregator = new StandardAggregator(List.of(
+				new IdentityAggregationService(classificationLog, gs1prefixService, barcodeValidationService, barcodeForensicsService),
+				new TaxonomyRealTimeAggregationService(classificationLog, configService)), configService);
 	}
 
 	/**
@@ -141,12 +134,22 @@ public class AggregationFacadeService {
 	}
 
 	/**
-	 * Re-sanitises all products in all enabled verticals. Delegates to
-	 * {@link #sanitizeVertical(VerticalConfig)} per vertical.
+	 * Re-sanitises all products in all verticals, one vertical after the other. Delegates to
+	 * {@link #sanitizeVertical(VerticalConfig)} per vertical. A vertical that fails is logged (ERROR) and the next
+	 * ones still run, as in {@link BatchService#batch()} (GOU-2280).
 	 */
 	public void sanitizeAllVerticals() {
+		List<String> failed = new ArrayList<>();
 		for (VerticalConfig vertical : verticalConfigService.getConfigsWithoutDefault()) {
-			sanitizeVertical(vertical);
+			try {
+				sanitizeVertical(vertical);
+			} catch (RuntimeException e) {
+				failed.add(vertical.getId());
+				logger.error("Sanitisation of vertical {} failed, moving on to the next vertical", vertical.getId(), e);
+			}
+		}
+		if (!failed.isEmpty()) {
+			logger.error("Sanitisation of all verticals done, {} failed: {}", failed.size(), failed);
 		}
 	}
 
@@ -181,11 +184,8 @@ public class AggregationFacadeService {
 			Iterator<Product> iterator = products.iterator();
 			while (iterator.hasNext()) {
 				Product p = iterator.next();
-				try {
-					batchAgg.onProduct(p);
+				if (aggregateOrSkip(batchAgg, p)) {
 					page.add(p);
-				} catch (AggregationSkipException e) {
-					logger.error("Skipping product during batched sanitisation : ", e);
 				}
 				if (page.size() == BatchService.INDEXATION_PAGE_SIZE) {
 					refreshed += queueWithNewestOffers(page);
@@ -222,17 +222,10 @@ public class AggregationFacadeService {
 	 * @param products products to aggregate; modified in-place
 	 */
 	public void aggregateProducts(final VerticalConfig vertical, final Set<Product> products) {
-		logger.info("started : Sanitisation batching for {} products in vertical : {}", products.size(), vertical);
-		StandardAggregator batchAgg = getStandardAggregator();
-
-		products.forEach(p -> {
-			try {
-				batchAgg.onProduct(p);
-			} catch (AggregationSkipException e) {
-				logger.error("Skipping product during batched sanitisation : ", e);
-			}
-		});
-		logger.info("done: Sanitisation batching for all items");
+		logger.info("started : Sanitisation batching for {} products in vertical : {}", products.size(), idOf(vertical));
+		int skipped = aggregateAll(getStandardAggregator(), products);
+		logger.info("done: Sanitisation batching for {} products in vertical {}, {} skipped", products.size(),
+				idOf(vertical), skipped);
 	}
 
 	/**
@@ -243,17 +236,44 @@ public class AggregationFacadeService {
 	 * @param products products to classify; modified in-place
 	 */
 	public void classificationAggregator(final VerticalConfig vertical, final Set<Product> products) {
-		logger.info("started : Classification batching for {} products in vertical : {}", products.size(), vertical);
-		StandardAggregator batchAgg = getCategorieClassificationAggregator();
+		logger.info("started : Classification batching for {} products in vertical : {}", products.size(), idOf(vertical));
+		int skipped = aggregateAll(classificationOnlyAggregator, products);
+		logger.info("done: Classification batching for {} products in vertical {}, {} skipped", products.size(),
+				idOf(vertical), skipped);
+	}
 
-		products.forEach(p -> {
-			try {
-				batchAgg.onProduct(p);
-			} catch (AggregationSkipException e) {
-				logger.error("Skipping product during batched sanitisation : ", e);
+	/**
+	 * Runs {@code aggregator} on every product.
+	 *
+	 * @return number of products a service asked to skip
+	 */
+	private static int aggregateAll(final StandardAggregator aggregator, final Collection<Product> products) {
+		int skipped = 0;
+		for (Product p : products) {
+			if (!aggregateOrSkip(aggregator, p)) {
+				skipped++;
 			}
-		});
-		logger.info("done: classification");
+		}
+		return skipped;
+	}
+
+	/**
+	 * Runs {@code aggregator} on a product.
+	 *
+	 * @return false when a service asked to skip the product, which is then logged
+	 */
+	private static boolean aggregateOrSkip(final StandardAggregator aggregator, final Product product) {
+		try {
+			aggregator.onProduct(product);
+			return true;
+		} catch (AggregationSkipException e) {
+			logger.error("Skipping product {} during batched sanitisation : ", product.getId(), e);
+			return false;
+		}
+	}
+
+	private static String idOf(final VerticalConfig vertical) {
+		return vertical == null ? null : vertical.getId();
 	}
 
 	/**
@@ -279,8 +299,7 @@ public class AggregationFacadeService {
 	 */
 	public void aggregate(final Product product) throws AggregationSkipException {
 		logger.info("started : Sanitisation batching for {}", product);
-		StandardAggregator batchAgg = getStandardAggregator();
-		batchAgg.onProduct(product);
+		getStandardAggregator().onProduct(product);
 		logger.info("done : Sanitisation batching for {}", product);
 	}
 
@@ -294,57 +313,18 @@ public class AggregationFacadeService {
 	 * @throws AggregationSkipException if the product fails validation
 	 */
 	public Product updateOne(final DataFragment df, final Product data) throws AggregationSkipException {
-		return realtimeAggregator.onDatafragment(df, data);
-	}
-
-	/** Closes the shared realtime aggregator on application shutdown. */
-	@PreDestroy
-	public void shutdown() {
-		realtimeAggregator.close();
+		return getStandardAggregator().onDatafragment(df, data);
 	}
 
 	/**
-	 * Builds a fresh {@link StandardAggregator} containing the full realtime
-	 * service chain. A dedicated aggregation log file is created for the given name.
+	 * The full chain of the 7 realtime services (identity, taxonomy, attributes, usage cost, names, price, media),
+	 * built once. It is shared by the realtime ingestion, the completion services, the batch and the on-demand
+	 * sanitisation, from several threads: it holds no mutable state (GOU-2280).
 	 *
-	 * @param name log-channel name (e.g. {@code "realtime"}, {@code "sanitisation"})
-	 * @return configured aggregator instance (Spring beans are not yet injected into services)
+	 * @return the shared standard aggregator
 	 */
-	public StandardAggregator getStandardAggregator(final String name) {
-		Logger aggLogger = GenericFileLogger.initLogger(name, apiProperties.aggLogLevel(),
-				apiProperties.logsFolder() + "/aggregation");
-
-		final List<AbstractAggregationService> services = new ArrayList<>();
-		services.add(new IdentityAggregationService(aggLogger, gs1prefixService, barcodeValidationService, barcodeForensicsService));
-		services.add(new TaxonomyRealTimeAggregationService(aggLogger, verticalConfigService));
-		services.add(new AttributeRealtimeAggregationService(verticalConfigService, brandService, aggLogger, icecatFeatureResolver));
-		services.add(new UsageCostAggregationService(aggLogger));
-		services.add(new NamesAggregationService(aggLogger, verticalConfigService, blablaService));
-		services.add(new PriceAggregationService(aggLogger));
-		services.add(new MediaAggregationService(aggLogger));
-
-		final StandardAggregator ret = new StandardAggregator(services, verticalConfigService);
-		autowireBeanFactory.autowireBean(ret);
-		return ret;
-	}
-
-	/**
-	 * Builds a {@link StandardAggregator} containing only the identity and taxonomy
-	 * services, used to (re-)classify products without touching other fields.
-	 *
-	 * @return configured classification-only aggregator
-	 */
-	public StandardAggregator getCategorieClassificationAggregator() {
-		Logger aggLogger = GenericFileLogger.initLogger("categores_classif", apiProperties.aggLogLevel(),
-				apiProperties.logsFolder() + "/aggregation");
-
-		final List<AbstractAggregationService> services = new ArrayList<>();
-		services.add(new IdentityAggregationService(aggLogger, gs1prefixService, barcodeValidationService, barcodeForensicsService));
-		services.add(new TaxonomyRealTimeAggregationService(aggLogger, verticalConfigService));
-
-		final StandardAggregator ret = new StandardAggregator(services, verticalConfigService);
-		autowireBeanFactory.autowireBean(ret);
-		return ret;
+	public StandardAggregator getStandardAggregator() {
+		return standardAggregator;
 	}
 
 	/**
@@ -355,8 +335,7 @@ public class AggregationFacadeService {
 	 * @return configured scoring aggregator
 	 */
 	public ScoringBatchedAggregator getScoringAggregator() {
-		Logger aggLogger = GenericFileLogger.initLogger("score", apiProperties.aggLogLevel(),
-				apiProperties.logsFolder() + "/aggregation");
+		Logger aggLogger = aggregationLogger(SCORING_LOG);
 
 		final List<AbstractAggregationService> services = new ArrayList<>();
 		services.add(new CleanScoreAggregationService(aggLogger));
@@ -366,19 +345,15 @@ public class AggregationFacadeService {
 		services.add(new EcoScoreAggregationService(aggLogger));
 		services.add(new ParticipatingScoresAggregationService(aggLogger));
 
-		final ScoringBatchedAggregator ret = new ScoringBatchedAggregator(services);
-		autowireBeanFactory.autowireBean(ret);
-		return ret;
+		return new ScoringBatchedAggregator(services);
 	}
 
 	/**
-	 * Shorthand for {@link #getStandardAggregator(String)} using the
-	 * {@code "sanitisation"} log-channel name.
-	 *
-	 * @return configured sanitisation aggregator
+	 * @param name log-channel name, also the file name in {@code <logs>/aggregation}
+	 * @return the dedicated aggregation logger of that channel, created on first use
 	 */
-	public StandardAggregator getStandardAggregator() {
-		return getStandardAggregator("sanitisation");
+	private Logger aggregationLogger(final String name) {
+		return GenericFileLogger.initLogger(name, apiProperties.aggLogLevel(), apiProperties.logsFolder() + "/aggregation");
 	}
 
 }

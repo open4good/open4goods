@@ -157,7 +157,7 @@ class ProductMappingServiceTest {
         Product product = new Product(gtin);
         product.getDatasourceCodes().put("eprel", 10L);
         product.getDatasourceCodes().put("eprel.searchSignature", -42L);
-        product.getDatasourceCodes().put("wikidata.miss", 20L);
+        product.getDatasourceCodes().put("wikidata.org.miss", 20L);
         product.getDatasourceCodes().put("rakuten.com", 30L);
 
         when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);

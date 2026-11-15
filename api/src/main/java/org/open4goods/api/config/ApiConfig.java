@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
+import org.open4goods.api.services.BatchRunningMarker;
 import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.EprelMatchMetrics;
 import org.open4goods.api.services.ImpactScoreBatchGuard;
@@ -93,7 +94,6 @@ import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
@@ -242,9 +242,26 @@ public class ApiConfig {
 		return new ImpactScoreSnapshotRepository(elasticsearchOperations);
 	}
 
+	/**
+	 * Single marker shared by the batch and the open data pass (GOU-2298): it counts its holders, two instances on
+	 * the same file would delete each other's marker.
+	 */
 	@Bean
-	BatchService batchService(ImpactScoreBatchGuard impactScoreBatchGuard, EprelMatchMetrics eprelMatchMetrics, AggregationFacadeService aggregationFacadeService, CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository, FeedIndexingService feedIndexingService, FeedService feedService, SerialisationService serialisationService, ResourceService resourceService, ImpactScoreSnapshotRepository impactScoreSnapshotRepository) {
+	BatchRunningMarker batchRunningMarker() {
+		return new BatchRunningMarker(apiProperties.getBatchRunningMarker());
+	}
+
+	/** Holds the shared marker during each open data pass so a beta deployment defers the api restart. */
+	@Bean
+	org.springframework.beans.factory.InitializingBean openDataRunningMarkerBinding(
+			org.open4goods.services.opendata.service.OpenDataService openDataService, BatchRunningMarker batchRunningMarker) {
+		return () -> openDataService.setPassHooks(batchRunningMarker::begin, batchRunningMarker::end);
+	}
+
+	@Bean
+	BatchService batchService(BatchRunningMarker batchRunningMarker, ImpactScoreBatchGuard impactScoreBatchGuard, EprelMatchMetrics eprelMatchMetrics, AggregationFacadeService aggregationFacadeService, CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository, FeedIndexingService feedIndexingService, FeedService feedService, SerialisationService serialisationService, ResourceService resourceService, ImpactScoreSnapshotRepository impactScoreSnapshotRepository) {
 		BatchService batchService = new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService, productRepository,  feedIndexingService, feedService, serialisationService, resourceService, apiProperties);
+		batchService.setBatchRunningMarker(batchRunningMarker);
 		batchService.setImpactScoreGuard(impactScoreBatchGuard);
 		batchService.setEprelMatchMetrics(eprelMatchMetrics);
 		batchService.setImpactScoreSnapshotRepository(impactScoreSnapshotRepository);
@@ -457,12 +474,12 @@ public class ApiConfig {
 	}
 
 	@Bean
-	AggregationFacadeService realtimeAggregationService(@Autowired EvaluationService evaluationService, StandardiserService standardiserService, AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository, ApiProperties apiProperties,
-			@Autowired Gs1PrefixService gs1prefixService, DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, BarcodeValidationService barcodeValidationService, BrandService brandservice, BlablaService blablaService,
-			IcecatService icecatFeatureService, IcecatFeatureResolver icecatFeatureResolver, SerialisationService serialisationService,
+	AggregationFacadeService realtimeAggregationService(ProductRepository aggregatedDataRepository, ApiProperties apiProperties,
+			Gs1PrefixService gs1prefixService, VerticalsConfigService configService, BarcodeValidationService barcodeValidationService,
+			BrandService brandservice, BlablaService blablaService, IcecatFeatureResolver icecatFeatureResolver,
 			BarcodeForensicsService barcodeForensicsService) {
-		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService, barcodeValidationService, brandservice, blablaService, icecatFeatureService,
-				icecatFeatureResolver, serialisationService, barcodeForensicsService);
+		return new AggregationFacadeService(aggregatedDataRepository, apiProperties, gs1prefixService, configService,
+				barcodeValidationService, brandservice, blablaService, icecatFeatureResolver, barcodeForensicsService);
 	}
 
 	//////////////////////////////////////////////////////////

@@ -27,7 +27,7 @@ Prérequis dans l'environnement GitHub `prod` :
    erreur.
 2. **`mode: apply`** : envoie `/opt/open4goods/opendata/{gtin,isbn}.zip` d'abord vers la clé temporaire
    `s3://nudger-opendata/.staging/{gtin,isbn}-open-data.zip`, avec `Content-Type: application/zip`,
-   `Content-Disposition: attachment`, `Cache-Control: public, max-age=86400` et la métadonnée `sha256`
+   `Content-Disposition: attachment`, `Cache-Control: public, max-age=300` et la métadonnée `sha256`
    (`--header-upload "X-Amz-Meta-Sha256: {sha256}"` ; les métadonnées système du fichier de prod, uid, gid, mode et dates,
    ne sont jamais copiées). Le processus tourne en `nice -n 19` / `ionice -c3`, débit montant limité par `upload_limit`
    (défaut 2 Mio/s).
@@ -57,3 +57,8 @@ Ce workflow reste un secours manuel pour les seuls zips.
 R2 : 10 Go-mois de stockage et 1 M d'opérations de classe A / 10 M de classe B gratuits par mois, sortie réseau
 gratuite. Les deux zips tiennent largement sous 10 Go : coût 0 €. Surveiller la taille cumulée dans le tableau de bord
 Cloudflare si les fichiers grossissent.
+
+## Jeux impact (GOU-2250)
+
+Le choix `impact` du workflow envoie tous les `impact-*.zip` (7 verticales et `impact-all.zip`) et les
+`impact-*-manifest.json` du dossier source, sous le même nom. `all` envoie GTIN, ISBN et impact.

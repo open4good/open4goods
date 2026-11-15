@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -39,7 +40,6 @@ import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributeParser;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 
 /**
@@ -90,10 +90,12 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	 * {@link SourcableAttribute#bestValue()}, then by datasource name and value, so that a parser breaking ties by
 	 * iteration order elects the same value whatever the order the raw attributes were visited in.
 	 */
-	private static final Comparator<SourcedAttribute> MERGED_SOURCE_ORDER = Comparator
-			.comparingInt((SourcedAttribute source) -> SourcableAttribute.trustedSourcePriority(source.getDataSourcename()))
-			.thenComparing(SourcedAttribute::getDataSourcename, Comparator.nullsLast(Comparator.naturalOrder()))
-			.thenComparing(SourcedAttribute::getValue, Comparator.nullsLast(Comparator.naturalOrder()));
+	private static Comparator<SourcedAttribute> mergedSourceOrder(List<String> priority) {
+		return Comparator
+				.comparingInt((SourcedAttribute source) -> SourcableAttribute.trustedSourcePriority(source.getDataSourcename(), priority))
+				.thenComparing(SourcedAttribute::getDataSourcename, Comparator.nullsLast(Comparator.naturalOrder()))
+				.thenComparing(SourcedAttribute::getValue, Comparator.nullsLast(Comparator.naturalOrder()));
+	}
 	/**
 	 * A power written with its unit: number (space-grouped thousands such as "1 200", comma or point decimal,
 	 * optionally spaced as in "0, 3") followed by W, kW or mW.
@@ -110,21 +112,18 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			Pattern.compile("[\u201c\u201d\"\u00b4\u2019]|\u2019\u2019|\u00b4\u00b4");
 
 	private final BrandService brandService;
-	private final VerticalsConfigService verticalConfigService;
 	private final IcecatFeatureResolver featureResolver;
 
 	/**
 	 * Builds the realtime attribute aggregation service.
 	 *
-	 * @param verticalConfigService vertical configuration lookup service
-	 * @param brandService          brand alias/exclusion service
-	 * @param logger                logger dedicated to aggregation diagnostics
-	 * @param featureResolver       Icecat feature-name resolver
+	 * @param brandService    brand alias/exclusion service
+	 * @param logger          logger dedicated to aggregation diagnostics
+	 * @param featureResolver Icecat feature-name resolver
 	 */
-	public AttributeRealtimeAggregationService(final VerticalsConfigService verticalConfigService,
-			final BrandService brandService, final Logger logger, final IcecatFeatureResolver featureResolver) {
+	public AttributeRealtimeAggregationService(final BrandService brandService, final Logger logger,
+			final IcecatFeatureResolver featureResolver) {
 		super(logger);
-		this.verticalConfigService = verticalConfigService;
 		this.brandService = brandService;
 		this.featureResolver = featureResolver;
 	}
@@ -312,7 +311,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		}
 
 		if (bestValue == null) {
-			bestValue = indexedAttr.bestValue();
+			bestValue = indexedAttr.bestValue(attrConf.getPreferredSources());
 		}
 
 		if (bestValue == null) {
@@ -357,7 +356,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		ProductAttribute merged = new ProductAttribute();
 		merged.setName(attrConf.getKey());
 		merged.setSource(indexedAttr.getSource().stream()
-				.sorted(MERGED_SOURCE_ORDER)
+				.sorted(mergedSourceOrder(attrConf.getPreferredSources()))
 				.collect(Collectors.toCollection(LinkedHashSet::new)));
 		return merged;
 	}

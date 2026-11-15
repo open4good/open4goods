@@ -14,11 +14,19 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.security.DigestOutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.HexFormat;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -43,6 +51,7 @@ import org.open4goods.model.exceptions.TechnicalException;
 import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.product.BarcodeType;
 import org.open4goods.model.product.Product;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.opendata.DatasetDefinition;
 import org.open4goods.services.opendata.DatasetWriter;
 import org.open4goods.services.opendata.DatasetWriterManager;
@@ -56,6 +65,7 @@ import org.open4goods.services.opendata.model.OpenDataGenerationStatus.State;
 import org.open4goods.services.opendata.model.OpenDataManifest;
 import org.open4goods.services.opendata.model.OpenDataPublicationStatus;
 import org.open4goods.services.productrepository.services.ProductRepository;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -100,7 +110,8 @@ public class OpenDataService implements HealthIndicator {
             "min_price",
             "currency",
             "categories",
-            "url"
+            "url",
+            "sources"
     };
 
     public static final String[] ISBN_HEADER = {
@@ -115,7 +126,8 @@ public class OpenDataService implements HealthIndicator {
             "format",
             "nb_page",
             "souscategorie",
-            "souscategorie2"
+            "souscategorie2",
+            "sources"
     };
 
     private static final List<String> ISBN_ATTRIBUTE_KEYS = List.of(
@@ -145,6 +157,7 @@ public class OpenDataService implements HealthIndicator {
 
     private final ProductRepository aggregatedDataRepository;
     private final OpenDataConfig openDataConfig;
+    private final VerticalsConfigService verticalsConfigService;
     private final boolean generationEnabled;
     private final OpenDataManifestStore manifestStore = new OpenDataManifestStore();
     private final MeterRegistry meterRegistry;
@@ -154,26 +167,35 @@ public class OpenDataService implements HealthIndicator {
     private final AtomicInteger concurrentDownloadsCounter = new AtomicInteger(0);
     private volatile OpenDataGenerationStatus status = OpenDataGenerationStatus.idle();
     private final Map<String, AtomicLong> exportedRows = new ConcurrentHashMap<>();
+    private volatile Runnable passStartHook = () -> { };
+    private volatile Runnable passEndHook = () -> { };
 
     @Autowired
     public OpenDataService(ProductRepository aggregatedDataRepository,
                            OpenDataConfig openDataConfig,
                            ObjectProvider<MeterRegistry> meterRegistry,
-                           OpenDataPublisher publisher) {
-        this(aggregatedDataRepository, openDataConfig, meterRegistry.getIfAvailable(SimpleMeterRegistry::new), publisher);
+                           OpenDataPublisher publisher,
+                           ObjectProvider<VerticalsConfigService> verticalsConfigService) {
+        this(aggregatedDataRepository, openDataConfig, meterRegistry.getIfAvailable(SimpleMeterRegistry::new), publisher,
+                verticalsConfigService.getIfAvailable());
     }
 
+    /**
+     * @param verticalsConfigService source of the impact datasets, one per vertical; {@code null} publishes none
+     */
     OpenDataService(ProductRepository aggregatedDataRepository,
                     OpenDataConfig openDataConfig,
-                    MeterRegistry meterRegistry) {
+                    MeterRegistry meterRegistry,
+                    VerticalsConfigService verticalsConfigService) {
         this(aggregatedDataRepository, openDataConfig, meterRegistry,
-                new OpenDataPublisher(openDataConfig, meterRegistry, S3OpenDataStorage::new));
+                new OpenDataPublisher(openDataConfig, meterRegistry, S3OpenDataStorage::new), verticalsConfigService);
     }
 
     OpenDataService(ProductRepository aggregatedDataRepository,
                     OpenDataConfig openDataConfig,
                     MeterRegistry meterRegistry,
-                    OpenDataPublisher publisher) {
+                    OpenDataPublisher publisher,
+                    VerticalsConfigService verticalsConfigService) {
         Assert.notNull(aggregatedDataRepository, "aggregatedDataRepository must not be null");
         Assert.notNull(openDataConfig, "openDataConfig must not be null");
         Assert.notNull(openDataConfig.getGenerationEnabled(), "openDataConfig.generationEnabled must be configured");
@@ -182,6 +204,7 @@ public class OpenDataService implements HealthIndicator {
 
         this.aggregatedDataRepository = aggregatedDataRepository;
         this.openDataConfig = openDataConfig;
+        this.verticalsConfigService = verticalsConfigService;
         this.generationEnabled = openDataConfig.isGenerationEnabled();
         this.meterRegistry = meterRegistry;
         this.publisher = publisher;
@@ -193,10 +216,14 @@ public class OpenDataService implements HealthIndicator {
     private static String[] exportSourceFields() {
         List<String> fields = new ArrayList<>(List.of(
                 "id",
+                "vertical",
+                "externalIds.eprel",
+                "names.url",
                 "lastChange",
                 "offersCount",
                 "offerNames",
                 "datasourceCategories",
+                "sources",
                 "gtinInfos.upcType",
                 "gtinInfos.country",
                 "price.minPrice.price",
@@ -221,12 +248,22 @@ public class OpenDataService implements HealthIndicator {
                 .baseUnit("seconds")
                 .register(meterRegistry);
         for (String dataset : List.of("gtin", "isbn")) {
-            AtomicLong rows = exportedRows.computeIfAbsent(dataset, key -> new AtomicLong());
+            exportedRowsGauge(dataset);
+        }
+    }
+
+    /**
+     * @return the row counter of a dataset, registered as a gauge on first use (impact datasets follow the YAML)
+     */
+    private AtomicLong exportedRowsGauge(String dataset) {
+        return exportedRows.computeIfAbsent(dataset, key -> {
+            AtomicLong rows = new AtomicLong();
             Gauge.builder("opendata.dataset.rows", rows, AtomicLong::get)
                     .description("Rows of the last open data file published by this process")
-                    .tag(DATASET_TAG, dataset)
+                    .tag(DATASET_TAG, key)
                     .register(meterRegistry);
-        }
+            return rows;
+        });
     }
 
     private double lastSuccessEpochSeconds() {
@@ -354,6 +391,19 @@ public class OpenDataService implements HealthIndicator {
         }
     }
 
+    /**
+     * Registers callbacks run when a generation pass starts and when it ends (success, failure or interruption,
+     * R2 publication included). The api uses them to hold the batch running marker that defers the beta restart
+     * (GOU-2298). The end callback runs even if the start one failed; callbacks must not throw.
+     *
+     * @param onStart run at the start of each pass
+     * @param onEnd run at the end of each pass
+     */
+    public void setPassHooks(Runnable onStart, Runnable onEnd) {
+        this.passStartHook = onStart == null ? () -> { } : onStart;
+        this.passEndHook = onEnd == null ? () -> { } : onEnd;
+    }
+
     private boolean acquire() {
         if (!generationEnabled) {
             LOGGER.warn("Open data generation skipped: open-data-config.generation-enabled is false");
@@ -372,6 +422,15 @@ public class OpenDataService implements HealthIndicator {
      * nothing is sent. A failure of the publication has its own status and metrics ({@link OpenDataPublisher}).
      */
     private boolean runPass() {
+        passStartHook.run();
+        try {
+            return doRunPass();
+        } finally {
+            passEndHook.run();
+        }
+    }
+
+    private boolean doRunPass() {
         Instant startedAt = Instant.now();
         OpenDataGenerationStatus previous = status;
         status = new OpenDataGenerationStatus(State.RUNNING, startedAt, null, previous.lastSuccessAt(), null, previous.rows());
@@ -383,7 +442,7 @@ public class OpenDataService implements HealthIndicator {
             Map<String, Long> rows = new LinkedHashMap<>();
             published.forEach(manifest -> rows.put(manifest.id(), manifest.rows()));
             Instant finishedAt = Instant.now();
-            rows.forEach((dataset, count) -> exportedRows.computeIfAbsent(dataset, key -> new AtomicLong()).set(count));
+            rows.forEach((dataset, count) -> exportedRowsGauge(dataset).set(count));
             status = new OpenDataGenerationStatus(State.SUCCEEDED, startedAt, finishedAt, finishedAt, null, rows);
             outcome = "success";
             LOGGER.info("Open data generation succeeded in {}: {}", Duration.between(startedAt, finishedAt), rows);
@@ -407,14 +466,19 @@ public class OpenDataService implements HealthIndicator {
     }
 
     /**
-     * @return the datasets just published locally, in the order of {@link #datasetDefinitions()}
+     * @return the datasets just published locally, in the order of the manifests (the global impact zip comes last)
      */
     private List<OpenDataPublisher.Dataset> publicationDatasets(List<DatasetManifest> manifests) {
         List<DatasetDefinition> definitions = datasetDefinitions();
         List<OpenDataPublisher.Dataset> datasets = new ArrayList<>();
-        for (int i = 0; i < definitions.size(); i++) {
-            datasets.add(new OpenDataPublisher.Dataset(manifests.get(i), definitions.get(i).finalZipFile().toPath(),
-                    definitions.get(i).manifestFile().toPath()));
+        for (DatasetManifest manifest : manifests) {
+            DatasetDefinition definition = definitions.stream().filter(d -> d.id().equals(manifest.id())).findFirst()
+                    .orElse(null);
+            datasets.add(definition != null
+                    ? new OpenDataPublisher.Dataset(manifest, definition.finalZipFile().toPath(),
+                            definition.manifestFile().toPath())
+                    : new OpenDataPublisher.Dataset(manifest, openDataConfig.impactZipFile("all").toPath(),
+                            openDataConfig.impactManifestFile("all").toPath()));
         }
         return datasets;
     }
@@ -432,8 +496,7 @@ public class OpenDataService implements HealthIndicator {
 
         Map<String, Long> indexCounts = new LinkedHashMap<>();
         for (DatasetDefinition dataset : datasets) {
-            indexCounts.put(dataset.id(), aggregatedDataRepository.countItemsByBarcodeType(
-                    dataset.barcodeTypes().toArray(new BarcodeType[0])));
+            indexCounts.put(dataset.id(), dataset.indexCount().getAsLong());
         }
 
         List<DatasetWriter> writers = writeDatasets(datasets);
@@ -446,8 +509,61 @@ public class OpenDataService implements HealthIndicator {
             checkRows(manifests.get(i), datasets.get(i));
         }
 
+        datasets = new ArrayList<>(datasets);
+        addGlobalImpactDataset(datasets, manifests);
         publish(datasets, manifests);
         return manifests;
+    }
+
+    /**
+     * Adds the global impact zip ({@code impact-all.zip}, GOU-2240): the CSV of every impact dataset of the pass in one
+     * archive, with its own manifest entry. Nothing is added when the pass has no impact dataset.
+     */
+    private void addGlobalImpactDataset(List<DatasetDefinition> datasets, List<DatasetManifest> manifests)
+            throws IOException {
+        List<DatasetDefinition> impacts = datasets.stream().filter(d -> d.id().startsWith("impact-")).toList();
+        if (impacts.isEmpty()) {
+            return;
+        }
+        String id = "impact-all";
+        File tmpZip = openDataConfig.tmpImpactZipFile("all");
+        MessageDigest digest = newSha256();
+        try (OutputStream out = new DigestOutputStream(new FileOutputStream(tmpZip), digest);
+                ZipOutputStream zip = new ZipOutputStream(out)) {
+            for (DatasetDefinition impact : impacts) {
+                try (ZipFile source = new ZipFile(impact.zipFile())) {
+                    zip.putNextEntry(new ZipEntry(impact.filename()));
+                    try (InputStream in = source.getInputStream(source.getEntry(impact.filename()))) {
+                        in.transferTo(zip);
+                    }
+                    zip.closeEntry();
+                }
+            }
+        }
+        long rows = 0;
+        long indexCount = 0;
+        for (DatasetManifest manifest : manifests) {
+            if (manifest.id().startsWith("impact-")) {
+                rows += manifest.rows();
+                indexCount += manifest.indexCount();
+            }
+        }
+        String publicFilename = openDataConfig.impactPublicFilename("all");
+        datasets.add(new DatasetDefinition(id, null, tmpZip, openDataConfig.impactZipFile("all"),
+                openDataConfig.impactManifestFile("all"), publicFilename, new String[0], product -> false,
+                () -> 0L, List.of(), product -> new String[0]));
+        manifests.add(new DatasetManifest(OpenDataManifest.SCHEMA_VERSION, id, publicFilename, publicUrl(publicFilename),
+                DatasetManifest.FORMAT, OpenDataManifest.LICENSE, Files.size(tmpZip.toPath()),
+                HexFormat.of().formatHex(digest.digest()), rows, indexCount, now(), List.of()));
+        LOGGER.info("{} rows exported in {} ({} datasets).", rows, publicFilename, impacts.size());
+    }
+
+    private static MessageDigest newSha256() {
+        try {
+            return MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
@@ -462,7 +578,9 @@ public class OpenDataService implements HealthIndicator {
                 openDataConfig.gtinManifestFile(),
                 openDataConfig.getGtinPublicFilename(),
                 GTIN_HEADER,
-                GTIN_BARCODE_TYPES,
+                product -> hasBarcodeType(product, GTIN_BARCODE_TYPES),
+                () -> aggregatedDataRepository.countItemsByBarcodeType(GTIN_BARCODE_TYPES.toArray(new BarcodeType[0])),
+                List.of(),
                 this::toGtinEntry
         );
 
@@ -474,11 +592,65 @@ public class OpenDataService implements HealthIndicator {
                 openDataConfig.isbnManifestFile(),
                 openDataConfig.getIsbnPublicFilename(),
                 ISBN_HEADER,
-                ISBN_BARCODE_TYPES,
+                product -> hasBarcodeType(product, ISBN_BARCODE_TYPES),
+                () -> aggregatedDataRepository.countItemsByBarcodeType(ISBN_BARCODE_TYPES.toArray(new BarcodeType[0])),
+                List.of(),
                 this::toIsbnEntry
         );
 
-        return List.of(gtinDataset, isbnDataset);
+        List<DatasetDefinition> datasets = new ArrayList<>(List.of(gtinDataset, isbnDataset));
+        impactDatasets().forEach(impact -> datasets.add(impactDefinition(impact)));
+        return datasets;
+    }
+
+    /**
+     * @return one impact dataset per enabled vertical that declares at least one criterion (GOU-2250). The list comes
+     *         from the vertical YAML: a new vertical gives a new dataset, with no list in this class.
+     */
+    List<ImpactDataset> impactDatasets() {
+        if (verticalsConfigService == null) {
+            return List.of();
+        }
+        List<ImpactDataset> impacts = new ArrayList<>();
+        for (VerticalConfig config : verticalsConfigService.getConfigsWithoutDefault(true)) {
+            if (StringUtils.isNotBlank(config.getId()) && !ImpactDataset.criteriaOf(config).isEmpty()) {
+                impacts.add(new ImpactDataset(config, openDataConfig.getSiteBaseUrl()));
+            }
+        }
+        return impacts;
+    }
+
+    private DatasetDefinition impactDefinition(ImpactDataset impact) {
+        String vertical = impact.vertical();
+        return new DatasetDefinition(
+                "impact-" + vertical,
+                "impact-" + vertical + ".csv",
+                openDataConfig.tmpImpactZipFile(vertical),
+                openDataConfig.impactZipFile(vertical),
+                openDataConfig.impactManifestFile(vertical),
+                openDataConfig.impactPublicFilename(vertical),
+                impact.header(),
+                impact::accepts,
+                () -> aggregatedDataRepository.countItemsByVertical(vertical),
+                impact.columnDocs(),
+                impact::toRow
+        );
+    }
+
+    private boolean hasBarcodeType(Product product, Set<BarcodeType> types) {
+        BarcodeType barcodeType = resolveBarcodeType(product);
+        return barcodeType != null && types.contains(barcodeType);
+    }
+
+    /**
+     * @return the projection of a pass: the GTIN and ISBN fields, plus the criteria attributes of the impact datasets
+     */
+    private String[] exportFields(List<DatasetDefinition> datasets) {
+        Set<String> fields = new java.util.LinkedHashSet<>(Arrays.asList(EXPORT_SOURCE_FIELDS));
+        for (ImpactDataset impact : impactDatasets()) {
+            fields.addAll(impact.sourceFields());
+        }
+        return fields.toArray(new String[0]);
     }
 
     private void prepareTmpDirectory() throws IOException {
@@ -535,17 +707,17 @@ public class OpenDataService implements HealthIndicator {
         }
 
         try (DatasetWriterManager manager = new DatasetWriterManager(datasetDefinitions)) {
-            EnumMap<BarcodeType, DatasetWriter> writerByType = mapWritersByType(manager.writers());
+            List<DatasetWriter> writers = manager.writers();
             long read = 0;
-            try (Stream<Product> stream = aggregatedDataRepository.exportAll(EXPORT_SOURCE_FIELDS, pageSize)) {
+            try (Stream<Product> stream = aggregatedDataRepository.exportAll(exportFields(datasetDefinitions), pageSize)) {
                 Iterator<Product> products = stream.iterator();
                 while (products.hasNext()) {
                     Product product = products.next();
                     read++;
-                    BarcodeType barcodeType = resolveBarcodeType(product);
-                    DatasetWriter writer = barcodeType == null ? null : writerByType.get(barcodeType);
-                    if (writer != null) {
-                        writer.write(product);
+                    for (DatasetWriter writer : writers) {
+                        if (writer.definition().selector().test(product)) {
+                            writer.write(product);
+                        }
                     }
                     if (read % pageSize == 0) {
                         if (!pause.isZero()) {
@@ -571,7 +743,8 @@ public class OpenDataService implements HealthIndicator {
         List<ColumnManifest> columns = new ArrayList<>();
         for (int i = 0; i < definition.header().length; i++) {
             double fillRate = rows == 0 ? 0 : Math.round(writer.filledCells(i) * 10_000d / rows) / 10_000d;
-            columns.add(new ColumnManifest(definition.header()[i], fillRate));
+            ColumnManifest doc = i < definition.columnDocs().size() ? definition.columnDocs().get(i) : null;
+            columns.add(doc == null ? new ColumnManifest(definition.header()[i], fillRate) : doc.withFillRate(fillRate));
         }
         return new DatasetManifest(
                 OpenDataManifest.SCHEMA_VERSION,
@@ -642,19 +815,6 @@ public class OpenDataService implements HealthIndicator {
 
     private static String now() {
         return Instant.now().truncatedTo(ChronoUnit.SECONDS).toString();
-    }
-
-    private EnumMap<BarcodeType, DatasetWriter> mapWritersByType(List<DatasetWriter> writers) {
-        EnumMap<BarcodeType, DatasetWriter> writerByType = new EnumMap<>(BarcodeType.class);
-        for (DatasetWriter writer : writers) {
-            for (BarcodeType barcodeType : writer.definition().barcodeTypes()) {
-                DatasetWriter existing = writerByType.put(barcodeType, writer);
-                if (existing != null && existing != writer) {
-                    throw new IllegalStateException("Barcode type " + barcodeType + " is mapped to multiple datasets");
-                }
-            }
-        }
-        return writerByType;
     }
 
     private BarcodeType resolveBarcodeType(Product product) {
@@ -762,8 +922,14 @@ public class OpenDataService implements HealthIndicator {
         } catch (Exception e) {
             LOGGER.error("Error while extracting URL for GTIN {}", data.getId(), e);
         }
+        line[12] = exportSources(data);
 
         return line;
+    }
+
+    /** The contributing sources of a product, identifiers separated by {@code |} (GOU-2301). */
+    private static String exportSources(Product data) {
+        return data.getSources() == null ? "" : StringUtils.join(data.getSources(), "|");
     }
 
     /**
@@ -803,6 +969,7 @@ public class OpenDataService implements HealthIndicator {
         line[9] = StringUtils.defaultString(isbnAttributes.get("NB DE PAGES"));
         line[10] = StringUtils.defaultString(isbnAttributes.get("SOUSCATEGORIE"));
         line[11] = StringUtils.defaultString(isbnAttributes.get("SOUSCATEGORIE2"));
+        line[12] = exportSources(data);
 
         return line;
     }

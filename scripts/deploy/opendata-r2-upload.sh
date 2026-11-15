@@ -17,10 +17,24 @@ if [ ! -x "${RCLONE}" ]; then
   echo "rclone introuvable: ${RCLONE} (binaire local, voir docs/operations/opendata-r2-upload.md)"
   exit 1
 fi
+# Entries to send, "local file|public key|content type". Impact datasets (GOU-2250): every impact-*.zip of the
+# source folder (7 verticals and impact-all.zip), with the impact manifests, which are JSON.
+entries=()
 case "${DATASET}" in
-  gtin) names="gtin" ;;
-  isbn) names="isbn" ;;
-  all)  names="gtin isbn" ;;
+  gtin) entries=("gtin.zip|gtin-open-data.zip|application/zip") ;;
+  isbn) entries=("isbn.zip|isbn-open-data.zip|application/zip") ;;
+  impact|all)
+    if [ "${DATASET}" = "all" ]; then
+      entries=("gtin.zip|gtin-open-data.zip|application/zip" "isbn.zip|isbn-open-data.zip|application/zip")
+    fi
+    shopt -s nullglob
+    for f in "${SRC_DIR}"/impact-*.zip; do entries+=("$(basename "${f}")|$(basename "${f}")|application/zip"); done
+    for f in "${SRC_DIR}"/impact-*-manifest.json; do entries+=("$(basename "${f}")|$(basename "${f}")|application/json"); done
+    shopt -u nullglob
+    if [ "${DATASET}" = "impact" ] && [ "${#entries[@]}" -eq 0 ]; then
+      echo "::error::aucun fichier impact-* dans ${SRC_DIR}"; exit 1
+    fi
+    ;;
   *) echo "dataset invalide"; exit 1 ;;
 esac
 
@@ -40,9 +54,10 @@ cleanup() {
 }
 trap cleanup EXIT
 
-for n in ${names}; do
-  src="${SRC_DIR}/${n}.zip"
-  key="${n}-open-data.zip"
+for entry in "${entries[@]}"; do
+  IFS='|' read -r file key ctype <<<"${entry}"
+  n="${file%.*}"
+  src="${SRC_DIR}/${file}"
   if [ ! -s "${src}" ]; then echo "::error::[${n}] fichier absent ou vide: ${src}"; exit 1; fi
   local_sha="$(nice -n 19 ionice -c3 sha256sum "${src}" </dev/null | cut -d' ' -f1)"
   if [[ ! "${local_sha}" =~ ^[0-9a-f]{64}$ ]]; then
@@ -67,7 +82,7 @@ for n in ${names}; do
   # The overall budget bounds every transfer: `timeout` kills rclone (and the stage is deleted by the trap).
   left="$(remaining)" || exit 1
   hdrs=(
-    --header-upload "Content-Type: application/zip"
+    --header-upload "Content-Type: ${ctype}"
     --header-upload "Content-Disposition: attachment; filename=\"${key}\""
     --header-upload "Cache-Control: public, max-age=86400"
     --header-upload "X-Amz-Meta-Sha256: ${local_sha}"
@@ -106,7 +121,7 @@ for n in ${names}; do
     echo "::error::[${n}] relecture des métadonnées de ${key} impossible"
     exit 1
   }
-  if ! grep -q "${local_sha}" <<<"${meta}" || ! grep -qi "application/zip" <<<"${meta}"; then
+  if ! grep -q "${local_sha}" <<<"${meta}" || ! grep -qi "${ctype}" <<<"${meta}"; then
     echo "::error::[${n}] métadonnées de ${key} incomplètes après renommage: ${meta}"
     exit 1
   fi

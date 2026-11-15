@@ -24,14 +24,10 @@ import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.PrefixedAttrText;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.LoggerFactory;
 
 @ExtendWith(MockitoExtension.class)
 class NamesAggregationServiceTest {
-
-	@Mock
-	private VerticalsConfigService verticalsConfigService;
 
 	@Mock
 	private BlablaService blablaService;
@@ -42,7 +38,6 @@ class NamesAggregationServiceTest {
 	void setUp() {
 		service = new NamesAggregationService(
 				LoggerFactory.getLogger(NamesAggregationService.class),
-				verticalsConfigService,
 				blablaService);
 	}
 

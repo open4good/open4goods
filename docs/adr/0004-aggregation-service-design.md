@@ -1,6 +1,6 @@
 # ADR 0004 - Aggregation Service Design: Manual Instantiation vs. Spring Beans
 
-**Status**: Accepted  
+**Status**: Accepted (updated 2026-11-15, GOU-2280: the standard chain is shared)  
 **Date**: 2026-06-05  
 **Context**: Aggregation pipeline architecture review
 
@@ -83,6 +83,38 @@ making the execution order implicit and debugging harder.
   easier to write (no state leaking between test invocations).
 - **Long-term**: True singleton services, standard `@Bean` definitions, full Spring
   lifecycle support.
+
+---
+
+## Update 2026-11-15 - One shared standard chain (GOU-2280)
+
+The standard chain did not need a fresh instance per invocation mode. Its 7 services
+hold only `final` fields towards thread-safe singletons and immutable constants, and none
+of them overrides `init`, `done` or `close`. The 4 completion chains were already called by
+`api.completion-concurrency` (10) virtual threads each.
+
+- `AggregationFacadeService` builds the standard chain **once**. `getStandardAggregator()`
+  hands the same instance to the realtime ingestion, the completion services (Icecat,
+  EPREL, Wikidata, Amazon), the batch aggregation and the on-demand sanitisation. Before,
+  there were 6 copies or more: realtime, one per completion service, one per batch call.
+  The classification-only chain (identity + taxonomy) is also built once.
+- A service of the standard chain must therefore hold **no mutable state**. Run-scoped
+  state belongs to the scoring chain.
+- `AutowireCapableBeanFactory.autowireBean()` is dropped. On an aggregator it injected
+  only the factory itself, which `AbstractAggregator.beforeStart()` then used to autowire
+  the services. No service has an injection point (`@Autowired`, `@Value`, `@Inject`,
+  `@Resource`), so nothing was ever injected into them. Also dropped: `beforeStart()`, which
+  called `init` on services that do not override it; the lifecycle with no override
+  (`close()` and `Closeable` on aggregators and services); and the facade's
+  `@PreDestroy shutdown()`. Services receive their collaborators through their constructors.
+- The scoring chain is still built for each run: Step 1 below (`BatchScoringContext`)
+  has not been done, so the scoring services keep their run-scoped state.
+- Consequence on logs: the standard chain writes to the `realtime` aggregation log
+  whatever the caller. `sanitisation.log` and the per-completion `*-aggregation.log`
+  files are no longer written.
+
+Step 2 (prototype beans) is moot for the standard chain. It still applies to the
+scoring chain once Step 1 is done.
 
 ---
 

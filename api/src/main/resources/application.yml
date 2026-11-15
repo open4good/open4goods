@@ -190,9 +190,10 @@ open-data-config:
   # Written in the manifests (url field).
   public-base-url: https://data.nudger.fr
   # Publication on R2 after a successful pass (GOU-2289): zips to .staging/, read back and sha256 check, copy to the
-  # public keys, per-dataset manifests, manifest.json last. Disabled here and in beta; prod enables it by a dedicated
-  # change. account-id, access-key-id and secret-access-key come from the prod GitHub Environment (R2_ACCOUNT_ID,
-  # R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY), rendered by scripts/deploy/render-service-secrets.sh: never here.
+  # public keys, per-dataset manifests, manifest.json last. Disabled here and in beta; enabled for prod in
+  # application-prod.yml (GOU-2300). account-id, access-key-id and secret-access-key come from the prod GitHub
+  # Environment (R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY), rendered by
+  # scripts/deploy/render-service-secrets.sh: never here.
   publication:
     enabled: false
     bucket: nudger-opendata

@@ -63,15 +63,8 @@ public class IcecatIndexService {
     private final IcecatSupplierRepository supplierRepository;
     private final IcecatIndexVersionManager versionManager;
 
-    private final Map<String, List<IcecatFeatureDocument>> featureCache = java.util.Collections.synchronizedMap(
-        new java.util.LinkedHashMap<String, List<IcecatFeatureDocument>>(256, 0.75f, true) {
-            private static final long serialVersionUID = 1L;
-            @Override
-            protected boolean removeEldestEntry(Map.Entry<String, List<IcecatFeatureDocument>> eldest) {
-                return size() > 10000;
-            }
-        }
-    );
+    /** Lookups by normalized name, bounded; emptied when the feature index is reimported. */
+    private final BoundedLruCache<String, List<IcecatFeatureDocument>> featureCache = new BoundedLruCache<>(10000);
 
     public IcecatIndexService(
             IcecatConfiguration iceCatConfig,
@@ -367,7 +360,8 @@ public class IcecatIndexService {
         if (normalizedName == null) {
             return List.of();
         }
-        return featureCache.computeIfAbsent(normalizedName, featureRepository::findByNormalizedNames);
+        // The Elasticsearch query of a miss runs outside the cache lock (GOU-2280)
+        return featureCache.getOrLoad(normalizedName, featureRepository::findByNormalizedNames);
     }
 
     /**

@@ -308,7 +308,7 @@
               <v-btn
                 variant="text"
                 prepend-icon="mdi-refresh"
-                @click="fetchProducts"
+                @click="fetchProducts()"
               >
                 {{ $t('common.actions.retry') }}
               </v-btn>
@@ -2091,7 +2091,9 @@ const isUsingInitialProductsData = computed(() => {
   }
 
   return (
-    productsData.value === initialProductsData.value &&
+    // `productsData` is a deep `ref` (reactive proxy) while `initialProductsData` keeps the raw
+    // object: compare raw values, otherwise the SSR list is always considered stale.
+    toRaw(productsData.value) === toRaw(initialProductsData.value) &&
     isDefaultQueryState.value &&
     matchesCategoryInitialSort(sortField.value, sortOrder.value)
   )
@@ -2164,13 +2166,21 @@ const buildAggregationRequest = (
   return aggs.length ? { aggs } : undefined
 }
 
-const fetchProducts = async () => {
+// `silent` refreshes the data (aggregations) without showing skeletons nor surfacing errors,
+// so the SSR-rendered list stays visible.
+let productsRequestId = 0
+
+const fetchProducts = async ({ silent = false }: { silent?: boolean } = {}) => {
   if (!verticalId.value || !hasHydrated.value) {
     return
   }
 
-  loadingProducts.value = true
-  productError.value = null
+  const requestId = ++productsRequestId
+
+  if (!silent) {
+    loadingProducts.value = true
+    productError.value = null
+  }
 
   try {
     const response = await csrfFetch<ProductSearchResponseDto>(
@@ -2195,16 +2205,24 @@ const fetchProducts = async () => {
       }
     )
 
+    // A newer request (user action during the silent refresh) wins.
+    if (requestId !== productsRequestId) {
+      return
+    }
     productsData.value = response
   } catch (error) {
     console.error(
       `[CategoryPage] Failed to search products for vertical "${verticalId.value}":`,
       error
     )
-    productsData.value = null
-    productError.value = t('category.products.fetchError')
+    if (!silent && requestId === productsRequestId) {
+      productsData.value = null
+      productError.value = t('category.products.fetchError')
+    }
   } finally {
-    loadingProducts.value = false
+    if (!silent && requestId === productsRequestId) {
+      loadingProducts.value = false
+    }
   }
 }
 
@@ -2429,9 +2447,11 @@ onMounted(async () => {
 
   hasHydrated.value = true
 
-  if (verticalId.value && !isUsingInitialProductsData.value) {
+  if (verticalId.value) {
     try {
-      await fetchProducts()
+      // Default state: keep the SSR list and fetch once, silently, to get the aggregations
+      // (the SSR request is sent without `aggs`).
+      await fetchProducts({ silent: isUsingInitialProductsData.value })
     } catch (err) {
       console.error('Failed to fetch initial products:', err)
     }

@@ -20,6 +20,7 @@ apache-maven-*-bin.tar.gz
 /jstack.log
 /.claude/
 /.paperclip-runtime/
+/.playwright-mcp/
 /products_with_offers.json
 /random_dishwasher.json
 /random_fridge.json
