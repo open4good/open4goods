@@ -108,7 +108,7 @@ est donc accepté par cette voie. Le socle ci-dessous s'appuie sur ce fait.
 - Lecture par lots des produits : `ProductRepository.multiGetForAggregation(Collection<Long>)`.
   Réindexation : `ProductRepository.addToFullindexationQueue(Collection<Product>)`.
   Export projeté : `ProductRepository.exportAll(String[] includeFields)`.
-- Agrégation : `AggregationFacadeService.getStandardAggregator(String name)`, qui enchaîne
+- Agrégation : `AggregationFacadeService.getStandardAggregator()`, la chaîne partagée (sans état) qui enchaîne
   Identity, Taxonomy, Attribute, UsageCost, Names, Price et Media.
 - Provenance des attributs : `SourcableAttribute` et `SourcedAttribute` (`model/.../attribute/`).
   `AttributeRealtimeAggregationService` enregistre le `datasourceName` du fragment comme source.
