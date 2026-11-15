@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
+import org.open4goods.api.services.BatchRunningMarker;
 import org.open4goods.api.services.BatchService;
 import org.open4goods.api.services.EprelMatchMetrics;
 import org.open4goods.api.services.ImpactScoreBatchGuard;
@@ -241,9 +242,26 @@ public class ApiConfig {
 		return new ImpactScoreSnapshotRepository(elasticsearchOperations);
 	}
 
+	/**
+	 * Single marker shared by the batch and the open data pass (GOU-2298): it counts its holders, two instances on
+	 * the same file would delete each other's marker.
+	 */
 	@Bean
-	BatchService batchService(ImpactScoreBatchGuard impactScoreBatchGuard, EprelMatchMetrics eprelMatchMetrics, AggregationFacadeService aggregationFacadeService, CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository, FeedIndexingService feedIndexingService, FeedService feedService, SerialisationService serialisationService, ResourceService resourceService, ImpactScoreSnapshotRepository impactScoreSnapshotRepository) {
+	BatchRunningMarker batchRunningMarker() {
+		return new BatchRunningMarker(apiProperties.getBatchRunningMarker());
+	}
+
+	/** Holds the shared marker during each open data pass so a beta deployment defers the api restart. */
+	@Bean
+	org.springframework.beans.factory.InitializingBean openDataRunningMarkerBinding(
+			org.open4goods.services.opendata.service.OpenDataService openDataService, BatchRunningMarker batchRunningMarker) {
+		return () -> openDataService.setPassHooks(batchRunningMarker::begin, batchRunningMarker::end);
+	}
+
+	@Bean
+	BatchService batchService(BatchRunningMarker batchRunningMarker, ImpactScoreBatchGuard impactScoreBatchGuard, EprelMatchMetrics eprelMatchMetrics, AggregationFacadeService aggregationFacadeService, CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository, FeedIndexingService feedIndexingService, FeedService feedService, SerialisationService serialisationService, ResourceService resourceService, ImpactScoreSnapshotRepository impactScoreSnapshotRepository) {
 		BatchService batchService = new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService, productRepository,  feedIndexingService, feedService, serialisationService, resourceService, apiProperties);
+		batchService.setBatchRunningMarker(batchRunningMarker);
 		batchService.setImpactScoreGuard(impactScoreBatchGuard);
 		batchService.setEprelMatchMetrics(eprelMatchMetrics);
 		batchService.setImpactScoreSnapshotRepository(impactScoreSnapshotRepository);

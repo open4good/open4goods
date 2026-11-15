@@ -60,18 +60,6 @@ public class BatchController {
         this.datasourcePurgeService = datasourcePurgeService;
     }
 
-    @PostMapping("/batch/tweak")
-    @Operation(
-            summary = "Run the data-cleanup (tweak) routine",
-            description = "Executes the ad-hoc data-cleanup routine implemented in BatchService.clean(). "
-                    + "The exact operations performed depend on the current implementation and are typically "
-                    + "one-shot fixes, deduplication passes or orphan-record removals. "
-                    + "Check the BatchService source for the current behaviour.")
-    @ApiResponse(responseCode = "200", description = "Cleanup routine completed")
-    public void batchCleanup() throws InvalidParameterException, IOException, InterruptedException {
-        batchService.clean();
-    }
-
     @PostMapping("/batch/clean-resources")
     @Operation(
             summary = "Run resource garbage collection",

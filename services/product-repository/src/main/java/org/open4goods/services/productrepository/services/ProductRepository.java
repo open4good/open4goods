@@ -1792,6 +1792,17 @@ public class ProductRepository {
         return elasticsearchOperations.count(query, CURRENT_INDEX);
     }
 
+    /**
+     * Counts every product of a vertical in the current index, excluded ones included (open data row guard, GOU-2250).
+     * Not cached: the generation pass compares its rows with the count taken at its start.
+     *
+     * @param vertical vertical identifier
+     * @return the number of products whose {@code vertical} is {@code vertical}
+     */
+    public long countItemsByVertical(String vertical) {
+        return elasticsearchOperations.count(new CriteriaQuery(new Criteria("vertical").is(vertical)), CURRENT_INDEX);
+    }
+
 	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
 	public Map<Integer, Long> byTaxonomy() {
 

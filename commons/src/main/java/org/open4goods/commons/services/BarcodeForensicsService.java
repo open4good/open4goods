@@ -51,7 +51,7 @@ public class BarcodeForensicsService {
 
         final String gs1Prefix = normalized.length() >= 3 ? normalized.substring(0, 3) : null;
         final String issuingCountryCode = gs1Prefix != null ? gs1PrefixService.detectCountry(normalized) : null;
-        final Gs1Class gs1Class = classifyGs1Class(normalized, gs1Prefix);
+        final Gs1Class gs1Class = barcodeValidationService.classifyGs1Class(normalized);
 
         final Integer packagingIndicator = type == BarcodeType.GTIN_14
                 ? Character.getNumericValue(normalized.charAt(0)) : null;
@@ -81,47 +81,6 @@ public class BarcodeForensicsService {
                 ? safeLastDigit(rawBarcode.trim()) : null;
         return new BarcodeForensics(false, BarcodeType.UNKNOWN, null, null, Gs1Class.UNKNOWN,
                 null, null, null, null, checkDigit);
-    }
-
-    private Gs1Class classifyGs1Class(final String normalized, final String gs1Prefix) {
-        if (gs1Prefix == null) {
-            return Gs1Class.UNKNOWN;
-        }
-
-        // ISSN periodicals: prefix 977
-        if ("977".equals(gs1Prefix)) {
-            return Gs1Class.ISSN_PERIODICAL;
-        }
-
-        // ISBN / ISMN: prefixes 978 and 979
-        if ("978".equals(gs1Prefix)) {
-            return Gs1Class.ISBN_BOOKLAND;
-        }
-        if ("979".equals(gs1Prefix)) {
-            // 979-0 is ISMN (music); everything else in 979 is ISBN
-            if (normalized.length() >= 4 && normalized.charAt(3) == '0') {
-                return Gs1Class.ISMN_MUSIC;
-            }
-            return Gs1Class.ISBN_BOOKLAND;
-        }
-
-        // Coupon: prefixes 980-999
-        try {
-            final int prefixInt = Integer.parseInt(gs1Prefix);
-            if (prefixInt >= 980) {
-                return Gs1Class.COUPON;
-            }
-            // Restricted / in-store / variable-weight
-            if ((prefixInt >= 20 && prefixInt <= 29)
-                    || (prefixInt >= 40 && prefixInt <= 49)
-                    || (prefixInt >= 200 && prefixInt <= 299)) {
-                return Gs1Class.RESTRICTED_INTERNAL;
-            }
-        } catch (final NumberFormatException ignored) {
-            return Gs1Class.UNKNOWN;
-        }
-
-        return Gs1Class.GTIN;
     }
 
     private String extractIsbnRegistrationGroup(final String normalized, final BarcodeType type) {

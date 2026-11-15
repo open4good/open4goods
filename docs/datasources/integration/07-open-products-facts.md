@@ -256,8 +256,8 @@ Champs `Product` : `sourceAttributions` (P0-4). Attribution par image : nouveau 
 - Test de projection : ni `category`, ni `price`, ni attribut `WEIGHT` ; ressource avec
   attribution ; une nouvelle projection avec un autre `imgid` remplace l'ancienne ressource ; le
   retrait de la fiche retire la ressource (S1).
-- Test de non-régression P0-1 : un produit dont une ressource a pour auteur
-  `openfoodfacts-contributors` survit à `POST /batch/tweak`.
+- Test de non-régression P0-1 : sans objet, `BatchService.clean()` et `POST /batch/tweak`
+  n'existent plus.
 - Critères en beta :
   - rapport d'import : 44 056 GTIN exploitables, à 2 % près ;
   - recouvrement publié par le dry-run avant activation de la projection ;

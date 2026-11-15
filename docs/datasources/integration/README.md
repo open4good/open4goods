@@ -36,15 +36,15 @@ lang: fr
 |---|---|
 | Plan 05 (EPREL smartphones) | avancé par le programme ImpactScore : hypothèse `productGroup` infirmée (GOU-2042), champs EPREL mappés dont les cycles de batterie x100 (GOU-1891, #3596), table Apple (#3606). Appariement au 2026-11-12 : 939 smartphones sur 14 589 (6,4 %), Apple 27 sur 1 689, Samsung 382 sur 3 668 ; mesure complète après le batch du 2026-11-17 (GOU-2048). Restent : règle Samsung `/DS`, filtre `deviceType`, attribution (P0-4), colonnes d'export. |
 | Plan 01 (indice de durabilité) | lecture marchande seulement : attribut `DURABILITY_INDEX` (GOU-1892), critère V2 `REPAIRABILITY_OR_DURABILITY_INDEX` (GOU-2041). L'import du fichier data.gouv n'est pas commencé. |
-| P0-1 à P0-11 | aucun prérequis livré. P0-9 confirmé en exécutant le code (section 4). |
+| P0-1 | livré (GOU-2296) : `BatchService.clean()` supprimé ; `POST /batch/tweak` et `cleanAiData()` supprimés ensuite. |
+| P0-2 à P0-11 | aucun prérequis livré. P0-9 confirmé en exécutant le code (section 4). |
 | Plans 02 à 04, 06 à 15 | non démarrés ; 09 et 10 en attente (Q2). |
 
 Recouvrements avec les lots d'agrégation en cours (GOU-2272) :
 
 | Prérequis | Lot qui touche les mêmes fichiers | Ordre |
 |---|---|---|
-| P0-1 (`BatchService`) | lot A (GOU-2273, #3665, fusionné le 2026-11-15) | possible dès maintenant |
-| P0-2, P0-3 (`AttributesConfig`, `AttributeConfig`) | lot G (GOU-2279, #3666, fusionné le 2026-11-15 ; réécrit l'index des synonymes sans les normaliser) | possible dès maintenant |
+| P0-2, P0-3 (`AttributesConfig`, `AttributeConfig`) | lot G (GOU-2279, #3666, fusionné le 2026-11-15 ; réécrit l'index des synonymes sans les normaliser) | **livrés** par GOU-2295 (PR en revue) ; aucun attribut YAML n'utilise encore `preferredSources` |
 | P0-5, projection (chaîne d'agrégation) | S1 (GOU-2280) | après S1 |
 
 ## 1. Sommaire des plans
@@ -448,6 +448,10 @@ Correctif, dans `BarcodeValidationService` :
    attrape 9 sur 10. Ils restent au provider, avec un log.
 5. Test qui échoue d'abord : `"0"`, `"00000000"`, `"17"`, `1234567890128`, un code 2xx, un
    GTIN-8 valide ; garder les tests UPC-A et ISBN-10 existants.
+
+**Livré (GOU-2294).** Seuil N = 8 chiffres significatifs, retenu d'après la mesure GOU-2293 :
+seuls 1 514 produits ont moins de 8 chiffres significatifs, alors que les codes à 8-10 chiffres
+sont presque tous des codes à offres actives. Les produits existants ne sont pas touchés.
 
 Hors de ce lot : front-api a deux autres contrôles de somme (`CssEligibilityService.isValidGtin`,
 `AmazonSearchLinkService.hasValidCheckDigit`), faute de dépendre de `commons`. À unifier plus

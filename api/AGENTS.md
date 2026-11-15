@@ -327,7 +327,7 @@ GOU-2248. `api` est le seul module qui génère les jeux GTIN et ISBN (`services
 - Un échec ne touche pas aux fichiers publiés et se voit : log `ERROR`, health `openData` DOWN, métrique
   `opendata_generation_failed`.
 - Publication sur R2 (GOU-2289, `OpenDataPublisher`) après un passage réussi, si
-  `open-data-config.publication.enabled` (faux par défaut et en bêta ; l'activation en prod est une PR dédiée).
+  `open-data-config.publication.enabled` (faux par défaut et en bêta ; vrai en prod, dans `application-prod.yml`).
   N'écris jamais un zip directement sur sa clé publique : clé `.staging/`, relecture et sha256, copie, manifests par jeu,
   `manifest.json` en dernier, suppression des anciens objets ensuite. Le garde-fou `max-bucket-size` (9 Go) reste sous
   les 10 Go-mois gratuits. Identifiants `R2_*` : config tree rendu par `render-service-secrets.sh`, jamais en YAML.

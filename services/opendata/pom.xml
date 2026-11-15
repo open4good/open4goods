@@ -45,6 +45,11 @@
       <artifactId>product-repository</artifactId>
       <version>${global.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.open4goods</groupId>
+      <artifactId>verticals</artifactId>
+      <version>${global.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -58,7 +63,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>33.7.1-jre</version>
+      <version>33.8.0-jre</version>
     </dependency>
     <dependency>
       <groupId>tools.jackson.core</groupId>
