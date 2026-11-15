@@ -40,7 +40,6 @@ import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributeParser;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 
 /**
@@ -113,21 +112,18 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			Pattern.compile("[\u201c\u201d\"\u00b4\u2019]|\u2019\u2019|\u00b4\u00b4");
 
 	private final BrandService brandService;
-	private final VerticalsConfigService verticalConfigService;
 	private final IcecatFeatureResolver featureResolver;
 
 	/**
 	 * Builds the realtime attribute aggregation service.
 	 *
-	 * @param verticalConfigService vertical configuration lookup service
-	 * @param brandService          brand alias/exclusion service
-	 * @param logger                logger dedicated to aggregation diagnostics
-	 * @param featureResolver       Icecat feature-name resolver
+	 * @param brandService    brand alias/exclusion service
+	 * @param logger          logger dedicated to aggregation diagnostics
+	 * @param featureResolver Icecat feature-name resolver
 	 */
-	public AttributeRealtimeAggregationService(final VerticalsConfigService verticalConfigService,
-			final BrandService brandService, final Logger logger, final IcecatFeatureResolver featureResolver) {
+	public AttributeRealtimeAggregationService(final BrandService brandService, final Logger logger,
+			final IcecatFeatureResolver featureResolver) {
 		super(logger);
-		this.verticalConfigService = verticalConfigService;
 		this.brandService = brandService;
 		this.featureResolver = featureResolver;
 	}

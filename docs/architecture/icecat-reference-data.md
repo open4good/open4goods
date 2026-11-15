@@ -41,6 +41,12 @@ repositories, bounded by small local caches (`IcecatIndexService.featureCache`,
 `IcecatFeatureResolver`'s normalized-name and by-id caches) with size-inspection methods for
 health checks.
 
+These caches are `BoundedLruCache` instances (least recently used entry evicted above the
+bound). A miss queries Elasticsearch outside the cache lock, so the completion threads resolve
+names in parallel (GOU-2280); two simultaneous misses on the same key both query, and the first
+value stored wins. A lookup that started before `featureCache` is emptied by a feature reimport
+is returned but not cached.
+
 ## Import and Versioning
 
 `IcecatIndexService.syncFromLoaders()` is the only entry point that downloads and parses the

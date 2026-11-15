@@ -74,8 +74,7 @@ public class WikidataCompletionService extends AbstractCompletionService {
         this.searchService = searchService;
         this.lookupService = lookupService;
         this.wikidataProperties = wikidataProperties;
-        this.aggregator = aggregationFacadeService.getStandardAggregator("wikidata-aggregation");
-        this.aggregator.beforeStart();
+        this.aggregator = aggregationFacadeService.getStandardAggregator();
     }
 
     @Override

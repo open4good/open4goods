@@ -3,7 +3,6 @@ package org.open4goods.api.services.aggregation.services.batch.scores;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -37,11 +36,9 @@ import org.open4goods.brand.model.ScoreScale;
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.commons.services.BarcodeForensicsService;
 import org.open4goods.commons.services.BarcodeValidationService;
-import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.Gs1PrefixService;
 import org.open4goods.commons.services.textgen.BlablaService;
 import org.open4goods.icecat.services.IcecatFeatureResolver;
-import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.product.ImpactScoreMeta;
 import org.open4goods.model.product.Product;
@@ -50,14 +47,12 @@ import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.ImpactScoreV2Config;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.verticals.GoogleTaxonomyService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -494,15 +489,9 @@ class ImpactScoreSimulationTest {
 		ApiProperties apiProperties = new ApiProperties();
 		apiProperties.setRootFolder(logs + "/");
 
-		AutowireCapableBeanFactory beanFactory = mock(AutowireCapableBeanFactory.class);
-		doAnswer(invocation -> null).when(beanFactory).autowireBean(any());
-
-		return new AggregationFacadeService(mock(EvaluationService.class),
-				mock(org.open4goods.model.StandardiserService.class), beanFactory, mock(ProductRepository.class),
-				apiProperties, mock(Gs1PrefixService.class), mock(DataSourceConfigService.class),
+		return new AggregationFacadeService(mock(ProductRepository.class), apiProperties, mock(Gs1PrefixService.class),
 				mock(VerticalsConfigService.class), mock(BarcodeValidationService.class), brandService,
-				mock(BlablaService.class), mock(IcecatService.class), mock(IcecatFeatureResolver.class),
-				mock(SerialisationService.class), mock(BarcodeForensicsService.class));
+				mock(BlablaService.class), mock(IcecatFeatureResolver.class), mock(BarcodeForensicsService.class));
 	}
 
 	/** What the export holds for a product, read before any scoring. */

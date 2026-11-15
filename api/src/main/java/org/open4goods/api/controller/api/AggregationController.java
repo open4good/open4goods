@@ -7,6 +7,7 @@ import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -45,7 +46,8 @@ public class AggregationController {
     @Operation(
             summary = "Aggregate all verticals",
             description = "Runs /aggregate/verticals/{vertical} for every active vertical, one after the other. "
-                    + "Same behaviour and same precautions as the single-vertical run.")
+                    + "Same behaviour and same precautions as the single-vertical run. A vertical that fails is "
+                    + "logged (ERROR) and the next ones still run.")
     @ApiResponse(responseCode = "200", description = "Products of every vertical aggregated and queued for indexation")
     public void aggregateAllVerticals() throws InvalidParameterException, IOException {
         aggregationFacadeService.sanitizeAllVerticals();
@@ -68,8 +70,8 @@ public class AggregationController {
     })
     public void aggregateVertical(
             @Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop', 'air-conditioner')", required = true)
-            @PathVariable String vertical) throws InvalidParameterException, IOException {
-        aggregationFacadeService.sanitizeVertical(verticalConfigService.getConfigById(vertical));
+            @PathVariable String vertical) throws InvalidParameterException, IOException, ResourceNotFoundException {
+        aggregationFacadeService.sanitizeVertical(knownVertical(vertical));
     }
 
     @PostMapping("/aggregate/gtin/{gtin}")
@@ -88,5 +90,18 @@ public class AggregationController {
             @PathVariable Long gtin)
             throws InvalidParameterException, IOException, ResourceNotFoundException, AggregationSkipException {
         aggregationFacadeService.sanitizeAndSave(repository.getById(gtin));
+    }
+
+    /**
+     * @param vertical vertical identifier from the path
+     * @return the configuration of that vertical
+     * @throws ResourceNotFoundException when no vertical has this identifier (404, GOU-2280)
+     */
+    private VerticalConfig knownVertical(String vertical) throws ResourceNotFoundException {
+        VerticalConfig config = verticalConfigService.getConfigById(vertical);
+        if (config == null) {
+            throw new ResourceNotFoundException("Unknown vertical: " + vertical);
+        }
+        return config;
     }
 }

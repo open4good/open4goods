@@ -73,7 +73,7 @@ class AmazonCompletionServiceTest {
         when(dataSourceConfigService.getDatasourceConfig("amazon.fr.yml")).thenReturn(datasource);
 
         AggregationFacadeService aggregationFacadeService = mock(AggregationFacadeService.class);
-        when(aggregationFacadeService.getStandardAggregator("amazon-aggregation")).thenReturn(mock(StandardAggregator.class));
+        when(aggregationFacadeService.getStandardAggregator()).thenReturn(mock(StandardAggregator.class));
 
         service = new AmazonCompletionService(mock(ProductRepository.class), mock(VerticalsConfigService.class),
                 apiProperties, dataSourceConfigService, aggregationFacadeService, paapiClient);
@@ -104,7 +104,7 @@ class AmazonCompletionServiceTest {
 
         DataSourceConfigService dataSourceConfigService = mock(DataSourceConfigService.class);
         AggregationFacadeService aggregationFacadeService = mock(AggregationFacadeService.class);
-        when(aggregationFacadeService.getStandardAggregator("amazon-aggregation")).thenReturn(mock(StandardAggregator.class));
+        when(aggregationFacadeService.getStandardAggregator()).thenReturn(mock(StandardAggregator.class));
 
         AmazonCompletionService disabledService = new AmazonCompletionService(mock(ProductRepository.class),
                 mock(VerticalsConfigService.class), apiProperties, dataSourceConfigService, aggregationFacadeService,

@@ -87,14 +87,19 @@ Expected among them: `7333394145372` (Electrolux E62LB200S) and
 `-H "Authorization: $O4G_INTERNAL_API_KEY"` as described in
 [api/AGENTS.md](../../api/AGENTS.md).
 
-1. Lost verticals: run the sanitisation of each vertical returned by the
-   `by_group` aggregation, one at a time, outside the 13:00 batch:
+1. Lost verticals: first switch the indexation queue logger to INFO and note
+   the queue level before the call (step 1 of
+   [Waiting for the indexation queue](#waiting-for-the-indexation-queue)):
+   that logger shows nothing in beta and prod until then. Then run the
+   sanitisation of each vertical returned by the `by_group` aggregation, one
+   at a time, outside the 13:00 batch:
    `curl -X POST "$API/aggregate/verticals/washing-machine"`, then `oven`,
    and so on. It reloads the products whose categories match the vertical,
    restores the vertical when the EPREL group confirms it and regenerates the
    slug. It neither completes nor scores (step 4). Products are queued by
    pages of 500, each page taking the newest realtime offers first, so offers
-   updated during the run are kept (GOU-2274). The call returns once the
+   updated during the run are kept (GOU-2274). An unknown vertical id answers
+   404 (GOU-2280). The call returns once the
    products are queued, not once they are indexed: wait for the indexation
    queue (below) before checking `8059019130255` (Hoover) and `8690842382758`
    (Leisure).
@@ -127,16 +132,23 @@ queue.
 
 No metric exposes the queue size. The only signal is the INFO line
 `full-products-worker-0 has indexed N products. M Remaining in queue` of
-`FullProductIndexationWorker` in `nohup-api.log`, hidden in beta and prod
-(`org.open4goods: warn`). To see it, switch that logger to INFO for the
-time of the repair, then back. The queue has drained when `M` falls to 0, or
-back to its level before the call.
+`FullProductIndexationWorker` in `/opt/open4goods/logs/nohup-api.log`, hidden
+in beta and prod (`org.open4goods: warn`). Switch that logger to INFO
+**before** the first `/aggregate/verticals` call, and note `M` then: it is the
+level of the queue before the call. A line is written only when the worker
+indexes a bulk: no new line for a minute means the queue was empty, the level
+is 0. The queue has drained when `M` falls to 0, or back to that level. Switch
+the logger back once the repair is over.
 
 ```bash
 LOGGER="$API/actuator/loggers/org.open4goods.services.productrepository.workers.FullProductIndexationWorker"
+# 1. Before the first /aggregate/verticals call: INFO, then the level before the call
 curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" -H "Content-Type: application/json" \
   -d '{"configuredLevel":"INFO"}' "$LOGGER"
-grep "Remaining in queue" nohup-api.log | tail -1
+grep "Remaining in queue" /opt/open4goods/logs/nohup-api.log | tail -1
+# 2. After each call: repeat until M falls to 0 or back to the level of step 1
+grep "Remaining in queue" /opt/open4goods/logs/nohup-api.log | tail -1
+# 3. Once the repair is over: back to the configured level
 curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" -H "Content-Type: application/json" \
   -d '{"configuredLevel":null}' "$LOGGER"
 ```

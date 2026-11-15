@@ -94,7 +94,6 @@ import org.slf4j.LoggerFactory;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
@@ -475,12 +474,12 @@ public class ApiConfig {
 	}
 
 	@Bean
-	AggregationFacadeService realtimeAggregationService(@Autowired EvaluationService evaluationService, StandardiserService standardiserService, AutowireCapableBeanFactory autowireBeanFactory, @Autowired ProductRepository aggregatedDataRepository, ApiProperties apiProperties,
-			@Autowired Gs1PrefixService gs1prefixService, DataSourceConfigService dataSourceConfigService, VerticalsConfigService configService, BarcodeValidationService barcodeValidationService, BrandService brandservice, BlablaService blablaService,
-			IcecatService icecatFeatureService, IcecatFeatureResolver icecatFeatureResolver, SerialisationService serialisationService,
+	AggregationFacadeService realtimeAggregationService(ProductRepository aggregatedDataRepository, ApiProperties apiProperties,
+			Gs1PrefixService gs1prefixService, VerticalsConfigService configService, BarcodeValidationService barcodeValidationService,
+			BrandService brandservice, BlablaService blablaService, IcecatFeatureResolver icecatFeatureResolver,
 			BarcodeForensicsService barcodeForensicsService) {
-		return new AggregationFacadeService(evaluationService, standardiserService, autowireBeanFactory, aggregatedDataRepository, apiProperties, gs1prefixService, dataSourceConfigService, configService, barcodeValidationService, brandservice, blablaService, icecatFeatureService,
-				icecatFeatureResolver, serialisationService, barcodeForensicsService);
+		return new AggregationFacadeService(aggregatedDataRepository, apiProperties, gs1prefixService, configService,
+				barcodeValidationService, brandservice, blablaService, icecatFeatureResolver, barcodeForensicsService);
 	}
 
 	//////////////////////////////////////////////////////////
